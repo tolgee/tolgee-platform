@@ -92,7 +92,10 @@ jobs:
           import xml.etree.ElementTree as ET
           import glob
           for f in glob.glob('**/build/test-results/**/TEST-*.xml', recursive=True):
-              tree = ET.parse(f)
+              try:
+                  tree = ET.parse(f)
+              except ET.ParseError:
+                  continue
               for tc in tree.findall('.//testcase'):
                   if tc.find('failure') is not None or tc.find('error') is not None:
                       print(f'{tc.get(\"classname\")}.{tc.get(\"name\")}')
@@ -293,6 +296,9 @@ jobs:
             echo "<${RUN_URL}|View failed run>"
           } > /tmp/slack-message.txt
 
-          curl -s -X POST -H 'Content-Type: application/json' \
+          curl --fail --show-error --silent \
+            --connect-timeout 5 --max-time 10 \
+            --retry 3 --retry-delay 2 --retry-connrefused \
+            -X POST -H 'Content-Type: application/json' \
             -d "$(jq -n --rawfile text /tmp/slack-message.txt '{text: $text}')" \
             "$SLACK_WEBHOOK_URL"
