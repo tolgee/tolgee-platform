@@ -117,7 +117,7 @@ class ProjectQaConfigService(
     settings: Map<QaCheckType, QaCheckSeverity?>,
   ) {
     requireQaEnabled(projectId)
-    val oldSettings = getSettings(projectId)
+    val oldEffective = getSettings(projectId)
     val config = getOrCreateConfig(projectId)
 
     for ((type, severity) in settings) {
@@ -129,8 +129,12 @@ class ProjectQaConfigService(
     }
     projectQaConfigRepository.save(config)
 
-    val changedTypes = settings.filter { (type, severity) -> oldSettings[type] != severity }.keys
-    recheckIfEnabled(projectId, changedTypes.toList())
+    val newEffective =
+      QaCheckType.entries.associateWith { type ->
+        config.settings[type] ?: type.defaultSeverity
+      }
+    val changedTypes = QaCheckType.entries.filter { oldEffective[it] != newEffective[it] }
+    recheckIfEnabled(projectId, changedTypes)
   }
 
   @Transactional
@@ -149,8 +153,11 @@ class ProjectQaConfigService(
           language = entityManager.getReference(Language::class.java, languageId),
         )
 
-    val oldSettings = langConfig.settings
-    val changedTypes = settings.filter { (type, severity) -> oldSettings[type] != severity }.keys
+    val globalSettings = getSettings(projectId)
+    val oldResolved =
+      QaCheckType.entries.associateWith { type ->
+        langConfig.settings[type] ?: globalSettings[type] ?: type.defaultSeverity
+      }
 
     for ((type, severity) in settings) {
       if (severity == null) {
@@ -161,7 +168,12 @@ class ProjectQaConfigService(
     }
     languageQaConfigRepository.save(langConfig)
 
-    recheckIfEnabled(projectId, changedTypes.toList(), listOf(languageId))
+    val newResolved =
+      QaCheckType.entries.associateWith { type ->
+        langConfig.settings[type] ?: globalSettings[type] ?: type.defaultSeverity
+      }
+    val changedTypes = QaCheckType.entries.filter { oldResolved[it] != newResolved[it] }
+    recheckIfEnabled(projectId, changedTypes, listOf(languageId))
   }
 
   @Transactional
@@ -171,11 +183,14 @@ class ProjectQaConfigService(
   ) {
     requireQaEnabled(projectId)
     val langConfig = languageQaConfigRepository.findByLanguageProjectIdAndLanguageId(projectId, languageId) ?: return
-    val changedTypes = langConfig.settings.keys
+    val oldResolved = getResolvedSettingsForLanguage(projectId, languageId)
 
     languageQaConfigRepository.delete(langConfig)
 
-    recheckIfEnabled(projectId, changedTypes.toList(), listOf(languageId))
+    // After deletion, language inherits all global settings
+    val newResolved = getSettings(projectId)
+    val changedTypes = QaCheckType.entries.filter { oldResolved[it] != newResolved[it] }
+    recheckIfEnabled(projectId, changedTypes, listOf(languageId))
   }
 
   private fun recheckIfEnabled(
