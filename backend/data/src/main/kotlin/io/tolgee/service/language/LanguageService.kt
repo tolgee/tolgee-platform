@@ -316,6 +316,7 @@ class LanguageService(
     return languageRepository.findByNameAndProject(name, project)
   }
 
+  @Transactional
   fun deleteAllByProject(projectId: Long) {
     translationService.deleteAllByProject(projectId)
     autoTranslationService.deleteConfigsByProject(projectId)
