@@ -19,6 +19,8 @@ data class QaPreviewWsSessionState(
   val organizationOwnerId: Long,
   val glossaryEnabled: Boolean,
 ) {
+  // Accessed from both the WS handler thread and afterConnectionClosed — must be volatile
+  @Volatile
   var currentJob: Job? = null
   var lastMessageTime: Instant? = null
   var messageCount: Int = 0

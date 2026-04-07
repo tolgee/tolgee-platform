@@ -12,6 +12,8 @@ class QaPreviewWebSocketConfig(
   private val handler: QaCheckPreviewWebSocketHandler,
 ) : WebSocketConfigurer {
   override fun registerWebSocketHandlers(registry: WebSocketHandlerRegistry) {
+    // Permissive CORS is intentional — the WebSocket requires JWT authentication
+    // in the init message, so cross-origin connections without a valid token are rejected.
     registry
       .addHandler(handler, "/ws/qa-preview")
       .setAllowedOriginPatterns("*")
