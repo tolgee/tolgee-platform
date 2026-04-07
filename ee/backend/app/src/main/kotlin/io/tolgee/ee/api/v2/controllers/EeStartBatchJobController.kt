@@ -108,9 +108,12 @@ class EeStartBatchJobController(
     data: QaRecheckByKeysRequest,
   ): BatchJobModel {
     projectFeatureGuard.checkEnabled(Feature.QA_CHECKS)
-    securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
-
     val projectId = projectHolder.project.id
+    securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectId)
+    if (data.languageIds != null) {
+      securityService.checkLanguageTranslatePermission(projectId, data.languageIds!!)
+    }
+
     val languageIds =
       data.languageIds
         ?: languageService.getProjectLanguages(projectId).map { it.id }
