@@ -1,15 +1,67 @@
 package io.tolgee.ee.service.qa
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import io.tolgee.configuration.tolgee.LanguageToolProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.boot.web.client.RestTemplateBuilder
+import org.springframework.http.HttpMethod
+import org.springframework.http.MediaType
+import org.springframework.test.web.client.MockRestServiceServer
+import org.springframework.test.web.client.match.MockRestRequestMatchers.method
+import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
+import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
+import org.springframework.web.client.RestTemplate
 
 class LanguageToolServiceTest {
-  private val service = LanguageToolService()
+  private lateinit var service: LanguageToolService
+  private lateinit var mockServer: MockRestServiceServer
+  private lateinit var tolgeeProperties: TolgeeProperties
+  private val objectMapper = ObjectMapper()
 
-  @Test
-  fun `returns results for supported language`() {
-    val results = service.check("Ths is a tset.", "en")
-    assertThat(results).isNotEmpty
+  @BeforeEach
+  fun setup() {
+    tolgeeProperties = TolgeeProperties(languageTool = LanguageToolProperties(url = "http://localhost:8010"))
+
+    // Create a RestTemplate and bind mock server to it
+    val restTemplate = RestTemplate()
+    mockServer = MockRestServiceServer.createServer(restTemplate)
+
+    // Create a RestTemplateBuilder that returns our mocked RestTemplate
+    val builder =
+      object : RestTemplateBuilder() {
+        override fun build(): RestTemplate = restTemplate
+
+        override fun connectTimeout(connectTimeout: java.time.Duration): RestTemplateBuilder = this
+
+        override fun readTimeout(readTimeout: java.time.Duration): RestTemplateBuilder = this
+      }
+
+    service = LanguageToolService(tolgeeProperties, builder)
+  }
+
+  private fun mockLanguagesResponse(
+    vararg languages: LanguageToolLanguageInfo,
+  ) {
+    val json = objectMapper.writeValueAsString(languages)
+    mockServer
+      .expect(requestTo("http://localhost:8010/v2/languages"))
+      .andExpect(method(HttpMethod.GET))
+      .andRespond(withSuccess(json, MediaType.APPLICATION_JSON))
+  }
+
+  private fun mockCheckResponse(
+    vararg matches: LanguageToolMatch,
+  ) {
+    val response = LanguageToolResponse(matches = matches.toList())
+    val json = objectMapper.writeValueAsString(response)
+    mockServer
+      .expect(requestTo("http://localhost:8010/v2/check"))
+      .andExpect(method(HttpMethod.POST))
+      .andRespond(withSuccess(json, MediaType.APPLICATION_JSON))
   }
 
   @Test
@@ -19,91 +71,98 @@ class LanguageToolServiceTest {
   }
 
   @Test
-  fun `returns empty for unsupported language`() {
-    val results = service.check("some text", "xx-unsupported")
-    assertThat(results).isEmpty()
+  fun `throws when URL is not configured`() {
+    tolgeeProperties.languageTool.url = ""
+    assertThatThrownBy { service.check("Hello", "en") }
+      .isInstanceOf(LanguageToolNotConfiguredException::class.java)
   }
 
   @Test
-  fun `resolves base language from regional tag`() {
-    val results = service.check("Ths is a tset.", "en-US")
-    assertThat(results).isNotEmpty
-  }
+  fun `returns matches from API`() {
+    mockLanguagesResponse(
+      LanguageToolLanguageInfo(name = "English (US)", code = "en", longCode = "en-US"),
+    )
+    mockCheckResponse(
+      LanguageToolMatch(
+        message = "Possible spelling mistake",
+        offset = 0,
+        length = 4,
+        replacements = listOf(LanguageToolReplacement("Hello")),
+        rule = LanguageToolRule(id = "MORFOLOGIK_RULE_EN_US", category = LanguageToolCategory(id = "TYPOS")),
+      ),
+    )
 
-  @Test
-  fun `isLanguageSupported returns true for supported language`() {
-    assertThat(service.isLanguageSupported("en")).isTrue()
-    assertThat(service.isLanguageSupported("de")).isTrue()
-  }
-
-  @Test
-  fun `isLanguageSupported returns false for unsupported language`() {
-    assertThat(service.isLanguageSupported("xx-unsupported")).isFalse()
-  }
-
-  @Test
-  fun `returns correct positions for misspelled word`() {
-    // "Helo world" — "Helo" at position 0-4
     val results = service.check("Helo world", "en")
-    val spellingResult = results.find { it.fromPos == 0 }
-    assertThat(spellingResult).isNotNull
-    assertThat(spellingResult!!.toPos).isEqualTo(4)
+    assertThat(results).hasSize(1)
+    assertThat(results[0].offset).isEqualTo(0)
+    assertThat(results[0].length).isEqualTo(4)
+    assertThat(results[0].replacements).hasSize(1)
+    assertThat(results[0].replacements[0].value).isEqualTo("Hello")
+    mockServer.verify()
   }
 
   @Test
-  fun `returns no issues for correct text`() {
-    val results = service.check("This is a correct sentence.", "en")
+  fun `resolves underscore-separated tag`() {
+    // pt_BR should be normalized to pt-BR and resolved against supported languages
+    mockLanguagesResponse(
+      LanguageToolLanguageInfo(name = "Portuguese (Brazil)", code = "pt", longCode = "pt-BR"),
+      LanguageToolLanguageInfo(name = "Portuguese (Portugal)", code = "pt", longCode = "pt-PT"),
+    )
+
+    val tag = service.resolveLanguageTag("pt_BR")
+    assertThat(tag).isEqualTo("pt-BR")
+  }
+
+  @Test
+  fun `falls back to base code for unknown variant`() {
+    mockLanguagesResponse(
+      LanguageToolLanguageInfo(name = "English (US)", code = "en", longCode = "en-US"),
+      LanguageToolLanguageInfo(name = "English (GB)", code = "en", longCode = "en-GB"),
+    )
+
+    // en-XX doesn't exist, should fall back to base "en" -> "en-US" (first variant)
+    val tag = service.resolveLanguageTag("en-XX")
+    assertThat(tag).isEqualTo("en-US")
+  }
+
+  @Test
+  fun `preserves exact language tag when supported`() {
+    mockLanguagesResponse(
+      LanguageToolLanguageInfo(name = "English (US)", code = "en", longCode = "en-US"),
+      LanguageToolLanguageInfo(name = "English (GB)", code = "en", longCode = "en-GB"),
+    )
+
+    assertThat(service.resolveLanguageTag("en-GB")).isEqualTo("en-GB")
+  }
+
+  @Test
+  fun `returns null for unsupported language`() {
+    mockLanguagesResponse(
+      LanguageToolLanguageInfo(name = "English (US)", code = "en", longCode = "en-US"),
+    )
+
+    assertThat(service.resolveLanguageTag("xx")).isNull()
+    assertThat(service.resolveLanguageTag("xx-YY")).isNull()
+  }
+
+  @Test
+  fun `resolves base language to default variant`() {
+    mockLanguagesResponse(
+      LanguageToolLanguageInfo(name = "English (US)", code = "en", longCode = "en-US"),
+      LanguageToolLanguageInfo(name = "English (GB)", code = "en", longCode = "en-GB"),
+    )
+
+    // "en" should resolve to "en-US" (the first variant for base code "en")
+    assertThat(service.resolveLanguageTag("en")).isEqualTo("en-US")
+  }
+
+  @Test
+  fun `returns empty for unsupported language in check`() {
+    mockLanguagesResponse(
+      LanguageToolLanguageInfo(name = "English (US)", code = "en", longCode = "en-US"),
+    )
+
+    val results = service.check("Some text", "xx-unknown")
     assertThat(results).isEmpty()
-  }
-
-  @Test
-  fun `resolves base language to its default variant`() {
-    assertThat(service.resolveLanguage("en")?.shortCodeWithCountryAndVariant).isEqualTo("en-US")
-    assertThat(service.resolveLanguage("de")?.shortCodeWithCountryAndVariant).isEqualTo("de-DE")
-  }
-
-  @Test
-  fun `preserves regional variant as-is`() {
-    assertThat(service.resolveLanguage("en-US")?.shortCodeWithCountryAndVariant).isEqualTo("en-US")
-    assertThat(service.resolveLanguage("en-GB")?.shortCodeWithCountryAndVariant).isEqualTo("en-GB")
-    assertThat(service.resolveLanguage("pt-BR")?.shortCodeWithCountryAndVariant).isEqualTo("pt-BR")
-    assertThat(service.resolveLanguage("pt-PT")?.shortCodeWithCountryAndVariant).isEqualTo("pt-PT")
-  }
-
-  @Test
-  fun `resolves single-variant language to itself`() {
-    assertThat(service.resolveLanguage("fr")?.shortCodeWithCountryAndVariant).isEqualTo("fr")
-  }
-
-  @Test
-  fun `resolves underscore-separated tag via base code fallback`() {
-    // LanguageTool only recognizes hyphens, so underscored tags fail exact match
-    // and fall back to base code (the part before "_") → defaultLanguageVariant.
-    assertThat(service.resolveLanguage("pt_BR")?.shortCodeWithCountryAndVariant).isEqualTo("pt-PT")
-    assertThat(service.resolveLanguage("de_AT")?.shortCodeWithCountryAndVariant).isEqualTo("de-DE")
-  }
-
-  @Test
-  fun `resolves unknown regional variant via base code fallback`() {
-    assertThat(service.resolveLanguage("en-XX")?.shortCodeWithCountryAndVariant).isEqualTo("en-US")
-  }
-
-  @Test
-  fun `returns null for unsupported language tags`() {
-    assertThat(service.resolveLanguage("")).isNull()
-    assertThat(service.resolveLanguage("xx")).isNull()
-    assertThat(service.resolveLanguage("xx-YY")).isNull()
-    assertThat(service.resolveLanguage("xyz-abc-def")).isNull()
-  }
-
-  @Test
-  fun `handles case sensitivity in language tags`() {
-    assertThat(service.resolveLanguage("en")?.shortCodeWithCountryAndVariant).isEqualTo("en-US")
-    assertThat(service.resolveLanguage("EN")?.shortCodeWithCountryAndVariant).isEqualTo("en-US")
-  }
-
-  @Test
-  fun `resolves valid multi-segment BCP-47 tag to itself`() {
-    assertThat(service.resolveLanguage("ca-ES-valencia")?.shortCodeWithCountryAndVariant).isEqualTo("ca-ES-valencia")
   }
 }

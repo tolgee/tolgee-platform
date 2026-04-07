@@ -63,7 +63,7 @@ class QaTestData : BaseTestData() {
 
   /**
    * Creates QA config with all check types enabled at WARNING, except SPELLING and GRAMMAR
-   * which are OFF (they depend on JLanguageTool which is non-deterministic in integration tests).
+   * which are OFF (they depend on an external LanguageTool container).
    */
   fun createDefaultQaConfig(): ProjectQaConfig {
     return ProjectQaConfig(

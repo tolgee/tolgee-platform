@@ -37,9 +37,9 @@ class GrammarCheck(
           QaCheckResult(
             type = QaCheckType.GRAMMAR,
             message = QaIssueMessage.QA_GRAMMAR_ERROR,
-            replacement = match.suggestedReplacements.firstOrNull(),
-            positionStart = match.fromPos,
-            positionEnd = match.toPos,
+            replacement = match.replacements.firstOrNull()?.value,
+            positionStart = match.offset,
+            positionEnd = match.offset + match.length,
             params = mapOf("message" to match.message),
           )
         }

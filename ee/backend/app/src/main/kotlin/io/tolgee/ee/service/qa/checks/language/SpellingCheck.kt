@@ -36,10 +36,10 @@ class SpellingCheck(
           QaCheckResult(
             type = QaCheckType.SPELLING,
             message = QaIssueMessage.QA_SPELLING_ERROR,
-            replacement = match.suggestedReplacements.firstOrNull(),
-            positionStart = match.fromPos,
-            positionEnd = match.toPos,
-            params = mapOf("word" to text.substring(match.fromPos, match.toPos)),
+            replacement = match.replacements.firstOrNull()?.value,
+            positionStart = match.offset,
+            positionEnd = match.offset + match.length,
+            params = mapOf("word" to text.substring(match.offset, match.offset + match.length)),
           )
         }
     return filterLanguageToolFalsePositives(results, text)

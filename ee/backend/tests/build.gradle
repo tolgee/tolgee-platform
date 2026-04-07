@@ -54,7 +54,6 @@ dependencies {
     testImplementation "org.springframework.boot:spring-boot-starter-websocket"
     testImplementation libs.jsonUnitAssert
     testImplementation libs.mockito
-    testImplementation libs.languageToolCore
     testImplementation libs.stripe
     testImplementation libs.jacksonModuleKotlin
     testImplementation platform(libs.mcpBom)

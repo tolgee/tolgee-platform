@@ -1,5 +1,9 @@
 package io.tolgee.ee.service.qa.checks
 
+import io.tolgee.ee.service.qa.LanguageToolCategory
+import io.tolgee.ee.service.qa.LanguageToolMatch
+import io.tolgee.ee.service.qa.LanguageToolReplacement
+import io.tolgee.ee.service.qa.LanguageToolRule
 import io.tolgee.ee.service.qa.LanguageToolService
 import io.tolgee.ee.service.qa.QaCheckParams
 import io.tolgee.ee.service.qa.assertAllHaveType
@@ -9,9 +13,13 @@ import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.model.enums.qa.QaIssueMessage
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.`when`
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 
 class GrammarCheckTest {
-  private val languageToolService = LanguageToolService()
+  private val languageToolService = mock(LanguageToolService::class.java)
   private val check = GrammarCheck(languageToolService)
 
   private fun params(
@@ -24,10 +32,22 @@ class GrammarCheckTest {
     languageTag = languageTag,
   )
 
-  @Test
-  fun `returns empty for correct text`() {
-    check.check(params("This is a correct sentence.")).assertNoIssues()
-  }
+  private fun grammarMatch(
+    message: String,
+    offset: Int,
+    length: Int,
+    replacement: String? = null,
+  ) = LanguageToolMatch(
+    message = message,
+    offset = offset,
+    length = length,
+    replacements = if (replacement != null) listOf(LanguageToolReplacement(replacement)) else emptyList(),
+    rule =
+      LanguageToolRule(
+        id = "HE_VERB_AGR",
+        category = LanguageToolCategory(id = "GRAMMAR"),
+      ),
+  )
 
   @Test
   fun `returns empty for blank text`() {
@@ -36,6 +56,10 @@ class GrammarCheckTest {
 
   @Test
   fun `detects grammar error`() {
+    `when`(languageToolService.check(eq("He go to school."), any())).thenReturn(
+      listOf(grammarMatch("Did you mean 'goes'?", offset = 3, length = 2, replacement = "goes")),
+    )
+
     val results = check.check(params("He go to school."))
     assertThat(results).isNotEmpty
     results.assertAllHaveType(QaCheckType.GRAMMAR)
@@ -44,61 +68,68 @@ class GrammarCheckTest {
 
   @Test
   fun `includes message in params`() {
+    `when`(languageToolService.check(eq("He go to school."), any())).thenReturn(
+      listOf(grammarMatch("Did you mean 'goes'?", offset = 3, length = 2, replacement = "goes")),
+    )
+
     val results = check.check(params("He go to school."))
     assertThat(results).isNotEmpty
     val first = results.first()
     assertThat(first.params).containsKey("message")
-    assertThat(first.params?.get("message")).isNotBlank()
-  }
-
-  @Test
-  fun `returns empty for unsupported language`() {
-    check.check(params("He go to school.", languageTag = "xx-unknown")).assertNoIssues()
-  }
-
-  @Test
-  fun `does not include spelling issues`() {
-    // Results may be empty — assertThat.allMatch is vacuously true on empty lists
-    val results = check.check(params("Helo world"))
-    assertThat(results).allMatch { it.type == QaCheckType.GRAMMAR }
-  }
-
-  @Test
-  fun `all results have GRAMMAR type`() {
-    check.check(params("He go to school and she go too.")).assertAllHaveType(QaCheckType.GRAMMAR)
+    assertThat(first.params?.get("message")).isEqualTo("Did you mean 'goes'?")
   }
 
   @Test
   fun `provides suggestion as replacement`() {
+    `when`(languageToolService.check(eq("He go to school."), any())).thenReturn(
+      listOf(grammarMatch("Did you mean 'goes'?", offset = 3, length = 2, replacement = "goes")),
+    )
+
     val results = check.check(params("He go to school."))
     assertThat(results).isNotEmpty
-    assertThat(results.first().replacement).isNotNull()
+    assertThat(results.first().replacement).isEqualTo("goes")
   }
 
   @Test
-  fun `does not flag casing for short lowercase label`() {
-    // "click here" is a button label, not a sentence — CASING rules should be suppressed
+  fun `returns empty when language tool returns no matches`() {
+    `when`(languageToolService.check(any(), any())).thenReturn(emptyList())
+
+    check.check(params("This is a correct sentence.")).assertNoIssues()
+  }
+
+  @Test
+  fun `filters out spelling rules`() {
+    val spellingMatch =
+      LanguageToolMatch(
+        message = "Possible spelling mistake",
+        offset = 0,
+        length = 4,
+        rule =
+          LanguageToolRule(
+            id = "MORFOLOGIK_RULE_EN_US",
+            category = LanguageToolCategory(id = "TYPOS"),
+          ),
+      )
+    `when`(languageToolService.check(any(), any())).thenReturn(listOf(spellingMatch))
+
+    check.check(params("Helo world")).assertNoIssues()
+  }
+
+  @Test
+  fun `filters out sentence rules (CASING category)`() {
+    val casingMatch =
+      LanguageToolMatch(
+        message = "This sentence does not start with an uppercase letter.",
+        offset = 0,
+        length = 5,
+        rule =
+          LanguageToolRule(
+            id = "UPPERCASE_SENTENCE_START",
+            category = LanguageToolCategory(id = "CASING"),
+          ),
+      )
+    `when`(languageToolService.check(any(), any())).thenReturn(listOf(casingMatch))
+
     check.check(params("click here")).assertNoIssues()
-  }
-
-  @Test
-  fun `does not flag casing for multi-word lowercase label`() {
-    // "add new item" is a UI label — CASING rules should be suppressed
-    check.check(params("add new item")).assertNoIssues()
-  }
-
-  @Test
-  fun `does not flag casing for long lowercase label`() {
-    // Long labels are still not sentences — CASING rules should be suppressed
-    check.check(params("select advanced export format options")).assertNoIssues()
-  }
-
-  @Test
-  fun `still detects grammar errors in lowercase sentence`() {
-    // "he go to school." has a real grammar error (HE_VERB_AGR), not just casing
-    val results = check.check(params("he go to school."))
-    assertThat(results).isNotEmpty
-    // Should contain grammar errors but NOT casing-only issues
-    assertThat(results).allMatch { it.type == QaCheckType.GRAMMAR }
   }
 }

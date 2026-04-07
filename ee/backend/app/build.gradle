@@ -98,10 +98,6 @@ dependencies {
     implementation 'org.apache.poi:poi-ooxml:5.4.0'
     implementation 'org.apache.commons:commons-collections4:4.4'
 
-    /**
-     * LanguageTool — spelling and grammar checks
-     */
-    implementation libs.languageToolAll
     implementation("com.github.ben-manes.caffeine:caffeine")
 
     /**
