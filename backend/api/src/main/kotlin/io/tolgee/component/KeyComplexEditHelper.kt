@@ -315,7 +315,7 @@ class KeyComplexEditHelper(
     isDescriptionChanged = key.keyMeta?.description != dto.description
     isIsPluralChanged =
       (dto.isPlural != null && key.isPlural != dto.isPlural) ||
-      (dto.isPlural == true && key.pluralArgName != dto.pluralArgName)
+      (dto.isPlural == true && dto.pluralArgName != null && key.pluralArgName != dto.pluralArgName)
     isMaxCharLimitChanged =
       dto.maxCharLimit != null &&
       key.maxCharLimit != dto.maxCharLimit.let { if (it != null && it <= 0) null else it }
