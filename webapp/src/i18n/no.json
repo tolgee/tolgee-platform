@@ -1914,6 +1914,7 @@
   "qa_check_failed": "En kvalitetskontroll kunne ikke utføres",
   "qa_check_ignored_label": "(Ignorert)",
   "qa_checks_feature_description": "QA-sjekker oppdager automatisk problemer i oversettelsene dine, som manglende placeholders, formateringsfeil og mer.",
+  "qa_checks_not_enabled": "QA-kontroller er ikke aktivert for dette prosjektet",
   "qa_check_tooltip_brackets_mismatch": "Oppdager forskjeller i parenteser mellom kilden og oversettelsen. Kontrollerte parenteser: ( ) [ ] og '{' '}' for ikke-ICU-prosjekter.",
   "qa_check_tooltip_brackets_unbalanced": "Oppdager åpnende parenteser uten tilhørende lukkende parenteser eller omvendt i oversettelsen.",
   "qa_check_tooltip_character_case_mismatch": "Oppdager når den første bokstaven i oversettelsen har forskjellig stor/liten bokstav enn kilden.",

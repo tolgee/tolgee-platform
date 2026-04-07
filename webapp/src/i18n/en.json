@@ -1927,6 +1927,7 @@
   "qa_check_failed": "A quality check failed to execute",
   "qa_check_ignored_label": "(Ignored)",
   "qa_checks_feature_description": "QA checks automatically detect issues in your translations such as missing placeholders, formatting mismatches, and more.",
+  "qa_checks_not_enabled": "QA checks are not enabled for this project",
   "qa_check_tooltip_brackets_mismatch": "Detects differences in brackets between the source and translation. Checked brackets: ( ) [ ] and '{' '}' for non-ICU projects.",
   "qa_check_tooltip_brackets_unbalanced": "Detects opening brackets without matching closing brackets or vice versa in the translation. Checked brackets: ( ) [ ] and '{' '}' for non-ICU projects.",
   "qa_check_tooltip_character_case_mismatch": "Detects when the first letter of the translation has different capitalization than the source.",

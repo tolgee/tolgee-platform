@@ -1917,6 +1917,7 @@
   "qa_check_failed": "Falha ao executar a verificação de qualidade",
   "qa_check_ignored_label": "(Ignorado)",
   "qa_checks_feature_description": "As verificações de QA detectam automaticamente problemas nas suas traduções, como placeholders ausentes, incompatibilidades de formatação e muito mais.",
+  "qa_checks_not_enabled": "As verificações de QA não estão habilitadas para este projeto",
   "qa_check_tooltip_brackets_mismatch": "Detecta diferenças em parênteses entre o texto de origem e a tradução. Parênteses verificados: ( ) [ ] e '{' '}' para projetos não-ICU.",
   "qa_check_tooltip_brackets_unbalanced": "Detecta parênteses de abertura sem parênteses de fechamento correspondentes ou vice-versa na tradução.",
   "qa_check_tooltip_character_case_mismatch": "Detecta quando a primeira letra da tradução tem capitalização diferente do texto de origem.",

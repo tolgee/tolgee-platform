@@ -1,3 +1,10 @@
+## [3.178.1](https://github.com/tolgee/tolgee-platform/compare/v3.178.0...v3.178.1) (2026-04-07)
+
+
+### Bug Fixes
+
+* optimize interaction with redis for batch jobs  ([#3578](https://github.com/tolgee/tolgee-platform/issues/3578)) ([e704b7e](https://github.com/tolgee/tolgee-platform/commit/e704b7ed4aa3c1eef969bc4e9e3370525377e29d))
+
 # [3.178.0](https://github.com/tolgee/tolgee-platform/compare/v3.177.1...v3.178.0) (2026-04-07)
 
 

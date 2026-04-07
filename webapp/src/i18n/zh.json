@@ -1918,6 +1918,7 @@
   "qa_check_failed": "质量检查执行失败",
   "qa_check_ignored_label": "(已忽略)",
   "qa_checks_feature_description": "QA 检查会自动检测翻译中的问题，例如缺失的 placeholder、格式不匹配等。",
+  "qa_checks_not_enabled": "此项目未启用 QA 检查",
   "qa_check_tooltip_brackets_mismatch": "检测源文本和译文之间括号的差异。检查的括号:( ) [ ] 以及非 ICU 项目中的 '{' '}'。",
   "qa_check_tooltip_brackets_unbalanced": "检测译文中存在未匹配的左括号或右括号。",
   "qa_check_tooltip_character_case_mismatch": "检测译文首字母的大小写与源文本不同。",

@@ -1692,6 +1692,7 @@
   "qa_check_failed": "Nie udało się wykonać kontroli jakości",
   "qa_check_ignored_label": "(Ignorowane)",
   "qa_checks_feature_description": "Kontrole QA automatycznie wykrywają problemy w tłumaczeniach, takie jak brakujące symbole zastępcze, niezgodności formatowania i inne.",
+  "qa_checks_not_enabled": "Kontrole QA nie są włączone dla tego projektu",
   "qa_check_tooltip_brackets_mismatch": "Wykrywa różnice w nawiasach między źródłem a tłumaczeniem. Sprawdzane nawiasy: ( ) [ ] oraz '{' '}' dla projektów nie-ICU.",
   "qa_check_tooltip_brackets_unbalanced": "Wykrywa otwierające nawiasy bez pasujących nawiasów zamykających lub odwrotnie w tłumaczeniu.",
   "qa_check_tooltip_character_case_mismatch": "Wykrywa różnice w wielkości pierwszej litery między źródłem a tłumaczeniem.",

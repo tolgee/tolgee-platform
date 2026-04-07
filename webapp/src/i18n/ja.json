@@ -1927,6 +1927,7 @@
   "qa_check_failed": "品質チェックの実行に失敗しました",
   "qa_check_ignored_label": "(無視)",
   "qa_checks_feature_description": "QA チェックは、プレースホルダー の欠落、フォーマットの不一致など、翻訳の問題を自動的に検出します。",
+  "qa_checks_not_enabled": "QA チェックはこのプロジェクトで有効になっていません",
   "qa_check_tooltip_brackets_mismatch": "ソーステキストと翻訳の間で括弧の違いを検出します。",
   "qa_check_tooltip_brackets_unbalanced": "翻訳内で対応する閉じ括弧のない開き括弧、またはその逆を検出します。",
   "qa_check_tooltip_character_case_mismatch": "ソーステキストと翻訳の最初の文字の大文字小文字が異なる場合を検出します。",

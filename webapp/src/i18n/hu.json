@@ -1917,6 +1917,7 @@
   "qa_check_failed": "Minőségellenőrzési ellenőrzés végrehajtása sikertelen",
   "qa_check_ignored_label": "(Mellőzve)",
   "qa_checks_feature_description": "A QA ellenőrzések automatikusan észlelik a fordításokban lévő problémákat, mint például a hiányzó helyőrzők, formázási eltérések és egyebek.",
+  "qa_checks_not_enabled": "A QA ellenőrzések nincsenek engedélyezve ehhez a projekthez",
   "qa_check_tooltip_brackets_mismatch": "Észleli a zárójelek közötti eltéréseket a forrás és a fordítás között. Ellenőrzött zárójelek: ( ) [ ] és '{' '}' nem-ICU projektek esetén.",
   "qa_check_tooltip_brackets_unbalanced": "Észleli a nyitó zárójeleket a megfelelő záró zárójelek nélkül vagy fordítva a fordításban.",
   "qa_check_tooltip_character_case_mismatch": "Észleli, ha a fordítás első betűjének nagybetűs/kisbetűs írásmódja eltér a forrásétól.",

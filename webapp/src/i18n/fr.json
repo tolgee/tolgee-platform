@@ -1920,6 +1920,7 @@
   "qa_check_failed": "Échec de l’exécution d’un contrôle qualité",
   "qa_check_ignored_label": "(Ignoré)",
   "qa_checks_feature_description": "Les vérifications QA détectent automatiquement les problèmes dans vos traductions tels que les placeholders manquants, les incompatibilités de formatage, et plus encore.",
+  "qa_checks_not_enabled": "Les contrôles QA ne sont pas activés pour ce projet",
   "qa_check_tooltip_brackets_mismatch": "Détecte les différences de crochets entre la source et la traduction. Crochets vérifiés : ( ) [ ] et '{' '}' pour les projets non-ICU.",
   "qa_check_tooltip_brackets_unbalanced": "Détecte les crochets ouvrants sans crochets fermants correspondants ou vice versa dans la traduction.",
   "qa_check_tooltip_character_case_mismatch": "Détecte lorsque la première lettre de la traduction a une capitalisation différente de celle de la source.",

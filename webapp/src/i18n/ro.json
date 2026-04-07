@@ -1921,6 +1921,7 @@
   "qa_check_failed": "O verificare a calității a eșuat să ruleze",
   "qa_check_ignored_label": "(Ignorat)",
   "qa_checks_feature_description": "Verificările QA detectează automat probleme în traducerile tale, cum ar fi placeholders lipsă, nepotriviri de formatare și altele.",
+  "qa_checks_not_enabled": "Verificările QA nu sunt activate pentru acest proiect",
   "qa_check_tooltip_brackets_mismatch": "Detectează diferențe în paranteze între sursă și traducere. Paranteze verificate: ( ) [ ] și '{' '}' pentru proiecte non-ICU.",
   "qa_check_tooltip_brackets_unbalanced": "Detectează paranteze deschise fără paranteze închise corespunzătoare sau invers în traducere.",
   "qa_check_tooltip_character_case_mismatch": "Detectează când prima literă a traducerii are o majusculă diferită față de sursă.",

@@ -1925,6 +1925,7 @@
   "qa_check_failed": "Een kwaliteitscontrole kon niet worden uitgevoerd",
   "qa_check_ignored_label": "(Genegeerd)",
   "qa_checks_feature_description": "QA-controles detecteren automatisch problemen in je vertalingen zoals ontbrekende placeholders, opmaakfouten en meer.",
+  "qa_checks_not_enabled": "QA-controles zijn niet ingeschakeld voor dit project",
   "qa_check_tooltip_brackets_mismatch": "Detecteert verschillen in haakjes tussen de bron en vertaling. Gecontroleerde haakjes: ( ) [ ] en '{' '}' voor niet-ICU projecten.",
   "qa_check_tooltip_brackets_unbalanced": "Detecteert openingshaakjes zonder bijbehorende sluitingshaakjes of omgekeerd in de vertaling.",
   "qa_check_tooltip_character_case_mismatch": "Detecteert wanneer de eerste letter van de vertaling een andere hoofdlettergebruik heeft dan de bron.",
