@@ -6,6 +6,7 @@ import io.tolgee.ee.service.qa.LanguageToolReplacement
 import io.tolgee.ee.service.qa.LanguageToolRule
 import io.tolgee.ee.service.qa.LanguageToolService
 import io.tolgee.ee.service.qa.QaCheckParams
+import io.tolgee.ee.service.qa.QaGlossaryTerm
 import io.tolgee.ee.service.qa.assertAllHaveType
 import io.tolgee.ee.service.qa.assertNoIssues
 import io.tolgee.ee.service.qa.checks.language.SpellingCheck
@@ -95,6 +96,84 @@ class SpellingCheckTest {
     `when`(languageToolService.check(any(), any())).thenReturn(emptyList())
 
     check.check(params("This is correct.")).assertNoIssues()
+  }
+
+  @Test
+  fun `filters spelling issue overlapping glossary term`() {
+    `when`(languageToolService.check(eq("Kubernetes is great"), any())).thenReturn(
+      listOf(spellingMatch("Kubernetes", offset = 0, replacement = "Cube nets")),
+    )
+
+    val p =
+      QaCheckParams(
+        baseText = null,
+        text = "Kubernetes is great",
+        baseLanguageTag = null,
+        languageTag = "en",
+        glossaryTerms = listOf(QaGlossaryTerm(start = 0, end = 10, termText = "Kubernetes")),
+      )
+
+    check.check(p).assertNoIssues()
+  }
+
+  @Test
+  fun `keeps spelling issue not overlapping glossary term`() {
+    `when`(languageToolService.check(eq("Kubernetes is gret"), any())).thenReturn(
+      listOf(
+        spellingMatch("Kubernetes", offset = 0, replacement = "Cube nets"),
+        spellingMatch("gret", offset = 14, replacement = "great"),
+      ),
+    )
+
+    val p =
+      QaCheckParams(
+        baseText = null,
+        text = "Kubernetes is gret",
+        baseLanguageTag = null,
+        languageTag = "en",
+        glossaryTerms = listOf(QaGlossaryTerm(start = 0, end = 10, termText = "Kubernetes")),
+      )
+
+    val results = check.check(p)
+    assertThat(results).hasSize(1)
+    assertThat(results.first().positionStart).isEqualTo(14)
+  }
+
+  @Test
+  fun `filters spelling issue with partial glossary overlap`() {
+    `when`(languageToolService.check(eq("MyKubernetes cluster"), any())).thenReturn(
+      listOf(spellingMatch("MyKubernetes", offset = 0, replacement = "My Kubernetes")),
+    )
+
+    val p =
+      QaCheckParams(
+        baseText = null,
+        text = "MyKubernetes cluster",
+        baseLanguageTag = null,
+        languageTag = "en",
+        glossaryTerms = listOf(QaGlossaryTerm(start = 2, end = 12, termText = "Kubernetes")),
+      )
+
+    check.check(p).assertNoIssues()
+  }
+
+  @Test
+  fun `null glossary terms preserves existing behavior`() {
+    `when`(languageToolService.check(eq("Helo world"), any())).thenReturn(
+      listOf(spellingMatch("Helo", offset = 0, replacement = "Hello")),
+    )
+
+    val p =
+      QaCheckParams(
+        baseText = null,
+        text = "Helo world",
+        baseLanguageTag = null,
+        languageTag = "en",
+        glossaryTerms = null,
+      )
+
+    val results = check.check(p)
+    assertThat(results).hasSize(1)
   }
 
   @Test

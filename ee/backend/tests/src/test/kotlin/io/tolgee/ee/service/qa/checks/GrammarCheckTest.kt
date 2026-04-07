@@ -6,6 +6,7 @@ import io.tolgee.ee.service.qa.LanguageToolReplacement
 import io.tolgee.ee.service.qa.LanguageToolRule
 import io.tolgee.ee.service.qa.LanguageToolService
 import io.tolgee.ee.service.qa.QaCheckParams
+import io.tolgee.ee.service.qa.QaGlossaryTerm
 import io.tolgee.ee.service.qa.assertAllHaveType
 import io.tolgee.ee.service.qa.assertNoIssues
 import io.tolgee.ee.service.qa.checks.language.GrammarCheck
@@ -95,6 +96,63 @@ class GrammarCheckTest {
     `when`(languageToolService.check(any(), any())).thenReturn(emptyList())
 
     check.check(params("This is a correct sentence.")).assertNoIssues()
+  }
+
+  @Test
+  fun `filters grammar issue overlapping glossary term`() {
+    `when`(languageToolService.check(eq("Tolgee help you translate"), any())).thenReturn(
+      listOf(grammarMatch("Did you mean 'helps'?", offset = 7, length = 4, replacement = "helps")),
+    )
+
+    val p =
+      QaCheckParams(
+        baseText = null,
+        text = "Tolgee help you translate",
+        baseLanguageTag = null,
+        languageTag = "en",
+        glossaryTerms = listOf(QaGlossaryTerm(start = 7, end = 11, termText = "help")),
+      )
+
+    check.check(p).assertNoIssues()
+  }
+
+  @Test
+  fun `keeps grammar issue not overlapping glossary term`() {
+    `when`(languageToolService.check(eq("Tolgee help you translate"), any())).thenReturn(
+      listOf(grammarMatch("Did you mean 'helps'?", offset = 7, length = 4, replacement = "helps")),
+    )
+
+    val p =
+      QaCheckParams(
+        baseText = null,
+        text = "Tolgee help you translate",
+        baseLanguageTag = null,
+        languageTag = "en",
+        glossaryTerms = listOf(QaGlossaryTerm(start = 0, end = 6, termText = "Tolgee")),
+      )
+
+    val results = check.check(p)
+    assertThat(results).hasSize(1)
+    assertThat(results.first().positionStart).isEqualTo(7)
+  }
+
+  @Test
+  fun `null glossary terms preserves existing behavior`() {
+    `when`(languageToolService.check(eq("He go to school."), any())).thenReturn(
+      listOf(grammarMatch("Did you mean 'goes'?", offset = 3, length = 2, replacement = "goes")),
+    )
+
+    val p =
+      QaCheckParams(
+        baseText = null,
+        text = "He go to school.",
+        baseLanguageTag = null,
+        languageTag = "en",
+        glossaryTerms = null,
+      )
+
+    val results = check.check(p)
+    assertThat(results).hasSize(1)
   }
 
   @Test

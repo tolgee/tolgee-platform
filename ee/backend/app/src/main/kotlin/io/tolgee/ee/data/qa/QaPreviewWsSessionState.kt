@@ -12,10 +12,12 @@ data class QaPreviewWsSessionState(
   val keyId: Long?,
   val translationId: Long?,
   val enabledCheckTypes: List<QaCheckType>,
-  val isPlural: Boolean = false,
-  val baseVariants: Map<String, String>? = null,
-  val maxCharLimit: Int? = null,
-  val icuPlaceholders: Boolean = true,
+  val isPlural: Boolean,
+  val baseVariants: Map<String, String>?,
+  val maxCharLimit: Int?,
+  val icuPlaceholders: Boolean,
+  val organizationOwnerId: Long,
+  val glossaryEnabled: Boolean,
 ) {
   var currentJob: Job? = null
   var lastMessageTime: Instant? = null

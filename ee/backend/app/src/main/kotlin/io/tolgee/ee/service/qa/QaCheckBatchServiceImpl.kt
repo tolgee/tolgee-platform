@@ -1,8 +1,11 @@
 package io.tolgee.ee.service.qa
 
+import io.sentry.Sentry
+import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.component.reporting.BusinessEventPublisher
 import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
 import io.tolgee.constants.Feature
+import io.tolgee.ee.service.glossary.GlossaryTermService
 import io.tolgee.formats.getPluralForms
 import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.repository.TranslationRepository
@@ -13,6 +16,7 @@ import io.tolgee.service.project.ProjectService
 import io.tolgee.service.qa.QaCheckBatchService
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.executeInNewRepeatableTransaction
+import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
@@ -31,6 +35,8 @@ class QaCheckBatchServiceImpl(
   private val businessEventPublisher: BusinessEventPublisher,
   private val transactionManager: PlatformTransactionManager,
   private val projectService: ProjectService,
+  private val glossaryTermService: GlossaryTermService,
+  private val enabledFeaturesProvider: EnabledFeaturesProvider,
 ) : QaCheckBatchService {
   @Transactional
   override fun runChecksAndPersist(
@@ -70,6 +76,8 @@ class QaCheckBatchServiceImpl(
     val textParsed = if (isPlural) getPluralForms(translationText) else null
     val baseParsed = if (isPlural && baseText != null) getPluralForms(baseText) else null
 
+    val glossaryTerms = findGlossaryTerms(project.organizationOwnerId, projectId, translationText, language.tag)
+
     val params =
       QaCheckParams(
         baseText = baseText,
@@ -82,6 +90,7 @@ class QaCheckBatchServiceImpl(
         baseTextVariants = baseParsed?.forms,
         maxCharLimit = key.maxCharLimit,
         icuPlaceholders = project.icuPlaceholders,
+        glossaryTerms = glossaryTerms,
       )
 
     val results =
@@ -112,6 +121,28 @@ class QaCheckBatchServiceImpl(
     }
 
     publishBusinessEvent(projectId)
+  }
+
+  private fun findGlossaryTerms(
+    organizationOwnerId: Long,
+    projectId: Long,
+    text: String,
+    languageTag: String,
+  ): List<QaGlossaryTerm>? {
+    if (text.isEmpty() || !enabledFeaturesProvider.isFeatureEnabled(organizationOwnerId, Feature.GLOSSARY)) {
+      return null
+    }
+    return try {
+      glossaryTermService.findQaGlossaryTerms(organizationOwnerId, projectId, text, languageTag)
+    } catch (e: Exception) {
+      Sentry.captureException(e)
+      logger.warn("Glossary lookup failed for project {}", projectId, e)
+      null
+    }
+  }
+
+  companion object {
+    private val logger = LoggerFactory.getLogger(QaCheckBatchServiceImpl::class.java)
   }
 
   private fun publishBusinessEvent(projectId: Long) {

@@ -17,9 +17,11 @@ class GrammarCheck(
   override val debounceDuration: Long = 500L
 
   override fun check(params: QaCheckParams): List<QaCheckResult> {
-    return QaPluralCheckHelper.runPerVariant(params) { text, _ ->
-      checkVariant(text, params.languageTag)
-    }
+    val results =
+      QaPluralCheckHelper.runPerVariant(params) { text, _ ->
+        checkVariant(text, params.languageTag)
+      }
+    return filterByGlossaryTerms(results, params.glossaryTerms)
   }
 
   private fun checkVariant(
@@ -31,8 +33,7 @@ class GrammarCheck(
     val matches = languageToolService.check(text, languageTag)
     val results =
       matches
-        .filter { !isSpellingRule(it) }
-        .filter { !isSentenceRule(it) }
+        .filter { !isSpellingRule(it) && !isSentenceRule(it) }
         .map { match ->
           QaCheckResult(
             type = QaCheckType.GRAMMAR,

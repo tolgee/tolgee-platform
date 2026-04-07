@@ -2,6 +2,8 @@ package io.tolgee.ee.api.v2.controllers.qa
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.sentry.Sentry
+import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Feature
 import io.tolgee.dtos.cacheable.ApiKeyDto
 import io.tolgee.ee.data.qa.QaCheckPreviewDone
@@ -9,10 +11,13 @@ import io.tolgee.ee.data.qa.QaCheckPreviewError
 import io.tolgee.ee.data.qa.QaCheckPreviewResult
 import io.tolgee.ee.data.qa.QaPreviewWsIssue
 import io.tolgee.ee.data.qa.QaPreviewWsSessionState
+import io.tolgee.ee.service.glossary.GlossaryTermService
 import io.tolgee.ee.service.qa.ProjectQaConfigService
 import io.tolgee.ee.service.qa.QaCheckParams
 import io.tolgee.ee.service.qa.QaCheckRunnerService
+import io.tolgee.ee.service.qa.QaGlossaryTerm
 import io.tolgee.ee.service.qa.QaIssueService
+import io.tolgee.ee.service.qa.findQaGlossaryTerms
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.formats.getPluralForms
 import io.tolgee.model.enums.Scope
@@ -55,6 +60,8 @@ class QaCheckPreviewWebSocketHandler(
   private val projectFeatureGuard: ProjectFeatureGuard,
   private val projectService: ProjectService,
   private val keyService: KeyService,
+  private val glossaryTermService: GlossaryTermService,
+  private val enabledFeaturesProvider: EnabledFeaturesProvider,
 ) : TextWebSocketHandler(),
   DisposableBean {
   private val supervisorJob = SupervisorJob()
@@ -75,6 +82,8 @@ class QaCheckPreviewWebSocketHandler(
 
       val textParsed = if (state.isPlural) getPluralForms(text) else null
 
+      val glossaryTerms = findGlossaryTerms(state, text)
+
       val params =
         QaCheckParams(
           baseText = state.baseText,
@@ -88,6 +97,7 @@ class QaCheckPreviewWebSocketHandler(
           activeVariant = activeVariant,
           maxCharLimit = state.maxCharLimit,
           icuPlaceholders = state.icuPlaceholders,
+          glossaryTerms = glossaryTerms,
         )
 
       coroutineScope {
@@ -234,7 +244,8 @@ class QaCheckPreviewWebSocketHandler(
     val isPlural = key?.isPlural ?: false
     val maxCharLimit = key?.maxCharLimit
     val baseParsed = if (isPlural && baseText != null) getPluralForms(baseText) else null
-    val project = projectService.get(projectId)
+    val project = projectService.getDto(projectId)
+    val glossaryEnabled = enabledFeaturesProvider.isFeatureEnabled(project.organizationOwnerId, Feature.GLOSSARY)
 
     session.attributes["state"] =
       QaPreviewWsSessionState(
@@ -249,6 +260,8 @@ class QaCheckPreviewWebSocketHandler(
         baseVariants = baseParsed?.forms,
         maxCharLimit = maxCharLimit,
         icuPlaceholders = project.icuPlaceholders,
+        organizationOwnerId = project.organizationOwnerId,
+        glossaryEnabled = glossaryEnabled,
       )
   }
 
@@ -262,6 +275,20 @@ class QaCheckPreviewWebSocketHandler(
       handleInit(session, json)
     } else {
       handleTextUpdate(session, state, json)
+    }
+  }
+
+  private fun findGlossaryTerms(
+    state: QaPreviewWsSessionState,
+    text: String,
+  ): List<QaGlossaryTerm>? {
+    if (!state.glossaryEnabled || text.isEmpty()) return null
+    return try {
+      glossaryTermService.findQaGlossaryTerms(state.organizationOwnerId, state.projectId, text, state.languageTag)
+    } catch (e: Exception) {
+      Sentry.captureException(e)
+      logger.warn("Glossary lookup failed for project {}", state.projectId, e)
+      null
     }
   }
 

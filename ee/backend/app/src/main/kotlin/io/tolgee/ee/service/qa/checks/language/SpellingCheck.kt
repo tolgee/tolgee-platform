@@ -17,9 +17,11 @@ class SpellingCheck(
   override val debounceDuration: Long = 500L
 
   override fun check(params: QaCheckParams): List<QaCheckResult> {
-    return QaPluralCheckHelper.runPerVariant(params) { text, _ ->
-      checkVariant(text, params.languageTag)
-    }
+    val results =
+      QaPluralCheckHelper.runPerVariant(params) { text, _ ->
+        checkVariant(text, params.languageTag)
+      }
+    return filterByGlossaryTerms(results, params.glossaryTerms)
   }
 
   private fun checkVariant(

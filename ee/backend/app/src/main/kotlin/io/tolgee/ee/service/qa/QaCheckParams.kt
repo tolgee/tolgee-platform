@@ -12,4 +12,5 @@ data class QaCheckParams(
   val activeVariant: String? = null,
   val maxCharLimit: Int? = null,
   val icuPlaceholders: Boolean = true,
+  val glossaryTerms: List<QaGlossaryTerm>? = null,
 )
