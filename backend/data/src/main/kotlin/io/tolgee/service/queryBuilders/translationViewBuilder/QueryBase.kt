@@ -135,7 +135,8 @@ class QueryBase<T>(
       addTotalSuggestionsCount(language)
       if (qaEnabled) {
         val qaIssueCountExpression = addQaIssueCount(translation, language)
-        this.querySelection[language to TranslationView::qaChecksStale] = translation.get(Translation_.qaChecksStale)
+        this.querySelection[language to TranslationView::qaChecksStale] =
+          cb.coalesce(translation.get(Translation_.qaChecksStale), false)
         queryTranslationFiltering.applyQaFilter(language, qaIssueCountExpression, translation)
       } else {
         this.querySelection[language to TranslationView::qaIssueCount] = cb.literal(0L)

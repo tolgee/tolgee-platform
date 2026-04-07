@@ -39,7 +39,7 @@ class UnmatchedNewlinesCheck : QaCheck {
       val textGap = textStructure.gaps[i]
 
       if (textGap.lineCount > baseGap.lineCount) {
-        results.add(extraNewlinesResult(baseGap, textGap))
+        results.add(extraNewlinesResult(baseGap, textGap, textStructure.separatorType))
         continue
       }
 
@@ -75,13 +75,15 @@ class UnmatchedNewlinesCheck : QaCheck {
   private fun extraNewlinesResult(
     baseGap: Gap,
     textGap: Gap,
+    separatorType: SeparatorType,
   ): QaCheckResult {
     val diff = textGap.lineCount - baseGap.lineCount
+    val charCount = diff * separatorType.separator.length
     return QaCheckResult(
       type = QaCheckType.UNMATCHED_NEWLINES,
       message = QaIssueMessage.QA_NEWLINES_EXTRA,
       replacement = "",
-      positionStart = textGap.endIndex - diff,
+      positionStart = textGap.endIndex - charCount,
       positionEnd = textGap.endIndex,
       params = mapOf("count" to diff.toString()),
     )

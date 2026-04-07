@@ -73,8 +73,14 @@ class QaCheckBatchServiceImpl(
     val translationText = existingTranslation?.text ?: ""
     val key = keyService.get(keyId)
     val isPlural = key.isPlural
-    val textParsed = if (isPlural) getPluralForms(translationText) else null
-    val baseParsed = if (isPlural && baseText != null) getPluralForms(baseText) else null
+    val textParsed =
+      translationText.takeIf { isPlural }?.let {
+        runCatching { getPluralForms(it) }.getOrNull()
+      }
+    val baseParsed =
+      baseText?.takeIf { isPlural }?.let {
+        runCatching { getPluralForms(it) }.getOrNull()
+      }
 
     val glossaryTerms = findGlossaryTerms(project.organizationOwnerId, projectId, translationText, language.tag)
 

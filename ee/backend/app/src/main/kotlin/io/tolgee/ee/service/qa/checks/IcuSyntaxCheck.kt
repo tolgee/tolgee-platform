@@ -19,7 +19,7 @@ class IcuSyntaxCheck : QaCheck {
     return try {
       MessagePatternUtil.buildMessageNode(text)
       emptyList()
-    } catch (e: Exception) {
+    } catch (e: IllegalArgumentException) {
       listOf(
         QaCheckResult(
           type = QaCheckType.ICU_SYNTAX,

@@ -40,7 +40,7 @@ class TranslationQaIssue(
   @ColumnDefault("'OPEN'")
   @ActivityLoggedProp
   var state: QaIssueState = QaIssueState.OPEN,
-  @Column(columnDefinition = "text")
+  @Column(columnDefinition = "jsonb")
   var params: String? = null,
   @ColumnDefault("false")
   var virtual: Boolean = false,

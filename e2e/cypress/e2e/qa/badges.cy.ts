@@ -9,11 +9,15 @@ import { E2TranslationsView } from '../../compounds/E2TranslationsView';
 describe('QA cell badges', () => {
   let projectId: number;
 
+  let view: E2TranslationsView;
+
   beforeEach(() => {
     qaTestData.clean();
     qaTestData.generateStandard().then((res) => {
       projectId = getProjectByNameFromTestData(res.body, 'test_project')!.id;
     });
+    login('test_username');
+    view = new E2TranslationsView();
   });
 
   afterEach(() => {
@@ -21,8 +25,6 @@ describe('QA cell badges', () => {
   });
 
   it('shows badge on translation cell with QA issues', () => {
-    login('test_username');
-    const view = new E2TranslationsView();
     view.visit(projectId);
 
     cy.contains('key_placeholder_issue')
@@ -32,8 +34,6 @@ describe('QA cell badges', () => {
   });
 
   it('shows correct count for multiple issues', () => {
-    login('test_username');
-    const view = new E2TranslationsView();
     view.visit(projectId);
 
     cy.contains('key_multiple_issues')
@@ -44,8 +44,6 @@ describe('QA cell badges', () => {
   });
 
   it('does not show badge for translation without issues', () => {
-    login('test_username');
-    const view = new E2TranslationsView();
     view.visit(projectId);
 
     cy.contains('key_no_issues')
@@ -55,8 +53,6 @@ describe('QA cell badges', () => {
   });
 
   it('does not show badge for translation with only ignored issues', () => {
-    login('test_username');
-    const view = new E2TranslationsView();
     view.visit(projectId);
 
     cy.contains('key_ignored_issue')
@@ -66,8 +62,6 @@ describe('QA cell badges', () => {
   });
 
   it('clicking badge opens QA panel', () => {
-    login('test_username');
-    const view = new E2TranslationsView();
     view.visit(projectId);
 
     cy.contains('key_placeholder_issue')

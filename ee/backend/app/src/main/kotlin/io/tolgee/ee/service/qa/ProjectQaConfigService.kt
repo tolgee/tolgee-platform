@@ -7,6 +7,7 @@ import io.tolgee.model.qa.LanguageQaConfig
 import io.tolgee.model.qa.ProjectQaConfig
 import io.tolgee.repository.qa.LanguageQaConfigRepository
 import io.tolgee.repository.qa.ProjectQaConfigRepository
+import io.tolgee.service.language.LanguageService
 import io.tolgee.service.project.LanguageStatsService
 import io.tolgee.service.project.ProjectService
 import jakarta.persistence.EntityManager
@@ -21,6 +22,7 @@ class ProjectQaConfigService(
   private val entityManager: EntityManager,
   private val qaRecheckService: QaRecheckService,
   private val languageStatsService: LanguageStatsService,
+  private val languageService: LanguageService,
 ) {
   @Transactional
   fun getOrCreateConfig(projectId: Long): ProjectQaConfig {
@@ -125,6 +127,9 @@ class ProjectQaConfigService(
     languageId: Long,
     settings: Map<QaCheckType, QaCheckSeverity?>,
   ) {
+    // Validate that the language belongs to this project
+    languageService.getEntity(languageId, projectId)
+
     val langConfig =
       languageQaConfigRepository.findByLanguageProjectIdAndLanguageId(projectId, languageId)
         ?: LanguageQaConfig(

@@ -21,20 +21,13 @@ describe('QA on dashboard', () => {
     qaTestData.clean();
   });
 
-  it('shows QA badge on language row in dashboard', () => {
+  it('shows QA badge with issue count on language row in dashboard', () => {
     login('test_username');
     cy.visit(`${HOST}/projects/${projectId}`);
     waitForGlobalLoading();
 
     // French language row should show QA badge since it has issues
     gcy('qa-badge').should('exist');
-  });
-
-  it('badge shows issue count', () => {
-    login('test_username');
-    cy.visit(`${HOST}/projects/${projectId}`);
-    waitForGlobalLoading();
-
     // The badge should contain a number representing issue count
     gcy('qa-badge').first().find('.unresolved').should('exist');
   });

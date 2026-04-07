@@ -26,7 +26,7 @@ fun List<QaCheckResult>.assertIssues(block: QaIssuesAssertScope.() -> Unit) {
 fun List<QaCheckResult>.assertAllHaveType(type: QaCheckType) {
   assertThat(this)
     .withFailMessage { "Expected non-empty results for assertAllHaveType" }
-    .isNotEmpty
+    .isNotEmpty()
   val mismatched = this.filter { it.type != type }
   assertThat(mismatched)
     .withFailMessage {
