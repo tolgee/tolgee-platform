@@ -105,6 +105,14 @@ class QaBranchMergeTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `branch merge triggers QA checks on modified translations`() {
     val keys = initConflicts()
 
+    // Snapshot pre-apply QA job count (initConflicts may have already triggered QA jobs)
+    val initialQaJobCount =
+      executeInNewTransaction(platformTransactionManager) {
+        batchJobService
+          .getAllByProjectId(testData.projectBuilder.self.id)
+          .count { it.type == BatchJobType.QA_CHECK }
+      }
+
     // Create merge with conflict resolved as SOURCE (feature branch wins)
     val change =
       createMergeWithConflict(
@@ -117,12 +125,14 @@ class QaBranchMergeTest : ProjectAuthControllerTest("/v2/projects/") {
     // Apply the merge — this triggers @RequestActivity(ActivityType.BRANCH_MERGE)
     performProjectAuthPost("branches/merge/$mergeId/apply").andIsOk
 
-    // QA batch job should be created for the merged translations
+    // QA batch job count should increase after merge
     waitForNotThrowing(timeout = 30_000, pollTime = 500) {
       executeInNewTransaction(platformTransactionManager) {
-        val jobs = batchJobService.getAllByProjectId(testData.projectBuilder.self.id)
-        val qaJobs = jobs.filter { it.type == BatchJobType.QA_CHECK }
-        qaJobs.assert.isNotEmpty
+        val qaJobCount =
+          batchJobService
+            .getAllByProjectId(testData.projectBuilder.self.id)
+            .count { it.type == BatchJobType.QA_CHECK }
+        assertThat(qaJobCount).isGreaterThan(initialQaJobCount)
       }
     }
   }
