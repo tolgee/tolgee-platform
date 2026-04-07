@@ -15,6 +15,7 @@ describe('QA on dashboard', () => {
     qaTestData.generateStandard().then((res) => {
       projectId = getProjectByNameFromTestData(res.body, 'test_project')!.id;
     });
+    login('test_username');
   });
 
   afterEach(() => {
@@ -22,7 +23,6 @@ describe('QA on dashboard', () => {
   });
 
   it('shows QA badge with issue count on language row in dashboard', () => {
-    login('test_username');
     cy.visit(`${HOST}/projects/${projectId}`);
     waitForGlobalLoading();
 

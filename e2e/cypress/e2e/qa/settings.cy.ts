@@ -15,6 +15,7 @@ describe('QA settings', () => {
     qaTestData.generateStandard().then((res) => {
       projectId = getProjectByNameFromTestData(res.body, 'test_project')!.id;
     });
+    login('test_username');
   });
 
   afterEach(() => {
@@ -29,7 +30,6 @@ describe('QA settings', () => {
   }
 
   it('navigates to QA settings page', () => {
-    login('test_username');
     visitQaSettings();
 
     gcy('qa-enabled-toggle').should('be.visible');
@@ -37,7 +37,6 @@ describe('QA settings', () => {
   });
 
   it('toggles QA checks on/off for project', () => {
-    login('test_username');
     visitQaSettings();
 
     // Toggle off
@@ -59,7 +58,6 @@ describe('QA settings', () => {
   });
 
   it('changes check type severity', () => {
-    login('test_username');
     visitQaSettings();
 
     // Find first settings row and change its severity
@@ -78,7 +76,6 @@ describe('QA settings', () => {
   });
 
   it('opens per-language settings dialog', () => {
-    login('test_username');
     visitQaSettings();
 
     // Click the language settings button for French
@@ -92,7 +89,6 @@ describe('QA settings', () => {
   });
 
   it('resets language settings to global', () => {
-    login('test_username');
     visitQaSettings();
 
     // Open language settings and make a change

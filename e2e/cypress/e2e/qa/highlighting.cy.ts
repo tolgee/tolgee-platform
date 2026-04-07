@@ -7,12 +7,15 @@ import { E2TranslationsView } from '../../compounds/E2TranslationsView';
 
 describe('QA inline highlighting', () => {
   let projectId: number;
+  let view: E2TranslationsView;
 
   beforeEach(() => {
     qaTestData.clean();
     qaTestData.generateStandard().then((res) => {
       projectId = getProjectByNameFromTestData(res.body, 'test_project')!.id;
     });
+    login('test_username');
+    view = new E2TranslationsView();
   });
 
   afterEach(() => {
@@ -20,8 +23,6 @@ describe('QA inline highlighting', () => {
   });
 
   it('shows highlight on translations with positional QA issues', () => {
-    login('test_username');
-    const view = new E2TranslationsView();
     view.visit(projectId);
 
     cy.contains('key_spacing_issue')
@@ -31,8 +32,6 @@ describe('QA inline highlighting', () => {
   });
 
   it('shows marker for zero-width QA issues', () => {
-    login('test_username');
-    const view = new E2TranslationsView();
     view.visit(projectId);
 
     cy.contains('key_punctuation_issue')
@@ -42,8 +41,6 @@ describe('QA inline highlighting', () => {
   });
 
   it('does not show highlights on translations without issues', () => {
-    login('test_username');
-    const view = new E2TranslationsView();
     view.visit(projectId);
 
     cy.contains('key_no_issues')

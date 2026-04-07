@@ -9,6 +9,7 @@ import { E2TranslationsView } from '../../compounds/E2TranslationsView';
 describe('QA panel', () => {
   let projectId: number;
   let disabledProjectId: number;
+  let view: E2TranslationsView;
 
   beforeEach(() => {
     qaTestData.clean();
@@ -19,6 +20,8 @@ describe('QA panel', () => {
         'Disabled QA Project'
       )!.id;
     });
+    login('test_username');
+    view = new E2TranslationsView();
   });
 
   afterEach(() => {
@@ -26,8 +29,6 @@ describe('QA panel', () => {
   });
 
   it('shows QA issues in panel when editing translation with issues', () => {
-    login('test_username');
-    const view = new E2TranslationsView();
     view.visit(projectId);
 
     view.getTranslationCell('key_placeholder_issue', 'fr').click();
@@ -42,8 +43,6 @@ describe('QA panel', () => {
   });
 
   it('shows empty panel when editing translation without issues', () => {
-    login('test_username');
-    const view = new E2TranslationsView();
     view.visit(projectId);
 
     view.getTranslationCell('key_no_issues', 'fr').click();
@@ -58,8 +57,6 @@ describe('QA panel', () => {
   });
 
   it('shows project-disabled message when QA is off for the project', () => {
-    login('test_username');
-    const view = new E2TranslationsView();
     view.visit(disabledProjectId);
 
     view.getTranslationCell('disabled_key', 'fr').click();
@@ -73,8 +70,6 @@ describe('QA panel', () => {
   });
 
   it('shows multiple issues for translation with multiple problems', () => {
-    login('test_username');
-    const view = new E2TranslationsView();
     view.visit(projectId);
 
     view.getTranslationCell('key_multiple_issues', 'fr').click();

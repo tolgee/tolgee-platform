@@ -9,12 +9,15 @@ import { waitForGlobalLoading } from '../../common/loading';
 
 describe('QA issue actions', () => {
   let projectId: number;
+  let view: E2TranslationsView;
 
   beforeEach(() => {
     qaTestData.clean();
     qaTestData.generateStandard().then((res) => {
       projectId = getProjectByNameFromTestData(res.body, 'test_project')!.id;
     });
+    login('test_username');
+    view = new E2TranslationsView();
   });
 
   afterEach(() => {
@@ -30,8 +33,6 @@ describe('QA issue actions', () => {
   }
 
   it('ignores a QA issue', () => {
-    login('test_username');
-    const view = new E2TranslationsView();
     view.visit(projectId);
 
     view.getTranslationCell('key_correctable', 'fr').click();
@@ -53,8 +54,6 @@ describe('QA issue actions', () => {
   });
 
   it('unignores a previously ignored issue', () => {
-    login('test_username');
-    const view = new E2TranslationsView();
     view.visit(projectId);
 
     view.getTranslationCell('key_ignored_issue', 'fr').click();
@@ -76,8 +75,6 @@ describe('QA issue actions', () => {
   });
 
   it('corrects an issue with replacement text', () => {
-    login('test_username');
-    const view = new E2TranslationsView();
     view.visit(projectId);
 
     view.getTranslationCell('key_correctable', 'fr').click();

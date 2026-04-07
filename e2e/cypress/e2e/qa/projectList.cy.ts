@@ -7,6 +7,7 @@ describe('QA on project list', () => {
   beforeEach(() => {
     qaTestData.clean();
     qaTestData.generateStandard();
+    login('test_username');
   });
 
   afterEach(() => {
@@ -14,7 +15,6 @@ describe('QA on project list', () => {
   });
 
   it('shows QA badge on project with issues', () => {
-    login('test_username');
     cy.visit(`${HOST}/projects`);
     waitForGlobalLoading();
 
@@ -25,7 +25,6 @@ describe('QA on project list', () => {
   });
 
   it('does not show QA badge on project with QA disabled', () => {
-    login('test_username');
     cy.visit(`${HOST}/projects`);
     waitForGlobalLoading();
 
