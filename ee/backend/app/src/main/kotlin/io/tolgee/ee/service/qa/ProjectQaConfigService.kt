@@ -1,5 +1,7 @@
 package io.tolgee.ee.service.qa
 
+import io.tolgee.constants.Message
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Language
 import io.tolgee.model.enums.qa.QaCheckSeverity
 import io.tolgee.model.enums.qa.QaCheckType
@@ -100,11 +102,21 @@ class ProjectQaConfigService(
     return languageQaConfigRepository.findAllByLanguageProjectId(projectId)
   }
 
+  // Config changes while QA is disabled would not trigger a recheck, so the
+  // persisted QA issues would silently go out of sync with the new settings.
+  private fun requireQaEnabled(projectId: Long) {
+    val project = projectService.get(projectId)
+    if (!project.useQaChecks) {
+      throw BadRequestException(Message.QA_CHECKS_NOT_ENABLED)
+    }
+  }
+
   @Transactional
   fun updateSettings(
     projectId: Long,
     settings: Map<QaCheckType, QaCheckSeverity?>,
   ) {
+    requireQaEnabled(projectId)
     val oldSettings = getSettings(projectId)
     val config = getOrCreateConfig(projectId)
 
@@ -127,6 +139,7 @@ class ProjectQaConfigService(
     languageId: Long,
     settings: Map<QaCheckType, QaCheckSeverity?>,
   ) {
+    requireQaEnabled(projectId)
     // Validate that the language belongs to this project
     languageService.getEntity(languageId, projectId)
 
@@ -156,6 +169,7 @@ class ProjectQaConfigService(
     projectId: Long,
     languageId: Long,
   ) {
+    requireQaEnabled(projectId)
     val langConfig = languageQaConfigRepository.findByLanguageProjectIdAndLanguageId(projectId, languageId) ?: return
     val changedTypes = langConfig.settings.keys
 
