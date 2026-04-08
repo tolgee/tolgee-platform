@@ -104,10 +104,6 @@ export const useEditService = ({
     }
   };
 
-  /**
-   * Saves a translation via the API and updates the local state.
-   * Marks QA checks as stale after save.
-   */
   const saveTranslationValue = async (params: {
     keyId: number;
     keyName: string;
@@ -115,6 +111,15 @@ export const useEditService = ({
     language: string;
     value: string;
   }) => {
+    // Mark stale before save to avoid race with websocket
+    translationService.changeTranslations([
+      {
+        keyId: params.keyId,
+        language: params.language,
+        value: { qaChecksStale: true, qaIssues: [] },
+      },
+    ]);
+
     const result = await putTranslation.mutateAsync({
       path: { projectId: project.id },
       content: {
@@ -136,14 +141,6 @@ export const useEditService = ({
           { keyId: params.keyId, language: lang, value: translation },
         ])
       );
-      // Mark QA checks as stale and clear old issues, since the translation was updated
-      translationService.changeTranslations([
-        {
-          keyId: params.keyId,
-          language: params.language,
-          value: { qaChecksStale: true, qaIssues: [] },
-        },
-      ]);
     }
 
     return result;
