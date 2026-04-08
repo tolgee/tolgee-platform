@@ -47,7 +47,7 @@ describe('QA settings', () => {
     gcy('qa-settings-row')
       .first()
       .findDcy('qa-settings-select')
-      .should('have.attr', 'aria-disabled', 'true');
+      .should('have.class', 'Mui-disabled');
 
     // Toggle back on
     gcy('qa-enabled-toggle').click();
