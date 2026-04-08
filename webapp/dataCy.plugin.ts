@@ -13,7 +13,6 @@ const SRC_PATH = resolve('./src');
 const OUTPUT_PATH = resolve('../e2e/cypress/support/dataCyType.d.ts');
 
 export function extractDataCy(): Plugin {
-  // Incremental state for watchChange — maps a file path to its dataCy values
   const fileItems: Record<string, string[]> = {};
 
   return {

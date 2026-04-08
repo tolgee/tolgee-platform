@@ -5,10 +5,14 @@ import svgr from 'vite-plugin-svgr';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import mdx from '@mdx-js/rollup';
 import { resolve } from 'node:path';
+import { existsSync } from 'node:fs';
 
 import { extractDataCy } from './dataCy.plugin';
 import rehypeHighlight from 'rehype-highlight';
 import { sentryVitePlugin } from '@sentry/vite-plugin';
+
+const billingFrontendDir = resolve(__dirname, '../../billing/frontend');
+const hasBilling = existsSync(billingFrontendDir);
 
 export default defineConfig(({ mode }) => {
   process.env = { ...process.env, ...loadEnv(mode, process.cwd()) };
@@ -20,8 +24,11 @@ export default defineConfig(({ mode }) => {
       react(),
       viteTsconfigPaths({
         projects: [
-          resolve(__dirname, 'tsconfig.json'),
+          resolve(__dirname, 'tsconfig.vite.json'),
           resolve(__dirname, '../library/tsconfig.json'),
+          ...(hasBilling
+            ? [resolve(billingFrontendDir, 'tsconfig.vite.json')]
+            : []),
         ],
       }),
       svgr(),
@@ -47,9 +54,21 @@ export default defineConfig(({ mode }) => {
         'date-fns',
         'react',
         'react-dom',
+        'react-router-dom',
+        'react-query',
+        'formik',
+        'yup',
+        'clsx',
       ],
       alias: {
         '@tginternal/library': resolve(__dirname, '../library/src'),
+        ...(hasBilling && {
+          'tg.billing': resolve(billingFrontendDir, 'billing'),
+          'tg.service/billingApiSchema.generated': resolve(
+            billingFrontendDir,
+            'billingApiSchema.generated'
+          ),
+        }),
       },
     },
     optimizeDeps: {
@@ -63,7 +82,11 @@ export default defineConfig(({ mode }) => {
       port: Number(process.env.VITE_PORT) || 3000,
       // this enables direct access to library sources
       fs: {
-        allow: [resolve(__dirname, '../library/src'), __dirname],
+        allow: [
+          resolve(__dirname, '../library/src'),
+          ...(hasBilling ? [billingFrontendDir] : []),
+          __dirname,
+        ],
       },
     },
     preview: {

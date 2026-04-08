@@ -12,10 +12,13 @@ import {
 } from '@mui/material';
 import { T } from '@tolgee/react';
 import { useTrialInfo } from 'tg.component/layout/TopBar/announcements/useTrialInfo';
-import { PlanFeaturesBox, PlanTitle } from '../Plan/PlanStyles';
-import { getHighlightColor } from '../Plan/Plan';
+import {
+  PlanFeaturesBox,
+  PlanTitle,
+} from 'tg.ee.module/billing/component/Plan/PlanStyles';
+import { getHighlightColor } from '../Plan/planUtils';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
-import { IncludedFeatures } from '../Plan/IncludedFeatures';
+import { IncludedFeatures } from 'tg.ee.module/billing/component/Plan/IncludedFeatures';
 import { IncludedUsage } from '../Plan/IncludedUsage';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { Link } from 'react-router-dom';
