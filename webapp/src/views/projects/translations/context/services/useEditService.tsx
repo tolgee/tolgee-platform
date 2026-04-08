@@ -1,5 +1,9 @@
 import { T } from '@tolgee/react';
-import { TolgeeFormat } from '@tginternal/editor';
+import {
+  TolgeeFormat,
+  getTolgeeFormat,
+  tolgeeFormatGenerateIcu,
+} from '@tginternal/editor';
 
 import { useProject } from 'tg.hooks/useProject';
 import { messageService } from 'tg.service/MessageService';
@@ -39,6 +43,7 @@ export type CorrectTranslationParams = {
   translationId: number;
   translationText: string;
   issue: QaReplacementParams;
+  pluralVariant?: string;
 };
 
 function findTranslationInList(
@@ -57,6 +62,8 @@ function findTranslationInList(
           keyId: key.keyId,
           keyName: key.keyName,
           keyNamespace: key.keyNamespace,
+          keyIsPlural: key.keyIsPlural,
+          keyPluralArgName: key.keyPluralArgName,
           languageTag: langTag,
           translation,
           tasks: key.tasks,
@@ -226,10 +233,12 @@ export const useEditService = ({
     }
 
     if (language && !data.preventTaskResolution) {
-      const key = translationService.fixedTranslations?.find(
+      const translationKey = translationService.fixedTranslations?.find(
         (k) => k.keyId === keyId
       );
-      const firstTask = key?.tasks?.find((t) => t.languageTag === language);
+      const firstTask = translationKey?.tasks?.find(
+        (t) => t.languageTag === language
+      );
 
       if (firstTask && taskEditControlsShouldBeVisible(firstTask)) {
         await taskService.setTaskTranslationState({
@@ -244,9 +253,21 @@ export const useEditService = ({
     doAfterCommand(data.after);
   };
 
-  /**
-   * Returns whether the user can save or suggest a given translation.
-   */
+  const getPermissionsForTranslation = (
+    found: NonNullable<ReturnType<typeof findTranslationInList>>
+  ) => {
+    const languageId = allLanguages.find(
+      (l) => l.tag === found.languageTag
+    )?.id;
+    if (!languageId) return null;
+    return getTranslationPermissions({
+      project,
+      languageId,
+      translationState: found.translation.state,
+      tasks: found.tasks,
+    });
+  };
+
   const canEditTranslation = (translationId: number) => {
     const found = findTranslationInList(
       translationService.fixedTranslations,
@@ -254,19 +275,10 @@ export const useEditService = ({
     );
     if (!found) return false;
 
-    const languageId = allLanguages.find(
-      (l) => l.tag === found.languageTag
-    )?.id;
-    if (!languageId) return false;
+    const permissions = getPermissionsForTranslation(found);
+    if (!permissions) return false;
 
-    const { canSave, canSuggest } = getTranslationPermissions({
-      project,
-      languageId,
-      translationState: found.translation.state,
-      tasks: found.tasks,
-    });
-
-    return canSave || canSuggest;
+    return permissions.canSave || permissions.canSuggest;
   };
 
   /**
@@ -280,33 +292,43 @@ export const useEditService = ({
     );
     if (!found) return;
 
-    const corrected = applyQaReplacement(params.translationText, params.issue);
+    const correctedVariant = applyQaReplacement(
+      params.translationText,
+      params.issue
+    );
 
-    const languageId = allLanguages.find(
-      (l) => l.tag === found.languageTag
-    )?.id;
-    if (!languageId) return;
+    // For plurals, reconstruct the full ICU text with the corrected variant
+    let value: string;
+    if (
+      found.keyIsPlural &&
+      params.pluralVariant &&
+      found.translation.text != null
+    ) {
+      const raw = !project.icuPlaceholders;
+      const format = getTolgeeFormat(found.translation.text, true, raw);
+      format.parameter = found.keyPluralArgName ?? 'value';
+      format.variants[params.pluralVariant] = correctedVariant;
+      value = tolgeeFormatGenerateIcu(format, raw);
+    } else {
+      value = correctedVariant;
+    }
 
-    const { canSave, canSuggest } = getTranslationPermissions({
-      project,
-      languageId,
-      translationState: found.translation.state,
-      tasks: found.tasks,
-    });
+    const permissions = getPermissionsForTranslation(found);
+    if (!permissions) return;
 
-    if (canSave) {
+    if (permissions.canSave) {
       await saveTranslationValue({
         keyId: found.keyId,
         keyName: found.keyName,
         keyNamespace: found.keyNamespace,
         language: found.languageTag,
-        value: corrected,
+        value,
       });
-    } else if (canSuggest) {
+    } else if (permissions.canSuggest) {
       await suggestTranslationValue({
         keyId: found.keyId,
         language: found.languageTag,
-        value: corrected,
+        value,
       });
     }
   };

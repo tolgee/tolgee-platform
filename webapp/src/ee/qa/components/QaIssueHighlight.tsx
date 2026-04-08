@@ -42,9 +42,7 @@ export const QaIssueHighlight = ({
   const { correctTranslation, canEditTranslation } = useTranslationsActions();
   const reportEvent = useReportEvent();
 
-  const replacement = issue.replacement;
-  const positionStart = issue.positionStart;
-  const positionEnd = issue.positionEnd;
+  const { replacement, positionStart, positionEnd } = issue;
 
   const isCorrectable =
     replacement != null &&
@@ -62,6 +60,7 @@ export const QaIssueHighlight = ({
             positionEnd,
             replacement,
           },
+          pluralVariant: issue.pluralVariant,
         });
         reportEvent('QA_ISSUE_CORRECTED_HIGHLIGHT', {
           checkType: issue.type,
