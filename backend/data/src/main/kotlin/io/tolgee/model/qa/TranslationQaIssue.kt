@@ -1,5 +1,6 @@
 package io.tolgee.model.qa
 
+import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import io.tolgee.activity.annotation.ActivityDescribingProp
 import io.tolgee.activity.annotation.ActivityEntityDescribingPaths
 import io.tolgee.activity.annotation.ActivityLoggedEntity
@@ -9,7 +10,6 @@ import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.model.enums.qa.QaIssueMessage
 import io.tolgee.model.enums.qa.QaIssueState
 import io.tolgee.model.translation.Translation
-import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
