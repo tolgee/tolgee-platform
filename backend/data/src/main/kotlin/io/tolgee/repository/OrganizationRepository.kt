@@ -117,6 +117,14 @@ interface OrganizationRepository : JpaRepository<Organization, Long> {
 
   @Query(
     """
+    from Organization o
+    where o.name = :name
+  """,
+  )
+  fun findAllByNameIncludingDeleted(name: String): List<Organization>
+
+  @Query(
+    """
     from Organization o 
     join o.memberRoles mr on mr.user = :user
     join mr.user u

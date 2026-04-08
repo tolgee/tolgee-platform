@@ -1,7 +1,9 @@
 import { FC, useState } from 'react';
+import { useDebounce } from 'use-debounce';
 import {
   Autocomplete,
   Box,
+  Chip,
   CircularProgress,
   Link,
   ListItem,
@@ -24,11 +26,13 @@ type InvoiceModel = components['schemas']['InvoiceModel'];
 type OrgItem = {
   id: number;
   name: string;
+  deleted: boolean;
 };
 
 export const OrgInvoicesSection: FC = () => {
   const { t } = useTranslate();
   const [search, setSearch] = useState('');
+  const [searchDebounced] = useDebounce(search, 500);
   const [selectedOrg, setSelectedOrg] = useState<OrgItem | null>(null);
   const [invoicePage, setInvoicePage] = useState(0);
 
@@ -36,7 +40,7 @@ export const OrgInvoicesSection: FC = () => {
     url: '/v2/administration/billing/organizations',
     method: 'get',
     query: {
-      search,
+      search: searchDebounced,
       page: 0,
       size: 20,
     },
@@ -49,6 +53,7 @@ export const OrgInvoicesSection: FC = () => {
     orgsLoadable.data?._embedded?.organizations?.map((o) => ({
       id: o.organization.id,
       name: o.organization.name,
+      deleted: o.deletedAt != null,
     })) ?? [];
 
   const invoicesLoadable = useBillingApiQuery({
@@ -80,6 +85,28 @@ export const OrgInvoicesSection: FC = () => {
           data-cy="admin-invoices-org-filter"
           options={orgItems}
           getOptionLabel={(o) => o.name}
+          renderOption={(props, o) => (
+            <Box
+              component="li"
+              {...props}
+              data-cy="admin-invoices-org-filter-option"
+              sx={{ display: 'flex', gap: 1, alignItems: 'center' }}
+            >
+              <span>{o.name}</span>
+              {o.deleted && (
+                <Chip
+                  data-cy="admin-invoices-org-filter-option-deleted-chip"
+                  label={t(
+                    'administration_invoices_org_filter_deleted_chip',
+                    'deleted'
+                  )}
+                  size="small"
+                  color="default"
+                  variant="outlined"
+                />
+              )}
+            </Box>
+          )}
           isOptionEqualToValue={(a, b) => a.id === b.id}
           loading={orgsLoadable.isFetching}
           value={selectedOrg}

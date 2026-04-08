@@ -165,8 +165,8 @@ class TestDataService(
 
         builder.data.organizations.forEach { organizationBuilder ->
           organizationBuilder.self.name.let { name ->
-            organizationService.findAllByName(name).forEach { org ->
-              organizationService.delete(org)
+            organizationService.findAllByNameIncludingDeleted(name).forEach { org ->
+              organizationService.deleteHard(org)
             }
           }
         }
