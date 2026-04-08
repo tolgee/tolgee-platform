@@ -51,7 +51,8 @@ class SpecialCharacterMismatchCheckTest {
   fun `detects missing special character`() {
     check.check(params("Cena: 10", "Price: \$10")).assertSingleIssue {
       message(QaIssueMessage.QA_SPECIAL_CHAR_MISSING)
-      param("character", "\$")
+      param("characters", "\$")
+      param("count", "1")
       noReplacement()
       noPosition()
     }
@@ -59,19 +60,12 @@ class SpecialCharacterMismatchCheckTest {
 
   @Test
   fun `detects multiple missing special characters`() {
-    check.check(params("10 domov 2024", "\$10 @home \u00A92024")).assertIssues {
-      issue {
-        message(QaIssueMessage.QA_SPECIAL_CHAR_MISSING)
-        param("character", "\$")
-      }
-      issue {
-        message(QaIssueMessage.QA_SPECIAL_CHAR_MISSING)
-        param("character", "@")
-      }
-      issue {
-        message(QaIssueMessage.QA_SPECIAL_CHAR_MISSING)
-        param("character", "\u00A9")
-      }
+    // Multiple missing characters are aggregated into a single issue
+    check.check(params("10 domov 2024", "\$10 @home \u00A92024")).assertSingleIssue {
+      message(QaIssueMessage.QA_SPECIAL_CHAR_MISSING)
+      param("count", "3")
+      noReplacement()
+      noPosition()
     }
   }
 
@@ -79,7 +73,8 @@ class SpecialCharacterMismatchCheckTest {
   fun `detects missing when count differs`() {
     check.check(params("\$10 sleva", "\$10 - \$5 sleva")).assertSingleIssue {
       message(QaIssueMessage.QA_SPECIAL_CHAR_MISSING)
-      param("character", "\$")
+      param("characters", "\$")
+      param("count", "1")
     }
   }
 
@@ -105,7 +100,8 @@ class SpecialCharacterMismatchCheckTest {
     check.check(params("\u20AC10 prix", "\$10 price")).assertIssues {
       issue {
         message(QaIssueMessage.QA_SPECIAL_CHAR_MISSING)
-        param("character", "\$")
+        param("characters", "\$")
+        param("count", "1")
       }
       issue {
         message(QaIssueMessage.QA_SPECIAL_CHAR_ADDED)
@@ -123,7 +119,8 @@ class SpecialCharacterMismatchCheckTest {
   fun `detects all supported special characters`() {
     for (char in SpecialCharacterMismatchCheck.SPECIAL_CHARS) {
       check.check(params("text", "text$char")).assertSingleIssue {
-        param("character", char.toString())
+        param("characters", char.toString())
+        param("count", "1")
       }
     }
   }

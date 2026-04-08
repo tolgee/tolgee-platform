@@ -127,6 +127,13 @@ class LanguageStatsService(
     }
   }
 
+  fun refreshLanguageStatsAllBranches(projectId: Long) {
+    val branchIds = languageStatsRepository.getDistinctBranchIdsByProjectId(projectId)
+    for (branchId in branchIds) {
+      refreshLanguageStats(projectId, branchId)
+    }
+  }
+
   fun getLanguageStatsDtos(projectIds: List<Long>): Map<Long, List<LanguageStatsDto>> {
     val data =
       projectIds.associateWith { projectId ->

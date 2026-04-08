@@ -127,7 +127,7 @@ class EeStartBatchJobController(
     }
 
     // Mark all existing translations targeted by the job as stale
-    val existingTranslationIds = translationService.getTranslationIdsByKeyIds(data.keyIds, data.languageIds)
+    val existingTranslationIds = translationService.getTranslationIdsByKeyIds(data.keyIds, languageIds)
     if (existingTranslationIds.isNotEmpty()) {
       translationService.setQaChecksStale(existingTranslationIds)
     }

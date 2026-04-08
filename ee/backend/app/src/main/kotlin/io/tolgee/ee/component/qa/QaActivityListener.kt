@@ -240,6 +240,14 @@ class QaActivityListener(
   ) {
     val changedLanguageIds = getLanguageTagChangedIds(event)
     if (changedLanguageIds.isEmpty()) return
+
+    val baseLanguageId = languageService.getProjectBaseLanguage(projectId).id
+    if (baseLanguageId in changedLanguageIds) {
+      // Base language tag changed — all QA results reference baseLanguageTag, so invalidate project-wide
+      translationService.setQaChecksStaleByProjectId(projectId)
+      return
+    }
+
     translationService.setQaChecksStaleByProjectIdAndLanguageIds(projectId, changedLanguageIds)
   }
 
@@ -249,6 +257,13 @@ class QaActivityListener(
   ) {
     val changedLanguageIds = getLanguageTagChangedIds(event)
     if (changedLanguageIds.isEmpty()) return
+
+    val baseLanguageId = languageService.getProjectBaseLanguage(projectId).id
+    if (baseLanguageId in changedLanguageIds) {
+      // Base language tag changed — recheck all translations project-wide
+      qaRecheckService.recheckTranslations(projectId = projectId)
+      return
+    }
 
     qaRecheckService.recheckTranslations(
       projectId = projectId,

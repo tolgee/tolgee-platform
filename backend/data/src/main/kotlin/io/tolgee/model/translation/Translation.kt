@@ -261,9 +261,7 @@ class Translation(
     snapshot: TranslationSnapshot?,
     resolution: BranchKeyMergeResolutionType,
   ) {
-    val oldText = this.text
     this.text = chooseThreeWay(source.text, this.text, snapshot?.value, resolution)
-    // qaChecksStale is handled by QaActivityListener when text changes
     this.state = chooseThreeWay(source.state, this.state, snapshot?.state, resolution) ?: this.state
     this.outdated = chooseThreeWay(source.outdated, this.outdated, null, resolution) ?: false
     this.auto = chooseThreeWay(source.auto, this.auto, null, resolution) ?: false

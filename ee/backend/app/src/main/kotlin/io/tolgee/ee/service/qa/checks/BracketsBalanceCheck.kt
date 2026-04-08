@@ -55,17 +55,18 @@ class BracketsBalanceCheck : QaCheck {
       }
     }
 
-    // Any remaining opening brackets on the stack are unclosed
-    for (info in stack) {
-      val closingBracket = bracketSets.openingToClosing[info.char]!!
+    // Aggregate all unclosed opening brackets into a single issue
+    if (stack.isNotEmpty()) {
+      val closingBrackets = stack.reversed().map { bracketSets.openingToClosing[it.char]!! }
+      val bracketsDescription = stack.joinToString(", ") { it.char.toString() }
       results.add(
         QaCheckResult(
           type = QaCheckType.BRACKETS_UNBALANCED,
           message = QaIssueMessage.QA_BRACKETS_UNCLOSED,
-          replacement = closingBracket.toString(),
+          replacement = closingBrackets.joinToString(""),
           positionStart = text.length,
           positionEnd = text.length,
-          params = mapOf("bracket" to info.char.toString()),
+          params = mapOf("brackets" to bracketsDescription, "count" to stack.size.toString()),
         ),
       )
     }

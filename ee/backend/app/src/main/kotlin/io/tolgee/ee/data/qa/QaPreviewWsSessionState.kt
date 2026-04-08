@@ -19,9 +19,49 @@ data class QaPreviewWsSessionState(
   val organizationOwnerId: Long,
   val glossaryEnabled: Boolean,
 ) {
-  // Accessed from both the WS handler thread and afterConnectionClosed — must be volatile
   @Volatile
   var currentJob: Job? = null
+
+  @Volatile
   var lastMessageTime: Instant? = null
+
+  @Volatile
   var messageCount: Int = 0
+
+  @Synchronized
+  fun cancelAndSetJob(newJobAction: () -> Job) {
+    currentJob?.cancel()
+    currentJob = newJobAction()
+  }
+
+  @Synchronized
+  fun cancelJob() {
+    currentJob?.cancel()
+    currentJob = null
+  }
+
+  @Synchronized
+  fun tryAcceptMessage(): Boolean {
+    val now = Instant.now()
+    val lastMessage = lastMessageTime
+
+    if (lastMessage != null && java.time.Duration
+        .between(lastMessage, now)
+        .toMillis() < RATE_LIMIT_WINDOW_MS
+    ) {
+      if (messageCount >= MAX_MESSAGES_PER_WINDOW) {
+        return false
+      }
+      messageCount++
+    } else {
+      messageCount = 1
+    }
+    lastMessageTime = now
+    return true
+  }
+
+  companion object {
+    const val RATE_LIMIT_WINDOW_MS = 1000L
+    const val MAX_MESSAGES_PER_WINDOW = 20
+  }
 }

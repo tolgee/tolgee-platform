@@ -730,6 +730,7 @@ declare namespace DataCy {
         "qa-action-correct" |
         "qa-action-ignore" |
         "qa-badge" |
+        "qa-badge-unresolved" |
         "qa-check-item" |
         "qa-enabled-toggle" |
         "qa-issue-highlight" |

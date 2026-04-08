@@ -50,7 +50,8 @@ class BracketsBalanceCheckTest {
   fun `detects unclosed opening bracket`() {
     check.check(params("Hello (world")).assertSingleIssue {
       message(QaIssueMessage.QA_BRACKETS_UNCLOSED)
-      param("bracket", "(")
+      param("brackets", "(")
+      param("count", "1")
       replacement(")")
       position(12, 12)
     }
@@ -70,12 +71,15 @@ class BracketsBalanceCheckTest {
   fun `detects mismatched bracket types`() {
     check.check(params("Hello (world]")).assertIssues {
       issue {
+        message(QaIssueMessage.QA_BRACKETS_UNMATCHED_CLOSE)
         param("bracket", "]")
         replacement("")
         position(12, 13)
       }
       issue {
-        param("bracket", "(")
+        message(QaIssueMessage.QA_BRACKETS_UNCLOSED)
+        param("brackets", "(")
+        param("count", "1")
         replacement(")")
       }
     }
@@ -98,9 +102,13 @@ class BracketsBalanceCheckTest {
 
   @Test
   fun `detects multiple unclosed brackets`() {
-    check.check(params("Hello (world [test")).assertIssues {
-      issue { message(QaIssueMessage.QA_BRACKETS_UNCLOSED) }
-      issue { message(QaIssueMessage.QA_BRACKETS_UNCLOSED) }
+    // Multiple unclosed brackets are aggregated into a single issue
+    check.check(params("Hello (world [test")).assertSingleIssue {
+      message(QaIssueMessage.QA_BRACKETS_UNCLOSED)
+      param("brackets", "(, [")
+      param("count", "2")
+      replacement("])")
+      position(18, 18)
     }
   }
 
@@ -140,7 +148,8 @@ class BracketsBalanceCheckTest {
   fun `still detects unclosed round bracket alongside ICU text`() {
     check.check(params("{count} items (extra")).assertSingleIssue {
       message(QaIssueMessage.QA_BRACKETS_UNCLOSED)
-      param("bracket", "(")
+      param("brackets", "(")
+      param("count", "1")
     }
   }
 
@@ -148,7 +157,8 @@ class BracketsBalanceCheckTest {
   fun `checks curly braces when ICU is disabled`() {
     check.check(params("Hello {world", icuPlaceholders = false)).assertSingleIssue {
       message(QaIssueMessage.QA_BRACKETS_UNCLOSED)
-      param("bracket", "{")
+      param("brackets", "{")
+      param("count", "1")
     }
   }
 

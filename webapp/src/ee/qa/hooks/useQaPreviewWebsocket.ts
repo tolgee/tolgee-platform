@@ -27,6 +27,10 @@ export const useQaPreviewWebsocket = ({
   const jwtToken = useGlobalContext((c) => c.auth.jwtToken);
   const initialIssuesRef = useRef(initialIssues);
   initialIssuesRef.current = initialIssues;
+  const latestTextRef = useRef(text);
+  latestTextRef.current = text;
+  const latestVariantRef = useRef(variant);
+  latestVariantRef.current = variant;
 
   useEffect(() => {
     // Re-seed from persisted issues when params change
@@ -52,8 +56,14 @@ export const useQaPreviewWebsocket = ({
         JSON.stringify({ token: jwtToken, projectId, keyId, languageTag })
       );
       // initial text update message
-      if (text != null) {
-        ws.send(JSON.stringify({ text, variant }));
+      const currentText = latestTextRef.current;
+      if (currentText != null) {
+        ws.send(
+          JSON.stringify({
+            text: currentText,
+            variant: latestVariantRef.current,
+          })
+        );
       } else {
         setIsLoading(false);
       }
@@ -103,7 +113,6 @@ export const useQaPreviewWebsocket = ({
       sendText.cancel();
       pendingTextUpdateRef.current = false;
       ws.close();
-      wsRef.current?.close();
       if (wsRef.current === ws) {
         wsRef.current = null;
       }
@@ -117,15 +126,12 @@ export const useQaPreviewWebsocket = ({
     }
   }, [initialIssues, enabled]);
 
-  const variantRef = useRef(variant);
-  variantRef.current = variant;
-
   const sendText = useDebouncedCallback(
     (t: string) => {
       pendingTextUpdateRef.current = false;
       if (wsRef.current?.readyState === WebSocket.OPEN) {
         wsRef.current.send(
-          JSON.stringify({ text: t, variant: variantRef.current })
+          JSON.stringify({ text: t, variant: latestVariantRef.current })
         );
       }
     },
@@ -136,7 +142,7 @@ export const useQaPreviewWebsocket = ({
   // variant is read from variantRef inside sendText, so it doesn't need to be
   // a dependency — variant changes always accompany text changes for plurals.
   useEffect(() => {
-    if (text != null && enabled) {
+    if (text != null && enabled && wsRef.current) {
       setIsLoading(true);
       pendingTextUpdateRef.current = true;
       sendText(text);

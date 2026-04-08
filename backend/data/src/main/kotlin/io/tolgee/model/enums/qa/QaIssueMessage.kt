@@ -87,5 +87,5 @@ enum class QaIssueMessage {
   ;
 
   @JsonValue
-  fun code(): String = name.lowercase(Locale.getDefault())
+  fun code(): String = name.lowercase(Locale.ROOT)
 }

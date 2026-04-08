@@ -50,7 +50,7 @@ class ProjectQaConfigService(
       // the user flips QA back on we don't need a full recheck — just the diff.
       qaRecheckService.recheckTranslations(projectId, onlyStale = true)
     } else {
-      languageStatsService.refreshLanguageStats(projectId)
+      languageStatsService.refreshLanguageStatsAllBranches(projectId)
     }
   }
 

@@ -4,6 +4,7 @@ import io.tolgee.ee.service.qa.QaCheckParams
 import io.tolgee.ee.service.qa.assertAllHaveType
 import io.tolgee.ee.service.qa.assertIssues
 import io.tolgee.ee.service.qa.assertNoIssues
+import io.tolgee.ee.service.qa.assertSingleIssue
 import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.model.enums.qa.QaIssueMessage
 import org.junit.jupiter.api.Test
@@ -50,17 +51,13 @@ class BracketsMismatchCheckTest {
 
   @Test
   fun `detects missing bracket in translation`() {
-    check.check(params("Ahoj svete", "Hello (world)")).assertIssues {
-      issue {
-        message(QaIssueMessage.QA_BRACKETS_MISSING)
-        noReplacement()
-        param("bracket", "(")
-      }
-      issue {
-        message(QaIssueMessage.QA_BRACKETS_MISSING)
-        noReplacement()
-        param("bracket", ")")
-      }
+    // Missing brackets are aggregated into a single issue
+    check.check(params("Ahoj svete", "Hello (world)")).assertSingleIssue {
+      message(QaIssueMessage.QA_BRACKETS_MISSING)
+      noReplacement()
+      noPosition()
+      param("brackets", "(, )")
+      param("count", "2")
     }
   }
 
@@ -105,17 +102,20 @@ class BracketsMismatchCheckTest {
 
   @Test
   fun `handles multiple bracket types`() {
-    check.check(params("Ahoj [svete]", "Hello (world) [test]")).assertIssues {
-      issue { param("bracket", "(") }
-      issue { param("bracket", ")") }
+    // Missing brackets are aggregated into a single issue
+    check.check(params("Ahoj [svete]", "Hello (world) [test]")).assertSingleIssue {
+      message(QaIssueMessage.QA_BRACKETS_MISSING)
+      param("brackets", "(, )")
+      param("count", "2")
     }
   }
 
   @Test
   fun `handles curly braces when ICU is disabled`() {
-    check.check(params("Ahoj svete", "Hello {world}", icuPlaceholders = false)).assertIssues {
-      issue { param("bracket", "{") }
-      issue { param("bracket", "}") }
+    check.check(params("Ahoj svete", "Hello {world}", icuPlaceholders = false)).assertSingleIssue {
+      message(QaIssueMessage.QA_BRACKETS_MISSING)
+      param("brackets", "{, }")
+      param("count", "2")
     }
   }
 
@@ -139,24 +139,37 @@ class BracketsMismatchCheckTest {
   @Test
   fun `still detects round bracket mismatch alongside ICU placeholders`() {
     check.check(params("{count} (extra) polozek", "{count} items")).assertIssues {
-      issue { param("bracket", "(") }
-      issue { param("bracket", ")") }
+      issue {
+        message(QaIssueMessage.QA_BRACKETS_EXTRA)
+        param("bracket", "(")
+      }
+      issue {
+        message(QaIssueMessage.QA_BRACKETS_EXTRA)
+        param("bracket", ")")
+      }
     }
   }
 
   @Test
   fun `checks curly braces when ICU is disabled`() {
     check.check(params("Ahoj {svete}", "Hello world", icuPlaceholders = false)).assertIssues {
-      issue { param("bracket", "{") }
-      issue { param("bracket", "}") }
+      issue {
+        message(QaIssueMessage.QA_BRACKETS_EXTRA)
+        param("bracket", "{")
+      }
+      issue {
+        message(QaIssueMessage.QA_BRACKETS_EXTRA)
+        param("bracket", "}")
+      }
     }
   }
 
   @Test
   fun `curly brace mismatch detected when ICU is disabled`() {
-    check.check(params("Ahoj svete", "Hello {world}", icuPlaceholders = false)).assertIssues {
-      issue { param("bracket", "{") }
-      issue { param("bracket", "}") }
+    check.check(params("Ahoj svete", "Hello {world}", icuPlaceholders = false)).assertSingleIssue {
+      message(QaIssueMessage.QA_BRACKETS_MISSING)
+      param("brackets", "{, }")
+      param("count", "2")
     }
   }
 }

@@ -46,7 +46,7 @@ describe('QA settings', () => {
     // Settings rows should be disabled (grayed out) when QA is off
     gcy('qa-settings-row')
       .first()
-      .find('[role="combobox"]')
+      .findDcy('qa-settings-select')
       .should('have.attr', 'aria-disabled', 'true');
 
     // Toggle back on

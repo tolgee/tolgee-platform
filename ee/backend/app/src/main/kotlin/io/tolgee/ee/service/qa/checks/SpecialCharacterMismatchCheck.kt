@@ -31,9 +31,11 @@ class SpecialCharacterMismatchCheck : QaCheck {
 
     val results = mutableListOf<QaCheckResult>()
 
-    // Characters in base but missing from translation
+    // Aggregate all missing characters into a single issue to avoid QA issue identity conflicts
     val missingChars = subtractMultiset(baseChars, textChars)
-    for (char in missingChars) {
+    if (missingChars.isNotEmpty()) {
+      val missingByChar = missingChars.groupingBy { it }.eachCount()
+      val description = missingByChar.entries.joinToString(", ") { (c, n) -> if (n > 1) "$c ×$n" else c.toString() }
       results.add(
         QaCheckResult(
           type = QaCheckType.SPECIAL_CHARACTER_MISMATCH,
@@ -41,7 +43,7 @@ class SpecialCharacterMismatchCheck : QaCheck {
           replacement = null,
           positionStart = null,
           positionEnd = null,
-          params = mapOf("character" to char.toString()),
+          params = mapOf("characters" to description, "count" to missingChars.size.toString()),
         ),
       )
     }

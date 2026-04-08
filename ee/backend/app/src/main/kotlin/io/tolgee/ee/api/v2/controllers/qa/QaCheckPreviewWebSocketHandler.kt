@@ -44,8 +44,6 @@ import org.springframework.web.socket.CloseStatus
 import org.springframework.web.socket.TextMessage
 import org.springframework.web.socket.WebSocketSession
 import org.springframework.web.socket.handler.TextWebSocketHandler
-import java.time.Duration
-import java.time.Instant
 
 @Component
 class QaCheckPreviewWebSocketHandler(
@@ -126,25 +124,17 @@ class QaCheckPreviewWebSocketHandler(
     state: QaPreviewWsSessionState,
     json: JsonNode,
   ) {
-    val now = Instant.now()
-    val lastMessage = state.lastMessageTime
-
-    if (lastMessage != null && Duration.between(lastMessage, now).toMillis() < RATE_LIMIT_WINDOW_MS) {
-      if (state.messageCount >= MAX_MESSAGES_PER_WINDOW) {
-        logger.debug("Rate limit exceeded for session {}", session.id)
-        return
-      }
-      state.messageCount++
-    } else {
-      state.messageCount = 1
+    if (!state.tryAcceptMessage()) {
+      logger.debug("Rate limit exceeded for session {}", session.id)
+      return
     }
-    state.lastMessageTime = now
 
     val text = json.get("text")?.asText() ?: ""
     val variant = json.get("variant")?.asText()
 
-    state.currentJob?.cancel()
-    state.currentJob = scope.launch { runChecks(session, state, text, activeVariant = variant) }
+    state.cancelAndSetJob {
+      scope.launch { runChecks(session, state, text, activeVariant = variant) }
+    }
   }
 
   private fun handleInit(
@@ -313,12 +303,10 @@ class QaCheckPreviewWebSocketHandler(
     status: CloseStatus,
   ) {
     val state = session.attributes["state"] as? QaPreviewWsSessionState
-    state?.currentJob?.cancel()
+    state?.cancelJob()
   }
 
   companion object {
     private val logger = LoggerFactory.getLogger(QaCheckPreviewWebSocketHandler::class.java)
-    private const val RATE_LIMIT_WINDOW_MS = 1000L
-    private const val MAX_MESSAGES_PER_WINDOW = 10
   }
 }

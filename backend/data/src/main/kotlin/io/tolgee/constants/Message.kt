@@ -333,8 +333,8 @@ enum class Message {
   ;
 
   val code: String
-    get() = name.lowercase(Locale.getDefault())
+    get() = name.lowercase(Locale.ROOT)
 
   @JsonValue
-  fun toLowerCase() = name.lowercase(Locale.getDefault())
+  fun toLowerCase() = name.lowercase(Locale.ROOT)
 }

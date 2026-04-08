@@ -274,6 +274,64 @@ class QaEventListenerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `triggers project-wide recheck when base language tag changes`() {
+    // Change the base language (English) tag — should trigger project-wide QA recheck
+    executeInNewTransaction(platformTransactionManager) {
+      projectHolder.project = ProjectDto.fromEntity(testData.project)
+      languageService.editLanguage(
+        languageId = testData.englishLanguage.id,
+        projectId = testData.project.id,
+        dto =
+          LanguageRequest(
+            name = "English",
+            tag = "en-US",
+            originalName = "English",
+            flagEmoji = "\uD83C\uDDEC\uD83C\uDDE7",
+          ),
+      )
+    }
+
+    // The activity listener triggers a project-wide recheckTranslations (not language-specific)
+    waitForNotThrowing(timeout = 10_000, pollTime = 500) {
+      executeInNewTransaction(platformTransactionManager) {
+        val jobs = batchJobService.getAllByProjectId(testData.project.id)
+        val qaJobs = jobs.filter { it.type == BatchJobType.QA_CHECK }
+        qaJobs.assert.isNotEmpty
+      }
+    }
+  }
+
+  @Test
+  fun `marks all translations stale when base language tag changes`() {
+    // Change the base language tag
+    executeInNewTransaction(platformTransactionManager) {
+      projectHolder.project = ProjectDto.fromEntity(testData.project)
+      languageService.editLanguage(
+        languageId = testData.englishLanguage.id,
+        projectId = testData.project.id,
+        dto =
+          LanguageRequest(
+            name = "English",
+            tag = "en-GB",
+            originalName = "English",
+            flagEmoji = "\uD83C\uDDEC\uD83C\uDDE7",
+          ),
+      )
+    }
+
+    // All translations in the project should be marked stale (project-wide)
+    waitForNotThrowing(timeout = 10_000, pollTime = 500) {
+      executeInNewTransaction(platformTransactionManager) {
+        val translations = translationRepository.getAllByProjectId(testData.project.id)
+        assertThat(translations).isNotEmpty
+        // All translations should be stale because base language tag changed
+        val staleTranslations = translations.filter { it.qaChecksStale }
+        assertThat(staleTranslations).hasSameSizeAs(translations)
+      }
+    }
+  }
+
+  @Test
   fun `does not trigger QA batch job when QA is disabled`() {
     // Disable QA for the project
     executeInNewTransaction(platformTransactionManager) {

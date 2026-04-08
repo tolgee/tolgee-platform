@@ -56,7 +56,7 @@ export function useQaIssueMessage(
     case 'qa_newlines_too_few_sections':
       return t('qa_issue_newlines_too_few_sections', normalizedParams);
     case 'qa_special_char_missing':
-      return normalizedParams?.character
+      return normalizedParams?.characters
         ? t('qa_issue_special_char_missing', normalizedParams)
         : t('qa_issue_special_char_missing_no_params');
     case 'qa_special_char_added':
@@ -76,7 +76,7 @@ export function useQaIssueMessage(
         ? t('qa_issue_url_replace', normalizedParams)
         : t('qa_issue_url_replace_no_params');
     case 'qa_brackets_missing':
-      return normalizedParams?.bracket
+      return normalizedParams?.brackets
         ? t('qa_issue_brackets_missing', normalizedParams)
         : t('qa_issue_brackets_missing_no_params');
     case 'qa_brackets_extra':
@@ -84,7 +84,7 @@ export function useQaIssueMessage(
         ? t('qa_issue_brackets_extra', normalizedParams)
         : t('qa_issue_brackets_extra_no_params');
     case 'qa_brackets_unclosed':
-      return normalizedParams?.bracket
+      return normalizedParams?.brackets
         ? t('qa_issue_brackets_unclosed', normalizedParams)
         : t('qa_issue_brackets_unclosed_no_params');
     case 'qa_brackets_unmatched_close':

@@ -29,6 +29,6 @@ describe('QA on dashboard', () => {
     // French language row should show QA badge since it has issues
     gcy('qa-badge').should('exist');
     // The badge should contain a number representing issue count
-    gcy('qa-badge').first().find('.unresolved').should('exist');
+    gcy('qa-badge-unresolved').first().should('exist');
   });
 });

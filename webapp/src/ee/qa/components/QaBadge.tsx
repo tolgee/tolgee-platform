@@ -88,6 +88,7 @@ export const QaBadge = ({
         badgeContent={count}
         color="primary"
         classes={{ badge: 'unresolved' }}
+        data-cy="qa-badge-unresolved"
       >
         <QaCheck />
       </StyledBadge>

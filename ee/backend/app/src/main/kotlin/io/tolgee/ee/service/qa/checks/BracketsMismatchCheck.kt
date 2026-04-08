@@ -32,15 +32,14 @@ class BracketsMismatchCheck : QaCheck {
     val textCounts = countBrackets(text, bracketChars)
 
     val results = mutableListOf<QaCheckResult>()
+    val missingBrackets = mutableListOf<Pair<Char, Int>>() // bracket to missing count
 
     for (bracket in bracketChars) {
       val baseCount = baseCounts[bracket] ?: 0
       val textCount = textCounts[bracket] ?: 0
 
-      if (baseCount == textCount) continue
-
       if (textCount > baseCount) {
-        // Extra brackets in translation — report each extra occurrence
+        // Extra brackets in translation — report each extra occurrence (they have unique positions)
         val positions = findBracketPositions(text, bracket)
         for (pos in positions.drop(baseCount)) {
           results.add(
@@ -54,21 +53,29 @@ class BracketsMismatchCheck : QaCheck {
             ),
           )
         }
-      } else {
-        // Missing brackets in translation — no specific position
-        repeat(baseCount - textCount) {
-          results.add(
-            QaCheckResult(
-              type = QaCheckType.BRACKETS_MISMATCH,
-              message = QaIssueMessage.QA_BRACKETS_MISSING,
-              replacement = null,
-              positionStart = null,
-              positionEnd = null,
-              params = mapOf("bracket" to bracket.toString()),
-            ),
-          )
-        }
+        continue
       }
+
+      if (textCount < baseCount) {
+        missingBrackets.add(bracket to (baseCount - textCount))
+        continue
+      }
+    }
+
+    // Aggregate all missing brackets into a single issue to avoid identity conflicts
+    if (missingBrackets.isNotEmpty()) {
+      val description = missingBrackets.joinToString(", ") { (b, n) -> if (n > 1) "$b ×$n" else b.toString() }
+      val totalMissing = missingBrackets.sumOf { it.second }
+      results.add(
+        QaCheckResult(
+          type = QaCheckType.BRACKETS_MISMATCH,
+          message = QaIssueMessage.QA_BRACKETS_MISSING,
+          replacement = null,
+          positionStart = null,
+          positionEnd = null,
+          params = mapOf("brackets" to description, "count" to totalMissing.toString()),
+        ),
+      )
     }
 
     return results
