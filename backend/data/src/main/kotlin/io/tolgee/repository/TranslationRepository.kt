@@ -252,7 +252,8 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
     languageIds: Collection<Long>,
   ): List<Translation>
 
-  @Modifying
+  // flushAutomatically=false: prevent auto-flush when called from BeforeTransactionCompletionProcess
+  @Modifying(flushAutomatically = false)
   @Query(
     nativeQuery = true,
     value =
@@ -261,7 +262,8 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
   )
   fun setQaChecksStaleByProjectId(projectId: Long)
 
-  @Modifying
+  // flushAutomatically=false: prevent auto-flush when called from BeforeTransactionCompletionProcess
+  @Modifying(flushAutomatically = false)
   @Query(
     nativeQuery = true,
     value =

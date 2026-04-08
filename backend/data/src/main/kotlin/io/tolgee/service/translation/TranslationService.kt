@@ -40,6 +40,7 @@ import io.tolgee.service.queryBuilders.translationViewBuilder.TranslationViewDat
 import io.tolgee.service.translation.SetTranslationTextUtil.Companion.Options
 import io.tolgee.util.nullIfEmpty
 import jakarta.persistence.EntityManager
+import jakarta.persistence.FlushModeType
 import jakarta.persistence.criteria.JoinType
 import jakarta.persistence.criteria.Predicate
 import org.springframework.beans.factory.annotation.Autowired
@@ -654,6 +655,8 @@ class TranslationService(
         .createQuery(
           "UPDATE Translation t SET t.qaChecksStale = true WHERE t.id IN :ids",
         ).setParameter("ids", chunk)
+        // Prevent auto-flush when called from BeforeTransactionCompletionProcess (QaActivityListener)
+        .setFlushMode(FlushModeType.COMMIT)
         .executeUpdate()
     }
   }
@@ -665,6 +668,8 @@ class TranslationService(
         .createQuery(
           "UPDATE Translation t SET t.qaChecksStale = true WHERE t.key.id IN :keyIds",
         ).setParameter("keyIds", chunk)
+        // Prevent auto-flush when called from BeforeTransactionCompletionProcess (QaActivityListener)
+        .setFlushMode(FlushModeType.COMMIT)
         .executeUpdate()
     }
   }
@@ -753,6 +758,8 @@ class TranslationService(
           """.trimIndent(),
         ).setParameter("translationIds", chunk)
         .setParameter("baseLanguageId", baseLanguageId)
+        // Prevent auto-flush when called from BeforeTransactionCompletionProcess (QaActivityListener)
+        .setFlushMode(FlushModeType.COMMIT)
         .executeUpdate()
     }
   }
