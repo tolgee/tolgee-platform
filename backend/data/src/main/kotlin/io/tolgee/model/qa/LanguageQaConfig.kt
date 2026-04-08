@@ -21,7 +21,7 @@ import org.hibernate.annotations.Type
 )
 class LanguageQaConfig(
   @ManyToOne
-  @JoinColumn(unique = true)
+  @JoinColumn(unique = true, nullable = false)
   var language: Language,
   @Type(JsonBinaryType::class)
   @Column(columnDefinition = "jsonb")

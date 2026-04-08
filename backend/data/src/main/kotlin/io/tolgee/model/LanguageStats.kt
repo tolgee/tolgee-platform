@@ -13,6 +13,7 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 import jakarta.persistence.Temporal
 import jakarta.persistence.TemporalType
+import org.hibernate.annotations.ColumnDefault
 import java.util.Date
 
 @Entity
@@ -45,8 +46,10 @@ class LanguageStats(
   @Temporal(TemporalType.TIMESTAMP)
   override var translationsUpdatedAt: Date? = null
 
+  @ColumnDefault("0")
   override var qaIssueCount: Long = 0
 
+  @ColumnDefault("0")
   override var qaChecksStaleCount: Long = 0
 
   override val languageId: Long
