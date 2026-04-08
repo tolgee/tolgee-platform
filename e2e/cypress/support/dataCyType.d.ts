@@ -28,8 +28,6 @@ declare namespace DataCy {
         "admin-invoices-item-number" |
         "admin-invoices-item-total" |
         "admin-invoices-org-filter" |
-        "admin-invoices-org-filter-option" |
-        "admin-invoices-org-filter-option-deleted-chip" |
         "admin-invoices-org-section" |
         "admin-subscriptions-cloud-cancel-plan-button" |
         "admin-subscriptions-self-hosted-cancel-plan-button" |

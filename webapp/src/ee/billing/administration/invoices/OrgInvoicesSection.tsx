@@ -3,7 +3,6 @@ import { useDebounce } from 'use-debounce';
 import {
   Autocomplete,
   Box,
-  Chip,
   CircularProgress,
   Link,
   ListItem,
@@ -26,7 +25,6 @@ type InvoiceModel = components['schemas']['InvoiceModel'];
 type OrgItem = {
   id: number;
   name: string;
-  deleted: boolean;
 };
 
 export const OrgInvoicesSection: FC = () => {
@@ -41,6 +39,7 @@ export const OrgInvoicesSection: FC = () => {
     method: 'get',
     query: {
       search: searchDebounced,
+      filterDeleted: false,
       page: 0,
       size: 20,
     },
@@ -53,7 +52,6 @@ export const OrgInvoicesSection: FC = () => {
     orgsLoadable.data?._embedded?.organizations?.map((o) => ({
       id: o.organization.id,
       name: o.organization.name,
-      deleted: o.deletedAt != null,
     })) ?? [];
 
   const invoicesLoadable = useBillingApiQuery({
@@ -85,28 +83,6 @@ export const OrgInvoicesSection: FC = () => {
           data-cy="admin-invoices-org-filter"
           options={orgItems}
           getOptionLabel={(o) => o.name}
-          renderOption={(props, o) => (
-            <Box
-              component="li"
-              {...props}
-              data-cy="admin-invoices-org-filter-option"
-              sx={{ display: 'flex', gap: 1, alignItems: 'center' }}
-            >
-              <span>{o.name}</span>
-              {o.deleted && (
-                <Chip
-                  data-cy="admin-invoices-org-filter-option-deleted-chip"
-                  label={t(
-                    'administration_invoices_org_filter_deleted_chip',
-                    'deleted'
-                  )}
-                  size="small"
-                  color="default"
-                  variant="outlined"
-                />
-              )}
-            </Box>
-          )}
           isOptionEqualToValue={(a, b) => a.id === b.id}
           loading={orgsLoadable.isFetching}
           value={selectedOrg}

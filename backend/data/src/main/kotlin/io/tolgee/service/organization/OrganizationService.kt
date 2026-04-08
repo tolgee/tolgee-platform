@@ -371,10 +371,6 @@ class OrganizationService(
     return organizationRepository.findAllByName(name)
   }
 
-  fun findAllByNameIncludingDeleted(name: String): List<Organization> {
-    return organizationRepository.findAllByNameIncludingDeleted(name)
-  }
-
   fun getProjectOwner(projectId: Long): Organization {
     return organizationRepository.getProjectOwner(projectId)
   }
