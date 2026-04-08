@@ -139,18 +139,16 @@ export const useQaPreviewWebsocket = ({
     { maxWait: 1000 }
   );
 
-  // variant is read from variantRef inside sendText, so it doesn't need to be
-  // a dependency — variant changes always accompany text changes for plurals.
   useEffect(() => {
     if (text != null && enabled && wsRef.current) {
       setIsLoading(true);
       pendingTextUpdateRef.current = true;
       sendText(text);
     }
-  }, [text, enabled]);
+  }, [text, variant, enabled]);
 
   const updateIssueState = useCallback(
-    (targetIssue: QaPreviewIssue, newState: string) => {
+    (targetIssue: QaPreviewIssue, newState: QaPreviewIssue['state']) => {
       setIssuesByType((prev) => {
         const next = new Map(prev);
         const typeIssues = next.get(targetIssue.type);
@@ -163,7 +161,7 @@ export const useQaPreviewWebsocket = ({
               i.positionStart === targetIssue.positionStart &&
               i.positionEnd === targetIssue.positionEnd &&
               i.pluralVariant === targetIssue.pluralVariant
-                ? { ...i, state: newState as QaPreviewIssue['state'] }
+                ? { ...i, state: newState }
                 : i
             )
           );

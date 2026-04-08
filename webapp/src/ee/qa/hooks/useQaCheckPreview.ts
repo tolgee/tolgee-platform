@@ -17,7 +17,10 @@ type QaCheckPreviewResult = {
   issues: QaPreviewIssue[];
   isLoading: boolean;
   isDisconnected: boolean;
-  updateIssueState: (issue: QaPreviewIssue, newState: string) => void;
+  updateIssueState: (
+    issue: QaPreviewIssue,
+    newState: QaPreviewIssue['state']
+  ) => void;
 };
 
 export const useQaCheckPreview = ({

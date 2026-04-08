@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react';
-import { tolgeeFormatGenerateIcu } from '@tginternal/editor';
+import { getTolgeeFormat, tolgeeFormatGenerateIcu } from '@tginternal/editor';
 import { PanelContentData } from 'tg.views/projects/translations/ToolsPanel/common/types';
 import { useQaCheckPreview } from './useQaCheckPreview';
 import { QaPreviewIssue } from 'tg.ee.module/qa/models/QaPreviewWsModels';
@@ -19,15 +19,11 @@ export const useQaChecksForPanel = (data: PanelContentData) => {
     return editingText ?? '';
   }, [keyData.keyIsPlural, data.editingFullValue, editingText, raw]);
 
-  // Get the variant offset from the parsed format
   const variantOffset = useMemo(() => {
-    if (!activeVariant || !data.editingFullValue?.variantOffsets) return 0;
-    return (
-      data.editingFullValue.variantOffsets[
-        activeVariant as Intl.LDMLPluralRule
-      ] ?? 0
-    );
-  }, [activeVariant, data.editingFullValue?.variantOffsets]);
+    if (!activeVariant || !keyData.keyIsPlural || !text) return 0;
+    const parsed = getTolgeeFormat(text, true, raw);
+    return parsed.variantOffsets?.[activeVariant as Intl.LDMLPluralRule] ?? 0;
+  }, [activeVariant, text, keyData.keyIsPlural, raw]);
 
   const translation = keyData.translations[language.tag];
   const allPersistedIssues: QaPreviewIssue[] =
@@ -61,7 +57,7 @@ export const useQaChecksForPanel = (data: PanelContentData) => {
   );
 
   const updateIssueState = useCallback(
-    (adjustedIssue: QaPreviewIssue, newState: string) => {
+    (adjustedIssue: QaPreviewIssue, newState: QaPreviewIssue['state']) => {
       // Reverse position adjustment
       const originalIssue =
         variantOffset === 0
