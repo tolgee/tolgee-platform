@@ -9,6 +9,7 @@ import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.model.enums.qa.QaIssueMessage
 import io.tolgee.model.enums.qa.QaIssueState
 import io.tolgee.model.translation.Translation
+import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
@@ -18,6 +19,7 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 import org.hibernate.annotations.ColumnDefault
+import org.hibernate.annotations.Type
 
 @Entity
 @ActivityLoggedEntity
@@ -41,8 +43,9 @@ class TranslationQaIssue(
   @ColumnDefault("'OPEN'")
   @ActivityLoggedProp
   var state: QaIssueState = QaIssueState.OPEN,
+  @Type(JsonBinaryType::class)
   @Column(columnDefinition = "jsonb")
-  var params: String? = null,
+  var params: Map<String, String>? = null,
   @ColumnDefault("false")
   var virtual: Boolean = false,
   var pluralVariant: String? = null,

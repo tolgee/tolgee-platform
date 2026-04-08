@@ -35,7 +35,7 @@ class QaE2eTestData : BaseTestData() {
             type = QaCheckType.INCONSISTENT_PLACEHOLDERS
             message = QaIssueMessage.QA_PLACEHOLDERS_MISSING
             state = QaIssueState.OPEN
-            params = """{"placeholder":"{count}"}"""
+            params = mapOf("placeholder" to "{count}")
           }
         }
       }
@@ -134,7 +134,7 @@ class QaE2eTestData : BaseTestData() {
             type = QaCheckType.INCONSISTENT_PLACEHOLDERS
             message = QaIssueMessage.QA_PLACEHOLDERS_MISSING
             state = QaIssueState.OPEN
-            params = """{"placeholder":"{name}"}"""
+            params = mapOf("placeholder" to "{name}")
           }
           addQaIssue {
             type = QaCheckType.PUNCTUATION_MISMATCH

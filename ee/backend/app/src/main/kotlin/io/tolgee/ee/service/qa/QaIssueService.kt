@@ -1,7 +1,5 @@
 package io.tolgee.ee.service.qa
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.reporting.BusinessEventPublisher
 import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
@@ -23,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class QaIssueService(
   private val qaIssueRepository: TranslationQaIssueRepository,
-  private val objectMapper: ObjectMapper,
   private val translationService: TranslationService,
   private val websocketEventPublisher: WebsocketEventPublisher,
   private val currentDateProvider: CurrentDateProvider,
@@ -56,7 +53,7 @@ class QaIssueService(
           replacement = result.replacement,
           positionStart = result.positionStart,
           positionEnd = result.positionEnd,
-          params = result.params?.let { objectMapper.writeValueAsString(it) },
+          params = result.params,
           state = matchingExisting?.state ?: QaIssueState.OPEN,
           pluralVariant = result.pluralVariant,
           translation = translation,
@@ -134,7 +131,7 @@ class QaIssueService(
           replacement = request.replacement,
           positionStart = request.positionStart,
           positionEnd = request.positionEnd,
-          params = request.params?.let { objectMapper.writeValueAsString(it) },
+          params = request.params,
           state = QaIssueState.IGNORED,
           virtual = true,
           pluralVariant = request.pluralVariant,
@@ -226,7 +223,4 @@ class QaIssueService(
     )
   }
 
-  fun deserializeParams(paramsJson: String?): Map<String, String>? {
-    return paramsJson?.let { objectMapper.readValue<Map<String, String>>(it) }
-  }
 }
