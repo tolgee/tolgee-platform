@@ -1,3 +1,10 @@
+## [3.179.1](https://github.com/tolgee/tolgee-platform/compare/v3.179.0...v3.179.1) (2026-04-09)
+
+
+### Bug Fixes
+
+* better placholder support in prompt ([e865315](https://github.com/tolgee/tolgee-platform/commit/e865315fb4313b4041792c46d5222db7587a9ba6))
+
 # [3.179.0](https://github.com/tolgee/tolgee-platform/compare/v3.178.1...v3.179.0) (2026-04-09)
 
 
