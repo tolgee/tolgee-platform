@@ -47,16 +47,18 @@ export const TabBasic = ({ value, onChange }: Props) => {
 
   const canCustomize = satisfiesPermission('prompts.edit');
 
-  const basicPromptItems: PromptItem[] = [
+  const basicPromptItems = [
     {
       id: 'KEY_NAME',
       label: t('ai_prompt_item_key_name'),
       hint: t('ai_prompt_item_key_name_hint'),
+      onEdit: undefined,
     },
     {
       id: 'KEY_DESCRIPTION',
       label: t('ai_prompt_item_key_description'),
       hint: t('ai_prompt_item_key_description_hint'),
+      onEdit: undefined,
     },
     {
       id: 'PROJECT_DESCRIPTION',
@@ -81,23 +83,33 @@ export const TabBasic = ({ value, onChange }: Props) => {
       id: 'TM_SUGGESTIONS',
       label: t('ai_prompt_item_tm_suggestions'),
       hint: t('ai_prompt_item_tm_suggestions_hint'),
+      onEdit: undefined,
     },
     {
       id: 'KEY_CONTEXT',
       label: t('ai_prompt_item_key_context'),
       hint: t('ai_prompt_item_key_context_hint'),
+      onEdit: undefined,
     },
     {
       id: 'GLOSSARY',
       label: t('ai_prompt_item_glossary'),
       hint: t('ai_prompt_item_glossary_hint'),
+      onEdit: undefined,
     },
     {
       id: 'SCREENSHOT',
       label: t('ai_prompt_item_screenshot'),
       hint: t('ai_prompt_item_screenshot_hint'),
+      onEdit: undefined,
     },
-  ];
+  ] as const satisfies readonly PromptItem[];
+
+  // Type error here means a BasicPromptOption was added to the API but not to the list above
+  const _allOptionsCovered: AllOptionsCovered<
+    BasicPromptOption,
+    typeof basicPromptItems
+  > = true;
 
   const theme = useTheme();
   const [hideTip, setHideTip] = useLocalStorageState({
@@ -186,3 +198,14 @@ export const TabBasic = ({ value, onChange }: Props) => {
     </Box>
   );
 };
+
+/**
+ * Resolves to `true` if every member of `Union` appears as an `id` in `Items`.
+ * Otherwise, resolves to `{ missing: ... }`
+ */
+type AllOptionsCovered<
+  Union extends string,
+  Items extends readonly { id: string }[]
+> = [Exclude<Union, Items[number]['id']>] extends [never]
+  ? true
+  : { missing: Exclude<Union, Items[number]['id']> };
