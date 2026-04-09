@@ -127,7 +127,12 @@ class PromptFragmentsHelper {
       Variable(
         "icuInfo",
         """
-        If message includes ICU parameters in curly braces, don't modify the parameter names.
+        If a message contains text inside curly braces `{}`, treat it as an ICU parameter or placeholder.
+        Never translate, modify, reorder, or remove anything inside `{}`. Keep the content exactly unchanged.
+        The translated string must contain every `{}` placeholder from the source. The number of placeholders and their exact content must match the source.
+        If a placeholder `{}` changes position in the translation compared to the source, ensure capitalization still matches the source style and follows the target language grammar.
+        Adapt existing punctuation to the conventions of the target language, but do not add punctuation that is not present in the source.
+        
         {{#if target.pluralFormExamples}}
         Translate ICU message plural forms, these are examples of source strings with placeholder replaced with example number
         for {{target.languageName}}:
