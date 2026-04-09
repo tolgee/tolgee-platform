@@ -16,6 +16,8 @@ class QaTestData : BaseTestData() {
 
   lateinit var otherProjectKey: Key
 
+  lateinit var keyWithoutFrTranslation: Key
+
   init {
     project.useQaChecks = true
     projectBuilder.build {
@@ -26,6 +28,12 @@ class QaTestData : BaseTestData() {
         }.build {
           enTranslation = addTranslation("en", "Hello world.").self
           frTranslation = addTranslation("fr", "bonjour monde").self
+        }.self
+      keyWithoutFrTranslation =
+        addKey {
+          name = "key-without-fr-translation"
+        }.build {
+          addTranslation("en", "Only English.")
         }.self
     }
 

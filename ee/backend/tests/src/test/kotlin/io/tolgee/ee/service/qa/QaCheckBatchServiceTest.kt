@@ -56,19 +56,6 @@ class QaCheckBatchServiceTest : AuthorizedControllerTest() {
     userAccount = null
   }
 
-  private fun refetchEntities() {
-    testData.testKey = entityManager.find(Key::class.java, testData.testKey.id)
-    testData.frTranslation = entityManager.find(Translation::class.java, testData.frTranslation.id)
-  }
-
-  private fun runChecks(languageId: Long = testData.frTranslation.language.id) {
-    qaCheckBatchService.runChecksAndPersist(
-      testData.project.id,
-      testData.testKey.id,
-      languageId,
-    )
-  }
-
   @Test
   @Transactional
   fun `creates QA issues when translation has problems`() {
@@ -127,22 +114,18 @@ class QaCheckBatchServiceTest : AuthorizedControllerTest() {
 
   @Test
   fun `creates QA issues for key with no existing translation`() {
-    // Delete the French translation so getOrCreate() will create a new one
-    executeInNewTransaction(platformTransactionManager) {
-      val translation = entityManager.find(Translation::class.java, testData.frTranslation.id)
-      qaIssueRepository.deleteAllByTranslationId(translation.id)
-      entityManager.remove(translation)
-    }
-
     // This should NOT throw TransientPropertyValueException
-    runChecks(testData.frenchLanguage.id)
+    runChecks(
+      keyId = testData.keyWithoutFrTranslation.id,
+      languageId = testData.frenchLanguage.id,
+    )
 
     // Verify that a translation was created and QA issues were persisted
     executeInNewTransaction(platformTransactionManager) {
       val translation =
         translationRepository.findOneByProjectIdAndKeyIdAndLanguageId(
           testData.project.id,
-          testData.testKey.id,
+          testData.keyWithoutFrTranslation.id,
           testData.frenchLanguage.id,
         )
       assertThat(translation).isNotNull
@@ -160,5 +143,21 @@ class QaCheckBatchServiceTest : AuthorizedControllerTest() {
     entityManager.flush()
 
     assertPostHogEventReported(postHog, "QA_CHECK_RUN")
+  }
+
+  private fun refetchEntities() {
+    testData.testKey = entityManager.find(Key::class.java, testData.testKey.id)
+    testData.frTranslation = entityManager.find(Translation::class.java, testData.frTranslation.id)
+  }
+
+  private fun runChecks(
+    keyId: Long = testData.testKey.id,
+    languageId: Long = testData.frTranslation.language.id,
+  ) {
+    qaCheckBatchService.runChecksAndPersist(
+      testData.project.id,
+      keyId,
+      languageId,
+    )
   }
 }
