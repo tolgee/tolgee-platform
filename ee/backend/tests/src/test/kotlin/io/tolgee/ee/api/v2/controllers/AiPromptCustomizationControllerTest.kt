@@ -2,11 +2,9 @@ package io.tolgee.ee.api.v2.controllers
 
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.constants.Feature
-import io.tolgee.constants.Message
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.development.AiPromptCustomizationTestData
 import io.tolgee.fixtures.andAssertThatJson
-import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.node
@@ -53,14 +51,16 @@ class AiPromptCustomizationControllerTest : ProjectAuthControllerTest("/v2/proje
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `set project prompt customization fails when feature is not enabled`() {
+  fun `set project prompt customization works without feature enabled`() {
     enabledFeaturesProvider.forceEnabled = emptySet()
     performProjectAuthPut(
       "ai-prompt-customization",
       mapOf(
         "description" to "new description",
       ),
-    ).andIsBadRequest.andHasErrorMessage(Message.FEATURE_NOT_ENABLED)
+    ).andIsOk.andAssertThatJson {
+      node("description").isEqualTo("new description")
+    }
   }
 
   @Test
@@ -88,5 +88,31 @@ class AiPromptCustomizationControllerTest : ProjectAuthControllerTest("/v2/proje
     ).andIsOk.andAssertThatJson {
       node("description").isEqualTo("new description")
     }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `set language prompt customization works without feature enabled`() {
+    enabledFeaturesProvider.forceEnabled = emptySet()
+    performProjectAuthPut(
+      "languages/${testData.czech.id}/ai-prompt-customization",
+      mapOf(
+        "description" to "new description",
+      ),
+    ).andIsOk.andAssertThatJson {
+      node("description").isEqualTo("new description")
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `set language prompt customization rejects description over 2000 chars`() {
+    val longDescription = "a".repeat(2001)
+    performProjectAuthPut(
+      "languages/${testData.czech.id}/ai-prompt-customization",
+      mapOf(
+        "description" to longDescription,
+      ),
+    ).andIsBadRequest
   }
 }

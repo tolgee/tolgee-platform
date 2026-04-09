@@ -20,7 +20,6 @@ import { useProject } from 'tg.hooks/useProject';
 import { useHistory } from 'react-router-dom';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { useEnabledFeatures } from 'tg.globalContext/helpers';
 
 export type BasicPromptOption = NonNullable<
   components['schemas']['PromptRunDto']['basicPromptOptions']
@@ -30,7 +29,7 @@ type PromptItem = {
   id: BasicPromptOption;
   label: string;
   hint: string;
-  onEdit?: (value: boolean) => void;
+  onEdit?: () => void;
 };
 
 type Props = {
@@ -39,7 +38,6 @@ type Props = {
 };
 
 export const TabBasic = ({ value, onChange }: Props) => {
-  const { isEnabled } = useEnabledFeatures();
   const { t } = useTranslate();
   const project = useProject();
   const [projectDescription, setProjectDescription] = useState(false);
@@ -47,8 +45,7 @@ export const TabBasic = ({ value, onChange }: Props) => {
 
   const { satisfiesPermission } = useProjectPermissions();
 
-  const canCustomize =
-    satisfiesPermission('prompts.edit') && isEnabled('AI_PROMPT_CUSTOMIZATION');
+  const canCustomize = satisfiesPermission('prompts.edit');
 
   const basicPromptItems: PromptItem[] = [
     {
@@ -159,7 +156,7 @@ export const TabBasic = ({ value, onChange }: Props) => {
               <Box display="flex" alignItems="center" gap={0.5} my={-1}>
                 {onEdit && (
                   <IconButton
-                    onClick={() => onEdit(true)}
+                    onClick={() => onEdit()}
                     data-cy="prompt-basic-option-edit"
                     data-cy-id={id}
                   >
