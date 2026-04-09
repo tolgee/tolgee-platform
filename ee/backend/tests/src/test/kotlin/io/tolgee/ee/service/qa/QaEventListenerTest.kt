@@ -212,27 +212,13 @@ class QaEventListenerTest : AuthorizedControllerTest() {
 
   @Test
   fun `triggers recheck when base language changes`() {
-    // Add a second language to use as new base
-    val germanLanguage =
-      executeInNewTransaction(platformTransactionManager) {
-        languageService.createLanguage(
-          LanguageRequest(
-            name = "German",
-            tag = "de",
-            originalName = "Deutsch",
-            flagEmoji = "\uD83C\uDDE9\uD83C\uDDEA",
-          ),
-          testData.project,
-        )
-      }
-
     executeInNewTransaction(platformTransactionManager) {
       projectHolder.project = ProjectDto.fromEntity(testData.project)
       projectService.editProject(
         testData.project.id,
         EditProjectRequest(
           name = testData.project.name,
-          baseLanguageId = germanLanguage.id,
+          baseLanguageId = testData.germanLanguage.id,
         ),
       )
     }
