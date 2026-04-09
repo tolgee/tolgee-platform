@@ -5100,8 +5100,8 @@ export interface components {
     };
     ProjectAiPromptCustomizationModel: {
       /**
-       * @description The project description used in the  prompt that helps AI translator to understand the context of your project.
-       * @example We are Dunder Mifflin, a paper company. We sell paper. This is an project of translations for out paper selling app.
+       * @description The project description used in the prompt that helps AI translator to understand the context of your project.
+       * @example We are Dunder Mifflin, a paper company. We sell paper. This is a project of translations for our paper selling app.
        */
       description?: string;
     };
@@ -5975,7 +5975,7 @@ export interface components {
     };
     SetLanguagePromptCustomizationRequest: {
       /**
-       * @description The language description used in the  prompt that helps AI translator to fine tune results for specific language
+       * @description The language description used in the prompt that helps AI translator to fine tune results for specific language
        * @example For arabic language, we are super formal. Always use these translations:
        * Paper -> ورقة
        * Office -> مكتب
