@@ -23,7 +23,10 @@ import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationMemoryService
 import io.tolgee.util.disableAccelBuffering
 import jakarta.validation.Valid
+import org.slf4j.LoggerFactory
 import org.springdoc.core.annotations.ParameterObject
+import org.springframework.dao.QueryTimeoutException
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.hateoas.PagedModel
@@ -51,6 +54,8 @@ class TranslationSuggestionController(
   private val securityService: SecurityService,
   private val machineTranslationSuggestionFacade: MachineTranslationSuggestionFacade,
 ) {
+  private val log = LoggerFactory.getLogger(TranslationSuggestionController::class.java)
+
   @PostMapping("/machine-translations")
   @Operation(
     summary = "Get machine translation suggestions",
@@ -112,22 +117,27 @@ class TranslationSuggestionController(
     )
     val targetLanguage = languageService.get(dto.targetLanguageId, projectHolder.project.id)
 
-    val data =
-      dto.baseText?.let { baseText ->
-        translationMemoryService.getSuggestions(
-          baseText,
-          isPlural = dto.isPlural ?: false,
-          keyId = null,
-          targetLanguage,
-          pageable,
-        )
-      }
-        ?: let {
-          val keyId = dto.keyId ?: throw BadRequestException(Message.KEY_NOT_FOUND)
-          val key = keyService.findOptional(keyId).orElseThrow { NotFoundException(Message.KEY_NOT_FOUND) }
-          key.checkInProject()
-          translationMemoryService.getSuggestions(key, targetLanguage, pageable)
+    val data: Page<TranslationMemoryItemView> =
+      try {
+        dto.baseText?.let { baseText ->
+          translationMemoryService.getSuggestions(
+            baseText,
+            isPlural = dto.isPlural ?: false,
+            keyId = null,
+            targetLanguage,
+            pageable,
+          )
         }
+          ?: let {
+            val keyId = dto.keyId ?: throw BadRequestException(Message.KEY_NOT_FOUND)
+            val key = keyService.findOptional(keyId).orElseThrow { NotFoundException(Message.KEY_NOT_FOUND) }
+            key.checkInProject()
+            translationMemoryService.getSuggestions(key, targetLanguage, pageable)
+          }
+      } catch (e: QueryTimeoutException) {
+        log.warn("Translation memory suggestions timed out", e)
+        Page.empty(pageable)
+      }
     return arraytranslationMemoryItemModelAssembler.toModel(data, translationMemoryItemModelAssembler)
   }
 

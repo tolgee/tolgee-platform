@@ -5,6 +5,7 @@ import io.tolgee.model.Language
 import io.tolgee.model.key.Key
 import io.tolgee.model.views.TranslationMemoryItemView
 import jakarta.persistence.EntityManager
+import jakarta.persistence.QueryTimeoutException
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
@@ -17,16 +18,16 @@ class TranslationMemoryService(
   private val translationsService: TranslationService,
   private val entityManager: EntityManager,
 ) {
-  /**
-   * Returns translation memory suggestions for the batch/MT pipeline.
-   *
-   * Uses % (trigram threshold operator) without ORDER BY so the composite GiST index on
-   * (language_id, text gist_trgm_ops) can stop early as soon as LIMIT rows are found,
-   * avoiding a full scan of all matching rows.
-   *
-   * REQUIRES_NEW: isolates SET LOCAL PostgreSQL settings (statement_timeout,
-   * pg_trgm.similarity_threshold) so they don't leak into the caller's transaction.
-   * It also ensures a QueryTimeoutException does not mark the outer transaction rollback-only.
+  /*
+   Returns translation memory suggestions for the batch/MT pipeline.
+
+   Uses % (trigram threshold operator) without ORDER BY so the composite GiST index on
+   (language_id, text gist_trgm_ops) can stop early as soon as LIMIT rows are found,
+   avoiding a full scan of all matching rows.
+
+   REQUIRES_NEW: isolates SET LOCAL PostgreSQL settings (statement_timeout,
+   pg_trgm.similarity_threshold) so they don't leak into the caller's transaction.
+   It also ensures a QueryTimeoutException does not mark the outer transaction rollback-only.
    */
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   fun getSuggestionsList(
@@ -37,8 +38,6 @@ class TranslationMemoryService(
     targetLanguage: LanguageDto,
     limit: Int = 5,
   ): List<TranslationMemoryItemView> {
-    // Protect against slow queries on large datasets. REQUIRES_NEW ensures this
-    // timeout does not leak into the caller's transaction.
     entityManager.createNativeQuery("set local statement_timeout to '550ms'").executeUpdate()
     entityManager.createNativeQuery("set local pg_trgm.similarity_threshold to 0.5").executeUpdate()
     val queryResult =
@@ -91,29 +90,31 @@ class TranslationMemoryService(
     return translationsService.getTranslationMemoryValue(key, targetLanguage)
   }
 
-  // REQUIRES_NEW: isolates SET LOCAL settings (statement_timeout, pg_trgm.similarity_threshold)
-  // applied inside getSuggestionsData so they don't leak into the caller's transaction.
+  // REQUIRES_NEW ensures SET LOCAL settings applied inside getSuggestionsData
+  // (statement_timeout, pg_trgm.similarity_threshold) don't leak into the caller's transaction.
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   fun getSuggestions(
     key: Key,
     targetLanguage: LanguageDto,
     pageable: Pageable,
   ): Page<TranslationMemoryItemView> {
-    val baseTranslation = translationsService.findBaseTranslation(key) ?: return Page.empty()
+    try {
+      val baseTranslation = translationsService.findBaseTranslation(key) ?: return Page.empty()
 
-    val baseTranslationText = baseTranslation.text ?: return Page.empty(pageable)
+      val baseTranslationText = baseTranslation.text ?: return Page.empty(pageable)
 
-    return getSuggestions(
-      baseTranslationText,
-      key.isPlural,
-      key.id,
-      targetLanguage,
-      pageable,
-    )
+      return getSuggestions(
+        baseTranslationText,
+        key.isPlural,
+        key.id,
+        targetLanguage,
+        pageable,
+      )
+    } catch (e: QueryTimeoutException) {
+      throw org.springframework.dao.QueryTimeoutException(e.message, e)
+    }
   }
 
-  // REQUIRES_NEW: isolates SET LOCAL settings (statement_timeout, pg_trgm.similarity_threshold)
-  // applied inside getSuggestionsData so they don't leak into the caller's transaction.
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   fun getSuggestions(
     baseTranslationText: String,
@@ -127,8 +128,7 @@ class TranslationMemoryService(
     return PageImpl(data, pageable, count)
   }
 
-  @Transactional
-  fun getSuggestionsData(
+  private fun getSuggestionsData(
     sourceTranslationText: String,
     isPlural: Boolean,
     keyId: Long?,
@@ -136,8 +136,6 @@ class TranslationMemoryService(
     offset: Long = 0,
     limit: Int = 5,
   ): Pair<Long, List<TranslationMemoryItemView>> {
-    // Protect against slow queries on large datasets. The surrounding REQUIRES_NEW
-    // transaction (from getSuggestions callers) ensures this timeout does not leak.
     entityManager.createNativeQuery("set local statement_timeout to '550ms'").executeUpdate()
     entityManager.createNativeQuery("set local pg_trgm.similarity_threshold to 0.5").executeUpdate()
     val queryResult =
