@@ -1,6 +1,7 @@
 package io.tolgee.service.project
 
 import io.tolgee.component.LockingProvider
+import io.tolgee.constants.Feature
 import io.tolgee.dtos.queryResults.LanguageStatsDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
@@ -10,6 +11,7 @@ import io.tolgee.model.views.projectStats.ProjectLanguageStatsResultView
 import io.tolgee.repository.LanguageStatsRepository
 import io.tolgee.repository.TranslationRepository
 import io.tolgee.service.language.LanguageService
+import io.tolgee.service.qa.TranslationQaIssueService
 import io.tolgee.service.queryBuilders.LanguageStatsProvider
 import io.tolgee.util.Logging
 import io.tolgee.util.debug
@@ -31,6 +33,8 @@ class LanguageStatsService(
   private val projectService: ProjectService,
   private val lockingProvider: LockingProvider,
   private val platformTransactionManager: PlatformTransactionManager,
+  private val translationQaIssueService: TranslationQaIssueService,
+  private val projectFeatureGuard: ProjectFeatureGuard,
 ) : Logging {
   fun refreshLanguageStats(
     projectId: Long,
@@ -53,6 +57,21 @@ class LanguageStatsService(
                 branchId,
               ).associateBy { it.language.id }
               .toMutableMap()
+
+          val project = projectService.get(projectId)
+          val qaEnabled = projectFeatureGuard.isFeatureEnabled(Feature.QA_CHECKS, project)
+          val qaIssueCounts =
+            if (qaEnabled) {
+              translationQaIssueService.getOpenIssueCountsByLanguageId(projectId, branchId)
+            } else {
+              emptyMap()
+            }
+          val qaChecksStaleCountMap =
+            if (qaEnabled) {
+              translationQaIssueService.getStaleCountsByLanguageId(projectId, branchId)
+            } else {
+              emptyMap()
+            }
 
           allRawLanguageStats
             .sortedBy { it.languageName }
@@ -84,6 +103,8 @@ class LanguageStatsService(
                 this.untranslatedWords = baseWords - translatedOrReviewedWords
                 untranslatedPercentage = untranslatedWords.toDouble() / baseWords * 100
                 translationsUpdatedAt = lastUpdatedAt
+                qaIssueCount = qaIssueCounts[language.id] ?: 0
+                qaChecksStaleCount = qaChecksStaleCountMap[language.id] ?: 0
               }
             }
 
@@ -103,6 +124,13 @@ class LanguageStatsService(
           logger.warn("Cannot save Language Stats due to NotFoundException. Project deleted too fast?", e)
         }
       }
+    }
+  }
+
+  fun refreshLanguageStatsAllBranches(projectId: Long) {
+    val branchIds = languageStatsRepository.getDistinctBranchIdsByProjectId(projectId)
+    for (branchId in branchIds) {
+      refreshLanguageStats(projectId, branchId)
     }
   }
 

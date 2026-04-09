@@ -4,6 +4,10 @@ import {
   PermissionAdvancedState,
 } from 'tg.component/PermissionsSettings/types';
 import { components } from 'tg.service/apiSchema.generated';
+import {
+  FilterActions,
+  FiltersInternal,
+} from 'tg.views/projects/translations/TranslationFilters/tools';
 
 export type PermissionsAdvancedEeProps = {
   dependencies: HierarchyItem;
@@ -62,4 +66,28 @@ export type GlossaryTermPreviewProps = {
 export type BranchReferenceData = {
   type: 'branch';
   name: string;
+};
+
+export type QaBadgeProps = {
+  count?: number;
+  stale?: boolean;
+  darkWhenNoIssues?: boolean;
+};
+
+export type QaLanguageStatsProps = {
+  languageId: number;
+  languageTag: string;
+};
+
+export type QaIssueHighlightProps = {
+  text: string;
+  translationText: string;
+  issue: components['schemas']['QaIssueModel'];
+  translationId: number;
+};
+
+export type SubfilterQaChecksProps = {
+  projectId: number;
+  value: FiltersInternal;
+  actions: FilterActions;
 };

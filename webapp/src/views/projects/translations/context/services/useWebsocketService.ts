@@ -6,6 +6,7 @@ import {
   TranslationsModifiedData,
 } from 'tg.websocket-client/WebsocketClient';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
+import { useEnabledFeatures } from 'tg.globalContext/helpers';
 import { useDebouncedCallback } from 'use-debounce';
 
 export const useWebsocketService = (
@@ -14,6 +15,8 @@ export const useWebsocketService = (
   const [eventBlockers, setEventBlockers] = useState(0);
   const project = useProject();
   const client = useGlobalContext((c) => c.wsClient.client);
+  const { isEnabled } = useEnabledFeatures();
+  const qaChecksEnabled = isEnabled('QA_CHECKS');
 
   function updateTranslations(event: TranslationsModifiedData) {
     const translationUpdates = event.data?.translations?.map((translation) => ({
@@ -29,18 +32,23 @@ export const useWebsocketService = (
       translationService.changeTranslations(translationUpdates);
     }
 
-    const keyUpdates = event.data?.keys?.map((key) => ({
-      keyId: key.id,
-      value:
+    const keyUpdates = event.data?.keys?.map((key) => {
+      const isDeleted =
         key.changeType === 'DEL' ||
-        (key.modifications as Record<string, any>)?.deletedAt?.new != null
+        (key.modifications as Record<string, Modification<unknown>>)?.deletedAt
+          ?.new != null;
+
+      return {
+        keyId: key.id,
+        value: isDeleted
           ? { deleted: true }
           : {
               ...getModifyingObject(key.modifications, {
                 name: 'keyName',
               }),
             },
-    }));
+      };
+    });
 
     if (keyUpdates) {
       translationService.updateTranslationKeys(keyUpdates);
@@ -63,12 +71,12 @@ export const useWebsocketService = (
     handleQueue();
   }, [eventBlockers]);
 
-  const handerRef = useRef(handleQueue);
-  handerRef.current = handleQueue;
+  const handlerRef = useRef(handleQueue);
+  handlerRef.current = handleQueue;
 
   const handleQueueDelayed = useDebouncedCallback(
     () => {
-      handerRef.current();
+      handlerRef.current();
     },
     100,
     { maxWait: 100 }
@@ -88,6 +96,28 @@ export const useWebsocketService = (
     }
   }, [project, client]);
 
+  useEffect(() => {
+    if (client && qaChecksEnabled) {
+      return client.subscribe(
+        `/projects/${project.id}/qa-issues-updated`,
+        (event) => {
+          translationService.changeTranslations([
+            {
+              keyId: event.data.keyId,
+              language: event.data.languageTag,
+              value: {
+                id: event.data.translationId,
+                qaIssueCount: event.data.qaIssueCount,
+                qaChecksStale: event.data.qaChecksStale,
+                qaIssues: event.data.qaIssues,
+              },
+            },
+          ]);
+        }
+      );
+    }
+  }, [project, client, qaChecksEnabled]);
+
   return {
     setEventBlockers,
   };
@@ -97,9 +127,9 @@ const getModifyingObject = (
   value: Record<string, Modification<any>>,
   fieldMapping?: Record<string, string>
 ) => {
-  const result = {};
-  Object.entries(value).forEach(([field, modification]) => {
+  const result: Record<string, unknown> = {};
+  for (const [field, modification] of Object.entries(value)) {
     result[fieldMapping?.[field] || field] = modification.new;
-  });
+  }
   return result;
 };

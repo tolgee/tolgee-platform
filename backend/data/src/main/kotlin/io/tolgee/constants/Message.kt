@@ -166,6 +166,7 @@ enum class Message {
   PLAN_HAS_SUBSCRIBERS,
   TRANSLATION_FAILED,
   BATCH_JOB_NOT_FOUND,
+  NO_TRANSLATIONS_TO_RECHECK,
   KEY_EXISTS_IN_NAMESPACE,
   TAG_IS_BLANK,
   EXECUTION_FAILED_ON_MANAGEMENT_ERROR,
@@ -328,11 +329,12 @@ enum class Message {
   EXPORT_KEY_PLURAL_SUFFIX_COLLISION,
   TRANSLATION_EXCEEDS_CHAR_LIMIT,
   URL_NOT_VALID,
+  QA_CHECKS_NOT_ENABLED,
   ;
 
   val code: String
-    get() = name.lowercase(Locale.getDefault())
+    get() = name.lowercase(Locale.ROOT)
 
   @JsonValue
-  fun toLowerCase() = name.lowercase(Locale.getDefault())
+  fun toLowerCase() = name.lowercase(Locale.ROOT)
 }

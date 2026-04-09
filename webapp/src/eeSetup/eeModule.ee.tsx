@@ -38,6 +38,7 @@ import { OperationTaskAddKeys } from '../ee/batchOperations/OperationTaskAddKeys
 import { OperationTaskRemoveKeys } from '../ee/batchOperations/OperationTaskRemoveKeys';
 import { useTranslationsSelector } from '../views/projects/translations/context/TranslationsContext';
 import { useProjectPermissions } from '../hooks/useProjectPermissions';
+import { useProject } from '../hooks/useProject';
 import { addPanel } from '../views/projects/translations/ToolsPanel/panelsList';
 import { tasksCount, TasksPanel } from '../ee/task/components/TasksPanel';
 import { addDeveloperViewItems } from '../views/projects/developer/developerViewItems';
@@ -47,30 +48,41 @@ import { addProjectMenuItems } from '../views/projects/projectMenu/ProjectMenu';
 import { addAdministrationMenuItems } from '../views/administration/components/BaseAdministrationView';
 import { SsoLoginView } from '../ee/security/Sso/SsoLoginView';
 import { OperationOrderTranslation } from '../views/projects/translations/BatchOperations/OperationOrderTranslation';
-import {
-  BillingMenuItemsProps,
-  GlossaryTermHighlightModel,
-  GlossaryTermHighlightsProps,
-  GlossaryTermPreviewProps,
-} from './EeModuleType';
+import { BillingMenuItemsProps } from './EeModuleType';
 import { AdministrationSubscriptionsView } from '../ee/billing/administration/subscriptions/AdministrationSubscriptionsView';
 import { OrganizationLlmProvidersView } from '../ee/llm/OrganizationLLMProviders/OrganizationLlmProvidersView';
 import { GlossariesListView } from '../ee/glossary/views/GlossariesListView';
-import { useGlossaryTermHighlights as useGlossaryTermHighlightsInternal } from '../ee/glossary/hooks/useGlossaryTermHighlights';
-import { GlossaryTermPreview as GlossaryTermPreviewInternal } from '../ee/glossary/components/GlossaryTermPreview';
+export { useGlossaryTermHighlights } from '../ee/glossary/hooks/useGlossaryTermHighlights';
+export { GlossaryTermPreview } from '../ee/glossary/components/GlossaryTermPreview';
 import {
   GlossariesPanel,
   useGlossariesCount,
 } from '../ee/glossary/components/GlossariesPanel';
+import {
+  QaChecksPanel,
+  useQaChecksCount,
+} from '../ee/qa/components/QaChecksPanel';
+export { QaBadge } from '../ee/qa/components/QaBadge';
+export { QaLanguageStats } from '../ee/qa/components/QaLanguageStats';
+export { QaCheckItem } from '../ee/qa/components/QaCheckItem';
+export { QaIssueHighlight } from '../ee/qa/components/QaIssueHighlight';
+export {
+  SubfilterQaChecks,
+  getQaChecksFiltersLength,
+  getQaChecksFiltersName,
+} from '../ee/qa/components/SubfilterQaChecks';
 import { GlossaryRouter } from '../ee/glossary/views/GlossaryRouter';
 import { createAdder } from '../fixtures/pluginAdder';
 import { ProjectSettingsTab } from '../views/projects/project/ProjectSettingsView';
 import { OperationAssignTranslationLabel } from '../ee/batchOperations/OperationAssignTranslationLabel';
 import { OperationUnassignTranslationLabel } from '../ee/batchOperations/OperationUnassignTranslationLabel';
 import { ProjectSettingsLabels } from '../ee/translationLabels/ProjectSettingsLabels';
+import { ProjectSettingsQa } from '../ee/qa/components/ProjectSettingsQa';
+import { OperationQaRecheck } from '../ee/qa/components/OperationQaRecheck';
 import { BranchesView } from '../ee/branching/BranchesView';
 import { BranchMergePage } from '../ee/branching/BranchMergePage';
 import { Branch } from '../component/CustomIcons';
+import { QaCheck } from '../component/CustomIcons';
 
 export { TaskReference } from '../ee/task/components/TaskReference';
 export { BranchReference } from '../ee/branching/components/BranchReference';
@@ -229,6 +241,7 @@ export function useUserTaskCount() {
 }
 
 export const useAddBatchOperations = () => {
+  const project = useProject();
   const { satisfiesPermission } = useProjectPermissions();
   const prefilteredTask = useTranslationsSelector(
     (c) => c.prefilter?.task !== undefined
@@ -237,13 +250,28 @@ export const useAddBatchOperations = () => {
 
   const { isEnabled } = useEnabledFeatures();
   const canEditTasks = satisfiesPermission('tasks.edit');
+  const canEditTranslations = satisfiesPermission('translations.edit');
   const canAssignLabels = satisfiesPermission('translation-labels.assign');
   const taskFeature = isEnabled('TASKS');
   const labelFeature = isEnabled('TRANSLATION_LABELS');
+  const qaChecksFeature = isEnabled('QA_CHECKS');
   const orderTranslationsFeature = isEnabled('ORDER_TRANSLATION');
   const { t } = useTranslate();
 
   return addOperations([
+    {
+      items: [
+        {
+          id: 'qa_recheck',
+          label: t('batch_operations_qa_recheck'),
+          divider: true,
+          enabled: canEditTranslations,
+          hidden: !qaChecksFeature || !project.useQaChecks,
+          component: OperationQaRecheck,
+        },
+      ],
+      placement: { position: 'after', value: 'clear_translations' },
+    },
     {
       items: [
         {
@@ -331,6 +359,19 @@ export const glossaryPanelAdder = addPanel(
     },
   ],
   { position: 'after', value: 'translation_memory' }
+);
+
+export const qaChecksPanelAdder = addPanel(
+  [
+    {
+      id: 'qa_checks',
+      icon: <QaCheck />,
+      name: <T keyName="translation_tools_qa_checks" />,
+      component: QaChecksPanel,
+      itemsCountFunction: useQaChecksCount,
+    },
+  ],
+  { position: 'before', value: 'comments' }
 );
 
 export const useAddDeveloperViewItems = () => {
@@ -473,33 +514,54 @@ export const useAddAdministrationMenuItems = () => {
 
 export const useAddProjectSettingsTabs = (projectId: number) => {
   const { t } = useTranslate();
-  const tabs: ProjectSettingsTab[] = [];
-
-  tabs.push({
-    value: 'labels',
-    label: t('project_settings_menu_labels'),
-    link: LINKS.PROJECT_EDIT_LABELS.build({
-      [PARAMS.PROJECT_ID]: projectId,
-    }),
-    dataCy: 'project-settings-menu-labels',
-    component: ProjectSettingsLabels,
-    enabled: true,
-    routeMatch: useRouteMatch(LINKS.PROJECT_EDIT_LABELS.template),
+  const tabsAdder = createAdder<ProjectSettingsTab>({
+    referencingProperty: 'value',
   });
 
-  return createAdder<ProjectSettingsTab>({ referencingProperty: 'value' })(
-    tabs,
-    {
-      position: 'after',
-      value: 'advanced',
-      fallbackPosition: 'start',
-    }
-  );
+  return (originalTabs: ProjectSettingsTab[]) => {
+    let tabs = originalTabs;
+    tabs = tabsAdder(
+      [
+        {
+          value: 'qa',
+          label: t('project_settings_menu_qa_checks'),
+          link: LINKS.PROJECT_EDIT_QA.build({
+            [PARAMS.PROJECT_ID]: projectId,
+          }),
+          dataCy: 'project-settings-menu-qa',
+          component: ProjectSettingsQa,
+          enabled: true,
+          routeMatch: useRouteMatch(LINKS.PROJECT_EDIT_QA.template),
+        },
+      ],
+      {
+        position: 'before',
+        value: 'advanced',
+        fallbackPosition: 'start',
+      }
+    )(tabs);
+
+    tabs = tabsAdder(
+      [
+        {
+          value: 'labels',
+          label: t('project_settings_menu_labels'),
+          link: LINKS.PROJECT_EDIT_LABELS.build({
+            [PARAMS.PROJECT_ID]: projectId,
+          }),
+          dataCy: 'project-settings-menu-labels',
+          component: ProjectSettingsLabels,
+          enabled: true,
+          routeMatch: useRouteMatch(LINKS.PROJECT_EDIT_LABELS.template),
+        },
+      ],
+      {
+        position: 'after',
+        value: 'advanced',
+        fallbackPosition: 'start',
+      }
+    )(tabs);
+
+    return tabs;
+  };
 };
-
-export const useGlossaryTermHighlights = (
-  props: GlossaryTermHighlightsProps
-): GlossaryTermHighlightModel[] => useGlossaryTermHighlightsInternal(props);
-
-export const GlossaryTermPreview: React.VFC<GlossaryTermPreviewProps> =
-  GlossaryTermPreviewInternal;

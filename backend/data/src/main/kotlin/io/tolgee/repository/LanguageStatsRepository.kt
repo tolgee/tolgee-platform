@@ -45,6 +45,8 @@ interface LanguageStatsRepository : JpaRepository<LanguageStats, Long> {
       ls.translatedPercentage,
       ls.reviewedPercentage,
       ls.translationsUpdatedAt,
+      ls.qaIssueCount,
+      ls.qaChecksStaleCount,
       b.isDefault
     )
     from LanguageStats ls
@@ -74,4 +76,15 @@ interface LanguageStatsRepository : JpaRepository<LanguageStats, Long> {
     projectId: Long,
     branchId: Long?,
   ): List<LanguageStats>
+
+  @Query(
+    """
+    select distinct b.id
+    from LanguageStats ls
+    left join ls.branch b
+    where ls.language.project.id = :projectId
+      and (b is null or b.deletedAt is null)
+  """,
+  )
+  fun getDistinctBranchIdsByProjectId(projectId: Long): List<Long?>
 }

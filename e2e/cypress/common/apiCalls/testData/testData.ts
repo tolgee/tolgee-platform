@@ -241,3 +241,5 @@ export function getInvitationsByProjectIdFromTestData(
 ) {
   return data.invitations.filter((i) => i.projectId === projectId);
 }
+
+export const qaTestData = generateTestDataObject('qa');

@@ -347,16 +347,9 @@ class TestDataService(
   }
 
   private fun saveSlackConfigs(builder: ProjectBuilder) {
-    builder.data.slackConfigs.forEach {
-      entityManager.persist(it.self)
-    }
-
     builder.data.slackConfigs.forEach { slackConfig ->
-      val messages =
-        slackConfig.data.slackMessages
-          .map { it.self }
-          .toMutableList()
-      messages.forEach { entityManager.persist(it) }
+      entityManager.persist(slackConfig.self)
+      slackConfig.data.slackMessages.forEach { entityManager.persist(it.self) }
     }
   }
 
@@ -451,6 +444,8 @@ class TestDataService(
   private fun saveTranslationDependants(translationBuilders: List<TranslationBuilder>) {
     val translationComments = translationBuilders.flatMap { it.data.comments.map { it.self } }
     translationCommentService.saveAll(translationComments)
+    val qaIssues = translationBuilders.flatMap { it.data.qaIssues.map { it.self } }
+    qaIssues.forEach { entityManager.persist(it) }
   }
 
   private fun saveTranslations(builder: ProjectBuilder): List<TranslationBuilder> {
@@ -460,7 +455,7 @@ class TestDataService(
   }
 
   private fun saveKeys(builder: ProjectBuilder): List<KeyBuilder> {
-    val keyBuilders = builder.data.keys.map { it }
+    val keyBuilders = builder.data.keys
     keyService.saveAll(keyBuilders.map { it.self })
     return keyBuilders
   }
@@ -490,7 +485,7 @@ class TestDataService(
   }
 
   private fun saveAllKeyDependants(keyBuilders: List<KeyBuilder>) {
-    val metas = keyBuilders.map { it.data.meta?.self }.filterNotNull()
+    val metas = keyBuilders.mapNotNull { it.data.meta?.self }
     tagService.saveAll(metas.flatMap { it.tags })
     keyCodeReferenceRepository.saveAll(metas.flatMap { it.codeReferences })
     keyMetaService.saveAll(metas)
@@ -498,7 +493,7 @@ class TestDataService(
 
   private fun saveAllImportDependants(importBuilders: List<ImportBuilder>) {
     val importFileBuilders = importBuilders.flatMap { it.data.importFiles }
-    val importKeyMetas = importFileBuilders.flatMap { it.data.importKeys.map { it.self.keyMeta } }.filterNotNull()
+    val importKeyMetas = importFileBuilders.flatMap { it.data.importKeys.mapNotNull { it.self.keyMeta } }
     keyMetaService.saveAll(importKeyMetas)
     keyMetaService.saveAllCodeReferences(importKeyMetas.flatMap { it.codeReferences })
     keyMetaService.saveAllComments(importKeyMetas.flatMap { it.comments })

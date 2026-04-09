@@ -3,6 +3,7 @@ package io.tolgee.service.project
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
+import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Project
 import io.tolgee.security.ProjectHolder
@@ -44,6 +45,19 @@ class ProjectFeatureGuard(
     project: Project = projectHolder.projectEntity,
   ): Boolean {
     if (!enabledFeaturesProvider.isFeatureEnabled(project.organizationOwner.id, feature)) {
+      return false
+    }
+    if (!ProjectFeatureRegistry.isEnabledOnProject(feature, project)) {
+      return false
+    }
+    return true
+  }
+
+  fun isFeatureEnabled(
+    feature: Feature,
+    project: ProjectDto = projectHolder.project,
+  ): Boolean {
+    if (!enabledFeaturesProvider.isFeatureEnabled(project.organizationOwnerId, feature)) {
       return false
     }
     if (!ProjectFeatureRegistry.isEnabledOnProject(feature, project)) {

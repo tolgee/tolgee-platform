@@ -20,6 +20,7 @@ interface ProjectRepository : JpaRepository<Project, Long> {
         r.slug as slug, r.avatarHash as avatarHash,
         r.useNamespaces as useNamespaces,
         r.useBranching as useBranching,
+        r.useQaChecks as useQaChecks,
         r.suggestionsMode as suggestionsMode,
         r.translationProtection as translationProtection,
         dn as defaultNamespace, o as organizationOwner,
@@ -89,6 +90,10 @@ interface ProjectRepository : JpaRepository<Project, Long> {
   ): Page<ProjectView>
 
   fun findAllByOrganizationOwnerId(organizationOwnerId: Long): List<Project>
+
+  fun findAllByOrganizationOwnerIdAndUseQaChecksTrueAndDeletedAtIsNull(organizationOwnerId: Long): List<Project>
+
+  fun findAllByUseQaChecksTrueAndDeletedAtIsNull(): List<Project>
 
   fun countAllBySlug(slug: String): Long
 

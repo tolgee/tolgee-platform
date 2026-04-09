@@ -3,6 +3,7 @@ package io.tolgee.service.translation
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.LanguageDto
+import io.tolgee.dtos.queryResults.qa.KeyLanguagePairView
 import io.tolgee.dtos.request.translation.GetTranslationsParams
 import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.exceptions.BadRequestException
@@ -18,9 +19,11 @@ import io.tolgee.model.ILanguage
 import io.tolgee.model.Language
 import io.tolgee.model.Language_
 import io.tolgee.model.Project
+import io.tolgee.model.Project_
 import io.tolgee.model.enums.TranslationProtection
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
+import io.tolgee.model.key.Key_
 import io.tolgee.model.translation.Translation
 import io.tolgee.model.translation.Translation_
 import io.tolgee.model.views.KeyWithTranslationsView
@@ -32,10 +35,14 @@ import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.project.ProjectService
+import io.tolgee.service.qa.TranslationQaIssueService
 import io.tolgee.service.queryBuilders.translationViewBuilder.TranslationViewDataProvider
 import io.tolgee.service.translation.SetTranslationTextUtil.Companion.Options
 import io.tolgee.util.nullIfEmpty
 import jakarta.persistence.EntityManager
+import jakarta.persistence.FlushModeType
+import jakarta.persistence.criteria.JoinType
+import jakarta.persistence.criteria.Predicate
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Lazy
@@ -56,6 +63,7 @@ class TranslationService(
   private val translationViewDataProvider: TranslationViewDataProvider,
   private val entityManager: EntityManager,
   private val translationCommentService: TranslationCommentService,
+  private val translationQaIssueService: TranslationQaIssueService,
 ) {
   @Autowired
   private lateinit var projectHolder: ProjectHolder
@@ -188,7 +196,14 @@ class TranslationService(
     params: GetTranslationsParams,
     languages: Set<LanguageDto>,
   ): Page<KeyWithTranslationsView> {
-    return translationViewDataProvider.getData(projectId, languages, pageable, params, params.cursor)
+    return translationViewDataProvider.getData(
+      projectId,
+      languages,
+      pageable,
+      params,
+      params.cursor,
+      includeQaIssues = params.includeQaIssues == true,
+    )
   }
 
   fun getSelectAllKeys(
@@ -291,6 +306,7 @@ class TranslationService(
   fun deleteByIdIn(ids: Collection<Long>) {
     importService.onExistingTranslationsRemoved(ids)
     translationCommentService.deleteByTranslationIdIn(ids)
+    translationQaIssueService.deleteAllByTranslationIdIn(ids)
     translationRepository.deleteByIdIn(ids)
   }
 
@@ -326,9 +342,8 @@ class TranslationService(
   }
 
   fun findBaseTranslation(key: Key): Translation? {
-    projectService.getOrAssignBaseLanguage(key.project.id).let {
-      return find(key, it).orElse(null)
-    }
+    val baseLanguage = projectService.getOrAssignBaseLanguage(key.project.id)
+    return find(key, baseLanguage).orElse(null)
   }
 
   fun getTranslationMemoryValue(
@@ -509,6 +524,7 @@ class TranslationService(
 
   fun deleteAllByProject(projectId: Long) {
     translationCommentService.deleteAllByProject(projectId)
+    translationQaIssueService.deleteAllByProjectId(projectId)
     entityManager
       .createNativeQuery(
         "DELETE FROM translation " +
@@ -579,5 +595,172 @@ class TranslationService(
   ): List<Translation> {
     return translationRepository
       .getTranslationsWithLabels(keyIds, languageIds)
+  }
+
+  fun getTranslationIdsByKeyIds(
+    keyIds: List<Long>,
+    languageIds: List<Long>? = null,
+  ): List<Long> {
+    if (keyIds.isEmpty()) return emptyList()
+    return keyIds.chunked(1000).flatMap { chunk ->
+      val cb = entityManager.criteriaBuilder
+      val query = cb.createQuery(Long::class.java)
+      val root = query.from(Translation::class.java)
+
+      val predicates =
+        mutableListOf<Predicate>(
+          root.get(Translation_.key).get<Long>("id").`in`(chunk),
+        )
+
+      if (!languageIds.isNullOrEmpty()) {
+        predicates.add(root.get(Translation_.language).get<Long>("id").`in`(languageIds))
+      }
+
+      query.select(root.get(Translation_.id))
+      query.where(*predicates.toTypedArray())
+
+      entityManager.createQuery(query).resultList
+    }
+  }
+
+  fun getNotStaleTranslationIds(
+    projectId: Long,
+    languageIds: List<Long>? = null,
+  ): List<Long> {
+    val cb = entityManager.criteriaBuilder
+    val query = cb.createQuery(Long::class.java)
+    val root = query.from(Translation::class.java)
+
+    val predicates =
+      mutableListOf<Predicate>(
+        cb.equal(root.get(Translation_.key).get<Any>("project").get<Long>("id"), projectId),
+      )
+
+    if (!languageIds.isNullOrEmpty()) {
+      predicates.add(root.get(Translation_.language).get<Long>("id").`in`(languageIds))
+    }
+
+    predicates.add(cb.equal(root.get(Translation_.qaChecksStale), false))
+
+    query.select(root.get(Translation_.id))
+    query.where(*predicates.toTypedArray())
+
+    return entityManager.createQuery(query).resultList
+  }
+
+  @Transactional
+  fun setQaChecksStale(translationIds: List<Long>) {
+    translationIds.chunked(1000).forEach { chunk ->
+      entityManager
+        .createQuery(
+          "UPDATE Translation t SET t.qaChecksStale = true WHERE t.id IN :ids",
+        ).setParameter("ids", chunk)
+        // Prevent auto-flush when called from BeforeTransactionCompletionProcess (QaActivityListener)
+        .setFlushMode(FlushModeType.COMMIT)
+        .executeUpdate()
+    }
+  }
+
+  @Transactional
+  fun setQaChecksStaleByKeyIds(keyIds: List<Long>) {
+    keyIds.chunked(1000).forEach { chunk ->
+      entityManager
+        .createQuery(
+          "UPDATE Translation t SET t.qaChecksStale = true WHERE t.key.id IN :keyIds",
+        ).setParameter("keyIds", chunk)
+        // Prevent auto-flush when called from BeforeTransactionCompletionProcess (QaActivityListener)
+        .setFlushMode(FlushModeType.COMMIT)
+        .executeUpdate()
+    }
+  }
+
+  fun setQaChecksStaleByProjectId(projectId: Long) {
+    translationRepository.setQaChecksStaleByProjectId(projectId)
+  }
+
+  fun setQaChecksStaleByProjectIdAndLanguageIds(
+    projectId: Long,
+    languageIds: List<Long>,
+  ) {
+    translationRepository.setQaChecksStaleByProjectIdAndLanguageIds(projectId, languageIds)
+  }
+
+  fun getKeyLanguagePairsForQaRecheck(
+    projectId: Long,
+    languageIds: List<Long>? = null,
+    onlyStale: Boolean = false,
+  ): List<KeyLanguagePairView> {
+    val cb = entityManager.criteriaBuilder
+    val query = cb.createTupleQuery()
+
+    val keyRoot = query.from(Key::class.java)
+    val projectJoin = keyRoot.join(Key_.project)
+    val langJoin = projectJoin.join(Project_.languages)
+
+    val translationJoin =
+      keyRoot.join(Key_.translations, JoinType.LEFT)
+    translationJoin.on(
+      cb.equal(translationJoin.get(Translation_.language), langJoin),
+    )
+
+    val predicates =
+      mutableListOf(
+        cb.equal(projectJoin.get<Long>("id"), projectId),
+      )
+
+    if (!languageIds.isNullOrEmpty()) {
+      predicates.add(langJoin.get(Language_.id).`in`(languageIds))
+    }
+
+    if (onlyStale) {
+      predicates.add(
+        cb.or(
+          cb.isNull(translationJoin.get(Translation_.id)),
+          cb.equal(translationJoin.get(Translation_.qaChecksStale), true),
+        ),
+      )
+    }
+
+    query.multiselect(keyRoot.get(Key_.id), langJoin.get(Language_.id))
+    query.where(*predicates.toTypedArray())
+
+    return entityManager.createQuery(query).resultList.map { tuple ->
+      KeyLanguagePairView(
+        keyId = tuple.get(0, Long::class.java),
+        languageId = tuple.get(1, Long::class.java),
+      )
+    }
+  }
+
+  /**
+   * Marks quality assurance (QA) checks as stale for translations associated with specified base translations.
+   * This method identifies all translations in other languages that share the same keys
+   * as the given base translations and updates their QA check status.
+   *
+   * If the list contains any translations that are not base translations, they are ignored.
+   */
+  @Transactional
+  fun setQaChecksStaleForBaseTranslationKeys(
+    translationIds: Collection<Long>,
+    baseLanguageId: Long,
+  ) {
+    if (translationIds.isEmpty()) return
+    translationIds.chunked(1000).forEach { chunk ->
+      entityManager
+        .createQuery(
+          """
+          UPDATE Translation t SET t.qaChecksStale = true
+          WHERE t.key.id IN (
+            SELECT t2.key.id FROM Translation t2
+            WHERE t2.id IN :translationIds AND t2.language.id = :baseLanguageId
+          )
+          AND t.language.id != :baseLanguageId
+          """.trimIndent(),
+        ).setParameter("translationIds", chunk)
+        .setParameter("baseLanguageId", baseLanguageId)
+        // Prevent auto-flush when called from BeforeTransactionCompletionProcess (QaActivityListener)
+        .setFlushMode(FlushModeType.COMMIT)
+        .executeUpdate()
+    }
   }
 }

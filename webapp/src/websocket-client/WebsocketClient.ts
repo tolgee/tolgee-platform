@@ -55,7 +55,7 @@ export const WebsocketClient = (options: WebsocketClientOptions) => {
         function (message) {
           try {
             const parsed = JSON.parse(message.body) as Message;
-            subscription.callback(parsed as any);
+            subscription.callback(parsed);
           } catch (e: any) {
             // eslint-disable-next-line no-console
             console.error(`WebSocket: error parsing message: ${e.message}`);
@@ -71,7 +71,7 @@ export const WebsocketClient = (options: WebsocketClientOptions) => {
     client = Stomp.over(() => new SockJS(`${options.serverUrl}/websocket`));
     client.configure({
       reconnectDelay: 3000,
-      debug: (msg) => {},
+      debug: () => {},
     });
   }
 
@@ -163,7 +163,8 @@ export const WebsocketClient = (options: WebsocketClientOptions) => {
 
 export type EventTypeProject =
   | 'translation-data-modified'
-  | 'batch-job-progress';
+  | 'batch-job-progress'
+  | 'qa-issues-updated';
 export type ChannelProject = `/projects/${number}/${EventTypeProject}`;
 
 export type EventTypeUser = 'notifications-changed';
@@ -185,6 +186,15 @@ export type BatchJobProgress = WebsocketEvent<{
 export type NotificationsChanged = WebsocketEvent<{
   currentlyUnseenCount: number;
   newNotification?: components['schemas']['NotificationModel'];
+}>;
+
+export type QaIssuesUpdatedData = WebsocketEvent<{
+  translationId: number;
+  keyId: number;
+  languageTag: string;
+  qaIssueCount: number;
+  qaChecksStale: boolean;
+  qaIssues: components['schemas']['QaIssueModel'][];
 }>;
 
 export type EntityModification<T> = T extends keyof schemas
@@ -250,6 +260,8 @@ export type Data<T> = T extends `/projects/${number}/translation-data-modified`
   ? TranslationsModifiedData
   : T extends `/projects/${number}/batch-job-progress`
   ? BatchJobProgress
+  : T extends `/projects/${number}/qa-issues-updated`
+  ? QaIssuesUpdatedData
   : T extends `/users/${number}/notifications-changed`
   ? NotificationsChanged
   : never;

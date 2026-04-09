@@ -183,7 +183,7 @@ class ProjectService(
     }
 
     if (dto.defaultNamespaceId != null) {
-      var namespace =
+      val namespace =
         project.namespaces.find { it.id == dto.defaultNamespaceId }
           ?: throw BadRequestException(Message.NAMESPACE_NOT_FROM_PROJECT)
       project.defaultNamespace = namespace
@@ -205,7 +205,7 @@ class ProjectService(
       project.slug = newSlug
     }
 
-    // if project has null slag, generate it
+    // if a project has null slug, generate it
     if (project.slug == null) {
       project.slug = generateSlug(project.name, null)
     }
@@ -241,6 +241,14 @@ class ProjectService(
 
   fun findAllInOrganization(organizationId: Long): List<Project> {
     return this.projectRepository.findAllByOrganizationOwnerId(organizationId)
+  }
+
+  fun findAllWithQaEnabledInOrganization(organizationId: Long): List<Project> {
+    return projectRepository.findAllByOrganizationOwnerIdAndUseQaChecksTrueAndDeletedAtIsNull(organizationId)
+  }
+
+  fun findAllWithQaEnabled(): List<Project> {
+    return projectRepository.findAllByUseQaChecksTrueAndDeletedAtIsNull()
   }
 
   private fun addPermittedLanguagesToProjects(

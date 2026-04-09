@@ -74,7 +74,7 @@ class AutoTranslationService(
         target =
           languageIds.flatMap { languageId ->
             if (configs[languageId]?.usingTm == false && configs[languageId]?.usingPrimaryMtService == false) {
-              return@flatMap listOf()
+              return@flatMap emptyList()
             }
             keyIds.map { keyId ->
               BatchTranslationTargetItem(
@@ -258,7 +258,7 @@ class AutoTranslationService(
     translations: List<Translation>,
     key: Key,
     isBatch: Boolean,
-  ) {
+  ): List<Long> {
     val project = projectService.getDto(key.project.id)
     val languages = translations.map { it.language.id }
 
@@ -270,13 +270,16 @@ class AutoTranslationService(
           usePrimaryService = true
         }.associateBy { it.targetLanguageId }
 
+    val modifiedIds = mutableListOf<Long>()
     translations.forEach { translation ->
       result[translation.language.id]?.let {
         it.translatedText?.let { text ->
           translation.setValueAndState(project, text, it.service, it.promptId)
+          modifiedIds.add(translation.id)
         }
       }
     }
+    return modifiedIds
   }
 
   /**
@@ -385,9 +388,9 @@ class AutoTranslationService(
     val configs = autoTranslationConfigRepository.findByProjectAndTargetLanguageIdIn(project, targetLanguageIds)
     val default =
       autoTranslationConfigRepository.findDefaultForProject(project)
-        ?: autoTranslationConfigRepository.findDefaultForProject(project) ?: AutoTranslationConfig().also {
-        it.project = project
-      }
+        ?: AutoTranslationConfig().also {
+          it.project = project
+        }
 
     return targetLanguageIds.associateWith { languageId ->
       (configs.find { it.targetLanguage?.id == languageId } ?: default)

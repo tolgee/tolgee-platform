@@ -656,6 +656,7 @@ declare namespace DataCy {
         "project-leave-button" |
         "project-list-languages" |
         "project-list-more-button" |
+        "project-list-qa-badge-button" |
         "project-list-translations-button" |
         "project-member-item" |
         "project-member-revoke-button" |
@@ -706,6 +707,7 @@ declare namespace DataCy {
         "project-settings-menu-advanced" |
         "project-settings-menu-general" |
         "project-settings-menu-labels" |
+        "project-settings-menu-qa" |
         "project-settings-name" |
         "project-settings-suggestions-mode-switch" |
         "project-settings-transfer-button" |
@@ -725,6 +727,24 @@ declare namespace DataCy {
         "project-transfer-dialog" |
         "prompt-basic-option" |
         "prompt-basic-option-edit" |
+        "qa-action-correct" |
+        "qa-action-ignore" |
+        "qa-badge" |
+        "qa-badge-unresolved" |
+        "qa-check-item" |
+        "qa-enabled-toggle" |
+        "qa-issue-highlight" |
+        "qa-issue-marker" |
+        "qa-language-dialog-inherited-banner" |
+        "qa-language-dialog-reset-to-global" |
+        "qa-language-dialog-save" |
+        "qa-language-settings-button" |
+        "qa-panel-container" |
+        "qa-panel-container-disabled" |
+        "qa-panel-container-empty" |
+        "qa-panel-container-project-disabled" |
+        "qa-settings-row" |
+        "qa-settings-select" |
         "quick-start-action" |
         "quick-start-dialog" |
         "quick-start-finish-action" |
@@ -887,6 +907,7 @@ declare namespace DataCy {
         "translations-cell-main-action-button" |
         "translations-cell-menu-item" |
         "translations-cell-menu-open-button" |
+        "translations-cell-qa-issues-button" |
         "translations-cell-screenshots-button" |
         "translations-cell-switch-mode" |
         "translations-cell-task-button" |

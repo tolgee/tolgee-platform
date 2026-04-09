@@ -111,4 +111,6 @@ enum class ActivityType(
   BRANCH_DELETE,
   BRANCH_PROTECTION_CHANGE,
   BRANCH_MERGE(onlyCountsInList = true, paramsProvider = BranchMergeActivityParamsProvider::class),
+  QA_ISSUE_IGNORE,
+  QA_ISSUE_UNIGNORE,
 }

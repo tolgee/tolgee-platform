@@ -15,6 +15,7 @@ import io.tolgee.model.Language.Companion.fromRequestDTO
 import io.tolgee.model.Project
 import io.tolgee.model.enums.Scope
 import io.tolgee.repository.LanguageRepository
+import io.tolgee.repository.qa.LanguageQaConfigRepository
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.project.ProjectService
@@ -37,6 +38,7 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.Optional
 
 @Service
+@Suppress("SelfReferenceConstructorParameter")
 class LanguageService(
   private val languageRepository: LanguageRepository,
   private val entityManager: EntityManager,
@@ -46,7 +48,6 @@ class LanguageService(
   private val securityService: SecurityService,
   @Lazy
   private val autoTranslationService: AutoTranslationService,
-  @Suppress("SelfReferenceConstructorParameter")
   @Lazy
   private val self: LanguageService,
   private val cacheManager: org.springframework.cache.CacheManager,
@@ -55,6 +56,7 @@ class LanguageService(
   private val activityHolder: ActivityHolder,
   private val authenticationFacade: AuthenticationFacade,
   private val applicationContext: ApplicationContext,
+  private val languageQaConfigRepository: LanguageQaConfigRepository,
 ) {
   @Lazy
   @Autowired
@@ -314,6 +316,7 @@ class LanguageService(
     return languageRepository.findByNameAndProject(name, project)
   }
 
+  @Transactional
   fun deleteAllByProject(projectId: Long) {
     translationService.deleteAllByProject(projectId)
     autoTranslationService.deleteConfigsByProject(projectId)
@@ -324,6 +327,7 @@ class LanguageService(
           "where language_id in (select id from language where project_id = :projectId)",
       ).setParameter("projectId", projectId)
       .executeUpdate()
+    languageQaConfigRepository.deleteAllByProjectId(projectId)
     entityManager
       .createNativeQuery("DELETE FROM language WHERE project_id = :projectId")
       .setParameter("projectId", projectId)

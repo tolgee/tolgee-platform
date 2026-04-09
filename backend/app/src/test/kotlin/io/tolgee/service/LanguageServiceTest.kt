@@ -15,6 +15,12 @@ import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.Language
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.qa.QaCheckType
+import io.tolgee.model.enums.qa.QaIssueMessage
+import io.tolgee.model.qa.LanguageQaConfig
+import io.tolgee.model.qa.TranslationQaIssue
+import io.tolgee.repository.qa.LanguageQaConfigRepository
+import io.tolgee.repository.qa.TranslationQaIssueRepository
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.TolgeeAuthentication
 import io.tolgee.testing.assert
@@ -38,6 +44,12 @@ class LanguageServiceTest : AbstractSpringTest() {
 
   @Autowired
   private lateinit var sessionFactory: SessionFactory
+
+  @Autowired
+  private lateinit var languageQaConfigRepository: LanguageQaConfigRepository
+
+  @Autowired
+  private lateinit var translationQaIssueRepository: TranslationQaIssueRepository
 
   @Test
   @Transactional
@@ -146,7 +158,7 @@ class LanguageServiceTest : AbstractSpringTest() {
     // This reliably detects N+1 issues as Hibernate acquires a new statement per query execution.
     // With 100 generated items, N+1 would cause 100+ statements; we expect a constant count instead.
     val count = sessionFactory.statistics.prepareStatementCount
-    count.assert.isLessThan(25)
+    count.assert.isLessThan(26)
 
     executeInNewTransaction {
       assertLanguageDeleted(testData.germanLanguage)
@@ -171,6 +183,29 @@ class LanguageServiceTest : AbstractSpringTest() {
       .setParameter("id", language.id)
       .resultList.assert
       .isEmpty()
+  }
+
+  @Test
+  @Transactional
+  fun `deletes language with QA config and issues`() {
+    val testData = TranslationsTestData()
+    testDataService.saveTestData(testData.root)
+
+    val language = testData.germanLanguage
+    val translation = testData.aKeyGermanTranslation
+
+    languageQaConfigRepository.save(LanguageQaConfig(language = language))
+    translationQaIssueRepository.save(
+      TranslationQaIssue(
+        type = QaCheckType.EMPTY_TRANSLATION,
+        message = QaIssueMessage.QA_EMPTY_TRANSLATION,
+        translation = translation,
+      ),
+    )
+    entityManager.flush()
+
+    languageService.hardDeleteLanguage(language.id)
+    languageService.findEntity(language.id).assert.isNull()
   }
 
   private fun assertActivityCreated() {

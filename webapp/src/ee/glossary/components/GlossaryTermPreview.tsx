@@ -1,6 +1,5 @@
 import {
   Box,
-  Card,
   IconButton,
   styled,
   TextField,
@@ -29,6 +28,7 @@ import clsx from 'clsx';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
 import { TooltipCard } from 'tg.component/common/TooltipCard';
+import { TextBlock } from 'tg.component/common/TextBlock';
 
 const StyledContainer = styled(Box)`
   display: flex;
@@ -54,11 +54,6 @@ const StyledContainer = styled(Box)`
       color: ${({ theme }) => theme.palette.primary.main};
     }
   }
-`;
-
-const StyledInnerCard = styled(Card)`
-  padding: ${({ theme }) => theme.spacing(1.5)};
-  background-color: ${({ theme }) => theme.palette.tokens.text._states.hover};
 `;
 
 const StyledTitleWrapper = styled(Box)`
@@ -371,10 +366,7 @@ export const GlossaryTermPreview: React.VFC<GlossaryTermPreviewProps> = ({
       </StyledTitleWrapper>
       <GlossaryTermTags term={term} />
       {!slim && (
-        <StyledInnerCard
-          elevation={0}
-          data-cy="glossary-term-preview-description-card"
-        >
+        <TextBlock data-cy="glossary-term-preview-description-card">
           {term.description ? (
             <StyledDescription data-cy="glossary-term-preview-description">
               {term.description}
@@ -384,7 +376,7 @@ export const GlossaryTermPreview: React.VFC<GlossaryTermPreviewProps> = ({
               <T keyName="empty_description" />
             </StyledEmptyDescription>
           )}
-        </StyledInnerCard>
+        </TextBlock>
       )}
     </StyledContainer>
   );

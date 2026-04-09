@@ -25,6 +25,7 @@ open class ProjectModel(
   val baseLanguage: LanguageModel?,
   val useNamespaces: Boolean,
   val useBranching: Boolean,
+  val useQaChecks: Boolean,
   val defaultNamespace: NamespaceModel?,
   val organizationRole: OrganizationRoleType?,
   @Schema(description = "Current user's direct permission", example = "MANAGE")

@@ -10,6 +10,45 @@ type ProjectModel = components['schemas']['ProjectModel'];
 type TaskModel = components['schemas']['KeyTaskViewModel'];
 type TranslationViewModel = components['schemas']['TranslationViewModel'];
 
+type PermissionParams = {
+  project: ProjectModel;
+  languageId: number;
+  translationState?: string;
+  tasks?: TaskModel[];
+};
+
+/**
+ * Determines whether the user can save or suggest a translation
+ * based on permissions, project settings, and task assignments.
+ */
+export function getTranslationPermissions({
+  project,
+  languageId,
+  translationState,
+  tasks,
+}: PermissionParams): { canSave: boolean; canSuggest: boolean } {
+  const { satisfiesLanguageAccess } = getPermissionTools(
+    project.computedPermission
+  );
+
+  const assignedTask = tasks?.find(
+    (t) => t.languageId === languageId && t.userAssigned
+  );
+
+  const canSave =
+    (satisfiesLanguageAccess('translations.edit', languageId) &&
+      (translationState !== 'REVIEWED' ||
+        project.translationProtection !== 'PROTECT_REVIEWED' ||
+        satisfiesLanguageAccess('translations.state-edit', languageId))) ||
+    Boolean(assignedTask?.userAssigned && assignedTask.type === 'TRANSLATE');
+
+  const canSuggest =
+    project.suggestionsMode !== 'DISABLED' &&
+    satisfiesLanguageAccess('translations.suggest', languageId);
+
+  return { canSave, canSuggest };
+}
+
 type Props = {
   onSave?: (options?: SaveProps) => void;
   tasks: TaskModel[] | undefined;
@@ -46,9 +85,14 @@ export function getEditorActions({
   const editorEmpty = isEmpty(value);
   const editorUnchanged = isUnchanged(value, translation?.text);
   const disabled = editorEmpty || editorUnchanged;
-  const { satisfiesLanguageAccess } = getPermissionTools(
-    project.computedPermission
-  );
+
+  const { canSave, canSuggest } = getTranslationPermissions({
+    project,
+    languageId,
+    translationState: translation?.state,
+    tasks,
+  });
+
   const task = tasks?.[0];
   const displayTaskControls =
     (currentTask === undefined || currentTask === task?.number) &&
@@ -57,20 +101,11 @@ export function getEditorActions({
     !task.done &&
     task.type === 'TRANSLATE';
 
-  const assignedTask = tasks?.find(
-    (t) => t.languageId === languageId && t.userAssigned
-  );
   const actions: TranslationAction[] = [];
 
   const additional: TranslationAction[] = [];
 
-  if (
-    (satisfiesLanguageAccess('translations.edit', languageId) &&
-      (translation?.state !== 'REVIEWED' ||
-        project.translationProtection !== 'PROTECT_REVIEWED' ||
-        satisfiesLanguageAccess('translations.state-edit', languageId))) ||
-    (assignedTask?.userAssigned && assignedTask.type === 'TRANSLATE')
-  ) {
+  if (canSave) {
     actions.push({
       action: (props) => onSave?.(props),
       label: displayTaskControls ? (
@@ -89,10 +124,7 @@ export function getEditorActions({
     }
   }
 
-  if (
-    project.suggestionsMode !== 'DISABLED' &&
-    satisfiesLanguageAccess('translations.suggest', languageId)
-  ) {
+  if (canSuggest) {
     actions.push({
       action: (props) => onSave?.({ ...props, suggestionOnly: true }),
       label: displayTaskControls ? (

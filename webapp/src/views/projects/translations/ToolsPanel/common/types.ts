@@ -1,3 +1,4 @@
+import type { TolgeeFormat } from '@tginternal/editor';
 import { components } from 'tg.service/apiSchema.generated';
 import { DeletableKeyWithTranslationsModelType } from '../../context/types';
 import { LanguageModel } from 'tg.component/PermissionsSettings/types';
@@ -13,6 +14,9 @@ export type PanelContentData = {
   language: LanguageModel;
   baseLanguage: LanguageModel;
   activeVariant: string | undefined;
+  editingText: string | undefined;
+  editingFullValue: TolgeeFormat | undefined;
+  isModified: boolean;
   editEnabled: boolean;
   projectPermissions: ReturnType<typeof useProjectPermissions>;
 };

@@ -18,6 +18,14 @@ import io.tolgee.dtos.BigMetaDto
 import io.tolgee.dtos.RelatedKeyDto
 import io.tolgee.fixtures.waitFor
 import io.tolgee.model.Project
+import io.tolgee.model.enums.qa.QaCheckType
+import io.tolgee.model.enums.qa.QaIssueMessage
+import io.tolgee.model.qa.LanguageQaConfig
+import io.tolgee.model.qa.ProjectQaConfig
+import io.tolgee.model.qa.TranslationQaIssue
+import io.tolgee.repository.qa.LanguageQaConfigRepository
+import io.tolgee.repository.qa.ProjectQaConfigRepository
+import io.tolgee.repository.qa.TranslationQaIssueRepository
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.testing.assert
 import io.tolgee.util.executeInNewRepeatableTransaction
@@ -35,6 +43,15 @@ class ProjectHardDeletingServiceTest : AbstractSpringTest() {
 
   @Autowired
   private lateinit var projectHardDeletingService: ProjectHardDeletingService
+
+  @Autowired
+  private lateinit var projectQaConfigRepository: ProjectQaConfigRepository
+
+  @Autowired
+  private lateinit var languageQaConfigRepository: LanguageQaConfigRepository
+
+  @Autowired
+  private lateinit var translationQaIssueRepository: TranslationQaIssueRepository
 
   @Test
   fun `deletes project with MT Settings`() {
@@ -130,6 +147,41 @@ class ProjectHardDeletingServiceTest : AbstractSpringTest() {
     testDataService.saveTestData(testData.root)
     io.tolgee.util.executeInNewTransaction(platformTransactionManager) {
       projectHardDeletingService.hardDeleteProject(testData.projectBuilder.self.refresh())
+    }
+  }
+
+  @Test
+  fun `deletes project with QA entities`() {
+    val testData = BaseTestData()
+    testData.projectBuilder.addKey(keyName = "test-key") {
+      addTranslation("en", "Hello world.")
+    }
+    testDataService.saveTestData(testData.root)
+
+    io.tolgee.util.executeInNewTransaction(platformTransactionManager) {
+      val project = projectService.get(testData.projectBuilder.self.id)
+      val language = languageService.getEntity(testData.englishLanguage.id)
+      val key = keyService.get(project.id, "test-key", null)
+      val translation = translationService.find(key, language).get()
+
+      projectQaConfigRepository.save(ProjectQaConfig(project = project))
+      languageQaConfigRepository.save(LanguageQaConfig(language = language))
+      translationQaIssueRepository.save(
+        TranslationQaIssue(
+          type = QaCheckType.EMPTY_TRANSLATION,
+          message = QaIssueMessage.QA_EMPTY_TRANSLATION,
+          translation = translation,
+        ),
+      )
+      entityManager.flush()
+    }
+
+    io.tolgee.util.executeInNewTransaction(platformTransactionManager) {
+      projectHardDeletingService.hardDeleteProject(testData.projectBuilder.self.refresh())
+    }
+
+    executeInNewTransaction {
+      projectService.find(testData.projectBuilder.self.id).assert.isNull()
     }
   }
 

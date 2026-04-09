@@ -1,5 +1,10 @@
 package io.tolgee.component.eventListeners
 
+import io.tolgee.batch.OnBatchJobCompleted
+import io.tolgee.batch.data.BatchJobType
+import io.tolgee.batch.events.OnBatchJobCancelled
+import io.tolgee.batch.events.OnBatchJobFailed
+import io.tolgee.batch.events.OnBatchJobSucceeded
 import io.tolgee.events.OnProjectActivityEvent
 import io.tolgee.model.Language
 import io.tolgee.model.Project
@@ -10,6 +15,7 @@ import io.tolgee.repository.TranslationRepository
 import io.tolgee.service.project.LanguageStatsService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.util.runSentryCatching
+import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 import org.springframework.transaction.event.TransactionalEventListener
@@ -52,6 +58,34 @@ class LanguageStatsListener(
       branchIds.forEach { branchId ->
         languageStatsService.refreshLanguageStats(projectId, branchId)
       }
+    }
+  }
+
+  @EventListener(OnBatchJobSucceeded::class)
+  @Async
+  fun onQaBatchJobSucceeded(event: OnBatchJobSucceeded) {
+    onQaBatchJobCompleted(event)
+  }
+
+  @EventListener(OnBatchJobFailed::class)
+  @Async
+  fun onQaBatchJobFailed(event: OnBatchJobFailed) {
+    onQaBatchJobCompleted(event)
+  }
+
+  @EventListener(OnBatchJobCancelled::class)
+  @Async
+  fun onQaBatchJobCancelled(event: OnBatchJobCancelled) {
+    onQaBatchJobCompleted(event)
+  }
+
+  private fun onQaBatchJobCompleted(event: OnBatchJobCompleted) {
+    if (bypass) return
+    if (event.job.type != BatchJobType.QA_CHECK) return
+    val projectId = event.job.projectId ?: return
+    runSentryCatching {
+      projectService.findDto(projectId) ?: return@runSentryCatching
+      languageStatsService.refreshLanguageStats(projectId)
     }
   }
 

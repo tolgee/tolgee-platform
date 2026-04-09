@@ -31,6 +31,8 @@ class LanguageStatsModelAssembler :
       untranslatedWordCount = stats.untranslatedWords,
       untranslatedPercentage = stats.untranslatedPercentage,
       translationsUpdatedAt = stats.translationsUpdatedAt,
+      qaIssueCount = stats.qaIssueCount,
+      qaChecksStaleCount = stats.qaChecksStaleCount,
     )
   }
 }
