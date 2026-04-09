@@ -2023,7 +2023,7 @@
   "qa_issue_spaces_trailing_removed": "ソースに合わせるため、翻訳の末尾の不足しているスペースを追加",
   "qa_issue_special_char_added": "文字 \"{character}\" は翻訳に含まれていますが、元のテキストには含まれていません。",
   "qa_issue_special_char_added_no_params": "特殊文字が翻訳に含まれていますが、元のテキストには含まれていません。",
-  "qa_issue_special_char_missing": "ソーステキストの文字「{character}」が翻訳から欠落",
+  "qa_issue_special_char_missing": "ソーステキストの特殊文字「{characters}」が翻訳から欠落しています。",
   "qa_issue_special_char_missing_no_params": "ソーステキストの特殊文字が翻訳から欠落",
   "qa_issue_spelling_error": "スペルミスの可能性: \"{word}\"",
   "qa_issue_spelling_error_no_params": "スペルミスの可能性",

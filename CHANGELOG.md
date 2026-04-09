@@ -1,3 +1,10 @@
+# [3.179.0](https://github.com/tolgee/tolgee-platform/compare/v3.178.1...v3.179.0) (2026-04-09)
+
+
+### Features
+
+* QA checks for translations ([#3479](https://github.com/tolgee/tolgee-platform/issues/3479)) ([e980e46](https://github.com/tolgee/tolgee-platform/commit/e980e46b6ad04bf62aeefc2466a04aa6d1fdee86)), closes [/github.com/tolgee/tolgee-platform/issues/2858#issuecomment-2854519407](https://github.com//github.com/tolgee/tolgee-platform/issues/2858/issues/issuecomment-2854519407)
+
 ## [3.178.1](https://github.com/tolgee/tolgee-platform/compare/v3.178.0...v3.178.1) (2026-04-07)
 
 
