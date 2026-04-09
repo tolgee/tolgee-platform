@@ -6,6 +6,7 @@ import io.tolgee.ee.utils.QaTestUtil
 import io.tolgee.fixtures.assertPostHogEventReported
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
+import io.tolgee.repository.TranslationRepository
 import io.tolgee.repository.qa.TranslationQaIssueRepository
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.util.executeInNewTransaction
@@ -21,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class QaBatchServiceTest : AuthorizedControllerTest() {
+class QaCheckBatchServiceTest : AuthorizedControllerTest() {
   @MockitoBean
   @Autowired
   lateinit var postHog: PostHog
@@ -31,6 +32,9 @@ class QaBatchServiceTest : AuthorizedControllerTest() {
 
   @Autowired
   private lateinit var qaIssueRepository: TranslationQaIssueRepository
+
+  @Autowired
+  private lateinit var translationRepository: TranslationRepository
 
   @Autowired
   lateinit var qa: QaTestUtil
@@ -57,16 +61,20 @@ class QaBatchServiceTest : AuthorizedControllerTest() {
     testData.frTranslation = entityManager.find(Translation::class.java, testData.frTranslation.id)
   }
 
+  private fun runChecks(languageId: Long = testData.frTranslation.language.id) {
+    qaCheckBatchService.runChecksAndPersist(
+      testData.project.id,
+      testData.testKey.id,
+      languageId,
+    )
+  }
+
   @Test
   @Transactional
   fun `creates QA issues when translation has problems`() {
     refetchEntities()
 
-    qaCheckBatchService.runChecksAndPersist(
-      testData.project.id,
-      testData.testKey.id,
-      testData.frTranslation.language.id,
-    )
+    runChecks()
     entityManager.flush()
 
     val issues = qaIssueRepository.findAllByTranslationId(testData.frTranslation.id)
@@ -84,11 +92,7 @@ class QaBatchServiceTest : AuthorizedControllerTest() {
       translation.text = "Bonjour monde."
     }
 
-    qaCheckBatchService.runChecksAndPersist(
-      testData.project.id,
-      testData.testKey.id,
-      testData.frTranslation.language.id,
-    )
+    runChecks()
 
     executeInNewTransaction(platformTransactionManager) {
       val issues = qaIssueRepository.findAllByTranslationId(testData.frTranslation.id)
@@ -99,11 +103,7 @@ class QaBatchServiceTest : AuthorizedControllerTest() {
   @Test
   fun `replaces existing issues on re-check`() {
     // First check — translation has problems
-    qaCheckBatchService.runChecksAndPersist(
-      testData.project.id,
-      testData.testKey.id,
-      testData.frTranslation.language.id,
-    )
+    runChecks()
 
     executeInNewTransaction(platformTransactionManager) {
       val issuesBefore = qaIssueRepository.findAllByTranslationId(testData.frTranslation.id)
@@ -117,11 +117,7 @@ class QaBatchServiceTest : AuthorizedControllerTest() {
     }
 
     // Re-check — should find no issues
-    qaCheckBatchService.runChecksAndPersist(
-      testData.project.id,
-      testData.testKey.id,
-      testData.frTranslation.language.id,
-    )
+    runChecks()
 
     executeInNewTransaction(platformTransactionManager) {
       val issuesAfter = qaIssueRepository.findAllByTranslationId(testData.frTranslation.id)
@@ -130,15 +126,37 @@ class QaBatchServiceTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `creates QA issues for key with no existing translation`() {
+    // Delete the French translation so getOrCreate() will create a new one
+    executeInNewTransaction(platformTransactionManager) {
+      val translation = entityManager.find(Translation::class.java, testData.frTranslation.id)
+      qaIssueRepository.deleteAllByTranslationId(translation.id)
+      entityManager.remove(translation)
+    }
+
+    // This should NOT throw TransientPropertyValueException
+    runChecks(testData.frenchLanguage.id)
+
+    // Verify that a translation was created and QA issues were persisted
+    executeInNewTransaction(platformTransactionManager) {
+      val translation =
+        translationRepository.findOneByProjectIdAndKeyIdAndLanguageId(
+          testData.project.id,
+          testData.testKey.id,
+          testData.frenchLanguage.id,
+        )
+      assertThat(translation).isNotNull
+      val issues = qaIssueRepository.findAllByTranslationId(translation!!.id)
+      assertThat(issues).isNotEmpty
+    }
+  }
+
+  @Test
   @Transactional
   fun `reports QA_CHECK_RUN event`() {
     refetchEntities()
 
-    qaCheckBatchService.runChecksAndPersist(
-      testData.project.id,
-      testData.testKey.id,
-      testData.frTranslation.language.id,
-    )
+    runChecks()
     entityManager.flush()
 
     assertPostHogEventReported(postHog, "QA_CHECK_RUN")
