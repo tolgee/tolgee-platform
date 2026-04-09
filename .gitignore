@@ -88,3 +88,7 @@ ngrok.local.yml
 
 # Worktree
 /worktree-env.sh
+
+# mcp-publisher auth tokens
+/.mcpregistry_github_token
+/.mcpregistry_registry_token
