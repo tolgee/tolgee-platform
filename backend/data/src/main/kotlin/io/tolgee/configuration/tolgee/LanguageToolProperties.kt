@@ -17,4 +17,20 @@ class LanguageToolProperties(
         "When empty, spelling and grammar checks are disabled.",
   )
   var url: String = "",
+  @DocProperty(
+    description =
+      "Maximum number of concurrent `/v2/check` requests a single Tolgee instance is " +
+        "allowed to send to the LanguageTool server.",
+  )
+  var maxConcurrentRequests: Int = 2,
+  @DocProperty(
+    description =
+      "TCP connect timeout for LanguageTool HTTP calls, in seconds.",
+  )
+  var connectTimeoutSeconds: Long = 5,
+  @DocProperty(
+    description =
+      "Read (socket) timeout for LanguageTool HTTP calls, in seconds.",
+  )
+  var readTimeoutSeconds: Long = 60,
 )
