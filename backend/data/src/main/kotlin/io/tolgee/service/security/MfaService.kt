@@ -61,7 +61,7 @@ class MfaService(
       throw PermissionException(Message.BAD_CREDENTIALS)
     }
 
-    if (user.totpKey?.isNotEmpty() != true) {
+    if (!hasMfaEnabled(user)) {
       throw BadRequestException(Message.MFA_NOT_ENABLED)
     }
 
@@ -109,7 +109,7 @@ class MfaService(
       throw AuthenticationException(Message.MFA_ENABLED)
     }
 
-    if (otp.length == 6) {
+    if (otp.length == totpGenerator.passwordLength) {
       if (!validateTotpCode(user, otp)) {
         throw AuthenticationException(Message.INVALID_OTP_CODE)
       }
@@ -130,23 +130,33 @@ class MfaService(
     key: ByteArray,
     code: String,
   ): Boolean {
-    if (code.length != 6) return false
+    if (code.length != totpGenerator.passwordLength) return false
 
     return try {
       val parsedCode = code.toInt()
-      val expectedCode = generateCode(key)
-      parsedCode == expectedCode
+      listOf(-1L, 0L, 1L).any { timeSlotOffset ->
+        parsedCode == generateCode(key, timeSlotOffset)
+      }
     } catch (e: NumberFormatException) {
       false
     }
   }
 
-  fun generateCode(key: ByteArray): Int {
-    return totpGenerator.generateOneTimePassword(SecretKeySpec(key, SecurityConfiguration.OTP_ALGORITHM), Instant.now())
+  fun generateCode(
+    key: ByteArray,
+    timeSlotOffset: Long = 0,
+  ): Int {
+    val timestamp = Instant.now().plus(totpGenerator.timeStep.multipliedBy(timeSlotOffset))
+    return totpGenerator.generateOneTimePassword(SecretKeySpec(key, SecurityConfiguration.OTP_ALGORITHM), timestamp)
   }
 
-  fun generateStringCode(key: ByteArray): String {
-    return generateCode(key).toString().padStart(6, '0')
+  fun generateStringCode(
+    key: ByteArray,
+    timeSlotOffset: Long = 0,
+  ): String {
+    return generateCode(key, timeSlotOffset)
+      .toString()
+      .padStart(totpGenerator.passwordLength, '0')
   }
 
   companion object {

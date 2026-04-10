@@ -15,12 +15,12 @@ import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.NotificationTestUtil
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.apache.commons.codec.binary.Base32
-import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
+import java.time.Instant
 
 @Import(TestEmailConfiguration::class)
 class UserMfaControllerTest : AuthorizedControllerTest() {
@@ -58,7 +58,7 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
     }
 
     val fromDb = userAccountService.findActive(initialUsername)
-    Assertions.assertThat(fromDb!!.totpKey).isEqualTo(encodedKey)
+    assertThat(fromDb!!.totpKey).isEqualTo(encodedKey)
 
     notificationUtil.newestInAppNotification().also {
       assertThat(it.type).isEqualTo(MFA_ENABLED)
@@ -81,7 +81,7 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
       )
     performAuthDelete("/v2/user/mfa/totp", requestDto).andIsOk
     val fromDb = userAccountService.findActive(initialUsername)
-    Assertions.assertThat(fromDb!!.totpKey).isNull()
+    assertThat(fromDb!!.totpKey).isNull()
 
     notificationUtil.newestInAppNotification().also {
       assertThat(it.type).isEqualTo(MFA_DISABLED)
@@ -104,11 +104,11 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
       )
 
     var fromDb = userAccountService.findActive(initialUsername)
-    Assertions.assertThat(fromDb!!.mfaRecoveryCodes).isEmpty()
+    assertThat(fromDb!!.mfaRecoveryCodes).isEmpty()
 
     performAuthPut("/v2/user/mfa/recovery", requestDto).andIsOk
     fromDb = userAccountService.findActive(initialUsername)
-    Assertions.assertThat(fromDb!!.mfaRecoveryCodes).isNotEmpty
+    assertThat(fromDb!!.mfaRecoveryCodes).isNotEmpty
   }
 
   @Test
@@ -128,7 +128,7 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
 
       assertThat(res).error().isCustomValidation.hasMessage("invalid_otp_code")
       val fromDb = userAccountService.findActive(initialUsername)
-      Assertions.assertThat(fromDb!!.totpKey).isNull()
+      assertThat(fromDb!!.totpKey).isNull()
     }
   }
 
@@ -142,7 +142,7 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
       )
 
     val disableRequestDto =
-      UserTotpEnableRequestDto(
+      UserTotpDisableRequestDto(
         password = "pwease let me innn!!!! >:(",
       )
 
@@ -153,7 +153,7 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
 
     performAuthPut("/v2/user/mfa/totp", enableRequestDto).andIsForbidden
     var fromDb = userAccountService.findActive(initialUsername)
-    Assertions.assertThat(fromDb!!.totpKey).isNull()
+    assertThat(fromDb!!.totpKey).isNull()
 
     enableMfa()
 
@@ -161,11 +161,11 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
 
     performAuthDelete("/v2/user/mfa/totp", disableRequestDto).andIsForbidden
     fromDb = userAccountService.findActive(initialUsername)
-    Assertions.assertThat(fromDb!!.totpKey).isNotNull
+    assertThat(fromDb!!.totpKey).isNotNull
 
     performAuthPut("/v2/user/mfa/recovery", recoveryRequestDto).andIsForbidden
     fromDb = userAccountService.findActive(initialUsername)
-    Assertions.assertThat(fromDb!!.mfaRecoveryCodes).isEmpty()
+    assertThat(fromDb!!.mfaRecoveryCodes).isEmpty()
   }
 
   @Test
@@ -197,5 +197,24 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
       refreshUser()
       performAuthGet("/v2/user").andExpect(MockMvcResultMatchers.status().isUnauthorized)
     }
+  }
+
+  @Test
+  fun `it accepts TOTP codes from adjacent time steps`() {
+    // Code from previous time step should be accepted
+    val previousCode = mfaService.generateStringCode(encodedKey, -1)
+    assertThat(mfaService.validateTotpCode(encodedKey, previousCode)).isTrue()
+
+    // Code from next time step should be accepted
+    val nextCode = mfaService.generateStringCode(encodedKey, 1)
+    assertThat(mfaService.validateTotpCode(encodedKey, nextCode)).isTrue()
+
+    // Code from 2 steps away (past) should be rejected
+    val tooOldCode = mfaService.generateStringCode(encodedKey, -2)
+    assertThat(mfaService.validateTotpCode(encodedKey, tooOldCode)).isFalse()
+
+    // Code from 2 steps away (future) should be rejected
+    val tooNewCode = mfaService.generateStringCode(encodedKey, 2)
+    assertThat(mfaService.validateTotpCode(encodedKey, tooNewCode)).isFalse()
   }
 }
