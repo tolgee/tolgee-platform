@@ -199,6 +199,10 @@ class ActivityService(
     return activityModifiedEntityRepository.findByRevisionId(revisionId)
   }
 
+  fun findDistinctBranchIdsByRevisionId(revisionId: Long): List<Long?> {
+    return activityModifiedEntityRepository.findDistinctBranchIdsByRevisionId(revisionId)
+  }
+
   private fun ActivityRevision.shouldSaveWithoutModification(): Boolean {
     val type = this.type ?: return true
     return type.saveWithoutModification
