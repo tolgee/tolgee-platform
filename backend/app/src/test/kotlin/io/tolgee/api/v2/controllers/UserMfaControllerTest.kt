@@ -46,6 +46,9 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
         mfaService.generateStringCode(encodedKey),
       )
     }
+    // `enableMfaTotp` bumps `tokens_valid_not_before` - invalidating all tokens.
+    // Refresh the token, so we have a new valid one.
+    refreshJwtToken()
   }
 
   private fun enableMfaAtFixedTime() {

@@ -5,6 +5,7 @@ import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.controllers.internal.InternalController
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.data.SensitiveOperationProtectionTestData
+import io.tolgee.repository.UserAccountRepository
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.service.security.MfaService
 import org.springframework.transaction.annotation.Transactional
@@ -17,6 +18,7 @@ class SensitiveOperationProtectionE2eDataController(
   private val currentDateProvider: CurrentDateProvider,
   private val mfaService: MfaService,
   private val jwtService: JwtService,
+  private val userAccountRepository: UserAccountRepository,
 ) : AbstractE2eDataController() {
   @GetMapping(value = ["/generate"])
   @Transactional
@@ -40,6 +42,8 @@ class SensitiveOperationProtectionE2eDataController(
   @GetMapping(value = ["/get-totp"])
   @Transactional
   fun getTotp(): Map<String, String> {
+    // Reset OTP replay protection, so E2E tests can use MFA tokens with higher cadency then once every 30s
+    userAccountRepository.findActive("pepa")?.also { it.totpLastUsedTimeStep = null }
     return mapOf("otp" to mfaService.generateStringCode(SensitiveOperationProtectionTestData.TOTP_KEY))
   }
 
