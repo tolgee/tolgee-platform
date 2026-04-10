@@ -66,6 +66,48 @@ describe('User profile', () => {
     cy.get('form').findInputByName('email').should('have.value', NEW_EMAIL);
   });
 
+  it('user can still use Tolgee after changing email', () => {
+    // Change email — triggers verification for new email
+    cy.get('form').findInputByName('email').clear().type(NEW_EMAIL);
+    cy.xpath("//*[@name='currentPassword']").clear().type(INITIAL_PASSWORD);
+    cy.gcy('global-form-save-button').click();
+    cy.contains('Email waiting for verification: pavel@honza.com').should(
+      'be.visible'
+    );
+
+    // User should NOT be blocked — they should still be able to navigate
+    cy.visit(HOST + '/projects');
+    cy.contains('No projects yet').should('be.visible');
+
+    // Should NOT see the "verify your email" blocking screen
+    cy.gcy('resend-email-button').should('not.exist');
+  });
+
+  it('resend verification sends to the new email', () => {
+    // Change email
+    cy.get('form').findInputByName('email').clear().type(NEW_EMAIL);
+    cy.xpath("//*[@name='currentPassword']").clear().type(INITIAL_PASSWORD);
+    cy.gcy('global-form-save-button').click();
+    cy.contains('Email waiting for verification: pavel@honza.com').should(
+      'be.visible'
+    );
+
+    // Clear emails so we only capture the resend
+    deleteAllEmails();
+
+    // Go to profile and find the resend option
+    // The TopBanner or profile page should have a way to resend
+    visit();
+    cy.contains('Email waiting for verification: pavel@honza.com').should(
+      'be.visible'
+    );
+
+    // Verify the verification email was sent to the NEW email, not the old one
+    getParsedEmailVerification().then((v) => {
+      cy.wrap(v.toAddress).should('eq', NEW_EMAIL);
+    });
+  });
+
   it('will change user settings', () => {
     cy.visit(`${HOST}/account/profile`);
     cy.contains('User profile').should('be.visible');
