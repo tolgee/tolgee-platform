@@ -42,7 +42,7 @@ class SensitiveOperationProtectionE2eDataController(
   @GetMapping(value = ["/get-totp"])
   @Transactional
   fun getTotp(): Map<String, String> {
-    // Reset OTP replay protection, so E2E tests can use MFA tokens with higher cadency then once every 30s
+    // Reset OTP replay protection, so E2E tests can use MFA tokens with higher cadence than once every 30s
     userAccountRepository.findActive("pepa")?.also { it.totpLastUsedTimeStep = null }
     return mapOf("otp" to mfaService.generateStringCode(SensitiveOperationProtectionTestData.TOTP_KEY))
   }
