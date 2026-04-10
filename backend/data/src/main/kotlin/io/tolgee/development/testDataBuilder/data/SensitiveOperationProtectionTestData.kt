@@ -6,6 +6,7 @@ import io.tolgee.model.UserAccount
 
 class SensitiveOperationProtectionTestData {
   companion object {
+    val TOTP_USERNAME = "pepa"
     val TOTP_KEY = "meowmeowmeowmeow".toByteArray()
   }
 
@@ -28,7 +29,7 @@ class SensitiveOperationProtectionTestData {
         }
       }
       addUserAccount {
-        username = "pepa"
+        username = TOTP_USERNAME
         name = "Pepa"
         totpKey = TOTP_KEY
         pepa = this
