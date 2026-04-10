@@ -65,6 +65,18 @@ class AiPromptCustomizationControllerTest : ProjectAuthControllerTest("/v2/proje
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `set project prompt customization rejects description over 2000 chars`() {
+    val longDescription = "a".repeat(2001)
+    performProjectAuthPut(
+      "ai-prompt-customization",
+      mapOf(
+        "description" to longDescription,
+      ),
+    ).andIsBadRequest
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `get language prompt customizations`() {
     performProjectAuthGet("language-ai-prompt-customizations")
       .andIsOk
