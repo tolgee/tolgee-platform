@@ -16,6 +16,11 @@ class QaTestData : BaseTestData() {
 
   lateinit var otherProjectKey: Key
 
+  /** Key that only has a base (English) translation — no French translation exists. */
+  lateinit var keyWithoutFrTranslation: Key
+
+  lateinit var germanLanguage: Language
+
   init {
     project.useQaChecks = true
     projectBuilder.build {
@@ -26,6 +31,18 @@ class QaTestData : BaseTestData() {
         }.build {
           enTranslation = addTranslation("en", "Hello world.").self
           frTranslation = addTranslation("fr", "bonjour monde").self
+        }.self
+      keyWithoutFrTranslation =
+        addKey {
+          name = "key-without-fr-translation"
+        }.build {
+          addTranslation("en", "Only English.")
+        }.self
+      germanLanguage =
+        addLanguage {
+          name = "German"
+          tag = "de"
+          originalName = "Deutsch"
         }.self
     }
 

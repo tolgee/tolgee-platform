@@ -125,7 +125,7 @@ class QaTranslationFilterTest : AuthorizedControllerTest() {
     qa.runChecksAndPersist(testData.frTranslation)
 
     performAuthGet(translationsUrl).andIsOk.andAssertThatJson {
-      node("_embedded.keys").isArray.hasSize(2)
+      node("_embedded.keys").isArray.hasSize(3)
     }
   }
 
