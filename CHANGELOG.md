@@ -1,3 +1,10 @@
+## [3.179.2](https://github.com/tolgee/tolgee-platform/compare/v3.179.1...v3.179.2) (2026-04-10)
+
+
+### Bug Fixes
+
+* save Translation before persisting QA issues ([#3599](https://github.com/tolgee/tolgee-platform/issues/3599)) ([7bbd296](https://github.com/tolgee/tolgee-platform/commit/7bbd2964533b8be0d8861753b7ee45b451140e9a))
+
 ## [3.179.1](https://github.com/tolgee/tolgee-platform/compare/v3.179.0...v3.179.1) (2026-04-09)
 
 
