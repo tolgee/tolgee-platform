@@ -1,3 +1,10 @@
+## [3.179.3](https://github.com/tolgee/tolgee-platform/compare/v3.179.2...v3.179.3) (2026-04-10)
+
+
+### Bug Fixes
+
+* throttle concurrent LanguageTool requests and raise read timeout ([#3602](https://github.com/tolgee/tolgee-platform/issues/3602)) ([bbcd037](https://github.com/tolgee/tolgee-platform/commit/bbcd037cc386767e7a9908c99b5db44fb75bc150))
+
 ## [3.179.2](https://github.com/tolgee/tolgee-platform/compare/v3.179.1...v3.179.2) (2026-04-10)
 
 
