@@ -17,6 +17,7 @@ import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.getForObject
 import org.springframework.web.client.postForObject
 import java.time.Duration
+import java.util.concurrent.Semaphore
 
 @Service
 class LanguageToolService(
@@ -25,9 +26,16 @@ class LanguageToolService(
 ) {
   private val restTemplate: RestTemplate by lazy {
     restTemplateBuilder
-      .connectTimeout(Duration.ofSeconds(5))
-      .readTimeout(Duration.ofSeconds(30))
+      .connectTimeout(Duration.ofSeconds(tolgeeProperties.languageTool.connectTimeoutSeconds))
+      .readTimeout(Duration.ofSeconds(tolgeeProperties.languageTool.readTimeoutSeconds))
       .build()
+  }
+
+  /**
+   * Per-instance concurrency gate for `/v2/check` calls.
+   */
+  private val requestSemaphore: Semaphore by lazy {
+    Semaphore(tolgeeProperties.languageTool.maxConcurrentRequests.coerceAtLeast(1), true)
   }
 
   private val resultCache: Cache<LanguageToolCacheKey, List<LanguageToolMatch>> =
@@ -168,13 +176,18 @@ class LanguageToolService(
       }
 
     val request = HttpEntity(body, headers)
-    val response =
-      restTemplate.postForObject<LanguageToolResponse?>(
-        "$baseUrl/v2/check",
-        request,
-      )
+    requestSemaphore.acquire()
+    try {
+      val response =
+        restTemplate.postForObject<LanguageToolResponse?>(
+          "$baseUrl/v2/check",
+          request,
+        )
 
-    return response?.matches ?: emptyList()
+      return response?.matches ?: emptyList()
+    } finally {
+      requestSemaphore.release()
+    }
   }
 
   companion object {
