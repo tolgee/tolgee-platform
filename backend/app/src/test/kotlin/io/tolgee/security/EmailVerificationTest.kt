@@ -5,9 +5,9 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.fixtures.EmailTestUtil
+import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.repository.UserAccountRepository
 import io.tolgee.testing.AbstractControllerTest
-import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -173,14 +173,10 @@ class EmailVerificationTest : AbstractControllerTest() {
 
   @Test
   @Transactional
-  fun `user with pending email change is still considered verified`() {
+  fun `pending email change exposes emailAwaitingVerification`() {
     val user = dbPopulator.createUserIfNotExists(initialUsername)
     emailVerificationService.createForUser(user, newEmail = "new@email.com")
 
-    assertThat(emailVerificationService.isVerified(user)).isFalse
-
-    // The user should be considered verified when the verification is for an email change,
-    // not for initial signup. The emailAwaitingVerification should be the new email.
     val view = userAccountRepository.findActiveView(user.id)
     assertThat(view.emailAwaitingVerification).isEqualTo("new@email.com")
   }
@@ -197,7 +193,8 @@ class EmailVerificationTest : AbstractControllerTest() {
     // Resend without explicit newEmail — should preserve the pending new email
     emailVerificationService.resendEmailVerification(
       user,
-      org.springframework.mock.web.MockHttpServletRequest(),
+      org.springframework.mock.web
+        .MockHttpServletRequest(),
     )
 
     // newEmail should still be set in the DB

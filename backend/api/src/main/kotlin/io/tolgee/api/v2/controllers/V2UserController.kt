@@ -260,6 +260,7 @@ class V2UserController(
   @PostMapping("")
   @Operation(summary = "Updates current user's data.", deprecated = true)
   @OpenApiHideFromPublicDocs
+  @BypassEmailVerification
   fun updateUserOld(
     @RequestBody @Valid
     dto: UserUpdateRequestDto?,
