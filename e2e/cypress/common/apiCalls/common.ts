@@ -1,4 +1,4 @@
-import { API_URL, PASSWORD, USERNAME } from '../constants';
+import { API_URL, MAIL_API_URL, PASSWORD, USERNAME } from '../constants';
 import { ArgumentTypes, Scope } from '../types';
 import { components } from '../../../../webapp/src/service/apiSchema.generated';
 import * as bcrypt from 'bcryptjs';
@@ -491,7 +491,7 @@ type EmailSummary = {
 };
 
 function fetchEmails(limit = 0) {
-  let options = { url: 'http://localhost:21080/api/v1/messages' };
+  let options = { url: `${MAIL_API_URL}/api/v1/messages` };
   if (limit) {
     options = { ...options, ...{ qs: { limit } } };
   }
@@ -506,7 +506,7 @@ export const getLatestEmail = (): Cypress.Chainable<EmailSummary> => {
   const promise = new Cypress.Promise<EmailSummary>((resolve, reject) => {
     const attempt = (count: number) => {
       cy.request({
-        url: 'http://localhost:21080/api/v1/message/latest',
+        url: `${MAIL_API_URL}/api/v1/message/latest`,
         failOnStatusCode: false,
       }).then((r) => {
         const body = r.body as EmailSummary | undefined;
@@ -538,12 +538,12 @@ export const getLatestEmail = (): Cypress.Chainable<EmailSummary> => {
 
 export const getEmail = (id) =>
   cy
-    .request({ url: `http://localhost:21080/api/v1/message/${id}` })
+    .request({ url: `${MAIL_API_URL}/api/v1/message/${id}` })
     .then((r) => r.body as EmailSummary);
 
 export const deleteAllEmails = () =>
   cy.request({
-    url: 'http://localhost:21080/api/v1/messages',
+    url: `${MAIL_API_URL}/api/v1/messages`,
     method: 'DELETE',
   });
 
