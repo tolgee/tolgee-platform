@@ -6,7 +6,6 @@ import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.fixtures.EmailTestUtil
 import io.tolgee.fixtures.waitForNotThrowing
-import io.tolgee.repository.UserAccountRepository
 import io.tolgee.testing.AbstractControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -25,9 +24,6 @@ import org.springframework.transaction.annotation.Transactional
 class EmailVerificationTest : AbstractControllerTest() {
   @Autowired
   private lateinit var emailTestUtil: EmailTestUtil
-
-  @Autowired
-  private lateinit var userAccountRepository: UserAccountRepository
 
   @Autowired
   override lateinit var tolgeeProperties: TolgeeProperties
@@ -169,16 +165,6 @@ class EmailVerificationTest : AbstractControllerTest() {
     val user = userAccountService.findActive(signUpDto.email) ?: throw NotFoundException()
 
     assertThat(getMessageContent()).contains("dummyCallbackUrl/login/verify_email/${user.id}/")
-  }
-
-  @Test
-  @Transactional
-  fun `pending email change exposes emailAwaitingVerification`() {
-    val user = dbPopulator.createUserIfNotExists(initialUsername)
-    emailVerificationService.createForUser(user, newEmail = "new@email.com")
-
-    val view = userAccountRepository.findActiveView(user.id)
-    assertThat(view.emailAwaitingVerification).isEqualTo("new@email.com")
   }
 
   @Test

@@ -5,6 +5,7 @@ import {
   disableEmailVerification,
   enableEmailVerification,
   getParsedEmailVerification,
+  getParsedEmailVerificationByIndex,
   login,
 } from '../../common/apiCalls/common';
 import { HOST } from '../../common/constants';
@@ -64,6 +65,31 @@ describe('User profile', () => {
 
     getParsedEmailVerification().then((v) => {
       cy.wrap(v.toAddress).should('eq', NEW_EMAIL);
+    });
+  });
+
+  it('resend after email change sends to the new email', () => {
+    // Change email
+    cy.get('form').findInputByName('email').clear().type(NEW_EMAIL);
+    cy.xpath("//*[@name='currentPassword']").clear().type(INITIAL_PASSWORD);
+    cy.gcy('global-form-save-button').click();
+    cy.contains('Email waiting for verification: pavel@honza.com').should(
+      'be.visible'
+    );
+
+    // User gets redirected to the verification screen, click resend
+    deleteAllEmails();
+    cy.visit(HOST + '/projects');
+    cy.gcy('resend-email-button').click();
+    cy.contains('Your verification link has been resent.');
+
+    // Resent email should go to the NEW email, not the old one
+    getParsedEmailVerification().then((v) => {
+      cy.wrap(v.toAddress).should('eq', NEW_EMAIL);
+
+      // Verify the link works
+      cy.visit(v.verifyEmailLink);
+      assertMessage('Email was verified');
     });
   });
 
