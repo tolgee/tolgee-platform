@@ -8,6 +8,7 @@ import {
   login,
 } from '../../common/apiCalls/common';
 import { HOST } from '../../common/constants';
+import { waitForGlobalLoading } from '../../common/loading';
 import { assertMessage } from '../../common/shared';
 
 describe('User profile', () => {
@@ -68,10 +69,13 @@ describe('User profile', () => {
   });
 
   it('resend after email change sends to the new email', () => {
+    deleteAllEmails();
+
     // Change email
     cy.get('form').findInputByName('email').clear().type(NEW_EMAIL);
     cy.xpath("//*[@name='currentPassword']").clear().type(INITIAL_PASSWORD);
     cy.gcy('global-form-save-button').click();
+    waitForGlobalLoading();
     cy.contains('Email waiting for verification: pavel@honza.com').should(
       'be.visible'
     );
@@ -80,7 +84,7 @@ describe('User profile', () => {
     deleteAllEmails();
     cy.visit(HOST + '/projects');
     cy.gcy('resend-email-button').click();
-    cy.contains('Your verification link has been resent.');
+    waitForGlobalLoading();
 
     // Resent email should go to the NEW email, not the old one
     getParsedEmailVerification().then((v) => {
