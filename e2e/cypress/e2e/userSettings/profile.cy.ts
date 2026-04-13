@@ -5,7 +5,6 @@ import {
   disableEmailVerification,
   enableEmailVerification,
   getParsedEmailVerification,
-  getParsedEmailVerificationByIndex,
   login,
 } from '../../common/apiCalls/common';
 import { HOST } from '../../common/constants';
