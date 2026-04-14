@@ -2622,6 +2622,8 @@
   "webhook_create_success": "Webhookの作成に成功しました！",
   "webhook_create_title": "Webhookの作成",
   "webhook_delete_success": "Webhookの削除に成功しました！",
+  "webhook_disable_confirmation_message": "この webhook は再度有効化されるまでイベントを受信しなくなります。",
+  "webhook_disable_confirmation_title": "Webhook を無効化しますか?",
   "webhook_edit_success": "Webhookの更新に成功しました！",
   "webhook_form_cancel": "キャンセル",
   "webhook_form_delete": "削除",

@@ -1,3 +1,10 @@
+## [3.179.4](https://github.com/tolgee/tolgee-platform/compare/v3.179.3...v3.179.4) (2026-04-14)
+
+
+### Performance Improvements
+
+* fix O(n) CPU spike in BatchJobChunkExecutionQueue with large queues ([#3566](https://github.com/tolgee/tolgee-platform/issues/3566)) ([4c269a2](https://github.com/tolgee/tolgee-platform/commit/4c269a281f45eb21a6fb33434072b0cf2089688f))
+
 ## [3.179.3](https://github.com/tolgee/tolgee-platform/compare/v3.179.2...v3.179.3) (2026-04-10)
 
 

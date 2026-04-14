@@ -2607,6 +2607,8 @@
   "webhook_create_success": "Webhook 已成功创建！",
   "webhook_create_title": "创建 Webhook",
   "webhook_delete_success": "Webhook 已成功删除！",
+  "webhook_disable_confirmation_message": "此 webhook 将不再接收事件，直到重新启用。",
+  "webhook_disable_confirmation_title": "停用 webhook?",
   "webhook_edit_success": "Webhook 已成功更新！",
   "webhook_form_cancel": "取消",
   "webhook_form_delete": "删除",
