@@ -140,7 +140,9 @@ describe('Organization Invitations', () => {
       .contains(roleType)
       .click();
 
-    cy.gcy('invitation-dialog-input-field').type('test@invitation.com');
+    cy.gcy('invitation-dialog-input-field').type(
+      email ? 'owner@zzzcool12.com' : 'test@invitation.com'
+    );
     cy.gcy('invitation-dialog-invite-button').click();
 
     if (!email) {

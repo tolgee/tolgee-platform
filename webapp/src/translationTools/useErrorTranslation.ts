@@ -15,6 +15,8 @@ export function useErrorTranslation() {
         return t('invalid_otp_code');
       case 'invitation_code_does_not_exist_or_expired':
         return t('invitation_code_does_not_exist_or_expired');
+      case 'invitation_email_mismatch':
+        return t('invitation_email_mismatch');
       case 'language_tag_exists':
         return t('language_tag_exists');
       case 'language_name_exists':

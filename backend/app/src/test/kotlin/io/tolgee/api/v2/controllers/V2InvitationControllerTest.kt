@@ -1,5 +1,7 @@
 package io.tolgee.api.v2.controllers
 
+import io.tolgee.config.TestEmailConfiguration
+import io.tolgee.dtos.misc.CreateOrganizationInvitationParams
 import io.tolgee.dtos.misc.CreateProjectInvitationParams
 import io.tolgee.dtos.request.organization.OrganizationInviteUserDto
 import io.tolgee.dtos.request.project.LanguagePermissions
@@ -160,6 +162,89 @@ class V2InvitationControllerTest : AuthorizedControllerTest() {
     val type = permissionService.getProjectPermissionScopesNoApiKey(project.id, newUser)!!
     type.assert.equalsPermissionType(expectedType)
   }
+
+  @Test
+  fun `rejects project invitation when email does not match`() {
+    val base = dbPopulator.createBase()
+    val code = createProjectInvitationCode(base.project, email = "target@example.com")
+
+    val newUser = dbPopulator.createUserIfNotExists("other@example.com", "pwd")
+    loginAsUser(newUser.username)
+    performAuthPut("/v2/invitations/$code/accept", null)
+      .andIsBadRequest
+      .andAssertThatJson {
+        node("code").isEqualTo("invitation_email_mismatch")
+      }
+
+    assertThat(invitationService.getForProject(base.project)).hasSize(1)
+    assertThat(permissionService.getProjectPermissionScopesNoApiKey(base.project.id, newUser)).isNullOrEmpty()
+  }
+
+  @Test
+  fun `accepts project invitation when email matches case insensitive`() {
+    val base = dbPopulator.createBase()
+    val code = createProjectInvitationCode(base.project, email = "Target@Example.COM")
+
+    val newUser = dbPopulator.createUserIfNotExists("target@example.com", "pwd")
+    loginAsUser(newUser.username)
+    performAuthPut("/v2/invitations/$code/accept", null).andIsOk
+
+    assertInvitationAccepted(base.project, newUser, ProjectPermissionType.EDIT)
+  }
+
+  @Test
+  fun `rejects organization invitation when email does not match`() {
+    val base = dbPopulator.createBase()
+    val code = createOrganizationInvitationCode(base.organization, email = "target@example.com")
+
+    val newUser = dbPopulator.createUserIfNotExists("other@example.com", "pwd")
+    loginAsUser(newUser.username)
+    performAuthPut("/v2/invitations/$code/accept", null)
+      .andIsBadRequest
+      .andAssertThatJson {
+        node("code").isEqualTo("invitation_email_mismatch")
+      }
+  }
+
+  @Test
+  fun `accepts link invitation without email for any user`() {
+    val base = dbPopulator.createBase()
+    val code = createProjectInvitationCode(base.project)
+
+    val newUser = dbPopulator.createUserIfNotExists("anyone@example.com", "pwd")
+    loginAsUser(newUser.username)
+    performAuthPut("/v2/invitations/$code/accept", null).andIsOk
+
+    assertInvitationAccepted(base.project, newUser, ProjectPermissionType.EDIT)
+  }
+
+  private fun createProjectInvitationCode(
+    project: Project,
+    type: ProjectPermissionType = ProjectPermissionType.EDIT,
+    email: String? = null,
+  ): String =
+    invitationService
+      .create(
+        CreateProjectInvitationParams(
+          project,
+          type,
+          email = email,
+        ),
+      ).code
+
+  private fun createOrganizationInvitationCode(
+    organization: Organization,
+    type: OrganizationRoleType = OrganizationRoleType.MEMBER,
+    email: String? = null,
+  ): String =
+    invitationService
+      .create(
+        CreateOrganizationInvitationParams(
+          organization = organization,
+          type = type,
+          email = email,
+        ),
+      ).code
 
   private fun createTranslateInvitation(project: Project): ProjectInvitationModel {
     val result =
