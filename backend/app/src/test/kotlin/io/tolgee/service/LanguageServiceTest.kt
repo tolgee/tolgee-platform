@@ -36,6 +36,9 @@ import org.springframework.transaction.annotation.Transactional
   properties = [
     "spring.jpa.properties.hibernate.generate_statistics=true",
     "logging.level.org.hibernate.engine.internal.StatisticalLoggingSessionEventListener=WARN",
+    "spring.jpa.show-sql=true",
+    // keep in sync with OrganizationServiceTest properties to share Spring test context
+    "tolgee.machine-translation.free-credits-amount=100000",
   ],
 )
 class LanguageServiceTest : AbstractSpringTest() {

@@ -26,7 +26,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import java.time.Duration
 import java.util.Date
@@ -36,7 +35,6 @@ import java.util.Date
   properties = ["tolgee.cache.enabled=true"],
 )
 class McpServerIntegrationTest : AbstractMcpTest() {
-  @MockitoBean
   @Autowired
   lateinit var postHog: PostHog
 

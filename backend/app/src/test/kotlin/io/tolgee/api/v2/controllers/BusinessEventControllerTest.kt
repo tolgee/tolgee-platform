@@ -12,12 +12,10 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
-import org.springframework.test.context.bean.override.mockito.MockitoBean
 
 class BusinessEventControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   private lateinit var testData: BaseTestData
 
-  @MockitoBean
   @Autowired
   lateinit var postHog: PostHog
 

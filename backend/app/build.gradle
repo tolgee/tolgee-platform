@@ -248,6 +248,14 @@ tasks.register('runStandardTests', Test) {
         excludeTags "contextRecreating", "websocket"
     }
     maxHeapSize = "4096m"
+
+    def shardIndex = System.getenv('SHARD_INDEX')
+    def shardTotal = System.getenv('SHARD_TOTAL')
+    if (shardIndex != null && shardTotal != null) {
+        systemProperty 'tolgee.test.shard.index', shardIndex
+        systemProperty 'tolgee.test.shard.total', shardTotal
+    }
+
     rootProject.setTestRetry(it)
 }
 
