@@ -406,7 +406,7 @@ class TagService(
     tagId: Long,
   ) {
     val tag =
-      find(tagId)?.takeIf { it.project.id == key.project.id }
+      tagRepository.findByIdAndProjectId(tagId, key.project.id)
         ?: throw NotFoundException(Message.TAG_NOT_FOUND)
     remove(key, tag)
   }

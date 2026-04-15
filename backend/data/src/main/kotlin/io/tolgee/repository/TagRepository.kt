@@ -115,6 +115,16 @@ interface TagRepository : JpaRepository<Tag, Long> {
 
   @Query(
     """
+    from Tag t where t.project.id = :projectId and t.id = :tagId
+  """,
+  )
+  fun findByIdAndProjectId(
+    tagId: Long,
+    projectId: Long,
+  ): Tag?
+
+  @Query(
+    """
     from Tag t left join fetch t.keyMetas km where t.project.id = :projectId and t.id = :tagId
   """,
   )
