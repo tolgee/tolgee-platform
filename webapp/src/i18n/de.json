@@ -1257,6 +1257,7 @@
   "invalid_recaptcha_token": "Du bist ein Roboter!",
   "invitation_code_accepted": "Einladung erfolgreich angenommen",
   "invitation_code_does_not_exist_or_expired": "Diese Einladung existiert nicht oder ist abgelaufen",
+  "invitation_email_mismatch_while_accepting_invitation_message": "Diese Einladung wurde an eine andere E-Mail-Adresse gesendet. Bitte melden Sie sich mit der E-Mail-Adresse an, an die die Einladung gesendet wurde.",
   "invitation_organization_mismatch": "Einladung kann nicht angenommen werden - verwaltete Konten können nicht Teil mehrerer Organisationen sein.",
   "invitations_invite_button": "Benutzer einladen",
   "invitations_title": "Einladungen",

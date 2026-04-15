@@ -1064,6 +1064,7 @@
   "invalid_recaptcha_token": "Ви робот!",
   "invitation_code_accepted": "Запрошення успішно прийнято",
   "invitation_code_does_not_exist_or_expired": "Це запрошення не існує або термін його дії закінчився",
+  "invitation_email_mismatch_while_accepting_invitation_message": "Це запрошення було надіслано на іншу електронну адресу. Будь ласка, увійдіть, використовуючи електронну адресу, на яку було надіслано запрошення.",
   "invitation_organization_mismatch": "Неможливо прийняти запрошення - керовані облікові записи не можуть бути частиною кількох організацій.",
   "invitations_invite_button": "Запросити користувача",
   "invitations_title": "Запрошення",

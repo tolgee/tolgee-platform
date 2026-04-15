@@ -1252,6 +1252,7 @@
   "invalid_recaptcha_token": "您是机器人！",
   "invitation_code_accepted": "已成功接受邀请",
   "invitation_code_does_not_exist_or_expired": "此邀请不存在或已过期",
+  "invitation_email_mismatch_while_accepting_invitation_message": "此邀请已发送至其他电子邮件地址。请使用收到邀请的电子邮件地址登录。",
   "invitation_organization_mismatch": "无法接受邀请 - 被管理的账户不能成为多个组织的一部分。",
   "invitations_invite_button": "邀请新用户",
   "invitations_title": "邀请",

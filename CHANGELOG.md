@@ -1,3 +1,10 @@
+# [3.180.0](https://github.com/tolgee/tolgee-platform/compare/v3.179.5...v3.180.0) (2026-04-15)
+
+
+### Features
+
+* refactor work with spring boot test context ([#3561](https://github.com/tolgee/tolgee-platform/issues/3561)) ([67e06bf](https://github.com/tolgee/tolgee-platform/commit/67e06bf1d4baea75c000c742bb5934240dcc561f))
+
 ## [3.179.5](https://github.com/tolgee/tolgee-platform/compare/v3.179.4...v3.179.5) (2026-04-15)
 
 

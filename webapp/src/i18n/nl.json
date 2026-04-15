@@ -1258,6 +1258,7 @@
   "invalid_recaptcha_token": "U bent een robot!",
   "invitation_code_accepted": "Uitnodiging succesvol geaccepteerd",
   "invitation_code_does_not_exist_or_expired": "Deze uitnodiging bestaat niet of is verlopen",
+  "invitation_email_mismatch_while_accepting_invitation_message": "Deze uitnodiging is naar een ander e-mailadres verzonden. Log in met het e-mailadres waarnaar de uitnodiging is verzonden.",
   "invitation_organization_mismatch": "Uitnodiging kan niet worden geaccepteerd - beheerde accounts kunnen geen deel uitmaken van meerdere organisaties.",
   "invitations_invite_button": "Gebruiker uitnodigen",
   "invitations_title": "Uitnodigingen",

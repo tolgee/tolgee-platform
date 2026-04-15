@@ -1259,6 +1259,7 @@
   "invalid_recaptcha_token": "Beklager. Det viser sig, at du er en robot! \uD83E\uDD16",
   "invitation_code_accepted": "Invitationen er blevet accepteret",
   "invitation_code_does_not_exist_or_expired": "Denne invitation eksisterer ikke eller er udløbet",
+  "invitation_email_mismatch_while_accepting_invitation_message": "Denne invitation blev sendt til en anden e-mailadresse. Log venligst ind med den e-mailadresse, som invitationen blev sendt til.",
   "invitation_organization_mismatch": "Kan ikke acceptere invitation - administrerede konti kan ikke være en del af flere organisationer.",
   "invitations_invite_button": "Inviter bruger",
   "invitations_title": "Invitationer",

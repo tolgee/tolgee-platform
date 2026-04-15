@@ -1254,6 +1254,7 @@
   "invalid_recaptcha_token": "Vous êtes un robot !",
   "invitation_code_accepted": "Invitation acceptée",
   "invitation_code_does_not_exist_or_expired": "Cette invitation n'existe pas ou a expiré",
+  "invitation_email_mismatch_while_accepting_invitation_message": "Cette invitation a été envoyée à une adresse e-mail différente. Veuillez vous connecter avec l'adresse e-mail à laquelle l'invitation a été envoyée.",
   "invitation_organization_mismatch": "Impossible d'accepter l'invitation - les comptes gérés ne peuvent pas faire partie de plusieurs organisations.",
   "invitations_invite_button": "Inviter un utilisateur",
   "invitations_title": "Invitations",

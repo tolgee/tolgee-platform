@@ -1260,6 +1260,7 @@
   "invalid_recaptcha_token": "You are a robot!",
   "invitation_code_accepted": "Invitation successfully accepted",
   "invitation_code_does_not_exist_or_expired": "This invitation does not exist or has expired",
+  "invitation_email_mismatch_while_accepting_invitation_message": "This invitation was sent to a different email address. Please log in with the email address the invitation was sent to.",
   "invitation_organization_mismatch": "Cannot accept invitation - managed accounts cannot be part of multiple organizations.",
   "invitations_invite_button": "Invite user",
   "invitations_title": "Invitations",

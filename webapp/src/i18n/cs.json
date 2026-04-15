@@ -1259,6 +1259,7 @@
   "invalid_recaptcha_token": "Jste robot!",
   "invitation_code_accepted": "Pozvánka úspěšně přijata",
   "invitation_code_does_not_exist_or_expired": "Pozvánka neexistuje nebo expirovala",
+  "invitation_email_mismatch_while_accepting_invitation_message": "Tato pozvánka byla odeslána na jinou e-mailovou adresu. Přihlaste se prosím pomocí e-mailové adresy, na kterou byla pozvánka odeslána.",
   "invitation_organization_mismatch": "Nelze přijmout pozvánku - spravované účty nemohou být součástí více organizací.",
   "invitations_invite_button": "Pozvat uživatele",
   "invitations_title": "Pozvánky",

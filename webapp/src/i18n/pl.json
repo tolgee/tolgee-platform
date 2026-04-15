@@ -1063,6 +1063,7 @@
   "invalid_recaptcha_token": "Jesteś robotem!",
   "invitation_code_accepted": "Zaproszenie zostało pomyślnie zaakceptowane",
   "invitation_code_does_not_exist_or_expired": "To zaproszenie nie istnieje lub wygasło",
+  "invitation_email_mismatch_while_accepting_invitation_message": "To zaproszenie zostało wysłane na inny adres e-mail. Zaloguj się przy użyciu adresu e-mail, na który zostało wysłane zaproszenie.",
   "invitation_organization_mismatch": "Nie można zaakceptować zaproszenia - zarządzane konta nie mogą być częścią wielu organizacji.",
   "invitations_invite_button": "Zaproś użytkownika",
   "invitations_title": "Zaproszenia",
