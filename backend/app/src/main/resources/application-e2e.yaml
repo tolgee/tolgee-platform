@@ -48,6 +48,7 @@ tolgee:
     global-limits: false
     endpoint-limits: false
     authentication-limits: false
+    email-verification-request-limit-enabled: false
   file-storage-url: http://localhost:${TOLGEE_E2E_PORT:8201}
   internal:
     controller-enabled: true

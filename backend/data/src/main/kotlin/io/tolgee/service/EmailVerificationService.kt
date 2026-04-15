@@ -79,13 +79,14 @@ class EmailVerificationService(
       throw BadRequestException(Message.EMAIL_ALREADY_VERIFIED)
     }
 
-    val email = newEmail ?: getEmail(userAccount)
+    val effectiveNewEmail = newEmail ?: userAccount.emailVerification?.newEmail
+    val email = effectiveNewEmail ?: userAccount.username
     val policy = rateLimitService.getEmailVerificationIpRateLimitPolicy(request, email)
 
     if (policy != null) {
       rateLimitService.consumeBucket(policy)
     }
-    createForUser(userAccount, callbackUrl, newEmail)
+    createForUser(userAccount, callbackUrl, effectiveNewEmail)
   }
 
   fun getEmail(userAccount: UserAccount): String {

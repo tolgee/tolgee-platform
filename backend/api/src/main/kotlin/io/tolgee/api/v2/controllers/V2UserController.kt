@@ -106,6 +106,7 @@ class V2UserController(
   @PutMapping("")
   @Operation(summary = "Update user", description = "Updates current user's profile information.")
   @OpenApiOrderExtension(2)
+  @BypassEmailVerification
   fun updateUser(
     @RequestBody @Valid
     dto: UserUpdateRequestDto?,
@@ -259,6 +260,7 @@ class V2UserController(
   @PostMapping("")
   @Operation(summary = "Updates current user's data.", deprecated = true)
   @OpenApiHideFromPublicDocs
+  @BypassEmailVerification
   fun updateUserOld(
     @RequestBody @Valid
     dto: UserUpdateRequestDto?,
