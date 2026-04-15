@@ -1,3 +1,10 @@
+## [3.179.5](https://github.com/tolgee/tolgee-platform/compare/v3.179.4...v3.179.5) (2026-04-15)
+
+
+### Bug Fixes
+
+* email verification bugs on email change and resend ([#3604](https://github.com/tolgee/tolgee-platform/issues/3604)) ([bb1c0e2](https://github.com/tolgee/tolgee-platform/commit/bb1c0e20fd4b84359b7e84f3970e59c02558b400))
+
 ## [3.179.4](https://github.com/tolgee/tolgee-platform/compare/v3.179.3...v3.179.4) (2026-04-14)
 
 
