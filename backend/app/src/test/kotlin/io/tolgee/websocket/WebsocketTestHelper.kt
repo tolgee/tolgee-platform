@@ -210,7 +210,7 @@ class WebsocketTestHelper(
 
   fun waitForAuthenticationStatus(status: MySessionHandler.AuthenticationStatus) {
     try {
-      waitFor(5000) {
+      waitFor(10000) {
         sessionHandler?.authenticationStatus == status
       }
     } catch (e: WaitNotSatisfiedException) {

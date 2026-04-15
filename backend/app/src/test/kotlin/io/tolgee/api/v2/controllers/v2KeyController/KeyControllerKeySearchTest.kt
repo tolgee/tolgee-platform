@@ -95,9 +95,15 @@ class KeyControllerKeySearchTest :
 
     // Warm up JIT, connection pool, and the Postgres query planner for the
     // search endpoint — the first call is consistently much slower than subsequent
-    // calls on CI runners, which otherwise skews the timing below.
-    performProjectAuthGet("keys/search?search=Hello&languageTag=de").andIsOk
-    performProjectAuthGet("keys/search?search=dol&languageTag=de").andIsOk
+    // calls on CI runners, which otherwise skews the timing below. Use the same
+    // executeInNewTransaction wrapping as the timed calls so the request runs
+    // in the same context.
+    executeInNewTransaction {
+      performProjectAuthGet("keys/search?search=Hello&languageTag=de").andIsOk
+    }
+    executeInNewTransaction {
+      performProjectAuthGet("keys/search?search=dol&languageTag=de").andIsOk
+    }
 
     retry(retries = 10, exceptionMatcher = {
       it is AssertionError
