@@ -14,6 +14,7 @@ class WebhookProperties {
 
   @DocProperty(
     description = "How often (in milliseconds) to check for webhooks to auto-disable.",
+    defaultExplanation = "= 1 hour",
   )
   var autoDisableCheckPeriodMs: Long = 3_600_000
 
@@ -29,6 +30,7 @@ class WebhookProperties {
 
   @DocProperty(
     description = "Lease time (in milliseconds) for the distributed lock used by the auto-disable job.",
+    defaultExplanation = "= 10 minutes",
   )
   var autoDisableLockLeaseTimeMs: Long = 600_000
 

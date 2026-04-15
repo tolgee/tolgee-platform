@@ -23,6 +23,7 @@ import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { CopyUrlItem } from 'tg.views/projects/developer/CopyUrlItem';
 import { WebhookEditDialog } from './WebhookEditDialog';
 import { useDateFormatter } from 'tg.hooks/useLocale';
+import { confirmation } from 'tg.hooks/confirmation';
 
 type WebhookConfigModel = components['schemas']['WebhookConfigModel'];
 
@@ -86,16 +87,40 @@ export const WebhookItem = ({ data }: Props) => {
     );
   }
 
-  function handleToggle() {
+  function performToggle(enabled: boolean) {
     toggleWebhook.mutate({
       path: { projectId: project.id, id: data.id },
       content: {
         'application/json': {
           url: data.url,
-          enabled: !data.enabled,
+          enabled,
         },
       },
     });
+  }
+
+  function handleToggle() {
+    if (data.enabled) {
+      confirmation({
+        title: (
+          <T
+            keyName="webhook_disable_confirmation_title"
+            defaultValue="Disable webhook?"
+          />
+        ),
+        message: (
+          <T
+            keyName="webhook_disable_confirmation_message"
+            defaultValue="This webhook will no longer receive events until re-enabled."
+          />
+        ),
+        onConfirm() {
+          performToggle(false);
+        },
+      });
+    } else {
+      performToggle(true);
+    }
   }
 
   const isAutoDisabled = !data.enabled && data.firstFailed;

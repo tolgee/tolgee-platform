@@ -614,5 +614,8 @@ export const setContentStorageBypass = (value: boolean) =>
 export const setWebhookControllerStatus = (value: number) =>
   setProperty('internal.webhookControllerStatus', value);
 
+export const triggerWebhookAutoDisable = () =>
+  internalFetch('webhook-auto-disable/run', { method: 'POST' });
+
 export const setTranslationsViewLanguagesLimit = (value: number) =>
   setProperty('translationsViewLanguagesLimit', value);

@@ -1,20 +1,21 @@
-import {
-  assertMessage,
-  confirmStandard,
-  gcyAdvanced,
-  visitProjectDeveloperHooks,
-} from '../../common/shared';
+import { assertMessage, confirmStandard } from '../../common/shared';
 import { contentDeliveryTestData } from '../../common/apiCalls/testData/testData';
 import {
+  deleteAllEmails,
+  getLatestEmail,
+  internalFetch,
   login,
   setWebhookControllerStatus,
+  triggerWebhookAutoDisable,
 } from '../../common/apiCalls/common';
 import { waitForGlobalLoading } from '../../common/loading';
 import { API_URL } from '../../common/constants';
 import { setFeature } from '../../common/features';
+import { E2WebhooksView } from '../../compounds/webhooks/E2WebhooksView';
 
 describe('Content delivery', () => {
   const testUrl = API_URL + '/internal/webhook-testing';
+  const view = new E2WebhooksView();
 
   beforeEach(() => {
     setWebhookControllerStatus(200);
@@ -22,8 +23,7 @@ describe('Content delivery', () => {
     contentDeliveryTestData.clean();
     contentDeliveryTestData.generateStandard().then((response) => {
       login();
-      const projectId = response.body.projects[0].id;
-      visitProjectDeveloperHooks(projectId);
+      view.visit(response.body.projects[0].id);
     });
   });
 
@@ -39,46 +39,34 @@ describe('Content delivery', () => {
   it('updates webhook', () => {
     const newUrl = 'testurl';
     createWebhook();
-    gcyAdvanced({ value: 'webhooks-list-item', url: testUrl })
-      .findDcy('webhooks-item-edit')
-      .click();
-    cy.gcy('webhook-form-url').find('input').clear().type(newUrl);
-    cy.gcy('webhook-form-save').click();
+    const editDialog = view.item(testUrl).openEdit();
+    editDialog.setUrl(newUrl);
+    editDialog.save();
     waitForGlobalLoading();
     assertMessage('Webhook successfully updated!');
-    gcyAdvanced({ value: 'webhooks-list-item', url: newUrl }).should(
-      'be.visible'
-    );
+    view.item(newUrl).shouldExist();
   });
 
   it('deletes webhook', () => {
     createWebhook();
-    gcyAdvanced({ value: 'webhooks-list-item', url: testUrl })
-      .findDcy('webhooks-item-edit')
-      .click();
-    cy.gcy('webhook-form-delete').click();
+    const editDialog = view.item(testUrl).openEdit();
+    editDialog.delete();
     confirmStandard();
     waitForGlobalLoading();
     assertMessage('Webhook successfully deleted!');
-    gcyAdvanced({ value: 'webhooks-list-item', url: testUrl }).should(
-      'not.exist'
-    );
+    view.item(testUrl).shouldNotExist();
   });
 
   it('tests valid webhook', () => {
     createWebhook();
-    gcyAdvanced({ value: 'webhooks-list-item', url: testUrl })
-      .findDcy('webhooks-item-test')
-      .click();
+    view.item(testUrl).test();
     waitForGlobalLoading();
     assertMessage('Test request sent to the webhook successfully');
   });
 
   it('tests invalid webhook', () => {
     createWebhook('invalid');
-    gcyAdvanced({ value: 'webhooks-list-item', url: 'invalid' })
-      .findDcy('webhooks-item-test')
-      .click();
+    view.item('invalid').test();
     waitForGlobalLoading();
     assertMessage('Test failed!');
   });
@@ -86,9 +74,7 @@ describe('Content delivery', () => {
   it('tests failing webhook', () => {
     setWebhookControllerStatus(400);
     createWebhook();
-    gcyAdvanced({ value: 'webhooks-list-item', url: testUrl })
-      .findDcy('webhooks-item-test')
-      .click();
+    view.item(testUrl).test();
     waitForGlobalLoading();
     assertMessage('Test failed!');
   });
@@ -100,68 +86,62 @@ describe('Content delivery', () => {
     cy.contains('You are over limit, modification is restricted').should(
       'be.visible'
     );
-    gcyAdvanced({ value: 'webhooks-list-item', url: testUrl })
-      .findDcy('webhooks-item-edit')
-      .click();
-    cy.gcy('webhook-form-delete').click();
+    const editDialog = view.item(testUrl).openEdit();
+    editDialog.delete();
     confirmStandard();
     waitForGlobalLoading();
 
     cy.contains("Your plan doesn't include the webhooks feature").should(
       'be.visible'
     );
-    cy.gcy('webhooks-add-item-button').should('be.disabled');
+    view.shouldShowAddButtonDisabled();
   });
 
   it('toggles webhook disabled and enabled', () => {
     createWebhook();
-    const item = gcyAdvanced({ value: 'webhooks-list-item', url: testUrl });
+    const item = view.item(testUrl);
 
-    // Disable the webhook
-    item.findDcy('webhook-item-toggle').find('input').click();
+    item.disable();
     waitForGlobalLoading();
+    item.shouldBeDisabled();
 
-    // Verify the row is dimmed (disabled state)
-    gcyAdvanced({ value: 'webhooks-list-item', url: testUrl }).should(
-      'have.css',
-      'opacity',
-      '0.6'
-    );
-
-    // Toggle should be unchecked
-    gcyAdvanced({ value: 'webhooks-list-item', url: testUrl })
-      .findDcy('webhook-item-toggle')
-      .find('input')
-      .should('not.be.checked');
-
-    // Re-enable the webhook
-    gcyAdvanced({ value: 'webhooks-list-item', url: testUrl })
-      .findDcy('webhook-item-toggle')
-      .find('input')
-      .click();
+    item.enable();
     waitForGlobalLoading();
+    item.shouldBeEnabled();
+  });
 
-    // Verify full opacity (enabled state)
-    gcyAdvanced({ value: 'webhooks-list-item', url: testUrl }).should(
-      'have.css',
-      'opacity',
-      '1'
-    );
+  it('auto-disables a webhook that has been failing for more than 3 days', () => {
+    deleteAllEmails();
+    createWebhook();
 
-    // Toggle should be checked
-    gcyAdvanced({ value: 'webhooks-list-item', url: testUrl })
-      .findDcy('webhook-item-toggle')
-      .find('input')
-      .should('be.checked');
+    // Mark the webhook as having failed 4 days ago
+    const fourDaysAgo = new Date(Date.now() - 4 * 24 * 60 * 60 * 1000);
+    internalFetch('sql/execute', {
+      method: 'POST',
+      body: `UPDATE webhook_config SET first_failed = '${fourDaysAgo.toISOString()}' WHERE url = '${testUrl}'`,
+    });
+
+    // Trigger the auto-disable scheduler
+    triggerWebhookAutoDisable();
+
+    // Reload and verify webhook is disabled
+    cy.reload();
+    waitForGlobalLoading();
+    view.item(testUrl).shouldBeDisabled();
+
+    // Verify an email was sent to the org owner
+    getLatestEmail().then((email) => {
+      cy.wrap(email.Subject).should('contain', 'Webhook');
+    });
   });
 
   function createWebhook(url: string = testUrl) {
-    cy.gcy('webhooks-add-item-button').click();
-    cy.gcy('webhook-form-url').find('input').type(url);
-    cy.gcy('webhook-form-save').click();
+    const dialog = view.openAddDialog();
+    dialog.setUrl(url);
+    dialog.save();
 
     waitForGlobalLoading();
-    gcyAdvanced({ value: 'webhooks-list-item', url }).should('be.visible');
+    view.item(url).shouldExist();
     assertMessage('Webhook successfully created!');
   }
 });
