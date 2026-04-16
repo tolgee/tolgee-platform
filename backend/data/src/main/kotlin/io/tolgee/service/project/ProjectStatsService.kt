@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 
-@Transactional
+@Transactional(readOnly = true)
 @Service
 class ProjectStatsService(
   private val entityManager: EntityManager,

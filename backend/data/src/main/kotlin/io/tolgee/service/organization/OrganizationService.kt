@@ -131,6 +131,7 @@ class OrganizationService(
   /**
    * Returns any organizations accessible by user.
    */
+  @Transactional(readOnly = true)
   fun findPreferred(
     userAccountId: Long,
     exceptOrganizationId: Long = 0,
@@ -163,6 +164,7 @@ class OrganizationService(
     }
   }
 
+  @Transactional(readOnly = true)
   fun findPermittedPaged(
     pageable: Pageable,
     requestParamsDto: OrganizationRequestParamsDto,
@@ -176,6 +178,7 @@ class OrganizationService(
     )
   }
 
+  @Transactional(readOnly = true)
   fun findPermittedPaged(
     pageable: Pageable,
     filterCurrentUserOwner: Boolean = false,
@@ -191,27 +194,33 @@ class OrganizationService(
     )
   }
 
+  @Transactional(readOnly = true)
   fun get(id: Long): Organization {
     return organizationRepository.find(id) ?: throw NotFoundException(Message.ORGANIZATION_NOT_FOUND)
   }
 
+  @Transactional(readOnly = true)
   fun find(id: Long): Organization? {
     return organizationRepository.find(id)
   }
 
+  @Transactional(readOnly = true)
   fun get(slug: String): Organization {
     return find(slug) ?: throw NotFoundException(Message.ORGANIZATION_NOT_FOUND)
   }
 
+  @Transactional(readOnly = true)
   fun find(slug: String): Organization? {
     return organizationRepository.findBySlug(slug)
   }
 
+  @Transactional(readOnly = true)
   @Cacheable(cacheNames = [Caches.ORGANIZATIONS], key = "{'id', #id}")
   fun findDto(id: Long): CachedOrganizationDto? {
     return find(id)?.let { CachedOrganizationDto.fromEntity(it) }
   }
 
+  @Transactional(readOnly = true)
   @Cacheable(cacheNames = [Caches.ORGANIZATIONS], key = "{'slug', #slug}")
   fun findDto(slug: String): CachedOrganizationDto? {
     return find(slug)?.let { CachedOrganizationDto.fromEntity(it) }
@@ -324,14 +333,17 @@ class OrganizationService(
    * Checks slug uniqueness
    * @return Returns true if valid
    */
+  @Transactional(readOnly = true)
   fun validateSlugUniqueness(slug: String): Boolean {
     return !organizationRepository.organizationWithSlugExists(slug)
   }
 
+  @Transactional(readOnly = true)
   fun isThereAnotherOwner(id: Long): Boolean {
     return organizationRoleService.isAnotherOwnerInOrganization(id)
   }
 
+  @Transactional(readOnly = true)
   fun generateSlug(
     name: String,
     oldSlug: String? = null,
@@ -347,6 +359,7 @@ class OrganizationService(
   /**
    * Returns all organizations which are owned only by the specified user
    */
+  @Transactional(readOnly = true)
   fun getAllSingleOwnedByUser(userAccount: UserAccount) = organizationRepository.getAllSingleOwnedByUser(userAccount)
 
   @Caching(
@@ -359,6 +372,7 @@ class OrganizationService(
     organizationRepository.save(organization)
   }
 
+  @Transactional(readOnly = true)
   fun findAllPaged(
     pageable: Pageable,
     search: String?,
@@ -367,10 +381,12 @@ class OrganizationService(
     return organizationRepository.findAllViews(pageable, search, userId)
   }
 
+  @Transactional(readOnly = true)
   fun findAllByName(name: String): List<Organization> {
     return organizationRepository.findAllByName(name)
   }
 
+  @Transactional(readOnly = true)
   fun getProjectOwner(projectId: Long): Organization {
     return organizationRepository.getProjectOwner(projectId)
   }
@@ -387,6 +403,7 @@ class OrganizationService(
     permissionService.save(basePermission)
   }
 
+  @Transactional(readOnly = true)
   fun findPrivateView(
     id: Long,
     currentUserId: Long,
@@ -397,6 +414,7 @@ class OrganizationService(
     }
   }
 
+  @Transactional(readOnly = true)
   fun findView(
     id: Long,
     currentUserId: Long,

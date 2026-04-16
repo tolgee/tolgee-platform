@@ -112,7 +112,7 @@ class ActivityService(
     }
   }
 
-  @Transactional
+  @Transactional(readOnly = true)
   fun findProjectActivity(
     projectId: Long,
     pageable: Pageable,
@@ -129,7 +129,7 @@ class ActivityService(
     ).get()
   }
 
-  @Transactional
+  @Transactional(readOnly = true)
   fun findProjectActivity(revisionId: Long): ProjectActivityView? {
     return ProjectActivityViewByRevisionProvider(
       applicationContext = applicationContext,
@@ -137,7 +137,7 @@ class ActivityService(
     ).get()
   }
 
-  @Transactional
+  @Transactional(readOnly = true)
   fun findProjectActivity(
     projectId: Long,
     revisionId: Long,
@@ -152,7 +152,7 @@ class ActivityService(
     ).get()
   }
 
-  @Transactional
+  @Transactional(readOnly = true)
   fun getTranslationHistory(
     translationId: Long,
     pageable: Pageable,
