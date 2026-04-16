@@ -19,7 +19,6 @@ import java.util.concurrent.ScheduledFuture
 @Component
 class SchedulingManager(
   private val taskScheduler: org.springframework.scheduling.TaskScheduler,
-  private val distributedThrottle: DistributedThrottle,
 ) : Logging {
   companion object {
     private val scheduledTasks = ConcurrentHashMap<String, ScheduledFuture<*>>()
@@ -45,24 +44,6 @@ class SchedulingManager(
     val id = UUID.randomUUID().toString()
     scheduledTasks[id] = future
     return id
-  }
-
-  /**
-   * Schedules a task that runs at most once per [period] across all application nodes.
-   *
-   * Combines [scheduleWithFixedDelay] with [DistributedThrottle] so the caller
-   * doesn't have to wire both manually. The [name] is used as the throttle key
-   * in Redis (or local memory when Redis is unavailable).
-   */
-  fun scheduleWithFixedDelayDistributed(
-    name: String,
-    period: Duration,
-    runnable: Runnable,
-  ): String {
-    return scheduleWithFixedDelay(
-      { distributedThrottle.runAtMostEvery(name, period) { runnable.run() } },
-      period,
-    )
   }
 
   @PreDestroy
