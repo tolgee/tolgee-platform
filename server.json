@@ -1,0 +1,27 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.tolgee/tolgee",
+  "title": "Tolgee",
+  "description": "Your app's translations in Tolgee: search keys, create translations, trigger machine translation",
+  "websiteUrl": "https://docs.tolgee.io/platform/integrations/mcp_server/setup",
+  "repository": {
+    "url": "https://github.com/tolgee/tolgee-platform",
+    "source": "github",
+    "id": "303766501"
+  },
+  "version": "1.0.0",
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://app.tolgee.io/mcp/developer",
+      "headers": [
+        {
+          "name": "X-API-Key",
+          "description": "Tolgee Personal Access Token (tgpat_...) or Project API Key (tgpak_...)",
+          "isRequired": true,
+          "isSecret": true
+        }
+      ]
+    }
+  ]
+}
