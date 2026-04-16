@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
+import org.springframework.transaction.annotation.Transactional
 
 @Repository
 @Lazy
@@ -62,14 +63,29 @@ interface TagRepository : JpaRepository<Tag, Long> {
   )
   fun getImportKeysWithTags(keyIds: Iterable<Long>): List<ImportKey>
 
+  /**
+   * Deletes tags atomically: only removes a tag if it has no remaining keyMeta links at delete time.
+   *
+   * This avoids the race condition where two concurrent transactions each check emptiness before
+   * either has flushed their join-table removal — both see the other's link, both skip the delete,
+   * and the tag survives with zero keyMetas.
+   *
+   * flushAutomatically = true is required so that pending key_meta_tags removals are written
+   * before this DELETE FROM tag runs (same reason as deleteByIdIn).
+   */
+  @Transactional
+  @Modifying(flushAutomatically = true)
   @Query(
     """
-    from Tag t
-    join fetch t.keyMetas
-    where t.id in :tagIds
+    delete from Tag t where t.id in :tagIds
+    and not exists (
+        select km from KeyMeta km
+        join km.tags tg
+        where tg.id = t.id
+    )
     """,
   )
-  fun getTagsWithKeyMetas(tagIds: Iterable<Long>): List<Tag>
+  fun deleteUnusedByIdIn(tagIds: Collection<Long>)
 
   fun findAllByProjectId(projectId: Long): List<Tag>
 
@@ -96,6 +112,16 @@ interface TagRepository : JpaRepository<Tag, Long> {
     """,
   )
   fun deleteAllUnused(projectId: Long)
+
+  @Query(
+    """
+    from Tag t where t.project.id = :projectId and t.id = :tagId
+  """,
+  )
+  fun findByIdAndProjectId(
+    tagId: Long,
+    projectId: Long,
+  ): Tag?
 
   @Query(
     """

@@ -192,13 +192,9 @@ class TagService(
     tag: Tag,
   ) {
     key.keyMeta?.let { keyMeta ->
-      tag.keyMetas.remove(keyMeta)
       keyMeta.tags.remove(tag)
-      tagRepository.save(tag)
       keyMetaService.save(keyMeta)
-      if (tag.keyMetas.size < 1) {
-        tagRepository.delete(tag)
-      }
+      tagRepository.deleteUnusedByIdIn(listOf(tag.id))
     }
   }
 
@@ -281,28 +277,25 @@ class TagService(
   }
 
   private fun deleteAllTagsForKeys(keys: Iterable<WithKeyMeta>) {
-    val tagIds = keys.flatMap { it.keyMeta?.tags?.map { it.id } ?: listOf() }.toSet()
-    // get tags with fetched keyMetas
-    val tagKeyMetasMap =
-      traceLogMeasureTime("tagService: deleteAllTagsForKeys: getTagsWithKeyMetas") {
-        tagRepository.getTagsWithKeyMetas(tagIds).associate {
-          it.id to it.keyMetas
-        }
-      }
-    keys.forEach { key ->
-      key.keyMeta?.let { keyMeta ->
-        keyMeta.tags.forEach { tag ->
-          // remove from tagsKeyMetas to find out whether to delete the tag
-          val tagKeyMetas = tagKeyMetasMap[tag.id]
-          tagKeyMetas?.removeIf { it.id == keyMeta.id }
-          if (tagKeyMetas?.isEmpty() != false) {
-            tagRepository.delete(tag)
-          }
-        }
-        keyMeta.tags.clear()
-        keyMetaService.save(keyMeta)
-      }
+    val keyMetas = keys.mapNotNull { it.keyMeta }
+    if (keyMetas.isEmpty()) return
+
+    val tagIds = keyMetas.flatMap { km -> km.tags.map { it.id } }.toSet()
+    if (tagIds.isEmpty()) return
+
+    // Clear tags from each keyMeta (owning side): removes join-table entries
+    // and triggers activity logging via @ActivityLoggedProp on KeyMeta.tags.
+    keyMetas.forEach { keyMeta ->
+      keyMeta.tags.clear()
+      keyMetaService.save(keyMeta)
     }
+
+    // Delete tags that have no remaining keyMetas, atomically.
+    // deleteUnusedByIdIn re-checks NOT EXISTS at delete time, so two concurrent
+    // transactions cannot both skip the delete and leave orphaned tags.
+    // flushAutomatically = true ensures key_meta_tags removals are written
+    // before the DELETE FROM tag runs (Hibernate would not auto-flush across tables).
+    tagRepository.deleteUnusedByIdIn(tagIds)
   }
 
   /**
@@ -412,7 +405,9 @@ class TagService(
     key: Key,
     tagId: Long,
   ) {
-    val tag = getWithKeyMetasFetched(key.project.id, tagId)
+    val tag =
+      tagRepository.findByIdAndProjectId(tagId, key.project.id)
+        ?: throw NotFoundException(Message.TAG_NOT_FOUND)
     remove(key, tag)
   }
 }
