@@ -62,7 +62,7 @@ class ProgressManager(
       batchJobId,
       executionId,
       ExecutionState(
-        successTargets = currentState?.successTargets ?: listOf(),
+        successTargetsCount = currentState?.successTargetsCount ?: 0,
         status = BatchJobChunkExecutionStatus.RUNNING,
         chunkNumber = currentState?.chunkNumber,
         retry = currentState?.retry,
@@ -171,7 +171,7 @@ class ProgressManager(
     batchJobStateProvider.updateSingleExecution(job.id, execution.id, newState)
 
     // Update progress counter using delta to prevent double-counting on repeated calls
-    val previousSuccessCount = existingState?.successTargets?.size ?: 0
+    val previousSuccessCount = existingState?.successTargetsCount ?: 0
     val newSuccessCount = execution.successTargets.size
     val progressDelta = newSuccessCount - previousSuccessCount
     if (progressDelta > 0) {
