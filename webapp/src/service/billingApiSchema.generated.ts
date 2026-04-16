@@ -330,6 +330,7 @@ export interface components {
         | "GLOSSARY"
         | "TRANSLATION_LABELS"
         | "BRANCHING"
+        | "QA_CHECKS"
       )[];
       /**
        * Format: int64
@@ -486,6 +487,7 @@ export interface components {
         | "GLOSSARY"
         | "TRANSLATION_LABELS"
         | "BRANCHING"
+        | "QA_CHECKS"
       )[];
       free: boolean;
       hasYearlyPrice: boolean;
@@ -527,6 +529,7 @@ export interface components {
         | "GLOSSARY"
         | "TRANSLATION_LABELS"
         | "BRANCHING"
+        | "QA_CHECKS"
       )[];
       forOrganizationIds: number[];
       free: boolean;
@@ -874,6 +877,7 @@ export interface components {
         | "plan_has_subscribers"
         | "translation_failed"
         | "batch_job_not_found"
+        | "no_translations_to_recheck"
         | "key_exists_in_namespace"
         | "tag_is_blank"
         | "execution_failed_on_management_error"
@@ -1036,6 +1040,7 @@ export interface components {
         | "export_key_plural_suffix_collision"
         | "translation_exceeds_char_limit"
         | "url_not_valid"
+        | "qa_checks_not_enabled"
         | "plan_migration_not_found"
         | "plan_has_migrations"
         | "source_and_target_plan_must_be_different";
@@ -1495,6 +1500,7 @@ export interface components {
         | "GLOSSARY"
         | "TRANSLATION_LABELS"
         | "BRANCHING"
+        | "QA_CHECKS"
       )[];
       /**
        * Format: int64
@@ -1543,6 +1549,7 @@ export interface components {
         | "GLOSSARY"
         | "TRANSLATION_LABELS"
         | "BRANCHING"
+        | "QA_CHECKS"
       )[];
       free: boolean;
       hasYearlyPrice: boolean;
@@ -1581,6 +1588,7 @@ export interface components {
         | "GLOSSARY"
         | "TRANSLATION_LABELS"
         | "BRANCHING"
+        | "QA_CHECKS"
       )[];
       forOrganizationIds: number[];
       free: boolean;
@@ -2687,6 +2695,7 @@ export interface operations {
             | "GLOSSARY"
             | "TRANSLATION_LABELS"
             | "BRANCHING"
+            | "QA_CHECKS"
           )[];
         };
       };
