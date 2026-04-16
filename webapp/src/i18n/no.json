@@ -1251,7 +1251,7 @@
   "invalid_recaptcha_token": "Du er en robot!",
   "invitation_code_accepted": "Invitasjonen ble akseptert vellykket",
   "invitation_code_does_not_exist_or_expired": "Denne invitasjonen eksisterer ikke eller har utløpt",
-  "invitation_email_mismatch_while_accepting_invitation_message": "Denne invitasjonen ble sendt til en annen e-postadresse. Vennligst logg inn med e-postadressen invitasjonen ble sendt til.",
+  "invitation_email_mismatch": "Denne invitasjonen ble sendt til en annen e-postadresse. Vennligst logg inn med e-postadressen invitasjonen ble sendt til.",
   "invitation_organization_mismatch": "Kan ikke godta invitasjon - administrerte kontoer kan ikke være en del av flere organisasjoner.",
   "invitations_invite_button": "Inviter bruker",
   "invitations_title": "Invitasjoner",

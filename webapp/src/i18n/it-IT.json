@@ -1239,7 +1239,7 @@
   "invalid_recaptcha_token": "Sei un robot!",
   "invitation_code_accepted": "Invito accettato con successo",
   "invitation_code_does_not_exist_or_expired": "Questo invito non esiste o è scaduto",
-  "invitation_email_mismatch_while_accepting_invitation_message": "Questo invito è stato inviato a un indirizzo email diverso. Accedi con l'indirizzo email a cui è stato inviato l'invito.",
+  "invitation_email_mismatch": "Questo invito è stato inviato a un indirizzo email diverso. Accedi con l'indirizzo email a cui è stato inviato l'invito.",
   "invitation_organization_mismatch": "Impossibile accettare l'invito - gli account gestiti non possono far parte di più organizzazioni.",
   "invitations_invite_button": "Invita utente",
   "invitations_title": "Inviti",

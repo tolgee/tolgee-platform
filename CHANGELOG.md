@@ -1,3 +1,15 @@
+## [3.180.1](https://github.com/tolgee/tolgee-platform/compare/v3.180.0...v3.180.1) (2026-04-16)
+
+
+### Bug Fixes
+
+* avoid loading full keyMetas collection when deleting tagged keys ([#3568](https://github.com/tolgee/tolgee-platform/issues/3568)) ([fa477e4](https://github.com/tolgee/tolgee-platform/commit/fa477e49d17d37039c85b190cbedd4aaa7ed3cd3)), closes [#3567](https://github.com/tolgee/tolgee-platform/issues/3567)
+
+
+### Performance Improvements
+
+* remove successTargets list from Redis batch job state ([#3593](https://github.com/tolgee/tolgee-platform/issues/3593)) ([2affc07](https://github.com/tolgee/tolgee-platform/commit/2affc07cf0f70227daedbbbdc6c0a614a01459c9))
+
 # [3.180.0](https://github.com/tolgee/tolgee-platform/compare/v3.179.5...v3.180.0) (2026-04-15)
 
 

@@ -1251,7 +1251,7 @@
   "invalid_recaptcha_token": "Você é um robô!",
   "invitation_code_accepted": "Convite aceito com sucesso",
   "invitation_code_does_not_exist_or_expired": "Este convite não existe ou expirou",
-  "invitation_email_mismatch_while_accepting_invitation_message": "Este convite foi enviado para um endereço de e-mail diferente. Por favor, faça login com o endereço de e-mail para o qual o convite foi enviado.",
+  "invitation_email_mismatch": "Este convite foi enviado para um endereço de e-mail diferente. Por favor, faça login com o endereço de e-mail para o qual o convite foi enviado.",
   "invitation_organization_mismatch": "Não é possível aceitar o convite - contas gerenciadas não podem fazer parte de várias organizações.",
   "invitations_invite_button": "Convidar usuário",
   "invitations_title": "Convites",

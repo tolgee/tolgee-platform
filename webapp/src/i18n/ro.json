@@ -1255,7 +1255,7 @@
   "invalid_recaptcha_token": "Esti un robot!",
   "invitation_code_accepted": "Invitația a fost acceptată cu succes",
   "invitation_code_does_not_exist_or_expired": "Această invitație nu există sau a expirat",
-  "invitation_email_mismatch_while_accepting_invitation_message": "Această invitație a fost trimisă la o altă adresă de email. Vă rugăm să vă autentificați cu adresa de email la care a fost trimisă invitația.",
+  "invitation_email_mismatch": "Această invitație a fost trimisă la o altă adresă de email. Vă rugăm să vă autentificați cu adresa de email la care a fost trimisă invitația.",
   "invitation_organization_mismatch": "Nu se poate accepta invitația - conturile gestionate nu pot face parte din mai multe organizații.",
   "invitations_invite_button": "Invită utilizator",
   "invitations_title": "Invitații",

@@ -1260,7 +1260,7 @@
   "invalid_recaptcha_token": "あなたはロボットです!",
   "invitation_code_accepted": "招待を承諾しました",
   "invitation_code_does_not_exist_or_expired": "この招待状は存在しないか期限切れです",
-  "invitation_email_mismatch_while_accepting_invitation_message": "この招待は別のメールアドレスに送信されました。招待が送信されたメールアドレスでログインしてください。",
+  "invitation_email_mismatch": "この招待は別のメールアドレスに送信されました。招待が送信されたメールアドレスでログインしてください。",
   "invitation_organization_mismatch": "招待を承諾できません。管理対象アカウントは複数の組織に所属できません。",
   "invitations_invite_button": "ユーザーを招待する",
   "invitations_title": "招待中のユーザー一覧",

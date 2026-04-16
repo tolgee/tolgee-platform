@@ -1251,7 +1251,7 @@
   "invalid_recaptcha_token": "Robot vagy!",
   "invitation_code_accepted": "Az meghívás sikeresen elfogadva",
   "invitation_code_does_not_exist_or_expired": "Ez a meghívó nem létezik vagy lejárt",
-  "invitation_email_mismatch_while_accepting_invitation_message": "Ez a meghívó egy másik e-mail címre lett küldve. Kérjük, jelentkezzen be azzal az e-mail címmel, amelyre a meghívót küldték.",
+  "invitation_email_mismatch": "Ez a meghívó egy másik e-mail címre lett küldve. Kérjük, jelentkezzen be azzal az e-mail címmel, amelyre a meghívót küldték.",
   "invitation_organization_mismatch": "Nem fogadható el a meghívás - a kezelt fiókok nem lehetnek több szervezet részei.",
   "invitations_invite_button": "Felhasználó meghívása",
   "invitations_title": "Meghívók",
