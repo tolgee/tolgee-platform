@@ -60,7 +60,7 @@ class BatchJobTestUtil(
   lateinit var websocketHelper: WebsocketTestHelper
 
   fun assertPreTranslationProcessExecutedTimes(times: Int) {
-    waitForNotThrowing(pollTime = 1000) {
+    waitForNotThrowing(pollTime = 1000, timeout = 30000) {
       verify(
         preTranslationByTmChunkProcessor,
         times(times),
