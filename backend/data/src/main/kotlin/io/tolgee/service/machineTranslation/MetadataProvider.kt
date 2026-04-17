@@ -5,7 +5,7 @@ import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.translation.TranslationMemoryService
 import jakarta.persistence.EntityManager
-import jakarta.persistence.QueryTimeoutException
+import org.springframework.dao.QueryTimeoutException
 import org.slf4j.LoggerFactory
 
 class MetadataProvider(
