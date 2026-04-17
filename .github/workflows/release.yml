@@ -63,6 +63,8 @@ jobs:
           docker buildx create --use
           ./gradlew dockerPublish
           VERSION=latest ./gradlew dockerPublish
+          DOCKER_CACHE_FROM=type=registry,ref=tolgee/tolgee:slim ./gradlew dockerPublishSlim
+          VERSION=latest DOCKER_CACHE_FROM=type=registry,ref=tolgee/tolgee:slim ./gradlew dockerPublishSlim
         env:
           VERSION: ${{ steps.version.outputs.VERSION }}
           TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
