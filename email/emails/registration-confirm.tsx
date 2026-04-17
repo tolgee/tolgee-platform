@@ -36,8 +36,8 @@ export default function RegistrationConfirmEmail() {
       <Text style={{ margin: '0 0 16px' }}>
         <LocalizedText
           keyName="email-greetings"
-          defaultValue="Hello {username},"
-          demoParams={{ username: 'Bob' }}
+          defaultValue="Hello {recipientName},"
+          demoParams={{ recipientName: 'Bob' }}
         />
       </Text>
       <Text>

@@ -39,6 +39,14 @@ Yup.setLocale({
       />
     ),
   },
+  number: {
+    min: ({ min }) => (
+      <T
+        keyName="validation_schema_number_min_message"
+        params={{ min: min.toString() }}
+      />
+    ),
+  },
 });
 
 const isValidBranchName = (name: string | undefined): boolean => {
@@ -579,6 +587,13 @@ export class Validation {
     });
 
   static readonly BRANCH_MERGE = (t: TranslateFunction) => Yup.object({});
+
+  static readonly PLAN_MIGRATION_FORM = () =>
+    Yup.object().shape({
+      monthlyOffsetDays: Yup.number().required().min(0),
+      yearlyOffsetDays: Yup.number().required().min(0),
+      customEmailBody: Yup.string().nullable(),
+    });
 }
 
 let GLOBAL_VALIDATION_DEBOUNCE_TIMER: any = undefined;

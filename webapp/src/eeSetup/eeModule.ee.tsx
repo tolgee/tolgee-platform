@@ -83,6 +83,10 @@ import { BranchesView } from '../ee/branching/BranchesView';
 import { BranchMergePage } from '../ee/branching/BranchMergePage';
 import { Branch } from '../component/CustomIcons';
 import { QaCheck } from '../component/CustomIcons';
+import { AdministrationCloudPlanMigrationCreate } from '../ee/billing/administration/subscriptionPlans/migration/cloud/AdministrationCloudPlanMigrationCreate';
+import { AdministrationCloudPlanMigrationEdit } from '../ee/billing/administration/subscriptionPlans/migration/cloud/AdministrationCloudPlanMigrationEdit';
+import { AdministrationSelfHostedEePlanMigrationCreate } from '../ee/billing/administration/subscriptionPlans/migration/selfhosted/AdministrationSelfHostedEePlanMigrationCreate';
+import { AdministrationSelfHostedEePlanMigrationEdit } from '../ee/billing/administration/subscriptionPlans/migration/selfhosted/AdministrationSelfHostedEePlanMigrationEdit';
 
 export { TaskReference } from '../ee/task/components/TaskReference';
 export { BranchReference } from '../ee/branching/components/BranchReference';
@@ -157,6 +161,18 @@ export const routes = {
       </PrivateRoute>
       <PrivateRoute
         exact
+        path={LINKS.ADMINISTRATION_BILLING_CLOUD_PLAN_MIGRATION_CREATE.template}
+      >
+        <AdministrationCloudPlanMigrationCreate />
+      </PrivateRoute>
+      <PrivateRoute
+        exact
+        path={LINKS.ADMINISTRATION_BILLING_CLOUD_PLAN_MIGRATION_EDIT.template}
+      >
+        <AdministrationCloudPlanMigrationEdit />
+      </PrivateRoute>
+      <PrivateRoute
+        exact
         path={LINKS.ADMINISTRATION_BILLING_CLOUD_PLAN_EDIT.template}
       >
         <AdministrationCloudPlanEditView />
@@ -169,6 +185,18 @@ export const routes = {
         path={LINKS.ADMINISTRATION_BILLING_EE_PLAN_CREATE.template}
       >
         <AdministrationEePlanCreateView />
+      </PrivateRoute>
+      <PrivateRoute
+        exact
+        path={LINKS.ADMINISTRATION_BILLING_EE_PLAN_MIGRATION_CREATE.template}
+      >
+        <AdministrationSelfHostedEePlanMigrationCreate />
+      </PrivateRoute>
+      <PrivateRoute
+        exact
+        path={LINKS.ADMINISTRATION_BILLING_EE_PLAN_MIGRATION_EDIT.template}
+      >
+        <AdministrationSelfHostedEePlanMigrationEdit />
       </PrivateRoute>
       <PrivateRoute
         exact

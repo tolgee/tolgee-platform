@@ -18,6 +18,7 @@ import { SubscriptionsTrialAlert } from './subscriptionsTrialAlert/Subscriptions
 import { TrialInfo } from './TrialInfo';
 import { getProgressData } from '../component/getProgressData';
 import { SubscriptionMetrics } from './SubscriptionMetrics';
+import { PlanMigrationAlert } from './PlanMigrationAlert';
 
 type CloudSubscriptionModel =
   billingComponents['schemas']['CloudSubscriptionModel'];
@@ -66,6 +67,7 @@ export const CurrentCloudSubscriptionInfo: FC<Props> = ({
 
   return (
     <>
+      <PlanMigrationAlert subscription={activeSubscription} />
       <StyledBillingSection gridArea="usage" maxWidth={750}>
         <StyledContent>
           <StyledBillingSectionTitle sx={{ mb: '12px', maxWidth: 260 }}>

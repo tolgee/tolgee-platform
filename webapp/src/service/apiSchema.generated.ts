@@ -2997,7 +2997,10 @@ export interface components {
         | "export_key_plural_suffix_collision"
         | "translation_exceeds_char_limit"
         | "url_not_valid"
-        | "qa_checks_not_enabled";
+        | "qa_checks_not_enabled"
+        | "plan_migration_not_found"
+        | "plan_has_migrations"
+        | "source_and_target_plan_must_be_different";
       params?: unknown[];
     };
     ExistenceEntityDescription: {
@@ -6658,7 +6661,10 @@ export interface components {
         | "export_key_plural_suffix_collision"
         | "translation_exceeds_char_limit"
         | "url_not_valid"
-        | "qa_checks_not_enabled";
+        | "qa_checks_not_enabled"
+        | "plan_migration_not_found"
+        | "plan_has_migrations"
+        | "source_and_target_plan_must_be_different";
       params?: unknown[];
       success: boolean;
     };
