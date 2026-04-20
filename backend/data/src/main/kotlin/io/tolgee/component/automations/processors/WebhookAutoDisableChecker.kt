@@ -1,7 +1,7 @@
 package io.tolgee.component.automations.processors
 
 import io.tolgee.component.CurrentDateProvider
-import io.tolgee.component.UsingRedisProvider
+import io.tolgee.component.Debouncer
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.email.EmailService
 import io.tolgee.model.webhook.WebhookConfig
@@ -12,13 +12,10 @@ import io.tolgee.util.addDays
 import io.tolgee.util.addMinutes
 import io.tolgee.util.logger
 import io.tolgee.util.runSentryCatching
-import org.springframework.context.ApplicationContext
-import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.stereotype.Component
 import org.springframework.web.util.HtmlUtils
 import java.time.Duration
 import java.util.Locale
-import java.util.concurrent.ConcurrentHashMap
 
 @Component
 class WebhookAutoDisableChecker(
@@ -27,11 +24,8 @@ class WebhookAutoDisableChecker(
   private val emailService: EmailService,
   private val tolgeeProperties: TolgeeProperties,
   private val webhookConfigRepository: WebhookConfigRepository,
-  private val usingRedisProvider: UsingRedisProvider,
-  private val applicationContext: ApplicationContext,
+  private val debouncer: Debouncer,
 ) : Logging {
-  private val inMemoryTimestamps = ConcurrentHashMap<Long, Long>()
-
   /**
    * Called after each webhook failure. Checks if the webhook should be warned or disabled.
    * Debounced per webhook ID — runs at most once per 5 minutes.
@@ -41,8 +35,13 @@ class WebhookAutoDisableChecker(
   fun checkAfterFailure(webhookConfig: WebhookConfig): Boolean {
     if (!tolgeeProperties.webhook.autoDisableEnabled) return false
     if (webhookConfig.firstFailed == null) return false
-    if (!shouldCheck(webhookConfig.id)) return false
 
+    return debouncer.debounce("webhook_disable_check:${webhookConfig.id}", DEBOUNCE_DURATION) {
+      performCheck(webhookConfig)
+    } ?: false
+  }
+
+  private fun performCheck(webhookConfig: WebhookConfig): Boolean {
     val props = tolgeeProperties.webhook
     val now = currentDateProvider.date
     val disableCutoff = now.addDays(-props.autoDisableAfterDays)
@@ -75,20 +74,6 @@ class WebhookAutoDisableChecker(
     }
 
     return false
-  }
-
-  private fun shouldCheck(webhookId: Long): Boolean {
-    if (usingRedisProvider.areWeUsingRedis) {
-      val redisTemplate = applicationContext.getBean(StringRedisTemplate::class.java)
-      val key = "webhook_disable_check:$webhookId"
-      return redisTemplate.opsForValue().setIfAbsent(key, "1", DEBOUNCE_DURATION) == true
-    }
-
-    val now = System.currentTimeMillis()
-    val lastCheck = inMemoryTimestamps[webhookId]
-    if (lastCheck != null && now - lastCheck < DEBOUNCE_DURATION.toMillis()) return false
-    inMemoryTimestamps[webhookId] = now
-    return true
   }
 
   private fun sendEmails(
