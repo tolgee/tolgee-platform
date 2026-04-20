@@ -225,8 +225,6 @@ class InterceptedEventsManager(
     }
   }
 
-  // Sentinel value for "queried but no default branch found"
-  private val NO_DEFAULT_BRANCH = -1L
   private val defaultBranchIdCache = ConcurrentHashMap<Long, Long>()
 
   private fun defaultBranchId(projectId: Long?): Long? {
@@ -251,6 +249,11 @@ class InterceptedEventsManager(
           .firstOrNull() ?: NO_DEFAULT_BRANCH
       }
     return if (cached == NO_DEFAULT_BRANCH) null else cached
+  }
+
+  companion object {
+    // Sentinel value for "queried but no default branch found"
+    private const val NO_DEFAULT_BRANCH = -1L
   }
 
   private fun getChangeEntityDescription(
