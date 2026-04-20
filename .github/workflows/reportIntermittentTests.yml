@@ -259,7 +259,7 @@ jobs:
           failOnError: false
 
   notify:
-    name: Notify Slack on failure 🔔
+    name: Report flaky tests 🔔
     needs: [backend-test, e2e]
     if: failure()
     runs-on: ubuntu-24.04
