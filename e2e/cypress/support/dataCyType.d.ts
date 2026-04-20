@@ -980,6 +980,7 @@ declare namespace DataCy {
         "user-profile" |
         "user-switch-item" |
         "user-switch-search" |
+        "webhook-auto-disabled-label" |
         "webhook-form-cancel" |
         "webhook-form-delete" |
         "webhook-form-save" |

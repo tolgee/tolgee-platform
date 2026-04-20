@@ -15,7 +15,6 @@ import jakarta.transaction.Transactional
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
-import java.util.Date
 
 @Service
 class WebhookConfigService(
@@ -86,6 +85,7 @@ class WebhookConfigService(
       if (newEnabled) {
         webhookConfig.firstFailed = null
         webhookConfig.autoDisableNotified = false
+        webhookConfig.autoDisabled = false
       }
     }
     automationService.updateForWebhookConfig(webhookConfig)
@@ -109,25 +109,5 @@ class WebhookConfigService(
 
   fun find(id: Long): WebhookConfig? {
     return webhookConfigRepository.findById(id).orElse(null)
-  }
-
-  fun findWebhooksToDisable(cutoffDate: Date): List<WebhookConfig> {
-    return webhookConfigRepository.findEnabledFailingSince(cutoffDate)
-  }
-
-  @Transactional
-  fun disableWebhook(webhookConfig: WebhookConfig) {
-    webhookConfig.enabled = false
-    webhookConfigRepository.save(webhookConfig)
-  }
-
-  fun findWebhooksToWarn(cutoffDate: Date): List<WebhookConfig> {
-    return webhookConfigRepository.findEnabledFailingNotNotified(cutoffDate)
-  }
-
-  @Transactional
-  fun markWarningNotified(webhookConfig: WebhookConfig) {
-    webhookConfig.autoDisableNotified = true
-    webhookConfigRepository.save(webhookConfig)
   }
 }

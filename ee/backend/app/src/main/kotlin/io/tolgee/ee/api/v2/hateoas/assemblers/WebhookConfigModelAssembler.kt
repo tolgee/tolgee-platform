@@ -18,6 +18,7 @@ class WebhookConfigModelAssembler :
       url = entity.url,
       webhookSecret = entity.webhookSecret,
       enabled = entity.enabled,
+      autoDisabled = entity.autoDisabled,
       firstFailed = entity.firstFailed?.time,
       lastExecuted = entity.lastExecuted?.time,
     )

@@ -16,6 +16,10 @@ class WebhookConfigModel(
   )
   val enabled: Boolean,
   @Schema(
+    description = "Whether the webhook was automatically disabled due to persistent failures.",
+  )
+  val autoDisabled: Boolean,
+  @Schema(
     description =
       "Date of the first failed webhook request. " +
         "If the last webhook request is successful, this value is set to null.",

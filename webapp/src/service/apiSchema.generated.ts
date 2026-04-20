@@ -7233,6 +7233,8 @@ export interface components {
       data: components["schemas"]["PromptVariableDto"][];
     };
     WebhookConfigModel: {
+      /** @description Whether the webhook was automatically disabled due to persistent failures. */
+      autoDisabled: boolean;
       /** @description Whether the webhook is enabled. Disabled webhooks are not executed. */
       enabled: boolean;
       /**

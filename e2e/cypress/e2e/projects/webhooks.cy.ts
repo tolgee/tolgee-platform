@@ -6,7 +6,8 @@ import {
   internalFetch,
   login,
   setWebhookControllerStatus,
-  triggerWebhookAutoDisable,
+  triggerWebhookAutoDisableCheck,
+  v2apiFetch,
 } from '../../common/apiCalls/common';
 import { waitForGlobalLoading } from '../../common/loading';
 import { API_URL } from '../../common/constants';
@@ -16,14 +17,16 @@ import { E2WebhooksView } from '../../compounds/webhooks/E2WebhooksView';
 describe('Content delivery', () => {
   const testUrl = API_URL + '/internal/webhook-testing';
   const view = new E2WebhooksView();
+  let projectId: number;
 
   beforeEach(() => {
     setWebhookControllerStatus(200);
     setFeature('WEBHOOKS', true);
     contentDeliveryTestData.clean();
     contentDeliveryTestData.generateStandard().then((response) => {
+      projectId = response.body.projects[0].id;
       login();
-      view.visit(response.body.projects[0].id);
+      view.visit(projectId);
     });
   });
 
@@ -114,24 +117,32 @@ describe('Content delivery', () => {
     deleteAllEmails();
     createWebhook();
 
-    // Mark the webhook as having failed 4 days ago
-    const fourDaysAgo = new Date(Date.now() - 4 * 24 * 60 * 60 * 1000);
-    internalFetch('sql/execute', {
-      method: 'POST',
-      body: `UPDATE webhook_config SET first_failed = '${fourDaysAgo.toISOString()}' WHERE url = '${testUrl}'`,
-    });
+    // Get the webhook ID via API
+    v2apiFetch(`projects/${projectId}/webhook-configs`).then((response) => {
+      const webhook = response.body._embedded.webhookConfigs.find(
+        (w) => w.url === testUrl
+      );
+      const webhookId = webhook.id;
 
-    // Trigger the auto-disable scheduler
-    triggerWebhookAutoDisable();
+      // Mark the webhook as having failed 4 days ago
+      const fourDaysAgo = new Date(Date.now() - 4 * 24 * 60 * 60 * 1000);
+      internalFetch('sql/execute', {
+        method: 'POST',
+        body: `UPDATE webhook_config SET first_failed = '${fourDaysAgo.toISOString()}' WHERE id = ${webhookId}`,
+      });
 
-    // Reload and verify webhook is disabled
-    cy.reload();
-    waitForGlobalLoading();
-    view.item(testUrl).shouldBeDisabled();
+      // Trigger the auto-disable check for this webhook
+      triggerWebhookAutoDisableCheck(webhookId);
 
-    // Verify an email was sent to the org owner
-    getLatestEmail().then((email) => {
-      cy.wrap(email.Subject).should('contain', 'Webhook');
+      // Reload and verify webhook is disabled
+      cy.reload();
+      waitForGlobalLoading();
+      view.item(testUrl).shouldBeDisabled();
+
+      // Verify an email was sent to the org owner
+      getLatestEmail().then((email) => {
+        cy.wrap(email.Subject).should('contain', 'Webhook');
+      });
     });
   });
 

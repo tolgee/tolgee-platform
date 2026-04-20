@@ -99,8 +99,6 @@ tolgee:
   batch:
     concurrency: 10
     old-job-cleanup-enabled: false
-  webhook:
-    auto-disable-enabled: false
   front-end-url: https://dummy-url.com
   ee:
     scheduled-reporting-enabled: false

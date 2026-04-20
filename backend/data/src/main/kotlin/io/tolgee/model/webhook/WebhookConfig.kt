@@ -49,4 +49,7 @@ class WebhookConfig(
 
   @ActivityIgnoredProp
   var autoDisableNotified: Boolean = false
+
+  @ActivityIgnoredProp
+  var autoDisabled: Boolean = false
 }

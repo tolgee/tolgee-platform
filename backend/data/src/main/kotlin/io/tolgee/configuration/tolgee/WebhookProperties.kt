@@ -13,12 +13,6 @@ class WebhookProperties {
   var autoDisableEnabled: Boolean = true
 
   @DocProperty(
-    description = "How often (in milliseconds) to check for webhooks to auto-disable.",
-    defaultExplanation = "= 1 hour",
-  )
-  var autoDisableCheckPeriodMs: Long = 3_600_000
-
-  @DocProperty(
     description = "Number of hours of continuous failure before a warning email is sent.",
   )
   var autoDisableWarningAfterHours: Int = 6
@@ -27,12 +21,6 @@ class WebhookProperties {
     description = "Number of days of continuous failure before a webhook is automatically disabled.",
   )
   var autoDisableAfterDays: Int = 3
-
-  @DocProperty(
-    description = "Lease time (in milliseconds) for the distributed lock used by the auto-disable job.",
-    defaultExplanation = "= 10 minutes",
-  )
-  var autoDisableLockLeaseTimeMs: Long = 600_000
 
   @PostConstruct
   fun validate() {

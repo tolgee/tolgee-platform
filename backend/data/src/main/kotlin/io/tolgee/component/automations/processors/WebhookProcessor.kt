@@ -20,6 +20,7 @@ class WebhookProcessor(
   val currentDateProvider: CurrentDateProvider,
   val webhookExecutor: WebhookExecutor,
   val entityManager: EntityManager,
+  val webhookAutoDisableChecker: WebhookAutoDisableChecker,
 ) : AutomationProcessor {
   override fun process(
     action: AutomationAction,
@@ -43,6 +44,7 @@ class WebhookProcessor(
       updateEntity(webhookConfig = config, failing = false)
     } catch (e: Exception) {
       updateEntity(config, true)
+      if (webhookAutoDisableChecker.checkAfterFailure(config)) return
       when (e) {
         is WebhookRespondedWithNon200Status -> throw RequeueWithDelayException(
           Message.WEBHOOK_RESPONDED_WITH_NON_200_STATUS,
