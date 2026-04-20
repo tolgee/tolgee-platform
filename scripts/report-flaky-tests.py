@@ -284,16 +284,36 @@ def choose_owner(
 # Mutations
 # ---------------------------------------------------------------------------
 
-def create_draft(project_id: str, title: str, body: str) -> str:
-    q = """
-    mutation($project: ID!, $title: String!, $body: String!) {
-      addProjectV2DraftIssue(input: {
-        projectId: $project, title: $title, body: $body
-      }) { projectItem { id } }
+def create_draft(
+    project_id: str, title: str, body: str, assignee_ids: list[str]
+) -> str:
+    import tempfile
+
+    q = (
+        "mutation($project:ID!,$title:String!,$body:String!,$assignees:[ID!]){"
+        " addProjectV2DraftIssue(input:{"
+        " projectId:$project, title:$title, body:$body, assigneeIds:$assignees"
+        " }) { projectItem { id } } }"
+    )
+    variables = {
+        "project": project_id,
+        "title": title,
+        "body": body,
+        "assignees": assignee_ids,
     }
-    """
-    data = gql(q, project=project_id, title=title, body=body)
-    return data["addProjectV2DraftIssue"]["projectItem"]["id"]
+    with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as fh:
+        json.dump({"query": q, "variables": variables}, fh)
+        path = fh.name
+    try:
+        resp = json.loads(run(["gh", "api", "graphql", "--input", path]))
+        if resp.get("errors"):
+            raise RuntimeError(f"create_draft errors: {resp['errors']}")
+        return resp["data"]["addProjectV2DraftIssue"]["projectItem"]["id"]
+    finally:
+        try:
+            os.unlink(path)
+        except OSError:
+            pass
 
 
 def set_text(project_id: str, item_id: str, field_id: str, value: str) -> None:
@@ -342,39 +362,6 @@ def user_node_id(login: str) -> str | None:
         node_id = None
     _login_to_node[login] = node_id
     return node_id
-
-
-def set_users(
-    project_id: str, item_id: str, field_id: str, user_ids: list[str]
-) -> None:
-    # gh api -f can't pass JSON arrays natively; write a variables file.
-    import tempfile
-
-    query = (
-        "mutation($p:ID!,$i:ID!,$f:ID!,$u:[ID!]!) {"
-        " updateProjectV2ItemFieldValue(input:{"
-        " projectId:$p, itemId:$i, fieldId:$f, value:{userIds:$u}"
-        " }) { projectV2Item { id } } }"
-    )
-    variables = {
-        "p": project_id,
-        "i": item_id,
-        "f": field_id,
-        "u": user_ids,
-    }
-    with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as fh:
-        json.dump({"query": query, "variables": variables}, fh)
-        path = fh.name
-    try:
-        out = run(["gh", "api", "graphql", "--input", path])
-        resp = json.loads(out)
-        if resp.get("errors"):
-            raise RuntimeError(f"set_users errors: {resp['errors']}")
-    finally:
-        try:
-            os.unlink(path)
-        except OSError:
-            pass
 
 
 def update_draft_body(item_id: str, title: str, body: str) -> None:
@@ -517,16 +504,15 @@ def main() -> int:
                 f"- {today}: {RUN_URL}",
             ]
         )
-        item_id = create_draft(project_id, title, body)
+        node_id = user_node_id(owner)
+        assignees = [node_id] if node_id else []
+        if not node_id:
+            print(f"  (could not resolve node id for @{owner})")
+        item_id = create_draft(project_id, title, body, assignees)
         set_text(project_id, item_id, fields["Test"]["id"], line)
         set_text(project_id, item_id, fields["Last run"]["id"], RUN_URL)
         set_number(project_id, item_id, fields["Fail count"]["id"], 1)
         set_date(project_id, item_id, fields["First seen"]["id"], today)
-        node_id = user_node_id(owner)
-        if node_id:
-            set_users(project_id, item_id, fields["Assignees"]["id"], [node_id])
-        else:
-            print(f"  (could not resolve node id for @{owner})")
         print(f"  new -> @{owner}: {line}")
 
     gho = os.environ.get("GITHUB_OUTPUT")
