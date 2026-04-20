@@ -11,14 +11,17 @@ data class TranslationView(
   val state: TranslationState,
   val auto: Boolean,
   val mtProvider: MtServiceType?,
-  val commentCount: Long,
-  val unresolvedCommentCount: Long,
+  // Comment, suggestion and QA counts are populated by batched post-loading in
+  // TranslationViewDataProvider. They are `var` so the post-load step can overwrite the
+  // initial 0/false values.
+  var commentCount: Long,
+  var unresolvedCommentCount: Long,
   val outdated: Boolean,
   var labels: List<Label> = emptyList(),
-  val activeSuggestionCount: Long,
-  val totalSuggestionCount: Long,
-  val qaIssueCount: Long = 0,
-  val qaChecksStale: Boolean = false,
+  var activeSuggestionCount: Long,
+  var totalSuggestionCount: Long,
+  var qaIssueCount: Long = 0,
+  var qaChecksStale: Boolean = false,
 ) {
   var suggestions: List<TranslationSuggestionView>? = null
   var qaIssues: List<TranslationQaIssue> = emptyList()
