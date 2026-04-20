@@ -125,6 +125,10 @@ def list_items(project_id: str) -> list[dict]:
                     field { ... on ProjectV2FieldCommon { name } }
                     date
                   }
+                  ... on ProjectV2ItemFieldUserValue {
+                    field { ... on ProjectV2FieldCommon { name } }
+                    users(first: 10) { nodes { login } }
+                  }
                 }
               }
             }
@@ -151,6 +155,9 @@ def item_field(item: dict, name: str):
             for k in ("text", "number", "date"):
                 if k in fv:
                     return fv[k]
+            users = (fv.get("users") or {}).get("nodes")
+            if users is not None:
+                return [u["login"] for u in users]
     return None
 
 
@@ -322,6 +329,54 @@ def set_date(project_id: str, item_id: str, field_id: str, value: str) -> None:
     gql(q, p=project_id, i=item_id, f=field_id, v=value)
 
 
+_login_to_node: dict[str, str | None] = {}
+
+
+def user_node_id(login: str) -> str | None:
+    if login in _login_to_node:
+        return _login_to_node[login]
+    try:
+        data = gh_json(f"/users/{login}")
+        node_id = data.get("node_id")
+    except RuntimeError:
+        node_id = None
+    _login_to_node[login] = node_id
+    return node_id
+
+
+def set_users(
+    project_id: str, item_id: str, field_id: str, user_ids: list[str]
+) -> None:
+    # gh api -f can't pass JSON arrays natively; write a variables file.
+    import tempfile
+
+    query = (
+        "mutation($p:ID!,$i:ID!,$f:ID!,$u:[ID!]!) {"
+        " updateProjectV2ItemFieldValue(input:{"
+        " projectId:$p, itemId:$i, fieldId:$f, value:{userIds:$u}"
+        " }) { projectV2Item { id } } }"
+    )
+    variables = {
+        "p": project_id,
+        "i": item_id,
+        "f": field_id,
+        "u": user_ids,
+    }
+    with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as fh:
+        json.dump({"query": query, "variables": variables}, fh)
+        path = fh.name
+    try:
+        out = run(["gh", "api", "graphql", "--input", path])
+        resp = json.loads(out)
+        if resp.get("errors"):
+            raise RuntimeError(f"set_users errors: {resp['errors']}")
+    finally:
+        try:
+            os.unlink(path)
+        except OSError:
+            pass
+
+
 def update_draft_body(item_id: str, title: str, body: str) -> None:
     q = """
     mutation($i:ID!,$t:String!,$b:String!) {
@@ -387,7 +442,7 @@ def main() -> int:
         return 0
 
     project_id, project_url, fields = discover_project()
-    required = ["Test", "Owner", "Last run", "Fail count", "First seen"]
+    required = ["Test", "Assignees", "Last run", "Fail count", "First seen"]
     missing = [n for n in required if n not in fields]
     if missing:
         print(f"project is missing fields: {missing}", file=sys.stderr)
@@ -405,12 +460,12 @@ def main() -> int:
     items = list_items(project_id)
     by_title = items_by_title(items)
 
-    # Load per owner (for balancing) based on open items
+    # Load per assignee (for balancing) based on open items
     load: dict[str, int] = {}
     for it in items:
-        owner = item_field(it, "Owner")
-        if owner:
-            load[owner] = load.get(owner, 0) + 1
+        assignees = item_field(it, "Assignees") or []
+        for login in assignees:
+            load[login] = load.get(login, 0) + 1
 
     today = date.today().isoformat()
     new_count = recurring_count = 0
@@ -464,10 +519,14 @@ def main() -> int:
         )
         item_id = create_draft(project_id, title, body)
         set_text(project_id, item_id, fields["Test"]["id"], line)
-        set_text(project_id, item_id, fields["Owner"]["id"], owner)
         set_text(project_id, item_id, fields["Last run"]["id"], RUN_URL)
         set_number(project_id, item_id, fields["Fail count"]["id"], 1)
         set_date(project_id, item_id, fields["First seen"]["id"], today)
+        node_id = user_node_id(owner)
+        if node_id:
+            set_users(project_id, item_id, fields["Assignees"]["id"], [node_id])
+        else:
+            print(f"  (could not resolve node id for @{owner})")
         print(f"  new -> @{owner}: {line}")
 
     gho = os.environ.get("GITHUB_OUTPUT")
