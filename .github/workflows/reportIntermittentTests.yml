@@ -277,6 +277,7 @@ jobs:
 
       - name: Report to project board
         id: project
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
           PROJECT_OWNER: tolgee
@@ -288,14 +289,18 @@ jobs:
 
       - name: Build failure list
         id: failures
+        if: always()
         run: |
           {
             echo 'list<<EOF'
-            cat ./failures/failed-tests-*.txt 2>/dev/null | sort -u | head -30 | sed 's/.*/• `&`/'
+            if compgen -G './failures/failed-tests-*.txt' > /dev/null; then
+              cat ./failures/failed-tests-*.txt | sort -u | head -30 | sed 's/.*/• `&`/'
+            fi
             echo 'EOF'
           } >> $GITHUB_OUTPUT
 
       - name: Send Slack notification
+        if: always()
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_FLAKY_TESTS_WEBHOOK_URL }}
           FAILED_TESTS: ${{ steps.failures.outputs.list }}

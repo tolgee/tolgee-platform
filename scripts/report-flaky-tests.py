@@ -241,12 +241,18 @@ def resolve_file(test_name: str, roots: list[Path]) -> tuple[Path, Path] | None:
 def blame_email(root: Path, file: Path) -> str | None:
     try:
         out = run(
-            ["git", "-C", str(root), "log", "-n", "1", "--format=%ae", "--",
+            ["git", "-C", str(root), "blame", "--line-porcelain", "--",
              str(file.relative_to(root))]
-        ).strip()
-        return out or None
+        )
     except RuntimeError:
         return None
+    emails: dict[str, int] = {}
+    for match in re.finditer(r"^author-mail <([^>]+)>$", out, re.MULTILINE):
+        email = match.group(1)
+        emails[email] = emails.get(email, 0) + 1
+    if not emails:
+        return None
+    return sorted(emails, key=lambda e: (-emails[e], e))[0]
 
 
 # ---------------------------------------------------------------------------
@@ -383,7 +389,10 @@ def update_draft_body(item_id: str, title: str, body: str) -> None:
     }
     """
     data = gql(q_fetch, id=item_id)
-    draft_id = data["node"]["content"]["id"]
+    content = (data.get("node") or {}).get("content") or {}
+    draft_id = content.get("id")
+    if not draft_id:
+        raise RuntimeError("project item content is not a DraftIssue")
     gql(q, i=draft_id, t=title, b=body)
 
 
