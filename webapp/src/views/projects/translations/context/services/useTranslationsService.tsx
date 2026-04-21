@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { InfiniteData } from 'react-query';
 import { useDebouncedCallback } from 'use-debounce';
 import { T } from '@tolgee/react';
-
 import {
   useApiInfiniteQuery,
   useApiMutation,
@@ -287,7 +286,7 @@ export const useTranslationsService = (props: Props) => {
 
   const setLanguages = (value: string[] | undefined) => {
     const limit = config.translationsViewLanguagesLimit;
-    if (value && value.length > limit) {
+    if (limit >= 0 && value && value.length > limit) {
       messaging.error(
         <T
           keyName="translations_languages_limit_reached"
