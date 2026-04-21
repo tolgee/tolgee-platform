@@ -114,6 +114,13 @@ describe('Content delivery', () => {
   });
 
   it('auto-disables a webhook that has been failing for more than 3 days', () => {
+    const testEmail = 'webhook-test@test.com';
+
+    // Set org owner's email to a valid address so the notification email can be sent
+    internalFetch('sql/execute', {
+      method: 'POST',
+      body: `UPDATE user_account SET username = '${testEmail}' WHERE username = 'test_username'`,
+    });
     deleteAllEmails();
     createWebhook();
 
@@ -134,14 +141,15 @@ describe('Content delivery', () => {
       // Trigger the auto-disable check for this webhook
       triggerWebhookAutoDisableCheck(webhookId);
 
-      // Reload and verify webhook is disabled
+      // Reload and verify webhook is disabled and marked as auto-disabled
       cy.reload();
       waitForGlobalLoading();
       view.item(testUrl).shouldBeDisabled();
+      cy.gcy('webhook-auto-disabled-label').should('be.visible');
 
-      // Verify an email was sent to the org owner
+      // Verify notification email was sent to the org owner
       getLatestEmail().then((email) => {
-        cy.wrap(email.Subject).should('contain', 'Webhook');
+        cy.wrap(email.To[0].Address).should('eq', testEmail);
       });
     });
   });
