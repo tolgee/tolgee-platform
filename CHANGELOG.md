@@ -1,3 +1,15 @@
+## [3.180.2](https://github.com/tolgee/tolgee-platform/compare/v3.180.1...v3.180.2) (2026-04-21)
+
+
+### Bug Fixes
+
+* handle TYPE_CUSTOM images in screenshot upload ([#3613](https://github.com/tolgee/tolgee-platform/issues/3613)) ([09ca50c](https://github.com/tolgee/tolgee-platform/commit/09ca50c03c1566d6019f70beb9faaeac308e73e0))
+
+
+### Performance Improvements
+
+* use readOnly transactions for pure-read service methods ([#3608](https://github.com/tolgee/tolgee-platform/issues/3608)) ([86553c2](https://github.com/tolgee/tolgee-platform/commit/86553c2abfe2b29529db2341e01629b225f100fd))
+
 ## [3.180.1](https://github.com/tolgee/tolgee-platform/compare/v3.180.0...v3.180.1) (2026-04-16)
 
 
