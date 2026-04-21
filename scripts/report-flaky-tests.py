@@ -51,6 +51,15 @@ def gh_json(*args: str) -> dict:
     return json.loads(run(["gh", "api", *args]))
 
 
+def write_output(**kwargs) -> None:
+    gho = os.environ.get("GITHUB_OUTPUT")
+    if not gho:
+        return
+    with open(gho, "a") as fh:
+        for k, v in kwargs.items():
+            fh.write(f"{k}={v}\n")
+
+
 def gql(query: str, **variables) -> dict:
     args = ["graphql", "-f", f"query={query}"]
     for k, v in variables.items():
@@ -438,6 +447,7 @@ def main() -> int:
         return 0
 
     project_id, project_url, fields = discover_project()
+    write_output(project_url=project_url)
     required = ["Test", "Assignees", "Last run", "Fail count", "First seen"]
     missing = [n for n in required if n not in fields]
     if missing:
@@ -524,12 +534,7 @@ def main() -> int:
         set_date(project_id, item_id, fields["First seen"]["id"], today)
         print(f"  new -> @{owner}: {line}")
 
-    gho = os.environ.get("GITHUB_OUTPUT")
-    if gho:
-        with open(gho, "a") as fh:
-            fh.write(f"project_url={project_url}\n")
-            fh.write(f"new_count={new_count}\n")
-            fh.write(f"recurring_count={recurring_count}\n")
+    write_output(new_count=new_count, recurring_count=recurring_count)
     print(f"done: {new_count} new, {recurring_count} recurring")
     return 0
 
