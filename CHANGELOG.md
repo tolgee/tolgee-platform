@@ -1,3 +1,10 @@
+## [3.180.3](https://github.com/tolgee/tolgee-platform/compare/v3.180.2...v3.180.3) (2026-04-21)
+
+
+### Performance Improvements
+
+* best of both worlds for translation memory suggestion queries ([#3540](https://github.com/tolgee/tolgee-platform/issues/3540)) ([29a5581](https://github.com/tolgee/tolgee-platform/commit/29a5581b54d936c5f6f4420ea64bf0cd02f90784))
+
 ## [3.180.2](https://github.com/tolgee/tolgee-platform/compare/v3.180.1...v3.180.2) (2026-04-21)
 
 
