@@ -1,5 +1,6 @@
 package io.tolgee.component
 
+import org.springframework.beans.factory.getBean
 import org.springframework.context.ApplicationContext
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.stereotype.Component
@@ -35,7 +36,7 @@ class Debouncer(
     duration: Duration,
   ): Boolean {
     if (usingRedisProvider.areWeUsingRedis) {
-      val redisTemplate = applicationContext.getBean(StringRedisTemplate::class.java)
+      val redisTemplate = applicationContext.getBean<StringRedisTemplate>()
       return redisTemplate.opsForValue().setIfAbsent(key, "1", duration) == true
     }
 

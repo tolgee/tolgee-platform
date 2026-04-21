@@ -1,5 +1,5 @@
-import { assertMessage, confirmStandard } from '../../common/shared';
-import { contentDeliveryTestData } from '../../common/apiCalls/testData/testData';
+import { assertMessage, confirmStandard, gcy } from '../../common/shared';
+import { webhooksTestData } from '../../common/apiCalls/testData/testData';
 import {
   deleteAllEmails,
   getLatestEmail,
@@ -14,18 +14,19 @@ import { API_URL } from '../../common/constants';
 import { setFeature } from '../../common/features';
 import { E2WebhooksView } from '../../compounds/webhooks/E2WebhooksView';
 
-describe('Content delivery', () => {
+describe('Webhooks', () => {
   const testUrl = API_URL + '/internal/webhook-testing';
+  const testUserEmail = 'webhooks-test@test.com';
   const view = new E2WebhooksView();
   let projectId: number;
 
   beforeEach(() => {
     setWebhookControllerStatus(200);
     setFeature('WEBHOOKS', true);
-    contentDeliveryTestData.clean();
-    contentDeliveryTestData.generateStandard().then((response) => {
+    webhooksTestData.clean();
+    webhooksTestData.generateStandard().then((response) => {
       projectId = response.body.projects[0].id;
-      login();
+      login(testUserEmail);
       view.visit(projectId);
     });
   });
@@ -114,13 +115,6 @@ describe('Content delivery', () => {
   });
 
   it('auto-disables a webhook that has been failing for more than 3 days', () => {
-    const testEmail = 'webhook-test@test.com';
-
-    // Set org owner's email to a valid address so the notification email can be sent
-    internalFetch('sql/execute', {
-      method: 'POST',
-      body: `UPDATE user_account SET username = '${testEmail}' WHERE username = 'test_username'`,
-    });
     deleteAllEmails();
     createWebhook();
 
@@ -145,11 +139,11 @@ describe('Content delivery', () => {
       cy.reload();
       waitForGlobalLoading();
       view.item(testUrl).shouldBeDisabled();
-      cy.gcy('webhook-auto-disabled-label').should('be.visible');
+      gcy('webhook-auto-disabled-label').should('be.visible');
 
       // Verify notification email was sent to the org owner
       getLatestEmail().then((email) => {
-        cy.wrap(email.To[0].Address).should('eq', testEmail);
+        cy.wrap(email.To[0].Address).should('eq', testUserEmail);
       });
     });
   });
