@@ -80,7 +80,7 @@ class TranslationService(
   @set:Lazy
   lateinit var projectService: ProjectService
 
-  @Transactional
+  @Transactional(readOnly = true)
   @Suppress("UNCHECKED_CAST")
   fun getTranslations(
     languageTags: Set<String>,
@@ -105,6 +105,7 @@ class TranslationService(
     return langTranslations
   }
 
+  @Transactional(readOnly = true)
   fun getAllByLanguageId(
     languageId: Long,
     branch: String? = null,
@@ -112,6 +113,7 @@ class TranslationService(
     return translationRepository.getAllByLanguageId(languageId, branch)
   }
 
+  @Transactional(readOnly = true)
   fun getKeyTranslations(
     languages: Set<ILanguage>,
     project: Project,
@@ -161,6 +163,7 @@ class TranslationService(
     }
   }
 
+  @Transactional(readOnly = true)
   fun find(
     key: Key,
     language: ILanguage,
@@ -168,14 +171,17 @@ class TranslationService(
     return translationRepository.findOneByKeyAndLanguageId(key, language.id)
   }
 
+  @Transactional(readOnly = true)
   fun get(id: Long): Translation {
     return this.find(id) ?: throw NotFoundException(Message.TRANSLATION_NOT_FOUND)
   }
 
+  @Transactional(readOnly = true)
   fun find(id: Long): Translation? {
     return this.translationRepository.findById(id).orElse(null)
   }
 
+  @Transactional(readOnly = true)
   fun find(
     projectId: Long,
     translationId: Long,
@@ -183,6 +189,7 @@ class TranslationService(
     return this.translationRepository.find(projectId, translationId)
   }
 
+  @Transactional(readOnly = true)
   fun get(
     projectId: Long,
     translationId: Long,
@@ -268,6 +275,7 @@ class TranslationService(
     return translationRepository.save(translation)
   }
 
+  @Transactional(readOnly = true)
   fun findForKeyByLanguages(
     key: Key,
     languageTags: Collection<String>,
@@ -401,6 +409,7 @@ class TranslationService(
     translationRepository.setOutdated(keyIds)
   }
 
+  @Transactional(readOnly = true)
   fun get(keyLanguagesMap: Map<Key, List<LanguageDto>>): List<Translation> {
     val cb = entityManager.criteriaBuilder
     val query = cb.createQuery(Translation::class.java)
@@ -420,6 +429,7 @@ class TranslationService(
     return entityManager.createQuery(query).resultList
   }
 
+  @Transactional(readOnly = true)
   fun getForKeys(
     keyIds: List<Long>,
     languageTags: List<String>,
@@ -462,11 +472,13 @@ class TranslationService(
     saveAll(translations)
   }
 
+  @Transactional(readOnly = true)
   fun getTranslations(
     keyIds: List<Long>,
     languageIds: List<Long>,
   ) = translationRepository.getAllByKeyIdInAndLanguageIdIn(keyIds, languageIds)
 
+  @Transactional(readOnly = true)
   fun getAllByKeyId(keyId: Long): List<Translation> = translationRepository.getAllByKeyIdIn(listOf(keyId)).toList()
 
   fun clearBatch(
@@ -588,7 +600,7 @@ class TranslationService(
     }
   }
 
-  @Transactional
+  @Transactional(readOnly = true)
   fun getTranslationsWithLabels(
     keyIds: List<Long>,
     languageIds: List<Long>,
@@ -597,6 +609,7 @@ class TranslationService(
       .getTranslationsWithLabels(keyIds, languageIds)
   }
 
+  @Transactional(readOnly = true)
   fun getTranslationIdsByKeyIds(
     keyIds: List<Long>,
     languageIds: List<Long>? = null,
@@ -623,6 +636,7 @@ class TranslationService(
     }
   }
 
+  @Transactional(readOnly = true)
   fun getNotStaleTranslationIds(
     projectId: Long,
     languageIds: List<Long>? = null,
@@ -685,6 +699,7 @@ class TranslationService(
     translationRepository.setQaChecksStaleByProjectIdAndLanguageIds(projectId, languageIds)
   }
 
+  @Transactional(readOnly = true)
   fun getKeyLanguagePairsForQaRecheck(
     projectId: Long,
     languageIds: List<Long>? = null,

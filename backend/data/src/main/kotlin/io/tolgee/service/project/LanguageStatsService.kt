@@ -154,6 +154,7 @@ class LanguageStatsService(
     }
   }
 
+  @Transactional(readOnly = true)
   fun getLanguageStats(
     projectId: Long,
     branchId: Long? = null,
