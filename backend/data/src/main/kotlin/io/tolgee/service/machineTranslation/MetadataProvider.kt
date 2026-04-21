@@ -5,14 +5,10 @@ import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.translation.TranslationMemoryService
 import jakarta.persistence.EntityManager
-import org.slf4j.LoggerFactory
-import org.springframework.dao.QueryTimeoutException
 
 class MetadataProvider(
   private val context: MtTranslatorContext,
 ) {
-  private val log = LoggerFactory.getLogger(MetadataProvider::class.java)
-
   fun getCloseItems(
     sourceLanguage: LanguageDto,
     targetLanguage: LanguageDto,
@@ -49,27 +45,22 @@ class MetadataProvider(
     text: String,
     keyId: Long?,
   ): List<ExampleItem> {
-    try {
-      return translationMemoryService
-        .getSuggestionsList(
-          baseTranslationText = text,
-          isPlural = isPlural,
-          keyId = keyId,
-          baseLanguageId = context.baseLanguage.id,
-          targetLanguage = targetLanguage,
-          limit = 5,
-        ).map {
-          ExampleItem(
-            key = it.keyName,
-            keyNamespace = it.keyNamespace,
-            source = it.baseTranslationText,
-            target = it.targetTranslationText,
-          )
-        }
-    } catch (e: QueryTimeoutException) {
-      log.warn("Translation memory suggestions timed out", e)
-      return emptyList()
-    }
+    return translationMemoryService
+      .getSuggestionsList(
+        baseTranslationText = text,
+        isPlural = isPlural,
+        keyId = keyId,
+        baseLanguageId = context.baseLanguage.id,
+        targetLanguage = targetLanguage,
+        limit = 5,
+      ).map {
+        ExampleItem(
+          key = it.keyName,
+          keyNamespace = it.keyNamespace,
+          source = it.baseTranslationText,
+          target = it.targetTranslationText,
+        )
+      }
   }
 
   private val bigMetaService: BigMetaService by lazy {

@@ -23,12 +23,8 @@ class TranslationMemoryService(
    Uses % (trigram threshold operator) without ORDER BY so the composite GiST index on
    (language_id, text gist_trgm_ops) can stop early as soon as LIMIT rows are found,
    avoiding a full scan of all matching rows.
-
-   REQUIRES_NEW: isolates SET LOCAL PostgreSQL settings (statement_timeout,
-   pg_trgm.similarity_threshold) so they don't leak into the caller's transaction.
-   It also ensures a QueryTimeoutException does not mark the outer transaction rollback-only.
    */
-  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  @Transactional
   fun getSuggestionsList(
     baseTranslationText: String,
     isPlural: Boolean,
@@ -37,51 +33,46 @@ class TranslationMemoryService(
     targetLanguage: LanguageDto,
     limit: Int = 5,
   ): List<TranslationMemoryItemView> {
-    entityManager.createNativeQuery("set local statement_timeout to '550ms'").executeUpdate()
     entityManager.createNativeQuery("set local pg_trgm.similarity_threshold to 0.5").executeUpdate()
-    try {
-      val queryResult =
-        entityManager
-          .createNativeQuery(
-            """
-          select target.text as targetTranslationText,
-                 baseTranslation.text as baseTranslationText,
-                 key.name as keyName, ns.name as keyNamespace, key.id as keyId,
-                 similarity(baseTranslation.text, :baseTranslationText) as similarity
-          from translation baseTranslation
-          join key on baseTranslation.key_id = key.id
-          left join namespace ns on key.namespace_id = ns.id
-          join translation target on
-                target.key_id = key.id and
-                target.language_id = :targetLanguageId and
-                target.text <> '' and
-                target.text is not null
-          where baseTranslation.language_id = :baseLanguageId
-            and (cast(:key as bigint) is null or key.id <> :key)
-            and key.is_plural = :isPlural
-            and baseTranslation.text % :baseTranslationText
-      """,
-          ).setParameter("baseTranslationText", baseTranslationText)
-          .setParameter("isPlural", isPlural)
-          .setParameter("key", keyId)
-          .setParameter("baseLanguageId", baseLanguageId)
-          .setParameter("targetLanguageId", targetLanguage.id)
-          .setMaxResults(limit)
-          .resultList
+    val queryResult =
+      entityManager
+        .createNativeQuery(
+          """
+        select target.text as targetTranslationText,
+               baseTranslation.text as baseTranslationText,
+               key.name as keyName, ns.name as keyNamespace, key.id as keyId,
+               similarity(baseTranslation.text, :baseTranslationText) as similarity
+        from translation baseTranslation
+        join key on baseTranslation.key_id = key.id
+        left join namespace ns on key.namespace_id = ns.id
+        join translation target on
+              target.key_id = key.id and
+              target.language_id = :targetLanguageId and
+              target.text <> '' and
+              target.text is not null
+        where baseTranslation.language_id = :baseLanguageId
+          and (cast(:key as bigint) is null or key.id <> :key)
+          and key.is_plural = :isPlural
+          and baseTranslation.text % :baseTranslationText
+    """,
+        ).setParameter("baseTranslationText", baseTranslationText)
+        .setParameter("isPlural", isPlural)
+        .setParameter("key", keyId)
+        .setParameter("baseLanguageId", baseLanguageId)
+        .setParameter("targetLanguageId", targetLanguage.id)
+        .setMaxResults(limit)
+        .resultList
 
-      return queryResult.map {
-        it as Array<*>
-        TranslationMemoryItemView(
-          targetTranslationText = it[0] as String,
-          baseTranslationText = it[1] as String,
-          keyName = it[2] as String,
-          keyNamespace = it[3] as String?,
-          keyId = it[4] as Long,
-          similarity = (it[5] as Number).toFloat(),
-        )
-      }
-    } catch (e: jakarta.persistence.QueryTimeoutException) {
-      throw org.springframework.dao.QueryTimeoutException(e.message, e)
+    return queryResult.map {
+      it as Array<*>
+      TranslationMemoryItemView(
+        targetTranslationText = it[0] as String,
+        baseTranslationText = it[1] as String,
+        keyName = it[2] as String,
+        keyNamespace = it[3] as String?,
+        keyId = it[4] as Long,
+        similarity = (it[5] as Number).toFloat(),
+      )
     }
   }
 
@@ -133,55 +124,50 @@ class TranslationMemoryService(
     offset: Long = 0,
     limit: Int = 5,
   ): Pair<Long, List<TranslationMemoryItemView>> {
-    entityManager.createNativeQuery("set local statement_timeout to '550ms'").executeUpdate()
     entityManager.createNativeQuery("set local pg_trgm.similarity_threshold to 0.5").executeUpdate()
-    try {
-      val queryResult =
-        entityManager
-          .createNativeQuery(
-            """
-          select target.text as targetTranslationText, baseTranslation.text as baseTranslationText,
-                 key.name as keyName, ns.name as keyNamespace, key.id as keyId,
-                 similarity(baseTranslation.text, :baseTranslationText) as similarity,
-                 count(*) over() as totalCount
-          from translation baseTranslation
-          join key on baseTranslation.key_id = key.id
-          left join namespace ns on key.namespace_id = ns.id
-          join project p on key.project_id = p.id
-          join translation target on
-                target.key_id = key.id and
-                target.language_id = :targetLanguageId and
-                target.text <> '' and
-                target.text is not null
-          where baseTranslation.language_id = p.base_language_id
-            and (cast(:key as bigint) is null or key.id <> :key)
-            and key.is_plural = :isPlural
-            and baseTranslation.text % :baseTranslationText
-          order by baseTranslation.text <-> :baseTranslationText
-      """,
-          ).setParameter("baseTranslationText", sourceTranslationText)
-          .setParameter("isPlural", isPlural)
-          .setParameter("key", keyId)
-          .setParameter("targetLanguageId", targetLanguage.id)
-          .setMaxResults(limit)
-          .setFirstResult(offset.toInt())
-          .resultList
+    val queryResult =
+      entityManager
+        .createNativeQuery(
+          """
+        select target.text as targetTranslationText, baseTranslation.text as baseTranslationText,
+               key.name as keyName, ns.name as keyNamespace, key.id as keyId,
+               similarity(baseTranslation.text, :baseTranslationText) as similarity,
+               count(*) over() as totalCount
+        from translation baseTranslation
+        join key on baseTranslation.key_id = key.id
+        left join namespace ns on key.namespace_id = ns.id
+        join project p on key.project_id = p.id
+        join translation target on
+              target.key_id = key.id and
+              target.language_id = :targetLanguageId and
+              target.text <> '' and
+              target.text is not null
+        where baseTranslation.language_id = p.base_language_id
+          and (cast(:key as bigint) is null or key.id <> :key)
+          and key.is_plural = :isPlural
+          and baseTranslation.text % :baseTranslationText
+        order by baseTranslation.text <-> :baseTranslationText
+    """,
+        ).setParameter("baseTranslationText", sourceTranslationText)
+        .setParameter("isPlural", isPlural)
+        .setParameter("key", keyId)
+        .setParameter("targetLanguageId", targetLanguage.id)
+        .setMaxResults(limit)
+        .setFirstResult(offset.toInt())
+        .resultList
 
-      val count = ((queryResult.firstOrNull() as Array<*>?)?.get(6) as Number?)?.toLong() ?: 0L
-      return count to
-        queryResult.map {
-          it as Array<*>
-          TranslationMemoryItemView(
-            targetTranslationText = it[0] as String,
-            baseTranslationText = it[1] as String,
-            keyName = it[2] as String,
-            keyNamespace = it[3] as String?,
-            similarity = (it[5] as Number).toFloat(),
-            keyId = it[4] as Long,
-          )
-        }
-    } catch (e: jakarta.persistence.QueryTimeoutException) {
-      throw org.springframework.dao.QueryTimeoutException(e.message, e)
-    }
+    val count = ((queryResult.firstOrNull() as Array<*>?)?.get(6) as Number?)?.toLong() ?: 0L
+    return count to
+      queryResult.map {
+        it as Array<*>
+        TranslationMemoryItemView(
+          targetTranslationText = it[0] as String,
+          baseTranslationText = it[1] as String,
+          keyName = it[2] as String,
+          keyNamespace = it[3] as String?,
+          similarity = (it[5] as Number).toFloat(),
+          keyId = it[4] as Long,
+        )
+      }
   }
 }
