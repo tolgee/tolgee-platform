@@ -3,7 +3,7 @@ import {
   qaTestData,
 } from '../../common/apiCalls/testData/testData';
 import { login } from '../../common/apiCalls/common';
-import { gcy } from '../../common/shared';
+import { gcy, gcyAdvanced } from '../../common/shared';
 import { E2TranslationsView } from '../../compounds/E2TranslationsView';
 import { editTranslation } from '../../common/translations';
 
@@ -76,8 +76,11 @@ describe('QA cell badges', () => {
       newValue: 'Edited',
     });
 
-    cy.contains('disabled_key')
-      .closestDcy('translations-row')
+    gcyAdvanced({
+      value: 'translations-table-cell',
+      key: 'disabled_key',
+      language: 'fr',
+    })
       .findDcy('translations-cell-qa-issues-button')
       .should('not.exist');
   });
