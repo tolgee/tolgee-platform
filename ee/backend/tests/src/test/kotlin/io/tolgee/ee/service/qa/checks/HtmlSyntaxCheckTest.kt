@@ -118,8 +118,58 @@ class HtmlSyntaxCheckTest {
   }
 
   @Test
-  fun `void element with closing tag - closing is orphaned`() {
-    check.check(params("<br></br>")).assertSingleIssue {
+  fun `void element with matching closing tag - no issue`() {
+    check.check(params("<br></br>")).assertNoIssues()
+  }
+
+  @Test
+  fun `multiple void element pairs - no issue`() {
+    check.check(params("<br></br>More text<hr></hr>")).assertNoIssues()
+  }
+
+  @Test
+  fun `void open inside real wrapper - no issue`() {
+    check.check(params("<b><br></b>")).assertNoIssues()
+  }
+
+  @Test
+  fun `void wrapping real content - no issue`() {
+    check.check(params("<br><b>text</b></br>")).assertNoIssues()
+  }
+
+  @Test
+  fun `void open with attributes and matching close - no issue`() {
+    check.check(params("""<img src="photo.jpg"></img>""")).assertNoIssues()
+  }
+
+  @Test
+  fun `extra unmatched void open is tolerated`() {
+    // Consistent with a bare `<br>` being accepted.
+    check.check(params("<br><br></br>")).assertNoIssues()
+  }
+
+  @Test
+  fun `interleaved distinct void names - no issue`() {
+    // Regression guard: the stack must be keyed per-name so two different void names
+    // can be open and close simultaneously.
+    check.check(params("<br><hr></br></hr>")).assertNoIssues()
+    check.check(params("<br><hr></hr></br>")).assertNoIssues()
+  }
+
+  @Test
+  fun `void leftover does not mask unclosed non-void`() {
+    // Leftover void opener is tolerated, but a genuinely unclosed real tag still errors.
+    check.check(params("<br><b>text</br>")).assertSingleIssue {
+      message(QaIssueMessage.QA_HTML_UNCLOSED_TAG)
+      param("tag", "<b>")
+    }
+  }
+
+  @Test
+  fun `stray closing void tag is flagged`() {
+    // Asymmetric leniency: a close tag with no opener is meaningless
+    // even for Tolgee component interpolation, so it still errors.
+    check.check(params("</br>")).assertSingleIssue {
       message(QaIssueMessage.QA_HTML_UNOPENED_TAG)
       param("tag", "</br>")
     }

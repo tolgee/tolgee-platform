@@ -33,16 +33,12 @@ class HtmlSyntaxCheck : QaCheck {
         HtmlTagKind.SELF_CLOSING -> { /* always valid */ }
 
         HtmlTagKind.OPEN -> {
-          if (tag.name in VOID_ELEMENTS) {
-            // Void elements like <br> don't need closing tags
-          } else {
-            openTags.getOrPut(tag.name) { mutableListOf() }.add(tag)
-          }
+          openTags.getOrPut(tag.name) { mutableListOf() }.add(tag)
         }
 
         HtmlTagKind.CLOSE -> {
           val stack = openTags[tag.name]
-          if (stack != null && stack.isNotEmpty()) {
+          if (!stack.isNullOrEmpty()) {
             stack.removeAt(stack.lastIndex)
             if (stack.isEmpty()) {
               openTags.remove(tag.name)
@@ -64,8 +60,10 @@ class HtmlSyntaxCheck : QaCheck {
       }
     }
 
-    // Remaining open tags are unclosed
-    for ((_, stack) in openTags) {
+    // Remaining open tags are unclosed — except void elements, for which a leftover
+    // opener is tolerated (see VOID_ELEMENTS doc).
+    for ((name, stack) in openTags) {
+      if (name in VOID_ELEMENTS) continue
       for (openTag in stack) {
         results.add(
           QaCheckResult(
@@ -84,6 +82,14 @@ class HtmlSyntaxCheck : QaCheck {
   }
 
   companion object {
+    /**
+     * HTML void-element names. In this check they mark tag names for which a leftover
+     * opener is tolerated (ignored rather than reported as unclosed). Tolgee component
+     * interpolation could use these names as placeholders and could write them as
+     * `<br></br>`, so we cannot assume having both opener and closer is a mistake,
+     * but at the same time we cannot report bare `<br>` as unclosed.
+     * Closing tags for void elements still participate normally in stack matching.
+     */
     val VOID_ELEMENTS =
       setOf(
         "area",
