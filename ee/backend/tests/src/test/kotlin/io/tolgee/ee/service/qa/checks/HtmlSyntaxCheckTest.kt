@@ -157,6 +157,15 @@ class HtmlSyntaxCheckTest {
   }
 
   @Test
+  fun `void element name is case-insensitive`() {
+    // HTML tag names are case-insensitive per spec; leftover uppercase/mixed-case
+    // void openers are tolerated just like lowercase ones.
+    check.check(params("<BR>")).assertNoIssues()
+    check.check(params("<Br></Br>")).assertNoIssues()
+    check.check(params("<IMG src=\"x\">")).assertNoIssues()
+  }
+
+  @Test
   fun `void leftover does not mask unclosed non-void`() {
     // Leftover void opener is tolerated, but a genuinely unclosed real tag still errors.
     check.check(params("<br><b>text</br>")).assertSingleIssue {
