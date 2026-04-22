@@ -57,8 +57,7 @@ class QaLanguageStatsRefreshTest : AuthorizedControllerTest() {
 
   @Test
   fun `refreshes language stats for default branch when revision only touches default branch`() {
-    setStaleAndCacheStats(branchId = testData.mainBranch.id, translationId = testData.mainFrTranslation.id)
-    setStaleAndCacheStats(branchId = testData.featureBranch.id, translationId = testData.featureFrTranslation.id)
+    cacheStaleStatsForBothBranches()
     clearStaleFlag(testData.mainFrTranslation.id)
 
     val revisionId = seedActivityRevision(branchIds = listOf(testData.mainBranch.id))
@@ -72,8 +71,7 @@ class QaLanguageStatsRefreshTest : AuthorizedControllerTest() {
 
   @Test
   fun `refreshes language stats for non-default branch when revision only touches that branch`() {
-    setStaleAndCacheStats(branchId = testData.mainBranch.id, translationId = testData.mainFrTranslation.id)
-    setStaleAndCacheStats(branchId = testData.featureBranch.id, translationId = testData.featureFrTranslation.id)
+    cacheStaleStatsForBothBranches()
     clearStaleFlag(testData.featureFrTranslation.id)
 
     val revisionId = seedActivityRevision(branchIds = listOf(testData.featureBranch.id))
@@ -87,8 +85,7 @@ class QaLanguageStatsRefreshTest : AuthorizedControllerTest() {
 
   @Test
   fun `refreshes language stats for all affected branches when revision spans multiple branches`() {
-    setStaleAndCacheStats(branchId = testData.mainBranch.id, translationId = testData.mainFrTranslation.id)
-    setStaleAndCacheStats(branchId = testData.featureBranch.id, translationId = testData.featureFrTranslation.id)
+    cacheStaleStatsForBothBranches()
     clearStaleFlag(testData.mainFrTranslation.id)
     clearStaleFlag(testData.featureFrTranslation.id)
 
@@ -103,7 +100,7 @@ class QaLanguageStatsRefreshTest : AuthorizedControllerTest() {
 
   @Test
   fun `does not refresh language stats for non-QA batch jobs`() {
-    setStaleAndCacheStats(branchId = testData.mainBranch.id, translationId = testData.mainFrTranslation.id)
+    cacheStaleStatsForBothBranches()
     clearStaleFlag(testData.mainFrTranslation.id)
 
     val revisionId = seedActivityRevision(branchIds = listOf(testData.mainBranch.id))
@@ -128,21 +125,15 @@ class QaLanguageStatsRefreshTest : AuthorizedControllerTest() {
     )
   }
 
-  private fun setStaleAndCacheStats(
-    branchId: Long,
-    translationId: Long,
-  ) {
-    executeInNewTransaction(platformTransactionManager) {
-      val translation = entityManager.find(Translation::class.java, translationId)
-      translation.qaChecksStale = true
-      entityManager.persist(translation)
-    }
-    languageStatsService.refreshLanguageStats(testData.project.id, branchId)
-
-    waitForNotThrowing(AssertionFailedError::class) {
-      val stats = getLanguageStats(languageTag = "fr", branchId = branchId)
-      assertThat(stats!!.qaChecksStaleCount).isGreaterThan(0)
-    }
+  /**
+   * Translations in [QaLanguageStatsBranchTestData] are persisted with `qaChecksStale = true`,
+   * so refreshing the language stats once caches a stale count of 1 per branch.
+   */
+  private fun cacheStaleStatsForBothBranches() {
+    languageStatsService.refreshLanguageStats(testData.project.id, testData.mainBranch.id)
+    languageStatsService.refreshLanguageStats(testData.project.id, testData.featureBranch.id)
+    assertStaleCountEquals(branchId = testData.mainBranch.id, expected = 1)
+    assertStaleCountEquals(branchId = testData.featureBranch.id, expected = 1)
   }
 
   private fun clearStaleFlag(translationId: Long) {
