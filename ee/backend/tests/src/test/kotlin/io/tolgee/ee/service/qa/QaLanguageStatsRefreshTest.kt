@@ -159,11 +159,17 @@ class QaLanguageStatsRefreshTest : AuthorizedControllerTest() {
     branchId: Long?,
     minimum: Long,
   ) {
-    // Listener methods run async via @Async proxy, so we need to wait
-    waitForNotThrowing(AssertionFailedError::class) {
+    // The listener is @Async, so if it were going to (incorrectly) refresh this branch,
+    // the drop could happen at any point during its execution window. Poll repeatedly
+    // for the entire window and fail immediately if the count ever drops below `minimum`.
+    val observationWindowMs = 1000L
+    val pollIntervalMs = 50L
+    val deadline = System.currentTimeMillis() + observationWindowMs
+    do {
       val stats = getLanguageStats(languageTag = "fr", branchId = branchId)
       assertThat(stats!!.qaChecksStaleCount).isGreaterThanOrEqualTo(minimum)
-    }
+      Thread.sleep(pollIntervalMs)
+    } while (System.currentTimeMillis() < deadline)
   }
 
   private fun getLanguageStats(
