@@ -20,7 +20,8 @@ import {
   ValueUpdate,
 } from '../types';
 import { PrefilterType } from '../../prefilters/usePrefilter';
-import { useConfig, useEnabledFeatures } from 'tg.globalContext/helpers';
+import { useConfig } from 'tg.globalContext/helpers';
+import { useQaChecksEnabled } from 'tg.ee';
 import { useTranslationFiltersService } from './useTranslationFilterService';
 
 const PAGE_SIZE = 60;
@@ -73,8 +74,7 @@ const flattenKeys = (
 
 export const useTranslationsService = (props: Props) => {
   const config = useConfig();
-  const { isEnabled } = useEnabledFeatures();
-  const qaChecksEnabled = isEnabled('QA_CHECKS');
+  const qaChecksEnabled = useQaChecksEnabled();
 
   const [order, setOrder] = useUrlSearchState('order', {
     defaultVal: 'keyName',

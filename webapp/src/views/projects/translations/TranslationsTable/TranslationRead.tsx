@@ -8,7 +8,7 @@ import { TranslationFlags } from '../cell/TranslationFlags';
 import { AiPlaygroundPreview } from '../translationVisual/AiPlaygroundPreview';
 import { TranslationLabels } from 'tg.views/projects/translations/TranslationsList/TranslationLabels';
 import { SuggestionsFirst } from '../Suggestions/SuggestionsFirst';
-import { useEnabledFeatures } from 'tg.globalContext/helpers';
+import { useQaChecksEnabled } from 'tg.ee';
 import { getFirstPluralVariantWithQaIssues } from 'tg.fixtures/qaUtils';
 
 const StyledContainer = styled('div')`
@@ -87,15 +87,9 @@ export const TranslationRead: React.FC<Props> = ({
     removeLabel,
   } = tools;
 
-  const { isEnabled } = useEnabledFeatures();
+  const qaChecksEnabled = useQaChecksEnabled();
 
-  const toggleEdit = () => {
-    if (isEditing) {
-      handleClose();
-    } else {
-      handleOpen();
-    }
-  };
+  const toggleEdit = () => (isEditing ? handleClose() : handleOpen());
 
   const state = translation?.state || 'UNTRANSLATED';
 
@@ -107,7 +101,7 @@ export const TranslationRead: React.FC<Props> = ({
       data-cy="translations-table-cell"
       data-cy-language={language.tag}
       data-cy-key={keyData.keyName}
-      onClick={cellClickable ? () => toggleEdit() : undefined}
+      onClick={cellClickable ? toggleEdit : undefined}
     >
       <StyledTranslation>
         <TranslationVisual
@@ -118,7 +112,7 @@ export const TranslationRead: React.FC<Props> = ({
           disabled={disabled}
           showHighlights={isEditingRow && language.base}
           isPlural={keyData.keyIsPlural}
-          qaIssues={isEnabled('QA_CHECKS') ? translation?.qaIssues : undefined}
+          qaIssues={qaChecksEnabled ? translation?.qaIssues : undefined}
           translationId={translation?.id}
         />
         {Boolean(translation?.totalSuggestionCount) && (

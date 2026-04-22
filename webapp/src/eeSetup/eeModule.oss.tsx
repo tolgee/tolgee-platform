@@ -38,6 +38,7 @@ export const TaskItem = Empty;
 export const TaskFilterPopover = Empty;
 export const TaskAllDonePlaceholder = Empty;
 export const QaBadge = (_props: QaBadgeProps) => Empty() as JSX.Element;
+export const useQaChecksEnabled = (): boolean => false;
 export const QaLanguageStats = (_props: QaLanguageStatsProps) =>
   Empty() as JSX.Element;
 export const QaCheckItem = Empty;

@@ -5,9 +5,11 @@ import {
 import { login } from '../../common/apiCalls/common';
 import { gcy } from '../../common/shared';
 import { E2TranslationsView } from '../../compounds/E2TranslationsView';
+import { editTranslation } from '../../common/translations';
 
 describe('QA cell badges', () => {
   let projectId: number;
+  let disabledProjectId: number;
 
   let view: E2TranslationsView;
 
@@ -15,6 +17,10 @@ describe('QA cell badges', () => {
     qaTestData.clean();
     qaTestData.generateStandard().then((res) => {
       projectId = getProjectByNameFromTestData(res.body, 'test_project')!.id;
+      disabledProjectId = getProjectByNameFromTestData(
+        res.body,
+        'Disabled QA Project'
+      )!.id;
     });
     login('test_username');
     view = new E2TranslationsView();
@@ -56,6 +62,21 @@ describe('QA cell badges', () => {
     view.visit(projectId);
 
     cy.contains('key_ignored_issue')
+      .closestDcy('translations-row')
+      .findDcy('translations-cell-qa-issues-button')
+      .should('not.exist');
+  });
+
+  it('does not show badge after editing translation in QA-disabled project', () => {
+    view.visit(disabledProjectId);
+
+    editTranslation({
+      key: 'disabled_key',
+      languageTag: 'fr',
+      newValue: 'Edited',
+    });
+
+    cy.contains('disabled_key')
       .closestDcy('translations-row')
       .findDcy('translations-cell-qa-issues-button')
       .should('not.exist');
