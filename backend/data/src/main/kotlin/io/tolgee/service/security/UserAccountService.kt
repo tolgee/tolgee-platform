@@ -35,6 +35,7 @@ import io.tolgee.service.notification.NotificationService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.util.Logging
 import io.tolgee.util.addMinutes
+import io.tolgee.util.logger
 import jakarta.persistence.EntityManager
 import jakarta.servlet.http.HttpServletRequest
 import org.apache.commons.lang3.time.DateUtils
@@ -56,6 +57,7 @@ import java.util.Calendar
 import java.util.Date
 
 @Service
+@Suppress("SelfReferenceConstructorParameter")
 class UserAccountService(
   @Lazy
   private val userAccountRepository: UserAccountRepository,
@@ -68,9 +70,10 @@ class UserAccountService(
   private val entityManager: EntityManager,
   private val currentDateProvider: CurrentDateProvider,
   private val cacheManager: CacheManager,
-  @Suppress("SelfReferenceConstructorParameter")
   @Lazy
   private val self: UserAccountService,
+  @Lazy
+  private val mfaService: MfaService,
 ) : Logging {
   @Autowired
   @Lazy
@@ -318,17 +321,18 @@ class UserAccountService(
   fun enableMfaTotp(
     userAccount: UserAccount,
     key: ByteArray,
+    initialOtp: String,
   ): UserAccount {
+    // Validate the OTP and seed `totpLastUsedTimeStep` from the matched step so
+    // the same code can't be replayed against the login endpoint immediately after enable.
+    val matchedStep =
+      mfaService.findMatchingTimeStep(key, initialOtp, minExclusiveTimeStep = null)
+        ?: throw ValidationException(Message.INVALID_OTP_CODE)
     userAccount.totpKey = key
+    userAccount.totpLastUsedTimeStep = matchedStep
     resetTokensValidNotBefore(userAccount)
     val savedUser = userAccountRepository.save(userAccount)
-    notificationService.notify(
-      Notification().apply {
-        this.user = userAccount
-        this.type = NotificationType.MFA_ENABLED
-        this.originatingUser = userAccount
-      },
-    )
+    notifySelf(userAccount, NotificationType.MFA_ENABLED)
     return savedUser
   }
 
@@ -336,31 +340,80 @@ class UserAccountService(
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
   fun disableMfaTotp(userAccount: UserAccount): UserAccount {
     userAccount.totpKey = null
+    userAccount.totpLastUsedTimeStep = null
     // note: if support for more MFA methods is added, this should be only done if no other MFA method is enabled
     userAccount.mfaRecoveryCodes = emptyList()
     resetTokensValidNotBefore(userAccount)
     val savedUser = userAccountRepository.save(userAccount)
+    notifySelf(userAccount, NotificationType.MFA_DISABLED)
+    return savedUser
+  }
+
+  private fun notifySelf(
+    userAccount: UserAccount,
+    notificationType: NotificationType,
+  ) {
     notificationService.notify(
       Notification().apply {
         this.user = userAccount
-        this.type = NotificationType.MFA_DISABLED
+        this.type = notificationType
         this.originatingUser = userAccount
       },
     )
-    return savedUser
+  }
+
+  /**
+   * Verifies a TOTP code against [userAccount] and atomically advances the stored
+   * [UserAccount.totpLastUsedTimeStep] so the same (or earlier) time step cannot be accepted
+   * again. This enforces RFC 6238 §5.2 replay prevention on top of the ±1 drift tolerance
+   * in [MfaService.findMatchingTimeStep].
+   *
+   * Throws [AuthenticationException] with [Message.INVALID_OTP_CODE] on every failure mode:
+   * missing/empty TOTP key, no matching code in the allowed window, or a concurrent request
+   * that already bumped the counter at or past the matched step.
+   */
+  @Transactional
+  @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
+  fun consumeTotpCode(
+    userAccount: UserAccount,
+    code: String,
+  ): UserAccount {
+    if (!MfaService.mfaEnabled(userAccount.totpKey)) {
+      throw AuthenticationException(Message.INVALID_OTP_CODE)
+    }
+    val key = userAccount.totpKey!!
+    val matchedStep =
+      mfaService.findMatchingTimeStep(key, code, userAccount.totpLastUsedTimeStep)
+        ?: throw AuthenticationException(Message.INVALID_OTP_CODE)
+    val rowsAffected =
+      userAccountRepository.updateTotpLastUsedTimeStepIfGreater(userAccount.id, matchedStep)
+    if (rowsAffected == 0) {
+      logger.warn(
+        "TOTP replay rejected for user {}: concurrent bump lost the race",
+        userAccount.id,
+      )
+      throw AuthenticationException(Message.INVALID_OTP_CODE)
+    }
+    // Keep the in-memory entity consistent for the remainder of this request.
+    userAccount.totpLastUsedTimeStep = matchedStep
+    return userAccount
   }
 
   @Transactional
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
   fun consumeMfaRecoveryCode(
     userAccount: UserAccount,
-    token: String,
+    recoveryCode: String,
   ): UserAccount {
-    if (!userAccount.mfaRecoveryCodes.contains(token)) {
+    if (!userAccount.mfaRecoveryCodes.contains(recoveryCode)) {
       throw AuthenticationException(Message.INVALID_OTP_CODE)
     }
 
-    userAccount.mfaRecoveryCodes = userAccount.mfaRecoveryCodes.minus(token)
+    userAccount.mfaRecoveryCodes = userAccount.mfaRecoveryCodes.minus(recoveryCode)
+
+    // Burn the current and next TOTP windows
+    val burnThrough = mfaService.currentTimeStep() + 1L
+    userAccount.totpLastUsedTimeStep = maxOf(burnThrough, userAccount.totpLastUsedTimeStep ?: burnThrough)
     return userAccountRepository.save(userAccount)
   }
 
@@ -506,13 +559,7 @@ class UserAccountService(
     userAccount.password = passwordEncoder.encode(dto.password)
     userAccount.passwordChanged = true
     val savedUser = userAccountRepository.save(userAccount)
-    notificationService.notify(
-      Notification().apply {
-        this.user = userAccount
-        this.type = NotificationType.PASSWORD_CHANGED
-        this.originatingUser = userAccount
-      },
-    )
+    notifySelf(userAccount, NotificationType.PASSWORD_CHANGED)
     return savedUser
   }
 

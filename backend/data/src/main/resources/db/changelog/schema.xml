@@ -5322,4 +5322,9 @@
     <changeSet author="anty (generated)" id="1775613609391-13">
         <addForeignKeyConstraint baseColumnNames="language_id" baseTableName="language_qa_config" constraintName="FKoqiiuc35c8wo16bm34pcv3ckw" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="language" validate="true"/>
     </changeSet>
+    <changeSet author="anty (generated)" id="1775827823285-1">
+        <addColumn tableName="user_account">
+            <column name="totp_last_used_time_step" type="BIGINT"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
