@@ -16,7 +16,7 @@ import { SubfilterComments } from './SubfilterComments';
 import { SubfilterLabels } from 'tg.views/projects/translations/TranslationFilters/SubfilterLabels';
 import { SubfilterSuggestions } from './SubfilterSuggestions';
 import { SubfilterDeletedBy } from './SubfilterDeletedBy';
-import { SubfilterQaChecks } from 'tg.ee';
+import { getQaChecksFiltersLength, SubfilterQaChecks } from 'tg.ee';
 
 type Props = {
   value: FiltersType;
@@ -86,11 +86,14 @@ export const TranslationFiltersPopup = ({
               actions={actions}
               projectId={projectId}
             />
-            <SubfilterQaChecks
-              value={value}
-              actions={actions}
-              projectId={projectId}
-            />
+            {(project.useQaChecks ||
+              Boolean(getQaChecksFiltersLength(value))) && (
+              <SubfilterQaChecks
+                value={value}
+                actions={actions}
+                projectId={projectId}
+              />
+            )}
           </>
         )}
         {project.suggestionsMode !== 'DISABLED' && (
