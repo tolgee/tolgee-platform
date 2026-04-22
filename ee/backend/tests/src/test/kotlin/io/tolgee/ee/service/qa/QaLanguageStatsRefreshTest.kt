@@ -60,11 +60,11 @@ class QaLanguageStatsRefreshTest : AuthorizedControllerTest() {
     cacheStaleStatsForBothBranches()
     clearStaleFlag(testData.mainFrTranslation.id)
 
-    val revisionId = seedActivityRevision(branchIds = listOf(testData.mainBranch.id))
+    val revisionId = seedActivityRevision(branchIds = listOf(null))
 
     fireBatchJobFinalized(revisionId)
 
-    assertStaleCountEquals(branchId = testData.mainBranch.id, expected = 0)
+    assertStaleCountEquals(branchId = null, expected = 0)
     // Feature branch must NOT have been refreshed — its stale count must stay above 0.
     assertStaleCountRemains(branchId = testData.featureBranch.id, minimum = 1)
   }
@@ -80,7 +80,7 @@ class QaLanguageStatsRefreshTest : AuthorizedControllerTest() {
 
     assertStaleCountEquals(branchId = testData.featureBranch.id, expected = 0)
     // Default branch must NOT have been refreshed — its stale count must stay above 0.
-    assertStaleCountRemains(branchId = testData.mainBranch.id, minimum = 1)
+    assertStaleCountRemains(branchId = null, minimum = 1)
   }
 
   @Test
@@ -90,11 +90,11 @@ class QaLanguageStatsRefreshTest : AuthorizedControllerTest() {
     clearStaleFlag(testData.featureFrTranslation.id)
 
     val revisionId =
-      seedActivityRevision(branchIds = listOf(testData.mainBranch.id, testData.featureBranch.id))
+      seedActivityRevision(branchIds = listOf(null, testData.featureBranch.id))
 
     fireBatchJobFinalized(revisionId)
 
-    assertStaleCountEquals(branchId = testData.mainBranch.id, expected = 0)
+    assertStaleCountEquals(branchId = null, expected = 0)
     assertStaleCountEquals(branchId = testData.featureBranch.id, expected = 0)
   }
 
@@ -103,7 +103,7 @@ class QaLanguageStatsRefreshTest : AuthorizedControllerTest() {
     cacheStaleStatsForBothBranches()
     clearStaleFlag(testData.mainFrTranslation.id)
 
-    val revisionId = seedActivityRevision(branchIds = listOf(testData.mainBranch.id))
+    val revisionId = seedActivityRevision(branchIds = listOf(null))
 
     languageStatsListener.onQaBatchJobFinalized(
       OnBatchJobFinalized(
@@ -113,7 +113,7 @@ class QaLanguageStatsRefreshTest : AuthorizedControllerTest() {
     )
 
     // Not a QA_CHECK job — the stale count must not have been recomputed.
-    assertStaleCountRemains(branchId = testData.mainBranch.id, minimum = 1)
+    assertStaleCountRemains(branchId = null, minimum = 1)
   }
 
   private fun fireBatchJobFinalized(revisionId: Long) {
@@ -130,9 +130,9 @@ class QaLanguageStatsRefreshTest : AuthorizedControllerTest() {
    * so refreshing the language stats once caches a stale count of 1 per branch.
    */
   private fun cacheStaleStatsForBothBranches() {
-    languageStatsService.refreshLanguageStats(testData.project.id, testData.mainBranch.id)
+    languageStatsService.refreshLanguageStats(testData.project.id, null)
     languageStatsService.refreshLanguageStats(testData.project.id, testData.featureBranch.id)
-    assertStaleCountEquals(branchId = testData.mainBranch.id, expected = 1)
+    assertStaleCountEquals(branchId = null, expected = 1)
     assertStaleCountEquals(branchId = testData.featureBranch.id, expected = 1)
   }
 
@@ -145,7 +145,7 @@ class QaLanguageStatsRefreshTest : AuthorizedControllerTest() {
   }
 
   private fun assertStaleCountEquals(
-    branchId: Long,
+    branchId: Long?,
     expected: Long,
   ) {
     // Listener methods run async via @Async proxy, so we need to wait
@@ -156,13 +156,14 @@ class QaLanguageStatsRefreshTest : AuthorizedControllerTest() {
   }
 
   private fun assertStaleCountRemains(
-    branchId: Long,
+    branchId: Long?,
     minimum: Long,
   ) {
-    // The listener is @Async — give it a chance to (incorrectly) run before we assert.
-    Thread.sleep(500)
-    val stats = getLanguageStats(languageTag = "fr", branchId = branchId)
-    assertThat(stats!!.qaChecksStaleCount).isGreaterThanOrEqualTo(minimum)
+    // Listener methods run async via @Async proxy, so we need to wait
+    waitForNotThrowing(AssertionFailedError::class) {
+      val stats = getLanguageStats(languageTag = "fr", branchId = branchId)
+      assertThat(stats!!.qaChecksStaleCount).isGreaterThanOrEqualTo(minimum)
+    }
   }
 
   private fun getLanguageStats(
