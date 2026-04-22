@@ -65,15 +65,16 @@ class WebhookProcessor(
     webhookConfig: WebhookConfig,
     failing: Boolean,
   ) {
-    if (failing) {
-      if (webhookConfig.firstFailed == null) {
-        webhookConfig.firstFailed = currentDateProvider.date
-      }
-    } else {
+    webhookConfig.lastExecuted = currentDateProvider.date
+    if (!failing) {
       webhookConfig.firstFailed = null
       webhookConfig.autoDisableNotified = false
+      entityManager.persist(webhookConfig)
+      return
     }
-    webhookConfig.lastExecuted = currentDateProvider.date
+    if (webhookConfig.firstFailed == null) {
+      webhookConfig.firstFailed = currentDateProvider.date
+    }
     entityManager.persist(webhookConfig)
   }
 }

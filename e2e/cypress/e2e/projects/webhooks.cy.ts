@@ -2,9 +2,10 @@ import { assertMessage, confirmStandard, gcy } from '../../common/shared';
 import { webhooksTestData } from '../../common/apiCalls/testData/testData';
 import {
   deleteAllEmails,
+  forceDate,
   getLatestEmail,
-  internalFetch,
   login,
+  releaseForcedDate,
   setWebhookControllerStatus,
   triggerWebhookAutoDisableCheck,
   v2apiFetch,
@@ -16,11 +17,13 @@ import { E2WebhooksView } from '../../compounds/webhooks/E2WebhooksView';
 
 describe('Webhooks', () => {
   const testUrl = API_URL + '/internal/webhook-testing';
+  const preCreatedUrl = 'https://this-will-hopefully-never-exist.com/wh';
   const testUserEmail = 'webhooks-test@test.com';
   const view = new E2WebhooksView();
   let projectId: number;
 
   beforeEach(() => {
+    releaseForcedDate();
     setWebhookControllerStatus(200);
     setFeature('WEBHOOKS', true);
     webhooksTestData.clean();
@@ -32,6 +35,7 @@ describe('Webhooks', () => {
   });
 
   afterEach(() => {
+    releaseForcedDate();
     setFeature('WEBHOOKS', true);
     setWebhookControllerStatus(400);
   });
@@ -41,24 +45,21 @@ describe('Webhooks', () => {
   });
 
   it('updates webhook', () => {
-    const newUrl = 'testurl';
-    createWebhook();
-    const editDialog = view.item(testUrl).openEdit();
-    editDialog.setUrl(newUrl);
+    const editDialog = view.item(preCreatedUrl).openEdit();
+    editDialog.setUrl('testurl');
     editDialog.save();
     waitForGlobalLoading();
     assertMessage('Webhook successfully updated!');
-    view.item(newUrl).shouldExist();
+    view.item('testurl').shouldExist();
   });
 
   it('deletes webhook', () => {
-    createWebhook();
-    const editDialog = view.item(testUrl).openEdit();
+    const editDialog = view.item(preCreatedUrl).openEdit();
     editDialog.delete();
     confirmStandard();
     waitForGlobalLoading();
     assertMessage('Webhook successfully deleted!');
-    view.item(testUrl).shouldNotExist();
+    view.item(preCreatedUrl).shouldNotExist();
   });
 
   it('tests valid webhook', () => {
@@ -69,8 +70,7 @@ describe('Webhooks', () => {
   });
 
   it('tests invalid webhook', () => {
-    createWebhook('invalid');
-    view.item('invalid').test();
+    view.item(preCreatedUrl).test();
     waitForGlobalLoading();
     assertMessage('Test failed!');
   });
@@ -84,13 +84,12 @@ describe('Webhooks', () => {
   });
 
   it('shows info if feature not enabled', () => {
-    createWebhook();
     setFeature('WEBHOOKS', false);
     cy.reload();
     cy.contains('You are over limit, modification is restricted').should(
       'be.visible'
     );
-    const editDialog = view.item(testUrl).openEdit();
+    const editDialog = view.item(preCreatedUrl).openEdit();
     editDialog.delete();
     confirmStandard();
     waitForGlobalLoading();
@@ -102,8 +101,7 @@ describe('Webhooks', () => {
   });
 
   it('toggles webhook disabled and enabled', () => {
-    createWebhook();
-    const item = view.item(testUrl);
+    const item = view.item(preCreatedUrl);
 
     item.disable();
     waitForGlobalLoading();
@@ -114,34 +112,58 @@ describe('Webhooks', () => {
     item.shouldBeEnabled();
   });
 
-  it('auto-disables a webhook that has been failing for more than 3 days', () => {
+  it('auto-disables a webhook after persistent failures and sends email', () => {
     deleteAllEmails();
-    createWebhook();
 
-    // Get the webhook ID via API
+    // Get the pre-created webhook ID
     v2apiFetch(`projects/${projectId}/webhook-configs`).then((response) => {
       const webhook = response.body._embedded.webhookConfigs.find(
-        (w) => w.url === testUrl
+        (w) => w.url === preCreatedUrl
       );
       const webhookId = webhook.id;
 
-      // Mark the webhook as having failed 4 days ago
-      const fourDaysAgo = new Date(Date.now() - 4 * 24 * 60 * 60 * 1000);
-      internalFetch('sql/execute', {
-        method: 'POST',
-        body: `UPDATE webhook_config SET first_failed = '${fourDaysAgo.toISOString()}' WHERE id = ${webhookId}`,
-      });
+      // Move time forward 4 days so the checker sees persistent failure
+      const fourDaysFromNow = Date.now() + 4 * 24 * 60 * 60 * 1000;
+      forceDate(fourDaysFromNow);
 
-      // Trigger the auto-disable check for this webhook
+      // Trigger the auto-disable check
       triggerWebhookAutoDisableCheck(webhookId);
 
       // Reload and verify webhook is disabled and marked as auto-disabled
       cy.reload();
       waitForGlobalLoading();
-      view.item(testUrl).shouldBeDisabled();
+      view.item(preCreatedUrl).shouldBeDisabled();
       gcy('webhook-auto-disabled-label').should('be.visible');
 
       // Verify notification email was sent to the org owner
+      getLatestEmail().then((email) => {
+        cy.wrap(email.To[0].Address).should('eq', testUserEmail);
+      });
+    });
+  });
+
+  it('sends warning email after 6 hours of failure', () => {
+    deleteAllEmails();
+
+    v2apiFetch(`projects/${projectId}/webhook-configs`).then((response) => {
+      const webhook = response.body._embedded.webhookConfigs.find(
+        (w) => w.url === preCreatedUrl
+      );
+      const webhookId = webhook.id;
+
+      // Move time forward 7 hours so the checker sees prolonged failure
+      const sevenHoursFromNow = Date.now() + 7 * 60 * 60 * 1000;
+      forceDate(sevenHoursFromNow);
+
+      // Trigger the auto-disable check
+      triggerWebhookAutoDisableCheck(webhookId);
+
+      // Webhook should still be enabled (not yet 3 days)
+      cy.reload();
+      waitForGlobalLoading();
+      view.item(preCreatedUrl).shouldBeEnabled();
+
+      // But a warning email should have been sent
       getLatestEmail().then((email) => {
         cy.wrap(email.To[0].Address).should('eq', testUserEmail);
       });

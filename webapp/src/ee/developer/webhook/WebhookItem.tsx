@@ -8,7 +8,6 @@ import {
   DialogContent,
   DialogTitle,
   styled,
-  Switch,
   Tooltip,
   useTheme,
 } from '@mui/material';
@@ -22,8 +21,8 @@ import { useMessage } from 'tg.hooks/useSuccessMessage';
 
 import { CopyUrlItem } from 'tg.views/projects/developer/CopyUrlItem';
 import { WebhookEditDialog } from './WebhookEditDialog';
+import { WebhookToggle } from './WebhookToggle';
 import { useDateFormatter } from 'tg.hooks/useLocale';
-import { confirmation } from 'tg.hooks/confirmation';
 
 type WebhookConfigModel = components['schemas']['WebhookConfigModel'];
 
@@ -64,12 +63,6 @@ export const WebhookItem = ({ data }: Props) => {
     method: 'post',
   });
 
-  const toggleWebhook = useApiMutation({
-    url: '/v2/projects/{projectId}/webhook-configs/{id}',
-    method: 'put',
-    invalidatePrefix: '/v2/projects/{projectId}/webhook-configs',
-  });
-
   function handleTest() {
     testLoadable.mutate(
       {
@@ -87,42 +80,6 @@ export const WebhookItem = ({ data }: Props) => {
     );
   }
 
-  function performToggle(enabled: boolean) {
-    toggleWebhook.mutate({
-      path: { projectId: project.id, id: data.id },
-      content: {
-        'application/json': {
-          url: data.url,
-          enabled,
-        },
-      },
-    });
-  }
-
-  function handleToggle() {
-    if (data.enabled) {
-      confirmation({
-        title: (
-          <T
-            keyName="webhook_disable_confirmation_title"
-            defaultValue="Disable webhook?"
-          />
-        ),
-        message: (
-          <T
-            keyName="webhook_disable_confirmation_message"
-            defaultValue="This webhook will no longer receive events until re-enabled."
-          />
-        ),
-        onConfirm() {
-          performToggle(false);
-        },
-      });
-    } else {
-      performToggle(true);
-    }
-  }
-
   return (
     <StyledContainer
       data-cy="webhooks-list-item"
@@ -130,21 +87,7 @@ export const WebhookItem = ({ data }: Props) => {
       sx={{ opacity: data.enabled ? 1 : 0.6 }}
     >
       <Box display="flex" gap={2} alignItems="center">
-        <Tooltip
-          title={
-            data.enabled
-              ? t('webhook_toggle_enabled', 'Enabled')
-              : t('webhook_toggle_disabled', 'Disabled')
-          }
-        >
-          <Switch
-            size="small"
-            checked={data.enabled}
-            onChange={handleToggle}
-            disabled={toggleWebhook.isLoading}
-            data-cy="webhook-item-toggle"
-          />
-        </Tooltip>
+        <WebhookToggle data={data} />
         <Box>{data.url}</Box>
         {Boolean(data.lastExecuted) && (
           <Tooltip title={t('webhooks_last_run_hint')}>
