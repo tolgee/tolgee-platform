@@ -63,7 +63,7 @@ class HtmlSyntaxCheck : QaCheck {
     // Remaining open tags are unclosed — except void elements, for which a leftover
     // opener is tolerated (see VOID_ELEMENTS doc).
     for ((name, stack) in openTags) {
-      if (name in VOID_ELEMENTS) continue
+      if (name.lowercase() in VOID_ELEMENTS) continue
       for (openTag in stack) {
         results.add(
           QaCheckResult(
