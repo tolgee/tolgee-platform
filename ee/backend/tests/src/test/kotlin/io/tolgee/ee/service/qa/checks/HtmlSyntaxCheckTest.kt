@@ -158,13 +158,8 @@ class HtmlSyntaxCheckTest {
 
   @Test
   fun `void element detection is case-insensitive`() {
-    // HtmlSyntaxCheck matches opener/closer names case-sensitively (so `<B></b>`
-    // would still be flagged as mismatched). This test verifies only one specific
-    // behavior: the void-element *tolerance* — i.e. whether a leftover opener is
-    // ignored rather than reported as unclosed — is case-insensitive. Examples:
-    // `<BR>` alone → tolerated (no issue), `<Br></Br>` → case-sensitive matching
-    // pops the opener, `<IMG ...>` → tolerated. See HtmlSyntaxCheck where the
-    // leftover-pass uses `name.lowercase() in VOID_ELEMENTS`.
+    // In HtmlSyntaxCheck, void-element detection is case-insensitive.
+    // Leftover uppercase/mixed-case void openers are tolerated like lowercase ones.
     check.check(params("<BR>")).assertNoIssues()
     check.check(params("<Br></Br>")).assertNoIssues()
     check.check(params("<IMG src=\"x\">")).assertNoIssues()
