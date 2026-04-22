@@ -2462,6 +2462,7 @@
   "verify_email_we_sent_email": "Ми надіслали вам лист для підтвердження на <b>{email}</b>. Після підтвердження ви зможете користуватися платформою.",
   "warning_header_namespace_cannot_be_used_when_feature_is_disabled": "Виявлено імпорт простору імен",
   "warning_message_namespace_cannot_be_used_when_feature_is_disabled": "Виявлено імпорт простору імен, але простори імен наразі вимкнені для цього проєкту.\n\nЩоб виконати імпорт із просторами імен, увімкніть простори імен у налаштуваннях проєкту та почніть імпорт з нуля.\n\nАбо ж ви можете продовжити поточний імпорт, і дані будуть імпортовані під невизначеним простором імен.",
+  "webhook_auto_disabled_hint": "Цей вебхук було автоматично вимкнено після безперервних збоїв протягом тривалого періоду.",
   "webhook_auto_disabled_label": "Автоматично вимкнено",
   "webhook_create_success": "Вебхук успішно створений!",
   "webhook_create_title": "Створити вебхук",
@@ -2488,6 +2489,8 @@
   "webhooks_subtitle": "Вебхуки проєкту",
   "webhook_test_fail": "Тест не вдався!",
   "webhook_test_success": "Тестовий запит успішно надіслано до вебхука",
+  "webhook_toggle_disabled": "Вимкнено",
+  "webhook_toggle_enabled": "Увімкнено",
   "webhook_update_title": "Редагувати вебхук",
   "wrong_current_password": "Введено неправильний поточний пароль",
   "your_email_was_changed_verification_message": "Коли ви змінюєте свою електронну адресу, нова адреса буде встановлена після її перевірки."

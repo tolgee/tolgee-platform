@@ -2725,6 +2725,7 @@
   "verify_email_we_sent_email": "V-am trimis un email de verificare la <b>{email}</b>. După verificare, veți putea utiliza platforma.",
   "warning_header_namespace_cannot_be_used_when_feature_is_disabled": "Importarea spațiilor de nume detectată",
   "warning_message_namespace_cannot_be_used_when_feature_is_disabled": "Importarea spațiilor de nume a fost detectată, dar spațiile de nume sunt dezactivate în prezent pentru acest proiect.\n\nPentru a executa importul cu spații de nume, activați spațiile de nume în setările proiectului și începeți importul de la zero.\n\nAlternativ, puteți continua cu importul curent, iar datele vor fi importate sub un spațiu de nume nespecificat.",
+  "webhook_auto_disabled_hint": "Acest webhook a fost dezactivat automat după eșecuri continue pe o perioadă extinsă.",
   "webhook_auto_disabled_label": "Dezactivat automat",
   "webhook_create_success": "Webhook creat cu succes!",
   "webhook_create_title": "Creează webhook",
@@ -2751,6 +2752,8 @@
   "webhooks_subtitle": "Webhook-uri de proiect",
   "webhook_test_fail": "Testul a eșuat!",
   "webhook_test_success": "Cererea de test a fost trimisă cu succes către webhook",
+  "webhook_toggle_disabled": "Dezactivat",
+  "webhook_toggle_enabled": "Activat",
   "webhook_update_title": "Editați webhook-ul",
   "wrong_current_password": "Parolă curentă incorectă introdusă",
   "your_email_was_changed_verification_message": "Când schimbați adresa de email, noua adresă va fi setată după verificarea acesteia."

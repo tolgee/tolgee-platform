@@ -2451,6 +2451,7 @@
   "verify_email_we_sent_email": "Wysłaliśmy Ci e-mail weryfikacyjny na adres <b>{email}</b>. Po weryfikacji będziesz mógł korzystać z platformy.",
   "warning_header_namespace_cannot_be_used_when_feature_is_disabled": "Wykryto importowanie przestrzeni nazw",
   "warning_message_namespace_cannot_be_used_when_feature_is_disabled": "Wykryto importowanie przestrzeni nazw, ale przestrzenie nazw są obecnie wyłączone dla tego projektu.\n\nAby wykonać importowanie z przestrzeniami nazw, włącz przestrzenie nazw w ustawieniach projektu i rozpocznij importowanie od nowa.\n\nAlternatywnie możesz kontynuować bieżący import, a dane zostaną zaimportowane pod nieokreśloną przestrzenią nazw.",
+  "webhook_auto_disabled_hint": "Ten webhook został automatycznie wyłączony po ciągłych niepowodzeniach przez dłuższy okres.",
   "webhook_auto_disabled_label": "Automatycznie wyłączony",
   "webhook_create_success": "Webhook został pomyślnie utworzony!",
   "webhook_create_title": "Utwórz webhook",
@@ -2477,6 +2478,8 @@
   "webhooks_subtitle": "Webhooki projektu",
   "webhook_test_fail": "Test nieudany!",
   "webhook_test_success": "Żądanie testowe zostało pomyślnie wysłane do webhooka",
+  "webhook_toggle_disabled": "Wyłączony",
+  "webhook_toggle_enabled": "Włączony",
   "webhook_update_title": "Edytuj webhook",
   "wrong_current_password": "Wprowadzono błędne obecne hasło",
   "your_email_was_changed_verification_message": "Po zmianie adresu e-mail, nowy adres zostanie ustawiony po jego weryfikacji."

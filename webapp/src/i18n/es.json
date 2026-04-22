@@ -2731,6 +2731,7 @@
   "verify_email_we_sent_email": "Le hemos enviado un correo electrónico de verificación a <b>{email}</b>. Después de la verificación, podrá usar la plataforma.",
   "warning_header_namespace_cannot_be_used_when_feature_is_disabled": "Importación de espacios de nombres detectada",
   "warning_message_namespace_cannot_be_used_when_feature_is_disabled": "Se detectó la importación de espacios de nombres, pero los espacios de nombres están actualmente deshabilitados para este proyecto.\n\nPara ejecutar la importación con espacios de nombres, habilite los espacios de nombres en los ajustes del proyecto y comience la importación desde cero.\n\nAlternativamente, puede proceder con la importación actual y los datos se importarán bajo un espacio de nombres no especificado.",
+  "webhook_auto_disabled_hint": "Este webhook se deshabilitó automáticamente después de fallar continuamente durante un período prolongado.",
   "webhook_auto_disabled_label": "Deshabilitado automáticamente",
   "webhook_create_success": "¡Webhook creado con éxito!",
   "webhook_create_title": "Crear webhook",
@@ -2757,6 +2758,8 @@
   "webhooks_subtitle": "Webhooks del proyecto",
   "webhook_test_fail": "¡Fallo en la prueba!",
   "webhook_test_success": "Solicitud de prueba enviada al webhook con éxito",
+  "webhook_toggle_disabled": "Deshabilitado",
+  "webhook_toggle_enabled": "Habilitado",
   "webhook_update_title": "Editar webhook",
   "wrong_current_password": "Se ha introducido una contraseña actual incorrecta",
   "your_email_was_changed_verification_message": "Si cambia su correo electrónico, el cambio no entrará en vigencia hasta que se verifique el nuevo correo electrónico."

@@ -2747,6 +2747,7 @@
   "verify_email_we_sent_email": "Vi har sendt dig en bekræftelses-e-mail på <b>{email}</b>. Efter bekræftelse vil du kunne bruge platformen.",
   "warning_header_namespace_cannot_be_used_when_feature_is_disabled": "Namespace import opdaget",
   "warning_message_namespace_cannot_be_used_when_feature_is_disabled": "Namespace import blev opdaget, men namespaces er i øjeblikket deaktiveret for dette projekt.\n\nFor at udføre importen med namespaces, aktiver namespaces i projektindstillingerne og start importen forfra.\n\nAlternativt kan du fortsætte med den nuværende import, og dataene vil blive importeret under en uspecificeret namespace.",
+  "webhook_auto_disabled_hint": "Denne webhook blev automatisk deaktiveret efter at have fejlet kontinuerligt i en længere periode.",
   "webhook_auto_disabled_label": "Automatisk deaktiveret",
   "webhook_create_success": "Webhook oprettet med succes!",
   "webhook_create_title": "Opret webhook",
@@ -2773,6 +2774,8 @@
   "webhooks_subtitle": "Projekt-webhooks",
   "webhook_test_fail": "Test mislykkedes!",
   "webhook_test_success": "Testanmodning sendt til webhook'en med succes",
+  "webhook_toggle_disabled": "Deaktiveret",
+  "webhook_toggle_enabled": "Aktiveret",
   "webhook_update_title": "Rediger webhook",
   "wrong_current_password": "Forkert nuværende adgangskode indtastet",
   "your_email_was_changed_verification_message": "Når du ændrer din e-mail, vil den nye e-mail blive indstillet efter bekræftelse."

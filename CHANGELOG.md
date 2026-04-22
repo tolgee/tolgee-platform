@@ -1,3 +1,15 @@
+# [3.181.0](https://github.com/tolgee/tolgee-platform/compare/v3.180.3...v3.181.0) (2026-04-22)
+
+
+### Bug Fixes
+
+* TOTP clock-drift tolerance with replay prevention ([#3601](https://github.com/tolgee/tolgee-platform/issues/3601)) ([3ea00ff](https://github.com/tolgee/tolgee-platform/commit/3ea00ff50f4add32f81c049aa7335033c0d04c2a))
+
+
+### Features
+
+* ungate AI context data for free plan users ([#3598](https://github.com/tolgee/tolgee-platform/issues/3598)) ([6366165](https://github.com/tolgee/tolgee-platform/commit/6366165c242b6a0f9f493c8a6d3f28afbdda6ba3)), closes [#3583](https://github.com/tolgee/tolgee-platform/issues/3583)
+
 ## [3.180.3](https://github.com/tolgee/tolgee-platform/compare/v3.180.2...v3.180.3) (2026-04-21)
 
 

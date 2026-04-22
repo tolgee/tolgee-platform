@@ -2739,6 +2739,7 @@
   "verify_email_we_sent_email": "Wir haben Ihnen eine Bestätigungs-E-Mail an <b>{email}</b> gesendet. Nach der Verifizierung können Sie die Plattform nutzen.",
   "warning_header_namespace_cannot_be_used_when_feature_is_disabled": "Importieren von Namespaces erkannt",
   "warning_message_namespace_cannot_be_used_when_feature_is_disabled": "Importieren von Namespaces wurde erkannt, aber Namespaces sind derzeit für dieses Projekt deaktiviert.\n\nUm den Import mit Namespaces durchzuführen, aktivieren Sie Namespaces in den Projekteinstellungen und starten Sie den Import von vorne.\n\nAlternativ können Sie mit dem aktuellen Import fortfahren, und die Daten werden unter einem nicht spezifizierten Namespace importiert.",
+  "webhook_auto_disabled_hint": "Dieser Webhook wurde nach anhaltenden Fehlern über einen längeren Zeitraum automatisch deaktiviert.",
   "webhook_auto_disabled_label": "Automatisch deaktiviert",
   "webhook_create_success": "Webhook erfolgreich erstellt!",
   "webhook_create_title": "Webhook erstellen",
@@ -2765,6 +2766,8 @@
   "webhooks_subtitle": "Projekt-Webhooks",
   "webhook_test_fail": "Test fehlgeschlagen!",
   "webhook_test_success": "Testanfrage erfolgreich an den Webhook gesendet",
+  "webhook_toggle_disabled": "Deaktiviert",
+  "webhook_toggle_enabled": "Aktiviert",
   "webhook_update_title": "Webhook bearbeiten",
   "wrong_current_password": "Falsches aktuelles Passwort eingegeben",
   "your_email_was_changed_verification_message": "Wenn Sie Ihre E-Mail ändern, wird die neue E-Mail nach ihrer Überprüfung eingestellt."

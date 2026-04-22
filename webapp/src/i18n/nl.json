@@ -2747,6 +2747,7 @@
   "verify_email_we_sent_email": "We hebben u een verificatie-e-mail gestuurd naar <b>{email}</b>. Na verificatie kunt u het platform gebruiken.",
   "warning_header_namespace_cannot_be_used_when_feature_is_disabled": "Namespace importeren gedetecteerd",
   "warning_message_namespace_cannot_be_used_when_feature_is_disabled": "Namespace importeren werd gedetecteerd, maar namespaces zijn momenteel uitgeschakeld voor dit project.\n\nOm de import met namespaces uit te voeren, schakelt u namespaces in de projectinstellingen in en start u de import opnieuw.\n\nAls alternatief kunt u doorgaan met de huidige import, en de gegevens worden geïmporteerd onder een niet-gespecificeerde namespace.",
+  "webhook_auto_disabled_hint": "Deze webhook is automatisch uitgeschakeld na langdurig aanhoudende fouten.",
   "webhook_auto_disabled_label": "Automatisch uitgeschakeld",
   "webhook_create_success": "Webhook succesvol aangemaakt!",
   "webhook_create_title": "Webhook aanmaken",
@@ -2773,6 +2774,8 @@
   "webhooks_subtitle": "Project Webhooks",
   "webhook_test_fail": "Test mislukt!",
   "webhook_test_success": "Testverzoek succesvol verzonden naar de webhook",
+  "webhook_toggle_disabled": "Uitgeschakeld",
+  "webhook_toggle_enabled": "Ingeschakeld",
   "webhook_update_title": "Webhook bewerken",
   "wrong_current_password": "Verkeerd huidig wachtwoord ingevoerd",
   "your_email_was_changed_verification_message": "Wanneer u uw e-mailadres wijzigt, wordt het nieuwe e-mailadres ingesteld nadat het is geverifieerd."

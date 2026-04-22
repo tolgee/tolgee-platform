@@ -2744,6 +2744,7 @@
   "verify_email_we_sent_email": "Odeslali jsme vám ověřovací e-mail na <b>{email}</b>. Po ověření budete moci začít používat platformu.",
   "warning_header_namespace_cannot_be_used_when_feature_is_disabled": "Zjištěno importování namespace",
   "warning_message_namespace_cannot_be_used_when_feature_is_disabled": "Bylo zjištěno importování namespaces, namespaces jsou pro tento projekt momentálně zakázány.\n\nChcete-li provést import s namespaces, povolte namespaces v nastavení projektu a import spusťte znovu.\n\nPřípadně můžete pokračovat s aktuálním importem a data budou importována pod nespecifikovaným namespace.",
+  "webhook_auto_disabled_hint": "Tento webhook byl automaticky deaktivován po opakovaném selhání po delší dobu.",
   "webhook_auto_disabled_label": "Automaticky zakázáno",
   "webhook_create_success": "Webhook úspěšně vytvořen!",
   "webhook_create_title": "Vytvořit webhook",
@@ -2770,6 +2771,8 @@
   "webhooks_subtitle": "Webhooky projektu",
   "webhook_test_fail": "Test selhal!",
   "webhook_test_success": "Testovací požadavek na webhook byl úspěšně odeslán",
+  "webhook_toggle_disabled": "Deaktivováno",
+  "webhook_toggle_enabled": "Povoleno",
   "webhook_update_title": "Upravit webhook",
   "wrong_current_password": "Vložili jste špatné současné heslo",
   "your_email_was_changed_verification_message": "Pokud změníte svůj e-mail, změna se projeví až po ověření nového e-mailu."

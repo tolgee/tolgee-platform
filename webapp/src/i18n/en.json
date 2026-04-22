@@ -2749,6 +2749,7 @@
   "verify_email_we_sent_email": "We have sent you a verification email at <b>{email}</b>. After verification, you will be able to use the platform.",
   "warning_header_namespace_cannot_be_used_when_feature_is_disabled": "Namespace importing detected",
   "warning_message_namespace_cannot_be_used_when_feature_is_disabled": "Namespace importing was detected, but namespaces are currently disabled for this project.\n\nTo execute the import with namespaces, enable namespaces in the project settings and start the import from scratch.\n\nAlternatively, you can proceed with the current import, and the data will be imported under an unspecified namespace.",
+  "webhook_auto_disabled_hint": "This webhook was automatically disabled after failing continuously for an extended period.",
   "webhook_auto_disabled_label": "Automatically disabled",
   "webhook_create_success": "Webhook successfully created!",
   "webhook_create_title": "Create webhook",
@@ -2775,6 +2776,8 @@
   "webhooks_subtitle": "Project Webhooks",
   "webhook_test_fail": "Test failed!",
   "webhook_test_success": "Test request sent to the webhook successfully",
+  "webhook_toggle_disabled": "Disabled",
+  "webhook_toggle_enabled": "Enabled",
   "webhook_update_title": "Edit webhook",
   "wrong_current_password": "Wrong current password entered",
   "your_email_was_changed_verification_message": "When you change your email, new email will be set after its verification."

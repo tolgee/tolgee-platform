@@ -2684,6 +2684,7 @@
   "verify_email_we_sent_email": "Ti abbiamo inviato un'email di verifica a <b>{email}</b>. Dopo la verifica, potrai utilizzare la piattaforma.",
   "warning_header_namespace_cannot_be_used_when_feature_is_disabled": "Rilevata importazione di namespace",
   "warning_message_namespace_cannot_be_used_when_feature_is_disabled": "È stata rilevata l'importazione di namespace, ma i namespace sono attualmente disabilitati per questo progetto.\n\nPer eseguire l'importazione con i namespace, abilita i namespace nelle impostazioni del progetto e avvia l'importazione da capo.\n\nIn alternativa, puoi procedere con l'importazione corrente e i dati verranno importati sotto un namespace non specificato.",
+  "webhook_auto_disabled_hint": "Questo webhook è stato disabilitato automaticamente dopo aver fallito continuamente per un periodo prolungato.",
   "webhook_auto_disabled_label": "Disabilitato automaticamente",
   "webhook_create_success": "Webhook creato con successo!",
   "webhook_create_title": "Crea webhook",
@@ -2710,6 +2711,8 @@
   "webhooks_subtitle": "Webhook del progetto",
   "webhook_test_fail": "Test fallito!",
   "webhook_test_success": "Richiesta di test inviata al webhook con successo",
+  "webhook_toggle_disabled": "Disabilitato",
+  "webhook_toggle_enabled": "Abilitato",
   "webhook_update_title": "Modifica webhook",
   "wrong_current_password": "Password attuale errata inserita",
   "your_email_was_changed_verification_message": "Quando cambi la tua email, la nuova email verrà impostata dopo la sua verifica."

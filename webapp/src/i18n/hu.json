@@ -2733,6 +2733,7 @@
   "verify_email_we_sent_email": "Ellenőrző e-mailt küldtünk a következő címre: <b>{email}</b>. Az ellenőrzés után használhatja a platformot.",
   "warning_header_namespace_cannot_be_used_when_feature_is_disabled": "Névtér importálása észlelve",
   "warning_message_namespace_cannot_be_used_when_feature_is_disabled": "Névtér importálása észlelve, de a névterek jelenleg le vannak tiltva ebben a projektben.\n\nA névterekkel történő importálás végrehajtásához engedélyezze a névtereket a projekt beállításokban, és kezdje el az importálást elölről.\n\nAlternatív megoldásként folytathatja a jelenlegi importálást, és az adatok egy nem meghatározott névtér alá kerülnek importálásra.",
+  "webhook_auto_disabled_hint": "Ez a webhook automatikusan letiltásra került, miután hosszabb ideig folyamatosan hibát jelzett.",
   "webhook_auto_disabled_label": "Automatikusan letiltva",
   "webhook_create_success": "Webhook sikeresen létrehozva!",
   "webhook_create_title": "Webhook létrehozása",
@@ -2759,6 +2760,8 @@
   "webhooks_subtitle": "Projekt Webhookok",
   "webhook_test_fail": "A teszt sikertelen volt!",
   "webhook_test_success": "A teszt kérés sikeresen elküldve a webhooknak",
+  "webhook_toggle_disabled": "Letiltva",
+  "webhook_toggle_enabled": "Engedélyezve",
   "webhook_update_title": "Webhook szerkesztése",
   "wrong_current_password": "Hibás jelenlegi jelszó megadva",
   "your_email_was_changed_verification_message": "Az új e-mail címed beállítása az ellenőrzés után történik."

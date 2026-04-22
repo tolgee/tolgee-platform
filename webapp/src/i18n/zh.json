@@ -2734,6 +2734,7 @@
   "verify_email_we_sent_email": "我们已向 <b>{email}</b> 发送了一封验证邮件。验证后，您将能够使用该平台。",
   "warning_header_namespace_cannot_be_used_when_feature_is_disabled": "检测到命名空间导入",
   "warning_message_namespace_cannot_be_used_when_feature_is_disabled": "检测到命名空间导入，但当前项目已禁用命名空间。\n\n要使用命名空间执行导入，请在项目设置中启用命名空间并从头开始导入。\n\n或者，您可以继续当前导入，数据将被导入到未指定的命名空间下。",
+  "webhook_auto_disabled_hint": "此 webhook 在持续失败一段时间后已被自动禁用。",
   "webhook_auto_disabled_label": "自动禁用",
   "webhook_create_success": "Webhook 已成功创建！",
   "webhook_create_title": "创建 Webhook",
@@ -2760,6 +2761,8 @@
   "webhooks_subtitle": "项目 Webhooks",
   "webhook_test_fail": "测试失败！",
   "webhook_test_success": "测试请求已成功发送到 Webhook",
+  "webhook_toggle_disabled": "停用",
+  "webhook_toggle_enabled": "启用",
   "webhook_update_title": "编辑 Webhook",
   "wrong_current_password": "您的当前密码输入错误",
   "your_email_was_changed_verification_message": "当您更改电子邮箱地址时，新地址将在完成验证后设置。"

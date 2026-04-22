@@ -2736,6 +2736,7 @@
   "verify_email_we_sent_email": "Nous vous avons envoyé un e-mail de vérification à <b>{email}</b>. Après vérification, vous pourrez utiliser la plateforme.",
   "warning_header_namespace_cannot_be_used_when_feature_is_disabled": "Importation de namespace détectée",
   "warning_message_namespace_cannot_be_used_when_feature_is_disabled": "L'importation de namespace a été détectée, mais les namespaces sont actuellement désactivés pour ce projet.\n\nPour exécuter l'importation avec des namespaces, activez les namespaces dans les paramètres du projet et recommencez l'importation depuis le début.\n\nSinon, vous pouvez continuer avec l'importation actuelle, et les données seront importées sous un namespace non spécifié.",
+  "webhook_auto_disabled_hint": "Ce webhook a été automatiquement désactivé après avoir échoué de manière continue pendant une période prolongée.",
   "webhook_auto_disabled_label": "Désactivé automatiquement",
   "webhook_create_success": "Webhook créé avec succès!",
   "webhook_create_title": "Créer un webhook",
@@ -2762,6 +2763,8 @@
   "webhooks_subtitle": "Webhooks du projet",
   "webhook_test_fail": "Échec du test!",
   "webhook_test_success": "La demande de test a été envoyée avec succès au webhook",
+  "webhook_toggle_disabled": "Désactivé",
+  "webhook_toggle_enabled": "Activé",
   "webhook_update_title": "Modifier le webhook",
   "wrong_current_password": "Mot de passe saisit incorrect ",
   "your_email_was_changed_verification_message": "Si vous changez votre adresse e-mail, la modification se manifestera après la vérification de cet e-mail."

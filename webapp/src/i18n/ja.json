@@ -2749,6 +2749,7 @@
   "verify_email_we_sent_email": "<b>{email}</b> に確認メールを送信しました。確認後、プラットフォームをご利用いただけるようになります。",
   "warning_header_namespace_cannot_be_used_when_feature_is_disabled": "名前空間のインポートが検出されました",
   "warning_message_namespace_cannot_be_used_when_feature_is_disabled": "名前空間のインポートが検出されましたが、このプロジェクトでは名前空間が現在無効になっています。\n\n名前空間を使用してインポートを実行するには、プロジェクト設定で名前空間を有効にし、インポートを最初から開始してください。\n\nまたは、現在のインポートを続行すると、データは指定されていない名前空間の下にインポートされます。",
+  "webhook_auto_disabled_hint": "この webhook は長期間にわたって継続的に失敗したため、自動的に無効化されました。",
   "webhook_auto_disabled_label": "自動的に無効化",
   "webhook_create_success": "Webhookの作成に成功しました！",
   "webhook_create_title": "Webhookの作成",
@@ -2775,6 +2776,8 @@
   "webhooks_subtitle": "プロジェクトのWebhook",
   "webhook_test_fail": "テストに失敗しました！",
   "webhook_test_success": "Webhook へのテストリクエストが正常に送信されました",
+  "webhook_toggle_disabled": "無効",
+  "webhook_toggle_enabled": "有効",
   "webhook_update_title": "Webhookの編集",
   "wrong_current_password": "入力された現在のパスワードが間違っています",
   "your_email_was_changed_verification_message": "メールアドレスを変更すると、確認後に新しいメールアドレスが設定されます。"
