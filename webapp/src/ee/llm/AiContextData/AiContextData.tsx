@@ -1,20 +1,14 @@
 import { Box, Typography } from '@mui/material';
-import { T, useTranslate } from '@tolgee/react';
+import { T } from '@tolgee/react';
 import { useProject } from 'tg.hooks/useProject';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { BoxLoading } from 'tg.component/common/BoxLoading';
-import { useEnabledFeatures } from 'tg.globalContext/helpers';
-import { DisabledFeatureBanner } from 'tg.component/common/DisabledFeatureBanner';
 
 import { AiLanguagesTable } from './AiLanguagesTable';
 import { AiProjectDescription } from './AiProjectDescription';
 
 export const AiContextData = () => {
   const project = useProject();
-  const { isEnabled } = useEnabledFeatures();
-  const { t } = useTranslate();
-
-  const featureEnabled = isEnabled('AI_PROMPT_CUSTOMIZATION');
 
   const languagesLoadable = useApiQuery({
     url: '/v2/projects/{projectId}/languages',
@@ -23,38 +17,19 @@ export const AiContextData = () => {
     query: {
       size: 1000,
     },
-    options: {
-      enabled: featureEnabled,
-    },
   });
 
   const descriptionLoadable = useApiQuery({
     url: '/v2/projects/{projectId}/ai-prompt-customization',
     method: 'get',
     path: { projectId: project.id },
-    options: {
-      enabled: featureEnabled,
-    },
   });
 
   const languageDescriptionsLoadable = useApiQuery({
     url: '/v2/projects/{projectId}/language-ai-prompt-customizations',
     method: 'get',
     path: { projectId: project.id },
-    options: {
-      enabled: featureEnabled,
-    },
   });
-
-  if (!featureEnabled) {
-    return (
-      <Box mt={4} mb={3} gap={3} display="grid">
-        <DisabledFeatureBanner
-          customMessage={t('ai_customization_not_enabled_message')}
-        />
-      </Box>
-    );
-  }
 
   if (
     languagesLoadable.isLoading ||
@@ -85,7 +60,7 @@ export const AiContextData = () => {
           description={descriptionLoadable.data?.description}
         />
 
-        {Boolean(languages?.length) && (
+        {languages.length > 0 && (
           <>
             <Typography variant="h6">
               <T keyName="language_ai_prompts_title" />
