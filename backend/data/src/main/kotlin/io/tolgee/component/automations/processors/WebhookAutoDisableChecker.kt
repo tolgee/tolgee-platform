@@ -51,7 +51,7 @@ class WebhookAutoDisableChecker(
       webhookConfig.enabled = false
       webhookConfig.autoDisabled = true
       webhookConfigRepository.save(webhookConfig)
-      sendEmails(webhookConfig, "webhook-disabled")
+      sendDisabledNotification(webhookConfig)
       logger.info(
         "Auto-disabled webhook {} (url: {}) after {} days of failures",
         webhookConfig.id,
@@ -62,7 +62,7 @@ class WebhookAutoDisableChecker(
     }
 
     if (!webhookConfig.autoDisableNotified && webhookConfig.firstFailed!! <= warningCutoff) {
-      sendEmails(webhookConfig, "webhook-failing-warning")
+      sendWarningNotification(webhookConfig)
       webhookConfig.autoDisableNotified = true
       webhookConfigRepository.save(webhookConfig)
       logger.info(
@@ -76,7 +76,15 @@ class WebhookAutoDisableChecker(
     return false
   }
 
-  private fun sendEmails(
+  private fun sendDisabledNotification(webhook: WebhookConfig) {
+    sendNotificationToOwners(webhook, "webhook-disabled")
+  }
+
+  private fun sendWarningNotification(webhook: WebhookConfig) {
+    sendNotificationToOwners(webhook, "webhook-failing-warning")
+  }
+
+  private fun sendNotificationToOwners(
     webhook: WebhookConfig,
     template: String,
   ) {
