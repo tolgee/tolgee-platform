@@ -8,7 +8,6 @@ import {
   releaseForcedDate,
   setWebhookControllerStatus,
   triggerWebhookAutoDisableCheck,
-  v2apiFetch,
 } from '../../common/apiCalls/common';
 import { waitForGlobalLoading } from '../../common/loading';
 import { API_URL } from '../../common/constants';
@@ -115,58 +114,41 @@ describe('Webhooks', () => {
   it('auto-disables a webhook after persistent failures and sends email', () => {
     deleteAllEmails();
 
-    // Get the pre-created webhook ID
-    v2apiFetch(`projects/${projectId}/webhook-configs`).then((response) => {
-      const webhook = response.body._embedded.webhookConfigs.find(
-        (w) => w.url === preCreatedUrl
-      );
-      const webhookId = webhook.id;
+    // Move time forward 4 days so the checker sees persistent failure
+    forceDate(Date.now() + 4 * 24 * 60 * 60 * 1000);
 
-      // Move time forward 4 days so the checker sees persistent failure
-      const fourDaysFromNow = Date.now() + 4 * 24 * 60 * 60 * 1000;
-      forceDate(fourDaysFromNow);
+    // Trigger the auto-disable check on all webhooks
+    triggerWebhookAutoDisableCheck();
 
-      // Trigger the auto-disable check
-      triggerWebhookAutoDisableCheck(webhookId);
+    // Reload and verify webhook is disabled and marked as auto-disabled
+    cy.reload();
+    waitForGlobalLoading();
+    view.item(preCreatedUrl).shouldBeDisabled();
+    gcy('webhook-auto-disabled-label').should('be.visible');
 
-      // Reload and verify webhook is disabled and marked as auto-disabled
-      cy.reload();
-      waitForGlobalLoading();
-      view.item(preCreatedUrl).shouldBeDisabled();
-      gcy('webhook-auto-disabled-label').should('be.visible');
-
-      // Verify notification email was sent to the org owner
-      getLatestEmail().then((email) => {
-        cy.wrap(email.To[0].Address).should('eq', testUserEmail);
-      });
+    // Verify notification email was sent to the org owner
+    getLatestEmail().then((email) => {
+      cy.wrap(email.To[0].Address).should('eq', testUserEmail);
     });
   });
 
   it('sends warning email after 6 hours of failure', () => {
     deleteAllEmails();
 
-    v2apiFetch(`projects/${projectId}/webhook-configs`).then((response) => {
-      const webhook = response.body._embedded.webhookConfigs.find(
-        (w) => w.url === preCreatedUrl
-      );
-      const webhookId = webhook.id;
+    // Move time forward 7 hours so the checker sees prolonged failure
+    forceDate(Date.now() + 7 * 60 * 60 * 1000);
 
-      // Move time forward 7 hours so the checker sees prolonged failure
-      const sevenHoursFromNow = Date.now() + 7 * 60 * 60 * 1000;
-      forceDate(sevenHoursFromNow);
+    // Trigger the auto-disable check
+    triggerWebhookAutoDisableCheck();
 
-      // Trigger the auto-disable check
-      triggerWebhookAutoDisableCheck(webhookId);
+    // Webhook should still be enabled (not yet 3 days)
+    cy.reload();
+    waitForGlobalLoading();
+    view.item(preCreatedUrl).shouldBeEnabled();
 
-      // Webhook should still be enabled (not yet 3 days)
-      cy.reload();
-      waitForGlobalLoading();
-      view.item(preCreatedUrl).shouldBeEnabled();
-
-      // But a warning email should have been sent
-      getLatestEmail().then((email) => {
-        cy.wrap(email.To[0].Address).should('eq', testUserEmail);
-      });
+    // But a warning email should have been sent
+    getLatestEmail().then((email) => {
+      cy.wrap(email.To[0].Address).should('eq', testUserEmail);
     });
   });
 

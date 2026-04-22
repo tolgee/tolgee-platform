@@ -15,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap
 class Debouncer(
   private val usingRedisProvider: UsingRedisProvider,
   private val applicationContext: ApplicationContext,
+  private val currentDateProvider: CurrentDateProvider,
 ) {
   private val inMemoryTimestamps = ConcurrentHashMap<String, Long>()
 
@@ -40,10 +41,11 @@ class Debouncer(
       return redisTemplate.opsForValue().setIfAbsent(key, "1", duration) == true
     }
 
-    val now = System.currentTimeMillis()
-    val lastRun = inMemoryTimestamps[key]
-    if (lastRun != null && now - lastRun < duration.toMillis()) return false
-    inMemoryTimestamps[key] = now
-    return true
+    val now = currentDateProvider.date.time
+    val durationMs = duration.toMillis()
+    val existing = inMemoryTimestamps.putIfAbsent(key, now)
+    if (existing == null) return true
+    if (now - existing < durationMs) return false
+    return inMemoryTimestamps.replace(key, existing, now)
   }
 }
