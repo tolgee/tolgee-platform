@@ -225,7 +225,7 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   }
 
   @Autowired
-  private fun initInitialUser() {
+  private fun initInitialUser(tolgeeProperties: TolgeeProperties) {
     initialUsername = tolgeeProperties.authentication.initialUsername
     initialPassword = initialPasswordManager.initialPassword
   }
