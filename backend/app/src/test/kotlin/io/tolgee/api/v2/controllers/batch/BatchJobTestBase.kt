@@ -38,12 +38,32 @@ class BatchJobTestBase {
 
   var fakeBefore: Boolean = false
 
+  // Snapshots of TolgeeProperties fields mutated in setup(). The properties bean is a
+  // singleton in the Spring context, and with the context shared across tests these mutations
+  // would leak between test classes. tearDown() restores them to the captured values.
+  private var fakeMtProvidersBefore: Boolean = false
+  private var googleApiKeyBefore: String? = null
+  private var googleDefaultEnabledBefore: Boolean = false
+  private var googleDefaultPrimaryBefore: Boolean = false
+  private var awsDefaultEnabledBefore: Boolean = false
+  private var awsAccessKeyBefore: String? = null
+  private var awsSecretKeyBefore: String? = null
+
   @Autowired
   private lateinit var testDataService: TestDataService
 
   fun setup() {
     batchJobOperationQueue.clear()
     testData = BatchJobsTestData()
+
+    // Snapshot current values before mutating, so tearDown() can restore them
+    fakeMtProvidersBefore = tolgeeProperties.internal.fakeMtProviders
+    googleApiKeyBefore = machineTranslationProperties.google.apiKey
+    googleDefaultEnabledBefore = machineTranslationProperties.google.defaultEnabled
+    googleDefaultPrimaryBefore = machineTranslationProperties.google.defaultPrimary
+    awsDefaultEnabledBefore = machineTranslationProperties.aws.defaultEnabled
+    awsAccessKeyBefore = machineTranslationProperties.aws.accessKey
+    awsSecretKeyBefore = machineTranslationProperties.aws.secretKey
 
     // Set properties directly instead of mocking
     tolgeeProperties.internal.fakeMtProviders = true
@@ -57,6 +77,17 @@ class BatchJobTestBase {
     machineTranslationProperties.aws.defaultEnabled = false
     machineTranslationProperties.aws.accessKey = "mock"
     machineTranslationProperties.aws.secretKey = "mock"
+  }
+
+  fun tearDown() {
+    // Restore shared TolgeeProperties singleton to avoid cross-test leakage
+    tolgeeProperties.internal.fakeMtProviders = fakeMtProvidersBefore
+    machineTranslationProperties.google.apiKey = googleApiKeyBefore
+    machineTranslationProperties.google.defaultEnabled = googleDefaultEnabledBefore
+    machineTranslationProperties.google.defaultPrimary = googleDefaultPrimaryBefore
+    machineTranslationProperties.aws.defaultEnabled = awsDefaultEnabledBefore
+    machineTranslationProperties.aws.accessKey = awsAccessKeyBefore
+    machineTranslationProperties.aws.secretKey = awsSecretKeyBefore
   }
 
   fun saveAndPrepare(testClass: ProjectAuthControllerTest) {
