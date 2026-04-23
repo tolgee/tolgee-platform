@@ -45,23 +45,19 @@ class OrganizationSlackControllerTest : AuthorizedControllerTest() {
   @Autowired
   private lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
 
-  private var slackClientIdBefore: String? = null
-  private var slackClientSecretBefore: String? = null
-
   @BeforeEach
   fun setUp() {
     testData = SlackTestData()
     testDataService.saveTestData(testData.root)
     enabledFeaturesProvider.forceEnabled = setOf(Feature.SLACK_INTEGRATION)
-    slackClientIdBefore = slackProperties.clientId
-    slackClientSecretBefore = slackProperties.clientSecret
   }
 
   @AfterEach
   fun tearDown() {
-    // Restore shared TolgeeProperties singleton to avoid cross-test leakage
-    slackProperties.clientId = slackClientIdBefore
-    slackProperties.clientSecret = slackClientSecretBefore
+    // Restore shared TolgeeProperties singleton to avoid cross-test leakage.
+    // Declared defaults are null and test yaml does not override slack.clientId/clientSecret.
+    slackProperties.clientId = null
+    slackProperties.clientSecret = null
     enabledFeaturesProvider.forceEnabled = null
   }
 

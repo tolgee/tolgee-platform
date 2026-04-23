@@ -19,21 +19,19 @@ class McpBatchToolsTest : AbstractMcpTest() {
   lateinit var data: McpPakTestData
   lateinit var client: McpSyncClient
 
-  private var fakeMtProvidersBefore: Boolean = false
-
   @BeforeEach
   fun setup() {
     data = createTestDataWithPak()
     client = createMcpClientWithPak(data.apiKey.encodedKey!!)
 
-    fakeMtProvidersBefore = internalProperties.fakeMtProviders
     internalProperties.fakeMtProviders = true
   }
 
   @AfterEach
   fun tearDown() {
-    // Restore shared TolgeeProperties singleton to avoid cross-test leakage
-    internalProperties.fakeMtProviders = fakeMtProvidersBefore
+    // Restore shared TolgeeProperties singleton to avoid cross-test leakage.
+    // Test yaml also sets this to true, so a literal restore is safe.
+    internalProperties.fakeMtProviders = true
   }
 
   @Test
