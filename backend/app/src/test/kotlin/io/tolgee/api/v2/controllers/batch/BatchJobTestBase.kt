@@ -38,14 +38,12 @@ class BatchJobTestBase {
 
   var fakeBefore: Boolean = false
 
-  // Snapshots of TolgeeProperties fields mutated in setup(). The properties bean is a
-  // singleton in the Spring context, and with the context shared across tests these mutations
-  // would leak between test classes. tearDown() restores them to the captured values.
+  // Snapshots of TolgeeProperties fields that are overridden by the test yaml
+  // (backend/app/src/test/resources/application.yaml). We cannot restore them to the
+  // declared defaults without leaking different values into other tests, so we capture
+  // the effective values before mutating and restore them in tearDown().
   private var fakeMtProvidersBefore: Boolean = false
   private var googleApiKeyBefore: String? = null
-  private var googleDefaultEnabledBefore: Boolean = false
-  private var googleDefaultPrimaryBefore: Boolean = false
-  private var awsDefaultEnabledBefore: Boolean = false
   private var awsAccessKeyBefore: String? = null
   private var awsSecretKeyBefore: String? = null
 
@@ -56,12 +54,9 @@ class BatchJobTestBase {
     batchJobOperationQueue.clear()
     testData = BatchJobsTestData()
 
-    // Snapshot current values before mutating, so tearDown() can restore them
+    // Snapshot values overridden by test yaml before mutating, so tearDown() can restore them
     fakeMtProvidersBefore = tolgeeProperties.internal.fakeMtProviders
     googleApiKeyBefore = machineTranslationProperties.google.apiKey
-    googleDefaultEnabledBefore = machineTranslationProperties.google.defaultEnabled
-    googleDefaultPrimaryBefore = machineTranslationProperties.google.defaultPrimary
-    awsDefaultEnabledBefore = machineTranslationProperties.aws.defaultEnabled
     awsAccessKeyBefore = machineTranslationProperties.aws.accessKey
     awsSecretKeyBefore = machineTranslationProperties.aws.secretKey
 
@@ -80,12 +75,13 @@ class BatchJobTestBase {
   }
 
   fun tearDown() {
-    // Restore shared TolgeeProperties singleton to avoid cross-test leakage
+    // Restore shared TolgeeProperties singleton to avoid cross-test leakage.
+    // Snapshotted fields are overridden by test yaml; the rest are restored to declared defaults.
     tolgeeProperties.internal.fakeMtProviders = fakeMtProvidersBefore
     machineTranslationProperties.google.apiKey = googleApiKeyBefore
-    machineTranslationProperties.google.defaultEnabled = googleDefaultEnabledBefore
-    machineTranslationProperties.google.defaultPrimary = googleDefaultPrimaryBefore
-    machineTranslationProperties.aws.defaultEnabled = awsDefaultEnabledBefore
+    machineTranslationProperties.google.defaultEnabled = true
+    machineTranslationProperties.google.defaultPrimary = true
+    machineTranslationProperties.aws.defaultEnabled = true
     machineTranslationProperties.aws.accessKey = awsAccessKeyBefore
     machineTranslationProperties.aws.secretKey = awsSecretKeyBefore
   }
