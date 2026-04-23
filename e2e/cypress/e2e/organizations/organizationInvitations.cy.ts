@@ -79,6 +79,19 @@ describe('Organization Invitations', () => {
     testAcceptInvitation('MEMBER', true);
   });
 
+  it('email invitation shows mismatch for wrong user', () => {
+    generateInvitationForEmail('MEMBER', 'nonexistent@test.com').then(
+      (code) => {
+        login('owner@zzzcool12.com', 'admin');
+        cy.visit(code as string);
+
+        cy.gcy('accept-invitation-email-mismatch').should('be.visible');
+        cy.gcy('accept-invitation-accept').should('not.exist');
+        cy.gcy('accept-invitation-decline').should('not.exist');
+      }
+    );
+  });
+
   it('invitation can be declined right away', () => {
     generateInvitation('MEMBER').then((code) => {
       logout();
@@ -155,6 +168,31 @@ describe('Organization Invitations', () => {
         return getParsedEmailInvitationLink();
       });
     }
+  };
+
+  const generateInvitationForEmail = (
+    roleType: 'MEMBER' | 'OWNER',
+    inviteeEmail: string
+  ) => {
+    const slug = getTolgeeSlug();
+
+    cy.visit(`${HOST}/organizations/${slug}/members`);
+
+    cy.gcy('invite-generate-button').click();
+
+    gcy('invitation-dialog-role-button').click();
+    gcy('organization-role-select-item')
+      .filter(':visible')
+      .contains(roleType)
+      .click();
+
+    cy.gcy('invitation-dialog-input-field').type(inviteeEmail);
+    cy.gcy('invitation-dialog-invite-button').click();
+
+    waitForGlobalLoading();
+    return assertMessage('Invitation was sent').then(() => {
+      return getParsedEmailInvitationLink();
+    });
   };
 
   const testAcceptInvitation = (
