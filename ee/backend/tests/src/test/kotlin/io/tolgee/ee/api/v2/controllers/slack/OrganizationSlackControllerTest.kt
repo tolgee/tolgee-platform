@@ -13,6 +13,7 @@ import io.tolgee.security.ProjectHolder
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.util.executeInNewTransaction
 import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.anyString
@@ -44,11 +45,24 @@ class OrganizationSlackControllerTest : AuthorizedControllerTest() {
   @Autowired
   private lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
 
+  private var slackClientIdBefore: String? = null
+  private var slackClientSecretBefore: String? = null
+
   @BeforeEach
   fun setUp() {
     testData = SlackTestData()
     testDataService.saveTestData(testData.root)
     enabledFeaturesProvider.forceEnabled = setOf(Feature.SLACK_INTEGRATION)
+    slackClientIdBefore = slackProperties.clientId
+    slackClientSecretBefore = slackProperties.clientSecret
+  }
+
+  @AfterEach
+  fun tearDown() {
+    // Restore shared TolgeeProperties singleton to avoid cross-test leakage
+    slackProperties.clientId = slackClientIdBefore
+    slackProperties.clientSecret = slackClientSecretBefore
+    enabledFeaturesProvider.forceEnabled = null
   }
 
   @Test
