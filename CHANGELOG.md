@@ -1,3 +1,12 @@
+## [3.181.1](https://github.com/tolgee/tolgee-platform/compare/v3.181.0...v3.181.1) (2026-04-23)
+
+
+### Bug Fixes
+
+* allow paired void-element tags like <br></br> in HTML QA check ([#3618](https://github.com/tolgee/tolgee-platform/issues/3618)) ([a9b8580](https://github.com/tolgee/tolgee-platform/commit/a9b8580a62d95ffa4a4336137cbe85e0cdeb3651))
+* do not show QaBadge when QA checks are disabled for the project ([#3619](https://github.com/tolgee/tolgee-platform/issues/3619)) ([36a0c32](https://github.com/tolgee/tolgee-platform/commit/36a0c32172e06f6d156206af24f46b37a2ddee41))
+* hide QA checks filter when QA checks are disabled for the project ([#3617](https://github.com/tolgee/tolgee-platform/issues/3617)) ([a8881b6](https://github.com/tolgee/tolgee-platform/commit/a8881b6bb5f320f80e1f6e279bb9d362f0f3c7c5))
+
 # [3.181.0](https://github.com/tolgee/tolgee-platform/compare/v3.180.3...v3.181.0) (2026-04-22)
 
 
