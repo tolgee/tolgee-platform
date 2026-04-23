@@ -6,7 +6,7 @@ import {
   TranslationsModifiedData,
 } from 'tg.websocket-client/WebsocketClient';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
-import { useEnabledFeatures } from 'tg.globalContext/helpers';
+import { useQaChecksEnabled } from 'tg.ee';
 import { useDebouncedCallback } from 'use-debounce';
 
 export const useWebsocketService = (
@@ -15,8 +15,7 @@ export const useWebsocketService = (
   const [eventBlockers, setEventBlockers] = useState(0);
   const project = useProject();
   const client = useGlobalContext((c) => c.wsClient.client);
-  const { isEnabled } = useEnabledFeatures();
-  const qaChecksEnabled = isEnabled('QA_CHECKS');
+  const qaChecksEnabled = useQaChecksEnabled();
 
   function updateTranslations(event: TranslationsModifiedData) {
     const translationUpdates = event.data?.translations?.map((translation) => ({

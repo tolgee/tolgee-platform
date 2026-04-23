@@ -63,6 +63,7 @@ import {
   useQaChecksCount,
 } from '../ee/qa/components/QaChecksPanel';
 export { QaBadge } from '../ee/qa/components/QaBadge';
+export { useQaChecksEnabled } from '../ee/qa/hooks/useQaChecksEnabled';
 export { QaLanguageStats } from '../ee/qa/components/QaLanguageStats';
 export { QaCheckItem } from '../ee/qa/components/QaCheckItem';
 export { QaIssueHighlight } from '../ee/qa/components/QaIssueHighlight';

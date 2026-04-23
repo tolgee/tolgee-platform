@@ -16,8 +16,7 @@ import { StateTransitionButtons } from './StateTransitionButtons';
 import { CELL_HIGHLIGHT_ON_HOVER, CELL_SHOW_ON_HOVER } from './styles';
 import { useTranslationsSelector } from '../context/TranslationsContext';
 import { useTaskTransitionTranslation } from 'tg.translationTools/useTaskTransitionTranslation';
-import { QaBadge } from 'tg.ee';
-import { useEnabledFeatures } from 'tg.globalContext/helpers';
+import { QaBadge, useQaChecksEnabled } from 'tg.ee';
 
 type State = components['schemas']['TranslationViewModel']['state'];
 type TaskModel = components['schemas']['KeyTaskViewModel'];
@@ -100,17 +99,16 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
   const spots: string[] = [];
 
   const translateTransition = useTaskTransitionTranslation();
-  const { isEnabled } = useEnabledFeatures();
+  const qaChecksEnabled = useQaChecksEnabled();
   const displayTransitionButtons = stateChangeEnabled && state;
   const displayEdit = editEnabled && onEdit;
   const commentsPresent = Boolean(commentsCount);
   const displayComments = onComments || commentsPresent;
   const onlyResolved = commentsPresent && !unresolvedCommentCount;
+  const qaIssuesPresent = Boolean(qaIssueCount);
   const qaIssuesResolved = qaIssueCount === 0;
   const displayQaIssues =
-    isEnabled('QA_CHECKS') &&
-    onQaIssues &&
-    (qaIssueCount !== 0 || qaChecksStale);
+    qaChecksEnabled && onQaIssues && (qaIssuesPresent || qaChecksStale);
   const prefilteredTask = useTranslationsSelector((c) => c.prefilter?.task);
   const task = tasks?.[0];
   const displayTaskButton =
@@ -139,7 +137,7 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
   const inDomTask = displayTaskButton;
 
   const gridTemplateAreas = `'${spots.join(' ')}'`;
-  const gridTemplateColumns = spots.map((_) => '28px').join(' ');
+  const gridTemplateColumns = Array(spots.length).fill('28px').join(' ');
 
   const { t } = useTranslate();
 

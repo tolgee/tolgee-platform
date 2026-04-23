@@ -6,6 +6,7 @@ import {
 } from '@tginternal/editor';
 
 import { useProject } from 'tg.hooks/useProject';
+import { useQaChecksEnabled } from 'tg.ee';
 import { messageService } from 'tg.service/MessageService';
 
 import {
@@ -91,6 +92,7 @@ export const useEditService = ({
   } = positionService;
 
   const project = useProject();
+  const qaChecksEnabled = useQaChecksEnabled();
 
   const putKey = usePutKey();
   const putTranslation = usePutTranslation();
@@ -118,14 +120,16 @@ export const useEditService = ({
     language: string;
     value: string;
   }) => {
-    // Mark stale before save to avoid race with websocket
-    translationService.changeTranslations([
-      {
-        keyId: params.keyId,
-        language: params.language,
-        value: { qaChecksStale: true, qaIssues: [] },
-      },
-    ]);
+    if (qaChecksEnabled) {
+      // Mark stale before save to avoid race with websocket.
+      translationService.changeTranslations([
+        {
+          keyId: params.keyId,
+          language: params.language,
+          value: { qaChecksStale: true, qaIssues: [] },
+        },
+      ]);
+    }
 
     const result = await putTranslation.mutateAsync({
       path: { projectId: project.id },
