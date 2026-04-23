@@ -259,11 +259,15 @@ jobs:
           failOnError: false
 
   notify:
-    name: Notify Slack on failure 🔔
+    name: Report flaky tests 🔔
     needs: [backend-test, e2e]
     if: failure()
     runs-on: ubuntu-24.04
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - uses: actions/download-artifact@v4
         with:
           pattern: failed_tests_*
@@ -271,20 +275,39 @@ jobs:
           path: ./failures
         continue-on-error: true
 
+      - name: Report to project board
+        id: project
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
+          PROJECT_OWNER: tolgee
+          PROJECT_NUMBER: "4"
+          TEAM_ORG: tolgee
+          TEAM_SLUG: coders
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: python3 scripts/report-flaky-tests.py ./failures .
+
       - name: Build failure list
         id: failures
+        if: always()
         run: |
           {
             echo 'list<<EOF'
-            cat ./failures/failed-tests-*.txt 2>/dev/null | sort -u | head -30 | sed 's/.*/• `&`/'
+            if compgen -G './failures/failed-tests-*.txt' > /dev/null; then
+              cat ./failures/failed-tests-*.txt | sort -u | head -30 | sed 's/.*/• `&`/'
+            fi
             echo 'EOF'
           } >> $GITHUB_OUTPUT
 
       - name: Send Slack notification
+        if: always()
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_FLAKY_TESTS_WEBHOOK_URL }}
           FAILED_TESTS: ${{ steps.failures.outputs.list }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          PROJECT_URL: ${{ steps.project.outputs.project_url }}
+          NEW_COUNT: ${{ steps.project.outputs.new_count }}
+          RECURRING_COUNT: ${{ steps.project.outputs.recurring_count }}
         run: |
           {
             echo "🔴 Flaky tests detected in *${{ github.repository }}*"
@@ -294,6 +317,9 @@ jobs:
             fi
             echo ""
             echo "<${RUN_URL}|View failed run>"
+            if [ -n "$PROJECT_URL" ]; then
+              echo "<${PROJECT_URL}|Flaky tests board> — ${NEW_COUNT:-0} new, ${RECURRING_COUNT:-0} recurring"
+            fi
           } > /tmp/slack-message.txt
 
           curl --fail --show-error --silent \
