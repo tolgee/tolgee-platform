@@ -8,6 +8,7 @@ import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.key.Key
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -50,6 +51,11 @@ class BatchRestoreKeysTest : ProjectAuthControllerTest("/v2/projects/") {
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     projectSupplier = { testData.projectBuilder.self }
+  }
+
+  @AfterEach
+  fun tearDown() {
+    batchJobTestBase.tearDown()
   }
 
   @Test

@@ -91,6 +91,8 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
 
   lateinit var promptTranslateCaptor: KArgumentCaptor<ProviderTranslateParams>
 
+  private var originalFreeCreditsAmount: Long = 0
+
   @BeforeEach
   fun setup() {
     Mockito.clearInvocations(amazonTranslate, deeplApiService, llmTranslationProvider)
@@ -99,6 +101,7 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
     initMachineTranslationProperties(1000)
     initMachineTranslationMocks()
     doAnswer { true }.whenever(eeSubscriptionInfoProvider).isSubscribed()
+    originalFreeCreditsAmount = machineTranslationProperties.freeCreditsAmount
     mockDefaultMtBucketSize(1000)
     cacheMock = mock()
     val rateLimitsCacheMock = mock<Cache>()
@@ -109,6 +112,8 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
   @AfterEach
   fun clear() {
     clearForcedDate()
+    // Restore shared TolgeeProperties singleton to avoid cross-test leakage
+    machineTranslationProperties.freeCreditsAmount = originalFreeCreditsAmount
   }
 
   private fun mockDefaultMtBucketSize(size: Long) {
