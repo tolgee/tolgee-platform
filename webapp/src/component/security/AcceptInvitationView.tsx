@@ -1,22 +1,20 @@
 import { useHistory, useRouteMatch } from 'react-router-dom';
 import { T, useTranslate } from '@tolgee/react';
-import { Box, Button, Link, Paper, styled, Typography } from '@mui/material';
+import { Box, Link, Paper, styled, Typography } from '@mui/material';
 
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { messageService } from 'tg.service/MessageService';
 import { tokenService } from 'tg.service/TokenService';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
-import { useUser } from 'tg.globalContext/helpers';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { useWindowTitle } from 'tg.hooks/useWindowTitle';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
-import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 import { TranslatedError } from 'tg.translationTools/TranslatedError';
 import { ApiError } from 'tg.service/http/ApiError';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
-import { components } from 'tg.service/apiSchema.generated';
+import { InvitationActions } from './InvitationActions';
 
 export const FULL_PAGE_BREAK_POINT = '(max-width: 700px)';
 
@@ -43,97 +41,6 @@ const StyledPaper = styled(Paper)`
     background: transparent;
   }
 `;
-
-type InvitationData = components['schemas']['PublicInvitationModel'];
-
-function InvitationInfoText({ data }: { data: InvitationData }) {
-  const username = data.createdBy?.name ?? data.createdBy?.username;
-  const project = data.projectName;
-  const organization = data.organizationName;
-  const params = { username, project, organization, b: <b /> };
-
-  if (project) {
-    if (username) {
-      return (
-        <T
-          keyName="accept_invitation_description_project_user"
-          params={params}
-        />
-      );
-    }
-    return (
-      <T keyName="accept_invitation_description_project" params={params} />
-    );
-  }
-  if (data.createdBy) {
-    return (
-      <T
-        keyName="accept_invitation_description_organization_user"
-        params={params}
-      />
-    );
-  }
-  return (
-    <T keyName="accept_invitation_description_organization" params={params} />
-  );
-}
-
-function InvitationActions({
-  data,
-  isLoading,
-  onAccept,
-  onDecline,
-}: {
-  data: InvitationData;
-  isLoading: boolean;
-  onAccept: () => void;
-  onDecline: () => void;
-}) {
-  const { t } = useTranslate();
-  const user = useUser();
-
-  const inviteeEmail = data.inviteeEmail;
-  const isEmailMismatch =
-    !!inviteeEmail &&
-    !!user &&
-    user.username.toLowerCase() !== inviteeEmail.toLowerCase();
-
-  if (isEmailMismatch) {
-    return (
-      <Box textAlign="center" data-cy="accept-invitation-email-mismatch">
-        <Typography color="error">
-          <T keyName="invitation_email_mismatch" />
-        </Typography>
-      </Box>
-    );
-  }
-
-  return (
-    <>
-      <Box textAlign="center" data-cy="accept-invitation-info-text">
-        <InvitationInfoText data={data} />
-      </Box>
-      <Box display="flex" gap={3} flexWrap="wrap" justifyContent="center">
-        <LoadingButton
-          loading={isLoading}
-          variant="contained"
-          color="primary"
-          onClick={onAccept}
-          data-cy="accept-invitation-accept"
-        >
-          {t('accept_invitation_accept')}
-        </LoadingButton>
-        <Button
-          variant="outlined"
-          onClick={onDecline}
-          data-cy="accept-invitation-decline"
-        >
-          {t('accept_invitation_decline')}
-        </Button>
-      </Box>
-    </>
-  );
-}
 
 const AcceptInvitationView: React.FC = () => {
   const history = useHistory();
