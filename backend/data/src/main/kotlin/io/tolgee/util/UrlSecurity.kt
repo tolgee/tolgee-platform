@@ -1,6 +1,6 @@
 package io.tolgee.util
 
-import io.tolgee.configuration.tolgee.InternalProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.BadRequestException
 import org.springframework.stereotype.Component
@@ -14,8 +14,10 @@ import java.net.URI
  */
 @Component
 class UrlSecurity(
-  private val internalProperties: InternalProperties,
+  private val tolgeeProperties: TolgeeProperties,
 ) {
+  private val internalProperties get() = tolgeeProperties.internal
+
   /**
    * Validates that the given URL is a safe external URL.
    * Throws [BadRequestException] if the URL is malformed, uses a non-HTTP(S) scheme,

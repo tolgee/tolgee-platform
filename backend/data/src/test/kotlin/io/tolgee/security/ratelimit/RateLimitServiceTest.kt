@@ -356,7 +356,7 @@ class RateLimitServiceTest {
         cacheManager,
         lockingProvider,
         currentDateProvider,
-        rateLimitProperties,
+        tolgeeProperties,
         authenticationFacade,
         mockAccessor,
       )
