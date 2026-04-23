@@ -49,6 +49,8 @@ class CreditLimitTest : ProjectAuthControllerTest("/v2/projects/") {
   @MockitoBean
   private lateinit var restTemplate: RestTemplate
 
+  // Snapshot retained: fake-mt-providers is overridden by the EE test yaml (true), so
+  // restoring to the declared default (false) would leak a wrong value into other tests.
   private var fakeMtProvidersBefore: Boolean = false
 
   @BeforeEach
