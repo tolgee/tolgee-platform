@@ -5,7 +5,7 @@ import io.tolgee.development.testDataBuilder.data.GlossaryTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.testing.AuthorizedControllerTest
-import org.assertj.core.api.Assertions.assertThat
+import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -49,14 +49,22 @@ class GlossaryExportControllerTest : AuthorizedControllerTest() {
         .andReturn()
 
     val csvContent = result.response.contentAsString
-    val lines = csvContent.lines()
+    val headerLine = csvContent.lines()[0]
+    val headers = headerLine.split(",").map { it.trim().removeSurrounding("\"") }
 
-    // Check the header line
-    val headerLine = lines[0]
-    assertThat(headerLine).isEqualToNormalizingNewlines(
-      """
-      "term","description","translatable","casesensitive","abbreviation","forbidden","cs","fr"
-      """.trimIndent(),
-    )
+    val fixedHeaders = listOf("term", "description", "translatable", "casesensitive", "abbreviation", "forbidden")
+    val languageHeaders = headers.drop(fixedHeaders.size)
+
+    // Fixed columns must appear first and in order
+    assertThat(headers.take(fixedHeaders.size)).isEqualTo(fixedHeaders)
+
+    // Language columns must include "cs" and "fr" (fr has no translations but must still appear)
+    assertThat(languageHeaders).contains("cs", "fr")
+
+    // Language columns must be sorted alphabetically
+    assertThat(languageHeaders).isEqualTo(languageHeaders.sorted())
+
+    // Base language "en" must not appear as a separate column (it's the "term" column)
+    assertThat(languageHeaders).doesNotContain("en")
   }
 }

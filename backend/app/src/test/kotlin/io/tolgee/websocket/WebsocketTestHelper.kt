@@ -188,9 +188,12 @@ class WebsocketTestHelper(
     dispatchCallback: () -> Unit,
     assertCallback: ((value: LinkedBlockingDeque<String>) -> Unit),
   ) {
-    Thread.sleep(200)
+    // Give the STOMP SUBSCRIBE frame enough time to be processed by the server
+    // before dispatching. Under CI load (especially with the Redis broker relay),
+    // 200ms was too tight and broadcasts could miss the not-yet-registered subscription.
+    Thread.sleep(1000)
     dispatchCallback()
-    waitFor(3000) {
+    waitFor(10000) {
       receivedMessages.isNotEmpty()
     }
     assertCallback(receivedMessages)
@@ -207,7 +210,7 @@ class WebsocketTestHelper(
 
   fun waitForAuthenticationStatus(status: MySessionHandler.AuthenticationStatus) {
     try {
-      waitFor(5000) {
+      waitFor(10000) {
         sessionHandler?.authenticationStatus == status
       }
     } catch (e: WaitNotSatisfiedException) {

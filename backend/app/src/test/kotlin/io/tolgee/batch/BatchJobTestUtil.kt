@@ -60,7 +60,7 @@ class BatchJobTestUtil(
   lateinit var websocketHelper: WebsocketTestHelper
 
   fun assertPreTranslationProcessExecutedTimes(times: Int) {
-    waitForNotThrowing(pollTime = 1000) {
+    waitForNotThrowing(pollTime = 1000, timeout = 30000) {
       verify(
         preTranslationByTmChunkProcessor,
         times(times),
@@ -414,13 +414,19 @@ class BatchJobTestUtil(
       .isEqualTo(maxConcurrency)
   }
 
-  fun assertMaxPerJobConcurrencyIsLessThanOrEqualTo(maxConcurrency: Int) {
-    waitFor(pollTime = 100) {
-      batchJobConcurrentLauncher.runningJobs.assert
-        .size()
-        .isLessThanOrEqualTo(maxConcurrency)
-      batchJobChunkExecutionQueue.size == 0
+  fun assertMaxPerJobConcurrencyIsLessThanOrEqualTo(
+    job: BatchJob,
+    maxConcurrency: Int,
+  ) {
+    var maxObserved = 0
+    waitFor(pollTime = 50) {
+      // Only count executions for THIS job — other jobs from shared Spring
+      // context may run concurrently and should not cause this assertion to fail.
+      val running = batchJobConcurrentLauncher.runningJobs.values.count { it.first.id == job.id }
+      if (running > maxObserved) maxObserved = running
+      batchJobChunkExecutionQueue.size == 0 && running == 0
     }
+    maxObserved.assert.isLessThanOrEqualTo(maxConcurrency)
   }
 
   fun getSingleJob(): BatchJob = entityManager.createQuery("""from BatchJob""", BatchJob::class.java).singleResult

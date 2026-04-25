@@ -374,7 +374,7 @@ abstract class AbstractBatchJobsGeneralTest :
     try {
       val mtJob = util.runMtJob(100)
       util.assertAllowedMaxPerJobConcurrency(mtJob, maxConcurrency)
-      util.assertMaxPerJobConcurrencyIsLessThanOrEqualTo(maxConcurrency)
+      util.assertMaxPerJobConcurrencyIsLessThanOrEqualTo(mtJob, maxConcurrency)
       util.waitForJobSuccess(mtJob)
       util.assertJobUnlocked()
     } finally {
