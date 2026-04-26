@@ -16,6 +16,7 @@ import org.springframework.web.socket.messaging.WebSocketStompClient
 import org.springframework.web.socket.sockjs.client.SockJsClient
 import org.springframework.web.socket.sockjs.client.WebSocketTransport
 import java.lang.reflect.Type
+import java.util.UUID
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.LinkedBlockingDeque
 import java.util.concurrent.TimeUnit
@@ -53,8 +54,17 @@ class WebsocketTestHelper(
     logger.debug("Connecting websocket (userId={}, projectId={}, dest={})", userId, projectId, path)
     receivedMessages = LinkedBlockingDeque()
 
+    // Register the latch BEFORE the connect: the connect future's completion
+    // races against the test worker resuming from .get(), and ConcurrentHashMap
+    // visibility was not enough — we previously saw `awaitSubscribed` find the
+    // latch missing in the same millisecond `register` happened on the
+    // StompSession callback thread. Generating the correlationId here and
+    // registering synchronously guarantees a strict happens-before.
+    val correlationId = UUID.randomUUID().toString()
+    WebsocketTestSubscribeSync.register(correlationId)
+
     webSocketStompClient.messageConverter = SimpleMessageConverter()
-    sessionHandler = MySessionHandler(path, receivedMessages)
+    sessionHandler = MySessionHandler(path, receivedMessages, correlationId)
     connection =
       webSocketStompClient
         .connectAsync(
@@ -63,15 +73,11 @@ class WebsocketTestHelper(
           getAuthHeaders(),
           sessionHandler!!,
         ).get(10, TimeUnit.SECONDS)
-    // Anchor for timing diagnostics: pair with `Server received SUBSCRIBE` from
-    // WebsocketTestEventListener and `assertNotified: dispatching` to see how
-    // long the server-side subscription registration actually takes vs. the
-    // 200 ms wait we currently use in `assertNotified`. If subscribe→register
-    // is consistently small, the 200 ms can probably be tightened.
     logger.debug(
-      "Client SUBSCRIBE sent (sessionId={}, dest={}, t={}ms)",
+      "Client SUBSCRIBE sent (sessionId={}, dest={}, correlationId={}, t={}ms)",
       connection?.sessionId,
       path,
+      correlationId,
       System.currentTimeMillis(),
     )
   }
@@ -97,6 +103,7 @@ class WebsocketTestHelper(
     } catch (e: IllegalStateException) {
       logger.warn("Could not unsubscribe from websocket", e)
     } finally {
+      WebsocketTestSubscribeSync.cleanup(handler.subscribeCorrelationId)
       webSocketStompClient.stop()
       logger.debug("Stopped websocket listener")
     }
@@ -105,6 +112,8 @@ class WebsocketTestHelper(
   class MySessionHandler(
     val dest: String,
     val receivedMessages: LinkedBlockingDeque<String>,
+    /** Correlation ID used to match this session's SUBSCRIBE with its server-side event. */
+    val subscribeCorrelationId: String,
   ) : StompSessionHandlerAdapter(),
     Logging {
     var subscription: StompSession.Subscription? = null
@@ -144,7 +153,12 @@ class WebsocketTestHelper(
       connectedHeaders: StompHeaders,
     ) {
       logger.debug("Websocket session {} connected, subscribing to {}", session.sessionId, dest)
-      subscription = session.subscribe(dest, this)
+      val subscribeHeaders =
+        StompHeaders().apply {
+          destination = dest
+          add(WebsocketTestSubscribeSync.CORRELATION_HEADER, subscribeCorrelationId)
+        }
+      subscription = session.subscribe(subscribeHeaders, this)
     }
 
     override fun handleException(
@@ -236,15 +250,23 @@ class WebsocketTestHelper(
     dispatchCallback: () -> Unit,
     assertCallback: ((value: LinkedBlockingDeque<String>) -> Unit),
   ) {
-    Thread.sleep(200)
-    logger.debug("assertNotified: dispatching (dest={}, t={}ms)", sessionHandler?.dest, System.currentTimeMillis())
+    val handler = sessionHandler ?: error("listen() must be called before assertNotified()")
+    // Wait for the server's SessionSubscribeEvent for this specific subscription.
+    // Replaces a fragile Thread.sleep(200) with real synchronization. Note the
+    // event fires when the SUBSCRIBE hits the inbound channel; broker
+    // registration follows microseconds later on the same channel pipeline. If
+    // a broadcast goes missing despite the latch having counted down, that
+    // gap is the suspect — the timing logs in WebsocketTestSubscribeSync
+    // will make it visible.
+    WebsocketTestSubscribeSync.awaitSubscribed(handler.subscribeCorrelationId, timeoutMs = 2000)
+    logger.debug("assertNotified: dispatching (dest={}, t={}ms)", handler.dest, System.currentTimeMillis())
     dispatchCallback()
     waitFor(3000) {
       receivedMessages.isNotEmpty()
     }
     logger.debug(
       "assertNotified: broadcast received (dest={}, t={}ms)",
-      sessionHandler?.dest,
+      handler.dest,
       System.currentTimeMillis(),
     )
     assertCallback(receivedMessages)

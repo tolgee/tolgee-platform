@@ -22,11 +22,16 @@ class WebsocketTestEventListener : Logging {
   @EventListener
   fun onSubscribe(event: SessionSubscribeEvent) {
     val accessor = StompHeaderAccessor.wrap(event.message)
+    val correlationId = accessor.getNativeHeader(WebsocketTestSubscribeSync.CORRELATION_HEADER)?.firstOrNull()
     logger.debug(
-      "Server received SUBSCRIBE (sessionId={}, dest={}, t={}ms)",
+      "Server received SUBSCRIBE (sessionId={}, dest={}, correlationId={}, t={}ms)",
       accessor.sessionId,
       accessor.destination,
+      correlationId,
       System.currentTimeMillis(),
     )
+    if (correlationId != null) {
+      WebsocketTestSubscribeSync.notifySubscribed(correlationId)
+    }
   }
 }
