@@ -63,7 +63,17 @@ class WebsocketTestHelper(
           getAuthHeaders(),
           sessionHandler!!,
         ).get(10, TimeUnit.SECONDS)
-    logger.debug("Websocket connected (sessionId={}, dest={})", connection?.sessionId, path)
+    // Anchor for timing diagnostics: pair with `Server received SUBSCRIBE` from
+    // WebsocketTestEventListener and `assertNotified: dispatching` to see how
+    // long the server-side subscription registration actually takes vs. the
+    // 200 ms wait we currently use in `assertNotified`. If subscribe→register
+    // is consistently small, the 200 ms can probably be tightened.
+    logger.debug(
+      "Client SUBSCRIBE sent (sessionId={}, dest={}, t={}ms)",
+      connection?.sessionId,
+      path,
+      System.currentTimeMillis(),
+    )
   }
 
   private fun getAuthHeaders(): StompHeaders {
@@ -227,10 +237,16 @@ class WebsocketTestHelper(
     assertCallback: ((value: LinkedBlockingDeque<String>) -> Unit),
   ) {
     Thread.sleep(200)
+    logger.debug("assertNotified: dispatching (dest={}, t={}ms)", sessionHandler?.dest, System.currentTimeMillis())
     dispatchCallback()
     waitFor(3000) {
       receivedMessages.isNotEmpty()
     }
+    logger.debug(
+      "assertNotified: broadcast received (dest={}, t={}ms)",
+      sessionHandler?.dest,
+      System.currentTimeMillis(),
+    )
     assertCallback(receivedMessages)
     stop()
   }
