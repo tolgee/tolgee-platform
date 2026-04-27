@@ -1,3 +1,10 @@
+## [3.181.3](https://github.com/tolgee/tolgee-platform/compare/v3.181.2...v3.181.3) (2026-04-27)
+
+
+### Bug Fixes
+
+* allow editing content delivery config on projects with branching disabled ([#3622](https://github.com/tolgee/tolgee-platform/issues/3622)) ([1da8d67](https://github.com/tolgee/tolgee-platform/commit/1da8d677447c79838c7d6ccd04ea5e3828b79e90))
+
 ## [3.181.2](https://github.com/tolgee/tolgee-platform/compare/v3.181.1...v3.181.2) (2026-04-27)
 
 
