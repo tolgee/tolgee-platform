@@ -71,4 +71,13 @@ interface ActivityModifiedEntityRepository : JpaRepository<ActivityModifiedEntit
     """,
   )
   fun findByRevisionId(revisionId: Long): List<ActivityModifiedEntity>
+
+  @Query(
+    """
+    select distinct ame.branchId
+    from ActivityModifiedEntity ame
+    where ame.activityRevision.id = :revisionId
+    """,
+  )
+  fun findDistinctBranchIdsByRevisionId(revisionId: Long): List<Long?>
 }

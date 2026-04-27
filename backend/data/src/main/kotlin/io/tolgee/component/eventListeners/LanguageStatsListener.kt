@@ -1,10 +1,8 @@
 package io.tolgee.component.eventListeners
 
-import io.tolgee.batch.OnBatchJobCompleted
+import io.tolgee.activity.ActivityService
 import io.tolgee.batch.data.BatchJobType
-import io.tolgee.batch.events.OnBatchJobCancelled
-import io.tolgee.batch.events.OnBatchJobFailed
-import io.tolgee.batch.events.OnBatchJobSucceeded
+import io.tolgee.batch.events.OnBatchJobFinalized
 import io.tolgee.events.OnProjectActivityEvent
 import io.tolgee.model.Language
 import io.tolgee.model.Project
@@ -27,6 +25,7 @@ class LanguageStatsListener(
   private val projectService: ProjectService,
   private val keyRepository: KeyRepository,
   private val translationRepository: TranslationRepository,
+  private val activityService: ActivityService,
 ) {
   var bypass = false
 
@@ -61,31 +60,21 @@ class LanguageStatsListener(
     }
   }
 
-  @EventListener(OnBatchJobSucceeded::class)
+  @EventListener(OnBatchJobFinalized::class)
   @Async
-  fun onQaBatchJobSucceeded(event: OnBatchJobSucceeded) {
-    onQaBatchJobCompleted(event)
-  }
-
-  @EventListener(OnBatchJobFailed::class)
-  @Async
-  fun onQaBatchJobFailed(event: OnBatchJobFailed) {
-    onQaBatchJobCompleted(event)
-  }
-
-  @EventListener(OnBatchJobCancelled::class)
-  @Async
-  fun onQaBatchJobCancelled(event: OnBatchJobCancelled) {
-    onQaBatchJobCompleted(event)
-  }
-
-  private fun onQaBatchJobCompleted(event: OnBatchJobCompleted) {
+  fun onQaBatchJobFinalized(event: OnBatchJobFinalized) {
     if (bypass) return
     if (event.job.type != BatchJobType.QA_CHECK) return
     val projectId = event.job.projectId ?: return
     runSentryCatching {
       projectService.findDto(projectId) ?: return@runSentryCatching
-      languageStatsService.refreshLanguageStats(projectId)
+
+      val branchIds = activityService.findDistinctBranchIdsByRevisionId(event.activityRevisionId)
+      if (branchIds.isEmpty()) return@runSentryCatching
+
+      branchIds.forEach { branchId ->
+        languageStatsService.refreshLanguageStats(projectId, branchId)
+      }
     }
   }
 
