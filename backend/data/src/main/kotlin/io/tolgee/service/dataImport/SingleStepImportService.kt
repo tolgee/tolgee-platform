@@ -19,6 +19,7 @@ import io.tolgee.model.dataImport.ImportTranslation
 import io.tolgee.service.branching.BranchService
 import io.tolgee.service.dataImport.ScreenshotImporter.Companion.ScreenshotToImport
 import io.tolgee.service.dataImport.status.ImportApplicationStatus
+import io.tolgee.service.dataImport.status.ImportApplicationStatusItem
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
@@ -41,11 +42,11 @@ class SingleStepImportService(
     project: Project,
     userAccount: UserAccount,
     params: SingleStepImportRequest,
-    reportStatus: ((ImportApplicationStatus) -> Unit) = {},
+    reportStatus: ((ImportApplicationStatusItem) -> Unit) = {},
     screenshots: List<ScreenshotToImport> = emptyList(),
     resolveConflict: ((translation: ImportTranslation) -> ForceMode?)? = null,
   ): ImportResult {
-    reportStatus?.invoke(ImportApplicationStatus.ANALYZING_FILES)
+    reportStatus.invoke(ImportApplicationStatusItem(ImportApplicationStatus.ANALYZING_FILES))
     val import =
       Import(project).also {
         it.author = userAccount
@@ -103,7 +104,7 @@ class SingleStepImportService(
     project: Project,
     userAccount: UserAccount,
     params: SingleStepImportResolvableRequest,
-    reportStatus: ((ImportApplicationStatus) -> Unit) = {},
+    reportStatus: ((ImportApplicationStatusItem) -> Unit) = {},
   ): ImportResult {
     val keysToFilesManager = KeysToFilesManager()
     keysToFilesManager.processKeys(params.keys)

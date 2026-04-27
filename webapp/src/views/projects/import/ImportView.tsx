@@ -104,6 +104,8 @@ export const ImportView: FunctionComponent = () => {
           onNewFiles={dataHelper.onNewFiles}
           loading={loading}
           operationStatus={applyImportHelper.status}
+          importedKeys={applyImportHelper.importedKeys}
+          totalKeys={applyImportHelper.totalKeys}
           importDone={applyImportHelper.loaded}
           disabled={!canEditProtectedBranch}
           operation={

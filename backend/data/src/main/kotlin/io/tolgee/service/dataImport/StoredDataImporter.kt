@@ -28,6 +28,7 @@ import io.tolgee.model.translation.Translation
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.ImageUploadService
 import io.tolgee.service.dataImport.status.ImportApplicationStatus
+import io.tolgee.service.dataImport.status.ImportApplicationStatusItem
 import io.tolgee.service.key.KeyMetaService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.NamespaceService
@@ -50,7 +51,7 @@ class StoredDataImporter(
   private val applicationContext: ApplicationContext,
   private val import: Import,
   private val forceMode: ForceMode = ForceMode.NO_FORCE,
-  private val reportStatus: ((ImportApplicationStatus) -> Unit) = {},
+  private val reportStatus: ((ImportApplicationStatusItem) -> Unit) = {},
   private val importSettings: IImportSettings,
   private val overrideMode: OverrideMode = OverrideMode.RECOMMENDED,
   private val errorOnUnresolvedConflict: Boolean? = null,
@@ -167,7 +168,7 @@ class StoredDataImporter(
     val importStart = System.currentTimeMillis()
     fun elapsed() = System.currentTimeMillis() - importStart
 
-    reportStatus(ImportApplicationStatus.PREPARING_AND_VALIDATING)
+    reportStatus(ImportApplicationStatusItem(ImportApplicationStatus.PREPARING_AND_VALIDATING))
 
     importDataManager.storedLanguages.forEach {
       it.prepareImport()
@@ -183,7 +184,7 @@ class StoredDataImporter(
     handleKeyMetas()
     logger.trace("Import phase: addKeys + handleKeyMetas completed in {}ms", elapsed())
 
-    reportStatus(ImportApplicationStatus.STORING_KEYS)
+    reportStatus(ImportApplicationStatusItem(ImportApplicationStatus.STORING_KEYS))
 
     namespaceService.saveAll(namespacesToSave.values)
 
@@ -192,7 +193,7 @@ class StoredDataImporter(
     handlePluralization()
     logger.trace("Import phase: namespaces + screenshots + pluralization completed in {}ms", elapsed())
 
-    reportStatus(ImportApplicationStatus.STORING_TRANSLATIONS)
+    reportStatus(ImportApplicationStatusItem(ImportApplicationStatus.STORING_TRANSLATIONS, totalKeys = keysToSave.size, importedKeys = 0))
 
     // Disable the Hibernate activity interceptor and record activity manually
     // via JDBC to avoid O(n²) overhead from the interceptor accumulating
@@ -207,7 +208,7 @@ class StoredDataImporter(
     saveKeysAndTranslationsInBatches()
     logger.trace("Import phase: saveKeysAndTranslationsInBatches completed in {}ms", elapsed())
 
-    reportStatus(ImportApplicationStatus.FINALIZING)
+    reportStatus(ImportApplicationStatusItem(ImportApplicationStatus.FINALIZING))
 
     translationService.setOutdatedBatch(outdatedFlagKeys)
 
@@ -495,6 +496,14 @@ class StoredDataImporter(
       recorder.recordDescribingEntities(keyBatch, batchTranslations)
 
       batchIndex++
+      val importedKeys = (batchIndex * FLUSH_BATCH_SIZE).coerceAtMost(totalKeyCount)
+      reportStatus(
+        ImportApplicationStatusItem(
+          ImportApplicationStatus.STORING_TRANSLATIONS,
+          totalKeys = totalKeyCount,
+          importedKeys = importedKeys,
+        ),
+      )
       logger.trace(
         "Batch {}/{}: {} keys, {} translations (total: {})",
         batchIndex,
