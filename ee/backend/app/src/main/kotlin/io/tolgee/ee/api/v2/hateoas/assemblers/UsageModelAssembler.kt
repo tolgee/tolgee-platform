@@ -22,6 +22,7 @@ class UsageModelAssembler : RepresentationModelAssembler<UsageData, UsageModel> 
       credits = data.creditsUsage?.let { sumToModel(it) },
       total = data.total,
       appliedStripeCredits = data.appliedStripeCredits,
+      carryOverTotal = data.carryOverTotal,
     )
   }
 
