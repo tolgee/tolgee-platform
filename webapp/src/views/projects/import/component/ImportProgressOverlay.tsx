@@ -37,6 +37,8 @@ export const ImportProgressOverlay = (props: {
   importDone: boolean;
   loading: boolean;
   operationStatus?: OperationStatusType;
+  importedKeys?: number | null;
+  totalKeys?: number | null;
   onImportMore: () => void;
   onActiveChange: (isActive: boolean) => void;
   branch?: string;
@@ -112,6 +114,13 @@ export const ImportProgressOverlay = (props: {
           <ImportProgressBar
             loading={props.loading}
             loaded={showFilesUploaded || showImportDone}
+            importedKeys={operation === 'apply' ? props.importedKeys : null}
+            totalKeys={operation === 'apply' ? props.totalKeys : null}
+            indeterminate={
+              operation !== 'apply' ||
+              props.importedKeys == null ||
+              props.totalKeys == null
+            }
           />
         </ImportInputAreaLayoutCenter>
         <ImportInputAreaLayoutBottom>
@@ -133,7 +142,11 @@ export const ImportProgressOverlay = (props: {
               </Button>
             </Box>
           ) : (
-            <ImportOperationStatus status={props.operationStatus} />
+            <ImportOperationStatus
+              status={props.operationStatus}
+              importedKeys={props.importedKeys}
+              totalKeys={props.totalKeys}
+            />
           )}
         </ImportInputAreaLayoutBottom>
       </ImportInputAreaLayout>

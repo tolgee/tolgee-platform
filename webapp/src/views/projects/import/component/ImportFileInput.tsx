@@ -33,6 +33,8 @@ type ImportFileInputProps = {
   loading: boolean;
   operation?: OperationType;
   operationStatus?: OperationStatusType;
+  importedKeys?: number | null;
+  totalKeys?: number | null;
   importDone: boolean;
   onImportMore: () => void;
   filesUploaded?: boolean;
@@ -157,6 +159,8 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
               onImportMore={props.onImportMore}
               filesUploaded={props.filesUploaded}
               operationStatus={props.operationStatus}
+              importedKeys={props.importedKeys}
+              totalKeys={props.totalKeys}
               onActiveChange={(isActive) =>
                 props.onProgressOverlayActiveChange(isActive)
               }
