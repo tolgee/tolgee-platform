@@ -16,6 +16,8 @@ import org.springframework.web.socket.messaging.WebSocketStompClient
 import org.springframework.web.socket.sockjs.client.SockJsClient
 import org.springframework.web.socket.sockjs.client.WebSocketTransport
 import java.lang.reflect.Type
+import java.util.UUID
+import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.LinkedBlockingDeque
 import java.util.concurrent.TimeUnit
 
@@ -49,10 +51,20 @@ class WebsocketTestHelper(
   private var connection: StompSession? = null
 
   fun listen(path: String) {
+    logger.debug("Connecting websocket (userId={}, projectId={}, dest={})", userId, projectId, path)
     receivedMessages = LinkedBlockingDeque()
 
+    // Register the latch BEFORE the connect: the connect future's completion
+    // races against the test worker resuming from .get(), and ConcurrentHashMap
+    // visibility was not enough — we previously saw `awaitSubscribed` find the
+    // latch missing in the same millisecond `register` happened on the
+    // StompSession callback thread. Generating the correlationId here and
+    // registering synchronously guarantees a strict happens-before.
+    val correlationId = UUID.randomUUID().toString()
+    WebsocketTestSubscribeSync.register(correlationId)
+
     webSocketStompClient.messageConverter = SimpleMessageConverter()
-    sessionHandler = MySessionHandler(path, receivedMessages)
+    sessionHandler = MySessionHandler(path, receivedMessages, correlationId)
     connection =
       webSocketStompClient
         .connectAsync(
@@ -61,6 +73,13 @@ class WebsocketTestHelper(
           getAuthHeaders(),
           sessionHandler!!,
         ).get(10, TimeUnit.SECONDS)
+    logger.debug(
+      "Client SUBSCRIBE sent (sessionId={}, dest={}, correlationId={}, t={}ms)",
+      connection?.sessionId,
+      path,
+      correlationId,
+      System.currentTimeMillis(),
+    )
   }
 
   private fun getAuthHeaders(): StompHeaders {
@@ -73,39 +92,73 @@ class WebsocketTestHelper(
   }
 
   fun stop() {
-    logger.info("Stopping websocket listener")
+    val handler = sessionHandler ?: return
+    val activeConnection = connection
+    sessionHandler = null
+    connection = null
+    logger.debug("Stopping websocket listener (sessionId={})", activeConnection?.sessionId)
     try {
-      sessionHandler?.subscription?.unsubscribe()
-      connection?.disconnect()
+      handler.subscription?.unsubscribe()
+      activeConnection?.disconnect()
     } catch (e: IllegalStateException) {
       logger.warn("Could not unsubscribe from websocket", e)
+    } finally {
+      WebsocketTestSubscribeSync.cleanup(handler.subscribeCorrelationId)
+      webSocketStompClient.stop()
+      logger.debug("Stopped websocket listener")
     }
-    webSocketStompClient.stop()
-    logger.info("Stopped websocket listener")
   }
 
   class MySessionHandler(
     val dest: String,
     val receivedMessages: LinkedBlockingDeque<String>,
+    /** Correlation ID used to match this session's SUBSCRIBE with its server-side event. */
+    val subscribeCorrelationId: String,
   ) : StompSessionHandlerAdapter(),
     Logging {
     var subscription: StompSession.Subscription? = null
 
-    @Volatile
-    var authenticationStatus: AuthenticationStatus? = null
+    // Append-only history of every status the session observed. The sequence
+    // matters because the ERROR frame and the transport close can fire in
+    // opposite orders under CI load — checking the full list (rather than
+    // just the latest value) lets a test pass when the expected rejection
+    // frame arrived at all, even if a CONNECTION_LOST was recorded first
+    // because the close fired before the frame was processed. If the list
+    // never contains the expected status, the wait fails — with the
+    // transitions logged so the failure points at the lost rejection frame.
+    val statusTransitions: MutableList<AuthenticationStatus> =
+      CopyOnWriteArrayList()
+
+    val authenticationStatus: AuthenticationStatus?
+      get() = statusTransitions.lastOrNull()
 
     enum class AuthenticationStatus {
       UNAUTHENTICATED,
       FORBIDDEN,
+
+      // The transport closed before any ERROR frame was processed. NOT a
+      // valid substitute for UNAUTHENTICATED/FORBIDDEN — the wait helper
+      // fails if this is the only entry in the transitions list. Recorded
+      // so that the failure log shows what we did see when the expected
+      // rejection frame was lost in the server's flush-before-close window.
+      CONNECTION_LOST,
+    }
+
+    private fun recordStatus(newStatus: AuthenticationStatus) {
+      statusTransitions.add(newStatus)
     }
 
     override fun afterConnected(
       session: StompSession,
       connectedHeaders: StompHeaders,
     ) {
-      logger.info("Connected to websocket")
-      logger.info("Subscribing to $dest")
-      subscription = session.subscribe(dest, this)
+      logger.debug("Websocket session {} connected, subscribing to {}", session.sessionId, dest)
+      val subscribeHeaders =
+        StompHeaders().apply {
+          destination = dest
+          add(WebsocketTestSubscribeSync.CORRELATION_HEADER, subscribeCorrelationId)
+        }
+      subscription = session.subscribe(subscribeHeaders, this)
     }
 
     override fun handleException(
@@ -115,7 +168,14 @@ class WebsocketTestHelper(
       payload: ByteArray,
       exception: Throwable,
     ) {
-      logger.warn("Stomp Error:", exception)
+      logger.error(
+        "Websocket session {} STOMP exception (command={}, headers={}, payload={}B)",
+        session.sessionId,
+        command,
+        headers,
+        payload.size,
+        exception,
+      )
     }
 
     override fun handleTransportError(
@@ -123,20 +183,17 @@ class WebsocketTestHelper(
       exception: Throwable,
     ) {
       super.handleTransportError(session, exception)
-      logger.warn("Stomp Transport Error:", exception)
-      // When the server rejects invalid credentials, it sends an "Unauthenticated"
-      // frame and closes the connection. Under CI load, the ConnectionLostException
-      // can arrive before handleFrame processes the rejection frame, so
-      // authenticationStatus is never set and waitForUnauthenticated() times out.
-      // Treating any connection loss (when authenticationStatus is still null) as
-      // UNAUTHENTICATED may mask non-auth disconnects, but this is acceptable:
-      // tests that expect a specific status (e.g. FORBIDDEN) will have already set
-      // authenticationStatus via handleFrame before the close arrives.
-      if (authenticationStatus == null &&
+      if (statusTransitions.isEmpty() &&
         exception is org.springframework.messaging.simp.stomp.ConnectionLostException
       ) {
-        authenticationStatus = AuthenticationStatus.UNAUTHENTICATED
+        recordStatus(AuthenticationStatus.CONNECTION_LOST)
       }
+      logger.error(
+        "Websocket session {} transport error (transitions at close: {})",
+        session.sessionId,
+        statusTransitions,
+        exception,
+      )
     }
 
     override fun getPayloadType(headers: StompHeaders): Type {
@@ -147,17 +204,20 @@ class WebsocketTestHelper(
       stompHeaders: StompHeaders,
       o: Any?,
     ) {
-      handleForbidden(stompHeaders)
-      handleUnauthenticated(stompHeaders)
-
-      logger.info(
-        "Handle Frame with stompHeaders: '{}' and payload: '{}'",
+      val messageHeader = stompHeaders.get("message")?.singleOrNull()
+      logger.debug(
+        "Frame received (dest={}, messageHeader={}, payloadBytes={}, allHeaders={})",
+        dest,
+        messageHeader,
+        (o as? ByteArray)?.size,
         stompHeaders,
-        (o as? ByteArray)?.decodeToString(),
       )
 
+      handleForbidden(messageHeader)
+      handleUnauthenticated(messageHeader)
+
       if (o !is ByteArray) {
-        logger.info("Payload '{}' is not a ByteArray, not adding into received messages.", o)
+        logger.debug("Payload '{}' is not a ByteArray, not adding into received messages.", o)
         return
       }
 
@@ -168,15 +228,17 @@ class WebsocketTestHelper(
       }
     }
 
-    private fun handleForbidden(stompHeaders: StompHeaders) {
-      if (stompHeaders.get("message")?.single() == "Forbidden") {
-        authenticationStatus = AuthenticationStatus.FORBIDDEN
+    private fun handleForbidden(messageHeader: String?) {
+      if (messageHeader == "Forbidden") {
+        logger.debug("Authentication status -> FORBIDDEN (dest={})", dest)
+        recordStatus(AuthenticationStatus.FORBIDDEN)
       }
     }
 
-    private fun handleUnauthenticated(stompHeaders: StompHeaders) {
-      if (stompHeaders.get("message")?.single() == "Unauthenticated") {
-        authenticationStatus = AuthenticationStatus.UNAUTHENTICATED
+    private fun handleUnauthenticated(messageHeader: String?) {
+      if (messageHeader == "Unauthenticated") {
+        logger.debug("Authentication status -> UNAUTHENTICATED (dest={})", dest)
+        recordStatus(AuthenticationStatus.UNAUTHENTICATED)
       }
     }
   }
@@ -188,14 +250,25 @@ class WebsocketTestHelper(
     dispatchCallback: () -> Unit,
     assertCallback: ((value: LinkedBlockingDeque<String>) -> Unit),
   ) {
-    // Give the STOMP SUBSCRIBE frame enough time to be processed by the server
-    // before dispatching. Under CI load (especially with the Redis broker relay),
-    // 200ms was too tight and broadcasts could miss the not-yet-registered subscription.
-    Thread.sleep(1000)
+    val handler = sessionHandler ?: error("listen() must be called before assertNotified()")
+    // Wait for the server's SessionSubscribeEvent for this specific subscription.
+    // Replaces a fragile Thread.sleep(200) with real synchronization. Note the
+    // event fires when the SUBSCRIBE hits the inbound channel; broker
+    // registration follows microseconds later on the same channel pipeline. If
+    // a broadcast goes missing despite the latch having counted down, that
+    // gap is the suspect — the timing logs in WebsocketTestSubscribeSync
+    // will make it visible.
+    WebsocketTestSubscribeSync.awaitSubscribed(handler.subscribeCorrelationId, timeoutMs = 2000)
+    logger.debug("assertNotified: dispatching (dest={}, t={}ms)", handler.dest, System.currentTimeMillis())
     dispatchCallback()
-    waitFor(10000) {
+    waitFor(3000) {
       receivedMessages.isNotEmpty()
     }
+    logger.debug(
+      "assertNotified: broadcast received (dest={}, t={}ms)",
+      handler.dest,
+      System.currentTimeMillis(),
+    )
     assertCallback(receivedMessages)
     stop()
   }
@@ -210,11 +283,19 @@ class WebsocketTestHelper(
 
   fun waitForAuthenticationStatus(status: MySessionHandler.AuthenticationStatus) {
     try {
-      waitFor(10000) {
-        sessionHandler?.authenticationStatus == status
+      waitFor(5000) {
+        sessionHandler?.statusTransitions?.contains(status) == true
       }
     } catch (e: WaitNotSatisfiedException) {
-      logger.info("Authentication status was not $status, was: ${sessionHandler?.authenticationStatus}")
+      val transitions = sessionHandler?.statusTransitions ?: emptyList<MySessionHandler.AuthenticationStatus>()
+      logger.error(
+        "Expected websocket authentication status {} never observed; transitions={}. " +
+          "If transitions are only [CONNECTION_LOST], the server's STOMP ERROR frame " +
+          "was lost in the flush-before-close window — investigate the server-side " +
+          "ERROR delivery path rather than relaxing the test.",
+        status,
+        transitions,
+      )
       throw e
     }
   }
