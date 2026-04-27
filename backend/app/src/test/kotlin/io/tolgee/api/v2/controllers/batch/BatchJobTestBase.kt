@@ -3,10 +3,7 @@ package io.tolgee.api.v2.controllers.batch
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.batch.BatchJobChunkExecutionQueue
 import io.tolgee.batch.BatchJobService
-import io.tolgee.config.BatchJobBaseConfiguration
-import io.tolgee.configuration.tolgee.InternalProperties
-import io.tolgee.configuration.tolgee.machineTranslation.AwsMachineTranslationProperties
-import io.tolgee.configuration.tolgee.machineTranslation.GoogleMachineTranslationProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationProperties
 import io.tolgee.development.testDataBuilder.TestDataService
 import io.tolgee.development.testDataBuilder.data.BatchJobsTestData
@@ -16,10 +13,7 @@ import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.translation.Translation
 import io.tolgee.testing.assert
 import jakarta.persistence.EntityManager
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Import
 import org.springframework.stereotype.Component
 import org.springframework.test.web.servlet.ResultActions
 import java.util.function.Consumer
@@ -35,15 +29,23 @@ class BatchJobTestBase {
   lateinit var batchJobService: BatchJobService
 
   @Autowired
-  lateinit var machineTranslationProperties: MachineTranslationProperties
+  lateinit var tolgeeProperties: TolgeeProperties
+
+  val machineTranslationProperties: MachineTranslationProperties get() = tolgeeProperties.machineTranslation
 
   @Autowired
   lateinit var entityManager: EntityManager
 
   var fakeBefore: Boolean = false
 
-  @Autowired
-  private lateinit var internalProperties: InternalProperties
+  // Snapshots of TolgeeProperties fields that are overridden by the test yaml
+  // (backend/app/src/test/resources/application.yaml). We cannot restore them to the
+  // declared defaults without leaking different values into other tests, so we capture
+  // the effective values before mutating and restore them in tearDown().
+  private var fakeMtProvidersBefore: Boolean = false
+  private var googleApiKeyBefore: String? = null
+  private var awsAccessKeyBefore: String? = null
+  private var awsSecretKeyBefore: String? = null
 
   @Autowired
   private lateinit var testDataService: TestDataService
@@ -52,21 +54,36 @@ class BatchJobTestBase {
     batchJobOperationQueue.clear()
     testData = BatchJobsTestData()
 
-    whenever(internalProperties.fakeMtProviders).thenReturn(true)
+    // Snapshot values overridden by test yaml before mutating, so tearDown() can restore them
+    fakeMtProvidersBefore = tolgeeProperties.internal.fakeMtProviders
+    googleApiKeyBefore = machineTranslationProperties.google.apiKey
+    awsAccessKeyBefore = machineTranslationProperties.aws.accessKey
+    awsSecretKeyBefore = machineTranslationProperties.aws.secretKey
 
-    val googleMock = mock<GoogleMachineTranslationProperties>()
-    whenever(googleMock.apiKey).thenReturn("mock")
-    whenever(googleMock.defaultEnabled).thenReturn(true)
-    whenever(googleMock.defaultPrimary).thenReturn(true)
+    // Set properties directly instead of mocking
+    tolgeeProperties.internal.fakeMtProviders = true
 
-    whenever(machineTranslationProperties.google).thenReturn(googleMock)
+    // Configure Google MT
+    machineTranslationProperties.google.apiKey = "mock"
+    machineTranslationProperties.google.defaultEnabled = true
+    machineTranslationProperties.google.defaultPrimary = true
 
-    val awsMock = mock<AwsMachineTranslationProperties>()
-    whenever(awsMock.defaultEnabled).thenReturn(false)
-    whenever(awsMock.accessKey).thenReturn("mock")
-    whenever(awsMock.secretKey).thenReturn("mock")
+    // Configure AWS MT
+    machineTranslationProperties.aws.defaultEnabled = false
+    machineTranslationProperties.aws.accessKey = "mock"
+    machineTranslationProperties.aws.secretKey = "mock"
+  }
 
-    whenever(machineTranslationProperties.aws).thenReturn(awsMock)
+  fun tearDown() {
+    // Restore shared TolgeeProperties singleton to avoid cross-test leakage.
+    // Snapshotted fields are overridden by test yaml; the rest are restored to declared defaults.
+    tolgeeProperties.internal.fakeMtProviders = fakeMtProvidersBefore
+    machineTranslationProperties.google.apiKey = googleApiKeyBefore
+    machineTranslationProperties.google.defaultEnabled = true
+    machineTranslationProperties.google.defaultPrimary = true
+    machineTranslationProperties.aws.defaultEnabled = true
+    machineTranslationProperties.aws.accessKey = awsAccessKeyBefore
+    machineTranslationProperties.aws.secretKey = awsSecretKeyBefore
   }
 
   fun saveAndPrepare(testClass: ProjectAuthControllerTest) {

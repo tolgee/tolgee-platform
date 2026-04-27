@@ -6,7 +6,7 @@ package io.tolgee.ee.api.v2.controllers.slack
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import io.tolgee.configuration.tolgee.SlackProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.ConnectToSlackDto
@@ -37,11 +37,13 @@ import org.springframework.web.bind.annotation.RestController
 @Tag(name = "Organization Slack")
 class OrganizationSlackController(
   private val organizationHolder: OrganizationHolder,
-  private val slackProperties: SlackProperties,
+  private val tolgeeProperties: TolgeeProperties,
   private val slackWorkspaceService: OrganizationSlackWorkspaceService,
   private val authenticationFacade: AuthenticationFacade,
   private val workspaceModelAssembler: WorkspaceModelAssembler,
 ) {
+  private val slackProperties get() = tolgeeProperties.slack
+
   @GetMapping("get-connect-url")
   @Operation(
     summary = "Get connect URL for Slack authentication",

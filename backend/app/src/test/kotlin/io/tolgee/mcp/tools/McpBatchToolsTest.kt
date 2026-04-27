@@ -5,9 +5,9 @@ import io.tolgee.AbstractMcpTest
 import io.tolgee.batch.BatchJobService
 import io.tolgee.config.BatchJobBaseConfiguration
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
 
@@ -24,7 +24,14 @@ class McpBatchToolsTest : AbstractMcpTest() {
     data = createTestDataWithPak()
     client = createMcpClientWithPak(data.apiKey.encodedKey!!)
 
-    whenever(internalProperties.fakeMtProviders).thenReturn(true)
+    internalProperties.fakeMtProviders = true
+  }
+
+  @AfterEach
+  fun tearDown() {
+    // Restore shared TolgeeProperties singleton to avoid cross-test leakage.
+    // Test yaml also sets this to true, so a literal restore is safe.
+    internalProperties.fakeMtProviders = true
   }
 
   @Test

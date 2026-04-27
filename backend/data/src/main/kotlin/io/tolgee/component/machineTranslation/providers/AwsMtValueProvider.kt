@@ -1,7 +1,7 @@
 package io.tolgee.component.machineTranslation.providers
 
 import io.tolgee.component.machineTranslation.MtValueProvider
-import io.tolgee.configuration.tolgee.machineTranslation.AwsMachineTranslationProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.model.mtServiceConfig.Formality
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
@@ -14,9 +14,10 @@ import software.amazon.awssdk.services.translate.model.Formality as AwsFormality
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 class AwsMtValueProvider(
-  private val awsMachineTranslationProperties: AwsMachineTranslationProperties,
+  private val tolgeeProperties: TolgeeProperties,
   private val amazonTranslate: TranslateClient?,
 ) : AbstractMtValueProvider() {
+  private val awsMachineTranslationProperties get() = tolgeeProperties.machineTranslation.aws
   override val isEnabled: Boolean
     get() =
       awsMachineTranslationProperties.enabled

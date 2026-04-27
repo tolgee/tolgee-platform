@@ -1,6 +1,6 @@
 package io.tolgee.unit.util
 
-import io.tolgee.configuration.tolgee.InternalProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.util.UrlSecurity
 import org.junit.jupiter.api.Test
@@ -8,7 +8,7 @@ import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 
 class UrlSecurityTest {
-  private val urlSecurity = UrlSecurity(InternalProperties())
+  private val urlSecurity = UrlSecurity(TolgeeProperties())
 
   @Test
   fun `allows valid external HTTPS URLs`() {

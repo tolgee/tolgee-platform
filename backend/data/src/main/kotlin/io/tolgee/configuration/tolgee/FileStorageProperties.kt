@@ -5,11 +5,15 @@
 package io.tolgee.configuration.tolgee
 
 import io.tolgee.configuration.annotations.DocProperty
-import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.boot.context.properties.NestedConfigurationProperty
 
-@ConfigurationProperties(prefix = "tolgee.file-storage")
-@DocProperty(description = "Configuration of Tolgee file storage.", displayName = "File storage")
+@DocProperty(
+  prefix = "tolgee.file-storage",
+  description = "Configuration of Tolgee file storage.",
+  displayName = "File storage",
+)
 class FileStorageProperties(
+  @NestedConfigurationProperty
   var s3: S3Settings = S3Settings(),
   @DocProperty(
     description = "Path to directory where Tolgee will store its files.",

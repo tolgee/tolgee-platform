@@ -1,10 +1,9 @@
 package io.tolgee.configuration.tolgee.machineTranslation
 
 import io.tolgee.configuration.annotations.DocProperty
-import org.springframework.boot.context.properties.ConfigurationProperties
 
-@ConfigurationProperties(prefix = "tolgee.machine-translation.aws")
 @DocProperty(
+  prefix = "tolgee.machine-translation.aws",
   description =
     "See [AWS's Amazon Translate](https://aws.amazon.com/translate) page " +
       "for more information and applicable pricing.",

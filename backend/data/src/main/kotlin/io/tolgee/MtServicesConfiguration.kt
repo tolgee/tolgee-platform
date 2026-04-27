@@ -2,8 +2,7 @@ package io.tolgee
 
 import com.google.cloud.translate.Translate
 import com.google.cloud.translate.TranslateOptions
-import io.tolgee.configuration.tolgee.machineTranslation.AwsMachineTranslationProperties
-import io.tolgee.configuration.tolgee.machineTranslation.GoogleMachineTranslationProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
@@ -14,9 +13,11 @@ import software.amazon.awssdk.services.translate.TranslateClient
 
 @Configuration
 class MtServicesConfiguration(
-  private val googleMachineTranslationProperties: GoogleMachineTranslationProperties,
-  private val awsMachineTranslationProperties: AwsMachineTranslationProperties,
+  private val tolgeeProperties: TolgeeProperties,
 ) {
+  private val googleMachineTranslationProperties get() = tolgeeProperties.machineTranslation.google
+  private val awsMachineTranslationProperties get() = tolgeeProperties.machineTranslation.aws
+
   @Bean
   fun getGoogleTranslationService(): Translate? {
     if (googleMachineTranslationProperties.apiKey != null) {

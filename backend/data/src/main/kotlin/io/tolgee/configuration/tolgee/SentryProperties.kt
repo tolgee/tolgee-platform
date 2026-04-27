@@ -1,10 +1,9 @@
 package io.tolgee.configuration.tolgee
 
 import io.tolgee.configuration.annotations.DocProperty
-import org.springframework.boot.context.properties.ConfigurationProperties
 
-@ConfigurationProperties(prefix = "tolgee.sentry")
 @DocProperty(
+  prefix = "tolgee.sentry",
   description = "Tolgee uses [Sentry](https://sentry.io/) for error reporting.",
   displayName = "Sentry",
 )

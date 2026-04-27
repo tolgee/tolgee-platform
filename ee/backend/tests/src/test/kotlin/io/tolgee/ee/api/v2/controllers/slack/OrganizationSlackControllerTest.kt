@@ -1,6 +1,5 @@
 package io.tolgee.ee.api.v2.controllers.slack
 
-import io.tolgee.configuration.tolgee.SlackProperties
 import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.SlackTestData
 import io.tolgee.dtos.cacheable.ProjectDto
@@ -14,6 +13,7 @@ import io.tolgee.security.ProjectHolder
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.util.executeInNewTransaction
 import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.anyString
@@ -40,8 +40,7 @@ class OrganizationSlackControllerTest : AuthorizedControllerTest() {
   @Autowired
   lateinit var restTemplate: RestTemplate
 
-  @Autowired
-  lateinit var slackProperties: SlackProperties
+  private val slackProperties get() = tolgeeProperties.slack
 
   @Autowired
   private lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
@@ -51,6 +50,15 @@ class OrganizationSlackControllerTest : AuthorizedControllerTest() {
     testData = SlackTestData()
     testDataService.saveTestData(testData.root)
     enabledFeaturesProvider.forceEnabled = setOf(Feature.SLACK_INTEGRATION)
+  }
+
+  @AfterEach
+  fun tearDown() {
+    // Restore shared TolgeeProperties singleton to avoid cross-test leakage.
+    // Declared defaults are null and test yaml does not override slack.clientId/clientSecret.
+    slackProperties.clientId = null
+    slackProperties.clientSecret = null
+    enabledFeaturesProvider.forceEnabled = null
   }
 
   @Test
