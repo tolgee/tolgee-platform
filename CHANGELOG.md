@@ -1,3 +1,10 @@
+## [3.181.2](https://github.com/tolgee/tolgee-platform/compare/v3.181.1...v3.181.2) (2026-04-27)
+
+
+### Bug Fixes
+
+* refresh language stats on all branches touched by QA batch job ([#3603](https://github.com/tolgee/tolgee-platform/issues/3603)) ([8efe23d](https://github.com/tolgee/tolgee-platform/commit/8efe23db11bfc2eac2422bc2976e28226c655012))
+
 ## [3.181.1](https://github.com/tolgee/tolgee-platform/compare/v3.181.0...v3.181.1) (2026-04-23)
 
 
