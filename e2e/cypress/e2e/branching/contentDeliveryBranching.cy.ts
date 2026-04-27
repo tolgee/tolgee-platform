@@ -107,6 +107,25 @@ describe('Content delivery with branching', () => {
       .findDcy('branch-selector')
       .should('contain', 'feature');
   });
+
+  it('edits branched content delivery when branching gets disabled', () => {
+    // Seed data is created with BRANCHING enabled so the config has a branch
+    // stored on the backend. Now simulate the feature being turned off.
+    setFeature('BRANCHING', false);
+    cy.reload();
+    waitForGlobalLoading();
+
+    openEditDialog('Main CDN');
+    // Branch selector must be hidden when branching is not enabled.
+    gcy('content-delivery-form-branch').should('not.exist');
+
+    cy.gcy('content-delivery-form-name').find('input').clear().type('Renamed');
+    cy.gcy('content-delivery-form-save').click();
+    waitForGlobalLoading();
+    // Before the fix the PUT body carried the stale filterBranch which the
+    // backend rejected with FEATURE_NOT_ENABLED_FOR_PROJECT.
+    assertMessage('Content delivery successfully updated!');
+  });
 });
 
 function openEditDialog(name: string) {

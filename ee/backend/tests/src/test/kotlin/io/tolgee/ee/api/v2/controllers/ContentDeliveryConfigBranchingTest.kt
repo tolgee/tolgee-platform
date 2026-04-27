@@ -162,6 +162,36 @@ class ContentDeliveryConfigBranchingTest : ProjectAuthControllerTest("/v2/projec
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `update default-branch CDN succeeds when branching not enabled and default is echoed`() {
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.MULTIPLE_CONTENT_DELIVERY_CONFIGS)
+    performProjectAuthPut(
+      "content-delivery-configs/${testData.mainBranchCdnConfig.self.id}",
+      mapOf("name" to "Renamed", "filterBranch" to "main"),
+    ).andIsOk
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `update default-branch CDN succeeds when branching not enabled and filterBranch is null`() {
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.MULTIPLE_CONTENT_DELIVERY_CONFIGS)
+    performProjectAuthPut(
+      "content-delivery-configs/${testData.mainBranchCdnConfig.self.id}",
+      mapOf("name" to "Renamed"),
+    ).andIsOk
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `update non-default-branch CDN fails when branching not enabled even if branch is unchanged`() {
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.MULTIPLE_CONTENT_DELIVERY_CONFIGS)
+    performProjectAuthPut(
+      "content-delivery-configs/${testData.featureBranchCdnConfig.self.id}",
+      mapOf("name" to "Feature CDN", "filterBranch" to "feature"),
+    ).andIsBadRequest.andHasErrorMessage(Message.FEATURE_NOT_ENABLED)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `CDN config filterBranch is derived from branch entity`() {
     executeInNewTransaction {
       val config = contentDeliveryConfigService.get(testData.featureBranchCdnConfig.self.id)
