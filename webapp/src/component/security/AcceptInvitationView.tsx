@@ -106,7 +106,7 @@ const AcceptInvitationView: React.FC = () => {
 
   function handleAccept() {
     if (!tokenService.getToken()) {
-      setInvitationCode(code);
+      setInvitationCode(code, invitationInfo.data?.inviteeEmail ?? undefined);
       history.push(LINKS.LOGIN.build());
     } else {
       acceptCode.mutate(
