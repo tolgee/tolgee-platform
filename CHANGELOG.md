@@ -1,3 +1,10 @@
+## [3.181.4](https://github.com/tolgee/tolgee-platform/compare/v3.181.3...v3.181.4) (2026-04-27)
+
+
+### Performance Improvements
+
+* drop statement_timeout on TM suggestion queries ([#3615](https://github.com/tolgee/tolgee-platform/issues/3615)) ([07cc841](https://github.com/tolgee/tolgee-platform/commit/07cc84190ab3a9fd95a646e4d9b0d501399e643a))
+
 ## [3.181.3](https://github.com/tolgee/tolgee-platform/compare/v3.181.2...v3.181.3) (2026-04-27)
 
 
