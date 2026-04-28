@@ -143,6 +143,8 @@ export const glossaryTestData = generateTestDataObject('glossary');
 export const translationMemoryTestData =
   generateTestDataObject('translation-memory');
 
+export const tmSuggestionsTestData = generateTestDataObject('tm-suggestions');
+
 export const notificationTestData = generateTestDataObject('notification');
 
 export const authProviderChange = generateTestDataObject(

@@ -11,6 +11,16 @@ export class E2TranslationMemoryView {
     return gcy('tm-entries-header');
   }
 
+  // --- Search ---
+
+  search(text: string) {
+    gcy('global-list-search').find('input').clear().type(text);
+  }
+
+  clearSearch() {
+    gcy('global-list-search').find('input').clear();
+  }
+
   // --- Layout toggle ---
 
   switchToFlat() {
@@ -25,6 +35,12 @@ export class E2TranslationMemoryView {
 
   getEntryRows() {
     return gcy('translation-memory-entry-row');
+  }
+
+  getEntryRowContaining(text: string) {
+    return gcy('translation-memory-entry-row')
+      .filter(`:contains("${text}")`)
+      .first();
   }
 
   clickTranslationCell(text: string) {
@@ -43,22 +59,12 @@ export class E2TranslationMemoryView {
     gcy('tm-entry-cancel').click();
   }
 
-  /**
-   * Selects a row that contains [rowText] via its checkbox. [rowText] may be
-   * any cell content unique to the target row (source or target text).
-   */
   selectRow(rowText: string) {
-    gcy('translation-memory-entry-row')
-      .filter(`:contains("${rowText}")`)
-      .first()
+    this.getEntryRowContaining(rowText)
       .find('[data-cy="tm-entry-row-checkbox"] input')
       .check();
   }
 
-  /**
-   * Clicks the batch-delete button in the bottom toolbar and confirms.
-   * Rows must be selected via [selectRow] beforehand.
-   */
   batchDelete() {
     gcy('tm-batch-delete-button').click();
     cy.get('[role="dialog"]').contains('button', 'Confirm').click();
@@ -90,26 +96,33 @@ export class E2TranslationMemoryView {
 
   // --- Import / Export ---
 
+  getImportButton() {
+    return gcy('tm-import-button');
+  }
+
+  getExportButton() {
+    return gcy('tm-export-button');
+  }
+
   clickImportButton() {
-    gcy('tm-import-button').click();
+    this.getImportButton().click();
   }
 
   clickExportButton() {
-    gcy('tm-export-button').click();
+    this.getExportButton().click();
   }
 
   assertImportDialogVisible() {
     gcy('tm-import-dialog').should('be.visible');
   }
 
-  importTmxFile(filename: string, content: string, mode?: 'keep' | 'override') {
+  importTmxFile(fixturePath: string, mode?: 'keep' | 'override') {
     this.clickImportButton();
     this.assertImportDialogVisible();
 
-    cy.writeFile(`cypress/fixtures/generated/${filename}`, content);
     gcy('tm-import-dialog')
       .find('input[type="file"]')
-      .selectFile(`cypress/fixtures/generated/${filename}`, { force: true });
+      .selectFile(`cypress/fixtures/${fixturePath}`, { force: true });
 
     gcy('tm-import-submit').should('not.be.disabled');
 
