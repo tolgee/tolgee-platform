@@ -114,6 +114,7 @@ class InvitationService(
     userAccount: UserAccount,
   ) {
     val invitation = getInvitation(code)
+    validateInvitationEmail(invitation, userAccount)
     val permission = invitation.permission
     val organizationRole = invitation.organizationRole
 
@@ -159,6 +160,18 @@ class InvitationService(
           organizationName = it.organization?.name,
         ),
       )
+    }
+  }
+
+  private fun validateInvitationEmail(
+    invitation: Invitation,
+    userAccount: UserAccount,
+  ) {
+    val invitationEmail = invitation.email
+    if (!invitationEmail.isNullOrBlank() &&
+      !invitationEmail.equals(userAccount.username, ignoreCase = true)
+    ) {
+      throw BadRequestException(Message.INVITATION_EMAIL_MISMATCH)
     }
   }
 

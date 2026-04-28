@@ -29,12 +29,13 @@ import {
   signUpAfter,
   visitSignUp,
 } from '../../common/login';
+import { getInput } from '../../common/xPath';
 import { ProjectDTO } from '../../../../webapp/src/service/response.types';
 import { waitForGlobalLoading } from '../../common/loading';
 
 const TEST_USERNAME = 'johndoe@doe.com';
 
-const createProjectWithInvitation = (name: string) => {
+const createProjectWithInvitation = (name: string, email?: string) => {
   return login().then(() =>
     createProject({
       name,
@@ -49,7 +50,7 @@ const createProjectWithInvitation = (name: string) => {
     }).then((projectResponse: { body: ProjectDTO }) => {
       return v2apiFetch(`projects/${projectResponse.body.id}/invite`, {
         method: 'PUT',
-        body: { type: 'VIEW', name: 'Franta' },
+        body: { type: 'VIEW', name: 'Franta', ...(email ? { email } : {}) },
       }).then((invitation) => {
         logout();
         return {
@@ -219,6 +220,19 @@ context('Sign up', () => {
       cy.gcy('pending-invitation-dismiss').should('be.visible').click();
       cy.gcy('pending-invitation-banner').should('not.exist');
     });
+  });
+
+  it('Prefills email on sign up from email-bound invitation', () => {
+    disableEmailVerification();
+    createProjectWithInvitation('Email bound project', TEST_USERNAME).then(
+      ({ invitationLink }) => {
+        cy.visit(invitationLink);
+        cy.gcy('accept-invitation-accept').should('be.visible').click();
+        cy.gcy('pending-invitation-banner').should('be.visible');
+        cy.visit(HOST + '/sign_up');
+        cy.xpath(getInput('email')).should('have.value', TEST_USERNAME);
+      }
+    );
   });
 
   it('Allows sign up when user has invitation', () => {

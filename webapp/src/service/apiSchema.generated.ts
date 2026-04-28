@@ -2688,6 +2688,7 @@ export interface components {
         | "can_not_revoke_own_permissions"
         | "data_corrupted"
         | "invitation_code_does_not_exist_or_expired"
+        | "invitation_email_mismatch"
         | "language_tag_exists"
         | "language_name_exists"
         | "language_not_found"
@@ -5454,6 +5455,7 @@ export interface components {
       createdBy?: components["schemas"]["SimpleUserAccountModel"];
       /** Format: int64 */
       id: number;
+      inviteeEmail?: string;
       organizationName?: string;
       projectName?: string;
     };
@@ -6349,6 +6351,7 @@ export interface components {
         | "can_not_revoke_own_permissions"
         | "data_corrupted"
         | "invitation_code_does_not_exist_or_expired"
+        | "invitation_email_mismatch"
         | "language_tag_exists"
         | "language_name_exists"
         | "language_not_found"

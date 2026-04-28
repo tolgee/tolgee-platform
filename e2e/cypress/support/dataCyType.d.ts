@@ -8,6 +8,7 @@ declare namespace DataCy {
         "accept-auth-provider-change-info-text" |
         "accept-invitation-accept" |
         "accept-invitation-decline" |
+        "accept-invitation-email-mismatch" |
         "accept-invitation-info-text" |
         "account-security-initial-password-set" |
         "account-security-provider-connect" |
@@ -441,6 +442,7 @@ declare namespace DataCy {
         "invitation-dialog-type-agency-button" |
         "invitation-dialog-type-email-button" |
         "invitation-dialog-type-link-button" |
+        "invitation_email_mismatch_message" |
         "invite-generate-button" |
         "invoice-details-dialog" |
         "key-char-limit-checkbox" |
