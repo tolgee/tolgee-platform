@@ -13,7 +13,6 @@ import io.tolgee.development.testDataBuilder.builders.PatBuilder
 import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.builders.TranslationBuilder
-import io.tolgee.development.testDataBuilder.builders.TranslationMemoryBuilder
 import io.tolgee.development.testDataBuilder.builders.UserAccountBuilder
 import io.tolgee.development.testDataBuilder.builders.UserPreferencesBuilder
 import io.tolgee.development.testDataBuilder.builders.slack.SlackUserConnectionBuilder
