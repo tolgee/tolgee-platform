@@ -960,6 +960,8 @@ declare namespace DataCy {
         "translation-tools-machine-translation-item-prompt" |
         "translation-tools-suggestions-show-all-checkbox" |
         "translation-tools-translation-memory-item" |
+        "translation-tools-translation-memory-item-key-name" |
+        "translation-tools-translation-memory-item-score" |
         "translation-tools-translation-memory-item-tm-name" |
         "translation-tools-translation-memory-item-updated" |
         "translations-add-button" |

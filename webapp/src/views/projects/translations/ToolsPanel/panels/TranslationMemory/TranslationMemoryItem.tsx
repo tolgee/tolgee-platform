@@ -147,6 +147,16 @@ const tierClass = (similarityPercent: number): string => {
   return 's-low';
 };
 
+// Stable test contract — separate from the styling class so e2e tests can assert tier
+// without coupling to the visual class name. `penalized` overrides any base tier when set.
+const tierAttr = (similarityPercent: number, penalized: boolean): string => {
+  if (penalized) return 'penalized';
+  if (similarityPercent >= 100) return '100';
+  if (similarityPercent >= 85) return 'high';
+  if (similarityPercent >= 60) return 'mid';
+  return 'low';
+};
+
 export const TranslationMemoryItem = ({
   item,
   languageTag,
@@ -189,6 +199,8 @@ export const TranslationMemoryItem = ({
       className={clsx(tierClass(displayedPercent), {
         penalized: penalty > 0,
       })}
+      data-tier={tierAttr(displayedPercent, penalty > 0)}
+      data-cy="translation-tools-translation-memory-item-score"
     >
       {displayedPercent}%{penalty > 0 && <StyledScoreDot />}
     </StyledScore>
@@ -239,7 +251,11 @@ export const TranslationMemoryItem = ({
             }
             if (item.keyName) {
               parts.push(
-                <StyledMetaItem key="key" title={item.keyName}>
+                <StyledMetaItem
+                  key="key"
+                  title={item.keyName}
+                  data-cy="translation-tools-translation-memory-item-key-name"
+                >
                   {item.keyName}
                 </StyledMetaItem>
               );

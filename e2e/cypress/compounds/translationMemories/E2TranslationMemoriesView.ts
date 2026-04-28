@@ -14,22 +14,51 @@ export class E2TranslationMemoriesView {
     cy.visit(`${HOST}/organizations/${organizationSlug}/translation-memories`);
   }
 
+  clickSidebarEntry() {
+    gcy('settings-menu-item')
+      .filter(':contains("Translation memories")')
+      .click();
+  }
+
+  getListItems() {
+    return gcy('translation-memory-list-item');
+  }
+
+  getListItem(name: string) {
+    return this.getListItems().filter(
+      `:has([data-cy="translation-memory-list-name"]:contains("${name}"))`
+    );
+  }
+
+  getEntriesCountFor(name: string) {
+    return this.getListItem(name).findDcy(
+      'translation-memory-list-entries-count'
+    );
+  }
+
   openMenu(name: string) {
-    // Filter on the TM-name child specifically — the list item now also renders the
-    // names of every project the TM is assigned to (Used-in-projects header), so a plain
-    // `:contains(name)` against the whole row matches every TM whose project list happens
-    // to mention this name.
-    gcy('translation-memory-list-item')
-      .filter(
-        `:has([data-cy="translation-memory-list-name"]:contains("${name}"))`
-      )
+    this.getListItem(name)
       .findDcy('translation-memories-list-more-button')
       .click();
   }
 
+  getMoreButtonFor(name: string) {
+    return this.getListItem(name).findDcy(
+      'translation-memories-list-more-button'
+    );
+  }
+
+  getEditMenuItem() {
+    return gcy('translation-memory-edit-button');
+  }
+
+  getDeleteMenuItem() {
+    return gcy('translation-memory-delete-button');
+  }
+
   deleteTranslationMemory(name: string) {
     this.openMenu(name);
-    gcy('translation-memory-delete-button').click();
+    this.getDeleteMenuItem().click();
     confirmHardMode();
   }
 
@@ -43,12 +72,19 @@ export class E2TranslationMemoriesView {
     return new E2TranslationMemoryCreateEditDialog();
   }
 
+  openSettingsDialog(name: string): E2TranslationMemoryCreateEditDialog {
+    this.openMenu(name);
+    this.getEditMenuItem().click();
+    gcy('tm-settings-dialog').should('be.visible');
+    return new E2TranslationMemoryCreateEditDialog();
+  }
+
+  getSettingsDialog() {
+    return gcy('tm-settings-dialog');
+  }
+
   openTm(name: string) {
-    gcy('translation-memory-list-item')
-      .filter(
-        `:has([data-cy="translation-memory-list-name"]:contains("${name}"))`
-      )
-      .click();
+    this.getListItem(name).click();
   }
 
   findAndVisitTm(
@@ -58,11 +94,5 @@ export class E2TranslationMemoriesView {
   ) {
     this.findAndVisit(data, orgName);
     this.openTm(tmName);
-  }
-
-  openSettingsDialog(name: string) {
-    this.openMenu(name);
-    gcy('translation-memory-edit-button').click();
-    gcy('tm-settings-dialog').should('be.visible');
   }
 }
