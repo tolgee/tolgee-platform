@@ -492,7 +492,10 @@ class SecurityService(
     keyIds: List<Long>,
     projectId: Long,
   ) {
-    val projectIds = keyRepository.getProjectIdsForKeyIds(keyIds)
+    val projectIds =
+      keyIds
+        .chunked(KEY_ID_LOOKUP_CHUNK_SIZE)
+        .flatMap { keyRepository.getProjectIdsForKeyIds(it) }
 
     if (projectIds.size != keyIds.size) {
       throw NotFoundException(Message.KEY_NOT_FOUND)
@@ -629,4 +632,8 @@ class SecurityService(
 
   private val activeApiKey: ApiKeyDto?
     get() = if (authenticationFacade.isProjectApiKeyAuth) authenticationFacade.projectApiKey else null
+
+  companion object {
+    private const val KEY_ID_LOOKUP_CHUNK_SIZE = 10_000
+  }
 }
