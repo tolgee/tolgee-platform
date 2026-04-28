@@ -6,7 +6,6 @@ import {
   Stack,
   Switch,
   TextField as MuiTextField,
-  Tooltip,
   Typography,
   styled,
 } from '@mui/material';
@@ -29,7 +28,7 @@ import {
   PendingRemovalRow,
   TmAssignedProjectsTable,
 } from 'tg.ee.module/translationMemory/views/TmAssignedProjectsTable';
-import { ConfirmRemoveProjectDialog } from 'tg.ee.module/translationMemory/views/ConfirmRemoveProjectDialog';
+import { confirmation } from 'tg.hooks/confirmation';
 
 const StyledContainer = styled('div')`
   padding: ${({ theme }) => theme.spacing(3)};
@@ -101,7 +100,7 @@ export const TranslationMemoryCreateEditForm = ({
   const featureEnabled = isEnabled('TRANSLATION_MEMORY');
 
   // IDs that were already saved on the server when the form opened. Used in edit mode to
-  // distinguish a "remove" of a saved assignment (needs DELETE + keepData decision) from
+  // distinguish a "remove" of a saved assignment (needs server-side DELETE on save) from
   // removal of a row the user just added in this session (just drop from local state).
   const originalProjectIds = useMemo(
     () =>
@@ -112,11 +111,6 @@ export const TranslationMemoryCreateEditForm = ({
   const [pendingRemovals, setPendingRemovals] = useState<PendingRemovalRow[]>(
     []
   );
-  const [confirmingProject, setConfirmingProject] = useState<{
-    projectId: number;
-    projectName: string;
-  } | null>(null);
-  const [confirmKeepData, setConfirmKeepData] = useState(false);
 
   if (initialValues === undefined) {
     return null;
@@ -135,9 +129,34 @@ export const TranslationMemoryCreateEditForm = ({
           projectName: string
         ) => {
           if (mode === 'edit' && originalProjectIds.has(projectId)) {
-            // Saved assignment → confirm removal with keepData option
-            setConfirmKeepData(false);
-            setConfirmingProject({ projectId, projectName });
+            // Saved assignment → confirm before queuing a server-side DELETE on save
+            confirmation({
+              title: (
+                <T
+                  keyName="tm_settings_disconnect_project_title"
+                  defaultValue="Disconnect {projectName}"
+                  params={{ projectName }}
+                />
+              ),
+              message: (
+                <T
+                  keyName="tm_settings_remove_project_message"
+                  defaultValue="This project will be disconnected from the translation memory."
+                />
+              ),
+              onConfirm: () => {
+                setPendingRemovals((prev) => [
+                  ...prev,
+                  { projectId, projectName },
+                ]);
+                setFieldValue(
+                  'assignedProjects',
+                  values.assignedProjects.filter(
+                    (a) => a.projectId !== projectId
+                  )
+                );
+              },
+            });
             return;
           }
           // Newly added in this session → just drop from values
@@ -145,25 +164,6 @@ export const TranslationMemoryCreateEditForm = ({
             'assignedProjects',
             values.assignedProjects.filter((a) => a.projectId !== projectId)
           );
-        };
-
-        const confirmRemove = () => {
-          if (!confirmingProject) return;
-          setPendingRemovals((prev) => [
-            ...prev,
-            {
-              projectId: confirmingProject.projectId,
-              projectName: confirmingProject.projectName,
-              keepData: confirmKeepData,
-            },
-          ]);
-          setFieldValue(
-            'assignedProjects',
-            values.assignedProjects.filter(
-              (a) => a.projectId !== confirmingProject.projectId
-            )
-          );
-          setConfirmingProject(null);
         };
 
         const undoRemoval = (projectId: number) => {
@@ -192,10 +192,7 @@ export const TranslationMemoryCreateEditForm = ({
               <TextField
                 name="name"
                 autoFocus
-                label={t(
-                  'translation_memory_field_name',
-                  'Translation memory name'
-                )}
+                label={t('translation_memory_field_name', 'Name')}
                 data-cy="create-translation-memory-field-name"
                 disabled={!featureEnabled}
                 minHeight={false}
@@ -234,14 +231,6 @@ export const TranslationMemoryCreateEditForm = ({
                   : t('global_form_create')}
               </LoadingButton>
             </StyledActions>
-
-            <ConfirmRemoveProjectDialog
-              project={confirmingProject}
-              keepData={confirmKeepData}
-              onKeepDataChange={setConfirmKeepData}
-              onConfirm={confirmRemove}
-              onCancel={() => setConfirmingProject(null)}
-            />
           </StyledContainer>
         );
       }}
@@ -344,13 +333,27 @@ const WriteOnlyReviewedField = ({
       title={
         <T
           keyName="project_tm_only_include_reviewed_hint"
-          defaultValue="Only translations in the Reviewed state appear as TM entries; non-reviewed translations are ignored. The setting is read-only — no data is rewritten when toggled."
+          defaultValue="Only translations in the Reviewed state are offered as TM suggestions. Other translations are excluded until they are reviewed."
         />
       }
     >
       <T
         keyName="project_tm_only_include_reviewed_label"
         defaultValue="Only include reviewed translations"
+      />
+    </LabelHint>
+  ) : locked ? (
+    <LabelHint
+      title={
+        <T
+          keyName="translation_memory_settings_write_only_reviewed_locked_tooltip"
+          defaultValue="This setting is fixed at creation time. Create a new shared TM if you need different behaviour."
+        />
+      }
+    >
+      <T
+        keyName="translation_memory_settings_write_only_reviewed"
+        defaultValue="Only accept reviewed translations"
       />
     </LabelHint>
   ) : (
@@ -369,7 +372,7 @@ const WriteOnlyReviewedField = ({
     </LabelHint>
   );
 
-  const control = (
+  return (
     <FormControlLabel
       control={
         <Switch
@@ -381,23 +384,6 @@ const WriteOnlyReviewedField = ({
       }
       label={label}
     />
-  );
-
-  if (!locked) {
-    return control;
-  }
-
-  return (
-    <Tooltip
-      title={
-        <T
-          keyName="translation_memory_settings_write_only_reviewed_locked_tooltip"
-          defaultValue="This setting is fixed at creation time. The flag determines how entries are seeded into a shared TM, so flipping it mid-life would leave inconsistent state. Create a new shared TM if you need different behaviour."
-        />
-      }
-    >
-      <span>{control}</span>
-    </Tooltip>
   );
 };
 

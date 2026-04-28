@@ -23,8 +23,7 @@ type Props = {
  * (TranslationMemoryCreateEditForm) — only the data plumbing differs:
  *   - initialValues come from the GET endpoint instead of empty defaults
  *   - submit calls PUT for the TM body, plus a per-project DELETE for any rows
- *     the user removed (preserving the keepData choice they made in the
- *     ConfirmRemoveProjectDialog)
+ *     the user removed (always with keepData=false — entries stay in the shared TM)
  *   - tmType is fed in so the form can lock writeOnlyReviewed for SHARED TMs
  */
 export const TranslationMemorySettingsDialog: React.VFC<Props> = ({
@@ -97,13 +96,13 @@ export const TranslationMemorySettingsDialog: React.VFC<Props> = ({
     pendingRemovals: PendingRemovalRow[]
   ) => {
     try {
-      // First fire per-project DELETEs so the keepData decision is preserved. Doing this
-      // before the PUT avoids the case where the PUT replaces assignments, dropping the row,
-      // and the subsequent DELETE then fails because the assignment is gone.
+      // First fire per-project DELETEs. Doing this before the PUT avoids the case where the
+      // PUT replaces assignments, dropping the row, and the subsequent DELETE then fails
+      // because the assignment is gone.
       for (const removal of pendingRemovals) {
         await unassignMutation.mutateAsync({
           path: { projectId: removal.projectId, translationMemoryId },
-          query: { keepData: removal.keepData },
+          query: { keepData: false },
         });
       }
 

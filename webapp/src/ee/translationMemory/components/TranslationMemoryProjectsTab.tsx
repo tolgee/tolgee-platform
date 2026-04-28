@@ -1,16 +1,8 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import {
   Box,
-  Button,
   Checkbox,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControlLabel,
   IconButton,
-  Radio,
-  RadioGroup,
   styled,
   Tooltip,
   Typography,
@@ -20,6 +12,7 @@ import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { components } from 'tg.service/apiSchema.generated';
 import { XClose } from '@untitled-ui/icons-react';
 import { useQueryClient } from 'react-query';
+import { confirmation } from 'tg.hooks/confirmation';
 
 type TmAssignedProjectModel = components['schemas']['TmAssignedProjectModel'];
 
@@ -118,29 +111,31 @@ export const TranslationMemoryProjectsTab: React.VFC<Props> = ({
     );
   };
 
-  const [disconnectItem, setDisconnectItem] =
-    useState<TmAssignedProjectModel | null>(null);
-  const [keepData, setKeepData] = useState(false);
-
   const handleRemove = (item: TmAssignedProjectModel) => {
-    setKeepData(false);
-    setDisconnectItem(item);
-  };
-
-  const handleDisconnectConfirm = () => {
-    if (!disconnectItem) return;
-    unassignMutation.mutate(
-      {
-        path: { projectId: disconnectItem.projectId, translationMemoryId },
-        query: { keepData },
+    confirmation({
+      title: (
+        <T
+          keyName="tm_settings_disconnect_project_title"
+          defaultValue="Disconnect {projectName}"
+          params={{ projectName: item.projectName }}
+        />
+      ),
+      message: (
+        <T
+          keyName="tm_settings_remove_project_message"
+          defaultValue="This project will be disconnected from the translation memory."
+        />
+      ),
+      onConfirm: () => {
+        unassignMutation.mutate(
+          {
+            path: { projectId: item.projectId, translationMemoryId },
+            query: { keepData: false },
+          },
+          { onSuccess: invalidate }
+        );
       },
-      {
-        onSuccess: () => {
-          setDisconnectItem(null);
-          invalidate();
-        },
-      }
-    );
+    });
   };
 
   return (
@@ -214,66 +209,6 @@ export const TranslationMemoryProjectsTab: React.VFC<Props> = ({
           ))}
         </StyledTable>
       )}
-
-      <Dialog
-        open={!!disconnectItem}
-        onClose={() => setDisconnectItem(null)}
-        data-cy="tm-disconnect-dialog"
-      >
-        <DialogTitle>
-          <T
-            keyName="translation_memory_disconnect_title"
-            defaultValue="Remove project from translation memory"
-          />
-        </DialogTitle>
-        <DialogContent>
-          <Typography variant="body2" mb={2}>
-            <T
-              keyName="translation_memory_disconnect_message"
-              defaultValue='You are about to disconnect "{projectName}" from this translation memory. What should happen to the existing entries?'
-              params={{ projectName: disconnectItem?.projectName ?? '' }}
-            />
-          </Typography>
-          <RadioGroup
-            value={keepData ? 'keep' : 'discard'}
-            onChange={(e) => setKeepData(e.target.value === 'keep')}
-          >
-            <FormControlLabel
-              value="discard"
-              control={<Radio data-cy="tm-disconnect-discard" />}
-              label={t(
-                'translation_memory_disconnect_discard',
-                'Just disconnect — entries stay in the shared memory'
-              )}
-            />
-            <FormControlLabel
-              value="keep"
-              control={<Radio data-cy="tm-disconnect-keep" />}
-              label={t(
-                'translation_memory_disconnect_keep',
-                "Copy entries into the project's own memory before disconnecting"
-              )}
-            />
-          </RadioGroup>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDisconnectItem(null)}>
-            <T keyName="global_cancel_button" defaultValue="Cancel" />
-          </Button>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleDisconnectConfirm}
-            disabled={unassignMutation.isLoading}
-            data-cy="tm-disconnect-confirm"
-          >
-            <T
-              keyName="translation_memory_disconnect_confirm"
-              defaultValue="Remove"
-            />
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   );
 };
