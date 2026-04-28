@@ -37,10 +37,11 @@ export class E2TranslationMemoryView {
     return gcy('translation-memory-entry-row');
   }
 
+  // No `.first()` here — callers that need a single element add it themselves. Keeping
+  // the unfiltered subject lets `.should('not.exist')` work, since `.first()` on an empty
+  // jQuery set errors before the assertion can override the existence requirement.
   getEntryRowContaining(text: string) {
-    return gcy('translation-memory-entry-row')
-      .filter(`:contains("${text}")`)
-      .first();
+    return gcy('translation-memory-entry-row').filter(`:contains("${text}")`);
   }
 
   clickTranslationCell(text: string) {
@@ -61,6 +62,7 @@ export class E2TranslationMemoryView {
 
   selectRow(rowText: string) {
     this.getEntryRowContaining(rowText)
+      .first()
       .find('[data-cy="tm-entry-row-checkbox"] input')
       .check();
   }

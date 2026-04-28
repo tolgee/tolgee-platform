@@ -18,8 +18,10 @@ class TmSuggestionsE2eDataController : AbstractE2eDataController() {
   // segment deterministically. Spring's `@LastModifiedDate` listener overwrites updatedAt on
   // persist — the only way to inject a known past timestamp is a native UPDATE after save.
   override fun afterTestDataStored(data: TestDataBuilder) {
-    em.createNativeQuery(
-      "UPDATE translation_memory_entry SET updated_at = NOW() - INTERVAL '3 days' WHERE target_text = :t",
-    ).setParameter("t", TmSuggestionsE2eTestData.BACKDATED_TARGET_TEXT).executeUpdate()
+    em
+      .createNativeQuery(
+        "UPDATE translation_memory_entry SET updated_at = NOW() - INTERVAL '3 days' WHERE target_text = :t",
+      ).setParameter("t", TmSuggestionsE2eTestData.BACKDATED_TARGET_TEXT)
+      .executeUpdate()
   }
 }
