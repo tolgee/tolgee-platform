@@ -45,8 +45,7 @@ class WebhookAutoDisableCheckerTest : AbstractSpringTest() {
 
   @Test
   fun `disables webhook failing for more than 3 days`() {
-    testData.webhookConfig.self.firstFailed = currentDateProvider.date.addDays(-4)
-    testData.webhookConfig.self.enabled = true
+    testData.setWebhookFailingSince(currentDateProvider.date.addDays(-4))
     testDataService.saveTestData(testData.root)
 
     val result = webhookAutoDisableChecker.checkAfterFailure(testData.webhookConfig.self)
@@ -59,8 +58,7 @@ class WebhookAutoDisableCheckerTest : AbstractSpringTest() {
 
   @Test
   fun `does not disable webhook failing for less than 3 days`() {
-    testData.webhookConfig.self.firstFailed = currentDateProvider.date.addDays(-2)
-    testData.webhookConfig.self.enabled = true
+    testData.setWebhookFailingSince(currentDateProvider.date.addDays(-2))
     testDataService.saveTestData(testData.root)
 
     val result = webhookAutoDisableChecker.checkAfterFailure(testData.webhookConfig.self)
@@ -72,9 +70,7 @@ class WebhookAutoDisableCheckerTest : AbstractSpringTest() {
 
   @Test
   fun `sends warning after 6 hours of failure`() {
-    testData.webhookConfig.self.firstFailed = currentDateProvider.date.addMinutes(-420)
-    testData.webhookConfig.self.enabled = true
-    testData.webhookConfig.self.autoDisableNotified = false
+    testData.setWebhookFailingSince(currentDateProvider.date.addMinutes(-420))
     testDataService.saveTestData(testData.root)
 
     val result = webhookAutoDisableChecker.checkAfterFailure(testData.webhookConfig.self)
@@ -92,22 +88,20 @@ class WebhookAutoDisableCheckerTest : AbstractSpringTest() {
 
   @Test
   fun `does not send warning twice`() {
-    testData.webhookConfig.self.firstFailed = currentDateProvider.date.addMinutes(-420)
-    testData.webhookConfig.self.enabled = true
-    testData.webhookConfig.self.autoDisableNotified = true
+    testData.setWebhookFailingSinceAlreadyNotified(currentDateProvider.date.addMinutes(-420))
     testDataService.saveTestData(testData.root)
 
     webhookAutoDisableChecker.checkAfterFailure(testData.webhookConfig.self)
 
-    Thread.sleep(1000)
-    emailTestUtil.messageArgumentCaptor.allValues.assert
-      .isEmpty()
+    waitForNotThrowing(timeout = 2000) {
+      emailTestUtil.messageArgumentCaptor.allValues.assert
+        .isEmpty()
+    }
   }
 
   @Test
   fun `sends disable email`() {
-    testData.webhookConfig.self.firstFailed = currentDateProvider.date.addDays(-4)
-    testData.webhookConfig.self.enabled = true
+    testData.setWebhookFailingSince(currentDateProvider.date.addDays(-4))
     testDataService.saveTestData(testData.root)
 
     webhookAutoDisableChecker.checkAfterFailure(testData.webhookConfig.self)
