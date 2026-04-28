@@ -1,5 +1,6 @@
 package io.tolgee.component.automations.processors
 
+import io.tolgee.exceptions.ExpectedUserError
 import org.springframework.http.HttpStatusCode
 
 class WebhookRespondedWithNon200Status(
@@ -13,4 +14,5 @@ class WebhookExecutionFailed(
 
 open class WebhookException(
   cause: Throwable? = null,
-) : RuntimeException("Webhook execution failed", cause)
+) : RuntimeException("Webhook execution failed", cause),
+  ExpectedUserError

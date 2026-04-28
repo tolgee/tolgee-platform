@@ -9,6 +9,7 @@ import io.tolgee.activity.ActivityHolder
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.exceptions.ExceptionWithMessage
+import io.tolgee.exceptions.ExpectedUserError
 import io.tolgee.exceptions.LlmRateLimitedException
 import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.model.batch.BatchJob
@@ -127,11 +128,20 @@ open class ChunkProcessingUtil(
   }
 
   private fun logKnownException(exception: Throwable) {
-    val isKnownCause = knownCauses.any { ExceptionUtils.indexOfType(exception, it) > -1 }
-    if (!isKnownCause) {
-      Sentry.captureException(exception)
-      logger.error(exception.message, exception)
+    if (isExpectedUserError(exception)) {
+      logger.warn("Skipping Sentry capture for expected user error: ${exception.message}")
+      return
     }
+    Sentry.captureException(exception)
+    logger.error(exception.message, exception)
+  }
+
+  private fun isExpectedUserError(exception: Throwable): Boolean {
+    if (knownCauses.any { ExceptionUtils.indexOfType(exception, it) > -1 }) return true
+    if (exception is MultipleItemsFailedException) {
+      return exception.exceptions.isNotEmpty() && exception.exceptions.all { isExpectedUserError(it) }
+    }
+    return ExceptionUtils.getThrowableList(exception).any { it is ExpectedUserError }
   }
 
   private fun retryFailedExecution(exception: Throwable) {
@@ -154,7 +164,9 @@ open class ChunkProcessingUtil(
     )
     if (errorKeyRetries >= maxRetries && maxRetries != -1) {
       logger.debug("Max retries reached for job execution ${execution.id}")
-      Sentry.captureException(exception)
+      if (!isExpectedUserError(exception)) {
+        Sentry.captureException(exception)
+      }
       return
     }
 
