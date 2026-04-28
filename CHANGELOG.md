@@ -1,3 +1,10 @@
+# [3.182.0](https://github.com/tolgee/tolgee-platform/compare/v3.181.4...v3.182.0) (2026-04-28)
+
+
+### Features
+
+* auto-disable webhooks after persistent failures ([#3587](https://github.com/tolgee/tolgee-platform/issues/3587)) ([5052cd1](https://github.com/tolgee/tolgee-platform/commit/5052cd1bde0d67938f99852c13a6deca46338df9))
+
 ## [3.181.4](https://github.com/tolgee/tolgee-platform/compare/v3.181.3...v3.181.4) (2026-04-27)
 
 
