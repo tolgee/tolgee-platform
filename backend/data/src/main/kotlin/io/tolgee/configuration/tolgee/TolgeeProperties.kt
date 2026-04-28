@@ -121,6 +121,7 @@ class TolgeeProperties(
   var postHog: PostHogProperties = PostHogProperties(),
   var telemetry: TelemetryProperties = TelemetryProperties(),
   var contentDelivery: ContentDeliveryProperties = ContentDeliveryProperties(),
+  var webhook: WebhookProperties = WebhookProperties(),
   var slack: SlackProperties = SlackProperties(),
   @DocProperty(hidden = true)
   var plausible: PlausibleProperties = PlausibleProperties(),

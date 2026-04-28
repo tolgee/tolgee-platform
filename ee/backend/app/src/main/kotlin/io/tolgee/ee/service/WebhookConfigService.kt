@@ -80,6 +80,14 @@ class WebhookConfigService(
     val webhookConfig = get(projectId, id)
     urlSecurity.validateUrl(dto.url)
     webhookConfig.url = dto.url
+    dto.enabled?.let { newEnabled ->
+      webhookConfig.enabled = newEnabled
+      if (newEnabled) {
+        webhookConfig.firstFailed = null
+        webhookConfig.autoDisableNotified = false
+        webhookConfig.autoDisabled = false
+      }
+    }
     automationService.updateForWebhookConfig(webhookConfig)
     return webhookConfigRepository.save(webhookConfig)
   }

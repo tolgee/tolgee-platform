@@ -35,6 +35,9 @@ class WebhookConfig(
   @NotBlank
   var webhookSecret: String = ""
 
+  @ActivityLoggedProp
+  var enabled: Boolean = true
+
   @OneToMany(mappedBy = "webhookConfig", orphanRemoval = true)
   var automationActions: MutableList<AutomationAction> = mutableListOf()
 
@@ -43,4 +46,10 @@ class WebhookConfig(
 
   @ActivityIgnoredProp
   var lastExecuted: Date? = null
+
+  @ActivityIgnoredProp
+  var autoDisableNotified: Boolean = false
+
+  @ActivityIgnoredProp
+  var autoDisabled: Boolean = false
 }

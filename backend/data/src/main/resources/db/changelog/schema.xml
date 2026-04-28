@@ -5327,4 +5327,25 @@
             <column name="totp_last_used_time_step" type="BIGINT"/>
         </addColumn>
     </changeSet>
+    <changeSet author="jcizmar" id="1743000000000-1">
+        <addColumn tableName="webhook_config">
+            <column name="enabled" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jcizmar" id="1743000000000-2">
+        <addColumn tableName="webhook_config">
+            <column name="auto_disable_notified" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jcizmar" id="1743000000000-3">
+        <addColumn tableName="webhook_config">
+            <column name="auto_disabled" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

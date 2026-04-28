@@ -4,24 +4,18 @@ import io.tolgee.model.automations.AutomationAction
 import io.tolgee.model.automations.AutomationActionType
 import io.tolgee.model.automations.AutomationTrigger
 import io.tolgee.model.automations.AutomationTriggerType
+import java.util.Date
 
-class WebhooksTestData : BaseTestData() {
+class WebhooksE2eTestData :
+  BaseTestData(
+    userName = "webhooks-test@test.com",
+  ) {
   val webhookConfig =
     projectBuilder.addWebhookConfig {
       url = "https://this-will-hopefully-never-exist.com/wh"
       webhookSecret = "whsec_hello"
+      firstFailed = Date()
     }
-
-  fun setWebhookFailingSince(date: java.util.Date) {
-    webhookConfig.self.firstFailed = date
-    webhookConfig.self.enabled = true
-  }
-
-  fun setWebhookFailingSinceAlreadyNotified(date: java.util.Date) {
-    webhookConfig.self.firstFailed = date
-    webhookConfig.self.enabled = true
-    webhookConfig.self.autoDisableNotified = true
-  }
 
   val automation =
     projectBuilder.addAutomation {

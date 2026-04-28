@@ -20,6 +20,7 @@ class WebhookProcessor(
   val currentDateProvider: CurrentDateProvider,
   val webhookExecutor: WebhookExecutor,
   val entityManager: EntityManager,
+  val webhookAutoDisableChecker: WebhookAutoDisableChecker,
 ) : AutomationProcessor {
   override fun process(
     action: AutomationAction,
@@ -29,6 +30,7 @@ class WebhookProcessor(
     val view = activityService.findProjectActivity(activityRevisionId) ?: return
     val activityModel = activityModelAssembler.toModel(view)
     val config = action.webhookConfig ?: return
+    if (!config.enabled) return
 
     val data =
       WebhookRequest(
@@ -42,6 +44,7 @@ class WebhookProcessor(
       updateEntity(webhookConfig = config, failing = false)
     } catch (e: Exception) {
       updateEntity(config, true)
+      if (webhookAutoDisableChecker.checkAfterFailure(config)) return
       when (e) {
         is WebhookRespondedWithNon200Status -> throw RequeueWithDelayException(
           Message.WEBHOOK_RESPONDED_WITH_NON_200_STATUS,
@@ -62,8 +65,16 @@ class WebhookProcessor(
     webhookConfig: WebhookConfig,
     failing: Boolean,
   ) {
-    webhookConfig.firstFailed = if (failing) currentDateProvider.date else null
     webhookConfig.lastExecuted = currentDateProvider.date
+    if (!failing) {
+      webhookConfig.firstFailed = null
+      webhookConfig.autoDisableNotified = false
+      entityManager.persist(webhookConfig)
+      return
+    }
+    if (webhookConfig.firstFailed == null) {
+      webhookConfig.firstFailed = currentDateProvider.date
+    }
     entityManager.persist(webhookConfig)
   }
 }
