@@ -25,6 +25,7 @@ enum class Feature {
   TRANSLATION_LABELS,
   BRANCHING,
   QA_CHECKS,
+  TRANSLATION_MEMORY,
   ;
 
   companion object {

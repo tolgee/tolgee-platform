@@ -20,6 +20,7 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.machineTranslation.MtService
 import io.tolgee.service.project.ProjectService
+import io.tolgee.service.translationMemory.TmAutoTranslateProvider
 import io.tolgee.util.executeInNewTransaction
 import io.tolgee.util.tryUntilItDoesntBreakConstraint
 import jakarta.persistence.EntityManager
@@ -32,7 +33,7 @@ import org.springframework.transaction.PlatformTransactionManager
 class AutoTranslationService(
   private val translationService: TranslationService,
   private val autoTranslationConfigRepository: AutoTranslationConfigRepository,
-  private val translationMemoryService: TranslationMemoryService,
+  private val tmAutoTranslateProvider: TmAutoTranslateProvider,
   private val mtService: MtService,
   private val languageService: LanguageService,
   private val batchJobService: BatchJobService,
@@ -125,7 +126,7 @@ class AutoTranslationService(
   ): Triple<String?, MtServiceType?, Long?>? {
     if (config.usingTm) {
       val value =
-        translationMemoryService
+        tmAutoTranslateProvider
           .getAutoTranslatedValue(
             translation.key,
             translation.language,
@@ -291,7 +292,7 @@ class AutoTranslationService(
   ): Map<Translation, Boolean> {
     val project = projectService.getDto(key.project.id)
     return toTranslate.associateWith { translation ->
-      val tmValue = translationMemoryService.getAutoTranslatedValue(key, translation.language)
+      val tmValue = tmAutoTranslateProvider.getAutoTranslatedValue(key, translation.language)
       tmValue
         ?.targetTranslationText
         .let { targetText -> if (targetText.isNullOrEmpty()) null else targetText }
