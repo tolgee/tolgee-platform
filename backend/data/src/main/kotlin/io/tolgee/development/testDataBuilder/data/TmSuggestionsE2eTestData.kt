@@ -17,10 +17,11 @@ import io.tolgee.model.translationMemory.TranslationMemoryType
  * `@LastModifiedDate` listener overwrites whatever the builder sets, so the backdating
  * has to happen after persist.
  */
-class TmSuggestionsE2eTestData : BaseTestData(
-  userName = "tm_suggestions_user",
-  projectName = "Suggestions Project",
-) {
+class TmSuggestionsE2eTestData :
+  BaseTestData(
+    userName = "tm_suggestions_user",
+    projectName = "Suggestions Project",
+  ) {
   companion object {
     /** Source text matched by edit-target keys whose only suggestion comes from the 3-day-old
      *  shared TM entry. The controller backdates the row with this target text. */
@@ -77,64 +78,67 @@ class TmSuggestionsE2eTestData : BaseTestData(
 
       val org = userAccountBuilder.defaultOrganizationBuilder
 
-      org.addTranslationMemory {
-        name = "Shared TM"
-        sourceLanguageTag = "en"
-        type = TranslationMemoryType.SHARED
-      }.build {
-        sharedTmWithDate = self
-        assignProject(project) { priority = 1 }
-        addEntry {
-          sourceText = "Tier source text"
-          targetText = "Vysoký score"
-          targetLanguageTag = "cs"
+      org
+        .addTranslationMemory {
+          name = "Shared TM"
+          sourceLanguageTag = "en"
+          type = TranslationMemoryType.SHARED
+        }.build {
+          sharedTmWithDate = self
+          assignProject(project) { priority = 1 }
+          addEntry {
+            sourceText = "Tier source text"
+            targetText = "Vysoký score"
+            targetLanguageTag = "cs"
+          }
+          addEntry {
+            sourceText = "Multi source text"
+            targetText = "Ze sdílené TM"
+            targetLanguageTag = "cs"
+          }
+          addEntry {
+            sourceText = "Time source text"
+            targetText = BACKDATED_TARGET_TEXT
+            targetLanguageTag = "cs"
+          }
         }
-        addEntry {
-          sourceText = "Multi source text"
-          targetText = "Ze sdílené TM"
-          targetLanguageTag = "cs"
-        }
-        addEntry {
-          sourceText = "Time source text"
-          targetText = BACKDATED_TARGET_TEXT
-          targetLanguageTag = "cs"
-        }
-      }
 
-      org.addTranslationMemory {
-        name = "Penalized shared TM"
-        sourceLanguageTag = "en"
-        type = TranslationMemoryType.SHARED
-        defaultPenalty = 30
-      }.build {
-        penalizedSharedTm = self
-        assignProject(project) { priority = 2 }
-        addEntry {
-          sourceText = "Penalty source text"
-          targetText = "Penalizovaný překlad"
-          targetLanguageTag = "cs"
+      org
+        .addTranslationMemory {
+          name = "Penalized shared TM"
+          sourceLanguageTag = "en"
+          type = TranslationMemoryType.SHARED
+          defaultPenalty = 30
+        }.build {
+          penalizedSharedTm = self
+          assignProject(project) { priority = 2 }
+          addEntry {
+            sourceText = "Penalty source text"
+            targetText = "Penalizovaný překlad"
+            targetLanguageTag = "cs"
+          }
         }
-      }
 
-      org.addTranslationMemory {
-        name = "No-read shared TM"
-        sourceLanguageTag = "en"
-        type = TranslationMemoryType.SHARED
-      }.build {
-        noReadSharedTm = self
-        // readAccess=false means suggestions from this TM must NOT reach the panel even
-        // though writes still flow in. Drives the permissions test below.
-        assignProject(project) {
-          priority = 3
-          readAccess = false
-          writeAccess = true
+      org
+        .addTranslationMemory {
+          name = "No-read shared TM"
+          sourceLanguageTag = "en"
+          type = TranslationMemoryType.SHARED
+        }.build {
+          noReadSharedTm = self
+          // readAccess=false means suggestions from this TM must NOT reach the panel even
+          // though writes still flow in. Drives the permissions test below.
+          assignProject(project) {
+            priority = 3
+            readAccess = false
+            writeAccess = true
+          }
+          addEntry {
+            sourceText = "Read-disabled source"
+            targetText = "Should not appear"
+            targetLanguageTag = "cs"
+          }
         }
-        addEntry {
-          sourceText = "Read-disabled source"
-          targetText = "Should not appear"
-          targetLanguageTag = "cs"
-        }
-      }
     }
   }
 
