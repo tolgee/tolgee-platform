@@ -69,8 +69,9 @@ class TranslationMemoryEntryManagementService(
       )
     }
 
-    val projectId = projectIdForTm(tm)
-      ?: return PageImpl(emptyList(), pageable, 0)
+    val projectId =
+      projectIdForTm(tm)
+        ?: return PageImpl(emptyList(), pageable, 0)
     return loadVirtualGroupsPaged(
       tm = tm,
       projectId = projectId,
@@ -188,7 +189,11 @@ class TranslationMemoryEntryManagementService(
         targetLanguageTag = targetLanguageTag,
       )
 
-    data class VirtualRow(val targetText: String, val targetLang: String, val keyName: String)
+    data class VirtualRow(
+      val targetText: String,
+      val targetLang: String,
+      val keyName: String,
+    )
 
     val bySource = mutableMapOf<String, MutableList<VirtualRow>>()
     for (row in rows) {
@@ -287,6 +292,7 @@ class TranslationMemoryEntryManagementService(
       order by source_text
       limit :limit offset :offset
       """.trimIndent()
+
     @Suppress("UNCHECKED_CAST")
     val rows =
       entityManager

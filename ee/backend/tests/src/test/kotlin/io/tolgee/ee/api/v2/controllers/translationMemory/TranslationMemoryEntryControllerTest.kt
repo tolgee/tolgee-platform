@@ -118,8 +118,7 @@ class TranslationMemoryEntryControllerTest : AuthorizedControllerTest() {
         node("page.totalElements").isEqualTo(2)
         node("page.totalPages").isEqualTo(2)
         node("_embedded.translationMemoryEntryGroups").isArray.hasSize(1)
-      }
-      .andReturn()
+      }.andReturn()
       .response
       .contentAsString
       .let { sourceTexts += extractSourceTexts(it) }
@@ -129,8 +128,7 @@ class TranslationMemoryEntryControllerTest : AuthorizedControllerTest() {
     ).andIsOk
       .andAssertThatJson {
         node("_embedded.translationMemoryEntryGroups").isArray.hasSize(1)
-      }
-      .andReturn()
+      }.andReturn()
       .response
       .contentAsString
       .let { sourceTexts += extractSourceTexts(it) }
