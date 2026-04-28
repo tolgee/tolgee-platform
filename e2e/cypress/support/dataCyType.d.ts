@@ -875,10 +875,6 @@ declare namespace DataCy {
         "tm-batch-toolbar" |
         "tm-content-subtitle" |
         "tm-create-entry-dialog" |
-        "tm-disconnect-confirm" |
-        "tm-disconnect-dialog" |
-        "tm-disconnect-discard" |
-        "tm-disconnect-keep" |
         "tm-entries-header" |
         "tm-entries-language-filter" |
         "tm-entries-language-select-item" |

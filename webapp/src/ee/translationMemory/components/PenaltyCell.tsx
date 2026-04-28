@@ -98,7 +98,7 @@ export const PenaltyCell: React.VFC<Props> = ({
   if (readOnly) {
     const label = isOverride
       ? `${override}%`
-      : t('translation_memory_penalty_default_chip', 'default · {value}%', {
+      : t('translation_memory_penalty_default_chip', '{value}%', {
           value: defaultPenalty,
         });
     return <ReadOnlyChip data-cy={dataCy}>{label}</ReadOnlyChip>;
@@ -120,7 +120,7 @@ export const PenaltyCell: React.VFC<Props> = ({
           }}
           data-cy={dataCy}
         >
-          {t('translation_memory_penalty_default_chip', 'default · {value}%', {
+          {t('translation_memory_penalty_default_chip', '{value}%', {
             value: defaultPenalty,
           })}
         </DefaultChip>

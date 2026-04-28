@@ -70,7 +70,7 @@ export const TmWriteOnlyReviewedDialog: React.VFC<Props> = ({
           <Typography variant="caption" color="text.secondary" display="block">
             <T
               keyName="project_tm_only_include_reviewed_hint"
-              defaultValue="Only translations in the Reviewed state appear as TM entries and are offered as suggestions. Flipping this back includes all translations again immediately — the project TM has no stored entries to rebuild."
+              defaultValue="Only translations in the Reviewed state are offered as TM suggestions. Other translations are excluded until they are reviewed."
             />
           </Typography>
         </Box>

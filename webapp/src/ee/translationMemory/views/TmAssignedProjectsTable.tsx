@@ -1,6 +1,5 @@
 import {
   Box,
-  Chip,
   IconButton,
   Switch,
   Tooltip,
@@ -69,7 +68,6 @@ export type AssignedProjectRow = {
 export type PendingRemovalRow = {
   projectId: number;
   projectName: string;
-  keepData: boolean;
 };
 
 type Props = {
@@ -150,17 +148,6 @@ export const TmAssignedProjectsTable: React.VFC<Props> = ({
       {removedRows.map((row) => (
         <StyledMarkedRow key={row.projectId}>
           <StyledMarkedName variant="body2">{row.projectName}</StyledMarkedName>
-          <Chip
-            size="small"
-            label={
-              row.keepData
-                ? t('tm_settings_keep_data_badge', 'Keep data')
-                : t('tm_settings_discard_data_badge', 'Discard data')
-            }
-            color={row.keepData ? 'info' : 'default'}
-            variant="outlined"
-            sx={{ flexShrink: 0 }}
-          />
           <Box sx={{ ml: 'auto' }}>
             <Tooltip title={t('tm_settings_undo_remove', 'Undo')}>
               <IconButton
