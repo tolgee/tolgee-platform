@@ -101,13 +101,13 @@ class SlackChannelMessagesOperations(
 
       return ChatSuccess(response)
     } catch (e: SlackApiException) {
-      return ChatFailureException<R>(e).also {
-        if (isUserConfigSlackError(it.error)) {
-          logger.warn("Cannot send message in slack: ${it.error}")
-        } else {
-          logger.error("Cannot send message in slack: ${it.error}", it)
-        }
+      val failure = ChatFailureException<R>(e)
+      if (isUserConfigSlackError(failure.error)) {
+        logger.warn("Cannot send message in slack: ${failure.error}")
+      } else {
+        logger.error("Cannot send message in slack: ${failure.error}", e)
       }
+      return failure
     }
   }
 

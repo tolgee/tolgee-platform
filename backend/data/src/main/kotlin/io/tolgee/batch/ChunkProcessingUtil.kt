@@ -8,8 +8,8 @@ import io.tolgee.Metrics
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.component.CurrentDateProvider
-import io.tolgee.constants.Message
 import io.tolgee.exceptions.ExceptionWithMessage
+import io.tolgee.exceptions.ExpectedUserError
 import io.tolgee.exceptions.LlmRateLimitedException
 import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.model.batch.BatchJob
@@ -138,8 +138,10 @@ open class ChunkProcessingUtil(
 
   private fun isExpectedUserError(exception: Throwable): Boolean {
     if (knownCauses.any { ExceptionUtils.indexOfType(exception, it) > -1 }) return true
-    val tolgeeMessage = (exception as? ExceptionWithMessage)?.tolgeeMessage
-    return tolgeeMessage in expectedUserErrorMessages
+    if (exception is MultipleItemsFailedException) {
+      return exception.exceptions.isNotEmpty() && exception.exceptions.all { isExpectedUserError(it) }
+    }
+    return ExceptionUtils.getThrowableList(exception).any { it is ExpectedUserError }
   }
 
   private fun retryFailedExecution(exception: Throwable) {
@@ -177,15 +179,6 @@ open class ChunkProcessingUtil(
     listOf(
       OutOfCreditsException::class.java,
       LlmRateLimitedException::class.java,
-    )
-  }
-
-  private val expectedUserErrorMessages: Set<Message> by lazy {
-    setOf(
-      // User's webhook URL is broken/unreachable — not our bug
-      Message.UNEXPECTED_ERROR_WHILE_EXECUTING_WEBHOOK,
-      // User's webhook returned a non-2xx response — not our bug
-      Message.WEBHOOK_RESPONDED_WITH_NON_200_STATUS,
     )
   }
 
