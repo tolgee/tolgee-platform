@@ -1,25 +1,23 @@
 # Webapp Translation Guidelines
 
-## Adding New Translation Keys via API
+## Adding New Translation Keys
 
-When adding new translation keys, use the Tolgee REST API at `https://app.tolgee.io`. The API key is stored in
-`.env.development.local` as `VITE_APP_TOLGEE_API_KEY`.
+When adding new translation keys, use the Tolgee MCP tools. The project ID is in `webapp/.tolgeerc.json` (`projectId`
+field). The API key is in `.env.development.local` as `VITE_APP_TOLGEE_API_KEY`.
 
 **Important:** Do NOT edit local translation files (`public/i18n/en.json`, etc.). Tolgee serves translations at runtime
 via its API/CDN, so local files are only fallbacks shipped with the repo. New keys only need to be created via the
-Tolgee REST API — the running app will pick them up automatically.
+Tolgee MCP tools — the running app will pick them up automatically.
 
-**Important:** Before making any Tolgee API calls, present a summary of ALL planned actions upfront (key creation,
-context upload, tagging) with the full details (key names, translations, tags, etc.). Ask the user for confirmation
+**Important:** Translations MUST always be uploaded to Tolgee — never skip this step. Before making any Tolgee calls,
+present a summary of ALL planned keys (names, English translations, tags) for user confirmation. Ask for confirmation
 once, then execute all calls together.
 
-**Important:** Always upload screenshots for each key. Upload BigMeta context when at least 2 related keys are present.
-
-**Important:** Always provide `defaultValue` when using the `T` component or `t()` function. This ensures the UI
-displays meaningful text before translations are uploaded to Tolgee, which is needed for screenshots to show correct
-initial values.
+**Important:** Screenshots are mandatory for every new key, unless the user explicitly asks to skip them.
 
 **Important:** Never concatenate translated text with other strings. Instead, use ICU message format parameters.
+
+## Code Patterns
 
 ```tsx
 // T component
@@ -41,92 +39,96 @@ t('my_key', 'Hello {name}', { name: userName })
 // {t('greeting', 'Hello — {name}', { name })}
 ```
 
-### 1. Take Screenshot and Get Key Positions
+### defaultValue Is Temporary
 
-Before creating keys, take a screenshot of the running app so the screenshot shows the UI with `defaultValue` text.
-Use Playwright MCP to navigate to the page, take a screenshot, and call `window.__tolgee.getVisibleKeys()` to get
-all visible translation keys with their positions.
+Add `defaultValue` **only to the new keys you are adding** — it makes those keys visible in the UI for screenshots.
+Do NOT add `defaultValue` to existing keys. After screenshots are taken, **remove all `defaultValue` props you added**.
+The actual translations live in Tolgee, not in the source.
 
-**Important:** Resize the Playwright viewport to a fixed size (e.g. 1280x720) **before** navigating to the page.
-The positions from `getVisibleKeys()` are in CSS pixels relative to the viewport, so the viewport dimensions must
-match the screenshot dimensions. Without this, highlights will be offset in Tolgee.
+## Workflow
+
+### 1. Add defaultValue to New Keys
+
+Add `defaultValue` to the new `T` components and `t()` calls you are creating, so the UI renders visible text for
+screenshots:
+
+```tsx
+<T keyName="my_new_key" defaultValue="My default text" />
+```
+
+Only add `defaultValue` to the keys you are creating — not to existing ones.
+
+### 2. Take Screenshots (Mandatory)
+
+Screenshots are mandatory unless the user explicitly opts out.
+
+Use the `/doc-screenshot` skill to take polished screenshots. If the skill is not available, follow the basic
+instructions below.
+
+#### Start the App
+
+1. Read `webapp/.env.development.local` for port configuration:
+   - `VITE_APP_API_URL` — backend URL (extract port, e.g. `http://localhost:8180` → port `8180`)
+   - `VITE_PORT` — frontend dev server port
+2. Start the backend as a background task:
+   ```bash
+   ./gradlew server-app:bootRun --args='--spring.profiles.active=dev'
+   ```
+3. Start the frontend as a background task (suppress auto-opening a browser window):
+   ```bash
+   cd webapp && BROWSER=none npm start
+   ```
+4. Wait for the backend to be ready:
+   ```bash
+   scripts/wait-for-backend.sh <backend-port>
+   ```
+
+#### Get Key Positions for Tolgee
+
+After navigating to the page, get the bounding boxes of new translation keys:
 
 ```js
-// Set a fixed viewport size first
-await page.setViewportSize({ width: 1280, height: 720 });
-
-// Navigate and get visible keys with positions
 const keys = await page.evaluate(() => window.__tolgee.getVisibleKeys());
 // Returns: [{ keyName, keyNamespace, position: { x, y, width, height } }, ...]
-
-// Take screenshot
-await page.screenshot({ path: 'screenshot.png' });
 ```
 
-### 2. Upload the Image
+`window.__tolgee` is available in development mode (provided by the `DevTools()` plugin). The app must be fully loaded
+and Tolgee initialized before calling this. Filter the results to only include the new keys you added.
 
-**Endpoint:** `POST https://app.tolgee.io/v2/image-upload`
+#### Upload Screenshots
 
-```bash
-curl -X POST "https://app.tolgee.io/v2/image-upload" \
-  -H "X-API-Key: ${VITE_APP_TOLGEE_API_KEY}" \
-  -F "image=@screenshot.png"
-```
+1. Base64-encode the screenshot file:
+   ```bash
+   base64 < <screenshot-file>
+   ```
+2. Call the `upload_image` MCP tool with the base64 string — it returns an `imageId`.
 
-Response includes `"id": 123456` — this is the `uploadedImageId` for the next step.
+#### Stop the App
 
-### 3. Create Keys with Translations, Tags, and Screenshots
+Stop both the backend and frontend background tasks when done with screenshots.
 
-Use `single-step-import-resolvable` to create all keys at once with their translations, tags, and screenshot
-references in a single API call. This replaces the need for separate key creation, tagging, and screenshot
-association steps.
+### 3. Remove defaultValue from Code
 
-**Endpoint:** `POST https://app.tolgee.io/v2/projects/single-step-import-resolvable`
+`defaultValue` was only needed for screenshots. Remove it from all `T` components and `t()` calls you added it to.
 
-```bash
-curl -X POST "https://app.tolgee.io/v2/projects/single-step-import-resolvable" \
-  -H "X-API-Key: ${VITE_APP_TOLGEE_API_KEY}" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "keys": [
-      {
-        "name": "my_key",
-        "translations": {
-          "en": "English text"
-        },
-        "tags": ["draft: my-feature-branch"],
-        "screenshots": [{
-          "uploadedImageId": 123456,
-          "positions": [{"x": 100, "y": 200, "width": 150, "height": 40}]
-        }]
-      }
-    ]
-  }'
-```
+### 4. Create Keys with Translations and Screenshots
 
-Map each entry from `getVisibleKeys()` to a key in the `keys` array, using the `position` values for `positions`.
-A key appearing multiple times (e.g. repeated buttons) should have multiple entries in `positions`.
-Only provide translations for the base language (English [en]).
-Tag each key using the branch tagging convention (see below): `"tags": ["draft: <feature-name>"]`.
+Use the `create_keys` MCP tool. For each key provide:
+- `name` — the key name
+- `translations` — `{ "en": "English text" }` (base language only)
+- `tags` — `["draft: <feature-name>"]` (see branch tagging convention below)
+- `description` — optional developer context
+- `screenshots` — `[{ "uploadedImageId": <id>, "positions": [{ "x": ..., "y": ..., "width": ..., "height": ... }] }]`
 
-### 4. Upload Context (Related Keys)
+Map `getVisibleKeys()` entries to the `positions` array. If a key appears multiple times on screen (e.g. repeated
+buttons), include multiple position entries. Only include positions for the new keys you are creating.
 
-Store which keys appear together on the same page/component for better MT suggestions. Requires at least 2 keys.
+To add screenshots to **existing** keys (without creating new ones), use the `add_key_screenshots` MCP tool instead.
 
-**Endpoint:** `POST https://app.tolgee.io/v2/projects/big-meta`
+### 5. Upload Context (Related Keys)
 
-```bash
-curl -X POST "https://app.tolgee.io/v2/projects/big-meta" \
-  -H "X-API-Key: ${VITE_APP_TOLGEE_API_KEY}" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "relatedKeysInOrder": [
-      { "keyName": "key_appearing_on_same_page_1" },
-      { "keyName": "key_appearing_on_same_page_2" },
-      { "keyName": "key_appearing_on_same_page_3" }
-    ]
-  }'
-```
+Use the `store_big_meta` MCP tool when at least 2 related keys are present. This tells Tolgee which keys appear
+together, improving machine translation consistency.
 
 ## Branch Tagging Convention
 
