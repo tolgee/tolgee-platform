@@ -1,0 +1,69 @@
+name: Check source cache
+description: Compute source hash and check if this job already passed for the same source state
+
+inputs:
+  cache-key-prefix:
+    description: Prefix for the cache key (e.g. test-passed-backend-tests)
+    required: true
+  extra-ignores:
+    description: Additional git pathspec ignore patterns, space-separated (e.g. ":!webapp/ :!e2e/")
+    required: false
+    default: ''
+  event-name:
+    description: The trigger event name for cache key scoping
+    required: true
+  extra-hash:
+    description: Additional string to include in the hash (e.g. another repo's commit SHA)
+    required: false
+    default: ''
+  working-directory:
+    description: Directory to run git ls-files in (defaults to workspace root)
+    required: false
+    default: '.'
+
+outputs:
+  cache-hit:
+    description: Whether tests already passed for this source state
+    value: ${{ steps.cache.outputs.cache-hit }}
+  cache-key:
+    description: The full cache key used
+    value: ${{ steps.key.outputs.key }}
+
+runs:
+  using: composite
+  steps:
+    - name: Compute source hash
+      id: hash
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        FILE_HASH=$(git ls-files -s -- . \
+          ':!docs/' ':!storybook-tolgee-addon/' ':!docker/' \
+          ':!*.md' ':!LICENSE' ':!*.gif' \
+          ':!.husky/' ':!.editorconfig' ':!.gitpod.yml' \
+          ':!.gitattributes' ':!.git-blame-ignore-revs' ':!.gitmodules' \
+          ':!ngrok.template.yml' ':!.coderabbit.yaml' \
+          ':!.github/ISSUE_TEMPLATE/' ':!.github/FUNDING.yml' \
+          ${{ inputs.extra-ignores }} \
+          | LC_ALL=C sort | sha256sum | cut -d' ' -f1)
+        HASH=$(echo "${FILE_HASH}${{ inputs.extra-hash }}" | sha256sum | cut -d' ' -f1)
+        echo "hash=$HASH" >> $GITHUB_OUTPUT
+
+    - name: Build cache key
+      id: key
+      shell: bash
+      run: echo "key=${{ inputs.cache-key-prefix }}-${{ inputs.event-name }}-${{ steps.hash.outputs.hash }}" >> $GITHUB_OUTPUT
+
+    - name: Check if already passed
+      id: cache
+      continue-on-error: true
+      uses: actions/cache/restore@v4
+      with:
+        path: .test-passed
+        key: ${{ steps.key.outputs.key }}
+        lookup-only: true
+
+    - name: Skip notice
+      if: steps.cache.outputs.cache-hit == 'true'
+      shell: bash
+      run: echo "### ⏭️ Skipped — already passed for this source state" >> $GITHUB_STEP_SUMMARY

@@ -1,0 +1,21 @@
+name: Save source cache
+description: Save a success marker to the source cache
+
+inputs:
+  cache-key:
+    description: The cache key (from check-source-cache outputs)
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Create marker
+      shell: bash
+      run: echo "passed" > .test-passed
+
+    - name: Save to cache
+      continue-on-error: true
+      uses: actions/cache/save@v4
+      with:
+        path: .test-passed
+        key: ${{ inputs.cache-key }}

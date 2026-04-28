@@ -1,0 +1,26 @@
+name: Build Frontend
+
+on:
+  workflow_call:
+
+jobs:
+  build:
+    name: Build frontend 🏗️
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
+
+      - name: Build webapp
+        run: ./gradlew buildWebapp
+        env:
+          TOLGEE_API_KEY: ${{ secrets.TOLGEE_API_KEY }}
+          TOLGEE_API_URL: ${{ secrets.TOLGEE_API_URL }}
+
+      - name: Upload built webapp
+        uses: actions/upload-artifact@v4
+        with:
+          name: webapp
+          path: webapp/dist
