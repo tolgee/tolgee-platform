@@ -30,6 +30,7 @@ class IcuToGenericFormatMessageConvertor(
     val formsResult = converted.formsResult ?: return ""
     return formsResult
       .toIcuPluralString(
+        optimize = false,
         addNewLines = false,
         argName = converted.argName ?: DEFAULT_PLURAL_ARGUMENT_NAME,
       )
