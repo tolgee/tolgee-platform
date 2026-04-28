@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/tolgee-tolgee-platform-badge.png)](https://mseep.ai/app/tolgee-tolgee-platform)
+
 <h1 align="center" style="border-bottom: none">
     <b>
         <a href="https://tolgee.io">Tolgee</a><br>
