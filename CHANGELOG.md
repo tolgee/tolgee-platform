@@ -1,3 +1,15 @@
+# [3.183.0](https://github.com/tolgee/tolgee-platform/compare/v3.182.1...v3.183.0) (2026-04-28)
+
+
+### Bug Fixes
+
+* skip Sentry reports for expected user-config errors ([#3626](https://github.com/tolgee/tolgee-platform/issues/3626)) ([58df795](https://github.com/tolgee/tolgee-platform/commit/58df795ce3e9564eb28fd3529943f43c84b6c298))
+
+
+### Features
+
+* add missing error code translations ([#3497](https://github.com/tolgee/tolgee-platform/issues/3497)) ([d9f5804](https://github.com/tolgee/tolgee-platform/commit/d9f5804b5dc4c28d72a91ba655b3f1e13282bdf8))
+
 ## [3.182.1](https://github.com/tolgee/tolgee-platform/compare/v3.182.0...v3.182.1) (2026-04-28)
 
 
