@@ -1,5 +1,6 @@
 package io.tolgee.ee.service.branching
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import io.tolgee.ee.repository.branching.KeySnapshotRepository
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.snapshot.KeySnapshot
@@ -12,6 +13,7 @@ class BranchSnapshotService(
   private val keySnapshotRepository: KeySnapshotRepository,
   private val entityManager: EntityManager,
 ) {
+  @WithSpan
   @Transactional
   fun createInitialSnapshot(
     projectId: Long,
@@ -144,6 +146,7 @@ class BranchSnapshotService(
     entityManager.createNativeQuery(sql).setParameter("branchId", branchId).executeUpdate()
   }
 
+  @WithSpan
   @Transactional
   fun rebuildSnapshotFromSource(
     projectId: Long,
@@ -206,8 +209,10 @@ class BranchSnapshotService(
       .executeUpdate()
   }
 
+  @WithSpan
   fun getSnapshotKeys(branchId: Long): List<KeySnapshot> = keySnapshotRepository.findAllByBranchId(branchId)
 
+  @WithSpan
   fun getSnapshotKeysByOriginalKeyIdIn(
     branchId: Long,
     originalKeyIds: Collection<Long>,
@@ -218,6 +223,7 @@ class BranchSnapshotService(
     return keySnapshotRepository.findAllByBranchIdAndOriginalKeyIdIn(branchId, originalKeyIds)
   }
 
+  @WithSpan
   fun deleteSnapshots(branchId: Long) {
     entityManager
       .createNativeQuery(

@@ -61,6 +61,12 @@ dependencies {
 
 
     /**
+     * OpenTelemetry for distributed tracing
+     */
+    implementation libs.opentelemetryApi
+    implementation libs.opentelemetryInstrumentationAnnotations
+
+    /**
      * MISC
      */
     implementation libs.jjwtApi

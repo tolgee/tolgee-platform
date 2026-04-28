@@ -1,5 +1,7 @@
 package io.tolgee.ee.service.branching.merging
 
+import io.opentelemetry.api.trace.Span
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.ee.exceptions.BranchMergeConflictNotResolvedException
 import io.tolgee.ee.service.branching.BranchSnapshotService
@@ -16,6 +18,7 @@ import io.tolgee.repository.KeyRepository
 import io.tolgee.service.key.KeyMetaService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.translation.TranslationService
+import io.tolgee.tracing.TolgeeTracingContext
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.LinkedHashMap
@@ -28,9 +31,12 @@ class BranchMergeExecutor(
   private val translationService: TranslationService,
   private val currentDateProvider: CurrentDateProvider,
   private val branchSnapshotService: BranchSnapshotService,
+  private val tracingContext: TolgeeTracingContext,
 ) {
+  @WithSpan
   @Transactional
   fun execute(merge: BranchMerge) {
+    setTracingAttributes(merge)
     attachKeysForMerge(merge)
     val snapshotKeys by lazy {
       branchSnapshotService.getSnapshotKeys(merge.sourceBranch.id).associateBy { it.originalKeyId }
@@ -63,6 +69,29 @@ class BranchMergeExecutor(
     merge.mergedAt = currentDateProvider.date
   }
 
+  private fun setTracingAttributes(merge: BranchMerge) {
+    tracingContext.setContext(merge.sourceBranch.project.id, null)
+
+    val span = Span.current()
+    span.setAttribute("tolgee.branch.merge.id", merge.id)
+    span.setAttribute("tolgee.branch.merge.changesCount", merge.changes.size.toLong())
+
+    val changesByType = merge.changes.groupingBy { it.change }.eachCount()
+    changesByType[BranchKeyMergeChangeType.ADD]?.let {
+      span.setAttribute("tolgee.branch.merge.additions", it.toLong())
+    }
+    changesByType[BranchKeyMergeChangeType.UPDATE]?.let {
+      span.setAttribute("tolgee.branch.merge.updates", it.toLong())
+    }
+    changesByType[BranchKeyMergeChangeType.DELETE]?.let {
+      span.setAttribute("tolgee.branch.merge.deletions", it.toLong())
+    }
+    changesByType[BranchKeyMergeChangeType.CONFLICT]?.let {
+      span.setAttribute("tolgee.branch.merge.conflicts", it.toLong())
+    }
+  }
+
+  @WithSpan
   private fun attachKeysForMerge(merge: BranchMerge) {
     val sourceIds = merge.changes.mapNotNull { it.sourceKey?.id }.toSet()
     val targetIds = merge.changes.mapNotNull { it.targetKey?.id }.toSet()
@@ -82,6 +111,7 @@ class BranchMergeExecutor(
     }
   }
 
+  @WithSpan
   private fun applyConflict(
     change: BranchMergeChange,
     keySnapshot: KeySnapshot,
@@ -90,6 +120,7 @@ class BranchMergeExecutor(
     applyUpdate(change, keySnapshot)
   }
 
+  @WithSpan
   private fun applyUpdate(
     change: BranchMergeChange,
     snapshotKey: KeySnapshot,
@@ -105,6 +136,7 @@ class BranchMergeExecutor(
     persistAfterMerge(targetKey)
   }
 
+  @WithSpan
   private fun applyAddition(
     change: BranchMergeChange,
     targetBranch: Branch,
@@ -161,6 +193,7 @@ class BranchMergeExecutor(
     }
   }
 
+  @WithSpan
   private fun applyDeletion(change: BranchMergeChange) {
     if (change.resolution != BranchKeyMergeResolutionType.SOURCE) {
       return
@@ -170,6 +203,7 @@ class BranchMergeExecutor(
     keyService.hardDelete(targetKey.id)
   }
 
+  @WithSpan
   private fun persistAfterMerge(key: Key) {
     key.translations.forEach {
       if (it.id == 0L) {

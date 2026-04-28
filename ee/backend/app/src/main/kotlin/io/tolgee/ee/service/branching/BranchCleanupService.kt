@@ -1,5 +1,6 @@
 package io.tolgee.ee.service.branching
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import io.tolgee.Metrics
 import io.tolgee.ee.repository.branching.BranchMergeRepository
 import io.tolgee.ee.repository.branching.BranchRepository
@@ -52,6 +53,7 @@ class BranchCleanupService(
    * Uses bulk SQL for high-volume tables (translations, key metadata, keys)
    * and delegates to services for business logic (screenshots, namespaces, tasks).
    */
+  @WithSpan
   @Transactional
   fun cleanupBranch(
     projectId: Long,
