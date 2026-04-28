@@ -8,6 +8,7 @@ import io.tolgee.Metrics
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.constants.Message
 import io.tolgee.exceptions.ExceptionWithMessage
 import io.tolgee.exceptions.LlmRateLimitedException
 import io.tolgee.exceptions.OutOfCreditsException
@@ -127,11 +128,18 @@ open class ChunkProcessingUtil(
   }
 
   private fun logKnownException(exception: Throwable) {
-    val isKnownCause = knownCauses.any { ExceptionUtils.indexOfType(exception, it) > -1 }
-    if (!isKnownCause) {
-      Sentry.captureException(exception)
-      logger.error(exception.message, exception)
+    if (isExpectedUserError(exception)) {
+      logger.warn("Skipping Sentry capture for expected user error: ${exception.message}")
+      return
     }
+    Sentry.captureException(exception)
+    logger.error(exception.message, exception)
+  }
+
+  private fun isExpectedUserError(exception: Throwable): Boolean {
+    if (knownCauses.any { ExceptionUtils.indexOfType(exception, it) > -1 }) return true
+    val tolgeeMessage = (exception as? ExceptionWithMessage)?.tolgeeMessage
+    return tolgeeMessage in expectedUserErrorMessages
   }
 
   private fun retryFailedExecution(exception: Throwable) {
@@ -154,7 +162,9 @@ open class ChunkProcessingUtil(
     )
     if (errorKeyRetries >= maxRetries && maxRetries != -1) {
       logger.debug("Max retries reached for job execution ${execution.id}")
-      Sentry.captureException(exception)
+      if (!isExpectedUserError(exception)) {
+        Sentry.captureException(exception)
+      }
       return
     }
 
@@ -167,6 +177,15 @@ open class ChunkProcessingUtil(
     listOf(
       OutOfCreditsException::class.java,
       LlmRateLimitedException::class.java,
+    )
+  }
+
+  private val expectedUserErrorMessages: Set<Message> by lazy {
+    setOf(
+      // User's webhook URL is broken/unreachable — not our bug
+      Message.UNEXPECTED_ERROR_WHILE_EXECUTING_WEBHOOK,
+      // User's webhook returned a non-2xx response — not our bug
+      Message.WEBHOOK_RESPONDED_WITH_NON_200_STATUS,
     )
   }
 
