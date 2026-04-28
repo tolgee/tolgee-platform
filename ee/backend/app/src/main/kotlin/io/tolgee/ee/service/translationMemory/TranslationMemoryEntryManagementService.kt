@@ -41,9 +41,9 @@ class TranslationMemoryEntryManagementService(
    * language matched by the optional [targetLanguageTag] filter, a flag indicating whether the
    * row is user-editable (`isManual`), and the list of contributing key names.
    *
-   * For SHARED TMs, rows come purely from `translation_memory_entry` (both manual and synced).
-   * For PROJECT TMs, rows are unioned from stored manual entries AND virtual rows computed from
-   * the project's translations on the fly.
+   * SHARED TMs are read from `translation_memory_entry`. PROJECT TMs hold no stored entries by
+   * design — their content is computed virtually from the project's translations on every read,
+   * and pagination is applied at the SQL level over distinct source texts.
    *
    * The language filter only narrows the entries within a row; rows still appear for source
    * texts that have no translation in the selected languages (the cells are empty). This keeps
@@ -57,28 +57,27 @@ class TranslationMemoryEntryManagementService(
     targetLanguageTag: String? = null,
   ): Page<TranslationMemoryEntryGroup> {
     val tm = requireTmInOrganization(organizationId, translationMemoryId)
-
-    val storedGroups =
-      loadStoredGroups(
-        tmId = translationMemoryId,
-        search = search?.takeIf { it.isNotBlank() },
-        targetLanguageTag = targetLanguageTag?.takeIf { it.isNotBlank() },
-        pageable = pageable,
-      )
+    val effectiveSearch = search?.takeIf { it.isNotBlank() }
+    val effectiveLang = targetLanguageTag?.takeIf { it.isNotBlank() }
 
     if (tm.type != TranslationMemoryType.PROJECT) {
-      return storedGroups
+      return loadStoredGroups(
+        tmId = translationMemoryId,
+        search = effectiveSearch,
+        targetLanguageTag = effectiveLang,
+        pageable = pageable,
+      )
     }
 
-    val projectId = projectIdForTm(tm) ?: return storedGroups
-    val virtualGroups =
-      loadVirtualGroups(
-        tm = tm,
-        projectId = projectId,
-        search = search?.takeIf { it.isNotBlank() },
-        targetLanguageTag = targetLanguageTag?.takeIf { it.isNotBlank() },
-      )
-    return mergeStoredAndVirtual(storedGroups, virtualGroups, pageable)
+    val projectId = projectIdForTm(tm)
+      ?: return PageImpl(emptyList(), pageable, 0)
+    return loadVirtualGroupsPaged(
+      tm = tm,
+      projectId = projectId,
+      search = effectiveSearch,
+      targetLanguageTag = effectiveLang,
+      pageable = pageable,
+    )
   }
 
   private fun projectIdForTm(tm: TranslationMemory): Long? {
@@ -151,15 +150,162 @@ class TranslationMemoryEntryManagementService(
     return PageImpl(groups, pageable, groupKeysPage.totalElements)
   }
 
-  private fun loadVirtualGroups(
+  /**
+   * Paginates project-TM virtual content at the SQL level. The earlier implementation pulled every
+   * virtual row into memory and concatenated them onto each requested page — so projects with many
+   * translations rendered the same content infinitely as the user scrolled. Now the page boundary
+   * is the distinct source-text list, and only the rows for the current page's source texts are
+   * hydrated.
+   */
+  private fun loadVirtualGroupsPaged(
     tm: TranslationMemory,
     projectId: Long,
     search: String?,
     targetLanguageTag: String?,
-  ): List<TranslationMemoryEntryGroup> {
-    // Pull every non-base translation that contributes to the virtual content of this project TM.
-    // Grouping by (sourceText) here so the UI shows one row per translation unit; keyNames
-    // aggregates every key that currently translates to this source text.
+    pageable: Pageable,
+  ): Page<TranslationMemoryEntryGroup> {
+    val total = countDistinctVirtualSourceTexts(projectId, tm.writeOnlyReviewed, search)
+    if (total == 0L) {
+      return PageImpl(emptyList(), pageable, 0)
+    }
+
+    val pageSourceTexts =
+      findDistinctVirtualSourceTextsPaged(
+        projectId = projectId,
+        writeOnlyReviewed = tm.writeOnlyReviewed,
+        search = search,
+        pageable = pageable,
+      )
+    if (pageSourceTexts.isEmpty()) {
+      return PageImpl(emptyList(), pageable, total)
+    }
+
+    val rows =
+      findVirtualRowsForSourceTexts(
+        projectId = projectId,
+        writeOnlyReviewed = tm.writeOnlyReviewed,
+        sourceTexts = pageSourceTexts,
+        targetLanguageTag = targetLanguageTag,
+      )
+
+    data class VirtualRow(val targetText: String, val targetLang: String, val keyName: String)
+
+    val bySource = mutableMapOf<String, MutableList<VirtualRow>>()
+    for (row in rows) {
+      val sourceText = row[0] as String
+      val targetText = row[1] as String
+      val targetLang = row[2] as String
+      val keyName = row[3] as String
+      bySource.getOrPut(sourceText) { mutableListOf() }.add(VirtualRow(targetText, targetLang, keyName))
+    }
+
+    // Preserve the page-query's source-text ordering so paged output is stable across requests.
+    val groups =
+      pageSourceTexts.map { sourceText ->
+        val srcRows = bySource[sourceText].orEmpty()
+        val keyNames = srcRows.map { it.keyName }.distinct().sorted()
+        val virtualEntries =
+          srcRows
+            .map {
+              VirtualEntry(
+                sourceText = sourceText,
+                targetText = it.targetText,
+                targetLanguageTag = it.targetLang,
+              )
+            }.distinct()
+        TranslationMemoryEntryGroup(
+          sourceText = sourceText,
+          keyNames = keyNames,
+          isManual = false,
+          entries = emptyList(),
+          virtualEntries = virtualEntries,
+        )
+      }
+    return PageImpl(groups, pageable, total)
+  }
+
+  private fun countDistinctVirtualSourceTexts(
+    projectId: Long,
+    writeOnlyReviewed: Boolean,
+    search: String?,
+  ): Long {
+    val sql =
+      """
+      select count(distinct base_t.text)
+      from project p
+      join language base_lang on base_lang.id = p.base_language_id
+      join key k on k.project_id = p.id
+      left join branch b on b.id = k.branch_id
+      join translation base_t on base_t.key_id = k.id and base_t.language_id = base_lang.id
+      join translation target_t on target_t.key_id = k.id and target_t.language_id <> base_lang.id
+      where p.id = :projectId
+        and base_t.text is not null and base_t.text <> ''
+        and target_t.text is not null and target_t.text <> ''
+        and (b.id is null or b.is_default = true)
+        and (not :writeOnlyReviewed or target_t.state = 2)
+        and (
+          cast(:search as text) is null
+          or lower(base_t.text) like lower('%' || cast(:search as text) || '%')
+          or lower(target_t.text) like lower('%' || cast(:search as text) || '%')
+        )
+      """.trimIndent()
+    val result =
+      entityManager
+        .createNativeQuery(sql)
+        .setParameter("projectId", projectId)
+        .setParameter("writeOnlyReviewed", writeOnlyReviewed)
+        .setParameter("search", search)
+        .singleResult
+    return (result as Number).toLong()
+  }
+
+  private fun findDistinctVirtualSourceTextsPaged(
+    projectId: Long,
+    writeOnlyReviewed: Boolean,
+    search: String?,
+    pageable: Pageable,
+  ): List<String> {
+    val sql =
+      """
+      select distinct base_t.text as source_text
+      from project p
+      join language base_lang on base_lang.id = p.base_language_id
+      join key k on k.project_id = p.id
+      left join branch b on b.id = k.branch_id
+      join translation base_t on base_t.key_id = k.id and base_t.language_id = base_lang.id
+      join translation target_t on target_t.key_id = k.id and target_t.language_id <> base_lang.id
+      where p.id = :projectId
+        and base_t.text is not null and base_t.text <> ''
+        and target_t.text is not null and target_t.text <> ''
+        and (b.id is null or b.is_default = true)
+        and (not :writeOnlyReviewed or target_t.state = 2)
+        and (
+          cast(:search as text) is null
+          or lower(base_t.text) like lower('%' || cast(:search as text) || '%')
+          or lower(target_t.text) like lower('%' || cast(:search as text) || '%')
+        )
+      order by source_text
+      limit :limit offset :offset
+      """.trimIndent()
+    @Suppress("UNCHECKED_CAST")
+    val rows =
+      entityManager
+        .createNativeQuery(sql)
+        .setParameter("projectId", projectId)
+        .setParameter("writeOnlyReviewed", writeOnlyReviewed)
+        .setParameter("search", search)
+        .setParameter("limit", pageable.pageSize)
+        .setParameter("offset", pageable.offset)
+        .resultList as List<String>
+    return rows
+  }
+
+  private fun findVirtualRowsForSourceTexts(
+    projectId: Long,
+    writeOnlyReviewed: Boolean,
+    sourceTexts: List<String>,
+    targetLanguageTag: String?,
+  ): List<Array<Any?>> {
     val sql =
       """
       select base_t.text as source_text,
@@ -174,76 +320,24 @@ class TranslationMemoryEntryManagementService(
       join translation target_t on target_t.key_id = k.id and target_t.language_id <> base_lang.id
       join language target_lang on target_lang.id = target_t.language_id
       where p.id = :projectId
-        and base_t.text is not null and base_t.text <> ''
+        and base_t.text = any(:sourceTexts)
         and target_t.text is not null and target_t.text <> ''
         and (b.id is null or b.is_default = true)
         and (not :writeOnlyReviewed or target_t.state = 2)
-        and (
-          cast(:search as text) is null
-          or lower(base_t.text) like lower('%' || cast(:search as text) || '%')
-          or lower(target_t.text) like lower('%' || cast(:search as text) || '%')
-        )
         and (
           cast(:targetLanguageTags as text) is null
           or target_lang.tag = any(string_to_array(cast(:targetLanguageTags as text), ','))
         )
       order by base_t.text, target_lang.tag
       """.trimIndent()
-
     @Suppress("UNCHECKED_CAST")
-    val rows =
-      entityManager
-        .createNativeQuery(sql)
-        .setParameter("projectId", projectId)
-        .setParameter("writeOnlyReviewed", tm.writeOnlyReviewed)
-        .setParameter("search", search)
-        .setParameter("targetLanguageTags", targetLanguageTag)
-        .resultList as List<Array<Any?>>
-
-    // Bucket by source_text
-    data class VirtualRow(
-      val targetText: String,
-      val targetLang: String,
-      val keyName: String,
-    )
-
-    val bySource = mutableMapOf<String, MutableList<VirtualRow>>()
-    for (row in rows) {
-      val sourceText = row[0] as String
-      val targetText = row[1] as String
-      val targetLang = row[2] as String
-      val keyName = row[3] as String
-      bySource.getOrPut(sourceText) { mutableListOf() }.add(VirtualRow(targetText, targetLang, keyName))
-    }
-
-    return bySource.map { (sourceText, virtualRows) ->
-      val keyNames = virtualRows.map { it.keyName }.distinct().sorted()
-      val virtualEntries =
-        virtualRows
-          .map { VirtualEntry(sourceText = sourceText, targetText = it.targetText, targetLanguageTag = it.targetLang) }
-          .distinct()
-      TranslationMemoryEntryGroup(
-        sourceText = sourceText,
-        keyNames = keyNames,
-        isManual = false,
-        entries = emptyList(),
-        virtualEntries = virtualEntries,
-      )
-    }
-  }
-
-  private fun mergeStoredAndVirtual(
-    stored: Page<TranslationMemoryEntryGroup>,
-    virtual: List<TranslationMemoryEntryGroup>,
-    pageable: Pageable,
-  ): Page<TranslationMemoryEntryGroup> {
-    // Simple concatenation for the initial implementation: stored groups first (already paged),
-    // then virtual groups. Stable ordering comes from loadVirtualGroups' ORDER BY on source_text.
-    // The total-element count approximates total by adding virtual group count — real pagination
-    // across the union would require a UNION query and is left for a follow-up.
-    val combined = stored.content + virtual
-    val virtualCount = virtual.size.toLong()
-    return PageImpl(combined, pageable, stored.totalElements + virtualCount)
+    return entityManager
+      .createNativeQuery(sql)
+      .setParameter("projectId", projectId)
+      .setParameter("writeOnlyReviewed", writeOnlyReviewed)
+      .setParameter("sourceTexts", sourceTexts.toTypedArray())
+      .setParameter("targetLanguageTags", targetLanguageTag)
+      .resultList as List<Array<Any?>>
   }
 
   private data class StoredGroupKey(

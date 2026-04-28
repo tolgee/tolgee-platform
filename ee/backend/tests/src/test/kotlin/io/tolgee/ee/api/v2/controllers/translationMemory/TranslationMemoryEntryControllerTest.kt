@@ -103,6 +103,48 @@ class TranslationMemoryEntryControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `project TM virtual content paginates without repeating source texts across pages`() {
+    // Regression: previous implementation loaded ALL virtual rows on every page request, so
+    // scrolling repeatedly returned the same source texts and the content view kept loading
+    // forever for projects with many translations. With proper SQL pagination, page 0 and
+    // page 1 must contain disjoint source texts.
+    val projectTmId = testData.projectTm.id
+    val sourceTexts = mutableSetOf<String>()
+
+    performAuthGet(
+      "/v2/organizations/$orgId/translation-memories/$projectTmId/entries?size=1&page=0",
+    ).andIsOk
+      .andAssertThatJson {
+        node("page.totalElements").isEqualTo(2)
+        node("page.totalPages").isEqualTo(2)
+        node("_embedded.translationMemoryEntryGroups").isArray.hasSize(1)
+      }
+      .andReturn()
+      .response
+      .contentAsString
+      .let { sourceTexts += extractSourceTexts(it) }
+
+    performAuthGet(
+      "/v2/organizations/$orgId/translation-memories/$projectTmId/entries?size=1&page=1",
+    ).andIsOk
+      .andAssertThatJson {
+        node("_embedded.translationMemoryEntryGroups").isArray.hasSize(1)
+      }
+      .andReturn()
+      .response
+      .contentAsString
+      .let { sourceTexts += extractSourceTexts(it) }
+
+    // Disjoint pages → 2 distinct source texts seen across the two requests, not 1 repeated.
+    assertThat(sourceTexts).hasSize(2)
+  }
+
+  private fun extractSourceTexts(json: String): List<String> {
+    val regex = Regex("\"sourceText\"\\s*:\\s*\"([^\"]+)\"")
+    return regex.findAll(json).map { it.groupValues[1] }.toList()
+  }
+
+  @Test
   fun `comma-separated language filter returns entries for all specified languages`() {
     // Test data: sharedTm has "Hello world" in de+fr and "Thank you" in de only
 
