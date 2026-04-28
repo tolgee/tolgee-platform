@@ -1,3 +1,10 @@
+## [3.182.1](https://github.com/tolgee/tolgee-platform/compare/v3.182.0...v3.182.1) (2026-04-28)
+
+
+### Bug Fixes
+
+* bind email-targeted invitations to the invitee's email ([#3605](https://github.com/tolgee/tolgee-platform/issues/3605)) ([a1a1090](https://github.com/tolgee/tolgee-platform/commit/a1a1090fda327fd13fe67621cbdb82c3ee1632f2))
+
 # [3.182.0](https://github.com/tolgee/tolgee-platform/compare/v3.181.4...v3.182.0) (2026-04-28)
 
 
