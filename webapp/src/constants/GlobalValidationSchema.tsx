@@ -253,6 +253,28 @@ export class Validation {
     description: Yup.string().nullable().min(3).max(2000),
   });
 
+  static readonly TRANSLATION_MEMORY_SETTINGS = Yup.object().shape({
+    name: Yup.string().required().min(1).max(100),
+    defaultPenalty: Yup.number()
+      .transform((value, originalValue) =>
+        originalValue === '' || originalValue === null ? 0 : value
+      )
+      .typeError(() => (
+        <T
+          keyName="validation_must_be_whole_number"
+          defaultValue="Must be a whole number between 0 and 100"
+        />
+      ))
+      .integer(() => (
+        <T
+          keyName="validation_must_be_whole_number"
+          defaultValue="Must be a whole number between 0 and 100"
+        />
+      ))
+      .min(0)
+      .max(100),
+  });
+
   private static slugValidation(min: number, max: number) {
     return Yup.string()
       .min(min)

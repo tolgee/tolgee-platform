@@ -34,7 +34,6 @@ export type BatchOperationAdder = ReturnType<typeof addOperations>;
 export const useBatchOperations = () => {
   const { satisfiesPermission, satisfiesPermissionWithBranching } =
     useProjectPermissions();
-
   const { t } = useTranslate();
 
   const canEditKey = satisfiesPermissionWithBranching('keys.edit');

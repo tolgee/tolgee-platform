@@ -140,6 +140,9 @@ export const branchMergeTestData = generateTestDataObject('branch-merge');
 
 export const glossaryTestData = generateTestDataObject('glossary');
 
+export const translationMemoryTestData =
+  generateTestDataObject('translation-memory');
+
 export const notificationTestData = generateTestDataObject('notification');
 
 export const authProviderChange = generateTestDataObject(

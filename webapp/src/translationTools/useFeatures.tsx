@@ -40,5 +40,6 @@ export function useFeatures() {
     TRANSLATION_LABELS: t('billing_subscriptions_translation_labels'),
     BRANCHING: t('billing_subscriptions_branching'),
     QA_CHECKS: t('billing_subscriptions_qa_checks'),
+    TRANSLATION_MEMORY: t('billing_subscriptions_translation_memory'),
   } as const satisfies Record<Feature, string>;
 }

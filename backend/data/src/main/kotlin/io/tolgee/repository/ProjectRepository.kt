@@ -91,6 +91,41 @@ interface ProjectRepository : JpaRepository<Project, Long> {
 
   fun findAllByOrganizationOwnerId(organizationOwnerId: Long): List<Project>
 
+  fun findAllByOrganizationOwnerIdAndDeletedAtIsNull(organizationOwnerId: Long): List<Project>
+
+  fun findAllByDeletedAtIsNull(): List<Project>
+
+  /**
+   * Returns IDs of non-deleted projects that have no PROJECT-type TM assignment. Used by the
+   * startup migration job to find candidates whose project TM needs to be provisioned.
+   */
+  @Query(
+    """
+    select p.id from Project p
+    where p.deletedAt is null
+      and not exists (
+        select 1 from TranslationMemoryProject tmp
+        where tmp.project.id = p.id
+          and tmp.translationMemory.type = io.tolgee.model.translationMemory.TranslationMemoryType.PROJECT
+      )
+    order by p.id
+    """,
+  )
+  fun findAllIdsWithoutProjectTm(): List<Long>
+
+  @Query(
+    """
+    select p from Project p
+    where p.deletedAt is null
+      and not exists (
+        select 1 from TranslationMemoryProject tmp
+        where tmp.project.id = p.id
+          and tmp.translationMemory.type = io.tolgee.model.translationMemory.TranslationMemoryType.PROJECT
+      )
+    """,
+  )
+  fun findAllWithoutProjectTm(pageable: Pageable): Page<Project>
+
   fun findAllByOrganizationOwnerIdAndUseQaChecksTrueAndDeletedAtIsNull(organizationOwnerId: Long): List<Project>
 
   fun findAllByUseQaChecksTrueAndDeletedAtIsNull(): List<Project>

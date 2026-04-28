@@ -1,10 +1,8 @@
 import { Box, styled, Tooltip, Typography } from '@mui/material';
-import { useTranslate } from '@tolgee/react';
-import { components } from 'tg.service/apiSchema.generated';
 import { ProjectLink } from 'tg.component/ProjectLink';
 import { useMemo } from 'react';
 
-type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
+type ProjectRef = { id: number; name: string };
 
 const StyledWrapper = styled(Box)`
   display: flex;
@@ -13,16 +11,18 @@ const StyledWrapper = styled(Box)`
 `;
 
 type Props = {
-  projects: SimpleProjectModel[];
+  projects: ProjectRef[];
+  label: React.ReactNode;
   maxDisplay?: number;
+  'data-cy'?: string;
 };
 
-export const GlossaryProjectsInfo: React.FC<Props> = ({
+export const ProjectsUsedInfo: React.FC<Props> = ({
   projects,
+  label,
   maxDisplay = 2,
+  'data-cy': dataCy,
 }) => {
-  const { t } = useTranslate();
-
   const sortedProjects = useMemo(
     () => [...projects].sort((a, b) => a.name.localeCompare(b.name)),
     [projects]
@@ -36,9 +36,9 @@ export const GlossaryProjectsInfo: React.FC<Props> = ({
   }
 
   const content = (
-    <StyledWrapper data-cy="glossary-projects-info">
+    <StyledWrapper data-cy={dataCy}>
       <Typography variant="body2" component="span">
-        ({t('glossary_projects_used_in_label')}{' '}
+        ({label}{' '}
         {displayedProjects.map((project, index) => (
           <span key={project.id}>
             {index > 0 && ', '}

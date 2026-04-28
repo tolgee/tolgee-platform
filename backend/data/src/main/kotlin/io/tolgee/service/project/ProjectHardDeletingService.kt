@@ -24,6 +24,7 @@ import io.tolgee.service.language.LanguageService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PermissionService
+import io.tolgee.service.translationMemory.TranslationMemoryManagementService
 import io.tolgee.util.Logging
 import jakarta.persistence.EntityManager
 import org.springframework.beans.factory.annotation.Qualifier
@@ -56,6 +57,7 @@ class ProjectHardDeletingService(
   @Qualifier("promptServiceEeImpl") private val promptService: PromptService,
   private val importSettingsService: ImportSettingsService,
   private val glossaryCleanupService: GlossaryCleanupService,
+  private val translationMemoryManagementService: TranslationMemoryManagementService,
   private val labelService: LabelService,
   private val branchService: BranchService,
   private val entityManager: EntityManager,
@@ -76,6 +78,10 @@ class ProjectHardDeletingService(
 
       traceLogMeasureTime("deleteProject: unassign glossaries") {
         glossaryCleanupService.unassignFromAllProjects(project)
+      }
+
+      traceLogMeasureTime("deleteProject: delete translation memories") {
+        translationMemoryManagementService.deleteAllByProject(projectId)
       }
 
       traceLogMeasureTime("deleteProject: delete project import settings") {

@@ -13,6 +13,7 @@ import io.tolgee.development.testDataBuilder.builders.PatBuilder
 import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.builders.TranslationBuilder
+import io.tolgee.development.testDataBuilder.builders.TranslationMemoryBuilder
 import io.tolgee.development.testDataBuilder.builders.UserAccountBuilder
 import io.tolgee.development.testDataBuilder.builders.UserPreferencesBuilder
 import io.tolgee.development.testDataBuilder.builders.slack.SlackUserConnectionBuilder
@@ -130,6 +131,7 @@ class TestDataService(
     executeInNewTransaction(transactionManager) {
       saveProjectData(builder)
       saveGlossaryData(builder)
+      saveTranslationMemoryData(builder)
       saveNotifications(builder)
       finalize()
     }
@@ -287,6 +289,13 @@ class TestDataService(
     builders.forEach {
       entityManager.persist(it.self)
     }
+  }
+
+  private fun saveTranslationMemoryData(builder: TestDataBuilder) {
+    val tmBuilders = builder.data.organizations.flatMap { it.data.translationMemories }
+    tmBuilders.forEach { entityManager.persist(it.self) }
+    tmBuilders.flatMap { it.data.projectAssignments }.forEach { entityManager.persist(it.self) }
+    tmBuilders.flatMap { it.data.entries }.forEach { entityManager.persist(it.self) }
   }
 
   private fun finalize() {

@@ -83,6 +83,13 @@ export const BaseOrganizationSettingsView: React.FC<Props> = ({
     label: t('organization_menu_glossaries'),
   });
 
+  menuItems.push({
+    link: LINKS.ORGANIZATION_TRANSLATION_MEMORIES.build({
+      [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
+    }),
+    label: t('organization_menu_translation_memories', 'Translation memories'),
+  });
+
   if (canManageOrganization) {
     menuItems.push({
       link: LINKS.ORGANIZATION_APPS.build({
