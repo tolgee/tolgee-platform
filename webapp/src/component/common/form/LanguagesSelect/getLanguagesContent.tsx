@@ -63,8 +63,17 @@ export const getLanguagesContent = ({
     value.includes(lang.tag)
   );
 
-  // Показываем кнопки "All" и "None" только для batch операций
   const isBatchOperation = context === 'batch-operations';
+  const isTranslations = context === 'translations';
+
+  const baseLang = languages.find((l) => l.base)?.tag;
+  const isOnlyBaseSelected = value.length === 1 && value[0] === baseLang;
+
+  const handleClear = () => {
+    if (baseLang) {
+      onChange([baseLang]);
+    }
+  };
 
   const languageItems = languages.map((lang) => (
     <MenuItem
@@ -79,9 +88,23 @@ export const getLanguagesContent = ({
     </MenuItem>
   ));
 
+  if (isTranslations) {
+    return [
+      ...languageItems,
+      <Divider key="divider" />,
+      <MenuItem
+        key="clear"
+        onClick={handleClear}
+        disabled={isOnlyBaseSelected}
+        data-cy="translations-language-select-clear"
+      >
+        <ListItemText primary={t('languages_select_clear', 'Clear')} />
+      </MenuItem>,
+    ];
+  }
+
   if (isBatchOperation) {
     return [
-      // All button
       <MenuItem
         key="select-all"
         onClick={handleSelectAll}
@@ -90,7 +113,6 @@ export const getLanguagesContent = ({
         <Checkbox checked={allSelected} size="small" />
         <ListItemText primary={t('languages_permitted_list_select_all')} />
       </MenuItem>,
-      // None button
       <MenuItem
         key="select-none"
         onClick={handleSelectNone}
@@ -99,13 +121,10 @@ export const getLanguagesContent = ({
         <Checkbox checked={false} size="small" />
         <ListItemText primary={t('llm_provider_form_select_priority_none')} />
       </MenuItem>,
-      // Divider
       <Divider key="divider" />,
-      // Individual language items
       ...languageItems,
     ];
   }
 
-  // Для обычного фильтра языков возвращаем только список языков без кнопок "All" и "None"
   return languageItems;
 };

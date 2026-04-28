@@ -1,5 +1,6 @@
 import { ProjectDTO } from '../../../../../webapp/src/service/response.types';
 import {
+  clearLanguages,
   create4Translations,
   toggleLang,
   translationsBeforeEach,
@@ -33,6 +34,24 @@ describe('Options with 5 Translations', () => {
       cy.contains('Studený přeložený text 1').should('not.exist');
       toggleLang('English');
       cy.contains('Select at least one language').should('be.visible');
+    });
+
+    it('will clear languages to base only', () => {
+      toggleLang('Česky');
+      cy.contains('Studený přeložený text 1').should('be.visible');
+      cy.contains('Cool translated text 1').should('be.visible');
+      clearLanguages();
+      cy.contains('Cool translated text 1').should('be.visible');
+      cy.contains('Studený přeložený text 1').should('not.exist');
+    });
+
+    it('will disable clear when only base language selected', () => {
+      cy.gcy('translations-language-select-form-control').click();
+      cy.gcy('translations-language-select-clear').should(
+        'have.attr',
+        'aria-disabled',
+        'true'
+      );
     });
 
     it('will search', () => {
