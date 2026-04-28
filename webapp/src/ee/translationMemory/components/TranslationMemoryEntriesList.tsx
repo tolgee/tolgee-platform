@@ -38,6 +38,7 @@ type OrganizationLanguageModel =
   components['schemas']['OrganizationLanguageModel'];
 
 const PAGE_SIZE = 50;
+const LANGUAGE_SEARCH_DEBOUNCE_MS = 500;
 
 // Container chrome mirrors GlossaryTermsList — no left/right border, optional horizontal-scroll
 // gradient hints rendered via the ::before/::after pseudos and toggled by ScrollArrows. Keep
@@ -293,7 +294,10 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
 
   // Language selector
   const [langSearch, setLangSearch] = useState('');
-  const [langSearchDebounced] = useDebounce(langSearch, 500);
+  const [langSearchDebounced] = useDebounce(
+    langSearch,
+    LANGUAGE_SEARCH_DEBOUNCE_MS
+  );
 
   const langQuery = { search: langSearchDebounced, size: 30 };
   const languagesLoadable = useApiInfiniteQuery({

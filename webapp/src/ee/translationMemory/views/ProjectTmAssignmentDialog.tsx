@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import {
   Box,
-  Button,
   Dialog,
-  DialogActions,
   DialogContent,
   DialogTitle,
   Switch,
@@ -11,8 +9,8 @@ import {
 } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
-import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { components } from 'tg.service/apiSchema.generated';
+import { DialogCancelSaveActions } from 'tg.ee.module/translationMemory/components/DialogCancelSaveActions';
 
 type AssignmentModel =
   components['schemas']['ProjectTranslationMemoryAssignmentModel'];
@@ -99,19 +97,11 @@ export const ProjectTmAssignmentDialog: React.VFC<Props> = ({
           />
         </Typography>
       </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>
-          <T keyName="global_cancel_button" defaultValue="Cancel" />
-        </Button>
-        <LoadingButton
-          variant="contained"
-          color="primary"
-          onClick={handleSave}
-          loading={updateMutation.isLoading}
-        >
-          <T keyName="global_form_save" defaultValue="Save" />
-        </LoadingButton>
-      </DialogActions>
+      <DialogCancelSaveActions
+        onCancel={onClose}
+        onSave={handleSave}
+        saving={updateMutation.isLoading}
+      />
     </Dialog>
   );
 };

@@ -1,9 +1,7 @@
 import { useState } from 'react';
 import {
   Box,
-  Button,
   Dialog,
-  DialogActions,
   DialogContent,
   DialogTitle,
   FormControlLabel,
@@ -11,7 +9,7 @@ import {
   Typography,
 } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
-import LoadingButton from 'tg.component/common/form/LoadingButton';
+import { DialogCancelSaveActions } from 'tg.ee.module/translationMemory/components/DialogCancelSaveActions';
 
 type Props = {
   open: boolean;
@@ -75,20 +73,12 @@ export const TmWriteOnlyReviewedDialog: React.VFC<Props> = ({
           </Typography>
         </Box>
       </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>
-          <T keyName="global_cancel_button" defaultValue="Cancel" />
-        </Button>
-        <LoadingButton
-          onClick={() => onSave(writeOnlyReviewed)}
-          variant="contained"
-          color="primary"
-          loading={saving}
-          data-cy="tm-write-only-reviewed-save"
-        >
-          <T keyName="global_form_save" defaultValue="Save" />
-        </LoadingButton>
-      </DialogActions>
+      <DialogCancelSaveActions
+        onCancel={onClose}
+        onSave={() => onSave(writeOnlyReviewed)}
+        saving={saving}
+        saveDataCy="tm-write-only-reviewed-save"
+      />
     </Dialog>
   );
 };

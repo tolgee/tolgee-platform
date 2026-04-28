@@ -28,7 +28,7 @@ import {
   PendingRemovalRow,
   TmAssignedProjectsTable,
 } from 'tg.ee.module/translationMemory/views/TmAssignedProjectsTable';
-import { confirmation } from 'tg.hooks/confirmation';
+import { confirmProjectDisconnect } from 'tg.ee.module/translationMemory/components/confirmProjectDisconnect';
 
 const StyledContainer = styled('div')`
   padding: ${({ theme }) => theme.spacing(3)};
@@ -54,6 +54,8 @@ export type CreateEditTranslationMemoryFormValues = {
   writeOnlyReviewed: boolean;
   assignedProjects: AssignedProjectRow[];
 };
+
+const PROJECT_SEARCH_DEBOUNCE_MS = 300;
 
 const validationSchema = Yup.object().shape({
   name: Yup.string().min(1).required(),
@@ -130,32 +132,15 @@ export const TranslationMemoryCreateEditForm = ({
         ) => {
           if (mode === 'edit' && originalProjectIds.has(projectId)) {
             // Saved assignment → confirm before queuing a server-side DELETE on save
-            confirmation({
-              title: (
-                <T
-                  keyName="tm_settings_disconnect_project_title"
-                  defaultValue="Disconnect {projectName}"
-                  params={{ projectName }}
-                />
-              ),
-              message: (
-                <T
-                  keyName="tm_settings_remove_project_message"
-                  defaultValue="This project will be disconnected from the translation memory."
-                />
-              ),
-              onConfirm: () => {
-                setPendingRemovals((prev) => [
-                  ...prev,
-                  { projectId, projectName },
-                ]);
-                setFieldValue(
-                  'assignedProjects',
-                  values.assignedProjects.filter(
-                    (a) => a.projectId !== projectId
-                  )
-                );
-              },
+            confirmProjectDisconnect(projectName, () => {
+              setPendingRemovals((prev) => [
+                ...prev,
+                { projectId, projectName },
+              ]);
+              setFieldValue(
+                'assignedProjects',
+                values.assignedProjects.filter((a) => a.projectId !== projectId)
+              );
             });
             return;
           }
@@ -407,7 +392,10 @@ const AssignedProjectsEditor = ({
   const organizationId = preferredOrganization!.id;
 
   const [projectSearch, setProjectSearch] = useState('');
-  const [projectSearchDebounced] = useDebounce(projectSearch, 300);
+  const [projectSearchDebounced] = useDebounce(
+    projectSearch,
+    PROJECT_SEARCH_DEBOUNCE_MS
+  );
 
   const projectsLoadable = useApiInfiniteQuery({
     url: '/v2/organizations/{id}/projects',
