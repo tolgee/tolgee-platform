@@ -1,0 +1,74 @@
+# Multi-stage build — no local JDK required.
+#
+# Stage 1: compile the Spring Boot backend and stage deployment files.
+#   - Uses eclipse-temurin:21-jdk; Gradle wrapper downloads Gradle 8.5 automatically.
+#   - SKIP_WEBAPP_BUILD=true skips the React frontend build (backend-only change).
+#
+# Stage 2: final runtime image — mirrors docker/app/Dockerfile exactly.
+#
+# Usage:
+#   docker build -f Dockerfile.dev-build \
+#     -t tolgee/tolgee:local \
+#     .
+
+# ── Stage 1: build ────────────────────────────────────────────────────────────
+FROM eclipse-temurin:21-jdk AS builder
+
+# gradle/utils.gradle resolves 'npm' at evaluation time unconditionally,
+# so npm must be on PATH even when SKIP_WEBAPP_BUILD=true.
+# Install a minimal Node.js 20 LTS from NodeSource.
+RUN apt-get update -qq \
+ && apt-get install -y --no-install-recommends curl ca-certificates \
+ && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+ && apt-get install -y --no-install-recommends nodejs \
+ && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /workspace
+
+# Copy Gradle wrapper and dependency metadata first for better layer caching
+COPY gradlew gradlew.bat gradle.properties settings.gradle build.gradle ./
+COPY gradle/ gradle/
+
+# Copy all source modules
+COPY backend/ backend/
+COPY ee/ ee/
+COPY library/ library/
+COPY email/ email/
+
+# Compile backend, unpack the fat JAR, and stage all files into build/docker/
+# SKIP_WEBAPP_BUILD=true prevents the npm/React build from actually running
+ENV SKIP_WEBAPP_BUILD=true
+RUN ./gradlew dockerPrepare --no-daemon 2>&1 \
+ && echo "=== build/docker contents ===" \
+ && find /workspace/build/docker -maxdepth 2 | sort
+
+
+# ── Stage 2: runtime ──────────────────────────────────────────────────────────
+# Mirrors docker/app/Dockerfile exactly; sources files from the builder stage.
+FROM postgres:13.21-alpine3.22
+
+RUN apk --no-cache add openjdk21 \
+ && apk --no-cache add libxml2
+
+EXPOSE 8080
+VOLUME /data
+
+ENV HEALTHCHECK_PORT=8080 \
+    spring_profiles_active=docker
+
+COPY --from=builder /workspace/build/docker/BOOT-INF/lib  /app/lib
+COPY --from=builder /workspace/build/docker/META-INF       /app/META-INF
+COPY --from=builder /workspace/build/docker/BOOT-INF/classes /app
+# cmd.sh is not staged by dockerPrepare (projectDir resolves to backend/app, not root);
+# copy it directly from the source tree instead.
+COPY docker/app/cmd.sh /app/cmd.sh
+RUN chmod +x /app/cmd.sh
+
+ARG OTEL_AGENT_VERSION=2.24.0
+RUN wget -O /app/opentelemetry-javaagent.jar \
+    "https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v${OTEL_AGENT_VERSION}/opentelemetry-javaagent.jar"
+
+ENTRYPOINT ["/app/cmd.sh"]
+
+HEALTHCHECK --interval=10s --timeout=3s --retries=20 \
+    CMD wget --spider -q "http://127.0.0.1:$HEALTHCHECK_PORT/actuator/health" || exit 1
