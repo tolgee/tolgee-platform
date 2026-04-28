@@ -19,10 +19,17 @@ import { LanguageValue } from 'tg.component/languages/LanguageValue';
 import { SecondaryBarSearchField } from 'tg.component/layout/SecondaryBarSearchField';
 import { BaseViewAddButton } from 'tg.component/layout/BaseViewAddButton';
 import { components } from 'tg.service/apiSchema.generated';
+import { UseInfiniteQueryResult } from 'react-query';
+import { ApiError } from 'tg.service/http/ApiError';
 import { EntryRowLayout } from './TranslationMemoryEntryRow';
 
 type OrganizationLanguageModel =
   components['schemas']['OrganizationLanguageModel'];
+
+type LanguagesLoadable = UseInfiniteQueryResult<
+  components['schemas']['PagedModelOrganizationLanguageModel'],
+  ApiError
+>;
 
 type Props = {
   search: string | undefined;
@@ -31,7 +38,7 @@ type Props = {
   layout: EntryRowLayout;
   onLayoutChange: (layout: EntryRowLayout) => void;
   languages: OrganizationLanguageModel[] | undefined;
-  languagesLoadable: any;
+  languagesLoadable: LanguagesLoadable;
   isAllSelected: boolean;
   selectedLanguages: string[] | undefined;
   langSearch: string;

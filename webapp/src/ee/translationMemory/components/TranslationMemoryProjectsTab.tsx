@@ -12,7 +12,7 @@ import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { components } from 'tg.service/apiSchema.generated';
 import { XClose } from '@untitled-ui/icons-react';
 import { useQueryClient } from 'react-query';
-import { confirmation } from 'tg.hooks/confirmation';
+import { confirmProjectDisconnect } from 'tg.ee.module/translationMemory/components/confirmProjectDisconnect';
 
 type TmAssignedProjectModel = components['schemas']['TmAssignedProjectModel'];
 
@@ -112,29 +112,14 @@ export const TranslationMemoryProjectsTab: React.VFC<Props> = ({
   };
 
   const handleRemove = (item: TmAssignedProjectModel) => {
-    confirmation({
-      title: (
-        <T
-          keyName="tm_settings_disconnect_project_title"
-          defaultValue="Disconnect {projectName}"
-          params={{ projectName: item.projectName }}
-        />
-      ),
-      message: (
-        <T
-          keyName="tm_settings_remove_project_message"
-          defaultValue="This project will be disconnected from the translation memory."
-        />
-      ),
-      onConfirm: () => {
-        unassignMutation.mutate(
-          {
-            path: { projectId: item.projectId, translationMemoryId },
-            query: { keepData: false },
-          },
-          { onSuccess: invalidate }
-        );
-      },
+    confirmProjectDisconnect(item.projectName, () => {
+      unassignMutation.mutate(
+        {
+          path: { projectId: item.projectId, translationMemoryId },
+          query: { keepData: false },
+        },
+        { onSuccess: invalidate }
+      );
     });
   };
 

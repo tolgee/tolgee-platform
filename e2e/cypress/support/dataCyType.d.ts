@@ -907,7 +907,6 @@ declare namespace DataCy {
         "tm-settings-dialog" |
         "tm-settings-write-only-reviewed" |
         "tm-write-only-reviewed-dialog" |
-        "tm-write-only-reviewed-save" |
         "tm-write-only-reviewed-toggle" |
         "top-banner" |
         "top-banner-content" |
