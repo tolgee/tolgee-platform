@@ -143,6 +143,93 @@ class TranslationMemoryEntryControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `project TM listing merges manual stored entries with virtual rows from project translations`() {
+    // PROJECT TMs return virtual content from the assigned project AND any manual entries the
+    // user added on the TM itself. Manual entries are interleaved with virtual rows by source
+    // text so the user sees one unified list.
+    val projectTmId = testData.projectTm.id
+    val request =
+      CreateTranslationMemoryEntryRequest().apply {
+        sourceText = "Manual phrase"
+        targetText = "Frase manual"
+        targetLanguageTag = "es"
+      }
+    performAuthPost(
+      "/v2/organizations/$orgId/translation-memories/$projectTmId/entries",
+      request,
+    ).andIsOk
+
+    performAuthGet(
+      "/v2/organizations/$orgId/translation-memories/$projectTmId/entries",
+    ).andIsOk
+      .andAssertThatJson {
+        // Two virtual rows ("Existing source", "Reviewed source") + one manual ("Manual phrase")
+        node("page.totalElements").isEqualTo(3)
+        node("_embedded.translationMemoryEntryGroups").isArray.hasSize(3)
+        // Alphabetical order by source_text
+        node("_embedded.translationMemoryEntryGroups[0].sourceText").isEqualTo("Existing source")
+        node("_embedded.translationMemoryEntryGroups[0].isManual").isEqualTo(false)
+        node("_embedded.translationMemoryEntryGroups[1].sourceText").isEqualTo("Manual phrase")
+        node("_embedded.translationMemoryEntryGroups[1].isManual").isEqualTo(true)
+        node("_embedded.translationMemoryEntryGroups[2].sourceText").isEqualTo("Reviewed source")
+        node("_embedded.translationMemoryEntryGroups[2].isManual").isEqualTo(false)
+      }
+  }
+
+  @Test
+  fun `project TM listing splits manual and virtual rows that share a source text`() {
+    // When a user adds a manual entry whose source text already exists as a virtual row, both
+    // appear as separate rows in the listing — the user can edit/delete the manual entry while
+    // the virtual one continues to track project translations. Manual sorts first within the
+    // same source text (matches SHARED-TM ordering: is_manual desc).
+    val projectTmId = testData.projectTm.id
+    val request =
+      CreateTranslationMemoryEntryRequest().apply {
+        sourceText = "Existing source"
+        targetText = "Manual override translation"
+        targetLanguageTag = "de"
+      }
+    performAuthPost(
+      "/v2/organizations/$orgId/translation-memories/$projectTmId/entries",
+      request,
+    ).andIsOk
+
+    performAuthGet(
+      "/v2/organizations/$orgId/translation-memories/$projectTmId/entries",
+    ).andIsOk
+      .andAssertThatJson {
+        node("page.totalElements").isEqualTo(3)
+        // First two rows share "Existing source" — manual ahead of virtual
+        node("_embedded.translationMemoryEntryGroups[0].sourceText").isEqualTo("Existing source")
+        node("_embedded.translationMemoryEntryGroups[0].isManual").isEqualTo(true)
+        node("_embedded.translationMemoryEntryGroups[1].sourceText").isEqualTo("Existing source")
+        node("_embedded.translationMemoryEntryGroups[1].isManual").isEqualTo(false)
+      }
+  }
+
+  @Test
+  fun `project TM listing finds manual entries via target-text search`() {
+    val projectTmId = testData.projectTm.id
+    performAuthPost(
+      "/v2/organizations/$orgId/translation-memories/$projectTmId/entries",
+      CreateTranslationMemoryEntryRequest().apply {
+        sourceText = "Manual phrase"
+        targetText = "Frase manual unique"
+        targetLanguageTag = "es"
+      },
+    ).andIsOk
+
+    performAuthGet(
+      "/v2/organizations/$orgId/translation-memories/$projectTmId/entries?search=unique",
+    ).andIsOk
+      .andAssertThatJson {
+        node("page.totalElements").isEqualTo(1)
+        node("_embedded.translationMemoryEntryGroups[0].sourceText").isEqualTo("Manual phrase")
+        node("_embedded.translationMemoryEntryGroups[0].isManual").isEqualTo(true)
+      }
+  }
+
+  @Test
   fun `comma-separated language filter returns entries for all specified languages`() {
     // Test data: sharedTm has "Hello world" in de+fr and "Thank you" in de only
 
