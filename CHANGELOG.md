@@ -1,3 +1,10 @@
+## [3.183.1](https://github.com/tolgee/tolgee-platform/compare/v3.183.0...v3.183.1) (2026-04-29)
+
+
+### Bug Fixes
+
+* QueryBase perf optimization  ([#3595](https://github.com/tolgee/tolgee-platform/issues/3595)) ([6854d66](https://github.com/tolgee/tolgee-platform/commit/6854d664bc20a6d3437d23446935f12e7e8d5e1b))
+
 # [3.183.0](https://github.com/tolgee/tolgee-platform/compare/v3.182.1...v3.183.0) (2026-04-28)
 
 
