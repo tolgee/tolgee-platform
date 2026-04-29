@@ -174,6 +174,7 @@ declare namespace DataCy {
         "avatar-upload-button" |
         "avatar-upload-file-input" |
         "base-language-select" |
+        "base-language-select-item" |
         "batch-operation-copy-source-select" |
         "batch-operation-copy-source-select-item" |
         "batch-operation-dialog-cancel-job" |
@@ -258,6 +259,8 @@ declare namespace DataCy {
         "create-edit-glossary-cancel" |
         "create-edit-glossary-dialog" |
         "create-edit-glossary-submit" |
+        "create-edit-translation-memory-cancel" |
+        "create-edit-translation-memory-submit" |
         "create-glossary-field-name" |
         "create-glossary-term-cancel" |
         "create-glossary-term-dialog" |
@@ -275,6 +278,8 @@ declare namespace DataCy {
         "create-task-field-type" |
         "create-task-field-type-item" |
         "create-task-submit" |
+        "create-translation-memory-dialog" |
+        "create-translation-memory-field-name" |
         "dashboard-projects-list-item" |
         "default-namespace-select" |
         "delete-user-button" |
@@ -339,8 +344,6 @@ declare namespace DataCy {
         "global-user-menu-button" |
         "glossaries-empty-add-button" |
         "glossaries-list-more-button" |
-        "glossary-base-language-select" |
-        "glossary-base-language-select-item" |
         "glossary-batch-delete-button" |
         "glossary-delete-button" |
         "glossary-edit-button" |
@@ -622,6 +625,9 @@ declare namespace DataCy {
         "plan_seat_limit_exceeded_while_accepting_invitation_message" |
         "project-ai-prompt-dialog-description-input" |
         "project-ai-prompt-dialog-save" |
+        "project-base-language-tm-conflict-confirm" |
+        "project-base-language-tm-conflict-dialog" |
+        "project-base-language-tm-conflict-list" |
         "project-branch-merge-accept" |
         "project-branch-merge-apply" |
         "project-branch-merge-cancel" |
@@ -712,6 +718,10 @@ declare namespace DataCy {
         "project-settings-menu-qa" |
         "project-settings-name" |
         "project-settings-suggestions-mode-switch" |
+        "project-settings-tm-configure" |
+        "project-settings-tm-row" |
+        "project-settings-tm-shared" |
+        "project-settings-tm-table" |
         "project-settings-transfer-button" |
         "project-settings-translation-protection-switch" |
         "project-settings-use-branching-switch" |
@@ -858,6 +868,46 @@ declare namespace DataCy {
         "tasks-view-board-button" |
         "tasks-view-list-button" |
         "this-is-the-element" |
+        "tm-add-project-autocomplete" |
+        "tm-assigned-project-row" |
+        "tm-assigned-projects-table" |
+        "tm-batch-delete-button" |
+        "tm-batch-toolbar" |
+        "tm-content-subtitle" |
+        "tm-create-entry-dialog" |
+        "tm-entries-header" |
+        "tm-entries-language-filter" |
+        "tm-entries-language-select-item" |
+        "tm-entries-layout-flat" |
+        "tm-entries-layout-stacked" |
+        "tm-entries-select-all" |
+        "tm-entries-table" |
+        "tm-entries-total-count" |
+        "tm-entry-add-language" |
+        "tm-entry-cancel" |
+        "tm-entry-create-submit" |
+        "tm-entry-edit-field" |
+        "tm-entry-row-checkbox" |
+        "tm-entry-row-keys" |
+        "tm-entry-save" |
+        "tm-entry-source-text" |
+        "tm-entry-target-text" |
+        "tm-entry-translation-cell" |
+        "tm-export-button" |
+        "tm-import-button" |
+        "tm-import-cancel" |
+        "tm-import-dialog" |
+        "tm-import-mode-keep" |
+        "tm-import-mode-override" |
+        "tm-import-submit" |
+        "tm-project-read-checkbox" |
+        "tm-project-remove" |
+        "tm-project-write-checkbox" |
+        "tm-settings-default-penalty" |
+        "tm-settings-dialog" |
+        "tm-settings-write-only-reviewed" |
+        "tm-write-only-reviewed-dialog" |
+        "tm-write-only-reviewed-toggle" |
         "top-banner" |
         "top-banner-content" |
         "top-banner-dismiss-button" |
@@ -885,6 +935,16 @@ declare namespace DataCy {
         "translation-label-add" |
         "translation-label-control" |
         "translation-label-delete" |
+        "translation-memories-empty-add-button" |
+        "translation-memories-list-more-button" |
+        "translation-memory-delete-button" |
+        "translation-memory-edit-button" |
+        "translation-memory-entry-row" |
+        "translation-memory-list-entries-count" |
+        "translation-memory-list-item" |
+        "translation-memory-list-languages" |
+        "translation-memory-list-name" |
+        "translation-memory-projects-info" |
         "translation-panel" |
         "translation-panel-content" |
         "translation-panel-items-count" |
@@ -899,6 +959,10 @@ declare namespace DataCy {
         "translation-tools-machine-translation-item-prompt" |
         "translation-tools-suggestions-show-all-checkbox" |
         "translation-tools-translation-memory-item" |
+        "translation-tools-translation-memory-item-key-name" |
+        "translation-tools-translation-memory-item-score" |
+        "translation-tools-translation-memory-item-tm-name" |
+        "translation-tools-translation-memory-item-updated" |
         "translations-add-button" |
         "translations-auto-translated-clear-button" |
         "translations-auto-translated-indicator" |

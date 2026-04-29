@@ -42,7 +42,7 @@ type Props<T, S> = {
     item: T
   ) => React.ReactNode;
   labelItem: (item: S) => string;
-  label?: string;
+  label?: React.ReactNode;
   error?: React.ReactNode;
   searchPlaceholder?: string;
   displaySearch?: boolean;
@@ -120,12 +120,12 @@ export function InfiniteSearchSelect<T, S>({
         minHeight={minHeight}
         InputProps={{
           placeholder: searchPlaceholder,
-          onClick: () => setOpen(true),
+          onClick: disabled ? undefined : () => setOpen(true),
           disabled: disabled,
           ref: anchorEl,
           fullWidth: true,
           sx: {
-            cursor: 'pointer',
+            cursor: disabled ? 'not-allowed' : 'pointer',
           },
           readOnly: true,
           inputComponent: inputComponent || FakeInput,

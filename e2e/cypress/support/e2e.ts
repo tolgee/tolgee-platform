@@ -59,4 +59,5 @@ before(() => {
   setFeature('TRANSLATION_LABELS', true);
   setFeature('BRANCHING', true);
   setFeature('QA_CHECKS', true);
+  setFeature('TRANSLATION_MEMORY', true);
 });

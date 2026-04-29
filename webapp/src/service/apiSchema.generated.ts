@@ -90,7 +90,7 @@ export interface paths {
   "/v2/api-keys": {
     get: operations["allByUser"];
     /** Creates new API key with provided scopes */
-    post: operations["create_17"];
+    post: operations["create_19"];
   };
   "/v2/api-keys/availableScopes": {
     get: operations["getScopes"];
@@ -104,15 +104,15 @@ export interface paths {
     get: operations["getCurrentPermissions"];
   };
   "/v2/api-keys/{apiKeyId}": {
-    put: operations["update_11"];
-    delete: operations["delete_10"];
+    put: operations["update_13"];
+    delete: operations["delete_12"];
   };
   "/v2/api-keys/{apiKeyId}/regenerate": {
     put: operations["regenerate_1"];
   };
   "/v2/api-keys/{keyId}": {
     /** Returns specific API key info */
-    get: operations["get_24"];
+    get: operations["get_26"];
   };
   "/v2/auth-provider": {
     get: operations["getCurrentAuthProvider"];
@@ -148,7 +148,7 @@ export interface paths {
     post: operations["upload"];
   };
   "/v2/image-upload/{ids}": {
-    delete: operations["delete_17"];
+    delete: operations["delete_19"];
   };
   "/v2/invitations/{code}/accept": {
     get: operations["acceptInvitation"];
@@ -175,10 +175,10 @@ export interface paths {
     post: operations["create_14"];
   };
   "/v2/organizations/{id}": {
-    get: operations["get_15"];
-    put: operations["update_10"];
+    get: operations["get_17"];
+    put: operations["update_12"];
     /** Deletes organization and all its data including projects */
-    delete: operations["delete_9"];
+    delete: operations["delete_11"];
   };
   "/v2/organizations/{id}/avatar": {
     put: operations["uploadAvatar_2"];
@@ -205,19 +205,19 @@ export interface paths {
     get: operations["getAllBaseLanguagesInUse"];
   };
   "/v2/organizations/{organizationId}/glossaries": {
-    get: operations["getAll_12"];
-    post: operations["create_15"];
+    get: operations["getAll_13"];
+    post: operations["create_17"];
   };
   "/v2/organizations/{organizationId}/glossaries-with-stats": {
-    get: operations["getAllWithStats"];
+    get: operations["getAllWithStats_1"];
   };
   "/v2/organizations/{organizationId}/glossaries/{glossaryId}": {
-    get: operations["get_13"];
-    put: operations["update_8"];
-    delete: operations["delete_7"];
+    get: operations["get_15"];
+    put: operations["update_10"];
+    delete: operations["delete_9"];
   };
   "/v2/organizations/{organizationId}/glossaries/{glossaryId}/assigned-projects": {
-    get: operations["getAssignedProjects"];
+    get: operations["getAssignedProjects_1"];
   };
   "/v2/organizations/{organizationId}/glossaries/{glossaryId}/export": {
     get: operations["export"];
@@ -229,20 +229,20 @@ export interface paths {
     get: operations["getLanguages"];
   };
   "/v2/organizations/{organizationId}/glossaries/{glossaryId}/terms": {
-    get: operations["getAll_13"];
-    post: operations["create_16"];
+    get: operations["getAll_14"];
+    post: operations["create_18"];
     delete: operations["deleteMultiple"];
   };
   "/v2/organizations/{organizationId}/glossaries/{glossaryId}/terms/{termId}": {
-    get: operations["get_14"];
-    put: operations["update_9"];
-    delete: operations["delete_8"];
+    get: operations["get_16"];
+    put: operations["update_11"];
+    delete: operations["delete_10"];
   };
   "/v2/organizations/{organizationId}/glossaries/{glossaryId}/terms/{termId}/translations": {
-    post: operations["update_12"];
+    post: operations["update_14"];
   };
   "/v2/organizations/{organizationId}/glossaries/{glossaryId}/terms/{termId}/translations/{languageTag}": {
-    get: operations["get_23"];
+    get: operations["get_25"];
   };
   "/v2/organizations/{organizationId}/glossaries/{glossaryId}/termsIds": {
     get: operations["getAllIds"];
@@ -258,7 +258,7 @@ export interface paths {
     get: operations["getAllLanguagesInUse"];
   };
   "/v2/organizations/{organizationId}/llm-providers": {
-    get: operations["getAll_11"];
+    get: operations["getAll_12"];
     post: operations["createProvider"];
   };
   "/v2/organizations/{organizationId}/llm-providers/all-available": {
@@ -311,6 +311,47 @@ export interface paths {
     get: operations["findProvider"];
     put: operations["setProvider"];
   };
+  "/v2/organizations/{organizationId}/translation-memories": {
+    get: operations["getAll_11"];
+    post: operations["create_15"];
+  };
+  "/v2/organizations/{organizationId}/translation-memories-with-stats": {
+    get: operations["getAllWithStats"];
+  };
+  "/v2/organizations/{organizationId}/translation-memories/{translationMemoryId}": {
+    get: operations["get_13"];
+    put: operations["update_8"];
+    delete: operations["delete_7"];
+  };
+  "/v2/organizations/{organizationId}/translation-memories/{translationMemoryId}/assigned-projects": {
+    get: operations["getAssignedProjects"];
+  };
+  "/v2/organizations/{organizationId}/translation-memories/{translationMemoryId}/entries": {
+    /** One row per distinct source text. The `targetLanguageTag` filter only narrows which entries are returned per group — source rows with no matching translation still appear with an empty `entries` list so the user can add a translation. */
+    get: operations["list_3"];
+    post: operations["create_16"];
+    /** For every entry ID in the payload, deletes the entire group that shares the same source text (and key). The request is deduplicated to distinct groups so passing multiple entries from the same row is a no-op past the first one. */
+    delete: operations["deleteMultipleGroups"];
+  };
+  "/v2/organizations/{organizationId}/translation-memories/{translationMemoryId}/entries/{entryId}": {
+    get: operations["get_14"];
+    put: operations["update_9"];
+    delete: operations["delete_8"];
+  };
+  "/v2/organizations/{organizationId}/translation-memories/{translationMemoryId}/entries/{entryId}/group": {
+    /** Deletes every entry that shares the same source text (and key) as the given entry — i.e. the entire translation-unit group visible as one row in the UI. */
+    delete: operations["deleteGroup"];
+  };
+  "/v2/organizations/{organizationId}/translation-memories/{translationMemoryId}/export": {
+    get: operations["exportTmx"];
+  };
+  "/v2/organizations/{organizationId}/translation-memories/{translationMemoryId}/import": {
+    post: operations["importTmx"];
+  };
+  "/v2/organizations/{organizationId}/translation-memories/{translationMemoryId}/write-only-reviewed": {
+    /** Sets `writeOnlyReviewed` on the given TM. Unlike the main update endpoint, this accepts PROJECT-type TMs too, so org maintainers can edit this single setting from the org-level TM list without switching into project settings. */
+    put: operations["setWriteOnlyReviewed"];
+  };
   "/v2/organizations/{organizationId}/usage": {
     get: operations["getUsage"];
   };
@@ -323,7 +364,7 @@ export interface paths {
     put: operations["setUserRole"];
   };
   "/v2/organizations/{slug}": {
-    get: operations["get_22"];
+    get: operations["get_24"];
   };
   "/v2/organizations/{slug}/projects": {
     /** Returns all organization projects the user has access to */
@@ -413,10 +454,10 @@ export interface paths {
     delete: operations["removeAvatar_1"];
   };
   "/v2/projects/{projectId}/batch-jobs": {
-    get: operations["list_3"];
+    get: operations["list_4"];
   };
   "/v2/projects/{projectId}/batch-jobs/{id}": {
-    get: operations["get_20"];
+    get: operations["get_22"];
   };
   "/v2/projects/{projectId}/batch-jobs/{id}/cancel": {
     /** Stops batch operation if possible. */
@@ -468,7 +509,7 @@ export interface paths {
   };
   "/v2/projects/{projectId}/branches/{branchId}": {
     post: operations["rename"];
-    delete: operations["delete_13"];
+    delete: operations["delete_15"];
   };
   "/v2/projects/{projectId}/branches/{branchId}/protected": {
     post: operations["setProtected"];
@@ -636,7 +677,7 @@ export interface paths {
     get: operations["getAll_7"];
     post: operations["create_6"];
     /** Delete one or multiple keys by their IDs in request body. Useful for larger requests esxceeding allowed URL length. */
-    delete: operations["delete_11"];
+    delete: operations["delete_13"];
   };
   "/v2/projects/{projectId}/keys/create": {
     post: operations["create_5"];
@@ -669,7 +710,7 @@ export interface paths {
     get: operations["selectKeys_2"];
   };
   "/v2/projects/{projectId}/keys/trash": {
-    get: operations["list_5"];
+    get: operations["list_8"];
   };
   "/v2/projects/{projectId}/keys/trash/deleters": {
     get: operations["listDeleters"];
@@ -684,7 +725,7 @@ export interface paths {
     put: operations["restore"];
   };
   "/v2/projects/{projectId}/keys/{ids}": {
-    delete: operations["delete_15"];
+    delete: operations["delete_17"];
   };
   "/v2/projects/{projectId}/keys/{id}": {
     get: operations["get_8"];
@@ -926,7 +967,7 @@ export interface paths {
     put: operations["executeComplexTagOperation"];
   };
   "/v2/projects/{projectId}/tags": {
-    get: operations["getAll_14"];
+    get: operations["getAll_15"];
   };
   "/v2/projects/{projectId}/tasks": {
     get: operations["getTasks"];
@@ -984,6 +1025,19 @@ export interface paths {
   "/v2/projects/{projectId}/transfer-to-organization/{organizationId}": {
     /** Transfers project's ownership to organization */
     put: operations["transferProjectToOrganization"];
+  };
+  "/v2/projects/{projectId}/translation-memories": {
+    get: operations["list_6"];
+  };
+  "/v2/projects/{projectId}/translation-memories/project-tm-settings": {
+    /** Sets TM-level flags on the project's own PROJECT-type TM. The shared-TM update endpoint rejects PROJECT TMs; this narrow endpoint exists so project admins can toggle the `writeOnlyReviewed` flag without org-level privileges. */
+    put: operations["updateProjectTmSettings"];
+  };
+  "/v2/projects/{projectId}/translation-memories/{translationMemoryId}": {
+    put: operations["updateAssignment"];
+    post: operations["assign"];
+    /** Removes the assignment between the project and the shared translation memory. When `keepData=true`, entries from the shared TM are first snapshotted into the project's own TM so the project retains the data after the disconnect. When `false` (default), the assignment is simply removed; the shared TM and its entries remain intact for other projects. */
+    delete: operations["unassign"];
   };
   "/v2/projects/{projectId}/translations": {
     get: operations["getTranslations"];
@@ -1095,14 +1149,14 @@ export interface paths {
   };
   "/v2/public/configuration-properties": {
     /** Return server configuration properties documentation */
-    get: operations["get_19"];
+    get: operations["get_21"];
   };
   "/v2/public/export-info/formats": {
-    get: operations["get_18"];
+    get: operations["get_20"];
   };
   "/v2/public/initial-data": {
     /** Returns initial data required by the UI to load */
-    get: operations["get_17"];
+    get: operations["get_19"];
   };
   "/v2/public/machine-translation-providers": {
     /** Get machine translation providers */
@@ -1176,7 +1230,7 @@ export interface paths {
     delete: operations["delete"];
   };
   "/v2/user-preferences": {
-    get: operations["get_16"];
+    get: operations["get_18"];
   };
   "/v2/user-preferences/set-language/{languageTag}": {
     put: operations["setLanguage"];
@@ -1422,6 +1476,22 @@ export interface components {
     };
     ApplyBranchMergeRequest: {
       deleteBranch: boolean;
+    };
+    AssignSharedTranslationMemoryRequest: {
+      /**
+       * Format: int32
+       * @description Per-assignment penalty override (0–100). When null, the TM's default penalty applies.
+       */
+      penalty?: number;
+      /**
+       * Format: int32
+       * @description Priority in suggestion results (lower = higher priority). When null, the assignment is placed after every existing one (max + 1) so it stacks at the bottom of the list.
+       */
+      priority?: number;
+      /** @description Whether this project can read from the TM */
+      readAccess: boolean;
+      /** @description Whether this project writes new translations to the TM */
+      writeAccess: boolean;
     };
     AuthInfoModel: {
       isReadOnly: boolean;
@@ -1872,6 +1942,11 @@ export interface components {
         transferOptions?: components["schemas"]["ProjectTransferOptionModel"][];
       };
     };
+    CollectionModelProjectTranslationMemoryAssignmentModel: {
+      _embedded?: {
+        translationMemoryAssignments?: components["schemas"]["ProjectTranslationMemoryAssignmentModel"][];
+      };
+    };
     CollectionModelQaIssueModel: {
       _embedded?: {
         qaIssues?: components["schemas"]["QaIssueModel"][];
@@ -1905,6 +1980,11 @@ export interface components {
     CollectionModelSimpleUserAccountModel: {
       _embedded?: {
         users?: components["schemas"]["SimpleUserAccountModel"][];
+      };
+    };
+    CollectionModelTmAssignedProjectModel: {
+      _embedded?: {
+        assignedProjects?: components["schemas"]["TmAssignedProjectModel"][];
       };
     };
     CollectionModelUsedNamespaceModel: {
@@ -2491,6 +2571,32 @@ export interface components {
       force: boolean;
       tokenUri: string;
     };
+    CreateSharedTranslationMemoryRequest: {
+      /**
+       * @deprecated
+       * @description IDs of projects to assign the TM to (with default read+write access)
+       */
+      assignedProjectIds?: number[];
+      /** @description Project assignments with access settings. Takes precedence over assignedProjectIds. */
+      assignedProjects?: components["schemas"]["ProjectAssignmentDto"][];
+      /**
+       * Format: int32
+       * @description Default penalty (0–100) subtracted from match scores for every assignment that does not define its own override. Defaults to 0.
+       */
+      defaultPenalty?: number;
+      /**
+       * @description Translation memory name
+       * @example Marketing TM
+       */
+      name: string;
+      /**
+       * @description Source language tag according to BCP 47 definition
+       * @example en
+       */
+      sourceLanguageTag: string;
+      /** @description When true, only translations whose state is REVIEWED are written to this TM. Translations that drop back to TRANSLATED or UNTRANSLATED also remove the entry. TMX import and direct TM-browser edits bypass this filter. Defaults to false. */
+      writeOnlyReviewed?: boolean;
+    };
     CreateTaskRequest: {
       assignees: number[];
       /** @description Branch name. If empty or null, default branch is used. */
@@ -2512,6 +2618,23 @@ export interface components {
       name?: string;
       /** @enum {string} */
       type: "TRANSLATE" | "REVIEW";
+    };
+    CreateTranslationMemoryEntryRequest: {
+      /**
+       * @description Source text (in the TM's source language)
+       * @example Hello world
+       */
+      sourceText: string;
+      /**
+       * @description Target language tag according to BCP 47 definition
+       * @example de
+       */
+      targetLanguageTag: string;
+      /**
+       * @description Target translation text
+       * @example Hallo Welt
+       */
+      targetText: string;
     };
     CreateTranslationSuggestionRequest: {
       translation: string;
@@ -2559,6 +2682,9 @@ export interface components {
     };
     DeleteMultipleGlossaryTermsRequest: {
       termIds: number[];
+    };
+    DeleteMultipleTranslationMemoryEntriesRequest: {
+      entryIds: number[];
     };
     DocItem: {
       description?: string;
@@ -2644,6 +2770,7 @@ export interface components {
         | "TRANSLATION_LABELS"
         | "BRANCHING"
         | "QA_CHECKS"
+        | "TRANSLATION_MEMORY"
       )[];
       isPayAsYouGo: boolean;
       /** Format: date-time */
@@ -2964,6 +3091,18 @@ export interface components {
         | "glossary_term_not_found"
         | "glossary_term_translation_not_found"
         | "glossary_non_translatable_term_cannot_be_translated"
+        | "translation_memory_not_found"
+        | "translation_memory_project_assignment_not_found"
+        | "cannot_unassign_project_from_own_translation_memory"
+        | "cannot_modify_project_translation_memory"
+        | "translation_memory_already_assigned_to_project"
+        | "translation_memory_base_language_mismatch"
+        | "cannot_change_tm_base_language_while_assigned"
+        | "cannot_change_project_base_language_tm_conflict"
+        | "project_translation_memory_not_found"
+        | "translation_memory_entry_not_found"
+        | "translation_memory_entry_read_only"
+        | "translation_memory_import_empty"
         | "llm_content_filter"
         | "llm_provider_empty_response"
         | "label_not_found"
@@ -4568,6 +4707,12 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
+    PagedModelSimpleTranslationMemoryModel: {
+      _embedded?: {
+        translationMemories?: components["schemas"]["SimpleTranslationMemoryModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
     PagedModelSimpleUserAccountModel: {
       _embedded?: {
         users?: components["schemas"]["SimpleUserAccountModel"][];
@@ -4604,9 +4749,21 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
+    PagedModelTranslationMemoryEntryGroupModel: {
+      _embedded?: {
+        translationMemoryEntryGroups?: components["schemas"]["TranslationMemoryEntryGroupModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
     PagedModelTranslationMemoryItemModel: {
       _embedded?: {
         translationMemoryItems?: components["schemas"]["TranslationMemoryItemModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelTranslationMemoryWithStatsModel: {
+      _embedded?: {
+        translationMemories?: components["schemas"]["TranslationMemoryWithStatsModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
     };
@@ -4952,6 +5109,7 @@ export interface components {
         | "TRANSLATION_LABELS"
         | "BRANCHING"
         | "QA_CHECKS"
+        | "TRANSLATION_MEMORY"
       )[];
       /** Format: int64 */
       id: number;
@@ -5077,6 +5235,16 @@ export interface components {
         | "GLOSSARY_TERM_UPDATE"
         | "GLOSSARY_TERM_DELETE"
         | "GLOSSARY_TERM_TRANSLATION_UPDATE"
+        | "TRANSLATION_MEMORY_CREATE"
+        | "TRANSLATION_MEMORY_UPDATE"
+        | "TRANSLATION_MEMORY_DELETE"
+        | "TRANSLATION_MEMORY_ASSIGN_PROJECT"
+        | "TRANSLATION_MEMORY_UNASSIGN_PROJECT"
+        | "TRANSLATION_MEMORY_UPDATE_PROJECT_CONFIG"
+        | "TRANSLATION_MEMORY_ENTRY_CREATE"
+        | "TRANSLATION_MEMORY_ENTRY_UPDATE"
+        | "TRANSLATION_MEMORY_ENTRY_DELETE"
+        | "TRANSLATION_MEMORY_IMPORT"
         | "TRANSLATION_LABELS_EDIT"
         | "TRANSLATION_LABEL_ASSIGN"
         | "TRANSLATION_LABEL_CREATE"
@@ -5105,6 +5273,22 @@ export interface components {
        * @example We are Dunder Mifflin, a paper company. We sell paper. This is a project of translations for our paper selling app.
        */
       description?: string;
+    };
+    ProjectAssignmentDto: {
+      /**
+       * Format: int32
+       * @description Per-assignment penalty override (0–100). When null, the TM's default penalty applies.
+       */
+      penalty?: number;
+      /**
+       * Format: int64
+       * @description Project ID
+       */
+      projectId: number;
+      /** @description Whether the project can read from this TM */
+      readAccess: boolean;
+      /** @description Whether the project can write to this TM */
+      writeAccess: boolean;
     };
     ProjectInvitationModel: {
       code?: string;
@@ -5245,6 +5429,23 @@ export interface components {
       name: string;
       slug: string;
     };
+    ProjectTranslationMemoryAssignmentModel: {
+      /** Format: int32 */
+      defaultPenalty: number;
+      /** Format: int32 */
+      penalty?: number;
+      /** Format: int32 */
+      priority: number;
+      readAccess: boolean;
+      sourceLanguageTag: string;
+      /** Format: int64 */
+      translationMemoryId: number;
+      translationMemoryName: string;
+      /** @enum {string} */
+      type: "PROJECT" | "SHARED";
+      writeAccess: boolean;
+      writeOnlyReviewed: boolean;
+    };
     ProjectWithStatsModel: {
       avatar?: components["schemas"]["Avatar"];
       baseLanguage?: components["schemas"]["LanguageModel"];
@@ -5380,6 +5581,7 @@ export interface components {
         | "TRANSLATION_LABELS"
         | "BRANCHING"
         | "QA_CHECKS"
+        | "TRANSLATION_MEMORY"
       )[];
       free: boolean;
       /** Format: int64 */
@@ -5946,6 +6148,7 @@ export interface components {
         | "TRANSLATION_LABELS"
         | "BRANCHING"
         | "QA_CHECKS"
+        | "TRANSLATION_MEMORY"
       )[];
       free: boolean;
       hasYearlyPrice: boolean;
@@ -6169,6 +6372,18 @@ export interface components {
       id: number;
       name: string;
       slug?: string;
+    };
+    SimpleTranslationMemoryModel: {
+      /** Format: int64 */
+      id: number;
+      name: string;
+      /**
+       * @description Source language tag of the translation memory
+       * @example en
+       */
+      sourceLanguageTag: string;
+      /** @enum {string} */
+      type: "PROJECT" | "SHARED";
     };
     SimpleUserAccountModel: {
       avatar?: components["schemas"]["Avatar"];
@@ -6627,6 +6842,18 @@ export interface components {
         | "glossary_term_not_found"
         | "glossary_term_translation_not_found"
         | "glossary_non_translatable_term_cannot_be_translated"
+        | "translation_memory_not_found"
+        | "translation_memory_project_assignment_not_found"
+        | "cannot_unassign_project_from_own_translation_memory"
+        | "cannot_modify_project_translation_memory"
+        | "translation_memory_already_assigned_to_project"
+        | "translation_memory_base_language_mismatch"
+        | "cannot_change_tm_base_language_while_assigned"
+        | "cannot_change_project_base_language_tm_conflict"
+        | "project_translation_memory_not_found"
+        | "translation_memory_entry_not_found"
+        | "translation_memory_entry_read_only"
+        | "translation_memory_import_empty"
         | "llm_content_filter"
         | "llm_provider_empty_response"
         | "label_not_found"
@@ -6811,6 +7038,25 @@ export interface components {
       type: "TRANSLATE" | "REVIEW";
     };
     TextNode: unknown;
+    TmAssignedProjectModel: {
+      /** Format: int32 */
+      penalty?: number;
+      /** Format: int32 */
+      priority: number;
+      /** Format: int64 */
+      projectId: number;
+      projectName: string;
+      readAccess: boolean;
+      writeAccess: boolean;
+    };
+    TmxImportResult: {
+      /** Format: int32 */
+      created: number;
+      /** Format: int32 */
+      skipped: number;
+      /** Format: int32 */
+      updated: number;
+    };
     TranslationAgencySimpleModel: {
       avatar?: components["schemas"]["Avatar"];
       /** Format: int64 */
@@ -6885,12 +7131,122 @@ export interface components {
       /** Format: int64 */
       languageId: number;
     };
+    TranslationMemoryEntryGroupModel: {
+      /** @description Persisted entries in this row, already filtered by the requested languages */
+      entries: components["schemas"]["TranslationMemoryEntryModel"][];
+      /** @description Whether the row is user-editable. True for manual rows (Add-entry dialog or TMX import); false for synced entries and virtual rows. */
+      isManual: boolean;
+      /** @description Names of the keys whose translations currently contribute to this row. Empty for manual rows. */
+      keyNames: string[];
+      /**
+       * @description Source text in the TM's source language
+       * @example Hello world
+       */
+      sourceText: string;
+      /** @description Virtual entries computed from project translations (project TMs only) */
+      virtualEntries: components["schemas"]["VirtualTranslationMemoryEntryModel"][];
+    };
+    TranslationMemoryEntryModel: {
+      /**
+       * Format: int64
+       * @description Creation timestamp
+       */
+      createdAt: number;
+      /** Format: int64 */
+      id: number;
+      /**
+       * @description Whether the entry was created manually (via the add-entry dialog or TMX import) or synced automatically from project translations. Manual entries are editable; synced entries are read-only.
+       * @example false
+       */
+      isManual: boolean;
+      /** @description Names of the keys whose translations contribute to this synced entry. Empty for manual entries and for synced entries whose contributing translations have all been deleted. */
+      keyNames: string[];
+      /**
+       * @description Source text in the TM's source language
+       * @example Hello world
+       */
+      sourceText: string;
+      /**
+       * @description Target language tag (BCP 47)
+       * @example de
+       */
+      targetLanguageTag: string;
+      /**
+       * @description Translated target text
+       * @example Hallo Welt
+       */
+      targetText: string;
+      /**
+       * Format: int64
+       * @description Last update timestamp
+       */
+      updatedAt: number;
+    };
     TranslationMemoryItemModel: {
       baseText: string;
       keyName: string;
       /** Format: float */
+      rawSimilarity: number;
+      /** Format: float */
       similarity: number;
       targetText: string;
+      translationMemoryName?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+    };
+    TranslationMemoryModel: {
+      /**
+       * Format: int32
+       * @description Default penalty (0–100) subtracted from match scores for every assignment that does not define its own override.
+       */
+      defaultPenalty: number;
+      /** Format: int64 */
+      id: number;
+      name: string;
+      organizationOwner: components["schemas"]["SimpleOrganizationModel"];
+      /**
+       * @description Source language tag of the translation memory
+       * @example en
+       */
+      sourceLanguageTag: string;
+      /** @enum {string} */
+      type: "PROJECT" | "SHARED";
+      /** @description When true, only translations in REVIEWED state contribute to this TM. */
+      writeOnlyReviewed: boolean;
+    };
+    TranslationMemoryWithStatsModel: {
+      /** @description Names of the first 3 assigned projects */
+      assignedProjectNames: string[];
+      /**
+       * Format: int64
+       * @description Total number of projects using this translation memory
+       */
+      assignedProjectsCount: number;
+      /**
+       * Format: int32
+       * @description Default penalty (0–100) subtracted from match scores unless an assignment overrides it.
+       */
+      defaultPenalty: number;
+      /**
+       * Format: int64
+       * @description Total number of entries in this translation memory
+       */
+      entryCount: number;
+      /** Format: int64 */
+      id: number;
+      name: string;
+      /**
+       * @description Source language tag
+       * @example en
+       */
+      sourceLanguageTag: string;
+      /**
+       * @description PROJECT or SHARED
+       * @example SHARED
+       */
+      type: string;
+      /** @description When true, only REVIEWED translations contribute to this TM. */
+      writeOnlyReviewed: boolean;
     };
     TranslationModel: {
       /** @description Was translated using Translation Memory or Machine translation service? */
@@ -7097,6 +7453,52 @@ export interface components {
       /** @description New description of the PAT */
       description: string;
     };
+    UpdateProjectTmSettingsRequest: {
+      /** @description When true, only translations whose state is REVIEWED are written to this project's own TM. Translations that drop back to TRANSLATED or UNTRANSLATED also remove the entry. TMX import and direct TM-browser edits bypass this filter. */
+      writeOnlyReviewed: boolean;
+    };
+    UpdateProjectTranslationMemoryAssignmentRequest: {
+      /**
+       * Format: int32
+       * @description Per-assignment penalty override (0–100). When null, the TM's default penalty applies.
+       */
+      penalty?: number;
+      /**
+       * Format: int32
+       * @description Priority in suggestion results (lower = higher priority). Omit to leave the current priority unchanged.
+       */
+      priority?: number;
+      /** @description Whether this project can read from the TM */
+      readAccess: boolean;
+      /** @description Whether this project writes new translations to the TM */
+      writeAccess: boolean;
+    };
+    UpdateSharedTranslationMemoryRequest: {
+      /**
+       * @deprecated
+       * @description IDs of projects to assign the TM to. Replaces existing assignments.
+       */
+      assignedProjectIds?: number[];
+      /** @description Project assignments with access settings. Replaces existing assignments. Takes precedence over assignedProjectIds. */
+      assignedProjects?: components["schemas"]["ProjectAssignmentDto"][];
+      /**
+       * Format: int32
+       * @description Default penalty (0–100) subtracted from match scores for every assignment that does not define its own override. Defaults to 0.
+       */
+      defaultPenalty?: number;
+      /**
+       * @description Translation memory name
+       * @example Marketing TM
+       */
+      name: string;
+      /**
+       * @description Source language tag according to BCP 47 definition
+       * @example en
+       */
+      sourceLanguageTag: string;
+      /** @description When true, only translations whose state is REVIEWED are written to this TM. Translations that drop back to TRANSLATED or UNTRANSLATED also remove the entry. TMX import and direct TM-browser edits bypass this filter. Defaults to false. */
+      writeOnlyReviewed?: boolean;
+    };
     UpdateTaskKeyRequest: {
       done: boolean;
     };
@@ -7122,6 +7524,23 @@ export interface components {
        */
       dueDate?: number;
       name?: string;
+    };
+    UpdateTranslationMemoryEntryRequest: {
+      /**
+       * @description Source text (in the TM's source language)
+       * @example Hello world
+       */
+      sourceText: string;
+      /**
+       * @description Target language tag according to BCP 47 definition
+       * @example de
+       */
+      targetLanguageTag: string;
+      /**
+       * @description Target translation text
+       * @example Hallo Welt
+       */
+      targetText: string;
     };
     UploadedImageModel: {
       /** Format: date-time */
@@ -7234,6 +7653,23 @@ export interface components {
     };
     VariablesResponseDto: {
       data: components["schemas"]["PromptVariableDto"][];
+    };
+    VirtualTranslationMemoryEntryModel: {
+      /**
+       * @description Source text in the TM's source language
+       * @example Hello world
+       */
+      sourceText: string;
+      /**
+       * @description Target language tag (BCP 47)
+       * @example de
+       */
+      targetLanguageTag: string;
+      /**
+       * @description Translated target text
+       * @example Hallo Welt
+       */
+      targetText: string;
     };
     WebhookConfigModel: {
       /** @description Whether the webhook was automatically disabled due to persistent failures. */
@@ -8188,7 +8624,7 @@ export interface operations {
     };
   };
   /** Creates new API key with provided scopes */
-  create_17: {
+  create_19: {
     responses: {
       /** OK */
       200: {
@@ -8337,7 +8773,7 @@ export interface operations {
       };
     };
   };
-  update_11: {
+  update_13: {
     parameters: {
       path: {
         apiKeyId: number;
@@ -8381,7 +8817,7 @@ export interface operations {
       };
     };
   };
-  delete_10: {
+  delete_12: {
     parameters: {
       path: {
         apiKeyId: number;
@@ -8461,7 +8897,7 @@ export interface operations {
     };
   };
   /** Returns specific API key info */
-  get_24: {
+  get_26: {
     parameters: {
       path: {
         keyId: number;
@@ -8923,7 +9359,7 @@ export interface operations {
       };
     };
   };
-  delete_17: {
+  delete_19: {
     parameters: {
       path: {
         ids: number[];
@@ -9310,7 +9746,7 @@ export interface operations {
       };
     };
   };
-  get_15: {
+  get_17: {
     parameters: {
       path: {
         id: number;
@@ -9349,7 +9785,7 @@ export interface operations {
       };
     };
   };
-  update_10: {
+  update_12: {
     parameters: {
       path: {
         id: number;
@@ -9394,7 +9830,7 @@ export interface operations {
     };
   };
   /** Deletes organization and all its data including projects */
-  delete_9: {
+  delete_11: {
     parameters: {
       path: {
         id: number;
@@ -9744,7 +10180,7 @@ export interface operations {
       };
     };
   };
-  getAll_12: {
+  getAll_13: {
     parameters: {
       path: {
         organizationId: number;
@@ -9792,7 +10228,7 @@ export interface operations {
       };
     };
   };
-  create_15: {
+  create_17: {
     parameters: {
       path: {
         organizationId: number;
@@ -9836,7 +10272,7 @@ export interface operations {
       };
     };
   };
-  getAllWithStats: {
+  getAllWithStats_1: {
     parameters: {
       path: {
         organizationId: number;
@@ -9884,7 +10320,7 @@ export interface operations {
       };
     };
   };
-  get_13: {
+  get_15: {
     parameters: {
       path: {
         organizationId: number;
@@ -9924,7 +10360,7 @@ export interface operations {
       };
     };
   };
-  update_8: {
+  update_10: {
     parameters: {
       path: {
         organizationId: number;
@@ -9969,7 +10405,7 @@ export interface operations {
       };
     };
   };
-  delete_7: {
+  delete_9: {
     parameters: {
       path: {
         organizationId: number;
@@ -10005,7 +10441,7 @@ export interface operations {
       };
     };
   };
-  getAssignedProjects: {
+  getAssignedProjects_1: {
     parameters: {
       path: {
         organizationId: number;
@@ -10176,7 +10612,7 @@ export interface operations {
       };
     };
   };
-  getAll_13: {
+  getAll_14: {
     parameters: {
       path: {
         organizationId: number;
@@ -10226,7 +10662,7 @@ export interface operations {
       };
     };
   };
-  create_16: {
+  create_18: {
     parameters: {
       path: {
         organizationId: number;
@@ -10312,7 +10748,7 @@ export interface operations {
       };
     };
   };
-  get_14: {
+  get_16: {
     parameters: {
       path: {
         organizationId: number;
@@ -10353,7 +10789,7 @@ export interface operations {
       };
     };
   };
-  update_9: {
+  update_11: {
     parameters: {
       path: {
         organizationId: number;
@@ -10399,7 +10835,7 @@ export interface operations {
       };
     };
   };
-  delete_8: {
+  delete_10: {
     parameters: {
       path: {
         organizationId: number;
@@ -10436,7 +10872,7 @@ export interface operations {
       };
     };
   };
-  update_12: {
+  update_14: {
     parameters: {
       path: {
         organizationId: number;
@@ -10482,7 +10918,7 @@ export interface operations {
       };
     };
   };
-  get_23: {
+  get_25: {
     parameters: {
       path: {
         organizationId: number;
@@ -10707,7 +11143,7 @@ export interface operations {
       };
     };
   };
-  getAll_11: {
+  getAll_12: {
     parameters: {
       path: {
         organizationId: number;
@@ -11366,6 +11802,741 @@ export interface operations {
       };
     };
   };
+  getAll_11: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        search?: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelSimpleTranslationMemoryModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  create_15: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TranslationMemoryModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateSharedTranslationMemoryRequest"];
+      };
+    };
+  };
+  getAllWithStats: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        search?: string;
+        type?: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelTranslationMemoryWithStatsModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  get_13: {
+    parameters: {
+      path: {
+        organizationId: number;
+        translationMemoryId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TranslationMemoryModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  update_8: {
+    parameters: {
+      path: {
+        organizationId: number;
+        translationMemoryId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TranslationMemoryModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateSharedTranslationMemoryRequest"];
+      };
+    };
+  };
+  delete_7: {
+    parameters: {
+      path: {
+        organizationId: number;
+        translationMemoryId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  getAssignedProjects: {
+    parameters: {
+      path: {
+        organizationId: number;
+        translationMemoryId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelTmAssignedProjectModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  /** One row per distinct source text. The `targetLanguageTag` filter only narrows which entries are returned per group — source rows with no matching translation still appear with an empty `entries` list so the user can add a translation. */
+  list_3: {
+    parameters: {
+      path: {
+        organizationId: number;
+        translationMemoryId: number;
+      };
+      query: {
+        search?: string;
+        targetLanguageTag?: string;
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelTranslationMemoryEntryGroupModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  create_16: {
+    parameters: {
+      path: {
+        organizationId: number;
+        translationMemoryId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TranslationMemoryEntryModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateTranslationMemoryEntryRequest"];
+      };
+    };
+  };
+  /** For every entry ID in the payload, deletes the entire group that shares the same source text (and key). The request is deduplicated to distinct groups so passing multiple entries from the same row is a no-op past the first one. */
+  deleteMultipleGroups: {
+    parameters: {
+      path: {
+        organizationId: number;
+        translationMemoryId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DeleteMultipleTranslationMemoryEntriesRequest"];
+      };
+    };
+  };
+  get_14: {
+    parameters: {
+      path: {
+        organizationId: number;
+        translationMemoryId: number;
+        entryId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TranslationMemoryEntryModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  update_9: {
+    parameters: {
+      path: {
+        organizationId: number;
+        translationMemoryId: number;
+        entryId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TranslationMemoryEntryModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateTranslationMemoryEntryRequest"];
+      };
+    };
+  };
+  delete_8: {
+    parameters: {
+      path: {
+        organizationId: number;
+        translationMemoryId: number;
+        entryId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  /** Deletes every entry that shares the same source text (and key) as the given entry — i.e. the entire translation-unit group visible as one row in the UI. */
+  deleteGroup: {
+    parameters: {
+      path: {
+        organizationId: number;
+        translationMemoryId: number;
+        entryId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  exportTmx: {
+    parameters: {
+      path: {
+        organizationId: number;
+        translationMemoryId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  importTmx: {
+    parameters: {
+      path: {
+        organizationId: number;
+        translationMemoryId: number;
+      };
+      query: {
+        overrideExisting?: boolean;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TmxImportResult"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          /** Format: binary */
+          file: string;
+        };
+      };
+    };
+  };
+  /** Sets `writeOnlyReviewed` on the given TM. Unlike the main update endpoint, this accepts PROJECT-type TMs too, so org maintainers can edit this single setting from the org-level TM list without switching into project settings. */
+  setWriteOnlyReviewed: {
+    parameters: {
+      path: {
+        organizationId: number;
+        translationMemoryId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateProjectTmSettingsRequest"];
+      };
+    };
+  };
   getUsage: {
     parameters: {
       path: {
@@ -11484,7 +12655,7 @@ export interface operations {
       };
     };
   };
-  get_22: {
+  get_24: {
     parameters: {
       path: {
         slug: string;
@@ -12762,7 +13933,7 @@ export interface operations {
       };
     };
   };
-  list_3: {
+  list_4: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -12809,7 +13980,7 @@ export interface operations {
       };
     };
   };
-  get_20: {
+  get_22: {
     parameters: {
       path: {
         id: number;
@@ -13574,7 +14745,7 @@ export interface operations {
       };
     };
   };
-  delete_13: {
+  delete_15: {
     parameters: {
       path: {
         branchId: number;
@@ -15556,7 +16727,7 @@ export interface operations {
     };
   };
   /** Delete one or multiple keys by their IDs in request body. Useful for larger requests esxceeding allowed URL length. */
-  delete_11: {
+  delete_13: {
     parameters: {
       path: {
         projectId: number;
@@ -15984,7 +17155,7 @@ export interface operations {
       };
     };
   };
-  list_5: {
+  list_8: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -16394,7 +17565,7 @@ export interface operations {
       };
     };
   };
-  delete_15: {
+  delete_17: {
     parameters: {
       path: {
         ids: number[];
@@ -19997,7 +21168,7 @@ export interface operations {
       };
     };
   };
-  getAll_14: {
+  getAll_15: {
     parameters: {
       query: {
         search?: string;
@@ -20877,6 +22048,216 @@ export interface operations {
       path: {
         projectId: number;
         organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  list_6: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelProjectTranslationMemoryAssignmentModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  /** Sets TM-level flags on the project's own PROJECT-type TM. The shared-TM update endpoint rejects PROJECT TMs; this narrow endpoint exists so project admins can toggle the `writeOnlyReviewed` flag without org-level privileges. */
+  updateProjectTmSettings: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateProjectTmSettingsRequest"];
+      };
+    };
+  };
+  updateAssignment: {
+    parameters: {
+      path: {
+        translationMemoryId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ProjectTranslationMemoryAssignmentModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateProjectTranslationMemoryAssignmentRequest"];
+      };
+    };
+  };
+  assign: {
+    parameters: {
+      path: {
+        translationMemoryId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ProjectTranslationMemoryAssignmentModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AssignSharedTranslationMemoryRequest"];
+      };
+    };
+  };
+  /** Removes the assignment between the project and the shared translation memory. When `keepData=true`, entries from the shared TM are first snapshotted into the project's own TM so the project retains the data after the disconnect. When `false` (default), the assignment is simply removed; the shared TM and its entries remain intact for other projects. */
+  unassign: {
+    parameters: {
+      path: {
+        translationMemoryId: number;
+        projectId: number;
+      };
+      query: {
+        keepData?: boolean;
       };
     };
     responses: {
@@ -22741,7 +24122,7 @@ export interface operations {
     };
   };
   /** Return server configuration properties documentation */
-  get_19: {
+  get_21: {
     responses: {
       /** OK */
       200: {
@@ -22775,7 +24156,7 @@ export interface operations {
       };
     };
   };
-  get_18: {
+  get_20: {
     responses: {
       /** OK */
       200: {
@@ -22810,7 +24191,7 @@ export interface operations {
     };
   };
   /** Returns initial data required by the UI to load */
-  get_17: {
+  get_19: {
     responses: {
       /** OK */
       200: {
@@ -23639,7 +25020,7 @@ export interface operations {
       };
     };
   };
-  get_16: {
+  get_18: {
     responses: {
       /** OK */
       200: {

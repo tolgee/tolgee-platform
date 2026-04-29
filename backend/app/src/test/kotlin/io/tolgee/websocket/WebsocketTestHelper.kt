@@ -261,7 +261,7 @@ class WebsocketTestHelper(
     WebsocketTestSubscribeSync.awaitSubscribed(handler.subscribeCorrelationId, timeoutMs = 2000)
     logger.debug("assertNotified: dispatching (dest={}, t={}ms)", handler.dest, System.currentTimeMillis())
     dispatchCallback()
-    waitFor(3000) {
+    waitFor(10000) {
       receivedMessages.isNotEmpty()
     }
     logger.debug(

@@ -7,7 +7,7 @@ import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { useGlossary } from 'tg.ee.module/glossary/hooks/useGlossary';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
 import { GlossarySwitch } from 'tg.ee.module/glossary/components/glossarySwitch';
-import { GlossaryProjectsInfo } from 'tg.ee.module/glossary/components/GlossaryProjectsInfo';
+import { ProjectsUsedInfo } from 'tg.component/ProjectsUsedInfo';
 
 export const GlossaryView = () => {
   const [search, setSearch] = useUrlSearchState('search', {
@@ -24,7 +24,11 @@ export const GlossaryView = () => {
       windowTitle={glossary.name || t('organization_glossary_title')}
       title={glossary.name || t('organization_glossary_title')}
       titleAdornment={
-        <GlossaryProjectsInfo projects={glossary.assignedProjects} />
+        <ProjectsUsedInfo
+          projects={glossary.assignedProjects}
+          label={t('glossary_projects_used_in_label')}
+          data-cy="glossary-projects-info"
+        />
       }
       link={LINKS.ORGANIZATION_GLOSSARY}
       navigation={[

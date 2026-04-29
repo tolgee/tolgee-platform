@@ -41,6 +41,7 @@ import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
+import io.tolgee.service.translationMemory.TranslationMemoryManagementService
 import io.tolgee.util.Logging
 import io.tolgee.util.SlugGenerator
 import jakarta.persistence.EntityManager
@@ -112,6 +113,10 @@ class ProjectService(
   @set:Lazy
   lateinit var aiPlaygroundResultService: AiPlaygroundResultService
 
+  @set:Autowired
+  @set:Lazy
+  lateinit var translationMemoryManagementService: TranslationMemoryManagementService
+
   @Transactional(readOnly = true)
   @Cacheable(cacheNames = [Caches.PROJECTS], key = "#id")
   fun findDto(id: Long): ProjectDto? {
@@ -169,6 +174,8 @@ class ProjectService(
         .findById(id)
         .orElseThrow { NotFoundException() }!!
     val wasBranchingEnabled = project.useBranching
+    val oldBaseLanguageId = project.baseLanguage?.id
+    val oldName = project.name
 
     if (!dto.useNamespaces && project.namespaces.isNotEmpty()) {
       throw ValidationException(Message.NAMESPACES_CANNOT_BE_DISABLED_WHEN_NAMESPACE_EXISTS)
@@ -199,6 +206,30 @@ class ProjectService(
       val language =
         project.languages.find { it.id == dto.baseLanguageId }
           ?: throw BadRequestException(Message.LANGUAGE_NOT_FROM_PROJECT)
+      if (language.id != oldBaseLanguageId) {
+        // Shared TMs declare a source language; changing the project base to a different
+        // language would leave them misaligned. Force the user to manually unassign the
+        // offending TMs first (the frontend offers a confirm-and-unassign flow).
+        //
+        // Params: one HashMap per conflicting TM with `id` and `name`, so the frontend can
+        // both list and unassign without a separate lookup.
+        val conflicts: List<java.io.Serializable> =
+          translationMemoryManagementService
+            .getSharedTmAssignmentsForProject(project.id)
+            .filter { it.translationMemory.sourceLanguageTag != language.tag }
+            .map {
+              hashMapOf<String, Any>(
+                "id" to it.translationMemory.id,
+                "name" to it.translationMemory.name,
+              )
+            }
+        if (conflicts.isNotEmpty()) {
+          throw BadRequestException(
+            Message.CANNOT_CHANGE_PROJECT_BASE_LANGUAGE_TM_CONFLICT,
+            conflicts,
+          )
+        }
+      }
       project.baseLanguage = language
       languageService.evictCacheForProject(project.id)
     }
@@ -218,6 +249,16 @@ class ProjectService(
 
     if (!wasBranchingEnabled && dto.useBranching) {
       branchService.enableBranchingOnProject(project.id)
+    }
+
+    val newBaseLanguageId = project.baseLanguage?.id
+    if (newBaseLanguageId != null && newBaseLanguageId != oldBaseLanguageId) {
+      // Project TM content is virtual (computed from translations at read time), so no rebuild
+      // is needed — only the TM's sourceLanguageTag needs to track the project's base language.
+      translationMemoryManagementService.updateProjectTmSourceLanguage(project.id)
+    }
+    if (project.name != oldName) {
+      translationMemoryManagementService.renameProjectTm(project.id, project.name)
     }
     return project
   }
@@ -247,6 +288,16 @@ class ProjectService(
   @Transactional(readOnly = true)
   fun findAllInOrganization(organizationId: Long): List<Project> {
     return this.projectRepository.findAllByOrganizationOwnerId(organizationId)
+  }
+
+  @Transactional(readOnly = true)
+  fun findAllActiveInOrganization(organizationId: Long): List<Project> {
+    return projectRepository.findAllByOrganizationOwnerIdAndDeletedAtIsNull(organizationId)
+  }
+
+  @Transactional(readOnly = true)
+  fun findAllActive(): List<Project> {
+    return projectRepository.findAllByDeletedAtIsNull()
   }
 
   @Transactional(readOnly = true)

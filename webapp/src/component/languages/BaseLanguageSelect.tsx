@@ -1,5 +1,5 @@
 import { components } from 'tg.service/apiSchema.generated';
-import React, { ComponentProps, useState } from 'react';
+import React, { ComponentProps, useEffect, useRef, useState } from 'react';
 import Box from '@mui/material/Box';
 import { useField, useFormikContext } from 'formik';
 import { useTranslate } from '@tolgee/react';
@@ -22,12 +22,16 @@ type Props = {
   name: string;
   assignedProjectsName?: string;
   disabled?: boolean;
-} & Omit<ComponentProps<typeof Box>, 'children'>;
+  label?: React.ReactNode;
+  minHeight?: boolean;
+} & Omit<ComponentProps<typeof Box>, 'children' | 'minHeight'>;
 
-export const GlossaryBaseLanguageSelect: React.VFC<Props> = ({
+export const BaseLanguageSelect: React.VFC<Props> = ({
   name,
   assignedProjectsName,
   disabled,
+  label,
+  minHeight,
   ...boxProps
 }) => {
   const { preferredOrganization } = usePreferredOrganization();
@@ -84,6 +88,16 @@ export const GlossaryBaseLanguageSelect: React.VFC<Props> = ({
     (p) => p._embedded?.languages ?? []
   );
 
+  // Auto-select the first language when no value is set and data is loaded.
+  // The ref prevents re-triggering after setSelected updates the Formik field.
+  const hasAutoSelected = useRef(false);
+  useEffect(() => {
+    if (!value && data && data.length > 0 && !hasAutoSelected.current) {
+      hasAutoSelected.current = true;
+      setSelected(data[0]);
+    }
+  }, [value, data]);
+
   const handleFetchMore = () => {
     if (dataLoadable.hasNextPage && !dataLoadable.isFetching) {
       dataLoadable.fetchNextPage();
@@ -106,7 +120,7 @@ export const GlossaryBaseLanguageSelect: React.VFC<Props> = ({
     return (
       <SelectItem
         {...props}
-        data-cy="glossary-base-language-select-item"
+        data-cy="base-language-select-item"
         selected={selected}
         label={<LanguageValue language={item} />}
         onClick={() => setSelected(item)}
@@ -119,7 +133,7 @@ export const GlossaryBaseLanguageSelect: React.VFC<Props> = ({
   }
 
   return (
-    <Box data-cy="glossary-base-language-select" {...boxProps}>
+    <Box data-cy="base-language-select" {...boxProps}>
       <InfiniteSearchSelect
         items={data}
         selected={value}
@@ -131,10 +145,11 @@ export const GlossaryBaseLanguageSelect: React.VFC<Props> = ({
         onFetchMore={handleFetchMore}
         renderItem={renderItem}
         labelItem={labelItem}
-        label={t('create_glossary_field_base_language')}
+        label={label ?? t('field_base_language', 'Base language')}
         error={meta.touched && error}
         searchPlaceholder={t('language_search_placeholder')}
         disabled={disabled}
+        minHeight={minHeight}
       />
     </Box>
   );

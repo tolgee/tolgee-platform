@@ -38,6 +38,7 @@ import io.tolgee.service.project.ProjectService
 import io.tolgee.service.qa.TranslationQaIssueService
 import io.tolgee.service.queryBuilders.translationViewBuilder.TranslationViewDataProvider
 import io.tolgee.service.translation.SetTranslationTextUtil.Companion.Options
+import io.tolgee.service.translationMemory.TranslationMemoryEntryService
 import io.tolgee.util.nullIfEmpty
 import jakarta.persistence.EntityManager
 import jakarta.persistence.FlushModeType
@@ -79,6 +80,10 @@ class TranslationService(
   @set:Autowired
   @set:Lazy
   lateinit var projectService: ProjectService
+
+  @set:Autowired
+  @set:Lazy
+  lateinit var translationMemoryEntryService: TranslationMemoryEntryService
 
   @Transactional(readOnly = true)
   @Suppress("UNCHECKED_CAST")
@@ -272,7 +277,9 @@ class TranslationService(
     if (translationTextLength > tolgeeProperties.maxTranslationTextLength) {
       throw BadRequestException(Message.TRANSLATION_TEXT_TOO_LONG, listOf(tolgeeProperties.maxTranslationTextLength))
     }
-    return translationRepository.save(translation)
+    val saved = translationRepository.save(translation)
+    translationMemoryEntryService.onTranslationSaved(saved)
+    return saved
   }
 
   @Transactional(readOnly = true)
