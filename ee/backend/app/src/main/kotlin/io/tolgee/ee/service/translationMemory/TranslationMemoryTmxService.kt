@@ -6,6 +6,7 @@ import io.tolgee.ee.service.translationMemory.tmx.TmxParsedEntry
 import io.tolgee.ee.service.translationMemory.tmx.TmxParser
 import io.tolgee.model.translationMemory.TranslationMemory
 import io.tolgee.model.translationMemory.TranslationMemoryEntry
+import io.tolgee.model.translationMemory.TranslationMemoryType
 import io.tolgee.repository.translationMemory.TranslationMemoryEntryRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -14,10 +15,23 @@ import java.io.InputStream
 @Service
 class TranslationMemoryTmxService(
   private val translationMemoryEntryRepository: TranslationMemoryEntryRepository,
+  private val translationMemoryEntryManagementService: TranslationMemoryEntryManagementService,
 ) {
   fun exportTmx(tm: TranslationMemory): ByteArray {
-    val entries = translationMemoryEntryRepository.findByTranslationMemoryId(tm.id)
+    val entries = loadEntriesForExport(tm)
     return TmxExporter(tm.sourceLanguageTag, entries).export()
+  }
+
+  /**
+   * SHARED TMs ship their stored rows. PROJECT TMs hold no stored rows by design — their content
+   * is computed virtually from the assigned project's translations, so the export hydrates that
+   * virtual view to match what the content browser shows.
+   */
+  private fun loadEntriesForExport(tm: TranslationMemory): List<TranslationMemoryEntry> {
+    if (tm.type == TranslationMemoryType.PROJECT) {
+      return translationMemoryEntryManagementService.findEntriesForProjectTmExport(tm)
+    }
+    return translationMemoryEntryRepository.findByTranslationMemoryId(tm.id)
   }
 
   @Transactional

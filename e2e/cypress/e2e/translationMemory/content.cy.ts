@@ -112,6 +112,26 @@ describe('Translation Memory content browser', () => {
     tmView.getEntryRowContaining('Guten Morgen').should('be.visible');
   });
 
+  it('shows manual entries alongside virtual rows on a project TM', () => {
+    // PROJECT TMs surface the assigned project's translations as virtual rows. A manual entry
+    // added on top must show as an extra row in the same browser, not hide or replace the
+    // virtual content.
+    listView.findAndVisitTm(data, 'test_username', 'Project With TM');
+
+    tmView.getEntryRowContaining('Existing source').should('be.visible');
+    tmView.getEntryRowContaining('Reviewed source').should('be.visible');
+
+    tmView.openCreateEntryDialog();
+    tmView.setSourceText('Manual e2e phrase');
+    tmView.setTargetText('Manuelle E2E-Phrase');
+    tmView.submitCreateEntry();
+
+    tmView.getEntryRowContaining('Manual e2e phrase').should('be.visible');
+    tmView.getEntryRowContaining('Manuelle E2E-Phrase').should('be.visible');
+    tmView.getEntryRowContaining('Existing source').should('be.visible');
+    tmView.getEntryRowContaining('Reviewed source').should('be.visible');
+  });
+
   describe('Import / Export', () => {
     it('shows import and export buttons', () => {
       listView.findAndVisitTm(data, 'test_username', 'Shared Marketing TM');

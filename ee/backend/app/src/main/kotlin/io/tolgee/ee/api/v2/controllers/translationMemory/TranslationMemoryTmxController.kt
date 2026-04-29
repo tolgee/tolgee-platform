@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
+import java.nio.charset.StandardCharsets
 
 @RestController
 @RequestMapping("/v2/organizations/{organizationId:[0-9]+}/translation-memories/{translationMemoryId:[0-9]+}")
@@ -76,7 +77,7 @@ class TranslationMemoryTmxController(
     return ResponseEntity
       .ok()
       .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"$filename\"")
-      .contentType(MediaType.APPLICATION_XML)
+      .contentType(MediaType("application", "xml", StandardCharsets.UTF_8))
       .body(bytes)
   }
 }

@@ -3,6 +3,7 @@ package io.tolgee.ee.api.v2.controllers.translationMemory
 import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.TranslationMemoryTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
+import io.tolgee.ee.data.translationMemory.CreateTranslationMemoryEntryRequest
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
@@ -85,6 +86,50 @@ class TranslationMemoryTmxControllerTest : AuthorizedControllerTest() {
     assertThat(result.response.contentType).contains("application/xml")
     assertThat(result.response.getHeader("Content-Disposition")).contains("attachment")
     assertThat(result.response.getHeader("Content-Disposition")).contains(".tmx")
+  }
+
+  @Test
+  fun `exports project TM virtual content from project translations`() {
+    val projectTmId = testData.projectTm.id
+    val result = performAuthGet(exportUrl(projectTmId)).andIsOk.andReturn()
+    val xml = result.response.contentAsString
+
+    assertThat(xml).contains("<tu")
+    // Virtual entries are derived from projectWithTm's translations
+    assertThat(xml).contains("Existing source")
+    assertThat(xml).contains("Bestehende Übersetzung")
+    assertThat(xml).contains("Reviewed source")
+    assertThat(xml).contains("Überprüfte Übersetzung")
+  }
+
+  @Test
+  fun `project TM export includes manual entries alongside virtual content`() {
+    // Mirrors the listing: a PROJECT TM's TMX must include any manually-added entries on top of
+    // the project's virtual translations. Without this, exporting a PROJECT TM into another TM
+    // would silently lose the user-curated rows.
+    val projectTmId = testData.projectTm.id
+    performAuthPost(
+      "/v2/organizations/$orgId/translation-memories/$projectTmId/entries",
+      CreateTranslationMemoryEntryRequest().apply {
+        sourceText = "Manual phrase"
+        targetText = "Frase manual"
+        targetLanguageTag = "es"
+      },
+    ).andIsOk
+
+    val xml =
+      performAuthGet(exportUrl(projectTmId))
+        .andIsOk
+        .andReturn()
+        .response.contentAsString
+
+    // Virtual rows still present
+    assertThat(xml).contains("Existing source")
+    assertThat(xml).contains("Reviewed source")
+    // Manual entry surfaces too
+    assertThat(xml).contains("Manual phrase")
+    assertThat(xml).contains("Frase manual")
+    assertThat(xml).contains("xml:lang=\"es\"")
   }
 
   @Test
