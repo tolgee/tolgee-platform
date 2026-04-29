@@ -6,16 +6,10 @@ import io.tolgee.model.Language_
 import io.tolgee.model.Project_
 import io.tolgee.model.Screenshot
 import io.tolgee.model.Screenshot_
-import io.tolgee.model.TranslationSuggestion
-import io.tolgee.model.TranslationSuggestion_
 import io.tolgee.model.UserAccount
 import io.tolgee.model.UserAccount_
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.Branch_
-import io.tolgee.model.enums.TranslationCommentState
-import io.tolgee.model.enums.TranslationState
-import io.tolgee.model.enums.TranslationSuggestionState
-import io.tolgee.model.enums.qa.QaIssueState
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyMeta_
 import io.tolgee.model.key.Key_
@@ -23,38 +17,61 @@ import io.tolgee.model.key.Namespace_
 import io.tolgee.model.key.screenshotReference.KeyScreenshotReference_
 import io.tolgee.model.keyBigMeta.KeysDistance
 import io.tolgee.model.keyBigMeta.KeysDistance_
-import io.tolgee.model.qa.TranslationQaIssue
-import io.tolgee.model.qa.TranslationQaIssue_
 import io.tolgee.model.translation.Translation
-import io.tolgee.model.translation.TranslationComment
-import io.tolgee.model.translation.TranslationComment_
 import io.tolgee.model.translation.Translation_
 import io.tolgee.model.views.KeyWithTranslationsView
-import io.tolgee.model.views.TranslationView
-import io.tolgee.security.authentication.AuthenticationFacade
 import jakarta.persistence.EntityManager
 import jakarta.persistence.criteria.CriteriaBuilder
 import jakarta.persistence.criteria.CriteriaQuery
 import jakarta.persistence.criteria.Expression
 import jakarta.persistence.criteria.Join
 import jakarta.persistence.criteria.JoinType
-import jakarta.persistence.criteria.ListJoin
 import jakarta.persistence.criteria.Path
 import jakarta.persistence.criteria.Predicate
 import jakarta.persistence.criteria.Root
 import jakarta.persistence.criteria.Subquery
 import java.util.Date
 
+/**
+ * Foundation for the Translation View query.
+ *
+ * This query returns **only key-level data**. It does not join the translations table at all —
+ * instead:
+ *
+ * - Translation-level filters are implemented as `EXISTS` subqueries on `Translation` via
+ *   [QueryTranslationFiltering].
+ * - Sorting and cursor pagination by `translations.{tag}.text` use scalar correlated subqueries
+ *   built by [scalarTranslationText].
+ * - Full-text search across translation texts is a single `EXISTS` subquery spanning all selected
+ *   languages (see [QueryGlobalFiltering.filterSearch]).
+ * - The actual translation data is fetched in a **separate query** by
+ *   [TranslationViewDataProvider] using `WHERE key.id IN (...) AND language.id IN (...)` and
+ *   assembled into the returned views in application code.
+ *
+ * The motivation for this structure is performance: a previous design LEFT-JOINed the
+ * `translation` table once per requested language, which grew linearly with language count and
+ * dominated cold-cache query time. With the filters expressed as EXISTS subqueries, the main
+ * query touches a constant number of tables regardless of how many languages are requested.
+ */
 class QueryBase<T>(
   private val cb: CriteriaBuilder,
   private val projectId: Long,
   val query: CriteriaQuery<T>,
-  private val languages: Set<LanguageDto>,
+  val languages: Set<LanguageDto>,
   private val params: TranslationFilters,
   private val entityManager: EntityManager,
   private val qaEnabled: Boolean,
+  val isCountQuery: Boolean = false,
 ) {
   val whereConditions: MutableSet<Predicate> = HashSet()
+
+  /**
+   * Translation-level filter predicates (one per active per-language filter). They are OR-ed
+   * together at query build time in [TranslationsViewQueryBuilder.getWhereConditions]. Filters
+   * across different languages and filter types are thus combined with OR semantics — e.g.
+   * `filterState=en,TRANSLATED` together with `filterHasUnresolvedCommentsInLang=de` returns the
+   * union of keys matching either condition, not the intersection.
+   */
   val translationConditions: MutableSet<Predicate> = HashSet()
   val root: Root<Key> = query.from(Key::class.java)
   val keyNameExpression: Path<String> = root.get(Key_.name)
@@ -66,13 +83,11 @@ class QueryBase<T>(
   val querySelection = QuerySelection()
   val fullTextFields: MutableSet<Expression<String>> = HashSet()
   lateinit var namespaceNameExpression: Path<String>
-  var translationsTextFields: MutableSet<Expression<String>> = HashSet()
   lateinit var screenshotCountExpression: Expression<Long>
   var branchJoin: Join<Key, Branch>? = null
   var deletedByJoin: Join<Key, UserAccount>? = null
-  val groupByExpressions: MutableSet<Expression<*>> = mutableSetOf()
-  private val queryGlobalFiltering = QueryGlobalFiltering(params, this, cb, entityManager)
-  var queryTranslationFiltering = QueryTranslationFiltering(params, this, cb)
+  private val queryGlobalFiltering = QueryGlobalFiltering(params, this, cb, entityManager, isCountQuery)
+  var queryTranslationFiltering = QueryTranslationFiltering(params, this, cb, isCountQuery)
 
   init {
     querySelection[KeyWithTranslationsView::keyId.name] = keyIdExpression
@@ -89,6 +104,7 @@ class QueryBase<T>(
     }
     fullTextFields.add(root.get(Key_.name))
     addLeftJoinedColumns()
+    applyTranslationFilters()
     queryGlobalFiltering.apply()
   }
 
@@ -102,207 +118,60 @@ class QueryBase<T>(
       addDeletedAtSelection()
       addDeletedBySelection()
     }
-    addLanguageSpecificFields()
   }
 
-  private fun addLanguageSpecificFields() {
-    val outdatedFieldMap = mutableMapOf<String, Expression<Boolean>>()
-
-    for (language in languages) {
-      val translation = addTranslationId(language)
-      val translationTextField = addTranslationText(translation, language)
-      this.fullTextFields.add(translationTextField)
-      translationsTextFields.add(translationTextField)
-
-      val translationStateField = addTranslationStateField(translation, language)
-
-      val outdatedField = addTranslationOutdatedField(translation, language)
-      outdatedFieldMap[language.tag] = outdatedField
-
-      val autoTranslatedField = addAutoTranslatedField(translation, language)
-      queryTranslationFiltering.applyStateFilter(
-        language,
-        translationTextField,
-        translationStateField,
-        autoTranslatedField,
-      )
-
-      this.querySelection[language to TranslationView::mtProvider] = translation.get(Translation_.mtProvider)
-      val resolvedCommentsExpression = addComments(translation, language)
-      val unresolvedCommentsExpression = addUnresolvedComments(translation, language)
-      val activeSuggestionsExpression = addActiveSuggestionsCount(language)
-      addTotalSuggestionsCount(language)
-      if (qaEnabled) {
-        val qaIssueCountExpression = addQaIssueCount(translation, language)
-        this.querySelection[language to TranslationView::qaChecksStale] =
-          cb.coalesce(translation.get(Translation_.qaChecksStale), false)
-        queryTranslationFiltering.applyQaFilter(language, qaIssueCountExpression, translation)
-      } else {
-        this.querySelection[language to TranslationView::qaIssueCount] = cb.literal(0L)
-        this.querySelection[language to TranslationView::qaChecksStale] = cb.literal(false)
-      }
-
-      queryTranslationFiltering.applyCommentsFilter(
-        language,
-        resolvedCommentsExpression,
-        unresolvedCommentsExpression,
-      )
-
-      queryTranslationFiltering.applyLabelFilter(
-        language,
-        translation,
-      )
-      queryTranslationFiltering.applySuggestionsFilter(language, activeSuggestionsExpression)
+  /**
+   * Invokes every translation-level filter in [QueryTranslationFiltering]. Each filter method
+   * is called **once** (not per language) and internally collapses its multi-language input
+   * into a single `language_id IN (…)` subquery wherever the semantics allow — see the
+   * "multi-language collapse" note in [QueryTranslationFiltering].
+   *
+   * All resulting predicates are added to [translationConditions] and later OR-ed together in
+   * [TranslationsViewQueryBuilder.getWhereConditions].
+   *
+   * QA-related filters (`filterHasQaIssuesInLang`, `filterQaCheckType`) are only applied when
+   * `qaEnabled` is true; on projects without the QA Checks feature the filter parameters are
+   * silently ignored.
+   */
+  private fun applyTranslationFilters() {
+    queryTranslationFiltering.applyStateFilters()
+    queryTranslationFiltering.applyAutoTranslatedFilter()
+    queryTranslationFiltering.applyUntranslatedInLangFilter()
+    queryTranslationFiltering.applyTranslatedInLangFilter()
+    queryTranslationFiltering.applyHasCommentsFilter()
+    queryTranslationFiltering.applyHasUnresolvedCommentsFilter()
+    queryTranslationFiltering.applyHasSuggestionsFilter()
+    queryTranslationFiltering.applyHasNoSuggestionsFilter()
+    queryTranslationFiltering.applyLabelFilter()
+    if (qaEnabled) {
+      queryTranslationFiltering.applyQaFilters()
     }
-
-    queryTranslationFiltering.applyOutdatedFilter(outdatedFieldMap)
+    queryTranslationFiltering.applyOutdatedFilters()
   }
 
-  private fun addTranslationOutdatedField(
-    translation: ListJoin<Key, Translation>,
-    language: LanguageDto,
-  ): Path<Boolean> {
-    val translationOutdated = translation.get(Translation_.outdated)
-    this.querySelection[language to TranslationView::outdated] = translationOutdated
-    return translationOutdated
-  }
-
-  private fun addAutoTranslatedField(
-    translation: ListJoin<Key, Translation>,
-    language: LanguageDto,
-  ): Path<Boolean> {
-    val autoTranslated = translation.get(Translation_.auto)
-    this.querySelection[language to TranslationView::auto] = autoTranslated
-    return autoTranslated
-  }
-
-  private fun addComments(
-    translation: ListJoin<Key, Translation>,
-    language: LanguageDto,
-  ): Expression<Long> {
-    val subquery = this.query.subquery(Long::class.java)
-    val subqueryRoot = subquery.from(TranslationComment::class.java)
-
-    subquery.select(cb.count(subqueryRoot.get(TranslationComment_.id)))
-    subquery.where(
-      cb.equal(
-        subqueryRoot.get(TranslationComment_.translation).get(Translation_.id),
-        translation.get(Translation_.id),
-      ),
-    )
-    this.querySelection[language to TranslationView::commentCount] = subquery
-    return subquery
-  }
-
-  private fun addActiveSuggestionsCount(language: LanguageDto): Expression<Long> {
-    val subquery = this.query.subquery(Long::class.java)
-    val subqueryRoot = subquery.from(TranslationSuggestion::class.java)
-
-    subquery.select(cb.count(subqueryRoot.get(TranslationSuggestion_.id)))
+  /**
+   * Builds a scalar correlated subquery that yields the `Translation.text` of the given language
+   * for the current key row. Used for:
+   *
+   *  - `ORDER BY (subquery) ...` when sorting by `translations.{tag}.text`
+   *  - `WHERE (subquery) > :cursor` when paginating over a translation-text sort column
+   *
+   * The `(key_id, language_id)` uniqueness constraint on the `translation` table guarantees at
+   * most one row, so no `LIMIT 1` is needed. The subquery returns `NULL` when the key has no
+   * translation in that language; ordering honors this via `NULLS FIRST` (asc) / `NULLS LAST`
+   * (desc) set in [TranslationsViewQueryBuilder.getOrderList].
+   */
+  fun scalarTranslationText(languageId: Long): Expression<String> {
+    val subquery = this.query.subquery(String::class.java)
+    val subRoot = subquery.from(Translation::class.java)
+    subquery.select(subRoot.get(Translation_.text))
     subquery.where(
       cb.and(
-        cb.equal(
-          subqueryRoot.get(TranslationSuggestion_.key).get(Key_.id),
-          this.root.get(Key_.id),
-        ),
-        cb.equal(
-          subqueryRoot.get(TranslationSuggestion_.language).get(Language_.id),
-          cb.literal(language.id),
-        ),
-        cb.equal(
-          subqueryRoot.get(TranslationSuggestion_.state),
-          cb.literal(TranslationSuggestionState.ACTIVE.name),
-        ),
+        cb.equal(subRoot.get(Translation_.key).get(Key_.id), this.root.get(Key_.id)),
+        cb.equal(subRoot.get(Translation_.language).get(Language_.id), cb.literal(languageId)),
       ),
     )
-    this.querySelection[language to TranslationView::activeSuggestionCount] = subquery
-    return subquery
-  }
-
-  private fun addTotalSuggestionsCount(language: LanguageDto): Expression<Long> {
-    val subquery = this.query.subquery(Long::class.java)
-    val subqueryRoot = subquery.from(TranslationSuggestion::class.java)
-
-    subquery.select(cb.count(subqueryRoot.get(TranslationSuggestion_.id)))
-    subquery.where(
-      cb.and(
-        cb.equal(
-          subqueryRoot.get(TranslationSuggestion_.key).get(Key_.id),
-          this.root.get(Key_.id),
-        ),
-        cb.equal(
-          subqueryRoot.get(TranslationSuggestion_.language).get(Language_.id),
-          cb.literal(language.id),
-        ),
-      ),
-    )
-    this.querySelection[language to TranslationView::totalSuggestionCount] = subquery
-    return subquery
-  }
-
-  private fun addQaIssueCount(
-    translation: ListJoin<Key, Translation>,
-    language: LanguageDto,
-  ): Expression<Long> {
-    val subquery = this.query.subquery(Long::class.java)
-    val subqueryRoot = subquery.from(TranslationQaIssue::class.java)
-
-    subquery.select(cb.count(subqueryRoot.get(TranslationQaIssue_.id)))
-    subquery.where(
-      cb.equal(
-        subqueryRoot.get(TranslationQaIssue_.translation).get(Translation_.id),
-        translation.get(Translation_.id),
-      ),
-      cb.equal(subqueryRoot.get(TranslationQaIssue_.state), QaIssueState.OPEN),
-    )
-    this.querySelection[language to TranslationView::qaIssueCount] = subquery
-    return subquery
-  }
-
-  private fun addUnresolvedComments(
-    translation: ListJoin<Key, Translation>,
-    language: LanguageDto,
-  ): Expression<Long> {
-    val subquery = this.query.subquery(Long::class.java)
-    val subqueryRoot = subquery.from(TranslationComment::class.java)
-
-    subquery.select(cb.count(subqueryRoot.get(TranslationComment_.id)))
-    subquery.where(
-      cb.equal(
-        subqueryRoot.get(TranslationComment_.translation).get(Translation_.id),
-        translation.get(Translation_.id),
-      ),
-      cb.equal(subqueryRoot.get(TranslationComment_.state), TranslationCommentState.NEEDS_RESOLUTION),
-    )
-    this.querySelection[language to TranslationView::unresolvedCommentCount] = subquery
-    return subquery
-  }
-
-  private fun addTranslationStateField(
-    translation: ListJoin<Key, Translation>,
-    language: LanguageDto,
-  ): Path<TranslationState> {
-    val translationStateField = translation.get(Translation_.state)
-    this.querySelection[language to TranslationView::state] = translationStateField
-    return translationStateField
-  }
-
-  private fun addTranslationText(
-    translation: ListJoin<Key, Translation>,
-    language: LanguageDto,
-  ): Path<String> {
-    val translationTextField = translation.get(Translation_.text)
-    this.querySelection[language to TranslationView::text] = translationTextField
-    return translationTextField
-  }
-
-  private fun addTranslationId(language: LanguageDto): ListJoin<Key, Translation> {
-    val translation = this.root.join(Key_.translations, JoinType.LEFT)
-    translation.on(cb.equal(translation.get(Translation_.language).get(Language_.id), language.id))
-    val translationId = translation.get(Translation_.id)
-    this.querySelection[language to TranslationView::id] = translationId
-    groupByExpressions.add(translationId)
-    return translation
+    return subquery as Expression<String>
   }
 
   private fun addScreenshotCounts() {
@@ -328,7 +197,6 @@ class QueryBase<T>(
     this.branchJoin = branch
     val branchName = branch.get(Branch_.name)
     this.querySelection[KeyWithTranslationsView::branch.name] = branchName
-    groupByExpressions.add(branchName)
   }
 
   private fun addNamespace() {
@@ -339,8 +207,6 @@ class QueryBase<T>(
     this.querySelection[KeyWithTranslationsView::keyNamespaceId.name] = namespaceId
     this.querySelection[KeyWithTranslationsView::keyNamespace.name] = namespaceName
     this.fullTextFields.add(namespaceName)
-    groupByExpressions.add(namespaceId)
-    groupByExpressions.add(namespaceName)
   }
 
   private fun addDescription() {
@@ -348,7 +214,6 @@ class QueryBase<T>(
     val description = keyMeta.get(KeyMeta_.description)
     this.querySelection[KeyWithTranslationsView::keyDescription.name] = description
     this.fullTextFields.add(description)
-    groupByExpressions.add(description)
   }
 
   private fun addContextCounts() {
@@ -366,7 +231,6 @@ class QueryBase<T>(
 
   private fun addDeletedAtSelection() {
     querySelection[KeyWithTranslationsView::deletedAt.name] = root.get(Key_.deletedAt)
-    groupByExpressions.add(root.get(Key_.deletedAt))
   }
 
   private fun addDeletedBySelection() {
@@ -377,15 +241,6 @@ class QueryBase<T>(
     querySelection[KeyWithTranslationsView::deletedByUserUsername.name] = deletedByJoin.get(UserAccount_.username)
     querySelection[KeyWithTranslationsView::deletedByUserAvatarHash.name] = deletedByJoin.get(UserAccount_.avatarHash)
     querySelection[KeyWithTranslationsView::deletedByUserDeletedAt.name] = deletedByJoin.get(UserAccount_.deletedAt)
-    groupByExpressions.addAll(
-      listOf(
-        deletedByJoin.get(UserAccount_.id),
-        deletedByJoin.get(UserAccount_.name),
-        deletedByJoin.get(UserAccount_.username),
-        deletedByJoin.get(UserAccount_.avatarHash),
-        deletedByJoin.get(UserAccount_.deletedAt),
-      ),
-    )
   }
 
   val Expression<String>.isNotNullOrBlank: Predicate
