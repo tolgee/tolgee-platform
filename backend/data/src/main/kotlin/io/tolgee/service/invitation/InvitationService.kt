@@ -167,6 +167,9 @@ class InvitationService(
     invitation: Invitation,
     userAccount: UserAccount,
   ) {
+    if (invitation.permission?.agency != null) {
+      return
+    }
     val invitationEmail = invitation.email
     if (!invitationEmail.isNullOrBlank() &&
       !invitationEmail.equals(userAccount.username, ignoreCase = true)

@@ -14,13 +14,14 @@ class PublicInvitationModelAssembler(
     PublicInvitationModel::class.java,
   ) {
   override fun toModel(entity: Invitation): PublicInvitationModel {
+    val isAgencyInvitation = entity.permission?.agency != null
     return PublicInvitationModel(
       id = entity.id!!,
       code = entity.code,
       projectName = entity.permission?.project?.name,
       organizationName = entity.organizationRole?.organization?.name,
       createdBy = entity.createdBy?.let { simpleUserAccountModelAssembler.toModel(it) },
-      inviteeEmail = entity.email,
+      inviteeEmail = if (isAgencyInvitation) null else entity.email,
     )
   }
 }
