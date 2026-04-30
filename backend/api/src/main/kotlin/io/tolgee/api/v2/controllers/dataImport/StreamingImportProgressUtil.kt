@@ -18,11 +18,11 @@ class StreamingImportProgressUtil(
   private val streamingResponseBodyProvider: StreamingResponseBodyProvider,
 ) : Logging {
   fun stream(
-    fn: (writeStatus: (status: ImportApplicationStatus) -> Unit) -> Unit,
+    fn: (writeStatus: (item: ImportApplicationStatusItem) -> Unit) -> Unit,
   ): ResponseEntity<StreamingResponseBody> {
     return streamingResponseBodyProvider.streamNdJson { write ->
-      val writeStatus = { status: ImportApplicationStatus ->
-        write(ImportApplicationStatusItem(status))
+      val writeStatus = { item: ImportApplicationStatusItem ->
+        write(item)
       }
       try {
         fn(writeStatus)

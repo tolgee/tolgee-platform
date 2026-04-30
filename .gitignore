@@ -92,3 +92,5 @@ ngrok.local.yml
 # mcp-publisher auth tokens
 /.mcpregistry_github_token
 /.mcpregistry_registry_token
+e2e/scripts/**/*.log
+e2e/scripts/**/*.json

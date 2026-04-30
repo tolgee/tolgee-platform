@@ -406,7 +406,9 @@ class TranslationService(
   }
 
   fun setOutdatedBatch(keyIds: List<Long>) {
-    translationRepository.setOutdated(keyIds)
+    keyIds.chunked(1000).forEach { chunk ->
+      translationRepository.setOutdated(chunk)
+    }
   }
 
   @Transactional(readOnly = true)

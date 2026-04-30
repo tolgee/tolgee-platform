@@ -142,11 +142,36 @@ class ImportDataManager(
     otherLanguages: List<ImportLanguage>,
   ): List<ImportTranslation> {
     val safeNamespace = getSafeNamespace(keyNamespace)
-    return otherLanguages.flatMap {
-      getStoredTranslations(it).filter { translation ->
-        translation.key.name == keyName && translation.key.file.namespace == safeNamespace
+    return otherLanguages.flatMap { language ->
+      val cached = storedTranslationsByKeyName[language]
+      if (cached != null) {
+        cached[safeNamespace to keyName] ?: emptyList()
+      } else {
+        // Not cached — language is still being populated, use direct lookup
+        val languageData = populateStoredTranslations(language)
+        languageData.entries
+          .filter { (key, _) -> key.name == keyName && key.file.namespace == safeNamespace }
+          .flatMap { it.value }
       }
     }
+  }
+
+  /**
+   * Cached map of stored translations grouped by (namespace, keyName) for O(1) lookup.
+   * Only populated for languages whose translations are fully loaded.
+   * Call [buildTranslationsByKeyNameCache] after a language is fully processed.
+   */
+  private val storedTranslationsByKeyName =
+    mutableMapOf<ImportLanguage, Map<Pair<String?, String>, List<ImportTranslation>>>()
+
+  fun buildTranslationsByKeyNameCache(language: ImportLanguage) {
+    val languageData = populateStoredTranslations(language)
+    val translationsByKey = mutableMapOf<Pair<String?, String>, MutableList<ImportTranslation>>()
+    languageData.forEach { (key, translations) ->
+      val mapKey = key.file.namespace to key.name
+      translationsByKey.getOrPut(mapKey) { mutableListOf() }.addAll(translations)
+    }
+    storedTranslationsByKeyName[language] = translationsByKey
   }
 
   fun populateStoredTranslations(language: ImportLanguage): MutableMap<ImportKey, MutableList<ImportTranslation>> {
@@ -275,6 +300,7 @@ class ImportDataManager(
             it != editedLanguage
         }.sortedBy { it.id } + listOf(editedLanguage)
     val affectedFiles = affectedLanguages.map { it.file }
+    storedTranslationsByKeyName.clear()
     resetBetweenFileCollisionIssuesForFiles(affectedFiles.map { it.id }, affectedLanguages.map { it.id })
     val handledLanguages = mutableListOf<ImportLanguage>()
     val issuesToSave = mutableListOf<ImportFileIssue>()

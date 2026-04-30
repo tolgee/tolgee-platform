@@ -191,8 +191,16 @@ class InterceptedEventsManager(
     revisionType: RevisionType,
     state: Array<out Any>? = null,
   ): Long? {
-    if (entity is Branch && !revisionType.isDel()) {
-      return entity.id
+    if (entity is Branch) {
+      // Invalidate cache when a branch is created/modified/deleted
+      try {
+        defaultBranchIdCache.remove(entity.project.id)
+      } catch (_: UninitializedPropertyAccessException) {
+        // project not yet set on new branch
+      }
+      if (!revisionType.isDel()) {
+        return entity.id
+      }
     }
 
     if (entity is Key) {
@@ -217,24 +225,35 @@ class InterceptedEventsManager(
     }
   }
 
+  private val defaultBranchIdCache = ConcurrentHashMap<Long, Long>()
+
   private fun defaultBranchId(projectId: Long?): Long? {
     if (projectId == null) {
       return null
     }
-    return entityManager
-      .createQuery(
-        """
-        select b.id
-        from Branch b
-        where b.project.id = :projectId
-          and b.isDefault = true
-          and b.deletedAt is null
-        """,
-        Long::class.java,
-      ).setParameter("projectId", projectId)
-      .setFlushMode(FlushModeType.COMMIT)
-      .resultList
-      .firstOrNull()
+    val cached =
+      defaultBranchIdCache.computeIfAbsent(projectId) {
+        entityManager
+          .createQuery(
+            """
+            select b.id
+            from Branch b
+            where b.project.id = :projectId
+              and b.isDefault = true
+              and b.deletedAt is null
+            """,
+            Long::class.java,
+          ).setParameter("projectId", projectId)
+          .setFlushMode(FlushModeType.COMMIT)
+          .resultList
+          .firstOrNull() ?: NO_DEFAULT_BRANCH
+      }
+    return if (cached == NO_DEFAULT_BRANCH) null else cached
+  }
+
+  companion object {
+    // Sentinel value for "queried but no default branch found"
+    private const val NO_DEFAULT_BRANCH = -1L
   }
 
   private fun getChangeEntityDescription(
