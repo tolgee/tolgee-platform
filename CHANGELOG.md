@@ -1,3 +1,10 @@
+## [3.183.2](https://github.com/tolgee/tolgee-platform/compare/v3.183.1...v3.183.2) (2026-04-30)
+
+
+### Bug Fixes
+
+* allow agency invitations to be accepted by any user ([#3628](https://github.com/tolgee/tolgee-platform/issues/3628)) ([0677f61](https://github.com/tolgee/tolgee-platform/commit/0677f6167ebe8379022de070d6bfc5078eba406d)), closes [#3605](https://github.com/tolgee/tolgee-platform/issues/3605)
+
 ## [3.183.1](https://github.com/tolgee/tolgee-platform/compare/v3.183.0...v3.183.1) (2026-04-29)
 
 
