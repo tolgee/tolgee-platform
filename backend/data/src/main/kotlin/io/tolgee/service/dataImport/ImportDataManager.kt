@@ -115,6 +115,17 @@ class ImportDataManager(
   }
 
   /**
+   * Releases all import entity references so they can be garbage-collected.
+   * Called by [StoredDataImporter.releaseImportData] before the batch save loop.
+   */
+  fun releaseData() {
+    storedKeys.clear()
+    storedTranslations.clear()
+    translationsToUpdateDueToCollisions.clear()
+    storedTranslationsByKeyName.clear()
+  }
+
+  /**
    * Returns list of translations provided for a language and a key.
    * It returns collection since translations could collide, when a user uploads a file with different values
    * for a key
@@ -168,7 +179,7 @@ class ImportDataManager(
     val languageData = populateStoredTranslations(language)
     val translationsByKey = mutableMapOf<Pair<String?, String>, MutableList<ImportTranslation>>()
     languageData.forEach { (key, translations) ->
-      val mapKey = key.file.namespace to key.name
+      val mapKey = getSafeNamespace(key.file.namespace) to key.name
       translationsByKey.getOrPut(mapKey) { mutableListOf() }.addAll(translations)
     }
     storedTranslationsByKeyName[language] = translationsByKey

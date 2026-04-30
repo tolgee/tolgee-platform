@@ -56,7 +56,7 @@ export const ImportProgressBar = (props: {
 
   const progress =
     props.importedKeys != null && props.totalKeys && props.totalKeys > 0
-      ? Math.round((props.importedKeys / props.totalKeys) * 100)
+      ? Math.min(100, Math.round((props.importedKeys / props.totalKeys) * 100))
       : null;
 
   const hasProgress = progress != null && progress > 0;

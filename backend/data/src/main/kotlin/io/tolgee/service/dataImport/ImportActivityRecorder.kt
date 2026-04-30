@@ -67,6 +67,7 @@ class ImportActivityRecorder(
          (entity_class, entity_id, describing_data, describing_relations,
           modifications, revision_type, activity_revision_id, branch_id)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+         -- defensive: keys don't repeat across batches, but guard against edge cases
          ON CONFLICT (activity_revision_id, entity_class, entity_id) DO NOTHING""",
       keyMetas.toList(),
       1000,
@@ -161,6 +162,7 @@ class ImportActivityRecorder(
       """INSERT INTO activity_describing_entity
          (entity_class, entity_id, data, describing_relations, activity_revision_id)
          VALUES (?, ?, ?, ?, ?)
+         -- same Language appears in every batch, so duplicates are expected
          ON CONFLICT (activity_revision_id, entity_class, entity_id) DO NOTHING""",
       entities,
       1000,
