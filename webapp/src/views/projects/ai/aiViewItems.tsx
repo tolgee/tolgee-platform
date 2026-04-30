@@ -11,17 +11,6 @@ export const useAiViewItems = () => {
 
   const items: AiViewItem[] = [
     {
-      value: 'prompts',
-      tab: {
-        label: t('ai_menu_prompts'),
-        dataCy: 'ai-menu-prompts',
-        condition: () => true,
-      },
-      link: LINKS.PROJECT_AI,
-      requireExactMath: true,
-      component: AiPromptsList,
-    },
-    {
       value: 'context-data',
       tab: {
         label: t('ai_menu_context_data'),
@@ -29,28 +18,36 @@ export const useAiViewItems = () => {
         condition: () => true,
       },
       link: LINKS.PROJECT_CONTEXT_DATA,
-      requireExactMath: true,
+      requireExactMatch: true,
       component: AiContextData,
+    },
+    {
+      value: 'prompts',
+      tab: {
+        label: t('ai_menu_prompts'),
+        dataCy: 'ai-menu-prompts',
+        condition: () => true,
+      },
+      link: LINKS.PROJECT_AI_PROMPTS,
+      requireExactMatch: true,
+      component: AiPromptsList,
     },
   ];
 
-  const value = items
-    .map((item) => {
-      const routerMatch = useRouteMatch(item.link.template);
-      if (!routerMatch) {
-        return [item.value, false];
-      }
+  const match = useRouteMatch(items.map((item) => item.link.template));
 
-      return [item.value, !(item.requireExactMath && !routerMatch.isExact)];
-    })
-    .find((v) => v[1])?.[0] as string | undefined;
-
-  const ActiveComponent = items.find((item) => item.value === value)?.component;
+  const activeItem = match
+    ? items.find(
+        (item) =>
+          item.link.template === match.path &&
+          (!item.requireExactMatch || match.isExact)
+      )
+    : undefined;
 
   return {
     items,
-    value,
-    ActiveComponent,
+    value: activeItem?.value,
+    ActiveComponent: activeItem?.component,
   };
 };
 
@@ -62,7 +59,7 @@ export type AiViewItem = {
     condition: ConditionType;
   };
   link: Link;
-  requireExactMath?: boolean;
+  requireExactMatch?: boolean;
   component: FC;
 };
 

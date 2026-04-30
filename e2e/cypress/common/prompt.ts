@@ -1,6 +1,7 @@
 import { gcy, gcyAdvanced } from './shared';
 import { getTranslationCell } from './translations';
 import { components } from '../../../webapp/src/service/apiSchema.generated';
+import { LINKS, PARAMS } from '../../../webapp/src/constants/links';
 import { buildXpath } from './XpathBuilder';
 import { HOST } from './constants';
 
@@ -42,5 +43,9 @@ export function getPromptEditor() {
 }
 
 export function visitAiSettings(projectId: number) {
-  return cy.visit(`${HOST}/projects/${projectId}/ai`);
+  return cy.visit(
+    `${HOST}${LINKS.PROJECT_AI_PROMPTS.build({
+      [PARAMS.PROJECT_ID]: projectId,
+    })}`
+  );
 }

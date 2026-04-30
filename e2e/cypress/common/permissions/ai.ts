@@ -6,6 +6,9 @@ import { ProjectInfo } from './shared';
 export function testAi({ project }: ProjectInfo) {
   const scopes = project.computedPermission.scopes;
 
+  gcy('ai-menu-prompts').click();
+  waitForGlobalLoading();
+
   gcy('ai-prompt-item-name').contains('Custom prompt').should('be.visible');
 
   if (scopes.includes('prompts.edit')) {
@@ -23,6 +26,8 @@ export function testAi({ project }: ProjectInfo) {
     gcy('ai-prompt-item-name').click();
     gcy('ai-prompt-name').contains('Renamed prompt').should('be.visible');
     gcy('project-menu-item-ai').click();
+    waitForGlobalLoading();
+    gcy('ai-menu-prompts').click();
     waitForGlobalLoading();
 
     // deleting prompt works
