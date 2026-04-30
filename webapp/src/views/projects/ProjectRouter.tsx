@@ -1,5 +1,5 @@
 import React from 'react';
-import { Route, Switch, useRouteMatch } from 'react-router-dom';
+import { Redirect, Route, Switch, useRouteMatch } from 'react-router-dom';
 
 import { PrivateRoute } from 'tg.component/common/PrivateRoute';
 import { LINKS, PARAMS } from 'tg.constants/links';
@@ -81,6 +81,14 @@ export const ProjectRouter = () => {
           <DeveloperView />
         </Route>
 
+        {/* /ai redirects to the default Context Data tab; /ai/* renders AiView. */}
+        <Route exact path={LINKS.PROJECT_AI.template}>
+          <Redirect
+            to={LINKS.PROJECT_CONTEXT_DATA.build({
+              [PARAMS.PROJECT_ID]: projectId,
+            })}
+          />
+        </Route>
         <Route path={LINKS.PROJECT_AI.template}>
           <AiView />
         </Route>
@@ -93,9 +101,7 @@ export const ProjectRouter = () => {
           <TaskRedirect />
         </Route>
 
-        {/*
-          Preview section...
-        */}
+        {/* Internal preview route (websockets debugging). */}
         <Route exact path={LINKS.PROJECT_WEBSOCKETS_PREVIEW.template}>
           <WebsocketPreview />
         </Route>

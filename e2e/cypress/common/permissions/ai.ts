@@ -1,3 +1,4 @@
+import { visitAiSettings } from '../prompt';
 import { waitForGlobalLoading } from '../loading';
 import { confirmStandard, gcy } from '../shared';
 import { getCell } from '../translations';
@@ -5,6 +6,13 @@ import { ProjectInfo } from './shared';
 
 export function testAi({ project }: ProjectInfo) {
   const scopes = project.computedPermission.scopes;
+
+  // The AI menu entry lands on the Context Data tab by default, which loads
+  // language metadata that's not always accessible with prompts.view alone.
+  // Navigate straight to the Prompts tab so the assertions below run from a
+  // page that only requires prompts.view.
+  visitAiSettings(project.id);
+  waitForGlobalLoading();
 
   gcy('ai-prompt-item-name').contains('Custom prompt').should('be.visible');
 
@@ -22,7 +30,7 @@ export function testAi({ project }: ProjectInfo) {
     // can open existing prompt
     gcy('ai-prompt-item-name').click();
     gcy('ai-prompt-name').contains('Renamed prompt').should('be.visible');
-    gcy('project-menu-item-ai').click();
+    visitAiSettings(project.id);
     waitForGlobalLoading();
 
     // deleting prompt works
