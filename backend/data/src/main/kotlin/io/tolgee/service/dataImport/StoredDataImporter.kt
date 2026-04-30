@@ -135,7 +135,12 @@ class StoredDataImporter(
    * loop. Used to build [ActivityModifiedEntity] entries for [OnProjectActivityStoredEvent]
    * so [AutoTranslationEventHandler] can determine which keys need auto-translation.
    */
-  private data class BaseTranslationRecord(val translationId: Long, val keyId: Long, val languageId: Long, val text: String?)
+  private data class BaseTranslationRecord(
+    val translationId: Long,
+    val keyId: Long,
+    val languageId: Long,
+    val text: String?,
+  )
 
   private val baseLanguageTranslations = mutableListOf<BaseTranslationRecord>()
 
@@ -166,6 +171,7 @@ class StoredDataImporter(
 
   fun doImport(): ImportResult {
     val importStart = System.currentTimeMillis()
+
     fun elapsed() = System.currentTimeMillis() - importStart
 
     reportStatus(ImportApplicationStatusItem(ImportApplicationStatus.PREPARING_AND_VALIDATING))
@@ -193,7 +199,13 @@ class StoredDataImporter(
     handlePluralization()
     logger.trace("Import phase: namespaces + screenshots + pluralization completed in {}ms", elapsed())
 
-    reportStatus(ImportApplicationStatusItem(ImportApplicationStatus.STORING_TRANSLATIONS, totalKeys = keysToSave.size, importedKeys = 0))
+    reportStatus(
+      ImportApplicationStatusItem(
+        ImportApplicationStatus.STORING_TRANSLATIONS,
+        totalKeys = keysToSave.size,
+        importedKeys = 0,
+      ),
+    )
 
     // Disable the Hibernate activity interceptor and record activity manually
     // via JDBC to avoid O(n²) overhead from the interceptor accumulating
@@ -331,7 +343,7 @@ class StoredDataImporter(
     // we have to save references to comments and codeReferences before saving key metas
     val comments =
       keyEntitiesToSave.flatMap {
-        it.keyMeta?.comments   ?: emptyList()
+        it.keyMeta?.comments ?: emptyList()
       }
     val codeReferences =
       keyEntitiesToSave.flatMap {
