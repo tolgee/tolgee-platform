@@ -26,13 +26,11 @@ import io.tolgee.model.key.KeyMeta
 import io.tolgee.model.key.Namespace
 import io.tolgee.model.translation.Translation
 import io.tolgee.security.authentication.AuthenticationFacade
-import io.tolgee.service.ImageUploadService
 import io.tolgee.service.dataImport.status.ImportApplicationStatus
 import io.tolgee.service.dataImport.status.ImportApplicationStatusItem
 import io.tolgee.service.key.KeyMetaService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.NamespaceService
-import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.key.TagService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
@@ -79,11 +77,8 @@ class StoredDataImporter(
 
   private val securityService = applicationContext.getBean(SecurityService::class.java)
 
-  private val imageUploadService = applicationContext.getBean(ImageUploadService::class.java)
-
   private val authenticationFacade = applicationContext.getBean(AuthenticationFacade::class.java)
 
-  private val screenshotService = applicationContext.getBean(ScreenshotService::class.java)
   private val jdbcTemplate = applicationContext.getBean(JdbcTemplate::class.java)
   private val objectMapper = applicationContext.getBean(ObjectMapper::class.java)
   private val activityHolder by lazy {
@@ -337,37 +332,6 @@ class StoredDataImporter(
     codeReferences.groupBy { it.keyMeta }.forEach { (keyMeta, c) -> keyMeta.codeReferences = c.toMutableList() }
   }
 
-  private fun saveKeyMetaData(keyEntitiesToSave: Collection<Key>) {
-    // hibernate bug workaround:
-    // saving key metas will cause them to be recreated by hibernate with empty values
-    // we have to save references to comments and codeReferences before saving key metas
-    val comments =
-      keyEntitiesToSave.flatMap {
-        it.keyMeta?.comments ?: emptyList()
-      }
-    val codeReferences =
-      keyEntitiesToSave.flatMap {
-        it.keyMeta?.codeReferences ?: emptyList()
-      }
-    keyMetaService.saveAll(keyMetasToSave)
-    keyMetaService.saveAllComments(comments)
-    keyMetaService.saveAllCodeReferences(codeReferences)
-
-    // set links to comments and code references to point to correct (previous)
-    // instances instead of the new empty ones
-    comments.groupBy { it.keyMeta }.forEach { (keyMeta, comments) ->
-      keyMeta.comments = comments.toMutableList()
-    }
-    codeReferences.groupBy { it.keyMeta }.forEach { (keyMeta, codeReferences) ->
-      keyMeta.codeReferences = codeReferences.toMutableList()
-    }
-  }
-
-  private fun saveTranslations() {
-    checkTranslationPermissions()
-    translationService.saveAll(translationsToSave.map { it.second })
-  }
-
   private fun getUnresolvedConflicts(conflicts: List<ImportTranslation>): List<SimpleImportConflictResult> {
     return conflicts.map {
       val conflict = it.conflict ?: throw IllegalStateException("Unresolved conflict should have conflict data")
@@ -500,12 +464,11 @@ class StoredDataImporter(
       // Record activity via JDBC (no interceptor overhead).
       // Only record newly created keys (not pre-existing ones from the project).
       val newKeyBatch = keyBatch.filter { it in newKeys }
-      val recorder = activityRecorder!!
-      recorder.recordKeys(newKeyBatch)
+      activityRecorder.recordKeys(newKeyBatch)
       val batchKeyIds = keyBatch.mapTo(HashSet()) { it.id }
-      recorder.recordKeyMetas(keyMetasToSave.filter { it.key?.id in batchKeyIds })
-      recorder.recordTranslations(batchTranslations)
-      recorder.recordDescribingEntities(keyBatch, batchTranslations)
+      activityRecorder.recordKeyMetas(keyMetasToSave.filter { it.key?.id in batchKeyIds })
+      activityRecorder.recordTranslations(batchTranslations)
+      activityRecorder.recordDescribingEntities(keyBatch, batchTranslations)
 
       batchIndex++
       val importedKeys = (batchIndex * FLUSH_BATCH_SIZE).coerceAtMost(totalKeyCount)
@@ -573,13 +536,8 @@ class StoredDataImporter(
     private const val FLUSH_BATCH_SIZE = 5000
   }
 
-  private fun saveKeys(): Collection<Key> {
-    return saveKeys(keysToSave.values)
-  }
-
-  private fun saveKeys(keys: Collection<Key>): Collection<Key> {
+  private fun saveKeys(keys: Collection<Key>) {
     keyService.saveAll(keys)
-    return keys
   }
 
   private fun addKeysAndCheckPermissions() {
