@@ -62,6 +62,8 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
     languageId: Long,
   ): Optional<Translation>
 
+  fun findAllByKey(key: Key): List<Translation>
+
   @Query(
     """
     from Translation t 

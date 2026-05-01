@@ -6,7 +6,9 @@ import io.tolgee.model.translationMemory.TranslationMemory
 import io.tolgee.model.translationMemory.TranslationMemoryEntry
 import io.tolgee.model.translationMemory.TranslationMemoryEntrySource
 import io.tolgee.model.translationMemory.TranslationMemoryEntrySourceId
+import io.tolgee.model.translationMemory.TranslationMemoryProject
 import io.tolgee.model.translationMemory.TranslationMemoryType
+import io.tolgee.repository.TranslationRepository
 import io.tolgee.repository.translationMemory.TranslationMemoryEntryRepository
 import io.tolgee.repository.translationMemory.TranslationMemoryEntrySourceRepository
 import io.tolgee.repository.translationMemory.TranslationMemoryRepository
@@ -22,6 +24,7 @@ class TranslationMemoryEntryService(
   private val translationMemoryEntryRepository: TranslationMemoryEntryRepository,
   private val translationMemoryEntrySourceRepository: TranslationMemoryEntrySourceRepository,
   private val translationMemoryRepository: TranslationMemoryRepository,
+  private val translationRepository: TranslationRepository,
   private val entityManager: EntityManager,
 ) {
   @set:Autowired
@@ -39,7 +42,21 @@ class TranslationMemoryEntryService(
    * - The project has no writable shared assignments → skip (the common free-plan case).
    * - The key lives on a non-default branch → skip (branch merges re-save translations, which
    *   re-enters this hook with the default-branch key).
-   * - The saved translation *is* the base language → skip (we track target → base, not vice versa).
+   *
+   * Two save paths thread through this hook:
+   *
+   * - **Target-language save** is the common case. The current translation supplies the
+   *   target half of the entry; the source text comes from the base translation read out of
+   *   the DB (not [Key.translations] in memory — that collection is only synchronized after
+   *   each save returns, so a target saved before the base in the same `setForKey` call
+   *   would not see it yet).
+   * - **Base-language save** can't directly produce a synced entry — there's no target half
+   *   to pair with — but its text *is* the source text every sibling target's entry depends
+   *   on. We re-run the sync for each sibling so:
+   *     1. A target saved earlier in `setForKey` (e.g. JSON `{"de": …, "en": …}` order) is
+   *        back-filled now that the base text exists.
+   *     2. A base text edit on an existing key pushes the new source text into stored entries
+   *        instead of leaving them stale.
    *
    * The per-TM sync is delegated to [syncSharedTmEntry].
    */
@@ -59,14 +76,36 @@ class TranslationMemoryEntryService(
     if (branch != null && !branch.isDefault) return
 
     val baseLanguage = key.project.baseLanguage ?: return
-    if (translation.language.id == baseLanguage.id) return
 
-    val baseTranslation = key.translations.firstOrNull { it.language.id == baseLanguage.id }
+    if (translation.language.id == baseLanguage.id) {
+      resyncSiblingsAfterBaseSave(translation, baseLanguage.id, sharedAssignments)
+      return
+    }
+
+    val baseTranslation =
+      translationRepository.findOneByKeyAndLanguageId(key, baseLanguage.id).orElse(null)
     val sourceText = baseTranslation?.text
     val targetText = translation.text
 
     for (assignment in sharedAssignments) {
       syncSharedTmEntry(assignment.translationMemory, translation, sourceText, targetText)
+    }
+  }
+
+  private fun resyncSiblingsAfterBaseSave(
+    baseTranslation: Translation,
+    baseLanguageId: Long,
+    sharedAssignments: List<TranslationMemoryProject>,
+  ) {
+    val newSourceText = baseTranslation.text
+    val siblings =
+      translationRepository
+        .findAllByKey(baseTranslation.key)
+        .filter { it.language.id != baseLanguageId }
+    for (sibling in siblings) {
+      for (assignment in sharedAssignments) {
+        syncSharedTmEntry(assignment.translationMemory, sibling, newSourceText, sibling.text)
+      }
     }
   }
 

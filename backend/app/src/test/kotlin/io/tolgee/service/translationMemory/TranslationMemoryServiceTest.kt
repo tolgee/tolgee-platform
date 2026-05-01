@@ -143,6 +143,46 @@ class TranslationMemoryServiceTest : AbstractSpringTest() {
   }
 
   @Test
+  fun `key creation with only base translation creates no synced entry`() {
+    // Source-without-target produces no TM entry by design — a TM entry is a
+    // (sourceText, targetText, language) triple, so a base-only save has nothing to pair.
+    val project = projectService.get(testData.projectWithTm.id)
+    val key = keyService.create(project, CreateKeyDto("base-only-key", null, mapOf("en" to "Only base")))
+
+    val entry =
+      syncedEntriesIn(testData.sharedTm.id).firstOrNull { keyNamesFor(it).contains(key.name) }
+    assertThat(entry).isNull()
+  }
+
+  @Test
+  fun `key creation with target-first translation order still creates synced entry`() {
+    // Frontends emitting JSON like `{"de": "Hallo", "en": "Hello"}` (target before base) flow
+    // through `setForKey` in insertion order. Without the fix, the de save fires
+    // `onTranslationSaved` while the base translation hasn't been persisted yet, so the hook
+    // can't resolve the source text and silently skips the synced-entry creation. Net effect
+    // for users: a freshly added key is not visible in the assigned shared TM.
+    val project = projectService.get(testData.projectWithTm.id)
+
+    val key =
+      keyService.create(
+        project,
+        CreateKeyDto(
+          "target-first-key",
+          null,
+          linkedMapOf("de" to "Hallo Welt", "en" to "Hello world"),
+        ),
+      )
+
+    val sharedEntry =
+      syncedEntriesIn(testData.sharedTm.id).firstOrNull {
+        keyNamesFor(it).contains(key.name) && it.targetLanguageTag == "de"
+      }
+    assertThat(sharedEntry).isNotNull()
+    assertThat(sharedEntry!!.sourceText).isEqualTo("Hello world")
+    assertThat(sharedEntry.targetText).isEqualTo("Hallo Welt")
+  }
+
+  @Test
   fun `write pipeline skips keys on non-default branches`() {
     val german = languageService.findEntitiesByTags(setOf("de"), testData.projectWithTm.id).first()
     val key = keyService.get(testData.keyOnFeatureBranch.id)
