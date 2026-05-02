@@ -7218,13 +7218,8 @@ export interface components {
       writeOnlyReviewed: boolean;
     };
     TranslationMemoryWithStatsModel: {
-      /** @description Names of the first 3 assigned projects */
+      /** @description Names of all assigned projects (size = total assignment count) */
       assignedProjectNames: string[];
-      /**
-       * Format: int64
-       * @description Total number of projects using this translation memory
-       */
-      assignedProjectsCount: number;
       /**
        * Format: int32
        * @description Default penalty (0–100) subtracted from match scores unless an assignment overrides it.

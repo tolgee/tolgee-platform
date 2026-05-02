@@ -87,8 +87,7 @@ interface TranslationMemoryRepository : JpaRepository<TranslationMemory, Long> {
              tm.source_language_tag as sourceLanguageTag,
              tm.type as type,
              coalesce(ec.cnt, 0) as entryCount,
-             coalesce(pc.cnt, 0) as assignedProjectsCount,
-             pn.names as assignedProjectNames,
+             pn.names as assignedProjectNamesCsv,
              tm.default_penalty as defaultPenalty,
              tm.write_only_reviewed as writeOnlyReviewed
       from translation_memory tm
@@ -123,20 +122,10 @@ interface TranslationMemoryRepository : JpaRepository<TranslationMemory, Long> {
                ), 0) as cnt
       ) ec on true
       left join lateral (
-        select count(*) as cnt
+        select string_agg(pr.name, ',' order by pr.name) as names
         from translation_memory_project tp
+        join project pr on pr.id = tp.project_id
         where tp.translation_memory_id = tm.id
-      ) pc on true
-      left join lateral (
-        select string_agg(p.name, ',' order by p.name) as names
-        from (
-          select pr.name
-          from translation_memory_project tp2
-          join project pr on pr.id = tp2.project_id
-          where tp2.translation_memory_id = tm.id
-          order by pr.name
-          limit 3
-        ) p
       ) pn on true
       where tm.organization_owner_id = :organizationId
         and not exists (

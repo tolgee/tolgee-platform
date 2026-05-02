@@ -19,11 +19,10 @@ class TranslationMemoryWithStatsModelAssembler :
       sourceLanguageTag = entity.sourceLanguageTag,
       type = entity.type,
       entryCount = entity.entryCount,
-      assignedProjectsCount = entity.assignedProjectsCount,
       assignedProjectNames =
-        entity.assignedProjectNames
+        entity.assignedProjectNamesCsv
           ?.split(",")
-          ?.filter { it.isNotBlank() }
+          ?.filter { it.isNotEmpty() }
           ?: emptyList(),
       defaultPenalty = entity.defaultPenalty,
       writeOnlyReviewed = entity.writeOnlyReviewed,

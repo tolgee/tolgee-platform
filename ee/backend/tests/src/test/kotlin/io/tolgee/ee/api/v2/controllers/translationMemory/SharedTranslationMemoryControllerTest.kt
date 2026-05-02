@@ -203,13 +203,13 @@ class SharedTranslationMemoryControllerTest : AuthorizedControllerTest() {
     // Find shared TM by name (array order is not guaranteed)
     val sharedTm = (0 until tms.size()).map { tms[it] }.first { it["name"].asText() == "Shared Marketing TM" }
     assertThat(sharedTm["entryCount"].asLong()).isEqualTo(2)
-    assertThat(sharedTm["assignedProjectsCount"].asLong()).isEqualTo(1)
+    assertThat(sharedTm["assignedProjectNames"].size()).isEqualTo(1)
     assertThat(sharedTm["assignedProjectNames"][0].asText()).isEqualTo("Project With TM")
 
     // Unassigned TM
     val unassigned = (0 until tms.size()).map { tms[it] }.first { it["name"].asText() == "Unassigned Shared TM" }
     assertThat(unassigned["entryCount"].asLong()).isEqualTo(0)
-    assertThat(unassigned["assignedProjectsCount"].asLong()).isEqualTo(0)
+    assertThat(unassigned["assignedProjectNames"].size()).isEqualTo(0)
   }
 
   @Test

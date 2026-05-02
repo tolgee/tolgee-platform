@@ -101,7 +101,7 @@ export const TranslationMemoryListItem: React.VFC<Props> = ({
   ];
 
   const projectNames = translationMemory.assignedProjectNames ?? [];
-  const totalProjects = translationMemory.assignedProjectsCount;
+  const totalProjects = projectNames.length;
 
   const isShared = translationMemory.type === 'SHARED';
 

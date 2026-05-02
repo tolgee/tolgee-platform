@@ -17,9 +17,7 @@ class TranslationMemoryWithStatsModel(
   val type: String,
   @Schema(description = "Total number of entries in this translation memory")
   val entryCount: Long,
-  @Schema(description = "Total number of projects using this translation memory")
-  val assignedProjectsCount: Long,
-  @Schema(description = "Names of the first 3 assigned projects")
+  @Schema(description = "Names of all assigned projects (size = total assignment count)")
   val assignedProjectNames: List<String>,
   @Schema(
     description =
