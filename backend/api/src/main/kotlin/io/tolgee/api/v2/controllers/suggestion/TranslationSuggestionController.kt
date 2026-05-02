@@ -120,32 +120,27 @@ class TranslationSuggestionController(
     val project = projectHolder.project
 
     val data: Page<TranslationMemoryItemView> =
-      try {
-        dto.baseText?.let { baseText ->
+      dto.baseText?.let { baseText ->
+        translationMemoryService.getSuggestions(
+          baseTranslationText = baseText,
+          isPlural = dto.isPlural ?: false,
+          keyId = null,
+          projectId = project.id,
+          organizationId = project.organizationOwnerId,
+          targetLanguageTag = targetLanguage.tag,
+          pageable = pageable,
+        )
+      }
+        ?: let {
+          val keyId = dto.keyId ?: throw BadRequestException(Message.KEY_NOT_FOUND)
+          val key = keyService.findOptional(keyId).orElseThrow { NotFoundException(Message.KEY_NOT_FOUND) }
+          key.checkInProject()
           translationMemoryService.getSuggestions(
-            baseTranslationText = baseText,
-            isPlural = dto.isPlural ?: false,
-            keyId = null,
-            projectId = project.id,
-            organizationId = project.organizationOwnerId,
-            targetLanguageTag = targetLanguage.tag,
-            pageable = pageable,
+            key,
+            LanguageDto.fromEntity(targetLanguage, baseLanguageId = null),
+            pageable,
           )
         }
-          ?: let {
-            val keyId = dto.keyId ?: throw BadRequestException(Message.KEY_NOT_FOUND)
-            val key = keyService.findOptional(keyId).orElseThrow { NotFoundException(Message.KEY_NOT_FOUND) }
-            key.checkInProject()
-            translationMemoryService.getSuggestions(
-              key,
-              LanguageDto.fromEntity(targetLanguage, baseLanguageId = null),
-              pageable,
-            )
-          }
-      } catch (e: QueryTimeoutException) {
-        log.warn("Translation memory suggestions timed out", e)
-        Page.empty(pageable)
-      }
     return arraytranslationMemoryItemModelAssembler.toModel(data, translationMemoryItemModelAssembler)
   }
 
