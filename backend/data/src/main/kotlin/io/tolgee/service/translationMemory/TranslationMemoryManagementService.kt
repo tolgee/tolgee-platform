@@ -132,14 +132,8 @@ class TranslationMemoryManagementService(
     return translationMemoryRepository.save(tm)
   }
 
-  fun getReadableTmIds(projectId: Long): List<Long> {
-    return translationMemoryProjectRepository
-      .findByProjectIdAndReadAccessTrue(projectId)
-      .map { it.translationMemory.id }
-  }
-
   /**
-   * Plan-aware variant used by the suggestion path.
+   * Plan-aware TM-id list for the suggestion path.
    * - If `Feature.TRANSLATION_MEMORY` is enabled → returns all readable TM IDs (project + shared).
    * - Otherwise (free plan) → returns only the project's own PROJECT-type TM ID.
    *
@@ -156,10 +150,6 @@ class TranslationMemoryManagementService(
     return readable
       .filter { it.translationMemory.type == TranslationMemoryType.PROJECT }
       .map { it.translationMemory.id }
-  }
-
-  fun getWritableTmAssignments(projectId: Long): List<TranslationMemoryProject> {
-    return translationMemoryProjectRepository.findByProjectIdAndWriteAccessTrue(projectId)
   }
 
   /**
