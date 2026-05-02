@@ -5383,6 +5383,12 @@
             <column name="organization_owner_id" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
+            <column name="default_penalty" type="INT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="write_only_reviewed" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
     </changeSet>
     <changeSet author="danielkrizan (generated)" id="1775717281513-2">
@@ -5405,11 +5411,13 @@
             <column name="target_text" type="TEXT">
                 <constraints nullable="false"/>
             </column>
-            <column name="key_id" type="BIGINT"/>
-            <column name="translation_id" type="BIGINT"/>
             <column name="translation_memory_id" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
+            <column name="is_manual" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tuid" type="text"/>
         </createTable>
     </changeSet>
     <changeSet author="danielkrizan (generated)" id="1775717281513-3">
@@ -5438,15 +5446,11 @@
             <column name="translation_memory_id" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
+            <column name="penalty" type="INT"/>
         </createTable>
     </changeSet>
     <changeSet author="danielkrizan (generated)" id="1775717281513-4">
         <addUniqueConstraint columnNames="translation_memory_id, project_id" constraintName="UK_tm_project_tm_id_project_id" tableName="translation_memory_project"/>
-    </changeSet>
-    <changeSet author="danielkrizan (generated)" id="1775717281513-5">
-        <createIndex indexName="IDX40k5afc2rneos21ly7h02i62o" tableName="translation_memory_entry">
-            <column name="translation_id"/>
-        </createIndex>
     </changeSet>
     <changeSet author="danielkrizan (generated)" id="1775717281513-6">
         <createIndex indexName="IDX67ed7gbrh1waifr0a6qi1uwns" tableName="translation_memory">
@@ -5481,17 +5485,11 @@
     <changeSet author="danielkrizan (generated)" id="1775717281513-12">
         <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="translation_memory_project" constraintName="FK1yl625wa6xjg9x6rx1gsh0g9h" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="project" validate="true"/>
     </changeSet>
-    <changeSet author="danielkrizan (generated)" id="1775717281513-13">
-        <addForeignKeyConstraint baseColumnNames="translation_id" baseTableName="translation_memory_entry" constraintName="FKa55sqi3cpsujl9sghyvtjwifo" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="translation" validate="true"/>
-    </changeSet>
     <changeSet author="danielkrizan (generated)" id="1775717281513-14">
         <addForeignKeyConstraint baseColumnNames="translation_memory_id" baseTableName="translation_memory_project" constraintName="FKb27xmhlu3500jve0n7f5g3pjn" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="translation_memory" validate="true"/>
     </changeSet>
     <changeSet author="danielkrizan (generated)" id="1775717281513-15">
         <addForeignKeyConstraint baseColumnNames="organization_owner_id" baseTableName="translation_memory" constraintName="FKcyxqwdixhdllamiwqwqhsxtfq" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="organization" validate="true"/>
-    </changeSet>
-    <changeSet author="danielkrizan (generated)" id="1775717281513-16">
-        <addForeignKeyConstraint baseColumnNames="key_id" baseTableName="translation_memory_entry" constraintName="FKk2f91cr8y2628r5ijmqekdbeu" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="key" validate="true"/>
     </changeSet>
     <changeSet author="danielkrizan (generated)" id="1775717281513-17">
         <addForeignKeyConstraint baseColumnNames="translation_memory_id" baseTableName="translation_memory_entry" constraintName="FKn688qo7m3kq7uch9fn5s6rsdf" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="translation_memory" validate="true"/>
@@ -5507,77 +5505,6 @@
         <rollback>
             <sql>DROP INDEX CONCURRENTLY IF EXISTS tm_entry_source_text_gist_trgm;</sql>
         </rollback>
-    </changeSet>
-
-    <changeSet author="dkrizan" id="tm-entry-unique-tm-translation-partial" runInTransaction="false">
-        <comment>Partial unique index preventing concurrent write-on-save from producing
-            duplicate (translation_memory_id, translation_id) rows. Partial so manual entries,
-            TMX imports, and keepData snapshots (which have null translation_id) remain
-            unconstrained.</comment>
-        <sql dbms="postgresql">
-            CREATE UNIQUE INDEX CONCURRENTLY IF NOT EXISTS uk_tm_entry_tm_translation
-            ON translation_memory_entry (translation_memory_id, translation_id)
-            WHERE translation_id IS NOT NULL;
-        </sql>
-        <rollback>
-            <sql>DROP INDEX CONCURRENTLY IF EXISTS uk_tm_entry_tm_translation;</sql>
-        </rollback>
-    </changeSet>
-    <changeSet author="dkrizan" id="tm-entry-add-tuid">
-        <addColumn tableName="translation_memory_entry">
-            <column name="tuid" type="text"/>
-        </addColumn>
-    </changeSet>
-    <changeSet author="dkrizan" id="tm-add-penalty">
-        <addColumn tableName="translation_memory">
-            <column name="default_penalty" type="INT" defaultValueNumeric="0">
-                <constraints nullable="false"/>
-            </column>
-        </addColumn>
-        <addColumn tableName="translation_memory_project">
-            <column name="penalty" type="INT"/>
-        </addColumn>
-    </changeSet>
-    <changeSet author="dkrizan" id="tm-add-write-only-reviewed">
-        <addColumn tableName="translation_memory">
-            <column name="write_only_reviewed" type="BOOLEAN" defaultValueBoolean="false">
-                <constraints nullable="false"/>
-            </column>
-        </addColumn>
-    </changeSet>
-    <changeSet author="dkrizan" id="tm-project-priority-nullable">
-        <dropNotNullConstraint
-            tableName="translation_memory_project"
-            columnName="priority"
-            columnDataType="INTEGER"/>
-        <sql>
-            update translation_memory_project tmp
-            set priority = null
-            where priority = 0
-              and exists (
-                select 1 from translation_memory tm
-                where tm.id = tmp.translation_memory_id
-                  and tm.type = 'PROJECT'
-              )
-        </sql>
-    </changeSet>
-
-    <changeSet author="dkrizan" id="tm-entry-dedup-refactor" runInTransaction="false">
-        <comment>Reshape translation_memory_entry for the dedup refactor. Project TM entries are
-            now virtual (computed from project translations at read time) and shared TM entries
-            are deduped across contributing translations via a new join table. The feature is
-            unreleased, so this changeset drops any existing rows rather than trying to migrate.</comment>
-        <sql dbms="postgresql">
-            DROP INDEX CONCURRENTLY IF EXISTS uk_tm_entry_tm_translation;
-        </sql>
-        <sql>delete from translation_memory_entry</sql>
-        <dropColumn tableName="translation_memory_entry" columnName="key_id"/>
-        <dropColumn tableName="translation_memory_entry" columnName="translation_id"/>
-        <addColumn tableName="translation_memory_entry">
-            <column name="is_manual" type="BOOLEAN" defaultValueBoolean="true">
-                <constraints nullable="false"/>
-            </column>
-        </addColumn>
     </changeSet>
 
     <changeSet author="dkrizan" id="tm-entry-source-table">
@@ -5612,30 +5539,9 @@
         </createIndex>
     </changeSet>
 
-    <changeSet author="dkrizan" id="tm-project-priority-not-nullable">
-        <comment>Rollback the earlier nullable-priority change. Project TMs are now created at
-            priority 0 (top of the list) and each newly-assigned shared TM stacks under them via
-            max+1. Null priority has no remaining meaning — backfill any legacy null to 0 before
-            re-enabling the constraint.</comment>
-        <sql>update translation_memory_project set priority = 0 where priority is null</sql>
-        <addNotNullConstraint
-            tableName="translation_memory_project"
-            columnName="priority"
-            columnDataType="INTEGER"/>
-        <rollback>
-            <dropNotNullConstraint
-                tableName="translation_memory_project"
-                columnName="priority"
-                columnDataType="INTEGER"/>
-        </rollback>
-    </changeSet>
-
     <changeSet author="dkrizan" id="tm-create-project-tms-for-existing-projects">
         <comment>Creates a PROJECT-type translation_memory + translation_memory_project assignment
-            for every active project. A temp pair table preallocates IDs so the two inserts share a
-            deterministic project↔tm mapping — INSERT…RETURNING can't pass project_id through, and
-            joining on (org, name) afterward would dupe when two projects in the same org share a
-            name.</comment>
+            for every active project.</comment>
         <sql>
             create temp table tmp_project_tm_pairs (
                 project_id bigint primary key,
