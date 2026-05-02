@@ -131,30 +131,6 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
 
   @Query(
     """
-      select 
-      new io.tolgee.model.views.TranslationMemoryItemView(baseTranslation.text, target.text, k.name, null, 1, k.id)
-      from Translation baseTranslation
-      join baseTranslation.key k
-      join k.project p
-      join Translation target on
-            target.key = k and
-            target.language.id = :targetLanguageId and
-            target.text <> '' and
-            target.text is not null
-      where baseTranslation.language = p.baseLanguage and
-        baseTranslation.text = :baseTranslationText and
-        k <> :key
-      """,
-  )
-  fun getTranslationMemoryValue(
-    baseTranslationText: String,
-    key: Key,
-    targetLanguageId: Long,
-    pageable: Pageable = Pageable.ofSize(1),
-  ): List<TranslationMemoryItemView>
-
-  @Query(
-    """
     select t.id as id, t.text as text, t.language.tag as languageTag
     from Translation t
   """,

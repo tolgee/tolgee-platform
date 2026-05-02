@@ -28,7 +28,6 @@ import io.tolgee.model.translation.Translation
 import io.tolgee.model.translation.Translation_
 import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.model.views.SimpleTranslationView
-import io.tolgee.model.views.TranslationMemoryItemView
 import io.tolgee.repository.TranslationRepository
 import io.tolgee.security.ProjectHolder
 import io.tolgee.service.dataImport.ImportService
@@ -354,25 +353,6 @@ class TranslationService(
       translation.resetFlags()
       this.save(translation)
     }
-  }
-
-  fun findBaseTranslation(key: Key): Translation? {
-    val baseLanguage = projectService.getOrAssignBaseLanguage(key.project.id)
-    return find(key, baseLanguage).orElse(null)
-  }
-
-  fun getTranslationMemoryValue(
-    key: Key,
-    targetLanguage: ILanguage,
-  ): TranslationMemoryItemView? {
-    val baseTranslationText = findBaseTranslation(key)?.text ?: return null
-
-    return translationRepository
-      .getTranslationMemoryValue(
-        baseTranslationText,
-        key,
-        targetLanguage.id,
-      ).firstOrNull()
   }
 
   @Transactional

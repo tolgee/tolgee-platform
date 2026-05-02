@@ -5,8 +5,6 @@ import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.model.views.TranslationMemoryItemView
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.translation.TranslationMemoryService
-import io.tolgee.service.translationMemory.ManagedTranslationMemorySuggestionService
-import io.tolgee.service.translationMemory.TranslationMemoryManagementService
 import jakarta.persistence.EntityManager
 import org.slf4j.LoggerFactory
 import org.springframework.dao.QueryTimeoutException
@@ -75,10 +73,6 @@ class MetadataProvider(
    * Examples carry the *penalized* similarity, so trust-adjusted TMs (e.g. a noisy
    * imported TM with a high default penalty) surface weaker context for MT prompts —
    * matching the user-facing suggestion ranking.
-   *
-   * Falls back to the legacy `translationMemoryService.getSuggestionsList` only for
-   * projects that still lack a project TM (legacy free-plan projects predating the
-   * auto-create in `ProjectCreationService`).
    */
   private fun fetchExamples(
     targetLanguage: LanguageDto,
@@ -87,24 +81,13 @@ class MetadataProvider(
     keyId: Long?,
   ): List<TranslationMemoryItemView> {
     val project = context.project
-    val readableTmIds = translationMemoryManagementService.getReadableTmIds(project.id)
-    if (readableTmIds.isNotEmpty()) {
-      return managedTranslationMemorySuggestionService.getSuggestionsList(
-        baseTranslationText = text,
-        isPlural = isPlural,
-        keyId = keyId,
-        projectId = project.id,
-        organizationId = project.organizationOwnerId,
-        targetLanguageTag = targetLanguage.tag,
-        limit = 5,
-      )
-    }
     return translationMemoryService.getSuggestionsList(
       baseTranslationText = text,
       isPlural = isPlural,
       keyId = keyId,
-      baseLanguageId = context.baseLanguage.id,
-      targetLanguage = targetLanguage,
+      projectId = project.id,
+      organizationId = project.organizationOwnerId,
+      targetLanguageTag = targetLanguage.tag,
       limit = 5,
     )
   }
@@ -119,14 +102,6 @@ class MetadataProvider(
 
   private val translationMemoryService: TranslationMemoryService by lazy {
     context.applicationContext.getBean(TranslationMemoryService::class.java)
-  }
-
-  private val translationMemoryManagementService: TranslationMemoryManagementService by lazy {
-    context.applicationContext.getBean(TranslationMemoryManagementService::class.java)
-  }
-
-  private val managedTranslationMemorySuggestionService: ManagedTranslationMemorySuggestionService by lazy {
-    context.applicationContext.getBean(ManagedTranslationMemorySuggestionService::class.java)
   }
 
   private val mtGlossaryTermsProvider by lazy {

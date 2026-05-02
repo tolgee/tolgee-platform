@@ -22,8 +22,6 @@ import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationMemoryService
-import io.tolgee.service.translationMemory.ManagedTranslationMemorySuggestionService
-import io.tolgee.service.translationMemory.TranslationMemoryManagementService
 import io.tolgee.util.disableAccelBuffering
 import jakarta.validation.Valid
 import org.slf4j.LoggerFactory
@@ -51,8 +49,6 @@ class TranslationSuggestionController(
   private val languageService: LanguageService,
   private val keyService: KeyService,
   private val translationMemoryService: TranslationMemoryService,
-  private val managedTranslationMemorySuggestionService: ManagedTranslationMemorySuggestionService,
-  private val translationMemoryManagementService: TranslationMemoryManagementService,
   private val translationMemoryItemModelAssembler: TranslationMemoryItemModelAssembler,
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   private val arraytranslationMemoryItemModelAssembler: PagedResourcesAssembler<TranslationMemoryItemView>,
@@ -122,45 +118,29 @@ class TranslationSuggestionController(
     )
     val targetLanguage = languageService.get(dto.targetLanguageId, projectHolder.project.id)
     val project = projectHolder.project
-    val useManagedPath =
-      translationMemoryManagementService.getReadableTmIds(project.id).isNotEmpty()
 
     val data: Page<TranslationMemoryItemView> =
       try {
         dto.baseText?.let { baseText ->
-          if (useManagedPath) {
-            managedTranslationMemorySuggestionService.getSuggestions(
-              baseTranslationText = baseText,
-              isPlural = dto.isPlural ?: false,
-              keyId = null,
-              projectId = project.id,
-              organizationId = project.organizationOwnerId,
-              targetLanguageTag = targetLanguage.tag,
-              pageable = pageable,
-            )
-          } else {
-            translationMemoryService.getSuggestions(
-              baseText,
-              isPlural = dto.isPlural ?: false,
-              keyId = null,
-              targetLanguage,
-              pageable,
-            )
-          }
+          translationMemoryService.getSuggestions(
+            baseTranslationText = baseText,
+            isPlural = dto.isPlural ?: false,
+            keyId = null,
+            projectId = project.id,
+            organizationId = project.organizationOwnerId,
+            targetLanguageTag = targetLanguage.tag,
+            pageable = pageable,
+          )
         }
           ?: let {
             val keyId = dto.keyId ?: throw BadRequestException(Message.KEY_NOT_FOUND)
             val key = keyService.findOptional(keyId).orElseThrow { NotFoundException(Message.KEY_NOT_FOUND) }
             key.checkInProject()
-            if (useManagedPath) {
-              managedTranslationMemorySuggestionService.getSuggestions(
-                key,
-                LanguageDto.fromEntity(targetLanguage, baseLanguageId = null),
-                pageable,
-              )
-            } else {
-              translationMemoryService.getSuggestions(key, targetLanguage, pageable)
-            }
+            translationMemoryService.getSuggestions(
+              key,
+              LanguageDto.fromEntity(targetLanguage, baseLanguageId = null),
+              pageable,
+            )
           }
       } catch (e: QueryTimeoutException) {
         log.warn("Translation memory suggestions timed out", e)

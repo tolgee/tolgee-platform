@@ -15,6 +15,7 @@ import io.tolgee.repository.translationMemory.TranslationMemoryProjectRepository
 import io.tolgee.repository.translationMemory.TranslationMemoryRepository
 import io.tolgee.service.project.ProjectCreationService
 import io.tolgee.service.project.ProjectHardDeletingService
+import io.tolgee.service.translation.TranslationMemoryService
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -47,7 +48,7 @@ class TranslationMemoryServiceTest : AbstractSpringTest() {
   lateinit var projectHardDeletingService: ProjectHardDeletingService
 
   @Autowired
-  lateinit var managedTranslationMemorySuggestionService: ManagedTranslationMemorySuggestionService
+  lateinit var translationMemoryService: TranslationMemoryService
 
   lateinit var testData: TranslationMemoryTestData
 
@@ -513,7 +514,7 @@ class TranslationMemoryServiceTest : AbstractSpringTest() {
     val project = projectService.get(testData.projectWithTm.id)
 
     val results =
-      managedTranslationMemorySuggestionService.getSuggestionsList(
+      translationMemoryService.getSuggestionsList(
         baseTranslationText = "Existing source",
         isPlural = false,
         keyId = null,

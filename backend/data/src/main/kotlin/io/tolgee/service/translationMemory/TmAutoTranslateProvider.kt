@@ -5,12 +5,9 @@ import io.tolgee.model.key.Key
 import io.tolgee.model.views.TranslationMemoryItemView
 
 /**
- * Resolves a TM match for auto-translate / batch pre-translate.
- *
- * Single CE implementation [TmAutoTranslateProviderOssImpl] dispatches between the new managed
- * TM path (`translation_memory_entry`) and the legacy [io.tolgee.service.translation.TranslationMemoryService]
- * (`translation` table) based on whether the project has any readable TM assignments. Plan-aware
- * filtering (free vs paid) lives inside the managed suggestion service.
+ * Resolves a TM match for auto-translate / batch pre-translate. The CE implementation
+ * delegates to [io.tolgee.service.translation.TranslationMemoryService], which applies plan-aware
+ * filtering internally (free plan → project's own TM only; paid plan → project + shared TMs).
  */
 interface TmAutoTranslateProvider {
   fun getAutoTranslatedValue(

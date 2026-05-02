@@ -10,7 +10,7 @@ import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.enums.Scope
-import io.tolgee.service.translationMemory.ManagedTranslationMemorySuggestionService
+import io.tolgee.service.translation.TranslationMemoryService
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import org.assertj.core.api.Assertions.assertThat
@@ -37,7 +37,7 @@ class TranslationSuggestionControllerManagedTmTest : ProjectAuthControllerTest("
   private lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
 
   @Autowired
-  private lateinit var managedTranslationMemorySuggestionService: ManagedTranslationMemorySuggestionService
+  private lateinit var translationMemoryService: TranslationMemoryService
 
   lateinit var testData: TranslationMemoryTestData
   var germanLanguageId: Long = 0
@@ -222,7 +222,7 @@ class TranslationSuggestionControllerManagedTmTest : ProjectAuthControllerTest("
     enabledFeaturesProvider.forceEnabled = setOf(Feature.TRANSLATION_MEMORY)
 
     val results =
-      managedTranslationMemorySuggestionService.getSuggestionsList(
+      translationMemoryService.getSuggestionsList(
         baseTranslationText = "Farewell",
         isPlural = false,
         keyId = null,

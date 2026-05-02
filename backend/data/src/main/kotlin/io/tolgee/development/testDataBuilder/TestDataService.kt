@@ -46,6 +46,7 @@ import io.tolgee.service.security.UserPreferencesService
 import io.tolgee.service.translation.AutoTranslationService
 import io.tolgee.service.translation.TranslationCommentService
 import io.tolgee.service.translation.TranslationService
+import io.tolgee.service.translationMemory.TranslationMemoryManagementService
 import io.tolgee.util.Logging
 import io.tolgee.util.executeInNewTransaction
 import io.tolgee.util.logger
@@ -94,6 +95,7 @@ class TestDataService(
   private val bypassableActivityListeners: List<BypassableActivityListener>,
   private val invitationService: InvitationService,
   private val keyCodeReferenceRepository: KeyCodeReferenceRepository,
+  private val translationMemoryManagementService: TranslationMemoryManagementService,
 ) : Logging {
   @Transactional
   fun saveTestData(ft: TestDataBuilder.() -> Unit): TestDataBuilder {
@@ -132,6 +134,7 @@ class TestDataService(
         saveProjectData(builder)
         saveGlossaryData(builder)
         saveTranslationMemoryData(builder)
+        ensureProjectTms(builder)
         saveNotifications(builder)
         finalize()
       }
@@ -298,6 +301,29 @@ class TestDataService(
     tmBuilders.forEach { entityManager.persist(it.self) }
     tmBuilders.flatMap { it.data.projectAssignments }.forEach { entityManager.persist(it.self) }
     tmBuilders.flatMap { it.data.entries }.forEach { entityManager.persist(it.self) }
+  }
+
+  /**
+   * Mirrors [io.tolgee.service.project.ProjectCreationService] which creates a project TM for
+   * every newly-created project. Builders bypass `ProjectCreationService` and persist projects
+   * directly, so without this step legacy fixtures lack a project TM and the suggestion path
+   * (which assumes the invariant "every project has a project TM") returns empty matches.
+   *
+   * Skips fixtures with a soft-deleted project or no organization owner — those represent
+   * incomplete setups (deletion-tests, in-progress edits) where adding a TM would just confuse
+   * the test. Idempotent for tests that already build a project TM via `addTranslationMemory`:
+   * `getOrCreateProjectTm` short-circuits on the existence check.
+   */
+  private fun ensureProjectTms(builder: TestDataBuilder) {
+    builder.data.projects.forEach { projectBuilder ->
+      val project = projectBuilder.self
+      if (project.deletedAt != null) return@forEach
+      // organizationOwner is a lateinit var on Project; some fixtures construct projects without
+      // setting it (in-progress edits, partial templates) and accessing the field would throw.
+      val ownerSet = runCatching { project.organizationOwner }.isSuccess
+      if (!ownerSet) return@forEach
+      translationMemoryManagementService.getOrCreateProjectTm(project)
+    }
   }
 
   private fun finalize() {

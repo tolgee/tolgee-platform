@@ -158,12 +158,14 @@ class AutoTranslatingTest : MachineTranslationTest() {
 
     waitForSpanishTranslationSet(CREATE_KEY_NAME)
 
+    // Source/target are intentionally dissimilar to "Hello"/"Hallo" so the project-TM fuzzy
+    // suggestion path doesn't auto-translate from the prior key — we want a fresh Google call.
     performCreateKey(
       keyName = "jaj",
       translations =
         mapOf(
-          "en" to "Hello2",
-          "de" to "Hallo2",
+          "en" to "Goodbye",
+          "de" to "Auf Wiedersehen",
         ),
     )
     waitForSpanishTranslationSet("jaj")
