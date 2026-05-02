@@ -61,7 +61,6 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
   @AfterEach
   fun after() {
     currentUserWebsocket.stop()
-    anotherUserWebsocket.stop()
   }
 
   @Test
@@ -246,16 +245,12 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
         // anotherUser trying to spy on other user's websocket
         testData.user.id,
       )
-    try {
-      spyingUserWebsocket.listenForNotificationsChanged()
-      spyingUserWebsocket.waitForForbidden()
-      saveNotificationForCurrentUser()
+    spyingUserWebsocket.listenForNotificationsChanged()
+    spyingUserWebsocket.waitForForbidden()
+    saveNotificationForCurrentUser()
 
-      assertCurrentUserReceivedMessage()
-      spyingUserWebsocket.receivedMessages.assert.isEmpty()
-    } finally {
-      spyingUserWebsocket.stop()
-    }
+    assertCurrentUserReceivedMessage()
+    spyingUserWebsocket.receivedMessages.assert.isEmpty()
   }
 
   private fun assertCurrentUserReceivedMessage() {
