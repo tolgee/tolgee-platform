@@ -5,6 +5,7 @@ import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.translation.TranslationMemoryService
 import jakarta.persistence.EntityManager
+import org.springframework.data.domain.Pageable
 
 class MetadataProvider(
   private val context: MtTranslatorContext,
@@ -46,14 +47,14 @@ class MetadataProvider(
     keyId: Long?,
   ): List<ExampleItem> {
     return translationMemoryService
-      .getSuggestionsList(
+      .getSuggestions(
         baseTranslationText = text,
         isPlural = isPlural,
         keyId = keyId,
-        baseLanguageId = context.baseLanguage.id,
         targetLanguage = targetLanguage,
-        limit = 5,
-      ).map {
+        pageable = Pageable.ofSize(5),
+      ).content
+      .map {
         ExampleItem(
           key = it.keyName,
           keyNamespace = it.keyNamespace,
