@@ -122,10 +122,6 @@ class TranslationSuggestionController(
     )
     val targetLanguage = languageService.get(dto.targetLanguageId, projectHolder.project.id)
     val project = projectHolder.project
-    // Lazy migration: paid orgs that predate the migration code may still have legacy projects
-    // with no project TM. Create one on first suggestion request so users get managed-path
-    // suggestions and TM content without needing to restart the server.
-    translationMemoryManagementService.ensureProjectTmIfFeatureEnabled(project.id, project.organizationOwnerId)
     val useManagedPath =
       translationMemoryManagementService.getReadableTmIds(project.id).isNotEmpty()
 

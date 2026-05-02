@@ -66,22 +66,6 @@ class TranslationMemoryManagementService(
   }
 
   /**
-   * Lazy provisioning hook: if the organization has the TRANSLATION_MEMORY feature but the
-   * project has no project-TM config row yet, create one. Short-circuits on the common case
-   * (TM already exists) with a single indexed query. No data backfill involved — entries are
-   * virtual.
-   */
-  @Transactional
-  fun ensureProjectTmIfFeatureEnabled(
-    projectId: Long,
-    organizationId: Long,
-  ) {
-    if (getProjectTm(projectId) != null) return
-    if (!enabledFeaturesProvider.isFeatureEnabled(organizationId, Feature.TRANSLATION_MEMORY)) return
-    createProjectTm(projectService.get(projectId))
-  }
-
-  /**
    * Updates the project TM's [TranslationMemory.sourceLanguageTag] to the project's current base
    * language tag. Called from [io.tolgee.service.project.ProjectService.editProject] when the base
    * language changes. No entries to rebuild — the content is virtual.

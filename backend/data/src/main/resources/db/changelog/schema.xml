@@ -5630,6 +5630,50 @@
         </rollback>
     </changeSet>
 
+    <changeSet author="dkrizan" id="tm-create-project-tms-for-existing-projects">
+        <comment>Creates a PROJECT-type translation_memory + translation_memory_project assignment
+            for every active project. A temp pair table preallocates IDs so the two inserts share a
+            deterministic project↔tm mapping — INSERT…RETURNING can't pass project_id through, and
+            joining on (org, name) afterward would dupe when two projects in the same org share a
+            name.</comment>
+        <sql>
+            create temp table tmp_project_tm_pairs (
+                project_id bigint primary key,
+                tm_id bigint not null
+            ) on commit drop;
+
+            insert into tmp_project_tm_pairs (project_id, tm_id)
+            select p.id, nextval('hibernate_sequence')
+            from project p
+            where p.deleted_at is null;
+
+            insert into translation_memory (
+                id, name, source_language_tag, type, default_penalty, write_only_reviewed,
+                organization_owner_id, created_at, updated_at
+            )
+            select pair.tm_id, p.name, coalesce(l.tag, ''), 'PROJECT', 0, false,
+                   p.organization_owner_id, now(), now()
+            from tmp_project_tm_pairs pair
+            join project p on p.id = pair.project_id
+            left join language l on l.id = p.base_language_id;
+
+            insert into translation_memory_project (
+                translation_memory_id, project_id, read_access, write_access, priority, penalty
+            )
+            select pair.tm_id, pair.project_id, true, true, 0, null
+            from tmp_project_tm_pairs pair;
+        </sql>
+        <rollback>
+            <sql>
+                delete from translation_memory_project
+                where translation_memory_id in (
+                    select id from translation_memory where type = 'PROJECT'
+                );
+                delete from translation_memory where type = 'PROJECT';
+            </sql>
+        </rollback>
+    </changeSet>
+
     <changeSet author="dkrizan" id="tm-translation-key-lang-index" runInTransaction="false">
         <comment>Composite index supporting the per-key/per-language lookups in the virtual-entry
             branch of the TM suggestion query. Replaces a bitmap-and over the existing single-column
