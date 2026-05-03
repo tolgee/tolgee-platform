@@ -2146,7 +2146,7 @@
   "self_hosted_plans_placeholder_description": "I piani self-hosted sono disponibili su richiesta. Contattaci per un'offerta personalizzata.",
   "self_hosted_plans_placeholder_title": "Piano self-hosted",
   "sensitive-authentication-dialog-title": "Autenticazione",
-  "sensitive-authentication-message": "Per procedere con questa operazione, si prega di autenticarsi nuovamente. ",
+  "sensitive-authentication-message": "Per procedere con questa operazione, si prega di autenticarsi nuovamente.",
   "sensitive-auth-submit-button": "OK",
   "sensitive-dialog-provide-2fa-code": "Fornisci un codice dalla tua app di autenticazione a 2 fattori.",
   "set_at_least_one_language_error": "Seleziona almeno una lingua.",

@@ -1955,7 +1955,7 @@
   "self_hosted_plans_placeholder_title": "Plan hostowany samodzielnie",
   "send-reason-created-account": "Otrzymujesz ten e-mail, ponieważ utworzyłeś konto na {instanceQualifier}",
   "sensitive-authentication-dialog-title": "Uwierzytelnianie",
-  "sensitive-authentication-message": "Aby kontynuować tę operację, proszę ponownie się uwierzytelnić",
+  "sensitive-authentication-message": "Aby kontynuować tę operację, proszę ponownie się uwierzytelnić.",
   "sensitive-auth-submit-button": "OK",
   "sensitive-dialog-provide-2fa-code": "Podaj kod z aplikacji uwierzytelniającej dwuskładnikowo.",
   "set_at_least_one_language_error": "Wybierz co najmniej jeden język",

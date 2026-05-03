@@ -1966,7 +1966,7 @@
   "self_hosted_plans_placeholder_title": "Тарифний план для self-hosted",
   "send-reason-created-account": "Ви отримали цей електронний лист, тому що створили обліковий запис на {instanceQualifier}",
   "sensitive-authentication-dialog-title": "Аутентифікація",
-  "sensitive-authentication-message": "Щоб продовжити цю операцію, будь ласка, повторно пройдіть автентифікацію",
+  "sensitive-authentication-message": "Щоб продовжити цю операцію, будь ласка, повторно пройдіть автентифікацію.",
   "sensitive-auth-submit-button": "Гаразд",
   "sensitive-dialog-provide-2fa-code": "Надайте код з вашого додатку двофакторної автентифікації.",
   "set_at_least_one_language_error": "Виберіть принаймні одну мову",

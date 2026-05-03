@@ -2179,7 +2179,7 @@
   "self_hosted_plans_placeholder_description": "Eget vertskap planer er tilgjengelige på forespørsel. Kontakt oss for et tilpasset tilbud.",
   "self_hosted_plans_placeholder_title": "Eget vertskap plan",
   "sensitive-authentication-dialog-title": "Autentisering",
-  "sensitive-authentication-message": "For å fortsette med denne operasjonen, vennligst autentiser deg på nytt",
+  "sensitive-authentication-message": "For å fortsette med denne operasjonen, vennligst autentiser deg på nytt.",
   "sensitive-auth-submit-button": "OK",
   "sensitive-dialog-provide-2fa-code": "Oppgi en kode fra din tofaktorautentiseringsapp.",
   "set_at_least_one_language_error": "Velg minst ett språk.",

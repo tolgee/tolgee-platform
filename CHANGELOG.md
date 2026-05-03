@@ -1,3 +1,10 @@
+## [3.183.3](https://github.com/tolgee/tolgee-platform/compare/v3.183.2...v3.183.3) (2026-05-03)
+
+
+### Bug Fixes
+
+* roll back TM suggestion query optimizations ([#3631](https://github.com/tolgee/tolgee-platform/issues/3631)) ([374e3c8](https://github.com/tolgee/tolgee-platform/commit/374e3c8a810fdda2cc27c6593af9d01f4582ddd7))
+
 ## [3.183.2](https://github.com/tolgee/tolgee-platform/compare/v3.183.1...v3.183.2) (2026-04-30)
 
 

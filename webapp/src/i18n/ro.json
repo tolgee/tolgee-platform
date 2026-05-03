@@ -2176,7 +2176,7 @@
   "self_hosted_plans_placeholder_description": "Planurile auto-găzduite sunt disponibile la cerere. Contactați-ne pentru o ofertă personalizată.",
   "self_hosted_plans_placeholder_title": "Plan auto-găzduit",
   "sensitive-authentication-dialog-title": "Autentificare",
-  "sensitive-authentication-message": "Pentru a continua cu această operațiune, autentificați-vă din nou",
+  "sensitive-authentication-message": "Pentru a continua cu această operațiune, autentificați-vă din nou.",
   "sensitive-auth-submit-button": "OK",
   "sensitive-dialog-provide-2fa-code": "Introduceți un cod din aplicația dvs. de autentificare în doi factori.",
   "set_at_least_one_language_error": "Selectați cel puțin o limbă.",
