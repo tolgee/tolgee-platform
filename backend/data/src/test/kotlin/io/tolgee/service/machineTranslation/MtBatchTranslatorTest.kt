@@ -25,6 +25,8 @@ import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.notNull
 import org.mockito.kotlin.whenever
 import org.springframework.context.ApplicationContext
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import kotlin.reflect.KClass
 
 class MtBatchTranslatorTest {
@@ -179,16 +181,15 @@ class MtBatchTranslatorTest {
     val translationMemoryServiceMock = TranslationMemoryService::class.mockIntoAppContext(appContextMock)
 
     doAnswer {
-      emptyList<TranslationMemoryItemView>()
+      Page.empty<TranslationMemoryItemView>()
     }.whenever(
       translationMemoryServiceMock,
-    ).getSuggestionsList(
+    ).getSuggestions(
       any<String>(),
       any<Boolean>(),
       notNull(),
-      any<Long>(),
       any<LanguageDto>(),
-      any<Int>(),
+      any<Pageable>(),
     )
 
     val bigMetaServiceMock = BigMetaService::class.mockIntoAppContext(appContextMock)

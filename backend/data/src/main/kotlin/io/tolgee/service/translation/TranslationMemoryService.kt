@@ -17,65 +17,6 @@ class TranslationMemoryService(
   private val translationsService: TranslationService,
   private val entityManager: EntityManager,
 ) {
-  /*
-   Returns translation memory suggestions for the batch/MT pipeline.
-
-   Uses % (trigram threshold operator) without ORDER BY so the composite GiST index on
-   (language_id, text gist_trgm_ops) can stop early as soon as LIMIT rows are found,
-   avoiding a full scan of all matching rows.
-   */
-  @Transactional
-  fun getSuggestionsList(
-    baseTranslationText: String,
-    isPlural: Boolean,
-    keyId: Long? = null,
-    baseLanguageId: Long,
-    targetLanguage: LanguageDto,
-    limit: Int = 5,
-  ): List<TranslationMemoryItemView> {
-    entityManager.createNativeQuery("set local pg_trgm.similarity_threshold to 0.5").executeUpdate()
-    val queryResult =
-      entityManager
-        .createNativeQuery(
-          """
-        select target.text as targetTranslationText,
-               baseTranslation.text as baseTranslationText,
-               key.name as keyName, ns.name as keyNamespace, key.id as keyId,
-               similarity(baseTranslation.text, :baseTranslationText) as similarity
-        from translation baseTranslation
-        join key on baseTranslation.key_id = key.id
-        left join namespace ns on key.namespace_id = ns.id
-        join translation target on
-              target.key_id = key.id and
-              target.language_id = :targetLanguageId and
-              target.text <> '' and
-              target.text is not null
-        where baseTranslation.language_id = :baseLanguageId
-          and (cast(:key as bigint) is null or key.id <> :key)
-          and key.is_plural = :isPlural
-          and baseTranslation.text % :baseTranslationText
-    """,
-        ).setParameter("baseTranslationText", baseTranslationText)
-        .setParameter("isPlural", isPlural)
-        .setParameter("key", keyId)
-        .setParameter("baseLanguageId", baseLanguageId)
-        .setParameter("targetLanguageId", targetLanguage.id)
-        .setMaxResults(limit)
-        .resultList
-
-    return queryResult.map {
-      it as Array<*>
-      TranslationMemoryItemView(
-        targetTranslationText = it[0] as String,
-        baseTranslationText = it[1] as String,
-        keyName = it[2] as String,
-        keyNamespace = it[3] as String?,
-        keyId = it[4] as Long,
-        similarity = (it[5] as Number).toFloat(),
-      )
-    }
-  }
-
   @Transactional
   fun getAutoTranslatedValue(
     key: Key,
@@ -116,7 +57,8 @@ class TranslationMemoryService(
     return PageImpl(data, pageable, count)
   }
 
-  private fun getSuggestionsData(
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  fun getSuggestionsData(
     sourceTranslationText: String,
     isPlural: Boolean,
     keyId: Long?,
@@ -129,24 +71,32 @@ class TranslationMemoryService(
       entityManager
         .createNativeQuery(
           """
-        select target.text as targetTranslationText, baseTranslation.text as baseTranslationText,
-               key.name as keyName, ns.name as keyNamespace, key.id as keyId,
-               similarity(baseTranslation.text, :baseTranslationText) as similarity,
-               count(*) over() as totalCount
-        from translation baseTranslation
-        join key on baseTranslation.key_id = key.id
-        left join namespace ns on key.namespace_id = ns.id
-        join project p on key.project_id = p.id
-        join translation target on
-              target.key_id = key.id and
-              target.language_id = :targetLanguageId and
-              target.text <> '' and
-              target.text is not null
-        where baseTranslation.language_id = p.base_language_id
-          and (cast(:key as bigint) is null or key.id <> :key)
-          and key.is_plural = :isPlural
-          and baseTranslation.text % :baseTranslationText
-        order by baseTranslation.text <-> :baseTranslationText
+        with base as (
+            select target.text as targetTranslationText, baseTranslation.text as baseTranslationText,
+              key.name as keyName, ns.name as keyNamespace, key.id as keyId, 
+            similarity(baseTranslation.text, :baseTranslationText) as similarity
+            from translation baseTranslation
+            join key on baseTranslation.key_id = key.id
+            left join namespace ns on key.namespace_id = ns.id
+            join project p on key.project_id = p.id
+            join translation target on
+                  target.key_id = key.id and 
+                  target.language_id = :targetLanguageId and
+                  target.text <> '' and
+                  target.text is not null
+            join key targetKey on target.key_id = targetKey.id    
+            """ +
+
+            // we use the case when syntax to force postgres to evaluate all the other conditions first,
+            // the similarity condition is slow even it uses index, and it tends to be evaluated first since
+            // huge underestimation
+            """
+            where case when (baseTranslation.language_id = p.base_language_id and
+              (cast(:key as bigint) is null or targetKey.id <> :key) and targetKey.is_plural = :isPlural)
+              then baseTranslation.text % :baseTranslationText end
+        ) select base.*, count(*) over() 
+        from base
+        order by base.similarity desc
     """,
         ).setParameter("baseTranslationText", sourceTranslationText)
         .setParameter("isPlural", isPlural)
@@ -156,7 +106,7 @@ class TranslationMemoryService(
         .setFirstResult(offset.toInt())
         .resultList
 
-    val count = ((queryResult.firstOrNull() as Array<*>?)?.get(6) as Number?)?.toLong() ?: 0L
+    val count = (queryResult.firstOrNull() as Array<*>?)?.get(6) as Long? ?: 0L
     return count to
       queryResult.map {
         it as Array<*>
@@ -165,7 +115,7 @@ class TranslationMemoryService(
           baseTranslationText = it[1] as String,
           keyName = it[2] as String,
           keyNamespace = it[3] as String?,
-          similarity = (it[5] as Number).toFloat(),
+          similarity = it[5] as Float,
           keyId = it[4] as Long,
         )
       }

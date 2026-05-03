@@ -24,7 +24,6 @@ import io.tolgee.service.translation.TranslationMemoryService
 import io.tolgee.util.disableAccelBuffering
 import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
-import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.hateoas.PagedModel
@@ -113,7 +112,7 @@ class TranslationSuggestionController(
     )
     val targetLanguage = languageService.get(dto.targetLanguageId, projectHolder.project.id)
 
-    val data: Page<TranslationMemoryItemView> =
+    val data =
       dto.baseText?.let { baseText ->
         translationMemoryService.getSuggestions(
           baseText,
