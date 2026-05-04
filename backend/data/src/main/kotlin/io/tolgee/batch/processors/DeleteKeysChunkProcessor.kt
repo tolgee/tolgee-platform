@@ -50,4 +50,9 @@ class DeleteKeysChunkProcessor(
   override fun getTarget(data: DeleteKeysRequest): List<Long> {
     return data.keyIds
   }
+
+  override fun getChunkSize(
+    request: DeleteKeysRequest,
+    projectId: Long?,
+  ): Int = 5000
 }

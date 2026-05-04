@@ -47,4 +47,9 @@ class HardDeleteKeysChunkProcessor(
   override fun getTarget(data: HardDeleteKeysRequest): List<Long> {
     return data.keyIds
   }
+
+  override fun getChunkSize(
+    request: HardDeleteKeysRequest,
+    projectId: Long?,
+  ): Int = 5000
 }

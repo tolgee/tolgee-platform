@@ -50,4 +50,9 @@ class ClearTranslationsChunkProcessor(
       languageIds = data.languageIds
     }
   }
+
+  override fun getChunkSize(
+    request: ClearTranslationsRequest,
+    projectId: Long?,
+  ): Int = 5000
 }
