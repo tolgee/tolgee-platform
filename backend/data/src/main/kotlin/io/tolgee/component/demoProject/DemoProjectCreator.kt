@@ -49,9 +49,6 @@ class DemoProjectCreator(
     addComments()
     project.baseLanguage = languages["en"]
     projectService.save(project)
-    // Mirrors the regular project-creation path (ProjectCreationService): every project gets
-    // its own PROJECT-type TM. The Liquibase backfill only covers projects that exist when
-    // the migration runs, so demo-project creation must do its own.
     translationMemoryManagementService.createProjectTm(project)
     return project
   }

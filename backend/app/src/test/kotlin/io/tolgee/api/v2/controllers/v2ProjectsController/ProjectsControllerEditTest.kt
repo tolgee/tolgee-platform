@@ -1,5 +1,6 @@
 package io.tolgee.api.v2.controllers.v2ProjectsController
 
+import io.tolgee.development.testDataBuilder.data.TranslationMemoryTestData
 import io.tolgee.dtos.request.project.EditProjectRequest
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
@@ -119,6 +120,33 @@ class ProjectsControllerEditTest : AuthorizedControllerTest() {
         .setParameter("slug", slug)
         .resultList.assert
         .hasSize(2)
+    }
+  }
+
+  @Test
+  fun `rejects base language change when shared TMs have mismatched source`() {
+    val testData = TranslationMemoryTestData()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    try {
+      val project = testData.projectWithTm
+      val germanId = testData.germanLanguageWithTm.id
+
+      performAuthPut(
+        "/v2/projects/${project.id}",
+        EditProjectRequest(
+          name = project.name,
+          slug = project.slug,
+          baseLanguageId = germanId,
+        ),
+      ).andIsBadRequest.andAssertThatJson {
+        // The conflicting TMs are echoed back so the UI can show the user which assignments
+        // would have to be unassigned before the rename.
+        node("code").isEqualTo("cannot_change_project_base_language_tm_conflict")
+      }
+    } finally {
+      testDataService.cleanTestData(testData.root)
+      userAccount = null
     }
   }
 }

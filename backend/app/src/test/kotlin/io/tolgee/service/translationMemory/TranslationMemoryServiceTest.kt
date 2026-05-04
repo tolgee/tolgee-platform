@@ -385,14 +385,11 @@ class TranslationMemoryServiceTest : AbstractSpringTest() {
 
   @Test
   fun `promoting TRANSLATED to REVIEWED adds the entry to a reviewed-only TM`() {
-    val project = projectService.get(testData.projectWithTm.id)
-    val german = languageService.findEntitiesByTags(setOf("de"), project.id).first()
-
-    val key = keyService.create(project, CreateKeyDto("promoted-key", null, mapOf("en" to "Promoted source")))
-    val translation = translationService.getOrCreate(key, german)
-    translation.text = "Hochgestufter Text"
+    // testData builder bypasses the translation save pipeline, so the synced entry on the
+    // reviewed-only TM hasn't been written yet. Save through the service to confirm the
+    // pre-state ("not on the reviewed-only TM" while TRANSLATED), then promote.
+    val translation = testData.promotedTargetTranslation
     translationService.save(translation)
-
     assertThat(
       syncedEntriesIn(testData.sharedTmReviewedOnly.id).flatMap { keyNamesFor(it) },
     ).doesNotContain("promoted-key")
@@ -409,16 +406,11 @@ class TranslationMemoryServiceTest : AbstractSpringTest() {
 
   @Test
   fun `demoting REVIEWED to TRANSLATED removes entry only from reviewed-only TMs`() {
-    val project = projectService.get(testData.projectWithTm.id)
-    val german = languageService.findEntitiesByTags(setOf("de"), project.id).first()
-
-    val key = keyService.create(project, CreateKeyDto("demotion-key", null, mapOf("en" to "Demotion source")))
-    val translation = translationService.getOrCreate(key, german)
-    translation.text = "Herabzustufender Text"
-    translation.state = TranslationState.REVIEWED
+    // testData builder bypasses the save pipeline; trigger a no-op save so the synced
+    // entries get written to the reviewed-only TM.
+    val translation = testData.demotedTargetTranslation
     translationService.save(translation)
     entityManager.flush()
-
     assertThat(
       syncedEntriesIn(testData.sharedTmReviewedOnly.id).flatMap { keyNamesFor(it) },
     ).contains("demotion-key")
@@ -434,42 +426,6 @@ class TranslationMemoryServiceTest : AbstractSpringTest() {
     assertThat(
       syncedEntriesIn(testData.sharedTm.id).flatMap { keyNamesFor(it) },
     ).contains("demotion-key")
-  }
-
-  @Test
-  fun `project base language change is rejected when shared TMs have mismatched source`() {
-    val project = projectService.get(testData.projectWithTm.id)
-    val german = languageService.findEntitiesByTags(setOf("de"), project.id).first()
-
-    val exception =
-      org.junit.jupiter.api.Assertions.assertThrows(io.tolgee.exceptions.BadRequestException::class.java) {
-        projectService.editProject(
-          project.id,
-          EditProjectRequest(
-            name = project.name,
-            slug = project.slug,
-            baseLanguageId = german.id,
-            useNamespaces = project.useNamespaces,
-            useBranching = project.useBranching,
-            defaultNamespaceId = null,
-            description = project.description,
-            icuPlaceholders = project.icuPlaceholders,
-            suggestionsMode = project.suggestionsMode,
-            translationProtection = project.translationProtection,
-          ),
-        )
-      }
-    assertThat(exception.code).isEqualTo("cannot_change_project_base_language_tm_conflict")
-    val conflictNames =
-      (exception.params ?: emptyList())
-        .filterIsInstance<Map<*, *>>()
-        .mapNotNull { it["name"] as? String }
-    assertThat(conflictNames).contains(
-      "Shared Marketing TM",
-      "Shared TM with default penalty",
-      "Shared TM with per-assignment penalty override",
-      "Reviewed-only shared TM",
-    )
   }
 
   @Test

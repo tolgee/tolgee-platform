@@ -67,6 +67,22 @@ class TranslationMemoryTestData : BaseTestData() {
   lateinit var reviewedKey: Key
   lateinit var reviewedTargetTranslation: Translation
 
+  /**
+   * Key whose German translation starts as `TRANSLATED`. Drives the "promote → reviewed-only TM
+   * picks it up" test: bumping the state to `REVIEWED` must surface the entry on the
+   * reviewed-only TM without affecting the always-on TMs.
+   */
+  lateinit var promotedKey: Key
+  lateinit var promotedTargetTranslation: Translation
+
+  /**
+   * Key whose German translation starts as `REVIEWED`. Drives the "demote → reviewed-only TM
+   * drops it" test: bumping the state down to `TRANSLATED` must remove the entry from the
+   * reviewed-only TM while leaving it on the always-on TMs.
+   */
+  lateinit var demotedKey: Key
+  lateinit var demotedTargetTranslation: Translation
+
   /** Non-default branch on [projectWithTm] — exercises the "TM writes skip non-default branches" rule. */
   lateinit var featureBranch: Branch
 
@@ -144,6 +160,43 @@ class TranslationMemoryTestData : BaseTestData() {
                 language = germanLanguageWithTm
                 key = this@keyBuilder.self
                 text = "Überprüfte Übersetzung"
+                state = TranslationState.REVIEWED
+              }.self
+          }
+
+          // Key whose German target is TRANSLATED — the promote test bumps it to REVIEWED.
+          addKey {
+            name = "promoted-key"
+            promotedKey = this
+          }.build keyBuilder@{
+            addTranslation {
+              language = english
+              key = this@keyBuilder.self
+              text = "Promoted source"
+            }
+            promotedTargetTranslation =
+              addTranslation {
+                language = germanLanguageWithTm
+                key = this@keyBuilder.self
+                text = "Hochgestufter Text"
+              }.self
+          }
+
+          // Key whose German target is REVIEWED — the demote test bumps it down to TRANSLATED.
+          addKey {
+            name = "demotion-key"
+            demotedKey = this
+          }.build keyBuilder@{
+            addTranslation {
+              language = english
+              key = this@keyBuilder.self
+              text = "Demotion source"
+            }
+            demotedTargetTranslation =
+              addTranslation {
+                language = germanLanguageWithTm
+                key = this@keyBuilder.self
+                text = "Herabzustufender Text"
                 state = TranslationState.REVIEWED
               }.self
           }
