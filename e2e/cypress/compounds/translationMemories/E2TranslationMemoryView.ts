@@ -96,18 +96,29 @@ export class E2TranslationMemoryView {
     gcy('tm-create-entry-dialog').should('not.exist');
   }
 
-  // --- Import / Export ---
+  // --- Import menu / Export ---
+  // The import button is a dropdown that fans out to "Import TMX" and "Copy from a project".
+  // Compound exposes both the trigger and each menu item separately so tests can either pick
+  // an action (`importTmxFile`, `openCopyFromProjectDialog`) or assert visibility independently.
 
-  getImportButton() {
-    return gcy('tm-import-button');
+  getImportMenuButton() {
+    return gcy('tm-import-menu-button');
+  }
+
+  openImportMenu() {
+    this.getImportMenuButton().click();
+  }
+
+  getImportTmxMenuItem() {
+    return gcy('tm-import-menu-tmx');
+  }
+
+  getCopyFromProjectMenuItem() {
+    return gcy('tm-import-menu-copy-from-project');
   }
 
   getExportButton() {
     return gcy('tm-export-button');
-  }
-
-  clickImportButton() {
-    this.getImportButton().click();
   }
 
   clickExportButton() {
@@ -119,7 +130,8 @@ export class E2TranslationMemoryView {
   }
 
   importTmxFile(fixturePath: string, mode?: 'keep' | 'override') {
-    this.clickImportButton();
+    this.openImportMenu();
+    this.getImportTmxMenuItem().click();
     this.assertImportDialogVisible();
 
     gcy('tm-import-dialog')
@@ -134,5 +146,43 @@ export class E2TranslationMemoryView {
 
     gcy('tm-import-submit').click();
     gcy('tm-import-dialog').should('not.exist');
+  }
+
+  // --- Empty-state wizard ---
+
+  getEmptyWizard() {
+    return gcy('tm-empty-wizard');
+  }
+
+  getEmptyWizardManualCard() {
+    return gcy('tm-empty-wizard-manual');
+  }
+
+  getEmptyWizardCopyCard() {
+    return gcy('tm-empty-wizard-copy');
+  }
+
+  getEmptyWizardImportCard() {
+    return gcy('tm-empty-wizard-import');
+  }
+
+  // --- Copy-from-project dialog (reused from wizard and toolbar menu) ---
+
+  openCopyFromProjectDialogFromMenu() {
+    this.openImportMenu();
+    this.getCopyFromProjectMenuItem().click();
+    gcy('tm-empty-wizard-copy-dialog').should('be.visible');
+  }
+
+  copyFromProject(projectName: string) {
+    gcy('tm-empty-wizard-copy-project').find('input').type(projectName);
+    cy.get('[role="presentation"]')
+      .filter(`:contains("${projectName}")`)
+      .first()
+      .find('li')
+      .first()
+      .click();
+    gcy('tm-empty-wizard-copy-submit').click();
+    gcy('tm-empty-wizard-copy-dialog').should('not.exist');
   }
 }
