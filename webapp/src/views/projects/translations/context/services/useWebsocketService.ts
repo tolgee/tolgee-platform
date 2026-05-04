@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import {
   Modification,
   TranslationsModifiedData,
+  QaIssuesUpdatedData,
 } from 'tg.websocket-client/WebsocketClient';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { useQaChecksEnabled } from 'tg.ee';
@@ -54,7 +55,23 @@ export const useWebsocketService = (
     }
   }
 
+  function updateQaIssues(events: QaIssuesUpdatedData[]) {
+    translationService.changeTranslations(
+      events.map((event) => ({
+        keyId: event.data.keyId,
+        language: event.data.languageTag,
+        value: {
+          id: event.data.translationId,
+          qaIssueCount: event.data.qaIssueCount,
+          qaChecksStale: event.data.qaChecksStale,
+          qaIssues: event.data.qaIssues,
+        },
+      }))
+    );
+  }
+
   const eventQueue = useRef([] as TranslationsModifiedData[]);
+  const qaEventQueue = useRef([] as QaIssuesUpdatedData[]);
 
   const handleQueue = () => {
     if (eventBlockers <= 0) {
@@ -62,6 +79,10 @@ export const useWebsocketService = (
         updateTranslations(e);
       });
       eventQueue.current = [];
+      if (qaEventQueue.current.length > 0) {
+        updateQaIssues(qaEventQueue.current);
+        qaEventQueue.current = [];
+      }
     }
   };
 
@@ -100,18 +121,8 @@ export const useWebsocketService = (
       return client.subscribe(
         `/projects/${project.id}/qa-issues-updated`,
         (event) => {
-          translationService.changeTranslations([
-            {
-              keyId: event.data.keyId,
-              language: event.data.languageTag,
-              value: {
-                id: event.data.translationId,
-                qaIssueCount: event.data.qaIssueCount,
-                qaChecksStale: event.data.qaChecksStale,
-                qaIssues: event.data.qaIssues,
-              },
-            },
-          ]);
+          qaEventQueue.current.push(event);
+          handleQueueDelayed();
         }
       );
     }
