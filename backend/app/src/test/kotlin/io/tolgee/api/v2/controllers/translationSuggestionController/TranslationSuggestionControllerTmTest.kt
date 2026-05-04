@@ -94,10 +94,7 @@ class TranslationSuggestionControllerTmTest : ProjectAuthControllerTest("/v2/pro
   fun `it suggests from TM only plurals for plural using baseText`() {
     val pluralKeys = testData.addPluralKeys()
     saveTestData()
-    // Both plural keys (`true plural`, `same true plural`) share an identical source+target;
-    // the suggestion query dedupes by (source, target) so only one row surfaces. The test
-    // still validates the plural filter — the non-plural keys are excluded entirely.
-    performTmSuggestionExpectTwoResults(
+    performTmSuggestion(
       baseText =
         testData.projectBuilder
           .getTranslation(pluralKeys.truePlural, testData.englishLanguage.tag)!!
@@ -116,7 +113,7 @@ class TranslationSuggestionControllerTmTest : ProjectAuthControllerTest("/v2/pro
   fun `it suggests from TM only plurals for non plural using baseText`() {
     val pluralKeys = testData.addPluralKeys()
     saveTestData()
-    performTmSuggestionExpectTwoResults(
+    performTmSuggestion(
       baseText =
         testData.projectBuilder
           .getTranslation(pluralKeys.falsePlural, testData.englishLanguage.tag)!!
@@ -150,12 +147,12 @@ class TranslationSuggestionControllerTmTest : ProjectAuthControllerTest("/v2/pro
     }
   }
 
-  private fun performTmSuggestionExpectTwoResults(
+  private fun performTmSuggestion(
     keyId: Long? = null,
     baseText: String? = null,
     baseIsPlural: Boolean? = null,
     expectedResultValue: String,
-    expectedTotal: Int = 2,
+    expectedTotal: Int,
   ) {
     performAuthPost(
       "/v2/projects/${project.id}/suggest/translation-memory",
