@@ -1,6 +1,7 @@
 package io.tolgee.ee.service.translationMemory
 
 import io.tolgee.constants.Message
+import io.tolgee.ee.data.translationMemory.CopyFromProjectResult
 import io.tolgee.ee.data.translationMemory.CreateTranslationMemoryEntryRequest
 import io.tolgee.ee.data.translationMemory.UpdateTranslationMemoryEntryRequest
 import io.tolgee.exceptions.BadRequestException
@@ -12,6 +13,7 @@ import io.tolgee.repository.translationMemory.TranslationMemoryEntryRepository
 import io.tolgee.repository.translationMemory.TranslationMemoryEntrySourceRepository
 import io.tolgee.repository.translationMemory.TranslationMemoryProjectRepository
 import io.tolgee.repository.translationMemory.TranslationMemoryRepository
+import io.tolgee.service.project.ProjectService
 import jakarta.persistence.EntityManager
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
@@ -38,6 +40,7 @@ class TranslationMemoryEntryManagementService(
   private val translationMemoryEntryRepository: TranslationMemoryEntryRepository,
   private val translationMemoryEntrySourceRepository: TranslationMemoryEntrySourceRepository,
   private val translationMemoryProjectRepository: TranslationMemoryProjectRepository,
+  private val projectService: ProjectService,
   private val entityManager: EntityManager,
 ) {
   /**
@@ -551,6 +554,82 @@ class TranslationMemoryEntryManagementService(
         this.isManual = true
       }
     return translationMemoryEntryRepository.save(entry)
+  }
+
+  /**
+   * Seeds [translationMemoryId] with manual entries copied from the source project's TM —
+   * both stored manual rows and virtual rows derived from the project's translations. Skips
+   * `(sourceText, targetLanguageTag, targetText)` triples already present on the target so the
+   * operation is idempotent and safe to run on a non-empty TM.
+   *
+   * Constraints:
+   * - Target TM must be SHARED. PROJECT TMs are populated from their assigned project's
+   *   translations and don't need a copy step.
+   * - Source project must belong to [organizationId] (same org boundary as the target TM).
+   * - Source project's base language must match the target TM's source language tag — TM entries
+   *   carry a single source-language constraint at the TM level.
+   */
+  @Transactional
+  fun copyFromProject(
+    organizationId: Long,
+    translationMemoryId: Long,
+    sourceProjectId: Long,
+  ): CopyFromProjectResult {
+    val targetTm = requireTmInOrganization(organizationId, translationMemoryId)
+    if (targetTm.type == TranslationMemoryType.PROJECT) {
+      throw BadRequestException(Message.CANNOT_MODIFY_PROJECT_TRANSLATION_MEMORY)
+    }
+    val sourceProject =
+      projectService.find(sourceProjectId)
+        ?: throw NotFoundException(Message.PROJECT_NOT_FOUND)
+    if (sourceProject.organizationOwner.id != organizationId) {
+      throw NotFoundException(Message.PROJECT_NOT_FOUND)
+    }
+    val sourceBaseLanguageTag =
+      sourceProject.baseLanguage?.tag
+        ?: throw BadRequestException(Message.TRANSLATION_MEMORY_BASE_LANGUAGE_MISMATCH)
+    if (sourceBaseLanguageTag != targetTm.sourceLanguageTag) {
+      throw BadRequestException(Message.TRANSLATION_MEMORY_BASE_LANGUAGE_MISMATCH)
+    }
+    val sourceTm =
+      translationMemoryProjectRepository
+        .findByProjectId(sourceProjectId)
+        .firstOrNull()
+        ?.translationMemory
+        ?: throw NotFoundException(Message.PROJECT_TRANSLATION_MEMORY_NOT_FOUND)
+
+    val sourceEntries = findEntriesForProjectTmExport(sourceTm)
+    if (sourceEntries.isEmpty()) {
+      return CopyFromProjectResult(copied = 0, skipped = 0)
+    }
+
+    val existingTargetTriples =
+      translationMemoryEntryRepository
+        .findByTranslationMemoryId(translationMemoryId)
+        .map { Triple(it.sourceText, it.targetLanguageTag, it.targetText) }
+        .toMutableSet()
+
+    var copied = 0
+    var skipped = 0
+    for (sourceEntry in sourceEntries) {
+      val triple =
+        Triple(sourceEntry.sourceText, sourceEntry.targetLanguageTag, sourceEntry.targetText)
+      if (!existingTargetTriples.add(triple)) {
+        skipped++
+        continue
+      }
+      val newEntry =
+        TranslationMemoryEntry().apply {
+          this.translationMemory = targetTm
+          this.sourceText = sourceEntry.sourceText
+          this.targetText = sourceEntry.targetText
+          this.targetLanguageTag = sourceEntry.targetLanguageTag
+          this.isManual = true
+        }
+      translationMemoryEntryRepository.save(newEntry)
+      copied++
+    }
+    return CopyFromProjectResult(copied = copied, skipped = skipped)
   }
 
   @Transactional

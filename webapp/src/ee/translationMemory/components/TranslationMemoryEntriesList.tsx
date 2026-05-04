@@ -30,6 +30,7 @@ import { ScrollArrows } from 'tg.ee.module/glossary/components/ScrollArrows';
 import { TmEntriesToolbar } from './TmEntriesToolbar';
 import { TmEntriesListHeader } from './TmEntriesListHeader';
 import { TmViewToolbar } from './TmViewToolbar';
+import { EmptyTmWizard } from './emptyWizard/EmptyTmWizard';
 
 type TranslationMemoryEntryGroupModel =
   components['schemas']['TranslationMemoryEntryGroupModel'];
@@ -408,6 +409,9 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
   };
 
   const isEmpty = !entries.isLoading && groups.length === 0;
+  // The wizard is the empty-state UI for users who can actually populate the TM. Read-only
+  // viewers and "your search returned nothing" cases keep the simple message.
+  const showEmptyWizard = isEmpty && canManage && !search && !targetLanguageTag;
 
   return (
     <Box>
@@ -501,7 +505,7 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
           style={{ height: tableHeight }}
         >
           <StyledContent>
-            {layout === 'flat' && displayLanguages.length > 0 && (
+            {layout === 'flat' && displayLanguages.length > 0 && !isEmpty && (
               <TmEntriesListHeader
                 sourceLanguageTag={sourceLanguageTag}
                 displayLanguages={displayLanguages}
@@ -509,7 +513,15 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
               />
             )}
 
-            {isEmpty ? (
+            {showEmptyWizard ? (
+              <EmptyTmWizard
+                organizationId={organizationId}
+                translationMemoryId={translationMemoryId}
+                sourceLanguageTag={sourceLanguageTag}
+                availableLanguages={displayLanguages}
+                onFinished={() => entries.refetch()}
+              />
+            ) : isEmpty ? (
               <StyledEmpty>
                 {t(
                   'translation_memory_entries_empty',

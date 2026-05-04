@@ -876,6 +876,13 @@ declare namespace DataCy {
         "tm-batch-toolbar" |
         "tm-content-subtitle" |
         "tm-create-entry-dialog" |
+        "tm-empty-wizard" |
+        "tm-empty-wizard-copy" |
+        "tm-empty-wizard-copy-dialog" |
+        "tm-empty-wizard-copy-project" |
+        "tm-empty-wizard-copy-submit" |
+        "tm-empty-wizard-import" |
+        "tm-empty-wizard-manual" |
         "tm-entries-header" |
         "tm-entries-language-filter" |
         "tm-entries-language-select-item" |
