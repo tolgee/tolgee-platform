@@ -49,22 +49,6 @@ class TranslationMemoryManagementService(
     return tm
   }
 
-  @Transactional
-  fun getOrCreateProjectTm(project: Project): TranslationMemory {
-    return getProjectTm(project.id) ?: createProjectTm(project)
-  }
-
-  /**
-   * Re-fetches the project inside the current transaction so lazy associations
-   * (e.g. `baseLanguage`, `organizationOwner`) can be resolved. Use this variant from
-   * async event handlers where the Project reference may have been loaded in a prior
-   * transaction and is now detached.
-   */
-  @Transactional
-  fun getOrCreateProjectTm(projectId: Long): TranslationMemory {
-    return getProjectTm(projectId) ?: createProjectTm(projectService.get(projectId))
-  }
-
   /**
    * Updates the project TM's [TranslationMemory.sourceLanguageTag] to the project's current base
    * language tag. Called from [io.tolgee.service.project.ProjectService.editProject] when the base

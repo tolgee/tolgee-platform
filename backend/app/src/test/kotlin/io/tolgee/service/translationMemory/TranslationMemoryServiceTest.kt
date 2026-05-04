@@ -281,25 +281,6 @@ class TranslationMemoryServiceTest : AbstractSpringTest() {
   }
 
   @Test
-  fun `getOrCreateProjectTm returns existing TM without duplicating`() {
-    val project = projectService.get(testData.projectWithTm.id)
-    val existingTmId = testData.projectTm.id
-
-    val tm1 = translationMemoryManagementService.getOrCreateProjectTm(project)
-    val tm2 = translationMemoryManagementService.getOrCreateProjectTm(project)
-
-    assertThat(tm1.id).isEqualTo(existingTmId)
-    assertThat(tm2.id).isEqualTo(existingTmId)
-
-    val projectTms =
-      translationMemoryProjectRepository
-        .findByProjectId(project.id)
-        .map { it.translationMemory }
-        .filter { it.type == TranslationMemoryType.PROJECT }
-    assertThat(projectTms).hasSize(1)
-  }
-
-  @Test
   fun `base language change updates project TM sourceLanguageTag without touching entries`() {
     // Unassign all shared TMs so the base-language-match validation doesn't block the change.
     translationMemoryProjectRepository.deleteAll(

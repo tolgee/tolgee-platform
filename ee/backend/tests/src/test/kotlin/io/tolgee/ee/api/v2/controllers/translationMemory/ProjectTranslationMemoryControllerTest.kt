@@ -31,10 +31,6 @@ class ProjectTranslationMemoryControllerTest : ProjectAuthControllerTest("/v2/pr
   @Autowired
   private lateinit var translationMemoryEntryRepository: TranslationMemoryEntryRepository
 
-  @Autowired
-  private lateinit var translationMemoryEntrySourceRepository:
-    io.tolgee.repository.translationMemory.TranslationMemoryEntrySourceRepository
-
   lateinit var testData: TranslationMemoryTestData
 
   @BeforeEach
@@ -124,82 +120,19 @@ class ProjectTranslationMemoryControllerTest : ProjectAuthControllerTest("/v2/pr
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `unassign with keepData=false leaves project TM entries unchanged`() {
+  fun `unassign leaves shared and project TM entries unchanged`() {
     val preAssignedSharedTmId = testData.sharedTm.id
     val projectTmId = testData.projectTm.id
     val beforeCount = translationMemoryEntryRepository.findByTranslationMemoryId(projectTmId).size
 
     performAuthDelete(
-      "/v2/projects/${project.id}/translation-memories/$preAssignedSharedTmId?keepData=false",
+      "/v2/projects/${project.id}/translation-memories/$preAssignedSharedTmId",
     ).andIsOk
 
     // Shared TM entries untouched (test data has 3: Hello world de+fr, Thank you de)
     assertThat(translationMemoryEntryRepository.findByTranslationMemoryId(preAssignedSharedTmId)).hasSize(3)
     // Project TM entries unchanged
     assertThat(translationMemoryEntryRepository.findByTranslationMemoryId(projectTmId)).hasSize(beforeCount)
-  }
-
-  @Test
-  @ProjectJWTAuthTestMethod
-  fun `disconnect with keepData=true twice does not duplicate entries`() {
-    // Flow: seed an entry into unassignedSharedTm, then run two assign-disconnect(keepData=true)
-    // cycles. The first cycle snapshots the entry into the project TM; the second cycle must
-    // detect the duplicate and skip it, leaving the project TM entry count unchanged.
-    val projectTmId = testData.projectTm.id
-    val snapshotSourceId = testData.snapshotSourceTm.id
-    val beforeCount = translationMemoryEntryRepository.findByTranslationMemoryId(projectTmId).size
-
-    // Test data seeds snapshotSourceTm with one entry ("Repeat source" → "Wiederhole Quelle" de)
-
-    // First cycle: assign → disconnect with keep
-    performAuthPost(
-      "/v2/projects/${project.id}/translation-memories/$snapshotSourceId",
-      AssignSharedTranslationMemoryRequest(),
-    ).andIsOk
-    performAuthDelete(
-      "/v2/projects/${project.id}/translation-memories/$snapshotSourceId?keepData=true",
-    ).andIsOk
-
-    val afterFirst = translationMemoryEntryRepository.findByTranslationMemoryId(projectTmId)
-    assertThat(afterFirst).hasSize(beforeCount + 1)
-
-    // Second cycle: re-assign → disconnect with keep again — should be a no-op for the project TM
-    performAuthPost(
-      "/v2/projects/${project.id}/translation-memories/$snapshotSourceId",
-      AssignSharedTranslationMemoryRequest(),
-    ).andIsOk
-    performAuthDelete(
-      "/v2/projects/${project.id}/translation-memories/$snapshotSourceId?keepData=true",
-    ).andIsOk
-
-    val afterSecond = translationMemoryEntryRepository.findByTranslationMemoryId(projectTmId)
-    assertThat(afterSecond).hasSize(beforeCount + 1)
-  }
-
-  @Test
-  @ProjectJWTAuthTestMethod
-  fun `unassign with keepData=true snapshots entries into project TM`() {
-    val preAssignedSharedTmId = testData.sharedTm.id
-    val projectTmId = testData.projectTm.id
-    val beforeCount = translationMemoryEntryRepository.findByTranslationMemoryId(projectTmId).size
-
-    performAuthDelete(
-      "/v2/projects/${project.id}/translation-memories/$preAssignedSharedTmId?keepData=true",
-    ).andIsOk
-
-    // Shared TM itself is untouched (3 entries: Hello world de+fr, Thank you de)
-    assertThat(translationMemoryEntryRepository.findByTranslationMemoryId(preAssignedSharedTmId)).hasSize(3)
-
-    // Project TM gained snapshots of each shared entry (3 new)
-    val afterEntries = translationMemoryEntryRepository.findByTranslationMemoryId(projectTmId)
-    assertThat(afterEntries).hasSize(beforeCount + 3)
-
-    val helloEntry = afterEntries.firstOrNull { it.sourceText == "Hello world" }
-    assertThat(helloEntry).isNotNull
-    assertThat(helloEntry!!.targetText).isEqualTo("Hallo Welt")
-    // Snapshot entries are manual — no translation back-references.
-    assertThat(helloEntry.isManual).isTrue()
-    assertThat(translationMemoryEntrySourceRepository.existsByEntryId(helloEntry.id)).isFalse()
   }
 
   @Test

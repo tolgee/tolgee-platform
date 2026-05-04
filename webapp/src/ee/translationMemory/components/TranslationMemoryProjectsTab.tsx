@@ -114,10 +114,7 @@ export const TranslationMemoryProjectsTab: React.VFC<Props> = ({
   const handleRemove = (item: TmAssignedProjectModel) => {
     confirmProjectDisconnect(item.projectName, () => {
       unassignMutation.mutate(
-        {
-          path: { projectId: item.projectId, translationMemoryId },
-          query: { keepData: false },
-        },
+        { path: { projectId: item.projectId, translationMemoryId } },
         { onSuccess: invalidate }
       );
     });

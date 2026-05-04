@@ -27,20 +27,6 @@ interface TranslationMemoryEntryRepository : JpaRepository<TranslationMemoryEntr
   ): TranslationMemoryEntry?
 
   /**
-   * Returns `[sourceText, targetText, targetLanguageTag]` triples already present in the given TM.
-   * Used by the snapshot-on-disconnect path to deduplicate incoming entries without loading the
-   * full destination TM as entities.
-   */
-  @Query(
-    """
-    select e.sourceText, e.targetText, e.targetLanguageTag
-    from TranslationMemoryEntry e
-    where e.translationMemory.id = :translationMemoryId
-    """,
-  )
-  fun findDedupKeysByTranslationMemoryId(translationMemoryId: Long): List<Array<Any>>
-
-  /**
    * Paginated list of entries in a TM, optionally filtered by target language tags (comma-separated)
    * and a free-text substring matching source or target text (case-insensitive).
    */

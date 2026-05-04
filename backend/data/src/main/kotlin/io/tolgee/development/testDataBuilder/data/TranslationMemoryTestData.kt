@@ -54,7 +54,6 @@ class TranslationMemoryTestData : BaseTestData() {
    * rejected.
    */
   lateinit var mismatchedBaseSharedTm: TranslationMemory
-  lateinit var snapshotSourceTm: TranslationMemory
   lateinit var germanLanguageNoTm: Language
   lateinit var germanLanguageWithTm: Language
   lateinit var existingKey: Key
@@ -278,22 +277,6 @@ class TranslationMemoryTestData : BaseTestData() {
           type = TranslationMemoryType.SHARED
         }.build {
           unassignedSharedTm = self
-        }
-
-      // A shared TM with one entry, not assigned to any project — used by keepData
-      // snapshot tests that need to assign → disconnect → verify dedup
-      userAccountBuilder.defaultOrganizationBuilder
-        .addTranslationMemory {
-          name = "Snapshot Source TM"
-          sourceLanguageTag = "en"
-          type = TranslationMemoryType.SHARED
-        }.build {
-          snapshotSourceTm = self
-          addEntry {
-            sourceText = "Repeat source"
-            targetText = "Wiederhole Quelle"
-            targetLanguageTag = "de"
-          }
         }
 
       // An org MEMBER user — used by shared TM permission tests

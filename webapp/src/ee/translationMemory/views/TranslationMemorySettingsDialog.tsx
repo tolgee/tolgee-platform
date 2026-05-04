@@ -22,8 +22,7 @@ type Props = {
  * Edit dialog for an existing TM. Wraps the same form used for creation
  * (TranslationMemoryCreateEditForm) — only the data plumbing differs:
  *   - initialValues come from the GET endpoint instead of empty defaults
- *   - submit calls PUT for the TM body, plus a per-project DELETE for any rows
- *     the user removed (always with keepData=false — entries stay in the shared TM)
+ *   - submit calls PUT for the TM body, plus a per-project DELETE for any rows the user removed
  *   - tmType is fed in so the form can lock writeOnlyReviewed for SHARED TMs
  */
 export const TranslationMemorySettingsDialog: React.VFC<Props> = ({
@@ -102,7 +101,6 @@ export const TranslationMemorySettingsDialog: React.VFC<Props> = ({
       for (const removal of pendingRemovals) {
         await unassignMutation.mutateAsync({
           path: { projectId: removal.projectId, translationMemoryId },
-          query: { keepData: false },
         });
       }
 

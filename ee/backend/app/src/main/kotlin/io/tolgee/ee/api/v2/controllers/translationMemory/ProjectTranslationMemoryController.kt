@@ -29,7 +29,6 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -77,10 +76,8 @@ class ProjectTranslationMemoryController(
   @Operation(
     summary = "Unassign a shared translation memory from the project",
     description =
-      "Removes the assignment between the project and the shared translation memory. " +
-        "When `keepData=true`, entries from the shared TM are first snapshotted into the project's " +
-        "own TM so the project retains the data after the disconnect. When `false` (default), the " +
-        "assignment is simply removed; the shared TM and its entries remain intact for other projects.",
+      "Removes the assignment between the project and the shared translation memory. The " +
+        "shared TM and its entries remain intact for other projects.",
   )
   @RequiresProjectPermissions([Scope.PROJECT_EDIT])
   @RequestActivity(ActivityType.TRANSLATION_MEMORY_UNASSIGN_PROJECT)
@@ -89,12 +86,10 @@ class ProjectTranslationMemoryController(
   @Transactional
   fun unassign(
     @PathVariable translationMemoryId: Long,
-    @RequestParam(defaultValue = "false") keepData: Boolean,
   ) {
     projectTranslationMemoryConfigService.unassignSharedTm(
       projectHolder.project.id,
       translationMemoryId,
-      keepData,
     )
   }
 

@@ -138,7 +138,6 @@ export const ProjectSettingsGeneral = () => {
       for (const conflict of conflictDialog.conflicts) {
         await unassignMutation.mutateAsync({
           path: { projectId: project.id, translationMemoryId: conflict.id },
-          query: { keepData: false },
         });
       }
       await updateProjectSettings(conflictDialog.values);

@@ -1040,7 +1040,7 @@ export interface paths {
   "/v2/projects/{projectId}/translation-memories/{translationMemoryId}": {
     put: operations["updateAssignment"];
     post: operations["assign"];
-    /** Removes the assignment between the project and the shared translation memory. When `keepData=true`, entries from the shared TM are first snapshotted into the project's own TM so the project retains the data after the disconnect. When `false` (default), the assignment is simply removed; the shared TM and its entries remain intact for other projects. */
+    /** Removes the assignment between the project and the shared translation memory. The shared TM and its entries remain intact for other projects. */
     delete: operations["unassign"];
   };
   "/v2/projects/{projectId}/translations": {
@@ -22320,15 +22320,12 @@ export interface operations {
       };
     };
   };
-  /** Removes the assignment between the project and the shared translation memory. When `keepData=true`, entries from the shared TM are first snapshotted into the project's own TM so the project retains the data after the disconnect. When `false` (default), the assignment is simply removed; the shared TM and its entries remain intact for other projects. */
+  /** Removes the assignment between the project and the shared translation memory. The shared TM and its entries remain intact for other projects. */
   unassign: {
     parameters: {
       path: {
         translationMemoryId: number;
         projectId: number;
-      };
-      query: {
-        keepData?: boolean;
       };
     };
     responses: {

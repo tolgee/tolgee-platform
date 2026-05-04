@@ -312,7 +312,7 @@ class TestDataService(
    * Skips fixtures with a soft-deleted project or no organization owner — those represent
    * incomplete setups (deletion-tests, in-progress edits) where adding a TM would just confuse
    * the test. Idempotent for tests that already build a project TM via `addTranslationMemory`:
-   * `getOrCreateProjectTm` short-circuits on the existence check.
+   * the existence check below short-circuits when the fixture already supplied one.
    */
   private fun ensureProjectTms(builder: TestDataBuilder) {
     builder.data.projects.forEach { projectBuilder ->
@@ -322,7 +322,9 @@ class TestDataService(
       // setting it (in-progress edits, partial templates) and accessing the field would throw.
       val ownerSet = runCatching { project.organizationOwner }.isSuccess
       if (!ownerSet) return@forEach
-      translationMemoryManagementService.getOrCreateProjectTm(project)
+      if (translationMemoryManagementService.getProjectTm(project.id) == null) {
+        translationMemoryManagementService.createProjectTm(project)
+      }
     }
   }
 
