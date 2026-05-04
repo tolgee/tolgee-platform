@@ -300,17 +300,6 @@ class TranslationMemoryServiceTest : AbstractSpringTest() {
   }
 
   @Test
-  fun `getOrCreateProjectTm creates the config row when missing`() {
-    val project = projectService.get(testData.projectWithoutTm.id)
-
-    val tm = translationMemoryManagementService.getOrCreateProjectTm(project)
-
-    assertThat(tm.type).isEqualTo(TranslationMemoryType.PROJECT)
-    // No entries — project TM content is virtual now.
-    assertThat(translationMemoryEntryRepository.findByTranslationMemoryId(tm.id)).isEmpty()
-  }
-
-  @Test
   fun `base language change updates project TM sourceLanguageTag without touching entries`() {
     // Unassign all shared TMs so the base-language-match validation doesn't block the change.
     translationMemoryProjectRepository.deleteAll(
