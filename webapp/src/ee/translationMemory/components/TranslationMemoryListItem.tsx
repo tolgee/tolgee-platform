@@ -157,22 +157,26 @@ export const TranslationMemoryListItem: React.VFC<Props> = ({
         </Typography>
       </StyledName>
       <StyledProjects>
-        <Typography variant="body2" color="text.secondary" noWrap>
-          {totalProjects === 0 && (
-            <T
-              keyName="translation_memory_list_no_project"
-              defaultValue="No project"
-            />
-          )}
-          {totalProjects > 0 && totalProjects <= 3 && projectNames.join(', ')}
-          {totalProjects > 3 && (
-            <T
-              keyName="translation_memory_list_projects_count"
-              defaultValue="{count, plural, one {# project} other {# projects}}"
-              params={{ count: totalProjects }}
-            />
-          )}
-        </Typography>
+        {/* Project-only TMs are bound 1:1 to their owning project — its name already shows
+            in the TM name column, so the assignment list would just repeat it. */}
+        {isShared && (
+          <Typography variant="body2" color="text.secondary" noWrap>
+            {totalProjects === 0 && (
+              <T
+                keyName="translation_memory_list_no_project"
+                defaultValue="No project"
+              />
+            )}
+            {totalProjects > 0 && totalProjects <= 3 && projectNames.join(', ')}
+            {totalProjects > 3 && (
+              <T
+                keyName="translation_memory_list_projects_count"
+                defaultValue="{count, plural, one {# project} other {# projects}}"
+                params={{ count: totalProjects }}
+              />
+            )}
+          </Typography>
+        )}
       </StyledProjects>
       <StyledLanguages data-cy="translation-memory-list-languages">
         <Grid container>
