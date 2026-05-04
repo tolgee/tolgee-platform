@@ -1,9 +1,10 @@
 import React from 'react';
-import { Button, TextField } from '@mui/material';
+import { Button, TextField, Tooltip } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { FlagImage } from '@tginternal/library/components/languages/FlagImage';
 import { languageInfo } from '@tginternal/language-util/lib/generated/languageInfo';
 import { useQueryClient } from 'react-query';
+import { Edit02 } from '@untitled-ui/icons-react';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { LimitedHeightText } from 'tg.component/LimitedHeightText';
 import { TmEntryText } from './TmEntryText';
@@ -13,6 +14,7 @@ import { components } from 'tg.service/apiSchema.generated';
 import {
   EntryRowLayout,
   StyledControls,
+  StyledEditAffordance,
   StyledEmpty,
   StyledLanguage,
   StyledTranslation,
@@ -39,6 +41,11 @@ type Props = {
   organizationId: number;
   translationMemoryId: number;
   canManage?: boolean;
+  /**
+   * Tooltip text shown when the cell is not editable. Falsy = no tooltip. Wired by the row
+   * which knows whether the disablement is a permission issue or a synced/virtual row.
+   */
+  editDisabledReason?: React.ReactNode;
   layout: EntryRowLayout;
 };
 
@@ -54,6 +61,7 @@ export const TranslationCell: React.VFC<Props> = ({
   organizationId,
   translationMemoryId,
   canManage = true,
+  editDisabledReason,
   layout,
 }) => {
   const { t } = useTranslate();
@@ -133,73 +141,89 @@ export const TranslationCell: React.VFC<Props> = ({
 
   const isSaving = updateMutation.isLoading || createMutation.isLoading;
 
+  // Show the tooltip only on the read-only state of an un-editable cell. Editable cells get
+  // the pencil-icon affordance instead; the editing state shows form controls and shouldn't
+  // be obscured.
+  const tooltipTitle: React.ReactNode =
+    !canManage && !isEditing && editDisabledReason ? editDisabledReason : '';
+
   return (
-    <StyledTranslationCell
-      $layout={layout}
-      className={isEditing ? 'editing' : ''}
-      onClick={!isEditing && canManage ? handleEdit : undefined}
-      style={!canManage ? { cursor: 'default' } : undefined}
-      data-cy="tm-entry-translation-cell"
-    >
-      {layout === 'stacked' && (
-        <StyledLanguage>
-          <FlagImage flagEmoji={targetFlag} height={16} />
-          <div>{targetName}</div>
-        </StyledLanguage>
-      )}
-      <StyledTranslation $layout={layout}>
-        {!isEditing ? (
-          entry?.targetText || virtualText ? (
-            <LimitedHeightText
-              maxLines={3}
-              wrap="break-word"
-              lineHeight="1.3em"
-            >
-              <TmEntryText
-                text={entry?.targetText ?? virtualText ?? ''}
-                locale={langTag}
-              />
-            </LimitedHeightText>
-          ) : (
-            <StyledEmpty>—</StyledEmpty>
-          )
-        ) : (
-          <>
-            <TextField
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-              onKeyDown={handleKeyDown}
-              multiline
-              minRows={2}
-              fullWidth
-              autoFocus
-              size="small"
-              data-cy="tm-entry-edit-field"
-            />
-            <StyledControls>
-              <div style={{ flex: 1 }} />
-              <Button
-                onClick={onCancel}
-                size="small"
-                variant="outlined"
-                data-cy="tm-entry-cancel"
-              >
-                {t('global_cancel_button')}
-              </Button>
-              <LoadingButton
-                onClick={save}
-                size="small"
-                variant="contained"
-                color="primary"
-                loading={isSaving}
-                data-cy="tm-entry-save"
-              >
-                {t('global_form_save')}
-              </LoadingButton>
-            </StyledControls>
-          </>
+    <Tooltip title={tooltipTitle} placement="bottom" arrow>
+      <StyledTranslationCell
+        $layout={layout}
+        className={isEditing ? 'editing' : ''}
+        onClick={!isEditing && canManage ? handleEdit : undefined}
+        style={!canManage ? { cursor: 'default' } : undefined}
+        data-cy="tm-entry-translation-cell"
+      >
+        {canManage && !isEditing && (
+          <StyledEditAffordance
+            className="tm-edit-affordance"
+            data-cy="tm-entry-edit-affordance"
+          >
+            <Edit02 width={20} height={20} />
+          </StyledEditAffordance>
         )}
-      </StyledTranslation>
-    </StyledTranslationCell>
+        {layout === 'stacked' && (
+          <StyledLanguage>
+            <FlagImage flagEmoji={targetFlag} height={16} />
+            <div>{targetName}</div>
+          </StyledLanguage>
+        )}
+        <StyledTranslation $layout={layout}>
+          {!isEditing ? (
+            entry?.targetText || virtualText ? (
+              <LimitedHeightText
+                maxLines={3}
+                wrap="break-word"
+                lineHeight="1.3em"
+              >
+                <TmEntryText
+                  text={entry?.targetText ?? virtualText ?? ''}
+                  locale={langTag}
+                />
+              </LimitedHeightText>
+            ) : (
+              <StyledEmpty>—</StyledEmpty>
+            )
+          ) : (
+            <>
+              <TextField
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                onKeyDown={handleKeyDown}
+                multiline
+                minRows={2}
+                fullWidth
+                autoFocus
+                size="small"
+                data-cy="tm-entry-edit-field"
+              />
+              <StyledControls>
+                <div style={{ flex: 1 }} />
+                <Button
+                  onClick={onCancel}
+                  size="small"
+                  variant="outlined"
+                  data-cy="tm-entry-cancel"
+                >
+                  {t('global_cancel_button')}
+                </Button>
+                <LoadingButton
+                  onClick={save}
+                  size="small"
+                  variant="contained"
+                  color="primary"
+                  loading={isSaving}
+                  data-cy="tm-entry-save"
+                >
+                  {t('global_form_save')}
+                </LoadingButton>
+              </StyledControls>
+            </>
+          )}
+        </StyledTranslation>
+      </StyledTranslationCell>
+    </Tooltip>
   );
 };

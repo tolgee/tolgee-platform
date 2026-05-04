@@ -1,5 +1,6 @@
 import React from 'react';
 import { Checkbox, styled } from '@mui/material';
+import { T } from '@tolgee/react';
 import { FlagImage } from '@tginternal/library/components/languages/FlagImage';
 import { languageInfo } from '@tginternal/language-util/lib/generated/languageInfo';
 import { LimitedHeightText } from 'tg.component/LimitedHeightText';
@@ -87,6 +88,19 @@ export const TranslationMemoryEntryRow: React.VFC<Props> = ({
   const hasStoredEntries = group.entries.length > 0;
   const selectable = hasStoredEntries && groupId !== undefined;
 
+  // Computed once per row — every cell shares the same disablement reason.
+  const rowEditDisabledReason: React.ReactNode = !canManage ? (
+    <T
+      keyName="tm_entry_edit_disabled_no_permission"
+      defaultValue="Only organization maintainers can edit translation memory entries."
+    />
+  ) : !group.isManual ? (
+    <T
+      keyName="tm_entry_edit_disabled_synced"
+      defaultValue="This entry is synced from a project translation. Edit the source translation in the project instead."
+    />
+  ) : undefined;
+
   return (
     <StyledRow
       $layout={layout}
@@ -166,6 +180,7 @@ export const TranslationMemoryEntryRow: React.VFC<Props> = ({
               organizationId={organizationId}
               translationMemoryId={translationMemoryId}
               canManage={editable}
+              editDisabledReason={rowEditDisabledReason}
               layout={layout}
             />
           );

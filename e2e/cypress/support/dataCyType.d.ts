@@ -894,6 +894,7 @@ declare namespace DataCy {
         "tm-entry-add-language" |
         "tm-entry-cancel" |
         "tm-entry-create-submit" |
+        "tm-entry-edit-affordance" |
         "tm-entry-edit-field" |
         "tm-entry-row-checkbox" |
         "tm-entry-row-keys" |

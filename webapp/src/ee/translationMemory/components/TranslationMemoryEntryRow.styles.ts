@@ -72,6 +72,7 @@ export const StyledTranslations = styled('div')<{ $layout: EntryRowLayout }>`
 `;
 
 export const StyledTranslationCell = styled('div')<{ $layout: EntryRowLayout }>`
+  position: relative;
   display: grid;
   grid-template-areas: ${({ $layout }) =>
     $layout === 'flat'
@@ -92,6 +93,12 @@ export const StyledTranslationCell = styled('div')<{ $layout: EntryRowLayout }>`
     background: ${({ theme }) => theme.palette.cell.hover};
     transition: background 0.1s ease-in;
   }
+  /* Pencil affordance is rendered always-on for editable cells; a sibling-state hover rule
+     here brings it from 0 → 1 opacity so the cell only advertises editability when the
+     pointer is over it. */
+  &:hover .tm-edit-affordance {
+    opacity: 1;
+  }
   &.editing {
     cursor: default;
     z-index: 1;
@@ -101,6 +108,19 @@ export const StyledTranslationCell = styled('div')<{ $layout: EntryRowLayout }>`
         ? '0px 0px 7px rgba(0, 0, 0, 1)'
         : '0px 0px 10px rgba(0, 0, 0, 0.2)'} !important;
   }
+`;
+
+export const StyledEditAffordance = styled('div')`
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: ${({ theme }) => theme.palette.text.secondary};
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.1s ease-in;
 `;
 
 export const StyledLanguage = styled('div')`
