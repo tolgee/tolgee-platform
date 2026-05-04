@@ -26,6 +26,13 @@ interface ReactListProps {
   type?: string | undefined;
   useStaticSize?: boolean | undefined;
   useTranslate3d?: boolean | undefined;
+  /**
+   * Extra pixels added to the inner container's size so the layout stays stable when an
+   * item expands inline (e.g. a cell entering edit mode). Set to a non-zero value only when
+   * such expansion is currently possible — otherwise it shows up as phantom scroll space at
+   * the bottom of the list. Default: 0.
+   */
+  expansionReserve?: number | undefined;
 }
 
 export declare class ReactList extends Component<ReactListProps> {

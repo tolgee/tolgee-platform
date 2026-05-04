@@ -541,6 +541,10 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
                     layout
                   )
                 }
+                // Only reserve room for editor expansion while a cell is actually being
+                // edited — otherwise we'd render ~300px of phantom scroll space below the
+                // last row.
+                expansionReserve={editingCell ? 300 : 0}
                 // @ts-ignore — third-party type expects JSX element; window/HTMLElement are accepted at runtime
                 scrollParentGetter={() => verticalScrollRef.current ?? window}
                 length={groups.length}
