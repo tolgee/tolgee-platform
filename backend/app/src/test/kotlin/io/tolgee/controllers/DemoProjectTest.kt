@@ -5,6 +5,7 @@ import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.Project
+import io.tolgee.model.translationMemory.TranslationMemoryType
 import io.tolgee.testing.AbstractControllerTest
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -33,9 +34,16 @@ class DemoProjectTest : AbstractControllerTest() {
       assertPlural()
       assertDescriptionAdded()
       assertTranslationHasComment()
+      assertProjectTmCreated()
     }
 
     assertStatsCreated()
+  }
+
+  private fun assertProjectTmCreated() {
+    val tm = translationMemoryManagementService.getProjectTm(project.id)!!
+    tm.type.assert.isEqualTo(TranslationMemoryType.PROJECT)
+    tm.sourceLanguageTag.assert.isEqualTo("en")
   }
 
   private fun assertTranslationHasComment() {

@@ -39,9 +39,6 @@ class TranslationMemoryServiceTest : AbstractSpringTest() {
   lateinit var translationMemoryRepository: TranslationMemoryRepository
 
   @Autowired
-  lateinit var translationMemoryManagementService: TranslationMemoryManagementService
-
-  @Autowired
   lateinit var projectCreationService: ProjectCreationService
 
   @Autowired
