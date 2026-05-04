@@ -38,19 +38,26 @@ type Props = {
   sourceLanguageTag: string;
   displayLanguages: string[];
   selectionService?: SelectionService<number>;
+  /**
+   * Toggles the select-all checkbox in the leading cell. When false the cell stays in the
+   * grid (so column alignment matches the rows below) but renders empty — row-level
+   * checkboxes are hidden for non-managers, so a select-all on top of nothing would mislead.
+   */
+  canManage?: boolean;
 };
 
 export const TmEntriesListHeader: React.VFC<Props> = ({
   sourceLanguageTag,
   displayLanguages,
   selectionService,
+  canManage = true,
 }) => (
   <StyledListHeader
     style={{ gridTemplateColumns: flatGridColumns(displayLanguages.length) }}
     data-cy="tm-entries-header"
   >
     <StyledSelectionCell>
-      {selectionService && (
+      {selectionService && canManage && (
         <Checkbox
           size="small"
           checked={selectionService.isAllSelected}

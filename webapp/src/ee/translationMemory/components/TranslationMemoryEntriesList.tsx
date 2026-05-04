@@ -527,6 +527,7 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
                 sourceLanguageTag={sourceLanguageTag}
                 displayLanguages={displayLanguages}
                 selectionService={selectionService}
+                canManage={canManage}
               />
             )}
 
