@@ -1,6 +1,5 @@
 package io.tolgee.service.translation
 
-import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.model.key.Key
 import io.tolgee.model.views.TranslationMemoryItemView
 import org.springframework.data.domain.Page
@@ -21,7 +20,7 @@ import org.springframework.data.domain.Pageable
 interface TranslationMemoryService {
   fun getSuggestions(
     key: Key,
-    targetLanguage: LanguageDto,
+    targetLanguageTag: String,
     pageable: Pageable,
   ): Page<TranslationMemoryItemView>
 

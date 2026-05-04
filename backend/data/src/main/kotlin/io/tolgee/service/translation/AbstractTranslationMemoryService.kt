@@ -1,6 +1,5 @@
 package io.tolgee.service.translation
 
-import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.model.key.Key
 import io.tolgee.model.views.TranslationMemoryItemView
 import io.tolgee.service.translationMemory.TranslationMemoryManagementService
@@ -49,7 +48,7 @@ abstract class AbstractTranslationMemoryService(
   @Transactional
   override fun getSuggestions(
     key: Key,
-    targetLanguage: LanguageDto,
+    targetLanguageTag: String,
     pageable: Pageable,
   ): Page<TranslationMemoryItemView> {
     val project = key.project
@@ -64,7 +63,7 @@ abstract class AbstractTranslationMemoryService(
       keyId = key.id,
       projectId = project.id,
       organizationId = project.organizationOwner.id,
-      targetLanguageTag = targetLanguage.tag,
+      targetLanguageTag = targetLanguageTag,
       pageable = pageable,
     )
   }

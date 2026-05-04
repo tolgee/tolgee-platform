@@ -1,6 +1,5 @@
 package io.tolgee.service.translationMemory
 
-import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.model.Language
 import io.tolgee.model.key.Key
 import io.tolgee.model.views.TranslationMemoryItemView
@@ -22,10 +21,7 @@ class TmAutoTranslateProviderOssImpl(
     targetLanguage: Language,
   ): TranslationMemoryItemView? =
     translationMemoryService
-      .getSuggestions(
-        key,
-        LanguageDto.fromEntity(targetLanguage, baseLanguageId = null),
-        PageRequest.of(0, 1),
-      ).content
+      .getSuggestions(key, targetLanguage.tag, PageRequest.of(0, 1))
+      .content
       .firstOrNull()
 }

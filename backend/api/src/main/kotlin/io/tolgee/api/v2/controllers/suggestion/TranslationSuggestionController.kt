@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.hateoas.invitation.TranslationMemoryItemModelAssembler
 import io.tolgee.constants.Message
-import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.request.SuggestRequestDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
@@ -24,9 +23,7 @@ import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationMemoryService
 import io.tolgee.util.disableAccelBuffering
 import jakarta.validation.Valid
-import org.slf4j.LoggerFactory
 import org.springdoc.core.annotations.ParameterObject
-import org.springframework.dao.QueryTimeoutException
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
@@ -55,8 +52,6 @@ class TranslationSuggestionController(
   private val securityService: SecurityService,
   private val machineTranslationSuggestionFacade: MachineTranslationSuggestionFacade,
 ) {
-  private val log = LoggerFactory.getLogger(TranslationSuggestionController::class.java)
-
   @PostMapping("/machine-translations")
   @Operation(
     summary = "Get machine translation suggestions",
@@ -119,7 +114,7 @@ class TranslationSuggestionController(
     val targetLanguage = languageService.get(dto.targetLanguageId, projectHolder.project.id)
     val project = projectHolder.project
 
-    val data: Page<TranslationMemoryItemView> =
+    val data =
       dto.baseText?.let { baseText ->
         translationMemoryService.getSuggestions(
           baseTranslationText = baseText,
@@ -135,11 +130,7 @@ class TranslationSuggestionController(
           val keyId = dto.keyId ?: throw BadRequestException(Message.KEY_NOT_FOUND)
           val key = keyService.findOptional(keyId).orElseThrow { NotFoundException(Message.KEY_NOT_FOUND) }
           key.checkInProject()
-          translationMemoryService.getSuggestions(
-            key,
-            LanguageDto.fromEntity(targetLanguage, baseLanguageId = null),
-            pageable,
-          )
+          translationMemoryService.getSuggestions(key, targetLanguage.tag, pageable)
         }
     return arraytranslationMemoryItemModelAssembler.toModel(data, translationMemoryItemModelAssembler)
   }
