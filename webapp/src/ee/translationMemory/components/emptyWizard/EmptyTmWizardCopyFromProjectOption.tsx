@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { T, useTranslate } from '@tolgee/react';
 import { Folder } from '@untitled-ui/icons-react';
-import { CopyFromProjectDialog } from './CopyFromProjectDialog';
+import { CopyFromProjectDialog } from 'tg.ee.module/translationMemory/components/CopyFromProjectDialog';
 import { EmptyTmWizardCard } from './EmptyTmWizardCard';
 
 type Props = {

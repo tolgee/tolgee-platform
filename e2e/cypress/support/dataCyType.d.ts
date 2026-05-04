@@ -903,9 +903,11 @@ declare namespace DataCy {
         "tm-entry-target-text" |
         "tm-entry-translation-cell" |
         "tm-export-button" |
-        "tm-import-button" |
         "tm-import-cancel" |
         "tm-import-dialog" |
+        "tm-import-menu-button" |
+        "tm-import-menu-copy-from-project" |
+        "tm-import-menu-tmx" |
         "tm-import-mode-keep" |
         "tm-import-mode-override" |
         "tm-import-submit" |

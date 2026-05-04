@@ -1,14 +1,20 @@
+import { useRef, useState } from 'react';
 import {
   Box,
   Button,
   ButtonGroup,
   IconButton,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
   Tooltip,
   Typography,
 } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import {
   FileDownload03,
+  Folder,
   LayoutGrid02,
   LayoutLeft,
   UploadCloud02,
@@ -49,6 +55,7 @@ type Props = {
   sourceLanguageTag: string;
   canManage: boolean;
   onImport: () => void;
+  onCopyFromProject: () => void;
   onExport: () => void;
   exportDisabled: boolean;
   onCreate: () => void;
@@ -72,11 +79,14 @@ export const TmEntriesToolbar: React.VFC<Props> = ({
   sourceLanguageTag,
   canManage,
   onImport,
+  onCopyFromProject,
   onExport,
   exportDisabled,
   onCreate,
 }) => {
   const { t } = useTranslate();
+  const importMenuAnchor = useRef<HTMLButtonElement | null>(null);
+  const [importMenuOpen, setImportMenuOpen] = useState(false);
 
   const renderLangItem = (props: object, item: OrganizationLanguageModel) => {
     const isBase = item.tag === sourceLanguageTag;
@@ -177,16 +187,66 @@ export const TmEntriesToolbar: React.VFC<Props> = ({
           />
         </Box>
         {canManage && (
-          <Tooltip title={t('translation_memory_import_tmx', 'Import TMX')}>
-            <IconButton
-              size="small"
-              color="primary"
-              onClick={onImport}
-              data-cy="tm-import-button"
+          <>
+            <Tooltip
+              title={t(
+                'translation_memory_import_menu_tooltip',
+                'Add entries…'
+              )}
             >
-              <UploadCloud02 width={20} height={20} />
-            </IconButton>
-          </Tooltip>
+              <IconButton
+                size="small"
+                color="primary"
+                onClick={() => setImportMenuOpen(true)}
+                ref={importMenuAnchor}
+                data-cy="tm-import-menu-button"
+              >
+                <UploadCloud02 width={20} height={20} />
+              </IconButton>
+            </Tooltip>
+            <Menu
+              anchorEl={importMenuAnchor.current}
+              open={importMenuOpen}
+              onClose={() => setImportMenuOpen(false)}
+              anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+              transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+            >
+              <MenuItem
+                onClick={() => {
+                  setImportMenuOpen(false);
+                  onImport();
+                }}
+                data-cy="tm-import-menu-tmx"
+              >
+                <ListItemIcon>
+                  <UploadCloud02 width={18} height={18} />
+                </ListItemIcon>
+                <ListItemText>
+                  <T
+                    keyName="translation_memory_import_tmx"
+                    defaultValue="Import TMX"
+                  />
+                </ListItemText>
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  setImportMenuOpen(false);
+                  onCopyFromProject();
+                }}
+                data-cy="tm-import-menu-copy-from-project"
+              >
+                <ListItemIcon>
+                  <Folder width={18} height={18} />
+                </ListItemIcon>
+                <ListItemText>
+                  <T
+                    keyName="translation_memory_copy_from_project"
+                    defaultValue="Copy from a project"
+                  />
+                </ListItemText>
+              </MenuItem>
+            </Menu>
+          </>
         )}
         <Tooltip title={t('translation_memory_export_tmx', 'Export TMX')}>
           <IconButton
