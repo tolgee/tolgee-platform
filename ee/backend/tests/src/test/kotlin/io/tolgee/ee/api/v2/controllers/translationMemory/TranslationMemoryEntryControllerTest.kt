@@ -116,8 +116,9 @@ class TranslationMemoryEntryControllerTest : AuthorizedControllerTest() {
       "/v2/organizations/$orgId/translation-memories/$projectTmId/entries?size=1&page=0",
     ).andIsOk
       .andAssertThatJson {
-        node("page.totalElements").isEqualTo(2)
-        node("page.totalPages").isEqualTo(2)
+        // projectWithTm has 4 keys with German targets — existing/reviewed/promoted/demoted.
+        node("page.totalElements").isEqualTo(4)
+        node("page.totalPages").isEqualTo(4)
         node("_embedded.translationMemoryEntryGroups").isArray.hasSize(1)
       }.andReturn()
       .response
@@ -134,7 +135,7 @@ class TranslationMemoryEntryControllerTest : AuthorizedControllerTest() {
       .contentAsString
       .let { sourceTexts += extractSourceTexts(it) }
 
-    // Disjoint pages → 2 distinct source texts seen across the two requests, not 1 repeated.
+    // Disjoint pages → distinct source texts seen across the two requests, not the same repeated.
     assertThat(sourceTexts).hasSize(2)
   }
 
@@ -164,16 +165,21 @@ class TranslationMemoryEntryControllerTest : AuthorizedControllerTest() {
       "/v2/organizations/$orgId/translation-memories/$projectTmId/entries",
     ).andIsOk
       .andAssertThatJson {
-        // Two virtual rows ("Existing source", "Reviewed source") + one manual ("Manual phrase")
-        node("page.totalElements").isEqualTo(3)
-        node("_embedded.translationMemoryEntryGroups").isArray.hasSize(3)
-        // Alphabetical order by source_text
-        node("_embedded.translationMemoryEntryGroups[0].sourceText").isEqualTo("Existing source")
+        // 4 virtual rows from projectWithTm's German targets (Demotion / Existing / Promoted /
+        // Reviewed) + 1 manual ("Manual phrase").
+        node("page.totalElements").isEqualTo(5)
+        node("_embedded.translationMemoryEntryGroups").isArray.hasSize(5)
+        // Alphabetical order by source_text — manual ("Manual phrase") slots between virtual rows.
+        node("_embedded.translationMemoryEntryGroups[0].sourceText").isEqualTo("Demotion source")
         node("_embedded.translationMemoryEntryGroups[0].isManual").isEqualTo(false)
-        node("_embedded.translationMemoryEntryGroups[1].sourceText").isEqualTo("Manual phrase")
-        node("_embedded.translationMemoryEntryGroups[1].isManual").isEqualTo(true)
-        node("_embedded.translationMemoryEntryGroups[2].sourceText").isEqualTo("Reviewed source")
-        node("_embedded.translationMemoryEntryGroups[2].isManual").isEqualTo(false)
+        node("_embedded.translationMemoryEntryGroups[1].sourceText").isEqualTo("Existing source")
+        node("_embedded.translationMemoryEntryGroups[1].isManual").isEqualTo(false)
+        node("_embedded.translationMemoryEntryGroups[2].sourceText").isEqualTo("Manual phrase")
+        node("_embedded.translationMemoryEntryGroups[2].isManual").isEqualTo(true)
+        node("_embedded.translationMemoryEntryGroups[3].sourceText").isEqualTo("Promoted source")
+        node("_embedded.translationMemoryEntryGroups[3].isManual").isEqualTo(false)
+        node("_embedded.translationMemoryEntryGroups[4].sourceText").isEqualTo("Reviewed source")
+        node("_embedded.translationMemoryEntryGroups[4].isManual").isEqualTo(false)
       }
   }
 
@@ -199,12 +205,14 @@ class TranslationMemoryEntryControllerTest : AuthorizedControllerTest() {
       "/v2/organizations/$orgId/translation-memories/$projectTmId/entries",
     ).andIsOk
       .andAssertThatJson {
-        node("page.totalElements").isEqualTo(3)
-        // First two rows share "Existing source" — manual ahead of virtual
-        node("_embedded.translationMemoryEntryGroups[0].sourceText").isEqualTo("Existing source")
-        node("_embedded.translationMemoryEntryGroups[0].isManual").isEqualTo(true)
+        // 4 virtual rows + 1 manual ("Existing source") sharing a source text with one virtual.
+        node("page.totalElements").isEqualTo(5)
+        // The two "Existing source" rows are alphabetically tied — manual sorts ahead of virtual
+        // (matches SHARED-TM ordering: is_manual desc).
         node("_embedded.translationMemoryEntryGroups[1].sourceText").isEqualTo("Existing source")
-        node("_embedded.translationMemoryEntryGroups[1].isManual").isEqualTo(false)
+        node("_embedded.translationMemoryEntryGroups[1].isManual").isEqualTo(true)
+        node("_embedded.translationMemoryEntryGroups[2].sourceText").isEqualTo("Existing source")
+        node("_embedded.translationMemoryEntryGroups[2].isManual").isEqualTo(false)
       }
   }
 
@@ -491,17 +499,19 @@ class TranslationMemoryEntryControllerTest : AuthorizedControllerTest() {
       request,
     ).andIsOk
       .andAssertThatJson {
-        // Source project has 2 keys with German translations -> 2 virtual entries copied.
-        node("copied").isEqualTo(2)
+        // Source project has 4 keys with German targets -> 4 virtual entries copied.
+        node("copied").isEqualTo(4)
         node("skipped").isEqualTo(0)
       }
 
     val entries = translationMemoryEntryRepository.findByTranslationMemoryId(targetTmId)
-    assertThat(entries).hasSize(2)
+    assertThat(entries).hasSize(4)
     assertThat(entries.map { it.sourceText to it.targetText })
       .containsExactlyInAnyOrder(
         "Existing source" to "Bestehende Übersetzung",
         "Reviewed source" to "Überprüfte Übersetzung",
+        "Promoted source" to "Hochgestufter Text",
+        "Demotion source" to "Herabzustufender Text",
       )
     // All copied rows are stored as manual — virtual rows are materialized on copy.
     assertThat(entries).allMatch { it.isManual }
@@ -523,9 +533,9 @@ class TranslationMemoryEntryControllerTest : AuthorizedControllerTest() {
     ).andIsOk
       .andAssertThatJson {
         node("copied").isEqualTo(0)
-        node("skipped").isEqualTo(2)
+        node("skipped").isEqualTo(4)
       }
-    assertThat(translationMemoryEntryRepository.findByTranslationMemoryId(targetTmId)).hasSize(2)
+    assertThat(translationMemoryEntryRepository.findByTranslationMemoryId(targetTmId)).hasSize(4)
   }
 
   @Test
