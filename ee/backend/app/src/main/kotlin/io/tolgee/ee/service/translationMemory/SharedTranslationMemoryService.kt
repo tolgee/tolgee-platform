@@ -169,12 +169,31 @@ class SharedTranslationMemoryService(
   ) {
     val existing = translationMemoryProjectRepository.findByTranslationMemoryId(tm.id)
     val existingByProjectId = existing.associateBy { it.project.id }
-    val newProjectIds = assignments.map { it.projectId }.toSet()
+    val targetProjectIds = assignments.map { it.projectId }.toSet()
 
     // Remove assignments not in the new set
-    existing.filter { it.project.id !in newProjectIds }.forEach {
+    existing.filter { it.project.id !in targetProjectIds }.forEach {
       translationMemoryProjectRepository.delete(it)
     }
+
+    val newAssignmentProjectIds =
+      assignments.map { it.projectId }.filter { it !in existingByProjectId }
+    // Pre-fetch projects + max priorities for all new assignments — replaces a per-iteration
+    // query each. With N new assignments we issue 2 queries total instead of 2*N.
+    val projectsById =
+      if (newAssignmentProjectIds.isNotEmpty()) {
+        projectService.findAll(newAssignmentProjectIds).associateBy { it.id }
+      } else {
+        emptyMap()
+      }
+    val maxPriorityByProjectId =
+      if (newAssignmentProjectIds.isNotEmpty()) {
+        translationMemoryProjectRepository
+          .findMaxPriorityByProjectIds(newAssignmentProjectIds)
+          .associate { (it[0] as Number).toLong() to (it[1] as Number).toInt() }
+      } else {
+        emptyMap()
+      }
 
     for (dto in assignments) {
       val existingAssignment = existingByProjectId[dto.projectId]
@@ -186,7 +205,9 @@ class SharedTranslationMemoryService(
         translationMemoryProjectRepository.save(existingAssignment)
       } else {
         // Create new assignment
-        val project = projectService.get(dto.projectId)
+        val project =
+          projectsById[dto.projectId]
+            ?: throw NotFoundException(Message.PROJECT_NOT_FOUND)
         require(project.organizationOwner.id == organizationId) {
           "Project ${dto.projectId} does not belong to organization $organizationId"
         }
@@ -199,11 +220,7 @@ class SharedTranslationMemoryService(
         }
         // Stack under every existing assignment (project TM starts at 0, previous shared TMs at
         // 1..N). First assignment to an empty-of-shared project ends up at 1.
-        val nextPriority =
-          translationMemoryProjectRepository
-            .findByProjectId(dto.projectId)
-            .maxOfOrNull { it.priority }
-            ?.plus(1) ?: 0
+        val nextPriority = maxPriorityByProjectId[dto.projectId]?.plus(1) ?: 0
         val assignment = TranslationMemoryProject()
         assignment.translationMemory = tm
         assignment.project = project

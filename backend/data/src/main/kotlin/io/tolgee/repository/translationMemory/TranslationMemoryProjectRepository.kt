@@ -3,7 +3,9 @@ package io.tolgee.repository.translationMemory
 import io.tolgee.model.translationMemory.TranslationMemoryProject
 import jakarta.persistence.QueryHint
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Query
 import org.springframework.data.jpa.repository.QueryHints
+import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
 
 @Repository
@@ -40,4 +42,21 @@ interface TranslationMemoryProjectRepository : JpaRepository<TranslationMemoryPr
   ): TranslationMemoryProject?
 
   fun deleteByProjectId(projectId: Long)
+
+  /**
+   * Returns `(project_id, max_priority)` pairs for the given project ids. Used to compute the
+   * "next available priority" for many new shared-TM assignments in one DB round-trip instead
+   * of one per assigned project.
+   */
+  @Query(
+    """
+    select p.project.id, max(p.priority)
+    from TranslationMemoryProject p
+    where p.project.id in :projectIds
+    group by p.project.id
+    """,
+  )
+  fun findMaxPriorityByProjectIds(
+    @Param("projectIds") projectIds: Collection<Long>,
+  ): List<Array<Any>>
 }
