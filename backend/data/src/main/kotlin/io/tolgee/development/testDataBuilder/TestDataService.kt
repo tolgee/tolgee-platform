@@ -296,11 +296,21 @@ class TestDataService(
     }
   }
 
+  /**
+   * Tests can call `saveTestData(testData.root)` more than once (e.g. add a key mid-test, then
+   * re-save). The auto-added project TM lands in the builder tree on the first save and gets
+   * an id assigned — on subsequent saves the entity is detached, so `persist` would throw
+   * `EntityExistsException`. Filter on `id == 0` so we only persist freshly-added entities,
+   * matching the pattern used by `saveBranches` and friends.
+   */
   private fun saveTranslationMemoryData(builder: TestDataBuilder) {
     val tmBuilders = builder.data.organizations.flatMap { it.data.translationMemories }
-    tmBuilders.forEach { entityManager.persist(it.self) }
-    tmBuilders.flatMap { it.data.projectAssignments }.forEach { entityManager.persist(it.self) }
-    tmBuilders.flatMap { it.data.entries }.forEach { entityManager.persist(it.self) }
+    tmBuilders.filter { it.self.id == 0L }.forEach { entityManager.persist(it.self) }
+    tmBuilders
+      .flatMap { it.data.projectAssignments }
+      .filter { it.self.id == 0L }
+      .forEach { entityManager.persist(it.self) }
+    tmBuilders.flatMap { it.data.entries }.filter { it.self.id == 0L }.forEach { entityManager.persist(it.self) }
   }
 
   /**
