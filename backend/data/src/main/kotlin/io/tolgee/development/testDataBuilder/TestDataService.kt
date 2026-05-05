@@ -46,7 +46,6 @@ import io.tolgee.service.security.UserPreferencesService
 import io.tolgee.service.translation.AutoTranslationService
 import io.tolgee.service.translation.TranslationCommentService
 import io.tolgee.service.translation.TranslationService
-import io.tolgee.service.translationMemory.TranslationMemoryManagementService
 import io.tolgee.util.Logging
 import io.tolgee.util.executeInNewTransaction
 import io.tolgee.util.logger
@@ -95,7 +94,6 @@ class TestDataService(
   private val bypassableActivityListeners: List<BypassableActivityListener>,
   private val invitationService: InvitationService,
   private val keyCodeReferenceRepository: KeyCodeReferenceRepository,
-  private val translationMemoryManagementService: TranslationMemoryManagementService,
 ) : Logging {
   @Transactional
   fun saveTestData(ft: TestDataBuilder.() -> Unit): TestDataBuilder {
@@ -133,8 +131,10 @@ class TestDataService(
       executeInNewTransaction(transactionManager) {
         saveProjectData(builder)
         saveGlossaryData(builder)
-        saveTranslationMemoryData(builder)
+        // Must run before saveTranslationMemoryData — auto-added project TMs are appended to the
+        // builder tree and get persisted by the regular TM pass alongside fixture-declared ones.
         ensureProjectTms(builder)
+        saveTranslationMemoryData(builder)
         saveNotifications(builder)
         finalize()
       }
@@ -311,8 +311,8 @@ class TestDataService(
    *
    * Skips fixtures with a soft-deleted project or no organization owner — those represent
    * incomplete setups (deletion-tests, in-progress edits) where adding a TM would just confuse
-   * the test. Idempotent for tests that already build a project TM via `addTranslationMemory`:
-   * the existence check below short-circuits when the fixture already supplied one.
+   * the test. Defers to [ProjectBuilder.ensureProjectTm], which itself short-circuits when the
+   * fixture explicitly declared a PROJECT-type TM.
    */
   private fun ensureProjectTms(builder: TestDataBuilder) {
     builder.data.projects.forEach { projectBuilder ->
@@ -322,9 +322,7 @@ class TestDataService(
       // setting it (in-progress edits, partial templates) and accessing the field would throw.
       val ownerSet = runCatching { project.organizationOwner }.isSuccess
       if (!ownerSet) return@forEach
-      if (translationMemoryManagementService.getProjectTm(project.id) == null) {
-        translationMemoryManagementService.createProjectTm(project)
-      }
+      projectBuilder.ensureProjectTm()
     }
   }
 
