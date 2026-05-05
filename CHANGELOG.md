@@ -1,3 +1,15 @@
+## [3.183.4](https://github.com/tolgee/tolgee-platform/compare/v3.183.3...v3.183.4) (2026-05-05)
+
+
+### Bug Fixes
+
+* chunk key id batches in delete-keys job ([#3623](https://github.com/tolgee/tolgee-platform/issues/3623)) ([0836e06](https://github.com/tolgee/tolgee-platform/commit/0836e0632269875cd2c1e746f276c592213a9545))
+
+
+### Performance Improvements
+
+* chunk bulk batch-job processors at 5000 items ([#3633](https://github.com/tolgee/tolgee-platform/issues/3633)) ([0291962](https://github.com/tolgee/tolgee-platform/commit/0291962998dfc5f9bc8e4fdbfe4a2bc394d743cb))
+
 ## [3.183.3](https://github.com/tolgee/tolgee-platform/compare/v3.183.2...v3.183.3) (2026-05-03)
 
 

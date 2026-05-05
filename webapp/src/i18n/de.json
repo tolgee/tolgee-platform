@@ -2483,6 +2483,7 @@
   "translation_filters_comments_unresolved": "Ungelöste Kommentare",
   "translation_filters_has_no_suggestions": "Keine Vorschläge",
   "translation_filters_has_suggestions": "Mit Vorschlägen",
+  "translation_filters_qa_checks_stale": "QA-Prüfungen veraltet",
   "translation_filters_qa_has_issues": "Beliebiges QA-Problem",
   "translation_format_help": "Wie Sie die Übersetzung formatieren",
   "translation_grid_key_text": "Schlüssel",

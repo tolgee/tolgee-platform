@@ -2472,6 +2472,7 @@
   "translation_filters_comments_unresolved": "Uløste kommentarer",
   "translation_filters_has_no_suggestions": "Ingen forslag",
   "translation_filters_has_suggestions": "Med forslag",
+  "translation_filters_qa_checks_stale": "QA-kontroller utdaterte",
   "translation_filters_qa_has_issues": "Ethvert QA-problem",
   "translation_format_help": "Hvordan formatere oversettelsen",
   "translation_grid_key_text": "Nøkkel",

@@ -2231,6 +2231,7 @@
   "translation_filters_comments_any": "Будь-які коментарі",
   "translation_filters_comments_unresolved": "Нерозв'язані коментарі",
   "translation_filters_has_suggestions": "З пропозиціями",
+  "translation_filters_qa_checks_stale": "Перевірки QA застарілі",
   "translation_filters_qa_has_issues": "Будь-яка проблема QA",
   "translation_format_help": "Як форматувати переклад",
   "translation_grid_key_text": "Ключ",

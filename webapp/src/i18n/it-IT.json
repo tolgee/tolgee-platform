@@ -2439,6 +2439,7 @@
   "translation_filters_comments_unresolved": "Commenti non risolti",
   "translation_filters_has_no_suggestions": "Nessun suggerimento",
   "translation_filters_has_suggestions": "Con suggerimenti",
+  "translation_filters_qa_checks_stale": "Verifiche QA non aggiornate",
   "translation_filters_qa_has_issues": "Qualsiasi problema QA",
   "translation_format_help": "Come formattare la traduzione",
   "translation_grid_key_text": "Chiave",

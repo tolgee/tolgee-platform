@@ -2488,6 +2488,7 @@
   "translation_filters_comments_unresolved": "Nevyřešené komentáře",
   "translation_filters_has_no_suggestions": "Žádné návrhy",
   "translation_filters_has_suggestions": "S návrhy",
+  "translation_filters_qa_checks_stale": "Kontroly QA zastaralé",
   "translation_filters_qa_has_issues": "Jakákoli chyba QA",
   "translation_format_help": "Jak formátovat překlad",
   "translation_grid_key_text": "Klíč",
