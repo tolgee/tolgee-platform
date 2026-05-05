@@ -355,12 +355,12 @@ class TranslationMemoryEntryManagementService(
 
   /**
    * SQL fragment that produces `(source_text, is_manual)` rows for a PROJECT TM:
-   * - manual half: distinct sources of stored manual entries on this TM
+   * - manual half: distinct sources of stored manual entries on this TM (`is_manual = true`)
    * - virtual half: distinct sources of writable target translations on the assigned project
+   *   (`is_manual = false`)
    *
-   * Both halves apply the same case-insensitive search filter against either source or target
-   * text. UNION (without ALL) deduplicates within each half so the outer pagination sees a
-   * stable, ordered key list.
+   * Both halves emit a fixed `is_manual` boolean, so they can never collide — `UNION ALL` is
+   * correct and avoids the sort+dedupe pass `UNION` would force.
    */
   private fun projectGroupKeysUnionSql(): String =
     """
@@ -381,7 +381,7 @@ class TranslationMemoryEntryManagementService(
       )
     group by e.source_text
 
-    union
+    union all
 
     select base_t.text as source_text, false as is_manual
     from project p

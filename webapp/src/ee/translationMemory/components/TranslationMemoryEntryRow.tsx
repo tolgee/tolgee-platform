@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Checkbox, styled } from '@mui/material';
 import { T } from '@tolgee/react';
 import { FlagImage } from '@tginternal/library/components/languages/FlagImage';
@@ -77,11 +77,16 @@ export const TranslationMemoryEntryRow: React.VFC<Props> = ({
   const sourceFlag = sourceLang?.flags?.[0] || '';
   const sourceName = sourceLang?.englishName || sourceLanguageTag;
 
-  const entryByLang = new Map(
-    group.entries.map((e) => [e.targetLanguageTag, e])
+  // Maps are referenced once per displayed language inside the cell loop. Memoizing keeps
+  // the row stable across parent re-renders (every cell click flips parent editing state and
+  // would otherwise re-build these for every visible row).
+  const entryByLang = useMemo(
+    () => new Map(group.entries.map((e) => [e.targetLanguageTag, e])),
+    [group.entries]
   );
-  const virtualByLang = new Map(
-    group.virtualEntries.map((v) => [v.targetLanguageTag, v])
+  const virtualByLang = useMemo(
+    () => new Map(group.virtualEntries.map((v) => [v.targetLanguageTag, v])),
+    [group.virtualEntries]
   );
 
   // Stored rows are selectable iff they carry a real entry ID; virtual rows never are.

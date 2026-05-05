@@ -5592,4 +5592,20 @@
             <sql>DROP INDEX CONCURRENTLY IF EXISTS ix_translation_key_lang;</sql>
         </rollback>
     </changeSet>
+
+    <changeSet author="dkrizan" id="tm-entry-tm-source-manual-index" runInTransaction="false">
+        <comment>Composite index for the entry-management hot paths that filter by
+            (translation_memory_id, source_text, is_manual): the on-translation-save sync lookup
+            in TranslationMemoryEntryServiceEeImpl, the projectGroupKeysUnionSql manual half, and
+            findByTranslationMemoryIdAndSourceTexts during content-browser page hydration.
+            Existing single-column indexes only covered translation_memory_id, leaving the rest
+            as a post-fetch filter step.</comment>
+        <sql dbms="postgresql">
+            CREATE INDEX CONCURRENTLY IF NOT EXISTS ix_tm_entry_tm_source_manual
+                ON translation_memory_entry (translation_memory_id, source_text, is_manual);
+        </sql>
+        <rollback>
+            <sql>DROP INDEX CONCURRENTLY IF EXISTS ix_tm_entry_tm_source_manual;</sql>
+        </rollback>
+    </changeSet>
 </databaseChangeLog>
