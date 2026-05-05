@@ -10062,6 +10062,12 @@ export interface operations {
         /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
         search?: string;
+        /** Filter projects by id */
+        filterId?: number[];
+        /** Filter projects without id */
+        filterNotId?: number[];
+        /** Filter projects whose base language tag matches */
+        filterBaseLanguageTag?: string;
       };
     };
     responses: {
@@ -12770,6 +12776,12 @@ export interface operations {
         /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
         search?: string;
+        /** Filter projects by id */
+        filterId?: number[];
+        /** Filter projects without id */
+        filterNotId?: number[];
+        /** Filter projects whose base language tag matches */
+        filterBaseLanguageTag?: string;
       };
     };
     responses: {
@@ -13180,6 +13192,8 @@ export interface operations {
         filterId?: number[];
         /** Filter projects without id */
         filterNotId?: number[];
+        /** Filter projects whose base language tag matches */
+        filterBaseLanguageTag?: string;
         /** Zero-based page index (0..N) */
         page?: number;
         /** The size of the page to be returned */

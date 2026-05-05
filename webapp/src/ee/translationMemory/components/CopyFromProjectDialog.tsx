@@ -50,11 +50,17 @@ export const CopyFromProjectDialog: React.VFC<Props> = ({
   const [debounced] = useDebounce(search, PROJECT_SEARCH_DEBOUNCE_MS);
   const [selected, setSelected] = useState<ProjectOption | null>(null);
 
+  // Filter projects server-side to those whose base language matches the TM. The backend
+  // rejects mismatched copies, so showing them in the picker would be a guaranteed-failure UX.
   const projectsLoadable = useApiInfiniteQuery({
     url: '/v2/organizations/{id}/projects',
     method: 'get',
     path: { id: organizationId },
-    query: { search: debounced, size: 30 },
+    query: {
+      search: debounced,
+      size: 30,
+      filterBaseLanguageTag: sourceLanguageTag,
+    },
     options: {
       keepPreviousData: true,
       noGlobalLoading: true,
@@ -68,6 +74,7 @@ export const CopyFromProjectDialog: React.VFC<Props> = ({
             query: {
               search: debounced,
               size: 30,
+              filterBaseLanguageTag: sourceLanguageTag,
               page: lastPage.page!.number! + 1,
             },
           };
@@ -77,18 +84,13 @@ export const CopyFromProjectDialog: React.VFC<Props> = ({
     },
   });
 
-  // Only projects whose base language matches the TM's source language can be copied —
-  // the backend rejects mismatched copies. Hide the rest from the picker so the user
-  // does not pick a project the operation will fail on.
-  const options = useMemo<ProjectOption[]>(() => {
-    const projects =
-      projectsLoadable.data?.pages.flatMap(
-        (p) => p._embedded?.projects ?? []
-      ) ?? [];
-    return projects
-      .filter((p) => p.baseLanguage?.tag === sourceLanguageTag)
-      .map((p) => ({ id: p.id, name: p.name }));
-  }, [projectsLoadable.data, sourceLanguageTag]);
+  const options = useMemo<ProjectOption[]>(
+    () =>
+      projectsLoadable.data?.pages
+        .flatMap((p) => p._embedded?.projects ?? [])
+        .map((p) => ({ id: p.id, name: p.name })) ?? [],
+    [projectsLoadable.data]
+  );
 
   const copyMutation = useApiMutation({
     url: '/v2/organizations/{organizationId}/translation-memories/{translationMemoryId}/copy-from-project',

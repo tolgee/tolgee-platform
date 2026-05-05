@@ -12,4 +12,9 @@ open class ProjectFilters {
     description = """Filter projects without id""",
   )
   var filterNotId: List<Long>? = null
+
+  @field:Parameter(
+    description = """Filter projects whose base language tag matches""",
+  )
+  var filterBaseLanguageTag: String? = null
 }

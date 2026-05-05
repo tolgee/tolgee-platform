@@ -43,6 +43,10 @@ interface ProjectRepository : JpaRepository<Project, Long> {
             :#{#filters.filterNotId} is null
             or r.id not in :#{#filters.filterNotId}
         )
+        and (
+            :#{#filters.filterBaseLanguageTag} is null
+            or bl.tag = :#{#filters.filterBaseLanguageTag}
+        )
     """
   }
 
@@ -78,6 +82,10 @@ interface ProjectRepository : JpaRepository<Project, Long> {
         and (
             :#{#filters.filterNotId} is null
             or r.id not in :#{#filters.filterNotId}
+        )
+        and (
+            :#{#filters.filterBaseLanguageTag} is null
+            or bl.tag = :#{#filters.filterBaseLanguageTag}
         )
     """,
   )
