@@ -13,9 +13,6 @@ import clsx from 'clsx';
 type TranslationMemoryItemModel =
   components['schemas']['TranslationMemoryItemModel'];
 
-// Layout mirrors the Claude-Design "Editor - TM panel" mock: a clickable row with the
-// match score on the left, TM-name + key on the right, the target translation in
-// emphasised text, then the source text muted underneath.
 const StyledItem = styled('div')`
   display: flex;
   flex-direction: column;
@@ -50,7 +47,6 @@ const StyledScore = styled('div')`
   gap: 4px;
   padding: 4px 8px;
   border-radius: 9999px;
-  font-family: 'Roboto Mono', monospace;
   font-variant-numeric: tabular-nums;
   font-size: 12px;
   font-weight: 500;
@@ -59,26 +55,27 @@ const StyledScore = styled('div')`
   white-space: nowrap;
 
   &.s-100 {
-    color: #1f8a4d;
-    background: #e6f8ef;
+    color: ${({ theme }) =>
+      theme.palette.tokens._components.alert.success.color};
+    background: ${({ theme }) =>
+      theme.palette.tokens._components.alert.success.background};
   }
   &.s-high {
     color: ${({ theme }) => theme.palette.primary.main};
-    background: ${({ theme }) =>
-      theme.palette.mode === 'dark'
-        ? 'rgba(238, 67, 99, 0.18)'
-        : 'rgba(238, 67, 99, 0.10)'};
+    background: ${({ theme }) => theme.palette.tokens.primary._states.selected};
   }
   &.s-mid {
-    color: #866a00;
-    background: #fff6d6;
+    color: ${({ theme }) =>
+      theme.palette.tokens._components.alert.warning.color};
+    background: ${({ theme }) =>
+      theme.palette.tokens._components.alert.warning.background};
   }
   &.s-low {
     color: ${({ theme }) => theme.palette.text.secondary};
     background: ${({ theme }) => theme.palette.emphasis[100]};
   }
   &.penalized {
-    border: 1px solid #ffce00;
+    border: 1px solid ${({ theme }) => theme.palette.tokens.warning.main};
     padding: 3px 7px;
   }
 `;
@@ -87,7 +84,7 @@ const StyledScoreDot = styled('span')`
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: #c89800;
+  background: ${({ theme }) => theme.palette.tokens.warning.dark};
 `;
 
 const StyledMeta = styled('div')`
