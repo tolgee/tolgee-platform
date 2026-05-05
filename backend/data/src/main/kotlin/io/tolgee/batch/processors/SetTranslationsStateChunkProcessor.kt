@@ -50,4 +50,9 @@ class SetTranslationsStateChunkProcessor(
       state = data.state
     }
   }
+
+  override fun getChunkSize(
+    request: SetTranslationsStateStateRequest,
+    projectId: Long?,
+  ): Int = 5000
 }

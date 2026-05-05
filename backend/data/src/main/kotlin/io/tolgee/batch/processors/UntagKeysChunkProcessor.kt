@@ -51,4 +51,9 @@ class UntagKeysChunkProcessor(
       this.tags = data.tags
     }
   }
+
+  override fun getChunkSize(
+    request: UntagKeysRequest,
+    projectId: Long?,
+  ): Int = 5000
 }
