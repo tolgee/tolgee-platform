@@ -73,8 +73,11 @@ export const TranslationCell: React.VFC<Props> = ({
   const [value, setValue] = React.useState(entry?.targetText || '');
 
   const invalidate = () =>
+    // Narrow to just this TM's entries — the broader prefix would also invalidate the org TM
+    // list, every other TM, and unrelated metadata, forcing collateral re-fetches on every
+    // cell save.
     queryClient.invalidateQueries(
-      '/v2/organizations/{organizationId}/translation-memories'
+      '/v2/organizations/{organizationId}/translation-memories/{translationMemoryId}/entries'
     );
 
   const updateMutation = useApiMutation({
