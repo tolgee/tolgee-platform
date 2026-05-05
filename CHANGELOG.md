@@ -1,3 +1,10 @@
+## [3.183.5](https://github.com/tolgee/tolgee-platform/compare/v3.183.4...v3.183.5) (2026-05-05)
+
+
+### Bug Fixes
+
+* debounce QA-issue websocket events to avoid translations view freeze ([#3632](https://github.com/tolgee/tolgee-platform/issues/3632)) ([8794c20](https://github.com/tolgee/tolgee-platform/commit/8794c20de65f0a78ee4f8a161cc56f063d7363e8))
+
 ## [3.183.4](https://github.com/tolgee/tolgee-platform/compare/v3.183.3...v3.183.4) (2026-05-05)
 
 
