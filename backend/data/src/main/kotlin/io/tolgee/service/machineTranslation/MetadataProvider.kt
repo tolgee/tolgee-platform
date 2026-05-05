@@ -2,18 +2,13 @@ package io.tolgee.service.machineTranslation
 
 import io.tolgee.component.machineTranslation.metadata.ExampleItem
 import io.tolgee.dtos.cacheable.LanguageDto
-import io.tolgee.model.views.TranslationMemoryItemView
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.translation.TranslationMemoryService
 import jakarta.persistence.EntityManager
-import org.slf4j.LoggerFactory
-import org.springframework.dao.QueryTimeoutException
 
 class MetadataProvider(
   private val context: MtTranslatorContext,
 ) {
-  private val log = LoggerFactory.getLogger(MetadataProvider::class.java)
-
   fun getCloseItems(
     sourceLanguage: LanguageDto,
     targetLanguage: LanguageDto,
@@ -44,15 +39,28 @@ class MetadataProvider(
       .resultList
   }
 
+  /**
+   * Examples carry the *penalized* similarity, so trust-adjusted TMs (e.g. a noisy imported TM
+   * with a high default penalty) surface weaker context for MT prompts — matching the
+   * user-facing suggestion ranking.
+   */
   fun getExamples(
     targetLanguage: LanguageDto,
     isPlural: Boolean,
     text: String,
     keyId: Long?,
   ): List<ExampleItem> {
-    try {
-      val results = fetchExamples(targetLanguage, isPlural, text, keyId)
-      return results.map {
+    val project = context.project
+    return translationMemoryService
+      .getSuggestionsList(
+        baseTranslationText = text,
+        isPlural = isPlural,
+        keyId = keyId,
+        projectId = project.id,
+        organizationId = project.organizationOwnerId,
+        targetLanguageTag = targetLanguage.tag,
+        limit = 5,
+      ).map {
         ExampleItem(
           key = it.keyName,
           keyNamespace = it.keyNamespace,
@@ -60,36 +68,6 @@ class MetadataProvider(
           target = it.targetTranslationText,
         )
       }
-    } catch (e: QueryTimeoutException) {
-      log.warn("Translation memory suggestions timed out", e)
-      return emptyList()
-    }
-  }
-
-  /**
-   * Routes the MT-context TM lookup through the managed service when the project has any
-   * readable managed TMs (every project after the TM management feature ships).
-   *
-   * Examples carry the *penalized* similarity, so trust-adjusted TMs (e.g. a noisy
-   * imported TM with a high default penalty) surface weaker context for MT prompts —
-   * matching the user-facing suggestion ranking.
-   */
-  private fun fetchExamples(
-    targetLanguage: LanguageDto,
-    isPlural: Boolean,
-    text: String,
-    keyId: Long?,
-  ): List<TranslationMemoryItemView> {
-    val project = context.project
-    return translationMemoryService.getSuggestionsList(
-      baseTranslationText = text,
-      isPlural = isPlural,
-      keyId = keyId,
-      projectId = project.id,
-      organizationId = project.organizationOwnerId,
-      targetLanguageTag = targetLanguage.tag,
-      limit = 5,
-    )
   }
 
   private val bigMetaService: BigMetaService by lazy {
