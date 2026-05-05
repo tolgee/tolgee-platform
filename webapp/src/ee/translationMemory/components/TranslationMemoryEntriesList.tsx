@@ -14,6 +14,7 @@ import { useDebounce } from 'use-debounce';
 import { ReactList } from 'tg.component/reactList/ReactList';
 import {
   EntryGroup,
+  EntryGroupCandidate,
   EntryRowLayout,
   TranslationMemoryEntryRow,
 } from 'tg.ee.module/translationMemory/components/TranslationMemoryEntryRow';
@@ -217,7 +218,7 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
   });
 
   // Backend returns groups directly: one per (source_text, origin) tuple on the page. Flatten
-  // every loaded page and map to the frontend EntryGroup shape consumed by the row.
+  // every loaded page and map to the frontend EntryGroup shape.
   const groups = useMemo<EntryGroup[]>(
     () =>
       (entries.data?.pages ?? []).flatMap((p) =>
@@ -230,6 +231,46 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
         }))
       ),
     [entries.data]
+  );
+
+  // Expand each group into N candidate rows where N = max entries-per-language. Multiple TMX
+  // tu units sharing (source, target_lang) but with different target_text — or imported with
+  // different tuids — each get their own row instead of being collapsed into one cell.
+  // Round-robin: candidate i picks the i-th entry per language; languages with fewer entries
+  // produce empty cells on later candidates.
+  const candidates = useMemo<EntryGroupCandidate[]>(
+    () =>
+      groups.flatMap((group) => {
+        const byLang = new Map<string, typeof group.entries>();
+        group.entries.forEach((e) => {
+          const list = byLang.get(e.targetLanguageTag);
+          if (list) {
+            list.push(e);
+          } else {
+            byLang.set(e.targetLanguageTag, [e]);
+          }
+        });
+        const candidateCount = Math.max(
+          1,
+          ...Array.from(byLang.values()).map((arr) => arr.length)
+        );
+        return Array.from({ length: candidateCount }, (_, i) => {
+          const entriesByLang = new Map<
+            string,
+            (typeof group.entries)[number]
+          >();
+          byLang.forEach((list, lang) => {
+            if (i < list.length) entriesByLang.set(lang, list[i]);
+          });
+          return {
+            group,
+            candidateIndex: i,
+            isPrimary: i === 0,
+            entriesByLang,
+          };
+        });
+      }),
+    [groups]
   );
 
   const totalElements = entries.data?.pages?.[0]?.page?.totalElements ?? 0;
@@ -379,29 +420,36 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
   };
 
   const renderItem = (index: number) => {
-    const group = groups[index];
-    const isLast = index === groups.length - 1;
+    const candidate = candidates[index];
+    const group = candidate.group;
+    const isLast = index === candidates.length - 1;
     if (isLast) onFetchNextPageHint();
-    const groupKey = `${group.sourceText}|||${group.isManual}`;
-    const editingLangForGroup = editingCell?.startsWith(groupKey + '|||')
+    // Editing key includes candidate index so multi-candidate stacks don't share an editing
+    // slot across rows of the same source.
+    const rowKey = `${group.sourceText}|||${group.isManual}|||${candidate.candidateIndex}`;
+    const editingLangForRow = editingCell?.startsWith(rowKey + '|||')
       ? editingCell.split('|||').pop()!
       : null;
-    const groupId = group.entries?.[0]?.id as number | undefined;
+    // Selection still operates on the whole (source, isManual) bucket — the batch-delete API
+    // wipes the entire group server-side, so only show the checkbox on the primary candidate.
+    const groupId = candidate.isPrimary
+      ? (group.entries?.[0]?.id as number | undefined)
+      : undefined;
 
     return (
       <TranslationMemoryEntryRow
-        key={groupKey}
-        group={group}
+        key={rowKey}
+        candidate={candidate}
         sourceLanguageTag={sourceLanguageTag}
         displayLanguages={displayLanguages}
         organizationId={organizationId}
         translationMemoryId={translationMemoryId}
-        editingLang={editingLangForGroup}
+        editingLang={editingLangForRow}
         canManage={canManage}
         layout={layout}
-        selectionService={selectionService}
+        selectionService={candidate.isPrimary ? selectionService : undefined}
         groupId={groupId}
-        onEditStart={(langTag) => setEditingCell(`${groupKey}|||${langTag}`)}
+        onEditStart={(langTag) => setEditingCell(`${rowKey}|||${langTag}`)}
         onEditEnd={() => {
           setEditingCell(null);
           entries.refetch();
@@ -554,7 +602,7 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
                 itemSizeEstimator={(index, cache) =>
                   cache[index] ||
                   estimateTmEntryRowHeight(
-                    groups[index],
+                    candidates[index]?.group,
                     displayLanguages.length,
                     layout
                   )
@@ -565,7 +613,7 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
                 expansionReserve={editingCell ? 300 : 0}
                 // @ts-ignore — third-party type expects JSX element; window/HTMLElement are accepted at runtime
                 scrollParentGetter={() => verticalScrollRef.current ?? window}
-                length={groups.length}
+                length={candidates.length}
                 useTranslate3d
                 itemRenderer={renderItem}
               />

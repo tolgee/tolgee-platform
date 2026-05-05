@@ -36,6 +36,19 @@ export type EntryGroup = {
   virtualEntries: VirtualTranslationMemoryEntryModel[];
 };
 
+/**
+ * One renderable row produced by expanding an EntryGroup. A group with N entries per
+ * (source, lang) becomes N candidate rows; each holds at most one entry per language. The
+ * source/keyNames/virtualEntries decoration only renders on the primary candidate so the row
+ * stack reads as "one source with multiple translation candidates".
+ */
+export type EntryGroupCandidate = {
+  group: EntryGroup;
+  candidateIndex: number;
+  isPrimary: boolean;
+  entriesByLang: Map<string, TranslationMemoryEntryModel>;
+};
+
 const StyledSelectionCell = styled('div')<{ $layout: EntryRowLayout }>`
   display: flex;
   align-items: flex-start;
@@ -45,7 +58,7 @@ const StyledSelectionCell = styled('div')<{ $layout: EntryRowLayout }>`
 `;
 
 type Props = {
-  group: EntryGroup;
+  candidate: EntryGroupCandidate;
   sourceLanguageTag: string;
   displayLanguages: string[];
   organizationId: number;
@@ -60,7 +73,7 @@ type Props = {
 };
 
 export const TranslationMemoryEntryRow: React.VFC<Props> = ({
-  group,
+  candidate,
   sourceLanguageTag,
   displayLanguages,
   organizationId,
@@ -73,20 +86,21 @@ export const TranslationMemoryEntryRow: React.VFC<Props> = ({
   selectionService,
   groupId,
 }) => {
+  const group = candidate.group;
   const sourceLang = languageInfo[sourceLanguageTag];
   const sourceFlag = sourceLang?.flags?.[0] || '';
   const sourceName = sourceLang?.englishName || sourceLanguageTag;
 
-  // Maps are referenced once per displayed language inside the cell loop. Memoizing keeps
-  // the row stable across parent re-renders (every cell click flips parent editing state and
-  // would otherwise re-build these for every visible row).
-  const entryByLang = useMemo(
-    () => new Map(group.entries.map((e) => [e.targetLanguageTag, e])),
-    [group.entries]
-  );
+  // [candidate.entriesByLang] arrives pre-bucketed by the parent (one entry per language for
+  // this candidate slot). Source-grouped buckets with multiple entries per (source, lang) are
+  // expanded into multiple sibling rows upstream — each row gets one entry per language here.
+  const entryByLang = candidate.entriesByLang;
   const virtualByLang = useMemo(
-    () => new Map(group.virtualEntries.map((v) => [v.targetLanguageTag, v])),
-    [group.virtualEntries]
+    () =>
+      candidate.isPrimary
+        ? new Map(group.virtualEntries.map((v) => [v.targetLanguageTag, v]))
+        : new Map(),
+    [group.virtualEntries, candidate.isPrimary]
   );
 
   // Stored rows are selectable iff they carry a real entry ID; virtual rows never are.
@@ -140,7 +154,9 @@ export const TranslationMemoryEntryRow: React.VFC<Props> = ({
         );
       })()}
       <StyledKeyCell $layout={layout}>
-        {group.keyNames.length > 0 && (
+        {/* Source/keys only on the primary candidate so a multi-candidate stack reads as
+            "one source, N variants" instead of repeating the source line on every row. */}
+        {candidate.isPrimary && group.keyNames.length > 0 && (
           <StyledKeyName data-cy="tm-entry-row-keys">
             {group.keyNames.slice(0, 3).join(', ')}
             {group.keyNames.length > 3 &&
@@ -148,15 +164,21 @@ export const TranslationMemoryEntryRow: React.VFC<Props> = ({
           </StyledKeyName>
         )}
         <StyledSourceText>
-          {layout === 'stacked' && (
+          {candidate.isPrimary && layout === 'stacked' && (
             <StyledLanguage style={{ padding: '0' }}>
               <FlagImage flagEmoji={sourceFlag} height={16} />
               <div style={{ fontWeight: 'bold' }}>{sourceName}</div>
             </StyledLanguage>
           )}
-          <LimitedHeightText maxLines={3} wrap="break-word" lineHeight="1.3em">
-            <TmEntryText text={group.sourceText} locale={sourceLanguageTag} />
-          </LimitedHeightText>
+          {candidate.isPrimary && (
+            <LimitedHeightText
+              maxLines={3}
+              wrap="break-word"
+              lineHeight="1.3em"
+            >
+              <TmEntryText text={group.sourceText} locale={sourceLanguageTag} />
+            </LimitedHeightText>
+          )}
         </StyledSourceText>
       </StyledKeyCell>
 
@@ -166,8 +188,8 @@ export const TranslationMemoryEntryRow: React.VFC<Props> = ({
           const virtualEntry = virtualByLang.get(langTag);
           const isEditing = editingLang === langTag;
 
-          // Editable only when the whole group is manual AND there's either a stored entry to
-          // update or no entry to create. Synced (non-manual) and virtual rows fall through to
+          // Editable only when the whole group is manual AND there's a stored entry to update
+          // OR no entry to create. Synced (non-manual) and virtual rows fall through to
           // read-only rendering.
           const editable = canManage && group.isManual;
 
