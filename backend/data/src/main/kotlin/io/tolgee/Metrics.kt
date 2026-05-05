@@ -178,6 +178,30 @@ class Metrics(
       .record(Duration.ofMillis(executionTimeMs.coerceAtLeast(0)))
   }
 
+  // ==========================================================================
+  // Machine Translation Provider Metrics
+  // ==========================================================================
+
+  /**
+   * Records the duration of a single call to a machine-translation provider
+   * (one text/key). Tagged by service (GOOGLE, AWS, DEEPL, AZURE, BAIDU, PROMPT)
+   * and outcome (success / error).
+   */
+  fun recordMtProviderCall(
+    service: String,
+    outcome: String,
+    durationMs: Long,
+  ) {
+    Timer
+      .builder("tolgee.mt.provider.call")
+      .description("Time spent calling a machine-translation provider (per text/key)")
+      .publishPercentileHistogram()
+      .tag("service", service)
+      .tag("outcome", outcome)
+      .register(meterRegistry)
+      .record(Duration.ofMillis(durationMs.coerceAtLeast(0)))
+  }
+
   // Branch operations - Priority 1 (Must Have)
   val branchCreateTimer: Timer by lazy {
     Timer
