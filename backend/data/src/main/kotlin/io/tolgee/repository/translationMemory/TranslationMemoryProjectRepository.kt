@@ -1,6 +1,7 @@
 package io.tolgee.repository.translationMemory
 
 import io.tolgee.model.translationMemory.TranslationMemoryProject
+import io.tolgee.model.translationMemory.TranslationMemoryType
 import jakarta.persistence.QueryHint
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
@@ -59,4 +60,30 @@ interface TranslationMemoryProjectRepository : JpaRepository<TranslationMemoryPr
   fun findMaxPriorityByProjectIds(
     @Param("projectIds") projectIds: Collection<Long>,
   ): List<Array<Any>>
+
+  /**
+   * Projection-only query for the suggestion read path: returns just the readable TM ids,
+   * optionally filtered by [type]. Avoids hydrating the `TranslationMemory` entity per
+   * assignment (which the previous "load all + filter in Kotlin" implementation did even
+   * when only the project TM mattered, e.g. on free plan).
+   *
+   * Marked with `FLUSH_MODE=COMMIT` for the same reason as [findByProjectIdAndReadAccessTrue]:
+   * this can be invoked mid-translation-save and must not trigger a premature flush.
+   */
+  @QueryHints(
+    value = [QueryHint(name = "org.hibernate.flushMode", value = "COMMIT")],
+  )
+  @Query(
+    """
+    select p.translationMemory.id
+    from TranslationMemoryProject p
+    where p.project.id = :projectId
+      and p.readAccess = true
+      and (:type is null or p.translationMemory.type = :type)
+    """,
+  )
+  fun findReadableTmIdsByProjectId(
+    @Param("projectId") projectId: Long,
+    @Param("type") type: TranslationMemoryType?,
+  ): List<Long>
 }

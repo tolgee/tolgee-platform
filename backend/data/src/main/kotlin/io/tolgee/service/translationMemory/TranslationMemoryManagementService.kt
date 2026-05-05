@@ -122,18 +122,19 @@ class TranslationMemoryManagementService(
    * - Otherwise (free plan) → returns only the project's own PROJECT-type TM ID.
    *
    * Free plan users get suggestions from their own project TM but do not see shared TM matches.
+   * Pushes the type filter into the query so the free path doesn't hydrate shared assignments
+   * just to throw them away.
    */
   fun getReadableTmIdsForSuggestions(
     projectId: Long,
     organizationId: Long,
   ): List<Long> {
-    val readable = translationMemoryProjectRepository.findByProjectIdAndReadAccessTrue(projectId)
-    if (enabledFeaturesProvider.isFeatureEnabled(organizationId, Feature.TRANSLATION_MEMORY)) {
-      return readable.map { it.translationMemory.id }
-    }
-    return readable
-      .filter { it.translationMemory.type == TranslationMemoryType.PROJECT }
-      .map { it.translationMemory.id }
+    val featureEnabled =
+      enabledFeaturesProvider.isFeatureEnabled(organizationId, Feature.TRANSLATION_MEMORY)
+    return translationMemoryProjectRepository.findReadableTmIdsByProjectId(
+      projectId = projectId,
+      type = if (featureEnabled) null else TranslationMemoryType.PROJECT,
+    )
   }
 
   /**
