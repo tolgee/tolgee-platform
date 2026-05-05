@@ -176,7 +176,12 @@ export const TranslationMemoryListItemMenu: FC<Props> = ({
                 {
                   onSuccess: () => setIsEditing(false),
                   onError: () =>
-                    messageService.error('Failed to save settings'),
+                    messageService.error(
+                      <T
+                        keyName="translation_memory_save_settings_error"
+                        defaultValue="Failed to save settings"
+                      />
+                    ),
                 }
               )
             }

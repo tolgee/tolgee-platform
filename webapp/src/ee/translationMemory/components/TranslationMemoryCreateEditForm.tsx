@@ -22,7 +22,7 @@ import { T, useTranslate } from '@tolgee/react';
 import { BaseLanguageSelect } from 'tg.component/languages/BaseLanguageSelect';
 import { useApiInfiniteQuery } from 'tg.service/http/useQueryApi';
 import { useDebounce } from 'use-debounce';
-import * as Yup from 'yup';
+import { Validation } from 'tg.constants/GlobalValidationSchema';
 import {
   AssignedProjectRow,
   PendingRemovalRow,
@@ -56,17 +56,6 @@ export type CreateEditTranslationMemoryFormValues = {
 };
 
 const PROJECT_SEARCH_DEBOUNCE_MS = 300;
-
-const validationSchema = Yup.object().shape({
-  name: Yup.string().min(1).required(),
-  baseLanguage: Yup.object()
-    .required()
-    .shape({
-      tag: Yup.string().min(1).required(),
-    }),
-  defaultPenalty: Yup.number().min(0).max(100).required(),
-  writeOnlyReviewed: Yup.boolean().required(),
-});
 
 type Mode = 'create' | 'edit';
 
@@ -122,7 +111,7 @@ export const TranslationMemoryCreateEditForm = ({
     <Formik
       initialValues={initialValues}
       enableReinitialize
-      validationSchema={validationSchema}
+      validationSchema={Validation.TRANSLATION_MEMORY_CREATE_EDIT}
       onSubmit={(values) => onSave(values, pendingRemovals)}
     >
       {({ submitForm, values, setFieldValue }) => {

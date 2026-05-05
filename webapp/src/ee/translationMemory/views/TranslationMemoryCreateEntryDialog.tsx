@@ -145,7 +145,12 @@ export const TranslationMemoryCreateEntryDialog: React.VFC<Props> = ({
       );
       onFinished();
     } catch {
-      messageService.error('Failed to create entries');
+      messageService.error(
+        <T
+          keyName="translation_memory_create_entry_error"
+          defaultValue="Failed to create entries"
+        />
+      );
     } finally {
       setSaving(false);
     }

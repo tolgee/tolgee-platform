@@ -305,7 +305,13 @@ export const ProjectSettingsTranslationMemory = () => {
               },
               {
                 onSuccess: finishSettings,
-                onError: () => messageService.error('Failed to save settings'),
+                onError: () =>
+                  messageService.error(
+                    <T
+                      keyName="translation_memory_save_settings_error"
+                      defaultValue="Failed to save settings"
+                    />
+                  ),
               }
             )
           }

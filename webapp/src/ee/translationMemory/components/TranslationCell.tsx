@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button, TextField, Tooltip } from '@mui/material';
-import { useTranslate } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import { FlagImage } from '@tginternal/library/components/languages/FlagImage';
 import { languageInfo } from '@tginternal/language-util/lib/generated/languageInfo';
 import { useQueryClient } from 'react-query';
@@ -111,7 +111,13 @@ export const TranslationCell: React.VFC<Props> = ({
         invalidate();
         onSaved();
       },
-      onError: () => messageService.error('Failed to save entry'),
+      onError: () =>
+        messageService.error(
+          <T
+            keyName="translation_memory_save_entry_error"
+            defaultValue="Failed to save entry"
+          />
+        ),
     };
     if (entry) {
       updateMutation.mutate(

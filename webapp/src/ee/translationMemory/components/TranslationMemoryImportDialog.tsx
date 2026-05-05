@@ -100,15 +100,37 @@ export const TranslationMemoryImportDialog: React.VFC<Props> = ({
       {
         onSuccess(data) {
           const result = data as components['schemas']['TmxImportResult'];
-          const parts: string[] = [];
-          if (result.created > 0) parts.push(`${result.created} created`);
-          if (result.updated > 0) parts.push(`${result.updated} updated`);
-          if (result.skipped > 0) parts.push(`${result.skipped} skipped`);
-          const summary = parts.length > 0 ? parts.join(', ') : 'No changes';
-          messageService.success(summary);
+          const noChanges =
+            result.created === 0 &&
+            result.updated === 0 &&
+            result.skipped === 0;
+          messageService.success(
+            noChanges ? (
+              <T
+                keyName="translation_memory_import_no_changes"
+                defaultValue="No changes"
+              />
+            ) : (
+              <T
+                keyName="translation_memory_import_summary"
+                defaultValue="{created} created, {updated} updated, {skipped} skipped"
+                params={{
+                  created: result.created,
+                  updated: result.updated,
+                  skipped: result.skipped,
+                }}
+              />
+            )
+          );
           onFinished();
         },
-        onError: () => messageService.error('Import failed'),
+        onError: () =>
+          messageService.error(
+            <T
+              keyName="translation_memory_import_error"
+              defaultValue="Import failed"
+            />
+          ),
       }
     );
   };

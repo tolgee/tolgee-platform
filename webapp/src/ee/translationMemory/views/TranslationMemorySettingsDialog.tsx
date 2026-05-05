@@ -124,7 +124,12 @@ export const TranslationMemorySettingsDialog: React.VFC<Props> = ({
 
       onFinished();
     } catch {
-      messageService.error('Failed to save settings');
+      messageService.error(
+        <T
+          keyName="translation_memory_save_settings_error"
+          defaultValue="Failed to save settings"
+        />
+      );
     }
   };
 
