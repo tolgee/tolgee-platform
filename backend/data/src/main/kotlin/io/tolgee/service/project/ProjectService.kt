@@ -207,28 +207,7 @@ class ProjectService(
         project.languages.find { it.id == dto.baseLanguageId }
           ?: throw BadRequestException(Message.LANGUAGE_NOT_FROM_PROJECT)
       if (language.id != oldBaseLanguageId) {
-        // Shared TMs declare a source language; changing the project base to a different
-        // language would leave them misaligned. Force the user to manually unassign the
-        // offending TMs first (the frontend offers a confirm-and-unassign flow).
-        //
-        // Params: one HashMap per conflicting TM with `id` and `name`, so the frontend can
-        // both list and unassign without a separate lookup.
-        val conflicts: List<java.io.Serializable> =
-          translationMemoryManagementService
-            .getSharedTmAssignmentsForProject(project.id)
-            .filter { it.translationMemory.sourceLanguageTag != language.tag }
-            .map {
-              hashMapOf<String, Any>(
-                "id" to it.translationMemory.id,
-                "name" to it.translationMemory.name,
-              )
-            }
-        if (conflicts.isNotEmpty()) {
-          throw BadRequestException(
-            Message.CANNOT_CHANGE_PROJECT_BASE_LANGUAGE_TM_CONFLICT,
-            conflicts,
-          )
-        }
+        requireSharedTmsMatchBaseLanguage(project.id, language.tag)
       }
       project.baseLanguage = language
       languageService.evictCacheForProject(project.id)
@@ -261,6 +240,36 @@ class ProjectService(
       translationMemoryManagementService.renameProjectTm(project.id, project.name)
     }
     return project
+  }
+
+  /**
+   * Shared TMs declare a source language; changing the project base to a different language would
+   * leave them misaligned. Force the user to manually unassign the offending TMs first (the
+   * frontend offers a confirm-and-unassign flow).
+   *
+   * Throws with one HashMap per conflicting TM (`id` and `name`) so the frontend can both list
+   * and unassign without a separate lookup.
+   */
+  private fun requireSharedTmsMatchBaseLanguage(
+    projectId: Long,
+    newBaseLanguageTag: String,
+  ) {
+    val conflicts: List<java.io.Serializable> =
+      translationMemoryManagementService
+        .getSharedTmAssignmentsForProject(projectId)
+        .filter { it.translationMemory.sourceLanguageTag != newBaseLanguageTag }
+        .map {
+          hashMapOf<String, Any>(
+            "id" to it.translationMemory.id,
+            "name" to it.translationMemory.name,
+          )
+        }
+    if (conflicts.isNotEmpty()) {
+      throw BadRequestException(
+        Message.CANNOT_CHANGE_PROJECT_BASE_LANGUAGE_TM_CONFLICT,
+        conflicts,
+      )
+    }
   }
 
   @Transactional(readOnly = true)
