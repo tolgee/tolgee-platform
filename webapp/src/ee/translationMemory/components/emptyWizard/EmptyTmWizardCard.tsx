@@ -1,48 +1,44 @@
 import React from 'react';
-import { ButtonBase, styled, Typography } from '@mui/material';
+import { Button, Card, styled, Typography } from '@mui/material';
 
-const StyledCard = styled(ButtonBase)`
+const StyledCard = styled(Card)`
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 22px;
-  background: ${({ theme }) => theme.palette.background.paper};
-  border: 1px solid ${({ theme }) => theme.palette.divider};
-  border-radius: 10px;
-  text-align: left;
-  cursor: pointer;
-  transition: border-color 140ms, background 140ms, transform 140ms;
-  height: 100%;
-
-  &:hover {
-    border-color: ${({ theme }) => theme.palette.primary.main};
-    background: ${({ theme }) => theme.palette.action.hover};
-    transform: translateY(-1px);
-  }
-
-  &:focus-visible {
-    outline: 2px solid ${({ theme }) => theme.palette.primary.main};
-    outline-offset: 2px;
-  }
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: ${({ theme }) => theme.spacing(2)};
+  border-radius: 20px;
+  width: 490px;
+  padding: ${({ theme }) => theme.spacing(4)};
+  background-color: ${({ theme }) =>
+    theme.palette.tokens.background.onDefaultGrey};
 `;
 
 const StyledIcon = styled('div')`
-  width: 44px;
-  height: 44px;
-  border-radius: 8px;
-  background: ${({ theme }) => theme.palette.action.hover};
-  color: ${({ theme }) => theme.palette.primary.main};
+  color: ${({ theme }) => theme.palette.primary.light};
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 4px;
+
+  & > svg {
+    width: 32px;
+    height: 32px;
+  }
+`;
+
+const StyledDescription = styled(Typography)`
+  color: ${({ theme }) => theme.palette.text.secondary};
+  margin-bottom: ${({ theme }) => theme.spacing(5)};
 `;
 
 type Props = {
   icon: React.ReactNode;
   title: React.ReactNode;
   description: React.ReactNode;
+  buttonLabel: React.ReactNode;
   onClick: () => void;
   dataCy: string;
 };
@@ -51,27 +47,23 @@ export const EmptyTmWizardCard: React.VFC<Props> = ({
   icon,
   title,
   description,
+  buttonLabel,
   onClick,
   dataCy,
 }) => {
   return (
-    <StyledCard onClick={onClick} data-cy={dataCy}>
+    <StyledCard elevation={0}>
       <StyledIcon>{icon}</StyledIcon>
-      <Typography
-        variant="body1"
-        fontWeight={500}
-        color="text.primary"
-        sx={{ letterSpacing: '0.15px' }}
+      <Typography variant="h4">{title}</Typography>
+      <StyledDescription variant="body1">{description}</StyledDescription>
+      <Button
+        onClick={onClick}
+        variant="contained"
+        color="primary"
+        data-cy={dataCy}
       >
-        {title}
-      </Typography>
-      <Typography
-        variant="body2"
-        color="text.secondary"
-        sx={{ lineHeight: 1.5 }}
-      >
-        {description}
-      </Typography>
+        {buttonLabel}
+      </Button>
     </StyledCard>
   );
 };

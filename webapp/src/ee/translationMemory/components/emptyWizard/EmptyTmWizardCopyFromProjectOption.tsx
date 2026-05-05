@@ -24,7 +24,7 @@ export const EmptyTmWizardCopyFromProjectOption: React.VFC<Props> = ({
     <>
       <EmptyTmWizardCard
         dataCy="tm-empty-wizard-copy"
-        icon={<Folder width={24} height={24} />}
+        icon={<Folder />}
         title={
           <T
             keyName="tm_empty_wizard_copy_card_title"
@@ -35,6 +35,12 @@ export const EmptyTmWizardCopyFromProjectOption: React.VFC<Props> = ({
           'tm_empty_wizard_copy_card_description',
           "Seed this memory with entries from an existing project's TM."
         )}
+        buttonLabel={
+          <T
+            keyName="tm_empty_wizard_copy_card_button"
+            defaultValue="Choose project"
+          />
+        }
         onClick={() => setOpen(true)}
       />
       {open && (

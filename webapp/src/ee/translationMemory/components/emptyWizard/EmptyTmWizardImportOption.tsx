@@ -22,7 +22,7 @@ export const EmptyTmWizardImportOption: React.VFC<Props> = ({
     <>
       <EmptyTmWizardCard
         dataCy="tm-empty-wizard-import"
-        icon={<UploadCloud02 width={24} height={24} />}
+        icon={<UploadCloud02 />}
         title={
           <T
             keyName="tm_empty_wizard_import_title"
@@ -33,6 +33,12 @@ export const EmptyTmWizardImportOption: React.VFC<Props> = ({
           'tm_empty_wizard_import_description',
           'Upload a TMX file with existing translations.'
         )}
+        buttonLabel={
+          <T
+            keyName="tm_empty_wizard_import_button"
+            defaultValue="Import file"
+          />
+        }
         onClick={() => setOpen(true)}
       />
       {open && (

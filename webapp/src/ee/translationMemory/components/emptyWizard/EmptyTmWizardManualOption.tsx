@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { T, useTranslate } from '@tolgee/react';
-import { Plus } from '@untitled-ui/icons-react';
+import { PlusCircle } from '@untitled-ui/icons-react';
 import { TranslationMemoryCreateEntryDialog } from 'tg.ee.module/translationMemory/views/TranslationMemoryCreateEntryDialog';
 import { EmptyTmWizardCard } from './EmptyTmWizardCard';
 
@@ -26,7 +26,7 @@ export const EmptyTmWizardManualOption: React.VFC<Props> = ({
     <>
       <EmptyTmWizardCard
         dataCy="tm-empty-wizard-manual"
-        icon={<Plus width={24} height={24} />}
+        icon={<PlusCircle />}
         title={
           <T
             keyName="tm_empty_wizard_manual_title"
@@ -37,6 +37,9 @@ export const EmptyTmWizardManualOption: React.VFC<Props> = ({
           'tm_empty_wizard_manual_description',
           'Type a source segment and its translation. Good for one-off terminology.'
         )}
+        buttonLabel={
+          <T keyName="tm_empty_wizard_manual_button" defaultValue="Add entry" />
+        }
         onClick={() => setOpen(true)}
       />
       {open && (
