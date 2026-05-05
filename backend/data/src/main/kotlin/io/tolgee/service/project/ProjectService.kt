@@ -56,6 +56,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.InputStream
+import java.io.Serializable
 
 @Transactional
 @Service
@@ -254,7 +255,7 @@ class ProjectService(
     projectId: Long,
     newBaseLanguageTag: String,
   ) {
-    val conflicts: List<java.io.Serializable> =
+    val conflicts: List<Serializable> =
       translationMemoryManagementService
         .getSharedTmAssignmentsForProject(projectId)
         .filter { it.translationMemory.sourceLanguageTag != newBaseLanguageTag }

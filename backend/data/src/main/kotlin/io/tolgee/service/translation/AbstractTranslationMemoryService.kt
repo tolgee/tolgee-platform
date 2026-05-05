@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.transaction.annotation.Transactional
+import java.util.Date
 
 /**
  * Common scaffolding for [TranslationMemoryService] implementations: parameter binding, similarity
@@ -189,6 +190,6 @@ abstract class AbstractTranslationMemoryService(
       similarity = (row[6] as Number).toFloat(),
       translationMemoryName = row[7] as String?,
       // index 8 is assignmentPriority (kept for ordering only — not exposed)
-      updatedAt = row[9] as java.util.Date?,
+      updatedAt = row[9] as Date?,
     )
 }
