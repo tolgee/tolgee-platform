@@ -1,13 +1,11 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import {
-  Autocomplete,
+  Box,
   Button,
-  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  TextField,
   Typography,
 } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
@@ -19,8 +17,17 @@ import {
 } from 'tg.service/http/useQueryApi';
 import { messageService } from 'tg.service/MessageService';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
+import { InfiniteSearchSelect } from 'tg.component/searchSelect/InfiniteSearchSelect';
+import { SelectItem } from 'tg.component/searchSelect/SelectItem';
+import { components } from 'tg.service/apiSchema.generated';
 
-const PROJECT_SEARCH_DEBOUNCE_MS = 250;
+const PROJECT_SEARCH_DEBOUNCE_MS = 500;
+
+type ProjectModel = components['schemas']['ProjectModel'];
+type SelectedProjectModel = {
+  id: number;
+  name: string;
+};
 
 type Props = {
   open: boolean;
@@ -29,11 +36,6 @@ type Props = {
   organizationId: number;
   translationMemoryId: number;
   sourceLanguageTag: string;
-};
-
-type ProjectOption = {
-  id: number;
-  name: string;
 };
 
 export const CopyFromProjectDialog: React.VFC<Props> = ({
@@ -47,22 +49,26 @@ export const CopyFromProjectDialog: React.VFC<Props> = ({
   const { t } = useTranslate();
 
   const [search, setSearch] = useState('');
-  const [debounced] = useDebounce(search, PROJECT_SEARCH_DEBOUNCE_MS);
-  const [selected, setSelected] = useState<ProjectOption | null>(null);
+  const [searchDebounced] = useDebounce(search, PROJECT_SEARCH_DEBOUNCE_MS);
+  const [selected, setSelected] = useState<SelectedProjectModel | undefined>(
+    undefined
+  );
 
   // Filter projects server-side to those whose base language matches the TM. The backend
   // rejects mismatched copies, so showing them in the picker would be a guaranteed-failure UX.
-  const projectsLoadable = useApiInfiniteQuery({
+  const query = {
+    search: searchDebounced,
+    size: 30,
+    filterBaseLanguageTag: sourceLanguageTag,
+  };
+  const dataLoadable = useApiInfiniteQuery({
     url: '/v2/organizations/{id}/projects',
     method: 'get',
     path: { id: organizationId },
-    query: {
-      search: debounced,
-      size: 30,
-      filterBaseLanguageTag: sourceLanguageTag,
-    },
+    query,
     options: {
       keepPreviousData: true,
+      refetchOnMount: true,
       noGlobalLoading: true,
       getNextPageParam: (lastPage) => {
         if (
@@ -72,9 +78,7 @@ export const CopyFromProjectDialog: React.VFC<Props> = ({
           return {
             path: { id: organizationId },
             query: {
-              search: debounced,
-              size: 30,
-              filterBaseLanguageTag: sourceLanguageTag,
+              ...query,
               page: lastPage.page!.number! + 1,
             },
           };
@@ -84,13 +88,32 @@ export const CopyFromProjectDialog: React.VFC<Props> = ({
     },
   });
 
-  const options = useMemo<ProjectOption[]>(
-    () =>
-      projectsLoadable.data?.pages
-        .flatMap((p) => p._embedded?.projects ?? [])
-        .map((p) => ({ id: p.id, name: p.name })) ?? [],
-    [projectsLoadable.data]
+  const data = dataLoadable.data?.pages.flatMap(
+    (p) => p._embedded?.projects ?? []
   );
+
+  const handleFetchMore = () => {
+    if (dataLoadable.hasNextPage && !dataLoadable.isFetching) {
+      dataLoadable.fetchNextPage();
+    }
+  };
+
+  const setSelectedProject = (item: ProjectModel) => {
+    setSelected({ id: item.id, name: item.name });
+  };
+
+  function renderItem(props: object, item: ProjectModel) {
+    const isSelected = selected?.id === item.id;
+    return (
+      <SelectItem
+        {...props}
+        data-cy="tm-empty-wizard-copy-project-item"
+        selected={isSelected}
+        label={item.name}
+        onClick={() => setSelectedProject(item)}
+      />
+    );
+  }
 
   const copyMutation = useApiMutation({
     url: '/v2/organizations/{organizationId}/translation-memories/{translationMemoryId}/copy-from-project',
@@ -143,49 +166,30 @@ export const CopyFromProjectDialog: React.VFC<Props> = ({
             defaultValue="Copy entries from an existing project's translation memory. The original project TM is left untouched."
           />
         </Typography>
-        <Autocomplete
-          size="small"
-          options={options}
-          getOptionLabel={(option) => option.name}
-          value={selected}
-          onChange={(_, newValue) => setSelected(newValue)}
-          inputValue={search}
-          onInputChange={(_, value) => setSearch(value)}
-          loading={projectsLoadable.isFetching}
-          isOptionEqualToValue={(option, value) => option.id === value.id}
-          noOptionsText={t(
-            'tm_empty_wizard_copy_no_matching_projects',
-            'No projects in this organization share this TM’s source language.'
-          )}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              autoFocus
-              data-cy="tm-empty-wizard-copy-project"
-              label={
-                <T
-                  keyName="tm_empty_wizard_copy_project_label"
-                  defaultValue="Source project"
-                />
-              }
-              placeholder={t(
-                'tm_empty_wizard_copy_project_placeholder',
-                'Choose a project…'
-              )}
-              InputProps={{
-                ...params.InputProps,
-                endAdornment: (
-                  <>
-                    {projectsLoadable.isFetching && (
-                      <CircularProgress size={16} />
-                    )}
-                    {params.InputProps.endAdornment}
-                  </>
-                ),
-              }}
-            />
-          )}
-        />
+        <Box data-cy="tm-empty-wizard-copy-project">
+          <InfiniteSearchSelect
+            items={data}
+            selected={selected}
+            queryResult={dataLoadable}
+            itemKey={(item) => item.id}
+            search={search}
+            onClearSelected={() => setSelected(undefined)}
+            onSearchChange={setSearch}
+            onFetchMore={handleFetchMore}
+            renderItem={renderItem}
+            labelItem={(item) => item.name}
+            label={
+              <T
+                keyName="tm_empty_wizard_copy_project_label"
+                defaultValue="Source project"
+              />
+            }
+            searchPlaceholder={t(
+              'tm_empty_wizard_copy_project_placeholder',
+              'Choose a project…'
+            )}
+          />
+        </Box>
         <Typography
           variant="caption"
           color="text.secondary"

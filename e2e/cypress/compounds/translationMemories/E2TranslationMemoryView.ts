@@ -175,13 +175,8 @@ export class E2TranslationMemoryView {
   }
 
   copyFromProject(projectName: string) {
-    gcy('tm-empty-wizard-copy-project').find('input').type(projectName);
-    cy.get('[role="presentation"]')
-      .filter(`:contains("${projectName}")`)
-      .first()
-      .find('li')
-      .first()
-      .click();
+    gcy('tm-empty-wizard-copy-project').click();
+    gcy('tm-empty-wizard-copy-project-item').contains(projectName).click();
     gcy('tm-empty-wizard-copy-submit').click();
     gcy('tm-empty-wizard-copy-dialog').should('not.exist');
   }

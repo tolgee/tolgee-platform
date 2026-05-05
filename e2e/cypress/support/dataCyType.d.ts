@@ -880,6 +880,7 @@ declare namespace DataCy {
         "tm-empty-wizard-copy" |
         "tm-empty-wizard-copy-dialog" |
         "tm-empty-wizard-copy-project" |
+        "tm-empty-wizard-copy-project-item" |
         "tm-empty-wizard-copy-submit" |
         "tm-empty-wizard-import" |
         "tm-empty-wizard-manual" |
