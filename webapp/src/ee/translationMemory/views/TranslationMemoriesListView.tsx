@@ -19,8 +19,8 @@ import {
   useIsOrganizationOwnerOrMaintainer,
 } from 'tg.globalContext/helpers';
 import { DisabledFeatureBanner } from 'tg.component/common/DisabledFeatureBanner';
-import { TranslationMemoryListItem } from 'tg.ee.module/translationMemory/components/TranslationMemoryListItem';
-import { TranslationMemoriesEmptyListMessage } from 'tg.ee.module/translationMemory/components/TranslationMemoriesEmptyListMessage';
+import { TranslationMemoryListItem } from 'tg.ee.module/translationMemory/components/list/TranslationMemoryListItem';
+import { TranslationMemoriesEmptyListMessage } from 'tg.ee.module/translationMemory/components/list/TranslationMemoriesEmptyListMessage';
 import { TranslationMemoryCreateDialog } from 'tg.ee.module/translationMemory/views/TranslationMemoryCreateDialog';
 
 const StyledWrapper = styled('div')`

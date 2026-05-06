@@ -17,10 +17,10 @@ import {
   EntryGroupCandidate,
   EntryRowLayout,
   TranslationMemoryEntryRow,
-} from 'tg.ee.module/translationMemory/components/TranslationMemoryEntryRow';
+} from 'tg.ee.module/translationMemory/components/content/TranslationMemoryEntryRow';
 import { TranslationMemoryCreateEntryDialog } from 'tg.ee.module/translationMemory/views/TranslationMemoryCreateEntryDialog';
-import { TranslationMemoryImportDialog } from 'tg.ee.module/translationMemory/components/TranslationMemoryImportDialog';
-import { CopyFromProjectDialog } from 'tg.ee.module/translationMemory/components/CopyFromProjectDialog';
+import { TranslationMemoryImportDialog } from 'tg.ee.module/translationMemory/components/content/TranslationMemoryImportDialog';
+import { CopyFromProjectDialog } from 'tg.ee.module/translationMemory/components/content/CopyFromProjectDialog';
 import { useTmExport } from 'tg.ee.module/translationMemory/hooks/useTmExport';
 import { components } from 'tg.service/apiSchema.generated';
 import { apiV2HttpService } from 'tg.service/http/ApiV2HttpService';

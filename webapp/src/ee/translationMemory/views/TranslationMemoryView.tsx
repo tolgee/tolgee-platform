@@ -7,7 +7,7 @@ import { usePreferredOrganization } from 'tg.globalContext/helpers';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useOrganization } from 'tg.views/organizations/useOrganization';
 import { useRouteMatch, Redirect } from 'react-router-dom';
-import { TranslationMemoryEntriesList } from 'tg.ee.module/translationMemory/components/TranslationMemoryEntriesList';
+import { TranslationMemoryEntriesList } from 'tg.ee.module/translationMemory/components/content/TranslationMemoryEntriesList';
 import { ProjectsUsedInfo } from 'tg.component/ProjectsUsedInfo';
 
 export const TranslationMemoryView = () => {

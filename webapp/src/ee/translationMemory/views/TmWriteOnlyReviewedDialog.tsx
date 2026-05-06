@@ -9,7 +9,7 @@ import {
   Typography,
 } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
-import { DialogCancelSaveActions } from 'tg.ee.module/translationMemory/components/DialogCancelSaveActions';
+import { DialogCancelSaveActions } from 'tg.ee.module/translationMemory/components/shared/DialogCancelSaveActions';
 
 type Props = {
   open: boolean;

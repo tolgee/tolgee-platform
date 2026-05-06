@@ -10,7 +10,7 @@ import {
 import { T, useTranslate } from '@tolgee/react';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { components } from 'tg.service/apiSchema.generated';
-import { DialogCancelSaveActions } from 'tg.ee.module/translationMemory/components/DialogCancelSaveActions';
+import { DialogCancelSaveActions } from 'tg.ee.module/translationMemory/components/shared/DialogCancelSaveActions';
 
 type AssignmentModel =
   components['schemas']['ProjectTranslationMemoryAssignmentModel'];

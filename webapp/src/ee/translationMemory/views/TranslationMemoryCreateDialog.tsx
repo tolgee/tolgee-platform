@@ -12,7 +12,7 @@ import { messageService } from 'tg.service/MessageService';
 import {
   TranslationMemoryCreateEditForm,
   CreateEditTranslationMemoryFormValues,
-} from 'tg.ee.module/translationMemory/components/TranslationMemoryCreateEditForm';
+} from 'tg.ee.module/translationMemory/components/createEdit/TranslationMemoryCreateEditForm';
 
 type CreateRequest =
   components['schemas']['CreateSharedTranslationMemoryRequest'];

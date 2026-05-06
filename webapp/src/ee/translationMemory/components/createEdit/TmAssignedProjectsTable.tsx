@@ -8,7 +8,7 @@ import {
 } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { RefreshCcw01, XClose } from '@untitled-ui/icons-react';
-import { PenaltyCell } from 'tg.ee.module/translationMemory/components/PenaltyCell';
+import { PenaltyCell } from 'tg.ee.module/translationMemory/components/createEdit/PenaltyCell';
 
 const StyledProjectTable = styled('div')`
   border: 1px solid ${({ theme }) => theme.palette.divider1};

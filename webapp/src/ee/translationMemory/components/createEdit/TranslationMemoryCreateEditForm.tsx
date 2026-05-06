@@ -27,8 +27,8 @@ import {
   AssignedProjectRow,
   PendingRemovalRow,
   TmAssignedProjectsTable,
-} from 'tg.ee.module/translationMemory/views/TmAssignedProjectsTable';
-import { confirmProjectDisconnect } from 'tg.ee.module/translationMemory/components/confirmProjectDisconnect';
+} from 'tg.ee.module/translationMemory/components/createEdit/TmAssignedProjectsTable';
+import { confirmProjectDisconnect } from 'tg.ee.module/translationMemory/components/createEdit/confirmProjectDisconnect';
 
 const StyledContainer = styled('div')`
   padding: ${({ theme }) => theme.spacing(3)};

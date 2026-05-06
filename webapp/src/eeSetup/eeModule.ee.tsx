@@ -87,7 +87,7 @@ import { BranchMergePage } from '../ee/branching/BranchMergePage';
 import { Branch } from '../component/CustomIcons';
 import { QaCheck } from '../component/CustomIcons';
 
-export { ProjectSettingsTranslationMemory } from '../ee/translationMemory/components/ProjectSettingsTranslationMemory';
+export { ProjectSettingsTranslationMemory } from '../ee/translationMemory/components/projectSettings/ProjectSettingsTranslationMemory';
 export { TaskReference } from '../ee/task/components/TaskReference';
 export { BranchReference } from '../ee/branching/components/BranchReference';
 export { GlobalLimitPopover } from '../ee/billing/limitPopover/GlobalLimitPopover';

@@ -1,20 +1,18 @@
 import React, { useState } from 'react';
 import { T, useTranslate } from '@tolgee/react';
-import { Folder } from '@untitled-ui/icons-react';
-import { CopyFromProjectDialog } from 'tg.ee.module/translationMemory/components/CopyFromProjectDialog';
+import { UploadCloud02 } from '@untitled-ui/icons-react';
+import { TranslationMemoryImportDialog } from 'tg.ee.module/translationMemory/components/content/TranslationMemoryImportDialog';
 import { EmptyTmWizardCard } from './EmptyTmWizardCard';
 
 type Props = {
   organizationId: number;
   translationMemoryId: number;
-  sourceLanguageTag: string;
   onFinished: () => void;
 };
 
-export const EmptyTmWizardCopyFromProjectOption: React.VFC<Props> = ({
+export const EmptyTmWizardImportOption: React.VFC<Props> = ({
   organizationId,
   translationMemoryId,
-  sourceLanguageTag,
   onFinished,
 }) => {
   const { t } = useTranslate();
@@ -23,28 +21,28 @@ export const EmptyTmWizardCopyFromProjectOption: React.VFC<Props> = ({
   return (
     <>
       <EmptyTmWizardCard
-        dataCy="tm-empty-wizard-copy"
-        icon={<Folder />}
+        dataCy="tm-empty-wizard-import"
+        icon={<UploadCloud02 />}
         title={
           <T
-            keyName="tm_empty_wizard_copy_card_title"
-            defaultValue="Copy from a project"
+            keyName="tm_empty_wizard_import_title"
+            defaultValue="Import from file"
           />
         }
         description={t(
-          'tm_empty_wizard_copy_card_description',
-          "Seed this memory with entries from an existing project's TM."
+          'tm_empty_wizard_import_description',
+          'Upload a TMX file with existing translations.'
         )}
         buttonLabel={
           <T
-            keyName="tm_empty_wizard_copy_card_button"
-            defaultValue="Choose project"
+            keyName="tm_empty_wizard_import_button"
+            defaultValue="Import file"
           />
         }
         onClick={() => setOpen(true)}
       />
       {open && (
-        <CopyFromProjectDialog
+        <TranslationMemoryImportDialog
           open={open}
           onClose={() => setOpen(false)}
           onFinished={() => {
@@ -53,7 +51,7 @@ export const EmptyTmWizardCopyFromProjectOption: React.VFC<Props> = ({
           }}
           organizationId={organizationId}
           translationMemoryId={translationMemoryId}
-          sourceLanguageTag={sourceLanguageTag}
+          hasExistingEntries={false}
         />
       )}
     </>

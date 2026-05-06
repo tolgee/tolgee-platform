@@ -7,7 +7,7 @@ import { CircledLanguageIconList } from 'tg.component/languages/CircledLanguageI
 import { languageInfo } from '@tginternal/language-util/lib/generated/languageInfo';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
-import { TranslationMemoryListItemMenu } from 'tg.ee.module/translationMemory/components/TranslationMemoryListItemMenu';
+import { TranslationMemoryListItemMenu } from 'tg.ee.module/translationMemory/components/list/TranslationMemoryListItemMenu';
 
 type TranslationMemoryWithStatsModel =
   components['schemas']['TranslationMemoryWithStatsModel'];
