@@ -217,11 +217,12 @@ class TranslationMemoryEntryManagementService(
     select base_t.text as source_text
     from project p
     join language base_lang on base_lang.id = p.base_language_id
-    join key k on k.project_id = p.id
+    join key k on k.project_id = p.id and k.deleted_at is null
     left join branch b on b.id = k.branch_id
     join translation base_t on base_t.key_id = k.id and base_t.language_id = base_lang.id
     join translation target_t on target_t.key_id = k.id and target_t.language_id <> base_lang.id
     where p.id = any(:projectIds)
+      and p.deleted_at is null
       and base_t.text is not null and base_t.text <> ''
       and target_t.text is not null and target_t.text <> ''
       and (b.id is null or b.is_default = true)
@@ -268,12 +269,13 @@ class TranslationMemoryEntryManagementService(
              target_lang.tag as target_lang
       from project p
       join language base_lang on base_lang.id = p.base_language_id
-      join key k on k.project_id = p.id
+      join key k on k.project_id = p.id and k.deleted_at is null
       left join branch b on b.id = k.branch_id
       join translation base_t on base_t.key_id = k.id and base_t.language_id = base_lang.id
       join translation target_t on target_t.key_id = k.id and target_t.language_id <> base_lang.id
       join language target_lang on target_lang.id = target_t.language_id
       where p.id = any(:projectIds)
+        and p.deleted_at is null
         and base_t.text is not null and base_t.text <> ''
         and target_t.text is not null and target_t.text <> ''
         and (b.id is null or b.is_default = true)
@@ -303,12 +305,13 @@ class TranslationMemoryEntryManagementService(
              k.name as key_name
       from project p
       join language base_lang on base_lang.id = p.base_language_id
-      join key k on k.project_id = p.id
+      join key k on k.project_id = p.id and k.deleted_at is null
       left join branch b on b.id = k.branch_id
       join translation base_t on base_t.key_id = k.id and base_t.language_id = base_lang.id
       join translation target_t on target_t.key_id = k.id and target_t.language_id <> base_lang.id
       join language target_lang on target_lang.id = target_t.language_id
       where p.id = any(:projectIds)
+        and p.deleted_at is null
         and base_t.text = any(:sourceTexts)
         and target_t.text is not null and target_t.text <> ''
         and (b.id is null or b.is_default = true)

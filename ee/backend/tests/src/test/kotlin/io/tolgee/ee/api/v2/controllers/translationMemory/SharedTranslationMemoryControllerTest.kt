@@ -272,7 +272,7 @@ class SharedTranslationMemoryControllerTest : AuthorizedControllerTest() {
         node("_embedded.assignedProjects").isArray.hasSize(1)
         node("_embedded.assignedProjects[0].projectName").isEqualTo("Project With TM")
         node("_embedded.assignedProjects[0].readAccess").isEqualTo(true)
-        node("_embedded.assignedProjects[0].writeAccess").isEqualTo(true)
+        node("_embedded.assignedProjects[0].writeAccess").isEqualTo(false)
       }
   }
 

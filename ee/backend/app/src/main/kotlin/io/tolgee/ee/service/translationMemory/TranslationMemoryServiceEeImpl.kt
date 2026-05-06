@@ -32,7 +32,7 @@ class TranslationMemoryServiceEeImpl(
            ) as similarity,
            tm.name as translationMemoryName,
            tmp.priority as assignmentPriority,
-           re.updated_at as updated_at
+           re.updated_at as updatedAt
     from (
       -- Stored entries: user-created via the add-entry dialog or TMX import. No contributing
       -- key — manual entries are not linked to any project translation.
@@ -42,7 +42,7 @@ class TranslationMemoryServiceEeImpl(
              tme.translation_memory_id as tm_id,
              null::text as key_name,
              null::text as key_namespace,
-             null::bigint as key_id,
+             0::bigint as key_id,
              null::boolean as any_key_is_plural,
              false as includes_current_key,
              tme.updated_at as updated_at
@@ -77,8 +77,9 @@ class TranslationMemoryServiceEeImpl(
           and base_t.text is not null
           and base_t.text % :baseTranslationText
       ) base_match
-      join key k on k.id = base_match.key_id
+      join key k on k.id = base_match.key_id and k.deleted_at is null
       join project p on p.id = k.project_id and p.base_language_id = base_match.language_id
+        and p.deleted_at is null
       join translation_memory_project tmp_w
         on tmp_w.project_id = p.id and tmp_w.write_access = true
       join translation_memory tm_virt

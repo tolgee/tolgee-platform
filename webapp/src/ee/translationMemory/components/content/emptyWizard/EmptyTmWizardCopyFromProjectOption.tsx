@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { T, useTranslate } from '@tolgee/react';
+import { T } from '@tolgee/react';
 import { Folder } from '@untitled-ui/icons-react';
 import { TranslationMemorySettingsDialog } from 'tg.ee.module/translationMemory/views/TranslationMemorySettingsDialog';
 import { EmptyWizardCard } from 'tg.component/entriesList/EmptyWizardCard';
@@ -8,14 +8,15 @@ type Props = {
   organizationId: number;
   translationMemoryId: number;
   sourceLanguageTag: string;
+  assignedProjectsCount: number;
   onFinished: () => void;
 };
 
 export const EmptyTmWizardCopyFromProjectOption: React.VFC<Props> = ({
   translationMemoryId,
+  assignedProjectsCount,
   onFinished,
 }) => {
-  const { t } = useTranslate();
   const [open, setOpen] = useState(false);
 
   return (
@@ -29,10 +30,20 @@ export const EmptyTmWizardCopyFromProjectOption: React.VFC<Props> = ({
             defaultValue="Sync from projects"
           />
         }
-        description={t(
-          'tm_empty_wizard_sync_projects_description',
-          'Choose which projects write into TM'
-        )}
+        description={
+          assignedProjectsCount > 0 ? (
+            <T
+              keyName="tm_empty_wizard_sync_projects_description_connected"
+              defaultValue="Connected to {count, plural, one {1 project} other {# projects}}. Translations will appear here once added."
+              params={{ count: assignedProjectsCount }}
+            />
+          ) : (
+            <T
+              keyName="tm_empty_wizard_sync_projects_description"
+              defaultValue="Choose which projects write into TM"
+            />
+          )
+        }
         buttonLabel={
           <T
             keyName="tm_empty_wizard_sync_projects_button"
@@ -50,6 +61,7 @@ export const EmptyTmWizardCopyFromProjectOption: React.VFC<Props> = ({
             onFinished();
           }}
           translationMemoryId={translationMemoryId}
+          projectsOnly
         />
       )}
     </>

@@ -404,8 +404,8 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
   };
 
   const isEmpty = !entries.isLoading && groups.length === 0;
-  // The wizard is the empty-state UI for users who can actually populate the TM. Read-only
-  // viewers and "your search returned nothing" cases keep the simple message.
+  // The wizard is the empty-state UI for users who can populate the TM. Once any project
+  // is assigned, hide the "Sync from projects" card — the user has been there.
   const showEmptyWizard = isEmpty && canManage && !search && !targetLanguageTag;
 
   return (
@@ -516,6 +516,7 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
                 translationMemoryId={translationMemoryId}
                 sourceLanguageTag={sourceLanguageTag}
                 availableLanguages={displayLanguages}
+                assignedProjectsCount={assignedProjectsCount}
                 onFinished={() => entries.refetch()}
               />
             ) : isEmpty ? (

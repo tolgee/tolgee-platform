@@ -76,6 +76,8 @@ type Props = {
     pendingRemovals: PendingRemovalRow[]
   ) => void;
   isSaving: boolean;
+  /** When true, only the assigned-projects section + actions render. Used by the wizard. */
+  projectsOnly?: boolean;
 };
 
 export const TranslationMemoryCreateEditForm = ({
@@ -85,6 +87,7 @@ export const TranslationMemoryCreateEditForm = ({
   onClose,
   onSave,
   isSaving,
+  projectsOnly,
 }: Props) => {
   const { t } = useTranslate();
 
@@ -164,24 +167,29 @@ export const TranslationMemoryCreateEditForm = ({
         return (
           <StyledContainer>
             <Stack spacing={3}>
-              <TextField
-                name="name"
-                autoFocus
-                label={t('translation_memory_field_name', 'Name')}
-                data-cy="create-translation-memory-field-name"
-                disabled={!featureEnabled}
-                minHeight={false}
-              />
-              <BaseLanguageFieldWithHint disabled={!featureEnabled} />
-              <DefaultPenaltyField disabled={!featureEnabled} />
-              <WriteOnlyReviewedField
-                disabled={!featureEnabled}
-                mode={mode}
-                tmType={tmType}
-              />
+              {!projectsOnly && (
+                <>
+                  <TextField
+                    name="name"
+                    autoFocus
+                    label={t('translation_memory_field_name', 'Name')}
+                    data-cy="create-translation-memory-field-name"
+                    disabled={!featureEnabled}
+                    minHeight={false}
+                  />
+                  <BaseLanguageFieldWithHint disabled={!featureEnabled} />
+                  <DefaultPenaltyField disabled={!featureEnabled} />
+                  <WriteOnlyReviewedField
+                    disabled={!featureEnabled}
+                    mode={mode}
+                    tmType={tmType}
+                  />
+                </>
+              )}
               <AssignedProjectsEditor
                 disabled={!featureEnabled}
                 mode={mode}
+                projectsOnly={projectsOnly}
                 pendingRemovals={pendingRemovals}
                 onRequestRemove={requestRemoveProject}
                 onUndoRemove={undoRemoval}
@@ -366,6 +374,7 @@ const WriteOnlyReviewedField = ({
 type AssignedProjectsEditorProps = {
   disabled: boolean;
   mode: Mode;
+  projectsOnly?: boolean;
   pendingRemovals: PendingRemovalRow[];
   onRequestRemove: (projectId: number, projectName: string) => void;
   onUndoRemove: (projectId: number) => void;
@@ -374,6 +383,7 @@ type AssignedProjectsEditorProps = {
 const AssignedProjectsEditor = ({
   disabled,
   mode,
+  projectsOnly,
   pendingRemovals,
   onRequestRemove,
   onUndoRemove,
@@ -478,11 +488,12 @@ const AssignedProjectsEditor = ({
     );
   };
 
-  // On create only: warn when projects are assigned but none has writeAccess. Such a TM
-  // would have no virtual content and would behave like an empty TM until either a write
-  // assignment is added or entries are added manually.
+  // Warn when projects are assigned but none has writeAccess — that TM has no virtual
+  // content. Surfaced in create mode and in the wizard's "Manage projects" modal; hidden
+  // in the full TM-settings dialog where users may have intentionally configured read-only
+  // sharing alongside other knobs.
   const showNoWriteAlert =
-    mode === 'create' &&
+    (mode === 'create' || projectsOnly) &&
     values.assignedProjects.length > 0 &&
     !values.assignedProjects.some((a) => a.writeAccess);
 
@@ -498,7 +509,7 @@ const AssignedProjectsEditor = ({
           mb: 0.5,
         }}
       >
-        {t('translation_memory_settings_used_in_projects', 'Used in projects')}
+        {t('translation_memory_settings_shared_with', 'Shared with')}
       </Typography>
       {showNoWriteAlert && (
         <Alert severity="warning" sx={{ mb: 1 }}>

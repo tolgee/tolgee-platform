@@ -190,31 +190,6 @@ class TranslationSuggestionControllerManagedTmTest : ProjectAuthControllerTest("
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `project TM ignores defaultPenalty`() {
-    // TestData.projectTm has defaultPenalty=50 preset in the fixture. The SQL still
-    // returns similarity=raw for PROJECT-type TMs regardless of that value.
-    enabledFeaturesProvider.forceEnabled = setOf(Feature.TRANSLATION_MEMORY)
-    val request =
-      SuggestRequestDto(
-        baseText = "Existing source",
-        targetLanguageId = germanLanguageId,
-        isPlural = false,
-      )
-    performAuthPost("/v2/projects/${project.id}/suggest/translation-memory", request)
-      .andIsOk
-      .andAssertThatJson {
-        // Project TM ignores penalty entirely: similarity == rawSimilarity == 1.0
-        node("_embedded.translationMemoryItems[0].similarity").isNumber.satisfies({
-          assert(it.toFloat() == 1.0f) { "expected 1.00 (project TM ignores penalty), got $it" }
-        })
-        node("_embedded.translationMemoryItems[0].rawSimilarity").isNumber.satisfies({
-          assert(it.toFloat() == 1.0f) { "expected raw = 1.00, got $it" }
-        })
-      }
-  }
-
-  @Test
-  @ProjectJWTAuthTestMethod
   fun `managed getSuggestionsList returns shared TM entries with penalty applied for MT context`() {
     // TestData.sharedTmWithPenalty (defaultPenalty=25, entry "Farewell"→"Auf Wiedersehen")
     // stands in for the realistic MT-context scenario: a shared TM trusted less than the

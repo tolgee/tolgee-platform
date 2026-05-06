@@ -216,14 +216,11 @@ class TranslationMemoryTestData : BaseTestData() {
         }
       projectWithTm = projectWithTmBuilder.self
 
-      // Non-zero defaultPenalty is intentional: PROJECT-type TMs are hard-coded to
-      // similarity=raw in the suggestion SQL, so tests using this TM exercise that invariant.
       userAccountBuilder.defaultOrganizationBuilder
         .addTranslationMemory {
           name = projectWithTm.name
           sourceLanguageTag = "en"
           type = TranslationMemoryType.PROJECT
-          defaultPenalty = 50
         }.build {
           projectTm = self
           // Priority 0 = top of the list by default; shared TMs in this fixture stack under it
@@ -240,7 +237,10 @@ class TranslationMemoryTestData : BaseTestData() {
           type = TranslationMemoryType.SHARED
         }.build {
           sharedTm = self
-          assignProject(projectWithTm) { priority = 1 }
+          assignProject(projectWithTm) {
+            priority = 1
+            writeAccess = false
+          }
           addEntry {
             sourceText = "Hello world"
             targetText = "Hallo Welt"

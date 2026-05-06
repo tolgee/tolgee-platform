@@ -16,6 +16,8 @@ type Props = {
   onClose: () => void;
   onFinished: () => void;
   translationMemoryId: number;
+  /** Render only the project-assignment section. Used by the empty wizard. */
+  projectsOnly?: boolean;
 };
 
 /**
@@ -30,6 +32,7 @@ export const TranslationMemorySettingsDialog: React.VFC<Props> = ({
   onClose,
   onFinished,
   translationMemoryId,
+  projectsOnly,
 }) => {
   const { preferredOrganization } = usePreferredOrganization();
   const organizationId = preferredOrganization!.id;
@@ -146,10 +149,17 @@ export const TranslationMemorySettingsDialog: React.VFC<Props> = ({
       onClick={(e) => e.stopPropagation()}
     >
       <DialogTitle>
-        <T
-          keyName="translation_memory_settings_title"
-          defaultValue="TM settings"
-        />
+        {projectsOnly ? (
+          <T
+            keyName="translation_memory_manage_projects_title"
+            defaultValue="Manage projects"
+          />
+        ) : (
+          <T
+            keyName="translation_memory_settings_title"
+            defaultValue="TM settings"
+          />
+        )}
       </DialogTitle>
 
       {isLoading || !initialValues ? (
@@ -166,6 +176,7 @@ export const TranslationMemorySettingsDialog: React.VFC<Props> = ({
           onClose={onClose}
           onSave={save}
           isSaving={isSaving}
+          projectsOnly={projectsOnly}
         />
       )}
     </Dialog>
