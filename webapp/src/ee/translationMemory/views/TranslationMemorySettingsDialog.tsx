@@ -8,8 +8,8 @@ import { languageInfo } from '@tginternal/language-util/lib/generated/languageIn
 import {
   CreateEditTranslationMemoryFormValues,
   TranslationMemoryCreateEditForm,
-} from 'tg.ee.module/translationMemory/components/createEdit/TranslationMemoryCreateEditForm';
-import { PendingRemovalRow } from 'tg.ee.module/translationMemory/components/createEdit/TmAssignedProjectsTable';
+} from 'tg.ee.module/translationMemory/components/form/TranslationMemoryCreateEditForm';
+import { PendingRemovalRow } from 'tg.ee.module/translationMemory/components/form/TmAssignedProjectsTable';
 
 type Props = {
   open: boolean;

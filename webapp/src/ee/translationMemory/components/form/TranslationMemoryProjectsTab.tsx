@@ -12,7 +12,7 @@ import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { components } from 'tg.service/apiSchema.generated';
 import { XClose } from '@untitled-ui/icons-react';
 import { useQueryClient } from 'react-query';
-import { confirmProjectDisconnect } from 'tg.ee.module/translationMemory/components/createEdit/confirmProjectDisconnect';
+import { confirmProjectDisconnect } from 'tg.ee.module/translationMemory/components/form/confirmProjectDisconnect';
 
 type TmAssignedProjectModel = components['schemas']['TmAssignedProjectModel'];
 
