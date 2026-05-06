@@ -113,10 +113,6 @@ export class E2TranslationMemoryView {
     return gcy('tm-import-menu-tmx');
   }
 
-  getCopyFromProjectMenuItem() {
-    return gcy('tm-import-menu-copy-from-project');
-  }
-
   getExportButton() {
     return gcy('tm-export-button');
   }
@@ -166,18 +162,4 @@ export class E2TranslationMemoryView {
     return gcy('tm-empty-wizard-import');
   }
 
-  // --- Copy-from-project dialog (reused from wizard and toolbar menu) ---
-
-  openCopyFromProjectDialogFromMenu() {
-    this.openImportMenu();
-    this.getCopyFromProjectMenuItem().click();
-    gcy('tm-empty-wizard-copy-dialog').should('be.visible');
-  }
-
-  copyFromProject(projectName: string) {
-    gcy('tm-empty-wizard-copy-project').click();
-    gcy('tm-empty-wizard-copy-project-item').contains(projectName).click();
-    gcy('tm-empty-wizard-copy-submit').click();
-    gcy('tm-empty-wizard-copy-dialog').should('not.exist');
-  }
 }

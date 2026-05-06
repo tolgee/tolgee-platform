@@ -59,37 +59,12 @@ describe('Translation Memory empty-state wizard', () => {
     gcy('tm-import-dialog').should('be.visible');
   });
 
-  it('copy card seeds the TM from a project and dismisses the wizard', () => {
+  it('sync card opens the manage-projects dialog', () => {
+    // Sync card opens the project-only TM settings dialog so the user can connect projects
+    // (write-assignments) and pull their translations in as virtual content.
     listView.findAndVisitTm(data, 'test_username', 'Unassigned Shared TM');
 
     tmView.getEmptyWizardCopyCard().click();
-    gcy('tm-empty-wizard-copy-dialog').should('be.visible');
-
-    tmView.copyFromProject('Project With TM');
-
-    // Two virtual entries on Project With TM (existingKey + reviewedKey, both with German
-    // targets) get copied into the empty shared TM as manual entries. Wizard should give
-    // way to the populated table.
-    tmView.getEmptyWizard().should('not.exist');
-    tmView.getEntryRowContaining('Existing source').should('be.visible');
-    tmView.getEntryRowContaining('Reviewed source').should('be.visible');
-  });
-
-  it('toolbar menu can copy from a project on a non-empty TM (idempotent)', () => {
-    // Copy-from-project also works on a TM that already has entries — the backend skips
-    // duplicates by (sourceText, targetLanguageTag, targetText), so existing entries stay
-    // intact and only new ones land. "Shared Marketing TM" has 2 distinct source texts;
-    // pulling in Project With TM (2 different sources) should grow it to 4.
-    listView.findAndVisitTm(data, 'test_username', 'Shared Marketing TM');
-
-    tmView.getEntryRows().should('have.length', 2);
-
-    tmView.openCopyFromProjectDialogFromMenu();
-    tmView.copyFromProject('Project With TM');
-
-    tmView.getEntryRowContaining('Existing source').should('be.visible');
-    tmView.getEntryRowContaining('Reviewed source').should('be.visible');
-    tmView.getEntryRowContaining('Hello world').should('be.visible');
-    tmView.getEntryRowContaining('Thank you').should('be.visible');
+    gcy('tm-settings-dialog').should('be.visible');
   });
 });

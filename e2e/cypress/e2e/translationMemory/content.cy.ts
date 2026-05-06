@@ -140,12 +140,11 @@ describe('Translation Memory content browser', () => {
       tmView.getExportButton().should('be.visible');
     });
 
-    it('exposes both import sources behind the import menu', () => {
+    it('exposes the TMX import behind the import menu', () => {
       listView.findAndVisitTm(data, 'test_username', 'Shared Marketing TM');
 
       tmView.openImportMenu();
       tmView.getImportTmxMenuItem().should('be.visible');
-      tmView.getCopyFromProjectMenuItem().should('be.visible');
     });
 
     it('imports a TMX file', () => {
