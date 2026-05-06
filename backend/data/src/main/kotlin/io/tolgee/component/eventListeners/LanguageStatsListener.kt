@@ -1,7 +1,8 @@
 package io.tolgee.component.eventListeners
 
-import io.tolgee.activity.ActivityService
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.batch.data.BatchJobType
+import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.batch.events.OnBatchJobFinalized
 import io.tolgee.events.OnProjectActivityEvent
 import io.tolgee.model.Language
@@ -25,7 +26,6 @@ class LanguageStatsListener(
   private val projectService: ProjectService,
   private val keyRepository: KeyRepository,
   private val translationRepository: TranslationRepository,
-  private val activityService: ActivityService,
 ) {
   var bypass = false
 
@@ -49,14 +49,7 @@ class LanguageStatsListener(
 
       val branchIds = resolveBranches(event)
 
-      if (branchIds.contains(null)) {
-        languageStatsService.refreshLanguageStats(projectId)
-        return@runSentryCatching
-      }
-
-      branchIds.forEach { branchId ->
-        languageStatsService.refreshLanguageStats(projectId, branchId)
-      }
+      refreshLanguageStatsForBranches(projectId, branchIds)
     }
   }
 
@@ -69,13 +62,39 @@ class LanguageStatsListener(
     runSentryCatching {
       projectService.findDto(projectId) ?: return@runSentryCatching
 
-      val branchIds = activityService.findDistinctBranchIdsByRevisionId(event.activityRevisionId)
-      if (branchIds.isEmpty()) return@runSentryCatching
-
-      branchIds.forEach { branchId ->
-        languageStatsService.refreshLanguageStats(projectId, branchId)
+      val keyIds = extractKeyIdsFromQaJobTarget(event.job.target)
+      if (keyIds.isEmpty()) {
+        return@runSentryCatching
       }
+
+      val branchIds = mutableSetOf<Long?>()
+      keyIds.chunked(IN_CLAUSE_BATCH_SIZE).forEach { chunk ->
+        branchIds.addAll(keyRepository.getBranchIdsByIds(chunk))
+      }
+
+      refreshLanguageStatsForBranches(projectId, branchIds)
     }
+  }
+
+  private fun refreshLanguageStatsForBranches(projectId: Long, branchIds: Set<Long?>) {
+    if (branchIds.contains(null)) {
+      languageStatsService.refreshLanguageStats(projectId)
+    }
+
+    branchIds.filterNotNull().forEach { branchId ->
+      languageStatsService.refreshLanguageStats(projectId, branchId)
+    }
+  }
+
+  private fun extractKeyIdsFromQaJobTarget(target: List<Any>): List<Long> {
+    if (target.isEmpty()) return emptyList()
+    val type =
+      jacksonObjectMapper().typeFactory.constructCollectionType(
+        List::class.java,
+        BatchTranslationTargetItem::class.java,
+      )
+    val items: List<BatchTranslationTargetItem> = jacksonObjectMapper().convertValue(target, type)
+    return items.map { it.keyId }.distinct()
   }
 
   private fun affectsStats(classes: Set<KClass<*>>): Boolean {
