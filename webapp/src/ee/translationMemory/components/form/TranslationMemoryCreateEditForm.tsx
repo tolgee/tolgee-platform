@@ -1,4 +1,5 @@
 import {
+  Alert,
   Autocomplete,
   Box,
   Button,
@@ -180,6 +181,7 @@ export const TranslationMemoryCreateEditForm = ({
               />
               <AssignedProjectsEditor
                 disabled={!featureEnabled}
+                mode={mode}
                 pendingRemovals={pendingRemovals}
                 onRequestRemove={requestRemoveProject}
                 onUndoRemove={undoRemoval}
@@ -363,6 +365,7 @@ const WriteOnlyReviewedField = ({
 
 type AssignedProjectsEditorProps = {
   disabled: boolean;
+  mode: Mode;
   pendingRemovals: PendingRemovalRow[];
   onRequestRemove: (projectId: number, projectName: string) => void;
   onUndoRemove: (projectId: number) => void;
@@ -370,6 +373,7 @@ type AssignedProjectsEditorProps = {
 
 const AssignedProjectsEditor = ({
   disabled,
+  mode,
   pendingRemovals,
   onRequestRemove,
   onUndoRemove,
@@ -474,6 +478,14 @@ const AssignedProjectsEditor = ({
     );
   };
 
+  // On create only: warn when projects are assigned but none has writeAccess. Such a TM
+  // would have no virtual content and would behave like an empty TM until either a write
+  // assignment is added or entries are added manually.
+  const showNoWriteAlert =
+    mode === 'create' &&
+    values.assignedProjects.length > 0 &&
+    !values.assignedProjects.some((a) => a.writeAccess);
+
   return (
     <Box>
       <Typography
@@ -488,6 +500,14 @@ const AssignedProjectsEditor = ({
       >
         {t('translation_memory_settings_used_in_projects', 'Used in projects')}
       </Typography>
+      {showNoWriteAlert && (
+        <Alert severity="warning" sx={{ mb: 1 }}>
+          <T
+            keyName="translation_memory_no_write_access_warning"
+            defaultValue="This TM will be empty. Give at least one project Write access for its translations to appear here."
+          />
+        </Alert>
+      )}
       <TmAssignedProjectsTable
         rows={values.assignedProjects}
         removedRows={pendingRemovals}

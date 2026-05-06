@@ -14,7 +14,6 @@ import {
 import { T, useTranslate } from '@tolgee/react';
 import {
   FileDownload03,
-  Folder,
   LayoutGrid02,
   LayoutLeft,
   UploadCloud02,
@@ -55,7 +54,6 @@ type Props = {
   sourceLanguageTag: string;
   canManage: boolean;
   onImport: () => void;
-  onCopyFromProject: () => void;
   onExport: () => void;
   exportDisabled: boolean;
   onCreate: () => void;
@@ -85,7 +83,6 @@ export const TmEntriesToolbar: React.VFC<Props> = ({
   sourceLanguageTag,
   canManage,
   onImport,
-  onCopyFromProject,
   onExport,
   exportDisabled,
   onCreate,
@@ -242,23 +239,6 @@ export const TmEntriesToolbar: React.VFC<Props> = ({
                   <T
                     keyName="translation_memory_import_tmx"
                     defaultValue="Import TMX"
-                  />
-                </ListItemText>
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  setImportMenuOpen(false);
-                  onCopyFromProject();
-                }}
-                data-cy="tm-import-menu-copy-from-project"
-              >
-                <ListItemIcon>
-                  <Folder width={18} height={18} />
-                </ListItemIcon>
-                <ListItemText>
-                  <T
-                    keyName="translation_memory_copy_from_project"
-                    defaultValue="Copy from a project"
                   />
                 </ListItemText>
               </MenuItem>

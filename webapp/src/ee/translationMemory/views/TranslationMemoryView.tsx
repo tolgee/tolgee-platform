@@ -1,19 +1,30 @@
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { BaseOrganizationSettingsView } from 'tg.views/organizations/components/BaseOrganizationSettingsView';
-import { useTranslate } from '@tolgee/react';
-import React, { useMemo } from 'react';
+import { T, useTranslate } from '@tolgee/react';
+import React, { useMemo, useState } from 'react';
+import { Box, IconButton, styled, Tooltip, Typography } from '@mui/material';
+import { Settings01 } from '@untitled-ui/icons-react';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useOrganization } from 'tg.views/organizations/useOrganization';
 import { useRouteMatch, Redirect } from 'react-router-dom';
 import { TranslationMemoryEntriesList } from 'tg.ee.module/translationMemory/components/content/TranslationMemoryEntriesList';
-import { ProjectsUsedInfo } from 'tg.component/ProjectsUsedInfo';
+import { TranslationMemorySettingsDialog } from 'tg.ee.module/translationMemory/views/TranslationMemorySettingsDialog';
+import { ProjectLink } from 'tg.component/ProjectLink';
+
+const StyledSharedWith = styled(Box)`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: ${({ theme }) => theme.palette.text.secondary};
+`;
 
 export const TranslationMemoryView = () => {
   const [search, setSearch] = useUrlSearchState('search', {
     defaultVal: '',
   });
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const { preferredOrganization } = usePreferredOrganization();
   const organization = useOrganization();
@@ -83,14 +94,63 @@ export const TranslationMemoryView = () => {
         t('organization_translation_memory_title', 'Translation memory')
       }
       titleAdornment={
-        <ProjectsUsedInfo
-          projects={projectsForInfo}
-          label={t(
-            'translation_memory_projects_used_in_label',
-            'Used in projects:'
-          )}
-          data-cy="translation-memory-projects-info"
-        />
+        <StyledSharedWith data-cy="translation-memory-shared-with">
+          <Typography variant="body2" component="span">
+            {tmData?.type === 'PROJECT' ? (
+              <T
+                keyName="translation_memory_project_tm_label"
+                defaultValue="(Project translation memory — cannot be shared)"
+              />
+            ) : projectsForInfo.length === 0 ? (
+              <T
+                keyName="translation_memory_not_shared_label"
+                defaultValue="(Not shared with any project)"
+              />
+            ) : (
+              <>
+                (
+                <T
+                  keyName="translation_memory_shared_with_label"
+                  defaultValue="Shared with:"
+                />{' '}
+                {projectsForInfo.slice(0, 2).map((project, index) => (
+                  <span key={project.id}>
+                    {index > 0 && ', '}
+                    <ProjectLink project={project} />
+                  </span>
+                ))}
+                {projectsForInfo.length > 2 && (
+                  <Tooltip
+                    placement="bottom-end"
+                    title={
+                      <Typography variant="body2" component="span">
+                        {projectsForInfo.slice(2).map((project) => (
+                          <div key={project.id}>
+                            <ProjectLink project={project} />
+                          </div>
+                        ))}
+                      </Typography>
+                    }
+                  >
+                    <span>, ...</span>
+                  </Tooltip>
+                )}
+                )
+              </>
+            )}
+          </Typography>
+          <Tooltip
+            title={t('translation_memory_settings_button', 'TM settings')}
+          >
+            <IconButton
+              size="small"
+              onClick={() => setSettingsOpen(true)}
+              data-cy="translation-memory-settings-button"
+            >
+              <Settings01 width={18} height={18} />
+            </IconButton>
+          </Tooltip>
+        </StyledSharedWith>
       }
       link={LINKS.ORGANIZATION_TRANSLATION_MEMORY}
       navigation={[
@@ -119,6 +179,18 @@ export const TranslationMemoryView = () => {
           assignedProjectsCount={assignedProjectsCount}
           search={search}
           onSearch={setSearch}
+        />
+      )}
+      {settingsOpen && (
+        <TranslationMemorySettingsDialog
+          open={settingsOpen}
+          onClose={() => setSettingsOpen(false)}
+          onFinished={() => {
+            setSettingsOpen(false);
+            assignedProjects.refetch();
+            tm.refetch();
+          }}
+          translationMemoryId={translationMemoryId}
         />
       )}
     </BaseOrganizationSettingsView>

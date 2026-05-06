@@ -874,10 +874,6 @@ declare namespace DataCy {
         "tm-create-entry-dialog" |
         "tm-empty-wizard" |
         "tm-empty-wizard-copy" |
-        "tm-empty-wizard-copy-dialog" |
-        "tm-empty-wizard-copy-project" |
-        "tm-empty-wizard-copy-project-item" |
-        "tm-empty-wizard-copy-submit" |
         "tm-empty-wizard-import" |
         "tm-empty-wizard-manual" |
         "tm-entries-header" |
@@ -900,7 +896,6 @@ declare namespace DataCy {
         "tm-import-cancel" |
         "tm-import-dialog" |
         "tm-import-menu-button" |
-        "tm-import-menu-copy-from-project" |
         "tm-import-menu-tmx" |
         "tm-import-mode-keep" |
         "tm-import-mode-override" |
@@ -949,7 +944,8 @@ declare namespace DataCy {
         "translation-memory-list-item" |
         "translation-memory-list-languages" |
         "translation-memory-list-name" |
-        "translation-memory-projects-info" |
+        "translation-memory-settings-button" |
+        "translation-memory-shared-with" |
         "translation-panel" |
         "translation-panel-content" |
         "translation-panel-items-count" |

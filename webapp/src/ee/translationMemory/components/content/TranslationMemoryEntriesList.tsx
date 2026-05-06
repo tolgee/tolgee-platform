@@ -20,7 +20,6 @@ import {
 } from 'tg.ee.module/translationMemory/components/content/TranslationMemoryEntryRow';
 import { TranslationMemoryCreateEntryDialog } from 'tg.ee.module/translationMemory/views/TranslationMemoryCreateEntryDialog';
 import { TranslationMemoryImportDialog } from 'tg.ee.module/translationMemory/components/content/TranslationMemoryImportDialog';
-import { CopyFromProjectDialog } from 'tg.ee.module/translationMemory/components/content/CopyFromProjectDialog';
 import { useTmExport } from 'tg.ee.module/translationMemory/hooks/useTmExport';
 import { components } from 'tg.service/apiSchema.generated';
 import { apiV2HttpService } from 'tg.service/http/ApiV2HttpService';
@@ -109,7 +108,6 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
   const canManage = useIsOrganizationOwnerOrMaintainer();
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
-  const [copyFromProjectOpen, setCopyFromProjectOpen] = useState(false);
   const [layoutParam, setLayoutParam] = useUrlSearchState('layout', {
     defaultVal: 'flat',
   });
@@ -457,7 +455,6 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
         sourceLanguageTag={sourceLanguageTag}
         canManage={canManage}
         onImport={() => setImportDialogOpen(true)}
-        onCopyFromProject={() => setCopyFromProjectOpen(true)}
         onExport={triggerExport}
         exportDisabled={exportLoading || totalElements === 0}
         onCreate={() => setCreateDialogOpen(true)}
@@ -490,20 +487,6 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
           organizationId={organizationId}
           translationMemoryId={translationMemoryId}
           hasExistingEntries={totalElements > 0}
-        />
-      )}
-
-      {copyFromProjectOpen && (
-        <CopyFromProjectDialog
-          open={copyFromProjectOpen}
-          onClose={() => setCopyFromProjectOpen(false)}
-          onFinished={() => {
-            setCopyFromProjectOpen(false);
-            entries.refetch();
-          }}
-          organizationId={organizationId}
-          translationMemoryId={translationMemoryId}
-          sourceLanguageTag={sourceLanguageTag}
         />
       )}
 
