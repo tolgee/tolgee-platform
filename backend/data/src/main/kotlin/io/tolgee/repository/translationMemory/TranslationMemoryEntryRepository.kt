@@ -14,19 +14,6 @@ interface TranslationMemoryEntryRepository : JpaRepository<TranslationMemoryEntr
   fun findByTranslationMemoryId(translationMemoryId: Long): List<TranslationMemoryEntry>
 
   /**
-   * Finds the single entry in [translationMemoryId] matching the `(sourceText, targetText,
-   * targetLanguageTag, isManual)` quadruple. Used by both the write pipeline's find-or-create
-   * (where `isManual = false`) and the manual-entry create path (where `isManual = true`).
-   */
-  fun findByTranslationMemoryIdAndSourceTextAndTargetTextAndTargetLanguageTagAndIsManual(
-    translationMemoryId: Long,
-    sourceText: String,
-    targetText: String,
-    targetLanguageTag: String,
-    isManual: Boolean,
-  ): TranslationMemoryEntry?
-
-  /**
    * Paginated list of entries in a TM, optionally filtered by target language tags (comma-separated)
    * and a free-text substring matching source or target text (case-insensitive).
    */
@@ -62,15 +49,12 @@ interface TranslationMemoryEntryRepository : JpaRepository<TranslationMemoryEntr
   ): Page<TranslationMemoryEntry>
 
   /**
-   * Returns distinct (source_text, is_manual) group keys in a TM, paginated. Each row is
-   * `[source_text, is_manual]`. Manual and synced entries with identical source text live in
-   * separate groups so the content browser can render them as separate rows — the keys column
-   * (joined through `translation_memory_entry_source`) then differentiates synced (list of
-   * contributing keys) from manual (empty).
+   * Returns distinct source_texts for stored entries in the TM, paginated. Used by the content
+   * browser to lay out one row per distinct source text.
    */
   @Query(
     value = """
-      select distinct e.source_text, e.is_manual
+      select distinct e.source_text
       from translation_memory_entry e
       where e.translation_memory_id = :translationMemoryId
         and (
@@ -80,15 +64,14 @@ interface TranslationMemoryEntryRepository : JpaRepository<TranslationMemoryEntr
             select 1 from translation_memory_entry e2
             where e2.translation_memory_id = e.translation_memory_id
               and e2.source_text = e.source_text
-              and e2.is_manual = e.is_manual
               and lower(e2.target_text::text) like lower('%' || :search || '%')
           )
         )
-      order by e.source_text, e.is_manual desc
+      order by e.source_text
     """,
     countQuery = """
       select count(*) from (
-        select distinct e.source_text, e.is_manual
+        select distinct e.source_text
         from translation_memory_entry e
         where e.translation_memory_id = :translationMemoryId
           and (
@@ -98,7 +81,6 @@ interface TranslationMemoryEntryRepository : JpaRepository<TranslationMemoryEntr
               select 1 from translation_memory_entry e2
               where e2.translation_memory_id = e.translation_memory_id
                 and e2.source_text = e.source_text
-                and e2.is_manual = e.is_manual
                 and lower(e2.target_text::text) like lower('%' || :search || '%')
             )
           )
@@ -106,17 +88,15 @@ interface TranslationMemoryEntryRepository : JpaRepository<TranslationMemoryEntr
     """,
     nativeQuery = true,
   )
-  fun findDistinctGroupKeysPaged(
+  fun findDistinctSourceTextsPaged(
     @Param("translationMemoryId") translationMemoryId: Long,
     @Param("search") search: String?,
     pageable: Pageable,
-  ): Page<Array<Any?>>
+  ): Page<String>
 
   /**
-   * Returns all entries in [translationMemoryId] whose `source_text` is in [sourceTexts] and
-   * `is_manual` matches one of the flags present in [isManualFlags]. Optionally narrows by
-   * [targetLanguageTags] (comma-separated). Used by the content-browser listing to hydrate the
-   * groups returned by [findDistinctGroupKeysPaged].
+   * Returns all entries in [translationMemoryId] whose `source_text` is in [sourceTexts].
+   * Optionally narrows by [targetLanguageTags] (comma-separated).
    */
   @Query(
     value = """
@@ -139,10 +119,8 @@ interface TranslationMemoryEntryRepository : JpaRepository<TranslationMemoryEntr
   fun deleteByTranslationMemoryId(translationMemoryId: Long)
 
   /**
-   * Deletes every entry in the TM whose source text matches [sourceText] and whose manual flag
-   * matches [isManual]. Used by the bulk "delete entire row" action in the content browser —
-   * each visible row corresponds to one `(sourceText, is_manual)` pair. Returns the number of
-   * rows deleted.
+   * Deletes every entry in the TM whose source text matches [sourceText]. Used by the bulk
+   * "delete entire row" action in the content browser. Returns the number of rows deleted.
    */
   @Modifying
   @Query(
@@ -150,13 +128,11 @@ interface TranslationMemoryEntryRepository : JpaRepository<TranslationMemoryEntr
       delete from translation_memory_entry e
       where e.translation_memory_id = :translationMemoryId
         and e.source_text = :sourceText
-        and e.is_manual = :isManual
     """,
     nativeQuery = true,
   )
-  fun deleteByTranslationMemoryIdAndSourceTextAndIsManual(
+  fun deleteByTranslationMemoryIdAndSourceText(
     @Param("translationMemoryId") translationMemoryId: Long,
     @Param("sourceText") sourceText: String,
-    @Param("isManual") isManual: Boolean,
   ): Int
 }

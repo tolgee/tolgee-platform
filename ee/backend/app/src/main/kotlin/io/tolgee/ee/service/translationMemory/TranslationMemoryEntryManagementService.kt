@@ -3,13 +3,10 @@ package io.tolgee.ee.service.translationMemory
 import io.tolgee.constants.Message
 import io.tolgee.ee.data.translationMemory.CreateTranslationMemoryEntryRequest
 import io.tolgee.ee.data.translationMemory.UpdateTranslationMemoryEntryRequest
-import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.translationMemory.TranslationMemory
 import io.tolgee.model.translationMemory.TranslationMemoryEntry
-import io.tolgee.model.translationMemory.TranslationMemoryType
 import io.tolgee.repository.translationMemory.TranslationMemoryEntryRepository
-import io.tolgee.repository.translationMemory.TranslationMemoryEntrySourceRepository
 import io.tolgee.repository.translationMemory.TranslationMemoryProjectRepository
 import io.tolgee.repository.translationMemory.TranslationMemoryRepository
 import jakarta.persistence.EntityManager
@@ -20,41 +17,31 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 /**
- * CRUD for individual entries inside a Translation Memory. Manual entries (`is_manual = true`)
- * are editable by the user via the add-entry dialog and TMX import; they exist on every TM type.
- * Synced entries (`is_manual = false`) are written by the translation-save pipeline and only
- * exist on SHARED TMs — they are read-only here ([update] and [delete] refuse them). Virtual
- * entries are computed on-read from the assigned project's translations and only exist on
- * PROJECT TMs; they have no row in `translation_memory_entry` and appear only in
- * [listEntryGroups] output.
+ * CRUD for individual entries inside a Translation Memory.
  *
- * What a TM's content browser shows:
- * - SHARED → manual + synced (both are stored).
- * - PROJECT → manual + virtual (manual stored, virtual computed).
+ * A TM's content = stored entries (created via the add-entry dialog or TMX import) plus
+ * virtual rows computed on read from every project assigned with `writeAccess=true`. This
+ * applies uniformly to every TM — PROJECT and SHARED types differ only in assignment
+ * lifecycle, not in content composition.
  */
 @Service
 class TranslationMemoryEntryManagementService(
   private val translationMemoryRepository: TranslationMemoryRepository,
   private val translationMemoryEntryRepository: TranslationMemoryEntryRepository,
-  private val translationMemoryEntrySourceRepository: TranslationMemoryEntrySourceRepository,
   private val translationMemoryProjectRepository: TranslationMemoryProjectRepository,
   private val entityManager: EntityManager,
 ) {
   /**
-   * Lists rows shown in the TM content browser. One row per `(sourceText, origin)` where
-   * `origin` is one of `manual`, `synced`, `virtual`. Each row carries cells for every target
-   * language matched by the optional [targetLanguageTag] filter, a flag indicating whether the
-   * row is user-editable (`isManual`), and the list of contributing key names.
+   * Lists rows shown in the TM content browser. One row per distinct source text, with cells
+   * for every target language matched by the optional [targetLanguageTag] filter.
    *
-   * SHARED TMs return manual + synced rows (both stored in `translation_memory_entry`). PROJECT
-   * TMs return manual stored rows merged with virtual rows computed from the assigned project's
-   * translations. Pagination spans both kinds — distinct `(sourceText, isManual)` pairs are
-   * paginated at SQL level so the content stays stable under infinite scroll regardless of
-   * project size.
+   * Page boundary is the union of:
+   *  - distinct source_texts of stored entries on this TM, and
+   *  - distinct source_texts of writable target translations on every assigned project with
+   *    `writeAccess=true`.
    *
-   * The language filter only narrows the entries within a row; rows still appear for source
-   * texts that have no translation in the selected languages (the cells are empty). This keeps
-   * the display stable as the user toggles languages.
+   * The language filter only narrows entries within a row; rows still appear for source
+   * texts that have no translation in the selected languages.
    */
   fun listEntryGroups(
     organizationId: Long,
@@ -66,177 +53,78 @@ class TranslationMemoryEntryManagementService(
     val tm = requireTmInOrganization(organizationId, translationMemoryId)
     val effectiveSearch = search?.takeIf { it.isNotBlank() }
     val effectiveLang = targetLanguageTag?.takeIf { it.isNotBlank() }
+    val writeProjectIds = writeAccessProjectIds(tm.id)
 
-    if (tm.type != TranslationMemoryType.PROJECT) {
-      return loadStoredGroups(
-        tmId = translationMemoryId,
+    val total = countGroupKeys(tm.id, writeProjectIds, tm.writeOnlyReviewed, effectiveSearch)
+    if (total == 0L) return PageImpl(emptyList(), pageable, 0)
+
+    val pageSourceTexts =
+      findGroupSourceTextsPaged(
+        tmId = tm.id,
+        projectIds = writeProjectIds,
+        writeOnlyReviewed = tm.writeOnlyReviewed,
         search = effectiveSearch,
-        targetLanguageTag = effectiveLang,
         pageable = pageable,
       )
-    }
+    if (pageSourceTexts.isEmpty()) return PageImpl(emptyList(), pageable, total)
 
-    return loadProjectGroupsPaged(
-      tm = tm,
-      projectId = projectIdForTm(tm),
-      search = effectiveSearch,
-      targetLanguageTag = effectiveLang,
-      pageable = pageable,
-    )
-  }
-
-  private fun projectIdForTm(tm: TranslationMemory): Long? {
-    if (tm.type != TranslationMemoryType.PROJECT) return null
-    return translationMemoryProjectRepository
-      .findByTranslationMemoryId(tm.id)
-      .firstOrNull()
-      ?.project
-      ?.id
-  }
-
-  private fun loadStoredGroups(
-    tmId: Long,
-    search: String?,
-    targetLanguageTag: String?,
-    pageable: Pageable,
-  ): Page<TranslationMemoryEntryGroup> {
-    val groupKeysPage =
-      translationMemoryEntryRepository.findDistinctGroupKeysPaged(
-        translationMemoryId = tmId,
-        search = search,
-        pageable = pageable,
-      )
-    if (groupKeysPage.content.isEmpty()) {
-      return PageImpl(emptyList(), pageable, groupKeysPage.totalElements)
-    }
-
-    val distinctSourceTexts = groupKeysPage.content.map { it[0] as String }.distinct()
-    val entries =
-      translationMemoryEntryRepository.findByTranslationMemoryIdAndSourceTexts(
-        translationMemoryId = tmId,
-        sourceTexts = distinctSourceTexts.toTypedArray(),
-        targetLanguageTags = targetLanguageTag,
-      )
-    val entryBuckets = entries.groupBy { StoredGroupKey(it.sourceText, it.isManual) }
-
-    // Batch-lookup key names per entry so the content-browser renders provenance chips without
-    // N+1 queries per row.
-    val allEntryIds = entries.map { it.id }
-    val keyNamesByEntry = mutableMapOf<Long, MutableList<String>>()
-    if (allEntryIds.isNotEmpty()) {
-      translationMemoryEntrySourceRepository
-        .findKeyNamesByEntryIds(allEntryIds)
-        .forEach { row ->
-          val entryId = (row[0] as Number).toLong()
-          val keyName = row[1] as String
-          keyNamesByEntry.getOrPut(entryId) { mutableListOf() }.add(keyName)
-        }
-    }
+    val storedBySource = hydrateStoredEntries(tm.id, pageSourceTexts, effectiveLang)
+    val virtualBySource =
+      hydrateVirtualRows(writeProjectIds, tm.writeOnlyReviewed, pageSourceTexts, effectiveLang)
 
     val groups =
-      groupKeysPage.content.map { row ->
-        val sourceText = row[0] as String
-        val isManual = row[1] as Boolean
-        val bucketed = entryBuckets[StoredGroupKey(sourceText, isManual)].orEmpty()
-        val keyNames =
-          if (isManual) {
-            emptyList()
-          } else {
-            bucketed.flatMap { keyNamesByEntry[it.id].orEmpty() }.distinct().sorted()
-          }
+      pageSourceTexts.map { sourceText ->
+        val virtuals = virtualBySource[sourceText].orEmpty()
         TranslationMemoryEntryGroup(
           sourceText = sourceText,
-          keyNames = keyNames,
-          isManual = isManual,
-          entries = bucketed,
-          virtualEntries = emptyList(),
+          keyNames = virtuals.map { it.keyName }.distinct().sorted(),
+          entries = storedBySource[sourceText].orEmpty(),
+          virtualEntries =
+            virtuals
+              .map {
+                VirtualEntry(
+                  sourceText = sourceText,
+                  targetText = it.targetText,
+                  targetLanguageTag = it.targetLang,
+                )
+              }.distinct(),
         )
-      }
-    return PageImpl(groups, pageable, groupKeysPage.totalElements)
-  }
-
-  /**
-   * Paginates a PROJECT TM's content at the SQL level. The page boundary is the union of
-   *  - distinct manual `(sourceText, true)` keys from `translation_memory_entry`, and
-   *  - distinct virtual `(sourceText, false)` keys derived from the assigned project's translations.
-   *
-   * For each page key we hydrate either the stored row (manual) or the per-language virtual rows
-   * (synthesized from the project translations). This keeps the listing stable under infinite
-   * scroll regardless of project size — the earlier implementation pulled every virtual row into
-   * memory on each request, which produced an "infinite" list for projects with many translations.
-   *
-   * When the project TM has no assigned project (rare, only possible if the project was deleted
-   * out from under the TM), virtual content is empty and only manual entries surface.
-   */
-  private fun loadProjectGroupsPaged(
-    tm: TranslationMemory,
-    projectId: Long?,
-    search: String?,
-    targetLanguageTag: String?,
-    pageable: Pageable,
-  ): Page<TranslationMemoryEntryGroup> {
-    // Sentinel keeps the union SQL valid when the TM has no assigned project; postgres rejects
-    // bound NULLs in `p.id = :projectId`, but `p.id = -1` simply yields zero virtual rows so only
-    // manual entries surface — which is the right fallback.
-    val safeProjectId = projectId ?: -1L
-    val total = countProjectGroupKeys(tm.id, safeProjectId, tm.writeOnlyReviewed, search)
-    if (total == 0L) {
-      return PageImpl(emptyList(), pageable, 0)
-    }
-
-    val pageKeys =
-      findProjectGroupKeysPaged(
-        tmId = tm.id,
-        projectId = safeProjectId,
-        writeOnlyReviewed = tm.writeOnlyReviewed,
-        search = search,
-        pageable = pageable,
-      )
-    if (pageKeys.isEmpty()) {
-      return PageImpl(emptyList(), pageable, total)
-    }
-
-    val manualSourceTexts = pageKeys.filter { it.isManual }.map { it.sourceText }.distinct()
-    val virtualSourceTexts = pageKeys.filter { !it.isManual }.map { it.sourceText }.distinct()
-
-    val manualEntriesBySourceText = hydrateManualEntries(tm.id, manualSourceTexts, targetLanguageTag)
-    val virtualRowsBySourceText =
-      hydrateVirtualRows(projectId, tm.writeOnlyReviewed, virtualSourceTexts, targetLanguageTag)
-
-    val groups =
-      pageKeys.map { key ->
-        buildProjectGroup(key, manualEntriesBySourceText, virtualRowsBySourceText)
       }
     return PageImpl(groups, pageable, total)
   }
 
-  private fun hydrateManualEntries(
+  private fun writeAccessProjectIds(tmId: Long): List<Long> =
+    translationMemoryProjectRepository
+      .findByTranslationMemoryId(tmId)
+      .filter { it.writeAccess }
+      .map { it.project.id }
+
+  private fun hydrateStoredEntries(
     tmId: Long,
-    manualSourceTexts: List<String>,
+    sourceTexts: List<String>,
     targetLanguageTag: String?,
   ): Map<String, List<TranslationMemoryEntry>> {
-    if (manualSourceTexts.isEmpty()) return emptyMap()
+    if (sourceTexts.isEmpty()) return emptyMap()
     return translationMemoryEntryRepository
       .findByTranslationMemoryIdAndSourceTexts(
         translationMemoryId = tmId,
-        sourceTexts = manualSourceTexts.toTypedArray(),
+        sourceTexts = sourceTexts.toTypedArray(),
         targetLanguageTags = targetLanguageTag,
-      ).filter { it.isManual }
-      .groupBy { it.sourceText }
+      ).groupBy { it.sourceText }
   }
 
   private fun hydrateVirtualRows(
-    projectId: Long?,
+    projectIds: List<Long>,
     writeOnlyReviewed: Boolean,
-    virtualSourceTexts: List<String>,
+    sourceTexts: List<String>,
     targetLanguageTag: String?,
   ): Map<String, List<VirtualSourceRow>> {
-    if (projectId == null || virtualSourceTexts.isEmpty()) return emptyMap()
+    if (projectIds.isEmpty() || sourceTexts.isEmpty()) return emptyMap()
     val rows =
       findVirtualRowsForSourceTexts(
-        projectId = projectId,
+        projectIds = projectIds,
         writeOnlyReviewed = writeOnlyReviewed,
-        sourceTexts = virtualSourceTexts,
+        sourceTexts = sourceTexts,
         targetLanguageTag = targetLanguageTag,
       )
     val bySource = mutableMapOf<String, MutableList<VirtualSourceRow>>()
@@ -255,116 +143,64 @@ class TranslationMemoryEntryManagementService(
     return bySource
   }
 
-  private fun buildProjectGroup(
-    key: ProjectGroupKey,
-    manualEntriesBySourceText: Map<String, List<TranslationMemoryEntry>>,
-    virtualRowsBySourceText: Map<String, List<VirtualSourceRow>>,
-  ): TranslationMemoryEntryGroup {
-    if (key.isManual) {
-      return TranslationMemoryEntryGroup(
-        sourceText = key.sourceText,
-        keyNames = emptyList(),
-        isManual = true,
-        entries = manualEntriesBySourceText[key.sourceText].orEmpty(),
-        virtualEntries = emptyList(),
-      )
-    }
-    val srcRows = virtualRowsBySourceText[key.sourceText].orEmpty()
-    val virtualEntries =
-      srcRows
-        .map {
-          VirtualEntry(
-            sourceText = key.sourceText,
-            targetText = it.targetText,
-            targetLanguageTag = it.targetLang,
-          )
-        }.distinct()
-    return TranslationMemoryEntryGroup(
-      sourceText = key.sourceText,
-      keyNames = srcRows.map { it.keyName }.distinct().sorted(),
-      isManual = false,
-      entries = emptyList(),
-      virtualEntries = virtualEntries,
-    )
-  }
-
-  /**
-   * Counts distinct `(source_text, is_manual)` pairs across stored manual entries on this TM and
-   * virtual rows derived from the assigned project. The count drives the total used by the page
-   * model so the front-end's infinite scroll knows when to stop.
-   */
-  private fun countProjectGroupKeys(
+  private fun countGroupKeys(
     tmId: Long,
-    projectId: Long,
+    projectIds: List<Long>,
     writeOnlyReviewed: Boolean,
     search: String?,
   ): Long {
-    val sql =
-      """
-      select count(*) from (
-        ${projectGroupKeysUnionSql()}
-      ) sub
-      """.trimIndent()
-    val result =
+    val sql = "select count(distinct source_text) from (${groupKeysUnionSql()}) sub"
+    return (
       entityManager
         .createNativeQuery(sql)
         .setParameter("tmId", tmId)
-        .setParameter("projectId", projectId)
+        .setParameter("projectIds", projectIds.toTypedArray())
         .setParameter("writeOnlyReviewed", writeOnlyReviewed)
         .setParameter("search", search)
-        .singleResult
-    return (result as Number).toLong()
+        .singleResult as Number
+    ).toLong()
   }
 
-  /**
-   * Returns one page of distinct `(source_text, is_manual)` keys ordered so manual rows come
-   * before virtual rows within the same source text — matches the SHARED-TM listing's ordering.
-   */
-  private fun findProjectGroupKeysPaged(
+  private fun findGroupSourceTextsPaged(
     tmId: Long,
-    projectId: Long,
+    projectIds: List<Long>,
     writeOnlyReviewed: Boolean,
     search: String?,
     pageable: Pageable,
-  ): List<ProjectGroupKey> {
+  ): List<String> {
     val sql =
       """
-      select source_text, is_manual from (
-        ${projectGroupKeysUnionSql()}
-      ) sub
-      order by source_text, is_manual desc
+      select distinct source_text from (${groupKeysUnionSql()}) sub
+      order by source_text
       limit :limit offset :offset
       """.trimIndent()
-
     @Suppress("UNCHECKED_CAST")
-    val rows =
+    return (
       entityManager
         .createNativeQuery(sql)
         .setParameter("tmId", tmId)
-        .setParameter("projectId", projectId)
+        .setParameter("projectIds", projectIds.toTypedArray())
         .setParameter("writeOnlyReviewed", writeOnlyReviewed)
         .setParameter("search", search)
         .setParameter("limit", pageable.pageSize)
         .setParameter("offset", pageable.offset)
-        .resultList as List<Array<Any?>>
-    return rows.map { ProjectGroupKey(sourceText = it[0] as String, isManual = it[1] as Boolean) }
+        .resultList as List<Any?>
+    ).map { it as String }
   }
 
   /**
-   * SQL fragment that produces `(source_text, is_manual)` rows for a PROJECT TM:
-   * - manual half: distinct sources of stored manual entries on this TM (`is_manual = true`)
-   * - virtual half: distinct sources of writable target translations on the assigned project
-   *   (`is_manual = false`)
+   * SQL fragment producing distinct source_texts from:
+   *  - stored entries on this TM, and
+   *  - target translations on every project assigned with writeAccess.
    *
-   * Both halves emit a fixed `is_manual` boolean, so they can never collide — `UNION ALL` is
-   * correct and avoids the sort+dedupe pass `UNION` would force.
+   * Empty `:projectIds` reduces the second half to zero rows so only stored entries surface,
+   * which is the right fallback for a TM with no write-assigned projects.
    */
-  private fun projectGroupKeysUnionSql(): String =
+  private fun groupKeysUnionSql(): String =
     """
-    select e.source_text as source_text, true as is_manual
+    select e.source_text as source_text
     from translation_memory_entry e
     where e.translation_memory_id = :tmId
-      and e.is_manual = true
       and (
         cast(:search as text) is null
         or lower(e.source_text::text) like lower('%' || cast(:search as text) || '%')
@@ -372,22 +208,20 @@ class TranslationMemoryEntryManagementService(
           select 1 from translation_memory_entry e2
           where e2.translation_memory_id = e.translation_memory_id
             and e2.source_text = e.source_text
-            and e2.is_manual = true
             and lower(e2.target_text::text) like lower('%' || cast(:search as text) || '%')
         )
       )
-    group by e.source_text
 
-    union all
+    union
 
-    select base_t.text as source_text, false as is_manual
+    select base_t.text as source_text
     from project p
     join language base_lang on base_lang.id = p.base_language_id
     join key k on k.project_id = p.id
     left join branch b on b.id = k.branch_id
     join translation base_t on base_t.key_id = k.id and base_t.language_id = base_lang.id
     join translation target_t on target_t.key_id = k.id and target_t.language_id <> base_lang.id
-    where p.id = :projectId
+    where p.id = any(:projectIds)
       and base_t.text is not null and base_t.text <> ''
       and target_t.text is not null and target_t.text <> ''
       and (b.id is null or b.is_default = true)
@@ -397,29 +231,19 @@ class TranslationMemoryEntryManagementService(
         or lower(base_t.text) like lower('%' || cast(:search as text) || '%')
         or lower(target_t.text) like lower('%' || cast(:search as text) || '%')
       )
-    group by base_t.text
     """.trimIndent()
 
   /**
-   * Hydrates a PROJECT TM's full content for TMX export — manual stored entries plus virtual rows
-   * computed from the assigned project's translations. The export must mirror what the content
-   * browser shows; otherwise the round-trip "see in UI → export → re-import elsewhere" loses
-   * data.
-   *
-   * Virtual rows are returned as transient (non-persisted) [TranslationMemoryEntry] objects so
-   * the caller can feed them to [io.tolgee.ee.service.translationMemory.tmx.TmxExporter] alongside
-   * stored ones — the exporter only reads `sourceText`, `targetText`, `targetLanguageTag`, and
-   * `tuid` (null on virtual rows since they have no stable identity to round-trip). Returns an
-   * empty list for non-PROJECT TMs.
+   * Hydrates a TM's full content for TMX export — stored entries plus virtual rows computed
+   * from every write-access-assigned project's translations. Virtual rows are returned as
+   * transient (non-persisted) entries with no `id` or `tuid`; the exporter only reads
+   * sourceText/targetText/targetLanguageTag/tuid.
    */
-  fun findEntriesForProjectTmExport(tm: TranslationMemory): List<TranslationMemoryEntry> {
-    if (tm.type != TranslationMemoryType.PROJECT) return emptyList()
-    val manual =
-      translationMemoryEntryRepository
-        .findByTranslationMemoryId(tm.id)
-        .filter { it.isManual }
-    val projectId = projectIdForTm(tm) ?: return manual
-    val virtualRows = findAllDistinctVirtualRowsForProject(projectId, tm.writeOnlyReviewed)
+  fun findEntriesForTmExport(tm: TranslationMemory): List<TranslationMemoryEntry> {
+    val stored = translationMemoryEntryRepository.findByTranslationMemoryId(tm.id)
+    val projectIds = writeAccessProjectIds(tm.id)
+    if (projectIds.isEmpty()) return stored
+    val virtualRows = findAllDistinctVirtualRowsForProjects(projectIds, tm.writeOnlyReviewed)
     val virtual =
       virtualRows.map { row ->
         TranslationMemoryEntry().apply {
@@ -429,13 +253,14 @@ class TranslationMemoryEntryManagementService(
           this.targetLanguageTag = row[2] as String
         }
       }
-    return manual + virtual
+    return stored + virtual
   }
 
-  private fun findAllDistinctVirtualRowsForProject(
-    projectId: Long,
+  private fun findAllDistinctVirtualRowsForProjects(
+    projectIds: List<Long>,
     writeOnlyReviewed: Boolean,
   ): List<Array<Any?>> {
+    if (projectIds.isEmpty()) return emptyList()
     val sql =
       """
       select distinct base_t.text as source_text,
@@ -448,7 +273,7 @@ class TranslationMemoryEntryManagementService(
       join translation base_t on base_t.key_id = k.id and base_t.language_id = base_lang.id
       join translation target_t on target_t.key_id = k.id and target_t.language_id <> base_lang.id
       join language target_lang on target_lang.id = target_t.language_id
-      where p.id = :projectId
+      where p.id = any(:projectIds)
         and base_t.text is not null and base_t.text <> ''
         and target_t.text is not null and target_t.text <> ''
         and (b.id is null or b.is_default = true)
@@ -458,17 +283,18 @@ class TranslationMemoryEntryManagementService(
     @Suppress("UNCHECKED_CAST")
     return entityManager
       .createNativeQuery(sql)
-      .setParameter("projectId", projectId)
+      .setParameter("projectIds", projectIds.toTypedArray())
       .setParameter("writeOnlyReviewed", writeOnlyReviewed)
       .resultList as List<Array<Any?>>
   }
 
   private fun findVirtualRowsForSourceTexts(
-    projectId: Long,
+    projectIds: List<Long>,
     writeOnlyReviewed: Boolean,
     sourceTexts: List<String>,
     targetLanguageTag: String?,
   ): List<Array<Any?>> {
+    if (projectIds.isEmpty() || sourceTexts.isEmpty()) return emptyList()
     val sql =
       """
       select base_t.text as source_text,
@@ -482,7 +308,7 @@ class TranslationMemoryEntryManagementService(
       join translation base_t on base_t.key_id = k.id and base_t.language_id = base_lang.id
       join translation target_t on target_t.key_id = k.id and target_t.language_id <> base_lang.id
       join language target_lang on target_lang.id = target_t.language_id
-      where p.id = :projectId
+      where p.id = any(:projectIds)
         and base_t.text = any(:sourceTexts)
         and target_t.text is not null and target_t.text <> ''
         and (b.id is null or b.is_default = true)
@@ -496,22 +322,12 @@ class TranslationMemoryEntryManagementService(
     @Suppress("UNCHECKED_CAST")
     return entityManager
       .createNativeQuery(sql)
-      .setParameter("projectId", projectId)
+      .setParameter("projectIds", projectIds.toTypedArray())
       .setParameter("writeOnlyReviewed", writeOnlyReviewed)
       .setParameter("sourceTexts", sourceTexts.toTypedArray())
       .setParameter("targetLanguageTags", targetLanguageTag)
       .resultList as List<Array<Any?>>
   }
-
-  private data class StoredGroupKey(
-    val sourceText: String,
-    val isManual: Boolean,
-  )
-
-  private data class ProjectGroupKey(
-    val sourceText: String,
-    val isManual: Boolean,
-  )
 
   private data class VirtualSourceRow(
     val targetText: String,
@@ -548,7 +364,6 @@ class TranslationMemoryEntryManagementService(
         this.sourceText = dto.sourceText
         this.targetText = dto.targetText
         this.targetLanguageTag = dto.targetLanguageTag
-        this.isManual = true
       }
     return translationMemoryEntryRepository.save(entry)
   }
@@ -561,11 +376,6 @@ class TranslationMemoryEntryManagementService(
     dto: UpdateTranslationMemoryEntryRequest,
   ): TranslationMemoryEntry {
     val entry = getEntry(organizationId, translationMemoryId, entryId)
-    if (!entry.isManual) {
-      // Synced entries track project translations — editing them here would clash with the next
-      // `onTranslationSaved` pass. Force the user to edit the source translation instead.
-      throw BadRequestException(Message.TRANSLATION_MEMORY_ENTRY_READ_ONLY)
-    }
     entry.sourceText = dto.sourceText
     entry.targetText = dto.targetText
     entry.targetLanguageTag = dto.targetLanguageTag
@@ -582,12 +392,7 @@ class TranslationMemoryEntryManagementService(
     translationMemoryEntryRepository.delete(entry)
   }
 
-  /**
-   * Deletes every entry in the TM whose source text matches the group the passed [entryId]
-   * belongs to — i.e. the whole row visible in the content browser. Both synced and manual
-   * entries can be deleted this way; synced rows re-materialize on the next `onTranslationSaved`
-   * pass for any remaining linked translation.
-   */
+  /** Deletes every stored entry sharing the source text of [entryId]. */
   @Transactional
   fun deleteGroup(
     organizationId: Long,
@@ -595,18 +400,13 @@ class TranslationMemoryEntryManagementService(
     entryId: Long,
   ): Int {
     val entry = getEntry(organizationId, translationMemoryId, entryId)
-    return translationMemoryEntryRepository.deleteByTranslationMemoryIdAndSourceTextAndIsManual(
+    return translationMemoryEntryRepository.deleteByTranslationMemoryIdAndSourceText(
       translationMemoryId = translationMemoryId,
       sourceText = entry.sourceText,
-      isManual = entry.isManual,
     )
   }
 
-  /**
-   * Batch variant of [deleteGroup]. For every entry ID in the payload, wipes the entire row
-   * (shared `sourceText + isManual` bucket) that entry belongs to. Dedupes to distinct rows so
-   * passing multiple entries from the same row only runs the delete once.
-   */
+  /** Batch variant of [deleteGroup]. Dedupes to distinct source_texts. */
   @Transactional
   fun deleteMultipleGroups(
     organizationId: Long,
@@ -620,14 +420,13 @@ class TranslationMemoryEntryManagementService(
         .findAllById(entryIds)
         .filter { it.translationMemory.id == translationMemoryId }
     if (entries.isEmpty()) return 0
-    val groupKeys = entries.map { StoredGroupKey(it.sourceText, it.isManual) }.toSet()
+    val sourceTexts = entries.map { it.sourceText }.toSet()
     var totalDeleted = 0
-    for (key in groupKeys) {
+    for (sourceText in sourceTexts) {
       totalDeleted +=
-        translationMemoryEntryRepository.deleteByTranslationMemoryIdAndSourceTextAndIsManual(
+        translationMemoryEntryRepository.deleteByTranslationMemoryIdAndSourceText(
           translationMemoryId = translationMemoryId,
-          sourceText = key.sourceText,
-          isManual = key.isManual,
+          sourceText = sourceText,
         )
     }
     return totalDeleted
@@ -642,11 +441,7 @@ class TranslationMemoryEntryManagementService(
   }
 }
 
-/**
- * A virtual cell in a project TM's content browser — computed from a project translation rather
- * than stored. Structurally identical to a `(sourceText, targetText, targetLanguageTag)` triple
- * that a stored entry would have, but carries no `id` because nothing is persisted.
- */
+/** Virtual cell — computed from a project translation rather than stored. */
 data class VirtualEntry(
   val sourceText: String,
   val targetText: String,

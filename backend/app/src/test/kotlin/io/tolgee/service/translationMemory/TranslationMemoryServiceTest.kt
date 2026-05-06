@@ -3,14 +3,10 @@ package io.tolgee.service.translationMemory
 import io.tolgee.AbstractSpringTest
 import io.tolgee.development.testDataBuilder.data.TranslationMemoryTestData
 import io.tolgee.dtos.request.LanguageRequest
-import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.dtos.request.project.CreateProjectRequest
 import io.tolgee.dtos.request.project.EditProjectRequest
-import io.tolgee.model.enums.TranslationState
-import io.tolgee.model.translationMemory.TranslationMemoryEntry
 import io.tolgee.model.translationMemory.TranslationMemoryType
 import io.tolgee.repository.translationMemory.TranslationMemoryEntryRepository
-import io.tolgee.repository.translationMemory.TranslationMemoryEntrySourceRepository
 import io.tolgee.repository.translationMemory.TranslationMemoryProjectRepository
 import io.tolgee.repository.translationMemory.TranslationMemoryRepository
 import io.tolgee.service.project.ProjectCreationService
@@ -33,9 +29,6 @@ class TranslationMemoryServiceTest : AbstractSpringTest() {
   lateinit var translationMemoryEntryRepository: TranslationMemoryEntryRepository
 
   @Autowired
-  lateinit var translationMemoryEntrySourceRepository: TranslationMemoryEntrySourceRepository
-
-  @Autowired
   lateinit var translationMemoryRepository: TranslationMemoryRepository
 
   @Autowired
@@ -54,15 +47,6 @@ class TranslationMemoryServiceTest : AbstractSpringTest() {
     testData = TranslationMemoryTestData()
     testDataService.saveTestData(testData.root)
   }
-
-  /** Key names contributing to a synced entry — via the source join table. */
-  private fun keyNamesFor(entry: TranslationMemoryEntry): List<String> =
-    translationMemoryEntrySourceRepository.findKeyNamesByEntryId(entry.id)
-
-  private fun syncedEntriesIn(tmId: Long): List<TranslationMemoryEntry> =
-    translationMemoryEntryRepository
-      .findByTranslationMemoryId(tmId)
-      .filter { !it.isManual }
 
   @Test
   fun `project creation auto-creates project TM`() {
@@ -83,7 +67,6 @@ class TranslationMemoryServiceTest : AbstractSpringTest() {
     val assignment = assignments.first()
     assertThat(assignment.readAccess).isTrue()
     assertThat(assignment.writeAccess).isTrue()
-    // Project TM lands at the top (priority 0); shared TMs stack under it via max+1.
     assertThat(assignment.priority).isEqualTo(0)
 
     val tm = assignment.translationMemory
@@ -92,175 +75,7 @@ class TranslationMemoryServiceTest : AbstractSpringTest() {
     assertThat(tm.name).isEqualTo("New TM Project")
     assertThat(tm.organizationOwner.id).isEqualTo(orgId)
 
-    // Project TMs are pure config — no entries are materialized.
     assertThat(translationMemoryEntryRepository.findByTranslationMemoryId(tm.id)).isEmpty()
-  }
-
-  @Test
-  fun `write pipeline skips for projects without TM`() {
-    val project = projectService.get(testData.projectWithoutTm.id)
-    val german = languageService.findEntitiesByTags(setOf("de"), project.id).first()
-
-    val key = keyService.create(project, CreateKeyDto("no-tm-key", null, mapOf("en" to "Hello")))
-
-    val translation = translationService.getOrCreate(key, german)
-    translation.text = "Hallo"
-    translationService.save(translation)
-
-    // projectWithoutTm has no TM assignments, so nothing materializes anywhere.
-    val allSyncedForKey =
-      translationMemoryEntryRepository
-        .findAll()
-        .filter { !it.isManual }
-        .filter { keyNamesFor(it).contains("no-tm-key") }
-    assertThat(allSyncedForKey).isEmpty()
-  }
-
-  @Test
-  fun `write pipeline creates synced entry in shared TMs and leaves project TM untouched`() {
-    val project = projectService.get(testData.projectWithTm.id)
-    val german = languageService.findEntitiesByTags(setOf("de"), project.id).first()
-
-    val key = keyService.create(project, CreateKeyDto("new-key", null, mapOf("en" to "New text")))
-
-    val translation = translationService.getOrCreate(key, german)
-    translation.text = "Neuer Text"
-    translationService.save(translation)
-
-    // Project TM receives no stored entries under the virtual-content model.
-    assertThat(syncedEntriesIn(testData.projectTm.id)).isEmpty()
-
-    // Each assigned shared TM gets a synced entry linked to the saved translation.
-    val sharedEntry =
-      syncedEntriesIn(testData.sharedTm.id).firstOrNull {
-        keyNamesFor(it).contains("new-key") && it.targetLanguageTag == "de"
-      }
-    assertThat(sharedEntry).isNotNull()
-    assertThat(sharedEntry!!.sourceText).isEqualTo("New text")
-    assertThat(sharedEntry.targetText).isEqualTo("Neuer Text")
-  }
-
-  @Test
-  fun `key creation with only base translation creates no synced entry`() {
-    // Source-without-target produces no TM entry by design — a TM entry is a
-    // (sourceText, targetText, language) triple, so a base-only save has nothing to pair.
-    val project = projectService.get(testData.projectWithTm.id)
-    val key = keyService.create(project, CreateKeyDto("base-only-key", null, mapOf("en" to "Only base")))
-
-    val entry =
-      syncedEntriesIn(testData.sharedTm.id).firstOrNull { keyNamesFor(it).contains(key.name) }
-    assertThat(entry).isNull()
-  }
-
-  @Test
-  fun `key creation with target-first translation order still creates synced entry`() {
-    // Frontends emitting JSON like `{"de": "Hallo", "en": "Hello"}` (target before base) flow
-    // through `setForKey` in insertion order. Without the fix, the de save fires
-    // `onTranslationSaved` while the base translation hasn't been persisted yet, so the hook
-    // can't resolve the source text and silently skips the synced-entry creation. Net effect
-    // for users: a freshly added key is not visible in the assigned shared TM.
-    val project = projectService.get(testData.projectWithTm.id)
-
-    val key =
-      keyService.create(
-        project,
-        CreateKeyDto(
-          "target-first-key",
-          null,
-          linkedMapOf("de" to "Hallo Welt", "en" to "Hello world"),
-        ),
-      )
-
-    val sharedEntry =
-      syncedEntriesIn(testData.sharedTm.id).firstOrNull {
-        keyNamesFor(it).contains(key.name) && it.targetLanguageTag == "de"
-      }
-    assertThat(sharedEntry).isNotNull()
-    assertThat(sharedEntry!!.sourceText).isEqualTo("Hello world")
-    assertThat(sharedEntry.targetText).isEqualTo("Hallo Welt")
-  }
-
-  @Test
-  fun `write pipeline skips keys on non-default branches`() {
-    val german = languageService.findEntitiesByTags(setOf("de"), testData.projectWithTm.id).first()
-    val key = keyService.get(testData.keyOnFeatureBranch.id)
-
-    val translation = translationService.getOrCreate(key, german)
-    translation.text = "Entwurf"
-    translationService.save(translation)
-
-    // No shared TM should have picked this up — feature branches don't feed the TM.
-    val leaked =
-      syncedEntriesIn(testData.sharedTm.id).firstOrNull {
-        keyNamesFor(it).contains(testData.keyOnFeatureBranch.name)
-      }
-    assertThat(leaked).isNull()
-  }
-
-  @Test
-  fun `updating translation reuses the same entry across saves`() {
-    // testData.existingTargetTranslation is "Bestehende Übersetzung" in German under "existing-key".
-    // First save materializes a synced entry in each shared TM; second save with a different text
-    // detaches from the first entry, (GC'd as orphan) and re-links to a fresh one. Either way, at
-    // most one entry per shared TM for this key.
-    val translation = translationService.get(testData.existingTargetTranslation.id)
-
-    translation.text = "Bestehende Übersetzung"
-    translationService.save(translation)
-
-    translation.text = "Aktualisierte Übersetzung"
-    translationService.save(translation)
-
-    val sharedEntries =
-      syncedEntriesIn(testData.sharedTm.id).filter { keyNamesFor(it).contains("existing-key") }
-    assertThat(sharedEntries).hasSize(1)
-    assertThat(sharedEntries.first().targetText).isEqualTo("Aktualisierte Übersetzung")
-  }
-
-  @Test
-  fun `deleting translation removes its source link from synced entries`() {
-    // Needs real commits for the FK cascade to fire against the DB rather than sit inside
-    // Hibernate's session cache, so everything runs in its own transaction.
-    val ids =
-      executeInNewTransaction {
-        val project = projectService.get(testData.projectWithTm.id)
-        val german = languageService.findEntitiesByTags(setOf("de"), project.id).first()
-        val key = keyService.create(project, CreateKeyDto("delete-me-key", null, mapOf("en" to "Delete me")))
-        val translation = translationService.getOrCreate(key, german).apply { text = "Lösch mich" }
-        val saved = translationService.save(translation)
-        saved.id
-      }
-    val translationId = ids
-
-    val entryIdBefore =
-      executeInNewTransaction {
-        syncedEntriesIn(testData.sharedTm.id)
-          .first { keyNamesFor(it).contains("delete-me-key") }
-          .id
-      }
-
-    executeInNewTransaction {
-      translationService.deleteByIdIn(listOf(translationId))
-    }
-
-    executeInNewTransaction {
-      val translationCount =
-        entityManager
-          .createNativeQuery("select count(*) from translation where id = :id")
-          .setParameter("id", translationId)
-          .singleResult as Number
-      assertThat(translationCount.toLong()).`as`("translation row").isEqualTo(0L)
-
-      val remainingSources =
-        entityManager
-          .createNativeQuery(
-            "select count(*) from translation_memory_entry_source " +
-              "where entry_id = :entryId and translation_id = :translationId",
-          ).setParameter("entryId", entryIdBefore)
-          .setParameter("translationId", translationId)
-          .singleResult as Number
-      assertThat(remainingSources.toLong()).`as`("source row").isEqualTo(0L)
-    }
   }
 
   @Test
@@ -273,16 +88,12 @@ class TranslationMemoryServiceTest : AbstractSpringTest() {
       projectHardDeletingService.hardDeleteProject(project)
     }
 
-    // TM assignments should be gone
     assertThat(translationMemoryProjectRepository.findByProjectId(projectId)).isEmpty()
-
-    // The project TM itself should be deleted
     assertThat(translationMemoryRepository.findById(tmId)).isEmpty()
   }
 
   @Test
-  fun `base language change updates project TM sourceLanguageTag without touching entries`() {
-    // Unassign all shared TMs so the base-language-match validation doesn't block the change.
+  fun `base language change updates project TM sourceLanguageTag`() {
     translationMemoryProjectRepository.deleteAll(
       translationMemoryProjectRepository
         .findByProjectId(testData.projectWithTm.id)
@@ -313,16 +124,12 @@ class TranslationMemoryServiceTest : AbstractSpringTest() {
 
     val refreshedTm = translationMemoryRepository.findById(testData.projectTm.id).orElseThrow()
     assertThat(refreshedTm.sourceLanguageTag).isEqualTo("de")
-    // No rebuild — project TM content is virtual, recomputed from translations at read time.
-    assertThat(translationMemoryEntryRepository.findByTranslationMemoryId(testData.projectTm.id))
-      .isEmpty()
   }
 
   @Test
   fun `project rename syncs project TM name`() {
     val project = projectService.get(testData.projectWithTm.id)
-    val originalName = testData.projectTm.name
-    assertThat(originalName).isEqualTo(project.name)
+    assertThat(testData.projectTm.name).isEqualTo(project.name)
 
     projectService.editProject(
       project.id,
@@ -347,93 +154,7 @@ class TranslationMemoryServiceTest : AbstractSpringTest() {
   }
 
   @Test
-  fun `reviewed-only TM skips TRANSLATED saves while permissive siblings take them`() {
-    val project = projectService.get(testData.projectWithTm.id)
-    val german = languageService.findEntitiesByTags(setOf("de"), project.id).first()
-
-    val key = keyService.create(project, CreateKeyDto("fresh-key", null, mapOf("en" to "Fresh source")))
-    val translation = translationService.getOrCreate(key, german)
-    translation.text = "Frischer Text" // stays TRANSLATED
-    translationService.save(translation)
-
-    assertThat(
-      syncedEntriesIn(testData.sharedTmReviewedOnly.id).flatMap { keyNamesFor(it) },
-    ).doesNotContain("fresh-key")
-
-    assertThat(
-      syncedEntriesIn(testData.sharedTm.id).flatMap { keyNamesFor(it) },
-    ).contains("fresh-key")
-  }
-
-  @Test
-  fun `reviewed-only TM accepts REVIEWED saves`() {
-    val project = projectService.get(testData.projectWithTm.id)
-    val german = languageService.findEntitiesByTags(setOf("de"), project.id).first()
-
-    val key = keyService.create(project, CreateKeyDto("reviewed-on-save", null, mapOf("en" to "Reviewed source 2")))
-    val translation = translationService.getOrCreate(key, german)
-    translation.text = "Überprüfter Text"
-    translation.state = TranslationState.REVIEWED
-    translationService.save(translation)
-
-    val match =
-      syncedEntriesIn(testData.sharedTmReviewedOnly.id)
-        .firstOrNull { keyNamesFor(it).contains("reviewed-on-save") }
-    assertThat(match).isNotNull()
-    assertThat(match!!.targetText).isEqualTo("Überprüfter Text")
-  }
-
-  @Test
-  fun `promoting TRANSLATED to REVIEWED adds the entry to a reviewed-only TM`() {
-    // testData builder bypasses the translation save pipeline, so the synced entry on the
-    // reviewed-only TM hasn't been written yet. Save through the service to confirm the
-    // pre-state ("not on the reviewed-only TM" while TRANSLATED), then promote.
-    val translation = testData.promotedTargetTranslation
-    translationService.save(translation)
-    assertThat(
-      syncedEntriesIn(testData.sharedTmReviewedOnly.id).flatMap { keyNamesFor(it) },
-    ).doesNotContain("promoted-key")
-
-    translation.state = TranslationState.REVIEWED
-    translationService.save(translation)
-
-    val after =
-      syncedEntriesIn(testData.sharedTmReviewedOnly.id)
-        .firstOrNull { keyNamesFor(it).contains("promoted-key") }
-    assertThat(after).isNotNull()
-    assertThat(after!!.targetText).isEqualTo("Hochgestufter Text")
-  }
-
-  @Test
-  fun `demoting REVIEWED to TRANSLATED removes entry only from reviewed-only TMs`() {
-    // testData builder bypasses the save pipeline; trigger a no-op save so the synced
-    // entries get written to the reviewed-only TM.
-    val translation = testData.demotedTargetTranslation
-    translationService.save(translation)
-    entityManager.flush()
-    assertThat(
-      syncedEntriesIn(testData.sharedTmReviewedOnly.id).flatMap { keyNamesFor(it) },
-    ).contains("demotion-key")
-
-    translation.state = TranslationState.TRANSLATED
-    translationService.save(translation)
-    entityManager.flush()
-
-    assertThat(
-      syncedEntriesIn(testData.sharedTmReviewedOnly.id).flatMap { keyNamesFor(it) },
-    ).doesNotContain("demotion-key")
-
-    assertThat(
-      syncedEntriesIn(testData.sharedTm.id).flatMap { keyNamesFor(it) },
-    ).contains("demotion-key")
-  }
-
-  @Test
-  fun `managed getSuggestionsList returns virtual project TM entries for MT context`() {
-    // Free-plan (CE default): getReadableTmIdsForSuggestions returns only the project TM, and
-    // the project TM's content is virtual (from translations). The fixture has a translation
-    // "Existing source" -> "Bestehende Übersetzung" (de) under existing-key — that pair should
-    // surface as a suggestion without ever being materialized as an entry row.
+  fun `getSuggestionsList returns virtual rows from write-assigned project translations`() {
     val project = projectService.get(testData.projectWithTm.id)
 
     val results =
@@ -450,7 +171,5 @@ class TranslationMemoryServiceTest : AbstractSpringTest() {
     assertThat(results).isNotEmpty
     val match = results.first { it.baseTranslationText == "Existing source" }
     assertThat(match.targetTranslationText).isEqualTo("Bestehende Übersetzung")
-    // Project TM never has a penalty applied — similarity == rawSimilarity.
-    assertThat(match.similarity).isEqualTo(match.rawSimilarity)
   }
 }

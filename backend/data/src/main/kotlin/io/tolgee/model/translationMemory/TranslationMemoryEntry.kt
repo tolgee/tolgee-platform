@@ -7,7 +7,6 @@ import jakarta.persistence.FetchType
 import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
-import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.OnDelete
 import org.hibernate.annotations.OnDeleteAction
 
@@ -34,17 +33,4 @@ class TranslationMemoryEntry : StandardAuditModel() {
 
   @Column(columnDefinition = "text", nullable = true)
   var tuid: String? = null
-
-  /**
-   * Manual entries (created via the "Add entry" dialog or a TMX import) are user-owned and
-   * editable. Synced entries (`false`) are created by [TranslationMemoryEntryService.onTranslationSaved]
-   * from an assigned project's translations and are read-only in the content browser.
-   *
-   * The two origins are intentionally kept as separate rows even when the `(sourceText, targetText,
-   * targetLanguageTag)` triple matches — see [TranslationMemoryEntrySource] and the write pipeline
-   * for the dedup semantics applied within each origin.
-   */
-  @Column(nullable = false)
-  @ColumnDefault("true")
-  var isManual: Boolean = true
 }

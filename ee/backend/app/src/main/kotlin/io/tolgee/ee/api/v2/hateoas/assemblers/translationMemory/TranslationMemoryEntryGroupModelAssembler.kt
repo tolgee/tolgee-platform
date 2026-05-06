@@ -18,7 +18,6 @@ class TranslationMemoryEntryGroupModelAssembler(
     return TranslationMemoryEntryGroupModel(
       sourceText = entity.sourceText,
       keyNames = entity.keyNames,
-      isManual = entity.isManual,
       entries = entity.entries.map { entryAssembler.toModel(it) },
       virtualEntries =
         entity.virtualEntries.map {

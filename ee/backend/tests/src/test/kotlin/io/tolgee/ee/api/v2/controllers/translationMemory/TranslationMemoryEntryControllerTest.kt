@@ -170,48 +170,34 @@ class TranslationMemoryEntryControllerTest : AuthorizedControllerTest() {
         node("_embedded.translationMemoryEntryGroups").isArray.hasSize(5)
         // Alphabetical order by source_text — manual ("Manual phrase") slots between virtual rows.
         node("_embedded.translationMemoryEntryGroups[0].sourceText").isEqualTo("Demotion source")
-        node("_embedded.translationMemoryEntryGroups[0].isManual").isEqualTo(false)
         node("_embedded.translationMemoryEntryGroups[1].sourceText").isEqualTo("Existing source")
-        node("_embedded.translationMemoryEntryGroups[1].isManual").isEqualTo(false)
         node("_embedded.translationMemoryEntryGroups[2].sourceText").isEqualTo("Manual phrase")
-        node("_embedded.translationMemoryEntryGroups[2].isManual").isEqualTo(true)
         node("_embedded.translationMemoryEntryGroups[3].sourceText").isEqualTo("Promoted source")
-        node("_embedded.translationMemoryEntryGroups[3].isManual").isEqualTo(false)
         node("_embedded.translationMemoryEntryGroups[4].sourceText").isEqualTo("Reviewed source")
-        node("_embedded.translationMemoryEntryGroups[4].isManual").isEqualTo(false)
       }
   }
 
   @Test
-  fun `project TM listing splits manual and virtual rows that share a source text`() {
-    // When a user adds a manual entry whose source text already exists as a virtual row, both
-    // appear as separate rows in the listing — the user can edit/delete the manual entry while
-    // the virtual one continues to track project translations. Manual sorts first within the
-    // same source text (matches SHARED-TM ordering: is_manual desc).
+  fun `manual entry sharing source text with a virtual row collapses into one group`() {
+    // The unified content model dedupes by source_text — a manual stored entry and the virtual
+    // row from the assigned project's translation share one row in the browser. The stored
+    // half goes into `entries`, the virtual half stays in `virtualEntries`.
     val projectTmId = testData.projectTm.id
-    val request =
+    performAuthPost(
+      "/v2/organizations/$orgId/translation-memories/$projectTmId/entries",
       CreateTranslationMemoryEntryRequest().apply {
         sourceText = "Existing source"
         targetText = "Manual override translation"
         targetLanguageTag = "de"
-      }
-    performAuthPost(
-      "/v2/organizations/$orgId/translation-memories/$projectTmId/entries",
-      request,
+      },
     ).andIsOk
 
     performAuthGet(
       "/v2/organizations/$orgId/translation-memories/$projectTmId/entries",
     ).andIsOk
       .andAssertThatJson {
-        // 4 virtual rows + 1 manual ("Existing source") sharing a source text with one virtual.
-        node("page.totalElements").isEqualTo(5)
-        // The two "Existing source" rows are alphabetically tied — manual sorts ahead of virtual
-        // (matches SHARED-TM ordering: is_manual desc).
-        node("_embedded.translationMemoryEntryGroups[1].sourceText").isEqualTo("Existing source")
-        node("_embedded.translationMemoryEntryGroups[1].isManual").isEqualTo(true)
-        node("_embedded.translationMemoryEntryGroups[2].sourceText").isEqualTo("Existing source")
-        node("_embedded.translationMemoryEntryGroups[2].isManual").isEqualTo(false)
+        // 4 distinct source_texts — "Existing source" appears once, with both stored and virtual.
+        node("page.totalElements").isEqualTo(4)
       }
   }
 
@@ -233,7 +219,6 @@ class TranslationMemoryEntryControllerTest : AuthorizedControllerTest() {
       .andAssertThatJson {
         node("page.totalElements").isEqualTo(1)
         node("_embedded.translationMemoryEntryGroups[0].sourceText").isEqualTo("Manual phrase")
-        node("_embedded.translationMemoryEntryGroups[0].isManual").isEqualTo(true)
       }
   }
 

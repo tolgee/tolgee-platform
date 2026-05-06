@@ -5,16 +5,9 @@ import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
 
 /**
- * A row in the TM content browser. One row per `(sourceText, origin)` where origin is manual,
- * synced (from an assigned project's translations) or virtual (computed on the fly for project
- * TMs). Manual rows are editable; synced and virtual rows are read-only.
- *
- * [entries] carries persisted rows (populated when `isManual = true` or when the row is a
- * synced entry in a shared TM). [virtualEntries] is populated only for virtual rows in a
- * project TM; they have no `id` because nothing is persisted.
- *
- * Both lists are already filtered by the requested target language(s) — if none of the
- * translations match, the list is empty but the group still appears in the page.
+ * A row in the TM content browser, keyed by sourceText. [entries] is the stored half
+ * (user-editable); [virtualEntries] is the computed half from write-access-assigned project
+ * translations (read-only).
  */
 @Relation(
   collectionRelation = "translationMemoryEntryGroups",
@@ -23,27 +16,14 @@ import org.springframework.hateoas.server.core.Relation
 class TranslationMemoryEntryGroupModel(
   @Schema(description = "Source text in the TM's source language", example = "Hello world")
   val sourceText: String,
-  @Schema(
-    description =
-      "Names of the keys whose translations currently contribute to this row. Empty for manual rows.",
-  )
+  @Schema(description = "Names of the keys contributing virtual rows in this group")
   val keyNames: List<String>,
-  @Schema(
-    description =
-      "Whether the row is user-editable. True for manual rows (Add-entry dialog or TMX import); " +
-        "false for synced entries and virtual rows.",
-  )
-  val isManual: Boolean,
-  @Schema(description = "Persisted entries in this row, already filtered by the requested languages")
+  @Schema(description = "Stored entries in this row, already filtered by the requested languages")
   val entries: List<TranslationMemoryEntryModel>,
-  @Schema(description = "Virtual entries computed from project translations (project TMs only)")
+  @Schema(description = "Virtual entries computed from write-access-assigned project translations")
   val virtualEntries: List<VirtualTranslationMemoryEntryModel>,
 ) : RepresentationModel<TranslationMemoryEntryGroupModel>()
 
-/**
- * A virtual cell in a project TM's content browser. Carries no `id` since it is not persisted —
- * it's just a view of a project translation that the virtual query derived at read time.
- */
 class VirtualTranslationMemoryEntryModel(
   @Schema(description = "Source text in the TM's source language", example = "Hello world")
   val sourceText: String,
