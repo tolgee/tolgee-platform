@@ -1,3 +1,10 @@
+# [3.184.0](https://github.com/tolgee/tolgee-platform/compare/v3.183.5...v3.184.0) (2026-05-06)
+
+
+### Features
+
+* add tooltips to S3 storage form fields ([#3637](https://github.com/tolgee/tolgee-platform/issues/3637)) ([176633b](https://github.com/tolgee/tolgee-platform/commit/176633bbd27b5e3b0e9ec037bb4cbf815ff92263))
+
 ## [3.183.5](https://github.com/tolgee/tolgee-platform/compare/v3.183.4...v3.183.5) (2026-05-05)
 
 
