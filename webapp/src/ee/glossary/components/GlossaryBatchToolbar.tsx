@@ -12,9 +12,6 @@ import {
 import { useGlossary } from 'tg.ee.module/glossary/hooks/useGlossary';
 import { BatchToolbarShell } from 'tg.component/entriesList/BatchToolbarShell';
 
-// data-cy values passed via props — kept here so the generator picks them up:
-//   "data-cy": "glossary-batch-delete-button"
-
 type Props = {
   selectionService: SelectionService<number>;
 };

@@ -20,11 +20,6 @@ import {
   StyledTranslationCell,
 } from './TranslationMemoryEntryRow.styles';
 
-// data-cy values passed via props — kept here so the generator picks them up:
-//   "data-cy": "tm-entry-edit-field"
-//   "data-cy": "tm-entry-cancel"
-//   "data-cy": "tm-entry-save"
-
 type TranslationMemoryEntryModel =
   components['schemas']['TranslationMemoryEntryModel'];
 
