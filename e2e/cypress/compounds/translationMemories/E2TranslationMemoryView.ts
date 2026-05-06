@@ -161,5 +161,4 @@ export class E2TranslationMemoryView {
   getEmptyWizardImportCard() {
     return gcy('tm-empty-wizard-import');
   }
-
 }

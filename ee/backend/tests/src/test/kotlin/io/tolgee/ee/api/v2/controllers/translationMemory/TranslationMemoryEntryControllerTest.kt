@@ -470,5 +470,4 @@ class TranslationMemoryEntryControllerTest : AuthorizedControllerTest() {
     userAccount = testData.orgMember
     performAuthGet("/v2/organizations/$orgId/translation-memories/$sharedTmId/entries").andIsOk
   }
-
 }

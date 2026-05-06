@@ -8,6 +8,9 @@ import { TranslatedError } from 'tg.translationTools/TranslatedError';
 import { useIsOrganizationOwnerOrMaintainer } from 'tg.globalContext/helpers';
 import { BatchToolbarShell } from 'tg.component/entriesList/BatchToolbarShell';
 
+// data-cy values passed via props — kept here so the generator picks them up:
+//   "data-cy": "tm-batch-delete-button"
+
 type Props = {
   organizationId: number;
   translationMemoryId: number;

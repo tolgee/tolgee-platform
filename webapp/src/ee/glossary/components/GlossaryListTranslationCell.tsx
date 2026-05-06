@@ -10,6 +10,11 @@ import { EditableTextCellForm } from 'tg.component/entriesList/EditableTextCellF
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
 import { useGlossary } from 'tg.ee.module/glossary/hooks/useGlossary';
 
+// data-cy values passed via props — kept here so the generator picks them up:
+//   "data-cy": "glossary-translation-edit-field"
+//   "data-cy": "glossary-translation-cancel-button"
+//   "data-cy": "glossary-translation-save-button"
+
 type GlossaryTermTranslationModel =
   components['schemas']['GlossaryTermTranslationModel'];
 
