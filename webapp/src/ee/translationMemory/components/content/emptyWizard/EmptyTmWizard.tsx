@@ -4,14 +4,20 @@ import { EmptyTmWizardManualOption } from './EmptyTmWizardManualOption';
 import { EmptyTmWizardCopyFromProjectOption } from './EmptyTmWizardCopyFromProjectOption';
 import { EmptyTmWizardImportOption } from './EmptyTmWizardImportOption';
 
+// Grid (with `minmax(0, 1fr)`) instead of flex with `flex: 1 1 280px`. Flexbox sizes each
+// card past its content min-width, so a card with longer text ends up wider than its
+// siblings (e.g. "Add manually" was visibly larger than the other two). Grid splits the
+// row into exactly equal columns regardless of inner copy.
 const StyledBox = styled(Box)`
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: ${({ theme }) => theme.spacing(2)};
-  align-items: center;
-  justify-content: center;
-  text-align: center;
   margin: ${({ theme }) => theme.spacing(2)};
-  flex-wrap: wrap;
+  text-align: center;
+
+  ${({ theme }) => theme.breakpoints.down('md')} {
+    grid-template-columns: 1fr;
+  }
 `;
 
 type Props = {
