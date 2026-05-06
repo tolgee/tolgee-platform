@@ -101,7 +101,7 @@ class BatchJobService(
         this.target = target
         this.totalItems = target.size
         this.chunkSize = processor.getChunkSize(projectId = project?.id, request = request)
-        this.jobCharacter = processor.getJobCharacter()
+        this.jobCharacter = processor.getJobCharacter(request = request, projectId = project?.id)
         this.maxPerJobConcurrency = processor.getMaxPerJobConcurrency()
         this.type = type
         this.hidden = isHidden
