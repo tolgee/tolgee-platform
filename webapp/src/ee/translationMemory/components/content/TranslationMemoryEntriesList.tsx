@@ -28,7 +28,12 @@ import { useSelectionService } from 'tg.service/useSelectionService';
 import { tmPreferencesService } from 'tg.ee.module/translationMemory/services/TmPreferencesService';
 import { useIsOrganizationOwnerOrMaintainer } from 'tg.globalContext/helpers';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
-import { ScrollArrows } from 'tg.ee.module/glossary/components/ScrollArrows';
+import { ScrollArrows } from 'tg.component/entriesList/ScrollArrows';
+import {
+  Container as ListContainer,
+  Content as ListContent,
+  VerticalScroll as ListVerticalScroll,
+} from 'tg.component/entriesList/entriesListChrome';
 import { TmEntriesToolbar } from './TmEntriesToolbar';
 import { TmEntriesListHeader } from './TmEntriesListHeader';
 import { TmViewToolbar } from './TmViewToolbar';
@@ -42,60 +47,6 @@ type OrganizationLanguageModel =
 
 const PAGE_SIZE = 50;
 const LANGUAGE_SEARCH_DEBOUNCE_MS = 500;
-
-// Container chrome mirrors GlossaryTermsList — no left/right border, optional horizontal-scroll
-// gradient hints rendered via the ::before/::after pseudos and toggled by ScrollArrows. Keep
-// the layout identical so visual treatment stays in sync as glossary evolves.
-const StyledContainer = styled('div')`
-  position: relative;
-  display: grid;
-  margin: 0px;
-  border-left: 0px;
-  border-right: 0px;
-  background: ${({ theme }) => theme.palette.background.default};
-  flex-grow: 1;
-
-  &::before {
-    content: '';
-    height: 100%;
-    position: absolute;
-    width: 6px;
-    background-image: linear-gradient(90deg, #0000002c, transparent);
-    top: 0px;
-    left: 0px;
-    z-index: 10;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 100ms ease-in-out;
-  }
-
-  &::after {
-    content: '';
-    height: 100%;
-    position: absolute;
-    width: 6px;
-    background-image: linear-gradient(-90deg, #0000002c, transparent);
-    top: 0px;
-    right: 0px;
-    z-index: 10;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 100ms ease-in-out;
-  }
-`;
-
-const StyledVerticalScroll = styled('div')`
-  overflow: auto;
-  scrollbar-width: thin;
-  scrollbar-color: ${({ theme }) => theme.palette.text.secondary} transparent;
-  scroll-behavior: smooth;
-  margin-top: ${({ theme }) => theme.spacing(0.5)};
-  min-height: 350px;
-`;
-
-const StyledContent = styled('div')`
-  position: relative;
-`;
 
 const StyledEmpty = styled('div')`
   padding: ${({ theme }) => theme.spacing(8, 2)};
@@ -514,6 +465,7 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
         onExport={triggerExport}
         exportDisabled={exportLoading || totalElements === 0}
         onCreate={() => setCreateDialogOpen(true)}
+        hideFilters={showEmptyWizard}
       />
 
       {createDialogOpen && (
@@ -559,17 +511,17 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
         />
       )}
 
-      <StyledContainer ref={containerRef} data-cy="tm-entries-table">
+      <ListContainer ref={containerRef} data-cy="tm-entries-table">
         <ScrollArrows
           containerRef={containerRef}
           verticalScrollRef={verticalScrollRef}
           deps={[displayLanguages, layout]}
         />
-        <StyledVerticalScroll
+        <ListVerticalScroll
           ref={verticalScrollRefCallback}
           style={{ height: tableHeight }}
         >
-          <StyledContent>
+          <ListContent>
             {layout === 'flat' && displayLanguages.length > 0 && !isEmpty && (
               <TmEntriesListHeader
                 sourceLanguageTag={sourceLanguageTag}
@@ -618,9 +570,9 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
                 itemRenderer={renderItem}
               />
             )}
-          </StyledContent>
-        </StyledVerticalScroll>
-      </StyledContainer>
+          </ListContent>
+        </ListVerticalScroll>
+      </ListContainer>
 
       <TmViewToolbar
         leftOffset={verticalScrollRef.current?.getBoundingClientRect?.()?.left}

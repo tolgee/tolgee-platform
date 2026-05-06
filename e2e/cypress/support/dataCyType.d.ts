@@ -344,7 +344,7 @@ declare namespace DataCy {
         "global-user-menu-button" |
         "glossaries-empty-add-button" |
         "glossaries-list-more-button" |
-        "glossary-batch-delete-button" |
+        "glossary-batch-toolbar" |
         "glossary-delete-button" |
         "glossary-edit-button" |
         "glossary-empty-add-term-button" |
@@ -872,7 +872,6 @@ declare namespace DataCy {
         "tm-add-project-autocomplete" |
         "tm-assigned-project-row" |
         "tm-assigned-projects-table" |
-        "tm-batch-delete-button" |
         "tm-batch-toolbar" |
         "tm-content-subtitle" |
         "tm-create-entry-dialog" |
