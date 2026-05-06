@@ -31,7 +31,6 @@ export { flatGridColumns } from './TranslationMemoryEntryRow.styles';
 export type EntryGroup = {
   sourceText: string;
   keyNames: string[];
-  isManual: boolean;
   entries: TranslationMemoryEntryModel[];
   virtualEntries: VirtualTranslationMemoryEntryModel[];
 };
@@ -103,20 +102,13 @@ export const TranslationMemoryEntryRow: React.VFC<Props> = ({
     [group.virtualEntries, candidate.isPrimary]
   );
 
-  // Stored rows are selectable iff they carry a real entry ID; virtual rows never are.
   const hasStoredEntries = group.entries.length > 0;
   const selectable = hasStoredEntries && groupId !== undefined;
 
-  // Computed once per row — every cell shares the same disablement reason.
   const rowEditDisabledReason: React.ReactNode = !canManage ? (
     <T
       keyName="tm_entry_edit_disabled_no_permission"
       defaultValue="Only organization maintainers can edit translation memory entries."
-    />
-  ) : !group.isManual ? (
-    <T
-      keyName="tm_entry_edit_disabled_synced"
-      defaultValue="This entry is synced from a project translation. Edit the source translation in the project instead."
     />
   ) : undefined;
 
@@ -188,10 +180,9 @@ export const TranslationMemoryEntryRow: React.VFC<Props> = ({
           const virtualEntry = virtualByLang.get(langTag);
           const isEditing = editingLang === langTag;
 
-          // Editable only when the whole group is manual AND there's a stored entry to update
-          // OR no entry to create. Synced (non-manual) and virtual rows fall through to
-          // read-only rendering.
-          const editable = canManage && group.isManual;
+          // Cells with a stored entry (or no entry yet) are editable when the user can manage.
+          // Pure virtual cells (only virtualText) stay read-only — see TranslationCell.
+          const editable = canManage;
 
           return (
             <TranslationCell

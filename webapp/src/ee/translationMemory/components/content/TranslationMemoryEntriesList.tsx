@@ -176,7 +176,6 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
         (p._embedded?.translationMemoryEntryGroups ?? []).map((g) => ({
           sourceText: g.sourceText,
           keyNames: g.keyNames ?? [],
-          isManual: g.isManual,
           entries: g.entries ?? [],
           virtualEntries: g.virtualEntries ?? [],
         }))
@@ -375,14 +374,11 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
     const group = candidate.group;
     const isLast = index === candidates.length - 1;
     if (isLast) onFetchNextPageHint();
-    // Editing key includes candidate index so multi-candidate stacks don't share an editing
-    // slot across rows of the same source.
-    const rowKey = `${group.sourceText}|||${group.isManual}|||${candidate.candidateIndex}`;
+    const rowKey = `${group.sourceText}|||${candidate.candidateIndex}`;
     const editingLangForRow = editingCell?.startsWith(rowKey + '|||')
       ? editingCell.split('|||').pop()!
       : null;
-    // Selection still operates on the whole (source, isManual) bucket — the batch-delete API
-    // wipes the entire group server-side, so only show the checkbox on the primary candidate.
+    // Selection operates on the whole source-text bucket — only show the checkbox on the primary candidate.
     const groupId = candidate.isPrimary
       ? (group.entries?.[0]?.id as number | undefined)
       : undefined;

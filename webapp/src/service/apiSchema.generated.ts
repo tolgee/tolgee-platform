@@ -326,10 +326,6 @@ export interface paths {
   "/v2/organizations/{organizationId}/translation-memories/{translationMemoryId}/assigned-projects": {
     get: operations["getAssignedProjects"];
   };
-  "/v2/organizations/{organizationId}/translation-memories/{translationMemoryId}/copy-from-project": {
-    /** Seeds this translation memory with manual entries copied from the source project's TM (both stored manual rows and virtual rows derived from the project's translations). Skips duplicates by `(sourceText, targetLanguageTag, targetText)` so the operation is idempotent and safe to run on a non-empty TM. */
-    post: operations["copyFromProject"];
-  };
   "/v2/organizations/{organizationId}/translation-memories/{translationMemoryId}/entries": {
     /** One row per distinct source text. The `targetLanguageTag` filter only narrows which entries are returned per group — source rows with no matching translation still appear with an empty `entries` list so the user can add a translation. */
     get: operations["list_3"];
@@ -2444,19 +2440,6 @@ export interface components {
       name: string;
       publicUrlPrefix?: string;
       s3ContentStorageConfig?: components["schemas"]["S3ContentStorageConfigDto"];
-    };
-    CopyFromProjectRequest: {
-      /**
-       * Format: int64
-       * @description ID of the project whose translation memory entries should be copied
-       */
-      sourceProjectId: number;
-    };
-    CopyFromProjectResult: {
-      /** Format: int32 */
-      copied: number;
-      /** Format: int32 */
-      skipped: number;
     };
     CopyTranslationRequest: {
       keyIds: number[];
@@ -7153,18 +7136,16 @@ export interface components {
       languageId: number;
     };
     TranslationMemoryEntryGroupModel: {
-      /** @description Persisted entries in this row, already filtered by the requested languages */
+      /** @description Stored entries in this row, already filtered by the requested languages */
       entries: components["schemas"]["TranslationMemoryEntryModel"][];
-      /** @description Whether the row is user-editable. True for manual rows (Add-entry dialog or TMX import); false for synced entries and virtual rows. */
-      isManual: boolean;
-      /** @description Names of the keys whose translations currently contribute to this row. Empty for manual rows. */
+      /** @description Names of the keys contributing virtual rows in this group */
       keyNames: string[];
       /**
        * @description Source text in the TM's source language
        * @example Hello world
        */
       sourceText: string;
-      /** @description Virtual entries computed from project translations (project TMs only) */
+      /** @description Virtual entries computed from write-access-assigned project translations */
       virtualEntries: components["schemas"]["VirtualTranslationMemoryEntryModel"][];
     };
     TranslationMemoryEntryModel: {
@@ -7175,13 +7156,6 @@ export interface components {
       createdAt: number;
       /** Format: int64 */
       id: number;
-      /**
-       * @description Whether the entry was created manually (via the add-entry dialog or TMX import) or synced automatically from project translations. Manual entries are editable; synced entries are read-only.
-       * @example false
-       */
-      isManual: boolean;
-      /** @description Names of the keys whose translations contribute to this synced entry. Empty for manual entries and for synced entries whose contributing translations have all been deleted. */
-      keyNames: string[];
       /**
        * @description Source text in the TM's source language
        * @example Hello world
@@ -12123,52 +12097,6 @@ export interface operations {
         content: {
           "application/json": string;
         };
-      };
-    };
-  };
-  /** Seeds this translation memory with manual entries copied from the source project's TM (both stored manual rows and virtual rows derived from the project's translations). Skips duplicates by `(sourceText, targetLanguageTag, targetText)` so the operation is idempotent and safe to run on a non-empty TM. */
-  copyFromProject: {
-    parameters: {
-      path: {
-        organizationId: number;
-        translationMemoryId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["CopyFromProjectResult"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json": string;
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json": string;
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CopyFromProjectRequest"];
       };
     };
   };
