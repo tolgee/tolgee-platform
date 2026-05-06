@@ -191,10 +191,6 @@ export const TranslationMemoryCreateEntryDialog: React.VFC<Props> = ({
             multiline
             minRows={2}
             fullWidth
-            placeholder={t(
-              'translation_memory_entry_source_placeholder',
-              'Source text...'
-            )}
             autoFocus
             data-cy="tm-entry-source-text"
           />
@@ -218,7 +214,10 @@ export const TranslationMemoryCreateEntryDialog: React.VFC<Props> = ({
                       variant="standard"
                       size="small"
                       disableUnderline
-                      sx={{ fontSize: 14 }}
+                      sx={{
+                        fontSize: 14,
+                        '& .MuiSelect-icon': { top: 'calc(50% - 14px)' },
+                      }}
                     >
                       {selectableTags.map((tag) => {
                         const li = languageInfo[tag];
@@ -241,10 +240,6 @@ export const TranslationMemoryCreateEntryDialog: React.VFC<Props> = ({
                     multiline
                     minRows={2}
                     fullWidth
-                    placeholder={t(
-                      'translation_memory_entry_target_placeholder',
-                      'Translation...'
-                    )}
                     data-cy="tm-entry-target-text"
                   />
                 </Box>

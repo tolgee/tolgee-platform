@@ -115,28 +115,32 @@ export const CopyFromProjectDialog: React.VFC<Props> = ({
     );
   }
 
-  const copyMutation = useApiMutation({
-    url: '/v2/organizations/{organizationId}/translation-memories/{translationMemoryId}/copy-from-project',
+  // Connect = create a shared-TM project assignment. read-only by default; users can flip
+  // write access in TM Settings later. The TM's defaultPenalty applies (penalty omitted).
+  const assignMutation = useApiMutation({
+    url: '/v2/projects/{projectId}/translation-memories/{translationMemoryId}',
     method: 'post',
     invalidatePrefix: '/v2/organizations/{organizationId}/translation-memories',
   });
 
   const handleConfirm = () => {
     if (!selected) return;
-    copyMutation.mutate(
+    assignMutation.mutate(
       {
-        path: { organizationId, translationMemoryId },
+        path: { projectId: selected.id, translationMemoryId },
         content: {
-          'application/json': { sourceProjectId: selected.id },
+          'application/json': {
+            readAccess: true,
+            writeAccess: false,
+          },
         },
       },
       {
-        onSuccess: (res) => {
+        onSuccess: () => {
           messageService.success(
             <T
-              keyName="tm_empty_wizard_copy_success"
-              defaultValue="Copied {copied, plural, one {# entry} other {# entries}} ({skipped} skipped)"
-              params={{ copied: res.copied, skipped: res.skipped }}
+              keyName="tm_empty_wizard_connect_success"
+              defaultValue="Project connected"
             />
           );
           onFinished();
@@ -155,15 +159,15 @@ export const CopyFromProjectDialog: React.VFC<Props> = ({
     >
       <DialogTitle>
         <T
-          keyName="tm_empty_wizard_copy_title"
-          defaultValue="Copy from a project"
+          keyName="tm_empty_wizard_connect_title"
+          defaultValue="Connect a project"
         />
       </DialogTitle>
       <DialogContent>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
           <T
-            keyName="tm_empty_wizard_copy_description"
-            defaultValue="Copy entries from an existing project's translation memory. The original project TM is left untouched."
+            keyName="tm_empty_wizard_connect_description"
+            defaultValue="The project's translations will appear in this memory automatically and stay in sync. You can connect more projects or disconnect any time in TM settings."
           />
         </Typography>
         <Box data-cy="tm-empty-wizard-copy-project">
@@ -180,40 +184,30 @@ export const CopyFromProjectDialog: React.VFC<Props> = ({
             labelItem={(item) => item.name}
             label={
               <T
-                keyName="tm_empty_wizard_copy_project_label"
-                defaultValue="Source project"
+                keyName="tm_empty_wizard_connect_project_label"
+                defaultValue="Project"
               />
             }
             searchPlaceholder={t(
-              'tm_empty_wizard_copy_project_placeholder',
+              'tm_empty_wizard_connect_project_placeholder',
               'Choose a project…'
             )}
           />
         </Box>
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          sx={{ mt: 1, display: 'block' }}
-        >
-          <T
-            keyName="tm_empty_wizard_copy_hint"
-            defaultValue="All entries from the project's TM will be copied into this memory."
-          />
-        </Typography>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>{t('global_cancel_button')}</Button>
         <LoadingButton
           color="primary"
           variant="contained"
-          loading={copyMutation.isLoading}
+          loading={assignMutation.isLoading}
           disabled={!selected}
           onClick={handleConfirm}
           data-cy="tm-empty-wizard-copy-submit"
         >
           <T
-            keyName="tm_empty_wizard_copy_submit"
-            defaultValue="Copy entries"
+            keyName="tm_empty_wizard_connect_submit"
+            defaultValue="Connect"
           />
         </LoadingButton>
       </DialogActions>

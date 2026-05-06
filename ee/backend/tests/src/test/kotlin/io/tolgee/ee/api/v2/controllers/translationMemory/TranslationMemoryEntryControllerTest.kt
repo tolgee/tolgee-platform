@@ -3,7 +3,6 @@ package io.tolgee.ee.api.v2.controllers.translationMemory
 import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.TranslationMemoryTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
-import io.tolgee.ee.data.translationMemory.CopyFromProjectRequest
 import io.tolgee.ee.data.translationMemory.CreateTranslationMemoryEntryRequest
 import io.tolgee.ee.data.translationMemory.DeleteMultipleTranslationMemoryEntriesRequest
 import io.tolgee.ee.data.translationMemory.UpdateTranslationMemoryEntryRequest
@@ -487,96 +486,4 @@ class TranslationMemoryEntryControllerTest : AuthorizedControllerTest() {
     performAuthGet("/v2/organizations/$orgId/translation-memories/$sharedTmId/entries").andIsOk
   }
 
-  // ---------- copy-from-project ----------
-
-  @Test
-  fun `copies project TM entries into an empty shared TM`() {
-    val targetTmId = testData.unassignedSharedTm.id
-    val request = CopyFromProjectRequest().apply { sourceProjectId = testData.projectWithTm.id }
-
-    performAuthPost(
-      "/v2/organizations/$orgId/translation-memories/$targetTmId/copy-from-project",
-      request,
-    ).andIsOk
-      .andAssertThatJson {
-        // Source project has 4 keys with German targets -> 4 virtual entries copied.
-        node("copied").isEqualTo(4)
-        node("skipped").isEqualTo(0)
-      }
-
-    val entries = translationMemoryEntryRepository.findByTranslationMemoryId(targetTmId)
-    assertThat(entries).hasSize(4)
-    assertThat(entries.map { it.sourceText to it.targetText })
-      .containsExactlyInAnyOrder(
-        "Existing source" to "Bestehende Übersetzung",
-        "Reviewed source" to "Überprüfte Übersetzung",
-        "Promoted source" to "Hochgestufter Text",
-        "Demotion source" to "Herabzustufender Text",
-      )
-    // All copied rows are stored as manual — virtual rows are materialized on copy.
-    assertThat(entries).allMatch { it.isManual }
-  }
-
-  @Test
-  fun `copy is idempotent — re-running skips entries already present`() {
-    val targetTmId = testData.unassignedSharedTm.id
-    val request = CopyFromProjectRequest().apply { sourceProjectId = testData.projectWithTm.id }
-
-    performAuthPost(
-      "/v2/organizations/$orgId/translation-memories/$targetTmId/copy-from-project",
-      request,
-    ).andIsOk
-
-    performAuthPost(
-      "/v2/organizations/$orgId/translation-memories/$targetTmId/copy-from-project",
-      request,
-    ).andIsOk
-      .andAssertThatJson {
-        node("copied").isEqualTo(0)
-        node("skipped").isEqualTo(4)
-      }
-    assertThat(translationMemoryEntryRepository.findByTranslationMemoryId(targetTmId)).hasSize(4)
-  }
-
-  @Test
-  fun `copy rejects mismatched base languages`() {
-    // mismatchedBaseSharedTm has source=fr; projectWithTm has base=en.
-    val targetTmId = testData.mismatchedBaseSharedTm.id
-    val request = CopyFromProjectRequest().apply { sourceProjectId = testData.projectWithTm.id }
-
-    performAuthPost(
-      "/v2/organizations/$orgId/translation-memories/$targetTmId/copy-from-project",
-      request,
-    ).andIsBadRequest
-  }
-
-  @Test
-  fun `copy rejects PROJECT-type target TM`() {
-    val request = CopyFromProjectRequest().apply { sourceProjectId = testData.projectWithTm.id }
-    performAuthPost(
-      "/v2/organizations/$orgId/translation-memories/${testData.projectTm.id}/copy-from-project",
-      request,
-    ).andIsBadRequest
-  }
-
-  @Test
-  fun `copy returns 404 when source project belongs to a different org`() {
-    val targetTmId = testData.unassignedSharedTm.id
-    val request = CopyFromProjectRequest().apply { sourceProjectId = -1 }
-    performAuthPost(
-      "/v2/organizations/$orgId/translation-memories/$targetTmId/copy-from-project",
-      request,
-    ).andIsNotFound
-  }
-
-  @Test
-  fun `member cannot copy from project`() {
-    val targetTmId = testData.unassignedSharedTm.id
-    val request = CopyFromProjectRequest().apply { sourceProjectId = testData.projectWithTm.id }
-    userAccount = testData.orgMember
-    performAuthPost(
-      "/v2/organizations/$orgId/translation-memories/$targetTmId/copy-from-project",
-      request,
-    ).andIsForbidden
-  }
 }

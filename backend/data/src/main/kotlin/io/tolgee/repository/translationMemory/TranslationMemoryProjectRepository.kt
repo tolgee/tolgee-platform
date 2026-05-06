@@ -24,17 +24,6 @@ interface TranslationMemoryProjectRepository : JpaRepository<TranslationMemoryPr
   )
   fun findByProjectIdAndReadAccessTrue(projectId: Long): List<TranslationMemoryProject>
 
-  /**
-   * Used by the write-on-save hook ([io.tolgee.service.translationMemory.TranslationMemoryEntryService.onTranslationSaved]).
-   * Marked with FLUSH_MODE=COMMIT so running this query inside the translation save flow does NOT trigger a
-   * premature Hibernate flush — flushing from within the save hook would expose transient entities that are
-   * still being assembled by the outer save (e.g. Labels on the enclosing Translation).
-   */
-  @QueryHints(
-    value = [QueryHint(name = "org.hibernate.flushMode", value = "COMMIT")],
-  )
-  fun findByProjectIdAndWriteAccessTrue(projectId: Long): List<TranslationMemoryProject>
-
   fun findByTranslationMemoryId(translationMemoryId: Long): List<TranslationMemoryProject>
 
   fun findByTranslationMemoryIdAndProjectId(

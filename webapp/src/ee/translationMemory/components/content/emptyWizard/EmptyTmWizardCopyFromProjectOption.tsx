@@ -27,18 +27,18 @@ export const EmptyTmWizardCopyFromProjectOption: React.VFC<Props> = ({
         icon={<Folder />}
         title={
           <T
-            keyName="tm_empty_wizard_copy_card_title"
-            defaultValue="Copy from a project"
+            keyName="tm_empty_wizard_connect_project_title"
+            defaultValue="Use translations from a project"
           />
         }
         description={t(
-          'tm_empty_wizard_copy_card_description',
-          "Seed this memory with entries from an existing project's TM."
+          'tm_empty_wizard_connect_project_description',
+          'Connect a project — its translations appear in this memory and stay in sync.'
         )}
         buttonLabel={
           <T
-            keyName="tm_empty_wizard_copy_card_button"
-            defaultValue="Choose project"
+            keyName="tm_empty_wizard_connect_project_button"
+            defaultValue="Connect project"
           />
         }
         onClick={() => setOpen(true)}

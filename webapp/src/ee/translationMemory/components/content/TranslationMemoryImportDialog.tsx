@@ -5,7 +5,6 @@ import {
   DialogContent,
   DialogActions,
   Button,
-  Typography,
 } from '@mui/material';
 import { T } from '@tolgee/react';
 
@@ -155,18 +154,13 @@ export const TranslationMemoryImportDialog: React.VFC<Props> = ({
           file={file}
           onFileSelect={setFile}
           acceptedFileTypes={[{ extension: '.tmx', icon: File02 }]}
+          helperText={
+            <T
+              keyName="translation_memory_import_tmx_format_note"
+              defaultValue="Only TMX 1.4b files are supported."
+            />
+          }
         />
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          display="block"
-          mt={1}
-        >
-          <T
-            keyName="translation_memory_import_tmx_format_note"
-            defaultValue="Only TMX 1.4b files are supported."
-          />
-        </Typography>
 
         {file && hasExistingEntries && (
           <ModeSelector
