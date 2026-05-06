@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { T, useTranslate } from '@tolgee/react';
 import { PlusCircle } from '@untitled-ui/icons-react';
 import { TranslationMemoryCreateEntryDialog } from 'tg.ee.module/translationMemory/views/TranslationMemoryCreateEntryDialog';
-import { EmptyTmWizardCard } from './EmptyTmWizardCard';
+import { EmptyWizardCard } from 'tg.component/entriesList/EmptyWizardCard';
 
 type Props = {
   organizationId: number;
@@ -24,7 +24,7 @@ export const EmptyTmWizardManualOption: React.VFC<Props> = ({
 
   return (
     <>
-      <EmptyTmWizardCard
+      <EmptyWizardCard
         dataCy="tm-empty-wizard-manual"
         icon={<PlusCircle />}
         title={

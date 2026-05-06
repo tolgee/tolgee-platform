@@ -17,7 +17,7 @@ import { messageService } from 'tg.service/MessageService';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { XClose, Plus } from '@untitled-ui/icons-react';
 import { languageInfo } from '@tginternal/language-util/lib/generated/languageInfo';
-import { FlagImage } from '@tginternal/library/components/languages/FlagImage';
+import { LanguageHeading } from 'tg.component/languages/LanguageHeading';
 
 const StyledActions = styled('div')`
   display: flex;
@@ -32,11 +32,15 @@ const StyledLangRow = styled('div')`
   align-items: flex-start;
 `;
 
+// 14px label that hosts the LanguageHeading (flag + name with bold-when-base) so
+// the dialog labels match the language headers in the Translations view. The wrapper
+// only supplies font size, color and bottom margin — bold weight is owned by
+// LanguageHeading via language.base.
 const StyledLangLabel = styled('div')`
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 13px;
+  font-size: 14px;
   color: ${({ theme }) => theme.palette.text.secondary};
   margin-bottom: 4px;
 `;
@@ -177,8 +181,9 @@ export const TranslationMemoryCreateEntryDialog: React.VFC<Props> = ({
       <DialogContent sx={{ display: 'grid', gap: 2, pt: '8px !important' }}>
         <div>
           <StyledLangLabel>
-            <FlagImage flagEmoji={sourceFlag} height={14} />
-            {sourceName} ({t('translation_memory_source', 'source')})
+            <LanguageHeading
+              language={{ name: sourceName, flagEmoji: sourceFlag, base: true }}
+            />
           </StyledLangLabel>
           <TextField
             value={sourceText}
@@ -213,17 +218,18 @@ export const TranslationMemoryCreateEntryDialog: React.VFC<Props> = ({
                       variant="standard"
                       size="small"
                       disableUnderline
-                      sx={{ fontSize: 13 }}
+                      sx={{ fontSize: 14 }}
                     >
                       {selectableTags.map((tag) => {
                         const li = languageInfo[tag];
-                        const liFlag = li?.flags?.[0] || '';
                         return (
                           <MenuItem key={tag} value={tag}>
-                            <Box display="flex" alignItems="center" gap={1}>
-                              <FlagImage flagEmoji={liFlag} height={14} />
-                              {li?.englishName || tag}
-                            </Box>
+                            <LanguageHeading
+                              language={{
+                                name: li?.englishName || tag,
+                                flagEmoji: li?.flags?.[0] || '',
+                              }}
+                            />
                           </MenuItem>
                         );
                       })}

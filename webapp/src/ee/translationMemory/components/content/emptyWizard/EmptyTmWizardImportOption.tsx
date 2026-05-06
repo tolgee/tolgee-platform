@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { T, useTranslate } from '@tolgee/react';
 import { UploadCloud02 } from '@untitled-ui/icons-react';
 import { TranslationMemoryImportDialog } from 'tg.ee.module/translationMemory/components/content/TranslationMemoryImportDialog';
-import { EmptyTmWizardCard } from './EmptyTmWizardCard';
+import { EmptyWizardCard } from 'tg.component/entriesList/EmptyWizardCard';
 
 type Props = {
   organizationId: number;
@@ -20,7 +20,7 @@ export const EmptyTmWizardImportOption: React.VFC<Props> = ({
 
   return (
     <>
-      <EmptyTmWizardCard
+      <EmptyWizardCard
         dataCy="tm-empty-wizard-import"
         icon={<UploadCloud02 />}
         title={

@@ -376,10 +376,7 @@ declare namespace DataCy {
         "glossary-term-preview-save-button" |
         "glossary-term-preview-source-text" |
         "glossary-term-preview-target-text" |
-        "glossary-translation-cancel-button" |
         "glossary-translation-cell" |
-        "glossary-translation-edit-field" |
-        "glossary-translation-save-button" |
         "glossary-view-button" |
         "glossary-view-language-select" |
         "handlebars-editor" |
@@ -892,13 +889,10 @@ declare namespace DataCy {
         "tm-entries-table" |
         "tm-entries-total-count" |
         "tm-entry-add-language" |
-        "tm-entry-cancel" |
         "tm-entry-create-submit" |
         "tm-entry-edit-affordance" |
-        "tm-entry-edit-field" |
         "tm-entry-row-checkbox" |
         "tm-entry-row-keys" |
-        "tm-entry-save" |
         "tm-entry-source-text" |
         "tm-entry-target-text" |
         "tm-entry-translation-cell" |

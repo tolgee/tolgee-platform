@@ -1,19 +1,18 @@
 import React from 'react';
-import { Button, TextField, Tooltip } from '@mui/material';
-import { T, useTranslate } from '@tolgee/react';
+import { Tooltip } from '@mui/material';
+import { T } from '@tolgee/react';
 import { FlagImage } from '@tginternal/library/components/languages/FlagImage';
 import { languageInfo } from '@tginternal/language-util/lib/generated/languageInfo';
 import { useQueryClient } from 'react-query';
 import { Edit02 } from '@untitled-ui/icons-react';
-import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { LimitedHeightText } from 'tg.component/LimitedHeightText';
+import { EditableTextCellForm } from 'tg.component/entriesList/EditableTextCellForm';
 import { TmEntryText } from './TmEntryText';
 import { messageService } from 'tg.service/MessageService';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { components } from 'tg.service/apiSchema.generated';
 import {
   EntryRowLayout,
-  StyledControls,
   StyledEditAffordance,
   StyledEmpty,
   StyledLanguage,
@@ -64,7 +63,6 @@ export const TranslationCell: React.VFC<Props> = ({
   editDisabledReason,
   layout,
 }) => {
-  const { t } = useTranslate();
   const queryClient = useQueryClient();
   const targetLang = languageInfo[langTag];
   const targetFlag = targetLang?.flags?.[0] || '';
@@ -138,16 +136,6 @@ export const TranslationCell: React.VFC<Props> = ({
     );
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      save();
-    }
-    if (e.key === 'Escape') {
-      onCancel();
-    }
-  };
-
   const isSaving = updateMutation.isLoading || createMutation.isLoading;
 
   // Show the tooltip only on the read-only state of an un-editable cell. Editable cells get
@@ -196,40 +184,16 @@ export const TranslationCell: React.VFC<Props> = ({
               <StyledEmpty>—</StyledEmpty>
             )
           ) : (
-            <>
-              <TextField
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
-                onKeyDown={handleKeyDown}
-                multiline
-                minRows={2}
-                fullWidth
-                autoFocus
-                size="small"
-                data-cy="tm-entry-edit-field"
-              />
-              <StyledControls>
-                <div style={{ flex: 1 }} />
-                <Button
-                  onClick={onCancel}
-                  size="small"
-                  variant="outlined"
-                  data-cy="tm-entry-cancel"
-                >
-                  {t('global_cancel_button')}
-                </Button>
-                <LoadingButton
-                  onClick={save}
-                  size="small"
-                  variant="contained"
-                  color="primary"
-                  loading={isSaving}
-                  data-cy="tm-entry-save"
-                >
-                  {t('global_form_save')}
-                </LoadingButton>
-              </StyledControls>
-            </>
+            <EditableTextCellForm
+              value={value}
+              onChange={setValue}
+              onSave={save}
+              onCancel={onCancel}
+              saving={isSaving}
+              fieldDataCy="tm-entry-edit-field"
+              cancelDataCy="tm-entry-cancel"
+              saveDataCy="tm-entry-save"
+            />
           )}
         </StyledTranslation>
       </StyledTranslationCell>

@@ -1,18 +1,5 @@
 import { styled } from '@mui/material';
 
-/**
- * Shared scroll chrome for the virtualized entries lists used by Glossary terms and TM
- * entries. The container draws no left/right border and renders horizontal-scroll
- * gradient hints via ::before/::after pseudos that ScrollArrows toggles by setting opacity.
- *
- * Usage:
- *   <Container ref={containerRef} data-cy="…">
- *     <ScrollArrows containerRef={containerRef} verticalScrollRef={verticalScrollRef} … />
- *     <VerticalScroll ref={verticalScrollRef}>
- *       <Content>{rows}</Content>
- *     </VerticalScroll>
- *   </Container>
- */
 export const Container = styled('div')`
   position: relative;
   display: grid;

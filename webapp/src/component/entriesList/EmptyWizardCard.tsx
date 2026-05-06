@@ -1,10 +1,6 @@
 import React from 'react';
 import { Button, Card, styled, Typography } from '@mui/material';
 
-// Width is controlled by the parent grid column (EmptyTmWizard); the card itself just
-// arranges its inner content vertically. `justify-content: flex-start` + `margin-top: auto`
-// on the button keeps the button anchored to the bottom of the card so the row of CTAs
-// lines up across all three cards even when descriptions wrap to different line counts.
 const StyledCard = styled(Card)`
   display: flex;
   flex-direction: column;
@@ -40,22 +36,31 @@ const StyledButton = styled(Button)`
   margin-top: auto;
 `;
 
+const StyledFooter = styled('div')`
+  margin-top: ${({ theme }) => theme.spacing(1)};
+`;
+
 type Props = {
   icon: React.ReactNode;
   title: React.ReactNode;
   description: React.ReactNode;
   buttonLabel: React.ReactNode;
   onClick: () => void;
+  buttonDisabled?: boolean;
   dataCy: string;
+  /** Optional content rendered below the button (e.g. a docs link). */
+  footer?: React.ReactNode;
 };
 
-export const EmptyTmWizardCard: React.VFC<Props> = ({
+export const EmptyWizardCard: React.VFC<Props> = ({
   icon,
   title,
   description,
   buttonLabel,
   onClick,
+  buttonDisabled,
   dataCy,
+  footer,
 }) => {
   return (
     <StyledCard elevation={0}>
@@ -64,12 +69,14 @@ export const EmptyTmWizardCard: React.VFC<Props> = ({
       <StyledDescription variant="body1">{description}</StyledDescription>
       <StyledButton
         onClick={onClick}
+        disabled={buttonDisabled}
         variant="contained"
         color="primary"
         data-cy={dataCy}
       >
         {buttonLabel}
       </StyledButton>
+      {footer && <StyledFooter>{footer}</StyledFooter>}
     </StyledCard>
   );
 };

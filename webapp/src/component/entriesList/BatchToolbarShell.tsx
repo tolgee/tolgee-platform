@@ -36,25 +36,14 @@ const StyledCheckbox = styled(Checkbox)`
 
 type Props = {
   selectionService: SelectionService<number>;
-  /** Single-action menu label — e.g. "Delete entries". */
   actionLabel: React.ReactNode;
-  /** Disable when the user lacks permission. */
   actionDisabled?: boolean;
-  /** Mutation in flight — drives the LoadingButton spinner alongside selectionService.isLoading. */
   actionLoading?: boolean;
   onAction: () => void;
   dataCy: string;
   actionDataCy: string;
 };
 
-/**
- * Shared shell for the floating "N selected" batch toolbar used by Glossary terms and TM
- * entries. Owns the visibility-when-empty toggle, select-all checkbox, count, the single
- * "action" Select (currently always "Delete X" — wired so callers can localise the label),
- * and the trailing chevron-icon LoadingButton.
- *
- * Callers wire up the actual mutation + confirmation flow externally.
- */
 export const BatchToolbarShell: React.VFC<Props> = ({
   selectionService,
   actionLabel,

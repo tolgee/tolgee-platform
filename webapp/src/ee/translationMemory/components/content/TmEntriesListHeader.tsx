@@ -3,46 +3,30 @@ import { T } from '@tolgee/react';
 import { FlagImage } from '@tginternal/library/components/languages/FlagImage';
 import { languageInfo } from '@tginternal/language-util/lib/generated/languageInfo';
 import { SelectionService } from 'tg.service/useSelectionService';
+import {
+  HeaderCell,
+  HeaderDataCell,
+  HeaderRow,
+} from 'tg.component/entriesList/headerChrome';
 import { flatGridColumns } from './TranslationMemoryEntryRow';
 
-const StyledListHeader = styled('div')`
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  background: ${({ theme }) => theme.palette.background.default};
-  display: grid;
-  margin-bottom: -1px;
-`;
-
-const StyledListHeaderCell = styled('div')`
-  display: flex;
-  align-items: center;
+const StyledDataCell = styled(HeaderDataCell)`
   gap: 8px;
   padding: ${({ theme }) => theme.spacing(1, 1.5)};
-  border-top: 1px solid ${({ theme }) => theme.palette.divider1};
-  border-bottom: 1px solid ${({ theme }) => theme.palette.divider1};
   font-size: 14px;
   color: ${({ theme }) => theme.palette.text.primary};
 `;
 
-const StyledSelectionCell = styled(StyledListHeaderCell)`
+const StyledSelectionCell = styled(HeaderCell)`
   padding: ${({ theme }) => theme.spacing(0, 0.5)};
   justify-content: center;
-`;
-
-const StyledDataCell = styled(StyledListHeaderCell)`
-  border-left: 1px solid ${({ theme }) => theme.palette.divider1};
 `;
 
 type Props = {
   sourceLanguageTag: string;
   displayLanguages: string[];
   selectionService?: SelectionService<number>;
-  /**
-   * Toggles the select-all checkbox in the leading cell. When false the cell stays in the
-   * grid (so column alignment matches the rows below) but renders empty — row-level
-   * checkboxes are hidden for non-managers, so a select-all on top of nothing would mislead.
-   */
+  /** When false, the leading cell stays for grid alignment but renders empty. */
   canManage?: boolean;
 };
 
@@ -52,7 +36,7 @@ export const TmEntriesListHeader: React.VFC<Props> = ({
   selectionService,
   canManage = true,
 }) => (
-  <StyledListHeader
+  <HeaderRow
     style={{ gridTemplateColumns: flatGridColumns(displayLanguages.length) }}
     data-cy="tm-entries-header"
   >
@@ -93,5 +77,5 @@ export const TmEntriesListHeader: React.VFC<Props> = ({
         </StyledDataCell>
       );
     })}
-  </StyledListHeader>
+  </HeaderRow>
 );

@@ -1,7 +1,8 @@
 import React, { ComponentProps } from 'react';
-import { Box, Button, Card, Link, styled, Typography } from '@mui/material';
+import { Box, Link, styled, Typography } from '@mui/material';
 import { PlusCircle, UploadCloud02 } from '@untitled-ui/icons-react';
 import { EmptyState } from 'tg.component/common/EmptyState';
+import { EmptyWizardCard } from 'tg.component/entriesList/EmptyWizardCard';
 import { T } from '@tolgee/react';
 
 // Two-column grid with `minmax(0, 1fr)` instead of flex with a fixed 490px card width.
@@ -22,36 +23,6 @@ const StyledBox = styled(Box)`
   }
 `;
 
-const StyledCard = styled(Card)`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  gap: ${({ theme }) => theme.spacing(2)};
-  border-radius: 20px;
-  padding: ${({ theme }) => theme.spacing(4)};
-  background-color: ${({ theme }) =>
-    theme.palette.tokens.background.onDefaultGrey};
-`;
-
-const StyledPlusCircle = styled(PlusCircle)`
-  color: ${({ theme }) => theme.palette.primary.light};
-  width: 32px;
-  height: 32px;
-`;
-
-const StyledUploadCloud02 = styled(UploadCloud02)`
-  color: ${({ theme }) => theme.palette.primary.light};
-  width: 32px;
-  height: 32px;
-`;
-
-const StyledDescription = styled(Typography)`
-  color: ${({ theme }) => theme.palette.text.secondary};
-  margin-bottom: ${({ theme }) => theme.spacing(5)};
-`;
-
 type Props = {
   loading?: boolean;
   wrapperProps?: ComponentProps<typeof Box>;
@@ -68,55 +39,49 @@ export const GlossaryEmptyListMessage: React.VFC<Props> = ({
   return (
     <EmptyState loading={loading} wrapperProps={wrapperProps}>
       <StyledBox>
-        <StyledCard elevation={0}>
-          <StyledPlusCircle />
-          <Typography variant="h4">
-            <T keyName="glossary_empty_placeholder_add_term_title" />
-          </Typography>
-          <StyledDescription variant="body1">
+        <EmptyWizardCard
+          dataCy="glossary-empty-add-term-button"
+          icon={<PlusCircle />}
+          title={<T keyName="glossary_empty_placeholder_add_term_title" />}
+          description={
             <T keyName="glossary_empty_placeholder_add_term_description" />
-          </StyledDescription>
-          <Button
-            onClick={onCreateTerm}
-            disabled={!onCreateTerm}
-            variant="contained"
-            color="primary"
-            data-cy="glossary-empty-add-term-button"
-          >
+          }
+          buttonLabel={
             <T keyName="glossary_empty_placeholder_add_term_button" />
-          </Button>
-          <Link
-            href="https://docs.tolgee.io/platform/glossaries/managing_glossaries"
-            sx={{ visibility: 'hidden' }}
-          >
-            <Typography variant="body2">
-              <T keyName="glossary_empty_placeholder_add_term_best_practices" />
-            </Typography>
-          </Link>
-        </StyledCard>
-        <StyledCard elevation={0}>
-          <StyledUploadCloud02 />
-          <Typography variant="h4">
-            <T keyName="glossary_empty_placeholder_import_terms_title" />
-          </Typography>
-          <StyledDescription variant="body1">
+          }
+          buttonDisabled={!onCreateTerm}
+          onClick={() => onCreateTerm?.()}
+          footer={
+            <Link
+              href="https://docs.tolgee.io/platform/glossaries/managing_glossaries"
+              sx={{ visibility: 'hidden' }}
+            >
+              <Typography variant="body2">
+                <T keyName="glossary_empty_placeholder_add_term_best_practices" />
+              </Typography>
+            </Link>
+          }
+        />
+        <EmptyWizardCard
+          dataCy="glossary-empty-import-terms-button"
+          icon={<UploadCloud02 />}
+          title={<T keyName="glossary_empty_placeholder_import_terms_title" />}
+          description={
             <T keyName="glossary_empty_placeholder_import_terms_description" />
-          </StyledDescription>
-          <Button
-            onClick={onImport}
-            disabled={!onImport}
-            variant="contained"
-            color="primary"
-            data-cy="glossary-empty-import-terms-button"
-          >
+          }
+          buttonLabel={
             <T keyName="glossary_empty_placeholder_import_terms_button" />
-          </Button>
-          <Link href="https://docs.tolgee.io/platform/glossaries/importing_and_exporting_glossaries">
-            <Typography variant="body2">
-              <T keyName="glossary_empty_placeholder_import_terms_csv_format" />
-            </Typography>
-          </Link>
-        </StyledCard>
+          }
+          buttonDisabled={!onImport}
+          onClick={() => onImport?.()}
+          footer={
+            <Link href="https://docs.tolgee.io/platform/glossaries/importing_and_exporting_glossaries">
+              <Typography variant="body2">
+                <T keyName="glossary_empty_placeholder_import_terms_csv_format" />
+              </Typography>
+            </Link>
+          }
+        />
       </StyledBox>
     </EmptyState>
   );

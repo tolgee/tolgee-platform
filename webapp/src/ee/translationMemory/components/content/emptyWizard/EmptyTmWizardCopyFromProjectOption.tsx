@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { T, useTranslate } from '@tolgee/react';
 import { Folder } from '@untitled-ui/icons-react';
 import { CopyFromProjectDialog } from 'tg.ee.module/translationMemory/components/content/CopyFromProjectDialog';
-import { EmptyTmWizardCard } from './EmptyTmWizardCard';
+import { EmptyWizardCard } from 'tg.component/entriesList/EmptyWizardCard';
 
 type Props = {
   organizationId: number;
@@ -22,7 +22,7 @@ export const EmptyTmWizardCopyFromProjectOption: React.VFC<Props> = ({
 
   return (
     <>
-      <EmptyTmWizardCard
+      <EmptyWizardCard
         dataCy="tm-empty-wizard-copy"
         icon={<Folder />}
         title={
