@@ -59,6 +59,12 @@ type Props = {
   onExport: () => void;
   exportDisabled: boolean;
   onCreate: () => void;
+  /**
+   * When true, the search field, total-count chip, layout toggle and language filter are
+   * hidden — used while the empty-state wizard is on screen so the toolbar collapses to
+   * just the right-hand action group instead of presenting empty filter widgets.
+   */
+  hideFilters?: boolean;
 };
 
 export const TmEntriesToolbar: React.VFC<Props> = ({
@@ -83,6 +89,7 @@ export const TmEntriesToolbar: React.VFC<Props> = ({
   onExport,
   exportDisabled,
   onCreate,
+  hideFilters,
 }) => {
   const { t } = useTranslate();
   const importMenuAnchor = useRef<HTMLButtonElement | null>(null);
@@ -109,83 +116,93 @@ export const TmEntriesToolbar: React.VFC<Props> = ({
   return (
     <Box display="flex" justifyContent="space-between" mb={2}>
       <Box display="flex" alignItems="center" gap="8px">
-        <SecondaryBarSearchField
-          onSearch={onSearch}
-          initial={search}
-          placeholder={t(
-            'translation_memory_entries_search_placeholder',
-            'Search entries...'
-          )}
-        />
-        {totalCount !== undefined && (
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            data-cy="tm-entries-total-count"
-          >
-            <T
-              keyName="translation_memory_entries_total_count"
-              defaultValue="{count, plural, one {# entry} other {# entries}}"
-              params={{ count: totalCount }}
+        {!hideFilters && (
+          <>
+            <SecondaryBarSearchField
+              onSearch={onSearch}
+              initial={search}
+              placeholder={t(
+                'translation_memory_entries_search_placeholder',
+                'Search entries...'
+              )}
             />
-          </Typography>
+            {totalCount !== undefined && (
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                data-cy="tm-entries-total-count"
+              >
+                <T
+                  keyName="translation_memory_entries_total_count"
+                  defaultValue="{count, plural, one {# entry} other {# entries}}"
+                  params={{ count: totalCount }}
+                />
+              </Typography>
+            )}
+          </>
         )}
       </Box>
       <Box display="flex" gap={1} alignItems="center">
-        <ButtonGroup>
-          <Tooltip
-            title={t(
-              'translation_memory_layout_flat_tooltip',
-              'One row per entry'
-            )}
-          >
-            <Button
-              color={layout === 'flat' ? 'primary' : ('default' as 'primary')}
-              onClick={() => onLayoutChange('flat')}
-              sx={{ px: 1 }}
-              data-cy="tm-entries-layout-flat"
-            >
-              <LayoutGrid02 width={20} height={20} />
-            </Button>
-          </Tooltip>
-          <Tooltip
-            title={t(
-              'translation_memory_layout_stacked_tooltip',
-              'Stack languages vertically'
-            )}
-          >
-            <Button
-              color={
-                layout === 'stacked' ? 'primary' : ('default' as 'primary')
-              }
-              onClick={() => onLayoutChange('stacked')}
-              sx={{ px: 1 }}
-              data-cy="tm-entries-layout-stacked"
-            >
-              <LayoutLeft width={20} height={20} />
-            </Button>
-          </Tooltip>
-        </ButtonGroup>
-        <Box data-cy="tm-entries-language-filter">
-          <InfiniteMultiSearchSelect
-            items={languages}
-            selected={
-              isAllSelected
-                ? (languages ?? []).map((l) => l.tag)
-                : selectedLanguages
-            }
-            queryResult={languagesLoadable}
-            itemKey={(item) => item.tag}
-            search={langSearch}
-            onClearSelected={onClearLanguages}
-            onSearchChange={onLangSearchChange}
-            onFetchMore={onFetchMoreLanguages}
-            renderItem={renderLangItem}
-            labelItem={(item) => item}
-            searchPlaceholder={t('language_search_placeholder')}
-            minHeight={false}
-          />
-        </Box>
+        {!hideFilters && (
+          <>
+            <ButtonGroup>
+              <Tooltip
+                title={t(
+                  'translation_memory_layout_flat_tooltip',
+                  'One row per entry'
+                )}
+              >
+                <Button
+                  color={
+                    layout === 'flat' ? 'primary' : ('default' as 'primary')
+                  }
+                  onClick={() => onLayoutChange('flat')}
+                  sx={{ px: 1 }}
+                  data-cy="tm-entries-layout-flat"
+                >
+                  <LayoutGrid02 width={20} height={20} />
+                </Button>
+              </Tooltip>
+              <Tooltip
+                title={t(
+                  'translation_memory_layout_stacked_tooltip',
+                  'Stack languages vertically'
+                )}
+              >
+                <Button
+                  color={
+                    layout === 'stacked' ? 'primary' : ('default' as 'primary')
+                  }
+                  onClick={() => onLayoutChange('stacked')}
+                  sx={{ px: 1 }}
+                  data-cy="tm-entries-layout-stacked"
+                >
+                  <LayoutLeft width={20} height={20} />
+                </Button>
+              </Tooltip>
+            </ButtonGroup>
+            <Box data-cy="tm-entries-language-filter">
+              <InfiniteMultiSearchSelect
+                items={languages}
+                selected={
+                  isAllSelected
+                    ? (languages ?? []).map((l) => l.tag)
+                    : selectedLanguages
+                }
+                queryResult={languagesLoadable}
+                itemKey={(item) => item.tag}
+                search={langSearch}
+                onClearSelected={onClearLanguages}
+                onSearchChange={onLangSearchChange}
+                onFetchMore={onFetchMoreLanguages}
+                renderItem={renderLangItem}
+                labelItem={(item) => item}
+                searchPlaceholder={t('language_search_placeholder')}
+                minHeight={false}
+              />
+            </Box>
+          </>
+        )}
         {canManage && (
           <>
             <Tooltip

@@ -4,14 +4,22 @@ import { PlusCircle, UploadCloud02 } from '@untitled-ui/icons-react';
 import { EmptyState } from 'tg.component/common/EmptyState';
 import { T } from '@tolgee/react';
 
+// Two-column grid with `minmax(0, 1fr)` instead of flex with a fixed 490px card width.
+// The grid keeps both cards exactly the same width regardless of inner copy, and the
+// `max-width` on the container caps the wizard at roughly the previous footprint
+// (~720px) instead of letting the cards stretch across the full content area.
 const StyledBox = styled(Box)`
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: ${({ theme }) => theme.spacing(2)};
-  align-items: center;
-  justify-content: center;
+  margin: ${({ theme }) => theme.spacing(2)} auto;
+  max-width: 720px;
   text-align: center;
-  margin: ${({ theme }) => theme.spacing(2)};
-  flex-wrap: wrap;
+
+  ${({ theme }) => theme.breakpoints.down('sm')} {
+    grid-template-columns: 1fr;
+    max-width: 490px;
+  }
 `;
 
 const StyledCard = styled(Card)`
@@ -22,7 +30,6 @@ const StyledCard = styled(Card)`
   text-align: center;
   gap: ${({ theme }) => theme.spacing(2)};
   border-radius: 20px;
-  width: 490px;
   padding: ${({ theme }) => theme.spacing(4)};
   background-color: ${({ theme }) =>
     theme.palette.tokens.background.onDefaultGrey};
