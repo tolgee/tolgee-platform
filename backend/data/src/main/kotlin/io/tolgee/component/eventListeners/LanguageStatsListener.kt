@@ -76,7 +76,10 @@ class LanguageStatsListener(
     }
   }
 
-  private fun refreshLanguageStatsForBranches(projectId: Long, branchIds: Set<Long?>) {
+  private fun refreshLanguageStatsForBranches(
+    projectId: Long,
+    branchIds: Set<Long?>,
+  ) {
     if (branchIds.contains(null)) {
       languageStatsService.refreshLanguageStats(projectId)
     }
