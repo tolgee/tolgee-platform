@@ -1,3 +1,10 @@
+## [3.184.1](https://github.com/tolgee/tolgee-platform/compare/v3.184.0...v3.184.1) (2026-05-07)
+
+
+### Bug Fixes
+
+* classify small QA-check jobs as FAST ([#3640](https://github.com/tolgee/tolgee-platform/issues/3640)) ([5a7c849](https://github.com/tolgee/tolgee-platform/commit/5a7c8497448d5fcdb3fa24d54a429f70e9ab7ed2))
+
 # [3.184.0](https://github.com/tolgee/tolgee-platform/compare/v3.183.5...v3.184.0) (2026-05-06)
 
 
