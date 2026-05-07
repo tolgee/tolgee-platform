@@ -48,7 +48,10 @@ class MachineTranslationChunkProcessor(
     return batchProperties.maxPerMtJobConcurrency
   }
 
-  override fun getJobCharacter(): JobCharacter {
+  override fun getJobCharacter(
+    request: MachineTranslationRequest,
+    projectId: Long?,
+  ): JobCharacter {
     return JobCharacter.SLOW
   }
 

@@ -88,7 +88,10 @@ class AiPlaygroundChunkProcessor(
     return 1
   }
 
-  override fun getJobCharacter(): JobCharacter {
+  override fun getJobCharacter(
+    request: MachineTranslationRequest,
+    projectId: Long?,
+  ): JobCharacter {
     return JobCharacter.SLOW
   }
 
