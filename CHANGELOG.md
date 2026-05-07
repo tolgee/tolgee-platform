@@ -1,3 +1,10 @@
+## [3.184.2](https://github.com/tolgee/tolgee-platform/compare/v3.184.1...v3.184.2) (2026-05-07)
+
+
+### Performance Improvements
+
+* batch-load keys in tag-complex, avoid loading full entity graphs ([#3624](https://github.com/tolgee/tolgee-platform/issues/3624)) ([6765b0e](https://github.com/tolgee/tolgee-platform/commit/6765b0e661fa82894fbc9630bd8716f2d9ff5fb9))
+
 ## [3.184.1](https://github.com/tolgee/tolgee-platform/compare/v3.184.0...v3.184.1) (2026-05-07)
 
 
