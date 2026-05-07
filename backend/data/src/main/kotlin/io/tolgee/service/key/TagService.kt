@@ -336,7 +336,10 @@ class TagService(
 
     if (req.tagOther != null || req.untagOther != null) {
       val untagOtherWithAppliedWildcards = req.untagOther?.applyWildcards(projectId)?.toList()
-      tagAndUntag(req.tagOther, untagOtherWithAppliedWildcards, provider.rest)
+      provider.restKeyIds.chunked(COMPLEX_TAG_BATCH_SIZE).forEach { chunkIds ->
+        val keys = keyService.getKeysWithTagsById(projectId, chunkIds)
+        tagAndUntag(req.tagOther, untagOtherWithAppliedWildcards, keys.toList())
+      }
     }
   }
 
@@ -409,5 +412,9 @@ class TagService(
       tagRepository.findByIdAndProjectId(tagId, key.project.id)
         ?: throw NotFoundException(Message.TAG_NOT_FOUND)
     remove(key, tag)
+  }
+
+  companion object {
+    private const val COMPLEX_TAG_BATCH_SIZE = 5000
   }
 }
