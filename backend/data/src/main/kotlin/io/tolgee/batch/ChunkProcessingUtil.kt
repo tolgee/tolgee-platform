@@ -129,7 +129,7 @@ open class ChunkProcessingUtil(
 
   private fun logKnownException(exception: Throwable) {
     if (isExpectedUserError(exception)) {
-      logger.warn("Skipping Sentry capture for expected user error: ${exception.message}")
+      logger.info("Skipping Sentry capture for expected user error: ${exception.message}", exception)
       return
     }
     Sentry.captureException(exception)
