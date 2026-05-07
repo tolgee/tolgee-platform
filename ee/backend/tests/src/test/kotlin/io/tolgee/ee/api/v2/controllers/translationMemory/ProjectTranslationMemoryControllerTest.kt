@@ -56,7 +56,8 @@ class ProjectTranslationMemoryControllerTest : ProjectAuthControllerTest("/v2/pr
       .andIsOk
       .andAssertThatJson {
         // projectTm + sharedTm + sharedTmWithPenalty + sharedTmWithOverride + sharedTmReviewedOnly
-        node("_embedded.translationMemoryAssignments").isArray.hasSize(5)
+        // + multiProjectSharedTm
+        node("_embedded.translationMemoryAssignments").isArray.hasSize(6)
       }
   }
 
@@ -112,8 +113,9 @@ class ProjectTranslationMemoryControllerTest : ProjectAuthControllerTest("/v2/pr
     performAuthGet("/v2/projects/${project.id}/translation-memories")
       .andIsOk
       .andAssertThatJson {
-        // projectTm + two penalty-fixture shared TMs + reviewed-only shared TM remain.
-        node("_embedded.translationMemoryAssignments").isArray.hasSize(4)
+        // projectTm + two penalty-fixture shared TMs + reviewed-only shared TM
+        // + multiProjectSharedTm remain.
+        node("_embedded.translationMemoryAssignments").isArray.hasSize(5)
         node("_embedded.translationMemoryAssignments[0].type").isEqualTo("PROJECT")
       }
   }

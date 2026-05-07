@@ -25,6 +25,9 @@ class TranslationMemoryEntryGroupModelAssembler(
             sourceText = it.sourceText,
             targetText = it.targetText,
             targetLanguageTag = it.targetLanguageTag,
+            projectId = it.projectId,
+            projectName = it.projectName,
+            keyName = it.keyName,
           )
         },
     )

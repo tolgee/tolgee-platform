@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Checkbox, styled } from '@mui/material';
 import { T } from '@tolgee/react';
 import { FlagImage } from '@tginternal/library/components/languages/FlagImage';
@@ -6,6 +6,7 @@ import { languageInfo } from '@tginternal/language-util/lib/generated/languageIn
 import { LimitedHeightText } from 'tg.component/LimitedHeightText';
 import { components } from 'tg.service/apiSchema.generated';
 import { SelectionService } from 'tg.service/useSelectionService';
+import { ProjectLink } from 'tg.component/ProjectLink';
 import { TranslationCell } from './TranslationCell';
 import { TmEntryText } from './TmEntryText';
 import {
@@ -46,6 +47,7 @@ export type EntryGroupCandidate = {
   candidateIndex: number;
   isPrimary: boolean;
   entriesByLang: Map<string, TranslationMemoryEntryModel>;
+  virtualsByLang: Map<string, VirtualTranslationMemoryEntryModel>;
 };
 
 const StyledSelectionCell = styled('div')<{ $layout: EntryRowLayout }>`
@@ -94,13 +96,7 @@ export const TranslationMemoryEntryRow: React.VFC<Props> = ({
   // this candidate slot). Source-grouped buckets with multiple entries per (source, lang) are
   // expanded into multiple sibling rows upstream — each row gets one entry per language here.
   const entryByLang = candidate.entriesByLang;
-  const virtualByLang = useMemo(
-    () =>
-      candidate.isPrimary
-        ? new Map(group.virtualEntries.map((v) => [v.targetLanguageTag, v]))
-        : new Map(),
-    [group.virtualEntries, candidate.isPrimary]
-  );
+  const virtualByLang = candidate.virtualsByLang;
 
   const hasStoredEntries = group.entries.length > 0;
   const selectable = hasStoredEntries && groupId !== undefined;
@@ -126,12 +122,9 @@ export const TranslationMemoryEntryRow: React.VFC<Props> = ({
         const hasCheckbox = Boolean(
           selectionService && selectable && canManage
         );
-        // In flat layout the selection cell is part of the grid template so it must always
-        // render (otherwise columns shift relative to the sticky header). In stacked layout
-        // we drop the empty 44px column for non-selectable rows so the source text sits
-        // closer to the row's left edge — most project-TM rows are virtual and never carry
-        // a checkbox, leaving the column wastefully empty.
-        if (!hasCheckbox && layout === 'stacked') return null;
+        // Always reserve the selection column in both layouts so virtual rows (no checkbox)
+        // line up with manual rows (with checkbox). Without this the virtual rows shifted
+        // 44px left of manual rows in stacked layout once a TM mixed both kinds.
         return (
           <StyledSelectionCell $layout={layout}>
             {hasCheckbox && (
@@ -146,31 +139,41 @@ export const TranslationMemoryEntryRow: React.VFC<Props> = ({
         );
       })()}
       <StyledKeyCell $layout={layout}>
-        {/* Source/keys only on the primary candidate so a multi-candidate stack reads as
-            "one source, N variants" instead of repeating the source line on every row. */}
-        {candidate.isPrimary && group.keyNames.length > 0 && (
-          <StyledKeyName data-cy="tm-entry-row-keys">
-            {group.keyNames.slice(0, 3).join(', ')}
-            {group.keyNames.length > 3 &&
-              `, +${group.keyNames.length - 3} more`}
-          </StyledKeyName>
-        )}
+        {/* Per-candidate key reference. Virtual candidates show the specific project key
+            they originate from; non-primary stored candidates have no key info, so we fall
+            back to the aggregated group.keyNames only on the primary candidate. */}
+        {(() => {
+          const candidateVirtual = Array.from(
+            candidate.virtualsByLang.values()
+          )[0];
+          if (candidateVirtual) {
+            return (
+              <StyledKeyName data-cy="tm-entry-row-keys">
+                {candidateVirtual.keyName}
+              </StyledKeyName>
+            );
+          }
+          if (candidate.isPrimary && group.keyNames.length > 0) {
+            return (
+              <StyledKeyName data-cy="tm-entry-row-keys">
+                {group.keyNames.slice(0, 3).join(', ')}
+                {group.keyNames.length > 3 &&
+                  `, +${group.keyNames.length - 3} more`}
+              </StyledKeyName>
+            );
+          }
+          return null;
+        })()}
         <StyledSourceText>
-          {candidate.isPrimary && layout === 'stacked' && (
+          {layout === 'stacked' && (
             <StyledLanguage style={{ padding: '0' }}>
               <FlagImage flagEmoji={sourceFlag} height={16} />
               <div style={{ fontWeight: 'bold' }}>{sourceName}</div>
             </StyledLanguage>
           )}
-          {candidate.isPrimary && (
-            <LimitedHeightText
-              maxLines={3}
-              wrap="break-word"
-              lineHeight="1.3em"
-            >
-              <TmEntryText text={group.sourceText} locale={sourceLanguageTag} />
-            </LimitedHeightText>
-          )}
+          <LimitedHeightText maxLines={3} wrap="break-word" lineHeight="1.3em">
+            <TmEntryText text={group.sourceText} locale={sourceLanguageTag} />
+          </LimitedHeightText>
         </StyledSourceText>
       </StyledKeyCell>
 
@@ -180,9 +183,31 @@ export const TranslationMemoryEntryRow: React.VFC<Props> = ({
           const virtualEntry = virtualByLang.get(langTag);
           const isEditing = editingLang === langTag;
 
-          // Cells with a stored entry (or no entry yet) are editable when the user can manage.
-          // Pure virtual cells (only virtualText) stay read-only — see TranslationCell.
-          const editable = canManage;
+          // Pure virtual cells (only virtualText, no stored entry) are read-only — they reflect
+          // a project translation, so the project is the right place to change them.
+          const isPureVirtual = !storedEntry && virtualEntry !== undefined;
+          const editable = canManage && !isPureVirtual;
+          const cellEditDisabledReason: React.ReactNode = isPureVirtual ? (
+            <span>
+              <T
+                keyName="tm_entry_edit_disabled_virtual_prefix"
+                defaultValue="This translation comes from project"
+              />{' '}
+              <ProjectLink
+                project={{
+                  id: virtualEntry!.projectId,
+                  name: virtualEntry!.projectName,
+                }}
+              />
+              {'. '}
+              <T
+                keyName="tm_entry_edit_disabled_virtual_suffix"
+                defaultValue="Edit it there."
+              />
+            </span>
+          ) : (
+            rowEditDisabledReason
+          );
 
           return (
             <TranslationCell
@@ -198,7 +223,7 @@ export const TranslationMemoryEntryRow: React.VFC<Props> = ({
               organizationId={organizationId}
               translationMemoryId={translationMemoryId}
               canManage={editable}
-              editDisabledReason={rowEditDisabledReason}
+              editDisabledReason={cellEditDisabledReason}
               layout={layout}
             />
           );

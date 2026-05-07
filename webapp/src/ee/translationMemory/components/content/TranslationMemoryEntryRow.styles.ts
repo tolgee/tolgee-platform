@@ -1,4 +1,4 @@
-import { styled } from '@mui/material';
+import { IconButton, styled } from '@mui/material';
 
 export type EntryRowLayout = 'stacked' | 'flat';
 
@@ -25,9 +25,8 @@ export const StyledRow = styled('div')<{ $layout: EntryRowLayout }>`
 `;
 
 // --- Key cell (left column) ---
-// Flat layout pads on all sides (matches every other grid cell). Stacked drops the
-// left padding so virtual rows (no checkbox column) hug the row's left edge instead
-// of carrying ~12px of dead space.
+// Flat layout pads on all sides; stacked drops the left padding so the source text sits
+// flush against the selection column instead of carrying ~12px of dead space.
 export const StyledKeyCell = styled('div')<{ $layout: EntryRowLayout }>`
   display: grid;
   grid-template-rows: auto 1fr;
@@ -83,12 +82,9 @@ export const StyledTranslationCell = styled('div')<{ $layout: EntryRowLayout }>`
   ${({ theme, $layout }) =>
     $layout === 'flat'
       ? `border-left: 1px solid ${theme.palette.divider1};`
-      : `border-top: 1px solid ${theme.palette.divider1};`}
+      : ``}
   cursor: pointer;
   min-width: 0;
-  &:first-of-type {
-    ${({ $layout }) => ($layout === 'flat' ? '' : 'border-top: none;')}
-  }
   &:hover {
     background: ${({ theme }) => theme.palette.cell.hover};
     transition: background 0.1s ease-in;
@@ -110,17 +106,28 @@ export const StyledTranslationCell = styled('div')<{ $layout: EntryRowLayout }>`
   }
 `;
 
-export const StyledEditAffordance = styled('div')`
+// Mirrors the translations view's ControlsButton: a 32px IconButton with a 18px icon
+// centered inside, so MUI's hover-circle background has enough room around the icon to be
+// clearly visible. Clicks bubble up to the parent cell, whose onClick wires the edit
+// handler.
+export const StyledEditAffordance = styled(IconButton)`
   position: absolute;
-  top: 6px;
-  right: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  top: 4px;
+  right: 4px;
+  width: 32px;
+  height: 32px;
   color: ${({ theme }) => theme.palette.text.secondary};
   opacity: 0;
-  pointer-events: none;
   transition: opacity 0.1s ease-in;
+
+  & svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  &:hover {
+    background-color: ${({ theme }) => theme.palette.action.hover};
+  }
 `;
 
 export const StyledLanguage = styled('div')`
@@ -151,9 +158,4 @@ export const StyledControls = styled('div')`
   align-items: center;
   justify-content: flex-end;
   margin-top: 8px;
-`;
-
-export const StyledEmpty = styled('span')`
-  font-style: italic;
-  color: ${({ theme }) => theme.palette.text.secondary};
 `;

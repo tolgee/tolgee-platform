@@ -52,6 +52,10 @@ export class E2TranslationMemoryView {
     gcy('tm-entry-edit-field').find('textarea').first().clear().type(text);
   }
 
+  editFieldClear() {
+    gcy('tm-entry-edit-field').find('textarea').first().clear();
+  }
+
   saveEdit() {
     gcy('tm-entry-save').click();
   }

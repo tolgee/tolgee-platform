@@ -31,4 +31,10 @@ class VirtualTranslationMemoryEntryModel(
   val targetText: String,
   @Schema(description = "Target language tag (BCP 47)", example = "de")
   val targetLanguageTag: String,
+  @Schema(description = "Id of the project the virtual row originates from", example = "42")
+  val projectId: Long,
+  @Schema(description = "Name of the project the virtual row originates from", example = "My project")
+  val projectName: String,
+  @Schema(description = "Name of the project key the virtual row originates from", example = "greeting.hello")
+  val keyName: String,
 )

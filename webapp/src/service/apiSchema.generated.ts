@@ -7646,6 +7646,22 @@ export interface components {
     };
     VirtualTranslationMemoryEntryModel: {
       /**
+       * @description Name of the project key the virtual row originates from
+       * @example greeting.hello
+       */
+      keyName: string;
+      /**
+       * Format: int64
+       * @description Id of the project the virtual row originates from
+       * @example 42
+       */
+      projectId: number;
+      /**
+       * @description Name of the project the virtual row originates from
+       * @example My project
+       */
+      projectName: string;
+      /**
        * @description Source text in the TM's source language
        * @example Hello world
        */

@@ -5,7 +5,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { Box, styled, Typography, useTheme } from '@mui/material';
+import { Box, Button, styled, Typography, useTheme } from '@mui/material';
 import { languageInfo } from '@tginternal/language-util/lib/generated/languageInfo';
 import { T, useTranslate } from '@tolgee/react';
 import { useResizeObserver } from 'usehooks-ts';
@@ -28,6 +28,7 @@ import { tmPreferencesService } from 'tg.ee.module/translationMemory/services/Tm
 import { useIsOrganizationOwnerOrMaintainer } from 'tg.globalContext/helpers';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { ScrollArrows } from 'tg.component/entriesList/ScrollArrows';
+import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import {
   Container as ListContainer,
   Content as ListContent,
@@ -181,40 +182,73 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
     [entries.data]
   );
 
-  // Expand each group into N candidate rows where N = max entries-per-language. Multiple TMX
-  // tu units sharing (source, target_lang) but with different target_text — or imported with
-  // different tuids — each get their own row instead of being collapsed into one cell.
-  // Round-robin: candidate i picks the i-th entry per language; languages with fewer entries
-  // produce empty cells on later candidates.
+  // Expand each group into N candidate rows where N = max slots-per-language; a slot is one
+  // stored entry OR one virtual entry. Multiple TMX tu units sharing (source, target_lang)
+  // with different target_text, or two write-access projects with different translations for
+  // the same source — each reach the frontend as separate entries; without this expansion
+  // the row's per-language Maps would silently collapse them into one cell.
+  // Slot order: stored first, then virtuals. Candidate i picks the i-th slot per language;
+  // languages with fewer slots produce empty cells on later candidates.
   const candidates = useMemo<EntryGroupCandidate[]>(
     () =>
       groups.flatMap((group) => {
-        const byLang = new Map<string, typeof group.entries>();
+        const storedByLang = new Map<string, typeof group.entries>();
         group.entries.forEach((e) => {
-          const list = byLang.get(e.targetLanguageTag);
+          const list = storedByLang.get(e.targetLanguageTag);
           if (list) {
             list.push(e);
           } else {
-            byLang.set(e.targetLanguageTag, [e]);
+            storedByLang.set(e.targetLanguageTag, [e]);
           }
         });
+        const virtualByLangAll = new Map<string, typeof group.virtualEntries>();
+        group.virtualEntries.forEach((v) => {
+          const list = virtualByLangAll.get(v.targetLanguageTag);
+          if (list) {
+            list.push(v);
+          } else {
+            virtualByLangAll.set(v.targetLanguageTag, [v]);
+          }
+        });
+        const langs = new Set<string>([
+          ...storedByLang.keys(),
+          ...virtualByLangAll.keys(),
+        ]);
         const candidateCount = Math.max(
           1,
-          ...Array.from(byLang.values()).map((arr) => arr.length)
+          ...Array.from(langs).map(
+            (lang) =>
+              (storedByLang.get(lang)?.length ?? 0) +
+              (virtualByLangAll.get(lang)?.length ?? 0)
+          )
         );
         return Array.from({ length: candidateCount }, (_, i) => {
           const entriesByLang = new Map<
             string,
             (typeof group.entries)[number]
           >();
-          byLang.forEach((list, lang) => {
-            if (i < list.length) entriesByLang.set(lang, list[i]);
+          const virtualsByLang = new Map<
+            string,
+            (typeof group.virtualEntries)[number]
+          >();
+          langs.forEach((lang) => {
+            const stored = storedByLang.get(lang) ?? [];
+            const virtual = virtualByLangAll.get(lang) ?? [];
+            if (i < stored.length) {
+              entriesByLang.set(lang, stored[i]);
+              return;
+            }
+            const vIndex = i - stored.length;
+            if (vIndex < virtual.length) {
+              virtualsByLang.set(lang, virtual[vIndex]);
+            }
           });
           return {
             group,
             candidateIndex: i,
             isPrimary: i === 0,
             entriesByLang,
+            virtualsByLang,
           };
         });
       }),
@@ -520,12 +554,32 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
                 onFinished={() => entries.refetch()}
               />
             ) : isEmpty ? (
-              <StyledEmpty>
-                {t(
-                  'translation_memory_entries_empty',
-                  'No entries in this translation memory yet.'
-                )}
-              </StyledEmpty>
+              search ? (
+                <EmptyListMessage
+                  hint={
+                    onSearch && (
+                      <Button onClick={() => onSearch('')} color="primary">
+                        <T
+                          keyName="translation_memory_entries_nothing_found_action"
+                          defaultValue="Clear filters"
+                        />
+                      </Button>
+                    )
+                  }
+                >
+                  <T
+                    keyName="translation_memory_entries_nothing_found"
+                    defaultValue="No entries found"
+                  />
+                </EmptyListMessage>
+              ) : (
+                <StyledEmpty>
+                  {t(
+                    'translation_memory_entries_empty',
+                    'No entries in this translation memory yet.'
+                  )}
+                </StyledEmpty>
+              )
             ) : (
               <ReactList
                 ref={reactListRef}

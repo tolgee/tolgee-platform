@@ -6,11 +6,13 @@ import { Box, IconButton, styled, Tooltip, Typography } from '@mui/material';
 import { Settings01 } from '@untitled-ui/icons-react';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
-import { useApiQuery } from 'tg.service/http/useQueryApi';
+import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useOrganization } from 'tg.views/organizations/useOrganization';
 import { useRouteMatch, Redirect } from 'react-router-dom';
 import { TranslationMemoryEntriesList } from 'tg.ee.module/translationMemory/components/content/TranslationMemoryEntriesList';
 import { TranslationMemorySettingsDialog } from 'tg.ee.module/translationMemory/views/TranslationMemorySettingsDialog';
+import { TmWriteOnlyReviewedDialog } from 'tg.ee.module/translationMemory/views/TmWriteOnlyReviewedDialog';
+import { messageService } from 'tg.service/MessageService';
 import { ProjectLink } from 'tg.component/ProjectLink';
 
 const StyledSharedWith = styled(Box)`
@@ -45,6 +47,12 @@ export const TranslationMemoryView = () => {
     options: {
       enabled: !isNaN(translationMemoryId),
     },
+  });
+
+  const writeOnlyReviewedMutation = useApiMutation({
+    url: '/v2/organizations/{organizationId}/translation-memories/{translationMemoryId}/write-only-reviewed',
+    method: 'put',
+    invalidatePrefix: '/v2/organizations/{organizationId}/translation-memories',
   });
 
   const assignedProjects = useApiQuery({
@@ -99,7 +107,7 @@ export const TranslationMemoryView = () => {
             {tmData?.type === 'PROJECT' ? (
               <T
                 keyName="translation_memory_project_tm_label"
-                defaultValue="(Project translation memory — cannot be shared)"
+                defaultValue="(Project translation memory)"
               />
             ) : projectsForInfo.length === 0 ? (
               <T
@@ -181,7 +189,39 @@ export const TranslationMemoryView = () => {
           onSearch={setSearch}
         />
       )}
-      {settingsOpen && (
+      {settingsOpen && tmData?.type === 'PROJECT' && (
+        <TmWriteOnlyReviewedDialog
+          open={settingsOpen}
+          initialWriteOnlyReviewed={tmData.writeOnlyReviewed ?? false}
+          saving={writeOnlyReviewedMutation.isLoading}
+          onClose={() => setSettingsOpen(false)}
+          onSave={(writeOnlyReviewed) =>
+            writeOnlyReviewedMutation.mutate(
+              {
+                path: {
+                  organizationId: organization!.id,
+                  translationMemoryId,
+                },
+                content: { 'application/json': { writeOnlyReviewed } },
+              },
+              {
+                onSuccess: () => {
+                  setSettingsOpen(false);
+                  tm.refetch();
+                },
+                onError: () =>
+                  messageService.error(
+                    <T
+                      keyName="translation_memory_save_settings_error"
+                      defaultValue="Failed to save settings"
+                    />
+                  ),
+              }
+            )
+          }
+        />
+      )}
+      {settingsOpen && tmData?.type !== 'PROJECT' && (
         <TranslationMemorySettingsDialog
           open={settingsOpen}
           onClose={() => setSettingsOpen(false)}

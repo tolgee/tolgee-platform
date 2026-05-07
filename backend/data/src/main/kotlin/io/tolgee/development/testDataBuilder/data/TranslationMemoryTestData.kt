@@ -49,6 +49,21 @@ class TranslationMemoryTestData : BaseTestData() {
   lateinit var unassignedSharedTm: TranslationMemory
 
   /**
+   * Second write-access project for [multiProjectSharedTm]. Has a single key whose English
+   * source matches `existingKey` from [projectWithTm] but a different German translation,
+   * so the same source text on this TM yields two distinct virtual rows from two projects.
+   * Drives the multi-candidate-row UI test.
+   */
+  lateinit var conflictProject: Project
+
+  /**
+   * Shared TM with two write-access-assigned projects ([projectWithTm] and [conflictProject])
+   * that both translate the same English source text differently. Used to exercise the
+   * multi-candidate row expansion in the TM content browser.
+   */
+  lateinit var multiProjectSharedTm: TranslationMemory
+
+  /**
    * Shared TM declared with a `fr` source — intentionally different from [projectWithTm]'s
    * English base. Drives the base-language-match validation: assigning this TM must be
    * rejected.
@@ -330,6 +345,61 @@ class TranslationMemoryTestData : BaseTestData() {
           type = TranslationMemoryType.SHARED
         }.build {
           unassignedSharedTm = self
+        }
+
+      // Second project carrying a key whose English source matches projectWithTm's
+      // existingKey ("Existing source") but with a different German translation. Combined
+      // with multiProjectSharedTm below, this drives the multi-candidate-row UI test:
+      // the same source text yields two distinct virtual rows on a single TM, one per
+      // project, each with its own keyName + translation.
+      val conflictProjectBuilder =
+        addProject {
+          name = "Conflict source project"
+          organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self
+        }.build buildProject@{
+          addPermission {
+            project = this@buildProject.self
+            user = this@TranslationMemoryTestData.user
+            type = ProjectPermissionType.MANAGE
+          }
+          val english =
+            addLanguage {
+              name = "English"
+              tag = "en"
+              originalName = "English"
+              this@buildProject.self.baseLanguage = this
+            }.self
+          val german =
+            addLanguage {
+              name = "German"
+              tag = "de"
+            }.self
+          addKey {
+            name = "shared-greeting"
+          }.build keyBuilder@{
+            addTranslation {
+              language = english
+              key = this@keyBuilder.self
+              text = "Existing source"
+            }
+            addTranslation {
+              language = german
+              key = this@keyBuilder.self
+              text = "Bestehende Übersetzung aus Konfliktprojekt"
+            }
+          }
+        }
+      conflictProject = conflictProjectBuilder.self
+
+      userAccountBuilder.defaultOrganizationBuilder
+        .addTranslationMemory {
+          name = "Multi-project shared TM"
+          sourceLanguageTag = "en"
+          type = TranslationMemoryType.SHARED
+        }.build {
+          multiProjectSharedTm = self
+          assignProject(projectWithTm) { priority = 5 }
+          assignProject(conflictProject) { priority = 6 }
         }
 
       // An org MEMBER user — used by shared TM permission tests

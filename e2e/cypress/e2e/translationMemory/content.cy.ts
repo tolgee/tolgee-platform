@@ -75,6 +75,21 @@ describe('Translation Memory content browser', () => {
       tmView.getEntryRowContaining('Hallo Welt').should('be.visible');
       cy.contains('Changed text').should('not.exist');
     });
+
+    // Saving an empty value should delete the stored entry instead of failing the
+    // backend's @NotBlank validation. The other German entry on the same source row
+    // ("Bonjour le monde" / fr) must stay so we know we deleted only one cell, not the
+    // whole group.
+    it('clearing the field deletes the stored entry', () => {
+      listView.findAndVisitTm(data, 'test_username', 'Shared Marketing TM');
+
+      tmView.clickTranslationCell('Hallo Welt');
+      tmView.editFieldClear();
+      tmView.saveEdit();
+
+      cy.contains('Hallo Welt').should('not.exist');
+      tmView.getEntryRowContaining('Bonjour le monde').should('be.visible');
+    });
   });
 
   describe('Batch delete', () => {

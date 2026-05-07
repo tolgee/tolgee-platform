@@ -118,13 +118,13 @@ class SharedTranslationMemoryControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `lists all translation memories in organization`() {
-    // 2 PROJECT TMs (projectTm built explicitly + auto-created TM for projectWithoutTm) + 6
-    // SHARED TMs (sharedTm, sharedTmWithPenalty, sharedTmWithOverride, sharedTmReviewedOnly,
-    // unassignedSharedTm, mismatchedBaseSharedTm).
+    // 3 PROJECT TMs (projectTm built explicitly + auto-created TMs for projectWithoutTm and
+    // conflictProject) + 7 SHARED TMs (sharedTm, sharedTmWithPenalty, sharedTmWithOverride,
+    // sharedTmReviewedOnly, unassignedSharedTm, mismatchedBaseSharedTm, multiProjectSharedTm).
     performAuthGet("/v2/organizations/$orgId/translation-memories")
       .andIsOk
       .andAssertThatJson {
-        node("_embedded.translationMemories").isArray.hasSize(8)
+        node("_embedded.translationMemories").isArray.hasSize(10)
       }
   }
 
@@ -182,8 +182,9 @@ class SharedTranslationMemoryControllerTest : AuthorizedControllerTest() {
     performAuthGet("/v2/organizations/$orgId/translation-memories-with-stats")
       .andIsOk
       .andAssertThatJson {
-        // 2 PROJECT TMs (projectTm + auto-created for projectWithoutTm) + 6 SHARED TMs.
-        node("_embedded.translationMemories").isArray.hasSize(8)
+        // 3 PROJECT TMs (projectTm + auto-created for projectWithoutTm + auto-created for
+        // conflictProject) + 7 SHARED TMs.
+        node("_embedded.translationMemories").isArray.hasSize(10)
       }
   }
 
@@ -228,14 +229,15 @@ class SharedTranslationMemoryControllerTest : AuthorizedControllerTest() {
       .andIsOk
       .andAssertThatJson {
         // sharedTm, sharedTmWithPenalty, sharedTmWithOverride, sharedTmReviewedOnly,
-        // mismatchedBaseSharedTm, unassignedSharedTm
-        node("_embedded.translationMemories").isArray.hasSize(6)
+        // mismatchedBaseSharedTm, unassignedSharedTm, multiProjectSharedTm
+        node("_embedded.translationMemories").isArray.hasSize(7)
         node("_embedded.translationMemories[0].type").isEqualTo("SHARED")
         node("_embedded.translationMemories[1].type").isEqualTo("SHARED")
         node("_embedded.translationMemories[2].type").isEqualTo("SHARED")
         node("_embedded.translationMemories[3].type").isEqualTo("SHARED")
         node("_embedded.translationMemories[4].type").isEqualTo("SHARED")
         node("_embedded.translationMemories[5].type").isEqualTo("SHARED")
+        node("_embedded.translationMemories[6].type").isEqualTo("SHARED")
       }
   }
 
@@ -244,10 +246,11 @@ class SharedTranslationMemoryControllerTest : AuthorizedControllerTest() {
     performAuthGet("/v2/organizations/$orgId/translation-memories-with-stats?type=PROJECT")
       .andIsOk
       .andAssertThatJson {
-        // projectTm (built explicitly) + auto-created TM for projectWithoutTm.
-        node("_embedded.translationMemories").isArray.hasSize(2)
+        // projectTm (built explicitly) + auto-created TMs for projectWithoutTm and conflictProject.
+        node("_embedded.translationMemories").isArray.hasSize(3)
         node("_embedded.translationMemories[0].type").isEqualTo("PROJECT")
         node("_embedded.translationMemories[1].type").isEqualTo("PROJECT")
+        node("_embedded.translationMemories[2].type").isEqualTo("PROJECT")
       }
   }
 
@@ -256,8 +259,8 @@ class SharedTranslationMemoryControllerTest : AuthorizedControllerTest() {
     performAuthGet("/v2/organizations/$orgId/translation-memories-with-stats")
       .andIsOk
       .andAssertThatJson {
-        // 2 PROJECT TMs + 6 SHARED TMs.
-        node("_embedded.translationMemories").isArray.hasSize(8)
+        // 3 PROJECT TMs + 7 SHARED TMs.
+        node("_embedded.translationMemories").isArray.hasSize(10)
       }
   }
 

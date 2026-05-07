@@ -157,7 +157,7 @@ export const TmEntriesToolbar: React.VFC<Props> = ({
                   sx={{ px: 1 }}
                   data-cy="tm-entries-layout-flat"
                 >
-                  <LayoutGrid02 width={20} height={20} />
+                  <LayoutGrid02 width={24} height={24} />
                 </Button>
               </Tooltip>
               <Tooltip
@@ -174,7 +174,7 @@ export const TmEntriesToolbar: React.VFC<Props> = ({
                   sx={{ px: 1 }}
                   data-cy="tm-entries-layout-stacked"
                 >
-                  <LayoutLeft width={20} height={20} />
+                  <LayoutLeft width={24} height={24} />
                 </Button>
               </Tooltip>
             </ButtonGroup>

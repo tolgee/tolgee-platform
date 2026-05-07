@@ -86,6 +86,9 @@ class TranslationMemoryEntryManagementService(
                   sourceText = sourceText,
                   targetText = it.targetText,
                   targetLanguageTag = it.targetLang,
+                  projectId = it.projectId,
+                  projectName = it.projectName,
+                  keyName = it.keyName,
                 )
               }.distinct(),
         )
@@ -137,6 +140,8 @@ class TranslationMemoryEntryManagementService(
             targetText = row[1] as String,
             targetLang = row[2] as String,
             keyName = row[3] as String,
+            projectId = (row[4] as Number).toLong(),
+            projectName = row[5] as String,
           ),
         )
     }
@@ -302,7 +307,9 @@ class TranslationMemoryEntryManagementService(
       select base_t.text as source_text,
              target_t.text as target_text,
              target_lang.tag as target_lang,
-             k.name as key_name
+             k.name as key_name,
+             p.id as project_id,
+             p.name as project_name
       from project p
       join language base_lang on base_lang.id = p.base_language_id
       join key k on k.project_id = p.id and k.deleted_at is null
@@ -336,6 +343,8 @@ class TranslationMemoryEntryManagementService(
     val targetText: String,
     val targetLang: String,
     val keyName: String,
+    val projectId: Long,
+    val projectName: String,
   )
 
   fun getEntry(
@@ -449,4 +458,7 @@ data class VirtualEntry(
   val sourceText: String,
   val targetText: String,
   val targetLanguageTag: String,
+  val projectId: Long,
+  val projectName: String,
+  val keyName: String,
 )

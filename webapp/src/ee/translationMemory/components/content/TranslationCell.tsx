@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tooltip } from '@mui/material';
+import { styled, Tooltip } from '@mui/material';
 import { T } from '@tolgee/react';
 import { FlagImage } from '@tginternal/library/components/languages/FlagImage';
 import { languageInfo } from '@tginternal/language-util/lib/generated/languageInfo';
@@ -14,7 +14,6 @@ import { components } from 'tg.service/apiSchema.generated';
 import {
   EntryRowLayout,
   StyledEditAffordance,
-  StyledEmpty,
   StyledLanguage,
   StyledTranslation,
   StyledTranslationCell,
@@ -22,6 +21,14 @@ import {
 
 type TranslationMemoryEntryModel =
   components['schemas']['TranslationMemoryEntryModel'];
+
+// Wrapper around the textarea + button row so the buttons sit one full theme-spacing(2)
+// (16px) below the textarea — matches Glossary's StyledEditBox layout.
+const StyledEditBox = styled('div')`
+  display: flex;
+  gap: ${({ theme }) => theme.spacing(2)};
+  flex-flow: column;
+`;
 
 type Props = {
   entry?: TranslationMemoryEntryModel;
@@ -88,6 +95,11 @@ export const TranslationCell: React.VFC<Props> = ({
     method: 'post',
   });
 
+  const deleteMutation = useApiMutation({
+    url: '/v2/organizations/{organizationId}/translation-memories/{translationMemoryId}/entries/{entryId}',
+    method: 'delete',
+  });
+
   const handleEdit = () => {
     if (!onEdit) return;
     setValue(entry?.targetText || '');
@@ -95,15 +107,6 @@ export const TranslationCell: React.VFC<Props> = ({
   };
 
   const save = () => {
-    const body = {
-      content: {
-        'application/json': {
-          sourceText,
-          targetLanguageTag: langTag,
-          targetText: value,
-        },
-      },
-    };
     const callbacks = {
       onSuccess: () => {
         invalidate();
@@ -116,6 +119,30 @@ export const TranslationCell: React.VFC<Props> = ({
             defaultValue="Failed to save entry"
           />
         ),
+    };
+    // Empty value clears the cell. For a stored entry that means deleting the row;
+    // for a never-saved virtual cell there is nothing to do.
+    if (!value.trim()) {
+      if (entry) {
+        deleteMutation.mutate(
+          {
+            path: { organizationId, translationMemoryId, entryId: entry.id },
+          },
+          callbacks
+        );
+        return;
+      }
+      onSaved();
+      return;
+    }
+    const body = {
+      content: {
+        'application/json': {
+          sourceText,
+          targetLanguageTag: langTag,
+          targetText: value,
+        },
+      },
     };
     if (entry) {
       updateMutation.mutate(
@@ -136,7 +163,10 @@ export const TranslationCell: React.VFC<Props> = ({
     );
   };
 
-  const isSaving = updateMutation.isLoading || createMutation.isLoading;
+  const isSaving =
+    updateMutation.isLoading ||
+    createMutation.isLoading ||
+    deleteMutation.isLoading;
 
   // Show the tooltip only on the read-only state of an un-editable cell. Editable cells get
   // the pencil-icon affordance instead; the editing state shows form controls and shouldn't
@@ -145,7 +175,7 @@ export const TranslationCell: React.VFC<Props> = ({
     !canManage && !isEditing && editDisabledReason ? editDisabledReason : '';
 
   return (
-    <Tooltip title={tooltipTitle} placement="bottom" arrow>
+    <Tooltip title={tooltipTitle} placement="bottom">
       <StyledTranslationCell
         $layout={layout}
         className={isEditing ? 'editing' : ''}
@@ -155,10 +185,12 @@ export const TranslationCell: React.VFC<Props> = ({
       >
         {canManage && !isEditing && (
           <StyledEditAffordance
+            size="small"
             className="tm-edit-affordance"
             data-cy="tm-entry-edit-affordance"
+            tabIndex={-1}
           >
-            <Edit02 width={20} height={20} />
+            <Edit02 />
           </StyledEditAffordance>
         )}
         {layout === 'stacked' && (
@@ -169,7 +201,7 @@ export const TranslationCell: React.VFC<Props> = ({
         )}
         <StyledTranslation $layout={layout}>
           {!isEditing ? (
-            entry?.targetText || virtualText ? (
+            (entry?.targetText || virtualText) && (
               <LimitedHeightText
                 maxLines={3}
                 wrap="break-word"
@@ -180,20 +212,20 @@ export const TranslationCell: React.VFC<Props> = ({
                   locale={langTag}
                 />
               </LimitedHeightText>
-            ) : (
-              <StyledEmpty>—</StyledEmpty>
             )
           ) : (
-            <EditableTextCellForm
-              value={value}
-              onChange={setValue}
-              onSave={save}
-              onCancel={onCancel}
-              saving={isSaving}
-              fieldDataCy="tm-entry-edit-field"
-              cancelDataCy="tm-entry-cancel"
-              saveDataCy="tm-entry-save"
-            />
+            <StyledEditBox>
+              <EditableTextCellForm
+                value={value}
+                onChange={setValue}
+                onSave={save}
+                onCancel={onCancel}
+                saving={isSaving}
+                fieldDataCy="tm-entry-edit-field"
+                cancelDataCy="tm-entry-cancel"
+                saveDataCy="tm-entry-save"
+              />
+            </StyledEditBox>
           )}
         </StyledTranslation>
       </StyledTranslationCell>

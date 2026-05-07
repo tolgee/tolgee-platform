@@ -8,7 +8,6 @@ const StyledControls = styled('div')`
   gap: 8px;
   align-items: center;
   justify-content: flex-end;
-  margin-top: 8px;
 `;
 
 type Props = {

@@ -91,6 +91,57 @@ describe('Translation Memory org settings', () => {
             .should('contain', String(rowCount));
         });
     });
+
+    // Same invariant for SHARED TMs that draw virtual content from a write-access-assigned
+    // project: the list count must include those virtual rows, not just stored entries.
+    // "Shared TM with default penalty" is assigned to "Project With TM" with default
+    // writeAccess=true and has 1 stored entry — exercises the union path.
+    it('list entry count matches the content row count for shared TMs with write-access projects', () => {
+      login('test_username');
+      view.findAndVisit(data, 'test_username');
+
+      view.openTm('Shared TM with default penalty');
+      tmView
+        .getEntryRows()
+        .should('have.length.at.least', 1)
+        .its('length')
+        .then((rowCount) => {
+          cy.go('back');
+          view
+            .getEntriesCountFor('Shared TM with default penalty')
+            .should('contain', String(rowCount));
+        });
+    });
+
+    // "Multi-project shared TM" has two write-access projects ("Project With TM" and
+    // "Conflict source project") that both translate "Existing source" but with different
+    // German targets. Each translation must surface as its own candidate row instead of
+    // collapsing into a single cell — and each row carries its own source text and key
+    // reference so the user can tell the variants apart.
+    it('renders one candidate row per project when two projects translate the same source differently', () => {
+      login('test_username');
+      view.findAndVisit(data, 'test_username');
+
+      view.openTm('Multi-project shared TM');
+
+      tmView.getEntryRowContaining('Existing source').should('have.length', 2);
+
+      // Each variant's specific German translation is visible.
+      tmView
+        .getEntryRowContaining('Bestehende Übersetzung')
+        .should('have.length.at.least', 1);
+      tmView
+        .getEntryRowContaining('Bestehende Übersetzung aus Konfliktprojekt')
+        .should('have.length', 1);
+
+      // Each candidate row exposes its originating project's key name.
+      cy.contains('[data-cy="tm-entry-row-keys"]', 'existing-key').should(
+        'be.visible'
+      );
+      cy.contains('[data-cy="tm-entry-row-keys"]', 'shared-greeting').should(
+        'be.visible'
+      );
+    });
   });
 
   describe('Create', () => {
