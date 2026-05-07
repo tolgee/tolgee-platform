@@ -202,6 +202,25 @@ class Metrics(
       .record(Duration.ofMillis(durationMs.coerceAtLeast(0)))
   }
 
+  /**
+   * Records the duration of a single translation-memory lookup
+   * (TranslationMemoryService.getAutoTranslatedValue, the path hit by
+   * AUTO_TRANSLATE / PRE_TRANSLATE_BT_TM chunks before the LLM call).
+   * Tagged by outcome: hit (TM returned a value), miss (no match), error.
+   */
+  fun recordTranslationMemoryLookup(
+    outcome: String,
+    durationMs: Long,
+  ) {
+    Timer
+      .builder("tolgee.translation.memory.lookup")
+      .description("Time spent looking up a translation-memory match for a single (key, target-language) pair")
+      .publishPercentileHistogram()
+      .tag("outcome", outcome)
+      .register(meterRegistry)
+      .record(Duration.ofMillis(durationMs.coerceAtLeast(0)))
+  }
+
   // Branch operations - Priority 1 (Must Have)
   val branchCreateTimer: Timer by lazy {
     Timer

@@ -1,5 +1,6 @@
 package io.tolgee.service.translation
 
+import io.tolgee.Metrics
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.model.Language
 import io.tolgee.model.key.Key
@@ -16,13 +17,28 @@ import org.springframework.transaction.annotation.Transactional
 class TranslationMemoryService(
   private val translationsService: TranslationService,
   private val entityManager: EntityManager,
+  private val metrics: Metrics,
 ) {
   @Transactional
   fun getAutoTranslatedValue(
     key: Key,
     targetLanguage: Language,
   ): TranslationMemoryItemView? {
-    return translationsService.getTranslationMemoryValue(key, targetLanguage)
+    val startedAt = System.currentTimeMillis()
+    return try {
+      val result = translationsService.getTranslationMemoryValue(key, targetLanguage)
+      metrics.recordTranslationMemoryLookup(
+        outcome = if (result != null) "hit" else "miss",
+        durationMs = System.currentTimeMillis() - startedAt,
+      )
+      result
+    } catch (e: Exception) {
+      metrics.recordTranslationMemoryLookup(
+        outcome = "error",
+        durationMs = System.currentTimeMillis() - startedAt,
+      )
+      throw e
+    }
   }
 
   @Transactional(propagation = Propagation.REQUIRES_NEW)
