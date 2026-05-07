@@ -12,8 +12,10 @@ import org.hibernate.annotations.OnDeleteAction
 
 @Entity
 @Table(
+  // Note: no `@Index(columnList = "translation_memory_id")` — the composite
+  // ix_tm_entry_tm_source (translation_memory_id, source_text) already covers
+  // tm_id-only lookups via its leftmost column.
   indexes = [
-    Index(columnList = "translation_memory_id"),
     Index(columnList = "target_language_tag"),
   ],
 )

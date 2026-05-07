@@ -5459,16 +5459,6 @@
             <column name="organization_owner_id"/>
         </createIndex>
     </changeSet>
-    <changeSet author="danielkrizan (generated)" id="1775717281513-8">
-        <createIndex indexName="IDXbdqokq1rea097a4a2t6qfilqe" tableName="translation_memory_entry">
-            <column name="translation_memory_id"/>
-        </createIndex>
-    </changeSet>
-    <changeSet author="danielkrizan (generated)" id="1775717281513-9">
-        <createIndex indexName="IDXddohmivqlnv20fn3j81lcgvqn" tableName="translation_memory_project">
-            <column name="translation_memory_id"/>
-        </createIndex>
-    </changeSet>
     <changeSet author="danielkrizan (generated)" id="1775717281513-10">
         <createIndex indexName="IDXjid1c6hu0mt7tavdwbwcwoh2g" tableName="translation_memory_entry">
             <column name="target_language_tag"/>

@@ -22,8 +22,10 @@ import org.hibernate.annotations.OnDeleteAction
       columnNames = ["translation_memory_id", "project_id"],
     ),
   ],
+  // Note: no `@Index(columnList = "translation_memory_id")` — UK_tm_project_tm_id_project_id
+  // is a unique constraint on (translation_memory_id, project_id), so its backing btree's
+  // leftmost column already serves tm_id-only lookups.
   indexes = [
-    Index(columnList = "translation_memory_id"),
     Index(columnList = "project_id"),
   ],
 )
