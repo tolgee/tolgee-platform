@@ -156,9 +156,12 @@ const additionalCheckboxProps = {
 
 const StyledLink = styled('a')`
   color: ${({ theme }) => theme.palette.tokens.icon.primary};
+  display: inline-flex;
+  align-items: center;
 
   .icon {
-    width: 18px;
-    height: 18px;
+    width: 15px;
+    height: 15px;
+    display: block;
   }
 `;
