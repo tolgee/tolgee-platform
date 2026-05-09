@@ -52,10 +52,7 @@ class QaLanguageStatsBranchTestData : BaseTestData() {
         branch = mainBranch
       }.build {
         addTranslation("en", "Hello world.")
-        mainFrTranslation =
-          addTranslation("fr", "bonjour monde")
-            .also { it.self.qaChecksStale = true }
-            .self
+        mainFrTranslation = addTranslation("fr", "bonjour monde").self
       }.also { mainKey = it.self }
 
       addKey {
@@ -63,10 +60,7 @@ class QaLanguageStatsBranchTestData : BaseTestData() {
         branch = featureBranch
       }.build {
         addTranslation("en", "Feature hello.")
-        featureFrTranslation =
-          addTranslation("fr", "bonjour feature")
-            .also { it.self.qaChecksStale = true }
-            .self
+        featureFrTranslation = addTranslation("fr", "bonjour feature").self
       }.also { featureKey = it.self }
     }
   }

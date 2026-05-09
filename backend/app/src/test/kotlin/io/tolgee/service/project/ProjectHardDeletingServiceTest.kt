@@ -16,19 +16,16 @@ import io.tolgee.development.testDataBuilder.data.SuggestionsTestData
 import io.tolgee.development.testDataBuilder.data.WebhooksTestData
 import io.tolgee.dtos.BigMetaDto
 import io.tolgee.dtos.RelatedKeyDto
+import io.tolgee.ee.development.QaTestData
 import io.tolgee.fixtures.waitFor
 import io.tolgee.model.Project
-import io.tolgee.model.enums.qa.QaCheckType
-import io.tolgee.model.enums.qa.QaIssueMessage
 import io.tolgee.model.qa.LanguageQaConfig
-import io.tolgee.model.qa.ProjectQaConfig
-import io.tolgee.model.qa.TranslationQaIssue
 import io.tolgee.repository.qa.LanguageQaConfigRepository
 import io.tolgee.repository.qa.ProjectQaConfigRepository
-import io.tolgee.repository.qa.TranslationQaIssueRepository
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.testing.assert
 import io.tolgee.util.executeInNewRepeatableTransaction
+import io.tolgee.util.executeInNewTransaction
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -49,9 +46,6 @@ class ProjectHardDeletingServiceTest : AbstractSpringTest() {
 
   @Autowired
   private lateinit var languageQaConfigRepository: LanguageQaConfigRepository
-
-  @Autowired
-  private lateinit var translationQaIssueRepository: TranslationQaIssueRepository
 
   @Test
   fun `deletes project with MT Settings`() {
@@ -136,7 +130,7 @@ class ProjectHardDeletingServiceTest : AbstractSpringTest() {
   fun `deletes project with webhooks`() {
     val testData = WebhooksTestData()
     testDataService.saveTestData(testData.root)
-    io.tolgee.util.executeInNewTransaction(platformTransactionManager) {
+    executeInNewTransaction(platformTransactionManager) {
       projectHardDeletingService.hardDeleteProject(testData.projectBuilder.self.refresh())
     }
   }
@@ -145,34 +139,21 @@ class ProjectHardDeletingServiceTest : AbstractSpringTest() {
   fun `deletes project with suggestions`() {
     val testData = SuggestionsTestData()
     testDataService.saveTestData(testData.root)
-    io.tolgee.util.executeInNewTransaction(platformTransactionManager) {
+    executeInNewTransaction(platformTransactionManager) {
       projectHardDeletingService.hardDeleteProject(testData.projectBuilder.self.refresh())
     }
   }
 
   @Test
   fun `deletes project with QA entities`() {
-    val testData = BaseTestData()
-    testData.projectBuilder.addKey(keyName = "test-key") {
-      addTranslation("en", "Hello world.")
-    }
+    val testData = QaTestData()
     testDataService.saveTestData(testData.root)
 
-    io.tolgee.util.executeInNewTransaction(platformTransactionManager) {
-      val project = projectService.get(testData.projectBuilder.self.id)
+    executeInNewTransaction(platformTransactionManager) {
+      val project = projectService.get(testData.project.id)
       val language = languageService.getEntity(testData.englishLanguage.id)
-      val key = keyService.get(project.id, "test-key", null)
-      val translation = translationService.find(key, language).get()
-
-      projectQaConfigRepository.save(ProjectQaConfig(project = project))
+      projectQaConfigRepository.save(testData.createDefaultQaConfig().also { it.project = project })
       languageQaConfigRepository.save(LanguageQaConfig(language = language))
-      translationQaIssueRepository.save(
-        TranslationQaIssue(
-          type = QaCheckType.EMPTY_TRANSLATION,
-          message = QaIssueMessage.QA_EMPTY_TRANSLATION,
-          translation = translation,
-        ),
-      )
       entityManager.flush()
     }
 

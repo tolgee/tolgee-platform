@@ -153,8 +153,7 @@ class QueryTranslationFiltering(
   }
 
   /**
-   * QA filters — `filterHasQaIssuesInLang` (collapsed across requested langs) and
-   * `filterQaCheckType` (collapsed across all selected return langs).
+   * QA filters — `filterHasQaIssuesInLang`, `filterQaCheckType` and `filterQaChecksStaleInLang`.
    */
   fun applyQaFilters() {
     val hasIssuesLangIds = languageIdsForTags(params.filterHasQaIssuesInLang)
@@ -167,6 +166,12 @@ class QueryTranslationFiltering(
       if (allLangIds.isNotEmpty()) {
         queryBase.translationConditions.add(buildQaIssueExists(allLangIds, checkTypes = checkTypes))
       }
+    }
+    val staleLangIds = languageIdsForTags(params.filterQaChecksStaleInLang)
+    if (staleLangIds != null) {
+      queryBase.translationConditions.add(
+        buildTranslationExists(staleLangIds) { t -> cb.isTrue(t.get(Translation_.qaChecksStale)) },
+      )
     }
   }
 

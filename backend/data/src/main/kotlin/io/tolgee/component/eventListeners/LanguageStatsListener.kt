@@ -26,8 +26,8 @@ class LanguageStatsListener(
   private val keyRepository: KeyRepository,
   private val translationRepository: TranslationRepository,
   private val activityService: ActivityService,
-) {
-  var bypass = false
+) : BypassableActivityListener {
+  override var bypass = false
 
   @TransactionalEventListener
   @Async

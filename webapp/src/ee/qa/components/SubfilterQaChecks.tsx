@@ -48,6 +48,14 @@ export const SubfilterQaChecks = ({
     }
   }
 
+  function handleToggleStale() {
+    if (value.filterQaChecksStale) {
+      actions.removeFilter('filterQaChecksStale');
+    } else {
+      actions.addFilter('filterQaChecksStale');
+    }
+  }
+
   return (
     <>
       <SubmenuItem
@@ -94,6 +102,12 @@ export const SubfilterQaChecks = ({
               ))}
             </div>
           ))}
+          <Divider />
+          <FilterItem
+            label={t('translation_filters_qa_checks_stale')}
+            selected={Boolean(value.filterQaChecksStale)}
+            onClick={handleToggleStale}
+          />
         </Menu>
       )}
     </>
@@ -102,8 +116,9 @@ export const SubfilterQaChecks = ({
 
 export function getQaChecksFiltersLength(value: FiltersInternal) {
   return (
-    Number(value.filterHasQaIssues !== undefined) +
-    (value.filterQaCheckTypes?.length ?? 0)
+    Number(Boolean(value.filterHasQaIssues)) +
+    (value.filterQaCheckTypes?.length ?? 0) +
+    Number(Boolean(value.filterQaChecksStale))
   );
 }
 
@@ -113,5 +128,8 @@ export function getQaChecksFiltersName(value: FiltersInternal) {
   }
   if (value.filterQaCheckTypes?.length) {
     return <CheckTypeFilterName checkType={value.filterQaCheckTypes[0]} />;
+  }
+  if (value.filterQaChecksStale) {
+    return <T keyName="translation_filters_qa_checks_stale" />;
   }
 }

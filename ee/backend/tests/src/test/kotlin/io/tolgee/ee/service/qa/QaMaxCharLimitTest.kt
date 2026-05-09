@@ -61,28 +61,18 @@ class QaMaxCharLimitTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   @Test
   fun `setting max char limit marks translations stale and triggers QA check`() {
-    // Clear stale flags first so we can verify they get set by the maxCharLimit change
-    executeInNewTransaction(platformTransactionManager) {
-      val en = translationService.find(testData.enTranslation.id)!!
-      en.qaChecksStale = false
-      entityManager.persist(en)
-      val fr = translationService.find(testData.frTranslation.id)!!
-      fr.qaChecksStale = false
-      entityManager.persist(fr)
-    }
-
     performProjectAuthPut(
-      "keys/${testData.testKey.id}/complex-update",
-      mapOf("name" to testData.testKey.name, "maxCharLimit" to 5),
+      "keys/${testData.freshFrKey.id}/complex-update",
+      mapOf("name" to testData.freshFrKey.name, "maxCharLimit" to 5),
     ).andIsOk
 
     // All translations for this key should be marked stale
     waitForNotThrowing(timeout = 10_000, pollTime = 500) {
       executeInNewTransaction(platformTransactionManager) {
-        val enTranslation = translationService.find(testData.enTranslation.id)!!
+        val enTranslation = translationService.find(testData.freshEnTranslation.id)!!
         assertThat(enTranslation.qaChecksStale).isTrue()
 
-        val frTranslation = translationService.find(testData.frTranslation.id)!!
+        val frTranslation = translationService.find(testData.freshFrTranslation.id)!!
         assertThat(frTranslation.qaChecksStale).isTrue()
       }
     }
