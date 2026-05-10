@@ -14,21 +14,38 @@ type TranslationMemoryItemModel =
   components['schemas']['TranslationMemoryItemModel'];
 
 const StyledItem = styled('div')`
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 4px;
   padding: ${({ theme }) => theme.spacing(1.5, 2)};
-  border-bottom: 1px solid ${({ theme }) => theme.palette.divider1};
-  transition: background 0.1s ease-in-out;
+  transition: background 0.1s ease-in-out, color 0.1s ease-in-out;
 
-  &:last-of-type {
-    border-bottom: none;
+  /* Inset divider — aligned with the text's horizontal extent on both sides instead of
+     hugging the panel's full width. */
+  &::after {
+    content: '';
+    position: absolute;
+    left: ${({ theme }) => theme.spacing(2)};
+    right: ${({ theme }) => theme.spacing(2)};
+    bottom: 0;
+    height: 1px;
+    background: ${({ theme }) => theme.palette.divider1};
+  }
+
+  &:last-of-type::after {
+    content: none;
   }
   &.clickable {
     cursor: pointer;
   }
   &.clickable:hover {
-    background: ${({ theme }) => theme.palette.cell.hover};
+    background: ${({ theme }) => theme.palette.tokens.text._states.selected};
+  }
+  /* Mirror MachineTranslationItem: clicking inserts the suggested text, so the suggestion
+     itself turns primary on hover to advertise the action. */
+  &.clickable:hover .tm-suggestion-target {
+    color: ${({ theme }) => theme.palette.primary.main};
   }
 `;
 
@@ -39,8 +56,9 @@ const StyledHead = styled('div')`
   gap: 8px;
 `;
 
-// Score colour tiers come from the design: 100% green, 85–99% primary (pink), 60–84% amber,
-// below 60% grey. Penalised matches add a yellow ring + a small dot inside the pill.
+// Three-tier scheme matching the pre-PR design (green / orange / grey at 1.0 / 0.7
+// thresholds), expressed via theme tokens. 100% = perfect match, 70%+ = fuzzy but usable,
+// below 70% = weak. Penalised matches add a yellow ring + dot inside the pill.
 const StyledScore = styled('div')`
   display: inline-flex;
   align-items: center;
@@ -48,10 +66,9 @@ const StyledScore = styled('div')`
   padding: 4px 8px;
   border-radius: 9999px;
   font-variant-numeric: tabular-nums;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   letter-spacing: 0.4px;
-  cursor: help;
   white-space: nowrap;
 
   &.s-100 {
@@ -59,10 +76,6 @@ const StyledScore = styled('div')`
       theme.palette.tokens._components.alert.success.color};
     background: ${({ theme }) =>
       theme.palette.tokens._components.alert.success.background};
-  }
-  &.s-high {
-    color: ${({ theme }) => theme.palette.primary.main};
-    background: ${({ theme }) => theme.palette.tokens.primary._states.selected};
   }
   &.s-mid {
     color: ${({ theme }) =>
@@ -111,10 +124,11 @@ const StyledMetaSeparator = styled('span')`
 `;
 
 const StyledTarget = styled('div')`
-  font-size: 14px;
+  font-size: 15px;
   color: ${({ theme }) => theme.palette.text.primary};
   overflow-wrap: break-word;
   overflow: hidden;
+  transition: color 0.1s ease-in-out;
 `;
 
 const StyledSource = styled('div')`
@@ -139,8 +153,7 @@ type Props = {
 
 const tierClass = (similarityPercent: number): string => {
   if (similarityPercent >= 100) return 's-100';
-  if (similarityPercent >= 85) return 's-high';
-  if (similarityPercent >= 60) return 's-mid';
+  if (similarityPercent >= 70) return 's-mid';
   return 's-low';
 };
 
@@ -149,8 +162,7 @@ const tierClass = (similarityPercent: number): string => {
 const tierAttr = (similarityPercent: number, penalized: boolean): string => {
   if (penalized) return 'penalized';
   if (similarityPercent >= 100) return '100';
-  if (similarityPercent >= 85) return 'high';
-  if (similarityPercent >= 60) return 'mid';
+  if (similarityPercent >= 70) return 'mid';
   return 'low';
 };
 
@@ -219,7 +231,7 @@ export const TranslationMemoryItem = ({
             title={
               <T
                 keyName="translation_memory_penalty_tooltip"
-                defaultValue="{raw}% raw − {penalty} penalty"
+                defaultValue="{raw}% similarity − {penalty}% penalty"
                 params={{ raw: rawPercent, penalty }}
               />
             }
@@ -239,7 +251,6 @@ export const TranslationMemoryItem = ({
               parts.push(
                 <StyledMetaItem
                   key="tm"
-                  title={item.translationMemoryName}
                   data-cy="translation-tools-translation-memory-item-tm-name"
                 >
                   {item.translationMemoryName}
@@ -248,24 +259,20 @@ export const TranslationMemoryItem = ({
             }
             if (item.keyName) {
               parts.push(
-                <StyledMetaItem
-                  key="key"
-                  title={item.keyName}
-                  data-cy="translation-tools-translation-memory-item-key-name"
-                >
-                  {item.keyName}
-                </StyledMetaItem>
+                <Tooltip key="key" title={item.keyName}>
+                  <StyledMetaItem data-cy="translation-tools-translation-memory-item-key-name">
+                    {item.keyName}
+                  </StyledMetaItem>
+                </Tooltip>
               );
             }
             if (updatedAtLabel) {
               parts.push(
-                <StyledMetaItem
-                  key="time"
-                  title={updatedAtAbsolute}
-                  data-cy="translation-tools-translation-memory-item-updated"
-                >
-                  {updatedAtLabel}
-                </StyledMetaItem>
+                <Tooltip key="time" title={updatedAtAbsolute ?? ''}>
+                  <StyledMetaItem data-cy="translation-tools-translation-memory-item-updated">
+                    {updatedAtLabel}
+                  </StyledMetaItem>
+                </Tooltip>
               );
             }
             return parts.flatMap((part, i) =>
@@ -282,7 +289,7 @@ export const TranslationMemoryItem = ({
         </StyledMeta>
       </StyledHead>
 
-      <StyledTarget>
+      <StyledTarget className="tm-suggestion-target">
         {targetText === '' ? (
           <StyledEmptyText>
             <T keyName="translation_memory_empty" />

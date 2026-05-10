@@ -17,7 +17,6 @@ const DefaultChip = styled('button')`
   border-radius: 999px;
   padding: 2px 8px;
   font-size: 11px;
-  font-family: inherit;
   cursor: pointer;
   white-space: nowrap;
   &:hover {

@@ -46,7 +46,6 @@ export const StyledKeyName = styled('div')`
   overflow: hidden;
   font-size: 12px;
   color: ${({ theme }) => theme.palette.text.secondary};
-  font-family: monospace;
   margin-bottom: 4px;
 `;
 
