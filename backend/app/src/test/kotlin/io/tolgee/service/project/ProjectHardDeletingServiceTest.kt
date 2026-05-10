@@ -16,10 +16,12 @@ import io.tolgee.development.testDataBuilder.data.SuggestionsTestData
 import io.tolgee.development.testDataBuilder.data.WebhooksTestData
 import io.tolgee.dtos.BigMetaDto
 import io.tolgee.dtos.RelatedKeyDto
-import io.tolgee.ee.development.QaTestData
 import io.tolgee.fixtures.waitFor
 import io.tolgee.model.Project
+import io.tolgee.model.enums.qa.QaCheckType
+import io.tolgee.model.enums.qa.QaIssueMessage
 import io.tolgee.model.qa.LanguageQaConfig
+import io.tolgee.model.qa.ProjectQaConfig
 import io.tolgee.repository.qa.LanguageQaConfigRepository
 import io.tolgee.repository.qa.ProjectQaConfigRepository
 import io.tolgee.service.bigMeta.BigMetaService
@@ -146,13 +148,25 @@ class ProjectHardDeletingServiceTest : AbstractSpringTest() {
 
   @Test
   fun `deletes project with QA entities`() {
-    val testData = QaTestData()
+    // QA-issue persistence is exercised via the builder's `addQaIssue`. Project- and
+    // language-level QA configs are added in a follow-up transaction since BaseTestData
+    // doesn't model them and the EE-module `QaTestData` is not on this test suite's
+    // classpath (`runWithoutEeTests`).
+    val testData = BaseTestData()
+    testData.projectBuilder.addKey(keyName = "test-key") {
+      addTranslation("en", "Hello world.").build {
+        addQaIssue {
+          type = QaCheckType.EMPTY_TRANSLATION
+          message = QaIssueMessage.QA_EMPTY_TRANSLATION
+        }
+      }
+    }
     testDataService.saveTestData(testData.root)
 
     executeInNewTransaction(platformTransactionManager) {
-      val project = projectService.get(testData.project.id)
+      val project = projectService.get(testData.projectBuilder.self.id)
       val language = languageService.getEntity(testData.englishLanguage.id)
-      projectQaConfigRepository.save(testData.createDefaultQaConfig().also { it.project = project })
+      projectQaConfigRepository.save(ProjectQaConfig(project = project))
       languageQaConfigRepository.save(LanguageQaConfig(language = language))
       entityManager.flush()
     }
