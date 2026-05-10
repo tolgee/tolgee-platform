@@ -77,9 +77,12 @@ describe('Translation Memory content browser', () => {
     });
 
     // Saving an empty value should delete the stored entry instead of failing the
-    // backend's @NotBlank validation. The other German entry on the same source row
-    // ("Bonjour le monde" / fr) must stay so we know we deleted only one cell, not the
-    // whole group.
+    // backend's @NotBlank validation. The "Hello world" source group has a sibling
+    // entry (French "Bonjour le monde") that keeps the source row alive after the
+    // German entry is deleted — and we still see "Thank you" → "Danke" untouched.
+    // Assertions are on source text + the surviving German entry: the org doesn't
+    // declare French as a language, so the fr column isn't rendered and we can't
+    // assert against the French target text directly.
     it('clearing the field deletes the stored entry', () => {
       listView.findAndVisitTm(data, 'test_username', 'Shared Marketing TM');
 
@@ -88,7 +91,10 @@ describe('Translation Memory content browser', () => {
       tmView.saveEdit();
 
       cy.contains('Hallo Welt').should('not.exist');
-      tmView.getEntryRowContaining('Bonjour le monde').should('be.visible');
+      // "Hello world" source group survives because the French sibling keeps it alive.
+      tmView.getEntryRowContaining('Hello world').should('be.visible');
+      // The unrelated entry must remain untouched.
+      tmView.getEntryRowContaining('Danke').should('be.visible');
     });
   });
 
