@@ -4,6 +4,7 @@ import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.GlossaryTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.ignoreTestOnSpringBug
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.web.servlet.MvcResult
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -44,9 +46,12 @@ class GlossaryExportControllerTest : AuthorizedControllerTest() {
     // The export should include all three languages: en (term column), cs, fr
 
     val result =
-      performAuthGet("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/export")
-        .andIsOk
-        .andReturn()
+      ignoreTestOnSpringBug {
+        performAuthGet("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/export")
+          .andIsOk
+          .andDo { obj: MvcResult -> obj.asyncResult }
+          .andReturn()
+      }
 
     val csvContent = result.response.contentAsString
     val headerLine = csvContent.lines()[0]
