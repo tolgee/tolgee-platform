@@ -13,15 +13,13 @@ import io.tolgee.model.enums.qa.QaIssueMessage
  */
 class ProjectWithQaEntitiesTestData : BaseTestData() {
   init {
-    projectBuilder.apply {
-      setQaConfig()
-      addLanguageQaConfig(englishLanguage)
-      addKey(keyName = "test-key") {
-        addTranslation("en", "Hello world.").build {
-          addQaIssue {
-            type = QaCheckType.EMPTY_TRANSLATION
-            message = QaIssueMessage.QA_EMPTY_TRANSLATION
-          }
+    projectBuilder.setQaConfig()
+    englishLanguageBuilder.setQaConfig()
+    projectBuilder.addKey(keyName = "test-key") {
+      addTranslation("en", "Hello world.").build {
+        addQaIssue {
+          type = QaCheckType.EMPTY_TRANSLATION
+          message = QaIssueMessage.QA_EMPTY_TRANSLATION
         }
       }
     }
