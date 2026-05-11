@@ -20,11 +20,8 @@ import {
   StyledTranslations,
 } from './TranslationMemoryEntryRow.styles';
 
-type TranslationMemoryEntryModel =
-  components['schemas']['TranslationMemoryEntryModel'];
-
-type VirtualTranslationMemoryEntryModel =
-  components['schemas']['VirtualTranslationMemoryEntryModel'];
+type TranslationMemoryRowCellModel =
+  components['schemas']['TranslationMemoryRowCellModel'];
 
 type TranslationMemoryRowModel =
   components['schemas']['TranslationMemoryRowModel'];
@@ -54,7 +51,7 @@ type Props = {
   canManage?: boolean;
   layout?: EntryRowLayout;
   selectionService?: SelectionService<number>;
-  /** Stable id used for selection. Only set on STORED rows; virtual rows have no id. */
+  /** Stable id used for selection. Only set on editable rows; read-only rows have no id. */
   groupId?: number;
 };
 
@@ -76,28 +73,41 @@ export const TranslationMemoryEntryRow: React.VFC<Props> = ({
   const sourceFlag = sourceLang?.flags?.[0] || '';
   const sourceName = sourceLang?.englishName || sourceLanguageTag;
 
-  const isVirtual = row.kind === 'VIRTUAL';
-  const isStored = row.kind === 'STORED';
+  const rowEditable = canManage && row.editable;
+  const mirroredFromProject = Boolean(row.projectId);
 
-  // Bucket the row's cells by target language so each column lookup is O(1).
-  const entryByLang = useMemo(() => {
-    const m = new Map<string, TranslationMemoryEntryModel>();
-    row.entries.forEach((e) => m.set(e.targetLanguageTag, e));
+  // Bucket cells by target language so each column lookup is O(1).
+  const cellByLang = useMemo(() => {
+    const m = new Map<string, TranslationMemoryRowCellModel>();
+    row.cells.forEach((c) => m.set(c.targetLanguageTag, c));
     return m;
-  }, [row.entries]);
-  const virtualByLang = useMemo(() => {
-    const m = new Map<string, VirtualTranslationMemoryEntryModel>();
-    row.virtualEntries.forEach((v) => m.set(v.targetLanguageTag, v));
-    return m;
-  }, [row.virtualEntries]);
+  }, [row.cells]);
 
-  const selectable = isStored && groupId !== undefined;
+  const selectable = row.editable && groupId !== undefined;
 
   const rowEditDisabledReason: React.ReactNode = !canManage ? (
     <T
       keyName="tm_entry_edit_disabled_no_permission"
       defaultValue="Only organization maintainers can edit translation memory entries."
     />
+  ) : mirroredFromProject ? (
+    <span>
+      <T
+        keyName="tm_entry_edit_disabled_virtual_prefix"
+        defaultValue="This translation comes from project"
+      />{' '}
+      <ProjectLink
+        project={{
+          id: row.projectId!,
+          name: row.projectName!,
+        }}
+      />
+      {'. '}
+      <T
+        keyName="tm_entry_edit_disabled_virtual_suffix"
+        defaultValue="Edit it there."
+      />
+    </span>
   ) : undefined;
 
   return (
@@ -114,9 +124,9 @@ export const TranslationMemoryEntryRow: React.VFC<Props> = ({
         const hasCheckbox = Boolean(
           selectionService && selectable && canManage
         );
-        // Always reserve the selection column in both layouts so virtual rows (no checkbox)
-        // line up with stored rows (with checkbox). Without this the virtual rows would
-        // shift 44px left of stored rows in stacked layout once a TM mixed both kinds.
+        // Always reserve the selection column in both layouts so non-editable rows (no
+        // checkbox) line up with editable rows. Without this they would shift 44px left
+        // of editable rows in stacked layout once a TM mixed both kinds.
         return (
           <StyledSelectionCell $layout={layout}>
             {hasCheckbox && (
@@ -131,9 +141,9 @@ export const TranslationMemoryEntryRow: React.VFC<Props> = ({
         );
       })()}
       <StyledKeyCell $layout={layout}>
-        {/* Key reference is a property of virtual rows (project keys). Stored rows have
-            no key of their own and stay unlabeled. */}
-        {isVirtual && row.keyName && (
+        {/* Key reference exists only for rows mirroring a project key. Editable manual
+            rows have no key of their own and stay unlabeled. */}
+        {row.keyName && (
           <StyledKeyName data-cy="tm-entry-row-keys">
             {row.keyName}
           </StyledKeyName>
@@ -153,52 +163,23 @@ export const TranslationMemoryEntryRow: React.VFC<Props> = ({
 
       <StyledTranslations $layout={layout}>
         {displayLanguages.map((langTag) => {
-          const storedEntry = entryByLang.get(langTag);
-          const virtualEntry = virtualByLang.get(langTag);
+          const cell = cellByLang.get(langTag);
           const isEditing = editingLang === langTag;
-
-          // A cell is editable when the user can manage AND the row is a STORED row.
-          // Virtual rows (including empty cells on them) are read-only — the project is
-          // the canonical place to add a missing translation; users add new manual
-          // sources via the create-entry dialog.
-          const editable = canManage && isStored;
-          const cellEditDisabledReason: React.ReactNode = isVirtual ? (
-            <span>
-              <T
-                keyName="tm_entry_edit_disabled_virtual_prefix"
-                defaultValue="This translation comes from project"
-              />{' '}
-              <ProjectLink
-                project={{
-                  id: row.projectId!,
-                  name: row.projectName!,
-                }}
-              />
-              {'. '}
-              <T
-                keyName="tm_entry_edit_disabled_virtual_suffix"
-                defaultValue="Edit it there."
-              />
-            </span>
-          ) : (
-            rowEditDisabledReason
-          );
-
           return (
             <TranslationCell
               key={langTag}
-              entry={storedEntry}
-              virtualText={virtualEntry?.targetText}
+              entryId={cell?.entryId ?? undefined}
+              text={cell?.targetText ?? ''}
               langTag={langTag}
               sourceText={row.sourceText}
               isEditing={isEditing}
-              onEdit={editable ? () => onEditStart(langTag) : undefined}
+              onEdit={rowEditable ? () => onEditStart(langTag) : undefined}
               onCancel={onEditEnd}
               onSaved={onEditEnd}
               organizationId={organizationId}
               translationMemoryId={translationMemoryId}
-              canManage={editable}
-              editDisabledReason={cellEditDisabledReason}
+              editable={rowEditable}
+              editDisabledReason={rowEditDisabledReason}
               layout={layout}
             />
           );

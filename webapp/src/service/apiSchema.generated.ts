@@ -7196,28 +7196,45 @@ export interface components {
       /** @description When true, only translations in REVIEWED state contribute to this TM. */
       writeOnlyReviewed: boolean;
     };
-    TranslationMemoryRowModel: {
-      /** @description Stored cells of this row, already filtered by the requested languages */
-      entries: components["schemas"]["TranslationMemoryEntryModel"][];
+    TranslationMemoryRowCellModel: {
       /**
-       * @description Originating project key name (virtual rows only)
+       * Format: int64
+       * @description Id of the underlying TM entry when the cell is editable. Absent for read-only cells mirrored from project translations.
+       * @example 12345
+       */
+      entryId?: number;
+      /**
+       * @description Target language tag (BCP 47)
+       * @example de
+       */
+      targetLanguageTag: string;
+      /**
+       * @description Translated target text
+       * @example Hallo Welt
+       */
+      targetText: string;
+    };
+    TranslationMemoryRowModel: {
+      /** @description Cells of this row, already filtered by the requested languages */
+      cells: components["schemas"]["TranslationMemoryRowCellModel"][];
+      /**
+       * @description Whether the row can be edited (manual TM entries) or is read-only (mirrored from a project key — change it in the project).
+       * @example true
+       */
+      editable: boolean;
+      /**
+       * @description Originating project key name when the row mirrors a project key
        * @example greeting.hello
        */
       keyName?: string;
       /**
-       * @description Row kind — STORED is user-managed; VIRTUAL is computed from a project translation
-       * @example STORED
-       * @enum {string}
-       */
-      kind: "STORED" | "VIRTUAL";
-      /**
        * Format: int64
-       * @description Originating project id (virtual rows only)
+       * @description Originating project id when the row mirrors a project key
        * @example 42
        */
       projectId?: number;
       /**
-       * @description Originating project name (virtual rows only)
+       * @description Originating project name when the row mirrors a project key
        * @example My project
        */
       projectName?: string;
@@ -7226,8 +7243,6 @@ export interface components {
        * @example Hello world
        */
       sourceText: string;
-      /** @description Virtual cells of this row, already filtered by the requested languages */
-      virtualEntries: components["schemas"]["VirtualTranslationMemoryEntryModel"][];
     };
     TranslationMemoryWithStatsModel: {
       /** @description Names of all assigned projects (size = total assignment count) */
@@ -7663,39 +7678,6 @@ export interface components {
     };
     VariablesResponseDto: {
       data: components["schemas"]["PromptVariableDto"][];
-    };
-    VirtualTranslationMemoryEntryModel: {
-      /**
-       * @description Name of the project key the virtual row originates from
-       * @example greeting.hello
-       */
-      keyName: string;
-      /**
-       * Format: int64
-       * @description Id of the project the virtual row originates from
-       * @example 42
-       */
-      projectId: number;
-      /**
-       * @description Name of the project the virtual row originates from
-       * @example My project
-       */
-      projectName: string;
-      /**
-       * @description Source text in the TM's source language
-       * @example Hello world
-       */
-      sourceText: string;
-      /**
-       * @description Target language tag (BCP 47)
-       * @example de
-       */
-      targetLanguageTag: string;
-      /**
-       * @description Translated target text
-       * @example Hallo Welt
-       */
-      targetText: string;
     };
     WebhookConfigModel: {
       /** @description Whether the webhook was automatically disabled due to persistent failures. */

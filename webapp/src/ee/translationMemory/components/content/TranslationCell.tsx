@@ -10,7 +10,6 @@ import { EditableTextCellForm } from 'tg.component/entriesList/EditableTextCellF
 import { TmEntryText } from './TmEntryText';
 import { messageService } from 'tg.service/MessageService';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { components } from 'tg.service/apiSchema.generated';
 import {
   EntryRowLayout,
   StyledEditAffordance,
@@ -18,9 +17,6 @@ import {
   StyledTranslation,
   StyledTranslationCell,
 } from './TranslationMemoryEntryRow.styles';
-
-type TranslationMemoryEntryModel =
-  components['schemas']['TranslationMemoryEntryModel'];
 
 // Wrapper around the textarea + button row so the buttons sit one full theme-spacing(2)
 // (16px) below the textarea — matches Glossary's StyledEditBox layout.
@@ -31,13 +27,11 @@ const StyledEditBox = styled('div')`
 `;
 
 type Props = {
-  entry?: TranslationMemoryEntryModel;
-  /**
-   * Read-only target text for virtual cells — used when the row is derived from a project
-   * translation rather than a stored entry. When provided and [entry] is undefined, the cell
-   * renders the virtual text without any edit affordance.
-   */
-  virtualText?: string;
+  /** Existing TM entry id when this cell already has a stored entry. Used to wire the
+   *  update/delete mutations; an empty editable cell has no id and a save creates a new entry. */
+  entryId?: number;
+  /** Current target text rendered in the cell. Empty string when nothing is set. */
+  text: string;
   langTag: string;
   sourceText: string;
   isEditing: boolean;
@@ -46,18 +40,19 @@ type Props = {
   onSaved: () => void;
   organizationId: number;
   translationMemoryId: number;
-  canManage?: boolean;
+  /** Row-level editability. When false, the cell is read-only no matter what. */
+  editable?: boolean;
   /**
    * Tooltip text shown when the cell is not editable. Falsy = no tooltip. Wired by the row
-   * which knows whether the disablement is a permission issue or a synced/virtual row.
+   * which knows whether the disablement is a permission issue or a project-mirrored row.
    */
   editDisabledReason?: React.ReactNode;
   layout: EntryRowLayout;
 };
 
 export const TranslationCell: React.VFC<Props> = ({
-  entry,
-  virtualText,
+  entryId,
+  text,
   langTag,
   sourceText,
   isEditing,
@@ -66,7 +61,7 @@ export const TranslationCell: React.VFC<Props> = ({
   onSaved,
   organizationId,
   translationMemoryId,
-  canManage = true,
+  editable = true,
   editDisabledReason,
   layout,
 }) => {
@@ -75,7 +70,7 @@ export const TranslationCell: React.VFC<Props> = ({
   const targetFlag = targetLang?.flags?.[0] || '';
   const targetName = targetLang?.englishName || langTag;
 
-  const [value, setValue] = React.useState(entry?.targetText || '');
+  const [value, setValue] = React.useState(text);
 
   const invalidate = () =>
     // Narrow to just this TM's entries — the broader prefix would also invalidate the org TM
@@ -102,7 +97,7 @@ export const TranslationCell: React.VFC<Props> = ({
 
   const handleEdit = () => {
     if (!onEdit) return;
-    setValue(entry?.targetText || '');
+    setValue(text);
     onEdit();
   };
 
@@ -120,13 +115,13 @@ export const TranslationCell: React.VFC<Props> = ({
           />
         ),
     };
-    // Empty value clears the cell. For a stored entry that means deleting the row;
-    // for a never-saved virtual cell there is nothing to do.
+    // Empty value clears the cell. For an existing entry that means deleting the row;
+    // for a brand-new cell there is nothing to do.
     if (!value.trim()) {
-      if (entry) {
+      if (entryId !== undefined) {
         deleteMutation.mutate(
           {
-            path: { organizationId, translationMemoryId, entryId: entry.id },
+            path: { organizationId, translationMemoryId, entryId },
           },
           callbacks
         );
@@ -144,10 +139,10 @@ export const TranslationCell: React.VFC<Props> = ({
         },
       },
     };
-    if (entry) {
+    if (entryId !== undefined) {
       updateMutation.mutate(
         {
-          path: { organizationId, translationMemoryId, entryId: entry.id },
+          path: { organizationId, translationMemoryId, entryId },
           ...body,
         },
         callbacks
@@ -172,18 +167,18 @@ export const TranslationCell: React.VFC<Props> = ({
   // the pencil-icon affordance instead; the editing state shows form controls and shouldn't
   // be obscured.
   const tooltipTitle: React.ReactNode =
-    !canManage && !isEditing && editDisabledReason ? editDisabledReason : '';
+    !editable && !isEditing && editDisabledReason ? editDisabledReason : '';
 
   return (
     <Tooltip title={tooltipTitle} placement="bottom">
       <StyledTranslationCell
         $layout={layout}
         className={isEditing ? 'editing' : ''}
-        onClick={!isEditing && canManage ? handleEdit : undefined}
-        style={!canManage ? { cursor: 'default' } : undefined}
+        onClick={!isEditing && editable ? handleEdit : undefined}
+        style={!editable ? { cursor: 'default' } : undefined}
         data-cy="tm-entry-translation-cell"
       >
-        {canManage && !isEditing && (
+        {editable && !isEditing && (
           <StyledEditAffordance
             size="small"
             className="tm-edit-affordance"
@@ -201,16 +196,13 @@ export const TranslationCell: React.VFC<Props> = ({
         )}
         <StyledTranslation $layout={layout}>
           {!isEditing ? (
-            (entry?.targetText || virtualText) && (
+            text && (
               <LimitedHeightText
                 maxLines={3}
                 wrap="break-word"
                 lineHeight="1.3em"
               >
-                <TmEntryText
-                  text={entry?.targetText ?? virtualText ?? ''}
-                  locale={langTag}
-                />
+                <TmEntryText text={text} locale={langTag} />
               </LimitedHeightText>
             )
           ) : (

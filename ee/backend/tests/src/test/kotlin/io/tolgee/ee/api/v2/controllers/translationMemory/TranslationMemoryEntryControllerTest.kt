@@ -80,9 +80,9 @@ class TranslationMemoryEntryControllerTest : AuthorizedControllerTest() {
     ).andIsOk
       .andAssertThatJson {
         node("_embedded.translationMemoryRows").isArray.hasSize(2)
-        // Each group has 1 German entry
-        node("_embedded.translationMemoryRows[0].entries").isArray.hasSize(1)
-        node("_embedded.translationMemoryRows[1].entries").isArray.hasSize(1)
+        // Each row has 1 German cell
+        node("_embedded.translationMemoryRows[0].cells").isArray.hasSize(1)
+        node("_embedded.translationMemoryRows[1].cells").isArray.hasSize(1)
       }
   }
 

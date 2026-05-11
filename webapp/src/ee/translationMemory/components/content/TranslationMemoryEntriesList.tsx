@@ -175,9 +175,9 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
 
   const totalElements = entries.data?.pages?.[0]?.page?.totalElements ?? 0;
 
-  // Each selectable row is identified by the representative entry ID (the first entry on
-  // the stored row). Virtual rows carry no entries and therefore no ID — they are not
-  // selectable for batch delete.
+  // Each selectable row is identified by the representative entry id (the first cell that
+  // has one). Read-only rows carry no entryId on any cell — they are not selectable for
+  // batch delete.
   const getAllGroupIds = async (): Promise<number[]> => {
     if (totalElements === 0) return [];
     const data = await apiV2HttpService.get<{
@@ -194,7 +194,7 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
     );
     return (
       data._embedded?.translationMemoryRows
-        ?.map((r) => r.entries?.[0]?.id)
+        ?.map((r) => r.cells.find((c) => c.entryId !== undefined)?.entryId)
         .filter((id): id is number => id !== undefined) ?? []
     );
   };
@@ -322,20 +322,19 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
     const row = rows[index];
     const isLast = index === rows.length - 1;
     if (isLast) onFetchNextPageHint();
-    // Row identity = (sourceText, kind, ...row metadata). STORED uses the first entry's id;
-    // VIRTUAL uses (project, key). Both yield a stable string suitable for keys/editing state.
-    const rowKey =
-      row.kind === 'STORED'
-        ? `s:${row.entries?.[0]?.id ?? row.sourceText}`
-        : `v:${row.projectId}:${row.keyName}:${row.sourceText}`;
+    // Row identity: editable rows use the first cell's entry id; rows mirrored from a project
+    // key use (projectId, keyName). Both yield a stable string for React keys / editing state.
+    const firstEntryId = row.cells.find(
+      (c) => c.entryId !== undefined
+    )?.entryId;
+    const rowKey = row.editable
+      ? `s:${firstEntryId ?? row.sourceText}`
+      : `v:${row.projectId}:${row.keyName}:${row.sourceText}`;
     const editingLangForRow = editingCell?.startsWith(rowKey + '|||')
       ? editingCell.split('|||').pop()!
       : null;
-    // Only STORED rows are selectable for batch delete. groupId is the first entry's id.
-    const groupId =
-      row.kind === 'STORED'
-        ? (row.entries?.[0]?.id as number | undefined)
-        : undefined;
+    // Only editable rows are selectable for batch delete. groupId is the first cell's entry id.
+    const groupId = row.editable ? firstEntryId : undefined;
 
     return (
       <TranslationMemoryEntryRow
@@ -348,7 +347,7 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
         editingLang={editingLangForRow}
         canManage={canManage}
         layout={layout}
-        selectionService={row.kind === 'STORED' ? selectionService : undefined}
+        selectionService={row.editable ? selectionService : undefined}
         groupId={groupId}
         onEditStart={(langTag) => setEditingCell(`${rowKey}|||${langTag}`)}
         onEditEnd={() => {
