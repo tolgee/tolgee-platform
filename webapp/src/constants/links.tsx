@@ -2,8 +2,8 @@ export class Link {
   _template: string;
 
   /**
-   * Constructor is private to avoid creating of unrefactorable links
-   * @param template
+   * Private to force construction via `ofRoot` / `ofParent`, so all links are
+   * refactor-safe and composed from the existing hierarchy.
    */
   private constructor(template: string) {
     this._template = template;
@@ -30,9 +30,8 @@ export class Link {
     return new Link(`${link ? link.template : ''}/${itemTemplate}`);
   }
 
-  public build(params?: { [key: string]: string | number }): string {
+  public build(params: { [key: string]: string | number } = {}): string {
     let link = this.template;
-    params = params ? params : {};
     for (const param of Object.keys(params)) {
       link = link.replace(`:${param}`, params[param].toString());
     }
@@ -404,6 +403,8 @@ export class LINKS {
   static PROJECT_AI = Link.ofParent(LINKS.PROJECT, 'ai');
 
   static PROJECT_CONTEXT_DATA = Link.ofParent(LINKS.PROJECT_AI, 'context-data');
+
+  static PROJECT_AI_PROMPTS = Link.ofParent(LINKS.PROJECT_AI, 'prompts');
 
   static PROJECT_INTEGRATE = Link.ofParent(LINKS.PROJECT, 'integrate');
 
