@@ -192,16 +192,18 @@ describe('Translation Memory org settings', () => {
       view.getListItem('Renamed TM').should('be.visible');
     });
 
-    // The flag determines how stored entries are seeded into a shared TM, so flipping it
-    // mid-life would leave inconsistent state. Form locks the switch in edit mode for
-    // SHARED TMs — guard the lock here so a future regression that re-enables editing
-    // is caught.
-    it('write-only-reviewed is locked in shared TM settings', () => {
+    // Post-unification all TM content surfaces virtually from write-access projects, so
+    // the write-only-reviewed flag only filters the virtual half; flipping it mid-life is
+    // safe and the switch must be editable on shared TMs too.
+    it('write-only-reviewed switch is editable in shared TM settings', () => {
       login('test_username');
       view.findAndVisit(data, 'test_username');
 
       const dialog = view.openSettingsDialog('Shared Marketing TM');
-      dialog.getWriteOnlyReviewedSwitch().find('input').should('be.disabled');
+      dialog
+        .getWriteOnlyReviewedSwitch()
+        .find('input')
+        .should('not.be.disabled');
     });
   });
 

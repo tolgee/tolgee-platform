@@ -92,33 +92,42 @@ interface TranslationMemoryRepository : JpaRepository<TranslationMemory, Long> {
              tm.write_only_reviewed as writeOnlyReviewed
       from translation_memory tm
       left join lateral (
-        -- Mirrors TranslationMemoryEntryManagementService.groupKeysUnionSql so the count on the
-        -- TMs list matches the row count of the content browser exactly. Virtual rows come from
-        -- any project assigned with write_access=true, regardless of TM type.
-        select count(*) as cnt from (
-          select e.source_text as source_text
-          from translation_memory_entry e
-          where e.translation_memory_id = tm.id
-
-          union
-
-          select base_t.text as source_text
-          from translation_memory_project tmp
-          join project p on p.id = tmp.project_id and p.deleted_at is null
-          join language base_lang on base_lang.id = p.base_language_id
-          join key k on k.project_id = p.id and k.deleted_at is null
-          left join branch b on b.id = k.branch_id
-          join translation base_t on base_t.key_id = k.id
-                                 and base_t.language_id = base_lang.id
-          join translation target_t on target_t.key_id = k.id
-                                   and target_t.language_id <> base_lang.id
-          where tmp.translation_memory_id = tm.id
-            and tmp.write_access = true
-            and base_t.text is not null and base_t.text <> ''
-            and target_t.text is not null and target_t.text <> ''
-            and (b.id is null or b.is_default = true)
-            and (not tm.write_only_reviewed or target_t.state = 2)
-        ) sub
+        -- Row count, matching TranslationMemoryEntryManagementService.rowIdentitiesSql:
+        --   - Stored: one row per (source_text, tuid-or-"manual") bucket. Each TMX tuid is
+        --     its own row; all null-tuid manual entries on a source collapse into one row.
+        --   - Virtual: one row per (source_text, project_id, key_name) on every project
+        --     assigned with write_access = true.
+        select
+          (
+            select count(*) from (
+              select 1
+              from translation_memory_entry e
+              where e.translation_memory_id = tm.id
+              group by e.source_text, coalesce(e.tuid, 'manual')
+            ) stored_rows
+          )
+          +
+          (
+            select count(*) from (
+              select 1
+              from translation_memory_project tmp
+              join project p on p.id = tmp.project_id and p.deleted_at is null
+              join language base_lang on base_lang.id = p.base_language_id
+              join key k on k.project_id = p.id and k.deleted_at is null
+              left join branch b on b.id = k.branch_id
+              join translation base_t on base_t.key_id = k.id
+                                     and base_t.language_id = base_lang.id
+              join translation target_t on target_t.key_id = k.id
+                                       and target_t.language_id <> base_lang.id
+              where tmp.translation_memory_id = tm.id
+                and tmp.write_access = true
+                and base_t.text is not null and base_t.text <> ''
+                and target_t.text is not null and target_t.text <> ''
+                and (b.id is null or b.is_default = true)
+                and (not tm.write_only_reviewed or target_t.state = 2)
+              group by base_t.text, p.id, k.name
+            ) virtual_rows
+          ) as cnt
       ) ec on true
       left join lateral (
         select string_agg(pr.name, ',' order by pr.name) as names

@@ -5,24 +5,35 @@ import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
 
 /**
- * A row in the TM content browser, keyed by sourceText. [entries] is the stored half
- * (user-editable); [virtualEntries] is the computed half from write-access-assigned project
- * translations (read-only).
+ * One row in the TM content browser. Stored rows carry user-editable cells in [entries];
+ * virtual rows carry read-only cells in [virtualEntries] plus the originating project
+ * identification. Pagination is row-level — a single source text can produce several rows.
  */
 @Relation(
-  collectionRelation = "translationMemoryEntryGroups",
-  itemRelation = "translationMemoryEntryGroup",
+  collectionRelation = "translationMemoryRows",
+  itemRelation = "translationMemoryRow",
 )
-class TranslationMemoryEntryGroupModel(
+class TranslationMemoryRowModel(
   @Schema(description = "Source text in the TM's source language", example = "Hello world")
   val sourceText: String,
-  @Schema(description = "Names of the keys contributing virtual rows in this group")
-  val keyNames: List<String>,
-  @Schema(description = "Stored entries in this row, already filtered by the requested languages")
+  @Schema(description = "Row kind — STORED is user-managed; VIRTUAL is computed from a project translation", example = "STORED")
+  val kind: Kind,
+  @Schema(description = "Stored cells of this row, already filtered by the requested languages")
   val entries: List<TranslationMemoryEntryModel>,
-  @Schema(description = "Virtual entries computed from write-access-assigned project translations")
+  @Schema(description = "Virtual cells of this row, already filtered by the requested languages")
   val virtualEntries: List<VirtualTranslationMemoryEntryModel>,
-) : RepresentationModel<TranslationMemoryEntryGroupModel>()
+  @Schema(description = "Originating project key name (virtual rows only)", example = "greeting.hello")
+  val keyName: String?,
+  @Schema(description = "Originating project id (virtual rows only)", example = "42")
+  val projectId: Long?,
+  @Schema(description = "Originating project name (virtual rows only)", example = "My project")
+  val projectName: String?,
+) : RepresentationModel<TranslationMemoryRowModel>() {
+  enum class Kind {
+    STORED,
+    VIRTUAL,
+  }
+}
 
 class VirtualTranslationMemoryEntryModel(
   @Schema(description = "Source text in the TM's source language", example = "Hello world")

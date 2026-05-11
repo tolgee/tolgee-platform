@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Checkbox, styled } from '@mui/material';
 import { T } from '@tolgee/react';
 import { FlagImage } from '@tginternal/library/components/languages/FlagImage';
@@ -26,29 +26,13 @@ type TranslationMemoryEntryModel =
 type VirtualTranslationMemoryEntryModel =
   components['schemas']['VirtualTranslationMemoryEntryModel'];
 
+type TranslationMemoryRowModel =
+  components['schemas']['TranslationMemoryRowModel'];
+
 export type { EntryRowLayout } from './TranslationMemoryEntryRow.styles';
 export { flatGridColumns } from './TranslationMemoryEntryRow.styles';
 
-export type EntryGroup = {
-  sourceText: string;
-  keyNames: string[];
-  entries: TranslationMemoryEntryModel[];
-  virtualEntries: VirtualTranslationMemoryEntryModel[];
-};
-
-/**
- * One renderable row produced by expanding an EntryGroup. A group with N entries per
- * (source, lang) becomes N candidate rows; each holds at most one entry per language. The
- * source/keyNames/virtualEntries decoration only renders on the primary candidate so the row
- * stack reads as "one source with multiple translation candidates".
- */
-export type EntryGroupCandidate = {
-  group: EntryGroup;
-  candidateIndex: number;
-  isPrimary: boolean;
-  entriesByLang: Map<string, TranslationMemoryEntryModel>;
-  virtualsByLang: Map<string, VirtualTranslationMemoryEntryModel>;
-};
+export type TmRow = TranslationMemoryRowModel;
 
 const StyledSelectionCell = styled('div')<{ $layout: EntryRowLayout }>`
   display: flex;
@@ -59,7 +43,7 @@ const StyledSelectionCell = styled('div')<{ $layout: EntryRowLayout }>`
 `;
 
 type Props = {
-  candidate: EntryGroupCandidate;
+  row: TmRow;
   sourceLanguageTag: string;
   displayLanguages: string[];
   organizationId: number;
@@ -70,11 +54,12 @@ type Props = {
   canManage?: boolean;
   layout?: EntryRowLayout;
   selectionService?: SelectionService<number>;
+  /** Stable id used for selection. Only set on STORED rows; virtual rows have no id. */
   groupId?: number;
 };
 
 export const TranslationMemoryEntryRow: React.VFC<Props> = ({
-  candidate,
+  row,
   sourceLanguageTag,
   displayLanguages,
   organizationId,
@@ -87,19 +72,26 @@ export const TranslationMemoryEntryRow: React.VFC<Props> = ({
   selectionService,
   groupId,
 }) => {
-  const group = candidate.group;
   const sourceLang = languageInfo[sourceLanguageTag];
   const sourceFlag = sourceLang?.flags?.[0] || '';
   const sourceName = sourceLang?.englishName || sourceLanguageTag;
 
-  // [candidate.entriesByLang] arrives pre-bucketed by the parent (one entry per language for
-  // this candidate slot). Source-grouped buckets with multiple entries per (source, lang) are
-  // expanded into multiple sibling rows upstream — each row gets one entry per language here.
-  const entryByLang = candidate.entriesByLang;
-  const virtualByLang = candidate.virtualsByLang;
+  const isVirtual = row.kind === 'VIRTUAL';
+  const isStored = row.kind === 'STORED';
 
-  const hasStoredEntries = group.entries.length > 0;
-  const selectable = hasStoredEntries && groupId !== undefined;
+  // Bucket the row's cells by target language so each column lookup is O(1).
+  const entryByLang = useMemo(() => {
+    const m = new Map<string, TranslationMemoryEntryModel>();
+    row.entries.forEach((e) => m.set(e.targetLanguageTag, e));
+    return m;
+  }, [row.entries]);
+  const virtualByLang = useMemo(() => {
+    const m = new Map<string, VirtualTranslationMemoryEntryModel>();
+    row.virtualEntries.forEach((v) => m.set(v.targetLanguageTag, v));
+    return m;
+  }, [row.virtualEntries]);
+
+  const selectable = isStored && groupId !== undefined;
 
   const rowEditDisabledReason: React.ReactNode = !canManage ? (
     <T
@@ -123,8 +115,8 @@ export const TranslationMemoryEntryRow: React.VFC<Props> = ({
           selectionService && selectable && canManage
         );
         // Always reserve the selection column in both layouts so virtual rows (no checkbox)
-        // line up with manual rows (with checkbox). Without this the virtual rows shifted
-        // 44px left of manual rows in stacked layout once a TM mixed both kinds.
+        // line up with stored rows (with checkbox). Without this the virtual rows would
+        // shift 44px left of stored rows in stacked layout once a TM mixed both kinds.
         return (
           <StyledSelectionCell $layout={layout}>
             {hasCheckbox && (
@@ -139,20 +131,13 @@ export const TranslationMemoryEntryRow: React.VFC<Props> = ({
         );
       })()}
       <StyledKeyCell $layout={layout}>
-        {/* Key reference is a property of virtual entries (project keys). Stored manual
-            entries — even when they share a source text with a virtual row — have no key
-            of their own, so the row stays unlabeled. */}
-        {(() => {
-          const candidateVirtual = Array.from(
-            candidate.virtualsByLang.values()
-          )[0];
-          if (!candidateVirtual) return null;
-          return (
-            <StyledKeyName data-cy="tm-entry-row-keys">
-              {candidateVirtual.keyName}
-            </StyledKeyName>
-          );
-        })()}
+        {/* Key reference is a property of virtual rows (project keys). Stored rows have
+            no key of their own and stay unlabeled. */}
+        {isVirtual && row.keyName && (
+          <StyledKeyName data-cy="tm-entry-row-keys">
+            {row.keyName}
+          </StyledKeyName>
+        )}
         <StyledSourceText>
           {layout === 'stacked' && (
             <StyledLanguage style={{ padding: '0' }}>
@@ -161,7 +146,7 @@ export const TranslationMemoryEntryRow: React.VFC<Props> = ({
             </StyledLanguage>
           )}
           <LimitedHeightText maxLines={3} wrap="break-word" lineHeight="1.3em">
-            <TmEntryText text={group.sourceText} locale={sourceLanguageTag} />
+            <TmEntryText text={row.sourceText} locale={sourceLanguageTag} />
           </LimitedHeightText>
         </StyledSourceText>
       </StyledKeyCell>
@@ -172,18 +157,12 @@ export const TranslationMemoryEntryRow: React.VFC<Props> = ({
           const virtualEntry = virtualByLang.get(langTag);
           const isEditing = editingLang === langTag;
 
-          // A cell is editable when the user can manage AND either it already holds a
-          // stored entry (manual override stays editable) OR the row has no virtual
-          // origin at all. Empty cells on a row whose source comes from a project stay
-          // read-only — the project is the canonical place to add the missing
-          // translation. Users add new manual sources via the create-entry dialog.
-          const rowFromProject = candidate.virtualsByLang.size > 0;
-          const sourceProject = rowFromProject
-            ? Array.from(candidate.virtualsByLang.values())[0]
-            : undefined;
-          const editable =
-            canManage && (Boolean(storedEntry) || !rowFromProject);
-          const cellEditDisabledReason: React.ReactNode = sourceProject ? (
+          // A cell is editable when the user can manage AND the row is a STORED row.
+          // Virtual rows (including empty cells on them) are read-only — the project is
+          // the canonical place to add a missing translation; users add new manual
+          // sources via the create-entry dialog.
+          const editable = canManage && isStored;
+          const cellEditDisabledReason: React.ReactNode = isVirtual ? (
             <span>
               <T
                 keyName="tm_entry_edit_disabled_virtual_prefix"
@@ -191,8 +170,8 @@ export const TranslationMemoryEntryRow: React.VFC<Props> = ({
               />{' '}
               <ProjectLink
                 project={{
-                  id: sourceProject.projectId,
-                  name: sourceProject.projectName,
+                  id: row.projectId!,
+                  name: row.projectName!,
                 }}
               />
               {'. '}
@@ -211,7 +190,7 @@ export const TranslationMemoryEntryRow: React.VFC<Props> = ({
               entry={storedEntry}
               virtualText={virtualEntry?.targetText}
               langTag={langTag}
-              sourceText={group.sourceText}
+              sourceText={row.sourceText}
               isEditing={isEditing}
               onEdit={editable ? () => onEditStart(langTag) : undefined}
               onCancel={onEditEnd}

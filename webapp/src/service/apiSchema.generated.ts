@@ -327,7 +327,7 @@ export interface paths {
     get: operations["getAssignedProjects"];
   };
   "/v2/organizations/{organizationId}/translation-memories/{translationMemoryId}/entries": {
-    /** One row per distinct source text. The `targetLanguageTag` filter only narrows which entries are returned per group — source rows with no matching translation still appear with an empty `entries` list so the user can add a translation. */
+    /** Pagination is row-level: each STORED bucket (manual entries on a source collapse into one row; each TMX `tuid` is its own row) and each VIRTUAL origin (one row per project key) gets its own page item. The `targetLanguageTag` filter narrows the *cells* of a row to a subset of target languages; rows themselves still appear with empty cells so the user can add a translation. */
     get: operations["list_3"];
     post: operations["create_16"];
     /** For every entry ID in the payload, deletes the entire group that shares the same source text (and key). The request is deduplicated to distinct groups so passing multiple entries from the same row is a no-op past the first one. */
@@ -4749,15 +4749,15 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
-    PagedModelTranslationMemoryEntryGroupModel: {
-      _embedded?: {
-        translationMemoryEntryGroups?: components["schemas"]["TranslationMemoryEntryGroupModel"][];
-      };
-      page?: components["schemas"]["PageMetadata"];
-    };
     PagedModelTranslationMemoryItemModel: {
       _embedded?: {
         translationMemoryItems?: components["schemas"]["TranslationMemoryItemModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelTranslationMemoryRowModel: {
+      _embedded?: {
+        translationMemoryRows?: components["schemas"]["TranslationMemoryRowModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
     };
@@ -7135,19 +7135,6 @@ export interface components {
       /** Format: int64 */
       languageId: number;
     };
-    TranslationMemoryEntryGroupModel: {
-      /** @description Stored entries in this row, already filtered by the requested languages */
-      entries: components["schemas"]["TranslationMemoryEntryModel"][];
-      /** @description Names of the keys contributing virtual rows in this group */
-      keyNames: string[];
-      /**
-       * @description Source text in the TM's source language
-       * @example Hello world
-       */
-      sourceText: string;
-      /** @description Virtual entries computed from write-access-assigned project translations */
-      virtualEntries: components["schemas"]["VirtualTranslationMemoryEntryModel"][];
-    };
     TranslationMemoryEntryModel: {
       /**
        * Format: int64
@@ -7208,6 +7195,39 @@ export interface components {
       type: "PROJECT" | "SHARED";
       /** @description When true, only translations in REVIEWED state contribute to this TM. */
       writeOnlyReviewed: boolean;
+    };
+    TranslationMemoryRowModel: {
+      /** @description Stored cells of this row, already filtered by the requested languages */
+      entries: components["schemas"]["TranslationMemoryEntryModel"][];
+      /**
+       * @description Originating project key name (virtual rows only)
+       * @example greeting.hello
+       */
+      keyName?: string;
+      /**
+       * @description Row kind — STORED is user-managed; VIRTUAL is computed from a project translation
+       * @example STORED
+       * @enum {string}
+       */
+      kind: "STORED" | "VIRTUAL";
+      /**
+       * Format: int64
+       * @description Originating project id (virtual rows only)
+       * @example 42
+       */
+      projectId?: number;
+      /**
+       * @description Originating project name (virtual rows only)
+       * @example My project
+       */
+      projectName?: string;
+      /**
+       * @description Source text in the TM's source language
+       * @example Hello world
+       */
+      sourceText: string;
+      /** @description Virtual cells of this row, already filtered by the requested languages */
+      virtualEntries: components["schemas"]["VirtualTranslationMemoryEntryModel"][];
     };
     TranslationMemoryWithStatsModel: {
       /** @description Names of all assigned projects (size = total assignment count) */
@@ -12116,7 +12136,7 @@ export interface operations {
       };
     };
   };
-  /** One row per distinct source text. The `targetLanguageTag` filter only narrows which entries are returned per group — source rows with no matching translation still appear with an empty `entries` list so the user can add a translation. */
+  /** Pagination is row-level: each STORED bucket (manual entries on a source collapse into one row; each TMX `tuid` is its own row) and each VIRTUAL origin (one row per project key) gets its own page item. The `targetLanguageTag` filter narrows the *cells* of a row to a subset of target languages; rows themselves still appear with empty cells so the user can add a translation. */
   list_3: {
     parameters: {
       path: {
@@ -12138,7 +12158,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["PagedModelTranslationMemoryEntryGroupModel"];
+          "application/json": components["schemas"]["PagedModelTranslationMemoryRowModel"];
         };
       };
       /** Bad Request */

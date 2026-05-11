@@ -1,15 +1,8 @@
 import { useState } from 'react';
-import {
-  Box,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  FormControlLabel,
-  Switch,
-  Typography,
-} from '@mui/material';
-import { T, useTranslate } from '@tolgee/react';
+import { Box, Dialog, DialogContent, DialogTitle } from '@mui/material';
+import { T } from '@tolgee/react';
 import { DialogCancelSaveActions } from 'tg.ee.module/translationMemory/components/shared/DialogCancelSaveActions';
+import { WriteOnlyReviewedSwitch } from 'tg.ee.module/translationMemory/components/form/fields/WriteOnlyReviewedSwitch';
 
 type Props = {
   open: boolean;
@@ -20,9 +13,9 @@ type Props = {
 };
 
 /**
- * Focused settings dialog containing just the `writeOnlyReviewed` toggle. Used wherever
- * the full TM settings dialog doesn't apply (project TMs from the project-settings page,
- * project TMs from the org TM list). Parent owns the save call — this component is pure UI.
+ * Focused settings dialog containing just the `writeOnlyReviewed` toggle. Used by the
+ * content view's gear icon for PROJECT TMs (the full settings dialog doesn't apply there).
+ * Parent owns the save call — this component is pure UI.
  */
 export const TmWriteOnlyReviewedDialog: React.VFC<Props> = ({
   open,
@@ -31,7 +24,6 @@ export const TmWriteOnlyReviewedDialog: React.VFC<Props> = ({
   onSave,
   onClose,
 }) => {
-  const { t } = useTranslate();
   const [writeOnlyReviewed, setWriteOnlyReviewed] = useState(
     initialWriteOnlyReviewed
   );
@@ -52,25 +44,11 @@ export const TmWriteOnlyReviewedDialog: React.VFC<Props> = ({
       </DialogTitle>
       <DialogContent>
         <Box>
-          <FormControlLabel
-            control={
-              <Switch
-                checked={writeOnlyReviewed}
-                onChange={(_, v) => setWriteOnlyReviewed(v)}
-                data-cy="tm-write-only-reviewed-toggle"
-              />
-            }
-            label={t(
-              'project_tm_only_include_reviewed_label',
-              'Only include reviewed translations'
-            )}
+          <WriteOnlyReviewedSwitch
+            checked={writeOnlyReviewed}
+            onChange={setWriteOnlyReviewed}
+            switchDataCy="tm-write-only-reviewed-toggle"
           />
-          <Typography variant="caption" color="text.secondary" display="block">
-            <T
-              keyName="project_tm_only_include_reviewed_hint"
-              defaultValue="Only translations in the Reviewed state are offered as TM suggestions. Other translations are excluded until they are reviewed."
-            />
-          </Typography>
         </Box>
       </DialogContent>
       <DialogCancelSaveActions

@@ -5,14 +5,14 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.constants.Feature
-import io.tolgee.ee.api.v2.hateoas.assemblers.translationMemory.TranslationMemoryEntryGroupModelAssembler
 import io.tolgee.ee.api.v2.hateoas.assemblers.translationMemory.TranslationMemoryEntryModelAssembler
-import io.tolgee.ee.api.v2.hateoas.model.translationMemory.TranslationMemoryEntryGroupModel
+import io.tolgee.ee.api.v2.hateoas.assemblers.translationMemory.TranslationMemoryRowModelAssembler
 import io.tolgee.ee.api.v2.hateoas.model.translationMemory.TranslationMemoryEntryModel
+import io.tolgee.ee.api.v2.hateoas.model.translationMemory.TranslationMemoryRowModel
 import io.tolgee.ee.data.translationMemory.CreateTranslationMemoryEntryRequest
 import io.tolgee.ee.data.translationMemory.DeleteMultipleTranslationMemoryEntriesRequest
 import io.tolgee.ee.data.translationMemory.UpdateTranslationMemoryEntryRequest
-import io.tolgee.ee.service.translationMemory.TranslationMemoryEntryGroup
+import io.tolgee.ee.service.translationMemory.TmRow
 import io.tolgee.ee.service.translationMemory.TranslationMemoryEntryManagementService
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.security.authentication.AllowApiAccess
@@ -42,17 +42,19 @@ import org.springframework.web.bind.annotation.RestController
 class TranslationMemoryEntryController(
   private val translationMemoryEntryManagementService: TranslationMemoryEntryManagementService,
   private val translationMemoryEntryModelAssembler: TranslationMemoryEntryModelAssembler,
-  private val translationMemoryEntryGroupModelAssembler: TranslationMemoryEntryGroupModelAssembler,
+  private val translationMemoryRowModelAssembler: TranslationMemoryRowModelAssembler,
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-  private val pagedGroupAssembler: PagedResourcesAssembler<TranslationMemoryEntryGroup>,
+  private val pagedRowAssembler: PagedResourcesAssembler<TmRow>,
 ) {
   @GetMapping
   @Operation(
-    summary = "List entries of a translation memory grouped by source text (paginated)",
+    summary = "List rows of a translation memory (paginated)",
     description =
-      "One row per distinct source text. The `targetLanguageTag` filter only narrows which " +
-        "entries are returned per group — source rows with no matching translation still appear " +
-        "with an empty `entries` list so the user can add a translation.",
+      "Pagination is row-level: each STORED bucket (manual entries on a source collapse into " +
+        "one row; each TMX `tuid` is its own row) and each VIRTUAL origin (one row per project " +
+        "key) gets its own page item. The `targetLanguageTag` filter narrows the *cells* of a " +
+        "row to a subset of target languages; rows themselves still appear with empty cells " +
+        "so the user can add a translation.",
   )
   @UseDefaultPermissions
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
@@ -63,16 +65,16 @@ class TranslationMemoryEntryController(
     @RequestParam(required = false) search: String?,
     @RequestParam(required = false) targetLanguageTag: String?,
     @ParameterObject pageable: Pageable,
-  ): PagedModel<TranslationMemoryEntryGroupModel> {
+  ): PagedModel<TranslationMemoryRowModel> {
     val page =
-      translationMemoryEntryManagementService.listEntryGroups(
+      translationMemoryEntryManagementService.listEntryRows(
         organizationId = organizationId,
         translationMemoryId = translationMemoryId,
         pageable = pageable,
         search = search,
         targetLanguageTag = targetLanguageTag,
       )
-    return pagedGroupAssembler.toModel(page, translationMemoryEntryGroupModelAssembler)
+    return pagedRowAssembler.toModel(page, translationMemoryRowModelAssembler)
   }
 
   @GetMapping("/{entryId:[0-9]+}")

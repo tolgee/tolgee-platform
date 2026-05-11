@@ -871,8 +871,6 @@ declare namespace DataCy {
         "tasks-view-list-button" |
         "this-is-the-element" |
         "tm-add-project-autocomplete" |
-        "tm-assigned-project-row" |
-        "tm-assigned-projects-table" |
         "tm-batch-delete-button" |
         "tm-batch-toolbar" |
         "tm-content-subtitle" |
@@ -908,9 +906,6 @@ declare namespace DataCy {
         "tm-import-mode-keep" |
         "tm-import-mode-override" |
         "tm-import-submit" |
-        "tm-project-read-checkbox" |
-        "tm-project-remove" |
-        "tm-project-write-checkbox" |
         "tm-settings-default-penalty" |
         "tm-settings-dialog" |
         "tm-settings-write-only-reviewed" |

@@ -25,7 +25,6 @@ type Props = {
  * (TranslationMemoryCreateEditForm) — only the data plumbing differs:
  *   - initialValues come from the GET endpoint instead of empty defaults
  *   - submit calls PUT for the TM body, plus a per-project DELETE for any rows the user removed
- *   - tmType is fed in so the form can lock writeOnlyReviewed for SHARED TMs
  */
 export const TranslationMemorySettingsDialog: React.VFC<Props> = ({
   open,
@@ -90,8 +89,6 @@ export const TranslationMemorySettingsDialog: React.VFC<Props> = ({
       })),
     };
   }, [tmQuery.data, assignedProjectsQuery.data]);
-
-  const tmType = tmQuery.data?.type as 'PROJECT' | 'SHARED' | undefined;
 
   const save = async (
     values: CreateEditTranslationMemoryFormValues,
@@ -171,7 +168,6 @@ export const TranslationMemorySettingsDialog: React.VFC<Props> = ({
       ) : (
         <TranslationMemoryCreateEditForm
           mode="edit"
-          tmType={tmType}
           initialValues={initialValues}
           onClose={onClose}
           onSave={save}

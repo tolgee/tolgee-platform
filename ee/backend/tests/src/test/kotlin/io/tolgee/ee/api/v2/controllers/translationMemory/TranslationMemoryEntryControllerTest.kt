@@ -57,7 +57,7 @@ class TranslationMemoryEntryControllerTest : AuthorizedControllerTest() {
       .andIsOk
       .andAssertThatJson {
         // Shared TM: 2 distinct source texts ("Hello world" de+fr, "Thank you" de)
-        node("_embedded.translationMemoryEntryGroups").isArray.hasSize(2)
+        node("_embedded.translationMemoryRows").isArray.hasSize(2)
       }
   }
 
@@ -68,8 +68,8 @@ class TranslationMemoryEntryControllerTest : AuthorizedControllerTest() {
     ).andIsOk
       .andAssertThatJson {
         // "hallo" matches the German target "Hallo Welt" — the group's source text is "Hello world"
-        node("_embedded.translationMemoryEntryGroups").isArray.hasSize(1)
-        node("_embedded.translationMemoryEntryGroups[0].sourceText").isEqualTo("Hello world")
+        node("_embedded.translationMemoryRows").isArray.hasSize(1)
+        node("_embedded.translationMemoryRows[0].sourceText").isEqualTo("Hello world")
       }
   }
 
@@ -79,10 +79,10 @@ class TranslationMemoryEntryControllerTest : AuthorizedControllerTest() {
       "/v2/organizations/$orgId/translation-memories/$sharedTmId/entries?targetLanguageTag=de",
     ).andIsOk
       .andAssertThatJson {
-        node("_embedded.translationMemoryEntryGroups").isArray.hasSize(2)
+        node("_embedded.translationMemoryRows").isArray.hasSize(2)
         // Each group has 1 German entry
-        node("_embedded.translationMemoryEntryGroups[0].entries").isArray.hasSize(1)
-        node("_embedded.translationMemoryEntryGroups[1].entries").isArray.hasSize(1)
+        node("_embedded.translationMemoryRows[0].entries").isArray.hasSize(1)
+        node("_embedded.translationMemoryRows[1].entries").isArray.hasSize(1)
       }
   }
 
@@ -97,7 +97,7 @@ class TranslationMemoryEntryControllerTest : AuthorizedControllerTest() {
       .andAssertThatJson {
         // Both source texts still paginate (totalElements = 2)
         node("page.totalElements").isEqualTo(2)
-        node("_embedded.translationMemoryEntryGroups").isArray.hasSize(2)
+        node("_embedded.translationMemoryRows").isArray.hasSize(2)
         // "Hello world" has 1 French entry; "Thank you" has none
       }
   }
@@ -118,7 +118,7 @@ class TranslationMemoryEntryControllerTest : AuthorizedControllerTest() {
         // projectWithTm has 4 keys with German targets — existing/reviewed/promoted/demoted.
         node("page.totalElements").isEqualTo(4)
         node("page.totalPages").isEqualTo(4)
-        node("_embedded.translationMemoryEntryGroups").isArray.hasSize(1)
+        node("_embedded.translationMemoryRows").isArray.hasSize(1)
       }.andReturn()
       .response
       .contentAsString
@@ -128,7 +128,7 @@ class TranslationMemoryEntryControllerTest : AuthorizedControllerTest() {
       "/v2/organizations/$orgId/translation-memories/$projectTmId/entries?size=1&page=1",
     ).andIsOk
       .andAssertThatJson {
-        node("_embedded.translationMemoryEntryGroups").isArray.hasSize(1)
+        node("_embedded.translationMemoryRows").isArray.hasSize(1)
       }.andReturn()
       .response
       .contentAsString
@@ -167,21 +167,21 @@ class TranslationMemoryEntryControllerTest : AuthorizedControllerTest() {
         // 4 virtual rows from projectWithTm's German targets (Demotion / Existing / Promoted /
         // Reviewed) + 1 manual ("Manual phrase").
         node("page.totalElements").isEqualTo(5)
-        node("_embedded.translationMemoryEntryGroups").isArray.hasSize(5)
+        node("_embedded.translationMemoryRows").isArray.hasSize(5)
         // Alphabetical order by source_text — manual ("Manual phrase") slots between virtual rows.
-        node("_embedded.translationMemoryEntryGroups[0].sourceText").isEqualTo("Demotion source")
-        node("_embedded.translationMemoryEntryGroups[1].sourceText").isEqualTo("Existing source")
-        node("_embedded.translationMemoryEntryGroups[2].sourceText").isEqualTo("Manual phrase")
-        node("_embedded.translationMemoryEntryGroups[3].sourceText").isEqualTo("Promoted source")
-        node("_embedded.translationMemoryEntryGroups[4].sourceText").isEqualTo("Reviewed source")
+        node("_embedded.translationMemoryRows[0].sourceText").isEqualTo("Demotion source")
+        node("_embedded.translationMemoryRows[1].sourceText").isEqualTo("Existing source")
+        node("_embedded.translationMemoryRows[2].sourceText").isEqualTo("Manual phrase")
+        node("_embedded.translationMemoryRows[3].sourceText").isEqualTo("Promoted source")
+        node("_embedded.translationMemoryRows[4].sourceText").isEqualTo("Reviewed source")
       }
   }
 
   @Test
-  fun `manual entry sharing source text with a virtual row collapses into one group`() {
-    // The unified content model dedupes by source_text — a manual stored entry and the virtual
-    // row from the assigned project's translation share one row in the browser. The stored
-    // half goes into `entries`, the virtual half stays in `virtualEntries`.
+  fun `manual entry sharing source text with a virtual row renders on its own row`() {
+    // Row-level pagination keeps stored manual entries on their own row even when they
+    // share a source text with virtual rows. Stored rows are user-editable and unlabeled;
+    // virtual rows stay read-only and carry the project key.
     val projectTmId = testData.projectTm.id
     performAuthPost(
       "/v2/organizations/$orgId/translation-memories/$projectTmId/entries",
@@ -196,8 +196,10 @@ class TranslationMemoryEntryControllerTest : AuthorizedControllerTest() {
       "/v2/organizations/$orgId/translation-memories/$projectTmId/entries",
     ).andIsOk
       .andAssertThatJson {
-        // 4 distinct source_texts — "Existing source" appears once, with both stored and virtual.
-        node("page.totalElements").isEqualTo(4)
+        // 4 virtual rows (one per write-access project key) + 1 stored row for the manual
+        // override on "Existing source" = 5 total rows.
+        node("page.totalElements").isEqualTo(5)
+        node("_embedded.translationMemoryRows").isArray.hasSize(5)
       }
   }
 
@@ -218,7 +220,7 @@ class TranslationMemoryEntryControllerTest : AuthorizedControllerTest() {
     ).andIsOk
       .andAssertThatJson {
         node("page.totalElements").isEqualTo(1)
-        node("_embedded.translationMemoryEntryGroups[0].sourceText").isEqualTo("Manual phrase")
+        node("_embedded.translationMemoryRows[0].sourceText").isEqualTo("Manual phrase")
       }
   }
 
@@ -231,7 +233,7 @@ class TranslationMemoryEntryControllerTest : AuthorizedControllerTest() {
       "/v2/organizations/$orgId/translation-memories/$sharedTmId/entries?targetLanguageTag=de,fr",
     ).andIsOk
       .andAssertThatJson {
-        node("_embedded.translationMemoryEntryGroups").isArray.hasSize(2)
+        node("_embedded.translationMemoryRows").isArray.hasSize(2)
       }
 
     // fr only → still 2 groups; "Hello world" has 1 entry, "Thank you" has 0
@@ -239,7 +241,7 @@ class TranslationMemoryEntryControllerTest : AuthorizedControllerTest() {
       "/v2/organizations/$orgId/translation-memories/$sharedTmId/entries?targetLanguageTag=fr",
     ).andIsOk
       .andAssertThatJson {
-        node("_embedded.translationMemoryEntryGroups").isArray.hasSize(2)
+        node("_embedded.translationMemoryRows").isArray.hasSize(2)
       }
   }
 

@@ -3,9 +3,7 @@ import {
   Autocomplete,
   Box,
   Button,
-  FormControlLabel,
   Stack,
-  Switch,
   TextField as MuiTextField,
   Typography,
   styled,
@@ -14,13 +12,11 @@ import { Formik, useFormikContext } from 'formik';
 import { useMemo, useState } from 'react';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { LabelHint } from 'tg.component/common/LabelHint';
 import {
   useEnabledFeatures,
   usePreferredOrganization,
 } from 'tg.globalContext/helpers';
 import { T, useTranslate } from '@tolgee/react';
-import { BaseLanguageSelect } from 'tg.component/languages/BaseLanguageSelect';
 import { useApiInfiniteQuery } from 'tg.service/http/useQueryApi';
 import { useDebounce } from 'use-debounce';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
@@ -30,6 +26,9 @@ import {
   TmAssignedProjectsTable,
 } from 'tg.ee.module/translationMemory/components/form/TmAssignedProjectsTable';
 import { confirmProjectDisconnect } from 'tg.ee.module/translationMemory/components/form/confirmProjectDisconnect';
+import { BaseLanguageFieldWithHint } from 'tg.ee.module/translationMemory/components/form/fields/BaseLanguageFieldWithHint';
+import { DefaultPenaltyField } from 'tg.ee.module/translationMemory/components/form/fields/DefaultPenaltyField';
+import { WriteOnlyReviewedField } from 'tg.ee.module/translationMemory/components/form/fields/WriteOnlyReviewedField';
 
 const StyledContainer = styled('div')`
   padding: ${({ theme }) => theme.spacing(3)};
@@ -62,13 +61,6 @@ type Mode = 'create' | 'edit';
 
 type Props = {
   mode: Mode;
-  /**
-   * In edit mode, identifies the kind of TM being edited. Drives whether the
-   * "only accept reviewed translations" switch is editable (PROJECT) or locked
-   * with a tooltip (SHARED — stored entries seeded under one rule, can't change).
-   * Ignored in create mode (the value is the create-time choice).
-   */
-  tmType?: 'PROJECT' | 'SHARED';
   initialValues?: CreateEditTranslationMemoryFormValues;
   onClose: () => void;
   onSave: (
@@ -82,7 +74,6 @@ type Props = {
 
 export const TranslationMemoryCreateEditForm = ({
   mode,
-  tmType,
   initialValues,
   onClose,
   onSave,
@@ -179,11 +170,7 @@ export const TranslationMemoryCreateEditForm = ({
                   />
                   <BaseLanguageFieldWithHint disabled={!featureEnabled} />
                   <DefaultPenaltyField disabled={!featureEnabled} />
-                  <WriteOnlyReviewedField
-                    disabled={!featureEnabled}
-                    mode={mode}
-                    tmType={tmType}
-                  />
+                  <WriteOnlyReviewedField disabled={!featureEnabled} />
                 </>
               )}
               <AssignedProjectsEditor
@@ -219,155 +206,6 @@ export const TranslationMemoryCreateEditForm = ({
         );
       }}
     </Formik>
-  );
-};
-
-const BaseLanguageFieldWithHint = ({ disabled }: { disabled: boolean }) => {
-  const { t } = useTranslate();
-  const { values } = useFormikContext<CreateEditTranslationMemoryFormValues>();
-  const hasAssignedProjects = values.assignedProjects.length > 0;
-  return (
-    <BaseLanguageSelect
-      name="baseLanguage"
-      disabled={disabled || hasAssignedProjects}
-      minHeight={false}
-      label={
-        <LabelHint
-          title={
-            hasAssignedProjects ? (
-              <T
-                keyName="translation_memory_settings_base_language_locked_hint"
-                defaultValue="Base language is locked while projects are assigned. Remove all projects first to change it."
-              />
-            ) : (
-              <T
-                keyName="translation_memory_settings_base_language_hint"
-                defaultValue="Must be the same across all projects using this TM."
-              />
-            )
-          }
-        >
-          {t('field_base_language', 'Base language')}
-        </LabelHint>
-      }
-    />
-  );
-};
-
-const DefaultPenaltyField = ({ disabled }: { disabled: boolean }) => {
-  const { t } = useTranslate();
-  return (
-    <TextField
-      name="defaultPenalty"
-      label={
-        <LabelHint
-          title={
-            <T
-              keyName="translation_memory_settings_default_penalty_hint"
-              defaultValue="Lowers match score by this many points. Applied to every project using this TM unless overridden below."
-            />
-          }
-        >
-          {t('translation_memory_settings_default_penalty', 'Default penalty')}
-        </LabelHint>
-      }
-      size="small"
-      disabled={disabled}
-      sx={{ width: 200 }}
-      minHeight={false}
-      inputProps={{
-        inputMode: 'numeric',
-        'data-cy': 'tm-settings-default-penalty',
-      }}
-      InputProps={{
-        endAdornment: (
-          <Typography variant="body2" color="text.secondary">
-            %
-          </Typography>
-        ),
-      }}
-    />
-  );
-};
-
-const WriteOnlyReviewedField = ({
-  disabled,
-  mode,
-  tmType,
-}: {
-  disabled: boolean;
-  mode: Mode;
-  tmType?: 'PROJECT' | 'SHARED';
-}) => {
-  const { values, setFieldValue } =
-    useFormikContext<CreateEditTranslationMemoryFormValues>();
-
-  // Locked when editing a SHARED TM — flipping post-creation would leave the stored entries
-  // inconsistent (some seeded under "all states", some under "reviewed only"). PROJECT TMs
-  // are virtual-only so they can be edited freely; create mode is the moment of choice and
-  // is always editable.
-  const locked = mode === 'edit' && tmType === 'SHARED';
-  const isProjectTmEdit = mode === 'edit' && tmType === 'PROJECT';
-
-  // Static-key branches — Tolgee's `tolgee extract` step rejects keys derived from a runtime
-  // expression. Two distinct UX flavours (project-edit vs create/shared-edit), each spelt out
-  // explicitly so the extractor can pick them up.
-  const label = isProjectTmEdit ? (
-    <LabelHint
-      title={
-        <T
-          keyName="project_tm_only_include_reviewed_hint"
-          defaultValue="Only translations in the Reviewed state are offered as TM suggestions. Other translations are excluded until they are reviewed."
-        />
-      }
-    >
-      <T
-        keyName="project_tm_only_include_reviewed_label"
-        defaultValue="Only include reviewed translations"
-      />
-    </LabelHint>
-  ) : locked ? (
-    <LabelHint
-      title={
-        <T
-          keyName="translation_memory_settings_write_only_reviewed_locked_tooltip"
-          defaultValue="This setting is fixed at creation time. Create a new shared TM if you need different behaviour."
-        />
-      }
-    >
-      <T
-        keyName="translation_memory_settings_write_only_reviewed"
-        defaultValue="Only accept reviewed translations"
-      />
-    </LabelHint>
-  ) : (
-    <LabelHint
-      title={
-        <T
-          keyName="translation_memory_settings_write_only_reviewed_hint"
-          defaultValue="Translations flow in only when marked Reviewed. If a reviewed translation is later un-reviewed, its entry is removed. TMX import and direct edits in this TM bypass the filter."
-        />
-      }
-    >
-      <T
-        keyName="translation_memory_settings_write_only_reviewed"
-        defaultValue="Only accept reviewed translations"
-      />
-    </LabelHint>
-  );
-
-  return (
-    <FormControlLabel
-      control={
-        <Switch
-          checked={values.writeOnlyReviewed}
-          onChange={(_, v) => setFieldValue('writeOnlyReviewed', v)}
-          disabled={disabled || locked}
-          data-cy="tm-settings-write-only-reviewed"
-        />
-      }
-      label={label}
-    />
   );
 };
 

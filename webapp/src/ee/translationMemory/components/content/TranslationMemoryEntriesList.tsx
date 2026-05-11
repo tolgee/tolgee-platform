@@ -13,9 +13,8 @@ import { useApiInfiniteQuery } from 'tg.service/http/useQueryApi';
 import { useDebounce } from 'use-debounce';
 import { ReactList } from 'tg.component/reactList/ReactList';
 import {
-  EntryGroup,
-  EntryGroupCandidate,
   EntryRowLayout,
+  TmRow,
   TranslationMemoryEntryRow,
 } from 'tg.ee.module/translationMemory/components/content/TranslationMemoryEntryRow';
 import { TranslationMemoryCreateEntryDialog } from 'tg.ee.module/translationMemory/views/TranslationMemoryCreateEntryDialog';
@@ -38,9 +37,6 @@ import { TmEntriesToolbar } from './TmEntriesToolbar';
 import { TmEntriesListHeader } from './TmEntriesListHeader';
 import { TmViewToolbar } from './TmViewToolbar';
 import { EmptyTmWizard } from './emptyWizard/EmptyTmWizard';
-
-type TranslationMemoryEntryGroupModel =
-  components['schemas']['TranslationMemoryEntryGroupModel'];
 
 type OrganizationLanguageModel =
   components['schemas']['OrganizationLanguageModel'];
@@ -72,15 +68,15 @@ type Props = {
  * TranslationMemoryEntryRow.styles.ts.
  */
 const estimateTmEntryRowHeight = (
-  group: EntryGroup | undefined,
+  row: TmRow | undefined,
   displayLanguageCount: number,
   layout: EntryRowLayout
 ): number => {
-  if (!group) return layout === 'flat' ? 64 : 120;
-  // Source area: 12px padding top + 18px line + 12px padding bottom = 42px base, +20 for keys
-  const keyLine = group.keyNames.length > 0 ? 20 : 0;
+  if (!row) return layout === 'flat' ? 64 : 120;
+  // Source area: 12px padding top + 18px line + 12px padding bottom = 42px base, +20 for key.
+  const keyLine = row.keyName ? 20 : 0;
   const sourceLineCount = Math.min(
-    Math.max(1, Math.ceil(group.sourceText.length / 60)),
+    Math.max(1, Math.ceil(row.sourceText.length / 60)),
     3
   );
   const sourceArea = 24 + 18 * sourceLineCount + keyLine;
@@ -167,105 +163,26 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
     },
   });
 
-  // Backend returns groups directly: one per (source_text, origin) tuple on the page. Flatten
-  // every loaded page and map to the frontend EntryGroup shape.
-  const groups = useMemo<EntryGroup[]>(
+  // Backend returns one model per row already (one STORED bucket = one row; one VIRTUAL
+  // origin = one row). Flatten every loaded page into a single array.
+  const rows = useMemo<TmRow[]>(
     () =>
-      (entries.data?.pages ?? []).flatMap((p) =>
-        (p._embedded?.translationMemoryEntryGroups ?? []).map((g) => ({
-          sourceText: g.sourceText,
-          keyNames: g.keyNames ?? [],
-          entries: g.entries ?? [],
-          virtualEntries: g.virtualEntries ?? [],
-        }))
+      (entries.data?.pages ?? []).flatMap(
+        (p) => p._embedded?.translationMemoryRows ?? []
       ),
     [entries.data]
   );
 
-  // Expand each group into separate candidate rows for stored vs virtual entries — never
-  // mixed in a single row. A manual entry sharing a source text with a project translation
-  // gets its own row (otherwise its target cells would land alongside virtual cells in the
-  // same row, hiding the manual/virtual distinction).
-  // Within each kind, multiple entries per (source, target_lang) — TMX with several target
-  // texts, or two write-access projects with different translations for the same source —
-  // expand into sibling candidate rows. The first stored candidate is the group's primary
-  // row (carries the keyName aggregation); virtual candidates render their per-row keyName.
-  const candidates = useMemo<EntryGroupCandidate[]>(
-    () =>
-      groups.flatMap((group) => {
-        const storedByLang = new Map<string, typeof group.entries>();
-        group.entries.forEach((e) => {
-          const list = storedByLang.get(e.targetLanguageTag);
-          if (list) {
-            list.push(e);
-          } else {
-            storedByLang.set(e.targetLanguageTag, [e]);
-          }
-        });
-        const virtualByLangAll = new Map<string, typeof group.virtualEntries>();
-        group.virtualEntries.forEach((v) => {
-          const list = virtualByLangAll.get(v.targetLanguageTag);
-          if (list) {
-            list.push(v);
-          } else {
-            virtualByLangAll.set(v.targetLanguageTag, [v]);
-          }
-        });
-
-        const storedCount = Math.max(
-          0,
-          ...Array.from(storedByLang.values()).map((l) => l.length)
-        );
-        const virtualCount = Math.max(
-          0,
-          ...Array.from(virtualByLangAll.values()).map((l) => l.length)
-        );
-        // Always produce at least one candidate so an entirely-empty group still renders
-        // (rare; happens when a stored entry was just deleted and the row is mid-refetch).
-        const totalCount = Math.max(1, storedCount + virtualCount);
-
-        return Array.from({ length: totalCount }, (_, i) => {
-          const entriesByLang = new Map<
-            string,
-            (typeof group.entries)[number]
-          >();
-          const virtualsByLang = new Map<
-            string,
-            (typeof group.virtualEntries)[number]
-          >();
-          if (i < storedCount) {
-            storedByLang.forEach((list, lang) => {
-              if (i < list.length) entriesByLang.set(lang, list[i]);
-            });
-          } else {
-            const vIndex = i - storedCount;
-            virtualByLangAll.forEach((list, lang) => {
-              if (vIndex < list.length) virtualsByLang.set(lang, list[vIndex]);
-            });
-          }
-          return {
-            group,
-            candidateIndex: i,
-            isPrimary: i === 0,
-            entriesByLang,
-            virtualsByLang,
-          };
-        });
-      }),
-    [groups]
-  );
-
   const totalElements = entries.data?.pages?.[0]?.page?.totalElements ?? 0;
 
-  // Each selectable row is identified by the representative entry ID (the first entry in the
-  // group). Virtual rows have no entries array and therefore no ID — they are not selectable
-  // for batch delete. The backend endpoint dedupes by (sourceText, is_manual), so multiple
-  // selected entries from the same row only trigger one delete.
+  // Each selectable row is identified by the representative entry ID (the first entry on
+  // the stored row). Virtual rows carry no entries and therefore no ID — they are not
+  // selectable for batch delete.
   const getAllGroupIds = async (): Promise<number[]> => {
     if (totalElements === 0) return [];
     const data = await apiV2HttpService.get<{
       _embedded?: {
-        translationMemoryEntryGroups?: TranslationMemoryEntryGroupModel[];
+        translationMemoryRows?: TmRow[];
       };
     }>(
       `organizations/${organizationId}/translation-memories/${translationMemoryId}/entries`,
@@ -276,8 +193,8 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
       }
     );
     return (
-      data._embedded?.translationMemoryEntryGroups
-        ?.map((g) => g.entries?.[0]?.id)
+      data._embedded?.translationMemoryRows
+        ?.map((r) => r.entries?.[0]?.id)
         .filter((id): id is number => id !== undefined) ?? []
     );
   };
@@ -402,23 +319,28 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
   };
 
   const renderItem = (index: number) => {
-    const candidate = candidates[index];
-    const group = candidate.group;
-    const isLast = index === candidates.length - 1;
+    const row = rows[index];
+    const isLast = index === rows.length - 1;
     if (isLast) onFetchNextPageHint();
-    const rowKey = `${group.sourceText}|||${candidate.candidateIndex}`;
+    // Row identity = (sourceText, kind, ...row metadata). STORED uses the first entry's id;
+    // VIRTUAL uses (project, key). Both yield a stable string suitable for keys/editing state.
+    const rowKey =
+      row.kind === 'STORED'
+        ? `s:${row.entries?.[0]?.id ?? row.sourceText}`
+        : `v:${row.projectId}:${row.keyName}:${row.sourceText}`;
     const editingLangForRow = editingCell?.startsWith(rowKey + '|||')
       ? editingCell.split('|||').pop()!
       : null;
-    // Selection operates on the whole source-text bucket — only show the checkbox on the primary candidate.
-    const groupId = candidate.isPrimary
-      ? (group.entries?.[0]?.id as number | undefined)
-      : undefined;
+    // Only STORED rows are selectable for batch delete. groupId is the first entry's id.
+    const groupId =
+      row.kind === 'STORED'
+        ? (row.entries?.[0]?.id as number | undefined)
+        : undefined;
 
     return (
       <TranslationMemoryEntryRow
         key={rowKey}
-        candidate={candidate}
+        row={row}
         sourceLanguageTag={sourceLanguageTag}
         displayLanguages={displayLanguages}
         organizationId={organizationId}
@@ -426,7 +348,7 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
         editingLang={editingLangForRow}
         canManage={canManage}
         layout={layout}
-        selectionService={candidate.isPrimary ? selectionService : undefined}
+        selectionService={row.kind === 'STORED' ? selectionService : undefined}
         groupId={groupId}
         onEditStart={(langTag) => setEditingCell(`${rowKey}|||${langTag}`)}
         onEditEnd={() => {
@@ -437,7 +359,7 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
     );
   };
 
-  const isEmpty = !entries.isLoading && groups.length === 0;
+  const isEmpty = !entries.isLoading && rows.length === 0;
   // The wizard is the empty-state UI for users who can populate the TM. Once any project
   // is assigned, hide the "Sync from projects" card — the user has been there.
   const showEmptyWizard = isEmpty && canManage && !search && !targetLanguageTag;
@@ -588,7 +510,7 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
                 itemSizeEstimator={(index, cache) =>
                   cache[index] ||
                   estimateTmEntryRowHeight(
-                    candidates[index]?.group,
+                    rows[index],
                     displayLanguages.length,
                     layout
                   )
@@ -599,7 +521,7 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
                 expansionReserve={editingCell ? 300 : 0}
                 // @ts-ignore — third-party type expects JSX element; window/HTMLElement are accepted at runtime
                 scrollParentGetter={() => verticalScrollRef.current ?? window}
-                length={candidates.length}
+                length={rows.length}
                 useTranslate3d
                 itemRenderer={renderItem}
               />
