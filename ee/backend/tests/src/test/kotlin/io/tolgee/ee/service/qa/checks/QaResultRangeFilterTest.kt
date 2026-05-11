@@ -1,13 +1,12 @@
 package io.tolgee.ee.service.qa.checks
 
 import io.tolgee.ee.service.qa.QaCheckResult
-import io.tolgee.ee.service.qa.checks.language.filterLanguageToolFalsePositives
 import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.model.enums.qa.QaIssueMessage
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-class LanguageToolResultFilterTest {
+class QaResultRangeFilterTest {
   private fun result(
     start: Int?,
     end: Int?,
@@ -21,14 +20,14 @@ class LanguageToolResultFilterTest {
 
   @Test
   fun `returns empty for empty results`() {
-    val filtered = filterLanguageToolFalsePositives(emptyList(), "Hello {name}")
+    val filtered = filterResultsInBlockedRanges(emptyList(), "Hello {name}")
     assertThat(filtered).isEmpty()
   }
 
   @Test
   fun `keeps all results when text has no placeholders or tags`() {
     val results = listOf(result(0, 4))
-    val filtered = filterLanguageToolFalsePositives(results, "Helo world")
+    val filtered = filterResultsInBlockedRanges(results, "Helo world")
     assertThat(filtered).hasSize(1)
   }
 
@@ -42,7 +41,7 @@ class LanguageToolResultFilterTest {
         result(6, 12), // "{name}" — overlaps placeholder, filter
         result(13, 18), // "world" — no overlap, keep
       )
-    val filtered = filterLanguageToolFalsePositives(results, text)
+    val filtered = filterResultsInBlockedRanges(results, text)
     assertThat(filtered).hasSize(2)
     assertThat(filtered.map { it.positionStart }).containsExactly(0, 13)
   }
@@ -59,7 +58,7 @@ class LanguageToolResultFilterTest {
         result(13, 17), // "</b>" — overlaps tag, filter
         result(18, 21), // "now" — keep
       )
-    val filtered = filterLanguageToolFalsePositives(results, text)
+    val filtered = filterResultsInBlockedRanges(results, text)
     assertThat(filtered).hasSize(3)
     assertThat(filtered.map { it.positionStart }).containsExactly(0, 9, 18)
   }
@@ -74,7 +73,7 @@ class LanguageToolResultFilterTest {
         result(6, 25), // "https://example.com" — overlaps URL, filter
         result(26, 31), // "today" — keep
       )
-    val filtered = filterLanguageToolFalsePositives(results, text)
+    val filtered = filterResultsInBlockedRanges(results, text)
     assertThat(filtered).hasSize(2)
     assertThat(filtered.map { it.positionStart }).containsExactly(0, 26)
   }
@@ -83,7 +82,7 @@ class LanguageToolResultFilterTest {
   fun `keeps results with null positions`() {
     val text = "Hello {name}"
     val results = listOf(result(null, null))
-    val filtered = filterLanguageToolFalsePositives(results, text)
+    val filtered = filterResultsInBlockedRanges(results, text)
     assertThat(filtered).hasSize(1)
   }
 
@@ -95,7 +94,7 @@ class LanguageToolResultFilterTest {
       listOf(
         result(1, 4), // "b{x" — partially overlaps, filter
       )
-    val filtered = filterLanguageToolFalsePositives(results, text)
+    val filtered = filterResultsInBlockedRanges(results, text)
     assertThat(filtered).isEmpty()
   }
 
@@ -108,7 +107,7 @@ class LanguageToolResultFilterTest {
         result(0, 2), // "ab" — adjacent to placeholder start, keep
         result(5, 7), // "cd" — adjacent to placeholder end, keep
       )
-    val filtered = filterLanguageToolFalsePositives(results, text)
+    val filtered = filterResultsInBlockedRanges(results, text)
     assertThat(filtered).hasSize(2)
   }
 
@@ -123,7 +122,7 @@ class LanguageToolResultFilterTest {
         result(20, 36), // '<a href="url">' — HTML tag, filter
         result(36, 55), // "https://example.com" — URL, filter
       )
-    val filtered = filterLanguageToolFalsePositives(results, text)
+    val filtered = filterResultsInBlockedRanges(results, text)
     assertThat(filtered).hasSize(1)
     assertThat(filtered[0].positionStart).isEqualTo(0)
   }
@@ -131,7 +130,7 @@ class LanguageToolResultFilterTest {
   @Test
   fun `returns same list when no blocked ranges exist`() {
     val results = listOf(result(0, 5), result(6, 11))
-    val filtered = filterLanguageToolFalsePositives(results, "Hello world")
+    val filtered = filterResultsInBlockedRanges(results, "Hello world")
     assertThat(filtered).hasSize(2)
   }
 
@@ -144,7 +143,7 @@ class LanguageToolResultFilterTest {
         result(6, 9), // "<b>" — HTML tag, filter
         result(9, 13), // "this" — keep
       )
-    val filtered = filterLanguageToolFalsePositives(results, text)
+    val filtered = filterResultsInBlockedRanges(results, text)
     assertThat(filtered).hasSize(1)
     assertThat(filtered[0].positionStart).isEqualTo(9)
   }

@@ -29,24 +29,43 @@ class RepeatedWordsCheck : QaCheck {
     for (i in 1 until words.size) {
       val prev = words[i - 1]
       val curr = words[i]
-      if (prev.value.equals(curr.value, ignoreCase = true)) {
-        results.add(
-          QaCheckResult(
-            type = QaCheckType.REPEATED_WORDS,
-            message = QaIssueMessage.QA_REPEATED_WORD,
-            replacement = "",
-            positionStart = prev.range.last + 1,
-            positionEnd = curr.range.last + 1,
-            params = mapOf("word" to curr.value),
-          ),
-        )
-      }
+      if (!prev.value.equals(curr.value, ignoreCase = true)) continue
+      if (!isPlainSpaceSeparator(text, prev.range.last + 1, curr.range.first)) continue
+      results.add(
+        QaCheckResult(
+          type = QaCheckType.REPEATED_WORDS,
+          message = QaIssueMessage.QA_REPEATED_WORD,
+          replacement = "",
+          positionStart = prev.range.last + 1,
+          positionEnd = curr.range.last + 1,
+          params = mapOf("word" to curr.value),
+        ),
+      )
     }
 
-    return results
+    return filterResultsInBlockedRanges(results, text)
+  }
+
+  /**
+   * Returns true when text in given range is non-empty and consists only of
+   * regular spaces (U+0020) and/or non-breaking spaces (U+00A0).
+   */
+  private fun isPlainSpaceSeparator(
+    text: String,
+    start: Int,
+    end: Int,
+  ): Boolean {
+    if (start >= end) return false
+    for (i in start until end) {
+      val c = text[i]
+      if (c != SPACE && c != NBSP) return false
+    }
+    return true
   }
 
   companion object {
     private val WORD_REGEX = Regex("""\p{L}[\p{L}\p{N}]*""")
+    private const val SPACE = '\u0020'
+    private const val NBSP = '\u00A0'
   }
 }
