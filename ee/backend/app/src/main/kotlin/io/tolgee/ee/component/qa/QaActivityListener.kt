@@ -48,6 +48,7 @@ class QaActivityListener(
   private val qaRecheckService: QaRecheckService,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
 ) : BypassableActivityListener {
+  @Volatile
   override var bypass = false
 
   // region Event listeners

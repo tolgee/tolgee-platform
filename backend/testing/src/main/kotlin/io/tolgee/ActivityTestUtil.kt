@@ -15,7 +15,8 @@ class ActivityTestUtil(
         from ActivityRevision ar left join fetch ar.modifiedEntities order by ar.id desc limit 1
         """.trimMargin(),
         ActivityRevision::class.java,
-      ).singleResult
+      ).resultList
+      .firstOrNull()
   }
 
   fun findRevisionsAfter(afterId: Long): List<ActivityRevision> {
