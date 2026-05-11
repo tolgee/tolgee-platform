@@ -400,6 +400,14 @@ class TranslationMemoryTestData : BaseTestData() {
           multiProjectSharedTm = self
           assignProject(projectWithTm) { priority = 5 }
           assignProject(conflictProject) { priority = 6 }
+          // Manual override on a source that also has virtual entries. After the recent
+          // candidate split this entry must render on its own row (no key reference,
+          // editable) rather than blending into a virtual row's German cell.
+          addEntry {
+            sourceText = "Existing source"
+            targetText = "Manual override"
+            targetLanguageTag = "de"
+          }
         }
 
       // An org MEMBER user — used by shared TM permission tests

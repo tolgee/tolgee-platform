@@ -153,6 +153,48 @@ describe('Translation Memory content browser', () => {
     tmView.getEntryRowContaining('Reviewed source').should('be.visible');
   });
 
+  describe('Stored vs virtual rendering', () => {
+    // "Multi-project shared TM" has both write-access projects translating "Existing source"
+    // (two virtual rows) and a manual stored entry on the same source ("Manual override").
+    // The fixture exercises the candidate split: stored rows must stay editable and carry
+    // no project-key reference; virtual rows stay read-only and carry their originating key.
+
+    // Guards against the regression where a manual entry sharing a source with virtual
+    // rows landed in the virtual row's cell instead of getting its own row.
+    it('a manual entry on a shared source renders on its own row without a key reference', () => {
+      listView.findAndVisitTm(data, 'test_username', 'Multi-project shared TM');
+
+      tmView.getEntryRowContaining('Existing source').should('have.length', 3);
+
+      // The stored manual row carries no project-key reference (manual entries have
+      // no associated key in the project), while each virtual row does.
+      tmView
+        .getEntryRowContaining('Manual override')
+        .find('[data-cy="tm-entry-row-keys"]')
+        .should('not.exist');
+      tmView
+        .getEntryRowContaining('Bestehende Übersetzung aus Konfliktprojekt')
+        .find('[data-cy="tm-entry-row-keys"]')
+        .should('contain', 'shared-greeting');
+    });
+
+    // Inline-editing on a virtual cell must be blocked — the same guard also covers empty
+    // cells on a virtual row (both share the `editable = canManage && (stored || !rowFromProject)`
+    // gate). Editing the stored manual row in the same group must still work.
+    it('clicking a virtual cell does not open the edit form, but the manual row stays editable', () => {
+      listView.findAndVisitTm(data, 'test_username', 'Multi-project shared TM');
+
+      // Virtual cell click → no edit field.
+      tmView.clickTranslationCell('Bestehende Übersetzung aus Konfliktprojekt');
+      cy.get('[data-cy="tm-entry-edit-field"]').should('not.exist');
+
+      // Manual stored cell on the same source group stays editable.
+      tmView.clickTranslationCell('Manual override');
+      cy.get('[data-cy="tm-entry-edit-field"]').should('be.visible');
+      tmView.cancelEdit();
+    });
+  });
+
   describe('Import / Export', () => {
     it('shows import and export buttons', () => {
       listView.findAndVisitTm(data, 'test_username', 'Shared Marketing TM');

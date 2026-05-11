@@ -115,18 +115,20 @@ describe('Translation Memory org settings', () => {
 
     // "Multi-project shared TM" has two write-access projects ("Project With TM" and
     // "Conflict source project") that both translate "Existing source" but with different
-    // German targets. Each translation must surface as its own candidate row instead of
-    // collapsing into a single cell — and each row carries its own source text and key
-    // reference so the user can tell the variants apart.
+    // German targets, plus a manual stored entry ("Manual override") on the same source.
+    // The three contributions must surface as three separate rows: one manual + two
+    // virtuals, each carrying its own variant text. Virtual rows expose the originating
+    // project's key reference.
     it('renders one candidate row per project when two projects translate the same source differently', () => {
       login('test_username');
       view.findAndVisit(data, 'test_username');
 
       view.openTm('Multi-project shared TM');
 
-      tmView.getEntryRowContaining('Existing source').should('have.length', 2);
+      tmView.getEntryRowContaining('Existing source').should('have.length', 3);
 
-      // Each variant's specific German translation is visible.
+      // Each variant's specific German target is visible.
+      tmView.getEntryRowContaining('Manual override').should('have.length', 1);
       tmView
         .getEntryRowContaining('Bestehende Übersetzung')
         .should('have.length.at.least', 1);
@@ -134,7 +136,7 @@ describe('Translation Memory org settings', () => {
         .getEntryRowContaining('Bestehende Übersetzung aus Konfliktprojekt')
         .should('have.length', 1);
 
-      // Each candidate row exposes its originating project's key name.
+      // Each virtual row exposes its originating project's key name.
       cy.contains('[data-cy="tm-entry-row-keys"]', 'existing-key').should(
         'be.visible'
       );
