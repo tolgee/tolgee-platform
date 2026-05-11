@@ -345,8 +345,8 @@ class TestDataService(
   }
 
   private fun saveQaConfigs(builder: ProjectBuilder) {
-    builder.data.qaConfig?.let { entityManager.persist(it) }
-    builder.data.languageQaConfigs.forEach { entityManager.persist(it) }
+    builder.data.qaConfig?.let { entityManager.persist(it.self) }
+    builder.data.languageQaConfigs.forEach { entityManager.persist(it.self) }
   }
 
   private fun saveWebhookConfigs(builder: ProjectBuilder) {

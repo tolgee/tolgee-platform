@@ -74,8 +74,8 @@ class ProjectBuilder(
     var contentDeliveryConfigs = mutableListOf<ContentDeliveryContentBuilder>()
     var webhookConfigs = mutableListOf<WebhookConfigBuilder>()
     var importSettings: ImportSettings? = null
-    var qaConfig: ProjectQaConfig? = null
-    val languageQaConfigs = mutableListOf<LanguageQaConfig>()
+    var qaConfig: ProjectQaConfigBuilder? = null
+    val languageQaConfigs = mutableListOf<LanguageQaConfigBuilder>()
     var slackConfigs = mutableListOf<SlackConfigBuilder>()
     val batchJobs: MutableList<BatchJobBuilder> = mutableListOf()
     val tasks = mutableListOf<TaskBuilder>()
@@ -249,16 +249,19 @@ class ProjectBuilder(
   }
 
   /** Seeds the project's [ProjectQaConfig]. There is at most one config per project. */
-  fun setQaConfig(ft: FT<ProjectQaConfig> = {}) {
-    data.qaConfig = ProjectQaConfig(project = this.self).apply(ft)
+  fun setQaConfig(ft: FT<ProjectQaConfig> = {}): ProjectQaConfigBuilder {
+    val builder = ProjectQaConfigBuilder(this).apply { ft(self) }
+    data.qaConfig = builder
+    return builder
   }
 
   /** Seeds a per-language [LanguageQaConfig]. There is at most one config per language. */
   fun addLanguageQaConfig(
     language: Language,
     ft: FT<LanguageQaConfig> = {},
-  ) {
-    data.languageQaConfigs.add(LanguageQaConfig(language = language).apply(ft))
+  ): LanguageQaConfigBuilder {
+    val builder = LanguageQaConfigBuilder(this, language)
+    return addOperation(data.languageQaConfigs, builder, ft)
   }
 
   fun addPrompt(ft: FT<Prompt>) = addOperation(data.prompts, ft)
