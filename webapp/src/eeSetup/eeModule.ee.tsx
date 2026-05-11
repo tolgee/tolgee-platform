@@ -536,7 +536,7 @@ export const useAddProjectSettingsTabs = (projectId: number) => {
         },
       ],
       {
-        position: 'before',
+        position: 'after',
         value: 'advanced',
         fallbackPosition: 'start',
       }
@@ -558,7 +558,7 @@ export const useAddProjectSettingsTabs = (projectId: number) => {
       ],
       {
         position: 'after',
-        value: 'advanced',
+        value: 'qa',
         fallbackPosition: 'start',
       }
     )(tabs);
