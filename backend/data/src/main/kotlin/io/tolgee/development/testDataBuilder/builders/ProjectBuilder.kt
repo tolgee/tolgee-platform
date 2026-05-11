@@ -246,7 +246,6 @@ class ProjectBuilder(
     data.importSettings = ImportSettings(this.self).apply(ft)
   }
 
-  /** Seeds the project's [ProjectQaConfig]. There is at most one config per project. */
   fun setQaConfig(ft: FT<ProjectQaConfig> = {}): ProjectQaConfigBuilder {
     val builder = ProjectQaConfigBuilder(this).apply { ft(self) }
     data.qaConfig = builder

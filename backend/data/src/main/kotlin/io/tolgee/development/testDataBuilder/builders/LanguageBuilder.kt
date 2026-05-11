@@ -19,7 +19,6 @@ class LanguageBuilder(
       project = projectBuilder.self
     }
 
-  /** Seeds the language's [LanguageQaConfig]. There is at most one config per language. */
   fun setQaConfig(ft: FT<LanguageQaConfig> = {}): LanguageQaConfigBuilder {
     val builder = LanguageQaConfigBuilder(this).apply { ft(self) }
     data.qaConfig = builder
