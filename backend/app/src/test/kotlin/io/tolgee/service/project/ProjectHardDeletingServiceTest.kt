@@ -19,8 +19,6 @@ import io.tolgee.dtos.BigMetaDto
 import io.tolgee.dtos.RelatedKeyDto
 import io.tolgee.fixtures.waitFor
 import io.tolgee.model.Project
-import io.tolgee.repository.qa.LanguageQaConfigRepository
-import io.tolgee.repository.qa.ProjectQaConfigRepository
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.testing.assert
 import io.tolgee.util.executeInNewRepeatableTransaction
@@ -39,12 +37,6 @@ class ProjectHardDeletingServiceTest : AbstractSpringTest() {
 
   @Autowired
   private lateinit var projectHardDeletingService: ProjectHardDeletingService
-
-  @Autowired
-  private lateinit var projectQaConfigRepository: ProjectQaConfigRepository
-
-  @Autowired
-  private lateinit var languageQaConfigRepository: LanguageQaConfigRepository
 
   @Test
   fun `deletes project with MT Settings`() {
@@ -147,12 +139,6 @@ class ProjectHardDeletingServiceTest : AbstractSpringTest() {
   fun `deletes project with QA entities`() {
     val testData = ProjectWithQaEntitiesTestData()
     testDataService.saveTestData(testData.root)
-
-    executeInNewTransaction(platformTransactionManager) {
-      projectQaConfigRepository.save(testData.createProjectQaConfig())
-      languageQaConfigRepository.save(testData.createLanguageQaConfig())
-      entityManager.flush()
-    }
 
     io.tolgee.util.executeInNewTransaction(platformTransactionManager) {
       projectHardDeletingService.hardDeleteProject(testData.projectBuilder.self.refresh())

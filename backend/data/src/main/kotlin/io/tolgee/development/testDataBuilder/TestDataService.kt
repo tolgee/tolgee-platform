@@ -326,6 +326,7 @@ class TestDataService(
     saveSlackConfigs(builder)
     saveAutomations(builder)
     saveImportSettings(builder)
+    saveQaConfigs(builder)
     saveBatchJobs(builder)
     saveTasks(builder)
     saveTaskKeys(builder)
@@ -341,6 +342,11 @@ class TestDataService(
       entityManager.merge(it.userAccount)
       entityManager.persist(it)
     }
+  }
+
+  private fun saveQaConfigs(builder: ProjectBuilder) {
+    builder.data.qaConfig?.let { entityManager.persist(it) }
+    builder.data.languageQaConfigs.forEach { entityManager.persist(it) }
   }
 
   private fun saveWebhookConfigs(builder: ProjectBuilder) {

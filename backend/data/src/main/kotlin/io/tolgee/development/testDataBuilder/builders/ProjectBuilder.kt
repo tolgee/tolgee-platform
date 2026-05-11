@@ -27,6 +27,8 @@ import io.tolgee.model.key.Tag
 import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
 import io.tolgee.model.keyBigMeta.KeysDistance
 import io.tolgee.model.mtServiceConfig.MtServiceConfig
+import io.tolgee.model.qa.LanguageQaConfig
+import io.tolgee.model.qa.ProjectQaConfig
 import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.model.task.Task
 import io.tolgee.model.task.TaskKey
@@ -72,6 +74,8 @@ class ProjectBuilder(
     var contentDeliveryConfigs = mutableListOf<ContentDeliveryContentBuilder>()
     var webhookConfigs = mutableListOf<WebhookConfigBuilder>()
     var importSettings: ImportSettings? = null
+    var qaConfig: ProjectQaConfig? = null
+    val languageQaConfigs = mutableListOf<LanguageQaConfig>()
     var slackConfigs = mutableListOf<SlackConfigBuilder>()
     val batchJobs: MutableList<BatchJobBuilder> = mutableListOf()
     val tasks = mutableListOf<TaskBuilder>()
@@ -242,6 +246,19 @@ class ProjectBuilder(
 
   fun setImportSettings(ft: FT<ImportSettings>) {
     data.importSettings = ImportSettings(this.self).apply(ft)
+  }
+
+  /** Seeds the project's [ProjectQaConfig]. There is at most one config per project. */
+  fun setQaConfig(ft: FT<ProjectQaConfig> = {}) {
+    data.qaConfig = ProjectQaConfig(project = this.self).apply(ft)
+  }
+
+  /** Seeds a per-language [LanguageQaConfig]. There is at most one config per language. */
+  fun addLanguageQaConfig(
+    language: Language,
+    ft: FT<LanguageQaConfig> = {},
+  ) {
+    data.languageQaConfigs.add(LanguageQaConfig(language = language).apply(ft))
   }
 
   fun addPrompt(ft: FT<Prompt>) = addOperation(data.prompts, ft)
