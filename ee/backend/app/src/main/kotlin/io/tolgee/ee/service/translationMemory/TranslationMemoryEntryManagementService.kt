@@ -154,6 +154,7 @@ class TranslationMemoryEntryManagementService(
       order by source_text, kind, origin_id
       limit :limit offset :offset
       """.trimIndent()
+
     @Suppress("UNCHECKED_CAST")
     val rows =
       entityManager
@@ -309,6 +310,7 @@ class TranslationMemoryEntryManagementService(
         )
       order by base_t.text, target_lang.tag
       """.trimIndent()
+
     @Suppress("UNCHECKED_CAST")
     val rows =
       entityManager

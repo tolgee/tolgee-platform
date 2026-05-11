@@ -20,8 +20,9 @@ class TranslationMemoryRowModel(
   @Schema(description = "Source text in the TM's source language", example = "Hello world")
   val sourceText: String,
   @Schema(
-    description = "Whether the row can be edited (manual TM entries) or is read-only " +
-      "(mirrored from a project key — change it in the project).",
+    description =
+      "Whether the row can be edited (manual TM entries) or is read-only " +
+        "(mirrored from a project key — change it in the project).",
     example = "true",
   )
   val editable: Boolean,
@@ -41,8 +42,9 @@ class TranslationMemoryRowCellModel(
   @Schema(description = "Target language tag (BCP 47)", example = "de")
   val targetLanguageTag: String,
   @Schema(
-    description = "Id of the underlying TM entry when the cell is editable. Absent for " +
-      "read-only cells mirrored from project translations.",
+    description =
+      "Id of the underlying TM entry when the cell is editable. Absent for " +
+        "read-only cells mirrored from project translations.",
     example = "12345",
   )
   val entryId: Long?,
