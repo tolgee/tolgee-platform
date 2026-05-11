@@ -17,4 +17,16 @@ class ActivityTestUtil(
         ActivityRevision::class.java,
       ).singleResult
   }
+
+  fun findRevisionsAfter(afterId: Long): List<ActivityRevision> {
+    return entityManager
+      .createQuery(
+        """
+        from ActivityRevision ar left join fetch ar.modifiedEntities
+          where ar.id > :afterId order by ar.id asc
+        """.trimMargin(),
+        ActivityRevision::class.java,
+      ).setParameter("afterId", afterId)
+      .resultList
+  }
 }

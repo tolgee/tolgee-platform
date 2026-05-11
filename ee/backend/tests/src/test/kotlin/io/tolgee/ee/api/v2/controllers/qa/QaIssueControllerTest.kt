@@ -535,30 +535,24 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
-  @Disabled(
-    "Was previously passing only because TestDataService activity events were leaking " +
-      "through to subsequent transactions, so `getLastRevision()` returned an unrelated " +
-      "BeforeEach-driven revision instead of the one created by `runChecksAndPersist`. " +
-      "Now that `BypassableActivityListener` properly suppresses activities during test-data " +
-      "save, the only revision is the QA-issue persistence one, which DOES contain a " +
-      "`TranslationQaIssue` modification despite `disableActivityLogging = true` being set on " +
-      "the entities — the assertion needs to be reworked. Tracking in a separate PR.",
-  )
   fun `batch QA recalculation does not create visible activity`() {
+    val baselineRevisionId = activityUtil.getLastRevision()?.id ?: 0L
+
     qa.runChecksAndPersist(testData.frTranslation)
 
-    val revision = activityUtil.getLastRevision()
-    // The batch QA check has activityType = null, so either no revision exists
-    // or the latest revision is not a QA-related activity type
-    if (revision != null) {
-      assertThat(revision.type).isNotIn(
-        ActivityType.QA_ISSUE_IGNORE,
-        ActivityType.QA_ISSUE_UNIGNORE,
-      )
-      val modifiedEntity =
-        revision.modifiedEntities.find { it.entityClass == TranslationQaIssue::class.simpleName }
-      assertThat(modifiedEntity).isNull()
-    }
+    val newRevisions = activityUtil.findRevisionsAfter(baselineRevisionId)
+    assertThat(newRevisions)
+      .withFailMessage(
+        "runChecksAndPersist must not create user-visible activity revisions, but produced: %s",
+        newRevisions.map { it.id to it.type },
+      ).allSatisfy { revision ->
+        assertThat(revision.type).isNotIn(
+          ActivityType.QA_ISSUE_IGNORE,
+          ActivityType.QA_ISSUE_UNIGNORE,
+        )
+        assertThat(revision.modifiedEntities.map { it.entityClass })
+          .doesNotContain(TranslationQaIssue::class.simpleName)
+      }
   }
 
   private fun virtualCaseMismatchRequest() =
