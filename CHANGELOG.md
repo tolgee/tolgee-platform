@@ -1,3 +1,10 @@
+## [3.184.4](https://github.com/tolgee/tolgee-platform/compare/v3.184.3...v3.184.4) (2026-05-11)
+
+
+### Bug Fixes
+
+* open Context Data tab by default on the AI page ([#3630](https://github.com/tolgee/tolgee-platform/issues/3630)) ([7f79ebc](https://github.com/tolgee/tolgee-platform/commit/7f79ebcfb132459b9ee50521e80673c41c314ec2))
+
 ## [3.184.3](https://github.com/tolgee/tolgee-platform/compare/v3.184.2...v3.184.3) (2026-05-11)
 
 
