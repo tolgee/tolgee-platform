@@ -6,6 +6,10 @@ import io.tolgee.formats.BaseIcuMessageConvertor
 import io.tolgee.formats.VisibleTextIcuPlaceholderConvertor
 import io.tolgee.model.key.Key
 
+fun Key.applyMaxCharLimit(value: Int?) {
+  value?.let { maxCharLimit = if (it <= 0) null else it }
+}
+
 fun validateCharLimit(
   key: Key,
   translations: Map<*, String?>,
@@ -22,7 +26,7 @@ fun validateCharLimit(
   }
 }
 
-private fun getMaxVisibleCharCount(
+fun getMaxVisibleCharCount(
   text: String,
   isPlural: Boolean,
 ): Int {

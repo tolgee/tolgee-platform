@@ -7,7 +7,7 @@ interface UserAccountWithOrganizationRoleView : IMfa {
   val id: Long
   val name: String
   var username: String
-  var organizationRole: OrganizationRoleType
+  var organizationRole: OrganizationRoleType?
   override var totpKey: ByteArray?
   var avatarHash: String?
 }

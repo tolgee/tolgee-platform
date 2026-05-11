@@ -62,7 +62,7 @@ class PermissionService(
   @set:Autowired
   lateinit var projectService: ProjectService
 
-  @Transactional
+  @Transactional(readOnly = true)
   fun findPermissionNonCached(
     projectId: Long? = null,
     userId: Long? = null,
@@ -75,19 +75,23 @@ class PermissionService(
     )
   }
 
+  @Transactional(readOnly = true)
   fun getAllOfProject(project: Project?): Set<Permission> {
     return permissionRepository.getAllByProjectAndUserNotNull(project)
   }
 
+  @Transactional(readOnly = true)
   fun findById(id: Long): Permission? {
     return cachedPermissionService.find(id)
   }
 
+  @Transactional(readOnly = true)
   fun getProjectPermissionScopesNoApiKey(
     projectId: Long,
     userAccount: UserAccount,
   ) = getProjectPermissionScopesNoApiKey(projectId, userAccount.id)
 
+  @Transactional(readOnly = true)
   fun getProjectPermissionScopesNoApiKey(
     projectId: Long,
     userAccountId: Long,
@@ -95,6 +99,7 @@ class PermissionService(
     return getProjectPermissionData(projectId, userAccountId).computedPermissions.expandedScopes
   }
 
+  @Transactional(readOnly = true)
   fun getProjectPermissionData(
     project: ProjectDto,
     userAccountId: Long,
@@ -126,6 +131,7 @@ class PermissionService(
     )
   }
 
+  @Transactional(readOnly = true)
   fun getUserProjectPermission(
     projectId: Long,
     userId: Long,
@@ -133,6 +139,7 @@ class PermissionService(
     return find(projectId, userId)
   }
 
+  @Transactional(readOnly = true)
   fun getPermittedTranslateLanguagesForUserIds(
     userIds: List<Long>,
     projectId: Long,
@@ -149,6 +156,7 @@ class PermissionService(
     return result
   }
 
+  @Transactional(readOnly = true)
   fun getPermittedTranslateLanguagesForProjectIds(
     projectIds: List<Long>,
     userId: Long,
@@ -165,6 +173,7 @@ class PermissionService(
     return result
   }
 
+  @Transactional(readOnly = true)
   fun getProjectPermissionData(
     projectId: Long,
     userAccountId: Long,
@@ -189,6 +198,7 @@ class PermissionService(
     delete(permission)
   }
 
+  @Transactional(readOnly = true)
   fun get(permissionId: Long): Permission {
     return this.cachedPermissionService.find(permissionId) ?: throw NotFoundException()
   }
@@ -216,6 +226,7 @@ class PermissionService(
     create(permission)
   }
 
+  @Transactional(readOnly = true)
   fun computeProjectPermission(
     organizationRole: OrganizationRoleType?,
     organizationBasePermission: IPermission,
@@ -262,7 +273,7 @@ class PermissionService(
     return this.save(permission)
   }
 
-  @Transactional
+  @Transactional(readOnly = true)
   fun find(
     projectId: Long? = null,
     userId: Long? = null,
@@ -447,6 +458,7 @@ class PermissionService(
     this.delete(permissionEntity)
   }
 
+  @Transactional(readOnly = true)
   fun getPermittedViewLanguages(
     projectId: Long,
     userId: Long,
@@ -492,6 +504,7 @@ class PermissionService(
     permissionRepository.deleteAll(permissions)
   }
 
+  @Transactional(readOnly = true)
   fun getAgencyPermissions(agencyId: Long): List<Permission> {
     return permissionRepository.findAllByAgencyId(agencyId)
   }

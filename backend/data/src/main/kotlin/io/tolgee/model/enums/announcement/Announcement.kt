@@ -21,6 +21,7 @@ enum class Announcement(
   FEATURE_LABELS(parseTime("2025-09-01 00:00 UTC")),
   FEATURE_SUGGESTIONS_AND_LABELS(parseTime("2025-09-10 00:00 UTC")),
   FEATURE_IMPROVED_FIGMA_ANDROID_AND_IOS(parseTime("2025-10-01 00:00 UTC")),
+  FEATURE_BRANCHING(parseTime("2026-05-01 00:00 UTC")),
   ;
 
   companion object {

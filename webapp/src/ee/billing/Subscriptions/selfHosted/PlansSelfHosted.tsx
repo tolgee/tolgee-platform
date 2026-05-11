@@ -15,6 +15,7 @@ import { PlansSelfHostedList } from './PlansSelfHostedList';
 import { StyledBillingSectionTitle } from '../../BillingSection';
 import { SelfHostedEeActiveSubscription } from './SelfHostedEeActiveSubscription';
 import { BillingPeriodType } from '../../component/Price/PeriodSwitch';
+import { SelfHostedPlansPlaceholder } from './SelfHostedPlansPlaceholder';
 
 type SelfHostedEeSubscriptionModel =
   components['schemas']['SelfHostedEeSubscriptionModel'];
@@ -112,50 +113,57 @@ export const PlansSelfHosted = () => {
     return null;
   }
 
+  const plans = plansLoadable.data?._embedded?.plans;
+  const hasPlans = plans && plans.length > 0;
+
   return (
     <>
-      {plansLoadable.data?._embedded?.plans &&
-        activeSubscriptionsLoadable.data &&
-        period && (
-          <>
-            <Box mb={4}>
-              <Typography variant="h6" mb={2}>
-                {t('organization-billing-self-hosted-active-subscriptions')}
-              </Typography>
-              {activeSubscriptions?.length && (
-                <StyledActive>
-                  {activeSubscriptions?.map((subscription) => (
-                    <SelfHostedEeActiveSubscription
-                      key={subscription.id}
-                      subscription={subscription}
-                      isNew={subscription === newSubscription}
-                    />
-                  ))}
-                </StyledActive>
-              )}
-              {!activeSubscriptions &&
-                activeSubscriptionsLoadable.isSuccess && (
-                  <T keyName="organization-billing-self-hosted-no-active-subscriptions" />
+      {plansLoadable.data && activeSubscriptionsLoadable.data && period && (
+        <>
+          {hasPlans ? (
+            <>
+              <Box mb={4}>
+                <Typography variant="h6" mb={2}>
+                  {t('organization-billing-self-hosted-active-subscriptions')}
+                </Typography>
+                {activeSubscriptions?.length && (
+                  <StyledActive>
+                    {activeSubscriptions?.map((subscription) => (
+                      <SelfHostedEeActiveSubscription
+                        key={subscription.id}
+                        subscription={subscription}
+                        isNew={subscription === newSubscription}
+                      />
+                    ))}
+                  </StyledActive>
                 )}
-            </Box>
+                {!activeSubscriptions &&
+                  activeSubscriptionsLoadable.isSuccess && (
+                    <T keyName="organization-billing-self-hosted-no-active-subscriptions" />
+                  )}
+              </Box>
 
-            <Box display="flex" justifyContent="center">
-              <StyledBillingSectionTitle>
-                <T keyName="organization_self_hosted_plans_title" />
-              </StyledBillingSectionTitle>
-            </Box>
-            <StyledShoppingGrid>
-              <PlansSelfHostedList
-                plans={plansLoadable.data._embedded.plans.map((plan) => ({
-                  ...plan,
-                  metricType: 'KEYS_SEATS',
-                }))}
-                onPeriodChange={(period) => setPeriod(period)}
-                period={period}
-              />
-            </StyledShoppingGrid>
-          </>
-        )}
+              <Box display="flex" justifyContent="center">
+                <StyledBillingSectionTitle>
+                  <T keyName="organization_self_hosted_plans_title" />
+                </StyledBillingSectionTitle>
+              </Box>
+              <StyledShoppingGrid>
+                <PlansSelfHostedList
+                  plans={plans.map((plan) => ({
+                    ...plan,
+                    metricType: 'KEYS_SEATS',
+                  }))}
+                  onPeriodChange={(period) => setPeriod(period)}
+                  period={period}
+                />
+              </StyledShoppingGrid>
+            </>
+          ) : (
+            <SelfHostedPlansPlaceholder />
+          )}
+        </>
+      )}
     </>
   );
 };

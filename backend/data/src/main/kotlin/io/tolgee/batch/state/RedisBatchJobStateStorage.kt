@@ -12,6 +12,18 @@ import java.util.concurrent.ConcurrentHashMap
 /**
  * Redis-based implementation of BatchJobStateProvider.
  * Uses Redisson for distributed state management.
+ *
+ * ## Performance considerations
+ *
+ * [ExecutionState] stores only lightweight metadata (status enum, counts, flags) — NOT
+ * the full successTargets list. This is critical: previously each hash entry contained
+ * a serialized list of potentially thousands of target IDs, making HGETALL / HVALS on
+ * large batch jobs take 100–500 ms and block Redis's single thread. With the lightweight
+ * state, each entry is ~50 bytes, so even 10,000 entries total ~500 KB — well within
+ * acceptable limits for periodic reads.
+ *
+ * The full successTargets list is persisted to the database only (via BatchJobService)
+ * and is never stored in Redis.
  */
 open class RedisBatchJobStateStorage(
   private val initializer: BatchJobStateInitializer,
@@ -175,18 +187,16 @@ open class RedisBatchJobStateStorage(
     return if (redisHash.isEmpty()) null else redisHash.readAllMap().toMutableMap()
   }
 
-  override fun removeJobState(jobId: Long): MutableMap<Long, ExecutionState>? {
+  override fun removeJobState(jobId: Long) {
     logger.debug("Removing job state for job $jobId")
     removeAllCounters(jobId)
     val redisHash = getRedisHashForJob(jobId)
-    val state = if (redisHash.isEmpty()) null else redisHash.readAllMap().toMutableMap()
     redisHash.delete()
     // Also remove initialization and started markers
     redissonClient.getBucket<Boolean>("$REDIS_STATE_INITIALIZED_KEY_PREFIX$jobId").delete()
     redissonClient.getBucket<Boolean>("$REDIS_STARTED_KEY_PREFIX$jobId").delete()
     // Clear local initialization cache to allow re-initialization if jobId is reused
     localInitializedJobs.remove(jobId)
-    return state
   }
 
   override fun hasCachedJobState(jobId: Long): Boolean {
@@ -198,8 +208,14 @@ open class RedisBatchJobStateStorage(
     return keys.mapNotNull { it.removePrefix(REDIS_STATE_KEY_PREFIX).toLongOrNull() }.toMutableSet()
   }
 
+  /**
+   * Cleans up batch job state hashes where all executions have a completed status.
+   *
+   * This uses HVALS to read all values from each hash. Because [ExecutionState] only
+   * stores lightweight metadata (no successTargets list), each value is ~50 bytes,
+   * making this operation fast even for jobs with thousands of chunks.
+   */
   override fun clearUnusedStates() {
-    // For Redis, we scan for batch_job_state:* keys and check each
     val keys = redissonClient.keys.getKeysByPattern("$REDIS_STATE_KEY_PREFIX*")
     keys.forEach { key ->
       val jobId = key.removePrefix(REDIS_STATE_KEY_PREFIX).toLongOrNull() ?: return@forEach

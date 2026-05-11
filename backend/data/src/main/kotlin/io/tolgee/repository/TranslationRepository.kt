@@ -243,7 +243,7 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
   @Query(
     """
     SELECT t FROM Translation t
-    LEFT JOIN FETCH t.labels 
+    LEFT JOIN FETCH t.labels
     WHERE t.key.id IN :keyIds AND t.language.id IN :languageIds
     """,
   )
@@ -251,4 +251,28 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
     keyIds: Collection<Long>,
     languageIds: Collection<Long>,
   ): List<Translation>
+
+  // flushAutomatically=false: prevent auto-flush when called from BeforeTransactionCompletionProcess
+  @Modifying(flushAutomatically = false)
+  @Query(
+    nativeQuery = true,
+    value =
+      "UPDATE translation SET qa_checks_stale = true " +
+        "WHERE key_id IN (SELECT id FROM key WHERE project_id = :projectId)",
+  )
+  fun setQaChecksStaleByProjectId(projectId: Long)
+
+  // flushAutomatically=false: prevent auto-flush when called from BeforeTransactionCompletionProcess
+  @Modifying(flushAutomatically = false)
+  @Query(
+    nativeQuery = true,
+    value =
+      "UPDATE translation SET qa_checks_stale = true " +
+        "WHERE key_id IN (SELECT id FROM key WHERE project_id = :projectId) " +
+        "AND language_id IN (:languageIds)",
+  )
+  fun setQaChecksStaleByProjectIdAndLanguageIds(
+    projectId: Long,
+    languageIds: List<Long>,
+  )
 }

@@ -1,5 +1,6 @@
 package io.tolgee.service.queryBuilders
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.dtos.response.CursorValue
@@ -8,6 +9,10 @@ import java.util.Base64
 
 class CursorUtil {
   companion object {
+    private val objectMapper: ObjectMapper by lazy {
+      jacksonObjectMapper()
+    }
+
     fun getCursor(
       item: Cursorable?,
       sort: Sort,
@@ -23,13 +28,13 @@ class CursorUtil {
           }.toMap()
           .toMutableMap()
 
-      val json = jacksonObjectMapper().writer().writeValueAsString(cursor)
+      val json = objectMapper.writer().writeValueAsString(cursor)
       return Base64.getEncoder().encodeToString(json.toByteArray())
     }
 
     fun parseCursor(cursor: String): Map<String, CursorValue> {
       val json = Base64.getDecoder().decode(cursor)
-      return jacksonObjectMapper().readValue(json)
+      return objectMapper.readValue(json)
     }
   }
 }

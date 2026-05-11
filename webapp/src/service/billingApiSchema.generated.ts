@@ -901,8 +901,10 @@ export interface components {
         | "branch_merge_revision_not_valid"
         | "branch_merge_conflicts_not_resolved"
         | "branch_merge_already_merged"
-        | "branching_not_enabled_for_project"
-        | "export_key_plural_suffix_collision";
+        | "feature_not_enabled_for_project"
+        | "export_key_plural_suffix_collision"
+        | "translation_exceeds_char_limit"
+        | "url_not_valid";
       params?: unknown[];
     };
     ExampleItem: {
@@ -1016,6 +1018,8 @@ export interface components {
     };
     OrganizationWithSubscriptionsModel: {
       cloudSubscription?: components["schemas"]["AdministrationCloudSubscriptionModel"];
+      /** Format: date-time */
+      deletedAt?: string;
       organization: components["schemas"]["SimpleOrganizationModel"];
       selfHostedSubscriptions: components["schemas"]["SelfHostedEeSubscriptionAdministrationModel"][];
     };
@@ -1542,6 +1546,7 @@ export interface components {
       /** Format: date-time */
       lastInteraction?: string;
       maxMrr: number;
+      name?: string;
       /** Format: int64 */
       organizationId?: number;
       organizationName?: string;
@@ -2178,6 +2183,8 @@ export interface operations {
         search?: string;
         withCloudPlanId?: number;
         hasSelfHostedSubscription?: boolean;
+        filterDeleted?: boolean;
+        trialing?: boolean;
       };
     };
     responses: {

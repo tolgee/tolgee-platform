@@ -55,7 +55,7 @@ class MtCreditBucketService(
 
   @Transactional(noRollbackFor = [OutOfCreditsException::class])
   @ExperimentalTime
-  override fun checkPositiveBalance(organizationId: Long) {
+  override fun checkCanConsumeCredits(organizationId: Long) {
     if (!shouldConsumeCredits()) {
       return
     }

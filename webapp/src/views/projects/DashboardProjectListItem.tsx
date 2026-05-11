@@ -11,15 +11,17 @@ import { Translate01 } from '@untitled-ui/icons-react';
 import { T, useTranslate } from '@tolgee/react';
 import { Link, useHistory } from 'react-router-dom';
 
-import { LINKS, PARAMS } from 'tg.constants/links';
+import { getProjectTranslationsUrl, LINKS, PARAMS } from 'tg.constants/links';
 import { components } from 'tg.service/apiSchema.generated';
 import { TranslationStatesBar } from 'tg.views/projects/TranslationStatesBar';
 import { ProjectListItemMenu } from 'tg.views/projects/ProjectListItemMenu';
 import { stopBubble } from 'tg.fixtures/eventHandler';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
+import { useEnabledFeatures } from 'tg.globalContext/helpers';
 import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
 import { CircledLanguageIconList } from 'tg.component/languages/CircledLanguageIconList';
+import { QaBadge } from 'tg.ee';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -119,14 +121,16 @@ type ProjectWithStatsModel = components['schemas']['ProjectWithStatsModel'];
 
 const DashboardProjectListItem = (p: ProjectWithStatsModel) => {
   const { t } = useTranslate();
-  const translationsLink = LINKS.PROJECT_TRANSLATIONS.build({
-    [PARAMS.PROJECT_ID]: p.id,
-  });
   const history = useHistory();
   const rightPanelWidth = useGlobalContext((c) => c.layout.rightPanelWidth);
   const isCompact = useMediaQuery(
     `@media(max-width: ${rightPanelWidth + 800}px)`
   );
+  const { isEnabled } = useEnabledFeatures();
+  const hasQaIssues = p.stats.qaIssueCount > 0;
+  const hasStaleQaChecks = p.stats.qaChecksStaleCount > 0;
+  const showQaBadge =
+    isEnabled('QA_CHECKS') && (hasQaIssues || hasStaleQaChecks);
 
   return (
     <QuickStartHighlight
@@ -177,19 +181,39 @@ const DashboardProjectListItem = (p: ProjectWithStatsModel) => {
         </StyledLanguages>
         <StyledControls>
           <Box width="100%" display="flex" justifyContent="flex-end">
-            <Tooltip title={t('project_list_translations_button')}>
-              <IconButton
-                data-cy="project-list-translations-button"
-                onClick={stopBubble()}
-                aria-label={t('project_list_translations_button')}
-                component={Link}
-                to={translationsLink}
-                size="small"
-                className="translationIconButton"
-              >
-                <Translate01 />
-              </IconButton>
-            </Tooltip>
+            {showQaBadge ? (
+              <Tooltip title={t('project_list_qa_issues_button')}>
+                <IconButton
+                  data-cy="project-list-qa-badge-button"
+                  onClick={stopBubble()}
+                  aria-label={t('project_list_qa_issues_button')}
+                  component={Link}
+                  to={getProjectTranslationsUrl(p.id, {
+                    filters: { filterHasQaIssues: true },
+                  })}
+                  size="small"
+                >
+                  <QaBadge
+                    count={p.stats.qaIssueCount}
+                    stale={hasStaleQaChecks}
+                  />
+                </IconButton>
+              </Tooltip>
+            ) : (
+              <Tooltip title={t('project_list_translations_button')}>
+                <IconButton
+                  data-cy="project-list-translations-button"
+                  onClick={stopBubble()}
+                  aria-label={t('project_list_translations_button')}
+                  component={Link}
+                  to={getProjectTranslationsUrl(p.id)}
+                  size="small"
+                  className="translationIconButton"
+                >
+                  <Translate01 />
+                </IconButton>
+              </Tooltip>
+            )}
             <ProjectListItemMenu
               projectId={p.id}
               computedPermission={p.computedPermission}

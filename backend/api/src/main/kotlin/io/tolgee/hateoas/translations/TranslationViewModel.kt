@@ -3,6 +3,7 @@ package io.tolgee.hateoas.translations
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.constants.MtServiceType
 import io.tolgee.hateoas.label.LabelModel
+import io.tolgee.hateoas.qa.QaIssueModel
 import io.tolgee.hateoas.translations.suggestions.TranslationSuggestionSimpleModel
 import io.tolgee.model.enums.TranslationState
 import org.springframework.hateoas.RepresentationModel
@@ -33,8 +34,14 @@ open class TranslationViewModel(
   val activeSuggestionCount: Long,
   @Schema(description = "Number of all suggestions")
   val totalSuggestionCount: Long,
+  @Schema(description = "Number of open QA issues")
+  val qaIssueCount: Long = 0,
+  @Schema(description = "Whether QA checks are stale and need re-running")
+  val qaChecksStale: Boolean = false,
   @get:Schema(description = "First suggestion")
   val suggestions: List<TranslationSuggestionSimpleModel>? = null,
+  @Schema(description = "Detailed QA issues for inline highlighting (only when includeQaIssues=true)")
+  val qaIssues: List<QaIssueModel>? = null,
 ) : RepresentationModel<TranslationViewModel>() {
   @get:Schema(description = "Was translation memory used to translate this?")
   val fromTranslationMemory: Boolean

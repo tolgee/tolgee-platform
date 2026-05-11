@@ -1,17 +1,16 @@
 package io.tolgee.security
 
-import io.tolgee.config.TestEmailConfiguration
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.fixtures.EmailTestUtil
+import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.testing.AbstractControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
@@ -19,7 +18,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.transaction.annotation.Transactional
 
-@Import(TestEmailConfiguration::class)
 class EmailVerificationTest : AbstractControllerTest() {
   @Autowired
   private lateinit var emailTestUtil: EmailTestUtil
@@ -164,5 +162,30 @@ class EmailVerificationTest : AbstractControllerTest() {
     val user = userAccountService.findActive(signUpDto.email) ?: throw NotFoundException()
 
     assertThat(getMessageContent()).contains("dummyCallbackUrl/login/verify_email/${user.id}/")
+  }
+
+  @Test
+  @Transactional
+  fun `resend preserves new email and sends to it`() {
+    val user = dbPopulator.createUserIfNotExists(initialUsername)
+    emailVerificationService.createForUser(user, newEmail = "new@email.com")
+
+    // Clear the mock to only capture the resend
+    emailTestUtil.initMocks()
+
+    // Resend without explicit newEmail — should preserve the pending new email
+    emailVerificationService.resendEmailVerification(
+      user,
+      org.springframework.mock.web
+        .MockHttpServletRequest(),
+    )
+
+    // newEmail should still be set in the DB
+    val verification = emailVerificationRepository.findById(user.emailVerification!!.id!!).get()
+    assertThat(verification.newEmail).isEqualTo("new@email.com")
+
+    // Email should be sent to the new address, not the old one
+    emailTestUtil.verifyEmailSent()
+    emailTestUtil.assertEmailTo.isEqualTo("new@email.com")
   }
 }

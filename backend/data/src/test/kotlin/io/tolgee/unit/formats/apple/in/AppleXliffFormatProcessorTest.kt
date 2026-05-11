@@ -5,6 +5,7 @@ import io.tolgee.formats.xliff.`in`.parser.XliffParser
 import io.tolgee.testing.assert
 import io.tolgee.unit.formats.PlaceholderConversionTestHelper
 import io.tolgee.util.FileProcessorContextMockUtil
+import io.tolgee.util.XmlSecurity
 import io.tolgee.util.assertAllSame
 import io.tolgee.util.assertKey
 import io.tolgee.util.assertLanguagesCount
@@ -16,12 +17,11 @@ import io.tolgee.util.description
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import javax.xml.stream.XMLEventReader
-import javax.xml.stream.XMLInputFactory
 
 class AppleXliffFormatProcessorTest {
   private val xmlEventReader: XMLEventReader
     get() {
-      val inputFactory: XMLInputFactory = XMLInputFactory.newDefaultFactory()
+      val inputFactory = XmlSecurity.newSecureXmlInputFactory()
       return inputFactory.createXMLEventReader(mockUtil.importFileDto.data.inputStream())
     }
 

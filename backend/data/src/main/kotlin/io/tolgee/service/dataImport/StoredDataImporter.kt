@@ -33,7 +33,7 @@ import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
 
 class StoredDataImporter(
-  applicationContext: ApplicationContext,
+  private val applicationContext: ApplicationContext,
   private val import: Import,
   private val forceMode: ForceMode = ForceMode.NO_FORCE,
   private val reportStatus: ((ImportApplicationStatus) -> Unit) = {},

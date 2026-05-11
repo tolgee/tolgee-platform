@@ -1,6 +1,7 @@
 package io.tolgee.service.queryBuilders.translationViewBuilder
 
 import io.tolgee.dtos.request.translation.TranslationFilters
+import io.tolgee.model.Language_
 import io.tolgee.model.UserAccount_
 import io.tolgee.model.activity.ActivityDescribingEntity
 import io.tolgee.model.activity.ActivityDescribingEntity_
@@ -9,19 +10,28 @@ import io.tolgee.model.activity.ActivityModifiedEntity_
 import io.tolgee.model.activity.ActivityRevision_
 import io.tolgee.model.branching.Branch_
 import io.tolgee.model.key.Key
+import io.tolgee.model.key.KeyMeta
 import io.tolgee.model.key.KeyMeta_
 import io.tolgee.model.key.Key_
 import io.tolgee.model.key.Namespace_
 import io.tolgee.model.key.Tag_
+import io.tolgee.model.task.TaskKey
 import io.tolgee.model.task.TaskKey_
 import io.tolgee.model.task.Task_
 import io.tolgee.model.temp.UnsuccessfulJobKey
 import io.tolgee.model.temp.UnsuccessfulJobKey_
+import io.tolgee.model.translation.Translation
+import io.tolgee.model.translation.Translation_
 import jakarta.persistence.EntityManager
+import jakarta.persistence.Tuple
 import jakarta.persistence.criteria.CriteriaBuilder
 import jakarta.persistence.criteria.JoinType
 import jakarta.persistence.criteria.Predicate
 import jakarta.persistence.criteria.Subquery
+import org.hibernate.query.criteria.JpaCteContainer
+import org.hibernate.query.criteria.JpaCteCriteria
+import org.hibernate.query.sqm.tree.select.AbstractSqmSelectQuery
+import org.hibernate.sql.ast.tree.cte.CteMaterialization
 import java.util.Locale
 
 class QueryGlobalFiltering(
@@ -29,6 +39,7 @@ class QueryGlobalFiltering(
   private val queryBase: QueryBase<*>,
   private val cb: CriteriaBuilder,
   private val entityManager: EntityManager,
+  private val isCountQuery: Boolean = false,
 ) {
   fun apply() {
     filterTag()
@@ -62,18 +73,33 @@ class QueryGlobalFiltering(
 
   private fun filterSearch() {
     val search = params.search
-    if (!search.isNullOrEmpty()) {
-      val fullTextRestrictions: MutableSet<Predicate> = HashSet()
-      for (fullTextField in queryBase.fullTextFields) {
-        fullTextRestrictions.add(
-          cb.like(
-            cb.upper(fullTextField),
-            "%" + search.uppercase(Locale.getDefault()) + "%",
-          ),
-        )
-      }
-      queryBase.whereConditions.add(cb.or(*fullTextRestrictions.toTypedArray()))
+    if (search.isNullOrEmpty()) return
+    val pattern = "%" + search.uppercase(Locale.getDefault()) + "%"
+
+    // `fullTextFields` holds only key-level columns (key name, namespace name, description).
+    // Translation text is searched via a non-correlated IN subquery so PostgreSQL scans the
+    // translation table once and semi-joins with the outer key set — much faster than a
+    // correlated EXISTS which would evaluate per outer key.
+    val keyLevelRestrictions: MutableList<Predicate> =
+      queryBase.fullTextFields
+        .map { cb.like(cb.upper(it), pattern) }
+        .toMutableList()
+
+    val selectedLangIds = queryBase.languages.map { it.id }
+    if (selectedLangIds.isNotEmpty()) {
+      val subquery = queryBase.query.subquery(Long::class.java)
+      val tRoot = subquery.from(Translation::class.java)
+      subquery.select(tRoot.get(Translation_.key).get(Key_.id))
+      subquery.where(
+        cb.and(
+          tRoot.get(Translation_.language).get(Language_.id).`in`(selectedLangIds),
+          cb.like(cb.upper(tRoot.get(Translation_.text)), pattern),
+        ),
+      )
+      keyLevelRestrictions.add(queryBase.root.get(Key_.id).`in`(subquery))
     }
+
+    queryBase.whereConditions.add(cb.or(*keyLevelRestrictions.toTypedArray()))
   }
 
   private fun filterHasNoScreenshot() {
@@ -89,23 +115,68 @@ class QueryGlobalFiltering(
   }
 
   private fun filterTranslatedAny() {
-    if (params.filterTranslatedAny == true) {
-      val predicates =
-        queryBase.translationsTextFields
-          .map { with(queryBase) { it.isNotNullOrBlank } }
-          .toTypedArray()
-      queryBase.whereConditions.add(cb.or(*predicates))
+    if (params.filterTranslatedAny != true) return
+    val selectedLangIds = queryBase.languages.map { it.id }
+    if (selectedLangIds.isEmpty()) {
+      queryBase.whereConditions.add(cb.disjunction())
+      return
     }
+    val subquery = queryBase.query.subquery(Long::class.java)
+    val tRoot = subquery.from(Translation::class.java)
+    val conditions = mutableListOf<Predicate>()
+    if (isCountQuery) {
+      subquery.select(tRoot.get(Translation_.key).get(Key_.id))
+    } else {
+      subquery.select(cb.literal(1L))
+      conditions.add(cb.equal(tRoot.get(Translation_.key).get(Key_.id), queryBase.root.get(Key_.id)))
+    }
+    conditions.add(tRoot.get(Translation_.language).get(Language_.id).`in`(selectedLangIds))
+    conditions.add(cb.isNotNull(tRoot.get(Translation_.text)))
+    conditions.add(cb.notEqual(tRoot.get(Translation_.text), ""))
+    subquery.where(*conditions.toTypedArray())
+    queryBase.whereConditions.add(
+      if (isCountQuery) queryBase.root.get(Key_.id).`in`(subquery) else cb.exists(subquery),
+    )
   }
 
   private fun filterUntranslatedAny() {
-    if (params.filterUntranslatedAny == true) {
-      val predicates =
-        queryBase.translationsTextFields
-          .map { with(queryBase) { it.isNullOrBlank } }
-          .toTypedArray()
-      queryBase.whereConditions.add(cb.or(*predicates))
-    }
+    if (params.filterUntranslatedAny != true) return
+    val selectedLangIds = queryBase.languages.map { it.id }
+    if (selectedLangIds.isEmpty()) return
+
+    // Materialized CTE: PostgreSQL computes the set of fully-translated key IDs once and
+    // hashes it, then anti-joins against the outer key set. This is much faster than an
+    // inline subquery which the planner may evaluate differently per outer row.
+    val cte = buildFullyTranslatedKeysCte(selectedLangIds)
+
+    val subquery = queryBase.query.subquery(Long::class.java)
+    val cteRoot = (subquery as AbstractSqmSelectQuery<Long>).from(cte)
+    subquery.select(cteRoot.get<Long>("keyId"))
+    queryBase.whereConditions.add(cb.not(queryBase.root.get(Key_.id).`in`(subquery)))
+  }
+
+  /**
+   * Builds a materialized CTE that selects key IDs having a non-empty translation in ALL
+   * selected languages. Registered on the outer [queryBase.query].
+   */
+  private fun buildFullyTranslatedKeysCte(selectedLangIds: List<Long>): JpaCteCriteria<Tuple> {
+    val cteQuery = cb.createTupleQuery()
+    val tRoot = cteQuery.from(Translation::class.java)
+    val keyIdPath = tRoot.get(Translation_.key).get(Key_.id)
+    cteQuery.multiselect(keyIdPath.alias("keyId"))
+    cteQuery.where(
+      cb.and(
+        tRoot.get(Translation_.language).get(Language_.id).`in`(selectedLangIds),
+        cb.isNotNull(tRoot.get(Translation_.text)),
+        cb.notEqual(tRoot.get(Translation_.text), ""),
+      ),
+    )
+    cteQuery.groupBy(keyIdPath)
+    cteQuery.having(cb.equal(cb.count(tRoot), cb.literal(selectedLangIds.size.toLong())))
+
+    val cte = (queryBase.query as JpaCteContainer).with(cteQuery)
+    cte.setMaterialization(CteMaterialization.MATERIALIZED)
+    return cte
   }
 
   private fun filterKeyId() {
@@ -147,11 +218,18 @@ class QueryGlobalFiltering(
       val subquerySelect = subquery.select(subRoot.get(Key_.id))
       val hasDefaultNamespace = filterNoNamespace.contains("")
 
-      subquerySelect.where(
-        cb.equal(subRoot.get(Key_.id), root.get(Key_.id)),
-        subJoin.get(Namespace_.name).`in`(filterNoNamespace),
-      )
-      queryBase.whereConditions.add(cb.not(cb.exists(subquery)))
+      if (isCountQuery) {
+        subquerySelect.where(
+          subJoin.get(Namespace_.name).`in`(filterNoNamespace),
+        )
+        queryBase.whereConditions.add(cb.not(root.get(Key_.id).`in`(subquery)))
+      } else {
+        subquerySelect.where(
+          cb.equal(subRoot.get(Key_.id), root.get(Key_.id)),
+          subJoin.get(Namespace_.name).`in`(filterNoNamespace),
+        )
+        queryBase.whereConditions.add(cb.not(cb.exists(subquery)))
+      }
       if (hasDefaultNamespace) {
         queryBase.whereConditions.add(
           queryBase.namespaceNameExpression.isNotNull,
@@ -168,70 +246,107 @@ class QueryGlobalFiltering(
   }
 
   private fun filterTag() {
-    val filterTag = distinguishEmptyValue(params.filterTag)
-    if (filterTag != null) {
-      val keyMetaJoin = queryBase.root.join(Key_.keyMeta, JoinType.LEFT)
-      val tagsJoin = keyMetaJoin.join(KeyMeta_.tags, JoinType.LEFT)
-      val hasEmptyTag = filterTag.contains("")
-      val inCondition = tagsJoin.get(Tag_.name).`in`(filterTag)
-      val condition =
-        if (hasEmptyTag) {
-          cb.or(inCondition, tagsJoin.get(Tag_.name).isNull)
-        } else {
-          inCondition
-        }
-      queryBase.whereConditions.add(condition)
+    val filterTag = distinguishEmptyValue(params.filterTag) ?: return
+    val nonEmptyTags = filterTag.filter { it.isNotEmpty() }
+    val hasEmptyTag = filterTag.contains("")
+
+    val predicates = mutableListOf<Predicate>()
+    if (nonEmptyTags.isNotEmpty()) {
+      predicates.add(tagSubqueryPredicate(nonEmptyTags, negate = false))
+    }
+    if (hasEmptyTag) {
+      // empty string in filterTag = "keys with no tags at all"
+      predicates.add(hasAnyTagPredicate(negate = true))
+    }
+    if (predicates.isNotEmpty()) {
+      queryBase.whereConditions.add(cb.or(*predicates.toTypedArray()))
     }
   }
 
   private fun filterNoTag() {
-    val filterNoTag = distinguishEmptyValue(params.filterNoTag)
-    if (filterNoTag != null) {
-      val query = queryBase.query
-      val root = queryBase.root
-      val keyMetaJoin = queryBase.root.join(Key_.keyMeta, JoinType.LEFT)
-      val tagsJoin = keyMetaJoin.join(KeyMeta_.tags, JoinType.LEFT)
+    val filterNoTag = distinguishEmptyValue(params.filterNoTag) ?: return
+    val nonEmptyTags = filterNoTag.filter { it.isNotEmpty() }
+    val hasEmptyTag = filterNoTag.contains("")
 
-      val subquery = query.subquery(Long::class.java)
-      val subRoot = subquery.from(Key::class.java)
-      val subJoin = subRoot.join(Key_.keyMeta).join(KeyMeta_.tags)
-      val hasEmptyTag = filterNoTag.contains("")
-
-      subquery
-        .select(subRoot.get(Key_.id))
-        .where(
-          cb.equal(subRoot.get(Key_.id), root.get(Key_.id)),
-          subJoin.get(Tag_.name).`in`(filterNoTag),
-        )
-
-      queryBase.whereConditions.add(
-        cb.not(cb.exists(subquery)),
-      )
-      if (hasEmptyTag) {
-        queryBase.whereConditions.add(tagsJoin.get(Tag_.name).isNotNull)
-      }
+    if (nonEmptyTags.isNotEmpty()) {
+      queryBase.whereConditions.add(tagSubqueryPredicate(nonEmptyTags, negate = true))
+    }
+    if (hasEmptyTag) {
+      // empty string in filterNoTag = "not without tag" = key must have at least one tag
+      queryBase.whereConditions.add(hasAnyTagPredicate(negate = false))
     }
   }
 
-  private fun filterTask() {
-    if (params.filterTaskNumber != null) {
-      val translationTaskKeyJoin =
-        queryBase.root
-          .join(Key_.tasks, JoinType.LEFT)
-      val translationTaskJoin =
-        translationTaskKeyJoin
-          .join(TaskKey_.task, JoinType.LEFT)
+  /**
+   * Builds an EXISTS/IN predicate matching keys tagged with any of [tagNames].
+   * When [negate] is true, returns the negated form (keys NOT tagged with any of them).
+   */
+  private fun tagSubqueryPredicate(
+    tagNames: List<String>,
+    negate: Boolean,
+  ): Predicate {
+    val subquery = queryBase.query.subquery(Long::class.java)
+    val kmRoot = subquery.from(KeyMeta::class.java)
+    val tagJoin = kmRoot.join(KeyMeta_.tags)
+    val predicate = buildTagSubquery(subquery, kmRoot, tagJoin.get(Tag_.name).`in`(tagNames))
+    return if (negate) cb.not(predicate) else predicate
+  }
 
-      queryBase.whereConditions.add(translationTaskJoin.get(Task_.number).`in`(params.filterTaskNumber))
+  /**
+   * Builds an EXISTS/IN predicate matching keys that have at least one tag.
+   * When [negate] is true, matches keys with NO tags.
+   */
+  private fun hasAnyTagPredicate(negate: Boolean): Predicate {
+    val subquery = queryBase.query.subquery(Long::class.java)
+    val kmRoot = subquery.from(KeyMeta::class.java)
+    val tagJoin = kmRoot.join(KeyMeta_.tags)
+    val predicate = buildTagSubquery(subquery, kmRoot, cb.isNotNull(tagJoin.get(Tag_.id)))
+    return if (negate) cb.not(predicate) else predicate
+  }
 
-      if (params.filterTaskKeysNotDone == true) {
-        queryBase.whereConditions.add(translationTaskKeyJoin.get(TaskKey_.done).`in`(false))
-      }
-
-      if (params.filterTaskKeysDone == true) {
-        queryBase.whereConditions.add(translationTaskKeyJoin.get(TaskKey_.done).`in`(true))
-      }
+  /**
+   * Shared helper: configures a tag subquery as either correlated EXISTS (data query) or
+   * non-correlated IN (count query), and returns the appropriate predicate.
+   */
+  private fun buildTagSubquery(
+    subquery: Subquery<Long>,
+    kmRoot: jakarta.persistence.criteria.Root<KeyMeta>,
+    condition: Predicate,
+  ): Predicate {
+    val keyIdPath = kmRoot.get(KeyMeta_.key).get(Key_.id)
+    if (isCountQuery) {
+      subquery.select(keyIdPath)
+      subquery.where(condition)
+      return queryBase.root.get(Key_.id).`in`(subquery)
     }
+    subquery.select(cb.literal(1L))
+    subquery.where(cb.and(cb.equal(keyIdPath, queryBase.root.get(Key_.id)), condition))
+    return cb.exists(subquery)
+  }
+
+  private fun filterTask() {
+    val taskNumbers = params.filterTaskNumber ?: return
+
+    val subquery = queryBase.query.subquery(Long::class.java)
+    val tkRoot = subquery.from(TaskKey::class.java)
+    val conditions = mutableListOf<Predicate>()
+    if (isCountQuery) {
+      subquery.select(tkRoot.get(TaskKey_.key).get(Key_.id))
+    } else {
+      subquery.select(cb.literal(1L))
+      conditions.add(cb.equal(tkRoot.get(TaskKey_.key).get(Key_.id), queryBase.root.get(Key_.id)))
+    }
+    conditions.add(tkRoot.get(TaskKey_.task).get(Task_.number).`in`(taskNumbers))
+    if (params.filterTaskKeysNotDone == true) {
+      conditions.add(cb.equal(tkRoot.get(TaskKey_.done), false))
+    }
+    if (params.filterTaskKeysDone == true) {
+      conditions.add(cb.equal(tkRoot.get(TaskKey_.done), true))
+    }
+    subquery.where(cb.and(*conditions.toTypedArray()))
+    queryBase.whereConditions.add(
+      if (isCountQuery) queryBase.root.get(Key_.id).`in`(subquery) else cb.exists(subquery),
+    )
   }
 
   private fun filterRevisionId() {

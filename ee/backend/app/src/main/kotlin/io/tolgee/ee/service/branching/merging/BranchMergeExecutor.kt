@@ -58,6 +58,7 @@ class BranchMergeExecutor(
         }
       }
     }
+
     merge.changes.clear()
     merge.mergedAt = currentDateProvider.date
   }
@@ -85,11 +86,8 @@ class BranchMergeExecutor(
     change: BranchMergeChange,
     keySnapshot: KeySnapshot,
   ) {
-    when (change.resolution) {
-      BranchKeyMergeResolutionType.SOURCE -> applyUpdate(change, keySnapshot)
-      BranchKeyMergeResolutionType.TARGET -> applyUpdate(change, keySnapshot)
-      null -> throw BranchMergeConflictNotResolvedException()
-    }
+    change.resolution ?: throw BranchMergeConflictNotResolvedException()
+    applyUpdate(change, keySnapshot)
   }
 
   private fun applyUpdate(
@@ -147,9 +145,7 @@ class BranchMergeExecutor(
           mtProvider = sourceTranslation.mtProvider
           outdated = sourceTranslation.outdated
         }
-      sourceTranslation.labels.forEach { label ->
-        translation.addLabel(label)
-      }
+      sourceTranslation.labels.forEach(translation::addLabel)
       translationService.save(translation)
     }
 
@@ -175,7 +171,11 @@ class BranchMergeExecutor(
   }
 
   private fun persistAfterMerge(key: Key) {
-    key.translations.filter { it.id == 0L }.forEach { translationService.save(it) }
+    key.translations.forEach {
+      if (it.id == 0L) {
+        translationService.save(it)
+      }
+    }
   }
 
   private inline fun BranchMergeChange.withSnapshotKey(

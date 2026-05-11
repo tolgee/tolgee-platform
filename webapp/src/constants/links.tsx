@@ -424,6 +424,7 @@ export class LINKS {
 
   static PROJECT_EDIT = Link.ofParent(LINKS.PROJECT_MANAGE, 'edit');
   static PROJECT_EDIT_ADVANCED = Link.ofParent(LINKS.PROJECT_EDIT, 'advanced');
+  static PROJECT_EDIT_QA = Link.ofParent(LINKS.PROJECT_EDIT, 'qa');
   static PROJECT_EDIT_LABELS = Link.ofParent(LINKS.PROJECT_EDIT, 'labels');
 
   static PROJECT_LANGUAGES = Link.ofParent(LINKS.PROJECT, 'languages');
@@ -503,6 +504,27 @@ export enum QUERY {
   TRANSLATIONS_AI_PLAYGROUND = 'aiPlayground',
   TRANSLATIONS_AI_PLAYGROUND_PROMPT = 'prompt',
 }
+
+export const getProjectTranslationsUrl = (
+  projectId: number,
+  options?: {
+    languages?: string[];
+    filters?: Record<string, unknown>;
+  }
+) => {
+  const base = LINKS.PROJECT_TRANSLATIONS.build({
+    [PARAMS.PROJECT_ID]: projectId,
+  });
+  const params = new URLSearchParams();
+  if (options?.languages?.length) {
+    options.languages.forEach((l) => params.append('languages', l));
+  }
+  if (options?.filters && Object.keys(options.filters).length > 0) {
+    params.set('filters', JSON.stringify(options.filters));
+  }
+  const query = params.toString();
+  return query ? `${base}?${query}` : base;
+};
 
 export const getTaskUrl = (projectId: number, taskNumber: number) => {
   return `${LINKS.GO_TO_PROJECT_TASK.build({

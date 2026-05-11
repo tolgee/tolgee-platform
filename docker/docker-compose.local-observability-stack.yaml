@@ -130,6 +130,20 @@ services:
       timeout: 5s
       retries: 5
 
+  languagetool:
+    image: erikvl87/languagetool:6.7
+    environment:
+      - Java_Xms=256m
+      - Java_Xmx=1024m
+    ports:
+      - "8010:8010"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8010/v2/languages"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
   # Tolgee Application with OpenTelemetry tracing enabled
   # Requires: ./gradlew docker (builds the image)
   # See: docs/observability/
@@ -154,6 +168,7 @@ services:
       - tolgee.postgres-autostart.enabled=false
       - tolgee.internal.mock-free-plan=true
       - tolgee.billing.enabled=false
+      - tolgee.language-tool.url=http://languagetool:8010
       # OpenTelemetry configuration
       - OTEL_JAVAAGENT_ENABLED=true
       - OTEL_SERVICE_NAME=tolgee-platform

@@ -4,5 +4,5 @@ interface KeyWithBaseTranslationView {
   val id: Long
   val name: String
   val namespace: String?
-  val baseTranslation: String
+  val baseTranslation: String?
 }

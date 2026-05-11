@@ -108,6 +108,13 @@ class BranchCleanupService(
       branchId,
     )
     execByBranch(
+      """
+      DELETE FROM translation_qa_issue
+      WHERE translation_id IN (SELECT id FROM translation WHERE key_id IN ($keySub))
+      """,
+      branchId,
+    )
+    execByBranch(
       "DELETE FROM translation WHERE key_id IN ($keySub)",
       branchId,
     )

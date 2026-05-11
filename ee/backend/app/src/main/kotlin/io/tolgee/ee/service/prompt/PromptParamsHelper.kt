@@ -75,16 +75,13 @@ class PromptParamsHelper(
 
     val filePath = screenshotService.getScreenshotPath(file)
 
-    if (screenshot.keyScreenshotReferences.find { it.key.id == key.id } !== null) {
-      val highlighter =
-        ScreenshotKeysHighlighter(
-          ByteArrayInputStream(
-            fileStorage.readFile(filePath),
-          ),
-        )
-      return highlighter.highlightKeys(screenshot, listOf(key.id)).toByteArray()
-    } else {
-      return fileStorage.readFile(filePath)
-    }
+    val highlighter =
+      ScreenshotKeysHighlighter(
+        ByteArrayInputStream(
+          fileStorage.readFile(filePath),
+        ),
+      )
+
+    return highlighter.highlightKey(screenshot, key.id).toByteArray()
   }
 }

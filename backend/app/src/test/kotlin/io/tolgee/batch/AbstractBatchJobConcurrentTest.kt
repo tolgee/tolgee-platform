@@ -245,7 +245,7 @@ abstract class AbstractBatchJobConcurrentTest :
   ) {
     waitForNotThrowing(pollTime = 100, timeout = timeoutMs) {
       executeInNewTransaction(transactionManager) {
-        val jobDto = batchJobService.getJobDto(job.id)
+        val jobDto = batchJobService.getJobDtoNoCache(job.id)
         jobDto.status.completed.assert
           .isTrue()
       }

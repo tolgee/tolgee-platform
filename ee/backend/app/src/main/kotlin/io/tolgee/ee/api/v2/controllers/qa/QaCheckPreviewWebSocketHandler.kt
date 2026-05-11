@@ -1,0 +1,312 @@
+package io.tolgee.ee.api.v2.controllers.qa
+
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
+import io.sentry.Sentry
+import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
+import io.tolgee.constants.Feature
+import io.tolgee.dtos.cacheable.ApiKeyDto
+import io.tolgee.ee.data.qa.QaCheckPreviewDone
+import io.tolgee.ee.data.qa.QaCheckPreviewError
+import io.tolgee.ee.data.qa.QaCheckPreviewResult
+import io.tolgee.ee.data.qa.QaPreviewWsIssue
+import io.tolgee.ee.data.qa.QaPreviewWsSessionState
+import io.tolgee.ee.service.glossary.GlossaryTermService
+import io.tolgee.ee.service.qa.ProjectQaConfigService
+import io.tolgee.ee.service.qa.QaCheckParams
+import io.tolgee.ee.service.qa.QaCheckRunnerService
+import io.tolgee.ee.service.qa.QaGlossaryTerm
+import io.tolgee.ee.service.qa.QaIssueService
+import io.tolgee.ee.service.qa.findQaGlossaryTerms
+import io.tolgee.exceptions.NotFoundException
+import io.tolgee.formats.getPluralForms
+import io.tolgee.model.enums.Scope
+import io.tolgee.model.qa.TranslationQaIssue
+import io.tolgee.security.authentication.JwtService
+import io.tolgee.service.key.KeyService
+import io.tolgee.service.language.LanguageService
+import io.tolgee.service.project.ProjectFeatureGuard
+import io.tolgee.service.project.ProjectService
+import io.tolgee.service.security.SecurityService
+import io.tolgee.service.translation.TranslationService
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.DisposableBean
+import org.springframework.stereotype.Component
+import org.springframework.web.socket.CloseStatus
+import org.springframework.web.socket.TextMessage
+import org.springframework.web.socket.WebSocketSession
+import org.springframework.web.socket.handler.TextWebSocketHandler
+
+@Component
+class QaCheckPreviewWebSocketHandler(
+  private val objectMapper: ObjectMapper,
+  private val projectQaConfigService: ProjectQaConfigService,
+  private val languageService: LanguageService,
+  private val translationService: TranslationService,
+  private val qaIssueService: QaIssueService,
+  private val qaCheckRunnerService: QaCheckRunnerService,
+  private val jwtService: JwtService,
+  private val securityService: SecurityService,
+  private val projectFeatureGuard: ProjectFeatureGuard,
+  private val projectService: ProjectService,
+  private val keyService: KeyService,
+  private val glossaryTermService: GlossaryTermService,
+  private val enabledFeaturesProvider: EnabledFeaturesProvider,
+) : TextWebSocketHandler(),
+  DisposableBean {
+  private val supervisorJob = SupervisorJob()
+  private val scope = CoroutineScope(Dispatchers.IO + supervisorJob)
+
+  override fun destroy() {
+    supervisorJob.cancel()
+  }
+
+  suspend fun runChecks(
+    session: WebSocketSession,
+    state: QaPreviewWsSessionState,
+    text: String,
+    activeVariant: String? = null,
+  ) {
+    try {
+      val persistedIssues = fetchPersistedIssues(state)
+
+      val textParsed = if (state.isPlural) getPluralForms(text) else null
+
+      val glossaryTerms = findGlossaryTerms(state, text)
+
+      val params =
+        QaCheckParams(
+          baseText = state.baseText,
+          text = text,
+          baseLanguageTag = state.baseLanguageTag,
+          languageTag = state.languageTag,
+          isPlural = state.isPlural,
+          textVariants = textParsed?.forms,
+          textVariantOffsets = textParsed?.offsets,
+          baseTextVariants = state.baseVariants,
+          activeVariant = activeVariant,
+          maxCharLimit = state.maxCharLimit,
+          icuPlaceholders = state.icuPlaceholders,
+          glossaryTerms = glossaryTerms,
+        )
+
+      coroutineScope {
+        state.enabledCheckTypes
+          .map { check ->
+            async {
+              val results = qaCheckRunnerService.runCheckWithDebounce(check, params)
+              val issues = results.map { QaPreviewWsIssue.fromQaCheckResult(it, persistedIssues) }
+              sendMessage(session, QaCheckPreviewResult(checkType = check, issues = issues))
+            }
+          }.awaitAll()
+      }
+
+      sendMessage(session, QaCheckPreviewDone())
+    } catch (e: CancellationException) {
+      throw e
+    } catch (e: Exception) {
+      logger.error("Error running QA checks", e)
+      sendMessage(session, QaCheckPreviewError(message = "Internal error running checks"))
+      sendMessage(session, QaCheckPreviewDone())
+    }
+  }
+
+  private fun handleTextUpdate(
+    session: WebSocketSession,
+    state: QaPreviewWsSessionState,
+    json: JsonNode,
+  ) {
+    if (!state.tryAcceptMessage()) {
+      logger.debug("Rate limit exceeded for session {}", session.id)
+      return
+    }
+
+    val text = json.get("text")?.asText() ?: ""
+    val variant = json.get("variant")?.asText()
+
+    state.cancelAndSetJob {
+      scope.launch { runChecks(session, state, text, activeVariant = variant) }
+    }
+  }
+
+  private fun handleInit(
+    session: WebSocketSession,
+    json: JsonNode,
+  ) {
+    try {
+      val token =
+        json.get("token")?.asText()
+          ?: throw IllegalArgumentException("Missing token")
+      val projectId =
+        json.get("projectId")?.asLong()
+          ?: throw IllegalArgumentException("Missing projectId")
+      val keyId = json.get("keyId")?.asLong()
+      val languageTag =
+        json.get("languageTag")?.asText()
+          ?: throw IllegalArgumentException("Missing languageTag")
+
+      checkAuth(token, projectId)
+      checkFeatureEnabled(projectId)
+      initializeState(session, projectId, languageTag, keyId)
+    } catch (e: IllegalArgumentException) {
+      logger.debug("WebSocket init validation failed", e)
+      sendMessage(session, QaCheckPreviewError(message = e.message ?: "Invalid request"))
+      session.close(CloseStatus.POLICY_VIOLATION)
+    } catch (e: NotFoundException) {
+      logger.debug("WebSocket init resource not found", e)
+      sendMessage(session, QaCheckPreviewError(message = "Resource not found"))
+      session.close(CloseStatus.POLICY_VIOLATION)
+    } catch (e: Exception) {
+      logger.warn("WebSocket init failed", e)
+      sendMessage(session, QaCheckPreviewError(message = "Authentication failed"))
+      session.close(CloseStatus.POLICY_VIOLATION)
+    }
+  }
+
+  private fun checkAuth(
+    token: String,
+    projectId: Long,
+  ) {
+    val auth = jwtService.validateToken(token)
+    securityService.checkProjectPermission(
+      projectId = projectId,
+      requiredPermission = Scope.TRANSLATIONS_VIEW,
+      user = auth.principal,
+      apiKey = auth.credentials as? ApiKeyDto,
+    )
+  }
+
+  private fun checkFeatureEnabled(projectId: Long) {
+    val project = projectService.get(projectId)
+    if (!projectFeatureGuard.isFeatureEnabled(Feature.QA_CHECKS, project)) {
+      throw IllegalStateException("QA Checks feature is not enabled")
+    }
+  }
+
+  private fun initializeState(
+    session: WebSocketSession,
+    projectId: Long,
+    languageTag: String,
+    keyId: Long?,
+  ) {
+    val key = keyId?.let { keyService.get(projectId, it) }
+
+    val baseLanguage = languageService.getProjectBaseLanguage(projectId)
+    val baseTag: String? = baseLanguage.tag.takeIf { languageTag != it }
+
+    val baseText: String? =
+      if (baseTag != null && keyId != null) {
+        translationService
+          .getTranslations(listOf(keyId), listOf(baseLanguage.id))
+          .firstOrNull()
+          ?.text
+      } else {
+        null
+      }
+
+    val language = languageService.findByTag(languageTag, projectId)
+
+    val translationId: Long? =
+      if (keyId != null && language != null) {
+        translationService
+          .getTranslations(listOf(keyId), listOf(language.id))
+          .firstOrNull()
+          ?.id
+      } else {
+        null
+      }
+
+    val enabledCheckTypes =
+      if (language != null) {
+        projectQaConfigService.getEnabledCheckTypesForLanguage(projectId, language.id)
+      } else {
+        projectQaConfigService.getEnabledCheckTypesForProject(projectId)
+      }
+
+    val isPlural = key?.isPlural ?: false
+    val maxCharLimit = key?.maxCharLimit
+    val baseParsed = if (isPlural && baseText != null) getPluralForms(baseText) else null
+    val project = projectService.getDto(projectId)
+    val glossaryEnabled = enabledFeaturesProvider.isFeatureEnabled(project.organizationOwnerId, Feature.GLOSSARY)
+
+    session.attributes["state"] =
+      QaPreviewWsSessionState(
+        projectId = projectId,
+        baseText = baseText,
+        baseLanguageTag = baseTag,
+        languageTag = languageTag,
+        keyId = keyId,
+        translationId = translationId,
+        enabledCheckTypes = enabledCheckTypes.toList(),
+        isPlural = isPlural,
+        baseVariants = baseParsed?.forms,
+        maxCharLimit = maxCharLimit,
+        icuPlaceholders = project.icuPlaceholders,
+        organizationOwnerId = project.organizationOwnerId,
+        glossaryEnabled = glossaryEnabled,
+      )
+  }
+
+  override fun handleTextMessage(
+    session: WebSocketSession,
+    message: TextMessage,
+  ) {
+    val json = objectMapper.readTree(message.payload)
+    val state = session.attributes["state"] as? QaPreviewWsSessionState
+    if (state == null) {
+      handleInit(session, json)
+    } else {
+      handleTextUpdate(session, state, json)
+    }
+  }
+
+  private fun findGlossaryTerms(
+    state: QaPreviewWsSessionState,
+    text: String,
+  ): List<QaGlossaryTerm>? {
+    if (!state.glossaryEnabled || text.isEmpty()) return null
+    return try {
+      glossaryTermService.findQaGlossaryTerms(state.organizationOwnerId, state.projectId, text, state.languageTag)
+    } catch (e: Exception) {
+      Sentry.captureException(e)
+      logger.warn("Glossary lookup failed for project {}", state.projectId, e)
+      null
+    }
+  }
+
+  private fun fetchPersistedIssues(state: QaPreviewWsSessionState): List<TranslationQaIssue> {
+    val translationId = state.translationId ?: return emptyList()
+    return qaIssueService.getIssuesForTranslation(state.projectId, translationId)
+  }
+
+  private fun sendMessage(
+    session: WebSocketSession,
+    data: Any,
+  ) {
+    synchronized(session) {
+      if (session.isOpen) {
+        session.sendMessage(TextMessage(objectMapper.writeValueAsString(data)))
+      }
+    }
+  }
+
+  override fun afterConnectionClosed(
+    session: WebSocketSession,
+    status: CloseStatus,
+  ) {
+    val state = session.attributes["state"] as? QaPreviewWsSessionState
+    state?.cancelJob()
+  }
+
+  companion object {
+    private val logger = LoggerFactory.getLogger(QaCheckPreviewWebSocketHandler::class.java)
+  }
+}

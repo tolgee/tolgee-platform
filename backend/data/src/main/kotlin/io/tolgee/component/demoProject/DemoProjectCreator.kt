@@ -206,7 +206,7 @@ class DemoProjectCreator(
   }
 
   private fun getOrCreateKeyMeta(key: Key): KeyMeta {
-    return key.keyMeta ?: let {
+    return key.keyMeta ?: run {
       val keyMeta = KeyMeta()
       keyMeta.key = key
       key.keyMeta = keyMeta

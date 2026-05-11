@@ -176,6 +176,22 @@ export function editTranslation({
   getCellSaveButton().click();
 }
 
+export function openTranslationEditorWithMt(
+  projectId: number,
+  key: string,
+  languageTag: string
+) {
+  selectLangsInLocalstorage(projectId, ['en', languageTag]);
+  visitTranslations(projectId);
+  waitForGlobalLoading(100, 30000);
+  getTranslationCell(key, languageTag).click();
+  cy.gcy('global-editor').should('be.visible');
+}
+
+export function waitForMtResult() {
+  cy.gcy('translation-tools-machine-translation-item').should('be.visible');
+}
+
 export function confirmDiscard() {
   cy.gcy('global-confirmation-confirm').contains('Discard').click();
 }

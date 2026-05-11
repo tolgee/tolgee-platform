@@ -1,4 +1,12 @@
-import { Chip, Link, TableCell, TableRow } from '@mui/material';
+import {
+  Chip,
+  Link,
+  TableCell,
+  TableRow,
+  Tooltip,
+  Typography,
+} from '@mui/material';
+import { useTranslate } from '@tolgee/react';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { AdministrationSubscriptionsCloudPlan } from './cloudPlan/AdministrationSubscriptionsCloudPlan';
 import React, { FC } from 'react';
@@ -8,8 +16,17 @@ import { AdministrationSubscriptionsSelfHostedEe } from './selfHosted/Administra
 export const AdministrationSubscriptionsListItem: FC<{
   item: components['schemas']['OrganizationWithSubscriptionsModel'];
 }> = ({ item }) => {
+  const { t } = useTranslate();
+
+  const deletedAt = item.deletedAt
+    ? new Date(item.deletedAt).toLocaleDateString()
+    : undefined;
+
   return (
-    <TableRow data-cy="administration-organizations-list-item">
+    <TableRow
+      data-cy="administration-organizations-list-item"
+      sx={item.deletedAt ? { opacity: 0.6 } : undefined}
+    >
       <TableCell
         sx={{
           minWidth: 0,
@@ -17,14 +34,30 @@ export const AdministrationSubscriptionsListItem: FC<{
           whiteSpace: 'nowrap',
         }}
       >
-        <Link
-          href={LINKS.ORGANIZATION_PROFILE.build({
-            [PARAMS.ORGANIZATION_SLUG]: item.organization.slug,
-          })}
-        >
-          {item.organization.name}
-        </Link>{' '}
+        {item.deletedAt ? (
+          <Typography component="span" color="text.secondary">
+            {item.organization.name}
+          </Typography>
+        ) : (
+          <Link
+            href={LINKS.ORGANIZATION_PROFILE.build({
+              [PARAMS.ORGANIZATION_SLUG]: item.organization.slug,
+            })}
+          >
+            {item.organization.name}
+          </Link>
+        )}{' '}
         <Chip size="small" label={item.organization.id} />
+        {deletedAt && (
+          <Tooltip title={deletedAt}>
+            <Chip
+              size="small"
+              label={t('administration_subscriptions_deleted', 'Deleted')}
+              color="error"
+              sx={{ ml: 0.5 }}
+            />
+          </Tooltip>
+        )}
       </TableCell>
       <TableCell>
         <AdministrationSubscriptionsCloudPlan item={item} />

@@ -28,7 +28,10 @@ interface ChunkProcessor<RequestType, ParamsType, TargetItemType> {
     return -1
   }
 
-  fun getJobCharacter(): JobCharacter {
+  fun getJobCharacter(
+    request: RequestType,
+    projectId: Long?,
+  ): JobCharacter {
     return JobCharacter.FAST
   }
 

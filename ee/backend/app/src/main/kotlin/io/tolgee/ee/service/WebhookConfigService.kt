@@ -10,6 +10,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.webhook.WebhookConfig
 import io.tolgee.repository.WebhookConfigRepository
 import io.tolgee.service.automations.AutomationService
+import io.tolgee.util.UrlSecurity
 import jakarta.transaction.Transactional
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -20,6 +21,7 @@ class WebhookConfigService(
   private val webhookConfigRepository: WebhookConfigRepository,
   private val webhookExecutor: WebhookExecutor,
   private val automationService: AutomationService,
+  private val urlSecurity: UrlSecurity,
 ) {
   fun get(
     projectId: Long,
@@ -44,6 +46,7 @@ class WebhookConfigService(
     project: Project,
     dto: WebhookConfigRequest,
   ): WebhookConfig {
+    urlSecurity.validateUrl(dto.url)
     val webhookConfig = WebhookConfig(project)
     webhookConfig.url = dto.url
     webhookConfig.webhookSecret = generateRandomWebhookSecret()
@@ -75,7 +78,16 @@ class WebhookConfigService(
     dto: WebhookConfigRequest,
   ): WebhookConfig {
     val webhookConfig = get(projectId, id)
+    urlSecurity.validateUrl(dto.url)
     webhookConfig.url = dto.url
+    dto.enabled?.let { newEnabled ->
+      webhookConfig.enabled = newEnabled
+      if (newEnabled) {
+        webhookConfig.firstFailed = null
+        webhookConfig.autoDisableNotified = false
+        webhookConfig.autoDisabled = false
+      }
+    }
     automationService.updateForWebhookConfig(webhookConfig)
     return webhookConfigRepository.save(webhookConfig)
   }

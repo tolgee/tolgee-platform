@@ -8,6 +8,7 @@ declare namespace DataCy {
         "accept-auth-provider-change-info-text" |
         "accept-invitation-accept" |
         "accept-invitation-decline" |
+        "accept-invitation-email-mismatch" |
         "accept-invitation-info-text" |
         "account-security-initial-password-set" |
         "account-security-provider-connect" |
@@ -89,6 +90,7 @@ declare namespace DataCy {
         "administration-subscriptions-current-plan-info" |
         "administration-subscriptions-custom-plans-item" |
         "administration-subscriptions-plan-popover" |
+        "administration-subscriptions-trialing-filter" |
         "administration-trial-end-date-field" |
         "administration-user-debug-account" |
         "administration-user-delete-user" |
@@ -107,6 +109,7 @@ declare namespace DataCy {
         "ai-languages-description-edit" |
         "ai-menu-context-data" |
         "ai-menu-prompts" |
+        "ai-playground-admin-access-info" |
         "ai-playground-preview" |
         "ai-playground-usage-cached-tokens" |
         "ai-playground-usage-mt-credits" |
@@ -439,6 +442,7 @@ declare namespace DataCy {
         "invitation-dialog-type-agency-button" |
         "invitation-dialog-type-email-button" |
         "invitation-dialog-type-link-button" |
+        "invitation_email_mismatch_message" |
         "invite-generate-button" |
         "invoice-details-dialog" |
         "key-char-limit-checkbox" |
@@ -483,6 +487,9 @@ declare namespace DataCy {
         "llm-provider-item-type" |
         "llm-provider-menu-item-delete" |
         "llm-provider-menu-item-edit" |
+        "llm-provider-pricing-capacity-context-and-screenshots" |
+        "llm-provider-pricing-capacity-context-no-screenshots" |
+        "llm-provider-pricing-capacity-no-context" |
         "llm-provider-pricing-dialog" |
         "llm-provider-pricing-estimate-context-and-screenshots" |
         "llm-provider-pricing-estimate-context-no-screenshots" |
@@ -490,6 +497,7 @@ declare namespace DataCy {
         "llm-provider-pricing-estimate-table" |
         "llm-provider-pricing-info" |
         "llm-provider-pricing-input-row" |
+        "llm-provider-pricing-monthly-capacity-table" |
         "llm-provider-pricing-output-row" |
         "llm-provider-pricing-token-table" |
         "llm-providers-custom" |
@@ -534,6 +542,7 @@ declare namespace DataCy {
         "mfa-recovery-codes-dialog-content" |
         "mfa-recovery-codes-dialog-password-input" |
         "mfa-recovery-codes-dialog-title" |
+        "mt-admin-access-info" |
         "mt-language-dialog-auto-for-import" |
         "mt-language-dialog-auto-machine-translation" |
         "mt-language-dialog-auto-translation-memory" |
@@ -649,6 +658,7 @@ declare namespace DataCy {
         "project-leave-button" |
         "project-list-languages" |
         "project-list-more-button" |
+        "project-list-qa-badge-button" |
         "project-list-translations-button" |
         "project-member-item" |
         "project-member-revoke-button" |
@@ -699,6 +709,7 @@ declare namespace DataCy {
         "project-settings-menu-advanced" |
         "project-settings-menu-general" |
         "project-settings-menu-labels" |
+        "project-settings-menu-qa" |
         "project-settings-name" |
         "project-settings-suggestions-mode-switch" |
         "project-settings-transfer-button" |
@@ -718,6 +729,24 @@ declare namespace DataCy {
         "project-transfer-dialog" |
         "prompt-basic-option" |
         "prompt-basic-option-edit" |
+        "qa-action-correct" |
+        "qa-action-ignore" |
+        "qa-badge" |
+        "qa-badge-unresolved" |
+        "qa-check-item" |
+        "qa-enabled-toggle" |
+        "qa-issue-highlight" |
+        "qa-issue-marker" |
+        "qa-language-dialog-inherited-banner" |
+        "qa-language-dialog-reset-to-global" |
+        "qa-language-dialog-save" |
+        "qa-language-settings-button" |
+        "qa-panel-container" |
+        "qa-panel-container-disabled" |
+        "qa-panel-container-empty" |
+        "qa-panel-container-project-disabled" |
+        "qa-settings-row" |
+        "qa-settings-select" |
         "quick-start-action" |
         "quick-start-dialog" |
         "quick-start-finish-action" |
@@ -738,6 +767,8 @@ declare namespace DataCy {
         "seat_spending_limit_exceeded_while_accepting_invitation_message" |
         "self-hosted-ee-active-plan" |
         "self-hosted-ee-subscription-metrics" |
+        "self-hosted-plans-placeholder" |
+        "self-hosted-plans-placeholder-contact-us" |
         "sensitive-dialog-otp-input" |
         "sensitive-dialog-password-input" |
         "sensitive-protection-dialog" |
@@ -878,6 +909,7 @@ declare namespace DataCy {
         "translations-cell-main-action-button" |
         "translations-cell-menu-item" |
         "translations-cell-menu-open-button" |
+        "translations-cell-qa-issues-button" |
         "translations-cell-screenshots-button" |
         "translations-cell-switch-mode" |
         "translations-cell-task-button" |
@@ -950,10 +982,12 @@ declare namespace DataCy {
         "user-profile" |
         "user-switch-item" |
         "user-switch-search" |
+        "webhook-auto-disabled-label" |
         "webhook-form-cancel" |
         "webhook-form-delete" |
         "webhook-form-save" |
         "webhook-form-url" |
+        "webhook-item-toggle" |
         "webhooks-add-item-button" |
         "webhooks-item-edit" |
         "webhooks-item-show-secret" |

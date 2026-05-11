@@ -4,8 +4,10 @@ import { useEffect, useRef, useState } from 'react';
 import {
   Modification,
   TranslationsModifiedData,
+  QaIssuesUpdatedData,
 } from 'tg.websocket-client/WebsocketClient';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
+import { useQaChecksEnabled } from 'tg.ee';
 import { useDebouncedCallback } from 'use-debounce';
 
 export const useWebsocketService = (
@@ -14,6 +16,7 @@ export const useWebsocketService = (
   const [eventBlockers, setEventBlockers] = useState(0);
   const project = useProject();
   const client = useGlobalContext((c) => c.wsClient.client);
+  const qaChecksEnabled = useQaChecksEnabled();
 
   function updateTranslations(event: TranslationsModifiedData) {
     const translationUpdates = event.data?.translations?.map((translation) => ({
@@ -29,25 +32,46 @@ export const useWebsocketService = (
       translationService.changeTranslations(translationUpdates);
     }
 
-    const keyUpdates = event.data?.keys?.map((key) => ({
-      keyId: key.id,
-      value:
+    const keyUpdates = event.data?.keys?.map((key) => {
+      const isDeleted =
         key.changeType === 'DEL' ||
-        (key.modifications as Record<string, any>)?.deletedAt?.new != null
+        (key.modifications as Record<string, Modification<unknown>>)?.deletedAt
+          ?.new != null;
+
+      return {
+        keyId: key.id,
+        value: isDeleted
           ? { deleted: true }
           : {
               ...getModifyingObject(key.modifications, {
                 name: 'keyName',
               }),
             },
-    }));
+      };
+    });
 
     if (keyUpdates) {
       translationService.updateTranslationKeys(keyUpdates);
     }
   }
 
+  function updateQaIssues(events: QaIssuesUpdatedData[]) {
+    translationService.changeTranslations(
+      events.map((event) => ({
+        keyId: event.data.keyId,
+        language: event.data.languageTag,
+        value: {
+          id: event.data.translationId,
+          qaIssueCount: event.data.qaIssueCount,
+          qaChecksStale: event.data.qaChecksStale,
+          qaIssues: event.data.qaIssues,
+        },
+      }))
+    );
+  }
+
   const eventQueue = useRef([] as TranslationsModifiedData[]);
+  const qaEventQueue = useRef([] as QaIssuesUpdatedData[]);
 
   const handleQueue = () => {
     if (eventBlockers <= 0) {
@@ -55,6 +79,10 @@ export const useWebsocketService = (
         updateTranslations(e);
       });
       eventQueue.current = [];
+      if (qaEventQueue.current.length > 0) {
+        updateQaIssues(qaEventQueue.current);
+        qaEventQueue.current = [];
+      }
     }
   };
 
@@ -63,12 +91,12 @@ export const useWebsocketService = (
     handleQueue();
   }, [eventBlockers]);
 
-  const handerRef = useRef(handleQueue);
-  handerRef.current = handleQueue;
+  const handlerRef = useRef(handleQueue);
+  handlerRef.current = handleQueue;
 
   const handleQueueDelayed = useDebouncedCallback(
     () => {
-      handerRef.current();
+      handlerRef.current();
     },
     100,
     { maxWait: 100 }
@@ -88,6 +116,18 @@ export const useWebsocketService = (
     }
   }, [project, client]);
 
+  useEffect(() => {
+    if (client && qaChecksEnabled) {
+      return client.subscribe(
+        `/projects/${project.id}/qa-issues-updated`,
+        (event) => {
+          qaEventQueue.current.push(event);
+          handleQueueDelayed();
+        }
+      );
+    }
+  }, [project, client, qaChecksEnabled]);
+
   return {
     setEventBlockers,
   };
@@ -97,9 +137,9 @@ const getModifyingObject = (
   value: Record<string, Modification<any>>,
   fieldMapping?: Record<string, string>
 ) => {
-  const result = {};
-  Object.entries(value).forEach(([field, modification]) => {
+  const result: Record<string, unknown> = {};
+  for (const [field, modification] of Object.entries(value)) {
     result[fieldMapping?.[field] || field] = modification.new;
-  });
+  }
   return result;
 };

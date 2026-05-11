@@ -50,4 +50,9 @@ class CopyTranslationsChunkProcessor(
       targetLanguageIds = data.targetLanguageIds
     }
   }
+
+  override fun getChunkSize(
+    request: CopyTranslationRequest,
+    projectId: Long?,
+  ): Int = 5000
 }

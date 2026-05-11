@@ -86,11 +86,12 @@ export const useTranslationCell = ({
     };
   }, [cellRef.current, keyId, langTag]);
 
-  const handleOpen = (mode?: EditMode) => {
+  const handleOpen = (mode?: EditMode, activeVariant?: string) => {
     setEdit({
       keyId,
       language: langTag,
       mode,
+      activeVariant,
     });
   };
 

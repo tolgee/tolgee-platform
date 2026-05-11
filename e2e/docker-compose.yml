@@ -6,7 +6,7 @@ services:
       - "${TOLGEE_E2E_PORT:-8201}:8201"
       - "${TOLGEE_E2E_ACTUATOR_PORT:-8091}:8091"
     environment:
-      - spring.profiles.active=docker,e2e
+      - SPRING_PROFILES_ACTIVE=docker,e2e
       - tolgee.smtp.host=fakesmtp
       - tolgee.smtp.port=1025
       - tolgee.frontend-url=http://localhost:${TOLGEE_E2E_PORT:-8201}

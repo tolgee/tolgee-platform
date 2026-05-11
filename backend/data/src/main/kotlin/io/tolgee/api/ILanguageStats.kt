@@ -14,4 +14,6 @@ interface ILanguageStats {
   val translatedPercentage: Double
   val reviewedPercentage: Double
   val translationsUpdatedAt: Date?
+  val qaIssueCount: Long
+  val qaChecksStaleCount: Long
 }

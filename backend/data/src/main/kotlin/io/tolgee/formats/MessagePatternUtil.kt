@@ -648,6 +648,12 @@ object MessagePatternUtil {
     var numericValue = MessagePattern.NO_NUMERIC_VALUE
     var msgNode: MessageNode? = null
 
+    /**
+     * The character position in the pattern string where the variant's content starts (after the '{').
+     */
+    val contentStartIndex: Int
+      get() = owningPattern.getPart(msgNode!!.start).limit
+
     override val patternString: String
       get() = msgNode?.contents?.joinToString("") { it.patternString } ?: ""
   }

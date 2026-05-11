@@ -80,7 +80,7 @@ class KeyMetaService(
             join fetch ikm.importKey ik
             left join fetch ikm.comments ikc
             join ik.file if
-            where if.import = :import 
+            where if.importData = :import 
             """,
         ).setParameter("import", import)
         .resultList as List<KeyMeta>

@@ -96,7 +96,7 @@ describe('custom prompt', () => {
     // fragments.icuInfo
     gcy('ai-prompt-rendered').should(
       'contain',
-      'If message includes ICU parameters'
+      'treat it as an ICU parameter or placeholder'
     );
 
     // fragments.keyName

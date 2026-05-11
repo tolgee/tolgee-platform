@@ -14,6 +14,7 @@ import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.unit.util.assertFile
 import io.tolgee.unit.util.getExported
+import io.tolgee.util.XmlSecurity
 import io.tolgee.util.buildExportTranslationList
 import org.junit.jupiter.api.Test
 import org.w3c.dom.Attr
@@ -24,7 +25,6 @@ import org.w3c.dom.NodeList
 import org.xml.sax.InputSource
 import java.io.StringReader
 import javax.xml.XMLConstants
-import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.transform.Source
 import javax.xml.transform.stream.StreamSource
 import javax.xml.validation.SchemaFactory
@@ -230,7 +230,7 @@ class XliffFileExporterTest {
   }
 
   private fun String.parseToDocument(): Document {
-    val dbf = DocumentBuilderFactory.newInstance()
+    val dbf = XmlSecurity.newSecureDocumentBuilderFactory()
     val db = dbf.newDocumentBuilder()
     val input = InputSource()
     input.characterStream = StringReader(this)

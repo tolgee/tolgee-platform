@@ -50,6 +50,11 @@ abstract class AbstractTranslationLabelChunkProcessor(
     )
   }
 
+  override fun getChunkSize(
+    request: LabelTranslationsRequest,
+    projectId: Long?,
+  ): Int = 5000
+
   abstract fun process(
     subChunk: List<Long>,
     languageIds: List<Long>,

@@ -138,4 +138,70 @@ class WebhookConfigControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       node("success").isBoolean.isFalse
     }
   }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `returns enabled field in response`() {
+    performProjectAuthGet(
+      "webhook-configs/${testData.webhookConfig.self.id}",
+    ).andIsOk.andAssertThatJson {
+      node("enabled").isEqualTo(true)
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `updates enabled field`() {
+    performProjectAuthPut(
+      "webhook-configs/${testData.webhookConfig.self.id}",
+      mapOf("url" to testData.webhookConfig.self.url, "enabled" to false),
+    ).andIsOk.andAssertThatJson {
+      node("enabled").isEqualTo(false)
+    }
+
+    webhookConfigService
+      .get(testData.webhookConfig.self.id)
+      .enabled.assert.isFalse
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `re-enabling clears firstFailed`() {
+    executeInNewTransaction {
+      val config = webhookConfigService.get(testData.webhookConfig.self.id)
+      config.firstFailed = java.util.Date()
+      config.enabled = false
+      entityManager.merge(config)
+    }
+
+    performProjectAuthPut(
+      "webhook-configs/${testData.webhookConfig.self.id}",
+      mapOf("url" to testData.webhookConfig.self.url, "enabled" to true),
+    ).andIsOk.andAssertThatJson {
+      node("enabled").isEqualTo(true)
+      node("firstFailed").isNull()
+    }
+
+    val updated = webhookConfigService.get(testData.webhookConfig.self.id)
+    updated.firstFailed.assert.isNull()
+    updated.enabled.assert.isTrue
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `update without enabled field does not change enabled state`() {
+    executeInNewTransaction {
+      val config = webhookConfigService.get(testData.webhookConfig.self.id)
+      config.enabled = false
+      entityManager.merge(config)
+    }
+
+    performProjectAuthPut(
+      "webhook-configs/${testData.webhookConfig.self.id}",
+      mapOf("url" to "https://new-url.com"),
+    ).andIsOk.andAssertThatJson {
+      node("enabled").isEqualTo(false)
+      node("url").isEqualTo("https://new-url.com")
+    }
+  }
 }

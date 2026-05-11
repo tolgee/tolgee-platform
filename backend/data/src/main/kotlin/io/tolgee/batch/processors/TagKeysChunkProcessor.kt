@@ -52,4 +52,9 @@ class TagKeysChunkProcessor(
       this.tags = data.tags
     }
   }
+
+  override fun getChunkSize(
+    request: TagKeysRequest,
+    projectId: Long?,
+  ): Int = 5000
 }

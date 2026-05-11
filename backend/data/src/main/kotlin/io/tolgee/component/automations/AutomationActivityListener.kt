@@ -48,8 +48,9 @@ class AutomationActivityListener(
     }
 
     val projectId = revision.projectId ?: return
+    val type = revision.type ?: return
 
-    automationsBatchJobCreator.executeActivityAutomation(projectId, revision.type, revision.id)
+    automationsBatchJobCreator.executeActivityAutomation(projectId, type, revision.id)
 
     if (revision.isTranslationModification) {
       automationsBatchJobCreator.executeTranslationDataModificationAutomation(projectId, revision.id)

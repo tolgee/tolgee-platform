@@ -54,6 +54,7 @@ type Props = {
 
 export const SignUpForm = (props: Props) => {
   const invitationCode = useGlobalContext((c) => c.auth.invitationCode);
+  const invitationEmail = useGlobalContext((c) => c.auth.invitationEmail);
   const config = useConfig();
   const orgRequired = !invitationCode && config.userCanCreateOrganizations;
   const userSourceField = config.userSourceField;
@@ -72,7 +73,7 @@ export const SignUpForm = (props: Props) => {
           {
             password: '',
             name: '',
-            email: '',
+            email: invitationEmail ?? '',
             organizationName: orgRequired ? '' : undefined,
             userSource: '',
           } as SignUpType

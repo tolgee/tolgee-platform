@@ -10,11 +10,11 @@ import java.io.Serializable
 open class ProjectAiPromptCustomizationModel(
   @Schema(
     description =
-      "The project description used in the  prompt that " +
+      "The project description used in the prompt that " +
         "helps AI translator to understand the context of your project.",
     example =
       "We are Dunder Mifflin, a paper company. We sell paper. " +
-        "This is an project of translations for out paper selling app.",
+        "This is a project of translations for our paper selling app.",
   )
   val description: String?,
 ) : RepresentationModel<ProjectAiPromptCustomizationModel>(),

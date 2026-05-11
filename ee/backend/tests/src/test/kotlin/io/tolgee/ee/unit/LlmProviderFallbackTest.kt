@@ -1,6 +1,7 @@
 package io.tolgee.ee.unit
 
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.component.adminMtServiceFilter.AdminMtServiceFilter
 import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.constants.Caches
 import io.tolgee.dtos.LlmParams
@@ -15,6 +16,7 @@ import io.tolgee.model.enums.LlmProviderPriority
 import io.tolgee.model.enums.LlmProviderType
 import io.tolgee.repository.LlmProviderRepository
 import io.tolgee.service.LlmPropertiesService
+import io.tolgee.util.UrlSecurity
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
@@ -38,6 +40,7 @@ class LlmProviderFallbackTest {
   private lateinit var internalProperties: InternalProperties
   private lateinit var currentDateProvider: CurrentDateProvider
   private lateinit var restTemplateBuilder: RestTemplateBuilder
+  private lateinit var adminMtServiceFilter: AdminMtServiceFilter
 
   private val orgId = 1L
 
@@ -51,6 +54,7 @@ class LlmProviderFallbackTest {
     internalProperties = mock()
     currentDateProvider = mock()
     restTemplateBuilder = mock()
+    adminMtServiceFilter = mock()
 
     whenever(cacheManager.getCache(Caches.LLM_PROVIDERS)).thenReturn(cache)
     whenever(cache.get(any<String>(), any<Class<*>>())).thenReturn(null)
@@ -67,6 +71,7 @@ class LlmProviderFallbackTest {
       LlmProviderResolver(
         llmProviderRepository = llmProviderRepository,
         llmPropertiesService = llmPropertiesService,
+        adminMtServiceFilter = adminMtServiceFilter,
       )
 
     service =
@@ -83,6 +88,8 @@ class LlmProviderFallbackTest {
         anthropicApiService = mock<AnthropicApiService>(),
         googleAiApiService = mock<GoogleAiApiService>(),
         llmProviderResolver = resolver,
+        urlSecurity = mock<UrlSecurity>(),
+        adminMtServiceFilter = adminMtServiceFilter,
       )
   }
 

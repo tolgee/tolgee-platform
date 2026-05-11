@@ -1,11 +1,11 @@
 package io.tolgee.api.v2.controllers.notification
 
-import io.tolgee.config.TestEmailConfiguration
 import io.tolgee.development.testDataBuilder.data.TaskTestData
 import io.tolgee.dtos.request.notification.NotificationSettingsRequest
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.node
+import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.notifications.Notification
 import io.tolgee.model.notifications.NotificationChannel
 import io.tolgee.model.notifications.NotificationType
@@ -17,9 +17,7 @@ import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Import
 
-@Import(TestEmailConfiguration::class)
 class NotificationSettingsControllerTest : AuthorizedControllerTest() {
   @Autowired
   lateinit var notificationService: NotificationService
@@ -73,9 +71,11 @@ class NotificationSettingsControllerTest : AuthorizedControllerTest() {
     val notification = dispatchNotification()
 
     assertThat(notificationTestUtil.newestInAppNotification().id).isEqualTo(notification.id)
-    assertThat(
-      notificationTestUtil.newestEmailNotification(),
-    ).contains("projects/${testData.project.id}/task?number=${testData.translateTask.self.number}")
+    waitForNotThrowing(timeout = 2000, pollTime = 25) {
+      assertThat(
+        notificationTestUtil.newestEmailNotification(),
+      ).contains("projects/${testData.project.id}/task?number=${testData.translateTask.self.number}")
+    }
   }
 
   @Test

@@ -5,7 +5,7 @@ import { assertMessage, gcy } from '../../common/shared';
 import 'cypress-file-upload';
 import { administrationTestData } from '../../common/apiCalls/testData/testData';
 import {
-  getUserListItem,
+  debugUserAccount,
   visitAdministration,
 } from '../../common/administration';
 import { createProject } from '../../common/projects';
@@ -47,10 +47,4 @@ function assertDebugFrameVisible() {
 function assertDebugFrameNotVisible() {
   gcy('administration-frame').should('not.exist');
   gcy('administration-debug-customer-account-message').should('not.exist');
-}
-
-function debugUserAccount() {
-  visitAdministration();
-  gcy('settings-menu-item').contains('Users').click();
-  getUserListItem().findDcy('administration-user-debug-account').click();
 }

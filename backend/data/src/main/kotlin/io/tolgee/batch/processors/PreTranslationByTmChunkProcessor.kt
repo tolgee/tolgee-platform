@@ -5,46 +5,37 @@ import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.batch.request.PreTranslationByTmRequest
 import io.tolgee.model.batch.params.PreTranslationByTmJobParams
-import io.tolgee.service.language.LanguageService
 import org.springframework.stereotype.Component
 import kotlin.coroutines.CoroutineContext
 
 @Component
 class PreTranslationByTmChunkProcessor(
-  private val languageService: LanguageService,
   private val genericAutoTranslationChunkProcessor: GenericAutoTranslationChunkProcessor,
-) : ChunkProcessor<PreTranslationByTmRequest, PreTranslationByTmJobParams, Long> {
+) : ChunkProcessor<PreTranslationByTmRequest, PreTranslationByTmJobParams, BatchTranslationTargetItem> {
   override fun process(
     job: BatchJobDto,
-    chunk: List<Long>,
+    chunk: List<BatchTranslationTargetItem>,
     coroutineContext: CoroutineContext,
   ) {
-    val parameters = getParams(job)
-    val languages = languageService.findByIdIn(parameters.targetLanguageIds)
-
-    val preparedChunk =
-      chunk
-        .map { keyId ->
-          languages.map { language ->
-            BatchTranslationTargetItem(keyId, language.id)
-          }
-        }.flatten()
-
     genericAutoTranslationChunkProcessor.process(
       job,
-      preparedChunk,
+      chunk,
       coroutineContext,
       useTranslationMemory = true,
       useMachineTranslation = false,
     )
   }
 
-  override fun getTargetItemType(): Class<Long> {
-    return Long::class.java
+  override fun getTargetItemType(): Class<BatchTranslationTargetItem> {
+    return BatchTranslationTargetItem::class.java
   }
 
-  override fun getTarget(data: PreTranslationByTmRequest): List<Long> {
-    return data.keyIds
+  override fun getTarget(data: PreTranslationByTmRequest): List<BatchTranslationTargetItem> {
+    return data.keyIds.flatMap { keyId ->
+      data.targetLanguageIds.map { languageId ->
+        BatchTranslationTargetItem(keyId, languageId)
+      }
+    }
   }
 
   override fun getParamsType(): Class<PreTranslationByTmJobParams> {

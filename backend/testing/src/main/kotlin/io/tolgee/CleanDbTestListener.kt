@@ -23,6 +23,14 @@ class CleanDbTestListener : TestExecutionListener {
       "databasechangeloglock",
     )
 
+  companion object {
+    @Volatile
+    private var cachedTables: List<String>? = null
+
+    @Volatile
+    private var nonEmptyCheckQuery: String? = null
+  }
+
   override fun beforeTestMethod(testContext: TestContext) {
     if (!shouldClenBeforeClass(testContext)) {
       cleanWithRetries(testContext)
@@ -79,18 +87,16 @@ class CleanDbTestListener : TestExecutionListener {
     ds.connection.use { conn ->
       val stmt = conn.createStatement()
       try {
-        val tables = stmt.getTablesToTruncate()
-        stmt.disableConstraints(tables)
-        val tablesString = tables.joinToString(",")
+        val allTables = getAllTables(stmt)
+        val nonEmptyTables = getNonEmptyTables(stmt, allTables)
 
-        stmt.execute(
-          "SET statement_timeout = 5000;" +
-            "TRUNCATE TABLE $tablesString;",
-        )
-
-        val enableConstraintsSQL = generateEnableConstraintsSQL(tables)
-        enableConstraintsSQL.forEach { stmt.addBatch(it) }
-        stmt.executeBatch()
+        if (nonEmptyTables.isNotEmpty()) {
+          val tablesString = nonEmptyTables.joinToString(",")
+          stmt.execute(
+            "SET statement_timeout = 5000;" +
+              "TRUNCATE TABLE $tablesString CASCADE;",
+          )
+        }
       } catch (e: InterruptedException) {
         stmt.cancel()
         throw e
@@ -98,44 +104,44 @@ class CleanDbTestListener : TestExecutionListener {
     }
   }
 
-  private fun Statement.disableConstraints(tables: List<String>) {
-    val disableConstraintsSQL = generateDisableConstraintsSQL(tables)
-    disableConstraintsSQL.forEach { addBatch(it) }
-    executeBatch()
-  }
+  private fun getAllTables(stmt: Statement): List<String> {
+    cachedTables?.let { return it }
 
-  private fun Statement.getTablesToTruncate(): List<String> {
-    val databaseName: Any = "postgres"
     val ignoredTablesString = ignoredTables.joinToString(", ") { "'$it'" }
-
     val rs: ResultSet =
-      executeQuery(
-        String.format(
-          "SELECT table_schema, table_name" +
-            " FROM information_schema.tables" +
-            " WHERE table_catalog = '%s' and (table_schema in ('public', 'billing', 'ee'))" +
-            "   and table_name not in ($ignoredTablesString)",
-          databaseName,
-        ),
+      stmt.executeQuery(
+        "SELECT table_schema, table_name" +
+          " FROM information_schema.tables" +
+          " WHERE table_catalog = 'postgres' and (table_schema in ('public', 'billing', 'ee'))" +
+          "   and table_name not in ($ignoredTablesString)",
       )
     val tables: MutableList<String> = ArrayList()
     while (rs.next()) {
       tables.add(rs.getString(1) + "." + rs.getString(2))
     }
 
+    cachedTables = tables
+    nonEmptyCheckQuery = buildNonEmptyCheckQuery(tables)
     return tables
   }
 
-  private fun generateDisableConstraintsSQL(tables: List<String>): List<String> {
-    return tables.map { table ->
-      "ALTER TABLE $table DISABLE TRIGGER ALL"
+  private fun buildNonEmptyCheckQuery(tables: List<String>): String {
+    return tables.joinToString(" UNION ALL ") { table ->
+      "SELECT '$table' AS t WHERE EXISTS (SELECT 1 FROM $table)"
     }
   }
 
-  private fun generateEnableConstraintsSQL(tables: List<String>): List<String> {
-    return tables.map { table ->
-      "ALTER TABLE $table ENABLE TRIGGER ALL"
+  private fun getNonEmptyTables(
+    stmt: Statement,
+    allTables: List<String>,
+  ): List<String> {
+    val query = nonEmptyCheckQuery ?: buildNonEmptyCheckQuery(allTables)
+    val rs = stmt.executeQuery(query)
+    val result = mutableListOf<String>()
+    while (rs.next()) {
+      result.add(rs.getString(1))
     }
+    return result
   }
 
   @Throws(Exception::class)

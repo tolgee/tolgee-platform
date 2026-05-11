@@ -24,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
-import java.util.stream.Collectors
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class V2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest() {
@@ -110,7 +109,7 @@ class V2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest() {
 
     performAuthDelete("/v2/image-upload/$idsToDelete", null).andIsOk
     val rest = imageUploadService.find(list.map { it.id }.toSet())
-    assertThat(rest).isEqualTo(list.stream().skip(10).collect(Collectors.toList()))
+    assertThat(rest).containsExactlyInAnyOrderElementsOf(list.drop(10))
 
     list.asSequence().take(10).forEach {
       fileStorage.fileExists("uploadedImages/${it.filenameWithExtension}").assert.isFalse()

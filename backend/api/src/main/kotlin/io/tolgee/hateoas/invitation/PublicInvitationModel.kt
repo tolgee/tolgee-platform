@@ -9,4 +9,5 @@ class PublicInvitationModel(
   val createdBy: SimpleUserAccountModel?,
   val projectName: String?,
   val organizationName: String?,
+  val inviteeEmail: String?,
 ) : RepresentationModel<PublicInvitationModel>()

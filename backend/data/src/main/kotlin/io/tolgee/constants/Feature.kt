@@ -24,6 +24,7 @@ enum class Feature {
   GLOSSARY,
   TRANSLATION_LABELS,
   BRANCHING,
+  QA_CHECKS,
   ;
 
   companion object {

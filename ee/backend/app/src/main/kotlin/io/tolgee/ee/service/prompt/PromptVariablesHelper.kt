@@ -304,7 +304,7 @@ class PromptVariablesHelper(
     return relatedKeys
   }
 
-  @Transactional(readOnly = true)
+  @Transactional
   fun getVariables(
     projectId: Long,
     keyId: Long?,

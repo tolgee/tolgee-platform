@@ -19,14 +19,18 @@ import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
 import { LanguageMenu } from './LanguageMenu';
 import { LanguageLabels } from './LanguageLabels';
 import { TranslationStatesBar } from '../../TranslationStatesBar';
-import { LINKS, PARAMS } from 'tg.constants/links';
+import { getProjectTranslationsUrl, LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { QaBadge, QaLanguageStats } from 'tg.ee';
+import { useEnabledFeatures } from 'tg.globalContext/helpers';
 import clsx from 'clsx';
+import { stopBubble } from 'tg.fixtures/eventHandler';
+import { TooltipCard } from 'tg.component/common/TooltipCard';
 
 const StyledContainer = styled('div')`
   display: grid;
-  grid-template-columns: auto auto auto 10fr auto;
+  grid-template-columns: auto auto auto 10fr auto auto;
   margin: ${({ theme }) => theme.spacing(1, 0, 2, 0)};
 `;
 
@@ -69,8 +73,15 @@ const StyledStates = styled('div')`
   align-items: center;
 `;
 
-const StyledActions = styled('div')`
+const StyledQaBadge = styled('div')`
   grid-column: 5;
+  grid-row: span 2;
+  display: grid;
+  align-items: center;
+`;
+
+const StyledActions = styled('div')`
+  grid-column: 6;
   grid-row: span 2;
   display: grid;
   align-items: center;
@@ -107,6 +118,7 @@ export const LanguageStats: FC<Props> = ({ languageStats, wordCount }) => {
   const allLangs = languages.map((l) => l.tag);
   const canViewLanguages = satisfiesPermission('translations.view');
   const canEditLanguages = satisfiesPermission('languages.edit');
+  const { isEnabled } = useEnabledFeatures();
 
   const redirectToLanguage = (lang?: string) => {
     const langs = !lang
@@ -114,11 +126,7 @@ export const LanguageStats: FC<Props> = ({ languageStats, wordCount }) => {
       : lang === baseLanguage
       ? [lang]
       : [baseLanguage, lang];
-    history.push(
-      LINKS.PROJECT_TRANSLATIONS.build({ [PARAMS.PROJECT_ID]: project.id }) +
-        '?' +
-        langs.map((l) => `languages=${l}`).join('&')
-    );
+    history.push(getProjectTranslationsUrl(project.id, { languages: langs }));
   };
 
   return (
@@ -207,6 +215,29 @@ export const LanguageStats: FC<Props> = ({ languageStats, wordCount }) => {
                   </Box>
                 </StyledTooltip>
               </StyledStates>
+              {isEnabled('QA_CHECKS') &&
+                (item.qaIssueCount > 0 || item.qaChecksStaleCount > 0) && (
+                  <Tooltip
+                    leaveDelay={150}
+                    components={{ Tooltip: TooltipCard }}
+                    title={
+                      <div onClick={stopBubble()}>
+                        <QaLanguageStats
+                          languageId={item.languageId!}
+                          languageTag={item.languageTag!}
+                        />
+                      </div>
+                    }
+                  >
+                    <StyledQaBadge style={{ cursor: 'pointer' }}>
+                      <QaBadge
+                        count={item.qaIssueCount}
+                        stale={item.qaChecksStaleCount > 0}
+                        darkWhenNoIssues
+                      />
+                    </StyledQaBadge>
+                  </Tooltip>
+                )}
               <StyledActions>
                 <LanguageMenu language={language!} />
               </StyledActions>

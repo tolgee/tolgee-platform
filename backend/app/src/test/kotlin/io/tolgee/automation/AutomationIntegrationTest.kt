@@ -4,6 +4,7 @@ import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.component.contentDelivery.ContentDeliveryFileStorageProvider
 import io.tolgee.component.contentDelivery.cachePurging.ContentDeliveryCachePurging
 import io.tolgee.component.contentDelivery.cachePurging.ContentDeliveryCachePurgingProvider
+import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.development.testDataBuilder.data.ContentDeliveryConfigTestData
 import io.tolgee.fixtures.andIsOk
@@ -41,6 +42,10 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var contentDeliveryCachePurgingProvider: ContentDeliveryCachePurgingProvider
 
   lateinit var purgingMock: ContentDeliveryCachePurging
+
+  @MockitoBean
+  @Autowired
+  lateinit var enabledFeaturesProvider: EnabledFeaturesProvider
 
   @Autowired
   lateinit var contentDeliveryConfigService: ContentDeliveryConfigService

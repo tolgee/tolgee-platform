@@ -20,7 +20,6 @@ import { useProject } from 'tg.hooks/useProject';
 import { useHistory } from 'react-router-dom';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { useEnabledFeatures } from 'tg.globalContext/helpers';
 
 export type BasicPromptOption = NonNullable<
   components['schemas']['PromptRunDto']['basicPromptOptions']
@@ -30,7 +29,7 @@ type PromptItem = {
   id: BasicPromptOption;
   label: string;
   hint: string;
-  onEdit?: (value: boolean) => void;
+  onEdit?: () => void;
 };
 
 type Props = {
@@ -39,7 +38,6 @@ type Props = {
 };
 
 export const TabBasic = ({ value, onChange }: Props) => {
-  const { isEnabled } = useEnabledFeatures();
   const { t } = useTranslate();
   const project = useProject();
   const [projectDescription, setProjectDescription] = useState(false);
@@ -47,19 +45,20 @@ export const TabBasic = ({ value, onChange }: Props) => {
 
   const { satisfiesPermission } = useProjectPermissions();
 
-  const canCustomize =
-    satisfiesPermission('prompts.edit') && isEnabled('AI_PROMPT_CUSTOMIZATION');
+  const canCustomize = satisfiesPermission('prompts.edit');
 
-  const basicPromptItems: PromptItem[] = [
+  const basicPromptItems = [
     {
       id: 'KEY_NAME',
       label: t('ai_prompt_item_key_name'),
       hint: t('ai_prompt_item_key_name_hint'),
+      onEdit: undefined,
     },
     {
       id: 'KEY_DESCRIPTION',
       label: t('ai_prompt_item_key_description'),
       hint: t('ai_prompt_item_key_description_hint'),
+      onEdit: undefined,
     },
     {
       id: 'PROJECT_DESCRIPTION',
@@ -84,23 +83,33 @@ export const TabBasic = ({ value, onChange }: Props) => {
       id: 'TM_SUGGESTIONS',
       label: t('ai_prompt_item_tm_suggestions'),
       hint: t('ai_prompt_item_tm_suggestions_hint'),
+      onEdit: undefined,
     },
     {
       id: 'KEY_CONTEXT',
       label: t('ai_prompt_item_key_context'),
       hint: t('ai_prompt_item_key_context_hint'),
+      onEdit: undefined,
     },
     {
       id: 'GLOSSARY',
       label: t('ai_prompt_item_glossary'),
       hint: t('ai_prompt_item_glossary_hint'),
+      onEdit: undefined,
     },
     {
       id: 'SCREENSHOT',
       label: t('ai_prompt_item_screenshot'),
       hint: t('ai_prompt_item_screenshot_hint'),
+      onEdit: undefined,
     },
-  ];
+  ] as const satisfies readonly PromptItem[];
+
+  // Type error here means a BasicPromptOption was added to the API but not to the list above
+  const _allOptionsCovered: AllOptionsCovered<
+    BasicPromptOption,
+    typeof basicPromptItems
+  > = true;
 
   const theme = useTheme();
   const [hideTip, setHideTip] = useLocalStorageState({
@@ -159,7 +168,7 @@ export const TabBasic = ({ value, onChange }: Props) => {
               <Box display="flex" alignItems="center" gap={0.5} my={-1}>
                 {onEdit && (
                   <IconButton
-                    onClick={() => onEdit(true)}
+                    onClick={() => onEdit()}
                     data-cy="prompt-basic-option-edit"
                     data-cy-id={id}
                   >
@@ -189,3 +198,14 @@ export const TabBasic = ({ value, onChange }: Props) => {
     </Box>
   );
 };
+
+/**
+ * Resolves to `true` if every member of `Union` appears as an `id` in `Items`.
+ * Otherwise, resolves to `{ missing: ... }`
+ */
+type AllOptionsCovered<
+  Union extends string,
+  Items extends readonly { id: string }[]
+> = [Exclude<Union, Items[number]['id']>] extends [never]
+  ? true
+  : { missing: Exclude<Union, Items[number]['id']> };

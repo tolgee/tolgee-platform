@@ -12,6 +12,17 @@ class WebhooksTestData : BaseTestData() {
       webhookSecret = "whsec_hello"
     }
 
+  fun setWebhookFailingSince(date: java.util.Date) {
+    webhookConfig.self.firstFailed = date
+    webhookConfig.self.enabled = true
+  }
+
+  fun setWebhookFailingSinceAlreadyNotified(date: java.util.Date) {
+    webhookConfig.self.firstFailed = date
+    webhookConfig.self.enabled = true
+    webhookConfig.self.autoDisableNotified = true
+  }
+
   val automation =
     projectBuilder.addAutomation {
       this.triggers.add(

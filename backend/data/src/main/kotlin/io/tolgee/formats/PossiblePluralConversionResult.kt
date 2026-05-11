@@ -5,6 +5,7 @@ class PossiblePluralConversionResult(
   val formsResult: Map<String, String>? = null,
   val argName: String? = null,
   val firstArgName: String? = null,
+  val variantOffsets: Map<String, Int>? = null,
 ) {
   init {
     if (singleResult == null && formsResult == null) {

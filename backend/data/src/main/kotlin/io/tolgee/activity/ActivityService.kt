@@ -51,7 +51,7 @@ class ActivityService(
 
     val mergedActivityRevision = persistActivityRevision(activityRevision)
 
-    persistedDescribingRelations(mergedActivityRevision)
+    persistDescribingRelations(mergedActivityRevision)
     mergedActivityRevision.modifiedEntities = persistModifiedEntities(modifiedEntities)
     applicationContext.publishEvent(OnProjectActivityStoredEvent(this, mergedActivityRevision))
   }
@@ -71,7 +71,7 @@ class ActivityService(
       ps.setObject(3, getJsonbObject(entity.describingData))
       ps.setObject(4, getJsonbObject(entity.describingRelations))
       ps.setObject(5, getJsonbObject(entity.modifications))
-      ps.setInt(6, RevisionType.values().indexOf(entity.revisionType))
+      ps.setInt(6, RevisionType.entries.indexOf(entity.revisionType))
       ps.setLong(7, entity.activityRevision.id)
       ps.setObject(8, entity.branchId)
     }
@@ -79,7 +79,7 @@ class ActivityService(
     return list
   }
 
-  private fun persistedDescribingRelations(activityRevision: ActivityRevision) {
+  private fun persistDescribingRelations(activityRevision: ActivityRevision) {
     jdbcTemplate.batchUpdate(
       "INSERT INTO activity_describing_entity " +
         "(entity_class, entity_id, data, describing_relations, activity_revision_id) " +
@@ -112,7 +112,7 @@ class ActivityService(
     }
   }
 
-  @Transactional
+  @Transactional(readOnly = true)
   fun findProjectActivity(
     projectId: Long,
     pageable: Pageable,
@@ -129,7 +129,7 @@ class ActivityService(
     ).get()
   }
 
-  @Transactional
+  @Transactional(readOnly = true)
   fun findProjectActivity(revisionId: Long): ProjectActivityView? {
     return ProjectActivityViewByRevisionProvider(
       applicationContext = applicationContext,
@@ -137,7 +137,7 @@ class ActivityService(
     ).get()
   }
 
-  @Transactional
+  @Transactional(readOnly = true)
   fun findProjectActivity(
     projectId: Long,
     revisionId: Long,
@@ -152,7 +152,7 @@ class ActivityService(
     ).get()
   }
 
-  @Transactional
+  @Transactional(readOnly = true)
   fun getTranslationHistory(
     translationId: Long,
     pageable: Pageable,
@@ -193,6 +193,14 @@ class ActivityService(
 
   fun findActivityRevisionInfo(id: Long): ActivityRevisionInfo? {
     return activityRevisionRepository.findInfo(id)
+  }
+
+  fun findModifiedEntitiesByRevisionId(revisionId: Long): List<ActivityModifiedEntity> {
+    return activityModifiedEntityRepository.findByRevisionId(revisionId)
+  }
+
+  fun findDistinctBranchIdsByRevisionId(revisionId: Long): List<Long?> {
+    return activityModifiedEntityRepository.findDistinctBranchIdsByRevisionId(revisionId)
   }
 
   private fun ActivityRevision.shouldSaveWithoutModification(): Boolean {

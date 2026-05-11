@@ -40,6 +40,7 @@ import io.tolgee.repository.dataImport.issues.ImportFileIssueParamRepository
 import io.tolgee.repository.dataImport.issues.ImportFileIssueRepository
 import io.tolgee.service.branching.BranchService
 import io.tolgee.service.dataImport.status.ImportApplicationStatus
+import io.tolgee.util.PathSecurity
 import io.tolgee.util.getSafeNamespace
 import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
@@ -173,7 +174,7 @@ class ImportService(
     if (importLanguage.existingLanguage == existingLanguage) {
       return
     }
-    val import = importLanguage.file.import
+    val import = importLanguage.file.importData
     Sentry.addBreadcrumb("Import ID: ${import.id}")
     val dataManager = ImportDataManager(applicationContext, import)
     val oldExistingLanguage = importLanguage.existingLanguage
@@ -191,7 +192,7 @@ class ImportService(
     namespace: String?,
   ) {
     val file = findFile(projectId, authorId, fileId) ?: throw NotFoundException()
-    val import = file.import
+    val import = file.importData
     Sentry.addBreadcrumb("Import ID: ${import.id}")
     val dataManager = ImportDataManager(applicationContext, import)
     file.namespace = getSafeNamespace(namespace)
@@ -265,7 +266,7 @@ class ImportService(
             left join fetch ik.keyMeta ikm
             left join fetch ikm.comments ikc
             join ik.file if
-            where if.import = :import
+            where if.importData = :import
             """,
         ).setParameter("import", import)
         .resultList as List<ImportKey>
@@ -372,10 +373,10 @@ class ImportService(
 
   @Transactional
   fun deleteLanguage(language: ImportLanguage) {
-    val import = language.file.import
+    val import = language.file.importData
     this.importTranslationRepository.deleteAllByLanguage(language)
     this.importLanguageRepository.delete(language)
-    if (this.findLanguages(import = language.file.import).isEmpty()) {
+    if (this.findLanguages(import = language.file.importData).isEmpty()) {
       deleteImport(import)
       return
     }
@@ -507,7 +508,8 @@ class ImportService(
     fileName: String,
   ): String {
     val notBlankFilename = fileName.ifBlank { "blank_name" }
-    return "${getFileStorageImportRoot(importId)}/$notBlankFilename"
+    val sanitized = PathSecurity.sanitizePath(notBlankFilename)
+    return "${getFileStorageImportRoot(importId)}/$sanitized"
   }
 
   private fun getFileStorageImportRoot(importId: String) = "importFiles/$importId"

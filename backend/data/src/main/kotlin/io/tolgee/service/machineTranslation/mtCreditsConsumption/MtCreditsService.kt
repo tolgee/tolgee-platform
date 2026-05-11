@@ -17,7 +17,7 @@ interface MtCreditsService {
     creditsInCents: Int,
   )
 
-  fun checkPositiveBalance(organizationId: Long)
+  fun checkCanConsumeCredits(organizationId: Long)
 
   fun getCreditBalances(organizationId: Long): MtCreditBalanceDto
 }

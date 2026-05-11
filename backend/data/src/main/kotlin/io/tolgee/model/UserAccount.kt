@@ -59,6 +59,9 @@ data class UserAccount(
   @Column(name = "totp_key", columnDefinition = "bytea")
   override var totpKey: ByteArray? = null
 
+  @Column(name = "totp_last_used_time_step")
+  var totpLastUsedTimeStep: Long? = null
+
   @Type(ListArrayType::class)
   @Column(name = "mfa_recovery_codes", columnDefinition = "text[]")
   var mfaRecoveryCodes: List<String> = emptyList()

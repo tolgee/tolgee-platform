@@ -19,11 +19,13 @@ const StyledAction = styled(Box)`
 type Props = {
   provider: ProviderWithPricing;
   perThousandMtCredits: number | null;
+  includedMtCredits: number | null;
 };
 
 export const LlmProviderPricingInfo = ({
   provider,
   perThousandMtCredits,
+  includedMtCredits,
 }: Props) => {
   const { t } = useTranslate();
   const [open, setOpen] = useState(false);
@@ -45,6 +47,7 @@ export const LlmProviderPricingInfo = ({
         <LlmProviderPricingDialog
           provider={provider}
           perThousandMtCredits={perThousandMtCredits}
+          includedMtCredits={includedMtCredits}
           onClose={() => setOpen(false)}
         />
       )}

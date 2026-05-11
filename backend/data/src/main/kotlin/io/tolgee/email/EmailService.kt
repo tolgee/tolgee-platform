@@ -56,7 +56,6 @@ class EmailService(
             "See https://docs.tolgee.io/platform/self_hosting/configuration#smtp",
         )
 
-  @Async
   fun sendEmailTemplate(
     recipient: String,
     template: String,

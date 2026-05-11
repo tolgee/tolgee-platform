@@ -102,6 +102,8 @@ tolgee:
   front-end-url: https://dummy-url.com
   ee:
     scheduled-reporting-enabled: false
-#logging:
-#  level:
-#    io.tolgee: DEBUG
+logging:
+  level:
+    io.tolgee.websocket: DEBUG
+    org.springframework.messaging.simp.stomp: DEBUG
+    org.springframework.web.socket.messaging: DEBUG

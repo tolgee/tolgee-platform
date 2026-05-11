@@ -5,6 +5,7 @@ import io.tolgee.model.task.Task
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.LanguageRepository
 import io.tolgee.repository.TranslationRepository
+import io.tolgee.repository.qa.LanguageQaConfigRepository
 import io.tolgee.service.AiPlaygroundResultService
 import io.tolgee.service.task.ITaskService
 import io.tolgee.service.translation.TranslationSuggestionService
@@ -31,6 +32,7 @@ class LanguageHardDeleter(
     translationRepository.deleteAll(allTranslations)
     taskService.deleteAll(tasks)
     aiPlaygroundResultService.deleteResultsByLanguage(language.id)
+    languageQaConfigRepository.deleteAllByLanguageId(language.id)
     languageRepository.delete(languageWithData)
     entityManager.flush()
   }
@@ -49,6 +51,7 @@ class LanguageHardDeleter(
             left join fetch k.branch
             left join fetch t.comments
             left join fetch t.labels
+            left join fetch t.qaIssues
             where t.id in :ids""",
               Translation::class.java,
             ).setParameter("ids", it.map { it.id })
@@ -102,5 +105,9 @@ class LanguageHardDeleter(
 
   private val translationSuggestionService by lazy {
     applicationContext.getBean(TranslationSuggestionService::class.java)
+  }
+
+  private val languageQaConfigRepository by lazy {
+    applicationContext.getBean(LanguageQaConfigRepository::class.java)
   }
 }

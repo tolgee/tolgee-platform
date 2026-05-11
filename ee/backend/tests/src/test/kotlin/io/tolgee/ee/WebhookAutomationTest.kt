@@ -165,6 +165,67 @@ class WebhookAutomationTest : ProjectAuthControllerTest("/v2/projects/") {
     }
   }
 
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `it does not overwrite firstFailed on subsequent failures`() {
+    val testData = WebhooksTestData()
+    currentDateProvider.forcedDate = currentDateProvider.date
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    this.projectSupplier = { testData.projectBuilder.self }
+    mockWebhookResponse(HttpStatus.BAD_REQUEST)
+
+    // First failure sets firstFailed
+    verifyWebhookExecuted(testData) {
+      modifyTranslationData()
+    }
+    val firstFailedTime =
+      webhookConfigService
+        .get(testData.webhookConfig.self.id)
+        .firstFailed!!
+        .time
+    firstFailedTime.assert.isEqualTo(currentDateProvider.date.time)
+
+    // Advance time and trigger another failure
+    currentDateProvider.forcedDate = currentDateProvider.date.addSeconds(5)
+
+    verifyWebhookExecuted(testData) {
+      currentDateProvider.forcedDate = currentDateProvider.date.addSeconds(5)
+    }
+
+    // Trigger another activity to cause a new webhook execution
+    verifyWebhookExecuted(testData) {
+      modifyTranslationData()
+    }
+
+    // firstFailed should still be the original time, not overwritten
+    val firstFailedAfterSecondFailure =
+      webhookConfigService
+        .get(testData.webhookConfig.self.id)
+        .firstFailed!!
+        .time
+    firstFailedAfterSecondFailure.assert.isEqualTo(firstFailedTime)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `it skips disabled webhooks`() {
+    val testData = WebhooksTestData()
+    testData.webhookConfig.self.enabled = false
+    currentDateProvider.forcedDate = currentDateProvider.date
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    this.projectSupplier = { testData.projectBuilder.self }
+    mockWebhookResponse(HttpStatus.OK)
+
+    val invocationsBefore = getWebhookRestTemplateInvocationCount()
+    modifyTranslationData()
+
+    // Wait a bit and verify webhook was NOT called
+    Thread.sleep(2000)
+    getWebhookRestTemplateInvocationCount().assert.isEqualTo(invocationsBefore)
+  }
+
   private fun modifyTranslationData() {
     performProjectAuthPost(
       "/translations",

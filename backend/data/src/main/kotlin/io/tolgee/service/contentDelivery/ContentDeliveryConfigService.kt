@@ -137,7 +137,6 @@ class ContentDeliveryConfigService(
     id: Long,
     dto: ContentDeliveryConfigRequest,
   ): ContentDeliveryConfig {
-    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, dto.filterBranch)
     checkMultipleConfigsFeature(projectService.get(projectId), maxCurrentAllowed = 1)
     val config = get(projectId, id)
     handleUpdateSlug(config, dto)
@@ -145,7 +144,11 @@ class ContentDeliveryConfigService(
     config.name = dto.name
     config.pruneBeforePublish = dto.pruneBeforePublish
     config.zip = dto.zip
-    config.branch = branchService.getActiveOrDefault(projectId, dto.filterBranch)
+    val newBranch = branchService.getActiveOrDefault(projectId, dto.filterBranch)
+    if (newBranch?.isDefault == false || config.branch?.isDefault == false) {
+      projectFeatureGuard.checkEnabled(Feature.BRANCHING)
+    }
+    config.branch = newBranch
     config.copyPropsFrom(dto)
     handleUpdateAutoPublish(dto, config)
     return save(config)

@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { InfiniteData } from 'react-query';
 import { useDebouncedCallback } from 'use-debounce';
 import { T } from '@tolgee/react';
-
 import {
   useApiInfiniteQuery,
   useApiMutation,
@@ -21,6 +20,7 @@ import {
 } from '../types';
 import { PrefilterType } from '../../prefilters/usePrefilter';
 import { useConfig } from 'tg.globalContext/helpers';
+import { useQaChecksEnabled } from 'tg.ee';
 import { useTranslationFiltersService } from './useTranslationFilterService';
 
 const PAGE_SIZE = 60;
@@ -73,6 +73,7 @@ const flattenKeys = (
 
 export const useTranslationsService = (props: Props) => {
   const config = useConfig();
+  const qaChecksEnabled = useQaChecksEnabled();
 
   const [order, setOrder] = useUrlSearchState('order', {
     defaultVal: 'keyName',
@@ -152,6 +153,7 @@ export const useTranslationsService = (props: Props) => {
     filterTaskKeysNotDone: props.prefilter?.taskFilterNotDone || undefined,
     branch: props.branchName,
     sort: ['keyNamespace', order, 'keyId'],
+    includeQaIssues: qaChecksEnabled,
   };
 
   const translations = useApiInfiniteQuery({
@@ -284,7 +286,7 @@ export const useTranslationsService = (props: Props) => {
 
   const setLanguages = (value: string[] | undefined) => {
     const limit = config.translationsViewLanguagesLimit;
-    if (value && value.length > limit) {
+    if (limit >= 0 && value && value.length > limit) {
       messaging.error(
         <T
           keyName="translations_languages_limit_reached"

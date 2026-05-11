@@ -22,6 +22,7 @@ type SignUpDto = components['schemas']['SignUpDto'];
 type SuperTokenAction = { onCancel: () => void; onSuccess: () => void };
 
 export const INVITATION_CODE_STORAGE_KEY = 'invitationCode';
+export const INVITATION_EMAIL_STORAGE_KEY = 'invitationEmail';
 
 const LOCAL_STORAGE_OAUTH_STATE_KEY = 'oauth2State';
 const LOCAL_STORAGE_SSO_STATE_KEY = 'ssoState';
@@ -106,13 +107,18 @@ export const useAuthService = (
       initial: undefined,
       key: INVITATION_CODE_STORAGE_KEY,
     });
+  const [invitationEmail, _setInvitationEmail] = useLocalStorageState({
+    initial: undefined,
+    key: INVITATION_EMAIL_STORAGE_KEY,
+  });
 
   const [allowRegistration, setAllowRegistration] = useState(
     Boolean(invitationCode)
   );
 
-  function setInvitationCode(code: string | undefined) {
+  function setInvitationCode(code: string | undefined, email?: string) {
     _setInvitationCode(code);
+    _setInvitationEmail(code ? email : undefined);
     if (code) {
       setAllowRegistration(true);
     }
@@ -230,6 +236,7 @@ export const useAuthService = (
     redirectSsoUrlLoadable,
     allowRegistration,
     invitationCode,
+    invitationEmail,
   };
 
   async function loginRedirectSso(domain: string) {

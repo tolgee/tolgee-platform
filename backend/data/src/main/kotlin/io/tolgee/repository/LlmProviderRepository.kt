@@ -22,4 +22,6 @@ interface LlmProviderRepository : JpaRepository<LlmProvider, Long> {
     id: Long,
     organizationId: Long,
   )
+
+  fun existsByOrganizationId(organizationId: Long): Boolean
 }

@@ -46,7 +46,7 @@ class ImageConverter(
   }
 
   private fun getScaledImage(targetDimension: Dimension): BufferedImage {
-    val resized = BufferedImage(targetDimension.width, targetDimension.height, sourceBufferedImage.type)
+    val resized = BufferedImage(targetDimension.width, targetDimension.height, getSafeImageType())
     val g = resized.createGraphics()
     g.setRenderingHint(
       RenderingHints.KEY_INTERPOLATION,
@@ -66,6 +66,16 @@ class ImageConverter(
     )
     g.dispose()
     return resized
+  }
+
+  private fun getSafeImageType(): Int {
+    if (sourceBufferedImage.type != BufferedImage.TYPE_CUSTOM) {
+      return sourceBufferedImage.type
+    }
+    if (sourceBufferedImage.colorModel.hasAlpha()) {
+      return BufferedImage.TYPE_INT_ARGB
+    }
+    return BufferedImage.TYPE_INT_RGB
   }
 
   val targetDimension: Dimension by lazy {

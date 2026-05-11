@@ -63,4 +63,21 @@ interface ActivityModifiedEntityRepository : JpaRepository<ActivityModifiedEntit
     pageable: Pageable,
     branchId: Long? = null,
   ): Page<ActivityModifiedEntity>
+
+  @Query(
+    """
+    from ActivityModifiedEntity ame
+    where ame.activityRevision.id = :revisionId
+    """,
+  )
+  fun findByRevisionId(revisionId: Long): List<ActivityModifiedEntity>
+
+  @Query(
+    """
+    select distinct ame.branchId
+    from ActivityModifiedEntity ame
+    where ame.activityRevision.id = :revisionId
+    """,
+  )
+  fun findDistinctBranchIdsByRevisionId(revisionId: Long): List<Long?>
 }

@@ -112,7 +112,7 @@ class ProjectService(
   @set:Lazy
   lateinit var aiPlaygroundResultService: AiPlaygroundResultService
 
-  @Transactional
+  @Transactional(readOnly = true)
   @Cacheable(cacheNames = [Caches.PROJECTS], key = "#id")
   fun findDto(id: Long): ProjectDto? {
     return projectRepository.find(id)?.let {
@@ -120,29 +120,33 @@ class ProjectService(
     }
   }
 
-  @Transactional
+  @Transactional(readOnly = true)
   @Cacheable(cacheNames = [Caches.PROJECTS], key = "#id")
   fun getDto(id: Long): ProjectDto {
     return findDto(id) ?: throw ProjectNotFoundException(id)
   }
 
+  @Transactional(readOnly = true)
   fun get(id: Long): Project {
     return find(id) ?: throw ProjectNotFoundException(id)
   }
 
+  @Transactional(readOnly = true)
   fun find(id: Long): Project? {
     return projectRepository.find(id)
   }
 
+  @Transactional(readOnly = true)
   fun findAll(ids: Iterable<Long>): List<Project> {
     return projectRepository.findAllById(ids)
   }
 
+  @Transactional(readOnly = true)
   fun findDeleted(id: Long): Project? {
     return projectRepository.findDeleted(id)
   }
 
-  @Transactional
+  @Transactional(readOnly = true)
   fun getView(id: Long): ProjectWithLanguagesView {
     val perms = permissionService.getProjectPermissionData(id, authenticationFacade.authenticatedUser.id)
     val withoutPermittedLanguages =
@@ -183,7 +187,7 @@ class ProjectService(
     }
 
     if (dto.defaultNamespaceId != null) {
-      var namespace =
+      val namespace =
         project.namespaces.find { it.id == dto.defaultNamespaceId }
           ?: throw BadRequestException(Message.NAMESPACE_NOT_FROM_PROJECT)
       project.defaultNamespace = namespace
@@ -205,7 +209,7 @@ class ProjectService(
       project.slug = newSlug
     }
 
-    // if project has null slag, generate it
+    // if a project has null slug, generate it
     if (project.slug == null) {
       project.slug = generateSlug(project.name, null)
     }
@@ -218,6 +222,7 @@ class ProjectService(
     return project
   }
 
+  @Transactional(readOnly = true)
   fun findAllPermitted(userAccount: UserAccount): List<ProjectDTO> {
     return projectRepository
       .findAllPermitted(userAccount.id)
@@ -239,8 +244,19 @@ class ProjectService(
       }.toList()
   }
 
+  @Transactional(readOnly = true)
   fun findAllInOrganization(organizationId: Long): List<Project> {
     return this.projectRepository.findAllByOrganizationOwnerId(organizationId)
+  }
+
+  @Transactional(readOnly = true)
+  fun findAllWithQaEnabledInOrganization(organizationId: Long): List<Project> {
+    return projectRepository.findAllByOrganizationOwnerIdAndUseQaChecksTrueAndDeletedAtIsNull(organizationId)
+  }
+
+  @Transactional(readOnly = true)
+  fun findAllWithQaEnabled(): List<Project> {
+    return projectRepository.findAllByUseQaChecksTrueAndDeletedAtIsNull()
   }
 
   private fun addPermittedLanguagesToProjects(
@@ -306,10 +322,12 @@ class ProjectService(
     avatarService.setAvatar(project, avatar)
   }
 
+  @Transactional(readOnly = true)
   fun validateSlugUniqueness(slug: String): Boolean {
     return projectRepository.countAllBySlug(slug) < 1
   }
 
+  @Transactional(readOnly = true)
   fun generateSlug(
     name: String,
     oldSlug: String? = null,
@@ -322,6 +340,7 @@ class ProjectService(
     }
   }
 
+  @Transactional(readOnly = true)
   fun findPermittedInOrganizationPaged(
     pageable: Pageable,
     search: String?,
@@ -337,6 +356,7 @@ class ProjectService(
     )
   }
 
+  @Transactional(readOnly = true)
   fun findPermittedInOrganizationPaged(
     pageable: Pageable,
     search: String?,
@@ -369,6 +389,7 @@ class ProjectService(
     return project
   }
 
+  @Transactional(readOnly = true)
   fun refresh(project: Project): Project {
     if (project.id == 0L) {
       return project
@@ -387,6 +408,7 @@ class ProjectService(
     save(project)
   }
 
+  @Transactional(readOnly = true)
   fun findAllByNameAndOrganizationOwner(
     name: String,
     organization: Organization,
@@ -394,6 +416,7 @@ class ProjectService(
     return projectRepository.findAllByNameAndOrganizationOwner(name, organization)
   }
 
+  @Transactional(readOnly = true)
   fun getProjectsWithDirectPermissions(
     id: Long,
     userIds: List<Long>,

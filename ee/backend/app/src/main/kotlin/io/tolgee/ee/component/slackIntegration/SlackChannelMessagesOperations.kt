@@ -96,19 +96,32 @@ class SlackChannelMessagesOperations(
 
       if (!response.isOk) {
         return ChatFailureResponseNotOk(response)
-          .also { failure ->
-            RuntimeException("Cannot send message in slack: ${failure.error}")
-              .let { logger.error(it.message, it) }
-          }
+          .also { failure -> logSlackFailure(failure.error) }
       }
 
       return ChatSuccess(response)
     } catch (e: SlackApiException) {
-      return ChatFailureException<R>(e).also {
-        logger.error("Cannot send message in slack: ${it.error}", it)
+      val failure = ChatFailureException<R>(e)
+      if (isUserConfigSlackError(failure.error)) {
+        logger.warn("Cannot send message in slack: ${failure.error}")
+      } else {
+        logger.error("Cannot send message in slack: ${failure.error}", e)
       }
+      return failure
     }
   }
+
+  private fun logSlackFailure(error: String) {
+    val message = "Cannot send message in slack: $error"
+    if (isUserConfigSlackError(error)) {
+      // User-side workspace/channel state — not a server bug, no need to alert
+      logger.warn(message)
+      return
+    }
+    logger.error(message, RuntimeException(message))
+  }
+
+  private fun isUserConfigSlackError(error: String): Boolean = error in USER_CONFIG_SLACK_ERRORS
 
   private fun OrganizationSlackWorkspace?.getSlackToken(): String {
     return this?.accessToken ?: tolgeeProperties.slack.token ?: throw SlackNotConfiguredException()
@@ -147,4 +160,18 @@ class SlackChannelMessagesOperations(
   data class SlackWorkspaceToken(
     val token: String,
   ) : SlackToken
+
+  companion object {
+    // Slack API errors caused by user/workspace state, not bugs in our code
+    private val USER_CONFIG_SLACK_ERRORS =
+      setOf(
+        "not_in_channel",
+        "channel_not_found",
+        "is_archived",
+        "account_inactive",
+        "token_revoked",
+        "missing_scope",
+        "invalid_auth",
+      )
+  }
 }

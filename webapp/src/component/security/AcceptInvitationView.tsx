@@ -1,6 +1,6 @@
 import { useHistory, useRouteMatch } from 'react-router-dom';
 import { T, useTranslate } from '@tolgee/react';
-import { Box, Button, Link, Paper, styled, Typography } from '@mui/material';
+import { Box, Link, Paper, styled, Typography } from '@mui/material';
 
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { messageService } from 'tg.service/MessageService';
@@ -10,11 +10,11 @@ import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { useWindowTitle } from 'tg.hooks/useWindowTitle';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
-import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 import { TranslatedError } from 'tg.translationTools/TranslatedError';
 import { ApiError } from 'tg.service/http/ApiError';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
+import { InvitationActions } from './InvitationActions';
 
 export const FULL_PAGE_BREAK_POINT = '(max-width: 700px)';
 
@@ -61,6 +61,14 @@ const AcceptInvitationView: React.FC = () => {
     },
     options: {
       onError(e: ApiError) {
+        if (e.code == 'invitation_email_mismatch') {
+          message.error(
+            <span data-cy="invitation_email_mismatch_message">
+              <T keyName="invitation_email_mismatch" />
+            </span>
+          );
+          return;
+        }
         if (e.code == 'plan_seat_limit_exceeded') {
           message.error(
             <span data-cy="plan_seat_limit_exceeded_while_accepting_invitation_message">
@@ -98,7 +106,7 @@ const AcceptInvitationView: React.FC = () => {
 
   function handleAccept() {
     if (!tokenService.getToken()) {
-      setInvitationCode(code);
+      setInvitationCode(code, invitationInfo.data?.inviteeEmail ?? undefined);
       history.push(LINKS.LOGIN.build());
     } else {
       acceptCode.mutate(
@@ -129,46 +137,6 @@ const AcceptInvitationView: React.FC = () => {
     return <FullPageLoading />;
   }
 
-  let infoText: React.ReactNode = null;
-
-  const username =
-    invitationInfo.data.createdBy?.name ??
-    invitationInfo.data.createdBy?.username;
-  const project = invitationInfo.data.projectName;
-  const organization = invitationInfo.data.organizationName;
-  const params = {
-    username,
-    project,
-    organization,
-    b: <b />,
-  };
-
-  if (project) {
-    if (username) {
-      infoText = (
-        <T
-          keyName="accept_invitation_description_project_user"
-          params={params}
-        />
-      );
-    } else {
-      infoText = (
-        <T keyName="accept_invitation_description_project" params={params} />
-      );
-    }
-  } else if (invitationInfo.data.createdBy) {
-    infoText = (
-      <T
-        keyName="accept_invitation_description_organization_user"
-        params={params}
-      />
-    );
-  } else {
-    infoText = (
-      <T keyName="accept_invitation_description_organization" params={params} />
-    );
-  }
-
   return (
     <DashboardPage hideQuickStart>
       <StyledContainer>
@@ -193,32 +161,12 @@ const AcceptInvitationView: React.FC = () => {
             )}
 
             <Box display="grid" gap="24px" justifyItems="center">
-              <Box textAlign="center" data-cy="accept-invitation-info-text">
-                {infoText}
-              </Box>
-              <Box
-                display="flex"
-                gap={3}
-                flexWrap="wrap"
-                justifyContent="center"
-              >
-                <LoadingButton
-                  loading={acceptCode.isLoading}
-                  variant="contained"
-                  color="primary"
-                  onClick={handleAccept}
-                  data-cy="accept-invitation-accept"
-                >
-                  {t('accept_invitation_accept')}
-                </LoadingButton>
-                <Button
-                  variant="outlined"
-                  onClick={handleDecline}
-                  data-cy="accept-invitation-decline"
-                >
-                  {t('accept_invitation_decline')}
-                </Button>
-              </Box>
+              <InvitationActions
+                data={invitationInfo.data}
+                isLoading={acceptCode.isLoading}
+                onAccept={handleAccept}
+                onDecline={handleDecline}
+              />
             </Box>
           </StyledPaper>
           <Box display="flex" justifyContent="center">

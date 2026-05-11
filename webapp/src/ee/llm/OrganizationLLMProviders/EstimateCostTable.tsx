@@ -53,7 +53,7 @@ const EstimateRow = ({
   formatCredits: (value: number) => string;
   creditsToEur: (credits: number) => string | null;
 }) => {
-  const totalTokens = inputTokens + OUTPUT_TOKENS;
+  const totalTokens = (inputTokens + OUTPUT_TOKENS) * STRINGS_COUNT;
   const credits = estimateCredits(inputPrice, outputPrice, inputTokens);
   return (
     <TableRow data-cy={dataCy}>
@@ -98,8 +98,8 @@ export const EstimateCostTable = (props: Props) => {
             <TableCell />
             <TableCell align="right">
               <T
-                keyName="llm_provider_pricing_tokens"
-                defaultValue="Tokens (per string)"
+                keyName="llm_provider_pricing_tokens_total"
+                defaultValue="Tokens"
               />
             </TableCell>
             <TableCell align="right">

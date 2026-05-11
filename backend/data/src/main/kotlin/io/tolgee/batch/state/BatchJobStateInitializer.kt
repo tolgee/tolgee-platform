@@ -43,7 +43,7 @@ class BatchJobStateInitializer(
       .associate {
         it.id to
           ExecutionState(
-            it.successTargets,
+            it.successTargets.size,
             it.status,
             it.chunkNumber,
             it.retry,
@@ -56,7 +56,7 @@ class BatchJobStateInitializer(
 
   fun getStateForExecution(execution: BatchJobChunkExecution): ExecutionState {
     return ExecutionState(
-      successTargets = execution.successTargets,
+      successTargetsCount = execution.successTargets.size,
       status = execution.status,
       chunkNumber = execution.chunkNumber,
       retry = execution.retry,
@@ -83,7 +83,7 @@ class BatchJobStateInitializer(
       if (executionState.status.completed && executionState.retry != true) {
         completedChunksCount++
       }
-      progressCount += executionState.successTargets.size
+      progressCount += executionState.successTargetsCount
       if (executionState.status == BatchJobChunkExecutionStatus.FAILED &&
         executionState.retry != true
       ) {

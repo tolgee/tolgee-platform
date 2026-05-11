@@ -25,6 +25,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
 import org.springframework.context.ApplicationContext
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
 import java.io.OutputStream
 import java.io.OutputStreamWriter
@@ -40,15 +41,21 @@ class MtResultStreamer(
   fun stream(): StreamingResponseBody {
     project = projectHolder.project
     val info = getInfo()
+    val securityContext = SecurityContextHolder.getContext()
 
     return streamingResponseBodyProvider.createStreamingResponseBody { outputStream ->
-      this.outputStream = outputStream
-      writer.writeJsonSync(info)
-      if (!baseBlank) {
-        writeServiceResultsAsync()
-      }
+      SecurityContextHolder.setContext(securityContext)
+      try {
+        this.outputStream = outputStream
+        writer.writeJsonSync(info)
+        if (!baseBlank) {
+          writeServiceResultsAsync()
+        }
 
-      writer.closeSync()
+        writer.closeSync()
+      } finally {
+        SecurityContextHolder.clearContext()
+      }
     }
   }
 
@@ -61,12 +68,18 @@ class MtResultStreamer(
   }
 
   private fun writeServiceResultsAsync() {
+    val securityContext = SecurityContextHolder.getContext()
     runBlocking(Dispatchers.IO) {
       servicesToUse
         .map { it.serviceType }
         .map { service ->
           async {
-            writeServiceResult(service)
+            SecurityContextHolder.setContext(securityContext)
+            try {
+              writeServiceResult(service)
+            } finally {
+              SecurityContextHolder.clearContext()
+            }
           }
         }.awaitAll()
     }

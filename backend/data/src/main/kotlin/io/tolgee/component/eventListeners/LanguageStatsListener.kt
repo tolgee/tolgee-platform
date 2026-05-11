@@ -1,5 +1,8 @@
 package io.tolgee.component.eventListeners
 
+import io.tolgee.activity.ActivityService
+import io.tolgee.batch.data.BatchJobType
+import io.tolgee.batch.events.OnBatchJobFinalized
 import io.tolgee.events.OnProjectActivityEvent
 import io.tolgee.model.Language
 import io.tolgee.model.Project
@@ -10,6 +13,7 @@ import io.tolgee.repository.TranslationRepository
 import io.tolgee.service.project.LanguageStatsService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.util.runSentryCatching
+import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 import org.springframework.transaction.event.TransactionalEventListener
@@ -21,6 +25,7 @@ class LanguageStatsListener(
   private val projectService: ProjectService,
   private val keyRepository: KeyRepository,
   private val translationRepository: TranslationRepository,
+  private val activityService: ActivityService,
 ) {
   var bypass = false
 
@@ -55,6 +60,24 @@ class LanguageStatsListener(
     }
   }
 
+  @EventListener(OnBatchJobFinalized::class)
+  @Async
+  fun onQaBatchJobFinalized(event: OnBatchJobFinalized) {
+    if (bypass) return
+    if (event.job.type != BatchJobType.QA_CHECK) return
+    val projectId = event.job.projectId ?: return
+    runSentryCatching {
+      projectService.findDto(projectId) ?: return@runSentryCatching
+
+      val branchIds = activityService.findDistinctBranchIdsByRevisionId(event.activityRevisionId)
+      if (branchIds.isEmpty()) return@runSentryCatching
+
+      branchIds.forEach { branchId ->
+        languageStatsService.refreshLanguageStats(projectId, branchId)
+      }
+    }
+  }
+
   private fun affectsStats(classes: Set<KClass<*>>): Boolean {
     return classes.contains(Language::class) ||
       classes.contains(Translation::class) ||
@@ -80,8 +103,8 @@ class LanguageStatsListener(
     val keyIds = event.modifiedEntities[Key::class]?.keys.orEmpty()
     if (keyIds.isEmpty()) return
 
-    keyRepository.getBranchIdsByIds(keyIds).forEach { branchId ->
-      branchIds.add(branchId)
+    keyIds.chunked(IN_CLAUSE_BATCH_SIZE).forEach { chunk ->
+      branchIds.addAll(keyRepository.getBranchIdsByIds(chunk))
     }
   }
 
@@ -92,8 +115,12 @@ class LanguageStatsListener(
     val translationIds = event.modifiedEntities[Translation::class]?.keys.orEmpty()
     if (translationIds.isEmpty()) return
 
-    translationRepository.getBranchIdsByIds(translationIds).forEach { branchId ->
-      branchIds.add(branchId)
+    translationIds.chunked(IN_CLAUSE_BATCH_SIZE).forEach { chunk ->
+      branchIds.addAll(translationRepository.getBranchIdsByIds(chunk))
     }
+  }
+
+  companion object {
+    private const val IN_CLAUSE_BATCH_SIZE = 30_000
   }
 }

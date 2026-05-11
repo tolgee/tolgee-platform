@@ -20,6 +20,7 @@ enum class Message {
   CAN_NOT_REVOKE_OWN_PERMISSIONS,
   DATA_CORRUPTED,
   INVITATION_CODE_DOES_NOT_EXIST_OR_EXPIRED,
+  INVITATION_EMAIL_MISMATCH,
   LANGUAGE_TAG_EXISTS,
   LANGUAGE_NAME_EXISTS,
   LANGUAGE_NOT_FOUND,
@@ -166,6 +167,7 @@ enum class Message {
   PLAN_HAS_SUBSCRIBERS,
   TRANSLATION_FAILED,
   BATCH_JOB_NOT_FOUND,
+  NO_TRANSLATIONS_TO_RECHECK,
   KEY_EXISTS_IN_NAMESPACE,
   TAG_IS_BLANK,
   EXECUTION_FAILED_ON_MANAGEMENT_ERROR,
@@ -327,11 +329,13 @@ enum class Message {
   FEATURE_NOT_ENABLED_FOR_PROJECT,
   EXPORT_KEY_PLURAL_SUFFIX_COLLISION,
   TRANSLATION_EXCEEDS_CHAR_LIMIT,
+  URL_NOT_VALID,
+  QA_CHECKS_NOT_ENABLED,
   ;
 
   val code: String
-    get() = name.lowercase(Locale.getDefault())
+    get() = name.lowercase(Locale.ROOT)
 
   @JsonValue
-  fun toLowerCase() = name.lowercase(Locale.getDefault())
+  fun toLowerCase() = name.lowercase(Locale.ROOT)
 }

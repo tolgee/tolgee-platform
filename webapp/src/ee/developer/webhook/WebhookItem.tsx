@@ -21,6 +21,7 @@ import { useMessage } from 'tg.hooks/useSuccessMessage';
 
 import { CopyUrlItem } from 'tg.views/projects/developer/CopyUrlItem';
 import { WebhookEditDialog } from './WebhookEditDialog';
+import { WebhookToggle } from './WebhookToggle';
 import { useDateFormatter } from 'tg.hooks/useLocale';
 
 type WebhookConfigModel = components['schemas']['WebhookConfigModel'];
@@ -80,8 +81,13 @@ export const WebhookItem = ({ data }: Props) => {
   }
 
   return (
-    <StyledContainer data-cy="webhooks-list-item" data-cy-url={data.url}>
+    <StyledContainer
+      data-cy="webhooks-list-item"
+      data-cy-url={data.url}
+      sx={{ opacity: data.enabled ? 1 : 0.6 }}
+    >
       <Box display="flex" gap={2} alignItems="center">
+        <WebhookToggle data={data} />
         <Box>{data.url}</Box>
         {Boolean(data.lastExecuted) && (
           <Tooltip title={t('webhooks_last_run_hint')}>
@@ -91,6 +97,27 @@ export const WebhookItem = ({ data }: Props) => {
                 dateStyle: 'short',
               })}
             </StyledTime>
+          </Tooltip>
+        )}
+        {data.autoDisabled && (
+          <Tooltip
+            title={t(
+              'webhook_auto_disabled_hint',
+              'This webhook was automatically disabled after failing continuously for an extended period.'
+            )}
+          >
+            <Box
+              sx={{
+                fontSize: '0.75rem',
+                color: theme.palette.text.secondary,
+              }}
+              data-cy="webhook-auto-disabled-label"
+            >
+              <T
+                keyName="webhook_auto_disabled_label"
+                defaultValue="Automatically disabled"
+              />
+            </Box>
           </Tooltip>
         )}
         {data.firstFailed && (

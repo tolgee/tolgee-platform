@@ -67,6 +67,8 @@ export const languagePermissionsData = generateTestDataObject(
 export const contentDeliveryTestData =
   generateTestDataObject('content-delivery');
 
+export const webhooksTestData = generateTestDataObject('webhooks');
+
 export const contentDeliveryBranchingTestData = generateTestDataObject(
   'content-delivery-branching'
 );
@@ -241,3 +243,5 @@ export function getInvitationsByProjectIdFromTestData(
 ) {
   return data.invitations.filter((i) => i.projectId === projectId);
 }
+
+export const qaTestData = generateTestDataObject('qa');

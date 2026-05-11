@@ -70,6 +70,8 @@ export const AiLanguageDescriptionDialog = ({
     );
   }
 
+  const isTooLong = Boolean(inputValue && inputValue.length > 2000);
+
   return (
     <Dialog open fullWidth maxWidth="sm" onClose={handleClose}>
       <Box sx={{ mt: 2, mx: 3, display: 'grid', gap: 0.5 }}>
@@ -87,6 +89,14 @@ export const AiLanguageDescriptionDialog = ({
             minRows={2}
             value={inputValue}
             onChange={(e) => setInputValue(e.currentTarget.value)}
+            error={isTooLong}
+            helperText={
+              isTooLong &&
+              t(
+                'language_ai_prompt_dialog_description_too_long',
+                'Description is too long (max 2000 characters)'
+              )
+            }
             data-cy="language-ai-prompt-dialog-description-input"
           />
           <AiTips
@@ -104,6 +114,7 @@ export const AiLanguageDescriptionDialog = ({
           loading={saveDescription.isLoading}
           color="primary"
           variant="contained"
+          disabled={isTooLong}
           data-cy="language-ai-prompt-dialog-save"
         >
           {t('global_form_save')}

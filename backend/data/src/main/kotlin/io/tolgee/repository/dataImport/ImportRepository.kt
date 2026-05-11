@@ -34,7 +34,7 @@ interface ImportRepository : JpaRepository<Import, Long> {
 
   @Query(
     """
-    select distinct if.namespace from ImportFile if where if.import.id = :importId
+    select distinct if.namespace from ImportFile if where if.importData.id = :importId
   """,
   )
   fun getAllNamespaces(importId: Long): Set<String?>

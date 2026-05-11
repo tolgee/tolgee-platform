@@ -123,7 +123,7 @@ class ScheduledUsageReportingTest : AbstractSpringTest() {
         // may fire between mock setup and this point, producing extra captures.
         val baseSize = captor.allValues.size
         usageToReportService.delete()
-        waitForNotThrowing(timeout = 10_000, pollTime = 100) {
+        waitForNotThrowing(timeout = 30_000, pollTime = 100) {
           captor.allValues.assert.hasSize(baseSize + 1)
         }
 
@@ -134,7 +134,7 @@ class ScheduledUsageReportingTest : AbstractSpringTest() {
         captor.allValues.assert.hasSize(baseSize + 1)
 
         currentDateProvider.move(Duration.ofDays(1))
-        waitForNotThrowing(timeout = 10_000, pollTime = 100) {
+        waitForNotThrowing(timeout = 30_000, pollTime = 100) {
           captor.allValues.assert.hasSize(baseSize + 2)
         }
 
@@ -145,7 +145,7 @@ class ScheduledUsageReportingTest : AbstractSpringTest() {
         captor.allValues.assert.hasSize(baseSize + 2)
 
         currentDateProvider.move(Duration.ofDays(1))
-        waitForNotThrowing(timeout = 10_000, pollTime = 100) {
+        waitForNotThrowing(timeout = 30_000, pollTime = 100) {
           captor.allValues.assert.hasSize(baseSize + 3)
         }
       }

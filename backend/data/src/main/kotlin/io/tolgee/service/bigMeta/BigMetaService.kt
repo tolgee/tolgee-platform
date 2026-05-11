@@ -218,14 +218,16 @@ class BigMetaService(
       }
 
       executeInNewTransaction(transactionManager) {
-        entityManager
-          .createQuery(
-            """
-      delete from KeysDistance kd 
+        ids.chunked(KEY_DELETE_CHUNK_SIZE).forEach { chunk ->
+          entityManager
+            .createQuery(
+              """
+      delete from KeysDistance kd
       where kd.key1Id in :ids or kd.key2Id in :ids
       """,
-          ).setParameter("ids", ids)
-          .executeUpdate()
+            ).setParameter("ids", chunk)
+            .executeUpdate()
+        }
       }
     }
   }
@@ -269,5 +271,9 @@ class BigMetaService(
 
   fun deleteAllByProjectId(id: Long) {
     keysDistanceRepository.deleteAllByProjectId(id)
+  }
+
+  companion object {
+    private const val KEY_DELETE_CHUNK_SIZE = 10_000
   }
 }

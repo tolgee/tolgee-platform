@@ -180,12 +180,12 @@ class LocalBatchJobStateStorage(
     return jobStatesMap[jobId]
   }
 
-  override fun removeJobState(jobId: Long): MutableMap<Long, ExecutionState>? {
+  override fun removeJobState(jobId: Long) {
     logger.debug("Removing job state for job $jobId")
     removeAllCounters(jobId)
     initializedJobs.remove(jobId)
     startedJobs.remove(jobId)
-    return jobStatesMap.remove(jobId)
+    jobStatesMap.remove(jobId)
   }
 
   override fun hasCachedJobState(jobId: Long): Boolean {

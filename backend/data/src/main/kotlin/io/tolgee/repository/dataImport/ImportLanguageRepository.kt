@@ -48,7 +48,7 @@ LEFT JOIN il.existingLanguage el
         """
   }
 
-  @Query("from ImportLanguage il join il.file if join if.import im where im.id = :importId")
+  @Query("from ImportLanguage il join il.file if join if.importData im where im.id = :importId")
   fun findAllByImport(importId: Long): List<ImportLanguage>
 
   @Modifying
@@ -59,7 +59,7 @@ LEFT JOIN il.existingLanguage el
   @Query(
     """
    $VIEW_BASE_QUERY
-        WHERE f.import.id = :importId
+        WHERE f.importData.id = :importId
             $VIEW_GROUP_BY
             order by il.id
             """,

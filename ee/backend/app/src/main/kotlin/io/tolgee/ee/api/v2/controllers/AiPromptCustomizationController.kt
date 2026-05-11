@@ -2,7 +2,6 @@ package io.tolgee.ee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import io.tolgee.constants.Feature
 import io.tolgee.ee.api.v2.hateoas.assemblers.LanguageAiPromptCustomizationModelAssembler
 import io.tolgee.ee.data.SetLanguagePromptCustomizationRequest
 import io.tolgee.ee.data.SetProjectPromptCustomizationRequest
@@ -13,7 +12,6 @@ import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.Scope
 import io.tolgee.openApiDocs.OpenApiEeExtension
 import io.tolgee.security.ProjectHolder
-import io.tolgee.security.authorization.RequiresFeatures
 import io.tolgee.security.authorization.RequiresOrganizationRole
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
@@ -52,7 +50,6 @@ class AiPromptCustomizationController(
   @Operation(summary = "Sets project level prompt customization")
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
   @RequiresProjectPermissions(scopes = [Scope.PROJECT_EDIT])
-  @RequiresFeatures(Feature.AI_PROMPT_CUSTOMIZATION)
   fun setPromptProjectCustomization(
     @Valid @RequestBody dto: SetProjectPromptCustomizationRequest,
   ): ProjectAiPromptCustomizationModel {
@@ -66,7 +63,6 @@ class AiPromptCustomizationController(
   @Operation(summary = "Sets language level prompt customization")
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
   @RequiresProjectPermissions(scopes = [Scope.PROJECT_EDIT, Scope.LANGUAGES_EDIT])
-  @RequiresFeatures(Feature.AI_PROMPT_CUSTOMIZATION)
   fun setLanguagePromptCustomization(
     @Valid @RequestBody dto: SetLanguagePromptCustomizationRequest,
     @PathVariable languageId: Long,

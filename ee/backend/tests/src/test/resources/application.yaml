@@ -70,6 +70,7 @@ tolgee:
       token-uri: "http://tokenUri"
   internal:
     fake-mt-providers: true
+    disable-url-ssrf-protection: true
     mock-free-plan: true
     disable-initial-user-creation: true
     use-in-memory-file-storage: true

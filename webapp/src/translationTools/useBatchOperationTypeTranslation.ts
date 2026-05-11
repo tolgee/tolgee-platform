@@ -40,6 +40,8 @@ export function useBatchOperationTypeTranslate() {
         return t('batch_operation_type_restore_keys');
       case 'HARD_DELETE_KEYS':
         return t('batch_operation_type_hard_delete_keys');
+      case 'QA_CHECK':
+        return t('batch_operation_type_qa_check');
       default:
         return type;
     }

@@ -12,6 +12,7 @@ import io.tolgee.exceptions.LlmRateLimitedException
 import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.exceptions.limits.PlanLimitExceededStringsException
 import io.tolgee.exceptions.limits.PlanSpendingLimitExceededStringsException
+import jakarta.persistence.EntityNotFoundException
 import kotlinx.coroutines.ensureActive
 import org.springframework.stereotype.Component
 import kotlin.coroutines.CoroutineContext
@@ -59,6 +60,8 @@ class MtProviderCatching(
         throw FailedDontRequeueException(e.tolgeeMessage!!, successfulTargets, e)
       } catch (e: LanguageNotSupportedException) {
         throw FailedDontRequeueException(e.tolgeeMessage!!, successfulTargets, e)
+      } catch (e: EntityNotFoundException) {
+        throw FailedDontRequeueException(Message.TRANSLATION_FAILED, successfulTargets, e)
       } catch (e: Throwable) {
         exceptions.add(RequeueWithDelayException(Message.TRANSLATION_FAILED, successfulTargets, e))
       }

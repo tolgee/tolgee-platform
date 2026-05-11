@@ -4,6 +4,7 @@ import { getAutoChange } from './types/getAutoChange';
 import { getStateChange } from './types/getStateChange';
 import { getGeneralChange } from './types/getGeneralChange';
 import { getCommentStateChange } from './types/getCommentStateChange';
+import { getQaIssueStateChange } from './types/getQaIssueStateChange';
 import { getKeyTagsChange } from './types/getKeyTagsChange';
 import { getLanguageFlagChange } from './types/getLanguageFlagChange';
 import { getProjectLanguageChange } from './types/getProjectLanguageChange';
@@ -42,6 +43,8 @@ export const formatDiff = ({
       return getStateChange(value);
     case 'comment_state':
       return getCommentStateChange(value);
+    case 'qa_issue_state':
+      return getQaIssueStateChange(value);
     case 'key_tags':
       return getKeyTagsChange(value);
     case 'text':

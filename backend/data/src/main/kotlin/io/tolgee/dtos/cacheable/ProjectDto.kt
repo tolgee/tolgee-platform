@@ -17,6 +17,7 @@ data class ProjectDto(
   override var icuPlaceholders: Boolean,
   var useNamespaces: Boolean,
   var useBranching: Boolean,
+  var useQaChecks: Boolean,
   var suggestionsMode: SuggestionsMode,
   var translationProtection: TranslationProtection,
 ) : Serializable,
@@ -34,6 +35,7 @@ data class ProjectDto(
         icuPlaceholders = entity.icuPlaceholders,
         useNamespaces = entity.useNamespaces,
         useBranching = entity.useBranching,
+        useQaChecks = entity.useQaChecks,
         suggestionsMode = entity.suggestionsMode,
         translationProtection = entity.translationProtection,
       )

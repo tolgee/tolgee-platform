@@ -24,6 +24,7 @@ import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.KeyRepository
 import io.tolgee.repository.LanguageRepository
+import io.tolgee.repository.TaskKeyRepository
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.AiPlaygroundResultService
 import io.tolgee.service.bigMeta.BigMetaService
@@ -33,6 +34,7 @@ import io.tolgee.service.key.utils.KeyInfoProvider
 import io.tolgee.service.key.utils.KeysImporter
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
+import io.tolgee.service.translation.applyMaxCharLimit
 import io.tolgee.service.translation.validateCharLimit
 import io.tolgee.util.Logging
 import io.tolgee.util.setSimilarityLimit
@@ -64,6 +66,7 @@ class KeyService(
   private val activityHolder: ActivityHolder,
   @Lazy
   private val aiPlaygroundResultService: AiPlaygroundResultService,
+  private val taskKeyRepository: TaskKeyRepository,
   @Lazy
   private val branchService: BranchService,
   @Lazy
@@ -123,6 +126,17 @@ class KeyService(
 
   fun get(id: Long): Key {
     return keyRepository.findByIdOrNull(id) ?: throw NotFoundException(Message.KEY_NOT_FOUND)
+  }
+
+  fun get(
+    projectId: Long,
+    id: Long,
+  ): Key {
+    val key = get(id)
+    if (key.project.id != projectId) {
+      throw NotFoundException(Message.KEY_NOT_FOUND)
+    }
+    return key
   }
 
   fun getView(
@@ -263,7 +277,7 @@ class KeyService(
     keyMetaService.getOrCreateForKey(key).apply {
       description = dto.description
     }
-    dto.maxCharLimit?.let { key.maxCharLimit = if (it <= 0) null else it }
+    key.applyMaxCharLimit(dto.maxCharLimit)
     return edit(key, dto.name, dto.namespace, dto.branch)
   }
 
@@ -336,12 +350,20 @@ class KeyService(
   @Transactional
   fun hardDelete(id: Long) {
     val key = findOptional(id).orElseThrow { NotFoundException() }
+    val namespace = key.namespace
     translationService.deleteAllByKey(id)
     keyMetaService.deleteAllByKeyId(id)
     screenshotService.deleteAllByKeyId(id)
+    taskKeyRepository.deleteAllByKeyIdIn(listOf(id))
     branchMergeService.deleteChangesByKeyIds(listOf(id))
-    keyRepository.delete(key)
-    namespaceService.deleteIfUnused(key.namespace)
+    // Flush and clear the persistence context to ensure deletions are synchronized
+    // and to prevent Hibernate 6.6's CHECK_ON_FLUSH from seeing stale relationships
+    entityManager.flush()
+    entityManager.clear()
+    // Re-fetch the key after clearing the persistence context
+    val keyToDelete = keyRepository.findById(id).orElseThrow { NotFoundException() }
+    keyRepository.delete(keyToDelete)
+    namespaceService.deleteIfUnused(namespace)
     aiPlaygroundResultService.deleteResultsByKeys(listOf(id))
   }
 
@@ -420,7 +442,16 @@ class KeyService(
     }
     aiPlaygroundResultService.deleteResultsByKeys(ids)
 
+    traceLogMeasureTime("delete multiple keys: delete task keys") {
+      taskKeyRepository.deleteAllByKeyIdIn(ids)
+    }
+
     branchMergeService.deleteChangesByKeyIds(ids)
+
+    // Flush and clear the persistence context to ensure deletions are synchronized
+    // and to prevent Hibernate 6.6's CHECK_ON_FLUSH from seeing stale relationships
+    entityManager.flush()
+    entityManager.clear()
 
     val keys =
       traceLogMeasureTime("hard delete multiple keys: fetch keys") {
@@ -485,6 +516,7 @@ class KeyService(
   fun deleteAllByProject(projectId: Long) {
     keyMetaService.deleteAllByProject(projectId)
     screenshotService.deleteAllByProject(projectId)
+    taskKeyRepository.deleteAllByKeyProjectId(projectId)
 
     entityManager
       .createQuery("""delete from Key where project.id = :projectId""")

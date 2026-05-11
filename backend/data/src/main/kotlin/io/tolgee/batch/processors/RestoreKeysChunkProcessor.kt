@@ -53,4 +53,9 @@ class RestoreKeysChunkProcessor(
   override fun getTarget(data: RestoreKeysRequest): List<Long> {
     return data.keyIds
   }
+
+  override fun getChunkSize(
+    request: RestoreKeysRequest,
+    projectId: Long?,
+  ): Int = 5000
 }

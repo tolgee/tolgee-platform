@@ -165,6 +165,10 @@ class Project(
   @ActivityLoggedProp
   var useBranching: Boolean = false
 
+  @ColumnDefault("false")
+  @ActivityLoggedProp
+  var useQaChecks: Boolean = false
+
   @ColumnDefault("DISABLED")
   @ActivityLoggedProp
   @Enumerated(EnumType.STRING)

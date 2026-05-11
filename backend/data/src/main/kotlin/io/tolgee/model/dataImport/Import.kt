@@ -32,7 +32,7 @@ class Import(
   @ManyToOne(optional = false)
   lateinit var author: UserAccount
 
-  @OneToMany(mappedBy = "import", orphanRemoval = true)
+  @OneToMany(mappedBy = "importData", orphanRemoval = true)
   var files = mutableListOf<ImportFile>()
 
   @ManyToOne(targetEntity = Branch::class)

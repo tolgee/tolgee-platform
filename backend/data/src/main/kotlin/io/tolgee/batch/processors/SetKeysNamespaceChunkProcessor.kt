@@ -72,4 +72,9 @@ class SetKeysNamespaceChunkProcessor(
       this.namespace = data.namespace
     }
   }
+
+  override fun getChunkSize(
+    request: SetKeysNamespaceRequest,
+    projectId: Long?,
+  ): Int = 5000
 }

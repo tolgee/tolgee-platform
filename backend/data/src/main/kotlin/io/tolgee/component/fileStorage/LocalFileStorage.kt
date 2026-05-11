@@ -62,7 +62,12 @@ class LocalFileStorage(
   private fun getLocalFile(storageFilePath: String): File {
     val dataRoot = localDataPath.removeTrailingSlash()
     val normalizedFilePath = storageFilePath.removeLeadingSlash()
-    return File("$dataRoot/$normalizedFilePath")
+    val resolved = File("$dataRoot/$normalizedFilePath").canonicalFile
+    val rootDir = File(dataRoot).canonicalFile
+    if (!resolved.path.startsWith(rootDir.path + File.separator) && resolved != rootDir) {
+      throw FileStoreException("Path traversal detected", storageFilePath)
+    }
+    return resolved
   }
 
   private fun String.removeLeadingSlash() = this.removePrefix("/")

@@ -1,5 +1,6 @@
 package io.tolgee.ee.service
 
+import io.tolgee.component.adminMtServiceFilter.AdminMtServiceFilter
 import io.tolgee.exceptions.LlmProviderNotFoundException
 import io.tolgee.repository.LlmProviderRepository
 import io.tolgee.service.LlmPropertiesService
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Component
 class LlmProviderResolver(
   private val llmProviderRepository: LlmProviderRepository,
   private val llmPropertiesService: LlmPropertiesService,
+  private val adminMtServiceFilter: AdminMtServiceFilter,
 ) {
   fun resolveProviderName(
     organizationId: Long,
@@ -34,7 +36,9 @@ class LlmProviderResolver(
     organizationId: Long,
     name: String,
   ): Boolean {
-    if (llmProviderRepository.getAll(organizationId).any { it.name == name }) return true
+    if (!adminMtServiceFilter.shouldSkipOrgLlmProviders(organizationId)) {
+      if (llmProviderRepository.getAll(organizationId).any { it.name == name }) return true
+    }
     return llmPropertiesService.getProviders().any { it.name == name }
   }
 

@@ -41,7 +41,10 @@ configureLiquibase("ee", "hibernate:spring:io.tolgee.ee.model", 'src/main/resour
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-websocket")
+    implementation("org.springframework.boot:spring-boot-starter-security")
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation libs.kotlinCoroutines
 
     implementation(project(":data"))
     implementation(project(":security"))
@@ -94,6 +97,8 @@ dependencies {
      */
     implementation 'org.apache.poi:poi-ooxml:5.4.0'
     implementation 'org.apache.commons:commons-collections4:4.4'
+
+    implementation("com.github.ben-manes.caffeine:caffeine")
 
     /**
      * HANDLEBARS

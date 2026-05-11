@@ -1,5 +1,6 @@
 package io.tolgee.ee.api.v2.controllers.task
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.config.TestEmailConfiguration
 import io.tolgee.constants.Feature
@@ -409,25 +410,32 @@ class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   @ProjectJWTAuthTestMethod
   fun `canceled tasks can be filtered out by timestamp`() {
-    val timeBeforeCreation = System.currentTimeMillis()
-    performProjectAuthPut(
-      "tasks/${testData.translateTask.self.number}/cancel",
-    ).andIsOk.andAssertThatJson {
-      node("state").isEqualTo("CANCELED")
-    }
-    val timeAfterCreation = System.currentTimeMillis()
+    val closedAt =
+      performProjectAuthPut(
+        "tasks/${testData.translateTask.self.number}/cancel",
+      ).andIsOk
+        .andAssertThatJson {
+          node("state").isEqualTo("CANCELED")
+          node("closedAt").isNumber
+        }.andReturn()
+        .response
+        .let {
+          com.fasterxml.jackson.module.kotlin
+            .jacksonObjectMapper()
+            .readTree(it.contentAsString)["closedAt"]
+            .asLong()
+        }
 
-    // should be included
+    // Filter with closedAt - 1: the canceled task's closedAt is after this, so both tasks should be included
     performProjectAuthGet(
-      "tasks?filterNotClosedBefore=$timeBeforeCreation",
+      "tasks?filterNotClosedBefore=${closedAt - 1}",
     ).andIsOk.andAssertThatJson {
       node("page").node("totalElements").isEqualTo(2)
-      node("_embedded.tasks[0].name").isEqualTo("Translate task")
     }
 
-    // should be excluded
+    // Filter with closedAt + 1: the canceled task's closedAt is before this, so only the open task remains
     performProjectAuthGet(
-      "tasks?filterNotClosedBefore=$timeAfterCreation",
+      "tasks?filterNotClosedBefore=${closedAt + 1}",
     ).andIsOk.andAssertThatJson {
       node("page").node("totalElements").isEqualTo(1)
       node("_embedded.tasks[0].name").isEqualTo("Review task")

@@ -102,6 +102,20 @@ services:
       timeout: 5s
       retries: 5
 
+  languagetool:
+    image: erikvl87/languagetool:6.7
+    environment:
+      - Java_Xms=256m
+      - Java_Xmx=1024m
+    ports:
+      - "8010:8010"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8010/v2/languages"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
   # Tolgee Dependencies
   postgres:
     image: postgres:15

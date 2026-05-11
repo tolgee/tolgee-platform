@@ -1,6 +1,5 @@
 package io.tolgee.facade
 
-import io.sentry.Sentry
 import io.tolgee.dtos.queryResults.LanguageStatsDto
 import io.tolgee.dtos.queryResults.ProjectStatistics
 import io.tolgee.hateoas.project.ProjectWithStatsModel
@@ -43,14 +42,10 @@ class ProjectWithStatsFacade(
         val baseLanguage = languages[projectWithLanguagesView.id]?.find { it.base }
         val projectLanguageStats = allLanguageStats[projectWithLanguagesView.id] ?: emptyList()
 
-        var stateTotals: ProjectStatsService.ProjectStateTotals? = null
-        if (baseLanguage != null) {
-          stateTotals =
-            projectStatsService.computeProjectTotals(
-              baseLanguage,
-              projectLanguageStats,
-            )
-        }
+        val stateTotals =
+          baseLanguage?.let {
+            projectStatsService.computeProjectTotals(it, projectLanguageStats)
+          }
 
         val translatedPercent = stateTotals?.translatedPercent.toPercentValue()
         val reviewedPercent = stateTotals?.reviewedPercent.toPercentValue()
@@ -59,6 +54,9 @@ class ProjectWithStatsFacade(
             2,
             RoundingMode.HALF_UP,
           )
+
+        val qaIssueCount = projectLanguageStats.sumOf { it.qaIssueCount }
+        val qaChecksStaleCount = projectLanguageStats.sumOf { it.qaChecksStaleCount }
 
         val projectStatistics =
           ProjectStatistics(
@@ -71,6 +69,8 @@ class ProjectWithStatsFacade(
                 TranslationState.REVIEWED to reviewedPercent,
                 TranslationState.UNTRANSLATED to untranslatedPercent,
               ),
+            qaIssueCount = qaIssueCount,
+            qaChecksStaleCount = qaChecksStaleCount,
           )
 
         val projectLanguages =
@@ -99,15 +99,9 @@ class ProjectWithStatsFacade(
   }
 
   fun Double?.toPercentValue(): BigDecimal {
-    if (this == null || this.isNaN()) {
+    if (this == null || this.isNaN() || this.isInfinite()) {
       return BigDecimal(0)
     }
-    return try {
-      this.toBigDecimal().setScale(3, RoundingMode.HALF_UP)
-    } catch (e: NumberFormatException) {
-      Sentry.captureMessage("Failed to convert $this to BigDecimal")
-      Sentry.captureException(e)
-      BigDecimal(0)
-    }
+    return this.toBigDecimal().setScale(3, RoundingMode.HALF_UP)
   }
 }

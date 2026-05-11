@@ -33,7 +33,10 @@ import { QUERY } from 'tg.constants/links';
 import { useEnabledFeatures } from 'tg.globalContext/helpers';
 import { useAiPlaygroundService } from './services/useAiPlaygroundService';
 import { useBranchesService } from './services/useBranchesService';
-import { useEditService } from './services/useEditService';
+import {
+  CorrectTranslationParams,
+  useEditService,
+} from './services/useEditService';
 import { useLabelsService } from './services/useLabelsService';
 import { useLayoutService } from './services/useLayoutService';
 import { usePositionService } from './services/usePositionService';
@@ -274,6 +277,12 @@ export const [
     },
     changeField(value: ChangeValue) {
       return editService.changeField(value);
+    },
+    canEditTranslation(translationId: number) {
+      return editService.canEditTranslation(translationId);
+    },
+    correctTranslation(params: CorrectTranslationParams) {
+      return editService.correctTranslation(params);
     },
     selectLanguages(languages: string[] | undefined) {
       translationService.setLanguages(languages);

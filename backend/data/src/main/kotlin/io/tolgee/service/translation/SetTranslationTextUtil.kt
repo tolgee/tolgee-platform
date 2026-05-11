@@ -54,7 +54,7 @@ class SetTranslationTextUtil(
       translations.entries
         .associate { (language, value) ->
           language to setTranslationText(key, language, value, options)
-        }.mapValues { it.value }
+        }
 
     applicationContext.publishEvent(
       OnTranslationsSet(
@@ -112,8 +112,6 @@ class SetTranslationTextUtil(
 
     translation.text = text
 
-    val hasText = !text.isNullOrEmpty()
-
     val keepState =
       options?.keepState
         ?: (project?.translationProtection == TranslationProtection.PROTECT_REVIEWED)
@@ -122,7 +120,7 @@ class SetTranslationTextUtil(
       when {
         translation.state == TranslationState.DISABLED -> TranslationState.DISABLED
         text.isNullOrEmpty() -> TranslationState.UNTRANSLATED
-        translation.isUntranslated && hasText -> TranslationState.TRANSLATED
+        translation.isUntranslated -> TranslationState.TRANSLATED
         hasTextChanged ->
           if (keepState) {
             translation.state

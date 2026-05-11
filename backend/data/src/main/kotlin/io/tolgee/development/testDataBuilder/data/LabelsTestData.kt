@@ -13,6 +13,8 @@ class LabelsTestData : BaseTestData() {
   lateinit var unassignedLabel: Label
   lateinit var czechLanguage: Language
   lateinit var keyWithoutCzTranslation: Key
+  lateinit var secondKeyEnTranslation: Translation
+  lateinit var secondKeyCsTranslation: Translation
 
   init {
     root.apply {
@@ -55,9 +57,9 @@ class LabelsTestData : BaseTestData() {
         addKey {
           name = "second key"
         }.build {
-          addTranslation("en", "second key translation").self
+          secondKeyEnTranslation = addTranslation("en", "second key translation").self
         }.build {
-          addTranslation("cs", "second key second translation").self
+          secondKeyCsTranslation = addTranslation("cs", "second key second translation").self
         }
         addKey {
           name = "third key (without czech translations)"

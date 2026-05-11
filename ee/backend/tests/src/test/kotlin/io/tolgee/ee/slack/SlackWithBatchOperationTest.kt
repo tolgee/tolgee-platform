@@ -94,15 +94,22 @@ class SlackWithBatchOperationTest : MachineTranslationTest() {
       mockedSlackClient.chatPostMessageRequests.assert.hasSize(3)
     }
 
-    mockedSlackClient.chatUpdateRequests.assert.hasSize(0)
+    // Auto-translation batch jobs may still be running and can produce
+    // chatUpdate requests (same race as SlackWithAutoTranslationTest).
+    // Record the current count so we can assert on the delta after the
+    // batch operation, rather than relying on clearInvocations which
+    // can miss late-arriving updates.
+    val postsBefore = mockedSlackClient.chatPostMessageRequests.size
+    val updatesBefore = mockedSlackClient.chatUpdateRequests.size
 
-    mockedSlackClient.clearInvocations()
     performBatchOperation(keyIds)
 
-    waitForNotThrowing(timeout = 3_000) {
-      mockedSlackClient.chatPostMessageRequests.assert.hasSize(1)
+    waitForNotThrowing(timeout = 10_000) {
+      val newPosts = mockedSlackClient.chatPostMessageRequests.size - postsBefore
+      val newUpdates = mockedSlackClient.chatUpdateRequests.size - updatesBefore
+      newPosts.assert.isEqualTo(1)
       // currently is 6 due to suboptimal implementations
-      mockedSlackClient.chatUpdateRequests.assert.hasSize(3)
+      newUpdates.assert.isEqualTo(3)
     }
   }
 

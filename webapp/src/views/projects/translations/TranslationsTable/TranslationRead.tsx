@@ -8,6 +8,8 @@ import { TranslationFlags } from '../cell/TranslationFlags';
 import { AiPlaygroundPreview } from '../translationVisual/AiPlaygroundPreview';
 import { TranslationLabels } from 'tg.views/projects/translations/TranslationsList/TranslationLabels';
 import { SuggestionsFirst } from '../Suggestions/SuggestionsFirst';
+import { useQaChecksEnabled } from 'tg.ee';
+import { getFirstPluralVariantWithQaIssues } from 'tg.fixtures/qaUtils';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -85,13 +87,9 @@ export const TranslationRead: React.FC<Props> = ({
     removeLabel,
   } = tools;
 
-  const toggleEdit = () => {
-    if (isEditing) {
-      handleClose();
-    } else {
-      handleOpen();
-    }
-  };
+  const qaChecksEnabled = useQaChecksEnabled();
+
+  const toggleEdit = () => (isEditing ? handleClose() : handleOpen());
 
   const state = translation?.state || 'UNTRANSLATED';
 
@@ -103,7 +101,7 @@ export const TranslationRead: React.FC<Props> = ({
       data-cy="translations-table-cell"
       data-cy-language={language.tag}
       data-cy-key={keyData.keyName}
-      onClick={cellClickable ? () => toggleEdit() : undefined}
+      onClick={cellClickable ? toggleEdit : undefined}
     >
       <StyledTranslation>
         <TranslationVisual
@@ -114,6 +112,8 @@ export const TranslationRead: React.FC<Props> = ({
           disabled={disabled}
           showHighlights={isEditingRow && language.base}
           isPlural={keyData.keyIsPlural}
+          qaIssues={qaChecksEnabled ? translation?.qaIssues : undefined}
+          translationId={translation?.id}
         />
         {Boolean(translation?.totalSuggestionCount) && (
           <SuggestionsFirst
@@ -147,8 +147,21 @@ export const TranslationRead: React.FC<Props> = ({
         <ControlsTranslation
           onEdit={() => handleOpen()}
           onComments={() => handleOpen('comments')}
+          onQaIssues={() =>
+            handleOpen(
+              'qa_checks',
+              keyData.keyIsPlural
+                ? getFirstPluralVariantWithQaIssues(
+                    translation?.qaIssues,
+                    language.tag
+                  )
+                : undefined
+            )
+          }
           commentsCount={translation?.commentCount}
           unresolvedCommentCount={translation?.unresolvedCommentCount}
+          qaIssueCount={translation?.qaIssueCount}
+          qaChecksStale={translation?.qaChecksStale}
           stateChangeEnabled={canChangeState}
           editEnabled={cellClickable}
           state={state}

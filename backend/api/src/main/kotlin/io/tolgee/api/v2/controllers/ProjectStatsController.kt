@@ -10,8 +10,11 @@ import io.tolgee.constants.Feature
 import io.tolgee.hateoas.project.stats.LanguageStatsModelAssembler
 import io.tolgee.hateoas.project.stats.ProjectStatsModel
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authentication.ReadOnlyOperation
+import io.tolgee.security.authorization.RequiresFeatures
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.branching.BranchService
@@ -20,6 +23,7 @@ import io.tolgee.service.project.LanguageStatsService
 import io.tolgee.service.project.ProjectFeatureGuard
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.project.ProjectStatsService
+import io.tolgee.service.qa.TranslationQaIssueService
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -42,6 +46,7 @@ class ProjectStatsController(
   private val languageService: LanguageService,
   private val branchService: BranchService,
   private val projectFeatureGuard: ProjectFeatureGuard,
+  private val translationQaIssueService: TranslationQaIssueService,
 ) {
   @Operation(summary = "Get project stats")
   @GetMapping("", produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -79,8 +84,27 @@ class ProjectStatsController(
       reviewedPercentage = totals.reviewedPercent,
       membersCount = projectStats.memberCount,
       tagCount = projectStats.tagCount,
-      languageStats = statsLanguagePairs.map { languageStatsModelAssembler.toModel(it) },
+      languageStats =
+        statsLanguagePairs.map {
+          languageStatsModelAssembler.toModel(it)
+        },
     )
+  }
+
+  @Operation(summary = "Get QA issue counts grouped by check type for a language")
+  @GetMapping("/qa-issue-counts")
+  @ReadOnlyOperation
+  @UseDefaultPermissions
+  @AllowApiAccess
+  @RequiresFeatures(Feature.QA_CHECKS)
+  fun getQaIssueCountsByCheckType(
+    @RequestParam(name = "languageId") languageId: Long,
+    @RequestParam(name = "branch", required = false) branchName: String? = null,
+  ): Map<QaCheckType, Long> {
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branchName)
+    val branch = branchService.getActiveOrDefault(projectHolder.project.id, branchName)
+    return translationQaIssueService
+      .getOpenIssueCountsByCheckType(projectHolder.project.id, languageId, branch?.id)
   }
 
   @Operation(summary = "Get project daily amount of events")

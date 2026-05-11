@@ -135,6 +135,30 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
     now: Date,
   )
 
+  /**
+   * Atomically bumps [UserAccount.totpLastUsedTimeStep] to [newTimeStep] only if the stored
+   * value is currently `null` or strictly less than [newTimeStep]. This is the CAS primitive
+   * behind TOTP replay prevention (RFC 6238 §5.2).
+   *
+   * @return `1` if the row was updated, `0` if another concurrent request already bumped at
+   *         or past [newTimeStep]. Callers **must** inspect this value: a return of `0`
+   *         indicates a replayed or racing OTP and must be surfaced as an authentication
+   *         failure.
+   */
+  @Modifying
+  @Query(
+    """
+    update UserAccount ua
+       set ua.totpLastUsedTimeStep = :newTimeStep
+     where ua.id = :id
+       and (ua.totpLastUsedTimeStep is null or ua.totpLastUsedTimeStep < :newTimeStep)
+    """,
+  )
+  fun updateTotpLastUsedTimeStepIfGreater(
+    id: Long,
+    newTimeStep: Long,
+  ): Int
+
   @Query(
     """
   select new io.tolgee.dtos.queryResults.UserAccountView(
