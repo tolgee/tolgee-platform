@@ -65,7 +65,7 @@ class RepeatedWordsCheck : QaCheck {
 
   companion object {
     private val WORD_REGEX = Regex("""\p{L}[\p{L}\p{N}]*""")
-    private const val SPACE = ' '
-    private const val NBSP = ' '
+    private const val SPACE = '\u0020'
+    private const val NBSP = '\u00A0'
   }
 }
