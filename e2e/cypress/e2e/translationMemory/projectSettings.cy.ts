@@ -46,17 +46,19 @@ describe('Translation Memory project settings', () => {
     });
 
     // First row (priority 0) is the project TM — read/write are hard-coded to true for
-    // PROJECT-type assignments, so the UI shows a single "Always on" chip instead of
-    // separate Read/Write chips.
+    // PROJECT-type assignments, so the UI shows a single "Always on" chip instead of any
+    // access-state badge.
     it('project TM row shows Always on badge (not Read/Write)', () => {
       tmSettings.getTmRows().first().should('contain', 'Always on');
       tmSettings.getTmRows().first().should('not.contain', 'Read');
       tmSettings.getTmRows().first().should('not.contain', 'Write');
     });
 
-    it('shared TM row shows Read and Write badges', () => {
-      tmSettings.getTmRows().eq(1).should('contain', 'Read');
-      tmSettings.getTmRows().eq(1).should('contain', 'Write');
+    // sharedTm's assignment to projectWithTm has writeAccess=false in the fixture, so the
+    // access badge collapses to "Read-only".
+    it('shared TM row shows the collapsed Read-only badge when only read is granted', () => {
+      tmSettings.getTmRows().eq(1).should('contain', 'Read-only');
+      tmSettings.getTmRows().eq(1).should('not.contain', 'Write');
     });
   });
 
