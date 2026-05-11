@@ -13,6 +13,7 @@ import { useQaIssueMessage } from '../hooks/useQaIssueMessage';
 import { useQaCheckTypeLabel } from '../hooks/useQaCheckTypeLabel';
 import { QaPreviewIssue } from 'tg.ee.module/qa/models/QaPreviewWsModels';
 import { TextBlock } from 'tg.component/common/TextBlock';
+import { cropDiffContext } from 'tg.fixtures/cropDiffContext';
 
 const StyledItem = styled(Box)`
   display: flex;
@@ -87,6 +88,16 @@ const StyledAddedSpaces = styled('span')`
   background-color: ${({ theme }) => theme.palette.success.light};
 `;
 
+const StyledInsertionMarker = styled('span')`
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background-color: ${({ theme }) => theme.palette.primary.main};
+  vertical-align: text-bottom;
+  border-radius: 1px;
+  margin: 0 1px;
+`;
+
 const StyledNormalActions = styled(Box)`
   display: flex;
   align-items: center;
@@ -97,22 +108,45 @@ function renderDiff(
   text: string,
   positionStart: number,
   positionEnd: number,
-  replacement: string
+  replacement: string,
+  locale?: string
 ) {
-  const before = text.slice(0, positionStart);
-  const removed = text.slice(positionStart, positionEnd);
-  const after = text.slice(positionEnd);
-  const isReplacementSpacesOnly = /^\s+$/.test(replacement);
+  const cropped = cropDiffContext(
+    text,
+    positionStart,
+    positionEnd,
+    replacement,
+    locale
+  );
+  const isReplacementSpacesOnly = /^\s+$/.test(cropped.replacement);
   return (
     <>
-      {before && <StyledUnchanged>{before}</StyledUnchanged>}
-      {removed && <StyledRemoved>{removed}</StyledRemoved>}
-      {isReplacementSpacesOnly ? (
-        <StyledAddedSpaces>{replacement}</StyledAddedSpaces>
-      ) : (
-        <StyledAdded>{replacement}</StyledAdded>
+      {cropped.beforeEllipsis && <StyledUnchanged>…</StyledUnchanged>}
+      {cropped.before && (
+        <StyledUnchanged>
+          <bdi>{cropped.before}</bdi>
+        </StyledUnchanged>
       )}
-      {after && <StyledUnchanged>{after}</StyledUnchanged>}
+      {cropped.removed && (
+        <StyledRemoved>
+          <bdi>{cropped.removed}</bdi>
+        </StyledRemoved>
+      )}
+      {cropped.isInsertion && cropped.replacement && <StyledInsertionMarker />}
+      {cropped.replacement &&
+        (isReplacementSpacesOnly ? (
+          <StyledAddedSpaces>{cropped.replacement}</StyledAddedSpaces>
+        ) : (
+          <StyledAdded>
+            <bdi>{cropped.replacement}</bdi>
+          </StyledAdded>
+        ))}
+      {cropped.after && (
+        <StyledUnchanged>
+          <bdi>{cropped.after}</bdi>
+        </StyledUnchanged>
+      )}
+      {cropped.afterEllipsis && <StyledUnchanged>…</StyledUnchanged>}
     </>
   );
 }
@@ -121,6 +155,7 @@ type Props = {
   issue: QaPreviewIssue;
   index?: number;
   text: string;
+  locale?: string;
   slim?: boolean;
   onCorrect?: () => void;
   onIgnore?: () => void;
@@ -130,6 +165,7 @@ export const QaCheckItem = ({
   issue,
   index,
   text,
+  locale,
   slim = false,
   onCorrect,
   onIgnore,
@@ -232,7 +268,8 @@ export const QaCheckItem = ({
               text,
               issue.positionStart ?? 0,
               issue.positionEnd ?? 0,
-              issue.replacement ?? ''
+              issue.replacement ?? '',
+              locale
             )}
           </StyledDiffText>
         </TextBlock>
