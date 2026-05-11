@@ -1,6 +1,6 @@
 package io.tolgee.component.eventListeners
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.batch.events.OnBatchJobFinalized
@@ -22,10 +22,11 @@ import kotlin.reflect.KClass
 
 @Component
 class LanguageStatsListener(
-  private var languageStatsService: LanguageStatsService,
+  private val languageStatsService: LanguageStatsService,
   private val projectService: ProjectService,
   private val keyRepository: KeyRepository,
   private val translationRepository: TranslationRepository,
+  private val objectMapper: ObjectMapper,
 ) {
   var bypass = false
 
@@ -80,11 +81,7 @@ class LanguageStatsListener(
     projectId: Long,
     branchIds: Set<Long?>,
   ) {
-    if (branchIds.contains(null)) {
-      languageStatsService.refreshLanguageStats(projectId)
-    }
-
-    branchIds.filterNotNull().forEach { branchId ->
+    branchIds.forEach { branchId ->
       languageStatsService.refreshLanguageStats(projectId, branchId)
     }
   }
@@ -92,11 +89,11 @@ class LanguageStatsListener(
   private fun extractKeyIdsFromQaJobTarget(target: List<Any>): List<Long> {
     if (target.isEmpty()) return emptyList()
     val type =
-      jacksonObjectMapper().typeFactory.constructCollectionType(
+      objectMapper.typeFactory.constructCollectionType(
         List::class.java,
         BatchTranslationTargetItem::class.java,
       )
-    val items: List<BatchTranslationTargetItem> = jacksonObjectMapper().convertValue(target, type)
+    val items: List<BatchTranslationTargetItem> = objectMapper.convertValue(target, type)
     return items.map { it.keyId }.distinct()
   }
 
