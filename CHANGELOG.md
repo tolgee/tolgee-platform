@@ -1,3 +1,11 @@
+## [3.184.5](https://github.com/tolgee/tolgee-platform/compare/v3.184.4...v3.184.5) (2026-05-11)
+
+
+### Bug Fixes
+
+* avoid Repeated Words QA check false positives ([#3641](https://github.com/tolgee/tolgee-platform/issues/3641)) ([a0dbb9b](https://github.com/tolgee/tolgee-platform/commit/a0dbb9b0140e9141002a084adf910c5685152b15))
+* reorder project settings tabs (Advanced before QA Checks) ([#3654](https://github.com/tolgee/tolgee-platform/issues/3654)) ([9ebaa84](https://github.com/tolgee/tolgee-platform/commit/9ebaa844799570de91a1771a9c5c744bf27e7e6c))
+
 ## [3.184.4](https://github.com/tolgee/tolgee-platform/compare/v3.184.3...v3.184.4) (2026-05-11)
 
 
