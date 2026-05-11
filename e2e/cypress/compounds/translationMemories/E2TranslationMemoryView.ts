@@ -100,21 +100,13 @@ export class E2TranslationMemoryView {
     gcy('tm-create-entry-dialog').should('not.exist');
   }
 
-  // --- Import menu / Export ---
-  // The import button is a dropdown that fans out to "Import TMX" and "Copy from a project".
-  // Compound exposes both the trigger and each menu item separately so tests can either pick
-  // an action (`importTmxFile`, `openCopyFromProjectDialog`) or assert visibility independently.
+  // --- Import / Export ---
+  // The import button opens the TMX import dialog directly — there used to be a menu when
+  // a second source ("Copy from a project") existed, but only TMX remains, so it's a plain
+  // button now.
 
-  getImportMenuButton() {
+  getImportButton() {
     return gcy('tm-import-menu-button');
-  }
-
-  openImportMenu() {
-    this.getImportMenuButton().click();
-  }
-
-  getImportTmxMenuItem() {
-    return gcy('tm-import-menu-tmx');
   }
 
   getExportButton() {
@@ -130,8 +122,7 @@ export class E2TranslationMemoryView {
   }
 
   importTmxFile(fixturePath: string, mode?: 'keep' | 'override') {
-    this.openImportMenu();
-    this.getImportTmxMenuItem().click();
+    this.getImportButton().click();
     this.assertImportDialogVisible();
 
     gcy('tm-import-dialog')

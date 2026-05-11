@@ -38,7 +38,7 @@ export const TmWriteOnlyReviewedDialog: React.VFC<Props> = ({
     >
       <DialogTitle>
         <T
-          keyName="tm_write_only_reviewed_dialog_title"
+          keyName="translation_memory_settings_title"
           defaultValue="TM settings"
         />
       </DialogTitle>

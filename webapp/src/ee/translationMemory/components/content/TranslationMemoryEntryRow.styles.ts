@@ -123,10 +123,6 @@ export const StyledEditAffordance = styled(IconButton)`
     width: 18px;
     height: 18px;
   }
-
-  &:hover {
-    background-color: ${({ theme }) => theme.palette.action.hover};
-  }
 `;
 
 export const StyledLanguage = styled('div')`

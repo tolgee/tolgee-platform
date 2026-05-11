@@ -82,6 +82,7 @@ class SharedTranslationMemoryService(
     organization: Organization,
     dto: CreateSharedTranslationMemoryRequest,
   ): TranslationMemory {
+    requireUniqueName(organization.id, dto.name, excludeId = null)
     val tm =
       TranslationMemory(
         name = dto.name,
@@ -96,6 +97,16 @@ class SharedTranslationMemoryService(
     return saved
   }
 
+  private fun requireUniqueName(
+    organizationId: Long,
+    name: String,
+    excludeId: Long?,
+  ) {
+    if (translationMemoryRepository.existsByOrganizationIdAndName(organizationId, name, excludeId)) {
+      throw BadRequestException(Message.TRANSLATION_MEMORY_NAME_ALREADY_EXISTS)
+    }
+  }
+
   @Transactional
   fun update(
     organizationId: Long,
@@ -103,6 +114,9 @@ class SharedTranslationMemoryService(
     dto: UpdateSharedTranslationMemoryRequest,
   ): TranslationMemory {
     val tm = getShared(organizationId, translationMemoryId)
+    if (dto.name != tm.name) {
+      requireUniqueName(organizationId, dto.name, excludeId = tm.id)
+    }
     if (dto.sourceLanguageTag != tm.sourceLanguageTag) {
       // Base-language invariant: a TM's sourceLanguageTag can only be changed while no
       // projects are assigned. Assignments are validated to match, so any change here

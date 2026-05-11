@@ -80,6 +80,26 @@ interface TranslationMemoryRepository : JpaRepository<TranslationMemory, Long> {
   )
   fun findAssignedToProject(projectId: Long): List<TranslationMemory>
 
+  /**
+   * Returns true if another TM in the same organization already uses [name]. [excludeId] is
+   * the id of the TM being updated (so it doesn't conflict with itself); pass null on create.
+   * Name matching is case-insensitive — "Marketing" and "marketing" collide.
+   */
+  @Query(
+    """
+    select count(tm) > 0 from TranslationMemory tm
+    where tm.organizationOwner.id = :organizationId
+      and tm.organizationOwner.deletedAt is null
+      and lower(tm.name) = lower(:name)
+      and (:excludeId is null or tm.id <> :excludeId)
+    """,
+  )
+  fun existsByOrganizationIdAndName(
+    organizationId: Long,
+    name: String,
+    excludeId: Long?,
+  ): Boolean
+
   @Query(
     value = """
       select tm.id as id,

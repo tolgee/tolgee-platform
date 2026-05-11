@@ -902,7 +902,6 @@ declare namespace DataCy {
         "tm-import-cancel" |
         "tm-import-dialog" |
         "tm-import-menu-button" |
-        "tm-import-menu-tmx" |
         "tm-import-mode-keep" |
         "tm-import-mode-override" |
         "tm-import-submit" |

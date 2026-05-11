@@ -5,6 +5,65 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { components } from 'tg.service/apiSchema.generated';
 
+type TranslateFn = ReturnType<typeof useTranslate>['t'];
+
+const mutedChipSx = (theme: any) => ({
+  flexShrink: 0,
+  backgroundColor: theme.palette.placeholders.variant.background,
+  color: theme.palette.placeholders.variant.text,
+  border: `1px solid ${theme.palette.placeholders.variant.border}`,
+});
+
+/**
+ * Renders the access-state badges for a shared TM assignment. Both R+W → two side-by-side
+ * "Read" / "Write" chips. Only one of them → a single "Read-only" / "Write-only" chip
+ * that spells out the effective state. Neither → a single "No access" chip. All variants
+ * use the muted palette so they don't compete visually with the type chip.
+ */
+function accessChips(read: boolean, write: boolean, t: TranslateFn) {
+  if (read && write) {
+    return (
+      <>
+        <Chip
+          size="small"
+          label={t('project_settings_tm_access_read', 'Read')}
+          sx={mutedChipSx}
+        />
+        <Chip
+          size="small"
+          label={t('project_settings_tm_access_write', 'Write')}
+          sx={mutedChipSx}
+        />
+      </>
+    );
+  }
+  if (read) {
+    return (
+      <Chip
+        size="small"
+        label={t('project_settings_tm_access_read_only', 'Read-only')}
+        sx={mutedChipSx}
+      />
+    );
+  }
+  if (write) {
+    return (
+      <Chip
+        size="small"
+        label={t('project_settings_tm_access_write_only', 'Write-only')}
+        sx={mutedChipSx}
+      />
+    );
+  }
+  // No badge for the no-access case — the absence is the signal. A subtle italic label
+  // keeps the row readable without the visual weight of a chip border.
+  return (
+    <Typography variant="body2" color="text.disabled" fontStyle="italic">
+      {t('project_settings_tm_access_none', 'No access')}
+    </Typography>
+  );
+}
+
 type AssignmentModel =
   components['schemas']['ProjectTranslationMemoryAssignmentModel'];
 
@@ -89,7 +148,18 @@ export const SortableTmRow = ({ tm, index, onSettings, canEdit }: Props) => {
               ? t('translation_memory_type_project_only', 'Project only')
               : t('translation_memory_type_shared', 'Shared')
           }
-          color={tm.type === 'PROJECT' ? 'secondary' : 'success'}
+          color={tm.type === 'PROJECT' ? undefined : 'primary'}
+          sx={(theme) => ({
+            flexShrink: 0,
+            ...(tm.type === 'PROJECT'
+              ? {
+                  backgroundColor:
+                    theme.palette.placeholders.variant.background,
+                  color: theme.palette.placeholders.variant.text,
+                  border: `1px solid ${theme.palette.placeholders.variant.border}`,
+                }
+              : {}),
+          })}
         />
       </StyledName>
       <StyledBadges>
@@ -108,20 +178,7 @@ export const SortableTmRow = ({ tm, index, onSettings, canEdit }: Props) => {
             />
           </Tooltip>
         ) : (
-          <>
-            <Chip
-              size="small"
-              label={t('project_settings_tm_read', 'Read')}
-              color={tm.readAccess ? 'primary' : 'default'}
-              variant={tm.readAccess ? 'filled' : 'outlined'}
-            />
-            <Chip
-              size="small"
-              label={t('project_settings_tm_write', 'Write')}
-              color={tm.writeAccess ? 'primary' : 'default'}
-              variant={tm.writeAccess ? 'filled' : 'outlined'}
-            />
-          </>
+          accessChips(tm.readAccess, tm.writeAccess, t)
         )}
       </StyledBadges>
       {canEdit && (
