@@ -10,7 +10,9 @@ import io.tolgee.model.key.Key
 import io.tolgee.model.qa.ProjectQaConfig
 import io.tolgee.model.translation.Translation
 
-class QaTestData : BaseTestData() {
+class QaTestData(
+  includeDefaultQaConfig: Boolean = true,
+) : BaseTestData() {
   lateinit var frenchLanguage: Language
   lateinit var testKey: Key
   lateinit var enTranslation: Translation
@@ -127,6 +129,18 @@ class QaTestData : BaseTestData() {
           tag = "de"
           originalName = "Deutsch"
         }.self
+      if (includeDefaultQaConfig) {
+        setQaConfig {
+          settings =
+            QaCheckType.entries
+              .associateWith { type ->
+                when (type) {
+                  QaCheckType.SPELLING, QaCheckType.GRAMMAR -> QaCheckSeverity.OFF
+                  else -> QaCheckSeverity.WARNING
+                }
+              }.toMutableMap()
+        }
+      }
     }
 
     root.apply {

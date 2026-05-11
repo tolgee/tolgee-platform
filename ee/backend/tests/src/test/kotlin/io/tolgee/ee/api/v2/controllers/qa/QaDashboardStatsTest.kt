@@ -39,7 +39,6 @@ class QaDashboardStatsTest : AuthorizedControllerTest() {
     testData = QaTestData()
     testDataService.saveTestData(testData.root)
     qa.testData = testData
-    qa.saveDefaultQaConfig()
     userAccount = testData.user
   }
 

@@ -46,7 +46,6 @@ class QaMaxCharLimitTest : ProjectAuthControllerTest("/v2/projects/") {
     testData = QaTestData()
     testDataService.saveTestData(testData.root)
     qa.testData = testData
-    qa.saveDefaultQaConfig()
     userAccount = testData.user
     projectSupplier = { testData.project }
   }

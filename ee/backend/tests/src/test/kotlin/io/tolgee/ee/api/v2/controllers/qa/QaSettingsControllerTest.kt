@@ -46,7 +46,7 @@ class QaSettingsControllerTest : AuthorizedControllerTest() {
   @BeforeEach
   fun setup() {
     enabledFeaturesProvider.forceEnabled = setOf(Feature.QA_CHECKS)
-    testData = QaTestData()
+    testData = QaTestData(includeDefaultQaConfig = false)
     testDataService.saveTestData(testData.root)
     qa.testData = testData
     userAccount = testData.user

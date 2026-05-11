@@ -13,7 +13,6 @@ import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
 import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.model.translation.Translation
-import io.tolgee.repository.qa.ProjectQaConfigRepository
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.util.executeInNewTransaction
@@ -34,9 +33,6 @@ class QaLanguageStatsRefreshTest : AuthorizedControllerTest() {
   @Autowired
   lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
 
-  @Autowired
-  lateinit var projectQaConfigRepository: ProjectQaConfigRepository
-
   lateinit var testData: QaLanguageStatsBranchTestData
 
   @BeforeEach
@@ -44,7 +40,6 @@ class QaLanguageStatsRefreshTest : AuthorizedControllerTest() {
     enabledFeaturesProvider.forceEnabled = setOf(Feature.QA_CHECKS, Feature.BRANCHING)
     testData = QaLanguageStatsBranchTestData()
     testDataService.saveTestData(testData.root)
-    projectQaConfigRepository.save(testData.createDefaultQaConfig())
     userAccount = testData.user
   }
 
