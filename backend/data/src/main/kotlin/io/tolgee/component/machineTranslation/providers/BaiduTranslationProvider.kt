@@ -79,7 +79,6 @@ class BaiduTranslationProvider(
       "de",
       "de-DE",
       "nl",
-      "nl",
       "nl-NL",
       "est",
       "et",
