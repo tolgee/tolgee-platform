@@ -163,4 +163,46 @@ class SpacesMismatchCheckTest {
   fun `all types are SPACES_MISMATCH`() {
     check.check(params("  Hello  world  ", "Hello world")).assertAllHaveType(QaCheckType.SPACES_MISMATCH)
   }
+
+  @Test
+  fun `detects doubled spaces when base text is null`() {
+    check.check(params("Hello  world", base = null)).assertSingleIssue {
+      message(QaIssueMessage.QA_SPACES_DOUBLED)
+      position(6, 7)
+      replacement("")
+    }
+  }
+
+  @Test
+  fun `does not report leading or trailing space issues when base text is null`() {
+    val results = check.check(params("  Hello  ", base = null))
+    val sourceComparisonMessages =
+      setOf(
+        QaIssueMessage.QA_SPACES_LEADING_ADDED,
+        QaIssueMessage.QA_SPACES_LEADING_REMOVED,
+        QaIssueMessage.QA_SPACES_TRAILING_ADDED,
+        QaIssueMessage.QA_SPACES_TRAILING_REMOVED,
+      )
+    results.filter { it.message in sourceComparisonMessages }.assertNoIssues()
+  }
+
+  @Test
+  fun `does not report doubled spaces inside ICU placeholders`() {
+    val text = "Hello {name,  select,  a {x} other {y}} world"
+    val base = "Hello {name, select, a {x} other {y}} world"
+    check
+      .check(params(text, base))
+      .filter { it.message == QaIssueMessage.QA_SPACES_DOUBLED }
+      .assertNoIssues()
+  }
+
+  @Test
+  fun `does not report doubled spaces inside HTML tags`() {
+    val text = "Hello <b  class=\"x\">world</b>"
+    val base = "Hello <b class=\"x\">world</b>"
+    check
+      .check(params(text, base))
+      .filter { it.message == QaIssueMessage.QA_SPACES_DOUBLED }
+      .assertNoIssues()
+  }
 }
