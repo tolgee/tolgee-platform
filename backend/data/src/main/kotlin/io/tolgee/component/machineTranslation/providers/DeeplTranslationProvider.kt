@@ -47,8 +47,8 @@ class DeeplTranslationProvider(
       "ja",
       "nl",
       "pl",
-      "pt-pt",
-      "pt-br",
+      "pt-PT",
+      "pt-BR",
       "ru",
     )
 
@@ -61,8 +61,8 @@ class DeeplTranslationProvider(
       "de",
       "el",
       "en",
-      "en-gb",
-      "en-us",
+      "en-GB",
+      "en-US",
       "es",
       "et",
       "fi",
@@ -78,8 +78,8 @@ class DeeplTranslationProvider(
       "nl",
       "pl",
       "pt",
-      "pt-pt",
-      "pt-br",
+      "pt-PT",
+      "pt-BR",
       "ro",
       "ru",
       "sk",
@@ -88,7 +88,7 @@ class DeeplTranslationProvider(
       "tr",
       "uk",
       "zh",
-      "zh-hans",
-      "zh-hant",
+      "zh-Hans",
+      "zh-Hant",
     )
 }

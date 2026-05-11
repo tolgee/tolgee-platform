@@ -13,10 +13,15 @@ class LanguageTagConvertorTest {
     assertThat(LanguageTagConvertor.findSuitableTag(arrayOf("cs", "en", "de"), "en-US"))
       .isEqualTo("en")
 
-    assertThat(LanguageTagConvertor.findSuitableTag(arrayOf("cs", "en", "de", "zh-TW"), "zh-Hant"))
-      .isEqualTo("zh-TW")
-
     assertThat(LanguageTagConvertor.findSuitableTag(arrayOf("cs", "en", "de", "zh-TW"), "bla"))
       .isEqualTo(null)
+  }
+
+  @Test
+  fun `it matches Chinese script subtags directly when provider supports them`() {
+    assertThat(LanguageTagConvertor.findSuitableTag(arrayOf("zh", "zh-Hans", "zh-Hant"), "zh-Hant"))
+      .isEqualTo("zh-Hant")
+    assertThat(LanguageTagConvertor.findSuitableTag(arrayOf("zh", "zh-Hans", "zh-Hant"), "zh-Hans"))
+      .isEqualTo("zh-Hans")
   }
 }

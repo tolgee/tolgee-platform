@@ -53,6 +53,8 @@ class GoogleTranslationProvider(
       "ny",
       "zh-CN",
       "zh-TW",
+      "zh-Hans",
+      "zh-Hant",
       "co",
       "hr",
       "cs",
