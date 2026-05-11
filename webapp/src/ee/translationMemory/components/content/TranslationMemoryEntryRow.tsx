@@ -139,30 +139,19 @@ export const TranslationMemoryEntryRow: React.VFC<Props> = ({
         );
       })()}
       <StyledKeyCell $layout={layout}>
-        {/* Per-candidate key reference. Virtual candidates show the specific project key
-            they originate from; non-primary stored candidates have no key info, so we fall
-            back to the aggregated group.keyNames only on the primary candidate. */}
+        {/* Key reference is a property of virtual entries (project keys). Stored manual
+            entries — even when they share a source text with a virtual row — have no key
+            of their own, so the row stays unlabeled. */}
         {(() => {
           const candidateVirtual = Array.from(
             candidate.virtualsByLang.values()
           )[0];
-          if (candidateVirtual) {
-            return (
-              <StyledKeyName data-cy="tm-entry-row-keys">
-                {candidateVirtual.keyName}
-              </StyledKeyName>
-            );
-          }
-          if (candidate.isPrimary && group.keyNames.length > 0) {
-            return (
-              <StyledKeyName data-cy="tm-entry-row-keys">
-                {group.keyNames.slice(0, 3).join(', ')}
-                {group.keyNames.length > 3 &&
-                  `, +${group.keyNames.length - 3} more`}
-              </StyledKeyName>
-            );
-          }
-          return null;
+          if (!candidateVirtual) return null;
+          return (
+            <StyledKeyName data-cy="tm-entry-row-keys">
+              {candidateVirtual.keyName}
+            </StyledKeyName>
+          );
         })()}
         <StyledSourceText>
           {layout === 'stacked' && (
@@ -183,11 +172,18 @@ export const TranslationMemoryEntryRow: React.VFC<Props> = ({
           const virtualEntry = virtualByLang.get(langTag);
           const isEditing = editingLang === langTag;
 
-          // Pure virtual cells (only virtualText, no stored entry) are read-only — they reflect
-          // a project translation, so the project is the right place to change them.
-          const isPureVirtual = !storedEntry && virtualEntry !== undefined;
-          const editable = canManage && !isPureVirtual;
-          const cellEditDisabledReason: React.ReactNode = isPureVirtual ? (
+          // A cell is editable when the user can manage AND either it already holds a
+          // stored entry (manual override stays editable) OR the row has no virtual
+          // origin at all. Empty cells on a row whose source comes from a project stay
+          // read-only — the project is the canonical place to add the missing
+          // translation. Users add new manual sources via the create-entry dialog.
+          const rowFromProject = candidate.virtualsByLang.size > 0;
+          const sourceProject = rowFromProject
+            ? Array.from(candidate.virtualsByLang.values())[0]
+            : undefined;
+          const editable =
+            canManage && (Boolean(storedEntry) || !rowFromProject);
+          const cellEditDisabledReason: React.ReactNode = sourceProject ? (
             <span>
               <T
                 keyName="tm_entry_edit_disabled_virtual_prefix"
@@ -195,8 +191,8 @@ export const TranslationMemoryEntryRow: React.VFC<Props> = ({
               />{' '}
               <ProjectLink
                 project={{
-                  id: virtualEntry!.projectId,
-                  name: virtualEntry!.projectName,
+                  id: sourceProject.projectId,
+                  name: sourceProject.projectName,
                 }}
               />
               {'. '}

@@ -182,13 +182,14 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
     [entries.data]
   );
 
-  // Expand each group into N candidate rows where N = max slots-per-language; a slot is one
-  // stored entry OR one virtual entry. Multiple TMX tu units sharing (source, target_lang)
-  // with different target_text, or two write-access projects with different translations for
-  // the same source — each reach the frontend as separate entries; without this expansion
-  // the row's per-language Maps would silently collapse them into one cell.
-  // Slot order: stored first, then virtuals. Candidate i picks the i-th slot per language;
-  // languages with fewer slots produce empty cells on later candidates.
+  // Expand each group into separate candidate rows for stored vs virtual entries — never
+  // mixed in a single row. A manual entry sharing a source text with a project translation
+  // gets its own row (otherwise its target cells would land alongside virtual cells in the
+  // same row, hiding the manual/virtual distinction).
+  // Within each kind, multiple entries per (source, target_lang) — TMX with several target
+  // texts, or two write-access projects with different translations for the same source —
+  // expand into sibling candidate rows. The first stored candidate is the group's primary
+  // row (carries the keyName aggregation); virtual candidates render their per-row keyName.
   const candidates = useMemo<EntryGroupCandidate[]>(
     () =>
       groups.flatMap((group) => {
@@ -210,19 +211,20 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
             virtualByLangAll.set(v.targetLanguageTag, [v]);
           }
         });
-        const langs = new Set<string>([
-          ...storedByLang.keys(),
-          ...virtualByLangAll.keys(),
-        ]);
-        const candidateCount = Math.max(
-          1,
-          ...Array.from(langs).map(
-            (lang) =>
-              (storedByLang.get(lang)?.length ?? 0) +
-              (virtualByLangAll.get(lang)?.length ?? 0)
-          )
+
+        const storedCount = Math.max(
+          0,
+          ...Array.from(storedByLang.values()).map((l) => l.length)
         );
-        return Array.from({ length: candidateCount }, (_, i) => {
+        const virtualCount = Math.max(
+          0,
+          ...Array.from(virtualByLangAll.values()).map((l) => l.length)
+        );
+        // Always produce at least one candidate so an entirely-empty group still renders
+        // (rare; happens when a stored entry was just deleted and the row is mid-refetch).
+        const totalCount = Math.max(1, storedCount + virtualCount);
+
+        return Array.from({ length: totalCount }, (_, i) => {
           const entriesByLang = new Map<
             string,
             (typeof group.entries)[number]
@@ -231,18 +233,16 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
             string,
             (typeof group.virtualEntries)[number]
           >();
-          langs.forEach((lang) => {
-            const stored = storedByLang.get(lang) ?? [];
-            const virtual = virtualByLangAll.get(lang) ?? [];
-            if (i < stored.length) {
-              entriesByLang.set(lang, stored[i]);
-              return;
-            }
-            const vIndex = i - stored.length;
-            if (vIndex < virtual.length) {
-              virtualsByLang.set(lang, virtual[vIndex]);
-            }
-          });
+          if (i < storedCount) {
+            storedByLang.forEach((list, lang) => {
+              if (i < list.length) entriesByLang.set(lang, list[i]);
+            });
+          } else {
+            const vIndex = i - storedCount;
+            virtualByLangAll.forEach((list, lang) => {
+              if (vIndex < list.length) virtualsByLang.set(lang, list[vIndex]);
+            });
+          }
           return {
             group,
             candidateIndex: i,
