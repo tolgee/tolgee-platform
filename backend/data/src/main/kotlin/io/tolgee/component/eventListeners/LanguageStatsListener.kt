@@ -13,6 +13,8 @@ import io.tolgee.repository.TranslationRepository
 import io.tolgee.service.project.LanguageStatsService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.util.runSentryCatching
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Lazy
 import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
@@ -29,10 +31,25 @@ class LanguageStatsListener(
 ) : BypassableActivityListener {
   override var bypass = false
 
+  @Lazy
+  @Autowired
+  private lateinit var self: LanguageStatsListener
+
   @TransactionalEventListener
-  @Async
   fun onActivity(event: OnProjectActivityEvent) {
     if (bypass) return
+    self.refreshForActivity(event)
+  }
+
+  @EventListener(OnBatchJobFinalized::class)
+  fun onQaBatchJobFinalized(event: OnBatchJobFinalized) {
+    if (bypass) return
+    if (event.job.type != BatchJobType.QA_CHECK) return
+    self.refreshForQaBatchJob(event)
+  }
+
+  @Async
+  fun refreshForActivity(event: OnProjectActivityEvent) {
     runSentryCatching {
       val projectId = event.activityRevision.projectId ?: return
 
@@ -60,11 +77,8 @@ class LanguageStatsListener(
     }
   }
 
-  @EventListener(OnBatchJobFinalized::class)
   @Async
-  fun onQaBatchJobFinalized(event: OnBatchJobFinalized) {
-    if (bypass) return
-    if (event.job.type != BatchJobType.QA_CHECK) return
+  fun refreshForQaBatchJob(event: OnBatchJobFinalized) {
     val projectId = event.job.projectId ?: return
     runSentryCatching {
       projectService.findDto(projectId) ?: return@runSentryCatching
