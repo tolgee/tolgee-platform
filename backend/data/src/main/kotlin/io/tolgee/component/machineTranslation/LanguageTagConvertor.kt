@@ -8,7 +8,7 @@ object LanguageTagConvertor {
     desiredTag: String,
   ): String? {
     return findSuitableTag(desiredTag) { newTag ->
-      suitableTags.contains(newTag)
+      suitableTags.any { it.equals(newTag, ignoreCase = true) }
     }
   }
 
