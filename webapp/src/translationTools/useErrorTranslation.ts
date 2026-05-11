@@ -544,6 +544,11 @@ export function useErrorTranslation() {
 
       case 'qa_checks_not_enabled':
         return t('qa_checks_not_enabled');
+
+      case 'translation_memory_name_already_exists':
+        return t('translation_memory_name_already_exists', {
+          value: params?.[0] || '',
+        });
       default:
         return code;
     }

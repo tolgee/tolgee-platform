@@ -103,7 +103,7 @@ class SharedTranslationMemoryService(
     excludeId: Long?,
   ) {
     if (translationMemoryRepository.existsByOrganizationIdAndName(organizationId, name, excludeId)) {
-      throw BadRequestException(Message.TRANSLATION_MEMORY_NAME_ALREADY_EXISTS)
+      throw BadRequestException(Message.TRANSLATION_MEMORY_NAME_ALREADY_EXISTS, listOf(name))
     }
   }
 
