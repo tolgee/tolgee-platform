@@ -2267,7 +2267,7 @@
   "translation_memory_new_entry": "Wpis",
   "translation_memory_no_assigned_projects": "Żaden projekt nie korzysta jeszcze z tej pamięci tłumaczeń.",
   "translation_memory_penalty_default_chip": "{value}%",
-  "translation_memory_penalty_tooltip": "{raw}% surowe − {penalty} kara",
+  "translation_memory_penalty_tooltip": "{raw}% podobieństwa − {penalty}% kara",
   "translation_memory_projects_col_project": "Projekt",
   "translation_memory_projects_col_read": "Odczyt",
   "translation_memory_projects_col_write": "Zapis",

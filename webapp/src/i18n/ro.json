@@ -2517,7 +2517,7 @@
   "translation_memory_new_entry": "Intrare",
   "translation_memory_no_assigned_projects": "Niciun proiect nu folosește încă această memorie de traducere.",
   "translation_memory_penalty_default_chip": "{value}%",
-  "translation_memory_penalty_tooltip": "{raw}% brut − {penalty} penalizare",
+  "translation_memory_penalty_tooltip": "{raw}% similaritate − {penalty}% penalizare",
   "translation_memory_projects_col_project": "Proiect",
   "translation_memory_projects_col_read": "Citit",
   "translation_memory_projects_col_write": "Scriere",

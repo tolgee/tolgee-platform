@@ -1,3 +1,10 @@
+## [3.184.3](https://github.com/tolgee/tolgee-platform/compare/v3.184.2...v3.184.3) (2026-05-11)
+
+
+### Bug Fixes
+
+* match MT language tags case-insensitively ([#3643](https://github.com/tolgee/tolgee-platform/issues/3643)) ([1a7a81b](https://github.com/tolgee/tolgee-platform/commit/1a7a81b338b52c43e75b16756b55f9161f2bb5fa)), closes [#3636](https://github.com/tolgee/tolgee-platform/issues/3636)
+
 ## [3.184.2](https://github.com/tolgee/tolgee-platform/compare/v3.184.1...v3.184.2) (2026-05-07)
 
 

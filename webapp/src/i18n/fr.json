@@ -2528,7 +2528,7 @@
   "translation_memory_new_entry": "Entrée",
   "translation_memory_no_assigned_projects": "Aucun projet n'utilise encore cette mémoire de traduction.",
   "translation_memory_penalty_default_chip": "{value} %",
-  "translation_memory_penalty_tooltip": "{raw} % brut − {penalty} pénalité",
+  "translation_memory_penalty_tooltip": "{raw} % de similarité − {penalty} % de pénalité",
   "translation_memory_projects_col_project": "Projet",
   "translation_memory_projects_col_read": "Lire",
   "translation_memory_projects_col_write": "Écriture",

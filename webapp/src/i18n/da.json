@@ -2496,7 +2496,7 @@
   "translation_filters_comments_unresolved": "Uløste kommentarer",
   "translation_filters_has_no_suggestions": "Ingen forslag",
   "translation_filters_has_suggestions": "Med forslag",
-  "translation_filters_qa_checks_stale": "QA-kontroller forældede",
+  "translation_filters_qa_checks_stale": "Forældede QA-kontroller",
   "translation_filters_qa_has_issues": "Ethvert QA-problem",
   "translation_format_help": "Hvordan man formaterer oversættelsen",
   "translation_grid_key_text": "Nøgle",
