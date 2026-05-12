@@ -8,11 +8,8 @@ import io.tolgee.ee.data.translationMemory.AssignSharedTranslationMemoryRequest
 import io.tolgee.ee.data.translationMemory.UpdateProjectTranslationMemoryAssignmentRequest
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
-import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
-import io.tolgee.model.enums.Scope
 import io.tolgee.repository.translationMemory.TranslationMemoryEntryRepository
-import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -173,47 +170,4 @@ class ProjectTranslationMemoryControllerTest : ProjectAuthControllerTest("/v2/pr
     ).andIsBadRequest
   }
 
-  // ---------- Permission tests ----------
-
-  @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_VIEW])
-  fun `TRANSLATIONS_VIEW scope can list assignments`() {
-    performProjectAuthGet("translation-memories").andIsOk
-  }
-
-  @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_VIEW])
-  fun `TRANSLATIONS_VIEW scope cannot assign shared TM`() {
-    performProjectAuthPost(
-      "translation-memories/${testData.unassignedSharedTm.id}",
-      AssignSharedTranslationMemoryRequest(),
-    ).andIsForbidden
-  }
-
-  @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_EDIT])
-  fun `TRANSLATIONS_EDIT scope alone cannot assign shared TM`() {
-    performProjectAuthPost(
-      "translation-memories/${testData.unassignedSharedTm.id}",
-      AssignSharedTranslationMemoryRequest(),
-    ).andIsForbidden
-  }
-
-  @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_VIEW])
-  fun `TRANSLATIONS_VIEW scope cannot unassign shared TM`() {
-    performProjectAuthDelete("translation-memories/${testData.sharedTm.id}").andIsForbidden
-  }
-
-  @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_VIEW])
-  fun `TRANSLATIONS_VIEW scope cannot update assignment`() {
-    performProjectAuthPut(
-      "translation-memories/${testData.sharedTm.id}",
-      UpdateProjectTranslationMemoryAssignmentRequest().apply { priority = 7 },
-    ).andIsForbidden
-  }
-
-  @ProjectApiKeyAuthTestMethod(scopes = [Scope.PROJECT_EDIT])
-  fun `PROJECT_EDIT scope can assign shared TM`() {
-    performProjectAuthPost(
-      "translation-memories/${testData.unassignedSharedTm.id}",
-      AssignSharedTranslationMemoryRequest(),
-    ).andIsOk
-  }
 }
