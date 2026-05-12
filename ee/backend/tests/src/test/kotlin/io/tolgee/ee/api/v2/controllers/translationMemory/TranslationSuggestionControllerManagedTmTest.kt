@@ -231,7 +231,7 @@ class TranslationSuggestionControllerManagedTmTest : ProjectAuthControllerTest("
   fun `identical entries across TMs are deduped, highest-priority TM survives`() {
     enabledFeaturesProvider.forceEnabled = setOf(Feature.TRANSLATION_MEMORY)
     executeInNewTransaction {
-      val project = projectService.get(testData.projectWithTm.id)
+      val project = testData.projectWithTm
       val german = languageService.findEntitiesByTags(setOf("de"), project.id).first()
       val key =
         keyService.create(

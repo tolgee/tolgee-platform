@@ -10,7 +10,6 @@ import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.isValidId
-import io.tolgee.model.translationMemory.TranslationMemoryType
 import io.tolgee.repository.translationMemory.TranslationMemoryProjectRepository
 import io.tolgee.testing.AuthorizedControllerTest
 import org.assertj.core.api.Assertions.assertThat
@@ -118,18 +117,19 @@ class SharedTranslationMemoryControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `lists all translation memories in organization`() {
-    // 3 PROJECT TMs (projectTm built explicitly + auto-created TMs for projectWithoutTm and
-    // conflictProject) + 7 SHARED TMs (sharedTm, sharedTmWithPenalty, sharedTmWithOverride,
-    // sharedTmReviewedOnly, unassignedSharedTm, mismatchedBaseSharedTm, multiProjectSharedTm).
+    // 4 PROJECT TMs (projectTm + onlyProjectTm built explicitly, plus auto-created for
+    // projectWithoutTm and conflictProject) + 7 SHARED TMs (sharedTm, sharedTmWithPenalty,
+    // sharedTmWithOverride, sharedTmReviewedOnly, unassignedSharedTm, mismatchedBaseSharedTm,
+    // multiProjectSharedTm).
     performAuthGet("/v2/organizations/$orgId/translation-memories")
       .andIsOk
       .andAssertThatJson {
-        node("_embedded.translationMemories").isArray.hasSize(10)
+        node("_embedded.translationMemories").isArray.hasSize(11)
       }
   }
 
   @Test
-  fun `cannot update project-type TM via shared endpoint`() {
+  fun `rejects update on project-type TM`() {
     val projectTmId = testData.projectTm.id
     val update =
       UpdateSharedTranslationMemoryRequest().apply {
@@ -182,9 +182,9 @@ class SharedTranslationMemoryControllerTest : AuthorizedControllerTest() {
     performAuthGet("/v2/organizations/$orgId/translation-memories-with-stats")
       .andIsOk
       .andAssertThatJson {
-        // 3 PROJECT TMs (projectTm + auto-created for projectWithoutTm + auto-created for
-        // conflictProject) + 7 SHARED TMs.
-        node("_embedded.translationMemories").isArray.hasSize(10)
+        // 4 PROJECT TMs (projectTm + onlyProjectTm + auto-created for projectWithoutTm +
+        // auto-created for conflictProject) + 7 SHARED TMs.
+        node("_embedded.translationMemories").isArray.hasSize(11)
       }
   }
 
@@ -259,11 +259,13 @@ class SharedTranslationMemoryControllerTest : AuthorizedControllerTest() {
     performAuthGet("/v2/organizations/$orgId/translation-memories-with-stats?type=PROJECT")
       .andIsOk
       .andAssertThatJson {
-        // projectTm (built explicitly) + auto-created TMs for projectWithoutTm and conflictProject.
-        node("_embedded.translationMemories").isArray.hasSize(3)
+        // projectTm + onlyProjectTm (both built explicitly) + auto-created TMs for
+        // projectWithoutTm and conflictProject.
+        node("_embedded.translationMemories").isArray.hasSize(4)
         node("_embedded.translationMemories[0].type").isEqualTo("PROJECT")
         node("_embedded.translationMemories[1].type").isEqualTo("PROJECT")
         node("_embedded.translationMemories[2].type").isEqualTo("PROJECT")
+        node("_embedded.translationMemories[3].type").isEqualTo("PROJECT")
       }
   }
 
@@ -272,8 +274,8 @@ class SharedTranslationMemoryControllerTest : AuthorizedControllerTest() {
     performAuthGet("/v2/organizations/$orgId/translation-memories-with-stats")
       .andIsOk
       .andAssertThatJson {
-        // 3 PROJECT TMs + 7 SHARED TMs.
-        node("_embedded.translationMemories").isArray.hasSize(10)
+        // 4 PROJECT TMs + 7 SHARED TMs.
+        node("_embedded.translationMemories").isArray.hasSize(11)
       }
   }
 
@@ -342,15 +344,10 @@ class SharedTranslationMemoryControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `creating TM with project assignment sets priority after existing shared assignments`() {
+    // testData seeds projectWithTm with project TM at 0 and shared TMs at priorities 1..5
+    // (sharedTm=1, sharedTmWithPenalty=2, sharedTmWithOverride=3, sharedTmReviewedOnly=4,
+    // multiProjectSharedTm=5). A new assignment uses max+1 → 6.
     val projectId = testData.projectWithTm.id
-    val existingSharedMax =
-      executeInNewTransaction {
-        translationMemoryProjectRepository
-          .findByProjectId(projectId)
-          .filter { it.translationMemory.type == TranslationMemoryType.SHARED }
-          .maxOf { it.priority }
-      }
-
     val request =
       CreateSharedTranslationMemoryRequest().apply {
         name = "Priority Test TM"
@@ -366,7 +363,7 @@ class SharedTranslationMemoryControllerTest : AuthorizedControllerTest() {
           .first { it.translationMemory.name == "Priority Test TM" }
           .priority
       }
-    assertThat(newPriority).isNotNull().isGreaterThan(existingSharedMax)
+    assertThat(newPriority).isEqualTo(6)
   }
 
   // ---------- Delete TM with project assignments (ON DELETE CASCADE) ----------

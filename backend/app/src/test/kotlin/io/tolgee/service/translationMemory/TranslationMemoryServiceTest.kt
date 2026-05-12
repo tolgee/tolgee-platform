@@ -94,14 +94,7 @@ class TranslationMemoryServiceTest : AbstractSpringTest() {
 
   @Test
   fun `base language change updates project TM sourceLanguageTag`() {
-    translationMemoryProjectRepository.deleteAll(
-      translationMemoryProjectRepository
-        .findByProjectId(testData.projectWithTm.id)
-        .filter { it.translationMemory.type != TranslationMemoryType.PROJECT },
-    )
-    entityManager.flush()
-
-    val project = projectService.get(testData.projectWithTm.id)
+    val project = testData.projectWithOnlyProjectTm
     val german = languageService.findEntitiesByTags(setOf("de"), project.id).first()
 
     projectService.editProject(
@@ -122,13 +115,13 @@ class TranslationMemoryServiceTest : AbstractSpringTest() {
     entityManager.flush()
     entityManager.clear()
 
-    val refreshedTm = translationMemoryRepository.findById(testData.projectTm.id).orElseThrow()
+    val refreshedTm = translationMemoryRepository.findById(testData.onlyProjectTm.id).orElseThrow()
     assertThat(refreshedTm.sourceLanguageTag).isEqualTo("de")
   }
 
   @Test
   fun `project rename syncs project TM name`() {
-    val project = projectService.get(testData.projectWithTm.id)
+    val project = testData.projectWithTm
     assertThat(testData.projectTm.name).isEqualTo(project.name)
 
     projectService.editProject(
@@ -155,7 +148,7 @@ class TranslationMemoryServiceTest : AbstractSpringTest() {
 
   @Test
   fun `getSuggestionsList returns virtual rows from write-assigned project translations`() {
-    val project = projectService.get(testData.projectWithTm.id)
+    val project = testData.projectWithTm
 
     val results =
       translationMemoryService.getSuggestionsList(

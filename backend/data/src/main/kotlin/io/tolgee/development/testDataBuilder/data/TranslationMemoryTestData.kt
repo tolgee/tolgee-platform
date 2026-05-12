@@ -49,6 +49,14 @@ class TranslationMemoryTestData : BaseTestData() {
   lateinit var unassignedSharedTm: TranslationMemory
 
   /**
+   * Project assigned only to its own PROJECT-type TM — no shared TM assignments. Use for
+   * tests that need to change the project's base language without tripping the
+   * shared-TM-base-mismatch validation.
+   */
+  lateinit var projectWithOnlyProjectTm: Project
+  lateinit var onlyProjectTm: TranslationMemory
+
+  /**
    * Second write-access project for [multiProjectSharedTm]. Has a single key whose English
    * source matches `existingKey` from [projectWithTm] but a different German translation,
    * so the same source text on this TM yields two distinct virtual rows from two projects.
@@ -97,6 +105,14 @@ class TranslationMemoryTestData : BaseTestData() {
    */
   lateinit var demotedKey: Key
   lateinit var demotedTargetTranslation: Translation
+
+  /**
+   * Key with an English source matching the "Hello world" entry on [sharedTm] and an empty
+   * German target. Auto-translate tests use it to verify the source text gets filled in by
+   * the shared-TM match.
+   */
+  lateinit var helloKey: Key
+  lateinit var helloKeyGermanTranslation: Translation
 
   /** Non-default branch on [projectWithTm] — exercises the "TM writes skip non-default branches" rule. */
   lateinit var featureBranch: Branch
@@ -213,6 +229,27 @@ class TranslationMemoryTestData : BaseTestData() {
                 key = this@keyBuilder.self
                 text = "Herabzustufender Text"
                 state = TranslationState.REVIEWED
+              }.self
+          }
+
+          // Key with an empty German row — auto-translate tests fill it with the "Hello world"
+          // match from sharedTm. Empty target text means it's filtered out of virtual-row counts
+          // (the virtual-row predicate requires non-empty target text), so other tests aren't
+          // perturbed by its presence.
+          addKey {
+            name = "hello-key"
+            helloKey = this
+          }.build keyBuilder@{
+            addTranslation {
+              language = english
+              key = this@keyBuilder.self
+              text = "Hello world"
+            }
+            helloKeyGermanTranslation =
+              addTranslation {
+                language = germanLanguageWithTm
+                key = this@keyBuilder.self
+                text = ""
               }.self
           }
 
@@ -345,6 +382,41 @@ class TranslationMemoryTestData : BaseTestData() {
           type = TranslationMemoryType.SHARED
         }.build {
           unassignedSharedTm = self
+        }
+
+      // Project + project-only TM, no shared assignments. The base-language change test
+      // edits this project so the shared-TM-base-mismatch validation has nothing to fire on.
+      val onlyProjectTmProjectBuilder =
+        addProject {
+          name = "Project With Only Project TM"
+          organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self
+        }.build buildProject@{
+          addPermission {
+            project = this@buildProject.self
+            user = this@TranslationMemoryTestData.user
+            type = ProjectPermissionType.MANAGE
+          }
+          addLanguage {
+            name = "English"
+            tag = "en"
+            originalName = "English"
+            this@buildProject.self.baseLanguage = this
+          }
+          addLanguage {
+            name = "German"
+            tag = "de"
+          }
+        }
+      projectWithOnlyProjectTm = onlyProjectTmProjectBuilder.self
+
+      userAccountBuilder.defaultOrganizationBuilder
+        .addTranslationMemory {
+          name = projectWithOnlyProjectTm.name
+          sourceLanguageTag = "en"
+          type = TranslationMemoryType.PROJECT
+        }.build {
+          onlyProjectTm = self
+          assignProject(projectWithOnlyProjectTm) { priority = 0 }
         }
 
       // Second project carrying a key whose English source matches projectWithTm's
