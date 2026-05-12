@@ -1,12 +1,14 @@
 package io.tolgee.service.dataImport
 
 import io.tolgee.api.IImportSettings
+import io.tolgee.configuration.tolgee.ImportProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.ImportResult
 import io.tolgee.dtos.dataImport.SimpleImportConflictResult
 import io.tolgee.dtos.request.SingleStepImportRequest
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ImportConflictNotResolvedException
+import io.tolgee.model.Language
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.dataImport.ImportTranslation
@@ -17,11 +19,13 @@ import io.tolgee.model.key.KeyMeta
 import io.tolgee.model.key.Namespace
 import io.tolgee.model.translation.Translation
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.service.ImageUploadService
 import io.tolgee.service.dataImport.status.ImportApplicationStatus
 import io.tolgee.service.dataImport.status.ImportApplicationStatusItem
 import io.tolgee.service.key.KeyMetaService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.NamespaceService
+import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.key.TagService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
@@ -29,7 +33,6 @@ import io.tolgee.util.flushAndClear
 import io.tolgee.util.getSafeNamespace
 import io.tolgee.util.nullIfEmpty
 import jakarta.persistence.EntityManager
-import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationContext
 import java.util.IdentityHashMap
 
@@ -47,8 +50,6 @@ class StoredDataImporter(
   private val screenshots: List<ScreenshotImporter.Companion.ScreenshotToImport> = emptyList(),
   private val resolveConflict: ((ImportTranslation) -> ForceMode?)? = null,
 ) {
-  private val logger = LoggerFactory.getLogger(StoredDataImporter::class.java)
-
   private val importDataManager by lazy {
     if (_importDataManager != null) {
       return@lazy _importDataManager
@@ -65,16 +66,53 @@ class StoredDataImporter(
 
   private val securityService = applicationContext.getBean(SecurityService::class.java)
 
+  private val imageUploadService = applicationContext.getBean(ImageUploadService::class.java)
+
   private val authenticationFacade = applicationContext.getBean(AuthenticationFacade::class.java)
 
-  val translationsToSave = mutableListOf<Pair<ImportTranslation, Translation>>()
+  private val importProperties = applicationContext.getBean(ImportProperties::class.java)
+
+  private val batchSize: Int
+    get() = importProperties.flushBatchSize
+
+  private val screenshotService = applicationContext.getBean(ScreenshotService::class.java)
+
+  val translationsToSave = mutableListOf<Translation>()
+
+  private val translationLanguageIds = mutableSetOf<Long>()
 
   /**
-   * We need to persist data after everything is checked for resolved conflicts since
-   * thrown ImportConflictNotResolvedException commits the transaction,
-   * looking for key in this map is also faster than querying database
+   * Keys whose plural status the import is flipping from non-plural to
+   * plural — (namespace, name) → source `pluralArgName`. Already-plural
+   * DB keys are handled directly from [importDataManager.existingKeys]
+   * in [PluralizationHandler].
    */
-  private val keysToSave = mutableMapOf<Pair<String?, String>, Key>()
+  val pluralFlipKeys = HashMap<Pair<String?, String>, String?>()
+
+  /**
+   * Nested namespace → name → Key. Filled while checking conflicts and
+   * persisted once everything has been validated — a thrown
+   * `ImportConflictNotResolvedException` commits the transaction and
+   * we don't want partial data on disk.
+   */
+  private val keysToSave = HashMap<String?, HashMap<String, Key>>()
+
+  private fun keysToSavePut(
+    namespace: String?,
+    name: String,
+    key: Key,
+  ): Key {
+    keysToSave.getOrPut(namespace) { HashMap() }[name] = key
+    return key
+  }
+
+  private fun keysToSaveGet(
+    namespace: String?,
+    name: String,
+  ): Key? = keysToSave[namespace]?.get(name)
+
+  private fun keysToSaveValuesSequence(): Sequence<Key> =
+    keysToSave.values.asSequence().flatMap { it.values.asSequence() }
 
   private val keyMetasToSave: MutableList<KeyMeta> = mutableListOf()
 
@@ -97,7 +135,7 @@ class StoredDataImporter(
 
   val unresolvedConflicts: MutableList<ImportTranslation> = mutableListOf()
 
-  /** Snapshot of imported (namespace, keyName) pairs, captured before [releaseImportData]. */
+  /** Imported (namespace, keyName) pairs, captured before parsed-file data is released. */
   private var importedKeyPairs: List<Pair<String?, String>> = emptyList()
 
   /**
@@ -110,7 +148,7 @@ class StoredDataImporter(
     val result: MutableMap<Pair<String?, String>, KeyMeta> = mutableMapOf()
     val metasToMerge =
       if (isSingleStepImport) {
-        importDataManager.storedKeys.map { it.value.keyMeta }.filterNotNull()
+        importDataManager.storedKeysValuesSequence().mapNotNull { it.keyMeta }.toList()
       } else {
         keyMetaService.getWithFetchedData(this.import)
       }
@@ -126,16 +164,12 @@ class StoredDataImporter(
   }
 
   fun doImport(): ImportResult {
-    val importStart = System.currentTimeMillis()
-
-    fun elapsed() = System.currentTimeMillis() - importStart
-
     reportStatus(ImportApplicationStatusItem(ImportApplicationStatus.PREPARING_AND_VALIDATING))
 
-    importDataManager.storedLanguages.forEach {
-      it.prepareImport()
+    importDataManager.storedLanguages.forEach { lang ->
+      lang.prepareImport()
+      importDataManager.releaseLanguageData(lang)
     }
-    logger.trace("Import phase: prepareImport completed in {}ms", elapsed())
 
     throwOnUnresolvedConflicts(unresolvedConflicts)
 
@@ -144,50 +178,33 @@ class StoredDataImporter(
     addKeysAndCheckPermissions()
 
     handleKeyMetas()
-    logger.trace("Import phase: addKeys + handleKeyMetas completed in {}ms", elapsed())
 
     reportStatus(ImportApplicationStatusItem(ImportApplicationStatus.STORING_KEYS))
 
     namespaceService.saveAll(namespacesToSave.values)
 
     addScreenshots()
+    releaseNewKeysReferences()
 
     handlePluralization()
-    logger.trace("Import phase: namespaces + screenshots + pluralization completed in {}ms", elapsed())
 
-    reportStatus(
-      ImportApplicationStatusItem(
-        ImportApplicationStatus.STORING_TRANSLATIONS,
-        totalKeys = keysToSave.size,
-        importedKeys = 0,
-      ),
-    )
-
-    // Snapshot imported key identifiers before releasing import data, because
-    // deleteOtherKeys() needs them and releaseImportData() clears storedKeys.
     importedKeyPairs =
-      importDataManager.storedKeys.entries.map { (fileNamePair, _) ->
-        Pair(fileNamePair.first.namespace, fileNamePair.second)
+      importDataManager.storedKeys.entries.flatMap { (file, byName) ->
+        byName.keys.map { name -> file.namespace to name }
       }
+    importDataManager.releaseData()
 
-    // Release import entities (ImportKey, ImportTranslation) from importDataManager.
-    // At 1M keys × 3 languages, these hold ~6M entities (~1.5 GB).
-    releaseImportData()
-    logger.trace("Import phase: releaseImportData completed in {}ms", elapsed())
+    reportStatus(ImportApplicationStatusItem(ImportApplicationStatus.STORING_TRANSLATIONS))
 
     saveKeysAndTranslationsInBatches()
-    logger.trace("Import phase: saveKeysAndTranslationsInBatches completed in {}ms", elapsed())
 
     reportStatus(ImportApplicationStatusItem(ImportApplicationStatus.FINALIZING))
 
     translationService.setOutdatedBatch(outdatedFlagKeys)
 
-    tagNewKeys()
-
     entityManager.flush()
 
     deleteOtherKeys()
-    logger.trace("Import phase: finalization completed in {}ms", elapsed())
 
     entityManager.flushAndClear()
 
@@ -210,6 +227,10 @@ class StoredDataImporter(
     )
   }
 
+  private fun releaseNewKeysReferences() {
+    newKeys.clear()
+  }
+
   /**
    * Throws error when `errorOnUnresolvedConflict` is set on the API request
    * and there are some unresolved conflicts
@@ -227,10 +248,11 @@ class StoredDataImporter(
     }
   }
 
-  private fun tagNewKeys() {
-    (importSettings as? SingleStepImportRequest)?.tagNewKeys?.let { tagNewKeys ->
-      tagService.tagKeys(newKeys.associateWith { tagNewKeys })
-    }
+  private fun tagNewKeysInBatch(newKeysInBatch: List<Key>) {
+    if (newKeysInBatch.isEmpty()) return
+    val tagsToApply = (importSettings as? SingleStepImportRequest)?.tagNewKeys ?: return
+    if (tagsToApply.isEmpty()) return
+    tagService.tagKeys(newKeysInBatch.associateWith { tagsToApply })
   }
 
   private fun deleteOtherKeys() {
@@ -255,19 +277,86 @@ class StoredDataImporter(
     saveKeys(handler.keysToSave)
   }
 
-  private fun saveKeyMetaDataForBatch(keyBatch: Collection<Key>) {
-    val batchKeySet = keyBatch.toSet()
-    val batchMetas = keyMetasToSave.filter { it.key in batchKeySet }
+  private fun saveKeysAndTranslationsInBatches() {
+    // IdentityHashMap because Key.equals isn't overridden (default identity)
+    // but Key.hashCode is — the inconsistency would make a regular HashMap
+    // unreliable.
+    val translationsByKey = IdentityHashMap<Key, MutableList<Translation>>(keysToSave.size)
+    translationsToSave.forEach { t ->
+      translationsByKey.getOrPut(t.key) { ArrayList(2) }.add(t)
+    }
+    translationsToSave.clear()
+
+    val keyMetaByKey = IdentityHashMap<Key, KeyMeta>(keyMetasToSave.size)
+    keyMetasToSave.forEach { keyMetaByKey[it.key!!] = it }
+    keyMetasToSave.clear()
+
+    val keyBatch = ArrayList<Key>(batchSize)
+    val outerIter = keysToSave.entries.iterator()
+    while (outerIter.hasNext()) {
+      val (_, innerMap) = outerIter.next()
+      val innerIter = innerMap.entries.iterator()
+      while (innerIter.hasNext()) {
+        keyBatch.add(innerIter.next().value)
+        innerIter.remove()
+        if (keyBatch.size == batchSize) {
+          flushBatch(keyBatch, translationsByKey, keyMetaByKey)
+          keyBatch.clear()
+        }
+      }
+      outerIter.remove()
+    }
+    if (keyBatch.isNotEmpty()) {
+      flushBatch(keyBatch, translationsByKey, keyMetaByKey)
+    }
+  }
+
+  private fun flushBatch(
+    keyBatch: List<Key>,
+    translationsByKey: IdentityHashMap<Key, MutableList<Translation>>,
+    keyMetaByKey: IdentityHashMap<Key, KeyMeta>,
+  ) {
+    val transientKeysInBatch = keyBatch.filter { it.id == 0L }
+
+    keyService.saveAll(keyBatch)
+    saveKeyMetaDataForBatch(keyBatch, keyMetaByKey)
+
+    val batchTranslations = ArrayList<Translation>(keyBatch.size * 2)
+    for (key in keyBatch) {
+      val list = translationsByKey.remove(key) ?: continue
+      batchTranslations.addAll(list)
+    }
+    translationService.saveAll(batchTranslations)
+
+    tagNewKeysInBatch(transientKeysInBatch)
+
+    entityManager.flushAndClear()
+  }
+
+  private fun saveKeyMetaDataForBatch(
+    keyBatch: Collection<Key>,
+    keyMetaByKey: IdentityHashMap<Key, KeyMeta>,
+  ) {
+    val batchMetas = keyBatch.mapNotNull { keyMetaByKey.remove(it) }
     if (batchMetas.isEmpty()) return
 
-    val comments = keyBatch.flatMap { it.keyMeta?.comments ?: emptyList() }
-    val codeReferences = keyBatch.flatMap { it.keyMeta?.codeReferences ?: emptyList() }
+    // hibernate bug workaround:
+    // saving key metas will cause them to be recreated by hibernate with empty values
+    // we have to save references to comments and codeReferences before saving key metas
+    val comments = batchMetas.flatMap { it.comments }
+    val codeReferences = batchMetas.flatMap { it.codeReferences }
     keyMetaService.saveAll(batchMetas)
     keyMetaService.saveAllComments(comments)
     keyMetaService.saveAllCodeReferences(codeReferences)
 
-    comments.groupBy { it.keyMeta }.forEach { (keyMeta, c) -> keyMeta.comments = c.toMutableList() }
-    codeReferences.groupBy { it.keyMeta }.forEach { (keyMeta, c) -> keyMeta.codeReferences = c.toMutableList() }
+    // set links to comments and code references to point to correct (previous)
+    // instances instead of the new empty ones
+    comments.groupBy { it.keyMeta }.forEach { (keyMeta, c) ->
+      keyMeta.comments = c.toMutableList()
+    }
+    codeReferences.groupBy { it.keyMeta }.forEach { (keyMeta, c) ->
+      keyMeta.codeReferences = c.toMutableList()
+    }
   }
 
   private fun getUnresolvedConflicts(conflicts: List<ImportTranslation>): List<SimpleImportConflictResult> {
@@ -282,105 +371,9 @@ class StoredDataImporter(
     }
   }
 
-  /**
-   * Releases import entities from [importDataManager] and clears the Hibernate session.
-   *
-   * At 1M keys × 3 languages, [ImportDataManager] holds ~3M [ImportKey], ~3M [ImportTranslation],
-   * plus existing keys/translations loaded for conflict resolution — totalling ~1.5 GB of heap.
-   * By the time we reach [saveKeysAndTranslationsInBatches], all data has been extracted into
-   * [keysToSave] and [translationsToSave], so the import entities are no longer needed.
-   *
-   * Clearing the collections AND flushing the Hibernate session lets the GC reclaim both
-   * the Java objects and the Hibernate persistence context entries that track them (~2 GB
-   * of [MutableEntityEntry], [EntityKey], [LazyAttributeLoadingInterceptor] etc.).
-   */
-  private fun releaseImportData() {
-    importDataManager.releaseData()
-  }
-
-  /**
-   * Saves keys, their metadata, and translations in batches with flushAndClear
-   * after each batch. This prevents the Hibernate session from holding all entities
-   * simultaneously, which would cause OOM at large scale (100k+ keys).
-   *
-   * Memory discipline: at million-key scale, holding all 1M Key + 3M Translation
-   * entities alive for the entire loop (through `keysToSave`, `translationsToSave`,
-   * `translationsByKey`) pushes the heap over 8 GB. To avoid this, we drain
-   * `keysToSave` and `translationsByKey` as we process each batch so the GC can
-   * reclaim already-persisted entities while the loop is still running.
-   *
-   * Keys and their translations are saved in the same batch so key references
-   * remain managed — no getReference() proxies needed.
-   */
-  private fun saveKeysAndTranslationsInBatches() {
-    // Group by key identity (reference), not by equals/hashCode which is slow for entities.
-    val translationsByKey = IdentityHashMap<Key, MutableList<Translation>>()
-    translationsToSave.forEach { (_, translation) ->
-      translationsByKey.getOrPut(translation.key) { mutableListOf() }.add(translation)
-    }
-    // We've captured everything we need in translationsByKey — release the
-    // source list now so its entries can be collected as we drain the map.
-    translationsToSave.clear()
-
-    val totalKeyCount = keysToSave.size
-    val totalBatches = (totalKeyCount + FLUSH_BATCH_SIZE - 1) / FLUSH_BATCH_SIZE
-    var savedTranslations = 0
-
-    // Drain keysToSave via its iterator so processed entries are removed as
-    // we go. keyBatch is reused across iterations to avoid allocation churn.
-    val keyIterator = keysToSave.entries.iterator()
-    val keyBatch = ArrayList<Key>(FLUSH_BATCH_SIZE)
-    var batchIndex = 0
-    while (keyIterator.hasNext()) {
-      keyBatch.clear()
-      var filled = 0
-      while (keyIterator.hasNext() && filled < FLUSH_BATCH_SIZE) {
-        keyBatch.add(keyIterator.next().value)
-        keyIterator.remove()
-        filled++
-      }
-
-      keyService.saveAll(keyBatch)
-      saveKeyMetaDataForBatch(keyBatch)
-
-      val batchTranslations = ArrayList<Translation>(keyBatch.size * 4)
-      keyBatch.forEach { key ->
-        // remove() releases the map's reference to the translation list once
-        // we move it into batchTranslations, so finished batches can be GC'd.
-        val list = translationsByKey.remove(key) ?: return@forEach
-        batchTranslations.addAll(list)
-      }
-      translationService.saveAll(batchTranslations)
-      savedTranslations += batchTranslations.size
-
-      entityManager.flushAndClear()
-
-      batchIndex++
-      val importedKeys = (batchIndex * FLUSH_BATCH_SIZE).coerceAtMost(totalKeyCount)
-      reportStatus(
-        ImportApplicationStatusItem(
-          ImportApplicationStatus.STORING_TRANSLATIONS,
-          totalKeys = totalKeyCount,
-          importedKeys = importedKeys,
-        ),
-      )
-      logger.trace(
-        "Batch {}/{}: {} keys, {} translations (total: {})",
-        batchIndex,
-        totalBatches,
-        keyBatch.size,
-        batchTranslations.size,
-        savedTranslations,
-      )
-    }
-  }
-
-  companion object {
-    private const val FLUSH_BATCH_SIZE = 5000
-  }
-
-  private fun saveKeys(keys: Collection<Key>) {
+  private fun saveKeys(keys: Collection<Key>): Collection<Key> {
     keyService.saveAll(keys)
+    return keys
   }
 
   private fun addKeysAndCheckPermissions() {
@@ -389,30 +382,31 @@ class StoredDataImporter(
   }
 
   private fun checkTranslationPermissions() {
-    val langIds = translationsToSave.mapTo(mutableSetOf()) { it.second.language.id }
-    securityService.checkLanguageTranslatePermission(import.project.id, langIds.toList())
+    if (translationLanguageIds.isEmpty()) return
+    securityService.checkLanguageTranslatePermission(import.project.id, translationLanguageIds.toList())
   }
 
   private fun checkKeyPermissions() {
-    val isCreatingKey = keysToSave.values.any { it.id == 0L }
+    val isCreatingKey = keysToSaveValuesSequence().any { it.id == 0L }
     if (isCreatingKey) {
       securityService.checkProjectPermission(import.project.id, Scope.KEYS_CREATE)
     }
   }
 
   private fun handleKeyMetas() {
-    this.importDataManager.storedKeys.entries.forEach { (fileNamePair, importKey) ->
+    importDataManager.storedKeysValuesSequence().forEach { importKey ->
       if (!importKey.shouldBeImported) {
         return@forEach
       }
-      val importedKeyMeta = storedMetas[fileNamePair.first.namespace to importKey.name]
+      val ns = importKey.file.namespace
+      val importedKeyMeta = storedMetas[ns to importKey.name]
       // don't touch key meta when imported key has no meta
       if (importedKeyMeta != null) {
-        keysToSave[fileNamePair.first.namespace to importKey.name]?.let { newKey ->
+        keysToSaveGet(ns, importKey.name)?.let { newKey ->
           // if key is obtained or created and meta exists, take it and import the data from the imported one
           // persist is cascaded on key, so it should be fine
           val keyMeta =
-            importDataManager.existingMetas[fileNamePair.first.namespace to importKey.name]?.also {
+            importDataManager.existingMetas[ns to importKey.name]?.also {
               keyMetaService.import(it, importedKeyMeta, importSettings.overrideKeyDescriptions)
             } ?: importedKeyMeta
           // also set key and remove import key
@@ -429,9 +423,9 @@ class StoredDataImporter(
   }
 
   private fun addAllKeys() {
-    importDataManager.storedKeys.map { (_, importKey) ->
+    importDataManager.storedKeysValuesSequence().forEach { importKey ->
       if (!importKey.shouldBeImported) {
-        return@map
+        return@forEach
       }
       addKeyToSave(importKey.file.namespace, importKey.name)
     }
@@ -469,32 +463,52 @@ class StoredDataImporter(
       }
 
     translation.key = existingKey
-    if (language == language.project.baseLanguage && translation.text != this.text) {
+    if (this.isBaseLanguageEditOfExisting(translation, language)) {
       outdatedFlagKeys.add(translation.key.id)
     }
     translationService.setTranslationTextNoSave(translation, text)
-    translationsToSave.add(this to translation)
+    translationsToSave.add(translation)
+    translationLanguageIds.add(language.id)
+
+    if (this.isPlural) {
+      val ns = this.key.file.namespace
+      val name = this.key.name
+      val existingKey = importDataManager.existingKeys[ns to name]
+      if (existingKey?.isPlural != true) {
+        pluralFlipKeys[ns to name] = this.key.pluralArgName
+      }
+    }
   }
+
+  private fun ImportTranslation.isBaseLanguageEditOfExisting(
+    translation: Translation,
+    language: Language,
+  ): Boolean =
+    this.conflict != null &&
+      language == language.project.baseLanguage &&
+      translation.text != this.text
 
   private val ImportTranslation.existingKey: Key
     get() {
-      // get key from already saved keys to save
-      return keysToSave.computeIfAbsent(this.key.file.namespace to this.key.name) {
-        // or get it from conflict or create new one
-        val newKey =
-          importDataManager.existingKeys[this.key.file.namespace to this.key.name]
-            ?: createNewKey(this.key.name, this.key.file.namespace)
-        newKey
-      }
+      val ns = this.key.file.namespace
+      val name = this.key.name
+      // get key from already saved keys to save, or from conflict, or create new
+      return keysToSaveGet(ns, name) ?: keysToSavePut(
+        ns,
+        name,
+        importDataManager.existingKeys[ns to name] ?: createNewKey(name, ns),
+      )
     }
 
   private fun addKeyToSave(
     namespace: String?,
     keyName: String,
   ): Key {
-    return keysToSave.computeIfAbsent(namespace to keyName) {
-      importDataManager.existingKeys[namespace to keyName] ?: createNewKey(keyName, namespace)
-    }
+    return keysToSaveGet(namespace, keyName) ?: keysToSavePut(
+      namespace,
+      keyName,
+      importDataManager.existingKeys[namespace to keyName] ?: createNewKey(keyName, namespace),
+    )
   }
 
   private fun createNewKey(

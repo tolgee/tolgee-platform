@@ -52,16 +52,29 @@ class ImportDataManager(
     applicationContext.getBean(KeyMetaService::class.java)
   }
 
-  val storedKeys by lazy {
-    if (!saveData) {
-      return@lazy mutableMapOf<Pair<ImportFile, String>, ImportKey>()
+  /** Nested file → keyName → ImportKey. */
+  val storedKeys: HashMap<ImportFile, HashMap<String, ImportKey>> by lazy {
+    val result = HashMap<ImportFile, HashMap<String, ImportKey>>()
+    if (!saveData) return@lazy result
+    importService.findKeys(import).forEach {
+      result.getOrPut(it.file) { HashMap() }[it.name] = it
     }
-    importService
-      .findKeys(import)
-      .asSequence()
-      .map { (it.file to it.name) to it }
-      .toMap(mutableMapOf())
+    result
   }
+
+  fun storedKeysValuesSequence(): Sequence<ImportKey> =
+    storedKeys.values.asSequence().flatMap { it.values.asSequence() }
+
+  fun getStoredKey(
+    file: ImportFile,
+    name: String,
+  ): ImportKey? = storedKeys[file]?.get(name)
+
+  fun storedKeysComputeIfAbsent(
+    file: ImportFile,
+    name: String,
+    create: () -> ImportKey,
+  ): ImportKey = storedKeys.getOrPut(file) { HashMap() }.getOrPut(name, create)
 
   val storedLanguages by lazy {
     importService.findLanguages(import).toMutableList()
@@ -114,15 +127,16 @@ class ImportDataManager(
     namespaceService.getAllInProject(import.project.id).map { it.name to it }.toMap(mutableMapOf())
   }
 
-  /**
-   * Releases all import entity references so they can be garbage-collected.
-   * Called by [StoredDataImporter.releaseImportData] before the batch save loop.
-   */
   fun releaseData() {
     storedKeys.clear()
     storedTranslations.clear()
-    translationsToUpdateDueToCollisions.clear()
     storedTranslationsByKeyName.clear()
+    translationsToUpdateDueToCollisions.clear()
+  }
+
+  fun releaseLanguageData(language: ImportLanguage) {
+    storedTranslations.remove(language)
+    storedTranslationsByKeyName.remove(language)
   }
 
   /**
@@ -137,10 +151,7 @@ class ImportDataManager(
     this.populateStoredTranslations(language)
     val languageData = this.storedTranslations[language]!!
 
-    return languageData[key] ?: let {
-      languageData[key] = mutableListOf()
-      languageData[key]!!
-    }
+    return languageData[key] ?: ArrayList<ImportTranslation>(1).also { languageData[key] = it }
   }
 
   fun getStoredTranslations(language: ImportLanguage): List<ImportTranslation> {
@@ -177,10 +188,15 @@ class ImportDataManager(
 
   fun buildTranslationsByKeyNameCache(language: ImportLanguage) {
     val languageData = populateStoredTranslations(language)
-    val translationsByKey = mutableMapOf<Pair<String?, String>, MutableList<ImportTranslation>>()
+    val translationsByKey = HashMap<Pair<String?, String>, List<ImportTranslation>>(languageData.size)
     languageData.forEach { (key, translations) ->
       val mapKey = getSafeNamespace(key.file.namespace) to key.name
-      translationsByKey.getOrPut(mapKey) { mutableListOf() }.addAll(translations)
+      val existing = translationsByKey[mapKey]
+      translationsByKey[mapKey] =
+        when {
+          existing == null -> translations
+          else -> existing + translations
+        }
     }
     storedTranslationsByKeyName[language] = translationsByKey
   }
@@ -191,12 +207,12 @@ class ImportDataManager(
       return languageData // it is already there
     }
 
-    languageData = mutableMapOf()
+    languageData = LinkedHashMap()
     storedTranslations[language] = languageData
     val translations = importService.findTranslations(language.id)
     translations.forEach { importTranslation ->
       val keyTranslations =
-        languageData.computeIfAbsent(importTranslation.key) { mutableListOf() }
+        languageData.computeIfAbsent(importTranslation.key) { ArrayList(1) }
       keyTranslations.add(importTranslation)
     }
     return languageData
@@ -212,7 +228,7 @@ class ImportDataManager(
   private fun getOrInitLanguageDataItem(
     language: ImportLanguage,
   ): MutableMap<ImportKey, MutableList<ImportTranslation>> {
-    return this.storedTranslations.computeIfAbsent(language) { mutableMapOf() }
+    return this.storedTranslations.computeIfAbsent(language) { LinkedHashMap() }
   }
 
   private fun detectConflictType(translation: Translation): ConflictType? {
@@ -274,7 +290,7 @@ class ImportDataManager(
   }
 
   fun saveAllStoredKeys() {
-    this.importService.saveAllKeys(this.storedKeys.values)
+    this.importService.saveAllKeys(storedKeysValuesSequence().toList())
   }
 
   fun prepareKeyMeta(keyMeta: KeyMeta) {
@@ -439,7 +455,7 @@ class ImportDataManager(
   }
 
   fun applyKeyCreateChange(createNewKeys: Boolean) {
-    storedKeys.forEach { (_, key) ->
+    storedKeysValuesSequence().forEach { key ->
       if (createNewKeys) {
         key.shouldBeImported = true
       } else {

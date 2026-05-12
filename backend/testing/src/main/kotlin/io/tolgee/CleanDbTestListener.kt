@@ -93,7 +93,7 @@ class CleanDbTestListener : TestExecutionListener {
         if (nonEmptyTables.isNotEmpty()) {
           val tablesString = nonEmptyTables.joinToString(",")
           stmt.execute(
-            "SET statement_timeout = 5000;" +
+            "SET LOCAL statement_timeout = 5000;" +
               "TRUNCATE TABLE $tablesString CASCADE;",
           )
         }

@@ -10,6 +10,7 @@ import io.tolgee.fixtures.node
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
+import io.tolgee.repository.dataImport.ImportTranslationRepository
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -18,6 +19,7 @@ import io.tolgee.util.performImport
 import net.javacrumbs.jsonunit.core.internal.Node.JsonMap
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.Resource
 import org.springframework.test.web.servlet.ResultActions
@@ -25,6 +27,9 @@ import org.springframework.transaction.annotation.Transactional
 
 @Transactional
 class V2ImportControllerAddFilesTest : ProjectAuthControllerTest("/v2/projects/") {
+  @Autowired
+  private lateinit var importTranslationRepository: ImportTranslationRepository
+
   @Value("classpath:import/zipOfJsons.zip")
   lateinit var zipOfJsons: Resource
 
@@ -119,18 +124,8 @@ class V2ImportControllerAddFilesTest : ProjectAuthControllerTest("/v2/projects/"
       assertThat(it.files).hasSize(1)
       assertThat(it.files[0].languages[0].translations).hasSize(8)
       // correctly assigns isPlural
-      assertThat(
-        it.files[0]
-          .keys[4]
-          .translations[0]
-          .isPlural,
-      ).isTrue()
-      assertThat(
-        it.files[0]
-          .keys[3]
-          .translations[0]
-          .isPlural,
-      ).isFalse()
+      assertThat(importTranslationRepository.findByKeyId(it.files[0].keys[4].id)[0].isPlural).isTrue()
+      assertThat(importTranslationRepository.findByKeyId(it.files[0].keys[3].id)[0].isPlural).isFalse()
     }
   }
 

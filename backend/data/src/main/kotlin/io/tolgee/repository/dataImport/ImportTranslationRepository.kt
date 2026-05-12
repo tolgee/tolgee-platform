@@ -86,6 +86,8 @@ interface ImportTranslationRepository : JpaRepository<ImportTranslation, Long> {
     languageId: Long,
   ): ImportTranslation?
 
+  fun findByKeyId(keyId: Long): List<ImportTranslation>
+
   @Query(
     """
       select distinct it from ImportTranslation it
