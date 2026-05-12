@@ -74,7 +74,9 @@ class BranchMergeExecutor(
    * may have cleared the persistence context, leaving [merge] detached.
    */
   private fun finalizeMerge(merge: BranchMerge) {
-    val managed = entityManager.find(BranchMerge::class.java, merge.id) ?: return
+    val managed =
+      entityManager.find(BranchMerge::class.java, merge.id)
+        ?: throw IllegalStateException("BranchMerge ${merge.id} was not found during finalization")
     managed.markMerged(currentDateProvider.date)
   }
 
