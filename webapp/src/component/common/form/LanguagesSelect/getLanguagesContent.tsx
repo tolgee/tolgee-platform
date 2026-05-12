@@ -74,29 +74,31 @@ export const getLanguagesContent = ({
 
   const languageItems = languages.map((lang) => (
     <Tooltip key={lang.tag} title={lang.name} placement="right">
-      <MenuItem
-        value={lang.tag}
-        data-cy="translations-language-select-item"
-        onClick={handleLanguageChange(lang.tag)}
-        disabled={disabledLanguages?.includes(lang.id)}
-      >
-        <Checkbox checked={value?.includes(lang.tag)} size="small" />
-        <ListItemText
-          primary={lang.name}
-          sx={{
-            '& .MuiListItemText-primary': {
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-              '@media (max-width: 600px)': {
-                whiteSpace: 'normal',
-                textOverflow: 'unset',
-                overflow: 'visible',
+      <span style={{ display: 'inline-block', width: '100%' }}>
+        <MenuItem
+          value={lang.tag}
+          data-cy="translations-language-select-item"
+          onClick={handleLanguageChange(lang.tag)}
+          disabled={disabledLanguages?.includes(lang.id)}
+        >
+          <Checkbox checked={value?.includes(lang.tag)} size="small" />
+          <ListItemText
+            primary={lang.name}
+            sx={(theme) => ({
+              '& .MuiListItemText-primary': {
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                [theme.breakpoints.down('sm')]: {
+                  whiteSpace: 'normal',
+                  textOverflow: 'unset',
+                  overflow: 'visible',
+                },
               },
-            },
-          }}
-        />
-      </MenuItem>
+            })}
+          />
+        </MenuItem>
+      </span>
     </Tooltip>
   ));
 
