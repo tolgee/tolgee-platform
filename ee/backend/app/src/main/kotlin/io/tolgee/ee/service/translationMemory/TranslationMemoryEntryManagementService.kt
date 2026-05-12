@@ -218,17 +218,24 @@ class TranslationMemoryEntryManagementService(
     join key k on k.project_id = p.id and k.deleted_at is null
     left join branch b on b.id = k.branch_id
     join translation base_t on base_t.key_id = k.id and base_t.language_id = base_lang.id
-    join translation target_t on target_t.key_id = k.id and target_t.language_id <> base_lang.id
     where p.id = any(:projectIds)
       and p.deleted_at is null
       and base_t.text is not null and base_t.text <> ''
-      and target_t.text is not null and target_t.text <> ''
       and (b.id is null or b.is_default = true)
-      and (not :writeOnlyReviewed or target_t.state = 2)
-      and (
-        cast(:search as text) is null
-        or lower(base_t.text) like lower('%' || cast(:search as text) || '%')
-        or lower(target_t.text) like lower('%' || cast(:search as text) || '%')
+      and exists (
+        -- EXISTS keeps the join row count at ~|keys| instead of |keys| × |target_langs|.
+        -- The search filter must still match a target inside the same bucket, so it lives
+        -- here alongside the language/state filters.
+        select 1 from translation target_t
+        where target_t.key_id = k.id
+          and target_t.language_id <> base_lang.id
+          and target_t.text is not null and target_t.text <> ''
+          and (not :writeOnlyReviewed or target_t.state = 2)
+          and (
+            cast(:search as text) is null
+            or lower(base_t.text) like lower('%' || cast(:search as text) || '%')
+            or lower(target_t.text) like lower('%' || cast(:search as text) || '%')
+          )
       )
     """.trimIndent()
 
