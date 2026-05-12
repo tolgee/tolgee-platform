@@ -601,4 +601,10 @@ class TranslationsTestData {
         state = QaIssueState.OPEN
       }
   }
+
+  fun addLanguageQaConfigOnGermanLanguage() {
+    projectBuilder.data.languages
+      .first { it.self === germanLanguage }
+      .setQaConfig()
+  }
 }

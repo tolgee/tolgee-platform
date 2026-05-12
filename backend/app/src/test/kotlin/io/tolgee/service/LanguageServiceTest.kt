@@ -15,8 +15,6 @@ import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.Language
 import io.tolgee.model.UserAccount
-import io.tolgee.model.qa.LanguageQaConfig
-import io.tolgee.repository.qa.LanguageQaConfigRepository
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.TolgeeAuthentication
 import io.tolgee.testing.assert
@@ -43,9 +41,6 @@ class LanguageServiceTest : AbstractSpringTest() {
 
   @Autowired
   private lateinit var sessionFactory: SessionFactory
-
-  @Autowired
-  private lateinit var languageQaConfigRepository: LanguageQaConfigRepository
 
   @Test
   @Transactional
@@ -186,12 +181,10 @@ class LanguageServiceTest : AbstractSpringTest() {
   fun `deletes language with QA config and issues`() {
     val testData = TranslationsTestData()
     testData.addQaIssueOnAKeyGerman()
+    testData.addLanguageQaConfigOnGermanLanguage()
     testDataService.saveTestData(testData.root)
 
     val language = testData.germanLanguage
-
-    languageQaConfigRepository.save(LanguageQaConfig(language = language))
-    entityManager.flush()
 
     languageService.hardDeleteLanguage(language.id)
     languageService.findEntity(language.id).assert.isNull()
