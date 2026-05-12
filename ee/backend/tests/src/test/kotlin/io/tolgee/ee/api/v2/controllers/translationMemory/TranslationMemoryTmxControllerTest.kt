@@ -4,9 +4,14 @@ import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.TranslationMemoryTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.data.translationMemory.CreateTranslationMemoryEntryRequest
+import io.tolgee.fixtures.TuRaw
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.buildTmx
+import io.tolgee.fixtures.buildTmxRaw
+import io.tolgee.fixtures.mockTmxFile
+import io.tolgee.fixtures.tu
 import io.tolgee.repository.translationMemory.TranslationMemoryEntryRepository
 import io.tolgee.testing.AuthorizedControllerTest
 import org.assertj.core.api.Assertions.assertThat

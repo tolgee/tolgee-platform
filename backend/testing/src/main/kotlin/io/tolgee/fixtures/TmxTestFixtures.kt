@@ -1,4 +1,4 @@
-package io.tolgee.ee.api.v2.controllers.translationMemory
+package io.tolgee.fixtures
 
 import org.springframework.mock.web.MockMultipartFile
 
