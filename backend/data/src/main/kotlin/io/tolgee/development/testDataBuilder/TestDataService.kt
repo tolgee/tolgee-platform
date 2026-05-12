@@ -13,6 +13,7 @@ import io.tolgee.development.testDataBuilder.builders.PatBuilder
 import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.builders.TranslationBuilder
+import io.tolgee.development.testDataBuilder.builders.TranslationMemoryBuilder
 import io.tolgee.development.testDataBuilder.builders.UserAccountBuilder
 import io.tolgee.development.testDataBuilder.builders.UserPreferencesBuilder
 import io.tolgee.development.testDataBuilder.builders.slack.SlackUserConnectionBuilder
@@ -296,21 +297,34 @@ class TestDataService(
     }
   }
 
-  /**
-   * Tests can call `saveTestData(testData.root)` more than once (e.g. add a key mid-test, then
-   * re-save). The auto-added project TM lands in the builder tree on the first save and gets
-   * an id assigned — on subsequent saves the entity is detached, so `persist` would throw
-   * `EntityExistsException`. Filter on `id == 0` so we only persist freshly-added entities,
-   * matching the pattern used by `saveBranches` and friends.
-   */
   private fun saveTranslationMemoryData(builder: TestDataBuilder) {
-    val tmBuilders = builder.data.organizations.flatMap { it.data.translationMemories }
-    tmBuilders.filter { it.self.id == 0L }.forEach { entityManager.persist(it.self) }
-    tmBuilders
+    val builders = saveTranslationMemories(builder)
+    saveTranslationMemoryDependants(builders)
+  }
+
+  private fun saveTranslationMemories(builder: TestDataBuilder): List<TranslationMemoryBuilder> {
+    val builders = builder.data.organizations.flatMap { it.data.translationMemories }
+    builders.filter { it.self.id == 0L }.forEach { entityManager.persist(it.self) }
+    return builders
+  }
+
+  private fun saveTranslationMemoryDependants(builders: List<TranslationMemoryBuilder>) {
+    saveTranslationMemoryProjectAssignments(builders)
+    saveTranslationMemoryEntries(builders)
+  }
+
+  private fun saveTranslationMemoryProjectAssignments(builders: List<TranslationMemoryBuilder>) {
+    builders
       .flatMap { it.data.projectAssignments }
       .filter { it.self.id == 0L }
       .forEach { entityManager.persist(it.self) }
-    tmBuilders.flatMap { it.data.entries }.filter { it.self.id == 0L }.forEach { entityManager.persist(it.self) }
+  }
+
+  private fun saveTranslationMemoryEntries(builders: List<TranslationMemoryBuilder>) {
+    builders
+      .flatMap { it.data.entries }
+      .filter { it.self.id == 0L }
+      .forEach { entityManager.persist(it.self) }
   }
 
   /**
