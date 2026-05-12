@@ -2537,6 +2537,7 @@
   "translation_memory_list_entries_count": "{count, plural, one {# položka} few {# položky} other {# položek}}",
   "translation_memory_list_no_project": "Žádný projekt",
   "translation_memory_list_projects_count": "{count, plural, one {# projekt} few {# projekty} other {# projektů}}",
+  "translation_memory_name_already_exists": "Překladová paměť s názvem \"{value}\" již existuje",
   "translation_memory_new_entry": "Položka",
   "translation_memory_no_assigned_projects": "Tuto překladovou paměť zatím nepoužívá žádný projekt.",
   "translation_memory_penalty_default_chip": "{value} %",

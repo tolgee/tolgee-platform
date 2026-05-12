@@ -2540,6 +2540,7 @@
   "translation_memory_list_entries_count": "{count, plural, one {# post} other {# poster}}",
   "translation_memory_list_no_project": "Intet projekt",
   "translation_memory_list_projects_count": "{count, plural, one {# projekt} other {# projekter}}",
+  "translation_memory_name_already_exists": "Oversættelseshukommelse med navnet \"{value}\" eksisterer allerede",
   "translation_memory_new_entry": "Post",
   "translation_memory_no_assigned_projects": "Ingen projekter bruger denne oversættelseshukommelse endnu.",
   "translation_memory_penalty_default_chip": "{value}%",

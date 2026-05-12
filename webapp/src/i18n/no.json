@@ -2521,6 +2521,7 @@
   "translation_memory_list_entries_count": "{count, plural, one {# oppføring} other {# oppføringer}}",
   "translation_memory_list_no_project": "Ingen prosjekt",
   "translation_memory_list_projects_count": "{count, plural, one {# prosjekt} other {# prosjekter}}",
+  "translation_memory_name_already_exists": "Oversettelsesminne med navnet \"{value}\" finnes allerede",
   "translation_memory_new_entry": "Oppføring",
   "translation_memory_no_assigned_projects": "Ingen prosjekter bruker dette oversettelsesminnet ennå.",
   "translation_memory_penalty_default_chip": "{value} %",

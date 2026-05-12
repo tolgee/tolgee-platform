@@ -2527,6 +2527,7 @@
   "translation_memory_list_entries_count": "{count, plural, one {# bejegyzés} other {# bejegyzés}}",
   "translation_memory_list_no_project": "Nincs projekt",
   "translation_memory_list_projects_count": "{count, plural, one {# projekt} other {# projekt}}",
+  "translation_memory_name_already_exists": "Fordítási memória \"{value}\" névvel már létezik",
   "translation_memory_new_entry": "Bejegyzés",
   "translation_memory_no_assigned_projects": "Még egy projekt sem használja ezt a fordítási memóriát.",
   "translation_memory_penalty_default_chip": "{value}%",

@@ -2280,6 +2280,7 @@
   "translation_memory_list_entries_count": "{count, plural, one {# запис} few {# записи} many {# записів} other {# записів}}",
   "translation_memory_list_no_project": "Немає проєкту",
   "translation_memory_list_projects_count": "{count, plural, one {# проект} few {# проекти} many {# проектів} other {# проектів}}",
+  "translation_memory_name_already_exists": "Пам'ять перекладів з назвою \"{value}\" вже існує",
   "translation_memory_new_entry": "Запис",
   "translation_memory_no_assigned_projects": "Жоден проєкт ще не використовує цю пам'ять перекладів.",
   "translation_memory_penalty_default_chip": "{value}%",

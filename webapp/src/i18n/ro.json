@@ -2519,6 +2519,7 @@
   "translation_memory_list_entries_count": "{count, plural, one {# intrare} few {# intrări} other {# de intrări}}",
   "translation_memory_list_no_project": "Niciun proiect",
   "translation_memory_list_projects_count": "{count, plural, one {# proiect} few {# proiecte} other {# de proiecte}}",
+  "translation_memory_name_already_exists": "Memorie de traducere cu numele \"{value}\" există deja",
   "translation_memory_new_entry": "Intrare",
   "translation_memory_no_assigned_projects": "Niciun proiect nu folosește încă această memorie de traducere.",
   "translation_memory_penalty_default_chip": "{value}%",

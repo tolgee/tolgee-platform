@@ -2541,6 +2541,7 @@
   "translation_memory_list_entries_count": "{count, plural, one {# item} other {# items}}",
   "translation_memory_list_no_project": "Geen project",
   "translation_memory_list_projects_count": "{count, plural, one {# project} other {# projecten}}",
+  "translation_memory_name_already_exists": "Vertaalgeheugen met naam \"{value}\" bestaat al",
   "translation_memory_new_entry": "Item",
   "translation_memory_no_assigned_projects": "Er zijn nog geen projecten die dit vertaalgeheugen gebruiken.",
   "translation_memory_penalty_default_chip": "{value}%",

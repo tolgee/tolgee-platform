@@ -2269,6 +2269,7 @@
   "translation_memory_list_entries_count": "{count, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}}",
   "translation_memory_list_no_project": "Brak projektu",
   "translation_memory_list_projects_count": "{count, plural, one {# projekt} few {# projekty} many {# projektów} other {# projektu}}",
+  "translation_memory_name_already_exists": "Pamięć tłumaczeń o nazwie \"{value}\" już istnieje",
   "translation_memory_new_entry": "Wpis",
   "translation_memory_no_assigned_projects": "Żaden projekt nie korzysta jeszcze z tej pamięci tłumaczeń.",
   "translation_memory_penalty_default_chip": "{value}%",

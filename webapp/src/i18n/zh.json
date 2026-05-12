@@ -2529,6 +2529,7 @@
   "translation_memory_list_entries_count": "{count, plural, one {# 条目} other {# 条目}}",
   "translation_memory_list_no_project": "无项目",
   "translation_memory_list_projects_count": "{count, plural, one {# 项目} other {# 项目}}",
+  "translation_memory_name_already_exists": "已存在名为 \"{value}\" 的翻译记忆库",
   "translation_memory_new_entry": "条目",
   "translation_memory_no_assigned_projects": "还没有项目使用此翻译记忆库。",
   "translation_memory_penalty_default_chip": "{value}%",

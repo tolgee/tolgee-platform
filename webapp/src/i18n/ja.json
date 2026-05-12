@@ -2543,6 +2543,7 @@
   "translation_memory_list_entries_count": "{count, plural, other {# entry}}",
   "translation_memory_list_no_project": "プロジェクトなし",
   "translation_memory_list_projects_count": "{count, plural, other {# project}}",
+  "translation_memory_name_already_exists": "名前 \"{value}\" の翻訳メモリは既に存在します",
   "translation_memory_new_entry": "エントリ",
   "translation_memory_no_assigned_projects": "この翻訳メモリを使用しているプロジェクトはまだありません。",
   "translation_memory_penalty_default_chip": "{value}%",

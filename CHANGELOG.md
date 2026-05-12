@@ -1,3 +1,15 @@
+# [3.185.0](https://github.com/tolgee/tolgee-platform/compare/v3.184.5...v3.185.0) (2026-05-12)
+
+
+### Bug Fixes
+
+* truncate QA preview for longer translations ([#3639](https://github.com/tolgee/tolgee-platform/issues/3639)) ([db288c7](https://github.com/tolgee/tolgee-platform/commit/db288c73eebdea42551ffddec4f1d8cf8428f5ad))
+
+
+### Features
+
+* add per-call metric for MT provider latency ([#3634](https://github.com/tolgee/tolgee-platform/issues/3634)) ([c480be0](https://github.com/tolgee/tolgee-platform/commit/c480be06c720d70d8e4bd9b070fa1dcc54b51bd5))
+
 ## [3.184.5](https://github.com/tolgee/tolgee-platform/compare/v3.184.4...v3.184.5) (2026-05-11)
 
 

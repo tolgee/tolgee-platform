@@ -2487,6 +2487,7 @@
   "translation_memory_list_entries_count": "{count, plural, one {# voce} other {# voci}}",
   "translation_memory_list_no_project": "Nessun progetto",
   "translation_memory_list_projects_count": "{count, plural, one {# progetto} other {# progetti}}",
+  "translation_memory_name_already_exists": "Memoria di traduzione con nome \"{value}\" esiste già",
   "translation_memory_new_entry": "Voce",
   "translation_memory_no_assigned_projects": "Nessun progetto sta ancora utilizzando questa memoria di traduzione.",
   "translation_memory_penalty_default_chip": "{value}%",
