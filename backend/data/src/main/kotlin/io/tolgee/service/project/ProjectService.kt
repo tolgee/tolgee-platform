@@ -447,9 +447,31 @@ class ProjectService(
     organizationId: Long,
   ) {
     val project = get(projectId)
+    val sourceOrgId = project.organizationOwner.id
     val organization = organizationService.find(organizationId) ?: throw NotFoundException()
+
+    // Move the project's counter contribution from source org to target org. The
+    // contribution query is org-agnostic (it filters by project id), so one query is
+    // enough — same value applies as both the negative delta on source and the positive
+    // delta on target.
+    val keyContribution = organizationStatsService.getProjectKeyContribution(projectId)
+    val translationContribution = organizationStatsService.getProjectTranslationContribution(projectId)
+
     project.organizationOwner = organization
     save(project)
+
+    if (keyContribution != 0L || translationContribution != 0L) {
+      organizationUsageCounterService.applyDelta(
+        sourceOrgId,
+        keyDelta = -keyContribution,
+        translationDelta = -translationContribution,
+      )
+      organizationUsageCounterService.applyDelta(
+        organizationId,
+        keyDelta = keyContribution,
+        translationDelta = translationContribution,
+      )
+    }
   }
 
   @Transactional(readOnly = true)

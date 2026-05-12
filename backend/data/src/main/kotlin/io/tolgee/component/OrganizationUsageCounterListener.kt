@@ -37,8 +37,9 @@ class OrganizationUsageCounterListener(
 
   private val logger = LoggerFactory.getLogger(javaClass)
 
-  private val organizationKeyDeltas: MutableMap<Long, Long> = mutableMapOf()
-  private val organizationTranslationDeltas: MutableMap<Long, Long> = mutableMapOf()
+  private var organizationId: Long? = null
+  private var keyDelta: Long = 0
+  private var translationDelta: Long = 0
   private var synchronizationRegistered = false
 
   @EventListener
@@ -48,18 +49,31 @@ class OrganizationUsageCounterListener(
     val delta = event.getUsageIncreaseAmount()
     if (delta == 0L) return
 
-    when (val entity = event.entity) {
-      is Key -> {
-        val orgId = entity.project.organizationOwner.id
-        organizationKeyDeltas.merge(orgId, delta, Long::plus)
-        registerSynchronizationOnce()
+    val (orgId, isKey) =
+      when (val entity = event.entity) {
+        is Key -> entity.project.organizationOwner.id to true
+        is Translation -> entity.key.project.organizationOwner.id to false
+        else -> return
       }
-      is Translation -> {
-        val orgId = entity.key.project.organizationOwner.id
-        organizationTranslationDeltas.merge(orgId, delta, Long::plus)
-        registerSynchronizationOnce()
-      }
+
+    if (organizationId == null) {
+      organizationId = orgId
+    } else if (organizationId != orgId) {
+      // No runtime path mutates keys/translations across multiple orgs in one
+      // transaction — keys/translations always belong to a single project, which belongs
+      // to a single org. If this ever fires, a new code path is doing something the
+      // counter doesn't account for. Reconciliation will heal whatever we miss.
+      logger.warn(
+        "Counter listener saw events for multiple organizations in one transaction " +
+          "(first={}, now={}). Skipping the second org; reconciliation will heal.",
+        organizationId,
+        orgId,
+      )
+      return
     }
+
+    if (isKey) keyDelta += delta else translationDelta += delta
+    registerSynchronizationOnce()
   }
 
   private fun registerSynchronizationOnce() {
@@ -76,18 +90,14 @@ class OrganizationUsageCounterListener(
       object : TransactionSynchronization {
         override fun beforeCommit(readOnly: Boolean) {
           if (readOnly) return
-          flushDeltas()
+          flushDelta()
         }
       },
     )
   }
 
-  private fun flushDeltas() {
-    val orgIds = organizationKeyDeltas.keys + organizationTranslationDeltas.keys
-    orgIds.forEach { orgId ->
-      val keyDelta = organizationKeyDeltas[orgId] ?: 0
-      val translationDelta = organizationTranslationDeltas[orgId] ?: 0
-      counterService.applyDelta(orgId, keyDelta, translationDelta)
-    }
+  private fun flushDelta() {
+    val orgId = organizationId ?: return
+    counterService.applyDelta(orgId, keyDelta, translationDelta)
   }
 }
