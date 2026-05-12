@@ -3,7 +3,6 @@ package io.tolgee.formats.genericStructuredFile.`in`
 import com.ibm.icu.util.IllformedLocaleException
 import com.ibm.icu.util.ULocale
 import io.tolgee.formats.importCommon.ImportFormat
-import java.util.concurrent.atomic.AtomicLong
 
 object FormatDetectionUtil {
   fun isValidBCP47Tag(tag: String): Boolean {
@@ -15,38 +14,49 @@ object FormatDetectionUtil {
     }
   }
 
+  /** Per-factor sampling cap — the hit-rate ratio converges well before this. */
+  private const val MAX_STRINGS_TO_INSPECT = 1000L
+
   fun regexFactor(
     regex: Regex,
     weight: Double = 1.0,
   ): Factor {
     return Factor(weight) { it: Any? ->
-      val hits = AtomicLong(0)
-      val total = AtomicLong(0)
-      processMapRecursive(it, regex, hits, total)
-      hits.get().toDouble() / total.get().toDouble()
+      // counters[0] = hits, counters[1] = total
+      val counters = LongArray(2)
+      processMapRecursive(it, regex, counters)
+      val total = counters[1]
+      if (total == 0L) 0.0 else counters[0].toDouble() / total.toDouble()
     }
   }
 
+  /** @return false once the inspection cap is reached so the caller can short-circuit. */
   private fun processMapRecursive(
     data: Any?,
     regex: Regex,
-    hits: AtomicLong,
-    total: AtomicLong,
-  ) {
+    counters: LongArray,
+  ): Boolean {
+    if (counters[1] >= MAX_STRINGS_TO_INSPECT) return false
     when (data) {
-      is Map<*, *> -> data.forEach { (_, value) -> processMapRecursive(value, regex, hits, total) }
-      is List<*> -> data.forEach { item -> processMapRecursive(item, regex, hits, total) }
-      is Array<*> -> data.forEach { item -> processMapRecursive(item, regex, hits, total) }
-      else -> {
-        if (data is String) {
-          val count = regex.findAll(data).count()
-          total.incrementAndGet()
-          if (regex.containsMatchIn(data)) {
-            hits.addAndGet(count.toLong())
-          }
+      is Map<*, *> ->
+        for ((_, value) in data) {
+          if (!processMapRecursive(value, regex, counters)) return false
         }
+      is List<*> ->
+        for (item in data) {
+          if (!processMapRecursive(item, regex, counters)) return false
+        }
+      is Array<*> ->
+        for (item in data) {
+          if (!processMapRecursive(item, regex, counters)) return false
+        }
+      is String -> {
+        counters[1]++
+        counters[0] += regex.findAll(data).count().toLong()
       }
+      else -> Unit
     }
+    return true
   }
 
   fun detectFromPossibleFormats(

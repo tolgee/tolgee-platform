@@ -139,19 +139,24 @@ class QaActivityListener(
     event: OnProjectActivityEvent,
     projectId: Long,
   ) {
-    val textChangedTranslationIds =
-      getTextChangedTranslations(event.modifiedEntities.values.flatMap { it.values }).map { it.entityId }
-    if (textChangedTranslationIds.isEmpty()) return
+    val textChangedEntities =
+      getTextChangedTranslations(event.modifiedEntities.values.flatMap { it.values })
+    if (textChangedEntities.isEmpty()) return
 
-    // Mark direct translations as stale
-    translationService.setQaChecksStale(textChangedTranslationIds)
+    translationService.setQaChecksStale(textChangedEntities.map { it.entityId })
 
-    // Mark siblings of base language changes as stale
+    // Mark siblings of base-language changes as stale.
     val baseLanguage = languageService.getProjectBaseLanguage(projectId)
-    translationService.setQaChecksStaleForBaseTranslationKeys(
-      translationIds = textChangedTranslationIds,
-      baseLanguageId = baseLanguage.id,
-    )
+    val baseLanguageTranslationIds =
+      textChangedEntities
+        .filter { it.describingRelations?.get("language")?.entityId == baseLanguage.id }
+        .map { it.entityId }
+    if (baseLanguageTranslationIds.isNotEmpty()) {
+      translationService.setQaChecksStaleForBaseTranslationKeys(
+        translationIds = baseLanguageTranslationIds.toLongArray(),
+        baseLanguageId = baseLanguage.id,
+      )
+    }
   }
 
   private fun getTranslationChangeTargets(

@@ -40,7 +40,6 @@ import io.tolgee.service.queryBuilders.translationViewBuilder.TranslationViewDat
 import io.tolgee.service.translation.SetTranslationTextUtil.Companion.Options
 import io.tolgee.util.nullIfEmpty
 import jakarta.persistence.EntityManager
-import jakarta.persistence.FlushModeType
 import jakarta.persistence.criteria.JoinType
 import jakarta.persistence.criteria.Predicate
 import org.springframework.beans.factory.annotation.Autowired
@@ -667,27 +666,15 @@ class TranslationService(
 
   @Transactional
   fun setQaChecksStale(translationIds: List<Long>) {
-    translationIds.chunked(1000).forEach { chunk ->
-      entityManager
-        .createQuery(
-          "UPDATE Translation t SET t.qaChecksStale = true WHERE t.id IN :ids",
-        ).setParameter("ids", chunk)
-        // Prevent auto-flush when called from BeforeTransactionCompletionProcess (QaActivityListener)
-        .setFlushMode(FlushModeType.COMMIT)
-        .executeUpdate()
+    translationIds.chunked(10_000).forEach { chunk ->
+      translationRepository.setQaChecksStaleByIds(chunk)
     }
   }
 
   @Transactional
   fun setQaChecksStaleByKeyIds(keyIds: List<Long>) {
-    keyIds.chunked(1000).forEach { chunk ->
-      entityManager
-        .createQuery(
-          "UPDATE Translation t SET t.qaChecksStale = true WHERE t.key.id IN :keyIds",
-        ).setParameter("keyIds", chunk)
-        // Prevent auto-flush when called from BeforeTransactionCompletionProcess (QaActivityListener)
-        .setFlushMode(FlushModeType.COMMIT)
-        .executeUpdate()
+    keyIds.chunked(10_000).forEach { chunk ->
+      translationRepository.setQaChecksStaleByKeyIds(chunk)
     }
   }
 
@@ -759,26 +746,10 @@ class TranslationService(
    */
   @Transactional
   fun setQaChecksStaleForBaseTranslationKeys(
-    translationIds: Collection<Long>,
+    translationIds: LongArray,
     baseLanguageId: Long,
   ) {
     if (translationIds.isEmpty()) return
-    translationIds.chunked(1000).forEach { chunk ->
-      entityManager
-        .createQuery(
-          """
-          UPDATE Translation t SET t.qaChecksStale = true
-          WHERE t.key.id IN (
-            SELECT t2.key.id FROM Translation t2
-            WHERE t2.id IN :translationIds AND t2.language.id = :baseLanguageId
-          )
-          AND t.language.id != :baseLanguageId
-          """.trimIndent(),
-        ).setParameter("translationIds", chunk)
-        .setParameter("baseLanguageId", baseLanguageId)
-        // Prevent auto-flush when called from BeforeTransactionCompletionProcess (QaActivityListener)
-        .setFlushMode(FlushModeType.COMMIT)
-        .executeUpdate()
-    }
+    translationRepository.setQaChecksStaleForBaseTranslationKeys(translationIds, baseLanguageId)
   }
 }
