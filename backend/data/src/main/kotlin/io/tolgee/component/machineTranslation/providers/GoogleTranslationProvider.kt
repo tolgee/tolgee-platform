@@ -16,6 +16,24 @@ class GoogleTranslationProvider(
   override val isEnabled: Boolean
     get() = !googleMachineTranslationProperties.apiKey.isNullOrEmpty()
 
+  /**
+   * The Cloud Translation NMT model (used by [Translate]) only recognises `zh-CN`/`zh`
+   * for Simplified and `zh-TW` for Traditional Chinese — the script-based tags
+   * `zh-Hans`/`zh-Hant` are documented for the Translation LLM model, not NMT, and
+   * silently fall back to Simplified when sent to NMT.
+   *
+   * docs: https://cloud.google.com/translate/docs/languages
+   */
+  override fun getSuitableTag(tag: String): String? {
+    if (tag.equals("zh-Hant", ignoreCase = true)) {
+      return super.getSuitableTag("zh-TW")
+    }
+    if (tag.equals("zh-Hans", ignoreCase = true)) {
+      return super.getSuitableTag("zh-CN")
+    }
+    return super.getSuitableTag(tag)
+  }
+
   override fun translateViaProvider(params: ProviderTranslateParams): MtValueProvider.MtResult {
     val result =
       translateService
@@ -53,8 +71,6 @@ class GoogleTranslationProvider(
       "ny",
       "zh-CN",
       "zh-TW",
-      "zh-Hans",
-      "zh-Hant",
       "co",
       "hr",
       "cs",
