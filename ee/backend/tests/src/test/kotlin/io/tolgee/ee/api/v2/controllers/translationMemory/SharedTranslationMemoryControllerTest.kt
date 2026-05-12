@@ -189,7 +189,7 @@ class SharedTranslationMemoryControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `with-stats returns entry count and assigned project names`() {
+  fun `with-stats returns assigned project names`() {
     val result =
       performAuthGet("/v2/organizations/$orgId/translation-memories-with-stats")
         .andIsOk
@@ -203,14 +203,27 @@ class SharedTranslationMemoryControllerTest : AuthorizedControllerTest() {
 
     // Find shared TM by name (array order is not guaranteed)
     val sharedTm = (0 until tms.size()).map { tms[it] }.first { it["name"].asText() == "Shared Marketing TM" }
-    assertThat(sharedTm["entryCount"].asLong()).isEqualTo(2)
     assertThat(sharedTm["assignedProjectNames"].size()).isEqualTo(1)
     assertThat(sharedTm["assignedProjectNames"][0].asText()).isEqualTo("Project With TM")
 
     // Unassigned TM
     val unassigned = (0 until tms.size()).map { tms[it] }.first { it["name"].asText() == "Unassigned Shared TM" }
-    assertThat(unassigned["entryCount"].asLong()).isEqualTo(0)
     assertThat(unassigned["assignedProjectNames"].size()).isEqualTo(0)
+  }
+
+  @Test
+  fun `entry-counts returns counts for requested ids and omits unknown ones`() {
+    val sharedTm = testData.sharedTm
+    val unassigned = testData.unassignedSharedTm
+    val bogusId = 999_999_999L
+
+    performAuthGet(
+      "/v2/organizations/$orgId/translation-memories/entry-counts?ids=${sharedTm.id}&ids=${unassigned.id}&ids=$bogusId",
+    ).andIsOk.andAssertThatJson {
+      node("counts.${sharedTm.id}").isEqualTo(2)
+      node("counts.${unassigned.id}").isEqualTo(0)
+      node("counts.$bogusId").isAbsent()
+    }
   }
 
   @Test

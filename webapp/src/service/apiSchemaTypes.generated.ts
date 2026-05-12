@@ -370,6 +370,7 @@ export type TranslationCommentWithLangKeyDto = components['schemas']['Translatio
 export type TranslationHistoryModel = components['schemas']['TranslationHistoryModel'];
 export type TranslationItemModel = components['schemas']['TranslationItemModel'];
 export type TranslationLabelRequest = components['schemas']['TranslationLabelRequest'];
+export type TranslationMemoryEntryCountsModel = components['schemas']['TranslationMemoryEntryCountsModel'];
 export type TranslationMemoryEntryModel = components['schemas']['TranslationMemoryEntryModel'];
 export type TranslationMemoryItemModel = components['schemas']['TranslationMemoryItemModel'];
 export type TranslationMemoryModel = components['schemas']['TranslationMemoryModel'];

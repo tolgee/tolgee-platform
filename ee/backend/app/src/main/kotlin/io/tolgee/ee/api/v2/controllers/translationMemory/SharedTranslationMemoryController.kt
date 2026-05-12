@@ -11,12 +11,14 @@ import io.tolgee.ee.api.v2.hateoas.assemblers.translationMemory.TranslationMemor
 import io.tolgee.ee.api.v2.hateoas.assemblers.translationMemory.TranslationMemoryWithStatsModelAssembler
 import io.tolgee.ee.api.v2.hateoas.model.translationMemory.SimpleTranslationMemoryModel
 import io.tolgee.ee.api.v2.hateoas.model.translationMemory.TmAssignedProjectModel
+import io.tolgee.ee.api.v2.hateoas.model.translationMemory.TranslationMemoryEntryCountsModel
 import io.tolgee.ee.api.v2.hateoas.model.translationMemory.TranslationMemoryModel
 import io.tolgee.ee.api.v2.hateoas.model.translationMemory.TranslationMemoryWithStatsModel
 import io.tolgee.ee.data.translationMemory.CreateSharedTranslationMemoryRequest
 import io.tolgee.ee.data.translationMemory.UpdateProjectTmSettingsRequest
 import io.tolgee.ee.data.translationMemory.UpdateSharedTranslationMemoryRequest
 import io.tolgee.ee.service.translationMemory.SharedTranslationMemoryService
+import io.tolgee.ee.service.translationMemory.TranslationMemoryEntryManagementService
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.translationMemory.TranslationMemory
 import io.tolgee.model.translationMemory.TranslationMemoryWithStats
@@ -49,6 +51,7 @@ import org.springframework.web.bind.annotation.RestController
 @Tag(name = "Translation Memory")
 class SharedTranslationMemoryController(
   private val sharedTranslationMemoryService: SharedTranslationMemoryService,
+  private val translationMemoryEntryManagementService: TranslationMemoryEntryManagementService,
   private val translationMemoryModelAssembler: TranslationMemoryModelAssembler,
   private val simpleTranslationMemoryModelAssembler: SimpleTranslationMemoryModelAssembler,
   private val translationMemoryWithStatsModelAssembler: TranslationMemoryWithStatsModelAssembler,
@@ -171,6 +174,29 @@ class SharedTranslationMemoryController(
     val page =
       sharedTranslationMemoryService.findAllWithStatsPaged(organizationHolder.organization.id, pageable, search, type)
     return pagedWithStatsAssembler.toModel(page, translationMemoryWithStatsModelAssembler)
+  }
+
+  @GetMapping("/translation-memories/entry-counts")
+  @Operation(
+    summary = "Get entry counts for a set of translation memories",
+    description =
+      "Returns the entry count for each requested TM id (stored + virtual). Unknown ids are " +
+        "omitted from the response. Separate from the list endpoint so the list can render " +
+        "without waiting on the per-TM virtual-row aggregation.",
+  )
+  @AllowApiAccess(AuthTokenType.ONLY_PAT)
+  @UseDefaultPermissions
+  @RequiresFeatures(Feature.TRANSLATION_MEMORY)
+  fun getEntryCounts(
+    @PathVariable organizationId: Long,
+    @RequestParam("ids") ids: List<Long>,
+  ): TranslationMemoryEntryCountsModel {
+    val counts =
+      translationMemoryEntryManagementService.getEntryCounts(
+        organizationHolder.organization.id,
+        ids,
+      )
+    return TranslationMemoryEntryCountsModel(counts = counts)
   }
 
   @GetMapping("/translation-memories/{translationMemoryId:[0-9]+}/assigned-projects")

@@ -79,10 +79,14 @@ const StyledNameText = styled(Typography)`
 
 type Props = {
   translationMemory: TranslationMemoryWithStatsModel;
+  // Undefined while the batch entry-counts request is still loading; the row renders
+  // an em-dash placeholder until it resolves.
+  entryCount: number | undefined;
 };
 
 export const TranslationMemoryListItem: React.VFC<Props> = ({
   translationMemory,
+  entryCount,
 }) => {
   const { t } = useTranslate();
   const history = useHistory();
@@ -149,11 +153,15 @@ export const TranslationMemoryListItem: React.VFC<Props> = ({
           color="text.secondary"
           data-cy="translation-memory-list-entries-count"
         >
-          <T
-            keyName="translation_memory_list_entries_count"
-            defaultValue="{count, plural, one {# entry} other {# entries}}"
-            params={{ count: translationMemory.entryCount }}
-          />
+          {entryCount === undefined ? (
+            '—'
+          ) : (
+            <T
+              keyName="translation_memory_list_entries_count"
+              defaultValue="{count, plural, one {# entry} other {# entries}}"
+              params={{ count: entryCount }}
+            />
+          )}
         </Typography>
       </StyledName>
       <StyledProjects>

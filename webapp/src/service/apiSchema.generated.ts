@@ -318,6 +318,10 @@ export interface paths {
   "/v2/organizations/{organizationId}/translation-memories-with-stats": {
     get: operations["getAllWithStats"];
   };
+  "/v2/organizations/{organizationId}/translation-memories/entry-counts": {
+    /** Returns the entry count for each requested TM id (stored + virtual). Unknown ids are omitted from the response. Separate from the list endpoint so the list can render without waiting on the per-TM virtual-row aggregation. */
+    get: operations["getEntryCounts"];
+  };
   "/v2/organizations/{organizationId}/translation-memories/{translationMemoryId}": {
     get: operations["get_13"];
     put: operations["update_8"];
@@ -7137,6 +7141,10 @@ export interface components {
       /** Format: int64 */
       languageId: number;
     };
+    TranslationMemoryEntryCountsModel: {
+      /** @description Entry counts keyed by translation memory id. TM ids not visible to the caller are omitted from the response. */
+      counts: { [key: string]: number };
+    };
     TranslationMemoryEntryModel: {
       /**
        * Format: int64
@@ -7254,11 +7262,6 @@ export interface components {
        * @description Default penalty (0–100) subtracted from match scores unless an assignment overrides it.
        */
       defaultPenalty: number;
-      /**
-       * Format: int64
-       * @description Total number of entries in this translation memory
-       */
-      entryCount: number;
       /** Format: int64 */
       id: number;
       name: string;
@@ -11931,6 +11934,49 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["PagedModelTranslationMemoryWithStatsModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  /** Returns the entry count for each requested TM id (stored + virtual). Unknown ids are omitted from the response. Separate from the list endpoint so the list can render without waiting on the per-TM virtual-row aggregation. */
+  getEntryCounts: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+      query: {
+        ids: number[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TranslationMemoryEntryCountsModel"];
         };
       };
       /** Bad Request */

@@ -214,21 +214,20 @@ class TranslationMemoryEntryManagementService(
       'virtual' as kind,
       p.id::text || ':' || k.name as origin_id
     from project p
-    join language base_lang on base_lang.id = p.base_language_id
     join key k on k.project_id = p.id and k.deleted_at is null
     left join branch b on b.id = k.branch_id
-    join translation base_t on base_t.key_id = k.id and base_t.language_id = base_lang.id
+    -- Reference p.base_language_id directly so PG can pick the (key_id, language_id)
+    -- unique index for base_t and target_t — joining `language` separately makes the
+    -- planner choose the key_id-only index and filter language at the join level.
+    join translation base_t on base_t.key_id = k.id and base_t.language_id = p.base_language_id
     where p.id = any(:projectIds)
       and p.deleted_at is null
       and base_t.text is not null and base_t.text <> ''
       and (b.id is null or b.is_default = true)
       and exists (
-        -- EXISTS keeps the join row count at ~|keys| instead of |keys| × |target_langs|.
-        -- The search filter must still match a target inside the same bucket, so it lives
-        -- here alongside the language/state filters.
         select 1 from translation target_t
         where target_t.key_id = k.id
-          and target_t.language_id <> base_lang.id
+          and target_t.language_id <> p.base_language_id
           and target_t.text is not null and target_t.text <> ''
           and (not :writeOnlyReviewed or target_t.state = 2)
           and (
@@ -517,6 +516,95 @@ class TranslationMemoryEntryManagementService(
         )
     }
     return totalDeleted
+  }
+
+  fun getEntryCount(
+    organizationId: Long,
+    translationMemoryId: Long,
+  ): Long {
+    val tm = requireTmInOrganization(organizationId, translationMemoryId)
+    val writeProjectIds = writeAccessProjectIds(tm.id)
+    return countRows(tm.id, writeProjectIds, tm.writeOnlyReviewed, search = null)
+  }
+
+  /**
+   * Counts entries for many TMs in one query. Returns a map keyed by TM id; ids the caller
+   * isn't allowed to read (different org, deleted) are dropped.
+   *
+   * The stored half groups `translation_memory_entry` by `(tm_id, source_text, tuid-or-"manual")`
+   * and counts groups per tm_id. The virtual half scans every write-access-assigned project
+   * once and groups by `(tm_id, source_text, project_id, key_name)` — shared scans across TMs
+   * that overlap on projects.
+   */
+  fun getEntryCounts(
+    organizationId: Long,
+    translationMemoryIds: List<Long>,
+  ): Map<Long, Long> {
+    if (translationMemoryIds.isEmpty()) return emptyMap()
+    val visibleIds =
+      translationMemoryRepository
+        .findIdsInOrganization(organizationId, translationMemoryIds)
+        .toSet()
+    if (visibleIds.isEmpty()) return emptyMap()
+
+    val sql =
+      """
+      with stored as (
+        select e.translation_memory_id as tm_id, count(*) as cnt
+        from (
+          select translation_memory_id, source_text, coalesce(tuid, 'manual') as bucket
+          from translation_memory_entry
+          where translation_memory_id = any(:tmIds)
+          group by translation_memory_id, source_text, coalesce(tuid, 'manual')
+        ) e
+        group by e.translation_memory_id
+      ),
+      virtual as (
+        select tm.id as tm_id, count(*) as cnt
+        from (
+          select tm.id, base_t.text, p.id as project_id, k.name
+          from translation_memory tm
+          join translation_memory_project tmp
+            on tmp.translation_memory_id = tm.id and tmp.write_access = true
+          join project p on p.id = tmp.project_id and p.deleted_at is null
+          join key k on k.project_id = p.id and k.deleted_at is null
+          left join branch b on b.id = k.branch_id
+          join translation base_t on base_t.key_id = k.id
+                                 and base_t.language_id = p.base_language_id
+          where tm.id = any(:tmIds)
+            and base_t.text is not null and base_t.text <> ''
+            and (b.id is null or b.is_default = true)
+            and exists (
+              select 1 from translation target_t
+              where target_t.key_id = k.id
+                and target_t.language_id <> p.base_language_id
+                and target_t.text is not null and target_t.text <> ''
+                and (not tm.write_only_reviewed or target_t.state = 2)
+            )
+          group by tm.id, base_t.text, p.id, k.name
+        ) tm
+        group by tm.id
+      )
+      select tm_id, sum(cnt) as cnt
+      from (
+        select tm_id, cnt from stored
+        union all
+        select tm_id, cnt from virtual
+      ) combined
+      group by tm_id
+      """.trimIndent()
+
+    @Suppress("UNCHECKED_CAST")
+    val rows =
+      entityManager
+        .createNativeQuery(sql)
+        .setParameter("tmIds", visibleIds.toTypedArray())
+        .resultList as List<Array<Any?>>
+
+    val byId = rows.associate { (it[0] as Number).toLong() to (it[1] as Number).toLong() }
+    // TMs with zero entries are absent from both CTEs — surface them as 0 explicitly so the
+    // caller distinguishes "not visible" (omitted) from "visible but empty" (0).
+    return visibleIds.associateWith { byId[it] ?: 0L }
   }
 
   private fun requireTmInOrganization(

@@ -65,6 +65,20 @@ export const TranslationMemoriesListView = () => {
   });
 
   const items = tms?.data?._embedded?.translationMemories;
+  const itemIds = items?.map((tm) => tm.id) ?? [];
+
+  const entryCounts = useApiQuery({
+    url: '/v2/organizations/{organizationId}/translation-memories/entry-counts',
+    method: 'get',
+    path: { organizationId: organization!.id },
+    query: { ids: itemIds },
+    options: {
+      enabled: featureEnabled && itemIds.length > 0,
+      keepPreviousData: true,
+    },
+  });
+
+  const countsById = entryCounts.data?.counts;
 
   const onCreate = () => {
     setCreateDialogOpen(true);
@@ -191,6 +205,7 @@ export const TranslationMemoriesListView = () => {
                     <TranslationMemoryListItem
                       key={tm.id}
                       translationMemory={tm}
+                      entryCount={countsById?.[tm.id]}
                     />
                   )}
                   emptyPlaceholder={

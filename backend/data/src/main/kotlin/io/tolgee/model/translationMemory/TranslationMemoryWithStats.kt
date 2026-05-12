@@ -12,7 +12,6 @@ interface TranslationMemoryWithStats {
   val name: String
   val sourceLanguageTag: String
   val type: String
-  val entryCount: Long
 
   val assignedProjectNamesCsv: String?
 

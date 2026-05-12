@@ -18,7 +18,6 @@ class TranslationMemoryWithStatsModelAssembler :
       name = entity.name,
       sourceLanguageTag = entity.sourceLanguageTag,
       type = entity.type,
-      entryCount = entity.entryCount,
       assignedProjectNames =
         entity.assignedProjectNamesCsv
           ?.split(",")

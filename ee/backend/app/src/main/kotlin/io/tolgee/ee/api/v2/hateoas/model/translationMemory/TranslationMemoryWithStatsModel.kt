@@ -15,8 +15,6 @@ class TranslationMemoryWithStatsModel(
   val sourceLanguageTag: String,
   @Schema(description = "PROJECT or SHARED", example = "SHARED")
   val type: String,
-  @Schema(description = "Total number of entries in this translation memory")
-  val entryCount: Long,
   @Schema(description = "Names of all assigned projects (size = total assignment count)")
   val assignedProjectNames: List<String>,
   @Schema(
