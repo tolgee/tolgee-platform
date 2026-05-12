@@ -1,5 +1,6 @@
 package io.tolgee.service.translationMemory
 
+import io.tolgee.Metrics
 import io.tolgee.model.Language
 import io.tolgee.model.key.Key
 import io.tolgee.model.views.TranslationMemoryItemView
@@ -15,13 +16,30 @@ import org.springframework.stereotype.Component
 @Component
 class TmAutoTranslateProviderOssImpl(
   private val translationMemoryService: TranslationMemoryService,
+  private val metrics: Metrics,
 ) : TmAutoTranslateProvider {
   override fun getAutoTranslatedValue(
     key: Key,
     targetLanguage: Language,
-  ): TranslationMemoryItemView? =
-    translationMemoryService
-      .getSuggestions(key, targetLanguage.tag, PageRequest.of(0, 1))
-      .content
-      .firstOrNull()
+  ): TranslationMemoryItemView? {
+    val startedAt = System.currentTimeMillis()
+    return try {
+      val result =
+        translationMemoryService
+          .getSuggestions(key, targetLanguage.tag, PageRequest.of(0, 1))
+          .content
+          .firstOrNull()
+      metrics.recordTranslationMemoryLookup(
+        outcome = if (result != null) "hit" else "miss",
+        durationMs = System.currentTimeMillis() - startedAt,
+      )
+      result
+    } catch (e: Exception) {
+      metrics.recordTranslationMemoryLookup(
+        outcome = "error",
+        durationMs = System.currentTimeMillis() - startedAt,
+      )
+      throw e
+    }
+  }
 }
