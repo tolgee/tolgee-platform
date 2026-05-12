@@ -92,7 +92,7 @@ class QaBaseChangeRecheckTest : AuthorizedControllerTest() {
 
     val baseLanguage = languageService.getProjectBaseLanguage(testData.project.id)
     translationService.setQaChecksStaleForBaseTranslationKeys(
-      translationIds = listOf(testData.enTranslation.id),
+      translationIds = longArrayOf(testData.enTranslation.id),
       baseLanguageId = baseLanguage.id,
     )
     entityManager.flushAndClear()
@@ -113,7 +113,7 @@ class QaBaseChangeRecheckTest : AuthorizedControllerTest() {
     val baseLanguage = languageService.getProjectBaseLanguage(testData.project.id)
     // Only FR (non-base) in input — no siblings should be marked
     translationService.setQaChecksStaleForBaseTranslationKeys(
-      translationIds = listOf(testData.frTranslation.id),
+      translationIds = longArrayOf(testData.frTranslation.id),
       baseLanguageId = baseLanguage.id,
     )
     entityManager.flushAndClear()
@@ -134,7 +134,7 @@ class QaBaseChangeRecheckTest : AuthorizedControllerTest() {
 
     val baseLanguage = languageService.getProjectBaseLanguage(testData.project.id)
     translationService.setQaChecksStaleForBaseTranslationKeys(
-      translationIds = listOf(testData.enTranslation.id),
+      translationIds = longArrayOf(testData.enTranslation.id),
       baseLanguageId = baseLanguage.id,
     )
     entityManager.flushAndClear()
