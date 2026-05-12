@@ -19,15 +19,7 @@ class UpdateSharedTranslationMemoryRequest {
   @field:Pattern(regexp = "^[^,]*$", message = "can not contain comma")
   var sourceLanguageTag: String = ""
 
-  @Schema(description = "IDs of projects to assign the TM to. Replaces existing assignments.")
-  @Deprecated("Use assignedProjects instead")
-  var assignedProjectIds: Set<Long>? = null
-
-  @Schema(
-    description =
-      "Project assignments with access settings. Replaces existing assignments. " +
-        "Takes precedence over assignedProjectIds.",
-  )
+  @Schema(description = "Project assignments with access settings. Replaces existing assignments.")
   var assignedProjects: List<ProjectAssignmentDto>? = null
 
   @Schema(

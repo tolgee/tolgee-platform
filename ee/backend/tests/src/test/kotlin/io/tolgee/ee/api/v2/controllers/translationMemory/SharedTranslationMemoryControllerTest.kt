@@ -4,6 +4,7 @@ import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.TranslationMemoryTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.data.translationMemory.CreateSharedTranslationMemoryRequest
+import io.tolgee.ee.data.translationMemory.ProjectAssignmentDto
 import io.tolgee.ee.data.translationMemory.UpdateSharedTranslationMemoryRequest
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
@@ -314,7 +315,7 @@ class SharedTranslationMemoryControllerTest : AuthorizedControllerTest() {
       CreateSharedTranslationMemoryRequest().apply {
         name = "TM With Projects"
         sourceLanguageTag = "en"
-        assignedProjectIds = setOf(projectId)
+        assignedProjects = listOf(ProjectAssignmentDto().apply { this.projectId = projectId })
       }
     performAuthPost("/v2/organizations/$orgId/translation-memories", request)
       .andIsOk
@@ -352,7 +353,7 @@ class SharedTranslationMemoryControllerTest : AuthorizedControllerTest() {
       CreateSharedTranslationMemoryRequest().apply {
         name = "Priority Test TM"
         sourceLanguageTag = "en"
-        assignedProjectIds = setOf(projectId)
+        assignedProjects = listOf(ProjectAssignmentDto().apply { this.projectId = projectId })
       }
     performAuthPost("/v2/organizations/$orgId/translation-memories", request).andIsOk
 

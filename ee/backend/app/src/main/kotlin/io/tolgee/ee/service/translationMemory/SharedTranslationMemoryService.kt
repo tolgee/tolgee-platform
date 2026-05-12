@@ -93,7 +93,7 @@ class SharedTranslationMemoryService(
       )
     tm.organizationOwner = organization
     val saved = translationMemoryRepository.save(tm)
-    resolveAndApplyAssignments(saved, organization.id, dto.assignedProjects, dto.assignedProjectIds)
+    resolveAndApplyAssignments(saved, organization.id, dto.assignedProjects)
     return saved
   }
 
@@ -131,7 +131,7 @@ class SharedTranslationMemoryService(
     tm.sourceLanguageTag = dto.sourceLanguageTag
     tm.defaultPenalty = dto.defaultPenalty ?: 0
     tm.writeOnlyReviewed = dto.writeOnlyReviewed ?: false
-    resolveAndApplyAssignments(tm, organizationId, dto.assignedProjects, dto.assignedProjectIds)
+    resolveAndApplyAssignments(tm, organizationId, dto.assignedProjects)
     return translationMemoryRepository.save(tm)
   }
 
@@ -155,25 +155,9 @@ class SharedTranslationMemoryService(
     tm: TranslationMemory,
     organizationId: Long,
     assignedProjects: List<ProjectAssignmentDto>?,
-    assignedProjectIds: Set<Long>?,
   ) {
-    // assignedProjects takes precedence over assignedProjectIds
-    if (assignedProjects != null) {
-      updateAssignedProjectsWithAccess(tm, organizationId, assignedProjects)
-      return
-    }
-    val ids = assignedProjectIds ?: return
-    updateAssignedProjectsWithAccess(
-      tm,
-      organizationId,
-      ids.map { id ->
-        ProjectAssignmentDto().apply {
-          projectId = id
-          readAccess = true
-          writeAccess = true
-        }
-      },
-    )
+    if (assignedProjects == null) return
+    updateAssignedProjectsWithAccess(tm, organizationId, assignedProjects)
   }
 
   private fun updateAssignedProjectsWithAccess(

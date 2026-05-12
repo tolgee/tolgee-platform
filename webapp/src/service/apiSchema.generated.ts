@@ -2576,12 +2576,7 @@ export interface components {
       tokenUri: string;
     };
     CreateSharedTranslationMemoryRequest: {
-      /**
-       * @deprecated
-       * @description IDs of projects to assign the TM to (with default read+write access)
-       */
-      assignedProjectIds?: number[];
-      /** @description Project assignments with access settings. Takes precedence over assignedProjectIds. */
+      /** @description Project assignments with access settings. */
       assignedProjects?: components["schemas"]["ProjectAssignmentDto"][];
       /**
        * Format: int32
@@ -7504,12 +7499,7 @@ export interface components {
       writeAccess: boolean;
     };
     UpdateSharedTranslationMemoryRequest: {
-      /**
-       * @deprecated
-       * @description IDs of projects to assign the TM to. Replaces existing assignments.
-       */
-      assignedProjectIds?: number[];
-      /** @description Project assignments with access settings. Replaces existing assignments. Takes precedence over assignedProjectIds. */
+      /** @description Project assignments with access settings. Replaces existing assignments. */
       assignedProjects?: components["schemas"]["ProjectAssignmentDto"][];
       /**
        * Format: int32
