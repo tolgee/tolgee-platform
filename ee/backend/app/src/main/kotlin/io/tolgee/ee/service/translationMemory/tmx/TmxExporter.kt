@@ -20,7 +20,6 @@ class TmxExporter(
     writer.writeAttribute("version", "1.4")
     writer.writeCharacters("\n  ")
 
-    // Header
     writer.writeEmptyElement("header")
     writer.writeAttribute("creationtool", "Tolgee")
     writer.writeAttribute("creationtoolversion", "1.0")
@@ -29,10 +28,10 @@ class TmxExporter(
     writer.writeAttribute("srclang", sourceLanguageTag)
     writer.writeCharacters("\n  ")
 
-    // Body
     writer.writeStartElement("body")
 
-    // Group by tuid if available, otherwise by sourceText
+    // Group by tuid when present, falling back to sourceText so entries without a tuid still
+    // share a single <tu>.
     val grouped = entries.groupBy { it.tuid ?: "auto:${it.sourceText}" }
     var autoTuid = 1
     for ((groupKey, entryGroup) in grouped) {
@@ -42,10 +41,8 @@ class TmxExporter(
       writer.writeAttribute("tuid", tuidValue)
       val sourceText = entryGroup.first().sourceText
 
-      // Source tuv
       writeTuv(writer, sourceLanguageTag, sourceText)
 
-      // Target tuvs
       for (entry in entryGroup) {
         writeTuv(writer, entry.targetLanguageTag, entry.targetText)
       }

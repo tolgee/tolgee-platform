@@ -1,8 +1,6 @@
 import { gcy } from '../../common/shared';
 
 export class E2TranslationMemoryView {
-  // --- Header ---
-
   getSubtitle() {
     return gcy('tm-content-subtitle');
   }
@@ -10,8 +8,6 @@ export class E2TranslationMemoryView {
   getListHeader() {
     return gcy('tm-entries-header');
   }
-
-  // --- Search ---
 
   search(text: string) {
     gcy('global-list-search').find('input').clear().type(text);
@@ -21,8 +17,6 @@ export class E2TranslationMemoryView {
     gcy('global-list-search').find('input').clear();
   }
 
-  // --- Layout toggle ---
-
   switchToFlat() {
     gcy('tm-entries-layout-flat').click();
   }
@@ -30,8 +24,6 @@ export class E2TranslationMemoryView {
   switchToStacked() {
     gcy('tm-entries-layout-stacked').click();
   }
-
-  // --- Entries ---
 
   getEntryRows() {
     return gcy('translation-memory-entry-row');
@@ -76,8 +68,6 @@ export class E2TranslationMemoryView {
     cy.get('[role="dialog"]').contains('button', 'Confirm').click();
   }
 
-  // --- Create entry dialog ---
-
   openCreateEntryDialog() {
     gcy('global-plus-button').click();
     gcy('tm-create-entry-dialog').should('be.visible');
@@ -99,11 +89,6 @@ export class E2TranslationMemoryView {
     gcy('tm-entry-create-submit').click();
     gcy('tm-create-entry-dialog').should('not.exist');
   }
-
-  // --- Import / Export ---
-  // The import button opens the TMX import dialog directly — there used to be a menu when
-  // a second source ("Copy from a project") existed, but only TMX remains, so it's a plain
-  // button now.
 
   getImportButton() {
     return gcy('tm-import-menu-button');
@@ -138,8 +123,6 @@ export class E2TranslationMemoryView {
     gcy('tm-import-submit').click();
     gcy('tm-import-dialog').should('not.exist');
   }
-
-  // --- Empty-state wizard ---
 
   getEmptyWizard() {
     return gcy('tm-empty-wizard');

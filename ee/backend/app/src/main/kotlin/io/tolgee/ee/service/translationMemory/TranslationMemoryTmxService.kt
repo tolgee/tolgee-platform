@@ -34,7 +34,6 @@ class TranslationMemoryTmxService(
 
     val existingEntries = translationMemoryEntryRepository.findByTranslationMemoryId(tm.id)
 
-    // Index existing entries by (tuid, targetLanguageTag) for conflict resolution
     val existingByTuidAndLang =
       existingEntries
         .filter { it.tuid != null }
@@ -50,12 +49,10 @@ class TranslationMemoryTmxService(
       val tuid = entry.tuid
 
       if (tuid != null) {
-        // Entry has a tuid — check for conflict
         val conflictKey = Pair(tuid, entry.targetLanguageTag)
         val existing = existingByTuidAndLang[conflictKey]
 
         if (existing != null) {
-          // Conflict: same tuid + same target language
           if (overrideExisting) {
             if (existing.targetText == entry.targetText && existing.sourceText == entry.sourceText) {
               skippedTuids.add(tuid)
@@ -66,16 +63,13 @@ class TranslationMemoryTmxService(
               updatedTuids.add(tuid)
             }
           } else {
-            // Keep existing
             skippedTuids.add(tuid)
           }
         } else {
-          // No conflict — create
           toSave.add(createEntry(tm, entry))
           createdTuids.add(tuid)
         }
       } else {
-        // No tuid — always create
         toSave.add(createEntry(tm, entry))
         createdTuids.add(null)
       }
@@ -85,7 +79,7 @@ class TranslationMemoryTmxService(
       translationMemoryEntryRepository.saveAll(toSave)
     }
 
-    // Count by distinct tuids (translation units)
+    // Count by distinct tuids — null tuid is treated as one bucket.
     val created = createdTuids.size
     val updated = (updatedTuids - createdTuids).size
     val skipped = (skippedTuids - createdTuids - updatedTuids).size

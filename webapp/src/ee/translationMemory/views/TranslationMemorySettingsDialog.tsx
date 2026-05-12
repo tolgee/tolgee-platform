@@ -16,7 +16,6 @@ type Props = {
   onClose: () => void;
   onFinished: () => void;
   translationMemoryId: number;
-  /** Render only the project-assignment section. Used by the empty wizard. */
   projectsOnly?: boolean;
 };
 
@@ -64,10 +63,7 @@ export const TranslationMemorySettingsDialog: React.VFC<Props> = ({
   >(() => {
     if (!tmQuery.data || !assignedProjectsQuery.data) return undefined;
     const tag = tmQuery.data.sourceLanguageTag;
-    // BaseLanguageSelect renders the value via name + flagEmoji on the SelectedLanguageModel.
-    // Populating only `tag` would leave the trigger displaying "undefined". Resolve the
-    // human-readable label and flag through the static languageInfo table — same as the
-    // original (now-removed) settings dialog did.
+    // BaseLanguageSelect renders via name + flagEmoji; tag alone leaves the trigger empty.
     const info = languageInfo[tag];
     return {
       name: tmQuery.data.name,

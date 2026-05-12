@@ -209,8 +209,6 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
   const reactListRef = useRef<ReactList>(null);
   const [tableHeight, setTableHeight] = useState(600);
 
-  // Stretch the scroll area to fill the viewport below the toolbar — same approach Glossary
-  // uses. Resize-observer keeps it correct on window/responsive changes.
   const onResize = useCallback(() => {
     const position = verticalScrollRef.current?.getBoundingClientRect();
     if (position) {
@@ -235,7 +233,6 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
 
   useResizeObserver({ ref: verticalScrollRef, onResize });
 
-  // Language selector
   const [langSearch, setLangSearch] = useState('');
   const [langSearchDebounced] = useDebounce(
     langSearch,
@@ -299,7 +296,6 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
     }
   };
 
-  // Languages to render as rows in each entry group
   const displayLanguages = useMemo(() => {
     const allNonBase = (languages ?? [])
       .map((l) => l.tag)

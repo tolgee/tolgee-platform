@@ -41,19 +41,13 @@ class TranslationMemoryManagementService(
     assignment.project = project
     assignment.readAccess = true
     assignment.writeAccess = true
-    // Priority 0 puts the project's own TM at the top; later-assigned shared TMs stack under
-    // it via max+1 in the shared-assignment service.
+    // Priority 0 keeps the project's own TM on top; shared TMs stack under it via max+1.
     assignment.priority = 0
     translationMemoryProjectRepository.save(assignment)
 
     return tm
   }
 
-  /**
-   * Updates the project TM's [TranslationMemory.sourceLanguageTag] to the project's current base
-   * language tag. Called from [io.tolgee.service.project.ProjectService.editProject] when the base
-   * language changes. No entries to rebuild — the content is virtual.
-   */
   @Transactional
   fun updateProjectTmSourceLanguage(projectId: Long) {
     val tm = getProjectTm(projectId) ?: return
@@ -71,23 +65,12 @@ class TranslationMemoryManagementService(
       ?.translationMemory
   }
 
-  /**
-   * Returns all SHARED TM assignments for a project (every assignment whose TM is not the
-   * project's own PROJECT TM). Used when validating base-language changes — the caller must
-   * reject the change if any assigned shared TM's `sourceLanguageTag` would disagree with
-   * the new project base.
-   */
   fun getSharedTmAssignmentsForProject(projectId: Long): List<TranslationMemoryProject> {
     return translationMemoryProjectRepository
       .findByProjectId(projectId)
       .filter { it.translationMemory.type != TranslationMemoryType.PROJECT }
   }
 
-  /**
-   * Keeps the project TM's [TranslationMemory.name] in sync with the owning project's name.
-   * The project TM is created with `name = project.name`; without this, a rename leaves the TM
-   * showing the stale name in the org-level TM list.
-   */
   @Transactional
   fun renameProjectTm(
     projectId: Long,
@@ -99,13 +82,6 @@ class TranslationMemoryManagementService(
     translationMemoryRepository.save(tm)
   }
 
-  /**
-   * Toggles the reviewed-only flag on the project's own TM. Project TMs don't support the
-   * full [io.tolgee.ee.data.translationMemory.UpdateSharedTranslationMemoryRequest] (name,
-   * assignments, and base language are derived from the project) so this narrow setter
-   * exists so project admins can flip this single setting via the project TM settings
-   * dialog without touching the shared-TM endpoint.
-   */
   @Transactional
   fun setProjectTmWriteOnlyReviewed(
     projectId: Long,
@@ -117,13 +93,8 @@ class TranslationMemoryManagementService(
   }
 
   /**
-   * Plan-aware TM-id list for the suggestion path.
-   * - If `Feature.TRANSLATION_MEMORY` is enabled → returns all readable TM IDs (project + shared).
-   * - Otherwise (free plan) → returns only the project's own PROJECT-type TM ID.
-   *
-   * Free plan users get suggestions from their own project TM but do not see shared TM matches.
-   * Pushes the type filter into the query so the free path doesn't hydrate shared assignments
-   * just to throw them away.
+   * Free plan returns only the project's own PROJECT-type TM; paid plans return all readable
+   * TM IDs (project + shared).
    */
   fun getReadableTmIdsForSuggestions(
     projectId: Long,
@@ -137,16 +108,11 @@ class TranslationMemoryManagementService(
     )
   }
 
-  /**
-   * Cleans up TM data when a project is deleted.
-   * Deletes the project's own TM (type=PROJECT) and removes assignments from shared TMs.
-   */
   @Transactional
   fun deleteAllByProject(projectId: Long) {
     val assignments = translationMemoryProjectRepository.findByProjectId(projectId)
     val projectTms = assignments.filter { it.translationMemory.type == TranslationMemoryType.PROJECT }
 
-    // Remove all assignments for this project
     translationMemoryProjectRepository.deleteByProjectId(projectId)
 
     // Delete project-type TMs entirely (entries cascade via DB FK)
