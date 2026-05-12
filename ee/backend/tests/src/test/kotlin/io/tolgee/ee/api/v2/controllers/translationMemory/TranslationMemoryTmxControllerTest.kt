@@ -355,5 +355,4 @@ class TranslationMemoryTmxControllerTest : AuthorizedControllerTest() {
         node("created").isEqualTo(2)
       }
   }
-
 }

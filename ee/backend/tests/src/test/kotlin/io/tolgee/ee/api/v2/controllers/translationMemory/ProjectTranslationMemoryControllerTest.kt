@@ -169,5 +169,4 @@ class ProjectTranslationMemoryControllerTest : ProjectAuthControllerTest("/v2/pr
       AssignSharedTranslationMemoryRequest(),
     ).andIsBadRequest
   }
-
 }
