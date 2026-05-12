@@ -17,8 +17,8 @@ class TranslationMemoryTmxService(
   private val translationMemoryEntryManagementService: TranslationMemoryEntryManagementService,
 ) {
   fun exportTmx(tm: TranslationMemory): ByteArray {
-    val entries = translationMemoryEntryManagementService.findEntriesForTmExport(tm)
-    return TmxExporter(tm.sourceLanguageTag, entries).export()
+    val units = translationMemoryEntryManagementService.findExportUnits(tm)
+    return TmxExporter(tm.sourceLanguageTag, units).export()
   }
 
   @Transactional

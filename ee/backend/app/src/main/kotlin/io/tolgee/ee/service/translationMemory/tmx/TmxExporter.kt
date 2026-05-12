@@ -1,13 +1,12 @@
 package io.tolgee.ee.service.translationMemory.tmx
 
-import io.tolgee.model.translationMemory.TranslationMemoryEntry
 import java.io.ByteArrayOutputStream
 import javax.xml.stream.XMLOutputFactory
 import javax.xml.stream.XMLStreamWriter
 
 class TmxExporter(
   private val sourceLanguageTag: String,
-  private val entries: List<TranslationMemoryEntry>,
+  private val units: List<TmxExportUnit>,
 ) {
   fun export(): ByteArray {
     val out = ByteArrayOutputStream()
@@ -30,21 +29,15 @@ class TmxExporter(
 
     writer.writeStartElement("body")
 
-    // Group by tuid when present, falling back to sourceText so entries without a tuid still
-    // share a single <tu>.
-    val grouped = entries.groupBy { it.tuid ?: "auto:${it.sourceText}" }
     var autoTuid = 1
-    for ((groupKey, entryGroup) in grouped) {
+    for (unit in units) {
       writer.writeCharacters("\n    ")
       writer.writeStartElement("tu")
-      val tuidValue = entryGroup.firstOrNull()?.tuid ?: (autoTuid++).toString()
-      writer.writeAttribute("tuid", tuidValue)
-      val sourceText = entryGroup.first().sourceText
+      writer.writeAttribute("tuid", unit.tuid ?: (autoTuid++).toString())
 
-      writeTuv(writer, sourceLanguageTag, sourceText)
-
-      for (entry in entryGroup) {
-        writeTuv(writer, entry.targetLanguageTag, entry.targetText)
+      writeTuv(writer, sourceLanguageTag, unit.sourceText)
+      for ((lang, text) in unit.translations) {
+        writeTuv(writer, lang, text)
       }
 
       writer.writeCharacters("\n    ")
