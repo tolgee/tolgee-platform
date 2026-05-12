@@ -52,7 +52,8 @@ export const LanguagesSelect: FunctionComponent<Props> = (props) => {
     variant: 'menu',
     PaperProps: {
       style: {
-        width: 250,
+        minWidth: 200,
+        maxWidth: 350,
       },
     },
     id: `language-select-${props.context}-menu`,

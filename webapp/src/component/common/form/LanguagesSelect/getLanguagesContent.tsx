@@ -1,4 +1,10 @@
-import { Checkbox, ListItemText, MenuItem, Divider } from '@mui/material';
+import {
+  Checkbox,
+  ListItemText,
+  MenuItem,
+  Divider,
+  Tooltip,
+} from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
 import { putBaseLangFirst } from 'tg.fixtures/putBaseLangFirst';
@@ -67,16 +73,31 @@ export const getLanguagesContent = ({
   const isBatchOperation = context === 'batch-operations';
 
   const languageItems = languages.map((lang) => (
-    <MenuItem
-      key={lang.tag}
-      value={lang.tag}
-      data-cy="translations-language-select-item"
-      onClick={handleLanguageChange(lang.tag)}
-      disabled={disabledLanguages?.includes(lang.id)}
-    >
-      <Checkbox checked={value?.includes(lang.tag)} size="small" />
-      <ListItemText primary={lang.name} />
-    </MenuItem>
+    <Tooltip key={lang.tag} title={lang.name} placement="right">
+      <MenuItem
+        value={lang.tag}
+        data-cy="translations-language-select-item"
+        onClick={handleLanguageChange(lang.tag)}
+        disabled={disabledLanguages?.includes(lang.id)}
+      >
+        <Checkbox checked={value?.includes(lang.tag)} size="small" />
+        <ListItemText
+          primary={lang.name}
+          sx={{
+            '& .MuiListItemText-primary': {
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              '@media (max-width: 600px)': {
+                whiteSpace: 'normal',
+                textOverflow: 'unset',
+                overflow: 'visible',
+              },
+            },
+          }}
+        />
+      </MenuItem>
+    </Tooltip>
   ));
 
   if (isBatchOperation) {
