@@ -6,6 +6,7 @@ enum class QaCheckType(
   // TEXT category — checks about the quality of the translated text.
   // SPELLING and GRAMMAR are intentionally kept as the last two entries of this group.
   EMPTY_TRANSLATION(QaCheckSeverity.WARNING),
+  MISSING_PLURAL_CATEGORIES(QaCheckSeverity.WARNING),
   CHARACTER_CASE_MISMATCH(QaCheckSeverity.WARNING),
   REPEATED_WORDS(QaCheckSeverity.WARNING),
   PUNCTUATION_MISMATCH(QaCheckSeverity.WARNING),
@@ -34,6 +35,7 @@ enum class QaCheckType(
         QaCheckCategory.TEXT to
           listOf(
             EMPTY_TRANSLATION,
+            MISSING_PLURAL_CATEGORIES,
             CHARACTER_CASE_MISMATCH,
             REPEATED_WORDS,
             PUNCTUATION_MISMATCH,
