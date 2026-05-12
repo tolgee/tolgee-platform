@@ -140,4 +140,5 @@ class TolgeeProperties(
         "\n\n",
   )
   var backEndUrl: String? = null,
+  var orgCounter: OrgCounterProperties = OrgCounterProperties(),
 )

@@ -5348,4 +5348,43 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="dbocharov" id="1778000000000-1">
+        <createTable tableName="organization_usage_counter">
+            <column name="organization_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="organization_usage_counterPK"/>
+            </column>
+            <column name="key_count" type="BIGINT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="translation_count" type="BIGINT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_reconciled_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="dbocharov" id="1778000000000-2">
+        <addForeignKeyConstraint baseColumnNames="organization_id"
+                                 baseTableName="organization_usage_counter"
+                                 constraintName="FK_organization_usage_counter_organization"
+                                 onDelete="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="organization"
+                                 validate="true"/>
+    </changeSet>
+    <changeSet author="bdshadow" id="1778000000000-3">
+        <comment>
+            Backfill organization_usage_counter for existing organizations.
+            Tested on production data: runs in under a minute (~36s)
+        </comment>
+        <sqlFile path="db/changelog/organizationUsageCounterBackfill.sql" relativeToChangelogFile="false"/>
+        <rollback>
+            <sql>DELETE FROM organization_usage_counter;</sql>
+        </rollback>
+    </changeSet>
 </databaseChangeLog>
