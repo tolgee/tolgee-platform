@@ -81,10 +81,6 @@ export class E2TranslationMemoryView {
     gcy('tm-entry-target-text').eq(index).find('textarea').first().type(text);
   }
 
-  addLanguage() {
-    gcy('tm-entry-add-language').click();
-  }
-
   submitCreateEntry() {
     gcy('tm-entry-create-submit').click();
     gcy('tm-create-entry-dialog').should('not.exist');

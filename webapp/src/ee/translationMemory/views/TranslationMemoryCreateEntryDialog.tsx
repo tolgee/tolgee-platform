@@ -2,10 +2,11 @@ import React, { useEffect, useState } from 'react';
 import {
   Box,
   Button,
+  Checkbox,
   Dialog,
   DialogContent,
   DialogTitle,
-  IconButton,
+  ListItemText,
   MenuItem,
   Select,
   styled,
@@ -15,7 +16,6 @@ import { T, useTranslate } from '@tolgee/react';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { messageService } from 'tg.service/MessageService';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { XClose, Plus } from '@untitled-ui/icons-react';
 import { languageInfo } from '@tginternal/language-util/lib/generated/languageInfo';
 import { LanguageHeading } from 'tg.component/languages/LanguageHeading';
 
@@ -24,12 +24,6 @@ const StyledActions = styled('div')`
   gap: 8px;
   padding-top: 16px;
   justify-content: end;
-`;
-
-const StyledLangRow = styled('div')`
-  display: flex;
-  gap: ${({ theme }) => theme.spacing(1)};
-  align-items: flex-start;
 `;
 
 // 14px label that hosts the LanguageHeading (flag + name with bold-when-base) so
@@ -45,10 +39,12 @@ const StyledLangLabel = styled('div')`
   margin-bottom: 4px;
 `;
 
-type TargetEntry = {
-  languageTag: string;
-  text: string;
-};
+const StyledDialogTitle = styled(DialogTitle)`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+`;
 
 type Props = {
   open: boolean;
@@ -57,8 +53,16 @@ type Props = {
   organizationId: number;
   translationMemoryId: number;
   sourceLanguageTag: string;
-  availableLanguages: string[];
+  // Full org language tag list (minus source). The header multi-select offers any of these
+  // as a target.
+  allLanguageTags: string[];
+  // Up-to-2 tags to pre-select. Empty array → dialog falls back to the first 2 of
+  // `allLanguageTags`.
+  initialSelectedTags: string[];
 };
+
+const defaultPreselection = (initial: string[], all: string[]) =>
+  (initial.length > 0 ? initial : all).slice(0, 2);
 
 export const TranslationMemoryCreateEntryDialog: React.VFC<Props> = ({
   open,
@@ -67,26 +71,30 @@ export const TranslationMemoryCreateEntryDialog: React.VFC<Props> = ({
   organizationId,
   translationMemoryId,
   sourceLanguageTag,
-  availableLanguages,
+  allLanguageTags,
+  initialSelectedTags,
 }) => {
   const { t } = useTranslate();
   const [sourceText, setSourceText] = useState('');
-  const [targets, setTargets] = useState<TargetEntry[]>(() =>
-    availableLanguages.length > 0
-      ? [{ languageTag: availableLanguages[0], text: '' }]
-      : []
+  const [selectedTags, setSelectedTags] = useState<string[]>(() =>
+    defaultPreselection(initialSelectedTags, allLanguageTags)
   );
+  // Keyed by lang tag so toggling a lang off and back on within one dialog session keeps
+  // whatever the user typed. The save path filters to `selectedTags` so unselected text is
+  // dropped on submit.
+  const [textByTag, setTextByTag] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
 
-  // If the dialog was mounted before the org languages finished loading,
-  // `availableLanguages` was empty and `targets` initialized to []. Once
-  // languages arrive, seed the first target so the user has something to
-  // type into. Empty entries should never be the steady state.
+  // If the dialog mounts before org languages finish loading, `allLanguageTags` is empty
+  // and `selectedTags` initialises to []. Seed once languages arrive so the user has at
+  // least one input. Empty selection should never be the steady state on open.
   useEffect(() => {
-    if (targets.length === 0 && availableLanguages.length > 0) {
-      setTargets([{ languageTag: availableLanguages[0], text: '' }]);
+    if (selectedTags.length === 0 && allLanguageTags.length > 0) {
+      setSelectedTags(
+        defaultPreselection(initialSelectedTags, allLanguageTags)
+      );
     }
-  }, [availableLanguages, targets.length]);
+  }, [allLanguageTags, initialSelectedTags, selectedTags.length]);
 
   const createMutation = useApiMutation({
     url: '/v2/organizations/{organizationId}/translation-memories/{translationMemoryId}/entries',
@@ -94,49 +102,31 @@ export const TranslationMemoryCreateEntryDialog: React.VFC<Props> = ({
     invalidatePrefix: '/v2/organizations/{organizationId}/translation-memories',
   });
 
-  const updateTarget = (index: number, text: string) => {
-    setTargets((prev) =>
-      prev.map((t, i) => (i === index ? { ...t, text } : t))
-    );
+  const updateText = (tag: string, text: string) => {
+    setTextByTag((prev) => ({ ...prev, [tag]: text }));
   };
 
-  const removeTarget = (index: number) => {
-    setTargets((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const addTarget = () => {
-    const usedTags = targets.map((t) => t.languageTag);
-    const nextTag = availableLanguages.find((t) => !usedTags.includes(t));
-    if (nextTag) {
-      setTargets((prev) => [...prev, { languageTag: nextTag, text: '' }]);
-    }
-  };
-
-  const changeLanguage = (index: number, tag: string) => {
-    setTargets((prev) =>
-      prev.map((t, i) => (i === index ? { ...t, languageTag: tag } : t))
-    );
-  };
-
-  const usedTags = targets.map((t) => t.languageTag);
-  const canAddMore = availableLanguages.some((t) => !usedTags.includes(t));
   const canSave =
-    sourceText.trim() && targets.some((t) => t.text.trim()) && !saving;
+    sourceText.trim().length > 0 &&
+    selectedTags.some((tag) => textByTag[tag]?.trim()) &&
+    !saving;
 
   const handleSave = async () => {
-    const nonEmpty = targets.filter((t) => t.text.trim());
-    if (!sourceText.trim() || nonEmpty.length === 0) return;
+    const payload = selectedTags
+      .map((tag) => ({ tag, text: textByTag[tag]?.trim() ?? '' }))
+      .filter((entry) => entry.text.length > 0);
+    if (!sourceText.trim() || payload.length === 0) return;
 
     setSaving(true);
     try {
-      for (const target of nonEmpty) {
+      for (const entry of payload) {
         await createMutation.mutateAsync({
           path: { organizationId, translationMemoryId },
           content: {
             'application/json': {
               sourceText: sourceText.trim(),
-              targetLanguageTag: target.languageTag,
-              targetText: target.text.trim(),
+              targetLanguageTag: entry.tag,
+              targetText: entry.text,
             },
           },
         });
@@ -172,12 +162,60 @@ export const TranslationMemoryCreateEntryDialog: React.VFC<Props> = ({
       maxWidth="sm"
       fullWidth
     >
-      <DialogTitle>
+      <StyledDialogTitle>
         <T
           keyName="translation_memory_create_entry_title"
           defaultValue="New entry"
         />
-      </DialogTitle>
+        <Select
+          multiple
+          size="small"
+          value={selectedTags}
+          onChange={(e) => {
+            const next = e.target.value;
+            setSelectedTags(typeof next === 'string' ? next.split(',') : next);
+          }}
+          displayEmpty
+          data-cy="tm-entry-language-multiselect"
+          sx={{ minWidth: 180, fontSize: 14 }}
+          renderValue={(selected) => {
+            if (selected.length === 0) {
+              return t(
+                'translation_memory_entry_languages_none',
+                'No languages'
+              );
+            }
+            return t(
+              'translation_memory_entry_languages_count',
+              '{count, plural, one {# language} other {# languages}}',
+              { count: selected.length }
+            );
+          }}
+        >
+          {allLanguageTags.map((tag) => {
+            const li = languageInfo[tag];
+            return (
+              <MenuItem
+                key={tag}
+                value={tag}
+                data-cy="tm-entry-language-multiselect-item"
+              >
+                <Checkbox checked={selectedTags.includes(tag)} size="small" />
+                <ListItemText
+                  primary={
+                    <LanguageHeading
+                      language={{
+                        name: li?.englishName || tag,
+                        flagEmoji: li?.flags?.[0] || '',
+                      }}
+                    />
+                  }
+                />
+              </MenuItem>
+            );
+          })}
+        </Select>
+      </StyledDialogTitle>
       <DialogContent sx={{ display: 'grid', gap: 2, pt: '8px !important' }}>
         <div>
           <StyledLangLabel>
@@ -196,81 +234,31 @@ export const TranslationMemoryCreateEntryDialog: React.VFC<Props> = ({
           />
         </div>
 
-        {targets.map((target, index) => {
-          const selectableTags = availableLanguages.filter(
-            (tag) => tag === target.languageTag || !usedTags.includes(tag)
-          );
-
+        {selectedTags.map((tag) => {
+          const li = languageInfo[tag];
           return (
-            <div key={index}>
-              <StyledLangRow>
-                <Box flex={1}>
-                  <StyledLangLabel>
-                    <Select
-                      value={target.languageTag}
-                      onChange={(e) =>
-                        changeLanguage(index, e.target.value as string)
-                      }
-                      variant="standard"
-                      size="small"
-                      disableUnderline
-                      sx={{
-                        fontSize: 14,
-                        '& .MuiSelect-icon': { top: 'calc(50% - 14px)' },
-                      }}
-                    >
-                      {selectableTags.map((tag) => {
-                        const li = languageInfo[tag];
-                        return (
-                          <MenuItem key={tag} value={tag}>
-                            <LanguageHeading
-                              language={{
-                                name: li?.englishName || tag,
-                                flagEmoji: li?.flags?.[0] || '',
-                              }}
-                            />
-                          </MenuItem>
-                        );
-                      })}
-                    </Select>
-                  </StyledLangLabel>
-                  <TextField
-                    value={target.text}
-                    onChange={(e) => updateTarget(index, e.target.value)}
-                    multiline
-                    minRows={2}
-                    fullWidth
-                    data-cy="tm-entry-target-text"
+            <div key={tag}>
+              <Box>
+                <StyledLangLabel>
+                  <LanguageHeading
+                    language={{
+                      name: li?.englishName || tag,
+                      flagEmoji: li?.flags?.[0] || '',
+                    }}
                   />
-                </Box>
-                {targets.length > 1 && (
-                  <IconButton
-                    size="small"
-                    onClick={() => removeTarget(index)}
-                    sx={{ mt: 3 }}
-                    aria-label={t(
-                      'translation_memory_remove_language',
-                      'Remove language'
-                    )}
-                  >
-                    <XClose width={16} height={16} />
-                  </IconButton>
-                )}
-              </StyledLangRow>
+                </StyledLangLabel>
+                <TextField
+                  value={textByTag[tag] ?? ''}
+                  onChange={(e) => updateText(tag, e.target.value)}
+                  multiline
+                  minRows={2}
+                  fullWidth
+                  data-cy="tm-entry-target-text"
+                />
+              </Box>
             </div>
           );
         })}
-
-        {canAddMore && (
-          <Button
-            size="small"
-            startIcon={<Plus width={14} height={14} />}
-            onClick={addTarget}
-            data-cy="tm-entry-add-language"
-          >
-            {t('translation_memory_entry_add_language', 'Add language')}
-          </Button>
-        )}
 
         <StyledActions>
           <Button onClick={onClose}>{t('global_cancel_button')}</Button>

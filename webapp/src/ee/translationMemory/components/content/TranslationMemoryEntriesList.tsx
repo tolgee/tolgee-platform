@@ -296,14 +296,26 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
     }
   };
 
+  const allNonBaseLanguageTags = useMemo(
+    () =>
+      (languages ?? [])
+        .map((l) => l.tag)
+        .filter((t) => t !== sourceLanguageTag),
+    [languages, sourceLanguageTag]
+  );
+
   const displayLanguages = useMemo(() => {
-    const allNonBase = (languages ?? [])
-      .map((l) => l.tag)
-      .filter((t) => t !== sourceLanguageTag);
-    if (isAllSelected) return allNonBase;
+    if (isAllSelected) return allNonBaseLanguageTags;
     // Preserve the order from org languages, filtered to selected
-    return allNonBase.filter((t) => selectedLanguages.includes(t));
-  }, [languages, isAllSelected, selectedLanguages, sourceLanguageTag]);
+    return allNonBaseLanguageTags.filter((t) => selectedLanguages.includes(t));
+  }, [allNonBaseLanguageTags, isAllSelected, selectedLanguages]);
+
+  // First two of the user's filter selection, used as the Create-entry dialog's default. Empty
+  // when the filter is in "All" mode — the dialog falls back to the first 2 of all langs.
+  const createDialogInitialTags = useMemo(() => {
+    if (!selectedLanguages || selectedLanguages.length === 0) return [];
+    return selectedLanguages.slice(0, 2);
+  }, [selectedLanguages]);
 
   const sourceLangName =
     languageInfo[sourceLanguageTag]?.englishName || sourceLanguageTag;
@@ -423,7 +435,8 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
           organizationId={organizationId}
           translationMemoryId={translationMemoryId}
           sourceLanguageTag={sourceLanguageTag}
-          availableLanguages={displayLanguages}
+          allLanguageTags={allNonBaseLanguageTags}
+          initialSelectedTags={createDialogInitialTags}
         />
       )}
 
@@ -466,7 +479,8 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
                 organizationId={organizationId}
                 translationMemoryId={translationMemoryId}
                 sourceLanguageTag={sourceLanguageTag}
-                availableLanguages={displayLanguages}
+                allLanguageTags={allNonBaseLanguageTags}
+                initialSelectedTags={createDialogInitialTags}
                 assignedProjectsCount={assignedProjectsCount}
                 onFinished={() => entries.refetch()}
               />

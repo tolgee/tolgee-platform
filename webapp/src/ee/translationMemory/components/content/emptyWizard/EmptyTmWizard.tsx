@@ -22,7 +22,8 @@ type Props = {
   organizationId: number;
   translationMemoryId: number;
   sourceLanguageTag: string;
-  availableLanguages: string[];
+  allLanguageTags: string[];
+  initialSelectedTags: string[];
   assignedProjectsCount: number;
   onFinished: () => void;
 };
@@ -31,7 +32,8 @@ export const EmptyTmWizard: React.VFC<Props> = ({
   organizationId,
   translationMemoryId,
   sourceLanguageTag,
-  availableLanguages,
+  allLanguageTags,
+  initialSelectedTags,
   assignedProjectsCount,
   onFinished,
 }) => {
@@ -53,7 +55,8 @@ export const EmptyTmWizard: React.VFC<Props> = ({
         organizationId={organizationId}
         translationMemoryId={translationMemoryId}
         sourceLanguageTag={sourceLanguageTag}
-        availableLanguages={availableLanguages}
+        allLanguageTags={allLanguageTags}
+        initialSelectedTags={initialSelectedTags}
         onFinished={onFinished}
       />
     </StyledBox>

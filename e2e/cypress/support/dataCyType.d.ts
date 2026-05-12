@@ -887,11 +887,12 @@ declare namespace DataCy {
         "tm-entries-select-all" |
         "tm-entries-table" |
         "tm-entries-total-count" |
-        "tm-entry-add-language" |
         "tm-entry-cancel" |
         "tm-entry-create-submit" |
         "tm-entry-edit-affordance" |
         "tm-entry-edit-field" |
+        "tm-entry-language-multiselect" |
+        "tm-entry-language-multiselect-item" |
         "tm-entry-row-checkbox" |
         "tm-entry-row-keys" |
         "tm-entry-save" |

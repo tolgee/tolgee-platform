@@ -8,7 +8,8 @@ type Props = {
   organizationId: number;
   translationMemoryId: number;
   sourceLanguageTag: string;
-  availableLanguages: string[];
+  allLanguageTags: string[];
+  initialSelectedTags: string[];
   onFinished: () => void;
 };
 
@@ -16,7 +17,8 @@ export const EmptyTmWizardManualOption: React.VFC<Props> = ({
   organizationId,
   translationMemoryId,
   sourceLanguageTag,
-  availableLanguages,
+  allLanguageTags,
+  initialSelectedTags,
   onFinished,
 }) => {
   const { t } = useTranslate();
@@ -53,7 +55,8 @@ export const EmptyTmWizardManualOption: React.VFC<Props> = ({
           organizationId={organizationId}
           translationMemoryId={translationMemoryId}
           sourceLanguageTag={sourceLanguageTag}
-          availableLanguages={availableLanguages}
+          allLanguageTags={allLanguageTags}
+          initialSelectedTags={initialSelectedTags}
         />
       )}
     </>
