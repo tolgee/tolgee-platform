@@ -905,6 +905,7 @@ declare namespace DataCy {
         "tm-import-mode-keep" |
         "tm-import-mode-override" |
         "tm-import-submit" |
+        "tm-no-write-access-notice" |
         "tm-settings-default-penalty" |
         "tm-settings-dialog" |
         "tm-settings-write-only-reviewed" |

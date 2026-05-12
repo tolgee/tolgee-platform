@@ -162,14 +162,6 @@ export const AssignedProjectsEditor = ({
       >
         {t('translation_memory_settings_shared_with', 'Shared with')}
       </Typography>
-      {showNoWriteAlert && (
-        <Alert severity="warning" sx={{ mb: 1 }}>
-          <T
-            keyName="translation_memory_no_write_access_warning"
-            defaultValue="This TM will be empty. Give at least one project Write access for its translations to appear here."
-          />
-        </Alert>
-      )}
       <TmAssignedProjectsTable
         rows={values.assignedProjects}
         removedRows={pendingRemovals}
@@ -214,6 +206,18 @@ export const AssignedProjectsEditor = ({
           blurOnSelect
           clearOnBlur
         />
+        {showNoWriteAlert && (
+          <Alert
+            severity="info"
+            sx={{ mt: 1 }}
+            data-cy="tm-no-write-access-notice"
+          >
+            <T
+              keyName="translation_memory_no_write_access_notice"
+              defaultValue="No project writes to this TM. Add or import entries after creation."
+            />
+          </Alert>
+        )}
       </Box>
     </Box>
   );

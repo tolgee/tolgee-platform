@@ -7,8 +7,20 @@ import {
   styled,
 } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
-import { RefreshCcw01, XClose } from '@untitled-ui/icons-react';
+import { InfoCircle, RefreshCcw01, XClose } from '@untitled-ui/icons-react';
 import { PenaltyCell } from 'tg.ee.module/translationMemory/components/form/PenaltyCell';
+
+const StyledHeaderLabel = styled('span')`
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+`;
+
+const StyledHeaderInfoIcon = styled(InfoCircle)`
+  width: 14px;
+  height: 14px;
+  color: ${({ theme }) => theme.palette.text.secondary};
+`;
 
 const StyledProjectTable = styled('div')`
   border: 1px solid ${({ theme }) => theme.palette.divider1};
@@ -104,10 +116,34 @@ export const TmAssignedProjectsTable: React.VFC<Props> = ({
           {t('translation_memory_settings_col_penalty', 'Penalty')}
         </div>
         <div style={{ textAlign: 'center' }}>
-          {t('translation_memory_settings_col_read', 'Read')}
+          <StyledHeaderLabel>
+            {t('translation_memory_settings_col_read', 'Read')}
+            <Tooltip
+              title={t(
+                'translation_memory_settings_col_read_tooltip',
+                'Project receives suggestions from this TM.'
+              )}
+            >
+              <span style={{ display: 'inline-flex' }}>
+                <StyledHeaderInfoIcon />
+              </span>
+            </Tooltip>
+          </StyledHeaderLabel>
         </div>
         <div style={{ textAlign: 'center' }}>
-          {t('translation_memory_settings_col_write', 'Write')}
+          <StyledHeaderLabel>
+            {t('translation_memory_settings_col_write', 'Write')}
+            <Tooltip
+              title={t(
+                'translation_memory_settings_col_write_tooltip',
+                'Project saves translations to this TM.'
+              )}
+            >
+              <span style={{ display: 'inline-flex' }}>
+                <StyledHeaderInfoIcon />
+              </span>
+            </Tooltip>
+          </StyledHeaderLabel>
         </div>
         <div />
       </StyledProjectHeader>
