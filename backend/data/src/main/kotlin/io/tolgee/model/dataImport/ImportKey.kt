@@ -6,7 +6,6 @@ import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
-import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
 import jakarta.validation.constraints.NotBlank
@@ -28,9 +27,6 @@ class ImportKey(
   var file: ImportFile,
 ) : StandardAuditModel(),
   WithKeyMeta {
-  @OneToMany(mappedBy = "key", orphanRemoval = true)
-  var translations: MutableList<ImportTranslation> = mutableListOf()
-
   @OneToOne(mappedBy = "importKey")
   override var keyMeta: KeyMeta? = null
 

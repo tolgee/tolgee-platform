@@ -5,6 +5,7 @@ import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.fixtures.AuthorizedRequestFactory
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.repository.KeyRepository
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Timeout
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
@@ -25,9 +27,12 @@ import kotlin.time.measureTime
 class MultiStepImportPerformanceTest : ProjectAuthControllerTest("/v2/projects/") {
   private val logger = LoggerFactory.getLogger(javaClass)
 
+  @Autowired
+  lateinit var keyRepository: KeyRepository
+
   companion object {
-    const val KEY_COUNT = 30_000
-    const val LANGUAGE_COUNT = 3
+    const val KEY_COUNT = 1_000_000
+    const val LANGUAGE_COUNT = 2
   }
 
   lateinit var testData: BaseTestData
@@ -78,9 +83,9 @@ class MultiStepImportPerformanceTest : ProjectAuthControllerTest("/v2/projects/"
     logger.info("Total multi-step import completed in {}", totalDuration)
 
     executeInNewTransaction {
-      val keyCount = keyService.getAll(testData.project.id).size
+      val keyCount = keyRepository.countByProjectId(testData.project.id)
       logger.info("Verified {} keys in project after import", keyCount)
-      keyCount.assert.isEqualTo(KEY_COUNT)
+      keyCount.assert.isEqualTo(KEY_COUNT.toLong())
 
       dumpImportActivity()
     }

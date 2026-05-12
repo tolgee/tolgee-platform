@@ -311,7 +311,7 @@ class CoreImportFilesProcessor(
   }
 
   private fun FileProcessorContext.getOrCreateKey(name: String): ImportKey {
-    return importDataManager.storedKeys.computeIfAbsent(this.fileEntity to name) {
+    return importDataManager.storedKeysComputeIfAbsent(this.fileEntity, name) {
       this.keys
         .computeIfAbsent(name) {
           ImportKey(name = name, this.fileEntity)
