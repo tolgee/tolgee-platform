@@ -122,6 +122,13 @@ class TranslationMemoryTestData : BaseTestData() {
 
   lateinit var orgMember: UserAccount
 
+  /**
+   * User with direct EDIT permission on [projectWithTm] but no role in the organization. Used
+   * by org-level TM authorization tests to verify project-only access does NOT grant access
+   * to org-scoped TM browsing.
+   */
+  lateinit var projectOnlyViewer: UserAccount
+
   init {
     root.apply {
       // Base project from BaseTestData has no TM — add German so tests can save translations
@@ -492,6 +499,21 @@ class TranslationMemoryTestData : BaseTestData() {
               orgMember = self
             }.self
           type = OrganizationRoleType.MEMBER
+        }
+      }
+
+      // Project-only viewer: direct permission on projectWithTm, no org role. Used by org-level
+      // TM authorization tests to verify project-only access doesn't open the org-scoped TM
+      // browse endpoints.
+      projectOnlyViewer =
+        addUserAccountWithoutOrganization {
+          username = "tm_project_only_viewer"
+        }.self
+      projectWithTmBuilder.apply {
+        addPermission {
+          project = projectWithTmBuilder.self
+          user = projectOnlyViewer
+          type = ProjectPermissionType.EDIT
         }
       }
     }

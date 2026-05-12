@@ -5,7 +5,10 @@ import React, { useMemo, useState } from 'react';
 import { Box, IconButton, styled, Tooltip, Typography } from '@mui/material';
 import { Settings01 } from '@untitled-ui/icons-react';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
-import { usePreferredOrganization } from 'tg.globalContext/helpers';
+import {
+  useIsOrganizationOwnerOrMaintainer,
+  usePreferredOrganization,
+} from 'tg.globalContext/helpers';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useOrganization } from 'tg.views/organizations/useOrganization';
 import { useRouteMatch, Redirect } from 'react-router-dom';
@@ -28,6 +31,7 @@ export const TranslationMemoryView = () => {
   });
   const [settingsOpen, setSettingsOpen] = useState(false);
 
+  const canManage = useIsOrganizationOwnerOrMaintainer();
   const { preferredOrganization } = usePreferredOrganization();
   const organization = useOrganization();
   const match = useRouteMatch();
@@ -147,17 +151,19 @@ export const TranslationMemoryView = () => {
               </>
             )}
           </Typography>
-          <Tooltip
-            title={t('translation_memory_settings_button', 'TM settings')}
-          >
-            <IconButton
-              size="small"
-              onClick={() => setSettingsOpen(true)}
-              data-cy="translation-memory-settings-button"
+          {canManage && (
+            <Tooltip
+              title={t('translation_memory_settings_button', 'TM settings')}
             >
-              <Settings01 width={18} height={18} />
-            </IconButton>
-          </Tooltip>
+              <IconButton
+                size="small"
+                onClick={() => setSettingsOpen(true)}
+                data-cy="translation-memory-settings-button"
+              >
+                <Settings01 width={18} height={18} />
+              </IconButton>
+            </Tooltip>
+          )}
         </StyledSharedWith>
       }
       link={LINKS.ORGANIZATION_TRANSLATION_MEMORY}

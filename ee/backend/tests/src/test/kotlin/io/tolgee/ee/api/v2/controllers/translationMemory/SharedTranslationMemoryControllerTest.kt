@@ -176,6 +176,17 @@ class SharedTranslationMemoryControllerTest : AuthorizedControllerTest() {
     performAuthGet("/v2/organizations/$orgId/translation-memories").andIsOk
   }
 
+  @Test
+  fun `project-only viewer cannot list org TMs`() {
+    // Project-level access via direct permission on projectWithTm — no org role. The org-scoped
+    // TM list would otherwise leak cross-project content (other projects' TMs, virtual rows
+    // from projects the viewer doesn't belong to).
+    userAccount = testData.projectOnlyViewer
+    performAuthGet("/v2/organizations/$orgId/translation-memories").andIsForbidden
+    performAuthGet("/v2/organizations/$orgId/translation-memories-with-stats").andIsForbidden
+    performAuthGet("/v2/organizations/$orgId/translation-memories/${testData.sharedTm.id}").andIsForbidden
+  }
+
   // ---------- With-stats endpoint ----------
 
   @Test

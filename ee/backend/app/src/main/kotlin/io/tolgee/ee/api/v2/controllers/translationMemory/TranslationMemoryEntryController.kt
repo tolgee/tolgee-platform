@@ -19,7 +19,6 @@ import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthTokenType
 import io.tolgee.security.authorization.RequiresFeatures
 import io.tolgee.security.authorization.RequiresOrganizationRole
-import io.tolgee.security.authorization.UseDefaultPermissions
 import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
@@ -56,7 +55,7 @@ class TranslationMemoryEntryController(
         "row to a subset of target languages; rows themselves still appear with empty cells " +
         "so the user can add a translation.",
   )
-  @UseDefaultPermissions
+  @RequiresOrganizationRole(OrganizationRoleType.MEMBER)
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequiresFeatures(Feature.TRANSLATION_MEMORY)
   fun list(
@@ -79,7 +78,7 @@ class TranslationMemoryEntryController(
 
   @GetMapping("/{entryId:[0-9]+}")
   @Operation(summary = "Get a single translation memory entry")
-  @UseDefaultPermissions
+  @RequiresOrganizationRole(OrganizationRoleType.MEMBER)
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequiresFeatures(Feature.TRANSLATION_MEMORY)
   fun get(

@@ -28,7 +28,6 @@ import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthTokenType
 import io.tolgee.security.authorization.RequiresFeatures
 import io.tolgee.security.authorization.RequiresOrganizationRole
-import io.tolgee.security.authorization.UseDefaultPermissions
 import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
@@ -136,7 +135,7 @@ class SharedTranslationMemoryController(
   @GetMapping("/translation-memories/{translationMemoryId:[0-9]+}")
   @Operation(summary = "Get translation memory")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
-  @UseDefaultPermissions
+  @RequiresOrganizationRole(OrganizationRoleType.MEMBER)
   @RequiresFeatures(Feature.TRANSLATION_MEMORY)
   fun get(
     @PathVariable organizationId: Long,
@@ -149,7 +148,7 @@ class SharedTranslationMemoryController(
   @GetMapping("/translation-memories")
   @Operation(summary = "Get all translation memories in the organization")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
-  @UseDefaultPermissions
+  @RequiresOrganizationRole(OrganizationRoleType.MEMBER)
   @RequiresFeatures(Feature.TRANSLATION_MEMORY)
   fun getAll(
     @PathVariable organizationId: Long,
@@ -163,7 +162,7 @@ class SharedTranslationMemoryController(
   @GetMapping("/translation-memories-with-stats")
   @Operation(summary = "Get all translation memories with statistics")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
-  @UseDefaultPermissions
+  @RequiresOrganizationRole(OrganizationRoleType.MEMBER)
   @RequiresFeatures(Feature.TRANSLATION_MEMORY)
   fun getAllWithStats(
     @PathVariable organizationId: Long,
@@ -185,7 +184,7 @@ class SharedTranslationMemoryController(
         "without waiting on the per-TM virtual-row aggregation.",
   )
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
-  @UseDefaultPermissions
+  @RequiresOrganizationRole(OrganizationRoleType.MEMBER)
   @RequiresFeatures(Feature.TRANSLATION_MEMORY)
   fun getEntryCounts(
     @PathVariable organizationId: Long,
@@ -202,7 +201,7 @@ class SharedTranslationMemoryController(
   @GetMapping("/translation-memories/{translationMemoryId:[0-9]+}/assigned-projects")
   @Operation(summary = "Get projects assigned to a translation memory")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
-  @UseDefaultPermissions
+  @RequiresOrganizationRole(OrganizationRoleType.MEMBER)
   @RequiresFeatures(Feature.TRANSLATION_MEMORY)
   fun getAssignedProjects(
     @PathVariable organizationId: Long,

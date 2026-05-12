@@ -16,7 +16,6 @@ import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthTokenType
 import io.tolgee.security.authorization.RequiresFeatures
 import io.tolgee.security.authorization.RequiresOrganizationRole
-import io.tolgee.security.authorization.UseDefaultPermissions
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -64,7 +63,7 @@ class TranslationMemoryTmxController(
   @GetMapping("/export")
   @Operation(summary = "Export translation memory as TMX file")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
-  @UseDefaultPermissions
+  @RequiresOrganizationRole(OrganizationRoleType.MEMBER)
   @RequiresFeatures(Feature.TRANSLATION_MEMORY)
   fun exportTmx(
     @PathVariable organizationId: Long,
