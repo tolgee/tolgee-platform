@@ -22,6 +22,8 @@ import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.label.LabelService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
+import io.tolgee.service.organization.OrganizationStatsService
+import io.tolgee.service.organization.OrganizationUsageCounterService
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.util.Logging
@@ -60,6 +62,8 @@ class ProjectHardDeletingService(
   private val branchService: BranchService,
   private val entityManager: EntityManager,
   private val projectQaConfigRepository: ProjectQaConfigRepository,
+  private val organizationStatsService: OrganizationStatsService,
+  private val organizationUsageCounterService: OrganizationUsageCounterService,
 ) : Logging {
   @Transactional
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#project.id")
@@ -72,6 +76,22 @@ class ProjectHardDeletingService(
         projectHolder.project
       } catch (e: ProjectNotSelectedException) {
         projectHolder.project = ProjectDto.fromEntity(project)
+      }
+
+      // Subtract whatever the project still contributes to the org counter. For projects
+      // that were soft-deleted first (the common path), the contribution is already 0 and
+      // applyDelta is a no-op. For projects hard-deleted without prior soft-delete, this
+      // is the only chance to keep the counter accurate before the bulk JPQL/native
+      // deletes in keyService/translationService/languageService bypass entity events.
+      val orgId = project.organizationOwner.id
+      val keyContribution = organizationStatsService.getProjectKeyContribution(projectId)
+      val translationContribution = organizationStatsService.getProjectTranslationContribution(projectId)
+      if (keyContribution != 0L || translationContribution != 0L) {
+        organizationUsageCounterService.applyDelta(
+          orgId,
+          keyDelta = -keyContribution,
+          translationDelta = -translationContribution,
+        )
       }
 
       traceLogMeasureTime("deleteProject: unassign glossaries") {

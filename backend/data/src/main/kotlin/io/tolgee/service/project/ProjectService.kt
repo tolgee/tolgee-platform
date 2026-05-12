@@ -37,6 +37,8 @@ import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.service.organization.OrganizationService
+import io.tolgee.service.organization.OrganizationStatsService
+import io.tolgee.service.organization.OrganizationUsageCounterService
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.SecurityService
@@ -111,6 +113,14 @@ class ProjectService(
   @set:Autowired
   @set:Lazy
   lateinit var aiPlaygroundResultService: AiPlaygroundResultService
+
+  @set:Autowired
+  @set:Lazy
+  lateinit var organizationStatsService: OrganizationStatsService
+
+  @set:Autowired
+  @set:Lazy
+  lateinit var organizationUsageCounterService: OrganizationUsageCounterService
 
   @Transactional(readOnly = true)
   @Cacheable(cacheNames = [Caches.PROJECTS], key = "#id")
@@ -214,10 +224,30 @@ class ProjectService(
       project.slug = generateSlug(project.name, null)
     }
 
+    val branchingChanged = wasBranchingEnabled != dto.useBranching
+    val keyContributionBefore =
+      if (branchingChanged) organizationStatsService.getProjectKeyContribution(project.id) else 0
+    val translationContributionBefore =
+      if (branchingChanged) organizationStatsService.getProjectTranslationContribution(project.id) else 0
+
     entityManager.persist(project)
 
     if (!wasBranchingEnabled && dto.useBranching) {
       branchService.enableBranchingOnProject(project.id)
+    }
+
+    if (branchingChanged) {
+      // Branching toggle changes which keys/translations count (default-branch-only
+      // vs. all-branches). Recompute the project's contribution after the toggle and
+      // apply the delta to the org counter.
+      entityManager.flush()
+      val keyContributionAfter = organizationStatsService.getProjectKeyContribution(project.id)
+      val translationContributionAfter = organizationStatsService.getProjectTranslationContribution(project.id)
+      organizationUsageCounterService.applyDelta(
+        project.organizationOwner.id,
+        keyDelta = keyContributionAfter - keyContributionBefore,
+        translationDelta = translationContributionAfter - translationContributionBefore,
+      )
     }
     return project
   }
@@ -280,6 +310,13 @@ class ProjectService(
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#id")
   fun deleteProject(id: Long) {
     val project = get(id)
+    // Capture the project's contribution to the org counter BEFORE soft-deleting
+    // anything; once project.deletedAt or any language.deletedAt is set in DB, the
+    // recount query filters those rows out and returns 0.
+    val orgId = project.organizationOwner.id
+    val keyContribution = organizationStatsService.getProjectKeyContribution(id)
+    val translationContribution = organizationStatsService.getProjectTranslationContribution(id)
+
     val languages = project.languages
     val currentDate = currentDateProvider.date
     languages.forEach {
@@ -288,6 +325,13 @@ class ProjectService(
     languageService.saveAll(languages)
     project.deletedAt = currentDate
     save(project)
+
+    organizationUsageCounterService.applyDelta(
+      orgId,
+      keyDelta = -keyContribution,
+      translationDelta = -translationContribution,
+    )
+
     applicationContext.publishEvent(OnProjectSoftDeleted(project))
   }
 
