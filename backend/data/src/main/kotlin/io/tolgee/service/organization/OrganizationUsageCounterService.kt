@@ -6,6 +6,7 @@ import io.tolgee.repository.OrganizationUsageCounterRepository
 import jakarta.persistence.EntityManager
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.time.Duration
 import java.util.Date
@@ -85,6 +86,68 @@ class OrganizationUsageCounterService(
       seedRow(organizationId, keyCount, translationCount, lastReconciledAt = now)
     }
     return Counts(keyCount, translationCount)
+  }
+
+  /**
+   * Reconcile one org: recount via slow query, compare with the stored counter, emit drift
+   * metrics on mismatch, and heal the counter. Runs in its own transaction so one slow
+   * recount doesn't block others in the reconciliation cycle.
+   */
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  fun reconcileOne(organizationId: Long) {
+    val recountStart = System.nanoTime()
+    val recountKeys = organizationStatsService.getKeyCount(organizationId)
+    val recountTranslations = organizationStatsService.getTranslationCount(organizationId)
+    metrics.orgCounterReconciliationDurationTimer.record(
+      Duration.ofNanos(System.nanoTime() - recountStart),
+    )
+
+    val existing = organizationUsageCounterRepository.findByOrganizationId(organizationId)
+    val cachedKeys = existing?.keyCount ?: 0L
+    val cachedTranslations = existing?.translationCount ?: 0L
+    val keyDrift = recountKeys - cachedKeys
+    val translationDrift = recountTranslations - cachedTranslations
+
+    if (existing == null || keyDrift != 0L || translationDrift != 0L) {
+      if (existing != null && (keyDrift != 0L || translationDrift != 0L)) {
+        metrics.orgCounterDriftDetected("reconciliation").increment()
+        if (keyDrift != 0L) {
+          metrics.orgCounterDriftMagnitude("keys").record(abs(keyDrift).toDouble())
+        }
+        if (translationDrift != 0L) {
+          metrics.orgCounterDriftMagnitude("translations").record(abs(translationDrift).toDouble())
+        }
+        logger.warn(
+          "Reconciliation drift for org {}: keyDrift={}, translationDrift={}. Healing.",
+          organizationId,
+          keyDrift,
+          translationDrift,
+        )
+      }
+      val now = Date()
+      val updated =
+        organizationUsageCounterRepository.setAbsolute(
+          organizationId,
+          recountKeys,
+          recountTranslations,
+          now,
+          now,
+        )
+      if (updated == 0) {
+        seedRow(organizationId, recountKeys, recountTranslations, lastReconciledAt = now)
+      }
+    } else {
+      // No drift — just bump last_reconciled_at so this org rotates to the back of the queue.
+      val now = Date()
+      organizationUsageCounterRepository.setAbsolute(
+        organizationId,
+        recountKeys,
+        recountTranslations,
+        now,
+        now,
+      )
+    }
+    metrics.orgCounterReconciliationOrgsProcessedCounter.increment()
   }
 
   /**

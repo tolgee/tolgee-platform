@@ -90,6 +90,7 @@ class OrganizationController(
   private val imageUploadService: ImageUploadService,
   private val mtCreditConsumer: MtCreditsService,
   private val organizationStatsService: OrganizationStatsService,
+  private val organizationUsageCounterService: io.tolgee.service.organization.OrganizationUsageCounterService,
   private val limitsProvider: LimitsProvider,
   private val projectService: ProjectService,
   private val payAsYouGoCreditsProvider: PayAsYouGoCreditsProvider,
@@ -321,10 +322,19 @@ class OrganizationController(
     val creditBalances = mtCreditConsumer.getCreditBalances(organization.id)
     val currentPayAsYouGoMtCredits = payAsYouGoCreditsProvider.getUsedPayAsYouGoCredits(organization)
     val availablePayAsYouGoMtCredits = payAsYouGoCreditsProvider.getPayAsYouGoAvailableCredits(organization)
-    val currentTranslations = organizationStatsService.getTranslationCount(organization.id)
     val currentSeats = organizationStatsService.getSeatCountToCountSeats(organization.id)
-    val currentKeys = organizationStatsService.getKeyCount(organization.id)
     val limits = limitsProvider.getLimits(organization.id)
+    // Read keys + translations from the maintained counter, with boundary-verification
+    // recount near the limit. Falls back to a slow-query recount only if the org is at
+    // or above `tolgee.org-counter.boundary-verify-threshold * limit`.
+    val counts =
+      organizationUsageCounterService.getCountsWithBoundaryVerification(
+        organization.id,
+        keyLimit = limits.keys.limit,
+        translationLimit = limits.strings.limit,
+      )
+    val currentKeys = counts.keys
+    val currentTranslations = counts.translations
 
     return PublicUsageModel(
       isPayAsYouGo = limits.isPayAsYouGo,

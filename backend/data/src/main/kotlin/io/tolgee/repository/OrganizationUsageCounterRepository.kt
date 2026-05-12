@@ -63,4 +63,25 @@ interface OrganizationUsageCounterRepository : JpaRepository<OrganizationUsageCo
   ): Int
 
   fun findByOrganizationId(organizationId: Long): OrganizationUsageCounter?
+
+  /**
+   * Returns organization IDs that should be reconciled next, ordered by least-recently
+   * reconciled. Skips orgs that have been soft-deleted.
+   *
+   * Used by the nightly reconciliation job to ensure every live org is recounted regularly.
+   * Orgs missing a counter row (never seeded) are not returned; the runtime seed handles them.
+   */
+  @Query(
+    value = """
+      SELECT c.organization_id
+      FROM organization_usage_counter c
+      JOIN organization o ON o.id = c.organization_id AND o.deleted_at IS NULL
+      ORDER BY c.last_reconciled_at ASC NULLS FIRST
+      LIMIT :pageSize
+    """,
+    nativeQuery = true,
+  )
+  fun findOrgIdsForReconciliation(
+    @Param("pageSize") pageSize: Int,
+  ): List<Long>
 }
