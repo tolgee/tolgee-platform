@@ -3,11 +3,7 @@ import { T, useTranslate } from '@tolgee/react';
 import { useProject } from 'tg.hooks/useProject';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
-import {
-  useEnabledFeatures,
-  useIsOrganizationOwnerOrMaintainer,
-} from 'tg.globalContext/helpers';
-import { DisabledFeatureBanner } from 'tg.component/common/DisabledFeatureBanner';
+import { useIsOrganizationOwnerOrMaintainer } from 'tg.globalContext/helpers';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useHistory } from 'react-router-dom';
 import { useQueryClient } from 'react-query';
@@ -63,8 +59,6 @@ export const ProjectSettingsTranslationMemory = () => {
   const { t } = useTranslate();
   const history = useHistory();
   const queryClient = useQueryClient();
-  const { isEnabled } = useEnabledFeatures();
-  const featureEnabled = isEnabled('TRANSLATION_MEMORY');
   const { satisfiesPermission } = useProjectPermissions();
   const canEditProject = satisfiesPermission('project.edit');
   const isOrgMaintainer = useIsOrganizationOwnerOrMaintainer();
@@ -74,9 +68,6 @@ export const ProjectSettingsTranslationMemory = () => {
     url: '/v2/projects/{projectId}/translation-memories',
     method: 'get',
     path: { projectId: project.id },
-    options: {
-      enabled: featureEnabled,
-    },
   });
 
   const serverSorted = useMemo(
@@ -210,7 +201,7 @@ export const ProjectSettingsTranslationMemory = () => {
         <Typography variant="h5">
           {t('project_settings_translation_memory_title', 'Translation memory')}
         </Typography>
-        {featureEnabled && orgSlug && canEditProject && (
+        {orgSlug && canEditProject && (
           <Button
             variant="outlined"
             color="primary"
@@ -223,74 +214,63 @@ export const ProjectSettingsTranslationMemory = () => {
         )}
       </Box>
 
-      {!featureEnabled ? (
-        <DisabledFeatureBanner
-          customMessage={t(
-            'translation_memories_feature_description',
-            'Translation memory management is available on the Business plan.'
-          )}
-        />
-      ) : (
-        <Box data-cy="project-settings-tm-shared">
-          <Typography variant="body2" color="text.secondary" mb={1}>
-            <T
-              keyName="project_settings_tm_description"
-              defaultValue="Control which translation memories are active in this project and set their priority. Memories higher in the list are preferred when suggesting translations in the editor."
-            />
-          </Typography>
+      <Box data-cy="project-settings-tm-shared">
+        <Typography variant="body2" color="text.secondary" mb={1}>
+          <T
+            keyName="project_settings_tm_description"
+            defaultValue="Control which translation memories are active in this project and set their priority. Memories higher in the list are preferred when suggesting translations in the editor."
+          />
+        </Typography>
 
-          {sorted.length > 0 && (
-            <>
-              {canEditProject && (
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  sx={{ display: 'block', mb: 0.5 }}
+        {sorted.length > 0 && (
+          <>
+            {canEditProject && sorted.length > 1 && (
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ display: 'block', mb: 0.5 }}
+              >
+                {t(
+                  'project_settings_tm_priority_hint',
+                  'Priority order — drag to reorder'
+                )}
+              </Typography>
+            )}
+            <StyledTable data-cy="project-settings-tm-table">
+              <StyledHeader>
+                <span />
+                <span>{t('project_settings_tm_col_priority', '#')}</span>
+                <span>
+                  {t('project_settings_tm_col_name', 'Translation memory')}
+                </span>
+                <span>{t('project_settings_tm_col_access', 'Access')}</span>
+                <span />
+              </StyledHeader>
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                modifiers={[restrictToVerticalAxis]}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext
+                  items={sorted.map((tm) => tm.translationMemoryId)}
+                  strategy={verticalListSortingStrategy}
                 >
-                  {t(
-                    'project_settings_tm_priority_hint',
-                    'Priority order — drag to reorder'
-                  )}
-                </Typography>
-              )}
-              <StyledTable data-cy="project-settings-tm-table">
-                <StyledHeader>
-                  <span />
-                  <span>{t('project_settings_tm_col_priority', '#')}</span>
-                  <span>
-                    {t('project_settings_tm_col_name', 'Translation memory')}
-                  </span>
-                  <span>{t('project_settings_tm_col_access', 'Access')}</span>
-                  <span />
-                </StyledHeader>
-                <DndContext
-                  sensors={sensors}
-                  collisionDetection={closestCenter}
-                  modifiers={[restrictToVerticalAxis]}
-                  onDragEnd={handleDragEnd}
-                >
-                  <SortableContext
-                    items={sorted.map((tm) => tm.translationMemoryId)}
-                    strategy={verticalListSortingStrategy}
-                  >
-                    {sorted.map((tm, index) => (
-                      <SortableTmRow
-                        key={tm.translationMemoryId}
-                        tm={tm}
-                        index={index}
-                        onSettings={() =>
-                          setSettingsTmId(tm.translationMemoryId)
-                        }
-                        canEdit={canEditProject}
-                      />
-                    ))}
-                  </SortableContext>
-                </DndContext>
-              </StyledTable>
-            </>
-          )}
-        </Box>
-      )}
+                  {sorted.map((tm, index) => (
+                    <SortableTmRow
+                      key={tm.translationMemoryId}
+                      tm={tm}
+                      index={index}
+                      onSettings={() => setSettingsTmId(tm.translationMemoryId)}
+                      canEdit={canEditProject}
+                    />
+                  ))}
+                </SortableContext>
+              </DndContext>
+            </StyledTable>
+          </>
+        )}
+      </Box>
 
       {settingsTmId !== null && settingsAssignment?.type === 'PROJECT' && (
         <TmWriteOnlyReviewedDialog

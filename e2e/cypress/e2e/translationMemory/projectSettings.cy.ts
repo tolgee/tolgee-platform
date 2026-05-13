@@ -1,6 +1,8 @@
 import { translationMemoryTestData } from '../../common/apiCalls/testData/testData';
 import { login } from '../../common/apiCalls/common';
 import { TestDataStandardResponse } from '../../common/apiCalls/testData/generator';
+import { setFeature } from '../../common/features';
+import { gcy } from '../../common/shared';
 import { E2ProjectTmSettings } from '../../compounds/translationMemories/E2ProjectTmSettings';
 import { E2TranslationMemoriesView } from '../../compounds/translationMemories/E2TranslationMemoriesView';
 
@@ -70,5 +72,30 @@ describe('Translation Memory project settings', () => {
 
     cy.url().should('include', '/translation-memories');
     tmListView.getListItems().should('have.length.at.least', 1);
+  });
+
+  describe('with TRANSLATION_MEMORY feature disabled', () => {
+    beforeEach(() => {
+      setFeature('TRANSLATION_MEMORY', false);
+      login('test_username');
+      tmSettings.findAndVisit(data, 'Project With TM');
+    });
+
+    afterEach(() => {
+      setFeature('TRANSLATION_MEMORY', true);
+    });
+
+    it('shows only the project TM row and no missing-feature banner', () => {
+      tmSettings.getSharedSection().should('be.visible');
+      gcy('disabled-feature-banner').should('not.exist');
+      tmSettings.getTmRows().should('have.length', 1);
+      tmSettings.getTmRows().first().should('contain', 'Project only');
+    });
+
+    it('Manage all TMs button still navigates to the org page (which shows the banner)', () => {
+      tmSettings.clickManageAllTms();
+      cy.url().should('include', '/translation-memories');
+      gcy('disabled-feature-banner').should('be.visible');
+    });
   });
 });

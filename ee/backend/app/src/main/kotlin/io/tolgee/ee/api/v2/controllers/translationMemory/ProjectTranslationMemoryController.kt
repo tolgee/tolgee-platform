@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
+import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Feature
 import io.tolgee.ee.api.v2.hateoas.assemblers.translationMemory.ProjectTranslationMemoryAssignmentModelAssembler
 import io.tolgee.ee.api.v2.hateoas.model.translationMemory.ProjectTranslationMemoryAssignmentModel
@@ -13,6 +14,7 @@ import io.tolgee.ee.data.translationMemory.UpdateProjectTranslationMemoryAssignm
 import io.tolgee.ee.service.translationMemory.ProjectTranslationMemoryConfigService
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.translationMemory.TranslationMemoryType
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.ReadOnlyOperation
@@ -44,16 +46,28 @@ class ProjectTranslationMemoryController(
   private val projectTranslationMemoryConfigService: ProjectTranslationMemoryConfigService,
   private val assignmentAssembler: ProjectTranslationMemoryAssignmentModelAssembler,
   private val translationMemoryManagementService: TranslationMemoryManagementService,
+  private val enabledFeaturesProvider: EnabledFeaturesProvider,
 ) {
   @GetMapping
-  @Operation(summary = "List all translation memory assignments for the project")
+  @Operation(
+    summary = "List all translation memory assignments for the project",
+    description =
+      "Always readable. When the TRANSLATION_MEMORY feature is not enabled for the " +
+        "organization, only the project-type assignment (if any) is returned so the " +
+        "settings page can still show the row that already drives in-project suggestions.",
+  )
   @ReadOnlyOperation
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
-  @RequiresFeatures(Feature.TRANSLATION_MEMORY)
   fun list(): CollectionModel<ProjectTranslationMemoryAssignmentModel> {
-    val assignments = projectTranslationMemoryConfigService.getAssignments(projectHolder.project.id)
-    return assignmentAssembler.toCollectionModel(assignments)
+    val project = projectHolder.project
+    val featureEnabled =
+      enabledFeaturesProvider.isFeatureEnabled(project.organizationOwnerId, Feature.TRANSLATION_MEMORY)
+    val visible =
+      projectTranslationMemoryConfigService
+        .getAssignments(project.id)
+        .filter { featureEnabled || it.translationMemory.type == TranslationMemoryType.PROJECT }
+    return assignmentAssembler.toCollectionModel(visible)
   }
 
   @PostMapping("/{translationMemoryId:[0-9]+}")

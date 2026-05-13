@@ -161,6 +161,18 @@ class ProjectTranslationMemoryControllerTest : ProjectAuthControllerTest("/v2/pr
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `lists only PROJECT-type assignment when feature disabled`() {
+    enabledFeaturesProvider.forceEnabled = emptySet()
+    performAuthGet("/v2/projects/${project.id}/translation-memories")
+      .andIsOk
+      .andAssertThatJson {
+        node("_embedded.translationMemoryAssignments").isArray.hasSize(1)
+        node("_embedded.translationMemoryAssignments[0].type").isEqualTo("PROJECT")
+      }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `does not assign when feature disabled`() {
     enabledFeaturesProvider.forceEnabled = emptySet()
     val unassignedId = testData.unassignedSharedTm.id
