@@ -37,6 +37,8 @@ import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.service.organization.OrganizationService
+import io.tolgee.service.organization.OrganizationStatsService
+import io.tolgee.service.organization.OrganizationUsageCounterService
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.SecurityService
@@ -111,6 +113,14 @@ class ProjectService(
   @set:Autowired
   @set:Lazy
   lateinit var aiPlaygroundResultService: AiPlaygroundResultService
+
+  @set:Autowired
+  @set:Lazy
+  lateinit var organizationStatsService: OrganizationStatsService
+
+  @set:Autowired
+  @set:Lazy
+  lateinit var organizationUsageCounterService: OrganizationUsageCounterService
 
   @Transactional(readOnly = true)
   @Cacheable(cacheNames = [Caches.PROJECTS], key = "#id")
@@ -214,10 +224,35 @@ class ProjectService(
       project.slug = generateSlug(project.name, null)
     }
 
+    val branchingChanged = wasBranchingEnabled != dto.useBranching
+    // Capture the project's pre-toggle contribution. Branch-copied keys share their
+    // (name, namespace) tuple with the default branch and would collapse under DISTINCT,
+    // so they don't move the count. The case that DOES move the count is a key added
+    // directly on a feature branch with a (name, namespace) that doesn't exist on the
+    // default branch — common during normal feature development. When branching is
+    // toggled off, those keys drop out of the slow-query result; the counter must
+    // follow. Two ~80ms queries per toggle is acceptable since this is a per-project
+    // settings change, not a hot path.
+    val keyContributionBefore =
+      if (branchingChanged) organizationStatsService.getProjectKeyContribution(project.id) else 0
+    val translationContributionBefore =
+      if (branchingChanged) organizationStatsService.getProjectTranslationContribution(project.id) else 0
+
     entityManager.persist(project)
 
     if (!wasBranchingEnabled && dto.useBranching) {
       branchService.enableBranchingOnProject(project.id)
+    }
+
+    if (branchingChanged) {
+      entityManager.flush()
+      val keyContributionAfter = organizationStatsService.getProjectKeyContribution(project.id)
+      val translationContributionAfter = organizationStatsService.getProjectTranslationContribution(project.id)
+      organizationUsageCounterService.applyDelta(
+        project.organizationOwner.id,
+        keyDelta = keyContributionAfter - keyContributionBefore,
+        translationDelta = translationContributionAfter - translationContributionBefore,
+      )
     }
     return project
   }
@@ -280,6 +315,13 @@ class ProjectService(
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#id")
   fun deleteProject(id: Long) {
     val project = get(id)
+    // Capture the project's contribution to the org counter BEFORE soft-deleting
+    // anything; once project.deletedAt or any language.deletedAt is set in DB, the
+    // recount query filters those rows out and returns 0.
+    val orgId = project.organizationOwner.id
+    val keyContribution = organizationStatsService.getProjectKeyContribution(id)
+    val translationContribution = organizationStatsService.getProjectTranslationContribution(id)
+
     val languages = project.languages
     val currentDate = currentDateProvider.date
     languages.forEach {
@@ -288,6 +330,13 @@ class ProjectService(
     languageService.saveAll(languages)
     project.deletedAt = currentDate
     save(project)
+
+    organizationUsageCounterService.applyDelta(
+      orgId,
+      keyDelta = -keyContribution,
+      translationDelta = -translationContribution,
+    )
+
     applicationContext.publishEvent(OnProjectSoftDeleted(project))
   }
 
@@ -403,9 +452,31 @@ class ProjectService(
     organizationId: Long,
   ) {
     val project = get(projectId)
+    val sourceOrgId = project.organizationOwner.id
     val organization = organizationService.find(organizationId) ?: throw NotFoundException()
+
+    // Move the project's counter contribution from source org to target org. The
+    // contribution query is org-agnostic (it filters by project id), so one query is
+    // enough — same value applies as both the negative delta on source and the positive
+    // delta on target.
+    val keyContribution = organizationStatsService.getProjectKeyContribution(projectId)
+    val translationContribution = organizationStatsService.getProjectTranslationContribution(projectId)
+
     project.organizationOwner = organization
     save(project)
+
+    if (keyContribution != 0L || translationContribution != 0L) {
+      organizationUsageCounterService.applyDelta(
+        sourceOrgId,
+        keyDelta = -keyContribution,
+        translationDelta = -translationContribution,
+      )
+      organizationUsageCounterService.applyDelta(
+        organizationId,
+        keyDelta = keyContribution,
+        translationDelta = translationContribution,
+      )
+    }
   }
 
   @Transactional(readOnly = true)

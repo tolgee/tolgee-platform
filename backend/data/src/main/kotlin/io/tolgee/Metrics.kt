@@ -268,4 +268,63 @@ class Metrics(
       .description("Time spent refreshing language stats")
       .register(meterRegistry)
   }
+
+  // ==========================================================================
+  // Organization Usage Counter Metrics
+  // ==========================================================================
+
+  /**
+   * Counts drift detections. Tag `source` is `reconciliation` or `boundary_verify`.
+   * A non-zero rate means the counter disagreed with the slow query — alert on it.
+   */
+  fun orgCounterDriftDetected(source: String): Counter =
+    meterRegistry.counter("tolgee.org_counter.drift.detected", "source", source)
+
+  /**
+   * Distribution of `abs(counter - recount)` deltas. Tag `counter` is `keys` or `translations`.
+   * Tracks the severity of drift, not just its existence.
+   */
+  fun orgCounterDriftMagnitude(counter: String): DistributionSummary =
+    DistributionSummary
+      .builder("tolgee.org_counter.drift.magnitude")
+      .description("Magnitude of detected drift between counter and slow-query recount")
+      .tag("counter", counter)
+      .publishPercentileHistogram()
+      .register(meterRegistry)
+
+  val orgCounterReconciliationDurationTimer: Timer by lazy {
+    Timer
+      .builder("tolgee.org_counter.reconciliation.duration")
+      .description("Per-org duration of the reconciliation slow-query recount")
+      .publishPercentileHistogram()
+      .register(meterRegistry)
+  }
+
+  val orgCounterReconciliationOrgsProcessedCounter: Counter by lazy {
+    Counter
+      .builder("tolgee.org_counter.reconciliation.orgs_processed")
+      .description("Number of organizations reconciled")
+      .register(meterRegistry)
+  }
+
+  val orgCounterBoundaryVerifyTriggeredCounter: Counter by lazy {
+    Counter
+      .builder("tolgee.org_counter.boundary_verify.triggered")
+      .description("Number of times the near-limit boundary verification recount fired")
+      .register(meterRegistry)
+  }
+
+  val orgCounterBoundaryVerifyMismatchCounter: Counter by lazy {
+    Counter
+      .builder("tolgee.org_counter.boundary_verify.mismatch")
+      .description("Of triggered boundary verifications, how many found drift")
+      .register(meterRegistry)
+  }
+
+  val orgCounterApplyDeltaTimer: Timer by lazy {
+    Timer
+      .builder("tolgee.org_counter.apply_delta.duration")
+      .description("Per-transaction counter UPDATE cost. Should stay sub-millisecond.")
+      .register(meterRegistry)
+  }
 }

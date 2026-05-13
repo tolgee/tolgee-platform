@@ -18,6 +18,8 @@ import io.tolgee.repository.LanguageRepository
 import io.tolgee.repository.qa.LanguageQaConfigRepository
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.dataImport.ImportService
+import io.tolgee.service.organization.OrganizationStatsService
+import io.tolgee.service.organization.OrganizationUsageCounterService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.SecurityService
@@ -66,6 +68,14 @@ class LanguageService(
   @set:Lazy
   lateinit var translationService: TranslationService
 
+  @set:Autowired
+  @set:Lazy
+  lateinit var organizationStatsService: OrganizationStatsService
+
+  @set:Autowired
+  @set:Lazy
+  lateinit var organizationUsageCounterService: OrganizationUsageCounterService
+
   @Transactional
   fun createLanguage(
     dto: LanguageRequest?,
@@ -96,10 +106,24 @@ class LanguageService(
 
   @Transactional
   fun deleteLanguage(language: Language) {
+    // Capture the language's translation contribution before flipping deletedAt — once
+    // deletedAt is set, the recount query filters it out and returns 0. The project
+    // is still intact here (this path is for standalone language deletion, not project
+    // soft-delete, which subtracts via ProjectService.deleteProject).
+    val orgId = language.project.organizationOwner.id
+    val translationContribution = organizationStatsService.getLanguageTranslationContribution(language.id)
+
     language.deletedAt = currentDateProvider.date
     importService.onExistingLanguageRemoved(language)
     permissionService.removeLanguageFromPermissions(language)
     save(language)
+
+    organizationUsageCounterService.applyDelta(
+      orgId,
+      keyDelta = 0,
+      translationDelta = -translationContribution,
+    )
+
     self.hardDeleteLanguageAsync(language, authenticationFacade.authenticatedUserOrNull?.id)
   }
 
