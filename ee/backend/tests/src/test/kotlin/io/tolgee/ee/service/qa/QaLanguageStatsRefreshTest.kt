@@ -11,8 +11,6 @@ import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.development.QaLanguageStatsBranchTestData
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.batch.BatchJobStatus
-import io.tolgee.repository.qa.ProjectQaConfigRepository
-import io.tolgee.model.translation.Translation
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.util.executeInNewTransaction

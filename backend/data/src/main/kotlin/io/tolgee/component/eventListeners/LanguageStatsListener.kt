@@ -29,7 +29,6 @@ class LanguageStatsListener(
   private val keyRepository: KeyRepository,
   private val translationRepository: TranslationRepository,
   private val objectMapper: ObjectMapper,
-  private val activityService: ActivityService,
 ) : BypassableActivityListener {
   @Volatile
   override var bypass = false
