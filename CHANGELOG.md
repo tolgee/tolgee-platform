@@ -1,3 +1,10 @@
+## [3.186.1](https://github.com/tolgee/tolgee-platform/compare/v3.186.0...v3.186.1) (2026-05-13)
+
+
+### Bug Fixes
+
+* refresh language stats after QA batch job rerun ([#3638](https://github.com/tolgee/tolgee-platform/issues/3638)) ([95cb9d9](https://github.com/tolgee/tolgee-platform/commit/95cb9d925d2cc8ebe580077f5d1c7fb45479674a))
+
 # [3.186.0](https://github.com/tolgee/tolgee-platform/compare/v3.185.0...v3.186.0) (2026-05-13)
 
 
