@@ -61,7 +61,12 @@ export const ProjectTmAssignmentDialog: React.VFC<Props> = ({
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle>{assignment.translationMemoryName}</DialogTitle>
+      <DialogTitle>
+        <T
+          keyName="translation_memory_settings_title"
+          defaultValue="TM settings"
+        />
+      </DialogTitle>
       <DialogContent>
         <Box display="flex" alignItems="center" justifyContent="space-between">
           <Typography variant="body2">
