@@ -45,8 +45,12 @@ export async function getFiles(dir) {
 }
 
 export function processFile(content) {
+  // Matches `data-cy="..."` (DOM attribute) and `dataCy="..."` (camelCase prop). Also
+  // accepts an alphabetic prefix before `Data` so prop names like `actionDataCy` /
+  // `fieldDataCy` that forward a literal data-cy value through a wrapper component get
+  // picked up too.
   const matches = content.matchAll(
-    /["']?data-?[cC]y["']?\s*[=:]\s*{?["'`]([A-Za-z0-9-_\s]+)["'`]?}?/g
+    /["']?[A-Za-z]*[Dd]ata-?[cC]y["']?\s*[=:]\s*{?["'`]([A-Za-z0-9-_\s]+)["'`]?}?/g
   );
   const items = [];
   for (const match of matches) {

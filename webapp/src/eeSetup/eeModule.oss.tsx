@@ -91,6 +91,8 @@ export const useGlossaryTermHighlights = (
 
 export const GlossaryTermPreview: React.VFC<GlossaryTermPreviewProps> =
   NotIncludedInOss('Glossaries');
+export const ProjectSettingsTranslationMemory = Empty;
+
 export const useAddProjectSettingsTabs =
   (projectId: number) => (existingItems) =>
     existingItems;
