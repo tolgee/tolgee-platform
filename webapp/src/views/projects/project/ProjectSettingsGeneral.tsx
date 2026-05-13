@@ -85,12 +85,10 @@ export const ProjectSettingsGeneral = () => {
     },
   });
 
-  const unassignMutation = useApiMutation({
-    url: '/v2/projects/{projectId}/translation-memories/{translationMemoryId}',
-    method: 'delete',
-  });
-
-  const updateProjectSettings = (values: FormValues) => {
+  const updateProjectSettings = (
+    values: FormValues,
+    unassignConflictingTms = false
+  ) => {
     return updateLoadable.mutateAsync({
       path: { projectId: project.id },
       content: {
@@ -103,6 +101,7 @@ export const ProjectSettingsGeneral = () => {
           useBranching: project.useBranching,
           ...values,
           description: values.description || undefined,
+          unassignConflictingTms,
         },
       },
     });
@@ -135,12 +134,7 @@ export const ProjectSettingsGeneral = () => {
     if (!conflictDialog) return;
     setUnassigning(true);
     try {
-      for (const conflict of conflictDialog.conflicts) {
-        await unassignMutation.mutateAsync({
-          path: { projectId: project.id, translationMemoryId: conflict.id },
-        });
-      }
-      await updateProjectSettings(conflictDialog.values);
+      await updateProjectSettings(conflictDialog.values, true);
       messageService.success(
         <T keyName="project_successfully_edited_message" />
       );

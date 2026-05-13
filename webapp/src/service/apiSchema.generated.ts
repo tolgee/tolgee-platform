@@ -1035,6 +1035,7 @@ export interface paths {
     put: operations["transferProjectToOrganization"];
   };
   "/v2/projects/{projectId}/translation-memories": {
+    /** Always readable. When the TRANSLATION_MEMORY feature is not enabled for the organization, only the project-type assignment (if any) is returned so the settings page can still show the row that already drives in-project suggestions. */
     get: operations["list_6"];
   };
   "/v2/projects/{projectId}/translation-memories/project-tm-settings": {
@@ -2741,6 +2742,8 @@ export interface components {
        * @enum {string}
        */
       translationProtection: "NONE" | "PROTECT_REVIEWED";
+      /** @description When true, the request is allowed to unassign shared translation memories whose source language differs from the new base language. Without this flag, such a conflict is rejected with `cannot_change_project_base_language_tm_conflict`. The frontend should only set this after the user explicitly confirms in the conflict dialog. */
+      unassignConflictingTms?: boolean;
       useBranching: boolean;
       useNamespaces: boolean;
     };
@@ -22196,6 +22199,7 @@ export interface operations {
       };
     };
   };
+  /** Always readable. When the TRANSLATION_MEMORY feature is not enabled for the organization, only the project-type assignment (if any) is returned so the settings page can still show the row that already drives in-project suggestions. */
   list_6: {
     parameters: {
       path: {

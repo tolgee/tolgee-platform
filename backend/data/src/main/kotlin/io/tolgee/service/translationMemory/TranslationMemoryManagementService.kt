@@ -71,6 +71,33 @@ class TranslationMemoryManagementService(
       .filter { it.translationMemory.type != TranslationMemoryType.PROJECT }
   }
 
+  /**
+   * Bulk-removes the shared TM assignments matching [translationMemoryIds] from [projectId].
+   * Used by the base-language change flow to detach mismatched shared TMs atomically inside
+   * the project-edit transaction. No feature gate — the caller (`PROJECT_EDIT` on the project)
+   * is the authority; this exists so users on plans without the TM feature can still rescue
+   * a project that carries leftover shared-TM assignments.
+   *
+   * Project-type TMs are silently filtered out — those cannot be detached from their own
+   * project. Unknown TM ids are simply not matched (no-op).
+   */
+  @Transactional
+  fun unassignSharedTmsByProject(
+    projectId: Long,
+    translationMemoryIds: Collection<Long>,
+  ) {
+    if (translationMemoryIds.isEmpty()) return
+    val assignments =
+      translationMemoryProjectRepository
+        .findByProjectId(projectId)
+        .filter {
+          it.translationMemory.id in translationMemoryIds &&
+            it.translationMemory.type != TranslationMemoryType.PROJECT
+        }
+    if (assignments.isEmpty()) return
+    translationMemoryProjectRepository.deleteAll(assignments)
+  }
+
   @Transactional
   fun renameProjectTm(
     projectId: Long,

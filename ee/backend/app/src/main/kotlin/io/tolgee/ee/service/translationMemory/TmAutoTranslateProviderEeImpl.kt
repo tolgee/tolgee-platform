@@ -39,8 +39,9 @@ class TmAutoTranslateProviderEeImpl(
   ): TranslationMemoryItemView? {
     val startedAt = System.currentTimeMillis()
     return try {
-      val result = findStoredEntryMatch(key, targetLanguage)
-        ?: ossDelegate.getAutoTranslatedValue(key, targetLanguage)
+      val result =
+        findStoredEntryMatch(key, targetLanguage)
+          ?: ossDelegate.getAutoTranslatedValue(key, targetLanguage)
       metrics.recordTranslationMemoryLookup(
         outcome = if (result != null) "hit" else "miss",
         durationMs = System.currentTimeMillis() - startedAt,

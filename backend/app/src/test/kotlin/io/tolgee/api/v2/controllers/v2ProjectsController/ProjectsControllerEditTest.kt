@@ -149,4 +149,49 @@ class ProjectsControllerEditTest : AuthorizedControllerTest() {
       userAccount = null
     }
   }
+
+  @Test
+  fun `accepts base language change with unassign flag when shared TMs have mismatched source`() {
+    val testData = TranslationMemoryTestData()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    try {
+      val project = testData.projectWithTm
+      val germanId = testData.germanLanguageWithTm.id
+
+      performAuthPut(
+        "/v2/projects/${project.id}",
+        EditProjectRequest(
+          name = project.name,
+          slug = project.slug,
+          baseLanguageId = germanId,
+          unassignConflictingTms = true,
+        ),
+      ).andIsOk.andAssertThatJson {
+        node("baseLanguage.id").isEqualTo(germanId)
+      }
+
+      // After the change, only the project's own PROJECT-type TM should remain
+      executeInNewTransaction {
+        entityManager
+          .createQuery(
+            "select tmp from TranslationMemoryProject tmp where tmp.project.id = :projectId",
+            io.tolgee.model.translationMemory.TranslationMemoryProject::class.java,
+          ).setParameter("projectId", project.id)
+          .resultList
+          .also { assert(it.size == 1) { "expected only project TM assignment, got ${it.size}" } }
+          .single()
+          .translationMemory
+          .type
+          .also {
+            assert(it == io.tolgee.model.translationMemory.TranslationMemoryType.PROJECT) {
+              "expected remaining assignment to be PROJECT type, got $it"
+            }
+          }
+      }
+    } finally {
+      testDataService.cleanTestData(testData.root)
+      userAccount = null
+    }
+  }
 }

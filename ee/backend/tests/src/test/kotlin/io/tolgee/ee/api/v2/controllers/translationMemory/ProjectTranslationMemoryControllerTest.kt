@@ -3,6 +3,7 @@ package io.tolgee.ee.api.v2.controllers.translationMemory
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.TranslationMemoryTestData
+import io.tolgee.dtos.request.project.EditProjectRequest
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.data.translationMemory.AssignSharedTranslationMemoryRequest
 import io.tolgee.ee.data.translationMemory.UpdateProjectTranslationMemoryAssignmentRequest
@@ -180,5 +181,29 @@ class ProjectTranslationMemoryControllerTest : ProjectAuthControllerTest("/v2/pr
       "/v2/projects/${project.id}/translation-memories/$unassignedId",
       AssignSharedTranslationMemoryRequest(),
     ).andIsBadRequest
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `base language change with unassign flag works when feature disabled`() {
+    enabledFeaturesProvider.forceEnabled = emptySet()
+    val germanId = testData.germanLanguageWithTm.id
+
+    performAuthPut(
+      "/v2/projects/${project.id}",
+      EditProjectRequest(
+        name = project.name,
+        slug = project.slug,
+        baseLanguageId = germanId,
+        unassignConflictingTms = true,
+      ),
+    ).andIsOk.andAssertThatJson {
+      node("baseLanguage.id").isEqualTo(germanId)
+    }
+
+    executeInNewTransaction {
+      assertThat(translationMemoryManagementService.getSharedTmAssignmentsForProject(project.id))
+        .isEmpty()
+    }
   }
 }
