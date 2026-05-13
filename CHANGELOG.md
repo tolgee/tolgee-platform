@@ -1,3 +1,10 @@
+# [3.186.0](https://github.com/tolgee/tolgee-platform/compare/v3.185.0...v3.186.0) (2026-05-13)
+
+
+### Features
+
+* filter for translations with stale QA checks + QA checks testing framework improvements ([#3649](https://github.com/tolgee/tolgee-platform/issues/3649)) ([96761da](https://github.com/tolgee/tolgee-platform/commit/96761da323fb90203c4b687aded9c2e8f8aac9ac))
+
 # [3.185.0](https://github.com/tolgee/tolgee-platform/compare/v3.184.5...v3.185.0) (2026-05-12)
 
 
