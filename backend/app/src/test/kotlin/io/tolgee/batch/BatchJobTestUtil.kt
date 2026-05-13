@@ -232,10 +232,10 @@ class BatchJobTestUtil(
   }
 
   fun makePreTranslationProcessorWaitingAfter50Executions(): () -> Unit {
-    var count = 0
+    val count = AtomicInteger(0)
 
     doAnswer {
-      if (count++ > 50) {
+      if (count.getAndIncrement() > 50) {
         while (true) {
           val context = it.arguments[2] as CoroutineContext
           context.ensureActive()
@@ -247,7 +247,7 @@ class BatchJobTestUtil(
 
     return {
       waitFor {
-        count > 50
+        count.get() > 50
       }
     }
   }

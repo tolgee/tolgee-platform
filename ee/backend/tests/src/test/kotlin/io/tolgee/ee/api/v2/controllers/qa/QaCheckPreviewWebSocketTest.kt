@@ -43,7 +43,6 @@ class QaCheckPreviewWebSocketTest : AuthorizedControllerTest() {
     testData = QaTestData()
     testDataService.saveTestData(testData.root)
     qa.testData = testData
-    qa.saveDefaultQaConfig()
     userAccount = testData.user
     jwtToken = jwtService.emitToken(testData.user.id)
   }

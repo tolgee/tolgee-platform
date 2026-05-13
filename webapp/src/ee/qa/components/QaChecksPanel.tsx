@@ -194,6 +194,7 @@ export const QaChecksPanel: FC<PanelContentProps> = (data) => {
             issue={issue}
             index={index + 1}
             text={text}
+            locale={data.language.tag}
             slim
             onCorrect={
               isCorrectable(issue) ? () => handleCorrect(issue) : undefined

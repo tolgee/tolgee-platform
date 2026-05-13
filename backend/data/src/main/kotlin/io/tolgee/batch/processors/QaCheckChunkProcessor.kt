@@ -51,7 +51,13 @@ class QaCheckChunkProcessor(
   override fun getChunkSize(
     request: QaCheckRequest,
     projectId: Long?,
-  ): Int = 10
+  ): Int = 100
 
-  override fun getJobCharacter(): JobCharacter = JobCharacter.SLOW
+  override fun getJobCharacter(
+    request: QaCheckRequest,
+    projectId: Long?,
+  ): JobCharacter {
+    val smallJob = request.target.size <= 10
+    return if (smallJob) JobCharacter.FAST else JobCharacter.SLOW
+  }
 }

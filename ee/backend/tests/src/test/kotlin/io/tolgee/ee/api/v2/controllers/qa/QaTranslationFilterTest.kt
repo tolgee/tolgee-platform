@@ -4,13 +4,10 @@ import com.posthog.server.PostHog
 import io.tolgee.constants.Feature
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.development.QaTestData
-import io.tolgee.ee.utils.QaTestUtil
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
-import io.tolgee.model.enums.qa.QaIssueState
-import io.tolgee.repository.qa.TranslationQaIssueRepository
 import io.tolgee.testing.AuthorizedControllerTest
-import io.tolgee.util.executeInNewTransaction
+import net.javacrumbs.jsonunit.assertj.assertThatJson
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -29,12 +26,6 @@ class QaTranslationFilterTest : AuthorizedControllerTest() {
   @Autowired
   private lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
 
-  @Autowired
-  lateinit var qa: QaTestUtil
-
-  @Autowired
-  private lateinit var qaIssueRepository: TranslationQaIssueRepository
-
   lateinit var testData: QaTestData
 
   private val translationsUrl
@@ -44,17 +35,7 @@ class QaTranslationFilterTest : AuthorizedControllerTest() {
   fun setup() {
     enabledFeaturesProvider.forceEnabled = setOf(Feature.QA_CHECKS)
     testData = QaTestData()
-    // Add a second key with clean translation
-    testData.projectBuilder
-      .addKey {
-        name = "clean-key"
-      }.build {
-        addTranslation("en", "Clean text.")
-        addTranslation("fr", "Texte propre.")
-      }
     testDataService.saveTestData(testData.root)
-    qa.testData = testData
-    qa.saveDefaultQaConfig()
     userAccount = testData.user
   }
 
@@ -66,77 +47,92 @@ class QaTranslationFilterTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `filters translations with QA issues in language`() {
-    // Create QA issues on the FR translation of test-key
-    qa.runChecksAndPersist(testData.frTranslation)
-
+  fun `filterHasQaIssuesInLang matches keys with OPEN issues, excludes keys with only IGNORED issues`() {
     performAuthGet(
       "$translationsUrl?filterHasQaIssuesInLang=fr",
     ).andIsOk.andAssertThatJson {
       node("_embedded.keys").isArray.hasSize(1)
-      node("_embedded.keys[0].keyName").isEqualTo("test-key")
+      node("_embedded.keys[0].keyName").isEqualTo("key-with-issues")
     }
   }
 
   @Test
-  fun `excludes translations with only ignored issues`() {
-    qa.runChecksAndPersist(testData.frTranslation)
-
-    // Ignore all issues
-    executeInNewTransaction(platformTransactionManager) {
-      val issues = qaIssueRepository.findAll().filter { it.translation.id == testData.frTranslation.id }
-      issues.forEach { it.state = QaIssueState.IGNORED }
-      qaIssueRepository.saveAll(issues)
-    }
-
-    performAuthGet(
-      "$translationsUrl?filterHasQaIssuesInLang=fr",
-    ).andIsOk.andAssertThatJson {
-      node("_embedded.keys").isAbsent()
-    }
-  }
-
-  @Test
-  fun `filters by specific check type`() {
-    qa.runChecksAndPersist(testData.frTranslation)
-
+  fun `filterQaCheckType matches keys with that check type in OPEN state`() {
     performAuthGet(
       "$translationsUrl?filterQaCheckType=PUNCTUATION_MISMATCH",
     ).andIsOk.andAssertThatJson {
       node("_embedded.keys").isArray.hasSize(1)
-      node("_embedded.keys[0].keyName").isEqualTo("test-key")
+      node("_embedded.keys[0].keyName").isEqualTo("key-with-issues")
     }
   }
 
   @Test
-  fun `filters by multiple check types`() {
-    qa.runChecksAndPersist(testData.frTranslation)
-
+  fun `filterQaCheckType supports multiple check types (OR semantics)`() {
     performAuthGet(
       "$translationsUrl?filterQaCheckType=PUNCTUATION_MISMATCH&filterQaCheckType=CHARACTER_CASE_MISMATCH",
     ).andIsOk.andAssertThatJson {
       node("_embedded.keys").isArray.hasSize(1)
-      node("_embedded.keys[0].keyName").isEqualTo("test-key")
+      node("_embedded.keys[0].keyName").isEqualTo("key-with-issues")
     }
   }
 
   @Test
   fun `returns all translations when no QA filter`() {
-    qa.runChecksAndPersist(testData.frTranslation)
-
     performAuthGet(translationsUrl).andIsOk.andAssertThatJson {
-      node("_embedded.keys").isArray.hasSize(3)
+      // test-key, key-without-fr-translation, fresh-fr-key, stale-fr-key, key-with-issues, ignored-only-key
+      node("_embedded.keys").isArray.hasSize(6)
     }
   }
 
   @Test
   fun `combines QA filter with language filter`() {
-    qa.runChecksAndPersist(testData.frTranslation)
-
     performAuthGet(
       "$translationsUrl?filterHasQaIssuesInLang=fr&languages=fr",
     ).andIsOk.andAssertThatJson {
       node("_embedded.keys").isArray.hasSize(1)
+      node("_embedded.keys[0].keyName").isEqualTo("key-with-issues")
+    }
+  }
+
+  @Test
+  fun `filterQaChecksStaleInLang matches only translations with qaChecksStale=true in lang`() {
+    // FR matches: test-key + stale-fr-key. Fresh, key-with-issues (fr fresh) and
+    // ignored-only must be absent.
+    performAuthGet("$translationsUrl?filterQaChecksStaleInLang=fr").andIsOk.andAssertThatJson {
+      node("_embedded.keys").isArray.hasSize(2)
+      node("_embedded.keys").isArray.anySatisfy {
+        assertThatJson(it).node("keyName").isEqualTo("test-key")
+      }
+      node("_embedded.keys").isArray.anySatisfy {
+        assertThatJson(it).node("keyName").isEqualTo("stale-fr-key")
+      }
+    }
+
+    // EN matches: test-key + key-without-fr-translation + key-with-issues (en is default
+    // stale because the seeded issues are on fr). fresh / stale (en is fresh) /
+    // ignored-only (en is fresh) are excluded.
+    performAuthGet("$translationsUrl?filterQaChecksStaleInLang=en").andIsOk.andAssertThatJson {
+      node("_embedded.keys").isArray.hasSize(3)
+      node("_embedded.keys").isArray.anySatisfy {
+        assertThatJson(it).node("keyName").isEqualTo("test-key")
+      }
+      node("_embedded.keys").isArray.anySatisfy {
+        assertThatJson(it).node("keyName").isEqualTo("key-without-fr-translation")
+      }
+      node("_embedded.keys").isArray.anySatisfy {
+        assertThatJson(it).node("keyName").isEqualTo("key-with-issues")
+      }
+    }
+  }
+
+  @Test
+  fun `stale filter is silently ignored when QA feature is disabled`() {
+    enabledFeaturesProvider.forceEnabled = emptySet()
+
+    performAuthGet("$translationsUrl?filterQaChecksStaleInLang=fr").andIsOk.andAssertThatJson {
+      // Filter is gated by qaEnabled — when QA is off, the param is ignored and all
+      // keys are returned.
+      node("page.totalElements").isEqualTo(6)
     }
   }
 }

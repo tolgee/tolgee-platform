@@ -103,6 +103,11 @@ export const useTranslationFilters = ({
           filterQaCheckTypes: add(filters.filterQaCheckTypes, value),
           filterHasQaIssues: undefined,
         });
+      case 'filterQaChecksStale':
+        return setFilters({
+          ...filters,
+          filterQaChecksStale: true,
+        });
       case 'filterLabel':
         return setFilters({
           ...filters,
@@ -189,6 +194,11 @@ export const useTranslationFilters = ({
           ...filters,
           filterQaCheckTypes: remove(filters.filterQaCheckTypes, value),
         });
+      case 'filterQaChecksStale':
+        return setFilters({
+          ...filters,
+          filterQaChecksStale: undefined,
+        });
       case 'filterLabel':
         return setFilters({
           ...filters,
@@ -243,6 +253,12 @@ export const useTranslationFilters = ({
       if (filters.filterHasQaIssues) {
         filtersQuery.filterHasQaIssuesInLang = add(
           filtersQuery.filterHasQaIssuesInLang,
+          tag
+        );
+      }
+      if (filters.filterQaChecksStale) {
+        filtersQuery.filterQaChecksStaleInLang = add(
+          filtersQuery.filterQaChecksStaleInLang,
           tag
         );
       }

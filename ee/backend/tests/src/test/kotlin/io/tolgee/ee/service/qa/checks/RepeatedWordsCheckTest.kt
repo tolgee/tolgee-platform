@@ -76,16 +76,38 @@ class RepeatedWordsCheckTest {
   }
 
   @Test
-  fun `detects repetition with punctuation between words`() {
-    check.check(params("word. word again")).assertSingleIssue {
-      param("word", "word")
+  fun `does not flag repetition separated by punctuation`() {
+    check.check(params("word. word again")).assertNoIssues()
+  }
+
+  @Test
+  fun `does not flag repetition across newline`() {
+    check.check(params("hello\nhello world")).assertNoIssues()
+  }
+
+  @Test
+  fun `does not flag repetition separated by tab`() {
+    check.check(params("the\tthe dog")).assertNoIssues()
+  }
+
+  @Test
+  fun `detects repetition separated by multiple spaces`() {
+    check.check(params("the  the dog")).assertSingleIssue {
+      param("word", "the")
     }
   }
 
   @Test
-  fun `detects repetition across newline`() {
-    check.check(params("hello\nhello world")).assertSingleIssue {
-      param("word", "hello")
+  fun `detects repetition separated by non-breaking space`() {
+    check.check(params("the the dog")).assertSingleIssue {
+      param("word", "the")
+    }
+  }
+
+  @Test
+  fun `detects repetition separated by mix of space and non-breaking space`() {
+    check.check(params("the  the dog")).assertSingleIssue {
+      param("word", "the")
     }
   }
 
@@ -146,5 +168,43 @@ class RepeatedWordsCheckTest {
   @Test
   fun `all types are REPEATED_WORDS`() {
     check.check(params("the the is is")).assertAllHaveType(QaCheckType.REPEATED_WORDS)
+  }
+
+  @Test
+  fun `does not flag adjacent HTML tags`() {
+    check.check(params("line<br><br>more")).assertNoIssues()
+  }
+
+  @Test
+  fun `does not flag adjacent self-closing HTML tags`() {
+    check.check(params("x<br/><br/>y")).assertNoIssues()
+  }
+
+  @Test
+  fun `does not flag adjacent uppercase HTML tags`() {
+    check.check(params("x<BR><BR>y")).assertNoIssues()
+  }
+
+  @Test
+  fun `does not flag tags with attributes containing word-like tokens`() {
+    check.check(params("""<a href="x">t</a> <a href="x">u</a>""")).assertNoIssues()
+  }
+
+  @Test
+  fun `does not flag repeated ICU placeholder`() {
+    check.check(params("Hello {name} {name}!")).assertNoIssues()
+  }
+
+  @Test
+  fun `does not flag repeated URL`() {
+    check.check(params("See https://tolgee.io https://tolgee.io now")).assertNoIssues()
+  }
+
+  @Test
+  fun `flags genuine repeat outside blocked ranges in mixed content`() {
+    check.check(params("<br>the the<br>")).assertSingleIssue {
+      message(QaIssueMessage.QA_REPEATED_WORD)
+      param("word", "the")
+    }
   }
 }

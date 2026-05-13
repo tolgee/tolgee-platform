@@ -1,6 +1,7 @@
 package io.tolgee.component.machineTranslation
 
 import io.sentry.Sentry
+import io.tolgee.Metrics
 import io.tolgee.component.machineTranslation.providers.ProviderTranslateParams
 import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.constants.Caches
@@ -24,6 +25,7 @@ class MtServiceManager(
   private val applicationContext: ApplicationContext,
   private val internalProperties: InternalProperties,
   private val cacheManager: CacheManager,
+  private val metrics: Metrics,
 ) {
   private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -48,9 +50,16 @@ class MtServiceManager(
       return foundInCache
     }
 
+    val startedAt = System.currentTimeMillis()
     return try {
       val translated =
         provider.translate(translateParams)
+
+      metrics.recordMtProviderCall(
+        params.serviceInfo.serviceType.name,
+        "success",
+        System.currentTimeMillis() - startedAt,
+      )
 
       val translateResult = getTranslateResult(translated, params.serviceInfo.serviceType, params.textRaw)
 
@@ -58,6 +67,11 @@ class MtServiceManager(
 
       return translateResult
     } catch (e: Exception) {
+      metrics.recordMtProviderCall(
+        params.serviceInfo.serviceType.name,
+        "error",
+        System.currentTimeMillis() - startedAt,
+      )
       handleSilentFail(params, e)
       getEmptyResult(params.serviceInfo.serviceType, params.textRaw.isBlank(), e)
     }

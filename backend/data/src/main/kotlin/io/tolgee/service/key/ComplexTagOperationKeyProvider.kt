@@ -15,7 +15,6 @@ import jakarta.persistence.EntityManager
 import jakarta.persistence.criteria.CriteriaBuilder
 import jakarta.persistence.criteria.Join
 import jakarta.persistence.criteria.JoinType
-import jakarta.persistence.criteria.Path
 import jakarta.persistence.criteria.Predicate
 import org.springframework.context.ApplicationContext
 
@@ -58,23 +57,24 @@ class ComplexTagOperationKeyProvider(
     entityManager.createQuery(query).resultList
   }
 
-  val rest: List<Key> by lazy {
-    val returnedIds = filtered.map { it.id }
+  val restKeyIds: List<Long> by lazy {
+    val allIds = allProjectKeyIds
+    val filteredIdSet = filtered.map { it.id }.toHashSet()
+    allIds.filter { it !in filteredIdSet }
+  }
+
+  private val allProjectKeyIds: List<Long> by lazy {
     val cb = entityManager.criteriaBuilder
-    val query = cb.createQuery(Key::class.java)
+    val query = cb.createQuery(Long::class.java)
     val root = query.from(Key::class.java)
-    val keyMeta = root.fetch(Key_.keyMeta, JoinType.LEFT)
     val branchJoin = root.join(Key_.branch, JoinType.LEFT)
-    @Suppress("UNCHECKED_CAST")
-    (keyMeta as Join<Key, KeyMeta>).fetch(KeyMeta_.tags, JoinType.LEFT) as Join<KeyMeta, Tag>
     entityManager
       .createQuery(
         query
-          .select(root)
+          .select(root.get(Key_.id))
           .where(
             cb.and(
               cb.equal(root.get(Key_.project).get(Project_.id), projectId),
-              cb.notIn(root.get(Key_.id), returnedIds),
               if (branch.isNullOrEmpty()) {
                 cb.or(
                   branchJoin.get(Branch_.id).isNull,
@@ -89,16 +89,6 @@ class ComplexTagOperationKeyProvider(
             ),
           ),
       ).resultList
-  }
-
-  private fun CriteriaBuilder.notIn(
-    path: Path<Long>,
-    collection: Collection<*>,
-  ): Predicate {
-    if (collection.isEmpty()) {
-      return this.and()
-    }
-    return this.not(path.`in`(collection))
   }
 
   private fun getKeyCondition(key: KeyId): Predicate? {

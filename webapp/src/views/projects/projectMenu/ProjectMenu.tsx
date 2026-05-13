@@ -31,6 +31,7 @@ export const ProjectMenu = () => {
   const { satisfiesPermission } = useProjectPermissions();
   const config = useConfig();
   const canPublishCd = satisfiesPermission('content-delivery.publish');
+  const projectIdParams = { [PARAMS.PROJECT_ID]: project.id };
 
   const { t } = useTranslate();
 
@@ -117,9 +118,7 @@ export const ProjectMenu = () => {
       text: t('project_menu_developer'),
       dataCy: 'project-menu-item-developer',
       quickStart: { itemKey: 'menu_developer' },
-      matchAsPrefix: LINKS.PROJECT_DEVELOPER.build({
-        [PARAMS.PROJECT_ID]: project.id,
-      }),
+      matchAsPrefix: LINKS.PROJECT_DEVELOPER.build(projectIdParams),
     },
     {
       id: 'integrate',
@@ -134,10 +133,10 @@ export const ProjectMenu = () => {
       id: 'ai',
       condition: ({ satisfiesPermission }) =>
         satisfiesPermission('prompts.view') && config.llm.enabled,
-      link: LINKS.PROJECT_AI,
+      link: LINKS.PROJECT_CONTEXT_DATA,
       icon: Stars,
       text: t('project_menu_ai'),
-      matchAsPrefix: true,
+      matchAsPrefix: LINKS.PROJECT_AI.build(projectIdParams),
       dataCy: 'project-menu-item-ai',
     },
     {

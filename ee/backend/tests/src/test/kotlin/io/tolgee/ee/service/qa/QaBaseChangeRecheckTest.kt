@@ -35,7 +35,6 @@ class QaBaseChangeRecheckTest : AuthorizedControllerTest() {
     testData = QaTestData()
     testDataService.saveTestData(testData.root)
     qa.testData = testData
-    qa.saveDefaultQaConfig()
     userAccount = testData.user
   }
 
@@ -49,6 +48,8 @@ class QaBaseChangeRecheckTest : AuthorizedControllerTest() {
     testData.testKey = entityManager.find(Key::class.java, testData.testKey.id)
     testData.enTranslation = entityManager.find(Translation::class.java, testData.enTranslation.id)
     testData.frTranslation = entityManager.find(Translation::class.java, testData.frTranslation.id)
+    testData.freshEnTranslation = entityManager.find(Translation::class.java, testData.freshEnTranslation.id)
+    testData.freshFrTranslation = entityManager.find(Translation::class.java, testData.freshFrTranslation.id)
   }
 
   @Test
@@ -86,18 +87,14 @@ class QaBaseChangeRecheckTest : AuthorizedControllerTest() {
   fun `setQaChecksStaleForBaseTranslationKeys marks siblings stale`() {
     refetchEntities()
 
-    // Clear stale flag first so we can verify it gets set
-    testData.frTranslation.qaChecksStale = false
-    entityManager.flush()
-
     val baseLanguage = languageService.getProjectBaseLanguage(testData.project.id)
     translationService.setQaChecksStaleForBaseTranslationKeys(
-      translationIds = listOf(testData.enTranslation.id),
+      translationIds = listOf(testData.freshEnTranslation.id),
       baseLanguageId = baseLanguage.id,
     )
     entityManager.flushAndClear()
 
-    val frTranslation = entityManager.find(Translation::class.java, testData.frTranslation.id)
+    val frTranslation = entityManager.find(Translation::class.java, testData.freshFrTranslation.id)
     assertThat(frTranslation.qaChecksStale).isTrue()
   }
 
@@ -106,19 +103,15 @@ class QaBaseChangeRecheckTest : AuthorizedControllerTest() {
   fun `setQaChecksStaleForBaseTranslationKeys does nothing when no base translations in input`() {
     refetchEntities()
 
-    // Clear stale flag first
-    testData.frTranslation.qaChecksStale = false
-    entityManager.flush()
-
     val baseLanguage = languageService.getProjectBaseLanguage(testData.project.id)
     // Only FR (non-base) in input — no siblings should be marked
     translationService.setQaChecksStaleForBaseTranslationKeys(
-      translationIds = listOf(testData.frTranslation.id),
+      translationIds = listOf(testData.freshFrTranslation.id),
       baseLanguageId = baseLanguage.id,
     )
     entityManager.flushAndClear()
 
-    val frTranslation = entityManager.find(Translation::class.java, testData.frTranslation.id)
+    val frTranslation = entityManager.find(Translation::class.java, testData.freshFrTranslation.id)
     assertThat(frTranslation.qaChecksStale).isFalse()
   }
 
@@ -127,20 +120,18 @@ class QaBaseChangeRecheckTest : AuthorizedControllerTest() {
   fun `setQaChecksStaleForBaseTranslationKeys includes empty translations`() {
     refetchEntities()
 
-    // Set FR translation to null (empty) and clear stale flag
-    testData.frTranslation.text = null
-    testData.frTranslation.qaChecksStale = false
+    testData.freshFrTranslation.text = null
     entityManager.flush()
 
     val baseLanguage = languageService.getProjectBaseLanguage(testData.project.id)
     translationService.setQaChecksStaleForBaseTranslationKeys(
-      translationIds = listOf(testData.enTranslation.id),
+      translationIds = listOf(testData.freshEnTranslation.id),
       baseLanguageId = baseLanguage.id,
     )
     entityManager.flushAndClear()
 
     // Empty translations should still be marked stale
-    val frTranslation = entityManager.find(Translation::class.java, testData.frTranslation.id)
+    val frTranslation = entityManager.find(Translation::class.java, testData.freshFrTranslation.id)
     assertThat(frTranslation.qaChecksStale).isTrue()
   }
 }

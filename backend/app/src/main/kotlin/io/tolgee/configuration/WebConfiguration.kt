@@ -30,7 +30,10 @@ import java.util.concurrent.TimeUnit
 
 @Configuration
 @EnableScheduling
-@EnableAsync
+// proxyTargetClass reason: Prefer CGLIB-proxies. Otherwise, we would need to include
+// all necessary methods in interfaces every time we implement an interface in a component
+// class when we need to use it with `@Autowired`.
+@EnableAsync(proxyTargetClass = true)
 class WebConfiguration(
   private val tolgeeProperties: TolgeeProperties,
   private val activityInterceptor: ActivityHandlerInterceptor,

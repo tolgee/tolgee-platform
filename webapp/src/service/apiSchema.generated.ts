@@ -15938,6 +15938,8 @@ export interface operations {
           | "HTML_SYNTAX"
           | "ICU_SYNTAX"
         )[];
+        /** Filter keys whose QA checks are stale (pending recomputation) in lang. When set, only keys with at least one stale translation in any of the provided languages are returned. */
+        filterQaChecksStaleInLang?: string[];
         /** Filter keys with any suggestions in lang */
         filterHasSuggestionsInLang?: string[];
         /** Filter keys with no suggestions in lang */
@@ -16087,6 +16089,8 @@ export interface operations {
           | "HTML_SYNTAX"
           | "ICU_SYNTAX"
         )[];
+        /** Filter keys whose QA checks are stale (pending recomputation) in lang. When set, only keys with at least one stale translation in any of the provided languages are returned. */
+        filterQaChecksStaleInLang?: string[];
         /** Filter keys with any suggestions in lang */
         filterHasSuggestionsInLang?: string[];
         /** Filter keys with no suggestions in lang */
@@ -16272,6 +16276,8 @@ export interface operations {
           | "HTML_SYNTAX"
           | "ICU_SYNTAX"
         )[];
+        /** Filter keys whose QA checks are stale (pending recomputation) in lang. When set, only keys with at least one stale translation in any of the provided languages are returned. */
+        filterQaChecksStaleInLang?: string[];
         /** Filter keys with any suggestions in lang */
         filterHasSuggestionsInLang?: string[];
         /** Filter keys with no suggestions in lang */
@@ -21009,6 +21015,8 @@ export interface operations {
           | "HTML_SYNTAX"
           | "ICU_SYNTAX"
         )[];
+        /** Filter keys whose QA checks are stale (pending recomputation) in lang. When set, only keys with at least one stale translation in any of the provided languages are returned. */
+        filterQaChecksStaleInLang?: string[];
         /** Filter keys with any suggestions in lang */
         filterHasSuggestionsInLang?: string[];
         /** Filter keys with no suggestions in lang */
@@ -21338,6 +21346,8 @@ export interface operations {
           | "HTML_SYNTAX"
           | "ICU_SYNTAX"
         )[];
+        /** Filter keys whose QA checks are stale (pending recomputation) in lang. When set, only keys with at least one stale translation in any of the provided languages are returned. */
+        filterQaChecksStaleInLang?: string[];
         /** Filter keys with any suggestions in lang */
         filterHasSuggestionsInLang?: string[];
         /** Filter keys with no suggestions in lang */

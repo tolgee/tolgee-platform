@@ -52,10 +52,12 @@ class BatchJobCancellationManager(
   }
 
   /**
-   * Sends request to cancel job executions on all instances
+   * Sends request to cancel job executions on all instances.
    *
-   * If using redis, it rends a message to redis channel
-   * If not, it just cancels local jobs
+   * When using Redis, also broadcasts the cancel message so other instances cancel
+   * their running coroutines for this job. The local instance always cancels
+   * directly (not via the Redis loopback) so cancellation does not depend on
+   * the Redis pub/sub round-trip latency.
    */
   private fun cancelLocalAndRemoteExecutions(id: Long) {
     if (usingRedisProvider.areWeUsingRedis) {
@@ -63,7 +65,6 @@ class BatchJobCancellationManager(
         RedisPubSubReceiverConfiguration.JOB_CANCEL_TOPIC,
         jacksonObjectMapper().writeValueAsString(id),
       )
-      return
     }
     cancelLocalJob(id)
   }

@@ -1,5 +1,6 @@
 package io.tolgee.development.testDataBuilder.data
 
+import io.tolgee.development.testDataBuilder.builders.LanguageBuilder
 import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.builders.UserAccountBuilder
@@ -14,7 +15,8 @@ open class BaseTestData(
   var projectBuilder: ProjectBuilder
   val project get() = projectBuilder.self
 
-  lateinit var englishLanguage: Language
+  lateinit var englishLanguageBuilder: LanguageBuilder
+  val englishLanguage: Language get() = englishLanguageBuilder.self
   var user: UserAccount
   var userAccountBuilder: UserAccountBuilder
 
@@ -39,13 +41,13 @@ open class BaseTestData(
             type = ProjectPermissionType.MANAGE
           }
 
-          addLanguage {
-            name = "English"
-            tag = "en"
-            originalName = "English"
-            englishLanguage = this
-            this@buildProject.self.baseLanguage = this
-          }
+          englishLanguageBuilder =
+            addLanguage {
+              name = "English"
+              tag = "en"
+              originalName = "English"
+              this@buildProject.self.baseLanguage = this
+            }
 
           this.self {
             baseLanguage = englishLanguage

@@ -5,6 +5,8 @@ import io.tolgee.ee.service.qa.QaCheck
 import io.tolgee.ee.service.qa.QaCheckParams
 import io.tolgee.ee.service.qa.QaCheckResult
 import io.tolgee.ee.service.qa.QaPluralCheckHelper
+import io.tolgee.ee.service.qa.checks.filterByGlossaryTerms
+import io.tolgee.ee.service.qa.checks.filterResultsInBlockedRanges
 import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.model.enums.qa.QaIssueMessage
 import org.springframework.stereotype.Component
@@ -44,6 +46,6 @@ class GrammarCheck(
             params = mapOf("message" to match.message),
           )
         }
-    return filterLanguageToolFalsePositives(results, text)
+    return filterResultsInBlockedRanges(results, text)
   }
 }

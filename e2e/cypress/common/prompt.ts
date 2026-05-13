@@ -42,5 +42,5 @@ export function getPromptEditor() {
 }
 
 export function visitAiSettings(projectId: number) {
-  return cy.visit(`${HOST}/projects/${projectId}/ai`);
+  return cy.visit(`${HOST}/projects/${projectId}/ai/prompts`);
 }

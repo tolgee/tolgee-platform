@@ -1,3 +1,58 @@
+# [3.186.0](https://github.com/tolgee/tolgee-platform/compare/v3.185.0...v3.186.0) (2026-05-13)
+
+
+### Features
+
+* filter for translations with stale QA checks + QA checks testing framework improvements ([#3649](https://github.com/tolgee/tolgee-platform/issues/3649)) ([96761da](https://github.com/tolgee/tolgee-platform/commit/96761da323fb90203c4b687aded9c2e8f8aac9ac))
+
+# [3.185.0](https://github.com/tolgee/tolgee-platform/compare/v3.184.5...v3.185.0) (2026-05-12)
+
+
+### Bug Fixes
+
+* truncate QA preview for longer translations ([#3639](https://github.com/tolgee/tolgee-platform/issues/3639)) ([db288c7](https://github.com/tolgee/tolgee-platform/commit/db288c73eebdea42551ffddec4f1d8cf8428f5ad))
+
+
+### Features
+
+* add per-call metric for MT provider latency ([#3634](https://github.com/tolgee/tolgee-platform/issues/3634)) ([c480be0](https://github.com/tolgee/tolgee-platform/commit/c480be06c720d70d8e4bd9b070fa1dcc54b51bd5))
+
+## [3.184.5](https://github.com/tolgee/tolgee-platform/compare/v3.184.4...v3.184.5) (2026-05-11)
+
+
+### Bug Fixes
+
+* avoid Repeated Words QA check false positives ([#3641](https://github.com/tolgee/tolgee-platform/issues/3641)) ([a0dbb9b](https://github.com/tolgee/tolgee-platform/commit/a0dbb9b0140e9141002a084adf910c5685152b15))
+* reorder project settings tabs (Advanced before QA Checks) ([#3654](https://github.com/tolgee/tolgee-platform/issues/3654)) ([9ebaa84](https://github.com/tolgee/tolgee-platform/commit/9ebaa844799570de91a1771a9c5c744bf27e7e6c))
+
+## [3.184.4](https://github.com/tolgee/tolgee-platform/compare/v3.184.3...v3.184.4) (2026-05-11)
+
+
+### Bug Fixes
+
+* open Context Data tab by default on the AI page ([#3630](https://github.com/tolgee/tolgee-platform/issues/3630)) ([7f79ebc](https://github.com/tolgee/tolgee-platform/commit/7f79ebcfb132459b9ee50521e80673c41c314ec2))
+
+## [3.184.3](https://github.com/tolgee/tolgee-platform/compare/v3.184.2...v3.184.3) (2026-05-11)
+
+
+### Bug Fixes
+
+* match MT language tags case-insensitively ([#3643](https://github.com/tolgee/tolgee-platform/issues/3643)) ([1a7a81b](https://github.com/tolgee/tolgee-platform/commit/1a7a81b338b52c43e75b16756b55f9161f2bb5fa)), closes [#3636](https://github.com/tolgee/tolgee-platform/issues/3636)
+
+## [3.184.2](https://github.com/tolgee/tolgee-platform/compare/v3.184.1...v3.184.2) (2026-05-07)
+
+
+### Performance Improvements
+
+* batch-load keys in tag-complex, avoid loading full entity graphs ([#3624](https://github.com/tolgee/tolgee-platform/issues/3624)) ([6765b0e](https://github.com/tolgee/tolgee-platform/commit/6765b0e661fa82894fbc9630bd8716f2d9ff5fb9))
+
+## [3.184.1](https://github.com/tolgee/tolgee-platform/compare/v3.184.0...v3.184.1) (2026-05-07)
+
+
+### Bug Fixes
+
+* classify small QA-check jobs as FAST ([#3640](https://github.com/tolgee/tolgee-platform/issues/3640)) ([5a7c849](https://github.com/tolgee/tolgee-platform/commit/5a7c8497448d5fcdb3fa24d54a429f70e9ab7ed2))
+
 # [3.184.0](https://github.com/tolgee/tolgee-platform/compare/v3.183.5...v3.184.0) (2026-05-06)
 
 
