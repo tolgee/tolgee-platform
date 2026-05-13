@@ -8,39 +8,37 @@ import io.tolgee.model.translation.Translation
 import io.tolgee.service.organization.OrganizationUsageCounterService
 import io.tolgee.util.BypassableListener
 import io.tolgee.util.getUsageIncreaseAmount
-import org.slf4j.LoggerFactory
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Scope
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
-import org.springframework.transaction.support.TransactionSynchronization
-import org.springframework.transaction.support.TransactionSynchronizationManager
+import org.springframework.transaction.event.TransactionPhase
+import org.springframework.transaction.event.TransactionalEventListener
 
 /**
  * Maintains the per-organization usage counter (`organization_usage_counter`) by accumulating
- * key / translation deltas as `EntityPreCommitEvent`s fire, then flushing them to the DB once
- * per transaction via a `beforeCommit` synchronization.
+ * key / translation deltas as `EntityPreCommitEvent`s fire, then flushing them to the DB
+ * once per transaction.
  *
- * One instance per transaction (`@Scope("transaction")`), so the delta maps and the
- * "synchronization registered" flag reset automatically between transactions.
- *
- * The flush runs inside the original transaction — if the transaction rolls back (e.g. a
- * limit check throws `BadRequestException`), the counter UPDATE rolls back with it. No
- * dual-write problem.
+ * One instance per transaction (`@Scope("transaction")`), so all state resets automatically
+ * between transactions. The flush is triggered by publishing `OrgCounterFlushSignal` on
+ * the first delta-bearing event of the transaction; Spring's `@TransactionalEventListener`
+ * fires the handler at `BEFORE_COMMIT`, inside the original transaction — if the
+ * transaction rolls back, the counter UPDATE rolls back with it.
  */
 @Scope(TransactionScopeConfig.SCOPE_TRANSACTION)
 @Component
 class OrganizationUsageCounterListener(
   private val counterService: OrganizationUsageCounterService,
   private val tolgeeProperties: TolgeeProperties,
+  private val applicationEventPublisher: ApplicationEventPublisher,
 ) : BypassableListener {
   override var bypass: Boolean = false
-
-  private val logger = LoggerFactory.getLogger(javaClass)
 
   private var organizationId: Long? = null
   private var keyDelta: Long = 0
   private var translationDelta: Long = 0
-  private var synchronizationRegistered = false
+  private var flushSignalPublished = false
 
   @EventListener
   fun onPreCommit(event: EntityPreCommitEvent) {
@@ -60,31 +58,19 @@ class OrganizationUsageCounterListener(
     // such entity reaches us via a single project, which belongs to a single org.
     organizationId = orgId
     if (isKey) keyDelta += delta else translationDelta += delta
-    registerSynchronizationOnce()
-  }
 
-  private fun registerSynchronizationOnce() {
-    if (synchronizationRegistered) return
-    if (!TransactionSynchronizationManager.isSynchronizationActive()) {
-      logger.warn(
-        "Counter delta event fired outside an active transaction synchronization scope; " +
-          "deltas will not be flushed. Reconciliation will heal this.",
-      )
-      return
+    if (!flushSignalPublished) {
+      flushSignalPublished = true
+      applicationEventPublisher.publishEvent(OrgCounterFlushSignal)
     }
-    synchronizationRegistered = true
-    TransactionSynchronizationManager.registerSynchronization(
-      object : TransactionSynchronization {
-        override fun beforeCommit(readOnly: Boolean) {
-          if (readOnly) return
-          flushDelta()
-        }
-      },
-    )
   }
 
-  private fun flushDelta() {
+  @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
+  fun flushDelta(signal: OrgCounterFlushSignal) {
     val orgId = organizationId ?: return
     counterService.applyDelta(orgId, keyDelta, translationDelta)
   }
+
+  /** Per-transaction signal that there are counter deltas to flush at BEFORE_COMMIT. */
+  object OrgCounterFlushSignal
 }
