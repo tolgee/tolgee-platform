@@ -1,3 +1,10 @@
+## [3.186.2](https://github.com/tolgee/tolgee-platform/compare/v3.186.1...v3.186.2) (2026-05-13)
+
+
+### Bug Fixes
+
+* separate source and target language lists for MT providers ([#3662](https://github.com/tolgee/tolgee-platform/issues/3662)) ([a340108](https://github.com/tolgee/tolgee-platform/commit/a3401086cf373b83498cfec71fd78ec7d3997873)), closes [#3643](https://github.com/tolgee/tolgee-platform/issues/3643)
+
 ## [3.186.1](https://github.com/tolgee/tolgee-platform/compare/v3.186.0...v3.186.1) (2026-05-13)
 
 
