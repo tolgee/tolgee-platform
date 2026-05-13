@@ -32,7 +32,7 @@ class TranslationSuggestionControllerStreamingTest : ProjectAuthControllerTest("
   lateinit var testData: BaseTestData
 
   lateinit var czechLanguage: Language
-  lateinit var hindiLanguage: Language
+  lateinit var khmerLanguage: Language
 
   @MockitoBean
   @Autowired
@@ -59,7 +59,7 @@ class TranslationSuggestionControllerStreamingTest : ProjectAuthControllerTest("
     testData =
       BaseTestData().apply {
         czechLanguage = projectBuilder.addCzech().self
-        hindiLanguage = projectBuilder.addHindi().self
+        khmerLanguage = projectBuilder.addKhmer().self
       }
 
     testDataService.saveTestData(testData.root)
@@ -113,7 +113,7 @@ class TranslationSuggestionControllerStreamingTest : ProjectAuthControllerTest("
         performProjectAuthPost(
           "suggest/machine-translations-streaming",
           mapOf(
-            "targetLanguageId" to hindiLanguage.id,
+            "targetLanguageId" to khmerLanguage.id,
             "baseText" to "text",
           ),
         ).andDo {

@@ -7,13 +7,16 @@ abstract class AbstractMtValueProvider : MtValueProvider {
   private val String.toSuitableTag: String?
     get() = getSuitableTag(this)
 
+  private val String.toSuitableSourceTag: String?
+    get() = getSuitableSourceTag(this)
+
   fun isFormalitySupported(tag: String): Boolean {
     val suitableTag = getSuitableTag(tag) ?: return false
     return formalitySupportingLanguages?.contains(suitableTag) ?: false
   }
 
   override fun translate(params: ProviderTranslateParams): MtValueProvider.MtResult {
-    val suitableSourceTag = params.sourceLanguageTag.toSuitableTag
+    val suitableSourceTag = params.sourceLanguageTag.toSuitableSourceTag
     val suitableTargetTag = params.targetLanguageTag.toSuitableTag
 
     if (suitableSourceTag.isNullOrEmpty() || suitableTargetTag.isNullOrEmpty()) {
