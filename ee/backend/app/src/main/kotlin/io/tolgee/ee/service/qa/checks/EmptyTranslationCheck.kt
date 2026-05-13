@@ -32,14 +32,7 @@ class EmptyTranslationCheck : QaCheck {
   private fun checkPluralVariants(params: QaCheckParams): List<QaCheckResult> {
     val requiredForms = getPluralFormsForLocale(params.languageTag)
 
-    val formsToCheck =
-      if (params.activeVariant != null) {
-        requiredForms.filter { it == params.activeVariant }
-      } else {
-        requiredForms
-      }
-
-    return formsToCheck.mapNotNull { form ->
+    return requiredForms.mapNotNull { form ->
       val variantText = params.textVariants?.get(form)
       if (variantText.isNullOrBlank()) {
         QaCheckResult(
