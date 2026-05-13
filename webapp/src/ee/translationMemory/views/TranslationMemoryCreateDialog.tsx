@@ -1,13 +1,9 @@
 import { Dialog, DialogTitle } from '@mui/material';
-import { T, useTranslate } from '@tolgee/react';
+import { T } from '@tolgee/react';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
-import {
-  useEnabledFeatures,
-  usePreferredOrganization,
-} from 'tg.globalContext/helpers';
-import { DisabledFeatureBanner } from 'tg.component/common/DisabledFeatureBanner';
+import { usePreferredOrganization } from 'tg.globalContext/helpers';
 import { messageService } from 'tg.service/MessageService';
 import {
   TranslationMemoryCreateEditForm,
@@ -36,12 +32,7 @@ export const TranslationMemoryCreateDialog = ({
   onClose,
   onFinished,
 }: Props) => {
-  const { t } = useTranslate();
-
   const { preferredOrganization } = usePreferredOrganization();
-
-  const { isEnabled } = useEnabledFeatures();
-  const featureEnabled = isEnabled('TRANSLATION_MEMORY');
 
   const mutation = useApiMutation({
     url: '/v2/organizations/{organizationId}/translation-memories',
@@ -94,14 +85,6 @@ export const TranslationMemoryCreateDialog = ({
       maxWidth="sm"
       onClick={(e) => e.stopPropagation()}
     >
-      {!featureEnabled && (
-        <DisabledFeatureBanner
-          customMessage={t(
-            'translation_memories_feature_description',
-            'Translation memory management is available on the Business plan.'
-          )}
-        />
-      )}
       <DialogTitle>
         <T
           keyName="translation_memory_create_title"

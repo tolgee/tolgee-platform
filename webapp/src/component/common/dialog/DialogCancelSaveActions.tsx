@@ -17,7 +17,7 @@ export const DialogCancelSaveActions: React.VFC<Props> = ({
 }) => (
   <DialogActions>
     <Button onClick={onCancel}>
-      <T keyName="global_cancel_button" defaultValue="Cancel" />
+      <T keyName="global_cancel_button" />
     </Button>
     <LoadingButton
       variant="contained"
@@ -26,7 +26,7 @@ export const DialogCancelSaveActions: React.VFC<Props> = ({
       loading={saving}
       data-cy={saveDataCy}
     >
-      <T keyName="global_form_save" defaultValue="Save" />
+      <T keyName="global_form_save" />
     </LoadingButton>
   </DialogActions>
 );

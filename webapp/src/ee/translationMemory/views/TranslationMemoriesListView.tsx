@@ -225,7 +225,7 @@ export const TranslationMemoriesListView = () => {
             <DisabledFeatureBanner
               customMessage={t(
                 'translation_memories_feature_description',
-                'Translation memory management is available on the Business plan.'
+                'Upgrade your plan to use the Translation memory management.'
               )}
             />
           </Box>

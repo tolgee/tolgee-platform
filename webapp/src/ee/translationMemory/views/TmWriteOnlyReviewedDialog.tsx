@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Box, Dialog, DialogContent, DialogTitle } from '@mui/material';
 import { T } from '@tolgee/react';
-import { DialogCancelSaveActions } from 'tg.ee.module/translationMemory/components/shared/DialogCancelSaveActions';
 import { WriteOnlyReviewedSwitch } from 'tg.ee.module/translationMemory/components/form/fields/WriteOnlyReviewedSwitch';
+import { DialogCancelSaveActions } from 'tg.component/common/dialog/DialogCancelSaveActions';
 
 type Props = {
   open: boolean;
