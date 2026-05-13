@@ -5519,9 +5519,11 @@
             left join language l on l.id = p.base_language_id;
 
             insert into translation_memory_project (
+                id, created_at, updated_at,
                 translation_memory_id, project_id, read_access, write_access, priority, penalty
             )
-            select pair.tm_id, pair.project_id, true, true, 0, null
+            select nextval('hibernate_sequence'), now(), now(),
+                   pair.tm_id, pair.project_id, true, true, 0, null
             from tmp_project_tm_pairs pair;
         </sql>
         <rollback>

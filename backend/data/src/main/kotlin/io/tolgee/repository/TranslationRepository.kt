@@ -129,6 +129,37 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
 
   fun deleteByIdIn(ids: Collection<Long>)
 
+  /**
+   * Exact-equality auto-translate lookup. Returns up to [pageable.size] translations whose
+   * key has a base-language translation equal to [baseTranslationText]. Used by the batch /
+   * MT pre-translate pipeline: the trigram-similarity suggestion query in
+   * `AbstractTranslationMemoryService` is too slow to run per-key, so the hot path resolves
+   * exact matches here and falls back to MT for the rest.
+   */
+  @Query(
+    """
+      select
+      new io.tolgee.model.views.TranslationMemoryItemView(baseTranslation.text, target.text, k.name, null, 1.0f, k.id)
+      from Translation baseTranslation
+      join baseTranslation.key k
+      join k.project p
+      join Translation target on
+            target.key = k and
+            target.language.id = :targetLanguageId and
+            target.text <> '' and
+            target.text is not null
+      where baseTranslation.language = p.baseLanguage and
+        baseTranslation.text = :baseTranslationText and
+        k <> :key
+      """,
+  )
+  fun getTranslationMemoryValue(
+    baseTranslationText: String,
+    key: Key,
+    targetLanguageId: Long,
+    pageable: Pageable = Pageable.ofSize(1),
+  ): List<TranslationMemoryItemView>
+
   @Query(
     """
     select t.id as id, t.text as text, t.language.tag as languageTag

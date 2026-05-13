@@ -28,6 +28,7 @@ import io.tolgee.model.translation.Translation
 import io.tolgee.model.translation.Translation_
 import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.model.views.SimpleTranslationView
+import io.tolgee.model.views.TranslationMemoryItemView
 import io.tolgee.repository.TranslationRepository
 import io.tolgee.security.ProjectHolder
 import io.tolgee.service.dataImport.ImportService
@@ -141,6 +142,26 @@ class TranslationService(
   ): Translation {
     return translationRepository.findOneByProjectIdAndKeyIdAndLanguageId(projectId, keyId, languageId)
       ?: this.createEmpty(keyId, languageId, projectId)
+  }
+
+  fun findBaseTranslation(key: Key): Translation? {
+    val baseLanguage = key.project.baseLanguage ?: return null
+    return key.translations.find { it.language.id == baseLanguage.id }
+  }
+
+  /**
+   * Exact-equality TM lookup used by the auto-translate / batch pre-translate hot path.
+   * Returns the first match found across the project's own translations; the EE
+   * `TmAutoTranslateProviderEeImpl` consults stored TM entries before falling back here.
+   */
+  fun getTranslationMemoryValue(
+    key: Key,
+    targetLanguage: ILanguage,
+  ): TranslationMemoryItemView? {
+    val baseTranslationText = findBaseTranslation(key)?.text ?: return null
+    return translationRepository
+      .getTranslationMemoryValue(baseTranslationText, key, targetLanguage.id)
+      .firstOrNull()
   }
 
   fun createEmpty(

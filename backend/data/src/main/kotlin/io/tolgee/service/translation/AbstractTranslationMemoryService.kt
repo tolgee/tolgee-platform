@@ -104,8 +104,9 @@ abstract class AbstractTranslationMemoryService(
         .resultList
 
     // count(*) over() trails the deduped projection; deduped has 10 columns
-    // (indexes 0..9), so the window count is at index 10.
-    val count = (resultList.firstOrNull() as Array<*>?)?.get(10) as Long? ?: 0L
+    // (indexes 0..9), so the window count is at index 10. PG returns it as bigint —
+    // JDBC may surface Long or BigInteger depending on driver, so go through Number.
+    val count = ((resultList.firstOrNull() as Array<*>?)?.get(10) as Number?)?.toLong() ?: 0L
     return PageImpl(resultList.map { mapRow(it as Array<*>) }, pageable, count)
   }
 
