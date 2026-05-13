@@ -18,8 +18,8 @@ const SIZE_KEYS = { x: 'width', y: 'height' };
 
 /**
  * custom thing for Tolgee
- * Default reserve (kept as a constant only because callers that don't pass `expansionReserve`
- * still get the historical buffer — preserves backwards compatibility for existing call sites).
+ * when editor is open, cell expands, so we keep some reserve at the bottom
+ * so the layout is not overflowing
  */
 const SIZE_RESERVE_IF_ITEMS_EXPAND = 300;
 
@@ -530,12 +530,8 @@ export class ReactList extends Component {
     const cache = {};
     const bottom = Math.ceil(length / itemsPerRow) * itemsPerRow;
     const size = this.getSpaceBefore(bottom, cache);
-    const reserve =
-      this.props.expansionReserve !== undefined
-        ? this.props.expansionReserve
-        : SIZE_RESERVE_IF_ITEMS_EXPAND;
     if (size) {
-      style[SIZE_KEYS[axis]] = size + reserve;
+      style[SIZE_KEYS[axis]] = size + SIZE_RESERVE_IF_ITEMS_EXPAND;
       if (axis === 'x') style.overflowX = 'hidden';
     }
     const offset = this.getSpaceBefore(from, cache);

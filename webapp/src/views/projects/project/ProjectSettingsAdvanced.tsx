@@ -19,7 +19,6 @@ import { DefaultNamespaceSelect } from './components/DefaultNamespaceSelect';
 import { LinkReadMore } from 'tg.component/LinkReadMore';
 import { useReportEvent } from 'tg.hooks/useReportEvent';
 import { useEnabledFeatures } from 'tg.globalContext/helpers';
-import { ProjectSettingsTranslationMemory } from 'tg.ee';
 
 type EditProjectRequest = components['schemas']['EditProjectRequest'];
 
@@ -167,8 +166,6 @@ export const ProjectSettingsAdvanced = () => {
           />
         </>
       )}
-
-      <ProjectSettingsTranslationMemory />
 
       <Typography variant="h5" mt={5} mb="20px">
         {t('project_settings_advanced_export_and_file_formats')}

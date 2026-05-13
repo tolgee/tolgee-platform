@@ -3,7 +3,7 @@ import { TextField } from 'tg.component/common/form/fields/TextField';
 import Box from '@mui/material/Box';
 import { T, useTranslate } from '@tolgee/react';
 import { AssignedProjectsSelect } from 'tg.ee.module/glossary/components/AssignedProjectsSelect';
-import { BaseLanguageSelect } from 'tg.component/languages/BaseLanguageSelect';
+import { GlossaryBaseLanguageSelect } from 'tg.ee.module/glossary/components/GlossaryBaseLanguageSelect';
 import { Alert } from '@mui/material';
 
 type Props = {
@@ -30,7 +30,7 @@ export const GlossaryCreateEditFields: VFC<Props> = ({
       {withAssignedProjects && (
         <AssignedProjectsSelect name="assignedProjects" disabled={disabled} />
       )}
-      <BaseLanguageSelect
+      <GlossaryBaseLanguageSelect
         name="baseLanguage"
         assignedProjectsName={
           withAssignedProjects ? 'assignedProjects' : undefined

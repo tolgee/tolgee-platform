@@ -60,8 +60,6 @@ export type FileDropzoneProps = {
     href: string;
     text: ReactNode;
   };
-  /** Optional caption rendered inside the dropzone, below the action area. */
-  helperText?: ReactNode;
 };
 
 export const FileDropzone: React.FC<FileDropzoneProps> = ({
@@ -70,7 +68,6 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({
   maxFiles = Infinity,
   acceptedFileTypes,
   helpLink,
-  helperText,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -231,11 +228,6 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({
                 {helpLink.text}
               </Typography>
             </Link>
-          )}
-          {helperText && (
-            <Typography variant="caption" color="text.secondary">
-              {helperText}
-            </Typography>
           )}
         </StyledContainer>
       </DragDropArea>

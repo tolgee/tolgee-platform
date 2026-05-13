@@ -1,9 +1,9 @@
 import React from 'react';
-import { styled } from '@mui/material';
+import { Box, styled } from '@mui/material';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { CellStateBar } from '../cell/CellStateBar';
-import { LanguageHeading } from 'tg.component/languages/LanguageHeading';
+import { FlagImage } from '@tginternal/library/components/languages/FlagImage';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 export type CellLanguageModel = Pick<
@@ -16,6 +16,7 @@ const StyledContent = styled('div')`
   align-items: center;
   padding: 8px 12px;
   flex-shrink: 0;
+  gap: 8px;
 `;
 
 type Props = {
@@ -27,7 +28,10 @@ export const CellLanguage: React.FC<Props> = ({ language, onResize }) => {
   return (
     <>
       <StyledContent>
-        <LanguageHeading language={language} />
+        <FlagImage flagEmoji={language.flagEmoji!} height={20} />
+        <Box sx={{ fontWeight: language.base ? 'bold' : 'normal' }}>
+          {language.name}
+        </Box>
       </StyledContent>
       {onResize && <CellStateBar onResize={onResize} />}
     </>

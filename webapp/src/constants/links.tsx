@@ -59,7 +59,6 @@ export enum PARAMS {
   VERIFICATION_CODE = 'verificationCode',
   ORGANIZATION_SLUG = 'slug',
   GLOSSARY_ID = 'glossaryId',
-  TRANSLATION_MEMORY_ID = 'translationMemoryId',
   TRANSLATION_ID = 'translationId',
   PLAN_ID = 'planId',
   TA_ID = 'taId',
@@ -321,16 +320,6 @@ export class LINKS {
   );
 
   static ORGANIZATION_GLOSSARY_VIEW = LINKS.ORGANIZATION_GLOSSARY;
-
-  static ORGANIZATION_TRANSLATION_MEMORIES = Link.ofParent(
-    LINKS.ORGANIZATION,
-    'translation-memories'
-  );
-
-  static ORGANIZATION_TRANSLATION_MEMORY = Link.ofParent(
-    LINKS.ORGANIZATION_TRANSLATION_MEMORIES,
-    p(PARAMS.TRANSLATION_MEMORY_ID)
-  );
 
   /**
    * Slack

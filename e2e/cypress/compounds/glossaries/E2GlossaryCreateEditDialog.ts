@@ -14,13 +14,13 @@ export class E2GlossaryCreateEditDialog {
   }
 
   setBaseLanguage(language: string) {
-    gcy('base-language-select').click();
-    gcy('base-language-select-item').contains(language).click();
+    gcy('glossary-base-language-select').click();
+    gcy('glossary-base-language-select-item').contains(language).click();
     this.checkBaseLanguage(language);
   }
 
   checkBaseLanguage(language: string) {
-    gcy('base-language-select').should('contain', language);
+    gcy('glossary-base-language-select').should('contain', language);
   }
 
   toggleAssignedProject(projectName: string) {
