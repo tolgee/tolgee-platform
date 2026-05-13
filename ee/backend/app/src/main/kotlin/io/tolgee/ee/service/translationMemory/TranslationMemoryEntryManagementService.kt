@@ -105,6 +105,48 @@ class TranslationMemoryEntryManagementService(
     return PageImpl(rows, pageable, total)
   }
 
+  /**
+   * Returns one entry ID per STORED row matching [search] (a representative — `min(id)`
+   * within each `(sourceText, tuid-or-"manual")` bucket). Virtual rows have no entry IDs
+   * so they are excluded. Used by the UI to drive "select all" for batch delete without
+   * paging through the whole content list.
+   */
+  fun findAllStoredEntryIds(
+    organizationId: Long,
+    translationMemoryId: Long,
+    search: String? = null,
+  ): List<Long> {
+    val tm = requireTmInOrganization(organizationId, translationMemoryId)
+    val effectiveSearch = search?.takeIf { it.isNotBlank() }
+
+    val sql =
+      """
+      select min(e.id) from translation_memory_entry e
+      where e.translation_memory_id = :tmId
+        and (
+          cast(:search as text) is null
+          or lower(e.source_text::text) like lower('%' || cast(:search as text) || '%')
+          or exists (
+            select 1 from translation_memory_entry e2
+            where e2.translation_memory_id = e.translation_memory_id
+              and e2.source_text = e.source_text
+              and e2.tuid is not distinct from e.tuid
+              and lower(e2.target_text::text) like lower('%' || cast(:search as text) || '%')
+          )
+        )
+      group by e.source_text, coalesce(e.tuid, 'manual')
+      """.trimIndent()
+
+    @Suppress("UNCHECKED_CAST")
+    val ids =
+      entityManager
+        .createNativeQuery(sql)
+        .setParameter("tmId", tm.id)
+        .setParameter("search", effectiveSearch)
+        .resultList as List<Number>
+    return ids.map { it.toLong() }
+  }
+
   private data class RowId(
     val sourceText: String,
     val kind: TmRow.Kind,

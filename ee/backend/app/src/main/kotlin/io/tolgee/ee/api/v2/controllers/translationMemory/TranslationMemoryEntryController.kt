@@ -23,6 +23,7 @@ import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
+import org.springframework.hateoas.CollectionModel
 import org.springframework.hateoas.PagedModel
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -74,6 +75,32 @@ class TranslationMemoryEntryController(
         targetLanguageTag = targetLanguageTag,
       )
     return pagedRowAssembler.toModel(page, translationMemoryRowModelAssembler)
+  }
+
+  @GetMapping("/entryIds")
+  @Operation(
+    summary = "List representative entry IDs for every stored row",
+    description =
+      "Returns one entry ID per stored row matching the optional `search` filter — the " +
+        "same row identities that the paged endpoint exposes, but flattened to a single " +
+        "long list for client-side `Select all` flows. Virtual rows are not included " +
+        "(they have no entry IDs).",
+  )
+  @RequiresOrganizationRole(OrganizationRoleType.MEMBER)
+  @AllowApiAccess(AuthTokenType.ONLY_PAT)
+  @RequiresFeatures(Feature.TRANSLATION_MEMORY)
+  fun getAllStoredEntryIds(
+    @PathVariable organizationId: Long,
+    @PathVariable translationMemoryId: Long,
+    @RequestParam(required = false) search: String?,
+  ): CollectionModel<Long> {
+    val ids =
+      translationMemoryEntryManagementService.findAllStoredEntryIds(
+        organizationId = organizationId,
+        translationMemoryId = translationMemoryId,
+        search = search,
+      )
+    return CollectionModel.of(ids)
   }
 
   @GetMapping("/{entryId:[0-9]+}")

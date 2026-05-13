@@ -337,6 +337,10 @@ export interface paths {
     /** For every entry ID in the payload, deletes the entire group that shares the same source text (and key). The request is deduplicated to distinct groups so passing multiple entries from the same row is a no-op past the first one. */
     delete: operations["deleteMultipleGroups"];
   };
+  "/v2/organizations/{organizationId}/translation-memories/{translationMemoryId}/entries/entryIds": {
+    /** Returns one entry ID per stored row matching the optional `search` filter — the same row identities that the paged endpoint exposes, but flattened to a single long list for client-side `Select all` flows. Virtual rows are not included (they have no entry IDs). */
+    get: operations["getAllStoredEntryIds"];
+  };
   "/v2/organizations/{organizationId}/translation-memories/{translationMemoryId}/entries/{entryId}": {
     get: operations["get_14"];
     put: operations["update_9"];
@@ -12291,6 +12295,50 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["DeleteMultipleTranslationMemoryEntriesRequest"];
+      };
+    };
+  };
+  /** Returns one entry ID per stored row matching the optional `search` filter — the same row identities that the paged endpoint exposes, but flattened to a single long list for client-side `Select all` flows. Virtual rows are not included (they have no entry IDs). */
+  getAllStoredEntryIds: {
+    parameters: {
+      path: {
+        organizationId: number;
+        translationMemoryId: number;
+      };
+      query: {
+        search?: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelLong"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
       };
     };
   };

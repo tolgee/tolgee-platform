@@ -9,7 +9,10 @@ import { Box, Button, styled, Typography, useTheme } from '@mui/material';
 import { languageInfo } from '@tginternal/language-util/lib/generated/languageInfo';
 import { T, useTranslate } from '@tolgee/react';
 import { useResizeObserver } from 'usehooks-ts';
-import { useApiInfiniteQuery } from 'tg.service/http/useQueryApi';
+import {
+  useApiInfiniteQuery,
+  useApiMutation,
+} from 'tg.service/http/useQueryApi';
 import { useDebounce } from 'use-debounce';
 import { ReactList } from 'tg.component/reactList/ReactList';
 import {
@@ -21,7 +24,6 @@ import { TranslationMemoryCreateEntryDialog } from 'tg.ee.module/translationMemo
 import { TranslationMemoryImportDialog } from 'tg.ee.module/translationMemory/components/content/TranslationMemoryImportDialog';
 import { useTmExport } from 'tg.ee.module/translationMemory/hooks/useTmExport';
 import { components } from 'tg.service/apiSchema.generated';
-import { apiV2HttpService } from 'tg.service/http/ApiV2HttpService';
 import { useSelectionService } from 'tg.service/useSelectionService';
 import { tmPreferencesService } from 'tg.ee.module/translationMemory/services/TmPreferencesService';
 import { useIsOrganizationOwnerOrMaintainer } from 'tg.globalContext/helpers';
@@ -176,27 +178,19 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
   const totalElements = entries.data?.pages?.[0]?.page?.totalElements ?? 0;
 
   // Each selectable row is identified by the representative entry id (the first cell that
-  // has one). Read-only rows carry no entryId on any cell — they are not selectable for
-  // batch delete.
+  // has one). Read-only (virtual) rows carry no entryId — the backend excludes them.
+  const getAllStoredEntryIdsMutation = useApiMutation({
+    url: '/v2/organizations/{organizationId}/translation-memories/{translationMemoryId}/entries/entryIds',
+    method: 'get',
+  });
+
   const getAllGroupIds = async (): Promise<number[]> => {
     if (totalElements === 0) return [];
-    const data = await apiV2HttpService.get<{
-      _embedded?: {
-        translationMemoryRows?: TmRow[];
-      };
-    }>(
-      `organizations/${organizationId}/translation-memories/${translationMemoryId}/entries`,
-      {
-        size: String(totalElements),
-        ...(search ? { search } : {}),
-        ...(targetLanguageTag ? { targetLanguageTag } : {}),
-      }
-    );
-    return (
-      data._embedded?.translationMemoryRows
-        ?.map((r) => r.cells.find((c) => c.entryId !== undefined)?.entryId)
-        .filter((id): id is number => id !== undefined) ?? []
-    );
+    const data = await getAllStoredEntryIdsMutation.mutateAsync({
+      path: { organizationId, translationMemoryId },
+      query: { search },
+    });
+    return data._embedded?.longList ?? [];
   };
 
   const selectionService = useSelectionService<number>({
