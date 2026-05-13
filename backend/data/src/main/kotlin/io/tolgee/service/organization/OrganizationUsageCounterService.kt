@@ -37,6 +37,7 @@ class OrganizationUsageCounterService(
     keyDelta: Long,
     translationDelta: Long,
   ) {
+    if (!tolgeeProperties.orgCounter.enabled) return
     if (keyDelta == 0L && translationDelta == 0L) return
 
     val start = System.nanoTime()
@@ -55,9 +56,18 @@ class OrganizationUsageCounterService(
 
   /**
    * Read the current counter values. Seeds the row via slow-query recount if missing.
+   *
+   * When the counter is disabled via `tolgee.org-counter.enabled`, falls back to the
+   * slow-query recount on every call (i.e. pre-counter behavior).
    */
   @Transactional
   fun getCounts(organizationId: Long): Counts {
+    if (!tolgeeProperties.orgCounter.enabled) {
+      return Counts(
+        organizationStatsService.getKeyCount(organizationId),
+        organizationStatsService.getTranslationCount(organizationId),
+      )
+    }
     val row = organizationUsageCounterRepository.findByOrganizationId(organizationId)
     if (row != null) {
       return Counts(row.keyCount, row.translationCount)
@@ -129,6 +139,11 @@ class OrganizationUsageCounterService(
     keyLimit: Long?,
     translationLimit: Long?,
   ): Counts {
+    if (!tolgeeProperties.orgCounter.enabled) {
+      // Counter disabled — getCounts already returns a fresh slow-query result, so the
+      // boundary check would just re-run the same query. Skip the verification step.
+      return getCounts(organizationId)
+    }
     val cached = getCounts(organizationId)
     val threshold = tolgeeProperties.orgCounter.boundaryVerifyThreshold
     val nearKeyBoundary = keyLimit != null && keyLimit > 0 && cached.keys >= threshold * keyLimit
