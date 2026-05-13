@@ -80,11 +80,7 @@ class OrganizationUsageCounterService(
   fun forceRecompute(organizationId: Long): Counts {
     val keyCount = organizationStatsService.getKeyCount(organizationId)
     val translationCount = organizationStatsService.getTranslationCount(organizationId)
-    val now = Date()
-    val updated = organizationUsageCounterRepository.setAbsolute(organizationId, keyCount, translationCount, now, now)
-    if (updated == 0) {
-      seedRow(organizationId, keyCount, translationCount, lastReconciledAt = now)
-    }
+    setAbsoluteOrSeed(organizationId, keyCount, translationCount)
     return Counts(keyCount, translationCount)
   }
 
@@ -104,37 +100,16 @@ class OrganizationUsageCounterService(
 
     val existing = organizationUsageCounterRepository.findByOrganizationId(organizationId)
     if (existing != null) {
-      val keyDrift = recountKeys - existing.keyCount
-      val translationDrift = recountTranslations - existing.translationCount
-      if (keyDrift != 0L || translationDrift != 0L) {
-        metrics.orgCounterDriftDetected("reconciliation").increment()
-        if (keyDrift != 0L) {
-          metrics.orgCounterDriftMagnitude("keys").record(abs(keyDrift).toDouble())
-        }
-        if (translationDrift != 0L) {
-          metrics.orgCounterDriftMagnitude("translations").record(abs(translationDrift).toDouble())
-        }
-        logger.warn(
-          "Reconciliation drift for org {}: keyDrift={}, translationDrift={}. Healing.",
-          organizationId,
-          keyDrift,
-          translationDrift,
-        )
-      }
-    }
-
-    val now = Date()
-    val updated =
-      organizationUsageCounterRepository.setAbsolute(
+      emitDriftMetricsIfAny(
         organizationId,
-        recountKeys,
-        recountTranslations,
-        now,
-        now,
+        cachedKeys = existing.keyCount,
+        cachedTranslations = existing.translationCount,
+        recountKeys = recountKeys,
+        recountTranslations = recountTranslations,
+        source = "reconciliation",
       )
-    if (updated == 0) {
-      seedRow(organizationId, recountKeys, recountTranslations, lastReconciledAt = now)
     }
+    setAbsoluteOrSeed(organizationId, recountKeys, recountTranslations)
     metrics.orgCounterReconciliationOrgsProcessedCounter.increment()
   }
 
@@ -171,29 +146,76 @@ class OrganizationUsageCounterService(
         organizationStatsService.getKeyCount(organizationId),
         organizationStatsService.getTranslationCount(organizationId),
       )
-    val keyDrift = recount.keys - cached.keys
-    val translationDrift = recount.translations - cached.translations
-
-    if (keyDrift != 0L || translationDrift != 0L) {
-      metrics.orgCounterBoundaryVerifyMismatchCounter.increment()
-      metrics.orgCounterDriftDetected("boundary_verify").increment()
-      if (keyDrift != 0L) {
-        metrics.orgCounterDriftMagnitude("keys").record(abs(keyDrift).toDouble())
-      }
-      if (translationDrift != 0L) {
-        metrics.orgCounterDriftMagnitude("translations").record(abs(translationDrift).toDouble())
-      }
-      logger.warn(
-        "Boundary verify drift for org {}: keyDrift={}, translationDrift={}. Healing counter.",
+    val drifted =
+      emitDriftMetricsIfAny(
         organizationId,
-        keyDrift,
-        translationDrift,
+        cachedKeys = cached.keys,
+        cachedTranslations = cached.translations,
+        recountKeys = recount.keys,
+        recountTranslations = recount.translations,
+        source = "boundary_verify",
       )
-      val now = Date()
-      organizationUsageCounterRepository.setAbsolute(organizationId, recount.keys, recount.translations, now, now)
+    if (drifted) {
+      metrics.orgCounterBoundaryVerifyMismatchCounter.increment()
+      setAbsoluteOrSeed(organizationId, recount.keys, recount.translations)
     }
-
     return recount
+  }
+
+  /**
+   * Compares cached counts against a fresh recount; on mismatch emits drift metrics tagged
+   * with `source` and logs a warning. Returns whether drift was detected.
+   */
+  private fun emitDriftMetricsIfAny(
+    organizationId: Long,
+    cachedKeys: Long,
+    cachedTranslations: Long,
+    recountKeys: Long,
+    recountTranslations: Long,
+    source: String,
+  ): Boolean {
+    val keyDrift = recountKeys - cachedKeys
+    val translationDrift = recountTranslations - cachedTranslations
+    if (keyDrift == 0L && translationDrift == 0L) return false
+
+    metrics.orgCounterDriftDetected(source).increment()
+    if (keyDrift != 0L) {
+      metrics.orgCounterDriftMagnitude("keys").record(abs(keyDrift).toDouble())
+    }
+    if (translationDrift != 0L) {
+      metrics.orgCounterDriftMagnitude("translations").record(abs(translationDrift).toDouble())
+    }
+    logger.warn(
+      "Counter drift for org {} (source={}): keyDrift={}, translationDrift={}. Healing.",
+      organizationId,
+      source,
+      keyDrift,
+      translationDrift,
+    )
+    return true
+  }
+
+  /**
+   * Writes absolute counter values, falling back to a seed insert if no row exists yet
+   * (e.g. the row was deleted between the reconciliation scan and this update).
+   */
+  private fun setAbsoluteOrSeed(
+    organizationId: Long,
+    keyCount: Long,
+    translationCount: Long,
+  ) {
+    val now = Date()
+    val updated =
+      organizationUsageCounterRepository.setAbsolute(
+        organizationId,
+        keyCount,
+        translationCount,
+        now,
+        now,
+      )
+    if (updated == 0) {
+      seedRow(organizationId, keyCount, translationCount, lastReconciledAt = now)
+    }
   }
 
   private fun seedRowFromRecount(organizationId: Long) {
