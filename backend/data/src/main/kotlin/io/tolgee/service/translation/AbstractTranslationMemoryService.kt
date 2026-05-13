@@ -81,8 +81,6 @@ abstract class AbstractTranslationMemoryService(
   ): Page<TranslationMemoryItemView> {
     val tmIds =
       translationMemoryManagementService.getReadableTmIdsForSuggestions(projectId, organizationId)
-    // Guard required: the SQL below uses `in :tmIds` which PostgreSQL rejects on an empty
-    // collection. Returning early also avoids an unnecessary round trip.
     if (tmIds.isEmpty()) return Page.empty(pageable)
 
     setSimilarityThreshold()

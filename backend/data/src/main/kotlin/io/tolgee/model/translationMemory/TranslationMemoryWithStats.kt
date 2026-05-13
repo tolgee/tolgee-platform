@@ -5,10 +5,7 @@ interface TranslationMemoryWithStats {
   val name: String
   val sourceLanguageTag: String
   val type: String
-
   val assignedProjectNamesCsv: String?
-
   val defaultPenalty: Int
-
   val writeOnlyReviewed: Boolean
 }

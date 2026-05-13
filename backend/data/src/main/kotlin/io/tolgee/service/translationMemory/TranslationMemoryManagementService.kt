@@ -93,8 +93,9 @@ class TranslationMemoryManagementService(
   }
 
   /**
-   * Free plan returns only the project's own PROJECT-type TM; paid plans return all readable
-   * TM IDs (project + shared).
+   * Retrieves the IDs of translation memories (TMs) that are readable for a given project.
+   * If the "TRANSLATION_MEMORY" feature is enabled for the organization, both project-specific
+   * and shared translation memories are considered. Otherwise, only project-specific TMs are returned.
    */
   fun getReadableTmIdsForSuggestions(
     projectId: Long,
