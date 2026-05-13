@@ -9,20 +9,23 @@ import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.service.organization.OrganizationUsageCounterService
 import io.tolgee.util.BypassableListener
+import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
-import org.springframework.transaction.event.TransactionPhase
-import org.springframework.transaction.event.TransactionalEventListener
 
 /**
  * Maintains the per-organization usage counter (`organization_usage_counter`) once per
  * transaction by reading deltas from the activity event's modified-entities map.
  *
- * Uses `OnProjectActivityEvent` (one event per transaction per project at BEFORE_COMMIT)
- * rather than `EntityPreCommitEvent` (one event per entity). On a 10k-key bulk import that
- * difference is ~20k method invocations vs 1 — a measurable win on the bulk-write path.
+ * Uses `OnProjectActivityEvent` (one event per transaction per project) rather than
+ * `EntityPreCommitEvent` (one event per entity). On a 10k-key bulk import that
+ * difference is ~20k method invocations vs 1.
  *
- * The handler runs inside the original transaction at BEFORE_COMMIT, so a transaction
- * rollback also rolls back the counter UPDATE.
+ * Plain `@EventListener` (synchronous): `OnProjectActivityEvent` is published from inside
+ * Hibernate's `BeforeTransactionCompletionProcess`, by which point Spring's BEFORE_COMMIT
+ * phase has already started. A `@TransactionalEventListener(BEFORE_COMMIT)` here gets
+ * registered too late and silently skipped — matching what the sibling
+ * `StringsKeysUsageListener` already does. The handler runs inside the original
+ * transaction, so a transaction rollback also rolls back the counter UPDATE.
  */
 @Component
 class OrganizationUsageCounterListener(
@@ -31,7 +34,7 @@ class OrganizationUsageCounterListener(
 ) : BypassableListener {
   override var bypass: Boolean = false
 
-  @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
+  @EventListener
   fun onActivity(event: OnProjectActivityEvent) {
     if (!tolgeeProperties.orgCounter.enabled || bypass) return
     val orgId = event.activityRevision.organizationId ?: return
