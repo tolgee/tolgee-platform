@@ -160,6 +160,14 @@ To filter default namespace, set to empty string.
   var filterQaCheckType: List<QaCheckType>? = null
 
   @field:Parameter(
+    description =
+      "Filter keys whose QA checks are stale (pending recomputation) in lang. " +
+        "When set, only keys with at least one stale translation in any of the provided " +
+        "languages are returned.",
+  )
+  var filterQaChecksStaleInLang: List<String>? = null
+
+  @field:Parameter(
     description = "Filter keys with any suggestions in lang",
   )
   var filterHasSuggestionsInLang: List<String>? = null

@@ -21,6 +21,7 @@ export type FiltersInternal = {
   filterHasComments?: boolean;
   filterHasQaIssues?: boolean;
   filterQaCheckTypes?: QaCheckType[];
+  filterQaChecksStale?: boolean;
   filterLabel?: string[];
   filterHasSuggestions?: boolean;
   filterHasNoSuggestions?: boolean;
@@ -49,6 +50,7 @@ export type AddParams =
   | ['filterHasComments']
   | ['filterHasQaIssues']
   | ['filterQaCheckTypes', QaCheckType]
+  | ['filterQaChecksStale']
   | ['filterLabel', string]
   | ['filterHasSuggestions']
   | ['filterHasNoSuggestions']

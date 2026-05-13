@@ -6,16 +6,8 @@ import io.tolgee.model.branching.Branch
 import io.tolgee.model.enums.qa.QaCheckSeverity
 import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.model.key.Key
-import io.tolgee.model.qa.ProjectQaConfig
 import io.tolgee.model.translation.Translation
 
-/**
- * Test data for QA language-stats refresh scenarios that involve branches.
- *
- * Contains a project with branching enabled, two branches (`main` + `feature`), and
- * one `fr` translation on each branch so stats can be asserted independently per
- * branch.
- */
 class QaLanguageStatsBranchTestData : BaseTestData() {
   lateinit var frenchLanguage: Language
 
@@ -52,10 +44,7 @@ class QaLanguageStatsBranchTestData : BaseTestData() {
         branch = mainBranch
       }.build {
         addTranslation("en", "Hello world.")
-        mainFrTranslation =
-          addTranslation("fr", "bonjour monde")
-            .also { it.self.qaChecksStale = true }
-            .self
+        mainFrTranslation = addTranslation("fr", "bonjour monde").self
       }.also { mainKey = it.self }
 
       addKey {
@@ -63,29 +52,19 @@ class QaLanguageStatsBranchTestData : BaseTestData() {
         branch = featureBranch
       }.build {
         addTranslation("en", "Feature hello.")
-        featureFrTranslation =
-          addTranslation("fr", "bonjour feature")
-            .also { it.self.qaChecksStale = true }
-            .self
+        featureFrTranslation = addTranslation("fr", "bonjour feature").self
       }.also { featureKey = it.self }
-    }
-  }
 
-  /**
-   * Creates QA config with all check types enabled at WARNING, except SPELLING and GRAMMAR
-   * which are OFF (they depend on an external LanguageTool container).
-   */
-  fun createDefaultQaConfig(): ProjectQaConfig {
-    return ProjectQaConfig(
-      project = project,
-      settings =
-        QaCheckType.entries
-          .associateWith { type ->
-            when (type) {
-              QaCheckType.SPELLING, QaCheckType.GRAMMAR -> QaCheckSeverity.OFF
-              else -> QaCheckSeverity.WARNING
-            }
-          }.toMutableMap(),
-    )
+      setQaConfig {
+        settings =
+          QaCheckType.entries
+            .associateWith { type ->
+              when (type) {
+                QaCheckType.SPELLING, QaCheckType.GRAMMAR -> QaCheckSeverity.OFF
+                else -> QaCheckSeverity.WARNING
+              }
+            }.toMutableMap()
+      }
+    }
   }
 }

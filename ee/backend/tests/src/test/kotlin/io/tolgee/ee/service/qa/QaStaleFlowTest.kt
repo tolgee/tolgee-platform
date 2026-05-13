@@ -48,7 +48,6 @@ class QaStaleFlowTest : AuthorizedControllerTest() {
     testData = QaTestData()
     testDataService.saveTestData(testData.root)
     qa.testData = testData
-    qa.saveDefaultQaConfig()
     userAccount = testData.user
   }
 
@@ -146,22 +145,15 @@ class QaStaleFlowTest : AuthorizedControllerTest() {
       entityManager.persist(project)
     }
 
-    // Clear stale flag first so we can verify it gets set
-    executeInNewTransaction(platformTransactionManager) {
-      val translation = translationService.find(testData.frTranslation.id)!!
-      translation.qaChecksStale = false
-      entityManager.persist(translation)
-    }
-
     // Save translation — should still mark stale even without QA feature
     performAuthPut(
       translationsUrl,
-      mapOf("key" to "test-key", "translations" to mapOf("fr" to "Bonjour tout le monde")),
+      mapOf("key" to "fresh-fr-key", "translations" to mapOf("fr" to "Frais modifié")),
     ).andIsOk
 
     waitForNotThrowing(timeout = 5_000, pollTime = 200) {
       executeInNewTransaction(platformTransactionManager) {
-        val translation = translationService.find(testData.frTranslation.id)!!
+        val translation = translationService.find(testData.freshFrTranslation.id)!!
         assertThat(translation.qaChecksStale).isTrue()
       }
     }
@@ -179,22 +171,15 @@ class QaStaleFlowTest : AuthorizedControllerTest() {
       entityManager.persist(project)
     }
 
-    // Clear stale flag on French translation
-    executeInNewTransaction(platformTransactionManager) {
-      val translation = translationService.find(testData.frTranslation.id)!!
-      translation.qaChecksStale = false
-      entityManager.persist(translation)
-    }
-
     // Change base (English) translation — should mark French sibling as stale
     performAuthPut(
       translationsUrl,
-      mapOf("key" to "test-key", "translations" to mapOf("en" to "Hello World!")),
+      mapOf("key" to "fresh-fr-key", "translations" to mapOf("en" to "Fresh modified")),
     ).andIsOk
 
     waitForNotThrowing(timeout = 10_000, pollTime = 500) {
       executeInNewTransaction(platformTransactionManager) {
-        val frTranslation = translationService.find(testData.frTranslation.id)!!
+        val frTranslation = translationService.find(testData.freshFrTranslation.id)!!
         assertThat(frTranslation.qaChecksStale).isTrue()
       }
     }

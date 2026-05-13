@@ -7,7 +7,6 @@ import io.tolgee.ee.development.QaTestData
 import io.tolgee.ee.utils.QaTestUtil
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
-import io.tolgee.model.translation.Translation
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.util.executeInNewTransaction
 import net.javacrumbs.jsonunit.assertj.assertThatJson
@@ -40,7 +39,6 @@ class QaDashboardStatsTest : AuthorizedControllerTest() {
     testData = QaTestData()
     testDataService.saveTestData(testData.root)
     qa.testData = testData
-    qa.saveDefaultQaConfig()
     userAccount = testData.user
   }
 
@@ -69,11 +67,6 @@ class QaDashboardStatsTest : AuthorizedControllerTest() {
 
   @Test
   fun `language stats include qaChecksStaleCount`() {
-    executeInNewTransaction(platformTransactionManager) {
-      val translation = entityManager.find(Translation::class.java, testData.frTranslation.id)
-      translation.qaChecksStale = true
-      entityManager.persist(translation)
-    }
     languageStatsService.refreshLanguageStats(testData.project.id)
 
     performAuthGet(

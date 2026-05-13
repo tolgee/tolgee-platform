@@ -4,11 +4,15 @@ import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.model.Language
 import io.tolgee.model.enums.qa.QaCheckSeverity
 import io.tolgee.model.enums.qa.QaCheckType
+import io.tolgee.model.enums.qa.QaIssueMessage
+import io.tolgee.model.enums.qa.QaIssueState
 import io.tolgee.model.key.Key
 import io.tolgee.model.qa.ProjectQaConfig
 import io.tolgee.model.translation.Translation
 
-class QaTestData : BaseTestData() {
+class QaTestData(
+  includeDefaultQaConfig: Boolean = true,
+) : BaseTestData() {
   lateinit var frenchLanguage: Language
   lateinit var testKey: Key
   lateinit var enTranslation: Translation
@@ -19,12 +23,35 @@ class QaTestData : BaseTestData() {
   /** Key that only has a base (English) translation — no French translation exists. */
   lateinit var keyWithoutFrTranslation: Key
 
+  /** Key whose FR translation has fresh (non-stale) QA checks and no QA issues. */
+  lateinit var freshFrKey: Key
+  lateinit var freshFrTranslation: Translation
+  lateinit var freshEnTranslation: Translation
+
+  /** Key whose FR translation has stale QA checks and no QA issues. */
+  lateinit var staleFrKey: Key
+  lateinit var staleFrTranslation: Translation
+
+  /**
+   * Key whose FR translation has OPEN PUNCTUATION_MISMATCH + CHARACTER_CASE_MISMATCH
+   * issues seeded. Used by filter tests that need at least one key with active issues.
+   */
+  lateinit var keyWithIssues: Key
+
+  /**
+   * Key whose FR translation has only IGNORED QA issues. Used to verify that filters
+   * which target OPEN issues correctly exclude translations whose issues have all been
+   * ignored.
+   */
+  lateinit var ignoredOnlyKey: Key
+
   lateinit var germanLanguage: Language
 
   init {
     project.useQaChecks = true
     projectBuilder.build {
       frenchLanguage = addFrench().self
+      // testKey: clean. No QA issues — tests that a pristine translation.
       testKey =
         addKey {
           name = "test-key"
@@ -32,11 +59,69 @@ class QaTestData : BaseTestData() {
           enTranslation = addTranslation("en", "Hello world.").self
           frTranslation = addTranslation("fr", "bonjour monde").self
         }.self
+      keyWithIssues =
+        addKey {
+          name = "key-with-issues"
+        }.build {
+          addTranslation("en", "Hello world.")
+          addTranslation("fr", "bonjour monde")
+            .also { it.self.qaChecksStale = false }
+            .build {
+              addQaIssue {
+                type = QaCheckType.PUNCTUATION_MISMATCH
+                message = QaIssueMessage.QA_PUNCTUATION_ADD
+                state = QaIssueState.OPEN
+                positionStart = 13
+                positionEnd = 13
+                replacement = "."
+              }
+              addQaIssue {
+                type = QaCheckType.CHARACTER_CASE_MISMATCH
+                message = QaIssueMessage.QA_CASE_CAPITALIZE
+                state = QaIssueState.OPEN
+                positionStart = 0
+                positionEnd = 1
+                replacement = "B"
+              }
+            }
+        }.self
       keyWithoutFrTranslation =
         addKey {
           name = "key-without-fr-translation"
         }.build {
           addTranslation("en", "Only English.")
+        }.self
+      freshFrKey =
+        addKey {
+          name = "fresh-fr-key"
+        }.build {
+          freshEnTranslation = addTranslation("en", "Fresh.").also { it.self.qaChecksStale = false }.self
+          freshFrTranslation = addTranslation("fr", "Frais.").also { it.self.qaChecksStale = false }.self
+        }.self
+      staleFrKey =
+        addKey {
+          name = "stale-fr-key"
+        }.build {
+          addTranslation("en", "Stale.").also { it.self.qaChecksStale = false }
+          staleFrTranslation = addTranslation("fr", "Périmé.").also { it.self.qaChecksStale = true }.self
+        }.self
+      ignoredOnlyKey =
+        addKey {
+          name = "ignored-only-key"
+        }.build {
+          addTranslation("en", "Click here.").also { it.self.qaChecksStale = false }
+          addTranslation("fr", "Cliquez ici")
+            .also { it.self.qaChecksStale = false }
+            .build {
+              addQaIssue {
+                type = QaCheckType.PUNCTUATION_MISMATCH
+                message = QaIssueMessage.QA_PUNCTUATION_ADD
+                state = QaIssueState.IGNORED
+                positionStart = 11
+                positionEnd = 11
+                replacement = "."
+              }
+            }
         }.self
       germanLanguage =
         addLanguage {
@@ -44,6 +129,18 @@ class QaTestData : BaseTestData() {
           tag = "de"
           originalName = "Deutsch"
         }.self
+      if (includeDefaultQaConfig) {
+        setQaConfig {
+          settings =
+            QaCheckType.entries
+              .associateWith { type ->
+                when (type) {
+                  QaCheckType.SPELLING, QaCheckType.GRAMMAR -> QaCheckSeverity.OFF
+                  else -> QaCheckSeverity.WARNING
+                }
+              }.toMutableMap()
+        }
+      }
     }
 
     root.apply {

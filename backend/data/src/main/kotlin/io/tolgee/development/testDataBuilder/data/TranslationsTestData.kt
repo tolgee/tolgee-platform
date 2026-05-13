@@ -15,6 +15,9 @@ import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.TranslationCommentState
 import io.tolgee.model.enums.TranslationState
+import io.tolgee.model.enums.qa.QaCheckType
+import io.tolgee.model.enums.qa.QaIssueMessage
+import io.tolgee.model.enums.qa.QaIssueState
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.screenshotReference.KeyInScreenshotPosition
 import io.tolgee.model.translation.Translation
@@ -587,5 +590,21 @@ class TranslationsTestData {
         name = "plural_key"
         isPlural = true
       }.self
+  }
+
+  fun addQaIssueOnAKeyGerman() {
+    projectBuilder.data.translations
+      .first { it.self === aKeyGermanTranslation }
+      .addQaIssue {
+        type = QaCheckType.EMPTY_TRANSLATION
+        message = QaIssueMessage.QA_EMPTY_TRANSLATION
+        state = QaIssueState.OPEN
+      }
+  }
+
+  fun addLanguageQaConfigOnGermanLanguage() {
+    projectBuilder.data.languages
+      .first { it.self === germanLanguage }
+      .setQaConfig()
   }
 }

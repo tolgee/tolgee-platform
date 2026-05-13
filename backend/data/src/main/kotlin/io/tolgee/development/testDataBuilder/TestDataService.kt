@@ -1,7 +1,7 @@
 package io.tolgee.development.testDataBuilder
 
 import io.tolgee.activity.ActivityHolder
-import io.tolgee.component.eventListeners.LanguageStatsListener
+import io.tolgee.component.eventListeners.BypassableActivityListener
 import io.tolgee.development.testDataBuilder.builders.AuthProviderChangeRequestBuilder
 import io.tolgee.development.testDataBuilder.builders.BatchJobBuilder
 import io.tolgee.development.testDataBuilder.builders.GlossaryBuilder
@@ -91,7 +91,7 @@ class TestDataService(
   private val activityHolder: ActivityHolder,
   private val automationService: AutomationService,
   private val contentDeliveryConfigService: ContentDeliveryConfigService,
-  private val languageStatsListener: LanguageStatsListener,
+  private val bypassableActivityListeners: List<BypassableActivityListener>,
   private val invitationService: InvitationService,
   private val keyCodeReferenceRepository: KeyCodeReferenceRepository,
 ) : Logging {
@@ -106,37 +106,40 @@ class TestDataService(
   @Transactional
   fun saveTestData(builder: TestDataBuilder) {
     activityHolder.enableAutoCompletion = false
-    languageStatsListener.bypass = true
-    runBeforeSaveMethodsOfAdditionalSavers(builder)
-    prepare()
+    bypassableActivityListeners.forEach { it.bypass = true }
+    try {
+      runBeforeSaveMethodsOfAdditionalSavers(builder)
+      prepare()
 
-    // Projects have to be stored in separate transaction since projectHolder's
-    // project has to be stored for transaction scope.
-    //
-    // To be able to save project in its separate transaction,
-    // user/organization has to be stored first.
-    executeInNewTransaction(transactionManager) {
-      generateSlugsForOrganizations(builder)
-      saveAllUsers(builder)
-      saveOrganizationData(builder)
+      // Projects have to be stored in separate transaction since projectHolder's
+      // project has to be stored for transaction scope.
+      //
+      // To be able to save project in its separate transaction,
+      // user/organization has to be stored first.
+      executeInNewTransaction(transactionManager) {
+        generateSlugsForOrganizations(builder)
+        saveAllUsers(builder)
+        saveOrganizationData(builder)
+      }
+
+      executeInNewTransaction(transactionManager) {
+        additionalTestDataSavers.forEach { it.save(builder) }
+      }
+      entityManager.flush()
+      entityManager.clear()
+
+      executeInNewTransaction(transactionManager) {
+        saveProjectData(builder)
+        saveGlossaryData(builder)
+        saveNotifications(builder)
+        finalize()
+      }
+
+      updateLanguageStats(builder)
+    } finally {
+      activityHolder.enableAutoCompletion = true
+      bypassableActivityListeners.forEach { it.bypass = false }
     }
-
-    executeInNewTransaction(transactionManager) {
-      additionalTestDataSavers.forEach { it.save(builder) }
-    }
-    entityManager.flush()
-    entityManager.clear()
-
-    executeInNewTransaction(transactionManager) {
-      saveProjectData(builder)
-      saveGlossaryData(builder)
-      saveNotifications(builder)
-      finalize()
-    }
-
-    updateLanguageStats(builder)
-    activityHolder.enableAutoCompletion = true
-    languageStatsListener.bypass = false
 
     runAfterSaveMethodsOfAdditionalSavers(builder)
   }
@@ -323,6 +326,7 @@ class TestDataService(
     saveSlackConfigs(builder)
     saveAutomations(builder)
     saveImportSettings(builder)
+    saveQaConfigs(builder)
     saveBatchJobs(builder)
     saveTasks(builder)
     saveTaskKeys(builder)
@@ -338,6 +342,13 @@ class TestDataService(
       entityManager.merge(it.userAccount)
       entityManager.persist(it)
     }
+  }
+
+  private fun saveQaConfigs(builder: ProjectBuilder) {
+    builder.data.qaConfig?.let { entityManager.persist(it.self) }
+    builder.data.languages
+      .mapNotNull { it.data.qaConfig }
+      .forEach { entityManager.persist(it.self) }
   }
 
   private fun saveWebhookConfigs(builder: ProjectBuilder) {
