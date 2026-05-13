@@ -224,31 +224,15 @@ class ProjectService(
       project.slug = generateSlug(project.name, null)
     }
 
-    val branchingChanged = wasBranchingEnabled != dto.useBranching
-    val keyContributionBefore =
-      if (branchingChanged) organizationStatsService.getProjectKeyContribution(project.id) else 0
-    val translationContributionBefore =
-      if (branchingChanged) organizationStatsService.getProjectTranslationContribution(project.id) else 0
-
     entityManager.persist(project)
 
     if (!wasBranchingEnabled && dto.useBranching) {
       branchService.enableBranchingOnProject(project.id)
     }
-
-    if (branchingChanged) {
-      // Branching toggle changes which keys/translations count (default-branch-only
-      // vs. all-branches). Recompute the project's contribution after the toggle and
-      // apply the delta to the org counter.
-      entityManager.flush()
-      val keyContributionAfter = organizationStatsService.getProjectKeyContribution(project.id)
-      val translationContributionAfter = organizationStatsService.getProjectTranslationContribution(project.id)
-      organizationUsageCounterService.applyDelta(
-        project.organizationOwner.id,
-        keyDelta = keyContributionAfter - keyContributionBefore,
-        translationDelta = translationContributionAfter - translationContributionBefore,
-      )
-    }
+    // No counter recompute on branching toggle: the count filter dedupes by
+    // (project, name, namespace), so feature-branch copies collapse onto their
+    // default-branch siblings. Only feature-branch-only keys (no default-branch
+    // counterpart) would differ, and reconciliation heals that edge case.
     return project
   }
 
