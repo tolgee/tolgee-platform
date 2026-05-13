@@ -199,11 +199,11 @@ class ProjectBuilder(
     }
   }
 
-  fun addHindi(): LanguageBuilder {
+  fun addKhmer(): LanguageBuilder {
     return addLanguage {
-      name = "Hindi"
-      originalName = "हिन्दी"
-      tag = "hi"
+      name = "Khmer"
+      originalName = "ខ្មែរ"
+      tag = "km"
     }
   }
 
