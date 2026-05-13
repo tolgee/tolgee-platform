@@ -55,7 +55,15 @@ class OrganizationUsageCounterService(
   }
 
   /**
-   * Read the current counter values. Seeds the row via slow-query recount if missing.
+   * Read the current counter values. If no counter row exists yet, falls back to the
+   * slow-query recount and returns those values *without* inserting a row.
+   *
+   * Why not seed on read: callers in billing wrap this in `executeInNewTransaction` for
+   * caching purposes, which means we run in a separate DB transaction and cannot see
+   * uncommitted writes from the caller's outer transaction (e.g. a newly-created
+   * organization). Inserting a counter row keyed to an as-yet-uncommitted org id would
+   * trip the FK constraint. Seeding belongs to `applyDelta`, which runs in the original
+   * transaction at BEFORE_COMMIT — by then the org is flushed and visible.
    *
    * When the counter is disabled via `tolgee.org-counter.enabled`, falls back to the
    * slow-query recount on every call (i.e. pre-counter behavior).
@@ -72,14 +80,10 @@ class OrganizationUsageCounterService(
     if (row != null) {
       return Counts(row.keyCount, row.translationCount)
     }
-    seedRowFromRecount(organizationId)
-    val seeded =
-      organizationUsageCounterRepository.findByOrganizationId(organizationId)
-        ?: return Counts(
-          organizationStatsService.getKeyCount(organizationId),
-          organizationStatsService.getTranslationCount(organizationId),
-        )
-    return Counts(seeded.keyCount, seeded.translationCount)
+    return Counts(
+      organizationStatsService.getKeyCount(organizationId),
+      organizationStatsService.getTranslationCount(organizationId),
+    )
   }
 
   /**
@@ -245,6 +249,11 @@ class OrganizationUsageCounterService(
   /**
    * Insert a counter row using a native UPSERT (ON CONFLICT DO NOTHING) so concurrent
    * seeders don't trip the PK constraint.
+   *
+   * Flushes pending Hibernate changes first so the FK target (`organization` row) is
+   * visible to this native INSERT. Without the flush, a newly-created org in the same
+   * transaction may not be in the DB yet when this runs (e.g. during initial-user setup
+   * where a Key is created in a brand-new org).
    */
   private fun seedRow(
     organizationId: Long,
@@ -252,6 +261,7 @@ class OrganizationUsageCounterService(
     translationCount: Long,
     lastReconciledAt: Date?,
   ) {
+    entityManager.flush()
     entityManager
       .createNativeQuery(
         """

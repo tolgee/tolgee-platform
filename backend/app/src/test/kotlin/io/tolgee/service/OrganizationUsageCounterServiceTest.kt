@@ -30,21 +30,22 @@ class OrganizationUsageCounterServiceTest : AbstractSpringTest() {
 
   @Test
   fun `getCounts returns values matching the slow-query recount`() {
-    // The maintenance listener seeds the counter during test data setup, so the row
-    // already exists here with values reflecting the seeded entities.
     val orgId = testData.organization.id
-
+    // testDataService saves via bulk inserts that don't fire OnProjectActivityEvent, so
+    // no counter row exists yet. getCounts falls back to slow-query and returns those.
     val counts = organizationUsageCounterService.getCounts(orgId)
 
     assertThat(counts.keys).isEqualTo(organizationStatsService.getKeyCount(orgId))
     assertThat(counts.translations).isEqualTo(organizationStatsService.getTranslationCount(orgId))
-    assertThat(organizationUsageCounterRepository.findByOrganizationId(orgId)).isNotNull
   }
 
   @Test
   fun `applyDelta increments the maintained counts`() {
     val orgId = testData.organization.id
-    val seeded = organizationUsageCounterService.getCounts(orgId)
+    // Bootstrap a counter row so applyDelta has something to UPDATE. In production the
+    // maintenance listener handles this seeding from the activity event flow; the
+    // testDataService path bypasses it.
+    val seeded = organizationUsageCounterService.forceRecompute(orgId)
 
     organizationUsageCounterService.applyDelta(orgId, keyDelta = 3, translationDelta = -2)
 

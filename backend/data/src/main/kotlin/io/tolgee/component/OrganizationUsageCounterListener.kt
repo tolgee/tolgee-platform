@@ -1,76 +1,89 @@
 package io.tolgee.component
 
-import io.tolgee.configuration.TransactionScopeConfig
+import io.tolgee.activity.data.RevisionType
 import io.tolgee.configuration.tolgee.TolgeeProperties
-import io.tolgee.events.EntityPreCommitEvent
+import io.tolgee.events.OnProjectActivityEvent
+import io.tolgee.model.SoftDeletable
+import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.service.organization.OrganizationUsageCounterService
 import io.tolgee.util.BypassableListener
-import io.tolgee.util.getUsageIncreaseAmount
-import org.springframework.context.ApplicationEventPublisher
-import org.springframework.context.annotation.Scope
-import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 import org.springframework.transaction.event.TransactionPhase
 import org.springframework.transaction.event.TransactionalEventListener
 
 /**
- * Maintains the per-organization usage counter (`organization_usage_counter`) by accumulating
- * key / translation deltas as `EntityPreCommitEvent`s fire, then flushing them to the DB
- * once per transaction.
+ * Maintains the per-organization usage counter (`organization_usage_counter`) once per
+ * transaction by reading deltas from the activity event's modified-entities map.
  *
- * One instance per transaction (`@Scope("transaction")`), so all state resets automatically
- * between transactions. The flush is triggered by publishing `OrgCounterFlushSignal` on
- * the first delta-bearing event of the transaction; Spring's `@TransactionalEventListener`
- * fires the handler at `BEFORE_COMMIT`, inside the original transaction — if the
- * transaction rolls back, the counter UPDATE rolls back with it.
+ * Uses `OnProjectActivityEvent` (one event per transaction per project at BEFORE_COMMIT)
+ * rather than `EntityPreCommitEvent` (one event per entity). On a 10k-key bulk import that
+ * difference is ~20k method invocations vs 1 — a measurable win on the bulk-write path.
+ *
+ * The handler runs inside the original transaction at BEFORE_COMMIT, so a transaction
+ * rollback also rolls back the counter UPDATE.
  */
-@Scope(TransactionScopeConfig.SCOPE_TRANSACTION)
 @Component
 class OrganizationUsageCounterListener(
   private val counterService: OrganizationUsageCounterService,
   private val tolgeeProperties: TolgeeProperties,
-  private val applicationEventPublisher: ApplicationEventPublisher,
 ) : BypassableListener {
   override var bypass: Boolean = false
 
-  private var organizationId: Long? = null
-  private var keyDelta: Long = 0
-  private var translationDelta: Long = 0
-  private var flushSignalPublished = false
-
-  @EventListener
-  fun onPreCommit(event: EntityPreCommitEvent) {
+  @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
+  fun onActivity(event: OnProjectActivityEvent) {
     if (!tolgeeProperties.orgCounter.enabled || bypass) return
+    val orgId = event.activityRevision.organizationId ?: return
 
-    val delta = event.getUsageIncreaseAmount()
-    if (delta == 0L) return
+    var keyDelta = 0L
+    var translationDelta = 0L
 
-    val (orgId, isKey) =
-      when (val entity = event.entity) {
-        is Key -> entity.project.organizationOwner.id to true
-        is Translation -> entity.key.project.organizationOwner.id to false
-        else -> return
-      }
+    event.modifiedEntities[Key::class]?.values?.forEach { keyDelta += computeKeyDelta(it) }
+    event.modifiedEntities[Translation::class]?.values?.forEach {
+      translationDelta += computeTranslationDelta(it)
+    }
 
-    // A single transaction only ever mutates keys/translations under one org — every
-    // such entity reaches us via a single project, which belongs to a single org.
-    organizationId = orgId
-    if (isKey) keyDelta += delta else translationDelta += delta
-
-    if (!flushSignalPublished) {
-      flushSignalPublished = true
-      applicationEventPublisher.publishEvent(OrgCounterFlushSignal)
+    if (keyDelta != 0L || translationDelta != 0L) {
+      counterService.applyDelta(orgId, keyDelta, translationDelta)
     }
   }
 
-  @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
-  fun flushDelta(signal: OrgCounterFlushSignal) {
-    val orgId = organizationId ?: return
-    counterService.applyDelta(orgId, keyDelta, translationDelta)
+  private fun computeKeyDelta(entity: ActivityModifiedEntity): Long =
+    when (entity.revisionType) {
+      RevisionType.ADD -> 1L
+      RevisionType.DEL -> -1L
+      RevisionType.MOD -> deletedAtDelta(entity)
+    }
+
+  private fun computeTranslationDelta(entity: ActivityModifiedEntity): Long {
+    val textMod = entity.modifications["text"]
+    return when (entity.revisionType) {
+      RevisionType.ADD -> if (!(textMod?.new as? String).isNullOrEmpty()) 1L else 0L
+      RevisionType.DEL -> if (!(textMod?.old as? String).isNullOrEmpty()) -1L else 0L
+      RevisionType.MOD -> {
+        if (textMod == null) {
+          // No text change; check soft-delete transitions (translations are hard-deleted
+          // today, but the rule mirrors keys for safety).
+          return deletedAtDelta(entity)
+        }
+        val oldEmpty = (textMod.old as? String).isNullOrEmpty()
+        val newEmpty = (textMod.new as? String).isNullOrEmpty()
+        when {
+          oldEmpty && !newEmpty -> 1L
+          !oldEmpty && newEmpty -> -1L
+          else -> 0L
+        }
+      }
+    }
   }
 
-  /** Per-transaction signal that there are counter deltas to flush at BEFORE_COMMIT. */
-  object OrgCounterFlushSignal
+  private fun deletedAtDelta(entity: ActivityModifiedEntity): Long {
+    val mod = entity.modifications[SoftDeletable::deletedAt.name] ?: return 0L
+    return when {
+      mod.old == null && mod.new != null -> -1L
+      mod.old != null && mod.new == null -> 1L
+      else -> 0L
+    }
+  }
 }
