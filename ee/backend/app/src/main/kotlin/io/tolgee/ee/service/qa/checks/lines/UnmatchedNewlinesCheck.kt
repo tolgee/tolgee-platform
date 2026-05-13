@@ -13,7 +13,7 @@ class UnmatchedNewlinesCheck : QaCheck {
   override val type: QaCheckType = QaCheckType.UNMATCHED_NEWLINES
 
   override fun check(params: QaCheckParams): List<QaCheckResult> {
-    return QaPluralCheckHelper.runPerVariant(params) { text, baseText ->
+    return QaPluralCheckHelper.runPerVariant(params) { text, baseText, _ ->
       checkVariant(text, baseText)
     }
   }

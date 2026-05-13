@@ -14,7 +14,7 @@ class BracketsBalanceCheck : QaCheck {
 
   override fun check(params: QaCheckParams): List<QaCheckResult> {
     val bracketSets = getBracketSets(params.icuPlaceholders)
-    return QaPluralCheckHelper.runPerVariant(params) { text, _ ->
+    return QaPluralCheckHelper.runPerVariant(params) { text, _, _ ->
       checkVariant(text, bracketSets)
     }
   }
@@ -34,6 +34,7 @@ class BracketsBalanceCheck : QaCheck {
         ch in bracketSets.opening -> {
           stack.addLast(BracketInfo(ch, i))
         }
+
         ch in bracketSets.closing -> {
           val expectedOpening = bracketSets.closingToOpening[ch]
           if (stack.isNotEmpty() && stack.last().char == expectedOpening) {

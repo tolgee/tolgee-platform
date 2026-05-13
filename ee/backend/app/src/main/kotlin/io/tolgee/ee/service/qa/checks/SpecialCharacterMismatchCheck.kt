@@ -13,21 +13,22 @@ class SpecialCharacterMismatchCheck : QaCheck {
   override val type: QaCheckType = QaCheckType.SPECIAL_CHARACTER_MISMATCH
 
   override fun check(params: QaCheckParams): List<QaCheckResult> {
-    return QaPluralCheckHelper.runPerVariant(params) { text, baseText ->
-      checkVariant(text, baseText)
+    val activeChars = getActiveSpecialChars(params.icuPlaceholders)
+    return QaPluralCheckHelper.runPerVariant(params) { text, baseText, _ ->
+      checkVariant(text, baseText, activeChars)
     }
   }
 
   private fun checkVariant(
     text: String,
     baseText: String?,
+    activeChars: Set<Char>,
   ): List<QaCheckResult> {
     val base = baseText ?: return emptyList()
-    if (base.isBlank()) return emptyList()
-    if (text.isBlank()) return emptyList()
+    if (base.isBlank() || text.isBlank()) return emptyList()
 
-    val baseChars = extractSpecialChars(base)
-    val textChars = extractSpecialChars(text)
+    val baseChars = extractSpecialChars(base, activeChars)
+    val textChars = extractSpecialChars(text, activeChars)
 
     val results = mutableListOf<QaCheckResult>()
 
@@ -50,8 +51,7 @@ class SpecialCharacterMismatchCheck : QaCheck {
 
     // Characters in translation but not in base
     val addedChars = subtractMultiset(textChars, baseChars)
-    for (char in addedChars.toSet()) {
-      val count = addedChars.count { it == char }
+    for ((char, count) in addedChars.groupingBy { it }.eachCount()) {
       val positions = findAllOccurrences(text, char)
       // Report the last N occurrences as the "extra" ones
       positions.takeLast(count).forEach { index ->
@@ -87,8 +87,14 @@ class SpecialCharacterMismatchCheck : QaCheck {
         '°',
       )
 
-    fun extractSpecialChars(text: String): List<Char> {
-      return text.filter { it in SPECIAL_CHARS }.toList()
+    fun getActiveSpecialChars(icuPlaceholders: Boolean): Set<Char> =
+      if (icuPlaceholders) SPECIAL_CHARS - '#' else SPECIAL_CHARS
+
+    fun extractSpecialChars(
+      text: String,
+      activeChars: Set<Char> = SPECIAL_CHARS,
+    ): List<Char> {
+      return text.filter { it in activeChars }.toList()
     }
 
     private fun subtractMultiset(

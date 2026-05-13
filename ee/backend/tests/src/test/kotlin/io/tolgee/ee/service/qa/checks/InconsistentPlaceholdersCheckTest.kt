@@ -226,6 +226,210 @@ class InconsistentPlaceholdersCheckTest {
   }
 
   @Test
+  fun `detects missing hash placeholder in plural variants`() {
+    // Base has # in both variants, translation has none in either.
+    check
+      .check(
+        params(
+          text = "{count, plural, one {polozka} other {polozek}}",
+          base = "{count, plural, one {# polozka} other {# polozek}}",
+          isPlural = true,
+          textVariants = mapOf("one" to "polozka", "other" to "polozek"),
+          baseTextVariants = mapOf("one" to "# polozka", "other" to "# polozek"),
+          textVariantOffsets = mapOf("one" to 21, "other" to 37),
+        ),
+      ).assertIssues {
+        issue {
+          message(QaIssueMessage.QA_PLACEHOLDERS_MISSING)
+          param("placeholder", "#")
+          pluralVariant("one")
+        }
+        issue {
+          message(QaIssueMessage.QA_PLACEHOLDERS_MISSING)
+          param("placeholder", "#")
+          pluralVariant("other")
+        }
+      }
+  }
+
+  @Test
+  fun `detects extra hash placeholder in plural variants`() {
+    check
+      .check(
+        params(
+          text = "{count, plural, one {# polozka} other {# polozek}}",
+          base = "{count, plural, one {polozka} other {polozek}}",
+          isPlural = true,
+          textVariants = mapOf("one" to "# polozka", "other" to "# polozek"),
+          baseTextVariants = mapOf("one" to "polozka", "other" to "polozek"),
+          textVariantOffsets = mapOf("one" to 21, "other" to 39),
+        ),
+      ).assertIssues {
+        issue {
+          message(QaIssueMessage.QA_PLACEHOLDERS_EXTRA)
+          param("placeholder", "#")
+          pluralVariant("one")
+        }
+        issue {
+          message(QaIssueMessage.QA_PLACEHOLDERS_EXTRA)
+          param("placeholder", "#")
+          pluralVariant("other")
+        }
+      }
+  }
+
+  @Test
+  fun `does not flag hash placeholder when both base and translation have it`() {
+    check
+      .check(
+        params(
+          text = "{count, plural, one {# polozka} other {# polozek}}",
+          base = "{count, plural, one {# item} other {# items}}",
+          isPlural = true,
+          textVariants = mapOf("one" to "# polozka", "other" to "# polozek"),
+          baseTextVariants = mapOf("one" to "# item", "other" to "# items"),
+          textVariantOffsets = mapOf("one" to 21, "other" to 39),
+        ),
+      ).assertNoIssues()
+  }
+
+  @Test
+  fun `counts hash occurrences within a single plural variant`() {
+    // Base has # twice in 'one' (e.g. "# orders, # total"), translation has it once —
+    // one # is missing. Top-level # gets a position just like a regular {arg}, so each
+    // occurrence is tracked individually rather than collapsed by name.
+    check
+      .check(
+        params(
+          text = "{count, plural, one {# polozek celkem} other {# polozek}}",
+          base = "{count, plural, one {# polozek, # celkem} other {# polozek}}",
+          isPlural = true,
+          textVariants = mapOf("one" to "# polozek celkem", "other" to "# polozek"),
+          baseTextVariants = mapOf("one" to "# polozek, # celkem", "other" to "# polozek"),
+          textVariantOffsets = mapOf("one" to 21, "other" to 46),
+        ),
+      ).assertSingleIssue {
+        message(QaIssueMessage.QA_PLACEHOLDERS_MISSING)
+        param("placeholder", "#")
+        pluralVariant("one")
+      }
+  }
+
+  @Test
+  fun `reports position of extra hash placeholder`() {
+    // Base has no # — translation added one in 'one'. The extra-issue path should
+    // include the # position (offset back into the full ICU text) and a "" replacement
+    // so the editor can offer to delete it.
+    check
+      .check(
+        params(
+          text = "{count, plural, one {# polozka} other {polozek}}",
+          base = "{count, plural, one {polozka} other {polozek}}",
+          isPlural = true,
+          textVariants = mapOf("one" to "# polozka", "other" to "polozek"),
+          baseTextVariants = mapOf("one" to "polozka", "other" to "polozek"),
+          textVariantOffsets = mapOf("one" to 21, "other" to 39),
+        ),
+      ).assertSingleIssue {
+        message(QaIssueMessage.QA_PLACEHOLDERS_EXTRA)
+        param("placeholder", "#")
+        pluralVariant("one")
+        position(21, 22)
+        replacement("")
+      }
+  }
+
+  @Test
+  fun `detects missing hash placeholder in non-plural ICU text`() {
+    // Inline ICU plural inside a non-plural string. `#` inside should still be tracked.
+    check
+      .check(
+        params(
+          text = "You have {count, plural, one {an item} other {many items}}",
+          base = "You have {count, plural, one {# item} other {# items}}",
+        ),
+      ).assertSingleIssue {
+        message(QaIssueMessage.QA_PLACEHOLDERS_MISSING)
+        param("placeholder", "#")
+      }
+  }
+
+  @Test
+  fun `escaped hash in plural variant is not a placeholder`() {
+    // Asymmetric escaping: base uses real `#` (a placeholder), translation uses `'#'`
+    // (literal hash, NOT a placeholder). Should report missing `#`.
+    check
+      .check(
+        params(
+          text = "{count, plural, one {'#' polozka} other {'#' polozek}}",
+          base = "{count, plural, one {# item} other {# items}}",
+          isPlural = true,
+          textVariants = mapOf("one" to "'#' polozka", "other" to "'#' polozek"),
+          baseTextVariants = mapOf("one" to "# item", "other" to "# items"),
+          textVariantOffsets = mapOf("one" to 21, "other" to 41),
+        ),
+      ).assertIssues {
+        issue {
+          message(QaIssueMessage.QA_PLACEHOLDERS_MISSING)
+          param("placeholder", "#")
+          pluralVariant("one")
+        }
+        issue {
+          message(QaIssueMessage.QA_PLACEHOLDERS_MISSING)
+          param("placeholder", "#")
+          pluralVariant("other")
+        }
+      }
+  }
+
+  @Test
+  fun `symmetric escaped hash in plural variant produces no issue`() {
+    // Both sides use `'#'` (escaped literal hash, not a placeholder) — no mismatch.
+    check
+      .check(
+        params(
+          text = "{count, plural, one {'#' polozka} other {'#' polozek}}",
+          base = "{count, plural, one {'#' item} other {'#' items}}",
+          isPlural = true,
+          textVariants = mapOf("one" to "'#' polozka", "other" to "'#' polozek"),
+          baseTextVariants = mapOf("one" to "'#' item", "other" to "'#' items"),
+          textVariantOffsets = mapOf("one" to 21, "other" to 41),
+        ),
+      ).assertNoIssues()
+  }
+
+  @Test
+  fun `hash inside select nested in plural is treated as literal`() {
+    // Per ICU MessageFormat, `#` only refers to the plural argument when it appears
+    // directly inside a plural variant body. Once nested inside another complex arg
+    // (here a select), `#` is just literal text — so it should NOT be tracked as a
+    // placeholder, and a missing `#` inside the nested select is not flagged.
+    check
+      .check(
+        params(
+          text =
+            "{count, plural, one {{g, select, m {polozka} other {polozka}}} " +
+              "other {{g, select, m {polozek} other {polozek}}}}",
+          base =
+            "{count, plural, one {{g, select, m {# item} other {# item}}} " +
+              "other {{g, select, m {# items} other {# items}}}}",
+          isPlural = true,
+          textVariants =
+            mapOf(
+              "one" to "{g, select, m {polozka} other {polozka}}",
+              "other" to "{g, select, m {polozek} other {polozek}}",
+            ),
+          baseTextVariants =
+            mapOf(
+              "one" to "{g, select, m {# item} other {# item}}",
+              "other" to "{g, select, m {# items} other {# items}}",
+            ),
+          textVariantOffsets = mapOf("one" to 21, "other" to 71),
+        ),
+      ).assertNoIssues()
+  }
+
+  @Test
   fun `detects missing placeholder in one plural variant only`() {
     check
       .check(

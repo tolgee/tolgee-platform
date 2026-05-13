@@ -16,7 +16,7 @@ class SpacesMismatchCheck : QaCheck {
   override val type: QaCheckType = QaCheckType.SPACES_MISMATCH
 
   override fun check(params: QaCheckParams): List<QaCheckResult> {
-    return QaPluralCheckHelper.runPerVariant(params) { text, baseText ->
+    return QaPluralCheckHelper.runPerVariant(params) { text, baseText, _ ->
       checkVariant(text, baseText)
     }
   }

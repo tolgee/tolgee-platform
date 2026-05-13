@@ -13,7 +13,7 @@ class HtmlSyntaxCheck : QaCheck {
   override val type: QaCheckType = QaCheckType.HTML_SYNTAX
 
   override fun check(params: QaCheckParams): List<QaCheckResult> {
-    return QaPluralCheckHelper.runPerVariant(params) { text, _ ->
+    return QaPluralCheckHelper.runPerVariant(params) { text, _, _ ->
       checkVariant(text)
     }
   }

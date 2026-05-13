@@ -13,7 +13,7 @@ class MissingNumbersCheck : QaCheck {
   override val type: QaCheckType = QaCheckType.MISSING_NUMBERS
 
   override fun check(params: QaCheckParams): List<QaCheckResult> {
-    return QaPluralCheckHelper.runPerVariant(params) { text, baseText ->
+    return QaPluralCheckHelper.runPerVariant(params) { text, baseText, _ ->
       checkVariant(text, baseText)
     }
   }
