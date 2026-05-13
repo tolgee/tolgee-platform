@@ -56,22 +56,9 @@ class OrganizationUsageCounterListener(
         else -> return
       }
 
-    if (organizationId == null) {
-      organizationId = orgId
-    } else if (organizationId != orgId) {
-      // No runtime path mutates keys/translations across multiple orgs in one
-      // transaction — keys/translations always belong to a single project, which belongs
-      // to a single org. If this ever fires, a new code path is doing something the
-      // counter doesn't account for. Reconciliation will heal whatever we miss.
-      logger.warn(
-        "Counter listener saw events for multiple organizations in one transaction " +
-          "(first={}, now={}). Skipping the second org; reconciliation will heal.",
-        organizationId,
-        orgId,
-      )
-      return
-    }
-
+    // A single transaction only ever mutates keys/translations under one org — every
+    // such entity reaches us via a single project, which belongs to a single org.
+    organizationId = orgId
     if (isKey) keyDelta += delta else translationDelta += delta
     registerSynchronizationOnce()
   }
