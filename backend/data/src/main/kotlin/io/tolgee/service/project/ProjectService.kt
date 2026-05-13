@@ -224,15 +224,36 @@ class ProjectService(
       project.slug = generateSlug(project.name, null)
     }
 
+    val branchingChanged = wasBranchingEnabled != dto.useBranching
+    // Capture the project's pre-toggle contribution. Branch-copied keys share their
+    // (name, namespace) tuple with the default branch and would collapse under DISTINCT,
+    // so they don't move the count. The case that DOES move the count is a key added
+    // directly on a feature branch with a (name, namespace) that doesn't exist on the
+    // default branch — common during normal feature development. When branching is
+    // toggled off, those keys drop out of the slow-query result; the counter must
+    // follow. Two ~80ms queries per toggle is acceptable since this is a per-project
+    // settings change, not a hot path.
+    val keyContributionBefore =
+      if (branchingChanged) organizationStatsService.getProjectKeyContribution(project.id) else 0
+    val translationContributionBefore =
+      if (branchingChanged) organizationStatsService.getProjectTranslationContribution(project.id) else 0
+
     entityManager.persist(project)
 
     if (!wasBranchingEnabled && dto.useBranching) {
       branchService.enableBranchingOnProject(project.id)
     }
-    // No counter recompute on branching toggle: the count filter dedupes by
-    // (project, name, namespace), so feature-branch copies collapse onto their
-    // default-branch siblings. Only feature-branch-only keys (no default-branch
-    // counterpart) would differ, and reconciliation heals that edge case.
+
+    if (branchingChanged) {
+      entityManager.flush()
+      val keyContributionAfter = organizationStatsService.getProjectKeyContribution(project.id)
+      val translationContributionAfter = organizationStatsService.getProjectTranslationContribution(project.id)
+      organizationUsageCounterService.applyDelta(
+        project.organizationOwner.id,
+        keyDelta = keyContributionAfter - keyContributionBefore,
+        translationDelta = translationContributionAfter - translationContributionBefore,
+      )
+    }
     return project
   }
 
