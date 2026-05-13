@@ -103,13 +103,10 @@ class OrganizationUsageCounterService(
     )
 
     val existing = organizationUsageCounterRepository.findByOrganizationId(organizationId)
-    val cachedKeys = existing?.keyCount ?: 0L
-    val cachedTranslations = existing?.translationCount ?: 0L
-    val keyDrift = recountKeys - cachedKeys
-    val translationDrift = recountTranslations - cachedTranslations
-
-    if (existing == null || keyDrift != 0L || translationDrift != 0L) {
-      if (existing != null && (keyDrift != 0L || translationDrift != 0L)) {
+    if (existing != null) {
+      val keyDrift = recountKeys - existing.keyCount
+      val translationDrift = recountTranslations - existing.translationCount
+      if (keyDrift != 0L || translationDrift != 0L) {
         metrics.orgCounterDriftDetected("reconciliation").increment()
         if (keyDrift != 0L) {
           metrics.orgCounterDriftMagnitude("keys").record(abs(keyDrift).toDouble())
@@ -124,21 +121,10 @@ class OrganizationUsageCounterService(
           translationDrift,
         )
       }
-      val now = Date()
-      val updated =
-        organizationUsageCounterRepository.setAbsolute(
-          organizationId,
-          recountKeys,
-          recountTranslations,
-          now,
-          now,
-        )
-      if (updated == 0) {
-        seedRow(organizationId, recountKeys, recountTranslations, lastReconciledAt = now)
-      }
-    } else {
-      // No drift — just bump last_reconciled_at so this org rotates to the back of the queue.
-      val now = Date()
+    }
+
+    val now = Date()
+    val updated =
       organizationUsageCounterRepository.setAbsolute(
         organizationId,
         recountKeys,
@@ -146,6 +132,8 @@ class OrganizationUsageCounterService(
         now,
         now,
       )
+    if (updated == 0) {
+      seedRow(organizationId, recountKeys, recountTranslations, lastReconciledAt = now)
     }
     metrics.orgCounterReconciliationOrgsProcessedCounter.increment()
   }
