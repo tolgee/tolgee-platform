@@ -16,12 +16,8 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { LanguageItem } from 'tg.component/languages/LanguageItem';
 import { QaSettingsItem } from 'tg.ee.module/qa/components/QaSettingsItem';
-import { components } from 'tg.service/apiSchema.generated';
-
-type QaSettings = components['schemas']['QaSettingsRequest'];
-type QaCheckType = components['schemas']['QaIssueModel']['type'];
-type QaCheckSeverity = QaSettings['settings'][keyof QaSettings['settings']];
-type LanguageQaConfigModel = components['schemas']['LanguageQaConfigModel'];
+import { LanguageQaConfigModel } from 'tg.service/apiSchemaTypes.generated';
+import { QaCheckType, QaCheckSeverity } from 'tg.service/apiSchemaTypes';
 
 const StyledBanner = styled('div')`
   background: ${({ theme }) => theme.palette.warning.light};

@@ -10,12 +10,8 @@ import {
   TABLE_LAST_CELL,
 } from 'tg.component/languages/tableStyles';
 import { QaLanguageSettingsDialog } from './QaLanguageSettingsDialog';
-import { components } from 'tg.service/apiSchema.generated';
-
-type QaSettings = components['schemas']['QaSettingsRequest'];
-type QaCheckType = components['schemas']['QaIssueModel']['type'];
-type QaCheckSeverity = QaSettings['settings'][keyof QaSettings['settings']];
-type LanguageQaConfigModel = components['schemas']['LanguageQaConfigModel'];
+import { LanguageQaConfigModel } from 'tg.service/apiSchemaTypes.generated';
+import { QaCheckType, QaCheckSeverity } from 'tg.service/apiSchemaTypes';
 
 type Props = {
   languageConfig: LanguageQaConfigModel;

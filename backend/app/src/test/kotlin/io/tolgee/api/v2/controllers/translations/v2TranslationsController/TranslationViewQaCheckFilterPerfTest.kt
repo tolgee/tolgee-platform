@@ -80,7 +80,8 @@ class TranslationViewQaCheckFilterPerfTest : AbstractPartialFixturePerfTestBase(
   @Test
   fun `filterQaCheckType=EMPTY_TRANSLATION`() {
     val expected = (KEY_COUNT / QA_FREQUENCY).toLong()
-    val title = "filterQaCheckType=EMPTY_TRANSLATION (~$expected matches)"
+    val title = "filterQaCheckType=en,EMPTY_TRANSLATION (~$expected matches)"
+    val qaLanguageTag = languages.first().tag
     measureScenario(title) {
       executeInNewTransaction {
         liftStatementTimeout()
@@ -91,7 +92,7 @@ class TranslationViewQaCheckFilterPerfTest : AbstractPartialFixturePerfTestBase(
             pageable = PageRequest.of(0, PAGE_SIZE),
             params =
               GetTranslationsParams().apply {
-                filterQaCheckType = listOf(QaCheckType.EMPTY_TRANSLATION)
+                filterQaCheckType = listOf("$qaLanguageTag,${QaCheckType.EMPTY_TRANSLATION.name}")
               },
           )
         assertThat(result.totalElements).isEqualTo(expected)

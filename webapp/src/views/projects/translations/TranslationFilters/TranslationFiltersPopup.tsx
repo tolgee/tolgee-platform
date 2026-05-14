@@ -91,7 +91,7 @@ export const TranslationFiltersPopup = ({
               <SubfilterQaChecks
                 value={value}
                 actions={actions}
-                projectId={projectId}
+                selectedLanguages={selectedLanguages}
               />
             )}
           </>

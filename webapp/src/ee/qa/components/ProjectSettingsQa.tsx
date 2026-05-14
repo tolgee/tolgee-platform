@@ -4,15 +4,11 @@ import { T, useTranslate } from '@tolgee/react';
 
 import { useProject } from 'tg.hooks/useProject';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
-import { components } from 'tg.service/apiSchema.generated';
+import { QaCheckType, QaCheckSeverity } from 'tg.service/apiSchemaTypes';
 import { QaSettingsItem } from 'tg.ee.module/qa/components/QaSettingsItem';
 import { QaLanguageSettings } from './QaLanguageSettings';
 import { useEnabledFeatures } from 'tg.globalContext/helpers';
 import { DisabledFeatureBanner } from 'tg.component/common/DisabledFeatureBanner';
-
-type QaSettings = components['schemas']['QaSettingsRequest'];
-type QaCheckType = components['schemas']['QaIssueModel']['type'];
-type QaCheckSeverity = QaSettings['settings'][keyof QaSettings['settings']];
 
 const StyledContainer = styled(Box)`
   margin-top: ${({ theme }) => theme.spacing(3)};

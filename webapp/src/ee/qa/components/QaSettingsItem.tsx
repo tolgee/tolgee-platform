@@ -8,13 +8,9 @@ import {
   Typography,
 } from '@mui/material';
 import { QaSettingsItemTooltip } from 'tg.ee.module/qa/components/QaSettingsItemTooltip';
-import { components } from 'tg.service/apiSchema.generated';
+import { QaCheckType, QaCheckSeverity } from 'tg.service/apiSchemaTypes';
 import { useTranslate } from '@tolgee/react';
 import { useQaCheckTypeLabel } from 'tg.ee.module/qa/hooks/useQaCheckTypeLabel';
-
-type QaCheckType = components['schemas']['QaIssueModel']['type'];
-type QaSettings = components['schemas']['QaSettingsRequest'];
-type QaCheckSeverity = QaSettings['settings'][keyof QaSettings['settings']];
 
 const SENTINEL_DEFAULT = '__DEFAULT__';
 

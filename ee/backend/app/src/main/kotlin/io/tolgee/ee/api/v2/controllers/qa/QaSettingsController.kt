@@ -4,19 +4,18 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.constants.Feature
 import io.tolgee.ee.api.v2.hateoas.assemblers.qa.LanguageQaConfigModelAssembler
-import io.tolgee.ee.api.v2.hateoas.assemblers.qa.QaCheckCategoryModelAssembler
 import io.tolgee.ee.api.v2.hateoas.assemblers.qa.QaLanguageSettingsModelAssembler
 import io.tolgee.ee.api.v2.hateoas.assemblers.qa.QaSettingsModelAssembler
 import io.tolgee.ee.api.v2.hateoas.model.qa.LanguageQaConfigModel
-import io.tolgee.ee.api.v2.hateoas.model.qa.QaCheckCategoryModel
 import io.tolgee.ee.api.v2.hateoas.model.qa.QaLanguageSettingsModel
 import io.tolgee.ee.api.v2.hateoas.model.qa.QaSettingsModel
 import io.tolgee.ee.data.qa.QaEnabledRequest
 import io.tolgee.ee.data.qa.QaLanguageSettingsRequest
 import io.tolgee.ee.data.qa.QaSettingsRequest
 import io.tolgee.ee.service.qa.ProjectQaConfigService
+import io.tolgee.hateoas.qa.QaCheckCategoryModel
+import io.tolgee.hateoas.qa.QaCheckCategoryModelAssembler
 import io.tolgee.model.enums.Scope
-import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.openApiDocs.OpenApiUnstableOperationExtension
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
@@ -53,9 +52,7 @@ class QaSettingsController(
   @AllowApiAccess
   @RequiresFeatures(Feature.QA_CHECKS)
   fun getCheckTypes(): List<QaCheckCategoryModel> {
-    return QaCheckType.CATEGORIES.map { (category, checkTypes) ->
-      qaCheckCategoryModelAssembler.toModel(category, checkTypes)
-    }
+    return qaCheckCategoryModelAssembler.toModelsForAllCategories()
   }
 
   @GetMapping("")

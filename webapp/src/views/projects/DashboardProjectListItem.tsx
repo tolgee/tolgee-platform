@@ -18,7 +18,7 @@ import { ProjectListItemMenu } from 'tg.views/projects/ProjectListItemMenu';
 import { stopBubble } from 'tg.fixtures/eventHandler';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
-import { useEnabledFeatures } from 'tg.globalContext/helpers';
+import { useEnabledFeatures, useQaCheckTypes } from 'tg.globalContext/helpers';
 import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
 import { CircledLanguageIconList } from 'tg.component/languages/CircledLanguageIconList';
 import { QaBadge } from 'tg.ee';
@@ -127,6 +127,7 @@ const DashboardProjectListItem = (p: ProjectWithStatsModel) => {
     `@media(max-width: ${rightPanelWidth + 800}px)`
   );
   const { isEnabled } = useEnabledFeatures();
+  const allQaCheckTypes = useQaCheckTypes();
   const hasQaIssues = p.stats.qaIssueCount > 0;
   const hasStaleQaChecks = p.stats.qaChecksStaleCount > 0;
   const showQaBadge =
@@ -189,7 +190,7 @@ const DashboardProjectListItem = (p: ProjectWithStatsModel) => {
                   aria-label={t('project_list_qa_issues_button')}
                   component={Link}
                   to={getProjectTranslationsUrl(p.id, {
-                    filters: { filterHasQaIssues: true },
+                    filters: { filterQaCheckTypes: allQaCheckTypes },
                   })}
                   size="small"
                 >
