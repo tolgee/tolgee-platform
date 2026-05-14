@@ -2,6 +2,14 @@
   "name": "@tginternal/client",
   "version": "0.0.0-prerelease.45c1441e6",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tolgee/tolgee-platform.git",
+    "directory": "client"
+  },
+  "homepage": "https://github.com/tolgee/tolgee-platform/tree/main/client",
+  "bugs": "https://github.com/tolgee/tolgee-platform/issues",
+  "license": "Apache-2.0",
   "files": [
     "dist",
     "lib"
