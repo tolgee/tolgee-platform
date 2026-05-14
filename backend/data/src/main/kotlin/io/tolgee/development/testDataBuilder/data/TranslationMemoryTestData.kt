@@ -11,6 +11,7 @@ import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.model.translationMemory.TranslationMemory
 import io.tolgee.model.translationMemory.TranslationMemoryType
+import java.util.Date
 
 /**
  * Test data for Translation Memory tests.
@@ -138,6 +139,18 @@ class TranslationMemoryTestData : BaseTestData() {
    */
   lateinit var farewellKey: Key
   lateinit var farewellKeyGermanTranslation: Translation
+
+  /**
+   * Pair driving the trashed-source-key regression test:
+   *   - [trashedSourceKey] is on [projectWithTm], soft-deleted ("in trash"), with English
+   *     "Trash source" + German "Müll-Übersetzung".
+   *   - [trashedSourceLiveTwinKey] is a live sibling with the same English base and an
+   *     empty German row.
+   * Auto-translate of the live twin must not pull the deleted twin's German.
+   */
+  lateinit var trashedSourceKey: Key
+  lateinit var trashedSourceLiveTwinKey: Key
+  lateinit var trashedSourceLiveTwinGermanTranslation: Translation
 
   /** Non-default branch on [projectWithTm] — exercises the "TM writes skip non-default branches" rule. */
   lateinit var featureBranch: Branch
@@ -309,6 +322,39 @@ class TranslationMemoryTestData : BaseTestData() {
               text = "Farewell"
             }
             farewellKeyGermanTranslation =
+              addTranslation {
+                language = germanLanguageWithTm
+                key = this@keyBuilder.self
+                text = ""
+              }.self
+          }
+
+          addKey {
+            name = "trashed-source-key"
+            deletedAt = Date()
+            trashedSourceKey = this
+          }.build keyBuilder@{
+            addTranslation {
+              language = english
+              key = this@keyBuilder.self
+              text = "Trash source"
+            }
+            addTranslation {
+              language = germanLanguageWithTm
+              key = this@keyBuilder.self
+              text = "Müll-Übersetzung"
+            }
+          }
+          addKey {
+            name = "trashed-source-live-twin"
+            trashedSourceLiveTwinKey = this
+          }.build keyBuilder@{
+            addTranslation {
+              language = english
+              key = this@keyBuilder.self
+              text = "Trash source"
+            }
+            trashedSourceLiveTwinGermanTranslation =
               addTranslation {
                 language = germanLanguageWithTm
                 key = this@keyBuilder.self

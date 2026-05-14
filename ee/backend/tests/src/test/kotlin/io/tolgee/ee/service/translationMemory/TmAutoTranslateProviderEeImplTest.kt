@@ -123,6 +123,23 @@ class TmAutoTranslateProviderEeImplTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `auto-translate ignores soft-deleted source keys`() {
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.TRANSLATION_MEMORY)
+    val germanId = testData.trashedSourceLiveTwinGermanTranslation.id
+
+    executeInNewTransaction {
+      autoTranslationService.softAutoTranslate(
+        projectId = testData.projectWithTm.id,
+        keyId = testData.trashedSourceLiveTwinKey.id,
+        languageId = testData.germanLanguageWithTm.id,
+      )
+    }
+
+    val after = translationRepository.findById(germanId).get()
+    assertThat(after.text.isNullOrBlank()).isTrue
+  }
+
+  @Test
   fun `with feature disabled, auto-translate falls back to classic path and finds no match`() {
     enabledFeaturesProvider.forceEnabled = emptySet()
     val germanId = testData.helloKeyGermanTranslation.id
