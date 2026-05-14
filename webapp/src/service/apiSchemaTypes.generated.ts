@@ -13,6 +13,7 @@ export type ApiKeyPermissionsModel = components['schemas']['ApiKeyPermissionsMod
 export type ApiKeyWithLanguagesModel = components['schemas']['ApiKeyWithLanguagesModel'];
 export type AppInstallModel = components['schemas']['AppInstallModel'];
 export type AppManifestModules = components['schemas']['AppManifestModules'];
+export type AppManifestPreviewModel = components['schemas']['AppManifestPreviewModel'];
 export type ApplyBranchMergeRequest = components['schemas']['ApplyBranchMergeRequest'];
 export type AuthInfoModel = components['schemas']['AuthInfoModel'];
 export type AuthMethodsDTO = components['schemas']['AuthMethodsDTO'];

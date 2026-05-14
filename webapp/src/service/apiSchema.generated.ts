@@ -206,6 +206,10 @@ export interface paths {
     /** Fetches the manifest at the given URL and registers the app for the organization. */
     post: operations["register"];
   };
+  "/v2/organizations/{organizationId}/apps/preview": {
+    /** Fetches the manifest at the given URL and returns its parsed contents (including the requested scopes) without persisting anything. Used by the registration UI to show a consent prompt before installing. */
+    post: operations["preview"];
+  };
   "/v2/organizations/{organizationId}/apps/{installId}": {
     /** Removes the registered app from the organization. */
     delete: operations["remove"];
@@ -1452,10 +1456,19 @@ export interface components {
       manifestUrl: string;
       modules: components["schemas"]["AppManifestModules"];
       name: string;
+      scopes: string[];
       version: string;
     };
     AppManifestModules: {
       "project-dashboard-page"?: components["schemas"]["ProjectDashboardPageModule"][];
+    };
+    AppManifestPreviewModel: {
+      appId: string;
+      baseUrl: string;
+      modules: components["schemas"]["AppManifestModules"];
+      name: string;
+      requestedScopes: string[];
+      version: string;
     };
     ApplyBranchMergeRequest: {
       deleteBranch: boolean;
@@ -3049,7 +3062,8 @@ export interface components {
         | "app_manifest_fetch_failed"
         | "app_manifest_invalid"
         | "app_already_installed"
-        | "app_install_not_found";
+        | "app_install_not_found"
+        | "app_token_not_allowed_for_endpoint";
       params?: unknown[];
     };
     ExistenceEntityDescription: {
@@ -6736,7 +6750,8 @@ export interface components {
         | "app_manifest_fetch_failed"
         | "app_manifest_invalid"
         | "app_already_installed"
-        | "app_install_not_found";
+        | "app_install_not_found"
+        | "app_token_not_allowed_for_endpoint";
       params?: unknown[];
       success: boolean;
     };
@@ -9821,6 +9836,51 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["AppInstallModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RegisterAppRequest"];
+      };
+    };
+  };
+  /** Fetches the manifest at the given URL and returns its parsed contents (including the requested scopes) without persisting anything. Used by the registration UI to show a consent prompt before installing. */
+  preview: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AppManifestPreviewModel"];
         };
       };
       /** Bad Request */

@@ -26,6 +26,8 @@ import io.tolgee.security.BILLING_API_KEY_PREFIX
 import io.tolgee.security.PAT_PREFIX
 import io.tolgee.security.ratelimit.RateLimitService
 import io.tolgee.security.thirdParty.SsoDelegate
+import io.tolgee.service.apps.AppEnablementService
+import io.tolgee.service.apps.AppInstallService
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PatService
 import io.tolgee.service.security.UserAccountService
@@ -47,6 +49,12 @@ class AuthenticationFilter(
   private val rateLimitService: RateLimitService,
   @Lazy
   private val jwtService: JwtService,
+  @Lazy
+  private val appTokenService: AppTokenService,
+  @Lazy
+  private val appInstallService: AppInstallService,
+  @Lazy
+  private val appEnablementService: AppEnablementService,
   @Lazy
   private val userAccountService: UserAccountService,
   @Lazy
@@ -88,7 +96,20 @@ class AuthenticationFilter(
     val authorization = request.getHeader("Authorization")
     if (authorization != null) {
       if (authorization.startsWith("Bearer ")) {
-        val auth = jwtService.validateToken(authorization.substring(7))
+        val token = authorization.substring(7)
+
+        // Try app-token (audience `tg.app`) first. If validation throws because the token
+        // is not an app token (wrong audience), fall back to the user JWT path. Any other
+        // failure (bad signature, expired, missing entities) surfaces as an auth error
+        // and we do not fall through.
+        val appAuth = tryAppTokenAuth(token)
+        if (appAuth != null) {
+          checkIfSsoUserStillValid(appAuth.principal)
+          SecurityContextHolder.getContext().authentication = appAuth
+          return
+        }
+
+        val auth = jwtService.validateToken(token)
         checkIfSsoUserStillValid(auth.principal)
 
         SecurityContextHolder.getContext().authentication = auth
@@ -128,6 +149,46 @@ class AuthenticationFilter(
           isSuperToken = true,
         )
     }
+  }
+
+  /**
+   * Returns an [AppAuthentication] if the token parses as an app token and the live
+   * entity resolution (install + user + tokensValidNotBefore + per-project enablement)
+   * succeeds. Returns null when the token is not an app token (so the caller falls
+   * back to user JWT validation). Throws [AuthenticationException] for app tokens that
+   * are well-formed but reference revoked or missing entities.
+   */
+  private fun tryAppTokenAuth(token: String): AppAuthentication? {
+    val claims =
+      try {
+        appTokenService.validateToken(token)
+      } catch (_: AuthenticationException) {
+        // wrong audience, bad signature, expired or malformed — let the caller try user JWT
+        return null
+      }
+
+    val install =
+      appInstallService.find(claims.installId)
+        ?: throw AuthenticationException(Message.INVALID_JWT_TOKEN)
+
+    val user =
+      userAccountService.findDto(claims.userId)
+        ?: throw AuthenticationException(Message.INVALID_JWT_TOKEN)
+
+    if (user.tokensValidNotBefore != null && claims.issuedAt.before(user.tokensValidNotBefore)) {
+      throw AuthExpiredException(Message.EXPIRED_JWT_TOKEN)
+    }
+
+    if (!appEnablementService.isEnabledForProject(claims.projectId, claims.installId)) {
+      throw AuthenticationException(Message.INVALID_JWT_TOKEN)
+    }
+
+    return AppAuthentication(
+      credentials = token,
+      appInstall = install,
+      userAccount = user,
+      projectId = claims.projectId,
+    )
   }
 
   private fun checkIfSsoUserStillValid(userDto: UserAccountDto) {

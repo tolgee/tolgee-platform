@@ -69,6 +69,14 @@ class AppEnablementService(
       .map { it.appInstall }
   }
 
+  @Transactional(readOnly = true)
+  fun isEnabledForProject(
+    projectId: Long,
+    appInstallId: Long,
+  ): Boolean {
+    return appEnabledForProjectRepository.findByProjectIdAndAppInstallId(projectId, appInstallId) != null
+  }
+
   @Transactional
   fun removeAllForAppInstall(appInstallId: Long) {
     appEnabledForProjectRepository.deleteByAppInstallId(appInstallId)

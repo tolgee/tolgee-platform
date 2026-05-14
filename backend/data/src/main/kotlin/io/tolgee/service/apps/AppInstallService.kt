@@ -38,6 +38,7 @@ class AppInstallService(
         this.version = fetched.manifest.version
         this.baseUrl = fetched.manifest.baseUrl
         this.manifestJson = fetched.rawJson
+        this.grantedScopes = fetched.scopes.toMutableSet()
       }
 
     return appInstallRepository.save(install)
@@ -46,6 +47,15 @@ class AppInstallService(
   @Transactional(readOnly = true)
   fun findAll(organizationId: Long): List<AppInstall> {
     return appInstallRepository.findAllByOrganizationId(organizationId)
+  }
+
+  @Transactional(readOnly = true)
+  fun find(installId: Long): AppInstall? {
+    return appInstallRepository.findById(installId).orElse(null)
+  }
+
+  fun previewManifest(manifestUrl: String): AppManifestFetcher.FetchResult {
+    return appManifestFetcher.fetch(manifestUrl)
   }
 
   @Transactional
@@ -67,6 +77,7 @@ class AppInstallService(
     install.version = fetched.manifest.version
     install.baseUrl = fetched.manifest.baseUrl
     install.manifestJson = fetched.rawJson
+    install.grantedScopes = fetched.scopes.toMutableSet()
 
     return appInstallRepository.save(install)
   }

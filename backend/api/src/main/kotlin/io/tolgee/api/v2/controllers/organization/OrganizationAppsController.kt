@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.dtos.request.RegisterAppRequest
 import io.tolgee.hateoas.organization.apps.AppInstallModel
 import io.tolgee.hateoas.organization.apps.AppInstallModelAssembler
+import io.tolgee.hateoas.organization.apps.AppManifestPreviewModel
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.authentication.AuthenticationFacade
@@ -30,6 +31,29 @@ class OrganizationAppsController(
   private val appInstallService: AppInstallService,
   private val appInstallModelAssembler: AppInstallModelAssembler,
 ) {
+  @PostMapping("/preview")
+  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @Operation(
+    summary = "Preview a Tolgee app manifest",
+    description =
+      "Fetches the manifest at the given URL and returns its parsed contents (including the requested scopes) " +
+        "without persisting anything. Used by the registration UI to show a consent prompt before installing.",
+  )
+  fun preview(
+    @PathVariable organizationId: Long,
+    @RequestBody data: RegisterAppRequest,
+  ): AppManifestPreviewModel {
+    val fetched = appInstallService.previewManifest(data.manifestUrl)
+    return AppManifestPreviewModel(
+      appId = fetched.manifest.id,
+      name = fetched.manifest.name,
+      version = fetched.manifest.version,
+      baseUrl = fetched.manifest.baseUrl,
+      modules = fetched.manifest.modules,
+      requestedScopes = fetched.scopes.map { it.value },
+    )
+  }
+
   @PostMapping
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
   @Operation(

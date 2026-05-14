@@ -86,8 +86,18 @@ class SecurityService(
         .expand(
           getProjectPermissionScopesNoApiKey(projectId, authenticationFacade.authenticatedUser.id),
         ).toSet()
-    val apiKey = activeApiKey ?: return projectScopes
 
+    if (authenticationFacade.isAppAuth) {
+      val appAuth = authenticationFacade.appAuthentication
+      if (appAuth.projectId != projectId) {
+        // App tokens are bound to a specific project; deny calls targeting any other.
+        return emptySet()
+      }
+      val installScopes = Scope.expand(appAuth.appInstall.grantedScopes).toSet()
+      return installScopes.intersect(projectScopes)
+    }
+
+    val apiKey = activeApiKey ?: return projectScopes
     return Scope.expand(apiKey.scopes).toSet().intersect(projectScopes.toSet())
   }
 

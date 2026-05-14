@@ -582,7 +582,20 @@ declare namespace DataCy {
         "organization-apps-item" |
         "organization-apps-item-refresh" |
         "organization-apps-item-remove" |
+        "organization-apps-item-scopes" |
+        "organization-apps-refresh-cancel" |
+        "organization-apps-refresh-content" |
+        "organization-apps-refresh-dialog" |
+        "organization-apps-refresh-scope-added" |
+        "organization-apps-refresh-scope-kept" |
+        "organization-apps-refresh-scope-removed" |
+        "organization-apps-refresh-submit" |
+        "organization-apps-register-back" |
         "organization-apps-register-button" |
+        "organization-apps-register-consent" |
+        "organization-apps-register-consent-no-scopes" |
+        "organization-apps-register-consent-scope" |
+        "organization-apps-register-continue" |
         "organization-apps-register-dialog" |
         "organization-apps-register-manifest-url" |
         "organization-apps-register-submit" |

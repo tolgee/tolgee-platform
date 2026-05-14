@@ -5487,4 +5487,30 @@
                                  referencedTableName="user_account"
                                  validate="true"/>
     </changeSet>
+    <changeSet author="jcizmar" id="1747180800000-14">
+        <createTable tableName="app_install_granted_scope">
+            <column name="app_install_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="scope" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="jcizmar" id="1747180800000-15">
+        <addPrimaryKey columnNames="app_install_id, scope"
+                       constraintName="app_install_granted_scopePK"
+                       tableName="app_install_granted_scope"/>
+    </changeSet>
+    <changeSet author="jcizmar" id="1747180800000-16">
+        <addForeignKeyConstraint baseColumnNames="app_install_id"
+                                 baseTableName="app_install_granted_scope"
+                                 constraintName="FK_app_install_granted_scope_app_install"
+                                 deferrable="false"
+                                 initiallyDeferred="false"
+                                 referencedColumnNames="id"
+                                 referencedTableName="app_install"
+                                 onDelete="CASCADE"
+                                 validate="true"/>
+    </changeSet>
 </databaseChangeLog>

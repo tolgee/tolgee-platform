@@ -14,8 +14,14 @@ import { T } from '@tolgee/react';
 import { useOrganization } from 'tg.views/organizations/useOrganization';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { confirmation } from 'tg.hooks/confirmation';
+import { useScopeTranslations } from 'tg.component/PermissionsSettings/useScopeTranslations';
+import { PermissionModelScope } from 'tg.component/PermissionsSettings/types';
+import { components } from 'tg.service/apiSchema.generated';
 
 import { RegisterAppDialog } from './RegisterAppDialog';
+import { RefreshAppDialog } from './RefreshAppDialog';
+
+type AppInstallModel = components['schemas']['AppInstallModel'];
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -63,7 +69,9 @@ const StyledModuleChips = styled('div')`
 
 export const RegisteredAppsApp = () => {
   const organization = useOrganization();
+  const { getScopeTranslation } = useScopeTranslations();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [refreshing, setRefreshing] = useState<AppInstallModel | null>(null);
 
   const apps = useApiQuery({
     url: '/v2/organizations/{organizationId}/apps',
@@ -76,12 +84,6 @@ export const RegisteredAppsApp = () => {
     },
   });
 
-  const refreshMutation = useApiMutation({
-    url: '/v2/organizations/{organizationId}/apps/{installId}/refresh',
-    method: 'post',
-    invalidatePrefix: '/v2/organizations/{organizationId}/apps',
-  });
-
   const removeMutation = useApiMutation({
     url: '/v2/organizations/{organizationId}/apps/{installId}',
     method: 'delete',
@@ -91,12 +93,6 @@ export const RegisteredAppsApp = () => {
   if (!organization) {
     return null;
   }
-
-  const handleRefresh = (installId: number) => {
-    refreshMutation.mutate({
-      path: { organizationId: organization.id, installId },
-    });
-  };
 
   const handleRemove = (installId: number, name: string) => {
     confirmation({
@@ -183,6 +179,20 @@ export const RegisteredAppsApp = () => {
                     ))}
                   </StyledModuleChips>
                 )}
+                {item.scopes.length > 0 && (
+                  <StyledModuleChips data-cy="organization-apps-item-scopes">
+                    {item.scopes.map((scope) => (
+                      <Chip
+                        key={scope}
+                        size="small"
+                        variant="outlined"
+                        label={getScopeTranslation(
+                          scope as PermissionModelScope
+                        )}
+                      />
+                    ))}
+                  </StyledModuleChips>
+                )}
               </StyledItemMeta>
               <Box display="flex" gap={1}>
                 <Tooltip
@@ -195,8 +205,7 @@ export const RegisteredAppsApp = () => {
                 >
                   <IconButton
                     data-cy="organization-apps-item-refresh"
-                    onClick={() => handleRefresh(item.id)}
-                    disabled={refreshMutation.isLoading}
+                    onClick={() => setRefreshing(item)}
                   >
                     <RefreshCcw01 />
                   </IconButton>
@@ -227,6 +236,15 @@ export const RegisteredAppsApp = () => {
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
       />
+
+      {refreshing && (
+        <RefreshAppDialog
+          open
+          organizationId={organization.id}
+          install={refreshing}
+          onClose={() => setRefreshing(null)}
+        />
+      )}
     </>
   );
 };

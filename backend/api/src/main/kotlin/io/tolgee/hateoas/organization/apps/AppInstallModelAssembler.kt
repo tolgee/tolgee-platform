@@ -21,6 +21,7 @@ class AppInstallModelAssembler(
       version = entity.version,
       baseUrl = entity.baseUrl,
       modules = manifest.modules,
+      scopes = entity.grantedScopes.map { it.value },
     )
   }
 }
