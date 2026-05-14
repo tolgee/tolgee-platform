@@ -83,6 +83,18 @@ class TranslationMemoryTestData : BaseTestData() {
   lateinit var mismatchedBaseSharedTm: TranslationMemory
   lateinit var germanLanguageNoTm: Language
   lateinit var germanLanguageWithTm: Language
+
+  /**
+   * Czech on [projectWithTm]. Paired with [helloKeyCzechTranslation] (empty) and the
+   * `shared-greeting-cs` key on [conflictProject] (non-empty cs translation) to drive the
+   * cross-project virtual-row regression test for auto-translate: [projectWithTm] can read
+   * [multiProjectSharedTm] and pulls the cs target from [conflictProject]'s translation,
+   * not from any stored entry.
+   */
+  lateinit var czechLanguageWithTm: Language
+
+  /** Empty Czech row on [helloKey] — the seat the cross-project auto-translate fills. */
+  lateinit var helloKeyCzechTranslation: Translation
   lateinit var existingKey: Key
   lateinit var existingTargetTranslation: Translation
 
@@ -166,6 +178,11 @@ class TranslationMemoryTestData : BaseTestData() {
             addLanguage {
               name = "German"
               tag = "de"
+            }.self
+          czechLanguageWithTm =
+            addLanguage {
+              name = "Czech"
+              tag = "cs"
             }.self
 
           // Pre-existing key + translations
@@ -259,6 +276,12 @@ class TranslationMemoryTestData : BaseTestData() {
             helloKeyGermanTranslation =
               addTranslation {
                 language = germanLanguageWithTm
+                key = this@keyBuilder.self
+                text = ""
+              }.self
+            helloKeyCzechTranslation =
+              addTranslation {
+                language = czechLanguageWithTm
                 key = this@keyBuilder.self
                 text = ""
               }.self
@@ -457,6 +480,11 @@ class TranslationMemoryTestData : BaseTestData() {
               name = "German"
               tag = "de"
             }.self
+          val czech =
+            addLanguage {
+              name = "Czech"
+              tag = "cs"
+            }.self
           addKey {
             name = "shared-greeting"
           }.build keyBuilder@{
@@ -469,6 +497,24 @@ class TranslationMemoryTestData : BaseTestData() {
               language = german
               key = this@keyBuilder.self
               text = "Bestehende Übersetzung aus Konfliktprojekt"
+            }
+          }
+          // Key whose English source intentionally matches projectWithTm.helloKey. The cs
+          // translation here is the only non-empty cs target for "Hello world" anywhere —
+          // no stored TM entry covers it — so auto-translate has to find it via the
+          // virtual-rows half of TmAutoTranslateProviderEeImpl on multiProjectSharedTm.
+          addKey {
+            name = "shared-greeting-cs"
+          }.build keyBuilder@{
+            addTranslation {
+              language = english
+              key = this@keyBuilder.self
+              text = "Hello world"
+            }
+            addTranslation {
+              language = czech
+              key = this@keyBuilder.self
+              text = "Ahoj světe"
             }
           }
         }

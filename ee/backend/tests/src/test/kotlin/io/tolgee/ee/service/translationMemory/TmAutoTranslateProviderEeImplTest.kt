@@ -80,6 +80,28 @@ class TmAutoTranslateProviderEeImplTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `auto-translate fills target from another project's translation via virtual rows`() {
+    // No stored entry on any TM has source 'Hello world' + lang cs. The cs translation
+    // exists only on conflictProject.shared-greeting-cs. Both projects write to
+    // multiProjectSharedTm and projectWithTm reads it — so the virtual-rows half of the EE
+    // exact-match query is the only path that can resolve this auto-translate.
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.TRANSLATION_MEMORY)
+    val czechId = testData.helloKeyCzechTranslation.id
+
+    executeInNewTransaction {
+      autoTranslationService.softAutoTranslate(
+        projectId = testData.projectWithTm.id,
+        keyId = testData.helloKey.id,
+        languageId = testData.czechLanguageWithTm.id,
+      )
+    }
+
+    val after = translationRepository.findById(czechId).get()
+    assertThat(after.text).isEqualTo("Ahoj světe")
+    assertThat(after.auto).isTrue
+  }
+
+  @Test
   fun `with feature disabled, auto-translate falls back to classic path and finds no match`() {
     enabledFeaturesProvider.forceEnabled = emptySet()
     val germanId = testData.helloKeyGermanTranslation.id
