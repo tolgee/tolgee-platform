@@ -12,11 +12,16 @@ export const flatGridColumns = (languageCount: number) =>
   ` minmax(200px, 1fr)`.repeat(Math.max(languageCount, 0));
 
 // --- Row container ---
+// In flat mode `min-width: max-content` keeps the row's box wide enough for the full grid
+// when the user scrolls horizontally. Without it the box stays at the scroll container's
+// width and the row separator (`border-top`) gets clipped past the original viewport, even
+// though the grid tracks themselves extend to fit the content.
 export const StyledRow = styled('div')<{ $layout: EntryRowLayout }>`
   ${({ $layout }) =>
     $layout === 'flat'
       ? `
         display: grid;
+        min-width: max-content;
       `
       : `
         display: flex;
