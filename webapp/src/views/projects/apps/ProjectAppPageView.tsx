@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Box, CircularProgress, styled, Typography } from '@mui/material';
 import { T } from '@tolgee/react';
 import { useParams } from 'react-router-dom';
@@ -11,9 +11,9 @@ import { useProject } from 'tg.hooks/useProject';
 const StyledIframe = styled('iframe')`
   width: 100%;
   min-height: 600px;
-  border: 1px solid ${({ theme }) => theme.palette.divider};
-  border-radius: 4px;
-  background: ${({ theme }) => theme.palette.background.paper};
+  border: none;
+  background: transparent;
+  display: block;
 `;
 
 const StyledMissing = styled('div')`
@@ -50,6 +50,7 @@ export const ProjectAppPageView = () => {
   });
 
   const [token, setToken] = useState<string | null>(null);
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
 
   useEffect(() => {
     if (!app || !module) return;
@@ -61,19 +62,46 @@ export const ProjectAppPageView = () => {
   }, [installId, moduleKey, project.id, Boolean(app), Boolean(module)]);
 
   const iframeSrc =
-    app && module && token
-      ? `${app.baseUrl}${module.entry}?token=${encodeURIComponent(
-          token
-        )}&projectId=${project.id}&apiUrl=${encodeURIComponent(
-          import.meta.env.VITE_APP_API_URL ?? window.location.origin
-        )}`
-      : null;
+    app && module && token ? `${app.baseUrl}${module.entry}` : null;
+
+  const appOrigin = useMemo(() => {
+    if (!app) return null;
+    try {
+      return new URL(app.baseUrl).origin;
+    } catch {
+      return null;
+    }
+  }, [app?.baseUrl]);
+
+  const apiUrl = import.meta.env.VITE_APP_API_URL ?? window.location.origin;
+
+  useEffect(() => {
+    if (!appOrigin || !token) return;
+
+    const handler = (event: MessageEvent) => {
+      if (event.origin !== appOrigin) return;
+      if (event.source !== iframeRef.current?.contentWindow) return;
+      if (event.data?.type !== 'tolgee-app:ready') return;
+
+      iframeRef.current?.contentWindow?.postMessage(
+        {
+          type: 'tolgee-app:init',
+          token,
+          projectId: project.id,
+          apiUrl,
+        },
+        appOrigin
+      );
+    };
+
+    window.addEventListener('message', handler);
+    return () => window.removeEventListener('message', handler);
+  }, [appOrigin, token, project.id, apiUrl]);
 
   return (
     <BaseProjectView
       maxWidth={1200}
       windowTitle={module?.title ?? 'App'}
-      title={module?.title ?? 'App'}
       navigation={[
         [
           'Apps',
@@ -116,9 +144,15 @@ export const ProjectAppPageView = () => {
         </Box>
       ) : (
         <StyledIframe
+          ref={iframeRef}
           data-cy="project-app-page-iframe"
           src={iframeSrc}
-          sandbox="allow-scripts allow-forms"
+          // `allow-same-origin` is required so the plugin can load its own
+          // assets (scripts, fetches) from its origin without CORS rejections.
+          // Isolation from the Tolgee parent is enforced by the plugin running
+          // on a different origin (per-plugin subdomain in prod, localhost:5180
+          // vs localhost:3824 in dev) — NOT by null-origin sandboxing.
+          sandbox="allow-scripts allow-forms allow-same-origin"
           title={module.title}
         />
       )}

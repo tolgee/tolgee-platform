@@ -14,8 +14,6 @@ import { LoadingButton } from '@mui/lab';
 import { T } from '@tolgee/react';
 
 import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { useScopeTranslations } from 'tg.component/PermissionsSettings/useScopeTranslations';
-import { PermissionModelScope } from 'tg.component/PermissionsSettings/types';
 import { components } from 'tg.service/apiSchema.generated';
 
 type AppInstallModel = components['schemas']['AppInstallModel'];
@@ -34,7 +32,6 @@ export const RefreshAppDialog = ({
   install,
   onClose,
 }: Props) => {
-  const { getScopeTranslation } = useScopeTranslations();
   const [preview, setPreview] = useState<AppManifestPreviewModel | null>(null);
 
   const previewMutation = useApiMutation({
@@ -137,7 +134,7 @@ export const RefreshAppDialog = ({
                       key={scope}
                       size="small"
                       color="warning"
-                      label={getScopeTranslation(scope as PermissionModelScope)}
+                      label={scope}
                       data-cy="organization-apps-refresh-scope-added"
                     />
                   ))}
@@ -159,7 +156,7 @@ export const RefreshAppDialog = ({
                       key={scope}
                       size="small"
                       variant="outlined"
-                      label={getScopeTranslation(scope as PermissionModelScope)}
+                      label={scope}
                       data-cy="organization-apps-refresh-scope-removed"
                     />
                   ))}
@@ -180,7 +177,7 @@ export const RefreshAppDialog = ({
                     <Chip
                       key={scope}
                       size="small"
-                      label={getScopeTranslation(scope as PermissionModelScope)}
+                      label={scope}
                       data-cy="organization-apps-refresh-scope-kept"
                     />
                   ))}

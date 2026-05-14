@@ -15,8 +15,6 @@ import { T, useTranslate } from '@tolgee/react';
 
 import { useOrganization } from 'tg.views/organizations/useOrganization';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { useScopeTranslations } from 'tg.component/PermissionsSettings/useScopeTranslations';
-import { PermissionModelScope } from 'tg.component/PermissionsSettings/types';
 import { components } from 'tg.service/apiSchema.generated';
 
 type AppManifestPreviewModel = components['schemas']['AppManifestPreviewModel'];
@@ -29,7 +27,6 @@ type Props = {
 export const RegisterAppDialog = ({ open, onClose }: Props) => {
   const organization = useOrganization();
   const { t } = useTranslate();
-  const { getScopeTranslation } = useScopeTranslations();
 
   const [manifestUrl, setManifestUrl] = useState('');
   const [preview, setPreview] = useState<AppManifestPreviewModel | null>(null);
@@ -185,7 +182,7 @@ export const RegisterAppDialog = ({ open, onClose }: Props) => {
                 <Chip
                   key={scope}
                   size="small"
-                  label={getScopeTranslation(scope as PermissionModelScope)}
+                  label={scope}
                   data-cy="organization-apps-register-consent-scope"
                 />
               ))}
