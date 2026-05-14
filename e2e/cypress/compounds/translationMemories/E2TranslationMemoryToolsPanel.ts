@@ -11,7 +11,7 @@ export class E2TranslationMemoryToolsPanel {
   }
 
   getEmptyState() {
-    return cy.contains('Nothing found');
+    return cy.gcy('translation-tools-translation-memory-empty');
   }
 
   getScoreOf(text: string) {

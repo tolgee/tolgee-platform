@@ -372,6 +372,7 @@ class TranslationMemoryEntryManagementService(
 
     val cellsByOrigin = mutableMapOf<RowId, MutableList<VirtualEntry>>()
     val originMeta = mutableMapOf<RowId, Pair<Long, String>>()
+    val rowIdSet = rowIds.toSet()
     for (row in rows) {
       val sourceText = row[0] as String
       val projectId = (row[4] as Number).toLong()
@@ -382,7 +383,7 @@ class TranslationMemoryEntryManagementService(
           kind = TmRow.Kind.VIRTUAL,
           originId = "$projectId:$keyName",
         )
-      if (rowId !in rowIds.toSet()) continue
+      if (rowId !in rowIdSet) continue
       cellsByOrigin
         .getOrPut(rowId) { mutableListOf() }
         .add(

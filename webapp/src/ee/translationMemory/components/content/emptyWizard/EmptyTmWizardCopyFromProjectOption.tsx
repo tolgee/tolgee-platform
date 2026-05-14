@@ -5,9 +5,7 @@ import { TranslationMemorySettingsDialog } from 'tg.ee.module/translationMemory/
 import { EmptyWizardCard } from 'tg.component/entriesList/EmptyWizardCard';
 
 type Props = {
-  organizationId: number;
   translationMemoryId: number;
-  sourceLanguageTag: string;
   assignedProjectsCount: number;
   onFinished: () => void;
 };

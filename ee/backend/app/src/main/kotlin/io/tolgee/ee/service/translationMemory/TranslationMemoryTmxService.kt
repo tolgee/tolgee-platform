@@ -44,12 +44,22 @@ class TranslationMemoryTmxService(
     val updatedTuids = mutableSetOf<String?>()
     val skippedTuids = mutableSetOf<String?>()
     val toSave = mutableListOf<TranslationMemoryEntry>()
+    // Tracks `(tuid, lang)` pairs already accounted for during this single import — covers the
+    // case where one TMX file contains the same identity multiple times. Without it the
+    // existingByTuidAndLang map never sees the freshly-created entry, so the second occurrence
+    // would slip into the "create new" branch and insert a duplicate.
+    val seenInBatch = mutableSetOf<Pair<String, String>>()
 
     for (entry in parsed) {
       val tuid = entry.tuid
 
       if (tuid != null) {
         val conflictKey = Pair(tuid, entry.targetLanguageTag)
+        if (conflictKey in seenInBatch) {
+          skippedTuids.add(tuid)
+          continue
+        }
+        seenInBatch.add(conflictKey)
         val existing = existingByTuidAndLang[conflictKey]
 
         if (existing != null) {

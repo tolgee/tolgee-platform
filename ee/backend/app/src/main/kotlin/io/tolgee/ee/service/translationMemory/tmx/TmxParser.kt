@@ -1,29 +1,22 @@
 package io.tolgee.ee.service.translationMemory.tmx
 
+import io.tolgee.util.XmlSecurity
 import org.w3c.dom.Element
 import org.w3c.dom.NodeList
 import java.io.InputStream
-import javax.xml.parsers.DocumentBuilderFactory
 
 class TmxParser(
   private val tmSourceLanguageTag: String,
 ) {
   fun parse(inputStream: InputStream): List<TmxParsedEntry> {
-    val factory = DocumentBuilderFactory.newInstance()
+    // Centralised hardening (FEATURE_SECURE_PROCESSING, disallow-doctype-decl, disabled XInclude
+    // and entity expansion) shared with the rest of the XML parsers in the codebase.
+    val factory = XmlSecurity.newSecureDocumentBuilderFactory()
     factory.isNamespaceAware = true
-    // Disable DTD loading — TMX files may reference tmx14.dtd which is not available
-    factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)
-    factory.setFeature("http://xml.org/sax/features/external-general-entities", false)
-    factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false)
     val doc = factory.newDocumentBuilder().parse(inputStream)
 
     val headerElements = doc.getElementsByTagName("header")
-    val srcLang =
-      if (headerElements.length > 0) {
-        (headerElements.item(0) as Element).getAttribute("srclang").ifBlank { tmSourceLanguageTag }
-      } else {
-        tmSourceLanguageTag
-      }
+    val srcLang = resolveSourceLanguage(headerElements)
 
     val tuElements = doc.getElementsByTagName("tu")
     val result = mutableListOf<TmxParsedEntry>()
@@ -60,6 +53,19 @@ class TmxParser(
           tuid = tuid,
         )
       }
+  }
+
+  /**
+   * Resolves the source language from the `<header srclang=…>` attribute, falling back to the
+   * TM's declared source when the attribute is missing, blank, or the TMX wildcard `*` (the
+   * spec value meaning "no single source language"). Without the wildcard branch every `<tu>`
+   * would be dropped because no `<tuv xml:lang="*">` ever matches a real translation row.
+   */
+  private fun resolveSourceLanguage(headerElements: NodeList): String {
+    if (headerElements.length == 0) return tmSourceLanguageTag
+    val declared = (headerElements.item(0) as Element).getAttribute("srclang")
+    if (declared.isBlank() || declared == "*") return tmSourceLanguageTag
+    return declared
   }
 
   private fun getLang(tuv: Element): String {

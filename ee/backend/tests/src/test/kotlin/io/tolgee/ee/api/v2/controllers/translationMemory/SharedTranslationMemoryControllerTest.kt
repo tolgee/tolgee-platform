@@ -1,5 +1,6 @@
 package io.tolgee.ee.api.v2.controllers.translationMemory
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.TranslationMemoryTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
@@ -328,25 +329,18 @@ class SharedTranslationMemoryControllerTest : AuthorizedControllerTest() {
         sourceLanguageTag = "en"
         assignedProjects = listOf(ProjectAssignmentDto().apply { this.projectId = projectId })
       }
-    performAuthPost("/v2/organizations/$orgId/translation-memories", request)
-      .andIsOk
-      .andAssertThatJson {
-        node("id").isValidId
-        node("name").isEqualTo("TM With Projects")
-      }
+    val createResult =
+      performAuthPost("/v2/organizations/$orgId/translation-memories", request)
+        .andIsOk
+        .andAssertThatJson {
+          node("id").isValidId
+          node("name").isEqualTo("TM With Projects")
+        }.andReturn()
 
-    // Verify the assignment was created — get the TM ID from the API response, then
-    // check the repository directly (avoids lazy-loading issues with detached entities).
+    // Verify the assignment was created — pull the TM id straight from the POST response so
+    // the lookup doesn't depend on search-endpoint semantics or the name being globally unique.
     val createdTmId =
-      performAuthGet("/v2/organizations/$orgId/translation-memories-with-stats?search=TM With Projects")
-        .andReturn()
-        .let {
-          com.fasterxml.jackson.databind
-            .ObjectMapper()
-            .readTree(it.response.contentAsString)
-            .at("/_embedded/translationMemories/0/id")
-            .asLong()
-        }
+      ObjectMapper().readTree(createResult.response.contentAsString).path("id").asLong()
     val assignments = translationMemoryProjectRepository.findByTranslationMemoryId(createdTmId)
     assertThat(assignments).hasSize(1)
     assertThat(assignments[0].project.id).isEqualTo(projectId)

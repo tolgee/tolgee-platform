@@ -80,7 +80,7 @@ export const TranslationMemory: React.FC<PanelContentProps> = ({
           />
         ))
       ) : (
-        <TabMessage>
+        <TabMessage data-cy="translation-tools-translation-memory-empty">
           {t('translation_tools_nothing_found', 'Nothing found')}
         </TabMessage>
       )}

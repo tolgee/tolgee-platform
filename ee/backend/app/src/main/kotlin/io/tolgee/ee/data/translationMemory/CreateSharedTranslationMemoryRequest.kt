@@ -1,6 +1,7 @@
 package io.tolgee.ee.data.translationMemory
 
 import io.swagger.v3.oas.annotations.media.Schema
+import jakarta.validation.Valid
 import jakarta.validation.constraints.Max
 import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotBlank
@@ -20,6 +21,7 @@ class CreateSharedTranslationMemoryRequest {
   var sourceLanguageTag: String = ""
 
   @Schema(description = "Project assignments with access settings.")
+  @field:Valid
   var assignedProjects: List<ProjectAssignmentDto>? = null
 
   @Schema(

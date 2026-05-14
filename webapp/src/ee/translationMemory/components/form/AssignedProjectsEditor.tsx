@@ -185,6 +185,11 @@ export const AssignedProjectsEditor = ({
           }}
           inputValue={projectSearch}
           onInputChange={(_, value) => setProjectSearch(value)}
+          renderOption={(props, option) => (
+            <li {...props} key={option.id} data-cy="tm-add-project-option">
+              {option.name}
+            </li>
+          )}
           renderInput={(params) => (
             <MuiTextField
               {...params}

@@ -61,7 +61,9 @@ class TmxExporter(
   ) {
     writer.writeCharacters("\n      ")
     writer.writeStartElement("tuv")
-    writer.writeAttribute("xml:lang", lang)
+    // `xml:lang` is a namespaced attribute; the 2-arg writeAttribute(localName, value) overload
+    // forbids prefixes in the name and throws XMLStreamException on strict implementations.
+    writer.writeAttribute("xml", "http://www.w3.org/XML/1998/namespace", "lang", lang)
     writer.writeStartElement("seg")
     writer.writeCharacters(text)
     writer.writeEndElement() // seg

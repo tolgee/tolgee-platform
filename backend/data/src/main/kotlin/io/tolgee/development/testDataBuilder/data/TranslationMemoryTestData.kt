@@ -15,11 +15,15 @@ import io.tolgee.model.translationMemory.TranslationMemoryType
 /**
  * Test data for Translation Memory tests.
  *
- * Provides two projects:
- *   - [projectWithTm]: has a project TM assigned, pre-populated with one key and its TM entry.
- *     Use for testing the write pipeline, update, delete cascade, and project deletion cleanup.
- *   - [projectWithoutTm]: the base project (inherited from [BaseTestData]) with no TM assigned.
- *     Use for testing that the write pipeline skips projects without TM.
+ * Provides two projects. Both have an auto-created project-type TM (every project gets one in
+ * the current model), so neither is "TM-less" any more — the difference is what's preloaded:
+ *   - [projectWithTm]: project TM is pre-populated with one key and its TM entry, plus a number
+ *     of shared TM assignments for the controller tests. Use for the write pipeline, update,
+ *     delete cascade, project deletion cleanup, and any test that needs realistic shared-TM
+ *     fixtures.
+ *   - [projectWithoutTm]: the base project (inherited from [BaseTestData]) — has only the
+ *     auto-created project TM, no fixture entries, no shared TM assignments. Use it whenever a
+ *     test needs a "clean slate" project against which to assert default behaviour.
  */
 class TranslationMemoryTestData : BaseTestData() {
   lateinit var projectWithTm: Project
@@ -519,6 +523,7 @@ class TranslationMemoryTestData : BaseTestData() {
     }
   }
 
-  /** Alias for the TM-less project (inherited from [BaseTestData]). */
+  /** Alias for the BaseTestData project. Still gets the auto-created project TM, just nothing
+   *  pre-populated and no shared-TM assignments. */
   val projectWithoutTm get() = project
 }

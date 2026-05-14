@@ -33,7 +33,9 @@ export class E2TranslationMemoryCreateEditDialog {
 
   toggleAssignedProject(projectName: string) {
     gcy('tm-add-project-autocomplete').find('input').click();
-    cy.get('li[role="option"]').contains(projectName).click();
+    // Scoped data-cy lookup — the option element is rendered with this attribute and the
+    // project name is the option's text. Avoids brittle text-only matching on `li[role=…]`.
+    gcy('tm-add-project-option').contains(projectName).click();
   }
 
   getWriteOnlyReviewedSwitch() {

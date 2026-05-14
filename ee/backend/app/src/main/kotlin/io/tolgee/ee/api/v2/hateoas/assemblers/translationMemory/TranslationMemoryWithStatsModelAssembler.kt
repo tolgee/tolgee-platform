@@ -21,6 +21,7 @@ class TranslationMemoryWithStatsModelAssembler :
       assignedProjectNames =
         entity.assignedProjectNamesCsv
           ?.split(",")
+          ?.map { it.trim() }
           ?.filter { it.isNotEmpty() }
           ?: emptyList(),
       defaultPenalty = entity.defaultPenalty,

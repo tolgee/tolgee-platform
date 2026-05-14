@@ -37,6 +37,12 @@ const StyledCheckbox = styled(Checkbox)`
 type Props = {
   selectionService: SelectionService<number>;
   actionLabel: React.ReactNode;
+  /**
+   * Accessible label for the icon-only action button. Plain string so screen readers and
+   * assistive tech can announce it — `actionLabel` is a `ReactNode` (typically `<T />`) so
+   * cannot be used directly.
+   */
+  actionAriaLabel: string;
   actionDisabled?: boolean;
   actionLoading?: boolean;
   onAction: () => void;
@@ -47,6 +53,7 @@ type Props = {
 export const BatchToolbarShell: React.VFC<Props> = ({
   selectionService,
   actionLabel,
+  actionAriaLabel,
   actionDisabled,
   actionLoading,
   onAction,
@@ -80,6 +87,7 @@ export const BatchToolbarShell: React.VFC<Props> = ({
         loading={Boolean(actionLoading) || selectionService.isLoading}
         onClick={onAction}
         data-cy={actionDataCy}
+        aria-label={actionAriaLabel}
       >
         <ChevronRight width={20} height={20} />
       </LoadingButton>

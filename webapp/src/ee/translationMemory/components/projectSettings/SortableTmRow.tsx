@@ -183,7 +183,11 @@ export const SortableTmRow = ({ tm, index, onSettings, canEdit }: Props) => {
       </StyledBadges>
       {canEdit && (
         <Tooltip title={t('project_settings_tm_settings', 'Settings')}>
-          <IconButton size="small" onClick={onSettings}>
+          <IconButton
+            size="small"
+            onClick={onSettings}
+            aria-label={t('project_settings_tm_settings', 'Settings')}
+          >
             <Settings01 width={16} height={16} />
           </IconButton>
         </Tooltip>

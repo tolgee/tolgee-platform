@@ -42,12 +42,23 @@ export const GlossaryEmptyListMessage: React.VFC<Props> = ({
         <EmptyWizardCard
           dataCy="glossary-empty-add-term-button"
           icon={<PlusCircle />}
-          title={<T keyName="glossary_empty_placeholder_add_term_title" />}
+          title={
+            <T
+              keyName="glossary_empty_placeholder_add_term_title"
+              defaultValue="Add a term"
+            />
+          }
           description={
-            <T keyName="glossary_empty_placeholder_add_term_description" />
+            <T
+              keyName="glossary_empty_placeholder_add_term_description"
+              defaultValue="Define a term and its translations so the editor can suggest them consistently."
+            />
           }
           buttonLabel={
-            <T keyName="glossary_empty_placeholder_add_term_button" />
+            <T
+              keyName="glossary_empty_placeholder_add_term_button"
+              defaultValue="Add term"
+            />
           }
           buttonDisabled={!onCreateTerm}
           onClick={() => onCreateTerm?.()}
@@ -57,7 +68,10 @@ export const GlossaryEmptyListMessage: React.VFC<Props> = ({
               sx={{ visibility: 'hidden' }}
             >
               <Typography variant="body2">
-                <T keyName="glossary_empty_placeholder_add_term_best_practices" />
+                <T
+                  keyName="glossary_empty_placeholder_add_term_best_practices"
+                  defaultValue="Best practices for glossary terms"
+                />
               </Typography>
             </Link>
           }
@@ -65,19 +79,33 @@ export const GlossaryEmptyListMessage: React.VFC<Props> = ({
         <EmptyWizardCard
           dataCy="glossary-empty-import-terms-button"
           icon={<UploadCloud02 />}
-          title={<T keyName="glossary_empty_placeholder_import_terms_title" />}
+          title={
+            <T
+              keyName="glossary_empty_placeholder_import_terms_title"
+              defaultValue="Import terms"
+            />
+          }
           description={
-            <T keyName="glossary_empty_placeholder_import_terms_description" />
+            <T
+              keyName="glossary_empty_placeholder_import_terms_description"
+              defaultValue="Bulk-load terms from a CSV file you already maintain elsewhere."
+            />
           }
           buttonLabel={
-            <T keyName="glossary_empty_placeholder_import_terms_button" />
+            <T
+              keyName="glossary_empty_placeholder_import_terms_button"
+              defaultValue="Import CSV"
+            />
           }
           buttonDisabled={!onImport}
           onClick={() => onImport?.()}
           footer={
             <Link href="https://docs.tolgee.io/platform/glossaries/importing_and_exporting_glossaries">
               <Typography variant="body2">
-                <T keyName="glossary_empty_placeholder_import_terms_csv_format" />
+                <T
+                  keyName="glossary_empty_placeholder_import_terms_csv_format"
+                  defaultValue="CSV format reference"
+                />
               </Typography>
             </Link>
           }

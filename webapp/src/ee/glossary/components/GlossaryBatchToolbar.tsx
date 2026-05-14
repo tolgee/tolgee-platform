@@ -1,7 +1,7 @@
 import React from 'react';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { confirmation } from 'tg.hooks/confirmation';
-import { T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import { SelectionService } from 'tg.service/useSelectionService';
 import { messageService } from 'tg.service/MessageService';
 import { TranslatedError } from 'tg.translationTools/TranslatedError';
@@ -19,6 +19,7 @@ type Props = {
 export const GlossaryBatchToolbar: React.VFC<Props> = ({
   selectionService,
 }) => {
+  const { t } = useTranslate();
   const { preferredOrganization } = usePreferredOrganization();
   const glossary = useGlossary();
 
@@ -79,6 +80,7 @@ export const GlossaryBatchToolbar: React.VFC<Props> = ({
           defaultValue="Delete terms"
         />
       }
+      actionAriaLabel={t('glossary_term_batch_delete_action', 'Delete terms')}
       actionDisabled={!canDelete}
       actionLoading={deleteSelectedMutation.isLoading}
       onAction={onDeleteSelected}

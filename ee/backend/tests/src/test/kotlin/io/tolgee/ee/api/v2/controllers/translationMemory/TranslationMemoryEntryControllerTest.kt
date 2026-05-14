@@ -299,7 +299,13 @@ class TranslationMemoryEntryControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `updates an entry`() {
-    val entry = translationMemoryEntryRepository.findByTranslationMemoryId(sharedTmId).first()
+    // Pick the (Hello world, de) entry deterministically — findBy… has no ordering guarantee and
+    // picking arbitrarily could collide with another existing entry on the targetLanguageTag we
+    // set below.
+    val entry =
+      translationMemoryEntryRepository
+        .findByTranslationMemoryId(sharedTmId)
+        .first { it.sourceText == "Hello world" && it.targetLanguageTag == "de" }
     val request =
       UpdateTranslationMemoryEntryRequest().apply {
         sourceText = entry.sourceText

@@ -40,9 +40,7 @@ export const EmptyTmWizard: React.VFC<Props> = ({
   return (
     <StyledBox data-cy="tm-empty-wizard">
       <EmptyTmWizardCopyFromProjectOption
-        organizationId={organizationId}
         translationMemoryId={translationMemoryId}
-        sourceLanguageTag={sourceLanguageTag}
         assignedProjectsCount={assignedProjectsCount}
         onFinished={onFinished}
       />

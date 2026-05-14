@@ -292,14 +292,15 @@ class AutoTranslationService(
   ): Map<Translation, Boolean> {
     val project = projectService.getDto(key.project.id)
     return toTranslate.associateWith { translation ->
-      val tmValue = tmAutoTranslateProvider.getAutoTranslatedValue(key, translation.language)
-      tmValue
-        ?.targetTranslationText
-        .let { targetText -> if (targetText.isNullOrEmpty()) null else targetText }
-        ?.let {
-          translation.setValueAndState(project, it, null)
-        }
-      (tmValue != null)
+      // "Match" must mean a non-blank target was actually applied. Returning true on a blank hit
+      // would tell the caller to skip MT fallback for this key, leaving it untranslated.
+      val tmText =
+        tmAutoTranslateProvider
+          .getAutoTranslatedValue(key, translation.language)
+          ?.targetTranslationText
+          ?.takeIf { it.isNotBlank() }
+      tmText?.let { translation.setValueAndState(project, it, null) }
+      tmText != null
     }
   }
 

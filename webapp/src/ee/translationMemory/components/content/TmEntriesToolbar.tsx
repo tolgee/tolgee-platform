@@ -21,7 +21,7 @@ import { BaseViewAddButton } from 'tg.component/layout/BaseViewAddButton';
 import { components } from 'tg.service/apiSchema.generated';
 import { UseInfiniteQueryResult } from 'react-query';
 import { ApiError } from 'tg.service/http/ApiError';
-import { EntryRowLayout } from './TranslationMemoryEntryRow';
+import { EntryRowLayout } from 'tg.ee.module/translationMemory/components/content/TranslationMemoryEntryRow';
 
 type OrganizationLanguageModel =
   components['schemas']['OrganizationLanguageModel'];
@@ -186,7 +186,10 @@ export const TmEntriesToolbar: React.VFC<Props> = ({
                 onFetchMore={onFetchMoreLanguages}
                 renderItem={renderLangItem}
                 labelItem={(item) => item}
-                searchPlaceholder={t('language_search_placeholder')}
+                searchPlaceholder={t(
+                  'language_search_placeholder',
+                  'Search languages'
+                )}
                 minHeight={false}
               />
             </Box>

@@ -9,7 +9,13 @@ export class E2ProjectTmSettings {
 
   findAndVisit(data: TestDataStandardResponse, projectName: string) {
     const project = data.projects.find((p) => p.name === projectName);
-    this.visit(project!.id);
+    if (!project) {
+      throw new Error(
+        `E2ProjectTmSettings.findAndVisit: project "${projectName}" missing from test data. ` +
+          `Available: ${data.projects.map((p) => p.name).join(', ')}`
+      );
+    }
+    this.visit(project.id);
   }
 
   getSharedSection() {

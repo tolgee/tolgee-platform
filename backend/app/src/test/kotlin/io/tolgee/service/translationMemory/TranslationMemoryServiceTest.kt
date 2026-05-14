@@ -13,6 +13,7 @@ import io.tolgee.service.project.ProjectCreationService
 import io.tolgee.service.project.ProjectHardDeletingService
 import io.tolgee.service.translation.TranslationMemoryService
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -46,6 +47,11 @@ class TranslationMemoryServiceTest : AbstractSpringTest() {
   fun setup() {
     testData = TranslationMemoryTestData()
     testDataService.saveTestData(testData.root)
+  }
+
+  @AfterEach
+  fun cleanup() {
+    testDataService.cleanTestData(testData.root)
   }
 
   @Test

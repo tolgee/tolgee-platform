@@ -32,14 +32,16 @@ fun buildTmxRaw(
   val sb = StringBuilder()
   sb.appendLine("""<?xml version="1.0" encoding="UTF-8"?>""")
   sb.appendLine("""<tmx version="1.4">""")
-  sb.appendLine("""  <header srclang="$srcLang" datatype="PlainText" creationtool="test"/>""")
+  sb.appendLine("""  <header srclang="${escapeXml(srcLang)}" datatype="PlainText" creationtool="test"/>""")
   sb.appendLine("""  <body>""")
   units.forEach { unit ->
-    val tuidAttr = if (unit.tuid != null) """ tuid="${unit.tuid}"""" else ""
+    val tuidAttr = if (unit.tuid != null) """ tuid="${escapeXml(unit.tuid)}"""" else ""
     sb.appendLine("""    <tu$tuidAttr>""")
-    sb.appendLine("""      <tuv xml:lang="$srcLang"><seg>${unit.source}</seg></tuv>""")
+    sb.appendLine(
+      """      <tuv xml:lang="${escapeXml(srcLang)}"><seg>${escapeXml(unit.source)}</seg></tuv>""",
+    )
     unit.targets.forEach { (lang, text) ->
-      sb.appendLine("""      <tuv xml:lang="$lang"><seg>$text</seg></tuv>""")
+      sb.appendLine("""      <tuv xml:lang="${escapeXml(lang)}"><seg>${escapeXml(text)}</seg></tuv>""")
     }
     sb.appendLine("""    </tu>""")
   }
@@ -47,6 +49,13 @@ fun buildTmxRaw(
   sb.appendLine("""</tmx>""")
   return sb.toString()
 }
+
+private fun escapeXml(s: String): String =
+  s.replace("&", "&amp;")
+    .replace("<", "&lt;")
+    .replace(">", "&gt;")
+    .replace("\"", "&quot;")
+    .replace("'", "&apos;")
 
 fun mockTmxFile(content: String): MockMultipartFile =
   MockMultipartFile("file", "test.tmx", "application/xml", content.toByteArray())

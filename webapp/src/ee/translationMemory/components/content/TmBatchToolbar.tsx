@@ -1,5 +1,5 @@
 import React from 'react';
-import { T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import { confirmation } from 'tg.hooks/confirmation';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { messageService } from 'tg.service/MessageService';
@@ -19,6 +19,7 @@ export const TmBatchToolbar: React.VFC<Props> = ({
   translationMemoryId,
   selectionService,
 }) => {
+  const { t } = useTranslate();
   const canDelete = useIsOrganizationOwnerOrMaintainer();
 
   const deleteSelectedMutation = useApiMutation({
@@ -79,6 +80,10 @@ export const TmBatchToolbar: React.VFC<Props> = ({
           defaultValue="Delete entries"
         />
       }
+      actionAriaLabel={t(
+        'translation_memory_entries_batch_delete_action',
+        'Delete entries'
+      )}
       actionDisabled={!canDelete}
       actionLoading={deleteSelectedMutation.isLoading}
       onAction={onDeleteSelected}

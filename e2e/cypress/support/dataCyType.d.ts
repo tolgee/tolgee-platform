@@ -871,6 +871,7 @@ declare namespace DataCy {
         "tasks-view-list-button" |
         "this-is-the-element" |
         "tm-add-project-autocomplete" |
+        "tm-add-project-option" |
         "tm-batch-delete-button" |
         "tm-batch-toolbar" |
         "tm-content-subtitle" |
@@ -964,6 +965,7 @@ declare namespace DataCy {
         "translation-tools-machine-translation-item" |
         "translation-tools-machine-translation-item-prompt" |
         "translation-tools-suggestions-show-all-checkbox" |
+        "translation-tools-translation-memory-empty" |
         "translation-tools-translation-memory-item" |
         "translation-tools-translation-memory-item-key-name" |
         "translation-tools-translation-memory-item-score" |

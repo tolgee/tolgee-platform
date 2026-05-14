@@ -158,7 +158,7 @@ export const TranslationMemorySettingsDialog: React.VFC<Props> = ({
       {isLoading || !initialValues ? (
         <DialogContent>
           <Box py={4} textAlign="center" color="text.secondary">
-            Loading...
+            <T keyName="global_loading" defaultValue="Loading..." />
           </Box>
         </DialogContent>
       ) : (

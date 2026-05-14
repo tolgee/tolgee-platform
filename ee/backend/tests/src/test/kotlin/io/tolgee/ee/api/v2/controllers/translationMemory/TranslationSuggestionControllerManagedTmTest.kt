@@ -158,10 +158,10 @@ class TranslationSuggestionControllerManagedTmTest : ProjectAuthControllerTest("
       .andAssertThatJson {
         node("_embedded.translationMemoryItems[0].targetText").isEqualTo("Auf Wiedersehen")
         node("_embedded.translationMemoryItems[0].similarity").isNumber.satisfies({
-          assert(it.toFloat() == 0.75f) { "expected 1.00 - 0.25 = 0.75, got $it" }
+          assertThat(it.toFloat()).`as` { "expected 1.00 - 0.25 = 0.75" }.isEqualTo(0.75f)
         })
         node("_embedded.translationMemoryItems[0].rawSimilarity").isNumber.satisfies({
-          assert(it.toFloat() == 1.0f) { "expected raw similarity = 1.00, got $it" }
+          assertThat(it.toFloat()).`as` { "expected raw similarity = 1.00" }.isEqualTo(1.0f)
         })
       }
   }
@@ -183,7 +183,7 @@ class TranslationSuggestionControllerManagedTmTest : ProjectAuthControllerTest("
         // override of 40 wins over default of 10 → 1.00 - 0.40 = 0.60
         node("_embedded.translationMemoryItems[0].targetText").isEqualTo("Viel Glück")
         node("_embedded.translationMemoryItems[0].similarity").isNumber.satisfies({
-          assert(it.toFloat() == 0.6f) { "expected 0.60, got $it" }
+          assertThat(it.toFloat()).`as` { "expected 0.60" }.isEqualTo(0.6f)
         })
       }
   }
