@@ -5,6 +5,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.constants.Message
 import io.tolgee.dtos.apps.AppManifest
 import io.tolgee.exceptions.BadRequestException
+import io.tolgee.model.enums.Scope
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestTemplate
@@ -17,6 +18,7 @@ class AppManifestFetcher(
   data class FetchResult(
     val manifest: AppManifest,
     val rawJson: String,
+    val scopes: Set<Scope>,
   )
 
   fun fetch(url: String): FetchResult {
@@ -35,6 +37,16 @@ class AppManifestFetcher(
         throw BadRequestException(Message.APP_MANIFEST_INVALID, listOf(e.message ?: ""))
       }
 
-    return FetchResult(manifest = manifest, rawJson = rawJson)
+    val scopes =
+      try {
+        Scope.parse(manifest.scopes)
+      } catch (e: BadRequestException) {
+        throw BadRequestException(
+          Message.APP_MANIFEST_INVALID,
+          listOf("unknown scope: ${e.params?.firstOrNull() ?: ""}"),
+        )
+      }
+
+    return FetchResult(manifest = manifest, rawJson = rawJson, scopes = scopes)
   }
 }

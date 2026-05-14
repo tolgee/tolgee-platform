@@ -5,6 +5,7 @@ import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.node
+import io.tolgee.model.enums.Scope
 import io.tolgee.service.apps.AppInstallService
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -51,8 +52,56 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
       node("modules.project-dashboard-page[0].key").isEqualTo("home")
       node("modules.project-dashboard-page[0].title").isEqualTo("Home")
       node("modules.project-dashboard-page[0].entry").isEqualTo("/")
+      node("scopes").isArray.containsExactlyInAnyOrder("translations.view", "keys.edit")
     }
-    assertThat(appInstallService.findAll(testData.organization.id)).hasSize(1)
+    val install = appInstallService.findAll(testData.organization.id).single()
+    assertThat(install.grantedScopes).containsExactlyInAnyOrder(Scope.TRANSLATIONS_VIEW, Scope.KEYS_EDIT)
+  }
+
+  @Test
+  fun `preview returns parsed manifest with requested scopes without persisting`() {
+    mockManifest(validManifest())
+    performAuthPost("${appsUrl()}/preview", registerBody()).andIsOk.andAssertThatJson {
+      node("appId").isEqualTo("test-app")
+      node("name").isEqualTo("Test App")
+      node("version").isEqualTo("0.1.0")
+      node("requestedScopes").isArray.containsExactlyInAnyOrder("translations.view", "keys.edit")
+    }
+    assertThat(appInstallService.findAll(testData.organization.id)).isEmpty()
+  }
+
+  @Test
+  fun `refresh updates granted scopes from new manifest`() {
+    mockManifest(validManifest())
+    performAuthPost(appsUrl(), registerBody()).andIsOk
+    val installId = appInstallService.findAll(testData.organization.id).single().id
+
+    mockManifest(validManifestV2WithExtraScope())
+    performAuthPost("${appsUrl()}/$installId/refresh", emptyMap<String, Any>()).andIsOk.andAssertThatJson {
+      node("scopes")
+        .isArray
+        .containsExactlyInAnyOrder("translations.view", "keys.edit", "screenshots.upload")
+    }
+    assertThat(appInstallService.find(installId)!!.grantedScopes)
+      .containsExactlyInAnyOrder(Scope.TRANSLATIONS_VIEW, Scope.KEYS_EDIT, Scope.SCREENSHOTS_UPLOAD)
+  }
+
+  @Test
+  fun `rejects manifest with an unknown scope`() {
+    mockManifest(validManifest().replace("\"keys.edit\"", "\"not.a.real.scope\""))
+    performAuthPost(appsUrl(), registerBody()).andIsBadRequest.andAssertThatJson {
+      node("code").isEqualTo("app_manifest_invalid")
+    }
+  }
+
+  @Test
+  fun `register without scopes block stores no granted scopes`() {
+    mockManifest(manifestWithoutScopes())
+    performAuthPost(appsUrl(), registerBody()).andIsOk.andAssertThatJson {
+      node("scopes").isArray.isEmpty()
+    }
+    val install = appInstallService.findAll(testData.organization.id).single()
+    assertThat(install.grantedScopes).isEmpty()
   }
 
   @Test
@@ -145,6 +194,7 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
       "name": "Test App",
       "version": "0.1.0",
       "baseUrl": "https://app.example.com",
+      "scopes": ["translations.view", "keys.edit"],
       "modules": {
         "project-dashboard-page": [
           {"key": "home", "title": "Home", "icon": "🏠", "entry": "/"}
@@ -160,9 +210,41 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
       "name": "Test App",
       "version": "0.2.0",
       "baseUrl": "https://app.example.com",
+      "scopes": ["translations.view", "keys.edit"],
       "modules": {
         "project-dashboard-page": [
           {"key": "home", "title": "Home v2", "icon": "🏠", "entry": "/"}
+        ]
+      }
+    }
+    """.trimIndent()
+
+  private fun validManifestV2WithExtraScope(): String =
+    """
+    {
+      "id": "test-app",
+      "name": "Test App",
+      "version": "0.2.0",
+      "baseUrl": "https://app.example.com",
+      "scopes": ["translations.view", "keys.edit", "screenshots.upload"],
+      "modules": {
+        "project-dashboard-page": [
+          {"key": "home", "title": "Home v2", "icon": "🏠", "entry": "/"}
+        ]
+      }
+    }
+    """.trimIndent()
+
+  private fun manifestWithoutScopes(): String =
+    """
+    {
+      "id": "test-app",
+      "name": "Test App",
+      "version": "0.1.0",
+      "baseUrl": "https://app.example.com",
+      "modules": {
+        "project-dashboard-page": [
+          {"key": "home", "title": "Home", "icon": "🏠", "entry": "/"}
         ]
       }
     }

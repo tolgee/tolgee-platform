@@ -8,6 +8,7 @@ data class AppManifest(
   val version: String,
   val baseUrl: String,
   val modules: AppManifestModules,
+  val scopes: List<String>? = null,
 )
 
 data class AppManifestModules(
