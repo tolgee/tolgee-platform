@@ -165,11 +165,12 @@ class SharedTranslationMemoryService(
     organizationId: Long,
     assignments: List<ProjectAssignmentDto>,
   ) {
-    // Duplicate projectIds would silently inflate to multiple assignments: existingByProjectId
-    // gets populated once from the DB, so a repeated `dto.projectId` in the request takes the
-    // "new assignment" branch every time after the first hit. Reject the whole request.
     val duplicates =
-      assignments.groupingBy { it.projectId }.eachCount().filter { it.value > 1 }.keys
+      assignments
+        .groupingBy { it.projectId }
+        .eachCount()
+        .filter { it.value > 1 }
+        .keys
     if (duplicates.isNotEmpty()) {
       throw BadRequestException(
         Message.TRANSLATION_MEMORY_DUPLICATE_PROJECT_ASSIGNMENT,

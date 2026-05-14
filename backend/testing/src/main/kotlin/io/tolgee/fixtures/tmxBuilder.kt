@@ -51,7 +51,8 @@ fun buildTmxRaw(
 }
 
 private fun escapeXml(s: String): String =
-  s.replace("&", "&amp;")
+  s
+    .replace("&", "&amp;")
     .replace("<", "&lt;")
     .replace(">", "&gt;")
     .replace("\"", "&quot;")
