@@ -114,6 +114,12 @@ export const SubfilterQaChecks = ({
                 ))}
               </div>
             ))}
+            <Divider />
+            <FilterItem
+              label={t('translation_filters_qa_checks_stale')}
+              selected={Boolean(value.filterQaChecksStale)}
+              onClick={handleToggleStale}
+            />
             <CompactListSubheader>
               <Box display="flex" justifyContent="space-between">
                 <Box>{t('translations_filter_languages_select_title')}</Box>
@@ -158,12 +164,6 @@ export const SubfilterQaChecks = ({
             >
               {expanded ? <ChevronUp /> : <ChevronDown />}
             </MenuItem>
-            <Divider />
-            <FilterItem
-              label={t('translation_filters_qa_checks_stale')}
-              selected={Boolean(value.filterQaChecksStale)}
-              onClick={handleToggleStale}
-            />
           </Box>
         </Menu>
       )}

@@ -236,12 +236,6 @@ export const useTranslationFilters = ({
           tag
         );
       }
-      if (filters.filterQaChecksStale) {
-        filtersQuery.filterQaChecksStaleInLang = add(
-          filtersQuery.filterQaChecksStaleInLang,
-          tag
-        );
-      }
     });
 
     selectedLanguages
@@ -256,6 +250,12 @@ export const useTranslationFilters = ({
         }
       })
       .forEach((tag) => {
+        if (filters.filterQaChecksStale) {
+          filtersQuery.filterQaChecksStaleInLang = add(
+            filtersQuery.filterQaChecksStaleInLang,
+            tag
+          );
+        }
         filters.filterQaCheckTypes?.forEach((type) => {
           filtersQuery.filterQaCheckType = add(
             filtersQuery.filterQaCheckType,
