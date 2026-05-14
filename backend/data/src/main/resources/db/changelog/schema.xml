@@ -5348,4 +5348,143 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="jcizmar" id="1747180800000-1">
+        <createTable tableName="app_install">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="app_installPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="organization_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="author_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="manifest_url" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="app_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="base_url" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="manifest_json" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="jcizmar" id="1747180800000-2">
+        <addUniqueConstraint columnNames="organization_id, app_id"
+                             constraintName="app_install_organization_id_app_id_unique"
+                             tableName="app_install"/>
+    </changeSet>
+    <changeSet author="jcizmar" id="1747180800000-3">
+        <createIndex indexName="IDX_app_install_organization_id" tableName="app_install">
+            <column name="organization_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="jcizmar" id="1747180800000-4">
+        <createIndex indexName="IDX_app_install_author_id" tableName="app_install">
+            <column name="author_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="jcizmar" id="1747180800000-5">
+        <addForeignKeyConstraint baseColumnNames="organization_id"
+                                 baseTableName="app_install"
+                                 constraintName="FK_app_install_organization"
+                                 deferrable="false"
+                                 initiallyDeferred="false"
+                                 referencedColumnNames="id"
+                                 referencedTableName="organization"
+                                 validate="true"/>
+    </changeSet>
+    <changeSet author="jcizmar" id="1747180800000-6">
+        <addForeignKeyConstraint baseColumnNames="author_id"
+                                 baseTableName="app_install"
+                                 constraintName="FK_app_install_author"
+                                 deferrable="false"
+                                 initiallyDeferred="false"
+                                 referencedColumnNames="id"
+                                 referencedTableName="user_account"
+                                 validate="true"/>
+    </changeSet>
+    <changeSet author="jcizmar" id="1747180800000-7">
+        <createTable tableName="app_enabled_for_project">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="app_enabled_for_projectPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="app_install_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="project_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="author_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="jcizmar" id="1747180800000-8">
+        <addUniqueConstraint columnNames="app_install_id, project_id"
+                             constraintName="app_enabled_for_project_unique"
+                             tableName="app_enabled_for_project"/>
+    </changeSet>
+    <changeSet author="jcizmar" id="1747180800000-9">
+        <createIndex indexName="IDX_app_enabled_for_project_app_install_id" tableName="app_enabled_for_project">
+            <column name="app_install_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="jcizmar" id="1747180800000-10">
+        <createIndex indexName="IDX_app_enabled_for_project_project_id" tableName="app_enabled_for_project">
+            <column name="project_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="jcizmar" id="1747180800000-11">
+        <addForeignKeyConstraint baseColumnNames="app_install_id"
+                                 baseTableName="app_enabled_for_project"
+                                 constraintName="FK_app_enabled_for_project_app_install"
+                                 deferrable="false"
+                                 initiallyDeferred="false"
+                                 referencedColumnNames="id"
+                                 referencedTableName="app_install"
+                                 validate="true"/>
+    </changeSet>
+    <changeSet author="jcizmar" id="1747180800000-12">
+        <addForeignKeyConstraint baseColumnNames="project_id"
+                                 baseTableName="app_enabled_for_project"
+                                 constraintName="FK_app_enabled_for_project_project"
+                                 deferrable="false"
+                                 initiallyDeferred="false"
+                                 referencedColumnNames="id"
+                                 referencedTableName="project"
+                                 validate="true"/>
+    </changeSet>
+    <changeSet author="jcizmar" id="1747180800000-13">
+        <addForeignKeyConstraint baseColumnNames="author_id"
+                                 baseTableName="app_enabled_for_project"
+                                 constraintName="FK_app_enabled_for_project_author"
+                                 deferrable="false"
+                                 initiallyDeferred="false"
+                                 referencedColumnNames="id"
+                                 referencedTableName="user_account"
+                                 validate="true"/>
+    </changeSet>
 </databaseChangeLog>

@@ -9,6 +9,7 @@ import { useProject } from 'tg.hooks/useProject';
 import { BaseProjectView } from '../BaseProjectView';
 import { ProjectSettingsGeneral } from './ProjectSettingsGeneral';
 import { ProjectSettingsAdvanced } from './ProjectSettingsAdvanced';
+import { ProjectSettingsApps } from './ProjectSettingsApps';
 import { useAddProjectSettingsTabs } from 'tg.ee';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { useReportEvent } from 'tg.hooks/useReportEvent';
@@ -59,6 +60,17 @@ export const ProjectSettingsView = () => {
       component: ProjectSettingsAdvanced,
       enabled: satisfiesPermission('project.edit'),
       routeMatch: useRouteMatch(LINKS.PROJECT_EDIT_ADVANCED.template),
+    },
+    {
+      value: 'apps',
+      label: t('project_settings_menu_apps', 'Apps'),
+      link: LINKS.PROJECT_EDIT_APPS.build({
+        [PARAMS.PROJECT_ID]: project.id,
+      }),
+      dataCy: 'project-settings-menu-apps',
+      component: ProjectSettingsApps,
+      enabled: satisfiesPermission('project.edit'),
+      routeMatch: useRouteMatch(LINKS.PROJECT_EDIT_APPS.template),
     },
   ] as ProjectSettingsTab[];
 

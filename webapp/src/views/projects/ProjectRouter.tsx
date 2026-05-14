@@ -22,6 +22,7 @@ import { TaskRedirect } from './TaskRedirect';
 import { routes } from 'tg.ee';
 import { IntegrateView } from './integrate/IntegrateView';
 import { AiView } from './ai/AiView';
+import { ProjectAppPageView } from './apps/ProjectAppPageView';
 import { BRANCH_ROUTES } from '../../branching/branchRoutes';
 
 export const ProjectRouter = () => {
@@ -91,6 +92,10 @@ export const ProjectRouter = () => {
         </Route>
         <Route path={LINKS.PROJECT_AI.template}>
           <AiView />
+        </Route>
+
+        <Route path={LINKS.PROJECT_APP_PAGE.template}>
+          <ProjectAppPageView />
         </Route>
 
         <Route path={LINKS.GO_TO_PROJECT_ACTIVITY_DETAIL.template}>

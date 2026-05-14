@@ -579,6 +579,14 @@ declare namespace DataCy {
         "order-translation-sharing-details-consent-checkbox" |
         "order-translation-submit" |
         "organization-address-part-field" |
+        "organization-apps-item" |
+        "organization-apps-item-refresh" |
+        "organization-apps-item-remove" |
+        "organization-apps-register-button" |
+        "organization-apps-register-dialog" |
+        "organization-apps-register-manifest-url" |
+        "organization-apps-register-submit" |
+        "organization-apps-registered-section" |
         "organization-description-field" |
         "organization-invitation-cancel-button" |
         "organization-invitation-copy-button" |
@@ -622,6 +630,7 @@ declare namespace DataCy {
         "plan_seat_limit_exceeded_while_accepting_invitation_message" |
         "project-ai-prompt-dialog-description-input" |
         "project-ai-prompt-dialog-save" |
+        "project-app-page-placeholder" |
         "project-branch-merge-accept" |
         "project-branch-merge-apply" |
         "project-branch-merge-cancel" |
@@ -665,6 +674,7 @@ declare namespace DataCy {
         "project-members-invitation-item" |
         "project-menu-item" |
         "project-menu-item-ai" |
+        "project-menu-item-app-" |
         "project-menu-item-branches" |
         "project-menu-item-dashboard" |
         "project-menu-item-developer" |
@@ -682,6 +692,10 @@ declare namespace DataCy {
         "project-name-field" |
         "project-select" |
         "project-settings" |
+        "project-settings-apps" |
+        "project-settings-apps-empty" |
+        "project-settings-apps-item" |
+        "project-settings-apps-item-toggle" |
         "project-settings-branch-item" |
         "project-settings-branch-item-name" |
         "project-settings-branch-item-properties" |
@@ -707,6 +721,7 @@ declare namespace DataCy {
         "project-settings-languages-list-edit-button" |
         "project-settings-languages-list-name" |
         "project-settings-menu-advanced" |
+        "project-settings-menu-apps" |
         "project-settings-menu-general" |
         "project-settings-menu-labels" |
         "project-settings-menu-qa" |

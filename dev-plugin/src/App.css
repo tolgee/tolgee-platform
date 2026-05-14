@@ -1,0 +1,15 @@
+.plugin-page {
+  font-family: system-ui, sans-serif;
+  padding: 2rem;
+  max-width: 720px;
+}
+
+.plugin-page h1 {
+  margin: 0 0 0.5rem;
+  font-size: 1.75rem;
+}
+
+.plugin-page p {
+  margin: 0;
+  color: #444;
+}
