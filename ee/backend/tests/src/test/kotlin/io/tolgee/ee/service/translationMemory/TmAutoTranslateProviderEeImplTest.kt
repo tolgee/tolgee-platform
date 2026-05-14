@@ -102,6 +102,27 @@ class TmAutoTranslateProviderEeImplTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `auto-translate skips a TM with non-zero penalty`() {
+    // sharedTmWithPenalty has defaultPenalty = 25 and is the only TM whose stored entries
+    // carry source 'Farewell'. The suggestion panel would still show it (with similarity
+    // reduced by the penalty), but auto-translate must refuse to fill — the user has marked
+    // the TM as not fully trusted, so silent overwrites are unwanted.
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.TRANSLATION_MEMORY)
+    val germanId = testData.farewellKeyGermanTranslation.id
+
+    executeInNewTransaction {
+      autoTranslationService.softAutoTranslate(
+        projectId = testData.projectWithTm.id,
+        keyId = testData.farewellKey.id,
+        languageId = testData.germanLanguageWithTm.id,
+      )
+    }
+
+    val after = translationRepository.findById(germanId).get()
+    assertThat(after.text.isNullOrBlank()).isTrue
+  }
+
+  @Test
   fun `with feature disabled, auto-translate falls back to classic path and finds no match`() {
     enabledFeaturesProvider.forceEnabled = emptySet()
     val germanId = testData.helloKeyGermanTranslation.id

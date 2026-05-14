@@ -29,6 +29,12 @@ import org.springframework.stereotype.Component
  * degrades gracefully on free-tier orgs without behaving differently from the OSS path
  * (project-type TMs rarely carry stored entries).
  *
+ * Penalty filter: only TMs whose effective penalty (per-assignment override, falling back to
+ * the TM's `default_penalty`) is 0 contribute matches. Any non-zero penalty means the user
+ * has marked the TM as "not fully trusted" — the suggestion panel still surfaces it with the
+ * penalty subtracted from similarity, but auto-translate must stay out so a 90%-trusted hit
+ * doesn't silently overwrite a fresh empty slot.
+ *
  * Self-match protection: virtual rows from the current key are excluded so a project
  * doesn't auto-fill from itself.
  */
@@ -82,6 +88,11 @@ class TmAutoTranslateProviderEeImpl(
     //      writeAccess to a readable TM. Mirrors the virtual-row half of
     //      `TranslationMemoryServiceEeImpl.baseSelect`, just with `=` instead of trigram `%`.
     //
+    // Both halves enforce the same penalty gate: the receiving project's assignment to the
+    // contributing TM (`tmp_recv`) must resolve to an effective penalty of 0 — `coalesce(
+    // tmp_recv.penalty, tm.default_penalty) = 0`. Anything non-zero is "the user marked this
+    // TM as not fully trusted" and shouldn't drive auto-fills.
+    //
     // The `kind` column lets us pick stored entries first when both halves return rows,
     // mirroring how the suggestion panel surfaces a user's manual additions.
     val sql =
@@ -89,10 +100,15 @@ class TmAutoTranslateProviderEeImpl(
       select target_text, kind from (
         select e.target_text, 'stored' as kind
         from translation_memory_entry e
+        join translation_memory tm on tm.id = e.translation_memory_id
+        left join translation_memory_project tmp_recv
+          on tmp_recv.translation_memory_id = e.translation_memory_id
+         and tmp_recv.project_id = :projectId
         where e.translation_memory_id in :tmIds
           and e.source_text = :baseText
           and e.target_language_tag = :targetLanguageTag
           and e.target_text <> ''
+          and coalesce(tmp_recv.penalty, tm.default_penalty) = 0
 
         union all
 
@@ -108,6 +124,9 @@ class TmAutoTranslateProviderEeImpl(
         join translation_memory tm_virt
           on tm_virt.id = tmp_w.translation_memory_id
          and tm_virt.id in :tmIds
+        left join translation_memory_project tmp_recv
+          on tmp_recv.translation_memory_id = tm_virt.id
+         and tmp_recv.project_id = :projectId
         left join branch b on b.id = k.branch_id
         join translation target_t
           on target_t.key_id = k.id
@@ -119,6 +138,7 @@ class TmAutoTranslateProviderEeImpl(
           and (b.id is null or b.is_default = true)
           and (not tm_virt.write_only_reviewed or target_t.state = 2)
           and k.id <> :selfKeyId
+          and coalesce(tmp_recv.penalty, tm_virt.default_penalty) = 0
       ) candidates
       order by case kind when 'stored' then 0 else 1 end
       limit 1
@@ -132,6 +152,7 @@ class TmAutoTranslateProviderEeImpl(
         .setParameter("baseText", baseText)
         .setParameter("targetLanguageTag", targetLanguage.tag)
         .setParameter("selfKeyId", key.id)
+        .setParameter("projectId", key.project.id)
         .resultList as List<Array<Any?>>
     val row = rows.firstOrNull() ?: return null
     return TranslationMemoryItemView(

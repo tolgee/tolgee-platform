@@ -130,6 +130,15 @@ class TranslationMemoryTestData : BaseTestData() {
   lateinit var helloKey: Key
   lateinit var helloKeyGermanTranslation: Translation
 
+  /**
+   * Key on [projectWithTm] whose only matching shared-TM entry lives on [sharedTmWithPenalty]
+   * (defaultPenalty = 25). Drives the penalty-gate regression test: auto-translate must
+   * refuse to fill an empty target when the only match comes from a TM that the project
+   * doesn't fully trust.
+   */
+  lateinit var farewellKey: Key
+  lateinit var farewellKeyGermanTranslation: Translation
+
   /** Non-default branch on [projectWithTm] — exercises the "TM writes skip non-default branches" rule. */
   lateinit var featureBranch: Branch
 
@@ -282,6 +291,26 @@ class TranslationMemoryTestData : BaseTestData() {
             helloKeyCzechTranslation =
               addTranslation {
                 language = czechLanguageWithTm
+                key = this@keyBuilder.self
+                text = ""
+              }.self
+          }
+
+          // Source matches sharedTmWithPenalty (defaultPenalty = 25). No other TM carries
+          // a "Farewell" entry, so any auto-fill here would have to come through the
+          // penalised TM — penalty gate should block it.
+          addKey {
+            name = "farewell-key"
+            farewellKey = this
+          }.build keyBuilder@{
+            addTranslation {
+              language = english
+              key = this@keyBuilder.self
+              text = "Farewell"
+            }
+            farewellKeyGermanTranslation =
+              addTranslation {
+                language = germanLanguageWithTm
                 key = this@keyBuilder.self
                 text = ""
               }.self
