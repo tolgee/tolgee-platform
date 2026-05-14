@@ -5,6 +5,19 @@ import org.w3c.dom.Element
 import org.w3c.dom.NodeList
 import java.io.InputStream
 
+/**
+ * Parses a TMX file into entries ready to be stored in a TM.
+ *
+ * The TM's declared [tmSourceLanguageTag] is **authoritative**: every parsed entry uses it as
+ * the source. The TMX's own `<header srclang>` attribute is intentionally ignored — TMX files
+ * commonly declare a different source language than the TM they're being imported into (e.g.
+ * a publicly-distributed en→cs/sk TMX imported into a cs-based TM), and respecting the TMX
+ * value would land entries whose `source_text` is in the wrong language, never matching the
+ * project's base translations downstream.
+ *
+ * `<tu>` elements that don't carry a `<tuv xml:lang="…">` matching [tmSourceLanguageTag] are
+ * silently dropped — there's nothing meaningful to use as a source.
+ */
 class TmxParser(
   private val tmSourceLanguageTag: String,
 ) {
@@ -15,16 +28,13 @@ class TmxParser(
     factory.isNamespaceAware = true
     val doc = factory.newDocumentBuilder().parse(inputStream)
 
-    val headerElements = doc.getElementsByTagName("header")
-    val srcLang = resolveSourceLanguage(headerElements)
-
     val tuElements = doc.getElementsByTagName("tu")
     val result = mutableListOf<TmxParsedEntry>()
 
     for (i in 0 until tuElements.length) {
       val tu = tuElements.item(i) as Element
       val tuid = tu.getAttribute("tuid").ifBlank { null }
-      result.addAll(parseTu(tu, srcLang, tuid))
+      result.addAll(parseTu(tu, tuid))
     }
 
     return result
@@ -32,18 +42,19 @@ class TmxParser(
 
   private fun parseTu(
     tu: Element,
-    srcLang: String,
     tuid: String?,
   ): List<TmxParsedEntry> {
     val tuvElements = tu.getElementsByTagName("tuv")
     val tuvList = toElementList(tuvElements)
 
-    val sourceTuv = tuvList.firstOrNull { getLang(it).equals(srcLang, ignoreCase = true) } ?: return emptyList()
+    val sourceTuv =
+      tuvList.firstOrNull { getLang(it).equals(tmSourceLanguageTag, ignoreCase = true) }
+        ?: return emptyList()
     val sourceText = getSegText(sourceTuv).trim()
     if (sourceText.isBlank()) return emptyList()
 
     return tuvList
-      .filter { !getLang(it).equals(srcLang, ignoreCase = true) }
+      .filter { !getLang(it).equals(tmSourceLanguageTag, ignoreCase = true) }
       .filter { getSegText(it).trim().isNotBlank() }
       .map { tuv ->
         TmxParsedEntry(
@@ -53,19 +64,6 @@ class TmxParser(
           tuid = tuid,
         )
       }
-  }
-
-  /**
-   * Resolves the source language from the `<header srclang=…>` attribute, falling back to the
-   * TM's declared source when the attribute is missing, blank, or the TMX wildcard `*` (the
-   * spec value meaning "no single source language"). Without the wildcard branch every `<tu>`
-   * would be dropped because no `<tuv xml:lang="*">` ever matches a real translation row.
-   */
-  private fun resolveSourceLanguage(headerElements: NodeList): String {
-    if (headerElements.length == 0) return tmSourceLanguageTag
-    val declared = (headerElements.item(0) as Element).getAttribute("srclang")
-    if (declared.isBlank() || declared == "*") return tmSourceLanguageTag
-    return declared
   }
 
   private fun getLang(tuv: Element): String {
