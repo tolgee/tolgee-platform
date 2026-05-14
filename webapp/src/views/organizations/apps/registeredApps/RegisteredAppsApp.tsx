@@ -14,8 +14,6 @@ import { T } from '@tolgee/react';
 import { useOrganization } from 'tg.views/organizations/useOrganization';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { confirmation } from 'tg.hooks/confirmation';
-import { useScopeTranslations } from 'tg.component/PermissionsSettings/useScopeTranslations';
-import { PermissionModelScope } from 'tg.component/PermissionsSettings/types';
 import { components } from 'tg.service/apiSchema.generated';
 
 import { RegisterAppDialog } from './RegisterAppDialog';
@@ -69,7 +67,6 @@ const StyledModuleChips = styled('div')`
 
 export const RegisteredAppsApp = () => {
   const organization = useOrganization();
-  const { getScopeTranslation } = useScopeTranslations();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [refreshing, setRefreshing] = useState<AppInstallModel | null>(null);
 
@@ -186,9 +183,7 @@ export const RegisteredAppsApp = () => {
                         key={scope}
                         size="small"
                         variant="outlined"
-                        label={getScopeTranslation(
-                          scope as PermissionModelScope
-                        )}
+                        label={scope}
                       />
                     ))}
                   </StyledModuleChips>

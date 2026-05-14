@@ -1,76 +1,89 @@
-import { useEffect, useMemo, useState } from 'react'
-import { createApiClient } from '@tginternal/client'
+import { useEffect, useState } from 'react'
+import { createApiClient, type components } from '@tginternal/client'
 import './App.css'
 
-type KeyRow = {
-  id: number
-  name: string
-  namespace?: string
-  translations: { language: string; text?: string }[]
-}
+type KeyRow = components['schemas']['KeyWithTranslationsModel']
+type LanguageModel = components['schemas']['LanguageModel']
 
-function parseContext() {
-  const url = new URL(window.location.href)
-  return {
-    token: url.searchParams.get('token'),
-    projectId: Number(url.searchParams.get('projectId')),
-    apiUrl: url.searchParams.get('apiUrl'),
-  }
+type AppContext = {
+  token: string
+  projectId: number
+  apiUrl: string
 }
 
 function App() {
-  const { token, projectId, apiUrl } = useMemo(parseContext, [])
+  const [context, setContext] = useState<AppContext | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
-  const [rows, setRows] = useState<KeyRow[]>([])
+  const [keys, setKeys] = useState<KeyRow[]>([])
+  const [languages, setLanguages] = useState<LanguageModel[]>([])
   const [projectName, setProjectName] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!token || !projectId || !apiUrl) {
-      setError(
-        'Missing context. Open this page through the Tolgee app sidebar.'
-      )
-      setLoading(false)
-      return
+    const handler = (event: MessageEvent) => {
+      if (event.data?.type !== 'tolgee-app:init') return
+      const { token, projectId, apiUrl } = event.data
+      if (
+        typeof token !== 'string' ||
+        typeof projectId !== 'number' ||
+        typeof apiUrl !== 'string'
+      ) {
+        setError('Received malformed init message from host.')
+        setLoading(false)
+        return
+      }
+      setContext({ token, projectId, apiUrl })
     }
+    window.addEventListener('message', handler)
+    window.parent.postMessage({ type: 'tolgee-app:ready' }, '*')
+    return () => window.removeEventListener('message', handler)
+  }, [])
+
+  useEffect(() => {
+    if (!context) return
 
     const client = createApiClient({
-      baseUrl: apiUrl,
-      userToken: token,
-      projectId,
+      baseUrl: context.apiUrl,
+      userToken: context.token,
+      projectId: context.projectId,
       autoThrow: false,
     })
 
     let cancelled = false
+    setLoading(true)
+    setError(null)
     ;(async () => {
       try {
         const projectResp = await client.GET('/v2/projects/{projectId}', {
-          params: { path: { projectId } },
+          params: { path: { projectId: context.projectId } },
         })
-        if (projectResp.data && !cancelled) {
-          setProjectName(projectResp.data.name)
+        if (projectResp.error) {
+          throw new Error(
+            `Project lookup failed: ${JSON.stringify(projectResp.error).slice(
+              0,
+              240
+            )}`
+          )
         }
+        if (cancelled) return
+        if (projectResp.data) setProjectName(projectResp.data.name)
 
         const keysResp = await client.GET(
           '/v2/projects/{projectId}/translations',
           {
-            params: {
-              path: { projectId },
-              query: { size: 20 },
-            },
+            params: { path: { projectId: context.projectId }, query: { size: 20 } },
           }
         )
         if (cancelled) return
         if (keysResp.error) {
           throw new Error(
-            `API error: ${JSON.stringify(keysResp.error).slice(0, 240)}`
+            `Translations lookup failed: ${JSON.stringify(
+              keysResp.error
+            ).slice(0, 240)}`
           )
         }
-        const embedded =
-          (keysResp.data as unknown as {
-            _embedded?: { keys?: KeyRow[] }
-          })?._embedded?.keys ?? []
-        setRows(embedded)
+        setKeys(keysResp.data?._embedded?.keys ?? [])
+        setLanguages(keysResp.data?.selectedLanguages ?? [])
       } catch (e) {
         if (!cancelled) {
           setError(e instanceof Error ? e.message : String(e))
@@ -83,7 +96,7 @@ function App() {
     return () => {
       cancelled = true
     }
-  }, [token, projectId, apiUrl])
+  }, [context])
 
   return (
     <main className="plugin-page">
@@ -96,47 +109,48 @@ function App() {
         )}
       </h1>
 
-      {loading && <p>Loading…</p>}
+      {!context && <p>Waiting for context from the host…</p>}
+      {context && loading && <p>Loading…</p>}
       {error && (
         <p style={{ color: '#b00' }} data-testid="error">
           {error}
         </p>
       )}
 
-      {!loading && !error && (
+      {context && !loading && !error && (
         <>
           <p>
             This is the Tolgee dev plugin. It used a signed app token to fetch
-            the first {rows.length} keys in this project via the REST API.
+            the first {keys.length} keys in this project via the REST API.
           </p>
 
-          {rows.length === 0 ? (
+          {keys.length === 0 ? (
             <p>No keys in this project yet.</p>
           ) : (
             <table className="keys">
               <thead>
                 <tr>
                   <th>Key</th>
-                  <th>Translations</th>
+                  {languages.map((lang) => (
+                    <th key={lang.tag}>
+                      <code className="lang">{lang.tag}</code> {lang.name}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
-                {rows.map((row) => (
-                  <tr key={row.id}>
+                {keys.map((row) => (
+                  <tr key={row.keyId}>
                     <td>
-                      {row.namespace && (
-                        <code className="ns">{row.namespace}</code>
+                      {row.keyNamespace && (
+                        <code className="ns">{row.keyNamespace}</code>
                       )}
-                      <strong>{row.name}</strong>
+                      <strong>{row.keyName}</strong>
                     </td>
-                    <td>
-                      {row.translations.map((t, i) => (
-                        <div key={i}>
-                          <code className="lang">{t.language}</code>{' '}
-                          {t.text ?? <em>—</em>}
-                        </div>
-                      ))}
-                    </td>
+                    {languages.map((lang) => {
+                      const t = row.translations[lang.tag]
+                      return <td key={lang.tag}>{t?.text ?? <em>—</em>}</td>
+                    })}
                   </tr>
                 ))}
               </tbody>
