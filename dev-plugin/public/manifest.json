@@ -3,13 +3,13 @@
   "name": "Tolgee Dev Plugin",
   "version": "0.1.0",
   "baseUrl": "http://localhost:5180",
+  "scopes": ["translations.view", "keys.view"],
   "modules": {
     "project-dashboard-page": [
       {
         "key": "hello",
         "title": "Hello World",
         "icon": "👋",
-        "path": "/hello",
         "entry": "/"
       }
     ]

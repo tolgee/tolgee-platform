@@ -643,7 +643,9 @@ declare namespace DataCy {
         "plan_seat_limit_exceeded_while_accepting_invitation_message" |
         "project-ai-prompt-dialog-description-input" |
         "project-ai-prompt-dialog-save" |
-        "project-app-page-placeholder" |
+        "project-app-page-iframe" |
+        "project-app-page-loading" |
+        "project-app-page-missing" |
         "project-branch-merge-accept" |
         "project-branch-merge-apply" |
         "project-branch-merge-cancel" |

@@ -14,6 +14,7 @@ export type ApiKeyWithLanguagesModel = components['schemas']['ApiKeyWithLanguage
 export type AppInstallModel = components['schemas']['AppInstallModel'];
 export type AppManifestModules = components['schemas']['AppManifestModules'];
 export type AppManifestPreviewModel = components['schemas']['AppManifestPreviewModel'];
+export type AppTokenModel = components['schemas']['AppTokenModel'];
 export type ApplyBranchMergeRequest = components['schemas']['ApplyBranchMergeRequest'];
 export type AuthInfoModel = components['schemas']['AuthInfoModel'];
 export type AuthMethodsDTO = components['schemas']['AuthMethodsDTO'];
