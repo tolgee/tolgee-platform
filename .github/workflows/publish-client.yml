@@ -9,6 +9,11 @@ on:
       - completed
   pull_request:
 
+# Trusted Publishers for npm via GitHub Actions OIDC
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   publish-client:
     runs-on: ubuntu-24.04
@@ -21,6 +26,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22.x"
+          registry-url: "https://registry.npmjs.org"
 
       - name: Install node modules
         run: npm ci
@@ -46,8 +52,6 @@ jobs:
           command: |
             ./gradlew runDockerE2e -x buildWebapp
 
-      - run: echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' > ~/.npmrc
-
       # client folder
       - name: install npm dependencies
         run: npm install
@@ -70,11 +74,9 @@ jobs:
             npm run update-version -- $VERSION
             npm run build
             npm run test
-            npm publish --tag latest
+            npm publish --tag latest --provenance
           fi
         working-directory: ./client
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish to prerelease tag
         if: steps.version.outputs.VERSION == ''
@@ -86,8 +88,6 @@ jobs:
             npm run update-version -- $VERSION
             npm run build
             npm run test
-            npm publish --tag prerelease
+            npm publish --tag prerelease --provenance
           fi
         working-directory: ./client
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
