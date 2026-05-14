@@ -12,21 +12,22 @@ export const flatGridColumns = (languageCount: number) =>
   ` minmax(200px, 1fr)`.repeat(Math.max(languageCount, 0));
 
 // --- Row container ---
-// In flat mode `min-width: max-content` keeps the row's box wide enough for the full grid
-// when the user scrolls horizontally. Without it the box stays at the scroll container's
-// width and the row separator (`border-top`) gets clipped past the original viewport, even
-// though the grid tracks themselves extend to fit the content.
+// Flat mode pushes the row separator onto each cell (StyledSelectionCell / StyledKeyCell /
+// StyledTranslationCell) rather than the row itself. The row is `display: grid` and its box
+// stays at the scroll container's width even when tracks overflow horizontally — a single
+// `border-top` on the row therefore gets clipped at the viewport edge once the user scrolls
+// right. The cells, sized by their grid tracks, paint borders across the full visible width
+// of the scrolled grid.
 export const StyledRow = styled('div')<{ $layout: EntryRowLayout }>`
-  ${({ $layout }) =>
+  ${({ theme, $layout }) =>
     $layout === 'flat'
       ? `
         display: grid;
-        min-width: max-content;
       `
       : `
         display: flex;
+        border-top: 1px solid ${theme.palette.divider1};
       `}
-  border-top: 1px solid ${({ theme }) => theme.palette.divider1};
 `;
 
 // --- Key cell (left column) ---
@@ -42,8 +43,10 @@ export const StyledKeyCell = styled('div')<{ $layout: EntryRowLayout }>`
     $layout === 'flat'
       ? `padding: ${theme.spacing(1.5)};`
       : `padding: ${theme.spacing(1.5, 1.5, 1.5, 0)};`}
-  ${({ $layout }) =>
-    $layout === 'flat' ? `min-width: 0;` : `flex: 0 0 33%; max-width: 33%;`}
+  ${({ theme, $layout }) =>
+    $layout === 'flat'
+      ? `min-width: 0; border-top: 1px solid ${theme.palette.divider1};`
+      : `flex: 0 0 33%; max-width: 33%;`}
 `;
 
 export const StyledKeyName = styled('div')`
@@ -85,7 +88,10 @@ export const StyledTranslationCell = styled('div')<{ $layout: EntryRowLayout }>`
     $layout === 'flat' ? theme.spacing(1.5) : theme.spacing(0)};
   ${({ theme, $layout }) =>
     $layout === 'flat'
-      ? `border-left: 1px solid ${theme.palette.divider1};`
+      ? `
+        border-left: 1px solid ${theme.palette.divider1};
+        border-top: 1px solid ${theme.palette.divider1};
+      `
       : ``}
   cursor: pointer;
   min-width: 0;

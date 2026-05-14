@@ -36,7 +36,10 @@ const StyledSelectionCell = styled('div')<{ $layout: EntryRowLayout }>`
   align-items: flex-start;
   justify-content: center;
   padding-top: ${({ $layout }) => ($layout === 'flat' ? '2px' : '5px')};
-  ${({ $layout }) => ($layout === 'flat' ? '' : 'flex: 0 0 44px;')}
+  ${({ theme, $layout }) =>
+    $layout === 'flat'
+      ? `border-top: 1px solid ${theme.palette.divider1};`
+      : 'flex: 0 0 44px;'}
 `;
 
 type Props = {
