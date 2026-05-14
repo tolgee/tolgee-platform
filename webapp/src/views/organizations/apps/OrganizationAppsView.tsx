@@ -1,9 +1,11 @@
 import { FunctionComponent } from 'react';
+import { Box } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { BaseOrganizationSettingsView } from '../components/BaseOrganizationSettingsView';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useOrganization } from '../useOrganization';
 import { apps } from 'tg.ee';
+import { RegisteredAppsApp } from './registeredApps/RegisteredAppsApp';
 
 export const OrganizationAppsView: FunctionComponent = () => {
   const organization = useOrganization();
@@ -29,9 +31,12 @@ export const OrganizationAppsView: FunctionComponent = () => {
       hideChildrenOnLoading={false}
       maxWidth="normal"
     >
-      {apps.map((App, index) => (
-        <App key={index} />
-      ))}
+      <Box display="grid" gap={2}>
+        {apps.map((App, index) => (
+          <App key={index} />
+        ))}
+        <RegisteredAppsApp />
+      </Box>
     </BaseOrganizationSettingsView>
   );
 };

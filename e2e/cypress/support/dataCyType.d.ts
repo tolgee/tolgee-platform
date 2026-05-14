@@ -488,6 +488,14 @@ declare namespace DataCy {
         "order-translation-sharing-details-consent-checkbox": true;
         "order-translation-submit": true;
         "organization-address-part-field": true;
+        "organization-apps-item": true;
+        "organization-apps-item-refresh": true;
+        "organization-apps-item-remove": true;
+        "organization-apps-register-button": true;
+        "organization-apps-register-dialog": true;
+        "organization-apps-register-manifest-url": true;
+        "organization-apps-register-submit": true;
+        "organization-apps-registered-section": true;
         "organization-description-field": true;
         "organization-invitation-cancel-button": true;
         "organization-invitation-copy-button": true;
@@ -531,6 +539,7 @@ declare namespace DataCy {
         "plan_seat_limit_exceeded_while_accepting_invitation_message": true;
         "project-ai-prompt-dialog-description-input": true;
         "project-ai-prompt-dialog-save": true;
+        "project-app-page-placeholder": true;
         "project-base-language-tm-conflict-confirm": true;
         "project-base-language-tm-conflict-dialog": true;
         "project-base-language-tm-conflict-list": true;
@@ -577,6 +586,7 @@ declare namespace DataCy {
         "project-members-invitation-item": true;
         "project-menu-item": true;
         "project-menu-item-ai": true;
+        "project-menu-item-app-": true;
         "project-menu-item-branches": true;
         "project-menu-item-dashboard": true;
         "project-menu-item-developer": true;
@@ -594,6 +604,10 @@ declare namespace DataCy {
         "project-name-field": true;
         "project-select": true;
         "project-settings": true;
+        "project-settings-apps": true;
+        "project-settings-apps-empty": true;
+        "project-settings-apps-item": true;
+        "project-settings-apps-item-toggle": true;
         "project-settings-branch-item": true;
         "project-settings-branch-item-name": true;
         "project-settings-branch-item-properties": true;
@@ -619,6 +633,7 @@ declare namespace DataCy {
         "project-settings-languages-list-edit-button": true;
         "project-settings-languages-list-name": true;
         "project-settings-menu-advanced": true;
+        "project-settings-menu-apps": true;
         "project-settings-menu-general": true;
         "project-settings-menu-labels": true;
         "project-settings-menu-qa": true;

@@ -1,0 +1,47 @@
+package io.tolgee.model.apps
+
+import io.tolgee.model.Organization
+import io.tolgee.model.StandardAuditModel
+import io.tolgee.model.UserAccount
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.FetchType
+import jakarta.persistence.Index
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.Table
+import jakarta.persistence.UniqueConstraint
+
+@Entity
+@Table(
+  name = "app_install",
+  uniqueConstraints = [
+    UniqueConstraint(
+      name = "app_install_organization_id_app_id_unique",
+      columnNames = ["organization_id", "app_id"],
+    ),
+  ],
+  indexes = [
+    Index(columnList = "organization_id"),
+    Index(columnList = "author_id"),
+  ],
+)
+class AppInstall : StandardAuditModel() {
+  @ManyToOne(fetch = FetchType.LAZY)
+  lateinit var organization: Organization
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  lateinit var author: UserAccount
+
+  lateinit var manifestUrl: String
+
+  lateinit var appId: String
+
+  lateinit var name: String
+
+  lateinit var version: String
+
+  lateinit var baseUrl: String
+
+  @Column(columnDefinition = "TEXT")
+  lateinit var manifestJson: String
+}
