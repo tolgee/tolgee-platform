@@ -2,10 +2,14 @@ package io.tolgee.api.v2.controllers.project
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.constants.Message
+import io.tolgee.exceptions.NotFoundException
+import io.tolgee.hateoas.project.apps.AppTokenModel
 import io.tolgee.hateoas.project.apps.ProjectAppModel
 import io.tolgee.hateoas.project.apps.ProjectAppModelAssembler
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.ProjectHolder
+import io.tolgee.security.authentication.AppTokenService
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
@@ -15,6 +19,7 @@ import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -27,6 +32,7 @@ class ProjectAppsController(
   private val projectHolder: ProjectHolder,
   private val authenticationFacade: AuthenticationFacade,
   private val appEnablementService: AppEnablementService,
+  private val appTokenService: AppTokenService,
   private val projectAppModelAssembler: ProjectAppModelAssembler,
 ) {
   @GetMapping
@@ -76,5 +82,29 @@ class ProjectAppsController(
     @PathVariable installId: Long,
   ) {
     appEnablementService.disable(projectHolder.project.id, installId)
+  }
+
+  @PostMapping("/{installId}/token")
+  @UseDefaultPermissions
+  @Operation(
+    summary = "Mint a user-context app token",
+    description =
+      "Issues a short-lived JWT bound to (install, project, current user) that the iframe can use to call " +
+        "Tolgee's REST API on behalf of the user. Returns 404 if the install is not enabled for this project.",
+  )
+  fun mintToken(
+    @PathVariable projectId: Long,
+    @PathVariable installId: Long,
+  ): AppTokenModel {
+    if (!appEnablementService.isEnabledForProject(projectId, installId)) {
+      throw NotFoundException(Message.APP_INSTALL_NOT_FOUND)
+    }
+    val token =
+      appTokenService.mintUserContextToken(
+        installId = installId,
+        userId = authenticationFacade.authenticatedUser.id,
+        projectId = projectId,
+      )
+    return AppTokenModel(token = token)
   }
 }

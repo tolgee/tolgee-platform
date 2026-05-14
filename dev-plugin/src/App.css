@@ -1,7 +1,7 @@
 .plugin-page {
   font-family: system-ui, sans-serif;
-  padding: 2rem;
-  max-width: 720px;
+  padding: 1.5rem;
+  max-width: 900px;
 }
 
 .plugin-page h1 {
@@ -10,6 +10,44 @@
 }
 
 .plugin-page p {
-  margin: 0;
+  margin: 0 0 1rem;
   color: #444;
+}
+
+.plugin-page table.keys {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.plugin-page table.keys th,
+.plugin-page table.keys td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+  vertical-align: top;
+}
+
+.plugin-page table.keys th {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  color: #666;
+  background: #fafafa;
+}
+
+.plugin-page code {
+  background: #f3f3f3;
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-size: 0.85em;
+}
+
+.plugin-page code.ns {
+  margin-right: 6px;
+  color: #888;
+}
+
+.plugin-page code.lang {
+  margin-right: 6px;
+  color: #555;
 }
