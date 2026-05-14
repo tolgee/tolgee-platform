@@ -13,16 +13,24 @@ import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Component
 
 /**
- * EE auto-translate resolver. Extends the OSS exact-equality lookup with a prior pass over
- * stored TM entries (manual entries + TMX imports) on every TM the project can read. Both
- * passes use exact equality on source text — the composite `(translation_memory_id,
- * source_text)` index covers it — so the per-key latency stays in the millisecond range
- * that the batch / MT pipelines require.
+ * EE auto-translate resolver. Mirrors the suggestion panel's notion of "matches the project
+ * can see" but with exact equality instead of trigram similarity, so the per-key latency
+ * stays in the millisecond range required by the batch / MT pipelines.
+ *
+ * Two sources of matches, in priority order:
+ *   1. Stored entries on any TM the project has read access to (`translation_memory_entry`
+ *      rows imported via TMX or added through the entry dialog).
+ *   2. Virtual rows: translations on any project that has write access to a readable TM,
+ *      where that project's base translation equals our base text. Mirrors the virtual-row
+ *      half of [io.tolgee.ee.service.translationMemory.TranslationMemoryServiceEeImpl.baseSelect].
  *
  * Plan-aware filtering is handled by [TranslationMemoryManagementService.getReadableTmIdsForSuggestions]:
  * when the feature is disabled it returns only the project's own TM, so this override
  * degrades gracefully on free-tier orgs without behaving differently from the OSS path
  * (project-type TMs rarely carry stored entries).
+ *
+ * Self-match protection: virtual rows from the current key are excluded so a project
+ * doesn't auto-fill from itself.
  */
 @Component
 @Primary
@@ -40,7 +48,7 @@ class TmAutoTranslateProviderEeImpl(
     val startedAt = System.currentTimeMillis()
     return try {
       val result =
-        findStoredEntryMatch(key, targetLanguage)
+        findExactMatch(key, targetLanguage)
           ?: ossDelegate.getAutoTranslatedValue(key, targetLanguage)
       metrics.recordTranslationMemoryLookup(
         outcome = if (result != null) "hit" else "miss",
@@ -56,7 +64,7 @@ class TmAutoTranslateProviderEeImpl(
     }
   }
 
-  private fun findStoredEntryMatch(
+  private fun findExactMatch(
     key: Key,
     targetLanguage: Language,
   ): TranslationMemoryItemView? {
@@ -68,14 +76,51 @@ class TmAutoTranslateProviderEeImpl(
       )
     if (tmIds.isEmpty()) return null
 
+    // Two-half UNION ALL:
+    //   1. Stored entries on any readable TM with an exact source-text match.
+    //   2. Virtual rows — exact-text matches against translations on any project that has
+    //      writeAccess to a readable TM. Mirrors the virtual-row half of
+    //      `TranslationMemoryServiceEeImpl.baseSelect`, just with `=` instead of trigram `%`.
+    //
+    // The `kind` column lets us pick stored entries first when both halves return rows,
+    // mirroring how the suggestion panel surfaces a user's manual additions.
     val sql =
       """
-      select e.source_text, e.target_text
-      from translation_memory_entry e
-      where e.translation_memory_id in :tmIds
-        and e.source_text = :baseText
-        and e.target_language_tag = :targetLanguageTag
-        and e.target_text <> ''
+      select target_text, kind from (
+        select e.target_text, 'stored' as kind
+        from translation_memory_entry e
+        where e.translation_memory_id in :tmIds
+          and e.source_text = :baseText
+          and e.target_language_tag = :targetLanguageTag
+          and e.target_text <> ''
+
+        union all
+
+        select target_t.text as target_text, 'virtual' as kind
+        from translation base_t
+        join key k on k.id = base_t.key_id and k.deleted_at is null
+        join project p
+          on p.id = k.project_id
+         and p.base_language_id = base_t.language_id
+         and p.deleted_at is null
+        join translation_memory_project tmp_w
+          on tmp_w.project_id = p.id and tmp_w.write_access = true
+        join translation_memory tm_virt
+          on tm_virt.id = tmp_w.translation_memory_id
+         and tm_virt.id in :tmIds
+        left join branch b on b.id = k.branch_id
+        join translation target_t
+          on target_t.key_id = k.id
+         and target_t.language_id <> base_t.language_id
+        join language target_lang on target_lang.id = target_t.language_id
+        where base_t.text = :baseText
+          and target_lang.tag = :targetLanguageTag
+          and target_t.text is not null and target_t.text <> ''
+          and (b.id is null or b.is_default = true)
+          and (not tm_virt.write_only_reviewed or target_t.state = 2)
+          and k.id <> :selfKeyId
+      ) candidates
+      order by case kind when 'stored' then 0 else 1 end
       limit 1
       """.trimIndent()
 
@@ -86,11 +131,12 @@ class TmAutoTranslateProviderEeImpl(
         .setParameter("tmIds", tmIds)
         .setParameter("baseText", baseText)
         .setParameter("targetLanguageTag", targetLanguage.tag)
+        .setParameter("selfKeyId", key.id)
         .resultList as List<Array<Any?>>
     val row = rows.firstOrNull() ?: return null
     return TranslationMemoryItemView(
-      baseTranslationText = row[0] as String,
-      targetTranslationText = row[1] as String,
+      baseTranslationText = baseText,
+      targetTranslationText = row[0] as String,
       keyName = key.name,
       keyNamespace = null,
       similarity = 1.0f,
