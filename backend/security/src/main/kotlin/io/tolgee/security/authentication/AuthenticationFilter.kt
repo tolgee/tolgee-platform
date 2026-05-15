@@ -17,11 +17,13 @@
 package io.tolgee.security.authentication
 
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.component.KeyGenerator
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.AuthExpiredException
 import io.tolgee.exceptions.AuthenticationException
+import io.tolgee.exceptions.PermissionException
 import io.tolgee.security.BILLING_API_KEY_PREFIX
 import io.tolgee.security.PAT_PREFIX
 import io.tolgee.security.ratelimit.RateLimitService
@@ -30,6 +32,7 @@ import io.tolgee.service.apps.AppEnablementService
 import io.tolgee.service.apps.AppInstallService
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PatService
+import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.UserAccountService
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
@@ -38,6 +41,7 @@ import org.springframework.context.annotation.Lazy
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
+import java.util.Base64
 
 @Component
 @Lazy
@@ -63,7 +67,18 @@ class AuthenticationFilter(
   private val patService: PatService,
   @Lazy
   private val ssoDelegate: SsoDelegate,
+  @Lazy
+  private val keyGenerator: KeyGenerator,
+  @Lazy
+  private val permissionService: PermissionService,
 ) : OncePerRequestFilter() {
+  companion object {
+    private const val APP_SECRET_PREFIX = "tgapps_"
+    private const val APP_CLIENT_ID_PREFIX = "tgapp_"
+    private const val ACTING_AS_USER_HEADER = "X-Tolgee-Act-As-User-Id"
+    private val PROJECT_URL_REGEX = Regex("/v2/projects/(\\d+)")
+  }
+
   private val authenticationProperties
     get() = tolgeeProperties.authentication
   private val internalProperties
@@ -116,6 +131,11 @@ class AuthenticationFilter(
         return
       }
 
+      if (authorization.startsWith("Basic ")) {
+        appBasicAuth(request, authorization.substring(6))
+        return
+      }
+
       throw AuthenticationException(Message.INVALID_JWT_TOKEN)
     }
 
@@ -127,6 +147,11 @@ class AuthenticationFilter(
 
       if (apiKey.startsWith(PAT_PREFIX)) {
         patAuth(apiKey)
+        return
+      }
+
+      if (apiKey.startsWith(APP_SECRET_PREFIX)) {
+        appSecretAuth(request, apiKey)
         return
       }
 
@@ -188,6 +213,7 @@ class AuthenticationFilter(
       appInstall = install,
       userAccount = user,
       projectId = claims.projectId,
+      isInstallContext = false,
     )
   }
 
@@ -269,6 +295,108 @@ class AuthenticationFilter(
         isReadOnly = false,
         isSuperToken = false,
       )
+  }
+
+  private fun appSecretAuth(
+    request: HttpServletRequest,
+    key: String,
+  ) {
+    val resolution =
+      appInstallService.resolveByClientSecretHash(keyGenerator.hash(key))
+        ?: throw AuthenticationException(Message.INVALID_APP_CREDENTIALS)
+    populateAppAuth(request, resolution, credentials = key)
+  }
+
+  private fun appBasicAuth(
+    request: HttpServletRequest,
+    encoded: String,
+  ) {
+    val decoded =
+      try {
+        String(Base64.getDecoder().decode(encoded))
+      } catch (_: IllegalArgumentException) {
+        throw AuthenticationException(Message.INVALID_APP_CREDENTIALS)
+      }
+    val separator = decoded.indexOf(':')
+    if (separator < 0) {
+      throw AuthenticationException(Message.INVALID_APP_CREDENTIALS)
+    }
+    val clientId = decoded.substring(0, separator)
+    val clientSecret = decoded.substring(separator + 1)
+    if (!clientId.startsWith(APP_CLIENT_ID_PREFIX) || !clientSecret.startsWith(APP_SECRET_PREFIX)) {
+      throw AuthenticationException(Message.INVALID_APP_CREDENTIALS)
+    }
+
+    val resolution =
+      appInstallService.resolveByClientId(clientId)
+        ?: throw AuthenticationException(Message.INVALID_APP_CREDENTIALS)
+    val providedHash = keyGenerator.hash(clientSecret)
+    val storedHash = resolution.install.clientSecretHash
+    if (storedHash == null || !constantTimeEquals(providedHash, storedHash)) {
+      throw AuthenticationException(Message.INVALID_APP_CREDENTIALS)
+    }
+    populateAppAuth(request, resolution, credentials = clientId)
+  }
+
+  private fun populateAppAuth(
+    request: HttpServletRequest,
+    resolution: AppInstallService.AppCredentialResolution,
+    credentials: Any?,
+  ) {
+    val install = resolution.install
+    val projectId = extractProjectIdFromUrl(request)
+    val actingAsUser = resolveActingAsUser(request, projectId)
+
+    if (projectId != null && !appEnablementService.isEnabledForProject(projectId, install.id)) {
+      throw AuthenticationException(Message.INVALID_APP_CREDENTIALS)
+    }
+
+    SecurityContextHolder.getContext().authentication =
+      AppAuthentication(
+        credentials = credentials,
+        userAccount = resolution.authorPrincipal,
+        appInstall = install,
+        projectId = projectId,
+        isInstallContext = true,
+        actingAsUserAccount = actingAsUser,
+      )
+  }
+
+  private fun resolveActingAsUser(
+    request: HttpServletRequest,
+    projectId: Long?,
+  ): UserAccountDto? {
+    val raw = request.getHeader(ACTING_AS_USER_HEADER) ?: return null
+    val userId =
+      raw.toLongOrNull() ?: throw AuthenticationException(Message.INVALID_APP_CREDENTIALS)
+    val user =
+      userAccountService.findDto(userId)
+        ?: throw PermissionException(Message.APP_ACTING_AS_USER_NOT_PROJECT_MEMBER)
+    if (projectId == null) {
+      return user
+    }
+    val scopes = permissionService.getProjectPermissionScopesNoApiKey(projectId, user.id)
+    if (scopes.isNullOrEmpty()) {
+      throw PermissionException(Message.APP_ACTING_AS_USER_NOT_PROJECT_MEMBER)
+    }
+    return user
+  }
+
+  private fun extractProjectIdFromUrl(request: HttpServletRequest): Long? {
+    val match = PROJECT_URL_REGEX.find(request.requestURI) ?: return null
+    return match.groupValues.getOrNull(1)?.toLongOrNull()
+  }
+
+  private fun constantTimeEquals(
+    a: String,
+    b: String,
+  ): Boolean {
+    if (a.length != b.length) return false
+    var result = 0
+    for (i in a.indices) {
+      result = result or (a[i].code xor b[i].code)
+    }
+    return result == 0
   }
 
   private val initialUser by lazy {

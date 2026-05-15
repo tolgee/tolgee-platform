@@ -19,4 +19,8 @@ interface AppInstallRepository : JpaRepository<AppInstall, Long> {
     organizationId: Long,
     appId: String,
   ): AppInstall?
+
+  fun findByClientSecretHash(clientSecretHash: String): AppInstall?
+
+  fun findByClientId(clientId: String): AppInstall?
 }

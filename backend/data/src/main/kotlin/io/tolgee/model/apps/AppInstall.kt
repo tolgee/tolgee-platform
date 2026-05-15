@@ -59,4 +59,27 @@ class AppInstall : StandardAuditModel() {
   )
   @Column(name = "scope")
   var grantedScopes: MutableSet<Scope> = mutableSetOf()
+
+  @ElementCollection(fetch = FetchType.EAGER)
+  @CollectionTable(
+    name = "app_install_webhook_subscription",
+    joinColumns = [JoinColumn(name = "app_install_id")],
+  )
+  @Column(name = "event")
+  var webhookSubscriptions: MutableSet<String> = mutableSetOf()
+
+  @Column(name = "webhook_url", length = 2048)
+  var webhookUrl: String? = null
+
+  @Column(name = "client_id", length = 64, unique = true)
+  var clientId: String? = null
+
+  @Column(name = "client_secret_hash", length = 128, unique = true)
+  var clientSecretHash: String? = null
+
+  @Column(name = "client_secret_prefix", length = 16)
+  var clientSecretPrefix: String? = null
+
+  @Column(name = "webhook_secret", length = 128)
+  var webhookSecret: String? = null
 }

@@ -15,5 +15,7 @@ interface AppEnabledForProjectRepository : JpaRepository<AppEnabledForProject, L
 
   fun findAllByProjectId(projectId: Long): List<AppEnabledForProject>
 
+  fun findAllByAppInstallId(appInstallId: Long): List<AppEnabledForProject>
+
   fun deleteByAppInstallId(appInstallId: Long)
 }

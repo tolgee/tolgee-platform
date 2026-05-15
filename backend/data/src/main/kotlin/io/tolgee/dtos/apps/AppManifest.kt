@@ -9,6 +9,12 @@ data class AppManifest(
   val baseUrl: String,
   val modules: AppManifestModules,
   val scopes: List<String>? = null,
+  val webhooks: AppManifestWebhooks? = null,
+)
+
+data class AppManifestWebhooks(
+  val events: List<String>,
+  val url: String,
 )
 
 data class AppManifestModules(

@@ -80,6 +80,14 @@ export const RefreshAppDialog = ({
     (scope) => !requested.includes(scope)
   );
 
+  const currentEvents = new Set(install.webhookEvents);
+  const requestedEvents = preview?.requestedWebhookEvents ?? [];
+  const addedEvents = requestedEvents.filter((e) => !currentEvents.has(e));
+  const keptEvents = requestedEvents.filter((e) => currentEvents.has(e));
+  const removedEvents = install.webhookEvents.filter(
+    (e) => !requestedEvents.includes(e)
+  );
+
   return (
     <Dialog
       open={open}
@@ -192,6 +200,71 @@ export const RefreshAppDialog = ({
                   defaultValue="This app does not request any permissions."
                 />
               </Typography>
+            )}
+
+            {addedEvents.length > 0 && (
+              <Box mt={2} mb={2}>
+                <Typography variant="body2" mb={1}>
+                  <T
+                    keyName="organization_apps_refresh_added_events"
+                    defaultValue="New webhook events:"
+                  />
+                </Typography>
+                <Box display="flex" flexWrap="wrap" gap={1}>
+                  {addedEvents.map((event) => (
+                    <Chip
+                      key={event}
+                      size="small"
+                      color="warning"
+                      label={event}
+                      data-cy="organization-apps-refresh-event-added"
+                    />
+                  ))}
+                </Box>
+              </Box>
+            )}
+
+            {removedEvents.length > 0 && (
+              <Box mb={2}>
+                <Typography variant="body2" mb={1}>
+                  <T
+                    keyName="organization_apps_refresh_removed_events"
+                    defaultValue="Webhook events no longer requested:"
+                  />
+                </Typography>
+                <Box display="flex" flexWrap="wrap" gap={1}>
+                  {removedEvents.map((event) => (
+                    <Chip
+                      key={event}
+                      size="small"
+                      variant="outlined"
+                      label={event}
+                      data-cy="organization-apps-refresh-event-removed"
+                    />
+                  ))}
+                </Box>
+              </Box>
+            )}
+
+            {keptEvents.length > 0 && (
+              <Box mb={1}>
+                <Typography variant="body2" mb={1}>
+                  <T
+                    keyName="organization_apps_refresh_kept_events"
+                    defaultValue="Webhook events already subscribed:"
+                  />
+                </Typography>
+                <Box display="flex" flexWrap="wrap" gap={1}>
+                  {keptEvents.map((event) => (
+                    <Chip
+                      key={event}
+                      size="small"
+                      label={event}
+                      data-cy="organization-apps-refresh-event-kept"
+                    />
+                  ))}
+                </Box>
+              </Box>
             )}
           </>
         )}

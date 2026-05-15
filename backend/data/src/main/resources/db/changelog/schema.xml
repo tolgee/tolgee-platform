@@ -5776,4 +5776,66 @@
                                  onDelete="CASCADE"
                                  validate="true"/>
     </changeSet>
+    <changeSet author="jcizmar" id="1747267200000-1">
+        <addColumn tableName="app_install">
+            <column name="webhook_url" type="VARCHAR(2048)"/>
+            <column name="client_id" type="VARCHAR(64)"/>
+            <column name="client_secret_hash" type="VARCHAR(128)"/>
+            <column name="client_secret_prefix" type="VARCHAR(16)"/>
+            <column name="webhook_secret" type="VARCHAR(128)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jcizmar" id="1747267200000-2">
+        <addUniqueConstraint columnNames="client_id"
+                             constraintName="app_install_client_id_unique"
+                             tableName="app_install"/>
+        <addUniqueConstraint columnNames="client_secret_hash"
+                             constraintName="app_install_client_secret_hash_unique"
+                             tableName="app_install"/>
+    </changeSet>
+    <changeSet author="jcizmar" id="1747267200000-3">
+        <createTable tableName="app_install_webhook_subscription">
+            <column name="app_install_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="event" type="VARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="jcizmar" id="1747267200000-4">
+        <addPrimaryKey columnNames="app_install_id, event"
+                       constraintName="app_install_webhook_subscriptionPK"
+                       tableName="app_install_webhook_subscription"/>
+    </changeSet>
+    <changeSet author="jcizmar" id="1747267200000-5">
+        <addForeignKeyConstraint baseColumnNames="app_install_id"
+                                 baseTableName="app_install_webhook_subscription"
+                                 constraintName="FK_app_install_webhook_subscription_app_install"
+                                 deferrable="false"
+                                 initiallyDeferred="false"
+                                 referencedColumnNames="id"
+                                 referencedTableName="app_install"
+                                 onDelete="CASCADE"
+                                 validate="true"/>
+    </changeSet>
+    <changeSet author="jcizmar" id="1747267200000-6">
+        <addColumn tableName="webhook_config">
+            <column name="app_install_id" type="BIGINT"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jcizmar" id="1747267200000-7">
+        <createIndex indexName="IDX_webhook_config_app_install_id" tableName="webhook_config">
+            <column name="app_install_id"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="app_install_id"
+                                 baseTableName="webhook_config"
+                                 constraintName="FK_webhook_config_app_install"
+                                 deferrable="false"
+                                 initiallyDeferred="false"
+                                 referencedColumnNames="id"
+                                 referencedTableName="app_install"
+                                 onDelete="CASCADE"
+                                 validate="true"/>
+    </changeSet>
 </databaseChangeLog>

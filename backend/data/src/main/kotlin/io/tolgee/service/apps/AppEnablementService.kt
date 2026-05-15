@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional
 class AppEnablementService(
   private val appEnabledForProjectRepository: AppEnabledForProjectRepository,
   private val appInstallRepository: AppInstallRepository,
+  private val appManagedAutomationService: AppManagedAutomationService,
 ) {
   @Transactional
   fun enable(
@@ -38,6 +39,7 @@ class AppEnablementService(
         this.author = author
       },
     )
+    appManagedAutomationService.onEnable(install, project)
     return install
   }
 
@@ -48,6 +50,7 @@ class AppEnablementService(
   ) {
     val existing =
       appEnabledForProjectRepository.findByProjectIdAndAppInstallId(projectId, appInstallId) ?: return
+    appManagedAutomationService.onDisable(existing.appInstall, existing.project)
     appEnabledForProjectRepository.delete(existing)
   }
 
@@ -79,6 +82,11 @@ class AppEnablementService(
 
   @Transactional
   fun removeAllForAppInstall(appInstallId: Long) {
-    appEnabledForProjectRepository.deleteByAppInstallId(appInstallId)
+    appEnabledForProjectRepository
+      .findAllByAppInstallId(appInstallId)
+      .forEach { enablement ->
+        appManagedAutomationService.onDisable(enablement.appInstall, enablement.project)
+        appEnabledForProjectRepository.delete(enablement)
+      }
   }
 }

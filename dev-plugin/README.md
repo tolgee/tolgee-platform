@@ -1,73 +1,56 @@
-# React + TypeScript + Vite
+# Tolgee Dev Plugin
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A minimal example of a Tolgee App used for local development of the Tolgee Apps
+PoC. Serves a manifest, an iframe page, and a small backend that receives
+webhooks and stores per-translation emoji + last-updated-at side data.
 
-Currently, two official plugins are available:
+## Running
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+`npm run dev` starts two processes side-by-side via `concurrently`:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- **Vite** on `http://localhost:5180` — serves the manifest at `/manifest.json`,
+  the iframe page, and proxies `/api/*` + `/webhook` to the backend.
+- **Express** on `http://localhost:5181` — handles `/webhook` (Tolgee →
+  plugin) and `/api/*` (plugin frontend → plugin backend).
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Vite's proxy means everything looks single-origin from Tolgee's perspective: the
+manifest declares `baseUrl: http://localhost:5180` and `webhooks.url: /webhook`.
+
+## Env vars
+
+| Var | Purpose |
+| --- | --- |
+| `TOLGEE_WEBHOOK_SECRET` | HMAC key Tolgee signs webhook bodies with. If unset, the server warns and accepts every webhook. Recommended to set in any non-trivial test. |
+| `PORT` | Override the backend port (default `5181`). |
+
+Get the webhook secret from the Tolgee "Custom apps" admin row after registering
+this plugin. The same row also shows the `clientId` + `clientSecret`, which a
+real plugin would use to call Tolgee's REST API on its own behalf — this
+example doesn't make outbound API calls, so the secret only matters for webhook
+verification here.
+
+## Storage
+
+`server/data.json` (gitignored) holds:
+
+```json
+{
+  "emojis": { "<translationId>": "🎉" },
+  "updatedAt": { "<translationId>": "2026-05-15T12:00:00.000Z" }
+}
 ```
+
+Translation IDs are globally unique in Tolgee, so a single shared file works
+across projects.
+
+## Frontend ↔ Backend auth — your problem
+
+Tolgee doesn't authenticate `plugin-frontend → plugin-backend` calls; that's up
+to the plugin author. This example leaves `/api/*` wide open because it runs on
+localhost. A real plugin would either validate the iframe's user-context JWT
+against Tolgee's `/v2/user` endpoint or use its own auth scheme.

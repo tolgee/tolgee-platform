@@ -51,3 +51,47 @@
   margin-right: 6px;
   color: #555;
 }
+
+.plugin-page .emoji-row {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+}
+
+.plugin-page .emoji-btn {
+  font-size: 1.1em;
+  line-height: 1;
+  border: 1px solid transparent;
+  background: transparent;
+  border-radius: 4px;
+  padding: 2px 4px;
+  cursor: pointer;
+  transition:
+    background 0.1s,
+    border-color 0.1s;
+}
+
+.plugin-page .emoji-btn:hover {
+  background: #f3f3f3;
+}
+
+.plugin-page .emoji-btn.selected {
+  background: #fff5d6;
+  border-color: #e0c060;
+}
+
+.plugin-page .emoji-btn.clear {
+  font-size: 0.95em;
+  color: #888;
+}
+
+.plugin-page .emoji-btn[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.plugin-page .updated {
+  font-size: 0.7rem;
+  color: #888;
+  margin-top: 2px;
+}

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import {
+  Alert,
   Box,
   Button,
   Chip,
@@ -7,10 +8,13 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  IconButton,
   TextField,
+  Tooltip,
   Typography,
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
+import { Copy06 } from '@untitled-ui/icons-react';
 import { T, useTranslate } from '@tolgee/react';
 
 import { useOrganization } from 'tg.views/organizations/useOrganization';
@@ -18,6 +22,8 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { components } from 'tg.service/apiSchema.generated';
 
 type AppManifestPreviewModel = components['schemas']['AppManifestPreviewModel'];
+type AppRegistrationResponseModel =
+  components['schemas']['AppRegistrationResponseModel'];
 
 type Props = {
   open: boolean;
@@ -30,6 +36,8 @@ export const RegisterAppDialog = ({ open, onClose }: Props) => {
 
   const [manifestUrl, setManifestUrl] = useState('');
   const [preview, setPreview] = useState<AppManifestPreviewModel | null>(null);
+  const [registered, setRegistered] =
+    useState<AppRegistrationResponseModel | null>(null);
 
   const previewMutation = useApiMutation({
     url: '/v2/organizations/{organizationId}/apps/preview',
@@ -45,6 +53,7 @@ export const RegisterAppDialog = ({ open, onClose }: Props) => {
   const reset = () => {
     setManifestUrl('');
     setPreview(null);
+    setRegistered(null);
     previewMutation.reset();
     registerMutation.reset();
   };
@@ -75,25 +84,36 @@ export const RegisterAppDialog = ({ open, onClose }: Props) => {
         path: { organizationId: organization.id },
         content: { 'application/json': { manifestUrl } },
       },
-      { onSuccess: handleClose }
+      { onSuccess: (data) => setRegistered(data) }
     );
   };
 
-  const step: 'url' | 'consent' = preview ? 'consent' : 'url';
+  const step: 'url' | 'consent' | 'reveal' = registered
+    ? 'reveal'
+    : preview
+    ? 'consent'
+    : 'url';
 
   return (
     <Dialog
       open={open}
-      onClose={handleClose}
+      onClose={step === 'reveal' ? undefined : handleClose}
       maxWidth="sm"
       fullWidth
       data-cy="organization-apps-register-dialog"
     >
       <DialogTitle>
-        <T
-          keyName="organization_apps_register_dialog_title"
-          defaultValue="Register app"
-        />
+        {step === 'reveal' ? (
+          <T
+            keyName="organization_apps_register_secrets_title"
+            defaultValue="Copy the credentials now"
+          />
+        ) : (
+          <T
+            keyName="organization_apps_register_dialog_title"
+            defaultValue="Register app"
+          />
+        )}
       </DialogTitle>
 
       {step === 'url' && (
@@ -187,6 +207,28 @@ export const RegisterAppDialog = ({ open, onClose }: Props) => {
                 />
               ))}
             </Box>
+
+            {preview.requestedWebhookEvents.length > 0 && (
+              <Box mt={3}>
+                <Typography variant="body2" mb={1}>
+                  <T
+                    keyName="organization_apps_register_consent_webhook_intro"
+                    defaultValue="And will receive webhooks for these events:"
+                  />
+                </Typography>
+                <Box display="flex" flexWrap="wrap" gap={1}>
+                  {preview.requestedWebhookEvents.map((event) => (
+                    <Chip
+                      key={event}
+                      size="small"
+                      color="info"
+                      label={event}
+                      data-cy="organization-apps-register-consent-webhook"
+                    />
+                  ))}
+                </Box>
+              </Box>
+            )}
           </DialogContent>
           <DialogActions>
             <Button
@@ -214,6 +256,104 @@ export const RegisterAppDialog = ({ open, onClose }: Props) => {
           </DialogActions>
         </>
       )}
+
+      {step === 'reveal' && registered && (
+        <>
+          <DialogContent data-cy="organization-apps-register-reveal">
+            <Alert severity="warning" sx={{ mb: 2 }}>
+              <T
+                keyName="organization_apps_register_secrets_warning"
+                defaultValue="The client secret is shown only once. Copy it into the plugin's environment now — you cannot retrieve it later."
+              />
+            </Alert>
+            <CopyableSecret
+              label={t('organization_apps_register_client_id', 'Client ID')}
+              value={registered.clientId ?? ''}
+              dataCy="organization-apps-register-secret-client-id"
+            />
+            <CopyableSecret
+              label={t(
+                'organization_apps_register_client_secret',
+                'Client secret'
+              )}
+              value={registered.clientSecret}
+              dataCy="organization-apps-register-secret-client-secret"
+            />
+            <CopyableSecret
+              label={t(
+                'organization_apps_register_webhook_secret',
+                'Webhook secret'
+              )}
+              value={registered.webhookSecret ?? ''}
+              dataCy="organization-apps-register-secret-webhook-secret"
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button
+              data-cy="organization-apps-register-done"
+              variant="contained"
+              color="primary"
+              onClick={handleClose}
+            >
+              <T
+                keyName="organization_apps_register_done"
+                defaultValue="I've copied the credentials"
+              />
+            </Button>
+          </DialogActions>
+        </>
+      )}
     </Dialog>
+  );
+};
+
+const CopyableSecret = ({
+  label,
+  value,
+  dataCy,
+}: {
+  label: string;
+  value: string;
+  dataCy: string;
+}) => {
+  const { t } = useTranslate();
+  return (
+    <Box mb={2}>
+      <Typography variant="caption" color="text.secondary">
+        {label}
+      </Typography>
+      <Box display="flex" alignItems="center" gap={1}>
+        <Box
+          flex={1}
+          sx={{
+            fontFamily: 'monospace',
+            fontSize: '0.85rem',
+            background: (theme) => theme.palette.action.hover,
+            borderRadius: 1,
+            padding: '6px 10px',
+            wordBreak: 'break-all',
+          }}
+          data-cy={dataCy}
+        >
+          {value || '—'}
+        </Box>
+        {value && (
+          <Tooltip
+            title={t(
+              'organization_apps_register_secret_copy_tooltip',
+              'Copy to clipboard'
+            )}
+          >
+            <IconButton
+              size="small"
+              onClick={() => navigator.clipboard?.writeText(value)}
+              data-cy={`${dataCy}-copy`}
+            >
+              <Copy06 width={16} height={16} />
+            </IconButton>
+          </Tooltip>
+        )}
+      </Box>
+    </Box>
   );
 };

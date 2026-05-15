@@ -8,7 +8,7 @@ import {
   Typography,
   styled,
 } from '@mui/material';
-import { RefreshCcw01, Trash01 } from '@untitled-ui/icons-react';
+import { Eye, EyeOff, RefreshCcw01, Trash01 } from '@untitled-ui/icons-react';
 import { T } from '@tolgee/react';
 
 import { useOrganization } from 'tg.views/organizations/useOrganization';
@@ -188,6 +188,20 @@ export const RegisteredAppsApp = () => {
                     ))}
                   </StyledModuleChips>
                 )}
+                {item.webhookEvents.length > 0 && (
+                  <StyledModuleChips data-cy="organization-apps-item-events">
+                    {item.webhookEvents.map((event) => (
+                      <Chip
+                        key={event}
+                        size="small"
+                        color="info"
+                        variant="outlined"
+                        label={event}
+                      />
+                    ))}
+                  </StyledModuleChips>
+                )}
+                <CredentialsRow install={item} />
               </StyledItemMeta>
               <Box display="flex" gap={1}>
                 <Tooltip
@@ -241,5 +255,102 @@ export const RegisteredAppsApp = () => {
         />
       )}
     </>
+  );
+};
+
+const StyledCredentialsRow = styled('div')`
+  display: grid;
+  grid-template-columns: minmax(0, 120px) minmax(0, 1fr);
+  gap: 4px 12px;
+  margin-top: 8px;
+  align-items: center;
+  font-size: 0.8rem;
+`;
+
+const StyledCredentialValue = styled('span')`
+  font-family: monospace;
+  word-break: break-all;
+  color: ${({ theme }) => theme.palette.text.secondary};
+`;
+
+const CredentialsRow = ({
+  install,
+}: {
+  install: components['schemas']['AppInstallModel'];
+}) => {
+  const [revealed, setRevealed] = useState(false);
+  if (!install.clientId && !install.webhookSecret) return null;
+  return (
+    <StyledCredentialsRow data-cy="organization-apps-item-credentials">
+      <Typography variant="caption" color="text.secondary">
+        <T
+          keyName="organization_apps_item_client_id"
+          defaultValue="Client ID"
+        />
+      </Typography>
+      <StyledCredentialValue data-cy="organization-apps-item-client-id">
+        {install.clientId ?? '—'}
+      </StyledCredentialValue>
+
+      <Typography variant="caption" color="text.secondary">
+        <T
+          keyName="organization_apps_item_client_secret"
+          defaultValue="Client secret"
+        />
+      </Typography>
+      <StyledCredentialValue data-cy="organization-apps-item-client-secret">
+        {install.clientSecretPrefix
+          ? `${install.clientSecretPrefix}… (hidden — re-register to rotate)`
+          : '—'}
+      </StyledCredentialValue>
+
+      <Typography variant="caption" color="text.secondary">
+        <T
+          keyName="organization_apps_item_webhook_secret"
+          defaultValue="Webhook secret"
+        />
+      </Typography>
+      <Box display="flex" alignItems="center" gap={1}>
+        <StyledCredentialValue
+          data-cy="organization-apps-item-webhook-secret"
+          sx={{ minWidth: 0, flex: 1 }}
+        >
+          {revealed
+            ? install.webhookSecret ?? '—'
+            : install.webhookSecret
+            ? '••••••••••••'
+            : '—'}
+        </StyledCredentialValue>
+        {install.webhookSecret && (
+          <Tooltip
+            title={
+              revealed ? (
+                <T
+                  keyName="organization_apps_item_hide_secret"
+                  defaultValue="Hide"
+                />
+              ) : (
+                <T
+                  keyName="organization_apps_item_show_secret"
+                  defaultValue="Show"
+                />
+              )
+            }
+          >
+            <IconButton
+              size="small"
+              onClick={() => setRevealed((v) => !v)}
+              data-cy="organization-apps-item-webhook-secret-toggle"
+            >
+              {revealed ? (
+                <EyeOff width={14} height={14} />
+              ) : (
+                <Eye width={14} height={14} />
+              )}
+            </IconButton>
+          </Tooltip>
+        )}
+      </Box>
+    </StyledCredentialsRow>
   );
 };
