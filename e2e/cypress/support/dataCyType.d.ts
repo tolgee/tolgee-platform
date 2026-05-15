@@ -580,12 +580,21 @@ declare namespace DataCy {
         "order-translation-submit" |
         "organization-address-part-field" |
         "organization-apps-item" |
+        "organization-apps-item-client-id" |
+        "organization-apps-item-client-secret" |
+        "organization-apps-item-credentials" |
+        "organization-apps-item-events" |
         "organization-apps-item-refresh" |
         "organization-apps-item-remove" |
         "organization-apps-item-scopes" |
+        "organization-apps-item-webhook-secret" |
+        "organization-apps-item-webhook-secret-toggle" |
         "organization-apps-refresh-cancel" |
         "organization-apps-refresh-content" |
         "organization-apps-refresh-dialog" |
+        "organization-apps-refresh-event-added" |
+        "organization-apps-refresh-event-kept" |
+        "organization-apps-refresh-event-removed" |
         "organization-apps-refresh-scope-added" |
         "organization-apps-refresh-scope-kept" |
         "organization-apps-refresh-scope-removed" |
@@ -595,9 +604,15 @@ declare namespace DataCy {
         "organization-apps-register-consent" |
         "organization-apps-register-consent-no-scopes" |
         "organization-apps-register-consent-scope" |
+        "organization-apps-register-consent-webhook" |
         "organization-apps-register-continue" |
         "organization-apps-register-dialog" |
+        "organization-apps-register-done" |
         "organization-apps-register-manifest-url" |
+        "organization-apps-register-reveal" |
+        "organization-apps-register-secret-client-id" |
+        "organization-apps-register-secret-client-secret" |
+        "organization-apps-register-secret-webhook-secret" |
         "organization-apps-register-submit" |
         "organization-apps-registered-section" |
         "organization-description-field" |

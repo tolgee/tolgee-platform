@@ -1,5 +1,6 @@
 package io.tolgee.api.v2.controllers
 
+import io.tolgee.component.KeyGenerator
 import io.tolgee.development.testDataBuilder.data.AppsTestData
 import io.tolgee.model.apps.AppInstall
 import io.tolgee.model.enums.Scope
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import java.util.Base64
 import java.util.Date
 
 /**
@@ -38,6 +40,9 @@ class AppPermissionInterceptionTest : AuthorizedControllerTest() {
 
   @Autowired
   lateinit var appTokenService: AppTokenService
+
+  @Autowired
+  lateinit var keyGenerator: KeyGenerator
 
   lateinit var testData: AppsTestData
 
@@ -144,6 +149,70 @@ class AppPermissionInterceptionTest : AuthorizedControllerTest() {
       .andExpect(status().isUnauthorized)
   }
 
+  @Test
+  fun `X-API-Key with tgapps_ secret succeeds when install has required scope`() {
+    val (install, secret) = registerInstallWithCredentials(setOf(Scope.TRANSLATIONS_VIEW))
+    appEnablementService.enable(testData.project, install.id, testData.user)
+
+    mvc
+      .perform(get(allKeysUrl()).header("X-API-Key", secret))
+      .andExpect(status().isOk)
+  }
+
+  @Test
+  fun `X-API-Key denied when install lacks required scope`() {
+    val (install, secret) = registerInstallWithCredentials(setOf(Scope.KEYS_EDIT))
+    appEnablementService.enable(testData.project, install.id, testData.user)
+
+    mvc
+      .perform(get(allKeysUrl()).header("X-API-Key", secret))
+      .andExpect(status().isForbidden)
+  }
+
+  @Test
+  fun `X-API-Key with tgapps_ secret returns 401 when install is not enabled for project`() {
+    val (_, secret) = registerInstallWithCredentials(setOf(Scope.TRANSLATIONS_VIEW))
+    mvc
+      .perform(get(allKeysUrl()).header("X-API-Key", secret))
+      .andExpect(status().isUnauthorized)
+  }
+
+  @Test
+  fun `X-API-Key with wrong secret returns 401`() {
+    val (install, _) = registerInstallWithCredentials(setOf(Scope.TRANSLATIONS_VIEW))
+    appEnablementService.enable(testData.project, install.id, testData.user)
+
+    mvc
+      .perform(
+        get(allKeysUrl())
+          .header("X-API-Key", "tgapps_${"a".repeat(40)}"),
+      ).andExpect(status().isUnauthorized)
+  }
+
+  @Test
+  fun `Authorization Basic with clientId clientSecret succeeds`() {
+    val (install, secret) = registerInstallWithCredentials(setOf(Scope.TRANSLATIONS_VIEW))
+    appEnablementService.enable(testData.project, install.id, testData.user)
+    val header = "Basic " + Base64.getEncoder().encodeToString("${install.clientId}:$secret".toByteArray())
+
+    mvc
+      .perform(get(allKeysUrl()).header("Authorization", header))
+      .andExpect(status().isOk)
+  }
+
+  @Test
+  fun `Authorization Basic with wrong secret returns 401`() {
+    val (install, _) = registerInstallWithCredentials(setOf(Scope.TRANSLATIONS_VIEW))
+    appEnablementService.enable(testData.project, install.id, testData.user)
+    val header =
+      "Basic " +
+        Base64.getEncoder().encodeToString("${install.clientId}:tgapps_${"x".repeat(40)}".toByteArray())
+
+    mvc
+      .perform(get(allKeysUrl()).header("Authorization", header))
+      .andExpect(status().isUnauthorized)
+  }
+
   private fun allKeysUrl() = "/v2/projects/${testData.project.id}/all-keys"
 
   /**
@@ -165,6 +234,16 @@ class AppPermissionInterceptionTest : AuthorizedControllerTest() {
         this.grantedScopes = scopes.toMutableSet()
       }
     return appInstallRepository.save(install)
+  }
+
+  private fun registerInstallWithCredentials(scopes: Set<Scope>): Pair<AppInstall, String> {
+    val install = registerInstall(scopes)
+    val plaintextSecret = "tgapps_${keyGenerator.generate(256)}"
+    install.clientId = "tgapp_${keyGenerator.generate(128)}"
+    install.clientSecretHash = keyGenerator.hash(plaintextSecret)
+    install.clientSecretPrefix = plaintextSecret.take(10)
+    install.webhookSecret = "tgappw_${keyGenerator.generate(256)}"
+    return appInstallRepository.save(install) to plaintextSecret
   }
 
   private fun manifestJsonFor(appId: String): String =

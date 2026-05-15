@@ -22,6 +22,11 @@ class AppInstallModelAssembler(
       baseUrl = entity.baseUrl,
       modules = manifest.modules,
       scopes = entity.grantedScopes.map { it.value },
+      webhookEvents = entity.webhookSubscriptions.toList(),
+      webhookUrl = entity.webhookUrl,
+      clientId = entity.clientId,
+      clientSecretPrefix = entity.clientSecretPrefix,
+      webhookSecret = entity.webhookSecret,
     )
   }
 }

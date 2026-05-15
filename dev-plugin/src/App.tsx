@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createApiClient, type components } from '@tginternal/client'
 import './App.css'
 
@@ -11,6 +11,27 @@ type AppContext = {
   apiUrl: string
 }
 
+type PluginState = {
+  emojis: Record<string, string>
+  updatedAt: Record<string, string>
+}
+
+const EMOJI_PALETTE = ['🎉', '🔥', '❓', '✅', '❌'] as const
+
+const formatRelative = (iso: string): string => {
+  const t = new Date(iso).getTime()
+  if (Number.isNaN(t)) return ''
+  const diff = Date.now() - t
+  const sec = Math.round(diff / 1000)
+  if (sec < 60) return `${sec}s ago`
+  const min = Math.round(sec / 60)
+  if (min < 60) return `${min}m ago`
+  const hr = Math.round(min / 60)
+  if (hr < 24) return `${hr}h ago`
+  const day = Math.round(hr / 24)
+  return `${day}d ago`
+}
+
 function App() {
   const [context, setContext] = useState<AppContext | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -18,6 +39,10 @@ function App() {
   const [keys, setKeys] = useState<KeyRow[]>([])
   const [languages, setLanguages] = useState<LanguageModel[]>([])
   const [projectName, setProjectName] = useState<string | null>(null)
+  const [pluginState, setPluginState] = useState<PluginState>({
+    emojis: {},
+    updatedAt: {},
+  })
 
   useEffect(() => {
     const handler = (event: MessageEvent) => {
@@ -50,9 +75,9 @@ function App() {
     })
 
     let cancelled = false
-    setLoading(true)
-    setError(null)
     ;(async () => {
+      setLoading(true)
+      setError(null)
       try {
         const projectResp = await client.GET('/v2/projects/{projectId}', {
           params: { path: { projectId: context.projectId } },
@@ -71,19 +96,25 @@ function App() {
         const keysResp = await client.GET(
           '/v2/projects/{projectId}/translations',
           {
-            params: { path: { projectId: context.projectId }, query: { size: 20 } },
+            params: {
+              path: { projectId: context.projectId },
+              query: { size: 20 },
+            },
           }
         )
         if (cancelled) return
         if (keysResp.error) {
           throw new Error(
-            `Translations lookup failed: ${JSON.stringify(
-              keysResp.error
-            ).slice(0, 240)}`
+            `Translations lookup failed: ${JSON.stringify(keysResp.error).slice(
+              0,
+              240
+            )}`
           )
         }
-        setKeys(keysResp.data?._embedded?.keys ?? [])
-        setLanguages(keysResp.data?.selectedLanguages ?? [])
+        const loadedKeys = keysResp.data?._embedded?.keys ?? []
+        const loadedLanguages = keysResp.data?.selectedLanguages ?? []
+        setKeys(loadedKeys)
+        setLanguages(loadedLanguages)
       } catch (e) {
         if (!cancelled) {
           setError(e instanceof Error ? e.message : String(e))
@@ -97,6 +128,64 @@ function App() {
       cancelled = true
     }
   }, [context])
+
+  const noteTranslationIdsKey = useMemo(() => {
+    const ids: number[] = []
+    for (const row of keys) {
+      for (const t of Object.values(row.translations)) {
+        if (t?.id != null) ids.push(t.id)
+      }
+    }
+    return ids.join(',')
+  }, [keys])
+
+  useEffect(() => {
+    if (!noteTranslationIdsKey) return
+    const ctrl = new AbortController()
+    fetch(`/api/state?ids=${noteTranslationIdsKey}`, {
+      signal: ctrl.signal,
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: PluginState | null) => {
+        if (data) setPluginState(data)
+      })
+      .catch((err) => {
+        if (err.name !== 'AbortError') console.warn('plugin state fetch:', err)
+      })
+    return () => ctrl.abort()
+  }, [noteTranslationIdsKey])
+
+  const noteTranslationIdFor = useCallback(
+    (row: KeyRow): number | null => {
+      for (const lang of languages) {
+        const t = row.translations[lang.tag]
+        if (t?.id != null) return t.id
+      }
+      return null
+    },
+    [languages]
+  )
+
+  const setEmoji = useCallback(
+    async (translationId: number, emoji: string | null) => {
+      setPluginState((prev) => {
+        const emojis = { ...prev.emojis }
+        if (emoji) emojis[translationId] = emoji
+        else delete emojis[translationId]
+        return { ...prev, emojis }
+      })
+      try {
+        await fetch('/api/emoji', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ translationId, emoji }),
+        })
+      } catch (err) {
+        console.warn('save emoji:', err)
+      }
+    },
+    []
+  )
 
   return (
     <main className="plugin-page">
@@ -131,6 +220,7 @@ function App() {
               <thead>
                 <tr>
                   <th>Key</th>
+                  <th>Note</th>
                   {languages.map((lang) => (
                     <th key={lang.tag}>
                       <code className="lang">{lang.tag}</code> {lang.name}
@@ -139,20 +229,73 @@ function App() {
                 </tr>
               </thead>
               <tbody>
-                {keys.map((row) => (
-                  <tr key={row.keyId}>
-                    <td>
-                      {row.keyNamespace && (
-                        <code className="ns">{row.keyNamespace}</code>
-                      )}
-                      <strong>{row.keyName}</strong>
-                    </td>
-                    {languages.map((lang) => {
-                      const t = row.translations[lang.tag]
-                      return <td key={lang.tag}>{t?.text ?? <em>—</em>}</td>
-                    })}
-                  </tr>
-                ))}
+                {keys.map((row) => {
+                  const noteId = noteTranslationIdFor(row)
+                  const currentEmoji =
+                    noteId != null
+                      ? pluginState.emojis[String(noteId)] ?? null
+                      : null
+                  const lastUpdated =
+                    noteId != null
+                      ? pluginState.updatedAt[String(noteId)] ?? null
+                      : null
+                  return (
+                    <tr key={row.keyId}>
+                      <td>
+                        {row.keyNamespace && (
+                          <code className="ns">{row.keyNamespace}</code>
+                        )}
+                        <strong>{row.keyName}</strong>
+                      </td>
+                      <td>
+                        <div className="emoji-row">
+                          {EMOJI_PALETTE.map((e) => (
+                            <button
+                              key={e}
+                              type="button"
+                              className={`emoji-btn${
+                                currentEmoji === e ? ' selected' : ''
+                              }`}
+                              onClick={() =>
+                                noteId != null &&
+                                setEmoji(
+                                  noteId,
+                                  currentEmoji === e ? null : e
+                                )
+                              }
+                              disabled={noteId == null}
+                              aria-pressed={currentEmoji === e}
+                            >
+                              {e}
+                            </button>
+                          ))}
+                          <button
+                            type="button"
+                            className="emoji-btn clear"
+                            onClick={() =>
+                              noteId != null && setEmoji(noteId, null)
+                            }
+                            disabled={noteId == null || !currentEmoji}
+                            aria-label="Clear"
+                          >
+                            ×
+                          </button>
+                        </div>
+                        <div className="updated">
+                          {lastUpdated
+                            ? `Updated ${formatRelative(lastUpdated)}`
+                            : '—'}
+                        </div>
+                      </td>
+                      {languages.map((lang) => {
+                        const t = row.translations[lang.tag]
+                        return (
+                          <td key={lang.tag}>{t?.text ?? <em>—</em>}</td>
+                        )
+                      })}
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           )}

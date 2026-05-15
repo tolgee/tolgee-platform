@@ -14,4 +14,9 @@ open class AppInstallModel(
   val baseUrl: String,
   val modules: AppManifestModules,
   val scopes: List<String>,
+  val webhookEvents: List<String>,
+  val webhookUrl: String?,
+  val clientId: String?,
+  val clientSecretPrefix: String?,
+  val webhookSecret: String?,
 ) : RepresentationModel<AppInstallModel>()

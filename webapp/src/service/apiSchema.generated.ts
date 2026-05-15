@@ -1455,6 +1455,8 @@ export interface components {
     AppInstallModel: {
       appId: string;
       baseUrl: string;
+      clientId?: string;
+      clientSecretPrefix?: string;
       /** Format: int64 */
       id: number;
       manifestUrl: string;
@@ -1462,6 +1464,9 @@ export interface components {
       name: string;
       scopes: string[];
       version: string;
+      webhookEvents: string[];
+      webhookSecret?: string;
+      webhookUrl?: string;
     };
     AppManifestModules: {
       "project-dashboard-page"?: components["schemas"]["ProjectDashboardPageModule"][];
@@ -1472,7 +1477,25 @@ export interface components {
       modules: components["schemas"]["AppManifestModules"];
       name: string;
       requestedScopes: string[];
+      requestedWebhookEvents: string[];
       version: string;
+    };
+    AppRegistrationResponseModel: {
+      appId: string;
+      baseUrl: string;
+      clientId?: string;
+      clientSecret: string;
+      clientSecretPrefix?: string;
+      /** Format: int64 */
+      id: number;
+      manifestUrl: string;
+      modules: components["schemas"]["AppManifestModules"];
+      name: string;
+      scopes: string[];
+      version: string;
+      webhookEvents: string[];
+      webhookSecret?: string;
+      webhookUrl?: string;
     };
     AppTokenModel: {
       token: string;
@@ -3070,7 +3093,9 @@ export interface components {
         | "app_manifest_invalid"
         | "app_already_installed"
         | "app_install_not_found"
-        | "app_token_not_allowed_for_endpoint";
+        | "app_token_not_allowed_for_endpoint"
+        | "invalid_app_credentials"
+        | "app_acting_as_user_not_project_member";
       params?: unknown[];
     };
     ExistenceEntityDescription: {
@@ -6758,7 +6783,9 @@ export interface components {
         | "app_manifest_invalid"
         | "app_already_installed"
         | "app_install_not_found"
-        | "app_token_not_allowed_for_endpoint";
+        | "app_token_not_allowed_for_endpoint"
+        | "invalid_app_credentials"
+        | "app_acting_as_user_not_project_member";
       params?: unknown[];
       success: boolean;
     };
@@ -9842,7 +9869,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["AppInstallModel"];
+          "application/json": components["schemas"]["AppRegistrationResponseModel"];
         };
       };
       /** Bad Request */

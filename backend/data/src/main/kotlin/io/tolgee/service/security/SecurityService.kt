@@ -89,11 +89,26 @@ class SecurityService(
 
     if (authenticationFacade.isAppAuth) {
       val appAuth = authenticationFacade.appAuthentication
-      if (appAuth.projectId != projectId) {
-        // App tokens are bound to a specific project; deny calls targeting any other.
+      if (appAuth.projectId != null && appAuth.projectId != projectId) {
         return emptySet()
       }
       val installScopes = Scope.expand(appAuth.appInstall.grantedScopes).toSet()
+
+      val actingAs = appAuth.actingAsUserAccount
+      if (actingAs != null) {
+        val actingAsScopes =
+          Scope
+            .expand(getProjectPermissionScopesNoApiKey(projectId, actingAs.id))
+            .toSet()
+        return installScopes.intersect(actingAsScopes)
+      }
+
+      if (appAuth.isInstallContext) {
+        // App-secret without acting-as header — install scopes only, no user intersection.
+        return installScopes
+      }
+
+      // User-context JWT (scope 5): intersect with the iframe user's project scopes.
       return installScopes.intersect(projectScopes)
     }
 

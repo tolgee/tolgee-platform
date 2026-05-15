@@ -12,4 +12,5 @@ open class AppManifestPreviewModel(
   val baseUrl: String,
   val modules: AppManifestModules,
   val requestedScopes: List<String>,
+  val requestedWebhookEvents: List<String>,
 ) : RepresentationModel<AppManifestPreviewModel>()

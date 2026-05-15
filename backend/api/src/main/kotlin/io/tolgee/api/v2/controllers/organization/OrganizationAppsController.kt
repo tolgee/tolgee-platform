@@ -2,10 +2,14 @@ package io.tolgee.api.v2.controllers.organization
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import io.tolgee.dtos.apps.AppManifest
 import io.tolgee.dtos.request.RegisterAppRequest
 import io.tolgee.hateoas.organization.apps.AppInstallModel
 import io.tolgee.hateoas.organization.apps.AppInstallModelAssembler
 import io.tolgee.hateoas.organization.apps.AppManifestPreviewModel
+import io.tolgee.hateoas.organization.apps.AppRegistrationResponseModel
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.authentication.AuthenticationFacade
@@ -30,6 +34,7 @@ class OrganizationAppsController(
   private val authenticationFacade: AuthenticationFacade,
   private val appInstallService: AppInstallService,
   private val appInstallModelAssembler: AppInstallModelAssembler,
+  private val objectMapper: ObjectMapper,
 ) {
   @PostMapping("/preview")
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
@@ -51,6 +56,7 @@ class OrganizationAppsController(
       baseUrl = fetched.manifest.baseUrl,
       modules = fetched.manifest.modules,
       requestedScopes = fetched.scopes.map { it.value },
+      requestedWebhookEvents = fetched.webhookEvents.toList(),
     )
   }
 
@@ -63,14 +69,31 @@ class OrganizationAppsController(
   fun register(
     @PathVariable organizationId: Long,
     @RequestBody data: RegisterAppRequest,
-  ): AppInstallModel {
-    val install =
+  ): AppRegistrationResponseModel {
+    val result =
       appInstallService.register(
         organization = organizationHolder.organizationEntity,
         manifestUrl = data.manifestUrl,
         author = authenticationFacade.authenticatedUserEntity,
       )
-    return appInstallModelAssembler.toModel(install)
+    val install = result.install
+    val manifest = objectMapper.readValue<AppManifest>(install.manifestJson)
+    return AppRegistrationResponseModel(
+      id = install.id,
+      manifestUrl = install.manifestUrl,
+      appId = install.appId,
+      name = install.name,
+      version = install.version,
+      baseUrl = install.baseUrl,
+      modules = manifest.modules,
+      scopes = install.grantedScopes.map { it.value },
+      webhookEvents = install.webhookSubscriptions.toList(),
+      webhookUrl = install.webhookUrl,
+      clientId = install.clientId,
+      clientSecretPrefix = install.clientSecretPrefix,
+      webhookSecret = install.webhookSecret,
+      clientSecret = result.plaintextClientSecret,
+    )
   }
 
   @GetMapping
