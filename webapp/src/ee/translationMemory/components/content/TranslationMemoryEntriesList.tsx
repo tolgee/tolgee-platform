@@ -59,6 +59,9 @@ type Props = {
   tmName: string;
   defaultPenalty: number;
   assignedProjectsCount: number;
+  /** PROJECT-type TMs are bound to a single project and have no assignment editor — the
+   *  empty-state wizard's "Sync from projects" card is hidden for them. */
+  isProjectTm: boolean;
   search?: string;
   onSearch?: (search: string) => void;
 };
@@ -99,6 +102,7 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
   tmName,
   defaultPenalty,
   assignedProjectsCount,
+  isProjectTm,
   search,
   onSearch,
 }) => {
@@ -476,6 +480,7 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
                 allLanguageTags={allNonBaseLanguageTags}
                 initialSelectedTags={createDialogInitialTags}
                 assignedProjectsCount={assignedProjectsCount}
+                isProjectTm={isProjectTm}
                 onFinished={() => entries.refetch()}
               />
             ) : isEmpty ? (

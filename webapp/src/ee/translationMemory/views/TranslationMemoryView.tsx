@@ -191,6 +191,7 @@ export const TranslationMemoryView = () => {
             (tmData as { defaultPenalty?: number }).defaultPenalty ?? 0
           }
           assignedProjectsCount={assignedProjectsCount}
+          isProjectTm={tmData.type === 'PROJECT'}
           search={search}
           onSearch={setSearch}
         />

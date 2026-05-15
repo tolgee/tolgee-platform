@@ -4,12 +4,13 @@ import { EmptyTmWizardManualOption } from './EmptyTmWizardManualOption';
 import { EmptyTmWizardCopyFromProjectOption } from './EmptyTmWizardCopyFromProjectOption';
 import { EmptyTmWizardImportOption } from './EmptyTmWizardImportOption';
 
-const StyledBox = styled(Box)`
+const StyledBox = styled(Box)<{ $cardCount: number }>`
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: ${({ $cardCount }) =>
+    `repeat(${$cardCount}, minmax(0, 1fr))`};
   gap: ${({ theme }) => theme.spacing(2)};
   margin: ${({ theme }) => theme.spacing(2)} auto;
-  max-width: 1100px;
+  max-width: ${({ $cardCount }) => ($cardCount === 3 ? 1100 : 740)}px;
   text-align: center;
 
   ${({ theme }) => theme.breakpoints.down('md')} {
@@ -25,6 +26,8 @@ type Props = {
   allLanguageTags: string[];
   initialSelectedTags: string[];
   assignedProjectsCount: number;
+  /** PROJECT-type TMs have no assignment editor — the Sync card opens one, so hide it. */
+  isProjectTm: boolean;
   onFinished: () => void;
 };
 
@@ -35,15 +38,19 @@ export const EmptyTmWizard: React.VFC<Props> = ({
   allLanguageTags,
   initialSelectedTags,
   assignedProjectsCount,
+  isProjectTm,
   onFinished,
 }) => {
+  const cardCount = isProjectTm ? 2 : 3;
   return (
-    <StyledBox data-cy="tm-empty-wizard">
-      <EmptyTmWizardCopyFromProjectOption
-        translationMemoryId={translationMemoryId}
-        assignedProjectsCount={assignedProjectsCount}
-        onFinished={onFinished}
-      />
+    <StyledBox data-cy="tm-empty-wizard" $cardCount={cardCount}>
+      {!isProjectTm && (
+        <EmptyTmWizardCopyFromProjectOption
+          translationMemoryId={translationMemoryId}
+          assignedProjectsCount={assignedProjectsCount}
+          onFinished={onFinished}
+        />
+      )}
       <EmptyTmWizardImportOption
         organizationId={organizationId}
         translationMemoryId={translationMemoryId}
