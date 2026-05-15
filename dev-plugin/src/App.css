@@ -95,3 +95,22 @@
   color: #888;
   margin-top: 2px;
 }
+
+.plugin-page th .th-hint {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 400;
+  color: #999;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.plugin-page .activity-cell {
+  vertical-align: middle;
+}
+
+.plugin-page .activity-count {
+  font-size: 0.7rem;
+  color: #888;
+  margin-top: 2px;
+}

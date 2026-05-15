@@ -14,9 +14,62 @@ type AppContext = {
 type PluginState = {
   emojis: Record<string, string>
   updatedAt: Record<string, string>
+  events: Record<string, string[]>
 }
 
 const EMOJI_PALETTE = ['🎉', '🔥', '❓', '✅', '❌'] as const
+const SPARKLINE_DAYS = 14
+const SPARKLINE_WIDTH = 84
+const SPARKLINE_HEIGHT = 18
+const MS_PER_DAY = 24 * 60 * 60 * 1000
+
+const bucketEvents = (timestamps: string[], days: number): number[] => {
+  const now = Date.now()
+  const startOfTodayUtc = now - (now % MS_PER_DAY)
+  const buckets = new Array<number>(days).fill(0)
+  for (const iso of timestamps) {
+    const t = Date.parse(iso)
+    if (Number.isNaN(t)) continue
+    const startOfEventDayUtc = t - (t % MS_PER_DAY)
+    const dayOffset = Math.round(
+      (startOfTodayUtc - startOfEventDayUtc) / MS_PER_DAY
+    )
+    if (dayOffset < 0 || dayOffset >= days) continue
+    buckets[days - 1 - dayOffset]++
+  }
+  return buckets
+}
+
+const Sparkline = ({ buckets }: { buckets: number[] }) => {
+  const max = Math.max(1, ...buckets)
+  const barWidth = SPARKLINE_WIDTH / buckets.length
+  return (
+    <svg
+      width={SPARKLINE_WIDTH}
+      height={SPARKLINE_HEIGHT}
+      role="img"
+      aria-label={`Activity: ${buckets.reduce(
+        (sum, c) => sum + c,
+        0
+      )} edits over ${buckets.length} days`}
+    >
+      {buckets.map((count, i) => {
+        const h = count === 0 ? 1 : (count / max) * (SPARKLINE_HEIGHT - 1)
+        return (
+          <rect
+            key={i}
+            x={i * barWidth + 1}
+            y={SPARKLINE_HEIGHT - h}
+            width={Math.max(1, barWidth - 2)}
+            height={h}
+            fill={count === 0 ? '#ddd' : '#aa3bff'}
+            rx={1}
+          />
+        )
+      })}
+    </svg>
+  )
+}
 
 const formatRelative = (iso: string): string => {
   const t = new Date(iso).getTime()
@@ -42,6 +95,7 @@ function App() {
   const [pluginState, setPluginState] = useState<PluginState>({
     emojis: {},
     updatedAt: {},
+    events: {},
   })
 
   useEffect(() => {
@@ -221,6 +275,10 @@ function App() {
                 <tr>
                   <th>Key</th>
                   <th>Note</th>
+                  <th>
+                    Activity
+                    <span className="th-hint">last {SPARKLINE_DAYS}d</span>
+                  </th>
                   {languages.map((lang) => (
                     <th key={lang.tag}>
                       <code className="lang">{lang.tag}</code> {lang.name}
@@ -239,6 +297,15 @@ function App() {
                     noteId != null
                       ? pluginState.updatedAt[String(noteId)] ?? null
                       : null
+                  const rowEvents: string[] = []
+                  for (const t of Object.values(row.translations)) {
+                    if (t?.id != null) {
+                      const log = pluginState.events[String(t.id)]
+                      if (log) rowEvents.push(...log)
+                    }
+                  }
+                  const buckets = bucketEvents(rowEvents, SPARKLINE_DAYS)
+                  const totalEdits = buckets.reduce((sum, c) => sum + c, 0)
                   return (
                     <tr key={row.keyId}>
                       <td>
@@ -258,10 +325,7 @@ function App() {
                               }`}
                               onClick={() =>
                                 noteId != null &&
-                                setEmoji(
-                                  noteId,
-                                  currentEmoji === e ? null : e
-                                )
+                                setEmoji(noteId, currentEmoji === e ? null : e)
                               }
                               disabled={noteId == null}
                               aria-pressed={currentEmoji === e}
@@ -285,6 +349,12 @@ function App() {
                           {lastUpdated
                             ? `Updated ${formatRelative(lastUpdated)}`
                             : '—'}
+                        </div>
+                      </td>
+                      <td className="activity-cell">
+                        <Sparkline buckets={buckets} />
+                        <div className="activity-count">
+                          {totalEdits} {totalEdits === 1 ? 'edit' : 'edits'}
                         </div>
                       </td>
                       {languages.map((lang) => {

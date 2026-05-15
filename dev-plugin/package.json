@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "concurrently -k -n vite,server -c blue,green \"npm:dev:frontend\" \"npm:dev:server\"",
     "dev:frontend": "vite",
-    "dev:server": "tsx watch server/index.ts",
+    "dev:server": "tsx watch --env-file-if-exists=.env.local server/index.ts",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"

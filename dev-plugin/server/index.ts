@@ -12,9 +12,12 @@ const DATA_FILE = join(__dirname, 'data.json')
 type Data = {
   emojis: Record<string, string>
   updatedAt: Record<string, string>
+  /** ISO timestamps of every translation-update webhook, keyed by translation id. */
+  events: Record<string, string[]>
 }
 
-const initialData: Data = { emojis: {}, updatedAt: {} }
+const initialData: Data = { emojis: {}, updatedAt: {}, events: {} }
+const ACTIVITY_RETENTION_DAYS = 14
 
 const data: Data = (() => {
   if (!existsSync(DATA_FILE)) return { ...initialData }
@@ -72,10 +75,10 @@ app.post(
       eventType?: string
       activityData?: {
         timestamp?: number
-        modifiedEntities?: Array<{
-          entityClass?: string
-          entityId?: number
-        }>
+        modifiedEntities?: Record<
+          string,
+          Array<{ entityClass?: string; entityId?: number }>
+        >
       }
     }
     try {
@@ -89,14 +92,20 @@ app.post(
       typeof timestamp === 'number'
         ? new Date(timestamp).toISOString()
         : new Date().toISOString()
-    const translations =
-      payload.activityData?.modifiedEntities?.filter(
-        (entity) => entity.entityClass === 'Translation' && typeof entity.entityId === 'number'
-      ) ?? []
+    const translations = payload.activityData?.modifiedEntities?.Translation ?? []
+    const cutoffMs = Date.now() - ACTIVITY_RETENTION_DAYS * 24 * 60 * 60 * 1000
+    let touched = 0
     for (const entity of translations) {
-      data.updatedAt[String(entity.entityId)] = occurredAt
+      if (typeof entity.entityId === 'number') {
+        const id = String(entity.entityId)
+        data.updatedAt[id] = occurredAt
+        const log = data.events[id] ?? []
+        log.push(occurredAt)
+        data.events[id] = log.filter((iso) => Date.parse(iso) >= cutoffMs)
+        touched++
+      }
     }
-    if (translations.length > 0) persist()
+    if (touched > 0) persist()
     res.status(204).end()
   }
 )
@@ -109,16 +118,18 @@ app.get('/api/state', (req, res) => {
     .map((s) => s.trim())
     .filter(Boolean)
   if (ids.length === 0) {
-    res.json({ emojis: {}, updatedAt: {} })
+    res.json({ emojis: {}, updatedAt: {}, events: {} })
     return
   }
   const emojis: Record<string, string> = {}
   const updatedAt: Record<string, string> = {}
+  const events: Record<string, string[]> = {}
   for (const id of ids) {
     if (data.emojis[id]) emojis[id] = data.emojis[id]
     if (data.updatedAt[id]) updatedAt[id] = data.updatedAt[id]
+    if (data.events[id]?.length) events[id] = data.events[id]
   }
-  res.json({ emojis, updatedAt })
+  res.json({ emojis, updatedAt, events })
 })
 
 app.put('/api/emoji', (req, res) => {

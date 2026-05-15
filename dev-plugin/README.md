@@ -14,12 +14,16 @@ npm run dev
 `npm run dev` starts two processes side-by-side via `concurrently`:
 
 - **Vite** on `http://localhost:5180` — serves the manifest at `/manifest.json`,
-  the iframe page, and proxies `/api/*` + `/webhook` to the backend.
-- **Express** on `http://localhost:5181` — handles `/webhook` (Tolgee →
-  plugin) and `/api/*` (plugin frontend → plugin backend).
+  the iframe page, and proxies `/api/*` to the backend so the iframe can call
+  the plugin's REST API same-origin.
+- **Express** on `http://localhost:5181` — receives webhooks directly from
+  Tolgee and handles `/api/*` for the iframe (via Vite's proxy).
 
-Vite's proxy means everything looks single-origin from Tolgee's perspective: the
-manifest declares `baseUrl: http://localhost:5180` and `webhooks.url: /webhook`.
+The manifest's `baseUrl` is `http://localhost:5180` (Vite, where the iframe is
+served), but `webhooks.url` is the **absolute** `http://localhost:5181/webhook`
+so Tolgee's server-side dispatcher hits Express directly without depending on
+Vite being up. In a real deployment, both would live behind a reverse proxy on
+one host, so the webhook URL would normally be relative.
 
 ## Env vars
 

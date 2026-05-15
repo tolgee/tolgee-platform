@@ -6,7 +6,7 @@
   "scopes": ["translations.view", "keys.view"],
   "webhooks": {
     "events": ["translation.set"],
-    "url": "/webhook"
+    "url": "http://localhost:5181/webhook"
   },
   "modules": {
     "project-dashboard-page": [
