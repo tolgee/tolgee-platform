@@ -9,7 +9,6 @@ export default defineConfig({
     strictPort: true,
     proxy: {
       '/api': 'http://localhost:5181',
-      '/webhook': 'http://localhost:5181',
     },
   },
 })
