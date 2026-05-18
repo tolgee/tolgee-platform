@@ -15,7 +15,6 @@ class EmptyTranslationCheckTest {
     languageTag: String = "en",
     isPlural: Boolean = false,
     textVariants: Map<String, String>? = null,
-    activeVariant: String? = null,
   ) = QaCheckParams(
     baseText = null,
     text = text,
@@ -23,7 +22,6 @@ class EmptyTranslationCheckTest {
     languageTag = languageTag,
     isPlural = isPlural,
     textVariants = textVariants,
-    activeVariant = activeVariant,
   )
 
   @Test
@@ -125,59 +123,6 @@ class EmptyTranslationCheckTest {
   }
 
   @Test
-  fun `activeVariant filters to only that variant - blank`() {
-    // English requires: one, other — both blank, but only checking "one"
-    check
-      .check(
-        params(
-          text = "{count, plural, one {} other {}}",
-          languageTag = "en",
-          isPlural = true,
-          textVariants = mapOf("one" to "", "other" to ""),
-          activeVariant = "one",
-        ),
-      ).assertSingleIssue {
-        message(QaIssueMessage.QA_EMPTY_PLURAL_VARIANT)
-        param("variant", "one")
-        pluralVariant("one")
-      }
-  }
-
-  @Test
-  fun `activeVariant filters to only that variant - filled`() {
-    // "one" is filled, "other" is blank — but we're only checking "one"
-    check
-      .check(
-        params(
-          text = "{count, plural, one {item} other {}}",
-          languageTag = "en",
-          isPlural = true,
-          textVariants = mapOf("one" to "item", "other" to ""),
-          activeVariant = "one",
-        ),
-      ).assertNoIssues()
-  }
-
-  @Test
-  fun `activeVariant set to variant missing from textVariants`() {
-    // "one" is required for English but missing from textVariants
-    check
-      .check(
-        params(
-          text = "{count, plural, other {items}}",
-          languageTag = "en",
-          isPlural = true,
-          textVariants = mapOf("other" to "items"),
-          activeVariant = "one",
-        ),
-      ).assertSingleIssue {
-        message(QaIssueMessage.QA_EMPTY_PLURAL_VARIANT)
-        param("variant", "one")
-        pluralVariant("one")
-      }
-  }
-
-  @Test
   fun `fully empty plural text fires generic empty translation only`() {
     // text is blank, textVariants is null (getPluralForms("") returns null)
     check
@@ -229,21 +174,6 @@ class EmptyTranslationCheckTest {
           languageTag = "en",
           isPlural = true,
           textVariants = null,
-        ),
-      ).assertNoIssues()
-  }
-
-  @Test
-  fun `activeVariant set to non-required form returns no issues`() {
-    // "zero" is not required for English — editing it should not flag anything
-    check
-      .check(
-        params(
-          text = "{count, plural, =0 {} one {item} other {items}}",
-          languageTag = "en",
-          isPlural = true,
-          textVariants = mapOf("=0" to "", "one" to "item", "other" to "items"),
-          activeVariant = "zero",
         ),
       ).assertNoIssues()
   }

@@ -7,14 +7,15 @@ import {
 } from 'tg.views/projects/translations/ToolsPanel/common/types';
 import { TabMessage } from 'tg.views/projects/translations/ToolsPanel/common/TabMessage';
 import { useQaChecksForPanel } from '../hooks/useQaChecksForPanel';
+import { QaPreviewIssue } from 'tg.ee.module/qa/models/QaPreviewWsModels';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { useEnabledFeatures } from 'tg.globalContext/helpers';
 import { QaCheckItem } from './QaCheckItem';
-import { applyQaReplacement } from 'tg.fixtures/qaUtils';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useReportEvent } from 'tg.hooks/useReportEvent';
 import { LinkExternal } from 'tg.component/LinkExternal';
+import { applyQaReplacement } from 'tg.fixtures/qaUtils';
 
 const StyledWrapper = styled('div')`
   margin-top: 4px;
@@ -38,12 +39,14 @@ export const useQaChecksCount = (data: PanelContentData) => {
   return translation?.qaIssueCount ?? 0;
 };
 
-function isCorrectable(issue: {
-  replacement?: string | null;
-  positionStart?: number | null;
-  positionEnd?: number | null;
-  state: string;
-}) {
+function isCorrectable(
+  issue: QaPreviewIssue,
+  keyIsPlural: boolean,
+  activeVariant: string | undefined
+): boolean {
+  if (keyIsPlural && issue.pluralVariant !== activeVariant) {
+    return false;
+  }
   return (
     issue.replacement != null &&
     issue.positionStart != null &&
@@ -143,12 +146,12 @@ export const QaChecksPanel: FC<PanelContentProps> = (data) => {
     );
   }
 
-  const handleCorrect = (issue: (typeof issues)[0]) => {
+  const handleCorrect = (issue: QaPreviewIssue) => {
     data.setValue(applyQaReplacement(text, issue));
     reportEvent('QA_ISSUE_CORRECTED_INLINE', { checkType: issue.type });
   };
 
-  const handleIgnoreToggle = (issue: (typeof issues)[0]) => {
+  const handleIgnoreToggle = (issue: QaPreviewIssue) => {
     const translationId = data.keyData.translations[data.language.tag]?.id;
     if (translationId == null) return;
 
@@ -181,11 +184,6 @@ export const QaChecksPanel: FC<PanelContentProps> = (data) => {
             <T keyName="translation_tools_qa_connection_lost" />
           </TabMessage>
         )}
-        {data.activeVariant && (
-          <TabMessage>
-            <T keyName="translation_tools_qa_plural_variant_note" />
-          </TabMessage>
-        )}
         {issues.map((issue, index) => (
           <QaCheckItem
             key={`${issue.type}-${issue.message}-${
@@ -196,8 +194,15 @@ export const QaChecksPanel: FC<PanelContentProps> = (data) => {
             text={text}
             locale={data.language.tag}
             slim
+            disabled={
+              data.activeVariant !== undefined &&
+              issue.pluralVariant !== undefined &&
+              issue.pluralVariant !== data.activeVariant
+            }
             onCorrect={
-              isCorrectable(issue) ? () => handleCorrect(issue) : undefined
+              isCorrectable(issue, data.keyData.keyIsPlural, data.activeVariant)
+                ? () => handleCorrect(issue)
+                : undefined
             }
             onIgnore={() => handleIgnoreToggle(issue)}
           />

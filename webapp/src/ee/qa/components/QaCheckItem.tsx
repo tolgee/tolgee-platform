@@ -22,7 +22,7 @@ const StyledItem = styled(Box)`
   margin: ${({ theme }) => theme.spacing(0.5)};
 `;
 
-const StyledIgnoredItem = styled(StyledItem)`
+const StyledDisabledItem = styled(StyledItem)`
   opacity: 0.5;
 `;
 
@@ -30,6 +30,29 @@ const StyledHeader = styled(Box)`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.spacing(1.5)};
+`;
+
+const StyledTypeLine = styled(Box)`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing(0.75)};
+  min-width: 0;
+`;
+
+const StyledVariantBadge = styled('span')`
+  display: inline-flex;
+  align-items: center;
+  height: ${({ theme }) => theme.spacing(2.5)};
+  padding: 0 ${({ theme }) => theme.spacing(1)};
+  border-radius: ${({ theme }) => theme.spacing(1.5)};
+  font-size: 11px;
+  line-height: 1;
+  background: ${({ theme }) =>
+    theme.palette.mode === 'light'
+      ? theme.palette.emphasis[100]
+      : theme.palette.emphasis[200]};
+  color: ${({ theme }) => theme.palette.text.primary};
+  flex-shrink: 0;
 `;
 
 const StyledIndexCircle = styled(Box)`
@@ -51,6 +74,11 @@ const StyledIcon = styled(Box)`
   align-items: center;
   color: ${({ theme }) => theme.palette.text.primary};
   flex-shrink: 0;
+`;
+
+const StyledIconButton = styled(IconButton)`
+  margin: ${({ theme }) => theme.spacing(-0.5)}
+    ${({ theme }) => theme.spacing(-0.2)};
 `;
 
 const StyledContent = styled(Box)`
@@ -157,6 +185,7 @@ type Props = {
   text: string;
   locale?: string;
   slim?: boolean;
+  disabled?: boolean;
   onCorrect?: () => void;
   onIgnore?: () => void;
 };
@@ -167,6 +196,7 @@ export const QaCheckItem = ({
   text,
   locale,
   slim = false,
+  disabled = false,
   onCorrect,
   onIgnore,
 }: Props) => {
@@ -178,33 +208,34 @@ export const QaCheckItem = ({
     issue.positionStart != null &&
     issue.positionEnd != null;
 
-  const showDiff = hasReplacement && issue.state === 'OPEN';
+  const showDiff = !disabled && hasReplacement && issue.state === 'OPEN';
 
-  const Container = issue.state === 'IGNORED' ? StyledIgnoredItem : StyledItem;
+  const Container =
+    disabled || issue.state === 'IGNORED' ? StyledDisabledItem : StyledItem;
 
   const buttonCorrectSmall = onCorrect && (
     <Tooltip title={t('qa_check_action_correct')}>
-      <IconButton
+      <StyledIconButton
         size="small"
         color="primary"
         onClick={onCorrect}
         data-cy="qa-action-correct"
       >
         <Check width={20} height={20} />
-      </IconButton>
+      </StyledIconButton>
     </Tooltip>
   );
 
   const buttonIgnoreSmall = onIgnore && (
     <Tooltip title={t('qa_check_action_ignore')}>
-      <IconButton
+      <StyledIconButton
         size="small"
         onClick={onIgnore}
         data-cy="qa-action-ignore"
         data-cy-state={issue.state}
       >
         <XClose width={20} height={20} />
-      </IconButton>
+      </StyledIconButton>
     </Tooltip>
   );
 
@@ -237,12 +268,13 @@ export const QaCheckItem = ({
     </Button>
   );
 
-  const textActions = slim ? (
-    <>
-      {buttonCorrectSmall}
-      {buttonIgnoreSmall}
-    </>
-  ) : undefined;
+  const textActions =
+    slim && !disabled ? (
+      <>
+        {buttonCorrectSmall}
+        {buttonIgnoreSmall}
+      </>
+    ) : undefined;
 
   return (
     <Container data-cy="qa-check-item">
@@ -255,10 +287,17 @@ export const QaCheckItem = ({
           </StyledIcon>
         )}
         <StyledContent>
-          <Typography variant="body2">{typeLabel}</Typography>
+          <StyledTypeLine>
+            <Typography variant="body2">{typeLabel}</Typography>
+            {issue.pluralVariant && (
+              <StyledVariantBadge data-cy="qa-check-item-variant-badge">
+                {issue.pluralVariant}
+              </StyledVariantBadge>
+            )}
+          </StyledTypeLine>
           <StyledMessage>{messageText}</StyledMessage>
         </StyledContent>
-        {slim && !showDiff && buttonIgnoreBig}
+        {slim && !showDiff && !disabled && buttonIgnoreBig}
       </StyledHeader>
 
       {showDiff && (
@@ -275,7 +314,7 @@ export const QaCheckItem = ({
         </TextBlock>
       )}
 
-      {!slim && (
+      {!slim && !disabled && (
         <StyledNormalActions>
           {issue.state === 'OPEN' && buttonCorrectBig}
           {buttonIgnoreBig}

@@ -734,6 +734,7 @@ declare namespace DataCy {
         "qa-badge" |
         "qa-badge-unresolved" |
         "qa-check-item" |
+        "qa-check-item-variant-badge" |
         "qa-enabled-toggle" |
         "qa-issue-highlight" |
         "qa-issue-marker" |

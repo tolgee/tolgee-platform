@@ -9,7 +9,6 @@ data class QaCheckParams(
   val textVariants: Map<String, String>? = null,
   val textVariantOffsets: Map<String, Int>? = null,
   val baseTextVariants: Map<String, String>? = null,
-  val activeVariant: String? = null,
   val maxCharLimit: Int? = null,
   val icuPlaceholders: Boolean = true,
   val glossaryTerms: List<QaGlossaryTerm>? = null,
