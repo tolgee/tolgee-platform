@@ -4,15 +4,7 @@ import { BaseOrganizationSettingsView } from 'tg.views/organizations/components/
 import { useTranslate } from '@tolgee/react';
 import { useOrganization } from 'tg.views/organizations/useOrganization';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
-import {
-  Box,
-  InputAdornment,
-  TextField,
-  ToggleButton,
-  ToggleButtonGroup,
-  styled,
-} from '@mui/material';
-import { SearchSm } from '@untitled-ui/icons-react';
+import { Box, ToggleButton, ToggleButtonGroup, styled } from '@mui/material';
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
 import {
   useEnabledFeatures,
@@ -95,6 +87,12 @@ export const TranslationMemoriesListView = () => {
   // Keep the toolbar while filtering so the user can always clear the filter —
   // otherwise a filter that empties the list would hide its own off switch.
   const showToolbar = totalElements > 5 || hasActiveFilter;
+  // BaseOrganizationSettingsView's onSearch is hoisted to the header bar; we still want
+  // page-resetting behaviour so the new query starts from page 0.
+  const handleSearch = (value: string) => {
+    setSearch(value);
+    setPage(0);
+  };
 
   return (
     <StyledWrapper>
@@ -108,6 +106,12 @@ export const TranslationMemoriesListView = () => {
           'Translation memories'
         )}
         link={LINKS.ORGANIZATION_TRANSLATION_MEMORIES}
+        onSearch={featureEnabled && showToolbar ? handleSearch : undefined}
+        searchPlaceholder={t(
+          'translation_memories_search_placeholder',
+          'Search...'
+        )}
+        initialSearch={search}
         navigation={[
           [
             t(
@@ -144,26 +148,6 @@ export const TranslationMemoriesListView = () => {
               <>
                 {showToolbar && (
                   <Box display="flex" gap={2} alignItems="center" mb={2}>
-                    <TextField
-                      size="small"
-                      placeholder={t(
-                        'translation_memories_search_placeholder',
-                        'Search...'
-                      )}
-                      value={search}
-                      onChange={(e) => {
-                        setSearch(e.target.value);
-                        setPage(0);
-                      }}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <SearchSm width={18} height={18} />
-                          </InputAdornment>
-                        ),
-                      }}
-                      sx={{ minWidth: 180 }}
-                    />
                     <ToggleButtonGroup
                       size="small"
                       sx={{
