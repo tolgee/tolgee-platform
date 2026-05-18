@@ -97,11 +97,17 @@ interface TranslationMemoryEntryRepository : JpaRepository<TranslationMemoryEntr
   /**
    * Returns all entries in [translationMemoryId] whose `source_text` is in [sourceTexts].
    * Optionally narrows by [targetLanguageTags] (comma-separated).
+   *
+   * The `md5(...)` predicate is what hits `ix_tm_entry_tm_source` (which indexes the hash, not
+   * the raw text, so that long source segments don't overflow the btree row size). The literal
+   * `source_text = any(...)` predicate stays as a collision guard — md5 has a ~2^-128 collision
+   * probability, but the literal check on the already-narrowed set is cheap insurance.
    */
   @Query(
     value = """
       select * from translation_memory_entry e
       where e.translation_memory_id = :translationMemoryId
+        and md5(e.source_text) = any(array(select md5(t) from unnest(:sourceTexts) t))
         and e.source_text = any(:sourceTexts)
         and (:targetLanguageTags is null or e.target_language_tag = any(string_to_array(:targetLanguageTags, ',')))
       order by e.source_text, e.target_language_tag, e.id desc

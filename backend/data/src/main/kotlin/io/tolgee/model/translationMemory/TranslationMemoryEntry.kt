@@ -13,7 +13,7 @@ import org.hibernate.annotations.OnDeleteAction
 @Entity
 @Table(
   // Note: no `@Index(columnList = "translation_memory_id")` — the composite
-  // ix_tm_entry_tm_source (translation_memory_id, source_text) already covers
+  // ix_tm_entry_tm_source (translation_memory_id, md5(source_text)) already covers
   // tm_id-only lookups via its leftmost column.
   indexes = [
     Index(columnList = "target_language_tag"),
@@ -35,4 +35,9 @@ class TranslationMemoryEntry : StandardAuditModel() {
 
   @Column(columnDefinition = "text", nullable = true)
   var tuid: String? = null
+
+  companion object {
+    /** Max length (in characters) of `source_text` and `target_text`. */
+    const val MAX_TEXT_LENGTH = 10_000
+  }
 }

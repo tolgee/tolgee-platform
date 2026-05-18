@@ -5551,12 +5551,14 @@
     </changeSet>
 
     <changeSet author="dkrizan" id="tm-entry-tm-source-index" runInTransaction="false">
-        <comment>Composite index for findByTranslationMemoryIdAndSourceTexts during
-            content-browser page hydration. Existing single-column indexes only covered
-            translation_memory_id, leaving the source_text filter as a post-fetch step.</comment>
+        <comment>Composite (translation_memory_id, md5(source_text)) index for the equality
+            probe in findByTranslationMemoryIdAndSourceTexts during content-browser page
+            hydration. The hash expression avoids the ~2704 B btree row limit — TMX imports
+            can legitimately carry multi-KB CJK segments that would otherwise blow up a
+            plain (translation_memory_id, source_text) index at insert time.</comment>
         <sql dbms="postgresql">
             CREATE INDEX CONCURRENTLY IF NOT EXISTS ix_tm_entry_tm_source
-                ON translation_memory_entry (translation_memory_id, source_text);
+                ON translation_memory_entry (translation_memory_id, md5(source_text));
         </sql>
         <rollback>
             <sql>DROP INDEX CONCURRENTLY IF EXISTS ix_tm_entry_tm_source;</sql>

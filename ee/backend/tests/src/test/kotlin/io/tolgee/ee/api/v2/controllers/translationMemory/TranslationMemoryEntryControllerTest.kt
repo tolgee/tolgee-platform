@@ -6,6 +6,7 @@ import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.data.translationMemory.CreateTranslationMemoryEntryRequest
 import io.tolgee.ee.data.translationMemory.DeleteMultipleTranslationMemoryEntriesRequest
 import io.tolgee.ee.data.translationMemory.UpdateTranslationMemoryEntryRequest
+import io.tolgee.model.translationMemory.TranslationMemoryEntry
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
@@ -287,7 +288,7 @@ class TranslationMemoryEntryControllerTest : AuthorizedControllerTest() {
   fun `rejects oversized source text`() {
     val request =
       CreateTranslationMemoryEntryRequest().apply {
-        sourceText = "x".repeat(10_001)
+        sourceText = "x".repeat(TranslationMemoryEntry.MAX_TEXT_LENGTH + 1)
         targetText = "Guten Morgen"
         targetLanguageTag = "de"
       }
@@ -431,6 +432,77 @@ class TranslationMemoryEntryControllerTest : AuthorizedControllerTest() {
       "/v2/organizations/$orgId/translation-memories/$sharedTmId/entries",
       request,
     ).andIsBadRequest
+  }
+
+  // ---------- Long-segment / hash-expression index sanity ----------
+  // These guard `ix_tm_entry_tm_source` — a btree on `(translation_memory_id, md5(source_text))`.
+  // A plain btree over raw source_text would hit Postgres' ~2704 B per-row limit on long CJK
+  // segments. We exercise both the insert path (which lands the index entry) and the lookup
+  // path (`findByTranslationMemoryIdAndSourceTexts`) so a regression to a non-hash index would
+  // fail loudly here.
+
+  @Test
+  fun `accepts and reads back a 5000-char ASCII source text`() {
+    val longSource = "x".repeat(5_000)
+    val request =
+      CreateTranslationMemoryEntryRequest().apply {
+        sourceText = longSource
+        targetText = "ok"
+        targetLanguageTag = "de"
+      }
+    performAuthPost(
+      "/v2/organizations/$orgId/translation-memories/$sharedTmId/entries",
+      request,
+    ).andIsOk
+
+    val found =
+      translationMemoryEntryRepository.findByTranslationMemoryIdAndSourceTexts(
+        translationMemoryId = sharedTmId,
+        sourceTexts = arrayOf(longSource),
+        targetLanguageTags = null,
+      )
+    assertThat(found).hasSize(1)
+    assertThat(found.first().sourceText).isEqualTo(longSource)
+  }
+
+  @Test
+  fun `accepts and reads back an 8000-char CJK source text`() {
+    // ~24 KB in UTF-8 — would overflow a plain `(translation_memory_id, source_text)` btree
+    // well before reaching this length. The md5 expression index doesn't care.
+    val longCjk = "中".repeat(8_000)
+    val request =
+      CreateTranslationMemoryEntryRequest().apply {
+        sourceText = longCjk
+        targetText = "ok"
+        targetLanguageTag = "de"
+      }
+    performAuthPost(
+      "/v2/organizations/$orgId/translation-memories/$sharedTmId/entries",
+      request,
+    ).andIsOk
+
+    val found =
+      translationMemoryEntryRepository.findByTranslationMemoryIdAndSourceTexts(
+        translationMemoryId = sharedTmId,
+        sourceTexts = arrayOf(longCjk),
+        targetLanguageTags = null,
+      )
+    assertThat(found).hasSize(1)
+    assertThat(found.first().sourceText).isEqualTo(longCjk)
+  }
+
+  @Test
+  fun `entry lookup ignores source texts that are not in the TM`() {
+    // Collision guard: the md5 predicate may theoretically (~2^-128) line up against an
+    // unrelated source_text; the literal `source_text = any(...)` filter keeps us correct.
+    val matches =
+      translationMemoryEntryRepository.findByTranslationMemoryIdAndSourceTexts(
+        translationMemoryId = sharedTmId,
+        sourceTexts = arrayOf("Hello world", "no such source"),
+        targetLanguageTags = null,
+      )
+    assertThat(matches).isNotEmpty
+    assertThat(matches.map { it.sourceText }).allMatch { it == "Hello world" }
   }
 
   // ---------- Permission tests (org MEMBER cannot mutate) ----------

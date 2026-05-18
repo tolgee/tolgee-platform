@@ -27,9 +27,10 @@ class TranslationMemoryTmxService(
     inputStream: InputStream,
     overrideExisting: Boolean,
   ): TmxImportResult {
-    val parsed = TmxParser(tm.sourceLanguageTag).parse(inputStream)
+    val parseResult = TmxParser(tm.sourceLanguageTag).parse(inputStream)
+    val parsed = parseResult.entries
     if (parsed.isEmpty()) {
-      return TmxImportResult(created = 0, updated = 0, skipped = 0)
+      return TmxImportResult(created = 0, updated = 0, skipped = parseResult.skippedOversize)
     }
 
     val existingEntries = translationMemoryEntryRepository.findByTranslationMemoryId(tm.id)
@@ -90,9 +91,11 @@ class TranslationMemoryTmxService(
     }
 
     // Count by distinct tuids — null tuid is treated as one bucket.
+    // Oversize segments from the parser are folded in so the UI's existing "skipped" toast
+    // surfaces them instead of silently swallowing long-text rows.
     val created = createdTuids.size
     val updated = (updatedTuids - createdTuids).size
-    val skipped = (skippedTuids - createdTuids - updatedTuids).size
+    val skipped = (skippedTuids - createdTuids - updatedTuids).size + parseResult.skippedOversize
     return TmxImportResult(created = created, updated = updated, skipped = skipped)
   }
 

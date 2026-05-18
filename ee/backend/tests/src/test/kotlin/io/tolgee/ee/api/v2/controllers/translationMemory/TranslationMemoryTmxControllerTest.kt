@@ -12,6 +12,7 @@ import io.tolgee.fixtures.buildTmx
 import io.tolgee.fixtures.buildTmxRaw
 import io.tolgee.fixtures.mockTmxFile
 import io.tolgee.fixtures.tu
+import io.tolgee.model.translationMemory.TranslationMemoryEntry
 import io.tolgee.repository.translationMemory.TranslationMemoryEntryRepository
 import io.tolgee.testing.AuthorizedControllerTest
 import org.assertj.core.api.Assertions.assertThat
@@ -322,6 +323,32 @@ class TranslationMemoryTmxControllerTest : AuthorizedControllerTest() {
 
     val entries = translationMemoryEntryRepository.findByTranslationMemoryId(emptyTmId)
     assertThat(entries).hasSize(2)
+  }
+
+  @Test
+  fun `import counts oversize-dropped entries in the skipped total`() {
+    // TMX import bypasses bean validation, so the parser enforces the same length cap that
+    // manual entries hit via @Size. Without this, long segments would be dropped silently —
+    // the user gets back a `skipped` count so the loss is visible.
+    val oversize = "x".repeat(TranslationMemoryEntry.MAX_TEXT_LENGTH + 1)
+    val tmx =
+      buildTmx(
+        "en",
+        listOf(
+          tu("Hello", mapOf("de" to "Hallo")),
+          tu(oversize, mapOf("de" to "lost", "fr" to "perdu")),
+        ),
+      )
+    performAuthMultipart(importUrl(emptyTmId), listOf(mockTmxFile(tmx)))
+      .andIsOk
+      .andAssertThatJson {
+        node("created").isEqualTo(1)
+        // 2 would-have-been entries dropped: the oversize-source tu had a de + fr target.
+        node("skipped").isEqualTo(2)
+      }
+    val entries = translationMemoryEntryRepository.findByTranslationMemoryId(emptyTmId)
+    assertThat(entries).hasSize(1)
+    assertThat(entries.single().sourceText).isEqualTo("Hello")
   }
 
   @Test
