@@ -21,7 +21,7 @@ class TranslationMemoryRowModelAssembler :
             TranslationMemoryRowCellModel(
               targetText = it.targetText,
               targetLanguageTag = it.targetLanguageTag,
-              entryId = it.id,
+              entryId = it.entryId,
             )
           }
         TmRow.Kind.VIRTUAL ->

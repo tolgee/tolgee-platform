@@ -285,12 +285,15 @@ class TranslationMemoryEntryManagementService(
   /**
    * Fetches all stored entries for the given row identities and groups them back into
    * buckets matching the (sourceText, tuid-or-"manual") origin used during pagination.
+   *
+   * Maps each JPA `TranslationMemoryEntry` to a [TmStoredCell] right here so the JPA model
+   * never escapes the service — the controller-side assembler reads only DTO fields.
    */
   private fun hydrateStoredRows(
     tmId: Long,
     rowIds: List<RowId>,
     targetLanguageTag: String?,
-  ): Map<RowId, List<TranslationMemoryEntry>> {
+  ): Map<RowId, List<TmStoredCell>> {
     if (rowIds.isEmpty()) return emptyMap()
     val sourceTexts = rowIds.map { it.sourceText }.distinct()
     val entries =
@@ -307,7 +310,17 @@ class TranslationMemoryEntryManagementService(
           kind = TmRow.Kind.STORED,
           originId = it.tuid ?: "manual",
         )
-      }.filterKeys { it in rowIdSet }
+      }
+      .filterKeys { it in rowIdSet }
+      .mapValues { (_, group) ->
+        group.map { entry ->
+          TmStoredCell(
+            entryId = entry.id,
+            targetText = entry.targetText,
+            targetLanguageTag = entry.targetLanguageTag,
+          )
+        }
+      }
   }
 
   /**

@@ -1,7 +1,5 @@
 package io.tolgee.ee.service.translationMemory
 
-import io.tolgee.model.translationMemory.TranslationMemoryEntry
-
 /**
  * One row in the TM content browser. A row is either stored (user-managed; cells in
  * [entries]) or virtual (computed from a project translation; cells in [virtualEntries]).
@@ -15,7 +13,7 @@ data class TmRow(
    *  entries). For virtual: "<projectId>:<keyName>". */
   val originId: String,
   /** Stored cells of this row (one per target language). Empty for virtual rows. */
-  val entries: List<TranslationMemoryEntry>,
+  val entries: List<TmStoredCell>,
   /** Virtual cells of this row (one per target language). Empty for stored rows. */
   val virtualEntries: List<VirtualEntry>,
   /** Originating project key name. Only set on virtual rows. */
