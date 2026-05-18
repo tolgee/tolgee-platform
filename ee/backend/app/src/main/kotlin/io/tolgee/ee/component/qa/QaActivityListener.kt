@@ -99,6 +99,16 @@ class QaActivityListener(
     }
   }
 
+  @EventListener
+  fun onQaBatchJobFinalizedSelfHeal(event: OnBatchJobFinalized) {
+    if (bypass) return
+    if (event.job.type != BatchJobType.QA_CHECK) return
+    val projectId = event.job.projectId ?: return
+    runSentryCatching {
+      qaRecheckService.recheckStuckStaleTranslationsInProject(projectId)
+    }
+  }
+
   // endregion
 
   // region Batch job processing (feature-gated)

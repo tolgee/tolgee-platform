@@ -248,6 +248,17 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
 
   @Query(
     """
+    select new io.tolgee.dtos.queryResults.qa.KeyLanguagePairView(k.id, t.language.id)
+    from Translation t
+    join t.key k
+    where k.project.id = :projectId
+      and t.qaChecksStale = true
+    """,
+  )
+  fun getStaleKeyLanguagePairsByProject(projectId: Long): List<KeyLanguagePairView>
+
+  @Query(
+    """
     from Translation t
     join t.key k
     where k.project.id = :projectId

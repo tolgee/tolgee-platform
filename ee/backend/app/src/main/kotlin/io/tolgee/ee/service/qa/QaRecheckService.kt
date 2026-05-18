@@ -1,10 +1,13 @@
 package io.tolgee.ee.service.qa
 
+import io.sentry.Sentry
+import io.sentry.SentryLevel
 import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.batch.request.QaCheckRequest
 import io.tolgee.constants.Feature
+import io.tolgee.dtos.queryResults.qa.KeyLanguagePairView
 import io.tolgee.model.Project
 import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.service.project.ProjectFeatureRegistry
@@ -41,18 +44,7 @@ class QaRecheckService(
       }
     }
 
-    val allTargetItems = pairs.map { BatchTranslationTargetItem(keyId = it.keyId, languageId = it.languageId) }
-    val project = entityManager.getReference(Project::class.java, projectId)
-
-    for (targetChunk in allTargetItems.chunked(MAX_BATCH_JOB_TARGET_SIZE)) {
-      batchJobService.startJob(
-        request = QaCheckRequest(target = targetChunk, checkTypes = checkTypes),
-        project = project,
-        author = null,
-        type = BatchJobType.QA_CHECK,
-        isHidden = true,
-      )
-    }
+    recheckFromKeyLanguagePairs(projectId, pairs, checkTypes = checkTypes)
   }
 
   @Transactional
@@ -66,12 +58,38 @@ class QaRecheckService(
     val pairs = translationService.getStaleKeyLanguagePairsByBranch(projectId, branchId)
     if (pairs.isEmpty()) return
 
+    recheckFromKeyLanguagePairs(projectId, pairs)
+  }
+
+  @Transactional
+  fun recheckStuckStaleTranslationsInProject(projectId: Long) {
+    val projectDto = projectService.getDto(projectId)
+    if (!ProjectFeatureRegistry.isEnabledOnProject(Feature.QA_CHECKS, projectDto)) return
+    if (batchJobService.hasActiveJobForProject(projectId, BatchJobType.QA_CHECK)) return
+
+    val pairs = translationService.getStaleKeyLanguagePairsByProject(projectId)
+    if (pairs.isEmpty()) return
+
+    Sentry.captureMessage(
+      "Found ${pairs.size} stuck-stale translation(s) after QA batch job finished; " +
+        "enqueueing self-heal QA recheck. projectId=$projectId",
+      SentryLevel.WARNING,
+    )
+
+    recheckFromKeyLanguagePairs(projectId, pairs)
+  }
+
+  private fun recheckFromKeyLanguagePairs(
+    projectId: Long,
+    pairs: List<KeyLanguagePairView>,
+    checkTypes: List<QaCheckType>? = null,
+  ) {
     val allTargetItems = pairs.map { BatchTranslationTargetItem(keyId = it.keyId, languageId = it.languageId) }
     val project = entityManager.getReference(Project::class.java, projectId)
 
     for (targetChunk in allTargetItems.chunked(MAX_BATCH_JOB_TARGET_SIZE)) {
       batchJobService.startJob(
-        request = QaCheckRequest(target = targetChunk),
+        request = QaCheckRequest(target = targetChunk, checkTypes = checkTypes),
         project = project,
         author = null,
         type = BatchJobType.QA_CHECK,
