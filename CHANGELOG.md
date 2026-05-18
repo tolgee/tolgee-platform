@@ -1,3 +1,15 @@
+# [3.188.0](https://github.com/tolgee/tolgee-platform/compare/v3.187.0...v3.188.0) (2026-05-18)
+
+
+### Bug Fixes
+
+* pass URI to RestTemplate in Bunny cache purge  ([#3671](https://github.com/tolgee/tolgee-platform/issues/3671)) ([98a904c](https://github.com/tolgee/tolgee-platform/commit/98a904c0f613b36c55dbc8b3f1589bfad857f221))
+
+
+### Features
+
+* split EMPTY_TRANSLATION QA check into two checks ([#3660](https://github.com/tolgee/tolgee-platform/issues/3660)) ([98416a6](https://github.com/tolgee/tolgee-platform/commit/98416a62ced572183e6349f2df2777c1aa54e589))
+
 # [3.187.0](https://github.com/tolgee/tolgee-platform/compare/v3.186.2...v3.187.0) (2026-05-18)
 
 
