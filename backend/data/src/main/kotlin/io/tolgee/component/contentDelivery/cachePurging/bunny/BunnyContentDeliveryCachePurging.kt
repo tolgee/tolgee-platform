@@ -8,6 +8,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.web.client.RestTemplate
+import java.net.URI
 import java.net.URLEncoder
 
 class BunnyContentDeliveryCachePurging(
@@ -29,11 +30,14 @@ class BunnyContentDeliveryCachePurging(
     val entity: HttpEntity<String> = getHttpEntity()
     val encodedPath = URLEncoder.encode("$prefix/${contentDeliveryConfig.slug}/*", Charsets.UTF_8)
 
-    val url = "https://api.bunny.net/purge?url=$encodedPath"
+    // Use URI directly to bypass RestTemplate's URI template processing, which would
+    // re-encode the percent-encoded characters in `encodedPath` and produce a double-encoded
+    // URL that Bunny rejects with `purge.urls_invalid`.
+    val uri = URI("https://api.bunny.net/purge?url=$encodedPath")
 
     val response =
       restTemplate.exchange(
-        url,
+        uri,
         HttpMethod.GET,
         entity,
         String::class.java,
