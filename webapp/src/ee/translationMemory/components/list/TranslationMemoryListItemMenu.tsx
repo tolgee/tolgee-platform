@@ -68,12 +68,23 @@ export const TranslationMemoryListItemMenu: FC<Props> = ({
       ),
       hardModeText: translationMemory.name.toUpperCase(),
       onConfirm() {
-        deleteMutation.mutate({
-          path: {
-            organizationId: preferredOrganization!.id,
-            translationMemoryId: translationMemory.id,
+        deleteMutation.mutate(
+          {
+            path: {
+              organizationId: preferredOrganization!.id,
+              translationMemoryId: translationMemory.id,
+            },
           },
-        });
+          {
+            onSuccess: () =>
+              messageService.success(
+                <T
+                  keyName="translation_memory_deleted"
+                  defaultValue="Translation memory deleted"
+                />
+              ),
+          }
+        );
       },
     });
   };
