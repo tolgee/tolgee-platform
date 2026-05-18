@@ -13,4 +13,13 @@ class QaCheckTypeCategoriesTest {
       .`as`("CATEGORIES must contain every QaCheckType exactly once")
       .containsExactlyInAnyOrderElementsOf(QaCheckType.entries)
   }
+
+  @Test
+  fun `QaCheckType entries order matches flattened CATEGORIES order`() {
+    val flattenedCategoryOrder = QaCheckType.CATEGORIES.values.flatten()
+
+    assertThat(flattenedCategoryOrder)
+      .`as`("QaCheckType.entries order must match the order of CATEGORIES.values.flatten()")
+      .containsExactlyElementsOf(QaCheckType.entries)
+  }
 }

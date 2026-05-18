@@ -3,29 +3,27 @@ package io.tolgee.model.enums.qa
 enum class QaCheckType(
   val defaultSeverity: QaCheckSeverity,
 ) {
+  // TEXT category — checks about the quality of the translated text.
+  // SPELLING and GRAMMAR are intentionally kept as the last two entries of this group.
   EMPTY_TRANSLATION(QaCheckSeverity.WARNING),
-  SPACES_MISMATCH(QaCheckSeverity.WARNING),
-  UNMATCHED_NEWLINES(QaCheckSeverity.WARNING),
-  TRIM_CHECK(QaCheckSeverity.WARNING),
-
   CHARACTER_CASE_MISMATCH(QaCheckSeverity.WARNING),
-  MISSING_NUMBERS(QaCheckSeverity.WARNING),
   REPEATED_WORDS(QaCheckSeverity.WARNING),
   PUNCTUATION_MISMATCH(QaCheckSeverity.WARNING),
-
+  TRIM_CHECK(QaCheckSeverity.WARNING),
+  SPACES_MISMATCH(QaCheckSeverity.WARNING),
+  UNMATCHED_NEWLINES(QaCheckSeverity.WARNING),
+  MISSING_NUMBERS(QaCheckSeverity.WARNING),
+  SPECIAL_CHARACTER_MISMATCH(QaCheckSeverity.WARNING),
+  BRACKETS_MISMATCH(QaCheckSeverity.WARNING),
+  BRACKETS_UNBALANCED(QaCheckSeverity.WARNING),
   SPELLING(QaCheckSeverity.OFF),
   GRAMMAR(QaCheckSeverity.OFF),
 
-  BRACKETS_MISMATCH(QaCheckSeverity.WARNING),
-  BRACKETS_UNBALANCED(QaCheckSeverity.WARNING),
-  SPECIAL_CHARACTER_MISMATCH(QaCheckSeverity.WARNING),
-  DIFFERENT_URLS(QaCheckSeverity.WARNING),
-
+  // TECHNICAL category — checks for technical correctness.
   KEY_LENGTH_LIMIT(QaCheckSeverity.WARNING),
-
+  DIFFERENT_URLS(QaCheckSeverity.WARNING),
   INCONSISTENT_PLACEHOLDERS(QaCheckSeverity.WARNING),
   INCONSISTENT_HTML(QaCheckSeverity.WARNING),
-
   HTML_SYNTAX(QaCheckSeverity.WARNING),
   ICU_SYNTAX(QaCheckSeverity.WARNING),
   ;
@@ -33,26 +31,26 @@ enum class QaCheckType(
   companion object {
     val CATEGORIES: Map<QaCheckCategory, List<QaCheckType>> =
       linkedMapOf(
-        QaCheckCategory.NORMAL to
+        QaCheckCategory.TEXT to
           listOf(
             EMPTY_TRANSLATION,
-            SPACES_MISMATCH,
-            UNMATCHED_NEWLINES,
-            TRIM_CHECK,
             CHARACTER_CASE_MISMATCH,
-            MISSING_NUMBERS,
-            SPELLING,
-            GRAMMAR,
             REPEATED_WORDS,
             PUNCTUATION_MISMATCH,
+            TRIM_CHECK,
+            SPACES_MISMATCH,
+            UNMATCHED_NEWLINES,
+            MISSING_NUMBERS,
+            SPECIAL_CHARACTER_MISMATCH,
             BRACKETS_MISMATCH,
             BRACKETS_UNBALANCED,
-            SPECIAL_CHARACTER_MISMATCH,
-            DIFFERENT_URLS,
-            KEY_LENGTH_LIMIT,
+            SPELLING,
+            GRAMMAR,
           ),
-        QaCheckCategory.SYNTAX to
+        QaCheckCategory.TECHNICAL to
           listOf(
+            KEY_LENGTH_LIMIT,
+            DIFFERENT_URLS,
             INCONSISTENT_PLACEHOLDERS,
             INCONSISTENT_HTML,
             HTML_SYNTAX,
