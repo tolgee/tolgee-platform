@@ -2,8 +2,7 @@ package io.tolgee.ee.service.translationMemory
 
 import io.tolgee.constants.Message
 import io.tolgee.ee.data.translationMemory.CreateMultipleTranslationMemoryEntriesRequest
-import io.tolgee.ee.data.translationMemory.CreateTranslationMemoryEntryRequest
-import io.tolgee.ee.data.translationMemory.UpdateTranslationMemoryEntryRequest
+import io.tolgee.ee.data.translationMemory.TranslationMemoryEntryRequest
 import io.tolgee.ee.service.translationMemory.tmx.TmxExportUnit
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
@@ -540,7 +539,7 @@ class TranslationMemoryEntryManagementService(
   fun create(
     organizationId: Long,
     translationMemoryId: Long,
-    dto: CreateTranslationMemoryEntryRequest,
+    dto: TranslationMemoryEntryRequest,
   ): TranslationMemoryEntry {
     val tm = requireTmInOrganization(organizationId, translationMemoryId)
     val entry =
@@ -594,7 +593,7 @@ class TranslationMemoryEntryManagementService(
     organizationId: Long,
     translationMemoryId: Long,
     entryId: Long,
-    dto: UpdateTranslationMemoryEntryRequest,
+    dto: TranslationMemoryEntryRequest,
   ): TranslationMemoryEntry {
     val entry = getEntry(organizationId, translationMemoryId, entryId)
     entry.sourceText = dto.sourceText

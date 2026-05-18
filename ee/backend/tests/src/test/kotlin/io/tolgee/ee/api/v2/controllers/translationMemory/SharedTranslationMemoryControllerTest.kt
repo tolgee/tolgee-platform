@@ -4,9 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.TranslationMemoryTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
-import io.tolgee.ee.data.translationMemory.CreateSharedTranslationMemoryRequest
+import io.tolgee.ee.data.translationMemory.SharedTranslationMemoryRequest
 import io.tolgee.ee.data.translationMemory.ProjectAssignmentDto
-import io.tolgee.ee.data.translationMemory.UpdateSharedTranslationMemoryRequest
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
@@ -53,7 +52,7 @@ class SharedTranslationMemoryControllerTest : AuthorizedControllerTest() {
   @Test
   fun `creates shared translation memory`() {
     val request =
-      CreateSharedTranslationMemoryRequest().apply {
+      SharedTranslationMemoryRequest().apply {
         name = "Marketing TM"
         sourceLanguageTag = "en"
       }
@@ -71,7 +70,7 @@ class SharedTranslationMemoryControllerTest : AuthorizedControllerTest() {
   fun `does not create when feature disabled`() {
     enabledFeaturesProvider.forceEnabled = emptySet()
     val request =
-      CreateSharedTranslationMemoryRequest().apply {
+      SharedTranslationMemoryRequest().apply {
         name = "Marketing TM"
         sourceLanguageTag = "en"
       }
@@ -84,7 +83,7 @@ class SharedTranslationMemoryControllerTest : AuthorizedControllerTest() {
     // (Changing the source on an assigned TM is rejected — covered by the next test.)
     val tmId = testData.unassignedSharedTm.id
     val update =
-      UpdateSharedTranslationMemoryRequest().apply {
+      SharedTranslationMemoryRequest().apply {
         name = "New Name"
         sourceLanguageTag = "de"
       }
@@ -100,7 +99,7 @@ class SharedTranslationMemoryControllerTest : AuthorizedControllerTest() {
   fun `rejects base language change when projects are assigned`() {
     val tmId = testData.sharedTm.id
     val update =
-      UpdateSharedTranslationMemoryRequest().apply {
+      SharedTranslationMemoryRequest().apply {
         name = testData.sharedTm.name
         sourceLanguageTag = "de"
       }
@@ -134,7 +133,7 @@ class SharedTranslationMemoryControllerTest : AuthorizedControllerTest() {
   fun `rejects update on project-type TM`() {
     val projectTmId = testData.projectTm.id
     val update =
-      UpdateSharedTranslationMemoryRequest().apply {
+      SharedTranslationMemoryRequest().apply {
         name = "Hacked"
         sourceLanguageTag = "en"
       }
@@ -147,7 +146,7 @@ class SharedTranslationMemoryControllerTest : AuthorizedControllerTest() {
   fun `member cannot create shared TM`() {
     userAccount = testData.orgMember
     val request =
-      CreateSharedTranslationMemoryRequest().apply {
+      SharedTranslationMemoryRequest().apply {
         name = "New Shared TM"
         sourceLanguageTag = "en"
       }
@@ -158,7 +157,7 @@ class SharedTranslationMemoryControllerTest : AuthorizedControllerTest() {
   fun `member cannot update shared TM`() {
     userAccount = testData.orgMember
     val update =
-      UpdateSharedTranslationMemoryRequest().apply {
+      SharedTranslationMemoryRequest().apply {
         name = "Renamed"
         sourceLanguageTag = "en"
       }
@@ -324,7 +323,7 @@ class SharedTranslationMemoryControllerTest : AuthorizedControllerTest() {
   fun `creates shared TM with assigned projects`() {
     val projectId = testData.projectWithTm.id
     val request =
-      CreateSharedTranslationMemoryRequest().apply {
+      SharedTranslationMemoryRequest().apply {
         name = "TM With Projects"
         sourceLanguageTag = "en"
         assignedProjects = listOf(ProjectAssignmentDto().apply { this.projectId = projectId })
@@ -355,7 +354,7 @@ class SharedTranslationMemoryControllerTest : AuthorizedControllerTest() {
     // multiProjectSharedTm=5). A new assignment uses max+1 → 6.
     val projectId = testData.projectWithTm.id
     val request =
-      CreateSharedTranslationMemoryRequest().apply {
+      SharedTranslationMemoryRequest().apply {
         name = "Priority Test TM"
         sourceLanguageTag = "en"
         assignedProjects = listOf(ProjectAssignmentDto().apply { this.projectId = projectId })

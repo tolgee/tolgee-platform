@@ -5,9 +5,8 @@ import io.tolgee.development.testDataBuilder.data.TranslationMemoryTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.data.translationMemory.CreateMultipleTranslationMemoryEntriesRequest
 import io.tolgee.ee.data.translationMemory.CreateMultipleTranslationMemoryEntriesTranslationRequest
-import io.tolgee.ee.data.translationMemory.CreateTranslationMemoryEntryRequest
 import io.tolgee.ee.data.translationMemory.DeleteMultipleTranslationMemoryEntriesRequest
-import io.tolgee.ee.data.translationMemory.UpdateTranslationMemoryEntryRequest
+import io.tolgee.ee.data.translationMemory.TranslationMemoryEntryRequest
 import io.tolgee.model.translationMemory.TranslationMemoryEntry
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
@@ -153,7 +152,7 @@ class TranslationMemoryEntryControllerTest : AuthorizedControllerTest() {
     // text so the user sees one unified list.
     val projectTmId = testData.projectTm.id
     val request =
-      CreateTranslationMemoryEntryRequest().apply {
+      TranslationMemoryEntryRequest().apply {
         sourceText = "Manual phrase"
         targetText = "Frase manual"
         targetLanguageTag = "es"
@@ -188,7 +187,7 @@ class TranslationMemoryEntryControllerTest : AuthorizedControllerTest() {
     val projectTmId = testData.projectTm.id
     performAuthPost(
       "/v2/organizations/$orgId/translation-memories/$projectTmId/entries",
-      CreateTranslationMemoryEntryRequest().apply {
+      TranslationMemoryEntryRequest().apply {
         sourceText = "Existing source"
         targetText = "Manual override translation"
         targetLanguageTag = "de"
@@ -211,7 +210,7 @@ class TranslationMemoryEntryControllerTest : AuthorizedControllerTest() {
     val projectTmId = testData.projectTm.id
     performAuthPost(
       "/v2/organizations/$orgId/translation-memories/$projectTmId/entries",
-      CreateTranslationMemoryEntryRequest().apply {
+      TranslationMemoryEntryRequest().apply {
         sourceText = "Manual phrase"
         targetText = "Frase manual unique"
         targetLanguageTag = "es"
@@ -251,7 +250,7 @@ class TranslationMemoryEntryControllerTest : AuthorizedControllerTest() {
   @Test
   fun `creates an entry`() {
     val request =
-      CreateTranslationMemoryEntryRequest().apply {
+      TranslationMemoryEntryRequest().apply {
         sourceText = "Good morning"
         targetText = "Guten Morgen"
         targetLanguageTag = "de"
@@ -275,7 +274,7 @@ class TranslationMemoryEntryControllerTest : AuthorizedControllerTest() {
   @Test
   fun `rejects blank source text`() {
     val request =
-      CreateTranslationMemoryEntryRequest().apply {
+      TranslationMemoryEntryRequest().apply {
         sourceText = "   "
         targetText = "Guten Morgen"
         targetLanguageTag = "de"
@@ -289,7 +288,7 @@ class TranslationMemoryEntryControllerTest : AuthorizedControllerTest() {
   @Test
   fun `rejects oversized source text`() {
     val request =
-      CreateTranslationMemoryEntryRequest().apply {
+      TranslationMemoryEntryRequest().apply {
         sourceText = "x".repeat(TranslationMemoryEntry.MAX_TEXT_LENGTH + 1)
         targetText = "Guten Morgen"
         targetLanguageTag = "de"
@@ -310,7 +309,7 @@ class TranslationMemoryEntryControllerTest : AuthorizedControllerTest() {
         .findByTranslationMemoryId(sharedTmId)
         .first { it.sourceText == "Hello world" && it.targetLanguageTag == "de" }
     val request =
-      UpdateTranslationMemoryEntryRequest().apply {
+      TranslationMemoryEntryRequest().apply {
         sourceText = entry.sourceText
         targetText = "Hallo Welt — updated"
         targetLanguageTag = "de"
@@ -425,7 +424,7 @@ class TranslationMemoryEntryControllerTest : AuthorizedControllerTest() {
   fun `does not allow create when feature disabled`() {
     enabledFeaturesProvider.forceEnabled = emptySet()
     val request =
-      CreateTranslationMemoryEntryRequest().apply {
+      TranslationMemoryEntryRequest().apply {
         sourceText = "Bonjour"
         targetText = "Hallo"
         targetLanguageTag = "de"
@@ -540,7 +539,7 @@ class TranslationMemoryEntryControllerTest : AuthorizedControllerTest() {
   fun `accepts and reads back a 5000-char ASCII source text`() {
     val longSource = "x".repeat(5_000)
     val request =
-      CreateTranslationMemoryEntryRequest().apply {
+      TranslationMemoryEntryRequest().apply {
         sourceText = longSource
         targetText = "ok"
         targetLanguageTag = "de"
@@ -566,7 +565,7 @@ class TranslationMemoryEntryControllerTest : AuthorizedControllerTest() {
     // well before reaching this length. The md5 expression index doesn't care.
     val longCjk = "中".repeat(8_000)
     val request =
-      CreateTranslationMemoryEntryRequest().apply {
+      TranslationMemoryEntryRequest().apply {
         sourceText = longCjk
         targetText = "ok"
         targetLanguageTag = "de"
@@ -606,7 +605,7 @@ class TranslationMemoryEntryControllerTest : AuthorizedControllerTest() {
   fun `member cannot create entry`() {
     userAccount = testData.orgMember
     val request =
-      CreateTranslationMemoryEntryRequest().apply {
+      TranslationMemoryEntryRequest().apply {
         sourceText = "Hi"
         targetText = "Hallo"
         targetLanguageTag = "de"
@@ -623,7 +622,7 @@ class TranslationMemoryEntryControllerTest : AuthorizedControllerTest() {
     userAccount = testData.orgMember
     performAuthPut(
       "/v2/organizations/$orgId/translation-memories/$sharedTmId/entries/${entry.id}",
-      UpdateTranslationMemoryEntryRequest().apply {
+      TranslationMemoryEntryRequest().apply {
         sourceText = entry.sourceText
         targetText = "tampered"
         targetLanguageTag = "de"

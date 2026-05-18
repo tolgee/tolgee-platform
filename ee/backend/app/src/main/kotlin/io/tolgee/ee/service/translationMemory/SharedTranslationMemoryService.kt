@@ -1,9 +1,8 @@
 package io.tolgee.ee.service.translationMemory
 
 import io.tolgee.constants.Message
-import io.tolgee.ee.data.translationMemory.CreateSharedTranslationMemoryRequest
+import io.tolgee.ee.data.translationMemory.SharedTranslationMemoryRequest
 import io.tolgee.ee.data.translationMemory.ProjectAssignmentDto
-import io.tolgee.ee.data.translationMemory.UpdateSharedTranslationMemoryRequest
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Organization
@@ -80,7 +79,7 @@ class SharedTranslationMemoryService(
   @Transactional
   fun create(
     organization: Organization,
-    dto: CreateSharedTranslationMemoryRequest,
+    dto: SharedTranslationMemoryRequest,
   ): TranslationMemory {
     requireUniqueName(organization.id, dto.name, excludeId = null)
     val tm =
@@ -111,7 +110,7 @@ class SharedTranslationMemoryService(
   fun update(
     organizationId: Long,
     translationMemoryId: Long,
-    dto: UpdateSharedTranslationMemoryRequest,
+    dto: SharedTranslationMemoryRequest,
   ): TranslationMemory {
     val tm = getShared(organizationId, translationMemoryId)
     if (dto.name != tm.name) {

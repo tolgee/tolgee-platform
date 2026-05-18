@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
 
-class UpdateTranslationMemoryEntryRequest {
+class TranslationMemoryEntryRequest {
   @Schema(example = "Hello world", description = "Source text (in the TM's source language)")
   @field:NotBlank
   @field:Size(max = TranslationMemoryEntry.MAX_TEXT_LENGTH)

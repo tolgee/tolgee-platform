@@ -14,9 +14,8 @@ import io.tolgee.ee.api.v2.hateoas.model.translationMemory.TmAssignedProjectMode
 import io.tolgee.ee.api.v2.hateoas.model.translationMemory.TranslationMemoryEntryCountsModel
 import io.tolgee.ee.api.v2.hateoas.model.translationMemory.TranslationMemoryModel
 import io.tolgee.ee.api.v2.hateoas.model.translationMemory.TranslationMemoryWithStatsModel
-import io.tolgee.ee.data.translationMemory.CreateSharedTranslationMemoryRequest
+import io.tolgee.ee.data.translationMemory.SharedTranslationMemoryRequest
 import io.tolgee.ee.data.translationMemory.UpdateProjectTmSettingsRequest
-import io.tolgee.ee.data.translationMemory.UpdateSharedTranslationMemoryRequest
 import io.tolgee.ee.service.translationMemory.SharedTranslationMemoryService
 import io.tolgee.ee.service.translationMemory.TranslationMemoryEntryManagementService
 import io.tolgee.model.enums.OrganizationRoleType
@@ -71,7 +70,7 @@ class SharedTranslationMemoryController(
   @Transactional
   fun create(
     @PathVariable organizationId: Long,
-    @RequestBody @Valid dto: CreateSharedTranslationMemoryRequest,
+    @RequestBody @Valid dto: SharedTranslationMemoryRequest,
   ): TranslationMemoryModel {
     val tm = sharedTranslationMemoryService.create(organizationHolder.organizationEntity, dto)
     return translationMemoryModelAssembler.toModel(tm)
@@ -112,7 +111,7 @@ class SharedTranslationMemoryController(
   fun update(
     @PathVariable organizationId: Long,
     @PathVariable translationMemoryId: Long,
-    @RequestBody @Valid dto: UpdateSharedTranslationMemoryRequest,
+    @RequestBody @Valid dto: SharedTranslationMemoryRequest,
   ): TranslationMemoryModel {
     val tm = sharedTranslationMemoryService.update(organizationHolder.organization.id, translationMemoryId, dto)
     return translationMemoryModelAssembler.toModel(tm)

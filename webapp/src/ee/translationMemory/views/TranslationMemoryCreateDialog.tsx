@@ -10,8 +10,7 @@ import {
   CreateEditTranslationMemoryFormValues,
 } from 'tg.ee.module/translationMemory/components/form/TranslationMemoryCreateEditForm';
 
-type CreateRequest =
-  components['schemas']['CreateSharedTranslationMemoryRequest'];
+type CreateRequest = components['schemas']['SharedTranslationMemoryRequest'];
 
 const initialValues: CreateEditTranslationMemoryFormValues = {
   name: '',

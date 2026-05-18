@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
 
-class CreateSharedTranslationMemoryRequest {
+class SharedTranslationMemoryRequest {
   @Schema(example = "Marketing TM", description = "Translation memory name")
   @field:NotBlank
   @field:Size(min = 1, max = 100)

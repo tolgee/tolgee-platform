@@ -2610,27 +2610,6 @@ export interface components {
       force: boolean;
       tokenUri: string;
     };
-    CreateSharedTranslationMemoryRequest: {
-      /** @description Project assignments with access settings. */
-      assignedProjects?: components["schemas"]["ProjectAssignmentDto"][];
-      /**
-       * Format: int32
-       * @description Default penalty (0–100) subtracted from match scores for every assignment that does not define its own override. Defaults to 0.
-       */
-      defaultPenalty?: number;
-      /**
-       * @description Translation memory name
-       * @example Marketing TM
-       */
-      name: string;
-      /**
-       * @description Source language tag according to BCP 47 definition
-       * @example en
-       */
-      sourceLanguageTag: string;
-      /** @description When true, only translations whose state is REVIEWED are written to this TM. Translations that drop back to TRANSLATED or UNTRANSLATED also remove the entry. TMX import and direct TM-browser edits bypass this filter. Defaults to false. */
-      writeOnlyReviewed?: boolean;
-    };
     CreateTaskRequest: {
       assignees: number[];
       /** @description Branch name. If empty or null, default branch is used. */
@@ -2652,23 +2631,6 @@ export interface components {
       name?: string;
       /** @enum {string} */
       type: "TRANSLATE" | "REVIEW";
-    };
-    CreateTranslationMemoryEntryRequest: {
-      /**
-       * @description Source text (in the TM's source language)
-       * @example Hello world
-       */
-      sourceText: string;
-      /**
-       * @description Target language tag according to BCP 47 definition
-       * @example de
-       */
-      targetLanguageTag: string;
-      /**
-       * @description Target translation text
-       * @example Hallo Welt
-       */
-      targetText: string;
     };
     CreateTranslationSuggestionRequest: {
       translation: string;
@@ -6314,6 +6276,27 @@ export interface components {
        */
       translations: { [key: string]: string };
     };
+    SharedTranslationMemoryRequest: {
+      /** @description Project assignments with access settings. */
+      assignedProjects?: components["schemas"]["ProjectAssignmentDto"][];
+      /**
+       * Format: int32
+       * @description Default penalty (0–100) subtracted from match scores for every assignment that does not define its own override. Defaults to 0.
+       */
+      defaultPenalty?: number;
+      /**
+       * @description Translation memory name
+       * @example Marketing TM
+       */
+      name: string;
+      /**
+       * @description Source language tag according to BCP 47 definition
+       * @example en
+       */
+      sourceLanguageTag: string;
+      /** @description When true, only translations whose state is REVIEWED are written to this TM. Translations that drop back to TRANSLATED or UNTRANSLATED also remove the entry. TMX import and direct TM-browser edits bypass this filter. Defaults to false. */
+      writeOnlyReviewed?: boolean;
+    };
     SignUpDto: {
       callbackUrl?: string;
       email: string;
@@ -7210,6 +7193,23 @@ export interface components {
        */
       updatedAt: number;
     };
+    TranslationMemoryEntryRequest: {
+      /**
+       * @description Source text (in the TM's source language)
+       * @example Hello world
+       */
+      sourceText: string;
+      /**
+       * @description Target language tag according to BCP 47 definition
+       * @example de
+       */
+      targetLanguageTag: string;
+      /**
+       * @description Target translation text
+       * @example Hallo Welt
+       */
+      targetText: string;
+    };
     TranslationMemoryItemModel: {
       baseText: string;
       keyName: string;
@@ -7539,27 +7539,6 @@ export interface components {
       /** @description Whether this project writes new translations to the TM */
       writeAccess: boolean;
     };
-    UpdateSharedTranslationMemoryRequest: {
-      /** @description Project assignments with access settings. Replaces existing assignments. */
-      assignedProjects?: components["schemas"]["ProjectAssignmentDto"][];
-      /**
-       * Format: int32
-       * @description Default penalty (0–100) subtracted from match scores for every assignment that does not define its own override. Defaults to 0.
-       */
-      defaultPenalty?: number;
-      /**
-       * @description Translation memory name
-       * @example Marketing TM
-       */
-      name: string;
-      /**
-       * @description Source language tag according to BCP 47 definition
-       * @example en
-       */
-      sourceLanguageTag: string;
-      /** @description When true, only translations whose state is REVIEWED are written to this TM. Translations that drop back to TRANSLATED or UNTRANSLATED also remove the entry. TMX import and direct TM-browser edits bypass this filter. Defaults to false. */
-      writeOnlyReviewed?: boolean;
-    };
     UpdateTaskKeyRequest: {
       done: boolean;
     };
@@ -7585,23 +7564,6 @@ export interface components {
        */
       dueDate?: number;
       name?: string;
-    };
-    UpdateTranslationMemoryEntryRequest: {
-      /**
-       * @description Source text (in the TM's source language)
-       * @example Hello world
-       */
-      sourceText: string;
-      /**
-       * @description Target language tag according to BCP 47 definition
-       * @example de
-       */
-      targetLanguageTag: string;
-      /**
-       * @description Target translation text
-       * @example Hallo Welt
-       */
-      targetText: string;
     };
     UploadedImageModel: {
       /** Format: date-time */
@@ -11940,7 +11902,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["CreateSharedTranslationMemoryRequest"];
+        "application/json": components["schemas"]["SharedTranslationMemoryRequest"];
       };
     };
   };
@@ -12117,7 +12079,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["UpdateSharedTranslationMemoryRequest"];
+        "application/json": components["schemas"]["SharedTranslationMemoryRequest"];
       };
     };
   };
@@ -12289,7 +12251,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["CreateTranslationMemoryEntryRequest"];
+        "application/json": components["schemas"]["TranslationMemoryEntryRequest"];
       };
     };
   };
@@ -12508,7 +12470,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["UpdateTranslationMemoryEntryRequest"];
+        "application/json": components["schemas"]["TranslationMemoryEntryRequest"];
       };
     };
   };

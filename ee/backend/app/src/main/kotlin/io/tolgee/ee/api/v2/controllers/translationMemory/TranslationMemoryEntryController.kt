@@ -10,9 +10,8 @@ import io.tolgee.ee.api.v2.hateoas.assemblers.translationMemory.TranslationMemor
 import io.tolgee.ee.api.v2.hateoas.model.translationMemory.TranslationMemoryEntryModel
 import io.tolgee.ee.api.v2.hateoas.model.translationMemory.TranslationMemoryRowModel
 import io.tolgee.ee.data.translationMemory.CreateMultipleTranslationMemoryEntriesRequest
-import io.tolgee.ee.data.translationMemory.CreateTranslationMemoryEntryRequest
 import io.tolgee.ee.data.translationMemory.DeleteMultipleTranslationMemoryEntriesRequest
-import io.tolgee.ee.data.translationMemory.UpdateTranslationMemoryEntryRequest
+import io.tolgee.ee.data.translationMemory.TranslationMemoryEntryRequest
 import io.tolgee.ee.service.translationMemory.TmRow
 import io.tolgee.ee.service.translationMemory.TranslationMemoryEntryManagementService
 import io.tolgee.model.enums.OrganizationRoleType
@@ -128,7 +127,7 @@ class TranslationMemoryEntryController(
   fun create(
     @PathVariable organizationId: Long,
     @PathVariable translationMemoryId: Long,
-    @RequestBody @Valid dto: CreateTranslationMemoryEntryRequest,
+    @RequestBody @Valid dto: TranslationMemoryEntryRequest,
   ): TranslationMemoryEntryModel {
     val entry = translationMemoryEntryManagementService.create(organizationId, translationMemoryId, dto)
     return translationMemoryEntryModelAssembler.toModel(entry)
@@ -168,7 +167,7 @@ class TranslationMemoryEntryController(
     @PathVariable organizationId: Long,
     @PathVariable translationMemoryId: Long,
     @PathVariable entryId: Long,
-    @RequestBody @Valid dto: UpdateTranslationMemoryEntryRequest,
+    @RequestBody @Valid dto: TranslationMemoryEntryRequest,
   ): TranslationMemoryEntryModel {
     val entry = translationMemoryEntryManagementService.update(organizationId, translationMemoryId, entryId, dto)
     return translationMemoryEntryModelAssembler.toModel(entry)

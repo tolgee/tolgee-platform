@@ -3,7 +3,7 @@ package io.tolgee.ee.api.v2.controllers.translationMemory
 import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.TranslationMemoryTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
-import io.tolgee.ee.data.translationMemory.CreateTranslationMemoryEntryRequest
+import io.tolgee.ee.data.translationMemory.TranslationMemoryEntryRequest
 import io.tolgee.fixtures.TuRaw
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
@@ -116,7 +116,7 @@ class TranslationMemoryTmxControllerTest : AuthorizedControllerTest() {
     val projectTmId = testData.projectTm.id
     performAuthPost(
       "/v2/organizations/$orgId/translation-memories/$projectTmId/entries",
-      CreateTranslationMemoryEntryRequest().apply {
+      TranslationMemoryEntryRequest().apply {
         sourceText = "Manual phrase"
         targetText = "Frase manual"
         targetLanguageTag = "es"
