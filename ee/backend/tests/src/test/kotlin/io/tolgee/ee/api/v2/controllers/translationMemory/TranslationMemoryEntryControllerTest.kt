@@ -7,13 +7,13 @@ import io.tolgee.ee.data.translationMemory.CreateMultipleTranslationMemoryEntrie
 import io.tolgee.ee.data.translationMemory.CreateMultipleTranslationMemoryEntriesTranslationRequest
 import io.tolgee.ee.data.translationMemory.DeleteMultipleTranslationMemoryEntriesRequest
 import io.tolgee.ee.data.translationMemory.TranslationMemoryEntryRequest
-import io.tolgee.model.translationMemory.TranslationMemoryEntry
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.isValidId
+import io.tolgee.model.translationMemory.TranslationMemoryEntry
 import io.tolgee.repository.translationMemory.TranslationMemoryEntryRepository
 import io.tolgee.testing.AuthorizedControllerTest
 import org.assertj.core.api.Assertions.assertThat

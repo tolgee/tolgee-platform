@@ -1,8 +1,8 @@
 package io.tolgee.ee.service.translationMemory
 
 import io.tolgee.constants.Message
-import io.tolgee.ee.data.translationMemory.SharedTranslationMemoryRequest
 import io.tolgee.ee.data.translationMemory.ProjectAssignmentDto
+import io.tolgee.ee.data.translationMemory.SharedTranslationMemoryRequest
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Organization

@@ -310,8 +310,7 @@ class TranslationMemoryEntryManagementService(
           kind = TmRow.Kind.STORED,
           originId = it.tuid ?: "manual",
         )
-      }
-      .filterKeys { it in rowIdSet }
+      }.filterKeys { it in rowIdSet }
       .mapValues { (_, group) ->
         group.map { entry ->
           TmStoredCell(

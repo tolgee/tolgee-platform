@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.TranslationMemoryTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
-import io.tolgee.ee.data.translationMemory.SharedTranslationMemoryRequest
 import io.tolgee.ee.data.translationMemory.ProjectAssignmentDto
+import io.tolgee.ee.data.translationMemory.SharedTranslationMemoryRequest
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
