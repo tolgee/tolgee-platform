@@ -24,6 +24,23 @@ interface TranslationMemoryProjectRepository : JpaRepository<TranslationMemoryPr
 
   fun findByTranslationMemoryId(translationMemoryId: Long): List<TranslationMemoryProject>
 
+  /**
+   * Projection of the same assignments narrowed to writeAccess=true, returning only the
+   * project ids. Avoids the N+1 lazy-load of `TranslationMemoryProject.project` that the
+   * content-browser path triggers on every page render to compute write-access scope.
+   */
+  @Query(
+    """
+    select tmp.project.id
+    from TranslationMemoryProject tmp
+    where tmp.translationMemory.id = :tmId
+      and tmp.writeAccess = true
+    """,
+  )
+  fun findWriteAccessProjectIds(
+    @Param("tmId") tmId: Long,
+  ): List<Long>
+
   fun findByTranslationMemoryIdAndProjectId(
     translationMemoryId: Long,
     projectId: Long,

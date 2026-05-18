@@ -5564,4 +5564,31 @@
             <sql>DROP INDEX CONCURRENTLY IF EXISTS ix_tm_entry_tm_source;</sql>
         </rollback>
     </changeSet>
+
+    <changeSet author="dkrizan" id="tm-entry-lower-source-trgm" runInTransaction="false">
+        <comment>GiST trigram index on lower(source_text) so case-insensitive infix LIKE
+            searches in the content-browser hit an index instead of seq-scanning the table.
+            Mirrors the existing tm_entry_source_text_gist_trgm but on the lower()-folded
+            value — our search predicates wrap source_text with lower() to be case-insensitive.</comment>
+        <sql dbms="postgresql">
+            CREATE INDEX CONCURRENTLY IF NOT EXISTS ix_tm_entry_lower_source_trgm
+                ON translation_memory_entry USING GIST (lower(source_text) gist_trgm_ops);
+        </sql>
+        <rollback>
+            <sql>DROP INDEX CONCURRENTLY IF EXISTS ix_tm_entry_lower_source_trgm;</sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="dkrizan" id="tm-entry-lower-target-trgm" runInTransaction="false">
+        <comment>Companion to ix_tm_entry_lower_source_trgm: target_text shows up in the same
+            content-browser LIKE filter (via EXISTS subqueries that match either side of an
+            entry), so it gets the same trigram index on the lower()-folded value.</comment>
+        <sql dbms="postgresql">
+            CREATE INDEX CONCURRENTLY IF NOT EXISTS ix_tm_entry_lower_target_trgm
+                ON translation_memory_entry USING GIST (lower(target_text) gist_trgm_ops);
+        </sql>
+        <rollback>
+            <sql>DROP INDEX CONCURRENTLY IF EXISTS ix_tm_entry_lower_target_trgm;</sql>
+        </rollback>
+    </changeSet>
 </databaseChangeLog>

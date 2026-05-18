@@ -162,10 +162,7 @@ class TranslationMemoryEntryManagementService(
   )
 
   private fun writeAccessProjectIds(tmId: Long): List<Long> =
-    translationMemoryProjectRepository
-      .findByTranslationMemoryId(tmId)
-      .filter { it.writeAccess }
-      .map { it.project.id }
+    translationMemoryProjectRepository.findWriteAccessProjectIds(tmId)
 
   private fun countRows(
     tmId: Long,
