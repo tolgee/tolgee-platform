@@ -1,6 +1,8 @@
 package io.tolgee.ee.service.branching
 
 import io.tolgee.AbstractSpringTest
+import io.tolgee.batch.BatchJobService
+import io.tolgee.batch.data.BatchJobType
 import io.tolgee.development.testDataBuilder.data.BranchCopyQaIssuesTestData
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.enums.qa.QaCheckType
@@ -29,6 +31,9 @@ class BranchCopyQaIssuesTest : AbstractSpringTest() {
 
   @Autowired
   lateinit var qaIssueRepository: TranslationQaIssueRepository
+
+  @Autowired
+  lateinit var batchJobService: BatchJobService
 
   private lateinit var testData: BranchCopyQaIssuesTestData
 
@@ -80,6 +85,45 @@ class BranchCopyQaIssuesTest : AbstractSpringTest() {
       val sourceIssues = qaIssueRepository.findAllByTranslationId(sourceTranslationId)
       sourceIssues.assert.hasSize(2)
     }
+  }
+
+  @Test
+  fun `enqueues QA batch job for stale translations on new branch`() {
+    // Snapshot QA job count before the act so we measure only what create-branch enqueues.
+    val initialQaJobCount =
+      executeInNewTransaction(platformTransactionManager) {
+        batchJobService.getAllByProjectId(testData.project.id).count { it.type == BatchJobType.QA_CHECK }
+      }
+
+    val newBranch =
+      branchService.createBranch(
+        projectId = testData.project.id,
+        name = "feature-stale",
+        originBranchId = testData.defaultBranch.id,
+        author = testData.user,
+      )
+
+    // The created branch has one stale translation (copied from source) → one QA batch job.
+    val newJobs =
+      executeInNewTransaction(platformTransactionManager) {
+        batchJobService
+          .getAllByProjectId(testData.project.id)
+          .filter { it.type == BatchJobType.QA_CHECK }
+      }
+    newJobs.size.assert.isEqualTo(initialQaJobCount + 1)
+
+    val enqueued = newJobs.first()
+    // Target is the new branch's stale translation only (not the non-stale one).
+    enqueued.totalItems.assert.isEqualTo(1)
+
+    // Sanity: the resolved target points to the new branch's `stale-greeting` translation.
+    val expectedTranslation = findTranslationOnBranch(newBranch, testData.staleKey.name)
+    val targetKeyIds =
+      (enqueued.target as List<*>).map { item ->
+        // Each item serialises to a JSON map { "keyId": ..., "languageId": ... }
+        (item as Map<*, *>)["keyId"]!!.toString().toLong()
+      }
+    targetKeyIds.assert.containsExactly(expectedTranslation.key.id)
   }
 
   private fun findTranslationOnBranch(

@@ -4,8 +4,11 @@ import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.batch.request.QaCheckRequest
+import io.tolgee.constants.Feature
 import io.tolgee.model.Project
 import io.tolgee.model.enums.qa.QaCheckType
+import io.tolgee.service.project.ProjectFeatureRegistry
+import io.tolgee.service.project.ProjectService
 import io.tolgee.service.translation.TranslationService
 import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Service
@@ -15,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional
 class QaRecheckService(
   private val batchJobService: BatchJobService,
   private val translationService: TranslationService,
+  private val projectService: ProjectService,
   private val entityManager: EntityManager,
 ) {
   @Transactional
@@ -51,11 +55,36 @@ class QaRecheckService(
     }
   }
 
+  @Transactional
+  fun recheckStaleTranslationsOnBranch(
+    projectId: Long,
+    branchId: Long,
+  ) {
+    val projectDto = projectService.getDto(projectId)
+    if (!ProjectFeatureRegistry.isEnabledOnProject(Feature.QA_CHECKS, projectDto)) return
+
+    val pairs = translationService.getStaleKeyLanguagePairsByBranch(projectId, branchId)
+    if (pairs.isEmpty()) return
+
+    val allTargetItems = pairs.map { BatchTranslationTargetItem(keyId = it.keyId, languageId = it.languageId) }
+    val project = entityManager.getReference(Project::class.java, projectId)
+
+    for (targetChunk in allTargetItems.chunked(MAX_BATCH_JOB_TARGET_SIZE)) {
+      batchJobService.startJob(
+        request = QaCheckRequest(target = targetChunk),
+        project = project,
+        author = null,
+        type = BatchJobType.QA_CHECK,
+        isHidden = true,
+      )
+    }
+  }
+
   companion object {
     /**
      * Maximum number of target items per batch job to prevent large JSONB payloads
      * in the batch_job table and excessive memory usage during serialization.
      */
-    const val MAX_BATCH_JOB_TARGET_SIZE = 10_000
+    const val MAX_BATCH_JOB_TARGET_SIZE = 32_000
   }
 }

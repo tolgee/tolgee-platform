@@ -15,9 +15,13 @@ class BranchCopyQaIssuesTestData : BaseTestData("branch-copy-qa", "Branch copy Q
   lateinit var openIssue: TranslationQaIssue
   lateinit var virtualIgnoredIssue: TranslationQaIssue
 
+  lateinit var staleKey: Key
+  lateinit var staleEnglishTranslation: Translation
+
   init {
     projectBuilder.apply {
       self.useBranching = true
+      self.useQaChecks = true
       addBranch {
         name = "main"
         project = projectBuilder.self
@@ -52,6 +56,19 @@ class BranchCopyQaIssuesTestData : BaseTestData("branch-copy-qa", "Branch copy Q
           }.build {
             virtualIgnoredIssue = self
           }
+        }
+      }
+      addKey {
+        name = "stale-greeting"
+        branch = defaultBranch
+      }.build {
+        staleKey = self
+        addTranslation {
+          language = englishLanguage
+          text = "Hi."
+          qaChecksStale = true
+        }.build {
+          staleEnglishTranslation = self
         }
       }
     }

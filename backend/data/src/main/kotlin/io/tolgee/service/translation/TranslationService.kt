@@ -690,6 +690,14 @@ class TranslationService(
   }
 
   @Transactional(readOnly = true)
+  fun getStaleKeyLanguagePairsByBranch(
+    projectId: Long,
+    branchId: Long,
+  ): List<KeyLanguagePairView> {
+    return translationRepository.getStaleKeyLanguagePairsByBranch(projectId, branchId)
+  }
+
+  @Transactional(readOnly = true)
   fun getKeyLanguagePairsForQaRecheck(
     projectId: Long,
     languageIds: List<Long>? = null,
