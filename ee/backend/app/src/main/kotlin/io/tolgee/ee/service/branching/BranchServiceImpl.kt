@@ -45,7 +45,6 @@ class BranchServiceImpl(
   private val authenticationFacade: AuthenticationFacade,
   private val projectBranchingMigrationService: ProjectBranchingMigrationService,
   private val activityHolder: ActivityHolder,
-  private val branchCleanupService: BranchCleanupService,
   private val applicationEventPublisher: ApplicationEventPublisher,
   private val metrics: Metrics,
 ) : AbstractBranchService(branchRepository, branchMergeService) {

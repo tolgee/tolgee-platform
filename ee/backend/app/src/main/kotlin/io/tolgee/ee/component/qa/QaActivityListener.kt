@@ -191,8 +191,10 @@ class QaActivityListener(
             .getProjectLanguages(projectId)
             .map { it.id }
             .filter { it != baseLanguage.id }
-        baseLanguageKeyIds.flatMap { keyId ->
-          otherLanguageIds.map { langId -> BatchTranslationTargetItem(keyId = keyId, languageId = langId) }
+        otherLanguageIds.flatMap { langId ->
+          baseLanguageKeyIds.map { keyId ->
+            BatchTranslationTargetItem(keyId = keyId, languageId = langId)
+          }
         }
       } else {
         emptyList()
@@ -227,8 +229,10 @@ class QaActivityListener(
     if (keyIds.isEmpty()) return emptyList()
 
     val allLanguageIds = languageService.getProjectLanguages(projectId).map { it.id }
-    return keyIds.flatMap { keyId ->
-      allLanguageIds.map { langId -> BatchTranslationTargetItem(keyId = keyId, languageId = langId) }
+    return allLanguageIds.flatMap { langId ->
+      keyIds.map { keyId ->
+        BatchTranslationTargetItem(keyId = keyId, languageId = langId)
+      }
     }
   }
 

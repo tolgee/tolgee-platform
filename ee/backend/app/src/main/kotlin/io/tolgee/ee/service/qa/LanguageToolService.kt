@@ -1,50 +1,14 @@
 package io.tolgee.ee.service.qa
 
-import com.github.benmanes.caffeine.cache.Cache
-import com.github.benmanes.caffeine.cache.Caffeine
 import io.sentry.Sentry
-import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.util.logger
-import org.slf4j.LoggerFactory
-import org.springframework.boot.web.client.RestTemplateBuilder
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
-import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
-import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.client.RestClientException
-import org.springframework.web.client.RestTemplate
-import org.springframework.web.client.getForObject
-import org.springframework.web.client.postForObject
-import java.time.Duration
-import java.util.concurrent.Semaphore
 
 @Service
 class LanguageToolService(
-  private val tolgeeProperties: TolgeeProperties,
-  private val restTemplateBuilder: RestTemplateBuilder,
+  private val languageToolApiClient: LanguageToolApiClient,
 ) {
-  private val restTemplate: RestTemplate by lazy {
-    restTemplateBuilder
-      .connectTimeout(Duration.ofSeconds(tolgeeProperties.languageTool.connectTimeoutSeconds))
-      .readTimeout(Duration.ofSeconds(tolgeeProperties.languageTool.readTimeoutSeconds))
-      .build()
-  }
-
-  /**
-   * Per-instance concurrency gate for `/v2/check` calls.
-   */
-  private val requestSemaphore: Semaphore by lazy {
-    Semaphore(tolgeeProperties.languageTool.maxConcurrentRequests.coerceAtLeast(1), true)
-  }
-
-  private val resultCache: Cache<LanguageToolCacheKey, List<LanguageToolMatch>> =
-    Caffeine
-      .newBuilder()
-      .expireAfterWrite(Duration.ofMinutes(5))
-      .maximumSize(200)
-      .build()
-
   /**
    * Cache of supported languages fetched from the LanguageTool server.
    * Maps base language code (e.g., "en") to its default long code (e.g., "en-US").
@@ -58,18 +22,9 @@ class LanguageToolService(
     languageTag: String,
   ): List<LanguageToolMatch> {
     if (text.isBlank()) return emptyList()
-
-    val url = tolgeeProperties.languageTool.url
-    if (url.isBlank()) {
-      throw LanguageToolNotConfiguredException()
-    }
-
+    languageToolApiClient.checkConfigured()
     val resolvedTag = resolveLanguageTag(languageTag) ?: return emptyList()
-
-    val key = LanguageToolCacheKey(resolvedTag, text)
-    return resultCache.get(key) {
-      callApi(url, text, resolvedTag)
-    }
+    return languageToolApiClient.callCheck(resolvedTag, text)
   }
 
   /**
@@ -105,10 +60,9 @@ class LanguageToolService(
     synchronized(this) {
       supportedLanguages?.let { return it }
 
-      val url = tolgeeProperties.languageTool.url
-      if (url.isBlank()) return emptyMap()
+      if (!languageToolApiClient.isConfigured) return emptyMap()
 
-      val languages = fetchSupportedLanguages(url)
+      val languages = fetchSupportedLanguages()
       if (languages.isNotEmpty()) {
         supportedLanguages = languages
       }
@@ -116,18 +70,14 @@ class LanguageToolService(
     }
   }
 
-  private fun fetchSupportedLanguages(baseUrl: String): Map<String, String> {
-    return try {
-      val response =
-        restTemplate.getForObject<Array<LanguageToolLanguageInfo>?>(
-          "$baseUrl/v2/languages",
-        ) ?: return emptyMap()
-
-      buildLanguageMap(response.toList())
+  private fun fetchSupportedLanguages(): Map<String, String> {
+    try {
+      val supportedLanguages = languageToolApiClient.getLanguages() ?: return emptyMap()
+      return buildLanguageMap(supportedLanguages)
     } catch (e: RestClientException) {
       Sentry.captureException(e)
       logger.warn("Failed to fetch supported languages from LanguageTool: ${e.message}")
-      emptyMap()
+      return emptyMap()
     }
   }
 
@@ -159,35 +109,6 @@ class LanguageToolService(
     }
 
     return map
-  }
-
-  private fun callApi(
-    baseUrl: String,
-    text: String,
-    languageTag: String,
-  ): List<LanguageToolMatch> {
-    val headers = HttpHeaders()
-    headers.contentType = MediaType.APPLICATION_FORM_URLENCODED
-
-    val body =
-      LinkedMultiValueMap<String, String>().apply {
-        add("text", text)
-        add("language", languageTag)
-      }
-
-    val request = HttpEntity(body, headers)
-    requestSemaphore.acquire()
-    try {
-      val response =
-        restTemplate.postForObject<LanguageToolResponse?>(
-          "$baseUrl/v2/check",
-          request,
-        )
-
-      return response?.matches ?: emptyList()
-    } finally {
-      requestSemaphore.release()
-    }
   }
 
   companion object {

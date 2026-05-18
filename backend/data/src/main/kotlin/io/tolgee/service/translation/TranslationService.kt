@@ -478,7 +478,7 @@ class TranslationService(
   fun getTranslations(
     keyIds: List<Long>,
     languageIds: List<Long>,
-  ) = translationRepository.getAllByKeyIdInAndLanguageIdIn(keyIds, languageIds)
+  ) = translationRepository.findAllByKeyIdInAndLanguageIdIn(keyIds, languageIds)
 
   @Transactional(readOnly = true)
   fun getAllByKeyId(keyId: Long): List<Translation> = translationRepository.getAllByKeyIdIn(listOf(keyId)).toList()

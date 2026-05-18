@@ -7,7 +7,6 @@ import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.batch.request.QaCheckRequest
 import io.tolgee.model.batch.params.QaCheckJobParams
-import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.service.qa.QaCheckBatchService
 import kotlinx.coroutines.ensureActive
 import org.springframework.stereotype.Component
@@ -25,15 +24,20 @@ class QaCheckChunkProcessor(
   ) {
     val params = getParams(job)
     val projectId = job.projectId ?: throw IllegalArgumentException("Project id is required")
-    val enabledCheckTypesCache = mutableMapOf<Long, Set<QaCheckType>>()
-    chunk.forEach { (keyId, languageId) ->
+    val isSlow = params.checkTypes?.any { it.isSlow } ?: true
+
+    coroutineContext.ensureActive()
+
+    qaCheckBatchService.runChecksAndPersistChunk(
+      projectId = projectId,
+      checkTypes = params.checkTypes,
+      items = chunk,
+    ) {
+      // progress callback
       coroutineContext.ensureActive()
-      val enabledCheckTypes =
-        enabledCheckTypesCache.getOrPut(languageId) {
-          qaCheckBatchService.getEnabledCheckTypesForLanguage(projectId, languageId)
-        }
-      qaCheckBatchService.runChecksAndPersist(projectId, keyId, languageId, params.checkTypes, enabledCheckTypes)
-      progressManager.reportSingleChunkProgress(job.id)
+      if (isSlow) {
+        progressManager.reportSingleChunkProgress(job.id)
+      }
     }
   }
 
@@ -51,7 +55,7 @@ class QaCheckChunkProcessor(
   override fun getChunkSize(
     request: QaCheckRequest,
     projectId: Long?,
-  ): Int = 100
+  ): Int = 1000
 
   override fun getJobCharacter(
     request: QaCheckRequest,

@@ -2,31 +2,32 @@ package io.tolgee.model.enums.qa
 
 enum class QaCheckType(
   val defaultSeverity: QaCheckSeverity,
+  val isSlow: Boolean,
 ) {
   // TEXT category — checks about the quality of the translated text.
   // SPELLING and GRAMMAR are intentionally kept as the last two entries of this group.
-  EMPTY_TRANSLATION(QaCheckSeverity.WARNING),
-  MISSING_PLURAL_CATEGORIES(QaCheckSeverity.WARNING),
-  CHARACTER_CASE_MISMATCH(QaCheckSeverity.WARNING),
-  REPEATED_WORDS(QaCheckSeverity.WARNING),
-  PUNCTUATION_MISMATCH(QaCheckSeverity.WARNING),
-  TRIM_CHECK(QaCheckSeverity.WARNING),
-  SPACES_MISMATCH(QaCheckSeverity.WARNING),
-  UNMATCHED_NEWLINES(QaCheckSeverity.WARNING),
-  MISSING_NUMBERS(QaCheckSeverity.WARNING),
-  SPECIAL_CHARACTER_MISMATCH(QaCheckSeverity.WARNING),
-  BRACKETS_MISMATCH(QaCheckSeverity.WARNING),
-  BRACKETS_UNBALANCED(QaCheckSeverity.WARNING),
-  SPELLING(QaCheckSeverity.OFF),
-  GRAMMAR(QaCheckSeverity.OFF),
+  EMPTY_TRANSLATION(defaultSeverity = QaCheckSeverity.WARNING, isSlow = false),
+  MISSING_PLURAL_CATEGORIES(defaultSeverity = QaCheckSeverity.WARNING, isSlow = false),
+  CHARACTER_CASE_MISMATCH(defaultSeverity = QaCheckSeverity.WARNING, isSlow = false),
+  REPEATED_WORDS(defaultSeverity = QaCheckSeverity.WARNING, isSlow = false),
+  PUNCTUATION_MISMATCH(defaultSeverity = QaCheckSeverity.WARNING, isSlow = false),
+  TRIM_CHECK(defaultSeverity = QaCheckSeverity.WARNING, isSlow = false),
+  SPACES_MISMATCH(defaultSeverity = QaCheckSeverity.WARNING, isSlow = false),
+  UNMATCHED_NEWLINES(defaultSeverity = QaCheckSeverity.WARNING, isSlow = false),
+  MISSING_NUMBERS(defaultSeverity = QaCheckSeverity.WARNING, isSlow = false),
+  SPECIAL_CHARACTER_MISMATCH(defaultSeverity = QaCheckSeverity.WARNING, isSlow = false),
+  BRACKETS_MISMATCH(defaultSeverity = QaCheckSeverity.WARNING, isSlow = false),
+  BRACKETS_UNBALANCED(defaultSeverity = QaCheckSeverity.WARNING, isSlow = false),
+  SPELLING(defaultSeverity = QaCheckSeverity.OFF, isSlow = true),
+  GRAMMAR(defaultSeverity = QaCheckSeverity.OFF, isSlow = true),
 
   // TECHNICAL category — checks for technical correctness.
-  KEY_LENGTH_LIMIT(QaCheckSeverity.WARNING),
-  DIFFERENT_URLS(QaCheckSeverity.WARNING),
-  INCONSISTENT_PLACEHOLDERS(QaCheckSeverity.WARNING),
-  INCONSISTENT_HTML(QaCheckSeverity.WARNING),
-  HTML_SYNTAX(QaCheckSeverity.WARNING),
-  ICU_SYNTAX(QaCheckSeverity.WARNING),
+  KEY_LENGTH_LIMIT(defaultSeverity = QaCheckSeverity.WARNING, isSlow = false),
+  DIFFERENT_URLS(defaultSeverity = QaCheckSeverity.WARNING, isSlow = false),
+  INCONSISTENT_PLACEHOLDERS(defaultSeverity = QaCheckSeverity.WARNING, isSlow = false),
+  INCONSISTENT_HTML(defaultSeverity = QaCheckSeverity.WARNING, isSlow = false),
+  HTML_SYNTAX(defaultSeverity = QaCheckSeverity.WARNING, isSlow = false),
+  ICU_SYNTAX(defaultSeverity = QaCheckSeverity.WARNING, isSlow = false),
   ;
 
   companion object {

@@ -57,16 +57,18 @@ export const useWebsocketService = (
 
   function updateQaIssues(events: QaIssuesUpdatedData[]) {
     translationService.changeTranslations(
-      events.map((event) => ({
-        keyId: event.data.keyId,
-        language: event.data.languageTag,
-        value: {
-          id: event.data.translationId,
-          qaIssueCount: event.data.qaIssueCount,
-          qaChecksStale: event.data.qaChecksStale,
-          qaIssues: event.data.qaIssues,
-        },
-      }))
+      events.flatMap((event) =>
+        event.data.map((update) => ({
+          keyId: update.keyId,
+          language: update.languageTag,
+          value: {
+            id: update.translationId,
+            qaIssueCount: update.qaIssueCount,
+            qaChecksStale: update.qaChecksStale,
+            qaIssues: update.qaIssues,
+          },
+        }))
+      )
     );
   }
 
