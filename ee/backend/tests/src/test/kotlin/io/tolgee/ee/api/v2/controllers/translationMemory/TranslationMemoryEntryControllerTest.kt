@@ -3,6 +3,8 @@ package io.tolgee.ee.api.v2.controllers.translationMemory
 import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.TranslationMemoryTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
+import io.tolgee.ee.data.translationMemory.CreateMultipleTranslationMemoryEntriesRequest
+import io.tolgee.ee.data.translationMemory.CreateMultipleTranslationMemoryEntriesTranslationRequest
 import io.tolgee.ee.data.translationMemory.CreateTranslationMemoryEntryRequest
 import io.tolgee.ee.data.translationMemory.DeleteMultipleTranslationMemoryEntriesRequest
 import io.tolgee.ee.data.translationMemory.UpdateTranslationMemoryEntryRequest
@@ -432,6 +434,99 @@ class TranslationMemoryEntryControllerTest : AuthorizedControllerTest() {
       "/v2/organizations/$orgId/translation-memories/$sharedTmId/entries",
       request,
     ).andIsBadRequest
+  }
+
+  // ---------- Bulk create (atomic multi-language POST) ----------
+
+  private fun bulkRequest(
+    source: String,
+    vararg translations: Pair<String, String>,
+  ) = CreateMultipleTranslationMemoryEntriesRequest().apply {
+    sourceText = source
+    this.translations =
+      translations.map { (lang, text) ->
+        CreateMultipleTranslationMemoryEntriesTranslationRequest().apply {
+          targetLanguageTag = lang
+          targetText = text
+        }
+      }
+  }
+
+  @Test
+  fun `bulk create lands all target languages in one request`() {
+    performAuthPost(
+      "/v2/organizations/$orgId/translation-memories/$sharedTmId/entries/multiple",
+      bulkRequest("Bonjour", "de" to "Guten Morgen", "fr" to "Bonjour", "es" to "Hola"),
+    ).andIsOk
+
+    val newEntries =
+      translationMemoryEntryRepository
+        .findByTranslationMemoryId(sharedTmId)
+        .filter { it.sourceText == "Bonjour" }
+    assertThat(newEntries).hasSize(3)
+    assertThat(newEntries.map { it.targetLanguageTag }).containsExactlyInAnyOrder("de", "fr", "es")
+  }
+
+  @Test
+  fun `bulk create rejects duplicate target languages in one request`() {
+    performAuthPost(
+      "/v2/organizations/$orgId/translation-memories/$sharedTmId/entries/multiple",
+      bulkRequest("Bonjour", "de" to "Guten Morgen", "de" to "Conflict"),
+    ).andIsBadRequest
+
+    // Nothing landed — atomicity holds across validation failure
+    val landed =
+      translationMemoryEntryRepository
+        .findByTranslationMemoryId(sharedTmId)
+        .filter { it.sourceText == "Bonjour" }
+    assertThat(landed).isEmpty()
+  }
+
+  @Test
+  fun `bulk create rolls back if one translation is invalid`() {
+    // One target text exceeds the per-entry size cap — the whole request must fail and leave
+    // the other (valid) translations unpersisted. Without atomicity the FE would see only the
+    // first language land, then a generic error for the rest.
+    performAuthPost(
+      "/v2/organizations/$orgId/translation-memories/$sharedTmId/entries/multiple",
+      bulkRequest(
+        "Bonjour",
+        "de" to "Guten Morgen",
+        "fr" to "x".repeat(TranslationMemoryEntry.MAX_TEXT_LENGTH + 1),
+      ),
+    ).andIsBadRequest
+
+    val landed =
+      translationMemoryEntryRepository
+        .findByTranslationMemoryId(sharedTmId)
+        .filter { it.sourceText == "Bonjour" }
+    assertThat(landed).isEmpty()
+  }
+
+  @Test
+  fun `bulk create requires at least one translation`() {
+    performAuthPost(
+      "/v2/organizations/$orgId/translation-memories/$sharedTmId/entries/multiple",
+      bulkRequest("Bonjour"),
+    ).andIsBadRequest
+  }
+
+  @Test
+  fun `bulk create is forbidden when feature is disabled`() {
+    enabledFeaturesProvider.forceEnabled = emptySet()
+    performAuthPost(
+      "/v2/organizations/$orgId/translation-memories/$sharedTmId/entries/multiple",
+      bulkRequest("Bonjour", "de" to "Guten Morgen"),
+    ).andIsBadRequest
+  }
+
+  @Test
+  fun `member cannot bulk create entries`() {
+    userAccount = testData.orgMember
+    performAuthPost(
+      "/v2/organizations/$orgId/translation-memories/$sharedTmId/entries/multiple",
+      bulkRequest("Bonjour", "de" to "Guten Morgen"),
+    ).andIsForbidden
   }
 
   // ---------- Long-segment / hash-expression index sanity ----------

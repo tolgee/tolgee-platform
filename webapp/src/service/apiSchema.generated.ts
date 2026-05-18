@@ -341,6 +341,10 @@ export interface paths {
     /** Returns one entry ID per stored row matching the optional `search` filter — the same row identities that the paged endpoint exposes, but flattened to a single long list for client-side `Select all` flows. Virtual rows are not included (they have no entry IDs). */
     get: operations["getAllStoredEntryIds"];
   };
+  "/v2/organizations/{organizationId}/translation-memories/{translationMemoryId}/entries/multiple": {
+    /** Atomic counterpart to the per-language POST. All entries land in one transaction, or none do — replaces the UI's previous per-language loop which could leave a partial result if a later language failed. The same target language must not appear twice in the same request. */
+    post: operations["createMultiple"];
+  };
   "/v2/organizations/{organizationId}/translation-memories/{translationMemoryId}/entries/{entryId}": {
     get: operations["get_14"];
     put: operations["update_9"];
@@ -1996,6 +2000,11 @@ export interface components {
         assignedProjects?: components["schemas"]["TmAssignedProjectModel"][];
       };
     };
+    CollectionModelTranslationMemoryEntryModel: {
+      _embedded?: {
+        translationMemoryEntries?: components["schemas"]["TranslationMemoryEntryModel"][];
+      };
+    };
     CollectionModelUsedNamespaceModel: {
       _embedded?: {
         namespaces?: components["schemas"]["UsedNamespaceModel"][];
@@ -2545,6 +2554,27 @@ export interface components {
     };
     CreateMultipleTasksRequest: {
       tasks: components["schemas"]["CreateTaskRequest"][];
+    };
+    CreateMultipleTranslationMemoryEntriesRequest: {
+      /**
+       * @description Source text (in the TM's source language)
+       * @example Hello world
+       */
+      sourceText: string;
+      /** @description Target translations to create, one per target language */
+      translations: components["schemas"]["CreateMultipleTranslationMemoryEntriesTranslationRequest"][];
+    };
+    CreateMultipleTranslationMemoryEntriesTranslationRequest: {
+      /**
+       * @description Target language tag according to BCP 47 definition
+       * @example de
+       */
+      targetLanguageTag: string;
+      /**
+       * @description Target translation text
+       * @example Hallo Welt
+       */
+      targetText: string;
     };
     CreatePatDto: {
       /** @description Description of the PAT */
@@ -3110,6 +3140,7 @@ export interface components {
         | "project_translation_memory_not_found"
         | "translation_memory_entry_not_found"
         | "translation_memory_entry_read_only"
+        | "translation_memory_entry_duplicate_target_language"
         | "translation_memory_import_empty"
         | "llm_content_filter"
         | "llm_provider_empty_response"
@@ -6867,6 +6898,7 @@ export interface components {
         | "project_translation_memory_not_found"
         | "translation_memory_entry_not_found"
         | "translation_memory_entry_read_only"
+        | "translation_memory_entry_duplicate_target_language"
         | "translation_memory_import_empty"
         | "llm_content_filter"
         | "llm_provider_empty_response"
@@ -12344,6 +12376,52 @@ export interface operations {
         content: {
           "application/json": string;
         };
+      };
+    };
+  };
+  /** Atomic counterpart to the per-language POST. All entries land in one transaction, or none do — replaces the UI's previous per-language loop which could leave a partial result if a later language failed. The same target language must not appear twice in the same request. */
+  createMultiple: {
+    parameters: {
+      path: {
+        organizationId: number;
+        translationMemoryId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelTranslationMemoryEntryModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateMultipleTranslationMemoryEntriesRequest"];
       };
     };
   };

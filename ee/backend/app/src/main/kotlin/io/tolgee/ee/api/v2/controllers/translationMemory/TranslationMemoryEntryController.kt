@@ -9,6 +9,7 @@ import io.tolgee.ee.api.v2.hateoas.assemblers.translationMemory.TranslationMemor
 import io.tolgee.ee.api.v2.hateoas.assemblers.translationMemory.TranslationMemoryRowModelAssembler
 import io.tolgee.ee.api.v2.hateoas.model.translationMemory.TranslationMemoryEntryModel
 import io.tolgee.ee.api.v2.hateoas.model.translationMemory.TranslationMemoryRowModel
+import io.tolgee.ee.data.translationMemory.CreateMultipleTranslationMemoryEntriesRequest
 import io.tolgee.ee.data.translationMemory.CreateTranslationMemoryEntryRequest
 import io.tolgee.ee.data.translationMemory.DeleteMultipleTranslationMemoryEntriesRequest
 import io.tolgee.ee.data.translationMemory.UpdateTranslationMemoryEntryRequest
@@ -131,6 +132,29 @@ class TranslationMemoryEntryController(
   ): TranslationMemoryEntryModel {
     val entry = translationMemoryEntryManagementService.create(organizationId, translationMemoryId, dto)
     return translationMemoryEntryModelAssembler.toModel(entry)
+  }
+
+  @PostMapping("/multiple")
+  @Operation(
+    summary = "Create translation memory entries for multiple target languages",
+    description =
+      "Atomic counterpart to the per-language POST. All entries land in one transaction, or " +
+        "none do — replaces the UI's previous per-language loop which could leave a partial " +
+        "result if a later language failed. The same target language must not appear twice in " +
+        "the same request.",
+  )
+  @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
+  @AllowApiAccess(AuthTokenType.ONLY_PAT)
+  @RequestActivity(ActivityType.TRANSLATION_MEMORY_ENTRY_CREATE)
+  @RequiresFeatures(Feature.TRANSLATION_MEMORY)
+  @Transactional
+  fun createMultiple(
+    @PathVariable organizationId: Long,
+    @PathVariable translationMemoryId: Long,
+    @RequestBody @Valid dto: CreateMultipleTranslationMemoryEntriesRequest,
+  ): CollectionModel<TranslationMemoryEntryModel> {
+    val entries = translationMemoryEntryManagementService.createMultiple(organizationId, translationMemoryId, dto)
+    return translationMemoryEntryModelAssembler.toCollectionModel(entries)
   }
 
   @PutMapping("/{entryId:[0-9]+}")

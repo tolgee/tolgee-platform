@@ -1,9 +1,11 @@
 package io.tolgee.ee.service.translationMemory
 
 import io.tolgee.constants.Message
+import io.tolgee.ee.data.translationMemory.CreateMultipleTranslationMemoryEntriesRequest
 import io.tolgee.ee.data.translationMemory.CreateTranslationMemoryEntryRequest
 import io.tolgee.ee.data.translationMemory.UpdateTranslationMemoryEntryRequest
 import io.tolgee.ee.service.translationMemory.tmx.TmxExportUnit
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.translationMemory.TranslationMemory
 import io.tolgee.model.translationMemory.TranslationMemoryEntry
@@ -549,6 +551,42 @@ class TranslationMemoryEntryManagementService(
         this.targetLanguageTag = dto.targetLanguageTag
       }
     return translationMemoryEntryRepository.save(entry)
+  }
+
+  /**
+   * Creates one entry per requested target language, all in one transaction. Replaces the
+   * UI's previous per-language POST loop — which could leave the TM in a partially-saved state
+   * if a later language failed.
+   */
+  @Transactional
+  fun createMultiple(
+    organizationId: Long,
+    translationMemoryId: Long,
+    dto: CreateMultipleTranslationMemoryEntriesRequest,
+  ): List<TranslationMemoryEntry> {
+    val tm = requireTmInOrganization(organizationId, translationMemoryId)
+    val duplicateLangs =
+      dto.translations
+        .groupingBy { it.targetLanguageTag }
+        .eachCount()
+        .filterValues { it > 1 }
+        .keys
+    if (duplicateLangs.isNotEmpty()) {
+      throw BadRequestException(
+        Message.TRANSLATION_MEMORY_ENTRY_DUPLICATE_TARGET_LANGUAGE,
+        listOf(duplicateLangs.sorted().joinToString(", ")),
+      )
+    }
+    val entries =
+      dto.translations.map { translation ->
+        TranslationMemoryEntry().apply {
+          this.translationMemory = tm
+          this.sourceText = dto.sourceText
+          this.targetText = translation.targetText
+          this.targetLanguageTag = translation.targetLanguageTag
+        }
+      }
+    return translationMemoryEntryRepository.saveAll(entries)
   }
 
   @Transactional

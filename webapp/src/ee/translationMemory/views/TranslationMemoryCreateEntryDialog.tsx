@@ -96,8 +96,8 @@ export const TranslationMemoryCreateEntryDialog: React.VFC<Props> = ({
     }
   }, [allLanguageTags, initialSelectedTags, selectedTags.length]);
 
-  const createMutation = useApiMutation({
-    url: '/v2/organizations/{organizationId}/translation-memories/{translationMemoryId}/entries',
+  const createMultipleMutation = useApiMutation({
+    url: '/v2/organizations/{organizationId}/translation-memories/{translationMemoryId}/entries/multiple',
     method: 'post',
     invalidatePrefix: '/v2/organizations/{organizationId}/translation-memories',
   });
@@ -112,25 +112,25 @@ export const TranslationMemoryCreateEntryDialog: React.VFC<Props> = ({
     !saving;
 
   const handleSave = async () => {
-    const payload = selectedTags
-      .map((tag) => ({ tag, text: textByTag[tag]?.trim() ?? '' }))
-      .filter((entry) => entry.text.length > 0);
-    if (!sourceText.trim() || payload.length === 0) return;
+    const translations = selectedTags
+      .map((tag) => ({
+        targetLanguageTag: tag,
+        targetText: textByTag[tag]?.trim() ?? '',
+      }))
+      .filter((entry) => entry.targetText.length > 0);
+    if (!sourceText.trim() || translations.length === 0) return;
 
     setSaving(true);
     try {
-      for (const entry of payload) {
-        await createMutation.mutateAsync({
-          path: { organizationId, translationMemoryId },
-          content: {
-            'application/json': {
-              sourceText: sourceText.trim(),
-              targetLanguageTag: entry.tag,
-              targetText: entry.text,
-            },
+      await createMultipleMutation.mutateAsync({
+        path: { organizationId, translationMemoryId },
+        content: {
+          'application/json': {
+            sourceText: sourceText.trim(),
+            translations,
           },
-        });
-      }
+        },
+      });
       messageService.success(
         <T
           keyName="translation_memory_entry_created"
