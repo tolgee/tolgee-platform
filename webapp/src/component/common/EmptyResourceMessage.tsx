@@ -60,9 +60,11 @@ export const EmptyResourceMessage: React.VFC<AddFirstResourceMessageProps> = ({
     <StyledCard elevation={0}>
       <StyledText>
         <Typography variant="h4">
+          {/* @tolgee-ignore — key is supplied by the caller via the `title` prop */}
           <T {...title} />
         </Typography>
         <Typography mt={2}>
+          {/* @tolgee-ignore — key is supplied by the caller via the `message` prop */}
           <T {...message} />
         </Typography>
       </StyledText>
@@ -81,6 +83,7 @@ export const EmptyResourceMessage: React.VFC<AddFirstResourceMessageProps> = ({
           aria-label="add"
           onClick={button.onClick}
         >
+          {/* @tolgee-ignore — key is supplied by the caller via the `button` prop */}
           <T
             keyName={button.keyName}
             defaultValue={button.defaultValue}
