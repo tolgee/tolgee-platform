@@ -113,6 +113,7 @@ class QaCheckBatchServiceImpl(
     return items.mapNotNull { item ->
       // If the key has been deleted between job enqueue and processing, skip it
       val key = keyById[item.keyId] ?: return@mapNotNull null
+      val languageTag = languageTagById[item.languageId] ?: return@mapNotNull null
 
       val translation = translationByKeyAndLanguage[item.keyId to item.languageId]
       val text = translation?.text ?: ""
@@ -128,10 +129,6 @@ class QaCheckBatchServiceImpl(
         baseText?.takeIf { isPlural }?.let {
           runCatching { getPluralForms(it) }.getOrNull()
         }
-
-      val languageTag =
-        languageTagById[item.languageId]
-          ?: error("Language tag missing for languageId=${item.languageId}")
 
       // This is probably the most expensive thing we do for each item
       // In the future, we will probably switch to persisting glossary terms for each translation,

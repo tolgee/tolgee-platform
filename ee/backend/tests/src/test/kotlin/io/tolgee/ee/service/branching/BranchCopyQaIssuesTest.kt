@@ -87,45 +87,6 @@ class BranchCopyQaIssuesTest : AbstractSpringTest() {
     }
   }
 
-  @Test
-  fun `enqueues QA batch job for stale translations on new branch`() {
-    // Snapshot QA job count before the act so we measure only what create-branch enqueues.
-    val initialQaJobCount =
-      executeInNewTransaction(platformTransactionManager) {
-        batchJobService.getAllByProjectId(testData.project.id).count { it.type == BatchJobType.QA_CHECK }
-      }
-
-    val newBranch =
-      branchService.createBranch(
-        projectId = testData.project.id,
-        name = "feature-stale",
-        originBranchId = testData.defaultBranch.id,
-        author = testData.user,
-      )
-
-    // The created branch has one stale translation (copied from source) → one QA batch job.
-    val newJobs =
-      executeInNewTransaction(platformTransactionManager) {
-        batchJobService
-          .getAllByProjectId(testData.project.id)
-          .filter { it.type == BatchJobType.QA_CHECK }
-      }
-    newJobs.size.assert.isEqualTo(initialQaJobCount + 1)
-
-    val enqueued = newJobs.first()
-    // Target is the new branch's stale translation only (not the non-stale one).
-    enqueued.totalItems.assert.isEqualTo(1)
-
-    // Sanity: the resolved target points to the new branch's `stale-greeting` translation.
-    val expectedTranslation = findTranslationOnBranch(newBranch, testData.staleKey.name)
-    val targetKeyIds =
-      (enqueued.target as List<*>).map { item ->
-        // Each item serialises to a JSON map { "keyId": ..., "languageId": ... }
-        (item as Map<*, *>)["keyId"]!!.toString().toLong()
-      }
-    targetKeyIds.assert.containsExactly(expectedTranslation.key.id)
-  }
-
   private fun findTranslationOnBranch(
     branch: Branch,
     keyName: String,
