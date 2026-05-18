@@ -1,0 +1,116 @@
+.plugin-page {
+  font-family: system-ui, sans-serif;
+  padding: 1.5rem;
+  max-width: 900px;
+}
+
+.plugin-page h1 {
+  margin: 0 0 0.5rem;
+  font-size: 1.75rem;
+}
+
+.plugin-page p {
+  margin: 0 0 1rem;
+  color: #444;
+}
+
+.plugin-page table.keys {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.plugin-page table.keys th,
+.plugin-page table.keys td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+  vertical-align: top;
+}
+
+.plugin-page table.keys th {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  color: #666;
+  background: #fafafa;
+}
+
+.plugin-page code {
+  background: #f3f3f3;
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-size: 0.85em;
+}
+
+.plugin-page code.ns {
+  margin-right: 6px;
+  color: #888;
+}
+
+.plugin-page code.lang {
+  margin-right: 6px;
+  color: #555;
+}
+
+.plugin-page .emoji-row {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+}
+
+.plugin-page .emoji-btn {
+  font-size: 1.1em;
+  line-height: 1;
+  border: 1px solid transparent;
+  background: transparent;
+  border-radius: 4px;
+  padding: 2px 4px;
+  cursor: pointer;
+  transition:
+    background 0.1s,
+    border-color 0.1s;
+}
+
+.plugin-page .emoji-btn:hover {
+  background: #f3f3f3;
+}
+
+.plugin-page .emoji-btn.selected {
+  background: #fff5d6;
+  border-color: #e0c060;
+}
+
+.plugin-page .emoji-btn.clear {
+  font-size: 0.95em;
+  color: #888;
+}
+
+.plugin-page .emoji-btn[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.plugin-page .updated {
+  font-size: 0.7rem;
+  color: #888;
+  margin-top: 2px;
+}
+
+.plugin-page th .th-hint {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 400;
+  color: #999;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.plugin-page .activity-cell {
+  vertical-align: middle;
+}
+
+.plugin-page .activity-count {
+  font-size: 0.7rem;
+  color: #888;
+  margin-top: 2px;
+}

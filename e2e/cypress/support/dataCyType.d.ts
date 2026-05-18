@@ -579,6 +579,42 @@ declare namespace DataCy {
         "order-translation-sharing-details-consent-checkbox" |
         "order-translation-submit" |
         "organization-address-part-field" |
+        "organization-apps-item" |
+        "organization-apps-item-client-id" |
+        "organization-apps-item-client-secret" |
+        "organization-apps-item-credentials" |
+        "organization-apps-item-events" |
+        "organization-apps-item-refresh" |
+        "organization-apps-item-remove" |
+        "organization-apps-item-scopes" |
+        "organization-apps-item-webhook-secret" |
+        "organization-apps-item-webhook-secret-toggle" |
+        "organization-apps-refresh-cancel" |
+        "organization-apps-refresh-content" |
+        "organization-apps-refresh-dialog" |
+        "organization-apps-refresh-event-added" |
+        "organization-apps-refresh-event-kept" |
+        "organization-apps-refresh-event-removed" |
+        "organization-apps-refresh-scope-added" |
+        "organization-apps-refresh-scope-kept" |
+        "organization-apps-refresh-scope-removed" |
+        "organization-apps-refresh-submit" |
+        "organization-apps-register-back" |
+        "organization-apps-register-button" |
+        "organization-apps-register-consent" |
+        "organization-apps-register-consent-no-scopes" |
+        "organization-apps-register-consent-scope" |
+        "organization-apps-register-consent-webhook" |
+        "organization-apps-register-continue" |
+        "organization-apps-register-dialog" |
+        "organization-apps-register-done" |
+        "organization-apps-register-manifest-url" |
+        "organization-apps-register-reveal" |
+        "organization-apps-register-secret-client-id" |
+        "organization-apps-register-secret-client-secret" |
+        "organization-apps-register-secret-webhook-secret" |
+        "organization-apps-register-submit" |
+        "organization-apps-registered-section" |
         "organization-description-field" |
         "organization-invitation-cancel-button" |
         "organization-invitation-copy-button" |
@@ -622,6 +658,9 @@ declare namespace DataCy {
         "plan_seat_limit_exceeded_while_accepting_invitation_message" |
         "project-ai-prompt-dialog-description-input" |
         "project-ai-prompt-dialog-save" |
+        "project-app-page-iframe" |
+        "project-app-page-loading" |
+        "project-app-page-missing" |
         "project-branch-merge-accept" |
         "project-branch-merge-apply" |
         "project-branch-merge-cancel" |
@@ -665,6 +704,7 @@ declare namespace DataCy {
         "project-members-invitation-item" |
         "project-menu-item" |
         "project-menu-item-ai" |
+        "project-menu-item-app-" |
         "project-menu-item-branches" |
         "project-menu-item-dashboard" |
         "project-menu-item-developer" |
@@ -682,6 +722,10 @@ declare namespace DataCy {
         "project-name-field" |
         "project-select" |
         "project-settings" |
+        "project-settings-apps" |
+        "project-settings-apps-empty" |
+        "project-settings-apps-item" |
+        "project-settings-apps-item-toggle" |
         "project-settings-branch-item" |
         "project-settings-branch-item-name" |
         "project-settings-branch-item-properties" |
@@ -707,6 +751,7 @@ declare namespace DataCy {
         "project-settings-languages-list-edit-button" |
         "project-settings-languages-list-name" |
         "project-settings-menu-advanced" |
+        "project-settings-menu-apps" |
         "project-settings-menu-general" |
         "project-settings-menu-labels" |
         "project-settings-menu-qa" |
