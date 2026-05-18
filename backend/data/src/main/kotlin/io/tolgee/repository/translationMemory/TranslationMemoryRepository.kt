@@ -1,21 +1,13 @@
 package io.tolgee.repository.translationMemory
 
 import io.tolgee.model.translationMemory.TranslationMemory
-import io.tolgee.model.translationMemory.TranslationMemoryType
 import io.tolgee.model.translationMemory.TranslationMemoryWithStats
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
-import org.springframework.stereotype.Repository
 
-@Repository
 interface TranslationMemoryRepository : JpaRepository<TranslationMemory, Long> {
-  fun findByOrganizationOwnerIdAndType(
-    organizationOwnerId: Long,
-    type: TranslationMemoryType,
-  ): List<TranslationMemory>
-
   @Query(
     """
     from TranslationMemory
@@ -51,22 +43,6 @@ interface TranslationMemoryRepository : JpaRepository<TranslationMemory, Long> {
     organizationId: Long,
     translationMemoryIds: List<Long>,
   ): List<Long>
-
-  @Query(
-    """
-    from TranslationMemory
-    where organizationOwner.id = :organizationId
-      and organizationOwner.deletedAt is null
-      and type = :type
-      and (lower(name) like lower(concat('%', coalesce(:search, ''), '%')) or :search is null)
-    """,
-  )
-  fun findByOrganizationIdAndTypePaged(
-    organizationId: Long,
-    type: TranslationMemoryType,
-    pageable: Pageable,
-    search: String?,
-  ): Page<TranslationMemory>
 
   @Query(
     """
