@@ -7,7 +7,6 @@ import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.batch.request.QaCheckRequest
 import io.tolgee.ee.development.QaTestData
 import io.tolgee.model.Project
-import io.tolgee.model.translation.Translation
 import io.tolgee.testing.assert
 import io.tolgee.util.executeInNewTransaction
 import org.junit.jupiter.api.AfterEach
@@ -31,7 +30,6 @@ class QaSelfHealStaleTest : AbstractSpringTest() {
   @BeforeEach
   fun setup() {
     testData = QaTestData()
-    testDataService.saveTestData(testData.root)
   }
 
   @AfterEach
@@ -41,6 +39,7 @@ class QaSelfHealStaleTest : AbstractSpringTest() {
 
   @Test
   fun `enqueues self-heal QA job when stale translations exist`() {
+    testDataService.saveTestData(testData.root)
     val baseline = qaJobCount()
 
     qaRecheckService.recheckStuckStaleTranslationsInProject(testData.project.id)
@@ -50,15 +49,8 @@ class QaSelfHealStaleTest : AbstractSpringTest() {
 
   @Test
   fun `does not enqueue when no stale translations`() {
-    executeInNewTransaction(platformTransactionManager) {
-      // FIXME: This should be a function in test data to optionally modify it's state before we save the test data
-      entityManager
-        .createQuery(
-          "update Translation t set t.qaChecksStale = false " +
-            "where t.key.project.id = :pid",
-        ).setParameter("pid", testData.project.id)
-        .executeUpdate()
-    }
+    testData.clearAllStaleFlags()
+    testDataService.saveTestData(testData.root)
     val baseline = qaJobCount()
 
     qaRecheckService.recheckStuckStaleTranslationsInProject(testData.project.id)
@@ -68,19 +60,8 @@ class QaSelfHealStaleTest : AbstractSpringTest() {
 
   @Test
   fun `does not enqueue when another QA job is already active`() {
-    val staleTranslation =
-      executeInNewTransaction(platformTransactionManager) {
-        // FIXME: This should be exposed by test data as it's propety - no need to query for stuff created by test data
-        // when it isn't required by the test itself
-        entityManager
-          .createQuery(
-            "select t from Translation t " +
-              "where t.key.project.id = :pid and t.qaChecksStale = true",
-            Translation::class.java,
-          ).setParameter("pid", testData.project.id)
-          .resultList
-          .first()
-      }
+    testDataService.saveTestData(testData.root)
+    val staleTranslation = testData.staleFrTranslation
     // Manually enqueue a QA job so `hasActiveJobForProject` returns true.
     executeInNewTransaction(platformTransactionManager) {
       val projectRef = entityManager.getReference(Project::class.java, testData.project.id)
@@ -110,11 +91,8 @@ class QaSelfHealStaleTest : AbstractSpringTest() {
 
   @Test
   fun `does not enqueue when QA checks are disabled on project`() {
-    executeInNewTransaction(platformTransactionManager) {
-      // FIXME: This should be a function in test data to optionally modify it's state before we save the test data
-      val project = entityManager.find(Project::class.java, testData.project.id)
-      project.useQaChecks = false
-    }
+    testData.disableQaChecks()
+    testDataService.saveTestData(testData.root)
     val baseline = qaJobCount()
 
     qaRecheckService.recheckStuckStaleTranslationsInProject(testData.project.id)
