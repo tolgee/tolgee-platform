@@ -5,6 +5,8 @@ import {
   DialogContent,
   DialogActions,
   Button,
+  Alert,
+  Box,
 } from '@mui/material';
 import { T } from '@tolgee/react';
 
@@ -16,6 +18,8 @@ import { ModeSelector, ModeOption } from 'tg.component/common/ModeSelector';
 import { SingleFileDropzone } from 'tg.component/common/SingleFileDropzone';
 import { FilesType } from 'tg.fixtures/FileUploadFixtures';
 import { File02 } from '@untitled-ui/icons-react';
+import { useTmxOversizeScan } from 'tg.ee.module/translationMemory/hooks/useTmxOversizeScan';
+import { TM_ENTRY_TEXT_MAX_LENGTH } from 'tg.ee.module/translationMemory/services/scanTmxForOversize';
 
 type Props = {
   open: boolean;
@@ -73,6 +77,7 @@ export const TranslationMemoryImportDialog: React.VFC<Props> = ({
 }) => {
   const [file, setFile] = useState<FilesType[number] | null>(null);
   const [importMode, setImportMode] = useState<ImportMode>('keep');
+  const scan = useTmxOversizeScan(file?.file ?? null);
 
   const importMutation = useApiMutation({
     url: '/v2/organizations/{organizationId}/translation-memories/{translationMemoryId}/import',
@@ -161,6 +166,31 @@ export const TranslationMemoryImportDialog: React.VFC<Props> = ({
             />
           }
         />
+
+        <Box mt={2} mb={2}>
+          {scan.kind === 'scanned' && scan.oversizeSegments > 0 && (
+            <Alert severity="warning" data-cy="tm-import-oversize-warning">
+              <T
+                keyName="translation_memory_import_oversize_warning"
+                defaultValue="Found {count, plural, one {# text} other {# texts}} over {limit} characters. {count, plural, one {This} other {These}} will be skipped unless changed."
+                params={{
+                  count: scan.oversizeSegments,
+                  limit: TM_ENTRY_TEXT_MAX_LENGTH,
+                }}
+              />
+            </Alert>
+          )}
+
+          {scan.kind === 'tooLargeToScan' && (
+            <Alert severity="info" data-cy="tm-import-large-file-notice">
+              <T
+                keyName="translation_memory_import_large_file_notice"
+                defaultValue="File too large to pre-check. Texts over {limit} characters will be skipped on import."
+                params={{ limit: TM_ENTRY_TEXT_MAX_LENGTH }}
+              />
+            </Alert>
+          )}
+        </Box>
 
         {file && hasExistingEntries && (
           <ModeSelector
