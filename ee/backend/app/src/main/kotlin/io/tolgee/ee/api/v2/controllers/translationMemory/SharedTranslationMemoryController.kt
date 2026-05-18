@@ -17,7 +17,7 @@ import io.tolgee.ee.api.v2.hateoas.model.translationMemory.TranslationMemoryWith
 import io.tolgee.ee.data.translationMemory.SharedTranslationMemoryRequest
 import io.tolgee.ee.data.translationMemory.UpdateProjectTmSettingsRequest
 import io.tolgee.ee.service.translationMemory.SharedTranslationMemoryService
-import io.tolgee.ee.service.translationMemory.TranslationMemoryEntryManagementService
+import io.tolgee.ee.service.translationMemory.TranslationMemoryRowListingService
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.translationMemory.TranslationMemory
 import io.tolgee.model.translationMemory.TranslationMemoryWithStats
@@ -49,7 +49,7 @@ import org.springframework.web.bind.annotation.RestController
 @Tag(name = "Translation Memory")
 class SharedTranslationMemoryController(
   private val sharedTranslationMemoryService: SharedTranslationMemoryService,
-  private val translationMemoryEntryManagementService: TranslationMemoryEntryManagementService,
+  private val translationMemoryRowListingService: TranslationMemoryRowListingService,
   private val translationMemoryModelAssembler: TranslationMemoryModelAssembler,
   private val simpleTranslationMemoryModelAssembler: SimpleTranslationMemoryModelAssembler,
   private val translationMemoryWithStatsModelAssembler: TranslationMemoryWithStatsModelAssembler,
@@ -190,7 +190,7 @@ class SharedTranslationMemoryController(
     @RequestParam("ids") ids: List<Long>,
   ): TranslationMemoryEntryCountsModel {
     val counts =
-      translationMemoryEntryManagementService.getEntryCounts(
+      translationMemoryRowListingService.getEntryCounts(
         organizationHolder.organization.id,
         ids,
       )

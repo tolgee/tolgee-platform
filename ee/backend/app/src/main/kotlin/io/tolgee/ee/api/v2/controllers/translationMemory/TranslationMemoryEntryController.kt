@@ -14,6 +14,7 @@ import io.tolgee.ee.data.translationMemory.DeleteMultipleTranslationMemoryEntrie
 import io.tolgee.ee.data.translationMemory.TranslationMemoryEntryRequest
 import io.tolgee.ee.service.translationMemory.TmRow
 import io.tolgee.ee.service.translationMemory.TranslationMemoryEntryManagementService
+import io.tolgee.ee.service.translationMemory.TranslationMemoryRowListingService
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthTokenType
@@ -41,6 +42,7 @@ import org.springframework.web.bind.annotation.RestController
 @Tag(name = "Translation Memory")
 class TranslationMemoryEntryController(
   private val translationMemoryEntryManagementService: TranslationMemoryEntryManagementService,
+  private val translationMemoryRowListingService: TranslationMemoryRowListingService,
   private val translationMemoryEntryModelAssembler: TranslationMemoryEntryModelAssembler,
   private val translationMemoryRowModelAssembler: TranslationMemoryRowModelAssembler,
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
@@ -67,7 +69,7 @@ class TranslationMemoryEntryController(
     @ParameterObject pageable: Pageable,
   ): PagedModel<TranslationMemoryRowModel> {
     val page =
-      translationMemoryEntryManagementService.listEntryRows(
+      translationMemoryRowListingService.listEntryRows(
         organizationId = organizationId,
         translationMemoryId = translationMemoryId,
         pageable = pageable,
@@ -95,7 +97,7 @@ class TranslationMemoryEntryController(
     @RequestParam(required = false) search: String?,
   ): CollectionModel<Long> {
     val ids =
-      translationMemoryEntryManagementService.findAllStoredEntryIds(
+      translationMemoryRowListingService.findAllStoredEntryIds(
         organizationId = organizationId,
         translationMemoryId = translationMemoryId,
         search = search,
