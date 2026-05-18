@@ -5566,6 +5566,7 @@ export interface components {
       category: "TEXT" | "TECHNICAL";
       checkTypes: (
         | "EMPTY_TRANSLATION"
+        | "MISSING_PLURAL_CATEGORIES"
         | "CHARACTER_CASE_MISMATCH"
         | "REPEATED_WORDS"
         | "PUNCTUATION_MISMATCH"
@@ -5590,7 +5591,7 @@ export interface components {
       /** @enum {string} */
       message:
         | "qa_empty_translation"
-        | "qa_empty_plural_variant"
+        | "qa_missing_plural_category"
         | "qa_check_failed"
         | "qa_spaces_leading_added"
         | "qa_spaces_leading_removed"
@@ -5643,6 +5644,7 @@ export interface components {
       /** @enum {string} */
       type:
         | "EMPTY_TRANSLATION"
+        | "MISSING_PLURAL_CATEGORIES"
         | "CHARACTER_CASE_MISMATCH"
         | "REPEATED_WORDS"
         | "PUNCTUATION_MISMATCH"
@@ -5671,7 +5673,7 @@ export interface components {
       /** @enum {string} */
       message:
         | "qa_empty_translation"
-        | "qa_empty_plural_variant"
+        | "qa_missing_plural_category"
         | "qa_check_failed"
         | "qa_spaces_leading_added"
         | "qa_spaces_leading_removed"
@@ -5726,6 +5728,7 @@ export interface components {
       /** @enum {string} */
       type:
         | "EMPTY_TRANSLATION"
+        | "MISSING_PLURAL_CATEGORIES"
         | "CHARACTER_CASE_MISMATCH"
         | "REPEATED_WORDS"
         | "PUNCTUATION_MISMATCH"
@@ -15919,6 +15922,7 @@ export interface operations {
         /** Filter keys with specific QA check type issues */
         filterQaCheckType?: (
           | "EMPTY_TRANSLATION"
+          | "MISSING_PLURAL_CATEGORIES"
           | "CHARACTER_CASE_MISMATCH"
           | "REPEATED_WORDS"
           | "PUNCTUATION_MISMATCH"
@@ -16070,6 +16074,7 @@ export interface operations {
         /** Filter keys with specific QA check type issues */
         filterQaCheckType?: (
           | "EMPTY_TRANSLATION"
+          | "MISSING_PLURAL_CATEGORIES"
           | "CHARACTER_CASE_MISMATCH"
           | "REPEATED_WORDS"
           | "PUNCTUATION_MISMATCH"
@@ -16257,6 +16262,7 @@ export interface operations {
         /** Filter keys with specific QA check type issues */
         filterQaCheckType?: (
           | "EMPTY_TRANSLATION"
+          | "MISSING_PLURAL_CATEGORIES"
           | "CHARACTER_CASE_MISMATCH"
           | "REPEATED_WORDS"
           | "PUNCTUATION_MISMATCH"
@@ -20996,6 +21002,7 @@ export interface operations {
         /** Filter keys with specific QA check type issues */
         filterQaCheckType?: (
           | "EMPTY_TRANSLATION"
+          | "MISSING_PLURAL_CATEGORIES"
           | "CHARACTER_CASE_MISMATCH"
           | "REPEATED_WORDS"
           | "PUNCTUATION_MISMATCH"
@@ -21327,6 +21334,7 @@ export interface operations {
         /** Filter keys with specific QA check type issues */
         filterQaCheckType?: (
           | "EMPTY_TRANSLATION"
+          | "MISSING_PLURAL_CATEGORIES"
           | "CHARACTER_CASE_MISMATCH"
           | "REPEATED_WORDS"
           | "PUNCTUATION_MISMATCH"

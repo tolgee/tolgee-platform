@@ -8,6 +8,8 @@ export function useQaCheckTypeLabel(type: QaCheckType): string {
   switch (type) {
     case 'EMPTY_TRANSLATION':
       return t('qa_check_type_empty_translation');
+    case 'MISSING_PLURAL_CATEGORIES':
+      return t('qa_check_type_missing_plural_categories');
     case 'SPACES_MISMATCH':
       return t('qa_check_type_spaces_mismatch');
     case 'UNMATCHED_NEWLINES':

@@ -5,7 +5,7 @@ import java.util.Locale
 
 enum class QaIssueMessage {
   QA_EMPTY_TRANSLATION,
-  QA_EMPTY_PLURAL_VARIANT,
+  QA_MISSING_PLURAL_CATEGORY,
   QA_CHECK_FAILED,
 
   // Spaces mismatch
