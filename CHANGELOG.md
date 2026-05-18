@@ -1,3 +1,17 @@
+# [3.187.0](https://github.com/tolgee/tolgee-platform/compare/v3.186.2...v3.187.0) (2026-05-18)
+
+
+### Bug Fixes
+
+* run doubled-spaces QA check on base translation and filter placeholders/HTML ([#3656](https://github.com/tolgee/tolgee-platform/issues/3656)) ([288eac2](https://github.com/tolgee/tolgee-platform/commit/288eac21f5c75b57604a99c0f76db55f642d4b3d))
+
+
+### Features
+
+* reorganize QA check categories into TEXT and TECHNICAL ([#3655](https://github.com/tolgee/tolgee-platform/issues/3655)) ([4c78dca](https://github.com/tolgee/tolgee-platform/commit/4c78dca81ad051ec44d274c2cc0ef11ac736eda1))
+* show language flag in QA stats popup header ([#3659](https://github.com/tolgee/tolgee-platform/issues/3659)) ([a210010](https://github.com/tolgee/tolgee-platform/commit/a210010363938679c8904f4fb8f7989a50dc86b4))
+* show QA issues for all plural variants in the side panel ([#3661](https://github.com/tolgee/tolgee-platform/issues/3661)) ([a180c6b](https://github.com/tolgee/tolgee-platform/commit/a180c6bdce78432179dde73851ff8da02e5164a7))
+
 ## [3.186.2](https://github.com/tolgee/tolgee-platform/compare/v3.186.1...v3.186.2) (2026-05-13)
 
 
