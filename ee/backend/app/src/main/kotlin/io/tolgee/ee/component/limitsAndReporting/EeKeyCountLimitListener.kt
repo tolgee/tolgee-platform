@@ -35,8 +35,8 @@ class EeKeyCountLimitListener(
   private var keyCount: Long? = null
 
   @EventListener
-  fun onActivity(event: EntityPreCommitEvent) {
-    if (billingConfProvider().enabled || event.entity !is Key) {
+  fun onActivity(event: EntityPreCommitEvent<Key>) {
+    if (billingConfProvider().enabled) {
       return
     }
 
