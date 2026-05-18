@@ -6,6 +6,7 @@ import { Box, IconButton, styled, Tooltip, Typography } from '@mui/material';
 import { Settings01 } from '@untitled-ui/icons-react';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import {
+  useEnabledFeatures,
   useIsOrganizationOwnerOrMaintainer,
   usePreferredOrganization,
 } from 'tg.globalContext/helpers';
@@ -32,6 +33,7 @@ export const TranslationMemoryView = () => {
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   const canManage = useIsOrganizationOwnerOrMaintainer();
+  const { isEnabled } = useEnabledFeatures();
   const { preferredOrganization } = usePreferredOrganization();
   const organization = useOrganization();
   const match = useRouteMatch();
@@ -85,7 +87,10 @@ export const TranslationMemoryView = () => {
     [assignedProjectsList]
   );
 
-  if (isNaN(translationMemoryId)) {
+  if (isNaN(translationMemoryId) || !isEnabled('TRANSLATION_MEMORY')) {
+    // Direct-URL access to the org TM view falls through when the feature is disabled.
+    // The list view renders the upgrade banner — bounce there instead of showing a broken
+    // detail page that depends on TM data the API won't return.
     return (
       <Redirect
         to={LINKS.ORGANIZATION_TRANSLATION_MEMORIES.build({
