@@ -94,23 +94,21 @@ export const TranslationMemoryEntryRow: React.VFC<Props> = ({
       defaultValue="Only organization maintainers can edit translation memory entries."
     />
   ) : mirroredFromProject ? (
-    <span>
-      <T
-        keyName="tm_entry_edit_disabled_virtual_prefix"
-        defaultValue="This translation comes from project"
-      />{' '}
-      <ProjectLink
-        project={{
-          id: row.projectId!,
-          name: row.projectName!,
-        }}
-      />
-      {'. '}
-      <T
-        keyName="tm_entry_edit_disabled_virtual_suffix"
-        defaultValue="Edit it there."
-      />
-    </span>
+    <T
+      keyName="tm_entry_edit_disabled_virtual"
+      defaultValue="This translation comes from project <projectLink>{projectName}</projectLink>. Edit it there."
+      params={{
+        projectName: row.projectName!,
+        projectLink: (
+          <ProjectLink
+            project={{
+              id: row.projectId!,
+              name: row.projectName!,
+            }}
+          />
+        ),
+      }}
+    />
   ) : undefined;
 
   return (
