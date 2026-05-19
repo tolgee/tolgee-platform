@@ -5348,4 +5348,18 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="anty" id="2026-05-19-migrate-qa-empty-plural-variant">
+        <sql>
+            UPDATE translation_qa_issue
+            SET type = 'MISSING_PLURAL_CATEGORIES',
+                message = 'QA_MISSING_PLURAL_CATEGORY'
+            WHERE message = 'QA_EMPTY_PLURAL_VARIANT';
+        </sql>
+        <rollback>
+            UPDATE translation_qa_issue
+            SET type = 'EMPTY_TRANSLATION',
+                message = 'QA_EMPTY_PLURAL_VARIANT'
+            WHERE message = 'QA_MISSING_PLURAL_CATEGORY';
+        </rollback>
+    </changeSet>
 </databaseChangeLog>
