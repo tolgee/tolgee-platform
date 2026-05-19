@@ -1,3 +1,10 @@
+## [3.188.1](https://github.com/tolgee/tolgee-platform/compare/v3.188.0...v3.188.1) (2026-05-19)
+
+
+### Bug Fixes
+
+* migrate stale QA_EMPTY_PLURAL_VARIANT rows to new enum ([#3672](https://github.com/tolgee/tolgee-platform/issues/3672)) ([b4ef2c4](https://github.com/tolgee/tolgee-platform/commit/b4ef2c46c67a6c0b3e73df1515992bf0a741a00f)), closes [#3660](https://github.com/tolgee/tolgee-platform/issues/3660)
+
 # [3.188.0](https://github.com/tolgee/tolgee-platform/compare/v3.187.0...v3.188.0) (2026-05-18)
 
 
