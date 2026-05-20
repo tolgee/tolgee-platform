@@ -20,10 +20,6 @@ import java.util.Date
   properties = ["tolgee.batch.old-job-cleanup-enabled=true"],
 )
 class OldBatchJobCleanerTest : AbstractSpringTest() {
-  companion object {
-    private const val DUMMY_LOCKED_JOB_ID = 999_999_999L
-  }
-
   @Autowired
   lateinit var oldBatchJobCleaner: OldBatchJobCleaner
 
@@ -175,14 +171,14 @@ class OldBatchJobCleanerTest : AbstractSpringTest() {
   fun `leaves project lock untouched when it points at a different (live) job`() {
     val oldDate = Date().addDays(-5)
     val oldJob = createJobWithStatus(BatchJobStatus.SUCCESS, oldDate)
+    val liveJob = createJobWithStatus(BatchJobStatus.RUNNING, Date())
     val projectId = testData.project.id
-    // Simulate a different live job currently holding the lock for this project.
-    lockingManager.getMap()[projectId] = DUMMY_LOCKED_JOB_ID
+    lockingManager.getMap()[projectId] = liveJob.id
 
     oldBatchJobCleaner.cleanup()
 
     assertJobDeleted(oldJob.id)
-    lockingManager.getLockedForProject(projectId).assert.isEqualTo(DUMMY_LOCKED_JOB_ID)
+    lockingManager.getLockedForProject(projectId).assert.isEqualTo(liveJob.id)
   }
 
   @Test
