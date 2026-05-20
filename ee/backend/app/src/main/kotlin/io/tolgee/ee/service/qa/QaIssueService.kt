@@ -225,7 +225,7 @@ class QaIssueService(
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, false, ?)
       """.trimIndent(),
       rows,
-      100,
+      1000,
     ) { ps, row ->
       val r = row.result
       val id = sequenceIdProvider.next(ps.connection)
