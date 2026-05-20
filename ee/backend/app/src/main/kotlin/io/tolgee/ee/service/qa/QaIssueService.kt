@@ -56,7 +56,7 @@ class QaIssueService(
   ) {
     if (resultsByTranslationId.isEmpty()) return
     val translationIds = resultsByTranslationId.keys
-    val existingIssuesByTranslationId = findExistingIssuesByTranslationIds(translationIds)
+    val existingIssuesByTranslationId = findExistingIssuesByTranslationIdsAndCheckTypes(translationIds, checkTypes)
 
     deleteByTranslationIdInAndTypeIn(translationIds, checkTypes)
     qaIssueRepository.flush()
@@ -83,9 +83,15 @@ class QaIssueService(
   }
 
   @Transactional(readOnly = true)
-  fun findExistingIssuesByTranslationIds(translationIds: Collection<Long>): Map<Long, List<TranslationQaIssue>> {
+  fun findExistingIssuesByTranslationIdsAndCheckTypes(
+    translationIds: Collection<Long>,
+    checkTypes: List<QaCheckType>? = null,
+  ): Map<Long, List<TranslationQaIssue>> {
     if (translationIds.isEmpty()) return emptyMap()
-    return qaIssueRepository.findByTranslationIds(translationIds).groupBy { it.translation.id }
+    if (checkTypes == null) {
+      return qaIssueRepository.findByTranslationIds(translationIds).groupBy { it.translation.id }
+    }
+    return qaIssueRepository.findByTranslationIdsAndCheckTypes(translationIds, checkTypes).groupBy { it.translation.id }
   }
 
   @Transactional

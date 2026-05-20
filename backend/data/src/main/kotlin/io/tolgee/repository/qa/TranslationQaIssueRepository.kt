@@ -77,6 +77,18 @@ interface TranslationQaIssueRepository : JpaRepository<TranslationQaIssue, Long>
   )
   fun findByTranslationIds(translationIds: Collection<Long>): List<TranslationQaIssue>
 
+  @Query(
+    """
+    select i from TranslationQaIssue i
+    where i.translation.id in :translationIds
+    and i.type in :checkTypes
+    """,
+  )
+  fun findByTranslationIdsAndCheckTypes(
+    translationIds: Collection<Long>,
+    checkTypes: List<QaCheckType>,
+  ): List<TranslationQaIssue>
+
   fun findAllByTranslationId(translationId: Long): List<TranslationQaIssue>
 
   fun findAllByTranslationIdIn(translationIds: Collection<Long>): List<TranslationQaIssue>
