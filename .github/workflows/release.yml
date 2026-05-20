@@ -67,8 +67,6 @@ jobs:
           VERSION: ${{ steps.version.outputs.VERSION }}
           TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
           TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
-          DOCKER_CACHE_FROM: type=registry,ref=tolgee/tolgee:latest
-          DOCKER_CACHE_TO: type=inline
 
       - name: Pack with webapp
         if: ${{ steps.version.outputs.VERSION != '' }}
