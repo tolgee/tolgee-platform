@@ -1,3 +1,10 @@
+# [3.190.0](https://github.com/tolgee/tolgee-platform/compare/v3.189.0...v3.190.0) (2026-05-20)
+
+
+### Features
+
+* Translation Memory Management ([#3596](https://github.com/tolgee/tolgee-platform/issues/3596)) ([f8c8129](https://github.com/tolgee/tolgee-platform/commit/f8c8129c370fcafada4a2f30058caa056a3bc596))
+
 # [3.189.0](https://github.com/tolgee/tolgee-platform/compare/v3.188.1...v3.189.0) (2026-05-20)
 
 
