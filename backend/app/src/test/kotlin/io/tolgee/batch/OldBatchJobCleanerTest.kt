@@ -16,12 +16,14 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import java.util.Date
 
-private const val DUMMY_LOCKED_JOB_ID = 999_999_999L
-
 @SpringBootTest(
   properties = ["tolgee.batch.old-job-cleanup-enabled=true"],
 )
 class OldBatchJobCleanerTest : AbstractSpringTest() {
+  companion object {
+    private const val DUMMY_LOCKED_JOB_ID = 999_999_999L
+  }
+
   @Autowired
   lateinit var oldBatchJobCleaner: OldBatchJobCleaner
 
