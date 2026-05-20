@@ -16,12 +16,17 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import java.util.Date
 
+private const val DUMMY_LOCKED_JOB_ID = 999_999_999L
+
 @SpringBootTest(
   properties = ["tolgee.batch.old-job-cleanup-enabled=true"],
 )
 class OldBatchJobCleanerTest : AbstractSpringTest() {
   @Autowired
   lateinit var oldBatchJobCleaner: OldBatchJobCleaner
+
+  @Autowired
+  lateinit var lockingManager: BatchJobProjectLockingManager
 
   lateinit var testData: BaseTestData
 
@@ -149,6 +154,33 @@ class OldBatchJobCleanerTest : AbstractSpringTest() {
     assertJobDeleted(cancelledJob.id)
     assertJobExists(failedJob.id)
     assertJobExists(runningJob.id)
+  }
+
+  @Test
+  fun `releases project lock pointing at a deleted job`() {
+    val oldDate = Date().addDays(-5)
+    val job = createJobWithStatus(BatchJobStatus.SUCCESS, oldDate)
+    val projectId = testData.project.id
+    lockingManager.getMap()[projectId] = job.id
+
+    oldBatchJobCleaner.cleanup()
+
+    assertJobDeleted(job.id)
+    lockingManager.getLockedForProject(projectId).assert.isEqualTo(0L)
+  }
+
+  @Test
+  fun `leaves project lock untouched when it points at a different (live) job`() {
+    val oldDate = Date().addDays(-5)
+    val oldJob = createJobWithStatus(BatchJobStatus.SUCCESS, oldDate)
+    val projectId = testData.project.id
+    // Simulate a different live job currently holding the lock for this project.
+    lockingManager.getMap()[projectId] = DUMMY_LOCKED_JOB_ID
+
+    oldBatchJobCleaner.cleanup()
+
+    assertJobDeleted(oldJob.id)
+    lockingManager.getLockedForProject(projectId).assert.isEqualTo(DUMMY_LOCKED_JOB_ID)
   }
 
   @Test
