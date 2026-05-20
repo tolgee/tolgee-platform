@@ -208,6 +208,10 @@ class QaIssueService(
       return
     }
 
+    if (types.isEmpty()) {
+      return
+    }
+
     qaIssueRepository.deleteAllByTranslationIdInAndTypeIn(translationIds, types)
   }
 
