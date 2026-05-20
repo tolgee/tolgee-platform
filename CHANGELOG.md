@@ -1,3 +1,15 @@
+# [3.189.0](https://github.com/tolgee/tolgee-platform/compare/v3.188.1...v3.189.0) (2026-05-20)
+
+
+### Bug Fixes
+
+* handle ICU plural # in QA checks ([#3664](https://github.com/tolgee/tolgee-platform/issues/3664)) ([0315ed4](https://github.com/tolgee/tolgee-platform/commit/0315ed4a6214760e20fe43df21be8c33925e91b5))
+
+
+### Features
+
+* defer usage invoices below 5 EUR with carry-over ([#3525](https://github.com/tolgee/tolgee-platform/issues/3525)) ([27de8a2](https://github.com/tolgee/tolgee-platform/commit/27de8a2419ced2aa10fdf77c733ea04b2e3ab0fd))
+
 ## [3.188.1](https://github.com/tolgee/tolgee-platform/compare/v3.188.0...v3.188.1) (2026-05-19)
 
 
