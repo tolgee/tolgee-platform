@@ -20,7 +20,7 @@ class GrammarCheck(
 
   override fun check(params: QaCheckParams): List<QaCheckResult> {
     val results =
-      QaPluralCheckHelper.runPerVariant(params) { text, _ ->
+      QaPluralCheckHelper.runPerVariant(params) { text, _, _ ->
         checkVariant(text, params.languageTag)
       }
     return filterByGlossaryTerms(results, params.glossaryTerms)

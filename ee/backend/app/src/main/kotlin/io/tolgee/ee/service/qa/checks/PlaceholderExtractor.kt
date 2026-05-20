@@ -8,11 +8,28 @@ data class ArgInfo(
   val positionEnd: Int? = null,
 )
 
-fun extractArgs(text: String): List<ArgInfo>? {
+/**
+ * Virtual placeholder name used for the ICU plural `#` token (REPLACE_NUMBER).
+ * Safe as a name because real ICU argument names are restricted to `[\p{L}\p{N}_]+`
+ * — so a user-defined argument named `#` is impossible.
+ */
+const val REPLACE_NUMBER_PLACEHOLDER_NAME = "#"
+
+/**
+ * Synthetic plural wrapper that makes the ICU parser treat the variant body as it
+ * would inside a real plural — unquoted `#` chars become REPLACE_NUMBER tokens.
+ */
+private const val PLURAL_WRAPPER_PREFIX = "{n,plural,other{"
+private const val PLURAL_WRAPPER_SUFFIX = "}}"
+
+fun extractArgs(
+  text: String,
+  isPluralVariant: Boolean = false,
+): List<ArgInfo>? {
   return try {
-    val node = MessagePatternUtil.buildMessageNode(text)
+    val rootMessage = buildMessageNode(text, isPluralVariant) ?: return emptyList()
     val args = mutableListOf<ArgInfo>()
-    collectArgsWithPositions(node, 0, args)
+    collectArgsWithPositions(rootMessage, 0, args)
     args
   } catch (_: Exception) {
     // Broad catch is intentional — parsing failures are surfaced by IcuSyntaxCheck,
@@ -21,11 +38,29 @@ fun extractArgs(text: String): List<ArgInfo>? {
   }
 }
 
+private fun buildMessageNode(
+  text: String,
+  isPluralVariant: Boolean,
+): MessagePatternUtil.MessageNode? {
+  if (!isPluralVariant) {
+    return MessagePatternUtil.buildMessageNode(text)
+  }
+
+  // Wrap as plural, then unwrap the original message node - to correctly parse plural variants
+  val wrappedNode = MessagePatternUtil.buildMessageNode(PLURAL_WRAPPER_PREFIX + text + PLURAL_WRAPPER_SUFFIX)
+  val pluralArg = wrappedNode.contents.firstOrNull() as? MessagePatternUtil.ArgNode ?: return null
+  return pluralArg.complexStyle
+    ?.variants
+    ?.firstOrNull()
+    ?.message
+}
+
 /**
- * Collects arg names with positions by accumulating patternString lengths.
- * Top-level args get accurate positions. Args nested inside complex styles
- * (select/plural/choice) are collected with position null,null (name only) since
- * QaPluralCheckHelper handles per-variant splitting for plural messages.
+ * Collects arg names with positions by accumulating patternString lengths starting
+ * from [offset]. Top-level args (and top-level REPLACE_NUMBER `#` tokens) get accurate
+ * positions. Args nested inside complex styles (select/plural/choice) are collected
+ * with null positions via [collectNamesOnly] since QaPluralCheckHelper handles
+ * per-variant splitting for plural messages.
  */
 private fun collectArgsWithPositions(
   node: MessagePatternUtil.MessageNode,
@@ -35,30 +70,44 @@ private fun collectArgsWithPositions(
   var pos = offset
   for (content in node.contents) {
     val len = content.patternString.length
-    if (content is MessagePatternUtil.ArgNode) {
-      content.name?.let { name ->
-        args.add(ArgInfo(name, pos, pos + len))
+    when {
+      content is MessagePatternUtil.ArgNode -> {
+        content.name?.let { name ->
+          args.add(ArgInfo(name, pos, pos + len))
+        }
+        content.complexStyle?.variants?.forEach { variant ->
+          variant.message?.let { collectNamesOnly(it, args) }
+        }
       }
-      content.complexStyle?.variants?.forEach { variant ->
-        variant.message?.let { collectNamesOnly(it, args) }
+
+      content.type == MessagePatternUtil.MessageContentsNode.Type.REPLACE_NUMBER -> {
+        args.add(ArgInfo(REPLACE_NUMBER_PLACEHOLDER_NAME, pos, pos + len))
       }
     }
     pos += len
   }
 }
 
-/** Recursively collects arg names from nested messages without position tracking. */
+/**
+ * Recursively collects arg names from nested messages without position tracking.
+ */
 private fun collectNamesOnly(
   node: MessagePatternUtil.MessageNode,
   args: MutableList<ArgInfo>,
 ) {
   for (content in node.contents) {
-    if (content is MessagePatternUtil.ArgNode) {
-      content.name?.let { name ->
-        args.add(ArgInfo(name))
+    when {
+      content is MessagePatternUtil.ArgNode -> {
+        content.name?.let { name ->
+          args.add(ArgInfo(name))
+        }
+        content.complexStyle?.variants?.forEach { variant ->
+          variant.message?.let { collectNamesOnly(it, args) }
+        }
       }
-      content.complexStyle?.variants?.forEach { variant ->
-        variant.message?.let { collectNamesOnly(it, args) }
+
+      content.type == MessagePatternUtil.MessageContentsNode.Type.REPLACE_NUMBER -> {
+        args.add(ArgInfo(REPLACE_NUMBER_PLACEHOLDER_NAME))
       }
     }
   }

@@ -15,11 +15,13 @@ class SpecialCharacterMismatchCheckTest {
   private fun params(
     text: String,
     base: String? = null,
+    icuPlaceholders: Boolean = true,
   ) = QaCheckParams(
     baseText = base,
     text = text,
     baseLanguageTag = "en",
     languageTag = "cs",
+    icuPlaceholders = icuPlaceholders,
   )
 
   @Test
@@ -116,13 +118,53 @@ class SpecialCharacterMismatchCheckTest {
   }
 
   @Test
-  fun `detects all supported special characters`() {
-    for (char in SpecialCharacterMismatchCheck.SPECIAL_CHARS) {
-      check.check(params("text", "text$char")).assertSingleIssue {
-        param("characters", char.toString())
+  fun `detects copyright trademark and degree characters`() {
+    // A spread of less common special chars, to exercise the full check (not just $).
+    check.check(params("text", "Copyright © 2024, registered ®, 100°F, brand ™")).assertSingleIssue {
+      message(QaIssueMessage.QA_SPECIAL_CHAR_MISSING)
+      param("count", "4")
+    }
+  }
+
+  @Test
+  fun `flags missing hash when ICU is disabled`() {
+    // Issue tag dropped from translation.
+    check.check(params("Cislo objednavky 123", "Order #123", icuPlaceholders = false)).assertSingleIssue {
+      message(QaIssueMessage.QA_SPECIAL_CHAR_MISSING)
+      param("characters", "#")
+      param("count", "1")
+    }
+  }
+
+  @Test
+  fun `skips missing hash when ICU is enabled`() {
+    // With ICU enabled, # is owned by the Inconsistent placeholders check to avoid
+    // double-reporting. Even a literal "#123" outside any plural is intentionally
+    // skipped — the simplification we accept in exchange for a single owner of #.
+    check.check(params("Cislo objednavky 123", "Order #123", icuPlaceholders = true)).assertNoIssues()
+  }
+
+  @Test
+  fun `skips extra hash when ICU is enabled`() {
+    check.check(params("Order #1 confirmed", "Order 1 confirmed", icuPlaceholders = true)).assertNoIssues()
+  }
+
+  @Test
+  fun `with ICU enabled still flags other chars when hash also differs`() {
+    // Translation dropped both `#` (issue tag) and `@` (handle). With ICU we ignore the
+    // missing `#` but the `@` should still be reported.
+    check
+      .check(
+        params(
+          text = "Objednavka 5 od support",
+          base = "Order #5 from @support",
+          icuPlaceholders = true,
+        ),
+      ).assertSingleIssue {
+        message(QaIssueMessage.QA_SPECIAL_CHAR_MISSING)
+        param("characters", "@")
         param("count", "1")
       }
-    }
   }
 
   @Test

@@ -13,8 +13,8 @@ class InconsistentPlaceholdersCheck : QaCheck {
   override val type: QaCheckType = QaCheckType.INCONSISTENT_PLACEHOLDERS
 
   override fun check(params: QaCheckParams): List<QaCheckResult> {
-    return QaPluralCheckHelper.runPerVariant(params) { text, baseText ->
-      checkVariant(text, baseText)
+    return QaPluralCheckHelper.runPerVariant(params) { text, baseText, isVariant ->
+      checkVariant(text, baseText, isVariant)
     }
   }
 
@@ -31,13 +31,13 @@ class InconsistentPlaceholdersCheck : QaCheck {
   private fun checkVariant(
     text: String,
     baseText: String?,
+    isPluralVariant: Boolean,
   ): List<QaCheckResult> {
     val base = baseText ?: return emptyList()
-    if (base.isBlank()) return emptyList()
-    if (text.isBlank()) return emptyList()
+    if (base.isBlank() || text.isBlank()) return emptyList()
 
-    val baseArgs = deduplicateNestedArgs(extractArgs(base) ?: return emptyList())
-    val textArgs = deduplicateNestedArgs(extractArgs(text) ?: return emptyList())
+    val baseArgs = deduplicateNestedArgs(extractArgs(base, isPluralVariant) ?: return emptyList())
+    val textArgs = deduplicateNestedArgs(extractArgs(text, isPluralVariant) ?: return emptyList())
 
     val baseCounts = baseArgs.groupingBy { it.name }.eachCount()
     val textCounts = textArgs.groupingBy { it.name }.eachCount()
