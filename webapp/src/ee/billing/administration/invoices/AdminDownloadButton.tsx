@@ -1,30 +1,27 @@
 import { FC } from 'react';
 
-import { useOrganization } from 'tg.views/organizations/useOrganization';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
-import { useInvoicePdfDownload } from './useInvoicePdfDownload';
-import { PdfDownloadButton } from './PdfDownloadButton';
+import { useInvoicePdfDownload } from '../../Invoices/useInvoicePdfDownload';
+import { PdfDownloadButton } from '../../Invoices/PdfDownloadButton';
 
-type DownloadButtonProps = {
+type AdminDownloadButtonProps = {
   invoice: components['schemas']['InvoiceModel'];
 };
 
-export const DownloadButton: FC<DownloadButtonProps> = ({ invoice }) => {
-  const organization = useOrganization();
+export const AdminDownloadButton: FC<AdminDownloadButtonProps> = ({
+  invoice,
+}) => {
   const { onSuccess } = useInvoicePdfDownload(invoice);
 
   const pdfMutation = useBillingApiMutation({
-    url: '/v2/organizations/{organizationId}/billing/invoices/{invoiceId}/pdf',
+    url: '/v2/administration/billing/invoices/{invoiceId}/pdf',
     method: 'get',
     fetchOptions: { rawResponse: true },
   });
 
   const onDownload = () => {
-    pdfMutation.mutate(
-      { path: { organizationId: organization!.id, invoiceId: invoice.id } },
-      { onSuccess }
-    );
+    pdfMutation.mutate({ path: { invoiceId: invoice.id } }, { onSuccess });
   };
 
   return (

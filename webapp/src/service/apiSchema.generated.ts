@@ -5353,6 +5353,7 @@ export interface components {
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
+      minUsageInvoiceAmount?: number;
     };
     PublicCloudPlanModel: {
       /** Format: date-time */
@@ -7139,6 +7140,8 @@ export interface components {
     UsageModel: {
       /** @description Relevant for invoices only. When there are applied stripe credits, we need to reduce the total price by this amount. */
       appliedStripeCredits?: number;
+      /** @description Relevant for invoices only. Total amount deferred from previous billing periods that is included in this invoice. */
+      carryOverTotal?: number;
       credits?: components["schemas"]["SumUsageItemModel"];
       keys: components["schemas"]["AverageProportionalUsageItemModel"];
       seats: components["schemas"]["AverageProportionalUsageItemModel"];

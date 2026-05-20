@@ -24,5 +24,11 @@ open class UsageModel(
   val credits: SumUsageItemModel?,
   val keys: AverageProportionalUsageItemModel = AverageProportionalUsageItemModel(),
   val total: BigDecimal = 0.toBigDecimal(),
+  @Schema(
+    description =
+      "Relevant for invoices only. " +
+        "Total amount deferred from previous billing periods that is included in this invoice.",
+  )
+  val carryOverTotal: BigDecimal? = null,
 ) : RepresentationModel<UsageModel>(),
   Serializable

@@ -50,6 +50,7 @@ import { SsoLoginView } from '../ee/security/Sso/SsoLoginView';
 import { OperationOrderTranslation } from '../views/projects/translations/BatchOperations/OperationOrderTranslation';
 import { BillingMenuItemsProps } from './EeModuleType';
 import { AdministrationSubscriptionsView } from '../ee/billing/administration/subscriptions/AdministrationSubscriptionsView';
+import { AdministrationInvoicesView } from '../ee/billing/administration/invoices/AdministrationInvoicesView';
 import { OrganizationLlmProvidersView } from '../ee/llm/OrganizationLLMProviders/OrganizationLlmProvidersView';
 import { GlossariesListView } from '../ee/glossary/views/GlossariesListView';
 export { useGlossaryTermHighlights } from '../ee/glossary/hooks/useGlossaryTermHighlights';
@@ -149,6 +150,9 @@ export const routes = {
       </PrivateRoute>
       <PrivateRoute path={LINKS.ADMINISTRATION_BILLING_SUBSCRIPTIONS.template}>
         <AdministrationSubscriptionsView />
+      </PrivateRoute>
+      <PrivateRoute exact path={LINKS.ADMINISTRATION_BILLING_INVOICES.template}>
+        <AdministrationInvoicesView />
       </PrivateRoute>
       <PrivateRoute
         exact
@@ -488,6 +492,12 @@ export const useAddAdministrationMenuItems = () => {
         id: 'subscriptions',
         link: LINKS.ADMINISTRATION_BILLING_SUBSCRIPTIONS,
         label: t('administration_subscriptions'),
+        condition: () => config.billing.enabled,
+      },
+      {
+        id: 'invoices',
+        link: LINKS.ADMINISTRATION_BILLING_INVOICES,
+        label: t('administration_invoices', 'Invoices'),
         condition: () => config.billing.enabled,
       },
       {

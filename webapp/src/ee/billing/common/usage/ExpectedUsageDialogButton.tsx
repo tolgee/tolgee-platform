@@ -39,9 +39,7 @@ export const ExpectedUsageDialogButton: FC<{
         <DialogTitle>{t('invoice_usage_dialog_title')}</DialogTitle>
         <DialogContent>
           {usageData ? (
-            <>
-              <UsageTable usageData={usageData} />
-            </>
+            <UsageTable usageData={usageData} />
           ) : (
             <EmptyListMessage loading={loading} />
           )}
