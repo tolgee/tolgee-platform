@@ -106,7 +106,7 @@ export const GlossaryImportDialog: React.VFC<Props> = ({
           onFileSelect={setFile}
           acceptedFileTypes={[{ extension: '.csv', icon: CsvLogo }]}
           helpLink={{
-            href: 'https://docs.tolgee.io/platform/projects_and_organizations/managing_glossaries#importing-terms-to-a-glossary',
+            href: 'https://docs.tolgee.io/platform/glossaries/importing_and_exporting_glossaries#format-of-the-csv-file',
             text: <T keyName="glossary_import_csv_formatting_guide" />,
           }}
         />
