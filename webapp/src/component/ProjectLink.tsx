@@ -1,23 +1,24 @@
 import React from 'react';
-import { components } from 'tg.service/apiSchema.generated';
 import { Link } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import { LINKS, PARAMS } from 'tg.constants/links';
 
-type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
-
 type Props = {
-  project: SimpleProjectModel;
+  project: { id: number; name: string };
 } & React.ComponentProps<typeof Link>;
 
-export const ProjectLink: React.FC<Props> = ({ project, ...props }) => {
+export const ProjectLink: React.FC<Props> = ({
+  project,
+  children,
+  ...props
+}) => {
   return (
     <Link
       component={RouterLink}
       to={LINKS.PROJECT.build({ [PARAMS.PROJECT_ID]: project.id })}
       {...props}
     >
-      {project.name}
+      {children ?? project.name}
     </Link>
   );
 };

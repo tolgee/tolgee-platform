@@ -24,6 +24,7 @@ import io.tolgee.service.translation.TranslationMemoryService
 import io.tolgee.util.disableAccelBuffering
 import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.hateoas.PagedModel
@@ -111,22 +112,25 @@ class TranslationSuggestionController(
       dto.keyId ?: -1,
     )
     val targetLanguage = languageService.get(dto.targetLanguageId, projectHolder.project.id)
+    val project = projectHolder.project
 
     val data =
       dto.baseText?.let { baseText ->
         translationMemoryService.getSuggestions(
-          baseText,
+          baseTranslationText = baseText,
           isPlural = dto.isPlural ?: false,
           keyId = null,
-          targetLanguage,
-          pageable,
+          projectId = project.id,
+          organizationId = project.organizationOwnerId,
+          targetLanguageTag = targetLanguage.tag,
+          pageable = pageable,
         )
       }
         ?: let {
           val keyId = dto.keyId ?: throw BadRequestException(Message.KEY_NOT_FOUND)
           val key = keyService.findOptional(keyId).orElseThrow { NotFoundException(Message.KEY_NOT_FOUND) }
           key.checkInProject()
-          translationMemoryService.getSuggestions(key, targetLanguage, pageable)
+          translationMemoryService.getSuggestions(key, targetLanguage.tag, pageable)
         }
     return arraytranslationMemoryItemModelAssembler.toModel(data, translationMemoryItemModelAssembler)
   }

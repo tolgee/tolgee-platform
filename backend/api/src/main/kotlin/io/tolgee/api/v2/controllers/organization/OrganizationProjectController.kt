@@ -6,6 +6,7 @@ package io.tolgee.api.v2.controllers.organization
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.dtos.request.project.ProjectFilters
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.facade.ProjectWithStatsFacade
 import io.tolgee.hateoas.project.ProjectModel
@@ -49,10 +50,11 @@ class OrganizationProjectController(
     @PathVariable("id") id: Long,
     @ParameterObject pageable: Pageable,
     @RequestParam("search") search: String?,
+    @ParameterObject filters: ProjectFilters,
   ): PagedModel<ProjectModel> {
     return organizationService.find(id)?.let { organization ->
       projectService
-        .findPermittedInOrganizationPaged(pageable, search, organizationId = organization.id)
+        .findPermittedInOrganizationPaged(pageable, search, organizationId = organization.id, filters = filters)
         .let { projects ->
           pagedProjectResourcesAssembler.toModel(projects, projectModelAssembler)
         }
@@ -69,9 +71,10 @@ class OrganizationProjectController(
     @PathVariable("slug") slug: String,
     @ParameterObject pageable: Pageable,
     @RequestParam("search") search: String?,
+    @ParameterObject filters: ProjectFilters,
   ): PagedModel<ProjectModel> {
     return organizationService.find(slug)?.let {
-      getAllProjects(it.id, pageable, search)
+      getAllProjects(it.id, pageable, search, filters)
     } ?: throw NotFoundException()
   }
 

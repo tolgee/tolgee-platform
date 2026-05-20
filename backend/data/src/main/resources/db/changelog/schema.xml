@@ -5362,4 +5362,233 @@
             WHERE message = 'QA_MISSING_PLURAL_CATEGORY';
         </rollback>
     </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1775717281513-1">
+        <createTable tableName="translation_memory">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="translation_memoryPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="source_language_tag" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="organization_owner_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="default_penalty" type="INT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="write_only_reviewed" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1775717281513-2">
+        <createTable tableName="translation_memory_entry">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="translation_memory_entryPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="source_text" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="target_language_tag" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="target_text" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="translation_memory_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tuid" type="text"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1775717281513-3">
+        <createTable tableName="translation_memory_project">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="translation_memory_projectPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="priority" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="read_access" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="write_access" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="project_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="translation_memory_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="penalty" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1775717281513-4">
+        <addUniqueConstraint columnNames="translation_memory_id, project_id" constraintName="UK_tm_project_tm_id_project_id" tableName="translation_memory_project"/>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1775717281513-6">
+        <createIndex indexName="IDX67ed7gbrh1waifr0a6qi1uwns" tableName="translation_memory">
+            <column name="source_language_tag"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1775717281513-7">
+        <createIndex indexName="IDX6hul0byfgs0n2vu3ol4pe54vu" tableName="translation_memory">
+            <column name="organization_owner_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1775717281513-10">
+        <createIndex indexName="IDXjid1c6hu0mt7tavdwbwcwoh2g" tableName="translation_memory_entry">
+            <column name="target_language_tag"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1775717281513-11">
+        <createIndex indexName="IDXqp3kktvoyqe8dxjscdueycbm7" tableName="translation_memory_project">
+            <column name="project_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1775717281513-12">
+        <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="translation_memory_project" constraintName="FK1yl625wa6xjg9x6rx1gsh0g9h" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="project" validate="true"/>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1775717281513-14">
+        <addForeignKeyConstraint baseColumnNames="translation_memory_id" baseTableName="translation_memory_project" constraintName="FKb27xmhlu3500jve0n7f5g3pjn" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="translation_memory" validate="true"/>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1775717281513-15">
+        <addForeignKeyConstraint baseColumnNames="organization_owner_id" baseTableName="translation_memory" constraintName="FKcyxqwdixhdllamiwqwqhsxtfq" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="organization" validate="true"/>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1775717281513-17">
+        <addForeignKeyConstraint baseColumnNames="translation_memory_id" baseTableName="translation_memory_entry" constraintName="FKn688qo7m3kq7uch9fn5s6rsdf" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="translation_memory" validate="true"/>
+    </changeSet>
+
+    <changeSet author="dkrizan" id="tm-entry-source-text-gist-trgm" runInTransaction="false">
+        <comment>GiST trigram index for translation memory entry similarity queries.
+            Mirrors the pattern from translation_lang_text_gist_trgm on the translation table.</comment>
+        <sql dbms="postgresql">
+            CREATE INDEX CONCURRENTLY IF NOT EXISTS tm_entry_source_text_gist_trgm
+            ON translation_memory_entry USING GIST (target_language_tag, source_text gist_trgm_ops);
+        </sql>
+        <rollback>
+            <sql>DROP INDEX CONCURRENTLY IF EXISTS tm_entry_source_text_gist_trgm;</sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="dkrizan" id="tm-create-project-tms-for-existing-projects">
+        <comment>Creates a PROJECT-type translation_memory + translation_memory_project assignment
+            for every active project.</comment>
+        <sql>
+            create temp table tmp_project_tm_pairs (
+                project_id bigint primary key,
+                tm_id bigint not null
+            ) on commit drop;
+
+            insert into tmp_project_tm_pairs (project_id, tm_id)
+            select p.id, nextval('hibernate_sequence')
+            from project p
+            where p.deleted_at is null;
+
+            insert into translation_memory (
+                id, name, source_language_tag, type, default_penalty, write_only_reviewed,
+                organization_owner_id, created_at, updated_at
+            )
+            select pair.tm_id, p.name, coalesce(l.tag, ''), 'PROJECT', 0, false,
+                   p.organization_owner_id, now(), now()
+            from tmp_project_tm_pairs pair
+            join project p on p.id = pair.project_id
+            left join language l on l.id = p.base_language_id;
+
+            insert into translation_memory_project (
+                id, created_at, updated_at,
+                translation_memory_id, project_id, read_access, write_access, priority, penalty
+            )
+            select nextval('hibernate_sequence'), now(), now(),
+                   pair.tm_id, pair.project_id, true, true, 0, null
+            from tmp_project_tm_pairs pair;
+        </sql>
+        <rollback>
+            <sql>
+                delete from translation_memory_project
+                where translation_memory_id in (
+                    select id from translation_memory where type = 'PROJECT'
+                );
+                delete from translation_memory where type = 'PROJECT';
+            </sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="dkrizan" id="tm-translation-key-lang-index" runInTransaction="false">
+        <comment>Composite index supporting the per-key/per-language lookups in the virtual-entry
+            branch of the TM suggestion query. Replaces a bitmap-and over the existing single-column
+            indexes on translation(key_id) and translation(language_id) with one direct probe.</comment>
+        <sql dbms="postgresql">
+            CREATE INDEX CONCURRENTLY IF NOT EXISTS ix_translation_key_lang
+                ON translation (key_id, language_id);
+        </sql>
+        <rollback>
+            <sql>DROP INDEX CONCURRENTLY IF EXISTS ix_translation_key_lang;</sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="dkrizan" id="tm-entry-tm-source-index" runInTransaction="false">
+        <comment>Composite (translation_memory_id, md5(source_text)) index for the equality
+            probe in findByTranslationMemoryIdAndSourceTexts during content-browser page
+            hydration. The hash expression avoids the ~2704 B btree row limit — TMX imports
+            can legitimately carry multi-KB CJK segments that would otherwise blow up a
+            plain (translation_memory_id, source_text) index at insert time.</comment>
+        <sql dbms="postgresql">
+            CREATE INDEX CONCURRENTLY IF NOT EXISTS ix_tm_entry_tm_source
+                ON translation_memory_entry (translation_memory_id, md5(source_text));
+        </sql>
+        <rollback>
+            <sql>DROP INDEX CONCURRENTLY IF EXISTS ix_tm_entry_tm_source;</sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="dkrizan" id="tm-entry-lower-source-trgm" runInTransaction="false">
+        <comment>GiST trigram index on lower(source_text) so case-insensitive infix LIKE
+            searches in the content-browser hit an index instead of seq-scanning the table.
+            Mirrors the existing tm_entry_source_text_gist_trgm but on the lower()-folded
+            value — our search predicates wrap source_text with lower() to be case-insensitive.</comment>
+        <sql dbms="postgresql">
+            CREATE INDEX CONCURRENTLY IF NOT EXISTS ix_tm_entry_lower_source_trgm
+                ON translation_memory_entry USING GIST (lower(source_text) gist_trgm_ops);
+        </sql>
+        <rollback>
+            <sql>DROP INDEX CONCURRENTLY IF EXISTS ix_tm_entry_lower_source_trgm;</sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="dkrizan" id="tm-entry-lower-target-trgm" runInTransaction="false">
+        <comment>Companion to ix_tm_entry_lower_source_trgm: target_text shows up in the same
+            content-browser LIKE filter (via EXISTS subqueries that match either side of an
+            entry), so it gets the same trigram index on the lower()-folded value.</comment>
+        <sql dbms="postgresql">
+            CREATE INDEX CONCURRENTLY IF NOT EXISTS ix_tm_entry_lower_target_trgm
+                ON translation_memory_entry USING GIST (lower(target_text) gist_trgm_ops);
+        </sql>
+        <rollback>
+            <sql>DROP INDEX CONCURRENTLY IF EXISTS ix_tm_entry_lower_target_trgm;</sql>
+        </rollback>
+    </changeSet>
 </databaseChangeLog>

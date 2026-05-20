@@ -53,6 +53,8 @@ import { AdministrationSubscriptionsView } from '../ee/billing/administration/su
 import { AdministrationInvoicesView } from '../ee/billing/administration/invoices/AdministrationInvoicesView';
 import { OrganizationLlmProvidersView } from '../ee/llm/OrganizationLLMProviders/OrganizationLlmProvidersView';
 import { GlossariesListView } from '../ee/glossary/views/GlossariesListView';
+import { TranslationMemoriesListView } from '../ee/translationMemory/views/TranslationMemoriesListView';
+import { TranslationMemoryView } from '../ee/translationMemory/views/TranslationMemoryView';
 export { useGlossaryTermHighlights } from '../ee/glossary/hooks/useGlossaryTermHighlights';
 export { GlossaryTermPreview } from '../ee/glossary/components/GlossaryTermPreview';
 import {
@@ -86,6 +88,7 @@ import { BranchMergePage } from '../ee/branching/BranchMergePage';
 import { Branch } from '../component/CustomIcons';
 import { QaCheck } from '../component/CustomIcons';
 
+export { ProjectSettingsTranslationMemory } from '../ee/translationMemory/components/projectSettings/ProjectSettingsTranslationMemory';
 export { TaskReference } from '../ee/task/components/TaskReference';
 export { BranchReference } from '../ee/branching/components/BranchReference';
 export { GlobalLimitPopover } from '../ee/billing/limitPopover/GlobalLimitPopover';
@@ -220,6 +223,18 @@ export const routes = {
         </PrivateRoute>
         <PrivateRoute exact path={LINKS.ORGANIZATION_GLOSSARY.template}>
           <GlossaryRouter />
+        </PrivateRoute>
+        <PrivateRoute
+          exact
+          path={LINKS.ORGANIZATION_TRANSLATION_MEMORIES.template}
+        >
+          <TranslationMemoriesListView />
+        </PrivateRoute>
+        <PrivateRoute
+          exact
+          path={LINKS.ORGANIZATION_TRANSLATION_MEMORY.template}
+        >
+          <TranslationMemoryView />
         </PrivateRoute>
       </>
     );

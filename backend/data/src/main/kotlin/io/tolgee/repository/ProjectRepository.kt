@@ -43,6 +43,10 @@ interface ProjectRepository : JpaRepository<Project, Long> {
             :#{#filters.filterNotId} is null
             or r.id not in :#{#filters.filterNotId}
         )
+        and (
+            :#{#filters.filterBaseLanguageTag} is null
+            or bl.tag = :#{#filters.filterBaseLanguageTag}
+        )
     """
   }
 
@@ -79,6 +83,10 @@ interface ProjectRepository : JpaRepository<Project, Long> {
             :#{#filters.filterNotId} is null
             or r.id not in :#{#filters.filterNotId}
         )
+        and (
+            :#{#filters.filterBaseLanguageTag} is null
+            or bl.tag = :#{#filters.filterBaseLanguageTag}
+        )
     """,
   )
   fun findAllPermitted(
@@ -90,6 +98,10 @@ interface ProjectRepository : JpaRepository<Project, Long> {
   ): Page<ProjectView>
 
   fun findAllByOrganizationOwnerId(organizationOwnerId: Long): List<Project>
+
+  fun findAllByOrganizationOwnerIdAndDeletedAtIsNull(organizationOwnerId: Long): List<Project>
+
+  fun findAllByDeletedAtIsNull(): List<Project>
 
   fun findAllByOrganizationOwnerIdAndUseQaChecksTrueAndDeletedAtIsNull(organizationOwnerId: Long): List<Project>
 

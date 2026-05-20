@@ -1,5 +1,6 @@
 package io.tolgee.api.v2.controllers.v2ProjectsController
 
+import io.tolgee.development.testDataBuilder.data.TranslationMemoryTestData
 import io.tolgee.dtos.request.project.EditProjectRequest
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
@@ -8,6 +9,8 @@ import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.model.Project
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -15,6 +18,15 @@ import org.springframework.boot.test.context.SpringBootTest
 @SpringBootTest
 @AutoConfigureMockMvc
 class ProjectsControllerEditTest : AuthorizedControllerTest() {
+  private var tmTestData: TranslationMemoryTestData? = null
+
+  @AfterEach
+  fun cleanupTm() {
+    tmTestData?.let { testDataService.cleanTestData(it.root) }
+    tmTestData = null
+    userAccount = null
+  }
+
   @Test
   fun `edits project`() {
     val base = dbPopulator.createBase()
@@ -120,5 +132,66 @@ class ProjectsControllerEditTest : AuthorizedControllerTest() {
         .resultList.assert
         .hasSize(2)
     }
+  }
+
+  @Test
+  fun `rejects base language change when shared TMs have mismatched source`() {
+    val testData = setupTmFixture()
+    val project = testData.projectWithTm
+    val germanId = testData.germanLanguageWithTm.id
+
+    performAuthPut(
+      "/v2/projects/${project.id}",
+      EditProjectRequest(
+        name = project.name,
+        slug = project.slug,
+        baseLanguageId = germanId,
+      ),
+    ).andIsBadRequest.andAssertThatJson {
+      // The conflicting TMs are echoed back so the UI can show the user which assignments
+      // would have to be unassigned before the rename.
+      node("code").isEqualTo("cannot_change_project_base_language_tm_conflict")
+    }
+  }
+
+  @Test
+  fun `accepts base language change with unassign flag when shared TMs have mismatched source`() {
+    val testData = setupTmFixture()
+    val project = testData.projectWithTm
+    val germanId = testData.germanLanguageWithTm.id
+
+    performAuthPut(
+      "/v2/projects/${project.id}",
+      EditProjectRequest(
+        name = project.name,
+        slug = project.slug,
+        baseLanguageId = germanId,
+        unassignConflictingTms = true,
+      ),
+    ).andIsOk.andAssertThatJson {
+      node("baseLanguage.id").isEqualTo(germanId)
+    }
+
+    // After the change, only the project's own PROJECT-type TM should remain
+    executeInNewTransaction {
+      val remaining =
+        entityManager
+          .createQuery(
+            "select tmp from TranslationMemoryProject tmp where tmp.project.id = :projectId",
+            io.tolgee.model.translationMemory.TranslationMemoryProject::class.java,
+          ).setParameter("projectId", project.id)
+          .resultList
+      assertThat(remaining).hasSize(1)
+      assertThat(remaining.single().translationMemory.type)
+        .isEqualTo(io.tolgee.model.translationMemory.TranslationMemoryType.PROJECT)
+    }
+  }
+
+  private fun setupTmFixture(): TranslationMemoryTestData {
+    val data = TranslationMemoryTestData()
+    testDataService.saveTestData(data.root)
+    userAccount = data.user
+    tmTestData = data
+    return data
   }
 }

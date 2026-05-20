@@ -25,6 +25,7 @@ import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.service.translation.TranslationCommentService
 import io.tolgee.service.translation.TranslationService
+import io.tolgee.service.translationMemory.TranslationMemoryManagementService
 import org.springframework.context.ApplicationContext
 import java.awt.Dimension
 
@@ -48,6 +49,7 @@ class DemoProjectCreator(
     addComments()
     project.baseLanguage = languages["en"]
     projectService.save(project)
+    translationMemoryManagementService.createProjectTm(project)
     return project
   }
 
@@ -275,5 +277,9 @@ class DemoProjectCreator(
 
   private val translationCommentService: TranslationCommentService by lazy {
     applicationContext.getBean(TranslationCommentService::class.java)
+  }
+
+  private val translationMemoryManagementService: TranslationMemoryManagementService by lazy {
+    applicationContext.getBean(TranslationMemoryManagementService::class.java)
   }
 }

@@ -53,6 +53,7 @@ import io.tolgee.service.security.UserAccountService
 import io.tolgee.service.security.UserPreferencesService
 import io.tolgee.service.translation.TranslationCommentService
 import io.tolgee.service.translation.TranslationService
+import io.tolgee.service.translationMemory.TranslationMemoryManagementService
 import io.tolgee.testing.AbstractTransactionalTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
@@ -229,6 +230,9 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
 
   @Autowired
   lateinit var schedulingManager: SchedulingManager
+
+  @Autowired
+  lateinit var translationMemoryManagementService: TranslationMemoryManagementService
 
   @BeforeEach
   fun clearCaches() {

@@ -5,7 +5,6 @@ import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.translation.TranslationMemoryService
 import jakarta.persistence.EntityManager
-import org.springframework.data.domain.Pageable
 
 class MetadataProvider(
   private val context: MtTranslatorContext,
@@ -40,21 +39,28 @@ class MetadataProvider(
       .resultList
   }
 
+  /**
+   * Examples carry the *penalized* similarity, so trust-adjusted TMs (e.g. a noisy imported TM
+   * with a high default penalty) surface weaker context for MT prompts — matching the
+   * user-facing suggestion ranking.
+   */
   fun getExamples(
     targetLanguage: LanguageDto,
     isPlural: Boolean,
     text: String,
     keyId: Long?,
   ): List<ExampleItem> {
+    val project = context.project
     return translationMemoryService
-      .getSuggestions(
+      .getSuggestionsList(
         baseTranslationText = text,
         isPlural = isPlural,
         keyId = keyId,
-        targetLanguage = targetLanguage,
-        pageable = Pageable.ofSize(5),
-      ).content
-      .map {
+        projectId = project.id,
+        organizationId = project.organizationOwnerId,
+        targetLanguageTag = targetLanguage.tag,
+        limit = 5,
+      ).map {
         ExampleItem(
           key = it.keyName,
           keyNamespace = it.keyNamespace,

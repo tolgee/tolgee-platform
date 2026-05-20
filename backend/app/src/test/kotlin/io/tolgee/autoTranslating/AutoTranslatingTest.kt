@@ -162,8 +162,8 @@ class AutoTranslatingTest : MachineTranslationTest() {
       keyName = "jaj",
       translations =
         mapOf(
-          "en" to "Hello2",
-          "de" to "Hallo2",
+          "en" to "Goodbye",
+          "de" to "Auf Wiedersehen",
         ),
     )
     waitForSpanishTranslationSet("jaj")

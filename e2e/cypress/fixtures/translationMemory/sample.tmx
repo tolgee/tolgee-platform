@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tmx version="1.4">
+  <header srclang="en" datatype="PlainText" creationtool="test"/>
+  <body>
+    <tu><tuv xml:lang="en"><seg>Good morning</seg></tuv><tuv xml:lang="de"><seg>Guten Morgen</seg></tuv></tu>
+  </body>
+</tmx>

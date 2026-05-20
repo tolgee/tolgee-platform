@@ -9,6 +9,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.branching.Branch
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.organization.OrganizationService
+import io.tolgee.service.translationMemory.TranslationMemoryManagementService
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -18,6 +19,7 @@ class ProjectCreationService(
   private val organizationService: OrganizationService,
   private val languageService: LanguageService,
   private val projectService: ProjectService,
+  private val translationMemoryManagementService: TranslationMemoryManagementService,
 ) {
   @Transactional
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#result.id")
@@ -36,6 +38,8 @@ class ProjectCreationService(
 
     val createdLanguages = dto.languages!!.map { languageService.createLanguage(it, project) }
     project.baseLanguage = getOrAssignBaseLanguage(dto, createdLanguages)
+
+    translationMemoryManagementService.createProjectTm(project)
 
     return project
   }
