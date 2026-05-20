@@ -5,7 +5,7 @@ import io.tolgee.ee.service.qa.LanguageToolMatch
 /**
  * Identifies LanguageTool rules that assume the text is a complete, standalone
  * sentence — e.g., "sentence should start with an uppercase letter" or "sentence
- * should end with a punctuation mark" .
+ * should end with a punctuation mark".
  *
  * These rules produce false positives on short, non-sentence translations like
  * button labels ("save", "click here", "add new item").
