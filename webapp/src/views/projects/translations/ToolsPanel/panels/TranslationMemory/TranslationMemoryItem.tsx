@@ -111,11 +111,30 @@ const StyledMeta = styled('div')`
   overflow: hidden;
 `;
 
-const StyledMetaItem = styled('span')`
+// The meta line has three parts of unequal importance. Rather than letting them
+// all shrink uniformly (which collapses every part to a useless "D…" stub), only
+// the key reference yields space — it is the longest and noisiest. The TM name
+// and timestamp keep their natural width; each still ellipsis-truncates on its
+// own as a last resort so a pathological value can't break the line.
+const StyledMetaTmName = styled('span')`
+  flex-shrink: 0;
+  max-width: 140px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+`;
+
+const StyledMetaKey = styled('span')`
+  flex-shrink: 1;
   min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+const StyledMetaTime = styled('span')`
+  flex-shrink: 0;
+  white-space: nowrap;
 `;
 
 const StyledMetaSeparator = styled('span')`
@@ -249,29 +268,28 @@ export const TranslationMemoryItem = ({
             const parts: React.ReactNode[] = [];
             if (item.translationMemoryName) {
               parts.push(
-                <StyledMetaItem
-                  key="tm"
-                  data-cy="translation-tools-translation-memory-item-tm-name"
-                >
-                  {item.translationMemoryName}
-                </StyledMetaItem>
+                <Tooltip key="tm" title={item.translationMemoryName}>
+                  <StyledMetaTmName data-cy="translation-tools-translation-memory-item-tm-name">
+                    {item.translationMemoryName}
+                  </StyledMetaTmName>
+                </Tooltip>
               );
             }
             if (item.keyName) {
               parts.push(
                 <Tooltip key="key" title={item.keyName}>
-                  <StyledMetaItem data-cy="translation-tools-translation-memory-item-key-name">
+                  <StyledMetaKey data-cy="translation-tools-translation-memory-item-key-name">
                     {item.keyName}
-                  </StyledMetaItem>
+                  </StyledMetaKey>
                 </Tooltip>
               );
             }
             if (updatedAtLabel) {
               parts.push(
                 <Tooltip key="time" title={updatedAtAbsolute ?? ''}>
-                  <StyledMetaItem data-cy="translation-tools-translation-memory-item-updated">
+                  <StyledMetaTime data-cy="translation-tools-translation-memory-item-updated">
                     {updatedAtLabel}
-                  </StyledMetaItem>
+                  </StyledMetaTime>
                 </Tooltip>
               );
             }
