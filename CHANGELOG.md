@@ -1,3 +1,15 @@
+## [3.190.1](https://github.com/tolgee/tolgee-platform/compare/v3.190.0...v3.190.1) (2026-05-21)
+
+
+### Bug Fixes
+
+* TM suggestion panel overflowing its container & e2e tests fixes ([#3678](https://github.com/tolgee/tolgee-platform/issues/3678)) ([e15fb47](https://github.com/tolgee/tolgee-platform/commit/e15fb47adf2dbb06bc2090587554494151f3510f)), closes [#3596](https://github.com/tolgee/tolgee-platform/issues/3596)
+
+
+### Performance Improvements
+
+* filter entity pre-commit events by entity type at dispatch ([#3669](https://github.com/tolgee/tolgee-platform/issues/3669)) ([9c29a0b](https://github.com/tolgee/tolgee-platform/commit/9c29a0bc20c3200b4acf07bd1af8e1f72d11a143))
+
 # [3.190.0](https://github.com/tolgee/tolgee-platform/compare/v3.189.0...v3.190.0) (2026-05-20)
 
 
