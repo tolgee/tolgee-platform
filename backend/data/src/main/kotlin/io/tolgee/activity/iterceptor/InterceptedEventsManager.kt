@@ -7,6 +7,7 @@ import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.activity.data.EntityDescriptionRef
 import io.tolgee.activity.data.EntityDescriptionWithRelations
+import io.tolgee.activity.data.ModifiedCollectionKey
 import io.tolgee.activity.data.PropertyModification
 import io.tolgee.activity.data.RevisionType
 import io.tolgee.activity.propChangesProvider.PropChangesProvider
@@ -66,26 +67,36 @@ class InterceptedEventsManager(
       return
     }
 
+    // Identify the field by invoking each collection-typed getter and
+    // matching the returned collection by reference. We can't use
+    // Hibernate's collection.role here because it is null when the
+    // interceptor fires for not-yet-persisted owners.
     val ownerField =
-      collectionOwner::class.members.find {
-        it.parameters.size == 1 && it.callIfInitialized(collectionOwner) === collection
-      } ?: return
+      getCollectionMembers(collectionOwner)
+        .find { it.callIfInitialized(collectionOwner) === collection }
+        ?: return
+    val fieldName = ownerField.name
 
-    val provider = getChangesProvider(collectionOwner, ownerField.name) ?: return
+    val provider = getChangesProvider(collectionOwner, fieldName) ?: return
 
     val storedSnapshotCollection = (collection.storedSnapshot as? HashMap<*, *>)?.values
     val stored = storedSnapshotCollection?.toList()
 
+    val collectionKey =
+      ModifiedCollectionKey(
+        entityClass = collectionOwner::class.simpleName!!,
+        entityId = collectionOwner.id,
+        fieldName = fieldName,
+      )
     val old =
-      activityHolder.modifiedCollections.computeIfAbsent(collectionOwner to ownerField.name) {
+      activityHolder.modifiedCollections.computeIfAbsent(collectionKey) {
         stored
       }
 
     val changes = provider.getChanges(old, collection) ?: return
     val activityModifiedEntity = getModifiedEntity(collectionOwner, RevisionType.MOD)
 
-    val newChanges = activityModifiedEntity.modifications + mutableMapOf(ownerField.name to changes)
-    activityModifiedEntity.modifications = (newChanges).toMutableMap()
+    activityModifiedEntity.modifications.put(fieldName, changes)
 
     activityModifiedEntity.setEntityDescription(collectionOwner)
     preCommitEventPublisher.onCollectionUpdate(
@@ -136,7 +147,7 @@ class InterceptedEventsManager(
     val changesMap = getChangesMap(entity, currentState, previousState, propertyNames)
 
     activityModifiedEntity.revisionType = effectiveRevisionType
-    activityModifiedEntity.modifications.putAll(changesMap)
+    activityModifiedEntity.modifications.addAll(changesMap)
 
     activityModifiedEntity.setEntityDescription(entity)
   }
@@ -158,9 +169,25 @@ class InterceptedEventsManager(
   }
 
   private fun ActivityModifiedEntity.setEntityDescription(entity: EntityWithId) {
-    val describingData = getChangeEntityDescription(entity, activityRevision)
-    this.describingData = describingData.first?.filter { !this.modifications.keys.contains(it.key) }
-    this.describingRelations = describingData.second
+    val (rawData, rawRelations) = getChangeEntityDescription(entity, activityRevision)
+    this.describingData =
+      rawData?.let { data ->
+        val compact =
+          io.tolgee.activity.data
+            .DescribingDataMap(this.entityClass)
+        for ((k, v) in data) {
+          if (!this.modifications.keys.contains(k)) compact.put(k, v)
+        }
+        compact
+      }
+    this.describingRelations =
+      rawRelations?.let { rels ->
+        val compact =
+          io.tolgee.activity.data
+            .DescribingRelationsMap(this.entityClass)
+        rels.forEach { (k, v) -> compact.put(k, v) }
+        compact
+      }
   }
 
   private fun getModifiedEntity(
@@ -191,8 +218,16 @@ class InterceptedEventsManager(
     revisionType: RevisionType,
     state: Array<out Any>? = null,
   ): Long? {
-    if (entity is Branch && !revisionType.isDel()) {
-      return entity.id
+    if (entity is Branch) {
+      // Invalidate cache when a branch is created/modified/deleted
+      try {
+        defaultBranchIdCache.remove(entity.project.id)
+      } catch (_: UninitializedPropertyAccessException) {
+        // project not yet set on new branch
+      }
+      if (!revisionType.isDel()) {
+        return entity.id
+      }
     }
 
     if (entity is Key) {
@@ -217,24 +252,30 @@ class InterceptedEventsManager(
     }
   }
 
+  private val defaultBranchIdCache = ConcurrentHashMap<Long, Long>()
+
   private fun defaultBranchId(projectId: Long?): Long? {
     if (projectId == null) {
       return null
     }
-    return entityManager
-      .createQuery(
-        """
-        select b.id
-        from Branch b
-        where b.project.id = :projectId
-          and b.isDefault = true
-          and b.deletedAt is null
-        """,
-        Long::class.java,
-      ).setParameter("projectId", projectId)
-      .setFlushMode(FlushModeType.COMMIT)
-      .resultList
-      .firstOrNull()
+    val cached =
+      defaultBranchIdCache.computeIfAbsent(projectId) {
+        entityManager
+          .createQuery(
+            """
+            select b.id
+            from Branch b
+            where b.project.id = :projectId
+              and b.isDefault = true
+              and b.deletedAt is null
+            """,
+            Long::class.java,
+          ).setParameter("projectId", projectId)
+          .setFlushMode(FlushModeType.COMMIT)
+          .resultList
+          .firstOrNull() ?: NO_DEFAULT_BRANCH
+      }
+    return if (cached == NO_DEFAULT_BRANCH) null else cached
   }
 
   private fun getChangeEntityDescription(
@@ -307,9 +348,13 @@ class InterceptedEventsManager(
     entity: Any,
     propertyName: String,
   ): PropChangesProvider? {
-    val propertyAnnotation = getEntityAnnotatedMembers(entity)[propertyName] ?: return null
-    val providerClass = propertyAnnotation.modificationProvider
-    return applicationContext.getBean(providerClass.java)
+    val perClass = providerCache.computeIfAbsent(entity::class.java) { ConcurrentHashMap() }
+    val cached =
+      perClass.computeIfAbsent(propertyName) {
+        val annotation = getEntityAnnotatedMembers(entity)[propertyName] ?: return@computeIfAbsent NO_PROVIDER
+        applicationContext.getBean(annotation.modificationProvider.java)
+      }
+    return cached.takeUnless { it === NO_PROVIDER }
   }
 
   private fun getEntityAnnotatedMembers(entity: Any): Map<String, ActivityLoggedProp> {
@@ -337,6 +382,23 @@ class InterceptedEventsManager(
 
   private val annotatedMembersCache: ConcurrentHashMap<Class<*>, Map<String, ActivityLoggedProp>> = ConcurrentHashMap()
   private val ignoredMembersCache: ConcurrentHashMap<Class<*>, Set<String>> = ConcurrentHashMap()
+  private val collectionMembersCache: ConcurrentHashMap<Class<*>, List<KCallable<*>>> = ConcurrentHashMap()
+  private val providerCache: ConcurrentHashMap<Class<*>, ConcurrentHashMap<String, PropChangesProvider>> =
+    ConcurrentHashMap()
+
+  private fun getCollectionMembers(entity: Any): List<KCallable<*>> {
+    return collectionMembersCache.computeIfAbsent(entity::class.java) {
+      entity::class
+        .members
+        .filter { member ->
+          if (member !is KProperty<*>) return@filter false
+          if (member.parameters.size != 1) return@filter false
+          val fieldType = member.javaField?.type ?: return@filter false
+          Collection::class.java.isAssignableFrom(fieldType) ||
+            Map::class.java.isAssignableFrom(fieldType)
+        }
+    }
+  }
 
   private fun shouldHandleActivity(entity: Any?) =
     entity is EntityWithId &&
@@ -414,4 +476,18 @@ class InterceptedEventsManager(
 
   private val activityHolder
     get() = activityHolderProvider.getActivityHolder()
+
+  companion object {
+    // Sentinel value for "queried but no default branch found"
+    private const val NO_DEFAULT_BRANCH = -1L
+
+    /** Sentinel for [providerCache] entries that have no provider — ConcurrentHashMap doesn't allow nulls. */
+    private val NO_PROVIDER: PropChangesProvider =
+      object : PropChangesProvider {
+        override fun getChanges(
+          old: Any?,
+          new: Any?,
+        ) = null
+      }
+  }
 }
