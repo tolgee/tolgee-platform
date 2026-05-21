@@ -43,15 +43,21 @@ fun orderPluralForms(pluralForms: Map<String, String>): Map<String, String> {
   return pluralForms.entries
     .sortedWith(
       compareBy(
-        // Exact-match selectors (=0, =1, =2, …) sort first, in ascending numeric order
-        { if (it.key.startsWith("=")) it.key.substring(1).toLongOrNull() ?: Long.MAX_VALUE else Long.MAX_VALUE },
-        // Standard ICU keyword selectors sort after exact-match, in canonical order
-        { val i = formKeywords.indexOf(it.key); if (i == -1) Int.MAX_VALUE else i },
+        { parseExactPluralFormKey(it.key) ?: Double.MAX_VALUE },
+        { formKeywords.indexOf(it.key) },
+        { it.key },
       ),
     ).associate { it.key to it.value }
 }
 
 val formKeywords = listOf("zero", "one", "two", "few", "many", "other")
+
+private fun parseExactPluralFormKey(key: String): Double? {
+  if (!key.startsWith("=")) {
+    return null
+  }
+  return key.substring(1).toDoubleOrNull()
+}
 
 /**
  * It takes the plurals and optimizes them by removing the unnecessary forms
