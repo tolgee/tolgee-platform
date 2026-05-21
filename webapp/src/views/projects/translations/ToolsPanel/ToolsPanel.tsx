@@ -27,12 +27,14 @@ const StyledTitle = styled(Box)`
 
 const StyledWrapper = styled('div')`
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   padding: 8px 0px 8px 0px;
   padding-bottom: 100px;
 `;
 
 const StyledPanelList = styled(Box)`
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   position: relative;
 `;
 

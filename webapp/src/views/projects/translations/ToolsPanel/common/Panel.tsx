@@ -5,6 +5,10 @@ import { PanelHeader } from './PanelHeader';
 
 const StyledContainer = styled(Box)`
   display: grid;
+  /* Bound the column to the available width (minmax min of 0, not the implicit
+     auto = min-content) so a panel with long unbreakable content can't widen
+     the shared column and push its siblings out. */
+  grid-template-columns: minmax(0, 1fr);
 `;
 
 const StyledContent = styled(Box)`

@@ -52,7 +52,7 @@ class StartBatchJobController(
 ) {
   @PostMapping(value = ["/pre-translate-by-tm"])
   @Operation(
-    summary = "Pre-translate by TM",
+    summary = "Translate from memory",
     description = "Pre-translate provided keys to provided languages by TM.",
   )
   @RequiresProjectPermissions([Scope.BATCH_PRE_TRANSLATE_BY_TM])
