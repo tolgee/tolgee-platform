@@ -23,6 +23,9 @@ class OldBatchJobCleanerTest : AbstractSpringTest() {
   @Autowired
   lateinit var oldBatchJobCleaner: OldBatchJobCleaner
 
+  @Autowired
+  lateinit var lockingManager: BatchJobProjectLockingManager
+
   lateinit var testData: BaseTestData
 
   @BeforeEach
@@ -149,6 +152,33 @@ class OldBatchJobCleanerTest : AbstractSpringTest() {
     assertJobDeleted(cancelledJob.id)
     assertJobExists(failedJob.id)
     assertJobExists(runningJob.id)
+  }
+
+  @Test
+  fun `releases project lock pointing at a deleted job`() {
+    val oldDate = Date().addDays(-5)
+    val job = createJobWithStatus(BatchJobStatus.SUCCESS, oldDate)
+    val projectId = testData.project.id
+    lockingManager.getMap()[projectId] = job.id
+
+    oldBatchJobCleaner.cleanup()
+
+    assertJobDeleted(job.id)
+    lockingManager.getLockedForProject(projectId).assert.isEqualTo(0L)
+  }
+
+  @Test
+  fun `leaves project lock untouched when it points at a different (live) job`() {
+    val oldDate = Date().addDays(-5)
+    val oldJob = createJobWithStatus(BatchJobStatus.SUCCESS, oldDate)
+    val liveJob = createJobWithStatus(BatchJobStatus.RUNNING, Date())
+    val projectId = testData.project.id
+    lockingManager.getMap()[projectId] = liveJob.id
+
+    oldBatchJobCleaner.cleanup()
+
+    assertJobDeleted(oldJob.id)
+    lockingManager.getLockedForProject(projectId).assert.isEqualTo(liveJob.id)
   }
 
   @Test

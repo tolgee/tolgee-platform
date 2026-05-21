@@ -426,6 +426,21 @@ class BatchJobService(
     before: Date,
   ): List<BatchJob> = batchJobRepository.getCompletedJobs(lockedJobIds, before)
 
+  fun findExistingJobIds(jobIds: Iterable<Long>): Set<Long> {
+    val idList = jobIds.toList()
+    if (idList.isEmpty()) return emptySet()
+    @Suppress("UNCHECKED_CAST")
+    return entityManager
+      .createNativeQuery(
+        """
+        SELECT id FROM tolgee_batch_job WHERE id IN :ids
+        """,
+      ).setParameter("ids", idList)
+      .resultList
+      .map { (it as Number).toLong() }
+      .toSet()
+  }
+
   fun getStuckJobIds(jobIds: MutableSet<Long>): List<Long> {
     return batchJobRepository.getStuckJobIds(jobIds, currentDateProvider.date.addMinutes(-2))
   }
