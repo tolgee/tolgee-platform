@@ -19,6 +19,7 @@ plugins {
     id "kotlin-allopen"
     id "org.hibernate.orm"
     id "io.sentry.jvm.gradle"
+    id "org.gradle.test-retry"
 }
 
 group = 'io.tolgee'
@@ -243,6 +244,7 @@ dependencies {
 tasks.named('test', Test) {
     useJUnitPlatform()
     maxHeapSize = "4096m"
+    rootProject.setTestRetry(it)
 }
 
 sourceSets {

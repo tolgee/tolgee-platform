@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Report flaky tests to the 'Flaky tests' org project.
 
-Reads failed-test lines from files in <failures-dir>, resolves each to an
+Reads flaky-test lines from files in <flaky-dir>, resolves each to an
 owning developer via git blame (constrained to members of a GitHub team),
 and creates or updates a draft issue on the org project.
 
@@ -14,9 +14,9 @@ Env vars:
   GH_TOKEN         token with project:rw + org:members:read (required)
 
 Usage:
-  report-flaky-tests.py <failures-dir> [<search-root>...]
+  report-flaky-tests.py <flaky-dir> [<search-root>...]
 
-If search-root is omitted, '.' is used. Each failed test is resolved by
+If search-root is omitted, '.' is used. Each flaky test is resolved by
 searching each root in order for a matching source file; git blame runs
 in that root.
 """
@@ -409,9 +409,9 @@ def update_draft_body(item_id: str, title: str, body: str) -> None:
 # Main
 # ---------------------------------------------------------------------------
 
-def read_failures(failures_dir: Path) -> list[str]:
+def read_flaky_tests(flaky_dir: Path) -> list[str]:
     lines: set[str] = set()
-    for f in sorted(failures_dir.glob("failed-tests-*.txt")):
+    for f in sorted(flaky_dir.glob("flaky-tests-*.txt")):
         for raw in f.read_text(errors="replace").splitlines():
             line = raw.strip()
             if line:
@@ -423,22 +423,22 @@ def main() -> int:
     if len(sys.argv) < 2:
         print(__doc__, file=sys.stderr)
         return 2
-    failures_dir = Path(sys.argv[1])
+    flaky_dir = Path(sys.argv[1])
     roots = [Path(r) for r in sys.argv[2:]] or [Path(".")]
 
-    if not failures_dir.is_dir():
-        print(f"no failures dir: {failures_dir}", file=sys.stderr)
+    if not flaky_dir.is_dir():
+        print(f"no flaky-tests dir: {flaky_dir}", file=sys.stderr)
         return 0
 
-    failures = read_failures(failures_dir)
-    if not failures:
-        print("no failed tests to report")
+    flaky_tests = read_flaky_tests(flaky_dir)
+    if not flaky_tests:
+        print("no flaky tests to report")
         return 0
 
-    print(f"::group::flaky-test-tracker: {len(failures)} failed tests")
-    for line in failures[:MAX_ITEMS_PER_RUN]:
+    print(f"::group::flaky-test-tracker: {len(flaky_tests)} flaky tests")
+    for line in flaky_tests[:MAX_ITEMS_PER_RUN]:
         print(f"  - {line}")
-    if len(failures) > MAX_ITEMS_PER_RUN:
+    if len(flaky_tests) > MAX_ITEMS_PER_RUN:
         print(f"  (capped at {MAX_ITEMS_PER_RUN})")
     print("::endgroup::")
 
@@ -476,7 +476,7 @@ def main() -> int:
     today = date.today().isoformat()
     new_count = recurring_count = 0
 
-    for line in failures[:MAX_ITEMS_PER_RUN]:
+    for line in flaky_tests[:MAX_ITEMS_PER_RUN]:
         title = f"Flaky: {line}"
         existing = by_title.get(title)
         if existing:

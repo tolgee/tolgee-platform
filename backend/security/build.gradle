@@ -11,6 +11,7 @@ plugins {
     id 'org.springframework.boot' apply false
     id "kotlin-allopen"
     id "io.sentry.jvm.gradle"
+    id "org.gradle.test-retry"
 }
 
 group = 'io.tolgee.security'
@@ -81,6 +82,7 @@ dependencies {
 tasks.named('test', Test) {
     useJUnitPlatform()
     maxHeapSize = "4096m"
+    rootProject.setTestRetry(it)
 }
 
 sourceSets {
