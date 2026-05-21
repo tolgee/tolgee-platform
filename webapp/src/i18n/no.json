@@ -2678,6 +2678,7 @@
   "translations_key_edit_label_tags": "Tagger",
   "translations_key_edit_placeholder": "Legg til tagg...",
   "translations_key_edit_title": "Rediger nøkkel",
+  "translations_key_msgctxt_tooltip": "Gettext msgctxt",
   "translations_key_soft_delete_confirmation": "{count, plural, one {# nøkkel vil bli flyttet til papirkurven. Du kan gjenopprette den i 7 dager.} other {# nøkler vil bli flyttet til papirkurven. Du kan gjenopprette dem i 7 dager.}}",
   "translations_languages_limit_reached": "Kan ikke velge mer enn {max} språk",
   "translations_list_labels_more_label": "+{count}",

@@ -2700,6 +2700,7 @@
   "translations_key_edit_label_tags": "Tags",
   "translations_key_edit_placeholder": "Add tag...",
   "translations_key_edit_title": "Edit key",
+  "translations_key_msgctxt_tooltip": "Gettext msgctxt",
   "translations_key_soft_delete_confirmation": "{count, plural, one {# key will be moved to Trash. You can restore it for 7 days.} other {# keys will be moved to Trash. You can restore them for 7 days.}}",
   "translations_languages_limit_reached": "Cannot select more than {max} languages",
   "translations_list_labels_more_label": "+{count}",

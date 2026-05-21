@@ -2421,6 +2421,7 @@
   "translations_key_edit_label_tags": "Tagi",
   "translations_key_edit_placeholder": "Dodaj tag...",
   "translations_key_edit_title": "Edytuj klucz",
+  "translations_key_msgctxt_tooltip": "Gettext msgctxt",
   "translations_key_soft_delete_confirmation": "{count, plural, one {# klucz zostanie przeniesiony do Kosza. Możesz go przywrócić przez 7 dni.} few {# klucze zostaną przeniesione do Kosza. Możesz je przywrócić przez 7 dni.} many {# kluczy zostanie przeniesionych do Kosza. Możesz je przywrócić przez 7 dni.} other {# klucza zostanie przeniesione do Kosza. Możesz je przywrócić przez 7 dni.}}",
   "translations_languages_limit_reached": "Nie można wybrać więcej niż {max} języków",
   "translations_missing_placeholders_label": "Brak:",

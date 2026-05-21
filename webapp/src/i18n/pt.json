@@ -2684,6 +2684,7 @@
   "translations_key_edit_label_tags": "Etiquetas",
   "translations_key_edit_placeholder": "Adicionar etiqueta...",
   "translations_key_edit_title": "Editar chave",
+  "translations_key_msgctxt_tooltip": "Gettext msgctxt",
   "translations_key_soft_delete_confirmation": "{count, plural, one {# chave será movida para a Lixeira. Você pode restaurá-la por 7 dias.} other {# chaves serão movidas para a Lixeira. Você pode restaurá-las por 7 dias.} }",
   "translations_languages_limit_reached": "Não é possível selecionar mais de {max} idiomas",
   "translations_list_labels_more_label": "+{count}",

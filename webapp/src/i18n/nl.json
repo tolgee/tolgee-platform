@@ -2698,6 +2698,7 @@
   "translations_key_edit_label_tags": "Tags",
   "translations_key_edit_placeholder": "Tag toevoegen...",
   "translations_key_edit_title": "Sleutel bewerken",
+  "translations_key_msgctxt_tooltip": "Gettext msgctxt",
   "translations_key_soft_delete_confirmation": "{count, plural, one {# sleutel wordt naar de prullenbak verplaatst. Je kunt deze 7 dagen herstellen.} other {# sleutels worden naar de prullenbak verplaatst. Je kunt deze 7 dagen herstellen.}}",
   "translations_languages_limit_reached": "Kan niet meer dan {max} talen selecteren",
   "translations_list_labels_more_label": "+{count}",

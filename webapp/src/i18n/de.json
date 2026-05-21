@@ -2690,6 +2690,7 @@
   "translations_key_edit_label_tags": "Tags",
   "translations_key_edit_placeholder": "Tag hinzufügen...",
   "translations_key_edit_title": "Schlüssel bearbeiten",
+  "translations_key_msgctxt_tooltip": "Gettext msgctxt",
   "translations_key_soft_delete_confirmation": "{count, plural, one {# Schlüssel wird in den Papierkorb verschoben. Sie können ihn 7 Tage lang wiederherstellen.} other {# Schlüssel werden in den Papierkorb verschoben. Sie können sie 7 Tage lang wiederherstellen.}}",
   "translations_languages_limit_reached": "Es können nicht mehr als {max} Sprachen ausgewählt werden",
   "translations_list_labels_more_label": "+{count}",

@@ -1,3 +1,10 @@
+## [3.190.3](https://github.com/tolgee/tolgee-platform/compare/v3.190.2...v3.190.3) (2026-05-21)
+
+
+### Bug Fixes
+
+* do not flag missing terminal punctuation in GrammarCheck ([#3673](https://github.com/tolgee/tolgee-platform/issues/3673)) ([b9f5f23](https://github.com/tolgee/tolgee-platform/commit/b9f5f236643b04230c0c2d451863aed061d0e34b))
+
 ## [3.190.2](https://github.com/tolgee/tolgee-platform/compare/v3.190.1...v3.190.2) (2026-05-21)
 
 

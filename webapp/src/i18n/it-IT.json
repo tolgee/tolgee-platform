@@ -2640,6 +2640,7 @@
   "translations_key_edit_label_tags": "Tag",
   "translations_key_edit_placeholder": "Aggiungi tag...",
   "translations_key_edit_title": "Modifica chiave",
+  "translations_key_msgctxt_tooltip": "Gettext msgctxt",
   "translations_key_soft_delete_confirmation": "{count, plural, one {# chiave verrà spostata nel Cestino. Puoi ripristinarla per 7 giorni.} other {# chiavi verranno spostate nel Cestino. Puoi ripristinarle per 7 giorni.} }",
   "translations_languages_limit_reached": "Non è possibile selezionare più di {max} lingue",
   "translations_list_labels_more_label": "+{count}",

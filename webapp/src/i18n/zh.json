@@ -2686,6 +2686,7 @@
   "translations_key_edit_label_tags": "Tags",
   "translations_key_edit_placeholder": "添加 tag...",
   "translations_key_edit_title": "编辑词条",
+  "translations_key_msgctxt_tooltip": "Gettext msgctxt",
   "translations_key_soft_delete_confirmation": "{count, plural, other {# 个 key 将被移至回收站。你可以在 7 天内恢复它们。}}",
   "translations_languages_limit_reached": "无法选择超过 {max} 种语言",
   "translations_list_labels_more_label": "+{count}",

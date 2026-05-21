@@ -2694,6 +2694,7 @@
   "translations_key_edit_label_tags": "Tagy",
   "translations_key_edit_placeholder": "Přidat tag...",
   "translations_key_edit_title": "Upravit klíč",
+  "translations_key_msgctxt_tooltip": "Gettext msgctxt",
   "translations_key_soft_delete_confirmation": "{count, plural, one {# klíč bude přesunut do koše. Můžete jej obnovit po dobu 7 dnů.} few {# klíče budou přesunuty do koše. Můžete je obnovit po dobu 7 dnů.} many {# klíče bude přesunuto do koše. Můžete je obnovit po dobu 7 dnů.} other {# klíčů bude přesunuto do koše. Můžete je obnovit po dobu 7 dnů.}}",
   "translations_languages_limit_reached": "Nelze vybrat více než {max} jazyků",
   "translations_list_labels_more_label": "+ {count}",

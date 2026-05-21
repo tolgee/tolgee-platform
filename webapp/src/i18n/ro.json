@@ -2676,6 +2676,7 @@
   "translations_key_edit_label_tags": "Etichete",
   "translations_key_edit_placeholder": "Adaugă etichetă...",
   "translations_key_edit_title": "Editare cheie",
+  "translations_key_msgctxt_tooltip": "Gettext msgctxt",
   "translations_key_soft_delete_confirmation": "{count, plural, one {# cheie va fi mutată în Coș. O poți restaura timp de 7 zile.} few {# chei vor fi mutate în Coș. Le poți restaura timp de 7 zile.} other {# de chei vor fi mutate în Coș. Le poți restaura timp de 7 zile.}}",
   "translations_languages_limit_reached": "Nu se pot selecta mai mult de {max} limbi",
   "translations_list_labels_more_label": "+{count}",

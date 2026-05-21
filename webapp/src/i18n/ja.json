@@ -2700,6 +2700,7 @@
   "translations_key_edit_label_tags": "タグ",
   "translations_key_edit_placeholder": "タグを追加...",
   "translations_key_edit_title": "キーを編集",
+  "translations_key_msgctxt_tooltip": "Gettext msgctxt",
   "translations_key_soft_delete_confirmation": "{count, plural, other {# 個のキーがゴミ箱に移動されます。7日間以内であればゴミ箱から復元できます。}}",
   "translations_languages_limit_reached": "{max} を超える言語を選択することはできません",
   "translations_list_labels_more_label": "+{count}",

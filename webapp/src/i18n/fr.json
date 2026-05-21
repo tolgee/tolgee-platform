@@ -2687,6 +2687,7 @@
   "translations_key_edit_label_tags": "Étiquettes",
   "translations_key_edit_placeholder": "Ajouter une étiquette...",
   "translations_key_edit_title": "Modifier la clé",
+  "translations_key_msgctxt_tooltip": "Gettext msgctxt",
   "translations_key_soft_delete_confirmation": "{count, plural, one {# clé sera déplacée dans la corbeille. Vous pouvez la restaurer pendant 7 jours.} other {# clés seront déplacées dans la corbeille. Vous pouvez les restaurer pendant 7 jours.} }",
   "translations_languages_limit_reached": "Impossible de sélectionner plus de {max} langues",
   "translations_list_labels_more_label": "+{count}",

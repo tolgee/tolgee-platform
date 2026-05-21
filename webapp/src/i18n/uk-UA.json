@@ -2432,6 +2432,7 @@
   "translations_key_edit_label_tags": "Теги",
   "translations_key_edit_placeholder": "Додати тег...",
   "translations_key_edit_title": "Редагувати ключ",
+  "translations_key_msgctxt_tooltip": "Gettext msgctxt",
   "translations_key_soft_delete_confirmation": "{count, plural, one {# ключ буде переміщено до Кошика. Ви можете відновити його протягом 7 днів.} few {# ключі будуть переміщені до Кошика. Ви можете відновити їх протягом 7 днів.} many {# ключів будуть переміщені до Кошика. Ви можете відновити їх протягом 7 днів.} other {# ключа будуть переміщені до Кошика. Ви можете відновити їх протягом 7 днів.}}",
   "translations_languages_limit_reached": "Не можна вибрати більше ніж {max} мов",
   "translations_missing_placeholders_label": "Відсутні:",
