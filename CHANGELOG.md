@@ -1,3 +1,11 @@
+## [3.190.2](https://github.com/tolgee/tolgee-platform/compare/v3.190.1...v3.190.2) (2026-05-21)
+
+
+### Bug Fixes
+
+* orphan batch job redis locks ([#3675](https://github.com/tolgee/tolgee-platform/issues/3675)) ([bb21d52](https://github.com/tolgee/tolgee-platform/commit/bb21d5254d64448058001f4cf3922560c0c8b1ac))
+* performance of import ([#3629](https://github.com/tolgee/tolgee-platform/issues/3629)) ([223c509](https://github.com/tolgee/tolgee-platform/commit/223c509b7ffc6cc60fe77751f624088157abf498))
+
 ## [3.190.1](https://github.com/tolgee/tolgee-platform/compare/v3.190.0...v3.190.1) (2026-05-21)
 
 
