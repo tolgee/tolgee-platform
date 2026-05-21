@@ -53,7 +53,7 @@ const StyledHead = styled('div')`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 20px;
 `;
 
 // Three-tier scheme matching the pre-PR design (green / orange / grey at 1.0 / 0.7
