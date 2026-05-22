@@ -50,6 +50,56 @@ const { data, error } = await client.GET(
 
 `autoThrow` (the default) raises on any non-2xx response and serializes the error using `errorFromLoadable`. Set it to `false` if you want to handle the `error`/`data` split yourself.
 
+## Webhook receiver types
+
+When you build a Tolgee app (or any service receiving Tolgee webhooks), the
+generated schema includes a `webhooks` namespace with a typed payload per
+[`ActivityType`](https://github.com/tolgee/tolgee-platform/blob/main/backend/data/src/main/kotlin/io/tolgee/activity/data/ActivityType.kt).
+The payload shape narrows automatically based on the event's flags
+(`onlyCountsInList`, `restrictEntitiesInList`, `paramsProvider`).
+
+```ts
+import type { webhooks } from "@tginternal/client";
+
+type SetTranslationsPayload =
+  webhooks["SET_TRANSLATIONS"]["post"]["requestBody"]["content"]["application/json"];
+
+app.post("/webhook", (req, res) => {
+  const payload = req.body as SetTranslationsPayload;
+  // payload.activityData.type            ⟶ "SET_TRANSLATIONS"
+  // payload.activityData.modifiedEntities.Translation[i].modifications.text?.new
+  // …all typed from the platform's @ActivityLoggedProp annotations.
+  res.sendStatus(204);
+});
+```
+
+To handle multiple events in one handler, narrow via the `activityData.type`
+discriminator:
+
+```ts
+import type { webhooks } from "@tginternal/client";
+
+type AnyWebhookPayload =
+  webhooks[keyof webhooks]["post"]["requestBody"]["content"]["application/json"];
+
+function handle(p: AnyWebhookPayload) {
+  switch (p.activityData?.type) {
+    case "SET_TRANSLATIONS":
+      // p.activityData.modifiedEntities.Translation is non-undefined here
+      break;
+    case "IMPORT":
+      // counts-only: p.activityData.modifiedEntities is empty,
+      // p.activityData.counts carries the per-entity-class totals.
+      break;
+  }
+}
+```
+
+Each webhook body is HMAC-signed with the install's `webhookSecret`. The
+`Tolgee-Signature` header carries `{ "timestamp": <ms>, "signature": "<hex>" }`;
+receivers should recompute `HMAC-SHA256(secret, "${timestamp}.${rawBody}")` and
+constant-time-compare before trusting the payload.
+
 ## Regenerating the schema
 
 ```bash
