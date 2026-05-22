@@ -1,7 +1,7 @@
 /**
  * Stub billing module — used when the billing repo is not present.
  * When the billing repo exists, Vite's alias overrides this with
- * the real implementation from billing/frontend/billing/billingModule.tsx.
+ * the real implementation from billing/frontend/src/billingModule.tsx.
  */
 import { Link } from 'tg.constants/links';
 import { BillingMenuItemsProps } from 'eeSetup/EeModuleType';
