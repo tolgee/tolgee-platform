@@ -2719,6 +2719,10 @@
   "translation_sort_item_oldest_on_top": "Oldest keys on top",
   "translation_sort_menu_label": "Sort by",
   "translation_spending_limit_exceeded": "Spending limit exceeded",
+  "translations_plural_add_exact_form": "Add exact form",
+  "translations_plural_exact_form_exists": "Exact form already exists",
+  "translations_plural_exact_form_invalid": "Enter a non-negative number",
+  "translations_plural_remove_exact_form": "Remove exact form",
   "translations_results_count": "{count, plural, one {1 key} other {# keys}}",
   "translations_screenshots_add_tooltip": "Add screenshot",
   "translations": {

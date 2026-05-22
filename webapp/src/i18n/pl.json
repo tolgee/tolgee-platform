@@ -2438,6 +2438,10 @@
   "translation_sort_item_oldest_on_top": "Najstarsze klucze na górze",
   "translation_sort_menu_label": "Sortuj według",
   "translation_spending_limit_exceeded": "Przekroczono limit wydatków",
+  "translations_plural_add_exact_form": "Dodaj dokładną formę",
+  "translations_plural_exact_form_exists": "Dokładna forma już istnieje",
+  "translations_plural_exact_form_invalid": "Wprowadź liczbę nieujemną",
+  "translations_plural_remove_exact_form": "Usuń dokładną formę",
   "translations_results_count": "{count, plural, one {1 klucz} few {# klucze} many {# kluczy} other {# klucza}}",
   "translations_screenshots_add_tooltip": "Dodaj zrzut ekranu",
   "translations": {

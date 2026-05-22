@@ -2713,6 +2713,10 @@
   "translation_sort_item_oldest_on_top": "Nejstarší klíče nahoře",
   "translation_sort_menu_label": "Seřadit podle",
   "translation_spending_limit_exceeded": "Výdajový limit překročen",
+  "translations_plural_add_exact_form": "Přidat přesný tvar",
+  "translations_plural_exact_form_exists": "Přesná forma již existuje",
+  "translations_plural_exact_form_invalid": "Zadejte nezáporné číslo",
+  "translations_plural_remove_exact_form": "Odebrat přesný tvar",
   "translations_results_count": "{count, plural, one {1 klíč} few {# klíče} other {# klíčů}}",
   "translations_screenshots_add_tooltip": "Přidat screenshot",
   "translations": {

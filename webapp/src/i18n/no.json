@@ -2697,6 +2697,10 @@
   "translation_sort_item_oldest_on_top": "Eldste nøkler øverst",
   "translation_sort_menu_label": "Sorter etter",
   "translation_spending_limit_exceeded": "Grensen for utgifter er overskredet",
+  "translations_plural_add_exact_form": "Legg til eksakt form",
+  "translations_plural_exact_form_exists": "Eksakt form eksisterer allerede",
+  "translations_plural_exact_form_invalid": "Skriv inn et ikke-negativt tall",
+  "translations_plural_remove_exact_form": "Fjern eksakt form",
   "translations_results_count": "{count, plural, one {1 nøkkel} other {# nøkler}}",
   "translations_screenshots_add_tooltip": "Legg til skjermbilde",
   "translations": {

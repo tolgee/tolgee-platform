@@ -1,3 +1,10 @@
+## [3.190.4](https://github.com/tolgee/tolgee-platform/compare/v3.190.3...v3.190.4) (2026-05-22)
+
+
+### Bug Fixes
+
+* update outdated CSV format help link in glossary import dialog ([#3674](https://github.com/tolgee/tolgee-platform/issues/3674)) ([5618493](https://github.com/tolgee/tolgee-platform/commit/56184930351b157802f75b8e5fba33aeb86bac5b))
+
 ## [3.190.3](https://github.com/tolgee/tolgee-platform/compare/v3.190.2...v3.190.3) (2026-05-21)
 
 

@@ -2701,6 +2701,10 @@
   "translation_sort_item_oldest_on_top": "Claves más antiguas en la parte superior",
   "translation_sort_menu_label": "Ordenar por",
   "translation_spending_limit_exceeded": "Límite de gasto excedido",
+  "translations_plural_add_exact_form": "Añadir forma exacta",
+  "translations_plural_exact_form_exists": "La forma exacta ya existe",
+  "translations_plural_exact_form_invalid": "Introduce un número no negativo",
+  "translations_plural_remove_exact_form": "Eliminar forma exacta",
   "translations_results_count": "{count, plural, one {1 clave} other {# claves}}",
   "translations_screenshots_add_tooltip": "Añadir captura de pantalla",
   "translations": {

@@ -2717,6 +2717,10 @@
   "translation_sort_item_oldest_on_top": "Ældste nøgler øverst",
   "translation_sort_menu_label": "Sorter efter",
   "translation_spending_limit_exceeded": "Grænse for forbrug overskredet",
+  "translations_plural_add_exact_form": "Tilføj eksakt form",
+  "translations_plural_exact_form_exists": "Eksakt form findes allerede",
+  "translations_plural_exact_form_invalid": "Indtast et ikke-negativt tal",
+  "translations_plural_remove_exact_form": "Fjern eksakt form",
   "translations_results_count": "{count, plural, one {1 nøgle} other {# nøgler}}",
   "translations_screenshots_add_tooltip": "Tilføj skærmbillede",
   "translations": {

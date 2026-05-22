@@ -2449,6 +2449,10 @@
   "translation_sort_item_oldest_on_top": "Найстаріші ключі зверху",
   "translation_sort_menu_label": "Сортувати за",
   "translation_spending_limit_exceeded": "Перевищено ліміт витрат",
+  "translations_plural_add_exact_form": "Додати точну форму",
+  "translations_plural_exact_form_exists": "Точна форма вже існує",
+  "translations_plural_exact_form_invalid": "Введіть невід'ємне число",
+  "translations_plural_remove_exact_form": "Видалити точну форму",
   "translations_results_count": "{count, plural, one {1 ключ} few {# ключі} many {# ключів} other {# ключа}}",
   "translations_screenshots_add_tooltip": "Додати знімок екрана",
   "translations": {

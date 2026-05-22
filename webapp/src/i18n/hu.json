@@ -2703,6 +2703,10 @@
   "translation_sort_item_oldest_on_top": "Régi kulcsok felül",
   "translation_sort_menu_label": "Rendezés",
   "translation_spending_limit_exceeded": "Költségkeret túllépve",
+  "translations_plural_add_exact_form": "Pontos alak hozzáadása",
+  "translations_plural_exact_form_exists": "A pontos forma már létezik",
+  "translations_plural_exact_form_invalid": "Adj meg egy nem negatív számot",
+  "translations_plural_remove_exact_form": "Pontos alak eltávolítása",
   "translations_results_count": "{count, plural, one {1 kulcs} other {# kulcs}}",
   "translations_screenshots_add_tooltip": "Képernyőkép hozzáadása",
   "translations": {

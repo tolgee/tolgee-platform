@@ -2705,6 +2705,10 @@
   "translation_sort_item_oldest_on_top": "最旧词条在顶部",
   "translation_sort_menu_label": "排序方式",
   "translation_spending_limit_exceeded": "已超出消费限额",
+  "translations_plural_add_exact_form": "添加精确形式",
+  "translations_plural_exact_form_exists": "Exact form 已存在",
+  "translations_plural_exact_form_invalid": "输入非负数",
+  "translations_plural_remove_exact_form": "移除 exact form",
   "translations_results_count": "{count, plural, one {1 个词条} other {# 个词条}}",
   "translations_screenshots_add_tooltip": "添加屏幕截图",
   "translations": {
