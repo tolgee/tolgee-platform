@@ -16,6 +16,14 @@
         "icon": "👋",
         "entry": "/"
       }
+    ],
+    "translation-tools-panel": [
+      {
+        "key": "activity",
+        "title": "Activity",
+        "icon": "📈",
+        "entry": "/tools-panel"
+      }
     ]
   }
 }

@@ -114,3 +114,32 @@
   color: #888;
   margin-top: 2px;
 }
+
+.tools-panel {
+  font-family: system-ui, sans-serif;
+  padding: 12px 14px;
+  display: grid;
+  gap: 8px;
+}
+
+.tools-panel-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.tools-panel-label {
+  font-size: 0.85rem;
+  color: #444;
+}
+
+.tools-panel-count {
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.tools-panel-hint {
+  font-size: 0.7rem;
+  color: #888;
+}

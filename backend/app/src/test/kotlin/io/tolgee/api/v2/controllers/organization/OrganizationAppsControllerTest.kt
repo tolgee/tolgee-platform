@@ -59,6 +59,18 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `parses translation-tools-panel modules alongside dashboard pages`() {
+    mockManifest(manifestWithToolsPanel())
+    performAuthPost(appsUrl(), registerBody()).andIsOk.andAssertThatJson {
+      node("modules.project-dashboard-page[0].key").isEqualTo("home")
+      node("modules.translation-tools-panel[0].key").isEqualTo("activity")
+      node("modules.translation-tools-panel[0].title").isEqualTo("Activity")
+      node("modules.translation-tools-panel[0].icon").isEqualTo("📈")
+      node("modules.translation-tools-panel[0].entry").isEqualTo("/tools-panel")
+    }
+  }
+
+  @Test
   fun `preview returns parsed manifest with requested scopes without persisting`() {
     mockManifest(validManifest())
     performAuthPost("${appsUrl()}/preview", registerBody()).andIsOk.andAssertThatJson {
@@ -230,6 +242,25 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
       "modules": {
         "project-dashboard-page": [
           {"key": "home", "title": "Home v2", "icon": "🏠", "entry": "/"}
+        ]
+      }
+    }
+    """.trimIndent()
+
+  private fun manifestWithToolsPanel(): String =
+    """
+    {
+      "id": "test-app",
+      "name": "Test App",
+      "version": "0.1.0",
+      "baseUrl": "https://app.example.com",
+      "scopes": ["translations.view", "keys.edit"],
+      "modules": {
+        "project-dashboard-page": [
+          {"key": "home", "title": "Home", "icon": "🏠", "entry": "/"}
+        ],
+        "translation-tools-panel": [
+          {"key": "activity", "title": "Activity", "icon": "📈", "entry": "/tools-panel"}
         ]
       }
     }
