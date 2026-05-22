@@ -122,6 +122,8 @@ dependencies {
     testImplementation('io.netty:netty-codec-http:4.2.5.Final')
     testImplementation('io.netty:netty-codec-http2:4.2.5.Final')
     testImplementation('io.netty:netty-handler:4.2.5.Final')
+    testImplementation('io.swagger.parser.v3:swagger-parser:2.1.20')
+    testImplementation('com.networknt:json-schema-validator:2.0.0')
     ktlint(project(":ktlint"))
 
 

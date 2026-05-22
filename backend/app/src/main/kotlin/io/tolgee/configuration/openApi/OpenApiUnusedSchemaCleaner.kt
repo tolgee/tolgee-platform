@@ -41,17 +41,24 @@ class OpenApiUnusedSchemaCleaner(
 
   private fun walkPathsAndAddAllSchemas() {
     openApi.paths.forEach { path ->
-      path.value.readOperations().forEach { operation ->
-        operation.requestBody?.content?.values?.forEach { mediaType ->
+      path.value.harvestOperationSchemas()
+    }
+    openApi.webhooks?.forEach { (_, pathItem) ->
+      pathItem.harvestOperationSchemas()
+    }
+  }
+
+  private fun io.swagger.v3.oas.models.PathItem.harvestOperationSchemas() {
+    readOperations().forEach { operation ->
+      operation.requestBody?.content?.values?.forEach { mediaType ->
+        mediaType.schema.addAllNamesRecursively()
+      }
+      operation.parameters?.forEach {
+        it.schema.addAllNamesRecursively()
+      }
+      operation.responses?.values?.forEach { response ->
+        response.content?.values?.forEach { mediaType ->
           mediaType.schema.addAllNamesRecursively()
-        }
-        operation.parameters?.forEach {
-          it.schema.addAllNamesRecursively()
-        }
-        operation.responses.values.forEach { response ->
-          response.content?.values?.forEach { mediaType ->
-            mediaType.schema.addAllNamesRecursively()
-          }
         }
       }
     }
