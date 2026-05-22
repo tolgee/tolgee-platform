@@ -1470,35 +1470,11 @@ export interface components {
       webhookUrl?: string;
     };
     AppManifestModules: {
-      "project-dashboard-page"?: components["schemas"]["ProjectDashboardPageModule"][];
-      "translation-tools-panel"?: components["schemas"]["TranslationToolsPanelModule"][];
-      "key-edit-tab"?: components["schemas"]["KeyEditTabModule"][];
       "key-action"?: components["schemas"]["KeyActionModule"][];
+      "key-edit-tab"?: components["schemas"]["KeyEditTabModule"][];
+      "project-dashboard-page"?: components["schemas"]["ProjectDashboardPageModule"][];
       "translation-action"?: components["schemas"]["TranslationActionModule"][];
-    };
-    KeyEditTabModule: {
-      entry: string;
-      icon: string;
-      key: string;
-      title: string;
-    };
-    KeyActionModule: {
-      dynamic?: boolean;
-      icon: string;
-      key: string;
-      tabKey?: string;
-      tooltip: string;
-      type: "link" | "panel" | "tab";
-      urlTemplate?: string;
-    };
-    TranslationActionModule: {
-      dynamic?: boolean;
-      icon: string;
-      key: string;
-      panelKey?: string;
-      tooltip: string;
-      type: "link" | "panel" | "tab";
-      urlTemplate?: string;
+      "translation-tools-panel"?: components["schemas"]["TranslationToolsPanelModule"][];
     };
     AppManifestPreviewModel: {
       appId: string;
@@ -1515,6 +1491,7 @@ export interface components {
       clientId?: string;
       clientSecret: string;
       clientSecretPrefix?: string;
+      decoratorsUrl?: string;
       /** Format: int64 */
       id: number;
       manifestUrl: string;
@@ -3704,6 +3681,16 @@ export interface components {
       accessToken?: string;
       tokenType?: string;
     };
+    KeyActionModule: {
+      dynamic: boolean;
+      icon: string;
+      key: string;
+      tabKey?: string;
+      tooltip: string;
+      /** @enum {string} */
+      type: "link" | "panel" | "tab";
+      urlTemplate?: string;
+    };
     KeyDefinitionDto: {
       name: string;
       namespace?: string;
@@ -3731,6 +3718,12 @@ export interface components {
        * @example homepage
        */
       namespace?: string;
+    };
+    KeyEditTabModule: {
+      entry: string;
+      icon: string;
+      key: string;
+      title: string;
     };
     KeyId: {
       /**
@@ -6965,6 +6958,16 @@ export interface components {
       type: "TRANSLATE" | "REVIEW";
     };
     TextNode: unknown;
+    TranslationActionModule: {
+      dynamic: boolean;
+      icon: string;
+      key: string;
+      panelKey?: string;
+      tooltip: string;
+      /** @enum {string} */
+      type: "link" | "panel" | "tab";
+      urlTemplate?: string;
+    };
     TranslationAgencySimpleModel: {
       avatar?: components["schemas"]["Avatar"];
       /** Format: int64 */

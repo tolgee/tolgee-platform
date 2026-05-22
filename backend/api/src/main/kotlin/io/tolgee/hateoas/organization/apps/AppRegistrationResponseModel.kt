@@ -18,6 +18,7 @@ class AppRegistrationResponseModel(
   clientId: String?,
   clientSecretPrefix: String?,
   webhookSecret: String?,
+  decoratorsUrl: String?,
   val clientSecret: String,
 ) : AppInstallModel(
     id = id,
@@ -33,4 +34,5 @@ class AppRegistrationResponseModel(
     clientId = clientId,
     clientSecretPrefix = clientSecretPrefix,
     webhookSecret = webhookSecret,
+    decoratorsUrl = decoratorsUrl,
   )
