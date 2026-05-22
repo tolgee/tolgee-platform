@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Box, Button, styled, Typography } from '@mui/material';
 import { languageInfo } from '@tginternal/language-util/lib/generated/languageInfo';
 import { T, useTranslate } from '@tolgee/react';
@@ -81,13 +81,13 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
   const {
     languages,
     languagesLoadable,
-    isAllSelected,
     selectedLanguages,
     langSearch,
     setLangSearch,
     fetchMoreLanguages,
     toggleLanguage,
     updateSelectedLanguages,
+    seedAutoDefault,
     allNonBaseLanguageTags,
     displayLanguages,
     targetLanguageTag,
@@ -104,6 +104,28 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
     search,
     targetLanguageTag,
   });
+
+  const firstPageEntryLanguages = useMemo(() => {
+    const firstPage =
+      entries.data?.pages?.[0]?._embedded?.translationMemoryRows;
+    if (!firstPage) return undefined;
+    const tags = new Set<string>();
+    firstPage.forEach((r) =>
+      r.cells.forEach((c) => tags.add(c.targetLanguageTag))
+    );
+    return [...tags];
+  }, [entries.data]);
+
+  // One-time seed: when nothing is stored for this TM, set the selection from the first
+  // page's languages and persist it.
+  useLayoutEffect(() => {
+    if (
+      selectedLanguages === undefined &&
+      firstPageEntryLanguages !== undefined
+    ) {
+      seedAutoDefault(firstPageEntryLanguages);
+    }
+  }, [selectedLanguages, firstPageEntryLanguages, seedAutoDefault]);
 
   const selectionService = useSelectionService<number>({
     totalCount: totalElements,
@@ -156,7 +178,9 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
         editingLang={editingLangForRow}
         canManage={canManage}
         layout={layout}
-        selectionService={row.editable ? selectionService : undefined}
+        // Passed for every row — the row itself renders a real checkbox for editable
+        // rows and a disabled one (with tooltip) for virtual rows.
+        selectionService={selectionService}
         groupId={groupId}
         onEditStart={(langTag) => setEditingCell(`${rowKey}|||${langTag}`)}
         onEditEnd={() => {
@@ -209,8 +233,7 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
         onLayoutChange={setLayoutParam}
         languages={languages}
         languagesLoadable={languagesLoadable}
-        isAllSelected={isAllSelected}
-        selectedLanguages={selectedLanguages}
+        selectedLanguages={displayLanguages}
         langSearch={langSearch}
         onLangSearchChange={setLangSearch}
         onFetchMoreLanguages={fetchMoreLanguages}
