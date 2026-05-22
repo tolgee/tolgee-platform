@@ -24,6 +24,7 @@ class ProjectAppModelAssembler(
       baseUrl = install.baseUrl,
       modules = manifest.modules,
       enabled = enabled,
+      decoratorsUrl = manifest.decoratorsUrl,
     )
   }
 }

@@ -59,6 +59,44 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `parses key-edit-tab and key+translation-action modules with decoratorsUrl`() {
+    mockManifest(manifestWithActions())
+    performAuthPost(appsUrl(), registerBody()).andIsOk.andAssertThatJson {
+      node("decoratorsUrl").isEqualTo("https://app.example.com/decorators")
+      node("modules.key-edit-tab[0].key").isEqualTo("audit")
+      node("modules.key-edit-tab[0].title").isEqualTo("Audit")
+      node("modules.key-edit-tab[0].entry").isEqualTo("/key-edit-tab/audit")
+      node("modules.key-action[0].key").isEqualTo("view-source")
+      node("modules.key-action[0].type").isEqualTo("link")
+      node("modules.key-action[0].urlTemplate").isEqualTo("https://example.com/{keyName}")
+      node("modules.key-action[1].key").isEqualTo("open-audit")
+      node("modules.key-action[1].type").isEqualTo("tab")
+      node("modules.key-action[1].dynamic").isEqualTo(true)
+      node("modules.key-action[1].tabKey").isEqualTo("audit")
+      node("modules.translation-action[0].key").isEqualTo("show-activity")
+      node("modules.translation-action[0].type").isEqualTo("panel")
+      node("modules.translation-action[0].dynamic").isEqualTo(true)
+      node("modules.translation-action[0].panelKey").isEqualTo("activity")
+    }
+  }
+
+  @Test
+  fun `rejects key-action of type tab whose tabKey doesn't resolve`() {
+    mockManifest(manifestWithActions().replace("\"tabKey\": \"audit\"", "\"tabKey\": \"nope\""))
+    performAuthPost(appsUrl(), registerBody()).andIsBadRequest.andAssertThatJson {
+      node("code").isEqualTo("app_manifest_invalid")
+    }
+  }
+
+  @Test
+  fun `rejects translation-action of type panel whose panelKey doesn't resolve`() {
+    mockManifest(manifestWithActions().replace("\"panelKey\": \"activity\"", "\"panelKey\": \"nope\""))
+    performAuthPost(appsUrl(), registerBody()).andIsBadRequest.andAssertThatJson {
+      node("code").isEqualTo("app_manifest_invalid")
+    }
+  }
+
+  @Test
   fun `parses translation-tools-panel modules alongside dashboard pages`() {
     mockManifest(manifestWithToolsPanel())
     performAuthPost(appsUrl(), registerBody()).andIsOk.andAssertThatJson {
@@ -261,6 +299,56 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
         ],
         "translation-tools-panel": [
           {"key": "activity", "title": "Activity", "icon": "📈", "entry": "/tools-panel"}
+        ]
+      }
+    }
+    """.trimIndent()
+
+  private fun manifestWithActions(): String =
+    """
+    {
+      "id": "test-app",
+      "name": "Test App",
+      "version": "0.1.0",
+      "baseUrl": "https://app.example.com",
+      "decoratorsUrl": "https://app.example.com/decorators",
+      "scopes": ["translations.view", "keys.edit"],
+      "modules": {
+        "project-dashboard-page": [
+          {"key": "home", "title": "Home", "icon": "🏠", "entry": "/"}
+        ],
+        "translation-tools-panel": [
+          {"key": "activity", "title": "Activity", "icon": "📈", "entry": "/tools-panel"}
+        ],
+        "key-edit-tab": [
+          {"key": "audit", "title": "Audit", "icon": "🛡️", "entry": "/key-edit-tab/audit"}
+        ],
+        "key-action": [
+          {
+            "key": "view-source",
+            "type": "link",
+            "icon": "🔗",
+            "tooltip": "View source",
+            "urlTemplate": "https://example.com/{keyName}"
+          },
+          {
+            "key": "open-audit",
+            "type": "tab",
+            "icon": "🛡️",
+            "tooltip": "Audit info",
+            "dynamic": true,
+            "tabKey": "audit"
+          }
+        ],
+        "translation-action": [
+          {
+            "key": "show-activity",
+            "type": "panel",
+            "icon": "📈",
+            "tooltip": "Activity",
+            "dynamic": true,
+            "panelKey": "activity"
+          }
         ]
       }
     }

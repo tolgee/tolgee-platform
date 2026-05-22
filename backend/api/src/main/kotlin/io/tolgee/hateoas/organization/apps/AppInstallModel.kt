@@ -19,4 +19,5 @@ open class AppInstallModel(
   val clientId: String?,
   val clientSecretPrefix: String?,
   val webhookSecret: String?,
+  val decoratorsUrl: String? = null,
 ) : RepresentationModel<AppInstallModel>()

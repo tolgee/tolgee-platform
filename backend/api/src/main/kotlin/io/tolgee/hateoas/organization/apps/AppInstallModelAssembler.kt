@@ -27,6 +27,7 @@ class AppInstallModelAssembler(
       clientId = entity.clientId,
       clientSecretPrefix = entity.clientSecretPrefix,
       webhookSecret = entity.webhookSecret,
+      decoratorsUrl = manifest.decoratorsUrl,
     )
   }
 }

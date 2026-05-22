@@ -10,6 +10,7 @@ data class AppManifest(
   val modules: AppManifestModules,
   val scopes: List<String>? = null,
   val webhooks: AppManifestWebhooks? = null,
+  val decoratorsUrl: String? = null,
 )
 
 data class AppManifestWebhooks(
@@ -22,6 +23,12 @@ data class AppManifestModules(
   val projectDashboardPage: List<ProjectDashboardPageModule>? = null,
   @JsonProperty("translation-tools-panel")
   val translationToolsPanel: List<TranslationToolsPanelModule>? = null,
+  @JsonProperty("key-edit-tab")
+  val keyEditTab: List<KeyEditTabModule>? = null,
+  @JsonProperty("key-action")
+  val keyAction: List<KeyActionModule>? = null,
+  @JsonProperty("translation-action")
+  val translationAction: List<TranslationActionModule>? = null,
 )
 
 data class ProjectDashboardPageModule(
@@ -37,3 +44,41 @@ data class TranslationToolsPanelModule(
   val icon: String,
   val entry: String,
 )
+
+data class KeyEditTabModule(
+  val key: String,
+  val title: String,
+  val icon: String,
+  val entry: String,
+)
+
+data class KeyActionModule(
+  val key: String,
+  val type: AppActionType,
+  val icon: String,
+  val tooltip: String,
+  val dynamic: Boolean = false,
+  val urlTemplate: String? = null,
+  val tabKey: String? = null,
+)
+
+data class TranslationActionModule(
+  val key: String,
+  val type: AppActionType,
+  val icon: String,
+  val tooltip: String,
+  val dynamic: Boolean = false,
+  val urlTemplate: String? = null,
+  val panelKey: String? = null,
+)
+
+enum class AppActionType {
+  @JsonProperty("link")
+  LINK,
+
+  @JsonProperty("panel")
+  PANEL,
+
+  @JsonProperty("tab")
+  TAB,
+}
