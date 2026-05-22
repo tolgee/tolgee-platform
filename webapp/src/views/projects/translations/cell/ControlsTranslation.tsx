@@ -17,9 +17,17 @@ import { CELL_HIGHLIGHT_ON_HOVER, CELL_SHOW_ON_HOVER } from './styles';
 import { useTranslationsSelector } from '../context/TranslationsContext';
 import { useTaskTransitionTranslation } from 'tg.translationTools/useTaskTransitionTranslation';
 import { QaBadge, useQaChecksEnabled } from 'tg.ee';
+import { AppDecoratorList } from '../decorators/AppDecoratorList';
 
 type State = components['schemas']['TranslationViewModel']['state'];
 type TaskModel = components['schemas']['KeyTaskViewModel'];
+
+const StyledControlsRoot = styled(Box)`
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+`;
 
 const StyledControlsWrapper = styled(Box)`
   display: grid;
@@ -75,6 +83,12 @@ type ControlsProps = {
   active?: boolean;
   containerProps?: React.ComponentProps<typeof Box>;
   className?: string;
+  keyId?: number;
+  keyName?: string;
+  keyNamespace?: string | null;
+  languageTag?: string;
+  languageId?: number;
+  translationId?: number;
 };
 
 export const ControlsTranslation: React.FC<ControlsProps> = ({
@@ -94,6 +108,12 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
   lastFocusable,
   active,
   className,
+  keyId,
+  keyName,
+  keyNamespace,
+  languageTag,
+  languageId,
+  translationId,
 }) => {
   const [hasNextState, setHasNextState] = React.useState(false);
   const spots: string[] = [];
@@ -142,95 +162,107 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
   const { t } = useTranslate();
 
   return (
-    <StyledControlsWrapper
-      style={{
-        gridTemplateAreas,
-        gridTemplateColumns,
-      }}
-      className={className}
-    >
-      {inDomTransitionButtons && (
-        <StateTransitionButtons
-          style={{ gridArea: 'state' }}
-          state={state}
-          onStateChange={onStateChange}
-          className={CELL_SHOW_ON_HOVER}
-          onNextStateExist={setHasNextState}
+    <StyledControlsRoot className={className}>
+      <StyledControlsWrapper
+        style={{
+          gridTemplateAreas,
+          gridTemplateColumns,
+        }}
+      >
+        {inDomTransitionButtons && (
+          <StateTransitionButtons
+            style={{ gridArea: 'state' }}
+            state={state}
+            onStateChange={onStateChange}
+            className={CELL_SHOW_ON_HOVER}
+            onNextStateExist={setHasNextState}
+          />
+        )}
+        {inDomEdit && (
+          <ControlsButton
+            style={{ gridArea: 'edit' }}
+            onClick={onEdit}
+            data-cy="translations-cell-edit-button"
+            className={CELL_SHOW_ON_HOVER}
+            tooltip={t('translations_cell_edit')}
+          >
+            <Edit02 />
+          </ControlsButton>
+        )}
+        {inDomComments && (
+          <ControlsButton
+            style={{ gridArea: 'comments' }}
+            onClick={onComments}
+            data-cy="translations-cell-comments-button"
+            className={clsx({
+              [CELL_SHOW_ON_HOVER]: !commentsPresent,
+              [CELL_HIGHLIGHT_ON_HOVER]: onlyResolved,
+            })}
+            tooltip={t('translation_cell_comments')}
+          >
+            {onlyResolved ? (
+              <StyledBadge
+                badgeContent={<StyledCheckIcon />}
+                classes={{
+                  badge: 'resolved',
+                }}
+              >
+                <MessageTextSquare02 />
+              </StyledBadge>
+            ) : (
+              <StyledBadge
+                badgeContent={unresolvedCommentCount}
+                color="primary"
+                classes={{ badge: 'unresolved' }}
+              >
+                <MessageTextSquare02 />
+              </StyledBadge>
+            )}
+          </ControlsButton>
+        )}
+        {inDomQaIssues && (
+          <ControlsButton
+            style={{ gridArea: 'qa' }}
+            onClick={onQaIssues}
+            data-cy="translations-cell-qa-issues-button"
+            className={clsx({
+              [CELL_SHOW_ON_HOVER]: !qaIssueCount,
+              [CELL_HIGHLIGHT_ON_HOVER]: qaIssuesResolved,
+            })}
+            tooltip={t('translation_cell_qa_issues')}
+          >
+            <QaBadge count={qaIssueCount} stale={qaChecksStale} />
+          </ControlsButton>
+        )}
+        {inDomTask && (
+          <ControlsButton
+            style={{ gridArea: 'task' }}
+            onClick={() => onTaskStateChange(!task?.done)}
+            data-cy="translations-cell-task-button"
+            color={
+              task?.userAssigned
+                ? task?.done
+                  ? 'secondary'
+                  : 'primary'
+                : undefined
+            }
+            tooltip={translateTransition(task.type, task.done)}
+          >
+            <ClipboardCheck />
+          </ControlsButton>
+        )}
+      </StyledControlsWrapper>
+      {keyId != null && (
+        <AppDecoratorList
+          kind="translation"
+          keyId={keyId}
+          keyName={keyName}
+          keyNamespace={keyNamespace}
+          languageTag={languageTag}
+          languageId={languageId}
+          translationId={translationId}
         />
       )}
-      {inDomEdit && (
-        <ControlsButton
-          style={{ gridArea: 'edit' }}
-          onClick={onEdit}
-          data-cy="translations-cell-edit-button"
-          className={CELL_SHOW_ON_HOVER}
-          tooltip={t('translations_cell_edit')}
-        >
-          <Edit02 />
-        </ControlsButton>
-      )}
-      {inDomComments && (
-        <ControlsButton
-          style={{ gridArea: 'comments' }}
-          onClick={onComments}
-          data-cy="translations-cell-comments-button"
-          className={clsx({
-            [CELL_SHOW_ON_HOVER]: !commentsPresent,
-            [CELL_HIGHLIGHT_ON_HOVER]: onlyResolved,
-          })}
-          tooltip={t('translation_cell_comments')}
-        >
-          {onlyResolved ? (
-            <StyledBadge
-              badgeContent={<StyledCheckIcon />}
-              classes={{
-                badge: 'resolved',
-              }}
-            >
-              <MessageTextSquare02 />
-            </StyledBadge>
-          ) : (
-            <StyledBadge
-              badgeContent={unresolvedCommentCount}
-              color="primary"
-              classes={{ badge: 'unresolved' }}
-            >
-              <MessageTextSquare02 />
-            </StyledBadge>
-          )}
-        </ControlsButton>
-      )}
-      {inDomQaIssues && (
-        <ControlsButton
-          style={{ gridArea: 'qa' }}
-          onClick={onQaIssues}
-          data-cy="translations-cell-qa-issues-button"
-          className={clsx({
-            [CELL_SHOW_ON_HOVER]: !qaIssueCount,
-            [CELL_HIGHLIGHT_ON_HOVER]: qaIssuesResolved,
-          })}
-          tooltip={t('translation_cell_qa_issues')}
-        >
-          <QaBadge count={qaIssueCount} stale={qaChecksStale} />
-        </ControlsButton>
-      )}
-      {inDomTask && (
-        <ControlsButton
-          style={{ gridArea: 'task' }}
-          onClick={() => onTaskStateChange(!task?.done)}
-          data-cy="translations-cell-task-button"
-          color={
-            task?.userAssigned
-              ? task?.done
-                ? 'secondary'
-                : 'primary'
-              : undefined
-          }
-          tooltip={translateTransition(task.type, task.done)}
-        >
-          <ClipboardCheck />
-        </ControlsButton>
-      )}
-    </StyledControlsWrapper>
+    </StyledControlsRoot>
   );
 };

@@ -3,6 +3,7 @@ package io.tolgee.service.apps
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.constants.Message
+import io.tolgee.dtos.apps.AppActionType
 import io.tolgee.dtos.apps.AppManifest
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.enums.Scope
@@ -52,6 +53,7 @@ class AppManifestFetcher(
 
     val webhookEvents = parseWebhookEvents(manifest)
     val resolvedWebhookUrl = resolveWebhookUrl(manifest)
+    validateActions(manifest)
 
     return FetchResult(
       manifest = manifest,
@@ -73,6 +75,77 @@ class AppManifestFetcher(
       }
     }
     return declared.toSet()
+  }
+
+  private fun validateActions(manifest: AppManifest) {
+    val tabKeys = manifest.modules.keyEditTab?.map { it.key }?.toSet().orEmpty()
+    val panelKeys = manifest.modules.translationToolsPanel?.map { it.key }?.toSet().orEmpty()
+
+    manifest.modules.keyAction?.forEach { action ->
+      when (action.type) {
+        AppActionType.LINK -> {
+          if (!action.dynamic && action.urlTemplate.isNullOrBlank()) {
+            throw BadRequestException(
+              Message.APP_MANIFEST_INVALID,
+              listOf("key-action '${action.key}' of type link requires urlTemplate when not dynamic"),
+            )
+          }
+        }
+        AppActionType.TAB -> {
+          val ref = action.tabKey
+          if (ref.isNullOrBlank()) {
+            throw BadRequestException(
+              Message.APP_MANIFEST_INVALID,
+              listOf("key-action '${action.key}' of type tab requires tabKey"),
+            )
+          }
+          if (ref !in tabKeys) {
+            throw BadRequestException(
+              Message.APP_MANIFEST_INVALID,
+              listOf("key-action '${action.key}' references unknown key-edit-tab '$ref'"),
+            )
+          }
+        }
+        AppActionType.PANEL ->
+          throw BadRequestException(
+            Message.APP_MANIFEST_INVALID,
+            listOf("key-action '${action.key}' cannot use type panel"),
+          )
+      }
+    }
+
+    manifest.modules.translationAction?.forEach { action ->
+      when (action.type) {
+        AppActionType.LINK -> {
+          if (!action.dynamic && action.urlTemplate.isNullOrBlank()) {
+            throw BadRequestException(
+              Message.APP_MANIFEST_INVALID,
+              listOf("translation-action '${action.key}' of type link requires urlTemplate when not dynamic"),
+            )
+          }
+        }
+        AppActionType.PANEL -> {
+          val ref = action.panelKey
+          if (ref.isNullOrBlank()) {
+            throw BadRequestException(
+              Message.APP_MANIFEST_INVALID,
+              listOf("translation-action '${action.key}' of type panel requires panelKey"),
+            )
+          }
+          if (ref !in panelKeys) {
+            throw BadRequestException(
+              Message.APP_MANIFEST_INVALID,
+              listOf("translation-action '${action.key}' references unknown translation-tools-panel '$ref'"),
+            )
+          }
+        }
+        AppActionType.TAB ->
+          throw BadRequestException(
+            Message.APP_MANIFEST_INVALID,
+            listOf("translation-action '${action.key}' cannot use type tab"),
+          )
+      }
+    }
   }
 
   private fun resolveWebhookUrl(manifest: AppManifest): String? {

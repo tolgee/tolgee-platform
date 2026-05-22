@@ -2,7 +2,7 @@
 
 This document describes the architecture of the **Tolgee Apps** plugin system. It is intended as a reference for anyone working on the apps subsystem (manifest handling, iframe rendering, SDK, signed tokens, webhooks) or building a plugin against it.
 
-Status: PoC design. Subject to revision as scopes are built. The PoC covers two extension points — **project dashboard page** and **translation tools panel** — plus signed-token REST API access and webhooks. Editor extensions, inline annotations, dev CLI and ZIP delivery are planned for later scopes.
+Status: PoC design. Subject to revision as scopes are built. The PoC covers four extension points — **project dashboard page**, **translation tools panel**, **key-edit dialog tab**, and **action decorators** (key + translation row icons) — plus signed-token REST API access and webhooks. Inline annotations, dev CLI and ZIP delivery are planned for later scopes.
 
 ---
 
@@ -31,6 +31,8 @@ A plugin is a **web service hosted by its author**, described by a JSON **manife
 | Enable plugin per project | ✓ | |
 | `project-dashboard-page` module → sidebar entry + iframe | ✓ | |
 | `translation-tools-panel` module → tools-panel tab + iframe | ✓ | |
+| `key-edit-tab` module → key-edit dialog tab + iframe | ✓ | |
+| `key-action` / `translation-action` icons on row + cell | ✓ | |
 | Signed context token delivered to iframe | ✓ | |
 | `@tolgee/apps-sdk` exposing `getContext()` | ✓ | |
 | Plugin → Tolgee REST API auth (token-based) | | ✓ |
@@ -98,6 +100,19 @@ For each enabled plugin that declares `translation-tools-panel` modules, every e
 5. When the user moves between keys or translation cells, Tolgee posts `tolgee-app:selection-changed` to the iframe so it can re-render against the new context.
 6. When the iframe knows its content height it posts `tolgee-app:resize` and Tolgee sizes the iframe element accordingly.
 
+### 2.4b User clicks an action decorator
+
+`key-action` and `translation-action` modules surface as small icon buttons next to the existing native action icons. The icon is a **navigation shortcut** — the plugin's real UI lives in a side-panel module or a key-edit dialog tab the plugin also declares.
+
+1. On rendering the translations view, the webapp fetches enabled apps via `/v2/projects/{projectId}/apps` and reads their `decoratorsUrl`. For each app with at least one **dynamic** action, the webapp `POST`s to `decoratorsUrl` with the visible window of `keyIds` + `languageTags`. The plugin replies with a list of `{keyId, languageTag?, actionKey, url?}` items. Static (non-dynamic) actions show on every row without any plugin call.
+2. The icon row is composed from: static manifest actions ∪ dynamic plugin replies, in `(install registration order, manifest declaration order)`.
+3. When the user clicks:
+   - `link` action: `window.open(url, '_blank')`. The URL is either the dynamic-returned `url` or the manifest `urlTemplate` with `{keyName}` / `{keyId}` / etc. substituted.
+   - `panel` action (translation-row): the webapp focuses the cell, opens the side panel, expands the referenced `translation-tools-panel` module, and scrolls it into view.
+   - `tab` action (key-row): the webapp opens the key-edit dialog with the referenced `key-edit-tab` selected. Opening is allowed even without `keys.edit`: in that case the dialog renders only plugin tabs and hides the Save action.
+
+The decorators endpoint is called **directly by the webapp**, not proxied through Tolgee's backend. The webapp authenticates with the user-context JWT it would have minted for the iframe (`POST /v2/projects/{id}/apps/{installId}/token`). The plugin must set CORS to allow the webapp origin.
+
 ### 2.5 Plugin calls Tolgee's REST API (later scope)
 
 ```ts
@@ -130,6 +145,7 @@ The plugin backend verifies the JWT against Tolgee's published public key (JWKS 
   "name": "Tolgee Dev Plugin",
   "version": "0.1.0",
   "baseUrl": "https://my-plugin.example.com",
+  "decoratorsUrl": "https://my-plugin.example.com/decorators",
   "modules": {
     "project-dashboard-page": [
       {
@@ -145,6 +161,41 @@ The plugin backend verifies the JWT against Tolgee's published public key (JWKS 
         "title": "Activity",
         "icon": "📈",
         "entry": "/tools-panel"
+      }
+    ],
+    "key-edit-tab": [
+      {
+        "key": "audit",
+        "title": "Audit",
+        "icon": "🛡️",
+        "entry": "/key-edit-tab/audit"
+      }
+    ],
+    "key-action": [
+      {
+        "key": "view-source",
+        "type": "link",
+        "icon": "🔗",
+        "tooltip": "View source",
+        "urlTemplate": "https://example.com/source/{keyName}"
+      },
+      {
+        "key": "open-audit",
+        "type": "tab",
+        "icon": "🛡️",
+        "tooltip": "Audit info",
+        "dynamic": true,
+        "tabKey": "audit"
+      }
+    ],
+    "translation-action": [
+      {
+        "key": "show-activity",
+        "type": "panel",
+        "icon": "📈",
+        "tooltip": "Show activity",
+        "dynamic": true,
+        "panelKey": "activity"
       }
     ]
   }
@@ -167,6 +218,23 @@ The plugin backend verifies the JWT against Tolgee's published public key (JWKS 
 | `modules.translation-tools-panel[].title` | string | Panel header title. |
 | `modules.translation-tools-panel[].icon` | string | Panel header icon (emoji or icon-name TBD). |
 | `modules.translation-tools-panel[].entry` | string | Path relative to `baseUrl`; the iframe will load this URL when the panel is expanded. |
+| `decoratorsUrl` | string | Absolute URL the webapp `POST`s to for dynamic action decorators. Plugin must serve it with CORS headers permitting the Tolgee origin. |
+| `modules.key-edit-tab[]` | array | Tabs this plugin contributes to the key-edit dialog. |
+| `modules.key-edit-tab[].key` | string | Unique within the plugin; referenced by `key-action[].tabKey`. |
+| `modules.key-edit-tab[].title` | string | Tab label. |
+| `modules.key-edit-tab[].icon` | string | Tab icon. |
+| `modules.key-edit-tab[].entry` | string | Path relative to `baseUrl`; the iframe will load this URL. |
+| `modules.key-action[]` | array | Icon-button actions added to the key row. |
+| `modules.key-action[].key` | string | Unique within the plugin; matches `actionKey` in dynamic responses. |
+| `modules.key-action[].type` | string | `link` or `tab`. |
+| `modules.key-action[].icon` / `.tooltip` | string | Rendered on the button. |
+| `modules.key-action[].dynamic` | boolean | When `true`, icon only shows for keys the plugin returns in its decorators response. |
+| `modules.key-action[].urlTemplate` | string | Required for static `link`. Interpolated tokens: `{keyName}`, `{keyNamespace}`, `{keyId}`, `{projectId}`. |
+| `modules.key-action[].tabKey` | string | For `type: tab`, references a declared `key-edit-tab[].key`. |
+| `modules.translation-action[]` | array | Icon-button actions added to translation cells. |
+| `modules.translation-action[].type` | string | `link` or `panel`. |
+| `modules.translation-action[].panelKey` | string | For `type: panel`, references a declared `translation-tools-panel[].key`. |
+| `modules.translation-action[].urlTemplate` | string | For static `link`. Adds `{languageTag}`, `{languageId}`, `{translationId}` to the supported tokens. |
 
 Later scopes will extend `modules` with additional types (`editor-right-panel`, `translation-decorator`, `custom-mt`, `modal`, …) and add top-level fields (`backendBaseUrl`, optionally `assets` when ZIP delivery lands).
 
@@ -249,6 +317,49 @@ For modules that live inside a fixed-size container (currently `translation-tool
 ```
 
 Tolgee applies the value to the iframe element (clamped to a reasonable range). For full-area modules (`project-dashboard-page`) the iframe stretches and the host ignores resize messages.
+
+### 3.5 Decorator dynamic protocol
+
+For modules declared `dynamic: true`, the webapp queries the plugin for per-row data as the visible window of keys/translations changes.
+
+**Request** (webapp → plugin, frontend-direct):
+
+```
+POST {decoratorsUrl}
+Authorization: Bearer <user-context-jwt>
+Content-Type: application/json
+{
+  "projectId": 42,
+  "keyIds": [1, 2, 3],
+  "languageTags": ["en", "de"]
+}
+```
+
+The JWT is the same install-context token minted via `POST /v2/projects/{id}/apps/{installId}/token`. Plugin verifies it offline against Tolgee's published public key (PoC dev-plugins skip verification).
+
+**Response**:
+
+```jsonc
+{
+  "items": [
+    { "keyId": 1, "actionKey": "open-audit" },
+    { "keyId": 2, "languageTag": "de", "actionKey": "show-activity" },
+    { "keyId": 3, "actionKey": "view-source", "url": "https://example.com/custom-3" }
+  ]
+}
+```
+
+Rules:
+- `actionKey` must match a `key-action` or `translation-action` `key`. Items the webapp can't resolve are dropped.
+- For `link` actions, a returned `url` overrides the manifest `urlTemplate`. Missing `url` falls back to the template.
+- For `panel`/`tab` actions, presence in the response is enough — no extra fields needed.
+- Items without `languageTag` apply to the key row regardless of language. Items with `languageTag` apply only to that specific translation cell.
+
+**CORS**: the plugin's `decoratorsUrl` must include `Access-Control-Allow-Origin` matching the Tolgee webapp's origin (or `*` for dev), and must allow the `Authorization` header.
+
+**Caching**: the webapp caches responses per `(installId, sorted keyIds, sorted languageTags)` for ~30 seconds. The plugin can rely on webhooks (`translation.set`, etc.) to know when its data changes; a future iteration will let plugins push cache invalidations to Tolgee.
+
+**Future** (`{branchId}`, `{branchName}`) — added when Tolgee gains branch support.
 
 #### 3.4.4 SDK surface (later scope)
 

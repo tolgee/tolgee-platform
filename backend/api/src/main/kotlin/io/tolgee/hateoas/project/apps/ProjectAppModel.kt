@@ -14,4 +14,5 @@ open class ProjectAppModel(
   val baseUrl: String,
   val modules: AppManifestModules,
   val enabled: Boolean,
+  val decoratorsUrl: String? = null,
 ) : RepresentationModel<ProjectAppModel>()

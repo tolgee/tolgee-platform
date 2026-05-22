@@ -1457,6 +1457,7 @@ export interface components {
       baseUrl: string;
       clientId?: string;
       clientSecretPrefix?: string;
+      decoratorsUrl?: string;
       /** Format: int64 */
       id: number;
       manifestUrl: string;
@@ -1471,6 +1472,33 @@ export interface components {
     AppManifestModules: {
       "project-dashboard-page"?: components["schemas"]["ProjectDashboardPageModule"][];
       "translation-tools-panel"?: components["schemas"]["TranslationToolsPanelModule"][];
+      "key-edit-tab"?: components["schemas"]["KeyEditTabModule"][];
+      "key-action"?: components["schemas"]["KeyActionModule"][];
+      "translation-action"?: components["schemas"]["TranslationActionModule"][];
+    };
+    KeyEditTabModule: {
+      entry: string;
+      icon: string;
+      key: string;
+      title: string;
+    };
+    KeyActionModule: {
+      dynamic?: boolean;
+      icon: string;
+      key: string;
+      tabKey?: string;
+      tooltip: string;
+      type: "link" | "panel" | "tab";
+      urlTemplate?: string;
+    };
+    TranslationActionModule: {
+      dynamic?: boolean;
+      icon: string;
+      key: string;
+      panelKey?: string;
+      tooltip: string;
+      type: "link" | "panel" | "tab";
+      urlTemplate?: string;
     };
     AppManifestPreviewModel: {
       appId: string;
@@ -5207,6 +5235,7 @@ export interface components {
     ProjectAppModel: {
       appId: string;
       baseUrl: string;
+      decoratorsUrl?: string;
       enabled: boolean;
       /** Format: int64 */
       id: number;

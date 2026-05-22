@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { Box, IconButton, styled, Typography } from '@mui/material';
 
 import {
@@ -14,6 +14,7 @@ import { XClose } from '@untitled-ui/icons-react';
 import { T } from '@tolgee/react';
 import { usePanelData } from './usePanelData';
 import { useAppToolsPanels } from './panels/AppPanel/useAppToolsPanels';
+import { onPanelRevealRequest } from '../decorators/panelRevealEvent';
 
 const StyledButton = styled(IconButton)`
   position: absolute;
@@ -46,8 +47,28 @@ export const ToolsPanel = () => {
   const languages = useTranslationsSelector((c) => c.languages);
   const { setSidePanelOpen } = useTranslationsActions();
 
-  const { openPanels, togglePanelOpen } = useOpenPanels();
+  const { openPanels, togglePanelOpen, ensurePanelOpen } = useOpenPanels();
   const appPanels = useAppToolsPanels(project.id);
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(
+    () =>
+      onPanelRevealRequest((id) => {
+        setSidePanelOpen(true);
+        ensurePanelOpen(id);
+        // Defer scrolling until after the open state propagates.
+        requestAnimationFrame(() => {
+          const el = wrapperRef.current?.querySelector(
+            `[data-cy-id="${CSS.escape(id)}"][data-cy="translation-panel"]`
+          );
+          (el as HTMLElement | null)?.scrollIntoView({
+            block: 'nearest',
+            behavior: 'smooth',
+          });
+        });
+      }),
+    [setSidePanelOpen, ensurePanelOpen]
+  );
 
   const keyData = useMemo(() => {
     return translations?.find((t) => t.keyId === keyId);
@@ -66,7 +87,7 @@ export const ToolsPanel = () => {
   const allPanels = useMemo(() => [...getPanels(), ...appPanels], [appPanels]);
 
   return (
-    <StyledWrapper>
+    <StyledWrapper ref={wrapperRef}>
       {displayPanels ? (
         <StyledPanelList>
           {allPanels

@@ -110,7 +110,50 @@ app.post(
   }
 )
 
+app.use((_req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*')
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS')
+  res.setHeader('Access-Control-Allow-Headers', 'Authorization,Content-Type')
+  res.setHeader('Access-Control-Max-Age', '600')
+  next()
+})
+
+app.options('*', (_req, res) => {
+  res.status(204).end()
+})
+
 app.use(json())
+
+type DecoratorRequest = {
+  projectId?: number
+  keyIds?: number[]
+  languageTags?: string[]
+}
+
+type DecoratorItem = {
+  keyId: number
+  languageTag?: string
+  actionKey: string
+  url?: string
+}
+
+app.post('/decorators', (req, res) => {
+  const body = (req.body ?? {}) as DecoratorRequest
+  const keyIds = Array.isArray(body.keyIds) ? body.keyIds.filter((id) => typeof id === 'number') : []
+  const languageTags = Array.isArray(body.languageTags)
+    ? body.languageTags.filter((t) => typeof t === 'string')
+    : []
+  const items: DecoratorItem[] = []
+  for (const keyId of keyIds) {
+    items.push({ keyId, actionKey: 'open-audit' })
+    if (keyId % 2 === 1) {
+      for (const tag of languageTags) {
+        items.push({ keyId, languageTag: tag, actionKey: 'show-activity' })
+      }
+    }
+  }
+  res.json({ items })
+})
 
 app.get('/api/state', (req, res) => {
   const ids = String(req.query.ids ?? '')

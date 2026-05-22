@@ -163,6 +163,7 @@ declare namespace DataCy {
         "api-key-list-item-regenerate-button" |
         "api-keys-create-edit-dialog" |
         "api-keys-project-select-item" |
+        "app-decorator-list" |
         "assigned-projects-select" |
         "assigned-projects-select-item" |
         "assignee-search-select-popover" |
@@ -447,7 +448,9 @@ declare namespace DataCy {
         "invoice-details-dialog" |
         "key-char-limit-checkbox" |
         "key-char-limit-input" |
+        "key-edit-app-tab-iframe" |
         "key-edit-tab-advanced" |
+        "key-edit-tab-app" |
         "key-edit-tab-context" |
         "key-edit-tab-custom-properties" |
         "key-edit-tab-general" |
@@ -914,6 +917,7 @@ declare namespace DataCy {
         "topbar-trial-popover-trial-plan-chip" |
         "transfer-project-apply-button" |
         "translation-agency-item" |
+        "translation-app-decorator" |
         "translation-controls-sort" |
         "translation-controls-sort-item" |
         "translation-create-description-input" |
