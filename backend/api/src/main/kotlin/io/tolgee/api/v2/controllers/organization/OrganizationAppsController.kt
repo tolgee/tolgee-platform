@@ -92,6 +92,7 @@ class OrganizationAppsController(
       clientId = install.clientId,
       clientSecretPrefix = install.clientSecretPrefix,
       webhookSecret = install.webhookSecret,
+      decoratorsUrl = manifest.decoratorsUrl,
       clientSecret = result.plaintextClientSecret,
     )
   }
