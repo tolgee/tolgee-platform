@@ -371,6 +371,7 @@ export type TranslationModel = components['schemas']['TranslationModel'];
 export type TranslationSuggestionAcceptResponse = components['schemas']['TranslationSuggestionAcceptResponse'];
 export type TranslationSuggestionModel = components['schemas']['TranslationSuggestionModel'];
 export type TranslationSuggestionSimpleModel = components['schemas']['TranslationSuggestionSimpleModel'];
+export type TranslationToolsPanelModule = components['schemas']['TranslationToolsPanelModule'];
 export type TranslationViewModel = components['schemas']['TranslationViewModel'];
 export type TranslationWithCommentModel = components['schemas']['TranslationWithCommentModel'];
 export type TrashedKeyWithTranslationsModel = components['schemas']['TrashedKeyWithTranslationsModel'];

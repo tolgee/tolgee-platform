@@ -940,6 +940,7 @@ declare namespace DataCy {
         "translation-suggestion" |
         "translation-suggestion-action-menu-item" |
         "translation-text" |
+        "translation-tools-app-iframe" |
         "translation-tools-machine-translation-item" |
         "translation-tools-machine-translation-item-prompt" |
         "translation-tools-suggestions-show-all-checkbox" |

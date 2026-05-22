@@ -46,6 +46,16 @@ class ProjectAppsControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `exposes translation-tools-panel modules to the project listing`() {
+    performAuthGet(projectAppsUrl()).andIsOk.andAssertThatJson {
+      node("_embedded.projectApps[0].modules.project-dashboard-page[0].key").isEqualTo("home")
+      node("_embedded.projectApps[0].modules.translation-tools-panel[0].key").isEqualTo("activity")
+      node("_embedded.projectApps[0].modules.translation-tools-panel[0].title").isEqualTo("Activity")
+      node("_embedded.projectApps[0].modules.translation-tools-panel[0].entry").isEqualTo("/tools-panel")
+    }
+  }
+
+  @Test
   fun `enable flips the state to true`() {
     val installId = installId()
     performAuthPut("${projectAppsUrl()}/$installId", null).andIsOk.andAssertThatJson {
@@ -133,6 +143,9 @@ class ProjectAppsControllerTest : AuthorizedControllerTest() {
       "modules": {
         "project-dashboard-page": [
           {"key": "home", "title": "Home", "icon": "🏠", "entry": "/"}
+        ],
+        "translation-tools-panel": [
+          {"key": "activity", "title": "Activity", "icon": "📈", "entry": "/tools-panel"}
         ]
       }
     }

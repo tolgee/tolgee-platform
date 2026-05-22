@@ -20,9 +20,18 @@ data class AppManifestWebhooks(
 data class AppManifestModules(
   @JsonProperty("project-dashboard-page")
   val projectDashboardPage: List<ProjectDashboardPageModule>? = null,
+  @JsonProperty("translation-tools-panel")
+  val translationToolsPanel: List<TranslationToolsPanelModule>? = null,
 )
 
 data class ProjectDashboardPageModule(
+  val key: String,
+  val title: String,
+  val icon: String,
+  val entry: String,
+)
+
+data class TranslationToolsPanelModule(
   val key: String,
   val title: String,
   val icon: String,

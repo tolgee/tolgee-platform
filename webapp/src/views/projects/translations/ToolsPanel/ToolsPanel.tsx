@@ -5,6 +5,7 @@ import {
   useTranslationsActions,
   useTranslationsSelector,
 } from '../context/TranslationsContext';
+import { useProject } from 'tg.hooks/useProject';
 import { Panel } from './common/Panel';
 
 import { getPanels, PANELS_WHEN_INACTIVE } from './panelsList';
@@ -12,6 +13,7 @@ import { useOpenPanels } from './useOpenPanels';
 import { XClose } from '@untitled-ui/icons-react';
 import { T } from '@tolgee/react';
 import { usePanelData } from './usePanelData';
+import { useAppToolsPanels } from './panels/AppPanel/useAppToolsPanels';
 
 const StyledButton = styled(IconButton)`
   position: absolute;
@@ -37,6 +39,7 @@ const StyledPanelList = styled(Box)`
 `;
 
 export const ToolsPanel = () => {
+  const project = useProject();
   const keyId = useTranslationsSelector((c) => c.cursor?.keyId);
   const languageTag = useTranslationsSelector((c) => c.cursor?.language);
   const translations = useTranslationsSelector((c) => c.translations);
@@ -44,6 +47,7 @@ export const ToolsPanel = () => {
   const { setSidePanelOpen } = useTranslationsActions();
 
   const { openPanels, togglePanelOpen } = useOpenPanels();
+  const appPanels = useAppToolsPanels(project.id);
 
   const keyData = useMemo(() => {
     return translations?.find((t) => t.keyId === keyId);
@@ -59,11 +63,13 @@ export const ToolsPanel = () => {
   const displayPanels = keyData && language && baseLanguage;
   const dataProps = usePanelData();
 
+  const allPanels = useMemo(() => [...getPanels(), ...appPanels], [appPanels]);
+
   return (
     <StyledWrapper>
       {displayPanels ? (
         <StyledPanelList>
-          {getPanels()
+          {allPanels
             .filter(
               ({ displayPanel }) => !displayPanel || displayPanel(dataProps)
             )

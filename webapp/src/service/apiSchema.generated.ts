@@ -1470,6 +1470,7 @@ export interface components {
     };
     AppManifestModules: {
       "project-dashboard-page"?: components["schemas"]["ProjectDashboardPageModule"][];
+      "translation-tools-panel"?: components["schemas"]["TranslationToolsPanelModule"][];
     };
     AppManifestPreviewModel: {
       appId: string;
@@ -7068,6 +7069,12 @@ export interface components {
       /** @enum {string} */
       state: "ACTIVE" | "ACCEPTED" | "DECLINED";
       translation?: string;
+    };
+    TranslationToolsPanelModule: {
+      entry: string;
+      icon: string;
+      key: string;
+      title: string;
     };
     TranslationViewModel: {
       /**

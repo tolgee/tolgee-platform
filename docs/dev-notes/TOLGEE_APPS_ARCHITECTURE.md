@@ -2,7 +2,7 @@
 
 This document describes the architecture of the **Tolgee Apps** plugin system. It is intended as a reference for anyone working on the apps subsystem (manifest handling, iframe rendering, SDK, signed tokens, webhooks) or building a plugin against it.
 
-Status: PoC design. Subject to revision as scopes are built. The PoC scope covers only the **project dashboard page** extension point — REST API client, webhooks, editor extensions, inline annotations, dev CLI and ZIP delivery are planned for later scopes.
+Status: PoC design. Subject to revision as scopes are built. The PoC covers two extension points — **project dashboard page** and **translation tools panel** — plus signed-token REST API access and webhooks. Editor extensions, inline annotations, dev CLI and ZIP delivery are planned for later scopes.
 
 ---
 
@@ -12,7 +12,12 @@ Status: PoC design. Subject to revision as scopes are built. The PoC scope cover
 
 Tolgee Apps is a plugin system that lets third-party developers extend Tolgee with custom UI, backend behavior, and event reactions. The model borrows the manifest + module pattern from **Crowdin Apps** and the cryptographic auth model from **Atlassian Connect**.
 
-For the PoC, the only capability shipped is: **a plugin can register one or more pages in a project's left navigation**. Clicking such a page opens the plugin's UI in a sandboxed iframe inside the project content area, with the project/user/org identity available to the plugin via a signed context token.
+For the PoC, plugins can contribute two kinds of UI:
+
+- **Project dashboard pages** — full-area pages mounted in the project's left navigation. Each entry gets its own route and a sandboxed iframe.
+- **Translation tools panels** — collapsible panels inside the existing right-hand tools panel of the translations view. Each entry shows alongside Comments / History / Machine Translation / Translation Memory and receives the currently selected key/language/translation as context.
+
+In both cases the project/user/org identity is delivered to the iframe through a signed JWT and the plugin communicates with the Tolgee parent page via `postMessage`.
 
 ### 1.2 Core model in one paragraph
 
@@ -25,6 +30,7 @@ A plugin is a **web service hosted by its author**, described by a JSON **manife
 | Register plugin against organization | ✓ | |
 | Enable plugin per project | ✓ | |
 | `project-dashboard-page` module → sidebar entry + iframe | ✓ | |
+| `translation-tools-panel` module → tools-panel tab + iframe | ✓ | |
 | Signed context token delivered to iframe | ✓ | |
 | `@tolgee/apps-sdk` exposing `getContext()` | ✓ | |
 | Plugin → Tolgee REST API auth (token-based) | | ✓ |
@@ -81,6 +87,17 @@ When the user clicks the entry:
 3. Tolgee renders a sandboxed iframe whose `src` is the plugin's `baseUrl` + `entry`, with the JWT passed in the URL.
 4. The iframe loads the plugin's bundle; the SDK reads the JWT and exposes context via `tolgee.getContext()`.
 
+### 2.4a User opens the translations view (translation-tools-panel)
+
+For each enabled plugin that declares `translation-tools-panel` modules, every entry contributes one collapsible panel inside the existing right-hand tools panel — alongside Comments, History, MT, TM, etc. The panel header uses the manifest `title` and `icon`.
+
+1. The translations view fetches the project's enabled apps via `/v2/projects/{projectId}/apps` and merges `translation-tools-panel` modules into the panel list.
+2. When the user expands the app panel, Tolgee mounts a sandboxed iframe whose `src` is `${baseUrl}${entry}`.
+3. Token minting is identical to dashboard pages — one token per install, signed by Tolgee.
+4. The current selection (keyId, languageId, languageTag, translationId) is delivered to the iframe in the `tolgee-app:init` payload (see §3.2 and §3.4).
+5. When the user moves between keys or translation cells, Tolgee posts `tolgee-app:selection-changed` to the iframe so it can re-render against the new context.
+6. When the iframe knows its content height it posts `tolgee-app:resize` and Tolgee sizes the iframe element accordingly.
+
 ### 2.5 Plugin calls Tolgee's REST API (later scope)
 
 ```ts
@@ -121,6 +138,14 @@ The plugin backend verifies the JWT against Tolgee's published public key (JWKS 
         "icon": "👋",
         "entry": "/"
       }
+    ],
+    "translation-tools-panel": [
+      {
+        "key": "activity",
+        "title": "Activity",
+        "icon": "📈",
+        "entry": "/tools-panel"
+      }
     ]
   }
 }
@@ -137,8 +162,13 @@ The plugin backend verifies the JWT against Tolgee's published public key (JWKS 
 | `modules.project-dashboard-page[].title` | string | Sidebar entry title. |
 | `modules.project-dashboard-page[].icon` | string | Sidebar entry icon (emoji or icon-name TBD). |
 | `modules.project-dashboard-page[].entry` | string | Path relative to `baseUrl`; the iframe will load this URL. |
+| `modules.translation-tools-panel[]` | array | Panels this plugin contributes to the translations view's right-hand tools panel. |
+| `modules.translation-tools-panel[].key` | string | Unique within the plugin; used as part of the panel id. |
+| `modules.translation-tools-panel[].title` | string | Panel header title. |
+| `modules.translation-tools-panel[].icon` | string | Panel header icon (emoji or icon-name TBD). |
+| `modules.translation-tools-panel[].entry` | string | Path relative to `baseUrl`; the iframe will load this URL when the panel is expanded. |
 
-Later scopes will extend `modules` with additional types (`editor-right-panel`, `translation-decorator`, `custom-mt`, `modal`, …) and add top-level fields (`scopes`, `webhooks`, `backendBaseUrl`, optionally `assets` when ZIP delivery lands).
+Later scopes will extend `modules` with additional types (`editor-right-panel`, `translation-decorator`, `custom-mt`, `modal`, …) and add top-level fields (`backendBaseUrl`, optionally `assets` when ZIP delivery lands).
 
 ### 3.2 Context token (JWT) schema
 
@@ -175,7 +205,54 @@ For the PoC, the manifest only specifies `entry`. Tolgee derives its in-product 
 
 The iframe and the Tolgee parent page communicate via `window.postMessage` only. Same-origin policy guarantees the iframe cannot read or write the parent's DOM, cookies, or storage directly.
 
-The SDK wraps the raw API to provide an async request/response style:
+#### 3.4.1 Handshake
+
+1. On mount the iframe posts `{ type: 'tolgee-app:ready' }` to `window.parent`.
+2. When Tolgee receives `ready` and has a token in hand, it replies with `tolgee-app:init` (payload below).
+
+The init payload is the same envelope for every module type; modules just ignore fields they don't care about.
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `type` | `'tolgee-app:init'` | |
+| `token` | string | Signed JWT, see §3.2. |
+| `apiUrl` | string | Tolgee API base URL the iframe should target. |
+| `organizationId` | number | Always set. |
+| `projectId` | number | Always set. |
+| `keyId` | number \| null | `translation-tools-panel` only: the currently selected key, if any. |
+| `languageId` | number \| null | `translation-tools-panel` only: the currently focused language, if any. |
+| `languageTag` | string \| null | `translation-tools-panel` only: BCP 47 tag of the focused language. |
+| `translationId` | number \| null | `translation-tools-panel` only: the focused translation cell, if any. |
+
+#### 3.4.2 Selection updates (translation-tools-panel)
+
+When the user moves between keys or translation cells while the tools-panel iframe is mounted, Tolgee posts:
+
+```jsonc
+{
+  "type": "tolgee-app:selection-changed",
+  "keyId": 42,
+  "languageId": 7,
+  "languageTag": "en",
+  "translationId": 1234
+}
+```
+
+The selection identifiers are not minted into the JWT — they would change too often. The token only carries the install / org / project / user / scopes claims. Per-key authorization is checked at REST-API call time against the user's project role.
+
+#### 3.4.3 Iframe sizing
+
+For modules that live inside a fixed-size container (currently `translation-tools-panel`), the iframe can request a height:
+
+```jsonc
+{ "type": "tolgee-app:resize", "height": 240 }
+```
+
+Tolgee applies the value to the iframe element (clamped to a reasonable range). For full-area modules (`project-dashboard-page`) the iframe stretches and the host ignores resize messages.
+
+#### 3.4.4 SDK surface (later scope)
+
+The SDK will wrap the raw API to provide an async request/response style:
 
 ```ts
 const ctx = await tolgee.getContext()
