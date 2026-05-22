@@ -49,7 +49,9 @@ const StyledDialogTitle = styled(DialogTitle)`
 type Props = {
   open: boolean;
   onClose: () => void;
-  onFinished: () => void;
+  /** Receives the target language tags of the just-created entry so the caller can make
+   *  sure those languages stay visible in the list. */
+  onFinished: (createdLanguageTags: string[]) => void;
   organizationId: number;
   translationMemoryId: number;
   sourceLanguageTag: string;
@@ -137,7 +139,7 @@ export const TranslationMemoryCreateEntryDialog: React.VFC<Props> = ({
           defaultValue="Entry created"
         />
       );
-      onFinished();
+      onFinished(translations.map((tr) => tr.targetLanguageTag));
     } catch {
       messageService.error(
         <T

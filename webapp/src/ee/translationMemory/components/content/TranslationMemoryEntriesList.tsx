@@ -252,9 +252,23 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
         <TranslationMemoryCreateEntryDialog
           open={createDialogOpen}
           onClose={() => setCreateDialogOpen(false)}
-          onFinished={() => {
+          onFinished={(createdLanguageTags) => {
             setCreateDialogOpen(false);
-            entries.refetch();
+            // A new entry can introduce target languages outside the current filter — add
+            // them so the just-created translations stay visible. When nothing is selected
+            // yet, the refetched first page (now including the new entry) lets the one-time
+            // seed pick them up.
+            const current = selectedLanguages;
+            const missing = current
+              ? createdLanguageTags.filter(
+                  (tag) => tag !== sourceLanguageTag && !current.includes(tag)
+                )
+              : [];
+            if (current && missing.length > 0) {
+              updateSelectedLanguages([...current, ...missing]);
+            } else {
+              entries.refetch();
+            }
           }}
           organizationId={organizationId}
           translationMemoryId={translationMemoryId}
