@@ -1,6 +1,7 @@
 package io.tolgee.batch.processors
 
-import io.tolgee.batch.ChunkProcessor
+import com.fasterxml.jackson.databind.ObjectMapper
+import io.tolgee.batch.AbstractChunkProcessor
 import io.tolgee.batch.JobCharacter
 import io.tolgee.batch.MtProviderCatching
 import io.tolgee.batch.ProgressManager
@@ -26,7 +27,8 @@ class AiPlaygroundChunkProcessor(
   private val aiPlaygroundResultService: AiPlaygroundResultService,
   private val mtProviderCatching: MtProviderCatching,
   private val progressManager: ProgressManager,
-) : ChunkProcessor<MachineTranslationRequest, AiPlaygroundJobParams, BatchTranslationTargetItem> {
+  objectMapper: ObjectMapper,
+) : AbstractChunkProcessor<MachineTranslationRequest, AiPlaygroundJobParams, BatchTranslationTargetItem>(objectMapper) {
   override fun process(
     job: BatchJobDto,
     chunk: List<BatchTranslationTargetItem>,

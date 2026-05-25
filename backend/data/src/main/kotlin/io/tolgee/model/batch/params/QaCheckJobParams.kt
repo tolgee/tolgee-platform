@@ -7,4 +7,5 @@ class QaCheckJobParams {
    * null -> all checks
    */
   var checkTypes: List<QaCheckType>? = null
+  var handlingStuckStaleItems: Boolean = false
 }

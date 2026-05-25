@@ -1,6 +1,7 @@
 package io.tolgee.batch.processors
 
-import io.tolgee.batch.ChunkProcessor
+import com.fasterxml.jackson.databind.ObjectMapper
+import io.tolgee.batch.AbstractChunkProcessor
 import io.tolgee.batch.FailedDontRequeueException
 import io.tolgee.batch.ProgressManager
 import io.tolgee.batch.data.BatchJobDto
@@ -19,7 +20,8 @@ class SetKeysNamespaceChunkProcessor(
   private val entityManager: EntityManager,
   private val keyService: KeyService,
   private val progressManager: ProgressManager,
-) : ChunkProcessor<SetKeysNamespaceRequest, SetKeysNamespaceParams, Long> {
+  objectMapper: ObjectMapper,
+) : AbstractChunkProcessor<SetKeysNamespaceRequest, SetKeysNamespaceParams, Long>(objectMapper) {
   override fun process(
     job: BatchJobDto,
     chunk: List<Long>,

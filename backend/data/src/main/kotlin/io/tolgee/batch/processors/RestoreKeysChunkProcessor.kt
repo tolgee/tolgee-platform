@@ -1,6 +1,7 @@
 package io.tolgee.batch.processors
 
-import io.tolgee.batch.ChunkProcessor
+import com.fasterxml.jackson.databind.ObjectMapper
+import io.tolgee.batch.AbstractChunkProcessor
 import io.tolgee.batch.FailedDontRequeueException
 import io.tolgee.batch.ProgressManager
 import io.tolgee.batch.data.BatchJobDto
@@ -18,7 +19,8 @@ class RestoreKeysChunkProcessor(
   private val keyService: KeyService,
   private val entityManager: EntityManager,
   private val progressManager: ProgressManager,
-) : ChunkProcessor<RestoreKeysRequest, Any?, Long> {
+  objectMapper: ObjectMapper,
+) : AbstractChunkProcessor<RestoreKeysRequest, Any?, Long>(objectMapper) {
   override fun process(
     job: BatchJobDto,
     chunk: List<Long>,

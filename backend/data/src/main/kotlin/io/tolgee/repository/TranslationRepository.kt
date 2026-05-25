@@ -215,9 +215,6 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
     languagesIds: List<Long>,
   ): List<Translation>
 
-  /**
-   * Eagerly fetches `key` and `language`
-   */
   @Query(
     """
     from Translation t

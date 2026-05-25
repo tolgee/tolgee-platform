@@ -416,10 +416,7 @@ class LanguageService(
     )
   }
 
-  fun findByIdIn(ids: Collection<Long>): List<Language> {
-    if (ids.isEmpty()) {
-      return emptyList()
-    }
+  fun findByIdIn(ids: Iterable<Long>): List<Language> {
     return languageRepository.findAllById(ids)
   }
 

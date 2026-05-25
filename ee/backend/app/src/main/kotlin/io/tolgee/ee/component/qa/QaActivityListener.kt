@@ -6,6 +6,7 @@ import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.batch.events.OnBatchJobFinalized
+import io.tolgee.batch.processors.QaCheckChunkProcessor
 import io.tolgee.batch.request.QaCheckRequest
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.component.eventListeners.BypassableActivityListener
@@ -47,6 +48,7 @@ class QaActivityListener(
   private val translationService: TranslationService,
   private val qaRecheckService: QaRecheckService,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
+  private val qaCheckChunkProcessor: QaCheckChunkProcessor,
 ) : BypassableActivityListener {
   @Volatile
   override var bypass = false
@@ -104,6 +106,11 @@ class QaActivityListener(
     if (bypass) return
     if (event.job.type != BatchJobType.QA_CHECK) return
     val projectId = event.job.projectId ?: return
+    val params = qaCheckChunkProcessor.getParams(event.job)
+    if (params.handlingStuckStaleItems) {
+      // Avoid endless loop
+      return
+    }
     runSentryCatching {
       qaRecheckService.recheckStuckStaleTranslationsInProject(projectId)
     }

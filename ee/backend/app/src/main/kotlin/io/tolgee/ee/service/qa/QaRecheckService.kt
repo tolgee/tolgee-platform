@@ -76,20 +76,26 @@ class QaRecheckService(
       SentryLevel.WARNING,
     )
 
-    recheckFromKeyLanguagePairs(projectId, pairs)
+    recheckFromKeyLanguagePairs(projectId, pairs, isHandlingStuckStaleItems = true)
   }
 
   private fun recheckFromKeyLanguagePairs(
     projectId: Long,
     pairs: List<KeyLanguagePairView>,
     checkTypes: List<QaCheckType>? = null,
+    isHandlingStuckStaleItems: Boolean = false,
   ) {
     val allTargetItems = pairs.map { BatchTranslationTargetItem(keyId = it.keyId, languageId = it.languageId) }
     val project = entityManager.getReference(Project::class.java, projectId)
 
     for (targetChunk in allTargetItems.chunked(MAX_BATCH_JOB_TARGET_SIZE)) {
       batchJobService.startJob(
-        request = QaCheckRequest(target = targetChunk, checkTypes = checkTypes),
+        request =
+          QaCheckRequest(
+            target = targetChunk,
+            checkTypes = checkTypes,
+            handlingStuckStaleItems = isHandlingStuckStaleItems,
+          ),
         project = project,
         author = null,
         type = BatchJobType.QA_CHECK,

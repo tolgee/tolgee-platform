@@ -46,7 +46,10 @@ class LanguageToolApiClient(
     }
   }
 
-  @Cacheable(Caches.LANGUAGE_TOOL_RESULTS, key = "{#resolvedTag, #text}")
+  @Cacheable(
+    Caches.LANGUAGE_TOOL_RESULTS,
+    key = "{#resolvedTag, T(org.apache.commons.codec.digest.DigestUtils).sha256Hex(#text)}",
+  )
   fun callCheck(
     resolvedTag: String,
     text: String,
