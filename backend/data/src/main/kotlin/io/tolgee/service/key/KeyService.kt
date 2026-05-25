@@ -373,13 +373,15 @@ class KeyService(
     deletedBy: UserAccount? = null,
   ) {
     val actualDeletedBy = deletedBy ?: authenticationFacade.authenticatedUserEntityOrNull
-    val keys = keyRepository.findAllByIdIn(ids.toList())
     val now = currentDateProvider.date
-    keys.forEach {
-      it.deletedAt = now
-      it.deletedBy = actualDeletedBy
+    ids.chunked(SOFT_DELETE_CHUNK_SIZE).forEach { chunk ->
+      val keys = keyRepository.findAllByIdIn(chunk)
+      keys.forEach {
+        it.deletedAt = now
+        it.deletedBy = actualDeletedBy
+      }
+      keyRepository.saveAll(keys)
     }
-    keyRepository.saveAll(keys)
   }
 
   @Transactional
@@ -727,5 +729,9 @@ class KeyService(
     val found = resolved.mapNotNull { it.second }
     val notFound = resolved.filter { it.second == null }.map { it.first }
     return found to notFound
+  }
+
+  companion object {
+    private const val SOFT_DELETE_CHUNK_SIZE = 10_000
   }
 }
