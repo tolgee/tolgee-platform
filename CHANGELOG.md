@@ -1,3 +1,12 @@
+## [3.190.5](https://github.com/tolgee/tolgee-platform/compare/v3.190.4...v3.190.5) (2026-05-25)
+
+
+### Bug Fixes
+
+* correctly order ICU exact-match plural selectors (=0, =1) ([#3681](https://github.com/tolgee/tolgee-platform/issues/3681)) ([7397db8](https://github.com/tolgee/tolgee-platform/commit/7397db8f1a21503b06cb4a15e1b3c9146c362f0d)), closes [#3267](https://github.com/tolgee/tolgee-platform/issues/3267) [#3548](https://github.com/tolgee/tolgee-platform/issues/3548)
+* replace QA badge stale spinner with static dots icon ([#3677](https://github.com/tolgee/tolgee-platform/issues/3677)) ([5e7d3fa](https://github.com/tolgee/tolgee-platform/commit/5e7d3fa8e112dbe74ab13906ef830bcd9ab3a2ca))
+* wrap StyledHelpIcon in Box to enable Tooltip on hover ([#3647](https://github.com/tolgee/tolgee-platform/issues/3647)) ([02de2d6](https://github.com/tolgee/tolgee-platform/commit/02de2d6742843729be23335930fb999657a68c86)), closes [#3646](https://github.com/tolgee/tolgee-platform/issues/3646)
+
 ## [3.190.4](https://github.com/tolgee/tolgee-platform/compare/v3.190.3...v3.190.4) (2026-05-22)
 
 
