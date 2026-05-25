@@ -750,13 +750,17 @@ def main() -> int:
         except RuntimeError as e:
             print(f"  (failed to delete {title}: {e})")
 
-    # Board totals reflect the pre-run snapshot — close enough for Slack stats.
+    # Re-fetch items so the totals reflect this run's writes (newly-created
+    # items, promotions, swept deletions) — the pre-run `items` snapshot
+    # doesn't include any of them, and on the very first run no item had a
+    # Flakiness value at fetch time.
+    items_after = list_items(project_id)
     total_confirmed = sum(
-        1 for it in items
+        1 for it in items_after
         if item_field(it, FLAKINESS_FIELD) == STATUS_CONFIRMED
     )
     total_suspected = sum(
-        1 for it in items
+        1 for it in items_after
         if item_field(it, FLAKINESS_FIELD) == STATUS_SUSPECTED
     )
 
