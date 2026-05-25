@@ -16,6 +16,12 @@ import * as path from 'path';
  * Test ids use the `<spec>/<title>` format expected by report-flaky-tests.py.
  */
 export function registerFlakyReport(on: Cypress.PluginEvents): void {
+  // No-op outside the flaky-detection workflow so local `cypress run` and
+  // other CI workflows don't write stray report files.
+  if (process.env.DETECT_FLAKY_TESTS !== 'true') {
+    return;
+  }
+
   on('after:run', (results) => {
     // A run that failed to start (CypressFailedRunResult) has no `runs`.
     if (!('runs' in results)) {
