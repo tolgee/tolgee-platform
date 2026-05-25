@@ -29,7 +29,9 @@ const StyledLabel = styled('div')`
 
 const StyledHelpIcon = styled(HelpCircle)`
   color: ${({ theme }) => theme.palette.tokens.icon.primary};
-  width: 16px;
+  width: 15px;
+  height: 15px;
+  display: block;
 `;
 
 export const LoadingCheckboxWithSkeleton: FC<
@@ -52,7 +54,11 @@ export const LoadingCheckboxWithSkeleton: FC<
           <div>{label}</div>
           {hint && (
             <Tooltip title={hint}>
-              {customHelpIcon || <StyledHelpIcon />}
+              {customHelpIcon || (
+                <Box display="flex" alignItems="center">
+                  <StyledHelpIcon />
+                </Box>
+              )}
             </Tooltip>
           )}
         </StyledLabel>
