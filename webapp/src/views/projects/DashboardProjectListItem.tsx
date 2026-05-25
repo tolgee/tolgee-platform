@@ -195,7 +195,8 @@ const DashboardProjectListItem = (p: ProjectWithStatsModel) => {
                 >
                   <QaBadge
                     count={p.stats.qaIssueCount}
-                    stale={hasStaleQaChecks}
+                    stale={hasStaleQaChecks && !p.stats.qaIssueCount}
+                    darkWhenNoIssues
                   />
                 </IconButton>
               </Tooltip>
