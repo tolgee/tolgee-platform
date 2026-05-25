@@ -32,13 +32,13 @@ class BranchMergeExecutor(
   private val entityManager: EntityManager,
 ) {
   @Transactional
-  fun execute(merge: BranchMerge) {
+  fun execute(merge: BranchMerge): BranchMerge {
     attachKeysForMerge(merge)
     val snapshotKeys by lazy {
       branchSnapshotService.getSnapshotKeys(merge.sourceBranch.id).associateBy { it.originalKeyId }
     }
     applyChanges(merge, snapshotKeys)
-    finalizeMerge(merge)
+    return finalizeMerge(merge)
   }
 
   /**
@@ -70,14 +70,17 @@ class BranchMergeExecutor(
   }
 
   /**
-   * Marks the merge complete. Re-fetches the entity first because [applyDeletion]
-   * may have cleared the persistence context, leaving [merge] detached.
+   * Marks the merge complete and returns the managed instance. Re-fetches the entity
+   * first because [applyDeletion] may have cleared the persistence context, leaving
+   * [merge] detached. Callers must use the returned instance — the passed-in [merge]
+   * is stale in the delete path.
    */
-  private fun finalizeMerge(merge: BranchMerge) {
+  private fun finalizeMerge(merge: BranchMerge): BranchMerge {
     val managed =
       entityManager.find(BranchMerge::class.java, merge.id)
         ?: throw IllegalStateException("BranchMerge ${merge.id} was not found during finalization")
     managed.markMerged(currentDateProvider.date)
+    return managed
   }
 
   private fun attachKeysForMerge(merge: BranchMerge) {
