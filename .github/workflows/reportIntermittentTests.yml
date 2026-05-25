@@ -299,9 +299,11 @@ jobs:
             echo 'EOF'
           } >> "$GITHUB_OUTPUT"
 
+      # Always run so the sweep pass cleans up stale Suspected items even on
+      # nights with no flaky detections.
       - name: Report flaky tests to project board
         id: project
-        if: steps.summary.outputs.flaky_count != '0'
+        if: always()
         continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
@@ -312,27 +314,31 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: python3 scripts/report-flaky-tests.py ./flaky .
 
+      # Newly confirmed flakes and hard failures are the actionable signals;
+      # raw per-run flaky counts (unpromoted Suspected items) don't trigger
+      # Slack on their own.
       - name: Send Slack notification
-        if: steps.summary.outputs.flaky_count != '0' || steps.summary.outputs.failed_count != '0'
+        if: steps.project.outputs.newly_confirmed_count != '0' || steps.summary.outputs.failed_count != '0'
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_FLAKY_TESTS_WEBHOOK_URL }}
-          FLAKY_TESTS: ${{ steps.summary.outputs.flaky_list }}
+          NEWLY_CONFIRMED_TESTS: ${{ steps.project.outputs.newly_confirmed_list }}
+          NEWLY_CONFIRMED_COUNT: ${{ steps.project.outputs.newly_confirmed_count }}
           FAILED_TESTS: ${{ steps.summary.outputs.failed_list }}
-          FLAKY_COUNT: ${{ steps.summary.outputs.flaky_count }}
           FAILED_COUNT: ${{ steps.summary.outputs.failed_count }}
+          TOTAL_CONFIRMED: ${{ steps.project.outputs.total_confirmed_count }}
+          TOTAL_SUSPECTED: ${{ steps.project.outputs.total_suspected_count }}
+          DELETED_SUSPECT: ${{ steps.project.outputs.deleted_suspect_count }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           PROJECT_URL: ${{ steps.project.outputs.project_url }}
-          NEW_COUNT: ${{ steps.project.outputs.new_count }}
-          RECURRING_COUNT: ${{ steps.project.outputs.recurring_count }}
         run: |
           {
-            if [ "${FLAKY_COUNT:-0}" != "0" ]; then
-              echo "🟡 ${FLAKY_COUNT} flaky test(s) detected in *${{ github.repository }}*"
+            if [ "${NEWLY_CONFIRMED_COUNT:-0}" != "0" ]; then
+              echo "🟡 ${NEWLY_CONFIRMED_COUNT} newly confirmed flaky test(s) in *${{ github.repository }}*"
               echo ""
-              echo "$FLAKY_TESTS"
+              echo "$NEWLY_CONFIRMED_TESTS"
             fi
             if [ "${FAILED_COUNT:-0}" != "0" ]; then
-              if [ "${FLAKY_COUNT:-0}" != "0" ]; then echo ""; fi
+              if [ "${NEWLY_CONFIRMED_COUNT:-0}" != "0" ]; then echo ""; fi
               echo "🔴 ${FAILED_COUNT} test(s) failing on every retry — broken, not flaky"
               echo ""
               echo "$FAILED_TESTS"
@@ -340,7 +346,11 @@ jobs:
             echo ""
             echo "<${RUN_URL}|View run>"
             if [ -n "$PROJECT_URL" ]; then
-              echo "<${PROJECT_URL}|Flaky tests board> — ${NEW_COUNT:-0} new, ${RECURRING_COUNT:-0} recurring"
+              board="<${PROJECT_URL}|Flaky tests board> — ${TOTAL_CONFIRMED:-0} confirmed, ${TOTAL_SUSPECTED:-0} suspected"
+              if [ "${DELETED_SUSPECT:-0}" != "0" ]; then
+                board="$board (${DELETED_SUSPECT} stale suspected cleaned up)"
+              fi
+              echo "$board"
             fi
           } > /tmp/slack-message.txt
 
