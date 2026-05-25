@@ -165,7 +165,7 @@ export const TmEntriesToolbar: React.VFC<Props> = ({
                 </Button>
               </Tooltip>
             </ButtonGroup>
-            <Box data-cy="tm-entries-language-filter">
+            <Box data-cy="tm-entries-language-filter" sx={{ width: 250 }}>
               <InfiniteMultiSearchSelect
                 items={languages}
                 selected={selectedLanguages ?? []}
