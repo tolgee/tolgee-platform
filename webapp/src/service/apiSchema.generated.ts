@@ -1331,7 +1331,8 @@ export interface components {
         | "FEATURE_LABELS"
         | "FEATURE_SUGGESTIONS_AND_LABELS"
         | "FEATURE_IMPROVED_FIGMA_ANDROID_AND_IOS"
-        | "FEATURE_BRANCHING";
+        | "FEATURE_BRANCHING"
+        | "FEATURE_TRANSLATION_MEMORY_MANAGEMENT";
     };
     ApiKeyModel: {
       /** @description Description */
