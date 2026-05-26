@@ -6,7 +6,7 @@ import io.tolgee.dtos.request.ImportFileMapping
 import io.tolgee.dtos.request.SingleStepImportRequest
 import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.formats.yaml.`in`.YamlFileProcessor
-import io.tolgee.unit.formats.PlaceholderConversionTestHelper
+import io.tolgee.testing.assert
 import io.tolgee.util.FileProcessorContextMockUtil
 import io.tolgee.util.assertLanguagesCount
 import io.tolgee.util.assertSingle
@@ -151,11 +151,18 @@ class YamlFileProcessorTest {
   }
 
   @Test
-  fun `placeholder conversion setting application works`() {
-    PlaceholderConversionTestHelper.testFile(
-      "en.yaml",
-      "src/test/resources/import/yaml/java.yaml",
-      assertBeforeSettingsApplication =
+  fun `converts java-style placeholders in YAML`() {
+    val processor =
+      mockUtil.mockCoreProcessor(
+        fileName = "en.yaml",
+        resourcesFilePath = "src/test/resources/import/yaml/java.yaml",
+      )
+    processor.processFiles(listOf(mockUtil.importFileDto))
+    mockUtil
+      .getSavedTranslations()
+      .map { it.text }
+      .assert
+      .isEqualTo(
         listOf(
           "{0, number} relací",
           "Upravit redakci",
@@ -165,19 +172,7 @@ class YamlFileProcessorTest {
           "Seznam oprav {0}",
           "Toto je text s parametry: {0} {1, number}",
         ),
-      assertAfterDisablingConversion =
-        listOf(
-          "%d relací",
-          "Seznam oprav %s",
-          "Toto je text s parametry: %s %d",
-        ),
-      assertAfterReEnablingConversion =
-        listOf(
-          "{0, number} relací",
-          "Seznam oprav {0}",
-          "Toto je text s parametry: {0} {1, number}",
-        ),
-    )
+      )
   }
 
   private fun processFile() {

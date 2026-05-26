@@ -1,7 +1,6 @@
 package io.tolgee.unit.formats.properties.`in`
 
 import io.tolgee.formats.properties.`in`.PropertiesFileProcessor
-import io.tolgee.unit.formats.PlaceholderConversionTestHelper
 import io.tolgee.util.FileProcessorContextMockUtil
 import io.tolgee.util.assertLanguagesCount
 import io.tolgee.util.assertSingle
@@ -56,26 +55,6 @@ class PropertiesJavaFileProcessorTest {
       .assertSingle {
         hasText("Param {0, number}")
       }
-  }
-
-  @Test
-  fun `placeholder conversion setting application works`() {
-    PlaceholderConversionTestHelper.testFile(
-      "en.properties",
-      "src/test/resources/import/properties/java.properties",
-      assertBeforeSettingsApplication =
-        listOf(
-          "Param {0, number}",
-        ),
-      assertAfterDisablingConversion =
-        listOf(
-          "Param %d",
-        ),
-      assertAfterReEnablingConversion =
-        listOf(
-          "Param {0, number}",
-        ),
-    )
   }
 
   private fun mockPlaceholderConversionTestFile(

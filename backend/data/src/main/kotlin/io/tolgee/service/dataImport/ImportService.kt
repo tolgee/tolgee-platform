@@ -1,7 +1,7 @@
 package io.tolgee.service.dataImport
 
 import io.sentry.Sentry
-import io.tolgee.api.IImportSettings
+import io.tolgee.api.IStoredImportSettings
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.component.reporting.BusinessEventPublisher
@@ -556,8 +556,8 @@ class ImportService(
   fun applySettings(
     userAccount: UserAccount,
     projectId: Long,
-    oldSettings: IImportSettings,
-    newSettings: IImportSettings,
+    oldSettings: IStoredImportSettings,
+    newSettings: IStoredImportSettings,
   ) {
     find(projectId, userAccount.id)?.let {
       applySettings(it, oldSettings, newSettings)
@@ -567,13 +567,9 @@ class ImportService(
 
   fun applySettings(
     import: Import,
-    oldSettings: IImportSettings,
-    newSettings: IImportSettings,
+    oldSettings: IStoredImportSettings,
+    newSettings: IStoredImportSettings,
   ) {
     ImportDataManager(applicationContext, import).applySettings(oldSettings, newSettings)
-  }
-
-  fun findTranslationsForPlaceholderConversion(importId: Long): List<ImportTranslation> {
-    return importTranslationRepository.findTranslationsForPlaceholderConversion(importId)
   }
 }

@@ -6,7 +6,7 @@ import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { LoadingCheckboxWithSkeleton } from 'tg.component/common/form/LoadingCheckboxWithSkeleton';
 import { HelpCircle } from '@untitled-ui/icons-react';
-import { DOCS_LINKS } from '../../../../constants/docLinks';
+import { DOCS_LINKS } from 'tg.constants/docLinks';
 
 type ImportSettingRequest = components['schemas']['ImportSettingsRequest'];
 type ImportSettingModel = components['schemas']['ImportSettingsModel'];
@@ -98,24 +98,6 @@ export const ImportSettingsPanel: FC = (props) => {
         color: theme.palette.tokens.text.primary,
       })}
     >
-      {project.icuPlaceholders && (
-        <LoadingCheckboxWithSkeleton
-          loading={loadingItems.has('convertPlaceholdersToIcu')}
-          onChange={(e) => {
-            onChange('convertPlaceholdersToIcu', e.target.checked);
-          }}
-          data-cy={'import-convert-placeholders-to-icu-checkbox'}
-          hint={t('import_convert_placeholders_to_icu_checkbox_label_hint')}
-          label={t('import_convert_placeholders_to_icu_checkbox_label')}
-          checked={state?.convertPlaceholdersToIcu}
-          {...additionalCheckboxProps}
-          customHelpIcon={
-            <StyledLink href={DOCS_LINKS.importingPlaceholders}>
-              <HelpCircle className="icon" />
-            </StyledLink>
-          }
-        />
-      )}
       <LoadingCheckboxWithSkeleton
         loading={loadingItems.has('overrideKeyDescriptions')}
         onChange={(e) => {

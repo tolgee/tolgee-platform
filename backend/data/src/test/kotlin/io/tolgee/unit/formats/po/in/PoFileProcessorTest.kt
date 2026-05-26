@@ -6,7 +6,6 @@ import io.tolgee.dtos.request.ImportFileMapping
 import io.tolgee.dtos.request.SingleStepImportRequest
 import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.formats.po.`in`.PoFileProcessor
-import io.tolgee.unit.formats.PlaceholderConversionTestHelper
 import io.tolgee.util.FileProcessorContextMockUtil
 import io.tolgee.util.assertLanguagesCount
 import io.tolgee.util.assertSingle
@@ -154,29 +153,6 @@ class PoFileProcessorTest {
           """.trimIndent(),
         )
       }
-  }
-
-  @Test
-  fun `placeholder conversion setting application works`() {
-    PlaceholderConversionTestHelper.testFile(
-      "en.po",
-      "src/test/resources/import/po/example_params.po",
-      assertBeforeSettingsApplication =
-        listOf(
-          "Hi {0, number} '{'icuParam'}'",
-          "{0, plural,\none {Hallo # '{'icuParam'}'}\nother {Hallo # '{'icuParam'}'}\n}",
-        ),
-      assertAfterDisablingConversion =
-        listOf(
-          "Hi %d '{'icuParam'}'",
-          "{value, plural,\none {Hallo %d '{'icuParam'}'}\nother {Hallo %d '{'icuParam'}'}\n}",
-        ),
-      assertAfterReEnablingConversion =
-        listOf(
-          "Hi {0, number} '{'icuParam'}'",
-          "{0, plural,\none {Hallo # '{'icuParam'}'}\nother {Hallo # '{'icuParam'}'}\n}",
-        ),
-    )
   }
 
   @Test

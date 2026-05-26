@@ -1,6 +1,7 @@
 package io.tolgee.service.dataImport
 
 import io.tolgee.api.IImportSettings
+import io.tolgee.api.IStoredImportSettings
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.dataImport.ImportSettings
@@ -20,10 +21,10 @@ class ImportSettingsService(
   fun store(
     userAccount: UserAccount,
     projectId: Long,
-    settings: IImportSettings,
+    settings: IStoredImportSettings,
   ): ImportSettings {
     val existing = getOrCreateSettings(userAccount, projectId)
-    val oldSettings = existing.clone()
+    val oldSettings = existing.storedClone()
     existing.assignFrom(settings)
     entityManager.persist(existing)
     importService.applySettings(userAccount, projectId, oldSettings, settings)
@@ -35,12 +36,9 @@ class ImportSettingsService(
     userAccount: UserAccount,
     projectId: Long,
   ): IImportSettings {
+    val stored = getOrCreateSettings(userAccount, projectId)
     val icuPlaceholders = projectService.get(projectId).icuPlaceholders
-    return getOrCreateSettings(userAccount, projectId).also {
-      if (!icuPlaceholders) {
-        it.convertPlaceholdersToIcu = false
-      }
-    }
+    return EffectiveImportSettings(stored, icuPlaceholders)
   }
 
   private fun getOrCreateSettings(
@@ -65,4 +63,10 @@ class ImportSettingsService(
       .setParameter("projectId", projectId)
       .executeUpdate()
   }
+
+  private class EffectiveImportSettings(
+    stored: IStoredImportSettings,
+    override var convertPlaceholdersToIcu: Boolean,
+  ) : IImportSettings,
+    IStoredImportSettings by stored
 }

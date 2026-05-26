@@ -2,7 +2,6 @@ package io.tolgee.unit.formats.csv.`in`
 
 import io.tolgee.formats.csv.`in`.CsvFileProcessor
 import io.tolgee.testing.assert
-import io.tolgee.unit.formats.PlaceholderConversionTestHelper
 import io.tolgee.util.FileProcessorContextMockUtil
 import io.tolgee.util.assertKey
 import io.tolgee.util.assertLanguagesCount
@@ -440,28 +439,25 @@ class CsvFormatProcessorTest {
   }
 
   @Test
-  fun `placeholder conversion setting application works`() {
-    PlaceholderConversionTestHelper.testFile(
-      "import.csv",
-      "src/test/resources/import/csv/placeholder_conversion.csv",
-      assertBeforeSettingsApplication =
+  fun `converts placeholders in CSV`() {
+    val processor =
+      mockUtil.mockCoreProcessor(
+        fileName = "import.csv",
+        resourcesFilePath = "src/test/resources/import/csv/placeholder_conversion.csv",
+      )
+    processor.processFiles(listOf(mockUtil.importFileDto))
+    mockUtil
+      .getSavedTranslations()
+      .map { it.text }
+      .assert
+      .isEqualTo(
         listOf(
           "this is csv {0, number}",
           "this is csv",
           "toto je csv {0, number}",
           "toto je csv",
         ),
-      assertAfterDisablingConversion =
-        listOf(
-          "this is csv %d",
-          "toto je csv %d",
-        ),
-      assertAfterReEnablingConversion =
-        listOf(
-          "this is csv {0, number}",
-          "toto je csv {0, number}",
-        ),
-    )
+      )
   }
 
   private fun mockPlaceholderConversionTestFile(

@@ -1,6 +1,6 @@
 package io.tolgee.service.dataImport
 
-import io.tolgee.api.IImportSettings
+import io.tolgee.api.IStoredImportSettings
 import io.tolgee.formats.CollisionHandler
 import io.tolgee.formats.isSamePossiblePlural
 import io.tolgee.model.Language
@@ -216,13 +216,6 @@ class ImportDataManager(
       keyTranslations.add(importTranslation)
     }
     return languageData
-  }
-
-  private fun populateStoredTranslationsToConvertPlaceholders() {
-    val translations = importService.findTranslationsForPlaceholderConversion(import.id)
-    translations.forEach {
-      getOrInitLanguageDataItem(it.language)[it.key] = mutableListOf(it)
-    }
   }
 
   private fun getOrInitLanguageDataItem(
@@ -442,13 +435,9 @@ class ImportDataManager(
   }
 
   fun applySettings(
-    oldSettings: IImportSettings,
-    newSettings: IImportSettings,
+    oldSettings: IStoredImportSettings,
+    newSettings: IStoredImportSettings,
   ) {
-    if (oldSettings.convertPlaceholdersToIcu != newSettings.convertPlaceholdersToIcu) {
-      applyConvertPlaceholdersChange(newSettings.convertPlaceholdersToIcu)
-    }
-
     if (oldSettings.createNewKeys != newSettings.createNewKeys) {
       applyKeyCreateChange(newSettings.createNewKeys)
     }
@@ -465,38 +454,5 @@ class ImportDataManager(
     if (saveData) {
       saveAllStoredKeys()
     }
-  }
-
-  private fun applyConvertPlaceholdersChange(convertPlaceholdersToIcu: Boolean) {
-    this.populateStoredTranslationsToConvertPlaceholders()
-    val toSave = mutableListOf<ImportTranslation>()
-    storedTranslations.forEach { (language, keyTranslationsMap) ->
-      keyTranslationsMap.forEach { (_, translations) ->
-        translations.forEach {
-          val convertor = it.convertor?.messageConvertorOrNull
-          if (convertor != null) {
-            val prev = it.text to it.isPlural
-            val converted =
-              convertor.convert(
-                rawData = it.rawData,
-                languageTag = language.name,
-                convertPlaceholders = convertPlaceholdersToIcu,
-                isProjectIcuEnabled = import.project.icuPlaceholders,
-              )
-            it.isPlural = converted.pluralArgName != null
-            it.text = converted.message
-            val new = it.text to it.isPlural
-            if (prev != new) {
-              toSave.add(it)
-            }
-          }
-        }
-      }
-    }
-    toSave.map { it.language }.toSet().forEach {
-      resetConflicts(it)
-      handleConflicts(false)
-    }
-    importService.saveTranslations(toSave)
   }
 }

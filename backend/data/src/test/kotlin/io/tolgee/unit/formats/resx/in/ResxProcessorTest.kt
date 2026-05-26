@@ -2,7 +2,6 @@ package io.tolgee.unit.formats.resx.`in`
 
 import io.tolgee.formats.resx.`in`.ResxProcessor
 import io.tolgee.testing.assert
-import io.tolgee.unit.formats.PlaceholderConversionTestHelper
 import io.tolgee.util.FileProcessorContextMockUtil
 import io.tolgee.util.assertKey
 import io.tolgee.util.assertLanguagesCount
@@ -217,27 +216,6 @@ class ResxProcessorTest {
       custom.assert.isNull()
       description.assert.isNull()
     }
-  }
-
-  @Test
-  fun `placeholder conversion setting application works`() {
-    PlaceholderConversionTestHelper.testFile(
-      "en.resx",
-      "src/test/resources/import/resx/strings_icu_everywhere.resx",
-      assertBeforeSettingsApplication =
-        listOf(
-          "Text with placeholders {0} and tags </br> and complex tags <p>text</p>",
-          "{num, plural,\n" +
-            "one {Showing # item}\n" +
-            "other {Showing {num} items}\n" +
-            "}",
-          "Text with named placeholders {asdf}",
-        ),
-      assertAfterDisablingConversion =
-        listOf(),
-      assertAfterReEnablingConversion =
-        listOf(),
-    )
   }
 
   private fun mockPlaceholderConversionTestFile(
