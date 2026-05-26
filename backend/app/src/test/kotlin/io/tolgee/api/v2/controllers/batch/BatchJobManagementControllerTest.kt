@@ -18,6 +18,7 @@ import io.tolgee.util.addMinutes
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
@@ -50,7 +51,7 @@ class BatchJobManagementControllerTest :
       doAnswer { it.callRealMethod() }
         .doAnswer { throwingService.throwExceptionInTransaction() }
         .whenever(autoTranslationService)
-        .autoTranslateSync(any(), any(), any(), any(), any(), any())
+        .autoTranslateSync(any(), anyOrNull(), anyOrNull(), anyOrNull(), any(), anyOrNull())
 
       performProjectAuthPost(
         "start-batch-job/machine-translate",
