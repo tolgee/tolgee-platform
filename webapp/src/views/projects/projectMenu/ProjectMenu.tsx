@@ -26,6 +26,7 @@ import { useProject } from 'tg.hooks/useProject';
 import { useBranchLinks } from 'tg.component/branching/useBranchLinks';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useAppTriggers, useAppTriggerDispatch } from '../apps/useAppTriggers';
+import { AppIcon } from '../apps/AppIcon';
 
 export const ProjectMenu = () => {
   const project = useProject();
@@ -206,7 +207,7 @@ export const ProjectMenu = () => {
             [PARAMS.APP_MODULE_KEY]: page.moduleKey,
           })}
           text={page.title}
-          icon={<span style={{ fontSize: 18 }}>{page.icon}</span>}
+          icon={<AppIcon icon={page.icon} size={20} fontSize="18px" />}
           data-cy={`project-menu-item-app-${page.installId}-${page.moduleKey}`}
         />
       ))}
@@ -229,7 +230,11 @@ const ProjectMenuActionItems = () => {
           }
           text={trigger.item.title ?? trigger.item.key}
           icon={
-            <span style={{ fontSize: 18 }}>{trigger.item.icon ?? '🔘'}</span>
+            <AppIcon
+              icon={trigger.item.icon ?? '🔘'}
+              size={20}
+              fontSize="18px"
+            />
           }
           data-cy={`project-menu-item-app-action-${trigger.install.id}-${trigger.item.key}`}
         />

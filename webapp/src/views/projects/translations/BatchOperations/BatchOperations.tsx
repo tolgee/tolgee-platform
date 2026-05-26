@@ -18,6 +18,7 @@ import {
   useAppTriggerDispatch,
   useAppTriggers,
 } from '../../apps/useAppTriggers';
+import { AppIcon } from '../../apps/AppIcon';
 
 const StyledContainer = styled('div')`
   position: absolute;
@@ -168,9 +169,11 @@ const BatchAppActions = ({ selection }: { selection: number[] }) => {
                 })
               }
             >
-              <span style={{ fontSize: '1.1em', lineHeight: 1 }}>
-                {trigger.item.icon ?? '🔘'}
-              </span>
+              <AppIcon
+                icon={trigger.item.icon ?? '🔘'}
+                size={20}
+                fontSize="1.1em"
+              />
             </IconButton>
           </Tooltip>
         </StyledItem>

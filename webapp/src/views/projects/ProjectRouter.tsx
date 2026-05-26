@@ -40,103 +40,106 @@ export const ProjectRouter = () => {
       <AppModalProvider>
         {matchedTranslations?.isExact && <HideObserver />}
         <Switch>
-        <Route exact path={LINKS.PROJECT_TRANSLATIONS_SINGLE.template}>
-          <SingleKeyView />
-        </Route>
+          <Route exact path={LINKS.PROJECT_TRANSLATIONS_SINGLE.template}>
+            <SingleKeyView />
+          </Route>
 
-        <Route exact path={LINKS.PROJECT_TRANSLATIONS_TRASH.template}>
-          <TrashView />
-        </Route>
+          <Route exact path={LINKS.PROJECT_TRANSLATIONS_TRASH.template}>
+            <TrashView />
+          </Route>
 
-        <Route exact path={LINKS.PROJECT_TRANSLATIONS.template}>
-          <TranslationsView />
-        </Route>
+          <Route exact path={LINKS.PROJECT_TRANSLATIONS.template}>
+            <TranslationsView />
+          </Route>
 
-        <Route path={LINKS.PROJECT_EDIT.template}>
-          <ProjectSettingsView />
-        </Route>
+          <Route path={LINKS.PROJECT_EDIT.template}>
+            <ProjectSettingsView />
+          </Route>
 
-        <Route path={LINKS.PROJECT_LANGUAGES.template}>
-          <LanguageSettingsView />
-        </Route>
+          <Route path={LINKS.PROJECT_LANGUAGES.template}>
+            <LanguageSettingsView />
+          </Route>
 
-        <Route exact path={LINKS.PROJECT_PERMISSIONS.template}>
-          <ProjectMembersView />
-        </Route>
+          <Route exact path={LINKS.PROJECT_PERMISSIONS.template}>
+            <ProjectMembersView />
+          </Route>
 
-        <PrivateRoute exact path={LINKS.PROJECT_IMPORT.template}>
-          <ImportView />
-        </PrivateRoute>
+          <PrivateRoute exact path={LINKS.PROJECT_IMPORT.template}>
+            <ImportView />
+          </PrivateRoute>
 
-        <Route path={LINKS.PROJECT_EXPORT.template}>
-          <ExportView />
-        </Route>
+          <Route path={LINKS.PROJECT_EXPORT.template}>
+            <ExportView />
+          </Route>
 
-        <Route exact path={LINKS.PROJECT_INTEGRATE.template}>
-          <IntegrateView />
-        </Route>
+          <Route exact path={LINKS.PROJECT_INTEGRATE.template}>
+            <IntegrateView />
+          </Route>
 
-        <Route exact path={LINKS.PROJECT_DASHBOARD.template}>
-          <DashboardView />
-        </Route>
+          <Route exact path={LINKS.PROJECT_DASHBOARD.template}>
+            <DashboardView />
+          </Route>
 
-        <Route path={LINKS.PROJECT_DEVELOPER.template}>
-          <DeveloperView />
-        </Route>
+          <Route path={LINKS.PROJECT_DEVELOPER.template}>
+            <DeveloperView />
+          </Route>
 
-        {/* /ai redirects to the default Context Data tab; /ai/* renders AiView. */}
-        <Route exact path={LINKS.PROJECT_AI.template}>
-          <Redirect
-            to={LINKS.PROJECT_CONTEXT_DATA.build({
-              [PARAMS.PROJECT_ID]: projectId,
-            })}
-          />
-        </Route>
-        <Route path={LINKS.PROJECT_AI.template}>
-          <AiView />
-        </Route>
+          {/* /ai redirects to the default Context Data tab; /ai/* renders AiView. */}
+          <Route exact path={LINKS.PROJECT_AI.template}>
+            <Redirect
+              to={LINKS.PROJECT_CONTEXT_DATA.build({
+                [PARAMS.PROJECT_ID]: projectId,
+              })}
+            />
+          </Route>
+          <Route path={LINKS.PROJECT_AI.template}>
+            <AiView />
+          </Route>
 
-        <Route path={LINKS.PROJECT_APP_PAGE.template}>
-          <ProjectAppPageView />
-        </Route>
+          <Route path={LINKS.PROJECT_APP_PAGE.template}>
+            <ProjectAppPageView />
+          </Route>
 
-        <Route path={LINKS.GO_TO_PROJECT_ACTIVITY_DETAIL.template}>
-          <ActivityDetailRedirect />
-        </Route>
+          <Route path={LINKS.GO_TO_PROJECT_ACTIVITY_DETAIL.template}>
+            <ActivityDetailRedirect />
+          </Route>
 
-        <Route path={LINKS.GO_TO_PROJECT_TASK.template}>
-          <TaskRedirect />
-        </Route>
+          <Route path={LINKS.GO_TO_PROJECT_TASK.template}>
+            <TaskRedirect />
+          </Route>
 
-        {/* Internal preview route (websockets debugging). */}
-        <Route exact path={LINKS.PROJECT_WEBSOCKETS_PREVIEW.template}>
-          <WebsocketPreview />
-        </Route>
+          {/* Internal preview route (websockets debugging). */}
+          <Route exact path={LINKS.PROJECT_WEBSOCKETS_PREVIEW.template}>
+            <WebsocketPreview />
+          </Route>
 
-        {/*Branched views*/}
-        <Route exact path={BRANCH_ROUTES.translation.branched}>
-          <SingleKeyView />
-        </Route>
+          {/*Branched views*/}
+          <Route exact path={BRANCH_ROUTES.translation.branched}>
+            <SingleKeyView />
+          </Route>
 
-        <Route exact path={BRANCH_ROUTES.translations.branched}>
-          <TranslationsView />
-        </Route>
+          <Route exact path={BRANCH_ROUTES.translations.branched}>
+            <TranslationsView />
+          </Route>
 
-        <Route exact path={BRANCH_ROUTES.dashboard.branched}>
-          <DashboardView />
-        </Route>
+          <Route exact path={BRANCH_ROUTES.dashboard.branched}>
+            <DashboardView />
+          </Route>
 
-        <Route exact path={BRANCH_ROUTES.import.branched}>
-          <ImportView />
-        </Route>
+          <Route exact path={BRANCH_ROUTES.import.branched}>
+            <ImportView />
+          </Route>
 
-        <Route exact path={BRANCH_ROUTES.export.branched}>
-          <ExportView />
-        </Route>
+          <Route exact path={BRANCH_ROUTES.export.branched}>
+            <ExportView />
+          </Route>
 
-        <Route exact path={LINKS.PROJECT_TRANSLATIONS_TRASH_BRANCHED.template}>
-          <TrashView />
-        </Route>
+          <Route
+            exact
+            path={LINKS.PROJECT_TRANSLATIONS_TRASH_BRANCHED.template}
+          >
+            <TrashView />
+          </Route>
         </Switch>
         <routes.Project />
       </AppModalProvider>

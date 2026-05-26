@@ -109,6 +109,7 @@ export function useAppTriggerDispatch(): (
           baseUrl: install.baseUrl,
           entry: modalDef.entry,
           title: modalDef.title,
+          icon: modalDef.icon ?? item.icon,
           width: modalDef.width,
           height: modalDef.height,
           extraInitPayload: options?.extraInitPayload,

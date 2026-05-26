@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { PanelConfig } from '../../common/types';
 import { createAppPanelComponent } from './AppPanel';
+import { AppIcon } from '../../../../apps/AppIcon';
 
 export function useAppToolsPanels(projectId: number): PanelConfig[] {
   const apps = useApiQuery({
@@ -22,7 +23,7 @@ export function useAppToolsPanels(projectId: number): PanelConfig[] {
         result.push({
           id: `app:${install.id}:${module.key}`,
           name: module.title,
-          icon: module.icon,
+          icon: <AppIcon icon={module.icon} size={18} fontSize="1em" />,
           component: createAppPanelComponent({
             installId: install.id,
             baseUrl: install.baseUrl,

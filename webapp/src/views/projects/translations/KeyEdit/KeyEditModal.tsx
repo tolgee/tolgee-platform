@@ -17,6 +17,7 @@ import {
   useAppTriggerDispatch,
   useAppTriggers,
 } from '../../apps/useAppTriggers';
+import { AppIcon } from '../../apps/AppIcon';
 
 import { useProject } from 'tg.hooks/useProject';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
@@ -294,7 +295,18 @@ export const KeyEditModal: React.FC<Props> = ({
                     data-cy-install-id={appTab.installId}
                     data-cy-tab-key={appTab.tabKey}
                     value={`app:${appTab.installId}:${appTab.tabKey}`}
-                    label={`${appTab.icon} ${appTab.title}`}
+                    label={
+                      <span
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 6,
+                        }}
+                      >
+                        <AppIcon icon={appTab.icon} size={16} />
+                        {appTab.title}
+                      </span>
+                    }
                   />
                 ))}
               </StyledTabs>
@@ -396,9 +408,11 @@ const KeyEditFooterAppActions = ({
               })
             }
           >
-            <span style={{ fontSize: '1.1em', lineHeight: 1 }}>
-              {trigger.item.icon ?? '🔘'}
-            </span>
+            <AppIcon
+              icon={trigger.item.icon ?? '🔘'}
+              size={20}
+              fontSize="1.1em"
+            />
           </IconButton>
         </Tooltip>
       ))}

@@ -140,6 +140,8 @@ The plugin backend verifies the JWT against Tolgee's published public key (JWKS 
 
 ### 3.1 Manifest schema (PoC)
 
+The `icon` field on every module accepts either an emoji (e.g. `"⚙️"`) or a Tolgee native icon name from `@untitled-ui/icons-react` (e.g. `"Settings01"`) or `tg.component/CustomIcons` (e.g. `"Stars"`). Auto-detection: if the string matches a registered icon component, it renders as the native React icon; otherwise it renders as literal text (the emoji path). Unknown names fall back to literal text — choose names from the `@untitled-ui/icons-react` exports to get the native look.
+
 ```json
 {
   "id": "tolgee-dev-plugin",
@@ -212,12 +214,12 @@ The plugin backend verifies the JWT against Tolgee's published public key (JWKS 
 | `modules.project-dashboard-page[]` | array | Pages this plugin contributes to the project sidebar. |
 | `modules.project-dashboard-page[].key` | string | Unique within the plugin; used as the URL slug under Tolgee's namespace. |
 | `modules.project-dashboard-page[].title` | string | Sidebar entry title. |
-| `modules.project-dashboard-page[].icon` | string | Sidebar entry icon (emoji or icon-name TBD). |
+| `modules.project-dashboard-page[].icon` | string | Sidebar entry icon (emoji or native icon name — see §3.1). |
 | `modules.project-dashboard-page[].entry` | string | Path relative to `baseUrl`; the iframe will load this URL. |
 | `modules.translation-tools-panel[]` | array | Panels this plugin contributes to the translations view's right-hand tools panel. |
 | `modules.translation-tools-panel[].key` | string | Unique within the plugin; used as part of the panel id. |
 | `modules.translation-tools-panel[].title` | string | Panel header title. |
-| `modules.translation-tools-panel[].icon` | string | Panel header icon (emoji or icon-name TBD). |
+| `modules.translation-tools-panel[].icon` | string | Panel header icon (emoji or native icon name — see §3.1). |
 | `modules.translation-tools-panel[].entry` | string | Path relative to `baseUrl`; the iframe will load this URL when the panel is expanded. |
 | `decoratorsUrl` | string | Absolute URL the webapp `POST`s to for dynamic action decorators. Plugin must serve it with CORS headers permitting the Tolgee origin. |
 | `modules.key-edit-tab[]` | array | Tabs this plugin contributes to the key-edit dialog. |
