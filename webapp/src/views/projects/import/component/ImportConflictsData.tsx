@@ -1,4 +1,5 @@
 import React, { FunctionComponent, useState } from 'react';
+import { KeyName } from 'tg.component/KeyName/KeyName';
 import { Box, Grid, Pagination, Typography } from '@mui/material';
 import { T } from '@tolgee/react';
 
@@ -57,7 +58,9 @@ export const ImportConflictsData: FunctionComponent<{
                       variant={'body2'}
                       data-cy="import-resolution-dialog-key-name"
                     >
-                      <b>{t.keyName}</b>
+                      <b>
+                        <KeyName name={t.keyName} />
+                      </b>
                     </Typography>
                   </Box>
                 </Grid>

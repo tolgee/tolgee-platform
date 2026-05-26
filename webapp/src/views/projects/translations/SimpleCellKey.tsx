@@ -8,6 +8,7 @@ import { Screenshots } from './Screenshots/Screenshots';
 import ReactMarkdown from 'react-markdown';
 import { MarkdownLink } from 'tg.component/common/MarkdownLink';
 import clsx from 'clsx';
+import { KeyName } from 'tg.component/KeyName/KeyName';
 
 type KeyWithTranslationsModel =
   components['schemas']['KeyWithTranslationsModel'];
@@ -52,7 +53,7 @@ export const SimpleCellKey: React.FC<Props> = ({ data }) => {
     >
       <StyledKey data-cy="translations-key-name">
         <LimitedHeightText maxLines={3} wrap="break-all">
-          {data.keyName}
+          <KeyName name={data.keyName} />
         </LimitedHeightText>
       </StyledKey>
       {data.keyDescription && (

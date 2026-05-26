@@ -121,7 +121,7 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
                   <EditorWrapper>
                     <StyledEdtorWrapper data-cy="translation-create-key-input">
                       <Editor
-                        mode="plain"
+                        mode="keyName"
                         value={field.value}
                         onChange={(val) => {
                           form.setFieldValue(field.name, val);
