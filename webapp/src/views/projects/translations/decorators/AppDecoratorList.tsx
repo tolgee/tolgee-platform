@@ -83,6 +83,7 @@ export const AppDecoratorList = ({
           key={`${d.installId}:${d.actionKey}`}
           decorator={d}
           keyId={keyId}
+          languageTag={languageTag ?? undefined}
         />
       ))}
     </StyledRow>
