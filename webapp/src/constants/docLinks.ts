@@ -5,4 +5,5 @@ export const DOCS_LINKS = {
   importingPlaceholders: `${DOCS_ROOT}/platform/projects_and_organizations/import#importing-placeholders`,
   qaChecksGrammar: `${DOCS_ROOT}/platform/translation_process/qa_checks#spelling-and-grammar-checks`,
   qaChecksSpelling: `${DOCS_ROOT}/platform/translation_process/qa_checks#spelling-and-grammar-checks`,
+  poMsgctxt: `${DOCS_ROOT}/platform/formats/po#message-context-msgctxt-and-key-names`,
 };

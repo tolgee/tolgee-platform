@@ -180,6 +180,44 @@ class PoFileProcessorTest {
   }
 
   @Test
+  fun `joins msgctxt and msgid into keyName via separator`() {
+    mockImportFile("example_msgctxt.po")
+    PoFileProcessor(mockUtil.fileProcessorContext).process()
+    val keys = mockUtil.fileProcessorContext.translations.keys
+    assertThat(keys).contains(
+      "menu\u0004Open",
+      "verb\u0004Open",
+      "Open",
+      "items\u0004%d item",
+    )
+  }
+
+  @Test
+  fun `drops msgctxt-only entry whose msgid is empty`() {
+    mockImportFile("example_msgctxt_only.po")
+    PoFileProcessor(mockUtil.fileProcessorContext).process()
+    assertThat(mockUtil.fileProcessorContext.translations.keys)
+      .containsExactly("menu\u0004Open")
+  }
+
+  @Test
+  fun `treats empty msgctxt as no msgctxt`() {
+    mockImportFile("example_msgctxt.po")
+    PoFileProcessor(mockUtil.fileProcessorContext).process()
+    val keys = mockUtil.fileProcessorContext.translations.keys
+    assertThat(keys).contains("Cancel")
+    assertThat(keys).doesNotContain("\u0004Cancel")
+  }
+
+  @Test
+  fun `preserves msgctxt escapes in keyName`() {
+    mockImportFile("example_msgctxt_escapes.po")
+    PoFileProcessor(mockUtil.fileProcessorContext).process()
+    val expected = "a \"quoted\" ctx\nwith newline\u0004Save"
+    assertThat(mockUtil.fileProcessorContext.translations.keys).contains(expected)
+  }
+
+  @Test
   fun `respects provided format`() {
     mockUtil.mockIt("en.json", "src/test/resources/import/po/example.po")
     mockUtil.fileProcessorContext.params =
