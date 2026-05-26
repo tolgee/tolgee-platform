@@ -1,3 +1,10 @@
+## [3.190.6](https://github.com/tolgee/tolgee-platform/compare/v3.190.5...v3.190.6) (2026-05-26)
+
+
+### Bug Fixes
+
+* prevent branch merge from dropping translation updates ([#3625](https://github.com/tolgee/tolgee-platform/issues/3625)) ([13f45a0](https://github.com/tolgee/tolgee-platform/commit/13f45a08946403286d4d54059b6abb9eba5fbf8c))
+
 ## [3.190.5](https://github.com/tolgee/tolgee-platform/compare/v3.190.4...v3.190.5) (2026-05-25)
 
 
