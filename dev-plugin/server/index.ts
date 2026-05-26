@@ -3,6 +3,19 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import express, { json, type Request } from 'express'
+import type { components } from '@tginternal/client'
+
+// Discriminated union of every typed webhook payload Tolgee can send.
+// Narrow with `payload.activityData?.type` (project-activity events) or
+// `payload.eventType` (e.g. TEST).
+type AppWebhookSchemas = {
+  [K in keyof components['schemas'] as K extends `AppWebhookPayload_${string}`
+    ? K
+    : never]: components['schemas'][K]
+}
+type AppWebhookPayload = AppWebhookSchemas[keyof AppWebhookSchemas]
+
+type ModifiedEntity = components['schemas']['ModifiedEntityModel']
 
 const PORT = Number(process.env.PORT ?? 5181)
 const WEBHOOK_SECRET = process.env.TOLGEE_WEBHOOK_SECRET ?? null
@@ -71,28 +84,28 @@ app.post(
       res.status(401).json({ error: 'invalid signature' })
       return
     }
-    let payload: {
-      eventType?: string
-      activityData?: {
-        timestamp?: number
-        modifiedEntities?: Record<
-          string,
-          Array<{ entityClass?: string; entityId?: number }>
-        >
-      }
-    }
+    let payload: AppWebhookPayload
     try {
-      payload = JSON.parse(raw)
+      payload = JSON.parse(raw) as AppWebhookPayload
     } catch {
       res.status(400).json({ error: 'invalid json' })
       return
     }
-    const timestamp = payload.activityData?.timestamp
+    const activityData = payload.activityData
+    const timestamp = activityData?.timestamp
     const occurredAt =
       typeof timestamp === 'number'
         ? new Date(timestamp).toISOString()
         : new Date().toISOString()
-    const translations = payload.activityData?.modifiedEntities?.Translation ?? []
+    // modifiedEntities is shaped per activity type but all variants store
+    // entity arrays keyed by entityClass. We only care about the Translation
+    // bucket; activity types that don't touch translations simply have no
+    // Translation entry, which yields an empty list here.
+    const modified = (activityData?.modifiedEntities ?? {}) as Record<
+      string,
+      ModifiedEntity[] | undefined
+    >
+    const translations: ModifiedEntity[] = modified.Translation ?? []
     const cutoffMs = Date.now() - ACTIVITY_RETENTION_DAYS * 24 * 60 * 60 * 1000
     let touched = 0
     for (const entity of translations) {
