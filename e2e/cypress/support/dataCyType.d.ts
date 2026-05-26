@@ -892,6 +892,7 @@ declare namespace DataCy {
         "tm-empty-wizard-import" |
         "tm-empty-wizard-manual" |
         "tm-entries-header" |
+        "tm-entries-header-base-badge" |
         "tm-entries-language-filter" |
         "tm-entries-language-select-item" |
         "tm-entries-layout-flat" |

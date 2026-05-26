@@ -1,4 +1,4 @@
-import { Checkbox, styled, Typography } from '@mui/material';
+import { Checkbox, styled } from '@mui/material';
 import { T } from '@tolgee/react';
 import { FlagImage } from '@tginternal/library/components/languages/FlagImage';
 import { languageInfo } from '@tginternal/language-util/lib/generated/languageInfo';
@@ -9,6 +9,7 @@ import {
   HeaderRow,
 } from 'tg.component/entriesList/headerChrome';
 import { flatGridColumns } from './TranslationMemoryEntryRow';
+import { DefaultChip } from 'tg.component/common/chips/DefaultChip';
 
 const StyledDataCell = styled(HeaderDataCell)`
   gap: 8px;
@@ -47,7 +48,13 @@ export const TmEntriesListHeader: React.VFC<Props> = ({
           checked={selectionService.isAllSelected}
           indeterminate={selectionService.isSomeSelected}
           disabled={selectionService.isLoading}
-          onChange={selectionService.toggleSelectAll}
+          // Not `toggleSelectAll`: virtual rows inflate `totalCount`, so `isAllSelected`
+          // never flips on and toggle would always re-select.
+          onChange={() =>
+            selectionService.isAnySelected
+              ? selectionService.unselectAll()
+              : selectionService.selectAll()
+          }
           data-cy="tm-entries-select-all"
         />
       )}
@@ -62,9 +69,12 @@ export const TmEntriesListHeader: React.VFC<Props> = ({
       <span style={{ fontWeight: 500 }}>
         {languageInfo[sourceLanguageTag]?.englishName || sourceLanguageTag}
       </span>
-      <Typography variant="caption" color="text.secondary">
-        <T keyName="translation_memory_header_source" defaultValue="Source" />
-      </Typography>
+      <DefaultChip
+        data-cy="tm-entries-header-base-badge"
+        label={
+          <T keyName="translation_memory_header_base" defaultValue="Base" />
+        }
+      />
     </StyledDataCell>
     {displayLanguages.map((tag) => {
       const info = languageInfo[tag];

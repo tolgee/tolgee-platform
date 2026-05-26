@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Box, Button, styled, Typography } from '@mui/material';
 import { languageInfo } from '@tginternal/language-util/lib/generated/languageInfo';
 import { T, useTranslate } from '@tolgee/react';
@@ -81,13 +81,13 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
   const {
     languages,
     languagesLoadable,
-    isAllSelected,
     selectedLanguages,
     langSearch,
     setLangSearch,
     fetchMoreLanguages,
     toggleLanguage,
     updateSelectedLanguages,
+    seedAutoDefault,
     allNonBaseLanguageTags,
     displayLanguages,
     targetLanguageTag,
@@ -104,6 +104,26 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
     search,
     targetLanguageTag,
   });
+
+  const firstPageEntryLanguages = useMemo(() => {
+    const firstPage =
+      entries.data?.pages?.[0]?._embedded?.translationMemoryRows;
+    if (!firstPage) return undefined;
+    const tags = new Set<string>();
+    firstPage.forEach((r) =>
+      r.cells.forEach((c) => tags.add(c.targetLanguageTag))
+    );
+    return [...tags];
+  }, [entries.data]);
+
+  useLayoutEffect(() => {
+    if (
+      selectedLanguages === undefined &&
+      firstPageEntryLanguages !== undefined
+    ) {
+      seedAutoDefault(firstPageEntryLanguages);
+    }
+  }, [selectedLanguages, firstPageEntryLanguages, seedAutoDefault]);
 
   const selectionService = useSelectionService<number>({
     totalCount: totalElements,
@@ -156,7 +176,7 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
         editingLang={editingLangForRow}
         canManage={canManage}
         layout={layout}
-        selectionService={row.editable ? selectionService : undefined}
+        selectionService={selectionService}
         groupId={groupId}
         onEditStart={(langTag) => setEditingCell(`${rowKey}|||${langTag}`)}
         onEditEnd={() => {
@@ -209,8 +229,7 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
         onLayoutChange={setLayoutParam}
         languages={languages}
         languagesLoadable={languagesLoadable}
-        isAllSelected={isAllSelected}
-        selectedLanguages={selectedLanguages}
+        selectedLanguages={displayLanguages}
         langSearch={langSearch}
         onLangSearchChange={setLangSearch}
         onFetchMoreLanguages={fetchMoreLanguages}
@@ -229,9 +248,23 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
         <TranslationMemoryCreateEntryDialog
           open={createDialogOpen}
           onClose={() => setCreateDialogOpen(false)}
-          onFinished={() => {
+          onFinished={(createdLanguageTags) => {
             setCreateDialogOpen(false);
-            entries.refetch();
+            // A new entry can introduce target languages outside the current filter — add
+            // them so the just-created translations stay visible. When nothing is selected
+            // yet, the refetched first page (now including the new entry) lets the one-time
+            // seed pick them up.
+            const current = selectedLanguages;
+            const missing = current
+              ? createdLanguageTags.filter(
+                  (tag) => tag !== sourceLanguageTag && !current.includes(tag)
+                )
+              : [];
+            if (current && missing.length > 0) {
+              updateSelectedLanguages([...current, ...missing]);
+            } else {
+              entries.refetch();
+            }
           }}
           organizationId={organizationId}
           translationMemoryId={translationMemoryId}

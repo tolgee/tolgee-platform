@@ -39,8 +39,7 @@ type Props = {
   onLayoutChange: (layout: EntryRowLayout) => void;
   languages: OrganizationLanguageModel[] | undefined;
   languagesLoadable: LanguagesLoadable;
-  isAllSelected: boolean;
-  selectedLanguages: string[] | undefined;
+  selectedLanguages: string[];
   langSearch: string;
   onLangSearchChange: (s: string) => void;
   onFetchMoreLanguages: () => void;
@@ -68,7 +67,6 @@ export const TmEntriesToolbar: React.VFC<Props> = ({
   onLayoutChange,
   languages,
   languagesLoadable,
-  isAllSelected,
   selectedLanguages,
   langSearch,
   onLangSearchChange,
@@ -86,10 +84,7 @@ export const TmEntriesToolbar: React.VFC<Props> = ({
   const { t } = useTranslate();
   const renderLangItem = (props: object, item: OrganizationLanguageModel) => {
     const isBase = item.tag === sourceLanguageTag;
-    const selected =
-      isBase ||
-      isAllSelected ||
-      (selectedLanguages?.includes(item.tag) ?? false);
+    const selected = isBase || selectedLanguages.includes(item.tag);
     return (
       <MultiselectItem
         {...props}
@@ -170,14 +165,10 @@ export const TmEntriesToolbar: React.VFC<Props> = ({
                 </Button>
               </Tooltip>
             </ButtonGroup>
-            <Box data-cy="tm-entries-language-filter">
+            <Box data-cy="tm-entries-language-filter" sx={{ width: 250 }}>
               <InfiniteMultiSearchSelect
                 items={languages}
-                selected={
-                  isAllSelected
-                    ? (languages ?? []).map((l) => l.tag)
-                    : selectedLanguages
-                }
+                selected={selectedLanguages}
                 queryResult={languagesLoadable}
                 itemKey={(item) => item.tag}
                 search={langSearch}

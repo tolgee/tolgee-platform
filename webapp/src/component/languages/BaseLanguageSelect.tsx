@@ -61,6 +61,7 @@ type Props = {
   disabled?: boolean;
   label?: React.ReactNode;
   minHeight?: boolean;
+  autoSelectFirst?: boolean;
 } & Omit<ComponentProps<typeof Box>, 'children' | 'minHeight'>;
 
 export const BaseLanguageSelect: React.VFC<Props> = ({
@@ -69,6 +70,7 @@ export const BaseLanguageSelect: React.VFC<Props> = ({
   disabled,
   label,
   minHeight,
+  autoSelectFirst = true,
   ...boxProps
 }) => {
   const { preferredOrganization } = usePreferredOrganization();
@@ -76,8 +78,18 @@ export const BaseLanguageSelect: React.VFC<Props> = ({
   const { t } = useTranslate();
   const [field, meta] = useField(name);
   const value = field.value as SelectedLanguageModel | undefined;
-  // Formik returns error as object - schema is incorrect...
-  const error = (meta.error as any)?.tag;
+
+  // meta.error shape depends on which Yup rule fired:
+  //   - object-level `.required()` (field cleared / undefined) → string
+  //   - shape `{ tag: ... }` validation → { tag: string }
+  //   - localized message → ReactElement
+  const error = React.isValidElement(meta.error)
+    ? meta.error
+    : typeof meta.error === 'string'
+    ? meta.error
+    : (meta.error as any)?.tag;
+
+  const showError = (meta.touched || context.submitCount > 0) && error;
 
   const [search, setSearch] = useState('');
   const [searchDebounced] = useDebounce(search, 500);
@@ -129,7 +141,13 @@ export const BaseLanguageSelect: React.VFC<Props> = ({
   // The ref prevents re-triggering after setSelected updates the Formik field.
   const hasAutoSelected = useRef(false);
   useEffect(() => {
-    if (!value && data && data.length > 0 && !hasAutoSelected.current) {
+    if (
+      autoSelectFirst &&
+      !value &&
+      data &&
+      data.length > 0 &&
+      !hasAutoSelected.current
+    ) {
       hasAutoSelected.current = true;
       setSelected(data[0]);
     }
@@ -216,7 +234,7 @@ export const BaseLanguageSelect: React.VFC<Props> = ({
         labelItem={labelItem}
         inputComponent={FlaggedInput}
         label={label ?? t('field_base_language', 'Base language')}
-        error={meta.touched && error}
+        error={showError}
         searchPlaceholder={t('language_search_placeholder')}
         disabled={disabled}
         minHeight={minHeight}

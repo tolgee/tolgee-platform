@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useDebounce } from 'use-debounce';
 
 import { useApiInfiniteQuery } from 'tg.service/http/useQueryApi';
@@ -17,13 +17,10 @@ type Args = {
 };
 
 /**
- * State + queries for the per-TM language filter:
- *   - the paginated org-languages query (with debounced search)
- *   - persisted user selection (per-TM, undefined = "all", [] = explicit "all", [t,…] = subset)
- *   - derived values for downstream consumers (filter param, display order, dialog defaults)
+ * State + queries for the per-TM language filter.
  *
- * Mutators (`toggleLanguage`, `updateSelectedLanguages`) persist through `tmPreferencesService`
- * so selection is sticky across page reloads.
+ * The selection is persisted per-TM and seeded once: on the first visit (nothing stored),
+ * `seedAutoDefault` sets it from the first page's entry languages and persists it.
  */
 export function useTmLanguageFilter({
   organizationId,
@@ -33,6 +30,10 @@ export function useTmLanguageFilter({
   const [selectedLanguages, setSelectedLanguages] = useState<
     string[] | undefined
   >(() => tmPreferencesService.getForTm(translationMemoryId));
+
+  // True only between the one-time auto-seed and the first explicit change. Keeps the
+  // backend filter off so seeding doesn't re-fetch the entries.
+  const [isAutoDefault, setIsAutoDefault] = useState(false);
 
   const [langSearch, setLangSearch] = useState('');
   const [langSearchDebounced] = useDebounce(
@@ -75,30 +76,33 @@ export function useTmLanguageFilter({
     }
   };
 
+  const seedAutoDefault = useCallback(
+    (entryLanguageTags: string[]) => {
+      const langs = entryLanguageTags.filter((t) => t !== sourceLanguageTag);
+      setSelectedLanguages(langs);
+      setIsAutoDefault(true);
+      tmPreferencesService.setForTm(translationMemoryId, langs);
+    },
+    [sourceLanguageTag, translationMemoryId]
+  );
+
   const updateSelectedLanguages = (langs: string[]) => {
     setSelectedLanguages(langs);
+    setIsAutoDefault(false);
     tmPreferencesService.setForTm(translationMemoryId, langs);
   };
 
-  const isAllSelected = selectedLanguages === undefined;
-
   const toggleLanguage = (item: OrganizationLanguageModel) => {
     if (item.tag === sourceLanguageTag) return;
-    if (isAllSelected) {
-      // Switching from "all" to explicit — deselect this one language
-      const allTags = (languages ?? [])
-        .map((l) => l.tag)
-        .filter((t) => t !== sourceLanguageTag && t !== item.tag);
-      updateSelectedLanguages(allTags);
-      return;
-    }
-    if (selectedLanguages!.includes(item.tag)) {
-      updateSelectedLanguages(selectedLanguages!.filter((t) => t !== item.tag));
-      return;
-    }
-    updateSelectedLanguages([...selectedLanguages!, item.tag]);
+    const current = selectedLanguages ?? [];
+    const next = current.includes(item.tag)
+      ? current.filter((t) => t !== item.tag)
+      : [...current, item.tag];
+    updateSelectedLanguages(next);
   };
 
+  // Every loaded org language except the base — offered to the create-entry dialog and the
+  // empty-state wizard as the full set of pickable target languages.
   const allNonBaseLanguageTags = useMemo(
     () =>
       (languages ?? [])
@@ -107,34 +111,37 @@ export function useTmLanguageFilter({
     [languages, sourceLanguageTag]
   );
 
-  const displayLanguages = useMemo(() => {
-    if (isAllSelected) return allNonBaseLanguageTags;
-    return allNonBaseLanguageTags.filter((t) => selectedLanguages!.includes(t));
-  }, [allNonBaseLanguageTags, isAllSelected, selectedLanguages]);
+  // The displayed / checked set: the stored selection, base language excluded.
+  const displayLanguages = useMemo(
+    () => (selectedLanguages ?? []).filter((t) => t !== sourceLanguageTag),
+    [selectedLanguages, sourceLanguageTag]
+  );
 
-  // The targetLanguageTag query param: comma-separated when narrowed, undefined for "all".
-  const targetLanguageTag =
-    selectedLanguages && selectedLanguages.length > 0
-      ? selectedLanguages.join(',')
-      : undefined;
+  // The targetLanguageTag query param: undefined while the selection is the freshly-seeded
+  // auto-default (filtering by every first-page language == no filter) or empty; a
+  // comma-separated list once the selection is an explicit/stored choice.
+  const targetLanguageTag = useMemo(() => {
+    if (isAutoDefault) return undefined;
+    if (!selectedLanguages || selectedLanguages.length === 0) return undefined;
+    return selectedLanguages.join(',');
+  }, [isAutoDefault, selectedLanguages]);
 
-  // First two of the user's filter selection, used as the Create-entry dialog's default. Empty
-  // when the filter is in "All" mode — the dialog falls back to the first 2 of all langs.
-  const createDialogInitialTags = useMemo(() => {
-    if (!selectedLanguages || selectedLanguages.length === 0) return [];
-    return selectedLanguages.slice(0, 2);
-  }, [selectedLanguages]);
+  // First two of the selection, used as the Create-entry dialog's default.
+  const createDialogInitialTags = useMemo(
+    () => displayLanguages.slice(0, 2),
+    [displayLanguages]
+  );
 
   return {
     languages,
     languagesLoadable,
-    isAllSelected,
     selectedLanguages,
     langSearch,
     setLangSearch,
     fetchMoreLanguages,
     toggleLanguage,
     updateSelectedLanguages,
+    seedAutoDefault,
     allNonBaseLanguageTags,
     displayLanguages,
     targetLanguageTag,

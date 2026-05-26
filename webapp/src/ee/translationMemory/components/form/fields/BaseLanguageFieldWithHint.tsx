@@ -22,6 +22,7 @@ export const BaseLanguageFieldWithHint = ({ disabled }: Props) => {
       name="baseLanguage"
       disabled={disabled || hasAssignedProjects}
       minHeight={false}
+      autoSelectFirst={false}
       label={
         <LabelHint
           title={

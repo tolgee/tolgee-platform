@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Checkbox, styled } from '@mui/material';
+import { Checkbox, styled, Tooltip } from '@mui/material';
 import { T } from '@tolgee/react';
 import { FlagImage } from '@tginternal/library/components/languages/FlagImage';
 import { languageInfo } from '@tginternal/language-util/lib/generated/languageInfo';
@@ -122,22 +122,39 @@ export const TranslationMemoryEntryRow: React.VFC<Props> = ({
       data-cy="translation-memory-entry-row"
     >
       {(() => {
-        const hasCheckbox = Boolean(
-          selectionService && selectable && canManage
-        );
-        // Always reserve the selection column in both layouts so non-editable rows (no
-        // checkbox) line up with editable rows. Without this they would shift 44px left
-        // of editable rows in stacked layout once a TM mixed both kinds.
-        return (
-          <StyledSelectionCell $layout={layout}>
-            {hasCheckbox && (
+        if (!selectionService || !canManage) {
+          return <StyledSelectionCell $layout={layout} />;
+        }
+        if (selectable) {
+          return (
+            <StyledSelectionCell $layout={layout}>
               <Checkbox
                 size="small"
-                checked={selectionService!.isSelected(groupId!)}
-                onChange={() => selectionService!.toggle(groupId!)}
+                checked={selectionService.isSelected(groupId!)}
+                onChange={() => selectionService.toggle(groupId!)}
                 data-cy="tm-entry-row-checkbox"
               />
-            )}
+            </StyledSelectionCell>
+          );
+        }
+        return (
+          <StyledSelectionCell $layout={layout}>
+            <Tooltip
+              title={
+                <T
+                  keyName="tm_entry_select_disabled_virtual"
+                  defaultValue="Synced entries from a project can't be selected."
+                />
+              }
+            >
+              <span>
+                <Checkbox
+                  size="small"
+                  disabled
+                  data-cy="tm-entry-row-checkbox"
+                />
+              </span>
+            </Tooltip>
           </StyledSelectionCell>
         );
       })()}
