@@ -14,7 +14,10 @@ import { XClose } from '@untitled-ui/icons-react';
 import { T } from '@tolgee/react';
 import { usePanelData } from './usePanelData';
 import { useAppToolsPanels } from './panels/AppPanel/useAppToolsPanels';
-import { onPanelRevealRequest } from '../decorators/panelRevealEvent';
+import {
+  consumePendingPanelReveal,
+  onPanelRevealRequest,
+} from '../decorators/panelRevealEvent';
 
 const StyledButton = styled(IconButton)`
   position: absolute;
@@ -51,24 +54,32 @@ export const ToolsPanel = () => {
   const appPanels = useAppToolsPanels(project.id);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(
-    () =>
-      onPanelRevealRequest((id) => {
-        setSidePanelOpen(true);
-        ensurePanelOpen(id);
-        // Defer scrolling until after the open state propagates.
-        requestAnimationFrame(() => {
-          const el = wrapperRef.current?.querySelector(
-            `[data-cy-id="${CSS.escape(id)}"][data-cy="translation-panel"]`
-          );
-          (el as HTMLElement | null)?.scrollIntoView({
-            block: 'nearest',
-            behavior: 'smooth',
-          });
-        });
-      }),
-    [setSidePanelOpen, ensurePanelOpen]
-  );
+  const reveal = (id: string) => {
+    setSidePanelOpen(true);
+    ensurePanelOpen(id);
+    // Defer scrolling until after the open state propagates and the
+    // panel content is mounted (requires the cursor to be set, which
+    // the caller should have done before requesting the reveal).
+    requestAnimationFrame(() => {
+      const el = wrapperRef.current?.querySelector(
+        `[data-cy-id="${CSS.escape(id)}"][data-cy="translation-panel"]`
+      );
+      (el as HTMLElement | null)?.scrollIntoView({
+        block: 'nearest',
+        behavior: 'smooth',
+      });
+    });
+  };
+
+  useEffect(() => {
+    // Two paths: (a) reveal arrived while listener was mounted → live
+    // event handler. (b) reveal arrived before ToolsPanel mounted
+    // (side panel was closed at click time) → stored as pending and
+    // consumed here on mount.
+    const pending = consumePendingPanelReveal();
+    if (pending) reveal(pending);
+    return onPanelRevealRequest(reveal);
+  }, []);
 
   const keyData = useMemo(() => {
     return translations?.find((t) => t.keyId === keyId);
