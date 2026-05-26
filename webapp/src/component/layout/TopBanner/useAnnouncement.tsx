@@ -181,6 +181,19 @@ export function useAnnouncement() {
           />
         );
 
+      case 'FEATURE_TRANSLATION_MEMORY_MANAGEMENT':
+        return (
+          <Announcement
+            content={
+              <T
+                keyName="announcement_translation_memory_management"
+                defaultValue="We've released Translation Memory management!"
+              />
+            }
+            link="https://docs.tolgee.io/platform/translation_process/managing_translation_memories"
+          />
+        );
+
       default:
         return assertUnreachableReturnNull(value);
     }
