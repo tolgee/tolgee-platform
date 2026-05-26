@@ -3,7 +3,6 @@ package io.tolgee.unit.formats.apple.`in`
 import io.tolgee.formats.apple.`in`.xliff.AppleXliffFileProcessor
 import io.tolgee.formats.xliff.`in`.parser.XliffParser
 import io.tolgee.testing.assert
-import io.tolgee.unit.formats.PlaceholderConversionTestHelper
 import io.tolgee.util.FileProcessorContextMockUtil
 import io.tolgee.util.XmlSecurity
 import io.tolgee.util.assertAllSame
@@ -372,40 +371,6 @@ class AppleXliffFormatProcessorTest {
     fileName: String = "cs.xliff",
   ) {
     mockUtil.mockIt("$languageTag.xliff", "src/test/resources/import/apple/$fileName")
-  }
-
-  @Test
-  fun `placeholder conversion setting application works`() {
-    PlaceholderConversionTestHelper.testFile(
-      "cs.xliff",
-      "src/test/resources/import/apple/params_everywhere_cs.xliff",
-      assertBeforeSettingsApplication =
-        listOf(
-          "{0, plural,\n" +
-            "zero {No dogs here {0} '{'icuParam'}'!}\n" +
-            "one {One dog is here {0} '{'icuParam'}'!}\n" +
-            "other {# dogs here {1} '{'icuParam'}'}\n" +
-            "}",
-          "Hi {0, number} '{'icuParam'}'",
-        ),
-      assertAfterDisablingConversion =
-        listOf(
-          "{value, plural,\n" +
-            "zero {No dogs here %@ '{'icuParam'}'!}\n" +
-            "one {One dog is here %@ '{'icuParam'}'!}\n" +
-            "other {%lld dogs here %@ '{'icuParam'}'}\n" +
-            "}",
-          "Hi %lld '{'icuParam'}'",
-        ),
-      assertAfterReEnablingConversion =
-        listOf(
-          "{0, plural,\n" +
-            "zero {No dogs here {0} '{'icuParam'}'!}\n" +
-            "one {One dog is here {0} '{'icuParam'}'!}\n" +
-            "other {# dogs here {1} '{'icuParam'}'}\n}",
-          "Hi {0, number} '{'icuParam'}'",
-        ),
-    )
   }
 
   private fun processFile() {

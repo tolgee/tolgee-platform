@@ -3,7 +3,6 @@ package io.tolgee.unit.formats.i18next.`in`
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.formats.json.`in`.JsonFileProcessor
 import io.tolgee.testing.assert
-import io.tolgee.unit.formats.PlaceholderConversionTestHelper
 import io.tolgee.util.FileProcessorContextMockUtil
 import io.tolgee.util.assertKey
 import io.tolgee.util.assertLanguagesCount
@@ -426,24 +425,23 @@ class I18nextFormatProcessorTest {
   }
 
   @Test
-  fun `placeholder conversion setting application works`() {
-    PlaceholderConversionTestHelper.testFile(
-      "en.json",
-      "src/test/resources/import/i18next/simple.json",
-      assertBeforeSettingsApplication =
+  fun `converts i18next placeholders`() {
+    val processor =
+      mockUtil.mockCoreProcessor(
+        fileName = "en.json",
+        resourcesFilePath = "src/test/resources/import/i18next/simple.json",
+      )
+    processor.processFiles(listOf(mockUtil.importFileDto))
+    mockUtil
+      .getSavedTranslations()
+      .map { it.text }
+      .assert
+      .isEqualTo(
         listOf(
           "'{{'value, currency'}}' this is i18next {count, number}",
           "'{{'value, currency'}}' this is i18next",
         ),
-      assertAfterDisablingConversion =
-        listOf(
-          "'{{'value, currency'}}' this is i18next '{{'count, number'}}'",
-        ),
-      assertAfterReEnablingConversion =
-        listOf(
-          "'{{'value, currency'}}' this is i18next {count, number}",
-        ),
-    )
+      )
   }
 
   private fun mockPlaceholderConversionTestFile(

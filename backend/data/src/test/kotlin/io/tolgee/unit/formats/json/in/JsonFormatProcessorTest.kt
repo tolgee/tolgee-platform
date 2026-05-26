@@ -6,7 +6,6 @@ import io.tolgee.dtos.request.SingleStepImportRequest
 import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.formats.json.`in`.JsonFileProcessor
 import io.tolgee.testing.assert
-import io.tolgee.unit.formats.PlaceholderConversionTestHelper
 import io.tolgee.util.FileProcessorContextMockUtil
 import io.tolgee.util.assertKey
 import io.tolgee.util.assertLanguagesCount
@@ -173,27 +172,6 @@ class JsonFormatProcessorTest {
   }
 
   @Test
-  fun `placeholder conversion setting application works`() {
-    PlaceholderConversionTestHelper.testFile(
-      "en.json",
-      "src/test/resources/import/json/java.json",
-      assertBeforeSettingsApplication =
-        listOf(
-          "%D this is java {1, number}",
-          "%D this is java",
-        ),
-      assertAfterDisablingConversion =
-        listOf(
-          "%D this is java %d",
-        ),
-      assertAfterReEnablingConversion =
-        listOf(
-          "%D this is java {1, number}",
-        ),
-    )
-  }
-
-  @Test
   fun `respects provided format`() {
     mockUtil.mockIt("en.json", "src/test/resources/import/json/icu.json")
     mockUtil.fileProcessorContext.params =
@@ -208,6 +186,26 @@ class JsonFormatProcessorTest {
         // it's escaped, because php cannot contain ICU
         hasText("'{'param'}'")
       }
+  }
+
+  @Test
+  fun `converts java-style placeholders in JSON`() {
+    val processor =
+      mockUtil.mockCoreProcessor(
+        fileName = "en.json",
+        resourcesFilePath = "src/test/resources/import/json/java.json",
+      )
+    processor.processFiles(listOf(mockUtil.importFileDto))
+    mockUtil
+      .getSavedTranslations()
+      .map { it.text }
+      .assert
+      .isEqualTo(
+        listOf(
+          "%D this is java {1, number}",
+          "%D this is java",
+        ),
+      )
   }
 
   private fun mockPlaceholderConversionTestFile(

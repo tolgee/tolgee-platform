@@ -22,17 +22,17 @@ class ImportSettingsControllerTest : ProjectAuthControllerTest("/v2/projects/") 
       "import-settings",
       mapOf(
         "overrideKeyDescriptions" to true,
-        "convertPlaceholdersToIcu" to false,
+        "createNewKeys" to false,
       ),
     ).andIsOk.andAssertThatJson {
       node("overrideKeyDescriptions").isBoolean.isTrue
-      node("convertPlaceholdersToIcu").isBoolean.isFalse
+      node("createNewKeys").isBoolean.isFalse
     }
 
     executeInNewTransaction {
       entityManager.getReference(ImportSettings::class.java, ImportSettingsId(userAccount!!.id, project.id)).apply {
         this.overrideKeyDescriptions.assert.isTrue()
-        this.convertPlaceholdersToIcu.assert.isFalse()
+        this.createNewKeys.assert.isFalse()
       }
     }
   }
@@ -44,7 +44,7 @@ class ImportSettingsControllerTest : ProjectAuthControllerTest("/v2/projects/") 
     testData.projectBuilder.setImportSettings {
       userAccount = testData.user
       overrideKeyDescriptions = true
-      convertPlaceholdersToIcu = false
+      createNewKeys = false
     }
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
@@ -54,7 +54,7 @@ class ImportSettingsControllerTest : ProjectAuthControllerTest("/v2/projects/") 
       "import-settings",
     ).andIsOk.andAssertThatJson {
       node("overrideKeyDescriptions").isBoolean.isTrue
-      node("convertPlaceholdersToIcu").isBoolean.isFalse
+      node("createNewKeys").isBoolean.isFalse
     }
   }
 }

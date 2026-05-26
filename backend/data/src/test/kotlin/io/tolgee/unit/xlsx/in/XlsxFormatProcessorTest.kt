@@ -2,7 +2,6 @@ package io.tolgee.unit.xlsx.`in`
 
 import io.tolgee.formats.xlsx.`in`.XlsxFileProcessor
 import io.tolgee.testing.assert
-import io.tolgee.unit.formats.PlaceholderConversionTestHelper
 import io.tolgee.util.FileProcessorContextMockUtil
 import io.tolgee.util.assertKey
 import io.tolgee.util.assertLanguagesCount
@@ -440,28 +439,25 @@ class XlsxFormatProcessorTest {
   }
 
   @Test
-  fun `placeholder conversion setting application works`() {
-    PlaceholderConversionTestHelper.testFile(
-      "import.xlsx",
-      "src/test/resources/import/xlsx/placeholder_conversion.xlsx",
-      assertBeforeSettingsApplication =
+  fun `converts placeholders in XLSX`() {
+    val processor =
+      mockUtil.mockCoreProcessor(
+        fileName = "import.xlsx",
+        resourcesFilePath = "src/test/resources/import/xlsx/placeholder_conversion.xlsx",
+      )
+    processor.processFiles(listOf(mockUtil.importFileDto))
+    mockUtil
+      .getSavedTranslations()
+      .map { it.text }
+      .assert
+      .isEqualTo(
         listOf(
           "this is xlsx {0, number}",
           "this is xlsx",
           "toto je xlsx {0, number}",
           "toto je xlsx",
         ),
-      assertAfterDisablingConversion =
-        listOf(
-          "this is xlsx %d",
-          "toto je xlsx %d",
-        ),
-      assertAfterReEnablingConversion =
-        listOf(
-          "this is xlsx {0, number}",
-          "toto je xlsx {0, number}",
-        ),
-    )
+      )
   }
 
   private fun mockPlaceholderConversionTestFile(

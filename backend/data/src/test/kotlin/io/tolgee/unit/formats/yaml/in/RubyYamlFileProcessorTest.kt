@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import io.tolgee.formats.yaml.`in`.YamlFileProcessor
 import io.tolgee.testing.assert
-import io.tolgee.unit.formats.PlaceholderConversionTestHelper
 import io.tolgee.util.FileProcessorContextMockUtil
 import io.tolgee.util.assertKey
 import io.tolgee.util.assertLanguagesCount
@@ -153,36 +152,6 @@ class RubyYamlFileProcessorTest {
       "src/test/resources/import/yaml/ruby.yaml",
       convertPlaceholders,
       projectIcuPlaceholdersEnabled,
-    )
-  }
-
-  @Test
-  fun `placeholder conversion setting application works`() {
-    PlaceholderConversionTestHelper.testFile(
-      "en.yml",
-      "src/test/resources/import/yaml/ruby.yaml",
-      assertBeforeSettingsApplication =
-        listOf(
-          "{count, plural,\none {# relace}\nfew {# relace}\nmany {# relace}\nother {# relací}\n}",
-          "Upravit redakci {count, number}",
-          "Seznam oprav {0, number} {1} {2, number, .00}",
-          "Toto je text s parametry: {param1} a {param2}",
-        ),
-      assertAfterDisablingConversion =
-        listOf(
-          "{value, plural,\none {%'{'count'}' relace}\nfew {%'{'count'}' relace}\nmany {%'{'count'}' relace}\n" +
-            "other {%'{'count'}' relací}\n}",
-          "Upravit redakci %<count>d",
-          "Seznam oprav %d %s %.2f",
-          "Toto je text s parametry: %'{'param1'}' a %'{'param2'}'",
-        ),
-      assertAfterReEnablingConversion =
-        listOf(
-          "{count, plural,\none {# relace}\nfew {# relace}\nmany {# relace}\nother {# relací}\n}",
-          "Upravit redakci {count, number}",
-          "Seznam oprav {0, number} {1} {2, number, .00}",
-          "Toto je text s parametry: {param1} a {param2}",
-        ),
     )
   }
 
