@@ -1,10 +1,8 @@
 package io.tolgee.batch.processors
 
 import io.tolgee.batch.JobCharacter
-import io.tolgee.batch.ProgressManager
 import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.batch.request.QaCheckRequest
-import io.tolgee.service.qa.QaCheckBatchService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
@@ -12,8 +10,9 @@ import org.mockito.kotlin.mock
 class QaCheckChunkProcessorTest {
   private val processor =
     QaCheckChunkProcessor(
-      qaCheckBatchService = mock<QaCheckBatchService>(),
-      progressManager = mock<ProgressManager>(),
+      qaCheckBatchService = mock(),
+      progressManager = mock(),
+      objectMapper = mock(),
     )
 
   private fun request(targetSize: Int): QaCheckRequest =
