@@ -158,7 +158,6 @@ class AppManifestFetcher(
     manifest.modules.bulkAction?.forEach { triggerAction("bulk-action", it.key, it.type, it.urlTemplate, it.modalKey, modalKeys) }
     manifest.modules.translationsToolbarAction?.forEach { triggerAction("translations-toolbar-action", it.key, it.type, it.urlTemplate, it.modalKey, modalKeys) }
     manifest.modules.projectMenuAction?.forEach { triggerAction("project-menu-action", it.key, it.type, it.urlTemplate, it.modalKey, modalKeys) }
-    manifest.modules.keyEditFooterAction?.forEach { triggerAction("key-edit-footer-action", it.key, it.type, it.urlTemplate, it.modalKey, modalKeys) }
     manifest.modules.shortcut?.forEach { shortcut ->
       if (shortcut.combination.isBlank()) {
         throw BadRequestException(
@@ -208,8 +207,8 @@ class AppManifestFetcher(
 
   /**
    * Validates a trigger action (bulk-action, translations-toolbar-action,
-   * project-menu-action, key-edit-footer-action, shortcut). Trigger actions
-   * support only `link` and `modal` types.
+   * project-menu-action, shortcut). Trigger actions support only `link` and
+   * `modal` types.
    */
   private fun triggerAction(
     location: String,

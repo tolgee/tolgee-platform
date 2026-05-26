@@ -248,7 +248,6 @@ The `icon` field on every module accepts either an emoji (e.g. `"⚙️"`) or a 
 | `modules.bulk-action[]` | array | Items appended to the bulk-actions bar (visible when ≥1 keys selected). Each item has `key`, `title`, `icon?`, `type: link \| modal`, and either `urlTemplate` or `modalKey`. The modal iframe additionally receives `selectedKeyIds`. |
 | `modules.translations-toolbar-action[]` | array | Items appended to the translations view toolbar (next to +KEY). Same shape as bulk-action. |
 | `modules.project-menu-action[]` | array | Sidebar entries that don't navigate to a route — clicking opens a modal (or external link). Same shape. |
-| `modules.key-edit-footer-action[]` | array | Buttons appended to the key-edit dialog footer. Modal iframes also receive `keyId`. |
 | `modules.shortcut[]` | array | Global keyboard shortcut registry. Each entry has `key`, `combination` (mousetrap-style, e.g. `Mod+Shift+E`), `type: link \| modal`, and either `urlTemplate` or `modalKey`. `Mod` resolves to ⌘ on macOS and Ctrl elsewhere. |
 
 Later scopes will extend `modules` with additional types (`editor-right-panel`, `translation-decorator`, `custom-mt`, `modal`, …) and add top-level fields (`backendBaseUrl`, optionally `assets` when ZIP delivery lands).
@@ -418,7 +417,6 @@ A `modal` module defines the iframe content; the trigger module determines **whe
 | `bulk-action` | Bulk-actions bar (visible when ≥1 keys selected). | `selectedKeyIds: number[]` |
 | `translations-toolbar-action` | Top of the translations view, next to the +KEY button. | (project context only) |
 | `project-menu-action` | Project sidebar — sits alongside `project-dashboard-page` entries but opens a modal instead of routing. | (project context only) |
-| `key-edit-footer-action` | Footer of the key-edit dialog, next to Cancel/Save. | `keyId` |
 | `shortcut` | Global keyboard shortcut bound in the translations view. | The currently-focused selection if any, else project context only. |
 
 #### Modal lifecycle

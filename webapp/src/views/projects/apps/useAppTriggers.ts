@@ -20,7 +20,6 @@ export type TriggerModuleKey =
   | 'bulk-action'
   | 'translations-toolbar-action'
   | 'project-menu-action'
-  | 'key-edit-footer-action'
   | 'shortcut';
 
 type AnyTriggerItem = {
