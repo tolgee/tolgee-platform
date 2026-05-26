@@ -1,3 +1,15 @@
+# [3.191.0](https://github.com/tolgee/tolgee-platform/compare/v3.190.6...v3.191.0) (2026-05-26)
+
+
+### Bug Fixes
+
+* translation memory UI issues ([#3688](https://github.com/tolgee/tolgee-platform/issues/3688)) ([7a85203](https://github.com/tolgee/tolgee-platform/commit/7a85203852b3f5b7a4a9ad4eb02206283aacc3de))
+
+
+### Features
+
+* rework QA filter to support per-type + per-language scoping ([#3667](https://github.com/tolgee/tolgee-platform/issues/3667)) ([d492bb4](https://github.com/tolgee/tolgee-platform/commit/d492bb405c228d0c4fb8df919e3de9c4844b93b7))
+
 ## [3.190.6](https://github.com/tolgee/tolgee-platform/compare/v3.190.5...v3.190.6) (2026-05-26)
 
 
