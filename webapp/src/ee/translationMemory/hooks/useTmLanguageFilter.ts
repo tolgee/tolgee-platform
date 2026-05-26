@@ -76,10 +76,6 @@ export function useTmLanguageFilter({
     }
   };
 
-  // One-time seed of the persisted selection from the first page of entries. The single
-  // caller guards on `selectedLanguages === undefined`, so this only runs when nothing is
-  // stored yet and never overrides a saved or user-edited choice. The seed is persisted so
-  // every later visit reuses it as-is rather than re-deriving from the entries.
   const seedAutoDefault = useCallback(
     (entryLanguageTags: string[]) => {
       const langs = entryLanguageTags.filter((t) => t !== sourceLanguageTag);

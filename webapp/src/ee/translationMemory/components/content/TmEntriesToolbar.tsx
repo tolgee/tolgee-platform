@@ -39,7 +39,7 @@ type Props = {
   onLayoutChange: (layout: EntryRowLayout) => void;
   languages: OrganizationLanguageModel[] | undefined;
   languagesLoadable: LanguagesLoadable;
-  selectedLanguages: string[] | undefined;
+  selectedLanguages: string[];
   langSearch: string;
   onLangSearchChange: (s: string) => void;
   onFetchMoreLanguages: () => void;
@@ -84,7 +84,7 @@ export const TmEntriesToolbar: React.VFC<Props> = ({
   const { t } = useTranslate();
   const renderLangItem = (props: object, item: OrganizationLanguageModel) => {
     const isBase = item.tag === sourceLanguageTag;
-    const selected = isBase || (selectedLanguages?.includes(item.tag) ?? false);
+    const selected = isBase || selectedLanguages.includes(item.tag);
     return (
       <MultiselectItem
         {...props}
@@ -168,7 +168,7 @@ export const TmEntriesToolbar: React.VFC<Props> = ({
             <Box data-cy="tm-entries-language-filter" sx={{ width: 250 }}>
               <InfiniteMultiSearchSelect
                 items={languages}
-                selected={selectedLanguages ?? []}
+                selected={selectedLanguages}
                 queryResult={languagesLoadable}
                 itemKey={(item) => item.tag}
                 search={langSearch}

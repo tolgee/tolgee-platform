@@ -116,8 +116,6 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
     return [...tags];
   }, [entries.data]);
 
-  // One-time seed: when nothing is stored for this TM, set the selection from the first
-  // page's languages and persist it.
   useLayoutEffect(() => {
     if (
       selectedLanguages === undefined &&
@@ -178,8 +176,6 @@ export const TranslationMemoryEntriesList: React.VFC<Props> = ({
         editingLang={editingLangForRow}
         canManage={canManage}
         layout={layout}
-        // Passed for every row — the row itself renders a real checkbox for editable
-        // rows and a disabled one (with tooltip) for virtual rows.
         selectionService={selectionService}
         groupId={groupId}
         onEditStart={(langTag) => setEditingCell(`${rowKey}|||${langTag}`)}

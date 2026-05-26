@@ -79,7 +79,13 @@ export const BaseLanguageSelect: React.VFC<Props> = ({
   const [field, meta] = useField(name);
   const value = field.value as SelectedLanguageModel | undefined;
 
+  // meta.error shape depends on which Yup rule fired:
+  //   - object-level `.required()` (field cleared / undefined) → string
+  //   - shape `{ tag: ... }` validation → { tag: string }
+  //   - localized message → ReactElement
   const error = React.isValidElement(meta.error)
+    ? meta.error
+    : typeof meta.error === 'string'
     ? meta.error
     : (meta.error as any)?.tag;
 

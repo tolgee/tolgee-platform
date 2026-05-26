@@ -48,10 +48,8 @@ export const TmEntriesListHeader: React.VFC<Props> = ({
           checked={selectionService.isAllSelected}
           indeterminate={selectionService.isSomeSelected}
           disabled={selectionService.isLoading}
-          // `toggleSelectAll` keys off `isAllSelected`, which can never be true here:
-          // `totalCount` counts virtual rows but only stored entries are selectable, so the
-          // selected count never reaches it. Toggle on "anything selected" instead — a click
-          // clears the selection when something is selected, otherwise selects all.
+          // Not `toggleSelectAll`: virtual rows inflate `totalCount`, so `isAllSelected`
+          // never flips on and toggle would always re-select.
           onChange={() =>
             selectionService.isAnySelected
               ? selectionService.unselectAll()
@@ -76,7 +74,7 @@ export const TmEntriesListHeader: React.VFC<Props> = ({
         label={
           <T keyName="translation_memory_header_base" defaultValue="Base" />
         }
-      ></DefaultChip>
+      />
     </StyledDataCell>
     {displayLanguages.map((tag) => {
       const info = languageInfo[tag];
