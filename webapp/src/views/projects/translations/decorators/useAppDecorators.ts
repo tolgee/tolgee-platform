@@ -80,7 +80,6 @@ async function fetchInstallToken(
       {
         method: 'POST',
         headers,
-        credentials: 'include',
       }
     );
     if (!res.ok) throw new Error(`mint-token failed: ${res.status}`);
