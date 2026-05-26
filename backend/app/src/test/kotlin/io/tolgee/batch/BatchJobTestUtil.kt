@@ -320,6 +320,7 @@ class BatchJobTestUtil(
       any(),
       any(),
       any(),
+      any(),
     )
   }
 
