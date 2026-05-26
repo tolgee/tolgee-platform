@@ -39,6 +39,7 @@ import {
   useAppTriggerDispatch,
   useAppTriggers,
 } from '../../apps/useAppTriggers';
+import { AppIcon } from '../../apps/AppIcon';
 
 import {
   useTranslationsActions,
@@ -353,9 +354,11 @@ const TranslationsToolbarAppActionsCompact = () => {
               dispatch(trigger, { templateVars: { projectId: project.id } })
             }
           >
-            <span style={{ fontSize: '1.1em', lineHeight: 1 }}>
-              {trigger.item.icon ?? '🔘'}
-            </span>
+            <AppIcon
+              icon={trigger.item.icon ?? '🔘'}
+              size={20}
+              fontSize="1.1em"
+            />
           </IconButton>
         </Tooltip>
       ))}

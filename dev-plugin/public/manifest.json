@@ -27,7 +27,7 @@
       {
         "key": "activity",
         "title": "Activity",
-        "icon": "📈",
+        "icon": "BarChart01",
         "entry": "/tools-panel"
       }
     ],
@@ -35,7 +35,7 @@
       {
         "key": "audit",
         "title": "Audit",
-        "icon": "🛡️",
+        "icon": "Shield01",
         "entry": "/key-edit-tab/audit"
       }
     ],
@@ -43,7 +43,7 @@
       {
         "key": "view-source",
         "type": "link",
-        "icon": "🔗",
+        "icon": "Link04",
         "tooltip": "View source",
         "urlTemplate": "https://example.com/source/{keyName}",
         "visibility": "on-hover"
@@ -51,7 +51,7 @@
       {
         "key": "open-audit",
         "type": "tab",
-        "icon": "🛡️",
+        "icon": "Shield01",
         "tooltip": "Audit info",
         "dynamic": true,
         "tabKey": "audit"
@@ -61,7 +61,7 @@
       {
         "key": "show-activity",
         "type": "panel",
-        "icon": "📈",
+        "icon": "BarChart01",
         "tooltip": "Show activity",
         "dynamic": true,
         "panelKey": "activity",
@@ -72,7 +72,7 @@
       {
         "key": "explain",
         "title": "Explain this key",
-        "icon": "💡",
+        "icon": "Lightbulb01",
         "entry": "/modal/explain",
         "width": 600,
         "height": 360
@@ -82,7 +82,7 @@
       {
         "key": "bulk-explain",
         "title": "Explain selection",
-        "icon": "🎯",
+        "icon": "Target01",
         "type": "modal",
         "modalKey": "explain"
       }
@@ -91,7 +91,7 @@
       {
         "key": "toolbar-explain",
         "title": "Explain view",
-        "icon": "⬇️",
+        "icon": "Download01",
         "type": "modal",
         "modalKey": "explain"
       }
@@ -100,7 +100,7 @@
       {
         "key": "menu-explain",
         "title": "Configure",
-        "icon": "⚙️",
+        "icon": "Settings01",
         "type": "modal",
         "modalKey": "explain"
       }
@@ -109,7 +109,7 @@
       {
         "key": "footer-explain",
         "title": "Translate with AI",
-        "icon": "🤖",
+        "icon": "Robot",
         "type": "modal",
         "modalKey": "explain"
       }

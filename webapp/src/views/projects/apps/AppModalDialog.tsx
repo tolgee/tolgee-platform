@@ -9,12 +9,14 @@ import { XClose } from '@untitled-ui/icons-react';
 
 import { useProject } from 'tg.hooks/useProject';
 import { useAppIframeMessaging } from '../translations/decorators/useAppIframeMessaging';
+import { AppIcon } from './AppIcon';
 
 export type AppModalRequest = {
   installId: number;
   baseUrl: string;
   entry: string;
   title: string;
+  icon?: string | null;
   width?: number;
   height?: number;
   extraInitPayload?: Record<string, unknown>;
@@ -90,7 +92,10 @@ export const AppModalDialog = ({ request, onClose }: Props) => {
       }}
     >
       <StyledTitle>
-        <span>{request.title}</span>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+          <AppIcon icon={request.icon} size={20} />
+          {request.title}
+        </span>
         <IconButton size="small" onClick={onClose} aria-label="close">
           <XClose />
         </IconButton>

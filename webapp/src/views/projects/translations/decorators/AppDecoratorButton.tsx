@@ -6,6 +6,7 @@ import { useTranslationsActions } from '../context/TranslationsContext';
 import { ResolvedDecorator } from './useAppDecorators';
 import { requestPanelReveal } from './panelRevealEvent';
 import { requestKeyDialogOpen } from './keyDialogEvent';
+import { AppIcon } from '../../apps/AppIcon';
 
 const StyledBadge = styled(Badge)`
   & .MuiBadge-badge {
@@ -53,7 +54,7 @@ export const AppDecoratorButton = ({
   const showBadge = typeof decorator.count === 'number' && decorator.count > 0;
 
   const iconNode = (
-    <span style={{ fontSize: '1.05em', lineHeight: 1 }}>{decorator.icon}</span>
+    <AppIcon icon={decorator.icon} size={18} fontSize="1.05em" />
   );
 
   return (
