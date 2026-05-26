@@ -7,6 +7,7 @@ import io.tolgee.component.PreferredOrganizationFacade
 import io.tolgee.hateoas.auth.AuthInfoModelAssembler
 import io.tolgee.hateoas.initialData.InitialDataEeSubscriptionModel
 import io.tolgee.hateoas.initialData.InitialDataModel
+import io.tolgee.hateoas.qa.QaCheckCategoryModelAssembler
 import io.tolgee.hateoas.sso.PublicSsoTenantModelAssembler
 import io.tolgee.hateoas.userAccount.PrivateUserAccountModelAssembler
 import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
@@ -37,6 +38,7 @@ class InitialDataController(
   private val authInfoModelAssembler: AuthInfoModelAssembler,
   private val privateUserAccountModelAssembler: PrivateUserAccountModelAssembler,
   private val publicSsoTenantModelAssembler: PublicSsoTenantModelAssembler,
+  private val qaCheckCategoryModelAssembler: QaCheckCategoryModelAssembler,
   private val eeSubscriptionProvider: EeSubscriptionProvider?,
 ) : IController {
   @GetMapping(value = [""])
@@ -45,6 +47,7 @@ class InitialDataController(
     val data =
       InitialDataModel(
         serverConfiguration = configurationController.getPublicConfiguration(),
+        qaCheckCategories = qaCheckCategoryModelAssembler.toModelsForAllCategories(),
       )
 
     val userAccount = authenticationFacade.authenticatedUserOrNull

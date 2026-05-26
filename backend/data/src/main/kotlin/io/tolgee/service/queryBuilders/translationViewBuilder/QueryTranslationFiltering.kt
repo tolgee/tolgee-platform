@@ -2,6 +2,7 @@ package io.tolgee.service.queryBuilders.translationViewBuilder
 
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.request.translation.TranslationFilterByLabel
+import io.tolgee.dtos.request.translation.TranslationFilterByQaCheckType
 import io.tolgee.dtos.request.translation.TranslationFilterByState
 import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.model.Language_
@@ -62,7 +63,7 @@ class QueryTranslationFiltering(
     if (byStateMap.isEmpty()) return
     val perLanguage =
       byStateMap.mapNotNull { (tag, states) ->
-        val language = queryBase.languages.find { it.tag == tag } ?: return@mapNotNull null
+        val language = languageByTag(tag) ?: return@mapNotNull null
         language to states.toSet()
       }
     val predicate = stateFilterBuilder.build(perLanguage) ?: return
@@ -80,7 +81,7 @@ class QueryTranslationFiltering(
   /** `filterUntranslatedInLang` — single-language `NOT EXISTS` of a non-empty row. */
   fun applyUntranslatedInLangFilter() {
     val tag = params.filterUntranslatedInLang ?: return
-    val language = queryBase.languages.find { it.tag == tag } ?: return
+    val language = languageByTag(tag) ?: return
     queryBase.translationConditions.add(
       cb.not(
         buildTranslationExists(listOf(language.id)) { t ->
@@ -93,7 +94,7 @@ class QueryTranslationFiltering(
   /** `filterTranslatedInLang` — single-language `EXISTS` of a non-empty row. */
   fun applyTranslatedInLangFilter() {
     val tag = params.filterTranslatedInLang ?: return
-    val language = queryBase.languages.find { it.tag == tag } ?: return
+    val language = languageByTag(tag) ?: return
     queryBase.translationConditions.add(
       buildTranslationExists(listOf(language.id)) { t ->
         cb.and(cb.isNotNull(t.get(Translation_.text)), cb.notEqual(t.get(Translation_.text), ""))
@@ -128,7 +129,7 @@ class QueryTranslationFiltering(
     if (langs.isEmpty()) return
     val perLangPredicates =
       langs.mapNotNull { tag ->
-        val language = queryBase.languages.find { it.tag == tag } ?: return@mapNotNull null
+        val language = languageByTag(tag) ?: return@mapNotNull null
         cb.not(buildActiveSuggestionExists(listOf(language.id)))
       }
     if (perLangPredicates.isEmpty()) return
@@ -145,7 +146,7 @@ class QueryTranslationFiltering(
     val perLangPredicates =
       map.mapNotNull { (tag, labelIds) ->
         if (labelIds.isEmpty()) return@mapNotNull null
-        val language = queryBase.languages.find { it.tag == tag } ?: return@mapNotNull null
+        val language = languageByTag(tag) ?: return@mapNotNull null
         buildLabelExists(language, labelIds.map { it.labelId })
       }
     if (perLangPredicates.isEmpty()) return
@@ -160,11 +161,16 @@ class QueryTranslationFiltering(
     if (hasIssuesLangIds != null) {
       queryBase.translationConditions.add(buildQaIssueExists(hasIssuesLangIds, checkTypes = null))
     }
-    val checkTypes = params.filterQaCheckType?.takeIf { it.isNotEmpty() }
-    if (checkTypes != null) {
-      val allLangIds = queryBase.languages.map { it.id }
-      if (allLangIds.isNotEmpty()) {
-        queryBase.translationConditions.add(buildQaIssueExists(allLangIds, checkTypes = checkTypes))
+    val checkTypeMap = filterByQaCheckTypeMap
+    if (checkTypeMap != null && checkTypeMap.isNotEmpty()) {
+      val perLangPredicates =
+        checkTypeMap.mapNotNull { (tag, types) ->
+          if (types.isEmpty()) return@mapNotNull null
+          val language = languageByTag(tag) ?: return@mapNotNull null
+          buildQaIssueExists(listOf(language.id), checkTypes = types.toList())
+        }
+      if (perLangPredicates.isNotEmpty()) {
+        queryBase.translationConditions.add(cb.or(*perLangPredicates.toTypedArray()))
       }
     }
     val staleLangIds = languageIdsForTags(params.filterQaChecksStaleInLang)
@@ -356,9 +362,11 @@ class QueryTranslationFiltering(
 
   // ─── parsed-filter caches ───────────────────────────────────────────────
 
+  private fun languageByTag(tag: String): LanguageDto? = queryBase.languages.find { it.tag == tag }
+
   private fun languageIdsForTags(tags: List<String>?): List<Long>? {
     if (tags.isNullOrEmpty()) return null
-    val ids = tags.mapNotNull { tag -> queryBase.languages.find { it.tag == tag }?.id }
+    val ids = tags.mapNotNull { tag -> languageByTag(tag)?.id }
     return ids.takeIf { it.isNotEmpty() }
   }
 
@@ -372,6 +380,14 @@ class QueryTranslationFiltering(
         }
         return@lazy map
       }
+  }
+
+  private val filterByQaCheckTypeMap: Map<String, Set<QaCheckType>>? by lazy {
+    params.filterQaCheckType
+      ?.takeIf { it.isNotEmpty() }
+      ?.let { TranslationFilterByQaCheckType.parseList(it) }
+      ?.groupBy({ it.languageTag }, { it.checkType })
+      ?.mapValues { (_, types) -> types.toSet() }
   }
 
   private val filterByLabelMap: Map<String, List<TranslationFilterByLabel>>? by lazy {

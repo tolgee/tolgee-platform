@@ -5,6 +5,7 @@ import io.tolgee.constants.Feature
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.development.QaTestData
 import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.testing.AuthorizedControllerTest
 import net.javacrumbs.jsonunit.assertj.assertThatJson
@@ -57,9 +58,9 @@ class QaTranslationFilterTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `filterQaCheckType matches keys with that check type in OPEN state`() {
+  fun `filterQaCheckType matches keys with that check type in OPEN state in the requested language`() {
     performAuthGet(
-      "$translationsUrl?filterQaCheckType=PUNCTUATION_MISMATCH",
+      "$translationsUrl?filterQaCheckType=fr,PUNCTUATION_MISMATCH",
     ).andIsOk.andAssertThatJson {
       node("_embedded.keys").isArray.hasSize(1)
       node("_embedded.keys[0].keyName").isEqualTo("key-with-issues")
@@ -67,20 +68,64 @@ class QaTranslationFilterTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `filterQaCheckType supports multiple check types (OR semantics)`() {
+  fun `filterQaCheckType does not match issues in other languages`() {
     performAuthGet(
-      "$translationsUrl?filterQaCheckType=PUNCTUATION_MISMATCH&filterQaCheckType=CHARACTER_CASE_MISMATCH",
+      "$translationsUrl?filterQaCheckType=en,PUNCTUATION_MISMATCH",
+    ).andIsOk.andAssertThatJson {
+      node("page.totalElements").isEqualTo(0)
+    }
+  }
+
+  @Test
+  fun `filterQaCheckType supports multiple check types in same language (OR semantics)`() {
+    performAuthGet(
+      "$translationsUrl?filterQaCheckType=fr,PUNCTUATION_MISMATCH&filterQaCheckType=fr,CHARACTER_CASE_MISMATCH",
     ).andIsOk.andAssertThatJson {
       node("_embedded.keys").isArray.hasSize(1)
       node("_embedded.keys[0].keyName").isEqualTo("key-with-issues")
+    }
+  }
+
+  @Test
+  fun `filterQaCheckType OR-combines across languages`() {
+    performAuthGet(
+      "$translationsUrl?languages=en&languages=fr&languages=de" +
+        "&filterQaCheckType=fr,PUNCTUATION_MISMATCH&filterQaCheckType=de,SPACES_MISMATCH",
+    ).andIsOk.andAssertThatJson {
+      node("_embedded.keys").isArray.hasSize(2)
+      node("_embedded.keys").isArray.anySatisfy {
+        assertThatJson(it).node("keyName").isEqualTo("key-with-issues")
+      }
+      node("_embedded.keys").isArray.anySatisfy {
+        assertThatJson(it).node("keyName").isEqualTo("key-with-de-issues")
+      }
+    }
+  }
+
+  @Test
+  fun `filterQaCheckType silently drops entries for languages not in the returned set`() {
+    performAuthGet(
+      "$translationsUrl?filterQaCheckType=de,SPACES_MISMATCH",
+    ).andIsOk.andAssertThatJson {
+      node("page.totalElements").isEqualTo(7)
+    }
+  }
+
+  @Test
+  fun `filterQaCheckType returns 400 when value is malformed`() {
+    performAuthGet(
+      "$translationsUrl?filterQaCheckType=fr,NOT_A_REAL_TYPE",
+    ).andIsBadRequest.andAssertThatJson {
+      node("code").isEqualTo("filter_by_value_qa_check_type_not_valid")
     }
   }
 
   @Test
   fun `returns all translations when no QA filter`() {
     performAuthGet(translationsUrl).andIsOk.andAssertThatJson {
-      // test-key, key-without-fr-translation, fresh-fr-key, stale-fr-key, key-with-issues, ignored-only-key
-      node("_embedded.keys").isArray.hasSize(6)
+      // test-key, key-without-fr-translation, fresh-fr-key, stale-fr-key, key-with-issues,
+      // ignored-only-key, key-with-de-issues
+      node("_embedded.keys").isArray.hasSize(7)
     }
   }
 
@@ -132,7 +177,7 @@ class QaTranslationFilterTest : AuthorizedControllerTest() {
     performAuthGet("$translationsUrl?filterQaChecksStaleInLang=fr").andIsOk.andAssertThatJson {
       // Filter is gated by qaEnabled — when QA is off, the param is ignored and all
       // keys are returned.
-      node("page.totalElements").isEqualTo(6)
+      node("page.totalElements").isEqualTo(7)
     }
   }
 }

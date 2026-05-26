@@ -47,6 +47,8 @@ class QaTestData(
 
   lateinit var germanLanguage: Language
 
+  lateinit var keyWithDeIssues: Key
+
   init {
     project.useQaChecks = true
     projectBuilder.build {
@@ -128,6 +130,24 @@ class QaTestData(
           name = "German"
           tag = "de"
           originalName = "Deutsch"
+        }.self
+      keyWithDeIssues =
+        addKey {
+          name = "key-with-de-issues"
+        }.build {
+          addTranslation("en", "Hello world.").also { it.self.qaChecksStale = false }
+          addTranslation("de", " Hallo Welt.")
+            .also { it.self.qaChecksStale = false }
+            .build {
+              addQaIssue {
+                type = QaCheckType.SPACES_MISMATCH
+                message = QaIssueMessage.QA_SPACES_LEADING_ADDED
+                state = QaIssueState.OPEN
+                positionStart = 0
+                positionEnd = 1
+                replacement = ""
+              }
+            }
         }.self
       if (includeDefaultQaConfig) {
         setQaConfig {

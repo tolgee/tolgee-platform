@@ -11,14 +11,13 @@ import { Link, useHistory } from 'react-router-dom';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
+import { useQaCheckTypes } from 'tg.globalContext/helpers';
 import { getProjectTranslationsUrl, LINKS, PARAMS } from 'tg.constants/links';
 import { QaCheck } from 'tg.component/CustomIcons';
 import { CircledLanguageIcon } from 'tg.component/languages/CircledLanguageIcon';
 import { QaLanguageStatsProps } from '../../../eeSetup/EeModuleType';
 import { IssueRow } from './IssueRow';
-import { components } from 'tg.service/apiSchema.generated';
-
-type QaCheckType = components['schemas']['QaIssueModel']['type'];
+import { QaCheckType } from 'tg.service/apiSchemaTypes';
 
 const StyledContent = styled(Box)`
   display: flex;
@@ -54,6 +53,7 @@ export const QaLanguageStats = ({
   const { t } = useTranslate();
   const project = useProject();
   const history = useHistory();
+  const allQaCheckTypes = useQaCheckTypes();
   const languages = useProjectLanguages();
   const baseLanguageTag = languages.find((l) => l.base)?.tag;
   const currentLanguage = languages.find((l) => l.id === languageId);
@@ -137,7 +137,9 @@ export const QaLanguageStats = ({
           variant="outlined"
           color="primary"
           size="small"
-          onClick={() => navigateToTranslations({ filterHasQaIssues: true })}
+          onClick={() =>
+            navigateToTranslations({ filterQaCheckTypes: allQaCheckTypes })
+          }
         >
           {t('qa_dashboard_popover_show_all')}
         </Button>

@@ -91,17 +91,10 @@ export const useTranslationFilters = ({
           filterHasComments: true,
           filterHasUnresolvedComments: undefined,
         });
-      case 'filterHasQaIssues':
-        return setFilters({
-          ...filters,
-          filterHasQaIssues: true,
-          filterQaCheckTypes: undefined,
-        });
       case 'filterQaCheckTypes':
         return setFilters({
           ...filters,
           filterQaCheckTypes: add(filters.filterQaCheckTypes, value),
-          filterHasQaIssues: undefined,
         });
       case 'filterQaChecksStale':
         return setFilters({
@@ -183,12 +176,6 @@ export const useTranslationFilters = ({
           ...filters,
           filterHasComments: undefined,
         });
-      case 'filterHasQaIssues':
-        return setFilters({
-          ...filters,
-          filterHasQaIssues: undefined,
-          filterQaCheckTypes: undefined,
-        });
       case 'filterQaCheckTypes':
         return setFilters({
           ...filters,
@@ -232,7 +219,6 @@ export const useTranslationFilters = ({
     filterHasScreenshot: filters.filterHasScreenshot,
     filterHasNoScreenshot: filters.filterHasNoScreenshot,
     filterDeletedByUserId: filters.filterDeletedByUserId,
-    filterQaCheckType: filters.filterQaCheckTypes,
   };
 
   // filters dependant on selected languages
@@ -250,19 +236,33 @@ export const useTranslationFilters = ({
           tag
         );
       }
-      if (filters.filterHasQaIssues) {
-        filtersQuery.filterHasQaIssuesInLang = add(
-          filtersQuery.filterHasQaIssuesInLang,
-          tag
-        );
-      }
-      if (filters.filterQaChecksStale) {
-        filtersQuery.filterQaChecksStaleInLang = add(
-          filtersQuery.filterQaChecksStaleInLang,
-          tag
-        );
-      }
     });
+
+    selectedLanguages
+      .filter((tag) => {
+        switch (filters.filterQaCheckTypeLanguage) {
+          case undefined:
+            return true;
+          case false:
+            return tag !== baseLang;
+          default:
+            return tag === filters.filterQaCheckTypeLanguage;
+        }
+      })
+      .forEach((tag) => {
+        if (filters.filterQaChecksStale) {
+          filtersQuery.filterQaChecksStaleInLang = add(
+            filtersQuery.filterQaChecksStaleInLang,
+            tag
+          );
+        }
+        filters.filterQaCheckTypes?.forEach((type) => {
+          filtersQuery.filterQaCheckType = add(
+            filtersQuery.filterQaCheckType,
+            `${tag},${type}`
+          );
+        });
+      });
     selectedLanguages
       .filter((tag) => {
         switch (filters.filterTranslationLanguage) {

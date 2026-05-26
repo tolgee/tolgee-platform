@@ -1,7 +1,5 @@
-import { components } from 'tg.service/apiSchema.generated';
+import { QaCheckType } from 'tg.service/apiSchemaTypes';
 import { DOCS_LINKS } from 'tg.constants/docLinks';
-
-type QaCheckType = components['schemas']['QaIssueModel']['type'];
 
 export function getQaCheckTypeDocLink(type: QaCheckType): string | null {
   switch (type) {

@@ -1,7 +1,5 @@
 import { useTranslate } from '@tolgee/react';
-import { components } from 'tg.service/apiSchema.generated';
-
-type QaCheckType = components['schemas']['QaIssueModel']['type'];
+import { QaCheckType } from 'tg.service/apiSchemaTypes';
 
 export function useQaCheckTypeTooltip(type: QaCheckType): string | null {
   const { t } = useTranslate();

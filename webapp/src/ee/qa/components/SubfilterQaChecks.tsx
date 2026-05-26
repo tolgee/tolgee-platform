@@ -1,42 +1,42 @@
 import { useRef, useState } from 'react';
 import { T, useTranslate } from '@tolgee/react';
-import { Divider, Menu } from '@mui/material';
+import { Box, Divider, Menu, MenuItem } from '@mui/material';
+import { ChevronDown, ChevronUp } from '@untitled-ui/icons-react';
 
 import { SubmenuItem } from 'tg.component/SubmenuItem';
+import { CompactListSubheader } from 'tg.component/ListComponents';
 import { FiltersInternal } from 'tg.views/projects/translations/TranslationFilters/tools';
 import { FilterItem } from 'tg.views/projects/translations/TranslationFilters/FilterItem';
 import { SubfilterQaChecksProps } from '../../../eeSetup/EeModuleType';
-import { useApiQuery } from 'tg.service/http/useQueryApi';
-import { components } from 'tg.service/apiSchema.generated';
+import { QaCheckType } from 'tg.service/apiSchemaTypes';
+import { useQaCategories, useQaCheckTypes } from 'tg.globalContext/helpers';
 import { CheckTypeFilterItem } from './CheckTypeFilterItem';
 import { CheckTypeFilterName } from 'tg.ee.module/qa/components/CheckTypeFilterName';
 
-type QaCheckType = components['schemas']['QaIssueModel']['type'];
-
 export const SubfilterQaChecks = ({
-  projectId,
   value,
   actions,
+  selectedLanguages,
 }: SubfilterQaChecksProps) => {
   const { t } = useTranslate();
   const [open, setOpen] = useState(false);
   const anchorEl = useRef<HTMLElement>(null);
+  const [expanded, setExpanded] = useState(
+    value.filterQaCheckTypeLanguage !== undefined
+  );
 
-  const { data: qaCheckCategories } = useApiQuery({
-    url: '/v2/projects/{projectId}/qa-settings/check-types',
-    method: 'get',
-    path: { projectId },
-    options: {
-      enabled: open,
-      staleTime: Infinity,
-    },
-  });
+  const qaCheckCategories = useQaCategories();
+  const allKnownTypes = useQaCheckTypes();
+
+  const allTypesSelected =
+    allKnownTypes.length > 0 &&
+    allKnownTypes.every((type) => value.filterQaCheckTypes?.includes(type));
 
   function handleToggleAnyQaIssues() {
-    if (value.filterHasQaIssues) {
-      actions.removeFilter('filterHasQaIssues');
-    } else {
-      actions.addFilter('filterHasQaIssues');
+    if (allTypesSelected) {
+      actions.setFilters({ ...value, filterQaCheckTypes: undefined });
+    } else if (allKnownTypes.length > 0) {
+      actions.setFilters({ ...value, filterQaCheckTypes: allKnownTypes });
     }
   }
 
@@ -54,6 +54,16 @@ export const SubfilterQaChecks = ({
     } else {
       actions.addFilter('filterQaChecksStale');
     }
+  }
+
+  function toggleLanguageScope(
+    newValue: FiltersInternal['filterQaCheckTypeLanguage']
+  ) {
+    actions.setFilters({
+      ...value,
+      filterQaCheckTypeLanguage:
+        newValue === value.filterQaCheckTypeLanguage ? undefined : newValue,
+    });
   }
 
   return (
@@ -82,32 +92,78 @@ export const SubfilterQaChecks = ({
           }}
           slotProps={{ paper: { style: { minWidth: 250 } } }}
         >
-          <FilterItem
-            label={t('translation_filters_qa_has_issues')}
-            selected={Boolean(value.filterHasQaIssues)}
-            onClick={handleToggleAnyQaIssues}
-          />
-          {qaCheckCategories?.map((category) => (
-            <div key={category.category}>
-              <Divider />
-              {category.checkTypes.map((checkType) => (
-                <CheckTypeFilterItem
-                  key={checkType}
-                  checkType={checkType}
-                  selected={
-                    value.filterQaCheckTypes?.includes(checkType) ?? false
-                  }
-                  onClick={() => handleToggleCheckType(checkType)}
+          <Box display="grid">
+            <FilterItem
+              label={t('translation_filters_qa_has_issues')}
+              selected={allTypesSelected}
+              onClick={handleToggleAnyQaIssues}
+            />
+            {qaCheckCategories?.map((category) => (
+              <div key={category.category}>
+                <Divider />
+                {category.checkTypes.map((checkType) => (
+                  <CheckTypeFilterItem
+                    key={checkType}
+                    checkType={checkType}
+                    selected={
+                      value.filterQaCheckTypes?.includes(checkType) ?? false
+                    }
+                    onClick={() => handleToggleCheckType(checkType)}
+                  />
+                ))}
+              </div>
+            ))}
+            <Divider />
+            <FilterItem
+              label={t('translation_filters_qa_checks_stale')}
+              selected={Boolean(value.filterQaChecksStale)}
+              onClick={handleToggleStale}
+            />
+            <CompactListSubheader>
+              <Box display="flex" justifyContent="space-between">
+                <Box>{t('translations_filter_languages_select_title')}</Box>
+              </Box>
+            </CompactListSubheader>
+            <FilterItem
+              data-cy="translations-filter-apply-for-all"
+              label={t('translations_filter_languages_all')}
+              selected={value.filterQaCheckTypeLanguage === undefined}
+              onClick={() => toggleLanguageScope(undefined)}
+              exclusive
+            />
+            {expanded && (
+              <>
+                <FilterItem
+                  data-cy="translations-filter-apply-no-base"
+                  label={t('translations_filter_languages_no_base')}
+                  selected={value.filterQaCheckTypeLanguage === false}
+                  onClick={() => toggleLanguageScope(false)}
+                  exclusive
                 />
-              ))}
-            </div>
-          ))}
-          <Divider />
-          <FilterItem
-            label={t('translation_filters_qa_checks_stale')}
-            selected={Boolean(value.filterQaChecksStale)}
-            onClick={handleToggleStale}
-          />
+                {selectedLanguages?.map((lang) => (
+                  <FilterItem
+                    data-cy="translations-filter-apply-for-language"
+                    key={lang.id}
+                    label={lang.name}
+                    selected={value.filterQaCheckTypeLanguage === lang.tag}
+                    onClick={() => toggleLanguageScope(lang.tag)}
+                    exclusive
+                  />
+                ))}
+              </>
+            )}
+            <MenuItem
+              data-cy="translations-filter-apply-for-expand"
+              role="button"
+              onClick={() => setExpanded((v) => !v)}
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+              }}
+            >
+              {expanded ? <ChevronUp /> : <ChevronDown />}
+            </MenuItem>
+          </Box>
         </Menu>
       )}
     </>
@@ -116,16 +172,12 @@ export const SubfilterQaChecks = ({
 
 export function getQaChecksFiltersLength(value: FiltersInternal) {
   return (
-    Number(Boolean(value.filterHasQaIssues)) +
     (value.filterQaCheckTypes?.length ?? 0) +
-    Number(Boolean(value.filterQaChecksStale))
+    (value.filterQaChecksStale ? 1 : 0)
   );
 }
 
 export function getQaChecksFiltersName(value: FiltersInternal) {
-  if (value.filterHasQaIssues) {
-    return <T keyName="translation_filters_qa_has_issues" />;
-  }
   if (value.filterQaCheckTypes?.length) {
     return <CheckTypeFilterName checkType={value.filterQaCheckTypes[0]} />;
   }
