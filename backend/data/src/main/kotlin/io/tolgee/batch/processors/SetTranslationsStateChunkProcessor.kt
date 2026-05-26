@@ -1,6 +1,7 @@
 package io.tolgee.batch.processors
 
-import io.tolgee.batch.ChunkProcessor
+import com.fasterxml.jackson.databind.ObjectMapper
+import io.tolgee.batch.AbstractChunkProcessor
 import io.tolgee.batch.ProgressManager
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.request.SetTranslationsStateStateRequest
@@ -16,7 +17,8 @@ class SetTranslationsStateChunkProcessor(
   private val translationService: TranslationService,
   private val entityManager: EntityManager,
   private val progressManager: ProgressManager,
-) : ChunkProcessor<SetTranslationsStateStateRequest, SetTranslationStateJobParams, Long> {
+  objectMapper: ObjectMapper,
+) : AbstractChunkProcessor<SetTranslationsStateStateRequest, SetTranslationStateJobParams, Long>(objectMapper) {
   override fun process(
     job: BatchJobDto,
     chunk: List<Long>,

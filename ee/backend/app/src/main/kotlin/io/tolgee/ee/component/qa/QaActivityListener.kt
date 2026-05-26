@@ -6,6 +6,7 @@ import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.batch.events.OnBatchJobFinalized
+import io.tolgee.batch.processors.QaCheckChunkProcessor
 import io.tolgee.batch.request.QaCheckRequest
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.component.eventListeners.BypassableActivityListener
@@ -47,6 +48,7 @@ class QaActivityListener(
   private val translationService: TranslationService,
   private val qaRecheckService: QaRecheckService,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
+  private val qaCheckChunkProcessor: QaCheckChunkProcessor,
 ) : BypassableActivityListener {
   @Volatile
   override var bypass = false
@@ -96,6 +98,21 @@ class QaActivityListener(
       if (entities.isEmpty()) return@runSentryCatching
 
       processModifiedEntities(projectId, entities)
+    }
+  }
+
+  @EventListener
+  fun onQaBatchJobFinalizedSelfHeal(event: OnBatchJobFinalized) {
+    if (bypass) return
+    if (event.job.type != BatchJobType.QA_CHECK) return
+    val projectId = event.job.projectId ?: return
+    val params = qaCheckChunkProcessor.getParams(event.job)
+    if (params.handlingStuckStaleItems) {
+      // Avoid endless loop
+      return
+    }
+    runSentryCatching {
+      qaRecheckService.recheckStuckStaleTranslationsInProject(projectId)
     }
   }
 
@@ -191,8 +208,10 @@ class QaActivityListener(
             .getProjectLanguages(projectId)
             .map { it.id }
             .filter { it != baseLanguage.id }
-        baseLanguageKeyIds.flatMap { keyId ->
-          otherLanguageIds.map { langId -> BatchTranslationTargetItem(keyId = keyId, languageId = langId) }
+        otherLanguageIds.flatMap { langId ->
+          baseLanguageKeyIds.map { keyId ->
+            BatchTranslationTargetItem(keyId = keyId, languageId = langId)
+          }
         }
       } else {
         emptyList()
@@ -227,8 +246,10 @@ class QaActivityListener(
     if (keyIds.isEmpty()) return emptyList()
 
     val allLanguageIds = languageService.getProjectLanguages(projectId).map { it.id }
-    return keyIds.flatMap { keyId ->
-      allLanguageIds.map { langId -> BatchTranslationTargetItem(keyId = keyId, languageId = langId) }
+    return allLanguageIds.flatMap { langId ->
+      keyIds.map { keyId ->
+        BatchTranslationTargetItem(keyId = keyId, languageId = langId)
+      }
     }
   }
 

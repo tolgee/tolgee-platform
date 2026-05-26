@@ -1,6 +1,7 @@
 package io.tolgee.batch.processors
 
-import io.tolgee.batch.ChunkProcessor
+import com.fasterxml.jackson.databind.ObjectMapper
+import io.tolgee.batch.AbstractChunkProcessor
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.batch.request.PreTranslationByTmRequest
@@ -11,7 +12,10 @@ import kotlin.coroutines.CoroutineContext
 @Component
 class PreTranslationByTmChunkProcessor(
   private val genericAutoTranslationChunkProcessor: GenericAutoTranslationChunkProcessor,
-) : ChunkProcessor<PreTranslationByTmRequest, PreTranslationByTmJobParams, BatchTranslationTargetItem> {
+  objectMapper: ObjectMapper,
+) : AbstractChunkProcessor<PreTranslationByTmRequest, PreTranslationByTmJobParams, BatchTranslationTargetItem>(
+    objectMapper,
+  ) {
   override fun process(
     job: BatchJobDto,
     chunk: List<BatchTranslationTargetItem>,

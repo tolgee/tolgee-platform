@@ -1,6 +1,7 @@
 package io.tolgee.batch.processors
 
-import io.tolgee.batch.ChunkProcessor
+import com.fasterxml.jackson.databind.ObjectMapper
+import io.tolgee.batch.AbstractChunkProcessor
 import io.tolgee.batch.JobCharacter
 import io.tolgee.batch.MtProviderCatching
 import io.tolgee.batch.ProgressManager
@@ -19,7 +20,8 @@ class AutoTranslateChunkProcessor(
   private val mtProviderCatching: MtProviderCatching,
   private val batchProperties: BatchProperties,
   private val progressManager: ProgressManager,
-) : ChunkProcessor<AutoTranslationRequest, AutoTranslationJobParams, BatchTranslationTargetItem> {
+  objectMapper: ObjectMapper,
+) : AbstractChunkProcessor<AutoTranslationRequest, AutoTranslationJobParams, BatchTranslationTargetItem>(objectMapper) {
   override fun process(
     job: BatchJobDto,
     chunk: List<BatchTranslationTargetItem>,

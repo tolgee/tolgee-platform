@@ -1,22 +1,24 @@
 package io.tolgee.batch.processors
 
-import io.tolgee.batch.ChunkProcessor
+import com.fasterxml.jackson.databind.ObjectMapper
+import io.tolgee.batch.AbstractChunkProcessor
 import io.tolgee.batch.JobCharacter
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.batch.request.MachineTranslationRequest
 import io.tolgee.configuration.tolgee.BatchProperties
 import io.tolgee.model.batch.params.MachineTranslationJobParams
-import io.tolgee.service.machineTranslation.MtServiceConfigService
 import org.springframework.stereotype.Component
 import kotlin.coroutines.CoroutineContext
 
 @Component
 class MachineTranslationChunkProcessor(
   private val genericAutoTranslationChunkProcessor: GenericAutoTranslationChunkProcessor,
-  private val mtServiceConfigService: MtServiceConfigService,
   private val batchProperties: BatchProperties,
-) : ChunkProcessor<MachineTranslationRequest, MachineTranslationJobParams, BatchTranslationTargetItem> {
+  objectMapper: ObjectMapper,
+) : AbstractChunkProcessor<MachineTranslationRequest, MachineTranslationJobParams, BatchTranslationTargetItem>(
+    objectMapper,
+  ) {
   override fun process(
     job: BatchJobDto,
     chunk: List<BatchTranslationTargetItem>,

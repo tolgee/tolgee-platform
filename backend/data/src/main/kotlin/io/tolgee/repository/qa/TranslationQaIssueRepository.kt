@@ -75,29 +75,23 @@ interface TranslationQaIssueRepository : JpaRepository<TranslationQaIssue, Long>
     where i.translation.id in :translationIds
     """,
   )
-  fun findByTranslationIds(translationIds: List<Long>): List<TranslationQaIssue>
+  fun findByTranslationIds(translationIds: Collection<Long>): List<TranslationQaIssue>
+
+  @Query(
+    """
+    select i from TranslationQaIssue i
+    where i.translation.id in :translationIds
+    and i.type in :checkTypes
+    """,
+  )
+  fun findByTranslationIdsAndCheckTypes(
+    translationIds: Collection<Long>,
+    checkTypes: List<QaCheckType>,
+  ): List<TranslationQaIssue>
 
   fun findAllByTranslationId(translationId: Long): List<TranslationQaIssue>
 
-  @Modifying
-  @Query("delete from TranslationQaIssue i where i.translation.id = :translationId")
-  fun deleteAllByTranslationId(translationId: Long)
-
-  @Modifying
-  @Query("delete from TranslationQaIssue i where i.translation.id in :translationIds")
-  fun deleteAllByTranslationIdIn(translationIds: Collection<Long>)
-
-  @Modifying
-  @Query(
-    nativeQuery = true,
-    value =
-      "DELETE FROM translation_qa_issue WHERE translation_id IN (" +
-        "SELECT id FROM translation WHERE " +
-        "key_id IN (SELECT id FROM key WHERE project_id = :projectId) " +
-        "OR language_id IN (SELECT id FROM language WHERE project_id = :projectId)" +
-        ")",
-  )
-  fun deleteAllByProjectId(projectId: Long)
+  fun findAllByTranslationIdIn(translationIds: Collection<Long>): List<TranslationQaIssue>
 
   @Query(
     """
@@ -154,4 +148,27 @@ interface TranslationQaIssueRepository : JpaRepository<TranslationQaIssue, Long>
     positionEnd: Int?,
     pluralVariant: String?,
   ): TranslationQaIssue?
+
+  @Modifying
+  @Query("delete from TranslationQaIssue i where i.translation.id in :translationIds")
+  fun deleteAllByTranslationIdIn(translationIds: Collection<Long>)
+
+  @Modifying
+  @Query("delete from TranslationQaIssue i where i.translation.id in :translationIds and i.type in :types")
+  fun deleteAllByTranslationIdInAndTypeIn(
+    translationIds: Collection<Long>,
+    types: Collection<QaCheckType>,
+  )
+
+  @Modifying
+  @Query(
+    nativeQuery = true,
+    value =
+      "DELETE FROM translation_qa_issue WHERE translation_id IN (" +
+        "SELECT id FROM translation WHERE " +
+        "key_id IN (SELECT id FROM key WHERE project_id = :projectId) " +
+        "OR language_id IN (SELECT id FROM language WHERE project_id = :projectId)" +
+        ")",
+  )
+  fun deleteAllByProjectId(projectId: Long)
 }

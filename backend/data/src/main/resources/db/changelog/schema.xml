@@ -5591,4 +5591,17 @@
             <sql>DROP INDEX CONCURRENTLY IF EXISTS ix_tm_entry_lower_target_trgm;</sql>
         </rollback>
     </changeSet>
+    <changeSet author="anty" id="qa-batch-perf-translation-stale-partial-idx" runInTransaction="false">
+        <comment>
+            Partial index for stale-translation lookups.
+        </comment>
+        <sql dbms="postgresql">
+            CREATE INDEX CONCURRENTLY IF NOT EXISTS translation_qa_checks_stale_partial_idx
+            ON translation (key_id)
+            WHERE qa_checks_stale = true;
+        </sql>
+        <rollback>
+            DROP INDEX CONCURRENTLY IF EXISTS translation_qa_checks_stale_partial_idx;
+        </rollback>
+    </changeSet>
 </databaseChangeLog>

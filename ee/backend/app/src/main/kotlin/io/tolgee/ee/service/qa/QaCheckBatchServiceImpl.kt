@@ -1,15 +1,17 @@
 package io.tolgee.ee.service.qa
 
 import io.sentry.Sentry
+import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.component.reporting.BusinessEventPublisher
 import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
 import io.tolgee.constants.Feature
+import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.ee.service.glossary.GlossaryTermService
 import io.tolgee.formats.getPluralForms
 import io.tolgee.model.enums.qa.QaCheckType
+import io.tolgee.repository.KeyRepository
 import io.tolgee.repository.TranslationRepository
-import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.project.ProjectFeatureRegistry
 import io.tolgee.service.project.ProjectService
@@ -30,7 +32,7 @@ class QaCheckBatchServiceImpl(
   private val qaIssueService: QaIssueService,
   private val translationService: TranslationService,
   private val translationRepository: TranslationRepository,
-  private val keyService: KeyService,
+  private val keyRepository: KeyRepository,
   private val languageService: LanguageService,
   private val businessEventPublisher: BusinessEventPublisher,
   private val transactionManager: PlatformTransactionManager,
@@ -45,101 +47,182 @@ class QaCheckBatchServiceImpl(
     keyId: Long,
     languageId: Long,
     checkTypes: List<QaCheckType>?,
-    enabledCheckTypes: Set<QaCheckType>?,
   ) {
-    val project = projectService.getDto(projectId)
+    runChecksAndPersistChunk(
+      projectId = projectId,
+      checkTypes = checkTypes,
+      items = listOf(BatchTranslationTargetItem(keyId = keyId, languageId = languageId)),
+    )
+  }
 
+  override fun runChecksAndPersistChunk(
+    projectId: Long,
+    checkTypes: List<QaCheckType>?,
+    items: List<BatchTranslationTargetItem>,
+    progressCallback: () -> Unit,
+  ) {
+    if (items.isEmpty()) return
+    val project = projectService.getDto(projectId)
     if (!ProjectFeatureRegistry.isEnabledOnProject(Feature.QA_CHECKS, project)) {
       return
     }
 
-    val existingTranslation =
-      translationRepository.findOneByProjectIdAndKeyIdAndLanguageId(projectId, keyId, languageId)
-
-    val baseLanguage = languageService.getProjectBaseLanguage(projectId)
-    val isBaseLanguage = languageId == baseLanguage.id
-    val language = if (isBaseLanguage) baseLanguage else languageService.getEntity(languageId, projectId)
-
-    val baseText =
-      if (!isBaseLanguage) {
-        translationService
-          .getTranslations(
-            listOf(keyId),
-            listOf(baseLanguage.id),
-          ).firstOrNull()
-          ?.text
-      } else {
-        null
-      }
-
-    val translationText = existingTranslation?.text ?: ""
-    val key = keyService.get(keyId)
-    val isPlural = key.isPlural
-    val textParsed =
-      translationText.takeIf { isPlural }?.let {
-        runCatching { getPluralForms(it) }.getOrNull()
-      }
-    val baseParsed =
-      baseText?.takeIf { isPlural }?.let {
-        runCatching { getPluralForms(it) }.getOrNull()
-      }
-
-    val glossaryTerms = findGlossaryTerms(project.organizationOwnerId, projectId, translationText, language.tag)
-
-    val params =
-      QaCheckParams(
-        baseText = baseText,
-        text = translationText,
-        baseLanguageTag = if (!isBaseLanguage) baseLanguage.tag else null,
-        languageTag = language.tag,
-        isPlural = isPlural,
-        textVariants = textParsed?.forms,
-        textVariantOffsets = textParsed?.offsets,
-        baseTextVariants = baseParsed?.forms,
-        maxCharLimit = key.maxCharLimit,
-        icuPlaceholders = project.icuPlaceholders,
-        glossaryTerms = glossaryTerms,
-      )
-
-    val results =
-      qaCheckRunnerService.runEnabledChecks(
-        projectId,
-        params,
-        checkTypes,
-        languageId = languageId,
-        enabledCheckTypes = enabledCheckTypes,
-      )
-
-    if (results.isEmpty() && existingTranslation == null) return
-
-    executeInNewRepeatableTransaction(transactionManager) {
-      val translation = translationService.getOrCreate(projectId, keyId, languageId)
-
-      // Only clear the stale flag if the translation text hasn't changed since we collected inputs.
-      // If it changed, QaActivityListener already marked it stale again, and a new batch job
-      // will re-check with the updated text.
-      if (checkTypes == null && (translation.text ?: "") == translationText) {
-        translation.qaChecksStale = false
-      }
-
-      // Disable activity logging — no content changes are happening here.
-      // Without this, when we create a new empty translation (so we can reference it from QA issues),
-      // it gets logged.
-      translation.disableActivityLogging = true
-      translationService.save(translation)
-
-      qaIssueService.replaceIssuesForTranslation(translation, results, checkTypes)
-
-      qaIssueService.publishQaIssuesUpdated(translation)
-    }
-
+    val results = runChecksForChunk(project, checkTypes, items, progressCallback)
+    persistChunkResults(projectId, results, checkTypes)
     publishBusinessEvent(projectId)
   }
 
-  override fun getEnabledCheckTypesForLanguage(
+  private fun runChecksForChunk(
+    project: ProjectDto,
+    checkTypes: List<QaCheckType>?,
+    items: List<BatchTranslationTargetItem>,
+    progressCallback: () -> Unit,
+  ): List<ItemResult> {
+    val baseLanguage = languageService.getProjectBaseLanguage(project.id)
+    val keyIds = items.map { it.keyId }.toSet()
+    val languageIds = items.map { it.languageId }.toSet()
+
+    val translations =
+      translationRepository.findAllWithKeyAndLanguageByKeyIdInAndLanguageIdIn(
+        keyIds,
+        languageIds + baseLanguage.id,
+      )
+
+    val wantedPairs = items.map { it.keyId to it.languageId }.toSet()
+    val translationByKeyAndLanguage =
+      translations
+        .filter { it.key.id to it.language.id in wantedPairs }
+        .associateBy { it.key.id to it.language.id }
+
+    val baseTextByKey =
+      translations
+        .filter { it.language.id == baseLanguage.id }
+        .associate { it.key.id to it.text }
+
+    val tagsFromTranslations =
+      translations.associate { it.language.id to it.language.tag } + (baseLanguage.id to baseLanguage.tag)
+    val missingLanguageIds = languageIds.filter { it !in tagsFromTranslations }
+    val missingLanguageTags = languageService.findByIdIn(missingLanguageIds).associate { it.id to it.tag }
+    val languageTagById = tagsFromTranslations + missingLanguageTags
+
+    val keyById = keyRepository.findAllByIdIn(keyIds).associateBy { it.id }
+
+    val enabledCheckTypesByLanguage: Map<Long, Set<QaCheckType>> =
+      languageIds.associateWith { projectQaConfigService.getEnabledCheckTypesForLanguage(project.id, it) }
+
+    return items.mapNotNull { item ->
+      // If the key has been deleted between job enqueue and processing, skip it
+      val key = keyById[item.keyId] ?: return@mapNotNull null
+      val languageTag = languageTagById[item.languageId] ?: return@mapNotNull null
+
+      val translation = translationByKeyAndLanguage[item.keyId to item.languageId]
+      val text = translation?.text ?: ""
+      val isBaseLanguage = item.languageId == baseLanguage.id
+      val baseText = if (isBaseLanguage) null else baseTextByKey[item.keyId]
+      val isPlural = key.isPlural
+
+      val textParsed =
+        text.takeIf { isPlural }?.let {
+          runCatching { getPluralForms(it) }.getOrNull()
+        }
+      val baseParsed =
+        baseText?.takeIf { isPlural }?.let {
+          runCatching { getPluralForms(it) }.getOrNull()
+        }
+
+      // This is probably the most expensive thing we do for each item
+      // In the future, we will probably switch to persisting glossary terms for each translation,
+      // so optimizing it right now might be premature
+      val glossaryTerms =
+        findGlossaryTerms(project.organizationOwnerId, project.id, text, languageTag)
+
+      val params =
+        QaCheckParams(
+          baseText = baseText,
+          text = text,
+          baseLanguageTag = if (!isBaseLanguage) baseLanguage.tag else null,
+          languageTag = languageTag,
+          isPlural = isPlural,
+          textVariants = textParsed?.forms,
+          textVariantOffsets = textParsed?.offsets,
+          baseTextVariants = baseParsed?.forms,
+          maxCharLimit = key.maxCharLimit,
+          icuPlaceholders = project.icuPlaceholders,
+          glossaryTerms = glossaryTerms,
+        )
+
+      val enabledCheckTypes = enabledCheckTypesByLanguage[item.languageId]
+      val results =
+        qaCheckRunnerService.runEnabledChecks(
+          project.id,
+          params,
+          checkTypes,
+          languageId = item.languageId,
+          enabledCheckTypes = enabledCheckTypes,
+        )
+
+      progressCallback()
+
+      ItemResult(
+        keyId = item.keyId,
+        languageId = item.languageId,
+        languageTag = languageTag,
+        textSnapshot = text,
+        hadExistingTranslation = translation != null,
+        results = results,
+      )
+    }
+  }
+
+  private fun persistChunkResults(
     projectId: Long,
-    languageId: Long,
-  ): Set<QaCheckType> = projectQaConfigService.getEnabledCheckTypesForLanguage(projectId, languageId)
+    results: List<ItemResult>,
+    checkTypes: List<QaCheckType>?,
+  ) {
+    executeInNewRepeatableTransaction(transactionManager) {
+      results
+        .mapNotNull { result ->
+          // Create / Get translation entities
+
+          if (result.results.isEmpty() && !result.hadExistingTranslation) return@mapNotNull null
+
+          // Second most expensive operation here - we deal with each translation separately
+          // Might be worth batching this in single query in future
+          val translation = translationService.getOrCreate(projectId, result.keyId, result.languageId)
+
+          // Only clear the stale flag if the translation text hasn't changed since we collected inputs.
+          // If it changed, QaActivityListener already marked it stale again, and a new batch job
+          // will re-check with the updated text.
+          if (checkTypes == null && (translation.text ?: "") == result.textSnapshot) {
+            translation.qaChecksStale = false
+          }
+
+          // Disable activity logging — no content changes are happening here.
+          // Without this, when we create a new empty translation (so we can reference it from QA issues),
+          // it gets logged.
+          translation.disableActivityLogging = true
+          translationService.save(translation)
+
+          translation to result
+        }.also {
+          // Save QA issues
+
+          val resultsByTranslationId = it.associate { (t, itemResult) -> t.id to itemResult.results }
+          qaIssueService.replaceIssuesForTranslations(
+            resultsByTranslationId = resultsByTranslationId,
+            checkTypes = checkTypes,
+          )
+        }.map { (translation, result) ->
+          // Create events for updated QA issues
+
+          QaIssuesUpdatedEvent(translation.id, result.keyId, result.languageTag, translation.qaChecksStale)
+        }.also { events ->
+          // Send events
+
+          qaIssueService.publishQaIssuesUpdated(projectId, events)
+        }
+    }
+  }
 
   private fun findGlossaryTerms(
     organizationOwnerId: Long,
@@ -173,5 +256,14 @@ class QaCheckBatchServiceImpl(
 
   companion object {
     private val logger = LoggerFactory.getLogger(QaCheckBatchServiceImpl::class.java)
+
+    private data class ItemResult(
+      val keyId: Long,
+      val languageId: Long,
+      val languageTag: String,
+      val textSnapshot: String,
+      val hadExistingTranslation: Boolean,
+      val results: List<QaCheckResult>,
+    )
   }
 }

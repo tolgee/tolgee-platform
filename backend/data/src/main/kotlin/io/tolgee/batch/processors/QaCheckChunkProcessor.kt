@@ -1,13 +1,13 @@
 package io.tolgee.batch.processors
 
-import io.tolgee.batch.ChunkProcessor
+import com.fasterxml.jackson.databind.ObjectMapper
+import io.tolgee.batch.AbstractChunkProcessor
 import io.tolgee.batch.JobCharacter
 import io.tolgee.batch.ProgressManager
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.batch.request.QaCheckRequest
 import io.tolgee.model.batch.params.QaCheckJobParams
-import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.service.qa.QaCheckBatchService
 import kotlinx.coroutines.ensureActive
 import org.springframework.stereotype.Component
@@ -17,7 +17,8 @@ import kotlin.coroutines.CoroutineContext
 class QaCheckChunkProcessor(
   private val qaCheckBatchService: QaCheckBatchService,
   private val progressManager: ProgressManager,
-) : ChunkProcessor<QaCheckRequest, QaCheckJobParams, BatchTranslationTargetItem> {
+  objectMapper: ObjectMapper,
+) : AbstractChunkProcessor<QaCheckRequest, QaCheckJobParams, BatchTranslationTargetItem>(objectMapper) {
   override fun process(
     job: BatchJobDto,
     chunk: List<BatchTranslationTargetItem>,
@@ -25,15 +26,20 @@ class QaCheckChunkProcessor(
   ) {
     val params = getParams(job)
     val projectId = job.projectId ?: throw IllegalArgumentException("Project id is required")
-    val enabledCheckTypesCache = mutableMapOf<Long, Set<QaCheckType>>()
-    chunk.forEach { (keyId, languageId) ->
+    val isSlow = params.checkTypes?.any { it.isSlow } ?: true
+
+    coroutineContext.ensureActive()
+
+    qaCheckBatchService.runChecksAndPersistChunk(
+      projectId = projectId,
+      checkTypes = params.checkTypes,
+      items = chunk,
+    ) {
+      // progress callback
       coroutineContext.ensureActive()
-      val enabledCheckTypes =
-        enabledCheckTypesCache.getOrPut(languageId) {
-          qaCheckBatchService.getEnabledCheckTypesForLanguage(projectId, languageId)
-        }
-      qaCheckBatchService.runChecksAndPersist(projectId, keyId, languageId, params.checkTypes, enabledCheckTypes)
-      progressManager.reportSingleChunkProgress(job.id)
+      if (isSlow) {
+        progressManager.reportSingleChunkProgress(job.id)
+      }
     }
   }
 
@@ -42,6 +48,7 @@ class QaCheckChunkProcessor(
   override fun getParams(data: QaCheckRequest): QaCheckJobParams =
     QaCheckJobParams().apply {
       checkTypes = data.checkTypes
+      handlingStuckStaleItems = data.handlingStuckStaleItems
     }
 
   override fun getParamsType(): Class<QaCheckJobParams> = QaCheckJobParams::class.java

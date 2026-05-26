@@ -1,5 +1,6 @@
 package io.tolgee.repository
 
+import io.tolgee.dtos.queryResults.qa.KeyLanguagePairView
 import io.tolgee.jobs.migration.translationStats.StatsMigrationTranslationView
 import io.tolgee.model.Project
 import io.tolgee.model.key.Key
@@ -214,10 +215,44 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
     languagesIds: List<Long>,
   ): List<Translation>
 
-  fun getAllByKeyIdInAndLanguageIdIn(
-    keyIds: List<Long>,
-    languageIds: List<Long>,
+  @Query(
+    """
+    from Translation t
+    join fetch t.key
+    join fetch t.language
+    where t.key.id in :keyIds and t.language.id in :languageIds
+    """,
+  )
+  fun findAllWithKeyAndLanguageByKeyIdInAndLanguageIdIn(
+    keyIds: Collection<Long>,
+    languageIds: Collection<Long>,
   ): List<Translation>
+
+  @Query(
+    """
+    select new io.tolgee.dtos.queryResults.qa.KeyLanguagePairView(k.id, t.language.id)
+    from Translation t
+    join t.key k
+    where k.project.id = :projectId
+      and k.branch.id = :branchId
+      and t.qaChecksStale = true
+    """,
+  )
+  fun getStaleKeyLanguagePairsByBranch(
+    projectId: Long,
+    branchId: Long,
+  ): List<KeyLanguagePairView>
+
+  @Query(
+    """
+    select new io.tolgee.dtos.queryResults.qa.KeyLanguagePairView(k.id, t.language.id)
+    from Translation t
+    join t.key k
+    where k.project.id = :projectId
+      and t.qaChecksStale = true
+    """,
+  )
+  fun getStaleKeyLanguagePairsByProject(projectId: Long): List<KeyLanguagePairView>
 
   @Query(
     """

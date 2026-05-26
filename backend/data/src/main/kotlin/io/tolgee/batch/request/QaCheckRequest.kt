@@ -6,4 +6,5 @@ import io.tolgee.model.enums.qa.QaCheckType
 data class QaCheckRequest(
   val target: List<BatchTranslationTargetItem>,
   val checkTypes: List<QaCheckType>? = null,
+  val handlingStuckStaleItems: Boolean = false,
 )

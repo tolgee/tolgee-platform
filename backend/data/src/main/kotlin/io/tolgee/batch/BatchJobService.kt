@@ -384,6 +384,26 @@ class BatchJobService(
     return batchJobRepository.findAllByProjectId(projectId)
   }
 
+  fun hasActiveJobForProject(
+    projectId: Long,
+    type: BatchJobType,
+  ): Boolean {
+    return entityManager
+      .createQuery(
+        """
+        select count(j) > 0 from BatchJob j
+        where j.project.id = :projectId
+          and j.type = :type
+          and j.status not in :completedStatuses
+        """.trimIndent(),
+        java.lang.Boolean::class.java,
+      ).setParameter("projectId", projectId)
+      .setParameter("type", type)
+      .setParameter("completedStatuses", BatchJobStatus.entries.filter { it.completed })
+      .singleResult
+      .booleanValue()
+  }
+
   fun getExecutions(batchJobId: Long): List<BatchJobChunkExecution> {
     return entityManager
       .createQuery(

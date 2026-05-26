@@ -1,6 +1,7 @@
 package io.tolgee.batch.processors
 
-import io.tolgee.batch.ChunkProcessor
+import com.fasterxml.jackson.databind.ObjectMapper
+import io.tolgee.batch.AbstractChunkProcessor
 import io.tolgee.batch.ProgressManager
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.request.NoOpRequest
@@ -10,7 +11,8 @@ import kotlin.coroutines.CoroutineContext
 @Component
 class NoOpChunkProcessor(
   private val progressManager: ProgressManager,
-) : ChunkProcessor<NoOpRequest, Any?, Long> {
+  objectMapper: ObjectMapper,
+) : AbstractChunkProcessor<NoOpRequest, Any?, Long>(objectMapper) {
   override fun process(
     job: BatchJobDto,
     chunk: List<Long>,

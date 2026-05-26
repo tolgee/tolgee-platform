@@ -12,6 +12,7 @@ import io.tolgee.dtos.request.branching.ResolveAllBranchMergeConflictsRequest
 import io.tolgee.dtos.request.branching.ResolveBranchMergeConflictRequest
 import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.ee.service.TaskService
+import io.tolgee.ee.service.qa.QaRecheckService
 import io.tolgee.events.OnBranchSoftDeleted
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
@@ -26,6 +27,7 @@ import io.tolgee.service.branching.AbstractBranchService
 import io.tolgee.service.branching.BranchCopyService
 import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationEventPublisher
+import org.springframework.context.annotation.Lazy
 import org.springframework.context.annotation.Primary
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -45,9 +47,10 @@ class BranchServiceImpl(
   private val authenticationFacade: AuthenticationFacade,
   private val projectBranchingMigrationService: ProjectBranchingMigrationService,
   private val activityHolder: ActivityHolder,
-  private val branchCleanupService: BranchCleanupService,
   private val applicationEventPublisher: ApplicationEventPublisher,
   private val metrics: Metrics,
+  @Lazy
+  private val qaRecheckService: QaRecheckService,
 ) : AbstractBranchService(branchRepository, branchMergeService) {
   override fun getBranches(
     projectId: Long,
@@ -129,6 +132,9 @@ class BranchServiceImpl(
 
       branchCopyService.copy(projectId, originBranch, branch)
       branchSnapshotService.createInitialSnapshot(projectId, originBranch, branch)
+
+      qaRecheckService.recheckStaleTranslationsOnBranch(projectId, branch.id)
+
       branch
     }!!
   }

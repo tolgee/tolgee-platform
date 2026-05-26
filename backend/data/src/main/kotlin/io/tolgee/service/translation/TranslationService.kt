@@ -478,7 +478,7 @@ class TranslationService(
   fun getTranslations(
     keyIds: List<Long>,
     languageIds: List<Long>,
-  ) = translationRepository.getAllByKeyIdInAndLanguageIdIn(keyIds, languageIds)
+  ) = translationRepository.findAllByKeyIdInAndLanguageIdIn(keyIds, languageIds)
 
   @Transactional(readOnly = true)
   fun getAllByKeyId(keyId: Long): List<Translation> = translationRepository.getAllByKeyIdIn(listOf(keyId)).toList()
@@ -687,6 +687,19 @@ class TranslationService(
     languageIds: List<Long>,
   ) {
     translationRepository.setQaChecksStaleByProjectIdAndLanguageIds(projectId, languageIds)
+  }
+
+  @Transactional(readOnly = true)
+  fun getStaleKeyLanguagePairsByBranch(
+    projectId: Long,
+    branchId: Long,
+  ): List<KeyLanguagePairView> {
+    return translationRepository.getStaleKeyLanguagePairsByBranch(projectId, branchId)
+  }
+
+  @Transactional(readOnly = true)
+  fun getStaleKeyLanguagePairsByProject(projectId: Long): List<KeyLanguagePairView> {
+    return translationRepository.getStaleKeyLanguagePairsByProject(projectId)
   }
 
   @Transactional(readOnly = true)

@@ -195,6 +195,14 @@ class QaTestData(
     }
   }
 
+  fun clearAllStaleFlags() {
+    projectBuilder.data.translations.forEach { it.self.qaChecksStale = false }
+  }
+
+  fun disableQaChecks() {
+    project.useQaChecks = false
+  }
+
   /**
    * Creates QA config with all check types enabled at WARNING, except SPELLING and GRAMMAR
    * which are OFF (they depend on an external LanguageTool container).
