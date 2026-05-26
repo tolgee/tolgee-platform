@@ -59,7 +59,9 @@ class PoParserTest {
   fun `does not emit PO_MSGCTXT_NOT_SUPPORTED issue`() {
     mockUtil.mockIt("example_msgctxt.po", "src/test/resources/import/po/example_msgctxt.po")
     PoParser(mockUtil.fileProcessorContext)()
-    val emittedTypes = mockUtil.fileProcessorContext.fileEntity.issues.map { it.type }
+    val emittedTypes =
+      mockUtil.fileProcessorContext.fileEntity.issues
+        .map { it.type }
     assertThat(emittedTypes).doesNotContain(FileIssueType.PO_MSGCTXT_NOT_SUPPORTED)
   }
 
