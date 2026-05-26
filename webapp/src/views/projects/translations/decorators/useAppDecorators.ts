@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useQueries } from 'react-query';
 
 import { useApiQuery } from 'tg.service/http/useQueryApi';
+import { tokenService } from 'tg.service/TokenService';
 import { components } from 'tg.service/apiSchema.generated';
 import {
   substituteUrlTemplate,
@@ -71,10 +72,14 @@ async function fetchInstallToken(
   const cached = TOKEN_CACHE.get(cacheKey);
   if (cached) return cached;
   const pending = (async () => {
+    const userJwt = tokenService.getToken();
+    const headers: Record<string, string> = {};
+    if (userJwt) headers.Authorization = `Bearer ${userJwt}`;
     const res = await fetch(
       `${apiUrl}/v2/projects/${projectId}/apps/${installId}/token`,
       {
         method: 'POST',
+        headers,
         credentials: 'include',
       }
     );
