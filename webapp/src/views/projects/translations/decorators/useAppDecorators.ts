@@ -13,33 +13,30 @@ type ProjectAppModel = components['schemas']['ProjectAppModel'];
 type KeyActionModule = components['schemas']['KeyActionModule'];
 type TranslationActionModule = components['schemas']['TranslationActionModule'];
 
-export type ResolvedDecoratorLink = {
+export type DecoratorVisibility = 'always' | 'on-hover';
+
+type ResolvedDecoratorBase = {
   installId: number;
   baseUrl: string;
   actionKey: string;
-  type: 'link';
   icon: string;
   tooltip: string;
+  visibility: DecoratorVisibility;
+  count?: number;
+};
+
+export type ResolvedDecoratorLink = ResolvedDecoratorBase & {
+  type: 'link';
   url: string;
 };
 
-export type ResolvedDecoratorTab = {
-  installId: number;
-  baseUrl: string;
-  actionKey: string;
+export type ResolvedDecoratorTab = ResolvedDecoratorBase & {
   type: 'tab';
-  icon: string;
-  tooltip: string;
   tabKey: string;
 };
 
-export type ResolvedDecoratorPanel = {
-  installId: number;
-  baseUrl: string;
-  actionKey: string;
+export type ResolvedDecoratorPanel = ResolvedDecoratorBase & {
   type: 'panel';
-  icon: string;
-  tooltip: string;
   panelKey: string;
 };
 
@@ -53,6 +50,8 @@ type DecoratorResponseItem = {
   languageTag?: string | null;
   actionKey: string;
   url?: string;
+  count?: number;
+  visibility?: DecoratorVisibility;
 };
 
 type DecoratorResponse = {
@@ -225,6 +224,10 @@ export function useAppDecorators(
           });
           if (action.dynamic && !dynamicMatch) continue;
 
+          const visibility: DecoratorVisibility =
+            dynamicMatch?.visibility ?? action.visibility ?? 'on-hover';
+          const count = dynamicMatch?.count;
+
           if (action.type === 'link') {
             const template = dynamicMatch?.url ?? action.urlTemplate;
             if (!template) continue;
@@ -235,6 +238,8 @@ export function useAppDecorators(
               type: 'link',
               icon: action.icon,
               tooltip: action.tooltip,
+              visibility,
+              count,
               url: substituteUrlTemplate(template, vars),
             });
           } else if (anchor === 'key' && action.type === 'tab') {
@@ -247,6 +252,8 @@ export function useAppDecorators(
               type: 'tab',
               icon: action.icon,
               tooltip: action.tooltip,
+              visibility,
+              count,
               tabKey,
             });
           } else if (anchor === 'translation' && action.type === 'panel') {
@@ -259,6 +266,8 @@ export function useAppDecorators(
               type: 'panel',
               icon: action.icon,
               tooltip: action.tooltip,
+              visibility,
+              count,
               panelKey,
             });
           }

@@ -40,7 +40,8 @@
         "type": "link",
         "icon": "🔗",
         "tooltip": "View source",
-        "urlTemplate": "https://example.com/source/{keyName}"
+        "urlTemplate": "https://example.com/source/{keyName}",
+        "visibility": "on-hover"
       },
       {
         "key": "open-audit",
@@ -58,7 +59,8 @@
         "icon": "📈",
         "tooltip": "Show activity",
         "dynamic": true,
-        "panelKey": "activity"
+        "panelKey": "activity",
+        "visibility": "always"
       }
     ]
   }

@@ -73,10 +73,12 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
       node("modules.key-action[1].type").isEqualTo("tab")
       node("modules.key-action[1].dynamic").isEqualTo(true)
       node("modules.key-action[1].tabKey").isEqualTo("audit")
+      node("modules.key-action[1].visibility").isEqualTo("on-hover")
       node("modules.translation-action[0].key").isEqualTo("show-activity")
       node("modules.translation-action[0].type").isEqualTo("panel")
       node("modules.translation-action[0].dynamic").isEqualTo(true)
       node("modules.translation-action[0].panelKey").isEqualTo("activity")
+      node("modules.translation-action[0].visibility").isEqualTo("always")
     }
   }
 
@@ -337,7 +339,8 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
             "icon": "🛡️",
             "tooltip": "Audit info",
             "dynamic": true,
-            "tabKey": "audit"
+            "tabKey": "audit",
+            "visibility": "on-hover"
           }
         ],
         "translation-action": [
@@ -347,7 +350,8 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
             "icon": "📈",
             "tooltip": "Activity",
             "dynamic": true,
-            "panelKey": "activity"
+            "panelKey": "activity",
+            "visibility": "always"
           }
         ]
       }

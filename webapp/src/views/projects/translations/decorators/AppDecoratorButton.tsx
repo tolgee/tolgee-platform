@@ -1,8 +1,21 @@
+import { Badge, styled } from '@mui/material';
+
 import { ControlsButton } from '../cell/ControlsButton';
+import { CELL_SHOW_ON_HOVER } from '../cell/styles';
 import { useTranslationsActions } from '../context/TranslationsContext';
 import { ResolvedDecorator } from './useAppDecorators';
 import { requestPanelReveal } from './panelRevealEvent';
 import { requestKeyDialogOpen } from './keyDialogEvent';
+
+const StyledBadge = styled(Badge)`
+  & .MuiBadge-badge {
+    font-size: 10px;
+    height: unset;
+    padding: 3px 3px;
+    display: flex;
+    min-width: 16px;
+  }
+`;
 
 type Props = {
   decorator: ResolvedDecorator;
@@ -36,16 +49,33 @@ export const AppDecoratorButton = ({
     }
   };
 
+  const hoverOnly = decorator.visibility === 'on-hover';
+  const showBadge = typeof decorator.count === 'number' && decorator.count > 0;
+
+  const iconNode = (
+    <span style={{ fontSize: '1.05em', lineHeight: 1 }}>{decorator.icon}</span>
+  );
+
   return (
     <ControlsButton
       onClick={onClick}
       tooltip={decorator.tooltip}
       data-cy="translation-app-decorator"
       data-cy-action-key={decorator.actionKey}
+      data-cy-visibility={decorator.visibility}
+      className={hoverOnly ? CELL_SHOW_ON_HOVER : undefined}
     >
-      <span style={{ fontSize: '1.05em', lineHeight: 1 }}>
-        {decorator.icon}
-      </span>
+      {showBadge ? (
+        <StyledBadge
+          badgeContent={decorator.count}
+          color="primary"
+          data-cy="translation-app-decorator-badge"
+        >
+          {iconNode}
+        </StyledBadge>
+      ) : (
+        iconNode
+      )}
     </ControlsButton>
   );
 };
