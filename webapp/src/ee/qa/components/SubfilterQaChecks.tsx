@@ -25,7 +25,6 @@ export const SubfilterQaChecks = ({
     value.filterQaCheckTypeLanguage !== undefined
   );
 
-  // QA categories come from initialData (static enum metadata) — no per-project fetch.
   const qaCheckCategories = useQaCategories();
   const allKnownTypes = useQaCheckTypes();
 

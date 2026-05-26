@@ -59,7 +59,7 @@ export const useOrganizationUsage = () => {
 };
 
 export const useQaCategories = () =>
-  useGlobalContext((c) => c.initialData.qaCheckCategories ?? []);
+  useGlobalContext((c) => c.initialData.qaCheckCategories ?? EMPTY_LIST);
 
 export const useQaCheckTypes = (): QaCheckType[] => {
   const categories = useQaCategories();
@@ -70,7 +70,7 @@ export const useEnabledFeatures = () => {
   const features =
     useGlobalContext(
       (c) => c.initialData.preferredOrganization?.enabledFeatures
-    ) || [];
+    ) || EMPTY_LIST;
 
   return {
     features,
@@ -79,3 +79,5 @@ export const useEnabledFeatures = () => {
     },
   };
 };
+
+const EMPTY_LIST = [];
