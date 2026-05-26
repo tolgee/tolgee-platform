@@ -12,7 +12,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@tginternal/client": "^0.0.0-prerelease.ec3da97e7",
+    "@tginternal/client": "^0.0.0-prerelease.c8329b552",
     "express": "^4.21.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6"
