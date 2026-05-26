@@ -3690,6 +3690,8 @@ export interface components {
       /** @enum {string} */
       type: "link" | "panel" | "tab";
       urlTemplate?: string;
+      /** @enum {string} */
+      visibility?: "always" | "on-hover";
     };
     KeyDefinitionDto: {
       name: string;
@@ -6967,6 +6969,8 @@ export interface components {
       /** @enum {string} */
       type: "link" | "panel" | "tab";
       urlTemplate?: string;
+      /** @enum {string} */
+      visibility?: "always" | "on-hover";
     };
     TranslationAgencySimpleModel: {
       avatar?: components["schemas"]["Avatar"];

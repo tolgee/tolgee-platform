@@ -60,6 +60,7 @@ data class KeyActionModule(
   val dynamic: Boolean = false,
   val urlTemplate: String? = null,
   val tabKey: String? = null,
+  val visibility: AppActionVisibility? = null,
 )
 
 data class TranslationActionModule(
@@ -70,6 +71,7 @@ data class TranslationActionModule(
   val dynamic: Boolean = false,
   val urlTemplate: String? = null,
   val panelKey: String? = null,
+  val visibility: AppActionVisibility? = null,
 )
 
 enum class AppActionType {
@@ -81,4 +83,12 @@ enum class AppActionType {
 
   @JsonProperty("tab")
   TAB,
+}
+
+enum class AppActionVisibility {
+  @JsonProperty("always")
+  ALWAYS,
+
+  @JsonProperty("on-hover")
+  ON_HOVER,
 }

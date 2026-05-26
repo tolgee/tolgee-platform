@@ -918,6 +918,7 @@ declare namespace DataCy {
         "transfer-project-apply-button" |
         "translation-agency-item" |
         "translation-app-decorator" |
+        "translation-app-decorator-badge" |
         "translation-controls-sort" |
         "translation-controls-sort-item" |
         "translation-create-description-input" |

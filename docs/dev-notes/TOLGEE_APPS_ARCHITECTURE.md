@@ -231,10 +231,12 @@ The plugin backend verifies the JWT against Tolgee's published public key (JWKS 
 | `modules.key-action[].dynamic` | boolean | When `true`, icon only shows for keys the plugin returns in its decorators response. |
 | `modules.key-action[].urlTemplate` | string | Required for static `link`. Interpolated tokens: `{keyName}`, `{keyNamespace}`, `{keyId}`, `{projectId}`. |
 | `modules.key-action[].tabKey` | string | For `type: tab`, references a declared `key-edit-tab[].key`. |
+| `modules.key-action[].visibility` | enum | `always` or `on-hover`. Default `on-hover`. May be overridden per-item via the dynamic decorators response. |
 | `modules.translation-action[]` | array | Icon-button actions added to translation cells. |
 | `modules.translation-action[].type` | string | `link` or `panel`. |
 | `modules.translation-action[].panelKey` | string | For `type: panel`, references a declared `translation-tools-panel[].key`. |
 | `modules.translation-action[].urlTemplate` | string | For static `link`. Adds `{languageTag}`, `{languageId}`, `{translationId}` to the supported tokens. |
+| `modules.translation-action[].visibility` | enum | `always` or `on-hover`. Default `on-hover`. May be overridden per-item via the dynamic decorators response. |
 
 Later scopes will extend `modules` with additional types (`editor-right-panel`, `translation-decorator`, `custom-mt`, `modal`, …) and add top-level fields (`backendBaseUrl`, optionally `assets` when ZIP delivery lands).
 
@@ -343,7 +345,7 @@ The JWT is the same install-context token minted via `POST /v2/projects/{id}/app
 {
   "items": [
     { "keyId": 1, "actionKey": "open-audit" },
-    { "keyId": 2, "languageTag": "de", "actionKey": "show-activity" },
+    { "keyId": 2, "languageTag": "de", "actionKey": "show-activity", "count": 3, "visibility": "always" },
     { "keyId": 3, "actionKey": "view-source", "url": "https://example.com/custom-3" }
   ]
 }
@@ -354,6 +356,8 @@ Rules:
 - For `link` actions, a returned `url` overrides the manifest `urlTemplate`. Missing `url` falls back to the template.
 - For `panel`/`tab` actions, presence in the response is enough — no extra fields needed.
 - Items without `languageTag` apply to the key row regardless of language. Items with `languageTag` apply only to that specific translation cell.
+- **`count`** (integer, optional): when `> 0`, renders a small number badge over the icon (styled like the native unresolved-comments badge). `count === 0` hides the badge but keeps the icon; absent/null is treated the same. Valid for any action type and for both static and dynamic actions.
+- **`visibility`** (`always` \| `on-hover`, optional): overrides the manifest's `visibility` for this specific (keyId, [languageTag]) instance. Precedence: dynamic-response `visibility` > manifest `visibility` > default `on-hover`. Lets a plugin keep an icon hover-only by default but elevate it to always-visible for items that need attention.
 
 **CORS**: the plugin's `decoratorsUrl` must include `Access-Control-Allow-Origin` matching the Tolgee webapp's origin (or `*` for dev), and must allow the `Authorization` header.
 

@@ -135,6 +135,8 @@ type DecoratorItem = {
   languageTag?: string
   actionKey: string
   url?: string
+  count?: number
+  visibility?: 'always' | 'on-hover'
 }
 
 app.post('/decorators', (req, res) => {
@@ -145,11 +147,23 @@ app.post('/decorators', (req, res) => {
     : []
   const items: DecoratorItem[] = []
   for (const keyId of keyIds) {
+    // Demo: every key gets the audit shortcut.
     items.push({ keyId, actionKey: 'open-audit' })
-    if (keyId % 2 === 1) {
-      for (const tag of languageTags) {
-        items.push({ keyId, languageTag: tag, actionKey: 'show-activity' })
+
+    // Demo: show-activity is emitted for every (keyId, languageTag) pair,
+    // with a synthetic count varying 0..6. count===0 hides the badge but
+    // keeps the icon. When count is 0 we also dynamically override the
+    // visibility to 'on-hover' so quiet cells declutter the row.
+    for (const tag of languageTags) {
+      const count = (keyId * 3 + tag.charCodeAt(0)) % 7
+      const item: DecoratorItem = {
+        keyId,
+        languageTag: tag,
+        actionKey: 'show-activity',
+        count,
       }
+      if (count === 0) item.visibility = 'on-hover'
+      items.push(item)
     }
   }
   res.json({ items })
