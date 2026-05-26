@@ -63,4 +63,9 @@ class BranchMerge :
 
   val isMerged: Boolean
     get() = mergedAt != null
+
+  fun markMerged(at: Date) {
+    changes.clear()
+    mergedAt = at
+  }
 }

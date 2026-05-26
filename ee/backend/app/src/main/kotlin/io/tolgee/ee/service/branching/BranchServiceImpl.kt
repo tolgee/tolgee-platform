@@ -206,20 +206,20 @@ class BranchServiceImpl(
         throw BadRequestException(Message.BRANCH_MERGE_CONFLICTS_NOT_RESOLVED)
       }
     }
-    branchMergeService.applyMerge(merge)
-    if (!merge.sourceBranch.isDefault) {
+    val mergedMerge = branchMergeService.applyMerge(merge)
+    if (!mergedMerge.sourceBranch.isDefault) {
       if (deleteBranch == true) {
         val defaultBranch =
           getDefaultBranch(projectId)
             ?: throw NotFoundException(Message.BRANCH_NOT_FOUND)
-        taskService.moveTasksAfterMerge(projectId, merge.sourceBranch, defaultBranch)
-        deleteBranch(projectId, merge.sourceBranch.id)
+        taskService.moveTasksAfterMerge(projectId, mergedMerge.sourceBranch, defaultBranch)
+        deleteBranch(projectId, mergedMerge.sourceBranch.id)
       } else {
         entityManager.flush()
         branchSnapshotService.rebuildSnapshotFromSource(
           projectId = projectId,
-          sourceBranch = merge.sourceBranch,
-          targetBranch = merge.targetBranch,
+          sourceBranch = mergedMerge.sourceBranch,
+          targetBranch = mergedMerge.targetBranch,
         )
       }
     }
