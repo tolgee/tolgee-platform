@@ -381,6 +381,8 @@ A manifest's `webhooks.events` array may contain **any value matching a Tolgee `
 
 Manifest validation rejects any event name that doesn't match an `ActivityType`. Unknown names return `app_manifest_invalid`.
 
+For batch events (e.g. `BATCH_*` activities) the webhook payload doesn't inline every modified entity — it only carries the `revisionId`. To retrieve the actual modifications, pass that id to the [Get modified entities by revision](/api/get-modified-entities-by-revision) endpoint. The response is paginated and supports filtering by entity class (e.g. `Translation`, `Key`). Summary information about the revision itself is available via [Get single revision](/api/get-single-revision).
+
 **Future** (`{branchId}`, `{branchName}`) — added when Tolgee gains branch support.
 
 #### 3.4.4 SDK surface (later scope)
