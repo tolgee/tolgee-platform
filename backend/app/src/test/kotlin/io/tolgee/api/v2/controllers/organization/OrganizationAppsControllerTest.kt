@@ -99,6 +99,59 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `accepts webhook subscription to any ActivityType by name`() {
+    mockManifest(manifestWithWebhookEvents("SET_TRANSLATIONS", "CREATE_KEY", "BATCH_KEY_RESTORE"))
+    performAuthPost(appsUrl(), registerBody()).andIsOk.andAssertThatJson {
+      node("webhookEvents")
+        .isArray
+        .containsExactlyInAnyOrder("SET_TRANSLATIONS", "CREATE_KEY", "BATCH_KEY_RESTORE")
+    }
+  }
+
+  @Test
+  fun `rejects webhook subscription to unknown event`() {
+    mockManifest(manifestWithWebhookEvents("NOT_A_REAL_EVENT"))
+    performAuthPost(appsUrl(), registerBody()).andIsBadRequest.andAssertThatJson {
+      node("code").isEqualTo("app_manifest_invalid")
+    }
+  }
+
+  @Test
+  fun `parses modal and trigger modules and round-trips them`() {
+    mockManifest(manifestWithModalAndTriggers())
+    performAuthPost(appsUrl(), registerBody()).andIsOk.andAssertThatJson {
+      node("modules.modal[0].key").isEqualTo("explain")
+      node("modules.modal[0].title").isEqualTo("Explain this key")
+      node("modules.modal[0].entry").isEqualTo("/modal/explain")
+      node("modules.bulk-action[0].key").isEqualTo("bulk-explain")
+      node("modules.bulk-action[0].modalKey").isEqualTo("explain")
+      node("modules.translations-toolbar-action[0].key").isEqualTo("toolbar-explain")
+      node("modules.project-menu-action[0].key").isEqualTo("menu-explain")
+      node("modules.key-edit-footer-action[0].key").isEqualTo("footer-explain")
+      node("modules.shortcut[0].key").isEqualTo("shortcut-explain")
+      node("modules.shortcut[0].combination").isEqualTo("Mod+Shift+E")
+    }
+  }
+
+  @Test
+  fun `rejects bulk-action with unknown modalKey`() {
+    mockManifest(
+      manifestWithModalAndTriggers().replace("\"modalKey\": \"explain\"", "\"modalKey\": \"nope\""),
+    )
+    performAuthPost(appsUrl(), registerBody()).andIsBadRequest.andAssertThatJson {
+      node("code").isEqualTo("app_manifest_invalid")
+    }
+  }
+
+  @Test
+  fun `rejects shortcut with blank combination`() {
+    mockManifest(manifestWithModalAndTriggers().replace("\"combination\": \"Mod+Shift+E\"", "\"combination\": \"\""))
+    performAuthPost(appsUrl(), registerBody()).andIsBadRequest.andAssertThatJson {
+      node("code").isEqualTo("app_manifest_invalid")
+    }
+  }
+
+  @Test
   fun `parses translation-tools-panel modules alongside dashboard pages`() {
     mockManifest(manifestWithToolsPanel())
     performAuthPost(appsUrl(), registerBody()).andIsOk.andAssertThatJson {
@@ -353,6 +406,66 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
             "panelKey": "activity",
             "visibility": "always"
           }
+        ]
+      }
+    }
+    """.trimIndent()
+
+  private fun manifestWithWebhookEvents(vararg events: String): String {
+    val list = events.joinToString(",") { "\"$it\"" }
+    return """
+      {
+        "id": "test-app",
+        "name": "Test App",
+        "version": "0.1.0",
+        "baseUrl": "https://app.example.com",
+        "scopes": ["translations.view", "keys.edit"],
+        "webhooks": {
+          "events": [$list],
+          "url": "/webhook"
+        },
+        "modules": {
+          "project-dashboard-page": [
+            {"key": "home", "title": "Home", "icon": "🏠", "entry": "/"}
+          ]
+        }
+      }
+      """.trimIndent()
+  }
+
+  private fun manifestWithModalAndTriggers(): String =
+    """
+    {
+      "id": "test-app",
+      "name": "Test App",
+      "version": "0.1.0",
+      "baseUrl": "https://app.example.com",
+      "scopes": ["translations.view", "keys.edit"],
+      "modules": {
+        "modal": [
+          {
+            "key": "explain",
+            "title": "Explain this key",
+            "icon": "💡",
+            "entry": "/modal/explain",
+            "width": 640,
+            "height": 400
+          }
+        ],
+        "bulk-action": [
+          {"key": "bulk-explain", "title": "Explain selection", "icon": "🎯", "type": "modal", "modalKey": "explain"}
+        ],
+        "translations-toolbar-action": [
+          {"key": "toolbar-explain", "title": "Explain view", "icon": "⬇️", "type": "modal", "modalKey": "explain"}
+        ],
+        "project-menu-action": [
+          {"key": "menu-explain", "title": "Configure", "icon": "⚙️", "type": "modal", "modalKey": "explain"}
+        ],
+        "key-edit-footer-action": [
+          {"key": "footer-explain", "title": "Translate with AI", "icon": "🤖", "type": "modal", "modalKey": "explain"}
+        ],
+        "shortcut": [
+          {"key": "shortcut-explain", "combination": "Mod+Shift+E", "type": "modal", "modalKey": "explain"}
         ]
       }
     }

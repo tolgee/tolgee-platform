@@ -164,6 +164,7 @@ declare namespace DataCy {
         "api-keys-create-edit-dialog" |
         "api-keys-project-select-item" |
         "app-decorator-list" |
+        "app-modal-iframe" |
         "assigned-projects-select" |
         "assigned-projects-select-item" |
         "assignee-search-select-popover" |
@@ -182,6 +183,7 @@ declare namespace DataCy {
         "batch-operation-dialog-minimize" |
         "batch-operation-dialog-ok" |
         "batch-operation-dialog-view-trash" |
+        "batch-operations-app-action" |
         "batch-operations-section" |
         "batch-operations-select" |
         "batch-operations-submit-button" |
@@ -449,6 +451,7 @@ declare namespace DataCy {
         "key-char-limit-checkbox" |
         "key-char-limit-input" |
         "key-edit-app-tab-iframe" |
+        "key-edit-footer-app-action" |
         "key-edit-tab-advanced" |
         "key-edit-tab-app" |
         "key-edit-tab-context" |
@@ -708,6 +711,7 @@ declare namespace DataCy {
         "project-menu-item" |
         "project-menu-item-ai" |
         "project-menu-item-app-" |
+        "project-menu-item-app-action-" |
         "project-menu-item-branches" |
         "project-menu-item-dashboard" |
         "project-menu-item-developer" |
@@ -1002,6 +1006,7 @@ declare namespace DataCy {
         "translations-tag-input" |
         "translations-tags-add" |
         "translations-task-indicator" |
+        "translations-toolbar-app-action" |
         "translations-toolbar-counter" |
         "translations-toolbar-to-top" |
         "translations-trash-button" |

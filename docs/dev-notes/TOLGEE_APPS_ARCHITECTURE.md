@@ -33,6 +33,7 @@ A plugin is a **web service hosted by its author**, described by a JSON **manife
 | `translation-tools-panel` module → tools-panel tab + iframe | ✓ | |
 | `key-edit-tab` module → key-edit dialog tab + iframe | ✓ | |
 | `key-action` / `translation-action` icons on row + cell | ✓ | |
+| `modal` module + 5 trigger surfaces (bulk, toolbar, sidebar, key-edit footer, keyboard shortcut) | ✓ | |
 | Signed context token delivered to iframe | ✓ | |
 | `@tolgee/apps-sdk` exposing `getContext()` | ✓ | |
 | Plugin → Tolgee REST API auth (token-based) | | ✓ |
@@ -237,6 +238,16 @@ The plugin backend verifies the JWT against Tolgee's published public key (JWKS 
 | `modules.translation-action[].panelKey` | string | For `type: panel`, references a declared `translation-tools-panel[].key`. |
 | `modules.translation-action[].urlTemplate` | string | For static `link`. Adds `{languageTag}`, `{languageId}`, `{translationId}` to the supported tokens. |
 | `modules.translation-action[].visibility` | enum | `always` or `on-hover`. Default `on-hover`. May be overridden per-item via the dynamic decorators response. |
+| `modules.modal[]` | array | Iframe modal definitions. Triggered by any `*-action` of type `modal` (and shortcuts). |
+| `modules.modal[].key` | string | Unique within the plugin; referenced by `modalKey`. |
+| `modules.modal[].title` | string | Dialog title shown in Tolgee's modal chrome. |
+| `modules.modal[].entry` | string | Path relative to `baseUrl` loaded into the iframe. |
+| `modules.modal[].width` / `.height` | int | Default modal size in px. Clamped to 90vw / 90vh at runtime. |
+| `modules.bulk-action[]` | array | Items appended to the bulk-actions bar (visible when ≥1 keys selected). Each item has `key`, `title`, `icon?`, `type: link \| modal`, and either `urlTemplate` or `modalKey`. The modal iframe additionally receives `selectedKeyIds`. |
+| `modules.translations-toolbar-action[]` | array | Items appended to the translations view toolbar (next to +KEY). Same shape as bulk-action. |
+| `modules.project-menu-action[]` | array | Sidebar entries that don't navigate to a route — clicking opens a modal (or external link). Same shape. |
+| `modules.key-edit-footer-action[]` | array | Buttons appended to the key-edit dialog footer. Modal iframes also receive `keyId`. |
+| `modules.shortcut[]` | array | Global keyboard shortcut registry. Each entry has `key`, `combination` (mousetrap-style, e.g. `Mod+Shift+E`), `type: link \| modal`, and either `urlTemplate` or `modalKey`. `Mod` resolves to ⌘ on macOS and Ctrl elsewhere. |
 
 Later scopes will extend `modules` with additional types (`editor-right-panel`, `translation-decorator`, `custom-mt`, `modal`, …) and add top-level fields (`backendBaseUrl`, optionally `assets` when ZIP delivery lands).
 
@@ -361,7 +372,13 @@ Rules:
 
 **CORS**: the plugin's `decoratorsUrl` must include `Access-Control-Allow-Origin` matching the Tolgee webapp's origin (or `*` for dev), and must allow the `Authorization` header.
 
-**Caching**: the webapp caches responses per `(installId, sorted keyIds, sorted languageTags)` for ~30 seconds. The plugin can rely on webhooks (`translation.set`, etc.) to know when its data changes; a future iteration will let plugins push cache invalidations to Tolgee.
+**Caching**: the webapp caches responses per `(installId, sorted keyIds, sorted languageTags)` for ~30 seconds. The plugin can rely on webhooks (`SET_TRANSLATIONS`, `CREATE_KEY`, etc. — see below) to know when its data changes; a future iteration will let plugins push cache invalidations to Tolgee.
+
+### 3.6 Webhook event names
+
+A manifest's `webhooks.events` array may contain **any value matching a Tolgee `ActivityType` enum name**, e.g. `SET_TRANSLATIONS`, `CREATE_KEY`, `BATCH_KEY_RESTORE`, `GLOSSARY_TERM_CREATE`, `TASK_FINISH`, …. The full list of typed payload shapes is generated into `@tginternal/client` as the `webhooks` interface (one entry per activity type); the dev-plugin's `onWebhook(payload, type, handler)` utility narrows by `payload.activityData?.type` to give a fully-typed payload inside the handler.
+
+Manifest validation rejects any event name that doesn't match an `ActivityType`. Unknown names return `app_manifest_invalid`.
 
 **Future** (`{branchId}`, `{branchName}`) — added when Tolgee gains branch support.
 
@@ -389,6 +406,36 @@ The Tolgee webapp runs a dispatcher that routes `type` to a handler (`getContext
 - The SDK enforces both. Plugin authors never see the raw API.
 
 Hand-rolling the correlation-id plumbing is fine for the PoC. For later polish, [`comlink`](https://github.com/GoogleChromeLabs/comlink) and [`penpal`](https://github.com/Aaronius/penpal) wrap postMessage into proxy-feeling RPC APIs and are worth evaluating before scaling the SDK surface.
+
+### 3.7 Modal triggers
+
+A `modal` module defines the iframe content; the trigger module determines **where** in the Tolgee UI it can be opened from. Each trigger entry has `type: link | modal`; modal types reference a declared modal by `modalKey`. Five trigger anchors are wired today:
+
+| Trigger module | UI anchor | Extra `tolgee-app:init` payload |
+| --- | --- | --- |
+| `bulk-action` | Bulk-actions bar (visible when ≥1 keys selected). | `selectedKeyIds: number[]` |
+| `translations-toolbar-action` | Top of the translations view, next to the +KEY button. | (project context only) |
+| `project-menu-action` | Project sidebar — sits alongside `project-dashboard-page` entries but opens a modal instead of routing. | (project context only) |
+| `key-edit-footer-action` | Footer of the key-edit dialog, next to Cancel/Save. | `keyId` |
+| `shortcut` | Global keyboard shortcut bound in the translations view. | The currently-focused selection if any, else project context only. |
+
+#### Modal lifecycle
+
+- The webapp owns the dialog chrome (title bar + close ×). Backdrop click and ESC close it.
+- The plugin can post `{ type: 'tolgee-app:close' }` from inside its iframe to close itself programmatically.
+- A new `open()` call replaces the currently-open modal (single-slot policy).
+
+#### Shortcut combination grammar
+
+`combination` is a mousetrap-style string of `+`-separated tokens, last one being the key:
+
+| Token | Meaning |
+| --- | --- |
+| `Mod` | ⌘ on macOS, Ctrl elsewhere |
+| `Ctrl` / `Meta` / `Shift` / `Alt` | explicit modifiers |
+| (any single character) | the trigger key — matched case-insensitively against `event.key` |
+
+Examples: `Mod+Shift+E`, `Ctrl+K`, `Shift+/`. Last-registered shortcut wins on collisions; no conflict warning.
 
 ### 3.5 Iframe sandboxing
 

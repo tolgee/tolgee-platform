@@ -1475,6 +1475,67 @@ export interface components {
       "project-dashboard-page"?: components["schemas"]["ProjectDashboardPageModule"][];
       "translation-action"?: components["schemas"]["TranslationActionModule"][];
       "translation-tools-panel"?: components["schemas"]["TranslationToolsPanelModule"][];
+      "modal"?: components["schemas"]["ModalModule"][];
+      "bulk-action"?: components["schemas"]["BulkActionModule"][];
+      "translations-toolbar-action"?: components["schemas"]["TranslationsToolbarActionModule"][];
+      "project-menu-action"?: components["schemas"]["ProjectMenuActionModule"][];
+      "key-edit-footer-action"?: components["schemas"]["KeyEditFooterActionModule"][];
+      "shortcut"?: components["schemas"]["ShortcutModule"][];
+    };
+    ModalModule: {
+      entry: string;
+      /** Format: int32 */
+      height?: number;
+      icon?: string;
+      key: string;
+      title: string;
+      /** Format: int32 */
+      width?: number;
+    };
+    BulkActionModule: {
+      icon?: string;
+      key: string;
+      modalKey?: string;
+      title: string;
+      /** @enum {string} */
+      type: "link" | "panel" | "tab" | "modal";
+      urlTemplate?: string;
+    };
+    TranslationsToolbarActionModule: {
+      icon?: string;
+      key: string;
+      modalKey?: string;
+      title: string;
+      /** @enum {string} */
+      type: "link" | "panel" | "tab" | "modal";
+      urlTemplate?: string;
+    };
+    ProjectMenuActionModule: {
+      icon?: string;
+      key: string;
+      modalKey?: string;
+      title: string;
+      /** @enum {string} */
+      type: "link" | "panel" | "tab" | "modal";
+      urlTemplate?: string;
+    };
+    KeyEditFooterActionModule: {
+      icon?: string;
+      key: string;
+      modalKey?: string;
+      title: string;
+      /** @enum {string} */
+      type: "link" | "panel" | "tab" | "modal";
+      urlTemplate?: string;
+    };
+    ShortcutModule: {
+      combination: string;
+      key: string;
+      modalKey?: string;
+      title?: string;
+      /** @enum {string} */
+      type: "link" | "panel" | "tab" | "modal";
+      urlTemplate?: string;
     };
     AppManifestPreviewModel: {
       appId: string;
@@ -3686,9 +3747,10 @@ export interface components {
       icon: string;
       key: string;
       tabKey?: string;
+      modalKey?: string;
       tooltip: string;
       /** @enum {string} */
-      type: "link" | "panel" | "tab";
+      type: "link" | "panel" | "tab" | "modal";
       urlTemplate?: string;
       /** @enum {string} */
       visibility?: "always" | "on-hover";
@@ -6965,9 +7027,10 @@ export interface components {
       icon: string;
       key: string;
       panelKey?: string;
+      modalKey?: string;
       tooltip: string;
       /** @enum {string} */
-      type: "link" | "panel" | "tab";
+      type: "link" | "panel" | "tab" | "modal";
       urlTemplate?: string;
       /** @enum {string} */
       visibility?: "always" | "on-hover";

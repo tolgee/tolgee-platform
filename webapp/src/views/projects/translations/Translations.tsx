@@ -29,6 +29,7 @@ import { BatchOperationsChangeIndicator } from './BatchOperations/BatchOperation
 import { FloatingToolsPanel } from './ToolsPanel/FloatingToolsPanel';
 import { countFilters } from './TranslationFilters/summary';
 import { AiPlayground } from './ToolsPanel/AiPlayground';
+import { useAppShortcuts } from '../apps/useAppShortcuts';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -42,6 +43,8 @@ export const Translations = () => {
   const { t } = useTranslate();
   const project = useProject();
   const projectPermissions = useProjectPermissions();
+
+  useAppShortcuts(project.id);
 
   const isLoading = useTranslationsSelector((c) => c.isLoading);
   const isFetching = useTranslationsSelector((c) => c.isFetching);
