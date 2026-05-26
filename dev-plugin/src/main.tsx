@@ -4,6 +4,7 @@ import './index.css'
 import App from './App.tsx'
 import ToolsPanel from './ToolsPanel.tsx'
 import KeyEditTab from './KeyEditTab.tsx'
+import ModalExplain from './ModalExplain.tsx'
 
 const route = window.location.pathname.replace(/\/+$/, '') || '/'
 const Root =
@@ -11,7 +12,9 @@ const Root =
     ? ToolsPanel
     : route === '/key-edit-tab/audit'
       ? KeyEditTab
-      : App
+      : route === '/modal/explain'
+        ? ModalExplain
+        : App
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

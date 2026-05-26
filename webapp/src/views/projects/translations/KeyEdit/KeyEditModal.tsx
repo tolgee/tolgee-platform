@@ -3,14 +3,20 @@ import {
   DialogTitle,
   DialogActions,
   DialogContent,
+  IconButton,
   Tabs,
   Tab,
+  Tooltip,
   styled,
 } from '@mui/material';
 import { useTranslate, T } from '@tolgee/react';
 import { Formik } from 'formik';
 import { Button } from '@mui/material';
 import { getFirstPluralParameter } from '@tginternal/editor';
+import {
+  useAppTriggerDispatch,
+  useAppTriggers,
+} from '../../apps/useAppTriggers';
 
 import { useProject } from 'tg.hooks/useProject';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
@@ -332,6 +338,11 @@ export const KeyEditModal: React.FC<Props> = ({
                   <T keyName="global_form_save" />
                 </LoadingButton>
               )}
+              <KeyEditFooterAppActions
+                keyId={keyId}
+                keyName={data.keyName}
+                keyNamespace={data.keyNamespace}
+              />
             </DialogActions>
             {warningOpen && (
               <ConfirmationDialog
@@ -345,5 +356,52 @@ export const KeyEditModal: React.FC<Props> = ({
         );
       }}
     </Formik>
+  );
+};
+
+const KeyEditFooterAppActions = ({
+  keyId,
+  keyName,
+  keyNamespace,
+}: {
+  keyId: number;
+  keyName: string;
+  keyNamespace?: string | null;
+}) => {
+  const project = useProject();
+  const triggers = useAppTriggers(project.id, 'key-edit-footer-action');
+  const dispatch = useAppTriggerDispatch();
+  if (triggers.length === 0) return null;
+  return (
+    <>
+      {triggers.map((trigger) => (
+        <Tooltip
+          key={`app-key-edit-footer-${trigger.install.id}-${trigger.item.key}`}
+          title={trigger.item.title ?? trigger.item.key}
+          disableInteractive
+        >
+          <IconButton
+            data-cy="key-edit-footer-app-action"
+            data-cy-key={trigger.item.key}
+            size="small"
+            onClick={() =>
+              dispatch(trigger, {
+                templateVars: {
+                  keyId,
+                  keyName,
+                  keyNamespace: keyNamespace ?? undefined,
+                  projectId: project.id,
+                },
+                keyId,
+              })
+            }
+          >
+            <span style={{ fontSize: '1.1em', lineHeight: 1 }}>
+              {trigger.item.icon ?? '🔘'}
+            </span>
+          </IconButton>
+        </Tooltip>
+      ))}
+    </>
   );
 };

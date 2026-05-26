@@ -13,6 +13,7 @@ import { ImportView } from './import/ImportView';
 import { ProjectMembersView } from './members/ProjectMembersView';
 import { ProjectSettingsView } from './project/ProjectSettingsView';
 import { TranslationsView } from './translations/TranslationsView';
+import { AppModalProvider } from './apps/AppModalContext';
 import { TrashView } from './translations/trash/TrashView';
 import { SingleKeyView } from './translations/SingleKeyView';
 import { DashboardView } from './dashboard/DashboardView';
@@ -36,8 +37,9 @@ export const ProjectRouter = () => {
 
   return (
     <ProjectContext id={Number(projectId)}>
-      {matchedTranslations?.isExact && <HideObserver />}
-      <Switch>
+      <AppModalProvider>
+        {matchedTranslations?.isExact && <HideObserver />}
+        <Switch>
         <Route exact path={LINKS.PROJECT_TRANSLATIONS_SINGLE.template}>
           <SingleKeyView />
         </Route>
@@ -135,8 +137,9 @@ export const ProjectRouter = () => {
         <Route exact path={LINKS.PROJECT_TRANSLATIONS_TRASH_BRANCHED.template}>
           <TrashView />
         </Route>
-      </Switch>
-      <routes.Project />
+        </Switch>
+        <routes.Project />
+      </AppModalProvider>
     </ProjectContext>
   );
 };

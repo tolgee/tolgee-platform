@@ -17,6 +17,10 @@ export type UseAppIframeMessagingOptions = {
   entry: string;
   selection: IframeSelection;
   onResize?: (height: number) => void;
+  /** Invoked when the iframe posts `{ type: 'tolgee-app:close' }`. */
+  onClose?: () => void;
+  /** Anchor-specific fields merged into the tolgee-app:init payload. */
+  extraInitPayload?: Record<string, unknown>;
 };
 
 export type UseAppIframeMessagingResult = {
@@ -45,6 +49,8 @@ export function useAppIframeMessaging(
     entry,
     selection,
     onResize,
+    onClose,
+    extraInitPayload,
   } = options;
 
   const token = useAppToken(projectId, installId);
@@ -71,6 +77,7 @@ export function useAppIframeMessaging(
         organizationId,
         projectId,
         ...selection,
+        ...extraInitPayload,
       },
       appOrigin
     );
@@ -93,6 +100,8 @@ export function useAppIframeMessaging(
         if (Number.isFinite(next) && next > 0 && onResize) {
           onResize(next);
         }
+      } else if (data.type === 'tolgee-app:close' && onClose) {
+        onClose();
       }
     };
     window.addEventListener('message', handler);
@@ -105,6 +114,7 @@ export function useAppIframeMessaging(
     projectId,
     selectionKey,
     onResize,
+    onClose,
   ]);
 
   useEffect(() => {

@@ -29,6 +29,18 @@ data class AppManifestModules(
   val keyAction: List<KeyActionModule>? = null,
   @JsonProperty("translation-action")
   val translationAction: List<TranslationActionModule>? = null,
+  @JsonProperty("modal")
+  val modal: List<ModalModule>? = null,
+  @JsonProperty("bulk-action")
+  val bulkAction: List<BulkActionModule>? = null,
+  @JsonProperty("translations-toolbar-action")
+  val translationsToolbarAction: List<TranslationsToolbarActionModule>? = null,
+  @JsonProperty("project-menu-action")
+  val projectMenuAction: List<ProjectMenuActionModule>? = null,
+  @JsonProperty("key-edit-footer-action")
+  val keyEditFooterAction: List<KeyEditFooterActionModule>? = null,
+  @JsonProperty("shortcut")
+  val shortcut: List<ShortcutModule>? = null,
 )
 
 data class ProjectDashboardPageModule(
@@ -60,6 +72,7 @@ data class KeyActionModule(
   val dynamic: Boolean = false,
   val urlTemplate: String? = null,
   val tabKey: String? = null,
+  val modalKey: String? = null,
   val visibility: AppActionVisibility? = null,
 )
 
@@ -71,7 +84,62 @@ data class TranslationActionModule(
   val dynamic: Boolean = false,
   val urlTemplate: String? = null,
   val panelKey: String? = null,
+  val modalKey: String? = null,
   val visibility: AppActionVisibility? = null,
+)
+
+data class ModalModule(
+  val key: String,
+  val title: String,
+  val entry: String,
+  val icon: String? = null,
+  val width: Int? = null,
+  val height: Int? = null,
+)
+
+data class BulkActionModule(
+  val key: String,
+  val title: String,
+  val type: AppActionType,
+  val icon: String? = null,
+  val urlTemplate: String? = null,
+  val modalKey: String? = null,
+)
+
+data class TranslationsToolbarActionModule(
+  val key: String,
+  val title: String,
+  val type: AppActionType,
+  val icon: String? = null,
+  val urlTemplate: String? = null,
+  val modalKey: String? = null,
+)
+
+data class ProjectMenuActionModule(
+  val key: String,
+  val title: String,
+  val type: AppActionType,
+  val icon: String? = null,
+  val urlTemplate: String? = null,
+  val modalKey: String? = null,
+)
+
+data class KeyEditFooterActionModule(
+  val key: String,
+  val title: String,
+  val type: AppActionType,
+  val icon: String? = null,
+  val urlTemplate: String? = null,
+  val modalKey: String? = null,
+)
+
+data class ShortcutModule(
+  val key: String,
+  val combination: String,
+  val type: AppActionType,
+  val title: String? = null,
+  val urlTemplate: String? = null,
+  val modalKey: String? = null,
 )
 
 enum class AppActionType {
@@ -83,6 +151,9 @@ enum class AppActionType {
 
   @JsonProperty("tab")
   TAB,
+
+  @JsonProperty("modal")
+  MODAL,
 }
 
 enum class AppActionVisibility {

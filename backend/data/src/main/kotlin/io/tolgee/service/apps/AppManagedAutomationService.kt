@@ -105,17 +105,12 @@ class AppManagedAutomationService(
     automation: Automation,
   ): AutomationTrigger {
     val activityType =
-      EVENT_TO_ACTIVITY_TYPE[event]
+      runCatching { ActivityType.valueOf(event) }.getOrNull()
         ?: error("Unknown app event '$event' — manifest validation should have rejected this earlier")
     return AutomationTrigger(automation).apply {
       this.type = AutomationTriggerType.ACTIVITY
       this.activityType = activityType
       this.debounceDurationInMs = 0
     }
-  }
-
-  companion object {
-    val EVENT_TO_ACTIVITY_TYPE: Map<String, ActivityType> =
-      mapOf("translation.set" to ActivityType.SET_TRANSLATIONS)
   }
 }

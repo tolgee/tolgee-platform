@@ -143,3 +143,50 @@
   font-size: 0.7rem;
   color: #888;
 }
+
+.modal-explain {
+  font-family: system-ui, sans-serif;
+  padding: 16px 20px;
+  display: grid;
+  gap: 12px;
+}
+
+.modal-explain h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.modal-explain table.kv {
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.modal-explain table.kv th {
+  text-align: left;
+  font-weight: 500;
+  padding: 4px 12px 4px 0;
+  color: #555;
+  vertical-align: top;
+}
+
+.modal-explain table.kv td {
+  padding: 4px 0;
+}
+
+.modal-explain .modal-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.modal-explain .modal-actions button {
+  padding: 6px 14px;
+  border-radius: 4px;
+  border: 1px solid #d0d0d0;
+  background: #fafafa;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.modal-explain .modal-actions button:hover {
+  background: #f0f0f0;
+}
