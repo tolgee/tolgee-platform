@@ -5591,8 +5591,4 @@
             <sql>DROP INDEX CONCURRENTLY IF EXISTS ix_tm_entry_lower_target_trgm;</sql>
         </rollback>
     </changeSet>
-
-    <changeSet author="jirikuchynka" id="drop-import-settings-convert-placeholders-to-icu">
-        <dropColumn tableName="import_settings" columnName="convert_placeholders_to_icu"/>
-    </changeSet>
 </databaseChangeLog>

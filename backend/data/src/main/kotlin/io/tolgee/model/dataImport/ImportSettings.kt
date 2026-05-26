@@ -33,6 +33,10 @@ class ImportSettings(
   @ColumnDefault("false")
   override var overrideKeyDescriptions: Boolean = false
 
+  @Deprecated("Removed in favor of ICU conversion being always enabled")
+  @ColumnDefault("true")
+  var convertPlaceholdersToIcu: Boolean = true
+
   @ColumnDefault("true")
   override var createNewKeys: Boolean = true
 }
