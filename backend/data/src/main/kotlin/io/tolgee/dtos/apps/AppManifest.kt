@@ -37,8 +37,6 @@ data class AppManifestModules(
   val translationsToolbarAction: List<TranslationsToolbarActionModule>? = null,
   @JsonProperty("project-menu-action")
   val projectMenuAction: List<ProjectMenuActionModule>? = null,
-  @JsonProperty("key-edit-footer-action")
-  val keyEditFooterAction: List<KeyEditFooterActionModule>? = null,
   @JsonProperty("shortcut")
   val shortcut: List<ShortcutModule>? = null,
 )
@@ -116,15 +114,6 @@ data class TranslationsToolbarActionModule(
 )
 
 data class ProjectMenuActionModule(
-  val key: String,
-  val title: String,
-  val type: AppActionType,
-  val icon: String? = null,
-  val urlTemplate: String? = null,
-  val modalKey: String? = null,
-)
-
-data class KeyEditFooterActionModule(
   val key: String,
   val title: String,
   val type: AppActionType,

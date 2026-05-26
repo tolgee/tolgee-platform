@@ -127,7 +127,6 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
       node("modules.bulk-action[0].modalKey").isEqualTo("explain")
       node("modules.translations-toolbar-action[0].key").isEqualTo("toolbar-explain")
       node("modules.project-menu-action[0].key").isEqualTo("menu-explain")
-      node("modules.key-edit-footer-action[0].key").isEqualTo("footer-explain")
       node("modules.shortcut[0].key").isEqualTo("shortcut-explain")
       node("modules.shortcut[0].combination").isEqualTo("Mod+Shift+E")
     }
@@ -460,9 +459,6 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
         ],
         "project-menu-action": [
           {"key": "menu-explain", "title": "Configure", "icon": "⚙️", "type": "modal", "modalKey": "explain"}
-        ],
-        "key-edit-footer-action": [
-          {"key": "footer-explain", "title": "Translate with AI", "icon": "🤖", "type": "modal", "modalKey": "explain"}
         ],
         "shortcut": [
           {"key": "shortcut-explain", "combination": "Mod+Shift+E", "type": "modal", "modalKey": "explain"}

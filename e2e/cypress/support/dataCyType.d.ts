@@ -451,7 +451,6 @@ declare namespace DataCy {
         "key-char-limit-checkbox" |
         "key-char-limit-input" |
         "key-edit-app-tab-iframe" |
-        "key-edit-footer-app-action" |
         "key-edit-tab-advanced" |
         "key-edit-tab-app" |
         "key-edit-tab-context" |

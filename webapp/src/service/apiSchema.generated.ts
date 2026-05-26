@@ -1479,7 +1479,6 @@ export interface components {
       "bulk-action"?: components["schemas"]["BulkActionModule"][];
       "translations-toolbar-action"?: components["schemas"]["TranslationsToolbarActionModule"][];
       "project-menu-action"?: components["schemas"]["ProjectMenuActionModule"][];
-      "key-edit-footer-action"?: components["schemas"]["KeyEditFooterActionModule"][];
       "shortcut"?: components["schemas"]["ShortcutModule"][];
     };
     ModalModule: {
@@ -1511,15 +1510,6 @@ export interface components {
       urlTemplate?: string;
     };
     ProjectMenuActionModule: {
-      icon?: string;
-      key: string;
-      modalKey?: string;
-      title: string;
-      /** @enum {string} */
-      type: "link" | "panel" | "tab" | "modal";
-      urlTemplate?: string;
-    };
-    KeyEditFooterActionModule: {
       icon?: string;
       key: string;
       modalKey?: string;
