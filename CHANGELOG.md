@@ -1,3 +1,15 @@
+# [3.192.0](https://github.com/tolgee/tolgee-platform/compare/v3.191.0...v3.192.0) (2026-05-26)
+
+
+### Bug Fixes
+
+* speed up QA batch checks (branch copy, LT cache, chunk batching) ([#3670](https://github.com/tolgee/tolgee-platform/issues/3670)) ([03cceb7](https://github.com/tolgee/tolgee-platform/commit/03cceb77a9540b0b5e6819b0d961d2102394d3d3))
+
+
+### Features
+
+* drop ICU conversion toggle from import settings UI ([#3691](https://github.com/tolgee/tolgee-platform/issues/3691)) ([1624de7](https://github.com/tolgee/tolgee-platform/commit/1624de702805b4d351bb66b74e6404c8c50682b3))
+
 # [3.191.0](https://github.com/tolgee/tolgee-platform/compare/v3.190.6...v3.191.0) (2026-05-26)
 
 
