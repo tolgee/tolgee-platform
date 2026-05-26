@@ -49,7 +49,7 @@ class BatchJobManagementControllerTest :
       doAnswer { it.callRealMethod() }
         .doAnswer { throwingService.throwExceptionInTransaction() }
         .whenever(autoTranslationService)
-        .autoTranslateSync(any(), any(), any(), any(), any())
+        .autoTranslateSync(any(), any(), any(), any(), any(), any())
 
       performProjectAuthPost(
         "start-batch-job/machine-translate",

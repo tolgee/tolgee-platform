@@ -331,19 +331,19 @@ abstract class AbstractBatchJobConcurrentTest :
   // region Processor Mocks - Machine Translation
 
   protected fun makeMtProcessorPass() {
-    doAnswer { }.whenever(autoTranslationService).autoTranslateSync(any(), any(), any(), any(), any())
+    doAnswer { }.whenever(autoTranslationService).autoTranslateSync(any(), any(), any(), any(), any(), any())
   }
 
   protected fun makeMtProcessorPassWithDelay(delayMs: Long) {
     doAnswer {
       Thread.sleep(delayMs)
-    }.whenever(autoTranslationService).autoTranslateSync(any(), any(), any(), any(), any())
+    }.whenever(autoTranslationService).autoTranslateSync(any(), any(), any(), any(), any(), any())
   }
 
   protected fun makeMtProcessorPassWithCounter(counter: AtomicInteger) {
     doAnswer {
       counter.incrementAndGet()
-    }.whenever(autoTranslationService).autoTranslateSync(any(), any(), any(), any(), any())
+    }.whenever(autoTranslationService).autoTranslateSync(any(), any(), any(), any(), any(), any())
   }
 
   protected fun makeMtProcessorPassWithConcurrencyTracking(
@@ -358,7 +358,7 @@ abstract class AbstractBatchJobConcurrentTest :
       } finally {
         currentConcurrency.decrementAndGet()
       }
-    }.whenever(autoTranslationService).autoTranslateSync(any(), any(), any(), any(), any())
+    }.whenever(autoTranslationService).autoTranslateSync(any(), any(), any(), any(), any(), any())
   }
 
   // endregion

@@ -8,6 +8,7 @@ import io.tolgee.service.PromptService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.translation.AutoTranslationService
+import io.tolgee.service.translationMemory.TmAutoTranslateProvider
 import org.springframework.stereotype.Component
 import kotlin.coroutines.CoroutineContext
 
@@ -19,6 +20,7 @@ class GenericAutoTranslationChunkProcessor(
   private val promptService: PromptService,
   private val mtProviderCatching: MtProviderCatching,
   private val progressManager: ProgressManager,
+  private val tmAutoTranslateProvider: TmAutoTranslateProvider,
 ) {
   fun process(
     job: BatchJobDto,
@@ -30,6 +32,20 @@ class GenericAutoTranslationChunkProcessor(
     val languages = languageService.findByIdIn(chunk.map { it.languageId }.toSet()).associateBy { it.id }
     val keys = keyService.find(chunk.map { it.keyId }).associateBy { it.id }
 
+    val precomputedTmMatches =
+      if (useTranslationMemory) {
+        tmAutoTranslateProvider.getAutoTranslatedValuesForChunk(
+          items =
+            chunk
+              .filter { keys.containsKey(it.keyId) && languages.containsKey(it.languageId) }
+              .map { it.keyId to it.languageId },
+          keysById = keys,
+          languagesById = languages,
+        )
+      } else {
+        null
+      }
+
     mtProviderCatching.iterateCatching(chunk, coroutineContext) { item ->
       val (keyId, languageId) = item
       val languageTag = languages[languageId]?.tag ?: return@iterateCatching
@@ -40,6 +56,7 @@ class GenericAutoTranslationChunkProcessor(
         useTranslationMemory = useTranslationMemory,
         useMachineTranslation = useMachineTranslation,
         isBatch = true,
+        precomputedTmMatches = precomputedTmMatches,
       )
       progressManager.reportSingleChunkProgress(job.id)
     }
