@@ -294,7 +294,6 @@ declare namespace DataCy {
         "import-conflicts-not-resolved-dialog": true;
         "import-conflicts-not-resolved-dialog-cancel-button": true;
         "import-conflicts-not-resolved-dialog-resolve-button": true;
-        "import-convert-placeholders-to-icu-checkbox": true;
         "import-file-error": true;
         "import-file-error-collapse-button": true;
         "import-file-error-more-less-button": true;
@@ -781,6 +780,7 @@ declare namespace DataCy {
         "tm-empty-wizard-import": true;
         "tm-empty-wizard-manual": true;
         "tm-entries-header": true;
+        "tm-entries-header-base-badge": true;
         "tm-entries-language-filter": true;
         "tm-entries-language-select-item": true;
         "tm-entries-layout-flat": true;
