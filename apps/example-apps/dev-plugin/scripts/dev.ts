@@ -4,6 +4,10 @@
  * route picks it up, and (if an install was registered) PATCHes the
  * Tolgee install's manifest URL so the new tunnel URL takes effect
  * immediately.
+ *
+ * Skips the tunnel entirely when the registered Tolgee instance lives
+ * on localhost — Tolgee can reach the dev plugin directly, no public
+ * URL needed. Force-disable via `TOLGEE_DEV_TUNNEL=none`.
  */
 import { existsSync } from 'node:fs'
 import { bin, install, Tunnel } from 'cloudflared'
@@ -12,9 +16,27 @@ import {
   patchManifestUrl,
   readInstallState,
   writeTunnelState,
+  type InstallState,
 } from './lib'
 
 const VITE_PORT = 5180
+const LOCAL_BASE_URL = `http://localhost:${VITE_PORT}`
+
+const isLocalHost = (urlString: string): boolean => {
+  try {
+    const host = new URL(urlString).hostname
+    return host === 'localhost' || host === '127.0.0.1' || host === '::1'
+  } catch {
+    return false
+  }
+}
+
+const shouldSkipTunnel = (installState: InstallState | null): boolean => {
+  if (process.env.TOLGEE_DEV_TUNNEL === 'none') return true
+  if (installState && isLocalHost(installState.tolgeeUrl)) return true
+  if (process.env.TOLGEE_URL && isLocalHost(process.env.TOLGEE_URL)) return true
+  return false
+}
 
 const ensureBinary = async (): Promise<void> => {
   if (!existsSync(bin)) {
@@ -38,12 +60,28 @@ const startTunnel = async (): Promise<string> => {
 
 const main = async (): Promise<void> => {
   clearTunnelState()
+  const installState = readInstallState()
+
+  if (shouldSkipTunnel(installState)) {
+    console.log(
+      `[tunnel] skipping cloudflared — Tolgee reaches the plugin at ${LOCAL_BASE_URL}`
+    )
+    writeTunnelState({ baseUrl: LOCAL_BASE_URL })
+    await maybePatchManifestUrl(installState, LOCAL_BASE_URL)
+    return
+  }
+
   await ensureBinary()
   const baseUrl = await startTunnel()
   console.log(`[tunnel] live at ${baseUrl}`)
   writeTunnelState({ baseUrl })
+  await maybePatchManifestUrl(installState, baseUrl)
+}
 
-  const installState = readInstallState()
+const maybePatchManifestUrl = async (
+  installState: InstallState | null,
+  baseUrl: string
+): Promise<void> => {
   if (!installState) {
     console.log(
       '[tunnel] no install registered — run `npm run register` to ' +
@@ -54,7 +92,7 @@ const main = async (): Promise<void> => {
   try {
     await patchManifestUrl(installState, `${baseUrl}/manifest.json`)
     console.log(
-      `[tunnel] PATCHed install ${installState.installId} to use new tunnel URL`
+      `[tunnel] PATCHed install ${installState.installId} to use ${baseUrl}/manifest.json`
     )
   } catch (err) {
     console.error('[tunnel] manifest-url update failed:', err)

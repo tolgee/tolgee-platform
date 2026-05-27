@@ -1,6 +1,12 @@
 # Tolgee instance the plugin targets. Used by scripts/register.ts and
-# by the dev tunnel orchestrator.
+# by the dev tunnel orchestrator. When this points at localhost, the
+# dev orchestrator skips Cloudflare (Tolgee can reach the plugin
+# directly).
 TOLGEE_URL={{tolgeeUrl}}
+
+# Force-disable the tunnel even when Tolgee is remote. Useful with a
+# custom proxy / Named Tunnel you boot yourself.
+# TOLGEE_DEV_TUNNEL=none
 
 # Webhook signing secret — Tolgee gives you this when the plugin is
 # registered, and it's also written to .tolgee-dev/install.json.
