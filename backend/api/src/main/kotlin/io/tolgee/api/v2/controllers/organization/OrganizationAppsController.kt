@@ -19,6 +19,7 @@ import org.springframework.hateoas.CollectionModel
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -121,6 +122,24 @@ class OrganizationAppsController(
     @PathVariable installId: Long,
   ): AppInstallModel {
     val install = appInstallService.refresh(organizationId, installId)
+    return appInstallModelAssembler.toModel(install)
+  }
+
+  @PatchMapping("/{installId}/manifest-url")
+  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @Operation(
+    summary = "Update manifest URL",
+    description =
+      "Repoints an existing install at a new manifest URL and re-fetches the manifest from there. " +
+        "The new manifest must declare the same `id` as the original. Useful for development: a tunnel " +
+        "URL that changes on every restart can be swapped in without re-installing the app.",
+  )
+  fun updateManifestUrl(
+    @PathVariable organizationId: Long,
+    @PathVariable installId: Long,
+    @RequestBody body: RegisterAppRequest,
+  ): AppInstallModel {
+    val install = appInstallService.updateManifestUrl(organizationId, installId, body.manifestUrl)
     return appInstallModelAssembler.toModel(install)
   }
 

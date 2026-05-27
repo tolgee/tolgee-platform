@@ -1,6 +1,7 @@
 package io.tolgee.api.v2.controllers.organization
 
 import io.tolgee.development.testDataBuilder.data.AppsTestData
+import io.tolgee.fixtures.AuthorizedRequestFactory
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
@@ -17,11 +18,15 @@ import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.MediaType
 import org.springframework.test.context.bean.override.mockito.MockitoBean
+import org.springframework.test.web.servlet.ResultActions
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch
 import org.springframework.web.client.ResourceAccessException
 import org.springframework.web.client.RestTemplate
 
 class OrganizationAppsControllerTest : AuthorizedControllerTest() {
+
   @Autowired
   lateinit var appInstallService: AppInstallService
 
@@ -274,6 +279,40 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `updates the manifest URL and refetches from the new location`() {
+    mockManifest(validManifest())
+    performAuthPost(appsUrl(), registerBody()).andIsOk
+    val installId = appInstallService.findAll(testData.organization.id).single().id
+
+    mockManifest(validManifestV2())
+    performAuthPatch(
+      "${appsUrl()}/$installId/manifest-url",
+      mapOf("manifestUrl" to "https://example.com/new-location/manifest.json"),
+    ).andIsOk.andAssertThatJson {
+      node("version").isEqualTo("0.2.0")
+      node("modules.project-dashboard-page[0].title").isEqualTo("Home v2")
+    }
+
+    val install = appInstallService.find(installId)!!
+    assertThat(install.manifestUrl).isEqualTo("https://example.com/new-location/manifest.json")
+  }
+
+  @Test
+  fun `manifest URL update rejects manifest whose app id changed`() {
+    mockManifest(validManifest())
+    performAuthPost(appsUrl(), registerBody()).andIsOk
+    val installId = appInstallService.findAll(testData.organization.id).single().id
+
+    mockManifest(validManifest().replace("\"test-app\"", "\"different-app\""))
+    performAuthPatch(
+      "${appsUrl()}/$installId/manifest-url",
+      mapOf("manifestUrl" to "https://example.com/new-location/manifest.json"),
+    ).andIsBadRequest.andAssertThatJson {
+      node("code").isEqualTo("app_manifest_invalid")
+    }
+  }
+
+  @Test
   fun `removes a registered app`() {
     mockManifest(validManifest())
     performAuthPost(appsUrl(), registerBody()).andIsOk
@@ -286,6 +325,15 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
   private fun appsUrl() = "/v2/organizations/${testData.organization.id}/apps"
 
   private fun registerBody() = mapOf("manifestUrl" to "https://example.com/manifest.json")
+
+  private fun performAuthPatch(url: String, body: Any): ResultActions {
+    loginAsAdminIfNotLogged()
+    return perform(
+      AuthorizedRequestFactory.addToken(patch(url))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(body)),
+    )
+  }
 
   private fun mockManifest(json: String) {
     doReturn(json).whenever(restTemplate).getForObject(anyString(), eq(String::class.java))

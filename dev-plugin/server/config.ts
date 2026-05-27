@@ -14,3 +14,12 @@ export const WEBHOOK_SECRET = process.env.TOLGEE_WEBHOOK_SECRET ?? null
 export const DATA_DIR = join(__dirname, '.data')
 export const DATA_FILE = join(DATA_DIR, 'data.json')
 export const ACTIVITY_RETENTION_DAYS = 14
+
+/**
+ * Tunnel state file written by scripts/dev.ts when the Cloudflare quick
+ * tunnel comes up. The manifest route reads `baseUrl` from this file on
+ * every request so manifest URLs always reflect the currently-active
+ * tunnel without restarting the server.
+ */
+export const TUNNEL_STATE_DIR = join(__dirname, '..', '.tolgee-dev')
+export const TUNNEL_STATE_FILE = join(TUNNEL_STATE_DIR, 'tunnel.json')
