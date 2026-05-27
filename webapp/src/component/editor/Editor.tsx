@@ -112,19 +112,21 @@ export const Editor: React.FC<EditorProps> = ({
   const languageCompartment = useRef<Compartment>(new Compartment());
 
   const StyledEditorWrapper = useMemo(() => {
-    if (mode === 'keyName') {
-      return generateKeyNameStyle({
-        styled,
-        colors: theme.palette.placeholders.variant,
-        component: StyledEditor,
-      });
-    }
-    return generatePlaceholdersStyle({
+    // Compose both placeholder and keyName styles unconditionally — switching
+    // the wrapper based on `mode` would unmount the styled component on every
+    // mode change and tear down the underlying CodeMirror EditorView with it,
+    // breaking any test or interaction that toggles modes mid-edit.
+    const withPlaceholders = generatePlaceholdersStyle({
       styled,
       colors: theme.palette.placeholders,
       component: StyledEditor,
     });
-  }, [theme.palette.placeholders, mode]);
+    return generateKeyNameStyle({
+      styled,
+      colors: theme.palette.placeholders.variant,
+      component: withPlaceholders,
+    });
+  }, [theme.palette.placeholders]);
 
   keyBindings.current = shortcuts;
 
