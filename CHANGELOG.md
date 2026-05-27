@@ -1,3 +1,16 @@
+# [3.193.0](https://github.com/tolgee/tolgee-platform/compare/v3.192.0...v3.193.0) (2026-05-27)
+
+
+### Bug Fixes
+
+* allow API key access to get-modified-entities-by-revision endpoint ([#3697](https://github.com/tolgee/tolgee-platform/issues/3697)) ([a314585](https://github.com/tolgee/tolgee-platform/commit/a31458526989336a8c3b6b51cad0575a6f973be2)), closes [#2284](https://github.com/tolgee/tolgee-platform/issues/2284)
+
+
+### Features
+
+* announcement banner for Translation Memory management ([#3692](https://github.com/tolgee/tolgee-platform/issues/3692)) ([afde9b3](https://github.com/tolgee/tolgee-platform/commit/afde9b38d11fa2d83bb02417cef9188627399c24)), closes [tolgee/documentation#1100](https://github.com/tolgee/documentation/issues/1100)
+* include projectId in webhook payload ([#3695](https://github.com/tolgee/tolgee-platform/issues/3695)) ([20f291b](https://github.com/tolgee/tolgee-platform/commit/20f291b8840764e6e0b5fd6443d104b9f1f12e45))
+
 # [3.192.0](https://github.com/tolgee/tolgee-platform/compare/v3.191.0...v3.192.0) (2026-05-26)
 
 
