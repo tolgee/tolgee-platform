@@ -7,7 +7,7 @@
     "dev": "concurrently -k -n vite,server,tunnel -c blue,green,yellow \"npm:dev:frontend\" \"npm:dev:server\" \"npm:dev:tunnel\"",
     "dev:frontend": "vite",
     "dev:server": "tsx watch --env-file-if-exists=.env.local server/index.ts",
-    "dev:tunnel": "tsx scripts/dev.ts",
+    "dev:tunnel": "tsx --env-file-if-exists=.env.local scripts/dev.ts",
     "register": "tsx scripts/register.ts",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
