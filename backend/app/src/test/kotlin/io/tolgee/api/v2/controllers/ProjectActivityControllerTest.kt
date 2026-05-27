@@ -9,6 +9,8 @@ import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.activity.ActivityRevision
+import io.tolgee.model.enums.Scope
+import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import net.javacrumbs.jsonunit.assertj.JsonAssert
 import org.junit.jupiter.api.BeforeEach
@@ -147,6 +149,17 @@ class ProjectActivityControllerTest : ProjectAuthControllerTest("/v2/projects/")
       .andIsOk
       .andAssertThatJson {
         node("page.totalElements").isEqualTo(1)
+      }
+  }
+
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.ADMIN])
+  fun `returns modified entities with API key`() {
+    performProjectAuthPut("/import/apply").andIsOk
+    val revision = activityUtil.getLastRevision()
+    performProjectAuthGet("activity/revisions/${revision?.id}/modified-entities")
+      .andIsOk
+      .andAssertThatJson {
+        node("_embedded.modifiedEntities").isArray
       }
   }
 }

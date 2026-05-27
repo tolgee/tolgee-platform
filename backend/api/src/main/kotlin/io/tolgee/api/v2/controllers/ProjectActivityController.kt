@@ -99,6 +99,7 @@ class ProjectActivityController(
   @Operation(summary = "Get modified entities in revision")
   @GetMapping("/revisions/{revisionId}/modified-entities")
   @RequiresProjectPermissions([Scope.ACTIVITY_VIEW])
+  @AllowApiAccess
   fun getModifiedEntitiesByRevision(
     @ParameterObject pageable: Pageable,
     @PathVariable revisionId: Long,
