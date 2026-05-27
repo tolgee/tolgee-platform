@@ -63,7 +63,7 @@ class WebhookConfigService(
     try {
       webhookExecutor.signAndExecute(
         config = webhookConfig,
-        data = WebhookRequest(webhookConfigId, WebhookEventType.TEST, null),
+        data = WebhookRequest(webhookConfigId, projectId, WebhookEventType.TEST, null),
       )
     } catch (e: WebhookException) {
       return false

@@ -35,6 +35,7 @@ class WebhookProcessor(
     val data =
       WebhookRequest(
         webhookConfigId = config.id,
+        projectId = config.project.id,
         eventType = WebhookEventType.PROJECT_ACTIVITY,
         activityData = activityModel,
       )

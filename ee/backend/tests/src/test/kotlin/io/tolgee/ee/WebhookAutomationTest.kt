@@ -152,6 +152,7 @@ class WebhookAutomationTest : ProjectAuthControllerTest("/v2/projects/") {
 
       assertThatJson(httpEntity.body!!) {
         node("webhookConfigId").isValidId
+        node("projectId").isEqualTo(testData.projectBuilder.self.id)
         node("eventType").isEqualTo("PROJECT_ACTIVITY")
         node("activityData") {
           node("revisionId").isNumber
