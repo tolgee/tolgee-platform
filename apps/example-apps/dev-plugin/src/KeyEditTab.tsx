@@ -1,22 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { createApiClient, type components } from '@tginternal/client'
+import { type components } from '@tginternal/client'
+import {
+  createTolgeeApp,
+  createTolgeeAppClient,
+  type TolgeeAppContext,
+  type TolgeeAppSelection,
+} from '@tolgee/apps-sdk/browser'
 import './App.css'
 
 type KeyRow = components['schemas']['KeyWithTranslationsModel']
 type LanguageModel = components['schemas']['LanguageModel']
-
-type Selection = {
-  keyId: number | null
-  languageId: number | null
-  languageTag: string | null
-  translationId: number | null
-}
-
-type AppContext = {
-  token: string
-  projectId: number
-  apiUrl: string
-}
 
 type PluginState = {
   emojis: Record<string, string>
@@ -24,12 +17,7 @@ type PluginState = {
   events: Record<string, string[]>
 }
 
-const EMPTY_SELECTION: Selection = {
-  keyId: null,
-  languageId: null,
-  languageTag: null,
-  translationId: null,
-}
+const EMPTY_SELECTION: TolgeeAppSelection = {}
 
 const formatRelative = (iso: string): string => {
   const t = new Date(iso).getTime()
@@ -46,8 +34,8 @@ const formatRelative = (iso: string): string => {
 }
 
 function KeyEditTab() {
-  const [context, setContext] = useState<AppContext | null>(null)
-  const [selection, setSelection] = useState<Selection>(EMPTY_SELECTION)
+  const [context, setContext] = useState<TolgeeAppContext | null>(null)
+  const [selection, setSelection] = useState<TolgeeAppSelection>(EMPTY_SELECTION)
   const [row, setRow] = useState<KeyRow | null>(null)
   const [languages, setLanguages] = useState<LanguageModel[]>([])
   const [pluginState, setPluginState] = useState<PluginState>({
@@ -58,42 +46,21 @@ function KeyEditTab() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const handler = (event: MessageEvent) => {
-      const data = event.data
-      if (!data || typeof data !== 'object') return
-      if (data.type === 'tolgee-app:init') {
-        const { token, projectId, apiUrl, keyId, languageId, languageTag, translationId } = data
-        if (typeof token === 'string' && typeof projectId === 'number' && typeof apiUrl === 'string') {
-          setContext({ token, projectId, apiUrl })
-        }
-        setSelection({
-          keyId: keyId ?? null,
-          languageId: languageId ?? null,
-          languageTag: languageTag ?? null,
-          translationId: translationId ?? null,
-        })
-      } else if (data.type === 'tolgee-app:selection-changed') {
-        setSelection({
-          keyId: data.keyId ?? null,
-          languageId: data.languageId ?? null,
-          languageTag: data.languageTag ?? null,
-          translationId: data.translationId ?? null,
-        })
-      }
+    const app = createTolgeeApp()
+    app.context.then((ctx) => {
+      setContext(ctx)
+      setSelection(ctx.selection)
+    })
+    const off = app.onSelectionChanged(setSelection)
+    return () => {
+      off()
+      app.dispose()
     }
-    window.addEventListener('message', handler)
-    window.parent.postMessage({ type: 'tolgee-app:ready' }, '*')
-    return () => window.removeEventListener('message', handler)
   }, [])
 
   useEffect(() => {
     if (!context || selection.keyId == null) return
-    const client = createApiClient({
-      baseUrl: context.apiUrl,
-      userToken: context.token,
-      projectId: context.projectId,
-      autoThrow: false,
-    })
+    const client = createTolgeeAppClient(context)
     let cancelled = false
     ;(async () => {
       try {

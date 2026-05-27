@@ -1,15 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { createApiClient, type components } from '@tginternal/client'
+import { type components } from '@tginternal/client'
+import {
+  createTolgeeApp,
+  createTolgeeAppClient,
+  type TolgeeAppContext,
+} from '@tolgee/apps-sdk/browser'
 import './App.css'
 
 type KeyRow = components['schemas']['KeyWithTranslationsModel']
 type LanguageModel = components['schemas']['LanguageModel']
-
-type AppContext = {
-  token: string
-  projectId: number
-  apiUrl: string
-}
 
 type PluginState = {
   emojis: Record<string, string>
@@ -86,7 +85,7 @@ const formatRelative = (iso: string): string => {
 }
 
 function App() {
-  const [context, setContext] = useState<AppContext | null>(null)
+  const [context, setContext] = useState<TolgeeAppContext | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [keys, setKeys] = useState<KeyRow[]>([])
@@ -99,34 +98,15 @@ function App() {
   })
 
   useEffect(() => {
-    const handler = (event: MessageEvent) => {
-      if (event.data?.type !== 'tolgee-app:init') return
-      const { token, projectId, apiUrl } = event.data
-      if (
-        typeof token !== 'string' ||
-        typeof projectId !== 'number' ||
-        typeof apiUrl !== 'string'
-      ) {
-        setError('Received malformed init message from host.')
-        setLoading(false)
-        return
-      }
-      setContext({ token, projectId, apiUrl })
-    }
-    window.addEventListener('message', handler)
-    window.parent.postMessage({ type: 'tolgee-app:ready' }, '*')
-    return () => window.removeEventListener('message', handler)
+    const app = createTolgeeApp()
+    app.context.then(setContext)
+    return () => app.dispose()
   }, [])
 
   useEffect(() => {
     if (!context) return
 
-    const client = createApiClient({
-      baseUrl: context.apiUrl,
-      userToken: context.token,
-      projectId: context.projectId,
-      autoThrow: false,
-    })
+    const client = createTolgeeAppClient(context)
 
     let cancelled = false
     ;(async () => {

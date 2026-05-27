@@ -1,25 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import {
+  createTolgeeApp,
+  type TolgeeApp,
+  type TolgeeAppSelection,
+} from '@tolgee/apps-sdk/browser'
 import './App.css'
-
-type InitMessage = {
-  type: 'tolgee-app:init'
-  token: string
-  apiUrl: string
-  organizationId: number
-  projectId: number
-  keyId: number | null
-  languageId: number | null
-  languageTag: string | null
-  translationId: number | null
-}
-
-type SelectionMessage = {
-  type: 'tolgee-app:selection-changed'
-  keyId: number | null
-  languageId: number | null
-  languageTag: string | null
-  translationId: number | null
-}
 
 type PluginState = {
   emojis: Record<string, string>
@@ -27,19 +12,7 @@ type PluginState = {
   events: Record<string, string[]>
 }
 
-type Selection = {
-  keyId: number | null
-  languageId: number | null
-  languageTag: string | null
-  translationId: number | null
-}
-
-const EMPTY_SELECTION: Selection = {
-  keyId: null,
-  languageId: null,
-  languageTag: null,
-  translationId: null,
-}
+const EMPTY_SELECTION: TolgeeAppSelection = {}
 
 const SPARKLINE_DAYS = 14
 const SPARKLINE_WIDTH = 168
@@ -95,35 +68,21 @@ const Sparkline = ({ buckets }: { buckets: number[] }) => {
 }
 
 function ToolsPanel() {
-  const [hostOrigin, setHostOrigin] = useState<string | null>(null)
-  const [selection, setSelection] = useState<Selection>(EMPTY_SELECTION)
+  const [selection, setSelection] = useState<TolgeeAppSelection>(EMPTY_SELECTION)
   const [pluginState, setPluginState] = useState<PluginState | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
+  const appRef = useRef<TolgeeApp | null>(null)
 
   useEffect(() => {
-    const handler = (event: MessageEvent) => {
-      const data = event.data as InitMessage | SelectionMessage | undefined
-      if (!data || typeof data !== 'object') return
-      if (data.type === 'tolgee-app:init') {
-        setHostOrigin(event.origin)
-        setSelection({
-          keyId: data.keyId,
-          languageId: data.languageId,
-          languageTag: data.languageTag,
-          translationId: data.translationId,
-        })
-      } else if (data.type === 'tolgee-app:selection-changed') {
-        setSelection({
-          keyId: data.keyId,
-          languageId: data.languageId,
-          languageTag: data.languageTag,
-          translationId: data.translationId,
-        })
-      }
+    const app = createTolgeeApp()
+    appRef.current = app
+    app.context.then((ctx) => setSelection(ctx.selection))
+    const off = app.onSelectionChanged(setSelection)
+    return () => {
+      off()
+      app.dispose()
+      appRef.current = null
     }
-    window.addEventListener('message', handler)
-    window.parent.postMessage({ type: 'tolgee-app:ready' }, '*')
-    return () => window.removeEventListener('message', handler)
   }, [])
 
   useEffect(() => {
@@ -156,18 +115,14 @@ function ToolsPanel() {
   const totalEdits = buckets.reduce((sum, c) => sum + c, 0)
 
   useEffect(() => {
-    if (!hostOrigin) return
     const el = containerRef.current
     if (!el) return
     const observer = new ResizeObserver(() => {
-      window.parent.postMessage(
-        { type: 'tolgee-app:resize', height: el.scrollHeight },
-        hostOrigin
-      )
+      appRef.current?.resize(el.scrollHeight)
     })
     observer.observe(el)
     return () => observer.disconnect()
-  }, [hostOrigin])
+  }, [])
 
   return (
     <div ref={containerRef} className="tools-panel">
