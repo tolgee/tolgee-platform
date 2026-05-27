@@ -31,6 +31,8 @@ export const commentsTestData = generateTestDataObject('translation-comments');
 export const translationSingleTestData =
   generateTestDataObject('translation-single');
 
+export const poMsgctxtTestData = generateTestDataObject('po-msgctxt');
+
 export const importTestData = {
   clean: () => cleanTestData('import'),
   generateBasic: () => internalFetch('e2e-data/import/generate'),
