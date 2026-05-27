@@ -5,6 +5,7 @@ import { registerWebhookRoute } from './routes/webhook'
 import { registerDecoratorsRoute } from './routes/decorators'
 import { registerStateRoute } from './routes/state'
 import { registerEmojiRoute } from './routes/emoji'
+import { registerManifestRoute } from './routes/manifest'
 
 const app = express()
 
@@ -18,6 +19,7 @@ app.options('*', (_req, res) => {
 })
 app.use(json())
 
+registerManifestRoute(app)
 registerDecoratorsRoute(app)
 registerStateRoute(app)
 registerEmojiRoute(app)

@@ -2,8 +2,8 @@
   "id": "tolgee-dev-plugin",
   "name": "Tolgee Dev Plugin",
   "version": "0.1.0",
-  "baseUrl": "http://localhost:5180",
-  "decoratorsUrl": "http://localhost:5181/decorators",
+  "baseUrl": "__BASE_URL__",
+  "decoratorsUrl": "__BASE_URL__/decorators",
   "scopes": ["translations.view", "keys.view"],
   "webhooks": {
     "events": [
@@ -12,7 +12,7 @@
       "CREATE_KEY",
       "KEY_DELETE"
     ],
-    "url": "http://localhost:5181/webhook"
+    "url": "__BASE_URL__/webhook"
   },
   "modules": {
     "project-dashboard-page": [

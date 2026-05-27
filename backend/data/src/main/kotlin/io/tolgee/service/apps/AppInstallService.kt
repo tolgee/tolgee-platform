@@ -134,6 +134,36 @@ class AppInstallService(
   }
 
   @Transactional
+  fun updateManifestUrl(
+    organizationId: Long,
+    installId: Long,
+    manifestUrl: String,
+  ): AppInstall {
+    val install =
+      appInstallRepository.findByOrganizationIdAndId(organizationId, installId)
+        ?: throw NotFoundException(Message.APP_INSTALL_NOT_FOUND)
+
+    val fetched = appManifestFetcher.fetch(manifestUrl)
+
+    if (fetched.manifest.id != install.appId) {
+      throw BadRequestException(Message.APP_MANIFEST_INVALID)
+    }
+
+    install.manifestUrl = manifestUrl
+    install.name = fetched.manifest.name
+    install.version = fetched.manifest.version
+    install.baseUrl = fetched.manifest.baseUrl
+    install.manifestJson = fetched.rawJson
+    install.grantedScopes = fetched.scopes.toMutableSet()
+    install.webhookSubscriptions = fetched.webhookEvents.toMutableSet()
+    install.webhookUrl = fetched.resolvedWebhookUrl
+
+    val saved = appInstallRepository.save(install)
+    appManagedAutomationService.onInstallRefresh(saved)
+    return saved
+  }
+
+  @Transactional
   fun remove(
     organizationId: Long,
     installId: Long,

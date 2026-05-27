@@ -4,15 +4,18 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently -k -n vite,server -c blue,green \"npm:dev:frontend\" \"npm:dev:server\"",
+    "dev": "concurrently -k -n vite,server,tunnel -c blue,green,yellow \"npm:dev:frontend\" \"npm:dev:server\" \"npm:dev:tunnel\"",
     "dev:frontend": "vite",
     "dev:server": "tsx watch --env-file-if-exists=.env.local server/index.ts",
+    "dev:tunnel": "tsx scripts/dev.ts",
+    "register": "tsx scripts/register.ts",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
     "@tginternal/client": "^0.0.0-prerelease.c8329b552",
+    "cloudflared": "^0.7.1",
     "express": "^4.21.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6"
