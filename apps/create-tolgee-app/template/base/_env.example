@@ -1,0 +1,9 @@
+# Tolgee instance the plugin targets. Used by scripts/register.ts and
+# by the dev tunnel orchestrator.
+TOLGEE_URL={{tolgeeUrl}}
+
+# Webhook signing secret — Tolgee gives you this when the plugin is
+# registered, and it's also written to .tolgee-dev/install.json.
+# Setting it here enables the webhook signature verifier; leaving it
+# unset disables verification and prints a warning on each request.
+# TOLGEE_WEBHOOK_SECRET=tgappw_xxx

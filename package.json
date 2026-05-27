@@ -2,6 +2,7 @@
   "name": "@tolgee/server",
   "workspaces": [
     "apps/tolgee-apps-sdk",
+    "apps/create-tolgee-app",
     "apps/example-apps/*"
   ],
   "scripts": {
