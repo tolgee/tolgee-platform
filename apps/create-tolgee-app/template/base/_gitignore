@@ -1,0 +1,17 @@
+node_modules
+dist
+dist-ssr
+*.local
+
+# Tunnel + install state written by `npm run dev` / `npm run register`.
+.tolgee-dev/
+
+# Local env overrides.
+.env.local
+
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.iml
+*.log
