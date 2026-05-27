@@ -1,5 +1,9 @@
 {
   "name": "@tolgee/server",
+  "workspaces": [
+    "apps/tolgee-apps-sdk",
+    "apps/example-apps/*"
+  ],
   "scripts": {
     "release": "semantic-release",
     "release-dry": "semantic-release --no-ci -d",

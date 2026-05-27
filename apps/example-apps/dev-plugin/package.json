@@ -14,7 +14,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@tginternal/client": "^0.0.0-prerelease.c8329b552",
+    "@tginternal/client": "0.0.0-prerelease.c8329b552",
+    "@tolgee/apps-sdk": "*",
     "cloudflared": "^0.7.1",
     "express": "^4.21.0",
     "react": "^19.2.6",

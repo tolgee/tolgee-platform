@@ -1,38 +1,26 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import {
+  createTolgeeApp,
+  type TolgeeApp,
+  type TolgeeAppContext,
+} from '@tolgee/apps-sdk/browser'
 import './App.css'
 
-type InitContext = {
-  token?: string
-  apiUrl?: string
-  organizationId?: number | null
-  projectId?: number
-  keyId?: number | null
-  languageId?: number | null
-  languageTag?: string | null
-  translationId?: number | null
-  selectedKeyIds?: number[]
-}
-
 function ModalExplain() {
-  const [context, setContext] = useState<InitContext | null>(null)
-  const [hostOrigin, setHostOrigin] = useState<string | null>(null)
+  const [context, setContext] = useState<TolgeeAppContext | null>(null)
+  const appRef = useRef<TolgeeApp | null>(null)
 
   useEffect(() => {
-    const handler = (event: MessageEvent) => {
-      if (!event.data || typeof event.data !== 'object') return
-      if (event.data.type !== 'tolgee-app:init') return
-      setHostOrigin(event.origin)
-      setContext(event.data as InitContext)
+    const app = createTolgeeApp()
+    appRef.current = app
+    app.context.then(setContext)
+    return () => {
+      app.dispose()
+      appRef.current = null
     }
-    window.addEventListener('message', handler)
-    window.parent.postMessage({ type: 'tolgee-app:ready' }, '*')
-    return () => window.removeEventListener('message', handler)
   }, [])
 
-  const close = () => {
-    if (!hostOrigin) return
-    window.parent.postMessage({ type: 'tolgee-app:close' }, hostOrigin)
-  }
+  const close = () => appRef.current?.close()
 
   return (
     <main className="modal-explain">
@@ -46,11 +34,11 @@ function ModalExplain() {
               [
                 ['projectId', context.projectId],
                 ['organizationId', context.organizationId],
-                ['keyId', context.keyId],
-                ['languageId', context.languageId],
-                ['languageTag', context.languageTag],
-                ['translationId', context.translationId],
-                ['selectedKeyIds', context.selectedKeyIds?.join(', ')],
+                ['keyId', context.selection.keyId],
+                ['languageId', context.selection.languageId],
+                ['languageTag', context.selection.languageTag],
+                ['translationId', context.selection.translationId],
+                ['selectedKeyIds', formatList(context.extra.selectedKeyIds)],
               ] as Array<[string, unknown]>
             )
               .filter(([, value]) => value !== undefined && value !== null && value !== '')
@@ -72,6 +60,10 @@ function ModalExplain() {
       </div>
     </main>
   )
+}
+
+const formatList = (value: unknown): string | undefined => {
+  return Array.isArray(value) ? value.join(', ') : undefined
 }
 
 export default ModalExplain

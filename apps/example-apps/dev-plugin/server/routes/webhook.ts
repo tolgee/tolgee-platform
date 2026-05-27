@@ -1,11 +1,12 @@
 import express, { type Express, type Request, type Response } from 'express'
-import { verifySignature } from '../signature'
-import { store } from '../store'
 import {
   onWebhook,
+  verifyWebhookSignature,
   type AppWebhookPayload,
   type WebhookPayloadFor,
-} from '../webhookHandler'
+} from '@tolgee/apps-sdk/server'
+import { WEBHOOK_SECRET } from '../config'
+import { store } from '../store'
 
 export const registerWebhookRoute = (app: Express): void => {
   // express.text parses the body verbatim — needed because the HMAC
@@ -17,9 +18,9 @@ export const registerWebhookRoute = (app: Express): void => {
   )
 }
 
-const handleWebhook = (req: Request, res: Response): void => {
+const handleWebhook = async (req: Request, res: Response): Promise<void> => {
   const raw = typeof req.body === 'string' ? req.body : ''
-  if (!verifySignature(req, raw)) {
+  if (!(await verifyOrAllow(req, raw))) {
     res.status(401).json({ error: 'invalid signature' })
     return
   }
@@ -30,6 +31,20 @@ const handleWebhook = (req: Request, res: Response): void => {
   }
   onWebhook(payload, 'SET_TRANSLATIONS', recordTranslationActivity)
   res.status(204).end()
+}
+
+const verifyOrAllow = async (req: Request, raw: string): Promise<boolean> => {
+  if (!WEBHOOK_SECRET) {
+    console.warn(
+      'TOLGEE_WEBHOOK_SECRET is not set — accepting webhook without verification.'
+    )
+    return true
+  }
+  return verifyWebhookSignature({
+    header: req.header('Tolgee-Signature'),
+    rawBody: raw,
+    secret: WEBHOOK_SECRET,
+  })
 }
 
 const parsePayload = (raw: string): AppWebhookPayload | null => {
