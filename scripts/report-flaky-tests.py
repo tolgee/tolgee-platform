@@ -1,22 +1,34 @@
 #!/usr/bin/env python3
 """Report flaky tests to the 'Flaky tests' org project.
 
-Reads failed-test lines from files in <failures-dir>, resolves each to an
+Reads flaky-test lines from files in <flaky-dir>, resolves each to an
 owning developer via git blame (constrained to members of a GitHub team),
 and creates or updates a draft issue on the org project.
 
+Each item carries a `Flakiness` status (Suspected / Confirmed). A test is
+promoted to Confirmed only after it has been seen at least
+`FLAKY_THRESHOLD` times within the last `FLAKY_WINDOW_DAYS` days, which
+filters out one-off GitHub Actions infrastructure hiccups. Suspected items
+that aren't promoted within `SUSPECTED_TTL_DAYS` days are deleted so the
+board stays clean.
+
 Env vars:
-  PROJECT_OWNER    org login (default: tolgee)
-  PROJECT_NUMBER   project number (default: 4)
-  TEAM_ORG         team org (default: tolgee)
-  TEAM_SLUG        eligible-assignees team slug (default: coders)
-  RUN_URL          CI run URL to record on the item
-  GH_TOKEN         token with project:rw + org:members:read (required)
+  PROJECT_OWNER       org login (default: tolgee)
+  PROJECT_NUMBER      project number (default: 4)
+  TEAM_ORG            team org (default: tolgee)
+  TEAM_SLUG           eligible-assignees team slug (default: coders)
+  RUN_URL             CI run URL to record on the item
+  FLAKY_THRESHOLD     detections in the window required to promote
+                      Suspected -> Confirmed (default: 3)
+  FLAKY_WINDOW_DAYS   rolling-window length in days (default: 7)
+  SUSPECTED_TTL_DAYS  delete Suspected items not seen for this many
+                      days (default: 14)
+  GH_TOKEN            token with project:rw + org:members:read (required)
 
 Usage:
-  report-flaky-tests.py <failures-dir> [<search-root>...]
+  report-flaky-tests.py <flaky-dir> [<search-root>...]
 
-If search-root is omitted, '.' is used. Each failed test is resolved by
+If search-root is omitted, '.' is used. Each flaky test is resolved by
 searching each root in order for a matching source file; git blame runs
 in that root.
 """
@@ -27,7 +39,8 @@ import os
 import re
 import subprocess
 import sys
-from datetime import date
+import tempfile
+from datetime import date, timedelta
 from pathlib import Path
 
 PROJECT_OWNER = os.environ.get("PROJECT_OWNER", "tolgee")
@@ -36,6 +49,19 @@ TEAM_ORG = os.environ.get("TEAM_ORG", "tolgee")
 TEAM_SLUG = os.environ.get("TEAM_SLUG", "coders")
 RUN_URL = os.environ.get("RUN_URL", "")
 MAX_ITEMS_PER_RUN = int(os.environ.get("MAX_ITEMS_PER_RUN", "30"))
+
+# Confirmation gate: a test is promoted to Confirmed only after it has been
+# seen at least FLAKY_THRESHOLD times within the last FLAKY_WINDOW_DAYS days.
+FLAKY_THRESHOLD = int(os.environ.get("FLAKY_THRESHOLD", "3"))
+FLAKY_WINDOW_DAYS = int(os.environ.get("FLAKY_WINDOW_DAYS", "7"))
+SUSPECTED_TTL_DAYS = int(os.environ.get("SUSPECTED_TTL_DAYS", "14"))
+
+FLAKINESS_FIELD = "Flakiness"
+STATUS_SUSPECTED = "Suspected"
+STATUS_CONFIRMED = "Confirmed"
+
+# Run-log lines in the item body look like `- 2026-05-25: <run-url>`.
+DATE_LINE_RE = re.compile(r"^- (\d{4}-\d{2}-\d{2}):", re.MULTILINE)
 
 
 def run(cmd: list[str], **kwargs) -> str:
@@ -57,7 +83,13 @@ def write_output(**kwargs) -> None:
         return
     with open(gho, "a") as fh:
         for k, v in kwargs.items():
-            fh.write(f"{k}={v}\n")
+            s = str(v)
+            # GITHUB_OUTPUT requires the <<DELIM ... DELIM heredoc form for any
+            # value containing newlines; use it for newly_confirmed_list etc.
+            if "\n" in s:
+                fh.write(f"{k}<<__OUTPUT_EOF__\n{s}\n__OUTPUT_EOF__\n")
+            else:
+                fh.write(f"{k}={s}\n")
 
 
 def gql(query: str, **variables) -> dict:
@@ -138,6 +170,11 @@ def list_items(project_id: str) -> list[dict]:
                     field { ... on ProjectV2FieldCommon { name } }
                     users(first: 10) { nodes { login } }
                   }
+                  ... on ProjectV2ItemFieldSingleSelectValue {
+                    field { ... on ProjectV2FieldCommon { name } }
+                    optionId
+                    name
+                  }
                 }
               }
             }
@@ -164,6 +201,9 @@ def item_field(item: dict, name: str):
             for k in ("text", "number", "date"):
                 if k in fv:
                     return fv[k]
+            if "optionId" in fv:
+                # Single-select: return the option's display name (e.g. "Confirmed").
+                return fv.get("name")
             users = (fv.get("users") or {}).get("nodes")
             if users is not None:
                 return [u["login"] for u in users]
@@ -405,13 +445,118 @@ def update_draft_body(item_id: str, title: str, body: str) -> None:
     gql(q, i=draft_id, t=title, b=body)
 
 
+def set_single_select(
+    project_id: str, item_id: str, field_id: str, option_id: str
+) -> None:
+    q = """
+    mutation($p:ID!,$i:ID!,$f:ID!,$v:String!) {
+      updateProjectV2ItemFieldValue(input:{
+        projectId:$p, itemId:$i, fieldId:$f, value:{singleSelectOptionId:$v}
+      }) { projectV2Item { id } }
+    }
+    """
+    gql(q, p=project_id, i=item_id, f=field_id, v=option_id)
+
+
+def delete_item(project_id: str, item_id: str) -> None:
+    q = """
+    mutation($p:ID!,$i:ID!) {
+      deleteProjectV2Item(input:{projectId:$p, itemId:$i}) { deletedItemId }
+    }
+    """
+    gql(q, p=project_id, i=item_id)
+
+
+def gql_with_input(query: str, variables: dict) -> dict:
+    """Run a GraphQL operation that takes list/object variables (`gh` CLI's
+    `-f`/`-F` flags only handle scalars)."""
+    with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as fh:
+        json.dump({"query": query, "variables": variables}, fh)
+        path = fh.name
+    try:
+        resp = json.loads(run(["gh", "api", "graphql", "--input", path]))
+        if resp.get("errors"):
+            raise RuntimeError(f"graphql errors: {resp['errors']}")
+        return resp["data"]
+    finally:
+        try:
+            os.unlink(path)
+        except OSError:
+            pass
+
+
+def ensure_flakiness_field(project_id: str, fields: dict) -> dict:
+    """Create the Flakiness single-select field if it doesn't exist yet.
+
+    Returns the (possibly refreshed) fields dict.
+    """
+    if FLAKINESS_FIELD in fields:
+        return fields
+    q = """
+    mutation($project:ID!,$name:String!,$opts:[ProjectV2SingleSelectFieldOptionInput!]!) {
+      createProjectV2Field(input:{
+        projectId:$project, dataType:SINGLE_SELECT, name:$name,
+        singleSelectOptions:$opts
+      }) { projectV2Field { ... on ProjectV2SingleSelectField { id name } } }
+    }
+    """
+    opts = [
+        {
+            "name": STATUS_SUSPECTED,
+            "color": "GRAY",
+            "description": (
+                f"Detected fewer than {FLAKY_THRESHOLD} times in the past "
+                f"{FLAKY_WINDOW_DAYS} days"
+            ),
+        },
+        {
+            "name": STATUS_CONFIRMED,
+            "color": "RED",
+            "description": (
+                f"Detected at least {FLAKY_THRESHOLD} times in the past "
+                f"{FLAKY_WINDOW_DAYS} days"
+            ),
+        },
+    ]
+    gql_with_input(
+        q, {"project": project_id, "name": FLAKINESS_FIELD, "opts": opts}
+    )
+    print(f"created project field '{FLAKINESS_FIELD}' with options "
+          f"{STATUS_SUSPECTED}, {STATUS_CONFIRMED}")
+    # Re-fetch to pick up the new field and its option IDs.
+    return discover_project()[2]
+
+
+# ---------------------------------------------------------------------------
+# Confirmation gate (rolling-window classification)
+# ---------------------------------------------------------------------------
+
+def parse_body_dates(body: str) -> list[date]:
+    """Extract dates from `- YYYY-MM-DD:` lines in the item body."""
+    out: list[date] = []
+    for m in DATE_LINE_RE.finditer(body or ""):
+        try:
+            out.append(date.fromisoformat(m.group(1)))
+        except ValueError:
+            pass
+    return out
+
+
+def classify(dates: list[date]) -> str:
+    """Return Confirmed if `dates` has FLAKY_THRESHOLD entries within the
+    rolling window, otherwise Suspected."""
+    cutoff = date.today() - timedelta(days=FLAKY_WINDOW_DAYS)
+    recent = sum(1 for d in dates if d >= cutoff)
+    return STATUS_CONFIRMED if recent >= FLAKY_THRESHOLD else STATUS_SUSPECTED
+
+
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
-def read_failures(failures_dir: Path) -> list[str]:
+def read_flaky_tests(flaky_dir: Path) -> list[str]:
     lines: set[str] = set()
-    for f in sorted(failures_dir.glob("failed-tests-*.txt")):
+    for f in sorted(flaky_dir.glob("flaky-tests-*.txt")):
         for raw in f.read_text(errors="replace").splitlines():
             line = raw.strip()
             if line:
@@ -423,22 +568,17 @@ def main() -> int:
     if len(sys.argv) < 2:
         print(__doc__, file=sys.stderr)
         return 2
-    failures_dir = Path(sys.argv[1])
+    flaky_dir = Path(sys.argv[1])
     roots = [Path(r) for r in sys.argv[2:]] or [Path(".")]
 
-    if not failures_dir.is_dir():
-        print(f"no failures dir: {failures_dir}", file=sys.stderr)
-        return 0
+    # An empty/missing flaky dir is fine — the sweep pass still runs so
+    # stale Suspected items get cleaned up.
+    flaky_tests = read_flaky_tests(flaky_dir) if flaky_dir.is_dir() else []
 
-    failures = read_failures(failures_dir)
-    if not failures:
-        print("no failed tests to report")
-        return 0
-
-    print(f"::group::flaky-test-tracker: {len(failures)} failed tests")
-    for line in failures[:MAX_ITEMS_PER_RUN]:
+    print(f"::group::flaky-test-tracker: {len(flaky_tests)} flaky tests")
+    for line in flaky_tests[:MAX_ITEMS_PER_RUN]:
         print(f"  - {line}")
-    if len(failures) > MAX_ITEMS_PER_RUN:
+    if len(flaky_tests) > MAX_ITEMS_PER_RUN:
         print(f"  (capped at {MAX_ITEMS_PER_RUN})")
     print("::endgroup::")
 
@@ -447,40 +587,66 @@ def main() -> int:
         return 0
 
     project_id, project_url, fields = discover_project()
+    fields = ensure_flakiness_field(project_id, fields)
     write_output(project_url=project_url)
-    required = ["Test", "Assignees", "Last run", "Fail count", "First seen"]
+    required = [
+        "Test", "Assignees", "Last run", "Fail count", "First seen",
+        FLAKINESS_FIELD,
+    ]
     missing = [n for n in required if n not in fields]
     if missing:
         print(f"project is missing fields: {missing}", file=sys.stderr)
         return 1
 
-    eligible = team_members()
-    if not eligible:
-        print(
-            f"team {TEAM_ORG}/{TEAM_SLUG} has no members readable with this "
-            "token; cannot assign",
-            file=sys.stderr,
-        )
-        return 1
+    flakiness_options = {
+        o["name"]: o["id"]
+        for o in fields[FLAKINESS_FIELD].get("options", [])
+    }
+    for required_opt in (STATUS_SUSPECTED, STATUS_CONFIRMED):
+        if required_opt not in flakiness_options:
+            print(
+                f"{FLAKINESS_FIELD} field is missing required option: "
+                f"{required_opt}",
+                file=sys.stderr,
+            )
+            return 1
+    suspected_opt = flakiness_options[STATUS_SUSPECTED]
+    confirmed_opt = flakiness_options[STATUS_CONFIRMED]
 
     items = list_items(project_id)
     by_title = items_by_title(items)
 
-    # Load per assignee (for balancing) based on open items
-    load: dict[str, int] = {}
-    for it in items:
-        assignees = item_field(it, "Assignees") or []
-        for login in assignees:
-            load[login] = load.get(login, 0) + 1
+    if flaky_tests:
+        eligible = team_members()
+        if not eligible:
+            print(
+                f"team {TEAM_ORG}/{TEAM_SLUG} has no members readable with "
+                "this token; cannot assign",
+                file=sys.stderr,
+            )
+            return 1
+        # Load per assignee (for balancing) based on open items
+        load: dict[str, int] = {}
+        for it in items:
+            assignees = item_field(it, "Assignees") or []
+            for login in assignees:
+                load[login] = load.get(login, 0) + 1
+    else:
+        eligible = []
+        load = {}
 
-    today = date.today().isoformat()
-    new_count = recurring_count = 0
+    today_d = date.today()
+    today = today_d.isoformat()
+    new_count = recurring_count = newly_confirmed_count = 0
+    newly_confirmed_ids: list[str] = []
+    touched_ids: set[str] = set()
 
-    for line in failures[:MAX_ITEMS_PER_RUN]:
+    for line in flaky_tests[:MAX_ITEMS_PER_RUN]:
         title = f"Flaky: {line}"
         existing = by_title.get(title)
         if existing:
             recurring_count += 1
+            touched_ids.add(existing["id"])
             count = int(item_field(existing, "Fail count") or 0) + 1
             set_number(
                 project_id, existing["id"], fields["Fail count"]["id"], count
@@ -489,13 +655,32 @@ def main() -> int:
                 project_id, existing["id"], fields["Last run"]["id"], RUN_URL
             )
             body = (existing.get("content") or {}).get("body") or ""
-            body = body.rstrip() + f"\n- {today}: {RUN_URL}"
+            new_body = body.rstrip() + f"\n- {today}: {RUN_URL}"
             try:
-                update_draft_body(existing["id"], title, body)
+                update_draft_body(existing["id"], title, new_body)
             except RuntimeError as e:
                 # Item may be a real Issue/PR, not a DraftIssue — skip body log
                 print(f"  (skipped body update for {title}: {e})")
-            print(f"  recurring ({count}x): {line}")
+            # Always classify against today's detection, even if the body
+            # update didn't persist — the status reflects what we observed.
+            new_status = classify(parse_body_dates(new_body))
+            old_status = item_field(existing, FLAKINESS_FIELD)
+            if new_status != old_status:
+                set_single_select(
+                    project_id, existing["id"],
+                    fields[FLAKINESS_FIELD]["id"],
+                    confirmed_opt if new_status == STATUS_CONFIRMED
+                    else suspected_opt,
+                )
+            if (
+                old_status != STATUS_CONFIRMED
+                and new_status == STATUS_CONFIRMED
+            ):
+                newly_confirmed_count += 1
+                newly_confirmed_ids.append(line)
+                print(f"  promoted -> Confirmed ({count}x total): {line}")
+            else:
+                print(f"  recurring ({count}x, {new_status}): {line}")
             continue
 
         new_count += 1
@@ -528,14 +713,75 @@ def main() -> int:
         if not node_id:
             print(f"  (could not resolve node id for @{owner})")
         item_id = create_draft(project_id, title, body, assignees)
+        touched_ids.add(item_id)
         set_text(project_id, item_id, fields["Test"]["id"], line)
         set_text(project_id, item_id, fields["Last run"]["id"], RUN_URL)
         set_number(project_id, item_id, fields["Fail count"]["id"], 1)
         set_date(project_id, item_id, fields["First seen"]["id"], today)
-        print(f"  new -> @{owner}: {line}")
+        # First detection is normally Suspected; only Confirmed if threshold==1.
+        initial_status = classify([today_d])
+        set_single_select(
+            project_id, item_id, fields[FLAKINESS_FIELD]["id"],
+            confirmed_opt if initial_status == STATUS_CONFIRMED else suspected_opt,
+        )
+        if initial_status == STATUS_CONFIRMED:
+            newly_confirmed_count += 1
+            newly_confirmed_ids.append(line)
+        print(f"  new -> @{owner} ({initial_status}): {line}")
 
-    write_output(new_count=new_count, recurring_count=recurring_count)
-    print(f"done: {new_count} new, {recurring_count} recurring")
+    # Sweep: delete Suspected items whose most recent detection is older
+    # than SUSPECTED_TTL_DAYS — they were one-off hiccups that never recurred.
+    deleted_suspect_count = 0
+    suspected_cutoff = today_d - timedelta(days=SUSPECTED_TTL_DAYS)
+    for it in items:
+        if it["id"] in touched_ids:
+            continue
+        if item_field(it, FLAKINESS_FIELD) != STATUS_SUSPECTED:
+            continue
+        body = (it.get("content") or {}).get("body") or ""
+        dates = parse_body_dates(body)
+        if not dates or max(dates) >= suspected_cutoff:
+            continue
+        title = (it.get("content") or {}).get("title") or "?"
+        try:
+            delete_item(project_id, it["id"])
+            deleted_suspect_count += 1
+            print(f"  deleted stale suspected item: {title}")
+        except RuntimeError as e:
+            print(f"  (failed to delete {title}: {e})")
+
+    # Re-fetch items so the totals reflect this run's writes (newly-created
+    # items, promotions, swept deletions) — the pre-run `items` snapshot
+    # doesn't include any of them, and on the very first run no item had a
+    # Flakiness value at fetch time.
+    items_after = list_items(project_id)
+    total_confirmed = sum(
+        1 for it in items_after
+        if item_field(it, FLAKINESS_FIELD) == STATUS_CONFIRMED
+    )
+    total_suspected = sum(
+        1 for it in items_after
+        if item_field(it, FLAKINESS_FIELD) == STATUS_SUSPECTED
+    )
+
+    newly_confirmed_list = "\n".join(
+        f"• `{n}`" for n in newly_confirmed_ids[:30]
+    )
+
+    write_output(
+        new_count=new_count,
+        recurring_count=recurring_count,
+        newly_confirmed_count=newly_confirmed_count,
+        newly_confirmed_list=newly_confirmed_list,
+        deleted_suspect_count=deleted_suspect_count,
+        total_confirmed_count=total_confirmed,
+        total_suspected_count=total_suspected,
+    )
+    print(
+        f"done: {new_count} new, {recurring_count} recurring, "
+        f"{newly_confirmed_count} newly confirmed, "
+        f"{deleted_suspect_count} stale suspected removed"
+    )
     return 0
 
 
