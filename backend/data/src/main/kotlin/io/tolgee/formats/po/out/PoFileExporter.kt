@@ -53,7 +53,7 @@ class PoFileExporter(
   }
 
   private fun StringBuilder.writeMsgCtxt(msgctxt: String?) {
-    if (msgctxt != null) {
+    if (!msgctxt.isNullOrEmpty()) {
       this.append(convertToPoMultilineString("msgctxt", msgctxt))
     }
   }
