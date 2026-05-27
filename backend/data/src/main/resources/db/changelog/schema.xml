@@ -5604,4 +5604,13 @@
             DROP INDEX CONCURRENTLY IF EXISTS translation_qa_checks_stale_partial_idx;
         </rollback>
     </changeSet>
+    <changeSet author="bdshadow" id="translation-text-hash-idx-for-tm-exact-match" runInTransaction="false">
+        <sql dbms="postgresql">
+            CREATE INDEX CONCURRENTLY IF NOT EXISTS translation_text_hash_idx
+            ON translation USING hash (text);
+        </sql>
+        <rollback>
+            DROP INDEX CONCURRENTLY IF EXISTS translation_text_hash_idx;
+        </rollback>
+    </changeSet>
 </databaseChangeLog>
