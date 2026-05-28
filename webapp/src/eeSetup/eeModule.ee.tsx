@@ -21,6 +21,7 @@ import {
   useConfig,
   useEnabledFeatures,
   useIsAdminOrSupporter,
+  useIsBeingImpersonated,
 } from '../globalContext/helpers';
 import { ProjectTasksView } from '../ee/task/views/projectTasks/ProjectTasksView';
 import { addOperations } from '../views/projects/translations/BatchOperations/operations';
@@ -202,9 +203,9 @@ export const useAddBatchOperations = () => {
   const qaChecksFeature = isEnabled('QA_CHECKS');
   const orderTranslationsFeature = isEnabled('ORDER_TRANSLATION');
   const qaChecksProjectFeature = qaChecksFeature && project.useQaChecks;
-  const hasPrivilegedAccess =
-    useIsAdminOrSupporter() ||
-    useGlobalContext((c) => Boolean(c.auth.adminToken));
+  const isAdminOrSupporter = useIsAdminOrSupporter();
+  const isBeingImpersonated = useIsBeingImpersonated();
+  const hasPrivilegedAccess = isAdminOrSupporter || isBeingImpersonated;
   const { t } = useTranslate();
 
   return addOperations([
