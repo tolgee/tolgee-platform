@@ -293,7 +293,7 @@ class ResxExporterTest {
         add(
           languageTag = "cs",
           keyName = "poisoned",
-          text = "Helloworld",
+          text = "Hello\u000Bworld",
         )
       }
 

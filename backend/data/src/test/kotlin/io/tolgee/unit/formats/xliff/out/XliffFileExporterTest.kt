@@ -537,7 +537,7 @@ class XliffFileExporterTest {
         add(
           languageTag = "de",
           keyName = "poisoned",
-          text = "Helloworld",
+          text = "Hello\u000Bworld",
         )
       }
 

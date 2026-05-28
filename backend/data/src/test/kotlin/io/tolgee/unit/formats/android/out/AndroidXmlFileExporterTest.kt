@@ -350,7 +350,7 @@ class AndroidXmlFileExporterTest {
         add(
           languageTag = "cs",
           keyName = "poisoned",
-          text = "Helloworld",
+          text = "Hello\u000Bworld",
         )
       }
 
