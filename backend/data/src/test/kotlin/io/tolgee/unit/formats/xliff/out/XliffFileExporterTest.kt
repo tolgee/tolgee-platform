@@ -532,10 +532,6 @@ class XliffFileExporterTest {
 
   @Test
   fun `exports cleanly when translation text contains XML 1_0-invalid characters`() {
-    // Production Sentry TOLGEE-BACKEND-3E3: a user-pasted 0x0B (vertical tab from Word/Excel)
-    // crashed the whole project export with TransformerException because JDK's default Transformer
-    // refuses to emit codepoints outside the XML 1.0 Char production. The exporter must silently
-    // drop the bad codepoint so a single poisoned translation can't sink the file.
     val built =
       buildExportTranslationList {
         add(

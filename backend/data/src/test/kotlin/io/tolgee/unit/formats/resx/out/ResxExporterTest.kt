@@ -288,9 +288,6 @@ class ResxExporterTest {
 
   @Test
   fun `exports cleanly when translation text contains XML 1_0-invalid characters`() {
-    // Production Sentry TOLGEE-BACKEND-3E3 (XLIFF) — ResX shares the same DOM-based write path via
-    // `textContent`, so a user-pasted 0x0B kills it identically. The exporter must drop the bad
-    // codepoint instead of crashing the whole export.
     val built =
       buildExportTranslationList {
         add(

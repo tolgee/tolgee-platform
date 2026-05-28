@@ -27,9 +27,6 @@ class TextToXmlResourcesConvertor(
   private val value: XmlResourcesStringValue,
   private val format: ExportFormat,
 ) : Logging {
-  // Sanitised once at the boundary so every downstream path (parse, CDATA escape, text-node
-  // rewrite) stays free of XML 1.0-invalid codepoints. Otherwise a user-pasted 0x0B sinks the
-  // whole Android/Compose XML export at Transformer.transform time.
   val string = sanitizeXmlText(value.string)
 
   fun convert(): ContentToAppend {

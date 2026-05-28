@@ -1,15 +1,11 @@
 package io.tolgee.util
 
 /**
- * Strips every codepoint outside the XML 1.0 `Char` production
- * (`#x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF]`).
+ * Strips every codepoint outside the XML 1.0 `Char` production. Apply at every user-content
+ * boundary that lands in an XML document — both DOM and StAX writers throw on illegal codepoints
+ * and a single bad one (e.g. a Word-pasted vertical tab) can sink the whole file.
  *
- * We walk codepoints rather than UTF-16 chars so valid surrogate pairs (emoji etc.) survive
- * intact while lone surrogates, illegal C0 controls (everything but tab/LF/CR), and BMP
- * noncharacters get dropped. Apply this to any user-controlled string that lands in an XML
- * document — both DOM (`textContent`, attribute values) and StAX (`writeCharacters`) writers
- * reject illegal codepoints with hard exceptions (`TransformerException` and
- * `WstxIOException` respectively), so a single bad codepoint can sink the whole export.
+ * Walks codepoints rather than UTF-16 chars so valid surrogate pairs (emoji etc.) survive intact.
  */
 fun sanitizeXmlText(text: String): String {
   if (text.isEmpty()) return text
