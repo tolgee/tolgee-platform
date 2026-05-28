@@ -9,6 +9,7 @@ import io.tolgee.service.export.ExportFileStructureTemplateProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.testing.assert
 import io.tolgee.util.buildExportTranslationList
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class AndroidXmlFileExporterTest {
@@ -340,5 +341,25 @@ class AndroidXmlFileExporterTest {
 
   private fun getExportParams(): ExportParams {
     return ExportParams().also { it.format = ExportFormat.ANDROID_XML }
+  }
+
+  @Test
+  fun `exports cleanly when translation text contains XML 1_0-invalid characters`() {
+    // Production Sentry TOLGEE-BACKEND-3E3 (XLIFF) — Android XML resources export shares the same
+    // DOM-based write path via TextToXmlResourcesConvertor, so a user-pasted 0x0B kills it
+    // identically. The exporter must drop the bad codepoint instead of crashing the whole export.
+    val built =
+      buildExportTranslationList {
+        add(
+          languageTag = "cs",
+          keyName = "poisoned",
+          text = "Helloworld",
+        )
+      }
+
+    val xml = getExported(getExporter(built.translations))["values-cs/strings.xml"]!!
+
+    assertThat(xml).contains("Helloworld")
+    assertThat(xml).doesNotContain(Char(0x0B).toString())
   }
 }

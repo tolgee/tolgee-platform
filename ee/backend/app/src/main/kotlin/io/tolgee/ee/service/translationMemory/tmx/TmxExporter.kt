@@ -1,34 +1,9 @@
 package io.tolgee.ee.service.translationMemory.tmx
 
+import io.tolgee.util.sanitizeXmlText
 import java.io.ByteArrayOutputStream
 import javax.xml.stream.XMLOutputFactory
 import javax.xml.stream.XMLStreamWriter
-
-// XML 1.0 §2.2 Char ::= #x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF].
-// TMX 1.4 mandates XML 1.0, so the underlying stream writer rejects every other codepoint — a
-// single user-pasted #x0B vertical tab (Word/Excel copy-paste) blew up the whole export with
-// WstxIOException. We walk codepoints rather than UTF-16 chars so valid surrogate pairs (emoji
-// etc.) survive intact; lone surrogates and BMP noncharacters are dropped along with the C0
-// controls so no other illegal codepoint can sink the file either.
-private fun sanitizeXmlText(text: String): String {
-  if (text.isEmpty()) return text
-  val out = StringBuilder(text.length)
-  var i = 0
-  while (i < text.length) {
-    val cp = text.codePointAt(i)
-    if (isValidXmlChar(cp)) out.appendCodePoint(cp)
-    i += Character.charCount(cp)
-  }
-  return out.toString()
-}
-
-private fun isValidXmlChar(cp: Int): Boolean {
-  if (cp == 0x9 || cp == 0xA || cp == 0xD) return true
-  if (cp in 0x20..0xD7FF) return true
-  if (cp in 0xE000..0xFFFD) return true
-  if (cp in 0x10000..0x10FFFF) return true
-  return false
-}
 
 class TmxExporter(
   private val sourceLanguageTag: String,

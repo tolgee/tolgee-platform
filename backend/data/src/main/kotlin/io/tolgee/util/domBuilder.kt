@@ -76,12 +76,15 @@ fun Element.attr(
   value: String?,
 ) {
   val attr = this.ownerDocument.createAttribute(name)
-  attr.value = value ?: ""
+  attr.value = sanitizeXmlText(value ?: "")
   this.setAttributeNode(attr)
 }
 
 fun Element.appendXmlOrText(content: String?) {
-  val contentNotNull = content ?: ""
+  // User-pasted control chars (e.g. 0x0B from Word/Excel) sink the whole export at write time
+  // because JDK's default Transformer rejects them with TransformerException — strip codepoints
+  // outside the XML 1.0 Char production up front so both branches stay safe.
+  val contentNotNull = sanitizeXmlText(content ?: "")
   try {
     val documentBuilder = XmlSecurity.newSecureDocumentBuilderFactory().newDocumentBuilder()
     val doc: Document = documentBuilder.parse(InputSource(StringReader("<root>$contentNotNull</root>")))

@@ -8,6 +8,7 @@ import io.tolgee.formats.xmlResources.XmlResourcesStringValue
 import io.tolgee.util.Logging
 import io.tolgee.util.XmlSecurity
 import io.tolgee.util.logger
+import io.tolgee.util.sanitizeXmlText
 import org.w3c.dom.Document
 import org.w3c.dom.Node
 import org.w3c.dom.NodeList
@@ -26,7 +27,10 @@ class TextToXmlResourcesConvertor(
   private val value: XmlResourcesStringValue,
   private val format: ExportFormat,
 ) : Logging {
-  val string = value.string
+  // Sanitised once at the boundary so every downstream path (parse, CDATA escape, text-node
+  // rewrite) stays free of XML 1.0-invalid codepoints. Otherwise a user-pasted 0x0B sinks the
+  // whole Android/Compose XML export at Transformer.transform time.
+  val string = sanitizeXmlText(value.string)
 
   fun convert(): ContentToAppend {
     if (value.isWrappedCdata || containsXmlAndPlaceholders) {
