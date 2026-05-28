@@ -30,6 +30,7 @@ import {
   useConfig,
   useEnabledFeatures,
   useIsAdminOrSupporter,
+  useIsBeingImpersonated,
 } from '../globalContext/helpers';
 import { OrganizationSubscriptionsView } from '../ee/billing/Subscriptions/OrganizationSubscriptionsView';
 import { OrganizationInvoicesView } from '../ee/billing/Invoices/OrganizationInvoicesView';
@@ -281,9 +282,9 @@ export const useAddBatchOperations = () => {
   const qaChecksFeature = isEnabled('QA_CHECKS');
   const orderTranslationsFeature = isEnabled('ORDER_TRANSLATION');
   const qaChecksProjectFeature = qaChecksFeature && project.useQaChecks;
-  const hasPrivilegedAccess =
-    useIsAdminOrSupporter() ||
-    useGlobalContext((c) => Boolean(c.auth.adminToken));
+  const isAdminOrSupporter = useIsAdminOrSupporter();
+  const isBeingImpersonated = useIsBeingImpersonated();
+  const hasPrivilegedAccess = isAdminOrSupporter || isBeingImpersonated;
   const { t } = useTranslate();
 
   return addOperations([

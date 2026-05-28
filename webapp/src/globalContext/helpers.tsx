@@ -27,6 +27,9 @@ export const useIsAdminOrSupporter = () =>
     return role === 'ADMIN' || role === 'SUPPORTER';
   });
 
+export const useIsBeingImpersonated = () =>
+  useGlobalContext((c) => Boolean(c.auth.adminToken));
+
 export const useIsSsoMigrationRequired = () =>
   useGlobalContext(
     (c) =>
