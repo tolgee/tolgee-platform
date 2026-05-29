@@ -2490,6 +2490,7 @@
   "translation_agency_selected": "Valgt",
   "translation_api_rate_limit": "Oversetteren mislyktes på grunn av hastighetsbegrensning",
   "translation_cell_comments": "Kommentarer",
+  "translation_cell_qa_checks_stale": "QA-sjekker blir evaluert",
   "translation_cell_qa_issues": "QA-problemer",
   "translation_char_counter_limit_reached": "Grense nådd",
   "translation_char_counter_over_limit": "Grensen overskredet med {count} tegn",

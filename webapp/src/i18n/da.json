@@ -2509,6 +2509,7 @@
   "translation_agency_selected": "Valgt",
   "translation_api_rate_limit": "Oversættelsen mislykkedes på grund af API-hastighedsbegrænsning",
   "translation_cell_comments": "Kommentarer",
+  "translation_cell_qa_checks_stale": "QA-tjek bliver evalueret",
   "translation_cell_qa_issues": "QA-problemer",
   "translation_char_counter_limit_reached": "Grænse nået",
   "translation_char_counter_over_limit": "Grænse overskredet med {count} tegn",

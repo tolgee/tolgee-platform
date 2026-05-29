@@ -1,3 +1,16 @@
+# [3.194.0](https://github.com/tolgee/tolgee-platform/compare/v3.193.1...v3.194.0) (2026-05-29)
+
+
+### Bug Fixes
+
+* ignore tags, placeholders and URLs in case and special-char QA checks ([#3706](https://github.com/tolgee/tolgee-platform/issues/3706)) ([dec7341](https://github.com/tolgee/tolgee-platform/commit/dec73415a15d19ddc6e7cbbc4fce9c6f0bf5b8be))
+* PO_ICU plural import should not escape ICU placeholders ([#3698](https://github.com/tolgee/tolgee-platform/issues/3698)) ([4c0fc64](https://github.com/tolgee/tolgee-platform/commit/4c0fc641258e1b9844340d45defdde384fc814b6)), closes [#3589](https://github.com/tolgee/tolgee-platform/issues/3589)
+
+
+### Features
+
+* add info tooltip to missing plural forms QA check ([#3704](https://github.com/tolgee/tolgee-platform/issues/3704)) ([55f89cd](https://github.com/tolgee/tolgee-platform/commit/55f89cd25f8eb38ef3df661cb0714271af2893b2))
+
 ## [3.193.1](https://github.com/tolgee/tolgee-platform/compare/v3.193.0...v3.193.1) (2026-05-29)
 
 

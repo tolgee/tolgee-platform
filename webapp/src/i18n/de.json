@@ -2501,6 +2501,7 @@
   "translation_agency_selected": "Ausgewählt",
   "translation_api_rate_limit": "Übersetzer ist aufgrund von Rate-Limit fehlgeschlagen",
   "translation_cell_comments": "Kommentare",
+  "translation_cell_qa_checks_stale": "QA-Prüfungen werden ausgewertet",
   "translation_cell_qa_issues": "QA-Probleme",
   "translation_char_counter_limit_reached": "Limit erreicht",
   "translation_char_counter_over_limit": "Limit um {count} Zeichen überschritten",

@@ -2506,6 +2506,7 @@
   "translation_agency_selected": "Vybráno",
   "translation_api_rate_limit": "Překladač selhal kvůli rate limitu",
   "translation_cell_comments": "Komentáře",
+  "translation_cell_qa_checks_stale": "QA kontroly se vyhodnocují",
   "translation_cell_qa_issues": "Chyby QA",
   "translation_char_counter_limit_reached": "Limit dosažen",
   "translation_char_counter_over_limit": "Limit překročen o {count} znaků",

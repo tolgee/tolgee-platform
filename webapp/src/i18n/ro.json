@@ -2487,6 +2487,7 @@
   "translation_agency_selected": "Selectat",
   "translation_api_rate_limit": "Traducătorul a eșuat din cauza limitării ratei",
   "translation_cell_comments": "Comentarii",
+  "translation_cell_qa_checks_stale": "Verificările QA sunt în curs de evaluare",
   "translation_cell_qa_issues": "Probleme QA",
   "translation_char_counter_limit_reached": "Limită atinsă",
   "translation_char_counter_over_limit": "Limită depășită cu {count} caractere",
