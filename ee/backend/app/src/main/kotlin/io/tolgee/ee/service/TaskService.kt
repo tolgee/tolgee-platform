@@ -343,7 +343,7 @@ class TaskService(
     dto.addKeys?.let { toAdd ->
       val existingKeys = task.keys.map { it.key.id }.toMutableSet()
       val nonExistingKeyIds = toAdd.subtract(existingKeys).toMutableSet()
-      val keysToAdd = keyService.getByIds(nonExistingKeyIds)
+      val keysToAdd = keyService.find(projectId, nonExistingKeyIds)
       val taskKeysToAdd =
         keysToAdd
           .filter { key -> nonExistingKeyIds.contains(key.id) }

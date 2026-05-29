@@ -33,6 +33,7 @@ class TaskTestData : BaseTestData("tasksTestUser", "Project with tasks") {
   var unrelatedProject: ProjectBuilder
   var unrelatedUser: UserAccountBuilder
   var unrelatedEnglish: LanguageBuilder
+  lateinit var unrelatedKey: KeyBuilder
 
   lateinit var blockedTask: TaskBuilder
 
@@ -193,6 +194,10 @@ class TaskTestData : BaseTestData("tasksTestUser", "Project with tasks") {
 
     unrelatedProject.apply {
       unrelatedEnglish = addEnglish()
+      unrelatedKey =
+        addKey(null, "unrelated key").apply {
+          addTranslation("en", "Unrelated translation")
+        }
     }
 
     unrelatedProject.self.apply {

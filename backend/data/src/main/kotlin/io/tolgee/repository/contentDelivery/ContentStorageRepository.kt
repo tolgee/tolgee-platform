@@ -21,6 +21,11 @@ interface ContentStorageRepository : JpaRepository<ContentStorage?, Long?> {
     contentDeliveryConfigId: Long,
   ): ContentStorage
 
+  fun findByProjectIdAndId(
+    projectId: Long,
+    contentDeliveryConfigId: Long,
+  ): ContentStorage?
+
   @Query(
     """
     select count(*) > 0 from ContentDeliveryConfig cdc where cdc.contentStorage = :storage

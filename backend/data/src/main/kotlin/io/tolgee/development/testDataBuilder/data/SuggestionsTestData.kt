@@ -29,6 +29,12 @@ class SuggestionsTestData(
   lateinit var pluralSuggestion: SuggestionBuilder
   lateinit var czechLanguage: Language
 
+  // A separate project (different org) with its own key + suggestion.
+  // Used to verify that access to a suggestion by id from another project is rejected.
+  lateinit var unrelatedProject: ProjectBuilder
+  lateinit var unrelatedKey: KeyBuilder
+  lateinit var unrelatedSuggestion: SuggestionBuilder
+
   init {
     user.name = "Tasks test user"
     projectReviewer =
@@ -180,6 +186,32 @@ class SuggestionsTestData(
             this.isPlural = true
           }
       }
+    }
+
+    val unrelatedUser =
+      root.addUserAccount {
+        username = "unrelated.suggester@test.com"
+        name = "Unrelated suggester"
+      }
+
+    unrelatedProject =
+      root.addProject {
+        name = "Unrelated suggestions project"
+      }
+
+    unrelatedProject.apply {
+      val unrelatedEnglish = addEnglish()
+      self.suggestionsMode = SuggestionsMode.ENABLED
+      unrelatedKey =
+        addKey(null, "unrelated key").apply {
+          addTranslation("en", "Unrelated translation")
+          unrelatedSuggestion =
+            addSuggestion {
+              this.language = unrelatedEnglish.self
+              this.author = unrelatedUser.self
+              this.translation = "Unrelated suggested translation"
+            }
+        }
     }
   }
 

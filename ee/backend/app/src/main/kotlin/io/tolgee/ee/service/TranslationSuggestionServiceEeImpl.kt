@@ -27,7 +27,6 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
-import kotlin.jvm.optionals.getOrNull
 
 @Primary
 @Component
@@ -109,21 +108,21 @@ class TranslationSuggestionServiceEeImpl(
 
   fun getSuggestion(
     projectId: Long,
+    languageId: Long,
     keyId: Long,
     suggestionId: Long,
   ): TranslationSuggestion {
-    val key = keyService.find(keyId) ?: throw NotFoundException(Message.KEY_NOT_FOUND)
-    keyService.checkInProject(key, projectId)
-    return translationSuggestionRepository.findById(suggestionId).getOrNull()
+    return translationSuggestionRepository.find(projectId, languageId, keyId, suggestionId)
       ?: throw NotFoundException(Message.SUGGESTION_NOT_FOUND)
   }
 
   fun declineSuggestion(
     projectId: Long,
+    languageId: Long,
     keyId: Long,
     suggestionId: Long,
   ): TranslationSuggestion {
-    val suggestion = getSuggestion(projectId, keyId, suggestionId)
+    val suggestion = getSuggestion(projectId, languageId, keyId, suggestionId)
     suggestion.state = TranslationSuggestionState.DECLINED
     translationSuggestionRepository.save(suggestion)
     return suggestion
@@ -131,10 +130,11 @@ class TranslationSuggestionServiceEeImpl(
 
   fun suggestionSetActive(
     projectId: Long,
+    languageId: Long,
     keyId: Long,
     suggestionId: Long,
   ): TranslationSuggestion {
-    val suggestion = getSuggestion(projectId, keyId, suggestionId)
+    val suggestion = getSuggestion(projectId, languageId, keyId, suggestionId)
     suggestion.state = TranslationSuggestionState.ACTIVE
     translationSuggestionRepository.save(suggestion)
     return suggestion
@@ -151,7 +151,7 @@ class TranslationSuggestionServiceEeImpl(
     val language =
       languageService.findEntity(languageId, projectId) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
     val key = keyService.find(keyId) ?: throw NotFoundException(Message.KEY_NOT_FOUND)
-    val suggestion = getSuggestion(projectId, keyId, suggestionId)
+    val suggestion = getSuggestion(projectId, languageId, keyId, suggestionId)
     if (key.isPlural != suggestion.isPlural) {
       if (suggestion.isPlural) {
         throw BadRequestException(Message.SUGGESTION_CANT_BE_PLURAL)
@@ -208,11 +208,12 @@ class TranslationSuggestionServiceEeImpl(
 
   fun deleteSuggestionCreatedByUser(
     projectId: Long,
+    languageId: Long,
     keyId: Long,
     suggestionId: Long,
     userId: Long,
   ) {
-    val suggestion = getSuggestion(projectId, keyId, suggestionId)
+    val suggestion = getSuggestion(projectId, languageId, keyId, suggestionId)
 
     if (suggestion.author?.id != userId) {
       throw PermissionException(Message.USER_CAN_ONLY_DELETE_HIS_SUGGESTIONS)

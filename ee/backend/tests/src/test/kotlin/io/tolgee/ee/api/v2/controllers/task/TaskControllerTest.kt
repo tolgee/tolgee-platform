@@ -272,6 +272,33 @@ class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `does not attach key from another project`() {
+    val foreignKeyId = testData.unrelatedKey.self.id
+    performProjectAuthPut(
+      "tasks/${testData.translateTask.self.number}/keys",
+      UpdateTaskKeysRequest(
+        addKeys = mutableSetOf(foreignKeyId),
+      ),
+    ).andIsOk
+
+    executeInNewTransaction {
+      val attached =
+        taskKeyRepository
+          .findAll()
+          .any { it.task.id == testData.translateTask.self.id && it.key.id == foreignKeyId }
+      assertThat(attached).isFalse()
+    }
+
+    // the task still has only its original keys
+    performProjectAuthGet(
+      "tasks/${testData.translateTask.self.number}",
+    ).andIsOk.andAssertThatJson {
+      node("totalItems").isEqualTo(testData.keysInTask.size)
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `can remove keys`() {
     val allKeys = testData.keysInTask.map { it.self.id }.toMutableSet()
     val keysToRemove = mutableSetOf(allKeys.first())

@@ -120,7 +120,8 @@ class LlmProviderService(
     providerId: Long,
     dto: LlmProviderRequest,
   ): LlmProviderDto {
-    val provider = llmProviderRepository.findById(providerId).getOrNull() ?: throw NotFoundException()
+    val provider =
+      llmProviderRepository.findByIdAndOrganizationId(providerId, organizationId) ?: throw NotFoundException()
     validateApiUrl(dto.apiUrl)
     provider.name = dto.name
     provider.type = dto.type
@@ -132,7 +133,6 @@ class LlmProviderService(
     provider.keepAlive = dto.keepAlive
     provider.format = dto.format
     provider.reasoningEffort = dto.reasoningEffort
-    provider.organization = organizationService.get(organizationId)
     llmProviderRepository.save(provider)
     return provider.toDto()
   }

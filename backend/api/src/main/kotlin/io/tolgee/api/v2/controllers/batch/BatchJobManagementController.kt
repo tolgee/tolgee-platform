@@ -103,7 +103,7 @@ class BatchJobManagementController(
   fun get(
     @PathVariable id: Long,
   ): BatchJobModel {
-    val view = batchJobService.getView(id)
+    val view = batchJobService.getView(projectHolder.project.id, id)
     checkViewPermission(view.batchJob)
     return batchJobModelAssembler.toModel(view)
   }
@@ -116,7 +116,7 @@ class BatchJobManagementController(
   fun cancel(
     @PathVariable id: Long,
   ) {
-    checkCancelPermission(batchJobService.getJobDto(id))
+    checkCancelPermission(batchJobService.getJobDto(projectHolder.project.id, id))
     batchJobCancellationManager.cancel(id)
   }
 

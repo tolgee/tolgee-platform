@@ -1,6 +1,7 @@
 package io.tolgee.development.testDataBuilder.data
 
 import io.tolgee.development.testDataBuilder.builders.KeyBuilder
+import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
@@ -11,11 +12,29 @@ class BatchJobsTestData : BaseTestData() {
   val germanLanguage = projectBuilder.addGerman().self
   val czechLanguage = projectBuilder.addCzech().self
 
+  // A separate project owned by another organization. The test user has no access to it.
+  // Used to verify a batch job of another project cannot be read/cancelled via this project's URL.
+  lateinit var unrelatedProject: ProjectBuilder
+
   init {
     this.projectBuilder.addPermission {
       user = anotherUser
       scopes = arrayOf(Scope.KEYS_VIEW)
     }
+
+    val unrelatedOrg =
+      root.addOrganization {
+        name = "Unrelated batch org"
+      }
+
+    unrelatedProject =
+      root
+        .addProject(organizationOwner = unrelatedOrg.self) {
+          name = "Unrelated batch project"
+        }.build {
+          addEnglish()
+          addCzech()
+        }
   }
 
   fun addTranslationOperationData(keyCount: Int = 100): List<Key> {

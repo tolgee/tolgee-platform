@@ -3,6 +3,7 @@ package io.tolgee.api.v2.controllers.batch
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsForbidden
+import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.isValidId
@@ -284,6 +285,27 @@ class BatchJobManagementControllerTest :
 
     performProjectAuthGet("batch-jobs/${job.id}")
       .andIsForbidden
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `cannot get or cancel a job of another project`() {
+    saveAndPrepare()
+
+    val foreignJob = util.runChunkedJobInUnrelatedProject(10)
+
+    performProjectAuthGet("batch-jobs/${foreignJob.id}")
+      .andIsNotFound
+
+    performProjectAuthPut("batch-jobs/${foreignJob.id}/cancel")
+      .andIsNotFound
+
+    executeInNewTransaction {
+      batchJobService
+        .getJobEntity(foreignJob.id)
+        .status.assert
+        .isNotEqualTo(BatchJobStatus.CANCELLED)
+    }
   }
 }
 

@@ -225,6 +225,16 @@ class BatchJobService(
     return this.findJobDto(id) ?: throw NotFoundException(Message.BATCH_JOB_NOT_FOUND)
   }
 
+  fun getJobDto(
+    projectId: Long,
+    id: Long,
+  ): BatchJobDto {
+    val job =
+      batchJobRepository.findByIdAndProjectId(id, projectId)
+        ?: throw NotFoundException(Message.BATCH_JOB_NOT_FOUND)
+    return BatchJobDto.fromEntity(job)
+  }
+
   /**
    * Gets job DTO directly from database, bypassing the cache.
    * Use this when you need to read the most recent committed state,
@@ -312,6 +322,16 @@ class BatchJobService(
 
   fun getView(jobId: Long): BatchJobView {
     val job = batchJobRepository.findById(jobId).orElseThrow { NotFoundException() }
+    return getView(job)
+  }
+
+  fun getView(
+    projectId: Long,
+    jobId: Long,
+  ): BatchJobView {
+    val job =
+      batchJobRepository.findByIdAndProjectId(jobId, projectId)
+        ?: throw NotFoundException(Message.BATCH_JOB_NOT_FOUND)
     return getView(job)
   }
 

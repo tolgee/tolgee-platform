@@ -9,12 +9,18 @@ import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.node
 import io.tolgee.model.enums.LlmProviderType
+import io.tolgee.repository.LlmProviderRepository
 import io.tolgee.testing.AuthorizedControllerTest
+import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 
 class LlmProviderControllerTest : AuthorizedControllerTest() {
   private lateinit var testData: PromptTestData
+
+  @Autowired
+  private lateinit var llmProviderRepository: LlmProviderRepository
 
   @BeforeEach
   fun setup() {
@@ -120,6 +126,27 @@ class LlmProviderControllerTest : AuthorizedControllerTest() {
       node("type").isEqualTo("OPENAI_AZURE")
       node("apiUrl").isEqualTo("https://updated.example.com")
     }
+  }
+
+  @Test
+  fun `cannot update provider of another organization`() {
+    val foreignProviderId = testData.unrelatedLlmProvider.self.id
+    val foreignOrgId = testData.unrelatedOrganization.self.id
+    performAuthPut(
+      "/v2/organizations/${testData.organization.self.id}/llm-providers/$foreignProviderId",
+      LlmProviderRequest(
+        name = "updated-by-other-org",
+        type = LlmProviderType.OPENAI_AZURE,
+        apiUrl = "https://other-org.example.com",
+      ),
+    ).andIsNotFound
+
+    // the foreign provider must be unchanged and still belong to the unrelated organization
+    val provider = llmProviderRepository.findById(foreignProviderId).get()
+    provider.name.assert.isEqualTo("unrelated-organization-provider")
+    provider.type.assert.isEqualTo(LlmProviderType.OPENAI)
+    provider.organization.id.assert
+      .isEqualTo(foreignOrgId)
   }
 
   @Test

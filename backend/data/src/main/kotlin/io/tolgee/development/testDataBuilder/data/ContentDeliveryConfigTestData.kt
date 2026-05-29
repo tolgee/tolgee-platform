@@ -1,5 +1,6 @@
 package io.tolgee.development.testDataBuilder.data
 
+import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import io.tolgee.model.automations.AutomationAction
 import io.tolgee.model.automations.AutomationTrigger
 import io.tolgee.model.automations.AutomationTriggerType
@@ -75,5 +76,30 @@ class ContentDeliveryConfigTestData : BaseTestData() {
   val keyWithTranslation =
     this.projectBuilder.addKey("key") {
       addTranslation("en", "Hello")
+    }
+
+  // A separate project (owned by an unrelated organization) with its own storage.
+  // Used to verify that access to a storage by id from another project is rejected.
+  val unrelatedOrg =
+    root.addOrganization {
+      name = "Unrelated org"
+    }
+
+  val unrelatedProject: ProjectBuilder =
+    root
+      .addProject(organizationOwner = unrelatedOrg.self) {
+        name = "Unrelated project"
+      }.build {
+        addEnglish()
+      }
+
+  val unrelatedAzureContentStorage =
+    unrelatedProject.addContentStorage {
+      name = "Unrelated Azure"
+      this.azureContentStorageConfig =
+        AzureContentStorageConfig(this).apply {
+          connectionString = "unrelatedConnectionString"
+          containerName = "unrelatedContainerName"
+        }
     }
 }
