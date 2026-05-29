@@ -103,6 +103,10 @@ export function useQaIssueMessage(
       return normalizedParams?.placeholder
         ? t('qa_issue_placeholders_extra', normalizedParams)
         : t('qa_issue_placeholders_extra_no_params');
+    case 'qa_placeholders_replace':
+      return normalizedParams?.placeholder && normalizedParams?.expected
+        ? t('qa_issue_placeholders_replace', normalizedParams)
+        : t('qa_issue_placeholders_replace_no_params');
     case 'qa_html_tag_missing':
       return normalizedParams?.tag
         ? t('qa_issue_html_tag_missing', normalizedParams)
