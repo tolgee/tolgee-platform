@@ -90,10 +90,17 @@ class PromptFragmentsHelper {
         "glossary",
         """
         {{#if glossary.json}}
-        These glossary terms should be strictly used, adjust form to fit into the context:
+        Use these glossary terms when the source text contains them, adapting the form to fit the context:
         {{glossary.json}}
         
+        Field descriptions:
+        source: the term as it appears in the source text.
+        target: how the term should be translated in {{target.languageName}}. When present, use it and adapt its form to the context. When absent, translate the term naturally like any other word.
+        description: extra guidance on how to handle this term; follow it.
         isCaseSensitive: If true, strictly follow the term casing, otherwise adjust casing to fit the context
+        {{#if glossary.hasAbbreviation}}
+        isAbbreviation: the term is an abbreviation.
+        {{/if}}
         {{#if glossary.hasForbiddenTerm}}
         isForbidden = Do not use it in the resulting translation.
         {{/if}}
