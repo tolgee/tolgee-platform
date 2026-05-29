@@ -209,7 +209,11 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
             [CELL_SHOW_ON_HOVER]: !qaIssueCount,
             [CELL_HIGHLIGHT_ON_HOVER]: qaIssuesResolved || qaChecksStale,
           })}
-          tooltip={t('translation_cell_qa_issues')}
+          tooltip={
+            qaChecksStale
+              ? t('translation_cell_qa_checks_stale')
+              : t('translation_cell_qa_issues')
+          }
         >
           <QaBadge count={qaIssueCount} stale={qaChecksStale} />
         </ControlsButton>
