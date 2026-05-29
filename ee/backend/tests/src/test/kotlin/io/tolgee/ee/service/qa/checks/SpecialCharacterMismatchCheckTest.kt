@@ -171,4 +171,33 @@ class SpecialCharacterMismatchCheckTest {
   fun `does not flag non-special characters`() {
     check.check(params("Hello world", "Hello world!?.:;")).assertNoIssues()
   }
+
+  @Test
+  fun `does not flag extra special char inside a URL`() {
+    // The `&` lives inside the URL query string, not in the translated content.
+    check.check(params("Visit https://x.com?a=1&b=2", "Visit page")).assertNoIssues()
+  }
+
+  @Test
+  fun `does not flag extra special char inside an HTML tag`() {
+    check.check(params("""Click <a href="mailto:x@y.com">here</a>""", "Click here")).assertNoIssues()
+  }
+
+  @Test
+  fun `flags genuine extra special char outside blocked ranges`() {
+    check.check(params("Price \$5 https://x.com", "Price 5")).assertSingleIssue {
+      message(QaIssueMessage.QA_SPECIAL_CHAR_ADDED)
+      param("character", "\$")
+    }
+  }
+
+  @Test
+  fun `still reports missing special char when a URL is present`() {
+    // The missing-char issue carries no position, so range filtering never drops it.
+    check.check(params("Cena: 10 https://x.com", "Price: \$10 https://x.com")).assertSingleIssue {
+      message(QaIssueMessage.QA_SPECIAL_CHAR_MISSING)
+      param("characters", "\$")
+      param("count", "1")
+    }
+  }
 }
