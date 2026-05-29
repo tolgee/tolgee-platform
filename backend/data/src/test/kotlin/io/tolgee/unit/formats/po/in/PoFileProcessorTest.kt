@@ -156,6 +156,30 @@ class PoFileProcessorTest {
   }
 
   @Test
+  fun `PO_ICU preserves ICU placeholders in plural forms`() {
+    mockUtil.mockIt("en.po", "src/test/resources/import/po/example_icu_plural.po")
+    processFile()
+    mockUtil.fileProcessorContext.assertLanguagesCount(1)
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "Welcome, {name}")
+      .assertSingle {
+        hasText("Welcome, {name}")
+      }
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "1 item")
+      .assertSinglePlural {
+        hasText(
+          """
+          {value, plural,
+          one {1 item}
+          other {{count} items}
+          }
+          """.trimIndent(),
+        )
+      }
+  }
+
+  @Test
   fun `respects provided format`() {
     mockUtil.mockIt("en.json", "src/test/resources/import/po/example.po")
     mockUtil.fileProcessorContext.params =

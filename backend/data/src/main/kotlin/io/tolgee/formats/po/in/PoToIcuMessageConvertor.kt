@@ -6,7 +6,6 @@ import io.tolgee.formats.DEFAULT_PLURAL_ARGUMENT_NAME
 import io.tolgee.formats.FormsToIcuPluralConvertor
 import io.tolgee.formats.MessageConvertorResult
 import io.tolgee.formats.ToIcuPlaceholderConvertor
-import io.tolgee.formats.convertMessage
 import io.tolgee.formats.getULocaleFromTag
 import io.tolgee.formats.importCommon.BaseImportRawDataConverter
 import io.tolgee.formats.importCommon.ImportMessageConvertor
@@ -35,8 +34,7 @@ class PoToIcuMessageConvertor(
     }
 
     if (rawData is Map<*, *>) {
-      val converted = convertPoPlural(rawData, languageTag, convertPlaceholders, isProjectIcuEnabled)
-      return converted
+      return convertPoPlural(rawData, languageTag, baseImportRawDataConverter)
     }
 
     throw IllegalArgumentException("Unsupported type of message")
@@ -45,8 +43,7 @@ class PoToIcuMessageConvertor(
   private fun convertPoPlural(
     possiblePluralForms: Map<*, *>,
     languageTag: String,
-    convertPlaceholders: Boolean,
-    isProjectIcuEnabled: Boolean,
+    baseImportRawDataConverter: BaseImportRawDataConverter,
   ): MessageConvertorResult {
     val formsConverted =
       possiblePluralForms.entries.associate { (formNumPossibleString, value) ->
@@ -57,7 +54,7 @@ class PoToIcuMessageConvertor(
         val locale = getULocaleFromTag(languageTag)
         val example = findSuitableExample(formNumber, locale)
         val keyword = PluralRules.forLocale(locale).select(example.toDouble())
-        keyword to (convert(value, true, convertPlaceholders, isProjectIcuEnabled))
+        keyword to baseImportRawDataConverter.convertMessage(value, isInPlural = true)
       }
     val argName =
       formsConverted.values.firstNotNullOfOrNull { it.pluralArgName }
@@ -78,20 +75,5 @@ class PoToIcuMessageConvertor(
   ): Int {
     val examples = PluralData.DATA[locale.language]?.examples ?: PluralData.DATA["en"]!!.examples
     return examples.find { it.plural == key }?.sample ?: examples[0].sample
-  }
-
-  private fun convert(
-    message: String,
-    isInPlural: Boolean = false,
-    convertPlaceholders: Boolean,
-    isProjectIcuEnabled: Boolean,
-  ): MessageConvertorResult {
-    return convertMessage(
-      message,
-      isInPlural,
-      convertPlaceholders,
-      isProjectIcuEnabled,
-      convertorFactory = paramConvertorFactory,
-    )
   }
 }
