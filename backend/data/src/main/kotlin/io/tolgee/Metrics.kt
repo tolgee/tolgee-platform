@@ -221,6 +221,30 @@ class Metrics(
       .record(Duration.ofMillis(durationMs.coerceAtLeast(0)))
   }
 
+  /**
+   * Records the duration of a batched translation-memory lookup
+   * (TranslationMemoryService.getAutoTranslatedValuesForChunk, run once per batch-job chunk
+   * in AUTO_TRANSLATE / PRE_TRANSLATE_BT_TM instead of one lookup per (key, target-language) pair).
+   */
+  fun recordTranslationMemoryLookupBatch(
+    chunkSize: Int,
+    hitCount: Int,
+    durationMs: Long,
+  ) {
+    Timer
+      .builder("tolgee.translation.memory.lookup.batch")
+      .description("Time spent on a batched translation-memory lookup for a full chunk")
+      .publishPercentileHistogram()
+      .register(meterRegistry)
+      .record(Duration.ofMillis(durationMs.coerceAtLeast(0)))
+    meterRegistry
+      .counter("tolgee.translation.memory.lookup.batch.items", "outcome", "hit")
+      .increment(hitCount.toDouble())
+    meterRegistry
+      .counter("tolgee.translation.memory.lookup.batch.items", "outcome", "miss")
+      .increment((chunkSize - hitCount).coerceAtLeast(0).toDouble())
+  }
+
   // Branch operations - Priority 1 (Must Have)
   val branchCreateTimer: Timer by lazy {
     Timer

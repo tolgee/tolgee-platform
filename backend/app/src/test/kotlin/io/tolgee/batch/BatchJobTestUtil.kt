@@ -316,10 +316,11 @@ class BatchJobTestUtil(
       }
     }.whenever(autoTranslationService).autoTranslateSync(
       any(),
+      anyOrNull(),
+      anyOrNull(),
+      anyOrNull(),
       any(),
-      any(),
-      any(),
-      any(),
+      anyOrNull(),
     )
   }
 

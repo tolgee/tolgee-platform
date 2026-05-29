@@ -15,6 +15,7 @@ import io.tolgee.model.enums.TranslationProtection
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
+import io.tolgee.model.views.TranslationMemoryItemView
 import io.tolgee.repository.AutoTranslationConfigRepository
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.language.LanguageService
@@ -95,6 +96,7 @@ class AutoTranslationService(
     projectId: Long,
     keyId: Long,
     languageId: Long,
+    precomputedTmMatches: Map<Pair<Long, Long>, TranslationMemoryItemView>? = null,
   ) {
     val project = projectService.getDto(projectId)
     val config = getConfig(entityManager.getReference(Project::class.java, projectId), languageId)
@@ -114,7 +116,7 @@ class AutoTranslationService(
       return
     }
 
-    val (text, usedService, promptId) = getAutoTranslatedValue(config, translation) ?: return
+    val (text, usedService, promptId) = getAutoTranslatedValue(config, translation, precomputedTmMatches) ?: return
     text ?: return
 
     translation.setValueAndState(project, text, usedService, promptId)
@@ -123,14 +125,18 @@ class AutoTranslationService(
   private fun getAutoTranslatedValue(
     config: AutoTranslationConfig,
     translation: Translation,
+    precomputedTmMatches: Map<Pair<Long, Long>, TranslationMemoryItemView>? = null,
   ): Triple<String?, MtServiceType?, Long?>? {
     if (config.usingTm) {
+      val pair = translation.key.id to translation.language.id
       val value =
-        tmAutoTranslateProvider
-          .getAutoTranslatedValue(
-            translation.key,
-            translation.language,
-          )?.targetTranslationText
+        if (precomputedTmMatches != null) {
+          precomputedTmMatches[pair]?.targetTranslationText
+        } else {
+          tmAutoTranslateProvider
+            .getAutoTranslatedValue(translation.key, translation.language)
+            ?.targetTranslationText
+        }
 
       if (!value.isNullOrBlank()) {
         return Triple(value, null, null)
@@ -174,6 +180,7 @@ class AutoTranslationService(
     useTranslationMemory: Boolean? = null,
     useMachineTranslation: Boolean? = null,
     isBatch: Boolean,
+    precomputedTmMatches: Map<Pair<Long, Long>, TranslationMemoryItemView>? = null,
   ) {
     val adjustedConfigs = getAdjustedConfigs(key, forcedLanguageTags, useTranslationMemory, useMachineTranslation)
 
@@ -195,7 +202,7 @@ class AutoTranslationService(
 
     val toTmTranslate = translations.filter { it.first.usingTm }.mapNotNull { it.second }
 
-    val translatedWithTm = autoTranslateUsingTm(toTmTranslate, key).filter { it.value }.keys
+    val translatedWithTm = autoTranslateUsingTm(toTmTranslate, key, precomputedTmMatches).filter { it.value }.keys
 
     val toMtTranslate =
       translations
@@ -289,16 +296,21 @@ class AutoTranslationService(
   private fun autoTranslateUsingTm(
     toTranslate: List<Translation>,
     key: Key,
+    precomputedTmMatches: Map<Pair<Long, Long>, TranslationMemoryItemView>? = null,
   ): Map<Translation, Boolean> {
     val project = projectService.getDto(key.project.id)
     return toTranslate.associateWith { translation ->
       // "Match" must mean a non-blank target was actually applied. Returning true on a blank hit
       // would tell the caller to skip MT fallback for this key, leaving it untranslated.
+      val pair = key.id to translation.language.id
       val tmText =
-        tmAutoTranslateProvider
-          .getAutoTranslatedValue(key, translation.language)
-          ?.targetTranslationText
-          ?.takeIf { it.isNotBlank() }
+        if (precomputedTmMatches != null) {
+          precomputedTmMatches[pair]?.targetTranslationText
+        } else {
+          tmAutoTranslateProvider
+            .getAutoTranslatedValue(key, translation.language)
+            ?.targetTranslationText
+        }?.takeIf { it.isNotBlank() }
       tmText?.let { translation.setValueAndState(project, it, null) }
       tmText != null
     }

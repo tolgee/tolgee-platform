@@ -30,6 +30,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.mockito.Mockito
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.whenever
 import org.redisson.api.RedissonClient
@@ -331,19 +332,26 @@ abstract class AbstractBatchJobConcurrentTest :
   // region Processor Mocks - Machine Translation
 
   protected fun makeMtProcessorPass() {
-    doAnswer { }.whenever(autoTranslationService).autoTranslateSync(any(), any(), any(), any(), any())
+    doAnswer {
+    }.whenever(
+      autoTranslationService,
+    ).autoTranslateSync(any(), anyOrNull(), anyOrNull(), anyOrNull(), any(), anyOrNull())
   }
 
   protected fun makeMtProcessorPassWithDelay(delayMs: Long) {
     doAnswer {
       Thread.sleep(delayMs)
-    }.whenever(autoTranslationService).autoTranslateSync(any(), any(), any(), any(), any())
+    }.whenever(
+      autoTranslationService,
+    ).autoTranslateSync(any(), anyOrNull(), anyOrNull(), anyOrNull(), any(), anyOrNull())
   }
 
   protected fun makeMtProcessorPassWithCounter(counter: AtomicInteger) {
     doAnswer {
       counter.incrementAndGet()
-    }.whenever(autoTranslationService).autoTranslateSync(any(), any(), any(), any(), any())
+    }.whenever(
+      autoTranslationService,
+    ).autoTranslateSync(any(), anyOrNull(), anyOrNull(), anyOrNull(), any(), anyOrNull())
   }
 
   protected fun makeMtProcessorPassWithConcurrencyTracking(
@@ -358,7 +366,9 @@ abstract class AbstractBatchJobConcurrentTest :
       } finally {
         currentConcurrency.decrementAndGet()
       }
-    }.whenever(autoTranslationService).autoTranslateSync(any(), any(), any(), any(), any())
+    }.whenever(
+      autoTranslationService,
+    ).autoTranslateSync(any(), anyOrNull(), anyOrNull(), anyOrNull(), any(), anyOrNull())
   }
 
   // endregion
