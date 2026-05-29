@@ -1,3 +1,10 @@
+## [3.193.1](https://github.com/tolgee/tolgee-platform/compare/v3.193.0...v3.193.1) (2026-05-29)
+
+
+### Bug Fixes
+
+* sanitize XML 1.0-invalid characters in TMX and translation exports ([#3702](https://github.com/tolgee/tolgee-platform/issues/3702)) ([20b17d6](https://github.com/tolgee/tolgee-platform/commit/20b17d65bddda18cf3489b6979cad3d8b7b73188)), closes [#x9](https://github.com/tolgee/tolgee-platform/issues/x9) [#x20](https://github.com/tolgee/tolgee-platform/issues/x20) [-#xD7](https://github.com/-/issues/xD7) [#xE000](https://github.com/tolgee/tolgee-platform/issues/xE000) [#x10000](https://github.com/tolgee/tolgee-platform/issues/x10000) [-#x10](https://github.com/-/issues/x10)
+
 # [3.193.0](https://github.com/tolgee/tolgee-platform/compare/v3.192.0...v3.193.0) (2026-05-27)
 
 
