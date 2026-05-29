@@ -1,5 +1,6 @@
 package io.tolgee.ee.service.translationMemory.tmx
 
+import io.tolgee.util.sanitizeXmlText
 import java.io.ByteArrayOutputStream
 import javax.xml.stream.XMLOutputFactory
 import javax.xml.stream.XMLStreamWriter
@@ -65,7 +66,7 @@ class TmxExporter(
     // forbids prefixes in the name and throws XMLStreamException on strict implementations.
     writer.writeAttribute("xml", "http://www.w3.org/XML/1998/namespace", "lang", lang)
     writer.writeStartElement("seg")
-    writer.writeCharacters(text)
+    writer.writeCharacters(sanitizeXmlText(text))
     writer.writeEndElement() // seg
     writer.writeEndElement() // tuv
   }

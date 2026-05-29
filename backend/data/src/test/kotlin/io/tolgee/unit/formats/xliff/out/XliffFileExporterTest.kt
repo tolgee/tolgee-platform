@@ -529,4 +529,22 @@ class XliffFileExporterTest {
   }
 
   private fun getExportParams() = ExportParams().apply { format = ExportFormat.XLIFF }
+
+  @Test
+  fun `exports cleanly when translation text contains XML 1_0-invalid characters`() {
+    val built =
+      buildExportTranslationList {
+        add(
+          languageTag = "de",
+          keyName = "poisoned",
+          text = "Hello\u000Bworld",
+        )
+      }
+
+    val files = getExporter(built.translations).produceFiles()
+
+    val xml = files["de.xliff"]!!.bufferedReader().readText()
+    assertThat(xml).contains("Helloworld")
+    assertThat(xml).doesNotContain("")
+  }
 }

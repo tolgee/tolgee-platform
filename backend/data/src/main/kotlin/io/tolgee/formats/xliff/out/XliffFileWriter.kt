@@ -8,6 +8,7 @@ import io.tolgee.util.appendXmlOrText
 import io.tolgee.util.attr
 import io.tolgee.util.buildDom
 import io.tolgee.util.element
+import io.tolgee.util.sanitizeXmlText
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import java.io.InputStream
@@ -93,7 +94,7 @@ class XliffFileWriter(
 
   private fun Element.appendXmlIfEnabledOrText(content: String?) {
     if (!enableXmlContent) {
-      textContent = content
+      textContent = sanitizeXmlText(content ?: "")
       return
     }
     this.appendXmlOrText(content)

@@ -8,6 +8,7 @@ import io.tolgee.service.export.ExportFileStructureTemplateProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.testing.assert
 import io.tolgee.util.buildExportTranslationList
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class ResxExporterTest {
@@ -283,5 +284,22 @@ class ResxExporterTest {
 
   private fun getExportParams(): ExportParams {
     return ExportParams().also { it.format = ExportFormat.RESX_ICU }
+  }
+
+  @Test
+  fun `exports cleanly when translation text contains XML 1_0-invalid characters`() {
+    val built =
+      buildExportTranslationList {
+        add(
+          languageTag = "cs",
+          keyName = "poisoned",
+          text = "Hello\u000Bworld",
+        )
+      }
+
+    val xml = getExported(getExporter(built.translations))["cs.resx"]!!
+
+    assertThat(xml).contains("Helloworld")
+    assertThat(xml).doesNotContain(Char(0x0B).toString())
   }
 }
