@@ -45,24 +45,26 @@ class GlossaryAiTranslationTestData {
               assignProject(project)
 
               translatedTerm =
-                addTerm {}.build {
-                  addTranslation {
-                    languageTag = "en"
-                    text = "Apple"
-                  }
-                  addTranslation {
-                    languageTag = "fr"
-                    text = "Pomme"
-                  }
-                }.self
+                addTerm {}
+                  .build {
+                    addTranslation {
+                      languageTag = "en"
+                      text = "Apple"
+                    }
+                    addTranslation {
+                      languageTag = "fr"
+                      text = "Pomme"
+                    }
+                  }.self
 
               untranslatedTerm =
-                addTerm {}.build {
-                  addTranslation {
-                    languageTag = "en"
-                    text = "Banana"
-                  }
-                }.self
+                addTerm {}
+                  .build {
+                    addTranslation {
+                      languageTag = "en"
+                      text = "Banana"
+                    }
+                  }.self
 
               untranslatedWithDescriptionTerm =
                 addTerm {
