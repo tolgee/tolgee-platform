@@ -1,4 +1,5 @@
 import { styled, Tooltip } from '@mui/material';
+import { KeyName } from 'tg.component/KeyName/KeyName';
 import { components } from 'tg.service/apiSchema.generated';
 import { useTimeDistance } from 'tg.hooks/useTimeDistance';
 import { TranslationWithPlaceholders } from 'tg.views/projects/translations/translationVisual/TranslationWithPlaceholders';
@@ -279,7 +280,7 @@ export const TranslationMemoryItem = ({
               parts.push(
                 <Tooltip key="key" title={item.keyName}>
                   <StyledMetaKey data-cy="translation-tools-translation-memory-item-key-name">
-                    {item.keyName}
+                    <KeyName name={item.keyName} />
                   </StyledMetaKey>
                 </Tooltip>
               );

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, styled } from '@mui/material';
 import ReactMarkdown from 'react-markdown';
+import { KeyName } from 'tg.component/KeyName/KeyName';
 import clsx from 'clsx';
 import { MinusCircle, PlusCircle } from '@untitled-ui/icons-react';
 
@@ -80,7 +81,8 @@ export const MergeKeyHeader: React.FC<Props> = ({ data, variant }) => {
         <TextColumn strike={strike}>
           <StyledKey data-cy="translations-key-name">
             <LimitedHeightText maxLines={3} wrap="break-all">
-              {[data.namespace, data.keyName].filter(Boolean).join('.')}
+              {data.namespace && <>{data.namespace}.</>}
+              <KeyName name={data.keyName} />
             </LimitedHeightText>
           </StyledKey>
           {data.keyDescription && (

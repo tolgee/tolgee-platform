@@ -4,6 +4,7 @@ import { T } from '@tolgee/react';
 import { FlagImage } from '@tginternal/library/components/languages/FlagImage';
 import { languageInfo } from '@tginternal/language-util/lib/generated/languageInfo';
 import { LimitedHeightText } from 'tg.component/LimitedHeightText';
+import { KeyName } from 'tg.component/KeyName/KeyName';
 import { components } from 'tg.service/apiSchema.generated';
 import { SelectionService } from 'tg.service/useSelectionService';
 import { ProjectLink } from 'tg.component/ProjectLink';
@@ -163,7 +164,7 @@ export const TranslationMemoryEntryRow: React.VFC<Props> = ({
             rows have no key of their own and stay unlabeled. */}
         {row.keyName && (
           <StyledKeyName data-cy="tm-entry-row-keys">
-            {row.keyName}
+            <KeyName name={row.keyName} />
           </StyledKeyName>
         )}
         <StyledSourceText>
