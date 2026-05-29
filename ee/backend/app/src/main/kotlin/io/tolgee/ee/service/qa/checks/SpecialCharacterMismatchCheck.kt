@@ -68,7 +68,7 @@ class SpecialCharacterMismatchCheck : QaCheck {
       }
     }
 
-    return results
+    return filterResultsInBlockedRanges(results, text)
   }
 
   companion object {

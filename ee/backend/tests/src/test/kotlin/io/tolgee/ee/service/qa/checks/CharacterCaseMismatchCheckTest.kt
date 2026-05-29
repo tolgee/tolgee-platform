@@ -104,4 +104,30 @@ class CharacterCaseMismatchCheckTest {
   fun `all types are CHARACTER_CASE_MISMATCH`() {
     check.check(params("bonjour", "Hello")).assertAllHaveType(QaCheckType.CHARACTER_CASE_MISMATCH)
   }
+
+  @Test
+  fun `does not flag first letter inside an HTML tag`() {
+    // First letter is the `b` of the <b> tag — intentionally not re-checked against
+    // the real first word; we only filter, we don't advance to the next letter.
+    check.check(params("<b>hello</b>", "Hello")).assertNoIssues()
+  }
+
+  @Test
+  fun `does not flag first letter inside an ICU placeholder`() {
+    check.check(params("{name} world", "Hello")).assertNoIssues()
+  }
+
+  @Test
+  fun `does not flag first letter inside a URL`() {
+    check.check(params("https://example.com is here", "Hello")).assertNoIssues()
+  }
+
+  @Test
+  fun `flags genuine mismatch when first letter is outside blocked ranges`() {
+    check.check(params("bonjour <b>x</b>", "Hello world")).assertSingleIssue {
+      message(QaIssueMessage.QA_CASE_CAPITALIZE)
+      replacement("B")
+      position(0, 1)
+    }
+  }
 }

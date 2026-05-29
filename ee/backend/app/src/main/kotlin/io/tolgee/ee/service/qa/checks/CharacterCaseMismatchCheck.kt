@@ -24,6 +24,14 @@ class CharacterCaseMismatchCheck : QaCheck {
     baseText: String?,
     languageTag: String,
   ): List<QaCheckResult> {
+    return filterResultsInBlockedRanges(detectCaseMismatch(text, baseText, languageTag), text)
+  }
+
+  private fun detectCaseMismatch(
+    text: String,
+    baseText: String?,
+    languageTag: String,
+  ): List<QaCheckResult> {
     val base = baseText ?: return emptyList()
     if (base.isBlank()) return emptyList()
     if (text.isBlank()) return emptyList()
