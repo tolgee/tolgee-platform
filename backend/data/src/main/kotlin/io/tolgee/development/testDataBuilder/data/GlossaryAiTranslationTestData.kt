@@ -17,8 +17,9 @@ class GlossaryAiTranslationTestData {
   lateinit var nonTranslatableTerm: GlossaryTerm
   lateinit var forbiddenTerm: GlossaryTerm
   lateinit var caseSensitiveOnlyTerm: GlossaryTerm
+  lateinit var abbreviationOnlyTerm: GlossaryTerm
 
-  val sourceText = "Apple Banana Cherry Dragon Elder Fig are common words"
+  val sourceText = "Apple Banana Cherry Dragon Elder Fig Grape are common words"
 
   val root: TestDataBuilder =
     TestDataBuilder().apply {
@@ -103,6 +104,16 @@ class GlossaryAiTranslationTestData {
                   addTranslation {
                     languageTag = "en"
                     text = "Fig"
+                  }
+                }.self
+
+              abbreviationOnlyTerm =
+                addTerm {
+                  flagAbbreviation = true
+                }.build {
+                  addTranslation {
+                    languageTag = "en"
+                    text = "Grape"
                   }
                 }.self
             }.self

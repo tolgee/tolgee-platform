@@ -84,7 +84,18 @@ class GlossaryTermsForAiTranslationTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `excludes an untranslated case-sensitive-only term`() {
-    assertThat(getTerms()).doesNotContainKey("Fig")
+  fun `includes an untranslated case-sensitive-only term`() {
+    val term = getTerms()["Fig"]
+    assertThat(term).isNotNull
+    assertThat(term!!.target).isNull()
+    assertThat(term.isCaseSensitive).isTrue()
+  }
+
+  @Test
+  fun `includes an untranslated abbreviation-only term`() {
+    val term = getTerms()["Grape"]
+    assertThat(term).isNotNull
+    assertThat(term!!.target).isNull()
+    assertThat(term.isAbbreviation).isTrue()
   }
 }
