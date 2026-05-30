@@ -12,6 +12,7 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
+import org.springframework.web.util.UriComponentsBuilder
 
 @Component
 class WebhookExecutor(
@@ -30,10 +31,13 @@ class WebhookExecutor(
     headers.contentType = MediaType.APPLICATION_JSON
 
     val request = HttpEntity(stringData, headers)
-
+    
+    // If the webhook URL already contains a % it likely already properly escaped its parameters
+    val uri = UriComponentsBuilder.fromUriString(config.url).build(config.url.contains("%"))
+    
     try {
       val responseEntity: ResponseEntity<String> =
-        restTemplate.exchange(config.url, HttpMethod.POST, request, String::class.java)
+        restTemplate.exchange(uri, HttpMethod.POST, request, String::class.java)
       if (!responseEntity.statusCode.is2xxSuccessful) {
         throw WebhookRespondedWithNon200Status(responseEntity.statusCode, responseEntity.body)
       }
