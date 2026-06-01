@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./src",
+    "paths": {
+      "tg.component/*": ["component/*"],
+      "tg.store/*": ["store/*"],
+      "tg.hooks/*": ["hooks/*"],
+      "tg.constants/*": ["constants/*"],
+      "tg.fixtures/*": ["fixtures/*"],
+      "tg.globalContext/*": ["globalContext/*"],
+      "tg.service/*": ["service/*"],
+      "tg.views/*": ["views/*"],
+      "tg.error/*": ["error/*"],
+      "tg.svgs/*": ["svgs/*"],
+      "tg.billing/*": ["ee/billing/*"],
+      "tg.ee.module/*": ["ee/*"],
+      "tg.ee": ["eeSetup/eeModule.current"],
+      "tg.translationTools/*": ["translationTools/*"],
+      "tg.websocket-client/*": ["websocket-client/*"],
+      "eeSetup/*": ["eeSetup/*"]
+    }
+  }
+}
