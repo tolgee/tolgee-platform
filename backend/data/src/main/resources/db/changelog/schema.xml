@@ -5627,4 +5627,119 @@
             <sql>DROP INDEX CONCURRENTLY IF EXISTS user_account_normalized_email;</sql>
         </rollback>
     </changeSet>
+
+    <changeSet author="dkrizan" id="user-account-resolve-case-insensitive-username-duplicates">
+        <comment>
+            Make usernames (emails) case-insensitive. Two things made this impossible before:
+            mixed-case usernames stored as-is, and a case-sensitive partial unique index
+            (changeSet 1663247386701-2) that allowed e.g. "JDimeo@x" and "jdimeo@x" to coexist.
+
+            With the new case-insensitive findActive() (lower(ua.username) = lower(:username))
+            any group of active accounts colliding on lower(username) would make findActive()
+            return >1 row and throw, breaking login for those users. This runs on Cloud AND on
+            every self-hosted upgrade, so it must be automatic, deterministic and non-destructive.
+
+            Steps (this changeSet):
+              1. Drop the old case-sensitive partial unique index (name is auto-generated, so it
+                 is located by definition rather than by name).
+              2. For each group of active accounts (deleted_at IS NULL AND disabled_at IS NULL)
+                 sharing lower(username), keep exactly one survivor and disable the rest. Survivor
+                 = most recent activity_revision, tie-broken by oldest created_at then lowest id.
+                 Losers are only disabled (disabled_at) - nothing is deleted, fully reversible.
+              3. Lowercase the username of every remaining active account.
+
+            The replacement unique index is created in the next changeSet (concurrently, so it
+            cannot run in this transactional changeSet).
+        </comment>
+
+        <sql dbms="postgresql" splitStatements="false"><![CDATA[
+            DO $$
+            DECLARE
+              idx text;
+            BEGIN
+              SELECT indexname INTO idx
+              FROM pg_indexes
+              WHERE schemaname = 'public'
+                AND tablename = 'user_account'
+                AND indexdef ILIKE '%UNIQUE%'
+                AND indexdef ILIKE '%(username)%'
+                AND indexdef ILIKE '%deleted_at IS NULL%'
+                AND indexdef NOT ILIKE '%lower(%';
+              IF idx IS NOT NULL THEN
+                EXECUTE 'DROP INDEX ' || quote_ident(idx);
+              END IF;
+            END $$;
+        ]]></sql>
+
+        <sql dbms="postgresql"><![CDATA[
+            WITH dup_emails AS (
+              SELECT lower(username) AS lemail
+              FROM user_account
+              WHERE deleted_at IS NULL AND disabled_at IS NULL
+              GROUP BY lower(username)
+              HAVING count(*) > 1
+            ),
+            cand AS (
+              SELECT ua.id, ua.created_at, lower(ua.username) AS lemail
+              FROM user_account ua
+              JOIN dup_emails d ON d.lemail = lower(ua.username)
+              WHERE ua.deleted_at IS NULL AND ua.disabled_at IS NULL
+            ),
+            last_activity AS (
+              SELECT author_id, max(timestamp) AS ts
+              FROM activity_revision
+              WHERE author_id IN (SELECT id FROM cand)
+              GROUP BY author_id
+            ),
+            ranked AS (
+              SELECT c.id,
+                     row_number() OVER (
+                       PARTITION BY c.lemail
+                       ORDER BY a.ts DESC NULLS LAST, c.created_at ASC, c.id ASC
+                     ) AS rn
+              FROM cand c
+              LEFT JOIN last_activity a ON a.author_id = c.id
+            )
+            UPDATE user_account ua
+            SET disabled_at = now()
+            FROM ranked r
+            WHERE ua.id = r.id AND r.rn > 1;
+        ]]></sql>
+
+        <sql dbms="postgresql"><![CDATA[
+            UPDATE user_account
+            SET username = lower(username)
+            WHERE deleted_at IS NULL
+              AND disabled_at IS NULL
+              AND username <> lower(username);
+        ]]></sql>
+
+        <rollback>
+            <!-- Schema-only rollback: restores the old case-sensitive partial unique index.
+                 The data changes (disabled duplicates, lowercased usernames) are not reverted -
+                 the original casing and disabled state are not recorded. -->
+            <sql dbms="postgresql"><![CDATA[
+                CREATE UNIQUE INDEX IF NOT EXISTS user_account_username_idx
+                  ON public.user_account (username)
+                  WHERE deleted_at IS NULL;
+            ]]></sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="dkrizan" id="user-account-lower-username-active-unique-index" runInTransaction="false">
+        <comment>
+            Case-insensitive replacement for the dropped unique index. Scoped to exactly what
+            findActive() treats as active (deleted_at IS NULL AND disabled_at IS NULL) so the
+            duplicates disabled in the previous changeSet are excluded and keep their data, while
+            at most one active account per lower(username) is guaranteed going forward.
+        </comment>
+        <sql dbms="postgresql">
+            CREATE UNIQUE INDEX CONCURRENTLY IF NOT EXISTS user_account_lower_username_active_uidx
+                ON user_account (lower(username))
+                WHERE deleted_at IS NULL AND disabled_at IS NULL;
+        </sql>
+        <rollback>
+            <sql dbms="postgresql">DROP INDEX CONCURRENTLY IF EXISTS user_account_lower_username_active_uidx;</sql>
+        </rollback>
+    </changeSet>
 </databaseChangeLog>
