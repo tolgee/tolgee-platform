@@ -28,4 +28,8 @@ data class SingleStepImportResolvableRequest(
     description = "List of keys to import",
   )
   var keys: List<SingleStepImportResolvableItemRequest> = listOf(),
+  @field:Schema(
+    description = "Whether to convert ICU message syntax placeholders (e.g., {0} → {0, number}). Default: true",
+  )
+  val convertPlaceholdersToIcu: Boolean = true,
 )
