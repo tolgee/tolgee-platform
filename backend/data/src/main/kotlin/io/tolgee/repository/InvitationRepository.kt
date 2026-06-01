@@ -36,8 +36,8 @@ interface InvitationRepository : JpaRepository<Invitation?, Long?> {
     select count(p) from Permission p
     left join p.invitation i
     left join p.user u
-    where 
-        (i.email = :email or u.username = :email) and
+    where
+        (lower(i.email) = lower(:email) or lower(u.username) = lower(:email)) and
         p.project = :project
   """,
   )
@@ -51,8 +51,8 @@ interface InvitationRepository : JpaRepository<Invitation?, Long?> {
     select count(orl.id) from OrganizationRole orl
     left join orl.invitation i
     left join orl.user u
-    where 
-        (i.email = :email or u.username = :email) and
+    where
+        (lower(i.email) = lower(:email) or lower(u.username) = lower(:email)) and
         orl.organization = :organization
   """,
   )
