@@ -60,7 +60,14 @@ class ContentDeliveryUploader(
     storage: FileStorage,
   ) {
     if (config.pruneBeforePublish) {
-      storage.pruneDirectory(config.slug)
+      try {
+        storage.pruneDirectory(config.slug)
+      } catch (e: Exception) {
+        throw io.tolgee.exceptions.BadRequestException(
+          io.tolgee.constants.Message.CONTENT_DELIVERY_PRUNE_FAILED,
+          cause = e,
+        )
+      }
     }
   }
 
