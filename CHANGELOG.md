@@ -1,3 +1,10 @@
+# [3.195.0](https://github.com/tolgee/tolgee-platform/compare/v3.194.0...v3.195.0) (2026-06-01)
+
+
+### Features
+
+* show distinct QA badge tooltip when checks are stale ([#3707](https://github.com/tolgee/tolgee-platform/issues/3707)) ([957db74](https://github.com/tolgee/tolgee-platform/commit/957db7407ccf579c9e1c65c8fac4e5fb9f0b8086))
+
 # [3.194.0](https://github.com/tolgee/tolgee-platform/compare/v3.193.1...v3.194.0) (2026-05-29)
 
 
