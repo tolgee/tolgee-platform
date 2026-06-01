@@ -875,6 +875,7 @@
   "content_outside_plural_forms": "Content found outside of plural forms",
   "content_storage_config_invalid": "Storage configuration invalid",
   "content_storage_config_required": "Content storage configuration is required",
+  "content_delivery_prune_failed": "Failed to prune content delivery storage. Your storage may not support directory cleanup — try disabling 'Prune before publishing' in the content delivery settings.",
   "content_storage_is_in_use": "Content storage can't be deleted, because it's in use!",
   "content_storage_test_failed": "Storage test failed",
   "copied_to_clipboard": "Copied!",
