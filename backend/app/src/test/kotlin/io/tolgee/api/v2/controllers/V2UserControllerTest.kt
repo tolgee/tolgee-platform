@@ -64,6 +64,19 @@ class V2UserControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `it stores the email lowercased on update`() {
+    val requestDTO =
+      UserUpdateRequestDto(
+        email = "Ben.New@Example.COM",
+        name = "Ben's new name",
+        currentPassword = initialPassword,
+      )
+    performAuthPut("/v2/user", requestDTO).andIsOk
+    Assertions.assertThat(userAccountService.findActive("ben.new@example.com")!!.username)
+      .isEqualTo("ben.new@example.com")
+  }
+
+  @Test
   fun `it updates the user password`() {
     val requestDTO =
       UserUpdatePasswordRequestDto(

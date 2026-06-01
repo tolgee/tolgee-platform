@@ -61,6 +61,6 @@ class SignUpService(
 
   fun dtoToEntity(request: SignUpDto): UserAccount {
     val encodedPassword = passwordEncoder.encode(request.password!!)
-    return UserAccount(name = request.name, username = request.email, password = encodedPassword)
+    return UserAccount(name = request.name, username = request.email.lowercase(), password = encodedPassword)
   }
 }
