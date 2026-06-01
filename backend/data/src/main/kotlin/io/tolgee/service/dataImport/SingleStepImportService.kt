@@ -117,7 +117,7 @@ class SingleStepImportService(
     // these options are not user accessible,
     // because it might act weird when just importing screenshots without any actual translations
     // leaving this for an actual usecase as it's now not clear how it should behave
-    request.convertPlaceholdersToIcu = false
+    request.convertPlaceholdersToIcu = params.convertPlaceholdersToIcu
     request.tagNewKeys = emptyList()
     request.fileMappings = keysToFilesManager.getFileMappings()
     request.removeOtherKeys = false

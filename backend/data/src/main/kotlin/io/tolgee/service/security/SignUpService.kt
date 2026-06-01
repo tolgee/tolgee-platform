@@ -27,7 +27,7 @@ class SignUpService(
 ) {
   @Transactional
   fun signUp(dto: SignUpDto): JwtAuthenticationResponse? {
-    userAccountService.findActive(dto.email)?.let {
+    userAccountService.findActive(dto.email.lowercase())?.let {
       throw BadRequestException(Message.USERNAME_ALREADY_EXISTS)
     }
 
@@ -61,6 +61,6 @@ class SignUpService(
 
   fun dtoToEntity(request: SignUpDto): UserAccount {
     val encodedPassword = passwordEncoder.encode(request.password!!)
-    return UserAccount(name = request.name, username = request.email, password = encodedPassword)
+    return UserAccount(name = request.name, username = request.email.lowercase(), password = encodedPassword)
   }
 }
