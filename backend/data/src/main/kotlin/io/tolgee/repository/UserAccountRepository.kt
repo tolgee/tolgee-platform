@@ -104,7 +104,7 @@ private const val PROJECT_PERMISSIONS_MAIN = """
 interface UserAccountRepository : JpaRepository<UserAccount, Long> {
   fun findByUsername(username: String?): Optional<UserAccount>
 
-  @Query("from UserAccount ua where ua.username = :username and ua.deletedAt is null and ua.disabledAt is null")
+  @Query("from UserAccount ua where lower(ua.username) = lower(:username) and ua.deletedAt is null and ua.disabledAt is null")
   fun findActive(username: String): UserAccount?
 
   @Query("from UserAccount ua where ua.id = :id and ua.deletedAt is null and ua.disabledAt is null")
