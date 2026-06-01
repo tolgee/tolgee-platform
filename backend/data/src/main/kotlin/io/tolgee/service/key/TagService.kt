@@ -203,7 +203,8 @@ class TagService(
     key: Key,
     newTags: List<String>,
   ) {
-    key.keyMeta?.tags?.forEach { oldTag ->
+    // Snapshot before mutating: remove() modifies keyMeta.tags in-place
+    key.keyMeta?.tags?.toList()?.forEach { oldTag ->
       if (newTags.find { oldTag.name == it } == null) {
         this.remove(key, oldTag)
       }
