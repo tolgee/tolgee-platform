@@ -74,6 +74,21 @@ class PublicControllerTest : AbstractControllerTest() {
   }
 
   @Test
+  fun `stores the username lowercased on sign up`() {
+    val dto = SignUpDto(name = "Pavel Novak", password = "aaaaaaaaa", email = "Pavel.Novak@Example.COM")
+    performPost("/api/public/sign_up", dto).andIsOk
+    assertThat(userAccountService.findActive("pavel.novak@example.com")!!.username)
+      .isEqualTo("pavel.novak@example.com")
+  }
+
+  @Test
+  fun `logs in case-insensitively regardless of email casing`() {
+    val dto = SignUpDto(name = "Pavel Novak", password = "aaaaaaaaa", email = "pavel.novak@example.com")
+    performPost("/api/public/sign_up", dto).andIsOk
+    doAuthentication("Pavel.Novak@EXAMPLE.com", "aaaaaaaaa").andIsOk
+  }
+
+  @Test
   fun `logs event to external monitor`() {
     val dto = SignUpDto(name = "Pavel Novak", password = "aaaaaaaaa", email = "aaaa@aaaa.com")
     performPost(
