@@ -317,6 +317,7 @@ const messageFormatParamMap = {
   'Java String.format': 'JAVA_STRING_FORMAT' as MessageFormat,
   'Ruby Sprintf': 'RUBY_SPRINTF' as MessageFormat,
   'Python Percent': 'PYTHON_PERCENT' as MessageFormat,
+  'Python Brace Format': 'PYTHON_BRACE' as MessageFormat,
 };
 
 type MessageFormat = components['schemas']['ExportParams']['messageFormat'];

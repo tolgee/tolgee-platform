@@ -95,6 +95,7 @@ export const formatGroups: FormatGroup[] = [
           'ICU',
           'RUBY_SPRINTF',
           'PYTHON_PERCENT',
+          'PYTHON_BRACE',
         ],
       },
       {
