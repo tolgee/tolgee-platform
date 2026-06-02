@@ -189,8 +189,6 @@ export default function ToolsPanel() {
             !error && <p className="bt-status">Loading translation…</p>}
           {pair && (
             <>
-              <Row label={baseLang} value={pair.baseText} muted />
-              <Row label={pair.sourceLang} value={pair.text} />
               {loading && (
                 <p className="bt-status">Back-translating with Claude…</p>
               )}
