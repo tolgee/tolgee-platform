@@ -5631,10 +5631,7 @@
     <changeSet author="dkrizan" id="user-account-disable-case-insensitive-username-duplicates">
         <comment>
             Make usernames (emails) case-insensitive. The old case-sensitive partial unique index
-            (changeSet 1663247386701-2) allowed e.g. "Ab@x" and "ab@x" to coexist as active accounts;
-            with the new case-insensitive findActive() such a pair makes findActive() return >1 row and
-            throw, breaking login. This runs on Cloud AND on every self-hosted upgrade, so it must be
-            automatic, deterministic and non-destructive.
+            (changeSet 1663247386701-2) allowed e.g. "Ab@x" and "ab@x" to coexist as active accounts/
 
             Step 1 of 3: for each group of active accounts (deleted_at IS NULL AND disabled_at IS NULL)
             sharing lower(username), keep one survivor and disable the rest. Survivor = most recent
@@ -5693,10 +5690,7 @@
     <changeSet author="dkrizan" id="user-account-lower-username-active-unique-index" runInTransaction="false">
         <comment>
             Step 2 of 3: the case-insensitive replacement index, built concurrently while the old
-            case-sensitive index is still live (so writes stay protected throughout). Scoped to exactly
-            what findActive() treats as active (deleted_at IS NULL AND disabled_at IS NULL), so the
-            duplicates disabled in step 1 are excluded and keep their data, while at most one active
-            account per lower(username) is guaranteed going forward.
+            case-sensitive index is still live (so writes stay protected throughout).
         </comment>
         <sql dbms="postgresql">
             CREATE UNIQUE INDEX CONCURRENTLY IF NOT EXISTS user_account_lower_username_active_uidx
