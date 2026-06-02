@@ -1,3 +1,10 @@
+# [3.196.0](https://github.com/tolgee/tolgee-platform/compare/v3.195.0...v3.196.0) (2026-06-02)
+
+
+### Features
+
+* single correctable QA issue for ICU placeholders with wrong name ([#3708](https://github.com/tolgee/tolgee-platform/issues/3708)) ([34b6160](https://github.com/tolgee/tolgee-platform/commit/34b6160dc2425765b6682b451cb0441735ea10c7))
+
 # [3.195.0](https://github.com/tolgee/tolgee-platform/compare/v3.194.0...v3.195.0) (2026-06-01)
 
 
