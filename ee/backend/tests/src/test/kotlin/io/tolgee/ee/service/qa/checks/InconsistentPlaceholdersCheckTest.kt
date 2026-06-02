@@ -75,21 +75,83 @@ class InconsistentPlaceholdersCheckTest {
   }
 
   @Test
-  fun `detects both missing and extra`() {
-    check.check(params("Ahoj {nom}", "Hello {name}")).assertIssues {
+  fun `collapses one missing and one extra into a single replace issue`() {
+    check.check(params("Ahoj {nom}", "Hello {name}")).assertSingleIssue {
+      message(QaIssueMessage.QA_PLACEHOLDERS_REPLACE)
+      param("placeholder", "nom")
+      param("expected", "name")
+      position(5, 10)
+      replacement("{name}")
+    }
+  }
+
+  @Test
+  fun `replace issue preserves the full source of a typed placeholder`() {
+    check.check(params("Ahoj {pocet, number}", "Hello {count, number}")).assertSingleIssue {
+      message(QaIssueMessage.QA_PLACEHOLDERS_REPLACE)
+      param("placeholder", "pocet")
+      param("expected", "count")
+      replacement("{count, number}")
+    }
+  }
+
+  @Test
+  fun `pairs into replace when only one of several placeholders is translated`() {
+    check.check(params("Ahoj {x} a {b}", "Hello {a} and {b}")).assertSingleIssue {
+      message(QaIssueMessage.QA_PLACEHOLDERS_REPLACE)
+      param("placeholder", "x")
+      param("expected", "a")
+      replacement("{a}")
+    }
+  }
+
+  @Test
+  fun `falls back to separate issues when multiple placeholders are translated`() {
+    check.check(params("Ahoj {x} a {y}", "Hello {a} and {b}")).assertIssues {
       issue {
         message(QaIssueMessage.QA_PLACEHOLDERS_MISSING)
-        param("placeholder", "name")
+        param("placeholder", "a")
+        noPosition()
+        noReplacement()
+      }
+      issue {
+        message(QaIssueMessage.QA_PLACEHOLDERS_MISSING)
+        param("placeholder", "b")
         noPosition()
         noReplacement()
       }
       issue {
         message(QaIssueMessage.QA_PLACEHOLDERS_EXTRA)
-        param("placeholder", "nom")
-        position(5, 10)
+        param("placeholder", "x")
+        replacement("")
+      }
+      issue {
+        message(QaIssueMessage.QA_PLACEHOLDERS_EXTRA)
+        param("placeholder", "y")
         replacement("")
       }
     }
+  }
+
+  @Test
+  fun `pairs into replace within a single plural variant only`() {
+    check
+      .check(
+        params(
+          text = "{count, plural, one {# polozka od {autor}} other {# polozek od {author}}}",
+          base = "{count, plural, one {# item by {author}} other {# items by {author}}}",
+          isPlural = true,
+          textVariants = mapOf("one" to "# polozka od {autor}", "other" to "# polozek od {author}"),
+          baseTextVariants = mapOf("one" to "# item by {author}", "other" to "# items by {author}"),
+          textVariantOffsets = mapOf("one" to 21, "other" to 49),
+        ),
+      ).assertSingleIssue {
+        message(QaIssueMessage.QA_PLACEHOLDERS_REPLACE)
+        param("placeholder", "autor")
+        param("expected", "author")
+        replacement("{author}")
+        pluralVariant("one")
+      }
   }
 
   @Test

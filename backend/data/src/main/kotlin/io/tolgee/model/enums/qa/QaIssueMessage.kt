@@ -64,6 +64,7 @@ enum class QaIssueMessage {
   // Inconsistent placeholders
   QA_PLACEHOLDERS_MISSING,
   QA_PLACEHOLDERS_EXTRA,
+  QA_PLACEHOLDERS_REPLACE,
 
   // Inconsistent HTML (comparison)
   QA_HTML_TAG_MISSING,

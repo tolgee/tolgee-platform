@@ -6,6 +6,7 @@ data class ArgInfo(
   val name: String,
   val positionStart: Int? = null,
   val positionEnd: Int? = null,
+  val sourceText: String? = null,
 )
 
 /**
@@ -73,7 +74,7 @@ private fun collectArgsWithPositions(
     when {
       content is MessagePatternUtil.ArgNode -> {
         content.name?.let { name ->
-          args.add(ArgInfo(name, pos, pos + len))
+          args.add(ArgInfo(name, pos, pos + len, content.patternString))
         }
         content.complexStyle?.variants?.forEach { variant ->
           variant.message?.let { collectNamesOnly(it, args) }
@@ -81,7 +82,7 @@ private fun collectArgsWithPositions(
       }
 
       content.type == MessagePatternUtil.MessageContentsNode.Type.REPLACE_NUMBER -> {
-        args.add(ArgInfo(REPLACE_NUMBER_PLACEHOLDER_NAME, pos, pos + len))
+        args.add(ArgInfo(REPLACE_NUMBER_PLACEHOLDER_NAME, pos, pos + len, content.patternString))
       }
     }
     pos += len
@@ -99,7 +100,7 @@ private fun collectNamesOnly(
     when {
       content is MessagePatternUtil.ArgNode -> {
         content.name?.let { name ->
-          args.add(ArgInfo(name))
+          args.add(ArgInfo(name, sourceText = content.patternString))
         }
         content.complexStyle?.variants?.forEach { variant ->
           variant.message?.let { collectNamesOnly(it, args) }
@@ -107,7 +108,7 @@ private fun collectNamesOnly(
       }
 
       content.type == MessagePatternUtil.MessageContentsNode.Type.REPLACE_NUMBER -> {
-        args.add(ArgInfo(REPLACE_NUMBER_PLACEHOLDER_NAME))
+        args.add(ArgInfo(REPLACE_NUMBER_PLACEHOLDER_NAME, sourceText = content.patternString))
       }
     }
   }
