@@ -572,7 +572,8 @@ class UserAccountService(
     dto: UserUpdateRequestDto,
     request: HttpServletRequest,
   ) {
-    if (userAccount.username.equals(dto.email, ignoreCase = true)) {
+    val newEmail = dto.email.lowercase()
+    if (userAccount.username == newEmail) {
       return
     }
 
@@ -581,13 +582,13 @@ class UserAccountService(
       throw ValidationException(Message.VALIDATION_EMAIL_IS_NOT_VALID)
     }
 
-    this.findActive(dto.email)?.let { throw ValidationException(Message.USERNAME_ALREADY_EXISTS) }
+    this.findActive(newEmail)?.let { throw ValidationException(Message.USERNAME_ALREADY_EXISTS) }
     if (tolgeeProperties.authentication.needsEmailVerification) {
-      emailVerificationService.resendEmailVerification(userAccount, request, dto.callbackUrl, dto.email)
+      emailVerificationService.resendEmailVerification(userAccount, request, dto.callbackUrl, newEmail)
       return
     }
 
-    userAccount.username = dto.email
+    userAccount.username = newEmail
   }
 
   fun invalidateTokens(userAccount: UserAccount): UserAccount {

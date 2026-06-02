@@ -64,7 +64,7 @@ class V2UserControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `it stores the email as entered and finds it case-insensitively on update`() {
+  fun `it stores the email lowercased on update`() {
     val requestDTO =
       UserUpdateRequestDto(
         email = "Ben.New@Example.COM",
@@ -73,7 +73,7 @@ class V2UserControllerTest : AuthorizedControllerTest() {
       )
     performAuthPut("/v2/user", requestDTO).andIsOk
     assertThat(userAccountService.findActive("ben.new@example.com")!!.username)
-      .isEqualTo("Ben.New@Example.COM")
+      .isEqualTo("ben.new@example.com")
   }
 
   @Test

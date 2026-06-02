@@ -80,6 +80,12 @@ class AuthTest : AbstractControllerTest() {
   }
 
   @Test
+  fun `generates token regardless of email casing`() {
+    val response = doAuthentication(initialUsername.uppercase(), initialPassword)
+    assertThat(response.andReturn().response.status).isEqualTo(200)
+  }
+
+  @Test
   fun userWithTokenHasAccess() {
     val response =
       doAuthentication(initialUsername, initialPassword)
