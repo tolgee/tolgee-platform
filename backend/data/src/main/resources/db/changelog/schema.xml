@@ -5631,10 +5631,8 @@
     <changeSet author="dkrizan" id="user-account-resolve-case-insensitive-username-duplicates">
         <comment>
             Normalize usernames (emails) to lowercase. The old case-sensitive partial unique index
-            (changeSet 1663247386701-2) allowed e.g. "JDimeo@x" and "jdimeo@x" to coexist as active
-            accounts; with the new case-insensitive findActive() (lower(ua.username) = lower(:username))
-            such a pair makes findActive() return >1 row and throw, breaking login. This runs on Cloud
-            AND on every self-hosted upgrade, so it must be automatic, deterministic and non-destructive.
+            (changeSet 1663247386701-2) allowed e.g. "Ab@x" and "ab@x" to coexist as active
+            accounts.
 
             Steps (this changeSet):
               1. Drop the old case-sensitive partial unique index (name is auto-generated, so it

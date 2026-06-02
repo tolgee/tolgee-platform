@@ -653,8 +653,8 @@ class UserAccountService(
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#userId")
   fun enable(userId: Long) {
     val user = this.userAccountRepository.findDisabled(userId)
-    // Another active account may already hold this email case-insensitively (e.g. this account
-    // was disabled as a duplicate). Re-enabling would violate the case-insensitive unique index.
+    // Another active account may already hold this email case-insensitively
+    // Re-enabling would violate the case-insensitive unique index
     this.findActive(user.username)?.let { throw ValidationException(Message.USERNAME_ALREADY_EXISTS) }
     user.disabledAt = null
     this.save(user)
