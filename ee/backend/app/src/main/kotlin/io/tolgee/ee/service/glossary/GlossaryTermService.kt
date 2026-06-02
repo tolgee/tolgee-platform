@@ -14,6 +14,7 @@ import io.tolgee.ee.repository.glossary.GlossaryTermRepository
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.glossary.Glossary
 import io.tolgee.model.glossary.GlossaryTerm
+import io.tolgee.model.glossary.GlossaryTerm.Companion.hasNoFlags
 import io.tolgee.model.glossary.GlossaryTermTranslation
 import io.tolgee.model.glossary.GlossaryTermTranslation.Companion.WORD_REGEX
 import io.tolgee.service.machineTranslation.MtGlossaryTermsProvider
@@ -300,10 +301,7 @@ class GlossaryTermService(
         if (
           target.isNullOrBlank() &&
           description.isBlank() &&
-          !term.flagNonTranslatable &&
-          !term.flagForbiddenTerm &&
-          !term.flagCaseSensitive &&
-          !term.flagAbbreviation
+          term.hasNoFlags
         ) {
           // Term doesn't bring anything of value - passing it could confuse (AI) translators
           return@mapNotNull null

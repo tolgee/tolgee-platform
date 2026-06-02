@@ -4,6 +4,7 @@ import io.tolgee.activity.annotation.ActivityEntityDescribingPaths
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.model.StandardAuditModel
+import io.tolgee.model.glossary.GlossaryTerm_.flagNonTranslatable
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -43,4 +44,9 @@ class GlossaryTerm(
 
   @ActivityLoggedProp
   var flagForbiddenTerm: Boolean = false
+
+  companion object {
+    val GlossaryTerm.hasNoFlags: Boolean
+      get() = !flagNonTranslatable && !flagCaseSensitive && !flagAbbreviation && !flagForbiddenTerm
+  }
 }
