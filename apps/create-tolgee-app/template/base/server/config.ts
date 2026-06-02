@@ -3,7 +3,16 @@ import { fileURLToPath } from 'node:url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
-export const PORT = Number(process.env.PORT ?? 5181)
+/** Vite dev server port. Tunnel + iframe URLs use this. */
+export const VITE_PORT = Number(process.env.VITE_PORT ?? 5180)
+
+/** Express server port. Manifest/webhook/decorator routes live here. */
+export const SERVER_PORT = Number(
+  process.env.SERVER_PORT ?? process.env.PORT ?? 5181
+)
+
+export const LOCAL_BASE_URL = `http://localhost:${VITE_PORT}`
+
 export const WEBHOOK_SECRET = process.env.TOLGEE_WEBHOOK_SECRET ?? null
 export const TOLGEE_URL =
   process.env.TOLGEE_URL ?? 'https://app.tolgee.io'

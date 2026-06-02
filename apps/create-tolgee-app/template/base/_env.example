@@ -8,6 +8,11 @@ TOLGEE_URL={{tolgeeUrl}}
 # custom proxy / Named Tunnel you boot yourself.
 # TOLGEE_DEV_TUNNEL=none
 
+# Ports the dev servers bind to. Override when running multiple plugins
+# side-by-side so each one gets its own pair.
+# VITE_PORT=5180
+# SERVER_PORT=5181
+
 # Webhook signing secret — Tolgee gives you this when the plugin is
 # registered, and it's also written to .tolgee-dev/install.json.
 # Setting it here enables the webhook signature verifier; leaving it

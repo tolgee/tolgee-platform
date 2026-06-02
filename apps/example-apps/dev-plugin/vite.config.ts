@@ -1,27 +1,29 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// https://vite.dev/config/
-export default defineConfig({
-  plugins: [react()],
-  server: {
-    port: 5180,
-    strictPort: true,
-    // Cloudflare quick tunnels expose a single port, so the public
-    // tunnel URL has to reach every backend endpoint too. Vite proxies
-    // these paths through to the Express server on 5181 so one tunnel
-    // URL serves both module iframes and webhook/decorator/manifest
-    // traffic.
-    proxy: {
-      '/api': 'http://localhost:5181',
-      '/manifest.json': 'http://localhost:5181',
-      '/webhook': 'http://localhost:5181',
-      '/decorators': 'http://localhost:5181',
-      '/state': 'http://localhost:5181',
-      '/emoji': 'http://localhost:5181',
+// Ports are env-overridable so multiple plugins can run side-by-side.
+// Defaults match the historical 5180/5181 pair.
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '')
+  const vitePort = Number(env.VITE_PORT ?? 5180)
+  const serverPort = Number(env.SERVER_PORT ?? 5181)
+  const serverTarget = `http://localhost:${serverPort}`
+  return {
+    plugins: [react()],
+    server: {
+      port: vitePort,
+      strictPort: true,
+      // Cloudflare quick tunnels expose a single port. Vite is the
+      // tunnel target; these proxies forward Tolgee → Express endpoints
+      // through the one public hostname.
+      proxy: {
+        '/manifest.json': serverTarget,
+        '/webhook': serverTarget,
+        '/decorators': serverTarget,
+      },
+      // Quick tunnels rewrite the Host header to the trycloudflare.com
+      // hostname; Vite's default host check would reject those requests.
+      allowedHosts: true,
     },
-    // Cloudflare quick tunnels rewrite the Host header to the tunnel
-    // hostname; Vite's default host check would reject those requests.
-    allowedHosts: true,
-  },
+  }
 })

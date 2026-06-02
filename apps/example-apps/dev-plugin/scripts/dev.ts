@@ -19,7 +19,7 @@ import {
   type InstallState,
 } from './lib'
 
-const VITE_PORT = 5180
+const VITE_PORT = Number(process.env.VITE_PORT ?? 5180)
 const LOCAL_BASE_URL = `http://localhost:${VITE_PORT}`
 
 const isLocalHost = (urlString: string): boolean => {
@@ -68,6 +68,14 @@ const main = async (): Promise<void> => {
     )
     writeTunnelState({ baseUrl: LOCAL_BASE_URL })
     await maybePatchManifestUrl(installState, LOCAL_BASE_URL)
+    // Park so concurrently -k doesn't tear the other processes down.
+    // A long-lived interval keeps the event loop alive until SIGINT/SIGTERM.
+    const heartbeat = setInterval(() => {}, 1 << 30)
+    await new Promise<void>((resolve) => {
+      process.once('SIGINT', () => resolve())
+      process.once('SIGTERM', () => resolve())
+    })
+    clearInterval(heartbeat)
     return
   }
 

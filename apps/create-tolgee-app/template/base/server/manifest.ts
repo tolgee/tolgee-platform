@@ -1,13 +1,11 @@
 import { readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { TUNNEL_STATE_FILE } from './config'
+import { LOCAL_BASE_URL, TUNNEL_STATE_FILE } from './config'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
 const TEMPLATE_PATH = join(__dirname, 'manifest.template.json')
-
-const LOCAL_BASE_URL = 'http://localhost:5180'
 
 const PLACEHOLDER = '__BASE_URL__'
 

@@ -23,8 +23,8 @@ import {
 
 type Org = { id: number; name: string; slug: string }
 
-const VITE_PORT = 5180
-const SERVER_PORT = 5181
+const VITE_PORT = Number(process.env.VITE_PORT ?? 5180)
+const SERVER_PORT = Number(process.env.SERVER_PORT ?? 5181)
 const LOCAL_MANIFEST_URL = `http://localhost:${SERVER_PORT}/manifest.json`
 
 const isLocalHost = (urlString: string): boolean => {

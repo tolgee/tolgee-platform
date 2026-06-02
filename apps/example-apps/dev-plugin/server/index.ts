@@ -1,5 +1,5 @@
 import express, { json } from 'express'
-import { PORT, WEBHOOK_SECRET } from './config'
+import { SERVER_PORT, WEBHOOK_SECRET } from './config'
 import { cors } from './cors'
 import { registerWebhookRoute } from './routes/webhook'
 import { registerDecoratorsRoute } from './routes/decorators'
@@ -24,8 +24,8 @@ registerDecoratorsRoute(app)
 registerStateRoute(app)
 registerEmojiRoute(app)
 
-app.listen(PORT, () => {
-  console.log(`dev-plugin server listening on http://localhost:${PORT}`)
+app.listen(SERVER_PORT, () => {
+  console.log(`dev-plugin server listening on http://localhost:${SERVER_PORT}`)
   if (!WEBHOOK_SECRET) {
     console.warn(
       'TOLGEE_WEBHOOK_SECRET is not set; webhook signatures will not be verified.'
