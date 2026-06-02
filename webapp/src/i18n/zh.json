@@ -2258,6 +2258,7 @@
   "slack_workspace_not_found": "未找到 Slack 工作区",
   "slug_not_unique": "此 URL 别名已被占用",
   "slug_validation_can_contain_just_lowercase_numbers_hyphens": "该字段只能包含小写字母、数字和连字符",
+  "source_and_target_plan_must_be_different": "源计划和目标计划必须不同",
   "spending_limit_dialog_close": "关闭",
   "spending_limit_dialog_description": "请联系支持部门 <email>billing@tolgee.io</email>，以提高您的支出限额。",
   "spending_limit_dialog_title": "已超出消费限额",

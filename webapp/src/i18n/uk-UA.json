@@ -2035,6 +2035,7 @@
   "slack_workspace_not_found": "Робочий простір Slack не знайдено",
   "slug_not_unique": "Цей URL-slug вже зайнятий",
   "slug_validation_can_contain_just_lowercase_numbers_hyphens": "Слаг має починатися з літери та може містити лише малі літери, цифри та дефіси",
+  "source_and_target_plan_must_be_different": "Вихідний та цільовий план мають бути різними",
   "spending_limit_dialog_close": "Закрити",
   "spending_limit_dialog_description": "Зверніться до підтримки за адресою <email>billing@tolgee.io</email>, щоб збільшити ліміт витрат",
   "spending_limit_dialog_title": "Перевищено ліміт витрат",

@@ -2254,6 +2254,7 @@
   "slack_workspace_not_found": "Espacio de trabajo de Slack no encontrado",
   "slug_not_unique": "Esta URL slug ya está en uso",
   "slug_validation_can_contain_just_lowercase_numbers_hyphens": "Este campo solo puede contener letras minúsculas, números y guiones",
+  "source_and_target_plan_must_be_different": "El plan de origen y destino deben ser diferentes",
   "spending_limit_dialog_close": "Cerrar",
   "spending_limit_dialog_description": "Contacte con soporte en <email>billing@tolgee.io</email> para aumentar su límite de gasto",
   "spending_limit_dialog_title": "Límite de gasto excedido",

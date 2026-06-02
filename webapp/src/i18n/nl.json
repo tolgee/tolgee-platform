@@ -2268,6 +2268,7 @@
   "slack_workspace_not_found": "Slack-werkruimte niet gevonden",
   "slug_not_unique": "Deze URL-slug is al in gebruik",
   "slug_validation_can_contain_just_lowercase_numbers_hyphens": "Dit veld mag alleen kleine letters, cijfers en streepjes bevatten",
+  "source_and_target_plan_must_be_different": "Bron- en doelplan moeten verschillend zijn",
   "spending_limit_dialog_close": "Sluiten",
   "spending_limit_dialog_description": "Neem contact op met de ondersteuning via <email>billing@tolgee.io</email> om uw uitgavenlimiet te verhogen",
   "spending_limit_dialog_title": "Limiet voor uitgaven overschreden",

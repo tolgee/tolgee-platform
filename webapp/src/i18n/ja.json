@@ -2270,6 +2270,7 @@
   "slack_workspace_not_found": "Slack ワークスペースが見つかりません",
   "slug_not_unique": "この URL スラッグは既に使用されています",
   "slug_validation_can_contain_just_lowercase_numbers_hyphens": "スラッグは文字で始まり、小文字の文字、数字、ハイフンのみを含むことができます",
+  "source_and_target_plan_must_be_different": "ソースとターゲットの plan は異なる必要があります",
   "spending_limit_dialog_close": "閉じる",
   "spending_limit_dialog_description": "使用限度額を引き上げるには、サポート <email>billing@tolgee.io</email> にお問い合わせください",
   "spending_limit_dialog_title": "使用限度額を超過しました",

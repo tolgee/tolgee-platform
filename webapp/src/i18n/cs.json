@@ -2263,6 +2263,7 @@
   "slack_workspace_not_found": "Slack workspace nenalezen",
   "slug_not_unique": "Tato URL adresa je již použita",
   "slug_validation_can_contain_just_lowercase_numbers_hyphens": "Slug musí začínat písmenem a může obsahovat pouze malá písmena, číslice a pomlčky",
+  "source_and_target_plan_must_be_different": "Zdrojový a cílový plán musí být odlišné",
   "spending_limit_dialog_close": "Zavřít",
   "spending_limit_dialog_description": "Kontaktujte podporu na <email>billing@tolgee.io</email> pro navýšení vašeho výdajového limitu",
   "spending_limit_dialog_title": "Výdajový limit překročen",

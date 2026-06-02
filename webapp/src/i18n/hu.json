@@ -2256,6 +2256,7 @@
   "slack_workspace_not_found": "Slack munkaterület nem található",
   "slug_not_unique": "Ez az URL slug már foglalt",
   "slug_validation_can_contain_just_lowercase_numbers_hyphens": "Ez a mező csak kisbetűket, számokat és kötőjeleket tartalmazhat",
+  "source_and_target_plan_must_be_different": "A forrás és a cél csomag különböző kell legyen",
   "spending_limit_dialog_close": "Bezárás",
   "spending_limit_dialog_description": "Lépjen kapcsolatba a támogatással a <email>billing@tolgee.io</email> címen, hogy növelje a költési limitjét",
   "spending_limit_dialog_title": "Költségkeret túllépve",

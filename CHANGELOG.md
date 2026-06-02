@@ -1,3 +1,10 @@
+## [3.196.1](https://github.com/tolgee/tolgee-platform/compare/v3.196.0...v3.196.1) (2026-06-02)
+
+
+### Bug Fixes
+
+* ConcurrentModificationException when changing multiple tags via complex-update endpoint ([#3710](https://github.com/tolgee/tolgee-platform/issues/3710)) ([28e06eb](https://github.com/tolgee/tolgee-platform/commit/28e06ebf58d9e82749d9054c4a8e69b62eaf166e))
+
 # [3.196.0](https://github.com/tolgee/tolgee-platform/compare/v3.195.0...v3.196.0) (2026-06-02)
 
 

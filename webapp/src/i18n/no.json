@@ -2248,6 +2248,7 @@
   "slack_workspace_not_found": "Slack-arbeidsområde ikke funnet",
   "slug_not_unique": "Denne URL-sluggen er allerede i bruk",
   "slug_validation_can_contain_just_lowercase_numbers_hyphens": "Dette feltet kan kun inneholde små bokstaver, tall og bindestrek",
+  "source_and_target_plan_must_be_different": "Kilde- og målplan må være forskjellige",
   "spending_limit_dialog_close": "Lukk",
   "spending_limit_dialog_description": "Kontakt støtte på <email>billing@tolgee.io</email> for å øke din spendinggrense",
   "spending_limit_dialog_title": "Grensen for utgifter er overskredet",

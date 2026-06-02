@@ -2270,6 +2270,7 @@
   "slack_workspace_not_found": "Slack workspace not found",
   "slug_not_unique": "This URL slug is already taken",
   "slug_validation_can_contain_just_lowercase_numbers_hyphens": "Slug has to start with letter and only may contain lowercase letters, numbers and hyphens",
+  "source_and_target_plan_must_be_different": "Source and target plan must be different",
   "spending_limit_dialog_close": "Close",
   "spending_limit_dialog_description": "Contact support on <email>billing@tolgee.io</email> to increase your spending limit",
   "spending_limit_dialog_title": "Spending limit exceeded",
