@@ -13,7 +13,7 @@
       {
         "key": "panel",
         "title": "Back translate",
-        "icon": "BarChart01",
+        "icon": "SwitchHorizontal01",
         "entry": "/tools-panel"
       }
     ]

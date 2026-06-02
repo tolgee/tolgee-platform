@@ -165,8 +165,6 @@ export default function ToolsPanel() {
 
   return (
     <main ref={containerRef} className="back-translate-panel">
-      <h2>Back translation</h2>
-
       {!ctx && <p className="bt-status">Loading context…</p>}
       {ctx && !baseLang && !error && (
         <p className="bt-status">Loading project metadata…</p>
