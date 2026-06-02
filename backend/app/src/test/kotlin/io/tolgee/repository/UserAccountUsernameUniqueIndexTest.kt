@@ -1,6 +1,7 @@
 package io.tolgee.repository
 
 import io.tolgee.AbstractSpringTest
+import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.model.UserAccount
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -40,5 +41,20 @@ class UserAccountUsernameUniqueIndexTest : AbstractSpringTest() {
         },
       )
     }.doesNotThrowAnyException()
+  }
+
+  @Test
+  @Transactional
+  fun `enable refuses to re-activate a duplicate colliding with an active account`() {
+    userAccountRepository.saveAndFlush(UserAccount(name = "a", username = "ciunique3@test.com", password = "x"))
+    val disabled =
+      userAccountRepository.saveAndFlush(
+        UserAccount(name = "b", username = "CiUnique3@test.com", password = "x").apply {
+          disabledAt = Date()
+        },
+      )
+
+    assertThatThrownBy { userAccountService.enable(disabled.id) }
+      .isInstanceOf(ValidationException::class.java)
   }
 }

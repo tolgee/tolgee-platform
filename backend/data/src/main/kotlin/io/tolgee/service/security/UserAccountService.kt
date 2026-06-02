@@ -572,8 +572,7 @@ class UserAccountService(
     dto: UserUpdateRequestDto,
     request: HttpServletRequest,
   ) {
-    val newEmail = dto.email.lowercase()
-    if (userAccount.username == newEmail) {
+    if (userAccount.username.equals(dto.email, ignoreCase = true)) {
       return
     }
 
@@ -582,13 +581,13 @@ class UserAccountService(
       throw ValidationException(Message.VALIDATION_EMAIL_IS_NOT_VALID)
     }
 
-    this.findActive(newEmail)?.let { throw ValidationException(Message.USERNAME_ALREADY_EXISTS) }
+    this.findActive(dto.email)?.let { throw ValidationException(Message.USERNAME_ALREADY_EXISTS) }
     if (tolgeeProperties.authentication.needsEmailVerification) {
-      emailVerificationService.resendEmailVerification(userAccount, request, dto.callbackUrl, newEmail)
+      emailVerificationService.resendEmailVerification(userAccount, request, dto.callbackUrl, dto.email)
       return
     }
 
-    userAccount.username = newEmail
+    userAccount.username = dto.email
   }
 
   fun invalidateTokens(userAccount: UserAccount): UserAccount {
@@ -653,6 +652,9 @@ class UserAccountService(
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#userId")
   fun enable(userId: Long) {
     val user = this.userAccountRepository.findDisabled(userId)
+    // Another active account may already hold this email case-insensitively (e.g. this account
+    // was disabled as a duplicate). Re-enabling would violate the case-insensitive unique index.
+    this.findActive(user.username)?.let { throw ValidationException(Message.USERNAME_ALREADY_EXISTS) }
     user.disabledAt = null
     this.save(user)
     this.applicationEventPublisher.publishEvent(OnUserCountChanged(decrease = false, this))

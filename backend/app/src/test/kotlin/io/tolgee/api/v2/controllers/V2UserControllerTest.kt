@@ -64,7 +64,7 @@ class V2UserControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `it stores the email lowercased on update`() {
+  fun `it stores the email as entered and finds it case-insensitively on update`() {
     val requestDTO =
       UserUpdateRequestDto(
         email = "Ben.New@Example.COM",
@@ -72,8 +72,9 @@ class V2UserControllerTest : AuthorizedControllerTest() {
         currentPassword = initialPassword,
       )
     performAuthPut("/v2/user", requestDTO).andIsOk
+    // username is stored verbatim; findActive folds case so the lowercase lookup still matches
     Assertions.assertThat(userAccountService.findActive("ben.new@example.com")!!.username)
-      .isEqualTo("ben.new@example.com")
+      .isEqualTo("Ben.New@Example.COM")
   }
 
   @Test

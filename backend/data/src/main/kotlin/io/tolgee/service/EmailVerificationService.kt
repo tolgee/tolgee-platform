@@ -147,7 +147,7 @@ class EmailVerificationService(
     user: UserAccount,
   ) {
     newEmail?.let {
-      user.username = it.lowercase()
+      user.username = newEmail
     }
   }
 

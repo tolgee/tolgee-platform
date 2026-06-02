@@ -5630,14 +5630,12 @@
 
     <changeSet author="dkrizan" id="user-account-resolve-case-insensitive-username-duplicates">
         <comment>
-            Make usernames (emails) case-insensitive. Two things made this impossible before:
-            mixed-case usernames stored as-is, and a case-sensitive partial unique index
-            (changeSet 1663247386701-2) that allowed e.g. "JDimeo@x" and "jdimeo@x" to coexist.
-
-            With the new case-insensitive findActive() (lower(ua.username) = lower(:username))
-            any group of active accounts colliding on lower(username) would make findActive()
-            return >1 row and throw, breaking login for those users. This runs on Cloud AND on
-            every self-hosted upgrade, so it must be automatic, deterministic and non-destructive.
+            Make logins case-insensitive without rewriting stored usernames. The old
+            case-sensitive partial unique index (changeSet 1663247386701-2) allowed e.g.
+            "JDimeo@x" and "jdimeo@x" to coexist as active accounts; with the new case-insensitive
+            findActive() (lower(ua.username) = lower(:username)) such a pair makes findActive()
+            return >1 row and throw, breaking login. This runs on Cloud AND on every self-hosted
+            upgrade, so it must be automatic, deterministic and non-destructive.
 
             Steps (this changeSet):
               1. Drop the old case-sensitive partial unique index (name is auto-generated, so it
@@ -5645,11 +5643,12 @@
               2. For each group of active accounts (deleted_at IS NULL AND disabled_at IS NULL)
                  sharing lower(username), keep exactly one survivor and disable the rest. Survivor
                  = most recent activity_revision, tie-broken by oldest created_at then lowest id.
-                 Losers are only disabled (disabled_at) - nothing is deleted, fully reversible.
-              3. Lowercase the username of every remaining active account.
+                 Losers are only disabled (disabled_at) - nothing is deleted, no usernames are
+                 rewritten, fully reversible.
 
-            The replacement unique index is created in the next changeSet (concurrently, so it
-            cannot run in this transactional changeSet).
+            Existing usernames keep their original casing; findActive() folds case at query time.
+            The replacement case-insensitive unique index is created in the next changeSet
+            (concurrently, so it cannot run in this transactional changeSet).
         </comment>
 
         <sql dbms="postgresql" splitStatements="false"><![CDATA[
@@ -5706,18 +5705,10 @@
             WHERE ua.id = r.id AND r.rn > 1;
         ]]></sql>
 
-        <sql dbms="postgresql"><![CDATA[
-            UPDATE user_account
-            SET username = lower(username)
-            WHERE deleted_at IS NULL
-              AND disabled_at IS NULL
-              AND username <> lower(username);
-        ]]></sql>
-
         <rollback>
             <!-- Schema-only rollback: restores the old case-sensitive partial unique index.
-                 The data changes (disabled duplicates, lowercased usernames) are not reverted -
-                 the original casing and disabled state are not recorded. -->
+                 The data change (disabled duplicates) is not reverted - which accounts were
+                 disabled is not recorded. -->
             <sql dbms="postgresql"><![CDATA[
                 CREATE UNIQUE INDEX IF NOT EXISTS user_account_username_idx
                   ON public.user_account (username)
