@@ -200,21 +200,18 @@ class TagService(
 
   @Transactional
   fun updateTags(
-      key: Key,
-      newTags: List<String>,
+    key: Key,
+    newTags: List<String>,
   ) {
-      val tagsToRemove =
-          key.keyMeta?.tags
-              ?.filter { it.name !in newTags }
-              ?: emptyList()
+    val tagsToRemove = key.keyMeta?.tags?.filter { it.name !in newTags } ?: emptyList()
 
-      tagsToRemove.forEach {
-          this.remove(key, it)
-      }
+    tagsToRemove.forEach {
+      this.remove(key, it)
+    }
 
-      newTags.forEach {
-          tagKey(key, it)
-      }
+    newTags.forEach {
+      tagKey(key, it)
+    }
   }
 
   fun getProjectTags(
