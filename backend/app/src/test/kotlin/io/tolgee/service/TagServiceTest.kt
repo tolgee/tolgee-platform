@@ -6,6 +6,7 @@ package io.tolgee.service
 
 import io.tolgee.AbstractSpringTest
 import io.tolgee.development.testDataBuilder.data.TagsTestData
+import io.tolgee.model.key.Key
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
@@ -40,5 +41,25 @@ class TagServiceTest : AbstractSpringTest() {
     entityManager.flush()
     val time = System.currentTimeMillis() - start
     assertThat(time).isLessThan(20000)
+  }
+
+  @Test
+  fun `updates tags without concurrent modification`() {
+    val tagsTestData = TagsTestData()
+    testDataService.saveTestData(tagsTestData.root)
+    entityManager.flush()
+    entityManager.clear()
+
+    val key = entityManager.find(Key::class.java, tagsTestData.existingTagKey.id)
+    tagService.updateTags(key, listOf("existing tag 2"))
+    entityManager.flush()
+    entityManager.clear()
+
+    val updatedKey = entityManager.find(Key::class.java, tagsTestData.existingTagKey.id)
+    val tagNames = updatedKey.keyMeta?.tags?.map { it.name } ?: emptyList()
+
+    assertThat(tagNames).containsExactly("existing tag 2")
+    assertThat(tagService.find(tagsTestData.existingTag.id)).isNull()
+    assertThat(tagService.find(tagsTestData.existingTag2.id)).isNotNull()
   }
 }
