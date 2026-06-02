@@ -77,7 +77,6 @@ class PublicControllerTest : AbstractControllerTest() {
   fun `stores the username as entered and finds it case-insensitively on sign up`() {
     val dto = SignUpDto(name = "Pavel Novak", password = "aaaaaaaaa", email = "Pavel.Novak@Example.COM")
     performPost("/api/public/sign_up", dto).andIsOk
-    // username is stored verbatim; findActive folds case so the lowercase lookup still matches
     assertThat(userAccountService.findActive("pavel.novak@example.com")!!.username)
       .isEqualTo("Pavel.Novak@Example.COM")
   }

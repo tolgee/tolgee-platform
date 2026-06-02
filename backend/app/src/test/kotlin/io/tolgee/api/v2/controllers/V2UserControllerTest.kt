@@ -72,8 +72,7 @@ class V2UserControllerTest : AuthorizedControllerTest() {
         currentPassword = initialPassword,
       )
     performAuthPut("/v2/user", requestDTO).andIsOk
-    // username is stored verbatim; findActive folds case so the lowercase lookup still matches
-    Assertions.assertThat(userAccountService.findActive("ben.new@example.com")!!.username)
+    assertThat(userAccountService.findActive("ben.new@example.com")!!.username)
       .isEqualTo("Ben.New@Example.COM")
   }
 
