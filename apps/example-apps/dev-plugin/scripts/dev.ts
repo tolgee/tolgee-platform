@@ -97,6 +97,11 @@ const maybePatchManifestUrl = async (
     )
     return
   }
+  if (!installState.pat) {
+    // No org-admin PAT available; skip the manifest-url PATCH. Fine if
+    // the manifest URL hasn't changed (e.g. stable localhost ports).
+    return
+  }
   try {
     await patchManifestUrl(installState, `${baseUrl}/manifest.json`)
     console.log(

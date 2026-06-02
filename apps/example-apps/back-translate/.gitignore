@@ -7,6 +7,9 @@ dist-ssr
 # Tunnel + install state written by `npm run dev` / `npm run register`.
 .tolgee-dev/
 
+# Local data store (webhook-driven cache).
+server/.data/
+
 # Local env overrides.
 .env.local
 

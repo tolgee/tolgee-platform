@@ -20,6 +20,8 @@ type Pair = {
   baseText: string
   text: string
   sourceLang: string
+  keyId: number
+  languageTag: string
 }
 
 const VERDICT: Record<Verdict, { glyph: string; color: string; label: string }> = {
@@ -124,7 +126,7 @@ export default function ToolsPanel() {
           setPair(null)
           return
         }
-        setPair({ baseText, text, sourceLang: tag })
+        setPair({ baseText, text, sourceLang: tag, keyId, languageTag: tag })
       })
     return () => {
       cancelled = true

@@ -58,12 +58,19 @@ const fetchOrgs = async (tolgeeUrl: string, pat: string): Promise<Org[]> => {
   return json._embedded?.organizations ?? []
 }
 
+type RegisterResponse = {
+  id: number
+  clientId: string
+  clientSecret: string
+  webhookSecret: string
+}
+
 const registerApp = async (
   tolgeeUrl: string,
   pat: string,
   orgId: number,
   manifestUrl: string
-): Promise<number> => {
+): Promise<RegisterResponse> => {
   const res = await fetch(`${tolgeeUrl}/v2/organizations/${orgId}/apps`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'X-API-Key': pat },
@@ -72,8 +79,7 @@ const registerApp = async (
   if (!res.ok) {
     throw new Error(`Register failed (${res.status}): ${await res.text()}`)
   }
-  const json = (await res.json()) as { id: number }
-  return json.id
+  return (await res.json()) as RegisterResponse
 }
 
 const startTunnel = async (): Promise<string> => {
@@ -153,16 +159,19 @@ const main = async (): Promise<void> => {
 
   await verifyManifestReachable(manifestUrl)
 
-  const installId = await registerApp(tolgeeUrl, pat, org.id, manifestUrl)
+  const registered = await registerApp(tolgeeUrl, pat, org.id, manifestUrl)
   const state: InstallState = {
     tolgeeUrl,
     organizationId: org.id,
-    installId,
+    installId: registered.id,
     pat,
+    clientId: registered.clientId,
+    clientSecret: registered.clientSecret,
+    webhookSecret: registered.webhookSecret,
   }
   writeJson(INSTALL_FILE, state)
   console.log(
-    `\nRegistered. Install ${installId} for org ${org.name} (${org.id}). ` +
+    `\nRegistered. Install ${registered.id} for org ${org.name} (${org.id}). ` +
       `Saved to ${INSTALL_FILE}.`
   )
   if (tunnelBaseUrl) {

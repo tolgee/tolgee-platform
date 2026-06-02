@@ -32,3 +32,14 @@ export const ANTHROPIC_MODEL =
  */
 export const TUNNEL_STATE_DIR = join(__dirname, '..', '.tolgee-dev')
 export const TUNNEL_STATE_FILE = join(TUNNEL_STATE_DIR, 'tunnel.json')
+
+/**
+ * Local install record. Written by `npm run register`; the webhook
+ * handler reads `clientSecret` from here to authenticate REST calls
+ * back into Tolgee (via `X-API-Key: tgapps_…`).
+ */
+export const INSTALL_FILE = join(TUNNEL_STATE_DIR, 'install.json')
+
+/** Persistent JSON store written by the webhook + read by decoratorsUrl. */
+export const STORE_DIR = join(__dirname, '.data')
+export const STORE_FILE = join(STORE_DIR, 'analyses.json')

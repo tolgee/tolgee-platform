@@ -14,11 +14,20 @@ export type InstallState = {
   organizationId: number
   installId: number
   /**
-   * Personal access token used to authenticate the manifest-url PATCH on
-   * every dev restart. Stored locally because the dev-plugin is single-
-   * developer; treat as a dev secret.
+   * Org-admin PAT used by the dev orchestrator to PATCH the manifest URL
+   * on every restart. PATCH is an org-admin action; the plugin's own
+   * clientSecret can't authorize it. Stored locally; treat as a dev secret.
    */
   pat: string
+  /**
+   * Plugin credentials Tolgee returned when this install was registered.
+   * The plugin uses `clientSecret` (`X-API-Key: tgapps_…`) for its own
+   * REST calls back into Tolgee — e.g. fetching base text from the
+   * webhook handler. `webhookSecret` signs the inbound webhook bodies.
+   */
+  clientId: string
+  clientSecret: string
+  webhookSecret: string
 }
 
 export type TunnelState = {
