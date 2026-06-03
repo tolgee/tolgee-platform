@@ -359,6 +359,7 @@ declare namespace DataCy {
         "key-edit-tab-context": true;
         "key-edit-tab-custom-properties": true;
         "key-edit-tab-general": true;
+        "key-name-msgctxt": true;
         "key-plural-checkbox": true;
         "key-plural-variable-name": true;
         "label-autocomplete-option": true;

@@ -6,6 +6,7 @@ import io.tolgee.formats.ImportFileProcessor
 import io.tolgee.formats.MessageConvertorResult
 import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.formats.po.PO_FILE_MSG_ID_PLURAL_CUSTOM_KEY
+import io.tolgee.formats.po.PO_MSGCTXT_KEY_SEPARATOR
 import io.tolgee.formats.po.`in`.data.PoParsedTranslation
 import io.tolgee.formats.po.`in`.data.PoParserResult
 import io.tolgee.model.dataImport.ImportLanguage
@@ -26,7 +27,7 @@ class PoFileProcessor(
       context.languages[languageId] = ImportLanguage(languageId, context.fileEntity)
 
       parsed.translations.forEachIndexed { idx, poTranslation ->
-        val keyName = poTranslation.msgid.toString()
+        val keyName = buildKeyName(poTranslation)
 
         if (poTranslation.msgidPlural.isNotEmpty()) {
           addPlural(poTranslation, idx)
@@ -72,7 +73,7 @@ class PoFileProcessor(
     val plurals = poTranslation.msgstrPlurals?.map { it.key to it.value.toString() }?.toMap()
     plurals?.let {
       val (converted, convertedBy) = getConvertedMessage(poTranslation, plurals)
-      val keyName = poTranslation.msgid.toString()
+      val keyName = buildKeyName(poTranslation)
       poTranslation.msgidPlural.toString().nullIfEmpty?.let {
         context.setCustom(keyName, PO_FILE_MSG_ID_PLURAL_CUSTOM_KEY, it)
       }
@@ -86,6 +87,15 @@ class PoFileProcessor(
         convertedBy = convertedBy,
       )
     }
+  }
+
+  private fun buildKeyName(poTranslation: PoParsedTranslation): String {
+    val msgid = poTranslation.msgid.toString()
+    val msgctxt = poTranslation.msgctxt.toString()
+    if (msgctxt.isEmpty()) {
+      return msgid
+    }
+    return "$msgctxt$PO_MSGCTXT_KEY_SEPARATOR$msgid"
   }
 
   private fun getConvertedMessage(

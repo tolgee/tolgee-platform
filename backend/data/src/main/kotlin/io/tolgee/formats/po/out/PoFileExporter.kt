@@ -4,11 +4,13 @@ import io.tolgee.dtos.IExportParams
 import io.tolgee.formats.ExportMessageFormat
 import io.tolgee.formats.getPluralData
 import io.tolgee.formats.po.PO_FILE_MSG_ID_PLURAL_CUSTOM_KEY
+import io.tolgee.formats.po.PO_MSGCTXT_KEY_SEPARATOR
 import io.tolgee.model.ILanguage
 import io.tolgee.service.export.ExportFilePathProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.export.exporters.FileExporter
 import java.io.InputStream
+import kotlin.text.split
 
 class PoFileExporter(
   val translations: List<ExportTranslationView>,
@@ -33,7 +35,8 @@ class PoFileExporter(
       val resultBuilder = getResultStringBuilder(translation)
       val converted = convertMessage(translation)
       resultBuilder.appendLine()
-      resultBuilder.writeMsgId(translation.key.name)
+      resultBuilder.writeMsgCtxt(translation.key.name.getMsgCtxt())
+      resultBuilder.writeMsgId(translation.key.name.getMsgId())
       resultBuilder.writeMsgIdPlural(translation, converted)
       resultBuilder.writeMsgStr(converted)
     }
@@ -47,6 +50,12 @@ class PoFileExporter(
       forceIsPlural = translation.key.isPlural,
       projectIcuPlaceholdersSupport = projectIcuPlaceholdersSupport,
     ).convert()
+  }
+
+  private fun StringBuilder.writeMsgCtxt(msgctxt: String?) {
+    if (!msgctxt.isNullOrEmpty()) {
+      this.append(convertToPoMultilineString("msgctxt", msgctxt))
+    }
   }
 
   private fun StringBuilder.writeMsgId(keyName: String) {
@@ -101,7 +110,8 @@ class PoFileExporter(
     translation: ExportTranslationView,
     converted: ToPoConversionResult,
   ) {
-    val msgIdPlural = translation.key.custom?.get(PO_FILE_MSG_ID_PLURAL_CUSTOM_KEY) as? String ?: translation.key.name
+    val msgIdPlural =
+      translation.key.custom?.get(PO_FILE_MSG_ID_PLURAL_CUSTOM_KEY) as? String ?: translation.key.name.getMsgId()
     if (converted.isPlural()) {
       this.append(
         convertToPoMultilineString(
@@ -110,5 +120,15 @@ class PoFileExporter(
         ),
       )
     }
+  }
+
+  private fun String.getMsgId(): String {
+    val parts = split(PO_MSGCTXT_KEY_SEPARATOR, limit = 2)
+    return parts.last()
+  }
+
+  private fun String.getMsgCtxt(): String? {
+    val parts = split(PO_MSGCTXT_KEY_SEPARATOR, limit = 2)
+    return parts.takeIf { parts.size > 1 }?.first()
   }
 }

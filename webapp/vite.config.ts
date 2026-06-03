@@ -44,6 +44,9 @@ export default defineConfig(({ mode }) => {
     resolve: {
       preserveSymlinks: true,
       dedupe: [
+        '@codemirror/lint',
+        '@codemirror/state',
+        '@codemirror/view',
         '@emotion/react',
         '@emotion/styled',
         '@mui/material',
