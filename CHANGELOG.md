@@ -1,3 +1,10 @@
+## [3.197.1](https://github.com/tolgee/tolgee-platform/compare/v3.197.0...v3.197.1) (2026-06-03)
+
+
+### Bug Fixes
+
+* stop leaking untranslated glossary terms into AI translations ([#3705](https://github.com/tolgee/tolgee-platform/issues/3705)) ([4fb3a4c](https://github.com/tolgee/tolgee-platform/commit/4fb3a4c428bdb14133596b03f97d74c61e531b10)), closes [#3288](https://github.com/tolgee/tolgee-platform/issues/3288)
+
 # [3.197.0](https://github.com/tolgee/tolgee-platform/compare/v3.196.1...v3.197.0) (2026-06-03)
 
 
