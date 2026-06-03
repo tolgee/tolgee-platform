@@ -424,7 +424,7 @@ export function useErrorTranslation() {
       case 'content_storage_config_required':
         return t('content_storage_config_required');
       case 'content_delivery_prune_failed':
-        return t('content_delivery_prune_failed');
+        return t('content_delivery_prune_failed', 'Content delivery prune failed');
 
       // Billing & subscriptions
       case 'plan_not_found':

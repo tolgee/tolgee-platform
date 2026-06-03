@@ -3,6 +3,8 @@ package io.tolgee.component.contentDelivery
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.contentDelivery.cachePurging.ContentDeliveryCachePurgingProvider
 import io.tolgee.component.fileStorage.FileStorage
+import io.tolgee.constants.Message
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.contentDelivery.ContentDeliveryConfig
 import io.tolgee.service.contentDelivery.ContentDeliveryConfigService
 import io.tolgee.service.export.ExportService
@@ -63,8 +65,8 @@ class ContentDeliveryUploader(
       try {
         storage.pruneDirectory(config.slug)
       } catch (e: Exception) {
-        throw io.tolgee.exceptions.BadRequestException(
-          io.tolgee.constants.Message.CONTENT_DELIVERY_PRUNE_FAILED,
+        throw BadRequestException(
+          Message.CONTENT_DELIVERY_PRUNE_FAILED,
           cause = e,
         )
       }
