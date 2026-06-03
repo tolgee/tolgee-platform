@@ -17,7 +17,12 @@ import { useGlobalContext } from '../globalContext/GlobalContext';
 import { useUserTasks } from '../globalContext/useUserTasks';
 import { AdministrationEeLicenseView } from 'tg.ee.module/billing/administration/AdministrationEeLicenseView';
 import { SlackApp } from '../ee/organizationApps/SlackApp';
-import { useConfig, useEnabledFeatures } from '../globalContext/helpers';
+import {
+  useConfig,
+  useEnabledFeatures,
+  useIsAdminOrSupporter,
+  useIsBeingImpersonated,
+} from '../globalContext/helpers';
 import { ProjectTasksView } from '../ee/task/views/projectTasks/ProjectTasksView';
 import { addOperations } from '../views/projects/translations/BatchOperations/operations';
 import { OperationTaskCreate } from '../ee/batchOperations/OperationTaskCreate';
@@ -197,6 +202,10 @@ export const useAddBatchOperations = () => {
   const labelFeature = isEnabled('TRANSLATION_LABELS');
   const qaChecksFeature = isEnabled('QA_CHECKS');
   const orderTranslationsFeature = isEnabled('ORDER_TRANSLATION');
+  const qaChecksProjectFeature = qaChecksFeature && project.useQaChecks;
+  const isAdminOrSupporter = useIsAdminOrSupporter();
+  const isBeingImpersonated = useIsBeingImpersonated();
+  const hasPrivilegedAccess = isAdminOrSupporter || isBeingImpersonated;
   const { t } = useTranslate();
 
   return addOperations([
@@ -207,7 +216,7 @@ export const useAddBatchOperations = () => {
           label: t('batch_operations_qa_recheck'),
           divider: true,
           enabled: canEditTranslations,
-          hidden: !qaChecksFeature || !project.useQaChecks,
+          hidden: !qaChecksProjectFeature || !hasPrivilegedAccess,
           component: OperationQaRecheck,
         },
       ],
