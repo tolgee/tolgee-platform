@@ -114,9 +114,8 @@ class SingleStepImportService(
     request.overrideMode = params.overrideMode ?: OverrideMode.RECOMMENDED
     request.errorOnUnresolvedConflict = params.errorOnUnresolvedConflict
 
-    // these options are not user accessible,
-    // because it might act weird when just importing screenshots without any actual translations
-    // leaving this for an actual usecase as it's now not clear how it should behave
+    // convertPlaceholdersToIcu is now exposed via the API (SingleStepImportResolvableRequest)
+    // Other import options remain internal as their UX behavior is not yet defined
     request.convertPlaceholdersToIcu = params.convertPlaceholdersToIcu
     request.tagNewKeys = emptyList()
     request.fileMappings = keysToFilesManager.getFileMappings()

@@ -574,11 +574,11 @@ class UserAccountService(
         throw ValidationException(Message.VALIDATION_EMAIL_IS_NOT_VALID)
       }
 
-      this.findActive(dto.email.lowercase())?.let { throw ValidationException(Message.USERNAME_ALREADY_EXISTS) }
+      this.findActive(dto.email)?.let { throw ValidationException(Message.USERNAME_ALREADY_EXISTS) }
       if (tolgeeProperties.authentication.needsEmailVerification) {
         emailVerificationService.resendEmailVerification(userAccount, request, dto.callbackUrl, dto.email)
       } else {
-        userAccount.username = dto.email.lowercase()
+        userAccount.username = dto.email
       }
     }
   }

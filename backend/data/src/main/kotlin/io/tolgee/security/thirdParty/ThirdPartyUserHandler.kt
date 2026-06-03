@@ -98,7 +98,7 @@ class ThirdPartyUserHandler(
 
   private fun createUserEntity(data: ThirdPartyUserDetails): UserAccount {
     val user = UserAccount()
-    user.username = data.username.lowercase()
+    user.username = data.username
     user.name = data.name
     user.thirdPartyAuthId = data.authId
     user.thirdPartyAuthType = data.thirdPartyAuthType
