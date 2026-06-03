@@ -1,8 +1,10 @@
 package io.tolgee.service.key
 
 import io.tolgee.constants.Message
+import io.tolgee.dtos.CreateScreenshotResult
 import io.tolgee.dtos.KeyImportResolvableResult
 import io.tolgee.dtos.cacheable.LanguageDto
+import io.tolgee.dtos.request.KeyInScreenshotPositionDto
 import io.tolgee.dtos.request.ScreenshotInfoDto
 import io.tolgee.dtos.request.translation.importKeysResolvable.ImportKeysResolvableItemDto
 import io.tolgee.dtos.request.translation.importKeysResolvable.ImportTranslationResolution
@@ -214,37 +216,56 @@ class ResolvingKeyImporter(
         ).toMutableList()
 
     val referencesToDelete = mutableListOf<KeyScreenshotReference>()
-    val addedReferences = mutableSetOf<Pair<Long, Long>>()
+
+    val mergedReferences = linkedMapOf<Pair<Long, Long>, MergedReferenceData>()
 
     keysToImport.forEach {
-      val key = getOrCreateKey(it)
+      val (key, _) = getOrCreateKey(it)
       it.screenshots?.forEach { screenshot ->
         val screenshotResult =
           createdScreenshots[screenshot.uploadedImageId]
             ?: throw NotFoundException(Message.ONE_OR_MORE_IMAGES_NOT_FOUND)
-        val info = ScreenshotInfoDto(screenshot.text, screenshot.positions)
 
-        val referenceKey = key.first.id to screenshotResult.screenshot.id
-        if (!addedReferences.add(referenceKey)) {
+        val referenceKey = key.id to screenshotResult.screenshot.id
+        val existing = mergedReferences[referenceKey]
+        if (existing != null) {
+          screenshot.positions?.let { newPositions ->
+            val combined: MutableList<KeyInScreenshotPositionDto> =
+              existing.mergedInfo.positions?.toMutableList() ?: mutableListOf()
+            combined.addAll(newPositions.filter { it !in combined })
+            existing.mergedInfo.positions = combined
+          }
+          if (existing.mergedInfo.text == null) {
+            existing.mergedInfo.text = screenshot.text
+          }
           return@forEach
         }
 
-        screenshotService.addReference(
-          key = key.first,
-          screenshot = screenshotResult.screenshot,
-          info = info,
-          originalDimension = screenshotResult.originalDimension,
-          targetDimension = screenshotResult.targetDimension,
-        )
+        mergedReferences[referenceKey] =
+          MergedReferenceData(
+            key = key,
+            screenshotResult = screenshotResult,
+            mergedInfo = ScreenshotInfoDto(screenshot.text, screenshot.positions?.toMutableList()),
+          )
 
         val toDelete =
           allReferences.filter { reference ->
-            reference.key.id == key.first.id &&
+            reference.key.id == key.id &&
               reference.screenshot.location == screenshotResult.screenshot.location
           }
 
         referencesToDelete.addAll(toDelete)
       }
+    }
+
+    mergedReferences.values.forEach { refData ->
+      screenshotService.addReference(
+        key = refData.key,
+        screenshot = refData.screenshotResult.screenshot,
+        info = refData.mergedInfo,
+        originalDimension = refData.screenshotResult.originalDimension,
+        targetDimension = refData.screenshotResult.targetDimension,
+      )
     }
 
     screenshotService.removeScreenshotReferences(referencesToDelete)
@@ -384,4 +405,10 @@ class ResolvingKeyImporter(
         key to translations.associateBy { it.language.tag }
       }.toMap()
   }
+
+  private data class MergedReferenceData(
+    val key: Key,
+    val screenshotResult: CreateScreenshotResult,
+    val mergedInfo: ScreenshotInfoDto,
+  )
 }
