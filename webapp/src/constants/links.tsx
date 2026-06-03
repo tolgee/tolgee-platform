@@ -202,6 +202,11 @@ export class LINKS {
   );
 
   /**
+   * Apps install consent (CLI browser-flow entry point)
+   */
+  static APP_INSTALL = Link.ofRoot('install-app');
+
+  /**
    * Organizations
    */
   static ORGANIZATIONS = Link.ofRoot('organizations');

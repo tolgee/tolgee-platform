@@ -18,6 +18,7 @@
     "@tolgee/apps-sdk": "*",
     "cloudflared": "^0.7.1",
     "express": "^4.21.0",
+    "open": "^10.1.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6"
   },

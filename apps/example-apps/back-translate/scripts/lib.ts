@@ -14,16 +14,12 @@ export type InstallState = {
   organizationId: number
   installId: number
   /**
-   * Org-admin PAT used by the dev orchestrator to PATCH the manifest URL
-   * on every restart. PATCH is an org-admin action; the plugin's own
-   * clientSecret can't authorize it. Stored locally; treat as a dev secret.
-   */
-  pat: string
-  /**
    * Plugin credentials Tolgee returned when this install was registered.
-   * The plugin uses `clientSecret` (`X-API-Key: tgapps_…`) for its own
-   * REST calls back into Tolgee — e.g. fetching base text from the
-   * webhook handler. `webhookSecret` signs the inbound webhook bodies.
+   * `clientSecret` (`X-API-Key: tgapps_…`) authenticates every outbound
+   * call the plugin makes back to Tolgee — webhook handler base-text
+   * lookups AND the self-service manifest-url PATCH the dev orchestrator
+   * fires on every restart. `webhookSecret` signs the inbound webhook
+   * bodies.
    */
   clientId: string
   clientSecret: string
@@ -59,12 +55,15 @@ export const patchManifestUrl = async (
   install: InstallState,
   manifestUrl: string
 ): Promise<void> => {
-  const url = `${install.tolgeeUrl}/v2/organizations/${install.organizationId}/apps/${install.installId}/manifest-url`
+  // Self-service endpoint — the install authenticates as itself with its
+  // clientSecret. The earlier org-admin endpoint required a PAT we no
+  // longer collect; this one only lets an install update its own URL.
+  const url = `${install.tolgeeUrl}/v2/apps/self/manifest-url`
   const res = await fetch(url, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
-      'X-API-Key': install.pat,
+      'X-API-Key': install.clientSecret,
     },
     body: JSON.stringify({ manifestUrl }),
   })
