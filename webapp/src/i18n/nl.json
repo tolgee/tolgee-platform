@@ -863,6 +863,7 @@
   "content_delivery_not_enabled_title": "Slechts één configuratie voor inhoudslevering is ingeschakeld",
   "content_delivery_over_limit_title": "U heeft de limiet overschreden, wijzigingen zijn beperkt",
   "content_delivery_page_hint": "Laad uw vertalingen rechtstreeks vanuit Tolgee zodat ze altijd up-to-date zijn",
+  "content_delivery_prune_failed": "Opschonen van opslag mislukt. Probeer 'Opschonen voor publiceren' uit te schakelen — uw opslag ondersteunt dit mogelijk niet.",
   "content_delivery_publis_success": "Inhoud succesvol gepubliceerd!",
   "content_delivery_subtitle": "Project inhoudslevering",
   "content_delivery_translations_prune_before_publish_hint": "De gegevens die zijn opgeslagen in de inhoudopslag worden verwijderd voordat er wordt gepubliceerd. Wanneer dit niet is ingeschakeld, worden gegevens van verwijderde talen of namespaces in de opslag bewaard.",

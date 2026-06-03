@@ -864,6 +864,7 @@
   "content_delivery_not_enabled_title": "単一のコンテンツ配信構成のみが有効",
   "content_delivery_over_limit_title": "制限を超えているため、変更は制限されています",
   "content_delivery_page_hint": "翻訳を Tolgee から直接読み込んで、常に最新の状態に保ちます",
+  "content_delivery_prune_failed": "ストレージの削除に失敗しました。「公開前に削除」を無効にしてみてください — ストレージがサポートしていない可能性があります。",
   "content_delivery_publis_success": "コンテンツが正常に公開されました！",
   "content_delivery_subtitle": "プロジェクトコンテンツの配信",
   "content_delivery_translations_prune_before_publish_hint": "コンテンツストレージに保存されているデータは、公開前に削除されます。有効にしない場合、削除された言語や名前空間のデータはストレージに保持されます。",

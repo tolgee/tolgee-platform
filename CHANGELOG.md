@@ -1,3 +1,16 @@
+# [3.197.0](https://github.com/tolgee/tolgee-platform/compare/v3.196.1...v3.197.0) (2026-06-03)
+
+
+### Bug Fixes
+
+* bump postgres base image 13.21 → 13.23 ([#3717](https://github.com/tolgee/tolgee-platform/issues/3717)) ([7e45c07](https://github.com/tolgee/tolgee-platform/commit/7e45c07214c5cb891596a80b793de59370062d2a))
+
+
+### Features
+
+* hide QA recheck batch operation from non-privileged users ([#3703](https://github.com/tolgee/tolgee-platform/issues/3703)) ([3dcd142](https://github.com/tolgee/tolgee-platform/commit/3dcd1427ec8ffed3b8b55b45b71e852c318a9001))
+* support gettext msgctxt in PO import/export and UI ([#3694](https://github.com/tolgee/tolgee-platform/issues/3694)) ([dfd7775](https://github.com/tolgee/tolgee-platform/commit/dfd77757a650dd6249ff6f1293ca307ce76c75c0)), closes [#3459](https://github.com/tolgee/tolgee-platform/issues/3459) [#3053](https://github.com/tolgee/tolgee-platform/issues/3053)
+
 ## [3.196.1](https://github.com/tolgee/tolgee-platform/compare/v3.196.0...v3.196.1) (2026-06-02)
 
 

@@ -864,6 +864,7 @@
   "content_delivery_not_enabled_title": "Only single content delivery configuration enabled",
   "content_delivery_over_limit_title": "You are over limit, modification is restricted",
   "content_delivery_page_hint": "Load your translations directly from Tolgee so they're always up to date",
+  "content_delivery_prune_failed": "Storage pruning failed. Try disabling 'Prune before publishing' — your storage may not support it.",
   "content_delivery_publis_success": "Content published successfully!",
   "content_delivery_subtitle": "Project Content Delivery",
   "content_delivery_translations_prune_before_publish_hint": "The data stored in the content storage will be removed before publishing. When not enabled, data from deleted languages or namespaces will be kept in the storage.",

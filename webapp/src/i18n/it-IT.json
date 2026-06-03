@@ -855,6 +855,7 @@
   "content_delivery_not_enabled_title": "È abilitata solo una configurazione di consegna dei contenuti",
   "content_delivery_over_limit_title": "Hai superato il limite, la modifica è limitata",
   "content_delivery_page_hint": "Carica le tue traduzioni direttamente da Tolgee in modo che siano sempre aggiornate",
+  "content_delivery_prune_failed": "Eliminazione dello storage non riuscita. Prova a disabilitare 'Elimina prima della pubblicazione' — il tuo storage potrebbe non supportarlo.",
   "content_delivery_publis_success": "Contenuto pubblicato con successo!",
   "content_delivery_subtitle": "Consegna dei contenuti del progetto",
   "content_delivery_translations_prune_before_publish_hint": "I dati memorizzati nell'archivio dei contenuti verranno rimossi prima della pubblicazione. Quando non abilitato, i dati delle lingue o degli spazi dei nomi eliminati verranno mantenuti nell'archivio.",
