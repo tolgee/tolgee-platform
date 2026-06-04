@@ -1,3 +1,11 @@
+## [3.197.2](https://github.com/tolgee/tolgee-platform/compare/v3.197.1...v3.197.2) (2026-06-04)
+
+
+### Bug Fixes
+
+* prevent Quick Start panel from reopening after user closes it ([#3522](https://github.com/tolgee/tolgee-platform/issues/3522)) ([3ef85c0](https://github.com/tolgee/tolgee-platform/commit/3ef85c0ad22f5c763761e92a40a1e0c20eba1401))
+* Show meaningful error when Content Delivery storage prune fails ([#3720](https://github.com/tolgee/tolgee-platform/issues/3720)) ([f709462](https://github.com/tolgee/tolgee-platform/commit/f709462b497824d805b9167a79d44ce3ee406611)), closes [#3715](https://github.com/tolgee/tolgee-platform/issues/3715) [#3339](https://github.com/tolgee/tolgee-platform/issues/3339)
+
 ## [3.197.1](https://github.com/tolgee/tolgee-platform/compare/v3.197.0...v3.197.1) (2026-06-03)
 
 
