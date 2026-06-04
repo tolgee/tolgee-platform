@@ -5630,29 +5630,17 @@
 
     <changeSet author="dkrizan" id="user-account-normalize-username-casing-and-dedup">
         <comment>
-            Make usernames (emails) case-insensitive by normalizing stored data, without touching the
-            existing unique index (changeSet 1663247386701-2: unique (username) where deleted_at is null).
-            All writes are now lowercased in code, so that case-sensitive index effectively enforces
-            case-insensitive uniqueness among active accounts.
+            Step 1 of 3 (with the next two changeSets) of making usernames (emails) case-insensitive:
+            dedup the data so the new unique lower(username) index can be built. The old case-sensitive
+            index allowed case-variant duplicates (e.g. "Ab@x" / "ab@x"), which the new index and
+            case-insensitive findActive() can't tolerate. Runs on Cloud and every self-hosted upgrade,
+            so it's automatic and non-destructive.
 
-            The old index, being case-sensitive, currently allows case-variant non-deleted duplicates
-            (e.g. "Ab@x" and "ab@x"). Once findActive() matches case-insensitively, such a pair would
-            make it return >1 row and throw, breaking login. This runs on Cloud AND every self-hosted
-            upgrade, so it must be automatic, deterministic and non-destructive.
-
-            Steps:
-              1. For each group of non-deleted accounts (deleted_at IS NULL, username NOT NULL) sharing
-                 lower(username), keep one survivor and retire the rest. Survivor = an active account if
-                 any (disabled_at IS NULL ranked first), then most recent activity_revision, tie-broken
-                 by oldest created_at then lowest id. Retired accounts are disabled and their username is
-                 renamed to a unique 'disabled-&lt;n&gt;-&lt;original&gt;' so they no longer collide -
-                 nothing is deleted, so a self-hosted admin can re-enable them (after fixing the email).
-              2. Lowercase the username of every remaining active account so stored data matches the new
-                 lowercased-write behavior.
-
-            The unique index is never dropped, so writes stay protected throughout (no uniqueness gap).
-            Order matters: renaming the losers (step 1) frees their lower(username) before the survivors
-            are lowercased (step 2), so the existing index is never violated mid-migration.
+            For each group of non-deleted accounts (deleted_at IS NULL, username NOT NULL) sharing
+            lower(username): keep one survivor (active first, then most recent activity, then oldest /
+            lowest id) and retire the rest by disabling + renaming (not deleted, so admins can re-enable).
+            Then lowercase the surviving active usernames.
+            Renaming happens before lowercasing so the still-live old unique index is never violated.
         </comment>
 
         <sql dbms="postgresql"><![CDATA[
