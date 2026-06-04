@@ -5708,4 +5708,47 @@
              disabled are not recorded, so there is nothing safe to revert to. -->
         <rollback/>
     </changeSet>
+
+    <changeSet author="dkrizan" id="user-account-lower-username-unique-index" runInTransaction="false">
+        <comment>
+            Replace the case-sensitive username uniqueness with a case-insensitive one. Built
+            CONCURRENTLY here, while the old case-sensitive index is still live, so writes are
+            protected throughout (the old index is dropped in the next changeSet, after this one
+            succeeds - there is never a window without a unique index).
+        </comment>
+        <sql dbms="postgresql">
+            CREATE UNIQUE INDEX CONCURRENTLY IF NOT EXISTS user_account_lower_username_uidx
+                ON user_account (lower(username))
+                WHERE deleted_at IS NULL;
+        </sql>
+        <rollback>
+            <sql dbms="postgresql">DROP INDEX CONCURRENTLY IF EXISTS user_account_lower_username_uidx;</sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="dkrizan" id="user-account-drop-old-case-sensitive-username-index">
+        <comment>
+            Drop the old case-sensitive partial unique index (changeSet 1663247386701-2, auto-named,
+            so located by definition).
+        </comment>
+        <sql dbms="postgresql" splitStatements="false"><![CDATA[
+            DO $$
+            DECLARE
+              idx text;
+            BEGIN
+              SELECT indexname INTO idx
+              FROM pg_indexes
+              WHERE schemaname = 'public'
+                AND tablename = 'user_account'
+                AND indexdef ILIKE '%UNIQUE%'
+                AND indexdef ILIKE '%(username)%'
+                AND indexdef ILIKE '%deleted_at IS NULL%'
+                AND indexdef NOT ILIKE '%lower(%';
+              IF idx IS NOT NULL THEN
+                EXECUTE 'DROP INDEX ' || quote_ident(idx);
+              END IF;
+            END $$;
+        ]]></sql>
+        <rollback/>
+    </changeSet>
 </databaseChangeLog>
