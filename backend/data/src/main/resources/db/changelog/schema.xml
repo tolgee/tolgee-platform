@@ -5628,20 +5628,31 @@
         </rollback>
     </changeSet>
 
-    <changeSet author="dkrizan" id="user-account-disable-case-insensitive-username-duplicates">
+    <changeSet author="dkrizan" id="user-account-normalize-username-casing-and-dedup">
         <comment>
-            Make usernames (emails) case-insensitive. The old case-sensitive partial unique index
-            (changeSet 1663247386701-2) allowed e.g. "Ab@x" and "ab@x" to coexist as active accounts/
+            Make usernames (emails) case-insensitive by normalizing stored data, without touching the
+            existing unique index (changeSet 1663247386701-2: unique (username) where deleted_at is null).
+            All writes are now lowercased in code, so that case-sensitive index effectively enforces
+            case-insensitive uniqueness among active accounts.
 
-            Step 1 of 3: for each group of active accounts (deleted_at IS NULL AND disabled_at IS NULL)
-            sharing lower(username), keep one survivor and disable the rest. Survivor = most recent
-            activity_revision, tie-broken by oldest created_at then lowest id. Losers are only disabled
-            (disabled_at) - nothing is deleted. NULL usernames are excluded (they are never real
-            duplicates).
+            The old index, being case-sensitive, currently allows case-variant non-deleted duplicates
+            (e.g. "Ab@x" and "ab@x"). Once findActive() matches case-insensitively, such a pair would
+            make it return >1 row and throw, breaking login. This runs on Cloud AND every self-hosted
+            upgrade, so it must be automatic, deterministic and non-destructive.
 
-            Done first, while the old unique index still protects writes, so there is never a window
-            without a uniqueness guarantee: the new index is built next (step 2) and the old one is
-            dropped last (step 3).
+            Steps:
+              1. For each group of non-deleted accounts (deleted_at IS NULL, username NOT NULL) sharing
+                 lower(username), keep one survivor and retire the rest. Survivor = an active account if
+                 any (disabled_at IS NULL ranked first), then most recent activity_revision, tie-broken
+                 by oldest created_at then lowest id. Retired accounts are disabled and their username is
+                 renamed to a unique 'disabled-&lt;n&gt;-&lt;original&gt;' so they no longer collide -
+                 nothing is deleted, so a self-hosted admin can re-enable them (after fixing the email).
+              2. Lowercase the username of every remaining active account so stored data matches the new
+                 lowercased-write behavior.
+
+            The unique index is never dropped, so writes stay protected throughout (no uniqueness gap).
+            Order matters: renaming the losers (step 1) frees their lower(username) before the survivors
+            are lowercased (step 2), so the existing index is never violated mid-migration.
         </comment>
 
         <sql dbms="postgresql"><![CDATA[
@@ -5649,17 +5660,15 @@
               SELECT lower(username) AS lemail
               FROM user_account
               WHERE deleted_at IS NULL
-                AND disabled_at IS NULL
                 AND username IS NOT NULL
               GROUP BY lower(username)
               HAVING count(*) > 1
             ),
             cand AS (
-              SELECT ua.id, ua.created_at, lower(ua.username) AS lemail
+              SELECT ua.id, ua.created_at, ua.disabled_at, lower(ua.username) AS lemail
               FROM user_account ua
               JOIN dup_emails d ON d.lemail = lower(ua.username)
               WHERE ua.deleted_at IS NULL
-                AND ua.disabled_at IS NULL
                 AND ua.username IS NOT NULL
             ),
             last_activity AS (
@@ -5672,61 +5681,19 @@
               SELECT c.id,
                      row_number() OVER (
                        PARTITION BY c.lemail
-                       ORDER BY a.ts DESC NULLS LAST, c.created_at ASC, c.id ASC
+                       ORDER BY (c.disabled_at IS NULL) DESC,
+                                a.ts DESC NULLS LAST,
+                                c.created_at ASC,
+                                c.id ASC
                      ) AS rn
               FROM cand c
               LEFT JOIN last_activity a ON a.author_id = c.id
             )
             UPDATE user_account ua
-            SET disabled_at = now()
+            SET disabled_at = COALESCE(ua.disabled_at, now()),
+                username = 'disabled-' || (r.rn - 1) || '-' || ua.username
             FROM ranked r
             WHERE ua.id = r.id AND r.rn > 1;
-        ]]></sql>
-
-        <!-- Irreversible data change: which accounts were disabled is not recorded. -->
-        <rollback/>
-    </changeSet>
-
-    <changeSet author="dkrizan" id="user-account-lower-username-active-unique-index" runInTransaction="false">
-        <comment>
-            Step 2 of 3: the case-insensitive replacement index, built concurrently while the old
-            case-sensitive index is still live (so writes stay protected throughout).
-        </comment>
-        <sql dbms="postgresql">
-            CREATE UNIQUE INDEX CONCURRENTLY IF NOT EXISTS user_account_lower_username_active_uidx
-                ON user_account (lower(username))
-                WHERE deleted_at IS NULL AND disabled_at IS NULL;
-        </sql>
-        <rollback>
-            <sql dbms="postgresql">DROP INDEX CONCURRENTLY IF EXISTS user_account_lower_username_active_uidx;</sql>
-        </rollback>
-    </changeSet>
-
-    <changeSet author="dkrizan" id="user-account-drop-old-username-index-and-normalize-casing">
-        <comment>
-            Step 3 of 3: now that the new case-insensitive index is live, drop the old case-sensitive
-            partial unique index (auto-named, so located by definition) and lowercase the username of
-            every remaining active account so stored data matches the new write behavior. Lowercasing
-            is safe here because the new index keys on lower(username), which it does not change.
-        </comment>
-
-        <sql dbms="postgresql" splitStatements="false"><![CDATA[
-            DO $$
-            DECLARE
-              idx text;
-            BEGIN
-              SELECT indexname INTO idx
-              FROM pg_indexes
-              WHERE schemaname = 'public'
-                AND tablename = 'user_account'
-                AND indexdef ILIKE '%UNIQUE%'
-                AND indexdef ILIKE '%(username)%'
-                AND indexdef ILIKE '%deleted_at IS NULL%'
-                AND indexdef NOT ILIKE '%lower(%';
-              IF idx IS NOT NULL THEN
-                EXECUTE 'DROP INDEX ' || quote_ident(idx);
-              END IF;
-            END $$;
         ]]></sql>
 
         <sql dbms="postgresql"><![CDATA[
@@ -5737,8 +5704,8 @@
               AND username <> lower(username);
         ]]></sql>
 
-        <!-- Irreversible: original casing is not recorded, and recreating the old case-sensitive
-             index could fail against the normalized data. -->
+        <!-- Irreversible data change: original casing, the renamed usernames and which accounts were
+             disabled are not recorded, so there is nothing safe to revert to. -->
         <rollback/>
     </changeSet>
 </databaseChangeLog>
