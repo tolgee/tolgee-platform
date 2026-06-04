@@ -216,7 +216,7 @@ class EmailServiceTest {
       "registration-confirm",
       Locale.ENGLISH,
       mapOf(
-        "username" to "bob@example.com",
+        "recipientName" to "bob@example.com",
         "confirmUrl" to "https://app.tolgee.io/verify/123/abc",
         "isSignup" to true,
       ),

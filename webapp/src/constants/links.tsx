@@ -65,6 +65,7 @@ export enum PARAMS {
   TA_ID = 'taId',
   BRANCH = 'branch',
   MERGE_ID = 'mergeId',
+  PLAN_MIGRATION_ID = 'migrationId',
 }
 
 export class LINKS {

@@ -1,22 +1,17 @@
 package io.tolgee.controllers.internal
 
-import io.tolgee.configuration.tolgee.E2eRuntimeMutable
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.request.SetPropertyDto
-import io.tolgee.exceptions.BadRequestException
-import io.tolgee.exceptions.NotFoundException
+import io.tolgee.facade.InternalPropertiesSetterFacade
 import jakarta.validation.Valid
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
-import kotlin.reflect.KMutableProperty1
-import kotlin.reflect.KProperty1
-import kotlin.reflect.full.declaredMemberProperties
-import kotlin.reflect.full.hasAnnotation
 
 @InternalController(["internal/properties"])
 class PropertiesController(
-  val tolgeeProperties: TolgeeProperties,
+  private val tolgeeProperties: TolgeeProperties,
+  private val internalPropertiesSetterFacade: InternalPropertiesSetterFacade,
 ) {
   @PutMapping(value = ["/set"])
   @Transactional
@@ -24,24 +19,6 @@ class PropertiesController(
     @RequestBody @Valid
     setPropertyDto: SetPropertyDto,
   ) {
-    val name = setPropertyDto.name
-    var instance: Any = tolgeeProperties
-    name.split(".").let { namePath ->
-      namePath.forEachIndexed { idx, property ->
-        val isLast = idx == namePath.size - 1
-        val props = instance::class.declaredMemberProperties
-        val prop = props.find { it.name == property } ?: throw NotFoundException()
-        if (isLast) {
-          (prop as? KMutableProperty1<Any, Any?>)?.let {
-            if (!it.hasAnnotation<E2eRuntimeMutable>()) {
-              io.tolgee.constants.Message.PROPERTY_NOT_MUTABLE
-            }
-            it.set(instance, setPropertyDto.value)
-            return
-          } ?: throw BadRequestException(io.tolgee.constants.Message.PROPERTY_NOT_MUTABLE)
-        }
-        instance = (prop as KProperty1<Any, Any?>).get(instance)!!
-      }
-    }
+    internalPropertiesSetterFacade.setProperty(tolgeeProperties, setPropertyDto)
   }
 }
