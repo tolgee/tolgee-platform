@@ -16,6 +16,8 @@ class DeeplTranslationProvider(
   override val isEnabled: Boolean
     get() = !deeplMachineTranslationProperties.authKey.isNullOrEmpty()
 
+  override val supportsContext = true
+
   override fun translateViaProvider(params: ProviderTranslateParams): MtValueProvider.MtResult {
     val result =
       deeplApiService.translate(
@@ -23,6 +25,7 @@ class DeeplTranslationProvider(
         params.sourceLanguageTag.uppercase(),
         params.targetLanguageTag.uppercase(),
         getFormality(params),
+        params.context,
       )
 
     return MtValueProvider.MtResult(

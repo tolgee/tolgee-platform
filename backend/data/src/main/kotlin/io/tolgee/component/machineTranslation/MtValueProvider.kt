@@ -41,6 +41,9 @@ interface MtValueProvider {
 
   val formalitySupportingLanguages: Array<String>?
 
+  val supportsContext: Boolean
+    get() = false
+
   fun getSuitableTag(tag: String): String? {
     if (supportedLanguages.isNullOrEmpty()) {
       return tag

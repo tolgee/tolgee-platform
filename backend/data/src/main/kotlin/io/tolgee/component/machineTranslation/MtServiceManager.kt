@@ -91,6 +91,7 @@ class MtServiceManager(
         sourceLanguageTag = params.sourceLanguageTag,
         targetLanguageTag = params.targetLanguageTag,
         metadata = params.metadata,
+        context = params.context,
         formality = if (supportsFormality) params.serviceInfo.formality else null,
         isBatch = params.isBatch,
         pluralFormExamples = params.pluralFormExamples,

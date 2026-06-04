@@ -10,6 +10,7 @@ data class TranslationParams(
   val sourceLanguageTag: String,
   val targetLanguageTag: String,
   val metadata: MtMetadata? = null,
+  val context: String? = null,
   val serviceInfo: MtServiceInfo,
   val isBatch: Boolean,
   var pluralForms: Map<String, String>? = null,
