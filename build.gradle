@@ -158,6 +158,10 @@ subprojects {
     ext['hibernate.version'] = hibernateVersion
     ext['commons-lang3.version'] = commonsLang3Version
     ext['jackson.version'] = jacksonVersion
+    ext['tomcat.version'] = '10.1.55'
+    ext['netty.version'] = '4.1.133.Final'
+    ext['thymeleaf.version'] = '3.1.5.RELEASE'
+    ext['postgresql.version'] = '42.7.11'
 
     tasks.withType(Test).configureEach {
         testLogging {
