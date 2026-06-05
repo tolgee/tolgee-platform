@@ -1,3 +1,10 @@
+## [3.197.3](https://github.com/tolgee/tolgee-platform/compare/v3.197.2...v3.197.3) (2026-06-05)
+
+
+### Bug Fixes
+
+* improve handling of disabled accounts ([#3461](https://github.com/tolgee/tolgee-platform/issues/3461)) ([9a4ee73](https://github.com/tolgee/tolgee-platform/commit/9a4ee73a761743ca432d34ea279dd876b989a198)), closes [#3276](https://github.com/tolgee/tolgee-platform/issues/3276)
+
 ## [3.197.2](https://github.com/tolgee/tolgee-platform/compare/v3.197.1...v3.197.2) (2026-06-04)
 
 
