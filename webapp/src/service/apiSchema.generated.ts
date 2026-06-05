@@ -2953,6 +2953,7 @@ export interface components {
         | "license_key_used_by_another_instance"
         | "translation_spending_limit_exceeded"
         | "credit_spending_limit_exceeded"
+        | "mt_credits_spending_limit_too_low"
         | "seats_spending_limit_exceeded"
         | "this_instance_is_already_licensed"
         | "big_meta_not_from_project"
@@ -5557,6 +5558,7 @@ export interface components {
     PublicBillingConfigurationDTO: {
       enabled: boolean;
       minUsageInvoiceAmount?: number;
+      mtCreditsMinSpendingLimit?: number;
     };
     PublicCloudPlanModel: {
       /** Format: date-time */
@@ -6734,6 +6736,7 @@ export interface components {
         | "license_key_used_by_another_instance"
         | "translation_spending_limit_exceeded"
         | "credit_spending_limit_exceeded"
+        | "mt_credits_spending_limit_too_low"
         | "seats_spending_limit_exceeded"
         | "this_instance_is_already_licensed"
         | "big_meta_not_from_project"
