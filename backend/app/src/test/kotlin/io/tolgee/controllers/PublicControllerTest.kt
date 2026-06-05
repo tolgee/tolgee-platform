@@ -1,6 +1,7 @@
 package io.tolgee.controllers
 
 import com.posthog.server.PostHog
+import io.tolgee.constants.Message
 import io.tolgee.dtos.misc.CreateProjectInvitationParams
 import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.fixtures.andAssertError
@@ -153,7 +154,7 @@ class PublicControllerTest : AbstractControllerTest() {
     performPost("/api/public/sign_up", dto2)
       .andIsBadRequest
       .andAssertError
-      .hasCode("user_account_disabled")
+      .hasCode(Message.USER_ACCOUNT_DISABLED.code)
   }
 
   @Test
@@ -172,7 +173,7 @@ class PublicControllerTest : AbstractControllerTest() {
     doAuthentication("login-disabled@test.com", "aaaaaaaaa")
       .andIsUnauthorized
       .andAssertError
-      .hasCode("user_account_disabled")
+      .hasCode(Message.USER_ACCOUNT_DISABLED.code)
   }
 
   @Test

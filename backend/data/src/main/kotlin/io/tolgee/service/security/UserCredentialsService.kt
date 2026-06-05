@@ -18,22 +18,20 @@ class UserCredentialsService(
     username: String,
     password: String,
   ): UserAccount {
-    val userAccount = userAccountService.findActive(username)
-    if (userAccount == null) {
-      // Reporting the disabled state before the password is verified lets an unauthenticated caller
-      // tell a disabled account apart from a non-existent one (user enumeration). Accepted tradeoff:
-      // sign-up already reveals whether an email is taken, so this exposes no extra capability.
-      userAccountService.findActiveOrDisabled(username)?.let {
-        throw AuthenticationException(Message.USER_ACCOUNT_DISABLED)
-      }
-      throw AuthenticationException(Message.BAD_CREDENTIALS)
-    }
+    val userAccount =
+      userAccountService.findActiveOrDisabled(username)
+        ?: throw AuthenticationException(Message.BAD_CREDENTIALS)
 
     if (userAccount.accountType == UserAccount.AccountType.MANAGED) {
       throw AuthenticationException(Message.OPERATION_UNAVAILABLE_FOR_ACCOUNT_TYPE)
     }
 
     checkNativeUserCredentials(userAccount, password)
+
+    if (userAccount.disabledAt != null) {
+      throw AuthenticationException(Message.USER_ACCOUNT_DISABLED)
+    }
+
     return userAccount
   }
 
