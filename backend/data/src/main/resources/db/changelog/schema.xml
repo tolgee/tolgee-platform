@@ -5679,7 +5679,13 @@
             )
             UPDATE user_account ua
             SET disabled_at = COALESCE(ua.disabled_at, now()),
-                username = 'disabled-' || (r.rn - 1) || '-' || ua.username
+                -- id makes it globally unique (even after truncation); left(...) keeps it within
+                -- username's varchar(255) so a very long email can't overflow and abort the migration.
+                username = format(
+                  'disabled-%s-%s',
+                  ua.id,
+                  left(ua.username, 255 - length(format('disabled-%s-', ua.id)))
+                )
             FROM ranked r
             WHERE ua.id = r.id AND r.rn > 1;
         ]]></sql>
