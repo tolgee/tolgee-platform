@@ -79,6 +79,19 @@ class PatAuthTest : AbstractControllerTest() {
   }
 
   @Test
+  fun `user doesnt authorize with PAT when account is disabled`() {
+    val pat = createUserWithPat()
+    userAccountService.disable(userAccountService.get("franta").id)
+
+    performGet(
+      "/v2/user",
+      HttpHeaders().apply {
+        add("X-API-Key", "tgpat_${pat.token}")
+      },
+    ).andIsUnauthorized
+  }
+
+  @Test
   fun `pat doesnt work on restricted endpoint`() {
     val pat = createUserWithPat(expiresAt = Date(Date().time + 100000))
     performDelete(

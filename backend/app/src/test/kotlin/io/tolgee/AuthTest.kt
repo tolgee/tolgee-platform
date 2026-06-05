@@ -259,6 +259,37 @@ class AuthTest : AbstractControllerTest() {
   }
 
   @Test
+  fun `rejects requests from a user disabled after the token was issued`() {
+    val user = userAccountService[initialUsername]
+    val token = jwtService.emitToken(user.id)
+    userAccountService.disable(user.id)
+
+    val mvcResult =
+      mvc
+        .perform(
+          MockMvcRequestBuilders
+            .get("/api/projects")
+            .accept(MediaType.ALL)
+            .header("Authorization", String.format("Bearer %s", token))
+            .contentType(MediaType.APPLICATION_JSON),
+        ).andReturn()
+
+    assertThat(mvcResult.response.status).isEqualTo(401)
+  }
+
+  @Test
+  fun `doesn't auth disabled user via oauth2`() {
+    assertThat(oAuth2AuthUtil.authorizeOAuth2User().response.status).isEqualTo(200)
+
+    val user = userAccountService.get("fakeEmail@domain.com")
+    userAccountService.disable(user.id)
+
+    val response = oAuth2AuthUtil.authorizeOAuth2User().response
+    assertThat(response.status).isEqualTo(401)
+    assertThat(response.contentAsString).contains(Message.USER_ACCOUNT_DISABLED.code)
+  }
+
+  @Test
   fun `super token endpoints require super token`() {
     val admin = userAccountService[initialUsername]
     var token = jwtService.emitToken(admin.id, isSuper = false)

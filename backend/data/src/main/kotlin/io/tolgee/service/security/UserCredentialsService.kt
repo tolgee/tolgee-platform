@@ -18,16 +18,20 @@ class UserCredentialsService(
     username: String,
     password: String,
   ): UserAccount {
-    val userAccount = userAccountService.findActive(username)
-    if (userAccount == null) {
-      throw AuthenticationException(Message.BAD_CREDENTIALS)
-    }
+    val userAccount =
+      userAccountService.findActiveOrDisabled(username)
+        ?: throw AuthenticationException(Message.BAD_CREDENTIALS)
 
     if (userAccount.accountType == UserAccount.AccountType.MANAGED) {
       throw AuthenticationException(Message.OPERATION_UNAVAILABLE_FOR_ACCOUNT_TYPE)
     }
 
     checkNativeUserCredentials(userAccount, password)
+
+    if (userAccount.disabledAt != null) {
+      throw AuthenticationException(Message.USER_ACCOUNT_DISABLED)
+    }
+
     return userAccount
   }
 

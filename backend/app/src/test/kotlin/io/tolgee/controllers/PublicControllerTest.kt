@@ -1,8 +1,10 @@
 package io.tolgee.controllers
 
 import com.posthog.server.PostHog
+import io.tolgee.constants.Message
 import io.tolgee.dtos.misc.CreateProjectInvitationParams
 import io.tolgee.dtos.request.auth.SignUpDto
+import io.tolgee.fixtures.andAssertError
 import io.tolgee.fixtures.andAssertResponse
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
@@ -126,6 +128,50 @@ class PublicControllerTest : AbstractControllerTest() {
         organizationName = "Jejda",
       )
     performPost("/api/public/sign_up", dto).andIsUnauthorized
+  }
+
+  @Test
+  fun `returns error when signing up with disabled account email`() {
+    val dto =
+      SignUpDto(
+        name = "Pavel Novak",
+        password = "aaaaaaaaa",
+        email = "disabled@test.com",
+      )
+    performPost("/api/public/sign_up", dto).andIsOk
+
+    val user = userAccountService.findActive("disabled@test.com")!!
+    userAccountService.disable(user.id)
+
+    val dto2 =
+      SignUpDto(
+        name = "Another User",
+        password = "bbbbbbbbb",
+        email = "disabled@test.com",
+      )
+    performPost("/api/public/sign_up", dto2)
+      .andIsBadRequest
+      .andAssertError
+      .hasCode(Message.USER_ACCOUNT_DISABLED.code)
+  }
+
+  @Test
+  fun `returns error when logging in with disabled account`() {
+    val dto =
+      SignUpDto(
+        name = "Login Disabled",
+        password = "aaaaaaaaa",
+        email = "login-disabled@test.com",
+      )
+    performPost("/api/public/sign_up", dto).andIsOk
+
+    val user = userAccountService.findActive("login-disabled@test.com")!!
+    userAccountService.disable(user.id)
+
+    doAuthentication("login-disabled@test.com", "aaaaaaaaa")
+      .andIsUnauthorized
+      .andAssertError
+      .hasCode(Message.USER_ACCOUNT_DISABLED.code)
   }
 
   @Test
