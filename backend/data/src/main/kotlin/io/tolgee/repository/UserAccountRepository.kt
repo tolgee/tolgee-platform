@@ -126,7 +126,7 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
   @Query("from UserAccount ua where ua.id = :id and ua.deletedAt is null and ua.disabledAt is null")
   fun findActive(id: Long): UserAccount?
 
-  @Query("from UserAccount ua where ua.username = :username and ua.deletedAt is null")
+  @Query("from UserAccount ua where lower(ua.username) = lower(:username) and ua.deletedAt is null")
   fun findActiveOrDisabled(username: String): UserAccount?
 
   @Query("from UserAccount ua left join fetch ua.emailVerification where ua.isInitialUser = true")
