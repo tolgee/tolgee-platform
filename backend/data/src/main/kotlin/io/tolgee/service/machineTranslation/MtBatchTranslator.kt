@@ -176,7 +176,8 @@ class MtBatchTranslator(
         item.promptId,
       )
 
-    val providerContext = buildContext(item, baseTranslationText, provider.supportsContext)
+    val providerContext =
+      if (provider.supportsContext) buildContext(item, baseTranslationText) else null
 
     return TranslationParams(
       text = withReplacedParams,
@@ -200,17 +201,10 @@ class MtBatchTranslator(
     )
   }
 
-  /**
-   * Builds the context passed to providers supporting it (e.g. DeepL), delegating the actual
-   * assembly to [MetadataProvider]. Returns null when the provider ignores context or there is
-   * no key to derive context from.
-   */
   private fun buildContext(
     item: MtBatchItemParams,
     baseTranslationText: String,
-    supportsContext: Boolean,
   ): String? {
-    if (!supportsContext) return null
     val keyId = item.keyId ?: return null
     return MetadataProvider(context).getContext(
       context.baseLanguage,
