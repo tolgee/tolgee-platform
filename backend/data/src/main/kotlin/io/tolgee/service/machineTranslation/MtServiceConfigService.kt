@@ -1,13 +1,6 @@
 package io.tolgee.service.machineTranslation
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
-import io.tolgee.configuration.tolgee.machineTranslation.AwsMachineTranslationProperties
-import io.tolgee.configuration.tolgee.machineTranslation.AzureCognitiveTranslationProperties
-import io.tolgee.configuration.tolgee.machineTranslation.BaiduMachineTranslationProperties
-import io.tolgee.configuration.tolgee.machineTranslation.DeeplMachineTranslationProperties
-import io.tolgee.configuration.tolgee.machineTranslation.GoogleMachineTranslationProperties
-import io.tolgee.configuration.tolgee.machineTranslation.LlmProperties
-import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationServiceProperties
 import io.tolgee.constants.Message
 import io.tolgee.constants.MtServiceType
 import io.tolgee.dtos.cacheable.LanguageDto
@@ -285,14 +278,8 @@ class MtServiceConfigService(
     }
     services.forEach {
       when (it.serviceType) {
-        MtServiceType.AWS -> {
-          entity.awsFormality = it.formality ?: Formality.DEFAULT
-        }
-
-        MtServiceType.DEEPL -> {
-          entity.deeplFormality = it.formality ?: Formality.DEFAULT
-        }
-
+        MtServiceType.AWS -> entity.awsFormality = it.formality ?: Formality.DEFAULT
+        MtServiceType.DEEPL -> entity.deeplFormality = it.formality ?: Formality.DEFAULT
         else -> {}
       }
     }
