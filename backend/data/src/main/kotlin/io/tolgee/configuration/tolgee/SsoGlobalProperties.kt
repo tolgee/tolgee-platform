@@ -2,7 +2,6 @@ package io.tolgee.configuration.tolgee
 
 import io.tolgee.api.ISsoTenant
 import io.tolgee.configuration.annotations.DocProperty
-import jakarta.annotation.PostConstruct
 import kotlin.reflect.KProperty0
 
 @DocProperty(
@@ -20,7 +19,9 @@ import kotlin.reflect.KProperty0
       " have access to. Per organization SSO users are automatically added to the organization they belong to.",
   displayName = "Server wide Single Sign-On",
 )
-class SsoGlobalProperties : ISsoTenant {
+class SsoGlobalProperties :
+  ISsoTenant,
+  SelfValidatingProperties {
   @E2eRuntimeMutable
   @DocProperty(description = "Enables SSO authentication on global level - as a login method for the whole server")
   var enabled: Boolean = false
@@ -66,8 +67,7 @@ class SsoGlobalProperties : ISsoTenant {
   override val global: Boolean
     get() = true
 
-  @PostConstruct
-  fun validate() {
+  override fun validate() {
     if (enabled) {
       listOf(
         ::clientId,
