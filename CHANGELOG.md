@@ -1,3 +1,10 @@
+## [3.197.4](https://github.com/tolgee/tolgee-platform/compare/v3.197.3...v3.197.4) (2026-06-06)
+
+
+### Bug Fixes
+
+* Merge duplicate screenshot references during key import ([#3521](https://github.com/tolgee/tolgee-platform/issues/3521)) ([61b0f60](https://github.com/tolgee/tolgee-platform/commit/61b0f60fb6d6e2c73b7114dd9a821e81986ab495))
+
 ## [3.197.3](https://github.com/tolgee/tolgee-platform/compare/v3.197.2...v3.197.3) (2026-06-05)
 
 
