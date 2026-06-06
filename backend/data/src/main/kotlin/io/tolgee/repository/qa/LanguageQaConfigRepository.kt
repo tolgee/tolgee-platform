@@ -17,6 +17,12 @@ interface LanguageQaConfigRepository : JpaRepository<LanguageQaConfig, Long> {
 
   fun findAllByLanguageProjectId(projectId: Long): List<LanguageQaConfig>
 
+  @Query(
+    "select c.language.id from LanguageQaConfig c " +
+      "where c.language.project.id = :projectId and c.enabled = false",
+  )
+  fun findDisabledLanguageIds(projectId: Long): Set<Long>
+
   fun deleteByLanguageProjectIdAndLanguageId(
     projectId: Long,
     languageId: Long,

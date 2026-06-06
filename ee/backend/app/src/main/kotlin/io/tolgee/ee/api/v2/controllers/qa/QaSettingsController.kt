@@ -166,4 +166,17 @@ class QaSettingsController(
   ) {
     projectQaConfigService.deleteLanguageSettings(projectHolder.project.id, languageId)
   }
+
+  @PutMapping("/languages/{languageId:[0-9]+}/enabled")
+  @Operation(summary = "Enable or disable QA checks for a specific language")
+  @RequiresProjectPermissions([Scope.PROJECT_EDIT])
+  @AllowApiAccess
+  @RequiresFeatures(Feature.QA_CHECKS)
+  fun setLanguageQaEnabled(
+    @PathVariable languageId: Long,
+    @RequestBody @Valid
+    dto: QaEnabledRequest,
+  ) {
+    projectQaConfigService.setLanguageQaEnabled(projectHolder.project.id, languageId, dto.enabled)
+  }
 }

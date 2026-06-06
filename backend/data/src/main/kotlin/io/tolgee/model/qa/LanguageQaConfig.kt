@@ -11,6 +11,7 @@ import jakarta.persistence.Index
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
+import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Type
 
 @Entity
@@ -26,4 +27,7 @@ class LanguageQaConfig(
   @Type(JsonBinaryType::class)
   @Column(columnDefinition = "jsonb")
   var settings: MutableMap<QaCheckType, QaCheckSeverity> = mutableMapOf(),
+  @ColumnDefault("true")
+  @Column(nullable = false)
+  var enabled: Boolean = true,
 ) : StandardAuditModel()

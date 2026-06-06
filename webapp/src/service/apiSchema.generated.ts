@@ -898,6 +898,9 @@ export interface paths {
   "/v2/projects/{projectId}/qa-settings/languages/{languageId}/resolved": {
     get: operations["getLanguageSettingsResolved"];
   };
+  "/v2/projects/{projectId}/qa-settings/languages/{languageId}/enabled": {
+    put: operations["setLanguageQaEnabled"];
+  };
   "/v2/projects/{projectId}/single-step-import": {
     /** Unlike the /v2/projects/{projectId}/import endpoint, imports the data in single request by provided files and parameters. This is useful for automated importing via API or CLI. */
     post: operations["singleStepFromFiles"];
@@ -4179,6 +4182,7 @@ export interface components {
     };
     LanguageQaConfigModel: {
       customSettings?: { [key: string]: "WARNING" | "OFF" };
+      enabled: boolean;
       language: components["schemas"]["LanguageModel"];
     };
     LanguageRequest: {
@@ -19978,6 +19982,47 @@ export interface operations {
         content: {
           "application/json": string;
         };
+      };
+    };
+  };
+  setLanguageQaEnabled: {
+    parameters: {
+      path: {
+        projectId: number;
+        languageId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["QaEnabledRequest"];
       };
     };
   };

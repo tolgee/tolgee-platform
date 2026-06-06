@@ -54,6 +54,34 @@ class ProjectQaConfigService(
     }
   }
 
+  @Transactional
+  fun setLanguageQaEnabled(
+    projectId: Long,
+    languageId: Long,
+    enabled: Boolean,
+  ) {
+    requireQaEnabled(projectId)
+    languageService.getEntity(languageId, projectId)
+
+    val current = isLanguageQaEnabled(projectId, languageId)
+    if (current == enabled) return
+
+    val langConfig =
+      languageQaConfigRepository.findByLanguageProjectIdAndLanguageId(projectId, languageId)
+        ?: LanguageQaConfig(
+          language = entityManager.getReference(Language::class.java, languageId),
+        )
+    langConfig.enabled = enabled
+
+    languageQaConfigRepository.save(langConfig)
+
+    if (enabled) {
+      qaRecheckService.recheckTranslations(projectId, languageIds = listOf(languageId), onlyStale = true)
+      return
+    }
+    languageStatsService.refreshLanguageStatsAllBranches(projectId)
+  }
+
   fun getSettings(projectId: Long): Map<QaCheckType, QaCheckSeverity> {
     val config = projectQaConfigRepository.findByProjectId(projectId)
     val stored = config?.settings ?: emptyMap()
@@ -65,10 +93,18 @@ class ProjectQaConfigService(
     return settings.filterValues { it != QaCheckSeverity.OFF }.keys
   }
 
+  fun isLanguageQaEnabled(
+    projectId: Long,
+    languageId: Long,
+  ): Boolean {
+    return languageQaConfigRepository.findByLanguageProjectIdAndLanguageId(projectId, languageId)?.enabled ?: true
+  }
+
   fun getEnabledCheckTypesForLanguage(
     projectId: Long,
     languageId: Long,
   ): Set<QaCheckType> {
+    if (!isLanguageQaEnabled(projectId, languageId)) return emptySet()
     val settings = getResolvedSettingsForLanguage(projectId, languageId)
     return settings.filterValues { it != QaCheckSeverity.OFF }.keys
   }
@@ -78,7 +114,7 @@ class ProjectQaConfigService(
     languageId: Long,
   ): Map<QaCheckType, QaCheckSeverity>? {
     val langConfig = languageQaConfigRepository.findByLanguageProjectIdAndLanguageId(projectId, languageId)
-    return langConfig?.settings?.toMap()
+    return langConfig?.settings?.toMap()?.ifEmpty { null }
   }
 
   fun getResolvedSettingsForLanguage(
@@ -94,6 +130,16 @@ class ProjectQaConfigService(
 
   fun getSettingsForAllLanguages(projectId: Long): List<LanguageQaConfig> {
     return languageQaConfigRepository.findAllByLanguageProjectId(projectId)
+  }
+
+  fun getEnabledLanguageIds(projectId: Long): Set<Long> {
+    val languageIds = languageService.getProjectLanguages(projectId).map { it.id }.toSet()
+    val disabledLanguageIds = languageQaConfigRepository.findDisabledLanguageIds(projectId)
+    return languageIds - disabledLanguageIds
+  }
+
+  fun getDisabledLanguageIds(projectId: Long): Set<Long> {
+    return languageQaConfigRepository.findDisabledLanguageIds(projectId)
   }
 
   @Transactional
@@ -125,7 +171,6 @@ class ProjectQaConfigService(
     settings: Map<QaCheckType, QaCheckSeverity?>,
   ) {
     requireQaEnabled(projectId)
-    // Validate that the language belongs to this project
     languageService.getEntity(languageId, projectId)
 
     val langConfig =

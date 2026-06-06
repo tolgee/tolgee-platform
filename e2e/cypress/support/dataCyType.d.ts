@@ -657,6 +657,7 @@ declare namespace DataCy {
         "qa-language-dialog-inherited-banner": true;
         "qa-language-dialog-reset-to-global": true;
         "qa-language-dialog-save": true;
+        "qa-language-enabled-toggle": true;
         "qa-language-settings-button": true;
         "qa-panel-container": true;
         "qa-panel-container-disabled": true;

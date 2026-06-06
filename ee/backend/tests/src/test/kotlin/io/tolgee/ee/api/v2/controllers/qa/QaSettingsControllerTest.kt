@@ -6,10 +6,14 @@ import io.tolgee.batch.data.BatchJobType
 import io.tolgee.constants.Feature
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.development.QaTestData
+import io.tolgee.ee.service.qa.ProjectQaConfigService
 import io.tolgee.ee.utils.QaTestUtil
 import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.waitForNotThrowing
+import io.tolgee.model.translation.Translation
+import io.tolgee.repository.qa.LanguageQaConfigRepository
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
 import io.tolgee.util.executeInNewTransaction
@@ -37,6 +41,12 @@ class QaSettingsControllerTest : AuthorizedControllerTest() {
 
   @Autowired
   private lateinit var batchJobService: BatchJobService
+
+  @Autowired
+  private lateinit var languageQaConfigRepository: LanguageQaConfigRepository
+
+  @Autowired
+  private lateinit var projectQaConfigService: ProjectQaConfigService
 
   lateinit var testData: QaTestData
 
@@ -183,8 +193,8 @@ class QaSettingsControllerTest : AuthorizedControllerTest() {
       langUrl,
       mapOf("settings" to mapOf("SPACES_MISMATCH" to null)),
     ).andIsOk.andAssertThatJson {
-      // No override should remain for SPACES_MISMATCH
-      node("settings").isObject.doesNotContainKey("SPACES_MISMATCH")
+      // With the last override removed the row has empty settings, which collapses to null
+      node("settings").isNull()
     }
   }
 
@@ -258,6 +268,134 @@ class QaSettingsControllerTest : AuthorizedControllerTest() {
         assertThatJson(it).node("language.id").isEqualTo(testData.frenchLanguage.id)
         assertThatJson(it).node("customSettings.SPACES_MISMATCH").isEqualTo("OFF")
       }
+    }
+  }
+
+  private val frenchEnabledUrl
+    get() = "$settingsUrl/languages/${testData.frenchLanguage.id}/enabled"
+
+  @Test
+  fun `toggles QA enabled state for a language`() {
+    qa.saveDefaultQaConfig()
+
+    performAuthPut(frenchEnabledUrl, mapOf("enabled" to false)).andIsOk
+
+    performAuthGet("$settingsUrl/languages").andIsOk.andAssertThatJson {
+      isArray.anySatisfy {
+        assertThatJson(it).node("language.id").isEqualTo(testData.frenchLanguage.id)
+        assertThatJson(it).node("enabled").isEqualTo(false)
+      }
+    }
+
+    performAuthPut(frenchEnabledUrl, mapOf("enabled" to true)).andIsOk
+
+    performAuthGet("$settingsUrl/languages").andIsOk.andAssertThatJson {
+      isArray.anySatisfy {
+        assertThatJson(it).node("language.id").isEqualTo(testData.frenchLanguage.id)
+        assertThatJson(it).node("enabled").isEqualTo(true)
+      }
+    }
+  }
+
+  @Test
+  fun `disabled-only language reports enabled false and null customSettings`() {
+    qa.saveDefaultQaConfig()
+
+    performAuthPut(frenchEnabledUrl, mapOf("enabled" to false)).andIsOk
+
+    performAuthGet("$settingsUrl/languages").andIsOk.andAssertThatJson {
+      isArray.anySatisfy {
+        assertThatJson(it).node("language.id").isEqualTo(testData.frenchLanguage.id)
+        assertThatJson(it).node("enabled").isEqualTo(false)
+        assertThatJson(it).node("customSettings").isNull()
+      }
+    }
+
+    performAuthGet("$settingsUrl/languages/${testData.frenchLanguage.id}").andIsOk.andAssertThatJson {
+      node("settings").isNull()
+    }
+  }
+
+  @Test
+  fun `disabling a language keeps its custom overrides`() {
+    qa.saveDefaultQaConfig()
+    val langUrl = "$settingsUrl/languages/${testData.frenchLanguage.id}"
+
+    performAuthPut(langUrl, mapOf("settings" to mapOf("SPACES_MISMATCH" to "OFF"))).andIsOk
+    performAuthPut(frenchEnabledUrl, mapOf("enabled" to false)).andIsOk
+
+    performAuthGet("$settingsUrl/languages").andIsOk.andAssertThatJson {
+      isArray.anySatisfy {
+        assertThatJson(it).node("language.id").isEqualTo(testData.frenchLanguage.id)
+        assertThatJson(it).node("enabled").isEqualTo(false)
+        assertThatJson(it).node("customSettings.SPACES_MISMATCH").isEqualTo("OFF")
+      }
+    }
+  }
+
+  @Test
+  fun `re-enabling QA for a language triggers a scoped recheck of its stale translations`() {
+    qa.saveDefaultQaConfig()
+    // testData has a stale French translation (staleFrTranslation); re-enable should recheck it.
+    performAuthPut(frenchEnabledUrl, mapOf("enabled" to false)).andIsOk
+    performAuthPut(frenchEnabledUrl, mapOf("enabled" to true)).andIsOk
+
+    waitForNotThrowing(timeout = 10_000, pollTime = 500) {
+      executeInNewTransaction(platformTransactionManager) {
+        val qaJobs =
+          batchJobService.getAllByProjectId(testData.project.id).filter { it.type == BatchJobType.QA_CHECK }
+        qaJobs.assert.isNotEmpty
+      }
+    }
+  }
+
+  @Test
+  fun `changing QA settings while a language is disabled marks its translations stale for re-check`() {
+    qa.saveDefaultQaConfig()
+    performAuthPut(frenchEnabledUrl, mapOf("enabled" to false)).andIsOk
+    assertTranslationStale(testData.freshFrTranslation.id, false)
+
+    performAuthPut(settingsUrl, mapOf("settings" to mapOf("SPACES_MISMATCH" to "OFF"))).andIsOk
+
+    assertTranslationStale(testData.freshFrTranslation.id, true)
+  }
+
+  private fun assertTranslationStale(
+    translationId: Long,
+    expected: Boolean,
+  ) {
+    executeInNewTransaction(platformTransactionManager) {
+      entityManager.find(Translation::class.java, translationId).qaChecksStale.assert.isEqualTo(expected)
+    }
+  }
+
+  @Test
+  fun `getEnabledCheckTypesForLanguage is empty for a QA-disabled language`() {
+    qa.saveDefaultQaConfig()
+    val frenchId = testData.frenchLanguage.id
+
+    executeInNewTransaction(platformTransactionManager) {
+      projectQaConfigService.getEnabledCheckTypesForLanguage(testData.project.id, frenchId).assert.isNotEmpty
+    }
+
+    performAuthPut(frenchEnabledUrl, mapOf("enabled" to false)).andIsOk
+
+    executeInNewTransaction(platformTransactionManager) {
+      projectQaConfigService.getEnabledCheckTypesForLanguage(testData.project.id, frenchId).assert.isEmpty()
+    }
+  }
+
+  @Test
+  fun `setting language enabled fails when project QA is disabled`() {
+    qa.saveDefaultQaConfig()
+    executeInNewTransaction(platformTransactionManager) {
+      val project = projectService.get(testData.project.id)
+      project.useQaChecks = false
+      entityManager.persist(project)
+    }
+
+    performAuthPut(frenchEnabledUrl, mapOf("enabled" to false)).andIsBadRequest.andAssertThatJson {
+      node("code").isEqualTo("qa_checks_not_enabled")
     }
   }
 }

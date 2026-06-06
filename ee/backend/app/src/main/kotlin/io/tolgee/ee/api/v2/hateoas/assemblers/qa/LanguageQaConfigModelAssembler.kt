@@ -16,7 +16,8 @@ class LanguageQaConfigModelAssembler(
   ): LanguageQaConfigModel {
     return LanguageQaConfigModel(
       language = languageModelAssembler.toModel(lang),
-      customSettings = entity?.settings?.toMap(),
+      customSettings = entity?.settings?.toMap()?.ifEmpty { null },
+      enabled = entity?.enabled ?: true,
     )
   }
 }
