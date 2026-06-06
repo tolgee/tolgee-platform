@@ -172,7 +172,10 @@ class QaTranslationFilterTest : AuthorizedControllerTest() {
       null,
     )
 
-    qaIssueRepository.findAllByTranslationId(esTranslationId).size.assert.isEqualTo(countBefore)
+    qaIssueRepository
+      .findAllByTranslationId(esTranslationId)
+      .size.assert
+      .isEqualTo(countBefore)
   }
 
   @Test

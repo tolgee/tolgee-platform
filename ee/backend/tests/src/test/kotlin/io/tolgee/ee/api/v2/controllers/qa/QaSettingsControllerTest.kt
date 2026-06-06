@@ -365,7 +365,10 @@ class QaSettingsControllerTest : AuthorizedControllerTest() {
     expected: Boolean,
   ) {
     executeInNewTransaction(platformTransactionManager) {
-      entityManager.find(Translation::class.java, translationId).qaChecksStale.assert.isEqualTo(expected)
+      entityManager
+        .find(Translation::class.java, translationId)
+        .qaChecksStale.assert
+        .isEqualTo(expected)
     }
   }
 
