@@ -8,6 +8,7 @@ import io.tolgee.configuration.annotations.AdditionalDocsProperties
 import io.tolgee.configuration.annotations.DocProperty
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProperties
 import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationProperties
+import jakarta.annotation.PostConstruct
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.NestedConfigurationProperty
 
@@ -163,4 +164,9 @@ class TolgeeProperties(
         "\n\n",
   )
   var backEndUrl: String? = null,
-)
+) {
+  @PostConstruct
+  fun validateProperties() {
+    validateNestedProperties(this)
+  }
+}
