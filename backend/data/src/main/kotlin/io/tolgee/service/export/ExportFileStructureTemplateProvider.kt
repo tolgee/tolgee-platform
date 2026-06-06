@@ -20,8 +20,26 @@ class ExportFileStructureTemplateProvider(
 
   private fun validateTemplate() {
     validateLanguageTagInTemplate()
+    validateLanguageTagNotForbidden()
     validateExtensionInTemplate()
     validateNamespaceInTemplate()
+  }
+
+  private fun validateLanguageTagNotForbidden() {
+    if (!params.format.forbidLanguageTagInTemplate) {
+      return
+    }
+    val languageTagPlaceholders =
+      arrayOf(
+        ExportFilePathPlaceholder.LANGUAGE_TAG,
+        ExportFilePathPlaceholder.ANDROID_LANGUAGE_TAG,
+        ExportFilePathPlaceholder.SNAKE_LANGUAGE_TAG,
+      )
+    val forbidden = languageTagPlaceholders.filter { getTemplate().contains(it.placeholder) }
+    if (forbidden.isEmpty()) {
+      return
+    }
+    throw BadRequestException(Message.FORBIDDEN_PLACEHOLDER_IN_TEMPLATE, forbidden)
   }
 
   /**

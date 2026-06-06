@@ -8,6 +8,7 @@ enum class ExportFormat(
   val defaultFileStructureTemplate: String = ExportFilePathProvider.DEFAULT_TEMPLATE,
   val multiLanguage: Boolean = false,
   val fileStructureExtensionRequired: Boolean = false,
+  val forbidLanguageTagInTemplate: Boolean = false,
 ) {
   JSON("json", "application/json"),
   JSON_TOLGEE("json", "application/json"),
@@ -59,5 +60,12 @@ enum class ExportFormat(
   APPLE_SDK(
     "json",
     "application/json",
+  ),
+  UNITY(
+    "asset",
+    "application/x-yaml",
+    defaultFileStructureTemplate = "{namespace}",
+    multiLanguage = true,
+    forbidLanguageTagInTemplate = true,
   ),
 }
