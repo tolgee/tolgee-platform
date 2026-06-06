@@ -69,11 +69,14 @@ class KeysImporter(
             this.branch = branchEntity ?: project.getDefaultBranch()
           }
 
-        val convertedToPlurals = keyDto.translations.convertToPluralIfAnyIsPlural()?.convertedStrings
-        key.isPlural = convertedToPlurals != null
+        val convertedToPlurals = keyDto.translations.convertToPluralIfAnyIsPlural()
+        if (convertedToPlurals != null) {
+          key.isPlural = true
+          key.pluralArgName = convertedToPlurals.argName
+        }
         keyService.save(key)
 
-        val translations = convertedToPlurals ?: keyDto.translations
+        val translations = convertedToPlurals?.convertedStrings ?: keyDto.translations
         translations.entries.forEach { (languageTag, value) ->
           languages[languageTag]?.let { language ->
             val translation = translationService.setTranslationText(key, language, value)

@@ -155,7 +155,12 @@ class ResolvingKeyImporter(
 
     // when an existing key is plural, we are converting all to plurals
     if (isExistingKeyPlural) {
-      translationsToModifyMap.convertToIcuPlurals(null).convertedStrings.forEach {
+      val converted = translationsToModifyMap.convertToIcuPlurals(key.pluralArgName)
+      if (key.pluralArgName.isNullOrBlank()) {
+        key.pluralArgName = converted.argName
+        keyService.save(key)
+      }
+      converted.convertedStrings.forEach {
         it.key.text = it.value
       }
       translationsToModify.save()
@@ -168,6 +173,7 @@ class ResolvingKeyImporter(
     // if anything from the new translations is plural, we are converting the key to plural
     if (convertedToPlurals != null) {
       key.isPlural = true
+      key.pluralArgName = convertedToPlurals.argName
       keyService.save(key)
       translationsToModify.forEach { translation ->
         translation.text = convertedToPlurals.convertedStrings[translation]

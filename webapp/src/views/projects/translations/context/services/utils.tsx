@@ -13,6 +13,16 @@ import { components } from 'tg.service/apiSchema.generated';
 
 type KeyTaskViewModel = components['schemas']['KeyTaskViewModel'];
 
+// Some import paths leave pluralArgName null even when the text uses a concrete
+// variable; falling straight back to 'value' would rewrite that variable and
+// break interpolation.
+export function resolvePluralParameter(
+  keyPluralArgName: string | undefined,
+  parsedParameter: string | undefined
+): string {
+  return keyPluralArgName || parsedParameter || 'value';
+}
+
 export function generateCurrentValue(
   position: EditorProps,
   textValue: string | undefined,
@@ -31,7 +41,10 @@ export function generateCurrentValue(
       result.activeVariant = variants[0];
     }
     result.value = format;
-    result.value.parameter = key.keyPluralArgName ?? 'value';
+    result.value.parameter = resolvePluralParameter(
+      key.keyPluralArgName,
+      format.parameter
+    );
   }
   return result;
 }
