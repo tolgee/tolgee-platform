@@ -1,12 +1,12 @@
 package io.tolgee.unit.component.machineTranslation
 
 import io.tolgee.component.machineTranslation.providers.AwsMtValueProvider
-import io.tolgee.configuration.tolgee.machineTranslation.AwsMachineTranslationProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class AwsMtValueProviderTest {
-  private val provider = AwsMtValueProvider(AwsMachineTranslationProperties(), null)
+  private val provider = AwsMtValueProvider(TolgeeProperties(), null)
 
   @Test
   fun `maps zh-Hant to zh-TW (AWS has no zh-Hant)`() {
