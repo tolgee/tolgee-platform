@@ -207,6 +207,20 @@ export const toggleLang = (lang) => {
   waitForGlobalLoading();
 };
 
+export const selectAllLanguages = () => {
+  cy.gcy('translations-language-select-form-control').click();
+  cy.gcy('translations-language-select-all').click();
+  dismissMenu();
+  waitForGlobalLoading();
+};
+
+export const selectBaseLanguage = () => {
+  cy.gcy('translations-language-select-form-control').click();
+  cy.gcy('translations-language-select-base').click();
+  dismissMenu();
+  waitForGlobalLoading();
+};
+
 export const create4Translations = (projectId: number) => {
   const promises = [];
   for (let i = 1; i < 5; i++) {
