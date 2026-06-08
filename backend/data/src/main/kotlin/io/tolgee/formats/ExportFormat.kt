@@ -9,6 +9,7 @@ enum class ExportFormat(
   val multiLanguage: Boolean = false,
   val fileStructureExtensionRequired: Boolean = false,
   val forbidLanguageTagInTemplate: Boolean = false,
+  val forbidExtensionInTemplate: Boolean = false,
 ) {
   JSON("json", "application/json"),
   JSON_TOLGEE("json", "application/json"),
@@ -67,5 +68,6 @@ enum class ExportFormat(
     defaultFileStructureTemplate = "{namespace}",
     multiLanguage = true,
     forbidLanguageTagInTemplate = true,
+    forbidExtensionInTemplate = true,
   ),
 }

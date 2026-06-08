@@ -26,9 +26,7 @@ class UnityExporterTest {
     val en = data["Localization_en.asset"]!!
     en.assert.contains("m_Code: \"en\"")
     en.assert.contains("m_SharedData: {fileID: 11400000")
-    // literal string -> not smart
     en.assert.contains("m_Localized: \"Hello\"")
-    // placeholder string -> smart
     en.assert.contains("m_Localized: \"Hi {name}\"")
   }
 
@@ -43,9 +41,7 @@ class UnityExporterTest {
 
   @Test
   fun `marks smart vs non-smart entries`() {
-    val data = export(simpleTranslations())
-    val en = data["Localization_en.asset"]!!
-    // the literal entry must be non-smart, the placeholder entry smart
+    val en = export(simpleTranslations())["Localization_en.asset"]!!
     en.assert.contains("m_Localized: \"Hello\"\n    m_Metadata:\n      m_Items: []\n    m_IsSmart: 0")
     en.assert.contains("m_Localized: \"Hi {name}\"\n    m_Metadata:\n      m_Items: []\n    m_IsSmart: 1")
   }
@@ -62,13 +58,24 @@ class UnityExporterTest {
           key.isPlural = true
         }
       }
-    val data = export(built.translations)
-    val cs = data["Localization_cs.asset"]!!
-    // czech has 4 categories (one, few, many, other) -> 3 pipe separators
+    val cs = export(built.translations)["Localization_cs.asset"]!!
     val plural = Regex("m_Localized: \"(\\{count:plural:[^\"]*})\"").find(cs)!!.groupValues[1]
     plural.assert.startsWith("{count:plural:")
     plural.count { it == '|' }.assert.isEqualTo(3)
     cs.assert.contains("m_IsSmart: 1")
+  }
+
+  @Test
+  fun `escapes a literal pipe inside a plural form`() {
+    val built =
+      buildExportTranslationList {
+        add(languageTag = "en", keyName = "k", text = "{count, plural, one {a|b} other {c}}") {
+          key.isPlural = true
+        }
+      }
+    val en = export(built.translations)["Localization_en.asset"]!!
+    // the literal pipe is backslash-escaped (then YAML-escaped), structural pipe stays bare
+    en.assert.contains("a\\\\|b|c")
   }
 
   @Test
@@ -86,9 +93,49 @@ class UnityExporterTest {
         add(languageTag = "en", keyName = "a", text = "A")
       }
 
-    val first = export(forward.translations)
-    val second = export(reversed.translations)
-    first.assert.isEqualTo(second)
+    export(forward.translations).assert.isEqualTo(export(reversed.translations))
+  }
+
+  @Test
+  fun `key-level smart flag covers all locales and missing translations`() {
+    val built =
+      buildExportTranslationList {
+        add(languageTag = "en", keyName = "m", text = "Hi {name}")
+        add(languageTag = "cs", keyName = "m", text = "Ahoj")
+        add(languageTag = "en", keyName = "only-en", text = "x")
+      }
+    val data = export(built.translations)
+    val cs = data["Localization_cs.asset"]!!
+    // smart-ness propagates to cs even though its own text is a plain literal
+    cs.assert.contains("m_Localized: \"Ahoj\"\n    m_Metadata:\n      m_Items: []\n    m_IsSmart: 1")
+    // a key untranslated in cs still gets a row, emitted empty
+    val onlyEnId = UnityIdentity.deriveKeyId(null, "only-en")
+    cs.assert.contains("m_Id: $onlyEnId\n    m_Localized: \"\"")
+  }
+
+  @Test
+  fun `escapes special characters in values`() {
+    val built =
+      buildExportTranslationList {
+        add(languageTag = "en", keyName = "k", text = "He said \"hi\"\nbye")
+      }
+    val en = export(built.translations)["Localization_en.asset"]!!
+    en.assert.contains("m_Localized: \"He said \\\"hi\\\"\\nbye\"")
+  }
+
+  @Test
+  fun `exports one collection per namespace`() {
+    val built =
+      buildExportTranslationList {
+        add(languageTag = "en", keyName = "a", text = "A") { key.namespace = "ui" }
+        add(languageTag = "en", keyName = "b", text = "B") { key.namespace = "menu" }
+      }
+    val data = export(built.translations)
+    data.keys.assert.contains("ui/ui Shared Data.asset")
+    data.keys.assert.contains("menu/menu Shared Data.asset")
+    data["ui/ui Shared Data.asset"]!!.assert.contains("m_Key: \"a\"")
+    data["menu/menu Shared Data.asset"]!!.assert.contains("m_Key: \"b\"")
+    data["ui/ui_en.asset"]!!.assert.contains("m_Localized: \"A\"")
   }
 
   @Test
@@ -98,11 +145,8 @@ class UnityExporterTest {
         add(languageTag = "en", keyName = "greeting", text = "Hello") {
           key.custom =
             mapOf(
-              "_unity" to
-                mapOf(
-                  "keyId" to 42L,
-                  "sharedTableDataGuid" to "1234567890abcdef1234567890abcdef",
-                ),
+              "_unityKeyId" to 42L,
+              "_unitySharedTableDataGuid" to "1234567890abcdef1234567890abcdef",
             )
         }
       }
@@ -112,17 +156,75 @@ class UnityExporterTest {
   }
 
   @Test
+  fun `preserved isSmart overrides derived smartness`() {
+    val built =
+      buildExportTranslationList {
+        add(languageTag = "en", keyName = "literal", text = "plain") { key.custom = mapOf("_unityIsSmart" to true) }
+        add(languageTag = "en", keyName = "ph", text = "Hi {name}") { key.custom = mapOf("_unityIsSmart" to false) }
+      }
+    val en = export(built.translations)["Localization_en.asset"]!!
+    en.assert.contains("m_Localized: \"plain\"\n    m_Metadata:\n      m_Items: []\n    m_IsSmart: 1")
+    en.assert.contains("m_Localized: \"Hi {name}\"\n    m_Metadata:\n      m_Items: []\n    m_IsSmart: 0")
+  }
+
+  @Test
+  fun `throws on key id collision`() {
+    val built =
+      buildExportTranslationList {
+        add(languageTag = "en", keyName = "a", text = "A") { key.custom = mapOf("_unityKeyId" to 42L) }
+        add(languageTag = "en", keyName = "b", text = "B") { key.custom = mapOf("_unityKeyId" to 42L) }
+      }
+    assertThrows<BadRequestException> { export(built.translations) }
+  }
+
+  @Test
+  fun `throws on shared table data guid conflict`() {
+    val built =
+      buildExportTranslationList {
+        add(languageTag = "en", keyName = "a", text = "A") {
+          key.custom = mapOf("_unitySharedTableDataGuid" to "1111111111111111aaaaaaaaaaaaaaaa")
+        }
+        add(languageTag = "en", keyName = "b", text = "B") {
+          key.custom = mapOf("_unitySharedTableDataGuid" to "2222222222222222bbbbbbbbbbbbbbbb")
+        }
+      }
+    assertThrows<BadRequestException> { export(built.translations) }
+  }
+
+  @Test
+  fun `does not throw when keys share the same preserved guid`() {
+    val built =
+      buildExportTranslationList {
+        add(languageTag = "en", keyName = "a", text = "A") {
+          key.custom = mapOf("_unitySharedTableDataGuid" to "1111111111111111aaaaaaaaaaaaaaaa")
+        }
+        add(languageTag = "en", keyName = "b", text = "B") {
+          key.custom = mapOf("_unitySharedTableDataGuid" to "1111111111111111aaaaaaaaaaaaaaaa")
+        }
+      }
+    export(built.translations)["Localization Shared Data.asset.meta"]!!
+      .assert.contains("guid: 1111111111111111aaaaaaaaaaaaaaaa")
+  }
+
+  @Test
   fun `rejects a template containing a language tag placeholder`() {
+    assertThrows<BadRequestException> { templateProvider("{namespace}/{languageTag}") }
+  }
+
+  @Test
+  fun `rejects a template containing an extension placeholder`() {
+    assertThrows<BadRequestException> { templateProvider("{namespace}/Strings.{extension}") }
+  }
+
+  private fun templateProvider(template: String) {
     val params =
       ExportParams().also {
         it.format = ExportFormat.UNITY
-        it.fileStructureTemplate = "{namespace}/{languageTag}"
+        it.fileStructureTemplate = template
       }
     val translations =
       buildExportTranslationList { add(languageTag = "en", keyName = "a", text = "A") }.translations
-    assertThrows<BadRequestException> {
-      ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate()
-    }
+    ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate()
   }
 
   private fun simpleTranslations(): List<ExportTranslationView> {

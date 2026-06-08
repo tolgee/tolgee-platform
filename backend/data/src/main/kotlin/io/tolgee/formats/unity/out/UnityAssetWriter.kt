@@ -67,14 +67,12 @@ class UnityAssetWriter(
     val entries = model.localeEntries(locale)
     val rendered =
       model.keys.values.joinToString("\n") { key ->
-        val entry = entries[key.id]
-        val value = entry?.value ?: ""
-        val isSmart = if (entry?.isSmart == true) 1 else 0
+        val value = entries[key.id]?.value ?: ""
         "  - m_Id: ${key.id}\n" +
           "    m_Localized: ${yamlString(value)}\n" +
           "    m_Metadata:\n" +
           "      m_Items: []\n" +
-          "    m_IsSmart: $isSmart"
+          "    m_IsSmart: ${smartFlag(key.isSmart)}"
       }
     return assetDocument(UnityFormatConstants.STRING_TABLE_SCRIPT_GUID) {
       append("  m_Name: ${yamlString("${model.collectionName}_$locale")}\n")
@@ -155,6 +153,11 @@ class UnityAssetWriter(
       "  userData: \n" +
       "  assetBundleName: \n" +
       "  assetBundleVariant: \n"
+  }
+
+  private fun smartFlag(smart: Boolean): Int {
+    if (smart) return 1
+    return 0
   }
 
   private fun yamlString(value: String): String {

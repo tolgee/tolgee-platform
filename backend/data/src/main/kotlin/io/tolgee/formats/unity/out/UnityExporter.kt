@@ -4,6 +4,7 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.IExportParams
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.formats.DEFAULT_PLURAL_ARGUMENT_NAME
+import io.tolgee.formats.PossiblePluralConversionResult
 import io.tolgee.formats.escaping.IcuUnescaper
 import io.tolgee.formats.populateForms
 import io.tolgee.formats.unity.UnityFormatConstants
@@ -45,14 +46,14 @@ class UnityExporter(
       if (existing != null && existing.name != keyName) {
         throw BadRequestException(Message.UNITY_DUPLICATE_KEY_ID, listOf(keyId.toString(), existing.name, keyName))
       }
-      model.keys[keyId] =
-        UnityKeyExportModel(keyId, keyName, views.firstNotNullOfOrNull { it.key.description })
 
-      val effectiveSmart = resolveEffectiveSmart(views)
+      val converted = views.associateWith { convert(it) }
+      val smart = resolveEffectiveSmart(views, converted)
+      model.keys[keyId] = UnityKeyExportModel(keyId, keyName, smart)
+
       views.forEach { view ->
         view.text ?: return@forEach
-        val value = renderValue(view, effectiveSmart)
-        model.localeEntries(view.languageTag)[keyId] = UnityLocalizedEntry(value, effectiveSmart)
+        model.localeEntries(view.languageTag)[keyId] = UnityLocalizedEntry(renderValue(view, converted[view], smart))
       }
     }
     return model
@@ -78,29 +79,36 @@ class UnityExporter(
     return preserved?.toLong() ?: UnityIdentity.deriveKeyId(namespace, keyName)
   }
 
-  private fun resolveEffectiveSmart(views: List<ExportTranslationView>): Boolean {
+  private fun resolveEffectiveSmart(
+    views: List<ExportTranslationView>,
+    converted: Map<ExportTranslationView, PossiblePluralConversionResult?>,
+  ): Boolean {
     val preserved = views.firstNotNullOfOrNull { preservedBoolean(it, UnityFormatConstants.CUSTOM_IS_SMART) }
     if (preserved != null) {
       return preserved
     }
-    return views.any { astSmart(it) }
+    return views.any { isSmart(converted[it]) }
   }
 
-  private fun astSmart(view: ExportTranslationView): Boolean {
-    val text = view.text ?: return false
-    val converted = IcuToUnityMessageConvertor(text, view.key.isPlural, isProjectIcuPlaceholdersEnabled).convert()
+  private fun isSmart(converted: PossiblePluralConversionResult?): Boolean {
+    converted ?: return false
     return converted.isPlural() || converted.firstArgName != null
+  }
+
+  private fun convert(view: ExportTranslationView): PossiblePluralConversionResult? {
+    val text = view.text ?: return null
+    return IcuToUnityMessageConvertor(text, view.key.isPlural, isProjectIcuPlaceholdersEnabled).convert()
   }
 
   private fun renderValue(
     view: ExportTranslationView,
+    converted: PossiblePluralConversionResult?,
     smart: Boolean,
   ): String {
     val text = view.text ?: return ""
-    if (!smart) {
+    if (!smart || converted == null) {
       return IcuUnescaper(text).unescaped
     }
-    val converted = IcuToUnityMessageConvertor(text, view.key.isPlural, isProjectIcuPlaceholdersEnabled).convert()
     if (!converted.isPlural()) {
       return converted.singleResult ?: ""
     }
@@ -115,29 +123,26 @@ class UnityExporter(
     val populated = populateForms(languageTag, forms)
     val order = UnityIdentity.pluralOrder(languageTag)
     val otherValue = populated["other"] ?: ""
-    val pipes = order.joinToString("|") { populated[it] ?: otherValue }
+    val pipes = order.joinToString("|") { escapePipe(populated[it] ?: otherValue) }
     return "{${argName ?: DEFAULT_PLURAL_ARGUMENT_NAME}:plural:$pipes}"
   }
 
-  @Suppress("UNCHECKED_CAST")
-  private fun unityCustom(view: ExportTranslationView): Map<String, Any?>? {
-    return view.key.custom?.get(UnityFormatConstants.CUSTOM_KEY) as? Map<String, Any?>
-  }
+  private fun escapePipe(form: String): String = form.replace("|", "\\|")
 
   private fun preservedString(
     view: ExportTranslationView,
     key: String,
-  ): String? = unityCustom(view)?.get(key) as? String
+  ): String? = view.key.custom?.get(key) as? String
 
   private fun preservedNumber(
     view: ExportTranslationView,
     key: String,
-  ): Number? = unityCustom(view)?.get(key) as? Number
+  ): Number? = view.key.custom?.get(key) as? Number
 
   private fun preservedBoolean(
     view: ExportTranslationView,
     key: String,
-  ): Boolean? = unityCustom(view)?.get(key) as? Boolean
+  ): Boolean? = view.key.custom?.get(key) as? Boolean
 
   companion object {
     const val DEFAULT_COLLECTION_NAME = "Localization"
