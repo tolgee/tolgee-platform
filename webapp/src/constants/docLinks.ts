@@ -6,4 +6,5 @@ export const DOCS_LINKS = {
   qaChecksGrammar: `${DOCS_ROOT}/platform/translation_process/qa_checks#spelling-and-grammar-checks`,
   qaChecksSpelling: `${DOCS_ROOT}/platform/translation_process/qa_checks#spelling-and-grammar-checks`,
   poMsgctxt: `${DOCS_ROOT}/platform/formats/po#message-context-msgctxt-and-key-names`,
+  supportedFormats: `${DOCS_ROOT}/platform/supported_formats`,
 };

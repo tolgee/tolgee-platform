@@ -17,6 +17,8 @@ import DotnetLogo from 'tg.svgs/logos/dotnet.svg?react';
 import XlsxLogo from 'tg.svgs/logos/xlsx.svg?react';
 import JavaLogo from 'tg.svgs/logos/java.svg?react';
 import FileYamlLogo from 'tg.svgs/logos/file-yaml.svg?react';
+import { ArrowUpRight } from '@untitled-ui/icons-react';
+import { DOCS_LINKS } from 'tg.constants/docLinks';
 
 const TechLogo = ({
   svg,
@@ -58,7 +60,7 @@ const FORMATS = [
   { name: 'PO PHP', logo: <PhoLogo /> },
   { name: 'PO C/C++', logo: <CLogo /> },
   { name: 'PO Python', logo: <PythonLogo /> },
-  { name: 'Java Properties', logo: <JavaLogo />, logoHeight: '24px',logoWidth: '24px', },
+  { name: 'Java Properties', logo: <JavaLogo /> },
   { name: 'Apple Strings', logo: <AppleLogo /> },
   { name: 'Apple Stringsdict', logo: <AppleLogo /> },
   { name: 'Apple Strings Catalog', logo: <AppleLogo /> },
@@ -67,7 +69,7 @@ const FORMATS = [
   { name: 'Compose Multiplatform XML', logo: <ComposeMultiplatformLogo /> },
   { name: 'Flutter ARB', logo: <FluttrerLogo /> },
   { name: 'Ruby YAML', logo: <RailsLogo /> },
-  { name: 'Structured YAML', logo: <FileYamlLogo />, logoHeight: '24px',logoWidth: '24px', },
+  { name: 'Structured YAML', logo: <FileYamlLogo /> },
   { name: 'i18next', logo: <I18nextLogo /> },
   { name: 'CSV', logo: <CsvLogo /> },
   { name: '.NET RESX', logo: <DotnetLogo /> },
@@ -102,25 +104,27 @@ export const ImportSupportedFormats = () => {
       <Box sx={{ mt: 3, textAlign: 'center' }}>
         <Button
           component="a"
-          href="https://docs.tolgee.io/platform/supported_formats"
+          href={DOCS_LINKS.supportedFormats}
           target="_blank"
-          rel="noopener noreferrer"
+          rel="noreferrer noopener"
           variant="outlined"
           size="small"
-          sx={{
+          endIcon={<ArrowUpRight />}
+          sx={(theme) => ({
             textTransform: 'none',
-            fontSize: '0.875rem',
-            color: (theme) => theme.palette.tokens.text.secondary,
-            borderColor: (theme) => theme.palette.tokens.border.secondary,
-            '&:hover': {
-              backgroundColor: (theme) =>
-                theme.palette.tokens.background['paper-2'],
-              borderColor: (theme) => theme.palette.tokens.text.secondary,
+            color: theme.palette.tokens.text.secondary,
+            borderColor: theme.palette.tokens.border.secondary,
+            '& .MuiButton-endIcon > svg': {
+              width: '1.25em',
+              height: '1.25em',
             },
-          }}
+            '&:hover': {
+              backgroundColor: theme.palette.tokens.background['paper-2'],
+              borderColor: theme.palette.tokens.text.secondary,
+            },
+          })}
         >
-          <T keyName="See all supported formats" />
-          {' →'}
+          <T keyName="import_file_supported_formats_see_all_button" />
         </Button>
       </Box>
     </>
