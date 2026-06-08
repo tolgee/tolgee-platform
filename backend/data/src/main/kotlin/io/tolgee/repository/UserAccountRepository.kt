@@ -102,7 +102,8 @@ private const val PROJECT_PERMISSIONS_MAIN = """
 @Repository
 @Lazy
 interface UserAccountRepository : JpaRepository<UserAccount, Long> {
-  fun findByUsername(username: String?): Optional<UserAccount>
+  @Query("from UserAccount ua where ua.username = :username")
+  fun findByExactUsername(username: String?): Optional<UserAccount>
 
   @Query(
     "from UserAccount ua where lower(ua.username) = lower(:username) " +

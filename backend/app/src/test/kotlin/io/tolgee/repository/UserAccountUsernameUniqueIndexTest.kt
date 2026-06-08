@@ -31,7 +31,6 @@ class UserAccountUsernameUniqueIndexTest : AbstractSpringTest() {
   fun `rejects a disabled account colliding with an active one - disabled still reserves the email`() {
     userAccountRepository.saveAndFlush(UserAccount(name = "a", username = "ciunique2@test.com", password = "x"))
 
-    // the index is scoped to deleted_at IS NULL (includes disabled), so a disabled case-variant is rejected
     assertThatThrownBy {
       userAccountRepository.saveAndFlush(
         UserAccount(name = "b", username = "CiUnique2@test.com", password = "x").apply {
@@ -46,7 +45,6 @@ class UserAccountUsernameUniqueIndexTest : AbstractSpringTest() {
   fun `allows a deleted account colliding on lower(username)`() {
     userAccountRepository.saveAndFlush(UserAccount(name = "a", username = "ciunique3@test.com", password = "x"))
 
-    // deleted rows are excluded from the index, so a soft-deleted case-variant may coexist.
     assertThatCode {
       userAccountRepository.saveAndFlush(
         UserAccount(name = "b", username = "CiUnique3@test.com", password = "x").apply {

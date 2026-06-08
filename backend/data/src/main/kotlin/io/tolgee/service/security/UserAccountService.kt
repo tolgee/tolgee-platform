@@ -577,7 +577,7 @@ class UserAccountService(
       return
     }
 
-    if (!emailValidator.isValid(dto.email, null)) {
+    if (!emailValidator.isValid(newEmail, null)) {
       // todo: Allow to specify STANDARD_VALIDATION typed errors to show errors on specific fields
       throw ValidationException(Message.VALIDATION_EMAIL_IS_NOT_VALID)
     }

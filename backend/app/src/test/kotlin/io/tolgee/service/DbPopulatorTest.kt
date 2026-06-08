@@ -35,7 +35,7 @@ class DbPopulatorTest : AbstractTransactionalTest() {
     populator.autoPopulate()
     userAccount =
       userAccountRepository
-        .findByUsername(tolgeeProperties.authentication.initialUsername)
+        .findByExactUsername(tolgeeProperties.authentication.initialUsername)
         .orElseThrow { NotFoundException() }
   }
 
