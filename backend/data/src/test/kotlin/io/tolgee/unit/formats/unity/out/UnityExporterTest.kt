@@ -203,7 +203,8 @@ class UnityExporterTest {
         }
       }
     export(built.translations)["Localization Shared Data.asset.meta"]!!
-      .assert.contains("guid: 1111111111111111aaaaaaaaaaaaaaaa")
+      .assert
+      .contains("guid: 1111111111111111aaaaaaaaaaaaaaaa")
   }
 
   @Test

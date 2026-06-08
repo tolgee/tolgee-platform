@@ -44,7 +44,10 @@ class UnityAssetWriter(
           "      m_Items: []"
       }
     val maxId = model.keys.keys.maxOrNull() ?: 0L
-    val trackedIds = model.keys.keys.joinToString("\n") { "    - $it" }.ifEmpty { "    []" }
+    val trackedIds =
+      model.keys.keys
+        .joinToString("\n") { "    - $it" }
+        .ifEmpty { "    []" }
     return assetDocument(UnityFormatConstants.SHARED_TABLE_DATA_SCRIPT_GUID) {
       append("  m_Name: ${yamlString("${model.collectionName} Shared Data")}\n")
       append("  m_TableCollectionName: ${yamlString(model.collectionName)}\n")
