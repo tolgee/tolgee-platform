@@ -198,61 +198,6 @@ export class LINKS {
     'ee-license'
   );
 
-  static ADMINISTRATION_EE_TA = Link.ofParent(
-    LINKS.ADMINISTRATION,
-    'ee-translation-agencies'
-  );
-
-  static ADMINISTRATION_EE_TA_CREATE = Link.ofParent(
-    LINKS.ADMINISTRATION_EE_TA,
-    'create'
-  );
-
-  static ADMINISTRATION_EE_TA_EDIT = Link.ofParent(
-    LINKS.ADMINISTRATION_EE_TA,
-    p(PARAMS.TA_ID) + '/edit'
-  );
-
-  static ADMINISTRATION_BILLING_CLOUD_PLANS = Link.ofParent(
-    LINKS.ADMINISTRATION,
-    'cloud-plans'
-  );
-
-  static ADMINISTRATION_BILLING_CLOUD_PLAN_EDIT = Link.ofParent(
-    LINKS.ADMINISTRATION_BILLING_CLOUD_PLANS,
-    p(PARAMS.PLAN_ID)
-  );
-
-  static ADMINISTRATION_BILLING_CLOUD_PLAN_CREATE = Link.ofParent(
-    LINKS.ADMINISTRATION_BILLING_CLOUD_PLANS,
-    'create'
-  );
-
-  static ADMINISTRATION_BILLING_EE_PLANS = Link.ofParent(
-    LINKS.ADMINISTRATION,
-    'ee-plans'
-  );
-
-  static ADMINISTRATION_BILLING_SUBSCRIPTIONS = Link.ofParent(
-    LINKS.ADMINISTRATION,
-    'subscriptions'
-  );
-
-  static ADMINISTRATION_BILLING_INVOICES = Link.ofParent(
-    LINKS.ADMINISTRATION,
-    'invoices'
-  );
-
-  static ADMINISTRATION_BILLING_EE_PLAN_EDIT = Link.ofParent(
-    LINKS.ADMINISTRATION_BILLING_EE_PLANS,
-    p(PARAMS.PLAN_ID)
-  );
-
-  static ADMINISTRATION_BILLING_EE_PLAN_CREATE = Link.ofParent(
-    LINKS.ADMINISTRATION_BILLING_EE_PLANS,
-    'create'
-  );
-
   /**
    * Organizations
    */
@@ -293,11 +238,6 @@ export class LINKS {
   static ORGANIZATION_BILLING_TEST_CLOCK_HELPER = Link.ofParent(
     LINKS.ORGANIZATION,
     'billing-test-clock-helper'
-  );
-
-  static ORGANIZATION_BILLING_PLANS_EDIT = Link.ofParent(
-    LINKS.ORGANIZATION,
-    'billing-plans-edit'
   );
 
   static ORGANIZATION_SUBSCRIPTIONS_SELF_HOSTED_EE = Link.ofParent(
