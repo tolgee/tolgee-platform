@@ -242,6 +242,19 @@ class AuthTest : AbstractControllerTest() {
   }
 
   @Test
+  fun `stores third-party email lowercased`() {
+    val emailResponse =
+      GithubEmailResponse().apply {
+        email = "Fake.Mixed@Email.com"
+        primary = true
+        verified = true
+      }
+    gitHubAuthUtil.authorizeGithubUser(emailResponse = ResponseEntity(arrayOf(emailResponse), HttpStatus.OK))
+    assertThat(userAccountService.findActive("fake.mixed@email.com")!!.username)
+      .isEqualTo("fake.mixed@email.com")
+  }
+
+  @Test
   fun authorizesGoogleUser() {
     val response = googleAuthUtil.authorizeGoogleUser().response.contentAsString
     val result = jacksonObjectMapper().readValue(response, HashMap::class.java)
