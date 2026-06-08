@@ -10,6 +10,8 @@ import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.BatchJobsTestData
 import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.model.batch.BatchJobStatus
+import io.tolgee.security.OrganizationHolder
+import io.tolgee.security.ProjectHolder
 import io.tolgee.testing.WebsocketTest
 import io.tolgee.testing.assert
 import io.tolgee.util.Logging
@@ -17,6 +19,9 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import java.time.Duration
@@ -71,6 +76,12 @@ abstract class AbstractBatchJobsGeneralTest :
   @MockitoSpyBean
   @Autowired
   lateinit var autoTranslationService: io.tolgee.service.translation.AutoTranslationService
+
+  @Autowired
+  lateinit var projectHolder: ProjectHolder
+
+  @Autowired
+  lateinit var organizationHolder: OrganizationHolder
 
   @Autowired
   lateinit var batchJobStateProvider: BatchJobStateProvider
@@ -380,6 +391,22 @@ abstract class AbstractBatchJobsGeneralTest :
     } finally {
       batchProperties.maxPerMtJobConcurrency = mtDefault
     }
+  }
+
+  @Test
+  fun `MT batch worker has ProjectHolder and OrganizationHolder populated`() {
+    doAnswer {
+      projectHolder.project
+      organizationHolder.organization
+    }.whenever(autoTranslationService).autoTranslateSync(any(), any(), any(), any(), any())
+
+    val job = util.runMtJob(3)
+
+    util.waitForCompleted(job)
+    batchJobService
+      .getJobDto(job.id)
+      .status.assert
+      .isEqualTo(BatchJobStatus.SUCCESS)
   }
 
   @Test
