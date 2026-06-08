@@ -1412,6 +1412,7 @@
   "languages_permitted_list_all": "Alle talen",
   "languages_permitted_list_reset": "Resetten",
   "languages_permitted_list_select_all": "Alle talen",
+  "languages_select_base_language": "Alleen basistaal",
   "languages_title": "Talen",
   "language_tag_exists": "Label bestaat al",
   "leave_project_confirmation_message": "Weet u zeker dat u dit project wilt verlaten?",

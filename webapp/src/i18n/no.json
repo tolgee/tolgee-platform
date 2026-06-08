@@ -1405,6 +1405,7 @@
   "languages_permitted_list_all": "Alle språk",
   "languages_permitted_list_reset": "Tilbakestill",
   "languages_permitted_list_select_all": "Alle språk",
+  "languages_select_base_language": "Kun grunnspråk",
   "languages_title": "Språk",
   "language_tag_exists": "Tagg eksisterer allerede",
   "leave_project_confirmation_message": "Er du sikker på at du vil forlate dette prosjektet?",

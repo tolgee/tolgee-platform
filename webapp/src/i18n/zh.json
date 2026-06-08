@@ -1407,6 +1407,7 @@
   "languages_permitted_list_all": "所有语言",
   "languages_permitted_list_reset": "重置",
   "languages_permitted_list_select_all": "所有语言",
+  "languages_select_base_language": "仅基础语言",
   "languages_title": "语言",
   "language_tag_exists": "Tag 已存在",
   "leave_project_confirmation_message": "您真的要离开这个项目吗？",

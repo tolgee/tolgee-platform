@@ -1412,6 +1412,7 @@
   "languages_permitted_list_all": "Všechny jazyky",
   "languages_permitted_list_reset": "Resetovat",
   "languages_permitted_list_select_all": "Všechny jazyky",
+  "languages_select_base_language": "Pouze základní jazyk",
   "languages_title": "Jazyky",
   "language_tag_exists": "Zkratka existuje",
   "leave_project_confirmation_message": "Skutečně chcete opustit tento projekt?",

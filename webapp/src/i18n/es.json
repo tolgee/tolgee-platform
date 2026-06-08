@@ -1405,6 +1405,7 @@
   "languages_permitted_list_all": "Todos los idiomas",
   "languages_permitted_list_reset": "Restablecer",
   "languages_permitted_list_select_all": "Todos los idiomas",
+  "languages_select_base_language": "Solo idioma base",
   "languages_title": "Idiomas",
   "language_tag_exists": "La etiqueta ya existe",
   "leave_project_confirmation_message": "¿Realmente quieres salir de este proyecto?",

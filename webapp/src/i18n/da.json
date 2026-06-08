@@ -1412,6 +1412,7 @@
   "languages_permitted_list_all": "Alle sprog",
   "languages_permitted_list_reset": "Nulstil",
   "languages_permitted_list_select_all": "Alle sprog",
+  "languages_select_base_language": "Kun basissprog",
   "languages_title": "Sprog",
   "language_tag_exists": "Tag findes allerede",
   "leave_project_confirmation_message": "Vil du virkelig forlade dette projekt?",

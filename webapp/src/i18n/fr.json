@@ -1407,6 +1407,7 @@
   "languages_permitted_list_all": "Toutes les langues",
   "languages_permitted_list_reset": "Réinitialiser",
   "languages_permitted_list_select_all": "Toutes les langues",
+  "languages_select_base_language": "Langue de base uniquement",
   "languages_title": "Langues",
   "language_tag_exists": "L'étiquette existe déjà",
   "leave_project_confirmation_message": "Voulez-vous vraiment abandonner ce projet ?",

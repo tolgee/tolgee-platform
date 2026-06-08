@@ -1388,6 +1388,7 @@
   "languages_modify_ok_button": "OK",
   "languages_permitted_list_all": "Tutte le lingue",
   "languages_permitted_list_reset": "Reimposta",
+  "languages_select_base_language": "Solo lingua base",
   "languages_title": "Lingue",
   "language_tag_exists": "Il tag esiste",
   "leave_project_confirmation_message": "Vuoi davvero lasciare questo progetto?",

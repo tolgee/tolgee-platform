@@ -1410,6 +1410,7 @@
   "languages_permitted_list_all": "Alle Sprachen",
   "languages_permitted_list_reset": "Zurücksetzen",
   "languages_permitted_list_select_all": "Alle Sprachen",
+  "languages_select_base_language": "Nur Basissprache",
   "languages_title": "Sprachen",
   "language_tag_exists": "Tag existiert",
   "leave_project_confirmation_message": "Wollen Sie dieses Projekt wirklich aufgeben?",

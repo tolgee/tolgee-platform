@@ -1214,6 +1214,7 @@
   "languages_permitted_list_all": "Wszystkie języki",
   "languages_permitted_list_reset": "Resetuj",
   "languages_permitted_list_select_all": "Wszystkie języki",
+  "languages_select_base_language": "Tylko język bazowy",
   "languages_title": "Języki",
   "language_tag_exists": "Tag istnieje",
   "leave_project_confirmation_message": "Czy na pewno chcesz opuścić ten projekt?",

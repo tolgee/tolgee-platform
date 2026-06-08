@@ -1414,6 +1414,7 @@
   "languages_permitted_list_all": "すべての言語",
   "languages_permitted_list_reset": "リセット",
   "languages_permitted_list_select_all": "すべての言語",
+  "languages_select_base_language": "基本言語のみ",
   "languages_title": "言語",
   "language_tag_exists": "タグは存在します",
   "leave_project_confirmation_message": "プロジェクトから脱退します。本当によろしいですか?",

@@ -1,3 +1,15 @@
+# [3.198.0](https://github.com/tolgee/tolgee-platform/compare/v3.197.4...v3.198.0) (2026-06-08)
+
+
+### Bug Fixes
+
+* chunk soft delete to avoid PostgreSQL parameter limit ([#3690](https://github.com/tolgee/tolgee-platform/issues/3690)) ([beed7e8](https://github.com/tolgee/tolgee-platform/commit/beed7e8016a28f47860d9015fe6b8eca3d724c0d))
+
+
+### Features
+
+* pass key context to DeepL machine translation ([#3723](https://github.com/tolgee/tolgee-platform/issues/3723)) ([77c3de4](https://github.com/tolgee/tolgee-platform/commit/77c3de4fc74e3ba1ef7cccd51dd1eb257494aa0a))
+
 ## [3.197.4](https://github.com/tolgee/tolgee-platform/compare/v3.197.3...v3.197.4) (2026-06-06)
 
 

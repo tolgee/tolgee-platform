@@ -1405,6 +1405,7 @@
   "languages_permitted_list_all": "Minden nyelv",
   "languages_permitted_list_reset": "Visszaállítás",
   "languages_permitted_list_select_all": "Minden nyelv",
+  "languages_select_base_language": "Csak alap nyelv",
   "languages_title": "Nyelvek",
   "language_tag_exists": "A címke már létezik",
   "leave_project_confirmation_message": "Valóban el akarja hagyni ezt a projektet?",
