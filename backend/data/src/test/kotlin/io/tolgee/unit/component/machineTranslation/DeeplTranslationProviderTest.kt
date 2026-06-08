@@ -2,10 +2,14 @@ package io.tolgee.unit.component.machineTranslation
 
 import io.tolgee.component.machineTranslation.providers.DeeplApiService
 import io.tolgee.component.machineTranslation.providers.DeeplTranslationProvider
+import io.tolgee.component.machineTranslation.providers.ProviderTranslateParams
 import io.tolgee.configuration.tolgee.machineTranslation.DeeplMachineTranslationProperties
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 
 class DeeplTranslationProviderTest {
   private val provider =
@@ -13,6 +17,37 @@ class DeeplTranslationProviderTest {
       DeeplMachineTranslationProperties(),
       mock<DeeplApiService>(),
     )
+
+  @Test
+  fun `supports context`() {
+    assertThat(provider.supportsContext).isTrue()
+  }
+
+  @Test
+  fun `forwards the context to the DeepL API`() {
+    val apiService = mock<DeeplApiService>()
+    val provider = DeeplTranslationProvider(DeeplMachineTranslationProperties(), apiService)
+
+    provider.translate(
+      ProviderTranslateParams(
+        text = "Save",
+        textRaw = "Save",
+        keyName = "button.save",
+        sourceLanguageTag = "en",
+        targetLanguageTag = "de",
+        context = "Button label on the settings screen",
+        isBatch = false,
+      ),
+    )
+
+    verify(apiService).translate(
+      eq("Save"),
+      eq("EN"),
+      eq("DE"),
+      any(),
+      eq("Button label on the settings screen"),
+    )
+  }
 
   @Test
   fun `English regional variants resolve to en as source`() {

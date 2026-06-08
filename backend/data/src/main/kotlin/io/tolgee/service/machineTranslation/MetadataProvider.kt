@@ -5,10 +5,14 @@ import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.translation.TranslationMemoryService
 import jakarta.persistence.EntityManager
+import org.slf4j.LoggerFactory
+import org.springframework.dao.DataAccessException
 
 class MetadataProvider(
   private val context: MtTranslatorContext,
 ) {
+  private val log = LoggerFactory.getLogger(MetadataProvider::class.java)
+
   fun getCloseItems(
     sourceLanguage: LanguageDto,
     targetLanguage: LanguageDto,
@@ -37,6 +41,31 @@ class MetadataProvider(
       .setParameter("sourceLanguageId", sourceLanguage.id)
       .setParameter("closeKeyIds", closeKeyIds)
       .resultList
+  }
+
+  /**
+   * Builds a plain-text context payload for providers that accept one
+   * Best-effort: context only improves the result, so a database failure while fetching the
+   * neighbouring keys yields no context rather than failing the translation itself.
+   */
+  fun getContext(
+    sourceLanguage: LanguageDto,
+    targetLanguage: LanguageDto,
+    metadataKey: MetadataKey,
+    keyDescription: String?,
+  ): String? {
+    try {
+      val parts = mutableListOf<String>()
+      keyDescription?.takeIf { it.isNotBlank() }?.let { parts.add(it) }
+      getCloseItems(sourceLanguage, targetLanguage, metadataKey)
+        .map { it.source }
+        .filter { it.isNotBlank() }
+        .forEach { parts.add(it) }
+      return parts.joinToString("\n").ifBlank { null }
+    } catch (e: DataAccessException) {
+      log.warn("Failed to build MT context for key ${metadataKey.keyId}", e)
+      return null
+    }
   }
 
   /**
