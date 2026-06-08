@@ -5709,7 +5709,26 @@
             CONCURRENTLY here, while the old case-sensitive index is still live, so writes are
             protected throughout (the old index is dropped in the next changeSet, after this one
             succeeds - there is never a window without a unique index).
+
+            An interrupted CONCURRENTLY build (killed deploy, lock timeout) leaves an INVALID index
+            of this name; CREATE ... IF NOT EXISTS would then match it by name and skip, so on retry
+            the next changeSet would drop the old index and leave nothing enforcing uniqueness. Drop
+            any such invalid leftover first so the build actually re-runs.
         </comment>
+        <sql dbms="postgresql" splitStatements="false"><![CDATA[
+            DO $$
+            BEGIN
+              IF EXISTS (
+                SELECT 1
+                FROM pg_class c
+                JOIN pg_index i ON i.indexrelid = c.oid
+                WHERE c.relname = 'user_account_lower_username_uidx'
+                  AND NOT i.indisvalid
+              ) THEN
+                DROP INDEX user_account_lower_username_uidx;
+              END IF;
+            END $$;
+        ]]></sql>
         <sql dbms="postgresql">
             CREATE UNIQUE INDEX CONCURRENTLY IF NOT EXISTS user_account_lower_username_uidx
                 ON user_account (lower(username))
@@ -5723,13 +5742,24 @@
     <changeSet author="dkrizan" id="user-account-drop-old-case-sensitive-username-index">
         <comment>
             Drop the old case-sensitive partial unique index (changeSet 1663247386701-2, auto-named,
-            so located by definition).
+            so located by definition) - but only once the case-insensitive replacement exists AND is
+            valid, so an interrupted build can never leave the table with no enforced unique index.
         </comment>
         <sql dbms="postgresql" splitStatements="false"><![CDATA[
             DO $$
             DECLARE
               idx text;
             BEGIN
+              IF NOT EXISTS (
+                SELECT 1
+                FROM pg_class c
+                JOIN pg_index i ON i.indexrelid = c.oid
+                WHERE c.relname = 'user_account_lower_username_uidx'
+                  AND i.indisvalid
+              ) THEN
+                RAISE EXCEPTION 'user_account_lower_username_uidx is missing or invalid; refusing to drop the old username index';
+              END IF;
+
               SELECT indexname INTO idx
               FROM pg_indexes
               WHERE schemaname = 'public'
