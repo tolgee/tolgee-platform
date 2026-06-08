@@ -12,6 +12,7 @@ import io.tolgee.exceptions.ErrorException
 import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.exceptions.ErrorResponseTyped
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.mcp.McpAuthenticationEntryPoint
 import io.tolgee.security.ratelimit.RateLimitBlockedException
 import io.tolgee.security.ratelimit.RateLimitResponseBody
 import io.tolgee.security.ratelimit.RateLimitedException
@@ -23,6 +24,7 @@ import org.apache.catalina.connector.ClientAbortException
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.hibernate.QueryException
 import org.springframework.dao.InvalidDataAccessApiUsageException
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
@@ -166,6 +168,19 @@ class ExceptionHandlers : Logging {
     ],
   )
   @ExceptionHandler(ErrorException::class)
+  fun handleServerError(
+    ex: ErrorException,
+    request: HttpServletRequest,
+  ): ResponseEntity<ErrorResponseBody> {
+    val response = handleServerError(ex)
+    if (ex.httpStatus != HttpStatus.UNAUTHORIZED) return response
+    if (request.requestURI?.startsWith("/mcp/") != true) return response
+    return ResponseEntity
+      .status(response.statusCode)
+      .header(HttpHeaders.WWW_AUTHENTICATE, McpAuthenticationEntryPoint.WWW_AUTHENTICATE_VALUE)
+      .body(response.body)
+  }
+
   fun handleServerError(ex: ErrorException): ResponseEntity<ErrorResponseBody> {
     logger.debug("Exception with response status {} caught", ex.httpStatus, ex)
     return ResponseEntity(ex.errorResponseBody, ex.httpStatus)

@@ -3,11 +3,16 @@ package io.tolgee.mcp
 import io.modelcontextprotocol.client.McpClient
 import io.modelcontextprotocol.client.transport.HttpClientStreamableHttpTransport
 import io.modelcontextprotocol.spec.McpSchema
+import io.tolgee.API_KEY_HEADER_NAME
 import io.tolgee.AbstractMcpTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.net.URI
+import java.net.http.HttpClient
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse
 import java.time.Duration
 import java.util.Date
 
@@ -70,6 +75,45 @@ class McpAuthenticationTest : AbstractMcpTest() {
       } catch (_: Exception) {
       }
     }
+  }
+
+  @Test
+  fun `mcp endpoint returns 401 with WWW-Authenticate when called without credentials`() {
+    val response = postMcpInitialize(apiKey = null)
+
+    assertThat(response.statusCode()).isEqualTo(401)
+    val wwwAuth = response.headers().firstValue("WWW-Authenticate").orElse(null)
+    assertThat(wwwAuth).isNotNull()
+    assertThat(wwwAuth).startsWith("Bearer ")
+  }
+
+  @Test
+  fun `mcp endpoint returns 401 with WWW-Authenticate when called with invalid PAT`() {
+    val response = postMcpInitialize(apiKey = "tgpat_invalid_token")
+
+    assertThat(response.statusCode()).isEqualTo(401)
+    val wwwAuth = response.headers().firstValue("WWW-Authenticate").orElse(null)
+    assertThat(wwwAuth).isNotNull()
+    assertThat(wwwAuth).startsWith("Bearer ")
+  }
+
+  private fun postMcpInitialize(apiKey: String?): HttpResponse<String> {
+    val client = HttpClient.newHttpClient()
+    val body =
+      """{"jsonrpc":"2.0","id":1,"method":"initialize","params":{""" +
+        """"protocolVersion":"2024-11-05","capabilities":{},""" +
+        """"clientInfo":{"name":"raw-test-client","version":"1.0"}}}"""
+    val builder =
+      HttpRequest
+        .newBuilder()
+        .uri(URI.create("http://localhost:$port/mcp/developer"))
+        .header("Content-Type", "application/json")
+        .header("Accept", "application/json, text/event-stream")
+        .POST(HttpRequest.BodyPublishers.ofString(body))
+    if (apiKey != null) {
+      builder.header(API_KEY_HEADER_NAME, apiKey)
+    }
+    return client.send(builder.build(), HttpResponse.BodyHandlers.ofString())
   }
 
   @Test

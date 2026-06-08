@@ -18,6 +18,7 @@ package io.tolgee.configuration
 
 import io.tolgee.component.ExceptionHandlerFilter
 import io.tolgee.component.TransferEncodingHeaderDebugFilter
+import io.tolgee.mcp.McpAuthenticationEntryPoint
 import io.tolgee.security.authentication.AdminAccessInterceptor
 import io.tolgee.security.authentication.AuthenticationFilter
 import io.tolgee.security.authentication.AuthenticationInterceptor
@@ -44,8 +45,11 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.access.intercept.AuthorizationFilter
+import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher
+import org.springframework.security.web.util.matcher.AnyRequestMatcher
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
@@ -77,6 +81,8 @@ class WebSecurityConfig(
   @Lazy
   private val featureAuthorizationInterceptor: FeatureAuthorizationInterceptor,
   private val exceptionHandlerFilter: ExceptionHandlerFilter,
+  @Lazy
+  private val mcpAuthenticationEntryPoint: McpAuthenticationEntryPoint,
 ) : WebMvcConfigurer {
   @Bean
   fun securityFilterChain(httpSecurity: HttpSecurity): SecurityFilterChain {
@@ -103,6 +109,18 @@ class WebSecurityConfig(
         it.requestMatchers(*ADMIN_ENDPOINTS).hasRole("SUPPORTER")
         it.requestMatchers("/api/**", "/v2/**", "/mcp/**").authenticated()
         it.anyRequest().permitAll()
+      }.exceptionHandling {
+        it.defaultAuthenticationEntryPointFor(
+          mcpAuthenticationEntryPoint,
+          PathPatternRequestMatcher.withDefaults().matcher("/mcp/**"),
+        )
+        // Preserve the existing 403 behavior for non-MCP paths. Without this fallback,
+        // a single registered mapping above would become the global default, flipping
+        // /api/** and /v2/** from 403 to 401.
+        it.defaultAuthenticationEntryPointFor(
+          Http403ForbiddenEntryPoint(),
+          AnyRequestMatcher.INSTANCE,
+        )
       }.headers { headers ->
         headers.xssProtection(Customizer.withDefaults())
         headers.contentTypeOptions(Customizer.withDefaults())
