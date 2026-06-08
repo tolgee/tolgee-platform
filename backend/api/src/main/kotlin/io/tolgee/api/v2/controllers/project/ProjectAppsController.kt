@@ -15,7 +15,6 @@ import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.apps.AppEnablementService
 import org.springframework.hateoas.CollectionModel
-import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -25,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/v2/projects/{projectId:[0-9]+}/apps"])
 @Tag(name = "Project Apps")
 class ProjectAppsController(

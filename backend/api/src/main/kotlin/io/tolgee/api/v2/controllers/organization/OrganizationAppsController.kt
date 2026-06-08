@@ -1,9 +1,9 @@
 package io.tolgee.api.v2.controllers.organization
 
-import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.tags.Tag
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.dtos.apps.AppManifest
 import io.tolgee.dtos.request.RegisterAppRequest
 import io.tolgee.hateoas.organization.apps.AppInstallModel
@@ -16,7 +16,6 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresOrganizationRole
 import io.tolgee.service.apps.AppInstallService
 import org.springframework.hateoas.CollectionModel
-import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
@@ -27,7 +26,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/v2/organizations/{organizationId:[0-9]+}/apps"])
 @Tag(name = "Organization Apps")
 class OrganizationAppsController(
@@ -139,7 +137,13 @@ class OrganizationAppsController(
     @PathVariable installId: Long,
     @RequestBody body: RegisterAppRequest,
   ): AppInstallModel {
-    val install = appInstallService.updateManifestUrl(organizationId, installId, body.manifestUrl)
+    val install =
+      appInstallService.updateManifestUrl(
+        organizationId = organizationId,
+        installId = installId,
+        manifestUrl = body.manifestUrl,
+        allowScopeWidening = true,
+      )
     return appInstallModelAssembler.toModel(install)
   }
 

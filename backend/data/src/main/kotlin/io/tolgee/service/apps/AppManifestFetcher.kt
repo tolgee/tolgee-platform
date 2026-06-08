@@ -8,6 +8,7 @@ import io.tolgee.dtos.apps.AppActionType
 import io.tolgee.dtos.apps.AppManifest
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.enums.Scope
+import io.tolgee.util.UrlSecurity
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestTemplate
@@ -17,6 +18,7 @@ import java.net.URI
 class AppManifestFetcher(
   private val restTemplate: RestTemplate,
   private val objectMapper: ObjectMapper,
+  private val urlSecurity: UrlSecurity,
 ) {
   data class FetchResult(
     val manifest: AppManifest,
@@ -27,6 +29,8 @@ class AppManifestFetcher(
   )
 
   fun fetch(url: String): FetchResult {
+    urlSecurity.validateUrl(url)
+
     val rawJson =
       try {
         restTemplate.getForObject(url, String::class.java)
@@ -87,34 +91,49 @@ class AppManifestFetcher(
     get() = ActivityType.entries.map { it.name }.toSet()
 
   private fun validateActions(manifest: AppManifest) {
-    val tabKeys = manifest.modules.keyEditTab?.map { it.key }?.toSet().orEmpty()
-    val panelKeys = manifest.modules.translationToolsPanel?.map { it.key }?.toSet().orEmpty()
-    val modalKeys = manifest.modules.modal?.map { it.key }?.toSet().orEmpty()
+    val tabKeys =
+      manifest.modules.keyEditTab
+        ?.map { it.key }
+        ?.toSet()
+        .orEmpty()
+    val panelKeys =
+      manifest.modules.translationToolsPanel
+        ?.map { it.key }
+        ?.toSet()
+        .orEmpty()
+    val modalKeys =
+      manifest.modules.modal
+        ?.map { it.key }
+        ?.toSet()
+        .orEmpty()
 
     manifest.modules.keyAction?.forEach { action ->
       when (action.type) {
-        AppActionType.LINK -> requireUrlTemplateForLink(
-          location = "key-action",
-          actionKey = action.key,
-          urlTemplate = action.urlTemplate,
-          dynamic = action.dynamic,
-        )
-        AppActionType.TAB -> requireRef(
-          location = "key-action",
-          actionKey = action.key,
-          refKind = "key-edit-tab",
-          refField = "tabKey",
-          ref = action.tabKey,
-          known = tabKeys,
-        )
-        AppActionType.MODAL -> requireRef(
-          location = "key-action",
-          actionKey = action.key,
-          refKind = "modal",
-          refField = "modalKey",
-          ref = action.modalKey,
-          known = modalKeys,
-        )
+        AppActionType.LINK ->
+          requireUrlTemplateForLink(
+            location = "key-action",
+            actionKey = action.key,
+            urlTemplate = action.urlTemplate,
+            dynamic = action.dynamic,
+          )
+        AppActionType.TAB ->
+          requireRef(
+            location = "key-action",
+            actionKey = action.key,
+            refKind = "key-edit-tab",
+            refField = "tabKey",
+            ref = action.tabKey,
+            known = tabKeys,
+          )
+        AppActionType.MODAL ->
+          requireRef(
+            location = "key-action",
+            actionKey = action.key,
+            refKind = "modal",
+            refField = "modalKey",
+            ref = action.modalKey,
+            known = modalKeys,
+          )
         AppActionType.PANEL ->
           throw BadRequestException(
             Message.APP_MANIFEST_INVALID,
@@ -125,28 +144,31 @@ class AppManifestFetcher(
 
     manifest.modules.translationAction?.forEach { action ->
       when (action.type) {
-        AppActionType.LINK -> requireUrlTemplateForLink(
-          location = "translation-action",
-          actionKey = action.key,
-          urlTemplate = action.urlTemplate,
-          dynamic = action.dynamic,
-        )
-        AppActionType.PANEL -> requireRef(
-          location = "translation-action",
-          actionKey = action.key,
-          refKind = "translation-tools-panel",
-          refField = "panelKey",
-          ref = action.panelKey,
-          known = panelKeys,
-        )
-        AppActionType.MODAL -> requireRef(
-          location = "translation-action",
-          actionKey = action.key,
-          refKind = "modal",
-          refField = "modalKey",
-          ref = action.modalKey,
-          known = modalKeys,
-        )
+        AppActionType.LINK ->
+          requireUrlTemplateForLink(
+            location = "translation-action",
+            actionKey = action.key,
+            urlTemplate = action.urlTemplate,
+            dynamic = action.dynamic,
+          )
+        AppActionType.PANEL ->
+          requireRef(
+            location = "translation-action",
+            actionKey = action.key,
+            refKind = "translation-tools-panel",
+            refField = "panelKey",
+            ref = action.panelKey,
+            known = panelKeys,
+          )
+        AppActionType.MODAL ->
+          requireRef(
+            location = "translation-action",
+            actionKey = action.key,
+            refKind = "modal",
+            refField = "modalKey",
+            ref = action.modalKey,
+            known = modalKeys,
+          )
         AppActionType.TAB ->
           throw BadRequestException(
             Message.APP_MANIFEST_INVALID,
@@ -155,9 +177,15 @@ class AppManifestFetcher(
       }
     }
 
-    manifest.modules.bulkAction?.forEach { triggerAction("bulk-action", it.key, it.type, it.urlTemplate, it.modalKey, modalKeys) }
-    manifest.modules.translationsToolbarAction?.forEach { triggerAction("translations-toolbar-action", it.key, it.type, it.urlTemplate, it.modalKey, modalKeys) }
-    manifest.modules.projectMenuAction?.forEach { triggerAction("project-menu-action", it.key, it.type, it.urlTemplate, it.modalKey, modalKeys) }
+    manifest.modules.bulkAction?.forEach {
+      triggerAction("bulk-action", it.key, it.type, it.urlTemplate, it.modalKey, modalKeys)
+    }
+    manifest.modules.translationsToolbarAction?.forEach {
+      triggerAction("translations-toolbar-action", it.key, it.type, it.urlTemplate, it.modalKey, modalKeys)
+    }
+    manifest.modules.projectMenuAction?.forEach {
+      triggerAction("project-menu-action", it.key, it.type, it.urlTemplate, it.modalKey, modalKeys)
+    }
     manifest.modules.shortcut?.forEach { shortcut ->
       if (shortcut.combination.isBlank()) {
         throw BadRequestException(
@@ -242,5 +270,4 @@ class AppManifestFetcher(
       )
     }
   }
-
 }

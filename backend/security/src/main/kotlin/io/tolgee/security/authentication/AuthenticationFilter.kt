@@ -367,14 +367,17 @@ class AuthenticationFilter(
     projectId: Long?,
   ): UserAccountDto? {
     val raw = request.getHeader(ACTING_AS_USER_HEADER) ?: return null
+    // Acting-as is only meaningful (and only scope-checked) within a project context. Without a
+    // project in the URL there is nothing to bound the acted-as user's permissions against, so we
+    // refuse rather than impersonate an arbitrary user on org/user-level endpoints.
+    if (projectId == null) {
+      throw PermissionException(Message.APP_ACTING_AS_USER_NOT_PROJECT_MEMBER)
+    }
     val userId =
       raw.toLongOrNull() ?: throw AuthenticationException(Message.INVALID_APP_CREDENTIALS)
     val user =
       userAccountService.findDto(userId)
         ?: throw PermissionException(Message.APP_ACTING_AS_USER_NOT_PROJECT_MEMBER)
-    if (projectId == null) {
-      return user
-    }
     val scopes = permissionService.getProjectPermissionScopesNoApiKey(projectId, user.id)
     if (scopes.isNullOrEmpty()) {
       throw PermissionException(Message.APP_ACTING_AS_USER_NOT_PROJECT_MEMBER)

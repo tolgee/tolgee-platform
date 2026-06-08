@@ -213,6 +213,25 @@ class AppPermissionInterceptionTest : AuthorizedControllerTest() {
       .andExpect(status().isUnauthorized)
   }
 
+  @Test
+  fun `acting-as header cannot impersonate a user on a non-project endpoint`() {
+    val (install, secret) = registerInstallWithCredentials(setOf(Scope.TRANSLATIONS_VIEW))
+    appEnablementService.enable(testData.project, install.id, testData.user)
+
+    // The app secret authenticates fine on this non-project endpoint as the install author...
+    mvc
+      .perform(get("/v2/user").header("X-API-Key", secret))
+      .andExpect(status().isOk)
+
+    // ...but it must not be able to act as an arbitrary user where there is no project to bound it.
+    mvc
+      .perform(
+        get("/v2/user")
+          .header("X-API-Key", secret)
+          .header("X-Tolgee-Act-As-User-Id", testData.outsider.id.toString()),
+      ).andExpect(status().isForbidden)
+  }
+
   private fun allKeysUrl() = "/v2/projects/${testData.project.id}/all-keys"
 
   /**

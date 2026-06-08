@@ -7,6 +7,7 @@ import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andIsUnauthorized
 import io.tolgee.fixtures.node
+import io.tolgee.model.enums.Scope
 import io.tolgee.service.apps.AppInstallService
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -70,6 +71,25 @@ class AppSelfControllerTest : AuthorizedControllerTest() {
     ).andIsBadRequest.andAssertThatJson {
       node("code").isEqualTo("app_manifest_invalid")
     }
+  }
+
+  @Test
+  fun `does not widen granted scopes on self manifest update`() {
+    mockManifest(validManifest())
+    val clientSecret = registerAndGetClientSecret()
+
+    // A plugin must not be able to self-grant a scope the owner never consented to by repointing
+    // at a manifest that declares more scopes.
+    mockManifest(validManifestWithExtraScope())
+    performSelfPatch(
+      clientSecret,
+      mapOf("manifestUrl" to "https://example.com/v2/manifest.json"),
+    ).andIsOk.andAssertThatJson {
+      node("scopes").isArray.containsExactlyInAnyOrder("translations.view", "keys.edit")
+    }
+
+    val install = appInstallService.findAll(testData.organization.id).single()
+    assertThat(install.grantedScopes).containsExactlyInAnyOrder(Scope.TRANSLATIONS_VIEW, Scope.KEYS_EDIT)
   }
 
   @Test
@@ -139,6 +159,22 @@ class AppSelfControllerTest : AuthorizedControllerTest() {
       "version": "0.2.0",
       "baseUrl": "https://app.example.com",
       "scopes": ["translations.view", "keys.edit"],
+      "modules": {
+        "project-dashboard-page": [
+          {"key": "home", "title": "Home v2", "icon": "🏠", "entry": "/"}
+        ]
+      }
+    }
+    """.trimIndent()
+
+  private fun validManifestWithExtraScope(): String =
+    """
+    {
+      "id": "test-app",
+      "name": "Test App",
+      "version": "0.2.0",
+      "baseUrl": "https://app.example.com",
+      "scopes": ["translations.view", "keys.edit", "screenshots.upload"],
       "modules": {
         "project-dashboard-page": [
           {"key": "home", "title": "Home v2", "icon": "🏠", "entry": "/"}

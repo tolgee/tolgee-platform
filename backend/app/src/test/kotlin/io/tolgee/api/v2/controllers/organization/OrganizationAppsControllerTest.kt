@@ -196,6 +196,16 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `rejects a manifest URL pointing at a private address`() {
+    performAuthPost(
+      appsUrl(),
+      mapOf("manifestUrl" to "http://127.0.0.1/manifest.json"),
+    ).andIsBadRequest.andAssertThatJson {
+      node("code").isEqualTo("url_not_valid")
+    }
+  }
+
+  @Test
   fun `rejects manifest with an unknown scope`() {
     mockManifest(validManifest().replace("\"keys.edit\"", "\"not.a.real.scope\""))
     performAuthPost(appsUrl(), registerBody()).andIsBadRequest.andAssertThatJson {

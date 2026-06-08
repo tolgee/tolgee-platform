@@ -9,6 +9,9 @@ import io.tolgee.model.UserAccount
 
 class AppsTestData {
   lateinit var user: UserAccount
+
+  /** A user with no membership in [organization] / [project] — used to assert acting-as bounds. */
+  lateinit var outsider: UserAccount
   lateinit var organization: Organization
   lateinit var project: Project
   lateinit var userAccountBuilder: UserAccountBuilder
@@ -22,6 +25,8 @@ class AppsTestData {
         }
       user = userAccountBuilder.self
       organization = userAccountBuilder.defaultOrganizationBuilder.self
+
+      outsider = addUserAccount { username = "outsider" }.self
 
       projectBuilder =
         addProject {

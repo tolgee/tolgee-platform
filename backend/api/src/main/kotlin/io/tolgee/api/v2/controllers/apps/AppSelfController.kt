@@ -48,6 +48,8 @@ class AppSelfController(
         organizationId = install.organization.id,
         installId = install.id,
         manifestUrl = body.manifestUrl,
+        // Plugin-authenticated call: must never widen its own granted scopes.
+        allowScopeWidening = false,
       )
     return appInstallModelAssembler.toModel(updated)
   }

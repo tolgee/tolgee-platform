@@ -8,6 +8,7 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Organization
 import io.tolgee.model.UserAccount
 import io.tolgee.model.apps.AppInstall
+import io.tolgee.model.enums.Scope
 import io.tolgee.repository.apps.AppInstallRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -120,24 +121,25 @@ class AppInstallService(
       throw BadRequestException(Message.APP_MANIFEST_INVALID)
     }
 
-    install.name = fetched.manifest.name
-    install.version = fetched.manifest.version
-    install.baseUrl = fetched.manifest.baseUrl
-    install.manifestJson = fetched.rawJson
-    install.grantedScopes = fetched.scopes.toMutableSet()
-    install.webhookSubscriptions = fetched.webhookEvents.toMutableSet()
-    install.webhookUrl = fetched.resolvedWebhookUrl
+    applyManifestSnapshot(install, fetched, allowScopeWidening = true)
 
     val saved = appInstallRepository.save(install)
     appManagedAutomationService.onInstallRefresh(saved)
     return saved
   }
 
+  /**
+   * @param allowScopeWidening whether the re-fetched manifest may grant scopes beyond those
+   *   already consented to. True only for owner-initiated calls (the org owner is the consent
+   *   authority). Must be false for plugin-initiated calls (`tgapps_…` credentials): a plugin
+   *   could otherwise self-grant arbitrary scopes by repointing at a manifest declaring more.
+   */
   @Transactional
   fun updateManifestUrl(
     organizationId: Long,
     installId: Long,
     manifestUrl: String,
+    allowScopeWidening: Boolean,
   ): AppInstall {
     val install =
       appInstallRepository.findByOrganizationIdAndId(organizationId, installId)
@@ -150,17 +152,36 @@ class AppInstallService(
     }
 
     install.manifestUrl = manifestUrl
-    install.name = fetched.manifest.name
-    install.version = fetched.manifest.version
-    install.baseUrl = fetched.manifest.baseUrl
-    install.manifestJson = fetched.rawJson
-    install.grantedScopes = fetched.scopes.toMutableSet()
-    install.webhookSubscriptions = fetched.webhookEvents.toMutableSet()
-    install.webhookUrl = fetched.resolvedWebhookUrl
+    applyManifestSnapshot(install, fetched, allowScopeWidening)
 
     val saved = appInstallRepository.save(install)
     appManagedAutomationService.onInstallRefresh(saved)
     return saved
+  }
+
+  private fun applyManifestSnapshot(
+    install: AppInstall,
+    fetched: AppManifestFetcher.FetchResult,
+    allowScopeWidening: Boolean,
+  ) {
+    install.name = fetched.manifest.name
+    install.version = fetched.manifest.version
+    install.baseUrl = fetched.manifest.baseUrl
+    install.manifestJson = fetched.rawJson
+    install.grantedScopes = resolveGrantedScopes(install.grantedScopes, fetched.scopes, allowScopeWidening)
+    install.webhookSubscriptions = fetched.webhookEvents.toMutableSet()
+    install.webhookUrl = fetched.resolvedWebhookUrl
+  }
+
+  private fun resolveGrantedScopes(
+    current: Set<Scope>,
+    fetched: Set<Scope>,
+    allowScopeWidening: Boolean,
+  ): MutableSet<Scope> {
+    if (allowScopeWidening) return fetched.toMutableSet()
+    // Narrow-only: drop scopes the manifest no longer declares, but never add a scope the owner
+    // hasn't consented to. Newly declared scopes stay withheld until an owner re-consents.
+    return fetched.intersect(current).toMutableSet()
   }
 
   @Transactional
