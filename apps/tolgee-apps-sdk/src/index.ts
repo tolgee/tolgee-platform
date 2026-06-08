@@ -13,3 +13,17 @@ export type {
   TolgeeAppContext,
   TolgeeAppSelection,
 } from './shared/contextTypes'
+export type {
+  AppManifest,
+  AppModules,
+  AppWebhooks,
+  AppAction,
+  AppActionType,
+  AppIframeModule,
+  AppShortcut,
+} from './shared/manifestTypes'
+export type {
+  DecoratorsRequest,
+  DecoratorsResponse,
+  DecoratorItem,
+} from './shared/decoratorTypes'

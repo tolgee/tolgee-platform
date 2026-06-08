@@ -115,6 +115,25 @@ export const MODULES: ModuleInfo[] = [
 ]
 
 /**
+ * Curated subset of Tolgee permission scopes the wizard offers. Each value is a
+ * valid `Scope` the platform accepts in `manifest.scopes`; the app is granted the
+ * intersection of these and the installing user's project permissions at runtime.
+ */
+export const SCOPES: { value: string; label: string }[] = [
+  { value: 'translations.view', label: 'Read translations' },
+  { value: 'translations.edit', label: 'Edit translations' },
+  { value: 'translations.state-edit', label: 'Change translation states' },
+  { value: 'translations.suggest', label: 'Suggest translations' },
+  { value: 'keys.view', label: 'Read keys' },
+  { value: 'keys.create', label: 'Create keys' },
+  { value: 'keys.edit', label: 'Edit keys' },
+  { value: 'keys.delete', label: 'Delete keys' },
+  { value: 'screenshots.view', label: 'View screenshots' },
+  { value: 'screenshots.upload', label: 'Upload screenshots' },
+  { value: 'activity.view', label: 'View activity' },
+]
+
+/**
  * Curated subset of Tolgee `ActivityType` values most apps care about.
  * The full list is large; the wizard surfaces these by default with an
  * "I'll edit manifest.template.json myself" escape hatch.

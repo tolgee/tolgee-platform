@@ -14,13 +14,16 @@ The first `npm run dev` after registration PATCHes the install in Tolgee
 to point at the fresh tunnel URL. Restart `dev` as many times as you like —
 each restart re-PATCHes; no manual reinstall.
 
+The dev tunnel + the one-time install flow are provided by the `@tolgee/apps-dev`
+CLI (`tolgee-app dev` / `tolgee-app register`), which the npm scripts above invoke —
+nothing to maintain in this repo.
+
 ## Layout
 
 ```
-manifest.template.json   ← edit this; baseUrl is __BASE_URL__ at request time
-src/                     ← iframe modules (one folder per `entry`)
-server/                  ← webhook + decorator endpoints
-scripts/                 ← dev orchestrator + one-time register
+server/manifest.template.json  ← edit this; baseUrl is __BASE_URL__ at request time
+src/                           ← iframe modules (one folder per `entry`)
+server/                        ← webhook + decorator + manifest endpoints
 ```
 
 ## What the SDK gives you
@@ -40,5 +43,5 @@ scripts/                 ← dev orchestrator + one-time register
 
 `server/manifest.template.json` is the source of truth. The server reads
 it on every `/manifest.json` request and substitutes `__BASE_URL__` with
-the live tunnel URL. After saving edits, run `npx tsx scripts/refresh.ts`
-(or restart `npm run dev`) to have Tolgee re-fetch.
+the live tunnel URL. After saving edits, restart `npm run dev` (which
+re-PATCHes the install) to have Tolgee re-fetch.

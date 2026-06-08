@@ -20,6 +20,7 @@
     "picocolors": "^1.1.1"
   },
   "devDependencies": {
+    "@tolgee/apps-sdk": "*",
     "@types/node": "^24.12.3",
     "tsup": "^8.3.5",
     "tsx": "^4.19.2",

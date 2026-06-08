@@ -7,21 +7,20 @@
     "dev": "concurrently -k -n vite,server,tunnel -c blue,green,yellow \"npm:dev:frontend\" \"npm:dev:server\" \"npm:dev:tunnel\"",
     "dev:frontend": "vite",
     "dev:server": "tsx watch --env-file-if-exists=.env.local server/index.ts",
-    "dev:tunnel": "tsx --env-file-if-exists=.env.local scripts/dev.ts",
-    "register": "tsx --env-file-if-exists=.env.local scripts/register.ts",
+    "dev:tunnel": "tolgee-app dev",
+    "register": "tolgee-app register",
     "build": "tsc -b && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
     "@tginternal/client": "0.0.0-prerelease.c8329b552",
     "@tolgee/apps-sdk": "*",
-    "cloudflared": "^0.7.1",
     "express": "^4.21.0",
-    "open": "^10.1.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6"
   },
   "devDependencies": {
+    "@tolgee/apps-dev": "*",
     "@types/express": "^4.17.21",
     "@types/node": "^24.12.3",
     "@types/react": "^19.2.14",

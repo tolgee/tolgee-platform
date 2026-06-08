@@ -1,11 +1,11 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 
-const __dirname = dirname(fileURLToPath(import.meta.url))
-
-export const ROOT = join(__dirname, '..')
-export const STATE_DIR = join(ROOT, '.tolgee-dev')
+/**
+ * State lives under the app being developed — i.e. the directory `tolgee-app`
+ * is invoked from — not under this package.
+ */
+export const STATE_DIR = join(process.cwd(), '.tolgee-dev')
 export const INSTALL_FILE = join(STATE_DIR, 'install.json')
 export const TUNNEL_FILE = join(STATE_DIR, 'tunnel.json')
 
@@ -15,11 +15,10 @@ export type InstallState = {
   installId: number
   /**
    * Plugin credentials Tolgee returned when this install was registered.
-   * `clientSecret` (`X-API-Key: tgapps_…`) authenticates every outbound
-   * call the plugin makes back to Tolgee — webhook handler base-text
-   * lookups AND the self-service manifest-url PATCH the dev orchestrator
-   * fires on every restart. `webhookSecret` signs the inbound webhook
-   * bodies.
+   * `clientSecret` (`X-API-Key: tgapps_…`) authenticates every outbound call
+   * the plugin makes back to Tolgee — webhook handler lookups AND the
+   * self-service manifest-url PATCH the dev orchestrator fires on every
+   * restart. `webhookSecret` signs the inbound webhook bodies.
    */
   clientId: string
   clientSecret: string
@@ -48,7 +47,8 @@ export const writeTunnelState = (state: TunnelState): void => {
 }
 
 export const clearTunnelState = (): void => {
-  writeJson(TUNNEL_FILE, { baseUrl: 'http://localhost:5180' })
+  const vitePort = Number(process.env.VITE_PORT ?? 5180)
+  writeJson(TUNNEL_FILE, { baseUrl: `http://localhost:${vitePort}` })
 }
 
 export const patchManifestUrl = async (
@@ -56,8 +56,7 @@ export const patchManifestUrl = async (
   manifestUrl: string
 ): Promise<void> => {
   // Self-service endpoint — the install authenticates as itself with its
-  // clientSecret. The earlier org-admin endpoint required a PAT we no
-  // longer collect; this one only lets an install update its own URL.
+  // clientSecret and may only update its own manifest URL.
   const url = `${install.tolgeeUrl}/v2/apps/self/manifest-url`
   const res = await fetch(url, {
     method: 'PATCH',
@@ -71,5 +70,23 @@ export const patchManifestUrl = async (
     throw new Error(
       `PATCH manifest-url failed (${res.status}): ${await res.text()}`
     )
+  }
+}
+
+export const isLocalHost = (urlString: string): boolean => {
+  try {
+    const host = new URL(urlString).hostname
+    return host === 'localhost' || host === '127.0.0.1' || host === '::1'
+  } catch {
+    return false
+  }
+}
+
+/** Loads `.env.local` from the app dir if present (replaces tsx's --env-file-if-exists). */
+export const loadEnvLocal = (): void => {
+  try {
+    process.loadEnvFile(join(process.cwd(), '.env.local'))
+  } catch {
+    // no .env.local — rely on the ambient environment
   }
 }

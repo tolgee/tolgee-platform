@@ -1,50 +1,28 @@
-/**
- * One-time install bootstrap.
- *
- * Default flow: open Tolgee in the user's browser, let them pick an org and
- * approve the install, then receive the install credentials back on a one-shot
- * localhost callback server.
- *
- * Headless fallback: pass `--pat=tgpat_…` to skip the browser and register
- * directly with a personal-access token (useful for CI).
- *
- * When Tolgee is local the manifest is served straight from Express — no
- * Cloudflare tunnel needed. For remote Tolgee a quick tunnel is booted so
- * Tolgee can fetch the manifest from outside the user's machine. Either way,
- * the local dev server must be running (`npm run dev` in another terminal).
- */
 import { createInterface } from 'node:readline/promises'
 import { existsSync } from 'node:fs'
-import { createServer, type IncomingMessage, type ServerResponse } from 'node:http'
+import {
+  createServer,
+  type IncomingMessage,
+  type ServerResponse,
+} from 'node:http'
 import { randomUUID, timingSafeEqual } from 'node:crypto'
 import open from 'open'
 import { bin, install, Tunnel } from 'cloudflared'
 import {
-  type InstallState,
   INSTALL_FILE,
+  isLocalHost,
   writeJson,
   writeTunnelState,
+  type InstallState,
 } from './lib'
 
 type Org = { id: number; name: string; slug: string }
 
-const VITE_PORT = Number(process.env.VITE_PORT ?? 5180)
-const SERVER_PORT = Number(process.env.SERVER_PORT ?? 5181)
-const LOCAL_MANIFEST_URL = `http://localhost:${SERVER_PORT}/manifest.json`
 const BROWSER_TIMEOUT_MS = 5 * 60_000
 
-const args = process.argv.slice(2)
-const patFlag =
-  args.find((a) => a.startsWith('--pat='))?.slice('--pat='.length) ?? null
-
-const isLocalHost = (urlString: string): boolean => {
-  try {
-    const host = new URL(urlString).hostname
-    return host === 'localhost' || host === '127.0.0.1' || host === '::1'
-  } catch {
-    return false
-  }
-}
+const vitePort = (): number => Number(process.env.VITE_PORT ?? 5180)
+const serverPort = (): number =>
+  Number(process.env.SERVER_PORT ?? process.env.PORT ?? 5181)
 
 const verifyManifestReachable = async (manifestUrl: string): Promise<void> => {
   let res: Response
@@ -68,7 +46,7 @@ const startTunnel = async (): Promise<string> => {
     await install(bin)
   }
   console.log('Starting Cloudflare quick tunnel…')
-  const tunnel = Tunnel.quick(`http://localhost:${VITE_PORT}`)
+  const tunnel = Tunnel.quick(`http://localhost:${vitePort()}`)
   const baseUrl = await new Promise<string>((resolve) =>
     tunnel.once('url', resolve)
   )
@@ -77,18 +55,17 @@ const startTunnel = async (): Promise<string> => {
 }
 
 /**
- * Picks the manifest URL Tolgee will fetch + writes the tunnel state so
- * the local server serves the right baseUrl.
- *   local Tolgee  → http://localhost:5181/manifest.json (Express direct)
+ * Picks the manifest URL Tolgee will fetch + writes the tunnel state so the
+ * local server serves the right baseUrl.
+ *   local Tolgee  → http://localhost:<server>/manifest.json (Express direct)
  *   remote Tolgee → Cloudflare quick tunnel pointing at Vite
  */
-const resolveManifestUrl = async (
-  tolgeeUrl: string
-): Promise<string> => {
+const resolveManifestUrl = async (tolgeeUrl: string): Promise<string> => {
+  const localManifestUrl = `http://localhost:${serverPort()}/manifest.json`
   if (isLocalHost(tolgeeUrl)) {
-    writeTunnelState({ baseUrl: `http://localhost:${VITE_PORT}` })
-    console.log(`Skipping tunnel — Tolgee is local; using ${LOCAL_MANIFEST_URL}`)
-    return LOCAL_MANIFEST_URL
+    writeTunnelState({ baseUrl: `http://localhost:${vitePort()}` })
+    console.log(`Skipping tunnel — Tolgee is local; using ${localManifestUrl}`)
+    return localManifestUrl
   }
   const tunnelBaseUrl = await startTunnel()
   writeTunnelState({ baseUrl: tunnelBaseUrl })
@@ -103,8 +80,8 @@ const constantTimeEq = (a: string, b: string): boolean => {
 }
 
 /**
- * Browser flow: spins up a one-shot HTTP server on 127.0.0.1, opens the
- * Tolgee install page, waits for the redirect callback.
+ * Browser flow: spins up a one-shot HTTP server on 127.0.0.1, opens the Tolgee
+ * install page, waits for the redirect callback.
  */
 const browserRegister = async (
   tolgeeUrl: string,
@@ -270,7 +247,11 @@ const patRegister = async (
   }
 }
 
-const main = async (): Promise<void> => {
+/** One-time install bootstrap. Pass `--pat=tgpat_…` for the headless flow. */
+export const runRegister = async (args: string[]): Promise<void> => {
+  const patFlag =
+    args.find((a) => a.startsWith('--pat='))?.slice('--pat='.length) ?? null
+
   if (existsSync(INSTALL_FILE)) {
     console.log(
       `Install record already exists at ${INSTALL_FILE}. Delete it to re-register, ` +
@@ -296,8 +277,3 @@ const main = async (): Promise<void> => {
       `Saved to ${INSTALL_FILE}.`
   )
 }
-
-main().catch((err) => {
-  console.error('register failed:', err instanceof Error ? err.message : err)
-  process.exit(1)
-})

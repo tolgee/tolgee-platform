@@ -7,17 +7,21 @@ import {
   text,
 } from '@clack/prompts'
 import { existsSync } from 'node:fs'
+import { createServer } from 'node:net'
 import { resolve } from 'node:path'
 import pc from 'picocolors'
-import { MODULES, WEBHOOK_EVENTS, type ModuleKey } from './registry'
+import { MODULES, SCOPES, WEBHOOK_EVENTS, type ModuleKey } from './registry'
 
 export type Answers = {
   id: string
   name: string
   targetDir: string
   selectedModules: ModuleKey[]
+  scopes: string[]
   webhookEvents: string[]
   tolgeeUrl: string
+  vitePort: number
+  serverPort: number
   installDeps: boolean
   gitInit: boolean
 }
@@ -82,6 +86,15 @@ export async function runWizard(initialName?: string): Promise<Answers> {
     })
   ) as ModuleKey[]
 
+  const scopes = abortIfCancelled(
+    await multiselect({
+      message: 'Which permission scopes does the plugin need?',
+      required: false,
+      options: SCOPES.map((s) => ({ value: s.value, label: s.label })),
+      initialValues: ['translations.view', 'keys.view'],
+    })
+  ) as string[]
+
   const webhookEvents = abortIfCancelled(
     await multiselect({
       message: 'Which webhook events should the plugin subscribe to?',
@@ -91,20 +104,25 @@ export async function runWizard(initialName?: string): Promise<Answers> {
     })
   ) as string[]
 
-  const tolgeeUrl = abortIfCancelled(
-    await text({
-      message: 'Tolgee URL:',
-      initialValue: 'https://app.tolgee.io',
-      validate: (v) => {
-        if (typeof v !== 'string' || v.length === 0) return 'Required.'
-        try {
-          new URL(v)
-          return undefined
-        } catch {
-          return 'Not a valid URL.'
-        }
-      },
-    })
+  const tolgeeUrl = normalizeUrl(
+    abortIfCancelled(
+      await text({
+        message: 'Tolgee URL:',
+        initialValue: 'https://app.tolgee.io',
+        validate: validateUrl,
+      })
+    )
+  )
+
+  const [freeVite, freeServer] = await findFreePortPair()
+  const [vitePort, serverPort] = parsePortPair(
+    abortIfCancelled(
+      await text({
+        message: 'Dev ports (Vite, Server) — auto-picked free pair, edit if you like:',
+        initialValue: `${freeVite}, ${freeServer}`,
+        validate: validatePortPair,
+      })
+    )
   )
 
   const pm = detectPackageManager()
@@ -127,14 +145,73 @@ export async function runWizard(initialName?: string): Promise<Answers> {
     name,
     targetDir: resolve(process.cwd(), id),
     selectedModules,
+    scopes,
     webhookEvents,
     tolgeeUrl,
+    vitePort,
+    serverPort,
     installDeps,
     gitInit,
   }
 }
 
-const toTitle = (slug: string): string => {
+/** True if a TCP port is free to bind on any interface (IPv4 + IPv6). */
+const isPortFree = (port: number): Promise<boolean> =>
+  new Promise((res) => {
+    const srv = createServer()
+    srv.once('error', () => res(false))
+    srv.once('listening', () => srv.close(() => res(true)))
+    srv.listen(port)
+  })
+
+/** First free (vite, server) pair, scanning 5180/5181, 5280/5281, … so plugins don't clash. */
+export const findFreePortPair = async (): Promise<[number, number]> => {
+  for (let base = 5180; base <= 5980; base += 100) {
+    if ((await isPortFree(base)) && (await isPortFree(base + 1))) {
+      return [base, base + 1]
+    }
+  }
+  return [5180, 5181]
+}
+
+export const validatePortPair = (v: unknown): string | undefined => {
+  if (typeof v !== 'string') return 'Required.'
+  const parts = v.split(',').map((s) => s.trim())
+  if (parts.length !== 2) return 'Give two ports separated by a comma, e.g. `5180, 5181`.'
+  for (const p of parts) {
+    const n = Number(p)
+    if (!Number.isInteger(n) || n < 1 || n > 65535) return `"${p}" is not a valid port.`
+  }
+  if (parts[0] === parts[1]) return 'Vite and server ports must differ.'
+  return undefined
+}
+
+/** Parses a validated `"vite, server"` string into a numeric pair. */
+export const parsePortPair = (v: string): [number, number] => {
+  const [vite, server] = v.split(',').map((s) => Number(s.trim()))
+  return [vite, server]
+}
+
+export const validateUrl = (v: unknown): string | undefined => {
+  if (typeof v !== 'string' || v.length === 0) return 'Required.'
+  if ((v.match(/:\/\//g) ?? []).length > 1) {
+    return 'URL has a duplicated scheme (e.g. http://http://…).'
+  }
+  let url: URL
+  try {
+    url = new URL(v)
+  } catch {
+    return 'Not a valid URL.'
+  }
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+    return 'Must start with http:// or https://.'
+  }
+  return undefined
+}
+
+export const normalizeUrl = (v: string): string => v.trim().replace(/\/+$/, '')
+
+export const toTitle = (slug: string): string => {
   return slug
     .split('-')
     .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
