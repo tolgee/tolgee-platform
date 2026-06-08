@@ -106,7 +106,7 @@ export const getLanguagesContent = ({
       >
         <Checkbox checked={isOnlyBaseSelected} size="small" />
         <ListItemText
-          primary={t('languages_select_base_language', 'Base language')}
+          primary={t('languages_select_base_language', 'Base language only')}
         />
       </MenuItem>,
       <Divider key="divider" />,
