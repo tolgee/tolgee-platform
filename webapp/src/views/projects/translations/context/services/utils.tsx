@@ -13,9 +13,6 @@ import { components } from 'tg.service/apiSchema.generated';
 
 type KeyTaskViewModel = components['schemas']['KeyTaskViewModel'];
 
-// Some import paths leave pluralArgName null even when the text uses a concrete
-// variable; falling straight back to 'value' would rewrite that variable and
-// break interpolation.
 export function resolvePluralParameter(
   keyPluralArgName: string | undefined,
   parsedParameter: string | undefined
