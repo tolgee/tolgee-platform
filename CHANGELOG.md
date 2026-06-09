@@ -1,3 +1,10 @@
+# [3.202.0](https://github.com/tolgee/tolgee-platform/compare/v3.201.0...v3.202.0) (2026-06-09)
+
+
+### Features
+
+* add QA Checks and Translation Memory announcement banner ([#3738](https://github.com/tolgee/tolgee-platform/issues/3738)) ([d74913d](https://github.com/tolgee/tolgee-platform/commit/d74913db2c5fa003a2ce41d5337effe4b531e690))
+
 # [3.201.0](https://github.com/tolgee/tolgee-platform/compare/v3.200.0...v3.201.0) (2026-06-09)
 
 
