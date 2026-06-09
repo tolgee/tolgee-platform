@@ -157,6 +157,8 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
 
   open val internalProperties get() = tolgeeProperties.internal
 
+  val webhookProperties get() = tolgeeProperties.webhook
+
   @Autowired
   lateinit var mtServiceConfigService: MtServiceConfigService
 

@@ -1,6 +1,5 @@
 package io.tolgee.ee.api.v2.controllers
 
-import io.tolgee.configuration.tolgee.WebhookProperties
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProperties
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.PromptTestData
@@ -26,9 +25,6 @@ class LlmProviderControllerTest : AuthorizedControllerTest() {
 
   @Autowired
   private lateinit var llmProviderRepository: LlmProviderRepository
-
-  @Autowired
-  private lateinit var webhookProperties: WebhookProperties
 
   @BeforeEach
   fun setup() {
