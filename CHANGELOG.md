@@ -1,3 +1,10 @@
+# [3.201.0](https://github.com/tolgee/tolgee-platform/compare/v3.200.0...v3.201.0) (2026-06-09)
+
+
+### Features
+
+* allow local addresses for webhooks via config flag ([#3736](https://github.com/tolgee/tolgee-platform/issues/3736)) ([c35811d](https://github.com/tolgee/tolgee-platform/commit/c35811d77e949ad5940e14eea5f975e7b03c9887)), closes [#3711](https://github.com/tolgee/tolgee-platform/issues/3711)
+
 # [3.200.0](https://github.com/tolgee/tolgee-platform/compare/v3.199.0...v3.200.0) (2026-06-09)
 
 
