@@ -85,15 +85,15 @@ describe('adjustQaIssuesForVariant', () => {
     expect(result[0].positionEnd).toBe(10);
   });
 
-  it('keeps positions unchanged when offset is zero', () => {
+  it('returns original issues when offset is zero', () => {
     const issues = [makeIssue(10, 15, 'one')];
     const result = adjustQaIssuesForVariant(issues, 'one', 0);
-    expect(result).toEqual(issues);
+    expect(result).toBe(issues); // same reference
   });
 
-  it('returns the same array when variant is undefined and offset is zero', () => {
+  it('returns original issues when variant is undefined', () => {
     const issues = [makeIssue(10, 15)];
-    const result = adjustQaIssuesForVariant(issues, undefined, 0);
+    const result = adjustQaIssuesForVariant(issues, undefined, 5);
     expect(result).toBe(issues);
   });
 
