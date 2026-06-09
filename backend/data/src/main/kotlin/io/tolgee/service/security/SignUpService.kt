@@ -4,7 +4,6 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.exceptions.AuthenticationException
-import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.UserAccount
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
@@ -24,15 +23,11 @@ class SignUpService(
   private val emailVerificationService: EmailVerificationService,
   private val tenantService: TenantService,
   private val passwordEncoder: PasswordEncoder,
+  private val registrationEmailValidator: RegistrationEmailValidator,
 ) {
   @Transactional
   fun signUp(dto: SignUpDto): JwtAuthenticationResponse? {
-    userAccountService.findActiveOrDisabled(dto.email)?.let {
-      if (it.disabledAt != null) {
-        throw BadRequestException(Message.USER_ACCOUNT_DISABLED)
-      }
-      throw BadRequestException(Message.USERNAME_ALREADY_EXISTS)
-    }
+    registrationEmailValidator.validate(dto.email)
 
     val user = dtoToEntity(dto)
     checkNotManagedByOrganization(user.domain)

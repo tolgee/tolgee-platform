@@ -5604,4 +5604,20 @@
             DROP INDEX CONCURRENTLY IF EXISTS translation_qa_checks_stale_partial_idx;
         </rollback>
     </changeSet>
+    <changeSet author="jancizmar" id="user-account-normalized-email-idx" runInTransaction="false">
+        <comment>
+            Functional index backing the sign-up duplicate guard (RegistrationEmailValidator), which
+            rejects plus-alias / case variants of an already-registered email. The expression must stay
+            byte-for-byte identical to UserAccountRepository.findNonDeletedByNormalizedEmail or the
+            planner won't use it. Partial on deleted_at is null to mirror that query's filter.
+        </comment>
+        <sql dbms="postgresql">
+            CREATE INDEX CONCURRENTLY IF NOT EXISTS user_account_normalized_email
+                ON user_account (regexp_replace(lower(username), '\+[^@]*@', '@'))
+                WHERE deleted_at IS NULL;
+        </sql>
+        <rollback>
+            <sql>DROP INDEX CONCURRENTLY IF EXISTS user_account_normalized_email;</sql>
+        </rollback>
+    </changeSet>
 </databaseChangeLog>

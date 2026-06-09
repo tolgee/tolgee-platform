@@ -143,6 +143,40 @@ class AuthenticationProperties(
         "own organization automatically created no matter the value of this setting.",
   )
   var userCanCreateOrganizations: Boolean = true,
+  @DocProperty(
+    description =
+      "When enabled, registrations from disposable / throw-away email providers " +
+        "(e.g. `mailinator.com`) are rejected. The blocklist is a bundled snapshot of the " +
+        "community-maintained [disposable-email-domains]" +
+        "(https://github.com/disposable-email-domains/disposable-email-domains) list.\n\n" +
+        "Use `blockedEmailDomains` to block additional domains and `allowedEmailDomains` " +
+        "to allow domains that the bundled list flags by mistake.",
+  )
+  var blockDisposableEmails: Boolean = true,
+  @DocProperty(
+    description =
+      "When enabled, sign-ups whose email is a " +
+        "[subaddressing](https://en.wikipedia.org/wiki/Email_address#Subaddressing) " +
+        "alias of an existing account are rejected. For example, when `foo@gmail.com` already exists, " +
+        "`foo+anything@gmail.com` is treated as the same account. The comparison is also case-insensitive.\n\n" +
+        ":::note\n" +
+        "This only affects **new registrations** — existing accounts and login are unaffected.\n" +
+        ":::",
+  )
+  var blockEmailAliases: Boolean = true,
+  @DocProperty(
+    description =
+      "Additional email domains to block from registration, on top of the bundled disposable-domain list. " +
+        "Matched case-insensitively against the domain part of the email.",
+  )
+  var blockedEmailDomains: MutableList<String> = mutableListOf(),
+  @DocProperty(
+    description =
+      "Email domains that are always allowed to register, even if present in the bundled disposable-domain " +
+        "list or in `blockedEmailDomains`. Takes precedence over both. Useful for rescuing a domain that the " +
+        "bundled list flags by mistake.",
+  )
+  var allowedEmailDomains: MutableList<String> = mutableListOf(),
   var github: GithubAuthenticationProperties = GithubAuthenticationProperties(),
   var google: GoogleAuthenticationProperties = GoogleAuthenticationProperties(),
   var oauth2: OAuth2AuthenticationProperties = OAuth2AuthenticationProperties(),
