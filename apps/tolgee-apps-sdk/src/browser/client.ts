@@ -14,7 +14,9 @@ import type { TolgeeAppContext } from '../shared/contextTypes'
  *       params: { path: { projectId: ctx.projectId } },
  *     })
  */
-export const createTolgeeAppClient = (context: TolgeeAppContext) => {
+export const createTolgeeAppClient = (
+  context: TolgeeAppContext
+): ReturnType<typeof createApiClient> => {
   return createApiClient({
     baseUrl: context.apiUrl,
     userToken: context.token,

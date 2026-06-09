@@ -1,7 +1,6 @@
 {
   "name": "@tolgee/apps-dev",
   "version": "0.0.0",
-  "private": true,
   "description": "Dev toolchain for Tolgee Apps — `tolgee-app dev` (tunnel + manifest repoint) and `tolgee-app register` (browser install).",
   "type": "module",
   "bin": {
@@ -10,6 +9,9 @@
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsup"
   },

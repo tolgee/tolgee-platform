@@ -14,13 +14,13 @@
   },
   "dependencies": {
     "@tginternal/client": "0.0.0-prerelease.c8329b552",
-    "@tolgee/apps-sdk": "*",
+    "@tolgee/apps-sdk": "{{sdkVersion}}",
     "express": "^4.21.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6"
   },
   "devDependencies": {
-    "@tolgee/apps-dev": "*",
+    "@tolgee/apps-dev": "{{devVersion}}",
     "@types/express": "^4.17.21",
     "@types/node": "^24.12.3",
     "@types/react": "^19.2.14",

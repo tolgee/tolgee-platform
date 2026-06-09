@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process'
-import { existsSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -27,6 +27,23 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
  */
 const PACKAGE_ROOT = resolve(__dirname, '..')
 const TEMPLATE_ROOT = join(PACKAGE_ROOT, 'template')
+
+/**
+ * Version to pin the generated app's `@tolgee/*` deps to. Returns this CLI's own
+ * published version (apps-sdk + apps-dev are released in lockstep), or `*` when
+ * running unpublished from the repo (version `0.0.0`), so in-repo scaffolds keep
+ * resolving the workspace packages.
+ */
+const internalDepVersion = (): string => {
+  try {
+    const pkg = JSON.parse(
+      readFileSync(join(PACKAGE_ROOT, 'package.json'), 'utf8')
+    ) as { version?: string }
+    return pkg.version && pkg.version !== '0.0.0' ? pkg.version : '*'
+  } catch {
+    return '*'
+  }
+}
 
 const MODULE_ENTRY_PATHS: Record<ModuleKey, { route: string; importPath: string }> = {
   'project-dashboard-page': { route: '/dashboard', importPath: './modules/dashboard' },
@@ -142,7 +159,14 @@ const scaffold = async (answers: Answers): Promise<void> => {
   // `routes` and `webhookHandlers` are NOT in vars — they're replaced by
   // targeted edits after copyTree's mustache pass so the placeholders survive
   // past `substitute()`.
-  const baseVars = { id: answers.id, name: answers.name, tolgeeUrl: answers.tolgeeUrl }
+  const depVersion = internalDepVersion()
+  const baseVars = {
+    id: answers.id,
+    name: answers.name,
+    tolgeeUrl: answers.tolgeeUrl,
+    sdkVersion: depVersion,
+    devVersion: depVersion,
+  }
 
   const s = spinner()
   s.start('Copying template')
