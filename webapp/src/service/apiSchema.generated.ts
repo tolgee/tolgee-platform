@@ -2256,7 +2256,8 @@ export interface components {
         | "XLSX"
         | "APPLE_XCSTRINGS"
         | "ANDROID_SDK"
-        | "APPLE_SDK";
+        | "APPLE_SDK"
+        | "UNITY";
       /** Format: int64 */
       id: number;
       /**
@@ -2387,7 +2388,8 @@ export interface components {
         | "XLSX"
         | "APPLE_XCSTRINGS"
         | "ANDROID_SDK"
-        | "APPLE_SDK";
+        | "APPLE_SDK"
+        | "UNITY";
       /**
        * @description Languages to be contained in export.
        *
@@ -3025,6 +3027,9 @@ export interface components {
         | "multiple_mappings_for_null_file_language_name"
         | "too_many_mappings_for_file"
         | "missing_placeholder_in_template"
+        | "forbidden_placeholder_in_template"
+        | "unity_duplicate_key_id"
+        | "unity_shared_table_data_guid_conflict"
         | "tag_not_found"
         | "cannot_parse_encrypted_slack_login_data"
         | "slack_workspace_not_found"
@@ -3178,7 +3183,8 @@ export interface components {
         | "XLSX"
         | "APPLE_XCSTRINGS"
         | "ANDROID_SDK"
-        | "APPLE_SDK";
+        | "APPLE_SDK"
+        | "UNITY";
       mediaType: string;
     };
     ExportParams: {
@@ -3252,7 +3258,8 @@ export interface components {
         | "XLSX"
         | "APPLE_XCSTRINGS"
         | "ANDROID_SDK"
-        | "APPLE_SDK";
+        | "APPLE_SDK"
+        | "UNITY";
       /**
        * @description Languages to be contained in export.
        *
@@ -3504,7 +3511,8 @@ export interface components {
         | "XLSX_ICU"
         | "XLSX_JAVA"
         | "XLSX_PHP"
-        | "XLSX_RUBY";
+        | "XLSX_RUBY"
+        | "UNITY";
       /**
        * @description The existing language tag in the Tolgee platform to which the imported language should be mapped.
        *
@@ -6807,6 +6815,9 @@ export interface components {
         | "multiple_mappings_for_null_file_language_name"
         | "too_many_mappings_for_file"
         | "missing_placeholder_in_template"
+        | "forbidden_placeholder_in_template"
+        | "unity_duplicate_key_id"
+        | "unity_shared_table_data_guid_conflict"
         | "tag_not_found"
         | "cannot_parse_encrypted_slack_login_data"
         | "slack_workspace_not_found"
@@ -15626,7 +15637,8 @@ export interface operations {
           | "XLSX"
           | "APPLE_XCSTRINGS"
           | "ANDROID_SDK"
-          | "APPLE_SDK";
+          | "APPLE_SDK"
+          | "UNITY";
         /**
          * Delimiter to structure file content.
          *
