@@ -1,43 +1,48 @@
 package io.tolgee.api.v2.controllers.batch
 
+import ch.qos.logback.classic.Level
+import ch.qos.logback.classic.Logger
+import ch.qos.logback.classic.spi.ILoggingEvent
+import ch.qos.logback.core.read.ListAppender
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.activity.iterceptor.ActivityRevisionInitializer
 import io.tolgee.config.BatchJobBaseConfiguration
-import io.tolgee.events.OnBeforeMachineTranslationEvent
 import io.tolgee.fixtures.andIsOk
-import io.tolgee.model.batch.BatchJob
-import io.tolgee.model.batch.BatchJobStatus
-import io.tolgee.security.OrganizationHolder
-import io.tolgee.security.ProjectHolder
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.TestConfiguration
-import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
-import org.springframework.context.event.EventListener
 
 /**
- * End-to-end repro for issue #3724.
+ * End-to-end repro for #3724 using only real production code.
  *
- * Drives the real `MACHINE_TRANSLATE` batch flow through the HTTP API — the
- * same path the bug reporter exercises in production. No mocking of
- * `autoTranslationService`: the chunk processor calls the real
- * `autoTranslateSync`, which calls the real `MtService`, which publishes the
- * real `OnBeforeMachineTranslationEvent` through Spring's event bus.
+ * Drives the real `MACHINE_TRANSLATE` batch flow through the HTTP API and
+ * captures DEBUG logs from [ActivityRevisionInitializer], which lives in the
+ * activity-tracking interceptor chain and defensively reads
+ * `ProjectHolder.project` / `OrganizationHolder.organization` while initialising
+ * each batch chunk's activity revision. When the holders aren't populated the
+ * initializer logs:
  *
- * [HolderProbingListenerConfig] registers a real Spring `@EventListener`
- * that dereferences `ProjectHolder.project` and `OrganizationHolder.organization`
- * inside the chunk's transaction. That is exactly the kind of access pattern
- * production LLM-MT code paths perform deep in the EE prompt / charging chain
- * — without [BatchJobActionService.populateHolders] the dereference throws
- * `ProjectNotSelectedException` on the batch worker thread, `MtProviderCatching`
- * aggregates it, and the chunk fails repeatedly. With the fix the holders are
- * populated, the listener returns normally, the fake Google provider
- * (`fakeMtProviders = true`) completes the chunk, and translations land in DB.
+ * > Project is not set in ProjectHolder. Activity will be stored without projectId.
+ *
+ * Before the fix this fires on batch worker coroutine threads on every chunk;
+ * after [BatchJobActionService.populateHolders] runs the initializer reads
+ * populated holders and the message never appears on those threads.
+ *
+ * Why this matters: this is the same missing-holder condition that production
+ * LLM-MT code paths trip over — the difference is that
+ * [ActivityRevisionInitializer] catches it defensively while the LLM-MT
+ * downstream code doesn't. The defensive log is therefore a free natural
+ * canary: if it fires for a batch worker, the bug is still present.
+ *
+ * Standard Google MT with `fakeMtProviders=true` keeps the test hermetic
+ * (no external HTTP) while exercising every real layer of the batch +
+ * activity-tracking pipeline.
  */
-@Import(BatchJobBaseConfiguration::class, BatchMtHolderPopulationTest.HolderProbingListenerConfig::class)
+@Import(BatchJobBaseConfiguration::class)
 class BatchMtHolderPopulationTest : ProjectAuthControllerTest("/v2/projects/") {
   @Autowired
   lateinit var batchJobTestBase: BatchJobTestBase
@@ -52,57 +57,50 @@ class BatchMtHolderPopulationTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `MT batch job persists translations when downstream listeners read ProjectHolder`() {
-    val keyCount = 5
-    val keys = testData.addTranslationOperationData(keyCount)
-    batchJobTestBase.saveAndPrepare(this)
+  fun `batch worker thread has populated ProjectHolder during real MT workflow`() {
+    val activityLogger =
+      LoggerFactory.getLogger(ActivityRevisionInitializer::class.java) as Logger
+    val originalLevel = activityLogger.level
+    val appender = ListAppender<ILoggingEvent>()
+    appender.start()
+    activityLogger.level = Level.DEBUG
+    activityLogger.addAppender(appender)
 
-    val targetLanguageId =
-      testData.projectBuilder
-        .getLanguageByTag("cs")!!
-        .self.id
+    try {
+      val keyCount = 5
+      val keys = testData.addTranslationOperationData(keyCount)
+      batchJobTestBase.saveAndPrepare(this)
 
-    performProjectAuthPost(
-      "start-batch-job/machine-translate",
-      mapOf(
-        "keyIds" to keys.map { it.id },
-        "targetLanguageIds" to listOf(targetLanguageId),
-      ),
-    ).andIsOk
+      val targetLanguageId =
+        testData.projectBuilder
+          .getLanguageByTag("cs")!!
+          .self.id
 
-    batchJobTestBase.waitForAllTranslated(keys.map { it.id }, keyCount)
+      performProjectAuthPost(
+        "start-batch-job/machine-translate",
+        mapOf(
+          "keyIds" to keys.map { it.id },
+          "targetLanguageIds" to listOf(targetLanguageId),
+        ),
+      ).andIsOk
 
-    executeInNewTransaction {
-      val jobs =
-        entityManager
-          .createQuery("""from BatchJob""", BatchJob::class.java)
-          .resultList
-      jobs.assert.hasSize(1)
-      jobs[0].status.assert.isEqualTo(BatchJobStatus.SUCCESS)
-    }
-  }
+      batchJobTestBase.waitForAllTranslated(keys.map { it.id }, keyCount)
 
-  @TestConfiguration
-  class HolderProbingListenerConfig {
-    @Bean
-    fun holderProbingListener(
-      projectHolder: ProjectHolder,
-      organizationHolder: OrganizationHolder,
-    ): HolderProbingListener = HolderProbingListener(projectHolder, organizationHolder)
-  }
+      // Real production assertion: no batch worker coroutine should ever hit
+      // the defensive catch. If it does, holders weren't populated on the
+      // worker thread — exactly the precondition that breaks LLM-MT in #3724.
+      val batchWorkerWarnings =
+        appender.list.filter { event ->
+          if (!event.threadName.contains("coroutine")) return@filter false
+          val msg = event.formattedMessage
+          msg.contains("Project is not set in ProjectHolder") ||
+            msg.contains("Organization is not set in OrganizationHolder")
+        }
 
-  class HolderProbingListener(
-    private val projectHolder: ProjectHolder,
-    private val organizationHolder: OrganizationHolder,
-  ) {
-    @EventListener(OnBeforeMachineTranslationEvent::class)
-    @Suppress("UNUSED_PARAMETER")
-    fun onBeforeMt(event: OnBeforeMachineTranslationEvent) {
-      // Throws ProjectNotSelectedException / OrganizationNotSelectedException
-      // if the batch worker hasn't populated the holders — same failure mode
-      // as real LLM-MT downstream code that depends on these holders.
-      projectHolder.project
-      organizationHolder.organization
+      batchWorkerWarnings.assert.isEmpty()
+    } finally {
+      activityLogger.detachAppender(appender)
+      activityLogger.level = originalLevel
     }
   }
 }
