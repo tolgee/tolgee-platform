@@ -544,7 +544,7 @@ jobs:
         run: |
           for i in $(seq 1 90); do
             status=$(curl -fsS http://localhost:8080/actuator/health 2>/dev/null \
-              | sed -n 's/.*"status":"\([^"]*\)".*/\1/p')
+              | jq -r '.status // empty')
             if [ "$status" = "UP" ]; then
               echo "Slim image healthy after $((i * 2))s"
               exit 0
