@@ -7,6 +7,9 @@ dist-ssr
 # Tunnel + install state written by `npm run dev` / `npm run register`.
 .tolgee-dev/
 
+# Tolgee sources/docs pulled by `npm run pull-context` for AI-assisted dev.
+.context/
+
 # Local env overrides.
 .env.local
 

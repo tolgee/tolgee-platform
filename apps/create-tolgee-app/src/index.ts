@@ -132,7 +132,7 @@ const resolveAnswers = async (argv: string[]): Promise<Answers> => {
     selectedModules,
     scopes: csv('scopes') ?? ['translations.view', 'keys.view'],
     webhookEvents: csv('webhooks') ?? [],
-    tolgeeUrl: normalizeUrl(flags.get('tolgee-url') ?? 'https://app.tolgee.io'),
+    tolgeeUrl: normalizeUrl(flags.get('tolgee-url') ?? 'https://apps.preview.tolgee.io'),
     ...(await resolvePorts(flags)),
     installDeps: flags.has('install'),
     gitInit: flags.has('git'),

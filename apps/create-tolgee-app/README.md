@@ -37,7 +37,7 @@ you through:
 4. **Webhook events** — pick from a curated list of common
    `ActivityType` values. The webhook route gets a typed `onWebhook(…)`
    stub per event.
-5. **Tolgee URL** — defaults to `https://app.tolgee.io`.
+5. **Tolgee URL** — defaults to `https://apps.preview.tolgee.io`.
 6. **Install deps** + **git init** prompts.
 
 ## After generation

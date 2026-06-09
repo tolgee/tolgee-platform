@@ -108,7 +108,7 @@ export async function runWizard(initialName?: string): Promise<Answers> {
     abortIfCancelled(
       await text({
         message: 'Tolgee URL:',
-        initialValue: 'https://app.tolgee.io',
+        initialValue: 'https://apps.preview.tolgee.io',
         validate: validateUrl,
       })
     )
