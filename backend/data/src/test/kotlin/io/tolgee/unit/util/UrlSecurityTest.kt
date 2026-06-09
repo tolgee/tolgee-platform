@@ -1,7 +1,9 @@
 package io.tolgee.unit.util
 
 import io.tolgee.configuration.tolgee.InternalProperties
+import io.tolgee.constants.Message
 import io.tolgee.exceptions.BadRequestException
+import io.tolgee.testing.assert
 import io.tolgee.util.UrlSecurity
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -56,6 +58,16 @@ class UrlSecurityTest {
   }
 
   @Test
+  fun `blocks multicast addresses`() {
+    assertThrows<BadRequestException> { urlSecurity.validateUrl("http://224.0.0.1/") }
+  }
+
+  @Test
+  fun `blocks IPv6 unique-local addresses`() {
+    assertThrows<BadRequestException> { urlSecurity.validateUrl("http://[fd00::1]/") }
+  }
+
+  @Test
   fun `blocks malformed URLs`() {
     assertThrows<BadRequestException> { urlSecurity.validateUrl("not-a-url") }
     assertThrows<BadRequestException> { urlSecurity.validateUrl("") }
@@ -65,5 +77,31 @@ class UrlSecurityTest {
   @Test
   fun `blocks URLs without host`() {
     assertThrows<BadRequestException> { urlSecurity.validateUrl("http://") }
+  }
+
+  @Test
+  fun `allows local addresses when allowLocalAddresses is true`() {
+    assertDoesNotThrow { urlSecurity.validateUrl("http://localhost/webhook", allowLocalAddresses = true) }
+    assertDoesNotThrow { urlSecurity.validateUrl("http://foo.localhost/webhook", allowLocalAddresses = true) }
+    assertDoesNotThrow { urlSecurity.validateUrl("http://127.0.0.1/webhook", allowLocalAddresses = true) }
+    assertDoesNotThrow { urlSecurity.validateUrl("http://192.168.1.10/webhook", allowLocalAddresses = true) }
+    assertDoesNotThrow { urlSecurity.validateUrl("http://[::1]/webhook", allowLocalAddresses = true) }
+    assertDoesNotThrow { urlSecurity.validateUrl("http://169.254.169.254/webhook", allowLocalAddresses = true) }
+    assertDoesNotThrow { urlSecurity.validateUrl("http://0.0.0.0/webhook", allowLocalAddresses = true) }
+    assertDoesNotThrow { urlSecurity.validateUrl("http://224.0.0.1/webhook", allowLocalAddresses = true) }
+    assertDoesNotThrow { urlSecurity.validateUrl("http://[fd00::1]/webhook", allowLocalAddresses = true) }
+  }
+
+  @Test
+  fun `still validates scheme and host when allowLocalAddresses is true`() {
+    assertUrlNotValid { urlSecurity.validateUrl("ftp://example.com/file", allowLocalAddresses = true) }
+    assertUrlNotValid { urlSecurity.validateUrl("file:///etc/passwd", allowLocalAddresses = true) }
+    assertUrlNotValid { urlSecurity.validateUrl("not-a-url", allowLocalAddresses = true) }
+    assertUrlNotValid { urlSecurity.validateUrl("http://", allowLocalAddresses = true) }
+  }
+
+  private fun assertUrlNotValid(executable: () -> Unit) {
+    val exception = assertThrows<BadRequestException>(executable)
+    exception.code.assert.isEqualTo(Message.URL_NOT_VALID.code)
   }
 }
