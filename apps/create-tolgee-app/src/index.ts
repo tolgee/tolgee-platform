@@ -29,17 +29,20 @@ const PACKAGE_ROOT = resolve(__dirname, '..')
 const TEMPLATE_ROOT = join(PACKAGE_ROOT, 'template')
 
 /**
- * Version to pin the generated app's `@tolgee/*` deps to. Returns this CLI's own
- * published version (apps-sdk + apps-dev are released in lockstep), or `*` when
- * running unpublished from the repo (version `0.0.0`), so in-repo scaffolds keep
- * resolving the workspace packages.
+ * Version to pin the generated app's `@tolgee/*` deps to. In the monorepo the
+ * apps-sdk/apps-dev packages sit next to this one, so we link them as workspace
+ * deps (`*`); when published, those siblings are absent and we pin to this CLI's
+ * own version (apps-sdk + apps-dev are released in lockstep). Detection is by
+ * sibling presence, not version number, so it survives release bumps.
  */
 const internalDepVersion = (): string => {
+  const inRepo = existsSync(resolve(PACKAGE_ROOT, '..', 'tolgee-apps-sdk', 'package.json'))
+  if (inRepo) return '*'
   try {
     const pkg = JSON.parse(
       readFileSync(join(PACKAGE_ROOT, 'package.json'), 'utf8')
     ) as { version?: string }
-    return pkg.version && pkg.version !== '0.0.0' ? pkg.version : '*'
+    return pkg.version ?? '*'
   } catch {
     return '*'
   }
