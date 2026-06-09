@@ -472,6 +472,7 @@
   "announcement_labels": "Vydali jsme štítky překladu!",
   "announcement_llm_providers_and_playground": "Vydali jsme <linkPlayground>AI Playground</linkPlayground> a <linkProviders>Vlastní LLM Poskytovatele</linkProviders>!",
   "announcement_new_pricing": "Tolgee představuje nové ceny pro vlastní hostování",
+  "announcement_qa_checks_and_translation_memory": "Vydali jsme <linkQa>QA kontroly</linkQa> a <linkTm>správu překladové paměti</linkTm>!",
   "announcement_suggestions_and_labels": "Vydali jsme <linkSuggestions>Návrhy</linkSuggestions> a <linkLabels>Štítky</linkLabels>!",
   "announcement_translation_memory_management": "Vydali jsme správu překladové paměti!",
   "announcement_visual_editor_and_formats_support": "Nový vizuální editor a podpora pro iOS, Android, Flutter a další",

@@ -472,6 +472,7 @@
   "announcement_labels": "Am lansat etichetele de traducere!",
   "announcement_llm_providers_and_playground": "Am lansat <linkPlayground>AI Playground</linkPlayground> și <linkProviders>Furnizori LLM Personalizați</linkProviders>!",
   "announcement_new_pricing": "Tolgee introduce noi prețuri pentru instanțele auto-găzduite",
+  "announcement_qa_checks_and_translation_memory": "Am lansat <linkQa>verificările QA</linkQa> și <linkTm>gestionarea Memoriei de traducere</linkTm>!",
   "announcement_suggestions_and_labels": "Am lansat <linkSuggestions>Sugestii</linkSuggestions> și <linkLabels>Etichete</linkLabels>!",
   "announcement_translation_memory_management": "Am lansat gestionarea Memoriei de traducere!",
   "announcement_visual_editor_and_formats_support": "Editor vizual lansat și suport pentru iOS, Android, Flutter și altele",

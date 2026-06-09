@@ -471,6 +471,7 @@
   "announcement_labels": "Megjelentek a fordítási címkék!",
   "announcement_llm_providers_and_playground": "Kiadásra került az <linkPlayground>AI Játszótér</linkPlayground> és az <linkProviders>Egyedi LLM Szolgáltatók</linkProviders>!",
   "announcement_new_pricing": "A Tolgee új árazást vezet be a saját szerveren futó példányokhoz",
+  "announcement_qa_checks_and_translation_memory": "Megjelent a <linkQa>QA Checks</linkQa> és a <linkTm>Translation Memory kezelés</linkTm>!",
   "announcement_suggestions_and_labels": "Megjelentek a <linkSuggestions>Javaslatok</linkSuggestions> és a <linkLabels>Címkék</linkLabels>!",
   "announcement_translation_memory_management": "Megjelent a Translation Memory kezelés!",
   "announcement_visual_editor_and_formats_support": "Megjelent a vizuális szerkesztő és támogatás az iOS, Android, Flutter és más platformokhoz",

@@ -471,6 +471,7 @@
   "announcement_labels": "Vi har lansert oversettelsesetiketter!",
   "announcement_llm_providers_and_playground": "Vi har lansert <linkPlayground>AI-lekeplass</linkPlayground> og <linkProviders>Tilpassede LLM-leverandører</linkProviders>!",
   "announcement_new_pricing": "Tolgee introduserer ny prising for selvhostede instanser",
+  "announcement_qa_checks_and_translation_memory": "Vi har lansert <linkQa>QA-sjekker</linkQa> og <linkTm>administrasjon av oversettelsesminne</linkTm>!",
   "announcement_suggestions_and_labels": "Vi har lansert <linkSuggestions>Forslag</linkSuggestions> og <linkLabels>Etiketter</linkLabels>!",
   "announcement_translation_memory_management": "Vi har lansert administrasjon av oversettelsesminne!",
   "announcement_visual_editor_and_formats_support": "Lansert visuell redigerer og støtte for iOS, Android, Flutter og andre",

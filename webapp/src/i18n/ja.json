@@ -472,6 +472,7 @@
   "announcement_labels": "翻訳ラベル をリリースしました",
   "announcement_llm_providers_and_playground": "<linkPlayground>AI Playground</linkPlayground> と <linkProviders>カスタム LLM プロバイダー</linkProviders> をリリースしました！",
   "announcement_new_pricing": "Tolgee はセルフホストインスタンスの新しい価格設定を導入しています",
+  "announcement_qa_checks_and_translation_memory": "<linkQa>QA Checks</linkQa> と <linkTm>Translation Memory 管理</linkTm>をリリースしました",
   "announcement_suggestions_and_labels": "<linkSuggestions>提案</linkSuggestions>と<linkLabels>ラベル</linkLabels>をリリースしました！",
   "announcement_translation_memory_management": "Translation Memory 管理をリリースしました",
   "announcement_visual_editor_and_formats_support": "ビジュアルエディタをリリースし、iOS、Android、Flutterなどをサポートしました",

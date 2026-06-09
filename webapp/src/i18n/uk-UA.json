@@ -384,6 +384,7 @@
   "announcement_general_link_text": "Показати більше",
   "announcement_glossaries_and_playground": "Ми випустили <linkGlossaries>Глосарії</linkGlossaries> і <linkPlayground>AI Playground</linkPlayground>!",
   "announcement_new_pricing": "Tolgee запроваджує нові ціни для самостійно розміщених екземплярів",
+  "announcement_qa_checks_and_translation_memory": "Ми випустили <linkQa>перевірки QA</linkQa> та <linkTm>керування пам'яттю перекладів</linkTm>!",
   "announcement_suggestions_and_labels": "Ми випустили <linkSuggestions>Пропозиції</linkSuggestions> та <linkLabels>Мітки</linkLabels>!",
   "announcement_translation_memory_management": "Ми випустили керування пам'яттю перекладів!",
   "announcement_visual_editor_and_formats_support": "Випущено візуальний редактор та підтримку для iOS, Android, Flutter та інших",

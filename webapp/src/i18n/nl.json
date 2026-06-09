@@ -472,6 +472,7 @@
   "announcement_labels": "We hebben vertalingslabels uitgebracht!",
   "announcement_llm_providers_and_playground": "We hebben <linkPlayground>AI Playground</linkPlayground> en <linkProviders>Aangepaste LLM Providers</linkProviders> uitgebracht!",
   "announcement_new_pricing": "Tolgee introduceert nieuwe prijzen voor zelf-gehoste instanties",
+  "announcement_qa_checks_and_translation_memory": "We hebben <linkQa>QA Checks</linkQa> en <linkTm>Translation Memory-beheer</linkTm> uitgebracht!",
   "announcement_suggestions_and_labels": "We hebben <linkSuggestions>Suggesties</linkSuggestions> en <linkLabels>Labels</linkLabels> gelanceerd!",
   "announcement_translation_memory_management": "We hebben Translation Memory-beheer uitgebracht!",
   "announcement_visual_editor_and_formats_support": "Uitgebrachte visuele editor en ondersteuning voor iOS, Android, Flutter en andere",

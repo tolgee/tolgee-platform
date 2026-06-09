@@ -471,6 +471,7 @@
   "announcement_labels": "Nous avons publié des étiquettes de traduction !",
   "announcement_llm_providers_and_playground": "Nous avons lancé <linkPlayground>AI Playground</linkPlayground> et <linkProviders>Fournisseurs LLM Personnalisés</linkProviders> !",
   "announcement_new_pricing": "Tolgee introduit de nouveaux tarifs pour les instances auto-hébergées",
+  "announcement_qa_checks_and_translation_memory": "Nous avons publié les <linkQa>vérifications QA</linkQa> et la <linkTm>gestion de la mémoire de traduction</linkTm> !",
   "announcement_suggestions_and_labels": "Nous avons lancé <linkSuggestions>Suggestions</linkSuggestions> et <linkLabels>Étiquettes</linkLabels>!",
   "announcement_translation_memory_management": "Nous avons publié la gestion de la mémoire de traduction !",
   "announcement_visual_editor_and_formats_support": "Nouvel Éditeur visuel avec supports de formats pour iOS, Android, Flutter and d'autre outils ",

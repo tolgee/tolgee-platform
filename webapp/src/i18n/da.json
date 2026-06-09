@@ -472,6 +472,7 @@
   "announcement_labels": "Vi har udgivet oversættelsesetiketter!",
   "announcement_llm_providers_and_playground": "Vi har lanceret <linkPlayground>AI Playground</linkPlayground> og <linkProviders>Brugerdefinerede LLM-udbydere</linkProviders>!",
   "announcement_new_pricing": "Tolgee introducerer ny prissætning for selvhostede instanser",
+  "announcement_qa_checks_and_translation_memory": "Vi har udgivet <linkQa>QA-tjek</linkQa> og <linkTm>Translation Memory-administration</linkTm>!",
   "announcement_suggestions_and_labels": "Vi har lanceret <linkSuggestions>Forslag</linkSuggestions> og <linkLabels>Etiketter</linkLabels>!",
   "announcement_translation_memory_management": "Vi har udgivet Translation Memory-administration!",
   "announcement_visual_editor_and_formats_support": "Ny visuel editor og understøttelse af iOS, Android, Flutter og lignende enheder, er udgivet",

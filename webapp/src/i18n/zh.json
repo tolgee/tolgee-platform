@@ -471,6 +471,7 @@
   "announcement_labels": "我们已发布译文标签！",
   "announcement_llm_providers_and_playground": "我们已发布 <linkPlayground>AI 操作平台</linkPlayground> 和 <linkProviders>自定义 LLM 提供商</linkProviders>！",
   "announcement_new_pricing": "Tolgee 将为自托管实例引入新的定价方式",
+  "announcement_qa_checks_and_translation_memory": "我们已发布 <linkQa>QA Checks</linkQa> 和 <linkTm>翻译记忆库管理</linkTm>！",
   "announcement_suggestions_and_labels": "我们已发布<linkSuggestions>建议</linkSuggestions>和<linkLabels>标签</linkLabels>！",
   "announcement_translation_memory_management": "我们已发布翻译记忆库管理！",
   "announcement_visual_editor_and_formats_support": "发布了可视化编辑器和对iOS、Android、Flutter等的支持",

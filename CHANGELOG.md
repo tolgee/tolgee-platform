@@ -1,3 +1,10 @@
+# [3.199.0](https://github.com/tolgee/tolgee-platform/compare/v3.198.0...v3.199.0) (2026-06-09)
+
+
+### Features
+
+* add "All/Base language only" options to translation language selector ([#3729](https://github.com/tolgee/tolgee-platform/issues/3729)) ([a5440af](https://github.com/tolgee/tolgee-platform/commit/a5440af9f0d6e4f50cb424f30f569c185c0c9e46)), closes [#3336](https://github.com/tolgee/tolgee-platform/issues/3336) [#3518](https://github.com/tolgee/tolgee-platform/issues/3518)
+
 # [3.198.0](https://github.com/tolgee/tolgee-platform/compare/v3.197.4...v3.198.0) (2026-06-08)
 
 

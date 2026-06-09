@@ -471,6 +471,7 @@
   "announcement_labels": "Abbiamo rilasciato le etichette di traduzione!",
   "announcement_llm_providers_and_playground": "Abbiamo rilasciato <linkPlayground>AI Playground</linkPlayground> e <linkProviders>Fornitori LLM Personalizzati</linkProviders>!",
   "announcement_new_pricing": "Tolgee sta introducendo nuovi prezzi per le istanze self-hosted",
+  "announcement_qa_checks_and_translation_memory": "Abbiamo rilasciato i <linkQa>controlli QA</linkQa> e la <linkTm>gestione della Translation Memory</linkTm>!",
   "announcement_suggestions_and_labels": "Abbiamo rilasciato <linkSuggestions>Suggerimenti</linkSuggestions> e <linkLabels>Etichette</linkLabels>!",
   "announcement_translation_memory_management": "Abbiamo rilasciato la gestione della Translation Memory!",
   "announcement_visual_editor_and_formats_support": "Rilasciato Visual Editor e supporto per iOS, Android, Flutter e altri",
