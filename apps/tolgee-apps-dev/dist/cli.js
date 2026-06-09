@@ -24,6 +24,13 @@ var clearTunnelState = () => {
   const vitePort3 = Number(process.env.VITE_PORT ?? 5180);
   writeJson(TUNNEL_FILE, { baseUrl: `http://localhost:${vitePort3}` });
 };
+var readTunnelState = () => {
+  try {
+    return JSON.parse(readFileSync(TUNNEL_FILE, "utf8"));
+  } catch {
+    return null;
+  }
+};
 var patchManifestUrl = async (install3, manifestUrl) => {
   const url = `${install3.tolgeeUrl}/v2/apps/self/manifest-url`;
   const res = await fetch(url, {
@@ -134,21 +141,26 @@ import {
 import { randomUUID, timingSafeEqual } from "crypto";
 import open from "open";
 import { bin as bin2, install as install2, Tunnel as Tunnel2 } from "cloudflared";
+var sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 var BROWSER_TIMEOUT_MS = 5 * 6e4;
 var vitePort2 = () => Number(process.env.VITE_PORT ?? 5180);
 var serverPort = () => Number(process.env.SERVER_PORT ?? process.env.PORT ?? 5181);
 var verifyManifestReachable = async (manifestUrl) => {
-  let res;
-  try {
-    res = await fetch(manifestUrl);
-  } catch (err) {
-    throw new Error(
-      `Could not reach ${manifestUrl}. Is \`npm run dev\` running in another terminal? (${err instanceof Error ? err.message : String(err)})`
-    );
+  const attempts = 5;
+  let lastError;
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    try {
+      const res = await fetch(manifestUrl);
+      if (res.ok) return;
+      lastError = new Error(`${manifestUrl} returned ${res.status}`);
+    } catch (err) {
+      lastError = err;
+    }
+    if (attempt < attempts) await sleep(1e3);
   }
-  if (!res.ok) {
-    throw new Error(`${manifestUrl} returned ${res.status}. Is dev running?`);
-  }
+  throw new Error(
+    `Could not reach ${manifestUrl}. Is \`npm run dev\` running in another terminal? (${lastError instanceof Error ? lastError.message : String(lastError)})`
+  );
 };
 var startTunnel2 = async () => {
   if (!existsSync2(bin2)) {
@@ -163,6 +175,19 @@ var startTunnel2 = async () => {
   console.log(`Tunnel live at ${baseUrl}`);
   return baseUrl;
 };
+var reusableTunnel = async () => {
+  const baseUrl = readTunnelState()?.baseUrl;
+  if (!baseUrl || isLocalHost(baseUrl)) return null;
+  try {
+    const res = await fetch(`${baseUrl}/manifest.json`);
+    if (res.ok) {
+      console.log(`Reusing live tunnel from \`tolgee-app dev\`: ${baseUrl}`);
+      return baseUrl;
+    }
+  } catch {
+  }
+  return null;
+};
 var resolveManifestUrl = async (tolgeeUrl) => {
   const localManifestUrl = `http://localhost:${serverPort()}/manifest.json`;
   if (isLocalHost(tolgeeUrl)) {
@@ -170,9 +195,9 @@ var resolveManifestUrl = async (tolgeeUrl) => {
     console.log(`Skipping tunnel \u2014 Tolgee is local; using ${localManifestUrl}`);
     return localManifestUrl;
   }
-  const tunnelBaseUrl = await startTunnel2();
-  writeTunnelState({ baseUrl: tunnelBaseUrl });
-  return `${tunnelBaseUrl}/manifest.json`;
+  const base = await reusableTunnel() ?? await startTunnel2();
+  writeTunnelState({ baseUrl: base });
+  return `${base}/manifest.json`;
 };
 var constantTimeEq = (a, b) => {
   const ab = Buffer.from(a);

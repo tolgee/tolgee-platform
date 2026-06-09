@@ -51,6 +51,14 @@ export const clearTunnelState = (): void => {
   writeJson(TUNNEL_FILE, { baseUrl: `http://localhost:${vitePort}` })
 }
 
+export const readTunnelState = (): TunnelState | null => {
+  try {
+    return JSON.parse(readFileSync(TUNNEL_FILE, 'utf8')) as TunnelState
+  } catch {
+    return null
+  }
+}
+
 export const patchManifestUrl = async (
   install: InstallState,
   manifestUrl: string

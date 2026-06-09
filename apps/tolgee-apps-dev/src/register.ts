@@ -11,10 +11,14 @@ import { bin, install, Tunnel } from 'cloudflared'
 import {
   INSTALL_FILE,
   isLocalHost,
+  readTunnelState,
   writeJson,
   writeTunnelState,
   type InstallState,
 } from './lib'
+
+const sleep = (ms: number): Promise<void> =>
+  new Promise((resolve) => setTimeout(resolve, ms))
 
 type Org = { id: number; name: string; slug: string }
 
@@ -25,19 +29,25 @@ const serverPort = (): number =>
   Number(process.env.SERVER_PORT ?? process.env.PORT ?? 5181)
 
 const verifyManifestReachable = async (manifestUrl: string): Promise<void> => {
-  let res: Response
-  try {
-    res = await fetch(manifestUrl)
-  } catch (err) {
-    throw new Error(
-      `Could not reach ${manifestUrl}. Is \`npm run dev\` running in another terminal? (${
-        err instanceof Error ? err.message : String(err)
-      })`
-    )
+  // A freshly-started quick tunnel can take a moment to become edge-routable,
+  // so retry a few times before giving up.
+  const attempts = 5
+  let lastError: unknown
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    try {
+      const res = await fetch(manifestUrl)
+      if (res.ok) return
+      lastError = new Error(`${manifestUrl} returned ${res.status}`)
+    } catch (err) {
+      lastError = err
+    }
+    if (attempt < attempts) await sleep(1000)
   }
-  if (!res.ok) {
-    throw new Error(`${manifestUrl} returned ${res.status}. Is dev running?`)
-  }
+  throw new Error(
+    `Could not reach ${manifestUrl}. Is \`npm run dev\` running in another terminal? (${
+      lastError instanceof Error ? lastError.message : String(lastError)
+    })`
+  )
 }
 
 const startTunnel = async (): Promise<string> => {
@@ -55,10 +65,32 @@ const startTunnel = async (): Promise<string> => {
 }
 
 /**
+ * Reuses a live tunnel that `tolgee-app dev` already opened, if any. Reads the
+ * URL `dev` persisted to tunnel.json and confirms it actually serves the
+ * manifest — tunnel.json can hold a stale/dead URL from a previous session, and
+ * a localhost value means no tunnel is up. Returns null in those cases so the
+ * caller starts its own tunnel.
+ */
+const reusableTunnel = async (): Promise<string | null> => {
+  const baseUrl = readTunnelState()?.baseUrl
+  if (!baseUrl || isLocalHost(baseUrl)) return null
+  try {
+    const res = await fetch(`${baseUrl}/manifest.json`)
+    if (res.ok) {
+      console.log(`Reusing live tunnel from \`tolgee-app dev\`: ${baseUrl}`)
+      return baseUrl
+    }
+  } catch {
+    // unreachable (stale URL) — fall back to starting our own tunnel
+  }
+  return null
+}
+
+/**
  * Picks the manifest URL Tolgee will fetch + writes the tunnel state so the
  * local server serves the right baseUrl.
  *   local Tolgee  → http://localhost:<server>/manifest.json (Express direct)
- *   remote Tolgee → Cloudflare quick tunnel pointing at Vite
+ *   remote Tolgee → reuse `dev`'s live tunnel, or open a fresh Cloudflare one
  */
 const resolveManifestUrl = async (tolgeeUrl: string): Promise<string> => {
   const localManifestUrl = `http://localhost:${serverPort()}/manifest.json`
@@ -67,9 +99,9 @@ const resolveManifestUrl = async (tolgeeUrl: string): Promise<string> => {
     console.log(`Skipping tunnel — Tolgee is local; using ${localManifestUrl}`)
     return localManifestUrl
   }
-  const tunnelBaseUrl = await startTunnel()
-  writeTunnelState({ baseUrl: tunnelBaseUrl })
-  return `${tunnelBaseUrl}/manifest.json`
+  const base = (await reusableTunnel()) ?? (await startTunnel())
+  writeTunnelState({ baseUrl: base })
+  return `${base}/manifest.json`
 }
 
 const constantTimeEq = (a: string, b: string): boolean => {
