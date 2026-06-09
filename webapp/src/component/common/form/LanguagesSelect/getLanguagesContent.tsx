@@ -63,8 +63,17 @@ export const getLanguagesContent = ({
     value.includes(lang.tag)
   );
 
-  // Показываем кнопки "All" и "None" только для batch операций
   const isBatchOperation = context === 'batch-operations';
+  const isTranslations = context === 'translations';
+
+  const baseLang = languages.find((l) => l.base)?.tag;
+  const isOnlyBaseSelected = value.length === 1 && value[0] === baseLang;
+
+  const handleSelectBase = () => {
+    if (baseLang) {
+      onChange([baseLang]);
+    }
+  };
 
   const languageItems = languages.map((lang) => (
     <MenuItem
@@ -79,9 +88,8 @@ export const getLanguagesContent = ({
     </MenuItem>
   ));
 
-  if (isBatchOperation) {
+  if (isTranslations) {
     return [
-      // All button
       <MenuItem
         key="select-all"
         onClick={handleSelectAll}
@@ -90,7 +98,32 @@ export const getLanguagesContent = ({
         <Checkbox checked={allSelected} size="small" />
         <ListItemText primary={t('languages_permitted_list_select_all')} />
       </MenuItem>,
-      // None button
+      <MenuItem
+        key="select-base"
+        onClick={handleSelectBase}
+        disabled={!baseLang}
+        data-cy="translations-language-select-base"
+      >
+        <Checkbox checked={isOnlyBaseSelected} size="small" />
+        <ListItemText
+          primary={t('languages_select_base_language', 'Base language only')}
+        />
+      </MenuItem>,
+      <Divider key="divider" />,
+      ...languageItems,
+    ];
+  }
+
+  if (isBatchOperation) {
+    return [
+      <MenuItem
+        key="select-all"
+        onClick={handleSelectAll}
+        data-cy="translations-language-select-all"
+      >
+        <Checkbox checked={allSelected} size="small" />
+        <ListItemText primary={t('languages_permitted_list_select_all')} />
+      </MenuItem>,
       <MenuItem
         key="select-none"
         onClick={handleSelectNone}
@@ -99,13 +132,10 @@ export const getLanguagesContent = ({
         <Checkbox checked={false} size="small" />
         <ListItemText primary={t('llm_provider_form_select_priority_none')} />
       </MenuItem>,
-      // Divider
       <Divider key="divider" />,
-      // Individual language items
       ...languageItems,
     ];
   }
 
-  // Для обычного фильтра языков возвращаем только список языков без кнопок "All" и "None"
   return languageItems;
 };

@@ -108,26 +108,23 @@ export const toggleInMultiselect = (
   chainable.find('div').first().click();
 
   getPopover().within(() => {
-    // first select all
+    // first select all (only real language items, not the All/Base/None actions)
     getPopover()
-      .get('input')
-      .each(
-        // cy.xpath(`.//*[text() = '${val}']/ancestor/ancestor::li//input`).each(
-        ($input) => {
-          const isChecked = $input.is(':checked');
-          if (!isChecked) {
-            cy.wrap($input).click();
-          }
+      .get('li[data-cy="translations-language-select-item"] input')
+      .each(($input) => {
+        const isChecked = $input.is(':checked');
+        if (!isChecked) {
+          cy.wrap($input).click();
         }
-      );
+      });
 
     // unselect necessary
     getPopover()
-      .get('.MuiListItemText-primary')
-      .each(($label) => {
-        const labelText = $label.text();
+      .get('li[data-cy="translations-language-select-item"]')
+      .each(($li) => {
+        const labelText = $li.find('.MuiListItemText-primary').text();
         if (!renderedValues.includes(labelText)) {
-          cy.wrap($label).click();
+          cy.wrap($li).find('.MuiListItemText-primary').click();
         }
       });
   });
@@ -140,7 +137,7 @@ export const assertMultiselect = (chainable: Chainable, values: string[]) => {
 
   getPopover().within(() => {
     getPopover()
-      .get('li.MuiMenuItem-root')
+      .get('li[data-cy="translations-language-select-item"]')
       .each(($li) => {
         const labelText = $li.find('.MuiListItemText-primary').text();
         const input = cy.wrap($li).find('input');

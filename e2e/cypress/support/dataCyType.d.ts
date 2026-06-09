@@ -903,6 +903,7 @@ declare namespace DataCy {
         "translations-key-edit-key-field": true;
         "translations-key-name": true;
         "translations-language-select-all": true;
+        "translations-language-select-base": true;
         "translations-language-select-form-control": true;
         "translations-language-select-item": true;
         "translations-language-select-none": true;
