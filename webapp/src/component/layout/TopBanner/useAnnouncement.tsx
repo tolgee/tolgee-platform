@@ -1,6 +1,7 @@
 import { T, useTranslate } from '@tolgee/react';
 import { assertUnreachableReturnNull } from 'tg.fixtures/assertUnreachable';
 import { components } from 'tg.service/apiSchema.generated';
+import { DOCS_LINKS } from 'tg.constants/docLinks';
 import { Announcement } from './Announcement';
 import { BannerLink } from './BannerLink';
 
@@ -190,7 +191,24 @@ export function useAnnouncement() {
                 defaultValue="We've released Translation Memory management!"
               />
             }
-            link="https://docs.tolgee.io/platform/translation_process/managing_translation_memories"
+            link={DOCS_LINKS.translationMemoryManagement}
+          />
+        );
+
+      case 'FEATURE_QA_CHECKS_AND_TRANSLATION_MEMORY':
+        return (
+          <Announcement
+            content={
+              <T
+                keyName="announcement_qa_checks_and_translation_memory"
+                params={{
+                  linkQa: <BannerLink href={DOCS_LINKS.qaChecks} />,
+                  linkTm: (
+                    <BannerLink href={DOCS_LINKS.translationMemoryManagement} />
+                  ),
+                }}
+              />
+            }
           />
         );
 
