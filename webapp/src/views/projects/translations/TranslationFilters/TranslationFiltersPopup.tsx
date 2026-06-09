@@ -12,6 +12,7 @@ import {
 } from './SubfilterNamespaces';
 import { SubfilterTranslations } from './SubfilterTranslations';
 import { SubfilterScreenshots } from './SubfilterScreenshots';
+import { SubfilterDescription } from './SubfilterDescription';
 import { SubfilterComments } from './SubfilterComments';
 import { SubfilterLabels } from 'tg.views/projects/translations/TranslationFilters/SubfilterLabels';
 import { SubfilterSuggestions } from './SubfilterSuggestions';
@@ -63,6 +64,11 @@ export const TranslationFiltersPopup = ({
           />
         )}
         <SubfilterScreenshots
+          value={value}
+          actions={actions}
+          projectId={projectId}
+        />
+        <SubfilterDescription
           value={value}
           actions={actions}
           projectId={projectId}

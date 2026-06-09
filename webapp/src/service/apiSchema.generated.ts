@@ -17211,6 +17211,10 @@ export interface operations {
         filterHasScreenshot?: boolean;
         /** Selects only keys without screenshots */
         filterHasNoScreenshot?: boolean;
+        /** Selects only keys with a description */
+        filterHasDescription?: boolean;
+        /** Selects only keys without a description */
+        filterHasNoDescription?: boolean;
         /**
          * Selects only keys with provided namespaces.
          *
@@ -17347,6 +17351,10 @@ export interface operations {
         filterHasScreenshot?: boolean;
         /** Selects only keys without screenshots */
         filterHasNoScreenshot?: boolean;
+        /** Selects only keys with a description */
+        filterHasDescription?: boolean;
+        /** Selects only keys without a description */
+        filterHasNoDescription?: boolean;
         /**
          * Selects only keys with provided namespaces.
          *
@@ -17519,6 +17527,10 @@ export interface operations {
         filterHasScreenshot?: boolean;
         /** Selects only keys without screenshots */
         filterHasNoScreenshot?: boolean;
+        /** Selects only keys with a description */
+        filterHasDescription?: boolean;
+        /** Selects only keys without a description */
+        filterHasNoDescription?: boolean;
         /**
          * Selects only keys with provided namespaces.
          *
@@ -22451,6 +22463,10 @@ export interface operations {
         filterHasScreenshot?: boolean;
         /** Selects only keys without screenshots */
         filterHasNoScreenshot?: boolean;
+        /** Selects only keys with a description */
+        filterHasDescription?: boolean;
+        /** Selects only keys without a description */
+        filterHasNoDescription?: boolean;
         /**
          * Selects only keys with provided namespaces.
          *
@@ -22767,6 +22783,10 @@ export interface operations {
         filterHasScreenshot?: boolean;
         /** Selects only keys without screenshots */
         filterHasNoScreenshot?: boolean;
+        /** Selects only keys with a description */
+        filterHasDescription?: boolean;
+        /** Selects only keys without a description */
+        filterHasNoDescription?: boolean;
         /**
          * Selects only keys with provided namespaces.
          *

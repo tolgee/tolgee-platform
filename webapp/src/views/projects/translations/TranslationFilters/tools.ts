@@ -17,6 +17,8 @@ export type FiltersInternal = {
   filterTranslationState?: TranslationStateType[];
   filterHasScreenshot?: boolean;
   filterHasNoScreenshot?: boolean;
+  filterHasDescription?: boolean;
+  filterHasNoDescription?: boolean;
   filterHasUnresolvedComments?: boolean;
   filterHasComments?: boolean;
   filterQaCheckTypes?: QaCheckType[];
@@ -55,6 +57,8 @@ export type AddParams =
   | ['filterTranslationState', TranslationStateType]
   | ['filterHasScreenshot']
   | ['filterHasNoScreenshot']
+  | ['filterHasDescription']
+  | ['filterHasNoDescription']
   | ['filterHasUnresolvedComments']
   | ['filterHasComments']
   | ['filterQaCheckTypes', QaCheckType]
