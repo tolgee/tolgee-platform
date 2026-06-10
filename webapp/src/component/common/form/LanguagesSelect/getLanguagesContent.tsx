@@ -73,15 +73,15 @@ export const getLanguagesContent = ({
   const isBatchOperation = context === 'batch-operations';
 
   const languageItems = languages.map((lang) => (
-    <Tooltip key={lang.tag} title={lang.name} placement="right">
-      <span style={{ display: 'inline-block', width: '100%' }}>
-        <MenuItem
-          value={lang.tag}
-          data-cy="translations-language-select-item"
-          onClick={handleLanguageChange(lang.tag)}
-          disabled={disabledLanguages?.includes(lang.id)}
-        >
-          <Checkbox checked={value?.includes(lang.tag)} size="small" />
+    <span style={{ display: 'inline-block', width: '100%' }}>
+      <MenuItem
+        value={lang.tag}
+        data-cy="translations-language-select-item"
+        onClick={handleLanguageChange(lang.tag)}
+        disabled={disabledLanguages?.includes(lang.id)}
+      >
+        <Checkbox checked={value?.includes(lang.tag)} size="small" />
+        <Tooltip title={lang.name} placement="right" >
           <ListItemText
             primary={lang.name}
             sx={(theme) => ({
@@ -97,9 +97,9 @@ export const getLanguagesContent = ({
               },
             })}
           />
-        </MenuItem>
-      </span>
-    </Tooltip>
+        </Tooltip>
+      </MenuItem>
+    </span>
   ));
 
   if (isBatchOperation) {
