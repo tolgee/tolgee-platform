@@ -6,4 +6,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 class ContentDeliveryCachePurgingProperties {
   var azureFrontDoor = ContentDeliveryAzureFrontDoorProperties()
   var cloudflare = ContentDeliveryCloudflareProperties()
+  var awsCloudfront = ContentDeliveryAWSCloudFrontProperties()
+  var bunny = ContentDeliveryBunnyProperties()
 }
