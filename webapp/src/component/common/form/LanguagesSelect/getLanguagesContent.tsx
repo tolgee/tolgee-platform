@@ -73,7 +73,7 @@ export const getLanguagesContent = ({
   const isBatchOperation = context === 'batch-operations';
 
   const languageItems = languages.map((lang) => (
-    <span style={{ display: 'inline-block', width: '100%' }}>
+    <span key={lang.tag} style={{ display: 'inline-block', width: '100%' }}>
       <MenuItem
         value={lang.tag}
         data-cy="translations-language-select-item"
