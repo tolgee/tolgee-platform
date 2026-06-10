@@ -137,6 +137,13 @@ class AuthenticationFilterTest {
     Mockito.`when`(authProperties.enabled).thenReturn(true)
     Mockito.`when`(internalProperties.verifySsoAccountAvailableBypass).thenReturn(null)
 
+    // These tests use user JWTs / PAK / PAT, never app tokens. validateToken throws
+    // for non-app tokens (the filter catches it and falls back to user JWT auth);
+    // an unstubbed mock would instead return null and NPE on claims.installId.
+    Mockito
+      .`when`(appTokenService.validateToken(any()))
+      .thenThrow(AuthenticationException(Message.INVALID_JWT_TOKEN))
+
     Mockito
       .`when`(rateLimitService.getIpAuthRateLimitPolicy(any()))
       .thenReturn(

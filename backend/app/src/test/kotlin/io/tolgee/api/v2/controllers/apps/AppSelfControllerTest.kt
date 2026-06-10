@@ -122,7 +122,10 @@ class AppSelfControllerTest : AuthorizedControllerTest() {
     return tree.get("clientSecret").asText()
   }
 
-  private fun performSelfPatch(clientSecret: String, body: Any): ResultActions {
+  private fun performSelfPatch(
+    clientSecret: String,
+    body: Any,
+  ): ResultActions {
     return perform(
       patch("/v2/apps/self/manifest-url")
         .header("X-API-Key", clientSecret)

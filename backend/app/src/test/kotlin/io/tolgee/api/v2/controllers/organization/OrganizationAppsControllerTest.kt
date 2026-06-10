@@ -26,7 +26,6 @@ import org.springframework.web.client.ResourceAccessException
 import org.springframework.web.client.RestTemplate
 
 class OrganizationAppsControllerTest : AuthorizedControllerTest() {
-
   @Autowired
   lateinit var appInstallService: AppInstallService
 
@@ -336,10 +335,14 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
 
   private fun registerBody() = mapOf("manifestUrl" to "https://example.com/manifest.json")
 
-  private fun performAuthPatch(url: String, body: Any): ResultActions {
+  private fun performAuthPatch(
+    url: String,
+    body: Any,
+  ): ResultActions {
     loginAsAdminIfNotLogged()
     return perform(
-      AuthorizedRequestFactory.addToken(patch(url))
+      AuthorizedRequestFactory
+        .addToken(patch(url))
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(body)),
     )
