@@ -10,7 +10,7 @@ import { useProject } from 'tg.hooks/useProject';
 
 const StyledIframe = styled('iframe')`
   width: 100%;
-  min-height: 600px;
+  height: 100%;
   border: none;
   background: transparent;
   display: block;
@@ -100,7 +100,8 @@ export const ProjectAppPageView = () => {
 
   return (
     <BaseProjectView
-      maxWidth={1200}
+      maxWidth="max"
+      stretch
       windowTitle={module?.title ?? 'App'}
       navigation={[
         [
