@@ -5838,4 +5838,16 @@
                                  onDelete="CASCADE"
                                  validate="true"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1781105628176-3">
+        <dropPrimaryKey constraintName="app_install_granted_scopePK" tableName="app_install_granted_scope"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1781105628176-4">
+        <dropPrimaryKey constraintName="app_install_webhook_subscriptionPK" tableName="app_install_webhook_subscription"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1781105628176-1">
+        <modifyDataType columnName="event" newDataType="varchar(255)" tableName="app_install_webhook_subscription"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1781105628176-2">
+        <dropNotNullConstraint columnDataType="clob" columnName="manifest_json" tableName="app_install"/>
+    </changeSet>
 </databaseChangeLog>
