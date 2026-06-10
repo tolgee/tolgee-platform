@@ -9,6 +9,12 @@ type TolgeeAppSelection = {
     languageId?: number;
     languageTag?: string;
     translationId?: number;
+    /**
+     * Tags of the languages currently shown in the translations view. Provided
+     * to the `translation-tools-panel-empty` module; updates as the user changes
+     * the language selector. Undefined for surfaces that don't supply it.
+     */
+    selectedLanguages?: string[];
 };
 /**
  * Context delivered to the iframe via the `tolgee-app:init` postMessage.

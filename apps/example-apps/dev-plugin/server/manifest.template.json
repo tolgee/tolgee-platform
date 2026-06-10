@@ -31,6 +31,14 @@
         "entry": "/tools-panel"
       }
     ],
+    "translation-tools-panel-empty": [
+      {
+        "key": "languages",
+        "title": "Languages",
+        "icon": "Globe01",
+        "entry": "/tools-panel-empty"
+      }
+    ],
     "key-edit-tab": [
       {
         "key": "audit",

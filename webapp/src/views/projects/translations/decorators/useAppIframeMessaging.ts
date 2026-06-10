@@ -7,6 +7,11 @@ export type IframeSelection = {
   languageId: number | null;
   languageTag: string | null;
   translationId: number | null;
+  /**
+   * Tags of the languages shown in the translations view. Only the
+   * `translation-tools-panel-empty` surface sets this; omitted elsewhere.
+   */
+  selectedLanguages?: string[];
 };
 
 export type UseAppIframeMessagingOptions = {
@@ -65,7 +70,9 @@ export function useAppIframeMessaging(
 
   const apiUrl = import.meta.env.VITE_APP_API_URL ?? window.location.origin;
 
-  const selectionKey = `${selection.keyId}|${selection.languageId}|${selection.translationId}`;
+  const selectionKey = `${selection.keyId}|${selection.languageId}|${
+    selection.translationId
+  }|${(selection.selectedLanguages ?? []).join(',')}`;
 
   const sendInit = () => {
     if (!appOrigin || !token || !iframeRef.current?.contentWindow) return;

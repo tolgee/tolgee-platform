@@ -51,6 +51,7 @@ const internalDepVersion = (): string => {
 const MODULE_ENTRY_PATHS: Record<ModuleKey, { route: string; importPath: string }> = {
   'project-dashboard-page': { route: '/dashboard', importPath: './modules/dashboard' },
   'translation-tools-panel': { route: '/tools-panel', importPath: './modules/toolsPanel' },
+  'translation-tools-panel-empty': { route: '/tools-panel-empty', importPath: './modules/toolsPanelEmpty' },
   'key-edit-tab': { route: '/key-edit-tab', importPath: './modules/keyEditTab' },
   modal: { route: '/modal', importPath: './modules/modal' },
   'key-action': { route: '', importPath: '' },

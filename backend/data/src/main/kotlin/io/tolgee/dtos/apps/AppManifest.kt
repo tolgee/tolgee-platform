@@ -23,6 +23,8 @@ data class AppManifestModules(
   val projectDashboardPage: List<ProjectDashboardPageModule>? = null,
   @JsonProperty("translation-tools-panel")
   val translationToolsPanel: List<TranslationToolsPanelModule>? = null,
+  @JsonProperty("translation-tools-panel-empty")
+  val translationToolsPanelEmpty: List<TranslationToolsPanelModule>? = null,
   @JsonProperty("key-edit-tab")
   val keyEditTab: List<KeyEditTabModule>? = null,
   @JsonProperty("key-action")

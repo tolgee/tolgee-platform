@@ -15,6 +15,7 @@ const KNOWN_INIT_FIELDS = new Set([
   'languageId',
   'translationId',
   'languageTag',
+  'selectedLanguages',
 ])
 
 type InitMessage = {
@@ -27,6 +28,7 @@ type InitMessage = {
   languageId?: number
   languageTag?: string
   translationId?: number
+  selectedLanguages?: string[]
 } & Record<string, unknown>
 
 type SelectionChangedMessage = {
@@ -35,6 +37,7 @@ type SelectionChangedMessage = {
   languageId?: number
   languageTag?: string
   translationId?: number
+  selectedLanguages?: string[]
 }
 
 const isInit = (d: unknown): d is InitMessage =>
@@ -62,6 +65,7 @@ const parseInit = (m: InitMessage): TolgeeAppContext => {
       languageId: m.languageId,
       languageTag: m.languageTag,
       translationId: m.translationId,
+      selectedLanguages: m.selectedLanguages,
     },
     extra,
   }
@@ -147,6 +151,7 @@ export class TolgeeApp {
         languageId: d.languageId,
         languageTag: d.languageTag,
         translationId: d.translationId,
+        selectedLanguages: d.selectedLanguages,
       }
       this.selectionHandlers.forEach((h) => h(this.currentSelection))
     }

@@ -1,5 +1,5 @@
 import { webhooks } from '@tginternal/client';
-export { A as AppContextClaims, T as TolgeeAppContext, a as TolgeeAppSelection } from './contextTypes-Bjy5zt1C.js';
+export { A as AppContextClaims, T as TolgeeAppContext, a as TolgeeAppSelection } from './contextTypes-49PRp5PQ.js';
 
 /**
  * Identifier of a webhook event Tolgee can send — keys of the `webhooks`
@@ -97,6 +97,8 @@ type AppShortcut = Omit<AppAction, 'type'> & {
 type AppModules = {
     'project-dashboard-page'?: AppIframeModule[];
     'translation-tools-panel'?: AppIframeModule[];
+    /** Panel shown in the translations tools area when no cell is being edited. */
+    'translation-tools-panel-empty'?: AppIframeModule[];
     'key-edit-tab'?: AppIframeModule[];
     modal?: AppIframeModule[];
     'key-action'?: AppAction[];

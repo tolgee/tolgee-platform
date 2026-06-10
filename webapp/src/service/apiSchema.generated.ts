@@ -1559,6 +1559,7 @@ export interface components {
       shortcut?: components["schemas"]["ShortcutModule"][];
       "translation-action"?: components["schemas"]["TranslationActionModule"][];
       "translation-tools-panel"?: components["schemas"]["TranslationToolsPanelModule"][];
+      "translation-tools-panel-empty"?: components["schemas"]["TranslationToolsPanelModule"][];
       "translations-toolbar-action"?: components["schemas"]["TranslationsToolbarActionModule"][];
     };
     AppManifestPreviewModel: {

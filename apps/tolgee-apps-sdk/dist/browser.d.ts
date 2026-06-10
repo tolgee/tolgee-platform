@@ -1,4 +1,4 @@
-import { T as TolgeeAppContext, a as TolgeeAppSelection } from './contextTypes-Bjy5zt1C.js';
+import { T as TolgeeAppContext, a as TolgeeAppSelection } from './contextTypes-49PRp5PQ.js';
 import { createApiClient } from '@tginternal/client';
 
 type Unsubscribe = () => void;

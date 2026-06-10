@@ -3,11 +3,17 @@ import { Box, CircularProgress, styled } from '@mui/material';
 
 import { useAppIframeMessaging } from '../../../decorators/useAppIframeMessaging';
 import { PanelContentProps } from '../../common/types';
+import { useTranslationsSelector } from '../../../context/TranslationsContext';
 
 type AppPanelBinding = {
   installId: number;
   baseUrl: string;
   entry: string;
+  /**
+   * When true the panel renders in the no-cell-selected state and is handed the
+   * view's selected language tags instead of a key/language selection.
+   */
+  empty?: boolean;
 };
 
 const StyledIframe = styled('iframe')`
@@ -35,6 +41,9 @@ export function createAppPanelComponent(binding: AppPanelBinding) {
   return function AppPanelContent(props: PanelContentProps) {
     const { project } = props;
     const organizationId = project.organizationOwner?.id ?? null;
+    const selectedLanguages = useTranslationsSelector(
+      (c) => c.selectedLanguages
+    );
     const [height, setHeight] = useState<number>(DEFAULT_HEIGHT);
 
     const onResize = useCallback((next: number) => {
@@ -47,7 +56,15 @@ export function createAppPanelComponent(binding: AppPanelBinding) {
       organizationId,
       baseUrl: binding.baseUrl,
       entry: binding.entry,
-      selection: buildSelectionPayload(props),
+      selection: binding.empty
+        ? {
+            keyId: null,
+            languageId: null,
+            languageTag: null,
+            translationId: null,
+            selectedLanguages: selectedLanguages ?? [],
+          }
+        : buildSelectionPayload(props),
       onResize,
     });
 

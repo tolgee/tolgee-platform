@@ -155,7 +155,7 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `parses translation-tools-panel modules alongside dashboard pages`() {
+  fun `parses translation-tools-panel and -empty modules alongside dashboard pages`() {
     mockManifest(manifestWithToolsPanel())
     performAuthPost(appsUrl(), registerBody()).andIsOk.andAssertThatJson {
       node("modules.project-dashboard-page[0].key").isEqualTo("home")
@@ -163,6 +163,9 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
       node("modules.translation-tools-panel[0].title").isEqualTo("Activity")
       node("modules.translation-tools-panel[0].icon").isEqualTo("📈")
       node("modules.translation-tools-panel[0].entry").isEqualTo("/tools-panel")
+      node("modules.translation-tools-panel-empty[0].key").isEqualTo("languages")
+      node("modules.translation-tools-panel-empty[0].title").isEqualTo("Languages")
+      node("modules.translation-tools-panel-empty[0].entry").isEqualTo("/tools-panel-empty")
     }
   }
 
@@ -414,6 +417,9 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
         ],
         "translation-tools-panel": [
           {"key": "activity", "title": "Activity", "icon": "📈", "entry": "/tools-panel"}
+        ],
+        "translation-tools-panel-empty": [
+          {"key": "languages", "title": "Languages", "icon": "🌐", "entry": "/tools-panel-empty"}
         ]
       }
     }

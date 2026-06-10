@@ -58,6 +58,8 @@ const entriesFor = (key: ModuleKey): unknown[] => {
       return [{ key: info.defaultEntryKey, title: 'Dashboard', icon: 'LayoutAlt04', entry: info.entryPath }]
     case 'translation-tools-panel':
       return [{ key: PANEL_KEY, title: 'Plugin panel', icon: 'BarChart01', entry: info.entryPath }]
+    case 'translation-tools-panel-empty':
+      return [{ key: 'empty-panel', title: 'Languages panel', icon: 'Globe01', entry: info.entryPath }]
     case 'key-edit-tab':
       return [{ key: TAB_KEY, title: 'Plugin tab', icon: 'Shield01', entry: info.entryPath }]
     case 'modal':

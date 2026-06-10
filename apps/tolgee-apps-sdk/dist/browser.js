@@ -8,7 +8,8 @@ var KNOWN_INIT_FIELDS = /* @__PURE__ */ new Set([
   "keyId",
   "languageId",
   "translationId",
-  "languageTag"
+  "languageTag",
+  "selectedLanguages"
 ]);
 var isInit = (d) => typeof d === "object" && d !== null && d.type === "tolgee-app:init";
 var isSelectionChanged = (d) => typeof d === "object" && d !== null && d.type === "tolgee-app:selection-changed";
@@ -26,7 +27,8 @@ var parseInit = (m) => {
       keyId: m.keyId,
       languageId: m.languageId,
       languageTag: m.languageTag,
-      translationId: m.translationId
+      translationId: m.translationId,
+      selectedLanguages: m.selectedLanguages
     },
     extra
   };
@@ -92,7 +94,8 @@ var TolgeeApp = class {
         keyId: d.keyId,
         languageId: d.languageId,
         languageTag: d.languageTag,
-        translationId: d.translationId
+        translationId: d.translationId,
+        selectedLanguages: d.selectedLanguages
       };
       this.selectionHandlers.forEach((h) => h(this.currentSelection));
     }

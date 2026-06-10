@@ -81,6 +81,8 @@ export type AppShortcut = Omit<AppAction, 'type'> & {
 export type AppModules = {
   'project-dashboard-page'?: AppIframeModule[]
   'translation-tools-panel'?: AppIframeModule[]
+  /** Panel shown in the translations tools area when no cell is being edited. */
+  'translation-tools-panel-empty'?: AppIframeModule[]
   'key-edit-tab'?: AppIframeModule[]
   modal?: AppIframeModule[]
   'key-action'?: AppAction[]

@@ -6,6 +6,7 @@
 export type ModuleKey =
   | 'project-dashboard-page'
   | 'translation-tools-panel'
+  | 'translation-tools-panel-empty'
   | 'key-edit-tab'
   | 'modal'
   | 'key-action'
@@ -49,6 +50,15 @@ export const MODULES: ModuleInfo[] = [
     hasIframe: true,
     defaultEntryKey: 'panel',
     entryPath: '/tools-panel',
+  },
+  {
+    key: 'translation-tools-panel-empty',
+    label: 'Translation tools panel (no selection)',
+    description:
+      'Panel shown in the translations tools area when no cell is selected; receives the selected language tags.',
+    hasIframe: true,
+    defaultEntryKey: 'empty-panel',
+    entryPath: '/tools-panel-empty',
   },
   {
     key: 'key-edit-tab',
