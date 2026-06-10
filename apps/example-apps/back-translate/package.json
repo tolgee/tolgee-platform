@@ -1,7 +1,7 @@
 {
   "name": "back-translate",
   "private": true,
-  "version": "0.0.1-alpha.0",
+  "version": "0.0.1-alpha.5",
   "type": "module",
   "scripts": {
     "dev": "concurrently -k -n vite,server,tunnel -c blue,green,yellow \"npm:dev:frontend\" \"npm:dev:server\" \"npm:dev:tunnel\"",
@@ -15,7 +15,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.100.1",
     "@tginternal/client": "0.0.0-prerelease.c8329b552",
-    "@tolgee/apps-sdk": "^0.0.1-alpha.0",
+    "@tolgee/apps-sdk": "^0.0.1-alpha.5",
     "cloudflared": "^0.7.1",
     "express": "^4.21.0",
     "open": "^10.1.0",
