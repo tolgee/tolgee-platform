@@ -23,7 +23,9 @@ export function useAppToolsPanels(projectId: number): PanelConfig[] {
         result.push({
           id: `app:${install.id}:${module.key}`,
           name: module.title,
-          icon: <AppIcon icon={module.icon} size={18} fontSize="1em" />,
+          // Size is governed by the shared PanelHeader icon slot; keep the emoji
+          // fallback relative (1em) so it scales with it too.
+          icon: <AppIcon icon={module.icon} fontSize="1em" />,
           component: createAppPanelComponent({
             installId: install.id,
             baseUrl: install.baseUrl,

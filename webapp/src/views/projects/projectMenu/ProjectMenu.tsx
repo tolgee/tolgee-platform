@@ -207,7 +207,7 @@ export const ProjectMenu = () => {
             [PARAMS.APP_MODULE_KEY]: page.moduleKey,
           })}
           text={page.title}
-          icon={<AppIcon icon={page.icon} size={20} fontSize="18px" />}
+          icon={<AppIcon icon={page.icon} fontSize="1em" />}
           data-cy={`project-menu-item-app-${page.installId}-${page.moduleKey}`}
         />
       ))}
@@ -229,13 +229,7 @@ const ProjectMenuActionItems = () => {
             dispatch(trigger, { templateVars: { projectId: project.id } })
           }
           text={trigger.item.title ?? trigger.item.key}
-          icon={
-            <AppIcon
-              icon={trigger.item.icon ?? '🔘'}
-              size={20}
-              fontSize="18px"
-            />
-          }
+          icon={<AppIcon icon={trigger.item.icon ?? '🔘'} fontSize="1em" />}
           data-cy={`project-menu-item-app-action-${trigger.install.id}-${trigger.item.key}`}
         />
       ))}

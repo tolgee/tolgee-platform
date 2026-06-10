@@ -41,6 +41,23 @@ const StyledItem = styled('li')`
   }
 `;
 
+// Single source of truth for the side-menu item icon size, so native items and
+// Tolgee app entries render a consistent icon regardless of what each passes in.
+export const SIDE_MENU_ICON_SIZE = 24;
+
+const StyledIcon = styled('span')`
+  display: grid;
+  place-items: center;
+  width: ${SIDE_MENU_ICON_SIZE}px;
+  height: ${SIDE_MENU_ICON_SIZE}px;
+  font-size: ${SIDE_MENU_ICON_SIZE}px;
+  line-height: 1;
+  & svg {
+    width: ${SIDE_MENU_ICON_SIZE}px;
+    height: ${SIDE_MENU_ICON_SIZE}px;
+  }
+`;
+
 type Props = {
   linkTo?: string;
   /** If provided, the item renders as a button and calls this on click. */
@@ -78,6 +95,8 @@ export function SideMenuItem({
 
   const matchesExactly = match.pathname === linkTo;
 
+  const renderedIcon = <StyledIcon>{icon}</StyledIcon>;
+
   function wrapWithQuickStart(children: React.ReactNode) {
     if (quickStart) {
       return (
@@ -112,7 +131,7 @@ export function SideMenuItem({
               onClick={onClick}
               className={clsx('link', { selected: isSelected })}
             >
-              {icon}
+              {renderedIcon}
             </button>
           ) : (
             <Link
@@ -122,7 +141,7 @@ export function SideMenuItem({
               tabIndex={hidden ? -1 : undefined}
               className={clsx('link', { selected: isSelected })}
             >
-              {icon}
+              {renderedIcon}
             </Link>
           )}
         </Tooltip>
