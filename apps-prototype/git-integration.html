@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Git Integration — Tolgee App prototype</title>
+<style>
+  :root{
+    --primary:#EC407A; --primary-text:#D81B5F; --primary-soft:#EC407A14;
+    --slate:#2C3C52; --bg:#f5f6f8; --card:#ffffff; --border:#e4e6eb;
+    --text:#1f2733; --muted:#6b7685; --good:#15a86b; --good-soft:#15a86b18;
+    --warn:#d98b00; --warn-soft:#d98b0018; --bad:#d6364f; --bad-soft:#d6364f15;
+    --radius:12px; --shadow:0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.10);
+    font-synthesis:none;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-size:14px;line-height:1.5;}
+  /* simulated Tolgee chrome ----------------------------------------- */
+  .host-frame{max-width:1180px;margin:0 auto;padding:0 0 60px;}
+  .host-bar{display:flex;align-items:center;gap:10px;height:48px;padding:0 20px;
+    background:var(--slate);color:#fff;font-size:13px;}
+  .host-bar .dot{width:10px;height:10px;border-radius:50%;background:var(--primary)}
+  .host-bar .crumb{opacity:.7}
+  .host-bar .crumb b{opacity:1;font-weight:600}
+  .host-bar .badge{margin-left:auto;background:#ffffff1f;border:1px solid #ffffff2e;
+    padding:3px 9px;border-radius:999px;font-size:11px;letter-spacing:.02em}
+  .iframe-note{max-width:1180px;margin:14px auto 0;padding:0 20px;color:var(--muted);font-size:12px}
+  .iframe-note code{background:#eceef1;padding:1px 5px;border-radius:5px}
+
+  .page{padding:24px 20px 0}
+  .page-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:22px}
+  .page-head .icon{width:42px;height:42px;border-radius:11px;background:var(--primary-soft);
+    display:grid;place-items:center;color:var(--primary-text);flex:none}
+  .page-head h1{margin:0;font-size:22px;font-weight:680;letter-spacing:-.01em}
+  .page-head p{margin:2px 0 0;color:var(--muted)}
+  .page-head .right{margin-left:auto;display:flex;gap:10px}
+
+  /* buttons --------------------------------------------------------- */
+  .btn{appearance:none;border:1px solid var(--border);background:#fff;color:var(--text);
+    padding:9px 15px;border-radius:9px;font-weight:600;font-size:13.5px;cursor:pointer;
+    display:inline-flex;align-items:center;gap:8px;transition:.12s;white-space:nowrap}
+  .btn:hover{border-color:#cfd3da;background:#fafbfc}
+  .btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+  .btn.primary:hover{background:#e02e6c}
+  .btn.ghost{border-color:transparent;background:transparent}
+  .btn.ghost:hover{background:#eceef1}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .btn svg{width:16px;height:16px}
+
+  /* cards ----------------------------------------------------------- */
+  .grid{display:grid;grid-template-columns:1.55fr 1fr;gap:18px;align-items:start}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+    box-shadow:var(--shadow)}
+  .card .c-head{display:flex;align-items:center;gap:10px;padding:15px 18px;border-bottom:1px solid var(--border)}
+  .card .c-head h3{margin:0;font-size:14.5px;font-weight:660}
+  .card .c-head .sub{color:var(--muted);font-size:12.5px;margin-left:auto}
+  .card .c-body{padding:18px}
+
+  .repo-row{display:flex;align-items:center;gap:13px}
+  .repo-ava{width:38px;height:38px;border-radius:9px;background:#1f2733;color:#fff;
+    display:grid;place-items:center;flex:none}
+  .repo-row .name{font-weight:660}
+  .repo-row .url{color:var(--muted);font-size:12.5px;word-break:break-all}
+  .pill{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:999px;
+    font-size:12px;font-weight:600}
+  .pill .d{width:7px;height:7px;border-radius:50%}
+  .pill.ok{background:var(--good-soft);color:var(--good)} .pill.ok .d{background:var(--good)}
+  .pill.dirty{background:var(--warn-soft);color:var(--warn)} .pill.dirty .d{background:var(--warn)}
+  .pill.err{background:var(--bad-soft);color:var(--bad)} .pill.err .d{background:var(--bad)}
+
+  .meta{display:grid;grid-template-columns:repeat(2,1fr);gap:12px 24px;margin-top:18px}
+  .meta .k{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+  .meta .v{font-weight:600;margin-top:2px}
+  .meta .v.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:500;font-size:13px}
+
+  .actions{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+
+  .diff{display:flex;gap:16px;margin-top:4px}
+  .diff .n{font-weight:700;font-size:15px}
+  .diff .add{color:var(--good)} .diff .del{color:var(--bad)} .diff .mod{color:var(--warn)}
+
+  /* settings -------------------------------------------------------- */
+  .field{margin-bottom:15px}
+  .field label{display:block;font-weight:600;font-size:12.5px;margin-bottom:6px}
+  .field input,.field select{width:100%;padding:9px 11px;border:1px solid var(--border);
+    border-radius:8px;font-size:13.5px;font-family:inherit;background:#fff}
+  .field input:focus,.field select:focus{outline:none;border-color:var(--primary);
+    box-shadow:0 0 0 3px var(--primary-soft)}
+  .field .hint{color:var(--muted);font-size:11.5px;margin-top:5px}
+  .toggle-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--border)}
+  .toggle-row:first-child{border-top:none}
+  .toggle-row .t-txt{flex:1}
+  .toggle-row .t-txt b{font-size:13.5px}
+  .toggle-row .t-txt span{display:block;color:var(--muted);font-size:12px}
+  .switch{position:relative;width:40px;height:23px;flex:none}
+  .switch input{display:none}
+  .switch i{position:absolute;inset:0;background:#cfd3da;border-radius:999px;transition:.16s}
+  .switch i::after{content:"";position:absolute;width:17px;height:17px;border-radius:50%;
+    background:#fff;top:3px;left:3px;transition:.16s;box-shadow:0 1px 2px rgba(0,0,0,.25)}
+  .switch input:checked + i{background:var(--primary)}
+  .switch input:checked + i::after{transform:translateX(17px)}
+
+  /* activity log ---------------------------------------------------- */
+  .log{margin-top:2px}
+  .log .row{display:flex;gap:12px;padding:11px 0;border-top:1px solid var(--border)}
+  .log .row:first-child{border-top:none}
+  .log .ico{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;flex:none}
+  .log .ico.push{background:var(--primary-soft);color:var(--primary-text)}
+  .log .ico.pull{background:#3b82f618;color:#2f6fd6}
+  .log .ico.sync{background:var(--good-soft);color:var(--good)}
+  .log .ico.err{background:var(--bad-soft);color:var(--bad)}
+  .log .txt{flex:1}
+  .log .txt b{font-weight:620}
+  .log .txt .when{color:var(--muted);font-size:12px}
+  .log .txt .det{color:var(--muted);font-size:12.5px;margin-top:1px}
+
+  /* empty state ----------------------------------------------------- */
+  .empty{text-align:center;padding:54px 20px}
+  .empty .big{width:60px;height:60px;border-radius:16px;background:var(--primary-soft);
+    color:var(--primary-text);display:grid;place-items:center;margin:0 auto 16px}
+  .empty h2{margin:0 0 6px;font-size:19px}
+  .empty p{margin:0 auto 22px;color:var(--muted);max-width:430px}
+
+  /* modal ----------------------------------------------------------- */
+  .scrim{position:fixed;inset:0;background:rgba(20,28,40,.45);display:none;
+    align-items:center;justify-content:center;padding:20px;z-index:20}
+  .scrim.open{display:flex}
+  .modal{background:#fff;border-radius:14px;width:min(560px,100%);box-shadow:0 20px 60px rgba(0,0,0,.3);
+    max-height:92vh;overflow:auto}
+  .modal .m-head{display:flex;align-items:center;padding:18px 20px;border-bottom:1px solid var(--border)}
+  .modal .m-head h3{margin:0;font-size:16px}
+  .modal .m-head .x{margin-left:auto;cursor:pointer;color:var(--muted);background:none;border:none;font-size:20px;line-height:1}
+  .modal .m-body{padding:20px}
+  .modal .m-foot{display:flex;gap:10px;justify-content:flex-end;padding:16px 20px;border-top:1px solid var(--border)}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+  /* toast ----------------------------------------------------------- */
+  #toasts{position:fixed;right:18px;bottom:18px;display:flex;flex-direction:column;gap:10px;z-index:40}
+  .toast{background:#1f2733;color:#fff;padding:12px 15px;border-radius:10px;font-size:13px;
+    display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);
+    animation:slide .25s ease;max-width:340px}
+  .toast .d{width:8px;height:8px;border-radius:50%;flex:none}
+  .toast.ok .d{background:#4ade80} .toast.work .d{background:#fbbf24} .toast.err .d{background:#f87171}
+  @keyframes slide{from{transform:translateY(8px);opacity:0}to{transform:none;opacity:1}}
+
+  .hidden{display:none!important}
+  .spin{animation:sp 1s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  @media(max-width:880px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- simulated Tolgee app chrome so the prototype reads in-context -->
+<div class="host-bar">
+  <span class="dot"></span>
+  <span class="crumb">Acme Corp / <b>Web App</b> / </span>
+  <b>Git Integration</b>
+  <span class="badge">Tolgee App · project-dashboard-page</span>
+</div>
+<div class="iframe-note">
+  ↑ Tolgee chrome (sidebar/route). Everything below renders inside the app's sandboxed
+  <code>&lt;iframe&gt;</code> — served by the app, talking to Tolgee via the signed token + REST API.
+</div>
+
+<div class="host-frame">
+<div class="page">
+
+  <div class="page-head">
+    <div class="icon">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M6 9v6"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>
+    </div>
+    <div>
+      <h1>Git Integration</h1>
+      <p>Sync this project's translations with a Git repository.</p>
+    </div>
+    <div class="right">
+      <button class="btn ghost" id="btnSettings" onclick="openModal('settingsModal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-2.82 1.17V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 8 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 3.6 14H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 8.6l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 10 4.6V3a2 2 0 0 1 4 0v.09A1.65 1.65 0 0 0 19.4 8.6l.06-.06a2 2 0 0 1 0 2.83Z"/></svg>
+        Settings
+      </button>
+    </div>
+  </div>
+
+  <!-- EMPTY STATE -->
+  <div class="card" id="emptyState">
+    <div class="empty">
+      <div class="big">
+        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M6 9v6"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>
+      </div>
+      <h2>No repository connected</h2>
+      <p>Connect a Git repository to push translations as files, pull changes back into
+         Tolgee, or keep both in sync automatically.</p>
+      <button class="btn primary" onclick="openModal('connectModal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        Connect repository
+      </button>
+    </div>
+  </div>
+
+  <!-- CONNECTED STATE -->
+  <div class="grid hidden" id="connectedState">
+    <div style="display:flex;flex-direction:column;gap:18px">
+
+      <!-- repo + actions -->
+      <div class="card">
+        <div class="c-head">
+          <h3>Repository</h3>
+          <span class="pill ok sub" id="statusPill"><span class="d"></span>In sync</span>
+        </div>
+        <div class="c-body">
+          <div class="repo-row">
+            <div class="repo-ava">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 .5C5.4.5 0 5.8 0 12.4c0 5.3 3.4 9.8 8.2 11.4.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.3-1.8-1.3-1.8-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1.1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C18 4.6 19 4.9 19 4.9c.6 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 24 12.4C24 5.8 18.6.5 12 .5Z"/></svg>
+            </div>
+            <div style="flex:1">
+              <div class="name">acme/web-app-locales</div>
+              <div class="url">github.com/acme/web-app-locales.git</div>
+            </div>
+            <button class="btn ghost" onclick="openModal('connectModal')" title="Edit connection">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg>
+            </button>
+          </div>
+
+          <div class="meta">
+            <div><div class="k">Branch</div><div class="v mono">main</div></div>
+            <div><div class="k">Format</div><div class="v">JSON (nested)</div></div>
+            <div><div class="k">Path pattern</div><div class="v mono">locales/{languageTag}.json</div></div>
+            <div><div class="k">Last commit</div><div class="v mono">a3f9c1e</div></div>
+          </div>
+
+          <div class="actions">
+            <button class="btn primary" id="btnPull" onclick="runOp('pull')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M5 21h14"/></svg>
+              Pull from Git
+            </button>
+            <button class="btn" id="btnPush" onclick="runOp('push')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21V9m0 0 4 4m-4-4-4 4"/><path d="M5 3h14"/></svg>
+              Push to Git
+            </button>
+            <button class="btn" id="btnSync" onclick="runOp('sync')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 0 1-9 9 9 9 0 0 1-7.5-4M3 12a9 9 0 0 1 9-9 9 9 0 0 1 7.5 4"/><path d="M21 3v5h-5M3 21v-5h5"/></svg>
+              Sync both ways
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- pending changes preview -->
+      <div class="card" id="changesCard">
+        <div class="c-head">
+          <h3>Pending changes</h3>
+          <span class="sub" id="changesSub">Tolgee → Git, since last push</span>
+        </div>
+        <div class="c-body">
+          <div class="diff">
+            <div class="n add" id="diffAdd">+12 keys</div>
+            <div class="n mod" id="diffMod">~34 translations</div>
+            <div class="n del" id="diffDel">−2 keys</div>
+          </div>
+          <p style="color:var(--muted);margin:12px 0 0;font-size:12.5px">
+            Computed by exporting the project (<code>translations.view</code>) and diffing
+            against the repo HEAD. A push commits these to <b>main</b> as the install's bot user.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- activity log -->
+    <div class="card">
+      <div class="c-head"><h3>Activity</h3><span class="sub">last 24h</span></div>
+      <div class="c-body">
+        <div class="log" id="log">
+          <div class="row">
+            <div class="ico sync"><svg viewBox="0 0 24 24" width="15" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 12a9 9 0 0 1-15.5 6M3 12a9 9 0 0 1 15.5-6"/><path d="M21 3v5h-5M3 21v-5h5"/></svg></div>
+            <div class="txt"><b>Auto-sync</b> <span class="when">· 2h ago</span>
+              <div class="det">Webhook <code>SET_TRANSLATIONS</code> → pushed 5 translations</div></div>
+          </div>
+          <div class="row">
+            <div class="ico pull"><svg viewBox="0 0 24 24" width="15" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3v12m0 0 4-4m-4 4-4-4"/></svg></div>
+            <div class="txt"><b>Pull</b> by Jana K. <span class="when">· 9h ago</span>
+              <div class="det">Imported 3 keys, 18 translations from <code>a3f9c1e</code></div></div>
+          </div>
+          <div class="row">
+            <div class="ico push"><svg viewBox="0 0 24 24" width="15" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 21V9m0 0 4 4m-4-4-4 4"/></svg></div>
+            <div class="txt"><b>Push</b> by Daniel K. <span class="when">· yesterday</span>
+              <div class="det">Commit <code>7b2e004</code> · 42 files changed</div></div>
+          </div>
+          <div class="row">
+            <div class="ico err"><svg viewBox="0 0 24 24" width="15" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg></div>
+            <div class="txt"><b>Push failed</b> <span class="when">· yesterday</span>
+              <div class="det">Merge conflict on <code>locales/de.json</code> — resolved via "Git wins"</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- CONNECT / EDIT MODAL -->
+<div class="scrim" id="connectModal">
+  <div class="modal">
+    <div class="m-head"><h3>Connect repository</h3><button class="x" onclick="closeModal('connectModal')">×</button></div>
+    <div class="m-body">
+      <div class="field">
+        <label>Repository URL</label>
+        <input id="f_url" value="https://github.com/acme/web-app-locales.git" placeholder="https://github.com/org/repo.git"/>
+        <div class="hint">HTTPS or SSH. GitHub, GitLab and Bitbucket supported.</div>
+      </div>
+      <div class="two">
+        <div class="field">
+          <label>Branch</label>
+          <input id="f_branch" value="main"/>
+        </div>
+        <div class="field">
+          <label>File format</label>
+          <select id="f_format">
+            <option>JSON (nested)</option><option>JSON (flat)</option>
+            <option>XLIFF 2.0</option><option>Java .properties</option>
+            <option>Apple .strings</option><option>Android XML</option><option>YAML</option><option>PO / gettext</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Path pattern</label>
+        <input id="f_path" value="locales/{languageTag}.json"/>
+        <div class="hint">Tokens: <code>{languageTag}</code>, <code>{namespace}</code>. One file per language.</div>
+      </div>
+      <div class="field">
+        <label>Access token <span style="color:var(--muted);font-weight:400">(stored encrypted by the app backend)</span></label>
+        <input id="f_token" type="password" value="ghp_xxxxxxxxxxxxxxxxxxxx" placeholder="Personal access token / deploy key"/>
+        <div class="hint">Tolgee never sees this. It lives in the app's backend, keyed by install.</div>
+      </div>
+    </div>
+    <div class="m-foot">
+      <button class="btn ghost" onclick="closeModal('connectModal')">Cancel</button>
+      <button class="btn" id="btnTest" onclick="testConn()">Test connection</button>
+      <button class="btn primary" onclick="saveConn()">Save &amp; connect</button>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="scrim" id="settingsModal">
+  <div class="modal">
+    <div class="m-head"><h3>Sync settings</h3><button class="x" onclick="closeModal('settingsModal')">×</button></div>
+    <div class="m-body">
+      <div class="toggle-row">
+        <div class="t-txt"><b>Auto-push on change</b>
+          <span>Push to Git whenever translations change in Tolgee (via webhooks).</span></div>
+        <label class="switch"><input type="checkbox" checked/><i></i></label>
+      </div>
+      <div class="toggle-row">
+        <div class="t-txt"><b>Auto-pull on commit</b>
+          <span>Import into Tolgee when a new commit lands on the tracked branch.</span></div>
+        <label class="switch"><input type="checkbox"/><i></i></label>
+      </div>
+      <div class="toggle-row">
+        <div class="t-txt"><b>Open a PR instead of committing</b>
+          <span>Pushes create a pull request rather than committing to the branch directly.</span></div>
+        <label class="switch"><input type="checkbox"/><i></i></label>
+      </div>
+      <div class="field" style="margin-top:16px">
+        <label>Conflict resolution</label>
+        <select>
+          <option>Tolgee wins</option><option>Git wins</option>
+          <option selected>Newest change wins</option><option>Always ask</option>
+        </select>
+        <div class="hint">Applied when both sides changed the same translation between syncs.</div>
+      </div>
+      <div class="field">
+        <label>Commit message template</label>
+        <input value="chore(i18n): sync translations from Tolgee [{date}]"/>
+      </div>
+    </div>
+    <div class="m-foot">
+      <button class="btn ghost" onclick="closeModal('settingsModal')">Cancel</button>
+      <button class="btn primary" onclick="closeModal('settingsModal');toast('ok','Settings saved')">Save</button>
+    </div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+
+<script>
+  let connected = false;
+
+  function openModal(id){document.getElementById(id).classList.add('open')}
+  function closeModal(id){document.getElementById(id).classList.remove('open')}
+  document.querySelectorAll('.scrim').forEach(s=>s.addEventListener('click',e=>{
+    if(e.target===s) s.classList.remove('open');
+  }));
+
+  function toast(kind,msg){
+    const t=document.createElement('div');
+    t.className='toast '+kind;
+    t.innerHTML='<span class="d"></span>'+msg;
+    document.getElementById('toasts').appendChild(t);
+    setTimeout(()=>{t.style.opacity='0';t.style.transition='.4s';setTimeout(()=>t.remove(),400);},3200);
+  }
+
+  function testConn(){
+    const b=document.getElementById('btnTest');
+    b.disabled=true;b.innerHTML='Testing…';
+    setTimeout(()=>{b.disabled=false;b.textContent='Test connection';toast('ok','Connection OK · main · 42 files');},1100);
+  }
+
+  function saveConn(){
+    closeModal('connectModal');
+    connected=true;
+    document.getElementById('emptyState').classList.add('hidden');
+    document.getElementById('connectedState').classList.remove('hidden');
+    toast('ok','Repository connected');
+  }
+
+  const opMeta = {
+    pull:{btn:'btnPull',label:'Pulling from Git…',done:'Pulled · 3 keys, 18 translations imported'},
+    push:{btn:'btnPush',label:'Pushing to Git…',done:'Pushed · commit 9c1d77a'},
+    sync:{btn:'btnSync',label:'Syncing…',done:'Synced · 12 in, 34 out'},
+  };
+  function runOp(op){
+    const m=opMeta[op], b=document.getElementById(m.btn);
+    const orig=b.innerHTML;
+    document.querySelectorAll('.actions .btn').forEach(x=>x.disabled=true);
+    b.innerHTML='<svg class="spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 12a9 9 0 1 1-6.2-8.5"/></svg> '+m.label;
+    const pill=document.getElementById('statusPill');
+    pill.className='pill dirty sub';pill.innerHTML='<span class="d"></span>Working…';
+    toast('work', m.label);
+    setTimeout(()=>{
+      document.querySelectorAll('.actions .btn').forEach(x=>x.disabled=false);
+      b.innerHTML=orig;
+      pill.className='pill ok sub';pill.innerHTML='<span class="d"></span>In sync';
+      // zero out pending after a push/sync
+      if(op!=='pull'){['diffAdd','diffMod','diffDel'].forEach(id=>document.getElementById(id).textContent='—');
+        document.getElementById('changesSub').textContent='Nothing to push';}
+      toast('ok', m.done);
+      prependLog(op,m.done);
+    }, 1500);
+  }
+
+  function prependLog(op,detail){
+    const map={pull:'pull',push:'push',sync:'sync'};
+    const icons={pull:'<path d="M12 3v12m0 0 4-4m-4 4-4-4"/>',
+      push:'<path d="M12 21V9m0 0 4 4m-4-4-4 4"/>',
+      sync:'<path d="M21 12a9 9 0 0 1-15.5 6M3 12a9 9 0 0 1 15.5-6"/>'};
+    const row=document.createElement('div');row.className='row';
+    row.innerHTML=`<div class="ico ${map[op]}"><svg viewBox="0 0 24 24" width="15" fill="none" stroke="currentColor" stroke-width="2.2">${icons[op]}</svg></div>
+      <div class="txt"><b>${op[0].toUpperCase()+op.slice(1)}</b> by Daniel K. <span class="when">· just now</span>
+      <div class="det">${detail}</div></div>`;
+    const log=document.getElementById('log');log.insertBefore(row,log.firstChild);
+  }
+</script>
+</body>
+</html>
