@@ -935,6 +935,9 @@ export interface paths {
     put: operations["updateLanguageSettings"];
     delete: operations["deleteLanguageSettings"];
   };
+  "/v2/projects/{projectId}/qa-settings/languages/{languageId}/enabled": {
+    put: operations["setLanguageQaEnabled"];
+  };
   "/v2/projects/{projectId}/qa-settings/languages/{languageId}/resolved": {
     get: operations["getLanguageSettingsResolved"];
   };
@@ -1372,7 +1375,8 @@ export interface components {
         | "FEATURE_SUGGESTIONS_AND_LABELS"
         | "FEATURE_IMPROVED_FIGMA_ANDROID_AND_IOS"
         | "FEATURE_BRANCHING"
-        | "FEATURE_TRANSLATION_MEMORY_MANAGEMENT";
+        | "FEATURE_TRANSLATION_MEMORY_MANAGEMENT"
+        | "FEATURE_QA_CHECKS_AND_TRANSLATION_MEMORY";
     };
     ApiKeyModel: {
       /** @description Description */
@@ -3261,6 +3265,9 @@ export interface components {
         | "translation_exceeds_char_limit"
         | "url_not_valid"
         | "qa_checks_not_enabled"
+        | "plan_migration_not_found"
+        | "plan_has_migrations"
+        | "source_and_target_plan_must_be_different"
         | "app_manifest_fetch_failed"
         | "app_manifest_invalid"
         | "app_already_installed"
@@ -4325,6 +4332,7 @@ export interface components {
     };
     LanguageQaConfigModel: {
       customSettings?: { [key: string]: "WARNING" | "OFF" };
+      enabled: boolean;
       language: components["schemas"]["LanguageModel"];
     };
     LanguageRequest: {
@@ -7118,6 +7126,9 @@ export interface components {
         | "translation_exceeds_char_limit"
         | "url_not_valid"
         | "qa_checks_not_enabled"
+        | "plan_migration_not_found"
+        | "plan_has_migrations"
+        | "source_and_target_plan_must_be_different"
         | "app_manifest_fetch_failed"
         | "app_manifest_invalid"
         | "app_already_installed"
@@ -20863,6 +20874,47 @@ export interface operations {
         content: {
           "application/json": string;
         };
+      };
+    };
+  };
+  setLanguageQaEnabled: {
+    parameters: {
+      path: {
+        languageId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["QaEnabledRequest"];
       };
     };
   };
