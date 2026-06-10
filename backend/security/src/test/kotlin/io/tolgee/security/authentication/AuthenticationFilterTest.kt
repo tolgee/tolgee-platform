@@ -17,6 +17,7 @@
 package io.tolgee.security.authentication
 
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.component.KeyGenerator
 import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
@@ -30,8 +31,11 @@ import io.tolgee.security.ratelimit.RateLimitPolicy
 import io.tolgee.security.ratelimit.RateLimitService
 import io.tolgee.security.ratelimit.RateLimitedException
 import io.tolgee.security.thirdParty.SsoDelegate
+import io.tolgee.service.apps.AppEnablementService
+import io.tolgee.service.apps.AppInstallService
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PatService
+import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -89,16 +93,31 @@ class AuthenticationFilterTest {
 
   private val ssoDelegate = Mockito.mock(SsoDelegate::class.java)
 
+  private val appTokenService = Mockito.mock(AppTokenService::class.java)
+
+  private val appInstallService = Mockito.mock(AppInstallService::class.java)
+
+  private val appEnablementService = Mockito.mock(AppEnablementService::class.java)
+
+  private val keyGenerator = Mockito.mock(KeyGenerator::class.java)
+
+  private val permissionService = Mockito.mock(PermissionService::class.java)
+
   private val authenticationFilter =
     AuthenticationFilter(
-      tolgeeProperties,
-      currentDateProvider,
-      rateLimitService,
-      jwtService,
-      userAccountService,
-      pakService,
-      patService,
-      ssoDelegate,
+      tolgeeProperties = tolgeeProperties,
+      currentDateProvider = currentDateProvider,
+      rateLimitService = rateLimitService,
+      jwtService = jwtService,
+      appTokenService = appTokenService,
+      appInstallService = appInstallService,
+      appEnablementService = appEnablementService,
+      userAccountService = userAccountService,
+      apiKeyService = pakService,
+      patService = patService,
+      ssoDelegate = ssoDelegate,
+      keyGenerator = keyGenerator,
+      permissionService = permissionService,
     )
 
   private val authenticationFacade =
