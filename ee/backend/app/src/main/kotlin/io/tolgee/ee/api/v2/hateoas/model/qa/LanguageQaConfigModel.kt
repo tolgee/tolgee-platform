@@ -10,4 +10,5 @@ import org.springframework.hateoas.server.core.Relation
 class LanguageQaConfigModel(
   val language: LanguageModel,
   val customSettings: Map<QaCheckType, QaCheckSeverity>?,
+  val enabled: Boolean,
 ) : RepresentationModel<LanguageQaConfigModel>()

@@ -157,8 +157,9 @@ class QueryTranslationFiltering(
    * QA filters — `filterHasQaIssuesInLang`, `filterQaCheckType` and `filterQaChecksStaleInLang`.
    */
   fun applyQaFilters() {
-    val hasIssuesLangIds = languageIdsForTags(params.filterHasQaIssuesInLang)
-    if (hasIssuesLangIds != null) {
+    val disabled = queryBase.qaDisabledLanguageIds
+    val hasIssuesLangIds = languageIdsForTags(params.filterHasQaIssuesInLang)?.filterNot { it in disabled }
+    if (!hasIssuesLangIds.isNullOrEmpty()) {
       queryBase.translationConditions.add(buildQaIssueExists(hasIssuesLangIds, checkTypes = null))
     }
     val checkTypeMap = filterByQaCheckTypeMap
@@ -167,14 +168,15 @@ class QueryTranslationFiltering(
         checkTypeMap.mapNotNull { (tag, types) ->
           if (types.isEmpty()) return@mapNotNull null
           val language = languageByTag(tag) ?: return@mapNotNull null
+          if (language.id in disabled) return@mapNotNull null
           buildQaIssueExists(listOf(language.id), checkTypes = types.toList())
         }
       if (perLangPredicates.isNotEmpty()) {
         queryBase.translationConditions.add(cb.or(*perLangPredicates.toTypedArray()))
       }
     }
-    val staleLangIds = languageIdsForTags(params.filterQaChecksStaleInLang)
-    if (staleLangIds != null) {
+    val staleLangIds = languageIdsForTags(params.filterQaChecksStaleInLang)?.filterNot { it in disabled }
+    if (!staleLangIds.isNullOrEmpty()) {
       queryBase.translationConditions.add(
         buildTranslationExists(staleLangIds) { t -> cb.isTrue(t.get(Translation_.qaChecksStale)) },
       )

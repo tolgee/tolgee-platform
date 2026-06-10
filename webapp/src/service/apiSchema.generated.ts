@@ -895,6 +895,9 @@ export interface paths {
     put: operations["updateLanguageSettings"];
     delete: operations["deleteLanguageSettings"];
   };
+  "/v2/projects/{projectId}/qa-settings/languages/{languageId}/enabled": {
+    put: operations["setLanguageQaEnabled"];
+  };
   "/v2/projects/{projectId}/qa-settings/languages/{languageId}/resolved": {
     get: operations["getLanguageSettingsResolved"];
   };
@@ -4185,6 +4188,7 @@ export interface components {
     };
     LanguageQaConfigModel: {
       customSettings?: { [key: string]: "WARNING" | "OFF" };
+      enabled: boolean;
       language: components["schemas"]["LanguageModel"];
     };
     LanguageRequest: {
@@ -20189,6 +20193,47 @@ export interface operations {
         content: {
           "application/json": string;
         };
+      };
+    };
+  };
+  setLanguageQaEnabled: {
+    parameters: {
+      path: {
+        languageId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["QaEnabledRequest"];
       };
     };
   };

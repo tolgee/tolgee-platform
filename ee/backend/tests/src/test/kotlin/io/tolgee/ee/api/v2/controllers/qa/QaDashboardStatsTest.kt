@@ -100,4 +100,23 @@ class QaDashboardStatsTest : AuthorizedControllerTest() {
       }
     }
   }
+
+  @Test
+  fun `language stats QA counts are zero only for a per-language disabled language`() {
+    languageStatsService.refreshLanguageStats(testData.project.id)
+
+    performAuthGet(
+      "/v2/projects/${testData.project.id}/stats",
+    ).andIsOk.andAssertThatJson {
+      node("languageStats").isArray.anySatisfy {
+        assertThatJson(it).node("languageTag").isEqualTo("es")
+        assertThatJson(it).node("qaIssueCount").isEqualTo(0)
+        assertThatJson(it).node("qaChecksStaleCount").isEqualTo(0)
+      }
+      node("languageStats").isArray.anySatisfy {
+        assertThatJson(it).node("languageTag").isEqualTo("de")
+        assertThatJson(it).node("qaIssueCount").isEqualTo(1)
+      }
+    }
+  }
 }

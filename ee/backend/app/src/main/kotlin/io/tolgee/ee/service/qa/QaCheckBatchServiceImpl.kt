@@ -78,9 +78,12 @@ class QaCheckBatchServiceImpl(
     items: List<BatchTranslationTargetItem>,
     progressCallback: () -> Unit,
   ): List<ItemResult> {
+    val qaDisabledLanguageIds = projectQaConfigService.getDisabledLanguageIds(project.id)
+    val enabledItems = items.filter { it.languageId !in qaDisabledLanguageIds }
+
     val baseLanguage = languageService.getProjectBaseLanguage(project.id)
-    val keyIds = items.map { it.keyId }.toSet()
-    val languageIds = items.map { it.languageId }.toSet()
+    val keyIds = enabledItems.map { it.keyId }.toSet()
+    val languageIds = enabledItems.map { it.languageId }.toSet()
 
     val translations =
       translationRepository.findAllWithKeyAndLanguageByKeyIdInAndLanguageIdIn(
@@ -88,7 +91,7 @@ class QaCheckBatchServiceImpl(
         languageIds + baseLanguage.id,
       )
 
-    val wantedPairs = items.map { it.keyId to it.languageId }.toSet()
+    val wantedPairs = enabledItems.map { it.keyId to it.languageId }.toSet()
     val translationByKeyAndLanguage =
       translations
         .filter { it.key.id to it.language.id in wantedPairs }
@@ -110,7 +113,7 @@ class QaCheckBatchServiceImpl(
     val enabledCheckTypesByLanguage: Map<Long, Set<QaCheckType>> =
       languageIds.associateWith { projectQaConfigService.getEnabledCheckTypesForLanguage(project.id, it) }
 
-    return items.mapNotNull { item ->
+    return enabledItems.mapNotNull { item ->
       // If the key has been deleted between job enqueue and processing, skip it
       val key = keyById[item.keyId] ?: return@mapNotNull null
       val languageTag = languageTagById[item.languageId] ?: return@mapNotNull null

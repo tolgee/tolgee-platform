@@ -235,12 +235,14 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
     join t.key k
     where k.project.id = :projectId
       and k.branch.id = :branchId
+      and t.language.id in :languageIds
       and t.qaChecksStale = true
     """,
   )
-  fun getStaleKeyLanguagePairsByBranch(
+  fun getStaleKeyLanguagePairsByBranchAndLanguageIds(
     projectId: Long,
     branchId: Long,
+    languageIds: Collection<Long>,
   ): List<KeyLanguagePairView>
 
   @Query(
@@ -249,10 +251,14 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
     from Translation t
     join t.key k
     where k.project.id = :projectId
+      and t.language.id in :languageIds
       and t.qaChecksStale = true
     """,
   )
-  fun getStaleKeyLanguagePairsByProject(projectId: Long): List<KeyLanguagePairView>
+  fun getStaleKeyLanguagePairsByProjectAndLanguageIds(
+    projectId: Long,
+    languageIds: Collection<Long>,
+  ): List<KeyLanguagePairView>
 
   @Query(
     """

@@ -7,6 +7,7 @@ import io.tolgee.activity.data.ActivityType
 import io.tolgee.constants.Feature
 import io.tolgee.ee.api.v2.hateoas.assemblers.qa.QaIssueModelAssembler
 import io.tolgee.ee.data.qa.QaCheckIssueIgnoreRequest
+import io.tolgee.ee.service.qa.ProjectQaConfigService
 import io.tolgee.ee.service.qa.QaIssueService
 import io.tolgee.hateoas.qa.QaIssueModel
 import io.tolgee.model.enums.Scope
@@ -15,6 +16,7 @@ import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.ReadOnlyOperation
 import io.tolgee.security.authorization.RequiresFeatures
 import io.tolgee.security.authorization.RequiresProjectPermissions
+import io.tolgee.service.translation.TranslationService
 import jakarta.validation.Valid
 import org.springframework.hateoas.CollectionModel
 import org.springframework.http.ResponseEntity
@@ -34,6 +36,8 @@ import org.springframework.web.bind.annotation.RestController
 class QaIssueController(
   private val qaIssueService: QaIssueService,
   private val qaIssueModelAssembler: QaIssueModelAssembler,
+  private val translationService: TranslationService,
+  private val projectQaConfigService: ProjectQaConfigService,
 ) {
   @GetMapping
   @Operation(summary = "Get persisted QA issues for a translation")
@@ -45,6 +49,11 @@ class QaIssueController(
     @PathVariable projectId: Long,
     @PathVariable translationId: Long,
   ): CollectionModel<QaIssueModel> {
+    val translation = translationService.get(projectId, translationId)
+    if (!projectQaConfigService.isLanguageQaEnabled(projectId, translation.language.id)) {
+      return CollectionModel.empty()
+    }
+
     val issues = qaIssueService.getIssuesForTranslation(projectId, translationId)
     return qaIssueModelAssembler.toCollectionModel(issues)
   }

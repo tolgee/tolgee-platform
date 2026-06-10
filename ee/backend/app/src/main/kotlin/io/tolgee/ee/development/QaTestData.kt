@@ -49,10 +49,25 @@ class QaTestData(
 
   lateinit var keyWithDeIssues: Key
 
+  /**
+   * Spanish has QA disabled at the language level ([LanguageQaConfig.enabled] = false) while the
+   * project QA feature stays on; [disabledLangTranslationWithIssues] seeds OPEN issues on it.
+   */
+  lateinit var spanishLanguage: Language
+  lateinit var disabledLangTranslationWithIssues: Translation
+
   init {
     project.useQaChecks = true
     projectBuilder.build {
       frenchLanguage = addFrench().self
+      val spanishBuilder =
+        addLanguage {
+          name = "Spanish"
+          tag = "es"
+          originalName = "Español"
+        }
+      spanishBuilder.setQaConfig { enabled = false }
+      spanishLanguage = spanishBuilder.self
       // testKey: clean. No QA issues — tests that a pristine translation.
       testKey =
         addKey {
@@ -86,6 +101,27 @@ class QaTestData(
                 replacement = "B"
               }
             }
+          disabledLangTranslationWithIssues =
+            addTranslation("es", "hola mundo")
+              .also { it.self.qaChecksStale = false }
+              .build {
+                addQaIssue {
+                  type = QaCheckType.PUNCTUATION_MISMATCH
+                  message = QaIssueMessage.QA_PUNCTUATION_ADD
+                  state = QaIssueState.OPEN
+                  positionStart = 11
+                  positionEnd = 11
+                  replacement = "."
+                }
+                addQaIssue {
+                  type = QaCheckType.CHARACTER_CASE_MISMATCH
+                  message = QaIssueMessage.QA_CASE_CAPITALIZE
+                  state = QaIssueState.OPEN
+                  positionStart = 0
+                  positionEnd = 1
+                  replacement = "H"
+                }
+              }.self
         }.self
       keyWithoutFrTranslation =
         addKey {
