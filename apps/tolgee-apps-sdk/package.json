@@ -1,6 +1,6 @@
 {
   "name": "@tolgee/apps-sdk",
-  "version": "0.0.1-alpha.5",
+  "version": "0.0.1-alpha.7",
   "description": "SDK for building Tolgee Apps plugins — postMessage handshake, manifest schema, webhook signature verifier, JWT context helpers.",
   "type": "module",
   "main": "./dist/index.js",
