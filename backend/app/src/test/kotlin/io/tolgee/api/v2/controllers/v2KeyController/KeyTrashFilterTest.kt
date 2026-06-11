@@ -106,6 +106,35 @@ class KeyTrashFilterTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @ProjectJWTAuthTestMethod
   @Test
+  fun `trashed listing combined with filterHasDescription returns only trashed keys with a description`() {
+    keyService.softDeleteMultiple(
+      listOf(testData.keyWithDescription.id, testData.numberedKeys[0].id),
+      testData.user,
+    )
+
+    performProjectAuthGet("/keys/trash?filterHasDescription=true")
+      .andPrettyPrint.andIsOk
+      .andAssertThatJson {
+        node("_embedded.keys") {
+          isArray.hasSize(1)
+          node("[0].name").isEqualTo("Key with description")
+        }
+        node("page.totalElements").isEqualTo(1)
+      }
+
+    performProjectAuthGet("/keys/trash?filterHasNoDescription=true")
+      .andPrettyPrint.andIsOk
+      .andAssertThatJson {
+        node("_embedded.keys") {
+          isArray.hasSize(1)
+          node("[0].name").isEqualTo("key 01")
+        }
+        node("page.totalElements").isEqualTo(1)
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
   fun `trashed listing combined with filterKeyName returns only trashed matching keys`() {
     val key05 = testData.numberedKeys[4]
     val key06 = testData.numberedKeys[5]

@@ -52,6 +52,8 @@ class QueryGlobalFiltering(
     filterTranslatedAny()
     filterHasScreenshot()
     filterHasNoScreenshot()
+    filterHasDescription()
+    filterHasNoDescription()
     filterSearch()
     filterRevisionId()
     filterFailedTargets()
@@ -111,6 +113,18 @@ class QueryGlobalFiltering(
   private fun filterHasScreenshot() {
     if (params.filterHasScreenshot == true) {
       queryBase.whereConditions.add(cb.gt(queryBase.screenshotCountExpression, 0))
+    }
+  }
+
+  private fun filterHasDescription() {
+    if (params.filterHasDescription == true) {
+      queryBase.whereConditions.add(cb.isNotNullOrBlank(queryBase.descriptionExpression))
+    }
+  }
+
+  private fun filterHasNoDescription() {
+    if (params.filterHasNoDescription == true) {
+      queryBase.whereConditions.add(cb.isNullOrBlank(queryBase.descriptionExpression))
     }
   }
 

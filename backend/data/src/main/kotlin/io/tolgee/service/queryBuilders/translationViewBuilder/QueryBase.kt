@@ -84,6 +84,7 @@ class QueryBase<T>(
   val querySelection = QuerySelection()
   val fullTextFields: MutableSet<Expression<String>> = HashSet()
   lateinit var namespaceNameExpression: Path<String>
+  lateinit var descriptionExpression: Path<String>
   lateinit var screenshotCountExpression: Expression<Long>
   var branchJoin: Join<Key, Branch>? = null
   var deletedByJoin: Join<Key, UserAccount>? = null
@@ -213,6 +214,7 @@ class QueryBase<T>(
   private fun addDescription() {
     val keyMeta = this.root.join(Key_.keyMeta, JoinType.LEFT)
     val description = keyMeta.get(KeyMeta_.description)
+    descriptionExpression = description
     this.querySelection[KeyWithTranslationsView::keyDescription.name] = description
     this.fullTextFields.add(description)
   }
@@ -243,10 +245,12 @@ class QueryBase<T>(
     querySelection[KeyWithTranslationsView::deletedByUserAvatarHash.name] = deletedByJoin.get(UserAccount_.avatarHash)
     querySelection[KeyWithTranslationsView::deletedByUserDeletedAt.name] = deletedByJoin.get(UserAccount_.deletedAt)
   }
+}
 
-  val Expression<String>.isNotNullOrBlank: Predicate
-    get() = cb.and(cb.isNotNull(this), cb.notEqual(this, ""))
+fun CriteriaBuilder.isNotNullOrBlank(expression: Expression<String>): Predicate {
+  return and(isNotNull(expression), notEqual(expression, ""))
+}
 
-  val Expression<String>.isNullOrBlank: Predicate
-    get() = cb.or(cb.isNull(this), cb.equal(this, ""))
+fun CriteriaBuilder.isNullOrBlank(expression: Expression<String>): Predicate {
+  return or(isNull(expression), equal(expression, ""))
 }
