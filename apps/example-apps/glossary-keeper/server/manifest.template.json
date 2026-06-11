@@ -1,0 +1,21 @@
+{
+  "id": "glossary-keeper",
+  "name": "Glossary Keeper",
+  "version": "0.1.0",
+  "baseUrl": "__BASE_URL__",
+  "scopes": ["translations.view", "keys.view", "glossary.view", "glossary.edit"],
+  "webhooks": {
+    "events": ["SET_TRANSLATIONS"],
+    "url": "__BASE_URL__/webhook"
+  },
+  "modules": {
+    "project-dashboard-page": [
+      {
+        "key": "updates",
+        "title": "Glossary updates",
+        "icon": "📖",
+        "entry": "/"
+      }
+    ]
+  }
+}

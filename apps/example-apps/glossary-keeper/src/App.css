@@ -1,0 +1,137 @@
+/* Colors come from applyTolgeeTheme(ctx.theme) → --tg-color-* (hex values are fallbacks). */
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, system-ui, sans-serif;
+  color: var(--tg-color-text, #1d1b20);
+  background: var(--tg-color-background, #fff);
+}
+
+.gk-page {
+  padding: 16px 20px;
+  max-width: 900px;
+}
+
+.gk-page h1 {
+  margin: 0 0 4px;
+  font-size: 1.3rem;
+}
+
+.gk-subtitle {
+  margin: 0 0 16px;
+  font-size: 0.9rem;
+  color: var(--tg-color-text-secondary, #6b6375);
+}
+
+.gk-muted {
+  font-size: 0.9rem;
+  color: var(--tg-color-text-secondary, #6b6375);
+}
+
+.gk-info {
+  padding: 12px 14px;
+  border: 1px solid var(--tg-color-divider, #e4e2dd);
+  border-radius: 8px;
+  background: var(--tg-color-background-paper, #f4f3ec);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.gk-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.gk-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.78rem;
+  color: var(--tg-color-text-secondary, #6b6375);
+}
+
+.gk-field select {
+  font-size: 0.9rem;
+  padding: 5px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--tg-color-divider, #e4e2dd);
+  background: var(--tg-color-background-paper, #fff);
+  color: var(--tg-color-text, #1d1b20);
+}
+
+.gk-btn {
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--tg-color-divider, #d0d0d0);
+  background: var(--tg-color-background-paper, #fafafa);
+  color: var(--tg-color-text, #1d1b20);
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.gk-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.gk-btn-primary {
+  border-color: transparent;
+  background: var(--tg-color-primary, #aa3bff);
+  color: var(--tg-color-primary-contrast, #fff);
+}
+
+.gk-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.gk-table th {
+  text-align: left;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--tg-color-text-secondary, #6b6375);
+  border-bottom: 1px solid var(--tg-color-divider, #e4e2dd);
+  padding: 6px 10px;
+}
+
+.gk-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--tg-color-divider, #e4e2dd);
+  vertical-align: top;
+}
+
+.gk-term {
+  font-weight: 600;
+}
+
+.gk-desc {
+  font-size: 0.8rem;
+  color: var(--tg-color-text-secondary, #6b6375);
+  margin-top: 2px;
+}
+
+.gk-lang {
+  display: inline-block;
+  font-size: 0.7rem;
+  padding: 1px 6px;
+  border-radius: 10px;
+  background: var(--tg-color-background-paper, #f4f3ec);
+  color: var(--tg-color-text-secondary, #6b6375);
+  margin-right: 4px;
+}
+
+.gk-page code {
+  background: var(--tg-color-background-paper, #f4f3ec);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
