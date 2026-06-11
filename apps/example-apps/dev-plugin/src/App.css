@@ -1,0 +1,201 @@
+/* All colors come from the example's design tokens in index.css, which resolve
+ * to Tolgee's theme via applyTolgeeTheme(ctx.theme). */
+
+.plugin-page {
+  font-family: system-ui, sans-serif;
+  padding: 1.5rem;
+  max-width: 900px;
+  color: var(--text-h);
+}
+
+.plugin-page h1 {
+  margin: 0 0 0.5rem;
+  font-size: 1.75rem;
+}
+
+.plugin-page p {
+  margin: 0 0 1rem;
+  color: var(--text);
+}
+
+.plugin-page table.keys {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.plugin-page table.keys th,
+.plugin-page table.keys td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.plugin-page table.keys th {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  color: var(--text);
+  background: var(--code-bg);
+}
+
+.plugin-page code {
+  background: var(--code-bg);
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-size: 0.85em;
+}
+
+.plugin-page code.ns {
+  margin-right: 6px;
+  color: var(--text);
+}
+
+.plugin-page code.lang {
+  margin-right: 6px;
+  color: var(--text);
+}
+
+.plugin-page .emoji-row {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+}
+
+.plugin-page .emoji-btn {
+  font-size: 1.1em;
+  line-height: 1;
+  border: 1px solid transparent;
+  background: transparent;
+  border-radius: 4px;
+  padding: 2px 4px;
+  cursor: pointer;
+  transition:
+    background 0.1s,
+    border-color 0.1s;
+}
+
+.plugin-page .emoji-btn:hover {
+  background: var(--code-bg);
+}
+
+.plugin-page .emoji-btn.selected {
+  background: var(--accent-bg);
+  border-color: var(--accent-border);
+}
+
+.plugin-page .emoji-btn.clear {
+  font-size: 0.95em;
+  color: var(--text);
+}
+
+.plugin-page .emoji-btn[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.plugin-page .updated {
+  font-size: 0.7rem;
+  color: var(--text);
+  margin-top: 2px;
+}
+
+.plugin-page th .th-hint {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 400;
+  color: var(--text);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.plugin-page .activity-cell {
+  vertical-align: middle;
+}
+
+.plugin-page .activity-count {
+  font-size: 0.7rem;
+  color: var(--text);
+  margin-top: 2px;
+}
+
+.tools-panel {
+  font-family: system-ui, sans-serif;
+  padding: 12px 14px;
+  display: grid;
+  gap: 8px;
+  background: var(--tg-color-background-paper, transparent);
+  color: var(--text-h);
+}
+
+.tools-panel-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.tools-panel-label {
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.tools-panel-count {
+  font-size: 0.75rem;
+  color: var(--text);
+}
+
+.tools-panel-hint {
+  font-size: 0.7rem;
+  color: var(--text);
+}
+
+.modal-explain {
+  font-family: system-ui, sans-serif;
+  padding: 16px 20px;
+  display: grid;
+  gap: 12px;
+  background: var(--tg-color-background, transparent);
+  color: var(--text-h);
+}
+
+.modal-explain h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.modal-explain table.kv {
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.modal-explain table.kv th {
+  text-align: left;
+  font-weight: 500;
+  padding: 4px 12px 4px 0;
+  color: var(--text);
+  vertical-align: top;
+}
+
+.modal-explain table.kv td {
+  padding: 4px 0;
+}
+
+.modal-explain .modal-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.modal-explain .modal-actions button {
+  padding: 6px 14px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: var(--code-bg);
+  color: var(--text-h);
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.modal-explain .modal-actions button:hover {
+  background: var(--accent-bg);
+}

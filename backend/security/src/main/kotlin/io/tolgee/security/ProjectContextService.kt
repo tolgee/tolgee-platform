@@ -68,6 +68,18 @@ class ProjectContextService(
             userId,
           )
 
+          if (authenticationFacade.isAppAuth) {
+            // The user demonstrably has the project (they reached it through the
+            // plugin sidebar of a project they're a member of). The empty effective
+            // scope set means the install's grantedScopes don't intersect with the
+            // user's project scopes. Surface that as 403 with the required scopes —
+            // hiding-project-existence is the wrong threat model here.
+            throw PermissionException(
+              Message.OPERATION_NOT_PERMITTED,
+              requiredScopes?.map { it.value } ?: emptyList(),
+            )
+          }
+
           if (!canBypassForReadOnly()) {
             // Security consideration: if the user cannot see the project, pretend it does not exist.
             throw ProjectNotFoundException(project.id)
@@ -131,7 +143,7 @@ class ProjectContextService(
   }
 
   private val canUseAdminPermissions
-    get() = !authenticationFacade.isProjectApiKeyAuth
+    get() = !authenticationFacade.isProjectApiKeyAuth && !authenticationFacade.isAppAuth
 
   private fun canBypass(isWriteOperation: Boolean): Boolean {
     if (!canUseAdminPermissions) return false

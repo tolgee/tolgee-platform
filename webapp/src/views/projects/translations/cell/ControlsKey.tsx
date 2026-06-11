@@ -6,22 +6,30 @@ import { styled } from '@mui/material';
 import { CELL_SHOW_ON_HOVER } from './styles';
 import { ControlsButton } from './ControlsButton';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { AppDecoratorList } from '../decorators/AppDecoratorList';
 
 const StyledControls = styled('div')`
   display: flex;
   gap: 12px;
+  align-items: center;
 `;
 
 type ControlsProps = {
   editEnabled?: boolean;
   onEdit?: () => void;
   onAddScreenshot?: () => void;
+  keyId?: number;
+  keyName?: string;
+  keyNamespace?: string | null;
 };
 
 export const ControlsKey: React.FC<ControlsProps> = ({
   editEnabled,
   onEdit,
   onAddScreenshot,
+  keyId,
+  keyName,
+  keyNamespace,
 }) => {
   const { satisfiesPermission } = useProjectPermissions();
   const canViewScreenshots = satisfiesPermission('screenshots.view');
@@ -55,6 +63,14 @@ export const ControlsKey: React.FC<ControlsProps> = ({
             <CameraPlus />
           </ControlsButton>
         </>
+      )}
+      {keyId != null && (
+        <AppDecoratorList
+          kind="key"
+          keyId={keyId}
+          keyName={keyName}
+          keyNamespace={keyNamespace}
+        />
       )}
     </StyledControls>
   );
