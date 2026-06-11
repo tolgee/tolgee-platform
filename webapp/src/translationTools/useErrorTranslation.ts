@@ -41,6 +41,11 @@ export function useErrorTranslation() {
         return t('third_party_switch_conflict');
       case 'username_already_exists':
         return t('username_already_exists');
+      case 'email_domain_not_allowed':
+        return t(
+          'email_domain_not_allowed',
+          'This email address cannot be used to register. Please use a different one.'
+        );
       case 'user_already_has_permissions':
         return t('user_already_has_permissions');
       case 'user_already_has_role':

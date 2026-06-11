@@ -6,6 +6,7 @@ import io.tolgee.dtos.misc.CreateProjectInvitationParams
 import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.fixtures.andAssertError
 import io.tolgee.fixtures.andAssertResponse
+import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andIsUnauthorized
@@ -27,18 +28,26 @@ import kotlin.properties.Delegates
 class PublicControllerTest : AbstractControllerTest() {
   private var canCreateOrganizations by Delegates.notNull<Boolean>()
   private var registrationsAllowed by Delegates.notNull<Boolean>()
+  private var blockDisposableEmails by Delegates.notNull<Boolean>()
+  private var blockEmailAliases by Delegates.notNull<Boolean>()
 
   @BeforeEach
   fun setup() {
     Mockito.reset(postHog)
     canCreateOrganizations = tolgeeProperties.authentication.userCanCreateOrganizations
     registrationsAllowed = tolgeeProperties.authentication.registrationsAllowed
+    blockDisposableEmails = tolgeeProperties.authentication.blockDisposableEmails
+    blockEmailAliases = tolgeeProperties.authentication.blockEmailAliases
   }
 
   @AfterEach
   fun tearDown() {
     tolgeeProperties.authentication.userCanCreateOrganizations = canCreateOrganizations
     tolgeeProperties.authentication.registrationsAllowed = registrationsAllowed
+    tolgeeProperties.authentication.blockDisposableEmails = blockDisposableEmails
+    tolgeeProperties.authentication.blockEmailAliases = blockEmailAliases
+    tolgeeProperties.authentication.blockedEmailDomains.clear()
+    tolgeeProperties.authentication.allowedEmailDomains.clear()
   }
 
   @Autowired
@@ -205,5 +214,69 @@ class PublicControllerTest : AbstractControllerTest() {
       .error()
       .isStandardValidation
       .onField("email")
+  }
+
+  @Test
+  fun `rejects sign up from a disposable email domain`() {
+    val dto = SignUpDto(name = "Pavel Novak", password = "aaaaaaaaa", email = "spammer@mailinator.com")
+    performPost("/api/public/sign_up", dto)
+      .andIsBadRequest
+      .andHasErrorMessage(Message.EMAIL_DOMAIN_NOT_ALLOWED)
+  }
+
+  @Test
+  fun `allows a disposable domain when disposable blocking is disabled`() {
+    tolgeeProperties.authentication.blockDisposableEmails = false
+    val dto = SignUpDto(name = "Pavel Novak", password = "aaaaaaaaa", email = "spammer@mailinator.com")
+    performPost("/api/public/sign_up", dto).andIsOk
+  }
+
+  @Test
+  fun `rejects sign up from an admin-configured blocked domain`() {
+    tolgeeProperties.authentication.blockedEmailDomains.add("blocked.example")
+    val dto = SignUpDto(name = "Pavel Novak", password = "aaaaaaaaa", email = "someone@blocked.example")
+    performPost("/api/public/sign_up", dto)
+      .andIsBadRequest
+      .andHasErrorMessage(Message.EMAIL_DOMAIN_NOT_ALLOWED)
+  }
+
+  @Test
+  fun `allows a domain that is whitelisted even when also disposable`() {
+    tolgeeProperties.authentication.allowedEmailDomains.add("mailinator.com")
+    val dto = SignUpDto(name = "Pavel Novak", password = "aaaaaaaaa", email = "spammer@mailinator.com")
+    performPost("/api/public/sign_up", dto).andIsOk
+  }
+
+  @Test
+  fun `rejects a plus-alias of an existing account`() {
+    dbPopulator.createUserIfNotExists("foo@gmail.com")
+    val dto = SignUpDto(name = "Pavel Novak", password = "aaaaaaaaa", email = "foo+spam@gmail.com")
+    performPost("/api/public/sign_up", dto)
+      .andIsBadRequest
+      .andHasErrorMessage(Message.USERNAME_ALREADY_EXISTS)
+  }
+
+  @Test
+  fun `rejects a case variant of an existing account`() {
+    dbPopulator.createUserIfNotExists("foo@gmail.com")
+    val dto = SignUpDto(name = "Pavel Novak", password = "aaaaaaaaa", email = "FOO@gmail.com")
+    performPost("/api/public/sign_up", dto)
+      .andIsBadRequest
+      .andHasErrorMessage(Message.USERNAME_ALREADY_EXISTS)
+  }
+
+  @Test
+  fun `allows a distinct email on the same domain as an existing account`() {
+    dbPopulator.createUserIfNotExists("foo@gmail.com")
+    val dto = SignUpDto(name = "Pavel Novak", password = "aaaaaaaaa", email = "bar@gmail.com")
+    performPost("/api/public/sign_up", dto).andIsOk
+  }
+
+  @Test
+  fun `allows a plus-alias when alias blocking is disabled`() {
+    tolgeeProperties.authentication.blockEmailAliases = false
+    dbPopulator.createUserIfNotExists("foo@gmail.com")
+    val dto = SignUpDto(name = "Pavel Novak", password = "aaaaaaaaa", email = "foo+spam@gmail.com")
+    performPost("/api/public/sign_up", dto).andIsOk
   }
 }
