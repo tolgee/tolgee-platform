@@ -1,3 +1,12 @@
+## [3.204.1](https://github.com/tolgee/tolgee-platform/compare/v3.204.0...v3.204.1) (2026-06-11)
+
+
+### Bug Fixes
+
+* **import:** show all supported formats + add docs link ([#3722](https://github.com/tolgee/tolgee-platform/issues/3722)) ([c23fb4c](https://github.com/tolgee/tolgee-platform/commit/c23fb4c8e3edac4c2b8c55e5662c0e4998c2c546)), closes [#3362](https://github.com/tolgee/tolgee-platform/issues/3362) [#3356](https://github.com/tolgee/tolgee-platform/issues/3356)
+* ProjectNotSelectedException in batch worker ([#3730](https://github.com/tolgee/tolgee-platform/issues/3730)) ([a7e3ce9](https://github.com/tolgee/tolgee-platform/commit/a7e3ce9e4ffbc2380d41ae97df799bf52e17d586)), closes [#3724](https://github.com/tolgee/tolgee-platform/issues/3724)
+* Revert "fix: ProjectNotSelectedException in batch worker" ([#3747](https://github.com/tolgee/tolgee-platform/issues/3747)) ([877effa](https://github.com/tolgee/tolgee-platform/commit/877effaef9c596a8963f58ae7319336b297d456e)), closes [tolgee/tolgee-platform#3730](https://github.com/tolgee/tolgee-platform/issues/3730)
+
 # [3.204.0](https://github.com/tolgee/tolgee-platform/compare/v3.203.0...v3.204.0) (2026-06-11)
 
 
