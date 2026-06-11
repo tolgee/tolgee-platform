@@ -8,4 +8,5 @@ export const DOCS_LINKS = {
   qaChecksSpelling: `${DOCS_ROOT}/platform/translation_process/qa_checks#spelling-and-grammar-checks`,
   translationMemoryManagement: `${DOCS_ROOT}/platform/translation_process/managing_translation_memories`,
   poMsgctxt: `${DOCS_ROOT}/platform/formats/po#message-context-msgctxt-and-key-names`,
+  supportedFormats: `${DOCS_ROOT}/platform/supported_formats`,
 };
