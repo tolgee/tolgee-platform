@@ -1,0 +1,21 @@
+# Snyk (https://snyk.io) policy file.
+# These advisories live in the Cypress e2e test harness only. The code never
+# ships to users and never runs in production — it executes in CI against known
+# fixture files, not attacker-controlled input. xlsx (SheetJS) has no published
+# npm fix. Re-review on expiry.
+version: v1.25.0
+ignore:
+  SNYK-JS-XLSX-6252523:
+    - '*':
+        reason: >-
+          ReDoS in xlsx. Test-only dependency (Cypress e2e); never shipped,
+          never processes untrusted input. No npm fix available (SheetJS
+          distributes fixes via their own CDN only).
+        expires: 2027-06-11T00:00:00.000Z
+  SNYK-JS-XLSX-5457926:
+    - '*':
+        reason: >-
+          Prototype pollution in xlsx. Test-only dependency (Cypress e2e); never
+          shipped, never processes untrusted input. No npm fix available
+          (SheetJS distributes fixes via their own CDN only).
+        expires: 2027-06-11T00:00:00.000Z
