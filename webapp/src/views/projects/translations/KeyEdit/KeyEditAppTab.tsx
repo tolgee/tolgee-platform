@@ -64,7 +64,7 @@ export const KeyEditAppTab = ({ installId, baseUrl, entry, data }: Props) => {
       data-cy="key-edit-app-tab-iframe"
       data-cy-install-id={installId}
       src={iframeSrc}
-      sandbox="allow-scripts allow-forms allow-same-origin"
+      sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"
     />
   );
 };

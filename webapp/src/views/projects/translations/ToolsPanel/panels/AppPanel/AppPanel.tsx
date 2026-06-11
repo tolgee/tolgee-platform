@@ -95,7 +95,7 @@ export function createAppPanelComponent(binding: AppPanelBinding) {
         data-cy="translation-tools-app-iframe"
         data-cy-install-id={binding.installId}
         src={iframeSrc}
-        sandbox="allow-scripts allow-forms allow-same-origin"
+        sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"
         style={{ height }}
       />
     );
