@@ -3,7 +3,6 @@ package io.tolgee.batch
 import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Message
-import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.FormalityNotSupportedException
 import io.tolgee.exceptions.LanguageNotSupportedException
 import io.tolgee.exceptions.LlmContentFilterException
@@ -63,8 +62,6 @@ class MtProviderCatching(
         throw FailedDontRequeueException(e.tolgeeMessage!!, successfulTargets, e)
       } catch (e: EntityNotFoundException) {
         throw FailedDontRequeueException(Message.TRANSLATION_FAILED, successfulTargets, e)
-      } catch (e: BadRequestException) {
-        throw FailedDontRequeueException(e.tolgeeMessage ?: Message.TRANSLATION_FAILED, successfulTargets, e)
       } catch (e: Throwable) {
         exceptions.add(RequeueWithDelayException(Message.TRANSLATION_FAILED, successfulTargets, e))
       }
