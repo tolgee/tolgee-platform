@@ -12,6 +12,7 @@ import { QaCheckType } from 'tg.service/apiSchemaTypes';
 import { useQaCategories, useQaCheckTypes } from 'tg.globalContext/helpers';
 import { CheckTypeFilterItem } from './CheckTypeFilterItem';
 import { CheckTypeFilterName } from 'tg.ee.module/qa/components/CheckTypeFilterName';
+import { useQaDisabledLanguageIds } from '../hooks/useQaDisabledLanguageIds';
 
 export const SubfilterQaChecks = ({
   value,
@@ -23,6 +24,11 @@ export const SubfilterQaChecks = ({
   const anchorEl = useRef<HTMLElement>(null);
   const [expanded, setExpanded] = useState(
     value.filterQaCheckTypeLanguage !== undefined
+  );
+
+  const qaDisabledLanguageIds = useQaDisabledLanguageIds();
+  const qaEnabledLanguages = selectedLanguages?.filter(
+    (lang) => !qaDisabledLanguageIds.has(lang.id)
   );
 
   const qaCheckCategories = useQaCategories();
@@ -140,7 +146,7 @@ export const SubfilterQaChecks = ({
                   onClick={() => toggleLanguageScope(false)}
                   exclusive
                 />
-                {selectedLanguages?.map((lang) => (
+                {qaEnabledLanguages?.map((lang) => (
                   <FilterItem
                     data-cy="translations-filter-apply-for-language"
                     key={lang.id}

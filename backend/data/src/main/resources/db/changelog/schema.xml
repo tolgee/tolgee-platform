@@ -5604,6 +5604,13 @@
             DROP INDEX CONCURRENTLY IF EXISTS translation_qa_checks_stale_partial_idx;
         </rollback>
     </changeSet>
+    <changeSet author="anty (generated)" id="1775827900000-1">
+        <addColumn tableName="language_qa_config">
+            <column name="enabled" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
     <changeSet author="jancizmar" id="user-account-normalized-email-idx" runInTransaction="false">
         <comment>
             Functional index backing the sign-up duplicate guard (RegistrationEmailValidator), which

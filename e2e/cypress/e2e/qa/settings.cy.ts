@@ -75,6 +75,36 @@ describe('QA settings', () => {
       .should('contain.text', 'Off');
   });
 
+  it('toggles QA checks on/off for a single language', () => {
+    visitQaSettings();
+
+    gcy('qa-language-enabled-toggle')
+      .first()
+      .find('input')
+      .should('be.checked');
+
+    gcy('qa-language-enabled-toggle').first().click();
+    waitForGlobalLoading();
+    gcy('qa-language-enabled-toggle')
+      .first()
+      .find('input')
+      .should('not.be.checked');
+
+    // persists across reload
+    visitQaSettings();
+    gcy('qa-language-enabled-toggle')
+      .first()
+      .find('input')
+      .should('not.be.checked');
+
+    gcy('qa-language-enabled-toggle').first().click();
+    waitForGlobalLoading();
+    gcy('qa-language-enabled-toggle')
+      .first()
+      .find('input')
+      .should('be.checked');
+  });
+
   it('opens per-language settings dialog', () => {
     visitQaSettings();
 

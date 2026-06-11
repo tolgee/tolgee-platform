@@ -690,22 +690,26 @@ class TranslationService(
   }
 
   @Transactional(readOnly = true)
-  fun getStaleKeyLanguagePairsByBranch(
+  fun getStaleKeyLanguagePairsByBranchAndLanguageIds(
     projectId: Long,
     branchId: Long,
+    languageIds: Collection<Long>,
   ): List<KeyLanguagePairView> {
-    return translationRepository.getStaleKeyLanguagePairsByBranch(projectId, branchId)
+    return translationRepository.getStaleKeyLanguagePairsByBranchAndLanguageIds(projectId, branchId, languageIds)
   }
 
   @Transactional(readOnly = true)
-  fun getStaleKeyLanguagePairsByProject(projectId: Long): List<KeyLanguagePairView> {
-    return translationRepository.getStaleKeyLanguagePairsByProject(projectId)
+  fun getStaleKeyLanguagePairsByProjectAndLanguageIds(
+    projectId: Long,
+    languageIds: Collection<Long>,
+  ): List<KeyLanguagePairView> {
+    return translationRepository.getStaleKeyLanguagePairsByProjectAndLanguageIds(projectId, languageIds)
   }
 
   @Transactional(readOnly = true)
   fun getKeyLanguagePairsForQaRecheck(
     projectId: Long,
-    languageIds: List<Long>? = null,
+    languageIds: Collection<Long>? = null,
     onlyStale: Boolean = false,
   ): List<KeyLanguagePairView> {
     val cb = entityManager.criteriaBuilder

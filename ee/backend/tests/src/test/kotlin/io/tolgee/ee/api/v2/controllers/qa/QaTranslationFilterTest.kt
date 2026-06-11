@@ -7,7 +7,10 @@ import io.tolgee.ee.development.QaTestData
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.repository.qa.TranslationQaIssueRepository
+import io.tolgee.service.qa.QaCheckBatchService
 import io.tolgee.testing.AuthorizedControllerTest
+import io.tolgee.testing.assert
 import net.javacrumbs.jsonunit.assertj.assertThatJson
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -26,6 +29,12 @@ class QaTranslationFilterTest : AuthorizedControllerTest() {
 
   @Autowired
   private lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
+
+  @Autowired
+  private lateinit var qaCheckBatchService: QaCheckBatchService
+
+  @Autowired
+  private lateinit var qaIssueRepository: TranslationQaIssueRepository
 
   lateinit var testData: QaTestData
 
@@ -109,6 +118,64 @@ class QaTranslationFilterTest : AuthorizedControllerTest() {
     ).andIsOk.andAssertThatJson {
       node("page.totalElements").isEqualTo(7)
     }
+  }
+
+  @Test
+  fun `disabling a language drops it from filterQaCheckType while keeping enabled languages`() {
+    performAuthGet(
+      "$translationsUrl?languages=en&languages=de&languages=es" +
+        "&filterQaCheckType=es,PUNCTUATION_MISMATCH&filterQaCheckType=de,SPACES_MISMATCH",
+    ).andIsOk.andAssertThatJson {
+      node("_embedded.keys").isArray.hasSize(1)
+      node("_embedded.keys[0].keyName").isEqualTo("key-with-de-issues")
+    }
+  }
+
+  @Test
+  fun `filterHasQaIssuesInLang for a disabled-only language is ignored`() {
+    performAuthGet("$translationsUrl?filterHasQaIssuesInLang=es").andIsOk.andAssertThatJson {
+      node("page.totalElements").isEqualTo(7)
+    }
+  }
+
+  @Test
+  fun `filterQaChecksStaleInLang for a disabled-only language is ignored`() {
+    performAuthGet("$translationsUrl?filterQaChecksStaleInLang=es").andIsOk.andAssertThatJson {
+      node("page.totalElements").isEqualTo(7)
+    }
+  }
+
+  @Test
+  fun `qaIssueCount is zero for a disabled language in the translation view`() {
+    performAuthGet("$translationsUrl?languages=es&languages=de").andIsOk.andAssertThatJson {
+      node("_embedded.keys").isArray.anySatisfy {
+        assertThatJson(it).node("keyName").isEqualTo("key-with-issues")
+        assertThatJson(it).node("translations.es.qaIssueCount").isEqualTo(0)
+      }
+      node("_embedded.keys").isArray.anySatisfy {
+        assertThatJson(it).node("keyName").isEqualTo("key-with-de-issues")
+        assertThatJson(it).node("translations.de.qaIssueCount").isEqualTo(1)
+      }
+    }
+  }
+
+  @Test
+  fun `recheck does not delete QA issues for a disabled language`() {
+    val esTranslationId = testData.disabledLangTranslationWithIssues.id
+    val countBefore = qaIssueRepository.findAllByTranslationId(esTranslationId).size
+    countBefore.assert.isGreaterThan(0)
+
+    qaCheckBatchService.runChecksAndPersist(
+      testData.project.id,
+      testData.keyWithIssues.id,
+      testData.spanishLanguage.id,
+      null,
+    )
+
+    qaIssueRepository
+      .findAllByTranslationId(esTranslationId)
+      .size.assert
+      .isEqualTo(countBefore)
   }
 
   @Test
