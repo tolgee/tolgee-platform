@@ -3,6 +3,7 @@ package io.tolgee.service.apps
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.activity.data.ActivityType
+import io.tolgee.configuration.tolgee.AppsProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.apps.AppActionType
 import io.tolgee.dtos.apps.AppManifest
@@ -19,6 +20,7 @@ class AppManifestFetcher(
   private val restTemplate: RestTemplate,
   private val objectMapper: ObjectMapper,
   private val urlSecurity: UrlSecurity,
+  private val appsProperties: AppsProperties,
 ) {
   data class FetchResult(
     val manifest: AppManifest,
@@ -29,7 +31,7 @@ class AppManifestFetcher(
   )
 
   fun fetch(url: String): FetchResult {
-    urlSecurity.validateUrl(url)
+    urlSecurity.validateUrl(url, allowLocalAddresses = appsProperties.allowLocalAddresses)
 
     val rawJson =
       try {
