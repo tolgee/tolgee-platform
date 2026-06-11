@@ -1,3 +1,16 @@
+# [3.204.0](https://github.com/tolgee/tolgee-platform/compare/v3.203.0...v3.204.0) (2026-06-11)
+
+
+### Bug Fixes
+
+* block disposable-domain and alias-duplicate registrations ([#3740](https://github.com/tolgee/tolgee-platform/issues/3740)) ([a80bae5](https://github.com/tolgee/tolgee-platform/commit/a80bae57affc745bf56265092e952eda4a9d6065))
+* patch OS-layer CVEs in the app Docker image ([#3743](https://github.com/tolgee/tolgee-platform/issues/3743)) ([0a06f4b](https://github.com/tolgee/tolgee-platform/commit/0a06f4be22a2d2a4df6ef5c0e31ef6a14929a0b4))
+
+
+### Features
+
+* add filter by description presence to key listing ([#3737](https://github.com/tolgee/tolgee-platform/issues/3737)) ([e49ce98](https://github.com/tolgee/tolgee-platform/commit/e49ce9842f94e7fde83c868cc316eb9db388350f)), closes [#3663](https://github.com/tolgee/tolgee-platform/issues/3663)
+
 # [3.203.0](https://github.com/tolgee/tolgee-platform/compare/v3.202.0...v3.203.0) (2026-06-11)
 
 
