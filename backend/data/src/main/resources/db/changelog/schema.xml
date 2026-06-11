@@ -5627,4 +5627,152 @@
             <sql>DROP INDEX CONCURRENTLY IF EXISTS user_account_normalized_email;</sql>
         </rollback>
     </changeSet>
+
+    <changeSet author="dkrizan" id="user-account-normalize-username-casing-and-dedup">
+        <comment>
+            Step 1 of 3 (with the next two changeSets) of making usernames (emails) case-insensitive:
+            dedup the data so the new unique lower(username) index can be built. The old case-sensitive
+            index allowed case-variant duplicates (e.g. "Ab@x" / "ab@x"), which the new index and
+            case-insensitive findActive() can't tolerate. Runs on Cloud and every self-hosted upgrade,
+            so it's automatic and non-destructive.
+
+            For each group of non-deleted accounts (deleted_at IS NULL, username NOT NULL) sharing
+            lower(username): keep one survivor (active first, then most recent activity, then oldest /
+            lowest id) and retire the rest by disabling + renaming (not deleted, so admins can re-enable).
+            Then lowercase the surviving active usernames.
+            Renaming happens before lowercasing so the still-live old unique index is never violated.
+        </comment>
+
+        <sql dbms="postgresql"><![CDATA[
+            WITH dup_emails AS (
+              SELECT lower(username) AS lemail
+              FROM user_account
+              WHERE deleted_at IS NULL
+                AND username IS NOT NULL
+              GROUP BY lower(username)
+              HAVING count(*) > 1
+            ),
+            cand AS (
+              SELECT ua.id, ua.created_at, ua.disabled_at, lower(ua.username) AS lemail
+              FROM user_account ua
+              JOIN dup_emails d ON d.lemail = lower(ua.username)
+              WHERE ua.deleted_at IS NULL
+                AND ua.username IS NOT NULL
+            ),
+            last_activity AS (
+              SELECT author_id, max(timestamp) AS ts
+              FROM activity_revision
+              WHERE author_id IN (SELECT id FROM cand)
+              GROUP BY author_id
+            ),
+            ranked AS (
+              SELECT c.id,
+                     row_number() OVER (
+                       PARTITION BY c.lemail
+                       ORDER BY (c.disabled_at IS NULL) DESC,
+                                a.ts DESC NULLS LAST,
+                                c.created_at ASC,
+                                c.id ASC
+                     ) AS rn
+              FROM cand c
+              LEFT JOIN last_activity a ON a.author_id = c.id
+            )
+            UPDATE user_account ua
+            SET disabled_at = COALESCE(ua.disabled_at, now()),
+                -- id makes it globally unique (even after truncation); left(...) keeps it within
+                -- username's varchar(255) so a very long email can't overflow and abort the migration.
+                username = format(
+                  'disabled-%s-%s',
+                  ua.id,
+                  left(ua.username, 255 - length(format('disabled-%s-', ua.id)))
+                )
+            FROM ranked r
+            WHERE ua.id = r.id AND r.rn > 1;
+        ]]></sql>
+
+        <sql dbms="postgresql"><![CDATA[
+            UPDATE user_account
+            SET username = lower(username)
+            WHERE deleted_at IS NULL
+              AND disabled_at IS NULL
+              AND username <> lower(username);
+        ]]></sql>
+
+        <!-- Irreversible data change: original casing, the renamed usernames and which accounts were
+             disabled are not recorded, so there is nothing safe to revert to. -->
+        <rollback/>
+    </changeSet>
+
+    <changeSet author="dkrizan" id="user-account-lower-username-unique-index" runInTransaction="false">
+        <comment>
+            Replace the case-sensitive username uniqueness with a case-insensitive one. Built
+            CONCURRENTLY here, while the old case-sensitive index is still live, so writes are
+            protected throughout (the old index is dropped in the next changeSet, after this one
+            succeeds - there is never a window without a unique index).
+
+            An interrupted CONCURRENTLY build (killed deploy, lock timeout) leaves an INVALID index
+            of this name; CREATE ... IF NOT EXISTS would then match it by name and skip, so on retry
+            the next changeSet would drop the old index and leave nothing enforcing uniqueness. Drop
+            any such invalid leftover first so the build actually re-runs.
+        </comment>
+        <sql dbms="postgresql" splitStatements="false"><![CDATA[
+            DO $$
+            BEGIN
+              IF EXISTS (
+                SELECT 1
+                FROM pg_class c
+                JOIN pg_index i ON i.indexrelid = c.oid
+                WHERE c.relname = 'user_account_lower_username_uidx'
+                  AND NOT i.indisvalid
+              ) THEN
+                DROP INDEX user_account_lower_username_uidx;
+              END IF;
+            END $$;
+        ]]></sql>
+        <sql dbms="postgresql">
+            CREATE UNIQUE INDEX CONCURRENTLY IF NOT EXISTS user_account_lower_username_uidx
+                ON user_account (lower(username))
+                WHERE deleted_at IS NULL;
+        </sql>
+        <rollback>
+            <sql dbms="postgresql">DROP INDEX CONCURRENTLY IF EXISTS user_account_lower_username_uidx;</sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="dkrizan" id="user-account-drop-old-case-sensitive-username-index">
+        <comment>
+            Drop the old case-sensitive partial unique index (changeSet 1663247386701-2, auto-named,
+            so located by definition) - but only once the case-insensitive replacement exists AND is
+            valid, so an interrupted build can never leave the table with no enforced unique index.
+        </comment>
+        <sql dbms="postgresql" splitStatements="false"><![CDATA[
+            DO $$
+            DECLARE
+              idx text;
+            BEGIN
+              IF NOT EXISTS (
+                SELECT 1
+                FROM pg_class c
+                JOIN pg_index i ON i.indexrelid = c.oid
+                WHERE c.relname = 'user_account_lower_username_uidx'
+                  AND i.indisvalid
+              ) THEN
+                RAISE EXCEPTION 'user_account_lower_username_uidx is missing or invalid; refusing to drop the old username index';
+              END IF;
+
+              SELECT indexname INTO idx
+              FROM pg_indexes
+              WHERE schemaname = 'public'
+                AND tablename = 'user_account'
+                AND indexdef ILIKE '%UNIQUE%'
+                AND indexdef ILIKE '%(username)%'
+                AND indexdef ILIKE '%deleted_at IS NULL%'
+                AND indexdef NOT ILIKE '%lower(%';
+              IF idx IS NOT NULL THEN
+                EXECUTE 'DROP INDEX ' || quote_ident(idx);
+              END IF;
+            END $$;
+        ]]></sql>
+        <rollback/>
+    </changeSet>
 </databaseChangeLog>

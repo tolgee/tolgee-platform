@@ -572,19 +572,23 @@ class UserAccountService(
     dto: UserUpdateRequestDto,
     request: HttpServletRequest,
   ) {
-    if (userAccount.username != dto.email) {
-      if (!emailValidator.isValid(dto.email, null)) {
-        // todo: Allow to specify STANDARD_VALIDATION typed errors to show errors on specific fields
-        throw ValidationException(Message.VALIDATION_EMAIL_IS_NOT_VALID)
-      }
-
-      this.findActive(dto.email)?.let { throw ValidationException(Message.USERNAME_ALREADY_EXISTS) }
-      if (tolgeeProperties.authentication.needsEmailVerification) {
-        emailVerificationService.resendEmailVerification(userAccount, request, dto.callbackUrl, dto.email)
-      } else {
-        userAccount.username = dto.email
-      }
+    val newEmail = dto.email.lowercase()
+    if (userAccount.username == newEmail) {
+      return
     }
+
+    if (!emailValidator.isValid(newEmail, null)) {
+      // todo: Allow to specify STANDARD_VALIDATION typed errors to show errors on specific fields
+      throw ValidationException(Message.VALIDATION_EMAIL_IS_NOT_VALID)
+    }
+
+    this.findActive(newEmail)?.let { throw ValidationException(Message.USERNAME_ALREADY_EXISTS) }
+    if (tolgeeProperties.authentication.needsEmailVerification) {
+      emailVerificationService.resendEmailVerification(userAccount, request, dto.callbackUrl, newEmail)
+      return
+    }
+
+    userAccount.username = newEmail
   }
 
   fun invalidateTokens(userAccount: UserAccount): UserAccount {
