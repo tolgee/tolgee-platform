@@ -141,6 +141,9 @@ export const SCOPES: { value: string; label: string }[] = [
   { value: 'screenshots.view', label: 'View screenshots' },
   { value: 'screenshots.upload', label: 'Upload screenshots' },
   { value: 'activity.view', label: 'View activity' },
+  // Organization-level scopes (let the app manage glossary terms in the org it's installed in).
+  { value: 'glossary.view', label: 'Read glossary terms' },
+  { value: 'glossary.edit', label: 'Edit glossary terms' },
 ]
 
 /**

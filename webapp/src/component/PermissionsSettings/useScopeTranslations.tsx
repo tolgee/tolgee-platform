@@ -53,6 +53,8 @@ export const useScopeTranslations = () => {
     'all.view': t('permissions_item_all_view'),
     'branch.management': t('permissions_item_branch_management'),
     'branch.protected-modify': t('permissions_item_branch_protected_modify'),
+    'glossary.view': t('permissions_item_glossary_view', 'View glossary terms'),
+    'glossary.edit': t('permissions_item_glossary_edit', 'Edit glossary terms'),
   };
 
   return {

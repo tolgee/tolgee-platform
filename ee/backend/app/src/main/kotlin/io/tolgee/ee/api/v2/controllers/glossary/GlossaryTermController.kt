@@ -18,9 +18,11 @@ import io.tolgee.ee.data.glossary.DeleteMultipleGlossaryTermsRequest
 import io.tolgee.ee.data.glossary.UpdateGlossaryTermWithTranslationRequest
 import io.tolgee.ee.service.glossary.GlossaryTermService
 import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.enums.Scope
 import io.tolgee.model.glossary.GlossaryTerm
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthTokenType
+import io.tolgee.security.authorization.AllowAppAccessWithOrgScope
 import io.tolgee.security.authorization.RequiresFeatures
 import io.tolgee.security.authorization.RequiresOrganizationRole
 import io.tolgee.security.authorization.UseDefaultPermissions
@@ -57,6 +59,7 @@ class GlossaryTermController(
   @Operation(summary = "Create a new glossary term")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
+  @AllowAppAccessWithOrgScope(Scope.GLOSSARY_EDIT)
   @RequiresFeatures(Feature.GLOSSARY)
   @Transactional
   @RequestActivity(ActivityType.GLOSSARY_TERM_CREATE)
@@ -79,6 +82,7 @@ class GlossaryTermController(
   @Operation(summary = "Batch delete multiple terms")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
+  @AllowAppAccessWithOrgScope(Scope.GLOSSARY_EDIT)
   @RequiresFeatures(Feature.GLOSSARY)
   @Transactional
   @RequestActivity(ActivityType.GLOSSARY_TERM_DELETE)
@@ -94,6 +98,7 @@ class GlossaryTermController(
   @Operation(summary = "Update glossary term")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
+  @AllowAppAccessWithOrgScope(Scope.GLOSSARY_EDIT)
   @RequiresFeatures(Feature.GLOSSARY)
   @Transactional
   @RequestActivity(ActivityType.GLOSSARY_TERM_UPDATE)
@@ -114,6 +119,7 @@ class GlossaryTermController(
   @Operation(summary = "Delete glossary term")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
+  @AllowAppAccessWithOrgScope(Scope.GLOSSARY_EDIT)
   @RequiresFeatures(Feature.GLOSSARY)
   @Transactional
   @RequestActivity(ActivityType.GLOSSARY_TERM_DELETE)
@@ -129,6 +135,7 @@ class GlossaryTermController(
   @Operation(summary = "Get glossary term")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @UseDefaultPermissions
+  @AllowAppAccessWithOrgScope(Scope.GLOSSARY_VIEW)
   @RequiresFeatures(Feature.GLOSSARY)
   fun get(
     @PathVariable organizationId: Long,
@@ -143,6 +150,7 @@ class GlossaryTermController(
   @Operation(summary = "Get all glossary terms")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @UseDefaultPermissions
+  @AllowAppAccessWithOrgScope(Scope.GLOSSARY_VIEW)
   @RequiresFeatures(Feature.GLOSSARY)
   fun getAll(
     @PathVariable organizationId: Long,
@@ -159,6 +167,7 @@ class GlossaryTermController(
   @Operation(summary = "Get all glossary terms with translations")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @UseDefaultPermissions
+  @AllowAppAccessWithOrgScope(Scope.GLOSSARY_VIEW)
   @RequiresFeatures(Feature.GLOSSARY)
   fun getAllWithTranslations(
     @PathVariable organizationId: Long,
@@ -182,6 +191,7 @@ class GlossaryTermController(
   @Operation(summary = "Get all glossary terms ids")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @UseDefaultPermissions
+  @AllowAppAccessWithOrgScope(Scope.GLOSSARY_VIEW)
   @RequiresFeatures(Feature.GLOSSARY)
   fun getAllIds(
     @PathVariable organizationId: Long,

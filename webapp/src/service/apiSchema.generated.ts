@@ -1471,6 +1471,8 @@ export interface components {
         | "all.view"
         | "branch.management"
         | "branch.protected-modify"
+        | "glossary.view"
+        | "glossary.edit"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -2260,6 +2262,8 @@ export interface components {
         | "all.view"
         | "branch.management"
         | "branch.protected-modify"
+        | "glossary.view"
+        | "glossary.edit"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -3541,7 +3545,9 @@ export interface components {
         | "translation-labels.assign"
         | "all.view"
         | "branch.management"
-        | "branch.protected-modify";
+        | "branch.protected-modify"
+        | "glossary.view"
+        | "glossary.edit";
     };
     IdentifyRequest: {
       anonymousUserId: string;
@@ -5063,6 +5069,8 @@ export interface components {
         | "all.view"
         | "branch.management"
         | "branch.protected-modify"
+        | "glossary.view"
+        | "glossary.edit"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -5159,6 +5167,8 @@ export interface components {
         | "all.view"
         | "branch.management"
         | "branch.protected-modify"
+        | "glossary.view"
+        | "glossary.edit"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -25175,6 +25185,8 @@ export interface operations {
               | "all.view"
               | "branch.management"
               | "branch.protected-modify"
+              | "glossary.view"
+              | "glossary.edit"
             )[];
           };
         };

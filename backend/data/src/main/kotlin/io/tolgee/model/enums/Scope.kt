@@ -45,6 +45,12 @@ enum class Scope(
   ALL_VIEW("all.view"),
   BRANCH_MANAGEMENT("branch.management"),
   BRANCH_PROTECTED_MODIFY("branch.protected-modify"),
+
+  // Organization-level scopes — grantable to apps via their manifest, checked by the
+  // org authorization interceptor. NOT part of the project hierarchy below (a project
+  // ADMIN does not get them, and project-permission checks never see them).
+  GLOSSARY_VIEW("glossary.view"),
+  GLOSSARY_EDIT("glossary.edit"),
   ;
 
   fun expand() = Scope.expand(this)
@@ -167,6 +173,24 @@ enum class Scope(
         ),
       )
 
+    /**
+     * Organization-level scope trees, kept separate from the project [hierarchy] so that
+     * project ADMIN doesn't implicitly grant them and project-permission checks never see
+     * them. Each root is its own tree so [expand] still resolves it (a scope absent from
+     * every tree would expand to nothing). Apps request these in their manifest and the
+     * org authorization interceptor checks them.
+     */
+    val organizationHierarchies =
+      listOf(
+        HierarchyItem(GLOSSARY_EDIT, listOf(HierarchyItem(GLOSSARY_VIEW))),
+      )
+
+    val organizationLevelScopes: Set<Scope> by lazy {
+      organizationHierarchies.flatMap { expand(it.scope).toList() }.toSet()
+    }
+
+    fun isOrganizationLevel(scope: Scope): Boolean = organizationLevelScopes.contains(scope)
+
     private fun expand(item: HierarchyItem): MutableSet<Scope> {
       val descendants =
         item.requires
@@ -191,7 +215,8 @@ enum class Scope(
     }
 
     private fun getScopeHierarchyItems(scope: Scope): Array<HierarchyItem> {
-      return getScopeHierarchyItems(root = hierarchy, scope).toTypedArray()
+      val roots = listOf(hierarchy) + organizationHierarchies
+      return roots.flatMap { getScopeHierarchyItems(root = it, scope) }.toTypedArray()
     }
 
     fun expand(scope: Scope): Array<Scope> {

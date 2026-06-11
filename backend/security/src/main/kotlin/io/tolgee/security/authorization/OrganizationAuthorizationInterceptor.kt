@@ -22,6 +22,7 @@ import io.tolgee.dtos.cacheable.isSupporterOrAdmin
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.enums.Scope
 import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.RequestContextService
 import io.tolgee.security.authentication.AuthenticationFacade
@@ -56,9 +57,9 @@ class OrganizationAuthorizationInterceptor(
     handler: HandlerMethod,
   ): Boolean {
     if (authenticationFacade.isAppAuth) {
-      // Apps act on a single project; they have no business satisfying organization-level
-      // role requirements or browsing org-scoped data.
-      throw PermissionException(Message.APP_TOKEN_NOT_ALLOWED_FOR_ENDPOINT)
+      // Apps are rejected from org-level endpoints unless the endpoint explicitly opts in via
+      // @AllowAppAccessWithOrgScope and the app's install (in this org) holds the required scope.
+      return handleAppAuthorization(request, handler)
     }
 
     val userId = authenticationFacade.authenticatedUser.id
@@ -120,6 +121,40 @@ class OrganizationAuthorizationInterceptor(
         request.method,
         request.requestURI,
       )
+    }
+
+    organizationHolder.organization = organization
+    return true
+  }
+
+  /**
+   * Authorizes an app token on an org-level endpoint. Allowed only when the endpoint opts in via
+   * [AllowAppAccessWithOrgScope], the app's install belongs to the target organization, and the
+   * install's granted scopes include the required org-level scope(s). The org owner consented to
+   * those scopes at install time, so no user organization role is checked (install grant suffices).
+   */
+  private fun handleAppAuthorization(
+    request: HttpServletRequest,
+    handler: HandlerMethod,
+  ): Boolean {
+    val annotation =
+      AnnotationUtils.getAnnotation(handler.method, AllowAppAccessWithOrgScope::class.java)
+        ?: throw PermissionException(Message.APP_TOKEN_NOT_ALLOWED_FOR_ENDPOINT)
+
+    val organization =
+      requestContextService.getTargetOrganization(request)
+        ?: throw PermissionException(Message.APP_TOKEN_NOT_ALLOWED_FOR_ENDPOINT)
+
+    val appInstall = authenticationFacade.appAuthentication.appInstall
+    if (appInstall.organization.id != organization.id) {
+      // An app may only act on its own organization.
+      throw PermissionException(Message.APP_TOKEN_NOT_ALLOWED_FOR_ENDPOINT)
+    }
+
+    val granted = Scope.expand(appInstall.grantedScopes).toSet()
+    val missing = annotation.scopes.toList().filterNot { granted.contains(it) }
+    if (missing.isNotEmpty()) {
+      throw PermissionException(missing)
     }
 
     organizationHolder.organization = organization

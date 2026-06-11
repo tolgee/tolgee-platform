@@ -11,8 +11,10 @@ import io.tolgee.ee.data.glossary.UpdateGlossaryTermTranslationRequest
 import io.tolgee.ee.service.glossary.GlossaryTermService
 import io.tolgee.ee.service.glossary.GlossaryTermTranslationService
 import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.enums.Scope
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthTokenType
+import io.tolgee.security.authorization.AllowAppAccessWithOrgScope
 import io.tolgee.security.authorization.RequiresFeatures
 import io.tolgee.security.authorization.RequiresOrganizationRole
 import io.tolgee.security.authorization.UseDefaultPermissions
@@ -38,6 +40,7 @@ class GlossaryTermTranslationController(
   @Operation(summary = "Set a new glossary term translation for language")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
+  @AllowAppAccessWithOrgScope(Scope.GLOSSARY_EDIT)
   @RequiresFeatures(Feature.GLOSSARY)
   @Transactional
   @RequestActivity(ActivityType.GLOSSARY_TERM_TRANSLATION_UPDATE)
@@ -62,6 +65,7 @@ class GlossaryTermTranslationController(
   @Operation(summary = "Get glossary term translation for language")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @UseDefaultPermissions
+  @AllowAppAccessWithOrgScope(Scope.GLOSSARY_VIEW)
   @RequiresFeatures(Feature.GLOSSARY)
   fun get(
     @PathVariable
