@@ -114,7 +114,9 @@ export const ProjectAppPageView = () => {
           // Isolation from the Tolgee parent is enforced by the plugin running
           // on a different origin (per-plugin subdomain in prod, localhost:5180
           // vs localhost:3824 in dev) — NOT by null-origin sandboxing.
-          sandbox="allow-scripts allow-forms allow-same-origin"
+          // allow-popups(+-to-escape-sandbox) lets in-app links / window.open open a
+          // normal (non-sandboxed) new tab.
+          sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"
           title={module.title}
         />
       )}
