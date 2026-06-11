@@ -1,6 +1,6 @@
 import { WebhookType, AppWebhookPayload, WebhookPayloadFor } from './index.js';
 export { AppAction, AppActionType, AppIframeModule, AppManifest, AppModules, AppShortcut, AppWebhooks, DecoratorItem, DecoratorsRequest, DecoratorsResponse } from './index.js';
-import { A as AppContextClaims } from './contextTypes-49PRp5PQ.js';
+import { A as AppContextClaims } from './contextTypes-xgD-1LAp.js';
 import '@tginternal/client';
 
 /**

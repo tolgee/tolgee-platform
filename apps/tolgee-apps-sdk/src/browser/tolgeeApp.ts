@@ -1,6 +1,7 @@
 import type {
   TolgeeAppContext,
   TolgeeAppSelection,
+  TolgeeAppTheme,
 } from '../shared/contextTypes'
 
 type Unsubscribe = () => void
@@ -16,6 +17,7 @@ const KNOWN_INIT_FIELDS = new Set([
   'translationId',
   'languageTag',
   'selectedLanguages',
+  'theme',
 ])
 
 type InitMessage = {
@@ -29,6 +31,7 @@ type InitMessage = {
   languageTag?: string
   translationId?: number
   selectedLanguages?: string[]
+  theme: TolgeeAppTheme
 } & Record<string, unknown>
 
 type SelectionChangedMessage = {
@@ -50,6 +53,16 @@ const isSelectionChanged = (d: unknown): d is SelectionChangedMessage =>
   d !== null &&
   (d as { type: unknown }).type === 'tolgee-app:selection-changed'
 
+type ThemeChangedMessage = {
+  type: 'tolgee-app:theme-changed'
+  theme: TolgeeAppTheme
+}
+
+const isThemeChanged = (d: unknown): d is ThemeChangedMessage =>
+  typeof d === 'object' &&
+  d !== null &&
+  (d as { type: unknown }).type === 'tolgee-app:theme-changed'
+
 const parseInit = (m: InitMessage): TolgeeAppContext => {
   const extra: Record<string, unknown> = {}
   for (const [k, v] of Object.entries(m)) {
@@ -67,6 +80,7 @@ const parseInit = (m: InitMessage): TolgeeAppContext => {
       translationId: m.translationId,
       selectedLanguages: m.selectedLanguages,
     },
+    theme: m.theme,
     extra,
   }
 }
@@ -85,6 +99,8 @@ export class TolgeeApp {
   private resolveContext!: (ctx: TolgeeAppContext) => void
   private selectionHandlers = new Set<(s: TolgeeAppSelection) => void>()
   private currentSelection: TolgeeAppSelection = {}
+  private themeHandlers = new Set<(t: TolgeeAppTheme) => void>()
+  private currentTheme: TolgeeAppTheme | undefined
 
   constructor() {
     this.contextPromise = new Promise((resolve) => {
@@ -124,6 +140,19 @@ export class TolgeeApp {
     }
   }
 
+  /**
+   * Subscribe to host theme changes (light/dark toggles). Returns an
+   * unsubscribe function and fires once with the current theme after init.
+   * Pair with `applyTolgeeTheme` to restyle the iframe live.
+   */
+  onThemeChanged(handler: (theme: TolgeeAppTheme) => void): Unsubscribe {
+    this.themeHandlers.add(handler)
+    if (this.currentTheme) handler(this.currentTheme)
+    return () => {
+      this.themeHandlers.delete(handler)
+    }
+  }
+
   /** Asks the host to close the modal/panel containing this iframe. */
   close(): void {
     window.parent.postMessage({ type: 'tolgee-app:close' }, '*')
@@ -144,7 +173,14 @@ export class TolgeeApp {
     if (isInit(d)) {
       const ctx = parseInit(d)
       this.currentSelection = ctx.selection
+      this.currentTheme = ctx.theme
       this.resolveContext(ctx)
+      // Deliver the initial values to handlers registered before init arrived
+      // (createTolgeeApp() is called, then handlers are added synchronously, all
+      // before the host's init message). Without this, onSelectionChanged /
+      // onThemeChanged would only fire on later changes, never on first load.
+      this.selectionHandlers.forEach((h) => h(ctx.selection))
+      this.themeHandlers.forEach((h) => h(ctx.theme))
     } else if (isSelectionChanged(d)) {
       this.currentSelection = {
         keyId: d.keyId,
@@ -154,6 +190,9 @@ export class TolgeeApp {
         selectedLanguages: d.selectedLanguages,
       }
       this.selectionHandlers.forEach((h) => h(this.currentSelection))
+    } else if (isThemeChanged(d)) {
+      this.currentTheme = d.theme
+      this.themeHandlers.forEach((h) => h(d.theme))
     }
   }
 }

@@ -1,11 +1,14 @@
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
+  /* Driven by applyTolgeeTheme(ctx.theme) → follows Tolgee's light/dark. The
+   * hex values are only fallbacks for when the theme hasn't been applied. */
+  --text: var(--tg-color-text-secondary, #6b6375);
+  --text-h: var(--tg-color-text, #08060d);
+  --bg: var(--tg-color-background, #fff);
+  --code-bg: var(--tg-color-background-paper, #f4f3ec);
+  --border: var(--tg-color-divider, #e4e2dd);
+  --accent: var(--tg-color-primary, #aa3bff);
   --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
+  --accent-border: var(--tg-color-divider, rgba(170, 59, 255, 0.5));
   --social-bg: rgba(244, 243, 236, 0.5);
   --shadow:
     rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
@@ -29,24 +32,11 @@
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
+/* Tolgee's theme (via applyTolgeeTheme) drives dark mode, not the OS — so the
+ * tokens above already resolve to dark values in dark mode. Only the icon
+ * inversion needs an explicit dark hook. */
+[data-tg-theme='dark'] #social .button-icon {
+  filter: invert(1) brightness(2);
 }
 
 #root {
@@ -62,7 +52,8 @@
 html,
 body {
   margin: 0;
-  background: transparent;
+  background: var(--tg-color-background, transparent);
+  color: var(--text);
 }
 
 h1,

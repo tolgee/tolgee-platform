@@ -9,10 +9,12 @@ var KNOWN_INIT_FIELDS = /* @__PURE__ */ new Set([
   "languageId",
   "translationId",
   "languageTag",
-  "selectedLanguages"
+  "selectedLanguages",
+  "theme"
 ]);
 var isInit = (d) => typeof d === "object" && d !== null && d.type === "tolgee-app:init";
 var isSelectionChanged = (d) => typeof d === "object" && d !== null && d.type === "tolgee-app:selection-changed";
+var isThemeChanged = (d) => typeof d === "object" && d !== null && d.type === "tolgee-app:theme-changed";
 var parseInit = (m) => {
   const extra = {};
   for (const [k, v] of Object.entries(m)) {
@@ -30,6 +32,7 @@ var parseInit = (m) => {
       translationId: m.translationId,
       selectedLanguages: m.selectedLanguages
     },
+    theme: m.theme,
     extra
   };
 };
@@ -38,6 +41,8 @@ var TolgeeApp = class {
   resolveContext;
   selectionHandlers = /* @__PURE__ */ new Set();
   currentSelection = {};
+  themeHandlers = /* @__PURE__ */ new Set();
+  currentTheme;
   constructor() {
     this.contextPromise = new Promise((resolve) => {
       this.resolveContext = resolve;
@@ -71,6 +76,18 @@ var TolgeeApp = class {
       this.selectionHandlers.delete(handler);
     };
   }
+  /**
+   * Subscribe to host theme changes (light/dark toggles). Returns an
+   * unsubscribe function and fires once with the current theme after init.
+   * Pair with `applyTolgeeTheme` to restyle the iframe live.
+   */
+  onThemeChanged(handler) {
+    this.themeHandlers.add(handler);
+    if (this.currentTheme) handler(this.currentTheme);
+    return () => {
+      this.themeHandlers.delete(handler);
+    };
+  }
   /** Asks the host to close the modal/panel containing this iframe. */
   close() {
     window.parent.postMessage({ type: "tolgee-app:close" }, "*");
@@ -88,7 +105,10 @@ var TolgeeApp = class {
     if (isInit(d)) {
       const ctx = parseInit(d);
       this.currentSelection = ctx.selection;
+      this.currentTheme = ctx.theme;
       this.resolveContext(ctx);
+      this.selectionHandlers.forEach((h) => h(ctx.selection));
+      this.themeHandlers.forEach((h) => h(ctx.theme));
     } else if (isSelectionChanged(d)) {
       this.currentSelection = {
         keyId: d.keyId,
@@ -98,6 +118,9 @@ var TolgeeApp = class {
         selectedLanguages: d.selectedLanguages
       };
       this.selectionHandlers.forEach((h) => h(this.currentSelection));
+    } else if (isThemeChanged(d)) {
+      this.currentTheme = d.theme;
+      this.themeHandlers.forEach((h) => h(d.theme));
     }
   };
 };
@@ -113,8 +136,20 @@ var createTolgeeAppClient = (context) => {
     autoThrow: false
   });
 };
+
+// src/browser/applyTheme.ts
+var VAR_PREFIX = "--tg-color-";
+var kebab = (s) => s.replace(/[A-Z]/g, (m) => `-${m.toLowerCase()}`);
+var applyTolgeeTheme = (theme, root = document.documentElement) => {
+  for (const [name, value] of Object.entries(theme.colors)) {
+    root.style.setProperty(`${VAR_PREFIX}${kebab(name)}`, value);
+  }
+  root.dataset.tgTheme = theme.mode;
+  root.style.colorScheme = theme.mode;
+};
 export {
   TolgeeApp,
+  applyTolgeeTheme,
   createTolgeeApp,
   createTolgeeAppClient
 };

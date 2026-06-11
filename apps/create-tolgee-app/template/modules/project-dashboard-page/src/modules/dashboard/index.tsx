@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import {
+  applyTolgeeTheme,
   createTolgeeApp,
   createTolgeeAppClient,
   type TolgeeAppContext,
@@ -13,7 +14,11 @@ export default function Dashboard() {
   useEffect(() => {
     const app = createTolgeeApp()
     app.context.then(setCtx)
-    return () => app.dispose()
+    const offTheme = app.onThemeChanged(applyTolgeeTheme)
+    return () => {
+      offTheme()
+      app.dispose()
+    }
   }, [])
 
   useEffect(() => {

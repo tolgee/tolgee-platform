@@ -1,7 +1,11 @@
+/* All colors come from the example's design tokens in index.css, which resolve
+ * to Tolgee's theme via applyTolgeeTheme(ctx.theme). */
+
 .plugin-page {
   font-family: system-ui, sans-serif;
   padding: 1.5rem;
   max-width: 900px;
+  color: var(--text-h);
 }
 
 .plugin-page h1 {
@@ -11,7 +15,7 @@
 
 .plugin-page p {
   margin: 0 0 1rem;
-  color: #444;
+  color: var(--text);
 }
 
 .plugin-page table.keys {
@@ -23,7 +27,7 @@
 .plugin-page table.keys th,
 .plugin-page table.keys td {
   padding: 8px 12px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--border);
   text-align: left;
   vertical-align: top;
 }
@@ -31,12 +35,12 @@
 .plugin-page table.keys th {
   font-size: 0.85rem;
   text-transform: uppercase;
-  color: #666;
-  background: #fafafa;
+  color: var(--text);
+  background: var(--code-bg);
 }
 
 .plugin-page code {
-  background: #f3f3f3;
+  background: var(--code-bg);
   padding: 1px 4px;
   border-radius: 3px;
   font-size: 0.85em;
@@ -44,12 +48,12 @@
 
 .plugin-page code.ns {
   margin-right: 6px;
-  color: #888;
+  color: var(--text);
 }
 
 .plugin-page code.lang {
   margin-right: 6px;
-  color: #555;
+  color: var(--text);
 }
 
 .plugin-page .emoji-row {
@@ -72,17 +76,17 @@
 }
 
 .plugin-page .emoji-btn:hover {
-  background: #f3f3f3;
+  background: var(--code-bg);
 }
 
 .plugin-page .emoji-btn.selected {
-  background: #fff5d6;
-  border-color: #e0c060;
+  background: var(--accent-bg);
+  border-color: var(--accent-border);
 }
 
 .plugin-page .emoji-btn.clear {
   font-size: 0.95em;
-  color: #888;
+  color: var(--text);
 }
 
 .plugin-page .emoji-btn[disabled] {
@@ -92,7 +96,7 @@
 
 .plugin-page .updated {
   font-size: 0.7rem;
-  color: #888;
+  color: var(--text);
   margin-top: 2px;
 }
 
@@ -100,7 +104,7 @@
   display: block;
   font-size: 0.65rem;
   font-weight: 400;
-  color: #999;
+  color: var(--text);
   text-transform: none;
   letter-spacing: 0;
 }
@@ -111,7 +115,7 @@
 
 .plugin-page .activity-count {
   font-size: 0.7rem;
-  color: #888;
+  color: var(--text);
   margin-top: 2px;
 }
 
@@ -120,6 +124,8 @@
   padding: 12px 14px;
   display: grid;
   gap: 8px;
+  background: var(--tg-color-background-paper, transparent);
+  color: var(--text-h);
 }
 
 .tools-panel-row {
@@ -131,17 +137,17 @@
 
 .tools-panel-label {
   font-size: 0.85rem;
-  color: #444;
+  color: var(--text);
 }
 
 .tools-panel-count {
   font-size: 0.75rem;
-  color: #888;
+  color: var(--text);
 }
 
 .tools-panel-hint {
   font-size: 0.7rem;
-  color: #888;
+  color: var(--text);
 }
 
 .modal-explain {
@@ -149,6 +155,8 @@
   padding: 16px 20px;
   display: grid;
   gap: 12px;
+  background: var(--tg-color-background, transparent);
+  color: var(--text-h);
 }
 
 .modal-explain h2 {
@@ -165,7 +173,7 @@
   text-align: left;
   font-weight: 500;
   padding: 4px 12px 4px 0;
-  color: #555;
+  color: var(--text);
   vertical-align: top;
 }
 
@@ -181,12 +189,13 @@
 .modal-explain .modal-actions button {
   padding: 6px 14px;
   border-radius: 4px;
-  border: 1px solid #d0d0d0;
-  background: #fafafa;
+  border: 1px solid var(--border);
+  background: var(--code-bg);
+  color: var(--text-h);
   cursor: pointer;
   font-size: 0.85rem;
 }
 
 .modal-explain .modal-actions button:hover {
-  background: #f0f0f0;
+  background: var(--accent-bg);
 }

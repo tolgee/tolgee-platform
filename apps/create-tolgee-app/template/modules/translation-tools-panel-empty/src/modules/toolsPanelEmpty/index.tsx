@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import {
+  applyTolgeeTheme,
   createTolgeeApp,
   type TolgeeApp,
   type TolgeeAppSelection,
@@ -16,8 +17,10 @@ export default function ToolsPanelEmpty() {
     app.context.then((ctx) => setSelection(ctx.selection))
     // Fires when the user changes the language selector, too.
     const off = app.onSelectionChanged(setSelection)
+    const offTheme = app.onThemeChanged(applyTolgeeTheme)
     return () => {
       off()
+      offTheme()
       app.dispose()
       appRef.current = null
     }

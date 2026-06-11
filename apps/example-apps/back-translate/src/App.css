@@ -4,8 +4,9 @@ body,
   margin: 0;
   padding: 0;
   font-family: -apple-system, system-ui, sans-serif;
-  color: #222;
-  background: #fff;
+  /* Driven by applyTolgeeTheme(ctx.theme); hex values are fallbacks. */
+  color: var(--tg-color-text, #222);
+  background: var(--tg-color-background, #fff);
 }
 
 main {
@@ -26,7 +27,7 @@ main h2 {
   text-align: left;
   padding: 4px 12px 4px 0;
   font-weight: 500;
-  color: #666;
+  color: var(--tg-color-text-secondary, #666);
 }
 
 .kv td {
@@ -34,7 +35,7 @@ main h2 {
 }
 
 .kv code {
-  background: #f3f3f3;
+  background: var(--tg-color-background-paper, #f3f3f3);
   padding: 1px 6px;
   border-radius: 4px;
 }
@@ -42,15 +43,16 @@ main h2 {
 .back-translate-panel {
   font-size: 13px;
   line-height: 1.4;
+  color: var(--tg-color-text, #222);
 }
 
 .bt-status {
-  color: #666;
+  color: var(--tg-color-text-secondary, #666);
   font-size: 12px;
 }
 
 .bt-error {
-  color: #c44343;
+  color: var(--tg-color-error, #c44343);
   font-size: 12px;
   white-space: pre-wrap;
   word-break: break-word;
@@ -68,13 +70,13 @@ main h2 {
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: #888;
+  color: var(--tg-color-text-secondary, #888);
   margin-bottom: 2px;
 }
 
 .bt-row-value {
   font-size: 13px;
-  color: #222;
+  color: var(--tg-color-text, #222);
   word-break: break-word;
 }
 
@@ -82,11 +84,11 @@ main h2 {
   display: flex;
   gap: 10px;
   align-items: flex-start;
-  border: 1px solid #ddd;
+  border: 1px solid var(--tg-color-divider, #ddd);
   border-radius: 6px;
   padding: 10px 12px;
   margin-top: 12px;
-  background: #fafafa;
+  background: var(--tg-color-background-paper, #fafafa);
 }
 
 .bt-verdict-glyph {
@@ -96,11 +98,11 @@ main h2 {
 
 .bt-verdict-explanation {
   font-size: 12px;
-  color: #444;
+  color: var(--tg-color-text-secondary, #444);
   margin-top: 2px;
 }
 
 .bt-cached {
   font-size: 11px;
-  color: #888;
+  color: var(--tg-color-text-secondary, #888);
 }

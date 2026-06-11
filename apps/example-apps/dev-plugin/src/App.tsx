@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { type components } from '@tginternal/client'
 import {
+  applyTolgeeTheme,
   createTolgeeApp,
   createTolgeeAppClient,
   type TolgeeAppContext,
@@ -100,7 +101,11 @@ function App() {
   useEffect(() => {
     const app = createTolgeeApp()
     app.context.then(setContext)
-    return () => app.dispose()
+    const offTheme = app.onThemeChanged(applyTolgeeTheme)
+    return () => {
+      offTheme()
+      app.dispose()
+    }
   }, [])
 
   useEffect(() => {

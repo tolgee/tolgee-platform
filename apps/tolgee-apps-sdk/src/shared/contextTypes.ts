@@ -18,6 +18,26 @@ export type TolgeeAppSelection = {
 }
 
 /**
+ * The host's current theme. Delivered at init and again whenever the user
+ * toggles light/dark, so the plugin can match Tolgee's look. `colors` are
+ * resolved CSS color strings from Tolgee's palette; feed them to
+ * {@link applyTolgeeTheme} to expose them as `--tg-color-*` CSS variables.
+ */
+export type TolgeeAppTheme = {
+  mode: 'light' | 'dark'
+  colors: {
+    background: string
+    backgroundPaper: string
+    text: string
+    textSecondary: string
+    primary: string
+    primaryContrast: string
+    divider: string
+    error: string
+  }
+}
+
+/**
  * Context delivered to the iframe via the `tolgee-app:init` postMessage.
  * `token` is the install-context JWT — pass it as a bearer token on
  * every REST call back to Tolgee.
@@ -28,6 +48,8 @@ export type TolgeeAppContext = {
   organizationId: number
   projectId: number
   selection: TolgeeAppSelection
+  /** Host theme at init; subscribe to changes via `onThemeChanged`. */
+  theme: TolgeeAppTheme
   /**
    * Trigger-specific fields merged into the init payload (e.g.
    * `selectedKeyIds` for bulk actions, `keyId` for key-edit-footer

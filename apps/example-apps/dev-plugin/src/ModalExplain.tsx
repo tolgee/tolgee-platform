@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import {
+  applyTolgeeTheme,
   createTolgeeApp,
   type TolgeeApp,
   type TolgeeAppContext,
@@ -14,7 +15,9 @@ function ModalExplain() {
     const app = createTolgeeApp()
     appRef.current = app
     app.context.then(setContext)
+    const offTheme = app.onThemeChanged(applyTolgeeTheme)
     return () => {
+      offTheme()
       app.dispose()
       appRef.current = null
     }

@@ -1,5 +1,5 @@
 import { webhooks } from '@tginternal/client';
-export { A as AppContextClaims, T as TolgeeAppContext, a as TolgeeAppSelection } from './contextTypes-49PRp5PQ.js';
+export { A as AppContextClaims, T as TolgeeAppContext, a as TolgeeAppSelection } from './contextTypes-xgD-1LAp.js';
 
 /**
  * Identifier of a webhook event Tolgee can send — keys of the `webhooks`

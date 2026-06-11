@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { type components } from '@tginternal/client'
 import {
+  applyTolgeeTheme,
   createTolgeeApp,
   createTolgeeAppClient,
   type TolgeeApp,
   type TolgeeAppContext,
+  type TolgeeAppTheme,
 } from '@tolgee/apps-sdk/browser'
 import './App.css'
 
@@ -13,6 +15,7 @@ type LanguageModel = components['schemas']['LanguageModel']
 function ToolsPanelEmpty() {
   const [context, setContext] = useState<TolgeeAppContext | null>(null)
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>([])
+  const [theme, setTheme] = useState<TolgeeAppTheme | null>(null)
   const [languages, setLanguages] = useState<LanguageModel[] | null>(null)
   const [error, setError] = useState<string | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -29,8 +32,14 @@ function ToolsPanelEmpty() {
     const off = app.onSelectionChanged((s) =>
       setSelectedLanguages(s.selectedLanguages ?? [])
     )
+    // Fires once with the initial theme, then on every light/dark toggle.
+    const offTheme = app.onThemeChanged((t) => {
+      applyTolgeeTheme(t)
+      setTheme(t)
+    })
     return () => {
       off()
+      offTheme()
       app.dispose()
       appRef.current = null
     }
@@ -95,7 +104,32 @@ function ToolsPanelEmpty() {
   }
 
   return (
-    <div ref={containerRef} className="tools-panel">
+    <div
+      ref={containerRef}
+      className="tools-panel"
+      style={{
+        background: 'var(--tg-color-background-paper)',
+        color: 'var(--tg-color-text)',
+      }}
+    >
+      <div className="tools-panel-label">Theme: {theme?.mode ?? '…'}</div>
+      {theme && (
+        <div style={{ display: 'flex', gap: 4, marginBottom: 10 }}>
+          {Object.entries(theme.colors).map(([name, color]) => (
+            <span
+              key={name}
+              title={`${name}: ${color}`}
+              style={{
+                width: 16,
+                height: 16,
+                borderRadius: 3,
+                background: color,
+                border: '1px solid var(--tg-color-divider)',
+              }}
+            />
+          ))}
+        </div>
+      )}
       <div className="tools-panel-label">
         Selected languages ({selectedLanguages.length})
       </div>

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { type components } from '@tginternal/client'
 import {
+  applyTolgeeTheme,
   createTolgeeApp,
   createTolgeeAppClient,
   type TolgeeAppContext,
@@ -52,8 +53,10 @@ function KeyEditTab() {
       setSelection(ctx.selection)
     })
     const off = app.onSelectionChanged(setSelection)
+    const offTheme = app.onThemeChanged(applyTolgeeTheme)
     return () => {
       off()
+      offTheme()
       app.dispose()
     }
   }, [])

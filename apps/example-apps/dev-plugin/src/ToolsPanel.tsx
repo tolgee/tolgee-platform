@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
+  applyTolgeeTheme,
   createTolgeeApp,
   type TolgeeApp,
   type TolgeeAppSelection,
@@ -58,7 +59,11 @@ const Sparkline = ({ buckets }: { buckets: number[] }) => {
             y={SPARKLINE_HEIGHT - h}
             width={Math.max(1, barWidth - 2)}
             height={h}
-            fill={count === 0 ? '#ddd' : '#aa3bff'}
+            fill={
+              count === 0
+                ? 'var(--tg-color-divider, #ddd)'
+                : 'var(--tg-color-primary, #aa3bff)'
+            }
             rx={1}
           />
         )
@@ -78,8 +83,10 @@ function ToolsPanel() {
     appRef.current = app
     app.context.then((ctx) => setSelection(ctx.selection))
     const off = app.onSelectionChanged(setSelection)
+    const offTheme = app.onThemeChanged(applyTolgeeTheme)
     return () => {
       off()
+      offTheme()
       app.dispose()
       appRef.current = null
     }

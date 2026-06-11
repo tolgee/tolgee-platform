@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef } from 'react';
+import { useTheme } from '@mui/material';
 
 import { useAppToken } from './useAppToken';
 
@@ -43,6 +44,21 @@ const safeOrigin = (url: string): string | null => {
   }
 };
 
+/** Curated palette handed to the iframe (see SDK TolgeeAppTheme). */
+type IframeTheme = {
+  mode: 'light' | 'dark';
+  colors: {
+    background: string;
+    backgroundPaper: string;
+    text: string;
+    textSecondary: string;
+    primary: string;
+    primaryContrast: string;
+    divider: string;
+    error: string;
+  };
+};
+
 export function useAppIframeMessaging(
   options: UseAppIframeMessagingOptions
 ): UseAppIframeMessagingResult {
@@ -70,6 +86,24 @@ export function useAppIframeMessaging(
 
   const apiUrl = import.meta.env.VITE_APP_API_URL ?? window.location.origin;
 
+  const muiTheme = useTheme();
+  const appTheme = useMemo<IframeTheme>(
+    () => ({
+      mode: muiTheme.palette.mode,
+      colors: {
+        background: muiTheme.palette.background.default,
+        backgroundPaper: muiTheme.palette.background.paper,
+        text: muiTheme.palette.text.primary,
+        textSecondary: muiTheme.palette.text.secondary,
+        primary: muiTheme.palette.primary.main,
+        primaryContrast: muiTheme.palette.primary.contrastText,
+        divider: muiTheme.palette.divider,
+        error: muiTheme.palette.error.main,
+      },
+    }),
+    [muiTheme.palette.mode]
+  );
+
   const selectionKey = `${selection.keyId}|${selection.languageId}|${
     selection.translationId
   }|${(selection.selectedLanguages ?? []).join(',')}`;
@@ -84,6 +118,7 @@ export function useAppIframeMessaging(
         organizationId,
         projectId,
         ...selection,
+        theme: appTheme,
         ...extraInitPayload,
       },
       appOrigin
@@ -136,6 +171,14 @@ export function useAppIframeMessaging(
       appOrigin
     );
   }, [selectionKey, appOrigin]);
+
+  useEffect(() => {
+    if (!initSentRef.current || !appOrigin) return;
+    iframeRef.current?.contentWindow?.postMessage(
+      { type: 'tolgee-app:theme-changed', theme: appTheme },
+      appOrigin
+    );
+  }, [appTheme, appOrigin]);
 
   return { iframeRef, iframeSrc, appOrigin, token };
 }

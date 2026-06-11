@@ -1,4 +1,4 @@
-import { T as TolgeeAppContext, a as TolgeeAppSelection } from './contextTypes-49PRp5PQ.js';
+import { T as TolgeeAppContext, a as TolgeeAppSelection, b as TolgeeAppTheme } from './contextTypes-xgD-1LAp.js';
 import { createApiClient } from '@tginternal/client';
 
 type Unsubscribe = () => void;
@@ -16,6 +16,8 @@ declare class TolgeeApp {
     private resolveContext;
     private selectionHandlers;
     private currentSelection;
+    private themeHandlers;
+    private currentTheme;
     constructor();
     /**
      * Resolves with the init payload the host posted via
@@ -31,6 +33,12 @@ declare class TolgeeApp {
      * after init.
      */
     onSelectionChanged(handler: (selection: TolgeeAppSelection) => void): Unsubscribe;
+    /**
+     * Subscribe to host theme changes (light/dark toggles). Returns an
+     * unsubscribe function and fires once with the current theme after init.
+     * Pair with `applyTolgeeTheme` to restyle the iframe live.
+     */
+    onThemeChanged(handler: (theme: TolgeeAppTheme) => void): Unsubscribe;
     /** Asks the host to close the modal/panel containing this iframe. */
     close(): void;
     /** Tells the host how tall this iframe wants to be. */
@@ -56,4 +64,23 @@ declare const createTolgeeApp: () => TolgeeApp;
  */
 declare const createTolgeeAppClient: (context: TolgeeAppContext) => ReturnType<typeof createApiClient>;
 
-export { TolgeeApp, TolgeeAppContext, TolgeeAppSelection, createTolgeeApp, createTolgeeAppClient };
+/**
+ * Applies the host theme to the iframe document so the plugin matches Tolgee:
+ * exposes each palette color as a `--tg-color-<name>` CSS custom property
+ * (e.g. `--tg-color-background`, `--tg-color-text-secondary`), sets
+ * `[data-tg-theme="light|dark"]`, and sets `color-scheme` (so native form
+ * controls and scrollbars follow the mode).
+ *
+ * Call it once with `ctx.theme` and again from `onThemeChanged` to follow live
+ * light/dark toggles:
+ *
+ * ```ts
+ * const app = createTolgeeApp()
+ * const ctx = await app.context
+ * applyTolgeeTheme(ctx.theme)
+ * app.onThemeChanged(applyTolgeeTheme)
+ * ```
+ */
+declare const applyTolgeeTheme: (theme: TolgeeAppTheme, root?: HTMLElement) => void;
+
+export { TolgeeApp, TolgeeAppContext, TolgeeAppSelection, TolgeeAppTheme, applyTolgeeTheme, createTolgeeApp, createTolgeeAppClient };

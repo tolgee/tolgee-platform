@@ -4,8 +4,9 @@ body,
   margin: 0;
   padding: 0;
   font-family: -apple-system, system-ui, sans-serif;
-  color: #222;
-  background: #fff;
+  /* Set by applyTolgeeTheme(ctx.theme) so the app follows Tolgee's light/dark. */
+  color: var(--tg-color-text, #222);
+  background: var(--tg-color-background, #fff);
 }
 
 main {

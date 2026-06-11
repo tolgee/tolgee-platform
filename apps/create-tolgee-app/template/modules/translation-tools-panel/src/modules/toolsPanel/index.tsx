@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import {
+  applyTolgeeTheme,
   createTolgeeApp,
   type TolgeeApp,
   type TolgeeAppSelection,
@@ -15,8 +16,10 @@ export default function ToolsPanel() {
     appRef.current = app
     app.context.then((ctx) => setSelection(ctx.selection))
     const off = app.onSelectionChanged(setSelection)
+    const offTheme = app.onThemeChanged(applyTolgeeTheme)
     return () => {
       off()
+      offTheme()
       app.dispose()
       appRef.current = null
     }
