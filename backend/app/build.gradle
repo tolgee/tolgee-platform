@@ -161,6 +161,7 @@ dependencies {
      * Google translation API
      */
     implementation platform(libs.googleCloud)
+    implementation platform(libs.grpcBom)
     implementation 'com.google.cloud:google-cloud-translate'
 
     /**
