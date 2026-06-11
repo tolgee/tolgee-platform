@@ -5627,4 +5627,84 @@
             <sql>DROP INDEX CONCURRENTLY IF EXISTS user_account_normalized_email;</sql>
         </rollback>
     </changeSet>
+    <changeSet author="jancizmar" id="ai-match-stats-1-translation-ai-match">
+        <createTable tableName="translation_ai_match">
+            <column name="translation_id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="translation_ai_matchPK"/>
+            </column>
+            <column name="project_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="language_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="match_score" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="reviewed_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="word_count" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="prompt_id" type="BIGINT"/>
+            <column name="mt_provider" type="VARCHAR(255)"/>
+            <column name="prompt_version_ts" type="TIMESTAMP WITHOUT TIME ZONE"/>
+        </createTable>
+        <addForeignKeyConstraint
+                baseColumnNames="translation_id"
+                baseTableName="translation_ai_match"
+                constraintName="fk_translation_ai_match_translation"
+                referencedColumnNames="id"
+                referencedTableName="translation"
+                onDelete="CASCADE"/>
+        <createIndex indexName="ix_translation_ai_match_project_reviewed" tableName="translation_ai_match">
+            <column name="project_id"/>
+            <column name="reviewed_at"/>
+        </createIndex>
+        <createIndex indexName="ix_translation_ai_match_project_language" tableName="translation_ai_match">
+            <column name="project_id"/>
+            <column name="language_id"/>
+        </createIndex>
+        <createIndex indexName="ix_translation_ai_match_project_prompt" tableName="translation_ai_match">
+            <column name="project_id"/>
+            <column name="prompt_id"/>
+            <column name="prompt_version_ts"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="jancizmar" id="ai-match-stats-2-refresh-state">
+        <createTable tableName="ai_match_refresh_state">
+            <column name="project_id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="ai_match_refresh_statePK"/>
+            </column>
+            <column name="last_processed_activity_revision_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint
+                baseColumnNames="project_id"
+                baseTableName="ai_match_refresh_state"
+                constraintName="fk_ai_match_refresh_state_project"
+                referencedColumnNames="id"
+                referencedTableName="project"
+                onDelete="CASCADE"/>
+    </changeSet>
+    <changeSet author="jancizmar" id="ai-match-stats-3-activity-revision-project-id-idx" runInTransaction="false">
+        <comment>
+            Composite (project_id, id) index on activity_revision so the AI-match watermark scan
+            (AiMatchStatsProvider.getAffectedSince / getMaxRevisionId: project_id = ? AND id > ?
+            ORDER BY id) is an index range scan instead of fetching all of a project's revisions.
+            Matters for projects with millions of historical revisions where only a few are new.
+        </comment>
+        <sql dbms="postgresql">
+            CREATE INDEX CONCURRENTLY IF NOT EXISTS activity_revision_project_id_id
+                ON activity_revision (project_id, id);
+        </sql>
+        <rollback>
+            <sql>DROP INDEX CONCURRENTLY IF EXISTS activity_revision_project_id_id;</sql>
+        </rollback>
+    </changeSet>
 </databaseChangeLog>
