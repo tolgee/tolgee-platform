@@ -1,0 +1,101 @@
+:root {
+  /* Driven by applyTolgeeTheme(ctx.theme) → follows Tolgee's light/dark. The
+   * hex values are only fallbacks for when the theme hasn't been applied. */
+  --text: var(--tg-color-text-secondary, #6b6375);
+  --text-h: var(--tg-color-text, #08060d);
+  --bg: var(--tg-color-background, #fff);
+  --code-bg: var(--tg-color-background-paper, #f4f3ec);
+  --border: var(--tg-color-divider, #e4e2dd);
+  --accent: var(--tg-color-primary, #aa3bff);
+  --accent-bg: rgba(170, 59, 255, 0.1);
+  --accent-border: var(--tg-color-divider, rgba(170, 59, 255, 0.5));
+  --social-bg: rgba(244, 243, 236, 0.5);
+  --shadow:
+    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+
+  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --mono: ui-monospace, Consolas, monospace;
+
+  font: 18px/145% var(--sans);
+  letter-spacing: 0.18px;
+  color-scheme: light dark;
+  color: var(--text);
+  background: transparent;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  @media (max-width: 1024px) {
+    font-size: 16px;
+  }
+}
+
+/* Tolgee's theme (via applyTolgeeTheme) drives dark mode, not the OS — so the
+ * tokens above already resolve to dark values in dark mode. Only the icon
+ * inversion needs an explicit dark hook. */
+[data-tg-theme='dark'] #social .button-icon {
+  filter: invert(1) brightness(2);
+}
+
+#root {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  background: transparent;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--tg-color-background, transparent);
+  color: var(--text);
+}
+
+h1,
+h2 {
+  font-family: var(--heading);
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+h1 {
+  font-size: 56px;
+  letter-spacing: -1.68px;
+  margin: 32px 0;
+  @media (max-width: 1024px) {
+    font-size: 36px;
+    margin: 20px 0;
+  }
+}
+h2 {
+  font-size: 24px;
+  line-height: 118%;
+  letter-spacing: -0.24px;
+  margin: 0 0 8px;
+  @media (max-width: 1024px) {
+    font-size: 20px;
+  }
+}
+p {
+  margin: 0;
+}
+
+code,
+.counter {
+  font-family: var(--mono);
+  display: inline-flex;
+  border-radius: 4px;
+  color: var(--text-h);
+}
+
+code {
+  font-size: 15px;
+  line-height: 135%;
+  padding: 4px 8px;
+  background: var(--code-bg);
+}

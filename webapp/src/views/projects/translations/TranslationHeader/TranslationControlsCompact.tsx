@@ -35,6 +35,11 @@ import { applyBranchToUrl } from 'tg.component/branching/branchingPath';
 import { countFilters } from 'tg.views/projects/translations/TranslationFilters/summary';
 import { LanguagesMenu } from 'tg.component/common/form/LanguagesSelect/LanguagesMenu';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
+import {
+  useAppTriggerDispatch,
+  useAppTriggers,
+} from '../../apps/useAppTriggers';
+import { AppIcon } from '../../apps/AppIcon';
 
 import {
   useTranslationsActions,
@@ -319,10 +324,44 @@ export const TranslationControlsCompact: React.FC<Props> = ({
                   </StyledIconButton>
                 </QuickStartHighlight>
               )}
+              <TranslationsToolbarAppActionsCompact />
             </StyledSpaced>
           </>
         )}
       </StyledContainer>
+    </>
+  );
+};
+
+const TranslationsToolbarAppActionsCompact = () => {
+  const project = useProject();
+  const triggers = useAppTriggers(project.id, 'translations-toolbar-action');
+  const dispatch = useAppTriggerDispatch();
+  if (triggers.length === 0) return null;
+  return (
+    <>
+      {triggers.map((trigger) => (
+        <Tooltip
+          key={`app-toolbar-${trigger.install.id}-${trigger.item.key}`}
+          title={trigger.item.title ?? trigger.item.key}
+          disableInteractive
+        >
+          <IconButton
+            data-cy="translations-toolbar-app-action"
+            data-cy-key={trigger.item.key}
+            size="small"
+            onClick={() =>
+              dispatch(trigger, { templateVars: { projectId: project.id } })
+            }
+          >
+            <AppIcon
+              icon={trigger.item.icon ?? '🔘'}
+              size={20}
+              fontSize="1.1em"
+            />
+          </IconButton>
+        </Tooltip>
+      ))}
     </>
   );
 };

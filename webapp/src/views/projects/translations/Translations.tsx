@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { T, useTranslate } from '@tolgee/react';
 import { Box, Button, styled } from '@mui/material';
 import { Link } from 'react-router-dom';
@@ -22,6 +22,7 @@ import {
 import { TranslationsTable } from './TranslationsTable/TranslationsTable';
 import { TranslationsHeader } from './TranslationHeader/TranslationsHeader';
 import { TranslationsList } from './TranslationsList/TranslationsList';
+import { useAppEmptyPanels } from './ToolsPanel/panels/AppPanel/useAppEmptyPanels';
 import { useTranslationsShortcuts } from './context/shortcuts/useTranslationsShortcuts';
 import { BaseProjectView } from '../BaseProjectView';
 import { TranslationsToolbar } from './TranslationsToolbar';
@@ -29,6 +30,7 @@ import { BatchOperationsChangeIndicator } from './BatchOperations/BatchOperation
 import { FloatingToolsPanel } from './ToolsPanel/FloatingToolsPanel';
 import { countFilters } from './TranslationFilters/summary';
 import { AiPlayground } from './ToolsPanel/AiPlayground';
+import { useAppShortcuts } from '../apps/useAppShortcuts';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -42,6 +44,9 @@ export const Translations = () => {
   const { t } = useTranslate();
   const project = useProject();
   const projectPermissions = useProjectPermissions();
+
+  useAppShortcuts(project.id);
+  const appEmptyPanels = useAppEmptyPanels(project.id);
 
   const isLoading = useTranslationsSelector((c) => c.isLoading);
   const isFetching = useTranslationsSelector((c) => c.isFetching);
@@ -63,7 +68,20 @@ export const Translations = () => {
     [translations]
   );
 
-  const { setSearchImmediate, setFilters } = useTranslationsActions();
+  const { setSearchImmediate, setFilters, setSidePanelOpen } =
+    useTranslationsActions();
+
+  // Open the tools panel by default when an app contributes a panel, so it's
+  // visible as soon as the translations view loads (not only after editing a
+  // cell). Fires once so a user who closes it isn't fought.
+  const autoOpenedSidePanel = useRef(false);
+  useEffect(() => {
+    if (autoOpenedSidePanel.current) return;
+    if (appEmptyPanels.length > 0) {
+      autoOpenedSidePanel.current = true;
+      setSidePanelOpen(true);
+    }
+  }, [appEmptyPanels.length, setSidePanelOpen]);
 
   const { onKey } = useTranslationsShortcuts();
 
