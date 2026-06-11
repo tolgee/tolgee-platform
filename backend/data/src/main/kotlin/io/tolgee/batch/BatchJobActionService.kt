@@ -18,6 +18,9 @@ import io.tolgee.constants.Message
 import io.tolgee.model.batch.BatchJobChunkExecution
 import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.pubSub.RedisPubSubReceiverConfiguration
+import io.tolgee.security.OrganizationHolder
+import io.tolgee.security.ProjectHolder
+import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.tracing.TolgeeTracingContext
 import io.tolgee.util.Logging
@@ -54,6 +57,10 @@ class BatchJobActionService(
   private val tracingContext: TolgeeTracingContext,
   @Lazy
   private val projectService: ProjectService,
+  @Lazy
+  private val organizationService: OrganizationService,
+  private val projectHolder: ProjectHolder,
+  private val organizationHolder: OrganizationHolder,
 ) : Logging {
   @WithSpan
   suspend fun handleItem(
@@ -91,6 +98,8 @@ class BatchJobActionService(
             publishRemoveConsuming(executionItem)
 
             progressManager.handleJobRunning(batchJobDto)
+
+            populateHolders(batchJobDto)
 
             logger.debug("Job ${batchJobDto.id}: 🟡 Processing chunk ${lockedExecution.id}")
             val savepoint = savePointManager.setSavepoint()
@@ -149,6 +158,24 @@ class BatchJobActionService(
         }
       }
     }
+  }
+
+  /**
+   * Populate the project and organization holders for the batch worker
+   * thread. On HTTP requests this is done by
+   * [io.tolgee.security.ProjectContextService.populateHolders]; batch workers
+   * have no such interceptor, so any downstream code reading
+   * [ProjectHolder.project] / [OrganizationHolder.organization] would throw.
+   *
+   * Must run inside the transaction so the transaction-scoped backing beans
+   * are active.
+   */
+  private fun populateHolders(batchJobDto: BatchJobDto) {
+    val projectId = batchJobDto.projectId ?: return
+    val project = projectService.getDto(projectId)
+    projectHolder.project = project
+    val organization = organizationService.findDto(project.organizationOwnerId) ?: return
+    organizationHolder.organization = organization
   }
 
   private fun handleCancelledExecution(executionItem: ExecutionQueueItem) {
