@@ -96,6 +96,11 @@ export const translationsTestData = {
     internalFetch('e2e-data/translations/generate-for-filters').then(
       (r) => r.body as ProjectDTO
     ),
+
+  generateForDescriptionFilters: () =>
+    internalFetch(
+      'e2e-data/translations/generate-for-description-filters'
+    ).then((r) => r.body as ProjectDTO),
 };
 
 export const translationsDisabled = generateTestDataObject(

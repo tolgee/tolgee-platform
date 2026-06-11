@@ -279,6 +279,44 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
 
   @ProjectJWTAuthTestMethod
   @Test
+  fun `filters by hasDescription`() {
+    testData.addKeysWithDescriptions()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthGet("/translations?filterHasDescription=true")
+      .andPrettyPrint.andIsOk
+      .andAssertThatJson {
+        node("_embedded.keys") {
+          isArray.hasSize(3)
+          node("[0].keyName").isEqualTo("A key")
+          node("[1].keyName").isEqualTo("desc-real")
+          node("[2].keyName").isEqualTo("desc-ws")
+        }
+        node("page.totalElements").isEqualTo(3)
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `filters by hasNoDescription`() {
+    testData.addKeysWithDescriptions()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthGet("/translations?filterHasNoDescription=true")
+      .andPrettyPrint.andIsOk
+      .andAssertThatJson {
+        node("_embedded.keys") {
+          isArray.hasSize(3)
+          node("[0].keyName").isEqualTo("Z key")
+          node("[1].keyName").isEqualTo("desc-null")
+          node("[2].keyName").isEqualTo("desc-empty")
+        }
+        node("page.totalElements").isEqualTo(3)
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
   fun `filters by state`() {
     testDataService.saveTestData(testData.root)
     userAccount = testData.user

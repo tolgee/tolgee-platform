@@ -72,6 +72,12 @@ To add multiple languages, repeat this param (eg. ?languages=en&languages=de)"""
   @field:Parameter(description = "Selects only keys without screenshots")
   var filterHasNoScreenshot: Boolean? = false
 
+  @field:Parameter(description = "Selects only keys with a description")
+  var filterHasDescription: Boolean? = false
+
+  @field:Parameter(description = "Selects only keys without a description")
+  var filterHasNoDescription: Boolean? = false
+
   @field:Parameter(
     description = """Selects only keys with provided namespaces. 
 

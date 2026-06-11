@@ -268,6 +268,36 @@ class TranslationsTestData {
       }
   }
 
+  fun addKeysWithDescriptions() {
+    projectBuilder.addKey { name = "desc-real" }.build {
+      setDescription("A real description")
+      addTranslation {
+        language = englishLanguage
+        text = "desc-real text"
+      }
+    }
+    projectBuilder.addKey { name = "desc-null" }.build {
+      addTranslation {
+        language = englishLanguage
+        text = "desc-null text"
+      }
+    }
+    projectBuilder.addKey { name = "desc-empty" }.build {
+      setDescription("")
+      addTranslation {
+        language = englishLanguage
+        text = "desc-empty text"
+      }
+    }
+    projectBuilder.addKey { name = "desc-ws" }.build {
+      setDescription("   ")
+      addTranslation {
+        language = englishLanguage
+        text = "desc-ws text"
+      }
+    }
+  }
+
   fun generateLotOfData(count: Long = 99) {
     root.data.projects[0].apply {
       (1..count).forEach {

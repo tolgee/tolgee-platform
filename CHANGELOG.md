@@ -1,3 +1,33 @@
+## [3.204.2](https://github.com/tolgee/tolgee-platform/compare/v3.204.1...v3.204.2) (2026-06-11)
+
+
+### Bug Fixes
+
+* make email case-insensitive across login, signup, and invitations ([#3716](https://github.com/tolgee/tolgee-platform/issues/3716)) ([b361450](https://github.com/tolgee/tolgee-platform/commit/b361450c7d731ff70911f25d3787d443b1c579e5)), closes [#1382](https://github.com/tolgee/tolgee-platform/issues/1382) [#3461](https://github.com/tolgee/tolgee-platform/issues/3461) [#3461](https://github.com/tolgee/tolgee-platform/issues/3461) [#3461](https://github.com/tolgee/tolgee-platform/issues/3461) [#3461](https://github.com/tolgee/tolgee-platform/issues/3461)
+* patch Snyk-reported webapp dependency vulnerabilities ([#3744](https://github.com/tolgee/tolgee-platform/issues/3744)) ([ac041a7](https://github.com/tolgee/tolgee-platform/commit/ac041a78a875c8240c5b73a76e00af6e24dbfd72))
+
+## [3.204.1](https://github.com/tolgee/tolgee-platform/compare/v3.204.0...v3.204.1) (2026-06-11)
+
+
+### Bug Fixes
+
+* **import:** show all supported formats + add docs link ([#3722](https://github.com/tolgee/tolgee-platform/issues/3722)) ([c23fb4c](https://github.com/tolgee/tolgee-platform/commit/c23fb4c8e3edac4c2b8c55e5662c0e4998c2c546)), closes [#3362](https://github.com/tolgee/tolgee-platform/issues/3362) [#3356](https://github.com/tolgee/tolgee-platform/issues/3356)
+* ProjectNotSelectedException in batch worker ([#3730](https://github.com/tolgee/tolgee-platform/issues/3730)) ([a7e3ce9](https://github.com/tolgee/tolgee-platform/commit/a7e3ce9e4ffbc2380d41ae97df799bf52e17d586)), closes [#3724](https://github.com/tolgee/tolgee-platform/issues/3724)
+* Revert "fix: ProjectNotSelectedException in batch worker" ([#3747](https://github.com/tolgee/tolgee-platform/issues/3747)) ([877effa](https://github.com/tolgee/tolgee-platform/commit/877effaef9c596a8963f58ae7319336b297d456e)), closes [tolgee/tolgee-platform#3730](https://github.com/tolgee/tolgee-platform/issues/3730)
+
+# [3.204.0](https://github.com/tolgee/tolgee-platform/compare/v3.203.0...v3.204.0) (2026-06-11)
+
+
+### Bug Fixes
+
+* block disposable-domain and alias-duplicate registrations ([#3740](https://github.com/tolgee/tolgee-platform/issues/3740)) ([a80bae5](https://github.com/tolgee/tolgee-platform/commit/a80bae57affc745bf56265092e952eda4a9d6065))
+* patch OS-layer CVEs in the app Docker image ([#3743](https://github.com/tolgee/tolgee-platform/issues/3743)) ([0a06f4b](https://github.com/tolgee/tolgee-platform/commit/0a06f4be22a2d2a4df6ef5c0e31ef6a14929a0b4))
+
+
+### Features
+
+* add filter by description presence to key listing ([#3737](https://github.com/tolgee/tolgee-platform/issues/3737)) ([e49ce98](https://github.com/tolgee/tolgee-platform/commit/e49ce9842f94e7fde83c868cc316eb9db388350f)), closes [#3663](https://github.com/tolgee/tolgee-platform/issues/3663)
+
 # [3.203.0](https://github.com/tolgee/tolgee-platform/compare/v3.202.0...v3.203.0) (2026-06-11)
 
 
