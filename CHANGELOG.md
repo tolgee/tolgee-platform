@@ -1,3 +1,11 @@
+# [3.203.0](https://github.com/tolgee/tolgee-platform/compare/v3.202.0...v3.203.0) (2026-06-11)
+
+
+### Features
+
+* per-language QA on/off switch ([#3727](https://github.com/tolgee/tolgee-platform/issues/3727)) ([a6ce894](https://github.com/tolgee/tolgee-platform/commit/a6ce89484ddc7b76558d31c7c8809230eca8d7cb)), closes [#3699](https://github.com/tolgee/tolgee-platform/issues/3699)
+* support EKS Pod Identity by upgrading AWS SDK to 2.46.6 ([#3741](https://github.com/tolgee/tolgee-platform/issues/3741)) ([25e5f34](https://github.com/tolgee/tolgee-platform/commit/25e5f341c3649801b199871b7882befbf76c31f3)), closes [#3735](https://github.com/tolgee/tolgee-platform/issues/3735)
+
 # [3.202.0](https://github.com/tolgee/tolgee-platform/compare/v3.201.0...v3.202.0) (2026-06-09)
 
 
