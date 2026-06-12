@@ -102,9 +102,13 @@ private const val PROJECT_PERMISSIONS_MAIN = """
 @Repository
 @Lazy
 interface UserAccountRepository : JpaRepository<UserAccount, Long> {
-  fun findByUsername(username: String?): Optional<UserAccount>
+  @Query("from UserAccount ua where ua.username = :username")
+  fun findByExactUsername(username: String?): Optional<UserAccount>
 
-  @Query("from UserAccount ua where ua.username = :username and ua.deletedAt is null and ua.disabledAt is null")
+  @Query(
+    "from UserAccount ua where lower(ua.username) = lower(:username) " +
+      "and ua.deletedAt is null and ua.disabledAt is null",
+  )
   fun findActive(username: String): UserAccount?
 
   // Sign-up alias/case-insensitive duplicate guard, mirroring findActiveOrDisabled (non-deleted) so the
@@ -123,7 +127,7 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
   @Query("from UserAccount ua where ua.id = :id and ua.deletedAt is null and ua.disabledAt is null")
   fun findActive(id: Long): UserAccount?
 
-  @Query("from UserAccount ua where ua.username = :username and ua.deletedAt is null")
+  @Query("from UserAccount ua where lower(ua.username) = lower(:username) and ua.deletedAt is null")
   fun findActiveOrDisabled(username: String): UserAccount?
 
   @Query("from UserAccount ua left join fetch ua.emailVerification where ua.isInitialUser = true")

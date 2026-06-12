@@ -80,6 +80,12 @@ class AuthTest : AbstractControllerTest() {
   }
 
   @Test
+  fun `generates token regardless of email casing`() {
+    val response = doAuthentication(initialUsername.uppercase(), initialPassword)
+    assertThat(response.andReturn().response.status).isEqualTo(200)
+  }
+
+  @Test
   fun userWithTokenHasAccess() {
     val response =
       doAuthentication(initialUsername, initialPassword)
@@ -233,6 +239,19 @@ class AuthTest : AbstractControllerTest() {
     val result = jacksonObjectMapper().readValue(response, HashMap::class.java)
     assertThat(result["accessToken"]).isNotNull
     assertThat(result["tokenType"]).isEqualTo("Bearer")
+  }
+
+  @Test
+  fun `stores third-party email lowercased`() {
+    val emailResponse =
+      GithubEmailResponse().apply {
+        email = "Fake.Mixed@Email.com"
+        primary = true
+        verified = true
+      }
+    gitHubAuthUtil.authorizeGithubUser(emailResponse = ResponseEntity(arrayOf(emailResponse), HttpStatus.OK))
+    assertThat(userAccountService.findActive("fake.mixed@email.com")!!.username)
+      .isEqualTo("fake.mixed@email.com")
   }
 
   @Test

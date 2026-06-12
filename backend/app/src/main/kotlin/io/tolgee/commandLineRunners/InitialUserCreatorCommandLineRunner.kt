@@ -46,7 +46,7 @@ class InitialUserCreatorCommandLineRunner(
 
   fun createInitialUser() {
     logger.info("Creating initial user...")
-    val initialUsername = properties.authentication.initialUsername
+    val initialUsername = properties.authentication.initialUsername.lowercase()
 
     // Check if the account already exists.
     // This can only be the case on Tolgee 3.x series and should be removed on Tolgee 4.

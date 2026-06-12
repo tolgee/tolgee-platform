@@ -79,6 +79,18 @@ export const useTranslationFilters = ({
           filterHasNoScreenshot: true,
           filterHasScreenshot: undefined,
         });
+      case 'filterHasDescription':
+        return setFilters({
+          ...filters,
+          filterHasDescription: true,
+          filterHasNoDescription: undefined,
+        });
+      case 'filterHasNoDescription':
+        return setFilters({
+          ...filters,
+          filterHasNoDescription: true,
+          filterHasDescription: undefined,
+        });
       case 'filterHasUnresolvedComments':
         return setFilters({
           ...filters,
@@ -166,6 +178,16 @@ export const useTranslationFilters = ({
           ...filters,
           filterHasNoScreenshot: undefined,
         });
+      case 'filterHasDescription':
+        return setFilters({
+          ...filters,
+          filterHasDescription: undefined,
+        });
+      case 'filterHasNoDescription':
+        return setFilters({
+          ...filters,
+          filterHasNoDescription: undefined,
+        });
       case 'filterHasUnresolvedComments':
         return setFilters({
           ...filters,
@@ -218,6 +240,8 @@ export const useTranslationFilters = ({
     filterNoNamespace: filters.filterNoNamespace,
     filterHasScreenshot: filters.filterHasScreenshot,
     filterHasNoScreenshot: filters.filterHasNoScreenshot,
+    filterHasDescription: filters.filterHasDescription,
+    filterHasNoDescription: filters.filterHasNoDescription,
     filterDeletedByUserId: filters.filterDeletedByUserId,
   };
 

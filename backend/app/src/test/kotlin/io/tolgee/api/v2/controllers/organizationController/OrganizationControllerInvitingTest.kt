@@ -215,6 +215,33 @@ class OrganizationControllerInvitingTest : AuthorizedControllerTest() {
     ).andIsBadRequest
   }
 
+  @Test
+  fun `does not invite when email already member regardless of casing`() {
+    val organization = prepareTestOrganization()
+    performAuthPut(
+      "/v2/organizations/${organization.id}/invite",
+      OrganizationInviteUserDto(
+        roleType = OrganizationRoleType.MEMBER,
+        email = TEST_USERNAME.uppercase(),
+        name = INVITED_NAME,
+      ),
+    ).andIsBadRequest
+  }
+
+  @Test
+  fun `does not invite when email already invited regardless of casing`() {
+    val organization = prepareTestOrganization()
+    performCreateInvitation(organization.id).andIsOk
+    performAuthPut(
+      "/v2/organizations/${organization.id}/invite",
+      OrganizationInviteUserDto(
+        roleType = OrganizationRoleType.MEMBER,
+        email = INVITED_EMAIL.uppercase(),
+        name = INVITED_NAME,
+      ),
+    ).andIsBadRequest
+  }
+
   private fun inviteWithUserWithNameAndEmail(organizationId: Long): String {
     val invitationJson = performCreateInvitation(organizationId).andIsOk.andGetContentAsString
 
