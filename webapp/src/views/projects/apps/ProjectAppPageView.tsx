@@ -115,8 +115,9 @@ export const ProjectAppPageView = () => {
           // on a different origin (per-plugin subdomain in prod, localhost:5180
           // vs localhost:3824 in dev) — NOT by null-origin sandboxing.
           // allow-popups(+-to-escape-sandbox) lets in-app links / window.open open a
-          // normal (non-sandboxed) new tab.
-          sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+          // normal (non-sandboxed) new tab; allow-top-navigation-by-user-activation lets a
+          // click navigate the whole Tolgee window (e.g. target="_top" links).
+          sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation"
           title={module.title}
         />
       )}
