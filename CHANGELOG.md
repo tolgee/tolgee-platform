@@ -1,3 +1,10 @@
+# [3.205.0](https://github.com/tolgee/tolgee-platform/compare/v3.204.2...v3.205.0) (2026-06-13)
+
+
+### Features
+
+* support Python brace-format placeholders in PO ([#3718](https://github.com/tolgee/tolgee-platform/issues/3718)) ([424b376](https://github.com/tolgee/tolgee-platform/commit/424b376bac523b075f09825902fe0a6de89bbe8b)), closes [#3589](https://github.com/tolgee/tolgee-platform/issues/3589)
+
 ## [3.204.2](https://github.com/tolgee/tolgee-platform/compare/v3.204.1...v3.204.2) (2026-06-11)
 
 
