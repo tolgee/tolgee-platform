@@ -257,7 +257,7 @@ export class Validation {
     });
 
   static readonly PROJECT_SETTINGS = Yup.object().shape({
-    name: Yup.string().required().min(3).max(100),
+    name: Yup.string().trim().required().min(3).max(100),
     description: Yup.string().nullable().min(3).max(2000),
   });
 
