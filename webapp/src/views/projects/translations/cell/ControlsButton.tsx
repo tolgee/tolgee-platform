@@ -19,29 +19,30 @@ type Props = React.ComponentProps<typeof IconButton> & {
   tooltip?: React.ReactNode;
 };
 
-export const ControlsButton: React.FC<Props> = React.forwardRef(
-  function ControlsButton(
-    { children, className, onClick, tooltip, ...props },
-    ref
-  ) {
-    const content = (
-      <StyledIconButton
-        size="small"
-        className={className}
-        onClick={stopBubble(onClick)}
-        ref={ref}
-        {...props}
-      >
-        {children}
-      </StyledIconButton>
-    );
+export const ControlsButton = React.forwardRef<
+  HTMLButtonElement,
+  React.PropsWithChildren<Props>
+>(function ControlsButton(
+  { children, className, onClick, tooltip, ...props },
+  ref
+) {
+  const content = (
+    <StyledIconButton
+      size="small"
+      className={className}
+      onClick={stopBubble(onClick)}
+      ref={ref}
+      {...props}
+    >
+      {children}
+    </StyledIconButton>
+  );
 
-    return tooltip ? (
-      <Tooltip disableInteractive title={tooltip}>
-        {content}
-      </Tooltip>
-    ) : (
-      content
-    );
-  }
-);
+  return tooltip ? (
+    <Tooltip disableInteractive title={tooltip}>
+      {content}
+    </Tooltip>
+  ) : (
+    content
+  );
+});
