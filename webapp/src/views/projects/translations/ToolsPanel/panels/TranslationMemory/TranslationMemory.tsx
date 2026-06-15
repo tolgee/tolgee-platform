@@ -14,7 +14,9 @@ const StyledContainer = styled('div')`
   flex-direction: column;
 `;
 
-export const TranslationMemory: React.FC<PanelContentProps> = ({
+export const TranslationMemory: React.FC<
+  React.PropsWithChildren<PanelContentProps>
+> = ({
   keyData,
   language,
   baseLanguage,

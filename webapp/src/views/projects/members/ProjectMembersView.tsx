@@ -19,7 +19,9 @@ import { InvitationItem } from './component/InvitationItem';
 import { BaseProjectView } from '../BaseProjectView';
 import { useConfig, useEnabledFeatures } from 'tg.globalContext/helpers';
 
-export const ProjectMembersView: FunctionComponent = () => {
+export const ProjectMembersView: FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const project = useProject();
   const config = useConfig();
   const { isEnabled } = useEnabledFeatures();

@@ -40,69 +40,71 @@ type Props = {
   bannerAfter: boolean;
 };
 
-export const RowTable: React.FC<Props> = React.memo(function RowTable({
-  data,
-  columnSizes,
-  languages,
-  onResize,
-  bannerBefore,
-  bannerAfter,
-}) {
-  const { satisfiesPermissionWithBranching } = useProjectPermissions();
-  const [hover, setHover] = useState(false);
-  const [focus, setFocus] = useState(false);
-  const active = hover || focus;
+export const RowTable: React.FC<React.PropsWithChildren<Props>> = React.memo(
+  function RowTable({
+    data,
+    columnSizes,
+    languages,
+    onResize,
+    bannerBefore,
+    bannerAfter,
+  }) {
+    const { satisfiesPermissionWithBranching } = useProjectPermissions();
+    const [hover, setHover] = useState(false);
+    const [focus, setFocus] = useState(false);
+    const active = hover || focus;
 
-  const [activeDebounced] = useDebounce(active, 100);
+    const [activeDebounced] = useDebounce(active, 100);
 
-  const relaxedActive = active || activeDebounced;
+    const relaxedActive = active || activeDebounced;
 
-  const containerRef = useRef<HTMLDivElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
 
-  const allClassName = clsx({
-    [CELL_SPACE_TOP]: bannerBefore,
-    [CELL_SPACE_BOTTOM]: bannerAfter,
-  });
+    const allClassName = clsx({
+      [CELL_SPACE_TOP]: bannerBefore,
+      [CELL_SPACE_BOTTOM]: bannerAfter,
+    });
 
-  return (
-    <StyledContainer
-      onMouseOver={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      onFocus={() => setFocus(true)}
-      onBlur={() => setFocus(false)}
-      data-cy="translations-row"
-      className={clsx(data.deleted && 'deleted')}
-      style={{
-        gridTemplateColumns: columnSizes.join(' '),
-        width: `calc(${columnSizes.join(' + ')})`,
-      }}
-    >
-      <CellKey
-        editInDialog
-        editEnabled={satisfiesPermissionWithBranching('keys.edit')}
-        data={data}
-        active={relaxedActive}
-        className={allClassName}
-      />
-      {languages.map((language, index) => {
-        return (
-          <CellTranslation
-            key={language.tag}
-            data={data}
-            language={language}
-            colIndex={index}
-            onResize={onResize}
-            active={relaxedActive}
-            // render last focusable button on last item, so it's focusable
-            lastFocusable={index === languages.length - 1}
-            className={allClassName}
-          />
-        );
-      })}
-      <StyledFakeContainer
-        ref={containerRef}
-        style={{ left: columnSizes[0] }}
-      />
-    </StyledContainer>
-  );
-});
+    return (
+      <StyledContainer
+        onMouseOver={() => setHover(true)}
+        onMouseLeave={() => setHover(false)}
+        onFocus={() => setFocus(true)}
+        onBlur={() => setFocus(false)}
+        data-cy="translations-row"
+        className={clsx(data.deleted && 'deleted')}
+        style={{
+          gridTemplateColumns: columnSizes.join(' '),
+          width: `calc(${columnSizes.join(' + ')})`,
+        }}
+      >
+        <CellKey
+          editInDialog
+          editEnabled={satisfiesPermissionWithBranching('keys.edit')}
+          data={data}
+          active={relaxedActive}
+          className={allClassName}
+        />
+        {languages.map((language, index) => {
+          return (
+            <CellTranslation
+              key={language.tag}
+              data={data}
+              language={language}
+              colIndex={index}
+              onResize={onResize}
+              active={relaxedActive}
+              // render last focusable button on last item, so it's focusable
+              lastFocusable={index === languages.length - 1}
+              className={allClassName}
+            />
+          );
+        })}
+        <StyledFakeContainer
+          ref={containerRef}
+          style={{ left: columnSizes[0] }}
+        />
+      </StyledContainer>
+    );
+  }
+);

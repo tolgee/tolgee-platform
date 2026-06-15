@@ -14,7 +14,9 @@ const StyledExitDebugButton = styled(Button)`
   border-color: rgba(135, 135, 135, 0.38);
 `;
 
-export const DebuggingCustomerAccountAnnouncement: FC = () => {
+export const DebuggingCustomerAccountAnnouncement: FC<
+  React.PropsWithChildren<unknown>
+> = () => {
   const history = useHistory();
   const { exitDebugCustomerAccount } = useGlobalActions();
 

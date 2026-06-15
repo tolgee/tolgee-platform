@@ -9,6 +9,8 @@ const StyledLoadingButton = styled(LoadingButton)`
 
 type Props = ComponentProps<typeof LoadingButton>;
 
-export const DangerButton: React.FC<Props> = (props) => {
+export const DangerButton: React.FC<React.PropsWithChildren<Props>> = (
+  props
+) => {
   return <StyledLoadingButton variant="outlined" color="error" {...props} />;
 };

@@ -329,7 +329,9 @@ const ThemeContext = React.createContext({
 
 export const useThemeContext = () => useContext(ThemeContext);
 
-export const ThemeProvider: React.FC = ({ children }) => {
+export const ThemeProvider: React.FC<React.PropsWithChildren<unknown>> = ({
+  children,
+}) => {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)', {
     noSsr: true,
   });

@@ -24,7 +24,9 @@ type Props = {
   className?: string;
 };
 
-export const SupportArraysSelector: React.FC<Props> = ({ className }) => {
+export const SupportArraysSelector: React.FC<
+  React.PropsWithChildren<Props>
+> = ({ className }) => {
   const { t } = useTranslate();
 
   return (

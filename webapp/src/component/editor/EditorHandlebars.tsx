@@ -124,7 +124,9 @@ export type EditorProps = {
   errors?: EditorError[];
 };
 
-export const EditorHandlebars: React.FC<EditorProps> = ({
+export const EditorHandlebars: React.FC<
+  React.PropsWithChildren<EditorProps>
+> = ({
   value,
   onChange,
   onFocus,

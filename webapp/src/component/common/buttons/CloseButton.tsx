@@ -52,7 +52,7 @@ type Props = {
   'data-cy'?: string;
 };
 
-export const CloseButton: FC<Props> = ({
+export const CloseButton: FC<React.PropsWithChildren<Props>> = ({
   onClose,
   tooltip,
   xs,

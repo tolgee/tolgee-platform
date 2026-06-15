@@ -43,7 +43,9 @@ const StyledDivider = styled('div')`
       : theme.palette.emphasis[400]};
 `;
 
-export const UserPresentAvatarMenu: React.FC = () => {
+export const UserPresentAvatarMenu: React.FC<
+  React.PropsWithChildren<unknown>
+> = () => {
   const { logout } = useGlobalActions();
   const { preferredOrganization, updatePreferredOrganization } =
     usePreferredOrganization();

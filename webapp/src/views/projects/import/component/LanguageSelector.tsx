@@ -46,10 +46,12 @@ const StyledInputAdornment = styled(InputAdornment)`
 `;
 
 const NEW_LANGUAGE_VALUE = '__new_language';
-export const LanguageSelector: React.FC<{
-  value?: number;
-  row: components['schemas']['ImportLanguageModel'];
-}> = (props) => {
+export const LanguageSelector: React.FC<
+  React.PropsWithChildren<{
+    value?: number;
+    row: components['schemas']['ImportLanguageModel'];
+  }>
+> = (props) => {
   const queryClient = useQueryClient();
   const languages = useProjectLanguages();
   const importData = useImportDataHelper();

@@ -7,7 +7,9 @@ type Props = {
   project: ProjectModel;
 };
 
-export const SmallProjectAvatar: React.FC<Props> = ({ project }) => {
+export const SmallProjectAvatar: React.FC<React.PropsWithChildren<Props>> = ({
+  project,
+}) => {
   return (
     <AvatarImg
       owner={{

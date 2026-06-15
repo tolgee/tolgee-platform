@@ -28,7 +28,9 @@ type Props = {
   diffEnabled: boolean;
 };
 
-const NamespaceComponent: React.FC<Props> = ({ input }) => {
+const NamespaceComponent: React.FC<React.PropsWithChildren<Props>> = ({
+  input,
+}) => {
   const oldInput = input.old?.data?.name || input.old;
   const newInput = input.new?.data?.name || input.new;
   if (oldInput && newInput) {

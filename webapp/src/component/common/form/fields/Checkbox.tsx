@@ -8,7 +8,9 @@ interface PGCheckboxProps {
 
 type Props = PGCheckboxProps & React.ComponentProps<typeof TolgeeCheckbox>;
 
-export const Checkbox: FunctionComponent<Props> = (props) => {
+export const Checkbox: FunctionComponent<React.PropsWithChildren<Props>> = (
+  props
+) => {
   const [field] = useField(props.name);
 
   return <TolgeeCheckbox {...field} {...props} />;

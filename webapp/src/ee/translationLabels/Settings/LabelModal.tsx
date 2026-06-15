@@ -9,12 +9,14 @@ import { components } from 'tg.service/apiSchema.generated';
 
 type LabelModel = components['schemas']['LabelModel'];
 
-export const LabelModal: FC<{
-  label?: LabelModel;
-  open: boolean;
-  close: () => void;
-  submit: (values: LabelFormValues) => void;
-}> = ({ open, close, label, submit }) => {
+export const LabelModal: FC<
+  React.PropsWithChildren<{
+    label?: LabelModel;
+    open: boolean;
+    close: () => void;
+    submit: (values: LabelFormValues) => void;
+  }>
+> = ({ open, close, label, submit }) => {
   const { t } = useTranslate();
   return (
     <Dialog open={open} onClose={close}>

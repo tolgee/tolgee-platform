@@ -46,7 +46,9 @@ const OutOfCreditsWrapper = styled('div')`
   border-radius: 8px;
 `;
 
-export const MachineTranslation: React.FC<PanelContentProps> = ({
+export const MachineTranslation: React.FC<
+  React.PropsWithChildren<PanelContentProps>
+> = ({
   keyData,
   language,
   project,

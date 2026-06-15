@@ -2,7 +2,9 @@ import { useTranslate } from '@tolgee/react';
 import { Tooltip } from '@mui/material';
 import { StyledBillingHint } from '../billing/Decorations';
 
-export const StringsHint: React.FC = ({ children }) => {
+export const StringsHint: React.FC<React.PropsWithChildren<unknown>> = ({
+  children,
+}) => {
   const { t } = useTranslate();
   return (
     <Tooltip disableInteractive title={t('global_strings_hint')}>
@@ -11,7 +13,9 @@ export const StringsHint: React.FC = ({ children }) => {
   );
 };
 
-export const KeysHint: React.FC = ({ children }) => {
+export const KeysHint: React.FC<React.PropsWithChildren<unknown>> = ({
+  children,
+}) => {
   const { t } = useTranslate();
   return (
     <Tooltip disableInteractive title={t('global_keys_hint')}>
@@ -20,7 +24,9 @@ export const KeysHint: React.FC = ({ children }) => {
   );
 };
 
-export const SeatsHint: React.FC = ({ children }) => {
+export const SeatsHint: React.FC<React.PropsWithChildren<unknown>> = ({
+  children,
+}) => {
   const { t } = useTranslate();
   return (
     <Tooltip disableInteractive title={t('global_seats_hint')}>

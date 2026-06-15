@@ -25,7 +25,7 @@ type Props = CardProps & {
   actions?: React.ReactNode;
 };
 
-export const TextBlock: React.FC<Props> = ({
+export const TextBlock: React.FC<React.PropsWithChildren<Props>> = ({
   children,
   actions,
   ...cardProps

@@ -36,12 +36,9 @@ type Props = {
   isPlural: boolean;
 };
 
-export const TranslationCellReadOnly: React.FC<Props> = ({
-  text,
-  state,
-  locale,
-  isPlural,
-}) => {
+export const TranslationCellReadOnly: React.FC<
+  React.PropsWithChildren<Props>
+> = ({ text, state, locale, isPlural }) => {
   const effectiveState = state || 'UNTRANSLATED';
   const stateColor =
     TRANSLATION_STATES[effectiveState]?.color ||

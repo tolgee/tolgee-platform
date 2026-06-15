@@ -19,7 +19,10 @@ type Props = {
   className: string;
 };
 
-export const NsSelector: React.FC<Props> = ({ namespaces, className }) => {
+export const NsSelector: React.FC<React.PropsWithChildren<Props>> = ({
+  namespaces,
+  className,
+}) => {
   const { t } = useTranslate();
   const project = useProject();
 

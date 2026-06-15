@@ -48,7 +48,7 @@ const StyledSupportedFilesIconsContainer = styled(Box)`
 
 export type FileType = {
   extension: string;
-  icon: React.ComponentType<any>;
+  icon: React.ComponentType<React.PropsWithChildren<any>>;
 };
 
 export type FileDropzoneProps = {
@@ -64,7 +64,9 @@ export type FileDropzoneProps = {
   helperText?: ReactNode;
 };
 
-export const FileDropzone: React.FC<FileDropzoneProps> = ({
+export const FileDropzone: React.FC<
+  React.PropsWithChildren<FileDropzoneProps>
+> = ({
   files,
   onFilesSelect,
   maxFiles = Infinity,

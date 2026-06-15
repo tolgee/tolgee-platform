@@ -17,12 +17,14 @@ export type LabelFormValues = {
   description: string | undefined;
 };
 
-export const LabelForm: FC<{
-  label?: LabelModel;
-  submit: (values: LabelFormValues) => void;
-  cancel?: () => void;
-  submitText?: string;
-}> = ({ label, submit, cancel, submitText }) => {
+export const LabelForm: FC<
+  React.PropsWithChildren<{
+    label?: LabelModel;
+    submit: (values: LabelFormValues) => void;
+    cancel?: () => void;
+    submitText?: string;
+  }>
+> = ({ label, submit, cancel, submitText }) => {
   const { t } = useTranslate();
   const initValues = {
     name: label?.name ?? '',

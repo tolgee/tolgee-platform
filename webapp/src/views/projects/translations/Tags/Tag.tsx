@@ -31,7 +31,7 @@ type Props = {
   sx?: SxProps;
 };
 
-export const Tag: React.FC<Props> = ({
+export const Tag: React.FC<React.PropsWithChildren<Props>> = ({
   name,
   onDelete,
   onClick,

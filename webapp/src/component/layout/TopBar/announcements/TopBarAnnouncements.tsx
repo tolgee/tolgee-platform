@@ -9,10 +9,9 @@ type TopBarAnnouncementsProps = {
   isDebuggingCustomerAccount?: boolean;
 };
 
-export const TopBarAnnouncements: FC<TopBarAnnouncementsProps> = ({
-  isAdminAccess,
-  isDebuggingCustomerAccount,
-}) => {
+export const TopBarAnnouncements: FC<
+  React.PropsWithChildren<TopBarAnnouncementsProps>
+> = ({ isAdminAccess, isDebuggingCustomerAccount }) => {
   function getContents() {
     if (isAdminAccess) {
       return <AdministrationAccessAnnouncement />;

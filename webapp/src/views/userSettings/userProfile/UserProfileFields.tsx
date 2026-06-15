@@ -6,7 +6,9 @@ import { T, useTranslate } from '@tolgee/react';
 import { useConfig, useUser } from 'tg.globalContext/helpers';
 import { FunctionComponent } from 'react';
 
-export const UserProfileFields: FunctionComponent = () => {
+export const UserProfileFields: FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const { t } = useTranslate();
   const config = useConfig();
   const user = useUser();

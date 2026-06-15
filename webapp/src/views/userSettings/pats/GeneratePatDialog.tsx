@@ -11,9 +11,11 @@ import { TextField } from 'tg.component/common/form/fields/TextField';
 import { ExpirationDateField } from 'tg.component/common/form/epirationField/ExpirationDateField';
 import { useExpirationDateOptions } from 'tg.component/common/form/epirationField/useExpirationDateOptions';
 
-export const GeneratePatDialog: FunctionComponent<{
-  onGenerated: (pat: components['schemas']['RevealedPatModel']) => void;
-}> = (props) => {
+export const GeneratePatDialog: FunctionComponent<
+  React.PropsWithChildren<{
+    onGenerated: (pat: components['schemas']['RevealedPatModel']) => void;
+  }>
+> = (props) => {
   const expirationDateOptions = useExpirationDateOptions();
   const history = useHistory();
 

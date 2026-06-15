@@ -76,7 +76,7 @@ type Props = BoxProps & {
   showLabels?: boolean;
 };
 
-export const BillingProgress: React.FC<Props> = ({
+export const BillingProgress: React.FC<React.PropsWithChildren<Props>> = ({
   progressItem,
   height = 6,
   isPayAsYouGo,

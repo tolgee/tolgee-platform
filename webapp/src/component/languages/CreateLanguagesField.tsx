@@ -19,7 +19,7 @@ type Props = {
   existingTags: string[];
 };
 
-export const CreateLanguagesField: FC<Props> = ({
+export const CreateLanguagesField: FC<React.PropsWithChildren<Props>> = ({
   value,
   onChange,
   autoFocus,

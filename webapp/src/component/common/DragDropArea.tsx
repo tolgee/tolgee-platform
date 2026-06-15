@@ -58,7 +58,9 @@ export type DragDropAreaProps = {
   children: ReactNode;
 };
 
-export const DragDropArea: React.FC<DragDropAreaProps> = ({
+export const DragDropArea: React.FC<
+  React.PropsWithChildren<DragDropAreaProps>
+> = ({
   onFilesReceived,
   onClick,
   active = true,

@@ -22,7 +22,9 @@ const LanguageReference = ({ id }: { id: number }) => {
   );
 };
 
-const LanguageIdsComponent: React.FC<Props> = ({ input }) => {
+const LanguageIdsComponent: React.FC<React.PropsWithChildren<Props>> = ({
+  input,
+}) => {
   const newInput = input.new;
 
   let displayed = input.new || [];

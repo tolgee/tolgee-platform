@@ -44,7 +44,7 @@ const GlobalConfirmation = () => {
   );
 };
 
-const Head: FC = () => {
+const Head: FC<React.PropsWithChildren<unknown>> = () => {
   const theme = useTheme();
 
   return (

@@ -20,10 +20,12 @@ const StyledIconWrapper = styled('div')`
 `;
 
 export const ChipButton: FunctionComponent<
-  {
-    beforeIcon?: ReactNode;
-    onClick: () => void;
-  } & ButtonProps
+  React.PropsWithChildren<
+    {
+      beforeIcon?: ReactNode;
+      onClick: () => void;
+    } & ButtonProps
+  >
 > = (props) => {
   const { beforeIcon, children, ...buttonProps } = props;
 

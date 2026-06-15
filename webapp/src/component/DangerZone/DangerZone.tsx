@@ -24,7 +24,9 @@ type Props = {
   actions: DangerAction[];
 };
 
-export const DangerZone: React.FC<Props> = ({ actions }) => {
+export const DangerZone: React.FC<React.PropsWithChildren<Props>> = ({
+  actions,
+}) => {
   const rightPanelWidth = useGlobalContext((c) => c.layout.rightPanelWidth);
   const isSmOrLower = useMediaQuery(
     `@container (max-width: ${899 + rightPanelWidth}px)`

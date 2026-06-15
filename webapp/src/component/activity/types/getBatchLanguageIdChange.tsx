@@ -7,7 +7,9 @@ type Props = {
   input: DiffValue<number>;
 };
 
-const LanguageIdsComponent: React.FC<Props> = ({ input }) => {
+const LanguageIdsComponent: React.FC<React.PropsWithChildren<Props>> = ({
+  input,
+}) => {
   const allLangs = useProjectLanguages();
   const langId = input.new;
   const language = allLangs.find((lang) => lang.id === langId);

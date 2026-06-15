@@ -7,7 +7,7 @@ import { getSelfHostedProgressData } from '../getSelfHostedProgressData';
 type SelfHostedPlanLimitPopoverProps = PlanLimitPopoverWrapperProps;
 
 export const PlanLimitPopoverSelfHosted: FC<
-  SelfHostedPlanLimitPopoverProps
+  React.PropsWithChildren<SelfHostedPlanLimitPopoverProps>
 > = ({ open, onClose }) => {
   const usageLoadable = useApiQuery({
     url: '/v2/ee-current-subscription-usage',

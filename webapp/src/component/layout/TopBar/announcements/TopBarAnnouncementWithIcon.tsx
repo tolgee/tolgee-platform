@@ -3,9 +3,11 @@ import { Box } from '@mui/material';
 import { AlertTriangle } from '@untitled-ui/icons-react';
 
 export const TopBarAnnouncementWithIcon: FC<
-  {
-    icon: ReactNode;
-  } & ComponentProps<typeof Box>
+  React.PropsWithChildren<
+    {
+      icon: ReactNode;
+    } & ComponentProps<typeof Box>
+  >
 > = ({ icon, children, ...props }) => {
   return (
     <Box
@@ -26,7 +28,9 @@ export const TopBarAnnouncementWithIcon: FC<
   );
 };
 
-export const TopBarAnnouncementWithAlertIcon: FC = ({ children, ...props }) => {
+export const TopBarAnnouncementWithAlertIcon: FC<
+  React.PropsWithChildren<unknown>
+> = ({ children, ...props }) => {
   return (
     <TopBarAnnouncementWithIcon icon={<AlertTriangle />} {...props}>
       {children}

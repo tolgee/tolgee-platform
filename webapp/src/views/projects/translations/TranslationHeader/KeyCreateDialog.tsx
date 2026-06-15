@@ -23,7 +23,7 @@ type Props = {
   onDirtyChange: (dirty: boolean) => void;
 };
 
-export const KeyCreateDialog: React.FC<Props> = ({
+export const KeyCreateDialog: React.FC<React.PropsWithChildren<Props>> = ({
   onClose,
   onDirtyChange,
 }) => {

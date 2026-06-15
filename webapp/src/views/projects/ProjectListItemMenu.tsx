@@ -8,11 +8,13 @@ import { components } from 'tg.service/apiSchema.generated';
 import { stopBubble } from 'tg.fixtures/eventHandler';
 import { useLeaveProject } from './useLeaveProject';
 
-export const ProjectListItemMenu: FC<{
-  projectId: number;
-  computedPermission: components['schemas']['ProjectWithStatsModel']['computedPermission'];
-  projectName: string;
-}> = (props) => {
+export const ProjectListItemMenu: FC<
+  React.PropsWithChildren<{
+    projectId: number;
+    computedPermission: components['schemas']['ProjectWithStatsModel']['computedPermission'];
+    projectName: string;
+  }>
+> = (props) => {
   const { t } = useTranslate();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const { leave } = useLeaveProject();

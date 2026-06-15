@@ -8,7 +8,7 @@ import { StyledTranslationFlagsContainer } from 'tg.views/projects/translations/
 import { TranslationTaskIndicatorProps } from '../../../eeSetup/EeModuleType';
 
 export const TranslationTaskIndicator: React.FC<
-  TranslationTaskIndicatorProps
+  React.PropsWithChildren<TranslationTaskIndicatorProps>
 > = ({ task }) => {
   const project = useProject();
   const theme = useTheme();

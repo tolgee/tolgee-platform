@@ -61,14 +61,16 @@ const ALLOWED_UPLOAD_TYPES = [
   'image/webp',
 ];
 
-export const ProfileAvatar: FC<{
-  disabled?: boolean;
-  onUpload: (blob: Blob) => Promise<any>;
-  onRemove: () => Promise<any>;
-  owner: AvatarOwner;
-  cropperProps?: Partial<CropperOptions>;
-  preview?: (props: AvatarOwner) => React.ReactNode;
-}> = (props) => {
+export const ProfileAvatar: FC<
+  React.PropsWithChildren<{
+    disabled?: boolean;
+    onUpload: (blob: Blob) => Promise<any>;
+    onRemove: () => Promise<any>;
+    owner: AvatarOwner;
+    cropperProps?: Partial<CropperOptions>;
+    preview?: (props: AvatarOwner) => React.ReactNode;
+  }>
+> = (props) => {
   const fileRef = createRef<HTMLInputElement>();
   const [uploaded, setUploaded] = useState(null as string | null | undefined);
   const cropperRef = createRef<ReactCropperElement>();

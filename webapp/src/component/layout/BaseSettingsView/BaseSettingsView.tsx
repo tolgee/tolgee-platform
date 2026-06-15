@@ -32,7 +32,7 @@ type Props = BaseViewProps & {
   menuItems: SettingsMenuItem[];
 };
 
-export const BaseSettingsView: React.FC<Props> = ({
+export const BaseSettingsView: React.FC<React.PropsWithChildren<Props>> = ({
   children,
   menuItems,
   maxWidth = 'normal',

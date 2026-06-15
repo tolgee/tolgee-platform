@@ -23,7 +23,10 @@ type Props = {
   onResize?: () => void;
 };
 
-export const CellLanguage: React.FC<Props> = ({ language, onResize }) => {
+export const CellLanguage: React.FC<React.PropsWithChildren<Props>> = ({
+  language,
+  onResize,
+}) => {
   return (
     <>
       <StyledContent>

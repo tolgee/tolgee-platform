@@ -40,7 +40,9 @@ type Props = {
   rightPanelContent?: (width: number) => React.ReactNode;
 };
 
-export const DashboardPage: FunctionComponent<Props> = ({
+export const DashboardPage: FunctionComponent<
+  React.PropsWithChildren<Props>
+> = ({
   children,
   isAdminAccess = false,
   fixedContent,

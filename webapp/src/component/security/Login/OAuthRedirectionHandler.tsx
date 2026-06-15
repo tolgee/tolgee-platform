@@ -11,7 +11,7 @@ import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 
 interface OAuthRedirectionHandlerProps {}
 export const OAuthRedirectionHandler: FunctionComponent<
-  OAuthRedirectionHandlerProps
+  React.PropsWithChildren<OAuthRedirectionHandlerProps>
 > = () => {
   const loginLoadable = useGlobalContext((c) => c.auth.authorizeOAuthLoadable);
 

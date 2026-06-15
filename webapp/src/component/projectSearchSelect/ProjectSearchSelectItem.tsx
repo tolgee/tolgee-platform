@@ -17,10 +17,9 @@ type Props = {
   size?: number;
 };
 
-export const ProjectSearchSelectItem: React.FC<Props> = ({
-  data,
-  size = 24,
-}) => {
+export const ProjectSearchSelectItem: React.FC<
+  React.PropsWithChildren<Props>
+> = ({ data, size = 24 }) => {
   return (
     <StyledOrgItem>
       <Box>

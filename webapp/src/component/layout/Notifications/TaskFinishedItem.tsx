@@ -7,10 +7,9 @@ import {
 
 type Props = TaskItemProps;
 
-export const TaskFinishedItem: FunctionComponent<Props> = ({
-  notification,
-  ...props
-}) => {
+export const TaskFinishedItem: FunctionComponent<
+  React.PropsWithChildren<Props>
+> = ({ notification, ...props }) => {
   return (
     <TaskItem notification={notification} {...props}>
       <T keyName="notifications-task-finished" />

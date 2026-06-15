@@ -115,10 +115,9 @@ function resolveTitleAndText(
   }
 }
 
-export const AuthProviderChangeBody: FunctionComponent<Props> = ({
-  children,
-  ...props
-}: Props) => {
+export const AuthProviderChangeBody: FunctionComponent<
+  React.PropsWithChildren<Props>
+> = ({ children, ...props }: Props) => {
   const isSsoMigrationRequired = useIsSsoMigrationRequired();
   const { title, text } = resolveTitleAndText(props, isSsoMigrationRequired);
 

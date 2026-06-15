@@ -11,7 +11,9 @@ const StyledId = styled('span')`
   font-size: 15px;
 `;
 
-export const TaskReference: React.FC<TaskReferenceProps> = ({ data }) => {
+export const TaskReference: React.FC<
+  React.PropsWithChildren<TaskReferenceProps>
+> = ({ data }) => {
   const project = useProject();
 
   return (

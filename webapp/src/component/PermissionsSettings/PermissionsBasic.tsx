@@ -17,7 +17,7 @@ type Props = {
   disabled?: boolean;
 };
 
-export const PermissionsBasic: React.FC<Props> = ({
+export const PermissionsBasic: React.FC<React.PropsWithChildren<Props>> = ({
   state,
   onChange,
   roles,

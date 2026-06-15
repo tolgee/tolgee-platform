@@ -11,7 +11,9 @@ type Props = {
   onClick?: React.MouseEventHandler<SVGElement>;
 };
 
-export const CloseButton: React.FC<Props> = ({ onClick }) => {
+export const CloseButton: React.FC<React.PropsWithChildren<Props>> = ({
+  onClick,
+}) => {
   return (
     <StyledCloseIcon
       role="button"

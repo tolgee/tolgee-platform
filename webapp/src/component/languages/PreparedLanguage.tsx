@@ -31,10 +31,12 @@ const StyledIconButton = styled(IconButton)`
 `;
 
 export const PreparedLanguage: React.FC<
-  components['schemas']['LanguageRequest'] & {
-    onReset: () => void;
-    onEdit: () => void;
-  }
+  React.PropsWithChildren<
+    components['schemas']['LanguageRequest'] & {
+      onReset: () => void;
+      onEdit: () => void;
+    }
+  >
 > = (props) => {
   const { t } = useTranslate();
   return (

@@ -38,7 +38,9 @@ const StyledCounterWrapper = styled('div')`
   }
 `;
 
-export const TranslationsToolbar: React.FC = () => {
+export const TranslationsToolbar: React.FC<
+  React.PropsWithChildren<unknown>
+> = () => {
   const [isMouseOver, setIsMouseOver] = useState(false);
   const [selectionOpen, setSelectionOpen] = useState(false);
   const totalCount = useTranslationsSelector((c) => c.translationsTotal || 0);

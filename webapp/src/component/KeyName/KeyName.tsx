@@ -17,7 +17,7 @@ type Props = {
   ['data-cy']?: string;
 };
 
-export const KeyName: React.FC<Props> = ({
+export const KeyName: React.FC<React.PropsWithChildren<Props>> = ({
   name,
   className,
   'data-cy': dataCy,

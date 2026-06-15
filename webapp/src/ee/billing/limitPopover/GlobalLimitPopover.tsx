@@ -3,7 +3,9 @@ import React, { useEffect, useState } from 'react';
 import { PlanLimitPopover } from './PlanLimitPopover';
 import { PlanLimitPopoverSpendingLimitExceeded } from './PlanLimitPopoverSpendingLimitExceeded';
 
-export const GlobalLimitPopover: React.FC = () => {
+export const GlobalLimitPopover: React.FC<
+  React.PropsWithChildren<unknown>
+> = () => {
   const { planLimitErrors, spendingLimitErrors } = useOrganizationUsage();
   const [planLimitErrOpen, setPlanLimitErrOpen] = useState(false);
   const [spendingLimitErrOpen, setSpendingLimitErrOpen] = useState(false);

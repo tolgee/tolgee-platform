@@ -77,7 +77,7 @@ type Props = {
   containerWidth: number;
 };
 
-export const TrashTable: React.FC<Props> = ({
+export const TrashTable: React.FC<React.PropsWithChildren<Props>> = ({
   trashedKeys,
   selectedKeys,
   onToggleKey,

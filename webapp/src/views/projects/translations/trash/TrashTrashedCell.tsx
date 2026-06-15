@@ -48,7 +48,7 @@ type Props = {
   onDelete: () => void;
 };
 
-export const TrashTrashedCell: React.FC<Props> = ({
+export const TrashTrashedCell: React.FC<React.PropsWithChildren<Props>> = ({
   data,
   canRestore,
   canDelete,

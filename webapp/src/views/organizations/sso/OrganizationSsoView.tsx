@@ -11,7 +11,9 @@ import { useEnabledFeatures } from 'tg.globalContext/helpers';
 import { DisabledFeatureBanner } from 'tg.component/common/DisabledFeatureBanner';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 
-export const OrganizationSsoView: FunctionComponent = () => {
+export const OrganizationSsoView: FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const organization = useOrganization();
   if (!organization) {
     return null;

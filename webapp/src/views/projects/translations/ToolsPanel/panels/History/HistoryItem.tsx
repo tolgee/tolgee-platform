@@ -91,7 +91,7 @@ type Props = {
   languageTag: string;
 };
 
-export const HistoryItem: React.FC<Props> = ({
+export const HistoryItem: React.FC<React.PropsWithChildren<Props>> = ({
   entry,
   showDifferences,
   languageTag,

@@ -29,12 +29,9 @@ type Props = {
   existingLanguages: string[];
 };
 
-export const LanguagesAddDialog: FunctionComponent<Props> = ({
-  onClose,
-  onCreated,
-  onChangesMade,
-  existingLanguages,
-}) => {
+export const LanguagesAddDialog: FunctionComponent<
+  React.PropsWithChildren<Props>
+> = ({ onClose, onCreated, onChangesMade, existingLanguages }) => {
   const project = useProject();
   const { refetchUsage } = useGlobalActions();
   const createLoadable = useApiMutation({

@@ -19,11 +19,9 @@ const StyledLinkedDetailNumber = styled(StyledLinkedDetailItem)`
 
 export type TaskItemProps = NotificationItemProps;
 
-export const TaskItem: FunctionComponent<TaskItemProps> = ({
-  notification,
-  children,
-  ...props
-}) => {
+export const TaskItem: FunctionComponent<
+  React.PropsWithChildren<TaskItemProps>
+> = ({ notification, children, ...props }) => {
   const { t } = useTranslate();
   const destinationUrl = getTaskUrl(
     notification.project!.id,

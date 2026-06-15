@@ -19,7 +19,9 @@ const StyledLink = styled(Link)`
   text-decoration: none;
 `;
 
-export const PatsView: FunctionComponent = () => {
+export const PatsView: FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const { t } = useTranslate();
   const [page, setPage] = useState(0);
 

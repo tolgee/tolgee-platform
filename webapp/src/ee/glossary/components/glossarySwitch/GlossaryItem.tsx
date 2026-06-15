@@ -13,7 +13,9 @@ type Props = {
   data: SimpleGlossaryModel;
 };
 
-export const GlossaryItem: React.FC<Props> = ({ data }) => {
+export const GlossaryItem: React.FC<React.PropsWithChildren<Props>> = ({
+  data,
+}) => {
   return (
     <StyledWrapper>
       <Box>{data.name}</Box>

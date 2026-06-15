@@ -17,7 +17,9 @@ import { LoginSsoForm } from 'tg.ee.module/security/Sso/LoginSsoForm';
 import { useLocation } from 'react-router-dom';
 import { GlobalLoading } from 'tg.component/GlobalLoading';
 
-export const SsoLoginView: FunctionComponent = () => {
+export const SsoLoginView: FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const { t } = useTranslate();
   const { loginRedirectSso, getLastSsoDomain } = useGlobalActions();
   const { search } = useLocation();

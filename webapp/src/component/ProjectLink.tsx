@@ -7,7 +7,7 @@ type Props = {
   project: { id: number; name: string };
 } & React.ComponentProps<typeof Link>;
 
-export const ProjectLink: React.FC<Props> = ({
+export const ProjectLink: React.FC<React.PropsWithChildren<Props>> = ({
   project,
   children,
   ...props

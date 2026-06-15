@@ -23,13 +23,9 @@ type Props = BaseViewProps & {
   link: Link;
 };
 
-export const BaseOrganizationSettingsView: React.FC<Props> = ({
-  children,
-  loading,
-  navigation,
-  link,
-  ...otherProps
-}) => {
+export const BaseOrganizationSettingsView: React.FC<
+  React.PropsWithChildren<Props>
+> = ({ children, loading, navigation, link, ...otherProps }) => {
   const config = useConfig();
   const match = useRouteMatch();
   const organizationSlug = match.params[PARAMS.ORGANIZATION_SLUG];

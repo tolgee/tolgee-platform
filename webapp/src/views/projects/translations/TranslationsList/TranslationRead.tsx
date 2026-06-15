@@ -64,7 +64,7 @@ type Props = {
   readonly?: boolean;
 };
 
-export const TranslationRead: React.FC<Props> = ({
+export const TranslationRead: React.FC<React.PropsWithChildren<Props>> = ({
   width,
   active,
   lastFocusable,

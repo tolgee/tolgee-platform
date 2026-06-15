@@ -21,10 +21,9 @@ type Props = {
   open: boolean;
 };
 
-export const PlanLimitPopoverSpendingLimitExceeded: React.FC<Props> = ({
-  open,
-  onClose,
-}) => {
+export const PlanLimitPopoverSpendingLimitExceeded: React.FC<
+  React.PropsWithChildren<Props>
+> = ({ open, onClose }) => {
   return (
     <PlanLimitPopoverWrapper
       open={open}

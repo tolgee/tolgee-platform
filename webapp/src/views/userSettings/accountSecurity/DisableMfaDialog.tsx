@@ -15,7 +15,9 @@ import { useHistory } from 'react-router-dom';
 
 type TotpDisableDto = components['schemas']['UserTotpDisableRequestDto'];
 
-export const DisableMfaDialog: FunctionComponent = () => {
+export const DisableMfaDialog: FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const history = useHistory();
 
   const onDialogClose = () => {

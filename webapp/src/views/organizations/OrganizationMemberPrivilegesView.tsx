@@ -8,7 +8,9 @@ import { useOrganization } from './useOrganization';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { ScopesInfo } from 'tg.component/PermissionsSettings/ScopesInfo';
 
-export const OrganizationMemberPrivilegesView: FunctionComponent = () => {
+export const OrganizationMemberPrivilegesView: FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const organization = useOrganization();
   const { t } = useTranslate();
 

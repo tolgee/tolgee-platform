@@ -11,7 +11,7 @@ type Props = {
   fallback?: React.ReactNode;
 };
 
-export const GlossaryContext: React.FC<Props> = ({
+export const GlossaryContext: React.FC<React.PropsWithChildren<Props>> = ({
   children,
   organizationId,
   glossaryId,

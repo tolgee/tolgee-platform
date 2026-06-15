@@ -72,12 +72,9 @@ interface ScreenshotDetailProps {
   onSrcExpired: () => void;
 }
 
-export const ScreenshotDetail: React.FC<ScreenshotDetailProps> = ({
-  onClose,
-  screenshots,
-  initialIndex,
-  onSrcExpired,
-}) => {
+export const ScreenshotDetail: React.FC<
+  React.PropsWithChildren<ScreenshotDetailProps>
+> = ({ onClose, screenshots, initialIndex, onSrcExpired }) => {
   const [index, setIndex] = useState(initialIndex);
   const itemsCount = screenshots.length;
   const screenshot = screenshots[index];

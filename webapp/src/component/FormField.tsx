@@ -17,7 +17,7 @@ type FieldLabelProps = {
   className?: string;
 };
 
-export const FieldLabel: React.FC<FieldLabelProps> = ({
+export const FieldLabel: React.FC<React.PropsWithChildren<FieldLabelProps>> = ({
   children,
   sx,
   className,
@@ -29,7 +29,9 @@ export const FieldLabel: React.FC<FieldLabelProps> = ({
   );
 };
 
-export const FieldError: React.FC<{ error: React.ReactNode }> = ({ error }) => {
+export const FieldError: React.FC<
+  React.PropsWithChildren<{ error: React.ReactNode }>
+> = ({ error }) => {
   return (
     <StyledError variant="caption" color="error">
       {error}

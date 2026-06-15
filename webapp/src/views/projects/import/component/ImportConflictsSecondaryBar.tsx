@@ -33,11 +33,13 @@ const StyledCounter = styled('div')`
   }
 `;
 
-export const ImportConflictsSecondaryBar: FunctionComponent<{
-  onShowResolvedToggle: () => void;
-  showResolved: boolean;
-  languageData: components['schemas']['ImportLanguageModel'];
-}> = (props) => {
+export const ImportConflictsSecondaryBar: FunctionComponent<
+  React.PropsWithChildren<{
+    onShowResolvedToggle: () => void;
+    showResolved: boolean;
+    languageData: components['schemas']['ImportLanguageModel'];
+  }>
+> = (props) => {
   const resolvedCount = props.languageData.resolvedCount;
 
   return (

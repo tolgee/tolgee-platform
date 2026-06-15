@@ -66,7 +66,9 @@ type Props = {
   transformOrigin?: PopoverOrigin;
 };
 
-export const ProjectSearchSelectPopover: React.FC<Props> = ({
+export const ProjectSearchSelectPopover: React.FC<
+  React.PropsWithChildren<Props>
+> = ({
   open,
   onClose,
   onSelect,

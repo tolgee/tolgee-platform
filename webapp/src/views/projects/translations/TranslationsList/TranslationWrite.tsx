@@ -87,7 +87,9 @@ type Props = {
   tools: ReturnType<typeof useTranslationCell>;
 };
 
-export const TranslationWrite: React.FC<Props> = ({ tools }) => {
+export const TranslationWrite: React.FC<React.PropsWithChildren<Props>> = ({
+  tools,
+}) => {
   const {
     value,
     keyData,

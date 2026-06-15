@@ -41,7 +41,9 @@ type ControlsProps = {
   onTaskStateChange?: (done: boolean) => void;
 };
 
-export const ControlsEditorSmall: React.FC<ControlsProps> = ({
+export const ControlsEditorSmall: React.FC<
+  React.PropsWithChildren<ControlsProps>
+> = ({
   state,
   mode,
   isBaseLanguage,

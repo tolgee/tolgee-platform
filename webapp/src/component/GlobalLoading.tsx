@@ -16,7 +16,7 @@ const StyledSmoothProgress = styled(SmoothProgress)`
   z-index: ${({ theme }) => theme.zIndex.tooltip};
 `;
 
-export const GlobalLoading: React.FC = () => {
+export const GlobalLoading: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { loading, spinners } = useContext(LoadingContext);
 
   return (
@@ -24,7 +24,9 @@ export const GlobalLoading: React.FC = () => {
   );
 };
 
-export const LoadingProvider: React.FC = (props) => {
+export const LoadingProvider: React.FC<React.PropsWithChildren<unknown>> = (
+  props
+) => {
   const [loading, setLoading] = useState(0);
   const [spinners, setSpinners] = useState(0);
   return (
