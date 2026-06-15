@@ -1,4 +1,3 @@
-import { FunctionComponent } from 'react';
 import {
   InputLabel,
   Switch as MUISwitch,
@@ -24,7 +23,7 @@ export type SwitchProps = React.ComponentProps<typeof MUISwitch> & {
   helperText?: React.ReactNode;
 };
 
-export const Switch: FunctionComponent<SwitchProps> = React.forwardRef(
+export const Switch = React.forwardRef<HTMLButtonElement, SwitchProps>(
   function Switch(props, ref) {
     const { label, helperText, sx, ...otherProps } = props;
     return (
