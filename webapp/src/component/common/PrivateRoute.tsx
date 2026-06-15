@@ -5,7 +5,9 @@ import { RedirectUnsignedUser } from './RedirectUnsignedUser';
 
 type Props = React.ComponentProps<typeof Route>;
 
-export const PrivateRoute: React.FC<Props> = (props) => {
+export const PrivateRoute: React.FC<React.PropsWithChildren<Props>> = (
+  props
+) => {
   return (
     <Route {...props}>
       <RedirectUnsignedUser>{props.children}</RedirectUnsignedUser>

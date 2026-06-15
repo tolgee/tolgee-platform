@@ -10,7 +10,7 @@ type Props = {
   allLangs?: LanguageModel[];
 };
 
-export const PermissionsAdvanced: React.FC<Props> = ({
+export const PermissionsAdvanced: React.FC<React.PropsWithChildren<Props>> = ({
   dependencies,
   state,
   onChange,

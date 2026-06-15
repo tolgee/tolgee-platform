@@ -14,7 +14,7 @@ type Props = {
   onChange: (languages: string[]) => void;
 };
 
-export const LanguagesMenu: React.FC<Props> = ({
+export const LanguagesMenu: React.FC<React.PropsWithChildren<Props>> = ({
   anchorEl,
   onClose,
   languages,

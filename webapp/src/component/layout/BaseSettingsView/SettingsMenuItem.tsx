@@ -36,7 +36,7 @@ type Props = {
   hidden?: boolean;
 };
 
-export const SettingsMenuItem: React.FC<Props> = ({
+export const SettingsMenuItem: React.FC<React.PropsWithChildren<Props>> = ({
   linkTo,
   text,
   selected,

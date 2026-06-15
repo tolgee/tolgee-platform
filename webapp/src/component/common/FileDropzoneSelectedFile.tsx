@@ -35,7 +35,7 @@ export type FileDropzoneSelectedFileProps = {
 };
 
 export const FileDropzoneSelectedFile: React.FC<
-  FileDropzoneSelectedFileProps
+  React.PropsWithChildren<FileDropzoneSelectedFileProps>
 > = ({ icon, file, onRemove }) => {
   const { t } = useTranslate();
   return (

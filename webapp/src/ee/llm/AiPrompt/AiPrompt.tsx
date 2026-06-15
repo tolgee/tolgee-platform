@@ -107,7 +107,7 @@ type Props = {
   keyData: DeletableKeyWithTranslationsModelType;
 };
 
-export const AiPrompt: React.FC<Props> = ({
+export const AiPrompt: React.FC<React.PropsWithChildren<Props>> = ({
   width,
   project,
   language,

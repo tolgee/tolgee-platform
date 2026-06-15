@@ -24,7 +24,7 @@ export type BranchFormProps = {
   submitText?: string;
 };
 
-export const BranchForm: FC<BranchFormProps> = ({
+export const BranchForm: FC<React.PropsWithChildren<BranchFormProps>> = ({
   submit,
   cancel,
   submitText,

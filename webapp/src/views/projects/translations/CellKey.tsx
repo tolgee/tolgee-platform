@@ -127,7 +127,7 @@ type Props = {
   editInDialog?: boolean;
 };
 
-export const CellKey: React.FC<Props> = ({
+export const CellKey: React.FC<React.PropsWithChildren<Props>> = ({
   data,
   widthPercent,
   width,

@@ -5,6 +5,8 @@ type Props = {
   data: WebhookConfigReferenceData;
 };
 
-export const WebhookConfigReference: React.FC<Props> = ({ data }) => {
+export const WebhookConfigReference: React.FC<
+  React.PropsWithChildren<Props>
+> = ({ data }) => {
   return <span className="reference referenceText">{data.url}</span>;
 };

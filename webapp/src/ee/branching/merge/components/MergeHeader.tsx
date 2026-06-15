@@ -22,7 +22,9 @@ const StyledBody = styled(Box)`
   gap: ${({ theme }) => theme.spacing(2)};
 `;
 
-export const MergeHeader: React.FC<Props> = ({ merge }) => {
+export const MergeHeader: React.FC<React.PropsWithChildren<Props>> = ({
+  merge,
+}) => {
   const hasUnresolvedConflicts = merge.keyUnresolvedConflictsCount > 0;
 
   return (

@@ -24,7 +24,9 @@ type Props = {
   className?: string;
 };
 
-export const CdAutoPublish: React.FC<Props> = ({ className }) => {
+export const CdAutoPublish: React.FC<React.PropsWithChildren<Props>> = ({
+  className,
+}) => {
   const { t } = useTranslate();
 
   return (

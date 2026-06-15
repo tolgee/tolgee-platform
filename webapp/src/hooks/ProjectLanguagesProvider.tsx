@@ -10,7 +10,9 @@ export const ProjectLanguagesContext =
   // @ts-ignore
   createContext<components['schemas']['PagedModelLanguageModel']>(null);
 
-export const ProjectLanguagesProvider: FunctionComponent = (props) => {
+export const ProjectLanguagesProvider: FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = (props) => {
   const projectDTO = useProject();
 
   const languagesLoadable = useApiQuery({

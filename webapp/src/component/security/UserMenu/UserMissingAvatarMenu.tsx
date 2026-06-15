@@ -28,7 +28,9 @@ const StyledDivider = styled('div')`
       : theme.palette.emphasis[400]};
 `;
 
-export const UserMissingAvatarMenu: React.FC = () => {
+export const UserMissingAvatarMenu: React.FC<
+  React.PropsWithChildren<unknown>
+> = () => {
   const { t } = useTranslate();
   const [anchorEl, setAnchorEl] = useState(null);
 

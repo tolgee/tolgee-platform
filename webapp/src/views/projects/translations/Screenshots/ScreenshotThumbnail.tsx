@@ -59,7 +59,9 @@ type Props = {
   onSrcExpired: () => void;
 };
 
-export const ScreenshotThumbnail: FunctionComponent<Props> = (props) => {
+export const ScreenshotThumbnail: FunctionComponent<
+  React.PropsWithChildren<Props>
+> = (props) => {
   const { satisfiesPermission } = useProjectPermissions();
   const canDeleteScreenshots = satisfiesPermission('screenshots.delete');
 

@@ -13,7 +13,9 @@ type SetPasswordFieldsProps = {
 
 type Props = SetPasswordFieldsProps & TextFieldProps;
 
-export const PasswordFieldWithValidation: React.FC<Props> = (props) => {
+export const PasswordFieldWithValidation: React.FC<
+  React.PropsWithChildren<Props>
+> = (props) => {
   const { t } = useTranslate();
 
   function getScoreTranslation(strength: number) {

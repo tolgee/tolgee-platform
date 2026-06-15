@@ -61,12 +61,9 @@ export type NotificationItemProps = {
   destinationUrl?: string;
 } & ListItemButtonProps;
 
-export const NotificationItem: React.FC<NotificationItemProps> = ({
-  notification,
-  key,
-  destinationUrl,
-  children,
-}) => {
+export const NotificationItem: React.FC<
+  React.PropsWithChildren<NotificationItemProps>
+> = ({ notification, key, destinationUrl, children }) => {
   const timeDistance = useTimeDistance();
   const createdAt = notification?.createdAt || '';
   const originatingUser = notification?.originatingUser;
@@ -119,9 +116,9 @@ export const NotificationItem: React.FC<NotificationItemProps> = ({
   );
 };
 
-export const NotificationItemSkeleton: React.FC<ListItemButtonProps> = (
-  props
-) => {
+export const NotificationItemSkeleton: React.FC<
+  React.PropsWithChildren<ListItemButtonProps>
+> = (props) => {
   return (
     <StyledItem {...props}>
       <StyledAvatar>

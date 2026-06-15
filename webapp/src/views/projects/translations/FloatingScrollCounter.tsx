@@ -53,12 +53,9 @@ type Props = {
   onScrollUp: () => void;
 };
 
-export const FloatingScrollCounter: React.FC<Props> = ({
-  scrollIndex,
-  totalCount,
-  visible,
-  onScrollUp,
-}) => {
+export const FloatingScrollCounter: React.FC<
+  React.PropsWithChildren<Props>
+> = ({ scrollIndex, totalCount, visible, onScrollUp }) => {
   const { t } = useTranslate();
   const counterContent = `${scrollIndex} / ${totalCount}`;
 

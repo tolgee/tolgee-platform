@@ -9,10 +9,9 @@ export interface ScreenshotDropzoneProps {
   validateAndUpload: (files: FilesType) => void;
 }
 
-export const ScreenshotDropzone: FunctionComponent<ScreenshotDropzoneProps> = ({
-  validateAndUpload,
-  ...props
-}) => {
+export const ScreenshotDropzone: FunctionComponent<
+  React.PropsWithChildren<ScreenshotDropzoneProps>
+> = ({ validateAndUpload, ...props }) => {
   const projectPermissions = useProjectPermissions();
 
   useEffect(() => {

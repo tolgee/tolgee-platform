@@ -38,8 +38,8 @@
     "@tolgee/react": "^6.2.7",
     "@tolgee/storybook-addon": "file:../storybook-tolgee-addon",
     "@types/node": "^20.16.0",
-    "@types/react": "17.0.90",
-    "@types/react-dom": "17.0.26",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^5.1.1",
     "cspell": "^9.4.0",
     "eslint": "^9.39.1",
@@ -52,8 +52,8 @@
     "fast-glob": "^3.3.3",
     "globals": "^16.5.0",
     "prettier": "^3.7.4",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "storybook": "^10.1.5",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.49.0",
@@ -66,8 +66,8 @@
     "@emotion/styled": "^11.14.1",
     "@mui/material": "^5.18.0",
     "@tolgee/react": "^6.2.7",
-    "react": ">=17.0.0",
-    "react-dom": ">=17.0.0"
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
   },
   "exports": {
     "./package.json": "./package.json",

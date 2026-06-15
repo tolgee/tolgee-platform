@@ -19,12 +19,9 @@ const StyledContainer = styled('div')`
   margin-top: 4px;
 `;
 
-export const TasksPanel: React.FC<PanelContentProps> = ({
-  keyData,
-  language,
-  setItemsCount,
-  project,
-}) => {
+export const TasksPanel: React.FC<
+  React.PropsWithChildren<PanelContentProps>
+> = ({ keyData, language, setItemsCount, project }) => {
   const firstTask = keyData.tasks?.find((t) => t.languageId === language.id);
   const tasksLoadable = useApiQuery({
     url: '/v2/projects/{projectId}/tasks',

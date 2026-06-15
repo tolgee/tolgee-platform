@@ -13,9 +13,11 @@ type NamespaceItem = {
   label: string;
 };
 
-const NamespaceValue: FC<{
-  namespace?: NamespaceItem;
-}> = (props) => {
+const NamespaceValue: FC<
+  React.PropsWithChildren<{
+    namespace?: NamespaceItem;
+  }>
+> = (props) => {
   const { t } = useTranslate();
   return (
     <Box

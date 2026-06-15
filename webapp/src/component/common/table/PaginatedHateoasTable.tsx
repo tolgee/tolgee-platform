@@ -52,7 +52,7 @@ interface PaginatedHateoasTableListComponentProps {
 }
 
 const PaginatedHateoasTableListComponent: FC<
-  PaginatedHateoasTableListComponentProps
+  React.PropsWithChildren<PaginatedHateoasTableListComponentProps>
 > = ({ children, tableHead }) => {
   return (
     <Table>

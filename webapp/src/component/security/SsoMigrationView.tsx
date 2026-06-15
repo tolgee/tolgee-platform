@@ -41,7 +41,7 @@ const StyledPaper = styled(Paper)`
   }
 `;
 
-const SsoMigrationView: React.FC = () => {
+const SsoMigrationView: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { useSsoAuthLinkByDomain, refetchInitialData } = useGlobalActions();
   const user = useUser();
 

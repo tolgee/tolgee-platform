@@ -19,7 +19,7 @@ type Props = {
   ownedOnly?: boolean;
 };
 
-export const OrganizationPopover: React.FC<Props> = ({
+export const OrganizationPopover: React.FC<React.PropsWithChildren<Props>> = ({
   open,
   onClose,
   onSelect,

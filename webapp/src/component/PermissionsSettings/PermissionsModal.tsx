@@ -35,7 +35,9 @@ export type PermissionModalProps = {
   onResetToOrganization?: () => Promise<void>;
 };
 
-export const PermissionsModal: React.FC<PermissionModalProps> = ({
+export const PermissionsModal: React.FC<
+  React.PropsWithChildren<PermissionModalProps>
+> = ({
   allLangs,
   onClose,
   title,

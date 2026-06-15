@@ -11,6 +11,10 @@ type Props = {
   className?: string;
 };
 
-export const PlanTitle: React.FC<Props> = ({ title, sx, className }) => {
+export const PlanTitle: React.FC<React.PropsWithChildren<Props>> = ({
+  title,
+  sx,
+  className,
+}) => {
   return <PlanTitleText {...{ sx, className }}>{title}</PlanTitleText>;
 };

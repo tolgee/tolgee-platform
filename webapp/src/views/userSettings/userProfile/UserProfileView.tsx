@@ -16,7 +16,9 @@ import { messageService } from 'tg.service/MessageService';
 
 import { DeleteUserButton } from './DeleteUserButton';
 
-export const UserProfileView: FunctionComponent = () => {
+export const UserProfileView: FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const { t } = useTranslate();
   const { refetchInitialData } = useGlobalActions();
   const managedBy = useApiQuery({

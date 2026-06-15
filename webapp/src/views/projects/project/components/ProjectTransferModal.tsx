@@ -21,10 +21,12 @@ import { useDebounce } from 'use-debounce';
 import { AlertTriangle } from '@untitled-ui/icons-react';
 import { messageService } from 'tg.service/MessageService';
 
-export const ProjectTransferModal: FC<{
-  open: boolean;
-  onClose: () => void;
-}> = (props) => {
+export const ProjectTransferModal: FC<
+  React.PropsWithChildren<{
+    open: boolean;
+    onClose: () => void;
+  }>
+> = (props) => {
   const project = useProject();
 
   const [search, setSearch] = useState(undefined as string | undefined);

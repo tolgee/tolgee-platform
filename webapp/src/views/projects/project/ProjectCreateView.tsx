@@ -22,7 +22,9 @@ import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 export type CreateProjectValueType =
   components['schemas']['CreateProjectRequest'];
 
-export const ProjectCreateView: FunctionComponent = () => {
+export const ProjectCreateView: FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const history = useHistory();
   const { quickStartCompleteStep } = useGlobalActions();
   const createProjectLoadable = useApiMutation({

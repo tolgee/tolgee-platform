@@ -19,7 +19,9 @@ const StyledLink = styled(Link)`
   text-decoration: none;
 `;
 
-export const ApiKeysView: FunctionComponent = () => {
+export const ApiKeysView: FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const { t } = useTranslate();
   const [page, setPage] = useState(0);
   const list = useApiQuery({

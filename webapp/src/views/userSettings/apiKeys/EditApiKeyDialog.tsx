@@ -21,7 +21,9 @@ interface Props {
   onSaved?: (data: components['schemas']['ApiKeyModel']) => void;
 }
 
-export const EditApiKeyDialog: FunctionComponent<Props> = (props) => {
+export const EditApiKeyDialog: FunctionComponent<
+  React.PropsWithChildren<Props>
+> = (props) => {
   const history = useHistory();
   const onDialogClose = () => {
     history.push(LINKS.USER_API_KEYS.build());

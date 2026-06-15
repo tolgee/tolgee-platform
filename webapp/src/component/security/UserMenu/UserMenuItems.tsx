@@ -12,7 +12,9 @@ import React, { FC } from 'react';
 import { createAdder } from 'tg.fixtures/pluginAdder';
 import { useAddUserMenuItems } from 'tg.ee';
 
-export const UserMenuItems: FC<{ onClose: () => void }> = ({ onClose }) => {
+export const UserMenuItems: FC<
+  React.PropsWithChildren<{ onClose: () => void }>
+> = ({ onClose }) => {
   const location = useLocation();
   const { t } = useTranslate();
 
@@ -85,7 +87,7 @@ export const UserMenuItems: FC<{ onClose: () => void }> = ({ onClose }) => {
 type UserMenuItem = {
   id: string;
   enabled: boolean;
-  Component: React.FC<{ onClose: () => void }>;
+  Component: React.FC<React.PropsWithChildren<{ onClose: () => void }>>;
 };
 
 export const addUserMenuItems = createAdder<UserMenuItem>({

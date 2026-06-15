@@ -7,10 +7,12 @@ import { ErrorResponseDto } from 'tg.service/response.types';
 import { Alert } from '../Alert';
 import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
-export const ResourceErrorComponent: FunctionComponent<{
-  error: ErrorResponseDto | any;
-  limit?: number;
-}> = (props) => {
+export const ResourceErrorComponent: FunctionComponent<
+  React.PropsWithChildren<{
+    error: ErrorResponseDto | any;
+    limit?: number;
+  }>
+> = (props) => {
   return (
     <>
       {props.error &&

@@ -8,7 +8,9 @@ import { CompactView } from 'tg.component/layout/CompactView';
 import { T, useTranslate } from '@tolgee/react';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 
-export const RequirePreferredOrganization: FC = (props) => {
+export const RequirePreferredOrganization: FC<
+  React.PropsWithChildren<unknown>
+> = (props) => {
   const allowPrivate = useGlobalContext((c) => c.auth.allowPrivate);
 
   const { t } = useTranslate();

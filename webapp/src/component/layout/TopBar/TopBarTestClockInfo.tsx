@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
 
-export const TopBarTestClockInfo: FC = () => {
+export const TopBarTestClockInfo: FC<React.PropsWithChildren<unknown>> = () => {
   const testClock = useTestClock();
 
   const formatDate = useDateFormatter();

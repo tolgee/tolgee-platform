@@ -16,7 +16,9 @@ interface Props {
   onGenerated: (data: components['schemas']['RevealedApiKeyModel']) => void;
 }
 
-export const RegenerateApiKeyDialog: FunctionComponent<Props> = (props) => {
+export const RegenerateApiKeyDialog: FunctionComponent<
+  React.PropsWithChildren<Props>
+> = (props) => {
   const history = useHistory();
   const onDialogClose = () => {
     history.push(LINKS.USER_API_KEYS.build());

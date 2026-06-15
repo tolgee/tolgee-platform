@@ -49,9 +49,11 @@ export const CustomSlug = () => {
   );
 };
 
-export const StorageField: FC<{
-  items: components['schemas']['ContentStorageModel'][];
-}> = ({ items }) => {
+export const StorageField: FC<
+  React.PropsWithChildren<{
+    items: components['schemas']['ContentStorageModel'][];
+  }>
+> = ({ items }) => {
   const { t } = useTranslate();
 
   const label = t('content_delivery_form_storage');

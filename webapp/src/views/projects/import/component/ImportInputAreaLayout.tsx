@@ -29,9 +29,11 @@ export const ImportInputAreaLayoutBottom = styled(Box)`
   min-height: 24px;
 `;
 
-export const ImportInputAreaLayoutTitle: FC<{
-  icon?: ReactNode;
-}> = (props) => {
+export const ImportInputAreaLayoutTitle: FC<
+  React.PropsWithChildren<{
+    icon?: ReactNode;
+  }>
+> = (props) => {
   return (
     <>
       <Typography variant="body1" sx={{ fontWeight: 'bold' }}>

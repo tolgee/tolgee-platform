@@ -104,9 +104,9 @@ type Props = {
   onDialogOpen: () => void;
 };
 
-export const TranslationControlsCompact: React.FC<Props> = ({
-  onDialogOpen,
-}) => {
+export const TranslationControlsCompact: React.FC<
+  React.PropsWithChildren<Props>
+> = ({ onDialogOpen }) => {
   const rightPanelWidth = useGlobalContext((c) => c.layout.rightPanelWidth);
   const isSuperSmall = useMediaQuery(
     `@media(max-width: ${rightPanelWidth + 600}px)`

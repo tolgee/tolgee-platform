@@ -14,7 +14,11 @@ type Props = {
   deleteEnabled: boolean;
 };
 
-export const Tags: React.FC<Props> = ({ tags, keyId, deleteEnabled }) => {
+export const Tags: React.FC<React.PropsWithChildren<Props>> = ({
+  tags,
+  keyId,
+  deleteEnabled,
+}) => {
   const { removeTag, removeFilter, addFilter } = useTranslationsActions();
   const filters = useTranslationsSelector((c) => c.filters);
 

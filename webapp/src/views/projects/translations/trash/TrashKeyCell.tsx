@@ -121,7 +121,7 @@ type Props = {
   onFilterNamespace?: (namespace: string) => void;
 };
 
-export const TrashKeyCell: React.FC<Props> = ({
+export const TrashKeyCell: React.FC<React.PropsWithChildren<Props>> = ({
   data,
   selected,
   onToggle,

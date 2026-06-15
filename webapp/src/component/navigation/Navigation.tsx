@@ -47,7 +47,9 @@ type Props = {
   path: NavigationItem[];
 };
 
-export const Navigation: React.FC<Props> = ({ path }) => {
+export const Navigation: React.FC<React.PropsWithChildren<Props>> = ({
+  path,
+}) => {
   const theme = useTheme();
   const rightPanelWidth = useGlobalContext((c) => c.layout.rightPanelWidth);
   const smallScreen = useMediaQuery(

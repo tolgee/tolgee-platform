@@ -29,10 +29,9 @@ type Props = {
   onClose: () => void;
 };
 
-export const NamespaceRenameDialog: React.FC<Props> = ({
-  namespace,
-  onClose,
-}) => {
+export const NamespaceRenameDialog: React.FC<
+  React.PropsWithChildren<Props>
+> = ({ namespace, onClose }) => {
   const { t } = useTranslate();
 
   const { name, id } = namespace;

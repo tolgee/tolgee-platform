@@ -13,7 +13,7 @@ type FieldLabelProps = {
   rightContent?: React.ReactNode;
 };
 
-export const Label: React.FC<FieldLabelProps> = ({
+export const Label: React.FC<React.PropsWithChildren<FieldLabelProps>> = ({
   children,
   sx,
   className,

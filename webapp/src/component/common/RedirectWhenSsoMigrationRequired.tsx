@@ -3,7 +3,9 @@ import { GlobalLoading } from 'tg.component/GlobalLoading';
 import { LINKS } from 'tg.constants/links';
 import { useIsSsoMigrationRequired } from 'tg.globalContext/helpers';
 
-export const RedirectWhenSsoMigrationRequired: React.FC = ({ children }) => {
+export const RedirectWhenSsoMigrationRequired: React.FC<
+  React.PropsWithChildren<unknown>
+> = ({ children }) => {
   const shouldRedirect = useIsSsoMigrationRequired();
 
   if (shouldRedirect) {

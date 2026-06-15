@@ -41,7 +41,7 @@ const StyledTextField = styled(TextField)`
   }
 `;
 
-export const Comments: React.FC<PanelContentProps> = ({
+export const Comments: React.FC<React.PropsWithChildren<PanelContentProps>> = ({
   keyData,
   language,
   setItemsCount,

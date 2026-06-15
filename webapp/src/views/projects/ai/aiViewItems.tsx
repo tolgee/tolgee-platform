@@ -60,7 +60,7 @@ export type AiViewItem = {
   };
   link: Link;
   requireExactMatch?: boolean;
-  component: FC;
+  component: FC<React.PropsWithChildren<unknown>>;
 };
 
 type SatisfiedPermissionType = ReturnType<

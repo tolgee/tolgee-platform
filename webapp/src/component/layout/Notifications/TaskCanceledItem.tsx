@@ -7,10 +7,9 @@ import {
 
 type Props = TaskItemProps;
 
-export const TaskCanceledItem: FunctionComponent<Props> = ({
-  notification,
-  ...props
-}) => {
+export const TaskCanceledItem: FunctionComponent<
+  React.PropsWithChildren<Props>
+> = ({ notification, ...props }) => {
   return (
     <TaskItem notification={notification} {...props}>
       <T keyName="notifications-task-canceled" />

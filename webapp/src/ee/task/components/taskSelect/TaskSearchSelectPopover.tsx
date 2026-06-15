@@ -69,7 +69,9 @@ type Props = {
   className?: string;
 };
 
-export const TaskSearchSelectPopover: React.FC<Props> = ({
+export const TaskSearchSelectPopover: React.FC<
+  React.PropsWithChildren<Props>
+> = ({
   open,
   onClose,
   onSelect,

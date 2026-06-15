@@ -15,7 +15,9 @@ export type BillingAdministrationMenuItem = {
 };
 
 export const billingModule = {
-  billingMenuItems: [] as React.FC<BillingMenuItemsProps>[],
+  billingMenuItems: [] as React.FC<
+    React.PropsWithChildren<BillingMenuItemsProps>
+  >[],
 
   AdministrationRoutes: Empty,
   OrganizationRoutes: Empty,

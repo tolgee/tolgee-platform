@@ -10,7 +10,9 @@ interface PGTextFieldProps {
 
 type Props = PGTextFieldProps & React.ComponentProps<typeof TolgeeTextField>;
 
-export const TextField: FunctionComponent<Props> = (props) => {
+export const TextField: FunctionComponent<React.PropsWithChildren<Props>> = (
+  props
+) => {
   const [field, meta] = useField(props.name);
   const [oldValue, setOldValue] = useState({
     name: field.value,

@@ -10,11 +10,9 @@ export type SingleFileDropzoneProps = Omit<
   onFileSelect: (file: FilesType[number] | null) => void;
 };
 
-export const SingleFileDropzone: React.FC<SingleFileDropzoneProps> = ({
-  file,
-  onFileSelect,
-  ...otherProps
-}) => {
+export const SingleFileDropzone: React.FC<
+  React.PropsWithChildren<SingleFileDropzoneProps>
+> = ({ file, onFileSelect, ...otherProps }) => {
   const files = file ? [file] : [];
 
   const handleFilesSelect = (newFiles: FilesType) => {

@@ -28,7 +28,9 @@ const StatCard = styled(Box)`
   background-color: ${({ theme }) => theme.palette.tokens.background.hover};
 `;
 
-export const StatsBlock: FC<{ merge: BranchMergeModel }> = ({ merge }) => {
+export const StatsBlock: FC<
+  React.PropsWithChildren<{ merge: BranchMergeModel }>
+> = ({ merge }) => {
   const { t } = useTranslate();
   const theme = useTheme();
 

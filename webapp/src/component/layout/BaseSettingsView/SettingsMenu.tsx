@@ -15,7 +15,9 @@ type Props = {
   items: SettingsMenuItem[];
 };
 
-export const SettingsMenu: React.FC<Props> = ({ items }) => {
+export const SettingsMenu: React.FC<React.PropsWithChildren<Props>> = ({
+  items,
+}) => {
   return (
     <div data-cy="organization-side-menu">
       <MenuList>

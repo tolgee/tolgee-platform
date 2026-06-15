@@ -23,7 +23,9 @@ const StyledInputFields = styled('div')`
   align-items: start;
 `;
 
-export const ChangePassword: FunctionComponent = () => {
+export const ChangePassword: FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const { handleAfterLogin } = useGlobalActions();
   const user = useUser();
 

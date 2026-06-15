@@ -60,7 +60,9 @@ type Props = {
   activityLoadable: UseInfiniteQueryResult<PagedModelProjectActivityModel>;
 };
 
-export const ActivityList: React.FC<Props> = ({ activityLoadable }) => {
+export const ActivityList: React.FC<React.PropsWithChildren<Props>> = ({
+  activityLoadable,
+}) => {
   const { ref, inView } = useInView({ rootMargin: '100px' });
   const [detailData, setDetailData] = useState<ActivityModel>();
   const [detailId, setDetailId] = useUrlSearchState('activity');

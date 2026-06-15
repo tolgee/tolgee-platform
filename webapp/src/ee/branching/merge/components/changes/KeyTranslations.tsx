@@ -40,7 +40,7 @@ type Props = {
   hideAllWhenFalse?: boolean;
 };
 
-export const KeyTranslations: FC<Props> = ({
+export const KeyTranslations: FC<React.PropsWithChildren<Props>> = ({
   keyData,
   changedTranslations,
   showAll,

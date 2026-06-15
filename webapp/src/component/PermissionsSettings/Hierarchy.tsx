@@ -46,7 +46,7 @@ type Props = {
   allLangs?: LanguageModel[];
 };
 
-export const Hierarchy: React.FC<Props> = ({
+export const Hierarchy: React.FC<React.PropsWithChildren<Props>> = ({
   dependencies,
   structure,
   state,

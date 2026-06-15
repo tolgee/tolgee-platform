@@ -20,7 +20,7 @@ type Props = {
   ownedOnly?: boolean;
 };
 
-export const OrganizationSwitch: React.FC<Props> = ({
+export const OrganizationSwitch: React.FC<React.PropsWithChildren<Props>> = ({
   onSelect,
   ownedOnly,
 }) => {

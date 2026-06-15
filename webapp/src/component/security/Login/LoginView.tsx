@@ -17,7 +17,9 @@ import { LoginCredentialsForm } from './LoginCredentialsForm';
 import { LoginTotpForm } from './LoginTotpForm';
 import { LoginMoreInfo } from './LoginMoreInfo';
 
-export const LoginView: FunctionComponent = () => {
+export const LoginView: FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const { t } = useTranslate();
   const credentialsRef = useRef({ username: '', password: '' });
   const [mfaRequired, setMfaRequired] = useState(false);

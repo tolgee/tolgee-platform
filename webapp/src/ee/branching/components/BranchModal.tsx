@@ -16,12 +16,14 @@ import LoadingButton from 'tg.component/common/form/LoadingButton';
 
 type BranchModel = components['schemas']['BranchModel'];
 
-export const BranchModal: FC<{
-  branch?: BranchModel;
-  open: boolean;
-  close: () => void;
-  submit: (values: BranchFormValues) => void;
-}> = ({ open, close, branch, submit }) => {
+export const BranchModal: FC<
+  React.PropsWithChildren<{
+    branch?: BranchModel;
+    open: boolean;
+    close: () => void;
+    submit: (values: BranchFormValues) => void;
+  }>
+> = ({ open, close, branch, submit }) => {
   const { t } = useTranslate();
   return (
     <Dialog open={open} onClose={close}>

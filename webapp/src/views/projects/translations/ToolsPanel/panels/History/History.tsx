@@ -35,7 +35,10 @@ const StyledDifferenceToggle = styled(FormControlLabel)`
   }
 `;
 
-export const History: React.FC<PanelContentProps> = ({ keyData, language }) => {
+export const History: React.FC<React.PropsWithChildren<PanelContentProps>> = ({
+  keyData,
+  language,
+}) => {
   const translation = keyData.translations[language.tag];
   const [limit, setLimit] = useState(true);
 

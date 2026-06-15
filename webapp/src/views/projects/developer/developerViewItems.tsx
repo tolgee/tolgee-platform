@@ -66,7 +66,7 @@ export type DeveloperViewItem = {
   };
   link: Link;
   requireExactMath?: boolean;
-  component: FC;
+  component: FC<React.PropsWithChildren<unknown>>;
 };
 
 type SatisfiedPermissionType = ReturnType<

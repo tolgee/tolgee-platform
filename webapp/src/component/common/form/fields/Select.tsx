@@ -12,7 +12,9 @@ interface PGSelectProps {
 
 type Props = PGSelectProps & Partial<ComponentProps<typeof TolgeeSelect>>;
 
-export const Select: FunctionComponent<Props> = (props) => {
+export const Select: FunctionComponent<React.PropsWithChildren<Props>> = (
+  props
+) => {
   const [field, meta] = useField({
     name: props.name,
     validate: props.validate,

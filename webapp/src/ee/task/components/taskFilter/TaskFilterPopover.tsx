@@ -46,7 +46,7 @@ type Props = {
   languages: LanguageModel[];
 };
 
-export const TaskFilterPopover: React.FC<Props> = ({
+export const TaskFilterPopover: React.FC<React.PropsWithChildren<Props>> = ({
   value: initialValue,
   onChange,
   onClose,

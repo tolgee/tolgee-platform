@@ -35,7 +35,7 @@ const StyledHelpIcon = styled(HelpCircle)`
 `;
 
 export const LoadingCheckboxWithSkeleton: FC<
-  LoadingCheckboxWithSkeletonProps
+  React.PropsWithChildren<LoadingCheckboxWithSkeletonProps>
 > = ({
   checked,
   hint,
