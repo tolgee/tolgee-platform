@@ -194,6 +194,9 @@ export const GlossaryTermPreview: React.VFC<GlossaryTermPreviewProps> = ({
       handleSave();
     } else if (e.key === 'Escape') {
       e.preventDefault();
+      // Don't let Escape bubble to the surrounding MUI Tooltip, which would
+      // close it and unmount this preview instead of just exiting edit mode.
+      e.stopPropagation();
       setIsEditing(false);
     }
   };
