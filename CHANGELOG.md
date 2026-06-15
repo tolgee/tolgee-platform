@@ -1,3 +1,10 @@
+## [3.205.1](https://github.com/tolgee/tolgee-platform/compare/v3.205.0...v3.205.1) (2026-06-15)
+
+
+### Bug Fixes
+
+* persist plural arg name on key import ([#3731](https://github.com/tolgee/tolgee-platform/issues/3731)) ([b833474](https://github.com/tolgee/tolgee-platform/commit/b8334746d6bffc8194534bfad19c667cd8d3f5f0)), closes [#2651](https://github.com/tolgee/tolgee-platform/issues/2651) [#3739](https://github.com/tolgee/tolgee-platform/issues/3739) [#2651](https://github.com/tolgee/tolgee-platform/issues/2651)
+
 # [3.205.0](https://github.com/tolgee/tolgee-platform/compare/v3.204.2...v3.205.0) (2026-06-13)
 
 
