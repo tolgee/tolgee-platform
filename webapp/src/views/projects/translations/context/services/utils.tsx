@@ -13,6 +13,13 @@ import { components } from 'tg.service/apiSchema.generated';
 
 type KeyTaskViewModel = components['schemas']['KeyTaskViewModel'];
 
+export function resolvePluralParameter(
+  keyPluralArgName: string | undefined,
+  parsedParameter: string | undefined
+): string {
+  return keyPluralArgName || parsedParameter || 'value';
+}
+
 export function generateCurrentValue(
   position: EditorProps,
   textValue: string | undefined,
@@ -31,7 +38,10 @@ export function generateCurrentValue(
       result.activeVariant = variants[0];
     }
     result.value = format;
-    result.value.parameter = key.keyPluralArgName ?? 'value';
+    result.value.parameter = resolvePluralParameter(
+      key.keyPluralArgName,
+      format.parameter
+    );
   }
   return result;
 }

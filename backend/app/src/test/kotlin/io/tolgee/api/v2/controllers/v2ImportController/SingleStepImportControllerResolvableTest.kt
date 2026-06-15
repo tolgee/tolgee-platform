@@ -279,6 +279,39 @@ class SingleStepImportControllerResolvableTest : ProjectAuthControllerTest("/v2/
     }
   }
 
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `persists plural arg name when importing a plural translation`() {
+    val request =
+      SingleStepImportResolvableRequest(
+        keys =
+          listOf(
+            SingleStepImportResolvableItemRequest(
+              name = "plural-key",
+              namespace = "namespace-1",
+              translations =
+                mapOf(
+                  "en" to
+                    SingleStepImportResolvableTranslationRequest(
+                      text = "I have {count, plural, one {# dog} other {# dogs}}.",
+                      resolution = ResolvableTranslationResolution.EXPECT_NO_CONFLICT,
+                    ),
+                ),
+            ),
+          ),
+      )
+    performProjectAuthPost(
+      "single-step-import-resolvable",
+      request,
+    ).andIsOk
+
+    executeInNewTransaction {
+      val key = getKey("namespace-1", "plural-key")
+      key!!.isPlural.assert.isTrue()
+      key.pluralArgName.assert.isEqualTo("count")
+    }
+  }
+
   private fun getActiveKey(
     namespace: String?,
     keyName: String,
