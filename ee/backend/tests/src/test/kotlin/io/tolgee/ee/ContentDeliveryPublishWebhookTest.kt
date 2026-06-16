@@ -44,21 +44,22 @@ class ContentDeliveryPublishWebhookTest : ProjectAuthControllerTest("/v2/project
   @Qualifier("webhookRestTemplate")
   lateinit var webhookRestTemplate: RestTemplate
 
+  lateinit var testData: WebhooksTestData
+
   @BeforeEach
   fun before() {
+    testData = WebhooksTestData()
+    userAccount = testData.user
+    projectSupplier = { testData.projectBuilder.self }
     Mockito.reset(restTemplate, webhookRestTemplate)
+    mockWebhookResponse(HttpStatus.OK)
   }
 
   @Test
   @ProjectJWTAuthTestMethod
   fun `dispatches CONTENT_DELIVERY_PUBLISH webhook with payload`() {
-    val testData = WebhooksTestData()
     testData.webhookConfig.self.eventTypes = mutableSetOf(WebhookEventType.CONTENT_DELIVERY_PUBLISH)
     testDataService.saveTestData(testData.root)
-    userAccount = testData.user
-    projectSupplier = { testData.projectBuilder.self }
-
-    mockWebhookResponse(HttpStatus.OK)
 
     val invocationsBefore = getWebhookRestTemplateInvocationCount()
 
@@ -97,14 +98,10 @@ class ContentDeliveryPublishWebhookTest : ProjectAuthControllerTest("/v2/project
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `does not dispatch to webhooks not subscribed to the event`() {
-    val testData = WebhooksTestData()
+  fun `does not dispatch to webhooks subscribed to a different event type`() {
+    // Webhook is subscribed to PROJECT_ACTIVITY, not CONTENT_DELIVERY_PUBLISH
     testData.webhookConfig.self.eventTypes = mutableSetOf(WebhookEventType.PROJECT_ACTIVITY)
     testDataService.saveTestData(testData.root)
-    userAccount = testData.user
-    projectSupplier = { testData.projectBuilder.self }
-
-    mockWebhookResponse(HttpStatus.OK)
 
     val invocationsBefore = getWebhookRestTemplateInvocationCount()
 
@@ -122,18 +119,19 @@ class ContentDeliveryPublishWebhookTest : ProjectAuthControllerTest("/v2/project
       ),
     )
 
-    Thread.sleep(3000)
+    Thread.sleep(2500)
+    getWebhookRestTemplateInvocationCount().assert.isEqualTo(invocationsBefore)
+
+    // Confirm the count stays unchanged — no delayed dispatch
+    Thread.sleep(500)
     getWebhookRestTemplateInvocationCount().assert.isEqualTo(invocationsBefore)
   }
 
   @Test
   @ProjectJWTAuthTestMethod
   fun `records failure streak when consumer returns 500`() {
-    val testData = WebhooksTestData()
     testData.webhookConfig.self.eventTypes = mutableSetOf(WebhookEventType.CONTENT_DELIVERY_PUBLISH)
     testDataService.saveTestData(testData.root)
-    userAccount = testData.user
-    projectSupplier = { testData.projectBuilder.self }
 
     mockWebhookResponse(HttpStatus.INTERNAL_SERVER_ERROR)
 
