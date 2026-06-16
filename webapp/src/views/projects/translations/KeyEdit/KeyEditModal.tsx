@@ -269,7 +269,7 @@ export const KeyEditModal: React.FC<Props> = ({
                 message={t('key_edit_modal_force_plural_change_message')}
                 onCancel={() => setWarningOpen(false)}
                 onConfirm={() => submitForm()}
-                />
+              />
             )}
             {whitespaceWarningOpen && (
               <ConfirmationDialog
