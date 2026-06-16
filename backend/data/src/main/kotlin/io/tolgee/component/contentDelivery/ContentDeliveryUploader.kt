@@ -1,15 +1,18 @@
 package io.tolgee.component.contentDelivery
 
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.component.automations.processors.ContentDeliveryPublishWebhookData
 import io.tolgee.component.contentDelivery.cachePurging.ContentDeliveryCachePurgingProvider
 import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.constants.Message
+import io.tolgee.events.OnContentDeliveryPublished
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.contentDelivery.ContentDeliveryConfig
 import io.tolgee.service.contentDelivery.ContentDeliveryConfigService
 import io.tolgee.service.export.ExportService
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Component
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
@@ -23,6 +26,7 @@ class ContentDeliveryUploader(
   private val contentDeliveryConfigService: ContentDeliveryConfigService,
   private val contentDeliveryCachePurgingProvider: ContentDeliveryCachePurgingProvider,
   private val currentDateProvider: CurrentDateProvider,
+  private val applicationEventPublisher: ApplicationEventPublisher,
 ) : Logging {
   fun upload(contentDeliveryConfigId: Long) {
     val config = contentDeliveryConfigService.get(contentDeliveryConfigId)
@@ -39,9 +43,25 @@ class ContentDeliveryUploader(
     storeToStorage(withFullPaths, storage)
     purgeCacheIfConfigured(config, files.keys)
 
-    config.lastPublished = currentDateProvider.date
-    config.lastPublishedFiles = files.map { it.key }.toList()
+    val publishedDate = currentDateProvider.date
+    val publishedFiles = files.map { it.key }.toList()
+    config.lastPublished = publishedDate
+    config.lastPublishedFiles = publishedFiles
     contentDeliveryConfigService.save(config)
+
+    applicationEventPublisher.publishEvent(
+      OnContentDeliveryPublished(
+        this,
+        ContentDeliveryPublishWebhookData(
+          projectId = config.project.id,
+          id = config.id,
+          name = config.name,
+          slug = config.slug,
+          lastPublished = publishedDate.time,
+          files = publishedFiles,
+        ),
+      ),
+    )
   }
 
   private fun createZipArchive(files: Map<String, InputStream>): Map<String, InputStream> {
