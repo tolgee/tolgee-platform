@@ -1628,7 +1628,8 @@ export interface components {
         | "ASSIGN_TRANSLATION_LABEL"
         | "UNASSIGN_TRANSLATION_LABEL"
         | "QA_CHECK"
-        | "NO_OP";
+        | "NO_OP"
+        | "WEBHOOK_DISPATCH";
       /**
        * Format: int64
        * @description The time when the job was last updated (status change)
@@ -3724,7 +3725,8 @@ export interface components {
         | "ASSIGN_TRANSLATION_LABEL"
         | "UNASSIGN_TRANSLATION_LABEL"
         | "QA_CHECK"
-        | "NO_OP";
+        | "NO_OP"
+        | "WEBHOOK_DISPATCH";
     };
     JsonNode: unknown;
     JwtAuthenticationResponse: {

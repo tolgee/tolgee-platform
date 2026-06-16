@@ -50,11 +50,7 @@ export const EventTypesSelector = () => {
             }
           >
             {EVENT_TYPES.map((type) => (
-              <MenuItem
-                key={type}
-                value={type}
-                data-cy={`webhook-event-type-${type.toLowerCase()}`}
-              >
+              <MenuItem key={type} value={type}>
                 <Checkbox checked={field.value.includes(type)} />
                 <ListItemText primary={eventTypeLabel(type, t)} />
               </MenuItem>
