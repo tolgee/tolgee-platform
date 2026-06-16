@@ -16,10 +16,6 @@ export const MandatoryDataProvider = (props: any) => {
   const queryClient = useQueryClient();
   const isFetching = useGlobalContext((c) => c.initialData.isFetching);
 
-  // react-query v3's useIsFetching/useIsMutating use a useState-based
-  // subscription that drops updates under React 18's createRoot, leaving the
-  // global loading bar stuck after a fetch/mutation settles. Subscribe to the
-  // caches via useSyncExternalStore so the counts stay reactive.
   const isGloballyFetching = useSyncExternalStore(
     (onChange) => queryClient.getQueryCache().subscribe(onChange),
     () =>
