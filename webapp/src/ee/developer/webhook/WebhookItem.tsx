@@ -88,7 +88,24 @@ export const WebhookItem = ({ data }: Props) => {
     >
       <Box display="flex" gap={2} alignItems="center">
         <WebhookToggle data={data} />
-        <Box>{data.url}</Box>
+        <Box>
+          <Box>{data.url}</Box>
+          {data.eventTypes && data.eventTypes.length > 0 && (
+            <Box
+              sx={{ fontSize: 13, opacity: 0.7 }}
+              data-cy="webhook-item-event-types"
+            >
+              {data.eventTypes
+                .map((type) =>
+                  t(
+                    `webhook_event_type_${type.toLowerCase()}`,
+                    type.toLowerCase().replace(/_/g, ' ')
+                  )
+                )
+                .join(', ')}
+            </Box>
+          )}
+        </Box>
         {Boolean(data.lastExecuted) && (
           <Tooltip title={t('webhooks_last_run_hint')}>
             <StyledTime>
