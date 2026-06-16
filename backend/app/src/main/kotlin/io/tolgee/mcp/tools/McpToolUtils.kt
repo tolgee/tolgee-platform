@@ -44,7 +44,7 @@ fun McpSyncServer.addTool(
     McpServerFeatures.SyncToolSpecification(
       tool,
       null,
-    ) { exchange, request ->
+    ) { _, request ->
       handler(request)
     },
   )
@@ -75,6 +75,8 @@ fun Map<String, Any?>.getString(key: String): String? = this[key] as? String
 fun Map<String, Any?>.requireString(key: String): String = getString(key) ?: missingParam(key)
 
 fun Map<String, Any?>.getInt(key: String): Int? = (this[key] as? Number)?.toInt()
+
+fun Map<String, Any?>.requireInt(key: String): Int = getInt(key) ?: missingParam(key)
 
 @Suppress("UNCHECKED_CAST")
 fun Map<String, Any?>.getStringList(key: String): List<String>? = this[key] as? List<String>

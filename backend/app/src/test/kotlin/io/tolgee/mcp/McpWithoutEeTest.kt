@@ -40,6 +40,8 @@ class McpWithoutEeTest : AbstractMcpTest() {
       "get_batch_job_status",
       "machine_translate",
       "store_big_meta",
+      "upload_image",
+      "add_key_screenshots",
     )
 
   private val eeBranchTools =

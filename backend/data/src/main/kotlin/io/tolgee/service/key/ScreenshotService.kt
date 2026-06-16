@@ -119,17 +119,17 @@ class ScreenshotService(
         positions = positions ?: mutableListOf()
         positions!!.add(
           KeyInScreenshotPosition(
-            positionDto.x.adjustByRation(xRatio),
-            positionDto.y.adjustByRation(yRatio),
-            positionDto.width.adjustByRation(xRatio),
-            positionDto.height.adjustByRation(yRatio),
+            positionDto.x.adjustByRatio(xRatio),
+            positionDto.y.adjustByRatio(yRatio),
+            positionDto.width.adjustByRatio(xRatio),
+            positionDto.height.adjustByRatio(yRatio),
           ),
         )
       }
     }
   }
 
-  fun Int.adjustByRation(ratio: Double): Int {
+  fun Int.adjustByRatio(ratio: Double): Int {
     return (this * ratio).roundToInt()
   }
 
@@ -164,10 +164,7 @@ class ScreenshotService(
           throw PermissionException(Message.CURRENT_USER_DOES_NOT_OWN_IMAGE)
         }
 
-        val info =
-          screenshotInfo.let {
-            ScreenshotInfoDto(it.text, it.positions)
-          }
+        val info = ScreenshotInfoDto(screenshotInfo.text, screenshotInfo.positions)
 
         val (screenshot, originalDimension, targetDimension) = saveScreenshot(image)
 
@@ -236,6 +233,57 @@ class ScreenshotService(
     image?.let { fileStorage.storeFile(screenshot.getFilePath(), it) }
   }
 
+  /**
+   * Associates uploaded images with multiple keys. Handles the case where the same
+   * uploadedImageId is referenced by multiple keys: each image is converted to a
+   * screenshot once, then additional keys get references to the same screenshot.
+   */
+  @Transactional
+  fun saveUploadedImagesForKeys(keyScreenshots: List<Pair<Key, List<KeyScreenshotDto>>>) {
+    // Collect all image IDs and load them in one batch
+    val allImageIds = keyScreenshots.flatMap { (_, screenshots) -> screenshots.map { it.uploadedImageId } }.distinct()
+    val images = imageUploadService.find(allImageIds).associateBy { it.id }
+
+    // Fail fast if any image IDs are missing (before any mutations)
+    val missingIds = allImageIds.filter { it !in images }
+    if (missingIds.isNotEmpty()) {
+      throw NotFoundException(Message.ONE_OR_MORE_IMAGES_NOT_FOUND)
+    }
+
+    images.values.forEach { image ->
+      if (authenticationFacade.authenticatedUser.id != image.userAccount.id) {
+        throw PermissionException(Message.CURRENT_USER_DOES_NOT_OWN_IMAGE)
+      }
+    }
+
+    // Convert each uploaded image to a screenshot exactly once
+    val createdScreenshots =
+      images
+        .map { (id, image) ->
+          id to saveScreenshot(image)
+        }.toMap()
+
+    // Add references for each key
+    val addedReferences = mutableSetOf<Pair<Long, Long>>()
+    for ((key, screenshots) in keyScreenshots) {
+      for (screenshotDto in screenshots) {
+        if (getScreenshotsCountForKey(key) >= tolgeeProperties.maxScreenshotsPerKey) {
+          throw BadRequestException(
+            Message.MAX_SCREENSHOTS_EXCEEDED,
+            listOf(tolgeeProperties.maxScreenshotsPerKey),
+          )
+        }
+        val result =
+          createdScreenshots[screenshotDto.uploadedImageId]
+            ?: throw NotFoundException(Message.ONE_OR_MORE_IMAGES_NOT_FOUND)
+        val referenceKey = key.id to result.screenshot.id
+        if (!addedReferences.add(referenceKey)) continue
+        val info = ScreenshotInfoDto(screenshotDto.text, screenshotDto.positions)
+        addReference(key, result.screenshot, info, result.originalDimension, result.targetDimension)
+      }
+    }
+  }
+
   @Transactional
   fun findAll(key: Key): List<Screenshot> {
     return screenshotRepository.findAllByKey(key)
@@ -243,9 +291,7 @@ class ScreenshotService(
 
   @Transactional
   fun delete(screenshots: Collection<Screenshot>) {
-    screenshots.forEach {
-      delete(it)
-    }
+    screenshots.forEach(::delete)
   }
 
   @Transactional
@@ -401,12 +447,11 @@ class ScreenshotService(
   fun getScreenshotsForKeys(keyIds: Collection<Long>): Map<Long, List<Screenshot>> {
     return this
       .getKeysWithScreenshots(keyIds)
-      .associate {
-        it.id to
-          it.keyScreenshotReferences
+      .associate { key ->
+        key.id to
+          key.keyScreenshotReferences
             .map { it.screenshot }
-            .toSet()
-            .toList()
+            .distinctBy { it.id }
       }
   }
 
