@@ -64,6 +64,8 @@ describe('Key name whitespace warning', () => {
     waitForGlobalLoading();
     cy.gcy('global-confirmation-dialog').should('not.exist');
     cy.gcy('translations-key-edit-key-field').should('not.exist');
-    cy.contains('A key edited').should('be.visible');
+    cy.gcy('translations-table-cell')
+      .contains('A key edited')
+      .should('be.visible');
   });
 });
