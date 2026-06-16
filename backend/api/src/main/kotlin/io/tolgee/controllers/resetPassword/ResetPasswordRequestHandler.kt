@@ -108,7 +108,7 @@ class ResetPasswordRequestHandler(
     userAccountService.setResetPasswordCode(userAccount!!, code)
   }
 
-  private fun generateCode(): String = RandomStringUtils.randomAlphabetic(50)
+  private fun generateCode(): String = RandomStringUtils.secure().nextAlphabetic(50)
 
   private fun getEncodedCodeString(code: String): String {
     val callbackString = code + "," + request.email
