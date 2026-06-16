@@ -323,10 +323,10 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
       </Box>
       {whitespaceWarningOpen && (
         <ConfirmationDialog
-          title={t('key_whitespace_warning_title', 'Spaces around key name')}
+          title={t('key_whitespace_warning_title', 'Key has extra spaces')}
           message={t(
             'key_whitespace_warning_message',
-            'This key name starts or ends with a space. Such spaces are easy to miss and can lead to duplicate or mismatched keys. Do you want to save it anyway?'
+            'Leading or trailing spaces can cause duplicate or mismatched keys. Save anyway?'
           )}
           confirmButtonText={t('key_whitespace_warning_confirm', 'Save anyway')}
           onCancel={() => setWhitespaceWarningOpen(false)}
