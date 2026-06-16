@@ -25,6 +25,7 @@ import { KeyCustomValues } from './KeyCustomValues';
 import { DeletableKeyWithTranslationsModelType } from '../context/types';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import ConfirmationDialog from 'tg.component/common/ConfirmationDialog';
+import { hasNewOuterWhitespace } from 'tg.fixtures/keyName';
 
 type TabsType = 'general' | 'advanced' | 'context' | 'customValues';
 
@@ -76,6 +77,7 @@ export const KeyEditModal: React.FC<Props> = ({
   const { updateKey } = useTranslationsActions();
   const keyId = data.keyId;
   const [warningOpen, setWarningOpen] = useState(false);
+  const [whitespaceWarningOpen, setWhitespaceWarningOpen] = useState(false);
 
   const keyInfoLoadable = useApiQuery({
     url: '/v2/projects/{projectId}/keys/{id}',
@@ -134,6 +136,13 @@ export const KeyEditModal: React.FC<Props> = ({
       enableReinitialize
       validationSchema={Validation.KEY_SETTINGS_FORM(t)}
       onSubmit={async (values, helpers) => {
+        if (
+          hasNewOuterWhitespace(data.keyName, values.name) &&
+          !whitespaceWarningOpen
+        ) {
+          setWhitespaceWarningOpen(true);
+          return;
+        }
         const custom = JSON.parse(values.custom);
         try {
           const data = await updateKeyLoadable.mutateAsync(
@@ -259,6 +268,24 @@ export const KeyEditModal: React.FC<Props> = ({
                 title={t('key_edit_modal_force_plural_change_title')}
                 message={t('key_edit_modal_force_plural_change_message')}
                 onCancel={() => setWarningOpen(false)}
+                onConfirm={() => submitForm()}
+                />
+            )}
+            {whitespaceWarningOpen && (
+              <ConfirmationDialog
+                title={t(
+                  'key_whitespace_warning_title',
+                  'Key has extra spaces'
+                )}
+                message={t(
+                  'key_whitespace_warning_message',
+                  'Leading or trailing spaces can cause duplicate or mismatched keys. Save anyway?'
+                )}
+                confirmButtonText={t(
+                  'key_whitespace_warning_confirm',
+                  'Save anyway'
+                )}
+                onCancel={() => setWhitespaceWarningOpen(false)}
                 onConfirm={() => submitForm()}
               />
             )}

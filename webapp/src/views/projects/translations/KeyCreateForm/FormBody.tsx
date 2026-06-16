@@ -29,6 +29,8 @@ import { PluralFormCheckbox } from 'tg.component/common/form/PluralFormCheckbox'
 import { CharLimitCheckbox } from 'tg.component/common/form/CharLimitCheckbox';
 import { ControlsEditorSmall } from '../cell/ControlsEditorSmall';
 import { getVisibleCharCount } from '../cell/getVisibleCharCount';
+import ConfirmationDialog from 'tg.component/common/ConfirmationDialog';
+import { hasOuterWhitespace } from 'tg.fixtures/keyName';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -83,6 +85,7 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
   const isPlural = form.values.isPlural;
 
   const [mode, setMode] = useState<'placeholders' | 'syntax'>('placeholders');
+  const [whitespaceWarningOpen, setWhitespaceWarningOpen] = useState(false);
 
   const maxCharLimit = form.values.maxCharLimit;
   const isBaseOverCharLimit =
@@ -92,9 +95,17 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
       (v) => getVisibleCharCount({ text: v, nested: isPlural }) > maxCharLimit
     );
 
+  const submitWithWhitespaceCheck = () => {
+    if (hasOuterWhitespace(form.values.name)) {
+      setWhitespaceWarningOpen(true);
+      return;
+    }
+    form.handleSubmit();
+  };
+
   const handleEnterSubmit = () => {
     if (!isBaseOverCharLimit) {
-      form.handleSubmit();
+      submitWithWhitespaceCheck();
     }
     return true;
   };
@@ -304,12 +315,27 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
             variant="contained"
             disabled={!form.isValid || isBaseOverCharLimit}
             type="submit"
-            onClick={() => form.handleSubmit()}
+            onClick={() => submitWithWhitespaceCheck()}
           >
             <T keyName="global_form_save" />
           </LoadingButton>
         </Box>
       </Box>
+      {whitespaceWarningOpen && (
+        <ConfirmationDialog
+          title={t('key_whitespace_warning_title', 'Spaces around key name')}
+          message={t(
+            'key_whitespace_warning_message',
+            'This key name starts or ends with a space. Such spaces are easy to miss and can lead to duplicate or mismatched keys. Do you want to save it anyway?'
+          )}
+          confirmButtonText={t('key_whitespace_warning_confirm', 'Save anyway')}
+          onCancel={() => setWhitespaceWarningOpen(false)}
+          onConfirm={() => {
+            setWhitespaceWarningOpen(false);
+            form.handleSubmit();
+          }}
+        />
+      )}
     </>
   );
 };
