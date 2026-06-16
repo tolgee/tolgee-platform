@@ -42,7 +42,10 @@ class WebhookConfig(
   @ActivityLoggedProp
   var enabled: Boolean = true
 
-  @ActivityLoggedProp
+  // Must stay ignored: this jsonb set is always dirty to Hibernate, so logging it would
+  // emit a WebhookConfig activity on every save (incl. failure/lastExecuted bookkeeping),
+  // which re-triggers the webhook automation and recursively fires webhooks.
+  @ActivityIgnoredProp
   @Type(JsonBinaryType::class)
   @Column(columnDefinition = "jsonb")
   var eventTypes: MutableSet<WebhookEventType> = mutableSetOf(WebhookEventType.PROJECT_ACTIVITY)
