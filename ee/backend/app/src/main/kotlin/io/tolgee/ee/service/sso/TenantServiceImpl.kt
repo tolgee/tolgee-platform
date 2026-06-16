@@ -11,6 +11,7 @@ import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.Organization
 import io.tolgee.model.SsoTenant
 import io.tolgee.service.TenantService
+import io.tolgee.util.UrlSecurity
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.context.annotation.Lazy
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service
 class TenantServiceImpl(
   private val tenantRepository: TenantRepository,
   private val properties: TolgeeProperties,
+  private val urlSecurity: UrlSecurity,
   @Suppress("SelfReferenceConstructorParameter") @Lazy
   private val self: TenantServiceImpl,
 ) : TenantService {
@@ -75,8 +77,18 @@ class TenantServiceImpl(
     if (!allowChangeDomain && tenant.domain != request.domain) {
       throw PermissionException(Message.SSO_DOMAIN_NOT_ALLOWED)
     }
+    validateProviderUrls(request)
     setTenantsFields(tenant, request, organization)
     return self.save(tenant)
+  }
+
+  private fun validateProviderUrls(request: SsoTenantDto) {
+    if (!request.enabled) {
+      return
+    }
+    val allowLocalAddresses = properties.authentication.ssoOrganizations.allowLocalAddresses
+    urlSecurity.validateUrl(request.tokenUri, allowLocalAddresses)
+    urlSecurity.validateUrl(request.authorizationUri, allowLocalAddresses)
   }
 
   private fun setTenantsFields(
