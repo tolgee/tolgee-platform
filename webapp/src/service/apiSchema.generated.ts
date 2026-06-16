@@ -7708,6 +7708,8 @@ export interface components {
       autoDisabled: boolean;
       /** @description Whether the webhook is enabled. Disabled webhooks are not executed. */
       enabled: boolean;
+      /** @description Event types this webhook is subscribed to. */
+      eventTypes: ("TEST" | "PROJECT_ACTIVITY" | "CONTENT_DELIVERY_PUBLISH")[];
       /**
        * Format: int64
        * @description Date of the first failed webhook request. If the last webhook request is successful, this value is set to null.
@@ -7725,6 +7727,7 @@ export interface components {
     };
     WebhookConfigRequest: {
       enabled?: boolean;
+      eventTypes?: ("TEST" | "PROJECT_ACTIVITY" | "CONTENT_DELIVERY_PUBLISH")[];
       url: string;
     };
     WebhookTestResponse: {
