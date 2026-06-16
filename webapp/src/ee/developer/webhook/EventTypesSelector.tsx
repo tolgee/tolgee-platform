@@ -12,6 +12,25 @@ import { useTranslate } from '@tolgee/react';
 
 const EVENT_TYPES = ['PROJECT_ACTIVITY', 'CONTENT_DELIVERY_PUBLISH'] as const;
 
+type EventType = (typeof EVENT_TYPES)[number];
+
+function eventTypeLabel(
+  type: EventType | string,
+  t: ReturnType<typeof useTranslate>['t']
+): string {
+  switch (type) {
+    case 'PROJECT_ACTIVITY':
+      return t('webhook_event_type_project_activity', 'Project activity');
+    case 'CONTENT_DELIVERY_PUBLISH':
+      return t(
+        'webhook_event_type_content_delivery_publish',
+        'Content delivery publish'
+      );
+    default:
+      return type;
+  }
+}
+
 export const EventTypesSelector = () => {
   const { t } = useTranslate();
   return (
@@ -27,14 +46,7 @@ export const EventTypesSelector = () => {
             variant="standard"
             data-cy="webhook-event-types-selector"
             renderValue={(values: string[]) =>
-              values
-                .map((v) =>
-                  t(
-                    `webhook_event_type_${v.toLowerCase()}`,
-                    v.toLowerCase().replace(/_/g, ' ')
-                  )
-                )
-                .join(', ')
+              values.map((v) => eventTypeLabel(v, t)).join(', ')
             }
           >
             {EVENT_TYPES.map((type) => (
@@ -44,12 +56,7 @@ export const EventTypesSelector = () => {
                 data-cy={`webhook-event-type-${type.toLowerCase()}`}
               >
                 <Checkbox checked={field.value.includes(type)} />
-                <ListItemText
-                  primary={t(
-                    `webhook_event_type_${type.toLowerCase()}`,
-                    type.toLowerCase().replace(/_/g, ' ')
-                  )}
-                />
+                <ListItemText primary={eventTypeLabel(type, t)} />
               </MenuItem>
             ))}
           </Select>

@@ -26,6 +26,22 @@ import { useDateFormatter } from 'tg.hooks/useLocale';
 
 type WebhookConfigModel = components['schemas']['WebhookConfigModel'];
 
+type TFn = ReturnType<typeof useTranslate>['t'];
+
+function eventTypeLabel(type: string, t: TFn): string {
+  switch (type) {
+    case 'PROJECT_ACTIVITY':
+      return t('webhook_event_type_project_activity', 'Project activity');
+    case 'CONTENT_DELIVERY_PUBLISH':
+      return t(
+        'webhook_event_type_content_delivery_publish',
+        'Content delivery publish'
+      );
+    default:
+      return type;
+  }
+}
+
 const StyledContainer = styled('div')`
   display: flex;
   padding: 8px 16px;
@@ -96,12 +112,7 @@ export const WebhookItem = ({ data }: Props) => {
               data-cy="webhook-item-event-types"
             >
               {data.eventTypes
-                .map((type) =>
-                  t(
-                    `webhook_event_type_${type.toLowerCase()}`,
-                    type.toLowerCase().replace(/_/g, ' ')
-                  )
-                )
+                .map((type) => eventTypeLabel(type, t))
                 .join(', ')}
             </Box>
           )}
