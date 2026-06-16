@@ -88,7 +88,9 @@ export const WebhookEditDialog = ({ onClose, data }: Props) => {
       <Formik
         initialValues={{
           url: data?.url ?? '',
-          eventTypes: (data?.eventTypes ?? ['PROJECT_ACTIVITY']) as WebhookEventType[],
+          eventTypes: (data?.eventTypes ?? [
+            'PROJECT_ACTIVITY',
+          ]) as WebhookEventType[],
         }}
         validationSchema={Validation.WEBHOOK_FORM}
         validateOnBlur={false}
