@@ -1,3 +1,10 @@
+## [3.205.2](https://github.com/tolgee/tolgee-platform/compare/v3.205.1...v3.205.2) (2026-06-16)
+
+
+### Bug Fixes
+
+* Validate SSO provider URLs and use SecureRandom for generated codes ([#3754](https://github.com/tolgee/tolgee-platform/issues/3754)) ([53d6980](https://github.com/tolgee/tolgee-platform/commit/53d6980275b1ffb59059a57c777ef60ea5e720ed))
+
 ## [3.205.1](https://github.com/tolgee/tolgee-platform/compare/v3.205.0...v3.205.1) (2026-06-15)
 
 
