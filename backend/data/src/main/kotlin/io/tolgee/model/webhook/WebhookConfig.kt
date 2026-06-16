@@ -17,8 +17,8 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import jakarta.validation.constraints.NotBlank
-import java.util.Date
 import org.hibernate.annotations.Type
+import java.util.Date
 
 @Entity
 @ActivityLoggedEntity
@@ -47,7 +47,7 @@ class WebhookConfig(
   // which re-triggers the webhook automation and recursively fires webhooks.
   @ActivityIgnoredProp
   @Type(JsonBinaryType::class)
-  @Column(columnDefinition = "jsonb")
+  @Column(columnDefinition = "jsonb", nullable = false)
   var eventTypes: MutableSet<WebhookEventType> = mutableSetOf(WebhookEventType.PROJECT_ACTIVITY)
 
   @OneToMany(mappedBy = "webhookConfig", orphanRemoval = true)
