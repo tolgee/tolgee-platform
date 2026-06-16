@@ -21,6 +21,7 @@ import io.tolgee.batch.processors.TagKeysChunkProcessor
 import io.tolgee.batch.processors.TrialExpirationNoticeProcessor
 import io.tolgee.batch.processors.UnassignTranslationLabelChunkProcessor
 import io.tolgee.batch.processors.UntagKeysChunkProcessor
+import io.tolgee.batch.processors.WebhookDispatchChunkProcessor
 import kotlin.reflect.KClass
 
 enum class BatchJobType(
@@ -134,6 +135,11 @@ enum class BatchJobType(
     activityType = null,
     maxRetries = 0,
     processor = NoOpChunkProcessor::class,
+    defaultExclusive = false,
+  ),
+  WEBHOOK_DISPATCH(
+    maxRetries = 3,
+    processor = WebhookDispatchChunkProcessor::class,
     defaultExclusive = false,
   ),
 }
