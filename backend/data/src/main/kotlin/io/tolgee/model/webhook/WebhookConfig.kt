@@ -1,12 +1,15 @@
 package io.tolgee.model.webhook
 
+import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import io.tolgee.activity.annotation.ActivityDescribingProp
 import io.tolgee.activity.annotation.ActivityIgnoredProp
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
+import io.tolgee.component.automations.processors.WebhookEventType
 import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.automations.AutomationAction
+import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
 import jakarta.persistence.Index
@@ -15,6 +18,7 @@ import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import jakarta.validation.constraints.NotBlank
 import java.util.Date
+import org.hibernate.annotations.Type
 
 @Entity
 @ActivityLoggedEntity
@@ -37,6 +41,11 @@ class WebhookConfig(
 
   @ActivityLoggedProp
   var enabled: Boolean = true
+
+  @ActivityLoggedProp
+  @Type(JsonBinaryType::class)
+  @Column(columnDefinition = "jsonb")
+  var eventTypes: MutableSet<WebhookEventType> = mutableSetOf(WebhookEventType.PROJECT_ACTIVITY)
 
   @OneToMany(mappedBy = "webhookConfig", orphanRemoval = true)
   var automationActions: MutableList<AutomationAction> = mutableListOf()
