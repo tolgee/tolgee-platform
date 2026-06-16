@@ -32,7 +32,8 @@ class ContentDeliveryPublishWebhookListener(
   @Transactional
   fun enqueueWebhooks(data: ContentDeliveryPublishWebhookData) {
     val webhooks =
-      webhookConfigRepository.findAllByProjectId(data.projectId)
+      webhookConfigRepository
+        .findAllByProjectId(data.projectId)
         .filter { it.enabled && it.eventTypes.contains(WebhookEventType.CONTENT_DELIVERY_PUBLISH) }
     if (webhooks.isEmpty()) return
 

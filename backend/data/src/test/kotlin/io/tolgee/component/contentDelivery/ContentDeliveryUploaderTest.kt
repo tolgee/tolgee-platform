@@ -22,32 +22,40 @@ class ContentDeliveryUploaderTest {
   @Test
   fun `publishes event with the published snapshot`() {
     val project = mock<Project> { on { id } doReturn 10L }
-    val config = mock<ContentDeliveryConfig> {
-      on { id } doReturn 55L
-      on { this.project } doReturn project
-      on { name } doReturn "Production CDN"
-      on { slug } doReturn "abc123"
-      on { zip } doReturn false
-      on { contentStorage } doReturn null
-      on { pruneBeforePublish } doReturn false
-    }
+    val config =
+      mock<ContentDeliveryConfig> {
+        on { id } doReturn 55L
+        on { this.project } doReturn project
+        on { name } doReturn "Production CDN"
+        on { slug } doReturn "abc123"
+        on { zip } doReturn false
+        on { contentStorage } doReturn null
+        on { pruneBeforePublish } doReturn false
+      }
 
     val configService = mock<ContentDeliveryConfigService> { on { get(55L) } doReturn config }
     val storage = mock<FileStorage>()
-    val storageProvider = mock<ContentDeliveryFileStorageProvider> {
-      on { getContentStorageWithDefaultClient() } doReturn storage
-    }
-    val exportService = mock<ExportService> {
-      on { export(any(), any()) } doReturn mapOf("en.json" to "{}".byteInputStream())
-    }
+    val storageProvider =
+      mock<ContentDeliveryFileStorageProvider> {
+        on { getContentStorageWithDefaultClient() } doReturn storage
+      }
+    val exportService =
+      mock<ExportService> {
+        on { export(any(), any()) } doReturn mapOf("en.json" to "{}".byteInputStream())
+      }
     val purgingProvider = mock<ContentDeliveryCachePurgingProvider> { on { purgings } doReturn listOf() }
     val dateProvider = mock<CurrentDateProvider> { on { date } doReturn Date(1718539200000) }
     val eventPublisher = mock<ApplicationEventPublisher>()
 
-    val uploader = ContentDeliveryUploader(
-      storageProvider, exportService, configService,
-      purgingProvider, dateProvider, eventPublisher,
-    )
+    val uploader =
+      ContentDeliveryUploader(
+        storageProvider,
+        exportService,
+        configService,
+        purgingProvider,
+        dateProvider,
+        eventPublisher,
+      )
 
     uploader.upload(55L)
 

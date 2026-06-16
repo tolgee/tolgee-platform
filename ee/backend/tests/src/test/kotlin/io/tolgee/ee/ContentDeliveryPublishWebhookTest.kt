@@ -150,7 +150,10 @@ class ContentDeliveryPublishWebhookTest : ProjectAuthControllerTest("/v2/project
     )
 
     waitForNotThrowing(timeout = 10000) {
-      webhookConfigService.get(testData.webhookConfig.self.id).firstFailed.assert.isNotNull()
+      webhookConfigService
+        .get(testData.webhookConfig.self.id)
+        .firstFailed.assert
+        .isNotNull()
     }
   }
 
