@@ -240,7 +240,7 @@ export class Validation {
 
   static readonly PROJECT_CREATION = (t: (string) => string) =>
     Yup.object().shape({
-      name: Yup.string().required().min(3).max(50),
+      name: Yup.string().trim().required().min(3).max(50),
       languages: Yup.array()
         .required()
         .min(1, t('project_creation_add_at_least_one_language'))
