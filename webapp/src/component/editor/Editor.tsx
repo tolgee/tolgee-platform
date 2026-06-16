@@ -58,7 +58,7 @@ const StyledEditor = styled('div')`
   }
 
   & .cm-keyname-space-indicator {
-    background-color: #ddeffe;
+    background-color: ${({ theme }) => theme.palette.label.lightBlue};
     border-radius: 2px;
   }
 `;

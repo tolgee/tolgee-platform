@@ -1,4 +1,9 @@
-import { EditorState, Extension, RangeSetBuilder, StateField } from '@codemirror/state';
+import {
+  EditorState,
+  Extension,
+  RangeSetBuilder,
+  StateField,
+} from '@codemirror/state';
 import { Decoration, DecorationSet, EditorView } from '@codemirror/view';
 
 // Marks the css class for space
@@ -6,7 +11,7 @@ const spaceDecoration = Decoration.mark({
   attributes: { class: 'cm-keyname-space-indicator' },
 });
 
-//Decorates the leading and trailing spaces 
+//Decorates the leading and trailing spaces
 function buildDecorations(state: EditorState) {
   const builder = new RangeSetBuilder<Decoration>();
   const text = state.doc.toString();
@@ -41,4 +46,6 @@ const visibleSpaceField = StateField.define<DecorationSet>({
   provide: (field) => EditorView.decorations.from(field),
 });
 
-export const visibleKeyNameSpacesPlugin = (): Extension[] => [visibleSpaceField];
+export const visibleKeyNameSpacesPlugin = (): Extension[] => [
+  visibleSpaceField,
+];
