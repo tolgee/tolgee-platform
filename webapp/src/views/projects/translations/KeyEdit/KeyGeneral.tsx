@@ -14,6 +14,7 @@ import { LabelHint } from 'tg.component/common/LabelHint';
 import { PluralFormCheckbox } from 'tg.component/common/form/PluralFormCheckbox';
 import { CharLimitCheckbox } from 'tg.component/common/form/CharLimitCheckbox';
 import { useProject } from 'tg.hooks/useProject';
+import { KeyNameWhitespaceWarning } from '../KeyNameWhitespaceWarning';
 import clsx from 'clsx';
 
 const StyledSection = styled('div')``;
@@ -76,6 +77,10 @@ export const KeyGeneral = () => {
             />
           </EditorWrapper>
           <FieldError error={errors.name} />
+          <KeyNameWhitespaceWarning
+            value={values.name}
+            onTrim={() => setFieldValue('name', values.name.trim())}
+          />
         </StyledSection>
         {project.useNamespaces && (
           <StyledSection>

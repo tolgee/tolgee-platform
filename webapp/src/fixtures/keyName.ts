@@ -16,7 +16,3 @@ export function splitKeyName(name: string): SplitKeyName {
 export function hasOuterWhitespace(name: string): boolean {
   return name !== name.trim();
 }
-
-export function hasNewOuterWhitespace(original: string, next: string): boolean {
-  return hasOuterWhitespace(next) && !hasOuterWhitespace(original);
-}

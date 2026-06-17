@@ -29,8 +29,7 @@ import { PluralFormCheckbox } from 'tg.component/common/form/PluralFormCheckbox'
 import { CharLimitCheckbox } from 'tg.component/common/form/CharLimitCheckbox';
 import { ControlsEditorSmall } from '../cell/ControlsEditorSmall';
 import { getVisibleCharCount } from '../cell/getVisibleCharCount';
-import ConfirmationDialog from 'tg.component/common/ConfirmationDialog';
-import { hasOuterWhitespace } from 'tg.fixtures/keyName';
+import { KeyNameWhitespaceWarning } from '../KeyNameWhitespaceWarning';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -85,7 +84,6 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
   const isPlural = form.values.isPlural;
 
   const [mode, setMode] = useState<'placeholders' | 'syntax'>('placeholders');
-  const [whitespaceWarningOpen, setWhitespaceWarningOpen] = useState(false);
 
   const maxCharLimit = form.values.maxCharLimit;
   const isBaseOverCharLimit =
@@ -95,17 +93,9 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
       (v) => getVisibleCharCount({ text: v, nested: isPlural }) > maxCharLimit
     );
 
-  const submitWithWhitespaceCheck = () => {
-    if (hasOuterWhitespace(form.values.name)) {
-      setWhitespaceWarningOpen(true);
-      return;
-    }
-    form.handleSubmit();
-  };
-
   const handleEnterSubmit = () => {
     if (!isBaseOverCharLimit) {
-      submitWithWhitespaceCheck();
+      form.handleSubmit();
     }
     return true;
   };
@@ -152,6 +142,12 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
                     </StyledEdtorWrapper>
                   </EditorWrapper>
                   <FieldError error={meta.touched && meta.error} />
+                  <KeyNameWhitespaceWarning
+                    value={field.value}
+                    onTrim={() =>
+                      form.setFieldValue(field.name, field.value.trim())
+                    }
+                  />
                 </div>
               );
             }}
@@ -315,27 +311,12 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
             variant="contained"
             disabled={!form.isValid || isBaseOverCharLimit}
             type="submit"
-            onClick={() => submitWithWhitespaceCheck()}
+            onClick={() => form.handleSubmit()}
           >
             <T keyName="global_form_save" />
           </LoadingButton>
         </Box>
       </Box>
-      {whitespaceWarningOpen && (
-        <ConfirmationDialog
-          title={t('key_whitespace_warning_title', 'Key has extra spaces')}
-          message={t(
-            'key_whitespace_warning_message',
-            'Leading or trailing spaces can cause duplicate or mismatched keys. Save anyway?'
-          )}
-          confirmButtonText={t('key_whitespace_warning_confirm', 'Save anyway')}
-          onCancel={() => setWhitespaceWarningOpen(false)}
-          onConfirm={() => {
-            setWhitespaceWarningOpen(false);
-            form.handleSubmit();
-          }}
-        />
-      )}
     </>
   );
 };
