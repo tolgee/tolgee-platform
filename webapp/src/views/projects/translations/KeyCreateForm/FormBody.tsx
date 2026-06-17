@@ -141,13 +141,16 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
                       />
                     </StyledEdtorWrapper>
                   </EditorWrapper>
-                  <FieldError error={meta.touched && meta.error} />
-                  <KeyNameWhitespaceWarning
-                    value={field.value}
-                    onTrim={() =>
-                      form.setFieldValue(field.name, field.value.trim())
-                    }
-                  />
+                  {meta.touched && meta.error ? (
+                    <FieldError error={meta.error} />
+                  ) : (
+                    <KeyNameWhitespaceWarning
+                      value={field.value}
+                      onTrim={() =>
+                        form.setFieldValue(field.name, field.value.trim())
+                      }
+                    />
+                  )}
                 </div>
               );
             }}

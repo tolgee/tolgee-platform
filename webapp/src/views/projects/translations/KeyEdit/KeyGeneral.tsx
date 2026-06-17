@@ -76,11 +76,14 @@ export const KeyGeneral = () => {
               minHeight="unset"
             />
           </EditorWrapper>
-          <FieldError error={errors.name} />
-          <KeyNameWhitespaceWarning
-            value={values.name}
-            onTrim={() => setFieldValue('name', values.name.trim())}
-          />
+          {errors.name ? (
+            <FieldError error={errors.name} />
+          ) : (
+            <KeyNameWhitespaceWarning
+              value={values.name}
+              onTrim={() => setFieldValue('name', values.name.trim())}
+            />
+          )}
         </StyledSection>
         {project.useNamespaces && (
           <StyledSection>
