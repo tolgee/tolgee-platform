@@ -11,7 +11,9 @@ import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.node
 import io.tolgee.model.UserAccount
 import io.tolgee.testing.AuthorizedControllerTest
+import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -28,6 +30,11 @@ class AdministrationControllerTest : AuthorizedControllerTest() {
     testData = AdministrationTestData()
     testDataService.saveTestData(testData.root)
     userAccount = testData.admin
+  }
+
+  @AfterEach
+  fun cleanData() {
+    testDataService.cleanTestData(testData.root)
   }
 
   @Test
@@ -153,10 +160,10 @@ class AdministrationControllerTest : AuthorizedControllerTest() {
   fun `disable and enable are idempotent`() {
     performAuthPut("/v2/administration/users/${testData.user.id}/disable", null).andIsOk
     performAuthPut("/v2/administration/users/${testData.user.id}/disable", null).andIsOk
-    assertThat(userAccountService.findActive(testData.user.id)).isNull()
+    userAccountService.findActive(testData.user.id).assert.isNull()
 
     performAuthPut("/v2/administration/users/${testData.user.id}/enable", null).andIsOk
     performAuthPut("/v2/administration/users/${testData.user.id}/enable", null).andIsOk
-    assertThat(userAccountService.findActive(testData.user.id)).isNotNull
+    userAccountService.findActive(testData.user.id).assert.isNotNull
   }
 }
