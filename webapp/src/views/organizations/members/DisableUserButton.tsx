@@ -1,5 +1,5 @@
 import { IconButton, Tooltip } from '@mui/material';
-import { SlashCircle01 } from '@untitled-ui/icons-react';
+import { PauseCircle } from '@untitled-ui/icons-react';
 import { T, useTranslate } from '@tolgee/react';
 
 import { confirmation } from 'tg.hooks/confirmation';
@@ -54,7 +54,7 @@ export const DisableUserButton = (props: {
         onClick={disableUser}
         size="small"
       >
-        <SlashCircle01 />
+        <PauseCircle />
       </IconButton>
     </Tooltip>
   );
