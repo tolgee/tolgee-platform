@@ -1,6 +1,5 @@
 import { Link, styled } from '@mui/material';
 import { T } from '@tolgee/react';
-import { AlertTriangle } from '@untitled-ui/icons-react';
 
 import { hasOuterWhitespace } from 'tg.fixtures/keyName';
 
@@ -11,18 +10,12 @@ const StyledSlot = styled('div')`
 const StyledWarning = styled('div')`
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   font-size: 12px;
   color: ${({ theme }) => theme.palette.warning.main};
-
-  & svg {
-    flex-shrink: 0;
-  }
 `;
 
-const StyledMessage = styled('span')`
-  flex-grow: 1;
-`;
+const StyledMessage = styled('span')``;
 
 type Props = {
   value: string;
@@ -37,7 +30,6 @@ export const KeyNameWhitespaceWarning: React.FC<Props> = ({
     <StyledSlot>
       {Boolean(value) && hasOuterWhitespace(value) && (
         <StyledWarning data-cy="key-name-whitespace-warning">
-          <AlertTriangle width={15} height={15} />
           <StyledMessage>
             <T
               keyName="key_whitespace_warning_message"
