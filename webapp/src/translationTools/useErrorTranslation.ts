@@ -174,6 +174,8 @@ export function useErrorTranslation() {
         return t('invitation_organization_mismatch');
       case 'user_is_managed_by_organization':
         return t('user_is_managed_by_organization');
+      case 'user_is_not_managed_by_organization':
+        return t('user_is_not_managed_by_organization');
       case 'cannot_set_sso_provider_missing_fields':
         return t('cannot_set_sso_provider_missing_fields');
       case 'namespace_cannot_be_used_when_feature_is_disabled':

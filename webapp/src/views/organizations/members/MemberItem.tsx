@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useTranslate } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import {
   IconButton,
   styled,
@@ -16,6 +16,8 @@ import { Link } from 'react-router-dom';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { RemoveUserButton } from './RemoveUserButton';
+import { DisableUserButton } from './DisableUserButton';
+import { EnableUserButton } from './EnableUserButton';
 import { UpdateRoleButton } from './UpdateRoleButton';
 import { useLeaveOrganization } from '../useLeaveOrganization';
 import { LINKS, PARAMS } from 'tg.constants/links';
@@ -45,6 +47,14 @@ const StyledItemText = styled('div')`
 
 const StyledMfaBadgeWrapper = styled('div')`
   padding: ${({ theme }) => theme.spacing(1)};
+`;
+
+const StyledDisabledLabel = styled('span')`
+  padding: ${({ theme }) => theme.spacing(0, 1)};
+  border-radius: 4px;
+  font-size: 12px;
+  background: ${({ theme }) => theme.palette.divider1};
+  color: ${({ theme }) => theme.palette.text.secondary};
 `;
 
 const StyledItemActions = styled('div')`
@@ -80,12 +90,50 @@ export const MemberItem: React.FC<React.PropsWithChildren<Props>> = ({
 
   const [projectsOpen, setProjectsOpen] = useState(false);
 
+  const renderMemberAction = () => {
+    if (currentUser?.id === user.id) {
+      if (user.managed) {
+        return null;
+      }
+      return (
+        <Tooltip title={t('organization_users_leave')}>
+          <IconButton
+            size="small"
+            onClick={() => leaveOrganization(organizationId)}
+            data-cy="organization-member-leave-button"
+          >
+            <XClose />
+          </IconButton>
+        </Tooltip>
+      );
+    }
+    if (user.managed) {
+      return user.disabled ? (
+        <EnableUserButton userId={user.id} userName={user.username} />
+      ) : (
+        <DisableUserButton userId={user.id} userName={user.username} />
+      );
+    }
+    return <RemoveUserButton userId={user.id} userName={user.username} />;
+  };
+
   return (
-    <StyledListItem data-cy="organization-member-item">
+    <StyledListItem
+      data-cy="organization-member-item"
+      sx={{ opacity: user.disabled ? 0.6 : 1 }}
+    >
       <StyledItemUser>
         <AvatarImg owner={{ ...user, type: 'USER' }} size={24} />
         <StyledItemText>
-          {user.name} ({user.username}){' '}
+          {user.name} ({user.username})
+          {user.disabled && (
+            <>
+              {' '}
+              <StyledDisabledLabel data-cy="organization-member-disabled-label">
+                <T keyName="organization_member_disabled_label" />
+              </StyledDisabledLabel>
+            </>
+          )}
         </StyledItemText>
         <StyledMfaBadgeWrapper>
           <MfaBadge enabled={user.mfaEnabled} />
@@ -105,19 +153,7 @@ export const MemberItem: React.FC<React.PropsWithChildren<Props>> = ({
           </>
         )}
 
-        {currentUser?.id === user.id ? (
-          <Tooltip title={t('organization_users_leave')}>
-            <IconButton
-              size="small"
-              onClick={() => leaveOrganization(organizationId)}
-              data-cy="organization-member-leave-button"
-            >
-              <XClose />
-            </IconButton>
-          </Tooltip>
-        ) : (
-          <RemoveUserButton userId={user.id} userName={user.username} />
-        )}
+        {renderMemberAction()}
       </StyledItemActions>
       {projectsOpen && (
         <Dialog open={true} onClose={() => setProjectsOpen(false)} fullWidth>
