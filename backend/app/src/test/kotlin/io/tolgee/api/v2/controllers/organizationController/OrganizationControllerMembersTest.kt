@@ -115,9 +115,7 @@ class OrganizationControllerMembersTest : BaseOrganizationControllerTest() {
     withOwnerInOrganization { organization, owner, role ->
       organizationRoleRepository.save(role)
       performAuthDelete("/v2/organizations/${organization.id}/users/${owner.id}", null).andIsOk
-      organizationRoleRepository.findByIdOrNull(role.id).let {
-        assertThat(it).isNull()
-      }
+      organizationRoleRepository.findByIdOrNull(role.id).assert.isNull()
     }
   }
 

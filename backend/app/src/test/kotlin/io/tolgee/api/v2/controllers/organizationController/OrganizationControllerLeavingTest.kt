@@ -20,9 +20,9 @@ class OrganizationControllerLeavingTest : BaseOrganizationControllerTest() {
   fun testLeaveOrganization() {
     val testOrg = executeInNewTransaction { this.organizationService.create(dummyDto, userAccount!!) }
     organizationRoleService.grantOwnerRoleToUser(dbPopulator.createUserIfNotExists("secondOwner"), testOrg)
-    assertThat(getPermittedOrgs().find { testOrg.id == it.id }).isNotNull
+    getPermittedOrgs().find { testOrg.id == it.id }.assert.isNotNull
     performAuthPut("/v2/organizations/${testOrg.id}/leave", null).andIsOk
-    assertThat(getPermittedOrgs().find { testOrg.id == it.id }).isNull()
+    getPermittedOrgs().find { testOrg.id == it.id }.assert.isNull()
   }
 
   private fun getPermittedOrgs() =

@@ -295,8 +295,8 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
     val organization2 = createOrganization(dummyDto2)
     createOrganization(dummyDto).let {
       performAuthDelete("/v2/organizations/${it.id}", null)
-      assertThat(organizationService.find(it.id)).isNull()
-      assertThat(organizationService.find(organization2.id)).isNotNull
+      organizationService.find(it.id).assert.isNull()
+      organizationService.find(organization2.id).assert.isNotNull
     }
   }
 

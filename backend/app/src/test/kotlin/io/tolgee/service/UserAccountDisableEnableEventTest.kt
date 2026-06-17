@@ -5,6 +5,7 @@ import io.tolgee.development.testDataBuilder.data.DisableManagedUserTestData
 import io.tolgee.events.OnUserCountChanged
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.context.ApplicationEvent
@@ -12,6 +13,13 @@ import org.springframework.context.ApplicationListener
 import org.springframework.context.event.ApplicationEventMulticaster
 
 class UserAccountDisableEnableEventTest : AbstractSpringTest() {
+  private var testData: DisableManagedUserTestData? = null
+
+  @AfterEach
+  fun cleanData() {
+    testData?.let { testDataService.cleanTestData(it.root) }
+  }
+
   @Test
   fun `disable publishes one decrease event on a real transition`() {
     val testData = saveTestData()
@@ -54,9 +62,10 @@ class UserAccountDisableEnableEventTest : AbstractSpringTest() {
   }
 
   private fun saveTestData(): DisableManagedUserTestData {
-    val testData = DisableManagedUserTestData()
-    testDataService.saveTestData(testData.root)
-    return testData
+    val data = DisableManagedUserTestData()
+    testDataService.saveTestData(data.root)
+    testData = data
+    return data
   }
 
   private fun captureUserCountEvents(block: () -> Unit): List<OnUserCountChanged> {

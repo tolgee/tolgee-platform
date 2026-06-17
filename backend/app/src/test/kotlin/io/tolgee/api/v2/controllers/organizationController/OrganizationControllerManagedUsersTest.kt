@@ -11,6 +11,7 @@ import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andIsUnauthorized
 import io.tolgee.fixtures.node
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -27,6 +28,11 @@ class OrganizationControllerManagedUsersTest : BaseOrganizationControllerTest() 
     testData = DisableManagedUserTestData()
     testDataService.saveTestData(testData.root)
     userAccount = testData.owner
+  }
+
+  @AfterEach
+  fun cleanManagedUsersTestData() {
+    testDataService.cleanTestData(testData.root)
   }
 
   @Test
