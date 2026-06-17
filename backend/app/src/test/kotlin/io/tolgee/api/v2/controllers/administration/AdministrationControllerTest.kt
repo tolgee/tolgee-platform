@@ -148,4 +148,15 @@ class AdministrationControllerTest : AuthorizedControllerTest() {
     performAuthPut("/v2/administration/users/${testData.user.id}/enable", null).andIsForbidden
     performAuthPut("/v2/administration/users/${testData.user.id}/disable", null).andIsForbidden
   }
+
+  @Test
+  fun `disable and enable are idempotent`() {
+    performAuthPut("/v2/administration/users/${testData.user.id}/disable", null).andIsOk
+    performAuthPut("/v2/administration/users/${testData.user.id}/disable", null).andIsOk
+    assertThat(userAccountService.findActive(testData.user.id)).isNull()
+
+    performAuthPut("/v2/administration/users/${testData.user.id}/enable", null).andIsOk
+    performAuthPut("/v2/administration/users/${testData.user.id}/enable", null).andIsOk
+    assertThat(userAccountService.findActive(testData.user.id)).isNotNull
+  }
 }
