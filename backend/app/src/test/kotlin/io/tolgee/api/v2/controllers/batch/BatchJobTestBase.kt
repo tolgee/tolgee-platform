@@ -36,30 +36,12 @@ class BatchJobTestBase {
   @Autowired
   lateinit var entityManager: EntityManager
 
-  var fakeBefore: Boolean = false
-
-  private var fakeMtProvidersBefore: Boolean = false
-  private var googleApiKeyBefore: String? = null
-  private var googleDefaultEnabledBefore: Boolean = false
-  private var googleDefaultPrimaryBefore: Boolean = false
-  private var awsDefaultEnabledBefore: Boolean = false
-  private var awsAccessKeyBefore: String? = null
-  private var awsSecretKeyBefore: String? = null
-
   @Autowired
   private lateinit var testDataService: TestDataService
 
   fun setup() {
     batchJobOperationQueue.clear()
     testData = BatchJobsTestData()
-
-    fakeMtProvidersBefore = tolgeeProperties.internal.fakeMtProviders
-    googleApiKeyBefore = machineTranslationProperties.google.apiKey
-    googleDefaultEnabledBefore = machineTranslationProperties.google.defaultEnabled
-    googleDefaultPrimaryBefore = machineTranslationProperties.google.defaultPrimary
-    awsDefaultEnabledBefore = machineTranslationProperties.aws.defaultEnabled
-    awsAccessKeyBefore = machineTranslationProperties.aws.accessKey
-    awsSecretKeyBefore = machineTranslationProperties.aws.secretKey
 
     tolgeeProperties.internal.fakeMtProviders = true
 
@@ -70,16 +52,6 @@ class BatchJobTestBase {
     machineTranslationProperties.aws.defaultEnabled = false
     machineTranslationProperties.aws.accessKey = "mock"
     machineTranslationProperties.aws.secretKey = "mock"
-  }
-
-  fun tearDown() {
-    tolgeeProperties.internal.fakeMtProviders = fakeMtProvidersBefore
-    machineTranslationProperties.google.apiKey = googleApiKeyBefore
-    machineTranslationProperties.google.defaultEnabled = googleDefaultEnabledBefore
-    machineTranslationProperties.google.defaultPrimary = googleDefaultPrimaryBefore
-    machineTranslationProperties.aws.defaultEnabled = awsDefaultEnabledBefore
-    machineTranslationProperties.aws.accessKey = awsAccessKeyBefore
-    machineTranslationProperties.aws.secretKey = awsSecretKeyBefore
   }
 
   fun saveAndPrepare(testClass: ProjectAuthControllerTest) {

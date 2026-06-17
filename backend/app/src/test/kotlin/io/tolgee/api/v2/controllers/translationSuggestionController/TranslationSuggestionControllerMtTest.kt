@@ -110,9 +110,6 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
   @AfterEach
   fun clear() {
     clearForcedDate()
-    // Restore shared TolgeeProperties singleton to avoid cross-test leakage.
-    // Declared default matches test yaml (-1), so a literal restore is safe.
-    machineTranslationProperties.freeCreditsAmount = -1
   }
 
   private fun mockDefaultMtBucketSize(size: Long) {

@@ -54,10 +54,6 @@ class OrganizationSlackControllerTest : AuthorizedControllerTest() {
 
   @AfterEach
   fun tearDown() {
-    // Restore shared TolgeeProperties singleton to avoid cross-test leakage.
-    // Declared defaults are null and test yaml does not override slack.clientId/clientSecret.
-    slackProperties.clientId = null
-    slackProperties.clientSecret = null
     enabledFeaturesProvider.forceEnabled = null
   }
 
