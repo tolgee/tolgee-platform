@@ -502,8 +502,11 @@ declare namespace DataCy {
         "organization-invitation-cancel-button": true;
         "organization-invitation-copy-button": true;
         "organization-invitation-item": true;
+        "organization-member-disabled-label": true;
         "organization-member-item": true;
         "organization-member-leave-button": true;
+        "organization-members-disable-user-button": true;
+        "organization-members-enable-user-button": true;
         "organization-members-remove-user-button": true;
         "organization-name-field": true;
         "organization-profile": true;
