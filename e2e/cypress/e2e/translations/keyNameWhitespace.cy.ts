@@ -1,7 +1,7 @@
 import { login } from '../../common/apiCalls/common';
 import { translationSingleTestData } from '../../common/apiCalls/testData/testData';
 import { waitForGlobalLoading } from '../../common/loading';
-import { assertMessage, confirmStandard } from '../../common/shared';
+import { assertMessage } from '../../common/shared';
 import {
   getCellSaveButton,
   openKeyEditDialog,
@@ -26,46 +26,43 @@ describe('Key name whitespace warning', () => {
     translationSingleTestData.clean();
   });
 
-  it('warns about outer spaces when creating a key', () => {
+  it('warns about outer spaces on create and trims them', () => {
     visitTranslations(projectId);
     waitForGlobalLoading();
     const dialog = new E2TranslationsView().openKeyCreateDialog();
-    // type a trailing space without it being the final keystroke (Cypress drops that)
+
+    // trailing space typed without it being the final keystroke (Cypress drops that)
     dialog.getKeyNameInput().type('spaced key x{backspace}');
-    dialog.save();
+    cy.gcy('key-name-whitespace-warning').should('be.visible');
 
-    cy.gcy('global-confirmation-dialog').should('be.visible');
-    cy.gcy('global-confirmation-cancel').click();
-    cy.gcy('global-confirmation-dialog').should('not.exist');
+    cy.gcy('key-name-whitespace-trim').click();
+    cy.gcy('key-name-whitespace-warning').should('not.exist');
 
     dialog.save();
-    confirmStandard();
     assertMessage('Key created');
+    cy.gcy('translations-table-cell')
+      .contains('spaced key')
+      .should('be.visible');
   });
 
-  it('warns when an edit introduces outer spaces', () => {
+  it('warns when an edit introduces outer spaces and trims them', () => {
     visitTranslations(projectId);
     openKeyEditDialog('A key');
     typeNewKeyName('A key x{backspace}');
-    getCellSaveButton().click();
+    cy.gcy('key-name-whitespace-warning').should('be.visible');
 
-    cy.gcy('global-confirmation-dialog').should('be.visible');
-    confirmStandard();
+    cy.gcy('key-name-whitespace-trim').click();
+    cy.gcy('key-name-whitespace-warning').should('not.exist');
+
+    getCellSaveButton().click();
     waitForGlobalLoading();
     cy.gcy('translations-key-edit-key-field').should('not.exist');
   });
 
-  it('does not warn when an edit keeps the name trimmed', () => {
+  it('does not warn when the key name is trimmed', () => {
     visitTranslations(projectId);
-    openKeyEditDialog('A key');
-    typeNewKeyName('A key edited');
-    getCellSaveButton().click();
-
-    waitForGlobalLoading();
-    cy.gcy('global-confirmation-dialog').should('not.exist');
-    cy.gcy('translations-key-edit-key-field').should('not.exist');
-    cy.gcy('translations-table-cell')
-      .contains('A key edited')
-      .should('be.visible');
+    const dialog = new E2TranslationsView().openKeyCreateDialog();
+    dialog.getKeyNameInput().type('clean key');
+    cy.gcy('key-name-whitespace-warning').should('not.exist');
   });
 });
