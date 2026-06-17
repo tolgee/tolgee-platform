@@ -38,6 +38,11 @@ class AdministrationControllerTest : AuthorizedControllerTest() {
     testDataService.cleanTestData(testData.root)
   }
 
+  @AfterEach
+  fun cleanData() {
+    testDataService.cleanTestData(testData.root)
+  }
+
   @Test
   fun `returns organizations`() {
     testDataService.saveTestData(testData.root)
@@ -186,10 +191,10 @@ class AdministrationControllerTest : AuthorizedControllerTest() {
   fun `disable and enable are idempotent`() {
     performAuthPut("/v2/administration/users/${testData.user.id}/disable", null).andIsOk
     performAuthPut("/v2/administration/users/${testData.user.id}/disable", null).andIsOk
-    assertThat(userAccountService.findActive(testData.user.id)).isNull()
+    userAccountService.findActive(testData.user.id).assert.isNull()
 
     performAuthPut("/v2/administration/users/${testData.user.id}/enable", null).andIsOk
     performAuthPut("/v2/administration/users/${testData.user.id}/enable", null).andIsOk
-    assertThat(userAccountService.findActive(testData.user.id)).isNotNull
+    userAccountService.findActive(testData.user.id).assert.isNotNull
   }
 }
