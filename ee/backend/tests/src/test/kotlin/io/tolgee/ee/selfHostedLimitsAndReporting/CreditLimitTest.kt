@@ -15,7 +15,6 @@ import io.tolgee.fixtures.ignoreTestOnSpringBug
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.util.addDays
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyString
@@ -49,10 +48,6 @@ class CreditLimitTest : ProjectAuthControllerTest("/v2/projects/") {
   @MockitoBean
   private lateinit var restTemplate: RestTemplate
 
-  // Snapshot retained: fake-mt-providers is overridden by the EE test yaml (true), so
-  // restoring to the declared default (false) would leak a wrong value into other tests.
-  private var fakeMtProvidersBefore: Boolean = false
-
   @BeforeEach
   fun setup() {
     saveTestDataAndPrepare()
@@ -60,16 +55,9 @@ class CreditLimitTest : ProjectAuthControllerTest("/v2/projects/") {
     initMachineTranslationProperties(
       freeCreditsAmount = -1,
     )
-    fakeMtProvidersBefore = internalProperties.fakeMtProviders
     internalProperties.fakeMtProviders = false
     whenever(restTemplateBuilder.readTimeout(any())).thenReturn(restTemplateBuilder)
     whenever(restTemplateBuilder.build()).thenReturn(restTemplate)
-  }
-
-  @AfterEach
-  fun tearDown() {
-    // Restore shared TolgeeProperties singleton to avoid cross-test leakage
-    internalProperties.fakeMtProviders = fakeMtProvidersBefore
   }
 
   @ProjectJWTAuthTestMethod
