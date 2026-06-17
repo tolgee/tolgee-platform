@@ -62,6 +62,8 @@ abstract class AbstractMcpTest : AbstractSpringTest() {
       }
     }
     clients.clear()
+    // Shared PER_CLASS context: a clock advanced by an expiry test must not leak into siblings.
+    clearForcedDate()
   }
 
   fun createTestDataWithPat(): McpPatTestData {
@@ -107,6 +109,7 @@ abstract class AbstractMcpTest : AbstractSpringTest() {
       apiKey = apiKey!!,
       projectId = base.project.id,
       organizationId = base.projectBuilder.self.organizationOwner.id,
+      userAccountId = base.userAccountBuilder.self.id,
     )
   }
 
@@ -160,5 +163,6 @@ abstract class AbstractMcpTest : AbstractSpringTest() {
     val apiKey: ApiKey,
     val projectId: Long,
     val organizationId: Long,
+    val userAccountId: Long,
   )
 }

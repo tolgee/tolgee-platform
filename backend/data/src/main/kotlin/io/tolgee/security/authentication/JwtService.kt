@@ -251,7 +251,6 @@ class JwtService(
   ): TicketAuthentication {
     val jws = parseJwt(token)
     if (jws.body.audience != JWT_TICKET_AUDIENCE) {
-      // This is not a token - possibly a token or something else.
       throw AuthenticationException(Message.INVALID_JWT_TOKEN)
     }
 
@@ -259,7 +258,12 @@ class JwtService(
       jws.body[JWT_TICKET_TYPE_CLAIM] as? String
         ?: throw AuthenticationException(Message.INVALID_JWT_TOKEN)
 
-    val jwsType = TicketType.valueOf(rawJwsType)
+    val jwsType =
+      try {
+        TicketType.valueOf(rawJwsType)
+      } catch (e: IllegalArgumentException) {
+        throw AuthenticationException(Message.INVALID_JWT_TOKEN)
+      }
     if (jwsType != expectedType) {
       throw AuthenticationException(Message.INVALID_JWT_TOKEN)
     }
@@ -325,5 +329,6 @@ class JwtService(
   enum class TicketType {
     AUTH_MFA,
     IMG_ACCESS,
+    IMG_UPLOAD,
   }
 }

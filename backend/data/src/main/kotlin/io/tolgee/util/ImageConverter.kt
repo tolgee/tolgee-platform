@@ -46,7 +46,11 @@ class ImageConverter(
   }
 
   private fun getScaledImage(targetDimension: Dimension): BufferedImage {
-    val resized = BufferedImage(targetDimension.width, targetDimension.height, sourceBufferedImage.type)
+    // Callers' integer-division ratios can floor an extreme-aspect side to 0; BufferedImage rejects a
+    // 0 dimension, so clamp.
+    val width = targetDimension.width.coerceAtLeast(1)
+    val height = targetDimension.height.coerceAtLeast(1)
+    val resized = BufferedImage(width, height, sourceBufferedImage.type)
     val g = resized.createGraphics()
     g.setRenderingHint(
       RenderingHints.KEY_INTERPOLATION,
@@ -56,8 +60,8 @@ class ImageConverter(
       sourceBufferedImage,
       0,
       0,
-      targetDimension.width,
-      targetDimension.height,
+      width,
+      height,
       0,
       0,
       sourceBufferedImage.width,

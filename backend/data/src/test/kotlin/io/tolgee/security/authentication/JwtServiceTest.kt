@@ -16,6 +16,7 @@
 
 package io.tolgee.security.authentication
 
+import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.security.Keys
 import io.tolgee.component.CurrentDateProvider
@@ -150,6 +151,23 @@ class JwtServiceTest {
 
     assertDoesNotThrow { jwtService.validateTicket(ticket, JwtService.TicketType.AUTH_MFA) }
     assertThrows<AuthenticationException> { jwtService.validateTicket(ticket, JwtService.TicketType.IMG_ACCESS) }
+  }
+
+  @Test
+  fun `it rejects a validly-signed ticket with an unknown type as a clean AuthenticationException`() {
+    val now = currentDateProvider.date
+    val token =
+      Jwts
+        .builder()
+        .signWith(testSigningKey)
+        .setIssuedAt(now)
+        .setAudience(JwtService.JWT_TICKET_AUDIENCE)
+        .setSubject(TEST_USER_ID.toString())
+        .setExpiration(Date(now.time + 60_000))
+        .claim(JwtService.JWT_TICKET_TYPE_CLAIM, "NOT_A_REAL_TYPE")
+        .compact()
+
+    assertThrows<AuthenticationException> { jwtService.validateTicket(token, JwtService.TicketType.IMG_UPLOAD) }
   }
 
   @Test

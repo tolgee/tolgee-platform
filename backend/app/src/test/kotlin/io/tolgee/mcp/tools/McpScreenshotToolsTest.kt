@@ -36,8 +36,8 @@ class McpScreenshotToolsTest : AbstractMcpTest() {
         "upload_image",
         mapOf("image" to MINIMAL_PNG_BASE64),
       )
-    assertThat(json["imageId"]).isNotNull()
-    assertThat(json["imageId"].asLong()).isGreaterThan(0)
+    assertThat(json["uploadedImageId"]).isNotNull()
+    assertThat(json["uploadedImageId"].asLong()).isGreaterThan(0)
   }
 
   @Test
@@ -60,7 +60,7 @@ class McpScreenshotToolsTest : AbstractMcpTest() {
         "upload_image",
         mapOf("image" to MINIMAL_PNG_BASE64),
       )
-    val imageId = uploadJson["imageId"].asLong()
+    val imageId = uploadJson["uploadedImageId"].asLong()
 
     // Create a key with the screenshot reference
     val createJson =
@@ -99,7 +99,7 @@ class McpScreenshotToolsTest : AbstractMcpTest() {
         "upload_image",
         mapOf("image" to MINIMAL_PNG_BASE64),
       )
-    val imageId = uploadJson["imageId"].asLong()
+    val imageId = uploadJson["uploadedImageId"].asLong()
 
     callTool(
       client,
@@ -149,7 +149,7 @@ class McpScreenshotToolsTest : AbstractMcpTest() {
         "upload_image",
         mapOf("image" to MINIMAL_PNG_BASE64),
       )
-    val imageId = uploadJson["imageId"].asLong()
+    val imageId = uploadJson["uploadedImageId"].asLong()
 
     callTool(
       client,
@@ -199,7 +199,7 @@ class McpScreenshotToolsTest : AbstractMcpTest() {
         "upload_image",
         mapOf("image" to MINIMAL_PNG_BASE64),
       )
-    val imageId = uploadJson["imageId"].asLong()
+    val imageId = uploadJson["uploadedImageId"].asLong()
 
     // Add screenshot to the existing key
     val json =
@@ -233,7 +233,7 @@ class McpScreenshotToolsTest : AbstractMcpTest() {
         "upload_image",
         mapOf("image" to MINIMAL_PNG_BASE64),
       )
-    val imageId = uploadJson["imageId"].asLong()
+    val imageId = uploadJson["uploadedImageId"].asLong()
 
     val result =
       callTool(

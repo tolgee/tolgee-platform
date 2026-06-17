@@ -15,6 +15,7 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.ImageUploadService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.ScreenshotService
+import io.tolgee.service.mcp.McpImageUploadUrlService
 import io.tolgee.util.executeInNewTransaction
 import org.springframework.core.io.ByteArrayResource
 import org.springframework.stereotype.Component
@@ -31,6 +32,7 @@ class ScreenshotMcpTools(
   private val authenticationFacade: AuthenticationFacade,
   private val objectMapper: ObjectMapper,
   private val transactionManager: PlatformTransactionManager,
+  private val mcpImageUploadUrlService: McpImageUploadUrlService,
 ) : McpToolsProvider {
   companion object {
     private const val MAX_BASE64_LENGTH = 15_000_000 // ~10MB image
@@ -45,14 +47,46 @@ class ScreenshotMcpTools(
       isGlobalRoute = true,
     )
 
+  private val getImageUploadUrlSpec =
+    ToolEndpointSpec(
+      mcpOperation = "get_image_upload_url",
+      requiredScopes = null,
+      allowedTokenType = AuthTokenType.ANY,
+      isWriteOperation = true,
+      isGlobalRoute = true,
+    )
+
   private val addKeyScreenshotsSpec =
     buildSpec(KeyScreenshotController::uploadScreenshot, "add_key_screenshots")
 
   override fun register(server: McpSyncServer) {
     server.addTool(
+      "get_image_upload_url",
+      "(Recommended) Get a short-lived URL for uploading a screenshot image out-of-band, instead of " +
+        "sending the image bytes through the model with upload_image. " +
+        "Returns { uploadUrl, expiresInSeconds }. Upload the image file to that URL as multipart field " +
+        "'image' (e.g. `curl -F image=@<file> \"<uploadUrl>\"`); the response contains an " +
+        "'uploadedImageId' to reference in the screenshots field of create_keys or add_key_screenshots.",
+      toolSchema { },
+    ) { _ ->
+      mcpRequestContext.executeAs(getImageUploadUrlSpec) {
+        val issued = mcpImageUploadUrlService.issueUploadUrl(authenticationFacade.authenticatedUser.id)
+        textResult(
+          objectMapper.writeValueAsString(
+            mapOf(
+              "uploadUrl" to issued.uploadUrl,
+              "expiresInSeconds" to issued.expiresInSeconds,
+            ),
+          ),
+        )
+      }
+    }
+
+    server.addTool(
       "upload_image",
-      "Upload a screenshot image for later use with create_keys or add_key_screenshots. " +
-        "Returns an image ID that can be referenced in the screenshots field.",
+      "(Not recommended — prefer get_image_upload_url, which avoids sending image bytes through the " +
+        "model.) Upload a screenshot image for later use with create_keys or add_key_screenshots. " +
+        "Returns an uploadedImageId that can be referenced in the screenshots field.",
       toolSchema {
         string("image", "Base64-encoded PNG or JPEG image data", required = true)
       },
@@ -80,7 +114,7 @@ class ScreenshotMcpTools(
         textResult(
           objectMapper.writeValueAsString(
             mapOf(
-              "imageId" to imageEntity.id,
+              "uploadedImageId" to imageEntity.id,
             ),
           ),
         )
@@ -90,7 +124,8 @@ class ScreenshotMcpTools(
     server.addTool(
       "add_key_screenshots",
       "Add screenshots to existing translation keys. " +
-        "First upload images with upload_image, then use this tool to associate them with keys. " +
+        "First obtain an uploadedImageId via get_image_upload_url (recommended) or upload_image (legacy " +
+        "base64), then use this tool to associate the image(s) with keys. " +
         "Use this when you need to add screenshots to keys that already exist.",
       toolSchema {
         number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
@@ -98,7 +133,7 @@ class ScreenshotMcpTools(
           string("keyName", "Translation key name", required = true)
           string("namespace", "Optional: namespace of the key")
           objectArray("screenshots", "Screenshots to associate with this key", required = true) {
-            number("uploadedImageId", "Image ID returned by upload_image", required = true)
+            number("uploadedImageId", "Image ID from get_image_upload_url (recommended) or upload_image", required = true)
             objectArray("positions", "Optional: positions of this key's text in the screenshot") {
               number("x", "X coordinate in pixels", required = true)
               number("y", "Y coordinate in pixels", required = true)

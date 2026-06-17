@@ -138,4 +138,5 @@ class TolgeeProperties(
         "\n\n",
   )
   var backEndUrl: String? = null,
+  var mcp: McpProperties = McpProperties(),
 )

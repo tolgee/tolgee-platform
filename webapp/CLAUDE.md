@@ -97,11 +97,12 @@ and Tolgee initialized before calling this. Filter the results to only include t
 
 #### Upload Screenshots
 
-1. Base64-encode the screenshot file:
+1. Call the `get_image_upload_url` MCP tool — it returns a short-lived `uploadUrl`.
+2. Upload the screenshot file to that URL (the bytes go out-of-band, not through the model):
    ```bash
-   base64 < <screenshot-file>
+   curl -F image=@<screenshot-file> "<uploadUrl>"
    ```
-2. Call the `upload_image` MCP tool with the base64 string — it returns an `imageId`.
+   The response contains an `uploadedImageId` to use in the `screenshots` field below.
 
 #### Stop the App
 

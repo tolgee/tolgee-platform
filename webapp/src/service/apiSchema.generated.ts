@@ -145,7 +145,7 @@ export interface paths {
     put: operations["setLicenseKey"];
   };
   "/v2/image-upload": {
-    post: operations["upload"];
+    post: operations["upload_1"];
   };
   "/v2/image-upload/{ids}": {
     delete: operations["delete_17"];
@@ -1059,6 +1059,10 @@ export interface paths {
   };
   "/v2/public/export-info/formats": {
     get: operations["get_18"];
+  };
+  "/v2/public/image-upload": {
+    /** Unauthenticated. Authorization is the short-lived signed `token` issued by the `get_image_upload_url` MCP tool. Returns the `uploadedImageId` to use with create_keys / add_key_screenshots. */
+    post: operations["upload"];
   };
   "/v2/public/initial-data": {
     /** Returns initial data required by the UI to load */
@@ -6839,6 +6843,10 @@ export interface components {
       dueDate?: number;
       name?: string;
     };
+    UploadedImageMcpModel: {
+      /** Format: int64 */
+      uploadedImageId: number;
+    };
     UploadedImageModel: {
       /** Format: date-time */
       createdAt: string;
@@ -8591,7 +8599,7 @@ export interface operations {
       };
     };
   };
-  upload: {
+  upload_1: {
     responses: {
       /** Created */
       201: {
@@ -21749,6 +21757,54 @@ export interface operations {
       404: {
         content: {
           "application/json": string;
+        };
+      };
+    };
+  };
+  /** Unauthenticated. Authorization is the short-lived signed `token` issued by the `get_image_upload_url` MCP tool. Returns the `uploadedImageId` to use with create_keys / add_key_screenshots. */
+  upload: {
+    parameters: {
+      query: {
+        token: string;
+      };
+    };
+    responses: {
+      /** Created */
+      201: {
+        content: {
+          "*/*": components["schemas"]["UploadedImageMcpModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          /** Format: binary */
+          image: string;
         };
       };
     };

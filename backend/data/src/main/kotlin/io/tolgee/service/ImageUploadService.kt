@@ -35,6 +35,7 @@ class ImageUploadService(
 
   companion object {
     const val UPLOADED_IMAGES_STORAGE_FOLDER_NAME = "uploadedImages"
+    private val IMAGE_CONTENT_TYPES = setOf("image/png", "image/jpeg", "image/gif")
   }
 
   @Transactional
@@ -108,8 +109,7 @@ class ImageUploadService(
   }
 
   fun validateIsImage(image: MultipartFile) {
-    val contentTypes = listOf("image/png", "image/jpeg", "image/gif")
-    if (!contentTypes.contains(image.contentType!!)) {
+    if (image.contentType !in IMAGE_CONTENT_TYPES) {
       throw ValidationException(Message.FILE_NOT_IMAGE)
     }
   }

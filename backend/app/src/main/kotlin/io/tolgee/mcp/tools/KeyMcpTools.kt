@@ -122,7 +122,8 @@ class KeyMcpTools(
       "Create translation keys in a Tolgee project with optional translations, tags, and screenshots. " +
         "Keys that already exist are silently skipped — their translations and tags are not updated. " +
         "Use update_key and set_translation to modify existing keys. " +
-        "To attach screenshots, first upload images with upload_image, then reference the returned image IDs here.",
+        "To attach screenshots, first obtain an uploadedImageId via get_image_upload_url (recommended) " +
+        "or upload_image, then reference it in the screenshots field here.",
       toolSchema {
         number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
         objectArray("keys", "List of keys to create", required = true) {
@@ -131,8 +132,11 @@ class KeyMcpTools(
           stringMap("translations", "Optional: translations as {languageTag: text} map")
           stringArray("tags", "Optional: tags to assign to the key")
           string("description", "Optional: description / developer context for the key")
-          objectArray("screenshots", "Optional: screenshots to associate (use upload_image first to get image IDs)") {
-            number("uploadedImageId", "Image ID returned by upload_image", required = true)
+          objectArray(
+            "screenshots",
+            "Optional: screenshots to associate (get an uploadedImageId via get_image_upload_url first)",
+          ) {
+            number("uploadedImageId", "Image ID from get_image_upload_url (recommended) or upload_image", required = true)
             objectArray("positions", "Optional: positions of this key's text in the screenshot") {
               number("x", "X coordinate in pixels", required = true)
               number("y", "Y coordinate in pixels", required = true)
