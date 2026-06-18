@@ -162,6 +162,9 @@ subprojects {
     ext['netty.version'] = nettyVersion
     ext['thymeleaf.version'] = thymeleafVersion
     ext['postgresql.version'] = postgresqlVersion
+    // Security override: the Spring Boot BOM pins the OpenTelemetry core (opentelemetry-bom) to an
+    // older, CVE-affected version; force it to the version we manage. Drop when the BOM catches up.
+    ext['opentelemetry.version'] = opentelemetryApiVersion
 
     tasks.withType(Test).configureEach {
         testLogging {
