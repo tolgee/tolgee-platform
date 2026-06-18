@@ -9,12 +9,12 @@ import io.tolgee.dtos.request.translation.ImportKeysItemDto
 import io.tolgee.mcp.McpRequestContext
 import io.tolgee.mcp.McpToolsProvider
 import io.tolgee.mcp.buildSpec
-import io.tolgee.model.enums.Scope
 import io.tolgee.security.ProjectHolder
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.util.executeInNewTransaction
+import io.tolgee.util.getSafeNamespace
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
@@ -120,7 +120,8 @@ class KeyMcpTools(
     server.addTool(
       "create_keys",
       "Create translation keys in a Tolgee project with optional translations, tags, and screenshots. " +
-        "Keys that already exist are silently skipped — their translations and tags are not updated. " +
+        "Keys that already exist are silently skipped — their translations and tags are not updated, " +
+        "but any screenshots passed for them are still attached. " +
         "Use update_key and set_translation to modify existing keys. " +
         "To attach screenshots, first obtain an uploadedImageId via get_image_upload_url (recommended) " +
         "or upload_image, then reference it in the screenshots field here.",
@@ -132,18 +133,9 @@ class KeyMcpTools(
           stringMap("translations", "Optional: translations as {languageTag: text} map")
           stringArray("tags", "Optional: tags to assign to the key")
           string("description", "Optional: description / developer context for the key")
-          objectArray(
-            "screenshots",
+          screenshotsField(
             "Optional: screenshots to associate (get an uploadedImageId via get_image_upload_url first)",
-          ) {
-            number("uploadedImageId", "Image ID from get_image_upload_url (recommended) or upload_image", required = true)
-            objectArray("positions", "Optional: positions of this key's text in the screenshot") {
-              number("x", "X coordinate in pixels", required = true)
-              number("y", "Y coordinate in pixels", required = true)
-              number("width", "Width in pixels", required = true)
-              number("height", "Height in pixels", required = true)
-            }
-          }
+          )
         }
         string("namespace", "Optional: default namespace for all keys (individual keys can override)")
         string("branch", "Optional: branch name")
@@ -164,27 +156,31 @@ class KeyMcpTools(
             )
           }
 
-        keyService.importKeys(keys, projectHolder.projectEntity, branch)
-
-        // Associate screenshots with keys (post-processing after key creation)
         val keysWithScreenshots = rawKeys.filter { it.getList("screenshots") != null }
         if (keysWithScreenshots.isNotEmpty()) {
-          securityService.checkProjectPermission(projectHolder.project.id, Scope.SCREENSHOTS_UPLOAD)
-          executeInNewTransaction(transactionManager) {
+          securityService.checkScreenshotsUploadPermission(projectHolder.project.id)
+        }
+
+        executeInNewTransaction(transactionManager) { ts ->
+          keyService.importKeys(keys, projectHolder.projectEntity, branch)
+
+          if (keysWithScreenshots.isNotEmpty()) {
             val keyScreenshotPairs =
-              keysWithScreenshots.mapNotNull { rawKey ->
+              keysWithScreenshots.map { rawKey ->
                 val keyName = rawKey.requireString("name")
-                val keyNamespace = rawKey.getString("namespace") ?: defaultNamespace
-                val keyEntity =
-                  keyService.find(projectHolder.project.id, keyName, keyNamespace, branch)
-                    ?: return@mapNotNull null
+                val keyNamespace = getSafeNamespace(rawKey.getString("namespace") ?: defaultNamespace)
+                val keyEntity = keyService.find(projectHolder.project.id, keyName, keyNamespace, branch)
+                if (keyEntity == null) {
+                  ts.setRollbackOnly()
+                  return@executeInNewTransaction errorResult("Key not found after creation: $keyName")
+                }
                 keyEntity to parseScreenshotDtos(rawKey.requireList("screenshots"))
               }
             screenshotService.saveUploadedImagesForKeys(keyScreenshotPairs)
           }
-        }
 
-        textResult(objectMapper.writeValueAsString(mapOf("created" to true, "keyCount" to keys.size)))
+          textResult(objectMapper.writeValueAsString(mapOf("created" to true, "keyCount" to keys.size)))
+        }
       }
     }
 

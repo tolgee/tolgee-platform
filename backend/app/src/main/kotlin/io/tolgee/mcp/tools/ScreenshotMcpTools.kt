@@ -3,8 +3,6 @@ package io.tolgee.mcp.tools
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.modelcontextprotocol.server.McpSyncServer
 import io.tolgee.api.v2.controllers.KeyScreenshotController
-import io.tolgee.dtos.request.KeyInScreenshotPositionDto
-import io.tolgee.dtos.request.key.KeyScreenshotDto
 import io.tolgee.mcp.McpRequestContext
 import io.tolgee.mcp.McpToolsProvider
 import io.tolgee.mcp.ToolEndpointSpec
@@ -17,6 +15,7 @@ import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.mcp.McpImageUploadUrlService
 import io.tolgee.util.executeInNewTransaction
+import io.tolgee.util.getSafeNamespace
 import org.springframework.core.io.ByteArrayResource
 import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
@@ -132,15 +131,7 @@ class ScreenshotMcpTools(
         objectArray("keyScreenshots", "List of keys and their screenshots", required = true) {
           string("keyName", "Translation key name", required = true)
           string("namespace", "Optional: namespace of the key")
-          objectArray("screenshots", "Screenshots to associate with this key", required = true) {
-            number("uploadedImageId", "Image ID from get_image_upload_url (recommended) or upload_image", required = true)
-            objectArray("positions", "Optional: positions of this key's text in the screenshot") {
-              number("x", "X coordinate in pixels", required = true)
-              number("y", "Y coordinate in pixels", required = true)
-              number("width", "Width in pixels", required = true)
-              number("height", "Height in pixels", required = true)
-            }
-          }
+          screenshotsField("Screenshots to associate with this key", required = true)
         }
         string("branch", "Optional: branch name")
       },
@@ -150,12 +141,16 @@ class ScreenshotMcpTools(
         val keyScreenshots = request.arguments.requireList("keyScreenshots")
 
         executeInNewTransaction(transactionManager) {
-          // Resolve all keys first — if any is missing, return error before mutations
           val keyScreenshotPairs =
             keyScreenshots.map { entry ->
               val keyName = entry.requireString("keyName")
               val keyEntity =
-                keyService.find(projectHolder.project.id, keyName, entry.getString("namespace"), branch)
+                keyService.find(
+                  projectHolder.project.id,
+                  keyName,
+                  getSafeNamespace(entry.getString("namespace")),
+                  branch,
+                )
                   ?: return@executeInNewTransaction errorResult("Key not found: $keyName")
               keyEntity to parseScreenshotDtos(entry.requireList("screenshots"))
             }
@@ -170,23 +165,3 @@ class ScreenshotMcpTools(
     }
   }
 }
-
-/**
- * Parse MCP screenshot arguments into [KeyScreenshotDto] list.
- * Shared by [ScreenshotMcpTools] and [KeyMcpTools].
- */
-fun parseScreenshotDtos(screenshots: List<Map<String, Any?>>): List<KeyScreenshotDto> =
-  screenshots.map { s ->
-    KeyScreenshotDto().apply {
-      uploadedImageId = s.requireLong("uploadedImageId")
-      positions =
-        s.getList("positions")?.map { p ->
-          KeyInScreenshotPositionDto(
-            x = p.requireInt("x"),
-            y = p.requireInt("y"),
-            width = p.requireInt("width"),
-            height = p.requireInt("height"),
-          )
-        }
-    }
-  }

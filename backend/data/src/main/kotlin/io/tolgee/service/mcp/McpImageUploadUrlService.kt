@@ -12,10 +12,6 @@ data class IssuedUploadUrl(
   val expiresInSeconds: Long,
 )
 
-/**
- * Issues short-lived signed URLs for uploading screenshot images out-of-band, and resolves the
- * uploading user from such a URL's token.
- */
 @Service
 class McpImageUploadUrlService(
   private val jwtService: JwtService,
@@ -37,11 +33,6 @@ class McpImageUploadUrlService(
     )
   }
 
-  /**
-   * Validates the upload token and returns the managed [UserAccount] entity the upload is attributed
-   * to. Revocation (deactivated/deleted/missing user) is enforced inside [JwtService.validateTicket],
-   * before this resolves the entity.
-   */
   fun resolveUserFromUploadToken(token: String): UserAccount {
     val auth = jwtService.validateTicket(token, JwtService.TicketType.IMG_UPLOAD)
     return userAccountService.get(auth.userAccount.id)

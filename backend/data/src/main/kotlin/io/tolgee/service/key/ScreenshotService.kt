@@ -233,18 +233,11 @@ class ScreenshotService(
     image?.let { fileStorage.storeFile(screenshot.getFilePath(), it) }
   }
 
-  /**
-   * Associates uploaded images with multiple keys. Handles the case where the same
-   * uploadedImageId is referenced by multiple keys: each image is converted to a
-   * screenshot once, then additional keys get references to the same screenshot.
-   */
   @Transactional
   fun saveUploadedImagesForKeys(keyScreenshots: List<Pair<Key, List<KeyScreenshotDto>>>) {
-    // Collect all image IDs and load them in one batch
     val allImageIds = keyScreenshots.flatMap { (_, screenshots) -> screenshots.map { it.uploadedImageId } }.distinct()
     val images = imageUploadService.find(allImageIds).associateBy { it.id }
 
-    // Fail fast if any image IDs are missing (before any mutations)
     val missingIds = allImageIds.filter { it !in images }
     if (missingIds.isNotEmpty()) {
       throw NotFoundException(Message.ONE_OR_MORE_IMAGES_NOT_FOUND)
@@ -256,32 +249,61 @@ class ScreenshotService(
       }
     }
 
-    // Convert each uploaded image to a screenshot exactly once
+    checkScreenshotsPerKeyLimit(keyScreenshots)
+
     val createdScreenshots =
       images
         .map { (id, image) ->
           id to saveScreenshot(image)
         }.toMap()
 
-    // Add references for each key
-    val addedReferences = mutableSetOf<Pair<Long, Long>>()
+    // One reference per (key, image). DTOs that repeat the same image for a key are merged rather
+    // than added as duplicate references.
+    val grouped = LinkedHashMap<Pair<Long, Long>, Pair<Key, MutableList<KeyScreenshotDto>>>()
     for ((key, screenshots) in keyScreenshots) {
       for (screenshotDto in screenshots) {
-        if (getScreenshotsCountForKey(key) >= tolgeeProperties.maxScreenshotsPerKey) {
-          throw BadRequestException(
-            Message.MAX_SCREENSHOTS_EXCEEDED,
-            listOf(tolgeeProperties.maxScreenshotsPerKey),
-          )
-        }
-        val result =
-          createdScreenshots[screenshotDto.uploadedImageId]
-            ?: throw NotFoundException(Message.ONE_OR_MORE_IMAGES_NOT_FOUND)
-        val referenceKey = key.id to result.screenshot.id
-        if (!addedReferences.add(referenceKey)) continue
-        val info = ScreenshotInfoDto(screenshotDto.text, screenshotDto.positions)
-        addReference(key, result.screenshot, info, result.originalDimension, result.targetDimension)
+        grouped
+          .getOrPut(key.id to screenshotDto.uploadedImageId) { key to mutableListOf() }
+          .second
+          .add(screenshotDto)
       }
     }
+
+    grouped.forEach { (groupKey, entry) ->
+      val (key, dtos) = entry
+      val result = createdScreenshots.getValue(groupKey.second)
+      val mergedPositions = dtos.flatMap { it.positions ?: emptyList() }.ifEmpty { null }
+      val text = dtos.firstNotNullOfOrNull { it.text }
+      val info = ScreenshotInfoDto(text, mergedPositions)
+      addReference(key, result.screenshot, info, result.originalDimension, result.targetDimension)
+    }
+  }
+
+  /**
+   * Must run before any image is converted: saveScreenshot writes files and deletes the uploaded
+   * source, which a transaction rollback cannot undo, so an over-limit batch would leave orphans
+   * if checked later. Counts distinct images per key — the same image twice for one key is one
+   * reference.
+   */
+  private fun checkScreenshotsPerKeyLimit(keyScreenshots: List<Pair<Key, List<KeyScreenshotDto>>>) {
+    val max = tolgeeProperties.maxScreenshotsPerKey
+    keyScreenshots
+      .groupBy { it.first.id }
+      .forEach { (_, group) ->
+        val key = group.first().first
+        val newDistinctCount =
+          group
+            .flatMap { it.second }
+            .map { it.uploadedImageId }
+            .distinct()
+            .size
+        if (getScreenshotsCountForKey(key) + newDistinctCount > max) {
+          throw BadRequestException(
+            Message.MAX_SCREENSHOTS_EXCEEDED,
+            listOf(max),
+          )
+        }
+      }
   }
 
   @Transactional

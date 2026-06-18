@@ -62,7 +62,10 @@ abstract class AbstractMcpTest : AbstractSpringTest() {
       }
     }
     clients.clear()
-    // Shared PER_CLASS context: a clock advanced by an expiry test must not leak into siblings.
+  }
+
+  @AfterEach
+  fun clearForcedDateAfterTest() {
     clearForcedDate()
   }
 
@@ -88,12 +91,17 @@ abstract class AbstractMcpTest : AbstractSpringTest() {
     )
   }
 
-  fun createTestDataWithPak(scopes: Set<Scope> = Scope.entries.toSet()): McpPakTestData {
+  fun createTestDataWithPak(
+    scopes: Set<Scope> = Scope.entries.toSet(),
+    userName: String = "pak_test_user",
+    projectName: String = "pak_test_project",
+    pakKey: String = "test_pak_key",
+  ): McpPakTestData {
     var apiKey: ApiKey? = null
-    val base = BaseTestData(userName = "pak_test_user", projectName = "pak_test_project")
+    val base = BaseTestData(userName = userName, projectName = projectName)
     base.projectBuilder.build {
       addApiKey {
-        key = "test_pak_key"
+        key = pakKey
         scopesEnum = scopes.toMutableSet()
         userAccount = base.userAccountBuilder.self
         apiKey = this

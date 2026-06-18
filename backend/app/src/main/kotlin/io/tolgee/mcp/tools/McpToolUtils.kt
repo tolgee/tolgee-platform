@@ -7,6 +7,8 @@ import io.modelcontextprotocol.spec.McpSchema.CallToolResult
 import io.modelcontextprotocol.spec.McpSchema.JsonSchema
 import io.modelcontextprotocol.spec.McpSchema.TextContent
 import io.tolgee.constants.Message
+import io.tolgee.dtos.request.KeyInScreenshotPositionDto
+import io.tolgee.dtos.request.key.KeyScreenshotDto
 import io.tolgee.exceptions.BadRequestException
 import org.springframework.data.domain.Page
 
@@ -96,3 +98,34 @@ fun Map<String, Any?>.requireList(key: String): List<Map<String, Any?>> = getLis
 @Suppress("UNCHECKED_CAST")
 fun Map<String, Any?>.getLongList(key: String): List<Long>? =
   (this[key] as? List<*>)?.mapNotNull { (it as? Number)?.toLong() }
+
+fun SchemaBuilder.screenshotsField(
+  description: String,
+  required: Boolean = false,
+) {
+  objectArray("screenshots", description, required) {
+    number("uploadedImageId", "Image ID from get_image_upload_url (recommended) or upload_image", required = true)
+    objectArray("positions", "Optional: positions of this key's text in the screenshot") {
+      number("x", "X coordinate in pixels", required = true)
+      number("y", "Y coordinate in pixels", required = true)
+      number("width", "Width in pixels", required = true)
+      number("height", "Height in pixels", required = true)
+    }
+  }
+}
+
+fun parseScreenshotDtos(screenshots: List<Map<String, Any?>>): List<KeyScreenshotDto> =
+  screenshots.map { s ->
+    KeyScreenshotDto().apply {
+      uploadedImageId = s.requireLong("uploadedImageId")
+      positions =
+        s.getList("positions")?.map { p ->
+          KeyInScreenshotPositionDto(
+            x = p.requireInt("x"),
+            y = p.requireInt("y"),
+            width = p.requireInt("width"),
+            height = p.requireInt("height"),
+          )
+        }
+    }
+  }

@@ -40,6 +40,7 @@ class McpWithoutEeTest : AbstractMcpTest() {
       "get_batch_job_status",
       "machine_translate",
       "store_big_meta",
+      "get_image_upload_url",
       "upload_image",
       "add_key_screenshots",
     )
