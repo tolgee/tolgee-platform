@@ -8,6 +8,7 @@ import io.sentry.Sentry
 import io.tolgee.Metrics
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.batch.data.BatchJobDto
+import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.data.ExecutionQueueItem
 import io.tolgee.batch.data.QueueEventType
 import io.tolgee.batch.events.JobQueueItemsEvent
@@ -123,7 +124,7 @@ class BatchJobActionService(
         logger.debug("Job: ${it.batchJob.id} - Handling execution committed ${it.id} (standard flow)")
         progressManager.handleChunkCompletedCommitted(it, batchJobDto = batchJobDto)
       }
-      addRetryExecutionToQueue(retryExecution, jobCharacter = executionItem.jobCharacter)
+      addRetryExecutionToQueue(retryExecution, jobCharacter = executionItem.jobCharacter, jobType = batchJobDto.type)
     } catch (e: Throwable) {
       when (e) {
         is CancellationException -> {
@@ -210,9 +211,10 @@ class BatchJobActionService(
   private fun addRetryExecutionToQueue(
     retryExecution: BatchJobChunkExecution?,
     jobCharacter: JobCharacter,
+    jobType: BatchJobType,
   ) {
     retryExecution?.let {
-      batchJobChunkExecutionQueue.addToQueue(it, jobCharacter)
+      batchJobChunkExecutionQueue.addToQueue(it, jobCharacter, jobType)
       logger.debug("Job ${it.batchJob.id}: Added chunk ${it.id} for re-trial")
     }
   }

@@ -3,6 +3,7 @@ package io.tolgee.batch
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.Metrics
 import io.tolgee.batch.data.BatchJobChunkExecutionDto
+import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.data.ExecutionQueueItem
 import io.tolgee.batch.data.QueueEventType
 import io.tolgee.batch.events.JobQueueItemsEvent
@@ -203,8 +204,9 @@ class BatchJobChunkExecutionQueue(
   fun addToQueue(
     execution: BatchJobChunkExecution,
     jobCharacter: JobCharacter,
+    jobType: BatchJobType,
   ) {
-    addItemsToQueue(listOf(execution.toItem(jobCharacter)))
+    addItemsToQueue(listOf(execution.toItem(jobCharacter, jobType)))
   }
 
   fun addToQueue(executions: List<BatchJobChunkExecution>) {
@@ -255,13 +257,17 @@ class BatchJobChunkExecutionQueue(
     // Yes. jobCharacter is part of the batchJob entity.
     // However, we don't want to fetch it here, because it would be a waste of resources.
     // So we can provide the jobCharacter here.
+    // Same for jobType: on the retry path batchJob is a detached lazy proxy (the chunk runs
+    // outside a Hibernate session), so accessing batchJob.type would throw
+    // LazyInitializationException — callers that already have the type must pass it in.
     jobCharacter: JobCharacter? = null,
+    jobType: BatchJobType? = null,
   ) = ExecutionQueueItem(
     id,
     batchJob.id,
     executeAfter?.time,
     jobCharacter ?: batchJob.jobCharacter,
-    jobType = batchJob.type,
+    jobType = jobType ?: batchJob.type,
   )
 
   private fun BatchJobChunkExecutionDto.toItem(providedJobCharacter: JobCharacter? = null) =
