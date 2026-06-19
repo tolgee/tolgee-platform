@@ -62,26 +62,8 @@ Only add `defaultValue` to the keys you are creating — not to existing ones.
 
 Screenshots are mandatory unless the user explicitly opts out.
 
-Use the `/doc-screenshot` skill to take polished screenshots. If the skill is not available, follow the basic
-instructions below.
-
-#### Start the App
-
-1. Read `webapp/.env.development.local` for port configuration:
-   - `VITE_APP_API_URL` — backend URL (extract port, e.g. `http://localhost:8180` → port `8180`)
-   - `VITE_PORT` — frontend dev server port
-2. Start the backend as a background task:
-   ```bash
-   ./gradlew server-app:bootRun --args='--spring.profiles.active=dev'
-   ```
-3. Start the frontend as a background task (suppress auto-opening a browser window):
-   ```bash
-   cd webapp && BROWSER=none npm start
-   ```
-4. Wait for the backend to be ready:
-   ```bash
-   scripts/wait-for-backend.sh <backend-port>
-   ```
+Use the `/doc-screenshot` skill to take polished screenshots. If the skill is not available, make sure the app is
+running and you have navigated to the relevant page, then follow the basic instructions below.
 
 #### Get Key Positions for Tolgee
 
@@ -103,10 +85,6 @@ and Tolgee initialized before calling this. Filter the results to only include t
    curl -F image=@<screenshot-file> "<uploadUrl>"
    ```
    The response contains an `uploadedImageId` to use in the `screenshots` field below.
-
-#### Stop the App
-
-Stop both the backend and frontend background tasks when done with screenshots.
 
 ### 3. Remove defaultValue from Code
 
