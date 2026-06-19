@@ -41,19 +41,31 @@ class BatchJobChunkExecutionQueue(
      * Per-job item queues. Key = jobId.
      *
      * All mutations go through ConcurrentHashMap.compute() which provides per-key
-     * atomicity, keeping roundRobinOrder and jobQueues in sync under concurrent access.
+     * atomicity, keeping jobsByType / typeOrder and jobQueues in sync under concurrent access.
      *
-     * Invariant: jobId is in roundRobinOrder ↔ jobQueues[jobId] is non-null and non-empty.
+     * Invariant: jobId is in jobsByType[type] ↔ jobQueues[jobId] is non-null and non-empty.
      */
     private val jobQueues = ConcurrentHashMap<Long, ConcurrentLinkedDeque<ExecutionQueueItem>>()
 
     /**
-     * Round-robin job order. Each jobId appears at most once when its queue is non-empty.
-     * pollFirst() picks the next job to serve; addLast() re-queues it after serving one chunk.
-     * Using [ConcurrentOrderedSet] instead of a plain deque ensures addLast() is idempotent,
-     * preventing duplicate jobId entries under concurrent poll/add races.
+     * Two-level round-robin order. Outer level rotates job *types*; inner level rotates
+     * jobs within a type. This makes scheduling fair across types regardless of how many
+     * jobs of each type are queued — a flood of one type cannot starve another.
+     *
+     * jobsByType: type -> rotation of jobIds that currently have queued chunks of that type.
+     * typeOrder:  rotation of types that currently have queued jobs.
+     *
+     * Invariants (eventually-consistent, self-correcting on poll like the job level):
+     *   I1: jobId in jobsByType[type]  ↔ jobQueues[jobId] is non-null and non-empty
+     *   I2: type  in typeOrder         ↔ jobsByType[type] has at least one jobId
+     * A type/job that lingers after a concurrent drain is skipped on the next poll.
+     * Both sets are [ConcurrentOrderedSet] so addLast() is idempotent under races.
+     * Empty per-type sets are left in jobsByType (≤ number of BatchJobTypes) rather than
+     * removed, to avoid a remove/computeIfAbsent race; typeOrder membership is what gates
+     * scheduling.
      */
-    private val roundRobinOrder = ConcurrentOrderedSet<Long>()
+    private val jobsByType = ConcurrentHashMap<io.tolgee.batch.data.BatchJobType, ConcurrentOrderedSet<Long>>()
+    private val typeOrder = ConcurrentOrderedSet<io.tolgee.batch.data.BatchJobType>()
 
     /**
      * O(1) duplicate detection — replaces the O(n) queue snapshot done on every add.
@@ -83,7 +95,7 @@ class BatchJobChunkExecutionQueue(
    * Adds a single item. Returns false if already queued (duplicate).
    *
    * Thread-safe: compute() serializes concurrent add/poll for the same jobId,
-   * ensuring roundRobinOrder.addLast(), incrementCharacterCount(), and
+   * ensuring jobsByType / typeOrder registration, incrementCharacterCount(), and
    * totalSize.incrementAndGet() are called exactly once per new item, atomically
    * with the deque mutation.
    */
@@ -93,8 +105,11 @@ class BatchJobChunkExecutionQueue(
     jobQueues.compute(item.jobId) { jobId, existing ->
       val deque =
         existing ?: ConcurrentLinkedDeque<ExecutionQueueItem>().also {
-          // Called atomically inside compute — only once per new job
-          roundRobinOrder.addLast(jobId)
+          // New job for this jobId — register it in its type's rotation (and the type in
+          // typeOrder). Called atomically inside compute — only once per new job.
+          // addLast is idempotent, so a concurrent re-add is a safe no-op.
+          jobsByType.computeIfAbsent(item.jobType) { ConcurrentOrderedSet() }.addLast(jobId)
+          typeOrder.addLast(item.jobType)
         }
       deque.addLast(item)
       incrementCharacterCount(item.jobCharacter)
@@ -121,7 +136,8 @@ class BatchJobChunkExecutionQueue(
               totalSize.decrementAndGet()
             }
             if (deque.isEmpty()) {
-              roundRobinOrder.remove(item.jobId)
+              // Job drained — drop it from its type rotation. typeOrder self-corrects on poll.
+              jobsByType[item.jobType]?.remove(item.jobId)
               null
             } else {
               deque
@@ -218,15 +234,17 @@ class BatchJobChunkExecutionQueue(
     var removedCount = 0
     jobQueues.compute(jobId) { _, deque ->
       if (deque != null) {
+        // All chunks of a job share its type; read it from any queued item.
+        val type = deque.peek()?.jobType
         deque.forEach { item ->
           queuedExecutionIds.remove(item.chunkExecutionId)
           decrementCharacterCount(item.jobCharacter)
         }
         removedCount = deque.size
         totalSize.addAndGet(-removedCount)
-        // Inside compute to prevent a concurrent addSingleItem from re-adding jobId
-        // to roundRobinOrder between the compute returning and the remove call.
-        roundRobinOrder.remove(jobId)
+        // Inside compute to prevent a concurrent addSingleItem from re-adding jobId between
+        // the compute returning and the remove call. typeOrder self-corrects on next poll.
+        if (type != null) jobsByType[type]?.remove(jobId)
       }
       null // remove entry from map
     }
@@ -268,34 +286,31 @@ class BatchJobChunkExecutionQueue(
   fun poll(): ExecutionQueueItem? = pollRoundRobin()
 
   /**
-   * O(1) round-robin poll across jobs.
+   * O(1) two-level round-robin poll: rotate types, then jobs within the chosen type, then
+   * serve one chunk. Fair across types regardless of per-type job count (see #3428 for the
+   * job level this builds on).
    *
-   * Rotates jobs fairly: each job gets one chunk served before any job gets a second.
-   * Uses pollFirst/addLast on roundRobinOrder — no full-queue scan required.
-   *
-   * Thread-safe: compute() serializes concurrent add/poll for the same jobId.
-   * roundRobinOrder is a [ConcurrentOrderedSet] so addLast() is idempotent — if a
-   * concurrent addSingleItem re-added jobId between our pollFirst() and compute(),
-   * our own addLast() inside compute() is a safe no-op instead of creating a duplicate.
-   * If a job's deque turns out to be empty (concurrent drain), the job is skipped
-   * and the next one is tried. maxAttempts prevents infinite loops in edge cases.
+   * Thread-safe: the chunk removal and all counters run inside jobQueues.compute(); the
+   * rotation sets are ConcurrentOrderedSets with idempotent addLast(). A type or job that
+   * drained concurrently is skipped; maxAttempts bounds the skip loop.
    */
   fun pollRoundRobin(): ExecutionQueueItem? {
     if (isEmpty()) return null
 
-    // jobQueues.size is O(1) (ConcurrentHashMap maintains an internal counter).
-    // It bounds the loop to the number of distinct jobs: in the worst case we try every
-    // job once and find all deques empty (concurrent drain), then give up.
-    val maxAttempts = jobQueues.size + 1
+    // Each iteration removes one type from typeOrder. We may skip types whose bucket drained
+    // concurrently (≤ number of types) and jobs that drained concurrently (≤ number of jobs).
+    val maxAttempts = jobQueues.size + jobsByType.size + 1
     var attempts = 0
     while (attempts++ <= maxAttempts) {
-      val jobId = roundRobinOrder.pollFirst() ?: return null
+      val type = typeOrder.pollFirst() ?: return null
+      val jobsForType = jobsByType[type]
+      val jobId = jobsForType?.pollFirst()
+      if (jobId == null) {
+        // Type bucket drained concurrently; type already removed from typeOrder. Try next.
+        continue
+      }
 
       var item: ExecutionQueueItem? = null
-
-      // All side-effects (queuedExecutionIds, counters, roundRobinOrder re-queue) are done
-      // inside compute so they are atomic with the deque mutation, preventing races with
-      // concurrent addSingleItem or removeJobExecutions calls for the same jobId.
       jobQueues.compute(jobId) { _, deque ->
         if (deque.isNullOrEmpty()) return@compute null
         item = deque.removeFirst()
@@ -304,15 +319,21 @@ class BatchJobChunkExecutionQueue(
         decrementCharacterCount(capturedItem.jobCharacter)
         totalSize.decrementAndGet()
         if (deque.isNotEmpty()) {
-          roundRobinOrder.addLast(jobId)
+          // Job still has chunks → keep it in its type's rotation (idempotent).
+          jobsForType.addLast(jobId)
           deque
         } else {
           null
         }
       }
 
+      // Re-queue the type if it still has any jobs waiting (idempotent; mirrors job level).
+      if (jobsForType.peekFirst() != null) {
+        typeOrder.addLast(type)
+      }
+
       if (item != null) return item
-      // deque was null or empty (concurrent drain) — don't re-add, try next job
+      // else: job deque drained concurrently — try next type/job
     }
     return null
   }
@@ -320,7 +341,8 @@ class BatchJobChunkExecutionQueue(
   fun clear() {
     logger.debug("Clearing queue")
     jobQueues.clear()
-    roundRobinOrder.clear()
+    jobsByType.clear()
+    typeOrder.clear()
     queuedExecutionIds.clear()
     totalSize.set(0)
     jobCharacterCounts.clear()
@@ -329,7 +351,8 @@ class BatchJobChunkExecutionQueue(
   fun find(function: (ExecutionQueueItem) -> Boolean): ExecutionQueueItem? = getAllQueueItems().find(function)
 
   fun peek(): ExecutionQueueItem {
-    val jobId = roundRobinOrder.peekFirst() ?: throw NoSuchElementException("Queue is empty")
+    val type = typeOrder.peekFirst() ?: throw NoSuchElementException("Queue is empty")
+    val jobId = jobsByType[type]?.peekFirst() ?: throw NoSuchElementException("Queue is empty")
     return jobQueues[jobId]?.peekFirst() ?: throw NoSuchElementException("Queue is empty")
   }
 

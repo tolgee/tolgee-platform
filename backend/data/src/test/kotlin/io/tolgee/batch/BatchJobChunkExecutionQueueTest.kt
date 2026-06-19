@@ -279,4 +279,59 @@ class BatchJobChunkExecutionQueueTest {
     assertThat(queue.find { it.chunkExecutionId == 2L }?.chunkExecutionId).isEqualTo(2)
     assertThat(queue.find { it.chunkExecutionId == 99L }).isNull()
   }
+
+  // ── type-level fairness ───────────────────────────────────────────────────
+
+  @Test
+  fun `pollRoundRobin does not let many jobs of one type starve another type`() {
+    // 100 QA_CHECK jobs, 1 chunk each
+    val qaItems = (1L..100L).map { item(it, jobId = it, jobType = BatchJobType.QA_CHECK) }
+    // 1 MACHINE_TRANSLATE job
+    val mtItem = item(1000L, jobId = 1000L, jobType = BatchJobType.MACHINE_TRANSLATE)
+    queue.addItemsToLocalQueue(qaItems + mtItem)
+
+    // With per-job round-robin the MT chunk would appear ~position 101.
+    // With type fairness, MT (one of 2 types) must be served within the first few polls.
+    val firstFew = (1..4).mapNotNull { queue.pollRoundRobin()?.jobType }
+    assertThat(firstFew).contains(BatchJobType.MACHINE_TRANSLATE)
+  }
+
+  @Test
+  fun `pollRoundRobin rotates across types before serving a type twice`() {
+    queue.addItemsToLocalQueue(
+      listOf(
+        item(1, jobId = 1, jobType = BatchJobType.QA_CHECK),
+        item(2, jobId = 1, jobType = BatchJobType.QA_CHECK),
+        item(3, jobId = 2, jobType = BatchJobType.MACHINE_TRANSLATE),
+        item(4, jobId = 2, jobType = BatchJobType.MACHINE_TRANSLATE),
+        item(5, jobId = 3, jobType = BatchJobType.AUTO_TRANSLATE),
+        item(6, jobId = 3, jobType = BatchJobType.AUTO_TRANSLATE),
+      ),
+    )
+
+    val types = (1..3).mapNotNull { queue.pollRoundRobin()?.jobType }
+    // first three polls must hit three distinct types (one full type cycle)
+    assertThat(types).containsExactlyInAnyOrder(
+      BatchJobType.QA_CHECK,
+      BatchJobType.MACHINE_TRANSLATE,
+      BatchJobType.AUTO_TRANSLATE,
+    )
+  }
+
+  @Test
+  fun `pollRoundRobin keeps job fairness within a single type`() {
+    // two jobs of the SAME type interleave (the #3428 guarantee, now scoped under a type)
+    queue.addItemsToLocalQueue(
+      listOf(
+        item(1, jobId = 1, jobType = BatchJobType.QA_CHECK),
+        item(2, jobId = 1, jobType = BatchJobType.QA_CHECK),
+        item(3, jobId = 1, jobType = BatchJobType.QA_CHECK),
+        item(4, jobId = 2, jobType = BatchJobType.QA_CHECK),
+        item(5, jobId = 2, jobType = BatchJobType.QA_CHECK),
+      ),
+    )
+    val jobs = (1..5).mapNotNull { queue.pollRoundRobin()?.jobId }
+    // job2 (2 chunks) must not wait behind all of job1's chunks
+    assertThat(jobs.indexOf(2L)).isLessThan(3)
+  }
 }
