@@ -1,3 +1,10 @@
+## [3.205.4](https://github.com/tolgee/tolgee-platform/compare/v3.205.3...v3.205.4) (2026-06-19)
+
+
+### Bug Fixes
+
+* dispatch Redis job-queue events in order to prevent dropped chunk retries ([#3761](https://github.com/tolgee/tolgee-platform/issues/3761)) ([64cb8dc](https://github.com/tolgee/tolgee-platform/commit/64cb8dc439ff51ce1b8db31eba559760f576efa4))
+
 ## [3.205.3](https://github.com/tolgee/tolgee-platform/compare/v3.205.2...v3.205.3) (2026-06-19)
 
 
