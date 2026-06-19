@@ -1,3 +1,10 @@
+## [3.205.3](https://github.com/tolgee/tolgee-platform/compare/v3.205.2...v3.205.3) (2026-06-19)
+
+
+### Bug Fixes
+
+* patch Snyk-reported backend dependency vulnerabilities ([#3742](https://github.com/tolgee/tolgee-platform/issues/3742)) ([a83e029](https://github.com/tolgee/tolgee-platform/commit/a83e0290602a5424cb74516fb3656cb1cf413420))
+
 ## [3.205.2](https://github.com/tolgee/tolgee-platform/compare/v3.205.1...v3.205.2) (2026-06-16)
 
 
