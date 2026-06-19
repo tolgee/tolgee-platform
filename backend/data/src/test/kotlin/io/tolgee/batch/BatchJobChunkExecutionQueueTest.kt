@@ -13,6 +13,12 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.springframework.data.redis.core.StringRedisTemplate
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 
 class BatchJobChunkExecutionQueueTest {
   private lateinit var queue: BatchJobChunkExecutionQueue
@@ -333,5 +339,135 @@ class BatchJobChunkExecutionQueueTest {
     val jobs = (1..5).mapNotNull { queue.pollRoundRobin()?.jobId }
     // job2 (2 chunks) must not wait behind all of job1's chunks
     assertThat(jobs.indexOf(2L)).isLessThan(3)
+  }
+
+  // ── concurrency stress test ───────────────────────────────────────────────
+
+  @Test
+  fun `concurrent producers and consumers lose no items and serve each item exactly once`() {
+    val types =
+      listOf(
+        BatchJobType.QA_CHECK,
+        BatchJobType.MACHINE_TRANSLATE,
+        BatchJobType.AUTO_TRANSLATE,
+        BatchJobType.AUTOMATION,
+      )
+    // 5 jobIds per type, spread across types deterministically
+    val jobsPerType = 5
+    val totalJobs = types.size * jobsPerType
+    // 20 000 items total, distributed evenly across jobs
+    val totalItems = 20_000
+    val itemsPerJob = totalItems / totalJobs
+
+    // Build the full item list with globally unique chunkExecutionIds.
+    // Layout: items 0..<itemsPerJob go to job 0, next block to job 1, etc.
+    data class Slot(val id: Long, val jobId: Long, val jobType: BatchJobType)
+    val allItems =
+      (0 until totalJobs).flatMap { jobIndex ->
+        val type = types[jobIndex / jobsPerType]
+        val jobId = (jobIndex + 1).toLong()
+        (0 until itemsPerJob).map { offset ->
+          val chunkId = (jobIndex * itemsPerJob + offset + 1).toLong()
+          Slot(chunkId, jobId, type)
+        }
+      }
+    val allIds = allItems.map { it.id }.toSet()
+    assertThat(allIds).hasSize(totalItems) // sanity: all ids unique
+
+    // Partition items across producers; each partition is added by exactly one thread.
+    val producerCount = 6
+    val consumerCount = 6
+    val batchSize = 50
+    val partitions = allItems.chunked(allItems.size / producerCount + 1)
+
+    val startGate = CountDownLatch(1)
+    val producersDone = AtomicBoolean(false)
+    val polledIds = ConcurrentHashMap.newKeySet<Long>()
+    val polledCount = AtomicInteger(0)
+    val deadlineMs = 20_000L
+
+    val executor = Executors.newFixedThreadPool(producerCount + consumerCount)
+    try {
+      // Launch producers
+      val producerFutures =
+        partitions.mapIndexed { idx, partition ->
+          executor.submit {
+            startGate.await()
+            partition.chunked(batchSize).forEach { batch ->
+              queue.addItemsToLocalQueue(
+                batch.map { s ->
+                  item(s.id, s.jobId, jobType = s.jobType)
+                },
+              )
+            }
+          }
+        }
+
+      // Launch consumers — keep polling until producers are done and queue is empty
+      val consumerFutures =
+        (0 until consumerCount).map {
+          executor.submit {
+            startGate.await()
+            val deadline = System.currentTimeMillis() + deadlineMs
+            while (true) {
+              val polled = queue.pollRoundRobin()
+              if (polled != null) {
+                polledIds.add(polled.chunkExecutionId)
+                polledCount.incrementAndGet()
+              } else {
+                // null from an eventually-consistent poll: only exit when producers are done
+                // AND the queue is genuinely empty
+                if (producersDone.get() && queue.isEmpty()) break
+                if (System.currentTimeMillis() > deadline) {
+                  error(
+                    "Consumer deadline exceeded: polled=${ polledCount.get()}, expected=$totalItems, " +
+                      "queueSize=${queue.size}, producersDone=${producersDone.get()}",
+                  )
+                }
+                Thread.yield()
+              }
+            }
+          }
+        }
+
+      // Release all threads simultaneously
+      startGate.countDown()
+
+      // Wait for producers to finish, then signal consumers
+      producerFutures.forEach { it.get(30, TimeUnit.SECONDS) }
+      producersDone.set(true)
+
+      // Wait for consumers
+      consumerFutures.forEach { it.get(30, TimeUnit.SECONDS) }
+    } finally {
+      executor.shutdownNow()
+    }
+
+    // ── assertions ────────────────────────────────────────────────────────────
+    assertThat(polledCount.get())
+      .withFailMessage("Expected $totalItems polled items but got ${polledCount.get()} (items lost or counted wrong)")
+      .isEqualTo(totalItems)
+
+    assertThat(polledIds.size)
+      .withFailMessage("${polledIds.size} distinct ids polled — expected $totalItems (duplicate serves detected)")
+      .isEqualTo(totalItems)
+
+    assertThat(polledIds)
+      .withFailMessage("Polled id set differs from added id set")
+      .isEqualTo(allIds)
+
+    assertThat(queue.size)
+      .withFailMessage("Queue size is ${queue.size} after draining — expected 0")
+      .isEqualTo(0)
+
+    assertThat(queue.isEmpty())
+      .withFailMessage("queue.isEmpty() returned false after draining all items")
+      .isTrue()
+
+    val positiveCharacterCounts =
+      queue.getJobCharacterCounts().filter { (_, v) -> v > 0 }
+    assertThat(positiveCharacterCounts)
+      .withFailMessage("Non-zero character counts remain after full drain: $positiveCharacterCounts")
+      .isEmpty()
   }
 }
