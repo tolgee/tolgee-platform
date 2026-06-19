@@ -361,7 +361,11 @@ class BatchJobChunkExecutionQueueTest {
 
     // Build the full item list with globally unique chunkExecutionIds.
     // Layout: items 0..<itemsPerJob go to job 0, next block to job 1, etc.
-    data class Slot(val id: Long, val jobId: Long, val jobType: BatchJobType)
+    data class Slot(
+      val id: Long,
+      val jobId: Long,
+      val jobType: BatchJobType,
+    )
     val allItems =
       (0 until totalJobs).flatMap { jobIndex ->
         val type = types[jobIndex / jobsPerType]
