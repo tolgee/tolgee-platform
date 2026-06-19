@@ -7,6 +7,7 @@ import io.modelcontextprotocol.spec.McpSchema.CallToolResult
 import io.modelcontextprotocol.spec.McpSchema.JsonSchema
 import io.modelcontextprotocol.spec.McpSchema.TextContent
 import io.tolgee.constants.Message
+import io.tolgee.dtos.RelatedKeyDto
 import io.tolgee.dtos.request.KeyInScreenshotPositionDto
 import io.tolgee.dtos.request.key.KeyScreenshotDto
 import io.tolgee.exceptions.BadRequestException
@@ -116,6 +117,20 @@ fun SchemaBuilder.screenshotsField(
     }
   }
 }
+
+fun parseRelatedKeysInOrder(
+  items: List<Map<String, Any?>>,
+  branch: String?,
+  defaultNamespace: String? = null,
+): MutableList<RelatedKeyDto> =
+  items
+    .map { item ->
+      RelatedKeyDto(
+        keyName = item.requireString("keyName"),
+        namespace = item.getString("namespace") ?: defaultNamespace,
+        branch = branch,
+      )
+    }.toMutableList()
 
 fun parseScreenshotDtos(screenshots: List<Map<String, Any?>>): List<KeyScreenshotDto> =
   screenshots.map { s ->

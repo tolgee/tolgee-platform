@@ -27,7 +27,7 @@ class KeyCodeReference(
 ) : StandardAuditModel(),
   WithKeyMetaReference {
   @field:NotBlank
-  @Column(length = 300)
+  @Column(length = PATH_MAX_LENGTH)
   var path: String = ""
 
   var line: Long? = null
@@ -36,5 +36,9 @@ class KeyCodeReference(
 
   override fun toString(): String {
     return "KeyCodeReference(path='$path', line=$line)"
+  }
+
+  companion object {
+    const val PATH_MAX_LENGTH = 300
   }
 }

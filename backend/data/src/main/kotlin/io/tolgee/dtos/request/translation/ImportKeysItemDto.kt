@@ -40,4 +40,11 @@ class ImportKeysItemDto(
     example = "{\"reactComponent\": \"SignUpButton\"}",
   )
   val custom: Map<String, Any?>? = null,
+  @Schema(
+    description = "Comments to attach to the key",
+    example = "[\"Shown in the homepage hero section\"]",
+  )
+  val comments: List<String>? = null,
+  @Schema(description = "Code references — where the key is used in the source code")
+  val codeReferences: List<KeyCodeReferenceRequest>? = null,
 )

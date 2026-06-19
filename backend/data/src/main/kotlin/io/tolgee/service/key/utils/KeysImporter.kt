@@ -1,12 +1,17 @@
 package io.tolgee.service.key.utils
 
 import io.tolgee.component.KeyCustomValuesValidator
+import io.tolgee.constants.Message
 import io.tolgee.dtos.request.translation.ImportKeysItemDto
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.formats.convertToPluralIfAnyIsPlural
 import io.tolgee.model.Project
 import io.tolgee.model.key.Key
+import io.tolgee.model.key.KeyCodeReference
+import io.tolgee.model.key.KeyComment
 import io.tolgee.model.key.KeyMeta
 import io.tolgee.model.key.Namespace
+import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.branching.BranchService
 import io.tolgee.service.key.KeyMetaService
 import io.tolgee.service.key.KeyService
@@ -34,6 +39,8 @@ class KeysImporter(
   private val branchService: BranchService = applicationContext.getBean(BranchService::class.java)
   private val keyCustomValuesValidator: KeyCustomValuesValidator =
     applicationContext.getBean(KeyCustomValuesValidator::class.java)
+  private val authenticationFacade: AuthenticationFacade =
+    applicationContext.getBean(AuthenticationFacade::class.java)
 
   fun import() {
     val languageTags = keys.flatMap { it.translations.keys }.toSet()
@@ -51,6 +58,8 @@ class KeysImporter(
 
     val toTag = mutableMapOf<Key, List<String>>()
     val keyMetasToSave = mutableListOf<KeyMeta>()
+    val commentsToSave = mutableListOf<KeyComment>()
+    val codeReferencesToSave = mutableListOf<KeyCodeReference>()
 
     keys.forEach { keyDto ->
       val safeNamespace = getSafeNamespace(keyDto.namespace)
@@ -87,7 +96,12 @@ class KeysImporter(
             toTag[key] = keyDto.tags
           }
         }
-        if (keyDto.description != null || keyDto.custom != null) {
+        val hasMeta =
+          keyDto.description != null ||
+            keyDto.custom != null ||
+            !keyDto.comments.isNullOrEmpty() ||
+            !keyDto.codeReferences.isNullOrEmpty()
+        if (hasMeta) {
           val keyMeta = key.keyMeta ?: KeyMeta(key = key)
           key.keyMeta = keyMeta
           keyMeta.description = keyDto.description
@@ -95,12 +109,37 @@ class KeysImporter(
             keyCustomValuesValidator.validate(it)
             keyMeta.custom = it.toMutableMap()
           }
+          val author = authenticationFacade.authenticatedUserEntity
+          keyDto.comments?.forEach { commentText ->
+            if (commentText.isBlank()) return@forEach
+            if (commentText.length > KeyComment.TEXT_MAX_LENGTH) {
+              throw BadRequestException(Message.KEY_COMMENT_TOO_LONG, listOf(KeyComment.TEXT_MAX_LENGTH))
+            }
+            keyMeta.addComment(author) { text = commentText }
+          }
+          keyDto.codeReferences?.forEach { ref ->
+            if (ref.path.isBlank()) return@forEach
+            if (ref.path.length > KeyCodeReference.PATH_MAX_LENGTH) {
+              throw BadRequestException(
+                Message.KEY_CODE_REFERENCE_PATH_TOO_LONG,
+                listOf(KeyCodeReference.PATH_MAX_LENGTH),
+              )
+            }
+            keyMeta.addCodeReference(author) {
+              path = ref.path
+              line = ref.line
+            }
+          }
           keyMetasToSave.add(keyMeta)
+          commentsToSave.addAll(keyMeta.comments)
+          codeReferencesToSave.addAll(keyMeta.codeReferences)
         }
       }
     }
 
     tagService.tagKeys(toTag)
     keyMetaService.saveAll(keyMetasToSave)
+    keyMetaService.saveAllComments(commentsToSave)
+    keyMetaService.saveAllCodeReferences(codeReferencesToSave)
   }
 }

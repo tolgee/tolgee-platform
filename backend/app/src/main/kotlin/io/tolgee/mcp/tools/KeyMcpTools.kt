@@ -3,13 +3,16 @@ package io.tolgee.mcp.tools
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.modelcontextprotocol.server.McpSyncServer
 import io.tolgee.api.v2.controllers.keys.KeyController
+import io.tolgee.dtos.BigMetaDto
 import io.tolgee.dtos.request.key.EditKeyDto
 import io.tolgee.dtos.request.translation.ImportKeysDto
 import io.tolgee.dtos.request.translation.ImportKeysItemDto
+import io.tolgee.dtos.request.translation.KeyCodeReferenceRequest
 import io.tolgee.mcp.McpRequestContext
 import io.tolgee.mcp.McpToolsProvider
 import io.tolgee.mcp.buildSpec
 import io.tolgee.security.ProjectHolder
+import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.security.SecurityService
@@ -25,6 +28,7 @@ class KeyMcpTools(
   private val keyService: KeyService,
   private val screenshotService: ScreenshotService,
   private val securityService: SecurityService,
+  private val bigMetaService: BigMetaService,
   private val projectHolder: ProjectHolder,
   private val objectMapper: ObjectMapper,
   private val transactionManager: PlatformTransactionManager,
@@ -119,9 +123,11 @@ class KeyMcpTools(
 
     server.addTool(
       "create_keys",
-      "Create translation keys in a Tolgee project with optional translations, tags, and screenshots. " +
-        "Keys that already exist are silently skipped — their translations, tags, description, and " +
-        "custom metadata are not updated, but any screenshots passed for them are still attached. " +
+      "Create translation keys in a Tolgee project with optional translations, tags, metadata and screenshots. " +
+        "Provide as much context (description, code references, related keys) as you can in this call: " +
+        "auto-translation (if configured) runs right after creation and won't be redone if you add context later. " +
+        "Keys that already exist are silently skipped — their translations, tags, description, custom metadata, " +
+        "comments, and code references are not updated, but any screenshots passed for them are still attached. " +
         "Use update_key and set_translation to modify existing keys. " +
         "To attach screenshots, first obtain an uploadedImageId via get_image_upload_url (recommended) " +
         "or upload_image, then reference it in the screenshots field here.",
@@ -134,9 +140,22 @@ class KeyMcpTools(
           stringArray("tags", "Optional: tags to assign to the key")
           string("description", "Optional: description / developer context for the key")
           objectField("custom", "Optional: arbitrary structured metadata stored on the key")
+          stringArray("comments", "Optional: comments to attach to the key")
+          objectArray("codeReferences", "Optional: where the key is used in source code") {
+            string("path", "File path (e.g. 'src/components/Header.tsx')", required = true)
+            number("line", "Optional: line number")
+          }
           screenshotsField(
             "Optional: screenshots to associate (get an uploadedImageId via get_image_upload_url first)",
           )
+        }
+        objectArray(
+          "relatedKeysInOrder",
+          "Optional: keys that appear together (in order, e.g. on the same screen) so auto-translation " +
+            "uses their translations as context. Reference keys created in this call or existing ones.",
+        ) {
+          string("keyName", "Key name", required = true)
+          string("namespace", "Optional: key namespace")
         }
         string("namespace", "Optional: default namespace for all keys (individual keys can override)")
         string("branch", "Optional: branch name")
@@ -155,12 +174,22 @@ class KeyMcpTools(
               tags = k.getStringList("tags"),
               description = k.getString("description"),
               custom = k.getObjectMap("custom"),
+              comments = k.getStringList("comments"),
+              codeReferences =
+                k.getList("codeReferences")?.map { ref ->
+                  KeyCodeReferenceRequest(path = ref.requireString("path"), line = ref.getLong("line"))
+                },
             )
           }
 
         val keysWithScreenshots = rawKeys.filter { it.getList("screenshots") != null }
         if (keysWithScreenshots.isNotEmpty()) {
           securityService.checkScreenshotsUploadPermission(projectHolder.project.id)
+        }
+
+        val relatedKeysInOrder = request.arguments.getList("relatedKeysInOrder")
+        if (!relatedKeysInOrder.isNullOrEmpty()) {
+          securityService.checkBigMetaUploadPermission(projectHolder.project.id)
         }
 
         executeInNewTransaction(transactionManager) { ts ->
@@ -179,6 +208,13 @@ class KeyMcpTools(
                 keyEntity to parseScreenshotDtos(rawKey.requireList("screenshots"))
               }
             screenshotService.saveUploadedImagesForKeys(keyScreenshotPairs)
+          }
+
+          if (!relatedKeysInOrder.isNullOrEmpty()) {
+            // Stored in this transaction so it lands before the post-commit auto-translate batch job.
+            val bigMeta = BigMetaDto()
+            bigMeta.relatedKeysInOrder = parseRelatedKeysInOrder(relatedKeysInOrder, branch, defaultNamespace)
+            bigMetaService.store(bigMeta, projectHolder.projectEntity)
           }
 
           textResult(objectMapper.writeValueAsString(mapOf("created" to true, "keyCount" to keys.size)))

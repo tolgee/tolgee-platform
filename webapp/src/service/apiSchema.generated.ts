@@ -3333,6 +3333,15 @@ export interface components {
       keys: components["schemas"]["ImportKeysItemDto"][];
     };
     ImportKeysItemDto: {
+      /** @description Code references — where the key is used in the source code */
+      codeReferences?: components["schemas"]["KeyCodeReferenceRequest"][];
+      /**
+       * @description Comments to attach to the key
+       * @example [
+       *   "Shown in the homepage hero section"
+       * ]
+       */
+      comments?: string[];
       /**
        * @description Arbitrary structured metadata (custom values) stored on the key
        * @example {
@@ -3536,6 +3545,19 @@ export interface components {
     JwtAuthenticationResponse: {
       accessToken?: string;
       tokenType?: string;
+    };
+    KeyCodeReferenceRequest: {
+      /**
+       * Format: int64
+       * @description Line number in the file where the key is used
+       * @example 42
+       */
+      line?: number;
+      /**
+       * @description Path to the file where the key is used
+       * @example src/components/Header.tsx
+       */
+      path: string;
     };
     KeyDefinitionDto: {
       name: string;

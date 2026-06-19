@@ -283,6 +283,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
                 mapOf("en" to "hello"),
               "tags" to listOf("tag1", "tag2", "test"),
               "custom" to mapOf("reactComponent" to "SignUpButton"),
+              "comments" to listOf("Imported comment"),
+              "codeReferences" to listOf(mapOf("path" to "src/App.tsx", "line" to 10)),
             ),
             mapOf(
               "name" to "key_without_tags",
@@ -321,6 +323,23 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       key.keyMeta!!
         .custom.assert
         .isEqualTo(mapOf("reactComponent" to "SignUpButton"))
+
+      val comments = key.keyMeta!!.comments
+      comments.assert.hasSize(1)
+      comments
+        .first()
+        .text.assert
+        .isEqualTo("Imported comment")
+      val codeRefs = key.keyMeta!!.codeReferences
+      codeRefs.assert.hasSize(1)
+      codeRefs
+        .first()
+        .path.assert
+        .isEqualTo("src/App.tsx")
+      codeRefs
+        .first()
+        .line.assert
+        .isEqualTo(10L)
 
       key.assert.isNotNull()
       key.keyMeta!!

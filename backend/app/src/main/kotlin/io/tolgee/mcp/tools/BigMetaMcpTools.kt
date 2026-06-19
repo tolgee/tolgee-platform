@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.modelcontextprotocol.server.McpSyncServer
 import io.tolgee.api.v2.controllers.BigMetaController
 import io.tolgee.dtos.BigMetaDto
-import io.tolgee.dtos.RelatedKeyDto
 import io.tolgee.mcp.McpRequestContext
 import io.tolgee.mcp.McpToolsProvider
 import io.tolgee.mcp.buildSpec
@@ -41,16 +40,7 @@ class BigMetaMcpTools(
     ) { request ->
       mcpRequestContext.executeAs(storeBigMetaSpec, request.arguments.getProjectId()) {
         val branch = request.arguments.getString("branch")
-        val relatedKeys =
-          request.arguments
-            .requireList("relatedKeysInOrder")
-            .map { k ->
-              RelatedKeyDto(
-                keyName = k.requireString("keyName"),
-                namespace = k.getString("namespace"),
-                branch = branch,
-              )
-            }.toMutableList()
+        val relatedKeys = parseRelatedKeysInOrder(request.arguments.requireList("relatedKeysInOrder"), branch)
 
         val dto = BigMetaDto()
         dto.relatedKeysInOrder = relatedKeys

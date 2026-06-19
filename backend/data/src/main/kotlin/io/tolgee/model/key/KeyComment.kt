@@ -31,7 +31,7 @@ class KeyComment(
   var fromImport: Boolean = false
 
   @field:NotBlank
-  @Column(columnDefinition = "text", length = 2000)
+  @Column(columnDefinition = "text", length = TEXT_MAX_LENGTH)
   var text: String = ""
 
   override fun toString(): String {
@@ -40,5 +40,9 @@ class KeyComment(
 
   override fun resolveKey(): Key? {
     return keyMeta.key
+  }
+
+  companion object {
+    const val TEXT_MAX_LENGTH = 2000
   }
 }
