@@ -65,8 +65,8 @@ class BatchJobChunkExecutionQueue(
      * removed, to avoid a remove/computeIfAbsent race; typeOrder membership is what gates
      * scheduling.
      */
-    private val jobsByType = ConcurrentHashMap<io.tolgee.batch.data.BatchJobType, ConcurrentOrderedSet<Long>>()
-    private val typeOrder = ConcurrentOrderedSet<io.tolgee.batch.data.BatchJobType>()
+    private val jobsByType = ConcurrentHashMap<BatchJobType, ConcurrentOrderedSet<Long>>()
+    private val typeOrder = ConcurrentOrderedSet<BatchJobType>()
 
     /**
      * O(1) duplicate detection — replaces the O(n) queue snapshot done on every add.
