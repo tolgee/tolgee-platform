@@ -2,6 +2,7 @@ package io.tolgee.batch
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.tolgee.Metrics
+import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.data.ExecutionQueueItem
 import io.tolgee.batch.data.QueueEventType
 import io.tolgee.batch.events.JobQueueItemsEvent
@@ -32,7 +33,14 @@ class BatchJobChunkExecutionQueueTest {
     id: Long,
     jobId: Long,
     character: JobCharacter = JobCharacter.FAST,
-  ) = ExecutionQueueItem(chunkExecutionId = id, jobId = jobId, executeAfter = null, jobCharacter = character)
+    jobType: BatchJobType = BatchJobType.QA_CHECK,
+  ) = ExecutionQueueItem(
+    chunkExecutionId = id,
+    jobId = jobId,
+    executeAfter = null,
+    jobCharacter = character,
+    jobType = jobType,
+  )
 
   // ── size / isEmpty ────────────────────────────────────────────────────────
 
@@ -111,6 +119,12 @@ class BatchJobChunkExecutionQueueTest {
         assertThat(polledJobs[i]).isNotEqualTo(polledJobs[i + 1])
       }
     }
+  }
+
+  @Test
+  fun `pollRoundRobin preserves jobType on items`() {
+    queue.addItemsToLocalQueue(listOf(item(1, jobId = 1, jobType = BatchJobType.MACHINE_TRANSLATE)))
+    assertThat(queue.pollRoundRobin()?.jobType).isEqualTo(BatchJobType.MACHINE_TRANSLATE)
   }
 
   // ── size tracking after polls ─────────────────────────────────────────────

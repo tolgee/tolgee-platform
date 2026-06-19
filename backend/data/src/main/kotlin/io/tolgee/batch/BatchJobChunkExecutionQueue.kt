@@ -143,7 +143,7 @@ class BatchJobChunkExecutionQueue(
         .unwrap(Session::class.java)
         .createQuery(
           """
-          select new io.tolgee.batch.data.BatchJobChunkExecutionDto(bjce.id, bk.id, bjce.executeAfter, bk.jobCharacter)
+          select new io.tolgee.batch.data.BatchJobChunkExecutionDto(bjce.id, bk.id, bjce.executeAfter, bk.jobCharacter, bk.type)
           from BatchJobChunkExecution bjce
           join bjce.batchJob bk
           where bjce.status = :executionStatus
@@ -238,10 +238,22 @@ class BatchJobChunkExecutionQueue(
     // However, we don't want to fetch it here, because it would be a waste of resources.
     // So we can provide the jobCharacter here.
     jobCharacter: JobCharacter? = null,
-  ) = ExecutionQueueItem(id, batchJob.id, executeAfter?.time, jobCharacter ?: batchJob.jobCharacter)
+  ) = ExecutionQueueItem(
+    id,
+    batchJob.id,
+    executeAfter?.time,
+    jobCharacter ?: batchJob.jobCharacter,
+    jobType = batchJob.type,
+  )
 
   private fun BatchJobChunkExecutionDto.toItem(providedJobCharacter: JobCharacter? = null) =
-    ExecutionQueueItem(id, batchJobId, executeAfter?.time, providedJobCharacter ?: jobCharacter)
+    ExecutionQueueItem(
+      id,
+      batchJobId,
+      executeAfter?.time,
+      providedJobCharacter ?: jobCharacter,
+      jobType = jobType,
+    )
 
   val size get() = totalSize.get()
 

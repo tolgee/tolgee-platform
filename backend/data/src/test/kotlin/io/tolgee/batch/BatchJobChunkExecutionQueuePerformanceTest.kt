@@ -2,6 +2,7 @@ package io.tolgee.batch
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.tolgee.Metrics
+import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.data.ExecutionQueueItem
 import io.tolgee.component.UsingRedisProvider
 import jakarta.persistence.EntityManager
@@ -46,11 +47,13 @@ class BatchJobChunkExecutionQueuePerformanceTest {
   private fun makeItem(
     id: Long,
     jobId: Long,
+    jobType: BatchJobType = BatchJobType.QA_CHECK,
   ) = ExecutionQueueItem(
     chunkExecutionId = id,
     jobId = jobId,
     executeAfter = null,
     jobCharacter = JobCharacter.FAST,
+    jobType = jobType,
   )
 
   /**
