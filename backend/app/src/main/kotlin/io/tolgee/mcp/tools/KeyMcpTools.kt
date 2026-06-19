@@ -120,8 +120,8 @@ class KeyMcpTools(
     server.addTool(
       "create_keys",
       "Create translation keys in a Tolgee project with optional translations, tags, and screenshots. " +
-        "Keys that already exist are silently skipped — their translations and tags are not updated, " +
-        "but any screenshots passed for them are still attached. " +
+        "Keys that already exist are silently skipped — their translations, tags, description, and " +
+        "custom metadata are not updated, but any screenshots passed for them are still attached. " +
         "Use update_key and set_translation to modify existing keys. " +
         "To attach screenshots, first obtain an uploadedImageId via get_image_upload_url (recommended) " +
         "or upload_image, then reference it in the screenshots field here.",
@@ -133,6 +133,7 @@ class KeyMcpTools(
           stringMap("translations", "Optional: translations as {languageTag: text} map")
           stringArray("tags", "Optional: tags to assign to the key")
           string("description", "Optional: description / developer context for the key")
+          objectField("custom", "Optional: arbitrary structured metadata stored on the key")
           screenshotsField(
             "Optional: screenshots to associate (get an uploadedImageId via get_image_upload_url first)",
           )
@@ -153,6 +154,7 @@ class KeyMcpTools(
               translations = k.getStringMap("translations") ?: emptyMap(),
               tags = k.getStringList("tags"),
               description = k.getString("description"),
+              custom = k.getObjectMap("custom"),
             )
           }
 

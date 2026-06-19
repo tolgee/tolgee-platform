@@ -35,4 +35,9 @@ class ImportKeysItemDto(
     example = "[\"homepage\", \"user-profile\"]",
   )
   val tags: List<String>? = null,
+  @Schema(
+    description = "Arbitrary structured metadata (custom values) stored on the key",
+    example = "{\"reactComponent\": \"SignUpButton\"}",
+  )
+  val custom: Map<String, Any?>? = null,
 )

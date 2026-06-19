@@ -3,12 +3,18 @@ package io.tolgee.mcp.tools
 import io.modelcontextprotocol.client.McpSyncClient
 import io.tolgee.AbstractMcpTest
 import io.tolgee.testing.assertions.Assertions.assertThat
+import io.tolgee.util.executeInNewTransaction
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.transaction.PlatformTransactionManager
 
 class McpKeyToolsTest : AbstractMcpTest() {
   lateinit var data: McpPakTestData
   lateinit var client: McpSyncClient
+
+  @Autowired
+  lateinit var transactionManager: PlatformTransactionManager
 
   @BeforeEach
   fun setup() {
@@ -186,5 +192,77 @@ class McpKeyToolsTest : AbstractMcpTest() {
         ),
       )
     assertThat(result.isError).isTrue()
+  }
+
+  @Test
+  fun `create_keys stores structured custom metadata on the key`() {
+    val custom =
+      mapOf(
+        "reactComponent" to "SignUpButton",
+        "primary" to true,
+        "order" to 3,
+        "aliases" to listOf("signup", "register"),
+        "props" to mapOf("variant" to "filled"),
+      )
+
+    callTool(
+      client,
+      "create_keys",
+      mapOf(
+        "projectId" to data.projectId,
+        "keys" to listOf(mapOf("name" to "custom.key", "custom" to custom)),
+      ),
+    )
+
+    executeInNewTransaction(transactionManager) {
+      val key = keyService.find(data.projectId, "custom.key", null)
+      assertThat(key).isNotNull()
+      // Full structured payload (bool, number, array, nested object) must survive the JSONB round-trip.
+      assertThat(key!!.keyMeta?.custom).isEqualTo(custom)
+    }
+  }
+
+  @Test
+  fun `create_keys rejects oversized custom values`() {
+    val oversized = "x".repeat(6000)
+
+    assertToolFails(
+      client,
+      "create_keys",
+      mapOf(
+        "projectId" to data.projectId,
+        "keys" to listOf(mapOf("name" to "toobig.key", "custom" to mapOf("blob" to oversized))),
+      ),
+      expectedError = "custom_values_json_too_long",
+    )
+
+    assertThat(keyService.find(data.projectId, "toobig.key", null)).isNull()
+  }
+
+  @Test
+  fun `create_keys does not overwrite custom on an already-existing key`() {
+    callTool(
+      client,
+      "create_keys",
+      mapOf(
+        "projectId" to data.projectId,
+        "keys" to listOf(mapOf("name" to "keep.custom", "custom" to mapOf("owner" to "first"))),
+      ),
+    )
+
+    callTool(
+      client,
+      "create_keys",
+      mapOf(
+        "projectId" to data.projectId,
+        "keys" to listOf(mapOf("name" to "keep.custom", "custom" to mapOf("owner" to "second"))),
+      ),
+    )
+
+    executeInNewTransaction(transactionManager) {
+      val key = keyService.find(data.projectId, "keep.custom", null)
+      assertThat(key).isNotNull()
+      assertThat(key!!.keyMeta?.custom).isEqualTo(mapOf("owner" to "first"))
+    }
   }
 }

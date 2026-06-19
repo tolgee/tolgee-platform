@@ -88,6 +88,9 @@ fun Map<String, Any?>.requireStringList(key: String): List<String> = getStringLi
 @Suppress("UNCHECKED_CAST")
 fun Map<String, Any?>.getStringMap(key: String): Map<String, String?>? = this[key] as? Map<String, String?>
 
+@Suppress("UNCHECKED_CAST")
+fun Map<String, Any?>.getObjectMap(key: String): Map<String, Any?>? = this[key] as? Map<String, Any?>
+
 fun Map<String, Any?>.requireStringMap(key: String): Map<String, String?> = getStringMap(key) ?: missingParam(key)
 
 @Suppress("UNCHECKED_CAST")

@@ -1,5 +1,6 @@
 package io.tolgee.service.key.utils
 
+import io.tolgee.component.KeyCustomValuesValidator
 import io.tolgee.dtos.request.translation.ImportKeysItemDto
 import io.tolgee.formats.convertToPluralIfAnyIsPlural
 import io.tolgee.model.Project
@@ -31,6 +32,8 @@ class KeysImporter(
   private val securityService: SecurityService = applicationContext.getBean(SecurityService::class.java)
   private val keyMetaService: KeyMetaService = applicationContext.getBean(KeyMetaService::class.java)
   private val branchService: BranchService = applicationContext.getBean(BranchService::class.java)
+  private val keyCustomValuesValidator: KeyCustomValuesValidator =
+    applicationContext.getBean(KeyCustomValuesValidator::class.java)
 
   fun import() {
     val languageTags = keys.flatMap { it.translations.keys }.toSet()
@@ -84,10 +87,14 @@ class KeysImporter(
             toTag[key] = keyDto.tags
           }
         }
-        if (keyDto.description != key.keyMeta?.description) {
+        if (keyDto.description != null || keyDto.custom != null) {
           val keyMeta = key.keyMeta ?: KeyMeta(key = key)
           key.keyMeta = keyMeta
           keyMeta.description = keyDto.description
+          keyDto.custom?.let {
+            keyCustomValuesValidator.validate(it)
+            keyMeta.custom = it.toMutableMap()
+          }
           keyMetasToSave.add(keyMeta)
         }
       }

@@ -3334,6 +3334,13 @@ export interface components {
     };
     ImportKeysItemDto: {
       /**
+       * @description Arbitrary structured metadata (custom values) stored on the key
+       * @example {
+       *   "reactComponent": "SignUpButton"
+       * }
+       */
+      custom?: { [key: string]: unknown };
+      /**
        * @description Description of key
        * @example This key is used on homepage. It's a label of sign up button.
        */

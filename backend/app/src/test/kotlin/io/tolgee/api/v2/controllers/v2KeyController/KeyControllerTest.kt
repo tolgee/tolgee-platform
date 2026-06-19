@@ -282,6 +282,7 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
               "translations" to
                 mapOf("en" to "hello"),
               "tags" to listOf("tag1", "tag2", "test"),
+              "custom" to mapOf("reactComponent" to "SignUpButton"),
             ),
             mapOf(
               "name" to "key_without_tags",
@@ -317,6 +318,10 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
         .description.assert
         .isEqualTo("description")
 
+      key.keyMeta!!
+        .custom.assert
+        .isEqualTo(mapOf("reactComponent" to "SignUpButton"))
+
       key.assert.isNotNull()
       key.keyMeta!!
         .tags.assert
@@ -330,6 +335,27 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
         ?.name.assert
         .isEqualTo("main")
     }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `import keys rejects oversized custom`() {
+    saveTestDataAndPrepare()
+
+    projectSupplier = { testData.project }
+    performProjectAuthPost(
+      "keys/import",
+      mapOf(
+        "keys" to
+          listOf(
+            mapOf(
+              "name" to "toobig_key",
+              "translations" to mapOf("en" to "hello"),
+              "custom" to mapOf("blob" to "x".repeat(6000)),
+            ),
+          ),
+      ),
+    ).andIsBadRequest.andAssertError.hasCode("custom_values_json_too_long")
   }
 
   @ProjectJWTAuthTestMethod

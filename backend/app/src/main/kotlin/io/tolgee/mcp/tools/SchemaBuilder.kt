@@ -47,6 +47,15 @@ class SchemaBuilder {
     if (required) requiredFields += name
   }
 
+  fun objectField(
+    name: String,
+    description: String,
+    required: Boolean = false,
+  ) {
+    properties[name] = mapOf("type" to "object", "description" to description)
+    if (required) requiredFields += name
+  }
+
   fun stringArray(
     name: String,
     description: String,
