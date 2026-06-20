@@ -14,6 +14,7 @@ import io.tolgee.service.ImageUploadService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.mcp.McpImageUploadUrlService
+import io.tolgee.service.security.SecurityService
 import io.tolgee.util.executeInNewTransaction
 import io.tolgee.util.getSafeNamespace
 import org.springframework.core.io.ByteArrayResource
@@ -32,6 +33,7 @@ class ScreenshotMcpTools(
   private val objectMapper: ObjectMapper,
   private val transactionManager: PlatformTransactionManager,
   private val mcpImageUploadUrlService: McpImageUploadUrlService,
+  private val securityService: SecurityService,
 ) : McpToolsProvider {
   companion object {
     private const val MAX_BASE64_LENGTH = 15_000_000 // ~10MB image
@@ -152,6 +154,7 @@ class ScreenshotMcpTools(
                   branch,
                 )
                   ?: return@executeInNewTransaction errorResult("Key not found: $keyName")
+              securityService.checkBranchModify(keyEntity)
               keyEntity to parseScreenshotDtos(entry.requireList("screenshots"))
             }
           screenshotService.saveUploadedImagesForKeys(keyScreenshotPairs)

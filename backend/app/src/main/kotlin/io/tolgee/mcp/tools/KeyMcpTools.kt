@@ -205,6 +205,7 @@ class KeyMcpTools(
                   ts.setRollbackOnly()
                   return@executeInNewTransaction errorResult("Key not found after creation: $keyName")
                 }
+                securityService.checkBranchModify(keyEntity)
                 keyEntity to parseScreenshotDtos(rawKey.requireList("screenshots"))
               }
             screenshotService.saveUploadedImagesForKeys(keyScreenshotPairs)

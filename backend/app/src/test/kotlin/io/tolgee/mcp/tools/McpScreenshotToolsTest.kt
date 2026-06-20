@@ -1,7 +1,6 @@
 package io.tolgee.mcp.tools
 
 import io.modelcontextprotocol.client.McpSyncClient
-import io.modelcontextprotocol.spec.McpSchema
 import io.tolgee.AbstractMcpTest
 import io.tolgee.model.enums.Scope
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -19,12 +18,6 @@ class McpScreenshotToolsTest : AbstractMcpTest() {
 
   @Autowired
   lateinit var transactionManager: PlatformTransactionManager
-
-  companion object {
-    // Valid 1x1 RGB PNG with zlib compression
-    const val MINIMAL_PNG_BASE64 =
-      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4z8AAAAMBAQDJ/pLvAAAAAElFTkSuQmCC"
-  }
 
   @BeforeEach
   fun setup() {
@@ -486,17 +479,5 @@ class McpScreenshotToolsTest : AbstractMcpTest() {
     assertThat(result.isError).isTrue()
   }
 
-  private fun uploadImage(): Long =
-    callToolAndGetJson(client, "upload_image", mapOf("image" to MINIMAL_PNG_BASE64))["uploadedImageId"].asLong()
-
-  /**
-   * A failing tool call may surface either as a thrown JSON-RPC error or as an error
-   * [McpSchema.CallToolResult], depending on which layer rejects it. Accept both.
-   */
-  private fun expectToolFailure(block: () -> McpSchema.CallToolResult) {
-    runCatching(block).fold(
-      onSuccess = { assertThat(it.isError).isTrue() },
-      onFailure = { },
-    )
-  }
+  private fun uploadImage(): Long = uploadImage(client)
 }

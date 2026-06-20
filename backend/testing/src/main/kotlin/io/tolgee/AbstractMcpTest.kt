@@ -28,6 +28,11 @@ abstract class AbstractMcpTest : AbstractSpringTest() {
 
   private val clients = mutableListOf<McpSyncClient>()
 
+  companion object {
+    const val MINIMAL_PNG_BASE64 =
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4z8AAAAMBAQDJ/pLvAAAAAElFTkSuQmCC"
+  }
+
   fun createMcpClientWithPat(pat: String): McpSyncClient = createMcpClientWithHeader("tgpat_$pat")
 
   fun createMcpClientWithPak(pak: String): McpSyncClient = createMcpClientWithHeader("tgpak_$pak")
@@ -157,6 +162,20 @@ abstract class AbstractMcpTest : AbstractSpringTest() {
     val exception = runCatching { callTool(client, name, arguments) }.exceptionOrNull()
     assertThat(exception).isNotNull()
     assertThat(exception!!.toString()).contains(expectedError)
+  }
+
+  fun uploadImage(client: McpSyncClient): Long =
+    callToolAndGetJson(client, "upload_image", mapOf("image" to MINIMAL_PNG_BASE64))["uploadedImageId"].asLong()
+
+  /**
+   * Accepts a tool failure surfacing EITHER as a thrown JSON-RPC error OR as an error
+   * [McpSchema.CallToolResult].
+   */
+  fun expectToolFailure(block: () -> McpSchema.CallToolResult) {
+    runCatching(block).fold(
+      onSuccess = { assertThat(it.isError).isTrue() },
+      onFailure = { },
+    )
   }
 
   data class McpPatTestData(
