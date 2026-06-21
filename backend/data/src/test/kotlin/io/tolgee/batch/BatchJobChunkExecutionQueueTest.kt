@@ -198,6 +198,30 @@ class BatchJobChunkExecutionQueueTest {
     assertThat(queue.pollRoundRobin()?.chunkExecutionId).isEqualTo(1)
   }
 
+  @Test
+  fun `removeJobExecutions drops only the targeted job and leaves other types intact`() {
+    queue.addItemsToLocalQueue(
+      listOf(
+        item(1, jobId = 1, jobType = BatchJobType.MACHINE_TRANSLATE),
+        item(2, jobId = 1, jobType = BatchJobType.MACHINE_TRANSLATE),
+        item(3, jobId = 2, jobType = BatchJobType.QA_CHECK),
+        item(4, jobId = 3, jobType = BatchJobType.AUTO_TRANSLATE),
+      ),
+    )
+
+    queue.removeJobExecutions(jobId = 1)
+
+    assertThat(queue.size).isEqualTo(2)
+    val polled = generateSequence { queue.pollRoundRobin() }.toList()
+    assertThat(polled.map { it.chunkExecutionId }).containsExactlyInAnyOrder(3L, 4L)
+    assertThat(polled.map { it.jobType }).containsExactlyInAnyOrder(
+      BatchJobType.QA_CHECK,
+      BatchJobType.AUTO_TRANSLATE,
+    )
+    assertThat(polled.map { it.jobType }).doesNotContain(BatchJobType.MACHINE_TRANSLATE)
+    assertThat(queue.isEmpty()).isTrue()
+  }
+
   // ── onJobItemEvent REMOVE ─────────────────────────────────────────────────
 
   @Test
