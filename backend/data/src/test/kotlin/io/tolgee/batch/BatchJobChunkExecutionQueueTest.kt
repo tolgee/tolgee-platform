@@ -314,9 +314,7 @@ class BatchJobChunkExecutionQueueTest {
 
   @Test
   fun `pollRoundRobin does not let many jobs of one type starve another type`() {
-    // 100 QA_CHECK jobs, 1 chunk each
     val qaItems = (1L..100L).map { item(it, jobId = it, jobType = BatchJobType.QA_CHECK) }
-    // 1 MACHINE_TRANSLATE job
     val mtItem = item(1000L, jobId = 1000L, jobType = BatchJobType.MACHINE_TRANSLATE)
     queue.addItemsToLocalQueue(qaItems + mtItem)
 
@@ -376,15 +374,12 @@ class BatchJobChunkExecutionQueueTest {
         BatchJobType.AUTO_TRANSLATE,
         BatchJobType.AUTOMATION,
       )
-    // 5 jobIds per type, spread across types deterministically
     val jobsPerType = 5
     val totalJobs = types.size * jobsPerType
-    // 20 000 items total, distributed evenly across jobs
     val totalItems = 20_000
     val itemsPerJob = totalItems / totalJobs
 
     // Build the full item list with globally unique chunkExecutionIds.
-    // Layout: items 0..<itemsPerJob go to job 0, next block to job 1, etc.
     data class Slot(
       val id: Long,
       val jobId: Long,
@@ -416,7 +411,6 @@ class BatchJobChunkExecutionQueueTest {
 
     val executor = Executors.newFixedThreadPool(producerCount + consumerCount)
     try {
-      // Launch producers
       val producerFutures =
         partitions.mapIndexed { idx, partition ->
           executor.submit {
@@ -431,7 +425,6 @@ class BatchJobChunkExecutionQueueTest {
           }
         }
 
-      // Launch consumers — keep polling until producers are done and queue is empty
       val consumerFutures =
         (0 until consumerCount).map {
           executor.submit {
@@ -458,14 +451,11 @@ class BatchJobChunkExecutionQueueTest {
           }
         }
 
-      // Release all threads simultaneously
       startGate.countDown()
 
-      // Wait for producers to finish, then signal consumers
       producerFutures.forEach { it.get(30, TimeUnit.SECONDS) }
       producersDone.set(true)
 
-      // Wait for consumers
       consumerFutures.forEach { it.get(30, TimeUnit.SECONDS) }
     } finally {
       executor.shutdownNow()

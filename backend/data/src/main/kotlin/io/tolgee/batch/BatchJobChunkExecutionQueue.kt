@@ -325,7 +325,6 @@ class BatchJobChunkExecutionQueue(
         decrementCharacterCount(capturedItem.jobCharacter)
         totalSize.decrementAndGet()
         if (deque.isNotEmpty()) {
-          // Job still has chunks → keep it in its type's rotation (idempotent).
           jobsForType.addLast(jobId)
           deque
         } else {
@@ -333,13 +332,11 @@ class BatchJobChunkExecutionQueue(
         }
       }
 
-      // Re-queue the type if it still has any jobs waiting (idempotent; mirrors job level).
       if (jobsForType.peekFirst() != null) {
         typeOrder.addLast(type)
       }
 
       if (item != null) return item
-      // else: job deque drained concurrently — try next type/job
     }
     return null
   }
