@@ -2,6 +2,7 @@ package io.tolgee.batch
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.tolgee.Metrics
+import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.data.ExecutionQueueItem
 import io.tolgee.batch.data.QueueEventType
 import io.tolgee.batch.events.JobQueueItemsEvent
@@ -12,6 +13,12 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.springframework.data.redis.core.StringRedisTemplate
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 
 class BatchJobChunkExecutionQueueTest {
   private lateinit var queue: BatchJobChunkExecutionQueue
@@ -32,7 +39,14 @@ class BatchJobChunkExecutionQueueTest {
     id: Long,
     jobId: Long,
     character: JobCharacter = JobCharacter.FAST,
-  ) = ExecutionQueueItem(chunkExecutionId = id, jobId = jobId, executeAfter = null, jobCharacter = character)
+    jobType: BatchJobType = BatchJobType.QA_CHECK,
+  ) = ExecutionQueueItem(
+    chunkExecutionId = id,
+    jobId = jobId,
+    executeAfter = null,
+    jobCharacter = character,
+    jobType = jobType,
+  )
 
   // ── size / isEmpty ────────────────────────────────────────────────────────
 
@@ -113,6 +127,12 @@ class BatchJobChunkExecutionQueueTest {
     }
   }
 
+  @Test
+  fun `pollRoundRobin preserves jobType on items`() {
+    queue.addItemsToLocalQueue(listOf(item(1, jobId = 1, jobType = BatchJobType.MACHINE_TRANSLATE)))
+    assertThat(queue.pollRoundRobin()?.jobType).isEqualTo(BatchJobType.MACHINE_TRANSLATE)
+  }
+
   // ── size tracking after polls ─────────────────────────────────────────────
 
   @Test
@@ -176,6 +196,30 @@ class BatchJobChunkExecutionQueueTest {
 
     assertThat(queue.size).isEqualTo(1)
     assertThat(queue.pollRoundRobin()?.chunkExecutionId).isEqualTo(1)
+  }
+
+  @Test
+  fun `removeJobExecutions drops only the targeted job and leaves other types intact`() {
+    queue.addItemsToLocalQueue(
+      listOf(
+        item(1, jobId = 1, jobType = BatchJobType.MACHINE_TRANSLATE),
+        item(2, jobId = 1, jobType = BatchJobType.MACHINE_TRANSLATE),
+        item(3, jobId = 2, jobType = BatchJobType.QA_CHECK),
+        item(4, jobId = 3, jobType = BatchJobType.AUTO_TRANSLATE),
+      ),
+    )
+
+    queue.removeJobExecutions(jobId = 1)
+
+    assertThat(queue.size).isEqualTo(2)
+    val polled = generateSequence { queue.pollRoundRobin() }.toList()
+    assertThat(polled.map { it.chunkExecutionId }).containsExactlyInAnyOrder(3L, 4L)
+    assertThat(polled.map { it.jobType }).containsExactlyInAnyOrder(
+      BatchJobType.QA_CHECK,
+      BatchJobType.AUTO_TRANSLATE,
+    )
+    assertThat(polled.map { it.jobType }).doesNotContain(BatchJobType.MACHINE_TRANSLATE)
+    assertThat(queue.isEmpty()).isTrue()
   }
 
   // ── onJobItemEvent REMOVE ─────────────────────────────────────────────────
@@ -264,5 +308,184 @@ class BatchJobChunkExecutionQueueTest {
 
     assertThat(queue.find { it.chunkExecutionId == 2L }?.chunkExecutionId).isEqualTo(2)
     assertThat(queue.find { it.chunkExecutionId == 99L }).isNull()
+  }
+
+  // ── type-level fairness ───────────────────────────────────────────────────
+
+  @Test
+  fun `pollRoundRobin does not let many jobs of one type starve another type`() {
+    val qaItems = (1L..100L).map { item(it, jobId = it, jobType = BatchJobType.QA_CHECK) }
+    val mtItem = item(1000L, jobId = 1000L, jobType = BatchJobType.MACHINE_TRANSLATE)
+    queue.addItemsToLocalQueue(qaItems + mtItem)
+
+    // With per-job round-robin the MT chunk would appear ~position 101.
+    // With type fairness, MT (one of 2 types) must be served within the first few polls.
+    val firstFew = (1..4).mapNotNull { queue.pollRoundRobin()?.jobType }
+    assertThat(firstFew).contains(BatchJobType.MACHINE_TRANSLATE)
+  }
+
+  @Test
+  fun `pollRoundRobin rotates across types before serving a type twice`() {
+    queue.addItemsToLocalQueue(
+      listOf(
+        item(1, jobId = 1, jobType = BatchJobType.QA_CHECK),
+        item(2, jobId = 1, jobType = BatchJobType.QA_CHECK),
+        item(3, jobId = 2, jobType = BatchJobType.MACHINE_TRANSLATE),
+        item(4, jobId = 2, jobType = BatchJobType.MACHINE_TRANSLATE),
+        item(5, jobId = 3, jobType = BatchJobType.AUTO_TRANSLATE),
+        item(6, jobId = 3, jobType = BatchJobType.AUTO_TRANSLATE),
+      ),
+    )
+
+    val types = (1..3).mapNotNull { queue.pollRoundRobin()?.jobType }
+    // first three polls must hit three distinct types (one full type cycle)
+    assertThat(types).containsExactlyInAnyOrder(
+      BatchJobType.QA_CHECK,
+      BatchJobType.MACHINE_TRANSLATE,
+      BatchJobType.AUTO_TRANSLATE,
+    )
+  }
+
+  @Test
+  fun `pollRoundRobin keeps job fairness within a single type`() {
+    // two jobs of the SAME type interleave (the #3428 guarantee, now scoped under a type)
+    queue.addItemsToLocalQueue(
+      listOf(
+        item(1, jobId = 1, jobType = BatchJobType.QA_CHECK),
+        item(2, jobId = 1, jobType = BatchJobType.QA_CHECK),
+        item(3, jobId = 1, jobType = BatchJobType.QA_CHECK),
+        item(4, jobId = 2, jobType = BatchJobType.QA_CHECK),
+        item(5, jobId = 2, jobType = BatchJobType.QA_CHECK),
+      ),
+    )
+    val jobs = (1..5).mapNotNull { queue.pollRoundRobin()?.jobId }
+    // job2 (2 chunks) must not wait behind all of job1's chunks
+    assertThat(jobs.indexOf(2L)).isLessThan(3)
+  }
+
+  // ── concurrency stress test ───────────────────────────────────────────────
+
+  @Test
+  fun `concurrent producers and consumers lose no items and serve each item exactly once`() {
+    val types =
+      listOf(
+        BatchJobType.QA_CHECK,
+        BatchJobType.MACHINE_TRANSLATE,
+        BatchJobType.AUTO_TRANSLATE,
+        BatchJobType.AUTOMATION,
+      )
+    val jobsPerType = 5
+    val totalJobs = types.size * jobsPerType
+    val totalItems = 20_000
+    val itemsPerJob = totalItems / totalJobs
+
+    // Build the full item list with globally unique chunkExecutionIds.
+    data class Slot(
+      val id: Long,
+      val jobId: Long,
+      val jobType: BatchJobType,
+    )
+    val allItems =
+      (0 until totalJobs).flatMap { jobIndex ->
+        val type = types[jobIndex / jobsPerType]
+        val jobId = (jobIndex + 1).toLong()
+        (0 until itemsPerJob).map { offset ->
+          val chunkId = (jobIndex * itemsPerJob + offset + 1).toLong()
+          Slot(chunkId, jobId, type)
+        }
+      }
+    val allIds = allItems.map { it.id }.toSet()
+    assertThat(allIds).hasSize(totalItems) // sanity: all ids unique
+
+    // Partition items across producers; each partition is added by exactly one thread.
+    val producerCount = 6
+    val consumerCount = 6
+    val batchSize = 50
+    val partitions = allItems.chunked(allItems.size / producerCount + 1)
+
+    val startGate = CountDownLatch(1)
+    val producersDone = AtomicBoolean(false)
+    val polledIds = ConcurrentHashMap.newKeySet<Long>()
+    val polledCount = AtomicInteger(0)
+    val deadlineMs = 20_000L
+
+    val executor = Executors.newFixedThreadPool(producerCount + consumerCount)
+    try {
+      val producerFutures =
+        partitions.mapIndexed { idx, partition ->
+          executor.submit {
+            startGate.await()
+            partition.chunked(batchSize).forEach { batch ->
+              queue.addItemsToLocalQueue(
+                batch.map { s ->
+                  item(s.id, s.jobId, jobType = s.jobType)
+                },
+              )
+            }
+          }
+        }
+
+      val consumerFutures =
+        (0 until consumerCount).map {
+          executor.submit {
+            startGate.await()
+            val deadline = System.currentTimeMillis() + deadlineMs
+            while (true) {
+              val polled = queue.pollRoundRobin()
+              if (polled != null) {
+                polledIds.add(polled.chunkExecutionId)
+                polledCount.incrementAndGet()
+              } else {
+                // null from an eventually-consistent poll: only exit when producers are done
+                // AND the queue is genuinely empty
+                if (producersDone.get() && queue.isEmpty()) break
+                if (System.currentTimeMillis() > deadline) {
+                  error(
+                    "Consumer deadline exceeded: polled=${ polledCount.get()}, expected=$totalItems, " +
+                      "queueSize=${queue.size}, producersDone=${producersDone.get()}",
+                  )
+                }
+                Thread.yield()
+              }
+            }
+          }
+        }
+
+      startGate.countDown()
+
+      producerFutures.forEach { it.get(30, TimeUnit.SECONDS) }
+      producersDone.set(true)
+
+      consumerFutures.forEach { it.get(30, TimeUnit.SECONDS) }
+    } finally {
+      executor.shutdownNow()
+    }
+
+    // ── assertions ────────────────────────────────────────────────────────────
+    assertThat(polledCount.get())
+      .withFailMessage("Expected $totalItems polled items but got ${polledCount.get()} (items lost or counted wrong)")
+      .isEqualTo(totalItems)
+
+    assertThat(polledIds.size)
+      .withFailMessage("${polledIds.size} distinct ids polled — expected $totalItems (duplicate serves detected)")
+      .isEqualTo(totalItems)
+
+    assertThat(polledIds)
+      .withFailMessage("Polled id set differs from added id set")
+      .isEqualTo(allIds)
+
+    assertThat(queue.size)
+      .withFailMessage("Queue size is ${queue.size} after draining — expected 0")
+      .isEqualTo(0)
+
+    assertThat(queue.isEmpty())
+      .withFailMessage("queue.isEmpty() returned false after draining all items")
+      .isTrue()
+
+    val positiveCharacterCounts =
+      queue.getJobCharacterCounts().filter { (_, v) -> v > 0 }
+    assertThat(positiveCharacterCounts)
+      .withFailMessage("Non-zero character counts remain after full drain: $positiveCharacterCounts")
+      .isEmpty()
   }
 }

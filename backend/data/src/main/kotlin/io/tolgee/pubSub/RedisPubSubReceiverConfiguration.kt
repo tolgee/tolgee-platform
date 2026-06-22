@@ -1,5 +1,6 @@
 package io.tolgee.pubSub
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression
 import org.springframework.context.ApplicationEventPublisher
@@ -22,6 +23,7 @@ class RedisPubSubReceiverConfiguration(
   private val connectionFactory: RedisConnectionFactory,
   private val applicationEventPublisher: ApplicationEventPublisher,
   private val tolgeeProperties: TolgeeProperties,
+  private val objectMapper: ObjectMapper,
 ) {
   companion object {
     const val WEBSOCKET_TOPIC = "websocket"
@@ -31,7 +33,7 @@ class RedisPubSubReceiverConfiguration(
 
   @Bean
   fun redisPubsubReceiver(): RedisPubSubReceiver {
-    return RedisPubSubReceiver(template, applicationEventPublisher)
+    return RedisPubSubReceiver(template, applicationEventPublisher, objectMapper)
   }
 
   @Bean
