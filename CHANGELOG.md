@@ -1,3 +1,10 @@
+## [3.205.5](https://github.com/tolgee/tolgee-platform/compare/v3.205.4...v3.205.5) (2026-06-22)
+
+
+### Bug Fixes
+
+* schedule batch chunks fairly across job types ([#3762](https://github.com/tolgee/tolgee-platform/issues/3762)) ([639fb54](https://github.com/tolgee/tolgee-platform/commit/639fb5487632c1db8c4d38070388cdeefbce5944)), closes [#3428](https://github.com/tolgee/tolgee-platform/issues/3428) [#3428](https://github.com/tolgee/tolgee-platform/issues/3428) [#3428](https://github.com/tolgee/tolgee-platform/issues/3428)
+
 ## [3.205.4](https://github.com/tolgee/tolgee-platform/compare/v3.205.3...v3.205.4) (2026-06-19)
 
 
