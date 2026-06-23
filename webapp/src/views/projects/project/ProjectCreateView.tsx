@@ -36,6 +36,7 @@ export const ProjectCreateView: FunctionComponent = () => {
     usePreferredOrganization();
 
   const onSubmit = (values: CreateProjectValueType) => {
+    values.name = values.name.trim();
     values.languages = values.languages.filter((l) => !!l);
     createProjectLoadable.mutate(
       {
