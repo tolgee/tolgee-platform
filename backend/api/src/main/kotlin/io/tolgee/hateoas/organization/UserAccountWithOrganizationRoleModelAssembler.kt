@@ -31,6 +31,8 @@ class UserAccountWithOrganizationRoleModelAssembler(
       projectsWithDirectPermission = data.second.map { simpleProjectModelAssembler.toModel(it) },
       mfaEnabled = data.first.isMfaEnabled,
       avatar = avatarService.getAvatarLinks(data.first.avatarHash),
+      managed = data.first.managed == true,
+      disabled = data.first.disabledAt != null,
     )
   }
 }

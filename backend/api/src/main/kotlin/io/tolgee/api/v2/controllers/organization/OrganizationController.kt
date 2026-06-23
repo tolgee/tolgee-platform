@@ -254,20 +254,45 @@ class OrganizationController(
   }
 
   @DeleteMapping("/{organizationId:[0-9]+}/users/{userId:[0-9]+}")
-  @Operation(
-    summary = "Remove user from organization",
-    description = (
-      "Remove user from organization. " +
-        "If user is managed by the organization, their account is disabled instead."
-    ),
-  )
+  @Operation(summary = "Remove user from organization")
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
   @RequiresSuperAuthentication
   fun removeUser(
     @PathVariable organizationId: Long,
     @PathVariable("userId") userId: Long,
   ) {
-    organizationRoleService.removeOrDeactivateUser(userId, organizationHolder.organization.id)
+    organizationRoleService.removeUser(userId, organizationHolder.organization.id)
+  }
+
+  @PutMapping("/{organizationId:[0-9]+}/users/{userId:[0-9]+}/disable")
+  @Operation(
+    summary = "Disable a managed user",
+    description = "Disables the account of a user managed by this organization.",
+  )
+  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @RequiresSuperAuthentication
+  fun disableUser(
+    @PathVariable organizationId: Long,
+    @PathVariable("userId") userId: Long,
+  ) {
+    if (authenticationFacade.authenticatedUser.id == userId) {
+      throw BadRequestException(Message.CANNOT_DISABLE_YOUR_OWN_ACCOUNT)
+    }
+    organizationRoleService.disableUser(userId, organizationHolder.organization.id)
+  }
+
+  @PutMapping("/{organizationId:[0-9]+}/users/{userId:[0-9]+}/enable")
+  @Operation(
+    summary = "Enable a managed user",
+    description = "Re-enables the disabled account of a user managed by this organization.",
+  )
+  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @RequiresSuperAuthentication
+  fun enableUser(
+    @PathVariable organizationId: Long,
+    @PathVariable("userId") userId: Long,
+  ) {
+    organizationRoleService.enableUser(userId, organizationHolder.organization.id)
   }
 
   @PutMapping("/{id:[0-9]+}/avatar", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])

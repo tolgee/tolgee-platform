@@ -643,7 +643,8 @@ class UserAccountService(
   @Transactional
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#userId")
   fun disable(userId: Long) {
-    val user = this.get(userId)
+    val user = userAccountRepository.findActiveOrDisabled(userId) ?: throw NotFoundException(Message.USER_NOT_FOUND)
+    if (user.disabledAt != null) return
     user.disabledAt = currentDateProvider.date
     this.save(user)
     this.applicationEventPublisher.publishEvent(OnUserCountChanged(decrease = true, this))
@@ -652,7 +653,8 @@ class UserAccountService(
   @Transactional
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#userId")
   fun enable(userId: Long) {
-    val user = this.userAccountRepository.findDisabled(userId)
+    val user = userAccountRepository.findActiveOrDisabled(userId) ?: throw NotFoundException(Message.USER_NOT_FOUND)
+    if (user.disabledAt == null) return
     user.disabledAt = null
     this.save(user)
     this.applicationEventPublisher.publishEvent(OnUserCountChanged(decrease = false, this))
