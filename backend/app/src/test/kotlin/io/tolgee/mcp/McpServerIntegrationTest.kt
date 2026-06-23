@@ -6,7 +6,6 @@ import io.modelcontextprotocol.client.transport.HttpClientStreamableHttpTranspor
 import io.modelcontextprotocol.spec.McpSchema
 import io.tolgee.AbstractMcpTest
 import io.tolgee.activity.data.ActivityType
-import io.tolgee.configuration.tolgee.RateLimitProperties
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.fixtures.assertPostHogEventReported
 import io.tolgee.fixtures.waitForNotThrowing
@@ -48,8 +47,7 @@ class McpServerIntegrationTest : AbstractMcpTest() {
   @Autowired
   lateinit var mcpRequestContext: McpRequestContext
 
-  @Autowired
-  lateinit var rateLimitProperties: RateLimitProperties
+  val rateLimitProperties get() = tolgeeProperties.rateLimits
 
   @Autowired
   lateinit var rateLimitService: io.tolgee.security.ratelimit.RateLimitService

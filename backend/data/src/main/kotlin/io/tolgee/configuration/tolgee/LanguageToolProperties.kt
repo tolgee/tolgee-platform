@@ -1,10 +1,9 @@
 package io.tolgee.configuration.tolgee
 
 import io.tolgee.configuration.annotations.DocProperty
-import org.springframework.boot.context.properties.ConfigurationProperties
 
-@ConfigurationProperties(prefix = "tolgee.language-tool")
 @DocProperty(
+  prefix = "tolgee.language-tool",
   description =
     "Configuration for an external LanguageTool server used for spelling and grammar checks.\n" +
       "LanguageTool container (erikvl87/languagetool:6.7) must be deployed as a separate container.",

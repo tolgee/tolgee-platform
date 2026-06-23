@@ -1,7 +1,7 @@
 package io.tolgee.component.machineTranslation.providers
 
 import io.tolgee.component.machineTranslation.MtValueProvider
-import io.tolgee.configuration.tolgee.machineTranslation.DeeplMachineTranslationProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.model.mtServiceConfig.Formality
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
@@ -10,9 +10,10 @@ import org.springframework.stereotype.Component
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 class DeeplTranslationProvider(
-  private val deeplMachineTranslationProperties: DeeplMachineTranslationProperties,
+  private val tolgeeProperties: TolgeeProperties,
   private val deeplApiService: DeeplApiService,
 ) : AbstractMtValueProvider() {
+  private val deeplMachineTranslationProperties get() = tolgeeProperties.machineTranslation.deepl
   override val isEnabled: Boolean
     get() = !deeplMachineTranslationProperties.authKey.isNullOrEmpty()
 

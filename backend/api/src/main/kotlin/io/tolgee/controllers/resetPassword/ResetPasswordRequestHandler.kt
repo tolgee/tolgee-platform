@@ -1,7 +1,6 @@
 package io.tolgee.controllers.resetPassword
 
 import io.tolgee.component.email.TolgeeEmailSender
-import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.misc.EmailParams
@@ -115,7 +114,7 @@ class ResetPasswordRequestHandler(
     return Base64.getEncoder().encodeToString(callbackString.toByteArray())
   }
 
-  private val frontEndUrlFromProperties by lazy { tolgeeProperties.frontEndUrl }
+  private val frontEndUrlFromProperties get() = tolgeeProperties.frontEndUrl
 
   private val userAccount by lazy {
     userAccountService.findActive(request.email)
@@ -125,9 +124,7 @@ class ResetPasswordRequestHandler(
     applicationContext.getBean(TolgeeProperties::class.java)
   }
 
-  private val authProperties: AuthenticationProperties by lazy {
-    applicationContext.getBean(AuthenticationProperties::class.java)
-  }
+  private val authProperties get() = tolgeeProperties.authentication
 
   private val userAccountService: UserAccountService by lazy {
     applicationContext.getBean(UserAccountService::class.java)

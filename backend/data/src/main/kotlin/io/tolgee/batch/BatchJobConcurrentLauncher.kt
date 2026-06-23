@@ -4,7 +4,7 @@ import io.sentry.Sentry
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.ExecutionQueueItem
 import io.tolgee.component.CurrentDateProvider
-import io.tolgee.configuration.tolgee.BatchProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.fixtures.waitFor
 import io.tolgee.tracing.TolgeeTracingContext
 import io.tolgee.util.Logging
@@ -23,7 +23,7 @@ import kotlin.math.ceil
 
 @Component
 class BatchJobConcurrentLauncher(
-  private val batchProperties: BatchProperties,
+  private val tolgeeProperties: TolgeeProperties,
   private val batchJobChunkExecutionQueue: BatchJobChunkExecutionQueue,
   private val currentDateProvider: CurrentDateProvider,
   private val batchJobProjectLockingManager: BatchJobProjectLockingManager,
@@ -32,6 +32,8 @@ class BatchJobConcurrentLauncher(
   private val batchJobActionService: BatchJobActionService,
   private val tracingContext: TolgeeTracingContext,
 ) : Logging {
+  private val batchProperties get() = tolgeeProperties.batch
+
   companion object {
     const val MIN_TIME_BETWEEN_OPERATIONS = 100
   }

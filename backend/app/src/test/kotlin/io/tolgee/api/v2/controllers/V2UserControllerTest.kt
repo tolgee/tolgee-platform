@@ -1,6 +1,5 @@
 package io.tolgee.api.v2.controllers
 
-import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.development.testDataBuilder.data.SensitiveOperationProtectionTestData
 import io.tolgee.development.testDataBuilder.data.UserDeletionTestData
 import io.tolgee.dtos.request.UserUpdatePasswordRequestDto
@@ -32,9 +31,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 @ContextRecreatingTest
 @SpringBootTest
 class V2UserControllerTest : AuthorizedControllerTest() {
-  @Autowired
-  override lateinit var tolgeeProperties: TolgeeProperties
-
   @Autowired
   lateinit var passwordEncoder: PasswordEncoder
 

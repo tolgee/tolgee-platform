@@ -1,7 +1,7 @@
 package io.tolgee.component.machineTranslation.providers
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import io.tolgee.configuration.tolgee.machineTranslation.DeeplMachineTranslationProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.model.mtServiceConfig.Formality
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
@@ -17,9 +17,11 @@ import org.springframework.web.client.postForEntity
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 class DeeplApiService(
-  private val deeplMachineTranslationProperties: DeeplMachineTranslationProperties,
+  private val tolgeeProperties: TolgeeProperties,
   private val restTemplate: RestTemplate,
 ) {
+  private val deeplMachineTranslationProperties get() = tolgeeProperties.machineTranslation.deepl
+
   fun translate(
     text: String,
     sourceTag: String,

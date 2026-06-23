@@ -1,7 +1,6 @@
 package io.tolgee.ee.api.v2.controllers
 
 import io.tolgee.ProjectAuthControllerTest
-import io.tolgee.configuration.tolgee.WebhookProperties
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.WebhooksTestData
@@ -22,9 +21,6 @@ class WebhookConfigUrlSecurityTest : ProjectAuthControllerTest("/v2/projects/") 
 
   @Autowired
   private lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
-
-  @Autowired
-  private lateinit var webhookProperties: WebhookProperties
 
   @BeforeEach
   fun setup() {
