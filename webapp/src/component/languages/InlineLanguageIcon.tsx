@@ -27,7 +27,10 @@ const StyledFlag = styled(FlagImage)`
   height: 1.4em;
 `;
 
-export const InlineLanguageIcon: React.FC<Props> = ({ flag, ...boxProps }) => {
+export const InlineLanguageIcon: React.FC<React.PropsWithChildren<Props>> = ({
+  flag,
+  ...boxProps
+}) => {
   return (
     <StyledIconWrapper {...boxProps}>
       <StyledFlag flagEmoji={flag || ''} draggable="false" />

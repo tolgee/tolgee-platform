@@ -9,11 +9,13 @@ import {
 } from '@mui/material';
 import { T } from '@tolgee/react';
 
-export const BranchProgressModal: FC<{
-  open: boolean;
-  title?: React.ReactNode;
-  message?: React.ReactNode;
-}> = ({ open, title, message }) => {
+export const BranchProgressModal: FC<
+  React.PropsWithChildren<{
+    open: boolean;
+    title?: React.ReactNode;
+    message?: React.ReactNode;
+  }>
+> = ({ open, title, message }) => {
   return (
     <Dialog open={open} disableEscapeKeyDown>
       <DialogTitle>

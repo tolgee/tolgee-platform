@@ -109,7 +109,9 @@ type Props = {
   children: React.ReactNode;
 };
 
-export const ScrollableTableContainer: React.FC<Props> = ({
+export const ScrollableTableContainer: React.FC<
+  React.PropsWithChildren<Props>
+> = ({
   tableRef,
   verticalScrollRef,
   scrollLeft,

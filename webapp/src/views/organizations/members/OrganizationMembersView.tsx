@@ -14,7 +14,9 @@ import { InvitationItem } from './InvitationItem';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useReportEvent } from 'tg.hooks/useReportEvent';
 
-export const OrganizationMembersView: FunctionComponent = () => {
+export const OrganizationMembersView: FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const organization = useOrganization();
   const { t } = useTranslate();
 

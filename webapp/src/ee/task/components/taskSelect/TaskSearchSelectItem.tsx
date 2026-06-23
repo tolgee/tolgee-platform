@@ -16,7 +16,9 @@ type Props = {
   data: Task;
 };
 
-export const TaskSearchSelectItem: React.FC<Props> = ({ data }) => {
+export const TaskSearchSelectItem: React.FC<React.PropsWithChildren<Props>> = ({
+  data,
+}) => {
   return (
     <StyledOrgItem>
       <TaskLabel task={data} />

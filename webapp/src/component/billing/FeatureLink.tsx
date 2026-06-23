@@ -5,7 +5,11 @@ type Props = {
   newTab?: boolean;
 };
 
-export const FeatureLink: React.FC<Props> = ({ children, href, newTab }) => {
+export const FeatureLink: React.FC<React.PropsWithChildren<Props>> = ({
+  children,
+  href,
+  newTab,
+}) => {
   if (newTab) {
     return (
       <StyledBillingLink href={href} target="_blank" rel="noreferrer noopener">

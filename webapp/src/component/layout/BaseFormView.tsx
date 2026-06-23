@@ -1,4 +1,5 @@
 import { FunctionComponent, ReactNode } from 'react';
+import { FormikProps } from 'formik';
 import { ObjectSchema } from 'yup';
 
 import { Link } from 'tg.constants/links';
@@ -17,10 +18,11 @@ interface BaseFormViewProps {
   customActions?: ReactNode;
   submitButtons?: ReactNode;
   submitButtonInner?: ReactNode;
+  children?: ReactNode | ((formikProps: FormikProps<any>) => ReactNode);
 }
 
 export const BaseFormView: FunctionComponent<
-  BaseFormViewProps & BaseViewProps
+  BaseFormViewProps & Omit<BaseViewProps, 'children'>
 > = (props) => {
   return (
     <BaseView {...props}>

@@ -8,7 +8,7 @@ import { useConfig, useIsEmailVerified } from 'tg.globalContext/helpers';
 
 type Props = BaseViewProps;
 
-export const BaseUserSettingsView: React.FC<Props> = ({
+export const BaseUserSettingsView: React.FC<React.PropsWithChildren<Props>> = ({
   children,
   navigation,
   ...otherProps

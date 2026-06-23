@@ -54,7 +54,7 @@ type Props = {
   className?: string;
 };
 
-export const TranslationFlags: React.FC<Props> = ({
+export const TranslationFlags: React.FC<React.PropsWithChildren<Props>> = ({
   keyData,
   lang,
   className,

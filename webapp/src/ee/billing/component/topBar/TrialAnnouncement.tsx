@@ -6,7 +6,9 @@ import { T } from '@tolgee/react';
 import { Link as RouterLink } from 'react-router-dom';
 import { useTrialInfo } from 'tg.component/layout/TopBar/announcements/useTrialInfo';
 
-export const TrialAnnouncement: React.FC = () => {
+export const TrialAnnouncement: React.FC<
+  React.PropsWithChildren<unknown>
+> = () => {
   const { subscriptionsLink, shouldShowAnnouncement, daysLeft } =
     useTrialInfo();
 

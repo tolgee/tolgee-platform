@@ -57,7 +57,9 @@ type Props = {
   onDialogOpen: () => void;
 };
 
-export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
+export const TranslationControls: React.FC<React.PropsWithChildren<Props>> = ({
+  onDialogOpen,
+}) => {
   const { satisfiesPermissionWithBranching } = useProjectPermissions();
   const project = useProject();
   const history = useHistory();

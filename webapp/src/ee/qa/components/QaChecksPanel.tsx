@@ -55,7 +55,9 @@ function isCorrectable(
   );
 }
 
-export const QaChecksPanel: FC<PanelContentProps> = (data) => {
+export const QaChecksPanel: FC<React.PropsWithChildren<PanelContentProps>> = (
+  data
+) => {
   const { isEnabled } = useEnabledFeatures();
   const { issues, isLoading, isDisconnected, updateIssueState } =
     useQaChecksForPanel(data);

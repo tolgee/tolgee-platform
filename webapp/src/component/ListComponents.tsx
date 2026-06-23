@@ -14,13 +14,15 @@ const StyledListSubheader = styled(ListSubheader)`
   position: static;
 `;
 
-export const CompactMenuItem: React.FC<React.ComponentProps<typeof MenuItem>> =
-  React.forwardRef(function CompactMenuItem(props, ref) {
-    return <StyledMenuItem ref={ref} {...props} />;
-  });
+export const CompactMenuItem = React.forwardRef<
+  HTMLLIElement,
+  React.ComponentProps<typeof MenuItem>
+>(function CompactMenuItem(props, ref) {
+  return <StyledMenuItem ref={ref} {...props} />;
+});
 
 export const CompactListSubheader: React.FC<
-  React.ComponentProps<typeof ListSubheader>
+  React.PropsWithChildren<React.ComponentProps<typeof ListSubheader>>
 > = (props) => {
   return <StyledListSubheader {...props} />;
 };

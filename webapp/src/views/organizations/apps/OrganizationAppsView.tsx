@@ -5,7 +5,9 @@ import { LINKS, PARAMS } from 'tg.constants/links';
 import { useOrganization } from '../useOrganization';
 import { apps } from 'tg.ee';
 
-export const OrganizationAppsView: FunctionComponent = () => {
+export const OrganizationAppsView: FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const organization = useOrganization();
   const { t } = useTranslate();
 

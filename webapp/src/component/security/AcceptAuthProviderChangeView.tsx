@@ -27,7 +27,9 @@ const StyledContent = styled(Box)`
   gap: 32px;
 `;
 
-const AcceptAuthProviderChangeView: React.FC = () => {
+const AcceptAuthProviderChangeView: React.FC<
+  React.PropsWithChildren<unknown>
+> = () => {
   const history = useHistory();
   const { t } = useTranslate();
 

@@ -17,7 +17,7 @@ type Props = {
   organizationId: number;
 };
 
-export const GlossaryPopover: React.FC<Props> = ({
+export const GlossaryPopover: React.FC<React.PropsWithChildren<Props>> = ({
   open,
   onClose,
   onSelect,

@@ -19,7 +19,7 @@ type Props = {
   disabled?: boolean;
 };
 
-export const RoleLanguages: React.FC<Props> = ({
+export const RoleLanguages: React.FC<React.PropsWithChildren<Props>> = ({
   state,
   onChange,
   allLangs,

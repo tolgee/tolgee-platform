@@ -27,7 +27,7 @@ type Props = {
   global?: boolean;
 };
 
-export const SmoothProgress: React.FC<Props> = ({
+export const SmoothProgress: React.FC<React.PropsWithChildren<Props>> = ({
   loading,
   className,
   sx,

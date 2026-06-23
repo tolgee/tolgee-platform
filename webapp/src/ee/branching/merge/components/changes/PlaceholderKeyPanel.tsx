@@ -14,7 +14,9 @@ const PlaceholderContent = styled(Box)`
   flex: 1;
 `;
 
-export const PlaceholderKeyPanel: FC<{ text: string }> = ({ text }) => (
+export const PlaceholderKeyPanel: FC<
+  React.PropsWithChildren<{ text: string }>
+> = ({ text }) => (
   <KeyWrapper>
     <PlaceholderContent>
       <Typography variant="body2" sx={{ fontStyle: 'italic' }}>

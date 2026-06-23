@@ -55,7 +55,7 @@ const StyledTitle = styled('div')`
   padding: 8px;
 `;
 
-export const CriticalUsageCircle: FC = () => {
+export const CriticalUsageCircle: FC<React.PropsWithChildren<unknown>> = () => {
   const { preferredOrganization } = usePreferredOrganization();
   const { planLimitErrors } = useOrganizationUsage();
 
@@ -86,7 +86,9 @@ export const CriticalUsageCircle: FC = () => {
 
   previousShown.current = Boolean(showStats);
 
-  const OptionalLink: React.FC = ({ children }) =>
+  const OptionalLink: React.FC<React.PropsWithChildren<unknown>> = ({
+    children,
+  }) =>
     isOrganizationOwner ? (
       <Link
         to={LINKS.ORGANIZATION_BILLING.build({

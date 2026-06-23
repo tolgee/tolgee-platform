@@ -5,7 +5,9 @@ import { TaskDetail } from './TaskDetail';
 import { FC } from 'react';
 import { QUERY } from 'tg.constants/links';
 
-export const TranslationsTaskDetail: FC = () => {
+export const TranslationsTaskDetail: FC<
+  React.PropsWithChildren<unknown>
+> = () => {
   const [taskDetail, setTaskDetail] = useUrlSearchState(
     QUERY.TRANSLATIONS_TASK_DETAIL
   );

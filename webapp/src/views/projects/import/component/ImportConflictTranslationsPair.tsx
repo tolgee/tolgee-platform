@@ -8,10 +8,12 @@ import { ImportConflictTranslation } from './ImportConflictTranslation';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useConflictHintTranslate } from '../hooks/useConflictHintTranslate';
 
-export const ImportConflictTranslationsPair: FunctionComponent<{
-  translation: components['schemas']['ImportTranslationModel'];
-  row: components['schemas']['ImportLanguageModel'];
-}> = ({ translation, row }) => {
+export const ImportConflictTranslationsPair: FunctionComponent<
+  React.PropsWithChildren<{
+    translation: components['schemas']['ImportTranslationModel'];
+    row: components['schemas']['ImportLanguageModel'];
+  }>
+> = ({ translation, row }) => {
   const project = useProject();
   const [expanded, setExpanded] = useState(false);
   const [leftExpandable, setLeftExpandable] = useState(false);

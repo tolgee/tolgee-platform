@@ -15,9 +15,11 @@ import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 
-export const ImportConflictsDataHeader: FunctionComponent<{
-  language: components['schemas']['ImportLanguageModel'];
-}> = (props) => {
+export const ImportConflictsDataHeader: FunctionComponent<
+  React.PropsWithChildren<{
+    language: components['schemas']['ImportLanguageModel'];
+  }>
+> = (props) => {
   const project = useProject();
 
   const theme = useTheme();

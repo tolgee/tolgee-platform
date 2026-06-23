@@ -5,7 +5,9 @@ type Props = {
   input: DiffValue<any>;
 };
 
-const NamespaceComponent: React.FC<Props> = ({ input }) => {
+const NamespaceComponent: React.FC<React.PropsWithChildren<Props>> = ({
+  input,
+}) => {
   const newInput = input.new?.data?.name || input.new;
   if (newInput) {
     return (

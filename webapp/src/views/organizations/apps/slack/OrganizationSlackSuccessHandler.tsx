@@ -9,7 +9,9 @@ import { messageService } from 'tg.service/MessageService';
 
 import { useOrganization } from '../../useOrganization';
 
-export const OrganizationSlackSuccessHandler: FunctionComponent = () => {
+export const OrganizationSlackSuccessHandler: FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const search = useUrlSearch();
   const organization = useOrganization();
 

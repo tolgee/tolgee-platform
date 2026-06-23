@@ -9,7 +9,7 @@ import { UserMissingAvatarMenu } from './UserMissingAvatarMenu';
 import { UserPresentAvatarMenu } from './UserPresentAvatarMenu';
 import { UserUnverifiedEmailMenu } from './UserUnverifiedEmailMenu';
 
-export const UserMenu: React.FC = () => {
+export const UserMenu: React.FC<React.PropsWithChildren<unknown>> = () => {
   const config = useConfig();
   const user = useUser();
   const isEmailVerified = useIsEmailVerified();

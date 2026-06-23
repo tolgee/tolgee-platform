@@ -77,7 +77,9 @@ type ControlsProps = {
   className?: string;
 };
 
-export const ControlsTranslation: React.FC<ControlsProps> = ({
+export const ControlsTranslation: React.FC<
+  React.PropsWithChildren<ControlsProps>
+> = ({
   state,
   editEnabled,
   stateChangeEnabled,

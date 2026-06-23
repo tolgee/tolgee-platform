@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { flushSync } from 'react-dom';
 import { Direction, Edit, EditorProps } from '../types';
 import {
   generateCurrentValue,
@@ -117,7 +118,7 @@ export function usePositionService({ translations, viewRefs }: Props) {
 
   const setPositionAndFocus = (pos: EditorProps | undefined) => {
     if (!pos) {
-      clearPosition();
+      flushSync(() => clearPosition());
     } else {
       const key = translations.fixedTranslations?.find(
         (key) => key.keyId === pos.keyId

@@ -10,7 +10,9 @@ import {
 // paths which shouldn't be stored, so we avoid loops
 const PATHS_NOT_TO_REMEMBER = [LINKS.PROJECTS, LINKS.LOGIN, LINKS.ROOT];
 
-export const RedirectUnsignedUser: React.FC = ({ children }) => {
+export const RedirectUnsignedUser: React.FC<
+  React.PropsWithChildren<unknown>
+> = ({ children }) => {
   const shouldRedirect = useGlobalContext((c) => !c.auth.allowPrivate);
 
   const history = useHistory();

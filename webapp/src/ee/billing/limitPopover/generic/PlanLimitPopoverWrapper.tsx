@@ -8,13 +8,9 @@ export type PlanLimitPopoverWrapperProps = {
   popoverProps?: Omit<ComponentProps<typeof Popover>, 'open'>;
 };
 
-export const PlanLimitPopoverWrapper: FC<PlanLimitPopoverWrapperProps> = ({
-  open,
-  onClose,
-  children,
-  popoverProps,
-  ...props
-}) => {
+export const PlanLimitPopoverWrapper: FC<
+  React.PropsWithChildren<PlanLimitPopoverWrapperProps>
+> = ({ open, onClose, children, popoverProps, ...props }) => {
   const anchorEl = document.getElementById(USAGE_ELEMENT_ID);
 
   return (

@@ -25,7 +25,9 @@ const StyledPanelBox = styled(Box)`
     theme.palette.tokens.background['paper-3']};
 `;
 
-export const ImportSettingsPanel: FC = (props) => {
+export const ImportSettingsPanel: FC<React.PropsWithChildren<unknown>> = (
+  props
+) => {
   const project = useProject();
   const { t } = useTranslate();
 

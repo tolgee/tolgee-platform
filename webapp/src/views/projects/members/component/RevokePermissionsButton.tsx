@@ -75,7 +75,9 @@ const RevokePermissionsButton = (props: {
     isDisabled = true;
   }
 
-  const Wrapper: FunctionComponent = (props) =>
+  const Wrapper: FunctionComponent<React.PropsWithChildren<unknown>> = (
+    props
+  ) =>
     !tooltip ? (
       <>{props.children}</>
     ) : (

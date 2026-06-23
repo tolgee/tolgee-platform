@@ -72,10 +72,9 @@ export function StandardForm<T extends FormikValues>({
 
           return (
             <Form id={formId}>
-              {(typeof props.children === 'function' &&
-                !props.loading &&
-                props.children(formikProps)) ||
-                props.children}
+              {typeof props.children === 'function'
+                ? !props.loading && props.children(formikProps)
+                : props.children}
               {props.submitButtons || (
                 <Box display="flex" justifyContent="flex-end" sx={rootSx}>
                   <React.Fragment>

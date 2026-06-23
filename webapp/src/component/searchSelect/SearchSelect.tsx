@@ -76,7 +76,7 @@ export function SearchSelect<T extends React.Key>({
     <StyledInputContent style={{ contain: noContain ? undefined : 'size' }}>
       {renderValue
         ? renderValue(value)
-        : (valueItem ? valueItem.name : value) || ''}
+        : (((valueItem ? valueItem.name : value) || '') as React.ReactNode)}
     </StyledInputContent>
   );
 

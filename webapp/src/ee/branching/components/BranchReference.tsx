@@ -6,7 +6,9 @@ type Props = {
   data: BranchReferenceData;
 };
 
-export const BranchReference: React.FC<Props> = ({ data }) => {
+export const BranchReference: React.FC<React.PropsWithChildren<Props>> = ({
+  data,
+}) => {
   return (
     <span className="reference referenceText">
       <BranchNameLink name={data.name} />

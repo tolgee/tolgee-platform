@@ -24,7 +24,7 @@ type Props = {
   noTooltip?: boolean;
 };
 
-export const AutoTranslationIcon: React.FC<Props> = ({
+export const AutoTranslationIcon: React.FC<React.PropsWithChildren<Props>> = ({
   provider,
   noTooltip,
 }) => {

@@ -23,9 +23,9 @@ type Props = {
   };
 };
 
-export const TranslationMemoryListItemMenu: FC<Props> = ({
-  translationMemory,
-}) => {
+export const TranslationMemoryListItemMenu: FC<
+  React.PropsWithChildren<Props>
+> = ({ translationMemory }) => {
   const { preferredOrganization } = usePreferredOrganization();
 
   const { t } = useTranslate();

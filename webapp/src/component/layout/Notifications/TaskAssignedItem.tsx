@@ -7,10 +7,9 @@ import {
 
 type TaskAssignedItemProps = TaskItemProps;
 
-export const TaskAssignedItem: FunctionComponent<TaskAssignedItemProps> = ({
-  notification,
-  ...props
-}) => {
+export const TaskAssignedItem: FunctionComponent<
+  React.PropsWithChildren<TaskAssignedItemProps>
+> = ({ notification, ...props }) => {
   return (
     <TaskItem notification={notification} {...props}>
       <T keyName="notifications-task-assigned" />

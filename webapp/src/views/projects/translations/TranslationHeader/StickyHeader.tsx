@@ -54,7 +54,7 @@ type Props = {
   marginBottom?: number;
 };
 
-export const StickyHeader: React.FC<Props> = ({
+export const StickyHeader: React.FC<React.PropsWithChildren<Props>> = ({
   height,
   children,
   marginBottom,

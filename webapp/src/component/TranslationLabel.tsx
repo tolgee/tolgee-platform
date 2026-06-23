@@ -44,14 +44,16 @@ const TooltipContent = styled('div')`
   min-width: 0;
 `;
 
-export const TranslationLabel: React.FC<{
-  label: LabelModel;
-  tooltip?: string;
-  children?: React.ReactNode;
-  className?: string;
-  onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
-  onDelete?: (labelId: number) => void;
-}> = ({ label, children, tooltip, className, onClick, onDelete, ...rest }) => {
+export const TranslationLabel: React.FC<
+  React.PropsWithChildren<{
+    label: LabelModel;
+    tooltip?: string;
+    children?: React.ReactNode;
+    className?: string;
+    onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
+    onDelete?: (labelId: number) => void;
+  }>
+> = ({ label, children, tooltip, className, onClick, onDelete, ...rest }) => {
   const labelContent = (
     <StyledTranslationLabel
       color={label.color}

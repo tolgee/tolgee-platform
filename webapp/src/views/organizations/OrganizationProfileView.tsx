@@ -22,7 +22,9 @@ import { useIsAdmin } from 'tg.globalContext/helpers';
 
 type OrganizationBody = components['schemas']['OrganizationDto'];
 
-export const OrganizationProfileView: FunctionComponent = () => {
+export const OrganizationProfileView: FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const { t } = useTranslate();
   const leaveOrganization = useLeaveOrganization();
   const { invalidateInitialData } = useGlobalActions();

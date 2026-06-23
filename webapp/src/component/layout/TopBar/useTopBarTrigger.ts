@@ -43,7 +43,7 @@ export const useTopBarTrigger = () => {
       triggeredByUser.current = true;
     };
     window.addEventListener('wheel', handler, { passive: true });
-    return () => window.removeEventListener('mousewheel', handler);
+    return () => window.removeEventListener('wheel', handler);
   }, [triggeredByUser]);
 
   useEffect(() => {

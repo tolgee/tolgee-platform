@@ -7,11 +7,9 @@ type IconMenuButtonProps = {
   renderMenu: (close: () => void) => React.ReactNode;
 };
 
-export const IconMenu: React.FC<IconMenuButtonProps> = ({
-  icon,
-  renderMenu,
-  ...iconButtonProps
-}) => {
+export const IconMenu: React.FC<
+  React.PropsWithChildren<IconMenuButtonProps>
+> = ({ icon, renderMenu, ...iconButtonProps }) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
   const handleOpen = (event: React.MouseEvent<HTMLElement>) => {

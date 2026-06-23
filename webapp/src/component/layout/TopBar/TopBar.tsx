@@ -69,7 +69,10 @@ type Props = {
   isDebuggingCustomerAccount?: boolean;
 };
 
-export const TopBar: FC<Props> = ({ hideQuickStart, ...announcementProps }) => {
+export const TopBar: FC<React.PropsWithChildren<Props>> = ({
+  hideQuickStart,
+  ...announcementProps
+}) => {
   const config = useConfig();
 
   const topBarHidden = useGlobalContext((c) => !c.layout.topBarHeight);

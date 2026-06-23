@@ -5,7 +5,7 @@ import { BillingProgress } from './BillingProgress';
 import { ProgressData } from './getProgressData';
 
 export const UsageDetailed: React.FC<
-  Partial<ProgressData> & { isPayAsYouGo: boolean }
+  React.PropsWithChildren<Partial<ProgressData> & { isPayAsYouGo: boolean }>
 > = (props) => {
   const items = [
     {

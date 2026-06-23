@@ -52,7 +52,7 @@ export const TaskNumberWithLink = ({
       projectId={project.id}
       {...{ sx, className }}
     >
-      #{task}
+      #{task.number}
     </TaskTranslationsLink>
   );
 };

@@ -17,7 +17,9 @@ export type SadEmotionMessageProps = {
   height?: string;
 };
 
-export const SadEmotionMessage: React.FC<SadEmotionMessageProps> = (props) => {
+export const SadEmotionMessage: React.FC<
+  React.PropsWithChildren<SadEmotionMessageProps>
+> = (props) => {
   return (
     <Box
       display="flex"

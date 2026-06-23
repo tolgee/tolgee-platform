@@ -27,7 +27,10 @@ type Props = {
   onResize: React.MouseEventHandler<HTMLDivElement>;
 };
 
-export const CellStateBar: React.FC<Props> = ({ state, onResize }) => {
+export const CellStateBar: React.FC<React.PropsWithChildren<Props>> = ({
+  state,
+  onResize,
+}) => {
   const getContent = () => (
     <StyledStateHover data-cy="translations-state-indicator">
       <StyledState

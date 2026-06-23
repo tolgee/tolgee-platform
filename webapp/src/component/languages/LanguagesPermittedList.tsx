@@ -48,13 +48,9 @@ type Props = React.HTMLAttributes<HTMLDivElement> & {
   emptyLabel?: string;
 };
 
-export const LanguagesPermittedList: React.FC<Props> = ({
-  languages,
-  disabled,
-  maxItems = 3,
-  emptyLabel,
-  ...props
-}) => {
+export const LanguagesPermittedList: React.FC<
+  React.PropsWithChildren<Props>
+> = ({ languages, disabled, maxItems = 3, emptyLabel, ...props }) => {
   const selectedLanguages = languages?.slice(0, maxItems) || [];
   const numOfExtra = (languages?.length || 0) - selectedLanguages.length;
   const { t } = useTranslate();

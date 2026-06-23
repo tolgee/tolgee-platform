@@ -82,7 +82,7 @@ function useRefGroup<T>(value: T): RefObject<T> {
   return refObject;
 }
 
-export const Editor: React.FC<EditorProps> = ({
+export const Editor: React.FC<React.PropsWithChildren<EditorProps>> = ({
   value,
   onChange,
   onFocus,

@@ -72,7 +72,9 @@ type Props = {
   filters?: AssigneeFilters;
 };
 
-export const AssigneeSearchSelectPopover: React.FC<Props> = ({
+export const AssigneeSearchSelectPopover: React.FC<
+  React.PropsWithChildren<Props>
+> = ({
   open,
   onClose,
   onSelect,

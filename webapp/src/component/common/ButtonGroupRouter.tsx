@@ -9,11 +9,9 @@ type ButtonGroupRouterItemProps = PropsWithChildren<
   } & React.ComponentProps<typeof Button>
 >;
 
-export const ButtonGroupRouterItem: FC<ButtonGroupRouterItemProps> = ({
-  link,
-  exact,
-  ...props
-}) => {
+export const ButtonGroupRouterItem: FC<
+  React.PropsWithChildren<ButtonGroupRouterItemProps>
+> = ({ link, exact, ...props }) => {
   const active = !!useRouteMatch({ path: link, exact })?.path;
 
   return (

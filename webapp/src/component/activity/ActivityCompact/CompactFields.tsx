@@ -19,7 +19,10 @@ type Props = {
   diffEnabled: boolean;
 };
 
-export const ActivityFields: React.FC<Props> = ({ fields, diffEnabled }) => {
+export const ActivityFields: React.FC<React.PropsWithChildren<Props>> = ({
+  fields,
+  diffEnabled,
+}) => {
   return (
     <StyledFields>
       {fields.map((field, i) => {

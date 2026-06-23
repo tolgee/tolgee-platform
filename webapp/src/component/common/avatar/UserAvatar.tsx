@@ -23,7 +23,9 @@ type Props = {
   size?: number;
 };
 
-export const UserAvatar: React.FC<Props> = ({ size = SIZE }) => {
+export const UserAvatar: React.FC<React.PropsWithChildren<Props>> = ({
+  size = SIZE,
+}) => {
   const user = useUser();
 
   return (

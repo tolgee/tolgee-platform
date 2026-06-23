@@ -10,7 +10,7 @@ type Props = {
   glossary: SimpleGlossaryModel;
 } & React.ComponentProps<typeof LinkExternal>;
 
-export const GlossaryLink: React.FC<Props> = ({
+export const GlossaryLink: React.FC<React.PropsWithChildren<Props>> = ({
   glossary,
   organizationSlug,
   ...props

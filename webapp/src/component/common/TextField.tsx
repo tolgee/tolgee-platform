@@ -1,4 +1,3 @@
-import { FunctionComponent } from 'react';
 import { InputLabel, TextField as MUITextField, styled } from '@mui/material';
 import React from 'react';
 
@@ -18,7 +17,7 @@ export type TextFieldProps = React.ComponentProps<typeof MUITextField> & {
   minHeight?: boolean;
 };
 
-export const TextField: FunctionComponent<TextFieldProps> = React.forwardRef(
+export const TextField = React.forwardRef<HTMLDivElement, TextFieldProps>(
   function TextField(props, ref) {
     const { label, minHeight = true, sx, ...otherProps } = props;
     return (

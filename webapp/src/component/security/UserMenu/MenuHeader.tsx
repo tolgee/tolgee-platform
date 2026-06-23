@@ -31,7 +31,11 @@ type Props = {
   subtitle?: string;
 };
 
-export const MenuHeader: React.FC<Props> = ({ entity, type, title }) => {
+export const MenuHeader: React.FC<React.PropsWithChildren<Props>> = ({
+  entity,
+  type,
+  title,
+}) => {
   return (
     <StyledContainer>
       <Box gridArea="logo">

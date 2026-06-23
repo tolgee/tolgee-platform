@@ -66,7 +66,7 @@ type Props = {
   projectId: number;
 };
 
-export const TrashControls: React.FC<Props> = ({
+export const TrashControls: React.FC<React.PropsWithChildren<Props>> = ({
   search,
   onSearchChange,
   filters,

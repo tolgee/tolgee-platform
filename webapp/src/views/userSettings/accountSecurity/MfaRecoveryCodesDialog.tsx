@@ -28,7 +28,7 @@ type MfaRecoveryCodesDialogProps = {
 };
 
 export const MfaRecoveryCodesDialog: FunctionComponent<
-  MfaRecoveryCodesDialogProps
+  React.PropsWithChildren<MfaRecoveryCodesDialogProps>
 > = ({ password: providedPassword }) => {
   const [insertedPassword, setInsertedPassword] = useState<string>();
   const history = useHistory();

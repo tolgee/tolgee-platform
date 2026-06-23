@@ -16,15 +16,17 @@ const StyledButton = styled(Button)`
   background: ${({ theme }) => theme.palette.background.default};
 `;
 
-export const LanguagePermissionsMenu: FunctionComponent<{
-  selected: number[];
-  onSelect: (value: number[]) => void;
-  buttonProps?: ComponentProps<typeof Button>;
-  disabled?: boolean | number[];
-  allLanguages: LanguageModel[];
-  selectAllButton?: boolean;
-  emptyLabel?: string;
-}> = (props) => {
+export const LanguagePermissionsMenu: FunctionComponent<
+  React.PropsWithChildren<{
+    selected: number[];
+    onSelect: (value: number[]) => void;
+    buttonProps?: ComponentProps<typeof Button>;
+    disabled?: boolean | number[];
+    allLanguages: LanguageModel[];
+    selectAllButton?: boolean;
+    emptyLabel?: string;
+  }>
+> = (props) => {
   const anchorEl = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
   const { t } = useTranslate();

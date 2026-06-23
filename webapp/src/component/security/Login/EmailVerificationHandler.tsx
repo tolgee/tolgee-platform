@@ -12,7 +12,7 @@ import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 interface OAuthRedirectionHandlerProps {}
 
 export const EmailVerificationHandler: FunctionComponent<
-  OAuthRedirectionHandlerProps
+  React.PropsWithChildren<OAuthRedirectionHandlerProps>
 > = () => {
   const match = useRouteMatch();
   const history = useHistory();

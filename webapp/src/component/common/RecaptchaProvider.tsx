@@ -2,7 +2,9 @@ import React, { FC } from 'react';
 import { useConfig } from 'tg.globalContext/helpers';
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 
-export const RecaptchaProvider: FC = (props) => {
+export const RecaptchaProvider: FC<React.PropsWithChildren<unknown>> = (
+  props
+) => {
   const config = useConfig();
   if (!config.recaptchaSiteKey) {
     return <>{props.children}</>;

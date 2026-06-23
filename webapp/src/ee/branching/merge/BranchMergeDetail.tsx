@@ -57,7 +57,7 @@ const StyledFloatingActionsInner = styled(Box)`
   border-radius: ${({ theme }) => theme.shape.borderRadius}px;
 `;
 
-export const BranchMergeDetail: FC = () => {
+export const BranchMergeDetail: FC<React.PropsWithChildren<unknown>> = () => {
   const { t } = useTranslate();
   const project = useProject();
   const queryClient = useQueryClient();

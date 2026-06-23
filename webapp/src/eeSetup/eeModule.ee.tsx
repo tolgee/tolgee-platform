@@ -103,9 +103,10 @@ export { CriticalUsageCircle } from '../ee/billing/component/CriticalUsageCircle
 export { TrialAnnouncement } from '../ee/billing/component/topBar/TrialAnnouncement';
 export { TrialChip } from '../ee/billing/component/topBar/TrialChip';
 
-export const billingMenuItems =
-  billingModule.billingMenuItems as React.FC<BillingMenuItemsProps>[];
-export const apps = [SlackApp] as React.FC[];
+export const billingMenuItems = billingModule.billingMenuItems as React.FC<
+  React.PropsWithChildren<BillingMenuItemsProps>
+>[];
+export const apps = [SlackApp] as React.FC<React.PropsWithChildren<unknown>>[];
 
 export const routes = {
   Root: () => {

@@ -24,7 +24,10 @@ const StyledEditorWrapper = styled(Box)`
   }
 `;
 
-export const EditorWrapper: React.FC<BoxProps> = ({ children, ...props }) => {
+export const EditorWrapper: React.FC<React.PropsWithChildren<BoxProps>> = ({
+  children,
+  ...props
+}) => {
   const handleClick: React.MouseEventHandler<HTMLDivElement> = (e) => {
     const editor = (e.target as HTMLDivElement).querySelector('.cm-content') as
       | HTMLDivElement

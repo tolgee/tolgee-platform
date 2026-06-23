@@ -21,7 +21,7 @@ type Props = {
   onClose: () => void;
 };
 
-export const BranchRenameModal: React.FC<Props> = ({
+export const BranchRenameModal: React.FC<React.PropsWithChildren<Props>> = ({
   open,
   initialName,
   onSubmit,

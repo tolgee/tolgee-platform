@@ -12,9 +12,11 @@ import { ImportConflictsDataHeader } from './ImportConflictsDataHeader';
 import { ImportConflictsSecondaryBar } from './ImportConflictsSecondaryBar';
 import { useConflictsHelper } from '../hooks/useConflictsHelper';
 
-export const ImportConflictsData: FunctionComponent<{
-  row: components['schemas']['ImportLanguageModel'];
-}> = (props) => {
+export const ImportConflictsData: FunctionComponent<
+  React.PropsWithChildren<{
+    row: components['schemas']['ImportLanguageModel'];
+  }>
+> = (props) => {
   const languageId = props.row.id;
   const [showResolved, setShowResolved] = useState(true);
   const [page, setPage] = useState(0);

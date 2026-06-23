@@ -20,13 +20,9 @@ type Props = {
   onNextStateExist?: (exists: boolean) => void;
 };
 
-export const StateTransitionButtons: React.FC<Props> = ({
-  state,
-  onStateChange,
-  className,
-  style,
-  onNextStateExist,
-}) => {
+export const StateTransitionButtons: React.FC<
+  React.PropsWithChildren<Props>
+> = ({ state, onStateChange, className, style, onNextStateExist }) => {
   const translateState = useStateTranslation();
   const { t } = useTranslate();
 

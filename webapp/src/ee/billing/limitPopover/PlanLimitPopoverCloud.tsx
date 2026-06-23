@@ -16,7 +16,9 @@ type Props = {
   open: boolean;
 };
 
-export const PlanLimitPopoverCloud: React.FC<Props> = ({ open, onClose }) => {
+export const PlanLimitPopoverCloud: React.FC<
+  React.PropsWithChildren<Props>
+> = ({ open, onClose }) => {
   const { preferredOrganization } = usePreferredOrganization();
   const { usage } = useOrganizationUsage();
   const isOwner = preferredOrganization?.currentUserRole === 'OWNER';

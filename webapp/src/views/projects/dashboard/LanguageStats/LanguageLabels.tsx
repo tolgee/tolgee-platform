@@ -65,7 +65,9 @@ type Props = {
   data: LanguageStatsModel;
 };
 
-export const LanguageLabels: React.FC<Props> = ({ data }) => {
+export const LanguageLabels: React.FC<React.PropsWithChildren<Props>> = ({
+  data,
+}) => {
   const statItems = statsIntoArray(data);
 
   return (

@@ -20,7 +20,9 @@ const StyledTableHeader = styled(Box)`
   text-align: center;
 `;
 
-export const NotificationsView: React.FC = () => {
+export const NotificationsView: React.FC<
+  React.PropsWithChildren<unknown>
+> = () => {
   const { t } = useTranslate();
   const { isEnabled } = useEnabledFeatures();
 

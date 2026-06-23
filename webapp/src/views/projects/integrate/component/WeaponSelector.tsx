@@ -39,10 +39,12 @@ const StyledIconWrapper = styled('div')`
   }
 `;
 
-export const WeaponSelector: FC<{
-  selected: Guide | undefined;
-  onSelect: (guide: Guide) => void;
-}> = (props) => {
+export const WeaponSelector: FC<
+  React.PropsWithChildren<{
+    selected: Guide | undefined;
+    onSelect: (guide: Guide) => void;
+  }>
+> = (props) => {
   return (
     <StyledRoot>
       {guides.map((g) => (

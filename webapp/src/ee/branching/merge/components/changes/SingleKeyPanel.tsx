@@ -23,7 +23,7 @@ type Props = {
   };
 };
 
-export const SingleKeyPanel: FC<Props> = ({
+export const SingleKeyPanel: FC<React.PropsWithChildren<Props>> = ({
   keyData,
   changedTranslations,
   showAll,

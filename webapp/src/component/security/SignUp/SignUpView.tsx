@@ -32,7 +32,9 @@ const StyledRightPart = styled('div')`
   padding-bottom: 90px;
 `;
 
-export const SignUpView: FunctionComponent = () => {
+export const SignUpView: FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const config = useConfig();
   const registrationAllowed = useGlobalContext(
     (c) =>

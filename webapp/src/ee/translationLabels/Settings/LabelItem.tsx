@@ -41,7 +41,7 @@ type Props = {
   onLabelRemove?: () => void;
 };
 
-export const LabelItem: React.FC<Props> = ({
+export const LabelItem: React.FC<React.PropsWithChildren<Props>> = ({
   label,
   onLabelEdit,
   onLabelRemove,

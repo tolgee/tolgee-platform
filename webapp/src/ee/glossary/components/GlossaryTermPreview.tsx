@@ -194,6 +194,7 @@ export const GlossaryTermPreview: React.VFC<GlossaryTermPreviewProps> = ({
       handleSave();
     } else if (e.key === 'Escape') {
       e.preventDefault();
+      e.stopPropagation();
       setIsEditing(false);
     }
   };

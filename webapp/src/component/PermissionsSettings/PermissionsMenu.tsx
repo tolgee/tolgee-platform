@@ -10,11 +10,9 @@ type Props = {
   modalProps: Omit<PermissionModalProps, 'onClose'>;
 };
 
-export const PermissionsMenu: FunctionComponent<Props> = ({
-  buttonTooltip,
-  buttonProps,
-  modalProps,
-}) => {
+export const PermissionsMenu: FunctionComponent<
+  React.PropsWithChildren<Props>
+> = ({ buttonTooltip, buttonProps, modalProps }) => {
   const [open, setOpen] = React.useState(false);
 
   const handleClose = () => {

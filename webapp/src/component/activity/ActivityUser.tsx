@@ -36,7 +36,10 @@ type Props = {
   onlyTime?: boolean;
 };
 
-export const ActivityUser: React.FC<Props> = ({ item, onlyTime }) => {
+export const ActivityUser: React.FC<React.PropsWithChildren<Props>> = ({
+  item,
+  onlyTime,
+}) => {
   const date = new Date(item.timestamp);
   const lang = useCurrentLanguage();
 

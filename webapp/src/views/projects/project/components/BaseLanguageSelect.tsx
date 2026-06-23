@@ -9,14 +9,16 @@ import { FieldLabel } from 'tg.component/FormField';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
-export const BaseLanguageSelect: FC<{
-  languages: Partial<LanguageModel>[];
-  label?: ReactNode;
-  name: string;
-  valueKey?: React.KeyOf<LanguageModel>;
-  minHeight?: boolean;
-  disabled?: boolean;
-}> = (props) => {
+export const BaseLanguageSelect: FC<
+  React.PropsWithChildren<{
+    languages: Partial<LanguageModel>[];
+    label?: ReactNode;
+    name: string;
+    valueKey?: React.KeyOf<LanguageModel>;
+    minHeight?: boolean;
+    disabled?: boolean;
+  }>
+> = (props) => {
   const availableLanguages = props.languages.filter((l) => !!l);
   const context = useFormikContext();
   const value = context.getFieldProps(props.name).value;
@@ -54,7 +56,7 @@ export const BaseLanguageSelect: FC<{
         }}
       >
         {availableLanguages.map((l, index) => (
-          <MenuItem key={index} value={l![valueKey] as React.Key}>
+          <MenuItem key={index} value={l![valueKey] as string | number}>
             <LanguageValue language={l!} />
           </MenuItem>
         ))}

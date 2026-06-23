@@ -61,7 +61,7 @@ type Props = {
   tools: ReturnType<typeof useTranslationCell>;
 };
 
-export const TranslationRead: React.FC<Props> = ({
+export const TranslationRead: React.FC<React.PropsWithChildren<Props>> = ({
   width,
   active,
   lastFocusable,

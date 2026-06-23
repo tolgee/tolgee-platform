@@ -8,7 +8,9 @@ type Props = {
   language: LanguageModel;
 };
 
-export const LanguageItem: React.FC<Props> = ({ language }) => {
+export const LanguageItem: React.FC<React.PropsWithChildren<Props>> = ({
+  language,
+}) => {
   return (
     <Box display="inline-flex" alignItems="center" mr={2}>
       <Box mr={0.5} display="inline-flex" justifyContent="center">

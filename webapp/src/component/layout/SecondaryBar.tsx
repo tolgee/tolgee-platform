@@ -10,11 +10,9 @@ type Props = React.ComponentProps<typeof Box> & {
   reducedSpacing?: boolean;
 };
 
-export const SecondaryBar: FunctionComponent<Props> = ({
-  noBorder,
-  reducedSpacing,
-  ...props
-}) => (
+export const SecondaryBar: FunctionComponent<
+  React.PropsWithChildren<Props>
+> = ({ noBorder, reducedSpacing, ...props }) => (
   <StyledBox
     m={reducedSpacing ? 0 : 3}
     mb={0}

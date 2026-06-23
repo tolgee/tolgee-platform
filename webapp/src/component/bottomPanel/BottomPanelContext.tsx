@@ -5,7 +5,9 @@ const BottomPanelSettersContext = React.createContext<{
   setHeight: React.Dispatch<React.SetStateAction<number>>;
 }>({ setHeight: () => {} });
 
-export const BottomPanelProvider: React.FC = (props) => {
+export const BottomPanelProvider: React.FC<React.PropsWithChildren<unknown>> = (
+  props
+) => {
   const [height, setHeight] = useState(0);
 
   return (

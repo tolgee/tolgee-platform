@@ -7,9 +7,11 @@ import { ResourceErrorComponent } from '../../common/form/ResourceErrorComponent
 import { Alert } from '../../common/Alert';
 import { SpendingLimitExceededDescription } from './SpendingLimitExceededDesciption';
 
-export const SignUpError: React.FC<{
-  loadable: LoadableType;
-}> = ({ loadable }) => {
+export const SignUpError: React.FC<
+  React.PropsWithChildren<{
+    loadable: LoadableType;
+  }>
+> = ({ loadable }) => {
   if (loadable.error?.code === 'seats_spending_limit_exceeded') {
     return (
       <Alert severity="error" data-cy="signup-error-seats-spending-limit">
