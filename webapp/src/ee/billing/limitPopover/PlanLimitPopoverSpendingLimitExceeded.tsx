@@ -7,6 +7,10 @@ import {
   styled,
 } from '@mui/material';
 import { T } from '@tolgee/react';
+import { useHistory } from 'react-router-dom';
+
+import { LINKS, PARAMS } from 'tg.constants/links';
+import { usePreferredOrganization } from 'tg.globalContext/helpers';
 import { SpendingLimitExceededDescription } from 'tg.component/security/SignUp/SpendingLimitExceededDesciption';
 import { PlanLimitPopoverWrapper } from './generic/PlanLimitPopoverWrapper';
 
@@ -19,12 +23,27 @@ const StyledDialogContent = styled(DialogContent)`
 type Props = {
   onClose: () => void;
   open: boolean;
+  showSubscriptionsLink?: boolean;
 };
 
 export const PlanLimitPopoverSpendingLimitExceeded: React.FC<Props> = ({
   open,
   onClose,
+  showSubscriptionsLink,
 }) => {
+  const { preferredOrganization } = usePreferredOrganization();
+  const isOwner = preferredOrganization?.currentUserRole === 'OWNER';
+  const history = useHistory();
+
+  const handleGoToSubscriptions = () => {
+    onClose();
+    history.push(
+      LINKS.ORGANIZATION_BILLING.build({
+        [PARAMS.ORGANIZATION_SLUG]: preferredOrganization!.slug,
+      })
+    );
+  };
+
   return (
     <PlanLimitPopoverWrapper
       open={open}
@@ -49,6 +68,18 @@ export const PlanLimitPopoverSpendingLimitExceeded: React.FC<Props> = ({
         >
           <T keyName="spending_limit_dialog_close" />
         </Button>
+        {isOwner && showSubscriptionsLink && (
+          <Button
+            data-cy="spending-limit-dialog-go-to-subscriptions"
+            color="primary"
+            onClick={handleGoToSubscriptions}
+          >
+            <T
+              keyName="spending_limit_dialog_go_to_subscriptions"
+              defaultValue="Go to subscriptions"
+            />
+          </Button>
+        )}
       </DialogActions>
     </PlanLimitPopoverWrapper>
   );

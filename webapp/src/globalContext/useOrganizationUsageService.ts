@@ -20,6 +20,8 @@ export const useOrganizationUsageService = ({
   >(undefined);
   const [planLimitErrors, setPlanLimitErrors] = useState(0);
   const [spendingLimitErrors, setSpendingLimitErrors] = useState(0);
+  const [mtCreditSpendingLimitErrors, setMtCreditSpendingLimitErrors] =
+    useState(0);
 
   const usageEnabled =
     organization?.id !== undefined && enabled && isOrganizationMember;
@@ -81,7 +83,7 @@ export const useOrganizationUsageService = ({
    * We don't want to disturb the translators that much with the error.
    */
   const increaseCreditSpendingLimitErrors = () => {
-    setSpendingLimitErrors((v) => {
+    setMtCreditSpendingLimitErrors((v) => {
       if (v > 0) {
         return v;
       }
@@ -96,16 +98,17 @@ export const useOrganizationUsageService = ({
   };
 
   useEffect(() => {
-    if (planLimitErrors || spendingLimitErrors) {
+    if (planLimitErrors || spendingLimitErrors || mtCreditSpendingLimitErrors) {
       refetchUsage();
     }
-  }, [planLimitErrors, spendingLimitErrors]);
+  }, [planLimitErrors, spendingLimitErrors, mtCreditSpendingLimitErrors]);
 
   return {
     state: {
       usage: organizationUsage,
       planLimitErrors,
       spendingLimitErrors,
+      mtCreditSpendingLimitErrors,
     },
     actions: {
       refetchUsage,

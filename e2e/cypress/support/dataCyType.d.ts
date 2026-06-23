@@ -695,6 +695,7 @@ declare namespace DataCy {
         "signup-error-plan-seat-limit": true;
         "signup-error-seats-spending-limit": true;
         "spending-limit-dialog-close": true;
+        "spending-limit-dialog-go-to-subscriptions": true;
         "spending-limit-exceeded-popover": true;
         "sso-migration-info-text": true;
         "storage-add-item-button": true;

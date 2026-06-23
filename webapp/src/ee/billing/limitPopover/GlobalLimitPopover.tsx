@@ -4,7 +4,8 @@ import { PlanLimitPopover } from './PlanLimitPopover';
 import { PlanLimitPopoverSpendingLimitExceeded } from './PlanLimitPopoverSpendingLimitExceeded';
 
 export const GlobalLimitPopover: React.FC = () => {
-  const { planLimitErrors, spendingLimitErrors } = useOrganizationUsage();
+  const { planLimitErrors, spendingLimitErrors, mtCreditSpendingLimitErrors } =
+    useOrganizationUsage();
   const [planLimitErrOpen, setPlanLimitErrOpen] = useState(false);
   const [spendingLimitErrOpen, setSpendingLimitErrOpen] = useState(false);
 
@@ -15,10 +16,10 @@ export const GlobalLimitPopover: React.FC = () => {
   }, [planLimitErrors]);
 
   useEffect(() => {
-    if (spendingLimitErrors > 0) {
+    if (spendingLimitErrors > 0 || mtCreditSpendingLimitErrors > 0) {
       setSpendingLimitErrOpen(true);
     }
-  }, [spendingLimitErrors]);
+  }, [spendingLimitErrors, mtCreditSpendingLimitErrors]);
 
   return (
     <>
@@ -29,6 +30,7 @@ export const GlobalLimitPopover: React.FC = () => {
       <PlanLimitPopoverSpendingLimitExceeded
         open={spendingLimitErrOpen}
         onClose={() => setSpendingLimitErrOpen(false)}
+        showSubscriptionsLink={mtCreditSpendingLimitErrors > 0}
       />
     </>
   );
