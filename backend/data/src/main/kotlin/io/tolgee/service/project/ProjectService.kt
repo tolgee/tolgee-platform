@@ -170,10 +170,7 @@ class ProjectService(
     id: Long,
     dto: EditProjectRequest,
   ): Project {
-    val project =
-      projectRepository
-        .findById(id)
-        .orElseThrow { NotFoundException() }!!
+    val project = get(id)
     val wasBranchingEnabled = project.useBranching
     val oldBaseLanguageId = project.baseLanguage?.id
     val oldName = project.name
@@ -241,6 +238,17 @@ class ProjectService(
       translationMemoryManagementService.renameProjectTm(project.id, project.name)
     }
     return project
+  }
+
+  @Transactional
+  @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#result.id")
+  fun setPublic(
+    id: Long,
+    public: Boolean,
+  ): Project {
+    val project = get(id)
+    project.public = public
+    return projectRepository.save(project)
   }
 
   /**

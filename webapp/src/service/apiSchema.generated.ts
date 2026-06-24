@@ -877,6 +877,10 @@ export interface paths {
     put: operations["updatePrompt"];
     delete: operations["deletePrompt"];
   };
+  "/v2/projects/{projectId}/publishing": {
+    /** Marks the project as public or private. Only the organization owner can change this. */
+    put: operations["setProjectPublic"];
+  };
   "/v2/projects/{projectId}/qa-settings": {
     get: operations["getSettings"];
     put: operations["updateSettings"];
@@ -5390,6 +5394,8 @@ export interface components {
       organizationOwner?: components["schemas"]["SimpleOrganizationModel"];
       /** @enum {string} */
       organizationRole?: "MEMBER" | "OWNER" | "MAINTAINER";
+      /** @description Whether the project is public — discoverable and open to community suggestions */
+      public: boolean;
       slug?: string;
       /**
        * @description Suggestions for translations
@@ -6225,6 +6231,10 @@ export interface components {
        * @example We are Dunder Mifflin, a paper company. We sell paper. This is an project of translations for out paper selling app.
        */
       description?: string;
+    };
+    SetProjectPublicRequest: {
+      /** @description Whether the project should be public (discoverable and open to community suggestions) */
+      public: boolean;
     };
     SetTranslationsResponseModel: {
       /**
@@ -19890,6 +19900,51 @@ export interface operations {
         content: {
           "application/json": string;
         };
+      };
+    };
+  };
+  /** Marks the project as public or private. Only the organization owner can change this. */
+  setProjectPublic: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ProjectModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetProjectPublicRequest"];
       };
     };
   };

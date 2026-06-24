@@ -26,6 +26,8 @@ open class ProjectModel(
   val useNamespaces: Boolean,
   val useBranching: Boolean,
   val useQaChecks: Boolean,
+  @Schema(description = "Whether the project is public — discoverable and open to community suggestions")
+  val public: Boolean,
   val defaultNamespace: NamespaceModel?,
   val organizationRole: OrganizationRoleType?,
   @Schema(description = "Current user's direct permission", example = "MANAGE")

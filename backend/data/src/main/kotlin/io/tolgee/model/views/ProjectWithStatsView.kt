@@ -16,6 +16,7 @@ class ProjectWithStatsView(
     view.useNamespaces,
     view.useBranching,
     view.useQaChecks,
+    view.public,
     view.defaultNamespace,
     view.organizationOwner,
     view.organizationRole,

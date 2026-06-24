@@ -21,6 +21,7 @@ interface ProjectRepository : JpaRepository<Project, Long> {
         r.useNamespaces as useNamespaces,
         r.useBranching as useBranching,
         r.useQaChecks as useQaChecks,
+        r.public as public,
         r.suggestionsMode as suggestionsMode,
         r.translationProtection as translationProtection,
         dn as defaultNamespace, o as organizationOwner,

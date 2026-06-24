@@ -5775,4 +5775,11 @@
         ]]></sql>
         <rollback/>
     </changeSet>
+    <changeSet author="jirikuchynka (generated)" id="1782222597005-1">
+        <addColumn tableName="project">
+            <column defaultValueBoolean="false" name="is_public" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
