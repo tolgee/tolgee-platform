@@ -169,6 +169,11 @@ class Project(
   @ActivityLoggedProp
   var useQaChecks: Boolean = false
 
+  @ColumnDefault("false")
+  @Column(name = "is_public")
+  @ActivityLoggedProp
+  var public: Boolean = false
+
   @ColumnDefault("DISABLED")
   @ActivityLoggedProp
   @Enumerated(EnumType.STRING)
