@@ -158,7 +158,12 @@ class WebhookContractFixture(
 
     val allowedKeys = allowedModifiedEntitiesKeys(payloadSchema)
     val actualKeys =
-      payload.path("activityData").path("modifiedEntities").fieldNames().asSequence().toSet()
+      payload
+        .path("activityData")
+        .path("modifiedEntities")
+        .fieldNames()
+        .asSequence()
+        .toSet()
     assertThat(actualKeys)
       .withFailMessage("modifiedEntities keys $actualKeys not a subset of spec-declared $allowedKeys")
       .isSubsetOf(allowedKeys)

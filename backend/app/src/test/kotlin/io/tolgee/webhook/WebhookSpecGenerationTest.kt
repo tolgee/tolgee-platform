@@ -27,20 +27,17 @@ import org.springframework.boot.test.context.SpringBootTest
 class WebhookSpecGenerationTest : AbstractControllerTest() {
   companion object {
     @JvmStatic
-    fun visibleActivityTypes(): List<ActivityType> =
-      ActivityType.entries.filter { !it.hideInList }
+    fun visibleActivityTypes(): List<ActivityType> = ActivityType.entries.filter { !it.hideInList }
 
     @JvmStatic
-    fun countsOnlyActivityTypes(): List<ActivityType> =
-      visibleActivityTypes().filter { it.onlyCountsInList }
+    fun countsOnlyActivityTypes(): List<ActivityType> = visibleActivityTypes().filter { it.onlyCountsInList }
 
     @JvmStatic
     fun restrictedActivityTypes(): List<ActivityType> =
       visibleActivityTypes().filter { it.restrictEntitiesInList != null }
 
     @JvmStatic
-    fun paramsProviderActivityTypes(): List<ActivityType> =
-      visibleActivityTypes().filter { it.paramsProvider != null }
+    fun paramsProviderActivityTypes(): List<ActivityType> = visibleActivityTypes().filter { it.paramsProvider != null }
   }
 
   private val jacksonMapper = ObjectMapper()
@@ -229,6 +226,8 @@ class WebhookSpecGenerationTest : AbstractControllerTest() {
   private fun assertProviderInterfaceUsable() {
     // Sanity check: compile-time reference to the provider interface so refactors break us early.
     val ignored: Class<out PublicParamsProvider>? = null
-    @Suppress("UNUSED_VARIABLE") val unused = ignored
+
+    @Suppress("UNUSED_VARIABLE")
+    val unused = ignored
   }
 }

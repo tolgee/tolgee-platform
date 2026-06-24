@@ -47,7 +47,12 @@ class KeyNameEditWebhookContractTest : ProjectAuthControllerTest("/v2/projects/"
   fun `modifications include the name diff`() {
     triggerKeyNameEdit()
     val payload = fixture.waitForWebhookWithType("KEY_NAME_EDIT")
-    val keyEntry = payload.path("activityData").path("modifiedEntities").path("Key").get(0)
+    val keyEntry =
+      payload
+        .path("activityData")
+        .path("modifiedEntities")
+        .path("Key")
+        .get(0)
     val nameMod = keyEntry.path("modifications").path("name")
     assertThat(nameMod.path("old").asText()).isEqualTo("k1")
     assertThat(nameMod.path("new").asText()).isEqualTo("renamed")

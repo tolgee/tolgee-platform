@@ -98,7 +98,9 @@ class AppWebhookOpenApiCustomizer {
 
   private fun ensureComponents(openAPI: OpenAPI) {
     if (openAPI.components == null) {
-      openAPI.components = io.swagger.v3.oas.models.Components()
+      openAPI.components =
+        io.swagger.v3.oas.models
+          .Components()
     }
     if (openAPI.components.schemas == null) {
       openAPI.components.schemas = LinkedHashMap()
@@ -166,7 +168,12 @@ class AppWebhookOpenApiCustomizer {
       }
 
     return ObjectSchema().apply {
-      addProperty("webhookConfigId", io.swagger.v3.oas.models.media.IntegerSchema().format("int64"))
+      addProperty(
+        "webhookConfigId",
+        io.swagger.v3.oas.models.media
+          .IntegerSchema()
+          .format("int64"),
+      )
       addProperty("eventType", eventTypeEnum)
       addProperty("activityData", activityDataAllOf)
     } as Schema<Any>
@@ -238,7 +245,9 @@ class AppWebhookOpenApiCustomizer {
     return schema as Schema<Any>
   }
 
-  private fun addPropertyModificationSchemaIfAbsent(@Suppress("UNUSED_PARAMETER") parent: Schema<*>) {
+  private fun addPropertyModificationSchemaIfAbsent(
+    @Suppress("UNUSED_PARAMETER") parent: Schema<*>,
+  ) {
     // No-op: ensureComponents and the schema map are managed by `apply()`; the
     // PropertyModification schema is added once below in [registerPropertyModificationSchema].
   }
