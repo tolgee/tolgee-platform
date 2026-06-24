@@ -625,6 +625,7 @@ declare namespace DataCy {
         "project-settings-menu-labels": true;
         "project-settings-menu-qa": true;
         "project-settings-name": true;
+        "project-settings-public-switch": true;
         "project-settings-suggestions-mode-switch": true;
         "project-settings-tm-configure": true;
         "project-settings-tm-row": true;
