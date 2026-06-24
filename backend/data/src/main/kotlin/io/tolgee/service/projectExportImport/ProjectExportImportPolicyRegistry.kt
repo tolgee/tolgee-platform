@@ -133,7 +133,9 @@ object ProjectExportImportPolicyRegistry {
   private fun MutableMap<String, ExportImportPolicy>.classify(
     klass: KClass<*>,
     policy: ExportImportPolicy,
-  ) = classifyUnique(requireNotNull(klass.qualifiedName) { "Entity class must have a qualified name" }, policy)
+    // Key by the JVM binary name (java.name) to match every lookup, which uses EntityType.javaType.name
+    // — qualifiedName differs for a nested @Entity (`Outer.Inner` vs `Outer$Inner`).
+  ) = classifyUnique(klass.java.name, policy)
 
   fun policyOf(entityClassName: String): ExportImportPolicy? = policies[entityClassName]
 

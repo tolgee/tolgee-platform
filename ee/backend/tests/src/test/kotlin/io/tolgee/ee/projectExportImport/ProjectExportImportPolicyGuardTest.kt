@@ -2,10 +2,11 @@ package io.tolgee.ee.projectExportImport
 
 import io.tolgee.AbstractSpringTest
 import io.tolgee.service.projectExportImport.EntityAssociations
+import io.tolgee.service.projectExportImport.EntityMetamodelReader
 import io.tolgee.service.projectExportImport.ExportImportPolicy
 import io.tolgee.service.projectExportImport.ProjectExportImportPolicyRegistry
+import io.tolgee.service.projectExportImport.ProjectScopedCollectorQueries
 import jakarta.persistence.metamodel.Attribute
-import jakarta.persistence.metamodel.PluralAttribute
 import jakarta.persistence.metamodel.SingularAttribute
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -66,7 +67,7 @@ class ProjectExportImportPolicyGuardTest : AbstractSpringTest() {
         if (!droppable) nonDroppableEvaluated++
         val violation =
           ProjectExportImportPolicyRegistry.associationViolation(
-            associationTargetClassName(attr),
+            EntityMetamodelReader.associationTargetClassName(attr),
             droppable,
           )
         if (violation != null) violations += "${entityType.javaType.simpleName}.${attr.name} -> $violation"
@@ -77,23 +78,54 @@ class ProjectExportImportPolicyGuardTest : AbstractSpringTest() {
           "(or, for a reference to an IGNORED type, make the FK nullable so it can be dropped on import):\n" +
           violations.sorted().joinToString("\n") { "  - $it" },
       ).isEmpty()
-    // Anti-vacuity: prove droppability was actually evaluated (a non-droppable singular FK found),
-    // so the check isn't passing only because every association resolved to droppable.
     assertThat(nonDroppableEvaluated)
       .withFailMessage("No OWNED non-nullable singular FK was detected — droppability resolved nothing")
       .isGreaterThan(0)
   }
 
+  @Test
+  fun `every OWNED type has a project-scoped collector query`() {
+    val ownedClassNames = ProjectExportImportPolicyRegistry.ownedClassNames
+    val missing = ownedClassNames - ProjectScopedCollectorQueries.queriesByClassName.keys
+    assertThat(missing)
+      .withFailMessage(
+        "These OWNED entities have no project-scoped collector query. Row discovery is per-type (not a " +
+          "graph walk), so each OWNED type must register one in ProjectScopedCollectorQueries:\n" +
+          missing.sorted().joinToString("\n") { "  - $it" },
+      ).isEmpty()
+  }
+
+  @Test
+  fun `collector queries target only OWNED types`() {
+    val ownedClassNames = ProjectExportImportPolicyRegistry.ownedClassNames
+    val extra = ProjectScopedCollectorQueries.queriesByClassName.keys - ownedClassNames
+    assertThat(extra)
+      .withFailMessage(
+        "These collector queries are registered for non-OWNED (or removed) types. Remove them from " +
+          "ProjectScopedCollectorQueries:\n" + extra.sorted().joinToString("\n") { "  - $it" },
+      ).isEmpty()
+  }
+
+  @Test
+  fun `OWNED type simple names are distinct (the export zip keys entity files by simple name)`() {
+    val duplicates =
+      ownedEntityTypes()
+        .groupBy { it.javaType.simpleName }
+        .filterValues { it.size > 1 }
+    assertThat(duplicates)
+      .withFailMessage(
+        "These OWNED types share a simple name. The export writes one entities/<SimpleName>.json per " +
+          "type, so a collision would silently overwrite one type's rows. Disambiguate the zip layout " +
+          "before adding such a type:\n" +
+          duplicates.entries.joinToString("\n") { (name, types) ->
+            "  - $name: ${types.joinToString { t -> t.javaType.name }}"
+          },
+      ).isEmpty()
+  }
+
   private fun ownedEntityTypes() =
     entityManager.metamodel.entities
       .filter { ProjectExportImportPolicyRegistry.policyOf(it.javaType.name) == ExportImportPolicy.OWNED }
-
-  private fun associationTargetClassName(attr: Attribute<*, *>): String =
-    when (attr) {
-      is PluralAttribute<*, *, *> -> attr.elementType.javaType.name
-      is SingularAttribute<*, *> -> attr.type.javaType.name
-      else -> attr.javaType.name
-    }
 
   private fun isDroppable(
     entityClass: Class<*>,

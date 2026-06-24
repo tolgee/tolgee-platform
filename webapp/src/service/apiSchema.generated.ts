@@ -57,6 +57,10 @@ export interface paths {
     /** Returns current project batch job locks from Redis or local storage based on configuration */
     get: operations["getProjectLocks"];
   };
+  "/v2/administration/projects/{projectId}/export": {
+    /** Exports the whole project (content, branches, tasks, screenshots, settings) as a self-contained zip that can be imported onto a project on another instance running the same Tolgee version. */
+    get: operations["exportProject"];
+  };
   "/v2/administration/users": {
     get: operations["getUsers"];
   };
@@ -8292,6 +8296,46 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["CollectionModelProjectLockModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  /** Exports the whole project (content, branches, tasks, screenshots, settings) as a self-contained zip that can be imported onto a project on another instance running the same Tolgee version. */
+  exportProject: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["StreamingResponseBody"];
         };
       };
       /** Bad Request */

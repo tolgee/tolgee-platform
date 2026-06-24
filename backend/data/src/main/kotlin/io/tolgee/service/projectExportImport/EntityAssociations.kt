@@ -3,9 +3,6 @@ package io.tolgee.service.projectExportImport
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToOne
-import kotlin.reflect.full.memberProperties
-import kotlin.reflect.jvm.javaField
-import kotlin.reflect.jvm.javaMethod
 
 object EntityAssociations {
   /**
@@ -27,9 +24,9 @@ object EntityAssociations {
     entityClass: Class<*>,
     propertyName: String,
   ): Boolean {
-    val property = entityClass.kotlin.memberProperties.find { it.name == propertyName } ?: return false
+    val property = EntityReflection.propertyOf(entityClass.kotlin, propertyName) ?: return false
     if (!property.returnType.isMarkedNullable) return false
-    val members = listOfNotNull(property.javaField, property.getter.javaMethod)
+    val members = EntityReflection.annotationMembers(property)
     if (members.isEmpty()) return false
     if (members.any { it.getAnnotation(ManyToOne::class.java)?.optional == false }) return false
     if (members.any { it.getAnnotation(OneToOne::class.java)?.optional == false }) return false
