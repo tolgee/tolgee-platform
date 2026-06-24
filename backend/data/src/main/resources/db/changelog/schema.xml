@@ -5775,4 +5775,19 @@
         ]]></sql>
         <rollback/>
     </changeSet>
+    <changeSet author="jirikuchynka (generated)" id="1782222597005-1">
+        <addColumn tableName="project">
+            <column defaultValueBoolean="false" name="is_public" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jirikuchynka" id="1782222597005-2">
+        <sql>
+            CREATE INDEX IF NOT EXISTS project_is_public ON project (id) WHERE is_public = true AND deleted_at IS NULL;
+        </sql>
+        <rollback>
+            DROP INDEX IF EXISTS project_is_public;
+        </rollback>
+    </changeSet>
 </databaseChangeLog>

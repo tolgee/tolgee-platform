@@ -193,6 +193,10 @@ export const visitProjectSettings = (projectId: number) => {
   return cy.visit(`${HOST}/projects/${projectId}/manage/edit`);
 };
 
+export const visitProjectSettingsAdvanced = (projectId: number) => {
+  return cy.visit(`${HOST}/projects/${projectId}/manage/edit/advanced`);
+};
+
 export const visitProjectLanguages = (projectId: number) => {
   return cy.visit(`${HOST}/projects/${projectId}/languages`);
 };
