@@ -57,6 +57,7 @@ class ProjectModelAssembler(
       useNamespaces = view.useNamespaces,
       useBranching = view.useBranching,
       useQaChecks = view.useQaChecks,
+      public = view.public,
       defaultNamespace = defaultNamespace,
       directPermission = view.directPermission?.let { permissionModelAssembler.toModel(it) },
       computedPermission = computedPermissionModelAssembler.toModel(computedPermissions),
