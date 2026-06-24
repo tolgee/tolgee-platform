@@ -3279,6 +3279,245 @@ export interface components {
       /** Format: int64 */
       webhookConfigId?: number;
     };
+    AppWebhookPayload_TRANSLATION_MEMORY_ASSIGN_PROJECT: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "TRANSLATION_MEMORY_ASSIGN_PROJECT";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_TRANSLATION_MEMORY_COPY_FROM_PROJECT: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "TRANSLATION_MEMORY_COPY_FROM_PROJECT";
+        modifiedEntities?: { [key: string]: unknown };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_TRANSLATION_MEMORY_CREATE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "TRANSLATION_MEMORY_CREATE";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_TRANSLATION_MEMORY_DELETE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "TRANSLATION_MEMORY_DELETE";
+        modifiedEntities?: {
+          TranslationMemory?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "TranslationMemory";
+            modifications?: components["schemas"]["TranslationMemoryModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_TRANSLATION_MEMORY_ENTRY_CREATE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "TRANSLATION_MEMORY_ENTRY_CREATE";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_TRANSLATION_MEMORY_ENTRY_DELETE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "TRANSLATION_MEMORY_ENTRY_DELETE";
+        modifiedEntities?: { [key: string]: unknown };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_TRANSLATION_MEMORY_ENTRY_UPDATE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "TRANSLATION_MEMORY_ENTRY_UPDATE";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_TRANSLATION_MEMORY_IMPORT: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "TRANSLATION_MEMORY_IMPORT";
+        modifiedEntities?: { [key: string]: unknown };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_TRANSLATION_MEMORY_UNASSIGN_PROJECT: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "TRANSLATION_MEMORY_UNASSIGN_PROJECT";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_TRANSLATION_MEMORY_UPDATE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "TRANSLATION_MEMORY_UPDATE";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_TRANSLATION_MEMORY_UPDATE_PROJECT_CONFIG: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "TRANSLATION_MEMORY_UPDATE_PROJECT_CONFIG";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
     AppWebhookPayload_UNKNOWN: {
       activityData?: components["schemas"]["ProjectActivityModel"] & {
         /** @enum {string} */
@@ -9182,6 +9421,11 @@ export interface components {
       type: "PROJECT" | "SHARED";
       /** @description When true, only translations in REVIEWED state contribute to this TM. */
       writeOnlyReviewed: boolean;
+    };
+    TranslationMemoryModifications: {
+      defaultPenalty?: components["schemas"]["PropertyModification"];
+      name?: components["schemas"]["PropertyModification"];
+      writeOnlyReviewed?: components["schemas"]["PropertyModification"];
     };
     TranslationMemoryRowCellModel: {
       /**
