@@ -16,6 +16,7 @@ import io.tolgee.formats.json.out.JsonFileExporterWithManifest
 import io.tolgee.formats.po.out.PoFileExporter
 import io.tolgee.formats.properties.out.PropertiesFileExporter
 import io.tolgee.formats.resx.out.ResxExporter
+import io.tolgee.formats.unity.out.UnityExporter
 import io.tolgee.formats.xliff.out.XliffFileExporter
 import io.tolgee.formats.xlsx.out.XlsxFileExporter
 import io.tolgee.formats.xmlResources.out.XmlResourcesExporter
@@ -191,6 +192,15 @@ class FileExporterFactory(
           exportParams,
           projectIcuPlaceholdersSupport,
           pathProvider = getFilePathProvider(exportParams, data),
+        )
+      }
+
+      ExportFormat.UNITY -> {
+        UnityExporter(
+          data,
+          exportParams,
+          projectIcuPlaceholdersSupport,
+          filePathProvider = getFilePathProvider(exportParams, data),
         )
       }
     }

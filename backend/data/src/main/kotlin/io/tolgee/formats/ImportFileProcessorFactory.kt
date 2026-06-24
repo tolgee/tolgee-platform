@@ -14,6 +14,9 @@ import io.tolgee.formats.json.`in`.JsonFileProcessor
 import io.tolgee.formats.po.`in`.PoFileProcessor
 import io.tolgee.formats.properties.`in`.PropertiesFileProcessor
 import io.tolgee.formats.resx.`in`.ResxProcessor
+import io.tolgee.formats.unity.`in`.UnityArchiveProcessor
+import io.tolgee.formats.unity.`in`.UnityAwareArchiveProcessor
+import io.tolgee.formats.unity.`in`.UnityProcessor
 import io.tolgee.formats.xliff.`in`.XliffFileProcessor
 import io.tolgee.formats.xlsx.`in`.XlsxFileProcessor
 import io.tolgee.formats.xmlResources.`in`.XmlResourcesProcessor
@@ -33,7 +36,11 @@ class ImportFileProcessorFactory(
 ) {
   fun getArchiveProcessor(file: ImportFileDto): ImportArchiveProcessor {
     return when (file.name.fileNameExtension) {
-      "zip" -> ZipTypeProcessor(tolgeeProperties.maxUploadFileSize.toLong() * 1024L)
+      "zip" ->
+        UnityAwareArchiveProcessor(
+          ZipTypeProcessor(tolgeeProperties.maxUploadFileSize.toLong() * 1024L),
+          UnityArchiveProcessor(objectMapper, yamlObjectMapper),
+        )
       else -> throw ImportCannotParseFileException(file.name, "No matching processor")
     }
   }
@@ -70,6 +77,7 @@ class ImportFileProcessorFactory(
       ImportFileFormat.RESX -> ResxProcessor(context)
       ImportFileFormat.XLSX -> XlsxFileProcessor(context)
       ImportFileFormat.XCSTRINGS -> XcstringsFileProcessor(context, objectMapper)
+      ImportFileFormat.UNITY -> UnityProcessor(context, objectMapper)
     }
   }
 

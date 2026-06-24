@@ -20,8 +20,31 @@ class ExportFileStructureTemplateProvider(
 
   private fun validateTemplate() {
     validateLanguageTagInTemplate()
+    validateLanguageTagNotForbidden()
     validateExtensionInTemplate()
+    validateExtensionNotForbidden()
     validateNamespaceInTemplate()
+  }
+
+  private fun validateLanguageTagNotForbidden() {
+    if (!params.format.forbidLanguageTagInTemplate) {
+      return
+    }
+    val forbidden = languageTagPlaceholders.filter { getTemplate().contains(it.placeholder) }
+    if (forbidden.isEmpty()) {
+      return
+    }
+    throw BadRequestException(Message.FORBIDDEN_PLACEHOLDER_IN_TEMPLATE, forbidden)
+  }
+
+  private fun validateExtensionNotForbidden() {
+    if (!params.format.forbidExtensionInTemplate) {
+      return
+    }
+    if (!getTemplate().contains(ExportFilePathPlaceholder.EXTENSION.placeholder)) {
+      return
+    }
+    throw BadRequestException(Message.FORBIDDEN_PLACEHOLDER_IN_TEMPLATE, listOf(ExportFilePathPlaceholder.EXTENSION))
   }
 
   /**
@@ -45,19 +68,10 @@ class ExportFileStructureTemplateProvider(
 
   private fun validateLanguageTagInTemplate() {
     if (!params.format.multiLanguage) {
-      val containsLanguageTag =
-        arrayOf(
-          ExportFilePathPlaceholder.LANGUAGE_TAG,
-          ExportFilePathPlaceholder.ANDROID_LANGUAGE_TAG,
-          ExportFilePathPlaceholder.SNAKE_LANGUAGE_TAG,
-        ).any { getTemplate().contains(it.placeholder) }
+      val containsLanguageTag = languageTagPlaceholders.any { getTemplate().contains(it.placeholder) }
 
       if (!containsLanguageTag) {
-        throw getMissingPlaceholderException(
-          ExportFilePathPlaceholder.LANGUAGE_TAG,
-          ExportFilePathPlaceholder.ANDROID_LANGUAGE_TAG,
-          ExportFilePathPlaceholder.SNAKE_LANGUAGE_TAG,
-        )
+        throw getMissingPlaceholderException(*languageTagPlaceholders)
       }
     }
   }
@@ -77,5 +91,14 @@ class ExportFileStructureTemplateProvider(
 
   private val namespaceCount by lazy {
     translations.map { it.key.namespace }.distinct().size
+  }
+
+  companion object {
+    private val languageTagPlaceholders =
+      arrayOf(
+        ExportFilePathPlaceholder.LANGUAGE_TAG,
+        ExportFilePathPlaceholder.ANDROID_LANGUAGE_TAG,
+        ExportFilePathPlaceholder.SNAKE_LANGUAGE_TAG,
+      )
   }
 }

@@ -1,0 +1,33 @@
+{
+  "collectionName": "Localization",
+  "keys": [
+    {
+      "name": "greeting",
+      "keyId": 12345,
+      "sharedTableDataGuid": "1234567890abcdef1234567890abcdef",
+      "isSmart": false,
+      "translations": [
+        { "locale": "en", "value": "Hello" },
+        { "locale": "cs", "value": "Ahoj" }
+      ]
+    },
+    {
+      "name": "welcome",
+      "keyId": 23456,
+      "sharedTableDataGuid": "1234567890abcdef1234567890abcdef",
+      "isSmart": true,
+      "translations": [
+        { "locale": "en", "value": "Hi {name}" }
+      ]
+    },
+    {
+      "name": "apples",
+      "keyId": 34567,
+      "sharedTableDataGuid": "1234567890abcdef1234567890abcdef",
+      "isSmart": true,
+      "translations": [
+        { "locale": "en", "pluralForms": { "one": "{} apple", "other": "{} apples" } }
+      ]
+    }
+  ]
+}

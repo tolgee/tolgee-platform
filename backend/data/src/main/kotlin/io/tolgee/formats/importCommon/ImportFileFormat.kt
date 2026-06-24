@@ -16,6 +16,7 @@ enum class ImportFileFormat(
   CSV(arrayOf("csv")),
   RESX(arrayOf("resx")),
   XLSX(arrayOf("xls", "xlsx")),
+  UNITY(arrayOf("unity")),
   ;
 
   companion object {

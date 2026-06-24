@@ -8,6 +8,7 @@ import io.tolgee.formats.paramConvertors.`in`.PhpToIcuPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.`in`.PythonBraceToIcuPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.`in`.PythonToIcuPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.`in`.RubyToIcuPlaceholderConvertor
+import io.tolgee.formats.paramConvertors.`in`.UnityToIcuPlaceholderConvertor
 import io.tolgee.formats.po.`in`.PoToIcuMessageConvertor
 
 enum class ImportFormat(
@@ -262,6 +263,14 @@ enum class ImportFormat(
   XLSX_RUBY(
     ImportFileFormat.XLSX,
     messageConvertorOrNull = GenericMapPluralImportRawDataConvertor { RubyToIcuPlaceholderConvertor() },
+  ),
+
+  UNITY(
+    ImportFileFormat.UNITY,
+    messageConvertorOrNull =
+      GenericMapPluralImportRawDataConvertor(optimizePlurals = true, canContainIcu = false) {
+        UnityToIcuPlaceholderConvertor()
+      },
   ),
 
   ;
