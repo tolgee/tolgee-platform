@@ -39,11 +39,22 @@ class OpenApiGroupBuilder(
 
     addExtensions()
 
+    addAppWebhooks()
+
     cleanUnusedModels()
 
     sortOutput()
 
     return@lazy builder.build()
+  }
+
+  private fun addAppWebhooks() {
+    if (groupName != ALL_INTERNAL_GROUP_NAME) return
+    val customizer = AppWebhookOpenApiCustomizer()
+    builder.addOpenApiCustomizer { openAPI ->
+      customizer.registerPropertyModificationSchema(openAPI)
+      customizer.apply(openAPI)
+    }
   }
 
   private fun sortOutput() {
@@ -289,5 +300,6 @@ class OpenApiGroupBuilder(
     const val PROJECT_ID_PARAMETER = "projectId"
     private val PROJECTS_PATH_REGEX = "^/(?:api|v2)/projects?/.*".toRegex()
     val PUBLIC_ENDPOINT_REGEX = "^/(?:api|v2)/public/.*".toRegex()
+    const val ALL_INTERNAL_GROUP_NAME = "All Internal - for Tolgee Web application"
   }
 }
