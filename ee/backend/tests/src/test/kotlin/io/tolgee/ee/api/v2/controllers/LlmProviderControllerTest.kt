@@ -1,20 +1,34 @@
 package io.tolgee.ee.api.v2.controllers
 
+import io.tolgee.configuration.tolgee.WebhookProperties
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProperties
+import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.PromptTestData
 import io.tolgee.dtos.request.llmProvider.LlmProviderRequest
 import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andHasErrorMessage
+import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.node
 import io.tolgee.model.enums.LlmProviderType
+import io.tolgee.repository.LlmProviderRepository
 import io.tolgee.testing.AuthorizedControllerTest
+import io.tolgee.testing.assert
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 
 class LlmProviderControllerTest : AuthorizedControllerTest() {
   private lateinit var testData: PromptTestData
+
+  @Autowired
+  private lateinit var llmProviderRepository: LlmProviderRepository
+
+  @Autowired
+  private lateinit var webhookProperties: WebhookProperties
 
   @BeforeEach
   fun setup() {
@@ -29,6 +43,12 @@ class LlmProviderControllerTest : AuthorizedControllerTest() {
         ),
       )
     this.userAccount = testData.organizationOwner.self
+  }
+
+  @AfterEach
+  fun resetSsrfProperties() {
+    internalProperties.disableUrlSsrfProtection = true
+    webhookProperties.allowLocalAddresses = false
   }
 
   @Test
@@ -81,6 +101,16 @@ class LlmProviderControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `keeps SSRF protection for provider url when webhook local addresses are allowed`() {
+    internalProperties.disableUrlSsrfProtection = false
+    webhookProperties.allowLocalAddresses = true
+    performAuthPost(
+      "/v2/organizations/${testData.organization.self.id}/llm-providers",
+      LlmProviderRequest(name = "local-provider", type = LlmProviderType.OPENAI, apiUrl = "http://localhost"),
+    ).andIsBadRequest.andHasErrorMessage(Message.URL_NOT_VALID)
+  }
+
+  @Test
   fun `denies llm provider creation to org member`() {
     this.userAccount = testData.organizationMember.self
     performAuthPost(
@@ -120,6 +150,27 @@ class LlmProviderControllerTest : AuthorizedControllerTest() {
       node("type").isEqualTo("OPENAI_AZURE")
       node("apiUrl").isEqualTo("https://updated.example.com")
     }
+  }
+
+  @Test
+  fun `cannot update provider of another organization`() {
+    val foreignProviderId = testData.unrelatedLlmProvider.self.id
+    val foreignOrgId = testData.unrelatedOrganization.self.id
+    performAuthPut(
+      "/v2/organizations/${testData.organization.self.id}/llm-providers/$foreignProviderId",
+      LlmProviderRequest(
+        name = "updated-by-other-org",
+        type = LlmProviderType.OPENAI_AZURE,
+        apiUrl = "https://other-org.example.com",
+      ),
+    ).andIsNotFound
+
+    // the foreign provider must be unchanged and still belong to the unrelated organization
+    val provider = llmProviderRepository.findById(foreignProviderId).get()
+    provider.name.assert.isEqualTo("unrelated-organization-provider")
+    provider.type.assert.isEqualTo(LlmProviderType.OPENAI)
+    provider.organization.id.assert
+      .isEqualTo(foreignOrgId)
   }
 
   @Test

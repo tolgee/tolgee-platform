@@ -22,7 +22,11 @@ import type { useTranslationsService } from './useTranslationsService';
 import type { useRefsService } from './useRefsService';
 import { AfterCommand, ChangeValue, SetEdit } from '../types';
 import type { useTaskService } from './useTaskService';
-import { composeValue, taskEditControlsShouldBeVisible } from './utils';
+import {
+  composeValue,
+  resolvePluralParameter,
+  taskEditControlsShouldBeVisible,
+} from './utils';
 import type { usePositionService } from './usePositionService';
 import { TranslationViewModel } from '../../ToolsPanel/common/types';
 import { getTranslationPermissions } from '../../cell/editorMainActions/getEditorActions';
@@ -310,7 +314,10 @@ export const useEditService = ({
     ) {
       const raw = !project.icuPlaceholders;
       const format = getTolgeeFormat(found.translation.text, true, raw);
-      format.parameter = found.keyPluralArgName ?? 'value';
+      format.parameter = resolvePluralParameter(
+        found.keyPluralArgName,
+        format.parameter
+      );
       format.variants[params.pluralVariant] = correctedVariant;
       value = tolgeeFormatGenerateIcu(format, raw);
     } else {

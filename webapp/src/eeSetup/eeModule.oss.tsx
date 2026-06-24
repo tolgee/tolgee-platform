@@ -39,6 +39,7 @@ export const TaskFilterPopover = Empty;
 export const TaskAllDonePlaceholder = Empty;
 export const QaBadge = (_props: QaBadgeProps) => Empty() as JSX.Element;
 export const useQaChecksEnabled = (): boolean => false;
+export const useQaDisabledLanguageIds = (): Set<number> => new Set();
 export const QaLanguageStats = (_props: QaLanguageStatsProps) =>
   Empty() as JSX.Element;
 export const QaCheckItem = Empty;
@@ -91,6 +92,8 @@ export const useGlossaryTermHighlights = (
 
 export const GlossaryTermPreview: React.VFC<GlossaryTermPreviewProps> =
   NotIncludedInOss('Glossaries');
+export const ProjectSettingsTranslationMemory = Empty;
+
 export const useAddProjectSettingsTabs =
   (projectId: number) => (existingItems) =>
     existingItems;

@@ -377,6 +377,27 @@ class BatchJobTestUtil(
     }
   }
 
+  fun runChunkedJobInUnrelatedProject(keyCount: Int): BatchJob {
+    return executeInNewTransaction(transactionManager) {
+      batchJobService.startJob(
+        request =
+          PreTranslationByTmRequest().apply {
+            keyIds = (1L..keyCount).map { it }
+            targetLanguageIds =
+              listOf(
+                testData.unrelatedProject
+                  .getLanguageByTag("cs")!!
+                  .self.id,
+              )
+          },
+        project = testData.unrelatedProject.self,
+        author = testData.user,
+        type = BatchJobType.PRE_TRANSLATE_BT_TM,
+        isHidden = false,
+      )
+    }
+  }
+
   fun runMtJob(
     keyCount: Int,
     author: UserAccount = testData.user,

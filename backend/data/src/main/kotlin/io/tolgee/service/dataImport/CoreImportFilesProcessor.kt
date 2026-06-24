@@ -243,6 +243,7 @@ class CoreImportFilesProcessor(
         importService.saveLanguages(this.languages.values)
       }
       importDataManager.populateStoredTranslations(entry.value)
+      importDataManager.buildTranslationsByKeyNameCache(entry.value)
     }
   }
 
@@ -310,7 +311,7 @@ class CoreImportFilesProcessor(
   }
 
   private fun FileProcessorContext.getOrCreateKey(name: String): ImportKey {
-    return importDataManager.storedKeys.computeIfAbsent(this.fileEntity to name) {
+    return importDataManager.storedKeysComputeIfAbsent(this.fileEntity, name) {
       this.keys
         .computeIfAbsent(name) {
           ImportKey(name = name, this.fileEntity)
@@ -335,6 +336,8 @@ class CoreImportFilesProcessor(
     if (saveData) {
       importDataManager.saveAllStoredTranslations()
     }
+    // Cache this file's languages for O(1) cross-file collision lookups by subsequent files
+    this.languages.values.forEach { importDataManager.buildTranslationsByKeyNameCache(it) }
   }
 
   private fun FileProcessorContext.shouldImportKey(keyName: String): Boolean {

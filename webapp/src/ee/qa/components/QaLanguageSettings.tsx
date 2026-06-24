@@ -9,11 +9,7 @@ import {
   TABLE_LAST_CELL,
 } from 'tg.component/languages/tableStyles';
 import { QaLanguageRow } from './QaLanguageRow';
-import { components } from 'tg.service/apiSchema.generated';
-
-type QaSettings = components['schemas']['QaSettingsRequest'];
-type QaCheckType = components['schemas']['QaIssueModel']['type'];
-type QaCheckSeverity = QaSettings['settings'][keyof QaSettings['settings']];
+import { QaCheckType, QaCheckSeverity } from 'tg.service/apiSchemaTypes';
 
 type Props = {
   globalSettings: Record<QaCheckType, QaCheckSeverity>;

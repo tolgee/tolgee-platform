@@ -1,5 +1,6 @@
 package io.tolgee.service.qa
 
+import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.model.enums.qa.QaCheckType
 import org.springframework.stereotype.Service
 
@@ -10,13 +11,16 @@ class QaCheckBatchServiceOssStub : QaCheckBatchService {
     keyId: Long,
     languageId: Long,
     checkTypes: List<QaCheckType>?,
-    enabledCheckTypes: Set<QaCheckType>?,
   ) {
     // No-op: QA checks are an EE feature
   }
 
-  override fun getEnabledCheckTypesForLanguage(
+  override fun runChecksAndPersistChunk(
     projectId: Long,
-    languageId: Long,
-  ): Set<QaCheckType> = emptySet()
+    checkTypes: List<QaCheckType>?,
+    items: List<BatchTranslationTargetItem>,
+    progressCallback: () -> Unit,
+  ) {
+    // No-op: QA checks are an EE feature
+  }
 }

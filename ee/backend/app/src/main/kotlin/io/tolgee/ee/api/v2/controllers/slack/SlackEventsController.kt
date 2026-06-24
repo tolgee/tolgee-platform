@@ -46,7 +46,7 @@ class SlackEventsController(
     @RequestHeader("X-Slack-Request-Timestamp") timestamp: String,
     @RequestBody payload: String,
   ) {
-    val event: SlackEventDto = validateAndParsePayload(payload, slackSignature, timestamp)
+    val event: SlackEventDto = parseInteractivityPayload(payload, slackSignature, timestamp)
 
     // Since we cannot respond to the event directly, we have to send a message to the channel.
     // Sometimes Tolgee might be unable to do it, because the token might be missing in Tolgee DB.
@@ -112,17 +112,27 @@ class SlackEventsController(
     return null
   }
 
+  private fun parseInteractivityPayload(
+    payload: String,
+    slackSignature: String,
+    timestamp: String,
+  ): SlackEventDto {
+    val decodedPayload = decodePayload(payload)
+    // Redirect buttons are handled by Slack client-side and may not carry a valid signature.
+    if (decodedPayload.contains("\"value\":\"redirect\"")) {
+      return objectMapper.readValue(decodedPayload)
+    }
+    return validateAndParsePayload(payload, slackSignature, timestamp)
+  }
+
   private inline fun <reified T> validateAndParsePayload(
     payload: String,
     slackSignature: String,
     timestamp: String,
   ): T {
-    val decodedPayload = URLDecoder.decode(payload.substringAfter("="), "UTF-8")
-    if (decodedPayload.contains("\"value\":\"redirect\"")) {
-      return objectMapper.readValue(decodedPayload)
-    }
-
     slackRequestValidation.validate(slackSignature, timestamp, payload)
-    return objectMapper.readValue(decodedPayload)
+    return objectMapper.readValue(decodePayload(payload))
   }
+
+  private fun decodePayload(payload: String): String = URLDecoder.decode(payload.substringAfter("="), "UTF-8")
 }

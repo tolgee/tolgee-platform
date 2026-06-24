@@ -4,7 +4,6 @@ import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.BadRequestException
 import org.springframework.stereotype.Component
-import java.net.Inet4Address
 import java.net.InetAddress
 import java.net.URI
 
@@ -23,7 +22,10 @@ class UrlSecurity(
    *
    * Skipped when tolgee.internal.disable-url-ssrf-protection is true (E2E tests use localhost URLs).
    */
-  fun validateUrl(url: String) {
+  fun validateUrl(
+    url: String,
+    allowLocalAddresses: Boolean = false,
+  ) {
     if (internalProperties.disableUrlSsrfProtection) return
 
     val uri =
@@ -39,6 +41,8 @@ class UrlSecurity(
     }
 
     val host = uri.host ?: throw BadRequestException(Message.URL_NOT_VALID)
+
+    if (allowLocalAddresses) return
 
     val lowerHost = host.lowercase()
     if (lowerHost == "localhost" || lowerHost.endsWith(".localhost")) {

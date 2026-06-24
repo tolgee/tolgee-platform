@@ -12,6 +12,7 @@ import io.tolgee.ee.service.ContentStorageService
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
+import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
@@ -298,6 +299,50 @@ class ContentStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") 
           ),
       ),
     ).andIsOk
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `cannot update storage of another project`() {
+    val foreignStorageId = testData.unrelatedAzureContentStorage.self.id
+    performProjectAuthPut(
+      "content-storages/$foreignStorageId",
+      mapOf(
+        "name" to "Updated by other project",
+        "azureContentStorageConfig" to
+          mapOf(
+            "connectionString" to "otherProjectConnectionString",
+            "containerName" to "otherProjectContainerName",
+          ),
+      ),
+    ).andIsNotFound
+
+    executeInNewTransaction {
+      val storage = contentStorageService.get(foreignStorageId)
+      storage.name.assert.isEqualTo("Unrelated Azure")
+      storage.azureContentStorageConfig!!
+        .connectionString.assert
+        .isEqualTo("unrelatedConnectionString")
+      storage.azureContentStorageConfig!!
+        .containerName.assert
+        .isEqualTo("unrelatedContainerName")
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `cannot test storage of another project`() {
+    val foreignStorageId = testData.unrelatedAzureContentStorage.self.id
+    performProjectAuthPost(
+      "content-storages/$foreignStorageId/test",
+      mapOf(
+        "name" to "azure",
+        "azureContentStorageConfig" to
+          mapOf(
+            "containerName" to "fakeContainerName",
+          ),
+      ),
+    ).andIsNotFound
   }
 
   private fun performCreate(): Pair<ContentStorage, ResultActions> {

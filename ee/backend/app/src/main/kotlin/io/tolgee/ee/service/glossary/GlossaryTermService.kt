@@ -14,6 +14,7 @@ import io.tolgee.ee.repository.glossary.GlossaryTermRepository
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.glossary.Glossary
 import io.tolgee.model.glossary.GlossaryTerm
+import io.tolgee.model.glossary.GlossaryTerm.Companion.hasNoFlags
 import io.tolgee.model.glossary.GlossaryTermTranslation
 import io.tolgee.model.glossary.GlossaryTermTranslation.Companion.WORD_REGEX
 import io.tolgee.service.machineTranslation.MtGlossaryTermsProvider
@@ -292,13 +293,24 @@ class GlossaryTermService(
   ): Set<TranslationGlossaryItem> =
     getHighlights(project.organizationOwnerId, project.id, text, sourceLanguageTag)
       .filter { it.value.text.isNotEmpty() }
-      .map { highlight ->
+      .mapNotNull { highlight ->
         val term = highlight.value.term
-        val targetTranslation = term.translations.find { it.languageTag == targetLanguageTag }
+        val target = term.translations.find { it.languageTag == targetLanguageTag }?.text
+        val description = term.description
+
+        if (
+          target.isNullOrBlank() &&
+          description.isBlank() &&
+          term.hasNoFlags
+        ) {
+          // Term doesn't bring anything of value - passing it could confuse (AI) translators
+          return@mapNotNull null
+        }
+
         TranslationGlossaryItem(
           source = highlight.value.text,
-          target = targetTranslation?.text,
-          description = term.description,
+          target = target,
+          description = description,
           isNonTranslatable = term.flagNonTranslatable,
           isCaseSensitive = term.flagCaseSensitive,
           isAbbreviation = term.flagAbbreviation,

@@ -40,7 +40,8 @@ class LanguageToolServiceTest {
         override fun readTimeout(readTimeout: java.time.Duration): RestTemplateBuilder = this
       }
 
-    service = LanguageToolService(tolgeeProperties, builder)
+    val apiClient = LanguageToolApiClient(tolgeeProperties, builder)
+    service = LanguageToolService(apiClient)
   }
 
   private fun mockLanguagesResponse(vararg languages: LanguageToolLanguageInfo) {

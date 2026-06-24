@@ -13,6 +13,7 @@ import io.tolgee.development.testDataBuilder.builders.PatBuilder
 import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.builders.TranslationBuilder
+import io.tolgee.development.testDataBuilder.builders.TranslationMemoryBuilder
 import io.tolgee.development.testDataBuilder.builders.UserAccountBuilder
 import io.tolgee.development.testDataBuilder.builders.UserPreferencesBuilder
 import io.tolgee.development.testDataBuilder.builders.slack.SlackUserConnectionBuilder
@@ -131,6 +132,10 @@ class TestDataService(
       executeInNewTransaction(transactionManager) {
         saveProjectData(builder)
         saveGlossaryData(builder)
+        // Must run before saveTranslationMemoryData — auto-added project TMs are appended to the
+        // builder tree and get persisted by the regular TM pass alongside fixture-declared ones.
+        ensureProjectTms(builder)
+        saveTranslationMemoryData(builder)
         saveNotifications(builder)
         finalize()
       }
@@ -289,6 +294,59 @@ class TestDataService(
     val builders = builders.flatMap { it.data.translations }
     builders.forEach {
       entityManager.persist(it.self)
+    }
+  }
+
+  private fun saveTranslationMemoryData(builder: TestDataBuilder) {
+    val builders = saveTranslationMemories(builder)
+    saveTranslationMemoryDependants(builders)
+  }
+
+  private fun saveTranslationMemories(builder: TestDataBuilder): List<TranslationMemoryBuilder> {
+    val builders = builder.data.organizations.flatMap { it.data.translationMemories }
+    builders.filter { it.self.id == 0L }.forEach { entityManager.persist(it.self) }
+    return builders
+  }
+
+  private fun saveTranslationMemoryDependants(builders: List<TranslationMemoryBuilder>) {
+    saveTranslationMemoryProjectAssignments(builders)
+    saveTranslationMemoryEntries(builders)
+  }
+
+  private fun saveTranslationMemoryProjectAssignments(builders: List<TranslationMemoryBuilder>) {
+    builders
+      .flatMap { it.data.projectAssignments }
+      .filter { it.self.id == 0L }
+      .forEach { entityManager.persist(it.self) }
+  }
+
+  private fun saveTranslationMemoryEntries(builders: List<TranslationMemoryBuilder>) {
+    builders
+      .flatMap { it.data.entries }
+      .filter { it.self.id == 0L }
+      .forEach { entityManager.persist(it.self) }
+  }
+
+  /**
+   * Mirrors [io.tolgee.service.project.ProjectCreationService] which creates a project TM for
+   * every newly-created project. Builders bypass `ProjectCreationService` and persist projects
+   * directly, so without this step legacy fixtures lack a project TM and the suggestion path
+   * (which assumes the invariant "every project has a project TM") returns empty matches.
+   *
+   * Skips fixtures with a soft-deleted project or no organization owner — those represent
+   * incomplete setups (deletion-tests, in-progress edits) where adding a TM would just confuse
+   * the test. Defers to [ProjectBuilder.ensureProjectTm], which itself short-circuits when the
+   * fixture explicitly declared a PROJECT-type TM.
+   */
+  private fun ensureProjectTms(builder: TestDataBuilder) {
+    builder.data.projects.forEach { projectBuilder ->
+      val project = projectBuilder.self
+      if (project.deletedAt != null) return@forEach
+      // organizationOwner is a lateinit var on Project; some fixtures construct projects without
+      // setting it (in-progress edits, partial templates) and accessing the field would throw.
+      val ownerSet = runCatching { project.organizationOwner }.isSuccess
+      if (!ownerSet) return@forEach
+      projectBuilder.ensureProjectTm()
     }
   }
 

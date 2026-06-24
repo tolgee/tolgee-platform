@@ -17,6 +17,26 @@ stream_over_http_enabled: true
 server:
   http_listen_port: 3200
   log_level: info
+  # Default 16 MiB is too small to fetch any trace that approaches our
+  # 20 MB max_bytes_per_trace cap. The /api/traces/<id> HTTP handler proxies
+  # through internal gRPC calls (query_frontend → querier → ingester); every
+  # hop must accept the larger message size. 32 MiB matches the per-trace
+  # ceiling with comfortable headroom.
+  grpc_server_max_send_msg_size: 33554432
+  grpc_server_max_recv_msg_size: 33554432
+  http_server_read_timeout: 60s
+  http_server_write_timeout: 60s
+
+querier:
+  frontend_worker:
+    grpc_client_config:
+      max_send_msg_size: 33554432
+      max_recv_msg_size: 33554432
+
+ingester_client:
+  grpc_client_config:
+    max_send_msg_size: 33554432
+    max_recv_msg_size: 33554432
 
 query_frontend:
   search:
@@ -78,5 +98,11 @@ storage:
 
 overrides:
   defaults:
+    global:
+      # Default 5 MB is too small once Tolgee batch jobs produce traces with
+      # large db.statement / activity-log spans. 20 MB gives ~5x headroom over
+      # observed peak (100k-key import ≈ 4.4 MB) while still tripping fast on
+      # any regression that re-introduces framework noise.
+      max_bytes_per_trace: 20971520  # 20 MB
     metrics_generator:
       processors: [service-graphs, span-metrics, local-blocks]

@@ -3,7 +3,7 @@ import clsx from 'clsx';
 import React, { useEffect } from 'react';
 import { useLoadingRegister } from 'tg.component/GlobalLoading';
 
-const StyledProgress = styled('div')<{ loading?: string; finish?: string }>`
+const StyledProgress = styled('div')`
   height: 4px;
   width: 100%;
   border-radius: 2px;
@@ -18,11 +18,10 @@ const StyledProgress = styled('div')<{ loading?: string; finish?: string }>`
     top: 0;
     left: 0;
     background-color: ${({ theme }) => theme.palette.import.progressWorking};
-    transition: width 1s steps(1, jump-end),
-      background-color 1s steps(1, jump-end);
+    transition: width 0.3s ease-out;
   }
 
-  &.loading::before {
+  &.indeterminate::before {
     width: 99%;
     transition: width 30s cubic-bezier(0.15, 0.735, 0.095, 1);
   }
@@ -37,19 +36,34 @@ const StyledProgress = styled('div')<{ loading?: string; finish?: string }>`
 export const ImportProgressBar = (props: {
   loading: boolean;
   loaded: boolean;
+  importedKeys?: number | null;
+  totalKeys?: number | null;
+  /** When true, shows a slow animated fill (0→99%) instead of real progress.
+   *  Used during file upload where no server-side progress is available. */
+  indeterminate?: boolean;
 }) => {
-  const [transitionLoading, setTransitionLoading] = React.useState(false);
+  const [delayedLoading, setDelayedLoading] = React.useState(false);
 
   useLoadingRegister(props.loading);
 
   useEffect(() => {
-    setTimeout(() => {
-      setTransitionLoading(true);
-    }, 10);
-  }, []);
+    if (props.loading) {
+      const timeout = setTimeout(() => setDelayedLoading(true), 10);
+      return () => clearTimeout(timeout);
+    }
+    setDelayedLoading(false);
+  }, [props.loading]);
+
+  const progress =
+    props.importedKeys != null && props.totalKeys && props.totalKeys > 0
+      ? Math.round((props.importedKeys / props.totalKeys) * 100)
+      : null;
+
+  const hasProgress = progress != null && progress > 0;
 
   const classes = clsx({
-    loading: transitionLoading && props.loading,
+    indeterminate:
+      delayedLoading && props.indeterminate && !hasProgress && !props.loaded,
     finish: props.loaded,
   });
 
@@ -58,7 +72,19 @@ export const ImportProgressBar = (props: {
       px={'200px'}
       sx={{ width: '100%', display: 'flex', alignItems: 'center' }}
     >
-      <StyledProgress data-cy="import-progress" className={classes} />
+      <StyledProgress
+        data-cy="import-progress"
+        className={classes}
+        sx={
+          hasProgress && !props.loaded
+            ? {
+                '&::before': {
+                  width: `${progress}% !important`,
+                },
+              }
+            : undefined
+        }
+      />
     </Box>
   );
 };

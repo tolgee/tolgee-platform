@@ -76,12 +76,12 @@ fun Element.attr(
   value: String?,
 ) {
   val attr = this.ownerDocument.createAttribute(name)
-  attr.value = value ?: ""
+  attr.value = sanitizeXmlText(value ?: "")
   this.setAttributeNode(attr)
 }
 
 fun Element.appendXmlOrText(content: String?) {
-  val contentNotNull = content ?: ""
+  val contentNotNull = sanitizeXmlText(content ?: "")
   try {
     val documentBuilder = XmlSecurity.newSecureDocumentBuilderFactory().newDocumentBuilder()
     val doc: Document = documentBuilder.parse(InputSource(StringReader("<root>$contentNotNull</root>")))

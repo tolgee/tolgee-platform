@@ -7,17 +7,17 @@ import io.tolgee.events.OnEntityPreUpdate
 import io.tolgee.model.SoftDeletable
 import io.tolgee.model.translation.Translation
 
-fun EntityPreCommitEvent.getUsageIncreaseAmount(): Long {
+fun EntityPreCommitEvent<*>.getUsageIncreaseAmount(): Long {
   return when (this) {
-    is OnEntityPrePersist -> {
+    is OnEntityPrePersist<*> -> {
       1
     }
 
-    is OnEntityPreDelete -> {
+    is OnEntityPreDelete<*> -> {
       -1
     }
 
-    is OnEntityPreUpdate -> {
+    is OnEntityPreUpdate<*> -> {
       val softDeleteChange = getSoftDeleteUsageChange()
       if (softDeleteChange != 0L) return softDeleteChange
 
@@ -43,13 +43,14 @@ fun EntityPreCommitEvent.getUsageIncreaseAmount(): Long {
   }
 }
 
-private fun OnEntityPreUpdate.getSoftDeleteUsageChange(): Long {
-  if (entity !is SoftDeletable || propertyNames == null || previousState == null) return 0
+private fun OnEntityPreUpdate<*>.getSoftDeleteUsageChange(): Long {
+  val current = entity
+  if (current !is SoftDeletable || propertyNames == null || previousState == null) return 0
   val deletedAtIndex = propertyNames!!.indexOf("deletedAt")
   if (deletedAtIndex < 0) return 0
   @Suppress("UNCHECKED_CAST")
   val oldValue = (previousState as Array<Any?>)[deletedAtIndex]
-  val newValue = entity.deletedAt
+  val newValue = current.deletedAt
   return when {
     oldValue == null && newValue != null -> -1 // soft-delete
     oldValue != null && newValue == null -> 1 // restore

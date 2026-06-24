@@ -1,7 +1,7 @@
 package io.tolgee.service.dataImport
 
 import io.sentry.Sentry
-import io.tolgee.api.IImportSettings
+import io.tolgee.api.IStoredImportSettings
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.component.reporting.BusinessEventPublisher
@@ -39,7 +39,7 @@ import io.tolgee.repository.dataImport.ImportTranslationRepository
 import io.tolgee.repository.dataImport.issues.ImportFileIssueParamRepository
 import io.tolgee.repository.dataImport.issues.ImportFileIssueRepository
 import io.tolgee.service.branching.BranchService
-import io.tolgee.service.dataImport.status.ImportApplicationStatus
+import io.tolgee.service.dataImport.status.ImportApplicationStatusItem
 import io.tolgee.util.PathSecurity
 import io.tolgee.util.getSafeNamespace
 import jakarta.persistence.EntityManager
@@ -126,7 +126,7 @@ class ImportService(
     authorId: Long,
     branch: String? = null,
     forceMode: ForceMode = ForceMode.NO_FORCE,
-    reportStatus: (ImportApplicationStatus) -> Unit = {},
+    reportStatus: (ImportApplicationStatusItem) -> Unit = {},
   ): ImportResult {
     return import(getNotExpired(projectId, authorId, branch), forceMode, reportStatus)
   }
@@ -135,7 +135,7 @@ class ImportService(
   fun import(
     import: Import,
     forceMode: ForceMode = ForceMode.NO_FORCE,
-    reportStatus: (ImportApplicationStatus) -> Unit = {},
+    reportStatus: (ImportApplicationStatusItem) -> Unit = {},
   ): ImportResult {
     Sentry.addBreadcrumb("Import ID: ${import.id}")
     val providedSettingsOrFromDb = importSettingsService.get(import.author, import.project.id)
@@ -556,8 +556,8 @@ class ImportService(
   fun applySettings(
     userAccount: UserAccount,
     projectId: Long,
-    oldSettings: IImportSettings,
-    newSettings: IImportSettings,
+    oldSettings: IStoredImportSettings,
+    newSettings: IStoredImportSettings,
   ) {
     find(projectId, userAccount.id)?.let {
       applySettings(it, oldSettings, newSettings)
@@ -567,13 +567,9 @@ class ImportService(
 
   fun applySettings(
     import: Import,
-    oldSettings: IImportSettings,
-    newSettings: IImportSettings,
+    oldSettings: IStoredImportSettings,
+    newSettings: IStoredImportSettings,
   ) {
     ImportDataManager(applicationContext, import).applySettings(oldSettings, newSettings)
-  }
-
-  fun findTranslationsForPlaceholderConversion(importId: Long): List<ImportTranslation> {
-    return importTranslationRepository.findTranslationsForPlaceholderConversion(importId)
   }
 }

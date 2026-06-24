@@ -40,15 +40,25 @@ export function adjustQaIssuesForVariant<T extends QaVariantIssue>(
   }
   return issues
     .filter((i) => !variant || i.pluralVariant === variant || !i.pluralVariant)
-    .map((i) => ({
-      ...i,
-      positionStart:
-        i.positionStart != null
-          ? i.positionStart - variantOffset
-          : i.positionStart,
-      positionEnd:
-        i.positionEnd != null ? i.positionEnd - variantOffset : i.positionEnd,
-    }));
+    .map((i) => offsetQaIssue(i, variantOffset));
+}
+
+export function offsetQaIssue<T extends QaVariantIssue>(
+  issue: T,
+  offset: number
+) {
+  if (offset === 0) return issue;
+  return {
+    ...issue,
+    positionStart:
+      issue.positionStart != null
+        ? issue.positionStart - offset
+        : issue.positionStart,
+    positionEnd:
+      issue.positionEnd != null
+        ? issue.positionEnd - offset
+        : issue.positionEnd,
+  };
 }
 
 export function getFirstPluralVariantWithQaIssues(

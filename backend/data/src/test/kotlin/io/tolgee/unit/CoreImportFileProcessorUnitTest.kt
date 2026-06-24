@@ -1,11 +1,11 @@
 package io.tolgee.unit
 
+import io.tolgee.api.IImportSettings
 import io.tolgee.component.KeyCustomValuesValidator
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.dtos.dataImport.ImportFileDto
-import io.tolgee.dtos.request.dataImport.ImportSettingsRequest
 import io.tolgee.formats.ImportFileProcessor
 import io.tolgee.formats.ImportFileProcessorFactory
 import io.tolgee.model.Language
@@ -82,11 +82,11 @@ class CoreImportFileProcessorUnitTest {
         applicationContextMock,
         importMock,
         importSettings =
-          ImportSettingsRequest(
-            overrideKeyDescriptions = false,
-            convertPlaceholdersToIcu = true,
-            createNewKeys = false,
-          ),
+          object : IImportSettings {
+            override var overrideKeyDescriptions: Boolean = false
+            override var convertPlaceholdersToIcu: Boolean = true
+            override var createNewKeys: Boolean = false
+          },
       )
 
     whenever(applicationContextMock.getBean(ImportFileProcessorFactory::class.java)).thenReturn(

@@ -8,8 +8,9 @@ import io.tolgee.model.key.Key
  * Test data for [KeyTrashFilterTest].
  *
  * Creates a project with English (base) and German, 10 numbered keys ("key 01"–"key 10") with
- * translations in both languages, a second user with MANAGE permission, and 3 tagged keys
- * ("Key with tag", "Another key with tag", "Key with tag 2").
+ * translations in both languages, a second user with MANAGE permission, 3 tagged keys
+ * ("Key with tag", "Another key with tag", "Key with tag 2"), and one key with a description
+ * ("Key with description").
  *
  * All keys and users are exposed as public fields so tests can reference them directly without
  * calling service lookups.
@@ -31,6 +32,7 @@ class KeyTrashTestData : BaseTestData("franta", "Franta's project") {
   lateinit var keyWithTag: Key
   lateinit var anotherKeyWithTag: Key
   lateinit var keyWithTag2: Key
+  lateinit var keyWithDescription: Key
 
   init {
     root.apply {
@@ -106,6 +108,21 @@ class KeyTrashTestData : BaseTestData("franta", "Franta's project") {
           addTranslation {
             language = englishLanguage
             text = "Key with tag 2 EN"
+          }
+        }.self
+
+      keyWithDescription =
+        addKey {
+          name = "Key with description"
+        }.build {
+          setDescription("A trashed key description")
+          addTranslation {
+            language = germanLanguage
+            text = "Key with description DE"
+          }
+          addTranslation {
+            language = englishLanguage
+            text = "Key with description EN"
           }
         }.self
     }

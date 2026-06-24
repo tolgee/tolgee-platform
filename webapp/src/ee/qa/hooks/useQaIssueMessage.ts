@@ -13,10 +13,10 @@ export function useQaIssueMessage(
   switch (message) {
     case 'qa_empty_translation':
       return t('qa_issue_empty_translation');
-    case 'qa_empty_plural_variant':
+    case 'qa_missing_plural_category':
       return normalizedParams?.variant
-        ? t('qa_issue_empty_plural_variant', normalizedParams)
-        : t('qa_issue_empty_plural_variant_no_params');
+        ? t('qa_issue_missing_plural_category', normalizedParams)
+        : t('qa_issue_missing_plural_category_no_params');
     case 'qa_check_failed':
       return t('qa_check_failed');
     case 'qa_spaces_leading_added':
@@ -103,6 +103,10 @@ export function useQaIssueMessage(
       return normalizedParams?.placeholder
         ? t('qa_issue_placeholders_extra', normalizedParams)
         : t('qa_issue_placeholders_extra_no_params');
+    case 'qa_placeholders_replace':
+      return normalizedParams?.placeholder && normalizedParams?.expected
+        ? t('qa_issue_placeholders_replace', normalizedParams)
+        : t('qa_issue_placeholders_replace_no_params');
     case 'qa_html_tag_missing':
       return normalizedParams?.tag
         ? t('qa_issue_html_tag_missing', normalizedParams)

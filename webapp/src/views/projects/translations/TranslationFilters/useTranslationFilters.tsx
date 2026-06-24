@@ -79,6 +79,18 @@ export const useTranslationFilters = ({
           filterHasNoScreenshot: true,
           filterHasScreenshot: undefined,
         });
+      case 'filterHasDescription':
+        return setFilters({
+          ...filters,
+          filterHasDescription: true,
+          filterHasNoDescription: undefined,
+        });
+      case 'filterHasNoDescription':
+        return setFilters({
+          ...filters,
+          filterHasNoDescription: true,
+          filterHasDescription: undefined,
+        });
       case 'filterHasUnresolvedComments':
         return setFilters({
           ...filters,
@@ -91,17 +103,10 @@ export const useTranslationFilters = ({
           filterHasComments: true,
           filterHasUnresolvedComments: undefined,
         });
-      case 'filterHasQaIssues':
-        return setFilters({
-          ...filters,
-          filterHasQaIssues: true,
-          filterQaCheckTypes: undefined,
-        });
       case 'filterQaCheckTypes':
         return setFilters({
           ...filters,
           filterQaCheckTypes: add(filters.filterQaCheckTypes, value),
-          filterHasQaIssues: undefined,
         });
       case 'filterQaChecksStale':
         return setFilters({
@@ -173,6 +178,16 @@ export const useTranslationFilters = ({
           ...filters,
           filterHasNoScreenshot: undefined,
         });
+      case 'filterHasDescription':
+        return setFilters({
+          ...filters,
+          filterHasDescription: undefined,
+        });
+      case 'filterHasNoDescription':
+        return setFilters({
+          ...filters,
+          filterHasNoDescription: undefined,
+        });
       case 'filterHasUnresolvedComments':
         return setFilters({
           ...filters,
@@ -182,12 +197,6 @@ export const useTranslationFilters = ({
         return setFilters({
           ...filters,
           filterHasComments: undefined,
-        });
-      case 'filterHasQaIssues':
-        return setFilters({
-          ...filters,
-          filterHasQaIssues: undefined,
-          filterQaCheckTypes: undefined,
         });
       case 'filterQaCheckTypes':
         return setFilters({
@@ -231,8 +240,9 @@ export const useTranslationFilters = ({
     filterNoNamespace: filters.filterNoNamespace,
     filterHasScreenshot: filters.filterHasScreenshot,
     filterHasNoScreenshot: filters.filterHasNoScreenshot,
+    filterHasDescription: filters.filterHasDescription,
+    filterHasNoDescription: filters.filterHasNoDescription,
     filterDeletedByUserId: filters.filterDeletedByUserId,
-    filterQaCheckType: filters.filterQaCheckTypes,
   };
 
   // filters dependant on selected languages
@@ -250,19 +260,33 @@ export const useTranslationFilters = ({
           tag
         );
       }
-      if (filters.filterHasQaIssues) {
-        filtersQuery.filterHasQaIssuesInLang = add(
-          filtersQuery.filterHasQaIssuesInLang,
-          tag
-        );
-      }
-      if (filters.filterQaChecksStale) {
-        filtersQuery.filterQaChecksStaleInLang = add(
-          filtersQuery.filterQaChecksStaleInLang,
-          tag
-        );
-      }
     });
+
+    selectedLanguages
+      .filter((tag) => {
+        switch (filters.filterQaCheckTypeLanguage) {
+          case undefined:
+            return true;
+          case false:
+            return tag !== baseLang;
+          default:
+            return tag === filters.filterQaCheckTypeLanguage;
+        }
+      })
+      .forEach((tag) => {
+        if (filters.filterQaChecksStale) {
+          filtersQuery.filterQaChecksStaleInLang = add(
+            filtersQuery.filterQaChecksStaleInLang,
+            tag
+          );
+        }
+        filters.filterQaCheckTypes?.forEach((type) => {
+          filtersQuery.filterQaCheckType = add(
+            filtersQuery.filterQaCheckType,
+            `${tag},${type}`
+          );
+        });
+      });
     selectedLanguages
       .filter((tag) => {
         switch (filters.filterTranslationLanguage) {

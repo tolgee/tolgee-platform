@@ -64,7 +64,7 @@ class ActivityService(
         "describing_relations, modifications, revision_type, activity_revision_id, branch_id) " +
         "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
       list,
-      100,
+      1000,
     ) { ps, entity ->
       ps.setString(1, entity.entityClass)
       ps.setLong(2, entity.entityId)
@@ -85,7 +85,7 @@ class ActivityService(
         "(entity_class, entity_id, data, describing_relations, activity_revision_id) " +
         "VALUES (?, ?, ?, ?, ?)",
       activityRevision.describingRelations,
-      100,
+      1000,
     ) { ps, entity ->
       ps.setString(1, entity.entityClass)
       ps.setLong(2, entity.entityId)

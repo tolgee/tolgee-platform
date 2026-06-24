@@ -4,6 +4,7 @@ import io.tolgee.formats.resx.ResxEntry
 import io.tolgee.util.attr
 import io.tolgee.util.buildDom
 import io.tolgee.util.element
+import io.tolgee.util.sanitizeXmlText
 import org.w3c.dom.Element
 import java.io.InputStream
 
@@ -52,12 +53,12 @@ class ResxWriter(
       attr("xml:space", "preserve")
       entry.data?.let {
         element("value") {
-          textContent = it
+          textContent = sanitizeXmlText(it)
         }
       }
       entry.comment?.let {
         element("comment") {
-          textContent = it
+          textContent = sanitizeXmlText(it)
         }
       }
     }

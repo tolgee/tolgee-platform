@@ -9,6 +9,7 @@ import io.tolgee.formats.normalizePlurals
 import io.tolgee.formats.optimizePluralForms
 import io.tolgee.formats.optimizePossiblePlural
 import io.tolgee.formats.orderPluralForms
+import io.tolgee.formats.toIcuPluralString
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 
@@ -26,7 +27,34 @@ class PluralsFormUtilTest {
   fun `orders plural forms`() {
     orderPluralForms(mapOf("many" to "", "one" to "", "=1" to "", "zero" to ""))
       .keys.assert
-      .containsExactly("zero", "one", "many", "=1")
+      .containsExactly("=1", "zero", "one", "many")
+  }
+
+  @Test
+  fun `orders multiple exact-match selectors numerically before keywords`() {
+    orderPluralForms(mapOf("other" to "x", "=2" to "x", "one" to "x", "=0" to "x", "=10" to "x"))
+      .keys.assert
+      .containsExactly("=0", "=2", "=10", "one", "other")
+  }
+
+  @Test
+  fun `exact-match selectors with distinct values are preserved by optimizePluralForms`() {
+    optimizePluralForms(mapOf("=0" to "no items", "one" to "one item", "other" to "# items"))
+      .keys.assert
+      .containsExactly("=0", "one", "other")
+  }
+
+  @Test
+  fun `toIcuPluralString preserves exact-match plural selectors`() {
+    val input = "{count, plural, =0 {You have no likes.} one {You have # like.} other {You have # likes.}}"
+    val forms = getPluralForms(input)!!.forms
+    val output = forms.toIcuPluralString(addNewLines = false, argName = "count")
+    assert(output.indexOf("=0") < output.indexOf("one")) {
+      "=0 should come before 'one' in: $output"
+    }
+    assert(output.indexOf("=0") < output.indexOf("other")) {
+      "=0 should come before 'other' in: $output"
+    }
   }
 
   @Test

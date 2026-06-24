@@ -90,7 +90,7 @@ class InvitationService(
   }
 
   private fun getInvitationInstance(params: CreateInvitationParams): Invitation {
-    val code = RandomStringUtils.randomAlphabetic(50)
+    val code = RandomStringUtils.secure().nextAlphabetic(50)
     val invitation = Invitation(code = code)
     invitation.email = params.email
     invitation.name = params.name

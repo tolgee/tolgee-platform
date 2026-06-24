@@ -88,6 +88,16 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `does not return QA issues for a translation whose language is QA-disabled`() {
+    performAuthGet(
+      "/v2/projects/${testData.project.id}/translations/" +
+        "${testData.disabledLangTranslationWithIssues.id}/qa-issues",
+    ).andIsOk.andAssertThatJson {
+      node("_embedded").isAbsent()
+    }
+  }
+
+  @Test
   fun `returns empty when no QA issues exist`() {
     performAuthGet(
       "$translationUrl/qa-issues",

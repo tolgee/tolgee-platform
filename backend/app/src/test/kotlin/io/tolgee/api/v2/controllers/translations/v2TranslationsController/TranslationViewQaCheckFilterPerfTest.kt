@@ -10,7 +10,6 @@ import io.tolgee.model.qa.TranslationQaIssue
 import io.tolgee.model.translation.Translation
 import io.tolgee.service.queryBuilders.translationViewBuilder.TranslationViewDataProvider
 import io.tolgee.testing.assertions.Assertions.assertThat
-import io.tolgee.util.executeInNewTransaction
 import io.tolgee.util.logger
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -80,7 +79,8 @@ class TranslationViewQaCheckFilterPerfTest : AbstractPartialFixturePerfTestBase(
   @Test
   fun `filterQaCheckType=EMPTY_TRANSLATION`() {
     val expected = (KEY_COUNT / QA_FREQUENCY).toLong()
-    val title = "filterQaCheckType=EMPTY_TRANSLATION (~$expected matches)"
+    val qaLanguageTag = languages.first().tag
+    val title = "filterQaCheckType=$qaLanguageTag,EMPTY_TRANSLATION (~$expected matches)"
     measureScenario(title) {
       executeInNewTransaction {
         liftStatementTimeout()
@@ -91,7 +91,7 @@ class TranslationViewQaCheckFilterPerfTest : AbstractPartialFixturePerfTestBase(
             pageable = PageRequest.of(0, PAGE_SIZE),
             params =
               GetTranslationsParams().apply {
-                filterQaCheckType = listOf(QaCheckType.EMPTY_TRANSLATION)
+                filterQaCheckType = listOf("$qaLanguageTag,${QaCheckType.EMPTY_TRANSLATION.name}")
               },
           )
         assertThat(result.totalElements).isEqualTo(expected)

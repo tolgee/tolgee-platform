@@ -35,6 +35,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.eq
@@ -150,6 +151,7 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
         any(),
         any(),
         any(),
+        anyOrNull(),
       ),
     ).thenReturn("Translated with DeepL")
 

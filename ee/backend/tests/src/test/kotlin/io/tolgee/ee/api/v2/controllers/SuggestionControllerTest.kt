@@ -4,18 +4,26 @@ import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.SuggestionsTestData
 import io.tolgee.dtos.request.key.ComplexEditKeyDto
 import io.tolgee.ee.data.translationSuggestion.CreateTranslationSuggestionRequest
+import io.tolgee.ee.repository.TranslationSuggestionRepository
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
+import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.node
 import io.tolgee.model.enums.SuggestionsMode
+import io.tolgee.model.enums.TranslationSuggestionState
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
+import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 
 class SuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: SuggestionsTestData
+
+  @Autowired
+  private lateinit var translationSuggestionRepository: TranslationSuggestionRepository
 
   fun initTestData(suggestionsMode: SuggestionsMode = SuggestionsMode.ENABLED) {
     testData = SuggestionsTestData(suggestionsMode)
@@ -239,6 +247,50 @@ class SuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       "languages/${testData.englishLanguage.id}/key/${testData.keys[0].self.id}/suggestion",
       CreateTranslationSuggestionRequest("New translation suggestion"),
     ).andIsForbidden
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `cannot accept, decline or set-active a suggestion of another project`() {
+    initTestData()
+    // projectReviewer has REVIEW on the related project (project A); the suggestion belongs to project B
+    val foreignSuggestionId = testData.unrelatedSuggestion.self.id
+    val basePath =
+      "languages/${testData.czechLanguage.id}/key/${testData.keys[0].self.id}/suggestion/$foreignSuggestionId"
+
+    performProjectAuthPut("$basePath/accept").andIsNotFound
+    performProjectAuthPut("$basePath/decline").andIsNotFound
+    performProjectAuthPut("$basePath/set-active").andIsNotFound
+
+    // the foreign suggestion's state must remain ACTIVE (not accepted/declined)
+    executeInNewTransaction {
+      val suggestion = translationSuggestionRepository.findById(foreignSuggestionId).get()
+      suggestion.state.assert.isEqualTo(TranslationSuggestionState.ACTIVE)
+    }
+
+    // no suggested translation must be copied into project A's czech translation
+    performProjectAuthGet("/translations?sort=id&filterKeyId=${testData.keys[0].self.id}")
+      .andIsOk
+      .andAssertThatJson {
+        node("_embedded.keys[0].translations.cs.text").isEqualTo("Překlad 0")
+      }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `cannot delete a suggestion of another project`() {
+    initTestData()
+    val foreignSuggestionId = testData.unrelatedSuggestion.self.id
+    performProjectAuthDelete(
+      "languages/${testData.czechLanguage.id}/key/${testData.keys[0].self.id}/suggestion/$foreignSuggestionId",
+    ).andIsNotFound
+
+    executeInNewTransaction {
+      translationSuggestionRepository
+        .findById(foreignSuggestionId)
+        .isPresent.assert
+        .isTrue()
+    }
   }
 
   @Test()

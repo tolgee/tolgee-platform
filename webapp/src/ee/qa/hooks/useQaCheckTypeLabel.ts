@@ -1,13 +1,13 @@
 import { useTranslate } from '@tolgee/react';
-import { components } from 'tg.service/apiSchema.generated';
-
-type QaCheckType = components['schemas']['QaIssueModel']['type'];
+import { QaCheckType } from 'tg.service/apiSchemaTypes';
 
 export function useQaCheckTypeLabel(type: QaCheckType): string {
   const { t } = useTranslate();
   switch (type) {
     case 'EMPTY_TRANSLATION':
       return t('qa_check_type_empty_translation');
+    case 'MISSING_PLURAL_CATEGORIES':
+      return t('qa_check_type_missing_plural_categories');
     case 'SPACES_MISMATCH':
       return t('qa_check_type_spaces_mismatch');
     case 'UNMATCHED_NEWLINES':

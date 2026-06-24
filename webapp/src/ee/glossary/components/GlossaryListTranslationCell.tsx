@@ -1,13 +1,12 @@
 import clsx from 'clsx';
-import { Button, styled, Tooltip } from '@mui/material';
+import { styled, Tooltip } from '@mui/material';
 import React from 'react';
 import { GlossaryListStyledRowCell } from 'tg.ee.module/glossary/components/GlossaryListStyledRowCell';
 import { components } from 'tg.service/apiSchema.generated';
-import { TextField } from 'tg.component/common/TextField';
 import { T } from '@tolgee/react';
-import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { LimitedHeightText } from 'tg.component/LimitedHeightText';
+import { EditableTextCellForm } from 'tg.component/entriesList/EditableTextCellForm';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
 import { useGlossary } from 'tg.ee.module/glossary/hooks/useGlossary';
 
@@ -40,15 +39,6 @@ const StyledEditBox = styled('div')`
   display: flex;
   gap: ${({ theme }) => theme.spacing(2)};
   flex-flow: column;
-`;
-
-const StyledControls = styled('div')`
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: flex-end;
-  flex-grow: 1;
 `;
 
 type Props = {
@@ -118,17 +108,6 @@ export const GlossaryListTranslationCell: React.VFC<Props> = ({
 
   const onHandleEdit = editEnabled && !isEditing ? handleEdit : undefined;
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      if (e.shiftKey) {
-        return;
-      }
-
-      e.preventDefault();
-      save();
-    }
-  };
-
   return (
     <Tooltip title={!editEnabled && editDisabledReason} placement="bottom">
       <StyledRowTranslationCell
@@ -147,38 +126,19 @@ export const GlossaryListTranslationCell: React.VFC<Props> = ({
           </StyledPreviewBox>
         ) : (
           <StyledEditBox>
-            <TextField
-              onChange={(e) => {
-                setValue(e.target.value);
-              }}
+            <EditableTextCellForm
               value={value}
-              onKeyDown={handleKeyDown}
-              multiline
+              onChange={setValue}
+              onSave={save}
+              onCancel={() => onCancel?.()}
+              saving={saveMutation.isLoading}
               minRows={3}
-              autoFocus
-              data-cy="glossary-translation-edit-field"
+              fieldDataCy="glossary-translation-edit-field"
+              cancelDataCy="glossary-translation-cancel-button"
+              saveDataCy="glossary-translation-save-button"
+              cancelLabel={<T keyName="translate_glossary_term_cell_cancel" />}
+              saveLabel={<T keyName="translate_glossary_term_cell_save" />}
             />
-            <StyledControls>
-              <Button
-                onClick={onCancel}
-                color="primary"
-                variant="outlined"
-                size="small"
-                data-cy="glossary-translation-cancel-button"
-              >
-                <T keyName="translate_glossary_term_cell_cancel" />
-              </Button>
-              <LoadingButton
-                onClick={save}
-                color="primary"
-                size="small"
-                variant="contained"
-                loading={saveMutation.isLoading}
-                data-cy="glossary-translation-save-button"
-              >
-                <T keyName="translate_glossary_term_cell_save" />
-              </LoadingButton>
-            </StyledControls>
           </StyledEditBox>
         )}
       </StyledRowTranslationCell>

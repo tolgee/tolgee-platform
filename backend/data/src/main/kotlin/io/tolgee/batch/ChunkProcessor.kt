@@ -1,6 +1,5 @@
 package io.tolgee.batch
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.batch.data.BatchJobDto
 import java.util.Date
 import kotlin.coroutines.CoroutineContext
@@ -20,9 +19,7 @@ interface ChunkProcessor<RequestType, ParamsType, TargetItemType> {
 
   fun getParams(data: RequestType): ParamsType
 
-  fun getParams(job: BatchJobDto): ParamsType {
-    return jacksonObjectMapper().convertValue(job.params, getParamsType())
-  }
+  fun getParams(job: BatchJobDto): ParamsType
 
   fun getMaxPerJobConcurrency(): Int {
     return -1

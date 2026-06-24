@@ -190,4 +190,40 @@ class GrammarCheckTest {
 
     check.check(params("click here")).assertNoIssues()
   }
+
+  @Test
+  fun `filters out missing-terminal-punctuation rule (PUNCTUATION_PARAGRAPH_END)`() {
+    val match =
+      LanguageToolMatch(
+        message = "Add a period at the end of the sentence.",
+        offset = 10,
+        length = 1,
+        rule =
+          LanguageToolRule(
+            id = "PUNCTUATION_PARAGRAPH_END",
+            category = LanguageToolCategory(id = "PUNCTUATION"),
+          ),
+      )
+    `when`(languageToolService.check(any(), any())).thenReturn(listOf(match))
+
+    check.check(params("Enregistrer", "fr")).assertNoIssues()
+  }
+
+  @Test
+  fun `filters out missing-terminal-punctuation rule (PUNCTUATION_PARAGRAPH_END2)`() {
+    val match =
+      LanguageToolMatch(
+        message = "Add a period at the end of the sentence.",
+        offset = 10,
+        length = 1,
+        rule =
+          LanguageToolRule(
+            id = "PUNCTUATION_PARAGRAPH_END2",
+            category = LanguageToolCategory(id = "PUNCTUATION"),
+          ),
+      )
+    `when`(languageToolService.check(any(), any())).thenReturn(listOf(match))
+
+    check.check(params("Enregistrer", "fr")).assertNoIssues()
+  }
 }

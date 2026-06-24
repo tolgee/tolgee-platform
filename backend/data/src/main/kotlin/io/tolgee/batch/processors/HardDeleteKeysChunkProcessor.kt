@@ -1,6 +1,7 @@
 package io.tolgee.batch.processors
 
-import io.tolgee.batch.ChunkProcessor
+import com.fasterxml.jackson.databind.ObjectMapper
+import io.tolgee.batch.AbstractChunkProcessor
 import io.tolgee.batch.ProgressManager
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.request.HardDeleteKeysRequest
@@ -15,7 +16,8 @@ class HardDeleteKeysChunkProcessor(
   private val keyService: KeyService,
   private val entityManager: EntityManager,
   private val progressManager: ProgressManager,
-) : ChunkProcessor<HardDeleteKeysRequest, Any?, Long> {
+  objectMapper: ObjectMapper,
+) : AbstractChunkProcessor<HardDeleteKeysRequest, Any?, Long>(objectMapper) {
   override fun process(
     job: BatchJobDto,
     chunk: List<Long>,

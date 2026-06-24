@@ -1,6 +1,6 @@
 package io.tolgee.service.dataImport
 
-import io.tolgee.api.IImportSettings
+import io.tolgee.api.IStoredImportSettings
 import io.tolgee.formats.CollisionHandler
 import io.tolgee.formats.isSamePossiblePlural
 import io.tolgee.model.Language
@@ -52,16 +52,29 @@ class ImportDataManager(
     applicationContext.getBean(KeyMetaService::class.java)
   }
 
-  val storedKeys by lazy {
-    if (!saveData) {
-      return@lazy mutableMapOf<Pair<ImportFile, String>, ImportKey>()
+  /** Nested file → keyName → ImportKey. */
+  val storedKeys: HashMap<ImportFile, HashMap<String, ImportKey>> by lazy {
+    val result = HashMap<ImportFile, HashMap<String, ImportKey>>()
+    if (!saveData) return@lazy result
+    importService.findKeys(import).forEach {
+      result.getOrPut(it.file) { HashMap() }[it.name] = it
     }
-    importService
-      .findKeys(import)
-      .asSequence()
-      .map { (it.file to it.name) to it }
-      .toMap(mutableMapOf())
+    result
   }
+
+  fun storedKeysValuesSequence(): Sequence<ImportKey> =
+    storedKeys.values.asSequence().flatMap { it.values.asSequence() }
+
+  fun getStoredKey(
+    file: ImportFile,
+    name: String,
+  ): ImportKey? = storedKeys[file]?.get(name)
+
+  fun storedKeysComputeIfAbsent(
+    file: ImportFile,
+    name: String,
+    create: () -> ImportKey,
+  ): ImportKey = storedKeys.getOrPut(file) { HashMap() }.getOrPut(name, create)
 
   val storedLanguages by lazy {
     importService.findLanguages(import).toMutableList()
@@ -114,6 +127,18 @@ class ImportDataManager(
     namespaceService.getAllInProject(import.project.id).map { it.name to it }.toMap(mutableMapOf())
   }
 
+  fun releaseData() {
+    storedKeys.clear()
+    storedTranslations.clear()
+    storedTranslationsByKeyName.clear()
+    translationsToUpdateDueToCollisions.clear()
+  }
+
+  fun releaseLanguageData(language: ImportLanguage) {
+    storedTranslations.remove(language)
+    storedTranslationsByKeyName.remove(language)
+  }
+
   /**
    * Returns list of translations provided for a language and a key.
    * It returns collection since translations could collide, when a user uploads a file with different values
@@ -126,10 +151,7 @@ class ImportDataManager(
     this.populateStoredTranslations(language)
     val languageData = this.storedTranslations[language]!!
 
-    return languageData[key] ?: let {
-      languageData[key] = mutableListOf()
-      languageData[key]!!
-    }
+    return languageData[key] ?: ArrayList<ImportTranslation>(1).also { languageData[key] = it }
   }
 
   fun getStoredTranslations(language: ImportLanguage): List<ImportTranslation> {
@@ -142,11 +164,41 @@ class ImportDataManager(
     otherLanguages: List<ImportLanguage>,
   ): List<ImportTranslation> {
     val safeNamespace = getSafeNamespace(keyNamespace)
-    return otherLanguages.flatMap {
-      getStoredTranslations(it).filter { translation ->
-        translation.key.name == keyName && translation.key.file.namespace == safeNamespace
+    return otherLanguages.flatMap { language ->
+      val cached = storedTranslationsByKeyName[language]
+      if (cached != null) {
+        cached[safeNamespace to keyName] ?: emptyList()
+      } else {
+        // Not cached — language is still being populated, use direct lookup
+        val languageData = populateStoredTranslations(language)
+        languageData.entries
+          .filter { (key, _) -> key.name == keyName && key.file.namespace == safeNamespace }
+          .flatMap { it.value }
       }
     }
+  }
+
+  /**
+   * Cached map of stored translations grouped by (namespace, keyName) for O(1) lookup.
+   * Only populated for languages whose translations are fully loaded.
+   * Call [buildTranslationsByKeyNameCache] after a language is fully processed.
+   */
+  private val storedTranslationsByKeyName =
+    mutableMapOf<ImportLanguage, Map<Pair<String?, String>, List<ImportTranslation>>>()
+
+  fun buildTranslationsByKeyNameCache(language: ImportLanguage) {
+    val languageData = populateStoredTranslations(language)
+    val translationsByKey = HashMap<Pair<String?, String>, List<ImportTranslation>>(languageData.size)
+    languageData.forEach { (key, translations) ->
+      val mapKey = getSafeNamespace(key.file.namespace) to key.name
+      val existing = translationsByKey[mapKey]
+      translationsByKey[mapKey] =
+        when {
+          existing == null -> translations
+          else -> existing + translations
+        }
+    }
+    storedTranslationsByKeyName[language] = translationsByKey
   }
 
   fun populateStoredTranslations(language: ImportLanguage): MutableMap<ImportKey, MutableList<ImportTranslation>> {
@@ -155,28 +207,21 @@ class ImportDataManager(
       return languageData // it is already there
     }
 
-    languageData = mutableMapOf()
+    languageData = LinkedHashMap()
     storedTranslations[language] = languageData
     val translations = importService.findTranslations(language.id)
     translations.forEach { importTranslation ->
       val keyTranslations =
-        languageData.computeIfAbsent(importTranslation.key) { mutableListOf() }
+        languageData.computeIfAbsent(importTranslation.key) { ArrayList(1) }
       keyTranslations.add(importTranslation)
     }
     return languageData
   }
 
-  private fun populateStoredTranslationsToConvertPlaceholders() {
-    val translations = importService.findTranslationsForPlaceholderConversion(import.id)
-    translations.forEach {
-      getOrInitLanguageDataItem(it.language)[it.key] = mutableListOf(it)
-    }
-  }
-
   private fun getOrInitLanguageDataItem(
     language: ImportLanguage,
   ): MutableMap<ImportKey, MutableList<ImportTranslation>> {
-    return this.storedTranslations.computeIfAbsent(language) { mutableMapOf() }
+    return this.storedTranslations.computeIfAbsent(language) { LinkedHashMap() }
   }
 
   private fun detectConflictType(translation: Translation): ConflictType? {
@@ -238,7 +283,7 @@ class ImportDataManager(
   }
 
   fun saveAllStoredKeys() {
-    this.importService.saveAllKeys(this.storedKeys.values)
+    this.importService.saveAllKeys(storedKeysValuesSequence().toList())
   }
 
   fun prepareKeyMeta(keyMeta: KeyMeta) {
@@ -275,6 +320,7 @@ class ImportDataManager(
             it != editedLanguage
         }.sortedBy { it.id } + listOf(editedLanguage)
     val affectedFiles = affectedLanguages.map { it.file }
+    storedTranslationsByKeyName.clear()
     resetBetweenFileCollisionIssuesForFiles(affectedFiles.map { it.id }, affectedLanguages.map { it.id })
     val handledLanguages = mutableListOf<ImportLanguage>()
     val issuesToSave = mutableListOf<ImportFileIssue>()
@@ -389,20 +435,16 @@ class ImportDataManager(
   }
 
   fun applySettings(
-    oldSettings: IImportSettings,
-    newSettings: IImportSettings,
+    oldSettings: IStoredImportSettings,
+    newSettings: IStoredImportSettings,
   ) {
-    if (oldSettings.convertPlaceholdersToIcu != newSettings.convertPlaceholdersToIcu) {
-      applyConvertPlaceholdersChange(newSettings.convertPlaceholdersToIcu)
-    }
-
     if (oldSettings.createNewKeys != newSettings.createNewKeys) {
       applyKeyCreateChange(newSettings.createNewKeys)
     }
   }
 
   fun applyKeyCreateChange(createNewKeys: Boolean) {
-    storedKeys.forEach { (_, key) ->
+    storedKeysValuesSequence().forEach { key ->
       if (createNewKeys) {
         key.shouldBeImported = true
       } else {
@@ -412,38 +454,5 @@ class ImportDataManager(
     if (saveData) {
       saveAllStoredKeys()
     }
-  }
-
-  private fun applyConvertPlaceholdersChange(convertPlaceholdersToIcu: Boolean) {
-    this.populateStoredTranslationsToConvertPlaceholders()
-    val toSave = mutableListOf<ImportTranslation>()
-    storedTranslations.forEach { (language, keyTranslationsMap) ->
-      keyTranslationsMap.forEach { (_, translations) ->
-        translations.forEach {
-          val convertor = it.convertor?.messageConvertorOrNull
-          if (convertor != null) {
-            val prev = it.text to it.isPlural
-            val converted =
-              convertor.convert(
-                rawData = it.rawData,
-                languageTag = language.name,
-                convertPlaceholders = convertPlaceholdersToIcu,
-                isProjectIcuEnabled = import.project.icuPlaceholders,
-              )
-            it.isPlural = converted.pluralArgName != null
-            it.text = converted.message
-            val new = it.text to it.isPlural
-            if (prev != new) {
-              toSave.add(it)
-            }
-          }
-        }
-      }
-    }
-    toSave.map { it.language }.toSet().forEach {
-      resetConflicts(it)
-      handleConflicts(false)
-    }
-    importService.saveTranslations(toSave)
   }
 }

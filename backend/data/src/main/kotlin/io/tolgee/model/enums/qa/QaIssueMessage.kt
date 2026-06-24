@@ -5,7 +5,7 @@ import java.util.Locale
 
 enum class QaIssueMessage {
   QA_EMPTY_TRANSLATION,
-  QA_EMPTY_PLURAL_VARIANT,
+  QA_MISSING_PLURAL_CATEGORY,
   QA_CHECK_FAILED,
 
   // Spaces mismatch
@@ -64,6 +64,7 @@ enum class QaIssueMessage {
   // Inconsistent placeholders
   QA_PLACEHOLDERS_MISSING,
   QA_PLACEHOLDERS_EXTRA,
+  QA_PLACEHOLDERS_REPLACE,
 
   // Inconsistent HTML (comparison)
   QA_HTML_TAG_MISSING,

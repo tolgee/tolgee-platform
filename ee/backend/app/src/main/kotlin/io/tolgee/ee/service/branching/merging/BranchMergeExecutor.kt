@@ -16,6 +16,7 @@ import io.tolgee.repository.KeyRepository
 import io.tolgee.service.key.KeyMetaService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.translation.TranslationService
+import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.LinkedHashMap
@@ -28,39 +29,58 @@ class BranchMergeExecutor(
   private val translationService: TranslationService,
   private val currentDateProvider: CurrentDateProvider,
   private val branchSnapshotService: BranchSnapshotService,
+  private val entityManager: EntityManager,
 ) {
   @Transactional
-  fun execute(merge: BranchMerge) {
+  fun execute(merge: BranchMerge): BranchMerge {
     attachKeysForMerge(merge)
     val snapshotKeys by lazy {
       branchSnapshotService.getSnapshotKeys(merge.sourceBranch.id).associateBy { it.originalKeyId }
     }
-    merge.changes.forEach { change ->
-      when (change.change) {
-        BranchKeyMergeChangeType.ADD -> {
-          applyAddition(change, merge.targetBranch)
-        }
+    applyChanges(merge, snapshotKeys)
+    return finalizeMerge(merge)
+  }
 
-        BranchKeyMergeChangeType.UPDATE -> {
-          change.withSnapshotKey(snapshotKeys) { snapshotKey ->
-            applyUpdate(change, snapshotKey)
-          }
-        }
+  /**
+   * Apply every change, deferring DELETEs to the end. [applyDeletion] eventually
+   * calls [KeyService.hardDelete], which clears the persistence context — any
+   * in-memory entity modification made *after* a delete would be silently dropped
+   * on commit. Applying deletes last ensures every other change is flushed first.
+   */
+  private fun applyChanges(
+    merge: BranchMerge,
+    snapshotKeys: Map<Long, KeySnapshot>,
+  ) {
+    merge.changes
+      .sortedBy { it.change == BranchKeyMergeChangeType.DELETE }
+      .forEach { applyChange(it, merge, snapshotKeys) }
+  }
 
-        BranchKeyMergeChangeType.DELETE -> {
-          applyDeletion(change)
-        }
-
-        BranchKeyMergeChangeType.CONFLICT -> {
-          change.withSnapshotKey(snapshotKeys) { snapshotKey ->
-            applyConflict(change, snapshotKey)
-          }
-        }
-      }
+  private fun applyChange(
+    change: BranchMergeChange,
+    merge: BranchMerge,
+    snapshotKeys: Map<Long, KeySnapshot>,
+  ) {
+    when (change.change) {
+      BranchKeyMergeChangeType.ADD -> applyAddition(change, merge.targetBranch)
+      BranchKeyMergeChangeType.UPDATE -> change.withSnapshotKey(snapshotKeys) { applyUpdate(change, it) }
+      BranchKeyMergeChangeType.DELETE -> applyDeletion(change)
+      BranchKeyMergeChangeType.CONFLICT -> change.withSnapshotKey(snapshotKeys) { applyConflict(change, it) }
     }
+  }
 
-    merge.changes.clear()
-    merge.mergedAt = currentDateProvider.date
+  /**
+   * Marks the merge complete and returns the managed instance. Re-fetches the entity
+   * first because [applyDeletion] may have cleared the persistence context, leaving
+   * [merge] detached. Callers must use the returned instance — the passed-in [merge]
+   * is stale in the delete path.
+   */
+  private fun finalizeMerge(merge: BranchMerge): BranchMerge {
+    val managed =
+      entityManager.find(BranchMerge::class.java, merge.id)
+        ?: throw IllegalStateException("BranchMerge ${merge.id} was not found during finalization")
+    managed.markMerged(currentDateProvider.date)
+    return managed
   }
 
   private fun attachKeysForMerge(merge: BranchMerge) {

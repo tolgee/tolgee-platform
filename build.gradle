@@ -158,6 +158,16 @@ subprojects {
     ext['hibernate.version'] = hibernateVersion
     ext['commons-lang3.version'] = commonsLang3Version
     ext['jackson.version'] = jacksonVersion
+    ext['tomcat.version'] = tomcatVersion
+    ext['netty.version'] = nettyVersion
+    ext['thymeleaf.version'] = thymeleafVersion
+    ext['postgresql.version'] = postgresqlVersion
+    ext['spring-framework.version'] = springFrameworkVersion
+    ext['spring-data-bom.version'] = springDataBomVersion
+    ext['spring-hateoas.version'] = springHateoasVersion
+    ext['spring-retry.version'] = springRetryVersion
+    ext['micrometer.version'] = micrometerVersion
+    ext['reactor-bom.version'] = reactorBomVersion
 
     tasks.withType(Test).configureEach {
         testLogging {
@@ -186,12 +196,22 @@ subprojects {
 ext.setTestRetry = { test ->
     boolean isCiServer = System.getenv().containsKey("CI")
     boolean isRelease = System.getenv().get("CI_RELEASE") == "true"
+    boolean detectFlaky = System.getenv().get("DETECT_FLAKY_TESTS") == "true"
 
     test.retry {
         if (isCiServer) {
             maxFailures = 20
             maxRetries = 5
         }
-        failOnPassedAfterRetry = !isRelease
+        // Flaky-detection runs collect flakes from the test reports instead of
+        // failing the build, so a run with only flaky tests stays green.
+        failOnPassedAfterRetry = !isRelease && !detectFlaky
+    }
+
+    if (detectFlaky) {
+        // Merge retries into a single <testcase> so a test that failed then
+        // passed is recorded as <flakyFailure> while a test that failed every
+        // attempt is recorded as <failure>.
+        test.reports.junitXml.mergeReruns = true
     }
 }

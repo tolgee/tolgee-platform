@@ -39,7 +39,7 @@ class QaTestUtil(
         languageTag = "fr",
       )
     val results = qaCheckRunnerService.runEnabledChecks(testData.project.id, params)
-    qaIssueService.replaceIssuesForTranslation(translation, results)
+    qaIssueService.replaceIssuesForTranslation(translation.id, results)
   }
 
   fun getPersistedIssues(translation: Translation): List<TranslationQaIssue> =

@@ -11,6 +11,8 @@ export function useErrorTranslation() {
 
       case 'bad_credentials':
         return t('bad_credentials');
+      case 'user_account_disabled':
+        return t('user_account_disabled');
       case 'invalid_otp_code':
         return t('invalid_otp_code');
       case 'invitation_code_does_not_exist_or_expired':
@@ -39,6 +41,11 @@ export function useErrorTranslation() {
         return t('third_party_switch_conflict');
       case 'username_already_exists':
         return t('username_already_exists');
+      case 'email_domain_not_allowed':
+        return t(
+          'email_domain_not_allowed',
+          'This email address cannot be used to register. Please use a different one.'
+        );
       case 'user_already_has_permissions':
         return t('user_already_has_permissions');
       case 'user_already_has_role':
@@ -111,6 +118,12 @@ export function useErrorTranslation() {
         return t('content_storage_is_in_use');
       case 'plan_has_subscribers':
         return t('plan_has_subscribers');
+      case 'plan_has_migrations':
+        return t('plan_has_migrations');
+      case 'plan_migration_not_found':
+        return t('plan_migration_not_found');
+      case 'source_and_target_plan_must_be_different':
+        return t('source_and_target_plan_must_be_different');
       case 'cannot_store_file_to_content_storage':
         return t('cannot_store_file_to_content_storage');
       case 'unexpected_error_while_publishing_to_content_storage':
@@ -423,6 +436,8 @@ export function useErrorTranslation() {
         return t('s3_config_required');
       case 'content_storage_config_required':
         return t('content_storage_config_required');
+      case 'content_delivery_prune_failed':
+        return t('content_delivery_prune_failed');
 
       // Billing & subscriptions
       case 'plan_not_found':
@@ -544,6 +559,11 @@ export function useErrorTranslation() {
 
       case 'qa_checks_not_enabled':
         return t('qa_checks_not_enabled');
+
+      case 'translation_memory_name_already_exists':
+        return t('translation_memory_name_already_exists', {
+          value: params?.[0] || '',
+        });
       default:
         return code;
     }

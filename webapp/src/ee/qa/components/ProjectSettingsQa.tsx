@@ -1,18 +1,14 @@
 import React, { useCallback } from 'react';
-import { Box, Typography, Switch, styled } from '@mui/material';
+import { Box, Divider, Typography, Switch, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
 import { useProject } from 'tg.hooks/useProject';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
-import { components } from 'tg.service/apiSchema.generated';
+import { QaCheckType, QaCheckSeverity } from 'tg.service/apiSchemaTypes';
 import { QaSettingsItem } from 'tg.ee.module/qa/components/QaSettingsItem';
 import { QaLanguageSettings } from './QaLanguageSettings';
 import { useEnabledFeatures } from 'tg.globalContext/helpers';
 import { DisabledFeatureBanner } from 'tg.component/common/DisabledFeatureBanner';
-
-type QaSettings = components['schemas']['QaSettingsRequest'];
-type QaCheckType = components['schemas']['QaIssueModel']['type'];
-type QaCheckSeverity = QaSettings['settings'][keyof QaSettings['settings']];
 
 const StyledContainer = styled(Box)`
   margin-top: ${({ theme }) => theme.spacing(3)};
@@ -46,6 +42,13 @@ export const ProjectSettingsQa = () => {
     method: 'get',
     path: { projectId: project.id },
     options: { enabled: qaFeatureEnabled },
+  });
+
+  const checkCategories = useApiQuery({
+    url: '/v2/projects/{projectId}/qa-settings/check-types',
+    method: 'get',
+    path: { projectId: project.id },
+    options: { enabled: qaFeatureEnabled, staleTime: Infinity },
   });
 
   const saveSettingsMutation = useApiMutation({
@@ -95,7 +98,7 @@ export const ProjectSettingsQa = () => {
     );
   }
 
-  if (!settings.data) {
+  if (!settings.data || !checkCategories.data) {
     return null;
   }
 
@@ -119,14 +122,19 @@ export const ProjectSettingsQa = () => {
       </StyledDescription>
 
       <StyledSettingsBody sx={{ opacity: disabled ? 0.5 : 1 }}>
-        {Object.keys(settings.data?.settings || {}).map((type) => (
-          <QaSettingsItem
-            key={type}
-            type={type as QaCheckType}
-            value={settings.data?.settings?.[type as QaCheckType] || 'OFF'}
-            onChange={handleChange}
-            disabled={disabled}
-          />
+        {checkCategories.data.map((category, categoryIndex) => (
+          <React.Fragment key={category.category}>
+            {categoryIndex > 0 && <Divider />}
+            {category.checkTypes.map((type) => (
+              <QaSettingsItem
+                key={type}
+                type={type as QaCheckType}
+                value={settings.data?.settings?.[type as QaCheckType] || 'OFF'}
+                onChange={handleChange}
+                disabled={disabled}
+              />
+            ))}
+          </React.Fragment>
         ))}
 
         {settings.data?.settings && (

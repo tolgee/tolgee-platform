@@ -16,7 +16,7 @@ class SpacesMismatchCheck : QaCheck {
   override val type: QaCheckType = QaCheckType.SPACES_MISMATCH
 
   override fun check(params: QaCheckParams): List<QaCheckResult> {
-    return QaPluralCheckHelper.runPerVariant(params) { text, baseText ->
+    return QaPluralCheckHelper.runPerVariant(params) { text, baseText, _ ->
       checkVariant(text, baseText)
     }
   }
@@ -25,29 +25,31 @@ class SpacesMismatchCheck : QaCheck {
     text: String,
     baseText: String?,
   ): List<QaCheckResult> {
-    val base = baseText ?: return emptyList()
-    if (base.isBlank()) return emptyList()
     if (text.isBlank()) return emptyList()
 
     val results = mutableListOf<QaCheckResult>()
 
-    checkSegmentMatches(
-      base,
-      text,
-      results,
-      QaIssueMessage.QA_SPACES_LEADING_ADDED,
-      QaIssueMessage.QA_SPACES_LEADING_REMOVED,
-      ::extractLeadingWhitespace,
-    )
-    checkSegmentMatches(
-      base,
-      text,
-      results,
-      QaIssueMessage.QA_SPACES_TRAILING_ADDED,
-      QaIssueMessage.QA_SPACES_TRAILING_REMOVED,
-      ::extractTrailingWhitespace,
-    )
-    checkDoubledSpaces(text, results)
+    results += filterResultsInBlockedRanges(checkDoubledSpaces(text), text)
+
+    // Source-comparison checks — only when a base text is available.
+    if (!baseText.isNullOrBlank()) {
+      checkSegmentMatches(
+        baseText,
+        text,
+        results,
+        QaIssueMessage.QA_SPACES_LEADING_ADDED,
+        QaIssueMessage.QA_SPACES_LEADING_REMOVED,
+        ::extractLeadingWhitespace,
+      )
+      checkSegmentMatches(
+        baseText,
+        text,
+        results,
+        QaIssueMessage.QA_SPACES_TRAILING_ADDED,
+        QaIssueMessage.QA_SPACES_TRAILING_REMOVED,
+        ::extractTrailingWhitespace,
+      )
+    }
 
     return results
   }
@@ -56,8 +58,8 @@ class SpacesMismatchCheck : QaCheck {
     base: String,
     text: String,
     results: MutableList<QaCheckResult>,
-    addingTextMessage: QaIssueMessage,
-    removingTextMessage: QaIssueMessage,
+    messageWhenAdded: QaIssueMessage,
+    messageWhenRemoved: QaIssueMessage,
     extractSegment: (String) -> Pair<String, Int>,
   ) {
     val (baseSegment, _) = extractSegment(base)
@@ -76,9 +78,9 @@ class SpacesMismatchCheck : QaCheck {
 
     val message =
       if (replacement.length <= (editEnd - editStart)) {
-        addingTextMessage
+        messageWhenAdded
       } else {
-        removingTextMessage
+        messageWhenRemoved
       }
 
     results.add(
@@ -92,28 +94,29 @@ class SpacesMismatchCheck : QaCheck {
     )
   }
 
-  private fun checkDoubledSpaces(
-    text: String,
-    results: MutableList<QaCheckResult>,
-  ) {
+  private fun checkDoubledSpaces(text: String): List<QaCheckResult> {
     val interiorStart = text.length - text.trimStart(*WHITESPACE_CHARS).length
     val interiorEnd = text.trimEnd(*WHITESPACE_CHARS).length
-    if (interiorStart >= interiorEnd) return
+    if (interiorStart >= interiorEnd) return emptyList()
 
+    val results = mutableListOf<QaCheckResult>()
     val interior = text.substring(interiorStart, interiorEnd)
     for (match in DOUBLED_SPACES_REGEX.findAll(interior)) {
-      val absStart = interiorStart + match.range.first
-      val absEnd = interiorStart + match.range.last + 1
+      val runStart = interiorStart + match.range.first
+      val runEnd = interiorStart + match.range.last + 1
+      // Keep the first space; flag only the extras as removable.
+      val firstExtraSpace = runStart + 1
       results.add(
         QaCheckResult(
           type = QaCheckType.SPACES_MISMATCH,
           message = QaIssueMessage.QA_SPACES_DOUBLED,
           replacement = "",
-          positionStart = absStart + 1,
-          positionEnd = absEnd,
+          positionStart = firstExtraSpace,
+          positionEnd = runEnd,
         ),
       )
     }
+    return results
   }
 
   companion object {

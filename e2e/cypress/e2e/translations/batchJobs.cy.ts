@@ -116,7 +116,7 @@ describe('Batch jobs', { scrollBehavior: false }, () => {
 
   it('will pre-translate with TM', () => {
     cy.gcy('translations-row-checkbox').first().click();
-    selectOperation('Pre-translate by TM');
+    selectOperation('Translate from memory');
     assertLanguagesSelected(['German']);
     executeBatchOperation();
   });

@@ -14,12 +14,20 @@ class CharacterCaseMismatchCheck : QaCheck {
   override val type: QaCheckType = QaCheckType.CHARACTER_CASE_MISMATCH
 
   override fun check(params: QaCheckParams): List<QaCheckResult> {
-    return QaPluralCheckHelper.runPerVariant(params) { text, baseText ->
+    return QaPluralCheckHelper.runPerVariant(params) { text, baseText, _ ->
       checkVariant(text, baseText, params.languageTag)
     }
   }
 
   private fun checkVariant(
+    text: String,
+    baseText: String?,
+    languageTag: String,
+  ): List<QaCheckResult> {
+    return filterResultsInBlockedRanges(detectCaseMismatch(text, baseText, languageTag), text)
+  }
+
+  private fun detectCaseMismatch(
     text: String,
     baseText: String?,
     languageTag: String,

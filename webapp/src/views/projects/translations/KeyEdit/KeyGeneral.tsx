@@ -71,7 +71,7 @@ export const KeyGeneral = () => {
                   run: () => (submitForm(), true),
                 },
               ]}
-              mode="plain"
+              mode="keyName"
               minHeight="unset"
             />
           </EditorWrapper>

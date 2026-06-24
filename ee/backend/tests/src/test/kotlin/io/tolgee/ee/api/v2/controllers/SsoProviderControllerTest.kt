@@ -177,7 +177,6 @@ class SsoProviderControllerTest : AuthorizedControllerTest() {
       "clientId" to "dummy_client_id",
       "clientSecret" to "clientSecret",
       "authorizationUri" to "https://dummy-url.com",
-      "redirectUri" to "redirectUri",
       "tokenUri" to "tokenUri",
       "enabled" to true,
     )
@@ -188,7 +187,6 @@ class SsoProviderControllerTest : AuthorizedControllerTest() {
       "clientId" to "dummy_client_id1",
       "clientSecret" to "clientSecret1",
       "authorizationUri" to "https://dummy-url1.com",
-      "redirectUri" to "redirectUri1",
       "tokenUri" to "tokenUri1",
       "enabled" to true,
       "force" to true,
@@ -200,7 +198,6 @@ class SsoProviderControllerTest : AuthorizedControllerTest() {
       "clientId" to "dummy_client_id1",
       "clientSecret" to "clientSecret1",
       "authorizationUri" to "https://dummy-url1.com",
-      "redirectUri" to "redirectUri1",
       "tokenUri" to "tokenUri1",
       "enabled" to true,
       "force" to true,
@@ -212,7 +209,6 @@ class SsoProviderControllerTest : AuthorizedControllerTest() {
       "clientId" to "",
       "clientSecret" to "",
       "authorizationUri" to "",
-      "redirectUri" to "",
       "tokenUri" to "",
       "enabled" to false,
     )
@@ -223,7 +219,6 @@ class SsoProviderControllerTest : AuthorizedControllerTest() {
       "clientId" to "dummy_client_id",
       "clientSecret" to "clientSecret",
       "authorizationUri" to "https://dummy-url.com",
-      "redirectUri" to "redirectUri",
       "tokenUri" to "tokenUri",
       "enabled" to true,
     )
@@ -234,7 +229,6 @@ class SsoProviderControllerTest : AuthorizedControllerTest() {
       "clientId" to "",
       "clientSecret" to "",
       "authorizationUri" to "",
-      "redirectUri" to "",
       "tokenUri" to "",
       "enabled" to true,
     )
@@ -250,7 +244,6 @@ class SsoProviderControllerTest : AuthorizedControllerTest() {
       "clientId" to "dummy_client_id",
       "clientSecret" to "clientSecret",
       "authorizationUri" to "https://dummy-url.com",
-      "redirectUri" to "redirectUri",
       "tokenUri" to "tokenUri",
       "enabled" to true,
     )

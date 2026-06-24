@@ -1,8 +1,12 @@
-FROM postgres:13.21-alpine3.22
+FROM postgres:13.23-alpine3.22
 
 ENTRYPOINT []
 
-RUN apk --no-cache add openjdk21
+# Pull the latest patched Alpine packages (openssl, libxml2, ...) on top of the
+# pinned base image, which lags behind the alpine3.22 branch on security fixes.
+RUN apk --no-cache upgrade
+
+RUN apk --no-cache add openjdk21-jre
 RUN apk --no-cache add libxml2
 
 #############

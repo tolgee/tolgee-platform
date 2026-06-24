@@ -14,7 +14,7 @@ class BracketsMismatchCheck : QaCheck {
 
   override fun check(params: QaCheckParams): List<QaCheckResult> {
     val bracketChars = getBracketChars(params.icuPlaceholders)
-    return QaPluralCheckHelper.runPerVariant(params) { text, baseText ->
+    return QaPluralCheckHelper.runPerVariant(params) { text, baseText, _ ->
       checkVariant(text, baseText, bracketChars)
     }
   }

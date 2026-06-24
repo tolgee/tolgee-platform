@@ -1,4 +1,4 @@
-import React, { FC, JSXElementConstructor } from 'react';
+import React, { FC, JSXElementConstructor, ReactNode } from 'react';
 import {
   HateoasListData,
   HateoasPaginatedData,
@@ -8,7 +8,7 @@ import {
   PaginatedHateoasList,
   PaginatedHateoasListProps,
 } from '../list/PaginatedHateoasList';
-import { Table, TableBody } from '@mui/material';
+import { Table, TableBody, TableHead } from '@mui/material';
 
 export type PaginatedHateoasTableProps<
   WrapperComponent extends
@@ -19,7 +19,9 @@ export type PaginatedHateoasTableProps<
 > = Omit<
   PaginatedHateoasListProps<WrapperComponent, typeof Table, TData, TItem>,
   'listComponent'
->;
+> & {
+  tableHead?: ReactNode;
+};
 
 export const PaginatedHateoasTable = <
   WrapperComponent extends
@@ -30,17 +32,31 @@ export const PaginatedHateoasTable = <
 >(
   props: PaginatedHateoasTableProps<WrapperComponent, TData, TItem>
 ) => {
+  const { tableHead, ...rest } = props;
   return (
     <PaginatedHateoasList
-      listComponent={PaginatedHateoasTableListComponent}
-      {...props}
+      listComponent={(listProps) => (
+        <PaginatedHateoasTableListComponent
+          tableHead={tableHead}
+          {...listProps}
+        />
+      )}
+      {...rest}
     />
   );
 };
 
-const PaginatedHateoasTableListComponent: FC = ({ children }) => {
+interface PaginatedHateoasTableListComponentProps {
+  children: ReactNode;
+  tableHead?: ReactNode;
+}
+
+const PaginatedHateoasTableListComponent: FC<
+  PaginatedHateoasTableListComponentProps
+> = ({ children, tableHead }) => {
   return (
     <Table>
+      {tableHead && <TableHead>{tableHead}</TableHead>}
       <TableBody>{children}</TableBody>
     </Table>
   );

@@ -1,6 +1,7 @@
 package io.tolgee.batch.processors
 
-import io.tolgee.batch.ChunkProcessor
+import com.fasterxml.jackson.databind.ObjectMapper
+import io.tolgee.batch.AbstractChunkProcessor
 import io.tolgee.batch.data.AutomationTargetItem
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.request.AutomationBjRequest
@@ -12,7 +13,8 @@ import kotlin.coroutines.CoroutineContext
 @Component
 class AutomationChunkProcessor(
   private val automationRunner: AutomationRunner,
-) : ChunkProcessor<AutomationBjRequest, AutomationBjParams, AutomationTargetItem> {
+  objectMapper: ObjectMapper,
+) : AbstractChunkProcessor<AutomationBjRequest, AutomationBjParams, AutomationTargetItem>(objectMapper) {
   override fun process(
     job: BatchJobDto,
     chunk: List<AutomationTargetItem>,

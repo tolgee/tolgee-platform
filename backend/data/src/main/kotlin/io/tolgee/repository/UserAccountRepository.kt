@@ -102,13 +102,33 @@ private const val PROJECT_PERMISSIONS_MAIN = """
 @Repository
 @Lazy
 interface UserAccountRepository : JpaRepository<UserAccount, Long> {
-  fun findByUsername(username: String?): Optional<UserAccount>
+  @Query("from UserAccount ua where ua.username = :username")
+  fun findByExactUsername(username: String?): Optional<UserAccount>
 
-  @Query("from UserAccount ua where ua.username = :username and ua.deletedAt is null and ua.disabledAt is null")
+  @Query(
+    "from UserAccount ua where lower(ua.username) = lower(:username) " +
+      "and ua.deletedAt is null and ua.disabledAt is null",
+  )
   fun findActive(username: String): UserAccount?
+
+  // Sign-up alias/case-insensitive duplicate guard, mirroring findActiveOrDisabled (non-deleted) so the
+  // caller can still distinguish disabled accounts. The expression must stay byte-for-byte identical to the
+  // user_account_normalized_email functional index, or Postgres won't use it.
+  @Query(
+    value = """
+      select * from user_account
+      where regexp_replace(lower(username), '\+[^@]*@', '@') = :normalizedEmail
+        and deleted_at is null
+    """,
+    nativeQuery = true,
+  )
+  fun findNonDeletedByNormalizedEmail(normalizedEmail: String): List<UserAccount>
 
   @Query("from UserAccount ua where ua.id = :id and ua.deletedAt is null and ua.disabledAt is null")
   fun findActive(id: Long): UserAccount?
+
+  @Query("from UserAccount ua where lower(ua.username) = lower(:username) and ua.deletedAt is null")
+  fun findActiveOrDisabled(username: String): UserAccount?
 
   @Query("from UserAccount ua left join fetch ua.emailVerification where ua.isInitialUser = true")
   fun findInitialUser(): UserAccount?

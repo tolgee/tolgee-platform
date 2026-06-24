@@ -87,7 +87,7 @@ export type QaIssueHighlightProps = {
 };
 
 export type SubfilterQaChecksProps = {
-  projectId: number;
   value: FiltersInternal;
   actions: FilterActions;
+  selectedLanguages: LanguageModel[];
 };

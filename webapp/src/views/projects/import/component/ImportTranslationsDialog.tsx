@@ -1,4 +1,5 @@
 import React, { FunctionComponent, useState } from 'react';
+import { KeyName } from 'tg.component/KeyName/KeyName';
 import { Box, Grid, styled } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import IconButton from '@mui/material/IconButton';
@@ -116,7 +117,9 @@ export const ImportTranslationsDialog: FunctionComponent<{
                 >
                   <Grid container spacing={2}>
                     <Grid item lg={4} md={3} sm xs>
-                      <Box>{i.keyName}</Box>
+                      <Box>
+                        <KeyName name={i.keyName} />
+                      </Box>
                       {i.keyDescription && (
                         <StyledDescription>
                           {i.keyDescription}

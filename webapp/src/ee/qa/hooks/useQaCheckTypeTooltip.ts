@@ -1,7 +1,5 @@
 import { useTranslate } from '@tolgee/react';
-import { components } from 'tg.service/apiSchema.generated';
-
-type QaCheckType = components['schemas']['QaIssueModel']['type'];
+import { QaCheckType } from 'tg.service/apiSchemaTypes';
 
 export function useQaCheckTypeTooltip(type: QaCheckType): string | null {
   const { t } = useTranslate();
@@ -14,6 +12,8 @@ export function useQaCheckTypeTooltip(type: QaCheckType): string | null {
       return t('qa_check_tooltip_character_case_mismatch');
     case 'MISSING_NUMBERS':
       return t('qa_check_tooltip_missing_numbers');
+    case 'MISSING_PLURAL_CATEGORIES':
+      return t('qa_check_tooltip_missing_plural_categories');
     case 'SPELLING':
       return t('qa_check_tooltip_spelling');
     case 'GRAMMAR':

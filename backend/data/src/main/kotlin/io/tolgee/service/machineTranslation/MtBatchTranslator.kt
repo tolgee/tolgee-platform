@@ -176,6 +176,9 @@ class MtBatchTranslator(
         item.promptId,
       )
 
+    val providerContext =
+      if (provider.supportsContext) buildContext(item, baseTranslationText) else null
+
     return TranslationParams(
       text = withReplacedParams,
       textRaw = baseTranslationText,
@@ -184,6 +187,7 @@ class MtBatchTranslator(
       targetLanguageTag = targetLanguageTag,
       serviceInfo = context.getServiceInfo(item.targetLanguageId, item.service),
       metadata = metadata,
+      context = providerContext,
       isBatch = context.isBatch,
       pluralForms = pluralForms?.forms,
       pluralFormExamples =
@@ -194,6 +198,19 @@ class MtBatchTranslator(
             it,
           )
         },
+    )
+  }
+
+  private fun buildContext(
+    item: MtBatchItemParams,
+    baseTranslationText: String,
+  ): String? {
+    val keyId = item.keyId ?: return null
+    return MetadataProvider(context).getContext(
+      context.baseLanguage,
+      context.getLanguage(item.targetLanguageId),
+      MetadataKey(keyId, baseTranslationText, item.targetLanguageId),
+      context.keys[keyId]?.description,
     )
   }
 

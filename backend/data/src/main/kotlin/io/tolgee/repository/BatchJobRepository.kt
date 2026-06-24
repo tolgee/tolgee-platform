@@ -76,6 +76,11 @@ interface BatchJobRepository : JpaRepository<BatchJob, Long> {
 
   fun findAllByProjectId(projectId: Long): List<BatchJob>
 
+  fun findByIdAndProjectId(
+    id: Long,
+    projectId: Long,
+  ): BatchJob?
+
   @Query(
     """
     select j from BatchJob j

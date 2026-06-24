@@ -129,6 +129,7 @@ class SuggestionController(
     val projectId = projectHolder.project.id
     translationSuggestionService.deleteSuggestionCreatedByUser(
       projectId,
+      languageId,
       keyId,
       suggestionId,
       authenticationFacade.authenticatedUser.id,
@@ -150,7 +151,7 @@ class SuggestionController(
       listOf(languageId),
     )
     val projectId = projectHolder.project.id
-    val suggestion = translationSuggestionService.declineSuggestion(projectId, keyId, suggestionId)
+    val suggestion = translationSuggestionService.declineSuggestion(projectId, languageId, keyId, suggestionId)
     return translationSuggestionModelAssembler.toModel(suggestion)
   }
 
@@ -201,7 +202,7 @@ class SuggestionController(
       listOf(languageId),
     )
     val projectId = projectHolder.project.id
-    val suggestion = translationSuggestionService.suggestionSetActive(projectId, keyId, suggestionId)
+    val suggestion = translationSuggestionService.suggestionSetActive(projectId, languageId, keyId, suggestionId)
     return translationSuggestionModelAssembler.toModel(suggestion)
   }
 }

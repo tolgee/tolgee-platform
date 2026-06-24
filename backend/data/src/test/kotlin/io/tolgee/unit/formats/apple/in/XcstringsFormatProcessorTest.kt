@@ -3,7 +3,6 @@ package io.tolgee.unit.formats.apple.`in`
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.formats.apple.`in`.xcstrings.XcstringsFileProcessor
 import io.tolgee.testing.assert
-import io.tolgee.unit.formats.PlaceholderConversionTestHelper
 import io.tolgee.util.FileProcessorContextMockUtil
 import io.tolgee.util.assertKey
 import io.tolgee.util.assertLanguagesCount
@@ -103,26 +102,6 @@ class XcstringsFormatProcessorTest {
     mockUtil.fileProcessorContext.assertKey("hello-world") {
       description.assert.isEqualTo("A greeting message")
     }
-  }
-
-  @Test
-  fun `placeholder conversion setting application works`() {
-    PlaceholderConversionTestHelper.testFile(
-      "example.xcstrings",
-      "src/test/resources/import/apple/example_params.xcstrings",
-      assertBeforeSettingsApplication =
-        listOf(
-          "{0, plural,\none {You have # message}\nother {You have # messages}\n}",
-        ),
-      assertAfterDisablingConversion =
-        listOf(
-          "{value, plural,\none {You have %lld message}\nother {You have %lld messages}\n}",
-        ),
-      assertAfterReEnablingConversion =
-        listOf(
-          "{0, plural,\none {You have # message}\nother {You have # messages}\n}",
-        ),
-    )
   }
 
   @Test

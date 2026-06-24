@@ -22,6 +22,20 @@ class WebhookProperties {
   )
   var autoDisableAfterDays: Int = 3
 
+  @DocProperty(
+    description =
+      "When enabled, webhook URLs may target otherwise-blocked address ranges — " +
+        "loopback, private/site-local, link-local, IPv6 unique-local, multicast and " +
+        "wildcard/any-local addresses. Useful for local development and integration testing.\n" +
+        "\n" +
+        ":::danger\n" +
+        "This removes SSRF protection for webhook targets. Keep it **disabled** on production " +
+        "and multi-tenant servers — anyone able to configure a webhook could otherwise reach " +
+        "internal services.\n" +
+        ":::\n\n",
+  )
+  var allowLocalAddresses: Boolean = false
+
   @PostConstruct
   fun validate() {
     require(autoDisableWarningAfterHours < autoDisableAfterDays * 24) {

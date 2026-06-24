@@ -41,7 +41,35 @@ class ScheduledJobCleaner(
     runSentryCatching {
       handleCompletedJobsCacheState()
       handleStuckJobs()
+      handleOrphanProjectLocks()
     }
+  }
+
+  /**
+   * Detects entries in `project_batch_job_locks` that point at a job id no longer present in
+   * `tolgee_batch_job` and resets them. This protects against orphan locks that survived job
+   * deletion through any path — the deletion cleanup is the first line of defense, this is
+   * the safety net for future regressions and pre-existing stale entries.
+   */
+  private fun handleOrphanProjectLocks() {
+    val lockedEntries =
+      lockingManager
+        .getMap()
+        .entries
+        .mapNotNull { entry ->
+          val jobId = entry.value ?: return@mapNotNull null
+          if (jobId == 0L) return@mapNotNull null
+          entry.key to jobId
+        }
+    if (lockedEntries.isEmpty()) return
+
+    val existingJobIds = batchJobService.findExistingJobIds(lockedEntries.map { it.second })
+    lockedEntries
+      .filter { it.second !in existingJobIds }
+      .forEach { (projectId, jobId) ->
+        logger.warn("Releasing orphan project lock: project=$projectId points at deleted job=$jobId")
+        lockingManager.unlockJobForProject(projectId, jobId)
+      }
   }
 
   private fun handleStuckJobs() {

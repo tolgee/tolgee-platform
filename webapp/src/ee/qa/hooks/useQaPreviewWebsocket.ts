@@ -7,6 +7,7 @@ import {
   QaPreviewResult,
   WsMessage,
 } from 'tg.ee.module/qa/models/QaPreviewWsModels';
+import { getPluralVariants } from '@tginternal/editor';
 
 export const useQaPreviewWebsocket = ({
   projectId,
@@ -29,8 +30,6 @@ export const useQaPreviewWebsocket = ({
   initialIssuesRef.current = initialIssues;
   const latestTextRef = useRef(text);
   latestTextRef.current = text;
-  const latestVariantRef = useRef(variant);
-  latestVariantRef.current = variant;
 
   useEffect(() => {
     // Re-seed from persisted issues when params change
@@ -58,12 +57,7 @@ export const useQaPreviewWebsocket = ({
       // initial text update message
       const currentText = latestTextRef.current;
       if (currentText != null) {
-        ws.send(
-          JSON.stringify({
-            text: currentText,
-            variant: latestVariantRef.current,
-          })
-        );
+        ws.send(JSON.stringify({ text: currentText }));
       } else {
         setIsLoading(false);
       }
@@ -130,9 +124,7 @@ export const useQaPreviewWebsocket = ({
     (t: string) => {
       pendingTextUpdateRef.current = false;
       if (wsRef.current?.readyState === WebSocket.OPEN) {
-        wsRef.current.send(
-          JSON.stringify({ text: t, variant: latestVariantRef.current })
-        );
+        wsRef.current.send(JSON.stringify({ text: t }));
       }
     },
     200,
@@ -145,7 +137,7 @@ export const useQaPreviewWebsocket = ({
       pendingTextUpdateRef.current = true;
       sendText(text);
     }
-  }, [text, variant, enabled]);
+  }, [text, enabled]);
 
   const updateIssueState = useCallback(
     (targetIssue: QaPreviewIssue, newState: QaPreviewIssue['state']) => {
@@ -172,15 +164,27 @@ export const useQaPreviewWebsocket = ({
     []
   );
 
+  // First generic issues, then current variant, then rest sorted by
+  // default order of plural variants
+  const pluralVariantsOrder: (string | undefined)[] = useMemo(
+    () => [undefined, variant, ...getPluralVariants(languageTag)],
+    [languageTag, variant]
+  );
+
   const issues = useMemo(() => {
+    const getVariantIndex = (variant: string | undefined) => {
+      const i = pluralVariantsOrder.indexOf(variant);
+      return i === -1 ? pluralVariantsOrder.length : i;
+    };
     const all = Array.from(issuesByType.values()).flat();
     return all.sort(
       (a, b) =>
+        getVariantIndex(a.pluralVariant) - getVariantIndex(b.pluralVariant) ||
         (a.positionStart ?? Infinity) - (b.positionStart ?? Infinity) ||
         (a.positionEnd ?? Infinity) - (b.positionEnd ?? Infinity) ||
         a.type.localeCompare(b.type)
     );
-  }, [issuesByType]);
+  }, [issuesByType, pluralVariantsOrder]);
 
   return { issues, isLoading, isDisconnected, updateIssueState };
 };

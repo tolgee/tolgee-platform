@@ -2,6 +2,7 @@ package io.tolgee.batch.cleaning
 
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Timer
+import io.tolgee.batch.BatchJobProjectLockingManager
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.LockingProvider
 import io.tolgee.component.SchedulingManager
@@ -13,6 +14,7 @@ import io.tolgee.util.logger
 import io.tolgee.util.runSentryCatching
 import jakarta.persistence.EntityManager
 import org.springframework.boot.context.event.ApplicationReadyEvent
+import org.springframework.context.annotation.Lazy
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
@@ -29,6 +31,8 @@ class OldBatchJobCleaner(
   private val lockingProvider: LockingProvider,
   private val transactionManager: PlatformTransactionManager,
   private val schedulingManager: SchedulingManager,
+  @Lazy
+  private val lockingManager: BatchJobProjectLockingManager,
 ) : Logging {
   @EventListener(ApplicationReadyEvent::class)
   fun scheduleCleanup() {
@@ -98,27 +102,29 @@ class OldBatchJobCleaner(
     statuses: List<String>,
     cutoffDate: Date,
   ): Pair<Int, Int> {
-    val jobIds = findJobIdsToDelete(statuses, cutoffDate)
-    if (jobIds.isEmpty()) return Pair(0, 0)
+    val jobs = findJobsToDelete(statuses, cutoffDate)
+    if (jobs.isEmpty()) return Pair(0, 0)
 
+    val jobIds = jobs.map { it.jobId }
     val executionIds = findExecutionIds(jobIds)
     nullifyActivityRevisionReferences(jobIds, executionIds)
     deleteChunkExecutions(jobIds, executionIds)
     deleteBatchJobs(jobIds)
+    releaseProjectLocks(jobs)
 
     return Pair(jobIds.size, executionIds.size)
   }
 
-  private fun findJobIdsToDelete(
+  private fun findJobsToDelete(
     statuses: List<String>,
     cutoffDate: Date,
-  ): List<Long> {
+  ): List<JobToDelete> {
     val statusesPlaceholder = statuses.mapIndexed { index, _ -> ":status$index" }.joinToString(", ")
     val query =
       entityManager
         .createNativeQuery(
           """
-          SELECT id FROM tolgee_batch_job
+          SELECT id, project_id FROM tolgee_batch_job
           WHERE status IN ($statusesPlaceholder)
           AND updated_at < :cutoffDate
           LIMIT :batchSize
@@ -130,11 +136,35 @@ class OldBatchJobCleaner(
     }
 
     @Suppress("UNCHECKED_CAST")
-    return query
-      .setParameter("cutoffDate", cutoffDate)
-      .setParameter("batchSize", batchProperties.jobCleanupBatchSize)
-      .resultList as List<Long>
+    val rows =
+      query
+        .setParameter("cutoffDate", cutoffDate)
+        .setParameter("batchSize", batchProperties.jobCleanupBatchSize)
+        .resultList as List<Array<Any?>>
+
+    return rows.map {
+      JobToDelete(
+        jobId = (it[0] as Number).toLong(),
+        projectId = (it[1] as Number?)?.toLong(),
+      )
+    }
   }
+
+  /**
+   * Releases any project lock still held by the deleted jobs. Normally the lock is released
+   * when the job completes, but if that ever failed (process crash, exception in the cancel
+   * path, etc.), the entry in `project_batch_job_locks` would point at a job id whose DB row
+   * is now gone — permanently blocking every future batch job for that project. This is a
+   * belt-and-suspenders cleanup tied to the same transaction boundary as the row deletion.
+   */
+  private fun releaseProjectLocks(jobs: List<JobToDelete>) {
+    jobs.forEach { lockingManager.unlockJobForProject(it.projectId, it.jobId) }
+  }
+
+  private data class JobToDelete(
+    val jobId: Long,
+    val projectId: Long?,
+  )
 
   private fun findExecutionIds(jobIds: List<Long>): List<Long> {
     @Suppress("UNCHECKED_CAST")

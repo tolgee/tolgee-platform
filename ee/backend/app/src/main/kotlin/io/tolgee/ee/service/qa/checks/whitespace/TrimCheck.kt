@@ -18,7 +18,7 @@ class TrimCheck : QaCheck {
     // whatever preference the user sets up in base translation to all translations.
     if (params.baseLanguageTag != null) return emptyList()
 
-    return QaPluralCheckHelper.runPerVariant(params) { text, _ ->
+    return QaPluralCheckHelper.runPerVariant(params) { text, _, _ ->
       checkVariant(text)
     }
   }

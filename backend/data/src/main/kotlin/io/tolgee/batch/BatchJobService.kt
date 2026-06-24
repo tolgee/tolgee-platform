@@ -225,6 +225,16 @@ class BatchJobService(
     return this.findJobDto(id) ?: throw NotFoundException(Message.BATCH_JOB_NOT_FOUND)
   }
 
+  fun getJobDto(
+    projectId: Long,
+    id: Long,
+  ): BatchJobDto {
+    val job =
+      batchJobRepository.findByIdAndProjectId(id, projectId)
+        ?: throw NotFoundException(Message.BATCH_JOB_NOT_FOUND)
+    return BatchJobDto.fromEntity(job)
+  }
+
   /**
    * Gets job DTO directly from database, bypassing the cache.
    * Use this when you need to read the most recent committed state,
@@ -315,6 +325,16 @@ class BatchJobService(
     return getView(job)
   }
 
+  fun getView(
+    projectId: Long,
+    jobId: Long,
+  ): BatchJobView {
+    val job =
+      batchJobRepository.findByIdAndProjectId(jobId, projectId)
+        ?: throw NotFoundException(Message.BATCH_JOB_NOT_FOUND)
+    return getView(job)
+  }
+
   fun getView(job: BatchJob): BatchJobView {
     val progress = getProgresses(listOf(job))[job.id] ?: 0
     val errorMessage = getErrorMessages(listOf(job))[job.id]
@@ -384,6 +404,26 @@ class BatchJobService(
     return batchJobRepository.findAllByProjectId(projectId)
   }
 
+  fun hasActiveJobForProject(
+    projectId: Long,
+    type: BatchJobType,
+  ): Boolean {
+    return entityManager
+      .createQuery(
+        """
+        select count(j) > 0 from BatchJob j
+        where j.project.id = :projectId
+          and j.type = :type
+          and j.status not in :completedStatuses
+        """.trimIndent(),
+        java.lang.Boolean::class.java,
+      ).setParameter("projectId", projectId)
+      .setParameter("type", type)
+      .setParameter("completedStatuses", BatchJobStatus.entries.filter { it.completed })
+      .singleResult
+      .booleanValue()
+  }
+
   fun getExecutions(batchJobId: Long): List<BatchJobChunkExecution> {
     return entityManager
       .createQuery(
@@ -425,6 +465,21 @@ class BatchJobService(
     lockedJobIds: Iterable<Long>,
     before: Date,
   ): List<BatchJob> = batchJobRepository.getCompletedJobs(lockedJobIds, before)
+
+  fun findExistingJobIds(jobIds: Iterable<Long>): Set<Long> {
+    val idList = jobIds.toList()
+    if (idList.isEmpty()) return emptySet()
+    @Suppress("UNCHECKED_CAST")
+    return entityManager
+      .createNativeQuery(
+        """
+        SELECT id FROM tolgee_batch_job WHERE id IN :ids
+        """,
+      ).setParameter("ids", idList)
+      .resultList
+      .map { (it as Number).toLong() }
+      .toSet()
+  }
 
   fun getStuckJobIds(jobIds: MutableSet<Long>): List<Long> {
     return batchJobRepository.getStuckJobIds(jobIds, currentDateProvider.date.addMinutes(-2))

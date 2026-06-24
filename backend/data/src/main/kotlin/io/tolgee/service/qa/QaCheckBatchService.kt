@@ -1,5 +1,6 @@
 package io.tolgee.service.qa
 
+import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.model.enums.qa.QaCheckType
 
 interface QaCheckBatchService {
@@ -8,15 +9,12 @@ interface QaCheckBatchService {
     keyId: Long,
     languageId: Long,
     checkTypes: List<QaCheckType>? = null,
-    enabledCheckTypes: Set<QaCheckType>? = null,
   )
 
-  /**
-   * Returns the set of QA check types enabled for a given language in a project,
-   * resolving per-language overrides against the project-level config.
-   */
-  fun getEnabledCheckTypesForLanguage(
+  fun runChecksAndPersistChunk(
     projectId: Long,
-    languageId: Long,
-  ): Set<QaCheckType> = emptySet()
+    checkTypes: List<QaCheckType>? = null,
+    items: List<BatchTranslationTargetItem>,
+    progressCallback: () -> Unit = {},
+  )
 }

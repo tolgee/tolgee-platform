@@ -5,6 +5,7 @@ import io.tolgee.formats.paramConvertors.out.IcuToCPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.out.IcuToI18nextPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.out.IcuToJavaPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.out.IcuToPhpPlaceholderConvertor
+import io.tolgee.formats.paramConvertors.out.IcuToPythonBracePlaceholderConvertor
 import io.tolgee.formats.paramConvertors.out.IcuToPythonPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.out.IcuToRubyPlaceholderConvertor
 
@@ -20,4 +21,5 @@ enum class ExportMessageFormat(
   I18NEXT(paramConvertorFactory = { IcuToI18nextPlaceholderConvertor() }),
   ICU(paramConvertorFactory = { IcuToIcuPlaceholderConvertor() }),
   PYTHON_PERCENT(paramConvertorFactory = { IcuToPythonPlaceholderConvertor() }),
+  PYTHON_BRACE(paramConvertorFactory = { IcuToPythonBracePlaceholderConvertor() }),
 }

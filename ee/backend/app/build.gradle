@@ -59,6 +59,10 @@ dependencies {
     implementation libs.springDocOpenApiUi
     implementation libs.springDocOpenApiCommon
 
+    /**
+     * DB
+     */
+    implementation 'org.postgresql:postgresql'
 
     /**
      * MISC

@@ -137,6 +137,6 @@ class ContentStorageController(
     dto: ContentStorageRequest,
     @PathVariable id: Long,
   ): StorageTestResult {
-    return contentStorageService.testStorage(dto, id)
+    return contentStorageService.testStorage(dto, id, projectHolder.project.id)
   }
 }

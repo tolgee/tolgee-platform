@@ -18,6 +18,9 @@ class TranslationMemoryItemModelAssembler :
       baseText = entity.baseTranslationText,
       keyName = entity.keyName,
       similarity = entity.similarity,
+      translationMemoryName = entity.translationMemoryName,
+      rawSimilarity = entity.rawSimilarity,
+      updatedAt = entity.updatedAt,
     )
   }
 }

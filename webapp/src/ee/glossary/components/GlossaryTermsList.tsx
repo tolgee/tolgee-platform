@@ -1,4 +1,9 @@
-import { ScrollArrows } from 'tg.ee.module/glossary/components/ScrollArrows';
+import { ScrollArrows } from 'tg.component/entriesList/ScrollArrows';
+import {
+  Container as ListContainer,
+  Content as ListContent,
+  VerticalScroll as ListVerticalScroll,
+} from 'tg.component/entriesList/entriesListChrome';
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import { Button, styled, useTheme } from '@mui/material';
 import { T } from '@tolgee/react';
@@ -17,61 +22,10 @@ import { useResizeObserver } from 'usehooks-ts';
 type SimpleGlossaryTermWithTranslationsModel =
   components['schemas']['SimpleGlossaryTermWithTranslationsModel'];
 
-const StyledContainer = styled('div')`
-  position: relative;
-  display: grid;
-  margin: 0px;
-  border-left: 0px;
-  border-right: 0px;
-  background: ${({ theme }) => theme.palette.background.default};
-  flex-grow: 1;
-
-  &::before {
-    content: '';
-    height: 100%;
-    position: absolute;
-    width: 6px;
-    background-image: linear-gradient(90deg, #0000002c, transparent);
-    top: 0px;
-    left: 0px;
-    z-index: 10;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 100ms ease-in-out;
-  }
-
-  &::after {
-    content: '';
-    height: 100%;
-    position: absolute;
-    width: 6px;
-    background-image: linear-gradient(-90deg, #0000002c, transparent);
-    top: 0px;
-    right: 0px;
-    z-index: 10;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 100ms ease-in-out;
-  }
-`;
-
 const StyleTermsCount = styled('div')`
   color: ${({ theme }) => theme.palette.text.secondary};
   margin-top: ${({ theme }) => theme.spacing(0.5)};
   margin-bottom: ${({ theme }) => theme.spacing(1)};
-`;
-
-const StyledVerticalScroll = styled('div')`
-  overflow: auto;
-  scrollbar-width: thin;
-  scrollbar-color: ${({ theme }) => theme.palette.text.secondary} transparent;
-  scroll-behavior: smooth;
-  margin-top: ${({ theme }) => theme.spacing(0.5)};
-  min-height: 350px;
-`;
-
-const StyledContent = styled('div')`
-  position: relative;
 `;
 
 type Props = {
@@ -161,7 +115,7 @@ export const GlossaryTermsList = ({
   if (terms.length === 0) {
     if (search !== undefined && search.length > 0) {
       return (
-        <StyledContainer data-cy="translations-view-table">
+        <ListContainer data-cy="translations-view-table">
           <EmptyListMessage
             loading={loading}
             hint={
@@ -175,33 +129,33 @@ export const GlossaryTermsList = ({
           >
             <T keyName="glossary_terms_nothing_found" />
           </EmptyListMessage>
-        </StyledContainer>
+        </ListContainer>
       );
     }
 
     return (
-      <StyledContainer data-cy="translations-view-table">
+      <ListContainer data-cy="translations-view-table">
         <GlossaryEmptyListMessage
           loading={loading}
           onCreateTerm={onCreateTerm}
           onImport={onImport}
         />
-      </StyledContainer>
+      </ListContainer>
     );
   }
 
   return (
-    <StyledContainer data-cy="translations-view-table" ref={containerRef}>
+    <ListContainer data-cy="translations-view-table" ref={containerRef}>
       <ScrollArrows
         containerRef={containerRef}
         verticalScrollRef={verticalScrollRef}
         deps={[selectedLanguages]}
       />
-      <StyledVerticalScroll
+      <ListVerticalScroll
         ref={verticalScrollRefCallback}
         style={{ height: tableHeight }}
       >
-        <StyledContent>
+        <ListContent>
           <StyleTermsCount>
             <T
               keyName="glossary_view_terms_count"
@@ -227,8 +181,8 @@ export const GlossaryTermsList = ({
             useTranslate3d
             itemRenderer={renderItem}
           />
-        </StyledContent>
-      </StyledVerticalScroll>
-    </StyledContainer>
+        </ListContent>
+      </ListVerticalScroll>
+    </ListContainer>
   );
 };

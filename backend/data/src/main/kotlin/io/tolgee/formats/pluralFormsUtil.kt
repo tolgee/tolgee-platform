@@ -41,17 +41,23 @@ fun populateForms(
 
 fun orderPluralForms(pluralForms: Map<String, String>): Map<String, String> {
   return pluralForms.entries
-    .sortedBy {
-      val formIndex = formKeywords.indexOf(it.key)
-      if (formIndex == -1) {
-        "A_$it"
-      } else {
-        formIndex.toString()
-      }
-    }.associate { it.key to it.value }
+    .sortedWith(
+      compareBy(
+        { parseExactPluralFormKey(it.key) ?: Double.MAX_VALUE },
+        { formKeywords.indexOf(it.key) },
+        { it.key },
+      ),
+    ).associate { it.key to it.value }
 }
 
 val formKeywords = listOf("zero", "one", "two", "few", "many", "other")
+
+private fun parseExactPluralFormKey(key: String): Double? {
+  if (!key.startsWith("=")) {
+    return null
+  }
+  return key.substring(1).toDoubleOrNull()
+}
 
 /**
  * It takes the plurals and optimizes them by removing the unnecessary forms

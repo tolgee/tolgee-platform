@@ -39,6 +39,14 @@ Yup.setLocale({
       />
     ),
   },
+  number: {
+    min: ({ min }) => (
+      <T
+        keyName="validation_schema_number_min_message"
+        params={{ min: min.toString() }}
+      />
+    ),
+  },
 });
 
 const isValidBranchName = (name: string | undefined): boolean => {
@@ -251,6 +259,35 @@ export class Validation {
   static readonly PROJECT_SETTINGS = Yup.object().shape({
     name: Yup.string().required().min(3).max(100),
     description: Yup.string().nullable().min(3).max(2000),
+  });
+
+  static readonly TRANSLATION_MEMORY_CREATE_EDIT = Yup.object().shape({
+    name: Yup.string().required().min(1).max(100),
+    baseLanguage: Yup.object()
+      .required()
+      .shape({
+        tag: Yup.string().min(1).required(),
+      }),
+    defaultPenalty: Yup.number()
+      .transform((value, originalValue) =>
+        originalValue === '' || originalValue === null ? 0 : value
+      )
+      .typeError(() => (
+        <T
+          keyName="validation_must_be_whole_number"
+          defaultValue="Must be a whole number between 0 and 100"
+        />
+      ))
+      .integer(() => (
+        <T
+          keyName="validation_must_be_whole_number"
+          defaultValue="Must be a whole number between 0 and 100"
+        />
+      ))
+      .min(0)
+      .max(100)
+      .required(),
+    writeOnlyReviewed: Yup.boolean().required(),
   });
 
   private static slugValidation(min: number, max: number) {
@@ -579,6 +616,13 @@ export class Validation {
     });
 
   static readonly BRANCH_MERGE = (t: TranslateFunction) => Yup.object({});
+
+  static readonly PLAN_MIGRATION_FORM = () =>
+    Yup.object().shape({
+      monthlyOffsetDays: Yup.number().required().min(0),
+      yearlyOffsetDays: Yup.number().required().min(0),
+      customEmailBody: Yup.string().nullable(),
+    });
 }
 
 let GLOBAL_VALIDATION_DEBOUNCE_TIMER: any = undefined;

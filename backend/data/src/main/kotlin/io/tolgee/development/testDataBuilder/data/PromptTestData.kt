@@ -29,6 +29,7 @@ class PromptTestData : BaseTestData() {
   lateinit var keys: MutableList<KeyBuilder>
   lateinit var customPrompt: PromptBuilder
   lateinit var llmProvider: LlmProviderBuilder
+  lateinit var unrelatedLlmProvider: LlmProviderBuilder
 
   init {
     serverAdmin =
@@ -48,9 +49,15 @@ class PromptTestData : BaseTestData() {
       }
 
     unrelatedOrganization =
-      root.addOrganization {
-        name = "unrelated organization"
-      }
+      root
+        .addOrganization {
+          name = "unrelated organization"
+        }.build {
+          unrelatedLlmProvider =
+            addLlmProvider {
+              name = "unrelated-organization-provider"
+            }
+        }
 
     organization =
       root

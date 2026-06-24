@@ -13,7 +13,7 @@ import {
 } from 'react-query';
 
 import { paths } from '../apiSchema.generated';
-import { paths as billingPaths } from '../billingApiSchema.generated';
+import { paths as billingPaths } from 'tg.service/billingApiSchema.generated';
 import { ApiError } from './ApiError';
 
 import { RequestOptions } from './ApiHttpService';
@@ -296,6 +296,13 @@ export const useBillingApiQuery = <
 >(
   props: QueryProps<Url, Method, billingPaths>
 ) => useApiQuery<Url, Method, billingPaths>(props);
+
+export const useBillingApiInfiniteQuery = <
+  Url extends keyof billingPaths,
+  Method extends keyof billingPaths[Url]
+>(
+  props: InfiniteQueryProps<Url, Method, billingPaths>
+) => useApiInfiniteQuery<Url, Method, billingPaths>(props);
 
 export const useBillingApiMutation = <
   Url extends keyof billingPaths,

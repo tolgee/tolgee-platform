@@ -11,13 +11,13 @@ import { Link, useHistory } from 'react-router-dom';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
+import { useQaCheckTypes } from 'tg.globalContext/helpers';
 import { getProjectTranslationsUrl, LINKS, PARAMS } from 'tg.constants/links';
 import { QaCheck } from 'tg.component/CustomIcons';
+import { CircledLanguageIcon } from 'tg.component/languages/CircledLanguageIcon';
 import { QaLanguageStatsProps } from '../../../eeSetup/EeModuleType';
 import { IssueRow } from './IssueRow';
-import { components } from 'tg.service/apiSchema.generated';
-
-type QaCheckType = components['schemas']['QaIssueModel']['type'];
+import { QaCheckType } from 'tg.service/apiSchemaTypes';
 
 const StyledContent = styled(Box)`
   display: flex;
@@ -39,6 +39,13 @@ const StyledButtons = styled(Box)`
   padding: 0 8px;
 `;
 
+const StyledSettingsLink = styled(Typography)`
+  font-size: 13px;
+  color: ${({ theme }) => theme.palette.text.secondary};
+  text-decoration: none;
+  cursor: pointer;
+` as typeof Typography;
+
 export const QaLanguageStats = ({
   languageId,
   languageTag,
@@ -46,8 +53,11 @@ export const QaLanguageStats = ({
   const { t } = useTranslate();
   const project = useProject();
   const history = useHistory();
+  const allQaCheckTypes = useQaCheckTypes();
   const languages = useProjectLanguages();
-  const baseLanguage = languages.find((l) => l.base)?.tag;
+  const baseLanguageTag = languages.find((l) => l.base)?.tag;
+  const currentLanguage = languages.find((l) => l.id === languageId);
+  const flagEmoji = currentLanguage?.flagEmoji;
 
   const { data, isLoading } = useApiQuery({
     url: '/v2/projects/{projectId}/stats/qa-issue-counts',
@@ -57,15 +67,14 @@ export const QaLanguageStats = ({
   });
 
   const entries = data
-    ? Object.entries(data)
+    ? (Object.entries(data) as [QaCheckType, number][])
         .filter(([, count]) => count > 0)
         .sort(([, a], [, b]) => b - a)
     : [];
 
-  const targetLanguages =
-    languageTag === baseLanguage
-      ? [languageTag]
-      : ([baseLanguage, languageTag].filter(Boolean) as string[]);
+  const targetLanguages = Array.from(
+    new Set([baseLanguageTag, languageTag].filter(Boolean) as string[])
+  );
 
   const navigateToTranslations = (filters: Record<string, unknown> = {}) => {
     history.push(
@@ -83,6 +92,9 @@ export const QaLanguageStats = ({
         <Typography variant="body2" fontWeight={500}>
           {t('qa_dashboard_popover_title')}
         </Typography>
+        {flagEmoji && (
+          <CircledLanguageIcon size={20} flag={flagEmoji} sx={{ ml: 'auto' }} />
+        )}
       </StyledHeader>
 
       {isLoading ? (
@@ -94,7 +106,7 @@ export const QaLanguageStats = ({
           {entries.map(([checkType, count]) => (
             <IssueRow
               key={checkType}
-              checkType={checkType as QaCheckType}
+              checkType={checkType}
               count={count}
               onClick={() =>
                 navigateToTranslations({ filterQaCheckTypes: [checkType] })
@@ -112,26 +124,22 @@ export const QaLanguageStats = ({
       )}
 
       <StyledButtons>
-        <Typography
+        <StyledSettingsLink
           component={Link}
           to={LINKS.PROJECT_EDIT_QA.build({
             [PARAMS.PROJECT_ID]: project.id,
           })}
           variant="button"
-          sx={{
-            fontSize: 13,
-            color: 'text.secondary',
-            textDecoration: 'none',
-            cursor: 'pointer',
-          }}
         >
           {t('qa_dashboard_popover_settings')}
-        </Typography>
+        </StyledSettingsLink>
         <Button
           variant="outlined"
           color="primary"
           size="small"
-          onClick={() => navigateToTranslations({ filterHasQaIssues: true })}
+          onClick={() =>
+            navigateToTranslations({ filterQaCheckTypes: allQaCheckTypes })
+          }
         >
           {t('qa_dashboard_popover_show_all')}
         </Button>

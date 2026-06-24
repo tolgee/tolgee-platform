@@ -13,7 +13,7 @@ class RepeatedWordsCheck : QaCheck {
   override val type: QaCheckType = QaCheckType.REPEATED_WORDS
 
   override fun check(params: QaCheckParams): List<QaCheckResult> {
-    return QaPluralCheckHelper.runPerVariant(params) { text, _ ->
+    return QaPluralCheckHelper.runPerVariant(params) { text, _, _ ->
       checkVariant(text)
     }
   }

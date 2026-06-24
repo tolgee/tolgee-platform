@@ -61,6 +61,7 @@ jobs:
         env:
           SKIP_SERVER_BUILD: true
           SKIP_EMAIL_BUILD: true
+          DETECT_FLAKY_TESTS: true
 
       - name: Get report name
         id: reportName
@@ -85,27 +86,19 @@ jobs:
           fail-on-error: false
           reporter: java-junit
 
-      - name: Collect failed tests
-        if: failure()
-        run: |
-          python3 -c "
-          import xml.etree.ElementTree as ET
-          import glob
-          for f in glob.glob('**/build/test-results/**/TEST-*.xml', recursive=True):
-              try:
-                  tree = ET.parse(f)
-              except ET.ParseError:
-                  continue
-              for tc in tree.findall('.//testcase'):
-                  if tc.find('failure') is not None or tc.find('error') is not None:
-                      print(f'{tc.get(\"classname\")}.{tc.get(\"name\")}')
-          " > failed-tests-${{ steps.reportName.outputs.reportName }}.txt || true
+      - name: Collect flaky and failed tests
+        if: always()
+        continue-on-error: true
+        run: python3 scripts/collect-flaky-tests.py "${{ steps.reportName.outputs.reportName }}"
 
       - uses: actions/upload-artifact@v4
-        if: failure()
+        if: always()
         with:
-          name: failed_tests_${{ steps.reportName.outputs.reportName }}
-          path: failed-tests-${{ steps.reportName.outputs.reportName }}.txt
+          name: flaky_tests_${{ steps.reportName.outputs.reportName }}
+          path: |
+            flaky-tests-${{ steps.reportName.outputs.reportName }}.txt
+            failed-tests-${{ steps.reportName.outputs.reportName }}.txt
+          if-no-files-found: ignore
 
   frontend-build:
     name: Build frontend 🏗️
@@ -214,19 +207,16 @@ jobs:
           SKIP_INSTALL_E2E_DEPS: true
           E2E_TOTAL_JOBS: ${{matrix.total_jobs}}
           E2E_JOB_INDEX: ${{matrix.job_index}}
-
-      - name: Collect failed tests
-        if: failure()
-        run: |
-          find ./e2e/cypress/screenshots -name "*.png" 2>/dev/null \
-            | sed 's|.*/screenshots/||; s| (failed)\.png$||; s| -- | > |' \
-            | sort -u > failed-tests-e2e-${{ matrix.job_index }}.txt || true
+          DETECT_FLAKY_TESTS: true
 
       - uses: actions/upload-artifact@v4
-        if: failure()
+        if: always()
         with:
-          name: failed_tests_e2e_${{ matrix.job_index }}
-          path: failed-tests-e2e-${{ matrix.job_index }}.txt
+          name: flaky_tests_e2e_${{ matrix.job_index }}
+          path: |
+            ./e2e/flaky-tests-e2e-${{ matrix.job_index }}.txt
+            ./e2e/failed-tests-e2e-${{ matrix.job_index }}.txt
+          if-no-files-found: ignore
 
       - uses: actions/upload-artifact@v4
         if: failure()
@@ -261,7 +251,7 @@ jobs:
   notify:
     name: Report flaky tests 🔔
     needs: [backend-test, e2e]
-    if: failure()
+    if: always()
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -270,13 +260,50 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          pattern: failed_tests_*
+          pattern: flaky_tests_*
           merge-multiple: true
-          path: ./failures
+          path: ./flaky
         continue-on-error: true
 
-      - name: Report to project board
+      # Flaky tests (failed then passed on retry) and hard failures (failed
+      # every retry) are collected into separate artifacts. Only flaky tests
+      # are reported to the board; hard failures are surfaced in Slack only.
+      - name: Summarize results
+        id: summary
+        run: |
+          flaky=""
+          failed=""
+          if compgen -G './flaky/flaky-tests-*.txt' > /dev/null; then
+            flaky=$(cat ./flaky/flaky-tests-*.txt | sed '/^[[:space:]]*$/d' | sort -u)
+          fi
+          if compgen -G './flaky/failed-tests-*.txt' > /dev/null; then
+            failed=$(cat ./flaky/failed-tests-*.txt | sed '/^[[:space:]]*$/d' | sort -u)
+          fi
+          flaky_count=0
+          failed_count=0
+          if [ -n "$flaky" ]; then
+            flaky_count=$(printf '%s\n' "$flaky" | wc -l | tr -d ' ')
+          fi
+          if [ -n "$failed" ]; then
+            failed_count=$(printf '%s\n' "$failed" | wc -l | tr -d ' ')
+          fi
+          echo "Found $flaky_count flaky, $failed_count consistently failing tests"
+          {
+            echo "flaky_count=$flaky_count"
+            echo "failed_count=$failed_count"
+            echo 'flaky_list<<EOF'
+            [ -n "$flaky" ] && printf '%s\n' "$flaky" | head -30 | sed 's/.*/• `&`/'
+            echo 'EOF'
+            echo 'failed_list<<EOF'
+            [ -n "$failed" ] && printf '%s\n' "$failed" | head -30 | sed 's/.*/• `&`/'
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      # Always run so the sweep pass cleans up stale Suspected items even on
+      # nights with no flaky detections.
+      - name: Report flaky tests to project board
         id: project
+        if: always()
         continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
@@ -285,40 +312,45 @@ jobs:
           TEAM_ORG: tolgee
           TEAM_SLUG: coders
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-        run: python3 scripts/report-flaky-tests.py ./failures .
+        run: python3 scripts/report-flaky-tests.py ./flaky .
 
-      - name: Build failure list
-        id: failures
-        if: always()
-        run: |
-          {
-            echo 'list<<EOF'
-            if compgen -G './failures/failed-tests-*.txt' > /dev/null; then
-              cat ./failures/failed-tests-*.txt | sort -u | head -30 | sed 's/.*/• `&`/'
-            fi
-            echo 'EOF'
-          } >> $GITHUB_OUTPUT
-
+      # Newly confirmed flakes and hard failures are the actionable signals;
+      # raw per-run flaky counts (unpromoted Suspected items) don't trigger
+      # Slack on their own.
       - name: Send Slack notification
-        if: always()
+        if: steps.project.outputs.newly_confirmed_count != '0' || steps.summary.outputs.failed_count != '0'
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_FLAKY_TESTS_WEBHOOK_URL }}
-          FAILED_TESTS: ${{ steps.failures.outputs.list }}
+          NEWLY_CONFIRMED_TESTS: ${{ steps.project.outputs.newly_confirmed_list }}
+          NEWLY_CONFIRMED_COUNT: ${{ steps.project.outputs.newly_confirmed_count }}
+          FAILED_TESTS: ${{ steps.summary.outputs.failed_list }}
+          FAILED_COUNT: ${{ steps.summary.outputs.failed_count }}
+          TOTAL_CONFIRMED: ${{ steps.project.outputs.total_confirmed_count }}
+          TOTAL_SUSPECTED: ${{ steps.project.outputs.total_suspected_count }}
+          DELETED_SUSPECT: ${{ steps.project.outputs.deleted_suspect_count }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           PROJECT_URL: ${{ steps.project.outputs.project_url }}
-          NEW_COUNT: ${{ steps.project.outputs.new_count }}
-          RECURRING_COUNT: ${{ steps.project.outputs.recurring_count }}
         run: |
           {
-            echo "🔴 Flaky tests detected in *${{ github.repository }}*"
-            if [ -n "$FAILED_TESTS" ]; then
+            if [ "${NEWLY_CONFIRMED_COUNT:-0}" != "0" ]; then
+              echo "🟡 ${NEWLY_CONFIRMED_COUNT} newly confirmed flaky test(s) in *${{ github.repository }}*"
+              echo ""
+              echo "$NEWLY_CONFIRMED_TESTS"
+            fi
+            if [ "${FAILED_COUNT:-0}" != "0" ]; then
+              if [ "${NEWLY_CONFIRMED_COUNT:-0}" != "0" ]; then echo ""; fi
+              echo "🔴 ${FAILED_COUNT} test(s) failing on every retry — broken, not flaky"
               echo ""
               echo "$FAILED_TESTS"
             fi
             echo ""
-            echo "<${RUN_URL}|View failed run>"
+            echo "<${RUN_URL}|View run>"
             if [ -n "$PROJECT_URL" ]; then
-              echo "<${PROJECT_URL}|Flaky tests board> — ${NEW_COUNT:-0} new, ${RECURRING_COUNT:-0} recurring"
+              board="<${PROJECT_URL}|Flaky tests board> — ${TOTAL_CONFIRMED:-0} confirmed, ${TOTAL_SUSPECTED:-0} suspected"
+              if [ "${DELETED_SUSPECT:-0}" != "0" ]; then
+                board="$board (${DELETED_SUSPECT} stale suspected cleaned up)"
+              fi
+              echo "$board"
             fi
           } > /tmp/slack-message.txt
 

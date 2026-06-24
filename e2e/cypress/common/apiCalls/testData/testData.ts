@@ -31,6 +31,8 @@ export const commentsTestData = generateTestDataObject('translation-comments');
 export const translationSingleTestData =
   generateTestDataObject('translation-single');
 
+export const poMsgctxtTestData = generateTestDataObject('po-msgctxt');
+
 export const importTestData = {
   clean: () => cleanTestData('import'),
   generateBasic: () => internalFetch('e2e-data/import/generate'),
@@ -94,6 +96,11 @@ export const translationsTestData = {
     internalFetch('e2e-data/translations/generate-for-filters').then(
       (r) => r.body as ProjectDTO
     ),
+
+  generateForDescriptionFilters: () =>
+    internalFetch(
+      'e2e-data/translations/generate-for-description-filters'
+    ).then((r) => r.body as ProjectDTO),
 };
 
 export const translationsDisabled = generateTestDataObject(
@@ -139,6 +146,11 @@ export const branchTestData = generateTestDataObject('branch');
 export const branchMergeTestData = generateTestDataObject('branch-merge');
 
 export const glossaryTestData = generateTestDataObject('glossary');
+
+export const translationMemoryTestData =
+  generateTestDataObject('translation-memory');
+
+export const tmSuggestionsTestData = generateTestDataObject('tm-suggestions');
 
 export const notificationTestData = generateTestDataObject('notification');
 

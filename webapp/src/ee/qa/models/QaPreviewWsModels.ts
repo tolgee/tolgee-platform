@@ -1,8 +1,6 @@
-import { components } from 'tg.service/apiSchema.generated';
+import { QaIssueModel } from 'tg.service/apiSchemaTypes.generated';
 
-type QaIssue = components['schemas']['QaIssueModel'];
-
-export type QaPreviewIssue = Omit<QaIssue, 'id'>;
+export type QaPreviewIssue = Omit<QaIssueModel, 'id'>;
 
 export type WsResultMessage = {
   type: 'result';

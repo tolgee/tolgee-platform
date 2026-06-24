@@ -21,6 +21,9 @@ export const useApplyImportHelper = (
     undefined as OperationStatusType | undefined
   );
 
+  const [importedKeys, setImportedKeys] = useState<number | null>(null);
+  const [totalKeys, setTotalKeys] = useState<number | null>(null);
+
   const importApplyMutation = useNdJsonStreamedMutation({
     url: '/v2/projects/{projectId}/import/apply-streaming',
     method: 'put',
@@ -34,7 +37,13 @@ export const useApplyImportHelper = (
         errorAction(data.errorResponseBody.code);
         throw new ApiError(data.errorResponseBody.code, data.errorResponseBody);
       }
-      return setStatus(data.status);
+      setStatus(data.status);
+      if (data.importedKeys != null) {
+        setImportedKeys(data.importedKeys);
+      }
+      if (data.totalKeys != null) {
+        setTotalKeys(data.totalKeys);
+      }
     },
   });
 
@@ -97,6 +106,8 @@ export const useApplyImportHelper = (
   const clear = () => {
     importApplyMutation.reset();
     setStatus(undefined);
+    setImportedKeys(null);
+    setTotalKeys(null);
   };
 
   return {
@@ -107,6 +118,8 @@ export const useApplyImportHelper = (
     loading: importApplyMutation.isLoading,
     loaded: importApplyMutation.isSuccess,
     status,
+    importedKeys,
+    totalKeys,
     clear,
   };
 };

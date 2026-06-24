@@ -73,7 +73,6 @@ class QaCheckPreviewWebSocketHandler(
     session: WebSocketSession,
     state: QaPreviewWsSessionState,
     text: String,
-    activeVariant: String? = null,
   ) {
     try {
       val persistedIssues = fetchPersistedIssues(state)
@@ -92,7 +91,6 @@ class QaCheckPreviewWebSocketHandler(
           textVariants = textParsed?.forms,
           textVariantOffsets = textParsed?.offsets,
           baseTextVariants = state.baseVariants,
-          activeVariant = activeVariant,
           maxCharLimit = state.maxCharLimit,
           icuPlaceholders = state.icuPlaceholders,
           glossaryTerms = glossaryTerms,
@@ -130,10 +128,9 @@ class QaCheckPreviewWebSocketHandler(
     }
 
     val text = json.get("text")?.asText() ?: ""
-    val variant = json.get("variant")?.asText()
 
     state.cancelAndSetJob {
-      scope.launch { runChecks(session, state, text, activeVariant = variant) }
+      scope.launch { runChecks(session, state, text) }
     }
   }
 

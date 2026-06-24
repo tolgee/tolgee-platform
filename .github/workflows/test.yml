@@ -295,6 +295,29 @@ jobs:
           npm run build
         working-directory: ./webapp
 
+  frontend-test:
+    name: Frontend unit tests 🧪
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
+        with:
+          java: "false"
+
+      - name: Install library dependencies
+        run: npm ci
+        working-directory: ./library
+
+      - name: Install webapp dependencies
+        run: npm ci
+        working-directory: ./webapp
+
+      - name: Run webapp unit tests
+        run: npm test
+        working-directory: ./webapp
+
   schema-check:
     name: Schema Check 📋
     needs: [backend-build]
@@ -529,6 +552,7 @@ jobs:
       - client-checks
       - frontend-build
       - frontend-code-check
+      - frontend-test
       - schema-check
       - migration-check
       - data-cy-check
@@ -560,6 +584,10 @@ jobs:
 
           if [[ "${{ needs.frontend-code-check.result }}" != "success" ]]; then
             failed_jobs+=("frontend-code-check")
+          fi
+
+          if [[ "${{ needs.frontend-test.result }}" != "success" ]]; then
+            failed_jobs+=("frontend-test")
           fi
 
           if [[ "${{ needs.schema-check.result }}" != "success" ]]; then

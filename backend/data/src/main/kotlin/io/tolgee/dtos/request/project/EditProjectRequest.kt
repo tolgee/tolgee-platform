@@ -32,4 +32,13 @@ data class EditProjectRequest(
         " can't change them by default and others will receive warning.",
   )
   var translationProtection: TranslationProtection = TranslationProtection.NONE,
+  @Schema(
+    description =
+      "When true, the request is allowed to unassign shared translation memories whose " +
+        "source language differs from the new base language. Without this flag, such a " +
+        "conflict is rejected with `cannot_change_project_base_language_tm_conflict`. The " +
+        "frontend should only set this after the user explicitly confirms in the conflict " +
+        "dialog.",
+  )
+  var unassignConflictingTms: Boolean? = null,
 )

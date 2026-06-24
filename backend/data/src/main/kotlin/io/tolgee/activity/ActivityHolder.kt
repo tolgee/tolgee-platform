@@ -1,6 +1,7 @@
 package io.tolgee.activity
 
 import io.tolgee.activity.data.ActivityType
+import io.tolgee.activity.data.ModifiedCollectionKey
 import io.tolgee.activity.data.RevisionType
 import io.tolgee.activity.iterceptor.InterceptedEventsManager
 import io.tolgee.model.EntityWithId
@@ -26,7 +27,13 @@ open class ActivityHolder(
     ActivityRevision()
   }
 
-  open var modifiedCollections: MutableMap<Pair<EntityWithId, String>, List<Any?>?> = mutableMapOf()
+  /**
+   * Per-revision cache of pre-modification collection snapshots, keyed by
+   * `(entityClass, entityId, fieldName)`. Storing class+id rather than the
+   * entity instance lets `flushAndClear` actually free the owner entity instead
+   * of pinning it through this map for the whole transaction.
+   */
+  open var modifiedCollections: MutableMap<ModifiedCollectionKey, List<Any?>?> = mutableMapOf()
 
   /**
    * Allows forcing a specific revision type for an entity modification.

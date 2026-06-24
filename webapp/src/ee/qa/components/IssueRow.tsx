@@ -2,9 +2,7 @@ import { Box, styled, Typography } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
 import { useQaCheckTypeLabel } from 'tg.ee.module/qa/hooks/useQaCheckTypeLabel';
-import { components } from 'tg.service/apiSchema.generated';
-
-type QaCheckType = components['schemas']['QaIssueModel']['type'];
+import { QaCheckType } from 'tg.service/apiSchemaTypes';
 
 const StyledRow = styled(Box)`
   display: flex;

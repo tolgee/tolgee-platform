@@ -69,6 +69,22 @@ interface TranslationSuggestionRepository : JpaRepository<TranslationSuggestion,
   @Query(
     """
         from TranslationSuggestion ts
+        where ts.id = :suggestionId
+            and ts.project.id = :projectId
+            and ts.language.id = :languageId
+            and ts.key.id = :keyId
+    """,
+  )
+  fun find(
+    projectId: Long,
+    languageId: Long,
+    keyId: Long,
+    suggestionId: Long,
+  ): TranslationSuggestion?
+
+  @Query(
+    """
+        from TranslationSuggestion ts
         where ts.project.id = :projectId
             and ts.language.id = :languageId
             and ts.key.id = :keyId

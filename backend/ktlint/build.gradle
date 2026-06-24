@@ -12,6 +12,7 @@ plugins {
     id 'java'
     id 'org.jetbrains.kotlin.jvm'
     id 'io.spring.dependency-management'
+    id "org.gradle.test-retry"
 }
 
 group = 'io.tolgee.testing.ktlint'
@@ -42,6 +43,7 @@ dependencies {
 
 tasks.named('test', Test) {
     useJUnitPlatform()
+    rootProject.setTestRetry(it)
 }
 
 dependencyManagement {

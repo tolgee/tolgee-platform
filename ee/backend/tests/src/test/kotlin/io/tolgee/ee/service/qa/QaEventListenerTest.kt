@@ -1,17 +1,21 @@
 package io.tolgee.ee.service.qa
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.posthog.server.PostHog
 import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.data.BatchJobType
+import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.constants.Feature
 import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.dtos.request.project.CreateProjectRequest
 import io.tolgee.dtos.request.project.EditProjectRequest
+import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.development.QaTestData
 import io.tolgee.ee.utils.QaTestUtil
 import io.tolgee.events.OnOrganizationFeaturesChanged
+import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.repository.TranslationRepository
 import io.tolgee.security.ProjectHolder
@@ -312,6 +316,33 @@ class QaEventListenerTest : AuthorizedControllerTest() {
         // All translations should be stale because base language tag changed
         val staleTranslations = translations.filter { it.qaChecksStale }
         assertThat(staleTranslations).hasSameSizeAs(translations)
+      }
+    }
+  }
+
+  @Test
+  fun `base-text change does not enqueue a QA recheck for a per-language disabled sibling`() {
+    performAuthPut(
+      "/v2/projects/${testData.project.id}/translations",
+      SetTranslationsWithKeyDto(
+        key = "key-with-de-issues",
+        translations = mutableMapOf("en" to "Changed base text."),
+      ),
+    ).andIsOk
+
+    waitForNotThrowing(timeout = 10_000, pollTime = 500) {
+      executeInNewTransaction(platformTransactionManager) {
+        val qaJobs =
+          batchJobService.getAllByProjectId(testData.project.id).filter { it.type == BatchJobType.QA_CHECK }
+        qaJobs.assert.isNotEmpty
+        val mapper = jacksonObjectMapper()
+        val targetLanguageIds =
+          qaJobs
+            .flatMap { it.target }
+            .map { mapper.convertValue(it, BatchTranslationTargetItem::class.java).languageId }
+            .toSet()
+        targetLanguageIds.assert.contains(testData.germanLanguage.id)
+        targetLanguageIds.assert.doesNotContain(testData.spanishLanguage.id)
       }
     }
   }

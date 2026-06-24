@@ -188,14 +188,15 @@ export type NotificationsChanged = WebsocketEvent<{
   newNotification?: components['schemas']['NotificationModel'];
 }>;
 
-export type QaIssuesUpdatedData = WebsocketEvent<{
+export type QaIssueUpdate = {
   translationId: number;
   keyId: number;
   languageTag: string;
   qaIssueCount: number;
   qaChecksStale: boolean;
   qaIssues: components['schemas']['QaIssueModel'][];
-}>;
+};
+export type QaIssuesUpdatedData = WebsocketEvent<QaIssueUpdate[]>;
 
 export type EntityModification<T> = T extends keyof schemas
   ? {

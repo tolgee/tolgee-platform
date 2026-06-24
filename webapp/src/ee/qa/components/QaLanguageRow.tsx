@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { Box, IconButton, Typography } from '@mui/material';
+import { Box, IconButton, Switch, Typography } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { Settings01 } from '@untitled-ui/icons-react';
 
+import { useProject } from 'tg.hooks/useProject';
+import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { LanguageItem } from 'tg.component/languages/LanguageItem';
 import {
   TABLE_DIVIDER,
@@ -10,12 +12,8 @@ import {
   TABLE_LAST_CELL,
 } from 'tg.component/languages/tableStyles';
 import { QaLanguageSettingsDialog } from './QaLanguageSettingsDialog';
-import { components } from 'tg.service/apiSchema.generated';
-
-type QaSettings = components['schemas']['QaSettingsRequest'];
-type QaCheckType = components['schemas']['QaIssueModel']['type'];
-type QaCheckSeverity = QaSettings['settings'][keyof QaSettings['settings']];
-type LanguageQaConfigModel = components['schemas']['LanguageQaConfigModel'];
+import { LanguageQaConfigModel } from 'tg.service/apiSchemaTypes.generated';
+import { QaCheckType, QaCheckSeverity } from 'tg.service/apiSchemaTypes';
 
 type Props = {
   languageConfig: LanguageQaConfigModel;
@@ -29,10 +27,24 @@ export const QaLanguageRow = ({
   disabled,
 }: Props) => {
   const [dialogOpen, setDialogOpen] = useState(false);
+  const project = useProject();
   const summaryText = useLanguageSettingsSummary(
     languageConfig,
     globalSettings
   );
+
+  const toggleEnabledMutation = useApiMutation({
+    url: '/v2/projects/{projectId}/qa-settings/languages/{languageId}/enabled',
+    method: 'put',
+    invalidatePrefix: '/v2/projects/{projectId}/qa-settings',
+  });
+
+  function handleToggleEnabled() {
+    toggleEnabledMutation.mutate({
+      path: { projectId: project.id, languageId: languageConfig.language.id },
+      content: { 'application/json': { enabled: !languageConfig.enabled } },
+    });
+  }
 
   return (
     <>
@@ -48,7 +60,18 @@ export const QaLanguageRow = ({
         </Typography>
       </Box>
 
-      <div className={TABLE_LAST_CELL}>
+      <Box
+        className={TABLE_LAST_CELL}
+        sx={{ display: 'flex', alignItems: 'center' }}
+      >
+        <Switch
+          checked={languageConfig.enabled}
+          onChange={handleToggleEnabled}
+          size="small"
+          disabled={disabled || toggleEnabledMutation.isLoading}
+          data-cy="qa-language-enabled-toggle"
+          data-cy-language={languageConfig.language.tag}
+        />
         <IconButton
           onClick={() => setDialogOpen(true)}
           size="small"
@@ -58,7 +81,7 @@ export const QaLanguageRow = ({
         >
           <Settings01 />
         </IconButton>
-      </div>
+      </Box>
 
       {dialogOpen && (
         <QaLanguageSettingsDialog
@@ -77,12 +100,16 @@ function useLanguageSettingsSummary(
 ): string {
   const { t } = useTranslate();
 
+  if (!languageConfig.enabled) {
+    return t('project_settings_qa_languages_disabled');
+  }
+
   if (!languageConfig.customSettings) {
     return t('project_settings_qa_languages_inherited');
   }
   const effectiveSettings: Record<QaCheckType, QaCheckSeverity> = {
     ...globalSettings,
-    ...(languageConfig.customSettings ?? {}),
+    ...languageConfig.customSettings,
   };
 
   const values = Object.values(effectiveSettings);

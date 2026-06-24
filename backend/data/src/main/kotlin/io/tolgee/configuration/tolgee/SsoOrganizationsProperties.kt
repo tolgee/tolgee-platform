@@ -31,4 +31,19 @@ class SsoOrganizationsProperties {
         " able to access the server after the account has been disabled or deleted in the SSO provider.",
   )
   var sessionExpirationMinutes: Int = 10
+
+  @DocProperty(
+    description =
+      "When enabled, per-organization SSO provider URLs (`tokenUri`, `authorizationUri`) may target " +
+        "otherwise-blocked address ranges — loopback, private/site-local, link-local, IPv6 unique-local, " +
+        "multicast and wildcard/any-local addresses. Useful when the identity provider runs on an internal " +
+        "network in a self-hosted deployment.\n" +
+        "\n" +
+        ":::danger\n" +
+        "This removes SSRF protection for SSO provider URLs. Keep it **disabled** on production and " +
+        "multi-tenant servers — an organization owner able to configure SSO could otherwise make the server " +
+        "reach internal services.\n" +
+        ":::\n\n",
+  )
+  var allowLocalAddresses: Boolean = false
 }

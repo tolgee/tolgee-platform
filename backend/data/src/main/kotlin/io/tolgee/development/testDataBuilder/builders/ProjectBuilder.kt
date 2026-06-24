@@ -33,6 +33,8 @@ import io.tolgee.model.task.Task
 import io.tolgee.model.task.TaskKey
 import io.tolgee.model.translation.Label
 import io.tolgee.model.translation.Translation
+import io.tolgee.model.translationMemory.TranslationMemory
+import io.tolgee.model.translationMemory.TranslationMemoryType
 import io.tolgee.model.webhook.WebhookConfig
 import org.springframework.core.io.ClassPathResource
 
@@ -269,5 +271,44 @@ class ProjectBuilder(
     return this.data.translations
       .find { it.self.key == key && it.self.language.tag == languageTag }
       ?.self
+  }
+
+  /**
+   * Declares a PROJECT-type TM for this project on its parent organization. Mirrors what
+   * `ProjectCreationService.createProject` does in production. The TM is added to the
+   * organization's TM list and is persisted alongside any explicitly-declared shared TMs by
+   * the regular TM persistence pass.
+   */
+  fun addProjectTm(ft: FT<TranslationMemory> = {}): TranslationMemoryBuilder {
+    val org =
+      testDataBuilder.data.organizations
+        .firstOrNull { it.self === self.organizationOwner }
+        ?: error("Project's organization owner is not part of the test data builder tree")
+    val tmBuilder =
+      org.addTranslationMemory {
+        name = self.name
+        sourceLanguageTag = self.baseLanguage?.tag ?: ""
+        type = TranslationMemoryType.PROJECT
+        ft(this)
+      }
+    tmBuilder.assignProject(self) { priority = 0 }
+    return tmBuilder
+  }
+
+  /**
+   * Idempotently ensures this project has a PROJECT-type TM declared. Called by
+   * `TestDataService` during persistence so fixtures that don't explicitly add one still
+   * satisfy the production invariant ("every project has a project TM").
+   */
+  internal fun ensureProjectTm() {
+    val alreadyDeclared =
+      testDataBuilder.data.organizations
+        .asSequence()
+        .flatMap { it.data.translationMemories.asSequence() }
+        .any { tm ->
+          tm.self.type == TranslationMemoryType.PROJECT &&
+            tm.data.projectAssignments.any { it.self.project === self }
+        }
+    if (!alreadyDeclared) addProjectTm()
   }
 }

@@ -5,11 +5,14 @@ import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.translation.TranslationMemoryService
 import jakarta.persistence.EntityManager
-import org.springframework.data.domain.Pageable
+import org.slf4j.LoggerFactory
+import org.springframework.dao.DataAccessException
 
 class MetadataProvider(
   private val context: MtTranslatorContext,
 ) {
+  private val log = LoggerFactory.getLogger(MetadataProvider::class.java)
+
   fun getCloseItems(
     sourceLanguage: LanguageDto,
     targetLanguage: LanguageDto,
@@ -40,21 +43,53 @@ class MetadataProvider(
       .resultList
   }
 
+  /**
+   * Builds a plain-text context payload for providers that accept one
+   * Best-effort: context only improves the result, so a database failure while fetching the
+   * neighbouring keys yields no context rather than failing the translation itself.
+   */
+  fun getContext(
+    sourceLanguage: LanguageDto,
+    targetLanguage: LanguageDto,
+    metadataKey: MetadataKey,
+    keyDescription: String?,
+  ): String? {
+    try {
+      val parts = mutableListOf<String>()
+      keyDescription?.takeIf { it.isNotBlank() }?.let { parts.add(it) }
+      getCloseItems(sourceLanguage, targetLanguage, metadataKey)
+        .map { it.source }
+        .filter { it.isNotBlank() }
+        .forEach { parts.add(it) }
+      return parts.joinToString("\n").ifBlank { null }
+    } catch (e: DataAccessException) {
+      log.warn("Failed to build MT context for key ${metadataKey.keyId}", e)
+      return null
+    }
+  }
+
+  /**
+   * Examples carry the *penalized* similarity, so trust-adjusted TMs (e.g. a noisy imported TM
+   * with a high default penalty) surface weaker context for MT prompts — matching the
+   * user-facing suggestion ranking.
+   */
   fun getExamples(
     targetLanguage: LanguageDto,
     isPlural: Boolean,
     text: String,
     keyId: Long?,
   ): List<ExampleItem> {
+    val project = context.project
     return translationMemoryService
-      .getSuggestions(
+      .getSuggestionsList(
         baseTranslationText = text,
         isPlural = isPlural,
         keyId = keyId,
-        targetLanguage = targetLanguage,
-        pageable = Pageable.ofSize(5),
-      ).content
-      .map {
+        projectId = project.id,
+        organizationId = project.organizationOwnerId,
+        targetLanguageTag = targetLanguage.tag,
+        limit = 5,
+      ).map {
         ExampleItem(
           key = it.keyName,
           keyNamespace = it.keyNamespace,

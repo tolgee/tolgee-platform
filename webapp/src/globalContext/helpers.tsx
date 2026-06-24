@@ -1,11 +1,6 @@
-import { components } from 'tg.service/apiSchema.generated';
+import { Feature, QaCheckType } from 'tg.service/apiSchemaTypes';
 
 import { useGlobalActions, useGlobalContext } from './GlobalContext';
-
-export type Feature =
-  components['schemas']['SelfHostedEePlanModel']['enabledFeatures'][number];
-
-export type FeaturesSource = 'EE_LICENSE' | 'ORGANIZATION';
 
 export const useConfig = () =>
   useGlobalContext((c) => c.initialData.serverConfiguration);
@@ -31,6 +26,9 @@ export const useIsAdminOrSupporter = () =>
     const role = c.initialData.userInfo?.globalServerRole;
     return role === 'ADMIN' || role === 'SUPPORTER';
   });
+
+export const useIsBeingImpersonated = () =>
+  useGlobalContext((c) => Boolean(c.auth.adminToken));
 
 export const useIsSsoMigrationRequired = () =>
   useGlobalContext(
@@ -63,11 +61,19 @@ export const useOrganizationUsage = () => {
   return useGlobalContext((v) => v.organizationUsage!);
 };
 
+export const useQaCategories = () =>
+  useGlobalContext((c) => c.initialData.qaCheckCategories ?? EMPTY_LIST);
+
+export const useQaCheckTypes = (): QaCheckType[] => {
+  const categories = useQaCategories();
+  return categories.flatMap((c) => c.checkTypes);
+};
+
 export const useEnabledFeatures = () => {
   const features =
     useGlobalContext(
       (c) => c.initialData.preferredOrganization?.enabledFeatures
-    ) || [];
+    ) || EMPTY_LIST;
 
   return {
     features,
@@ -76,3 +82,5 @@ export const useEnabledFeatures = () => {
     },
   };
 };
+
+const EMPTY_LIST = [];

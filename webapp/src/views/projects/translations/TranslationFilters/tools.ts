@@ -17,9 +17,10 @@ export type FiltersInternal = {
   filterTranslationState?: TranslationStateType[];
   filterHasScreenshot?: boolean;
   filterHasNoScreenshot?: boolean;
+  filterHasDescription?: boolean;
+  filterHasNoDescription?: boolean;
   filterHasUnresolvedComments?: boolean;
   filterHasComments?: boolean;
-  filterHasQaIssues?: boolean;
   filterQaCheckTypes?: QaCheckType[];
   filterQaChecksStale?: boolean;
   filterLabel?: string[];
@@ -36,6 +37,16 @@ export type FiltersInternal = {
   filterTranslationLanguage?: true | string;
   // same for suggestions
   filterSuggestionLanguage?: true | string;
+
+  /*
+   * this one differs from the two above
+   *
+   * Specifies which languages will be considered when filtering by the QA check type:
+   *  - undefined = all languages (default)
+   *  - false = all but base
+   *  - string = one language tag
+   */
+  filterQaCheckTypeLanguage?: false | string;
 };
 
 export type AddParams =
@@ -46,9 +57,10 @@ export type AddParams =
   | ['filterTranslationState', TranslationStateType]
   | ['filterHasScreenshot']
   | ['filterHasNoScreenshot']
+  | ['filterHasDescription']
+  | ['filterHasNoDescription']
   | ['filterHasUnresolvedComments']
   | ['filterHasComments']
-  | ['filterHasQaIssues']
   | ['filterQaCheckTypes', QaCheckType]
   | ['filterQaChecksStale']
   | ['filterLabel', string]

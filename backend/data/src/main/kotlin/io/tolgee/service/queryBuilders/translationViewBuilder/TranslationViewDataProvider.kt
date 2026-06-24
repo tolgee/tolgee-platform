@@ -9,6 +9,7 @@ import io.tolgee.model.enums.TranslationSuggestionState
 import io.tolgee.model.enums.qa.QaIssueState
 import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.model.views.TranslationView
+import io.tolgee.repository.qa.LanguageQaConfigRepository
 import io.tolgee.repository.qa.TranslationQaIssueRepository
 import io.tolgee.service.key.TagService
 import io.tolgee.service.label.LabelService
@@ -29,6 +30,7 @@ class TranslationViewDataProvider(
   private val tagService: TagService,
   private val labelService: LabelService,
   private val qaIssueRepository: TranslationQaIssueRepository,
+  private val languageQaConfigRepository: LanguageQaConfigRepository,
   private val projectFeatureGuard: ProjectFeatureGuard,
   private val projectService: ProjectService,
 ) {
@@ -46,14 +48,16 @@ class TranslationViewDataProvider(
   ): Page<KeyWithTranslationsView> {
     val project = projectService.get(projectId)
     val qaEnabled = projectFeatureGuard.isFeatureEnabled(Feature.QA_CHECKS, project)
+    val qaDisabledLanguageIds = resolveQaDisabledLanguageIds(projectId, qaEnabled)
 
     createFailedKeysInJobTempTable(params.filterFailedKeysOfJob)
 
-    val countBuilder = getTranslationsViewQueryBuilder(projectId, languages, params, pageable, cursor, qaEnabled)
+    val countBuilder =
+      getTranslationsViewQueryBuilder(projectId, languages, params, pageable, cursor, qaEnabled, qaDisabledLanguageIds)
     val count = em.createQuery(countBuilder.countQuery).singleResult
 
     val translationsViewQueryBuilder =
-      getTranslationsViewQueryBuilder(projectId, languages, params, pageable, cursor, qaEnabled)
+      getTranslationsViewQueryBuilder(projectId, languages, params, pageable, cursor, qaEnabled, qaDisabledLanguageIds)
     val query = em.createQuery(translationsViewQueryBuilder.dataQuery).setMaxResults(pageable.pageSize)
     if (cursor == null) {
       query.firstResult = pageable.offset.toInt()
@@ -67,7 +71,7 @@ class TranslationViewDataProvider(
     // Fetch translations + all per-translation counts (comments, suggestions, QA issues)
     // in a single query. The inline count subqueries are cheap because they only run on
     // the page's translations (~pageSize × langCount rows, typically <500).
-    populateTranslationsWithCounts(keyIds, languages, views, qaEnabled)
+    populateTranslationsWithCounts(keyIds, languages, views, qaEnabled, qaDisabledLanguageIds)
 
     val translationIds =
       views
@@ -85,7 +89,7 @@ class TranslationViewDataProvider(
       }
     }
     if (qaEnabled && includeQaIssues && translationIds.isNotEmpty()) {
-      populateQaIssues(translationIds, views)
+      populateQaIssues(translationIds, views, qaDisabledLanguageIds)
     }
     return PageImpl(views, pageable, count)
   }
@@ -100,15 +104,16 @@ class TranslationViewDataProvider(
    * `UNTRANSLATED` state so that every returned view has an entry for every requested language.
    *
    * This combines what would otherwise be 4 separate queries (translation fetch + 3 count
-   * queries) into 1. The QA issue count subquery is only included when [qaEnabled] is true;
-   * otherwise a literal `0L` is selected so the column layout (and the `COL_*` indices) stays
-   * stable.
+   * queries) into 1. The QA issue count expression ([qaCountExpr]) has three shapes: a literal
+   * `0L` when QA is off project-wide, a plain count subquery when enabled, and a count subquery
+   * with a `language.id not in (:qaDisabledLanguageIds)` exclusion when some languages have QA
+   * disabled. The `0L` shape keeps the column layout (and the `COL_*` indices) stable.
    *
    * Uses plain JPQL rather than Criteria API because the query has 5 inline correlated count
-   * subqueries plus conditional logic (`qaCountExpr` toggles between a real subquery and `0L`).
-   * Expressing that in Criteria API would require dozens of lines of nested `subquery.correlate()`
-   * and conditional builders. The JPQL string is more readable for a fixed-shape query with no
-   * dynamic predicates.
+   * subqueries. The only dynamic parts are the `qaCountExpr` shape above and its two conditional
+   * parameter binds (`openQa`, and `qaDisabledLanguageIds` only when the exclusion clause is
+   * present); expressing the 5 correlated subqueries in Criteria API would require dozens of lines
+   * of nested `subquery.correlate()`, so the JPQL string stays more readable.
    */
   @Suppress("LongMethod")
   private fun populateTranslationsWithCounts(
@@ -116,6 +121,7 @@ class TranslationViewDataProvider(
     languages: Set<LanguageDto>,
     views: List<KeyWithTranslationsView>,
     qaEnabled: Boolean,
+    qaDisabledLanguageIds: Set<Long>,
   ) {
     if (languages.isEmpty()) return
 
@@ -131,15 +137,8 @@ class TranslationViewDataProvider(
     val viewsByKeyId: Map<Long, KeyWithTranslationsView> = views.associateBy { it.keyId }
     val tagById: Map<Long, String> = languages.associate { it.id to it.tag }
 
-    // The QA issue count subquery is only included when QA checks are enabled for the project.
-    // When disabled, a literal 0L keeps the column layout stable so the COL_* indices stay valid.
-    val qaCountExpr =
-      if (qaEnabled) {
-        """(select count(qa) from TranslationQaIssue qa
-            where qa.translation.id = t.id and qa.state = :openQa)"""
-      } else {
-        "0L"
-      }
+    val excludeDisabled = qaEnabled && qaDisabledLanguageIds.isNotEmpty()
+    val qaCountExpr = qaCountExpr(qaEnabled, excludeDisabled)
 
     keyIds.chunked(IN_CLAUSE_CHUNK_SIZE).forEach { keyIdChunk ->
       val query =
@@ -168,6 +167,9 @@ class TranslationViewDataProvider(
           .setParameter("activeSuggestion", TranslationSuggestionState.ACTIVE)
       if (qaEnabled) {
         query.setParameter("openQa", QaIssueState.OPEN)
+      }
+      if (excludeDisabled) {
+        query.setParameter("qaDisabledLanguageIds", qaDisabledLanguageIds)
       }
 
       for (row in query.resultList) {
@@ -210,6 +212,28 @@ class TranslationViewDataProvider(
       qaChecksStale = false,
     )
 
+  private fun resolveQaDisabledLanguageIds(
+    projectId: Long,
+    qaEnabled: Boolean,
+  ): Set<Long> {
+    if (!qaEnabled) return emptySet()
+    return languageQaConfigRepository.findDisabledLanguageIds(projectId)
+  }
+
+  private fun qaCountExpr(
+    qaEnabled: Boolean,
+    excludeDisabled: Boolean,
+  ): String {
+    if (!qaEnabled) return "0L"
+    if (!excludeDisabled) {
+      return """(select count(qa) from TranslationQaIssue qa
+            where qa.translation.id = t.id and qa.state = :openQa)"""
+    }
+    return """(select count(qa) from TranslationQaIssue qa
+            where qa.translation.id = t.id and qa.state = :openQa
+              and t.language.id not in :qaDisabledLanguageIds)"""
+  }
+
   /**
    * Batch-loads the actual `TranslationQaIssue` objects for the page's translations and
    * attaches them to the matching `TranslationView.qaIssues` lists. Only called when the caller
@@ -218,10 +242,12 @@ class TranslationViewDataProvider(
   private fun populateQaIssues(
     translationIds: List<Long>,
     views: List<KeyWithTranslationsView>,
+    qaDisabledLanguageIds: Set<Long>,
   ) {
     val qaIssuesMap =
       qaIssueRepository
         .findByTranslationIds(translationIds)
+        .filterNot { it.translation.language.id in qaDisabledLanguageIds }
         .groupBy { it.translation.id }
     if (qaIssuesMap.isEmpty()) return
     views.forEach { view ->
@@ -273,6 +299,7 @@ class TranslationViewDataProvider(
   ): MutableList<Long> {
     val project = projectService.get(projectId)
     val qaEnabled = projectFeatureGuard.isFeatureEnabled(Feature.QA_CHECKS, project)
+    val qaDisabledLanguageIds = resolveQaDisabledLanguageIds(projectId, qaEnabled)
     createFailedKeysInJobTempTable(params.filterFailedKeysOfJob)
     val translationsViewQueryBuilder =
       TranslationsViewQueryBuilder(
@@ -283,6 +310,7 @@ class TranslationViewDataProvider(
         sort = Sort.by(Sort.Order.asc(KeyWithTranslationsView::keyId.name)),
         entityManager = em,
         qaEnabled = qaEnabled,
+        qaDisabledLanguageIds = qaDisabledLanguageIds,
       )
     val result = em.createQuery(translationsViewQueryBuilder.keyIdsQuery).resultList
     deleteFailedKeysInJobTempTable()
@@ -296,6 +324,7 @@ class TranslationViewDataProvider(
     pageable: Pageable,
     cursor: String?,
     qaEnabled: Boolean,
+    qaDisabledLanguageIds: Set<Long>,
   ) = TranslationsViewQueryBuilder(
     cb = em.criteriaBuilder,
     projectId = projectId,
@@ -305,5 +334,6 @@ class TranslationViewDataProvider(
     cursor = cursor?.let { CursorUtil.parseCursor(it) },
     entityManager = em,
     qaEnabled = qaEnabled,
+    qaDisabledLanguageIds = qaDisabledLanguageIds,
   )
 }

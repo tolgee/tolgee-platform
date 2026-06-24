@@ -25,6 +25,7 @@ class DeeplApiService(
     sourceTag: String,
     targetTag: String,
     formality: Formality,
+    context: String? = null,
   ): String? {
     val headers = HttpHeaders()
     headers.contentType = MediaType.APPLICATION_FORM_URLENCODED
@@ -39,6 +40,7 @@ class DeeplApiService(
       requestBody.add(it.key, it.value)
     }
     addFormality(requestBody, formality)
+    context?.takeIf { it.isNotBlank() }?.let { requestBody.add("context", it) }
 
     val request = HttpEntity(requestBody, headers)
 

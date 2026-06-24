@@ -101,6 +101,10 @@ class BranchCopyServiceSql(
       traceLogMeasureTime("branchCopyService: copyTranslationComments batch $batchIndex") {
         copyTranslationComments(targetBranch)
       }
+
+      traceLogMeasureTime("branchCopyService: copyTranslationQaIssues batch $batchIndex") {
+        copyTranslationQaIssues(targetBranch)
+      }
     }
   }
 
@@ -325,20 +329,44 @@ class BranchCopyServiceSql(
 
   /**
    * Copies translations using the pre-computed key mapping.
-   * Much simpler and faster than the original 4-way join.
    */
   private fun copyTranslations(targetBranch: Branch) {
     val sql = """
       INSERT INTO translation (
-        id, text, key_id, language_id, state, auto, mt_provider, 
-        word_count, character_count, outdated, created_at, updated_at
+        id, text, key_id, language_id, state, auto, mt_provider,
+        word_count, character_count, outdated, qa_checks_stale, created_at, updated_at
       )
       SELECT nextval('hibernate_sequence') AS id,
              t.text, m.target_key_id, t.language_id, t.state, t.auto, t.mt_provider,
-             t.word_count, t.character_count, t.outdated, 
+             t.word_count, t.character_count, t.outdated, t.qa_checks_stale,
              :targetBranchCreatedAt, :targetBranchCreatedAt
       FROM translation t
       JOIN temp_key_mapping m ON m.source_key_id = t.key_id
+    """
+    entityManager
+      .createNativeQuery(sql)
+      .setParameter("targetBranchCreatedAt", targetBranch.createdAt)
+      .executeUpdate()
+  }
+
+  /**
+   * Copies QA issues using the pre-computed key mapping.
+   */
+  private fun copyTranslationQaIssues(targetBranch: Branch) {
+    val sql = """
+      INSERT INTO translation_qa_issue (
+        id, type, message, replacement, position_start, position_end, state, params,
+        virtual, plural_variant, translation_id, created_at, updated_at
+      )
+      SELECT nextval('hibernate_sequence') AS id,
+             qi.type, qi.message, qi.replacement, qi.position_start, qi.position_end,
+             qi.state, qi.params, qi.virtual, qi.plural_variant, tgt_t.id,
+             :targetBranchCreatedAt, :targetBranchCreatedAt
+      FROM translation_qa_issue qi
+      JOIN translation src_t ON src_t.id = qi.translation_id
+      JOIN temp_key_mapping m ON m.source_key_id = src_t.key_id
+      JOIN translation tgt_t ON tgt_t.key_id = m.target_key_id
+                            AND tgt_t.language_id = src_t.language_id
     """
     entityManager
       .createNativeQuery(sql)

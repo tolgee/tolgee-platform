@@ -19,6 +19,7 @@ plugins {
     id "kotlin-allopen"
     id "org.hibernate.orm"
     id "io.sentry.jvm.gradle"
+    id "org.gradle.test-retry"
 }
 
 group = 'io.tolgee'
@@ -189,7 +190,7 @@ dependencies {
     implementation libs.micrometerPrometheus
     implementation 'org.dom4j:dom4j:2.1.4'
     implementation libs.jacksonKotlin
-    implementation("org.apache.commons:commons-configuration2:2.10.1")
+    implementation("org.apache.commons:commons-configuration2:2.15.0")
     implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVersion"
     implementation("com.fasterxml.woodstox:woodstox-core:7.1.1")
 
@@ -204,6 +205,7 @@ dependencies {
      * Google translation API
      */
     implementation platform(libs.googleCloud)
+    implementation platform(libs.grpcBom)
     implementation 'com.google.cloud:google-cloud-translate'
 
     /**
@@ -243,6 +245,7 @@ dependencies {
 tasks.named('test', Test) {
     useJUnitPlatform()
     maxHeapSize = "4096m"
+    rootProject.setTestRetry(it)
 }
 
 sourceSets {

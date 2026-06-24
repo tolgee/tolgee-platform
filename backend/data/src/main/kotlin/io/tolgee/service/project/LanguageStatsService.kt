@@ -10,6 +10,7 @@ import io.tolgee.model.branching.Branch
 import io.tolgee.model.views.projectStats.ProjectLanguageStatsResultView
 import io.tolgee.repository.LanguageStatsRepository
 import io.tolgee.repository.TranslationRepository
+import io.tolgee.repository.qa.LanguageQaConfigRepository
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.qa.TranslationQaIssueService
 import io.tolgee.service.queryBuilders.LanguageStatsProvider
@@ -35,6 +36,7 @@ class LanguageStatsService(
   private val platformTransactionManager: PlatformTransactionManager,
   private val translationQaIssueService: TranslationQaIssueService,
   private val projectFeatureGuard: ProjectFeatureGuard,
+  private val languageQaConfigRepository: LanguageQaConfigRepository,
 ) : Logging {
   fun refreshLanguageStats(
     projectId: Long,
@@ -72,6 +74,7 @@ class LanguageStatsService(
             } else {
               emptyMap()
             }
+          val qaDisabledLanguageIds = resolveQaDisabledLanguageIds(projectId, qaEnabled)
 
           allRawLanguageStats
             .sortedBy { it.languageName }
@@ -103,8 +106,9 @@ class LanguageStatsService(
                 this.untranslatedWords = baseWords - translatedOrReviewedWords
                 untranslatedPercentage = untranslatedWords.toDouble() / baseWords * 100
                 translationsUpdatedAt = lastUpdatedAt
-                qaIssueCount = qaIssueCounts[language.id] ?: 0
-                qaChecksStaleCount = qaChecksStaleCountMap[language.id] ?: 0
+                qaIssueCount = qaIssueCounts[language.id]?.takeIf { language.id !in qaDisabledLanguageIds } ?: 0
+                qaChecksStaleCount =
+                  qaChecksStaleCountMap[language.id]?.takeIf { language.id !in qaDisabledLanguageIds } ?: 0
               }
             }
 
@@ -182,5 +186,13 @@ class LanguageStatsService(
     branchId: Long?,
   ): List<ProjectLanguageStatsResultView> {
     return LanguageStatsProvider(entityManager, projectId, branchId).getResultForSingleProject()
+  }
+
+  private fun resolveQaDisabledLanguageIds(
+    projectId: Long,
+    qaEnabled: Boolean,
+  ): Set<Long> {
+    if (!qaEnabled) return emptySet()
+    return languageQaConfigRepository.findDisabledLanguageIds(projectId)
   }
 }

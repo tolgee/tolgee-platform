@@ -86,19 +86,5 @@ interface ImportTranslationRepository : JpaRepository<ImportTranslation, Long> {
     languageId: Long,
   ): ImportTranslation?
 
-  @Query(
-    """
-      select distinct it from ImportTranslation it
-      join fetch it.key ik
-      left join fetch ik.keyMeta
-      left join fetch it.conflict ic
-      left join fetch ic.key ick
-      left join fetch ick.keyMeta
-      join fetch it.language il
-      join il.file if
-      where if.needsParamConversion = true
-      and if.importData.id = :importId
-      """,
-  )
-  fun findTranslationsForPlaceholderConversion(importId: Long): List<ImportTranslation>
+  fun findByKeyId(keyId: Long): List<ImportTranslation>
 }

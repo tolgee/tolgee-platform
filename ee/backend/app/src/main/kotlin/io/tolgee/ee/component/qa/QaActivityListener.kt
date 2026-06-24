@@ -6,10 +6,12 @@ import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.batch.events.OnBatchJobFinalized
+import io.tolgee.batch.processors.QaCheckChunkProcessor
 import io.tolgee.batch.request.QaCheckRequest
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.component.eventListeners.BypassableActivityListener
 import io.tolgee.constants.Feature
+import io.tolgee.ee.service.qa.ProjectQaConfigService
 import io.tolgee.ee.service.qa.QaRecheckService
 import io.tolgee.events.OnProjectActivityEvent
 import io.tolgee.model.Language
@@ -47,6 +49,8 @@ class QaActivityListener(
   private val translationService: TranslationService,
   private val qaRecheckService: QaRecheckService,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
+  private val qaCheckChunkProcessor: QaCheckChunkProcessor,
+  private val projectQaConfigService: ProjectQaConfigService,
 ) : BypassableActivityListener {
   @Volatile
   override var bypass = false
@@ -99,6 +103,21 @@ class QaActivityListener(
     }
   }
 
+  @EventListener
+  fun onQaBatchJobFinalizedSelfHeal(event: OnBatchJobFinalized) {
+    if (bypass) return
+    if (event.job.type != BatchJobType.QA_CHECK) return
+    val projectId = event.job.projectId ?: return
+    val params = qaCheckChunkProcessor.getParams(event.job)
+    if (params.handlingStuckStaleItems) {
+      // Avoid endless loop
+      return
+    }
+    runSentryCatching {
+      qaRecheckService.recheckStuckStaleTranslationsInProject(projectId)
+    }
+  }
+
   // endregion
 
   // region Batch job processing (feature-gated)
@@ -107,8 +126,10 @@ class QaActivityListener(
     projectId: Long,
     entities: List<ActivityModifiedEntity>,
   ) {
-    val translationTargets = getTranslationChangeTargets(projectId, entities)
-    val maxCharLimitTargets = getMaxCharLimitChangeTargets(projectId, entities)
+    val enabledLanguageIds = projectQaConfigService.getEnabledLanguageIds(projectId)
+
+    val translationTargets = getTranslationChangeTargets(projectId, entities, enabledLanguageIds)
+    val maxCharLimitTargets = getMaxCharLimitChangeTargets(entities, enabledLanguageIds)
 
     val allTargets = (translationTargets + maxCharLimitTargets).distinct()
     startQaCheckBatchJob(projectId, allTargets)
@@ -139,24 +160,30 @@ class QaActivityListener(
     event: OnProjectActivityEvent,
     projectId: Long,
   ) {
-    val textChangedTranslationIds =
-      getTextChangedTranslations(event.modifiedEntities.values.flatMap { it.values }).map { it.entityId }
-    if (textChangedTranslationIds.isEmpty()) return
+    val textChangedEntities =
+      getTextChangedTranslations(event.modifiedEntities.values.flatMap { it.values })
+    if (textChangedEntities.isEmpty()) return
 
-    // Mark direct translations as stale
-    translationService.setQaChecksStale(textChangedTranslationIds)
+    translationService.setQaChecksStale(textChangedEntities.map { it.entityId })
 
-    // Mark siblings of base language changes as stale
+    // Mark siblings of base-language changes as stale.
     val baseLanguage = languageService.getProjectBaseLanguage(projectId)
-    translationService.setQaChecksStaleForBaseTranslationKeys(
-      translationIds = textChangedTranslationIds,
-      baseLanguageId = baseLanguage.id,
-    )
+    val baseLanguageTranslationIds =
+      textChangedEntities
+        .filter { it.describingRelations?.get("language")?.entityId == baseLanguage.id }
+        .map { it.entityId }
+    if (baseLanguageTranslationIds.isNotEmpty()) {
+      translationService.setQaChecksStaleForBaseTranslationKeys(
+        translationIds = baseLanguageTranslationIds.toLongArray(),
+        baseLanguageId = baseLanguage.id,
+      )
+    }
   }
 
   private fun getTranslationChangeTargets(
     projectId: Long,
     entities: List<ActivityModifiedEntity>,
+    enabledLanguageIds: Set<Long>,
   ): List<BatchTranslationTargetItem> {
     val textChangedEntities = getTextChangedTranslations(entities)
     if (textChangedEntities.isEmpty()) return emptyList()
@@ -166,28 +193,25 @@ class QaActivityListener(
       textChangedEntities.mapNotNull { entity ->
         val keyId = entity.describingRelations?.get("key")?.entityId ?: return@mapNotNull null
         val languageId = entity.describingRelations?.get("language")?.entityId ?: return@mapNotNull null
+        if (languageId !in enabledLanguageIds) return@mapNotNull null
         BatchTranslationTargetItem(keyId = keyId, languageId = languageId)
       }
-
-    if (directTargets.isEmpty()) return emptyList()
 
     // For base text changes, also include all project languages
     val baseLanguage = languageService.getProjectBaseLanguage(projectId)
     val baseLanguageKeyIds =
-      directTargets
-        .filter { it.languageId == baseLanguage.id }
-        .map { it.keyId }
+      textChangedEntities
+        .filter { it.describingRelations?.get("language")?.entityId == baseLanguage.id }
+        .mapNotNull { it.describingRelations?.get("key")?.entityId }
         .toSet()
 
     val siblingTargets =
       if (baseLanguageKeyIds.isNotEmpty()) {
-        val otherLanguageIds =
-          languageService
-            .getProjectLanguages(projectId)
-            .map { it.id }
-            .filter { it != baseLanguage.id }
-        baseLanguageKeyIds.flatMap { keyId ->
-          otherLanguageIds.map { langId -> BatchTranslationTargetItem(keyId = keyId, languageId = langId) }
+        val otherLanguageIds = enabledLanguageIds.filter { it != baseLanguage.id }
+        otherLanguageIds.flatMap { langId ->
+          baseLanguageKeyIds.map { keyId ->
+            BatchTranslationTargetItem(keyId = keyId, languageId = langId)
+          }
         }
       } else {
         emptyList()
@@ -215,15 +239,16 @@ class QaActivityListener(
   }
 
   private fun getMaxCharLimitChangeTargets(
-    projectId: Long,
     entities: List<ActivityModifiedEntity>,
+    enabledLanguageIds: Set<Long>,
   ): List<BatchTranslationTargetItem> {
     val keyIds = getMaxCharLimitChangedKeyIds(entities)
     if (keyIds.isEmpty()) return emptyList()
 
-    val allLanguageIds = languageService.getProjectLanguages(projectId).map { it.id }
-    return keyIds.flatMap { keyId ->
-      allLanguageIds.map { langId -> BatchTranslationTargetItem(keyId = keyId, languageId = langId) }
+    return enabledLanguageIds.flatMap { langId ->
+      keyIds.map { keyId ->
+        BatchTranslationTargetItem(keyId = keyId, languageId = langId)
+      }
     }
   }
 

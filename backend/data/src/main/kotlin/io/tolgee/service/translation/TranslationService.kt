@@ -40,7 +40,6 @@ import io.tolgee.service.queryBuilders.translationViewBuilder.TranslationViewDat
 import io.tolgee.service.translation.SetTranslationTextUtil.Companion.Options
 import io.tolgee.util.nullIfEmpty
 import jakarta.persistence.EntityManager
-import jakarta.persistence.FlushModeType
 import jakarta.persistence.criteria.JoinType
 import jakarta.persistence.criteria.Predicate
 import org.springframework.beans.factory.annotation.Autowired
@@ -142,6 +141,26 @@ class TranslationService(
   ): Translation {
     return translationRepository.findOneByProjectIdAndKeyIdAndLanguageId(projectId, keyId, languageId)
       ?: this.createEmpty(keyId, languageId, projectId)
+  }
+
+  fun findBaseTranslation(key: Key): Translation? {
+    val baseLanguage = key.project.baseLanguage ?: return null
+    return key.translations.find { it.language.id == baseLanguage.id }
+  }
+
+  /**
+   * Exact-equality TM lookup used by the auto-translate / batch pre-translate hot path.
+   * Returns the first match found across the project's own translations; the EE
+   * `TmAutoTranslateProviderEeImpl` consults stored TM entries before falling back here.
+   */
+  fun getTranslationMemoryValue(
+    key: Key,
+    targetLanguage: ILanguage,
+  ): TranslationMemoryItemView? {
+    val baseTranslationText = findBaseTranslation(key)?.text ?: return null
+    return translationRepository
+      .getTranslationMemoryValue(baseTranslationText, key, targetLanguage.id)
+      .firstOrNull()
   }
 
   fun createEmpty(
@@ -349,25 +368,6 @@ class TranslationService(
     }
   }
 
-  fun findBaseTranslation(key: Key): Translation? {
-    val baseLanguage = projectService.getOrAssignBaseLanguage(key.project.id)
-    return find(key, baseLanguage).orElse(null)
-  }
-
-  fun getTranslationMemoryValue(
-    key: Key,
-    targetLanguage: ILanguage,
-  ): TranslationMemoryItemView? {
-    val baseTranslationText = findBaseTranslation(key)?.text ?: return null
-
-    return translationRepository
-      .getTranslationMemoryValue(
-        baseTranslationText,
-        key,
-        targetLanguage.id,
-      ).firstOrNull()
-  }
-
   @Transactional
   fun dismissAutoTranslated(translation: Translation) {
     translation.auto = false
@@ -406,7 +406,9 @@ class TranslationService(
   }
 
   fun setOutdatedBatch(keyIds: List<Long>) {
-    translationRepository.setOutdated(keyIds)
+    keyIds.chunked(1000).forEach { chunk ->
+      translationRepository.setOutdated(chunk)
+    }
   }
 
   @Transactional(readOnly = true)
@@ -476,7 +478,7 @@ class TranslationService(
   fun getTranslations(
     keyIds: List<Long>,
     languageIds: List<Long>,
-  ) = translationRepository.getAllByKeyIdInAndLanguageIdIn(keyIds, languageIds)
+  ) = translationRepository.findAllByKeyIdInAndLanguageIdIn(keyIds, languageIds)
 
   @Transactional(readOnly = true)
   fun getAllByKeyId(keyId: Long): List<Translation> = translationRepository.getAllByKeyIdIn(listOf(keyId)).toList()
@@ -664,27 +666,15 @@ class TranslationService(
 
   @Transactional
   fun setQaChecksStale(translationIds: List<Long>) {
-    translationIds.chunked(1000).forEach { chunk ->
-      entityManager
-        .createQuery(
-          "UPDATE Translation t SET t.qaChecksStale = true WHERE t.id IN :ids",
-        ).setParameter("ids", chunk)
-        // Prevent auto-flush when called from BeforeTransactionCompletionProcess (QaActivityListener)
-        .setFlushMode(FlushModeType.COMMIT)
-        .executeUpdate()
+    translationIds.chunked(10_000).forEach { chunk ->
+      translationRepository.setQaChecksStaleByIds(chunk)
     }
   }
 
   @Transactional
   fun setQaChecksStaleByKeyIds(keyIds: List<Long>) {
-    keyIds.chunked(1000).forEach { chunk ->
-      entityManager
-        .createQuery(
-          "UPDATE Translation t SET t.qaChecksStale = true WHERE t.key.id IN :keyIds",
-        ).setParameter("keyIds", chunk)
-        // Prevent auto-flush when called from BeforeTransactionCompletionProcess (QaActivityListener)
-        .setFlushMode(FlushModeType.COMMIT)
-        .executeUpdate()
+    keyIds.chunked(10_000).forEach { chunk ->
+      translationRepository.setQaChecksStaleByKeyIds(chunk)
     }
   }
 
@@ -700,9 +690,26 @@ class TranslationService(
   }
 
   @Transactional(readOnly = true)
+  fun getStaleKeyLanguagePairsByBranchAndLanguageIds(
+    projectId: Long,
+    branchId: Long,
+    languageIds: Collection<Long>,
+  ): List<KeyLanguagePairView> {
+    return translationRepository.getStaleKeyLanguagePairsByBranchAndLanguageIds(projectId, branchId, languageIds)
+  }
+
+  @Transactional(readOnly = true)
+  fun getStaleKeyLanguagePairsByProjectAndLanguageIds(
+    projectId: Long,
+    languageIds: Collection<Long>,
+  ): List<KeyLanguagePairView> {
+    return translationRepository.getStaleKeyLanguagePairsByProjectAndLanguageIds(projectId, languageIds)
+  }
+
+  @Transactional(readOnly = true)
   fun getKeyLanguagePairsForQaRecheck(
     projectId: Long,
-    languageIds: List<Long>? = null,
+    languageIds: Collection<Long>? = null,
     onlyStale: Boolean = false,
   ): List<KeyLanguagePairView> {
     val cb = entityManager.criteriaBuilder
@@ -756,26 +763,10 @@ class TranslationService(
    */
   @Transactional
   fun setQaChecksStaleForBaseTranslationKeys(
-    translationIds: Collection<Long>,
+    translationIds: LongArray,
     baseLanguageId: Long,
   ) {
     if (translationIds.isEmpty()) return
-    translationIds.chunked(1000).forEach { chunk ->
-      entityManager
-        .createQuery(
-          """
-          UPDATE Translation t SET t.qaChecksStale = true
-          WHERE t.key.id IN (
-            SELECT t2.key.id FROM Translation t2
-            WHERE t2.id IN :translationIds AND t2.language.id = :baseLanguageId
-          )
-          AND t.language.id != :baseLanguageId
-          """.trimIndent(),
-        ).setParameter("translationIds", chunk)
-        .setParameter("baseLanguageId", baseLanguageId)
-        // Prevent auto-flush when called from BeforeTransactionCompletionProcess (QaActivityListener)
-        .setFlushMode(FlushModeType.COMMIT)
-        .executeUpdate()
-    }
+    translationRepository.setQaChecksStaleForBaseTranslationKeys(translationIds, baseLanguageId)
   }
 }
