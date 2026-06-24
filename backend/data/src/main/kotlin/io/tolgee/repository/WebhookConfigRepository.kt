@@ -33,4 +33,12 @@ interface WebhookConfigRepository : JpaRepository<WebhookConfig, Long> {
     projectId: Long,
     pageable: Pageable,
   ): Page<WebhookConfig>
+
+  @Query(
+    """
+    from WebhookConfig wc
+    where wc.project.id = :projectId
+  """,
+  )
+  fun findAllByProjectId(projectId: Long): List<WebhookConfig>
 }

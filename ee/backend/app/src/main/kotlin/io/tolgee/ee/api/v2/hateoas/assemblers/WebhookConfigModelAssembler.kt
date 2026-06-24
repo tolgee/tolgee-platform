@@ -21,6 +21,7 @@ class WebhookConfigModelAssembler :
       autoDisabled = entity.autoDisabled,
       firstFailed = entity.firstFailed?.time,
       lastExecuted = entity.lastExecuted?.time,
+      eventTypes = entity.eventTypes,
     )
   }
 }
