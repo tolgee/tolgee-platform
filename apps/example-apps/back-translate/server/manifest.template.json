@@ -1,0 +1,45 @@
+{
+  "id": "back-translate",
+  "name": "Back Translate",
+  "version": "0.1.0",
+  "baseUrl": "__BASE_URL__",
+  "decoratorsUrl": "__BASE_URL__/decorators",
+  "scopes": [
+    "translations.view",
+    "keys.view"
+  ],
+  "webhooks": {
+    "events": ["SET_TRANSLATIONS"],
+    "url": "__BASE_URL__/webhook"
+  },
+  "modules": {
+    "translation-tools-panel": [
+      {
+        "key": "panel",
+        "title": "Back translate",
+        "icon": "SwitchHorizontal01",
+        "entry": "/tools-panel"
+      }
+    ],
+    "translation-action": [
+      {
+        "key": "warning",
+        "type": "panel",
+        "icon": "AlertCircle",
+        "tooltip": "Back-translation drifts from base — review",
+        "dynamic": true,
+        "panelKey": "panel",
+        "visibility": "always"
+      },
+      {
+        "key": "error",
+        "type": "panel",
+        "icon": "AlertOctagon",
+        "tooltip": "Back-translation differs from base — likely wrong",
+        "dynamic": true,
+        "panelKey": "panel",
+        "visibility": "always"
+      }
+    ]
+  }
+}

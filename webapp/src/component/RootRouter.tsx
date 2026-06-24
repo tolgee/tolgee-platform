@@ -19,6 +19,12 @@ import { RecaptchaProvider } from 'tg.component/common/RecaptchaProvider';
 
 const LoginRouter = React.lazy(() => import('./security/Login/LoginRouter'));
 
+const InstallAppView = React.lazy(() =>
+  import('tg.views/installApp/InstallAppView').then((m) => ({
+    default: m.InstallAppView,
+  }))
+);
+
 const SlackConnectView = React.lazy(() => import('./slack/SlackConnectView'));
 
 const SlackConnectedView = React.lazy(
@@ -84,6 +90,9 @@ export const RootRouter = () => {
         </PrivateRoute>
         <PrivateRoute path={LINKS.GO_TO_PREFERRED_ORGANIZATION.template}>
           <PreferredOrganizationRedirect />
+        </PrivateRoute>
+        <PrivateRoute exact path={LINKS.APP_INSTALL.template}>
+          <InstallAppView />
         </PrivateRoute>
         <PrivateRoute path={LINKS.USER_SETTINGS.template}>
           <UserSettingsRouter />

@@ -1,0 +1,31 @@
+{
+  "name": "create-tolgee-app",
+  "version": "0.0.1-alpha.7",
+  "description": "Scaffold a new Tolgee Apps plugin with a working dev environment in one command.",
+  "type": "module",
+  "bin": {
+    "create-tolgee-app": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "template"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "@clack/prompts": "^0.11.0",
+    "picocolors": "^1.1.1"
+  },
+  "devDependencies": {
+    "@tolgee/apps-sdk": "*",
+    "@types/node": "^24.12.3",
+    "tsup": "^8.3.5",
+    "tsx": "^4.19.2",
+    "typescript": "~6.0.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

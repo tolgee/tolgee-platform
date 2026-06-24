@@ -1,0 +1,21 @@
+node_modules
+dist
+dist-ssr
+*.local
+*.tsbuildinfo
+
+# Tunnel + install state written by `npm run dev` / `npm run register`.
+.tolgee-dev/
+
+# Local data store (webhook-driven cache).
+server/.data/
+
+# Local env overrides.
+.env.local
+
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.iml
+*.log

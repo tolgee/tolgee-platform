@@ -151,6 +151,12 @@ export const TranslationRead: React.FC<Props> = ({
           active={active}
           lastFocusable={lastFocusable}
           className="controls-t"
+          keyId={keyData.keyId}
+          keyName={keyData.keyName}
+          keyNamespace={keyData.keyNamespace}
+          languageTag={language.tag}
+          languageId={language.id}
+          translationId={translation?.id}
         />
       )}
 

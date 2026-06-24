@@ -1,0 +1,41 @@
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, system-ui, sans-serif;
+  /* Set by applyTolgeeTheme(ctx.theme) so the app follows Tolgee's light/dark. */
+  color: var(--tg-color-text, #222);
+  background: var(--tg-color-background, #fff);
+}
+
+main {
+  padding: 16px;
+}
+
+main h1,
+main h2 {
+  margin-top: 0;
+}
+
+.kv {
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.kv th {
+  text-align: left;
+  padding: 4px 12px 4px 0;
+  font-weight: 500;
+  color: #666;
+}
+
+.kv td {
+  padding: 4px 0;
+}
+
+.kv code {
+  background: #f3f3f3;
+  padding: 1px 6px;
+  border-radius: 4px;
+}

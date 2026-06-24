@@ -6,10 +6,12 @@ import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
+import io.tolgee.model.apps.AppInstall
 import io.tolgee.model.automations.AutomationAction
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
 import jakarta.persistence.Index
+import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
@@ -21,6 +23,7 @@ import java.util.Date
 @Table(
   indexes = [
     Index(columnList = "project_id"),
+    Index(columnList = "app_install_id"),
   ],
 )
 class WebhookConfig(
@@ -52,4 +55,8 @@ class WebhookConfig(
 
   @ActivityIgnoredProp
   var autoDisabled: Boolean = false
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "app_install_id")
+  var appInstall: AppInstall? = null
 }
