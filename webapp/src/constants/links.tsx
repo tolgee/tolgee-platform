@@ -384,6 +384,10 @@ export class LINKS {
   static PROJECT_EDIT_ADVANCED = Link.ofParent(LINKS.PROJECT_EDIT, 'advanced');
   static PROJECT_EDIT_QA = Link.ofParent(LINKS.PROJECT_EDIT, 'qa');
   static PROJECT_EDIT_LABELS = Link.ofParent(LINKS.PROJECT_EDIT, 'labels');
+  static PROJECT_EDIT_EXPORT_IMPORT = Link.ofParent(
+    LINKS.PROJECT_EDIT,
+    'export-import'
+  );
 
   static PROJECT_LANGUAGES = Link.ofParent(LINKS.PROJECT, 'languages');
 
