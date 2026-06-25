@@ -97,6 +97,27 @@ export const GenerateApiKeyDialog: FunctionComponent<Props> = (props) => {
 
   const expirationDateOptions = useExpirationDateOptions();
 
+  const projectList = projects.data?._embedded?.projects;
+  const showOrganization =
+    new Set(
+      projectList
+        ?.map((p) => p.organizationOwner?.id)
+        .filter((id) => id !== undefined)
+    ).size > 1;
+
+  const renderProjectLabel = (
+    project: components['schemas']['ProjectModel']
+  ) => (
+    <>
+      {project.name}
+      {showOrganization && project.organizationOwner && (
+        <Box component="span" ml={1} sx={{ color: 'text.secondary' }}>
+          {project.organizationOwner.name}
+        </Box>
+      )}
+    </>
+  );
+
   const getProject = (projectId?: number) => {
     return (
       projects.data?._embedded?.projects?.find(
@@ -188,19 +209,20 @@ export const GenerateApiKeyDialog: FunctionComponent<Props> = (props) => {
                           name="projectId"
                           label="Project"
                           minHeight={false}
-                          renderValue={(v) =>
-                            projects.data?._embedded?.projects?.find(
+                          renderValue={(v) => {
+                            const selected = projectList?.find(
                               (r) => r.id === v
-                            )?.name
-                          }
+                            );
+                            return selected && renderProjectLabel(selected);
+                          }}
                         >
-                          {projects.data?._embedded?.projects?.map((r) => (
+                          {projectList?.map((r) => (
                             <MenuItem
                               data-cy="api-keys-project-select-item"
                               key={r.id}
                               value={r.id}
                             >
-                              {r.name}
+                              {renderProjectLabel(r)}
                             </MenuItem>
                           ))}
                         </Select>
