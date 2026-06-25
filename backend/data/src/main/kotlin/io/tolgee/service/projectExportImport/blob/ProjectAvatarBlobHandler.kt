@@ -28,6 +28,8 @@ class ProjectAvatarBlobHandler(
   }
 
   companion object {
-    fun blobName(projectId: Long): String = "avatar/$projectId.png"
+    const val AVATAR_BLOB_DIR = "avatar/"
+
+    fun blobName(projectId: Long): String = "$AVATAR_BLOB_DIR$projectId.png"
   }
 }

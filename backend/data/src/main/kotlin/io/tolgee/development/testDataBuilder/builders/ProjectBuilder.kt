@@ -16,6 +16,7 @@ import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.BranchMerge
 import io.tolgee.model.branching.BranchMergeChange
+import io.tolgee.model.branching.snapshot.KeySnapshot
 import io.tolgee.model.contentDelivery.ContentDeliveryConfig
 import io.tolgee.model.contentDelivery.ContentStorage
 import io.tolgee.model.dataImport.Import
@@ -87,6 +88,7 @@ class ProjectBuilder(
     val branches = mutableListOf<BranchBuilder>()
     val branchMerges = mutableListOf<BranchMergeBuilder>()
     val branchMergeChanges = mutableListOf<BranchMergeChangeBuilder>()
+    val keySnapshots = mutableListOf<KeySnapshotBuilder>()
     val tags = mutableListOf<TagBuilder>()
   }
 
@@ -113,6 +115,8 @@ class ProjectBuilder(
   fun addBranch(ft: FT<Branch>) = addOperation(data.branches, ft)
 
   fun addBranchMerge(ft: FT<BranchMerge>) = addOperation(data.branchMerges, ft)
+
+  fun addKeySnapshot(ft: FT<KeySnapshot>) = addOperation(data.keySnapshots, ft)
 
   fun addBranchMergeChange(
     branchMergeBuilder: BranchMergeBuilder,

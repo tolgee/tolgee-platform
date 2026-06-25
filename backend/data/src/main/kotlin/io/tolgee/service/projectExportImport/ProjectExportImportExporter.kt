@@ -49,6 +49,7 @@ class ProjectExportImportExporter(
       ZipOutputStream(BufferedOutputStream(Files.newOutputStream(tempFile))).use { zip ->
         val blobRowsByHandler = LinkedHashMap<BlobHandler, List<Any>>()
         val counts = writeEntities(zip, projectId, blobRowsByHandler)
+        writeProject(zip, project)
         writeBlobs(zip, blobRowsByHandler, project)
         writeManifest(zip, project, version, counts)
       }
@@ -86,6 +87,22 @@ class ProjectExportImportExporter(
       blobHandlerRegistry.handlerFor(entityType.javaType.name)?.let { blobRowsByHandler[it] = rows }
     }
     return counts
+  }
+
+  /**
+   * Writes the PROJECT_ROOT row's own scalar columns. The project is kept (not recreated) on import, but
+   * mirror semantics overwrite its scalars from source, so they must travel in the zip — the project
+   * is not an OWNED type and has no `entities/` file. Only attrs are consumed on import; its associations
+   * stay the target's.
+   */
+  private fun writeProject(
+    zip: ZipOutputStream,
+    project: Project,
+  ) {
+    val projectType = entityManager.metamodel.entity(Project::class.java)
+    zip.putNextEntry(ZipEntry(ExportZipLayout.PROJECT))
+    zip.write(objectMapper.writeValueAsBytes(EntityMetamodelReader.read(project, projectType)))
+    zip.closeEntry()
   }
 
   private fun writeBlobs(

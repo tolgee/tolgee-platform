@@ -4,6 +4,7 @@ import io.tolgee.AbstractSpringTest
 import io.tolgee.service.projectExportImport.EntityAssociations
 import io.tolgee.service.projectExportImport.EntityMetamodelReader
 import io.tolgee.service.projectExportImport.ExportImportPolicy
+import io.tolgee.service.projectExportImport.ProjectContentClearer
 import io.tolgee.service.projectExportImport.ProjectExportImportPolicyRegistry
 import io.tolgee.service.projectExportImport.ProjectScopedCollectorQueries
 import jakarta.persistence.metamodel.Attribute
@@ -92,6 +93,29 @@ class ProjectExportImportPolicyGuardTest : AbstractSpringTest() {
         "These OWNED entities have no project-scoped collector query. Row discovery is per-type (not a " +
           "graph walk), so each OWNED type must register one in ProjectScopedCollectorQueries:\n" +
           missing.sorted().joinToString("\n") { "  - $it" },
+      ).isEmpty()
+  }
+
+  @Test
+  fun `every OWNED type has a clear strategy`() {
+    val ownedClassNames = ProjectExportImportPolicyRegistry.ownedClassNames
+    val missing = ownedClassNames - ProjectContentClearer.clearedOwnedClassNames
+    assertThat(missing)
+      .withFailMessage(
+        "These OWNED entities are not cleared by ProjectContentClearer. Clear-in-place must wipe every " +
+          "OWNED type before a mirror import (a missed type silently degrades the mirror into a merge); " +
+          "wire its project-scoped deletion and add it to ProjectContentClearer.CLEARED_OWNED_TYPES:\n" +
+          missing.sorted().joinToString("\n") { "  - $it" },
+      ).isEmpty()
+  }
+
+  @Test
+  fun `clear strategies target only OWNED types`() {
+    val extra = ProjectContentClearer.clearedOwnedClassNames - ProjectExportImportPolicyRegistry.ownedClassNames
+    assertThat(extra)
+      .withFailMessage(
+        "ProjectContentClearer.CLEARED_OWNED_TYPES lists non-OWNED (or removed) types. Remove them:\n" +
+          extra.sorted().joinToString("\n") { "  - $it" },
       ).isEmpty()
   }
 

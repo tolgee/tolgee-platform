@@ -7,6 +7,7 @@ import io.tolgee.model.task.Task
 import io.tolgee.model.translation.Label
 import io.tolgee.model.translation.Translation
 import java.io.ByteArrayOutputStream
+import java.util.Base64
 import java.util.Date
 
 /**
@@ -26,7 +27,13 @@ class ProjectExportImportTestData(
   val assignedLabelName = "assigned-label"
   val unassignedLabelName = "unassigned-label"
   val avatarHash = "export-test-avatar-hash"
-  val screenshotImageBytes = "FAKE-SCREENSHOT-IMAGE-BYTES".toByteArray()
+
+  // A real 1x1 PNG: the export stores the bytes as-is, but the import decodes them to regenerate
+  // thumbnails (ImageConverter/ImageIO), so non-image bytes would fail the round-trip.
+  val screenshotImageBytes: ByteArray =
+    Base64.getDecoder().decode(
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
+    )
   val commentText = "Please review"
   val keyOnDeletedBranchName = "key-on-deleted-branch"
   val deletedBranchName = "deleted-branch"
