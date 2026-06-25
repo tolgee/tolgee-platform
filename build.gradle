@@ -158,16 +158,6 @@ subprojects {
     ext['hibernate.version'] = hibernateVersion
     ext['commons-lang3.version'] = commonsLang3Version
     ext['jackson.version'] = jacksonVersion
-    ext['tomcat.version'] = tomcatVersion
-    ext['netty.version'] = nettyVersion
-    ext['thymeleaf.version'] = thymeleafVersion
-    ext['postgresql.version'] = postgresqlVersion
-    ext['spring-framework.version'] = springFrameworkVersion
-    ext['spring-data-bom.version'] = springDataBomVersion
-    ext['spring-hateoas.version'] = springHateoasVersion
-    ext['spring-retry.version'] = springRetryVersion
-    ext['micrometer.version'] = micrometerVersion
-    ext['reactor-bom.version'] = reactorBomVersion
 
     tasks.withType(Test).configureEach {
         testLogging {
