@@ -35,6 +35,21 @@ class McpAuthenticationTest : AbstractMcpTest() {
   }
 
   @Test
+  fun `initialize and listTools succeed without auth`() {
+    val client = createMcpClientWithoutAuth()
+    val tools = client.listTools()
+    assertThat(tools.tools()).isNotEmpty
+  }
+
+  @Test
+  fun `callTool fails without auth header`() {
+    val client = createMcpClientWithoutAuth()
+    assertThrows<Exception> {
+      callTool(client, "list_projects")
+    }
+  }
+
+  @Test
   fun `callTool succeeds with PAK for project-scoped tool`() {
     val pakData = createTestDataWithPak()
     val client = createMcpClientWithPak(pakData.apiKey.encodedKey!!)

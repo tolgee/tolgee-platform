@@ -3,6 +3,7 @@ package io.tolgee.mcp
 import io.tolgee.activity.ActivityHandlerInterceptor
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.constants.Message
+import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.ProjectContextService
@@ -35,6 +36,9 @@ class McpRequestContext(
     projectId: Long? = null,
     block: () -> T,
   ): T {
+    // The /mcp/** path is not authenticated at the security filter chain (see WebSecurityConfig), so that list of tools is publicly available and can be health-checked by tools like glama.ai
+    // so unauthenticated tool calls reach this point and must be rejected here.
+    requireAuthenticated()
     // Order mirrors the HTTP interceptor chain:
     // 1. RateLimitInterceptor
     applyRateLimit(spec)
@@ -59,6 +63,12 @@ class McpRequestContext(
     setupActivity(spec)
     emitPostHogEvent(spec)
     return block()
+  }
+
+  private fun requireAuthenticated() {
+    if (authenticationFacade.authenticatedUserOrNull == null) {
+      throw AuthenticationException(Message.UNAUTHENTICATED)
+    }
   }
 
   /** Mirrors [AuthenticationInterceptor.preHandle] */
