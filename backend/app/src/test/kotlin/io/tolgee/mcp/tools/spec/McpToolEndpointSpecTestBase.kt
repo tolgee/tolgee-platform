@@ -3,6 +3,7 @@ package io.tolgee.mcp.tools.spec
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.constants.Feature
+import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.mcp.McpRequestContext
 import io.tolgee.mcp.RateLimitSpec
 import io.tolgee.mcp.ToolEndpointSpec
@@ -44,6 +45,7 @@ abstract class McpToolEndpointSpecTestBase {
     projectContextService = mock()
 
     whenever(activityHolder.businessEventData).thenReturn(businessEventData)
+    whenever(authenticationFacade.authenticatedUserOrNull).thenReturn(mock<UserAccountDto>())
 
     sut =
       McpRequestContext(

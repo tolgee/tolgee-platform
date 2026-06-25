@@ -32,13 +32,17 @@ abstract class AbstractMcpTest : AbstractSpringTest() {
 
   fun createMcpClientWithPak(pak: String): McpSyncClient = createMcpClientWithHeader("tgpak_$pak")
 
-  private fun createMcpClientWithHeader(apiKeyHeader: String): McpSyncClient {
+  fun createMcpClientWithoutAuth(): McpSyncClient = createMcpClientWithHeader(null)
+
+  private fun createMcpClientWithHeader(apiKeyHeader: String?): McpSyncClient {
     val transport =
       HttpClientStreamableHttpTransport
         .builder("http://localhost:$port")
         .endpoint("/mcp/developer")
         .customizeRequest { builder ->
-          builder.header("X-API-Key", apiKeyHeader)
+          if (apiKeyHeader != null) {
+            builder.header("X-API-Key", apiKeyHeader)
+          }
         }.build()
 
     val client =
