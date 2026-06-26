@@ -57,6 +57,14 @@ export interface paths {
     /** Returns current project batch job locks from Redis or local storage based on configuration */
     get: operations["getProjectLocks"];
   };
+  "/v2/administration/projects/{projectId}/export": {
+    /** Exports the whole project (content, branches, tasks, screenshots, settings) as a self-contained zip that can be imported onto a project on another instance running the same Tolgee version. */
+    get: operations["exportProject"];
+  };
+  "/v2/administration/projects/{projectId}/import": {
+    /** Wipes ALL in-scope content of this project and replaces it with the uploaded export zip (mirror / wipe-and-replace). The zip must come from an instance running the same Tolgee version. Users are matched by username/email; content authored by a user not present on this instance is attributed to the importing admin. */
+    post: operations["importProject"];
+  };
   "/v2/administration/users": {
     get: operations["getUsers"];
   };
@@ -3152,7 +3160,8 @@ export interface components {
         | "qa_checks_not_enabled"
         | "plan_migration_not_found"
         | "plan_has_migrations"
-        | "source_and_target_plan_must_be_different";
+        | "source_and_target_plan_must_be_different"
+        | "project_import_version_mismatch";
       params?: unknown[];
     };
     ExistenceEntityDescription: {
@@ -6941,7 +6950,8 @@ export interface components {
         | "qa_checks_not_enabled"
         | "plan_migration_not_found"
         | "plan_has_migrations"
-        | "source_and_target_plan_must_be_different";
+        | "source_and_target_plan_must_be_different"
+        | "project_import_version_mismatch";
       params?: unknown[];
       success: boolean;
     };
@@ -8316,6 +8326,90 @@ export interface operations {
       404: {
         content: {
           "application/json": string;
+        };
+      };
+    };
+  };
+  /** Exports the whole project (content, branches, tasks, screenshots, settings) as a self-contained zip that can be imported onto a project on another instance running the same Tolgee version. */
+  exportProject: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["StreamingResponseBody"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  /** Wipes ALL in-scope content of this project and replaces it with the uploaded export zip (mirror / wipe-and-replace). The zip must come from an instance running the same Tolgee version. Users are matched by username/email; content authored by a user not present on this instance is attributed to the importing admin. */
+  importProject: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          /** Format: binary */
+          file: string;
         };
       };
     };

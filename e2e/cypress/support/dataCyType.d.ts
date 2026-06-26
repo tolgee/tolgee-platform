@@ -606,6 +606,11 @@ declare namespace DataCy {
         "project-settings-button": true;
         "project-settings-delete-button": true;
         "project-settings-description": true;
+        "project-settings-export-button": true;
+        "project-settings-export-import": true;
+        "project-settings-import-button": true;
+        "project-settings-import-manifest": true;
+        "project-settings-import-version-warning": true;
         "project-settings-label-item": true;
         "project-settings-label-item-description": true;
         "project-settings-label-item-label": true;
@@ -619,6 +624,7 @@ declare namespace DataCy {
         "project-settings-languages-list-edit-button": true;
         "project-settings-languages-list-name": true;
         "project-settings-menu-advanced": true;
+        "project-settings-menu-export-import": true;
         "project-settings-menu-general": true;
         "project-settings-menu-labels": true;
         "project-settings-menu-qa": true;
