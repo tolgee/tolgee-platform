@@ -76,6 +76,44 @@ class OrganizationStatsService(
       .let { (it as Number).toLong() }
   }
 
+  fun getWordCount(organizationId: Long): Long {
+    return entityManager
+      .createNativeQuery(
+        """
+        with org_keys as materialized (
+          select k.id, k.project_id, k.name, k.namespace_id
+          from key k
+          join project p on p.id = k.project_id and p.deleted_at is null
+          left join branch b on b.id = k.branch_id
+          where p.organization_owner_id = :organizationId
+            and k.deleted_at is null
+            and (k.branch_id is null or b.deleted_at is null)
+            and (p.use_branching = true or k.branch_id is null or b.is_default = true)
+        ),
+        org_translations as materialized (
+          select ok.project_id, ok.name, ok.namespace_id, t.language_id,
+                 coalesce(t.word_count, 0) as word_count
+          from org_keys ok
+          join translation t on t.key_id = ok.id
+            and t.text is not null
+            and t.text <> ''
+        )
+        select coalesce(sum(max_wc), 0) from (
+          select max(ot.word_count) as max_wc
+          from org_translations ot
+          where exists (
+            select 1 from language l
+            where l.id = ot.language_id
+              and l.deleted_at is null
+          )
+          group by ot.project_id, ot.name, ot.namespace_id, ot.language_id
+        ) sub
+        """.trimIndent(),
+      ).setParameter("organizationId", organizationId)
+      .singleResult
+      .let { (it as Number).toLong() }
+  }
+
   fun getKeyCount(organizationId: Long): Long {
     return (
       entityManager
