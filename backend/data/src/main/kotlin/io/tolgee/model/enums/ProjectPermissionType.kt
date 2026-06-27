@@ -11,6 +11,7 @@ enum class ProjectPermissionType(
       Scope.ACTIVITY_VIEW,
       Scope.KEYS_VIEW,
       Scope.TASKS_VIEW,
+      Scope.ORGANIZATION_QUOTAS_VIEW,
     ),
   ),
   TRANSLATE(
@@ -25,6 +26,7 @@ enum class ProjectPermissionType(
       Scope.TRANSLATIONS_COMMENTS_SET_STATE,
       Scope.TASKS_VIEW,
       Scope.TRANSLATION_LABEL_ASSIGN,
+      Scope.ORGANIZATION_QUOTAS_VIEW,
     ),
   ),
   REVIEW(
@@ -40,6 +42,7 @@ enum class ProjectPermissionType(
       Scope.TRANSLATIONS_STATE_EDIT,
       Scope.TASKS_VIEW,
       Scope.TRANSLATION_LABEL_ASSIGN,
+      Scope.ORGANIZATION_QUOTAS_VIEW,
     ),
   ),
   EDIT(
@@ -66,6 +69,7 @@ enum class ProjectPermissionType(
       Scope.PROMPTS_VIEW,
       Scope.PROMPTS_EDIT,
       Scope.TRANSLATION_LABEL_ASSIGN,
+      Scope.ORGANIZATION_QUOTAS_VIEW,
     ),
   ),
   MANAGE(

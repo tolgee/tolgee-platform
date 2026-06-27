@@ -81,6 +81,25 @@ class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `task author email is hidden from a member lacking members-view`() {
+    userAccount = testData.projectViewRoleUser.self
+    performProjectAuthGet(
+      "tasks/${testData.translateTask.self.number}",
+    ).andAssertThatJson {
+      node("author.username").isEqualTo("")
+      node("author.name").isEqualTo("Project user")
+    }
+
+    userAccount = testData.projectManageRoleUser.self
+    performProjectAuthGet(
+      "tasks/${testData.translateTask.self.number}",
+    ).andAssertThatJson {
+      node("author.username").isEqualTo("project.user@test.com")
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `creates new task which triggers notification`() {
     val keys = testData.keysOutOfTask.map { it.self.id }.toMutableSet()
     performProjectAuthPost(

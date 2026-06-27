@@ -20,6 +20,7 @@ class SuggestionsTestData(
   var projectTranslator: UserAccountBuilder
   var czechTranslator: UserAccountBuilder
   var czechReviewer: UserAccountBuilder
+  var communityUser: UserAccountBuilder
   var relatedProject: ProjectBuilder
   var keys: MutableList<KeyBuilder> = mutableListOf()
   val czechSuggestions: MutableList<SuggestionBuilder> = mutableListOf()
@@ -71,6 +72,12 @@ class SuggestionsTestData(
       root.addUserAccount {
         username = "cs.reviewer@test.com"
         name = "Czech reviewer"
+      }
+
+    communityUser =
+      root.addUserAccount {
+        username = "community@test.com"
+        name = "Community user"
       }
 
     userAccountBuilder.defaultOrganizationBuilder.apply {

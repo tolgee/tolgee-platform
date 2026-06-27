@@ -127,8 +127,7 @@ class TaskController(
     @PathVariable
     taskNumber: Long,
   ): TaskModel {
-    // users can view tasks assigned to them
-    securityService.hasTaskViewScopeOrIsAssigned(projectHolder.project.id, taskNumber)
+    securityService.checkTaskViewScopeOrAssigned(projectHolder.project.id, taskNumber)
     val task = taskService.getTask(projectHolder.project.id, taskNumber)
     return taskModelAssembler.toModel(task)
   }
@@ -179,8 +178,7 @@ class TaskController(
     @PathVariable
     taskNumber: Long,
   ): TaskModel {
-    // users can only finish tasks assigned to them
-    securityService.hasTaskEditScopeOrIsAssigned(projectHolder.project.id, taskNumber)
+    securityService.checkTaskEditScopeOrAssigned(projectHolder.project.id, taskNumber)
     val task = taskService.setTaskState(projectHolder.project.id, taskNumber, TaskState.FINISHED)
     return taskModelAssembler.toModel(task)
   }
@@ -240,7 +238,7 @@ class TaskController(
     @PathVariable
     taskNumber: Long,
   ): List<TaskPerUserReportModel> {
-    securityService.hasTaskViewScopeOrIsAssigned(projectHolder.project.id, taskNumber)
+    securityService.checkTaskViewScopeOrAssigned(projectHolder.project.id, taskNumber)
 
     val result = taskService.getReport(projectHolder.projectEntity, taskNumber)
     return result.map { taskPerUserReportModelAssembler.toModel(it) }
@@ -258,7 +256,7 @@ class TaskController(
     @PathVariable
     taskNumber: Long,
   ): ResponseEntity<ByteArrayResource> {
-    securityService.hasTaskViewScopeOrIsAssigned(projectHolder.project.id, taskNumber)
+    securityService.checkTaskViewScopeOrAssigned(projectHolder.project.id, taskNumber)
     val byteArray = taskService.getExcelFile(projectHolder.projectEntity, taskNumber)
     val resource = ByteArrayResource(byteArray)
 
@@ -279,7 +277,7 @@ class TaskController(
     @PathVariable
     taskNumber: Long,
   ): TaskKeysResponse {
-    securityService.hasTaskViewScopeOrIsAssigned(projectHolder.project.id, taskNumber)
+    securityService.checkTaskViewScopeOrAssigned(projectHolder.project.id, taskNumber)
     return TaskKeysResponse(
       keys = taskService.getTaskKeys(projectHolder.project.id, taskNumber),
     )
@@ -310,6 +308,7 @@ class TaskController(
     @PathVariable
     taskNumber: Long,
   ): List<Long> {
+    securityService.checkTaskViewScopeOrAssigned(projectHolder.project.id, taskNumber)
     return taskService.getBlockingTasks(projectHolder.project.id, taskNumber)
   }
 
@@ -330,8 +329,7 @@ class TaskController(
     @RequestBody @Valid
     dto: UpdateTaskKeyRequest,
   ): UpdateTaskKeyResponse {
-    // users can only update tasks assigned to them
-    securityService.hasTaskEditScopeOrIsAssigned(projectHolder.project.id, taskNumber)
+    securityService.checkTaskEditScopeOrAssigned(projectHolder.project.id, taskNumber)
     return taskService.updateTaskKey(projectHolder.project.id, taskNumber, keyId, dto)
   }
 

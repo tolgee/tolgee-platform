@@ -308,6 +308,7 @@ class ProjectService(
               organization.basePermission,
               permission,
               userAccount.role ?: UserAccount.Role.USER,
+              isProjectPublic = project.public,
             ).scopes
         fromEntityAndPermission(project, scopes)
       }.toList()

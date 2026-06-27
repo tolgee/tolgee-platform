@@ -7,4 +7,5 @@ enum class ComputedPermissionOrigin {
   NONE,
   SERVER_ADMIN,
   SERVER_SUPPORTER,
+  COMMUNITY,
 }

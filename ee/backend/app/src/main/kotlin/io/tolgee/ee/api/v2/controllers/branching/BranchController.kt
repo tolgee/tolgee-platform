@@ -177,7 +177,7 @@ class BranchController(
   @GetMapping(value = ["/merge"])
   @Operation(summary = "Get branch merges")
   @AllowApiAccess
-  @UseDefaultPermissions
+  @RequiresProjectPermissions([Scope.BRANCH_MANAGEMENT])
   @OpenApiOrderExtension(4)
   fun getBranchMerges(
     @ParameterObject
@@ -191,7 +191,7 @@ class BranchController(
   @PostMapping(value = ["/merge/preview"])
   @Operation(summary = "Creates a merge, dry-runs source branch to target branch and return preview")
   @AllowApiAccess
-  @UseDefaultPermissions
+  @RequiresProjectPermissions([Scope.BRANCH_MANAGEMENT])
   @OpenApiOrderExtension(5)
   fun dryRunMerge(
     @RequestBody request: DryRunMergeBranchRequest,
@@ -204,7 +204,7 @@ class BranchController(
   @GetMapping(value = ["/merge/{mergeId}/preview"])
   @Operation(summary = "Get branch merge session preview")
   @AllowApiAccess
-  @UseDefaultPermissions
+  @RequiresProjectPermissions([Scope.BRANCH_MANAGEMENT])
   @OpenApiOrderExtension(6)
   fun getBranchMergeSessionPreview(
     @PathVariable mergeId: Long,
@@ -217,7 +217,7 @@ class BranchController(
   @PostMapping(value = ["/merge/{mergeId}/refresh"])
   @Operation(summary = "Refresh branch merge session preview")
   @AllowApiAccess
-  @UseDefaultPermissions
+  @RequiresProjectPermissions([Scope.BRANCH_MANAGEMENT])
   @OpenApiOrderExtension(11)
   fun refreshBranchMerge(
     @PathVariable mergeId: Long,
@@ -230,7 +230,7 @@ class BranchController(
   @GetMapping(value = ["/merge/{mergeId}/conflicts"])
   @Operation(summary = "Get branch merge session conflicts")
   @AllowApiAccess
-  @UseDefaultPermissions
+  @RequiresProjectPermissions([Scope.BRANCH_MANAGEMENT])
   @OpenApiOrderExtension(7)
   fun getBranchMergeSessionConflicts(
     @ParameterObject
@@ -245,7 +245,7 @@ class BranchController(
   @GetMapping(value = ["/merge/{mergeId}/changes"])
   @Operation(summary = "Get branch merge session changes")
   @AllowApiAccess
-  @UseDefaultPermissions
+  @RequiresProjectPermissions([Scope.BRANCH_MANAGEMENT])
   @OpenApiOrderExtension(7)
   fun getBranchMergeSessionChanges(
     @ParameterObject pageable: Pageable,
@@ -260,7 +260,7 @@ class BranchController(
   @GetMapping(value = ["/merge/{mergeId}/changes/{changeId}"])
   @Operation(summary = "Get single branch merge session change")
   @AllowApiAccess
-  @UseDefaultPermissions
+  @RequiresProjectPermissions([Scope.BRANCH_MANAGEMENT])
   @OpenApiOrderExtension(8)
   fun getBranchMergeSessionChange(
     @PathVariable mergeId: Long,
@@ -274,7 +274,7 @@ class BranchController(
   @PutMapping(value = ["/merge/{mergeId}/resolve"])
   @Operation(summary = "Resolve branch merge session conflicts")
   @AllowApiAccess
-  @UseDefaultPermissions
+  @RequiresProjectPermissions([Scope.BRANCH_MANAGEMENT])
   @OpenApiOrderExtension(9)
   fun resolveConflict(
     @PathVariable mergeId: Long,
@@ -287,7 +287,7 @@ class BranchController(
   @PutMapping(value = ["/merge/{mergeId}/resolve-all"])
   @Operation(summary = "Resolve all branch merge session conflicts")
   @AllowApiAccess
-  @UseDefaultPermissions
+  @RequiresProjectPermissions([Scope.BRANCH_MANAGEMENT])
   @OpenApiOrderExtension(10)
   fun resolveAllConflicts(
     @PathVariable mergeId: Long,
@@ -300,7 +300,7 @@ class BranchController(
   @DeleteMapping(value = ["/merge/{mergeId}"])
   @Operation(summary = "Delete branch merge session")
   @AllowApiAccess
-  @UseDefaultPermissions
+  @RequiresProjectPermissions([Scope.BRANCH_MANAGEMENT])
   @OpenApiOrderExtension(11)
   fun deleteBranchMerge(
     @PathVariable mergeId: Long,
@@ -313,7 +313,7 @@ class BranchController(
   @Operation(summary = "Merge source branch to target branch")
   @AllowApiAccess
   @RequestActivity(ActivityType.BRANCH_MERGE)
-  @UseDefaultPermissions
+  @RequiresProjectPermissions([Scope.BRANCH_MANAGEMENT])
   @OpenApiOrderExtension(12)
   fun merge(
     @PathVariable mergeId: Long,

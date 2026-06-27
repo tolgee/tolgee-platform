@@ -8,9 +8,11 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.dtos.request.dataImport.ImportSettingsRequest
 import io.tolgee.hateoas.dataImport.ImportSettingsModel
+import io.tolgee.model.enums.Scope
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.dataImport.ImportSettingsService
 import jakarta.validation.Valid
@@ -57,7 +59,7 @@ class ImportSettingsController(
     description = "Stores import settings for the authenticated user and the project.",
   )
   @AllowApiAccess
-  @UseDefaultPermissions
+  @RequiresProjectPermissions([Scope.KEYS_CREATE])
   fun store(
     @Valid @RequestBody dto: ImportSettingsRequest,
   ): ImportSettingsModel {

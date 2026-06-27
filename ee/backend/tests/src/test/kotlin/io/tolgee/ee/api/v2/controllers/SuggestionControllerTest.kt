@@ -40,12 +40,12 @@ class SuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       .andAssertThatJson {
         node("_embedded.suggestions") {
           node("[0].translation").isEqualTo("Navržený překlad 0-1")
-          node("[0].author.username").isEqualTo("translator@test.com")
+          node("[0].author.username").isEqualTo("")
           node("[0].author.name").isEqualTo("Project translator")
         }
         node("_embedded.suggestions") {
           node("[1].translation").isEqualTo("Navržený překlad 0-2")
-          node("[1].author.username").isEqualTo("reviewer@test.com")
+          node("[1].author.username").isEqualTo("")
           node("[1].author.name").isEqualTo("Project reviewer")
         }
         node("page.totalElements").isNumber.isEqualTo(BigDecimal(2))
@@ -89,7 +89,7 @@ class SuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     ).andAssertThatJson {
       node("accepted") {
         node("translation").isEqualTo("Navržený překlad 0-1")
-        node("author.username").isEqualTo("translator@test.com")
+        node("author.username").isEqualTo("")
         node("state").isEqualTo("ACCEPTED")
       }
       node("declined").isArray.hasSize(0)
@@ -148,7 +148,7 @@ class SuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     ).andAssertThatJson {
       node("accepted") {
         node("translation").isEqualTo("Navržený překlad 0-1")
-        node("author.username").isEqualTo("translator@test.com")
+        node("author.username").isEqualTo("")
         node("state").isEqualTo("ACCEPTED")
       }
       node("declined[0]").isEqualTo(testData.czechSuggestions[1].self.id)

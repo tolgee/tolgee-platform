@@ -1435,6 +1435,7 @@ export interface components {
         | "all.view"
         | "branch.management"
         | "branch.protected-modify"
+        | "organization-quotas.view"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -2088,7 +2089,8 @@ export interface components {
         | "ORGANIZATION_OWNER"
         | "NONE"
         | "SERVER_ADMIN"
-        | "SERVER_SUPPORTER";
+        | "SERVER_SUPPORTER"
+        | "COMMUNITY";
       permissionModel?: components["schemas"]["PermissionModel"];
       /**
        * @deprecated
@@ -2145,6 +2147,7 @@ export interface components {
         | "all.view"
         | "branch.management"
         | "branch.protected-modify"
+        | "organization-quotas.view"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -3423,7 +3426,8 @@ export interface components {
         | "translation-labels.assign"
         | "all.view"
         | "branch.management"
-        | "branch.protected-modify";
+        | "branch.protected-modify"
+        | "organization-quotas.view";
     };
     IdentifyRequest: {
       anonymousUserId: string;
@@ -4917,6 +4921,7 @@ export interface components {
         | "all.view"
         | "branch.management"
         | "branch.protected-modify"
+        | "organization-quotas.view"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -5013,6 +5018,7 @@ export interface components {
         | "all.view"
         | "branch.management"
         | "branch.protected-modify"
+        | "organization-quotas.view"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -24575,6 +24581,7 @@ export interface operations {
               | "all.view"
               | "branch.management"
               | "branch.protected-modify"
+              | "organization-quotas.view"
             )[];
           };
         };

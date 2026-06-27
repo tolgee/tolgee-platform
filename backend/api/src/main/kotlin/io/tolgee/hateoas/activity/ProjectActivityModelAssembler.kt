@@ -4,6 +4,7 @@ import io.tolgee.api.IProjectActivityModelAssembler
 import io.tolgee.api.v2.controllers.ApiKeyController
 import io.tolgee.model.views.activity.ProjectActivityView
 import io.tolgee.service.AvatarService
+import io.tolgee.service.security.SecurityService
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.stereotype.Component
 
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component
 class ProjectActivityModelAssembler(
   private val avatarService: AvatarService,
   private val modifiedEntityModelAssembler: ModifiedEntityModelAssembler,
+  private val securityService: SecurityService,
 ) : RepresentationModelAssemblerSupport<ProjectActivityView, ProjectActivityModel>(
     ApiKeyController::class.java,
     ProjectActivityModel::class.java,
@@ -26,7 +28,7 @@ class ProjectActivityModelAssembler(
           ProjectActivityAuthorModel(
             id = view.authorId!!,
             name = view.authorName,
-            username = view.authorUsername!!,
+            username = securityService.maskedMemberField(view.authorUsername),
             avatar = avatarService.getAvatarLinks(view.authorAvatarHash),
             deleted = view.authorDeleted,
           )

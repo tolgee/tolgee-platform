@@ -5,6 +5,7 @@ import io.tolgee.hateoas.userAccount.SimpleUserAccountModel
 import io.tolgee.service.AvatarService
 import io.tolgee.service.key.KeySearchResultView
 import io.tolgee.service.key.KeyTrashPurgeScheduler
+import io.tolgee.service.security.SecurityService
 import io.tolgee.util.addDays
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.stereotype.Component
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component
 @Component
 class TrashedKeyModelAssembler(
   private val avatarService: AvatarService,
+  private val securityService: SecurityService,
 ) : RepresentationModelAssemblerSupport<KeySearchResultView, TrashedKeyModel>(
     KeyTrashController::class.java,
     TrashedKeyModel::class.java,
@@ -34,7 +36,7 @@ class TrashedKeyModelAssembler(
     return entity.deletedByUserId?.let { userId ->
       SimpleUserAccountModel(
         id = userId,
-        username = entity.deletedByUserUsername ?: "",
+        username = securityService.maskedMemberField(entity.deletedByUserUsername),
         name = entity.deletedByUserName,
         avatar = avatarService.getAvatarLinks(entity.deletedByUserAvatarHash),
         deleted = entity.deletedByUserDeleted ?: false,
