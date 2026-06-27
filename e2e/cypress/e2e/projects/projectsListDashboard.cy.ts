@@ -55,7 +55,7 @@ describe('Projects Dashboard', () => {
     cy.contains('Project 2')
       .closestDcy('dashboard-projects-list-item')
       .findDcy('project-list-org-name')
-      .should('contain', 'Dashboard Test Org');
+      .should('contain', 'test_username');
   });
 
   it('does not show public badge on a private project', () => {
