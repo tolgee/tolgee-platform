@@ -570,6 +570,8 @@ declare namespace DataCy {
         "project-leave-button": true;
         "project-list-languages": true;
         "project-list-more-button": true;
+        "project-list-org-name": true;
+        "project-list-public-badge": true;
         "project-list-qa-badge-button": true;
         "project-list-translations-button": true;
         "project-member-item": true;

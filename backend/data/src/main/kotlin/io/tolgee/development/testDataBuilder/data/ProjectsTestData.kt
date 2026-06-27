@@ -9,7 +9,7 @@ import io.tolgee.model.enums.TaskType
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.task.Task
 
-class ProjectsTestData : BaseTestData() {
+open class ProjectsTestData : BaseTestData() {
   lateinit var project2English: Language
   lateinit var project2Deutsch: Language
   lateinit var project2: Project
