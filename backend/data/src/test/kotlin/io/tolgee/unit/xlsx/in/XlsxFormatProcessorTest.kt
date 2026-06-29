@@ -1,5 +1,6 @@
 package io.tolgee.unit.xlsx.`in`
 
+import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.formats.xlsx.`in`.XlsxFileProcessor
 import io.tolgee.testing.assert
 import io.tolgee.util.FileProcessorContextMockUtil
@@ -12,6 +13,7 @@ import io.tolgee.util.custom
 import io.tolgee.util.description
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class XlsxFormatProcessorTest {
   lateinit var mockUtil: FileProcessorContextMockUtil
@@ -470,6 +472,14 @@ class XlsxFormatProcessorTest {
       convertPlaceholders,
       projectIcuPlaceholdersEnabled,
     )
+  }
+
+  @Test
+  fun `throws on a misformatted sheet (title row and empty key column)`() {
+    mockUtil.mockIt("empty_key_column.xlsx", "src/test/resources/import/xlsx/empty_key_column.xlsx")
+    assertThrows<ImportCannotParseFileException> {
+      processFile()
+    }
   }
 
   private fun processFile() {
