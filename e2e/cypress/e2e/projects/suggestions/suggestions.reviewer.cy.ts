@@ -229,6 +229,42 @@ describe('Suggestions reviewer', () => {
     assertMessage('Suggestion accepted');
   });
 
+  it('read cell shows the next correct 3 suggestions after one is declined', () => {
+    getTranslationCell('key 2', 'cs')
+      .findDcy('translation-suggestion')
+      .should('have.length', 3);
+    getTranslationCell('key 2', 'cs').within(() => {
+      cy.contains('+1').should('be.visible');
+    });
+    getTranslationCell('key 2', 'cs').click();
+    waitForGlobalLoading();
+    cy.gcy('suggestions-list')
+      .findDcy('translation-suggestion')
+      .first()
+      .should('contain', 'Many suggestion 2-4');
+    gcyAdvanced({ value: 'suggestion-action', action: 'decline' })
+      .first()
+      .click();
+    waitForGlobalLoading();
+    visitTranslations(projectId);
+    waitForGlobalLoading();
+    getTranslationCell('key 2', 'cs')
+      .findDcy('translation-suggestion')
+      .should('have.length', 3);
+    getTranslationCell('key 2', 'cs').within(() => {
+      cy.gcy('translation-suggestion')
+        .eq(0)
+        .should('contain', 'Many suggestion 2-3');
+      cy.gcy('translation-suggestion')
+        .eq(1)
+        .should('contain', 'Many suggestion 2-2');
+      cy.gcy('translation-suggestion')
+        .eq(2)
+        .should('contain', 'Many suggestion 2-1');
+      cy.contains('+1').should('not.exist');
+    });
+  });
+
   function acceptOnly(text: string) {
     cy.gcy('translation-suggestion')
       .contains(text)

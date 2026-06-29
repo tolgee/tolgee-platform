@@ -4,6 +4,7 @@ import { PanelHeader } from '../ToolsPanel/common/PanelHeader';
 import { T, useTranslate } from '@tolgee/react';
 import { components } from 'tg.service/apiSchema.generated';
 import { TranslationSuggestion } from './TranslationSuggestion';
+import { MAX_DISPLAYED_SUGGESTIONS } from './SuggestionsFirst';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { useTranslationsActions } from '../context/TranslationsContext';
@@ -133,10 +134,14 @@ export const SuggestionsList = ({
         lang: languageTag,
         data(translation) {
           const firstPage = suggestions.pages?.[0];
-          const firstSuggestion = firstPage?._embedded?.suggestions?.[0];
+          const shown =
+            firstPage?._embedded?.suggestions?.slice(
+              0,
+              MAX_DISPLAYED_SUGGESTIONS
+            ) ?? [];
           return {
             ...translation,
-            suggestions: firstSuggestion ? [firstSuggestion] : [],
+            suggestions: shown,
             activeSuggestionCount: firstPage.page?.totalElements ?? 0,
           };
         },
