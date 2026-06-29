@@ -1,3 +1,10 @@
+# [3.206.0](https://github.com/tolgee/tolgee-platform/compare/v3.205.5...v3.206.0) (2026-06-29)
+
+
+### Features
+
+* expose MCP tools/list without authentication ([#3768](https://github.com/tolgee/tolgee-platform/issues/3768)) ([4bcc88c](https://github.com/tolgee/tolgee-platform/commit/4bcc88ce5177729556ee5b40766d87fccfd703fb))
+
 ## [3.205.5](https://github.com/tolgee/tolgee-platform/compare/v3.205.4...v3.205.5) (2026-06-22)
 
 
