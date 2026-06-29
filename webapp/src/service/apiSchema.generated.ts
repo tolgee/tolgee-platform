@@ -278,7 +278,7 @@ export interface paths {
   };
   "/v2/organizations/{organizationId}/projects-with-stats": {
     /** Returns all projects (including statistics) where current user has any permission (except none) */
-    get: operations["getAllWithStatistics_2"];
+    get: operations["getAllWithStatistics_3"];
   };
   "/v2/organizations/{organizationId}/set-base-permissions": {
     /** Set default granular (scope-based) permissions for organization users, who don't have direct project permissions set. */
@@ -384,7 +384,7 @@ export interface paths {
   };
   "/v2/organizations/{slug}/projects-with-stats": {
     /** Returns all projects (including statistics) where current user has any permission (except none) */
-    get: operations["getAllWithStatistics_1"];
+    get: operations["getAllWithStatistics_2"];
   };
   "/v2/pats": {
     get: operations["getAll_9"];
@@ -417,7 +417,7 @@ export interface paths {
   };
   "/v2/projects/with-stats": {
     /** Returns all projects (including statistics) where current user has any permission */
-    get: operations["getAllWithStatistics"];
+    get: operations["getAllWithStatistics_1"];
   };
   "/v2/projects/{projectId}": {
     get: operations["get_2"];
@@ -1181,6 +1181,10 @@ export interface paths {
   "/v2/public/machine-translation-providers": {
     /** Get machine translation providers */
     get: operations["getInfo_4"];
+  };
+  "/v2/public/projects/with-stats": {
+    /** Returns all public projects (including statistics), discoverable by anyone — no authentication required */
+    get: operations["getAllWithStatistics"];
   };
   "/v2/public/scope-info/hierarchy": {
     get: operations["getHierarchy"];
@@ -11483,7 +11487,7 @@ export interface operations {
     };
   };
   /** Returns all projects (including statistics) where current user has any permission (except none) */
-  getAllWithStatistics_2: {
+  getAllWithStatistics_3: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -12939,7 +12943,7 @@ export interface operations {
     };
   };
   /** Returns all projects (including statistics) where current user has any permission (except none) */
-  getAllWithStatistics_1: {
+  getAllWithStatistics_2: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -13398,7 +13402,7 @@ export interface operations {
     };
   };
   /** Returns all projects (including statistics) where current user has any permission */
-  getAllWithStatistics: {
+  getAllWithStatistics_1: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -24473,6 +24477,52 @@ export interface operations {
               key: string
             ]: components["schemas"]["MachineTranslationProviderModel"];
           };
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  /** Returns all public projects (including statistics), discoverable by anyone — no authentication required */
+  getAllWithStatistics: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        search?: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelProjectWithStatsModel"];
         };
       };
       /** Bad Request */

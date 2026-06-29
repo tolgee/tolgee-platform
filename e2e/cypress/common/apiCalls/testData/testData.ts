@@ -56,6 +56,8 @@ export const projectListData = generateTestDataObject(
   'projects-list-dashboard'
 );
 
+export const publicProjectsData = generateTestDataObject('public-projects');
+
 export const projectTestData = generateTestDataObject('projects');
 
 export const apiKeysTestData = generateTestDataObject('api-keys');

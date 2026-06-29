@@ -20,6 +20,8 @@ open class ProjectWithStatsModel(
   val slug: String?,
   val avatar: Avatar?,
   val organizationOwner: SimpleOrganizationModel?,
+  @Schema(description = "Whether the project is public — discoverable and open to community suggestions")
+  val public: Boolean,
   val baseLanguage: LanguageModel?,
   val organizationRole: OrganizationRoleType?,
   @Schema(description = "Current user's direct permission", example = "MANAGE")
