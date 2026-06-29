@@ -55,11 +55,15 @@ class OrganizationStatsWordCountTestData {
       useBranching = false
     }.build {
       addLanguage {
-        name = "English"; tag = "en"; originalName = "English"
+        name = "English"
+        tag = "en"
+        originalName = "English"
         this@build.self.baseLanguage = this
       }
       addLanguage {
-        name = "German"; tag = "de"; originalName = "Deutsch"
+        name = "German"
+        tag = "de"
+        originalName = "Deutsch"
       }
 
       addKey { name = "ml-key1" }.build {
@@ -91,22 +95,34 @@ class OrganizationStatsWordCountTestData {
       useBranching = true
     }.build {
       addLanguage {
-        name = "English"; tag = "en"; originalName = "English"
+        name = "English"
+        tag = "en"
+        originalName = "English"
         this@build.self.baseLanguage = this
       }
 
       addBranch {
-        name = "main"; project = self; isDefault = true
+        name = "main"
+        project = self
+        isDefault = true
       }.build { mainBranch = self }
 
       addBranch {
-        name = "feature"; project = self; originBranch = mainBranch
+        name = "feature"
+        project = self
+        originBranch = mainBranch
       }.build { featureBranch = self }
 
-      addKey { name = "bd-key1"; branch = mainBranch }.build {
+      addKey {
+        name = "bd-key1"
+        branch = mainBranch
+      }.build {
         addTranslation("en", "one")
       }
-      addKey { name = "bd-key1"; branch = featureBranch }.build {
+      addKey {
+        name = "bd-key1"
+        branch = featureBranch
+      }.build {
         addTranslation("en", "hello world")
       }
     }
@@ -132,18 +148,24 @@ class OrganizationStatsWordCountTestData {
       useBranching = false
     }.build {
       addLanguage {
-        name = "English"; tag = "en"; originalName = "English"
+        name = "English"
+        tag = "en"
+        originalName = "English"
         this@build.self.baseLanguage = this
       }
 
       val mainBranch =
         addBranch {
-          name = "main"; project = self; isDefault = true
+          name = "main"
+          project = self
+          isDefault = true
         }.build { self }.self
 
       val orphanBranch =
         addBranch {
-          name = "orphan"; project = self; originBranch = mainBranch
+          name = "orphan"
+          project = self
+          originBranch = mainBranch
         }.build { self }.self
 
       // On null branch (no branch_id) — counted
@@ -152,7 +174,10 @@ class OrganizationStatsWordCountTestData {
       }
 
       // On orphan branch — excluded (branching disabled)
-      addKey { name = "nb-wc-key2"; branch = orphanBranch }.build {
+      addKey {
+        name = "nb-wc-key2"
+        branch = orphanBranch
+      }.build {
         addTranslation("en", "foo bar baz")
       }
     }
@@ -177,7 +202,9 @@ class OrganizationStatsWordCountTestData {
       useBranching = false
     }.build {
       addLanguage {
-        name = "English"; tag = "en"; originalName = "English"
+        name = "English"
+        tag = "en"
+        originalName = "English"
         this@build.self.baseLanguage = this
       }
 
