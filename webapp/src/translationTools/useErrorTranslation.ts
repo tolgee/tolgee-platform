@@ -403,14 +403,10 @@ export function useErrorTranslation() {
       case 'import_failed':
         return t('import_failed');
       case 'project_import_version_mismatch':
-        return t(
-          'project_import_version_mismatch',
-          'This archive was exported from Tolgee {manifestVersion}, but this instance runs {runningVersion}. Import is only supported between matching versions.',
-          {
-            manifestVersion: params?.[0] || '',
-            runningVersion: params?.[1] || '',
-          }
-        );
+        return t('project_import_version_mismatch', {
+          manifestVersion: params?.[0] || '',
+          runningVersion: params?.[1] || '',
+        });
 
       // Machine translation
       case 'no_auto_translation_method':

@@ -114,25 +114,14 @@ export const ProjectSettingsExportImport = () => {
       return;
     }
     confirmation({
-      title: (
-        <T
-          keyName="project_settings_import_confirm_title"
-          defaultValue="Replace project content"
-        />
-      ),
+      title: <T keyName="project_settings_import_confirm_title" />,
       message: (
         <T
           keyName="project_settings_import_confirm_message"
-          defaultValue="This permanently deletes all content of <b>{name}</b> and replaces it with the uploaded archive. This cannot be undone."
           params={{ name: project.name, b: <b /> }}
         />
       ),
-      confirmButtonText: (
-        <T
-          keyName="project_settings_import_confirm_button"
-          defaultValue="Import & replace"
-        />
-      ),
+      confirmButtonText: <T keyName="project_settings_import_confirm_button" />,
       hardModeText: project.name.toUpperCase(),
       onConfirm() {
         importLoadable.mutate(
@@ -145,10 +134,7 @@ export const ProjectSettingsExportImport = () => {
           {
             onSuccess() {
               messageService.success(
-                <T
-                  keyName="project_settings_import_success_message"
-                  defaultValue="Project imported successfully."
-                />
+                <T keyName="project_settings_import_success_message" />
               );
               clearSelection();
             },
@@ -166,16 +152,10 @@ export const ProjectSettingsExportImport = () => {
   return (
     <Box display="grid" mb={8} data-cy="project-settings-export-import">
       <Typography variant="h5" mt={4} mb="20px">
-        <T
-          keyName="project_settings_export_title"
-          defaultValue="Export project"
-        />
+        <T keyName="project_settings_export_title" />
       </Typography>
       <Typography variant="body1" mb={2}>
-        <T
-          keyName="project_settings_export_description"
-          defaultValue="Download this project as a self-contained zip archive. It can be imported onto a project on another Tolgee instance running the same version."
-        />
+        <T keyName="project_settings_export_description" />
       </Typography>
       <Box>
         <LoadingButton
@@ -185,41 +165,26 @@ export const ProjectSettingsExportImport = () => {
           color="primary"
           onClick={handleExport}
         >
-          <T
-            keyName="project_settings_export_button"
-            defaultValue="Export project"
-          />
+          <T keyName="project_settings_export_button" />
         </LoadingButton>
       </Box>
 
       <Typography variant="h5" mt={5} mb="20px">
-        <T
-          keyName="project_settings_import_title"
-          defaultValue="Import project"
-        />
+        <T keyName="project_settings_import_title" />
       </Typography>
       <Typography variant="body1" mb={2}>
         <T
           keyName="project_settings_import_description"
-          defaultValue="Upload a project export archive to replace this project's content. <b>This permanently deletes all current content of this project</b> and replaces it with the uploaded archive."
           params={{ b: <b /> }}
         />
       </Typography>
 
       <LabelHint
-        title={
-          <T
-            keyName="project_settings_import_user_mapping_hint"
-            defaultValue="Users are matched by username and email. Anything authored by a user not present on this instance is attributed to you."
-          />
-        }
+        title={<T keyName="project_settings_import_user_mapping_hint" />}
         sx={{ mb: 2 }}
       >
         <Typography variant="body2" color="textSecondary">
-          <T
-            keyName="project_settings_import_user_mapping_label"
-            defaultValue="How are users mapped?"
-          />
+          <T keyName="project_settings_import_user_mapping_label" />
         </Typography>
       </LabelHint>
 
@@ -231,10 +196,7 @@ export const ProjectSettingsExportImport = () => {
 
       {manifestUnreadable && (
         <Alert severity="error" sx={{ mb: 2 }}>
-          <T
-            keyName="project_settings_import_manifest_unreadable"
-            defaultValue="Could not read the export archive. Make sure you selected a valid Tolgee project export zip."
-          />
+          <T keyName="project_settings_import_manifest_unreadable" />
         </Alert>
       )}
 
@@ -242,10 +204,7 @@ export const ProjectSettingsExportImport = () => {
         <StyledManifest mb={2} data-cy="project-settings-import-manifest">
           <StyledManifestRow>
             <Typography variant="body2" color="textSecondary">
-              <T
-                keyName="project_settings_import_manifest_source_project"
-                defaultValue="Source project"
-              />
+              <T keyName="project_settings_import_manifest_source_project" />
             </Typography>
             <Typography variant="body2">
               {manifest.sourceProjectName}
@@ -253,19 +212,13 @@ export const ProjectSettingsExportImport = () => {
           </StyledManifestRow>
           <StyledManifestRow>
             <Typography variant="body2" color="textSecondary">
-              <T
-                keyName="project_settings_import_manifest_version"
-                defaultValue="Tolgee version"
-              />
+              <T keyName="project_settings_import_manifest_version" />
             </Typography>
             <Typography variant="body2">{manifest.schemaVersion}</Typography>
           </StyledManifestRow>
           <StyledManifestRow>
             <Typography variant="body2" color="textSecondary">
-              <T
-                keyName="project_settings_import_manifest_content"
-                defaultValue="Content"
-              />
+              <T keyName="project_settings_import_manifest_content" />
             </Typography>
             <Typography variant="body2">{entityCounts}</Typography>
           </StyledManifestRow>
@@ -280,7 +233,6 @@ export const ProjectSettingsExportImport = () => {
         >
           <T
             keyName="project_settings_import_version_warning"
-            defaultValue="This archive was exported from Tolgee {manifestVersion}, but this instance runs {runningVersion}. Import is only supported between matching versions."
             params={{
               manifestVersion: manifest.schemaVersion,
               runningVersion: config.version,
@@ -298,10 +250,7 @@ export const ProjectSettingsExportImport = () => {
           }
           onClick={handleImport}
         >
-          <T
-            keyName="project_settings_import_button"
-            defaultValue="Import & replace"
-          />
+          <T keyName="project_settings_import_button" />
         </DangerButton>
       </Box>
     </Box>

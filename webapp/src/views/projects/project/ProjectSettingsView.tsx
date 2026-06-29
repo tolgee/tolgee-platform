@@ -65,7 +65,7 @@ export const ProjectSettingsView = () => {
     },
     {
       value: 'export-import',
-      label: t('project_settings_menu_export_import', 'Export & Import'),
+      label: t('project_settings_menu_export_import'),
       link: LINKS.PROJECT_EDIT_EXPORT_IMPORT.build({
         [PARAMS.PROJECT_ID]: project.id,
       }),
