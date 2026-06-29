@@ -158,16 +158,6 @@ class CommunitySuggestionTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   @ProjectJWTAuthTestMethod
   fun `comment author emails are hidden from community`() {
-    userAccount = testData.user
-    performProjectAuthPost(
-      "translations/create-comment",
-      TranslationCommentWithLangKeyDto(
-        keyId = testData.keys[0].self.id,
-        languageId = testData.czechLanguage.id,
-        text = "Member comment",
-      ),
-    ).andIsCreated
-
     val translationId =
       transactionTemplate.execute {
         translationService.find(testData.keys[0].self, testData.czechLanguage).get().id

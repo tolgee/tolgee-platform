@@ -94,6 +94,15 @@ class ProjectStatsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     `returns stats`()
   }
 
+  @ProjectApiKeyAuthTestMethod(
+    scopes = [Scope.TRANSLATIONS_VIEW, Scope.KEYS_VIEW],
+  )
+  fun `hides member count from API key lacking members-view`() {
+    performProjectAuthGet("stats").andIsOk.andAssertThatJson {
+      node("membersCount").isEqualTo(0)
+    }
+  }
+
   @Test
   @ProjectJWTAuthTestMethod
   fun `returns daily activity`() {

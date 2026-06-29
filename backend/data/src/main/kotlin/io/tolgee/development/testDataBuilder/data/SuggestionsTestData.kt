@@ -177,6 +177,13 @@ class SuggestionsTestData(
         )
       }
 
+      czechTranslations[0].apply {
+        addComment {
+          text = "Member comment"
+          author = this@SuggestionsTestData.user
+        }
+      }
+
       pluralKey =
         addKey(null, "pluralKey").apply {
           self.isPlural = true
