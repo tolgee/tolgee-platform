@@ -41,8 +41,9 @@ class ProjectsPublishingController(
   @PutMapping(value = ["/{projectId:[0-9]+}/publishing"])
   @Operation(
     summary = "Set project publishing state",
-    description = "Marks the project as public or private. " +
-      "Only the organization owner or a server admin can change this.",
+    description =
+      "Marks the project as public or private. " +
+        "Only the organization owner or a server admin can change this.",
   )
   @RequestActivity(ActivityType.EDIT_PROJECT)
   @RequiresProjectPermissions([Scope.PROJECT_EDIT])

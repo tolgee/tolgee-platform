@@ -878,7 +878,7 @@ export interface paths {
     delete: operations["deletePrompt"];
   };
   "/v2/projects/{projectId}/publishing": {
-    /** Marks the project as public or private. Only the organization owner can change this. */
+    /** Marks the project as public or private. Only the organization owner or a server admin can change this. */
     put: operations["setProjectPublic"];
   };
   "/v2/projects/{projectId}/qa-settings": {
@@ -19909,7 +19909,7 @@ export interface operations {
       };
     };
   };
-  /** Marks the project as public or private. Only the organization owner can change this. */
+  /** Marks the project as public or private. Only the organization owner or a server admin can change this. */
   setProjectPublic: {
     parameters: {
       path: {
