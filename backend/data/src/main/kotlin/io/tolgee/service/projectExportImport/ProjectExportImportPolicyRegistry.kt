@@ -187,9 +187,6 @@ object ProjectExportImportPolicyRegistry {
         InstanceId::class,
         ForcedServerDateTime::class,
       )
-      // Classified by string, not ::class: these live in an EE module :data cannot depend on, so they
-      // are unreferenceable here. The `no stale entries` guard validates the names against the live
-      // metamodel, so a rename or move still fails the build.
       ignoredByName(
         "io.tolgee.ee.model.EeSubscription",
         "io.tolgee.ee.model.UsageToReport",
