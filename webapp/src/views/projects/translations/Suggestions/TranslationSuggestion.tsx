@@ -14,6 +14,7 @@ import { components } from 'tg.service/apiSchema.generated';
 import { useTimeDistance } from 'tg.hooks/useTimeDistance';
 import {
   Check,
+  CheckDone01,
   DotsVertical,
   ReverseLeft,
   Trash01,
@@ -99,6 +100,7 @@ type Props = {
   isLoading?: boolean;
   onDecline?: () => void;
   onAccept?: () => void;
+  onAcceptAndDeclineOthers?: () => void;
   onDelete?: () => void;
   onReverse?: () => void;
   sx?: SxProps;
@@ -110,6 +112,7 @@ export const TranslationSuggestion = ({
   locale,
   maxLines = 3,
   onAccept,
+  onAcceptAndDeclineOthers,
   onDecline,
   onDelete,
   onReverse,
@@ -125,10 +128,53 @@ export const TranslationSuggestion = ({
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLButtonElement>(null);
 
-  const actions: ActionItem[] = [];
+  const active = suggestion.state === 'ACTIVE';
 
+  const inlineActions: ActionItem[] = [];
+  if (active) {
+    if (onAccept) {
+      inlineActions.push({
+        action: 'accept',
+        label: onAcceptAndDeclineOthers
+          ? t('translation_suggestion_accept_only')
+          : t('translation_suggestion_accept_tooltip'),
+        onClick: onAccept,
+        icon: Check,
+        color: theme.palette.tokens.success.main,
+        disabled: isLoading,
+      });
+    }
+    if (onDecline) {
+      inlineActions.push({
+        action: 'decline',
+        label: t('translation_suggestion_decline_tooltip'),
+        onClick: onDecline,
+        icon: XClose,
+        disabled: isLoading,
+      });
+    }
+  } else if (onReverse) {
+    inlineActions.push({
+      action: 'reverse',
+      label: t('translation_suggestion_reverse_tooltip'),
+      onClick: onReverse,
+      icon: ReverseLeft,
+      disabled: isLoading,
+    });
+  }
+
+  const menuItems: ActionItem[] = [];
+  if (active && onAcceptAndDeclineOthers) {
+    menuItems.push({
+      action: 'accept-decline-others',
+      label: t('translation_suggestion_accept_and_decline_others'),
+      onClick: onAcceptAndDeclineOthers,
+      icon: CheckDone01,
+      disabled: isLoading,
+    });
+  }
   if (onDelete && suggestion.author.id === user?.id) {
-    actions.push({
+    menuItems.push({
       action: 'delete',
       label: t('translation_suggestion_delete_tooltip'),
       onClick: onDelete,
@@ -137,48 +183,15 @@ export const TranslationSuggestion = ({
       disabled: isLoading,
     });
   }
-  if (suggestion.state !== 'ACTIVE') {
-    if (onReverse) {
-      actions.push({
-        action: 'reverse',
-        label: t('translation_suggestion_reverse_tooltip'),
-        onClick: onReverse,
-        icon: ReverseLeft,
-        disabled: isLoading,
-      });
-    }
-  } else {
-    if (onAccept) {
-      actions.push({
-        action: 'accept',
-        label: t('translation_suggestion_accept_tooltip'),
-        onClick: onAccept,
-        icon: Check,
-        color: theme.palette.tokens.success.main,
-        disabled: isLoading,
-      });
-    }
-    if (onDecline) {
-      actions.push({
-        action: 'decline',
-        label: t('translation_suggestion_decline_tooltip'),
-        onClick: onDecline,
-        icon: XClose,
-        disabled: isLoading,
-      });
-    }
-  }
 
-  const showMenu = actions.length > 2;
-  const regularItems = showMenu ? actions.slice(0, 1) : actions;
-  const menuItems = showMenu ? actions.slice(1) : [];
-  const active = suggestion.state === 'ACTIVE';
+  const hasActions = inlineActions.length > 0 || menuItems.length > 0;
+
   return (
     <StyledContainer
       {...{
         sx,
         className: clsx(
-          { withActions: actions.length !== 0, showActions: menuOpen },
+          { withActions: hasActions, showActions: menuOpen },
           className
         ),
       }}
@@ -212,7 +225,7 @@ export const TranslationSuggestion = ({
         <StyledRightPart>
           <StyledDate className="date">{formatDate(lastUpdated)}</StyledDate>
           <StyledActions className="actions">
-            {regularItems.map((action, i) => (
+            {inlineActions.map((action, i) => (
               <SuggestionAction
                 key={i}
                 tooltip={action.label}
@@ -223,12 +236,13 @@ export const TranslationSuggestion = ({
                 action={action.action}
               />
             ))}
-            {showMenu && (
+            {menuItems.length > 0 && (
               <>
                 <SuggestionAction
                   tooltip={t('translation_suggestion_show_more_tooltip')}
                   icon={DotsVertical}
                   color="default"
+                  disabled={isLoading}
                   onClick={() => setMenuOpen(true)}
                   ref={menuRef}
                   action="menu"
@@ -238,21 +252,23 @@ export const TranslationSuggestion = ({
                   anchorEl={menuRef.current}
                   onClose={() => setMenuOpen(false)}
                 >
-                  {menuItems.map((action, i) => {
-                    const Icon = action.icon;
+                  {menuItems.map((item, i) => {
+                    const Icon = item.icon;
                     return (
                       <MenuItem
                         key={i}
                         onClick={() => {
-                          action.onClick();
+                          item.onClick();
                           setMenuOpen(false);
                         }}
-                        sx={{ color: action.color }}
+                        disabled={item.disabled}
+                        sx={{ color: item.color }}
                         data-cy="translation-suggestion-action-menu-item"
+                        data-cy-action={item.action}
                       >
                         <Box display="flex" gap={1} alignItems="center">
                           <Icon width={20} height={20} />
-                          <span>{action.label}</span>
+                          <span>{item.label}</span>
                         </Box>
                       </MenuItem>
                     );
