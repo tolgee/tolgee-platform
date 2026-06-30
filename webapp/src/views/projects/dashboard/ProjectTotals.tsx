@@ -299,12 +299,16 @@ export const ProjectTotals: React.FC<{
         >
           <StyledTileDataItem data-cy="project-dashboard-members-count">
             <StyledTileValue>
-              {Number(stats.membersCount).toLocaleString(locale)}
+              {canViewMembers
+                ? Number(stats.membersCount).toLocaleString(locale)
+                : '—'}
             </StyledTileValue>
             <StyledTileDescription>
-              {t('project_dashboard_member_count_plural', {
-                value: Number(stats.membersCount),
-              })}
+              {canViewMembers
+                ? t('project_dashboard_member_count_plural', {
+                    value: Number(stats.membersCount),
+                  })
+                : t('project_menu_members')}
             </StyledTileDescription>
           </StyledTileDataItem>
           {membersEditable && (

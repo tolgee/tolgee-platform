@@ -73,6 +73,7 @@ class ProjectModelAssembler(
       view.organizationOwner.basePermission,
       view.directPermission,
       authenticationFacade.authenticatedUserOrNull?.role,
+      isProjectPublic = view.public,
     )
   }
 }

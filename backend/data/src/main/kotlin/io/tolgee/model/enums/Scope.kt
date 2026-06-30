@@ -45,6 +45,7 @@ enum class Scope(
   ALL_VIEW("all.view"),
   BRANCH_MANAGEMENT("branch.management"),
   BRANCH_PROTECTED_MODIFY("branch.protected-modify"),
+  ORGANIZATION_QUOTAS_VIEW("organization-quotas.view"),
   ;
 
   fun expand() = Scope.expand(this)
@@ -160,6 +161,7 @@ enum class Scope(
               batchJobsView,
               tasksView,
               promptsView,
+              HierarchyItem(ORGANIZATION_QUOTAS_VIEW),
             ),
           ),
           HierarchyItem(BRANCH_MANAGEMENT),

@@ -53,6 +53,7 @@ export const useScopeTranslations = () => {
     'all.view': t('permissions_item_all_view'),
     'branch.management': t('permissions_item_branch_management'),
     'branch.protected-modify': t('permissions_item_branch_protected_modify'),
+    'organization-quotas.view': t('permissions_item_organization_quotas_view'),
   };
 
   return {

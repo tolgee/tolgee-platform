@@ -188,7 +188,10 @@ export const TranslationSuggestion = ({
         title={
           <T
             keyName="suggestion_author_tooltip"
-            params={{ user: user?.name ?? user?.username, b: <b /> }}
+            params={{
+              user: suggestion.author.name ?? suggestion.author.username,
+              b: <b />,
+            }}
           />
         }
       >

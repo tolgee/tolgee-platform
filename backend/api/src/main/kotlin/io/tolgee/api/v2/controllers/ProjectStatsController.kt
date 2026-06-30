@@ -24,6 +24,7 @@ import io.tolgee.service.project.ProjectFeatureGuard
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.project.ProjectStatsService
 import io.tolgee.service.qa.TranslationQaIssueService
+import io.tolgee.service.security.SecurityService
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -47,6 +48,7 @@ class ProjectStatsController(
   private val branchService: BranchService,
   private val projectFeatureGuard: ProjectFeatureGuard,
   private val translationQaIssueService: TranslationQaIssueService,
+  private val securityService: SecurityService,
 ) {
   @Operation(summary = "Get project stats")
   @GetMapping("", produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -82,7 +84,7 @@ class ProjectStatsController(
       baseWordsCount = totals.baseWordsCount,
       translatedPercentage = totals.translatedPercent,
       reviewedPercentage = totals.reviewedPercent,
-      membersCount = projectStats.memberCount,
+      membersCount = visibleMembersCount(projectStats.memberCount),
       tagCount = projectStats.tagCount,
       languageStats =
         statsLanguagePairs.map {
@@ -113,5 +115,10 @@ class ProjectStatsController(
   @AllowApiAccess
   fun getProjectDailyActivity(): Map<LocalDate, Long> {
     return projectStatsService.getProjectDailyActivity(projectHolder.project.id)
+  }
+
+  private fun visibleMembersCount(memberCount: Long): Long {
+    if (!securityService.shouldExposeMemberInfo()) return 0
+    return memberCount
   }
 }
