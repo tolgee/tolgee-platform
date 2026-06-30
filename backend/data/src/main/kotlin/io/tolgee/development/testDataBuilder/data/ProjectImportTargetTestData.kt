@@ -36,22 +36,23 @@ class ProjectImportTargetTestData :
     projectBuilder.apply {
       self.useBranching = true
       targetOldKey =
-        addKey(keyName = oldKeyName).build {
-          addTranslation("en", "old target value").build {
-            addQaIssue {
-              type = QaCheckType.EMPTY_TRANSLATION
-              message = QaIssueMessage.QA_EMPTY_TRANSLATION
-              state = QaIssueState.IGNORED
-              replacement = oldTargetQaReplacement
+        addKey(keyName = oldKeyName)
+          .build {
+            addTranslation("en", "old target value").build {
+              addQaIssue {
+                type = QaCheckType.EMPTY_TRANSLATION
+                message = QaIssueMessage.QA_EMPTY_TRANSLATION
+                state = QaIssueState.IGNORED
+                replacement = oldTargetQaReplacement
+              }
             }
-          }
-          addSuggestion {
-            language = englishLanguage
-            author = user
-            translation = oldTargetSuggestionText
-            state = TranslationSuggestionState.ACTIVE
-          }
-        }.self
+            addSuggestion {
+              language = englishLanguage
+              author = user
+              translation = oldTargetSuggestionText
+              state = TranslationSuggestionState.ACTIVE
+            }
+          }.self
       addLabel {
         name = oldLabelName
         color = "#abcdef"

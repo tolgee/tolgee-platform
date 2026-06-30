@@ -1,11 +1,60 @@
 package io.tolgee.service.projectExportImport
 
+import io.tolgee.model.AiPlaygroundResult
+import io.tolgee.model.ApiKey
+import io.tolgee.model.AuthProviderChangeRequest
+import io.tolgee.model.AutoTranslationConfig
+import io.tolgee.model.DismissedAnnouncement
+import io.tolgee.model.EmailVerification
+import io.tolgee.model.ForcedServerDateTime
+import io.tolgee.model.InstanceId
+import io.tolgee.model.Invitation
 import io.tolgee.model.Language
+import io.tolgee.model.LanguageStats
+import io.tolgee.model.LlmProvider
+import io.tolgee.model.MtCreditBucket
+import io.tolgee.model.Organization
+import io.tolgee.model.OrganizationRole
+import io.tolgee.model.Pat
+import io.tolgee.model.Permission
 import io.tolgee.model.Project
+import io.tolgee.model.Prompt
+import io.tolgee.model.QuickStart
 import io.tolgee.model.Screenshot
+import io.tolgee.model.SsoTenant
 import io.tolgee.model.TranslationSuggestion
+import io.tolgee.model.UploadedImage
 import io.tolgee.model.UserAccount
+import io.tolgee.model.UserPreferences
+import io.tolgee.model.activity.ActivityDescribingEntity
+import io.tolgee.model.activity.ActivityModifiedEntity
+import io.tolgee.model.activity.ActivityRevision
+import io.tolgee.model.automations.Automation
+import io.tolgee.model.automations.AutomationAction
+import io.tolgee.model.automations.AutomationTrigger
+import io.tolgee.model.batch.BatchJob
+import io.tolgee.model.batch.BatchJobChunkExecution
 import io.tolgee.model.branching.Branch
+import io.tolgee.model.branching.BranchMerge
+import io.tolgee.model.branching.BranchMergeChange
+import io.tolgee.model.branching.snapshot.KeyMetaSnapshot
+import io.tolgee.model.branching.snapshot.KeySnapshot
+import io.tolgee.model.branching.snapshot.TranslationSnapshot
+import io.tolgee.model.contentDelivery.AzureContentStorageConfig
+import io.tolgee.model.contentDelivery.ContentDeliveryConfig
+import io.tolgee.model.contentDelivery.ContentStorage
+import io.tolgee.model.contentDelivery.S3ContentStorageConfig
+import io.tolgee.model.dataImport.Import
+import io.tolgee.model.dataImport.ImportFile
+import io.tolgee.model.dataImport.ImportKey
+import io.tolgee.model.dataImport.ImportLanguage
+import io.tolgee.model.dataImport.ImportSettings
+import io.tolgee.model.dataImport.ImportTranslation
+import io.tolgee.model.dataImport.issues.ImportFileIssue
+import io.tolgee.model.dataImport.issues.ImportFileIssueParam
+import io.tolgee.model.glossary.Glossary
+import io.tolgee.model.glossary.GlossaryTerm
+import io.tolgee.model.glossary.GlossaryTermTranslation
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyCodeReference
 import io.tolgee.model.key.KeyComment
@@ -13,14 +62,30 @@ import io.tolgee.model.key.KeyMeta
 import io.tolgee.model.key.Namespace
 import io.tolgee.model.key.Tag
 import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
+import io.tolgee.model.keyBigMeta.KeysDistance
+import io.tolgee.model.mtServiceConfig.MtServiceConfig
+import io.tolgee.model.notifications.Notification
+import io.tolgee.model.notifications.NotificationSetting
 import io.tolgee.model.qa.LanguageQaConfig
 import io.tolgee.model.qa.ProjectQaConfig
 import io.tolgee.model.qa.TranslationQaIssue
+import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
+import io.tolgee.model.slackIntegration.SavedSlackMessage
+import io.tolgee.model.slackIntegration.SlackConfig
+import io.tolgee.model.slackIntegration.SlackConfigPreference
+import io.tolgee.model.slackIntegration.SlackMessageInfo
+import io.tolgee.model.slackIntegration.SlackUserConnection
 import io.tolgee.model.task.Task
 import io.tolgee.model.task.TaskKey
+import io.tolgee.model.temp.UnsuccessfulJobKey
 import io.tolgee.model.translation.Label
 import io.tolgee.model.translation.Translation
 import io.tolgee.model.translation.TranslationComment
+import io.tolgee.model.translationAgency.TranslationAgency
+import io.tolgee.model.translationMemory.TranslationMemory
+import io.tolgee.model.translationMemory.TranslationMemoryEntry
+import io.tolgee.model.translationMemory.TranslationMemoryProject
+import io.tolgee.model.webhook.WebhookConfig
 import kotlin.reflect.KClass
 
 /**
@@ -56,71 +121,76 @@ object ProjectExportImportPolicyRegistry {
       classify(Project::class, ExportImportPolicy.PROJECT_ROOT)
 
       ignored(
-        "io.tolgee.model.Organization",
-        "io.tolgee.model.OrganizationRole",
-        "io.tolgee.model.Permission",
-        "io.tolgee.model.ApiKey",
-        "io.tolgee.model.Invitation",
-        "io.tolgee.model.Pat",
-        "io.tolgee.model.UserPreferences",
-        "io.tolgee.model.EmailVerification",
-        "io.tolgee.model.SsoTenant",
-        "io.tolgee.model.AuthProviderChangeRequest",
-        "io.tolgee.model.DismissedAnnouncement",
-        "io.tolgee.model.QuickStart",
-        "io.tolgee.model.activity.ActivityRevision",
-        "io.tolgee.model.activity.ActivityModifiedEntity",
-        "io.tolgee.model.activity.ActivityDescribingEntity",
-        "io.tolgee.model.branching.BranchMerge",
-        "io.tolgee.model.branching.BranchMergeChange",
-        "io.tolgee.model.branching.snapshot.KeySnapshot",
-        "io.tolgee.model.branching.snapshot.TranslationSnapshot",
-        "io.tolgee.model.branching.snapshot.KeyMetaSnapshot",
-        "io.tolgee.model.LanguageStats",
-        "io.tolgee.model.keyBigMeta.KeysDistance",
-        "io.tolgee.model.AutoTranslationConfig",
-        "io.tolgee.model.mtServiceConfig.MtServiceConfig",
-        "io.tolgee.model.Prompt",
-        "io.tolgee.model.AiPlaygroundResult",
-        "io.tolgee.model.MtCreditBucket",
-        "io.tolgee.model.LlmProvider",
-        "io.tolgee.model.batch.BatchJob",
-        "io.tolgee.model.batch.BatchJobChunkExecution",
-        "io.tolgee.model.temp.UnsuccessfulJobKey",
-        "io.tolgee.model.dataImport.Import",
-        "io.tolgee.model.dataImport.ImportFile",
-        "io.tolgee.model.dataImport.ImportLanguage",
-        "io.tolgee.model.dataImport.ImportKey",
-        "io.tolgee.model.dataImport.ImportTranslation",
-        "io.tolgee.model.dataImport.ImportSettings",
-        "io.tolgee.model.dataImport.issues.ImportFileIssue",
-        "io.tolgee.model.dataImport.issues.ImportFileIssueParam",
-        "io.tolgee.model.contentDelivery.ContentStorage",
-        "io.tolgee.model.contentDelivery.ContentDeliveryConfig",
-        "io.tolgee.model.contentDelivery.S3ContentStorageConfig",
-        "io.tolgee.model.contentDelivery.AzureContentStorageConfig",
-        "io.tolgee.model.automations.Automation",
-        "io.tolgee.model.automations.AutomationTrigger",
-        "io.tolgee.model.automations.AutomationAction",
-        "io.tolgee.model.webhook.WebhookConfig",
-        "io.tolgee.model.slackIntegration.SlackConfig",
-        "io.tolgee.model.slackIntegration.SlackConfigPreference",
-        "io.tolgee.model.slackIntegration.SavedSlackMessage",
-        "io.tolgee.model.slackIntegration.SlackMessageInfo",
-        "io.tolgee.model.slackIntegration.SlackUserConnection",
-        "io.tolgee.model.slackIntegration.OrganizationSlackWorkspace",
-        "io.tolgee.model.glossary.Glossary",
-        "io.tolgee.model.glossary.GlossaryTerm",
-        "io.tolgee.model.glossary.GlossaryTermTranslation",
-        "io.tolgee.model.translationMemory.TranslationMemory",
-        "io.tolgee.model.translationMemory.TranslationMemoryEntry",
-        "io.tolgee.model.translationMemory.TranslationMemoryProject",
-        "io.tolgee.model.notifications.Notification",
-        "io.tolgee.model.notifications.NotificationSetting",
-        "io.tolgee.model.UploadedImage",
-        "io.tolgee.model.translationAgency.TranslationAgency",
-        "io.tolgee.model.InstanceId",
-        "io.tolgee.model.ForcedServerDateTime",
+        Organization::class,
+        OrganizationRole::class,
+        Permission::class,
+        ApiKey::class,
+        Invitation::class,
+        Pat::class,
+        UserPreferences::class,
+        EmailVerification::class,
+        SsoTenant::class,
+        AuthProviderChangeRequest::class,
+        DismissedAnnouncement::class,
+        QuickStart::class,
+        ActivityRevision::class,
+        ActivityModifiedEntity::class,
+        ActivityDescribingEntity::class,
+        BranchMerge::class,
+        BranchMergeChange::class,
+        KeySnapshot::class,
+        TranslationSnapshot::class,
+        KeyMetaSnapshot::class,
+        LanguageStats::class,
+        KeysDistance::class,
+        AutoTranslationConfig::class,
+        MtServiceConfig::class,
+        Prompt::class,
+        AiPlaygroundResult::class,
+        MtCreditBucket::class,
+        LlmProvider::class,
+        BatchJob::class,
+        BatchJobChunkExecution::class,
+        UnsuccessfulJobKey::class,
+        Import::class,
+        ImportFile::class,
+        ImportLanguage::class,
+        ImportKey::class,
+        ImportTranslation::class,
+        ImportSettings::class,
+        ImportFileIssue::class,
+        ImportFileIssueParam::class,
+        ContentStorage::class,
+        ContentDeliveryConfig::class,
+        S3ContentStorageConfig::class,
+        AzureContentStorageConfig::class,
+        Automation::class,
+        AutomationTrigger::class,
+        AutomationAction::class,
+        WebhookConfig::class,
+        SlackConfig::class,
+        SlackConfigPreference::class,
+        SavedSlackMessage::class,
+        SlackMessageInfo::class,
+        SlackUserConnection::class,
+        OrganizationSlackWorkspace::class,
+        Glossary::class,
+        GlossaryTerm::class,
+        GlossaryTermTranslation::class,
+        TranslationMemory::class,
+        TranslationMemoryEntry::class,
+        TranslationMemoryProject::class,
+        Notification::class,
+        NotificationSetting::class,
+        UploadedImage::class,
+        TranslationAgency::class,
+        InstanceId::class,
+        ForcedServerDateTime::class,
+      )
+      // Classified by string, not ::class: these live in an EE module :data cannot depend on, so they
+      // are unreferenceable here. The `no stale entries` guard validates the names against the live
+      // metamodel, so a rename or move still fails the build.
+      ignoredByName(
         "io.tolgee.ee.model.EeSubscription",
         "io.tolgee.ee.model.UsageToReport",
       )
@@ -129,7 +199,10 @@ object ProjectExportImportPolicyRegistry {
   private fun MutableMap<String, ExportImportPolicy>.owned(vararg classes: KClass<*>) =
     classes.forEach { classify(it, ExportImportPolicy.OWNED) }
 
-  private fun MutableMap<String, ExportImportPolicy>.ignored(vararg classNames: String) =
+  private fun MutableMap<String, ExportImportPolicy>.ignored(vararg classes: KClass<*>) =
+    classes.forEach { classify(it, ExportImportPolicy.IGNORED) }
+
+  private fun MutableMap<String, ExportImportPolicy>.ignoredByName(vararg classNames: String) =
     classNames.forEach { classifyUnique(it, ExportImportPolicy.IGNORED) }
 
   private fun MutableMap<String, ExportImportPolicy>.classify(
