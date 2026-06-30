@@ -130,6 +130,9 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
   @Query("from UserAccount ua where lower(ua.username) = lower(:username) and ua.deletedAt is null")
   fun findActiveOrDisabled(username: String): UserAccount?
 
+  @Query("from UserAccount ua where ua.id = :id and ua.deletedAt is null")
+  fun findActiveOrDisabled(id: Long): UserAccount?
+
   @Query("from UserAccount ua left join fetch ua.emailVerification where ua.isInitialUser = true")
   fun findInitialUser(): UserAccount?
 
@@ -235,18 +238,19 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
   @Query(
     """
         select ua.id as id, ua.name as name, ua.username as username, mr.type as organizationRole,
-          ua.totpKey as totpKey, ua.avatarHash as avatarHash
-        from UserAccount ua 
+          ua.totpKey as totpKey, ua.avatarHash as avatarHash, mr.managed as managed,
+          ua.disabledAt as disabledAt
+        from UserAccount ua
         left join ua.organizationRoles mr on mr.organization.id = :organizationId
         left join ua.permissions pp
         left join pp.project p on p.deletedAt is null
         left join p.organizationOwner o on o.id = :organizationId
         where (o is not null or mr is not null) and ((lower(ua.name)
-        like lower(concat('%', cast(:search as text),'%')) 
+        like lower(concat('%', cast(:search as text),'%'))
         or lower(ua.username) like lower(concat('%', cast(:search as text),'%'))) or cast(:search as text) is null)
         and ua.deletedAt is null
-        and ua.disabledAt is null
-        group by ua.id, mr.type
+        and (ua.disabledAt is null or mr.managed = true)
+        group by ua.id, mr.type, mr.managed
       """,
   )
   fun getAllInOrganization(
@@ -330,13 +334,6 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
   """,
   )
   fun countAllEnabled(): Long
-
-  @Query(
-    value = """
-    select ua from UserAccount ua where ua.id = :id and ua.disabledAt is not null
-  """,
-  )
-  fun findDisabled(id: Long): UserAccount
 
   @Query(
     """
