@@ -100,6 +100,7 @@ export const ProjectSettingsGeneral = () => {
           useNamespaces: project.useNamespaces,
           useBranching: project.useBranching,
           ...values,
+          name: values.name.trim(),
           description: values.description || undefined,
           unassignConflictingTms,
         },

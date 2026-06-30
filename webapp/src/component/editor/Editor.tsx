@@ -15,6 +15,7 @@ import {
 
 import { Direction } from 'tg.fixtures/getLanguageDirection';
 import { useScrollMargins } from 'tg.hooks/useScrollMargins';
+import { visibleKeyNameSpacesPlugin } from './utils/codemirrorVisibleWhitespace';
 
 const StyledEditor = styled('div')`
   font-size: 14px;
@@ -54,6 +55,11 @@ const StyledEditor = styled('div')`
     background-color: ${({ theme }) => theme.palette.tooltip.background};
     padding: 4px 8px;
     margin-top: 4px;
+  }
+
+  & .cm-keyname-space-indicator {
+    background-color: ${({ theme }) => theme.palette.label.lightBlue};
+    border-radius: 2px;
   }
 `;
 
@@ -192,7 +198,7 @@ export const Editor: React.FC<EditorProps> = ({
         );
         break;
       case 'keyName':
-        placeholderPlugins.push(KeyNamePlugin());
+        placeholderPlugins.push(KeyNamePlugin(), visibleKeyNameSpacesPlugin());
         break;
     }
     const syntaxPlugins =

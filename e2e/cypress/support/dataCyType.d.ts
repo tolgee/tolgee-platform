@@ -360,6 +360,8 @@ declare namespace DataCy {
         "key-edit-tab-custom-properties": true;
         "key-edit-tab-general": true;
         "key-name-msgctxt": true;
+        "key-name-whitespace-trim": true;
+        "key-name-whitespace-warning": true;
         "key-plural-checkbox": true;
         "key-plural-variable-name": true;
         "label-autocomplete-option": true;
