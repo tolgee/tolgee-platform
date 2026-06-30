@@ -477,17 +477,21 @@ class CsvFormatProcessorTest {
   @Test
   fun `throws when the key column is empty in every row`() {
     mockUtil.mockIt("empty_key_column.csv", "src/test/resources/import/csv/empty_key_column.csv")
-    assertThrows<ImportCannotParseFileException> {
-      processFile()
-    }
+    val exception =
+      assertThrows<ImportCannotParseFileException> {
+        processFile()
+      }
+    exception.causeMessage.assert.contains("The key column")
   }
 
   @Test
   fun `throws when an extra title row pushes the language header out of place`() {
     mockUtil.mockIt("title_row_on_top.csv", "src/test/resources/import/csv/title_row_on_top.csv")
-    assertThrows<ImportCannotParseFileException> {
-      processFile()
-    }
+    val exception =
+      assertThrows<ImportCannotParseFileException> {
+        processFile()
+      }
+    exception.causeMessage.assert.contains("No language columns were detected")
   }
 
   private fun processFile() {

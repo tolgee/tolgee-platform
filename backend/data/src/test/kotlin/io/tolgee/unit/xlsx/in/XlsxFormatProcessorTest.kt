@@ -477,9 +477,11 @@ class XlsxFormatProcessorTest {
   @Test
   fun `throws on a misformatted sheet (title row and empty key column)`() {
     mockUtil.mockIt("empty_key_column.xlsx", "src/test/resources/import/xlsx/empty_key_column.xlsx")
-    assertThrows<ImportCannotParseFileException> {
-      processFile()
-    }
+    val exception =
+      assertThrows<ImportCannotParseFileException> {
+        processFile()
+      }
+    exception.causeMessage.assert.contains("The key column")
   }
 
   private fun processFile() {
