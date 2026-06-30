@@ -297,6 +297,8 @@ export class LINKS {
 
   static PUBLIC_PROJECTS = Link.ofRoot('public-projects');
 
+  static COMMUNITY_PROJECTS = Link.ofRoot('community-projects');
+
   /**
    * Visible with view permissions
    */

@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { useTranslate } from '@tolgee/react';
 
 import { OrganizationItem } from './OrganizationItem';
+import { CommunityTranslationItem } from './CommunityTranslationItem';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiInfiniteQuery } from 'tg.service/http/useQueryApi';
 import { useConfig, useIsAdmin } from 'tg.globalContext/helpers';
@@ -17,6 +18,8 @@ type Props = {
   selected: OrganizationModel | undefined;
   onAddNew: () => void;
   ownedOnly?: boolean;
+  onCommunityNavigate?: () => void;
+  communitySelected?: boolean;
 };
 
 export const OrganizationPopover: React.FC<Props> = ({
@@ -27,6 +30,8 @@ export const OrganizationPopover: React.FC<Props> = ({
   selected,
   onAddNew,
   ownedOnly,
+  onCommunityNavigate,
+  communitySelected,
 }) => {
   const { t } = useTranslate();
   const [search, setSearch] = useState('');
@@ -87,7 +92,7 @@ export const OrganizationPopover: React.FC<Props> = ({
       onClose={onClose}
       onSelect={onSelect}
       anchorEl={anchorEl}
-      selectedId={selected.id}
+      selectedId={communitySelected ? undefined : selected.id}
       items={items || []}
       isLoading={organizationsLoadable.isFetching}
       hasNextPage={organizationsLoadable.hasNextPage ?? false}
@@ -99,6 +104,15 @@ export const OrganizationPopover: React.FC<Props> = ({
       onSearchChange={handleSearchChange}
       onAddNew={canCreateOrganizations ? onAddNew : undefined}
       addNewTooltip={t('organizations_add_new')}
+      footerAction={
+        onCommunityNavigate
+          ? {
+              content: <CommunityTranslationItem />,
+              onClick: onCommunityNavigate,
+              dataCy: 'organization-switch-community',
+            }
+          : undefined
+      }
     />
   );
 };
