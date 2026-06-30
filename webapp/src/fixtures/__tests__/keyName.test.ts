@@ -1,4 +1,8 @@
-import { PO_MSGCTXT_KEY_SEPARATOR, splitKeyName } from '../keyName';
+import {
+  hasOuterWhitespace,
+  PO_MSGCTXT_KEY_SEPARATOR,
+  splitKeyName,
+} from '../keyName';
 
 describe('splitKeyName', () => {
   it('returns only msgid for name without separator', () => {
@@ -30,4 +34,20 @@ describe('splitKeyName', () => {
   it('returns empty msgid for empty input', () => {
     expect(splitKeyName('')).toEqual({ msgid: '' });
   });
+});
+
+describe('hasOuterWhitespace', () => {
+  it.each(['key', '', 'inner key', 'a.b.c'])(
+    'returns false for clean name %p',
+    (name) => {
+      expect(hasOuterWhitespace(name)).toBe(false);
+    }
+  );
+
+  it.each([' key', 'key ', '  key  ', '\tkey', 'key\t', '\tkey\t'])(
+    'returns true for name with outer whitespace %p',
+    (name) => {
+      expect(hasOuterWhitespace(name)).toBe(true);
+    }
+  );
 });

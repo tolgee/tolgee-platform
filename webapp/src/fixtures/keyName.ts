@@ -13,6 +13,12 @@ export function splitKeyName(name: string): SplitKeyName {
   return { msgctxt: name.slice(0, i), msgid: name.slice(i + 1) };
 }
 
+export const KEY_NAME_LEADING_WHITESPACE_REGEX = /^(\s+)/;
+export const KEY_NAME_TRAILING_WHITESPACE_REGEX = /(\s+)$/;
+
 export function hasOuterWhitespace(name: string): boolean {
-  return name !== name.trim();
+  return (
+    KEY_NAME_LEADING_WHITESPACE_REGEX.test(name) ||
+    KEY_NAME_TRAILING_WHITESPACE_REGEX.test(name)
+  );
 }

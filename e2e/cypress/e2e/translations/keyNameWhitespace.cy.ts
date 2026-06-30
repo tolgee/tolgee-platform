@@ -65,4 +65,20 @@ describe('Key name whitespace warning', () => {
     dialog.getKeyNameInput().type('clean key');
     cy.gcy('key-name-whitespace-warning').should('not.exist');
   });
+
+  it('warns when editing a key whose whitespace was already there', () => {
+    visitTranslations(projectId);
+    waitForGlobalLoading();
+    const dialog = new E2TranslationsView().openKeyCreateDialog();
+
+    // persist a key that keeps its outer whitespace (no trim)
+    dialog.getKeyNameInput().type('preexisting key x{backspace}');
+    cy.gcy('key-name-whitespace-warning').should('be.visible');
+    dialog.save();
+    assertMessage('Key created');
+    waitForGlobalLoading();
+
+    openKeyEditDialog('preexisting key');
+    cy.gcy('key-name-whitespace-warning').should('be.visible');
+  });
 });
