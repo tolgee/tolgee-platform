@@ -140,6 +140,9 @@ class TranslationSuggestionServiceEeImpl(
     return suggestion
   }
 
+  // No row lock / @Version / ACTIVE precondition here: two moderators accepting different suggestions
+  // on the same key+language concurrently can both end ACCEPTED (last accept wins the live translation).
+  // Do not assume an at-most-one-ACCEPTED invariant holds.
   @Transactional
   fun acceptSuggestion(
     projectId: Long,

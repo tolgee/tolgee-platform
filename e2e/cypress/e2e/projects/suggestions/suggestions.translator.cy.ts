@@ -58,13 +58,12 @@ describe('Suggestions translator', () => {
     visitTranslations(projectId);
     getTranslationCell('key 0', 'cs').click();
     waitForGlobalLoading();
+    cy.gcy('suggestions-list')
+      .findDcy('translation-suggestion')
+      .should('have.length', 2);
     gcyAdvanced({
       value: 'suggestion-action',
       action: 'accept',
-    }).should('not.exist');
-    gcyAdvanced({
-      value: 'suggestion-action',
-      action: 'menu',
     }).should('not.exist');
   });
 
@@ -72,12 +71,16 @@ describe('Suggestions translator', () => {
     visitTranslations(projectId);
     getTranslationCell('key 0', 'cs').click();
     waitForGlobalLoading();
+    cy.gcy('translation-suggestion')
+      .contains('Navržený překlad 0-1')
+      .closest('[data-cy="translation-suggestion"]')
+      .within(() => {
+        gcyAdvanced({ value: 'suggestion-action', action: 'menu' }).click();
+      });
     gcyAdvanced({
-      value: 'suggestion-action',
+      value: 'translation-suggestion-action-menu-item',
       action: 'delete',
-    })
-      .should('exist')
-      .click();
+    }).click();
     waitForGlobalLoading();
     cy.gcy('translation-suggestion')
       .contains('Navržený překlad 0-1')
