@@ -4,6 +4,12 @@ import java.util.regex.MatchResult
 import java.util.regex.Pattern
 
 object TextHelper {
+  private const val PARAM_PLACEHOLDER_PREFIX = "{xx"
+  private const val PARAM_PLACEHOLDER_SUFFIX = "xx}"
+
+  val paramPlaceholderRegex =
+    Regex(Regex.escape(PARAM_PLACEHOLDER_PREFIX) + "\\d+" + Regex.escape(PARAM_PLACEHOLDER_SUFFIX))
+
   @JvmStatic
   fun splitOnNonEscapedDelimiter(
     string: String,
@@ -100,7 +106,7 @@ object TextHelper {
         buffer.append(char)
 
         if (openCount < 1) {
-          val paramPlaceholder = "{xx${params.size}xx}"
+          val paramPlaceholder = "$PARAM_PLACEHOLDER_PREFIX${params.size}$PARAM_PLACEHOLDER_SUFFIX"
           params[paramPlaceholder] = buffer.toString()
           buffer.clear()
           result.append(paramPlaceholder)
