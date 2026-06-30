@@ -1,12 +1,12 @@
 import { components } from 'tg.service/billingApiSchema.generated';
 
-type CloudPlanModel = components['schemas']['CloudPlanModel'];
+type CloudPlanTierModel = components['schemas']['CloudPlanTierModel'];
 
 export type PlanType = Omit<
-  CloudPlanModel,
+  CloudPlanTierModel,
   'prices' | 'includedUsage' | 'type'
 > & {
-  prices?: CloudPlanModel['prices'];
-  includedUsage?: CloudPlanModel['includedUsage'];
-  type?: CloudPlanModel['type'] | 'CONTACT_US';
+  prices?: CloudPlanTierModel['prices'];
+  includedUsage?: CloudPlanTierModel['includedUsage'];
+  type?: CloudPlanTierModel['type'] | 'CONTACT_US';
 };
