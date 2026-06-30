@@ -1,3 +1,10 @@
+# [3.207.0](https://github.com/tolgee/tolgee-platform/compare/v3.206.0...v3.207.0) (2026-06-30)
+
+
+### Features
+
+* warn before saving key names with leading/trailing whitespace ([#3756](https://github.com/tolgee/tolgee-platform/issues/3756)) ([0e1c2cf](https://github.com/tolgee/tolgee-platform/commit/0e1c2cfb38a88869b65c623501b7b188de0f9e3d)), closes [#3750](https://github.com/tolgee/tolgee-platform/issues/3750) [#3359](https://github.com/tolgee/tolgee-platform/issues/3359) [#3359](https://github.com/tolgee/tolgee-platform/issues/3359) [#3750](https://github.com/tolgee/tolgee-platform/issues/3750) [#3750](https://github.com/tolgee/tolgee-platform/issues/3750) [#3359](https://github.com/tolgee/tolgee-platform/issues/3359) [#3750](https://github.com/tolgee/tolgee-platform/issues/3750)
+
 # [3.206.0](https://github.com/tolgee/tolgee-platform/compare/v3.205.5...v3.206.0) (2026-06-29)
 
 
