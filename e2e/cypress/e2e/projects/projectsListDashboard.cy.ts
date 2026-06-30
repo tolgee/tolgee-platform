@@ -46,6 +46,25 @@ describe('Projects Dashboard', () => {
     assertTooltip('Deutsch');
   });
 
+  it('shows public badge and organization on a public project', () => {
+    cy.contains('Project 2')
+      .closestDcy('dashboard-projects-list-item')
+      .findDcy('project-list-public-badge')
+      .should('be.visible')
+      .and('contain', 'public');
+    cy.contains('Project 2')
+      .closestDcy('dashboard-projects-list-item')
+      .findDcy('project-list-org-name')
+      .should('contain', 'test_username');
+  });
+
+  it('does not show public badge on a private project', () => {
+    cy.contains('test_project')
+      .closestDcy('dashboard-projects-list-item')
+      .findDcy('project-list-public-badge')
+      .should('not.exist');
+  });
+
   afterEach(() => {
     projectListData.clean();
     setBypassSeatCountCheck(false);
