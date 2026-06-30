@@ -878,7 +878,7 @@ export interface paths {
     delete: operations["deletePrompt"];
   };
   "/v2/projects/{projectId}/publishing": {
-    /** Marks the project as public or private. Only the organization owner can change this. */
+    /** Marks the project as public or private. Only the organization owner or a server admin can change this. */
     put: operations["setProjectPublic"];
   };
   "/v2/projects/{projectId}/qa-settings": {
@@ -1435,6 +1435,7 @@ export interface components {
         | "all.view"
         | "branch.management"
         | "branch.protected-modify"
+        | "organization-quotas.view"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -2088,7 +2089,8 @@ export interface components {
         | "ORGANIZATION_OWNER"
         | "NONE"
         | "SERVER_ADMIN"
-        | "SERVER_SUPPORTER";
+        | "SERVER_SUPPORTER"
+        | "COMMUNITY";
       permissionModel?: components["schemas"]["PermissionModel"];
       /**
        * @deprecated
@@ -2145,6 +2147,7 @@ export interface components {
         | "all.view"
         | "branch.management"
         | "branch.protected-modify"
+        | "organization-quotas.view"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -3423,7 +3426,8 @@ export interface components {
         | "translation-labels.assign"
         | "all.view"
         | "branch.management"
-        | "branch.protected-modify";
+        | "branch.protected-modify"
+        | "organization-quotas.view";
     };
     IdentifyRequest: {
       anonymousUserId: string;
@@ -4917,6 +4921,7 @@ export interface components {
         | "all.view"
         | "branch.management"
         | "branch.protected-modify"
+        | "organization-quotas.view"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -5013,6 +5018,7 @@ export interface components {
         | "all.view"
         | "branch.management"
         | "branch.protected-modify"
+        | "organization-quotas.view"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -19903,7 +19909,7 @@ export interface operations {
       };
     };
   };
-  /** Marks the project as public or private. Only the organization owner can change this. */
+  /** Marks the project as public or private. Only the organization owner or a server admin can change this. */
   setProjectPublic: {
     parameters: {
       path: {
@@ -24575,6 +24581,7 @@ export interface operations {
               | "all.view"
               | "branch.management"
               | "branch.protected-modify"
+              | "organization-quotas.view"
             )[];
           };
         };

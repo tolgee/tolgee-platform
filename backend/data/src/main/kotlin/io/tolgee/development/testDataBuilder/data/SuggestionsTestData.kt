@@ -20,6 +20,7 @@ class SuggestionsTestData(
   var projectTranslator: UserAccountBuilder
   var czechTranslator: UserAccountBuilder
   var czechReviewer: UserAccountBuilder
+  var communityUser: UserAccountBuilder
   var relatedProject: ProjectBuilder
   var keys: MutableList<KeyBuilder> = mutableListOf()
   val czechSuggestions: MutableList<SuggestionBuilder> = mutableListOf()
@@ -73,6 +74,12 @@ class SuggestionsTestData(
         name = "Czech reviewer"
       }
 
+    communityUser =
+      root.addUserAccount {
+        username = "community@test.com"
+        name = "Community user"
+      }
+
     userAccountBuilder.defaultOrganizationBuilder.apply {
       addRole {
         user = orgMember.self
@@ -110,6 +117,7 @@ class SuggestionsTestData(
       addPermission {
         user = czechTranslator.self
         type = ProjectPermissionType.TRANSLATE
+        viewLanguages = mutableSetOf(czechLanguage)
         translateLanguages = mutableSetOf(czechLanguage)
         suggestLanguages = mutableSetOf(czechLanguage)
       }
@@ -168,6 +176,13 @@ class SuggestionsTestData(
             this.translation = "Suggested translation 0-2"
           },
         )
+      }
+
+      czechTranslations[0].apply {
+        addComment {
+          text = "Member comment"
+          author = this@SuggestionsTestData.user
+        }
       }
 
       pluralKey =
