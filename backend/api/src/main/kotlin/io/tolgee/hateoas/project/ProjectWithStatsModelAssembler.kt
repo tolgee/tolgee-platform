@@ -57,6 +57,7 @@ class ProjectWithStatsModelAssembler(
       computedPermission = computedPermissionModelAssembler.toModel(computedPermissions),
       stats = view.stats,
       languages = view.languages.map { languageModelAssembler.toModel(it) },
+      public = view.public,
       icuPlaceholders = view.icuPlaceholders,
     )
   }

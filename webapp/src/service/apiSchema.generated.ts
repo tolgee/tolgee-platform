@@ -5497,6 +5497,8 @@ export interface components {
       organizationOwner?: components["schemas"]["SimpleOrganizationModel"];
       /** @enum {string} */
       organizationRole?: "MEMBER" | "OWNER" | "MAINTAINER";
+      /** @description Whether the project is public — discoverable and open to community suggestions */
+      public: boolean;
       slug?: string;
       stats: components["schemas"]["ProjectStatistics"];
     };

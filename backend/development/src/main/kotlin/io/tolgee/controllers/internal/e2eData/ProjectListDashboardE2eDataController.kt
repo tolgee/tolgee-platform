@@ -2,7 +2,7 @@ package io.tolgee.controllers.internal.e2eData
 
 import io.tolgee.controllers.internal.InternalController
 import io.tolgee.development.testDataBuilder.TestDataService
-import io.tolgee.development.testDataBuilder.data.ProjectsTestData
+import io.tolgee.development.testDataBuilder.data.ProjectsListDashboardTestData
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.UserAccountService
 import org.springframework.transaction.annotation.Transactional
@@ -17,7 +17,7 @@ class ProjectListDashboardE2eDataController(
   @GetMapping(value = ["/generate"])
   @Transactional
   fun generateBasicTestData() {
-    val data = ProjectsTestData()
+    val data = ProjectsListDashboardTestData()
     data.user.username = "projectListDashboardUser"
     data.user.name = "Test User"
     testDataService.saveTestData(data.root)
@@ -32,7 +32,7 @@ class ProjectListDashboardE2eDataController(
       }
       userAccountService.delete(it)
     }
-    userAccountService.findActive(ProjectsTestData().userWithTranslatePermission.username)?.let {
+    userAccountService.findActive(ProjectsListDashboardTestData().userWithTranslatePermission.username)?.let {
       userAccountService.delete(it)
     }
   }
