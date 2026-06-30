@@ -4,10 +4,11 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.dtos.MtCreditBalanceDto
 import io.tolgee.hateoas.machineTranslation.CreditBalanceModel
+import io.tolgee.model.enums.Scope
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authorization.RequiresOrganizationRole
-import io.tolgee.security.authorization.UseDefaultPermissions
+import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.machineTranslation.mtCreditsConsumption.MtCreditsService
 import io.tolgee.service.organization.OrganizationService
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -30,7 +31,7 @@ class MtCreditsController(
     summary = "Get credit balance for project",
     description = "Returns machine translation credit balance for specified project",
   )
-  @UseDefaultPermissions
+  @RequiresProjectPermissions([Scope.ORGANIZATION_QUOTAS_VIEW])
   @AllowApiAccess
   fun getProjectCredits(
     @PathVariable projectId: Long,
