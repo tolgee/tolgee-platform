@@ -78,7 +78,9 @@ describe('Key name whitespace warning', () => {
     assertMessage('Key created');
     waitForGlobalLoading();
 
-    openKeyEditDialog('preexisting key');
+    // exact-text lookup would miss the trailing space, so match by substring
+    cy.gcy('translations-key-name').contains('preexisting key').click();
+    cy.gcy('translations-key-edit-key-field').should('be.visible');
     cy.gcy('key-name-whitespace-warning').should('be.visible');
   });
 });
