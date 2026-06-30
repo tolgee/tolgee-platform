@@ -12,6 +12,7 @@ import { useInfiniteSuggestions } from './useInfiniteSuggestions';
 import { LabelHint } from 'tg.component/common/LabelHint';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { useUser } from 'tg.globalContext/helpers';
+import { applyAcceptedSuggestion } from './utils';
 
 const FETCH_NEXT_PAGE_SCROLL_THRESHOLD_IN_PIXELS = 220;
 
@@ -156,6 +157,10 @@ export const SuggestionsList = ({
   const suggestionsLoadable =
     showAll && allLoaded ? allSuggestions : activeSuggestions;
 
+  const activeCount =
+    activeSuggestions.data?.pages?.[0]?.page?.totalElements ??
+    translation.activeSuggestionCount;
+
   function handleDecline(suggestionId: number) {
     declineLoadable.mutate({
       path: { projectId, keyId, languageId, suggestionId },
@@ -189,9 +194,10 @@ export const SuggestionsList = ({
             data(translation) {
               return {
                 ...translation,
-                text: data.accepted.translation,
-                suggestions: [],
-                activeSuggestionCount: 0,
+                ...applyAcceptedSuggestion(translation, {
+                  acceptedTranslation: data.accepted.translation,
+                  declinedCount: data.declined.length,
+                }),
               };
             },
           });
@@ -211,8 +217,11 @@ export const SuggestionsList = ({
   }
 
   function handleAccept(suggestionId: number) {
-    const firstPage = activeSuggestions.data?.pages?.[0];
-    acceptSuggestion(suggestionId, (firstPage?.page?.totalElements ?? 0) > 1);
+    acceptSuggestion(suggestionId, false);
+  }
+
+  function handleAcceptAndDeclineOthers(suggestionId: number) {
+    acceptSuggestion(suggestionId, true);
   }
 
   const handleFetchMore = () => {
@@ -309,6 +318,11 @@ export const SuggestionsList = ({
                     lastUpdated={itemWithDate.createdAt}
                     onAccept={
                       canReview ? () => handleAccept(item.id) : undefined
+                    }
+                    onAcceptAndDeclineOthers={
+                      canReview && activeCount > 1
+                        ? () => handleAcceptAndDeclineOthers(item.id)
+                        : undefined
                     }
                     onDecline={
                       canReview ? () => handleDecline(item.id) : undefined
