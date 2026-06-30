@@ -2,6 +2,7 @@ package io.tolgee.service.projectExportImport
 
 import io.tolgee.model.Language
 import io.tolgee.model.Screenshot
+import io.tolgee.model.TranslationSuggestion
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyCodeReference
@@ -12,6 +13,7 @@ import io.tolgee.model.key.Tag
 import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
 import io.tolgee.model.qa.LanguageQaConfig
 import io.tolgee.model.qa.ProjectQaConfig
+import io.tolgee.model.qa.TranslationQaIssue
 import io.tolgee.model.task.Task
 import io.tolgee.model.task.TaskKey
 import io.tolgee.model.translation.Label
@@ -60,6 +62,11 @@ object ProjectScopedCollectorQueries {
         "select e from TranslationComment e where e.translation.key.project.id = :projectId " +
           "and e.translation.key.deletedAt is null and e.translation.language.deletedAt is null",
       )
+      query(
+        TranslationSuggestion::class,
+        "select e from TranslationSuggestion e where e.project.id = :projectId " +
+          "and e.key.deletedAt is null and e.language.deletedAt is null",
+      )
       query(Tag::class, "select e from Tag e where e.project.id = :projectId")
       query(Label::class, "select e from Label e where e.project.id = :projectId")
       query(
@@ -82,6 +89,11 @@ object ProjectScopedCollectorQueries {
       query(
         LanguageQaConfig::class,
         "select e from LanguageQaConfig e where e.language.project.id = :projectId and e.language.deletedAt is null",
+      )
+      query(
+        TranslationQaIssue::class,
+        "select e from TranslationQaIssue e where e.translation.key.project.id = :projectId " +
+          "and e.translation.key.deletedAt is null and e.translation.language.deletedAt is null",
       )
     }
 

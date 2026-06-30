@@ -3,6 +3,7 @@ package io.tolgee.service.projectExportImport
 import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.Screenshot
+import io.tolgee.model.TranslationSuggestion
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyCodeReference
@@ -13,6 +14,7 @@ import io.tolgee.model.key.Tag
 import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
 import io.tolgee.model.qa.LanguageQaConfig
 import io.tolgee.model.qa.ProjectQaConfig
+import io.tolgee.model.qa.TranslationQaIssue
 import io.tolgee.model.task.Task
 import io.tolgee.model.task.TaskKey
 import io.tolgee.model.translation.Label
@@ -87,6 +89,7 @@ class ProjectContentClearer(
     aiPlaygroundResultService.deleteResultsByProject(projectId)
     // translation_label rows FK translation; clearing labels drops the join before translations are deleted.
     labelService.deleteLabelsByProjectId(projectId)
+    deleteSuggestions(projectId)
     // These two reuse the language/key delete subgraphs; their child rows cascade per the entities'
     // @OneToMany mappings, so they must run before the project row but after the join tables above.
     languageService.deleteAllByProject(projectId)
@@ -134,6 +137,12 @@ class ProjectContentClearer(
     // Imports FK both branch and language (no cascade) and are transient upload state, never transferred.
     importService.getAllByProject(projectId).forEach { importService.hardDeleteImport(it) }
     importSettingsService.deleteAllByProject(projectId)
+  }
+
+  private fun deleteSuggestions(projectId: Long) {
+    // TranslationSuggestionServiceOssImpl.deleteAllByProject is a no-op on OSS, so the languageService
+    // cascade won't remove suggestions here — delete them explicitly or they leak into the mirror import.
+    jpqlUpdate("DELETE FROM TranslationSuggestion ts WHERE ts.project.id = :projectId", projectId)
   }
 
   private fun detachKeptConfigFromBranches(projectId: Long) {
@@ -224,6 +233,7 @@ class ProjectContentClearer(
         KeyCodeReference::class,
         Translation::class,
         TranslationComment::class,
+        TranslationSuggestion::class,
         Tag::class,
         Label::class,
         Screenshot::class,
@@ -233,6 +243,7 @@ class ProjectContentClearer(
         TaskKey::class,
         ProjectQaConfig::class,
         LanguageQaConfig::class,
+        TranslationQaIssue::class,
       )
 
     val clearedOwnedClassNames: Set<String>

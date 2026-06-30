@@ -2,6 +2,10 @@ package io.tolgee.development.testDataBuilder.data
 
 import io.tolgee.model.Screenshot
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.TranslationSuggestionState
+import io.tolgee.model.enums.qa.QaCheckType
+import io.tolgee.model.enums.qa.QaIssueMessage
+import io.tolgee.model.enums.qa.QaIssueState
 import io.tolgee.model.key.Tag
 import io.tolgee.model.task.Task
 import io.tolgee.model.translation.Label
@@ -51,6 +55,21 @@ class ProjectExportImportTestData(
   lateinit var assignedLabel: Label
   lateinit var taskOnDeletedLanguage: Task
   lateinit var liveTask: Task
+  lateinit var suggestionAuthor: UserAccount
+
+  val staleTrueKeyName = "greeting"
+  val suggestionKeyName = "suggestion-key"
+  val suggestionText = "suggested-greeting"
+  val qaKeyName = "qa-key"
+  val qaIssueReplacement = "corrected-punctuation"
+  val qaIssuePluralVariant = "other"
+  val qaIssueParams = mapOf("expected" to "{count}", "actual" to "count")
+  val qaOpenPositionStart = 2
+  val qaOpenPositionEnd = 7
+  val keyHopSuggestionText = "key-hop-suggestion-should-not-export"
+  val languageHopSuggestionText = "language-hop-suggestion-should-not-export"
+  val keyHopQaReplacement = "key-hop-qa-should-not-export"
+  val languageHopQaReplacement = "language-hop-qa-should-not-export"
 
   init {
     projectBuilder.self.avatarHash = avatarHash
@@ -60,13 +79,21 @@ class ProjectExportImportTestData(
       role = UserAccount.Role.ADMIN
       adminUser = this
     }
+    root.addUserAccount {
+      username = "export-suggester@suggest.com"
+      name = "Export Suggester"
+      suggestionAuthor = this
+    }
 
     projectBuilder.apply {
       setQaConfig { }
       englishLanguageBuilder.setQaConfig { }
 
       addKey(keyName = "greeting").build {
-        addTranslation("en", "Hello").self.promptId = distinctivePromptId
+        addTranslation("en", "Hello").self.apply {
+          promptId = distinctivePromptId
+          qaChecksStale = true
+        }
       }
 
       lateinit var labeledTranslation: Translation
@@ -137,10 +164,24 @@ class ProjectExportImportTestData(
         name = softDeletedKeyName
         deletedAt = Date()
       }.build {
+        // key-hop: a suggestion + QA issue with a LIVE language under the soft-deleted key. The key.deletedAt
+        // clause alone must exclude them, so the live language proves that clause independently of the language hop.
+        addSuggestion {
+          language = englishLanguage
+          author = suggestionAuthor
+          translation = keyHopSuggestionText
+          state = TranslationSuggestionState.ACTIVE
+        }
         addTranslation("en", softDeletedTranslationText).build {
           addComment {
             text = trashedTranslationCommentText
             author = this@ProjectExportImportTestData.user
+          }
+          addQaIssue {
+            type = QaCheckType.EMPTY_TRANSLATION
+            message = QaIssueMessage.QA_EMPTY_TRANSLATION
+            state = QaIssueState.OPEN
+            replacement = keyHopQaReplacement
           }
         }
         addMeta {
@@ -162,6 +203,58 @@ class ProjectExportImportTestData(
           originalName = "Deleted language"
           deletedAt = Date()
         }.self
+
+      addKey(keyName = suggestionKeyName).build {
+        addTranslation("en", "Suggest target")
+        addSuggestion {
+          language = englishLanguage
+          author = suggestionAuthor
+          translation = suggestionText
+          isPlural = true
+          state = TranslationSuggestionState.DECLINED
+        }
+        // language-hop: a suggestion in the soft-deleted language on a LIVE key — the language.deletedAt clause
+        // alone must exclude it.
+        addSuggestion {
+          language = deletedLanguage
+          author = suggestionAuthor
+          translation = languageHopSuggestionText
+          state = TranslationSuggestionState.ACTIVE
+        }
+      }
+
+      addKey(keyName = qaKeyName).build {
+        addTranslation("en", "QA target").build {
+          self.qaChecksStale = false
+          addQaIssue {
+            type = QaCheckType.PUNCTUATION_MISMATCH
+            message = QaIssueMessage.QA_PUNCTUATION_ADD
+            state = QaIssueState.OPEN
+            replacement = qaIssueReplacement
+            positionStart = qaOpenPositionStart
+            positionEnd = qaOpenPositionEnd
+            virtual = true
+            pluralVariant = qaIssuePluralVariant
+            params = qaIssueParams
+          }
+          addQaIssue {
+            type = QaCheckType.EMPTY_TRANSLATION
+            message = QaIssueMessage.QA_EMPTY_TRANSLATION
+            state = QaIssueState.IGNORED
+          }
+        }
+        // language-hop: a QA issue in the soft-deleted language on a LIVE key — the language.deletedAt clause
+        // alone must exclude it.
+        addTranslation("zz-deleted", "language-hop-qa-target").build {
+          addQaIssue {
+            type = QaCheckType.EMPTY_TRANSLATION
+            message = QaIssueMessage.QA_EMPTY_TRANSLATION
+            state = QaIssueState.OPEN
+            replacement = languageHopQaReplacement
+          }
+        }
+      }
+
       taskOnDeletedLanguage =
         addTask {
           name = taskOnDeletedLanguageName

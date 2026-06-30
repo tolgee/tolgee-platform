@@ -164,6 +164,26 @@ class ProjectExportImportExporterTest : AbstractSpringTest() {
       .doesNotContain(testData.trashedTranslationCommentText)
   }
 
+  @Test
+  fun `exports live suggestions and QA issues with full field fidelity`() {
+    assertThat(entities("TranslationSuggestion").map { it.attrs["translation"] }).contains(testData.suggestionText)
+    val openIssue = entities("TranslationQaIssue").single { it.attrs["replacement"] == testData.qaIssueReplacement }
+    assertThat(openIssue.attrs["params"]).isEqualTo(testData.qaIssueParams)
+    assertThat(openIssue.attrs["virtual"]).isEqualTo(true)
+    assertThat(openIssue.attrs["pluralVariant"]).isEqualTo(testData.qaIssuePluralVariant)
+  }
+
+  @Test
+  fun `excludes suggestions and QA issues under a soft-deleted key or language`() {
+    val suggestionTexts = entities("TranslationSuggestion").map { it.attrs["translation"] }
+    assertThat(suggestionTexts).contains(testData.suggestionText)
+    assertThat(suggestionTexts).doesNotContain(testData.keyHopSuggestionText, testData.languageHopSuggestionText)
+
+    val qaReplacements = entities("TranslationQaIssue").map { it.attrs["replacement"] }
+    assertThat(qaReplacements).contains(testData.qaIssueReplacement)
+    assertThat(qaReplacements).doesNotContain(testData.keyHopQaReplacement, testData.languageHopQaReplacement)
+  }
+
   private fun entities(type: String): List<SerializedEntity> {
     val bytes = zip[ExportZipLayout.entityPath(type)] ?: return emptyList()
     return objectMapper.readValue(bytes, object : TypeReference<List<SerializedEntity>>() {})

@@ -160,7 +160,7 @@ class ProjectExportImportImporter(
   }
 
   private fun refreshDerivedData(projectId: Long) {
-    // QA issues and the translation memory are intentionally NOT recomputed here — they regenerate lazily.
+    // Do NOT recompute QA issues here — they regenerate lazily.
     languageStatsService.refreshLanguageStatsAllBranches(projectId)
   }
 

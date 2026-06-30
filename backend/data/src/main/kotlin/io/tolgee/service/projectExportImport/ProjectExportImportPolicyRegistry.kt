@@ -3,6 +3,7 @@ package io.tolgee.service.projectExportImport
 import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.Screenshot
+import io.tolgee.model.TranslationSuggestion
 import io.tolgee.model.UserAccount
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.key.Key
@@ -14,6 +15,7 @@ import io.tolgee.model.key.Tag
 import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
 import io.tolgee.model.qa.LanguageQaConfig
 import io.tolgee.model.qa.ProjectQaConfig
+import io.tolgee.model.qa.TranslationQaIssue
 import io.tolgee.model.task.Task
 import io.tolgee.model.task.TaskKey
 import io.tolgee.model.translation.Label
@@ -37,6 +39,7 @@ object ProjectExportImportPolicyRegistry {
         KeyCodeReference::class,
         Translation::class,
         TranslationComment::class,
+        TranslationSuggestion::class,
         Tag::class,
         Label::class,
         Screenshot::class,
@@ -46,6 +49,7 @@ object ProjectExportImportPolicyRegistry {
         TaskKey::class,
         ProjectQaConfig::class,
         LanguageQaConfig::class,
+        TranslationQaIssue::class,
       )
 
       classify(UserAccount::class, ExportImportPolicy.USER_REF)
@@ -72,13 +76,11 @@ object ProjectExportImportPolicyRegistry {
         "io.tolgee.model.branching.snapshot.KeySnapshot",
         "io.tolgee.model.branching.snapshot.TranslationSnapshot",
         "io.tolgee.model.branching.snapshot.KeyMetaSnapshot",
-        "io.tolgee.model.qa.TranslationQaIssue",
         "io.tolgee.model.LanguageStats",
         "io.tolgee.model.keyBigMeta.KeysDistance",
         "io.tolgee.model.AutoTranslationConfig",
         "io.tolgee.model.mtServiceConfig.MtServiceConfig",
         "io.tolgee.model.Prompt",
-        "io.tolgee.model.TranslationSuggestion",
         "io.tolgee.model.AiPlaygroundResult",
         "io.tolgee.model.MtCreditBucket",
         "io.tolgee.model.LlmProvider",

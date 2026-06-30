@@ -7,6 +7,12 @@ import io.tolgee.development.testDataBuilder.data.ProjectImportBranchedSourceTes
 import io.tolgee.development.testDataBuilder.data.ProjectImportTargetTestData
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Screenshot
+import io.tolgee.model.TranslationSuggestion
+import io.tolgee.model.enums.TranslationSuggestionState
+import io.tolgee.model.enums.qa.QaCheckType
+import io.tolgee.model.enums.qa.QaIssueMessage
+import io.tolgee.model.enums.qa.QaIssueState
+import io.tolgee.model.qa.TranslationQaIssue
 import io.tolgee.service.AvatarService
 import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.projectExportImport.ProjectExportImportExporter
@@ -84,6 +90,8 @@ class ProjectExportImportImporterTest : AbstractSpringTest() {
         source.keyOnDeletedBranchName,
         source.keyForExcludedTaskName,
         source.keyForLiveTaskName,
+        source.suggestionKeyName,
+        source.qaKeyName,
       )
     assertThat(labelNames(target.targetProject.id))
       .containsExactlyInAnyOrder(source.assignedLabelName, source.unassignedLabelName)
@@ -167,6 +175,73 @@ class ProjectExportImportImporterTest : AbstractSpringTest() {
 
     assertThat(commentAuthorUsername(target.targetProject.id, source.commentText))
       .isEqualTo(source.adminUser.username)
+  }
+
+  @Test
+  fun `imports a suggestion with its key, language and matched author`() {
+    importSourceOntoTarget()
+    val suggestion = singleSuggestion(target.targetProject.id, source.suggestionText)
+    assertThat(suggestion.key.name).isEqualTo(source.suggestionKeyName)
+    assertThat(suggestion.language?.tag).isEqualTo("en")
+    assertThat(suggestion.author?.username).isEqualTo(source.suggestionAuthor.username)
+    assertThat(suggestion.isPlural).isTrue()
+    assertThat(suggestion.state).isEqualTo(TranslationSuggestionState.DECLINED)
+  }
+
+  @Test
+  fun `falls back to the importing admin for a suggestion author absent on this instance`() {
+    executeInNewTransaction {
+      entityManager
+        .createQuery("update UserAccount u set u.deletedAt = CURRENT_TIMESTAMP where u.id = :id")
+        .setParameter("id", source.suggestionAuthor.id)
+        .executeUpdate()
+    }
+
+    importSourceOntoTarget()
+
+    assertThat(singleSuggestion(target.targetProject.id, source.suggestionText).author?.username)
+      .isEqualTo(source.adminUser.username)
+  }
+
+  @Test
+  fun `imports QA issues on the right translation and preserves the dismissal state`() {
+    importSourceOntoTarget()
+    val issues = qaIssues(target.targetProject.id, source.qaKeyName, "en")
+
+    val open = issues.single { it.replacement == source.qaIssueReplacement }
+    assertThat(open.state).isEqualTo(QaIssueState.OPEN)
+    assertThat(open.type).isEqualTo(QaCheckType.PUNCTUATION_MISMATCH)
+    assertThat(open.message).isEqualTo(QaIssueMessage.QA_PUNCTUATION_ADD)
+    assertThat(open.params).isEqualTo(source.qaIssueParams)
+    assertThat(open.positionStart).isEqualTo(source.qaOpenPositionStart)
+    assertThat(open.positionEnd).isEqualTo(source.qaOpenPositionEnd)
+    assertThat(open.virtual).isTrue()
+    assertThat(open.pluralVariant).isEqualTo(source.qaIssuePluralVariant)
+
+    val dismissed = issues.single { it.replacement == null }
+    assertThat(dismissed.state).isEqualTo(QaIssueState.IGNORED)
+    assertThat(dismissed.type).isEqualTo(QaCheckType.EMPTY_TRANSLATION)
+  }
+
+  @Test
+  fun `preserves the qaChecksStale flag across the import`() {
+    importSourceOntoTarget()
+    val projectId = target.targetProject.id
+    assertThat(qaChecksStale(projectId, source.staleTrueKeyName)).isTrue()
+    assertThat(qaChecksStale(projectId, source.qaKeyName)).isFalse()
+  }
+
+  @Test
+  fun `clears the target's pre-existing suggestions and QA issues`() {
+    importSourceOntoTarget()
+    val projectId = target.targetProject.id
+
+    assertThat(suggestionTexts(projectId))
+      .contains(source.suggestionText)
+      .doesNotContain(target.oldTargetSuggestionText)
+    assertThat(qaIssueReplacements(projectId))
+      .contains(source.qaIssueReplacement)
+      .doesNotContain(target.oldTargetQaReplacement)
   }
 
   @Test
@@ -476,6 +551,67 @@ class ProjectExportImportImporterTest : AbstractSpringTest() {
         ).setParameter("p", projectId)
         .setParameter("t", text)
         .singleResult
+    }
+
+  private fun singleSuggestion(
+    projectId: Long,
+    translation: String,
+  ): TranslationSuggestion =
+    readInTransaction {
+      entityManager
+        .createQuery(
+          "select s from TranslationSuggestion s join fetch s.key join fetch s.language left join fetch s.author " +
+            "where s.project.id = :p and s.translation = :t",
+          TranslationSuggestion::class.java,
+        ).setParameter("p", projectId)
+        .setParameter("t", translation)
+        .singleResult
+    }
+
+  private fun suggestionTexts(projectId: Long): List<String> =
+    projectStrings(projectId, "select s.translation from TranslationSuggestion s where s.project.id = :p")
+
+  private fun qaIssues(
+    projectId: Long,
+    keyName: String,
+    languageTag: String,
+  ): List<TranslationQaIssue> =
+    readInTransaction {
+      entityManager
+        .createQuery(
+          "select q from TranslationQaIssue q where q.translation.key.project.id = :p " +
+            "and q.translation.key.name = :k and q.translation.language.tag = :l",
+          TranslationQaIssue::class.java,
+        ).setParameter("p", projectId)
+        .setParameter("k", keyName)
+        .setParameter("l", languageTag)
+        .resultList
+    }
+
+  private fun qaIssueReplacements(projectId: Long): List<String?> =
+    readInTransaction {
+      entityManager
+        .createQuery(
+          "select q.replacement from TranslationQaIssue q where q.translation.key.project.id = :p",
+          String::class.java,
+        ).setParameter("p", projectId)
+        .resultList
+    }
+
+  private fun qaChecksStale(
+    projectId: Long,
+    keyName: String,
+  ): Boolean =
+    readInTransaction {
+      entityManager
+        .createQuery(
+          "select t.qaChecksStale from Translation t " +
+            "where t.key.project.id = :p and t.key.name = :k and t.language.tag = 'en'",
+          java.lang.Boolean::class.java,
+        ).setParameter("p", projectId)
+        .setParameter("k", keyName)
+        .singleResult
+        .booleanValue()
     }
 
   private fun keyBranchName(

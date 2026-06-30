@@ -3,6 +3,10 @@ package io.tolgee.development.testDataBuilder.data
 import io.tolgee.model.Project
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.enums.BranchKeyMergeChangeType
+import io.tolgee.model.enums.TranslationSuggestionState
+import io.tolgee.model.enums.qa.QaCheckType
+import io.tolgee.model.enums.qa.QaIssueMessage
+import io.tolgee.model.enums.qa.QaIssueState
 import io.tolgee.model.key.Key
 
 /**
@@ -23,13 +27,31 @@ class ProjectImportTargetTestData :
   val oldKeyName = "old-target-key"
   val oldLabelName = "old-target-label"
   val oldTaskName = "old-target-task"
+  val oldTargetSuggestionText = "old-target-suggestion"
+  val oldTargetQaReplacement = "old-target-qa"
   val siblingKeyName = "sibling-key"
   val siblingLabelName = "sibling-label"
 
   init {
     projectBuilder.apply {
       self.useBranching = true
-      targetOldKey = addKey(keyName = oldKeyName).build { addTranslation("en", "old target value") }.self
+      targetOldKey =
+        addKey(keyName = oldKeyName).build {
+          addTranslation("en", "old target value").build {
+            addQaIssue {
+              type = QaCheckType.EMPTY_TRANSLATION
+              message = QaIssueMessage.QA_EMPTY_TRANSLATION
+              state = QaIssueState.IGNORED
+              replacement = oldTargetQaReplacement
+            }
+          }
+          addSuggestion {
+            language = englishLanguage
+            author = user
+            translation = oldTargetSuggestionText
+            state = TranslationSuggestionState.ACTIVE
+          }
+        }.self
       addLabel {
         name = oldLabelName
         color = "#abcdef"
