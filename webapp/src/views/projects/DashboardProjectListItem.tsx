@@ -21,6 +21,7 @@ import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { useEnabledFeatures, useQaCheckTypes } from 'tg.globalContext/helpers';
 import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
 import { CircledLanguageIconList } from 'tg.component/languages/CircledLanguageIconList';
+import { TransparentChip } from 'tg.component/common/chips/TransparentChip';
 import { QaBadge } from 'tg.ee';
 
 const StyledContainer = styled('div')`
@@ -117,6 +118,28 @@ const StyledProjectName = styled(Typography)`
   word-break: break-word;
 `;
 
+const StyledPublicLine = styled('div')`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing(0.5)};
+  overflow: hidden;
+  margin-top: ${({ theme }) => theme.spacing(0.25)};
+`;
+
+const StyledPublicChip = styled(TransparentChip)`
+  flex-shrink: 0;
+  & .MuiChip-label {
+    font-size: 13px;
+  }
+`;
+
+const StyledOrganizationName = styled(Typography)`
+  color: ${({ theme }) => theme.palette.text.secondary};
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
 type ProjectWithStatsModel = components['schemas']['ProjectWithStatsModel'];
 
 const DashboardProjectListItem = (p: ProjectWithStatsModel) => {
@@ -163,6 +186,23 @@ const DashboardProjectListItem = (p: ProjectWithStatsModel) => {
         </StyledImage>
         <StyledTitle>
           <StyledProjectName variant="h3">{p.name}</StyledProjectName>
+          {p.public && (
+            <StyledPublicLine>
+              <StyledPublicChip
+                size="small"
+                label={t('project_list_public_badge')}
+                data-cy="project-list-public-badge"
+              />
+              {p.organizationOwner?.name && (
+                <StyledOrganizationName
+                  variant="body2"
+                  data-cy="project-list-org-name"
+                >
+                  {p.organizationOwner.name}
+                </StyledOrganizationName>
+              )}
+            </StyledPublicLine>
+          )}
         </StyledTitle>
         <StyledKeyCount>
           <Typography variant="body1">
