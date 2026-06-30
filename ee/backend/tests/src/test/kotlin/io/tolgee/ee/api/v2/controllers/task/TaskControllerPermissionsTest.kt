@@ -53,6 +53,7 @@ class TaskControllerPermissionsTest : ProjectAuthControllerTest("/v2/projects/")
     performProjectAuthGet("tasks/${testData.translateTask.self.number}/per-user-report").andIsOk
     performProjectAuthGet("tasks/${testData.translateTask.self.number}/xlsx-report").andIsOk
     performProjectAuthGet("tasks/${testData.translateTask.self.number}/keys").andIsOk
+    performProjectAuthGet("tasks/${testData.translateTask.self.number}/blocking-tasks").andIsOk
   }
 
   @Test

@@ -7,6 +7,7 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
+import io.tolgee.model.enums.Scope
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import org.junit.jupiter.api.AfterEach
@@ -86,9 +87,20 @@ class ProjectStatsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     }
   }
 
-  @ProjectApiKeyAuthTestMethod
+  @ProjectApiKeyAuthTestMethod(
+    scopes = [Scope.TRANSLATIONS_EDIT, Scope.KEYS_EDIT, Scope.TRANSLATIONS_VIEW, Scope.KEYS_VIEW, Scope.MEMBERS_VIEW],
+  )
   fun `returns stats with API key`() {
     `returns stats`()
+  }
+
+  @ProjectApiKeyAuthTestMethod(
+    scopes = [Scope.TRANSLATIONS_VIEW, Scope.KEYS_VIEW],
+  )
+  fun `hides member count from API key lacking members-view`() {
+    performProjectAuthGet("stats").andIsOk.andAssertThatJson {
+      node("membersCount").isEqualTo(0)
+    }
   }
 
   @Test

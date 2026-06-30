@@ -28,7 +28,10 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/v2/projects"])
-@Tag(name = "Project Publishing", description = "Marks a project as public or private (organization owner only)")
+@Tag(
+  name = "Project Publishing",
+  description = "Marks a project as public or private (organization owner or server admin)",
+)
 class ProjectsPublishingController(
   private val projectService: ProjectService,
   private val projectHolder: ProjectHolder,
@@ -38,7 +41,9 @@ class ProjectsPublishingController(
   @PutMapping(value = ["/{projectId:[0-9]+}/publishing"])
   @Operation(
     summary = "Set project publishing state",
-    description = "Marks the project as public or private. Only the organization owner can change this.",
+    description =
+      "Marks the project as public or private. " +
+        "Only the organization owner or a server admin can change this.",
   )
   @RequestActivity(ActivityType.EDIT_PROJECT)
   @RequiresProjectPermissions([Scope.PROJECT_EDIT])

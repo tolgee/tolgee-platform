@@ -88,6 +88,14 @@ class ComputedPermissionDto(
     return this
   }
 
+  fun withCommunityFloor(): ComputedPermissionDto {
+    val hasCommunityScopes = expandedScopes.toSet().containsAll(COMMUNITY.scopes.toList())
+    val viewAndSuggestUnrestricted = viewLanguageIds.isNullOrEmpty() && suggestLanguageIds.isNullOrEmpty()
+    if (hasCommunityScopes && viewAndSuggestUnrestricted) return this
+    if (scopes.isEmpty()) return COMMUNITY
+    return ComputedPermissionDto(getCommunityFlooredPermission(this), origin = origin)
+  }
+
   constructor(permission: IPermission) : this(
     permission,
     origin =
@@ -136,6 +144,17 @@ class ComputedPermissionDto(
       }
     }
 
+    private fun getCommunityFlooredPermission(base: IPermission): IPermission {
+      return object : IPermission by getExtendedPermission(base, COMMUNITY.scopes) {
+        // All-language view + suggest: a language-restricted base must not leave a member
+        // viewing/suggesting in fewer languages than a non-member.
+        override val viewLanguageIds: Set<Long>?
+          get() = null
+        override val suggestLanguageIds: Set<Long>?
+          get() = null
+      }
+    }
+
     val ComputedPermissionDto.isAllReadOnlyPermitted: Boolean
       get() = expandedScopes.toSet().containsAll(Scope.readOnlyScopes.toList())
 
@@ -167,6 +186,23 @@ class ComputedPermissionDto(
             type = ProjectPermissionType.VIEW,
           ),
           origin = ComputedPermissionOrigin.SERVER_SUPPORTER,
+        )
+
+    val COMMUNITY
+      get() =
+        ComputedPermissionDto(
+          getEmptyPermission(
+            scopes =
+              arrayOf(
+                Scope.TRANSLATIONS_VIEW,
+                Scope.SCREENSHOTS_VIEW,
+                Scope.ACTIVITY_VIEW,
+                Scope.TRANSLATIONS_SUGGEST,
+                Scope.TRANSLATIONS_COMMENTS_ADD,
+              ),
+            type = ProjectPermissionType.VIEW,
+          ),
+          origin = ComputedPermissionOrigin.COMMUNITY,
         )
   }
 }
