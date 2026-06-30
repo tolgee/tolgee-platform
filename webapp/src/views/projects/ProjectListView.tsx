@@ -16,6 +16,7 @@ import {
   usePreferredOrganization,
 } from 'tg.globalContext/helpers';
 import { OrganizationSwitch } from 'tg.component/organizationSwitch/OrganizationSwitch';
+import { useLatchedSearchVisibility } from 'tg.views/projects/useLatchedSearchVisibility';
 import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
 import { CriticalUsageCircle } from 'tg.ee';
 
@@ -51,13 +52,18 @@ export const ProjectListView = () => {
 
   const addAllowed = isOrganizationOwnerOrMaintainer || isAdminAccess;
 
-  const showSearch =
-    search || (listPermitted.data?.page?.totalElements ?? 0) > 5;
+  const showSearch = useLatchedSearchVisibility(
+    listPermitted.data?.page?.totalElements,
+    search
+  );
 
   return (
     <DashboardPage isAdminAccess={isAdminAccess}>
       <BaseView
         windowTitle={t('projects_title')}
+        title={t('projects_title')}
+        titleAdornment={<OrganizationSwitch plain />}
+        standaloneTitle
         onSearch={showSearch ? setSearch : undefined}
         searchPlaceholder={t('projects_search_placeholder')}
         maxWidth={1000}
@@ -74,11 +80,7 @@ export const ProjectListView = () => {
         }
         addLabel={t('projects_add_button')}
         hideChildrenOnLoading={false}
-        navigation={[
-          [<OrganizationSwitch key={0} />],
-          [t('projects_title'), LINKS.PROJECTS.build()],
-        ]}
-        navigationRight={<CriticalUsageCircle />}
+        customButtons={[<CriticalUsageCircle key="usage" />]}
         loading={listPermitted.isFetching}
       >
         <ProjectsList

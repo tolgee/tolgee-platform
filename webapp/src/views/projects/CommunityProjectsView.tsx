@@ -1,0 +1,89 @@
+import { useState } from 'react';
+import { T, useTranslate } from '@tolgee/react';
+import { useHistory } from 'react-router-dom';
+
+import { EmailNotVerifiedView } from 'tg.component/EmailNotVerifiedView';
+import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
+import { BaseView } from 'tg.component/layout/BaseView';
+import { DashboardPage } from 'tg.component/layout/DashboardPage';
+import { OrganizationSwitch } from 'tg.component/organizationSwitch/OrganizationSwitch';
+import { LINKS } from 'tg.constants/links';
+import { useIsEmailVerified } from 'tg.globalContext/helpers';
+import { useApiQuery } from 'tg.service/http/useQueryApi';
+import { ProjectsList } from 'tg.views/projects/ProjectsList';
+import { useLatchedSearchVisibility } from 'tg.views/projects/useLatchedSearchVisibility';
+import { CriticalUsageCircle } from 'tg.ee';
+
+const CommunityProjects = () => {
+  const [page, setPage] = useState(0);
+  const [search, setSearch] = useState('');
+  const { t } = useTranslate();
+  const history = useHistory();
+
+  const loadable = useApiQuery({
+    url: '/v2/public/projects/with-stats',
+    method: 'get',
+    query: {
+      page,
+      size: 20,
+      search,
+      sort: ['name,asc'],
+    },
+    options: {
+      keepPreviousData: true,
+    },
+  });
+
+  const showSearch = useLatchedSearchVisibility(
+    loadable.data?.page?.totalElements,
+    search
+  );
+
+  return (
+    <DashboardPage>
+      <BaseView
+        data-cy="community-projects-view"
+        windowTitle={t('community_projects_window_title')}
+        title={t('projects_title')}
+        standaloneTitle
+        titleAdornment={
+          <OrganizationSwitch
+            plain
+            selectedSurface="community"
+            onSelect={() => history.push(LINKS.ROOT.build())}
+          />
+        }
+        onSearch={
+          showSearch
+            ? (value) => {
+                setSearch(value);
+                setPage(0);
+              }
+            : undefined
+        }
+        searchPlaceholder={t('projects_search_placeholder')}
+        maxWidth={1000}
+        allCentered
+        hideChildrenOnLoading={false}
+        customButtons={[<CriticalUsageCircle key="usage" />]}
+        loading={loadable.isFetching}
+      >
+        <ProjectsList
+          variant="public"
+          loadable={loadable}
+          onPageChange={setPage}
+          emptyPlaceholder={
+            <EmptyListMessage loading={loadable.isFetching}>
+              <T keyName="public_projects_empty" />
+            </EmptyListMessage>
+          }
+        />
+      </BaseView>
+    </DashboardPage>
+  );
+};
+
+export const CommunityProjectsView = () => {
+  const isEmailVerified = useIsEmailVerified();
+  return isEmailVerified ? <CommunityProjects /> : <EmailNotVerifiedView />;
+};

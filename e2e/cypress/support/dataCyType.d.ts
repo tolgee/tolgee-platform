@@ -146,7 +146,9 @@ declare namespace DataCy {
         "comment-menu-needs-resolution": true;
         "comment-resolve": true;
         "comment-text": true;
+        "community-projects-view": true;
         "community-translation-banner": true;
+        "community-translation-item": true;
         "content-delivery-add-button": true;
         "content-delivery-auto-publish-checkbox": true;
         "content-delivery-delete-button": true;
@@ -505,6 +507,7 @@ declare namespace DataCy {
         "organization-role-select-item": true;
         "organization-side-menu": true;
         "organization-switch": true;
+        "organization-switch-community": true;
         "palette-color": true;
         "pat-expiry-info": true;
         "pat-list-item": true;
