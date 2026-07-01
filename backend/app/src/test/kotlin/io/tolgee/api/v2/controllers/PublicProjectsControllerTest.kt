@@ -121,7 +121,9 @@ class PublicProjectsControllerTest : AuthorizedControllerTest() {
       node("_embedded.projects") {
         node("[0].id").isEqualTo(testData.otherOrgPublicProject.id)
         node("[0].organizationRole").isEqualTo(null)
-        node("[0].computedPermission.type").isEqualTo("NONE")
+        // logged-in users get the community floor (VIEW) on public projects they have no role on
+        node("[0].computedPermission.type").isEqualTo("VIEW")
+        node("[0].computedPermission.origin").isEqualTo("COMMUNITY")
         node("[1].id").isEqualTo(testData.publicProject.id)
         node("[1].organizationRole").isEqualTo("OWNER")
         node("[1].computedPermission.type").isEqualTo("MANAGE")
@@ -150,7 +152,7 @@ class PublicProjectsControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `a logged-in non-member also gets NONE permission on a public row`() {
+  fun `a logged-in non-member gets the community permission on a public row`() {
     userAccount = testData.nonMember
     performAuthGet("/v2/public/projects/with-stats").andIsOk.andAssertThatJson {
       node("_embedded.projects") {
@@ -158,8 +160,8 @@ class PublicProjectsControllerTest : AuthorizedControllerTest() {
         node("[1].id").isEqualTo(testData.publicProject.id)
         node("[1].directPermission").isEqualTo(null)
         node("[1].organizationRole").isEqualTo(null)
-        node("[1].computedPermission.type").isEqualTo("NONE")
-        node("[1].computedPermission.scopes").isArray.hasSize(0)
+        node("[1].computedPermission.type").isEqualTo("VIEW")
+        node("[1].computedPermission.origin").isEqualTo("COMMUNITY")
       }
     }
   }

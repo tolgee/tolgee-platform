@@ -53,7 +53,6 @@ class ProjectWithStatsModelAssembler(
       organizationRole = view.organizationRole,
       baseLanguage = baseLanguage.let { languageModelAssembler.toModel(LanguageDto.fromEntity(it, it.id)) },
       organizationOwner = view.organizationOwner.let { simpleOrganizationModelAssembler.toModel(it) },
-      public = view.public,
       directPermission = view.directPermission?.let { permissionModelAssembler.toModel(it) },
       computedPermission = computedPermissionModelAssembler.toModel(computedPermissions),
       stats = view.stats,
