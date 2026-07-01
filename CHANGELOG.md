@@ -1,3 +1,10 @@
+# [3.208.0](https://github.com/tolgee/tolgee-platform/compare/v3.207.0...v3.208.0) (2026-07-01)
+
+
+### Features
+
+* bump @tginternal/editor to 1.18.0 - html entity placeholder highlighting  ([#3766](https://github.com/tolgee/tolgee-platform/issues/3766)) ([23048d5](https://github.com/tolgee/tolgee-platform/commit/23048d50e310fe7869099ab19d66da05400265de))
+
 # [3.207.0](https://github.com/tolgee/tolgee-platform/compare/v3.206.0...v3.207.0) (2026-06-30)
 
 
