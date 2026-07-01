@@ -385,15 +385,18 @@ export class Validation {
       is: (free: any, newStripeProduct: any) => !free && !newStripeProduct,
       then: Yup.string().required(),
     }),
-    prices: Yup.object().when('type', {
-      is: 'PAY_AS_YOU_GO',
-      then: Yup.object({
-        perThousandMtCredits: Yup.number().min(0),
-        perThousandTranslations: Yup.number().min(0),
-        perSeat: Yup.number().min(0),
-        perThousandKeys: Yup.number().min(0),
-      }),
-    }),
+    tiers: Yup.array().of(
+      Yup.object({
+        includedMtCredits: Yup.number().min(0),
+        eurMonthly: Yup.number().min(0),
+        eurYearly: Yup.number().min(0),
+        usdMonthly: Yup.number().min(0),
+        usdYearly: Yup.number().min(0),
+        pricePerThousandKeys: Yup.number().min(0),
+        pricePerSeat: Yup.number().min(0),
+        pricePerThousandTranslations: Yup.number().min(0),
+      })
+    ),
     free: Yup.boolean(),
     stripeProductName: Yup.string().when(['free', 'newStripeProduct'], {
       is: (free: any, newStripeProduct: any) => !free && newStripeProduct,
