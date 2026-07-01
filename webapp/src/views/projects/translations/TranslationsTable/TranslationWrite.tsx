@@ -10,6 +10,7 @@ import { useTranslationCell } from '../useTranslationCell';
 import { TranslationEditor } from '../TranslationEditor';
 import { MissingPlaceholders } from '../cell/MissingPlaceholders';
 import { useMissingPlaceholders } from '../cell/useMissingPlaceholders';
+import { useInvalidPlaceholders } from '../cell/useInvalidPlaceholders';
 import { TranslationVisual } from '../translationVisual/TranslationVisual';
 import { ControlsEditorReadOnly } from '../cell/ControlsEditorReadOnly';
 import { useBaseTranslation } from '../useBaseTranslation';
@@ -92,6 +93,12 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
     enabled: baseLanguage !== language.tag,
   });
 
+  const invalidPlaceholders = useInvalidPlaceholders({
+    currentTranslation: value,
+    nested,
+    enabled: editEnabled,
+  });
+
   const translationTasks = keyData.tasks?.filter(
     (t) => t.languageTag === language.tag
   );
@@ -150,9 +157,12 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
           />
         )}
         <StyledPlaceholdersAndControls>
-          {Boolean(missingPlaceholders.length) && (
+          {Boolean(
+            missingPlaceholders.length || invalidPlaceholders.length
+          ) && (
             <MissingPlaceholders
               placeholders={missingPlaceholders}
+              invalidPlaceholders={invalidPlaceholders}
               onPlaceholderClick={handlePlaceholderClick}
               variant={editVal.value.parameter ? activeVariant : undefined}
               locale={language.tag}

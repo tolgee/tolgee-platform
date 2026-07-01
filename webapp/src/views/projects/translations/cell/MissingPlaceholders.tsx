@@ -1,5 +1,6 @@
 import { styled, useTheme } from '@mui/material';
 import {
+  InvalidPlaceholder,
   Placeholder,
   generatePlaceholdersStyle,
   getVariantExample,
@@ -17,8 +18,17 @@ const StyledLabel = styled('span')`
   bottom: 1px;
 `;
 
+const StyledInvalid = styled('span')`
+  margin-right: 8px;
+  font-size: 14px;
+  position: relative;
+  bottom: 1px;
+  color: ${({ theme }) => theme.palette.error.main};
+`;
+
 type Props = {
   placeholders: Placeholder[];
+  invalidPlaceholders: InvalidPlaceholder[];
   onPlaceholderClick: (placeholder: Placeholder) => void;
   locale: string;
   variant: string | undefined;
@@ -27,6 +37,7 @@ type Props = {
 
 export const MissingPlaceholders = ({
   placeholders,
+  invalidPlaceholders,
   onPlaceholderClick,
   locale,
   variant,
@@ -50,6 +61,17 @@ export const MissingPlaceholders = ({
       className={className}
       onMouseDown={(e) => e.preventDefault()}
     >
+      {Boolean(invalidPlaceholders.length) && (
+        <StyledInvalid>
+          <T
+            keyName="translations_invalid_icu_placeholders"
+            defaultValue="Invalid ICU: {value}"
+            params={{
+              value: invalidPlaceholders.map((p) => p.value).join(', '),
+            }}
+          />
+        </StyledInvalid>
+      )}
       {Boolean(placeholders.length) && (
         <>
           <StyledLabel>
