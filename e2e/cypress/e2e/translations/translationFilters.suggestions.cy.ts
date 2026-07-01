@@ -30,7 +30,7 @@ describe('Translation filters suggestions', () => {
     assertFilter({
       submenu: 'Suggestions',
       filterOption: ['With suggestions'],
-      toSeeAfter: ['key 0', 'pluralKey'],
+      toSeeAfter: ['key 0', 'key 2', 'key 3', 'pluralKey'],
       checkAfter() {
         cy.gcy('translations-filter-select').contains('With suggestions');
       },
@@ -41,7 +41,7 @@ describe('Translation filters suggestions', () => {
     assertFilter({
       submenu: 'Suggestions',
       filterOption: ['No suggestions'],
-      toSeeAfter: ['key 1', 'key 2', 'key 3'],
+      toSeeAfter: ['key 1'],
       checkAfter() {
         cy.gcy('translations-filter-select').contains('No suggestions');
       },

@@ -724,6 +724,7 @@ declare namespace DataCy {
         "submenu-item": true;
         "suggestion-action": true;
         "suggestions-list": true;
+        "suggestions-show-all": true;
         "switch-popover-item": true;
         "switch-popover-new": true;
         "switch-popover-search": true;

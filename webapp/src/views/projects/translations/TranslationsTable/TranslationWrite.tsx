@@ -14,9 +14,15 @@ import { TranslationVisual } from '../translationVisual/TranslationVisual';
 import { ControlsEditorReadOnly } from '../cell/ControlsEditorReadOnly';
 import { useBaseTranslation } from '../useBaseTranslation';
 import { TaskInfoMessage } from 'tg.ee';
+import { SuggestionsList } from '../Suggestions/SuggestionsList';
 
 const StyledContainer = styled('div')`
   display: grid;
+`;
+
+const StyledSuggestions = styled('div')`
+  display: grid;
+  padding: 4px 12px 12px 16px;
 `;
 
 const StyledEditor = styled('div')`
@@ -195,6 +201,19 @@ export const TranslationWrite: React.FC<React.PropsWithChildren<Props>> = ({
           </StyledControls>
         </StyledPlaceholdersAndControls>
       </StyledBottom>
+
+      {Boolean(translation?.totalSuggestionCount) && (
+        <StyledSuggestions>
+          <SuggestionsList
+            translation={translation!}
+            keyId={keyData.keyId}
+            isPlural={keyData.keyIsPlural}
+            locale={language.tag}
+            languageTag={language.tag}
+            languageId={language.id}
+          />
+        </StyledSuggestions>
+      )}
     </StyledContainer>
   );
 };
