@@ -1,0 +1,1 @@
+export const PUBLIC_CONTENT_MAX_WIDTH = 1000;

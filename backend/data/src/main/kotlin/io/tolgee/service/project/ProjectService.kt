@@ -58,6 +58,10 @@ import org.springframework.transaction.annotation.Transactional
 import java.io.InputStream
 import java.io.Serializable
 
+// fed into BASE_VIEW_QUERY's per-user permission/role joins; must never equal a real UserAccount id,
+// or an anonymous caller would inherit that account's permissions
+private const val NO_USER_ID = -1L
+
 @Transactional
 @Service
 class ProjectService(
@@ -453,6 +457,16 @@ class ProjectService(
         filters ?: ProjectFilters(),
       )
     return addPermittedLanguagesToProjects(withoutPermittedLanguages, userAccountId)
+  }
+
+  @Transactional(readOnly = true)
+  fun findAllPublicPaged(
+    pageable: Pageable,
+    search: String?,
+  ): Page<ProjectWithLanguagesView> {
+    val userAccountId = authenticationFacade.authenticatedUserOrNull?.id ?: NO_USER_ID
+    val projects = projectRepository.findAllPublic(userAccountId, pageable, search)
+    return projects.map { ProjectWithLanguagesView.fromProjectView(it, null) }
   }
 
   @CacheEvict(cacheNames = [Caches.PROJECTS], allEntries = true)
