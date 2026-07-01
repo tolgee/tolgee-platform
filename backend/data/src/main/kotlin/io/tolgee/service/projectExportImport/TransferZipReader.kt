@@ -91,10 +91,14 @@ class TransferZipReader(
     return out.toByteArray()
   }
 
-  private fun entityTypeOf(name: String): String =
-    name
-      .removePrefix(ExportZipLayout.ENTITIES_DIR)
-      .removeSuffix(".json")
+  private fun entityTypeOf(name: String): String {
+    val relative = name.removePrefix(ExportZipLayout.ENTITIES_DIR)
+    val entityType = relative.removeSuffix(".json")
+    require(entityType != relative && entityType.isNotEmpty() && "/" !in entityType) {
+      "Export zip has an invalid entity entry: $name"
+    }
+    return entityType
+  }
 
   data class ParsedExport(
     val manifest: ExportManifest,

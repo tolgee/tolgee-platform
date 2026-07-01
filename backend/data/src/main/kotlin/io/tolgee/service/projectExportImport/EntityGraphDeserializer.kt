@@ -2,6 +2,8 @@ package io.tolgee.service.projectExportImport
 
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.tolgee.constants.Message
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Project
 import io.tolgee.model.Screenshot
 import io.tolgee.model.UserAccount
@@ -159,7 +161,12 @@ class EntityGraphDeserializer(
     return when (ProjectExportImportPolicyRegistry.policyOf(targetClassName)) {
       ExportImportPolicy.USER_REF -> resolveUser(rawValue, context)
       ExportImportPolicy.PROJECT_ROOT -> context.targetProject
-      ExportImportPolicy.OWNED -> context.entity(targetClassName, rawValue)
+      ExportImportPolicy.OWNED ->
+        context.entity(targetClassName, rawValue)
+          ?: throw BadRequestException(
+            Message.PROJECT_IMPORT_CORRUPT_ARCHIVE,
+            listOf(targetClassName, normalizeHandle(rawValue).toString(), attr.name),
+          )
       else -> null
     }
   }

@@ -56,15 +56,20 @@ class ProjectExportImportController(
   ): ResponseEntity<StreamingResponseBody> {
     val export = projectExportImportExporter.exportToTempFile(projectId, versionProvider.version)
     val tempFile = export.path
-    val body =
-      streamingResponseBodyProvider.createStreamingResponseBody { outputStream ->
-        try {
-          Files.copy(tempFile, outputStream)
-        } finally {
-          Files.deleteIfExists(tempFile)
+    try {
+      val body =
+        streamingResponseBodyProvider.createStreamingResponseBody { outputStream ->
+          try {
+            Files.copy(tempFile, outputStream)
+          } finally {
+            Files.deleteIfExists(tempFile)
+          }
         }
-      }
-    return ResponseEntity.ok().headers(zipHeaders(export.projectName)).body(body)
+      return ResponseEntity.ok().headers(zipHeaders(export.projectName)).body(body)
+    } catch (e: Throwable) {
+      Files.deleteIfExists(tempFile)
+      throw e
+    }
   }
 
   @PostMapping(value = ["/import"], consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])

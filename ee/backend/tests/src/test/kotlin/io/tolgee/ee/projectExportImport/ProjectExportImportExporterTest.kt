@@ -116,10 +116,32 @@ class ProjectExportImportExporterTest : AbstractSpringTest() {
   }
 
   @Test
-  fun `drops a nullable association to a soft-deleted target`() {
+  fun `excludes live content that sits on a soft-deleted branch`() {
     assertThat(entities("Branch").map { it.attrs["name"] }).doesNotContain(testData.deletedBranchName)
-    val keyOnDeletedBranch = entities("Key").single { it.attrs["name"] == testData.keyOnDeletedBranchName }
-    assertThat(keyOnDeletedBranch.assocs["branch"]).isNull()
+    assertThat(entities("Key").map { it.attrs["name"] }).doesNotContain(testData.keyOnDeletedBranchName)
+    assertThat(entities("Task").map { it.attrs["name"] }).doesNotContain(testData.taskOnDeletedBranchName)
+    assertThat(entities("Translation").map { it.attrs["text"] })
+      .doesNotContain(testData.keyOnDeletedBranchTranslationText)
+    assertThat(entities("KeyMeta").map { it.attrs["description"] })
+      .doesNotContain(testData.keyOnDeletedBranchMetaDescription)
+    assertThat(entities("KeyCodeReference").map { it.attrs["path"] })
+      .doesNotContain(testData.keyOnDeletedBranchCodeRefPath)
+    assertThat(entities("TranslationComment").map { it.attrs["text"] })
+      .doesNotContain(testData.keyOnDeletedBranchCommentText)
+    assertThat(entities("KeyComment").map { it.attrs["text"] })
+      .doesNotContain(testData.keyOnDeletedBranchKeyCommentText)
+    assertThat(entities("TranslationSuggestion").map { it.attrs["translation"] })
+      .doesNotContain(testData.keyOnDeletedBranchSuggestionText)
+    assertThat(entities("TranslationQaIssue").map { it.attrs["replacement"] })
+      .doesNotContain(testData.keyOnDeletedBranchQaReplacement)
+    assertThat(entities("KeyScreenshotReference").mapNotNull { (it.assocs["key"] as? Number)?.toLong() })
+      .doesNotContain(testData.keyOnDeletedBranch.id)
+
+    val taskKeys = entities("TaskKey")
+    assertThat(taskKeys.mapNotNull { (it.assocs["task"] as? Number)?.toLong() })
+      .doesNotContain(testData.taskOnDeletedBranch.id)
+    assertThat(taskKeys.mapNotNull { (it.assocs["key"] as? Number)?.toLong() })
+      .doesNotContain(testData.keyOnDeletedBranch.id)
   }
 
   @Test

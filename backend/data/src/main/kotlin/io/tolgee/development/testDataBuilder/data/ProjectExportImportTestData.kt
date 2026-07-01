@@ -6,6 +6,8 @@ import io.tolgee.model.enums.TranslationSuggestionState
 import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.model.enums.qa.QaIssueMessage
 import io.tolgee.model.enums.qa.QaIssueState
+import io.tolgee.model.key.Key
+import io.tolgee.model.key.KeyComment
 import io.tolgee.model.key.Tag
 import io.tolgee.model.task.Task
 import io.tolgee.model.translation.Label
@@ -40,6 +42,14 @@ class ProjectExportImportTestData(
     )
   val commentText = "Please review"
   val keyOnDeletedBranchName = "key-on-deleted-branch"
+  val keyOnDeletedBranchTranslationText = "on-deleted-branch-value"
+  val keyOnDeletedBranchMetaDescription = "deleted-branch-key-meta"
+  val keyOnDeletedBranchCodeRefPath = "src/DeletedBranch.kt"
+  val keyOnDeletedBranchCommentText = "deleted-branch-comment"
+  val keyOnDeletedBranchKeyCommentText = "deleted-branch-key-comment"
+  val keyOnDeletedBranchSuggestionText = "deleted-branch-suggestion"
+  val keyOnDeletedBranchQaReplacement = "deleted-branch-qa"
+  val taskOnDeletedBranchName = "task-on-deleted-branch"
   val deletedBranchName = "deleted-branch"
   val taskOnDeletedLanguageName = "task-on-deleted-language"
   val keyForExcludedTaskName = "live-key-for-excluded-task"
@@ -55,6 +65,8 @@ class ProjectExportImportTestData(
   lateinit var assignedLabel: Label
   lateinit var taskOnDeletedLanguage: Task
   lateinit var liveTask: Task
+  lateinit var keyOnDeletedBranch: Key
+  lateinit var taskOnDeletedBranch: Task
   lateinit var suggestionAuthor: UserAccount
 
   val staleTrueKeyName = "greeting"
@@ -156,9 +168,52 @@ class ProjectExportImportTestData(
           deletedAt = Date()
           project = projectBuilder.self
         }.self
-      addKey(keyName = keyOnDeletedBranchName).build {
-        self.branch = deletedBranch
-      }
+      keyOnDeletedBranch =
+        addKey(keyName = keyOnDeletedBranchName)
+          .build {
+            self.branch = deletedBranch
+            addTranslation("en", keyOnDeletedBranchTranslationText).build {
+              addComment {
+                text = keyOnDeletedBranchCommentText
+                author = this@ProjectExportImportTestData.user
+              }
+              addQaIssue {
+                type = QaCheckType.EMPTY_TRANSLATION
+                message = QaIssueMessage.QA_EMPTY_TRANSLATION
+                state = QaIssueState.OPEN
+                replacement = keyOnDeletedBranchQaReplacement
+              }
+            }
+            addSuggestion {
+              language = englishLanguage
+              author = suggestionAuthor
+              translation = keyOnDeletedBranchSuggestionText
+              state = TranslationSuggestionState.ACTIVE
+            }
+            addMeta {
+              description = keyOnDeletedBranchMetaDescription
+              comments =
+                mutableListOf(
+                  KeyComment(this).apply {
+                    text = keyOnDeletedBranchKeyCommentText
+                    author = this@ProjectExportImportTestData.user
+                  },
+                )
+              addCodeReference(this@ProjectExportImportTestData.user) {
+                path = keyOnDeletedBranchCodeRefPath
+              }
+            }
+            val screenshotBuilder = addScreenshot { }
+            screenshotBuilder.image = ByteArrayOutputStream().apply { write(screenshotImageBytes) }
+          }.self
+      taskOnDeletedBranch =
+        addTask {
+          name = taskOnDeletedBranchName
+          number = 3
+          language = englishLanguage
+          branch = deletedBranch
+          project = projectBuilder.self
+        }.self
 
       addKey {
         name = softDeletedKeyName
@@ -279,6 +334,15 @@ class ProjectExportImportTestData(
       addTaskKey {
         task = liveTask
         key = liveKeyForLiveTask
+      }
+
+      addTaskKey {
+        task = taskOnDeletedBranch
+        key = liveKeyForLiveTask
+      }
+      addTaskKey {
+        task = liveTask
+        key = keyOnDeletedBranch
       }
     }
   }

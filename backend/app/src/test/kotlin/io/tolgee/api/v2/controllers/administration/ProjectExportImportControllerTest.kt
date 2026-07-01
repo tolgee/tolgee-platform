@@ -1,7 +1,9 @@
 package io.tolgee.api.v2.controllers.administration
 
 import io.tolgee.development.testDataBuilder.data.ProjectExportImportTestData
+import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.fixtures.andIsBadRequest
+import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.testing.AuthorizedControllerTest
@@ -68,13 +70,19 @@ class ProjectExportImportControllerTest : AuthorizedControllerTest() {
   fun `import wipes and replaces the project for a super admin`() {
     val zip = exportedZipBytes()
 
+    // A stray key present only in the target (absent from the export) must be gone after the mirror
+    // import — otherwise a no-op import would also satisfy the "content is present" assertion.
+    addKey("stray-should-be-wiped")
+
     userAccount = testData.adminUser
     performAuthMultipart(
       "/v2/administration/projects/${testData.project.id}/import",
       listOf(MockMultipartFile("file", "export.zip", "application/zip", zip)),
     ).andIsOk
 
-    assertThat(projectKeyNames()).contains("greeting", "labeled")
+    assertThat(projectKeyNames())
+      .contains("greeting", "labeled")
+      .doesNotContain("stray-should-be-wiped")
   }
 
   @Test
@@ -169,6 +177,11 @@ class ProjectExportImportControllerTest : AuthorizedControllerTest() {
       .andDo { obj: MvcResult -> obj.asyncResult }
       .andReturn()
       .response.contentAsByteArray
+  }
+
+  private fun addKey(name: String) {
+    userAccount = testData.user
+    performAuthPost("/v2/projects/${testData.project.id}/keys", CreateKeyDto(name = name)).andIsCreated
   }
 
   // The import commits in its own transaction; read it back in a fresh one so the assertion sees it.

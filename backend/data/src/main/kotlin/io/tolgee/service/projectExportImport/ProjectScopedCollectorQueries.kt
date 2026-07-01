@@ -38,52 +38,72 @@ object ProjectScopedCollectorQueries {
     buildMap {
       query(Language::class, "select e from Language e where e.project.id = :projectId and e.deletedAt is null")
       query(Namespace::class, "select e from Namespace e where e.project.id = :projectId")
-      query(Key::class, "select e from Key e where e.project.id = :projectId and e.deletedAt is null")
+      // A key on a soft-deleted branch is deleted content (hidden everywhere in the app), so it and its
+      // children are excluded from the export — not exported with the branch nulled, which would resurrect
+      // them onto the default branch on import (colliding with real keys). The branch hop is nullable
+      // (NULL = legacy default branch), so it must be a LEFT JOIN — an implicit inner join via
+      // `...branch.deletedAt` would silently drop every row whose key/task has no branch at all.
+      query(
+        Key::class,
+        "select e from Key e left join e.branch b " +
+          "where e.project.id = :projectId and e.deletedAt is null and (b is null or b.deletedAt is null)",
+      )
       query(
         KeyMeta::class,
-        "select e from KeyMeta e where e.key.project.id = :projectId and e.key.deletedAt is null",
+        "select e from KeyMeta e join e.key k left join k.branch b " +
+          "where k.project.id = :projectId and k.deletedAt is null and (b is null or b.deletedAt is null)",
       )
       query(
         KeyComment::class,
-        "select e from KeyComment e where e.keyMeta.key.project.id = :projectId and e.keyMeta.key.deletedAt is null",
+        "select e from KeyComment e join e.keyMeta.key k left join k.branch b " +
+          "where k.project.id = :projectId and k.deletedAt is null and (b is null or b.deletedAt is null)",
       )
       query(
         KeyCodeReference::class,
-        "select e from KeyCodeReference e " +
-          "where e.keyMeta.key.project.id = :projectId and e.keyMeta.key.deletedAt is null",
+        "select e from KeyCodeReference e join e.keyMeta.key k left join k.branch b " +
+          "where k.project.id = :projectId and k.deletedAt is null and (b is null or b.deletedAt is null)",
       )
       query(
         Translation::class,
-        "select e from Translation e where e.key.project.id = :projectId " +
-          "and e.key.deletedAt is null and e.language.deletedAt is null",
+        "select e from Translation e join e.key k left join k.branch b " +
+          "where k.project.id = :projectId and k.deletedAt is null and e.language.deletedAt is null " +
+          "and (b is null or b.deletedAt is null)",
       )
       query(
         TranslationComment::class,
-        "select e from TranslationComment e where e.translation.key.project.id = :projectId " +
-          "and e.translation.key.deletedAt is null and e.translation.language.deletedAt is null",
+        "select e from TranslationComment e join e.translation.key k left join k.branch b " +
+          "where k.project.id = :projectId and k.deletedAt is null and e.translation.language.deletedAt is null " +
+          "and (b is null or b.deletedAt is null)",
       )
       query(
         TranslationSuggestion::class,
-        "select e from TranslationSuggestion e where e.project.id = :projectId " +
-          "and e.key.deletedAt is null and e.language.deletedAt is null",
+        "select e from TranslationSuggestion e join e.key k left join k.branch b " +
+          "where e.project.id = :projectId and k.deletedAt is null and e.language.deletedAt is null " +
+          "and (b is null or b.deletedAt is null)",
       )
       query(Tag::class, "select e from Tag e where e.project.id = :projectId")
       query(Label::class, "select e from Label e where e.project.id = :projectId")
       query(
         Screenshot::class,
-        "select distinct s from KeyScreenshotReference r join r.screenshot s " +
-          "where r.key.project.id = :projectId and r.key.deletedAt is null",
+        "select distinct s from KeyScreenshotReference r join r.screenshot s join r.key k left join k.branch b " +
+          "where k.project.id = :projectId and k.deletedAt is null and (b is null or b.deletedAt is null)",
       )
       query(
         KeyScreenshotReference::class,
-        "select e from KeyScreenshotReference e where e.key.project.id = :projectId and e.key.deletedAt is null",
+        "select e from KeyScreenshotReference e join e.key k left join k.branch b " +
+          "where k.project.id = :projectId and k.deletedAt is null and (b is null or b.deletedAt is null)",
       )
       query(Branch::class, "select e from Branch e where e.project.id = :projectId and e.deletedAt is null")
-      query(Task::class, "select e from Task e where e.project.id = :projectId and e.language.deletedAt is null")
+      query(
+        Task::class,
+        "select e from Task e left join e.branch b " +
+          "where e.project.id = :projectId and e.language.deletedAt is null and (b is null or b.deletedAt is null)",
+      )
       query(
         TaskKey::class,
-        "select e from TaskKey e where e.task.project.id = :projectId " +
-          "and e.task.language.deletedAt is null and e.key.deletedAt is null",
+        "select e from TaskKey e join e.key k left join e.task.branch tb left join k.branch kb " +
+          "where e.task.project.id = :projectId and e.task.language.deletedAt is null and k.deletedAt is null " +
+          "and (tb is null or tb.deletedAt is null) and (kb is null or kb.deletedAt is null)",
       )
       query(ProjectQaConfig::class, "select e from ProjectQaConfig e where e.project.id = :projectId")
       query(
@@ -92,8 +112,9 @@ object ProjectScopedCollectorQueries {
       )
       query(
         TranslationQaIssue::class,
-        "select e from TranslationQaIssue e where e.translation.key.project.id = :projectId " +
-          "and e.translation.key.deletedAt is null and e.translation.language.deletedAt is null",
+        "select e from TranslationQaIssue e join e.translation.key k left join k.branch b " +
+          "where k.project.id = :projectId and k.deletedAt is null and e.translation.language.deletedAt is null " +
+          "and (b is null or b.deletedAt is null)",
       )
     }
 

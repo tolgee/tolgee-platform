@@ -1,5 +1,6 @@
 package io.tolgee.service.projectExportImport
 
+import com.fasterxml.jackson.core.JacksonException
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.constants.Message
@@ -21,6 +22,7 @@ import io.tolgee.util.logger
 import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+import java.io.IOException
 import java.io.InputStream
 
 /**
@@ -62,7 +64,20 @@ class ProjectExportImportImporter(
     runningVersion: String,
     ignoreVersion: Boolean = false,
   ) {
-    val parsed = zipReader.read(input)
+    // A malformed/hostile archive surfaces as IllegalArgumentException (zipReader's own guards), JacksonException
+    // (an unparseable manifest), or an IOException (a corrupt/truncated zip or deflate stream — ZipException,
+    // EOFException, ...); translate all of them to a clean 400 so a bad client upload is not a 500 + Sentry
+    // alert (this endpoint is admin-facing recovery). Every IOException reachable here is archive-derived.
+    val parsed =
+      try {
+        zipReader.read(input)
+      } catch (e: IllegalArgumentException) {
+        throw corruptArchive(e)
+      } catch (e: JacksonException) {
+        throw corruptArchive(e)
+      } catch (e: IOException) {
+        throw corruptArchive(e)
+      }
     if (!ignoreVersion && parsed.manifest.schemaVersion != runningVersion) {
       throw BadRequestException(
         Message.PROJECT_IMPORT_VERSION_MISMATCH,
@@ -70,8 +85,18 @@ class ProjectExportImportImporter(
       )
     }
 
+    // project.json is part of the archive contract and the source of the scalar mirror. Reject a zip that
+    // lacks it (or whose content is unparseable) BEFORE the wipe — otherwise the target is cleared and then
+    // left with its own stale scalars. Its bytes are stored raw by zipReader, so parse them here.
+    val projectJson = parsed.projectJson ?: throw BadRequestException(Message.PROJECT_IMPORT_MISSING_PROJECT_JSON)
+    val projectRecord = corruptArchiveOnParseError { objectMapper.readValue(projectJson, SerializedEntity::class.java) }
+
     // Suppress activity logging for the whole transaction (this orchestrator owns it): the wipe + re-insert
     // must not emit revisions. Per-entity disableActivityLogging is also set in EntityMetamodelWriter.
+    // Do NOT restore this before the method returns: auto-completion fires when THIS transaction commits, so
+    // flipping it back on inside the method re-enables it before commit and emits a spurious revision (see the
+    // `produces no activity revisions` test). The holder is request/transaction-scoped and its ThreadLocal is
+    // cleared on transaction completion (ActivityHolderProvider), so leaving it false does not leak.
     activityHolder.enableAutoCompletion = false
 
     clearer.clear(projectService.get(targetProjectId))
@@ -83,16 +108,19 @@ class ProjectExportImportImporter(
     // proxy only initializes once we touch it post-insert, by which point the source languages exist.
     val project = entityManager.getReference(Project::class.java, targetProjectId)
     val importingAdmin = userAccountService.get(importingAdminId)
-    val projectRecord = parsed.projectJson?.let { objectMapper.readValue(it, SerializedEntity::class.java) }
 
+    // deserialize parses the entity JSON blobs; a malformed one is a corrupt archive (400), and the wipe
+    // already done here rolls back via @Transactional so the target is restored.
     val result =
-      deserializer.deserialize(
-        parsed.entityJsonByType,
-        project,
-        importingAdmin,
-        userResolver = cachingUserResolver(),
-        projectRecord = projectRecord,
-      )
+      corruptArchiveOnParseError {
+        deserializer.deserialize(
+          parsed.entityJsonByType,
+          project,
+          importingAdmin,
+          userResolver = cachingUserResolver(),
+          projectRecord = projectRecord,
+        )
+      }
 
     mirrorProjectScalars(project, projectRecord, result.maxImportedTaskNumber)
     restoreScreenshots(result.screenshotsBySourceId, parsed.blobs)
@@ -101,6 +129,16 @@ class ProjectExportImportImporter(
     entityManager.flush()
     refreshDerivedData(targetProjectId)
   }
+
+  private fun corruptArchive(e: Exception) =
+    BadRequestException(Message.PROJECT_IMPORT_CORRUPT_ARCHIVE, listOf(e.message ?: ""))
+
+  private inline fun <T> corruptArchiveOnParseError(parse: () -> T): T =
+    try {
+      parse()
+    } catch (e: JacksonException) {
+      throw corruptArchive(e)
+    }
 
   /** Resolves a source username to a live target user (case-insensitive, disabled excluded), caching hits. */
   private fun cachingUserResolver(): (String) -> UserAccount? {

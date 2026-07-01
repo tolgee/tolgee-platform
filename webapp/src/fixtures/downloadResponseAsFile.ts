@@ -29,9 +29,9 @@ export const downloadResponseAsFile = async (
     const a = document.createElement('a');
     try {
       a.href = url;
-      a.download =
-        parseContentDispositionFilename(response) ??
-        sanitizeFilename(fallbackName);
+      a.download = sanitizeFilename(
+        parseContentDispositionFilename(response) ?? fallbackName
+      );
       a.click();
     } finally {
       a.remove();

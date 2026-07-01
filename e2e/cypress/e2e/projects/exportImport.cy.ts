@@ -22,6 +22,11 @@ describe('Project settings - Export & Import (server admin)', () => {
   let projectId: number;
 
   beforeEach(() => {
+    // The download name is a fixed constant; drop any stale copy so verifyDownload
+    // can't pass on a leftover archive from a previous test.
+    cy.exec(`rm -f "${downloadsFolder}/${EXPORT_FILE}"`, {
+      failOnNonZeroExit: false,
+    });
     login().then(() =>
       createTestProject().then((r) => {
         projectId = r.body.id;

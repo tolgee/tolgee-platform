@@ -105,6 +105,42 @@ class TransferZipReaderTest {
   }
 
   @Test
+  fun `rejects an entity entry without a json suffix`() {
+    val zip =
+      buildZip(
+        ExportZipLayout.MANIFEST to objectMapper.writeValueAsBytes(manifest()),
+        "${ExportZipLayout.ENTITIES_DIR}Key" to "[]".toByteArray(),
+      )
+    assertThatThrownBy { reader.read(zip.inputStream()) }
+      .isInstanceOf(IllegalArgumentException::class.java)
+      .hasMessageContaining("invalid entity entry")
+  }
+
+  @Test
+  fun `rejects an entity entry with an empty type name`() {
+    val zip =
+      buildZip(
+        ExportZipLayout.MANIFEST to objectMapper.writeValueAsBytes(manifest()),
+        "${ExportZipLayout.ENTITIES_DIR}.json" to "[]".toByteArray(),
+      )
+    assertThatThrownBy { reader.read(zip.inputStream()) }
+      .isInstanceOf(IllegalArgumentException::class.java)
+      .hasMessageContaining("invalid entity entry")
+  }
+
+  @Test
+  fun `rejects a nested entity entry path`() {
+    val zip =
+      buildZip(
+        ExportZipLayout.MANIFEST to objectMapper.writeValueAsBytes(manifest()),
+        "${ExportZipLayout.ENTITIES_DIR}sub/Key.json" to "[]".toByteArray(),
+      )
+    assertThatThrownBy { reader.read(zip.inputStream()) }
+      .isInstanceOf(IllegalArgumentException::class.java)
+      .hasMessageContaining("invalid entity entry")
+  }
+
+  @Test
   fun `fails when the manifest is missing`() {
     val zip = buildZip(ExportZipLayout.entityPath("Key") to "[]".toByteArray())
     assertThatThrownBy { reader.read(zip.inputStream()) }

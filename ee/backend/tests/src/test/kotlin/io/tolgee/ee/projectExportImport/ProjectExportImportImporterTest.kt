@@ -2,6 +2,7 @@ package io.tolgee.ee.projectExportImport
 
 import com.fasterxml.jackson.core.type.TypeReference
 import io.tolgee.AbstractSpringTest
+import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.ProjectExportImportTestData
 import io.tolgee.development.testDataBuilder.data.ProjectImportBranchedSourceTestData
 import io.tolgee.development.testDataBuilder.data.ProjectImportTargetTestData
@@ -20,9 +21,9 @@ import io.tolgee.service.projectExportImport.ProjectExportImportImporter
 import io.tolgee.service.projectExportImport.model.ExportZipLayout
 import io.tolgee.service.projectExportImport.model.SerializedEntity
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import java.io.ByteArrayInputStream
@@ -87,7 +88,6 @@ class ProjectExportImportImporterTest : AbstractSpringTest() {
         "rich-key",
         "screenshot-key-1",
         "screenshot-key-2",
-        source.keyOnDeletedBranchName,
         source.keyForExcludedTaskName,
         source.keyForLiveTaskName,
         source.suggestionKeyName,
@@ -119,7 +119,9 @@ class ProjectExportImportImporterTest : AbstractSpringTest() {
     importSourceOntoTarget()
     val projectId = target.targetProject.id
 
-    assertThat(keyNames(projectId)).doesNotContain(source.softDeletedKeyName)
+    assertThat(keyNames(projectId))
+      .doesNotContain(source.softDeletedKeyName)
+      .doesNotContain(source.keyOnDeletedBranchName)
     assertThat(translationTexts(projectId)).doesNotContain(source.softDeletedTranslationText)
     assertThat(branchNames(projectId)).doesNotContain(source.deletedBranchName)
     assertThat(languageTags(projectId)).doesNotContain("zz-deleted")
@@ -246,12 +248,67 @@ class ProjectExportImportImporterTest : AbstractSpringTest() {
 
   @Test
   fun `aborts on a version mismatch with the target untouched`() {
-    val zip = exportZip(source.project.id)
-    assertThatThrownBy {
-      importer.import(ByteArrayInputStream(zip), target.targetProject.id, source.adminUser.id, "wrong-version")
-    }.isInstanceOf(BadRequestException::class.java)
-
+    val ex =
+      assertThrows<BadRequestException> {
+        importer.import(
+          ByteArrayInputStream(exportZip(source.project.id)),
+          target.targetProject.id,
+          source.adminUser.id,
+          "wrong-version",
+        )
+      }
+    assertThat(ex.code).isEqualTo(Message.PROJECT_IMPORT_VERSION_MISMATCH.code)
     assertThat(keyNames(target.targetProject.id)).contains(target.oldKeyName)
+  }
+
+  @Test
+  fun `rejects a zip missing project_json before wiping the target`() {
+    assertImportRejected(
+      rezipWithout(exportZip(source.project.id)) { it == ExportZipLayout.PROJECT },
+      Message.PROJECT_IMPORT_MISSING_PROJECT_JSON,
+    )
+  }
+
+  @Test
+  fun `rejects a structurally invalid archive with a bad request and leaves the target untouched`() {
+    assertImportRejected(byteArrayOf(1, 2, 3, 4), Message.PROJECT_IMPORT_CORRUPT_ARCHIVE)
+  }
+
+  @Test
+  fun `rejects a zip whose manifest is not valid JSON with a bad request`() {
+    assertImportRejected(
+      zipFrom(mapOf(ExportZipLayout.MANIFEST to "definitely not json".toByteArray())),
+      Message.PROJECT_IMPORT_CORRUPT_ARCHIVE,
+    )
+  }
+
+  @Test
+  fun `rejects a zip whose project_json is not valid JSON with a bad request`() {
+    val entries = readZip(exportZip(source.project.id)).toMutableMap()
+    entries[ExportZipLayout.PROJECT] = "definitely not json".toByteArray()
+    assertImportRejected(zipFrom(entries), Message.PROJECT_IMPORT_CORRUPT_ARCHIVE)
+  }
+
+  @Test
+  fun `rejects a zip whose entity file is not valid JSON with a bad request`() {
+    val entries = readZip(exportZip(source.project.id)).toMutableMap()
+    entries[ExportZipLayout.entityPath("Key")] = "definitely not json".toByteArray()
+    assertImportRejected(zipFrom(entries), Message.PROJECT_IMPORT_CORRUPT_ARCHIVE)
+  }
+
+  @Test
+  fun `rejects a zip truncated mid-header with a bad request`() {
+    // Keep only the first bytes so ZipInputStream validates the local-header signature and then hits EOF
+    // reading the entry name (EOFException) — a common corruption mode for an interrupted archive download.
+    assertImportRejected(exportZip(source.project.id).copyOf(35), Message.PROJECT_IMPORT_CORRUPT_ARCHIVE)
+  }
+
+  @Test
+  fun `aborts on an unresolved OWNED reference with the target untouched`() {
+    assertImportRejected(
+      tamperFirstAssoc(exportZip(source.project.id), "KeyMeta", "key", BOGUS_HANDLE),
+      Message.PROJECT_IMPORT_CORRUPT_ARCHIVE,
+    )
   }
 
   @Test
@@ -383,6 +440,50 @@ class ProjectExportImportImporterTest : AbstractSpringTest() {
           zos.write(bytes)
           zos.closeEntry()
         }
+      }
+    }
+    return out.toByteArray()
+  }
+
+  private fun assertImportRejected(
+    zip: ByteArray,
+    expectedCode: Message,
+  ) {
+    val ex =
+      assertThrows<BadRequestException> {
+        importer.import(ByteArrayInputStream(zip), target.targetProject.id, source.adminUser.id, VERSION)
+      }
+    assertThat(ex.code).isEqualTo(expectedCode.code)
+    assertThat(keyNames(target.targetProject.id)).contains(target.oldKeyName)
+  }
+
+  /** Repoints the first record of an OWNED entity type's [assocName] at a non-existent handle. */
+  private fun tamperFirstAssoc(
+    zip: ByteArray,
+    type: String,
+    assocName: String,
+    bogusHandle: Long,
+  ): ByteArray {
+    val entries = readZip(zip).toMutableMap()
+    val path = ExportZipLayout.entityPath(type)
+    val records =
+      objectMapper
+        .readValue(
+          entries.getValue(path),
+          object : TypeReference<List<SerializedEntity>>() {},
+        ).toMutableList()
+    records[0] = records[0].copy(assocs = records[0].assocs + (assocName to bogusHandle))
+    entries[path] = objectMapper.writeValueAsBytes(records)
+    return zipFrom(entries)
+  }
+
+  private fun zipFrom(entries: Map<String, ByteArray>): ByteArray {
+    val out = ByteArrayOutputStream()
+    ZipOutputStream(out).use { zos ->
+      entries.forEach { (name, bytes) ->
+        zos.putNextEntry(ZipEntry(name))
+        zos.write(bytes)
+        zos.closeEntry()
       }
     }
     return out.toByteArray()
@@ -667,6 +768,7 @@ class ProjectExportImportImporterTest : AbstractSpringTest() {
 
   companion object {
     private const val VERSION = "9.9.9-import-test"
+    private const val BOGUS_HANDLE = 999_999_999L
 
     // A real 1x1 PNG: the avatar restore re-decodes the bytes (AvatarService/ImageConverter) to compute a
     // thumbnail, so non-image bytes would fail.
