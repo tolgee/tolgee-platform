@@ -1,6 +1,7 @@
 package io.tolgee.api.v2.controllers.administration
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.controllers.IController
 import io.tolgee.openApiDocs.OpenApiSelfHostedExtension
@@ -73,12 +74,20 @@ class ProjectExportImportController(
       "Wipes ALL in-scope content of this project and replaces it with the uploaded export zip " +
         "(mirror / wipe-and-replace). The zip must come from an instance running the same Tolgee " +
         "version. Users are matched by username/email; content authored by a user not present on this " +
-        "instance is attributed to the importing admin.",
+        "instance is attributed to the importing admin. Setting `ignoreVersion` bypasses the version " +
+        "check — unsupported: a cross-version import may complete yet silently corrupt the project's data.",
   )
   @RequiresSuperAuthentication
   fun importProject(
     @PathVariable projectId: Long,
     @RequestParam("file") file: MultipartFile,
+    @Parameter(
+      description =
+        "Bypass the schema-version check. Unsupported; intended only for cross-version admin recovery — " +
+          "the import may complete yet silently corrupt data.",
+    )
+    @RequestParam("ignoreVersion", defaultValue = "false")
+    ignoreVersion: Boolean = false,
   ) {
     file.inputStream.use { stream ->
       projectExportImportImporter.import(
@@ -86,6 +95,7 @@ class ProjectExportImportController(
         targetProjectId = projectId,
         importingAdminId = authenticationFacade.authenticatedUser.id,
         runningVersion = versionProvider.version,
+        ignoreVersion = ignoreVersion,
       )
     }
   }

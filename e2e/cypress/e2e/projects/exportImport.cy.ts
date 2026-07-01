@@ -75,6 +75,35 @@ describe('Project settings - Export & Import (server admin)', () => {
     gcy('project-settings-import-manifest').should('not.exist');
     gcy('project-settings-import-button').should('be.disabled');
   });
+
+  it('imports a version-mismatched archive via the override confirmation', () => {
+    cy.intercept('POST', '**/administration/projects/*/import*', {
+      statusCode: 200,
+      body: {},
+    }).as('import');
+
+    visitProjectSettings(projectId);
+    gcy('project-settings-menu-export-import').click();
+
+    gcy('project-settings-export-import')
+      .find('input[type=file]')
+      .selectFile('cypress/fixtures/version-mismatch-export.zip', {
+        force: true,
+      });
+
+    gcy('project-settings-import-manifest').should('be.visible');
+    gcy('project-settings-import-version-warning').should('be.visible');
+
+    gcy('project-settings-import-button').should('not.be.disabled').click();
+    cy.contains('0.0.0-mismatch').should('be.visible');
+    cy.contains('wipes project Test').should('be.visible');
+    confirmHardMode();
+
+    cy.wait('@import')
+      .its('request.url')
+      .should('include', 'ignoreVersion=true');
+    gcy('project-settings-import-manifest').should('not.exist');
+  });
 });
 
 describe('Project settings - Export & Import (non-admin gating)', () => {

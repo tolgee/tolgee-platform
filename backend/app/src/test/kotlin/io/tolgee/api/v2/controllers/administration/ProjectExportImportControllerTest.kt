@@ -1,6 +1,7 @@
 package io.tolgee.api.v2.controllers.administration
 
 import io.tolgee.development.testDataBuilder.data.ProjectExportImportTestData
+import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.testing.AuthorizedControllerTest
@@ -12,7 +13,10 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.MvcResult
 import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
+import java.util.zip.ZipOutputStream
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -71,6 +75,91 @@ class ProjectExportImportControllerTest : AuthorizedControllerTest() {
     ).andIsOk
 
     assertThat(projectKeyNames()).contains("greeting", "labeled")
+  }
+
+  @Test
+  fun `import rejects a version mismatch without the override`() {
+    val zip = tamperManifestVersion(exportedZipBytes(), "some-other-version")
+
+    userAccount = testData.adminUser
+    performAuthMultipart(
+      "/v2/administration/projects/${testData.project.id}/import",
+      listOf(MockMultipartFile("file", "export.zip", "application/zip", zip)),
+    ).andIsBadRequest
+  }
+
+  @Test
+  fun `import bypasses a version mismatch with ignoreVersion`() {
+    val zip = tamperManifestVersion(exportedZipBytes(), "some-other-version")
+
+    userAccount = testData.adminUser
+    performAuthMultipart(
+      "/v2/administration/projects/${testData.project.id}/import",
+      listOf(MockMultipartFile("file", "export.zip", "application/zip", zip)),
+      mapOf("ignoreVersion" to arrayOf("true")),
+    ).andIsOk
+
+    assertThat(projectKeyNames()).contains("greeting", "labeled")
+  }
+
+  @Test
+  fun `a failed override import rolls back, leaving the project intact`() {
+    val zip =
+      replaceEntry(
+        tamperManifestVersion(exportedZipBytes(), "some-other-version"),
+        "entities/Key.json",
+        "{ not valid json".toByteArray(),
+      )
+
+    userAccount = testData.adminUser
+    val status =
+      performAuthMultipart(
+        "/v2/administration/projects/${testData.project.id}/import",
+        listOf(MockMultipartFile("file", "export.zip", "application/zip", zip)),
+        mapOf("ignoreVersion" to arrayOf("true")),
+      ).andReturn().response.status
+    assertThat(status).isGreaterThanOrEqualTo(400)
+
+    assertThat(projectKeyNames()).contains("greeting", "labeled")
+  }
+
+  private fun replaceEntry(
+    zip: ByteArray,
+    name: String,
+    newBytes: ByteArray,
+  ): ByteArray =
+    rewriteZipEntries(zip) { entryName, bytes ->
+      if (entryName != name) return@rewriteZipEntries bytes
+      newBytes
+    }
+
+  private fun tamperManifestVersion(
+    zip: ByteArray,
+    newVersion: String,
+  ): ByteArray =
+    rewriteZipEntries(zip) { entryName, bytes ->
+      if (entryName != "manifest.json") return@rewriteZipEntries bytes
+      String(bytes)
+        .replace(Regex("\"schemaVersion\"\\s*:\\s*\"[^\"]*\""), "\"schemaVersion\":\"$newVersion\"")
+        .toByteArray()
+    }
+
+  private fun rewriteZipEntries(
+    zip: ByteArray,
+    transform: (name: String, bytes: ByteArray) -> ByteArray,
+  ): ByteArray {
+    val out = ByteArrayOutputStream()
+    ZipOutputStream(out).use { zos ->
+      ZipInputStream(ByteArrayInputStream(zip)).use { zis ->
+        generateSequence { zis.nextEntry }.filterNot { it.isDirectory }.forEach { entry ->
+          val bytes = transform(entry.name, zis.readAllBytes())
+          zos.putNextEntry(ZipEntry(entry.name))
+          zos.write(bytes)
+          zos.closeEntry()
+        }
+      }
+    }
+    return out.toByteArray()
   }
 
   private fun exportedZipBytes(): ByteArray {

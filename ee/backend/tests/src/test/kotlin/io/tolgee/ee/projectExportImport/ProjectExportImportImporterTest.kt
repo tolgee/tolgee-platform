@@ -255,6 +255,22 @@ class ProjectExportImportImporterTest : AbstractSpringTest() {
   }
 
   @Test
+  fun `with ignoreVersion, replaces content despite a version-string mismatch`() {
+    val zip = exportZip(source.project.id)
+    importer.import(
+      ByteArrayInputStream(zip),
+      target.targetProject.id,
+      source.adminUser.id,
+      "wrong-version",
+      ignoreVersion = true,
+    )
+
+    assertThat(keyNames(target.targetProject.id))
+      .contains("greeting")
+      .doesNotContain(target.oldKeyName)
+  }
+
+  @Test
   fun `produces no activity revisions`() {
     val before = activityRevisionCount()
     importSourceOntoTarget()

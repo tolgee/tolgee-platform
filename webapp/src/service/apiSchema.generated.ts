@@ -62,7 +62,7 @@ export interface paths {
     get: operations["exportProject"];
   };
   "/v2/administration/projects/{projectId}/import": {
-    /** Wipes ALL in-scope content of this project and replaces it with the uploaded export zip (mirror / wipe-and-replace). The zip must come from an instance running the same Tolgee version. Users are matched by username/email; content authored by a user not present on this instance is attributed to the importing admin. */
+    /** Wipes ALL in-scope content of this project and replaces it with the uploaded export zip (mirror / wipe-and-replace). The zip must come from an instance running the same Tolgee version. Users are matched by username/email; content authored by a user not present on this instance is attributed to the importing admin. Setting `ignoreVersion` bypasses the version check — unsupported: a cross-version import may complete yet silently corrupt the project's data. */
     post: operations["importProject"];
   };
   "/v2/administration/users": {
@@ -8370,11 +8370,15 @@ export interface operations {
       };
     };
   };
-  /** Wipes ALL in-scope content of this project and replaces it with the uploaded export zip (mirror / wipe-and-replace). The zip must come from an instance running the same Tolgee version. Users are matched by username/email; content authored by a user not present on this instance is attributed to the importing admin. */
+  /** Wipes ALL in-scope content of this project and replaces it with the uploaded export zip (mirror / wipe-and-replace). The zip must come from an instance running the same Tolgee version. Users are matched by username/email; content authored by a user not present on this instance is attributed to the importing admin. Setting `ignoreVersion` bypasses the version check — unsupported: a cross-version import may complete yet silently corrupt the project's data. */
   importProject: {
     parameters: {
       path: {
         projectId: number;
+      };
+      query: {
+        /** Bypass the schema-version check. Unsupported; intended only for cross-version admin recovery — the import may complete yet silently corrupt data. */
+        ignoreVersion?: boolean;
       };
     };
     responses: {

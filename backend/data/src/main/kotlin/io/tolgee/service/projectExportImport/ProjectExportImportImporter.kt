@@ -29,8 +29,12 @@ import java.io.InputStream
  * rolls back to the pre-import state.
  *
  * The schema-version gate runs first and before any mutation — a mismatched export aborts with the target
- * untouched. The remaining steps are: clear-in-place, two-phase insert, project scalar mirror, blob
- * restore, then a derived-data refresh.
+ * untouched, UNLESS [import]'s `ignoreVersion` is set, in which case the equality check is skipped and the
+ * wipe proceeds against a possibly-drifted schema — where an insert that *succeeds* can commit
+ * subtly-wrong/partial data (the unbounded hazard of the bypass, which no transaction can catch).
+ *
+ * The remaining steps are: clear-in-place, two-phase insert, project scalar mirror, blob restore, then a
+ * derived-data refresh.
  */
 @Component
 class ProjectExportImportImporter(
@@ -47,15 +51,19 @@ class ProjectExportImportImporter(
   private val languageStatsService: LanguageStatsService,
   private val activityHolder: ActivityHolder,
 ) : Logging {
-  @Transactional
+  // rollbackFor = Exception: the wipe runs before the re-insert, and a parse/IO failure mid-insert is a
+  // checked exception that the default (runtime-only) rollback rule would let commit — leaving the target
+  // permanently wiped. Rolling back on any exception keeps clear()+insert a single all-or-nothing unit.
+  @Transactional(rollbackFor = [Exception::class])
   fun import(
     input: InputStream,
     targetProjectId: Long,
     importingAdminId: Long,
     runningVersion: String,
+    ignoreVersion: Boolean = false,
   ) {
     val parsed = zipReader.read(input)
-    if (parsed.manifest.schemaVersion != runningVersion) {
+    if (!ignoreVersion && parsed.manifest.schemaVersion != runningVersion) {
       throw BadRequestException(
         Message.PROJECT_IMPORT_VERSION_MISMATCH,
         listOf(parsed.manifest.schemaVersion, runningVersion),

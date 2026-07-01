@@ -108,9 +108,52 @@ export const ProjectSettingsExportImport = () => {
   const versionMismatch =
     manifest !== null && manifest.schemaVersion !== config.version;
 
+  const runImport = (selected: FilesType[number], ignoreVersion: boolean) => {
+    importLoadable.mutate(
+      {
+        path: { projectId: project.id },
+        query: { ignoreVersion },
+        content: {
+          'multipart/form-data': { file: selected.file as any },
+        },
+      },
+      {
+        onSuccess() {
+          messageService.success(
+            <T keyName="project_settings_import_success_message" />
+          );
+          clearSelection();
+        },
+      }
+    );
+  };
+
   const handleImport = () => {
     const selected = file;
-    if (!selected || manifestLoading || manifestUnreadable || versionMismatch) {
+    if (!selected || manifestLoading || manifestUnreadable) {
+      return;
+    }
+    if (versionMismatch) {
+      confirmation({
+        title: <T keyName="project_settings_import_version_confirm_title" />,
+        message: (
+          <T
+            keyName="project_settings_import_version_confirm_message"
+            params={{
+              name: project.name,
+              manifestVersion: manifest!.schemaVersion,
+              runningVersion: config.version,
+            }}
+          />
+        ),
+        confirmButtonText: (
+          <T keyName="project_settings_import_version_confirm_button" />
+        ),
+        hardModeText: project.name.toUpperCase(),
+        onConfirm() {
+          runImport(selected, true);
+        },
+      });
       return;
     }
     confirmation({
@@ -124,22 +167,7 @@ export const ProjectSettingsExportImport = () => {
       confirmButtonText: <T keyName="project_settings_import_confirm_button" />,
       hardModeText: project.name.toUpperCase(),
       onConfirm() {
-        importLoadable.mutate(
-          {
-            path: { projectId: project.id },
-            content: {
-              'multipart/form-data': { file: selected.file as any },
-            },
-          },
-          {
-            onSuccess() {
-              messageService.success(
-                <T keyName="project_settings_import_success_message" />
-              );
-              clearSelection();
-            },
-          }
-        );
+        runImport(selected, false);
       },
     });
   };
@@ -245,9 +273,7 @@ export const ProjectSettingsExportImport = () => {
         <DangerButton
           data-cy="project-settings-import-button"
           loading={importLoadable.isLoading}
-          disabled={
-            !file || manifestLoading || manifestUnreadable || versionMismatch
-          }
+          disabled={!file || manifestLoading || manifestUnreadable}
           onClick={handleImport}
         >
           <T keyName="project_settings_import_button" />
