@@ -3161,7 +3161,9 @@ export interface components {
         | "plan_migration_not_found"
         | "plan_has_migrations"
         | "source_and_target_plan_must_be_different"
-        | "project_import_version_mismatch";
+        | "project_import_version_mismatch"
+        | "project_import_missing_project_json"
+        | "project_import_corrupt_archive";
       params?: unknown[];
     };
     ExistenceEntityDescription: {
@@ -6951,7 +6953,9 @@ export interface components {
         | "plan_migration_not_found"
         | "plan_has_migrations"
         | "source_and_target_plan_must_be_different"
-        | "project_import_version_mismatch";
+        | "project_import_version_mismatch"
+        | "project_import_missing_project_json"
+        | "project_import_corrupt_archive";
       params?: unknown[];
       success: boolean;
     };
