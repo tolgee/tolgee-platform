@@ -1,3 +1,10 @@
+# [3.209.0](https://github.com/tolgee/tolgee-platform/compare/v3.208.0...v3.209.0) (2026-07-01)
+
+
+### Features
+
+* show org name in API key project selector for multi-org users ([#3767](https://github.com/tolgee/tolgee-platform/issues/3767)) ([3af4aec](https://github.com/tolgee/tolgee-platform/commit/3af4aec3415f32941963dd685694d0bd7a5c9699))
+
 # [3.208.0](https://github.com/tolgee/tolgee-platform/compare/v3.207.0...v3.208.0) (2026-07-01)
 
 
