@@ -1,5 +1,6 @@
 package io.tolgee.unit.formats.csv.`in`
 
+import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.formats.csv.`in`.CsvFileProcessor
 import io.tolgee.testing.assert
 import io.tolgee.util.FileProcessorContextMockUtil
@@ -12,6 +13,7 @@ import io.tolgee.util.custom
 import io.tolgee.util.description
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class CsvFormatProcessorTest {
   lateinit var mockUtil: FileProcessorContextMockUtil
@@ -470,6 +472,26 @@ class CsvFormatProcessorTest {
       convertPlaceholders,
       projectIcuPlaceholdersEnabled,
     )
+  }
+
+  @Test
+  fun `throws when the key column is empty in every row`() {
+    mockUtil.mockIt("empty_key_column.csv", "src/test/resources/import/csv/empty_key_column.csv")
+    val exception =
+      assertThrows<ImportCannotParseFileException> {
+        processFile()
+      }
+    exception.causeMessage.assert.contains("The key column")
+  }
+
+  @Test
+  fun `throws when an extra title row pushes the language header out of place`() {
+    mockUtil.mockIt("title_row_on_top.csv", "src/test/resources/import/csv/title_row_on_top.csv")
+    val exception =
+      assertThrows<ImportCannotParseFileException> {
+        processFile()
+      }
+    exception.causeMessage.assert.contains("No language columns were detected")
   }
 
   private fun processFile() {

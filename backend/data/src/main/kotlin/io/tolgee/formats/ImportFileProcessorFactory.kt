@@ -34,7 +34,7 @@ class ImportFileProcessorFactory(
   fun getArchiveProcessor(file: ImportFileDto): ImportArchiveProcessor {
     return when (file.name.fileNameExtension) {
       "zip" -> ZipTypeProcessor(tolgeeProperties.maxUploadFileSize.toLong() * 1024L)
-      else -> throw ImportCannotParseFileException(file.name, "No matching processor")
+      else -> throw noMatchingProcessorException(file.name, listOf("zip"))
     }
   }
 
@@ -45,9 +45,17 @@ class ImportFileProcessorFactory(
     val format =
       findFormatInMapping(context)
         ?: ImportFileFormat.findByExtension(file.name.fileNameExtension)
-        ?: throw ImportCannotParseFileException(file.name, "No matching processor")
+        ?: throw noMatchingProcessorException(file.name, ImportFileFormat.supportedExtensions)
 
     return getProcessor(format, context)
+  }
+
+  private fun noMatchingProcessorException(
+    filename: String,
+    supportedExtensions: List<String>,
+  ): ImportCannotParseFileException {
+    val message = "No matching processor. Supported file extensions: ${supportedExtensions.joinToString(", ")}"
+    return ImportCannotParseFileException(filename, message)
   }
 
   private fun findFormatInMapping(context: FileProcessorContext) = context.mapping?.format?.fileFormat

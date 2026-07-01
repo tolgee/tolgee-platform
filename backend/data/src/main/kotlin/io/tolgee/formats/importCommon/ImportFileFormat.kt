@@ -26,6 +26,10 @@ enum class ImportFileFormat(
         }.toMap()
     }
 
+    val supportedExtensions: List<String> by lazy {
+      extensionFormatMap.keys.toList()
+    }
+
     fun findByExtension(extension: String?): ImportFileFormat? {
       return extensionFormatMap[extension]
     }
