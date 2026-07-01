@@ -8,7 +8,6 @@ import { PUBLIC_CONTENT_MAX_WIDTH } from './publicProjectsLayout';
 const StyledBanner = styled('div')`
   position: relative;
   width: 100%;
-  overflow: hidden;
   background: linear-gradient(
     to right,
     ${({ theme }) => alpha(theme.palette.background.default, 0.12)},
@@ -28,6 +27,9 @@ const StyledContent = styled('div')`
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing(2.5)};
+`;
+
+const StyledSubtext = styled(Typography)`
   max-width: 561px;
 `;
 
@@ -67,7 +69,7 @@ const StyledBullet = styled('div')`
 const StyledMouse = styled('img')`
   position: absolute;
   right: ${({ theme }) => theme.spacing(2)};
-  bottom: 0;
+  bottom: -20px;
   height: 190px;
   pointer-events: none;
   user-select: none;
@@ -95,12 +97,12 @@ export const CommunityTranslationBanner = () => {
               />
             </StyledHeading>
           </div>
-          <Typography variant="body1">
+          <StyledSubtext variant="body1">
             <T
               keyName="public_projects_banner_subtext"
               defaultValue="Projects of all kinds, from games to apps to tools, are looking for translators. Browse, pick a language, and start contributing."
             />
-          </Typography>
+          </StyledSubtext>
           <StyledBullets>
             <StyledBullet>
               <Edit05 width={21} height={22} />

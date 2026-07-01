@@ -23,14 +23,14 @@ const StyledContent = styled('div')`
   width: 100%;
   max-width: ${PUBLIC_CONTENT_MAX_WIDTH}px;
   margin: 0 auto;
-  padding: ${({ theme }) => theme.spacing(0, 2, 4)};
+  padding: ${({ theme }) => theme.spacing(4, 2)};
 `;
 
 const MAX_PROJECTS_WITHOUT_SEARCH = 5;
 
 const StyledSearch = styled('div')`
   display: flex;
-  padding: ${({ theme }) => theme.spacing(4, 0, 3)};
+  padding: ${({ theme }) => theme.spacing(0, 0, 3)};
   & > * {
     width: 220px;
   }
