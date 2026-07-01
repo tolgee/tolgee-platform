@@ -1,6 +1,8 @@
 package io.tolgee.ee
 
 import io.tolgee.configuration.annotations.DocProperty
+import io.tolgee.configuration.tolgee.validateNestedProperties
+import jakarta.annotation.PostConstruct
 import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties(prefix = "tolgee.ee")
@@ -21,4 +23,9 @@ class EeProperties(
    */
   @DocProperty(hidden = true)
   var checkPeriodInMs: Long = 1000 * 60 * 5,
-)
+) {
+  @PostConstruct
+  fun validateProperties() {
+    validateNestedProperties(this)
+  }
+}

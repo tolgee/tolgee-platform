@@ -2,7 +2,7 @@ package io.tolgee.batch
 
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.component.UsingRedisProvider
-import io.tolgee.configuration.tolgee.BatchProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import org.redisson.api.RMap
@@ -23,8 +23,10 @@ class BatchJobProjectLockingManager(
   @Lazy
   private val redissonClient: RedissonClient,
   private val usingRedisProvider: UsingRedisProvider,
-  private val batchProperties: BatchProperties,
+  private val tolgeeProperties: TolgeeProperties,
 ) : Logging {
+  private val batchProperties get() = tolgeeProperties.batch
+
   companion object {
     private val localProjectLocks by lazy {
       ConcurrentHashMap<Long, Long?>()

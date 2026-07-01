@@ -2,8 +2,10 @@ package io.tolgee.ee.configuration
 
 import io.tolgee.PostgresRunner
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.ee.EeProperties
 import liquibase.integration.spring.SpringLiquibase
 import org.springframework.boot.autoconfigure.domain.EntityScan
+import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories
@@ -12,6 +14,7 @@ import javax.sql.DataSource
 @Configuration
 @EnableJpaRepositories("io.tolgee.ee.repository")
 @EntityScan(basePackages = ["io.tolgee.ee.model"])
+@EnableConfigurationProperties(EeProperties::class)
 class EeLiquibaseConfiguration(
   val tolgeeProperties: TolgeeProperties,
 ) {

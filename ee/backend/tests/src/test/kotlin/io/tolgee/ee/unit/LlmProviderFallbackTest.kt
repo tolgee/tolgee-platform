@@ -3,6 +3,7 @@ package io.tolgee.ee.unit
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.adminMtServiceFilter.AdminMtServiceFilter
 import io.tolgee.configuration.tolgee.InternalProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Caches
 import io.tolgee.dtos.LlmParams
 import io.tolgee.ee.component.llm.AnthropicApiService
@@ -38,6 +39,7 @@ class LlmProviderFallbackTest {
   private lateinit var cache: Cache
   private lateinit var openaiApiService: OpenaiApiService
   private lateinit var internalProperties: InternalProperties
+  private lateinit var tolgeeProperties: TolgeeProperties
   private lateinit var currentDateProvider: CurrentDateProvider
   private lateinit var restTemplateBuilder: RestTemplateBuilder
   private lateinit var adminMtServiceFilter: AdminMtServiceFilter
@@ -52,6 +54,8 @@ class LlmProviderFallbackTest {
     cache = mock()
     openaiApiService = mock()
     internalProperties = mock()
+    tolgeeProperties = mock()
+    whenever(tolgeeProperties.internal).thenReturn(internalProperties)
     currentDateProvider = mock()
     restTemplateBuilder = mock()
     adminMtServiceFilter = mock()
@@ -84,7 +88,7 @@ class LlmProviderFallbackTest {
         cacheManager = cacheManager,
         currentDateProvider = currentDateProvider,
         restTemplateBuilder = restTemplateBuilder,
-        internalProperties = internalProperties,
+        tolgeeProperties = tolgeeProperties,
         anthropicApiService = mock<AnthropicApiService>(),
         googleAiApiService = mock<GoogleAiApiService>(),
         llmProviderResolver = resolver,

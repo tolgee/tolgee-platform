@@ -1,7 +1,7 @@
 package io.tolgee.service.dataImport
 
 import io.tolgee.api.IImportSettings
-import io.tolgee.configuration.tolgee.ImportProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.ImportResult
 import io.tolgee.dtos.dataImport.SimpleImportConflictResult
@@ -70,7 +70,7 @@ class StoredDataImporter(
 
   private val authenticationFacade = applicationContext.getBean(AuthenticationFacade::class.java)
 
-  private val importProperties = applicationContext.getBean(ImportProperties::class.java)
+  private val importProperties = applicationContext.getBean(TolgeeProperties::class.java).import
 
   private val batchSize: Int
     get() = importProperties.flushBatchSize

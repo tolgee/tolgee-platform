@@ -85,6 +85,9 @@ dependencies {
     implementation libs.springmockk
     implementation libs.mockito
     implementation libs.jsonUnitAssert
+    // Align the launcher with the BOM-managed junit-platform-engine; Gradle otherwise auto-injects an
+    // older launcher and test discovery fails with "OutputDirectoryProvider not available".
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     /**
      * Kotlin

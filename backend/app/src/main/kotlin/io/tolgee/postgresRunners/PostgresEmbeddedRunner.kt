@@ -1,8 +1,7 @@
 package io.tolgee.postgresRunners
 
 import io.tolgee.PostgresRunner
-import io.tolgee.configuration.tolgee.FileStorageProperties
-import io.tolgee.configuration.tolgee.PostgresAutostartProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.fixtures.waitFor
 import org.slf4j.LoggerFactory
 import java.io.IOException
@@ -12,9 +11,10 @@ import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.concurrent.thread
 
 class PostgresEmbeddedRunner(
-  private val postgresAutostartProperties: PostgresAutostartProperties,
-  private val storageProperties: FileStorageProperties,
+  private val tolgeeProperties: TolgeeProperties,
 ) : PostgresRunner {
+  private val postgresAutostartProperties get() = tolgeeProperties.postgresAutostart
+  private val storageProperties get() = tolgeeProperties.fileStorage
   private val logger = LoggerFactory.getLogger(javaClass)
   private lateinit var proc: Process
   private var running: AtomicBoolean = AtomicBoolean(false)

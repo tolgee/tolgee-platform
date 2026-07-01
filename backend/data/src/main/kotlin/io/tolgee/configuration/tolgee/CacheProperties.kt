@@ -1,10 +1,9 @@
 package io.tolgee.configuration.tolgee
 
 import io.tolgee.configuration.annotations.DocProperty
-import org.springframework.boot.context.properties.ConfigurationProperties
 
-@ConfigurationProperties(prefix = "tolgee.cache")
 @DocProperty(
+  prefix = "tolgee.cache",
   description =
     "At the expense of higher memory footprint, " +
       "Tolgee can use a cache to reduce the stress on the database and fetch the\n" +

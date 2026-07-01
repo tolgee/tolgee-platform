@@ -1,7 +1,6 @@
 package io.tolgee.config
 
-import io.tolgee.configuration.tolgee.InternalProperties
-import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import org.mockito.Mockito
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
@@ -24,13 +23,7 @@ class BatchJobBaseConfiguration {
    */
   @Bean
   @Primary
-  fun machineTranslationProperties(): MachineTranslationProperties {
-    return Mockito.spy(MachineTranslationProperties::class.java)
-  }
-
-  @Bean
-  @Primary
-  fun internalProperties(): InternalProperties {
-    return Mockito.spy(InternalProperties::class.java)
+  fun tolgeeProperties(): TolgeeProperties {
+    return Mockito.spy(TolgeeProperties::class.java)
   }
 }
