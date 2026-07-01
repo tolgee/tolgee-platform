@@ -32,6 +32,11 @@ import { useProject } from 'tg.hooks/useProject';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { applyBranchToUrl } from 'tg.component/branching/branchingPath';
 import { useTrashCount } from '../trash/useTrashCount';
+import {
+  useAppTriggerDispatch,
+  useAppTriggers,
+} from '../../apps/useAppTriggers';
+import { AppIcon } from '../../apps/AppIcon';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -182,6 +187,7 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
               </Button>
             </QuickStartHighlight>
           )}
+          <TranslationsToolbarAppActions />
         </StyledSpaced>
       </StyledContainer>
       <TranslationSortMenu
@@ -190,6 +196,39 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
         onChange={setOrder}
         value={order}
       />
+    </>
+  );
+};
+
+const TranslationsToolbarAppActions = () => {
+  const project = useProject();
+  const triggers = useAppTriggers(project.id, 'translations-toolbar-action');
+  const dispatch = useAppTriggerDispatch();
+  if (triggers.length === 0) return null;
+  return (
+    <>
+      {triggers.map((trigger) => (
+        <Tooltip
+          key={`app-toolbar-${trigger.install.id}-${trigger.item.key}`}
+          title={trigger.item.title ?? trigger.item.key}
+          disableInteractive
+        >
+          <IconButton
+            data-cy="translations-toolbar-app-action"
+            data-cy-key={trigger.item.key}
+            onClick={() =>
+              dispatch(trigger, { templateVars: { projectId: project.id } })
+            }
+            size="small"
+          >
+            <AppIcon
+              icon={trigger.item.icon ?? '🔘'}
+              size={20}
+              fontSize="1.1em"
+            />
+          </IconButton>
+        </Tooltip>
+      ))}
     </>
   );
 };

@@ -174,6 +174,12 @@ export const TranslationRead: React.FC<Props> = ({
           className="controls"
           tasks={keyData.tasks?.filter((t) => t.languageTag === language.tag)}
           onTaskStateChange={setAssignedTaskState}
+          keyId={keyData.keyId}
+          keyName={keyData.keyName}
+          keyNamespace={keyData.keyNamespace}
+          languageTag={language.tag}
+          languageId={language.id}
+          translationId={translation?.id}
         />
       )}
     </StyledContainer>

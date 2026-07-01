@@ -1,8 +1,9 @@
-import { Box, styled } from '@mui/material';
+import { Box, IconButton, styled, Tooltip } from '@mui/material';
 import { useState } from 'react';
 import { useQueryClient } from 'react-query';
 import { useProjectActions } from 'tg.hooks/ProjectContext';
 import { invalidateUrlPrefix } from 'tg.service/http/useQueryApi';
+import { useProject } from 'tg.hooks/useProject';
 
 import {
   useTranslationsActions,
@@ -13,6 +14,11 @@ import { BatchOperationDialog } from './OperationsSummary/BatchOperationDialog';
 import { BatchActions, BatchJobModel } from './types';
 import { SelectAllCheckbox } from './SelectAllCheckbox';
 import { useBatchOperations } from './operations';
+import {
+  useAppTriggerDispatch,
+  useAppTriggers,
+} from '../../apps/useAppTriggers';
+import { AppIcon } from '../../apps/AppIcon';
 
 const StyledContainer = styled('div')`
   position: absolute;
@@ -122,6 +128,7 @@ export const BatchOperations = ({ open, onClose }: Props) => {
                   {...sharedProps}
                 />
               </StyledItem>
+              <BatchAppActions selection={selection} />
             </StyledBase>
             {OperationComponent && <OperationComponent {...sharedProps} />}
           </StyledContent>
@@ -134,6 +141,43 @@ export const BatchOperations = ({ open, onClose }: Props) => {
           onFinished={onFinished}
         />
       )}
+    </>
+  );
+};
+
+const BatchAppActions = ({ selection }: { selection: number[] }) => {
+  const project = useProject();
+  const triggers = useAppTriggers(project.id, 'bulk-action');
+  const dispatch = useAppTriggerDispatch();
+  if (triggers.length === 0) return null;
+  return (
+    <>
+      {triggers.map((trigger) => (
+        <StyledItem key={`app-bulk-${trigger.install.id}-${trigger.item.key}`}>
+          <Tooltip
+            title={trigger.item.title ?? trigger.item.key}
+            disableInteractive
+          >
+            <IconButton
+              data-cy="batch-operations-app-action"
+              data-cy-key={trigger.item.key}
+              size="small"
+              onClick={() =>
+                dispatch(trigger, {
+                  templateVars: { projectId: project.id },
+                  extraInitPayload: { selectedKeyIds: selection },
+                })
+              }
+            >
+              <AppIcon
+                icon={trigger.item.icon ?? '🔘'}
+                size={20}
+                fontSize="1.1em"
+              />
+            </IconButton>
+          </Tooltip>
+        </StyledItem>
+      ))}
     </>
   );
 };

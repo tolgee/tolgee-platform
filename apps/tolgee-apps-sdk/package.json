@@ -1,0 +1,42 @@
+{
+  "name": "@tolgee/apps-sdk",
+  "version": "0.0.1-alpha.7",
+  "description": "SDK for building Tolgee Apps plugins — postMessage handshake, manifest schema, webhook signature verifier, JWT context helpers.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./server": {
+      "types": "./dist/server.d.ts",
+      "import": "./dist/server.js"
+    },
+    "./browser": {
+      "types": "./dist/browser.d.ts",
+      "import": "./dist/browser.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup"
+  },
+  "dependencies": {
+    "@tginternal/client": "0.0.0-prerelease.c8329b552"
+  },
+  "devDependencies": {
+    "@types/node": "^24.12.3",
+    "tsup": "^8.3.5",
+    "typescript": "~6.0.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

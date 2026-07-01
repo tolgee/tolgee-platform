@@ -1,0 +1,21 @@
+node_modules
+dist
+dist-ssr
+*.local
+*.tsbuildinfo
+
+# Tunnel + install state written by `npm run dev` / `npm run register`.
+.tolgee-dev/
+
+# Tolgee sources/docs pulled by `npm run pull-context` for AI-assisted dev.
+.context/
+
+# Local env overrides.
+.env.local
+
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.iml
+*.log

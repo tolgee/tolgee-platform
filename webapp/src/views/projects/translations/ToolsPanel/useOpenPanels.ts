@@ -39,5 +39,16 @@ export const useOpenPanels = () => {
     }
   }
 
-  return { openPanels, setOpenPanels, togglePanelOpen } as const;
+  function ensurePanelOpen(id: string) {
+    if (!openPanels.includes(id)) {
+      setOpenPanels([...openPanels, id]);
+    }
+  }
+
+  return {
+    openPanels,
+    setOpenPanels,
+    togglePanelOpen,
+    ensurePanelOpen,
+  } as const;
 };

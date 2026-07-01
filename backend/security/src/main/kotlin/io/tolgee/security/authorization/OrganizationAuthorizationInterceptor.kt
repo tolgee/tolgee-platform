@@ -16,6 +16,7 @@
 
 package io.tolgee.security.authorization
 
+import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.isAdmin
 import io.tolgee.dtos.cacheable.isSupporterOrAdmin
 import io.tolgee.exceptions.NotFoundException
@@ -54,6 +55,12 @@ class OrganizationAuthorizationInterceptor(
     response: HttpServletResponse,
     handler: HandlerMethod,
   ): Boolean {
+    if (authenticationFacade.isAppAuth) {
+      // Apps act on a single project; they have no business satisfying organization-level
+      // role requirements or browsing org-scoped data.
+      throw PermissionException(Message.APP_TOKEN_NOT_ALLOWED_FOR_ENDPOINT)
+    }
+
     val userId = authenticationFacade.authenticatedUser.id
     val organization =
       requestContextService.getTargetOrganization(request)

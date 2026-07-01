@@ -1,0 +1,108 @@
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, system-ui, sans-serif;
+  /* Driven by applyTolgeeTheme(ctx.theme); hex values are fallbacks. */
+  color: var(--tg-color-text, #222);
+  background: var(--tg-color-background, #fff);
+}
+
+main {
+  padding: 16px;
+}
+
+main h1,
+main h2 {
+  margin-top: 0;
+}
+
+.kv {
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.kv th {
+  text-align: left;
+  padding: 4px 12px 4px 0;
+  font-weight: 500;
+  color: var(--tg-color-text-secondary, #666);
+}
+
+.kv td {
+  padding: 4px 0;
+}
+
+.kv code {
+  background: var(--tg-color-background-paper, #f3f3f3);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.back-translate-panel {
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--tg-color-text, #222);
+}
+
+.bt-status {
+  color: var(--tg-color-text-secondary, #666);
+  font-size: 12px;
+}
+
+.bt-error {
+  color: var(--tg-color-error, #c44343);
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.bt-row {
+  margin: 8px 0;
+}
+
+.bt-row-muted {
+  opacity: 0.65;
+}
+
+.bt-row-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--tg-color-text-secondary, #888);
+  margin-bottom: 2px;
+}
+
+.bt-row-value {
+  font-size: 13px;
+  color: var(--tg-color-text, #222);
+  word-break: break-word;
+}
+
+.bt-verdict {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  border: 1px solid var(--tg-color-divider, #ddd);
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin-top: 12px;
+  background: var(--tg-color-background-paper, #fafafa);
+}
+
+.bt-verdict-glyph {
+  font-size: 1.6em;
+  line-height: 1;
+}
+
+.bt-verdict-explanation {
+  font-size: 12px;
+  color: var(--tg-color-text-secondary, #444);
+  margin-top: 2px;
+}
+
+.bt-cached {
+  font-size: 11px;
+  color: var(--tg-color-text-secondary, #888);
+}

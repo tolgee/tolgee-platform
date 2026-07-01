@@ -1,16 +1,25 @@
 {
   "name": "@tolgee/server",
+  "workspaces": [
+    "apps/tolgee-apps-sdk",
+    "apps/tolgee-apps-dev",
+    "apps/create-tolgee-app",
+    "apps/example-apps/*"
+  ],
   "scripts": {
     "release": "semantic-release",
     "release-dry": "semantic-release --no-ci -d",
     "release-dry-debug": "semantic-release --no-ci -d --debug",
-    "init-husky": "npm exec --prefix webapp husky .husky"
+    "init-husky": "npm exec --prefix webapp husky .husky",
+    "build:apps": "lerna run build",
+    "publish:apps:alpha": "lerna run build && lerna publish prerelease --preid alpha --dist-tag alpha --no-git-tag-version --no-push --yes"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.1",
     "@semantic-release/exec": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
     "@semantic-release/github": "^8.0.4",
+    "lerna": "^6.6.2",
     "semantic-release": "^19.0.2"
   },
   "release": {

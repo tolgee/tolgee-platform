@@ -16,6 +16,24 @@ const StyledHeader = styled(Box)`
   height: 39px;
 `;
 
+// Single source of truth for the panel-header leading-icon size, so every panel
+// (native tools panels and Tolgee app panels alike) renders a consistent icon
+// regardless of what each panel passes in.
+export const PANEL_HEADER_ICON_SIZE = 24;
+
+const StyledIcon = styled(Box)`
+  display: grid;
+  place-items: center;
+  width: ${PANEL_HEADER_ICON_SIZE}px;
+  height: ${PANEL_HEADER_ICON_SIZE}px;
+  font-size: ${PANEL_HEADER_ICON_SIZE}px;
+  line-height: 1;
+  & svg {
+    width: ${PANEL_HEADER_ICON_SIZE}px;
+    height: ${PANEL_HEADER_ICON_SIZE}px;
+  }
+`;
+
 const StyledName = styled(Box)`
   flex-shrink: 1;
   white-space: nowrap;
@@ -67,7 +85,7 @@ export const PanelHeader = ({
 }: Props) => {
   return (
     <StyledHeader onMouseDown={(e) => e.preventDefault()} sx={sx}>
-      {icon}
+      <StyledIcon>{icon}</StyledIcon>
       <StyledName>{name}</StyledName>
       {!hideCount && countContent !== undefined ? (
         <StyledBadge data-cy="translation-panel-items-count">

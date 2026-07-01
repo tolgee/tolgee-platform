@@ -41,7 +41,7 @@ class WebhookConfigService(
     projectId: Long,
     pageable: Pageable,
   ): Page<WebhookConfig> {
-    return webhookConfigRepository.findByProjectId(projectId, pageable)
+    return webhookConfigRepository.findByProjectIdAndAppInstallIsNull(projectId, pageable)
   }
 
   fun create(

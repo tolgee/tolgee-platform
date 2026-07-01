@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTranslate } from '@tolgee/react';
 import { Checkbox, styled, Tooltip, Box } from '@mui/material';
 import { Zap } from '@untitled-ui/icons-react';
@@ -23,7 +23,8 @@ import {
 import { ControlsKey } from './cell/ControlsKey';
 import { TagAdd } from './Tags/TagAdd';
 import { TagInput } from './Tags/TagInput';
-import { KeyEditModal } from './KeyEdit/KeyEditModal';
+import { KeyEditModal, TabsType } from './KeyEdit/KeyEditModal';
+import { onKeyDialogOpenRequest } from './decorators/keyDialogEvent';
 import { useKeyCell } from './useKeyCell';
 import { ALLOWED_UPLOAD_TYPES, Screenshots } from './Screenshots/Screenshots';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
@@ -178,6 +179,25 @@ export const CellKey: React.FC<Props> = ({
       cellRef,
     });
 
+  const [pluginTab, setPluginTab] = useState<TabsType | null>(null);
+
+  useEffect(
+    () =>
+      onKeyDialogOpenRequest((detail) => {
+        if (detail.keyId !== data.keyId) return;
+        setPluginTab(detail.initialTab as TabsType);
+      }),
+    [data.keyId]
+  );
+
+  const dialogOpen = isEditing || pluginTab != null;
+  const dialogInitialTab: TabsType =
+    pluginTab ?? (editVal?.mode === 'context' ? 'context' : 'general');
+  const closeDialog = (forceFlag: boolean) => {
+    if (pluginTab != null) setPluginTab(null);
+    if (isEditing) handleClose(forceFlag);
+  };
+
   return (
     <>
       <StyledContainer
@@ -276,6 +296,9 @@ export const CellKey: React.FC<Props> = ({
                 onEdit={() => handleOpen()}
                 onAddScreenshot={canAddScreenshots ? openFiles : undefined}
                 editEnabled={editEnabled}
+                keyId={data.keyId}
+                keyName={data.keyName}
+                keyNamespace={data.keyNamespace}
               />
             ) : (
               // hide as many components as possible in order to be performant
@@ -302,11 +325,11 @@ export const CellKey: React.FC<Props> = ({
           </>
         )}
       </StyledContainer>
-      {isEditing && (
+      {dialogOpen && (
         <KeyEditModal
           data={data}
-          onClose={() => handleClose(true)}
-          initialTab={editVal?.mode === 'context' ? 'context' : 'general'}
+          onClose={() => closeDialog(true)}
+          initialTab={dialogInitialTab}
         />
       )}
     </>

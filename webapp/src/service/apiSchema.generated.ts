@@ -114,6 +114,10 @@ export interface paths {
     /** Returns specific API key info */
     get: operations["get_26"];
   };
+  "/v2/apps/self/manifest-url": {
+    /** Repoints the install at a new manifest URL and re-fetches the manifest. The new manifest must declare the same `id` as the original — a plugin can swap its dev tunnel URL between restarts but can't masquerade as a different plugin. Authenticated by the install's `clientSecret`. */
+    patch: operations["updateManifestUrl_1"];
+  };
   "/v2/auth-provider": {
     get: operations["getCurrentAuthProvider"];
     delete: operations["deleteCurrentAuthProvider"];
@@ -199,6 +203,28 @@ export interface paths {
   "/v2/organizations/{id}/users": {
     /** Returns all users in organization. The result also contains users who are only members of projects in the organization. */
     get: operations["getAllUsers_1"];
+  };
+  "/v2/organizations/{organizationId}/apps": {
+    /** Returns all apps registered for the organization. */
+    get: operations["list_4"];
+    /** Fetches the manifest at the given URL and registers the app for the organization. */
+    post: operations["register"];
+  };
+  "/v2/organizations/{organizationId}/apps/preview": {
+    /** Fetches the manifest at the given URL and returns its parsed contents (including the requested scopes) without persisting anything. Used by the registration UI to show a consent prompt before installing. */
+    post: operations["preview"];
+  };
+  "/v2/organizations/{organizationId}/apps/{installId}": {
+    /** Removes the registered app from the organization. */
+    delete: operations["remove"];
+  };
+  "/v2/organizations/{organizationId}/apps/{installId}/manifest-url": {
+    /** Repoints an existing install at a new manifest URL and re-fetches the manifest from there. The new manifest must declare the same `id` as the original. Useful for development: a tunnel URL that changes on every restart can be swapped in without re-installing the app. */
+    patch: operations["updateManifestUrl"];
+  };
+  "/v2/organizations/{organizationId}/apps/{installId}/refresh": {
+    /** Re-fetches the manifest from the registered URL and updates the stored snapshot. */
+    post: operations["refresh"];
   };
   "/v2/organizations/{organizationId}/base-languages": {
     /** Returns all base languages in use by projects owned by specified organization */
@@ -455,6 +481,20 @@ export interface paths {
     /** Returns all API keys for specified project */
     get: operations["allByProject"];
   };
+  "/v2/projects/{projectId}/apps": {
+    /** Returns all apps registered in the project's organization, each annotated with whether it is enabled for this project. */
+    get: operations["list_11"];
+  };
+  "/v2/projects/{projectId}/apps/{installId}": {
+    /** Enables the given app install for this project. Idempotent. */
+    put: operations["enable"];
+    /** Disables the given app for this project. Idempotent — no-op if it wasn't enabled. */
+    delete: operations["disable"];
+  };
+  "/v2/projects/{projectId}/apps/{installId}/token": {
+    /** Issues a short-lived JWT bound to (install, project, current user) that the iframe can use to call Tolgee's REST API on behalf of the user. Returns 404 if the install is not enabled for this project. */
+    post: operations["mintToken"];
+  };
   "/v2/projects/{projectId}/auto-translation-settings": {
     /** Returns default auto translation settings for project (deprecated: use per language config with null language id) */
     get: operations["getAutoTranslationSettings"];
@@ -466,7 +506,7 @@ export interface paths {
     delete: operations["removeAvatar_1"];
   };
   "/v2/projects/{projectId}/batch-jobs": {
-    get: operations["list_4"];
+    get: operations["list_5"];
   };
   "/v2/projects/{projectId}/batch-jobs/{id}": {
     get: operations["get_22"];
@@ -722,7 +762,7 @@ export interface paths {
     get: operations["selectKeys_2"];
   };
   "/v2/projects/{projectId}/keys/trash": {
-    get: operations["list_8"];
+    get: operations["list_9"];
   };
   "/v2/projects/{projectId}/keys/trash/deleters": {
     get: operations["listDeleters"];
@@ -1043,7 +1083,7 @@ export interface paths {
   };
   "/v2/projects/{projectId}/translation-memories": {
     /** Always readable. When the TRANSLATION_MEMORY feature is not enabled for the organization, only the project-type assignment (if any) is returned so the settings page can still show the row that already drives in-project suggestions. */
-    get: operations["list_6"];
+    get: operations["list_7"];
   };
   "/v2/projects/{projectId}/translation-memories/project-tm-settings": {
     /** Sets TM-level flags on the project's own PROJECT-type TM. The shared-TM update endpoint rejects PROJECT TMs; this narrow endpoint exists so project admins can toggle the `writeOnlyReviewed` flag without org-level privileges. */
@@ -1492,6 +1532,66 @@ export interface components {
       userFullName?: string;
       username?: string;
     };
+    AppInstallModel: {
+      appId: string;
+      baseUrl: string;
+      clientId?: string;
+      clientSecretPrefix?: string;
+      decoratorsUrl?: string;
+      /** Format: int64 */
+      id: number;
+      manifestUrl: string;
+      modules: components["schemas"]["AppManifestModules"];
+      name: string;
+      scopes: string[];
+      version: string;
+      webhookEvents: string[];
+      webhookSecret?: string;
+      webhookUrl?: string;
+    };
+    AppManifestModules: {
+      "bulk-action"?: components["schemas"]["BulkActionModule"][];
+      "key-action"?: components["schemas"]["KeyActionModule"][];
+      "key-edit-tab"?: components["schemas"]["KeyEditTabModule"][];
+      modal?: components["schemas"]["ModalModule"][];
+      "project-dashboard-page"?: components["schemas"]["ProjectDashboardPageModule"][];
+      "project-menu-action"?: components["schemas"]["ProjectMenuActionModule"][];
+      shortcut?: components["schemas"]["ShortcutModule"][];
+      "translation-action"?: components["schemas"]["TranslationActionModule"][];
+      "translation-tools-panel"?: components["schemas"]["TranslationToolsPanelModule"][];
+      "translation-tools-panel-empty"?: components["schemas"]["TranslationToolsPanelModule"][];
+      "translations-toolbar-action"?: components["schemas"]["TranslationsToolbarActionModule"][];
+    };
+    AppManifestPreviewModel: {
+      appId: string;
+      baseUrl: string;
+      modules: components["schemas"]["AppManifestModules"];
+      name: string;
+      requestedScopes: string[];
+      requestedWebhookEvents: string[];
+      version: string;
+    };
+    AppRegistrationResponseModel: {
+      appId: string;
+      baseUrl: string;
+      clientId?: string;
+      clientSecret: string;
+      clientSecretPrefix?: string;
+      decoratorsUrl?: string;
+      /** Format: int64 */
+      id: number;
+      manifestUrl: string;
+      modules: components["schemas"]["AppManifestModules"];
+      name: string;
+      scopes: string[];
+      version: string;
+      webhookEvents: string[];
+      webhookSecret?: string;
+      webhookUrl?: string;
+    };
+    AppTokenModel: {
+      token: string;
+    };
     ApplyBranchMergeRequest: {
       deleteBranch: boolean;
     };
@@ -1829,6 +1929,15 @@ export interface components {
       /** @description Name of the branch this branch was created from */
       originBranchName?: string;
     };
+    BulkActionModule: {
+      icon?: string;
+      key: string;
+      modalKey?: string;
+      title: string;
+      /** @enum {string} */
+      type: "link" | "panel" | "tab" | "modal";
+      urlTemplate?: string;
+    };
     BusinessEventReportRequest: {
       anonymousUserId?: string;
       data?: { [key: string]: unknown };
@@ -1853,6 +1962,11 @@ export interface components {
     CollectionModelAiPlaygroundResultModel: {
       _embedded?: {
         results?: components["schemas"]["AiPlaygroundResultModel"][];
+      };
+    };
+    CollectionModelAppInstallModel: {
+      _embedded?: {
+        appInstalls?: components["schemas"]["AppInstallModel"][];
       };
     };
     CollectionModelAutoTranslationConfigModel: {
@@ -1943,6 +2057,11 @@ export interface components {
     CollectionModelOrganizationInvitationModel: {
       _embedded?: {
         organizationInvitations?: components["schemas"]["OrganizationInvitationModel"][];
+      };
+    };
+    CollectionModelProjectAppModel: {
+      _embedded?: {
+        projectApps?: components["schemas"]["ProjectAppModel"][];
       };
     };
     CollectionModelProjectInvitationModel: {
@@ -3152,7 +3271,14 @@ export interface components {
         | "qa_checks_not_enabled"
         | "plan_migration_not_found"
         | "plan_has_migrations"
-        | "source_and_target_plan_must_be_different";
+        | "source_and_target_plan_must_be_different"
+        | "app_manifest_fetch_failed"
+        | "app_manifest_invalid"
+        | "app_already_installed"
+        | "app_install_not_found"
+        | "app_token_not_allowed_for_endpoint"
+        | "invalid_app_credentials"
+        | "app_acting_as_user_not_project_member";
       params?: unknown[];
     };
     ExistenceEntityDescription: {
@@ -3731,6 +3857,19 @@ export interface components {
       accessToken?: string;
       tokenType?: string;
     };
+    KeyActionModule: {
+      dynamic: boolean;
+      icon: string;
+      key: string;
+      modalKey?: string;
+      tabKey?: string;
+      tooltip: string;
+      /** @enum {string} */
+      type: "link" | "panel" | "tab" | "modal";
+      urlTemplate?: string;
+      /** @enum {string} */
+      visibility?: "always" | "on-hover";
+    };
     KeyDefinitionDto: {
       name: string;
       namespace?: string;
@@ -3758,6 +3897,12 @@ export interface components {
        * @example homepage
        */
       namespace?: string;
+    };
+    KeyEditTabModule: {
+      entry: string;
+      icon: string;
+      key: string;
+      title: string;
     };
     KeyId: {
       /**
@@ -4343,6 +4488,16 @@ export interface components {
       keyIds: number[];
       llmPrompt?: components["schemas"]["PromptDto"];
       targetLanguageIds: number[];
+    };
+    ModalModule: {
+      entry: string;
+      /** Format: int32 */
+      height?: number;
+      icon?: string;
+      key: string;
+      title: string;
+      /** Format: int32 */
+      width?: number;
     };
     ModifiedEntityModel: {
       description?: { [key: string]: unknown };
@@ -5290,6 +5445,18 @@ export interface components {
        */
       description?: string;
     };
+    ProjectAppModel: {
+      appId: string;
+      baseUrl: string;
+      decoratorsUrl?: string;
+      enabled: boolean;
+      /** Format: int64 */
+      id: number;
+      manifestUrl: string;
+      modules: components["schemas"]["AppManifestModules"];
+      name: string;
+      version: string;
+    };
     ProjectAssignmentDto: {
       /**
        * Format: int32
@@ -5305,6 +5472,12 @@ export interface components {
       readAccess: boolean;
       /** @description Whether the project can write to this TM */
       writeAccess: boolean;
+    };
+    ProjectDashboardPageModule: {
+      entry: string;
+      icon: string;
+      key: string;
+      title: string;
     };
     ProjectInvitationModel: {
       code?: string;
@@ -5370,6 +5543,15 @@ export interface components {
       lockedJobId?: number;
       /** Format: int64 */
       projectId: number;
+    };
+    ProjectMenuActionModule: {
+      icon?: string;
+      key: string;
+      modalKey?: string;
+      title: string;
+      /** @enum {string} */
+      type: "link" | "panel" | "tab" | "modal";
+      urlTemplate?: string;
     };
     ProjectModel: {
       avatar?: components["schemas"]["Avatar"];
@@ -6019,6 +6201,9 @@ export interface components {
        */
       expiresAt?: number;
     };
+    RegisterAppRequest: {
+      manifestUrl: string;
+    };
     RelatedKeyDto: {
       branch?: string;
       keyName: string;
@@ -6313,6 +6498,15 @@ export interface components {
       sourceLanguageTag: string;
       /** @description When true, only translations whose state is REVIEWED are written to this TM. Translations that drop back to TRANSLATED or UNTRANSLATED also remove the entry. TMX import and direct TM-browser edits bypass this filter. Defaults to false. */
       writeOnlyReviewed?: boolean;
+    };
+    ShortcutModule: {
+      combination: string;
+      key: string;
+      modalKey?: string;
+      title?: string;
+      /** @enum {string} */
+      type: "link" | "panel" | "tab" | "modal";
+      urlTemplate?: string;
     };
     SignUpDto: {
       callbackUrl?: string;
@@ -6941,7 +7135,14 @@ export interface components {
         | "qa_checks_not_enabled"
         | "plan_migration_not_found"
         | "plan_has_migrations"
-        | "source_and_target_plan_must_be_different";
+        | "source_and_target_plan_must_be_different"
+        | "app_manifest_fetch_failed"
+        | "app_manifest_invalid"
+        | "app_already_installed"
+        | "app_install_not_found"
+        | "app_token_not_allowed_for_endpoint"
+        | "invalid_app_credentials"
+        | "app_acting_as_user_not_project_member";
       params?: unknown[];
       success: boolean;
     };
@@ -7109,6 +7310,19 @@ export interface components {
       skipped: number;
       /** Format: int32 */
       updated: number;
+    };
+    TranslationActionModule: {
+      dynamic: boolean;
+      icon: string;
+      key: string;
+      modalKey?: string;
+      panelKey?: string;
+      tooltip: string;
+      /** @enum {string} */
+      type: "link" | "panel" | "tab" | "modal";
+      urlTemplate?: string;
+      /** @enum {string} */
+      visibility?: "always" | "on-hover";
     };
     TranslationAgencySimpleModel: {
       avatar?: components["schemas"]["Avatar"];
@@ -7391,6 +7605,12 @@ export interface components {
       state: "ACTIVE" | "ACCEPTED" | "DECLINED";
       translation?: string;
     };
+    TranslationToolsPanelModule: {
+      entry: string;
+      icon: string;
+      key: string;
+      title: string;
+    };
     TranslationViewModel: {
       /**
        * Format: int64
@@ -7452,6 +7672,15 @@ export interface components {
     TranslationWithCommentModel: {
       comment: components["schemas"]["TranslationCommentModel"];
       translation: components["schemas"]["TranslationModel"];
+    };
+    TranslationsToolbarActionModule: {
+      icon?: string;
+      key: string;
+      modalKey?: string;
+      title: string;
+      /** @enum {string} */
+      type: "link" | "panel" | "tab" | "modal";
+      urlTemplate?: string;
     };
     TrashedKeyWithTranslationsModel: {
       /**
@@ -8968,6 +9197,46 @@ export interface operations {
       };
     };
   };
+  /** Repoints the install at a new manifest URL and re-fetches the manifest. The new manifest must declare the same `id` as the original — a plugin can swap its dev tunnel URL between restarts but can't masquerade as a different plugin. Authenticated by the install's `clientSecret`. */
+  updateManifestUrl_1: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AppInstallModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RegisterAppRequest"];
+      };
+    };
+  };
   getCurrentAuthProvider: {
     responses: {
       /** OK */
@@ -10140,6 +10409,260 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["PagedModelUserAccountWithOrganizationRoleModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  /** Returns all apps registered for the organization. */
+  list_4: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelAppInstallModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  /** Fetches the manifest at the given URL and registers the app for the organization. */
+  register: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AppRegistrationResponseModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RegisterAppRequest"];
+      };
+    };
+  };
+  /** Fetches the manifest at the given URL and returns its parsed contents (including the requested scopes) without persisting anything. Used by the registration UI to show a consent prompt before installing. */
+  preview: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AppManifestPreviewModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RegisterAppRequest"];
+      };
+    };
+  };
+  /** Removes the registered app from the organization. */
+  remove: {
+    parameters: {
+      path: {
+        organizationId: number;
+        installId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  /** Repoints an existing install at a new manifest URL and re-fetches the manifest from there. The new manifest must declare the same `id` as the original. Useful for development: a tunnel URL that changes on every restart can be swapped in without re-installing the app. */
+  updateManifestUrl: {
+    parameters: {
+      path: {
+        organizationId: number;
+        installId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AppInstallModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RegisterAppRequest"];
+      };
+    };
+  };
+  /** Re-fetches the manifest from the registered URL and updates the stored snapshot. */
+  refresh: {
+    parameters: {
+      path: {
+        organizationId: number;
+        installId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AppInstallModel"];
         };
       };
       /** Bad Request */
@@ -13941,6 +14464,165 @@ export interface operations {
       };
     };
   };
+  /** Returns all apps registered in the project's organization, each annotated with whether it is enabled for this project. */
+  list_11: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelProjectAppModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  /** Enables the given app install for this project. Idempotent. */
+  enable: {
+    parameters: {
+      path: {
+        projectId: number;
+        installId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ProjectAppModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  /** Disables the given app for this project. Idempotent — no-op if it wasn't enabled. */
+  disable: {
+    parameters: {
+      path: {
+        projectId: number;
+        installId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  /** Issues a short-lived JWT bound to (install, project, current user) that the iframe can use to call Tolgee's REST API on behalf of the user. Returns 404 if the install is not enabled for this project. */
+  mintToken: {
+    parameters: {
+      path: {
+        projectId: number;
+        installId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AppTokenModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
   /** Returns default auto translation settings for project (deprecated: use per language config with null language id) */
   getAutoTranslationSettings: {
     parameters: {
@@ -14112,7 +14794,7 @@ export interface operations {
       };
     };
   };
-  list_4: {
+  list_5: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -17326,7 +18008,7 @@ export interface operations {
       };
     };
   };
-  list_8: {
+  list_9: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -22274,7 +22956,7 @@ export interface operations {
     };
   };
   /** Always readable. When the TRANSLATION_MEMORY feature is not enabled for the organization, only the project-type assignment (if any) is returned so the settings page can still show the row that already drives in-project suggestions. */
-  list_6: {
+  list_7: {
     parameters: {
       path: {
         projectId: number;

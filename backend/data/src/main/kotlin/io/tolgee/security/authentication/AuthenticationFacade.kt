@@ -98,6 +98,14 @@ class AuthenticationFacade(
   val isProjectApiKeyAuth: Boolean
     get() = if (isAuthenticated) authentication.credentials is ApiKeyDto else false
 
+  val isAppAuth: Boolean
+    get() = SecurityContextHolder.getContext().authentication is AppAuthentication
+
+  val appAuthentication: AppAuthentication
+    get() =
+      SecurityContextHolder.getContext().authentication as? AppAuthentication
+        ?: throw AuthenticationException(Message.UNAUTHENTICATED)
+
   val isPersonalAccessTokenAuth: Boolean
     get() = if (isAuthenticated) authentication.credentials is PatDto else false
 

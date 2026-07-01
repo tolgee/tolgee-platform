@@ -1,28 +1,31 @@
-import { useMemo } from 'react';
-import { Box, IconButton, styled, Typography } from '@mui/material';
+import { useEffect, useMemo, useRef } from 'react';
+import { Box, IconButton, styled } from '@mui/material';
 
 import {
   useTranslationsActions,
   useTranslationsSelector,
 } from '../context/TranslationsContext';
+import { useProject } from 'tg.hooks/useProject';
 import { Panel } from './common/Panel';
 
 import { getPanels, PANELS_WHEN_INACTIVE } from './panelsList';
 import { useOpenPanels } from './useOpenPanels';
 import { XClose } from '@untitled-ui/icons-react';
-import { T } from '@tolgee/react';
 import { usePanelData } from './usePanelData';
+import { useAppToolsPanels } from './panels/AppPanel/useAppToolsPanels';
+import { useAppEmptyPanels } from './panels/AppPanel/useAppEmptyPanels';
+import {
+  consumePendingPanelReveal,
+  onPanelRevealRequest,
+} from '../decorators/panelRevealEvent';
 
 const StyledButton = styled(IconButton)`
   position: absolute;
   top: 0px;
   right: 0px;
-`;
-
-const StyledTitle = styled(Box)`
-  margin-top: 6px;
-  margin-left: 8px;
-  padding-left: 8px;
+  /* Sit above the panels' sticky headers (z-index 3) so it stays clickable in
+   * the header's empty right area. */
+  z-index: 4;
 `;
 
 const StyledWrapper = styled('div')`
@@ -39,13 +42,64 @@ const StyledPanelList = styled(Box)`
 `;
 
 export const ToolsPanel = () => {
+  const project = useProject();
   const keyId = useTranslationsSelector((c) => c.cursor?.keyId);
   const languageTag = useTranslationsSelector((c) => c.cursor?.language);
   const translations = useTranslationsSelector((c) => c.translations);
   const languages = useTranslationsSelector((c) => c.languages);
   const { setSidePanelOpen } = useTranslationsActions();
 
-  const { openPanels, togglePanelOpen } = useOpenPanels();
+  const { openPanels, togglePanelOpen, ensurePanelOpen } = useOpenPanels();
+  const appPanels = useAppToolsPanels(project.id);
+  const appEmptyPanels = useAppEmptyPanels(project.id);
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+
+  const reveal = (id: string) => {
+    setSidePanelOpen(true);
+    ensurePanelOpen(id);
+    // Defer scrolling until after the open state propagates and the
+    // panel content is mounted (requires the cursor to be set, which
+    // the caller should have done before requesting the reveal).
+    requestAnimationFrame(() => {
+      const el = wrapperRef.current?.querySelector(
+        `[data-cy-id="${CSS.escape(id)}"][data-cy="translation-panel"]`
+      );
+      (el as HTMLElement | null)?.scrollIntoView({
+        block: 'nearest',
+        behavior: 'smooth',
+      });
+    });
+  };
+
+  useEffect(() => {
+    // Two paths: (a) reveal arrived while listener was mounted → live
+    // event handler. (b) reveal arrived before ToolsPanel mounted
+    // (side panel was closed at click time) → stored as pending and
+    // consumed here on mount.
+    const pending = consumePendingPanelReveal();
+    if (pending) reveal(pending);
+    return onPanelRevealRequest(reveal);
+  }, []);
+
+  useEffect(() => {
+    // Expand app plugin panels the first time they appear, but don't re-open
+    // one the user has since collapsed — track which ids we've already
+    // auto-opened so the default applies once per panel.
+    const SEEN_KEY = '__tolgee_seenAppPanels';
+    let seen: string[] = [];
+    try {
+      const raw = localStorage.getItem(SEEN_KEY);
+      if (Array.isArray(JSON.parse(raw ?? ''))) seen = JSON.parse(raw ?? '');
+    } catch (e) {
+      // ignore malformed storage
+    }
+    const fresh = appEmptyPanels
+      .map((p) => p.id)
+      .filter((id) => !seen.includes(id));
+    if (fresh.length === 0) return;
+    fresh.forEach((id) => ensurePanelOpen(id));
+    localStorage.setItem(SEEN_KEY, JSON.stringify([...seen, ...fresh]));
+  }, [appEmptyPanels]);
 
   const keyData = useMemo(() => {
     return translations?.find((t) => t.keyId === keyId);
@@ -61,11 +115,16 @@ export const ToolsPanel = () => {
   const displayPanels = keyData && language && baseLanguage;
   const dataProps = usePanelData();
 
+  const allPanels = useMemo(() => [...getPanels(), ...appPanels], [appPanels]);
+
   return (
-    <StyledWrapper>
+    <StyledWrapper ref={wrapperRef}>
       {displayPanels ? (
         <StyledPanelList>
-          {getPanels()
+          <StyledButton onClick={() => setSidePanelOpen(false)}>
+            <XClose />
+          </StyledButton>
+          {allPanels
             .filter(
               ({ displayPanel }) => !displayPanel || displayPanel(dataProps)
             )
@@ -83,15 +142,10 @@ export const ToolsPanel = () => {
         </StyledPanelList>
       ) : (
         <StyledPanelList>
-          <StyledTitle>
-            <Typography variant="subtitle1" mb={2}>
-              <T keyName="tools_panel_hint" />
-            </Typography>
-          </StyledTitle>
           <StyledButton onClick={() => setSidePanelOpen(false)}>
             <XClose />
           </StyledButton>
-          {PANELS_WHEN_INACTIVE.map((config) => (
+          {[...appEmptyPanels, ...PANELS_WHEN_INACTIVE].map((config) => (
             <Panel
               {...config}
               key={config.id}
