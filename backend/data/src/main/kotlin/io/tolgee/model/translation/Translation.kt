@@ -19,6 +19,7 @@ import io.tolgee.model.qa.TranslationQaIssue
 import io.tolgee.service.branching.chooseThreeWay
 import io.tolgee.service.branching.isConflictingThreeWay
 import io.tolgee.service.branching.mergeSetsWithBase
+import io.tolgee.service.projectExportImport.DoNotExport
 import io.tolgee.util.TranslationStatsUtil
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -118,6 +119,7 @@ class Translation(
   var labels: MutableSet<Label> = mutableSetOf()
 
   @ActivityLoggedProp
+  @DoNotExport
   var promptId: Long? = null
 
   val isUntranslated: Boolean

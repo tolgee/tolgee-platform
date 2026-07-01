@@ -9,9 +9,11 @@ import { useProject } from 'tg.hooks/useProject';
 import { BaseProjectView } from '../BaseProjectView';
 import { ProjectSettingsGeneral } from './ProjectSettingsGeneral';
 import { ProjectSettingsAdvanced } from './ProjectSettingsAdvanced';
+import { ProjectSettingsExportImport } from './ProjectSettingsExportImport';
 import { useAddProjectSettingsTabs } from 'tg.ee';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { useReportEvent } from 'tg.hooks/useReportEvent';
+import { useIsAdmin } from 'tg.globalContext/helpers';
 
 export type ProjectSettingsTab = {
   value: string;
@@ -36,6 +38,7 @@ export const ProjectSettingsView = () => {
   const { t } = useTranslate();
   const { satisfiesPermission } = useProjectPermissions();
   const reportEvent = useReportEvent();
+  const isAdmin = useIsAdmin();
 
   let tabs = [
     {
@@ -59,6 +62,17 @@ export const ProjectSettingsView = () => {
       component: ProjectSettingsAdvanced,
       enabled: satisfiesPermission('project.edit'),
       routeMatch: useRouteMatch(LINKS.PROJECT_EDIT_ADVANCED.template),
+    },
+    {
+      value: 'export-import',
+      label: t('project_settings_menu_export_import'),
+      link: LINKS.PROJECT_EDIT_EXPORT_IMPORT.build({
+        [PARAMS.PROJECT_ID]: project.id,
+      }),
+      dataCy: 'project-settings-menu-export-import',
+      component: ProjectSettingsExportImport,
+      enabled: isAdmin,
+      routeMatch: useRouteMatch(LINKS.PROJECT_EDIT_EXPORT_IMPORT.template),
     },
   ] as ProjectSettingsTab[];
 

@@ -370,6 +370,7 @@ class TestDataService(
     saveAllNamespaces(builder)
     saveBranches(builder)
     saveBranchMerges(builder)
+    saveKeySnapshots(builder)
     saveKeyData(builder)
     saveBranchMergeChanges(builder)
     saveTranslationData(builder)
@@ -711,6 +712,12 @@ class TestDataService(
 
   private fun saveBranchMergeChanges(builder: ProjectBuilder) {
     builder.data.branchMergeChanges.filter { it.self.id == 0L }.forEach {
+      entityManager.persist(it.self)
+    }
+  }
+
+  private fun saveKeySnapshots(builder: ProjectBuilder) {
+    builder.data.keySnapshots.filter { it.self.id == 0L }.forEach {
       entityManager.persist(it.self)
     }
   }
