@@ -27,6 +27,10 @@ const SlackConnectedView = React.lazy(
 
 const SignUpView = React.lazy(() => import('./security/SignUp/SignUpView'));
 
+const PublicProjectListView = React.lazy(
+  () => import('tg.views/projects/public/PublicProjectListView')
+);
+
 const PasswordResetSetView = React.lazy(
   () => import('./security/ResetPasswordSetView')
 );
@@ -66,6 +70,9 @@ export const RootRouter = () => {
         </PublicOnlyRoute>
         <Route path={LINKS.LOGIN.template}>
           <LoginRouter />
+        </Route>
+        <Route exact path={LINKS.PUBLIC_PROJECTS.template}>
+          <PublicProjectListView />
         </Route>
         <Route path={LINKS.ACCEPT_INVITATION.template}>
           <AcceptInvitationView />

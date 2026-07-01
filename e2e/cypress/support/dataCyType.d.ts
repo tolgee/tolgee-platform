@@ -146,6 +146,7 @@ declare namespace DataCy {
         "comment-menu-needs-resolution": true;
         "comment-resolve": true;
         "comment-text": true;
+        "community-translation-banner": true;
         "content-delivery-add-button": true;
         "content-delivery-auto-publish-checkbox": true;
         "content-delivery-delete-button": true;
@@ -650,6 +651,8 @@ declare namespace DataCy {
         "project-transfer-dialog": true;
         "prompt-basic-option": true;
         "prompt-basic-option-edit": true;
+        "public-projects-login-button": true;
+        "public-projects-sign-up-button": true;
         "qa-action-correct": true;
         "qa-action-ignore": true;
         "qa-badge": true;
