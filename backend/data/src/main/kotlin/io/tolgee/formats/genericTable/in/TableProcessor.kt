@@ -15,7 +15,7 @@ abstract class TableProcessor(
     data.importAll(format)
   }
 
-  private fun Iterable<TableEntry>.validateStructure() {
+  private fun List<TableEntry>.validateStructure() {
     if (none()) return
     if (none { it.key.isNotBlank() }) {
       throw ImportCannotParseFileException(
@@ -60,5 +60,5 @@ abstract class TableProcessor(
     )
   }
 
-  protected abstract fun parse(): Pair<Iterable<TableEntry>, ImportFormat>
+  protected abstract fun parse(): Pair<List<TableEntry>, ImportFormat>
 }

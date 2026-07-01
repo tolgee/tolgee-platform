@@ -9,7 +9,7 @@ import io.tolgee.service.dataImport.processors.FileProcessorContext
 class XlsxFileProcessor(
   override val context: FileProcessorContext,
 ) : TableProcessor(context) {
-  override fun parse(): Pair<Iterable<TableEntry>, ImportFormat> {
+  override fun parse(): Pair<List<TableEntry>, ImportFormat> {
     try {
       val parser =
         XlsxFileParser(
