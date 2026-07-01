@@ -1,3 +1,10 @@
+## [3.209.1](https://github.com/tolgee/tolgee-platform/compare/v3.209.0...v3.209.1) (2026-07-01)
+
+
+### Bug Fixes
+
+* reject misformatted table (XLSX/CSV) imports with a clear error ([#3773](https://github.com/tolgee/tolgee-platform/issues/3773)) ([e94f8b9](https://github.com/tolgee/tolgee-platform/commit/e94f8b9721176f224e6d158ee15d890d5d354991))
+
 # [3.209.0](https://github.com/tolgee/tolgee-platform/compare/v3.208.0...v3.209.0) (2026-07-01)
 
 
