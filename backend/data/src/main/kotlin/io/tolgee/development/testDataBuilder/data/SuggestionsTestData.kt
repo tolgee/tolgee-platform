@@ -185,6 +185,24 @@ class SuggestionsTestData(
         }
       }
 
+      keys[2].apply {
+        (1..4).forEach { i ->
+          addSuggestion {
+            this.language = czechLanguage
+            this.author = projectTranslator.self
+            this.translation = "Many suggestion 2-$i"
+          }
+        }
+      }
+
+      keys[3].apply {
+        addSuggestion {
+          this.language = czechLanguage
+          this.author = projectTranslator.self
+          this.translation = "Only suggestion 3-1"
+        }
+      }
+
       pluralKey =
         addKey(null, "pluralKey").apply {
           self.isPlural = true

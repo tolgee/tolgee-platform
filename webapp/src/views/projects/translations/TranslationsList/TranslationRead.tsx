@@ -172,6 +172,7 @@ export const TranslationRead: React.FC<React.PropsWithChildren<Props>> = ({
             count={translation?.activeSuggestionCount ?? 0}
             isPlural={keyData.keyIsPlural}
             locale={language.tag}
+            onShowAll={cellClickable ? () => handleOpen() : undefined}
           />
         )}
         {aiPlaygroundData && (

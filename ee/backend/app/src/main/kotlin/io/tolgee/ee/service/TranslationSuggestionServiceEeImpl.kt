@@ -44,7 +44,7 @@ class TranslationSuggestionServiceEeImpl(
     keyIds: List<Long>,
     languageIds: List<Long>,
   ): Map<Pair<Long, String>, List<TranslationSuggestionView>> {
-    val data = translationSuggestionRepository.getByKeyId(projectId, languageIds, keyIds)
+    val data = translationSuggestionRepository.getByKeyId(projectId, languageIds, keyIds, MAX_DISPLAYED_SUGGESTIONS)
     val result = mutableMapOf<Pair<Long, String>, MutableList<TranslationSuggestionView>>()
     data.forEach {
       val pair = Pair(it.keyId, it.languageTag)
@@ -239,5 +239,10 @@ class TranslationSuggestionServiceEeImpl(
     if (text.length > tolgeeProperties.maxTranslationTextLength) {
       throw BadRequestException(Message.TRANSLATION_TEXT_TOO_LONG, listOf(tolgeeProperties.maxTranslationTextLength))
     }
+  }
+
+  companion object {
+    // Mirror of the frontend MAX_DISPLAYED_SUGGESTIONS (SuggestionsFirst.tsx) — both must change together.
+    const val MAX_DISPLAYED_SUGGESTIONS = 3
   }
 }
