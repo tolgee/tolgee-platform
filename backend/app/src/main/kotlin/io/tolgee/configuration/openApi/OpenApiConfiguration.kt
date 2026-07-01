@@ -97,7 +97,9 @@ class OpenApiConfiguration {
   fun billingOpenApi(): GroupedOpenApi? {
     return internalGroupForPaths(
       paths = BILLING,
-      excludedPaths = arrayOf("/v2/public/billing/webhook"),
+      // public billing session endpoints are server-side integration points, not part of any generated
+      // frontend client, so keep them out of the billing schema too.
+      excludedPaths = arrayOf("/v2/public/billing/webhook", BILLING_PUBLIC_SESSION, BILLING_PUBLIC_SESSION_SUB),
       name = "V2 Billing",
     )
   }
@@ -233,6 +235,8 @@ class OpenApiConfiguration {
     private const val BILLING_TELEMETRY = "/v2/**/telemetry/**"
     private const val BILLING_TRANSLATOR = "/v2/**/translator/**"
     private const val BILLING_LLM = "/v2/**/llm/**"
+    private const val BILLING_PUBLIC_SESSION = "/v2/public/session"
+    private const val BILLING_PUBLIC_SESSION_SUB = "/v2/public/session/**"
     private val BILLING =
       arrayOf(
         BILLING_MAIN,
@@ -240,6 +244,8 @@ class OpenApiConfiguration {
         BILLING_TELEMETRY,
         BILLING_TRANSLATOR,
         BILLING_LLM,
+        BILLING_PUBLIC_SESSION,
+        BILLING_PUBLIC_SESSION_SUB,
       )
     private val PATH_WITH_PROJECT_ID_REGEX = "^/(?:api|v2)/projects?/\\{$PROJECT_ID_PARAMETER}.*".toRegex()
   }
