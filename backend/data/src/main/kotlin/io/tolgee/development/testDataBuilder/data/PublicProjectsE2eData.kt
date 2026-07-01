@@ -1,33 +1,23 @@
 package io.tolgee.development.testDataBuilder.data
 
 import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
-import io.tolgee.model.Project
 
 /**
- * E2E fixture for the /public-projects page. The BaseTestData project ("Private project") stays
- * non-public so the spec can assert it is absent from the anonymous listing; two public projects in
- * the same org are discoverable.
+ * E2E fixture for the /public-projects page: seeds `count` public projects plus the non-public
+ * BaseTestData project ("Private project") used for the exclusion assertion.
  */
-class PublicProjectsE2eData : BaseTestData("publicProjectsUser", "Private project") {
-  lateinit var communityAlpha: Project
-  lateinit var communityBeta: Project
-
+class PublicProjectsE2eData(
+  count: Int = 6,
+) : BaseTestData("publicProjectsUser", "Private project") {
   init {
     root.apply {
-      addProject(organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self) {
-        name = "Community Alpha"
-        public = true
-      }.build {
-        communityAlpha = self
-        addBaseLanguage()
-      }
-
-      addProject(organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self) {
-        name = "Community Beta"
-        public = true
-      }.build {
-        communityBeta = self
-        addBaseLanguage()
+      listOf("Alpha", "Beta", "Gamma", "Delta", "Epsilon", "Zeta").take(count).forEach { suffix ->
+        addProject(organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self) {
+          name = "Community $suffix"
+          public = true
+        }.build {
+          addBaseLanguage()
+        }
       }
     }
   }

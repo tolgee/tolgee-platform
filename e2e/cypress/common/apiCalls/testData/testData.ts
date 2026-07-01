@@ -56,7 +56,10 @@ export const projectListData = generateTestDataObject(
   'projects-list-dashboard'
 );
 
-export const publicProjectsData = generateTestDataObject('public-projects');
+export const publicProjectsData = {
+  ...generateTestDataObject('public-projects'),
+  generateFew: () => internalFetch('e2e-data/public-projects/generate-few'),
+};
 
 export const projectTestData = generateTestDataObject('projects');
 

@@ -1,35 +1,49 @@
-import { Box, styled, Typography } from '@mui/material';
+import { alpha, styled, Typography } from '@mui/material';
 import { Edit05, MessageTextSquare02 } from '@untitled-ui/icons-react';
 import { T } from '@tolgee/react';
 
-import { MouseIllustration } from 'tg.component/security/MouseIllustration';
+import { SPLIT_CONTENT_BREAK_POINT } from 'tg.component/layout/CompactView';
+import { PUBLIC_CONTENT_MAX_WIDTH } from './publicProjectsLayout';
 
 const StyledBanner = styled('div')`
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: ${({ theme }) => theme.spacing(4)};
-  align-items: center;
-  padding: ${({ theme }) => theme.spacing(4, 0)};
-  @container (max-width: 700px) {
-    grid-template-columns: 1fr;
-  }
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background: linear-gradient(
+    to right,
+    ${({ theme }) => alpha(theme.palette.background.default, 0.12)},
+    ${({ theme }) => alpha(theme.palette.primary.main, 0.12)} 69%,
+    ${({ theme }) => alpha(theme.palette.background.default, 0.12)}
+  );
+`;
+
+const StyledInner = styled('div')`
+  position: relative;
+  max-width: ${PUBLIC_CONTENT_MAX_WIDTH}px;
+  margin: 0 auto;
+  padding: ${({ theme }) => theme.spacing(5, 2)};
 `;
 
 const StyledContent = styled('div')`
   display: flex;
   flex-direction: column;
-  gap: ${({ theme }) => theme.spacing(1)};
-  max-width: 540px;
+  gap: ${({ theme }) => theme.spacing(2.5)};
+  max-width: 561px;
 `;
 
 const StyledEyebrow = styled(Typography)`
-  font-weight: 500;
-  color: ${({ theme }) => theme.palette.text.secondary};
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.235;
+  letter-spacing: 0.25px;
+  color: ${({ theme }) => theme.palette.text.primary};
 `;
 
 const StyledHeading = styled(Typography)`
-  font-size: 28px;
+  font-size: 40px;
   font-weight: 700;
+  line-height: 1.167;
+  letter-spacing: -1.5px;
   color: ${({ theme }) => theme.palette.primary.main};
 `;
 
@@ -37,21 +51,27 @@ const StyledBullets = styled('div')`
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing(0.5)};
-  margin-top: ${({ theme }) => theme.spacing(1)};
 `;
 
 const StyledBullet = styled('div')`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.spacing(1)};
-  color: ${({ theme }) => theme.palette.text.secondary};
+  color: ${({ theme }) => theme.palette.text.primary};
   & svg {
     color: ${({ theme }) => theme.palette.primary.main};
+    flex-shrink: 0;
   }
 `;
 
-const StyledIllustration = styled(Box)`
-  @container (max-width: 700px) {
+const StyledMouse = styled('img')`
+  position: absolute;
+  right: ${({ theme }) => theme.spacing(2)};
+  bottom: 0;
+  height: 190px;
+  pointer-events: none;
+  user-select: none;
+  @media ${SPLIT_CONTENT_BREAK_POINT} {
     display: none;
   }
 `;
@@ -59,49 +79,51 @@ const StyledIllustration = styled(Box)`
 export const CommunityTranslationBanner = () => {
   return (
     <StyledBanner data-cy="community-translation-banner">
-      <StyledContent>
-        <StyledEyebrow variant="body2">
-          <T
-            keyName="public_projects_banner_eyebrow"
-            defaultValue="Community translations"
-          />
-        </StyledEyebrow>
-        <StyledHeading variant="h1">
-          <T
-            keyName="public_projects_banner_heading"
-            defaultValue="Help projects speak your language"
-          />
-        </StyledHeading>
-        <Typography variant="body1" color="textSecondary">
-          <T
-            keyName="public_projects_banner_subtext"
-            defaultValue="Projects of all kinds, from games to apps to tools, are looking for translators. Browse, pick a language, and start contributing."
-          />
-        </Typography>
-        <StyledBullets>
-          <StyledBullet>
-            <Edit05 width={18} height={18} />
-            <Typography variant="body2">
+      <StyledInner>
+        <StyledContent>
+          <div>
+            <StyledEyebrow>
               <T
-                keyName="public_projects_banner_bullet_suggest"
-                defaultValue="Suggest better translation"
+                keyName="public_projects_banner_eyebrow"
+                defaultValue="Community translations"
               />
-            </Typography>
-          </StyledBullet>
-          <StyledBullet>
-            <MessageTextSquare02 width={18} height={18} />
-            <Typography variant="body2">
+            </StyledEyebrow>
+            <StyledHeading variant="h1">
               <T
-                keyName="public_projects_banner_bullet_comment"
-                defaultValue="Comment on current translation"
+                keyName="public_projects_banner_heading"
+                defaultValue="Help projects speak your language"
               />
-            </Typography>
-          </StyledBullet>
-        </StyledBullets>
-      </StyledContent>
-      <StyledIllustration>
-        <MouseIllustration />
-      </StyledIllustration>
+            </StyledHeading>
+          </div>
+          <Typography variant="body1">
+            <T
+              keyName="public_projects_banner_subtext"
+              defaultValue="Projects of all kinds, from games to apps to tools, are looking for translators. Browse, pick a language, and start contributing."
+            />
+          </Typography>
+          <StyledBullets>
+            <StyledBullet>
+              <Edit05 width={21} height={22} />
+              <Typography variant="body1">
+                <T
+                  keyName="public_projects_banner_bullet_suggest"
+                  defaultValue="Suggest better translation"
+                />
+              </Typography>
+            </StyledBullet>
+            <StyledBullet>
+              <MessageTextSquare02 width={21} height={22} />
+              <Typography variant="body1">
+                <T
+                  keyName="public_projects_banner_bullet_comment"
+                  defaultValue="Comment on current translation"
+                />
+              </Typography>
+            </StyledBullet>
+          </StyledBullets>
+        </StyledContent>
+        <StyledMouse src="/images/communityMouse.svg" alt="" />
+      </StyledInner>
     </StyledBanner>
   );
 };

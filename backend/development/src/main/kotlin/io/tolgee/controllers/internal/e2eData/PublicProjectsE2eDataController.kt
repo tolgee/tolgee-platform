@@ -20,6 +20,12 @@ class PublicProjectsE2eDataController(
     testDataService.saveTestData(PublicProjectsE2eData().root)
   }
 
+  @GetMapping(value = ["/generate-few"])
+  @Transactional
+  fun generateFew() {
+    testDataService.saveTestData(PublicProjectsE2eData(count = 5).root)
+  }
+
   @GetMapping(value = ["/clean"])
   @Transactional
   fun clean() {

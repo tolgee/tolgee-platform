@@ -24,8 +24,6 @@ type Props = {
   onPageChange: (page: number) => void;
   emptyPlaceholder: ReactNode;
   variant?: 'default' | 'public';
-  onSearchChange?: (value: string) => void;
-  searchText?: string;
 };
 
 export const ProjectsList = ({
@@ -33,16 +31,12 @@ export const ProjectsList = ({
   onPageChange,
   emptyPlaceholder,
   variant = 'default',
-  onSearchChange,
-  searchText,
 }: Props) => {
   return (
     <StyledWrapper>
       <PaginatedHateoasList
         wrapperComponentProps={{ className: 'listWrapper' }}
         onPageChange={onPageChange}
-        onSearchChange={onSearchChange}
-        searchText={searchText}
         loadable={loadable}
         renderItem={(r: ProjectWithStatsModel) => (
           <DashboardProjectListItem key={r.id} variant={variant} {...r} />
