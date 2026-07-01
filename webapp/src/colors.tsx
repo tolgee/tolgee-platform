@@ -103,6 +103,7 @@ export type Placeholders = {
   variable: Placeholder;
   tag: Placeholder;
   variant: Placeholder;
+  entity: Placeholder;
   inactive: Placeholder;
 };
 
@@ -251,6 +252,11 @@ export const colors = {
         background: '#F0F2F4',
         text: '#4D5B6E',
       },
+      entity: {
+        border: '#F9C4D6',
+        background: '#FCDEE9',
+        text: '#822343',
+      },
       inactive: {
         background: '#e3e7ea',
         border: '#e3e7ea',
@@ -373,6 +379,11 @@ export const colors = {
       variant: {
         border: '#4D5B6E',
         background: '#4D5B6E',
+        text: '#F0F2F4',
+      },
+      entity: {
+        border: '#96506F',
+        background: '#96506F',
         text: '#F0F2F4',
       },
       inactive: {
