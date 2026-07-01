@@ -27,10 +27,10 @@ const StyledContent = styled('div')`
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing(2.5)};
-`;
-
-const StyledSubtext = styled(Typography)`
-  max-width: 561px;
+  padding-right: 260px;
+  @media ${SPLIT_CONTENT_BREAK_POINT} {
+    padding-right: 0;
+  }
 `;
 
 const StyledEyebrow = styled(Typography)`
@@ -47,6 +47,10 @@ const StyledHeading = styled(Typography)`
   line-height: 1.167;
   letter-spacing: -1.5px;
   color: ${({ theme }) => theme.palette.primary.main};
+`;
+
+const StyledSubtext = styled(Typography)`
+  max-width: 561px;
 `;
 
 const StyledBullets = styled('div')`
@@ -69,7 +73,7 @@ const StyledBullet = styled('div')`
 const StyledMouse = styled('img')`
   position: absolute;
   right: ${({ theme }) => theme.spacing(2)};
-  bottom: -20px;
+  bottom: -15px;
   height: 190px;
   pointer-events: none;
   user-select: none;
