@@ -17,6 +17,8 @@ class AwsMtValueProvider(
   private val awsMachineTranslationProperties: AwsMachineTranslationProperties,
   private val amazonTranslate: TranslateClient?,
 ) : AbstractMtValueProvider() {
+  override val placeholderProtector = HtmlNoTranslatePlaceholderProtector
+
   override val isEnabled: Boolean
     get() =
       awsMachineTranslationProperties.enabled
