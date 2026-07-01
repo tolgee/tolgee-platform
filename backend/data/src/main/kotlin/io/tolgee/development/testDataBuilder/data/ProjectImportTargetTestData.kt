@@ -88,11 +88,21 @@ class ProjectImportTargetTestData :
         sourceKey = targetOldKey
         change = BranchKeyMergeChangeType.UPDATE
       }
+      // Child translation/keyMeta snapshots so the clear-in-place path (and assertCleared) wipes all three
+      // snapshot tables against non-empty rows, not just branch_key_snapshot.
       addKeySnapshot {
         branch = feature
         name = "snapshot"
         originalKeyId = 0
         branchKeyId = 0
+      }.build {
+        addTranslationSnapshot {
+          language = "en"
+          value = "snapshot value"
+        }
+        addKeyMetaSnapshot {
+          description = "snapshot desc"
+        }
       }
     }
 

@@ -5,6 +5,9 @@ import io.tolgee.model.Project
 import io.tolgee.model.Screenshot
 import io.tolgee.model.TranslationSuggestion
 import io.tolgee.model.branching.Branch
+import io.tolgee.model.branching.snapshot.KeyMetaSnapshot
+import io.tolgee.model.branching.snapshot.KeySnapshot
+import io.tolgee.model.branching.snapshot.TranslationSnapshot
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyCodeReference
 import io.tolgee.model.key.KeyComment
@@ -244,6 +247,10 @@ class ProjectContentClearer(
         ProjectQaConfig::class,
         LanguageQaConfig::class,
         TranslationQaIssue::class,
+        // Deleted by deleteBranchMergesAndSnapshots (before the branch wipe).
+        KeySnapshot::class,
+        TranslationSnapshot::class,
+        KeyMetaSnapshot::class,
       )
 
     val clearedOwnedClassNames: Set<String>

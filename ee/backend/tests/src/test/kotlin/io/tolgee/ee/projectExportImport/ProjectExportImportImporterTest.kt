@@ -6,9 +6,13 @@ import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.ProjectExportImportTestData
 import io.tolgee.development.testDataBuilder.data.ProjectImportBranchedSourceTestData
 import io.tolgee.development.testDataBuilder.data.ProjectImportTargetTestData
+import io.tolgee.ee.service.branching.BranchMergeService
+import io.tolgee.ee.service.branching.BranchSnapshotService
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Screenshot
 import io.tolgee.model.TranslationSuggestion
+import io.tolgee.model.branching.Branch
+import io.tolgee.model.branching.snapshot.KeySnapshot
 import io.tolgee.model.enums.TranslationSuggestionState
 import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.model.enums.qa.QaIssueMessage
@@ -41,6 +45,12 @@ class ProjectExportImportImporterTest : AbstractSpringTest() {
 
   @Autowired
   private lateinit var importer: ProjectExportImportImporter
+
+  @Autowired
+  private lateinit var branchSnapshotService: BranchSnapshotService
+
+  @Autowired
+  private lateinit var branchMergeService: BranchMergeService
 
   private lateinit var source: ProjectExportImportTestData
   private lateinit var target: ProjectImportTargetTestData
@@ -406,6 +416,176 @@ class ProjectExportImportImporterTest : AbstractSpringTest() {
     assertThat(keyBranchName(projectId, branched.defaultKeyName)).isEqualTo("main")
   }
 
+  @Test
+  fun `an imported feature branch still merges against its three-way baseline`() {
+    val branched = savedBranchedWithSnapshots()
+    mutateTranslation(branched.sharedFeatureKey.id, "shared value EDITED")
+
+    val expected = mergeChangeSignatures(branched.featureBranch.id, branched.defaultBranch.id)
+    importBranchedOntoTarget(branched)
+
+    val (feature, default) = importedBranchIds(target.targetProject.id)
+    val actual = mergeChangeSignatures(feature, default)
+
+    assertThat(actual).isEqualTo(expected)
+    assertThat(actual).contains("${branched.sharedKeyName}:UPDATE")
+    assertThat(actual).noneMatch { it == "${branched.sharedKeyName}:ADD" }
+  }
+
+  @Test
+  fun `remaps snapshot key ids and screenshot ids onto the imported rows`() {
+    val branched = savedBranchedWithSnapshots()
+    importBranchedOntoTarget(branched)
+    val projectId = target.targetProject.id
+
+    val snapshot = importedSnapshot(projectId, branched.sharedKeyName)
+    assertThat(snapshot.originalKeyId).isEqualTo(keyId(projectId, branched.sharedKeyName, "main"))
+    assertThat(snapshot.branchKeyId).isEqualTo(keyId(projectId, branched.sharedKeyName, "feature"))
+    assertThat(snapshot.screenshotReferences).isNotEmpty()
+    assertThat(snapshot.screenshotReferences.map { it.screenshotId })
+      .containsExactly(singleScreenshot(projectId).id)
+
+    val translationSnapshot = snapshot.translations.single { it.language == "en" }
+    assertThat(translationSnapshot.value).isEqualTo(branched.sharedTranslationText)
+    assertThat(translationSnapshot.labels).isNotEmpty().containsExactly(branched.sharedLabelName)
+
+    val keyMetaSnapshot = snapshot.keyMetaSnapshot!!
+    assertThat(keyMetaSnapshot.description).isEqualTo(branched.sharedMetaDescription)
+    assertThat(keyMetaSnapshot.custom).isNotEmpty().isEqualTo(branched.sharedCustom)
+    assertThat(keyMetaSnapshot.tags).isNotEmpty().containsExactly(branched.sharedTagName)
+  }
+
+  @Test
+  fun `tolerates a snapshot referencing a soft-deleted key with distinct sentinel ids`() {
+    val branched = savedBranchedWithSnapshots()
+    // Soft-delete the feature copies AFTER the snapshots captured them, so each snapshot's branchKeyId
+    // now points at a key excluded from the export (its branch stays live, so the snapshot is exported).
+    softDeleteKey(branched.danglingFeatureKey1.id)
+    softDeleteKey(branched.danglingFeatureKey2.id)
+    importBranchedOntoTarget(branched)
+    val projectId = target.targetProject.id
+
+    val snapshot1 = importedSnapshot(projectId, branched.danglingKeyName1)
+    val snapshot2 = importedSnapshot(projectId, branched.danglingKeyName2)
+    assertThat(snapshot1.branchKeyId).isNegative()
+    assertThat(snapshot2.branchKeyId).isNegative()
+    assertThat(snapshot1.branchKeyId).isNotEqualTo(snapshot2.branchKeyId)
+    // The default copies survive, so originalKeyId still remaps to a real (positive) imported key.
+    assertThat(snapshot1.originalKeyId).isPositive()
+    assertThat(snapshot2.originalKeyId).isPositive()
+
+    val (feature, default) = importedBranchIds(projectId)
+    val changes = mergeChangeSignatures(feature, default)
+    assertThat(changes).contains("${branched.danglingKeyName1}:DELETE", "${branched.danglingKeyName2}:DELETE")
+  }
+
+  @Test
+  fun `drops a snapshot screenshot reference whose screenshot is absent from the export`() {
+    val branched = savedBranchedWithSnapshots()
+    deleteScreenshotReferences(branched.sharedScreenshot.id)
+    importBranchedOntoTarget(branched)
+
+    assertThat(importedSnapshot(target.targetProject.id, branched.sharedKeyName).screenshotReferences).isEmpty()
+  }
+
+  private fun savedBranchedWithSnapshots(): ProjectImportBranchedSourceTestData {
+    val branched = ProjectImportBranchedSourceTestData()
+    testDataService.saveTestData(branched.root)
+    branchSnapshotService.createInitialSnapshot(branched.project.id, branched.defaultBranch, branched.featureBranch)
+    return branched
+  }
+
+  private fun importBranchedOntoTarget(branched: ProjectImportBranchedSourceTestData) {
+    val zip = exportZip(branched.project.id)
+    importer.import(ByteArrayInputStream(zip), target.targetProject.id, source.adminUser.id, VERSION)
+  }
+
+  /** `name:changeType` for every change a dry-run merge of feature→default produces, sorted. */
+  private fun mergeChangeSignatures(
+    featureBranchId: Long,
+    defaultBranchId: Long,
+  ): List<String> =
+    readInTransaction {
+      val feature = entityManager.find(Branch::class.java, featureBranchId)
+      val default = entityManager.find(Branch::class.java, defaultBranchId)
+      branchMergeService
+        .dryRun(feature, default)
+        .changes
+        .map { "${(it.sourceKey ?: it.targetKey)?.name}:${it.change}" }
+        .sorted()
+    }
+
+  private fun importedBranchIds(projectId: Long): Pair<Long, Long> =
+    readInTransaction {
+      val branches =
+        entityManager
+          .createQuery("select b from Branch b where b.project.id = :p", Branch::class.java)
+          .setParameter("p", projectId)
+          .resultList
+      branches.single { !it.isDefault }.id to branches.single { it.isDefault }.id
+    }
+
+  private fun importedSnapshot(
+    projectId: Long,
+    keyName: String,
+  ): KeySnapshot =
+    readInTransaction {
+      entityManager
+        .createQuery(
+          "select ks from KeySnapshot ks left join fetch ks.translations left join fetch ks.keyMetaSnapshot " +
+            "where ks.project.id = :p and ks.name = :n",
+          KeySnapshot::class.java,
+        ).setParameter("p", projectId)
+        .setParameter("n", keyName)
+        .resultList
+        .distinct()
+        .single()
+    }
+
+  private fun keyId(
+    projectId: Long,
+    keyName: String,
+    branchName: String,
+  ): Long =
+    readInTransaction {
+      entityManager
+        .createQuery(
+          "select k.id from Key k where k.project.id = :p and k.name = :n and k.branch.name = :b",
+          java.lang.Long::class.java,
+        ).setParameter("p", projectId)
+        .setParameter("n", keyName)
+        .setParameter("b", branchName)
+        .singleResult
+        .toLong()
+    }
+
+  private fun mutateTranslation(
+    keyId: Long,
+    text: String,
+  ) = executeInNewTransaction {
+    entityManager
+      .createQuery("update Translation t set t.text = :x where t.key.id = :k and t.language.tag = 'en'")
+      .setParameter("x", text)
+      .setParameter("k", keyId)
+      .executeUpdate()
+  }
+
+  private fun softDeleteKey(keyId: Long) =
+    executeInNewTransaction {
+      entityManager
+        .createQuery("update Key k set k.deletedAt = CURRENT_TIMESTAMP where k.id = :id")
+        .setParameter("id", keyId)
+        .executeUpdate()
+    }
+
+  private fun deleteScreenshotReferences(screenshotId: Long) =
+    executeInNewTransaction {
+      entityManager
+        .createQuery("delete from KeyScreenshotReference r where r.screenshot.id = :id")
+        .setParameter("id", screenshotId)
+        .executeUpdate()
+    }
+
   private fun importSourceOntoTarget() {
     val zip = exportZip(source.project.id)
     importer.import(ByteArrayInputStream(zip), target.targetProject.id, source.adminUser.id, VERSION)
@@ -511,6 +691,10 @@ class ProjectExportImportImporterTest : AbstractSpringTest() {
     if (attr in EXCLUDED_ATTRS) return false
     // Branch.pending is reset to false on import, so it intentionally won't round-trip.
     if (type == "Branch" && attr == "pending") return false
+    // KeySnapshot.originalKeyId/branchKeyId/screenshotReferences are intentionally remapped to the new
+    // key/screenshot ids (like Branch.pending, they don't round-trip verbatim). The source test data
+    // currently carries no snapshots so this comparison never sees them; exclude them here if that changes.
+    if (type == "KeySnapshot" && attr in setOf("originalKeyId", "branchKeyId", "screenshotReferences")) return false
     return true
   }
 

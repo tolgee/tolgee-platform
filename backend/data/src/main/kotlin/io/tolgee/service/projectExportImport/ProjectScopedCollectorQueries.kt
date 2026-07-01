@@ -4,6 +4,9 @@ import io.tolgee.model.Language
 import io.tolgee.model.Screenshot
 import io.tolgee.model.TranslationSuggestion
 import io.tolgee.model.branching.Branch
+import io.tolgee.model.branching.snapshot.KeyMetaSnapshot
+import io.tolgee.model.branching.snapshot.KeySnapshot
+import io.tolgee.model.branching.snapshot.TranslationSnapshot
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyCodeReference
 import io.tolgee.model.key.KeyComment
@@ -115,6 +118,20 @@ object ProjectScopedCollectorQueries {
         "select e from TranslationQaIssue e join e.translation.key k left join k.branch b " +
           "where k.project.id = :projectId and k.deletedAt is null and e.translation.language.deletedAt is null " +
           "and (b is null or b.deletedAt is null)",
+      )
+      query(
+        KeySnapshot::class,
+        "select e from KeySnapshot e join e.branch b where e.project.id = :projectId and b.deletedAt is null",
+      )
+      query(
+        TranslationSnapshot::class,
+        "select e from TranslationSnapshot e join e.keySnapshot ks join ks.branch b " +
+          "where ks.project.id = :projectId and b.deletedAt is null",
+      )
+      query(
+        KeyMetaSnapshot::class,
+        "select e from KeyMetaSnapshot e join e.keySnapshot ks join ks.branch b " +
+          "where ks.project.id = :projectId and b.deletedAt is null",
       )
     }
 

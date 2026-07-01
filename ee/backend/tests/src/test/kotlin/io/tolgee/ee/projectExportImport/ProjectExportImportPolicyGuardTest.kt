@@ -1,6 +1,9 @@
 package io.tolgee.ee.projectExportImport
 
 import io.tolgee.AbstractSpringTest
+import io.tolgee.model.branching.snapshot.KeyMetaSnapshot
+import io.tolgee.model.branching.snapshot.KeySnapshot
+import io.tolgee.model.branching.snapshot.TranslationSnapshot
 import io.tolgee.service.projectExportImport.EntityAssociations
 import io.tolgee.service.projectExportImport.EntityMetamodelReader
 import io.tolgee.service.projectExportImport.ExportImportPolicy
@@ -145,6 +148,51 @@ class ProjectExportImportPolicyGuardTest : AbstractSpringTest() {
             "  - $name: ${types.joinToString { t -> t.javaType.name }}"
           },
       ).isEmpty()
+  }
+
+  @Test
+  fun `snapshot columns are pinned (a new snapshot column may be a cross-entity id needing a remap)`() {
+    // The snapshot entities carry foreign-keys-in-disguise — plain Long columns (originalKeyId/
+    // branchKeyId) and jsonb-embedded screenshotIds — that the metamodel can't see as associations, so
+    // the categorical association guards above don't cover them. They are remapped by hand in
+    // EntityGraphDeserializer.remapSnapshotReferences. Pin the basic-column set of each snapshot type so
+    // adding a column fails the build and forces a decision: is it another cross-entity id to remap?
+    val pinned =
+      mapOf(
+        KeySnapshot::class.java to
+          setOf(
+            "name",
+            "namespace",
+            "isPlural",
+            "pluralArgName",
+            "maxCharLimit",
+            "originalKeyId",
+            "branchKeyId",
+            "screenshotReferences",
+            "createdAt",
+            "updatedAt",
+          ),
+        TranslationSnapshot::class.java to setOf("language", "value", "state", "labels", "createdAt", "updatedAt"),
+        KeyMetaSnapshot::class.java to setOf("description", "custom", "tags", "createdAt", "updatedAt"),
+      )
+    pinned.forEach { (clazz, expected) ->
+      val actual =
+        entityManager.metamodel
+          .entity(clazz)
+          .attributes
+          .filterNot { it.isAssociation }
+          .filterNot { it is SingularAttribute<*, *> && it.isId }
+          .map { it.name }
+          .toSet()
+      assertThat(actual)
+        .withFailMessage(
+          "Basic columns of ${clazz.simpleName} changed (expected %s, was %s). If you added another " +
+            "cross-entity id, wire it into EntityGraphDeserializer.remapSnapshotReferences, then update " +
+            "this pinned set.",
+          expected,
+          actual,
+        ).isEqualTo(expected)
+    }
   }
 
   private fun ownedEntityTypes() =

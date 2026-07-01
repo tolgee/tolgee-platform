@@ -115,6 +115,9 @@ object ProjectExportImportPolicyRegistry {
         ProjectQaConfig::class,
         LanguageQaConfig::class,
         TranslationQaIssue::class,
+        KeySnapshot::class,
+        TranslationSnapshot::class,
+        KeyMetaSnapshot::class,
       )
 
       classify(UserAccount::class, ExportImportPolicy.USER_REF)
@@ -138,9 +141,6 @@ object ProjectExportImportPolicyRegistry {
         ActivityDescribingEntity::class,
         BranchMerge::class,
         BranchMergeChange::class,
-        KeySnapshot::class,
-        TranslationSnapshot::class,
-        KeyMetaSnapshot::class,
         LanguageStats::class,
         KeysDistance::class,
         AutoTranslationConfig::class,

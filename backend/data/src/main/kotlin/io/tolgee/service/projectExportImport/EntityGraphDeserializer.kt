@@ -8,6 +8,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.Screenshot
 import io.tolgee.model.UserAccount
 import io.tolgee.model.branching.Branch
+import io.tolgee.model.branching.snapshot.KeySnapshot
 import io.tolgee.model.key.Key
 import io.tolgee.model.task.Task
 import io.tolgee.service.projectExportImport.model.SerializedEntity
@@ -29,7 +30,9 @@ import org.springframework.stereotype.Component
  *   so every row has a real PK before anything references it.
  * - **Phase B** wires the only thing phase A can't: self-referential FKs (`Branch.originBranch`, which may
  *   point at a later branch) and the to-many owning links (labels, tags, assignees); it also resets
- *   `Branch.pending` per the mirror's merge-state discard.
+ *   `Branch.pending` per the mirror's merge-state discard, and remaps `KeySnapshot`'s
+ *   foreign-keys-in-disguise (originalKeyId/branchKeyId and the jsonb screenshot ids) onto the imported
+ *   rows, which likewise need every Key and Screenshot registered first.
  *
  * Every lookup is keyed by the **source PK handle** (a scalar/string), never by an entity instance: an
  * unflushed entity has `id == 0` and a colliding hash, so unsaved entities must never enter a hash map.
@@ -88,6 +91,40 @@ class EntityGraphDeserializer(
       writer.setToManyAssociation(entity, attr.name, resolved)
     }
     if (entity is Branch) entity.pending = false
+    if (entity is KeySnapshot) remapSnapshotReferences(entity, context)
+  }
+
+  /**
+   * KeySnapshot's cross-entity references are foreign-keys-in-disguise — the plain `Long` columns
+   * originalKeyId/branchKeyId and the screenshotIds embedded in the `screenshotReferences` jsonb, none
+   * of them JPA associations — so [EntityMetamodelWriter.setBasicAttrs] copied the source ids verbatim.
+   * Remap them to the imported rows here in phase B, after every Key and Screenshot is registered.
+   *
+   * Keep in sync with `BranchSnapshotService.createInitialSnapshot` (the authority that writes these
+   * columns): a new cross-entity id added there needs a remap here — the `snapshot columns are pinned`
+   * build guard fails until it is.
+   */
+  private fun remapSnapshotReferences(
+    entity: KeySnapshot,
+    context: Context,
+  ) {
+    entity.originalKeyId = remapKeyId(entity.originalKeyId, context)
+    entity.branchKeyId = remapKeyId(entity.branchKeyId, context)
+    entity.screenshotReferences =
+      entity.screenshotReferences
+        .mapNotNull { view ->
+          // Screenshot no longer referenced by any live key -> not in the export -> drop the dangling entry.
+          val screenshot = context.entity(Screenshot::class.java.name, view.screenshotId) as? Screenshot
+          screenshot?.let { view.copy(screenshotId = it.id) }
+        }.toMutableSet()
+  }
+
+  private fun remapKeyId(
+    sourceKeyId: Long,
+    context: Context,
+  ): Long {
+    val key = context.entity(Key::class.java.name, sourceKeyId) as? Key ?: return context.nextMissingKeyId()
+    return key.id
   }
 
   /**
@@ -251,6 +288,18 @@ class EntityGraphDeserializer(
     var importedDefaultBranch: Branch? = null
     var sourceDefaultBranchHandle: Any? = null
     var maxTaskNumber: Long = 0
+    private var missingKeyIdCounter = 0L
+
+    /**
+     * A distinct negative id for a snapshot key reference (originalKeyId/branchKeyId) whose target Key
+     * was not in the export — its source key was individually soft-deleted while its branch stayed live,
+     * so the Key collector skipped it. Negative so it can never collide with a real (positive) key id in
+     * BranchMergeAnalyzer's `sourceById`/`targetById`, and distinct per call so that analyzer's id-keyed
+     * maps don't collapse two missing refs onto one key. BranchMergeAnalyzer treats an id matching no
+     * live key as a deleted key — the correct three-way outcome — so we tolerate rather than throw
+     * (a project with a soft-deleted baseline key is a legitimate export).
+     */
+    fun nextMissingKeyId(): Long = --missingKeyIdCounter
 
     fun register(
       type: EntityType<*>,

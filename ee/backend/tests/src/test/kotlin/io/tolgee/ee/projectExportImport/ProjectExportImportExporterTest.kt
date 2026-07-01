@@ -3,6 +3,8 @@ package io.tolgee.ee.projectExportImport
 import com.fasterxml.jackson.core.type.TypeReference
 import io.tolgee.AbstractSpringTest
 import io.tolgee.development.testDataBuilder.data.ProjectExportImportTestData
+import io.tolgee.development.testDataBuilder.data.ProjectImportBranchedSourceTestData
+import io.tolgee.ee.service.branching.BranchSnapshotService
 import io.tolgee.service.AvatarService
 import io.tolgee.service.projectExportImport.ProjectExportImportExporter
 import io.tolgee.service.projectExportImport.model.ExportManifest
@@ -23,6 +25,9 @@ import java.util.zip.ZipInputStream
 class ProjectExportImportExporterTest : AbstractSpringTest() {
   @Autowired
   private lateinit var exporter: ProjectExportImportExporter
+
+  @Autowired
+  private lateinit var branchSnapshotService: BranchSnapshotService
 
   private lateinit var testData: ProjectExportImportTestData
   private lateinit var zip: Map<String, ByteArray>
@@ -206,13 +211,38 @@ class ProjectExportImportExporterTest : AbstractSpringTest() {
     assertThat(qaReplacements).doesNotContain(testData.keyHopQaReplacement, testData.languageHopQaReplacement)
   }
 
-  private fun entities(type: String): List<SerializedEntity> {
+  @Test
+  fun `excludes branch snapshots that sit on a soft-deleted branch`() {
+    val branched = ProjectImportBranchedSourceTestData()
+    testDataService.saveTestData(branched.root)
+    branchSnapshotService.createInitialSnapshot(branched.project.id, branched.defaultBranch, branched.featureBranch)
+    executeInNewTransaction {
+      entityManager
+        .createQuery("update Branch b set b.deletedAt = CURRENT_TIMESTAMP where b.id = :id")
+        .setParameter("id", branched.featureBranch.id)
+        .executeUpdate()
+    }
+
+    val branchedZip = exportZip(branched.project.id)
+    listOf("KeySnapshot", "TranslationSnapshot", "KeyMetaSnapshot").forEach { type ->
+      assertThat(entitiesIn(branchedZip, type))
+        .withFailMessage("%s rows on a soft-deleted branch must not be exported", type)
+        .isEmpty()
+    }
+  }
+
+  private fun entities(type: String): List<SerializedEntity> = entitiesIn(zip, type)
+
+  private fun entitiesIn(
+    zip: Map<String, ByteArray>,
+    type: String,
+  ): List<SerializedEntity> {
     val bytes = zip[ExportZipLayout.entityPath(type)] ?: return emptyList()
     return objectMapper.readValue(bytes, object : TypeReference<List<SerializedEntity>>() {})
   }
 
-  private fun exportZip(): Map<String, ByteArray> {
-    val tempFile = exporter.exportToTempFile(testData.project.id, VERSION).path
+  private fun exportZip(projectId: Long = testData.project.id): Map<String, ByteArray> {
+    val tempFile = exporter.exportToTempFile(projectId, VERSION).path
     try {
       return ZipInputStream(ByteArrayInputStream(Files.readAllBytes(tempFile))).use { stream ->
         generateSequence { stream.nextEntry }
