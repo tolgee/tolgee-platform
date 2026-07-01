@@ -72,7 +72,6 @@ class PublicProjectsControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `search matches the project name case-insensitively`() {
-    // mixed case vs stored "Other org public project" — pins lower(r.name)
     performGet("/v2/public/projects/with-stats?search=other ORG").andIsOk.andAssertThatJson {
       node("_embedded.projects") {
         isArray.hasSize(1)
@@ -83,7 +82,6 @@ class PublicProjectsControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `search matches the organization name case-insensitively`() {
-    // lowercase vs stored "Vibrant translators" — pins lower(o.name)
     performGet("/v2/public/projects/with-stats?search=vibrant").andIsOk.andAssertThatJson {
       node("_embedded.projects") {
         isArray.hasSize(1)
@@ -121,7 +119,6 @@ class PublicProjectsControllerTest : AuthorizedControllerTest() {
       node("_embedded.projects") {
         node("[0].id").isEqualTo(testData.otherOrgPublicProject.id)
         node("[0].organizationRole").isEqualTo(null)
-        // logged-in users get the community floor (VIEW) on public projects they have no role on
         node("[0].computedPermission.type").isEqualTo("VIEW")
         node("[0].computedPermission.origin").isEqualTo("COMMUNITY")
         node("[1].id").isEqualTo(testData.publicProject.id)
@@ -171,7 +168,6 @@ class PublicProjectsControllerTest : AuthorizedControllerTest() {
     performGet("/v2/public/projects/with-stats").andIsOk.andAssertThatJson {
       node("_embedded.projects").isArray.hasSize(2)
     }
-    // the anonymous read must not have triggered the base-language write-on-read
     baseLanguageId(testData.noBaseLanguageProject.id).assert.isNull()
   }
 
@@ -186,7 +182,6 @@ class PublicProjectsControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `excludes a public project with no organization owner`() {
-    // if it were listed, the assembler's non-null organizationOwner deref would 500 instead of 200
     performGet("/v2/public/projects/with-stats").andIsOk.andAssertThatJson {
       node("_embedded.projects").isArray.hasSize(2)
     }

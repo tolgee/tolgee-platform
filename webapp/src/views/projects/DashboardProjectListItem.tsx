@@ -150,6 +150,7 @@ const DashboardProjectListItem = ({ variant = 'default', ...p }: Props) => {
   const isPublicVariant = variant === 'public';
   const { t } = useTranslate();
   const history = useHistory();
+  const allowPrivate = useGlobalContext((c) => c.auth.allowPrivate);
   const rightPanelWidth = useGlobalContext((c) => c.layout.rightPanelWidth);
   const isCompact = useMediaQuery(
     `@media(max-width: ${rightPanelWidth + 800}px)`
@@ -166,7 +167,7 @@ const DashboardProjectListItem = ({ variant = 'default', ...p }: Props) => {
       data-cy="dashboard-projects-list-item"
       onClick={() =>
         history.push(
-          isPublicVariant
+          isPublicVariant && !allowPrivate
             ? LINKS.LOGIN.build()
             : LINKS.PROJECT_DASHBOARD.build({
                 [PARAMS.PROJECT_ID]: p.id,

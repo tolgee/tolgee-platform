@@ -14,7 +14,6 @@ class PublicProjectsControllerTestData : BaseTestData() {
   lateinit var otherOrgPublicProject: Project
   lateinit var nonMember: UserAccount
 
-  // holds a DIRECT project permission on otherOrgPublicProject without belonging to its org
   lateinit var directPermissionUser: UserAccount
 
   lateinit var noBaseLanguageProject: Project

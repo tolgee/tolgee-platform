@@ -1,5 +1,6 @@
 import { HOST } from '../../common/constants';
 import { gcy } from '../../common/shared';
+import { login } from '../../common/apiCalls/common';
 import { publicProjectsData } from '../../common/apiCalls/testData/testData';
 import { waitForGlobalLoading } from '../../common/loading';
 
@@ -36,6 +37,9 @@ describe('Public projects view', () => {
     cy.contains('Community Alpha').should('be.visible');
     cy.contains('Community Zeta').should('be.visible');
     cy.contains('Private project').should('not.exist');
+    gcy('project-list-more-button').should('not.exist');
+    gcy('project-list-translations-button').should('not.exist');
+    gcy('project-list-qa-badge-button').should('not.exist');
   });
 
   it('narrows the list with search', () => {
@@ -64,5 +68,14 @@ describe('Public projects view', () => {
     visit();
     gcy('dashboard-projects-list-item').first().click();
     cy.url().should('include', '/login');
+  });
+
+  it('opens the project instead of login for a logged-in visitor', () => {
+    publicProjectsData.generate();
+    login('admin', 'admin');
+    visit();
+    gcy('community-translation-banner').should('be.visible');
+    gcy('dashboard-projects-list-item').first().click();
+    cy.url().should('match', /\/projects\/[0-9]+/);
   });
 });

@@ -278,7 +278,7 @@ export interface paths {
   };
   "/v2/organizations/{organizationId}/projects-with-stats": {
     /** Returns all projects (including statistics) where current user has any permission (except none) */
-    get: operations["getAllWithStatistics_3"];
+    get: operations["getAllWithStatistics_2"];
   };
   "/v2/organizations/{organizationId}/set-base-permissions": {
     /** Set default granular (scope-based) permissions for organization users, who don't have direct project permissions set. */
@@ -384,7 +384,7 @@ export interface paths {
   };
   "/v2/organizations/{slug}/projects-with-stats": {
     /** Returns all projects (including statistics) where current user has any permission (except none) */
-    get: operations["getAllWithStatistics_2"];
+    get: operations["getAllWithStatistics_1"];
   };
   "/v2/pats": {
     get: operations["getAll_9"];
@@ -417,7 +417,7 @@ export interface paths {
   };
   "/v2/projects/with-stats": {
     /** Returns all projects (including statistics) where current user has any permission */
-    get: operations["getAllWithStatistics_1"];
+    get: operations["getAllWithStatistics"];
   };
   "/v2/projects/{projectId}": {
     get: operations["get_2"];
@@ -1184,7 +1184,7 @@ export interface paths {
   };
   "/v2/public/projects/with-stats": {
     /** Returns all public projects (including statistics), discoverable by anyone — no authentication required */
-    get: operations["getAllWithStatistics"];
+    get: operations["getAllPublicWithStatistics"];
   };
   "/v2/public/scope-info/hierarchy": {
     get: operations["getHierarchy"];
@@ -11487,7 +11487,7 @@ export interface operations {
     };
   };
   /** Returns all projects (including statistics) where current user has any permission (except none) */
-  getAllWithStatistics_3: {
+  getAllWithStatistics_2: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -12943,7 +12943,7 @@ export interface operations {
     };
   };
   /** Returns all projects (including statistics) where current user has any permission (except none) */
-  getAllWithStatistics_2: {
+  getAllWithStatistics_1: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -13402,7 +13402,7 @@ export interface operations {
     };
   };
   /** Returns all projects (including statistics) where current user has any permission */
-  getAllWithStatistics_1: {
+  getAllWithStatistics: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -24506,7 +24506,7 @@ export interface operations {
     };
   };
   /** Returns all public projects (including statistics), discoverable by anyone — no authentication required */
-  getAllWithStatistics: {
+  getAllPublicWithStatistics: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
