@@ -1492,6 +1492,2140 @@ export interface components {
       userFullName?: string;
       username?: string;
     };
+    AppWebhookPayload_ACCEPT_SUGGESTION: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "ACCEPT_SUGGESTION";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_AI_PROMPT_CREATE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "AI_PROMPT_CREATE";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_AI_PROMPT_DELETE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "AI_PROMPT_DELETE";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_AI_PROMPT_UPDATE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "AI_PROMPT_UPDATE";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_AUTO_TRANSLATE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "AUTO_TRANSLATE";
+        modifiedEntities?: { [key: string]: unknown };
+        params?: { [key: string]: unknown };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_BATCH_ASSIGN_TRANSLATION_LABEL: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "BATCH_ASSIGN_TRANSLATION_LABEL";
+        modifiedEntities?: { [key: string]: unknown };
+        params?: { [key: string]: unknown };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_BATCH_CLEAR_TRANSLATIONS: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "BATCH_CLEAR_TRANSLATIONS";
+        modifiedEntities?: { [key: string]: unknown };
+        params?: { [key: string]: unknown };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_BATCH_COPY_TRANSLATIONS: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "BATCH_COPY_TRANSLATIONS";
+        modifiedEntities?: { [key: string]: unknown };
+        params?: { [key: string]: unknown };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_BATCH_KEY_HARD_DELETE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "BATCH_KEY_HARD_DELETE";
+        modifiedEntities?: { [key: string]: unknown };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_BATCH_KEY_RESTORE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "BATCH_KEY_RESTORE";
+        modifiedEntities?: { [key: string]: unknown };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_BATCH_MACHINE_TRANSLATE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "BATCH_MACHINE_TRANSLATE";
+        modifiedEntities?: { [key: string]: unknown };
+        params?: { [key: string]: unknown };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_BATCH_PRE_TRANSLATE_BY_TM: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "BATCH_PRE_TRANSLATE_BY_TM";
+        modifiedEntities?: { [key: string]: unknown };
+        params?: { [key: string]: unknown };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_BATCH_SET_KEYS_NAMESPACE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "BATCH_SET_KEYS_NAMESPACE";
+        modifiedEntities?: { [key: string]: unknown };
+        params?: { [key: string]: unknown };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_BATCH_SET_TRANSLATION_STATE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "BATCH_SET_TRANSLATION_STATE";
+        modifiedEntities?: { [key: string]: unknown };
+        params?: { [key: string]: unknown };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_BATCH_TAG_KEYS: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "BATCH_TAG_KEYS";
+        modifiedEntities?: { [key: string]: unknown };
+        params?: { [key: string]: unknown };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_BATCH_UNASSIGN_TRANSLATION_LABEL: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "BATCH_UNASSIGN_TRANSLATION_LABEL";
+        modifiedEntities?: { [key: string]: unknown };
+        params?: { [key: string]: unknown };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_BATCH_UNTAG_KEYS: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "BATCH_UNTAG_KEYS";
+        modifiedEntities?: { [key: string]: unknown };
+        params?: { [key: string]: unknown };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_BRANCH_CREATE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "BRANCH_CREATE";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_BRANCH_DELETE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "BRANCH_DELETE";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_BRANCH_MERGE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "BRANCH_MERGE";
+        modifiedEntities?: { [key: string]: unknown };
+        params?: { [key: string]: unknown };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_BRANCH_PROTECTION_CHANGE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "BRANCH_PROTECTION_CHANGE";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_BRANCH_RENAME: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "BRANCH_RENAME";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_COMPLEX_EDIT: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "COMPLEX_EDIT";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_COMPLEX_TAG_OPERATION: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "COMPLEX_TAG_OPERATION";
+        modifiedEntities?: { [key: string]: unknown };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_CONTENT_DELIVERY_CONFIG_CREATE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "CONTENT_DELIVERY_CONFIG_CREATE";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_CONTENT_DELIVERY_CONFIG_DELETE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "CONTENT_DELIVERY_CONFIG_DELETE";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_CONTENT_DELIVERY_CONFIG_UPDATE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "CONTENT_DELIVERY_CONFIG_UPDATE";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_CONTENT_STORAGE_CREATE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "CONTENT_STORAGE_CREATE";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_CONTENT_STORAGE_DELETE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "CONTENT_STORAGE_DELETE";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_CONTENT_STORAGE_UPDATE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "CONTENT_STORAGE_UPDATE";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_CREATE_KEY: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "CREATE_KEY";
+        modifiedEntities?: {
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_CREATE_LANGUAGE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "CREATE_LANGUAGE";
+        modifiedEntities?: {
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_CREATE_PROJECT: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "CREATE_PROJECT";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_CREATE_SUGGESTION: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "CREATE_SUGGESTION";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_DECLINE_SUGGESTION: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "DECLINE_SUGGESTION";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_DELETE_LANGUAGE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "DELETE_LANGUAGE";
+        modifiedEntities?: {
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_DELETE_SUGGESTION: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "DELETE_SUGGESTION";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_DISMISS_AUTO_TRANSLATED_STATE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "DISMISS_AUTO_TRANSLATED_STATE";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_EDIT_LANGUAGE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "EDIT_LANGUAGE";
+        modifiedEntities?: {
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_EDIT_PROJECT: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "EDIT_PROJECT";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_GLOSSARY_CREATE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "GLOSSARY_CREATE";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_GLOSSARY_DELETE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "GLOSSARY_DELETE";
+        modifiedEntities?: {
+          Glossary?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Glossary";
+            modifications?: components["schemas"]["GlossaryModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_GLOSSARY_IMPORT: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "GLOSSARY_IMPORT";
+        modifiedEntities?: { [key: string]: unknown };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_GLOSSARY_TERM_CREATE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "GLOSSARY_TERM_CREATE";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_GLOSSARY_TERM_DELETE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "GLOSSARY_TERM_DELETE";
+        modifiedEntities?: { [key: string]: unknown };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_GLOSSARY_TERM_TRANSLATION_UPDATE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "GLOSSARY_TERM_TRANSLATION_UPDATE";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_GLOSSARY_TERM_UPDATE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "GLOSSARY_TERM_UPDATE";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_GLOSSARY_UPDATE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "GLOSSARY_UPDATE";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_IMPORT: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "IMPORT";
+        modifiedEntities?: { [key: string]: unknown };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_KEY_CHARACTER_LIMIT_EDIT: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "KEY_CHARACTER_LIMIT_EDIT";
+        modifiedEntities?: {
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_KEY_DELETE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "KEY_DELETE";
+        modifiedEntities?: { [key: string]: unknown };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_KEY_HARD_DELETE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "KEY_HARD_DELETE";
+        modifiedEntities?: { [key: string]: unknown };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_KEY_NAME_EDIT: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "KEY_NAME_EDIT";
+        modifiedEntities?: {
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_KEY_RESTORE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "KEY_RESTORE";
+        modifiedEntities?: {
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_KEY_SOFT_DELETE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "KEY_SOFT_DELETE";
+        modifiedEntities?: { [key: string]: unknown };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_KEY_TAGS_EDIT: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "KEY_TAGS_EDIT";
+        modifiedEntities?: {
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_NAMESPACE_EDIT: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "NAMESPACE_EDIT";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_ORDER_TRANSLATION: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "ORDER_TRANSLATION";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_QA_ISSUE_IGNORE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "QA_ISSUE_IGNORE";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_QA_ISSUE_UNIGNORE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "QA_ISSUE_UNIGNORE";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_REVERSE_SUGGESTION: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "REVERSE_SUGGESTION";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_SCREENSHOT_ADD: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "SCREENSHOT_ADD";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_SCREENSHOT_DELETE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "SCREENSHOT_DELETE";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_SET_OUTDATED_FLAG: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "SET_OUTDATED_FLAG";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_SET_TRANSLATIONS: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "SET_TRANSLATIONS";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_SET_TRANSLATION_STATE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "SET_TRANSLATION_STATE";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_SUGGESTION_SET_ACTIVE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "SUGGESTION_SET_ACTIVE";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_TASKS_CREATE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "TASKS_CREATE";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_TASK_CLOSE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "TASK_CLOSE";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_TASK_CREATE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "TASK_CREATE";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_TASK_FINISH: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "TASK_FINISH";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_TASK_KEYS_UPDATE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "TASK_KEYS_UPDATE";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_TASK_REOPEN: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "TASK_REOPEN";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_TASK_UPDATE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "TASK_UPDATE";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_TRANSLATION_COMMENT_ADD: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "TRANSLATION_COMMENT_ADD";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_TRANSLATION_COMMENT_DELETE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "TRANSLATION_COMMENT_DELETE";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_TRANSLATION_COMMENT_EDIT: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "TRANSLATION_COMMENT_EDIT";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_TRANSLATION_COMMENT_SET_STATE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "TRANSLATION_COMMENT_SET_STATE";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_TRANSLATION_LABELS_EDIT: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "TRANSLATION_LABELS_EDIT";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_TRANSLATION_LABEL_ASSIGN: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "TRANSLATION_LABEL_ASSIGN";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_TRANSLATION_LABEL_CREATE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "TRANSLATION_LABEL_CREATE";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_TRANSLATION_LABEL_DELETE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "TRANSLATION_LABEL_DELETE";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_TRANSLATION_LABEL_UPDATE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "TRANSLATION_LABEL_UPDATE";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_TRANSLATION_MEMORY_ASSIGN_PROJECT: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "TRANSLATION_MEMORY_ASSIGN_PROJECT";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_TRANSLATION_MEMORY_COPY_FROM_PROJECT: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "TRANSLATION_MEMORY_COPY_FROM_PROJECT";
+        modifiedEntities?: { [key: string]: unknown };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_TRANSLATION_MEMORY_CREATE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "TRANSLATION_MEMORY_CREATE";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_TRANSLATION_MEMORY_DELETE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "TRANSLATION_MEMORY_DELETE";
+        modifiedEntities?: {
+          TranslationMemory?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "TranslationMemory";
+            modifications?: components["schemas"]["TranslationMemoryModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_TRANSLATION_MEMORY_ENTRY_CREATE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "TRANSLATION_MEMORY_ENTRY_CREATE";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_TRANSLATION_MEMORY_ENTRY_DELETE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "TRANSLATION_MEMORY_ENTRY_DELETE";
+        modifiedEntities?: { [key: string]: unknown };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_TRANSLATION_MEMORY_ENTRY_UPDATE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "TRANSLATION_MEMORY_ENTRY_UPDATE";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_TRANSLATION_MEMORY_IMPORT: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "TRANSLATION_MEMORY_IMPORT";
+        modifiedEntities?: { [key: string]: unknown };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_TRANSLATION_MEMORY_UNASSIGN_PROJECT: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "TRANSLATION_MEMORY_UNASSIGN_PROJECT";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_TRANSLATION_MEMORY_UPDATE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "TRANSLATION_MEMORY_UPDATE";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_TRANSLATION_MEMORY_UPDATE_PROJECT_CONFIG: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "TRANSLATION_MEMORY_UPDATE_PROJECT_CONFIG";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_UNKNOWN: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "UNKNOWN";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_WEBHOOK_CONFIG_CREATE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "WEBHOOK_CONFIG_CREATE";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_WEBHOOK_CONFIG_DELETE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "WEBHOOK_CONFIG_DELETE";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
+    AppWebhookPayload_WEBHOOK_CONFIG_UPDATE: {
+      activityData?: components["schemas"]["ProjectActivityModel"] & {
+        /** @enum {string} */
+        type?: "WEBHOOK_CONFIG_UPDATE";
+        modifiedEntities?: {
+          Translation?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Translation";
+            modifications?: components["schemas"]["TranslationModifications"];
+          })[];
+          Key?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Key";
+            modifications?: components["schemas"]["KeyModifications"];
+          })[];
+          Language?: (components["schemas"]["ModifiedEntityModel"] & {
+            /** @enum {string} */
+            entityClass?: "Language";
+            modifications?: components["schemas"]["LanguageModifications"];
+          })[];
+        };
+      };
+      /** @enum {string} */
+      eventType?: "PROJECT_ACTIVITY";
+      /** Format: int64 */
+      webhookConfigId?: number;
+    };
     ApplyBranchMergeRequest: {
       deleteBranch: boolean;
     };
@@ -3354,6 +5488,11 @@ export interface components {
       name: string;
       organizationOwner: components["schemas"]["SimpleOrganizationModel"];
     };
+    GlossaryModifications: {
+      assignedProjects?: components["schemas"]["PropertyModification"];
+      baseLanguageTag?: components["schemas"]["PropertyModification"];
+      name?: components["schemas"]["PropertyModification"];
+    };
     GlossaryTermHighlightModel: {
       position: components["schemas"]["PositionModel"];
       value: components["schemas"]["GlossaryTermModel"];
@@ -3836,6 +5975,15 @@ export interface components {
        */
       namespace?: string;
     };
+    KeyModifications: {
+      branch?: components["schemas"]["PropertyModification"];
+      deletedAt?: components["schemas"]["PropertyModification"];
+      isPlural?: components["schemas"]["PropertyModification"];
+      maxCharLimit?: components["schemas"]["PropertyModification"];
+      name?: components["schemas"]["PropertyModification"];
+      namespace?: components["schemas"]["PropertyModification"];
+      pluralArgName?: components["schemas"]["PropertyModification"];
+    };
     KeyScreenshotDto: {
       positions?: components["schemas"]["KeyInScreenshotPositionDto"][];
       text?: string;
@@ -4190,6 +6338,14 @@ export interface components {
        * @example cs-CZ
        */
       tag: string;
+    };
+    LanguageModifications: {
+      aiTranslatorPromptDescription?: components["schemas"]["PropertyModification"];
+      deletedAt?: components["schemas"]["PropertyModification"];
+      flagEmoji?: components["schemas"]["PropertyModification"];
+      name?: components["schemas"]["PropertyModification"];
+      originalName?: components["schemas"]["PropertyModification"];
+      tag?: components["schemas"]["PropertyModification"];
     };
     LanguageQaConfigModel: {
       customSettings?: { [key: string]: "WARNING" | "OFF" };
@@ -7266,6 +9422,11 @@ export interface components {
       /** @description When true, only translations in REVIEWED state contribute to this TM. */
       writeOnlyReviewed: boolean;
     };
+    TranslationMemoryModifications: {
+      defaultPenalty?: components["schemas"]["PropertyModification"];
+      name?: components["schemas"]["PropertyModification"];
+      writeOnlyReviewed?: components["schemas"]["PropertyModification"];
+    };
     TranslationMemoryRowCellModel: {
       /**
        * Format: int64
@@ -7360,6 +9521,15 @@ export interface components {
       state: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED";
       /** @description Translation text */
       text?: string;
+    };
+    TranslationModifications: {
+      auto?: components["schemas"]["PropertyModification"];
+      labels?: components["schemas"]["PropertyModification"];
+      mtProvider?: components["schemas"]["PropertyModification"];
+      outdated?: components["schemas"]["PropertyModification"];
+      promptId?: components["schemas"]["PropertyModification"];
+      state?: components["schemas"]["PropertyModification"];
+      text?: components["schemas"]["PropertyModification"];
     };
     TranslationSuggestionAcceptResponse: {
       accepted: components["schemas"]["TranslationSuggestionModel"];
