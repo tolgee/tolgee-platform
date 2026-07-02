@@ -64,6 +64,7 @@ class CachedPermissionService(
           viewLanguageIds = permission.viewLanguageIds,
           stateChangeLanguageIds = permission.stateChangeLanguageIds,
           suggestLanguageIds = permission.suggestLanguageIds,
+          suggestManageLanguageIds = permission.suggestManageLanguageIds,
           type = permission.type,
           granular = permission.granular,
         )

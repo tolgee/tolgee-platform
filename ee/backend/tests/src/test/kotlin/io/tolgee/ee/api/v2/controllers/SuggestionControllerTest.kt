@@ -1,11 +1,13 @@
 package io.tolgee.ee.api.v2.controllers
 
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.SuggestionsTestData
 import io.tolgee.dtos.request.key.ComplexEditKeyDto
 import io.tolgee.ee.data.translationSuggestion.CreateTranslationSuggestionRequest
 import io.tolgee.ee.repository.TranslationSuggestionRepository
 import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsNotFound
@@ -30,6 +32,24 @@ class SuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @AfterEach
   fun resetClock() {
     clearForcedDate()
+  }
+
+  private fun assertSuggestionExists(suggestionId: Long) {
+    executeInNewTransaction {
+      translationSuggestionRepository
+        .findById(suggestionId)
+        .isPresent.assert
+        .isTrue()
+    }
+  }
+
+  private fun assertSuggestionDeleted(suggestionId: Long) {
+    executeInNewTransaction {
+      translationSuggestionRepository
+        .findById(suggestionId)
+        .isPresent.assert
+        .isFalse()
+    }
   }
 
   fun initTestData(suggestionsMode: SuggestionsMode = SuggestionsMode.ENABLED) {
@@ -292,9 +312,11 @@ class SuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `can delete his own suggestion`() {
     initTestData()
     userAccount = testData.projectTranslator.self
+    val suggestionId = testData.czechSuggestions[0].self.id
     performProjectAuthDelete(
-      "languages/${testData.czechLanguage.id}/key/${testData.keys[0].self.id}/suggestion/${testData.czechSuggestions[0].self.id}",
+      "languages/${testData.czechLanguage.id}/key/${testData.keys[0].self.id}/suggestion/$suggestionId",
     ).andIsOk
+    assertSuggestionDeleted(suggestionId)
   }
 
   @Test
@@ -302,9 +324,157 @@ class SuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `can't delete suggestion of someone else`() {
     initTestData()
     userAccount = testData.projectTranslator.self
+    val suggestionId = testData.czechSuggestions[1].self.id
     performProjectAuthDelete(
-      "languages/${testData.czechLanguage.id}/key/${testData.keys[0].self.id}/suggestion/${testData.czechSuggestions[1].self.id}",
+      "languages/${testData.czechLanguage.id}/key/${testData.keys[0].self.id}/suggestion/$suggestionId",
+    ).andIsForbidden.andHasErrorMessage(Message.USER_CAN_ONLY_DELETE_HIS_SUGGESTIONS)
+    assertSuggestionExists(suggestionId)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `moderator with suggestions-manage scope can delete another user's suggestion`() {
+    initTestData()
+    userAccount = testData.suggestionModerator.self
+    val suggestionId = testData.czechSuggestions[1].self.id
+    performProjectAuthDelete(
+      "languages/${testData.czechLanguage.id}/key/${testData.keys[0].self.id}/suggestion/$suggestionId",
+    ).andIsOk
+    assertSuggestionDeleted(suggestionId)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `granular suggestions-manage permission can list suggestions`() {
+    initTestData()
+    userAccount = testData.suggestionModerator.self
+    performProjectAuthGet(
+      "languages/${testData.czechLanguage.id}/key/${testData.keys[0].self.id}/suggestion",
+    ).andIsOk.andAssertThatJson {
+      node("page.totalElements").isNumber.isEqualTo(BigDecimal(2))
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `view-only member cannot list suggestions`() {
+    initTestData()
+    userAccount = testData.viewOnlyUser.self
+    performProjectAuthGet(
+      "languages/${testData.czechLanguage.id}/key/${testData.keys[0].self.id}/suggestion",
     ).andIsForbidden
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `suggester without manage scope can list suggestions in permitted language`() {
+    initTestData()
+    userAccount = testData.czechTranslator.self
+    performProjectAuthGet(
+      "languages/${testData.czechLanguage.id}/key/${testData.keys[0].self.id}/suggestion",
+    ).andIsOk
+    performProjectAuthGet(
+      "languages/${testData.englishLanguage.id}/key/${testData.keys[0].self.id}/suggestion",
+    ).andIsForbidden
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `language-restricted moderator lists suggestions only in permitted language`() {
+    initTestData()
+    userAccount = testData.czechSuggestionModerator.self
+    performProjectAuthGet(
+      "languages/${testData.czechLanguage.id}/key/${testData.keys[0].self.id}/suggestion",
+    ).andIsOk.andAssertThatJson {
+      node("page.totalElements").isNumber.isEqualTo(BigDecimal(2))
+    }
+    performProjectAuthGet(
+      "languages/${testData.englishLanguage.id}/key/${testData.keys[0].self.id}/suggestion",
+    ).andIsForbidden
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `EDIT preset member can delete another user's suggestion`() {
+    initTestData()
+    userAccount = testData.projectEditor.self
+    val suggestionId = testData.czechSuggestions[0].self.id
+    performProjectAuthDelete(
+      "languages/${testData.czechLanguage.id}/key/${testData.keys[0].self.id}/suggestion/$suggestionId",
+    ).andIsOk
+    assertSuggestionDeleted(suggestionId)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `unrestricted moderator can delete another user's suggestion in any language`() {
+    initTestData()
+    userAccount = testData.suggestionModerator.self
+    val suggestionId = testData.englishSuggestions[0].self.id
+    performProjectAuthDelete(
+      "languages/${testData.englishLanguage.id}/key/${testData.keys[0].self.id}/suggestion/$suggestionId",
+    ).andIsOk
+    assertSuggestionDeleted(suggestionId)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `reviewer without suggestions-manage scope cannot delete another user's suggestion`() {
+    initTestData()
+    userAccount = testData.projectReviewer.self
+    val suggestionId = testData.czechSuggestions[0].self.id
+    performProjectAuthDelete(
+      "languages/${testData.czechLanguage.id}/key/${testData.keys[0].self.id}/suggestion/$suggestionId",
+    ).andIsForbidden.andHasErrorMessage(Message.USER_CAN_ONLY_DELETE_HIS_SUGGESTIONS)
+    assertSuggestionExists(suggestionId)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `server admin can delete another user's suggestion in any language`() {
+    initTestData()
+    userAccount = testData.serverAdmin.self
+    val suggestionId = testData.englishSuggestions[1].self.id
+    performProjectAuthDelete(
+      "languages/${testData.englishLanguage.id}/key/${testData.keys[0].self.id}/suggestion/$suggestionId",
+    ).andIsOk
+    assertSuggestionDeleted(suggestionId)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `language-restricted moderator can delete suggestion in a permitted language`() {
+    initTestData()
+    userAccount = testData.czechSuggestionModerator.self
+    val suggestionId = testData.czechSuggestions[0].self.id
+    performProjectAuthDelete(
+      "languages/${testData.czechLanguage.id}/key/${testData.keys[0].self.id}/suggestion/$suggestionId",
+    ).andIsOk
+    assertSuggestionDeleted(suggestionId)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `language-restricted moderator cannot delete suggestion in another language`() {
+    initTestData()
+    userAccount = testData.czechSuggestionModerator.self
+    val suggestionId = testData.englishSuggestions[0].self.id
+    performProjectAuthDelete(
+      "languages/${testData.englishLanguage.id}/key/${testData.keys[0].self.id}/suggestion/$suggestionId",
+    ).andIsForbidden.andHasErrorMessage(Message.LANGUAGE_NOT_PERMITTED)
+    assertSuggestionExists(suggestionId)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `author can delete own suggestion even in a non-permitted language`() {
+    initTestData()
+    userAccount = testData.czechReviewer.self
+    val suggestionId = testData.czechReviewerEnglishSuggestion.self.id
+    performProjectAuthDelete(
+      "languages/${testData.englishLanguage.id}/key/${testData.keys[3].self.id}/suggestion/$suggestionId",
+    ).andIsOk
+    assertSuggestionDeleted(suggestionId)
   }
 
   @Test

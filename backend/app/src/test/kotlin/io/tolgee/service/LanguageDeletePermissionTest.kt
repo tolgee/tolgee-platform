@@ -109,6 +109,36 @@ class LanguageDeletePermissionTest : AbstractSpringTest() {
     }
   }
 
+  @Test
+  @Transactional
+  fun `lowers permissions for suggestions manage (granular)`() {
+    checkUser(testData.suggestManageScopeUser) {
+      assertThat(computedPermissions.scopes).doesNotContain(Scope.TRANSLATION_SUGGESTIONS_MANAGE)
+      assertThat(computedPermissions.scopes)
+        .containsExactlyInAnyOrder(Scope.TRANSLATIONS_VIEW, Scope.KEYS_VIEW)
+    }
+  }
+
+  @Test
+  @Transactional
+  fun `keeps suggestions manage scope when a non-last language is deleted (granular)`() {
+    checkUser(testData.suggestManageMultiLangUser) {
+      assertThat(computedPermissions.scopes).contains(Scope.TRANSLATION_SUGGESTIONS_MANAGE)
+      assertThat(computedPermissions.suggestManageLanguageIds).hasSize(1)
+    }
+  }
+
+  @Test
+  @Transactional
+  fun `lowers permissions for combined state-edit and suggestions manage (granular)`() {
+    checkUser(testData.stateChangeAndSuggestManageScopeUser) {
+      assertThat(computedPermissions.scopes)
+        .doesNotContain(Scope.TRANSLATIONS_STATE_EDIT, Scope.TRANSLATION_SUGGESTIONS_MANAGE)
+      assertThat(computedPermissions.scopes)
+        .containsExactlyInAnyOrder(Scope.TRANSLATIONS_VIEW, Scope.KEYS_VIEW)
+    }
+  }
+
   private fun checkUser(
     userAccount: UserAccount,
     checkFn: ProjectPermissionData.() -> Unit,

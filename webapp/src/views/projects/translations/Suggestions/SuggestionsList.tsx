@@ -90,6 +90,10 @@ export const SuggestionsList = ({
     'translations.state-edit',
     languageId
   );
+  const canModerateSuggestions = satisfiesLanguageAccess(
+    'translation-suggestions.manage',
+    languageId
+  );
   const user = useUser();
 
   const projectId = project.id;
@@ -336,7 +340,7 @@ export const SuggestionsList = ({
                       canReview ? () => handleReverse(item.id) : undefined
                     }
                     onDelete={
-                      user?.id === item.author.id
+                      user?.id === item.author.id || canModerateSuggestions
                         ? () => handleDelete(item.id)
                         : undefined
                     }

@@ -94,6 +94,7 @@ class CommunityPermissionComputationTest : AbstractSpringTest() {
         override val translateLanguageIds = setOf(1L)
         override val stateChangeLanguageIds = setOf(1L)
         override val suggestLanguageIds = setOf(1L)
+        override val suggestManageLanguageIds = setOf(1L)
         override val type = ProjectPermissionType.EDIT
         override val granular = true
       }

@@ -6,8 +6,10 @@ import io.tolgee.development.testDataBuilder.builders.SuggestionBuilder
 import io.tolgee.development.testDataBuilder.builders.TranslationBuilder
 import io.tolgee.development.testDataBuilder.builders.UserAccountBuilder
 import io.tolgee.model.Language
+import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
+import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.SuggestionsMode
 import io.tolgee.model.enums.TranslationState
 
@@ -21,10 +23,16 @@ class SuggestionsTestData(
   var czechTranslator: UserAccountBuilder
   var czechReviewer: UserAccountBuilder
   var communityUser: UserAccountBuilder
+  var suggestionModerator: UserAccountBuilder
+  var czechSuggestionModerator: UserAccountBuilder
+  var serverAdmin: UserAccountBuilder
+  var projectEditor: UserAccountBuilder
+  var viewOnlyUser: UserAccountBuilder
   var relatedProject: ProjectBuilder
   var keys: MutableList<KeyBuilder> = mutableListOf()
   val czechSuggestions: MutableList<SuggestionBuilder> = mutableListOf()
   val englishSuggestions: MutableList<SuggestionBuilder> = mutableListOf()
+  lateinit var czechReviewerEnglishSuggestion: SuggestionBuilder
   val czechTranslations: MutableList<TranslationBuilder> = mutableListOf()
   lateinit var pluralKey: KeyBuilder
   lateinit var pluralSuggestion: SuggestionBuilder
@@ -80,6 +88,37 @@ class SuggestionsTestData(
         name = "Community user"
       }
 
+    suggestionModerator =
+      root.addUserAccount {
+        username = "suggestion.moderator@test.com"
+        name = "Suggestion moderator"
+      }
+
+    czechSuggestionModerator =
+      root.addUserAccount {
+        username = "cs.suggestion.moderator@test.com"
+        name = "Czech suggestion moderator"
+      }
+
+    serverAdmin =
+      root.addUserAccount {
+        username = "server.admin@test.com"
+        name = "Server admin"
+        role = UserAccount.Role.ADMIN
+      }
+
+    projectEditor =
+      root.addUserAccount {
+        username = "editor@test.com"
+        name = "Project editor"
+      }
+
+    viewOnlyUser =
+      root.addUserAccount {
+        username = "view.only@test.com"
+        name = "View only user"
+      }
+
     userAccountBuilder.defaultOrganizationBuilder.apply {
       addRole {
         user = orgMember.self
@@ -127,6 +166,29 @@ class SuggestionsTestData(
         translateLanguages = mutableSetOf(czechLanguage)
         suggestLanguages = mutableSetOf(czechLanguage)
         stateChangeLanguages = mutableSetOf(czechLanguage)
+      }
+
+      addPermission {
+        user = projectEditor.self
+        type = ProjectPermissionType.EDIT
+      }
+
+      addPermission {
+        user = viewOnlyUser.self
+        type = ProjectPermissionType.VIEW
+      }
+
+      addPermission {
+        user = suggestionModerator.self
+        type = null
+        scopes = arrayOf(Scope.TRANSLATIONS_VIEW, Scope.TRANSLATION_SUGGESTIONS_MANAGE)
+      }
+
+      addPermission {
+        user = czechSuggestionModerator.self
+        type = null
+        scopes = arrayOf(Scope.TRANSLATIONS_VIEW, Scope.TRANSLATION_SUGGESTIONS_MANAGE)
+        suggestManageLanguages = mutableSetOf(czechLanguage)
       }
 
       (0 until 4).forEach {
@@ -200,6 +262,13 @@ class SuggestionsTestData(
           this.author = projectTranslator.self
           this.translation = "Only suggestion 3-1"
         }
+
+        czechReviewerEnglishSuggestion =
+          addSuggestion {
+            this.language = englishLanguage
+            this.author = czechReviewer.self
+            this.translation = "Suggested translation 3 by cs reviewer"
+          }
       }
 
       pluralKey =

@@ -20,7 +20,6 @@ import {
   Trash01,
   XClose,
 } from '@untitled-ui/icons-react';
-import { useUser } from 'tg.globalContext/helpers';
 import { SuggestionAction } from './SuggestionAction';
 import { TranslationVisual } from '../translationVisual/TranslationVisual';
 import { useRef, useState } from 'react';
@@ -123,7 +122,6 @@ export const TranslationSuggestion = ({
 }: Props) => {
   const theme = useTheme();
   const formatDate = useTimeDistance();
-  const user = useUser();
   const { t } = useTranslate();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLButtonElement>(null);
@@ -173,7 +171,7 @@ export const TranslationSuggestion = ({
       disabled: isLoading,
     });
   }
-  if (onDelete && suggestion.author.id === user?.id) {
+  if (onDelete) {
     menuItems.push({
       action: 'delete',
       label: t('translation_suggestion_delete_tooltip'),

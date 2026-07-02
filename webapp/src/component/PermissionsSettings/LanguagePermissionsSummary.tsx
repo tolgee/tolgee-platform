@@ -17,6 +17,7 @@ export function LanguagePermissionSummary({ permissions, allLangs }: Props) {
     translateLanguageIds,
     stateChangeLanguageIds,
     suggestLanguageIds,
+    suggestManageLanguageIds,
   } = permissions;
 
   const categories: LanguagePermissionCategory[] = [
@@ -34,6 +35,11 @@ export function LanguagePermissionSummary({ permissions, allLangs }: Props) {
       label: t('permission_type_suggest'),
       data: suggestLanguageIds,
       scope: 'translations.suggest',
+    },
+    {
+      label: t('permission_type_suggest_manage'),
+      data: suggestManageLanguageIds,
+      scope: 'translation-suggestions.manage',
     },
     {
       label: t('permission_type_view'),

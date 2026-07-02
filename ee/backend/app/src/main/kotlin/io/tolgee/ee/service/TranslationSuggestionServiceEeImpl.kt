@@ -7,7 +7,6 @@ import io.tolgee.ee.data.translationSuggestion.CreateTranslationSuggestionReques
 import io.tolgee.ee.repository.TranslationSuggestionRepository
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.exceptions.PermissionException
 import io.tolgee.formats.StringIsNotPluralException
 import io.tolgee.formats.normalizePlurals
 import io.tolgee.model.Project
@@ -206,19 +205,7 @@ class TranslationSuggestionServiceEeImpl(
     )
   }
 
-  fun deleteSuggestionCreatedByUser(
-    projectId: Long,
-    languageId: Long,
-    keyId: Long,
-    suggestionId: Long,
-    userId: Long,
-  ) {
-    val suggestion = getSuggestion(projectId, languageId, keyId, suggestionId)
-
-    if (suggestion.author?.id != userId) {
-      throw PermissionException(Message.USER_CAN_ONLY_DELETE_HIS_SUGGESTIONS)
-    }
-
+  fun deleteSuggestion(suggestion: TranslationSuggestion) {
     translationSuggestionRepository.delete(suggestion)
   }
 
