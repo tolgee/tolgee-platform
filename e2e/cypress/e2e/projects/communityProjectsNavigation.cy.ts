@@ -62,9 +62,10 @@ describe('Community projects navigation', () => {
     cy.location('pathname').should('eq', '/community-projects');
   });
 
-  it('shows the community chrome: community chip, no add button', () => {
+  it('shows the community chrome: banner, community chip, no add button', () => {
     visitCommunity();
     gcy('community-projects-view').should('be.visible');
+    gcy('community-translation-banner').should('be.visible');
     gcy('organization-switch')
       .findDcy('community-translation-item')
       .should('be.visible');

@@ -11,6 +11,7 @@ import { LINKS } from 'tg.constants/links';
 import { useIsEmailVerified } from 'tg.globalContext/helpers';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { ProjectsList } from 'tg.views/projects/ProjectsList';
+import { CommunityTranslationBanner } from 'tg.views/projects/public/CommunityTranslationBanner';
 import { useLatchedSearchVisibility } from 'tg.views/projects/useLatchedSearchVisibility';
 import { CriticalUsageCircle } from 'tg.ee';
 
@@ -41,6 +42,7 @@ const CommunityProjects = () => {
 
   return (
     <DashboardPage>
+      <CommunityTranslationBanner />
       <BaseView
         data-cy="community-projects-view"
         windowTitle={t('community_projects_window_title')}
