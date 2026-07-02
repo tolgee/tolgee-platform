@@ -68,6 +68,13 @@ class ProjectExportImportTestData(
   lateinit var keyOnDeletedBranch: Key
   lateinit var taskOnDeletedBranch: Task
   lateinit var suggestionAuthor: UserAccount
+  lateinit var greetingKey: Key
+  lateinit var labeledKey: Key
+  lateinit var softDeletedKey: Key
+
+  val bigMetaDistance = 0.25
+  val bigMetaHits = 7L
+  val danglingBigMetaDistance = 0.9
 
   val staleTrueKeyName = "greeting"
   val suggestionKeyName = "suggestion-key"
@@ -101,23 +108,27 @@ class ProjectExportImportTestData(
       setQaConfig { }
       englishLanguageBuilder.setQaConfig { }
 
-      addKey(keyName = "greeting").build {
-        addTranslation("en", "Hello").self.apply {
-          promptId = distinctivePromptId
-          qaChecksStale = true
-        }
-      }
+      greetingKey =
+        addKey(keyName = "greeting")
+          .build {
+            addTranslation("en", "Hello").self.apply {
+              promptId = distinctivePromptId
+              qaChecksStale = true
+            }
+          }.self
 
       lateinit var labeledTranslation: Translation
-      addKey(keyName = "labeled").build {
-        addTranslation("en", "Labeled").build {
-          labeledTranslation = self
-          addComment {
-            text = commentText
-            author = this@ProjectExportImportTestData.user
-          }
-        }
-      }
+      labeledKey =
+        addKey(keyName = "labeled")
+          .build {
+            addTranslation("en", "Labeled").build {
+              labeledTranslation = self
+              addComment {
+                text = commentText
+                author = this@ProjectExportImportTestData.user
+              }
+            }
+          }.self
       assignedLabel =
         addLabel {
           name = assignedLabelName
@@ -215,41 +226,42 @@ class ProjectExportImportTestData(
           project = projectBuilder.self
         }.self
 
-      addKey {
-        name = softDeletedKeyName
-        deletedAt = Date()
-      }.build {
-        // key-hop: a suggestion + QA issue with a LIVE language under the soft-deleted key. The key.deletedAt
-        // clause alone must exclude them, so the live language proves that clause independently of the language hop.
-        addSuggestion {
-          language = englishLanguage
-          author = suggestionAuthor
-          translation = keyHopSuggestionText
-          state = TranslationSuggestionState.ACTIVE
-        }
-        addTranslation("en", softDeletedTranslationText).build {
-          addComment {
-            text = trashedTranslationCommentText
-            author = this@ProjectExportImportTestData.user
+      softDeletedKey =
+        addKey {
+          name = softDeletedKeyName
+          deletedAt = Date()
+        }.build {
+          // key-hop: a suggestion + QA issue with a LIVE language under the soft-deleted key. The key.deletedAt
+          // clause alone must exclude them, so the live language proves that clause independently of the language hop.
+          addSuggestion {
+            language = englishLanguage
+            author = suggestionAuthor
+            translation = keyHopSuggestionText
+            state = TranslationSuggestionState.ACTIVE
           }
-          addQaIssue {
-            type = QaCheckType.EMPTY_TRANSLATION
-            message = QaIssueMessage.QA_EMPTY_TRANSLATION
-            state = QaIssueState.OPEN
-            replacement = keyHopQaReplacement
+          addTranslation("en", softDeletedTranslationText).build {
+            addComment {
+              text = trashedTranslationCommentText
+              author = this@ProjectExportImportTestData.user
+            }
+            addQaIssue {
+              type = QaCheckType.EMPTY_TRANSLATION
+              message = QaIssueMessage.QA_EMPTY_TRANSLATION
+              state = QaIssueState.OPEN
+              replacement = keyHopQaReplacement
+            }
           }
-        }
-        addMeta {
-          description = trashedKeyMetaDescription
-          tags.add(
-            Tag().apply {
-              project = projectBuilder.self
-              name = "trashed-tag"
-            },
-          )
-          addCodeReference(this@ProjectExportImportTestData.user) { path = trashedCodeReferencePath }
-        }
-      }
+          addMeta {
+            description = trashedKeyMetaDescription
+            tags.add(
+              Tag().apply {
+                project = projectBuilder.self
+                name = "trashed-tag"
+              },
+            )
+            addCodeReference(this@ProjectExportImportTestData.user) { path = trashedCodeReferencePath }
+          }
+        }.self
 
       val deletedLanguage =
         addLanguage {
@@ -343,6 +355,18 @@ class ProjectExportImportTestData(
       addTaskKey {
         task = liveTask
         key = keyOnDeletedBranch
+      }
+
+      // Stored high-id-first (labeled before greeting) so the row is intentionally NON-canonical in
+      // source id space — the import must re-canonicalize it after remap, and the round-trip test's
+      // key1Id < key2Id assertion would fail if it didn't.
+      addKeysDistance(labeledKey, greetingKey) {
+        distance = bigMetaDistance
+        hits = bigMetaHits
+      }
+      addKeysDistance(greetingKey, softDeletedKey) {
+        distance = danglingBigMetaDistance
+        hits = 3
       }
     }
   }

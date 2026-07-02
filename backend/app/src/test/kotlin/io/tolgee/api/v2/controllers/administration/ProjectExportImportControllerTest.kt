@@ -6,6 +6,7 @@ import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.model.translationMemory.TranslationMemoryType
 import io.tolgee.testing.AuthorizedControllerTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -83,6 +84,41 @@ class ProjectExportImportControllerTest : AuthorizedControllerTest() {
     assertThat(projectKeyNames())
       .contains("greeting", "labeled")
       .doesNotContain("stray-should-be-wiped")
+  }
+
+  @Test
+  fun `import restores BigMeta and the default project TM end-to-end`() {
+    val zip = exportedZipBytes()
+
+    userAccount = testData.adminUser
+    performAuthMultipart(
+      "/v2/administration/projects/${testData.project.id}/import",
+      listOf(MockMultipartFile("file", "export.zip", "application/zip", zip)),
+    ).andIsOk
+
+    executeInNewTransaction {
+      val bigMetaCount =
+        entityManager
+          .createQuery(
+            "select count(kd) from KeysDistance kd where kd.project.id = :p",
+            java.lang.Long::class.java,
+          ).setParameter("p", testData.project.id)
+          .singleResult
+          .toLong()
+      assertThat(bigMetaCount).isEqualTo(1)
+
+      val projectTmCount =
+        entityManager
+          .createQuery(
+            "select count(a) from TranslationMemoryProject a " +
+              "where a.project.id = :p and a.translationMemory.type = :t",
+            java.lang.Long::class.java,
+          ).setParameter("p", testData.project.id)
+          .setParameter("t", TranslationMemoryType.PROJECT)
+          .singleResult
+          .toLong()
+      assertThat(projectTmCount).isEqualTo(1)
+    }
   }
 
   @Test

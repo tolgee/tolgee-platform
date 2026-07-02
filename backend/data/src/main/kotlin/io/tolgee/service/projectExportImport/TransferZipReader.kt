@@ -51,6 +51,7 @@ class TransferZipReader(
       when {
         name == ExportZipLayout.MANIFEST -> {}
         name == ExportZipLayout.PROJECT -> {}
+        name == ExportZipLayout.BIG_META -> {}
         name.startsWith(ExportZipLayout.ENTITIES_DIR) ->
           entityJsonByType[entityTypeOf(name)] = bytes
         name.startsWith(ExportZipLayout.BLOBS_DIR) ->
@@ -58,7 +59,13 @@ class TransferZipReader(
         else -> throw IllegalArgumentException("Export zip has an unexpected entry: $name")
       }
     }
-    return ParsedExport(manifest, entries[ExportZipLayout.PROJECT], entityJsonByType, blobs)
+    return ParsedExport(
+      manifest,
+      entries[ExportZipLayout.PROJECT],
+      entries[ExportZipLayout.BIG_META],
+      entityJsonByType,
+      blobs,
+    )
   }
 
   private fun safeEntryName(rawName: String): String {
@@ -103,6 +110,7 @@ class TransferZipReader(
   data class ParsedExport(
     val manifest: ExportManifest,
     val projectJson: ByteArray?,
+    val bigMetaJson: ByteArray?,
     val entityJsonByType: Map<String, ByteArray>,
     val blobs: Map<String, ByteArray>,
   )

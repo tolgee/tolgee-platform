@@ -142,6 +142,10 @@ object ProjectExportImportPolicyRegistry {
         BranchMerge::class,
         BranchMergeChange::class,
         LanguageStats::class,
+        // BigMeta. IGNORED here because it can't traverse the generic graph — its @IdClass components
+        // (key1Id/key2Id) are raw soft-FK scalars that are also the immutable PK — but it IS
+        // round-tripped, via the dedicated bigMeta.json side-channel (exporter.writeBigMeta /
+        // importer.restoreBigMeta).
         KeysDistance::class,
         AutoTranslationConfig::class,
         MtServiceConfig::class,

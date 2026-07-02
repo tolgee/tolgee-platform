@@ -57,6 +57,15 @@ import kotlin.reflect.KClass
  * Must be called within the caller's transaction (the importer's): it is deliberately not `@Transactional`
  * so the wipe and the subsequent re-insert share one rollback boundary, and its flush/clear + `COUNT == 0`
  * backstop only make sense inside that transaction.
+ *
+ * This is a **mirror transfer, not a backup/restore**: everything project-scoped is wiped so no
+ * base-project row can interfere with the insert, but only in-scope data is restored — so a
+ * non-OWNED wipe with no restore path is the normal, intended case, not an omission. Each non-OWNED
+ * wipe below carries an inline disposition tag (an untagged delete is an OWNED type, restored via the
+ * generic graph); a future editor adding a non-OWNED wipe should tag it with one of:
+ *  - `DROPPED` — gone for good (transient or user-reconfigurable data),
+ *  - `RESTORED_DEFAULT` — re-seeded by the importer as project creation would,
+ *  - `RESTORED_SIDE_CHANNEL` — re-inserted by the importer from a dedicated export file.
  */
 @Component
 class ProjectContentClearer(
@@ -79,8 +88,9 @@ class ProjectContentClearer(
 
     clearTasks(projectId)
     // branch_merge_change FKs key (no cascade) — must go before keys, and before its branch_merge parent.
-    deleteBranchMergeChanges(projectId)
-    clearImports(projectId)
+    deleteBranchMergeChanges(projectId) // DROPPED (branch-merge history)
+    clearImports(projectId) // DROPPED (transient upload state)
+    // RESTORED_DEFAULT: importer re-seeds a fresh PROJECT-type TM via createProjectTm.
     translationMemoryManagementService.deleteAllByProject(projectId)
 
     // The project keeps pointing at content we are about to delete; null the pointers first.
@@ -88,8 +98,8 @@ class ProjectContentClearer(
     project.defaultNamespace = null
     projectRepository.saveAndFlush(project)
 
-    mtServiceConfigService.deleteAllByProjectId(projectId)
-    aiPlaygroundResultService.deleteResultsByProject(projectId)
+    mtServiceConfigService.deleteAllByProjectId(projectId) // DROPPED (user-reconfigurable)
+    aiPlaygroundResultService.deleteResultsByProject(projectId) // DROPPED (transient)
     // translation_label rows FK translation; clearing labels drops the join before translations are deleted.
     labelService.deleteLabelsByProjectId(projectId)
     deleteSuggestions(projectId)
@@ -103,9 +113,10 @@ class ProjectContentClearer(
     entityManager.flush()
     entityManager.clear()
 
+    // RESTORED_SIDE_CHANNEL: importer re-inserts remapped rows via restoreBigMeta.
     bigMetaService.deleteAllByProjectId(projectId)
     detachKeptConfigFromBranches(projectId)
-    deleteBranchMergesAndSnapshots(projectId)
+    deleteBranchMergesAndSnapshots(projectId) // branch_merge is DROPPED (history); the snapshot rows are OWNED
     branchService.deleteAllByProjectId(projectId)
     projectQaConfigRepository.deleteAllByProjectId(projectId)
 

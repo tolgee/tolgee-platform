@@ -6,9 +6,12 @@ import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.ProjectExportImportTestData
 import io.tolgee.development.testDataBuilder.data.ProjectImportBranchedSourceTestData
 import io.tolgee.development.testDataBuilder.data.ProjectImportTargetTestData
+import io.tolgee.dtos.BigMetaDto
+import io.tolgee.dtos.RelatedKeyDto
 import io.tolgee.ee.service.branching.BranchMergeService
 import io.tolgee.ee.service.branching.BranchSnapshotService
 import io.tolgee.exceptions.BadRequestException
+import io.tolgee.model.Project
 import io.tolgee.model.Screenshot
 import io.tolgee.model.TranslationSuggestion
 import io.tolgee.model.branching.Branch
@@ -17,8 +20,13 @@ import io.tolgee.model.enums.TranslationSuggestionState
 import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.model.enums.qa.QaIssueMessage
 import io.tolgee.model.enums.qa.QaIssueState
+import io.tolgee.model.keyBigMeta.KeysDistance
 import io.tolgee.model.qa.TranslationQaIssue
+import io.tolgee.model.translationMemory.TranslationMemoryProject
+import io.tolgee.model.translationMemory.TranslationMemoryType
 import io.tolgee.service.AvatarService
+import io.tolgee.service.bigMeta.BigMetaService
+import io.tolgee.service.bigMeta.KeysDistanceDto
 import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.projectExportImport.ProjectExportImportExporter
 import io.tolgee.service.projectExportImport.ProjectExportImportImporter
@@ -51,6 +59,9 @@ class ProjectExportImportImporterTest : AbstractSpringTest() {
 
   @Autowired
   private lateinit var branchMergeService: BranchMergeService
+
+  @Autowired
+  private lateinit var bigMetaService: BigMetaService
 
   private lateinit var source: ProjectExportImportTestData
   private lateinit var target: ProjectImportTargetTestData
@@ -345,6 +356,78 @@ class ProjectExportImportImporterTest : AbstractSpringTest() {
   }
 
   @Test
+  fun `round-trips BigMeta with remapped canonical key ids and drops rows whose key was not imported`() {
+    importSourceOntoTarget()
+    val projectId = target.targetProject.id
+
+    val rows = keysDistances(projectId)
+    assertThat(rows).hasSize(1)
+    val row = rows.single()
+    assertThat(row.key1Id).isLessThan(row.key2Id)
+    assertThat(setOf(keyNameById(projectId, row.key1Id), keyNameById(projectId, row.key2Id)))
+      .containsExactlyInAnyOrder("greeting", "labeled")
+    assertThat(row.distance).isEqualTo(source.bigMetaDistance)
+    assertThat(row.hits).isEqualTo(source.bigMetaHits)
+  }
+
+  @Test
+  fun `imports a zip without bigMeta json (pre-feature archive) leaving no BigMeta`() {
+    val zip = exportZip(source.project.id)
+    val withoutBigMeta = rezipWithout(zip) { it == ExportZipLayout.BIG_META }
+    importer.import(ByteArrayInputStream(withoutBigMeta), target.targetProject.id, source.adminUser.id, VERSION)
+
+    assertThat(keysDistances(target.targetProject.id)).isEmpty()
+  }
+
+  @Test
+  fun `an imported BigMeta row is canonical so a later store does not duplicate the pair`() {
+    importSourceOntoTarget()
+    val projectId = target.targetProject.id
+
+    val dto =
+      BigMetaDto().apply {
+        relatedKeysInOrder = mutableListOf(RelatedKeyDto(keyName = "greeting"), RelatedKeyDto(keyName = "labeled"))
+      }
+    readInTransaction { bigMetaService.store(dto, entityManager.getReference(Project::class.java, projectId)) }
+
+    // A non-canonical imported row would miss the (key1id,key2id) upsert conflict target and duplicate.
+    assertThat(keysDistances(projectId)).hasSize(1)
+  }
+
+  @Test
+  fun `storeImportedDistances de-dupes both orderings of a pair (legacy archive would else crash the batch)`() {
+    importSourceOntoTarget()
+    val projectId = target.targetProject.id
+    val a = keyIdByName(projectId, "rich-key")
+    val b = keyIdByName(projectId, source.suggestionKeyName)
+
+    bigMetaService.storeImportedDistances(
+      listOf(
+        KeysDistanceDto(key1Id = a, key2Id = b, distance = 0.1, projectId = projectId, hits = 1),
+        KeysDistanceDto(key1Id = b, key2Id = a, distance = 0.2, projectId = projectId, hits = 2),
+      ),
+    )
+
+    assertThat(keysDistances(projectId).filter { setOf(it.key1Id, it.key2Id) == setOf(a, b) }).hasSize(1)
+  }
+
+  @Test
+  fun `recreates the project's default PROJECT-type TM on import`() {
+    importSourceOntoTarget()
+    val projectId = target.targetProject.id
+
+    val tm = readInTransaction { translationMemoryManagementService.getProjectTm(projectId) }
+    assertThat(tm).isNotNull
+    assertThat(tm!!.type).isEqualTo(TranslationMemoryType.PROJECT)
+    assertThat(tm.name).isEqualTo(source.project.name)
+
+    val assignment = projectTmAssignment(projectId)
+    assertThat(assignment.priority).isEqualTo(0)
+    assertThat(assignment.readAccess).isTrue()
+    assertThat(assignment.writeAccess).isTrue()
+  }
+
+  @Test
   fun `round-trips screenshot bytes and gives the avatar a fresh non-dangling hash`() {
     importSourceOntoTarget()
 
@@ -584,6 +667,51 @@ class ProjectExportImportImporterTest : AbstractSpringTest() {
         .createQuery("delete from KeyScreenshotReference r where r.screenshot.id = :id")
         .setParameter("id", screenshotId)
         .executeUpdate()
+    }
+
+  private fun keysDistances(projectId: Long): List<KeysDistance> =
+    readInTransaction {
+      entityManager
+        .createQuery("select kd from KeysDistance kd where kd.project.id = :p", KeysDistance::class.java)
+        .setParameter("p", projectId)
+        .resultList
+    }
+
+  private fun keyIdByName(
+    projectId: Long,
+    name: String,
+  ): Long =
+    readInTransaction {
+      entityManager
+        .createQuery("select k.id from Key k where k.project.id = :p and k.name = :n", java.lang.Long::class.java)
+        .setParameter("p", projectId)
+        .setParameter("n", name)
+        .singleResult
+        .toLong()
+    }
+
+  private fun keyNameById(
+    projectId: Long,
+    keyId: Long,
+  ): String? =
+    readInTransaction {
+      entityManager
+        .createQuery("select k.name from Key k where k.id = :id and k.project.id = :p", String::class.java)
+        .setParameter("id", keyId)
+        .setParameter("p", projectId)
+        .resultList
+        .firstOrNull()
+    }
+
+  private fun projectTmAssignment(projectId: Long): TranslationMemoryProject =
+    readInTransaction {
+      entityManager
+        .createQuery(
+          "select a from TranslationMemoryProject a join fetch a.translationMemory tm where a.project.id = :p",
+          TranslationMemoryProject::class.java,
+        ).setParameter("p", projectId)
+        .resultList
+        .single { it.translationMemory.type == TranslationMemoryType.PROJECT }
     }
 
   private fun importSourceOntoTarget() {

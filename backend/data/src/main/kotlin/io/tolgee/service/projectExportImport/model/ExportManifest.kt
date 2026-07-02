@@ -9,4 +9,5 @@ data class ExportManifest(
   val sourceProjectName: String,
   val exportedAt: Long,
   val entityCounts: Map<String, Int>,
+  val bigMetaCount: Int = 0,
 )

@@ -16,6 +16,12 @@ enum class ExportImportPolicy {
   /** `Project`: the root; not recreated — on import it is the admin-selected target project. */
   PROJECT_ROOT,
 
-  /** Not serialized and not traversed: instance-specific, derived, transient, or out-of-scope. */
+  /**
+   * Not traversed by the generic graph: instance-specific, derived, transient, or out-of-scope.
+   * IGNORED usually means not serialized either, but this is not guaranteed — at least one IGNORED
+   * entity (`KeysDistance`) is round-tripped via a side channel (see its entry in
+   * `ProjectExportImportPolicyRegistry`). Do not treat IGNORED as a hard "never leaves this instance"
+   * guarantee.
+   */
   IGNORED,
 }

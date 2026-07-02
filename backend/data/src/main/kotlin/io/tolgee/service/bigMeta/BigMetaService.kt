@@ -50,6 +50,31 @@ class BigMetaService(
     return keysDistanceRepository.save(keysDistance)
   }
 
+  fun findAllForExport(projectId: Long): List<KeysDistanceDto> {
+    return entityManager
+      .createQuery(
+        "select new io.tolgee.service.bigMeta.KeysDistanceDto(" +
+          "kd.key1Id, kd.key2Id, kd.distance, kd.project.id, kd.hits, true) " +
+          "from KeysDistance kd where kd.project.id = :projectId",
+        KeysDistanceDto::class.java,
+      ).setParameter("projectId", projectId)
+      .resultList
+  }
+
+  fun storeImportedDistances(distances: Collection<KeysDistanceDto>) {
+    if (distances.isEmpty()) return
+    // A foreign archive's remapped pairs may be non-canonical; canonicalize to (min, max) — as
+    // KeysDistanceUtil does for runtime writes — so a later store()'s ON CONFLICT (key1id, key2id)
+    // upsert matches these rows instead of duplicating the pair. distinctBy drops a legacy archive's
+    // both-orderings duplicate of one pair, which would otherwise collide on the conflict target within
+    // a single batch — Postgres rejects that under reWriteBatchedInserts (default self-hosted config).
+    val canonical =
+      distances
+        .map { it.copy(key1Id = minOf(it.key1Id, it.key2Id), key2Id = maxOf(it.key1Id, it.key2Id)) }
+        .distinctBy { it.key1Id to it.key2Id }
+    insertNewDistances(canonical)
+  }
+
   @Transactional
   fun store(
     data: BigMetaDto,
@@ -130,7 +155,7 @@ class BigMetaService(
     val timestamp = Timestamp(currentDateProvider.date.time)
     jdbcTemplate.batchUpdate(
       """
-      insert into keys_distance (key1id, key2id, distance, hits, created_at, updated_at, project_id) 
+      insert into keys_distance (key1id, key2id, distance, hits, created_at, updated_at, project_id)
       values (?, ?, ?, ?, ?, ?, ?)
       on conflict (key1id, key2id) do update set score = excluded.score, hits = excluded.hits, updated_at = ?
       """,

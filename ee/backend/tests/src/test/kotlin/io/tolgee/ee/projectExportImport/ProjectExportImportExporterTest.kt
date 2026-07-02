@@ -9,6 +9,7 @@ import io.tolgee.service.AvatarService
 import io.tolgee.service.projectExportImport.ProjectExportImportExporter
 import io.tolgee.service.projectExportImport.model.ExportManifest
 import io.tolgee.service.projectExportImport.model.ExportZipLayout
+import io.tolgee.service.projectExportImport.model.SerializedBigMeta
 import io.tolgee.service.projectExportImport.model.SerializedEntity
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -212,6 +213,20 @@ class ProjectExportImportExporterTest : AbstractSpringTest() {
   }
 
   @Test
+  fun `exports BigMeta rows (source key ids) in bigMeta json with a manifest count`() {
+    val manifest = objectMapper.readValue(zip.getValue(ExportZipLayout.MANIFEST), ExportManifest::class.java)
+    assertThat(manifest.bigMetaCount).isEqualTo(2)
+
+    val rows = bigMeta()
+    assertThat(rows).hasSize(2)
+    val livePair = setOf(testData.greetingKey.id, testData.labeledKey.id)
+    val liveRow = rows.single { setOf(it.key1Id, it.key2Id) == livePair }
+    assertThat(liveRow.distance).isEqualTo(testData.bigMetaDistance)
+    assertThat(liveRow.hits).isEqualTo(testData.bigMetaHits)
+    assertThat(rows).anySatisfy { assertThat(setOf(it.key1Id, it.key2Id)).contains(testData.softDeletedKey.id) }
+  }
+
+  @Test
   fun `excludes branch snapshots that sit on a soft-deleted branch`() {
     val branched = ProjectImportBranchedSourceTestData()
     testDataService.saveTestData(branched.root)
@@ -229,6 +244,11 @@ class ProjectExportImportExporterTest : AbstractSpringTest() {
         .withFailMessage("%s rows on a soft-deleted branch must not be exported", type)
         .isEmpty()
     }
+  }
+
+  private fun bigMeta(): List<SerializedBigMeta> {
+    val bytes = zip[ExportZipLayout.BIG_META] ?: return emptyList()
+    return objectMapper.readValue(bytes, object : TypeReference<List<SerializedBigMeta>>() {})
   }
 
   private fun entities(type: String): List<SerializedEntity> = entitiesIn(zip, type)

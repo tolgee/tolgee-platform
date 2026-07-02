@@ -58,7 +58,7 @@ class EntityGraphDeserializer(
     ownedTypes.forEach { type -> recordsByType.getValue(type).forEach { phaseBWire(type, it, context) } }
     projectRecord?.let { wireProjectRootContentPointers(it, context) }
 
-    return Result(context.screenshotsBySourceId, context.maxTaskNumber)
+    return Result(context.screenshotsBySourceId, context.keyIdBySourceId, context.maxTaskNumber)
   }
 
   private fun phaseAInsert(
@@ -225,6 +225,9 @@ class EntityGraphDeserializer(
     if (entity is Screenshot) {
       context.screenshotsBySourceId[(record.handle as Number).toLong()] = entity
     }
+    if (entity is Key) {
+      context.keyIdBySourceId[(record.handle as Number).toLong()] = entity.id
+    }
     if (entity is Branch && record.attrs["isDefault"] == true) {
       context.importedDefaultBranch = entity
       context.sourceDefaultBranchHandle = normalizeHandle(record.handle)
@@ -285,6 +288,7 @@ class EntityGraphDeserializer(
   ) {
     private val byTypeAndHandle = HashMap<String, MutableMap<Any, Any>>()
     val screenshotsBySourceId = LinkedHashMap<Long, Screenshot>()
+    val keyIdBySourceId = LinkedHashMap<Long, Long>()
     var importedDefaultBranch: Branch? = null
     var sourceDefaultBranchHandle: Any? = null
     var maxTaskNumber: Long = 0
@@ -320,6 +324,7 @@ class EntityGraphDeserializer(
 
   data class Result(
     val screenshotsBySourceId: Map<Long, Screenshot>,
+    val keyIdBySourceId: Map<Long, Long>,
     val maxImportedTaskNumber: Long,
   )
 

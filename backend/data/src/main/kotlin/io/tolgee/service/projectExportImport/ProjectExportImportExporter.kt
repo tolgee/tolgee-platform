@@ -4,12 +4,14 @@ import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.model.Project
+import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.projectExportImport.blob.BlobEntry
 import io.tolgee.service.projectExportImport.blob.BlobHandler
 import io.tolgee.service.projectExportImport.blob.BlobHandlerRegistry
 import io.tolgee.service.projectExportImport.model.ExportManifest
 import io.tolgee.service.projectExportImport.model.ExportZipLayout
+import io.tolgee.service.projectExportImport.model.SerializedBigMeta
 import jakarta.persistence.EntityManager
 import jakarta.persistence.metamodel.EntityType
 import org.springframework.stereotype.Component
@@ -33,6 +35,7 @@ class ProjectExportImportExporter(
   private val blobHandlerRegistry: BlobHandlerRegistry,
   private val currentDateProvider: CurrentDateProvider,
   private val projectService: ProjectService,
+  private val bigMetaService: BigMetaService,
 ) {
   /**
    * Builds the export zip in a temp file and returns it with the source project name (read in the same
@@ -50,8 +53,9 @@ class ProjectExportImportExporter(
         val blobRowsByHandler = LinkedHashMap<BlobHandler, List<Any>>()
         val counts = writeEntities(zip, projectId, blobRowsByHandler)
         writeProject(zip, project)
+        val bigMetaCount = writeBigMeta(zip, projectId)
         writeBlobs(zip, blobRowsByHandler, project)
-        writeManifest(zip, project, version, counts)
+        writeManifest(zip, project, version, counts, bigMetaCount)
       }
     } catch (e: Throwable) {
       Files.deleteIfExists(tempFile)
@@ -74,19 +78,28 @@ class ProjectExportImportExporter(
     ownedEntityTypes().forEach { entityType ->
       val simpleName = entityType.javaType.simpleName
       val rows = collect(entityType, projectId)
-      zip.putNextEntry(ZipEntry(ExportZipLayout.entityPath(simpleName)))
-      val generator = objectMapper.factory.createGenerator(zip).disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET)
-      generator.writeStartArray()
-      rows.forEach { objectMapper.writeValue(generator, EntityMetamodelReader.read(it, entityType)) }
-      generator.writeEndArray()
-      // close() (not flush) returns Jackson's pooled buffer; safe because AUTO_CLOSE_TARGET is off, so
-      // the underlying zip stream stays open.
-      generator.close()
-      zip.closeEntry()
+      writeJsonArray(zip, ExportZipLayout.entityPath(simpleName), rows) { EntityMetamodelReader.read(it, entityType) }
       counts[simpleName] = rows.size
       blobHandlerRegistry.handlerFor(entityType.javaType.name)?.let { blobRowsByHandler[it] = rows }
     }
     return counts
+  }
+
+  private fun <T> writeJsonArray(
+    zip: ZipOutputStream,
+    entryName: String,
+    rows: Iterable<T>,
+    toSerialized: (T) -> Any,
+  ) {
+    zip.putNextEntry(ZipEntry(entryName))
+    val generator = objectMapper.factory.createGenerator(zip).disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET)
+    generator.writeStartArray()
+    rows.forEach { objectMapper.writeValue(generator, toSerialized(it)) }
+    generator.writeEndArray()
+    // close() (not flush) returns Jackson's pooled buffer; safe because AUTO_CLOSE_TARGET is off, so
+    // the underlying zip stream stays open.
+    generator.close()
+    zip.closeEntry()
   }
 
   /**
@@ -103,6 +116,17 @@ class ProjectExportImportExporter(
     zip.putNextEntry(ZipEntry(ExportZipLayout.PROJECT))
     zip.write(objectMapper.writeValueAsBytes(EntityMetamodelReader.read(project, projectType)))
     zip.closeEntry()
+  }
+
+  private fun writeBigMeta(
+    zip: ZipOutputStream,
+    projectId: Long,
+  ): Int {
+    val rows = bigMetaService.findAllForExport(projectId)
+    writeJsonArray(zip, ExportZipLayout.BIG_META, rows) {
+      SerializedBigMeta(it.key1Id, it.key2Id, it.distance, it.hits)
+    }
+    return rows.size
   }
 
   private fun writeBlobs(
@@ -135,6 +159,7 @@ class ProjectExportImportExporter(
     project: Project,
     version: String,
     counts: Map<String, Int>,
+    bigMetaCount: Int,
   ) {
     val manifest =
       ExportManifest(
@@ -142,6 +167,7 @@ class ProjectExportImportExporter(
         sourceProjectName = project.name,
         exportedAt = currentDateProvider.date.time,
         entityCounts = counts,
+        bigMetaCount = bigMetaCount,
       )
     zip.putNextEntry(ZipEntry(ExportZipLayout.MANIFEST))
     zip.write(objectMapper.writeValueAsBytes(manifest))

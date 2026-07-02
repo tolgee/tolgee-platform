@@ -1,6 +1,7 @@
 package io.tolgee.service.projectExportImport
 
 import com.fasterxml.jackson.core.JacksonException
+import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.constants.Message
@@ -9,13 +10,17 @@ import io.tolgee.model.Project
 import io.tolgee.model.Screenshot
 import io.tolgee.model.UserAccount
 import io.tolgee.service.AvatarService
+import io.tolgee.service.bigMeta.BigMetaService
+import io.tolgee.service.bigMeta.KeysDistanceDto
 import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.project.LanguageStatsService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.projectExportImport.blob.ProjectAvatarBlobHandler
 import io.tolgee.service.projectExportImport.blob.ScreenshotBlobHandler
+import io.tolgee.service.projectExportImport.model.SerializedBigMeta
 import io.tolgee.service.projectExportImport.model.SerializedEntity
 import io.tolgee.service.security.UserAccountService
+import io.tolgee.service.translationMemory.TranslationMemoryManagementService
 import io.tolgee.util.ImageConverter
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
@@ -52,6 +57,8 @@ class ProjectExportImportImporter(
   private val avatarService: AvatarService,
   private val languageStatsService: LanguageStatsService,
   private val activityHolder: ActivityHolder,
+  private val bigMetaService: BigMetaService,
+  private val translationMemoryManagementService: TranslationMemoryManagementService,
 ) : Logging {
   // rollbackFor = Exception: the wipe runs before the re-insert, and a parse/IO failure mid-insert is a
   // checked exception that the default (runtime-only) rollback rule would let commit — leaving the target
@@ -123,10 +130,15 @@ class ProjectExportImportImporter(
       }
 
     mirrorProjectScalars(project, projectRecord, result.maxImportedTaskNumber)
+    // Re-seed the project's default PROJECT-type TM the clearer removed, exactly as project creation
+    // does (ProjectCreationService.createProject). Runs after the scalar mirror so name/baseLanguage/
+    // organizationOwner are set — the inputs createProjectTm reads.
+    translationMemoryManagementService.createProjectTm(project)
     restoreScreenshots(result.screenshotsBySourceId, parsed.blobs)
     restoreAvatar(project, parsed.blobs)
 
     entityManager.flush()
+    restoreBigMeta(parsed.bigMetaJson, result.keyIdBySourceId, targetProjectId)
     refreshDerivedData(targetProjectId)
   }
 
@@ -203,6 +215,38 @@ class ProjectExportImportImporter(
       return
     }
     project.avatarHash = avatarService.storeAvatarFiles(avatar.value.inputStream(), project)
+  }
+
+  /**
+   * Re-inserts the exported BigMeta rows, remapping source key ids to the imported keys and dropping any
+   * pair whose key did not survive (individually soft-deleted, so absent from the graph). Runs after the
+   * flush so the imported keys are in the DB before the raw-JDBC insert. Canonical ordering is applied by
+   * [io.tolgee.service.bigMeta.BigMetaService].
+   */
+  private fun restoreBigMeta(
+    bigMetaJson: ByteArray?,
+    keyIdBySourceId: Map<Long, Long>,
+    targetProjectId: Long,
+  ) {
+    bigMetaJson ?: return
+    val records =
+      corruptArchiveOnParseError {
+        objectMapper.readValue(bigMetaJson, object : TypeReference<List<SerializedBigMeta>>() {})
+      }
+    val dtos =
+      records.mapNotNull { record ->
+        val key1 = keyIdBySourceId[record.key1Id] ?: return@mapNotNull null
+        val key2 = keyIdBySourceId[record.key2Id] ?: return@mapNotNull null
+        KeysDistanceDto(
+          key1Id = key1,
+          key2Id = key2,
+          distance = record.distance,
+          projectId = targetProjectId,
+          hits = record.hits,
+          stored = false,
+        )
+      }
+    bigMetaService.storeImportedDistances(dtos)
   }
 
   private fun refreshDerivedData(projectId: Long) {
