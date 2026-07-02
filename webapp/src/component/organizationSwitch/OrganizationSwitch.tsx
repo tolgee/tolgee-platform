@@ -63,9 +63,12 @@ export const OrganizationSwitch: React.FC<Props> = ({
     history.push(LINKS.ORGANIZATIONS_ADD.build());
   };
 
-  const handleCommunityNavigate = () => {
-    history.push(LINKS.COMMUNITY_PROJECTS.build());
-  };
+  // TODO: fully implemented, but after talk with designer we decided to
+  // show the community only when user contributed to a public project
+  // which needs contributors tracking - will be implemented in future pitch
+  // const handleCommunityNavigate = () => {
+  //   history.push(LINKS.COMMUNITY_PROJECTS.build());
+  // };
 
   const isCommunitySurface = selectedSurface === 'community';
 
@@ -91,7 +94,7 @@ export const OrganizationSwitch: React.FC<Props> = ({
         anchorEl={anchorEl.current!}
         onAddNew={handleCreateNewOrg}
         communitySelected={isCommunitySurface}
-        onCommunityNavigate={handleCommunityNavigate}
+        // onCommunityNavigate={handleCommunityNavigate}
       />
     </Box>
   );
