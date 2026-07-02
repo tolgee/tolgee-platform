@@ -10,6 +10,7 @@ import {
   styled,
   Typography,
   Button,
+  Divider,
 } from '@mui/material';
 import { Plus } from '@untitled-ui/icons-react';
 import { useTranslate } from '@tolgee/react';
@@ -65,7 +66,7 @@ type SwitchPopoverProps<T extends { id: number; name: string }> = {
   onClose: () => void;
   onSelect: (item: T) => void;
   anchorEl: HTMLElement;
-  selectedId: number;
+  selectedId?: number;
 
   // Data
   items: T[];
@@ -83,6 +84,12 @@ type SwitchPopoverProps<T extends { id: number; name: string }> = {
   // Optional "Add new" button
   onAddNew?: () => void;
   addNewTooltip?: string;
+
+  footerAction?: {
+    content: React.ReactNode;
+    onClick: () => void;
+    dataCy?: string;
+  };
 
   // Search callback for a parent to handle
   onSearchChange: (search: string) => void;
@@ -105,6 +112,7 @@ export function SwitchPopover<T extends { id: number; name: string }>({
   searchThreshold = DEFAULT_SEARCH_THRESHOLD,
   onAddNew,
   addNewTooltip,
+  footerAction,
   onSearchChange,
 }: SwitchPopoverProps<T>) {
   const [inputValue, setInputValue] = useState('');
@@ -222,6 +230,23 @@ export function SwitchPopover<T extends { id: number; name: string }>({
             </StyledInputWrapper>
           )}
         />
+        {footerAction && (
+          <>
+            <Divider />
+            <Box sx={{ py: 1 }}>
+              <MenuItem
+                tabIndex={0}
+                data-cy={footerAction.dataCy}
+                onClick={() => {
+                  footerAction.onClick();
+                  onClose();
+                }}
+              >
+                {footerAction.content}
+              </MenuItem>
+            </Box>
+          </>
+        )}
       </StyledWrapper>
     </Popover>
   );

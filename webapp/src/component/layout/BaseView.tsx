@@ -91,7 +91,7 @@ export const BaseView: FC<BaseViewProps> = (props) => {
             </Box>
           </SecondaryBar>
         )}
-        <HeaderBar noBorder={Boolean(displayNavigation)} {...props} />
+        <HeaderBar {...props} noBorder={Boolean(displayNavigation)} />
         <StyledPaddingWrapper
           {...props.wrapperProps}
           gridRow={props.stretch ? 4 : undefined}
