@@ -3,6 +3,7 @@ import { suggestionsTestData } from '../../../common/apiCalls/testData/testData'
 import { waitForGlobalLoading } from '../../../common/loading';
 import { gcyAdvanced } from '../../../common/shared';
 import {
+  getCellCancelButton,
   getPluralEditor,
   getTranslationCell,
   visitTranslations,
@@ -58,13 +59,12 @@ describe('Suggestions translator', () => {
     visitTranslations(projectId);
     getTranslationCell('key 0', 'cs').click();
     waitForGlobalLoading();
+    cy.gcy('suggestions-list')
+      .findDcy('translation-suggestion')
+      .should('have.length', 2);
     gcyAdvanced({
       value: 'suggestion-action',
       action: 'accept',
-    }).should('not.exist');
-    gcyAdvanced({
-      value: 'suggestion-action',
-      action: 'menu',
     }).should('not.exist');
   });
 
@@ -72,15 +72,76 @@ describe('Suggestions translator', () => {
     visitTranslations(projectId);
     getTranslationCell('key 0', 'cs').click();
     waitForGlobalLoading();
+    cy.gcy('translation-suggestion')
+      .contains('Navržený překlad 0-1')
+      .closest('[data-cy="translation-suggestion"]')
+      .within(() => {
+        gcyAdvanced({ value: 'suggestion-action', action: 'menu' }).click();
+      });
     gcyAdvanced({
-      value: 'suggestion-action',
+      value: 'translation-suggestion-action-menu-item',
       action: 'delete',
-    })
-      .should('exist')
-      .click();
+    }).click();
     waitForGlobalLoading();
     cy.gcy('translation-suggestion')
       .contains('Navržený překlad 0-1')
       .should('not.exist');
   });
+
+  it('read cell shows the newest 3 suggestions + a +N badge, and keeps them after the editor opens and closes', () => {
+    visitTranslations(projectId);
+    assertReadCellSuggestions(['2-4', '2-3', '2-2']);
+    getTranslationCell('key 2', 'cs').within(() => {
+      cy.contains('+1').should('be.visible');
+    });
+    getTranslationCell('key 2', 'cs').click();
+    waitForGlobalLoading();
+    getCellCancelButton().click();
+    waitForGlobalLoading();
+    assertReadCellSuggestions(['2-4', '2-3', '2-2']);
+  });
+
+  it('keeps up to 3 read-cell suggestions after suggesting on a cell that already has some', () => {
+    visitTranslations(projectId);
+    getTranslationCell('key 2', 'cs').click();
+    cy.gcy('global-editor').clear().type('Brand new suggestion');
+    cy.gcy('translations-cell-main-action-button')
+      .should('contain', 'Suggest')
+      .click();
+    waitForGlobalLoading();
+    getTranslationCell('key 2', 'cs')
+      .findDcy('translation-suggestion')
+      .should('have.length', 3);
+    getTranslationCell('key 2', 'cs').within(() => {
+      cy.gcy('translation-suggestion')
+        .eq(0)
+        .should('contain', 'Brand new suggestion');
+      cy.gcy('translation-suggestion')
+        .eq(1)
+        .should('contain', 'Many suggestion 2-4');
+      cy.gcy('translation-suggestion')
+        .eq(2)
+        .should('contain', 'Many suggestion 2-3');
+    });
+  });
+
+  it('renders the 3-suggestion stack in table view too', () => {
+    visitTranslations(projectId);
+    cy.gcy('translations-view-table-button').click();
+    waitForGlobalLoading();
+    assertReadCellSuggestions(['2-4', '2-3', '2-2']);
+  });
+
+  function assertReadCellSuggestions(suffixes: string[]) {
+    getTranslationCell('key 2', 'cs')
+      .findDcy('translation-suggestion')
+      .should('have.length', suffixes.length);
+    getTranslationCell('key 2', 'cs').within(() => {
+      suffixes.forEach((suffix, index) => {
+        cy.gcy('translation-suggestion')
+          .eq(index)
+          .should('contain', `Many suggestion ${suffix}`);
+      });
+    });
+  }
 });

@@ -6,27 +6,42 @@ import { useTranslate } from '@tolgee/react';
 type TranslationSuggestionSimpleModel =
   components['schemas']['TranslationSuggestionSimpleModel'];
 
-const StyledContainer = styled('div')`
+// Mirror of TranslationSuggestionServiceEeImpl.MAX_DISPLAYED_SUGGESTIONS (backend caps the embed); keep in sync.
+export const MAX_DISPLAYED_SUGGESTIONS = 3;
+
+const StyledWrapper = styled('div')`
   display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: start;
+  border-radius: 8px;
+  background: ${({ theme }) => theme.palette.tokens.background.onDefaultGrey};
+`;
+
+const StyledLastLine = styled('div')`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  & > :first-child {
+    flex: 1;
+    min-width: 0;
+  }
 `;
 
 const StyledExtra = styled('div')`
   display: flex;
-  padding: 1px 8px;
+  flex-shrink: 0;
+  height: 22px;
+  min-width: 22px;
+  padding: 0 4px;
+  box-sizing: border-box;
   align-items: center;
-  border-radius: 13px;
-  background: ${({ theme }) => theme.palette.tokens.background.onDefaultGrey};
-  margin-top: 8px;
-  margin-left: 8px;
-`;
-
-const StyledWrapper = styled('div')`
-  display: grid;
-  gap: 8px;
-  border-radius: 8px;
-  background: ${({ theme }) => theme.palette.tokens.background.onDefaultGrey};
+  justify-content: center;
+  border-radius: 11px;
+  margin-right: 8px;
+  font-size: 12px;
+  line-height: 1;
+  color: ${({ theme }) => theme.palette.text.secondary};
+  background: ${({ theme }) => theme.palette.tokens.background['paper-1']};
+  border: 1px solid ${({ theme }) => theme.palette.divider};
 `;
 
 type Props = {
@@ -43,11 +58,12 @@ export const SuggestionsFirst = ({
   locale,
 }: Props) => {
   const { t } = useTranslate();
-  const extraCount = count - suggestions.length;
+  const displayed = suggestions.slice(0, MAX_DISPLAYED_SUGGESTIONS);
+  const extraCount = count - displayed.length;
   return (
-    <StyledContainer>
-      <StyledWrapper>
-        {suggestions.map((s) => (
+    <StyledWrapper>
+      {displayed.map((s, i) => {
+        const node = (
           <TranslationSuggestion
             key={s.id}
             suggestion={s}
@@ -55,13 +71,21 @@ export const SuggestionsFirst = ({
             locale={locale}
             maxLines={2}
           />
-        ))}
-      </StyledWrapper>
-      {Boolean(extraCount) && (
-        <Tooltip title={t('suggestions_other_tooltip')}>
-          <StyledExtra>+{extraCount}</StyledExtra>
-        </Tooltip>
-      )}
-    </StyledContainer>
+        );
+        const isLastLineWithExtra =
+          extraCount > 0 && i === displayed.length - 1;
+        if (isLastLineWithExtra) {
+          return (
+            <StyledLastLine key={s.id}>
+              {node}
+              <Tooltip title={t('suggestions_other_tooltip')}>
+                <StyledExtra>+{extraCount}</StyledExtra>
+              </Tooltip>
+            </StyledLastLine>
+          );
+        }
+        return node;
+      })}
+    </StyledWrapper>
   );
 };

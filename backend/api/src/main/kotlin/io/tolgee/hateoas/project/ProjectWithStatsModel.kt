@@ -31,6 +31,8 @@ open class ProjectWithStatsModel(
   val computedPermission: ComputedPermissionModel,
   val stats: ProjectStatistics,
   val languages: List<LanguageModel>,
+  @Schema(description = "Whether the project is public — discoverable and open to community suggestions")
+  val public: Boolean,
   @Schema(description = "Whether to disable ICU placeholder visualization in the editor and it's support.")
   var icuPlaceholders: Boolean,
 ) : RepresentationModel<ProjectWithStatsModel>()

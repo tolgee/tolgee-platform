@@ -118,6 +118,9 @@ export const usePermissionsStructure = () => {
         ],
       },
       {
+        value: 'organization-quotas.view',
+      },
+      {
         label: t('permissions_item_members'),
         children: [
           {

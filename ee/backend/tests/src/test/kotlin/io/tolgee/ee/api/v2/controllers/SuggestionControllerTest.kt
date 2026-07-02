@@ -15,15 +15,22 @@ import io.tolgee.model.enums.SuggestionsMode
 import io.tolgee.model.enums.TranslationSuggestionState
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
+import java.util.Date
 
 class SuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: SuggestionsTestData
 
   @Autowired
   private lateinit var translationSuggestionRepository: TranslationSuggestionRepository
+
+  @AfterEach
+  fun resetClock() {
+    clearForcedDate()
+  }
 
   fun initTestData(suggestionsMode: SuggestionsMode = SuggestionsMode.ENABLED) {
     testData = SuggestionsTestData(suggestionsMode)
@@ -40,15 +47,111 @@ class SuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       .andAssertThatJson {
         node("_embedded.suggestions") {
           node("[0].translation").isEqualTo("Navržený překlad 0-1")
-          node("[0].author.username").isEqualTo("translator@test.com")
+          node("[0].author.username").isEqualTo("")
           node("[0].author.name").isEqualTo("Project translator")
         }
         node("_embedded.suggestions") {
           node("[1].translation").isEqualTo("Navržený překlad 0-2")
-          node("[1].author.username").isEqualTo("reviewer@test.com")
+          node("[1].author.username").isEqualTo("")
           node("[1].author.name").isEqualTo("Project reviewer")
         }
         node("page.totalElements").isNumber.isEqualTo(BigDecimal(2))
+      }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `embeds up to MAX_DISPLAYED_SUGGESTIONS newest suggestions per cell in the translations view`() {
+    initTestData()
+    val manyKey = testData.keys[2].self
+    val oneKey = testData.keys[3].self
+    val twoKey = testData.keys[0].self
+    performProjectAuthGet(
+      "/translations?sort=id" +
+        "&filterKeyId=${twoKey.id}&filterKeyId=${manyKey.id}&filterKeyId=${oneKey.id}",
+    ).andIsOk
+      .andAssertThatJson {
+        node("_embedded.keys[1].translations.cs") {
+          node("suggestions").isArray.hasSize(3)
+          node("suggestions[0].translation").isEqualTo("Many suggestion 2-4")
+          node("suggestions[1].translation").isEqualTo("Many suggestion 2-3")
+          node("suggestions[2].translation").isEqualTo("Many suggestion 2-2")
+          node("activeSuggestionCount").isNumber.isEqualTo(BigDecimal(4))
+        }
+        node("_embedded.keys[2].translations.cs") {
+          node("suggestions").isArray.hasSize(1)
+          node("suggestions[0].translation").isEqualTo("Only suggestion 3-1")
+          node("activeSuggestionCount").isNumber.isEqualTo(BigDecimal(1))
+        }
+        node("_embedded.keys[0].translations.cs") {
+          node("suggestions").isArray.hasSize(2)
+          node("activeSuggestionCount").isNumber.isEqualTo(BigDecimal(2))
+        }
+        node("_embedded.keys[0].translations.en") {
+          node("suggestions").isArray.hasSize(2)
+          node("activeSuggestionCount").isNumber.isEqualTo(BigDecimal(2))
+        }
+      }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `breaks createdAt ties by id desc in the embed`() {
+    initTestData()
+    val key = testData.keys[1].self
+    // both suggestions share one forced createdAt, so only the id desc tiebreaker can order them
+    setForcedDate(currentDateProvider.date)
+    performProjectAuthPost(
+      "languages/${testData.czechLanguage.id}/key/${key.id}/suggestion",
+      CreateTranslationSuggestionRequest(translation = "cs lower id"),
+    ).andIsOk
+    performProjectAuthPost(
+      "languages/${testData.czechLanguage.id}/key/${key.id}/suggestion",
+      CreateTranslationSuggestionRequest(translation = "cs higher id"),
+    ).andIsOk
+
+    performProjectAuthGet("/translations?sort=id&filterKeyId=${key.id}")
+      .andIsOk
+      .andAssertThatJson {
+        node("_embedded.keys[0].translations.cs.suggestions") {
+          isArray.hasSize(2)
+          node("[0].translation").isEqualTo("cs higher id")
+          node("[1].translation").isEqualTo("cs lower id")
+        }
+      }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `embeds suggestions ordered by createdAt desc, not by id`() {
+    initTestData()
+    val key = testData.keys[1].self
+    val base = currentDateProvider.date.time
+
+    fun createAt(
+      offsetMillis: Long,
+      translation: String,
+    ) {
+      setForcedDate(Date(base + offsetMillis))
+      performProjectAuthPost(
+        "languages/${testData.czechLanguage.id}/key/${key.id}/suggestion",
+        CreateTranslationSuggestionRequest(translation = translation),
+      ).andIsOk
+    }
+
+    createAt(0, "cs oldest")
+    createAt(120_000, "cs newest")
+    createAt(60_000, "cs middle")
+
+    performProjectAuthGet("/translations?sort=id&filterKeyId=${key.id}")
+      .andIsOk
+      .andAssertThatJson {
+        node("_embedded.keys[0].translations.cs.suggestions") {
+          isArray.hasSize(3)
+          node("[0].translation").isEqualTo("cs newest")
+          node("[1].translation").isEqualTo("cs middle")
+          node("[2].translation").isEqualTo("cs oldest")
+        }
       }
   }
 
@@ -89,7 +192,7 @@ class SuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     ).andAssertThatJson {
       node("accepted") {
         node("translation").isEqualTo("Navržený překlad 0-1")
-        node("author.username").isEqualTo("translator@test.com")
+        node("author.username").isEqualTo("")
         node("state").isEqualTo("ACCEPTED")
       }
       node("declined").isArray.hasSize(0)
@@ -148,7 +251,7 @@ class SuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     ).andAssertThatJson {
       node("accepted") {
         node("translation").isEqualTo("Navržený překlad 0-1")
-        node("author.username").isEqualTo("translator@test.com")
+        node("author.username").isEqualTo("")
         node("state").isEqualTo("ACCEPTED")
       }
       node("declined[0]").isEqualTo(testData.czechSuggestions[1].self.id)

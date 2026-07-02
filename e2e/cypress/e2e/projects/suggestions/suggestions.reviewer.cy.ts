@@ -3,6 +3,7 @@ import { suggestionsTestData } from '../../../common/apiCalls/testData/testData'
 import { waitForGlobalLoading } from '../../../common/loading';
 import {
   assertMessage,
+  assertNotMessage,
   gcyAdvanced,
   visitProjectDashboard,
 } from '../../../common/shared';
@@ -60,18 +61,49 @@ describe('Suggestions reviewer', () => {
     cy.gcy('translation-suggestion').contains('návrhů').should('be.visible');
   });
 
-  it('reviewer can accept suggestion', () => {
-    acceptSuggestion();
-    assertMessage('Suggestion accepted, other variants declined (1)');
+  it('reviewer can accept only, leaving the other suggestion active', () => {
+    cy.intercept('PUT', /\/suggestion\/\d+\/accept/).as('accept');
+    getTranslationCell('key 0', 'cs').click();
+    waitForGlobalLoading();
+    acceptOnly('Navržený překlad 0-1');
+    cy.wait('@accept')
+      .its('request.url')
+      .should('not.contain', 'declineOther=true');
+    assertMessage('Suggestion accepted');
+    assertNotMessage('declined');
+    waitForGlobalLoading();
+    getTranslationCell('key 0', 'cs').click();
+    cy.gcy('suggestions-list')
+      .findDcy('translation-panel-items-count')
+      .should('contain', '1');
+    cy.gcy('suggestions-list')
+      .findDcy('translation-suggestion')
+      .contains('Navržený překlad 0-2')
+      .should('exist');
+    cy.gcy('suggestions-list')
+      .findDcy('translation-suggestion')
+      .contains('Navržený překlad 0-1')
+      .should('not.exist');
   });
 
   it('accepted suggestion stays reviewed', () => {
-    acceptSuggestion();
+    getTranslationCell('key 0', 'cs').click();
+    waitForGlobalLoading();
+    acceptOnly('Navržený překlad 0-1');
+    waitForGlobalLoading();
     assertHasState('Navržený překlad 0-1', 'Reviewed');
   });
 
-  it('acceptation of suggestion declines other suggestions', () => {
-    acceptSuggestion();
+  it('accept and decline others declines the rest', () => {
+    cy.intercept('PUT', /\/suggestion\/\d+\/accept/).as('accept');
+    getTranslationCell('key 0', 'cs').click();
+    waitForGlobalLoading();
+    openRowMenu('Navržený překlad 0-1', 'accept-decline-others');
+    cy.wait('@accept')
+      .its('request.url')
+      .should('contain', 'declineOther=true');
+    assertMessage('Suggestion accepted, other variants declined (1)');
+    waitForGlobalLoading();
     getTranslationCell('key 0', 'cs').click();
     cy.gcy('suggestions-list')
       .findDcy('translation-panel-items-count')
@@ -79,7 +111,10 @@ describe('Suggestions reviewer', () => {
   });
 
   it('reviewer can reverse inactive suggestion', () => {
-    acceptSuggestion();
+    getTranslationCell('key 0', 'cs').click();
+    waitForGlobalLoading();
+    openRowMenu('Navržený překlad 0-1', 'accept-decline-others');
+    waitForGlobalLoading();
     getTranslationCell('key 0', 'cs').click();
     cy.gcy('suggestions-list')
       .findDcy('translation-tools-suggestions-show-all-checkbox')
@@ -108,16 +143,33 @@ describe('Suggestions reviewer', () => {
   it('reviewer can decline suggestion', () => {
     getTranslationCell('key 0', 'cs').click();
     waitForGlobalLoading();
-    gcyAdvanced({
-      value: 'suggestion-action',
-      action: 'decline',
-    })
-      .first()
-      .click();
+    cy.gcy('suggestions-list')
+      .findDcy('translation-suggestion')
+      .should('have.length', 2);
+    cy.gcy('translation-suggestion')
+      .contains('Navržený překlad 0-1')
+      .closest('[data-cy="translation-suggestion"]')
+      .within(() => {
+        gcyAdvanced({ value: 'suggestion-action', action: 'decline' }).click();
+      });
     waitForGlobalLoading();
     cy.gcy('suggestions-list')
       .findDcy('translation-suggestion')
-      .should('have.length', 1);
+      .should('have.length', 1)
+      .within(() => {
+        gcyAdvanced({ value: 'suggestion-action', action: 'accept' }).should(
+          'exist'
+        );
+        gcyAdvanced({ value: 'suggestion-action', action: 'menu' }).click();
+      });
+    gcyAdvanced({
+      value: 'translation-suggestion-action-menu-item',
+      action: 'delete',
+    }).should('exist');
+    gcyAdvanced({
+      value: 'translation-suggestion-action-menu-item',
+      action: 'accept-decline-others',
+    }).should('not.exist');
 
     visitProjectDashboard(projectId);
     gcyAdvanced({
@@ -129,12 +181,7 @@ describe('Suggestions reviewer', () => {
   it('reviewer can delete his own suggestion', () => {
     getTranslationCell('key 0', 'cs').click();
     waitForGlobalLoading();
-    gcyAdvanced({
-      value: 'suggestion-action',
-      action: 'delete',
-    })
-      .should('exist')
-      .click();
+    openRowMenu('Navržený překlad 0-2', 'delete');
     waitForGlobalLoading();
     cy.gcy('translation-suggestion')
       .contains('Navržený překlad 0-2')
@@ -150,15 +197,7 @@ describe('Suggestions reviewer', () => {
   it('reviewer can accept his own suggestion', () => {
     getTranslationCell('key 0', 'cs').click();
     waitForGlobalLoading();
-    gcyAdvanced({
-      value: 'suggestion-action',
-      action: 'menu',
-    })
-      .should('exist')
-      .click();
-    cy.gcy('translation-suggestion-action-menu-item')
-      .contains('Accept suggestion')
-      .click();
+    openRowMenu('Navržený překlad 0-2', 'accept-decline-others');
     waitForGlobalLoading();
     cy.gcy('translation-suggestion')
       .contains('Navržený překlad 0-2')
@@ -172,15 +211,82 @@ describe('Suggestions reviewer', () => {
     }).should('contain', 'Navržený překlad 0-1');
   });
 
-  function acceptSuggestion() {
-    getTranslationCell('key 0', 'cs').click();
+  it('single active suggestion shows accept inline without the overflow menu', () => {
+    getTranslationCell('pluralKey', 'cs').click();
     waitForGlobalLoading();
-    gcyAdvanced({
-      value: 'suggestion-action',
-      action: 'accept',
-    })
+    cy.gcy('suggestions-list')
+      .findDcy('translation-suggestion')
+      .should('have.length', 1)
+      .within(() => {
+        gcyAdvanced({ value: 'suggestion-action', action: 'accept' }).should(
+          'exist'
+        );
+        gcyAdvanced({ value: 'suggestion-action', action: 'menu' }).should(
+          'not.exist'
+        );
+        gcyAdvanced({ value: 'suggestion-action', action: 'accept' }).click();
+      });
+    assertMessage('Suggestion accepted');
+  });
+
+  it('read cell shows the next correct 3 suggestions after one is declined', () => {
+    getTranslationCell('key 2', 'cs')
+      .findDcy('translation-suggestion')
+      .should('have.length', 3);
+    getTranslationCell('key 2', 'cs').within(() => {
+      cy.contains('+1').should('be.visible');
+    });
+    getTranslationCell('key 2', 'cs').click();
+    waitForGlobalLoading();
+    cy.gcy('suggestions-list')
+      .findDcy('translation-suggestion')
+      .first()
+      .should('contain', 'Many suggestion 2-4');
+    gcyAdvanced({ value: 'suggestion-action', action: 'decline' })
       .first()
       .click();
     waitForGlobalLoading();
+    visitTranslations(projectId);
+    waitForGlobalLoading();
+    getTranslationCell('key 2', 'cs')
+      .findDcy('translation-suggestion')
+      .should('have.length', 3);
+    getTranslationCell('key 2', 'cs').within(() => {
+      cy.gcy('translation-suggestion')
+        .eq(0)
+        .should('contain', 'Many suggestion 2-3');
+      cy.gcy('translation-suggestion')
+        .eq(1)
+        .should('contain', 'Many suggestion 2-2');
+      cy.gcy('translation-suggestion')
+        .eq(2)
+        .should('contain', 'Many suggestion 2-1');
+      cy.contains('+1').should('not.exist');
+    });
+  });
+
+  function acceptOnly(text: string) {
+    cy.gcy('translation-suggestion')
+      .contains(text)
+      .closest('[data-cy="translation-suggestion"]')
+      .within(() => {
+        gcyAdvanced({ value: 'suggestion-action', action: 'accept' }).click();
+      });
+  }
+
+  function openRowMenu(
+    text: string,
+    action: 'accept-decline-others' | 'delete'
+  ) {
+    cy.gcy('translation-suggestion')
+      .contains(text)
+      .closest('[data-cy="translation-suggestion"]')
+      .within(() => {
+        gcyAdvanced({ value: 'suggestion-action', action: 'menu' }).click();
+      });
+    gcyAdvanced({
+      value: 'translation-suggestion-action-menu-item',
+      action,
+    }).click();
   }
 });

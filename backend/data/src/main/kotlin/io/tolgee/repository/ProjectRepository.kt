@@ -21,6 +21,7 @@ interface ProjectRepository : JpaRepository<Project, Long> {
         r.useNamespaces as useNamespaces,
         r.useBranching as useBranching,
         r.useQaChecks as useQaChecks,
+        r.public as public,
         r.suggestionsMode as suggestionsMode,
         r.translationProtection as translationProtection,
         dn as defaultNamespace, o as organizationOwner,
@@ -95,6 +96,30 @@ interface ProjectRepository : JpaRepository<Project, Long> {
     @Param("search") search: String? = null,
     organizationId: Long? = null,
     filters: ProjectFilters,
+  ): Page<ProjectView>
+
+  /**
+   * Lists public projects for the anonymous endpoint. The `organizationOwner is not null` filter is
+   * required because the shared stats assembler dereferences a non-null `organizationOwner` (legacy
+   * user-owned projects would NPE). The `baseLanguage is not null and bl.deletedAt is null` filters keep
+   * out projects whose base language is missing/soft-deleted: the stats pipeline calls
+   * `languageService.getProjectLanguages`, which auto-assigns and persists a new base language
+   * (`setNewProjectBaseLanguage`) for any such project — an unauthenticated GET must never mutate.
+   */
+  @Query(
+    """$BASE_VIEW_QUERY
+        where r.public = true and r.deletedAt is null and r.organizationOwner is not null
+        and r.baseLanguage is not null and bl.deletedAt is null
+        and (
+            :search is null or (lower(r.name) like lower(concat('%', cast(:search as text), '%'))
+            or lower(o.name) like lower(concat('%', cast(:search as text),'%')))
+        )
+    """,
+  )
+  fun findAllPublic(
+    userAccountId: Long,
+    pageable: Pageable,
+    @Param("search") search: String? = null,
   ): Page<ProjectView>
 
   fun findAllByOrganizationOwnerId(organizationOwnerId: Long): List<Project>

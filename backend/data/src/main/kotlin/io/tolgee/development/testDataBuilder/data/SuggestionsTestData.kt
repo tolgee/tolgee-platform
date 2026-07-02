@@ -20,6 +20,7 @@ class SuggestionsTestData(
   var projectTranslator: UserAccountBuilder
   var czechTranslator: UserAccountBuilder
   var czechReviewer: UserAccountBuilder
+  var communityUser: UserAccountBuilder
   var relatedProject: ProjectBuilder
   var keys: MutableList<KeyBuilder> = mutableListOf()
   val czechSuggestions: MutableList<SuggestionBuilder> = mutableListOf()
@@ -71,6 +72,12 @@ class SuggestionsTestData(
       root.addUserAccount {
         username = "cs.reviewer@test.com"
         name = "Czech reviewer"
+      }
+
+    communityUser =
+      root.addUserAccount {
+        username = "community@test.com"
+        name = "Community user"
       }
 
     userAccountBuilder.defaultOrganizationBuilder.apply {
@@ -168,6 +175,31 @@ class SuggestionsTestData(
             this.translation = "Suggested translation 0-2"
           },
         )
+      }
+
+      czechTranslations[0].apply {
+        addComment {
+          text = "Member comment"
+          author = this@SuggestionsTestData.user
+        }
+      }
+
+      keys[2].apply {
+        (1..4).forEach { i ->
+          addSuggestion {
+            this.language = czechLanguage
+            this.author = projectTranslator.self
+            this.translation = "Many suggestion 2-$i"
+          }
+        }
+      }
+
+      keys[3].apply {
+        addSuggestion {
+          this.language = czechLanguage
+          this.author = projectTranslator.self
+          this.translation = "Only suggestion 3-1"
+        }
       }
 
       pluralKey =

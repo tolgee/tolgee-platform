@@ -146,6 +146,7 @@ declare namespace DataCy {
         "comment-menu-needs-resolution": true;
         "comment-resolve": true;
         "comment-text": true;
+        "community-translation-banner": true;
         "content-delivery-add-button": true;
         "content-delivery-auto-publish-checkbox": true;
         "content-delivery-delete-button": true;
@@ -572,6 +573,8 @@ declare namespace DataCy {
         "project-leave-button": true;
         "project-list-languages": true;
         "project-list-more-button": true;
+        "project-list-org-name": true;
+        "project-list-public-badge": true;
         "project-list-qa-badge-button": true;
         "project-list-translations-button": true;
         "project-member-item": true;
@@ -625,6 +628,7 @@ declare namespace DataCy {
         "project-settings-menu-labels": true;
         "project-settings-menu-qa": true;
         "project-settings-name": true;
+        "project-settings-public-switch": true;
         "project-settings-suggestions-mode-switch": true;
         "project-settings-tm-configure": true;
         "project-settings-tm-row": true;
@@ -647,6 +651,8 @@ declare namespace DataCy {
         "project-transfer-dialog": true;
         "prompt-basic-option": true;
         "prompt-basic-option-edit": true;
+        "public-projects-login-button": true;
+        "public-projects-sign-up-button": true;
         "qa-action-correct": true;
         "qa-action-ignore": true;
         "qa-badge": true;

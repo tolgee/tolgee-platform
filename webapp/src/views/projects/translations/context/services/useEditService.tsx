@@ -17,6 +17,7 @@ import {
   usePutTranslation,
 } from 'tg.service/TranslationHooks';
 import { components } from 'tg.service/apiSchema.generated';
+import { MAX_DISPLAYED_SUGGESTIONS } from '../../Suggestions/SuggestionsFirst';
 
 import type { useTranslationsService } from './useTranslationsService';
 import type { useRefsService } from './useRefsService';
@@ -193,7 +194,10 @@ export const useEditService = ({
         lang: lang.tag,
         data(value) {
           return {
-            suggestions: [result],
+            suggestions: [result, ...(value.suggestions ?? [])].slice(
+              0,
+              MAX_DISPLAYED_SUGGESTIONS
+            ),
             activeSuggestionCount: (value.activeSuggestionCount ?? 0) + 1,
             totalSuggestionCount: (value.totalSuggestionCount ?? 0) + 1,
           } satisfies Partial<TranslationViewModel>;

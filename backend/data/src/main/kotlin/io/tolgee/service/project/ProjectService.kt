@@ -58,6 +58,10 @@ import org.springframework.transaction.annotation.Transactional
 import java.io.InputStream
 import java.io.Serializable
 
+// fed into BASE_VIEW_QUERY's per-user permission/role joins; must never equal a real UserAccount id,
+// or an anonymous caller would inherit that account's permissions
+private const val NO_USER_ID = -1L
+
 @Transactional
 @Service
 class ProjectService(
@@ -170,10 +174,7 @@ class ProjectService(
     id: Long,
     dto: EditProjectRequest,
   ): Project {
-    val project =
-      projectRepository
-        .findById(id)
-        .orElseThrow { NotFoundException() }!!
+    val project = get(id)
     val wasBranchingEnabled = project.useBranching
     val oldBaseLanguageId = project.baseLanguage?.id
     val oldName = project.name
@@ -243,6 +244,17 @@ class ProjectService(
     return project
   }
 
+  @Transactional
+  @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#result.id")
+  fun setPublic(
+    id: Long,
+    public: Boolean,
+  ): Project {
+    val project = get(id)
+    project.public = public
+    return projectRepository.save(project)
+  }
+
   /**
    * Shared TMs declare a source language; changing the project base to a different language
    * would leave them misaligned. Without [unassignConflictingTms] this rejects the change and
@@ -300,6 +312,7 @@ class ProjectService(
               organization.basePermission,
               permission,
               userAccount.role ?: UserAccount.Role.USER,
+              isProjectPublic = project.public,
             ).scopes
         fromEntityAndPermission(project, scopes)
       }.toList()
@@ -444,6 +457,16 @@ class ProjectService(
         filters ?: ProjectFilters(),
       )
     return addPermittedLanguagesToProjects(withoutPermittedLanguages, userAccountId)
+  }
+
+  @Transactional(readOnly = true)
+  fun findAllPublicPaged(
+    pageable: Pageable,
+    search: String?,
+  ): Page<ProjectWithLanguagesView> {
+    val userAccountId = authenticationFacade.authenticatedUserOrNull?.id ?: NO_USER_ID
+    val projects = projectRepository.findAllPublic(userAccountId, pageable, search)
+    return projects.map { ProjectWithLanguagesView.fromProjectView(it, null) }
   }
 
   @CacheEvict(cacheNames = [Caches.PROJECTS], allEntries = true)

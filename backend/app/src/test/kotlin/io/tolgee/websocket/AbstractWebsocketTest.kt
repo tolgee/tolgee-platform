@@ -74,7 +74,8 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
       },
     ) {
       assertThatJson(it.poll()).apply {
-        node("actor.data.username").isEqualTo("test_username")
+        node("actor.data.username").isEqualTo("")
+        node("actor.data.name").isEqualTo("Test user name")
         node("data.keys[0]") {
           node("id").isValidId
           node("modifications.name") {
@@ -274,6 +275,7 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
 
   private fun prepareTestData() {
     testData = BaseTestData()
+    testData.user.name = "Test user name"
     testData.root.addUserAccount {
       username = "anotherUser"
       anotherUser = this

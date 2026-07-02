@@ -21,6 +21,7 @@ import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { useEnabledFeatures, useQaCheckTypes } from 'tg.globalContext/helpers';
 import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
 import { CircledLanguageIconList } from 'tg.component/languages/CircledLanguageIconList';
+import { TransparentChip } from 'tg.component/common/chips/TransparentChip';
 import { QaBadge } from 'tg.ee';
 
 const StyledContainer = styled('div')`
@@ -117,11 +118,39 @@ const StyledProjectName = styled(Typography)`
   word-break: break-word;
 `;
 
+const StyledPublicLine = styled('div')`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow: hidden;
+  margin-top: 2px;
+`;
+
+const StyledPublicChip = styled(TransparentChip)`
+  flex-shrink: 0;
+  & .MuiChip-label {
+    font-size: 13px;
+  }
+`;
+
+const StyledOrganizationName = styled(Typography)`
+  color: ${({ theme }) => theme.palette.text.secondary};
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
 type ProjectWithStatsModel = components['schemas']['ProjectWithStatsModel'];
 
-const DashboardProjectListItem = (p: ProjectWithStatsModel) => {
+type Props = ProjectWithStatsModel & {
+  variant?: 'default' | 'public';
+};
+
+const DashboardProjectListItem = ({ variant = 'default', ...p }: Props) => {
+  const isPublicVariant = variant === 'public';
   const { t } = useTranslate();
   const history = useHistory();
+  const allowPrivate = useGlobalContext((c) => c.auth.allowPrivate);
   const rightPanelWidth = useGlobalContext((c) => c.layout.rightPanelWidth);
   const isCompact = useMediaQuery(
     `@media(max-width: ${rightPanelWidth + 800}px)`
@@ -133,54 +162,68 @@ const DashboardProjectListItem = (p: ProjectWithStatsModel) => {
   const showQaBadge =
     isEnabled('QA_CHECKS') && (hasQaIssues || hasStaleQaChecks);
 
-  return (
-    <QuickStartHighlight
-      itemKey="demo_project"
-      disabled={p.name !== 'Demo project'}
-      borderRadius="4px"
-      offset={1}
+  const content = (
+    <StyledContainer
+      data-cy="dashboard-projects-list-item"
+      onClick={() =>
+        history.push(
+          isPublicVariant && !allowPrivate
+            ? LINKS.LOGIN.build()
+            : LINKS.PROJECT_DASHBOARD.build({
+                [PARAMS.PROJECT_ID]: p.id,
+              })
+        )
+      }
     >
-      <StyledContainer
-        data-cy="dashboard-projects-list-item"
-        onClick={() =>
-          history.push(
-            LINKS.PROJECT_DASHBOARD.build({
-              [PARAMS.PROJECT_ID]: p.id,
-            })
-          )
-        }
-      >
-        <StyledImage>
-          <AvatarImg
-            owner={{
-              name: p.name,
-              avatar: p.avatar,
-              type: 'PROJECT',
-              id: p.id,
-            }}
-            size={50}
-          />
-        </StyledImage>
-        <StyledTitle>
-          <StyledProjectName variant="h3">{p.name}</StyledProjectName>
-        </StyledTitle>
-        <StyledKeyCount>
-          <Typography variant="body1">
-            <T
-              keyName="project_list_keys_count"
-              params={{ keysCount: p.stats.keyCount.toString() }}
+      <StyledImage>
+        <AvatarImg
+          owner={{
+            name: p.name,
+            avatar: p.avatar,
+            type: 'PROJECT',
+            id: p.id,
+          }}
+          size={50}
+        />
+      </StyledImage>
+      <StyledTitle>
+        <StyledProjectName variant="h3">{p.name}</StyledProjectName>
+        {p.public && (
+          <StyledPublicLine>
+            <StyledPublicChip
+              size="small"
+              label={t('project_list_public_badge')}
+              data-cy="project-list-public-badge"
             />
-          </Typography>
-        </StyledKeyCount>
-        <StyledStats>
-          <TranslationStatesBar stats={p.stats as any} labels={!isCompact} />
-        </StyledStats>
-        <StyledLanguages data-cy="project-list-languages">
-          <Grid container>
-            <CircledLanguageIconList languages={p.languages} />
-          </Grid>
-        </StyledLanguages>
-        <StyledControls>
+            {p.organizationOwner?.name && (
+              <StyledOrganizationName
+                variant="body2"
+                data-cy="project-list-org-name"
+              >
+                {p.organizationOwner.name}
+              </StyledOrganizationName>
+            )}
+          </StyledPublicLine>
+        )}
+      </StyledTitle>
+      <StyledKeyCount>
+        <Typography variant="body1">
+          <T
+            keyName="project_list_keys_count"
+            params={{ keysCount: p.stats.keyCount.toString() }}
+          />
+        </Typography>
+      </StyledKeyCount>
+      <StyledStats>
+        <TranslationStatesBar stats={p.stats as any} labels={!isCompact} />
+      </StyledStats>
+      <StyledLanguages data-cy="project-list-languages">
+        <Grid container>
+          <CircledLanguageIconList languages={p.languages} />
+        </Grid>
+      </StyledLanguages>
+      <StyledControls>
+        {!isPublicVariant && (
           <Box width="100%" display="flex" justifyContent="flex-end">
             {showQaBadge ? (
               <Tooltip title={t('project_list_qa_issues_button')}>
@@ -222,8 +265,23 @@ const DashboardProjectListItem = (p: ProjectWithStatsModel) => {
               projectName={p.name}
             />
           </Box>
-        </StyledControls>
-      </StyledContainer>
+        )}
+      </StyledControls>
+    </StyledContainer>
+  );
+
+  if (isPublicVariant) {
+    return content;
+  }
+
+  return (
+    <QuickStartHighlight
+      itemKey="demo_project"
+      disabled={p.name !== 'Demo project'}
+      borderRadius="4px"
+      offset={1}
+    >
+      {content}
     </QuickStartHighlight>
   );
 };
