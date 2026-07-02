@@ -315,6 +315,22 @@ class ProjectService(
     return projectRepository.findAllByOrganizationOwnerIdAndDeletedAtIsNull(organizationId)
   }
 
+  @Transactional
+  @CacheEvict(cacheNames = [Caches.PROJECTS], allEntries = true)
+  fun softDeleteAllInOrganization(organizationId: Long) {
+    projectRepository.softDeleteByOrganizationId(organizationId, currentDateProvider.date)
+  }
+
+  @Transactional(readOnly = true)
+  fun findIdsInDeletedOrganizations(pageable: Pageable): Page<Long> {
+    return projectRepository.findIdsInDeletedOrganizations(pageable)
+  }
+
+  @Transactional(readOnly = true)
+  fun findIncludingDeleted(id: Long): Project? {
+    return projectRepository.findById(id).orElse(null)
+  }
+
   @Transactional(readOnly = true)
   fun findAllActive(): List<Project> {
     return projectRepository.findAllByDeletedAtIsNull()

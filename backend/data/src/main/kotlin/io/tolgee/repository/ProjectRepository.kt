@@ -8,9 +8,11 @@ import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
+import java.util.Date
 
 @Repository
 @Lazy
@@ -98,6 +100,21 @@ interface ProjectRepository : JpaRepository<Project, Long> {
   ): Page<ProjectView>
 
   fun findAllByOrganizationOwnerId(organizationOwnerId: Long): List<Project>
+
+  @Modifying
+  @Query(
+    """
+    update Project p set p.deletedAt = :deletedAt
+    where p.organizationOwner.id = :organizationId and p.deletedAt is null
+    """,
+  )
+  fun softDeleteByOrganizationId(
+    @Param("organizationId") organizationId: Long,
+    @Param("deletedAt") deletedAt: Date,
+  )
+
+  @Query("select p.id from Project p where p.organizationOwner.deletedAt is not null")
+  fun findIdsInDeletedOrganizations(pageable: Pageable): Page<Long>
 
   fun findAllByOrganizationOwnerIdAndDeletedAtIsNull(organizationOwnerId: Long): List<Project>
 

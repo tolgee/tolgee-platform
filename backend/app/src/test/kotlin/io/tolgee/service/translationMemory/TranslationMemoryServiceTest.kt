@@ -103,22 +103,23 @@ class TranslationMemoryServiceTest : AbstractSpringTest() {
     val project = testData.projectWithOnlyProjectTm
     val german = languageService.findEntitiesByTags(setOf("de"), project.id).first()
 
-    projectService.editProject(
-      project.id,
-      EditProjectRequest(
-        name = project.name,
-        slug = project.slug,
-        baseLanguageId = german.id,
-        useNamespaces = project.useNamespaces,
-        useBranching = project.useBranching,
-        defaultNamespaceId = null,
-        description = project.description,
-        icuPlaceholders = project.icuPlaceholders,
-        suggestionsMode = project.suggestionsMode,
-        translationProtection = project.translationProtection,
-      ),
-    )
-    entityManager.flush()
+    executeInNewTransaction {
+      projectService.editProject(
+        project.id,
+        EditProjectRequest(
+          name = project.name,
+          slug = project.slug,
+          baseLanguageId = german.id,
+          useNamespaces = project.useNamespaces,
+          useBranching = project.useBranching,
+          defaultNamespaceId = null,
+          description = project.description,
+          icuPlaceholders = project.icuPlaceholders,
+          suggestionsMode = project.suggestionsMode,
+          translationProtection = project.translationProtection,
+        ),
+      )
+    }
     entityManager.clear()
 
     val refreshedTm = translationMemoryRepository.findById(testData.onlyProjectTm.id).orElseThrow()
@@ -130,22 +131,23 @@ class TranslationMemoryServiceTest : AbstractSpringTest() {
     val project = testData.projectWithTm
     assertThat(testData.projectTm.name).isEqualTo(project.name)
 
-    projectService.editProject(
-      project.id,
-      EditProjectRequest(
-        name = "Renamed Project",
-        slug = project.slug,
-        baseLanguageId = project.baseLanguage?.id,
-        useNamespaces = project.useNamespaces,
-        useBranching = project.useBranching,
-        defaultNamespaceId = null,
-        description = project.description,
-        icuPlaceholders = project.icuPlaceholders,
-        suggestionsMode = project.suggestionsMode,
-        translationProtection = project.translationProtection,
-      ),
-    )
-    entityManager.flush()
+    executeInNewTransaction {
+      projectService.editProject(
+        project.id,
+        EditProjectRequest(
+          name = "Renamed Project",
+          slug = project.slug,
+          baseLanguageId = project.baseLanguage?.id,
+          useNamespaces = project.useNamespaces,
+          useBranching = project.useBranching,
+          defaultNamespaceId = null,
+          description = project.description,
+          icuPlaceholders = project.icuPlaceholders,
+          suggestionsMode = project.suggestionsMode,
+          translationProtection = project.translationProtection,
+        ),
+      )
+    }
     entityManager.clear()
 
     val refreshedTm = translationMemoryRepository.findById(testData.projectTm.id).orElseThrow()
