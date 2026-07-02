@@ -65,7 +65,15 @@ export const usePermissionsStructure = () => {
             value: 'translations.state-edit',
           },
           {
-            value: 'translations.suggest',
+            label: t('permissions_item_translations_suggestions'),
+            children: [
+              {
+                value: 'translations.suggest',
+              },
+              {
+                value: 'translation-suggestions.manage',
+              },
+            ],
           },
           {
             label: t('permissions_item_translations_comments'),

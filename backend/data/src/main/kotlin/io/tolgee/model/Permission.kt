@@ -105,6 +105,13 @@ class Permission(
   var suggestLanguages: MutableSet<Language> = mutableSetOf()
 
   /**
+   * Languages for TRANSLATION_SUGGESTIONS_MANAGE scope.
+   * When specified, user is restricted to moderate suggestions only for specific languages.
+   */
+  @ManyToMany(fetch = FetchType.EAGER)
+  var suggestManageLanguages: MutableSet<Language> = mutableSetOf()
+
+  /**
    * Languages for TRANSLATIONS_VIEW scope.
    * When specified, user is restricted to view specific language translations.
    */
@@ -142,6 +149,7 @@ class Permission(
     this.translateLanguages = languagePermissions?.translate?.toMutableSet() ?: mutableSetOf()
     this.stateChangeLanguages = languagePermissions?.stateChange?.toMutableSet() ?: mutableSetOf()
     this.suggestLanguages = languagePermissions?.suggest?.toMutableSet() ?: mutableSetOf()
+    this.suggestManageLanguages = languagePermissions?.suggestManage?.toMutableSet() ?: mutableSetOf()
     this.agency = agency
   }
 
@@ -164,6 +172,9 @@ class Permission(
   override val suggestLanguageIds: Set<Long>?
     get() = this.suggestLanguages.map { it.id }.toSet()
 
+  override val suggestManageLanguageIds: Set<Long>?
+    get() = this.suggestManageLanguages.map { it.id }.toSet()
+
   companion object {
     @Configurable
     class PermissionListeners {
@@ -180,7 +191,9 @@ class Permission(
           (
             permission.viewLanguages.isNotEmpty() ||
               permission.translateLanguages.isNotEmpty() ||
-              permission.stateChangeLanguages.isNotEmpty()
+              permission.stateChangeLanguages.isNotEmpty() ||
+              permission.suggestLanguages.isNotEmpty() ||
+              permission.suggestManageLanguages.isNotEmpty()
           )
         ) {
           throw IllegalStateException("Organization base permission cannot have language permissions")

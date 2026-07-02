@@ -17,4 +17,7 @@ interface RequestWithLanguagePermissions {
 
   @get:Schema(description = "Languages user can suggest translation")
   var suggestLanguages: Set<Long>?
+
+  @get:Schema(description = "Languages user can manage suggestions for")
+  var suggestManageLanguages: Set<Long>?
 }

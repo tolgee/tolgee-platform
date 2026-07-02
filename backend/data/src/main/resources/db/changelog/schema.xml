@@ -5790,4 +5790,20 @@
             DROP INDEX IF EXISTS project_is_public;
         </rollback>
     </changeSet>
+    <changeSet author="jirikuchynka (generated)" id="1782996347000-1">
+        <createTable tableName="permission_suggest_manage_languages">
+            <column name="permission_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="permission_suggest_manage_languagesPK"/>
+            </column>
+            <column name="suggest_manage_languages_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="permission_suggest_manage_languagesPK"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="jirikuchynka (generated)" id="1782996347000-2">
+        <addForeignKeyConstraint baseColumnNames="suggest_manage_languages_id" baseTableName="permission_suggest_manage_languages" constraintName="FK_perm_suggest_manage_languages_language" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="language" validate="true"/>
+    </changeSet>
+    <changeSet author="jirikuchynka (generated)" id="1782996347000-3">
+        <addForeignKeyConstraint baseColumnNames="permission_id" baseTableName="permission_suggest_manage_languages" constraintName="FK_perm_suggest_manage_languages_permission" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="permission" validate="true"/>
+    </changeSet>
 </databaseChangeLog>

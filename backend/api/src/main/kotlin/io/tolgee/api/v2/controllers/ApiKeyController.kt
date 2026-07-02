@@ -230,6 +230,7 @@ class ApiKeyController(
       viewLanguageIds = computed.viewLanguageIds.toNormalizedPermittedLanguageSet(),
       stateChangeLanguageIds = computed.stateChangeLanguageIds.toNormalizedPermittedLanguageSet(),
       suggestLanguageIds = computed.suggestLanguageIds.toNormalizedPermittedLanguageSet(),
+      suggestManageLanguageIds = computed.suggestManageLanguageIds.toNormalizedPermittedLanguageSet(),
       scopes = securityService.getCurrentPermittedScopes(projectIdNotNull).toTypedArray(),
       project = simpleProjectModelAssembler.toModel(projectService.get(projectIdNotNull)),
     )

@@ -37,6 +37,7 @@ class CommunityPermissionScopesTest {
       .doesNotContain(
         Scope.TRANSLATIONS_EDIT,
         Scope.TRANSLATIONS_STATE_EDIT,
+        Scope.TRANSLATION_SUGGESTIONS_MANAGE,
         Scope.KEYS_EDIT,
         Scope.KEYS_CREATE,
         Scope.KEYS_DELETE,
@@ -56,7 +57,34 @@ class CommunityPermissionScopesTest {
     assertThat(permission.viewLanguageIds).isNull()
     assertThat(permission.translateLanguageIds).isNull()
     assertThat(permission.suggestLanguageIds).isNull()
+    assertThat(permission.suggestManageLanguageIds).isNull()
     assertThat(permission.stateChangeLanguageIds).isNull()
+  }
+
+  @Test
+  fun `suggestions-manage scope expands to the implied read scopes`() {
+    assertThat(Scope.expand(Scope.TRANSLATION_SUGGESTIONS_MANAGE).toSet())
+      .contains(Scope.TRANSLATION_SUGGESTIONS_MANAGE, Scope.TRANSLATIONS_VIEW, Scope.KEYS_VIEW)
+    assertThat(Scope.expand(Scope.TRANSLATION_SUGGESTIONS_MANAGE).toSet())
+      .doesNotContain(Scope.TRANSLATIONS_SUGGEST)
+  }
+
+  @Test
+  fun `only EDIT and MANAGE presets grant the suggestions-manage scope`() {
+    assertThat(Scope.expand(ProjectPermissionType.EDIT.availableScopes).toSet())
+      .contains(Scope.TRANSLATION_SUGGESTIONS_MANAGE)
+    assertThat(Scope.expand(ProjectPermissionType.MANAGE.availableScopes).toSet())
+      .contains(Scope.TRANSLATION_SUGGESTIONS_MANAGE)
+
+    listOf(
+      ProjectPermissionType.NONE,
+      ProjectPermissionType.VIEW,
+      ProjectPermissionType.TRANSLATE,
+      ProjectPermissionType.REVIEW,
+    ).forEach { type ->
+      assertThat(Scope.expand(type.availableScopes).toSet())
+        .doesNotContain(Scope.TRANSLATION_SUGGESTIONS_MANAGE)
+    }
   }
 
   @Test
