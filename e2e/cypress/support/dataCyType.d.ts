@@ -146,7 +146,9 @@ declare namespace DataCy {
         "comment-menu-needs-resolution": true;
         "comment-resolve": true;
         "comment-text": true;
+        "community-projects-view": true;
         "community-translation-banner": true;
+        "community-translation-item": true;
         "content-delivery-add-button": true;
         "content-delivery-auto-publish-checkbox": true;
         "content-delivery-delete-button": true;
@@ -728,6 +730,7 @@ declare namespace DataCy {
         "suggestion-action": true;
         "suggestions-list": true;
         "suggestions-show-all": true;
+        "switch-popover-footer-action": true;
         "switch-popover-item": true;
         "switch-popover-new": true;
         "switch-popover-search": true;

@@ -3,6 +3,7 @@ import { Redirect, Route, Switch } from 'react-router-dom';
 
 import { LINKS } from 'tg.constants/links';
 import { ProjectsRouter } from 'tg.views/projects/ProjectsRouter';
+import { CommunityProjectsView } from 'tg.views/projects/CommunityProjectsView';
 import { UserSettingsRouter } from 'tg.views/userSettings/UserSettingsRouter';
 import { OrganizationsRouter } from 'tg.views/organizations/OrganizationsRouter';
 import { AdministrationView } from 'tg.views/administration/AdministrationView';
@@ -109,6 +110,9 @@ export const RootRouter = () => {
             </PrivateRoute>
             <PrivateRoute path={LINKS.PROJECTS.template}>
               <ProjectsRouter />
+            </PrivateRoute>
+            <PrivateRoute exact path={LINKS.COMMUNITY_PROJECTS.template}>
+              <CommunityProjectsView />
             </PrivateRoute>
             <PrivateRoute path={`${LINKS.ORGANIZATIONS.template}`}>
               <OrganizationsRouter />
