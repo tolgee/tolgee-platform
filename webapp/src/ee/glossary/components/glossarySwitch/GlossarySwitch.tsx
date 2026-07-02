@@ -15,7 +15,9 @@ const StyledLink = styled(Link)`
   display: flex;
 `;
 
-export const GlossarySwitch: React.FC = () => {
+export const GlossarySwitch: React.FC<
+  React.PropsWithChildren<unknown>
+> = () => {
   const anchorEl = useRef<HTMLAnchorElement>(null);
   const [isOpen, setIsOpen] = useState(false);
   const { preferredOrganization } = usePreferredOrganization();

@@ -11,7 +11,7 @@ type Props = {
   'data-cy'?: string;
 };
 
-export const TabMessage: React.FC<Props> = ({
+export const TabMessage: React.FC<React.PropsWithChildren<Props>> = ({
   children,
   'data-cy': dataCy,
 }) => {

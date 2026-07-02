@@ -66,8 +66,8 @@ export function InfiniteMultiSearchSelect<T, S>({
 
   const renderOption =
     renderItem ??
-    ((_, item: T) => {
-      return itemKey(item);
+    ((_, item: T): React.ReactNode => {
+      return String(itemKey(item));
     });
 
   const totalItems = queryResult?.data?.pages[0]?.page?.totalElements;

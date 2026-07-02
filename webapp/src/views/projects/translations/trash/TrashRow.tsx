@@ -30,57 +30,59 @@ type Props = {
   onFilterNamespace?: (namespace: string) => void;
 };
 
-export const TrashRow: React.FC<Props> = React.memo(function TrashRow({
-  data,
-  selected,
-  onToggle,
-  onRestore,
-  onDelete,
-  canRestore,
-  canDelete,
-  languages,
-  columnSizes,
-  showNamespace,
-  onFilterNamespace,
-}) {
-  const translations = data.translations ?? {};
+export const TrashRow: React.FC<React.PropsWithChildren<Props>> = React.memo(
+  function TrashRow({
+    data,
+    selected,
+    onToggle,
+    onRestore,
+    onDelete,
+    canRestore,
+    canDelete,
+    languages,
+    columnSizes,
+    showNamespace,
+    onFilterNamespace,
+  }) {
+    const translations = data.translations ?? {};
 
-  return (
-    <StyledRow
-      style={{
-        gridTemplateColumns: columnSizes.join(' '),
-        width: `calc(${columnSizes.join(' + ')})`,
-      }}
-      data-cy="trash-row"
-    >
-      <TrashKeyCell
-        data={data}
-        selected={selected}
-        onToggle={onToggle}
-        showNamespace={showNamespace}
-        onFilterNamespace={onFilterNamespace}
-      />
+    return (
+      <StyledRow
+        style={{
+          gridTemplateColumns: columnSizes.join(' '),
+          width: `calc(${columnSizes.join(' + ')})`,
+        }}
+        data-cy="trash-row"
+      >
+        <TrashKeyCell
+          data={data}
+          selected={selected}
+          onToggle={onToggle}
+          showNamespace={showNamespace}
+          onFilterNamespace={onFilterNamespace}
+        />
 
-      <TrashTrashedCell
-        data={data}
-        canRestore={canRestore}
-        canDelete={canDelete}
-        onRestore={onRestore}
-        onDelete={onDelete}
-      />
+        <TrashTrashedCell
+          data={data}
+          canRestore={canRestore}
+          canDelete={canDelete}
+          onRestore={onRestore}
+          onDelete={onDelete}
+        />
 
-      {languages.map((language) => {
-        const translation = translations[language.tag];
-        return (
-          <TranslationCellReadOnly
-            key={language.tag}
-            text={translation?.text}
-            state={translation?.state}
-            locale={language.tag}
-            isPlural={data.isPlural ?? false}
-          />
-        );
-      })}
-    </StyledRow>
-  );
-});
+        {languages.map((language) => {
+          const translation = translations[language.tag];
+          return (
+            <TranslationCellReadOnly
+              key={language.tag}
+              text={translation?.text}
+              state={translation?.state}
+              locale={language.tag}
+              isPlural={data.isPlural ?? false}
+            />
+          );
+        })}
+      </StyledRow>
+    );
+  }
+);

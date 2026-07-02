@@ -40,12 +40,9 @@ type TrialChipTooltipProps = {
   onClose: () => void;
 };
 
-export const TrialChipTooltip: FC<TrialChipTooltipProps> = ({
-  children,
-  onOpen,
-  open,
-  onClose,
-}) => {
+export const TrialChipTooltip: FC<
+  React.PropsWithChildren<TrialChipTooltipProps>
+> = ({ children, onOpen, open, onClose }) => {
   const { preferredOrganization: organization } = usePreferredOrganization();
 
   const activeSubscription = organization?.activeCloudSubscription;

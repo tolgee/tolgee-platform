@@ -8,6 +8,7 @@ import {
 } from '../../common/comments';
 import { gcyAdvanced } from '../../common/shared';
 import { getCell, setStateToReviewed } from '../../common/state';
+import { waitForGlobalLoading } from '../../common/loading';
 import { visitMyTasks } from '../../common/tasks';
 import { editCell } from '../../common/translations';
 import { Sheet, WorkBook } from 'xlsx';
@@ -64,6 +65,7 @@ describe('my tasks', () => {
       .contains('All items in the task are done')
       .should('be.visible');
     cy.gcy('global-confirmation-confirm').click();
+    waitForGlobalLoading();
     visitMyTasks();
     cy.gcy('task-item')
       .contains('Translate task')
@@ -82,6 +84,7 @@ describe('my tasks', () => {
       .contains('All items in the task are done')
       .should('be.visible');
     cy.gcy('global-confirmation-confirm').click();
+    waitForGlobalLoading();
     visitMyTasks();
     cy.gcy('task-item')
       .contains('Review task')

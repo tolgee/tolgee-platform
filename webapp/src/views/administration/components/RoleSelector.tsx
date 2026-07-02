@@ -10,10 +10,12 @@ import { MenuItem, Select } from '@mui/material';
 type Role = components['schemas']['UserAccountModel']['globalServerRole'];
 type User = components['schemas']['UserAccountModel'];
 
-export const RoleSelector: FC<{
-  onSuccess: () => void;
-  user: User;
-}> = ({ user, onSuccess }) => {
+export const RoleSelector: FC<
+  React.PropsWithChildren<{
+    onSuccess: () => void;
+    user: User;
+  }>
+> = ({ user, onSuccess }) => {
   const currentUser = useUser();
 
   const setRoleMutation = useApiMutation({

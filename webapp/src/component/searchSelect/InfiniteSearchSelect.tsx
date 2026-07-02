@@ -48,7 +48,9 @@ type Props<T, S> = {
   displaySearch?: boolean;
   disabled?: boolean;
   minHeight?: boolean;
-  inputComponent?: React.ComponentType<InputBaseComponentProps>;
+  inputComponent?: React.ComponentType<
+    React.PropsWithChildren<InputBaseComponentProps>
+  >;
   menuAnchorOrigin?: {
     vertical: 'top' | 'bottom';
     horizontal: 'left' | 'right';
@@ -79,8 +81,8 @@ export function InfiniteSearchSelect<T, S>({
 
   const renderOption =
     renderItem ??
-    ((_, item: T) => {
-      return itemKey(item);
+    ((_, item: T): React.ReactNode => {
+      return String(itemKey(item));
     });
 
   const totalItems = queryResult?.data?.pages[0]?.page?.totalElements;

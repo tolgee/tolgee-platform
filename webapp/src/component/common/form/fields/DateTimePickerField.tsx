@@ -13,12 +13,14 @@ type FormControlProps = ComponentProps<typeof FormControl> & {
 type DateTimePickerProps = PropsOf<typeof DateTimePicker>;
 
 export const DateTimePickerField: FC<
-  {
-    name: string;
-    className?: string;
-    formControlProps?: FormControlProps;
-    dateTimePickerProps: DateTimePickerProps;
-  } & DateTimePickerFieldProps
+  React.PropsWithChildren<
+    {
+      name: string;
+      className?: string;
+      formControlProps?: FormControlProps;
+      dateTimePickerProps: DateTimePickerProps;
+    } & DateTimePickerFieldProps
+  >
 > = ({ name, formControlProps, dateTimePickerProps }) => {
   const [field, _, helpers] = useField(name);
   const { error, helperText } = useFieldError({ fieldName: name });

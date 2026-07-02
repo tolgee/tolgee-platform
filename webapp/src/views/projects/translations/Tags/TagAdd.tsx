@@ -22,7 +22,7 @@ type Props = {
   className?: string;
 };
 
-export const TagAdd: React.FC<Props> = ({
+export const TagAdd: React.FC<React.PropsWithChildren<Props>> = ({
   onClick,
   withFullLabel,
   className,

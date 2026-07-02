@@ -24,7 +24,9 @@ type Props = {
   className?: string;
 };
 
-export const EscapeHtmlSelector: React.FC<Props> = ({ className }) => {
+export const EscapeHtmlSelector: React.FC<React.PropsWithChildren<Props>> = ({
+  className,
+}) => {
   const { t } = useTranslate();
 
   return (

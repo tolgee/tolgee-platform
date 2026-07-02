@@ -9,7 +9,7 @@ import { LINKS } from 'tg.constants/links';
 type PasswordChangedItemProps = NotificationItemProps;
 
 export const PasswordChangedItem: FunctionComponent<
-  PasswordChangedItemProps
+  React.PropsWithChildren<PasswordChangedItemProps>
 > = ({ notification, ...props }) => {
   return (
     <NotificationItem

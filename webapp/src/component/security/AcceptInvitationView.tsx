@@ -42,7 +42,7 @@ const StyledPaper = styled(Paper)`
   }
 `;
 
-const AcceptInvitationView: React.FC = () => {
+const AcceptInvitationView: React.FC<React.PropsWithChildren<unknown>> = () => {
   const history = useHistory();
   const match = useRouteMatch();
   const { t } = useTranslate();

@@ -10,12 +10,9 @@ import { createAdder } from 'tg.fixtures/pluginAdder';
 
 type Props = BaseViewProps;
 
-export const BaseAdministrationView: React.FC<Props> = ({
-  children,
-  loading,
-  navigation,
-  ...otherProps
-}) => {
+export const BaseAdministrationView: React.FC<
+  React.PropsWithChildren<Props>
+> = ({ children, loading, navigation, ...otherProps }) => {
   const { t } = useTranslate();
 
   const addItems = useAddAdministrationMenuItems();

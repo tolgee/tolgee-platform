@@ -26,7 +26,7 @@ type Props = {
   project: SimpleProjectModel;
 };
 
-export const TaskSearchSelect: React.FC<Props> = ({
+export const TaskSearchSelect: React.FC<React.PropsWithChildren<Props>> = ({
   value,
   onChange,
   label,

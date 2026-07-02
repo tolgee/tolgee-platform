@@ -30,8 +30,10 @@ export const TaskReference = NotIncludedInOss('TaskReference');
 export const BranchReference = NotIncludedInOss('BranchReference');
 export const PermissionsAdvancedEe = NotIncludedInOss('PermissionsAdvancedEe');
 export const GlobalLimitPopover = Empty;
-export const billingMenuItems = [] as React.FC<BillingMenuItemsProps>[];
-export const apps = [] as React.FC[];
+export const billingMenuItems = [] as React.FC<
+  React.PropsWithChildren<BillingMenuItemsProps>
+>[];
+export const apps = [] as React.FC<React.PropsWithChildren<unknown>>[];
 export const AgencyLabel = NotIncludedInOss('AgencyLabel');
 export const OrderTranslationsDialog = Empty;
 export const TaskItem = Empty;

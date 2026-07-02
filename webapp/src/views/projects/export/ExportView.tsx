@@ -6,7 +6,9 @@ import { useProject } from 'tg.hooks/useProject';
 import { ExportForm } from './ExportForm';
 import { BaseProjectView } from '../BaseProjectView';
 
-export const ExportView: FunctionComponent = () => {
+export const ExportView: FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const project = useProject();
   const { t } = useTranslate();
 

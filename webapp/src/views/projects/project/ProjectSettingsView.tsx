@@ -18,7 +18,7 @@ export type ProjectSettingsTab = {
   label: string;
   link: string;
   dataCy?: string;
-  component?: FunctionComponent;
+  component?: FunctionComponent<React.PropsWithChildren<unknown>>;
   enabled: boolean;
   routeMatch: match | null;
 };

@@ -24,7 +24,7 @@ type Props = {
   maxLimit: number | null | undefined;
 };
 
-export const CharacterCounter: React.FC<Props> = ({
+export const CharacterCounter: React.FC<React.PropsWithChildren<Props>> = ({
   currentCount,
   maxLimit,
 }) => {

@@ -10,7 +10,7 @@ import React from 'react';
 
 type NotificationsComponentMap = Record<
   components['schemas']['NotificationModel']['type'],
-  React.FC<NotificationItemProps>
+  React.FC<React.PropsWithChildren<NotificationItemProps>>
 >;
 
 export const notificationComponents: NotificationsComponentMap = {

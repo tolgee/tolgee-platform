@@ -32,7 +32,9 @@ type Props = {
   description: string;
 };
 
-export const ProjectDescription: React.FC<Props> = ({ description }) => {
+export const ProjectDescription: React.FC<React.PropsWithChildren<Props>> = ({
+  description,
+}) => {
   const project = useProject();
   const permissions = useProjectPermissions();
   const canManage = permissions.satisfiesPermission('project.edit');

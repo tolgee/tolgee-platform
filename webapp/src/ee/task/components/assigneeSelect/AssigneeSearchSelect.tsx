@@ -29,7 +29,7 @@ type Props = {
   filters?: AssigneeFilters;
 };
 
-export const AssigneeSearchSelect: React.FC<Props> = ({
+export const AssigneeSearchSelect: React.FC<React.PropsWithChildren<Props>> = ({
   value,
   onChange,
   label,

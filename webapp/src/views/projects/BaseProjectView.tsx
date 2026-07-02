@@ -19,7 +19,7 @@ type Props = BaseViewProps & {
   branching?: boolean;
 };
 
-export const BaseProjectView: React.FC<Props> = ({
+export const BaseProjectView: React.FC<React.PropsWithChildren<Props>> = ({
   navigation,
   rightPanelContent,
   branching,

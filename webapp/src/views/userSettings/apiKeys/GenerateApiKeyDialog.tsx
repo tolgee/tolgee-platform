@@ -43,7 +43,9 @@ interface Props {
 const setsIntersection = (set1: Set<unknown>, set2: Set<unknown>) =>
   new Set([...set1].filter((v) => set2.has(v)));
 
-export const GenerateApiKeyDialog: FunctionComponent<Props> = (props) => {
+export const GenerateApiKeyDialog: FunctionComponent<
+  React.PropsWithChildren<Props>
+> = (props) => {
   const history = useHistory();
   const onDialogClose = () => {
     if (props.onClose) {

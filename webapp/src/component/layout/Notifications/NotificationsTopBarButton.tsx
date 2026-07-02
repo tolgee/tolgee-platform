@@ -16,7 +16,9 @@ const StyledIconButton = styled(IconButton)`
   }
 `;
 
-export const NotificationsTopBarButton: React.FC = () => {
+export const NotificationsTopBarButton: React.FC<
+  React.PropsWithChildren<unknown>
+> = () => {
   const { t } = useTranslate();
   const [anchorEl, setAnchorEl] = useState<PopoverProps['anchorEl']>(null);
   const [unseenCount, setUnseenCount] = useState<number>();

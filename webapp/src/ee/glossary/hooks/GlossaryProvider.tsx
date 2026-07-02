@@ -21,7 +21,7 @@ export const GlossaryContextHolder = React.createContext<ContextData>(
   null as any
 );
 
-export const GlossaryProvider: React.FC<Props> = ({
+export const GlossaryProvider: React.FC<React.PropsWithChildren<Props>> = ({
   children,
   glossary,
   assignedProjects,

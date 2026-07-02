@@ -4,7 +4,7 @@ import { Box, Chip } from '@mui/material';
 import { T } from '@tolgee/react';
 import { TrialChipTooltip } from './TrialChipTooltip';
 
-export const TrialChip: FC = () => {
+export const TrialChip: FC<React.PropsWithChildren<unknown>> = () => {
   const { shouldShowChip } = useTrialInfo();
 
   const [tooltipOpen, setTooltipOpen] = useState(false);

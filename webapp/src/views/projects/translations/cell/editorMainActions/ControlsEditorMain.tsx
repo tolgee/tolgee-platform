@@ -38,7 +38,9 @@ type ControlsProps = {
   overCharLimit?: boolean;
 };
 
-export const ControlsEditorMain: React.FC<ControlsProps> = ({
+export const ControlsEditorMain: React.FC<
+  React.PropsWithChildren<ControlsProps>
+> = ({
   onSave,
   onCancel,
   className,

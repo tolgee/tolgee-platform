@@ -16,7 +16,7 @@ type Props = {
   rightPanelContent?: (width: number) => React.ReactNode;
 };
 
-export const ProjectPage: React.FC<Props> = ({
+export const ProjectPage: React.FC<React.PropsWithChildren<Props>> = ({
   children,
   rightPanelContent,
 }) => {

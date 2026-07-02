@@ -74,7 +74,10 @@ type Props = {
   autofocus?: boolean;
 };
 
-export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
+export const FormBody: React.FC<React.PropsWithChildren<Props>> = ({
+  onCancel,
+  autofocus,
+}) => {
   const { t } = useTranslate();
   const form = useFormikContext<ValuesCreateType>();
   const project = useProject();

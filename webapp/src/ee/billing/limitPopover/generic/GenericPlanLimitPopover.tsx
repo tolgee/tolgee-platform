@@ -29,14 +29,9 @@ const StyledDialogContent = styled(DialogContent)`
   max-width: 500px;
 `;
 
-export const GenericPlanLimitPopover: FC<PlanLimitPopoverProps> = ({
-  open,
-  onClose,
-  isPayAsYouGo,
-  progressData,
-  actionButton,
-  loading,
-}) => {
+export const GenericPlanLimitPopover: FC<
+  React.PropsWithChildren<PlanLimitPopoverProps>
+> = ({ open, onClose, isPayAsYouGo, progressData, actionButton, loading }) => {
   return (
     <PlanLimitPopoverWrapper
       open={open}

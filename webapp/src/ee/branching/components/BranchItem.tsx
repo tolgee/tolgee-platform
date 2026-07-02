@@ -63,7 +63,7 @@ type Props = {
   onMergeDetail: () => void;
 };
 
-export const BranchItem: React.FC<Props> = ({
+export const BranchItem: React.FC<React.PropsWithChildren<Props>> = ({
   branch,
   onRemove,
   onRename,

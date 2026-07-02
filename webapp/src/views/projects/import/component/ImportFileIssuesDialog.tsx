@@ -9,10 +9,12 @@ import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useFileIssueTranslation } from 'tg.translationTools/useFileIssueTranslation';
 import { useFileIssuePeramTranslation } from 'tg.translationTools/useFileIssueParamTranslation';
 
-export const ImportFileIssuesDialog: FunctionComponent<{
-  row?: components['schemas']['ImportLanguageModel'];
-  onClose: () => void;
-}> = (props) => {
+export const ImportFileIssuesDialog: FunctionComponent<
+  React.PropsWithChildren<{
+    row?: components['schemas']['ImportLanguageModel'];
+    onClose: () => void;
+  }>
+> = (props) => {
   const translateFileIssue = useFileIssueTranslation();
   const translateFileParamIssue = useFileIssuePeramTranslation();
   const project = useProject();

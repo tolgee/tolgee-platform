@@ -12,7 +12,9 @@ type Props = {
   disabled?: boolean;
 };
 
-export const OrganizationFields: React.FC<Props> = ({ disabled }) => {
+export const OrganizationFields: React.FC<React.PropsWithChildren<Props>> = ({
+  disabled,
+}) => {
   const [slugDisabled, setSlugDisabled] = useState(true);
 
   const formik = useFormikContext();

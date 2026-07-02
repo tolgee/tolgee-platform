@@ -9,7 +9,9 @@ import { useHistory, useRouteMatch } from 'react-router-dom';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 
-export const EditPatDialog: FunctionComponent = () => {
+export const EditPatDialog: FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const history = useHistory();
   const onDialogClose = () => {
     history.push(LINKS.USER_PATS.build());

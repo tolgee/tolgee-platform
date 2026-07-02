@@ -8,10 +8,9 @@ import { LINKS } from 'tg.constants/links';
 
 type MfaEnabledItemProps = NotificationItemProps;
 
-export const MfaEnabledItem: FunctionComponent<MfaEnabledItemProps> = ({
-  notification,
-  ...props
-}) => {
+export const MfaEnabledItem: FunctionComponent<
+  React.PropsWithChildren<MfaEnabledItemProps>
+> = ({ notification, ...props }) => {
   return (
     <NotificationItem
       notification={notification}

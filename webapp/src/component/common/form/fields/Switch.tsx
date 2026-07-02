@@ -9,7 +9,9 @@ interface PGSwitchProps {
 
 type Props = PGSwitchProps & React.ComponentProps<typeof TolgeeSwitch>;
 
-export const Switch: FunctionComponent<Props> = (props) => {
+export const Switch: FunctionComponent<React.PropsWithChildren<Props>> = (
+  props
+) => {
   const [field] = useField(props.name);
   const [oldValue, setOldValue] = useState(field.value);
 

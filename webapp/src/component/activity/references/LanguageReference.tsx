@@ -7,7 +7,9 @@ type Props = {
   data: LanguageReferenceData;
 };
 
-export const LanguageReference: React.FC<Props> = ({ data }) => {
+export const LanguageReference: React.FC<React.PropsWithChildren<Props>> = ({
+  data,
+}) => {
   return (
     <span className="reference referenceComposed">
       <span className="referenceText">{data.language.name} </span>

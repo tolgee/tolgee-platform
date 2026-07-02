@@ -22,7 +22,7 @@ export type BatchOperation = {
   enabled: boolean;
   hidden?: boolean;
   divider?: boolean;
-  component: FC<OperationProps>;
+  component: FC<React.PropsWithChildren<OperationProps>>;
 };
 
 export const addOperations = createMultiAdder<BatchOperation>({

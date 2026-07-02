@@ -31,7 +31,10 @@ type Props = {
   topSpacing?: boolean;
 };
 
-export const NamespaceBanner: React.FC<Props> = ({ namespace, maxWidth }) => {
+export const NamespaceBanner: React.FC<React.PropsWithChildren<Props>> = ({
+  namespace,
+  maxWidth,
+}) => {
   const elRef = useRef<HTMLDivElement>(null);
   const { nsRefRegister } = useHeaderNsActions();
   const { name, row } = namespace;

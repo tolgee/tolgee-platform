@@ -11,7 +11,9 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { LINKS } from 'tg.constants/links';
 import { useHistory } from 'react-router-dom';
 
-export const ChangeAuthProvider: FunctionComponent = () => {
+export const ChangeAuthProvider: FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const { useSsoAuthLinkByDomain } = useGlobalActions();
   const user = useUser();
   const oAuthServices = useOAuthServices();

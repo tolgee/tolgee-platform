@@ -8,6 +8,7 @@ import { useConfig, useUser } from 'tg.globalContext/helpers';
 import { Alert } from 'tg.component/common/Alert';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
+import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 import { BaseUserSettingsView } from '../BaseUserSettingsView';
 import { ChangePassword } from './ChangePassword';
@@ -17,7 +18,9 @@ import { MfaRecoveryCodesDialog } from './MfaRecoveryCodesDialog';
 import { DisableMfaDialog } from './DisableMfaDialog';
 import { ChangeAuthProvider } from './ChangeAuthProvider';
 
-export const AccountSecurityView: FunctionComponent = () => {
+export const AccountSecurityView: FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const { t } = useTranslate();
   const user = useUser();
   const config = useConfig();
@@ -54,7 +57,13 @@ export const AccountSecurityView: FunctionComponent = () => {
         </Typography>
         <Box>
           {!!resetResetLoadable.error && (
-            <Alert severity="error">{resetResetLoadable.error}</Alert>
+            <Alert severity="error">
+              <TranslatedError
+                code={
+                  resetResetLoadable.error.code || 'unexpected_error_occurred'
+                }
+              />
+            </Alert>
           )}
           {resetResetLoadable.isSuccess && (
             <Alert

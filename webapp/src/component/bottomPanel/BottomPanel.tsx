@@ -35,7 +35,10 @@ type Props = {
   height: number;
 };
 
-export const BottomPanel: React.FC<Props> = ({ children, height }) => {
+export const BottomPanel: React.FC<React.PropsWithChildren<Props>> = ({
+  children,
+  height,
+}) => {
   const { width } = useWindowDimensions();
 
   const { setHeight } = useBottomPanelSetters();

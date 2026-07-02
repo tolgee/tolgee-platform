@@ -27,7 +27,9 @@ type ConflictPanelProps = {
   };
 };
 
-export const ConflictKeyPanel: FC<ConflictPanelProps> = ({
+export const ConflictKeyPanel: FC<
+  React.PropsWithChildren<ConflictPanelProps>
+> = ({
   keyData,
   accepted,
   onAccept,

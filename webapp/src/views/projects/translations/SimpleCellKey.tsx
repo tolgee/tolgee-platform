@@ -42,7 +42,9 @@ type Props = {
   data: KeyWithTranslationsModel;
 };
 
-export const SimpleCellKey: React.FC<Props> = ({ data }) => {
+export const SimpleCellKey: React.FC<React.PropsWithChildren<Props>> = ({
+  data,
+}) => {
   return (
     <Box
       data-cy="translations-table-cell"

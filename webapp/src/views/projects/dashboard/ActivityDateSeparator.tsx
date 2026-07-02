@@ -29,7 +29,9 @@ type Props = {
   date: Date;
 };
 
-export const ActivityDateSeparator: React.FC<Props> = ({ date }) => {
+export const ActivityDateSeparator: React.FC<
+  React.PropsWithChildren<Props>
+> = ({ date }) => {
   const lang = useCurrentLanguage();
   const isToday = new Date().toLocaleDateString() === date.toLocaleDateString();
   const { t } = useTranslate();

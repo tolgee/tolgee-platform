@@ -3,12 +3,9 @@ import { usePermissionsStructure } from 'tg.component/PermissionsSettings/usePer
 import { PermissionsAdvancedEeProps } from '../../eeSetup/EeModuleType';
 import { FC } from 'react';
 
-export const PermissionsAdvancedEe: FC<PermissionsAdvancedEeProps> = ({
-  dependencies,
-  state,
-  onChange,
-  allLangs,
-}) => {
+export const PermissionsAdvancedEe: FC<
+  React.PropsWithChildren<PermissionsAdvancedEeProps>
+> = ({ dependencies, state, onChange, allLangs }) => {
   const structure = usePermissionsStructure();
 
   return (

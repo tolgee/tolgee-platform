@@ -17,7 +17,7 @@ type Props = {
   'data-cy'?: string;
 };
 
-export const ProjectsUsedInfo: React.FC<Props> = ({
+export const ProjectsUsedInfo: React.FC<React.PropsWithChildren<Props>> = ({
   projects,
   label,
   maxDisplay = 2,

@@ -21,7 +21,9 @@ const StyledIconButton = styled(IconButton)`
   }
 `;
 
-export const LanguageMenu: FunctionComponent<{ className?: string }> = () => {
+export const LanguageMenu: FunctionComponent<
+  React.PropsWithChildren<{ className?: string }>
+> = () => {
   const { t } = useTranslate();
   const tolgee = useTolgee();
   const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {

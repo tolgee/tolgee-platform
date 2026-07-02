@@ -15,13 +15,9 @@ export type AutoAvatarProps = {
   ownerType: 'ORG' | 'USER' | 'PROJECT';
 };
 
-export const AutoAvatar: FC<ComponentProps<'img'> & AutoAvatarProps> = ({
-  entityId,
-  size,
-  ownerName,
-  ownerType,
-  ...imgProps
-}) => {
+export const AutoAvatar: FC<
+  React.PropsWithChildren<ComponentProps<'img'> & AutoAvatarProps>
+> = ({ entityId, size, ownerName, ownerType, ...imgProps }) => {
   const src = useAutoAvatarImgSrc({
     entityId,
     size,

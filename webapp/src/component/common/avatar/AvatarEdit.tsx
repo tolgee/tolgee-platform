@@ -14,11 +14,13 @@ const StyledBox = styled(Box)`
 
 export type CropperOptions = ReactCropperProps & { rounded: boolean };
 
-export const AvatarEdit: FC<{
-  src: string;
-  cropperRef: React.RefObject<ReactCropperElement>;
-  cropperProps?: Partial<CropperOptions>;
-}> = ({ src, cropperRef, cropperProps }) => {
+export const AvatarEdit: FC<
+  React.PropsWithChildren<{
+    src: string;
+    cropperRef: React.RefObject<ReactCropperElement>;
+    cropperProps?: Partial<CropperOptions>;
+  }>
+> = ({ src, cropperRef, cropperProps }) => {
   const { rounded, ...other } = { ...cropperProps, rounded: true };
   return (
     <StyledBox>

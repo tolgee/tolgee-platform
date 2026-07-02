@@ -29,7 +29,7 @@ type Props = {
   width?: string | number;
 };
 
-export const KeyCellContent: React.FC<Props> = ({
+export const KeyCellContent: React.FC<React.PropsWithChildren<Props>> = ({
   keyName,
   description,
   width,

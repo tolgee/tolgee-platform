@@ -185,7 +185,7 @@ export type ProjectMenuItem = {
   id: string;
   condition: (props: ConditionProps) => boolean;
   link: Link;
-  icon: FC;
+  icon: FC<React.PropsWithChildren<unknown>>;
   text: string;
   dataCy: string;
   matchAsPrefix?: boolean | string;

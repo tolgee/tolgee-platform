@@ -5,7 +5,9 @@ type Props = {
   description: string;
 };
 
-export const ProviderDescription: React.FC<Props> = ({ description }) => {
+export const ProviderDescription: React.FC<React.PropsWithChildren<Props>> = ({
+  description,
+}) => {
   return (
     <Box>
       <ReactMarkdown

@@ -37,77 +37,79 @@ type Props = {
   bannerAfter: boolean;
 };
 
-export const RowList: React.FC<Props> = React.memo(function RowList({
-  data,
-  columnSizesPercent,
-  columnSizes,
-  languages,
-  onResize,
-  bannerBefore,
-  bannerAfter,
-}) {
-  const { satisfiesPermissionWithBranching } = useProjectPermissions();
-  const [hover, setHover] = useState(false);
-  const [focus, setFocus] = useState(false);
-  const active = hover || focus;
+export const RowList: React.FC<React.PropsWithChildren<Props>> = React.memo(
+  function RowList({
+    data,
+    columnSizesPercent,
+    columnSizes,
+    languages,
+    onResize,
+    bannerBefore,
+    bannerAfter,
+  }) {
+    const { satisfiesPermissionWithBranching } = useProjectPermissions();
+    const [hover, setHover] = useState(false);
+    const [focus, setFocus] = useState(false);
+    const active = hover || focus;
 
-  const [activeDebounced] = useDebounce(active, 100);
+    const [activeDebounced] = useDebounce(active, 100);
 
-  const relaxedActive = active || activeDebounced;
+    const relaxedActive = active || activeDebounced;
 
-  const keyClassName = clsx({
-    [CELL_SPACE_TOP]: bannerBefore,
-    [CELL_SPACE_BOTTOM]: bannerAfter,
-  });
+    const keyClassName = clsx({
+      [CELL_SPACE_TOP]: bannerBefore,
+      [CELL_SPACE_BOTTOM]: bannerAfter,
+    });
 
-  const firstTranslationClassName = clsx({
-    [CELL_SPACE_TOP]: bannerBefore,
-  });
+    const firstTranslationClassName = clsx({
+      [CELL_SPACE_TOP]: bannerBefore,
+    });
 
-  const lastTranslationClassName = clsx({
-    [CELL_SPACE_BOTTOM]: bannerAfter,
-  });
+    const lastTranslationClassName = clsx({
+      [CELL_SPACE_BOTTOM]: bannerAfter,
+    });
 
-  return (
-    <StyledContainer
-      onMouseOver={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      onFocus={() => setFocus(true)}
-      onBlur={() => setFocus(false)}
-      data-cy="translations-row"
-      className={clsx(data.deleted && 'deleted')}
-    >
-      <CellKey
-        editInDialog
-        editEnabled={satisfiesPermissionWithBranching('keys.edit')}
-        data={data}
-        widthPercent={columnSizesPercent[0]}
-        width={columnSizes[0]}
-        active={relaxedActive}
-        className={keyClassName}
-        oneScreenshotBig
-      />
-      <StyledLanguages style={{ width: columnSizesPercent[1] }}>
-        {languages.map((language, index) => {
-          return (
-            <CellTranslation
-              key={language.tag}
-              data={data}
-              language={language}
-              colIndex={0}
-              onResize={onResize}
-              width={columnSizesPercent[1]}
-              active={relaxedActive}
-              className={clsx({
-                [firstTranslationClassName]: index === 0,
-                [lastTranslationClassName]: index === languages.length - 1,
-              })}
-              // render last focusable button on last item, so it's focusable
-              lastFocusable={index === languages.length - 1}
-            />
-          );
-        })}
-      </StyledLanguages>
-    </StyledContainer>
-  );
-});
+    return (
+      <StyledContainer
+        onMouseOver={() => setHover(true)}
+        onMouseLeave={() => setHover(false)}
+        onFocus={() => setFocus(true)}
+        onBlur={() => setFocus(false)}
+        data-cy="translations-row"
+        className={clsx(data.deleted && 'deleted')}
+      >
+        <CellKey
+          editInDialog
+          editEnabled={satisfiesPermissionWithBranching('keys.edit')}
+          data={data}
+          widthPercent={columnSizesPercent[0]}
+          width={columnSizes[0]}
+          active={relaxedActive}
+          className={keyClassName}
+          oneScreenshotBig
+        />
+        <StyledLanguages style={{ width: columnSizesPercent[1] }}>
+          {languages.map((language, index) => {
+            return (
+              <CellTranslation
+                key={language.tag}
+                data={data}
+                language={language}
+                colIndex={0}
+                onResize={onResize}
+                width={columnSizesPercent[1]}
+                active={relaxedActive}
+                className={clsx({
+                  [firstTranslationClassName]: index === 0,
+                  [lastTranslationClassName]: index === languages.length - 1,
+                })}
+                // render last focusable button on last item, so it's focusable
+                lastFocusable={index === languages.length - 1}
+              />
+            );
+          })}
+        </StyledLanguages>
+      </StyledContainer>
+    );
+  }
+);

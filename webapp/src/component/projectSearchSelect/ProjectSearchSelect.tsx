@@ -21,7 +21,7 @@ type Props = {
   className?: string;
 };
 
-export const ProjectSearchSelect: React.FC<Props> = ({
+export const ProjectSearchSelect: React.FC<React.PropsWithChildren<Props>> = ({
   value,
   onChange,
   label,

@@ -5,7 +5,9 @@ import {
   useGlobalContext,
 } from 'tg.globalContext/GlobalContext';
 
-export const RedirectSignedUser: React.FC = ({ children }) => {
+export const RedirectSignedUser: React.FC<React.PropsWithChildren<unknown>> = ({
+  children,
+}) => {
   const shouldRedirect = useGlobalContext((c) => Boolean(c.auth.allowPrivate));
   const { redirectAfterLogin } = useGlobalActions();
 

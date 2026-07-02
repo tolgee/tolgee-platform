@@ -26,7 +26,7 @@ function settingsToggleDataCy(
   return `notifications-settings-${group}-${channel}`;
 }
 
-export const SettingsRow: React.FC<Props> = ({
+export const SettingsRow: React.FC<React.PropsWithChildren<Props>> = ({
   description = '',
   subdescription = '',
   group,

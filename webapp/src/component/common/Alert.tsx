@@ -7,8 +7,8 @@ const StyledMuiAlert = styled(MuiAlert)`
   margin-bottom: ${({ theme }) => theme.spacing(2)};
 `;
 
-export const Alert: FunctionComponent<React.ComponentProps<typeof MuiAlert>> = (
-  props
-) => {
+export const Alert: FunctionComponent<
+  React.PropsWithChildren<React.ComponentProps<typeof MuiAlert>>
+> = (props) => {
   return <StyledMuiAlert {...props} />;
 };

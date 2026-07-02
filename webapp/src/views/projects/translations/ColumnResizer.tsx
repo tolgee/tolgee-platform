@@ -30,7 +30,7 @@ type Props = {
   passResizeCallback?: (callback: () => void) => void;
 };
 
-export const ColumnResizer: React.FC<Props> = ({
+export const ColumnResizer: React.FC<React.PropsWithChildren<Props>> = ({
   size,
   left,
   onResize,

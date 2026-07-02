@@ -55,7 +55,10 @@ const TextColumn = styled('div')<{ strike?: boolean }>`
   ${({ strike }) => (strike ? 'text-decoration: line-through;' : '')}
 `;
 
-export const MergeKeyHeader: React.FC<Props> = ({ data, variant }) => {
+export const MergeKeyHeader: React.FC<React.PropsWithChildren<Props>> = ({
+  data,
+  variant,
+}) => {
   const strike = variant === 'deleted';
   return (
     <Box

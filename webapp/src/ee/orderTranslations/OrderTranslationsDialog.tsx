@@ -106,7 +106,9 @@ type Props = {
   branch?: string;
 };
 
-export const OrderTranslationsDialog: React.FC<Props> = ({
+export const OrderTranslationsDialog: React.FC<
+  React.PropsWithChildren<Props>
+> = ({
   open,
   onClose,
   onFinished,

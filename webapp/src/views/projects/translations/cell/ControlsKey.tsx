@@ -18,7 +18,7 @@ type ControlsProps = {
   onAddScreenshot?: () => void;
 };
 
-export const ControlsKey: React.FC<ControlsProps> = ({
+export const ControlsKey: React.FC<React.PropsWithChildren<ControlsProps>> = ({
   editEnabled,
   onEdit,
   onAddScreenshot,

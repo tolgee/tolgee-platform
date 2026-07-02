@@ -15,7 +15,9 @@ import { useHistory } from 'react-router-dom';
 
 type OrganizationBody = components['schemas']['OrganizationDto'];
 
-export const OrganizationCreateView: FunctionComponent = () => {
+export const OrganizationCreateView: FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const loadable = useApiMutation({
     url: '/v2/organizations',
     method: 'post',

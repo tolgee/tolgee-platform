@@ -25,7 +25,9 @@ type Props = {
   className?: string;
 };
 
-export const CdZipExport: FC<Props> = ({ className }) => {
+export const CdZipExport: FC<React.PropsWithChildren<Props>> = ({
+  className,
+}) => {
   const { t } = useTranslate();
 
   return (

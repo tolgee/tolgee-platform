@@ -13,7 +13,9 @@ const StyledDisabled = styled('span')`
   color: ${({ theme }) => theme.palette.error.main};
 `;
 
-export const MfaSettings: FunctionComponent = () => {
+export const MfaSettings: FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const user = useUser();
   if (!user) return null;
 

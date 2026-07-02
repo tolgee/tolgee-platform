@@ -65,7 +65,7 @@ type Props = {
   initialTab: TabsType;
 };
 
-export const KeyEditModal: React.FC<Props> = ({
+export const KeyEditModal: React.FC<React.PropsWithChildren<Props>> = ({
   onClose,
   initialTab,
   data,

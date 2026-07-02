@@ -13,10 +13,9 @@ type ControlsProps = {
   className?: string;
 };
 
-export const ControlsEditorReadOnly: React.FC<ControlsProps> = ({
-  onClose,
-  className,
-}) => {
+export const ControlsEditorReadOnly: React.FC<
+  React.PropsWithChildren<ControlsProps>
+> = ({ onClose, className }) => {
   return (
     <StyledContainer className={className}>
       <Button

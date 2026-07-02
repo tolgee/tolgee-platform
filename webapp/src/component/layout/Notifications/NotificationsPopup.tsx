@@ -61,11 +61,9 @@ type NotificationsPopupProps = {
   anchorEl: PopoverProps['anchorEl'];
 };
 
-export const NotificationsPopup: React.FC<NotificationsPopupProps> = ({
-  onClose,
-  onNotificationsChanged,
-  anchorEl,
-}) => {
+export const NotificationsPopup: React.FC<
+  React.PropsWithChildren<NotificationsPopupProps>
+> = ({ onClose, onNotificationsChanged, anchorEl }) => {
   const user = useUser();
   const client = useGlobalContext((c) => c.wsClient.client);
   const { t } = useTranslate();

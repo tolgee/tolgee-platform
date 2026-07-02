@@ -58,7 +58,9 @@ const StyledRoot = styled(Box)(({ theme }) => ({
   marginTop: '16px',
 }));
 
-const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
+const ImportFileInput: FunctionComponent<
+  React.PropsWithChildren<ImportFileInputProps>
+> = (props) => {
   const { t } = useTranslate();
   const fileRef = React.createRef<HTMLInputElement>();
   const config = useConfig();

@@ -33,11 +33,9 @@ const StyledFlag = styled(FlagImage)`
   position: absolute;
 `;
 
-export const CircledLanguageIcon: React.FC<CircledLanguageIconProps> = ({
-  flag,
-  size = DEFAULT_SIZE,
-  ...boxProps
-}) => {
+export const CircledLanguageIcon: React.FC<
+  React.PropsWithChildren<CircledLanguageIconProps>
+> = ({ flag, size = DEFAULT_SIZE, ...boxProps }) => {
   return (
     <CircledIcon size={size} {...boxProps}>
       <StyledFlag
@@ -50,12 +48,9 @@ export const CircledLanguageIcon: React.FC<CircledLanguageIconProps> = ({
   );
 };
 
-export const CircledIcon: React.FC<CircledIconProps> = ({
-  size = DEFAULT_SIZE,
-  children,
-  wrapperProps,
-  ...boxProps
-}) => {
+export const CircledIcon: React.FC<
+  React.PropsWithChildren<CircledIconProps>
+> = ({ size = DEFAULT_SIZE, children, wrapperProps, ...boxProps }) => {
   return (
     <StyledBox {...boxProps} className={boxProps.className}>
       <StyledIconWrapper {...wrapperProps} width={size} height={size}>
@@ -71,7 +66,9 @@ type CircledPillProps = {
   wrapperProps?: ComponentProps<typeof Box>;
 } & ComponentProps<typeof Box>;
 
-export const CircledPill: React.FC<CircledPillProps> = ({
+export const CircledPill: React.FC<
+  React.PropsWithChildren<CircledPillProps>
+> = ({
   width = DEFAULT_SIZE,
   height = DEFAULT_SIZE,
   children,

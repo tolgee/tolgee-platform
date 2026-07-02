@@ -5,7 +5,10 @@ import { PlanLimitPopoverWrapperProps } from './generic/PlanLimitPopoverWrapper'
 
 type Props = PlanLimitPopoverWrapperProps;
 
-export const PlanLimitPopover: React.FC<Props> = ({ open, onClose }) => {
+export const PlanLimitPopover: React.FC<React.PropsWithChildren<Props>> = ({
+  open,
+  onClose,
+}) => {
   const config = useConfig();
 
   if (config.billing.enabled) {

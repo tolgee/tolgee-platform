@@ -23,7 +23,9 @@ type ValueType = {
   email: string;
 };
 
-const PasswordResetView: FunctionComponent<LoginProps> = () => {
+const PasswordResetView: FunctionComponent<
+  React.PropsWithChildren<LoginProps>
+> = () => {
   const { t } = useTranslate();
   const remoteConfig = useConfig();
 

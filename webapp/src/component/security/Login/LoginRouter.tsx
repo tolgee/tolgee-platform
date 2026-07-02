@@ -10,7 +10,9 @@ import { PublicOnlyRoute } from 'tg.component/common/PublicOnlyRoute';
 
 interface LoginRouterProps {}
 
-const LoginRouter: FunctionComponent<LoginRouterProps> = (props) => {
+const LoginRouter: FunctionComponent<
+  React.PropsWithChildren<LoginRouterProps>
+> = (props) => {
   return (
     <Switch>
       <PublicOnlyRoute exact path={LINKS.LOGIN.template}>

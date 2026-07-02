@@ -17,7 +17,9 @@ type Props = {
   rowData: RowData;
 };
 
-export const LanguageRow: React.FC<Props> = ({ rowData }) => {
+export const LanguageRow: React.FC<React.PropsWithChildren<Props>> = ({
+  rowData,
+}) => {
   const { t } = useTranslate();
 
   const { inheritedFromDefault, settings } = rowData;

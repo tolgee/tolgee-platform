@@ -6,7 +6,9 @@ type Props = {
   disabled?: boolean;
 };
 
-export const OrganizationProfileAvatar: React.FC<Props> = ({ disabled }) => {
+export const OrganizationProfileAvatar: React.FC<
+  React.PropsWithChildren<Props>
+> = ({ disabled }) => {
   const uploadLoadable = useApiMutation({
     url: '/v2/organizations/{id}/avatar',
     method: 'put',

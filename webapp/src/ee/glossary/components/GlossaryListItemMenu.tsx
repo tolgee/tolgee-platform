@@ -21,7 +21,9 @@ type Props = {
   glossary: SimpleGlossaryModel;
 };
 
-export const GlossaryListItemMenu: FC<Props> = ({ glossary }) => {
+export const GlossaryListItemMenu: FC<React.PropsWithChildren<Props>> = ({
+  glossary,
+}) => {
   const { preferredOrganization } = usePreferredOrganization();
 
   const { t } = useTranslate();

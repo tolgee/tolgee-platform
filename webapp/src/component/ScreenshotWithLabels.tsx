@@ -31,7 +31,7 @@ type Props = {
   onSrcExpired: () => void;
 };
 
-export const ScreenshotWithLabels: React.FC<Props> = ({
+export const ScreenshotWithLabels: React.FC<React.PropsWithChildren<Props>> = ({
   screenshot,
   showTooltips,
   objectFit = 'contain',

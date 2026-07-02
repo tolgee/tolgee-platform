@@ -8,7 +8,7 @@ import {
   TolgeeProvider,
 } from '@tolgee/react';
 import { FormatIcu } from '@tolgee/format-icu';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { QueryClientProvider } from 'react-query';
 
 import { BrowserRouter } from 'react-router-dom';
@@ -106,9 +106,9 @@ const MainWrapper = () => {
   );
 };
 
-ReactDOM.render(
+const root = createRoot(document.getElementById('root')!);
+root.render(
   <StrictMode>
     <MainWrapper />
-  </StrictMode>,
-  document.getElementById('root')
+  </StrictMode>
 );

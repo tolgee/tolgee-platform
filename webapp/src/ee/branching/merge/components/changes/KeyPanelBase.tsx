@@ -76,11 +76,9 @@ type KeyFooterToggleProps = {
   };
 };
 
-export const KeyFooterToggle: FC<KeyFooterToggleProps> = ({
-  showAll,
-  onToggleShowAll,
-  toggleLabels,
-}) => (
+export const KeyFooterToggle: FC<
+  React.PropsWithChildren<KeyFooterToggleProps>
+> = ({ showAll, onToggleShowAll, toggleLabels }) => (
   <KeyFooter>
     <Button size="small" variant="text" onClick={onToggleShowAll}>
       {showAll

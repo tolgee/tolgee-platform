@@ -26,7 +26,11 @@ type Props = {
   showText?: boolean;
 };
 
-export const AddLabel: React.FC<Props> = ({ onClick, className, showText }) => {
+export const AddLabel: React.FC<React.PropsWithChildren<Props>> = ({
+  onClick,
+  className,
+  showText,
+}) => {
   return (
     <Wrap
       onClick={onClick}

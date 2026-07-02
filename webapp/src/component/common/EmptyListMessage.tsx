@@ -10,12 +10,9 @@ type Props = {
   wrapperProps?: ComponentProps<typeof Box>;
 } & SadEmotionMessageProps;
 
-export const EmptyListMessage: FunctionComponent<Props> = ({
-  loading,
-  wrapperProps,
-  children,
-  ...otherProps
-}) => {
+export const EmptyListMessage: FunctionComponent<
+  React.PropsWithChildren<Props>
+> = ({ loading, wrapperProps, children, ...otherProps }) => {
   return (
     <EmptyState loading={loading} wrapperProps={wrapperProps}>
       <SadEmotionMessage {...otherProps}>

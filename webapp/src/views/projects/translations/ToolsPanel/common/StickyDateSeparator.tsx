@@ -26,7 +26,9 @@ type Props = {
   date: Date;
 };
 
-export const StickyDateSeparator: React.FC<Props> = ({ date }) => {
+export const StickyDateSeparator: React.FC<React.PropsWithChildren<Props>> = ({
+  date,
+}) => {
   const lang = useCurrentLanguage();
   const isToday = new Date().toLocaleDateString() === date.toLocaleDateString();
   const { t } = useTranslate();

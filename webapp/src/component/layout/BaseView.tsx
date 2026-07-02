@@ -49,7 +49,7 @@ export type BaseViewProps = {
   stretch?: boolean;
 } & Omit<HeaderBarProps, 'noBorder'>;
 
-export const BaseView: FC<BaseViewProps> = (props) => {
+export const BaseView: FC<React.PropsWithChildren<BaseViewProps>> = (props) => {
   const hideChildrenOnLoading =
     props.hideChildrenOnLoading === undefined || props.hideChildrenOnLoading;
 
