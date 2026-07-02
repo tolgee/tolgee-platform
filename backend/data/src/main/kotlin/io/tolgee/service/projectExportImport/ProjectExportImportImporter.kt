@@ -1,7 +1,6 @@
 package io.tolgee.service.projectExportImport
 
 import com.fasterxml.jackson.core.JacksonException
-import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.constants.Message
@@ -10,15 +9,14 @@ import io.tolgee.model.Project
 import io.tolgee.model.Screenshot
 import io.tolgee.model.UserAccount
 import io.tolgee.service.AvatarService
-import io.tolgee.service.bigMeta.BigMetaService
-import io.tolgee.service.bigMeta.KeysDistanceDto
 import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.project.LanguageStatsService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.projectExportImport.blob.ProjectAvatarBlobHandler
 import io.tolgee.service.projectExportImport.blob.ScreenshotBlobHandler
-import io.tolgee.service.projectExportImport.model.SerializedBigMeta
 import io.tolgee.service.projectExportImport.model.SerializedEntity
+import io.tolgee.service.projectExportImport.sidechannel.SideChannelHandlerRegistry
+import io.tolgee.service.projectExportImport.sidechannel.SideChannelImportContext
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.service.translationMemory.TranslationMemoryManagementService
 import io.tolgee.util.ImageConverter
@@ -57,7 +55,7 @@ class ProjectExportImportImporter(
   private val avatarService: AvatarService,
   private val languageStatsService: LanguageStatsService,
   private val activityHolder: ActivityHolder,
-  private val bigMetaService: BigMetaService,
+  private val sideChannelHandlerRegistry: SideChannelHandlerRegistry,
   private val translationMemoryManagementService: TranslationMemoryManagementService,
 ) : Logging {
   // rollbackFor = Exception: the wipe runs before the re-insert, and a parse/IO failure mid-insert is a
@@ -138,7 +136,7 @@ class ProjectExportImportImporter(
     restoreAvatar(project, parsed.blobs)
 
     entityManager.flush()
-    restoreBigMeta(parsed.bigMetaJson, result.keyIdBySourceId, targetProjectId)
+    restoreSideChannels(parsed.sideChannels, result.keyIdBySourceId, targetProjectId)
     refreshDerivedData(targetProjectId)
   }
 
@@ -218,35 +216,25 @@ class ProjectExportImportImporter(
   }
 
   /**
-   * Re-inserts the exported BigMeta rows, remapping source key ids to the imported keys and dropping any
-   * pair whose key did not survive (individually soft-deleted, so absent from the graph). Runs after the
-   * flush so the imported keys are in the DB before the raw-JDBC insert. Canonical ordering is applied by
-   * [io.tolgee.service.bigMeta.BigMetaService].
+   * Restores every SIDE_CHANNEL entity (e.g. BigMeta) from its own zip entry, remapping source ids to the
+   * imported rows. Runs after the flush so the imported keys are in the DB before a handler's insert.
    */
-  private fun restoreBigMeta(
-    bigMetaJson: ByteArray?,
+  private fun restoreSideChannels(
+    sideChannels: Map<String, ByteArray>,
     keyIdBySourceId: Map<Long, Long>,
     targetProjectId: Long,
   ) {
-    bigMetaJson ?: return
-    val records =
-      corruptArchiveOnParseError {
-        objectMapper.readValue(bigMetaJson, object : TypeReference<List<SerializedBigMeta>>() {})
+    val context = SideChannelImportContext(targetProjectId, keyIdBySourceId)
+    sideChannels.forEach { (entryName, json) ->
+      val handler = sideChannelHandlerRegistry.byEntryName(entryName)
+      if (handler == null) {
+        // Forward-compat: a source instance may carry a side channel this instance has no handler for
+        // (only reachable via ignoreVersion, since the schema-version gate otherwise blocks it). Drop it.
+        logger.warn("Imported archive has side channel '$entryName' with no handler; skipping it")
+        return@forEach
       }
-    val dtos =
-      records.mapNotNull { record ->
-        val key1 = keyIdBySourceId[record.key1Id] ?: return@mapNotNull null
-        val key2 = keyIdBySourceId[record.key2Id] ?: return@mapNotNull null
-        KeysDistanceDto(
-          key1Id = key1,
-          key2Id = key2,
-          distance = record.distance,
-          projectId = targetProjectId,
-          hits = record.hits,
-          stored = false,
-        )
-      }
-    bigMetaService.storeImportedDistances(dtos)
+      corruptArchiveOnParseError { handler.restore(json, context) }
+    }
   }
 
   private fun refreshDerivedData(projectId: Long) {

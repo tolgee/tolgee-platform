@@ -4,14 +4,13 @@ import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.model.Project
-import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.projectExportImport.blob.BlobEntry
 import io.tolgee.service.projectExportImport.blob.BlobHandler
 import io.tolgee.service.projectExportImport.blob.BlobHandlerRegistry
 import io.tolgee.service.projectExportImport.model.ExportManifest
 import io.tolgee.service.projectExportImport.model.ExportZipLayout
-import io.tolgee.service.projectExportImport.model.SerializedBigMeta
+import io.tolgee.service.projectExportImport.sidechannel.SideChannelHandlerRegistry
 import jakarta.persistence.EntityManager
 import jakarta.persistence.metamodel.EntityType
 import org.springframework.stereotype.Component
@@ -35,7 +34,7 @@ class ProjectExportImportExporter(
   private val blobHandlerRegistry: BlobHandlerRegistry,
   private val currentDateProvider: CurrentDateProvider,
   private val projectService: ProjectService,
-  private val bigMetaService: BigMetaService,
+  private val sideChannelHandlerRegistry: SideChannelHandlerRegistry,
 ) {
   /**
    * Builds the export zip in a temp file and returns it with the source project name (read in the same
@@ -53,9 +52,9 @@ class ProjectExportImportExporter(
         val blobRowsByHandler = LinkedHashMap<BlobHandler, List<Any>>()
         val counts = writeEntities(zip, projectId, blobRowsByHandler)
         writeProject(zip, project)
-        val bigMetaCount = writeBigMeta(zip, projectId)
+        val sideChannelCounts = writeSideChannels(zip, projectId)
         writeBlobs(zip, blobRowsByHandler, project)
-        writeManifest(zip, project, version, counts, bigMetaCount)
+        writeManifest(zip, project, version, counts, sideChannelCounts)
       }
     } catch (e: Throwable) {
       Files.deleteIfExists(tempFile)
@@ -118,15 +117,17 @@ class ProjectExportImportExporter(
     zip.closeEntry()
   }
 
-  private fun writeBigMeta(
+  private fun writeSideChannels(
     zip: ZipOutputStream,
     projectId: Long,
-  ): Int {
-    val rows = bigMetaService.findAllForExport(projectId)
-    writeJsonArray(zip, ExportZipLayout.BIG_META, rows) {
-      SerializedBigMeta(it.key1Id, it.key2Id, it.distance, it.hits)
+  ): Map<String, Int> {
+    val counts = LinkedHashMap<String, Int>()
+    sideChannelHandlerRegistry.handlersInWriteOrder.forEach { handler ->
+      val rows = handler.collectForExport(projectId)
+      writeJsonArray(zip, handler.entryName, rows) { it }
+      counts[handler.entryName] = rows.size
     }
-    return rows.size
+    return counts
   }
 
   private fun writeBlobs(
@@ -159,7 +160,7 @@ class ProjectExportImportExporter(
     project: Project,
     version: String,
     counts: Map<String, Int>,
-    bigMetaCount: Int,
+    sideChannelCounts: Map<String, Int>,
   ) {
     val manifest =
       ExportManifest(
@@ -167,7 +168,7 @@ class ProjectExportImportExporter(
         sourceProjectName = project.name,
         exportedAt = currentDateProvider.date.time,
         entityCounts = counts,
-        bigMetaCount = bigMetaCount,
+        sideChannelCounts = sideChannelCounts,
       )
     zip.putNextEntry(ZipEntry(ExportZipLayout.MANIFEST))
     zip.write(objectMapper.writeValueAsBytes(manifest))

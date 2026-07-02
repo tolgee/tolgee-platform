@@ -99,7 +99,7 @@ object EntityMetamodelReader {
       .filter { EntityReflection.isOwningAssociation(entityClass, it.name) }
       .forEach { attr ->
         val policy = targetPolicy(attr)
-        if (policy == ExportImportPolicy.IGNORED) return@forEach
+        if (policy?.isNotGraphCarried == true) return@forEach
         val value = EntityReflection.readProperty(entity, attr.name)
         if (value == null) {
           result[attr.name] = null

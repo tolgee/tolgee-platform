@@ -56,6 +56,17 @@ class ProjectExportImportPolicyRegistryTest {
   }
 
   @Test
+  fun `associationViolation rejects a non-droppable reference to a SIDE_CHANNEL type`() {
+    val sideChannelTarget = "io.tolgee.model.keyBigMeta.KeysDistance"
+    assertThat(ProjectExportImportPolicyRegistry.policyOf(sideChannelTarget))
+      .isEqualTo(ExportImportPolicy.SIDE_CHANNEL)
+    assertThat(ProjectExportImportPolicyRegistry.associationViolation(sideChannelTarget, droppable = false))
+      .isNotNull()
+    assertThat(ProjectExportImportPolicyRegistry.associationViolation(sideChannelTarget, droppable = true))
+      .isNull()
+  }
+
+  @Test
   fun `associationViolation allows references to OWNED, USER_REF and PROJECT_ROOT targets`() {
     assertThat(ProjectExportImportPolicyRegistry.associationViolation(Key::class.qualifiedName!!, false)).isNull()
     assertThat(

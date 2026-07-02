@@ -34,6 +34,23 @@ class TransferZipReaderTest {
   }
 
   @Test
+  fun `routes a sidechannels entry into sideChannels by its path prefix (not the manifest)`() {
+    val zip =
+      buildZip(
+        ExportZipLayout.MANIFEST to objectMapper.writeValueAsBytes(manifest()),
+        ExportZipLayout.BIG_META to "[]".toByteArray(),
+        "${ExportZipLayout.SIDE_CHANNELS_DIR}future.json" to byteArrayOf(7),
+      )
+
+    val parsed = reader.read(zip.inputStream())
+
+    assertThat(
+      parsed.sideChannels,
+    ).containsKeys(ExportZipLayout.BIG_META, "${ExportZipLayout.SIDE_CHANNELS_DIR}future.json")
+    assertThat(parsed.sideChannels.getValue(ExportZipLayout.BIG_META)).isEqualTo("[]".toByteArray())
+  }
+
+  @Test
   fun `rejects an absolute zip entry path (zip-slip)`() {
     val zip = buildZip("/etc/passwd" to byteArrayOf(1))
     assertThatThrownBy { reader.read(zip.inputStream()) }

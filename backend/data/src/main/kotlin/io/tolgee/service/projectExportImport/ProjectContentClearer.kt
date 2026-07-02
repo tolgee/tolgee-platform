@@ -113,7 +113,7 @@ class ProjectContentClearer(
     entityManager.flush()
     entityManager.clear()
 
-    // RESTORED_SIDE_CHANNEL: importer re-inserts remapped rows via restoreBigMeta.
+    // RESTORED_SIDE_CHANNEL: importer re-inserts remapped rows via restoreSideChannels.
     bigMetaService.deleteAllByProjectId(projectId)
     detachKeptConfigFromBranches(projectId)
     deleteBranchMergesAndSnapshots(projectId) // branch_merge is DROPPED (history); the snapshot rows are OWNED

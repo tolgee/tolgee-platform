@@ -262,19 +262,18 @@ class EntityGraphDeserializer(
     type.singularAttributes
       .filter { it.isAssociation }
       .filter { EntityReflection.isOwningAssociation(type.javaType, it.name) }
-      .filter {
-        ProjectExportImportPolicyRegistry.policyOf(EntityMetamodelReader.associationTargetClassName(it)) !=
-          ExportImportPolicy.IGNORED
-      }
+      .filter { isGraphCarriedTarget(it) }
 
   private fun toManyOwningAssociations(type: EntityType<*>): List<PluralAttribute<*, *, *>> =
     type.pluralAttributes
       .filter { it.isAssociation }
       .filter { EntityReflection.isOwningAssociation(type.javaType, it.name) }
-      .filter {
-        ProjectExportImportPolicyRegistry.policyOf(EntityMetamodelReader.associationTargetClassName(it)) !=
-          ExportImportPolicy.IGNORED
-      }
+      .filter { isGraphCarriedTarget(it) }
+
+  private fun isGraphCarriedTarget(attr: Attribute<*, *>): Boolean =
+    ProjectExportImportPolicyRegistry
+      .policyOf(EntityMetamodelReader.associationTargetClassName(attr))
+      ?.isNotGraphCarried != true
 
   private fun normalizeHandle(handle: Any): Any {
     if (handle is Number) return handle.toLong()

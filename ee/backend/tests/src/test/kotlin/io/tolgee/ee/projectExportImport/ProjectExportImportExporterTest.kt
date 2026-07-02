@@ -215,7 +215,7 @@ class ProjectExportImportExporterTest : AbstractSpringTest() {
   @Test
   fun `exports BigMeta rows (source key ids) in bigMeta json with a manifest count`() {
     val manifest = objectMapper.readValue(zip.getValue(ExportZipLayout.MANIFEST), ExportManifest::class.java)
-    assertThat(manifest.bigMetaCount).isEqualTo(2)
+    assertThat(manifest.sideChannelCounts[ExportZipLayout.BIG_META]).isEqualTo(2)
 
     val rows = bigMeta()
     assertThat(rows).hasSize(2)

@@ -380,6 +380,27 @@ class ProjectExportImportImporterTest : AbstractSpringTest() {
   }
 
   @Test
+  fun `skips an unknown side-channel entry with no handler (forward-compat) and imports the rest`() {
+    // Order the unknown entry FIRST so a regression to a loop-aborting return (instead of the per-entry
+    // skip) would leave bigMeta.json unprocessed and fail the keysDistances assertion below.
+    val entries = LinkedHashMap<String, ByteArray>()
+    entries["${ExportZipLayout.SIDE_CHANNELS_DIR}future.json"] = "[]".toByteArray()
+    entries.putAll(readZip(exportZip(source.project.id)))
+
+    importer.import(ByteArrayInputStream(zipFrom(entries)), target.targetProject.id, source.adminUser.id, VERSION)
+
+    assertThat(keyNames(target.targetProject.id)).contains("greeting", "labeled")
+    assertThat(keysDistances(target.targetProject.id)).isNotEmpty()
+  }
+
+  @Test
+  fun `rejects a corrupt side-channel entry with a bad request and leaves the target untouched`() {
+    val entries = readZip(exportZip(source.project.id)).toMutableMap()
+    entries[ExportZipLayout.BIG_META] = "{ not valid json".toByteArray()
+    assertImportRejected(zipFrom(entries), Message.PROJECT_IMPORT_CORRUPT_ARCHIVE)
+  }
+
+  @Test
   fun `an imported BigMeta row is canonical so a later store does not duplicate the pair`() {
     importSourceOntoTarget()
     val projectId = target.targetProject.id

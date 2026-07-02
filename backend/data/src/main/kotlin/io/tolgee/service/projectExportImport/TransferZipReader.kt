@@ -46,12 +46,15 @@ class TransferZipReader(
     val manifest = objectMapper.readValue(manifestBytes, ExportManifest::class.java)
 
     val entityJsonByType = LinkedHashMap<String, ByteArray>()
+    val sideChannels = LinkedHashMap<String, ByteArray>()
     val blobs = LinkedHashMap<String, ByteArray>()
     entries.forEach { (name, bytes) ->
       when {
         name == ExportZipLayout.MANIFEST -> {}
         name == ExportZipLayout.PROJECT -> {}
-        name == ExportZipLayout.BIG_META -> {}
+        // Routed by directory prefix like entities/ and blobs/ (not by manifest content), so a hostile
+        // manifest can't reclassify a real entry.
+        name.startsWith(ExportZipLayout.SIDE_CHANNELS_DIR) -> sideChannels[name] = bytes
         name.startsWith(ExportZipLayout.ENTITIES_DIR) ->
           entityJsonByType[entityTypeOf(name)] = bytes
         name.startsWith(ExportZipLayout.BLOBS_DIR) ->
@@ -62,7 +65,7 @@ class TransferZipReader(
     return ParsedExport(
       manifest,
       entries[ExportZipLayout.PROJECT],
-      entries[ExportZipLayout.BIG_META],
+      sideChannels,
       entityJsonByType,
       blobs,
     )
@@ -110,7 +113,7 @@ class TransferZipReader(
   data class ParsedExport(
     val manifest: ExportManifest,
     val projectJson: ByteArray?,
-    val bigMetaJson: ByteArray?,
+    val sideChannels: Map<String, ByteArray>,
     val entityJsonByType: Map<String, ByteArray>,
     val blobs: Map<String, ByteArray>,
   )

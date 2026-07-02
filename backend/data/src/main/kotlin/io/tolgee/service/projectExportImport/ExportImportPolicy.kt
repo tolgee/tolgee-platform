@@ -17,11 +17,21 @@ enum class ExportImportPolicy {
   PROJECT_ROOT,
 
   /**
-   * Not traversed by the generic graph: instance-specific, derived, transient, or out-of-scope.
-   * IGNORED usually means not serialized either, but this is not guaranteed — at least one IGNORED
-   * entity (`KeysDistance`) is round-tripped via a side channel (see its entry in
-   * `ProjectExportImportPolicyRegistry`). Do not treat IGNORED as a hard "never leaves this instance"
-   * guarantee.
+   * Serialized and restored, but outside the generic graph: an entity the metamodel walk can't handle
+   * (e.g. `KeysDistance` — see its entry in `ProjectExportImportPolicyRegistry`). Each SIDE_CHANNEL type
+   * is round-tripped by a dedicated [io.tolgee.service.projectExportImport.sidechannel.SideChannelHandler],
+   * and `ProjectExportImportPolicyGuardTest` fails the build unless every SIDE_CHANNEL type has one.
    */
+  SIDE_CHANNEL,
+
+  /** Not serialized and not traversed: instance-specific, derived, transient, or out-of-scope. */
   IGNORED,
+  ;
+
+  /**
+   * True for policies the generic entity graph does not carry: a reference from an OWNED entity to such a
+   * target is dropped (nulled) on import, so a non-nullable FK to one is a build-gate violation.
+   */
+  val isNotGraphCarried: Boolean
+    get() = this == IGNORED || this == SIDE_CHANNEL
 }

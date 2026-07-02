@@ -122,6 +122,10 @@ object ProjectExportImportPolicyRegistry {
 
       classify(UserAccount::class, ExportImportPolicy.USER_REF)
       classify(Project::class, ExportImportPolicy.PROJECT_ROOT)
+      // BigMeta. Can't traverse the generic graph — its @IdClass components (key1Id/key2Id) are raw
+      // soft-FK scalars that are also the immutable PK — so it round-trips through a dedicated
+      // SideChannelHandler (bigMeta.json) instead.
+      classify(KeysDistance::class, ExportImportPolicy.SIDE_CHANNEL)
 
       ignored(
         Organization::class,
@@ -142,11 +146,6 @@ object ProjectExportImportPolicyRegistry {
         BranchMerge::class,
         BranchMergeChange::class,
         LanguageStats::class,
-        // BigMeta. IGNORED here because it can't traverse the generic graph — its @IdClass components
-        // (key1Id/key2Id) are raw soft-FK scalars that are also the immutable PK — but it IS
-        // round-tripped, via the dedicated bigMeta.json side-channel (exporter.writeBigMeta /
-        // importer.restoreBigMeta).
-        KeysDistance::class,
         AutoTranslationConfig::class,
         MtServiceConfig::class,
         Prompt::class,
@@ -218,6 +217,9 @@ object ProjectExportImportPolicyRegistry {
   val ownedClassNames: Set<String>
     get() = policies.filterValues { it == ExportImportPolicy.OWNED }.keys
 
+  val sideChannelClassNames: Set<String>
+    get() = policies.filterValues { it == ExportImportPolicy.SIDE_CHANNEL }.keys
+
   fun unclassified(managedEntityClassNames: Set<String>): Set<String> = managedEntityClassNames - policies.keys
 
   fun staleEntries(managedEntityClassNames: Set<String>): Set<String> = policies.keys - managedEntityClassNames
@@ -232,8 +234,8 @@ object ProjectExportImportPolicyRegistry {
     droppable: Boolean,
   ): String? {
     val policy = policyOf(targetClassName) ?: return "target type $targetClassName is not classified"
-    if (policy == ExportImportPolicy.IGNORED && !droppable) {
-      return "non-nullable association to IGNORED type $targetClassName cannot be satisfied on import"
+    if (policy.isNotGraphCarried && !droppable) {
+      return "non-nullable association to $policy type $targetClassName cannot be satisfied on import"
     }
     return null
   }

@@ -10,10 +10,12 @@ import io.tolgee.service.projectExportImport.ExportImportPolicy
 import io.tolgee.service.projectExportImport.ProjectContentClearer
 import io.tolgee.service.projectExportImport.ProjectExportImportPolicyRegistry
 import io.tolgee.service.projectExportImport.ProjectScopedCollectorQueries
+import io.tolgee.service.projectExportImport.sidechannel.SideChannelHandlerRegistry
 import jakarta.persistence.metamodel.Attribute
 import jakarta.persistence.metamodel.SingularAttribute
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 
 /**
@@ -26,6 +28,9 @@ import org.springframework.boot.test.context.SpringBootTest
  */
 @SpringBootTest
 class ProjectExportImportPolicyGuardTest : AbstractSpringTest() {
+  @Autowired
+  private lateinit var sideChannelHandlerRegistry: SideChannelHandlerRegistry
+
   private val managedEntityClassNames: Set<String>
     get() =
       entityManager.metamodel.entities
@@ -38,7 +43,7 @@ class ProjectExportImportPolicyGuardTest : AbstractSpringTest() {
     assertThat(unclassified)
       .withFailMessage(
         "These @Entity classes are not classified for project export/import. Add each to " +
-          "ProjectExportImportPolicyRegistry (OWNED / USER_REF / PROJECT_ROOT / IGNORED):\n" +
+          "ProjectExportImportPolicyRegistry (OWNED / USER_REF / PROJECT_ROOT / SIDE_CHANNEL / IGNORED):\n" +
           unclassified.sorted().joinToString("\n") { "  - $it" },
       ).isEmpty()
   }
@@ -131,6 +136,28 @@ class ProjectExportImportPolicyGuardTest : AbstractSpringTest() {
         "These collector queries are registered for non-OWNED (or removed) types. Remove them from " +
           "ProjectScopedCollectorQueries:\n" + extra.sorted().joinToString("\n") { "  - $it" },
       ).isEmpty()
+  }
+
+  @Test
+  fun `every SIDE_CHANNEL type has a handler (and every handler a SIDE_CHANNEL type)`() {
+    val sideChannel = ProjectExportImportPolicyRegistry.sideChannelClassNames
+    val handled = sideChannelHandlerRegistry.handledEntityClassNames
+
+    assertThat(sideChannel - handled)
+      .withFailMessage(
+        "These SIDE_CHANNEL types have no SideChannelHandler, so they would export/restore nothing. " +
+          "Add a handler (writer + reader) for each:\n" +
+          (sideChannel - handled).sorted().joinToString("\n") { "  - $it" },
+      ).isEmpty()
+    assertThat(handled - sideChannel)
+      .withFailMessage(
+        "These SideChannelHandlers target a type not classified SIDE_CHANNEL. Classify it SIDE_CHANNEL " +
+          "or remove the handler:\n" +
+          (handled - sideChannel).sorted().joinToString("\n") { "  - $it" },
+      ).isEmpty()
+    assertThat(sideChannel)
+      .withFailMessage("Expected at least one SIDE_CHANNEL type (KeysDistance/BigMeta)")
+      .isNotEmpty()
   }
 
   @Test
