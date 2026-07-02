@@ -46,6 +46,13 @@ Yup.setLocale({
         params={{ min: min.toString() }}
       />
     ),
+    moreThan: ({ more }) => (
+      <T
+        keyName="validation_schema_number_more_than_message"
+        defaultValue="Value must be greater than {value}"
+        params={{ value: more.toString() }}
+      />
+    ),
   },
 });
 
@@ -385,18 +392,32 @@ export class Validation {
       is: (free: any, newStripeProduct: any) => !free && !newStripeProduct,
       then: Yup.string().required(),
     }),
-    tiers: Yup.array().of(
-      Yup.object({
-        includedMtCredits: Yup.number().min(0),
-        eurMonthly: Yup.number().min(0),
-        eurYearly: Yup.number().min(0),
-        usdMonthly: Yup.number().min(0),
-        usdYearly: Yup.number().min(0),
-        pricePerThousandKeys: Yup.number().min(0),
-        pricePerSeat: Yup.number().min(0),
-        pricePerThousandTranslations: Yup.number().min(0),
-      })
-    ),
+    tiers: Yup.array().when(['metricType', 'free'], {
+      is: (metricType: any, free: any) =>
+        metricType === 'HOSTED_WORDS' && !free,
+      then: Yup.array().of(
+        Yup.object({
+          includedWords: Yup.number().moreThan(0).required(),
+          includedMtCredits: Yup.number().min(0),
+          eurMonthly: Yup.number().moreThan(0).required(),
+          eurYearly: Yup.number().min(0),
+          usdMonthly: Yup.number().min(0),
+          usdYearly: Yup.number().min(0),
+        })
+      ),
+      otherwise: Yup.array().of(
+        Yup.object({
+          includedMtCredits: Yup.number().min(0),
+          eurMonthly: Yup.number().min(0),
+          eurYearly: Yup.number().min(0),
+          usdMonthly: Yup.number().min(0),
+          usdYearly: Yup.number().min(0),
+          pricePerThousandKeys: Yup.number().min(0),
+          pricePerSeat: Yup.number().min(0),
+          pricePerThousandTranslations: Yup.number().min(0),
+        })
+      ),
+    }),
     free: Yup.boolean(),
     stripeProductName: Yup.string().when(['free', 'newStripeProduct'], {
       is: (free: any, newStripeProduct: any) => !free && newStripeProduct,
