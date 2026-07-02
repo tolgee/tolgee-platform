@@ -24,10 +24,18 @@ import { CircledLanguageIconList } from 'tg.component/languages/CircledLanguageI
 import { TransparentChip } from 'tg.component/common/chips/TransparentChip';
 import { QaBadge } from 'tg.ee';
 
-const StyledContainer = styled('div')`
+const StyledContainer = styled('div', {
+  shouldForwardProp: (prop) => prop !== 'isPublicVariant',
+})<{ isPublicVariant?: boolean }>`
   display: grid;
-  grid-template-columns: calc(${({ theme }) => theme.spacing(2)} + 50px) 150px 100px 5fr 1.5fr 70px;
-  grid-template-areas: 'image title keyCount stats languages controls';
+  grid-template-columns: ${({ theme, isPublicVariant }) =>
+    isPublicVariant
+      ? `calc(${theme.spacing(2)} + 50px) 180px 100px 5fr 1.5fr`
+      : `calc(${theme.spacing(2)} + 50px) 150px 100px 5fr 1.5fr 70px`};
+  grid-template-areas: ${({ isPublicVariant }) =>
+    isPublicVariant
+      ? "'image title keyCount stats languages'"
+      : "'image title keyCount stats languages controls'"};
   padding: ${({ theme }) => theme.spacing(3, 2.5)};
   cursor: pointer;
   background-color: ${({ theme }) => theme.palette.background.default};
@@ -43,20 +51,21 @@ const StyledContainer = styled('div')`
     }
   }
   @container (max-width: 850px) {
-    grid-template-columns: auto 1fr 1fr 70px;
-    grid-template-areas:
-      'image title keyCount  controls'
-      'image title languages controls'
-      'image stats stats     stats';
+    grid-template-columns: ${({ isPublicVariant }) =>
+      isPublicVariant ? 'auto 1fr 1fr' : 'auto 1fr 1fr 70px'};
+    grid-template-areas: ${({ isPublicVariant }) =>
+      isPublicVariant
+        ? "'image title keyCount' 'image title languages' 'image stats stats'"
+        : "'image title keyCount  controls' 'image title languages controls' 'image stats stats     stats'"};
   }
   @container (max-width: 599px) {
     grid-gap: ${({ theme }) => theme.spacing(1, 2)};
-    grid-template-columns: auto 1fr 70px;
-    grid-template-areas:
-      'image     title     controls'
-      'image     keyCount  controls'
-      'languages languages languages'
-      'stats     stats     stats';
+    grid-template-columns: ${({ isPublicVariant }) =>
+      isPublicVariant ? 'auto 1fr' : 'auto 1fr 70px'};
+    grid-template-areas: ${({ isPublicVariant }) =>
+      isPublicVariant
+        ? "'image title' 'image keyCount' 'languages languages' 'stats stats'"
+        : "'image     title     controls' 'image     keyCount  controls' 'languages languages languages' 'stats     stats     stats'"};
   }
 `;
 
@@ -150,7 +159,6 @@ const DashboardProjectListItem = ({ variant = 'default', ...p }: Props) => {
   const isPublicVariant = variant === 'public';
   const { t } = useTranslate();
   const history = useHistory();
-  const allowPrivate = useGlobalContext((c) => c.auth.allowPrivate);
   const rightPanelWidth = useGlobalContext((c) => c.layout.rightPanelWidth);
   const isCompact = useMediaQuery(
     `@media(max-width: ${rightPanelWidth + 800}px)`
@@ -165,13 +173,12 @@ const DashboardProjectListItem = ({ variant = 'default', ...p }: Props) => {
   const content = (
     <StyledContainer
       data-cy="dashboard-projects-list-item"
+      isPublicVariant={isPublicVariant}
       onClick={() =>
         history.push(
-          isPublicVariant && !allowPrivate
-            ? LINKS.LOGIN.build()
-            : LINKS.PROJECT_DASHBOARD.build({
-                [PARAMS.PROJECT_ID]: p.id,
-              })
+          LINKS.PROJECT_DASHBOARD.build({
+            [PARAMS.PROJECT_ID]: p.id,
+          })
         )
       }
     >
@@ -222,8 +229,8 @@ const DashboardProjectListItem = ({ variant = 'default', ...p }: Props) => {
           <CircledLanguageIconList languages={p.languages} />
         </Grid>
       </StyledLanguages>
-      <StyledControls>
-        {!isPublicVariant && (
+      {!isPublicVariant && (
+        <StyledControls>
           <Box width="100%" display="flex" justifyContent="flex-end">
             {showQaBadge ? (
               <Tooltip title={t('project_list_qa_issues_button')}>
@@ -265,8 +272,8 @@ const DashboardProjectListItem = ({ variant = 'default', ...p }: Props) => {
               projectName={p.name}
             />
           </Box>
-        )}
-      </StyledControls>
+        </StyledControls>
+      )}
     </StyledContainer>
   );
 

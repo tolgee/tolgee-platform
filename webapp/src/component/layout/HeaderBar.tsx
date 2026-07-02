@@ -30,6 +30,7 @@ export type HeaderBarProps = {
   onSearch?: (value: string) => void;
   searchPlaceholder?: string;
   customHeader?: ReactNode;
+  standaloneTitle?: boolean;
   switcher?: ReactNode;
   maxWidth?: BaseViewWidth;
   initialSearch?: string;
@@ -51,58 +52,99 @@ export const HeaderBar: React.VFC<HeaderBarProps> = (props) => {
   if (props.headerBarDisable || !displayHeader) {
     return null;
   }
+
+  const hasSearch = typeof props.onSearch === 'function';
+  const stackedSearch = Boolean(props.standaloneTitle) && hasSearch;
+
+  const titleContent = (
+    <Box display="flex" alignItems="center" gap={props.standaloneTitle ? 2 : 1}>
+      {props.title !== undefined && (
+        <Typography variant={props.titleVariant || 'h4'}>
+          {props.title}
+        </Typography>
+      )}
+      {props.titleAdornment}
+    </Box>
+  );
+
+  const searchField = hasSearch && (
+    <Box>
+      <SecondaryBarSearchField
+        onSearch={props.onSearch!}
+        initial={props.initialSearch}
+        placeholder={props.searchPlaceholder}
+      />
+    </Box>
+  );
+
+  const switcherAndButtons = (
+    <Box display="flex" gap={2}>
+      {props.switcher && (
+        <Box display="flex" alignItems="center">
+          {props.switcher}
+        </Box>
+      )}
+      {props.customButtons &&
+        props.customButtons.map((button, index) => (
+          <Box key={index} display="flex" alignItems="center">
+            {button}
+          </Box>
+        ))}
+    </Box>
+  );
+
+  const addButton = props.addComponent
+    ? props.addComponent
+    : (props.onAdd || props.addLinkTo) && (
+        <BaseViewAddButton
+          addLinkTo={props.addLinkTo}
+          onClick={props.onAdd}
+          label={props.addLabel}
+        />
+      );
+
   return (
     <SecondaryBar
-      noBorder={props.noBorder}
+      noBorder={props.noBorder || props.standaloneTitle}
       reducedSpacing={props.reducedSpacing}
+      {...(props.standaloneTitle ? { pt: 5 } : {})}
     >
       <StyledContainerInner
         data-cy="global-base-view-title"
         style={{ maxWidth }}
       >
-        {props.customHeader || (
-          <Box display="flex" justifyContent="space-between">
-            <Box display="flex" alignItems="center" gap="8px">
-              {props.title !== undefined && (
-                <Typography variant={props.titleVariant || 'h4'}>
-                  {props.title}
-                </Typography>
-              )}
-              {props.titleAdornment}
-              {typeof props.onSearch === 'function' && (
-                <Box>
-                  <SecondaryBarSearchField
-                    onSearch={props.onSearch}
-                    initial={props.initialSearch}
-                    placeholder={props.searchPlaceholder}
-                  />
-                </Box>
-              )}
+        {props.customHeader ||
+          (stackedSearch ? (
+            <Box display="grid" gap={2}>
+              <Box
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+              >
+                {titleContent}
+                {switcherAndButtons}
+              </Box>
+              <Box
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+              >
+                {searchField}
+                {addButton}
+              </Box>
             </Box>
-            <Box display="flex" gap={2}>
-              {props.switcher && (
-                <Box display="flex" alignItems="center">
-                  {props.switcher}
-                </Box>
-              )}
-              {props.customButtons &&
-                props.customButtons.map((button, index) => (
-                  <Box key={index} display="flex" alignItems="center">
-                    {button}
-                  </Box>
-                ))}
-              {props.addComponent
-                ? props.addComponent
-                : (props.onAdd || props.addLinkTo) && (
-                    <BaseViewAddButton
-                      addLinkTo={props.addLinkTo}
-                      onClick={props.onAdd}
-                      label={props.addLabel}
-                    />
-                  )}
+          ) : (
+            <Box display="flex" justifyContent="space-between">
+              <Box display="flex" alignItems="center" gap={1}>
+                {titleContent}
+                {searchField}
+              </Box>
+              <Box display="flex" gap={2}>
+                {switcherAndButtons}
+                {addButton}
+              </Box>
             </Box>
-          </Box>
-        )}
+          ))}
       </StyledContainerInner>
     </SecondaryBar>
   );
