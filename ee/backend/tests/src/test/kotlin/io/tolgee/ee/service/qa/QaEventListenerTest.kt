@@ -87,8 +87,8 @@ class QaEventListenerTest : AuthorizedControllerTest() {
     val demoProjId = demoProjectId
     demoProjectId = null
     demoProjId?.let { id ->
-      waitForProjectBatchJobsCompleted(id)
       try {
+        waitForProjectBatchJobsCompleted(id)
         executeInNewTransaction(platformTransactionManager) {
           val project = projectService.get(id)
           projectHardDeletingService.hardDeleteProject(project)
@@ -97,7 +97,11 @@ class QaEventListenerTest : AuthorizedControllerTest() {
         // Demo project may have already been cleaned up or failed to create
       }
     }
-    waitForProjectBatchJobsCompleted(testData.project.id)
+    try {
+      waitForProjectBatchJobsCompleted(testData.project.id)
+    } catch (_: Exception) {
+      // Proceed with cleanup even if batch jobs did not complete in time
+    }
     testDataService.cleanTestData(testData.root)
     userAccount = null
     enabledFeaturesProvider.forceEnabled = null
