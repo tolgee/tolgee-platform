@@ -15,7 +15,7 @@ import {
   useIsOrganizationOwnerOrMaintainer,
   usePreferredOrganization,
 } from 'tg.globalContext/helpers';
-import { OrganizationSwitch } from 'tg.component/organizationSwitch/OrganizationSwitch';
+import { ProjectsListTitle } from 'tg.views/projects/ProjectsListTitle';
 import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
 import { CriticalUsageCircle } from 'tg.ee';
 
@@ -74,10 +74,7 @@ export const ProjectListView = () => {
         }
         addLabel={t('projects_add_button')}
         hideChildrenOnLoading={false}
-        navigation={[
-          [<OrganizationSwitch key={0} />],
-          [t('projects_title'), LINKS.PROJECTS.build()],
-        ]}
+        navigation={[[<ProjectsListTitle key={0} communityNavigation />]]}
         navigationRight={<CriticalUsageCircle />}
         loading={listPermitted.isFetching}
       >
