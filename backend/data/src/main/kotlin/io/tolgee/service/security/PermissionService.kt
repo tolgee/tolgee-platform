@@ -367,11 +367,13 @@ class PermissionService(
     permission.stateChangeLanguages = languagePermissions.stateChange.standardize()
     permission.viewLanguages = languagePermissions.view.standardize()
     permission.suggestLanguages = languagePermissions.suggest.standardize()
+    permission.suggestManageLanguages = languagePermissions.suggestManage.standardize()
 
     if (permission.viewLanguages.isNotEmpty()) {
       permission.viewLanguages.addAll(permission.translateLanguages)
       permission.viewLanguages.addAll(permission.stateChangeLanguages)
       permission.viewLanguages.addAll(permission.suggestLanguages)
+      permission.viewLanguages.addAll(permission.suggestManageLanguages)
     }
   }
 

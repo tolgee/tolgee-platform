@@ -811,7 +811,6 @@ export interface paths {
     post: operations["createSuggestion"];
   };
   "/v2/projects/{projectId}/languages/{languageId}/key/{keyId}/suggestion/{suggestionId}": {
-    /** User can only delete suggestion created by them */
     delete: operations["deleteSuggestion"];
   };
   "/v2/projects/{projectId}/languages/{languageId}/key/{keyId}/suggestion/{suggestionId}/accept": {
@@ -1406,6 +1405,7 @@ export interface components {
         | "translations.view"
         | "translations.edit"
         | "translations.suggest"
+        | "translation-suggestions.manage"
         | "keys.edit"
         | "screenshots.upload"
         | "screenshots.delete"
@@ -1457,6 +1457,14 @@ export interface components {
        * ]
        */
       suggestLanguageIds?: number[];
+      /**
+       * @description List of languages user can manage suggestions for. If null, managing suggestions for all languages is permitted.
+       * @example [
+       *   200001,
+       *   200004
+       * ]
+       */
+      suggestManageLanguageIds?: number[];
       /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example [
@@ -2118,6 +2126,7 @@ export interface components {
         | "translations.view"
         | "translations.edit"
         | "translations.suggest"
+        | "translation-suggestions.manage"
         | "keys.edit"
         | "screenshots.upload"
         | "screenshots.delete"
@@ -2169,6 +2178,14 @@ export interface components {
        * ]
        */
       suggestLanguageIds?: number[];
+      /**
+       * @description List of languages user can manage suggestions for. If null, managing suggestions for all languages is permitted.
+       * @example [
+       *   200001,
+       *   200004
+       * ]
+       */
+      suggestManageLanguageIds?: number[];
       /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example [
@@ -3398,6 +3415,7 @@ export interface components {
         | "translations.view"
         | "translations.edit"
         | "translations.suggest"
+        | "translation-suggestions.manage"
         | "keys.edit"
         | "screenshots.upload"
         | "screenshots.delete"
@@ -4892,6 +4910,7 @@ export interface components {
         | "translations.view"
         | "translations.edit"
         | "translations.suggest"
+        | "translation-suggestions.manage"
         | "keys.edit"
         | "screenshots.upload"
         | "screenshots.delete"
@@ -4943,6 +4962,14 @@ export interface components {
        * ]
        */
       suggestLanguageIds?: number[];
+      /**
+       * @description List of languages user can manage suggestions for. If null, managing suggestions for all languages is permitted.
+       * @example [
+       *   200001,
+       *   200004
+       * ]
+       */
+      suggestManageLanguageIds?: number[];
       /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example [
@@ -4989,6 +5016,7 @@ export interface components {
         | "translations.view"
         | "translations.edit"
         | "translations.suggest"
+        | "translation-suggestions.manage"
         | "keys.edit"
         | "screenshots.upload"
         | "screenshots.delete"
@@ -5040,6 +5068,14 @@ export interface components {
        * ]
        */
       suggestLanguageIds?: number[];
+      /**
+       * @description List of languages user can manage suggestions for. If null, managing suggestions for all languages is permitted.
+       * @example [
+       *   200001,
+       *   200004
+       * ]
+       */
+      suggestManageLanguageIds?: number[];
       /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example [
@@ -5369,6 +5405,8 @@ export interface components {
       stateChangeLanguages?: number[];
       /** @description Languages user can suggest translation */
       suggestLanguages?: number[];
+      /** @description Languages user can manage suggestions for */
+      suggestManageLanguages?: number[];
       /** @description Languages user can translate to */
       translateLanguages?: number[];
       /** @enum {string} */
@@ -18909,7 +18947,6 @@ export interface operations {
       };
     };
   };
-  /** User can only delete suggestion created by them */
   deleteSuggestion: {
     parameters: {
       path: {
@@ -23958,6 +23995,7 @@ export interface operations {
         viewLanguages?: number[];
         stateChangeLanguages?: number[];
         suggestLanguages?: number[];
+        suggestManageLanguages?: number[];
       };
     };
     responses: {
@@ -24008,6 +24046,7 @@ export interface operations {
         viewLanguages?: number[];
         stateChangeLanguages?: number[];
         suggestLanguages?: number[];
+        suggestManageLanguages?: number[];
       };
     };
     responses: {
@@ -24600,6 +24639,7 @@ export interface operations {
               | "translations.view"
               | "translations.edit"
               | "translations.suggest"
+              | "translation-suggestions.manage"
               | "keys.edit"
               | "screenshots.upload"
               | "screenshots.delete"

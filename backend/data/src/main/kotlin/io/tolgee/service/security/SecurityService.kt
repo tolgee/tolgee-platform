@@ -231,6 +231,16 @@ class SecurityService(
     }
   }
 
+  fun checkLanguageViewSuggestionsPermission(
+    projectId: Long,
+    languageIds: Collection<Long>,
+  ) {
+    passIfAnyPermissionCheckSucceeds(
+      { checkLanguageSuggestPermission(projectId, languageIds) },
+      { checkLanguageSuggestionsManagePermission(projectId, languageIds) },
+    )
+  }
+
   fun checkLanguageSuggestPermission(
     projectId: Long,
     languageIds: Collection<Long>,
@@ -240,6 +250,18 @@ class SecurityService(
       checkLanguagePermission(
         projectId,
       ) { data -> data.checkSuggestPermitted(*languageIds.toLongArray()) }
+    }
+  }
+
+  fun checkLanguageSuggestionsManagePermission(
+    projectId: Long,
+    languageIds: Collection<Long>,
+  ) {
+    checkProjectPermission(projectId, Scope.TRANSLATION_SUGGESTIONS_MANAGE)
+    runIfUserNotServerAdmin {
+      checkLanguagePermission(
+        projectId,
+      ) { data -> data.checkSuggestManagePermitted(*languageIds.toLongArray()) }
     }
   }
 

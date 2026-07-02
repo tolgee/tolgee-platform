@@ -12,6 +12,7 @@ enum class Scope(
   TRANSLATIONS_VIEW("translations.view"),
   TRANSLATIONS_EDIT("translations.edit"),
   TRANSLATIONS_SUGGEST("translations.suggest"),
+  TRANSLATION_SUGGESTIONS_MANAGE("translation-suggestions.manage"),
   KEYS_EDIT("keys.edit"),
   SCREENSHOTS_UPLOAD("screenshots.upload"),
   SCREENSHOTS_DELETE("screenshots.delete"),
@@ -142,6 +143,10 @@ enum class Scope(
           ),
           HierarchyItem(
             TRANSLATIONS_SUGGEST,
+            listOf(translationsView),
+          ),
+          HierarchyItem(
+            TRANSLATION_SUGGESTIONS_MANAGE,
             listOf(translationsView),
           ),
           batchJobsView,

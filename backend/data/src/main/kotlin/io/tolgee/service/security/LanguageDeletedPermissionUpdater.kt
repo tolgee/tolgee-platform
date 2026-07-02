@@ -19,6 +19,8 @@ class LanguageDeletedPermissionUpdater(
   operator fun invoke() {
     if (permission.scopes.isNotEmpty()) {
       handleStateChangeLanguagesGranular()
+      handleSuggestLanguagesGranular()
+      handleSuggestManageLanguagesGranular()
       handleTranslateLanguagesGranular()
       handleViewLanguagesGranular()
     }
@@ -38,6 +40,8 @@ class LanguageDeletedPermissionUpdater(
       permission.translateLanguages,
       permission.viewLanguages,
       permission.stateChangeLanguages,
+      permission.suggestLanguages,
+      permission.suggestManageLanguages,
     ).forEach { languages ->
       languages.removeIf { it.id == language.id }
     }
@@ -84,6 +88,18 @@ class LanguageDeletedPermissionUpdater(
   private fun handleStateChangeLanguagesGranular() {
     if (shouldLowerPermissions(permission.stateChangeLanguages, Scope.TRANSLATIONS_STATE_EDIT)) {
       permission.scopes = scopesWithout(Scope.TRANSLATIONS_STATE_EDIT)
+    }
+  }
+
+  private fun handleSuggestLanguagesGranular() {
+    if (shouldLowerPermissions(permission.suggestLanguages, Scope.TRANSLATIONS_SUGGEST)) {
+      permission.scopes = scopesWithout(Scope.TRANSLATIONS_SUGGEST)
+    }
+  }
+
+  private fun handleSuggestManageLanguagesGranular() {
+    if (shouldLowerPermissions(permission.suggestManageLanguages, Scope.TRANSLATION_SUGGESTIONS_MANAGE)) {
+      permission.scopes = scopesWithout(Scope.TRANSLATION_SUGGESTIONS_MANAGE)
     }
   }
 

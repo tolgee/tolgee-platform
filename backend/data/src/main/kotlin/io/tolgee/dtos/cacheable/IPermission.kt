@@ -11,6 +11,7 @@ interface IPermission {
   val viewLanguageIds: Set<Long>?
   val stateChangeLanguageIds: Set<Long>?
   val suggestLanguageIds: Set<Long>?
+  val suggestManageLanguageIds: Set<Long>?
   val type: ProjectPermissionType?
   val granular: Boolean?
 

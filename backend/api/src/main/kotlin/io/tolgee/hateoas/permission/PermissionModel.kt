@@ -12,5 +12,6 @@ open class PermissionModel(
   override val viewLanguageIds: Collection<Long>?,
   override val stateChangeLanguageIds: Collection<Long>?,
   override val suggestLanguageIds: Collection<Long>?,
+  override val suggestManageLanguageIds: Collection<Long>?,
 ) : RepresentationModel<PermissionModel>(),
   IDeprecatedPermissionModel

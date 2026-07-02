@@ -17,6 +17,7 @@ export function LanguagePermissionSummary({ permissions, allLangs }: Props) {
     translateLanguageIds,
     stateChangeLanguageIds,
     suggestLanguageIds,
+    suggestManageLanguageIds,
   } = permissions;
 
   const categories: LanguagePermissionCategory[] = [
@@ -36,6 +37,11 @@ export function LanguagePermissionSummary({ permissions, allLangs }: Props) {
       scope: 'translations.suggest',
     },
     {
+      label: t('permission_type_suggest_manage'),
+      data: suggestManageLanguageIds,
+      scope: 'translation-suggestions.manage',
+    },
+    {
       label: t('permission_type_view'),
       data: viewLanguageIds,
       scope: 'translations.view',
@@ -48,9 +54,17 @@ export function LanguagePermissionSummary({ permissions, allLangs }: Props) {
         ...(viewLanguageIds || []),
         ...(translateLanguageIds || []),
         ...(stateChangeLanguageIds || []),
+        ...(suggestLanguageIds || []),
+        ...(suggestManageLanguageIds || []),
       ])
     );
-  }, [viewLanguageIds, translateLanguageIds, stateChangeLanguageIds]);
+  }, [
+    viewLanguageIds,
+    translateLanguageIds,
+    stateChangeLanguageIds,
+    suggestLanguageIds,
+    suggestManageLanguageIds,
+  ]);
 
   const hintNeeded = Boolean(languagesUnion.length);
 

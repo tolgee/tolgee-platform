@@ -7,4 +7,5 @@ class LanguagePermissions(
   var view: Set<Language>? = null,
   var stateChange: Set<Language>? = null,
   var suggest: Set<Language>? = null,
+  var suggestManage: Set<Language>? = null,
 )
