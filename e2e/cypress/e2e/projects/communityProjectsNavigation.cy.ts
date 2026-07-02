@@ -50,13 +50,16 @@ describe('Community projects navigation', () => {
     cy.waitForDom();
   };
 
-  it('navigates to the community page via the dropdown entry (mouse)', () => {
+  // TODO: the "Community translation" switcher entry is currently disabled (it will return once
+  // contributor tracking lands in a future pitch). Re-enable these five skipped tests — the ones
+  // that drive `organization-switch-community` — when the button is added back.
+  it.skip('navigates to the community page via the dropdown entry (mouse)', () => {
     openSwitch();
     gcy('organization-switch-community').click();
     cy.location('pathname').should('eq', '/community-projects');
   });
 
-  it('navigates to the community page via the dropdown entry (keyboard)', () => {
+  it.skip('navigates to the community page via the dropdown entry (keyboard)', () => {
     openSwitch();
     gcy('organization-switch-community').focus().type('{enter}');
     cy.location('pathname').should('eq', '/community-projects');
@@ -102,7 +105,8 @@ describe('Community projects navigation', () => {
       .should('be.visible');
   });
 
-  it('highlights no org row while on the community page but still offers the community entry', () => {
+  // Skipped: community switcher entry disabled — re-enable with the button (see TODO above).
+  it.skip('highlights no org row while on the community page but still offers the community entry', () => {
     visitCommunity();
     openSwitch();
     gcy('switch-popover-item').should('exist');
@@ -110,7 +114,8 @@ describe('Community projects navigation', () => {
     gcy('organization-switch-community').should('be.visible');
   });
 
-  it('offers the community entry from a switcher outside the projects pages', () => {
+  // Skipped: community switcher entry disabled — re-enable with the button (see TODO above).
+  it.skip('offers the community entry from a switcher outside the projects pages', () => {
     cy.visit(
       `${HOST}/organizations/${organizationData['Tolgee'].slug}/members`
     );
@@ -129,7 +134,8 @@ describe('Community projects navigation', () => {
     gcy('global-list-search').should('not.exist');
   });
 
-  it('closes the popover on Escape from the footer entry', () => {
+  // Skipped: community switcher entry disabled — re-enable with the button (see TODO above).
+  it.skip('closes the popover on Escape from the footer entry', () => {
     openSwitch();
     gcy('organization-switch-community').focus().type('{esc}');
     gcy('switch-popover-item').should('not.exist');
