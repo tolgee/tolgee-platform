@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { useHistory } from 'react-router-dom';
 
@@ -14,6 +15,14 @@ import { ProjectsList } from 'tg.views/projects/ProjectsList';
 import { CommunityTranslationBanner } from 'tg.views/projects/public/CommunityTranslationBanner';
 import { useLatchedSearchVisibility } from 'tg.views/projects/useLatchedSearchVisibility';
 import { CriticalUsageCircle } from 'tg.ee';
+
+// Flex column so the full-width banner keeps its content height — the surrounding grid layouts
+// (DashboardPage main + BaseView content) stretch a bare second grid row to fill the viewport.
+const StyledContent = styled('div')`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing(3)};
+`;
 
 const CommunityProjects = () => {
   const [page, setPage] = useState(0);
@@ -42,7 +51,6 @@ const CommunityProjects = () => {
 
   return (
     <DashboardPage>
-      <CommunityTranslationBanner />
       <BaseView
         data-cy="community-projects-view"
         windowTitle={t('community_projects_window_title')}
@@ -70,16 +78,19 @@ const CommunityProjects = () => {
         customButtons={[<CriticalUsageCircle key="usage" />]}
         loading={loadable.isFetching}
       >
-        <ProjectsList
-          variant="public"
-          loadable={loadable}
-          onPageChange={setPage}
-          emptyPlaceholder={
-            <EmptyListMessage loading={loadable.isFetching}>
-              <T keyName="public_projects_empty" />
-            </EmptyListMessage>
-          }
-        />
+        <StyledContent>
+          <CommunityTranslationBanner />
+          <ProjectsList
+            variant="public"
+            loadable={loadable}
+            onPageChange={setPage}
+            emptyPlaceholder={
+              <EmptyListMessage loading={loadable.isFetching}>
+                <T keyName="public_projects_empty" />
+              </EmptyListMessage>
+            }
+          />
+        </StyledContent>
       </BaseView>
     </DashboardPage>
   );
