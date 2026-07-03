@@ -16,6 +16,7 @@ import io.tolgee.ee.development.QaTestData
 import io.tolgee.ee.utils.QaTestUtil
 import io.tolgee.events.OnOrganizationFeaturesChanged
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.waitFor
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.repository.TranslationRepository
 import io.tolgee.security.ProjectHolder
@@ -87,6 +88,7 @@ class QaEventListenerTest : AuthorizedControllerTest() {
     demoProjectId = null
     demoProjId?.let { id ->
       try {
+        waitForProjectBatchJobsCompleted(id)
         executeInNewTransaction(platformTransactionManager) {
           val project = projectService.get(id)
           projectHardDeletingService.hardDeleteProject(project)
@@ -95,9 +97,27 @@ class QaEventListenerTest : AuthorizedControllerTest() {
         // Demo project may have already been cleaned up or failed to create
       }
     }
+    try {
+      waitForProjectBatchJobsCompleted(testData.project.id)
+    } catch (_: Exception) {
+      // Proceed with cleanup even if batch jobs did not complete in time
+    }
     testDataService.cleanTestData(testData.root)
     userAccount = null
     enabledFeaturesProvider.forceEnabled = null
+  }
+
+  /**
+   * Deleting a project while its QA batch job is still running deadlocks: the job worker's
+   * nested transaction and the deleting transaction block each other via row locks, and the
+   * cycle is invisible to Postgres because one edge waits inside the JVM.
+   */
+  private fun waitForProjectBatchJobsCompleted(projectId: Long) {
+    waitFor(timeout = 30_000, pollTime = 100) {
+      executeInNewTransaction(platformTransactionManager) {
+        batchJobService.getAllByProjectId(projectId).all { it.status.completed }
+      }
+    }
   }
 
   @Test
