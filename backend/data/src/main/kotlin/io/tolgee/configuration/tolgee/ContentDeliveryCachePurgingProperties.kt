@@ -1,11 +1,23 @@
 package io.tolgee.configuration.tolgee
 
-import org.springframework.boot.context.properties.ConfigurationProperties
+import io.tolgee.configuration.annotations.DocProperty
+import io.tolgee.model.contentDelivery.ContentDeliveryPurgingConfig
+import org.springframework.boot.context.properties.NestedConfigurationProperty
 
-@ConfigurationProperties(prefix = "tolgee.content-delivery.cache-purging")
+@DocProperty(prefix = "tolgee.content-delivery.cache-purging")
 class ContentDeliveryCachePurgingProperties {
+  @NestedConfigurationProperty
   var azureFrontDoor = ContentDeliveryAzureFrontDoorProperties()
+
+  @NestedConfigurationProperty
   var cloudflare = ContentDeliveryCloudflareProperties()
-  var awsCloudfront = ContentDeliveryAWSCloudFrontProperties()
+
+  @NestedConfigurationProperty
   var bunny = ContentDeliveryBunnyProperties()
+
+  @NestedConfigurationProperty
+  var awsCloudFront = ContentDeliveryAWSCloudFrontProperties()
 }
+
+fun ContentDeliveryCachePurgingProperties.all(): List<ContentDeliveryPurgingConfig> =
+  listOf(azureFrontDoor, cloudflare, bunny, awsCloudFront)

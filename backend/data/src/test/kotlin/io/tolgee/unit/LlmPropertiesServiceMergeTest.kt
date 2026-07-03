@@ -1,5 +1,6 @@
 package io.tolgee.unit
 
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProperties
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProperties.LlmProvider
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProperties.LlmProviderDefaults
@@ -11,7 +12,7 @@ import org.junit.jupiter.api.Test
 
 class LlmPropertiesServiceMergeTest {
   private fun createService(props: LlmProperties): LlmPropertiesService {
-    return LlmPropertiesService(props, null)
+    return LlmPropertiesService(TolgeeProperties(llm = props), null)
   }
 
   @Test

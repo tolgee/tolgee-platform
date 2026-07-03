@@ -1,8 +1,8 @@
 package io.tolgee.configuration.tolgee
 
-import org.springframework.boot.context.properties.ConfigurationProperties
+import io.tolgee.configuration.annotations.DocProperty
 
-@ConfigurationProperties(prefix = "tolgee.slack")
+@DocProperty(prefix = "tolgee.slack")
 class SlackProperties {
   var token: String? = null
   var signingSecret: String? = null

@@ -1,7 +1,7 @@
 package io.tolgee.component.machineTranslation.providers
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import io.tolgee.configuration.tolgee.machineTranslation.BaiduMachineTranslationProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
 import org.springframework.http.HttpHeaders
@@ -16,9 +16,11 @@ import java.security.MessageDigest
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 class BaiduApiService(
-  private val baiduMachineTranslationProperties: BaiduMachineTranslationProperties,
+  private val tolgeeProperties: TolgeeProperties,
   private val restTemplate: RestTemplate,
 ) {
+  private val baiduMachineTranslationProperties get() = tolgeeProperties.machineTranslation.baidu
+
   fun translate(
     text: String,
     sourceTag: String,

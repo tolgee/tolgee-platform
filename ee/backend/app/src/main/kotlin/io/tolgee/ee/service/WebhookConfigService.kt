@@ -4,7 +4,7 @@ import io.tolgee.component.automations.processors.WebhookEventType
 import io.tolgee.component.automations.processors.WebhookException
 import io.tolgee.component.automations.processors.WebhookExecutor
 import io.tolgee.component.automations.processors.WebhookRequest
-import io.tolgee.configuration.tolgee.WebhookProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.request.WebhookConfigRequest
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
@@ -23,8 +23,10 @@ class WebhookConfigService(
   private val webhookExecutor: WebhookExecutor,
   private val automationService: AutomationService,
   private val urlSecurity: UrlSecurity,
-  private val webhookProperties: WebhookProperties,
+  private val tolgeeProperties: TolgeeProperties,
 ) {
+  private val webhookProperties get() = tolgeeProperties.webhook
+
   fun get(
     projectId: Long,
     id: Long,

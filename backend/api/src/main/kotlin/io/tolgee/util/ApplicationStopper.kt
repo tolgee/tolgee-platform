@@ -1,6 +1,6 @@
 package io.tolgee.util
 
-import io.tolgee.configuration.tolgee.InternalProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import org.slf4j.LoggerFactory
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.context.event.ApplicationFailedEvent
@@ -12,10 +12,11 @@ import kotlin.system.exitProcess
 
 @Component
 class ApplicationStopper(
-  val internalProperties: InternalProperties,
+  val tolgeeProperties: TolgeeProperties,
   val applicationContext: ApplicationContext,
 ) {
   private val log = LoggerFactory.getLogger(ApplicationStopper::class.java)
+  private val internalProperties get() = tolgeeProperties.internal
 
   @EventListener(ApplicationReadyEvent::class)
   fun handleApplicationReady() {

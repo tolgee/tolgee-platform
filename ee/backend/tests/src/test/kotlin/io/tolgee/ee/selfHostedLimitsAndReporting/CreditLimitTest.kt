@@ -2,7 +2,6 @@ package io.tolgee.ee.selfHostedLimitsAndReporting
 
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.api.SubscriptionStatus
-import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.BaseTestData
@@ -29,12 +28,10 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod.POST
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.bean.override.mockito.MockitoBean
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
 
 @SpringBootTest()
-@MockitoSpyBean(types = [InternalProperties::class])
 class CreditLimitTest : ProjectAuthControllerTest("/v2/projects/") {
   @Autowired
   private lateinit var eeSubscriptionRepository: EeSubscriptionRepository
@@ -42,10 +39,6 @@ class CreditLimitTest : ProjectAuthControllerTest("/v2/projects/") {
   private lateinit var testData: TestData
 
   private lateinit var httpClientMocker: HttpClientMocker
-
-  @Autowired
-  @MockitoSpyBean
-  override lateinit var internalProperties: InternalProperties
 
   @MockitoBean
   @Autowired
@@ -62,7 +55,7 @@ class CreditLimitTest : ProjectAuthControllerTest("/v2/projects/") {
     initMachineTranslationProperties(
       freeCreditsAmount = -1,
     )
-    whenever(internalProperties.fakeMtProviders).thenReturn(false)
+    internalProperties.fakeMtProviders = false
     whenever(restTemplateBuilder.readTimeout(any())).thenReturn(restTemplateBuilder)
     whenever(restTemplateBuilder.build()).thenReturn(restTemplate)
   }

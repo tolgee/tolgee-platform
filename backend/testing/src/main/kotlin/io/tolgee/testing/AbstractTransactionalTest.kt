@@ -2,6 +2,7 @@ package io.tolgee.testing
 
 import io.tolgee.BatchJobTestListener
 import io.tolgee.CleanDbTestListener
+import io.tolgee.ConfigurationPropertiesResetListener
 import jakarta.persistence.EntityManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ActiveProfiles
@@ -15,6 +16,7 @@ import org.springframework.test.context.transaction.TransactionalTestExecutionLi
   value = [
     TransactionalTestExecutionListener::class,
     DependencyInjectionTestExecutionListener::class,
+    ConfigurationPropertiesResetListener::class,
     CleanDbTestListener::class,
     DirtiesContextTestExecutionListener::class,
     BatchJobTestListener::class,

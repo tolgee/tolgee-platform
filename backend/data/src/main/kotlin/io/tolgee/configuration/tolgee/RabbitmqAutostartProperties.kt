@@ -1,8 +1,8 @@
 package io.tolgee.configuration.tolgee
 
-import org.springframework.boot.context.properties.ConfigurationProperties
+import io.tolgee.configuration.annotations.DocProperty
 
-@ConfigurationProperties(prefix = "tolgee.rabbitmq-autostart")
+@DocProperty(prefix = "tolgee.rabbitmq-autostart")
 class RabbitmqAutostartProperties {
   var enabled: Boolean = true
   var mode: RabbitMqAutostartMode = RabbitMqAutostartMode.DOCKER

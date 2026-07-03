@@ -6,7 +6,6 @@ package io.tolgee
 
 import io.tolgee.commandLineRunners.StartupImportCommandLineRunner
 import io.tolgee.configuration.tolgee.ImportProperties
-import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.development.Base
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -17,16 +16,12 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.Resource
 
-@Suppress("LateinitVarOverridesLateinitVar")
 @CleanDbBeforeClass
 class StartupImportCommandLineRunnerTest : AbstractSpringTest() {
   private lateinit var base: Base
 
   @Value("classpath:startup-import")
   lateinit var importDir: Resource
-
-  @Autowired
-  override lateinit var tolgeeProperties: TolgeeProperties
 
   @Autowired
   lateinit var startupImportCommandLineRunner: StartupImportCommandLineRunner
