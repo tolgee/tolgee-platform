@@ -200,10 +200,7 @@ class EntityGraphDeserializer(
       ExportImportPolicy.PROJECT_ROOT -> context.targetProject
       ExportImportPolicy.OWNED ->
         context.entity(targetClassName, rawValue)
-          ?: throw BadRequestException(
-            Message.PROJECT_IMPORT_CORRUPT_ARCHIVE,
-            listOf(targetClassName, normalizeHandle(rawValue).toString(), attr.name),
-          )
+          ?: throw corruptArchive(targetClassName, normalizeHandle(rawValue), attr.name)
       else -> null
     }
   }
@@ -212,7 +209,8 @@ class EntityGraphDeserializer(
     rawValue: Any,
     context: Context,
   ): UserAccount {
-    val username = (rawValue as Map<*, *>)["username"] as String
+    val username = (rawValue as? Map<*, *>)?.get("username") as? String
+      ?: throw corruptArchive("UserRef", rawValue, "username")
     return context.userResolver(username) ?: context.importingAdmin
   }
 
@@ -223,10 +221,10 @@ class EntityGraphDeserializer(
     context: Context,
   ) {
     if (entity is Screenshot) {
-      context.screenshotsBySourceId[(record.handle as Number).toLong()] = entity
+      context.screenshotsBySourceId[requireNumericHandle(record)] = entity
     }
     if (entity is Key) {
-      context.keyIdBySourceId[(record.handle as Number).toLong()] = entity.id
+      context.keyIdBySourceId[requireNumericHandle(record)] = entity.id
     }
     if (entity is Branch && record.attrs["isDefault"] == true) {
       context.importedDefaultBranch = entity
@@ -242,6 +240,15 @@ class EntityGraphDeserializer(
     json ?: return emptyList()
     return objectMapper.readValue(json, object : TypeReference<List<SerializedEntity>>() {})
   }
+
+  // A valid-JSON archive with the wrong value shape parses into Any/Any?, so casts here throw
+  // ClassCastException/NPE that escape the caller's JacksonException-only corrupt-archive guard and
+  // surface as 500s. Reject the shape as a corrupt archive instead, matching resolveReference's OWNED path.
+  private fun requireNumericHandle(record: SerializedEntity): Long =
+    (record.handle as? Number)?.toLong() ?: throw corruptArchive(record.handle)
+
+  private fun corruptArchive(vararg params: Any?): BadRequestException =
+    BadRequestException(Message.PROJECT_IMPORT_CORRUPT_ARCHIVE, params.map { it?.toString() ?: "" })
 
   /**
    * Owning singular FKs set in phase A: everything except self-references. Their target type precedes this

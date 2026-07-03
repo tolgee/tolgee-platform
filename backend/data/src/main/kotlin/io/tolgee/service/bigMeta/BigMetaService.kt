@@ -157,7 +157,7 @@ class BigMetaService(
       """
       insert into keys_distance (key1id, key2id, distance, hits, created_at, updated_at, project_id)
       values (?, ?, ?, ?, ?, ?, ?)
-      on conflict (key1id, key2id) do update set score = excluded.score, hits = excluded.hits, updated_at = ?
+      on conflict (key1id, key2id) do update set distance = excluded.distance, hits = excluded.hits, updated_at = ?
       """,
       toInsert,
       10000,

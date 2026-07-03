@@ -15,8 +15,8 @@ import { usePreferredOrganization } from 'tg.globalContext/helpers';
 import { OrganizationSwitch } from 'tg.component/organizationSwitch/OrganizationSwitch';
 import { messageService } from 'tg.service/MessageService';
 
-import { BaseLanguageSelect } from './components/BaseLanguageSelect';
-import { CreateProjectLanguagesArrayField } from './components/CreateProjectLanguagesArrayField';
+import { BaseLanguageSelect } from 'tg.views/projects/project/components/BaseLanguageSelect';
+import { CreateProjectLanguagesArrayField } from 'tg.views/projects/project/components/CreateProjectLanguagesArrayField';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 
 export type CreateProjectValueType =

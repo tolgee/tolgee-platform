@@ -43,8 +43,9 @@ class ProjectExportImportExporterTest : AbstractSpringTest() {
   }
 
   @AfterEach
-  fun resetClock() {
+  fun tearDown() {
     currentDateProvider.forcedDate = null
+    testDataService.cleanTestData(testData.root)
   }
 
   @Test

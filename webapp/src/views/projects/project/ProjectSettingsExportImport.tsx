@@ -18,7 +18,7 @@ import { downloadResponseAsFile } from 'tg.fixtures/downloadResponseAsFile';
 import {
   ExportManifest,
   readExportManifest,
-} from './components/exportImport/readExportManifest';
+} from 'tg.views/projects/project/components/exportImport/readExportManifest';
 
 const StyledManifest = styled(Box)`
   display: grid;

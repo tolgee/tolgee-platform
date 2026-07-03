@@ -7,6 +7,8 @@ import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.bigMeta.KeysDistanceDto
 import io.tolgee.service.projectExportImport.model.ExportZipLayout
 import io.tolgee.service.projectExportImport.model.SerializedBigMeta
+import io.tolgee.util.Logging
+import io.tolgee.util.logger
 import org.springframework.stereotype.Component
 import kotlin.reflect.KClass
 
@@ -18,7 +20,8 @@ import kotlin.reflect.KClass
 class BigMetaSideChannelHandler(
   private val bigMetaService: BigMetaService,
   private val objectMapper: ObjectMapper,
-) : SideChannelHandler {
+) : SideChannelHandler,
+  Logging {
   override val entityClass: KClass<*> = KeysDistance::class
   override val entryName: String = ExportZipLayout.BIG_META
 
@@ -43,6 +46,10 @@ class BigMetaSideChannelHandler(
           stored = false,
         )
       }
+    val dropped = records.size - dtos.size
+    if (dropped > 0) {
+      logger.debug("Dropped $dropped of ${records.size} BigMeta record(s) referencing keys absent from the import")
+    }
     bigMetaService.storeImportedDistances(dtos)
   }
 }

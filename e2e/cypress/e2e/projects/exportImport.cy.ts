@@ -63,7 +63,7 @@ describe('Project settings - Export & Import (server admin)', () => {
     // The dropzone's hidden <input type=file> is a sibling of the dropzone div,
     // so scope the lookup to the whole section rather than the dropzone element.
     gcy('project-settings-export-import')
-      .find('input[type=file]')
+      .find('[data-cy=file-dropzone-file-input]')
       .selectFile(`${downloadsFolder}/${EXPORT_FILE}`, { force: true });
 
     // Manifest preview shows the source project name; same version => no warning.
@@ -91,7 +91,7 @@ describe('Project settings - Export & Import (server admin)', () => {
     gcy('project-settings-menu-export-import').click();
 
     gcy('project-settings-export-import')
-      .find('input[type=file]')
+      .find('[data-cy=file-dropzone-file-input]')
       .selectFile('cypress/fixtures/version-mismatch-export.zip', {
         force: true,
       });
@@ -116,7 +116,7 @@ describe('Project settings - Export & Import (non-admin gating)', () => {
 
   beforeEach(() => {
     administrationTestData.clean();
-    administrationTestData.generate();
+    administrationTestData.generateStandard();
     login('user@user.com').then(() =>
       createTestProject().then((r) => {
         projectId = r.body.id;

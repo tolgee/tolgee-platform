@@ -33,6 +33,7 @@ import io.tolgee.service.projectExportImport.ProjectExportImportImporter
 import io.tolgee.service.projectExportImport.model.ExportZipLayout
 import io.tolgee.service.projectExportImport.model.SerializedEntity
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -74,6 +75,12 @@ class ProjectExportImportImporterTest : AbstractSpringTest() {
 
     target = ProjectImportTargetTestData()
     testDataService.saveTestData(target.root)
+  }
+
+  @AfterEach
+  fun cleanup() {
+    testDataService.cleanTestData(target.root)
+    testDataService.cleanTestData(source.root)
   }
 
   @Test
@@ -325,6 +332,22 @@ class ProjectExportImportImporterTest : AbstractSpringTest() {
   }
 
   @Test
+  fun `rejects an archive whose user reference has the wrong shape with a bad request`() {
+    assertImportRejected(
+      tamperFirstAssocRaw(exportZip(source.project.id), "TranslationSuggestion", "author", "not-a-user-ref"),
+      Message.PROJECT_IMPORT_CORRUPT_ARCHIVE,
+    )
+  }
+
+  @Test
+  fun `rejects an archive whose key handle is not numeric with a bad request`() {
+    assertImportRejected(
+      tamperFirstHandle(exportZip(source.project.id), "Key", "not-a-number"),
+      Message.PROJECT_IMPORT_CORRUPT_ARCHIVE,
+    )
+  }
+
+  @Test
   fun `aborts on an unresolved OWNED reference with the target untouched`() {
     assertImportRejected(
       tamperFirstAssoc(exportZip(source.project.id), "KeyMeta", "key", BOGUS_HANDLE),
@@ -430,6 +453,25 @@ class ProjectExportImportImporterTest : AbstractSpringTest() {
     )
 
     assertThat(keysDistances(projectId).filter { setOf(it.key1Id, it.key2Id) == setOf(a, b) }).hasSize(1)
+  }
+
+  @Test
+  fun `storeImportedDistances refreshes the distance of an existing pair on re-import`() {
+    importSourceOntoTarget()
+    val projectId = target.targetProject.id
+    val a = keyIdByName(projectId, "rich-key")
+    val b = keyIdByName(projectId, source.suggestionKeyName)
+
+    bigMetaService.storeImportedDistances(
+      listOf(KeysDistanceDto(key1Id = a, key2Id = b, distance = 0.1, projectId = projectId, hits = 1)),
+    )
+    bigMetaService.storeImportedDistances(
+      listOf(KeysDistanceDto(key1Id = a, key2Id = b, distance = 0.9, projectId = projectId, hits = 5)),
+    )
+
+    val row = keysDistances(projectId).single { setOf(it.key1Id, it.key2Id) == setOf(a, b) }
+    assertThat(row.distance).isEqualTo(0.9)
+    assertThat(row.hits).isEqualTo(5)
   }
 
   @Test
@@ -792,6 +834,25 @@ class ProjectExportImportImporterTest : AbstractSpringTest() {
     type: String,
     assocName: String,
     bogusHandle: Long,
+  ): ByteArray = tamperFirstRecord(zip, type) { it.copy(assocs = it.assocs + (assocName to bogusHandle)) }
+
+  private fun tamperFirstAssocRaw(
+    zip: ByteArray,
+    type: String,
+    assocName: String,
+    rawValue: Any?,
+  ): ByteArray = tamperFirstRecord(zip, type) { it.copy(assocs = it.assocs + (assocName to rawValue)) }
+
+  private fun tamperFirstHandle(
+    zip: ByteArray,
+    type: String,
+    rawHandle: Any,
+  ): ByteArray = tamperFirstRecord(zip, type) { it.copy(handle = rawHandle) }
+
+  private fun tamperFirstRecord(
+    zip: ByteArray,
+    type: String,
+    edit: (SerializedEntity) -> SerializedEntity,
   ): ByteArray {
     val entries = readZip(zip).toMutableMap()
     val path = ExportZipLayout.entityPath(type)
@@ -801,7 +862,7 @@ class ProjectExportImportImporterTest : AbstractSpringTest() {
           entries.getValue(path),
           object : TypeReference<List<SerializedEntity>>() {},
         ).toMutableList()
-    records[0] = records[0].copy(assocs = records[0].assocs + (assocName to bogusHandle))
+    records[0] = edit(records[0])
     entries[path] = objectMapper.writeValueAsBytes(records)
     return zipFrom(entries)
   }

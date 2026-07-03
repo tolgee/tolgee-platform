@@ -219,6 +219,7 @@ declare namespace DataCy {
         "export-submit-button": true;
         "export-support_arrays-selector": true;
         "file-dropzone-add-more-button": true;
+        "file-dropzone-file-input": true;
         "file-dropzone-remove-button": true;
         "file-dropzone-select-button": true;
         "filter-item": true;

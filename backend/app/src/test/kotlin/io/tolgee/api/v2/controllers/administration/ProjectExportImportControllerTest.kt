@@ -9,6 +9,7 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.translationMemory.TranslationMemoryType
 import io.tolgee.testing.AuthorizedControllerTest
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -30,6 +31,11 @@ class ProjectExportImportControllerTest : AuthorizedControllerTest() {
   fun setup() {
     testData = ProjectExportImportTestData(projectName = "weird/name*?")
     testDataService.saveTestData(testData.root)
+  }
+
+  @AfterEach
+  fun cleanup() {
+    testDataService.cleanTestData(testData.root)
   }
 
   @Test
