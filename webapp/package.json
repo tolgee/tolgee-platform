@@ -86,6 +86,7 @@
     "tsc:prod": "npm run --prefix ../library build:types && tsc --project tsconfig.prod.json",
     "load-translations": "tolgee pull",
     "check-translations": "tolgee extract check",
+    "check-missing-keys": "node ./scripts/check-missing-keys.mjs",
     "tag-keys:deprecated": "tolgee tag --filter-not-extracted --filter-tag production --tag deprecated",
     "tag-keys:production": "tolgee tag --filter-extracted --tag production --untag deprecated 'draft: *' --untag-other production",
     "tag-keys": "npm run tag-keys:deprecated && npm run tag-keys:production",

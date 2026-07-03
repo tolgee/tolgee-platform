@@ -280,7 +280,7 @@ jobs:
           TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
 
       - name: Check missing translation keys
-        run: npm run tsc:prod
+        run: npm run check-missing-keys
         working-directory: ./webapp
         if: ${{ env.TOLGEE_API_KEY != '' }}
         env:
