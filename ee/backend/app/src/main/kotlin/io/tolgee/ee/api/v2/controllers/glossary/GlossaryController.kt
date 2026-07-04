@@ -35,6 +35,7 @@ import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.hateoas.CollectionModel
 import org.springframework.hateoas.PagedModel
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -46,6 +47,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
+@CrossOrigin(origins = ["*"])
 @RequestMapping("/v2/organizations/{organizationId:[0-9]+}")
 @Tag(name = "Glossary")
 class GlossaryController(
@@ -176,6 +178,6 @@ class GlossaryController(
   ): CollectionModel<SimpleProjectModel> {
     val organization = organizationHolder.organization
     val glossary = glossaryService.get(organization.id, glossaryId)
-    return simpleProjectModelAssembler.toCollectionModel(glossary.assignedProjects)
+    return simpleProjectModelAssembler.toCollectionModel(glossaryService.getAssignedProjectsForCurrentUser(glossary))
   }
 }

@@ -469,6 +469,11 @@ class ProjectService(
     return projects.map { ProjectWithLanguagesView.fromProjectView(it, null) }
   }
 
+  @Transactional(readOnly = true)
+  fun hasPublicProjects(organizationId: Long): Boolean {
+    return projectRepository.hasPublicProjects(organizationId)
+  }
+
   @CacheEvict(cacheNames = [Caches.PROJECTS], allEntries = true)
   fun saveAll(projects: Collection<Project>): MutableList<Project> = projectRepository.saveAll(projects)
 

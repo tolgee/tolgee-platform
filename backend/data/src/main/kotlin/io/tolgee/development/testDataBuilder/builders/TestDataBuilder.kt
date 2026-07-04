@@ -4,6 +4,7 @@ import io.tolgee.model.Organization
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
+import jakarta.persistence.EntityManager
 
 class TestDataBuilder(
   fn: (TestDataBuilder.() -> Unit) = {},
@@ -27,6 +28,27 @@ class TestDataBuilder(
   }
 
   val data = DATA()
+
+  /**
+   * Raw-state fixups TestDataService runs after the graph is saved — for states the JPA layer
+   * self-heals or forbids on entity save (soft deletes, missing base language).
+   */
+  val afterSaveRawStates = mutableListOf<(EntityManager) -> Unit>()
+
+  fun rawStateAfterSave(fn: (EntityManager) -> Unit) {
+    afterSaveRawStates.add(fn)
+  }
+
+  fun rawUpdateAfterSave(
+    sql: String,
+    params: () -> Map<String, Any?>,
+  ) {
+    rawStateAfterSave { em ->
+      val query = em.createNativeQuery(sql)
+      params().forEach { (name, value) -> query.setParameter(name, value) }
+      query.executeUpdate()
+    }
+  }
 
   fun addUserAccountWithoutOrganization(ft: UserAccount.() -> Unit): UserAccountBuilder {
     val builder = UserAccountBuilder(this)

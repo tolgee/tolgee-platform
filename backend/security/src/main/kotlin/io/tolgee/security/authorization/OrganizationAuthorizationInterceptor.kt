@@ -36,7 +36,8 @@ import org.springframework.web.method.HandlerMethod
 
 /**
  * This interceptor performs an authorization step to access organization-related endpoints.
- * By default, the user needs to have access to at least 1 project on the target org to access it.
+ * By default it enforces the org view floor (see [OrganizationRoleService.canUserViewStrictOrPublic]).
+ * Anything beyond viewing must require a role via `@RequiresOrganizationRole`.
  */
 @Component
 class OrganizationAuthorizationInterceptor(
@@ -71,7 +72,7 @@ class OrganizationAuthorizationInterceptor(
       requiredRole ?: "read-only",
     )
 
-    if (!organizationRoleService.canUserViewStrict(userId, organization.id)) {
+    if (!organizationRoleService.canUserViewStrictOrPublic(userId, organization.id)) {
       if (!canBypass(request, handler)) {
         logger.debug(
           "Rejecting access to org#{} for user#{} - No view permissions",

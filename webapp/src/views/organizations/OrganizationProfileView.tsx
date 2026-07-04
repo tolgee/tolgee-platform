@@ -54,7 +54,7 @@ export const OrganizationProfileView: FunctionComponent<
   const isAdmin = useIsAdmin();
 
   const readOnly = organization.data?.currentUserRole !== 'OWNER' && !isAdmin;
-  const notMember = !organization.data?.currentUserRole;
+  const hasNoRole = !organization.data?.currentUserRole;
 
   const onSubmit = (values: OrganizationBody) => {
     const toSave = {
@@ -150,7 +150,7 @@ export const OrganizationProfileView: FunctionComponent<
                 color="secondary"
                 variant="outlined"
                 onClick={handleLeave}
-                disabled={notMember}
+                disabled={hasNoRole}
               >
                 <T keyName="organization_leave_button" />
               </Button>
