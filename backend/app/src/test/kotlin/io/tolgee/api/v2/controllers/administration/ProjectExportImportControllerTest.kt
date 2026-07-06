@@ -23,10 +23,10 @@ import java.awt.image.BufferedImage
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.nio.file.Files
-import javax.imageio.ImageIO
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
+import javax.imageio.ImageIO
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -39,7 +39,7 @@ class ProjectExportImportControllerTest : AuthorizedControllerTest() {
   @Autowired
   private lateinit var versionProvider: VersionProvider
 
-  private val PNG_SIGNATURE =
+  private val pngSignature =
     byteArrayOf(0x89.toByte(), 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A)
 
   @BeforeEach
@@ -180,7 +180,7 @@ class ProjectExportImportControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `import rejects an archive whose screenshot blob has a valid header but corrupt body`() {
-    assertScreenshotBlobRejected(PNG_SIGNATURE + "corrupt-png-body".toByteArray())
+    assertScreenshotBlobRejected(pngSignature + "corrupt-png-body".toByteArray())
   }
 
   // A 6000x1 image decodes fine but its scaled thumbnail height floors to 0, so ImageConverter.getThumbnail

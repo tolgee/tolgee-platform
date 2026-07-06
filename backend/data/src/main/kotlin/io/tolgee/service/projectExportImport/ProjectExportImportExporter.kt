@@ -116,7 +116,8 @@ class ProjectExportImportExporter(
     project: Project,
   ) {
     val projectType = entityManager.metamodel.entity(Project::class.java)
-    writeRawEntry(zip, ExportZipLayout.PROJECT, objectMapper.writeValueAsBytes(EntityMetamodelReader.read(project, projectType)))
+    val bytes = objectMapper.writeValueAsBytes(EntityMetamodelReader.read(project, projectType))
+    writeRawEntry(zip, ExportZipLayout.PROJECT, bytes)
   }
 
   private fun writeRawEntry(

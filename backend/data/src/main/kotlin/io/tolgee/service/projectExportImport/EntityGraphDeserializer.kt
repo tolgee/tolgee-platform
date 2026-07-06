@@ -209,8 +209,9 @@ class EntityGraphDeserializer(
     rawValue: Any,
     context: Context,
   ): UserAccount {
-    val username = (rawValue as? Map<*, *>)?.get("username") as? String
-      ?: throw corruptArchive("UserRef", rawValue, "username")
+    val username =
+      (rawValue as? Map<*, *>)?.get("username") as? String
+        ?: throw corruptArchive("UserRef", rawValue, "username")
     return context.userResolver(username) ?: context.importingAdmin
   }
 

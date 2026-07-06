@@ -43,11 +43,11 @@ import java.awt.image.BufferedImage
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.nio.file.Files
-import javax.imageio.ImageIO
 import java.util.Base64
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
+import javax.imageio.ImageIO
 
 @SpringBootTest
 class ProjectExportImportImporterTest : AbstractSpringTest() {

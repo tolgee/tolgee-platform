@@ -246,7 +246,8 @@ class ProjectExportImportImporter(
     }
     // storeAvatarFiles converts (getImage + getThumbnail) before it writes; a bad avatar throws before any
     // file is stored, so translate it to a corrupt-archive 400 rather than an uncaught 500.
-    project.avatarHash = corruptArchiveOnImageError { avatarService.storeAvatarFiles(avatar.value.inputStream(), project) }
+    project.avatarHash =
+      corruptArchiveOnImageError { avatarService.storeAvatarFiles(avatar.value.inputStream(), project) }
   }
 
   // ImageConverter.getThumbnail — the operation the write path runs on every image blob — throws for bytes
