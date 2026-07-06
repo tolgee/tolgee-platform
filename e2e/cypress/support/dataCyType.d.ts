@@ -611,6 +611,7 @@ declare namespace DataCy {
         "project-settings-export-import": true;
         "project-settings-import-button": true;
         "project-settings-import-manifest": true;
+        "project-settings-import-manifest-unreadable": true;
         "project-settings-import-version-warning": true;
         "project-settings-label-item": true;
         "project-settings-label-item-description": true;

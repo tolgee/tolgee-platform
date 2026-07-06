@@ -7,17 +7,23 @@ import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.translationMemory.TranslationMemoryType
+import io.tolgee.service.projectExportImport.ProjectExportImportExporter
 import io.tolgee.testing.AuthorizedControllerTest
+import io.tolgee.util.VersionProvider
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.MvcResult
+import java.awt.image.BufferedImage
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
+import java.nio.file.Files
+import javax.imageio.ImageIO
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
@@ -26,6 +32,15 @@ import java.util.zip.ZipOutputStream
 @AutoConfigureMockMvc
 class ProjectExportImportControllerTest : AuthorizedControllerTest() {
   private lateinit var testData: ProjectExportImportTestData
+
+  @Autowired
+  private lateinit var exporter: ProjectExportImportExporter
+
+  @Autowired
+  private lateinit var versionProvider: VersionProvider
+
+  private val PNG_SIGNATURE =
+    byteArrayOf(0x89.toByte(), 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A)
 
   @BeforeEach
   fun setup() {
@@ -47,6 +62,10 @@ class ProjectExportImportControllerTest : AuthorizedControllerTest() {
   @Test
   fun `export returns a project zip for a super admin`() {
     userAccount = testData.adminUser
+    // The endpoint streams via StreamingResponseBody; asserting the HTTP contract (status + headers) is
+    // reliable, but draining the streamed body through MockMvc is not (the provider closes the request's
+    // Hibernate session, which conflicts with in-test async dispatch). The zip payload — including the
+    // manifest — is asserted directly from the exporter below and via the round-trip import tests.
     val response =
       performAuthGet("/v2/administration/projects/${testData.project.id}/export")
         .andIsOk
@@ -58,7 +77,7 @@ class ProjectExportImportControllerTest : AuthorizedControllerTest() {
     assertThat(contentDisposition).contains("attachment").contains("weird_name__.zip").doesNotContain("/")
 
     val entryNames =
-      ZipInputStream(ByteArrayInputStream(response.contentAsByteArray)).use { stream ->
+      ZipInputStream(ByteArrayInputStream(exportedZipBytes())).use { stream ->
         generateSequence { stream.nextEntry }.map { it.name }.toList()
       }
     assertThat(entryNames).contains("manifest.json")
@@ -152,6 +171,44 @@ class ProjectExportImportControllerTest : AuthorizedControllerTest() {
     assertThat(projectKeyNames()).contains("greeting", "labeled")
   }
 
+  // Headerless bytes make ImageIO.read return null; a valid PNG header over a corrupt body makes it throw
+  // IIOException. Both decode-failure paths must surface as a clean 400, not a 500.
+  @Test
+  fun `import rejects an archive whose screenshot blob has no image header`() {
+    assertScreenshotBlobRejected("not a real image".toByteArray())
+  }
+
+  @Test
+  fun `import rejects an archive whose screenshot blob has a valid header but corrupt body`() {
+    assertScreenshotBlobRejected(PNG_SIGNATURE + "corrupt-png-body".toByteArray())
+  }
+
+  // A 6000x1 image decodes fine but its scaled thumbnail height floors to 0, so ImageConverter.getThumbnail
+  // throws — a decodable-but-unthumbnailable blob that must still be a clean 400, not a 500.
+  @Test
+  fun `import rejects an archive whose screenshot blob is a decodable but non-thumbnailable image`() {
+    val degenerate =
+      ByteArrayOutputStream().use { out ->
+        ImageIO.write(BufferedImage(6000, 1, BufferedImage.TYPE_INT_RGB), "png", out)
+        out.toByteArray()
+      }
+    assertScreenshotBlobRejected(degenerate)
+  }
+
+  private fun assertScreenshotBlobRejected(corruptBlob: ByteArray) {
+    val zip =
+      rewriteZipEntries(exportedZipBytes()) { entryName, bytes ->
+        if (!entryName.startsWith("blobs/screenshots/")) return@rewriteZipEntries bytes
+        corruptBlob
+      }
+
+    userAccount = testData.adminUser
+    performAuthMultipart(
+      "/v2/administration/projects/${testData.project.id}/import",
+      listOf(MockMultipartFile("file", "export.zip", "application/zip", zip)),
+    ).andIsBadRequest
+  }
+
   @Test
   fun `a failed override import rolls back, leaving the project intact`() {
     val zip =
@@ -212,13 +269,17 @@ class ProjectExportImportControllerTest : AuthorizedControllerTest() {
     return out.toByteArray()
   }
 
+  // Produce the export bytes straight from the exporter service rather than the streaming HTTP endpoint:
+  // MockMvc does not deterministically drain a StreamingResponseBody (its body is intermittently empty),
+  // which would make every import test flaky. The HTTP export contract is covered by
+  // `export returns a project zip` / `export is forbidden without super auth`.
   private fun exportedZipBytes(): ByteArray {
-    userAccount = testData.adminUser
-    return performAuthGet("/v2/administration/projects/${testData.project.id}/export")
-      .andIsOk
-      .andDo { obj: MvcResult -> obj.asyncResult }
-      .andReturn()
-      .response.contentAsByteArray
+    val export = exporter.exportToTempFile(testData.project.id, versionProvider.version)
+    return try {
+      Files.readAllBytes(export.path)
+    } finally {
+      Files.deleteIfExists(export.path)
+    }
   }
 
   private fun addKey(name: String) {

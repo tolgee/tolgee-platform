@@ -66,18 +66,37 @@ describe('Project settings - Export & Import (server admin)', () => {
       .find('[data-cy=file-dropzone-file-input]')
       .selectFile(`${downloadsFolder}/${EXPORT_FILE}`, { force: true });
 
-    // Manifest preview shows the source project name; same version => no warning.
     gcy('project-settings-import-manifest')
       .should('be.visible')
       .and('contain.text', 'Test');
     gcy('project-settings-import-version-warning').should('not.exist');
 
-    // Destructive confirmation (hard mode: retype the project name).
     gcy('project-settings-import-button').should('not.be.disabled').click();
     confirmHardMode();
 
-    // On success the component clears the selection, so the preview disappears.
     gcy('project-settings-import-manifest').should('not.exist');
+    gcy('project-settings-import-button').should('be.disabled');
+  });
+
+  it('rejects an unreadable file and keeps the import button disabled', () => {
+    visitProjectSettings(projectId);
+    gcy('project-settings-menu-export-import').click();
+
+    // A plain-text file renamed .zip has no readable manifest.
+    gcy('project-settings-export-import')
+      .find('[data-cy=file-dropzone-file-input]')
+      .selectFile(
+        {
+          contents: Cypress.Buffer.from('not a real zip archive'),
+          fileName: 'broken.zip',
+          mimeType: 'application/zip',
+        },
+        { force: true }
+      );
+
+    gcy('project-settings-import-manifest-unreadable').should('be.visible');
+    gcy('project-settings-import-manifest').should('not.exist');
+    gcy('project-settings-import-version-warning').should('not.exist');
     gcy('project-settings-import-button').should('be.disabled');
   });
 

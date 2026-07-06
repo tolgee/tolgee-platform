@@ -1,4 +1,4 @@
-package io.tolgee.service.projectExportImport
+package io.tolgee.model.annotation
 
 /**
  * Excludes a single persistent column of an OWNED entity from project export/import. Use it for

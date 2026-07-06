@@ -1,6 +1,7 @@
 package io.tolgee.service.projectExportImport
 
 import io.tolgee.model.Language
+import io.tolgee.model.annotation.DoNotExport
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyMeta
 import io.tolgee.model.key.Tag

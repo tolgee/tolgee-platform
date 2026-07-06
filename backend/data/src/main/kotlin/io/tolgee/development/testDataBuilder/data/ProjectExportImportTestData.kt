@@ -92,6 +92,9 @@ class ProjectExportImportTestData(
 
   init {
     projectBuilder.self.avatarHash = avatarHash
+    // Ahead of every live task number (the surviving task is number 2) so the import's lastTaskNumber
+    // high-watermark reconciliation is exercised on its source-wins branch, not just the imported max.
+    projectBuilder.self.lastTaskNumber = SOURCE_LAST_TASK_NUMBER
     root.addUserAccount {
       username = "export-admin@admin.com"
       name = "Export Admin"
@@ -369,5 +372,9 @@ class ProjectExportImportTestData(
         hits = 3
       }
     }
+  }
+
+  companion object {
+    const val SOURCE_LAST_TASK_NUMBER = 42L
   }
 }

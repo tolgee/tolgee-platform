@@ -50,8 +50,7 @@ class TransferZipReader(
     val blobs = LinkedHashMap<String, ByteArray>()
     entries.forEach { (name, bytes) ->
       when {
-        name == ExportZipLayout.MANIFEST -> {}
-        name == ExportZipLayout.PROJECT -> {}
+        name == ExportZipLayout.MANIFEST || name == ExportZipLayout.PROJECT -> {}
         // Routed by directory prefix like entities/ and blobs/ (not by manifest content), so a hostile
         // manifest can't reclassify a real entry.
         name.startsWith(ExportZipLayout.SIDE_CHANNELS_DIR) -> sideChannels[name] = bytes

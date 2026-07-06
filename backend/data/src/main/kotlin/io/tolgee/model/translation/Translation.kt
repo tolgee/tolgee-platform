@@ -10,6 +10,7 @@ import io.tolgee.constants.MtServiceType
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Language
 import io.tolgee.model.StandardAuditModel
+import io.tolgee.model.annotation.DoNotExport
 import io.tolgee.model.branching.BranchMergeableEntity
 import io.tolgee.model.branching.snapshot.TranslationSnapshot
 import io.tolgee.model.enums.BranchKeyMergeResolutionType
@@ -19,7 +20,6 @@ import io.tolgee.model.qa.TranslationQaIssue
 import io.tolgee.service.branching.chooseThreeWay
 import io.tolgee.service.branching.isConflictingThreeWay
 import io.tolgee.service.branching.mergeSetsWithBase
-import io.tolgee.service.projectExportImport.DoNotExport
 import io.tolgee.util.TranslationStatsUtil
 import jakarta.persistence.Column
 import jakarta.persistence.Entity

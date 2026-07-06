@@ -40,6 +40,13 @@ import java.io.InputStream
  *
  * The remaining steps are: clear-in-place, two-phase insert, project scalar mirror, blob restore, then a
  * derived-data refresh.
+ *
+ * Scale boundary (constraints a caller must respect): the import runs in one synchronous transaction —
+ * the single-transaction rollback is the only safety net for the destructive wipe. It cannot be chunked,
+ * because phase B wires managed entities held in the source-handle maps and a mid-import flush+clear would
+ * detach them; the source graph is therefore held in heap and the feature is bounded to projects that fit
+ * within one request/transaction. The project must be quiescent during import — concurrent edits are not
+ * supported.
  */
 @Component
 class ProjectExportImportImporter(
@@ -114,8 +121,7 @@ class ProjectExportImportImporter(
     val project = entityManager.getReference(Project::class.java, targetProjectId)
     val importingAdmin = userAccountService.get(importingAdminId)
 
-    // deserialize parses the entity JSON blobs; a malformed one is a corrupt archive (400), and the wipe
-    // already done here rolls back via @Transactional so the target is restored.
+    // A malformed entity JSON blob is a corrupt archive (400).
     val result =
       corruptArchiveOnParseError {
         deserializer.deserialize(
@@ -132,11 +138,19 @@ class ProjectExportImportImporter(
     // does (ProjectCreationService.createProject). Runs after the scalar mirror so name/baseLanguage/
     // organizationOwner are set — the inputs createProjectTm reads.
     translationMemoryManagementService.createProjectTm(project)
-    restoreScreenshots(result.screenshotsBySourceId, parsed.blobs)
-    restoreAvatar(project, parsed.blobs)
 
     entityManager.flush()
+    // Everything that can fail on a corrupt/hostile archive — the side-channel restore and all image
+    // conversion — happens before any blob is written to the non-transactional FileStorage. Screenshots are
+    // converted up front and their pure-IO writes deferred; the avatar's own conversion runs (and throws)
+    // before it writes and before the screenshot writes. A rollback thus leaves no orphaned files.
+    // (flush first so the imported keys are in the DB before a side-channel handler's insert.)
     restoreSideChannels(parsed.sideChannels, result.keyIdBySourceId, targetProjectId)
+    val preparedScreenshots = prepareScreenshots(result.screenshotsBySourceId, parsed.blobs)
+    // restoreAvatar before the screenshot writes: storeAvatarFiles converts (the fallible getThumbnail
+    // step) before it writes any file, so a bad avatar throws here with nothing yet written to storage.
+    restoreAvatar(project, parsed.blobs)
+    writePreparedScreenshots(preparedScreenshots)
     refreshDerivedData(targetProjectId)
   }
 
@@ -174,28 +188,46 @@ class ProjectExportImportImporter(
     project.lastTaskNumber = maxOf(sourceLastTaskNumber, maxImportedTaskNumber)
   }
 
+  private class PreparedScreenshot(
+    val screenshot: Screenshot,
+    val full: ByteArray,
+    val middleSized: ByteArray,
+    val thumbnail: ByteArray,
+  )
+
   /**
-   * Re-stores each imported screenshot's bytes. The row was persisted in phase A, so its id and createdAt
-   * (and thus the hash-derived path `f(id, createdAt)`) already exist. Restore lives here rather than in the
-   * deserializer because it needs the parsed blobs, which the deserializer never sees. The full image is
-   * stored byte-identically from the zip; the middle/thumbnail sizes are regenerated, never trusted from it.
+   * Converts each imported screenshot's bytes (the middle/thumbnail sizes are regenerated, never trusted
+   * from the zip) WITHOUT writing anything. This is the fallible half of the restore — image conversion —
+   * so a bad image throws here, before [writePreparedScreenshots] touches storage.
    */
-  private fun restoreScreenshots(
+  private fun prepareScreenshots(
     screenshotsBySourceId: Map<Long, Screenshot>,
     blobs: Map<String, ByteArray>,
-  ) {
-    screenshotsBySourceId.forEach { (sourceId, screenshot) ->
+  ): List<PreparedScreenshot> =
+    screenshotsBySourceId.mapNotNull { (sourceId, screenshot) ->
       val name = ScreenshotBlobHandler.blobName(sourceId, screenshot.extension)
       val full = blobs[name]
       if (full == null) {
         logger.warn("Imported screenshot $sourceId has no blob '$name' in the zip; stored without an image")
-        return@forEach
+        return@mapNotNull null
       }
-      val converter = ImageConverter(full.inputStream())
-      val middleSized = converter.getThumbnail(600).toByteArray()
-      val thumbnail = converter.getThumbnail(200).toByteArray()
-      screenshotService.storeFiles(screenshot, full, middleSized, thumbnail)
+      corruptArchiveOnImageError {
+        val converter = ImageConverter(full.inputStream())
+        PreparedScreenshot(
+          screenshot,
+          full,
+          converter.getThumbnail(ScreenshotService.MIDDLE_SIZED_MAX_DIMENSION).toByteArray(),
+          converter.getThumbnail(ScreenshotService.THUMBNAIL_MAX_DIMENSION).toByteArray(),
+        )
+      }
     }
+
+  /**
+   * Writes the prepared screenshots. The row was persisted in phase A, so its id and createdAt (and thus
+   * the hash-derived path `f(id, createdAt)`) already exist. Pure byte storage — no fallible conversion.
+   */
+  private fun writePreparedScreenshots(prepared: List<PreparedScreenshot>) {
+    prepared.forEach { screenshotService.storeFiles(it.screenshot, it.full, it.middleSized, it.thumbnail) }
   }
 
   /**
@@ -212,8 +244,24 @@ class ProjectExportImportImporter(
       project.avatarHash = null
       return
     }
-    project.avatarHash = avatarService.storeAvatarFiles(avatar.value.inputStream(), project)
+    // storeAvatarFiles converts (getImage + getThumbnail) before it writes; a bad avatar throws before any
+    // file is stored, so translate it to a corrupt-archive 400 rather than an uncaught 500.
+    project.avatarHash = corruptArchiveOnImageError { avatarService.storeAvatarFiles(avatar.value.inputStream(), project) }
   }
+
+  // ImageConverter.getThumbnail — the operation the write path runs on every image blob — throws for bytes
+  // with no image header (NPE from a null ImageIO.read), a corrupt/truncated body (IIOException), and a
+  // decodable-but-degenerate image whose scaled dimension floors to 0 (IllegalArgumentException). Translate
+  // all of them to a corrupt-archive 400 so a hand-crafted zip is not a 500 + Sentry alert (per the class
+  // KDoc), and run it before any write so a rejected image leaves no orphaned files.
+  private inline fun <T> corruptArchiveOnImageError(convert: () -> T): T =
+    try {
+      convert()
+    } catch (e: IOException) {
+      throw corruptArchive(e)
+    } catch (e: RuntimeException) {
+      throw corruptArchive(e)
+    }
 
   /**
    * Restores every SIDE_CHANNEL entity (e.g. BigMeta) from its own zip entry, remapping source ids to the

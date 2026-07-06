@@ -9,10 +9,11 @@ import jakarta.persistence.metamodel.EntityType
  *
  * The edge set is **all** singular owning associations to OWNED targets (required *and* nullable), not just
  * the required ones, so the order is also a safe child-before-parent basis (a nullable FK like `Key.branch`
- * still imposes an ordering); inserting over the superset trivially respects the required subset too
- * (nullable FKs are wired in the deserializer's second phase, after every row exists). Self-references
- * (`Branch.originBranch`) are not edges — a self-referential table is filled in one statement, and a
- * self-edge would be a cycle. (The wipe side does not consume this order — [ProjectContentClearer] hand-
+ * still imposes an ordering); inserting over the superset trivially respects the required subset too. A
+ * nullable owning FK is resolved in phase A exactly like a required one — which is precisely why it must be
+ * an edge here; only self-references and to-many owning links are deferred to the deserializer's phase B.
+ * Self-references (`Branch.originBranch`) are not edges — a self-referential table is filled in one
+ * statement, and a self-edge would be a cycle. (The wipe side does not consume this order — [ProjectContentClearer] hand-
  * writes its delete sequence because the FK hazards it faces, join tables and non-OWNED branch-merge rows,
  * aren't expressible by singular-FK topology.)
  */
@@ -22,7 +23,7 @@ object OwnedTypeTopologicalOrder {
       entityManagerEntities
         .filter { ProjectExportImportPolicyRegistry.policyOf(it.javaType.name) == ExportImportPolicy.OWNED }
     val byName = owned.associateBy { it.javaType.name }
-    val visited = LinkedHashSet<String>()
+    val visited = HashSet<String>()
     val ordered = mutableListOf<EntityType<*>>()
     val onStack = HashSet<String>()
 

@@ -39,9 +39,11 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import java.awt.image.BufferedImage
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.nio.file.Files
+import javax.imageio.ImageIO
 import java.util.Base64
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
@@ -95,6 +97,45 @@ class ProjectExportImportImporterTest : AbstractSpringTest() {
         .withFailMessage("OWNED type %s did not round-trip identically (column fidelity)", type)
         .containsExactlyInAnyOrderElementsOf(comparableAttrs(sourceZip, type))
     }
+  }
+
+  @Test
+  fun `mirrors the source project name onto the target while preserving the target's slug`() {
+    val originalSlug =
+      readInTransaction { entityManager.find(Project::class.java, target.targetProject.id).slug }
+
+    importSourceOntoTarget()
+
+    val project = readInTransaction { entityManager.find(Project::class.java, target.targetProject.id) }
+    assertThat(project.name).isEqualTo(source.project.name)
+    assertThat(project.slug).isEqualTo(originalSlug)
+  }
+
+  @Test
+  fun `advances lastTaskNumber to the high-watermark of the source and the imported tasks`() {
+    val sourceLastTaskNumber =
+      readInTransaction { entityManager.find(Project::class.java, source.project.id).lastTaskNumber }
+
+    importSourceOntoTarget()
+
+    val (targetLastTaskNumber, maxImportedTaskNumber) =
+      readInTransaction {
+        val last = entityManager.find(Project::class.java, target.targetProject.id).lastTaskNumber
+        val maxTask =
+          entityManager
+            .createQuery(
+              "select coalesce(max(t.number), 0) from Task t where t.project.id = :p",
+              java.lang.Long::class.java,
+            ).setParameter("p", target.targetProject.id)
+            .singleResult
+            .toLong()
+        last to maxTask
+      }
+    // The fixture's source counter is ahead of every live task number (source-wins branch): the target must
+    // adopt the source high-watermark, not the max imported task number, so a regression that dropped the
+    // source operand (lastTaskNumber = maxImportedTaskNumber) would be caught here.
+    assertThat(sourceLastTaskNumber).isGreaterThan(maxImportedTaskNumber)
+    assertThat(targetLastTaskNumber).isEqualTo(sourceLastTaskNumber)
   }
 
   @Test
@@ -798,6 +839,42 @@ class ProjectExportImportImporterTest : AbstractSpringTest() {
     }
 
   /** Re-zips [zip], dropping every entry whose name matches [drop] — used to simulate a missing blob. */
+  @Test
+  fun `rejects an archive whose avatar blob is a decodable but non-thumbnailable image`() {
+    // 200x1 decodes and survives getThumbnail(200) but floors to a zero dimension at storeAvatarFiles'
+    // getThumbnail(50) — a decodable-but-unthumbnailable avatar that must be a clean 400, not a 500.
+    val degenerate =
+      ByteArrayOutputStream().use { out ->
+        ImageIO.write(BufferedImage(200, 1, BufferedImage.TYPE_INT_RGB), "png", out)
+        out.toByteArray()
+      }
+    val zip =
+      rezipReplacing(exportZip(source.project.id), degenerate) {
+        it.startsWith("${ExportZipLayout.BLOBS_DIR}avatar/")
+      }
+    assertImportRejected(zip, Message.PROJECT_IMPORT_CORRUPT_ARCHIVE)
+  }
+
+  private fun rezipReplacing(
+    zip: ByteArray,
+    replacement: ByteArray,
+    match: (String) -> Boolean,
+  ): ByteArray {
+    val out = ByteArrayOutputStream()
+    ZipOutputStream(out).use { zos ->
+      ZipInputStream(ByteArrayInputStream(zip)).use { zis ->
+        generateSequence { zis.nextEntry }.filterNot { it.isDirectory }.forEach { entry ->
+          var bytes = zis.readAllBytes()
+          if (match(entry.name)) bytes = replacement
+          zos.putNextEntry(ZipEntry(entry.name))
+          zos.write(bytes)
+          zos.closeEntry()
+        }
+      }
+    }
+    return out.toByteArray()
+  }
+
   private fun rezipWithout(
     zip: ByteArray,
     drop: (String) -> Boolean,

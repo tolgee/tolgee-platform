@@ -9,9 +9,8 @@ class SideChannelHandlerRegistry(
 ) {
   private val handlerByEntryName: Map<String, SideChannelHandler> = handlers.associateBy { it.entryName }
 
-  // Keyed by the JVM binary name (java.name) to match EntityType.javaType.name and the java.name keys in
-  // ProjectExportImportPolicyRegistry.sideChannelClassNames — not qualifiedName, which differs for a
-  // nested @Entity (`Outer.Inner` vs `Outer$Inner`).
+  // Keyed by the JVM binary name (java.name) to match ProjectExportImportPolicyRegistry's keys; see its
+  // classify() for why java.name and not qualifiedName.
   private val handlerByEntityClassName: Map<String, SideChannelHandler> =
     handlers.associateBy { it.entityClass.java.name }
 

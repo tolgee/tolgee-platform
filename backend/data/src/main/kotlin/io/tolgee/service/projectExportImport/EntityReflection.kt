@@ -1,5 +1,6 @@
 package io.tolgee.service.projectExportImport
 
+import io.tolgee.model.annotation.DoNotExport
 import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany

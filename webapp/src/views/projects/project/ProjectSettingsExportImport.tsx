@@ -22,16 +22,16 @@ import {
 
 const StyledManifest = styled(Box)`
   display: grid;
-  gap: 4px;
-  padding: 12px 16px;
+  gap: ${({ theme }) => theme.spacing(0.5)};
+  padding: ${({ theme }) => theme.spacing(1.5, 2)};
   border: 1px solid ${({ theme }) => theme.palette.divider1};
-  border-radius: 6px;
+  border-radius: ${({ theme }) => theme.shape.borderRadius}px;
 `;
 
 const StyledManifestRow = styled(Box)`
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: 8px;
+  gap: ${({ theme }) => theme.spacing(1)};
 `;
 
 export const ProjectSettingsExportImport = () => {
@@ -108,6 +108,8 @@ export const ProjectSettingsExportImport = () => {
   const versionMismatch =
     manifest !== null && manifest.schemaVersion !== config.version;
 
+  const importDisabled = !file || manifestLoading || manifestUnreadable;
+
   const runImport = (selected: FilesType[number], ignoreVersion: boolean) => {
     importLoadable.mutate(
       {
@@ -130,7 +132,7 @@ export const ProjectSettingsExportImport = () => {
 
   const handleImport = () => {
     const selected = file;
-    if (!selected || manifestLoading || manifestUnreadable) {
+    if (importDisabled || !selected) {
       return;
     }
     if (versionMismatch) {
@@ -179,7 +181,7 @@ export const ProjectSettingsExportImport = () => {
 
   return (
     <Box display="grid" mb={8} data-cy="project-settings-export-import">
-      <Typography variant="h5" mt={4} mb="20px">
+      <Typography variant="h5" mt={4} mb={2.5}>
         <T keyName="project_settings_export_title" />
       </Typography>
       <Typography variant="body1" mb={2}>
@@ -197,7 +199,7 @@ export const ProjectSettingsExportImport = () => {
         </LoadingButton>
       </Box>
 
-      <Typography variant="h5" mt={5} mb="20px">
+      <Typography variant="h5" mt={5} mb={2.5}>
         <T keyName="project_settings_import_title" />
       </Typography>
       <Typography variant="body1" mb={2}>
@@ -223,7 +225,11 @@ export const ProjectSettingsExportImport = () => {
       />
 
       {manifestUnreadable && (
-        <Alert severity="error" sx={{ mb: 2 }}>
+        <Alert
+          severity="error"
+          sx={{ mb: 2 }}
+          data-cy="project-settings-import-manifest-unreadable"
+        >
           <T keyName="project_settings_import_manifest_unreadable" />
         </Alert>
       )}
@@ -273,7 +279,7 @@ export const ProjectSettingsExportImport = () => {
         <DangerButton
           data-cy="project-settings-import-button"
           loading={importLoadable.isLoading}
-          disabled={!file || manifestLoading || manifestUnreadable}
+          disabled={importDisabled}
           onClick={handleImport}
         >
           <T keyName="project_settings_import_button" />

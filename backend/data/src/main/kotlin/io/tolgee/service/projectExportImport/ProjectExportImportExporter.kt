@@ -14,6 +14,7 @@ import io.tolgee.service.projectExportImport.sidechannel.SideChannelHandlerRegis
 import jakarta.persistence.EntityManager
 import jakarta.persistence.metamodel.EntityType
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Isolation
 import org.springframework.transaction.annotation.Transactional
 import java.io.BufferedOutputStream
 import java.nio.file.Files
@@ -25,7 +26,10 @@ import java.util.zip.ZipOutputStream
  * Serializes one project's OWNED subgraph and its external blobs into a self-contained export zip
  * (layout: [ExportZipLayout]). Rows are discovered per-OWNED-type via [ProjectScopedCollectorQueries]
  * and read reflectively by [EntityMetamodelReader]. The whole zip is built into a temp file inside one
- * read-only transaction so no DB/blob read happens lazily during streaming.
+ * read-only REPEATABLE READ transaction so no DB/blob read happens lazily during streaming, and the
+ * per-type collection walk (many separate queries) reads one stable snapshot — under READ COMMITTED a
+ * concurrent commit between two collector queries would tear the graph (e.g. a Translation captured whose
+ * Key was missed), producing a zip that fails to import.
  */
 @Component
 class ProjectExportImportExporter(
@@ -40,7 +44,7 @@ class ProjectExportImportExporter(
    * Builds the export zip in a temp file and returns it with the source project name (read in the same
    * transaction). The caller must delete the file.
    */
-  @Transactional(readOnly = true)
+  @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
   fun exportToTempFile(
     projectId: Long,
     version: String,
@@ -112,8 +116,16 @@ class ProjectExportImportExporter(
     project: Project,
   ) {
     val projectType = entityManager.metamodel.entity(Project::class.java)
-    zip.putNextEntry(ZipEntry(ExportZipLayout.PROJECT))
-    zip.write(objectMapper.writeValueAsBytes(EntityMetamodelReader.read(project, projectType)))
+    writeRawEntry(zip, ExportZipLayout.PROJECT, objectMapper.writeValueAsBytes(EntityMetamodelReader.read(project, projectType)))
+  }
+
+  private fun writeRawEntry(
+    zip: ZipOutputStream,
+    entryName: String,
+    bytes: ByteArray,
+  ) {
+    zip.putNextEntry(ZipEntry(entryName))
+    zip.write(bytes)
     zip.closeEntry()
   }
 
@@ -150,9 +162,7 @@ class ProjectExportImportExporter(
     writtenNames: MutableSet<String>,
   ) {
     if (!writtenNames.add(blob.name)) return
-    zip.putNextEntry(ZipEntry(ExportZipLayout.blobPath(blob.name)))
-    zip.write(blob.bytes)
-    zip.closeEntry()
+    writeRawEntry(zip, ExportZipLayout.blobPath(blob.name), blob.bytes)
   }
 
   private fun writeManifest(
@@ -170,9 +180,7 @@ class ProjectExportImportExporter(
         entityCounts = counts,
         sideChannelCounts = sideChannelCounts,
       )
-    zip.putNextEntry(ZipEntry(ExportZipLayout.MANIFEST))
-    zip.write(objectMapper.writeValueAsBytes(manifest))
-    zip.closeEntry()
+    writeRawEntry(zip, ExportZipLayout.MANIFEST, objectMapper.writeValueAsBytes(manifest))
   }
 
   private fun collect(
