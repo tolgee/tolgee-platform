@@ -185,10 +185,14 @@ export const GenerateApiKeyDialog: FunctionComponent<Props> = (props) => {
                 validationSchema={Validation.CREATE_API_KEY}
               >
                 {(formikProps: FormikProps<Value>) => {
-                  const project = getProject(formikProps.values.projectId)!;
+                  // The selected project can disappear from the list (e.g. its
+                  // organization was just deleted and the query refetched), so
+                  // fall back to the first available project.
+                  const project =
+                    getProject(formikProps.values.projectId) ?? getProject();
 
                   const availableScopes = new Set(
-                    project.computedPermission.scopes ?? []
+                    project?.computedPermission?.scopes ?? []
                   );
 
                   useEffect(() => {
@@ -200,6 +204,19 @@ export const GenerateApiKeyDialog: FunctionComponent<Props> = (props) => {
                       )
                     );
                   }, [project]);
+
+                  useEffect(() => {
+                    if (
+                      project &&
+                      formikProps.values.projectId !== project.id
+                    ) {
+                      formikProps.setFieldValue('projectId', project.id);
+                    }
+                  }, [project?.id]);
+
+                  if (!project) {
+                    return null;
+                  }
 
                   return (
                     <>
