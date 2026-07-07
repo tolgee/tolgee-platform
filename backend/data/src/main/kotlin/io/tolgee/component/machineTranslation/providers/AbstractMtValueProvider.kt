@@ -4,6 +4,8 @@ import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.component.machineTranslation.metadata.MtMetadata
 
 abstract class AbstractMtValueProvider : MtValueProvider {
+  protected open val placeholderProtector: MtPlaceholderProtector = NoopMtPlaceholderProtector
+
   private val String.toSuitableTag: String?
     get() = getSuitableTag(this)
 
@@ -33,12 +35,17 @@ abstract class AbstractMtValueProvider : MtValueProvider {
       )
     }
 
-    return translateViaProvider(
-      params.apply {
-        sourceLanguageTag = suitableSourceTag
-        targetLanguageTag = suitableTargetTag
-      },
-    )
+    val preparedParams =
+      params
+        .copy(text = placeholderProtector.protect(params.text))
+        .apply {
+          sourceLanguageTag = suitableSourceTag
+          targetLanguageTag = suitableTargetTag
+        }
+
+    return translateViaProvider(preparedParams).also {
+      it.translated = it.translated?.let(placeholderProtector::restore)
+    }
   }
 
   override fun getMetadata(
