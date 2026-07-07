@@ -12,4 +12,5 @@ class SelfHostedUsageLimitsModel(
   val keys: LimitModel,
   val seats: LimitModel,
   val mtCreditsInCents: LimitModel,
+  val words: LimitModel,
 ) : RepresentationModel<SelfHostedUsageLimitsModel>()

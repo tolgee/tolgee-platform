@@ -5,6 +5,7 @@
 import type { components } from './apiSchema.generated';
 
 export type AcceptAuthProviderChangeRequest = components['schemas']['AcceptAuthProviderChangeRequest'];
+export type AdsSessionResponse = components['schemas']['AdsSessionResponse'];
 export type AiPlaygroundResultModel = components['schemas']['AiPlaygroundResultModel'];
 export type AiPlaygroundResultRequest = components['schemas']['AiPlaygroundResultRequest'];
 export type AnnouncementDto = components['schemas']['AnnouncementDto'];
@@ -78,6 +79,7 @@ export type ContentDeliveryConfigRequest = components['schemas']['ContentDeliver
 export type ContentStorageModel = components['schemas']['ContentStorageModel'];
 export type ContentStorageRequest = components['schemas']['ContentStorageRequest'];
 export type CopyTranslationRequest = components['schemas']['CopyTranslationRequest'];
+export type CreateAdsSessionRequest = components['schemas']['CreateAdsSessionRequest'];
 export type CreateApiKeyDto = components['schemas']['CreateApiKeyDto'];
 export type CreateBranchModel = components['schemas']['CreateBranchModel'];
 export type CreateGlossaryRequest = components['schemas']['CreateGlossaryRequest'];
@@ -302,6 +304,7 @@ export type RegenerateApiKeyDto = components['schemas']['RegenerateApiKeyDto'];
 export type RegeneratePatDto = components['schemas']['RegeneratePatDto'];
 export type RelatedKeyDto = components['schemas']['RelatedKeyDto'];
 export type RenameBranchModel = components['schemas']['RenameBranchModel'];
+export type ReportSessionConversionRequest = components['schemas']['ReportSessionConversionRequest'];
 export type ResetPassword = components['schemas']['ResetPassword'];
 export type ResetPasswordRequest = components['schemas']['ResetPasswordRequest'];
 export type ResolveAllBranchMergeConflictsRequest = components['schemas']['ResolveAllBranchMergeConflictsRequest'];

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonGetter
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonSetter
 import io.tolgee.constants.Feature
+import io.tolgee.publicBilling.MetricType
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
 import java.util.Date
@@ -23,6 +24,7 @@ open class SelfHostedEePlanModel(
   val nonCommercial: Boolean,
   val isPayAsYouGo: Boolean,
   val archivedAt: Date? = null,
+  val metricType: MetricType = MetricType.KEYS_SEATS,
 ) : RepresentationModel<SelfHostedEePlanModel>() {
   /**
    * We need to provide this setter so unrecognized features are ignored in situation
