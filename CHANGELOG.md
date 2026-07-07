@@ -1,3 +1,10 @@
+## [3.209.2](https://github.com/tolgee/tolgee-platform/compare/v3.209.1...v3.209.2) (2026-07-07)
+
+
+### Bug Fixes
+
+* protect MT placeholders from AWS Translate mangling for Traditional Chinese ([#3779](https://github.com/tolgee/tolgee-platform/issues/3779)) ([782ce14](https://github.com/tolgee/tolgee-platform/commit/782ce14bd601db6cfc7ba9498abb5e2c5b4c544a))
+
 ## [3.209.1](https://github.com/tolgee/tolgee-platform/compare/v3.209.0...v3.209.1) (2026-07-01)
 
 
