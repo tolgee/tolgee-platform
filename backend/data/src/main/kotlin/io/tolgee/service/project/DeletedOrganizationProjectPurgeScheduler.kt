@@ -78,7 +78,7 @@ class DeletedOrganizationProjectPurgeScheduler(
   companion object {
     private const val PURGE_LOCK_NAME = "orphan_project_purge_lock"
     private const val BATCH_SIZE = 50
-    private val PURGE_PERIOD = Duration.ofHours(1)
+    private val PURGE_PERIOD = Duration.ofDays(1)
     private val PURGE_LOCK_LEASE_TIME = Duration.ofMinutes(10)
   }
 }
