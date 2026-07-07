@@ -52,6 +52,29 @@ class SoftDeleteTest : AbstractSpringTest() {
   }
 
   @Test
+  fun `deleting an organization soft deletes its projects' languages`() {
+    val testData = BaseTestData()
+    executeInNewTransaction {
+      testDataService.saveTestData(testData.root)
+    }
+
+    val organizationId = testData.projectBuilder.self.organizationOwner.id
+    val languageId = testData.englishLanguage.id
+
+    executeInNewTransaction {
+      organizationService.delete(organizationService.get(organizationId))
+    }
+
+    val deletedAt =
+      entityManager
+        .createNativeQuery("select deleted_at from language where id = :id")
+        .setParameter("id", languageId)
+        .singleResult
+
+    deletedAt.assert.isNotNull
+  }
+
+  @Test
   fun `queries don't return deleted projects`() {
     val testData = BaseTestData()
     executeInNewTransaction {

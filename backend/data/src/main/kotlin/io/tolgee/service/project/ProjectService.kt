@@ -318,7 +318,7 @@ class ProjectService(
   @Transactional
   @CacheEvict(cacheNames = [Caches.PROJECTS], allEntries = true)
   fun softDeleteAllInOrganization(organizationId: Long) {
-    projectRepository.softDeleteByOrganizationId(organizationId, currentDateProvider.date)
+    findAllActiveInOrganization(organizationId).forEach { softDeleteProject(it) }
   }
 
   @Transactional(readOnly = true)
@@ -367,15 +367,19 @@ class ProjectService(
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#id")
   fun deleteProject(id: Long) {
     val project = get(id)
-    val languages = project.languages
+    softDeleteProject(project)
+    applicationContext.publishEvent(OnProjectSoftDeleted(project))
+  }
+
+  private fun softDeleteProject(project: Project) {
     val currentDate = currentDateProvider.date
+    val languages = project.languages
     languages.forEach {
       it.deletedAt = currentDate
     }
     languageService.saveAll(languages)
     project.deletedAt = currentDate
     save(project)
-    applicationContext.publishEvent(OnProjectSoftDeleted(project))
   }
 
   /**
