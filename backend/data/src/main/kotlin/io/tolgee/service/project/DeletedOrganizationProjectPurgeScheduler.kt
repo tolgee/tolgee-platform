@@ -8,6 +8,7 @@ import io.tolgee.util.executeInNewTransaction
 import io.tolgee.util.logger
 import io.tolgee.util.runSentryCatching
 import org.springframework.boot.context.event.ApplicationReadyEvent
+import org.springframework.context.annotation.Lazy
 import org.springframework.context.event.EventListener
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Component
@@ -24,6 +25,7 @@ import java.time.Duration
 @Component
 class DeletedOrganizationProjectPurgeScheduler(
   private val projectService: ProjectService,
+  @Lazy
   private val projectHardDeletingService: ProjectHardDeletingService,
   private val lockingProvider: LockingProvider,
   private val transactionManager: PlatformTransactionManager,
