@@ -431,6 +431,13 @@ export class Validation {
       is: false,
       then: Yup.string().required(),
     }),
+    includedUsage: Yup.object().when(['metricType', 'free'], {
+      is: (metricType: any, free: any) =>
+        metricType === 'HOSTED_WORDS' && !free,
+      then: Yup.object({
+        words: Yup.number().moreThan(0).required(),
+      }),
+    }),
   });
 
   static readonly STORAGE_FORM_AZURE_CREATE = Yup.object({
