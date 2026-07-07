@@ -69,6 +69,8 @@ class EeSubscription :
       isPayAsYouGo = isPayAsYouGo,
       keysLimit = keysLimit,
       seatsLimit = seatsLimit,
+      includedWords = includedWords,
+      wordsLimit = wordsLimit,
     )
   }
 
@@ -93,4 +95,14 @@ class EeSubscription :
   var seatsLimit: Long = 0L
 
   var isPayAsYouGo: Boolean = false
+
+  /**
+   * How many words are included in the subscription plan
+   */
+  var includedWords: Long = 0L
+
+  /**
+   * How many words can a customer use until they reach spending limit
+   */
+  var wordsLimit: Long = -1L
 }

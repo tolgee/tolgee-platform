@@ -72,6 +72,11 @@ class EeLicensingMockRequestUtil(
               mockedPlan.includedUsage.mtCredits,
               mockedPlan.includedUsage.mtCredits,
             ),
+          words =
+            LimitModel(
+              mockedPlan.includedUsage.words,
+              mockedPlan.includedUsage.words,
+            ),
         ),
     )
 

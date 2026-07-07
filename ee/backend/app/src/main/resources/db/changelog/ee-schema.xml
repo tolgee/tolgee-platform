@@ -131,4 +131,18 @@
             </column>
         </createTable>
     </changeSet>
+    <changeSet author="dkrizan" id="1751900000000-1">
+        <addColumn tableName="ee_subscription">
+            <column name="included_words" type="BIGINT" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="dkrizan" id="1751900000000-2">
+        <addColumn tableName="ee_subscription">
+            <column name="words_limit" type="BIGINT" defaultValue="-1">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
