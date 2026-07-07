@@ -1,6 +1,7 @@
 package io.tolgee.service
 
 import io.tolgee.AbstractSpringTest
+import io.tolgee.development.testDataBuilder.data.CountAllWordsOnInstanceTestData
 import io.tolgee.development.testDataBuilder.data.OrganizationStatsTestData
 import io.tolgee.development.testDataBuilder.data.OrganizationStatsWordCountTestData
 import io.tolgee.service.organization.OrganizationStatsService
@@ -145,5 +146,20 @@ class OrganizationStatsServiceTest : AbstractSpringTest() {
     testDataService.saveTestData(wcData.root)
     val wordCount = organizationStatsService.getWordCount(wcData.emptyTranslationOrg.id)
     assertThat(wordCount).isEqualTo(0)
+  }
+
+  @Test
+  fun `countAllWordsOnInstance sums branch-deduped word counts across the whole instance`() {
+    // firstOrg: EN "hello world" = 2 words
+    // secondOrg (use_branching = true): same key on main ("one" = 1) and feature
+    // ("hello world there" = 3) branches — MAX(1, 3) = 3, not the sum (4)
+    // Total contributed by this test data: 2 + 3 = 5
+    val baseline = organizationStatsService.countAllWordsOnInstance()
+
+    val cawData = CountAllWordsOnInstanceTestData()
+    testDataService.saveTestData(cawData.root)
+
+    val wordCount = organizationStatsService.countAllWordsOnInstance()
+    assertThat(wordCount - baseline).isEqualTo(5)
   }
 }
