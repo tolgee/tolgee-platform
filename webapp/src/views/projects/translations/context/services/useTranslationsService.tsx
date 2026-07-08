@@ -22,6 +22,10 @@ import { PrefilterType } from '../../prefilters/usePrefilter';
 import { useConfig } from 'tg.globalContext/helpers';
 import { useQaChecksEnabled } from 'tg.ee';
 import { useTranslationFiltersService } from './useTranslationFilterService';
+import {
+  buildSearchRequestParams,
+  getReferencedLanguageTags,
+} from '../../searchQuery/buildSearchRequestParams';
 
 const PAGE_SIZE = 60;
 
@@ -44,6 +48,7 @@ type Props = {
   updateLocalStorageLanguages?: boolean;
   baseLang: string | undefined;
   prefilter?: PrefilterType;
+  allLanguageTags?: string[];
 };
 
 const addBaseIfMissing = (languages: string[] | undefined, base: string) => {
@@ -54,6 +59,21 @@ const addBaseIfMissing = (languages: string[] | undefined, base: string) => {
     return [...languages, base];
   }
   return languages;
+};
+
+// the backend resolves language-scoped search only within the requested languages
+const addSearchedIfMissing = (
+  languages: string[] | undefined,
+  searched: string[]
+) => {
+  if (!languages || languages.length === 0) {
+    return languages;
+  }
+  const missing = searched.filter((tag) => !languages.includes(tag));
+  if (missing.length === 0) {
+    return languages;
+  }
+  return [...languages, ...missing];
 };
 
 const shaveBy = (
@@ -134,15 +154,27 @@ export const useTranslationsService = (props: Props) => {
       ? [props.keyNamespace]
       : filtersQuery.filterNamespace;
 
+  const searchParams = useMemo(
+    () =>
+      buildSearchRequestParams(
+        urlSearch as string | undefined,
+        props.allLanguageTags ?? []
+      ),
+    [urlSearch, props.allLanguageTags]
+  );
+
   const requestQuery: TranslationsQueryType = {
     ...query,
     // smuggle in base lang if not present
-    languages: addBaseIfMissing(query.languages, props.baseLang!),
+    languages: addSearchedIfMissing(
+      addBaseIfMissing(query.languages, props.baseLang!),
+      getReferencedLanguageTags(searchParams)
+    ),
     ...filtersQuery,
     filterKeyName: props.keyName ? [props.keyName] : undefined,
     filterNamespace,
     filterKeyId: props.keyId ? [props.keyId] : undefined,
-    search: urlSearch as string,
+    ...searchParams,
     filterRevisionId:
       props.prefilter?.activity !== undefined
         ? [props.prefilter.activity]

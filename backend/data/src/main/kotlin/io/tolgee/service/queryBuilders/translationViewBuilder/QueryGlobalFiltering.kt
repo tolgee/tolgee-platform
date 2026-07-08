@@ -1,5 +1,6 @@
 package io.tolgee.service.queryBuilders.translationViewBuilder
 
+import io.tolgee.dtos.request.translation.TranslationFilterByPattern
 import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.model.Language_
 import io.tolgee.model.UserAccount_
@@ -25,6 +26,7 @@ import io.tolgee.model.translation.Translation_
 import jakarta.persistence.EntityManager
 import jakarta.persistence.Tuple
 import jakarta.persistence.criteria.CriteriaBuilder
+import jakarta.persistence.criteria.Expression
 import jakarta.persistence.criteria.JoinType
 import jakarta.persistence.criteria.Predicate
 import jakarta.persistence.criteria.Subquery
@@ -54,6 +56,7 @@ class QueryGlobalFiltering(
     filterHasNoScreenshot()
     filterHasDescription()
     filterHasNoDescription()
+    filterPatterns()
     filterSearch()
     filterRevisionId()
     filterFailedTargets()
@@ -72,6 +75,123 @@ class QueryGlobalFiltering(
       )
     }
   }
+
+  private fun filterPatterns() {
+    validatePatternParams()
+    applyFieldPatterns(params.filterKeyPattern, queryBase.keyNameExpression, negated = false, nullable = false)
+    applyFieldPatterns(params.filterNoKeyPattern, queryBase.keyNameExpression, negated = true, nullable = false)
+    applyFieldPatterns(
+      params.filterDescriptionPattern,
+      queryBase.descriptionExpression,
+      negated = false,
+      nullable = true,
+    )
+    applyFieldPatterns(
+      params.filterNoDescriptionPattern,
+      queryBase.descriptionExpression,
+      negated = true,
+      nullable = true,
+    )
+    applyFieldPatterns(
+      params.filterNamespacePattern,
+      queryBase.namespaceNameExpression,
+      negated = false,
+      nullable = true,
+    )
+    applyFieldPatterns(
+      params.filterNoNamespacePattern,
+      queryBase.namespaceNameExpression,
+      negated = true,
+      nullable = true,
+    )
+    applyTranslationPatterns(params.filterTranslationPattern, negated = false)
+    applyTranslationPatterns(params.filterNoTranslationPattern, negated = true)
+  }
+
+  private fun validatePatternParams() {
+    WildcardLikeUtil.validatePatterns(params.filterKeyPattern)
+    WildcardLikeUtil.validatePatterns(params.filterNoKeyPattern)
+    WildcardLikeUtil.validatePatterns(params.filterDescriptionPattern)
+    WildcardLikeUtil.validatePatterns(params.filterNoDescriptionPattern)
+    WildcardLikeUtil.validatePatterns(params.filterNamespacePattern)
+    WildcardLikeUtil.validatePatterns(params.filterNoNamespacePattern)
+    WildcardLikeUtil.validatePatterns(params.filterTranslationPattern)
+    WildcardLikeUtil.validatePatterns(params.filterNoTranslationPattern)
+  }
+
+  private fun applyFieldPatterns(
+    patterns: List<String>?,
+    field: Expression<String>,
+    negated: Boolean,
+    nullable: Boolean,
+  ) {
+    patterns?.forEach { pattern ->
+      queryBase.whereConditions.add(fieldPatternPredicate(field, pattern, negated, nullable))
+    }
+  }
+
+  private fun fieldPatternPredicate(
+    field: Expression<String>,
+    pattern: String,
+    negated: Boolean,
+    nullable: Boolean,
+  ): Predicate {
+    val like = patternLike(field, pattern)
+    if (!negated) return like
+    if (!nullable) return cb.not(like)
+    // `NOT (NULL LIKE x)` is NULL and drops the row — keys without the joined value must match
+    return cb.or(cb.isNull(field), cb.not(like))
+  }
+
+  private fun applyTranslationPatterns(
+    values: List<String>?,
+    negated: Boolean,
+  ) {
+    val parsed = values?.let { TranslationFilterByPattern.parseList(it) } ?: return
+    parsed.forEach { filter ->
+      val languageIds = patternLanguageIds(filter.languageTag) ?: return@forEach
+      val predicate = translationPatternPredicate(languageIds, filter.pattern)
+      queryBase.whereConditions.add(if (negated) cb.not(predicate) else predicate)
+    }
+  }
+
+  private fun patternLanguageIds(languageTag: String?): List<Long>? {
+    if (languageTag == null) {
+      return queryBase.languages.map { it.id }.takeIf { it.isNotEmpty() }
+    }
+    val language = queryBase.languages.find { it.tag == languageTag } ?: return null
+    return listOf(language.id)
+  }
+
+  private fun translationPatternPredicate(
+    languageIds: List<Long>,
+    pattern: String,
+  ): Predicate {
+    val subquery = queryBase.query.subquery(Long::class.java)
+    val tRoot = subquery.from(Translation::class.java)
+    val conditions = mutableListOf<Predicate>()
+    conditions.add(tRoot.get(Translation_.language).get(Language_.id).`in`(languageIds))
+    conditions.add(patternLike(tRoot.get(Translation_.text), pattern))
+    if (isCountQuery) {
+      subquery.select(tRoot.get(Translation_.key).get(Key_.id))
+      subquery.where(*conditions.toTypedArray())
+      return queryBase.root.get(Key_.id).`in`(subquery)
+    }
+    subquery.select(cb.literal(1L))
+    conditions.add(cb.equal(tRoot.get(Translation_.key).get(Key_.id), queryBase.root.get(Key_.id)))
+    subquery.where(*conditions.toTypedArray())
+    return cb.exists(subquery)
+  }
+
+  private fun patternLike(
+    field: Expression<String>,
+    pattern: String,
+  ): Predicate =
+    cb.like(
+      cb.upper(field),
+      WildcardLikeUtil.toLikePattern(pattern).uppercase(Locale.getDefault()),
+      WildcardLikeUtil.ESCAPE_CHAR,
+    )
 
   private fun filterSearch() {
     val search = params.search

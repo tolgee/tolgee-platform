@@ -22,7 +22,6 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.queryResults.TranslationHistoryView
 import io.tolgee.dtos.request.translation.GetTranslationsParams
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
-import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.hateoas.translations.KeysWithTranslationsPageModel
 import io.tolgee.hateoas.translations.KeysWithTranslationsPagedResourcesAssembler
@@ -53,7 +52,6 @@ import io.tolgee.service.translation.TranslationService
 import io.tolgee.service.translation.TranslationSuggestionService
 import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
-import org.springframework.beans.propertyeditors.CustomCollectionEditor
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
@@ -242,11 +240,7 @@ When null, resulting file will be a flat key-value object.
 
   @InitBinder("translationFilters")
   fun customizeBinding(binder: WebDataBinder) {
-    binder.registerCustomEditor(
-      List::class.java,
-      TranslationFilters::filterKeyName.name,
-      CustomCollectionEditor(List::class.java),
-    )
+    TranslationFiltersBindingCustomizer.customize(binder)
   }
 
   @GetMapping(value = [""])

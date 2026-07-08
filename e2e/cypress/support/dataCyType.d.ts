@@ -915,6 +915,8 @@ declare namespace DataCy {
         "translations-outdated-indicator": true;
         "translations-row": true;
         "translations-row-checkbox": true;
+        "translations-search-help-button": true;
+        "translations-search-help-popover": true;
         "translations-select-all-button": true;
         "translations-shortcuts-command": true;
         "translations-state-filter": true;

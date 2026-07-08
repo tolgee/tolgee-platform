@@ -32,6 +32,7 @@ import { useProject } from 'tg.hooks/useProject';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { applyBranchToUrl } from 'tg.component/branching/branchingPath';
 import { useTrashCount } from '../trash/useTrashCount';
+import { SearchSyntaxHelp } from './SearchSyntaxHelp';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -98,6 +99,7 @@ export const TranslationControls: React.FC<React.PropsWithChildren<Props>> = ({
             label={null}
             variant="outlined"
             placeholder={t('standard_search_label')}
+            endAdornment={<SearchSyntaxHelp />}
           />
           <TranslationFilters
             projectId={project.id}

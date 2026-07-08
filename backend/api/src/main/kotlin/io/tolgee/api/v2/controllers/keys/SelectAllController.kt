@@ -6,6 +6,7 @@ package io.tolgee.api.v2.controllers.keys
 
 import io.swagger.v3.oas.annotations.Operation
 import io.tolgee.api.v2.controllers.IController
+import io.tolgee.api.v2.controllers.translation.TranslationFiltersBindingCustomizer
 import io.tolgee.dtos.request.translation.SelectAllResponse
 import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.model.enums.Scope
@@ -17,8 +18,10 @@ import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.translation.TranslationService
 import org.springdoc.core.annotations.ParameterObject
+import org.springframework.web.bind.WebDataBinder
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.InitBinder
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -34,6 +37,11 @@ class SelectAllController(
   private val languageService: LanguageService,
   private val authenticationFacade: AuthenticationFacade,
 ) : IController {
+  @InitBinder("translationFilters")
+  fun customizeBinding(binder: WebDataBinder) {
+    TranslationFiltersBindingCustomizer.customize(binder)
+  }
+
   @GetMapping(
     value = [
       "/v2/projects/{projectId:[0-9]+}/translations/select-all",

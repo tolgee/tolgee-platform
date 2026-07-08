@@ -41,6 +41,7 @@ import {
   useTranslationsSelector,
 } from '../context/TranslationsContext';
 import { ViewMode } from '../context/types';
+import { SearchSyntaxHelp } from './SearchSyntaxHelp';
 
 const StyledLanguagesSelect = styled(LanguagesSelect)`
   & .MuiInputBase-root {
@@ -179,6 +180,7 @@ export const TranslationControlsCompact: React.FC<
                 width: '100%',
               }}
               setSearchOpen={setSearchOpen}
+              endAdornment={<SearchSyntaxHelp />}
             />
             <StyledIconButton size="small" onClick={() => setSearchOpen(false)}>
               <XClose />
