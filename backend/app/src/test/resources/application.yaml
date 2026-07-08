@@ -82,6 +82,7 @@ tolgee:
     mock-free-plan: true
     disable-initial-user-creation: true
     use-in-memory-file-storage: true
+    orphan-project-purge-enabled: false
   cache:
     caffeine-max-size: 1000
   machine-translation:

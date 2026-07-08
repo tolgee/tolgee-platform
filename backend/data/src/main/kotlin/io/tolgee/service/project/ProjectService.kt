@@ -315,6 +315,22 @@ class ProjectService(
     return projectRepository.findAllByOrganizationOwnerIdAndDeletedAtIsNull(organizationId)
   }
 
+  @Transactional
+  @CacheEvict(cacheNames = [Caches.PROJECTS], allEntries = true)
+  fun softDeleteAllInOrganization(organizationId: Long) {
+    findAllActiveInOrganization(organizationId).forEach { softDeleteProject(it) }
+  }
+
+  @Transactional(readOnly = true)
+  fun findIdsInDeletedOrganizations(pageable: Pageable): Page<Long> {
+    return projectRepository.findIdsInDeletedOrganizations(pageable)
+  }
+
+  @Transactional(readOnly = true)
+  fun findIncludingDeleted(id: Long): Project? {
+    return projectRepository.findById(id).orElse(null)
+  }
+
   @Transactional(readOnly = true)
   fun findAllActive(): List<Project> {
     return projectRepository.findAllByDeletedAtIsNull()
@@ -351,15 +367,19 @@ class ProjectService(
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#id")
   fun deleteProject(id: Long) {
     val project = get(id)
-    val languages = project.languages
+    softDeleteProject(project)
+    applicationContext.publishEvent(OnProjectSoftDeleted(project))
+  }
+
+  private fun softDeleteProject(project: Project) {
     val currentDate = currentDateProvider.date
+    val languages = project.languages
     languages.forEach {
       it.deletedAt = currentDate
     }
     languageService.saveAll(languages)
     project.deletedAt = currentDate
     save(project)
-    applicationContext.publishEvent(OnProjectSoftDeleted(project))
   }
 
   /**

@@ -99,6 +99,9 @@ interface ProjectRepository : JpaRepository<Project, Long> {
 
   fun findAllByOrganizationOwnerId(organizationOwnerId: Long): List<Project>
 
+  @Query("select p.id from Project p where p.organizationOwner.deletedAt is not null")
+  fun findIdsInDeletedOrganizations(pageable: Pageable): Page<Long>
+
   fun findAllByOrganizationOwnerIdAndDeletedAtIsNull(organizationOwnerId: Long): List<Project>
 
   fun findAllByDeletedAtIsNull(): List<Project>
