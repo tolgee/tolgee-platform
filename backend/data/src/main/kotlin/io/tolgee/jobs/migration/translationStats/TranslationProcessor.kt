@@ -1,7 +1,7 @@
 package io.tolgee.jobs.migration.translationStats
 
 import io.tolgee.util.TranslationStatsUtil
-import org.springframework.batch.item.ItemProcessor
+import org.springframework.batch.infrastructure.item.ItemProcessor
 
 class TranslationProcessor : ItemProcessor<StatsMigrationTranslationView, TranslationStats> {
   override fun process(item: StatsMigrationTranslationView): TranslationStats {

@@ -2,14 +2,14 @@ package io.tolgee.jobs.migration.translationStats
 
 import io.tolgee.repository.TranslationRepository
 import jakarta.persistence.EntityManager
-import org.springframework.batch.core.Job
-import org.springframework.batch.core.Step
+import org.springframework.batch.core.job.Job
 import org.springframework.batch.core.job.builder.JobBuilder
 import org.springframework.batch.core.repository.JobRepository
+import org.springframework.batch.core.step.Step
 import org.springframework.batch.core.step.builder.StepBuilder
-import org.springframework.batch.item.ItemReader
-import org.springframework.batch.item.ItemWriter
-import org.springframework.batch.item.data.RepositoryItemReader
+import org.springframework.batch.infrastructure.item.ItemReader
+import org.springframework.batch.infrastructure.item.ItemWriter
+import org.springframework.batch.infrastructure.item.data.RepositoryItemReader
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -49,10 +49,11 @@ class TranslationStatsJobConfiguration {
 
   val reader: ItemReader<StatsMigrationTranslationView>
     get() =
-      RepositoryItemReader<StatsMigrationTranslationView>().apply {
-        setRepository(translationRepository)
+      RepositoryItemReader<StatsMigrationTranslationView>(
+        translationRepository,
+        mapOf("id" to Sort.Direction.ASC),
+      ).apply {
         setMethodName(translationRepository::findAllForStatsUpdate.name)
-        setSort(mapOf("id" to Sort.Direction.ASC))
         setPageSize(100)
       }
 
