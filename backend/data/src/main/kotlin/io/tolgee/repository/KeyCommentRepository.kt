@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @Repository
 @Lazy
-interface KeyCommentRepository : JpaRepository<KeyComment?, Long?> {
+interface KeyCommentRepository : JpaRepository<KeyComment, Long> {
   @Modifying
   @Transactional
   @Query(

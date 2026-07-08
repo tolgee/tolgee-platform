@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository
 
 @Repository
 @Lazy
-interface ContentStorageRepository : JpaRepository<ContentStorage?, Long?> {
+interface ContentStorageRepository : JpaRepository<ContentStorage, Long> {
   fun findAllByProjectId(
     projectId: Long,
     pageable: Pageable,
