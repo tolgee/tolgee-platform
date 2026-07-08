@@ -12,7 +12,7 @@ import java.util.Optional
 
 @Repository
 @Lazy
-interface InvitationRepository : JpaRepository<Invitation?, Long?> {
+interface InvitationRepository : JpaRepository<Invitation, Long> {
   fun deleteAllByCreatedAtLessThan(date: Date)
 
   fun findOneByCode(code: String?): Optional<Invitation>

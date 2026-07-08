@@ -18,7 +18,7 @@ package io.tolgee.configuration
 
 import io.hypersistence.utils.hibernate.query.QueryStackTraceLogger
 import org.hibernate.cfg.AvailableSettings
-import org.springframework.boot.autoconfigure.orm.jpa.HibernatePropertiesCustomizer
+import org.springframework.boot.hibernate.autoconfigure.HibernatePropertiesCustomizer
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 

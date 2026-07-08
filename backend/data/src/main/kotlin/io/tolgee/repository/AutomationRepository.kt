@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository
 
 @Repository
 @Lazy
-interface AutomationRepository : JpaRepository<Automation?, Long?> {
+interface AutomationRepository : JpaRepository<Automation, Long> {
   @Query(
     """
     from Automation a

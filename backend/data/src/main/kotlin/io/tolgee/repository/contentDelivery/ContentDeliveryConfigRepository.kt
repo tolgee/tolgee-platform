@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository
 
 @Repository
 @Lazy
-interface ContentDeliveryConfigRepository : JpaRepository<ContentDeliveryConfig?, Long?> {
+interface ContentDeliveryConfigRepository : JpaRepository<ContentDeliveryConfig, Long> {
   @Query(
     """
     select count(c) = 0 from ContentDeliveryConfig c
