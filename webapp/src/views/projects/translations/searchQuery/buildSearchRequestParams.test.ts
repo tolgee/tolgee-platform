@@ -73,6 +73,15 @@ describe('buildSearchRequestParams', () => {
     });
   });
 
+  it('applies no filter for a qualifier with empty value', () => {
+    expect(buildSearchRequestParams('description:', LANGS)).toEqual({
+      search: undefined,
+    });
+    expect(buildSearchRequestParams('description: cart', LANGS)).toEqual({
+      search: 'cart',
+    });
+  });
+
   it('keeps commas in translation pattern values', () => {
     expect(buildSearchRequestParams('en:"cart, with comma"', LANGS)).toEqual({
       filterTranslationPattern: ['en,cart, with comma'],

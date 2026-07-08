@@ -40,7 +40,6 @@ import {
   useTranslationsSelector,
 } from '../context/TranslationsContext';
 import { ViewMode } from '../context/types';
-import { SearchSyntaxHelp } from './SearchSyntaxHelp';
 import { TranslationsSearchField } from './search/TranslationsSearchField';
 
 const StyledLanguagesSelect = styled(LanguagesSelect)`
@@ -172,8 +171,6 @@ export const TranslationControlsCompact: React.FC<
             <StyledSearch
               value={search || ''}
               onSearchChange={handleSearchChange}
-              label={null}
-              variant="outlined"
               placeholder={t('standard_search_label')}
               style={{
                 height: 35,
@@ -181,7 +178,6 @@ export const TranslationControlsCompact: React.FC<
                 width: '100%',
               }}
               setSearchOpen={setSearchOpen}
-              endAdornment={<SearchSyntaxHelp />}
               languageTags={allLanguages?.map((l) => l.tag) ?? []}
             />
             <StyledIconButton size="small" onClick={() => setSearchOpen(false)}>

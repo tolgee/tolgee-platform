@@ -15,6 +15,12 @@ export type TextToken = {
   value: string;
 };
 
+/** a recognized qualifier with an empty value — contributes nothing */
+export type IgnoredToken = {
+  type: 'ignored';
+  raw: string;
+};
+
 export type ScopedToken = {
   type: 'scoped';
   qualifier: ReservedQualifier | 'language';
@@ -24,10 +30,11 @@ export type ScopedToken = {
   value: string;
 };
 
-export type ParsedToken = TextToken | ScopedToken;
+export type ParsedToken = TextToken | ScopedToken | IgnoredToken;
 
 export type ParsedSearch = {
   tokens: ParsedToken[];
+  /** true when any token was recognized as query syntax (scoped or ignored) */
   hasScopedTokens: boolean;
 };
 
@@ -81,11 +88,21 @@ function parseToken(raw: string, languageTags: string[]): ParsedToken {
   }
   const [, minus, qualifierRaw, valueRaw] = match;
   const value = unquote(valueRaw);
-  if (!value) {
+  const qualifier = qualifierRaw.toLowerCase();
+  const isReserved = (RESERVED_QUALIFIERS as readonly string[]).includes(
+    qualifier
+  );
+  const languageTag = isReserved
+    ? undefined
+    : languageTags.find((tag) => tag.toLowerCase() === qualifier);
+  if (!isReserved && languageTag === undefined) {
     return textToken;
   }
-  const qualifier = qualifierRaw.toLowerCase();
-  if ((RESERVED_QUALIFIERS as readonly string[]).includes(qualifier)) {
+  // a qualifier the user is still typing the value for must not filter anything
+  if (!value.trim()) {
+    return { type: 'ignored', raw };
+  }
+  if (isReserved) {
     return {
       type: 'scoped',
       qualifier: qualifier as ReservedQualifier,
@@ -93,19 +110,13 @@ function parseToken(raw: string, languageTags: string[]): ParsedToken {
       value,
     };
   }
-  const languageTag = languageTags.find(
-    (tag) => tag.toLowerCase() === qualifier
-  );
-  if (languageTag !== undefined) {
-    return {
-      type: 'scoped',
-      qualifier: 'language',
-      languageTag,
-      negated: minus === '-',
-      value,
-    };
-  }
-  return textToken;
+  return {
+    type: 'scoped',
+    qualifier: 'language',
+    languageTag,
+    negated: minus === '-',
+    value,
+  };
 }
 
 /**
@@ -122,6 +133,6 @@ export function parseSearchQuery(
   );
   return {
     tokens,
-    hasScopedTokens: tokens.some((token) => token.type === 'scoped'),
+    hasScopedTokens: tokens.some((token) => token.type !== 'text'),
   };
 }

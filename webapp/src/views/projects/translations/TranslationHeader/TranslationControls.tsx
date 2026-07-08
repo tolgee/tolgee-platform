@@ -31,7 +31,6 @@ import { useProject } from 'tg.hooks/useProject';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { applyBranchToUrl } from 'tg.component/branching/branchingPath';
 import { useTrashCount } from '../trash/useTrashCount';
-import { SearchSyntaxHelp } from './SearchSyntaxHelp';
 import { TranslationsSearchField } from './search/TranslationsSearchField';
 
 const StyledContainer = styled('div')`
@@ -96,10 +95,7 @@ export const TranslationControls: React.FC<React.PropsWithChildren<Props>> = ({
           <StyledTranslationsSearchField
             value={search || ''}
             onSearchChange={setSearch}
-            label={null}
-            variant="outlined"
             placeholder={t('standard_search_label')}
-            endAdornment={<SearchSyntaxHelp />}
             languageTags={allLanguages?.map((l) => l.tag) ?? []}
           />
           <TranslationFilters

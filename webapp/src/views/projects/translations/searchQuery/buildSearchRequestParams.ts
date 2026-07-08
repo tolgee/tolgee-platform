@@ -82,6 +82,9 @@ export function buildSearchRequestParams(
       textParts.push(token.value);
       continue;
     }
+    if (token.type === 'ignored') {
+      continue;
+    }
     const name = paramName(token);
     result[name] = [...(result[name] ?? []), paramValue(token)];
   }

@@ -102,10 +102,21 @@ describe('parseSearchQuery', () => {
     ]);
   });
 
-  it('degrades empty qualifier value to text', () => {
+  it('ignores qualifier with empty value', () => {
     const result = parseSearchQuery('key:', LANGS);
+    expect(result.tokens).toEqual([{ type: 'ignored', raw: 'key:' }]);
+    expect(result.hasScopedTokens).toBe(true);
+  });
+
+  it('ignores language qualifier with empty value', () => {
+    const result = parseSearchQuery('de:', LANGS);
+    expect(result.tokens).toEqual([{ type: 'ignored', raw: 'de:' }]);
+  });
+
+  it('ignores qualifier with whitespace-only quoted value', () => {
+    const result = parseSearchQuery('description:" "', LANGS);
     expect(result.tokens).toEqual([
-      { type: 'text', raw: 'key:', value: 'key:' },
+      { type: 'ignored', raw: 'description:" "' },
     ]);
   });
 

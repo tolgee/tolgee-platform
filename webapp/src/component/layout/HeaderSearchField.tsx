@@ -11,13 +11,11 @@ export const HeaderSearchField = (
     onSearchChange: (value: string) => void;
     style?: React.CSSProperties;
     setSearchOpen?: (open: boolean) => void;
-    endAdornment?: React.ReactNode;
   }
 ) => {
   const theme = useTheme();
 
-  const { value, onSearchChange, setSearchOpen, endAdornment, ...otherProps } =
-    props;
+  const { value, onSearchChange, setSearchOpen, ...otherProps } = props;
 
   return (
     <TextField
@@ -31,22 +29,19 @@ export const HeaderSearchField = (
             <SearchSm width={20} height={20} />
           </InputAdornment>
         ),
-        endAdornment: (Boolean(value) || Boolean(endAdornment)) && (
+        endAdornment: Boolean(value) && (
           <InputAdornment
             position="end"
             style={{ marginRight: -5, marginLeft: 5 }}
           >
-            {Boolean(value) && (
-              <IconButton
-                size="small"
-                onClick={stopAndPrevent(() => onSearchChange(''))}
-                onMouseDown={stopAndPrevent()}
-                edge="start"
-              >
-                <XClose width={20} height={20} />
-              </IconButton>
-            )}
-            {endAdornment}
+            <IconButton
+              size="small"
+              onClick={stopAndPrevent(() => onSearchChange(''))}
+              onMouseDown={stopAndPrevent()}
+              edge="start"
+            >
+              <XClose width={20} height={20} />
+            </IconButton>
           </InputAdornment>
         ),
         style: {

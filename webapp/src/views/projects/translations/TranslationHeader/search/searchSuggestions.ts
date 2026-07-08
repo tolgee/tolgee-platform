@@ -51,15 +51,3 @@ export function getSuggestions(
   }
   return { items, replaceFrom, replaceTo: caret };
 }
-
-export function applySuggestion(
-  value: string,
-  state: SuggestionState,
-  item: SuggestionItem
-): { value: string; caret: number } {
-  const newValue =
-    value.slice(0, state.replaceFrom) +
-    item.insert +
-    value.slice(state.replaceTo);
-  return { value: newValue, caret: state.replaceFrom + item.insert.length };
-}

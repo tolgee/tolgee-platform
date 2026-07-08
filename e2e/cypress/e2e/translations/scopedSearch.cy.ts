@@ -5,6 +5,8 @@ import {
 import { ProjectDTO } from '../../../../webapp/src/service/response.types';
 import { waitForGlobalLoading } from '../../common/loading';
 
+const searchInput = () => cy.gcy('global-search-field').find('.cm-content');
+
 describe('Scoped search', () => {
   let project: ProjectDTO = null;
 
@@ -22,42 +24,43 @@ describe('Scoped search', () => {
     cy.gcy('translations-cell-main-action-button').click();
     waitForGlobalLoading();
 
-    cy.gcy('global-search-field').type('description:wombat');
+    searchInput().type('description:wombat');
     cy.contains('Cool key 01').should('be.visible');
     cy.contains('Cool key 02').should('not.exist');
 
     // "Cool" matches other keys by name, but not their descriptions
-    cy.gcy('global-search-field')
-      .find('input')
-      .clear()
-      .type('description:Cool');
+    searchInput().clear().type('description:Cool');
     cy.contains('Cool key 01').should('not.exist');
   });
 
+  it('ignores a qualifier while its value is still empty', () => {
+    searchInput().type('description:');
+    waitForGlobalLoading();
+    cy.contains('Cool key 01').should('be.visible');
+    cy.contains('Cool key 04').should('be.visible');
+  });
+
   it('searches keys by wildcard patterns', () => {
-    cy.gcy('global-search-field').type('key:*01');
+    searchInput().type('key:*01');
     cy.contains('Cool key 01').should('be.visible');
     cy.contains('Cool key 02').should('not.exist');
 
-    cy.gcy('global-search-field').find('input').clear().type('key:Cool*');
+    searchInput().clear().type('key:Cool*');
     cy.contains('Cool key 01').should('be.visible');
     cy.contains('Cool key 04').should('be.visible');
   });
 
   it('searches in a specific language', () => {
-    cy.gcy('global-search-field').type('cs:"Studený přeložený text 1"');
+    searchInput().type('cs:"Studený přeložený text 1"');
     cy.contains('Cool key 01').should('be.visible');
     cy.contains('Cool key 02').should('not.exist');
 
-    cy.gcy('global-search-field')
-      .find('input')
-      .clear()
-      .type('en:"Studený přeložený text"');
+    searchInput().clear().type('en:"Studený přeložený text"');
     cy.contains('Cool key 01').should('not.exist');
   });
 
   it('keeps plain search behavior', () => {
-    cy.gcy('global-search-field').type('Cool key 04');
+    searchInput().type('Cool key 04');
     cy.contains('Cool key 01').should('not.exist');
     cy.contains('Cool key 04').should('be.visible');
   });
@@ -72,20 +75,24 @@ describe('Scoped search', () => {
       .and('include', 'docs.tolgee.io');
   });
 
-  it('suggests qualifiers while typing and completes on click', () => {
-    cy.gcy('global-search-field').type('des');
-    cy.gcy('translations-search-suggestion-item')
+  it('suggests qualifiers after two letters and completes on click', () => {
+    searchInput().type('d');
+    cy.get('.cm-tooltip-autocomplete').should('not.exist');
+
+    searchInput().type('e');
+    cy.get('.cm-tooltip-autocomplete')
+      .should('be.visible')
       .contains('description:')
       .click();
-    cy.gcy('global-search-field')
-      .find('input')
-      .should('have.value', 'description:');
+    searchInput().should('have.text', 'description:');
   });
 
   it('completes qualifier with keyboard', () => {
-    cy.gcy('global-search-field').type('key{enter}');
-    cy.gcy('global-search-field').find('input').should('have.value', 'key:');
-    cy.focused().type('*01');
+    searchInput().type('key');
+    cy.get('.cm-tooltip-autocomplete').should('be.visible');
+    searchInput().type('{enter}');
+    searchInput().should('have.text', 'key:');
+    searchInput().type('*01');
     cy.contains('Cool key 01').should('be.visible');
     cy.contains('Cool key 02').should('not.exist');
   });

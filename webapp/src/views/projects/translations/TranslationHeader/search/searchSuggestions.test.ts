@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { applySuggestion, getSuggestions } from './searchSuggestions';
+import { getSuggestions } from './searchSuggestions';
 
 const LANGS = ['en', 'de', 'en-US'];
 
@@ -38,10 +38,7 @@ describe('getSuggestions', () => {
     const state = getSuggestions('-des', 4, LANGS)!;
     expect(state.items[0].insert).toBe('description:');
     expect(state.replaceFrom).toBe(1);
-    expect(applySuggestion('-des', state, state.items[0])).toEqual({
-      value: '-description:',
-      caret: 13,
-    });
+    expect(state.replaceTo).toBe(4);
   });
 
   it('returns nothing for tokens with a qualifier already', () => {
@@ -56,11 +53,10 @@ describe('getSuggestions', () => {
     expect(getSuggestions('xyz', 3, LANGS)).toBeUndefined();
   });
 
-  it('replaces mid-value token and moves caret after the colon', () => {
+  it('computes replace range for a mid-value token', () => {
     const state = getSuggestions('des something', 3, LANGS)!;
-    expect(applySuggestion('des something', state, state.items[0])).toEqual({
-      value: 'description: something',
-      caret: 12,
-    });
+    expect(state.items[0].insert).toBe('description:');
+    expect(state.replaceFrom).toBe(0);
+    expect(state.replaceTo).toBe(3);
   });
 });
