@@ -13,6 +13,7 @@ data class UsageLimits(
   val seats: Limit,
   val mtCreditsInCents: Limit,
   val words: Limit,
+  val autoUpgradeEnabled: Boolean = false,
 ) {
   data class Limit(
     /**

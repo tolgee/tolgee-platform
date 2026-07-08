@@ -21,6 +21,7 @@ class SubscriptionFromModelAssigner(
     subscription.seatsLimit = model.limits.seats.limit
     subscription.includedWords = model.limits.words.included
     subscription.wordsLimit = model.limits.words.limit
+    subscription.autoUpgradeEnabled = model.limits.autoUpgradeEnabled ?: false
     subscription.status = model.status
     subscription.lastValidCheck = currentDate
   }

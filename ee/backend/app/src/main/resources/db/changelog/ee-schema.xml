@@ -155,4 +155,11 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="dkrizan" id="1751900000000-4">
+        <addColumn tableName="ee_subscription">
+            <column name="auto_upgrade_enabled" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

@@ -12,23 +12,26 @@ import org.junit.jupiter.api.Test
 import java.util.Date
 
 class SubscriptionFromModelAssignerTest {
-  private fun model(words: LimitModel) =
-    SelfHostedEeSubscriptionModel(
-      plan =
-        SelfHostedEePlanModel(
-          prices = PlanPricesModel(),
-          free = false,
-          nonCommercial = false,
-          isPayAsYouGo = false,
-        ),
-      limits =
-        SelfHostedUsageLimitsModel(
-          keys = LimitModel(included = -1, limit = -1),
-          seats = LimitModel(included = -1, limit = -1),
-          mtCreditsInCents = LimitModel(included = -1, limit = -1),
-          words = words,
-        ),
-    )
+  private fun model(
+    words: LimitModel,
+    autoUpgradeEnabled: Boolean? = null,
+  ) = SelfHostedEeSubscriptionModel(
+    plan =
+      SelfHostedEePlanModel(
+        prices = PlanPricesModel(),
+        free = false,
+        nonCommercial = false,
+        isPayAsYouGo = false,
+      ),
+    limits =
+      SelfHostedUsageLimitsModel(
+        keys = LimitModel(included = -1, limit = -1),
+        seats = LimitModel(included = -1, limit = -1),
+        mtCreditsInCents = LimitModel(included = -1, limit = -1),
+        words = words,
+        autoUpgradeEnabled = autoUpgradeEnabled,
+      ),
+  )
 
   @Test
   fun `assigns included words and words limit from the model`() {
@@ -56,5 +59,31 @@ class SubscriptionFromModelAssignerTest {
 
     assertThat(subscription.includedWords).isEqualTo(-1L)
     assertThat(subscription.wordsLimit).isEqualTo(-1L)
+  }
+
+  @Test
+  fun `assigns autoUpgradeEnabled from the model`() {
+    val subscription = EeSubscription()
+
+    SubscriptionFromModelAssigner(
+      subscription,
+      model(words = LimitModel(included = -1, limit = -1), autoUpgradeEnabled = true),
+      Date(),
+    ).assign()
+
+    assertThat(subscription.autoUpgradeEnabled).isTrue()
+  }
+
+  @Test
+  fun `no autoUpgradeEnabled on the model (old server) - assigns false (blocking, behaviour preserving)`() {
+    val subscription = EeSubscription()
+
+    SubscriptionFromModelAssigner(
+      subscription,
+      model(words = LimitModel(included = -1, limit = -1), autoUpgradeEnabled = null),
+      Date(),
+    ).assign()
+
+    assertThat(subscription.autoUpgradeEnabled).isFalse()
   }
 }

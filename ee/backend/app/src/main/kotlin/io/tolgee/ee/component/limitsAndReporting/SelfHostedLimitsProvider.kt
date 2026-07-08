@@ -23,6 +23,7 @@ class SelfHostedLimitsProvider(
       strings = DEFAULT_LIMITS.strings,
       mtCreditsInCents = DEFAULT_LIMITS.mtCreditsInCents,
       words = UsageLimits.Limit(included = subscription.includedWords, limit = subscription.wordsLimit),
+      autoUpgradeEnabled = subscription.autoUpgradeEnabled,
       isTrial = false,
     )
   }

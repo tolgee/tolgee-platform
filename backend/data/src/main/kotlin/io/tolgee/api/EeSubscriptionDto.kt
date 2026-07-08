@@ -25,4 +25,5 @@ data class EeSubscriptionDto(
   var seatsLimit: Long,
   var includedWords: Long = 0L,
   var wordsLimit: Long = -1L,
+  var autoUpgradeEnabled: Boolean = false,
 )

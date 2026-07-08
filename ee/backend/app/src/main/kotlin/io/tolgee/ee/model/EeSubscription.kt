@@ -71,6 +71,7 @@ class EeSubscription :
       seatsLimit = seatsLimit,
       includedWords = includedWords,
       wordsLimit = wordsLimit,
+      autoUpgradeEnabled = autoUpgradeEnabled,
     )
   }
 
@@ -105,4 +106,12 @@ class EeSubscription :
    * How many words can a customer use until they reach spending limit
    */
   var wordsLimit: Long = -1L
+
+  /**
+   * Whether the subscription auto-upgrades to a covering tier instead of blocking over the word limit.
+   * Defaults to false (blocking) so instances on an older server version that don't send this field
+   * on the license stay blocking.
+   */
+  @ColumnDefault("false")
+  var autoUpgradeEnabled: Boolean = false
 }
