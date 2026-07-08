@@ -1,7 +1,5 @@
 package io.tolgee
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.constants.Message
 import io.tolgee.controllers.PublicController
 import io.tolgee.fixtures.andAssertThatJson
@@ -29,6 +27,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.client.RestTemplate
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.util.Date
 
 @Transactional

@@ -1,6 +1,5 @@
 package io.tolgee.mcp
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.modelcontextprotocol.server.McpServer
 import io.modelcontextprotocol.server.McpSyncServer
 import io.modelcontextprotocol.server.transport.WebMvcStreamableServerTransportProvider
@@ -12,6 +11,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.servlet.function.RouterFunction
 import org.springframework.web.servlet.function.ServerResponse
+import tools.jackson.databind.ObjectMapper
 
 @Configuration
 class McpConfig {

@@ -1,6 +1,5 @@
 package io.tolgee.controllers
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.controllers.IController
@@ -24,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.context.request.WebRequest
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
+import tools.jackson.databind.ObjectMapper
 import java.io.ByteArrayInputStream
 import java.io.OutputStream
 import java.time.Duration

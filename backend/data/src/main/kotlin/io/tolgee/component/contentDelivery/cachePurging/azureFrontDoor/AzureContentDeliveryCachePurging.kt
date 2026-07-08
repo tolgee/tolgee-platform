@@ -1,7 +1,6 @@
 package io.tolgee.component.contentDelivery.cachePurging.azureFrontDoor
 
 import com.azure.core.credential.TokenRequestContext
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.component.contentDelivery.cachePurging.ContentDeliveryCachePurging
 import io.tolgee.model.contentDelivery.AzureFrontDoorConfig
 import io.tolgee.model.contentDelivery.ContentDeliveryConfig
@@ -10,6 +9,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.web.client.RestTemplate
+import tools.jackson.module.kotlin.jacksonObjectMapper
 
 class AzureContentDeliveryCachePurging(
   private val config: AzureFrontDoorConfig,

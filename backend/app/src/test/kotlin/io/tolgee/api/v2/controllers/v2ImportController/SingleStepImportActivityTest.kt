@@ -1,6 +1,5 @@
 package io.tolgee.api.v2.controllers.v2ImportController
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.activity.data.RevisionType
@@ -20,6 +19,7 @@ import org.springframework.mock.web.MockMultipartFile
 import org.springframework.mock.web.MockPart
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+import tools.jackson.module.kotlin.jacksonObjectMapper
 
 class SingleStepImportActivityTest : ProjectAuthControllerTest("/v2/projects/") {
   @Autowired

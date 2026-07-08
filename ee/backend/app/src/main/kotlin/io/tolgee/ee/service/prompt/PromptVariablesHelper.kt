@@ -1,7 +1,6 @@
 package io.tolgee.ee.service.prompt
 
 import com.fasterxml.jackson.annotation.JsonInclude
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.component.machineTranslation.metadata.TranslationGlossaryItem
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.LanguageDto
@@ -24,6 +23,9 @@ import io.tolgee.service.translation.TranslationService
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.json.JsonMapper
+import tools.jackson.module.kotlin.jacksonObjectMapper
 
 @Component
 class PromptVariablesHelper(
@@ -110,9 +112,11 @@ class PromptVariablesHelper(
             }
           if (!closeItems.isNullOrEmpty()) {
             closeItems.joinToString("\n") {
-              val mapper = ObjectMapper()
-              mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
-              mapper.writeValueAsString(it)
+              JsonMapper
+                .builder()
+                .changeDefaultPropertyInclusion { incl -> incl.withValueInclusion(JsonInclude.Include.NON_NULL) }
+                .build()
+                .writeValueAsString(it)
             }
           } else {
             null
@@ -148,9 +152,11 @@ class PromptVariablesHelper(
       Variable("json", description = "Glossary items", lazyValue = {
         if (glossaryTerms.isNotEmpty()) {
           glossaryTerms.joinToString("\n") {
-            val mapper = ObjectMapper()
-            mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
-            mapper.writeValueAsString(removeUnnecessaryFields(it))
+            JsonMapper
+              .builder()
+              .changeDefaultPropertyInclusion { incl -> incl.withValueInclusion(JsonInclude.Include.NON_NULL) }
+              .build()
+              .writeValueAsString(removeUnnecessaryFields(it))
           }
         } else {
           null
@@ -295,9 +301,11 @@ class PromptVariablesHelper(
             }
           if (!closeItems.isNullOrEmpty()) {
             closeItems.joinToString("\n") {
-              val mapper = ObjectMapper()
-              mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
-              mapper.writeValueAsString(it)
+              JsonMapper
+                .builder()
+                .changeDefaultPropertyInclusion { incl -> incl.withValueInclusion(JsonInclude.Include.NON_NULL) }
+                .build()
+                .writeValueAsString(it)
             }
           } else {
             null

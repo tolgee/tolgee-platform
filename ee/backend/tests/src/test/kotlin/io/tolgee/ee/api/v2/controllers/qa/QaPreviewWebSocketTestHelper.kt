@@ -1,7 +1,5 @@
 package io.tolgee.ee.api.v2.controllers.qa
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.fixtures.WaitNotSatisfiedException
 import io.tolgee.fixtures.waitFor
 import org.springframework.web.socket.TextMessage
@@ -9,6 +7,8 @@ import org.springframework.web.socket.WebSocketHttpHeaders
 import org.springframework.web.socket.WebSocketSession
 import org.springframework.web.socket.client.standard.StandardWebSocketClient
 import org.springframework.web.socket.handler.TextWebSocketHandler
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.net.URI
 import java.util.concurrent.LinkedBlockingDeque
 import java.util.concurrent.TimeUnit

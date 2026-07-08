@@ -1,6 +1,5 @@
 package io.tolgee.api.v2.controllers.v2KeyController
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.ResolvableImportTestData
 import io.tolgee.dtos.request.ImageUploadInfoDto
@@ -19,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.core.io.Resource
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import kotlin.properties.Delegates
 import kotlin.time.measureTime
 

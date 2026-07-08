@@ -1,6 +1,5 @@
 package io.tolgee.batch
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.batch.cleaning.BatchJobStatusProvider
 import io.tolgee.batch.events.JobCancelEvent
@@ -21,6 +20,7 @@ import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
+import tools.jackson.module.kotlin.jacksonObjectMapper
 
 @Component
 class BatchJobCancellationManager(

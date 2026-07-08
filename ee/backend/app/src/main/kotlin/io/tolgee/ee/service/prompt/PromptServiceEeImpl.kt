@@ -1,6 +1,5 @@
 package io.tolgee.ee.service.prompt
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.jknack.handlebars.Handlebars
 import com.github.jknack.handlebars.HandlebarsException
 import io.tolgee.component.machineTranslation.MtValueProvider
@@ -37,6 +36,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.client.RestClientException
+import tools.jackson.databind.ObjectMapper
 
 @Primary
 @Service

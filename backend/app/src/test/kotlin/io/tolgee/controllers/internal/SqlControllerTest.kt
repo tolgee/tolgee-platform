@@ -1,7 +1,5 @@
 package io.tolgee.controllers.internal
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.testing.AbstractControllerTest
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -16,6 +14,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.web.method.HandlerMethod
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
+import tools.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.module.kotlin.readValue
 
 @AutoConfigureMockMvc
 @ContextRecreatingTest

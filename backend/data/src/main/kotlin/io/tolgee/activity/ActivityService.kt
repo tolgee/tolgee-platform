@@ -1,6 +1,5 @@
 package io.tolgee.activity
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.activity.data.RevisionType
 import io.tolgee.activity.projectActivity.ModificationsByRevisionsProvider
@@ -26,6 +25,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import tools.jackson.databind.ObjectMapper
 
 @Service
 class ActivityService(

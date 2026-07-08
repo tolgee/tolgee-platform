@@ -1,6 +1,5 @@
 package io.tolgee.jobs.migration.allOrganizationOwner
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.jobs.migration.MigrationJobRunner
 import io.tolgee.repository.ProjectRepository
@@ -15,6 +14,7 @@ import org.springframework.batch.core.launch.JobLauncher
 import org.springframework.batch.core.repository.JobRepository
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
+import tools.jackson.module.kotlin.jacksonObjectMapper
 
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @Component

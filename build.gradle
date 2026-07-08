@@ -157,7 +157,22 @@ subprojects {
 
     ext['hibernate.version'] = hibernateVersion
     ext['commons-lang3.version'] = commonsLang3Version
-    ext['jackson.version'] = jacksonVersion
+
+    // Hibernate's metamodel generator (hibernate-jpamodelgen, run via kapt) uses
+    // ANTLR lexers generated against antlr 4.13.x. Gradle bundles antlr4-runtime 4.7.2
+    // transitively via tomlj (its version-catalog TOML parser, strict-pinned to
+    // tomlj = "1.0.0!!" as of Gradle 9.6.1 / master), and it lands on the kapt worker's
+    // bootstrap classpath where it wins via parent-first delegation and fails with
+    // "Could not deserialize ATN with version 4 (expected 3)". Prepend the antlr4-runtime
+    // that hibernate-jpamodelgen itself pulls in (via the kapt classpath) to the worker
+    // boot classpath so the matching runtime is loaded first. Sourced from the kapt
+    // configuration rather than hardcoded so it tracks whatever version Hibernate needs.
+    tasks.matching { it.name == 'kaptKotlin' }.configureEach {
+        def antlrRuntimeJar = configurations.kapt.files.find { it.name.startsWith('antlr4-runtime') }
+        if (antlrRuntimeJar != null) {
+            kaptProcessJvmArgs.add('-Xbootclasspath/a:' + antlrRuntimeJar.absolutePath)
+        }
+    }
 
     tasks.withType(Test).configureEach {
         testLogging {

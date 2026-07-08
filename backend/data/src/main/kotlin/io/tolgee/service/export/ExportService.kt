@@ -1,6 +1,5 @@
 package io.tolgee.service.export
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.component.reporting.BusinessEventPublisher
 import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
 import io.tolgee.dtos.IExportParams
@@ -15,6 +14,7 @@ import io.tolgee.util.logger
 import io.tolgee.util.trace
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Service
+import tools.jackson.databind.ObjectMapper
 import java.io.InputStream
 import java.time.Duration
 

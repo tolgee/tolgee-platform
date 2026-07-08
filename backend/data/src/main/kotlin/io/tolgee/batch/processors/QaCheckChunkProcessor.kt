@@ -1,6 +1,5 @@
 package io.tolgee.batch.processors
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.batch.AbstractChunkProcessor
 import io.tolgee.batch.JobCharacter
 import io.tolgee.batch.ProgressManager
@@ -11,6 +10,7 @@ import io.tolgee.model.batch.params.QaCheckJobParams
 import io.tolgee.service.qa.QaCheckBatchService
 import kotlinx.coroutines.ensureActive
 import org.springframework.stereotype.Component
+import tools.jackson.databind.ObjectMapper
 import kotlin.coroutines.CoroutineContext
 
 @Component

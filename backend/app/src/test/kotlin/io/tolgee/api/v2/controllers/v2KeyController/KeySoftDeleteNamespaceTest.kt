@@ -1,7 +1,5 @@
 package io.tolgee.api.v2.controllers.v2KeyController
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.NamespacesTestData
 import io.tolgee.fixtures.andAssertThatJson
@@ -14,6 +12,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import tools.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.module.kotlin.readValue
 
 @SpringBootTest
 @AutoConfigureMockMvc

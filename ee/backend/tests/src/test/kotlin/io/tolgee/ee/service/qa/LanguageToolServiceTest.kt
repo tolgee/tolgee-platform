@@ -1,6 +1,5 @@
 package io.tolgee.ee.service.qa
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.configuration.tolgee.LanguageToolProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import org.assertj.core.api.Assertions.assertThat
@@ -15,6 +14,7 @@ import org.springframework.test.web.client.match.MockRestRequestMatchers.method
 import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
 import org.springframework.web.client.RestTemplate
+import tools.jackson.databind.ObjectMapper
 
 class LanguageToolServiceTest {
   private lateinit var service: LanguageToolService

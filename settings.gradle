@@ -37,8 +37,8 @@ dependencyResolutionManagement {
     versionCatalogs {
         libs {
             library('stripe', 'com.stripe', 'stripe-java').version('22.11.0')
-            library('jacksonModuleKotlin', 'com.fasterxml.jackson.module', 'jackson-module-kotlin').version(jacksonVersion)
-            library('jacksonDataFormatXml', 'com.fasterxml.jackson.dataformat', 'jackson-dataformat-xml').version(jacksonVersion)
+            library('jacksonModuleKotlin', 'tools.jackson.module', 'jackson-module-kotlin').version(jacksonVersion)
+            library('jacksonDataFormatXml', 'tools.jackson.dataformat', 'jackson-dataformat-xml').version(jacksonVersion)
             library('kotlin', 'org.jetbrains.kotlin', 'kotlin-gradle-plugin').version(kotlinVersion)
             library('kotlinReflect', 'org.jetbrains.kotlin', 'kotlin-reflect').version(kotlinVersion)
             library('kotlinCoroutines', 'org.jetbrains.kotlinx', 'kotlinx-coroutines-core').version('1.10.2')
@@ -46,7 +46,6 @@ dependencyResolutionManagement {
             library('springDocOpenApiUi', 'org.springdoc', 'springdoc-openapi-starter-webmvc-ui').version(springDocVersion)
             library('springDocOpenApiKotlin', 'org.springdoc', 'springdoc-openapi-kotlin').version(springDocVersion)
             library('springDocOpenApiCommon', 'org.springdoc', 'springdoc-openapi-starter-common').version(springDocVersion)
-            library('jacksonKotlin', 'com.fasterxml.jackson.module', 'jackson-module-kotlin').version('2.15.3')
             library('jjwtApi', 'io.jsonwebtoken', 'jjwt-api').version(jjwtVersion)
             library('jjwtImpl', 'io.jsonwebtoken', 'jjwt-impl').version(jjwtVersion)
             library('jjwtJackson', 'io.jsonwebtoken', 'jjwt-jackson').version(jjwtVersion)
@@ -69,7 +68,7 @@ dependencyResolutionManagement {
             library('liquibaseCore', "org.liquibase:liquibase-core:4.30.0")
             library('liquibaseHibernate', "org.liquibase.ext:liquibase-hibernate6:4.30.0")
             library('liquibasePicoli', "info.picocli:picocli:4.6.3")
-            library('hibernateTypes', "io.hypersistence:hypersistence-utils-hibernate-63:3.14.1")
+            library('hibernateTypes', "io.hypersistence:hypersistence-utils-hibernate-73:3.15.3")
             library('redissonSpringBootStarter', "org.redisson:redisson-spring-boot-starter:3.27.0")
             library('postHog', "com.posthog:posthog-server:1.1.0")
             library('micrometerPrometheus', "io.micrometer:micrometer-registry-prometheus:1.13.3")

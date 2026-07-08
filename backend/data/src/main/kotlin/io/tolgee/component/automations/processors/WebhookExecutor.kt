@@ -1,6 +1,5 @@
 package io.tolgee.component.automations.processors
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.fixtures.computeHmacSha256
 import io.tolgee.model.webhook.WebhookConfig
@@ -13,6 +12,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
+import tools.jackson.module.kotlin.jacksonObjectMapper
 
 @Component
 class WebhookExecutor(

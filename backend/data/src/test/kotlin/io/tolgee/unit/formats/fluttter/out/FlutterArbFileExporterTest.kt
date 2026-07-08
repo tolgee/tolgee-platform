@@ -1,6 +1,5 @@
 package io.tolgee.unit.formats.fluttter.out
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.flutter.out.FlutterArbFileExporter
@@ -10,6 +9,7 @@ import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.testing.assert
 import io.tolgee.util.buildExportTranslationList
 import org.junit.jupiter.api.Test
+import tools.jackson.module.kotlin.jacksonObjectMapper
 
 class FlutterArbFileExporterTest {
   @Test

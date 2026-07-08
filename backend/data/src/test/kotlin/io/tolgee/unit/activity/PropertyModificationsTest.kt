@@ -1,11 +1,11 @@
 package io.tolgee.unit.activity
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.tolgee.activity.data.PropertyModification
 import io.tolgee.activity.data.PropertyModifications
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.module.kotlin.registerKotlinModule
 
 /**
  * Verifies that [PropertyModifications] is byte-equivalent on the wire to

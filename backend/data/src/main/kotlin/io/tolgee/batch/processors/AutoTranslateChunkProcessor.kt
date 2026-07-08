@@ -1,6 +1,5 @@
 package io.tolgee.batch.processors
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.batch.AbstractChunkProcessor
 import io.tolgee.batch.JobCharacter
 import io.tolgee.batch.MtProviderCatching
@@ -12,6 +11,7 @@ import io.tolgee.configuration.tolgee.BatchProperties
 import io.tolgee.model.batch.params.AutoTranslationJobParams
 import io.tolgee.service.translation.AutoTranslationService
 import org.springframework.stereotype.Component
+import tools.jackson.databind.ObjectMapper
 import kotlin.coroutines.CoroutineContext
 
 @Component

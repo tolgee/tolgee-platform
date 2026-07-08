@@ -1,12 +1,12 @@
 package io.tolgee.formats.apple.`in`.xcstrings
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.formats.ImportFileProcessor
 import io.tolgee.formats.apple.`in`.guessNamespaceFromPath
 import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.service.dataImport.processors.FileProcessorContext
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.ObjectMapper
 
 class XcstringsFileProcessor(
   override val context: FileProcessorContext,
@@ -24,7 +24,7 @@ class XcstringsFileProcessor(
         root.get("strings")
           ?: throw ImportCannotParseFileException(context.file.name, "Missing 'strings' object in xcstrings file")
 
-      strings.fields().forEach { (key, value) ->
+      strings.properties().forEach { (key, value) ->
         processKey(key, value)
       }
 
@@ -72,7 +72,7 @@ class XcstringsFileProcessor(
       addConvertedTranslation(key, sourceLanguage, key)
     }
 
-    localizations.fields().forEach { (languageTag, localization) ->
+    localizations.properties().forEach { (languageTag, localization) ->
       when {
         localization.has("stringUnit") -> {
           processSingleTranslation(key, languageTag, localization)
@@ -109,7 +109,7 @@ class XcstringsFileProcessor(
     val variations = localization.get("variations")?.get("plural") ?: return
     val forms = mutableMapOf<String, String>()
 
-    variations.fields().forEach { (form, content) ->
+    variations.properties().forEach { (form, content) ->
       val stringUnit = content.get("stringUnit")
       val value = stringUnit?.get("value")?.asText()
 

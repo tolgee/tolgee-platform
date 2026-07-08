@@ -4,8 +4,6 @@
 
 package io.tolgee.api.v2.controllers.v2ScreenshotController
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.fixtures.generateImage
 import io.tolgee.model.Project
@@ -16,6 +14,8 @@ import org.springframework.http.MediaType
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.ResultActions
+import tools.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.module.kotlin.readValue
 import java.io.File
 
 abstract class AbstractV2ScreenshotControllerTest : ProjectAuthControllerTest("/v2/projects/") {

@@ -1,7 +1,5 @@
 package io.tolgee.unit.formats.yaml.out
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.genericStructuredFile.out.CustomPrettyPrinter
@@ -10,6 +8,8 @@ import io.tolgee.service.export.ExportFilePathProvider
 import io.tolgee.service.export.ExportFileStructureTemplateProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.util.buildExportTranslationList
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.dataformat.yaml.YAMLFactory
 
 object YamlExportTestData {
   fun getIcuPlaceholdersDisabledExporter(): YamlFileExporter {

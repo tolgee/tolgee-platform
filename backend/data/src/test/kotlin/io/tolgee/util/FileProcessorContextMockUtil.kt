@@ -1,8 +1,5 @@
 package io.tolgee.util
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.api.IImportSettings
 import io.tolgee.component.KeyCustomValuesValidator
 import io.tolgee.configuration.tolgee.TolgeeProperties
@@ -24,6 +21,9 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.context.ApplicationContext
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.dataformat.yaml.YAMLFactory
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.io.File
 import kotlin.reflect.jvm.javaMethod
 

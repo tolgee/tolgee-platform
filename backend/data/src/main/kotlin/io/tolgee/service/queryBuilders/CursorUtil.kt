@@ -1,10 +1,10 @@
 package io.tolgee.service.queryBuilders
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.dtos.response.CursorValue
 import org.springframework.data.domain.Sort
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.module.kotlin.readValue
 import java.util.Base64
 
 class CursorUtil {
