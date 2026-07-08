@@ -10,14 +10,14 @@ import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
 import jakarta.persistence.EntityManager
-import org.springframework.batch.core.Job
-import org.springframework.batch.core.Step
+import org.springframework.batch.core.job.Job
 import org.springframework.batch.core.job.builder.JobBuilder
 import org.springframework.batch.core.repository.JobRepository
+import org.springframework.batch.core.step.Step
 import org.springframework.batch.core.step.builder.StepBuilder
-import org.springframework.batch.item.ItemReader
-import org.springframework.batch.item.ItemWriter
-import org.springframework.batch.item.data.RepositoryItemReader
+import org.springframework.batch.infrastructure.item.ItemReader
+import org.springframework.batch.infrastructure.item.ItemWriter
+import org.springframework.batch.infrastructure.item.data.RepositoryItemReader
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -67,10 +67,8 @@ class AllOrganizationOwnerJobConfiguration {
 
   val noOrgProjectReader: ItemReader<Project>
     get() =
-      RepositoryItemReader<Project>().apply {
-        setRepository(projectRepository)
+      RepositoryItemReader<Project>(projectRepository, mapOf("id" to Direction.ASC)).apply {
         setMethodName(projectRepository::findAllWithUserOwner.name)
-        setSort(mapOf("id" to Direction.ASC))
         setPageSize(STEP_SIZE)
       }
 
@@ -111,10 +109,8 @@ class AllOrganizationOwnerJobConfiguration {
 
   val noRoleUserReader: ItemReader<UserAccount>
     get() =
-      RepositoryItemReader<UserAccount>().apply {
-        setRepository(userAccountRepository)
+      RepositoryItemReader<UserAccount>(userAccountRepository, mapOf("id" to Direction.ASC)).apply {
         setMethodName(userAccountRepository::findAllWithoutAnyOrganization.name)
-        setSort(mapOf("id" to Direction.ASC))
         setPageSize(STEP_SIZE)
       }
 
