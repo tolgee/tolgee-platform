@@ -39,7 +39,7 @@ class DeletedOrganizationProjectPurgeScheduler(
       return
     }
     schedulingManager.scheduleWithFixedDelay(::purge, PURGE_PERIOD)
-    logger.debug("Scheduled orphan project purge task with period: {}", PURGE_PERIOD)
+    logger.info("Scheduled orphan project purge task with period: {}", PURGE_PERIOD)
   }
 
   fun purge() {
@@ -51,6 +51,7 @@ class DeletedOrganizationProjectPurgeScheduler(
   }
 
   private fun purgeProjectsOfDeletedOrganizations() {
+    logger.info("Running orphan project purge")
     var totalPurged = 0
     do {
       val batch =
@@ -70,9 +71,7 @@ class DeletedOrganizationProjectPurgeScheduler(
       totalPurged += batch.numberOfElements
     } while (batch.hasNext())
 
-    if (totalPurged > 0) {
-      logger.info("Purged {} projects of deleted organizations", totalPurged)
-    }
+    logger.info("Orphan project purge finished, purged {} projects", totalPurged)
   }
 
   companion object {
