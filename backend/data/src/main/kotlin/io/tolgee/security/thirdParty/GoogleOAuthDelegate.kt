@@ -52,7 +52,7 @@ class GoogleOAuthDelegate(
       if (response != null && response.containsKey("access_token")) {
         val headers = HttpHeaders()
         headers["Authorization"] = "Bearer " + response["access_token"]
-        val entity = HttpEntity<String?>(null, headers)
+        val entity = HttpEntity<String>(null, headers)
 
         // get google user data
 
