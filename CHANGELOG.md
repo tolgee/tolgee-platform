@@ -1,3 +1,10 @@
+## [3.209.4](https://github.com/tolgee/tolgee-platform/compare/v3.209.3...v3.209.4) (2026-07-08)
+
+
+### Bug Fixes
+
+* keep session open for glossary highlight lazy loading ([#3793](https://github.com/tolgee/tolgee-platform/issues/3793)) ([0a3216a](https://github.com/tolgee/tolgee-platform/commit/0a3216a792a5559735b05803d4276b035ec2a609))
+
 ## [3.209.3](https://github.com/tolgee/tolgee-platform/compare/v3.209.2...v3.209.3) (2026-07-08)
 
 

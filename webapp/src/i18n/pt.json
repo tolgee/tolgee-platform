@@ -1080,6 +1080,8 @@
   "file_too_big": "O arquivo é muito grande",
   "filter_by_agency": "Filtrar por agência...",
   "filter_by_value_label_not_valid": "Valor de filtro de etiqueta inválido",
+  "filter_pattern_language_not_valid": "O idioma de pesquisa não está entre os idiomas retornados",
+  "filter_pattern_not_valid": "O padrão do filtro de pesquisa não é válido",
   "flag_selector_search_flag": "Pesquisar bandeira...",
   "formality_not_supported_by_service": "O serviço não suporta formalidade",
   "former-user-name": "Usuário antigo",
@@ -2810,6 +2812,12 @@
       }
     }
   },
+  "translations_search_help_docs_link": "Leia mais na documentação",
+  "translations_search_help_key": "Pesquisar apenas em nomes de chave",
+  "translations_search_help_negation": "Excluir chaves correspondentes",
+  "translations_search_help_phrase": "Use aspas para frases com espaços",
+  "translations_search_help_title": "Pesquisa avançada",
+  "translations_search_help_translation": "Pesquisar apenas em textos de tradução",
   "translations_select_all": "Selecionar todos",
   "translations_selected_count": "{count, plural, one {Selecionado} other {Selecionados}} {count, number}/{total, number}",
   "translations_shortcut_click": "Clique",

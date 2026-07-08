@@ -1083,6 +1083,8 @@
   "file_too_big": "Fișierul este prea mare",
   "filter_by_agency": "Filtrează după agenție...",
   "filter_by_value_label_not_valid": "Valoare filtru etichetă invalidă",
+  "filter_pattern_language_not_valid": "Limba de căutare nu se află printre limbile returnate",
+  "filter_pattern_not_valid": "Modelul filtrului de căutare nu este valid",
   "flag_selector_search_flag": "Căutați steagul...",
   "formality_not_supported_by_service": "Serviciul nu suportă formalitatea",
   "former-user-name": "Utilizator anterior",
@@ -2799,6 +2801,12 @@
       }
     }
   },
+  "translations_search_help_docs_link": "Citiți mai multe în documentație",
+  "translations_search_help_key": "Căutați doar în numele cheilor",
+  "translations_search_help_language": "Căutați doar într-o singură limbă",
+  "translations_search_help_negation": "Excludeți cheile potrivite",
+  "translations_search_help_phrase": "Folosiți ghilimele pentru fraze cu spații",
+  "translations_search_help_translation": "Căutați doar în textele de traducere",
   "translations_select_all": "Selectează tot",
   "translations_selected_count": "Selectate {count, number} / {total, number}",
   "translations_shortcut_click": "Click",

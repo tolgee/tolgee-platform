@@ -1082,6 +1082,8 @@
   "file_too_big": "文件太大",
   "filter_by_agency": "按代理筛选...",
   "filter_by_value_label_not_valid": "无效的标签筛选值",
+  "filter_pattern_language_not_valid": "搜索语言不在返回的语言中",
+  "filter_pattern_not_valid": "搜索过滤模式无效",
   "flag_selector_search_flag": "搜索旗帜...",
   "formality_not_supported_by_service": "服务不支持礼貌语态",
   "former-user-name": "前用户",
@@ -2813,6 +2815,12 @@
       }
     }
   },
+  "translations_search_help_docs_link": "在文档中阅读更多",
+  "translations_search_help_key": "仅在 key 名称中搜索",
+  "translations_search_help_negation": "排除匹配的 keys",
+  "translations_search_help_phrase": "使用引号搜索含空格的短语",
+  "translations_search_help_title": "高级搜索",
+  "translations_search_help_translation": "仅在翻译文本中搜索",
   "translations_select_all": "全选",
   "translations_selected_count": "已选择 {count, number} / {total, number}",
   "translations_shortcut_click": "点击",

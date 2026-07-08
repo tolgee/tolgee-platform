@@ -918,6 +918,8 @@
   "file_too_big": "Plik jest za duży",
   "filter_by_agency": "Filtruj według agencji...",
   "filter_by_value_label_not_valid": "Nieprawidłowa wartość filtra etykiety",
+  "filter_pattern_language_not_valid": "Język wyszukiwania nie należy do zwróconych języków",
+  "filter_pattern_not_valid": "Wzorzec filtra wyszukiwania jest nieprawidłowy",
   "flag_selector_search_flag": "Szukaj flagi...",
   "footer-cloud-address": "Letovická 1421/22, Řečkovice, 621 00 Brno, Republika Czeska",
   "footer-cloud-sent-by": "\uD83D\uDC2D Wysłane przez Tolgee - Sprawdź <link>blog</link> i nasze media społecznościowe! \uD83E\uDDC0",
@@ -2543,6 +2545,12 @@
       }
     }
   },
+  "translations_search_help_docs_link": "Przeczytaj więcej w dokumentacji",
+  "translations_search_help_key": "Szukaj tylko w nazwach kluczy",
+  "translations_search_help_namespace": "Szukaj tylko w przestrzeniach nazw",
+  "translations_search_help_phrase": "Użyj cudzysłowów dla fraz ze spacjami",
+  "translations_search_help_title": "Zaawansowane wyszukiwanie",
+  "translations_search_help_translation": "Szukaj tylko w tekstach tłumaczeń",
   "translations_select_all": "Zaznacz wszystko",
   "translations_selected_count": "Wybrane {count, number} / {total, number}",
   "translations_shortcut_click": "Kliknij",

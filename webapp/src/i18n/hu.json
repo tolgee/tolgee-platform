@@ -1080,6 +1080,8 @@
   "file_too_big": "A fájl túl nagy",
   "filter_by_agency": "Szűrés ügynökség szerint...",
   "filter_by_value_label_not_valid": "Érvénytelen címke szűrőérték",
+  "filter_pattern_language_not_valid": "A keresési nyelv nem szerepel a visszaadott nyelvek között",
+  "filter_pattern_not_valid": "A keresési szűrőminta érvénytelen",
   "flag_selector_search_flag": "Zászló keresése...",
   "formality_not_supported_by_service": "A szolgáltatás nem támogatja a formális stílust",
   "former-user-name": "Korábbi felhasználó",
@@ -2810,6 +2812,12 @@
       }
     }
   },
+  "translations_search_help_docs_link": "Olvass többet a dokumentációban",
+  "translations_search_help_key": "Keresés csak a kulcsnevekben",
+  "translations_search_help_negation": "Egyező kulcsok kizárása",
+  "translations_search_help_phrase": "Idézőjeleket használj szóközöket tartalmazó kifejezésekhez",
+  "translations_search_help_title": "Haladó keresés",
+  "translations_search_help_translation": "Keresés csak a fordítás szövegeiben",
   "translations_select_all": "Összes kijelölése",
   "translations_selected_count": "Kiválasztva: {count, number} / {total, number}",
   "translations_shortcut_click": "Kattintás",

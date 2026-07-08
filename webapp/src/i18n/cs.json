@@ -1085,6 +1085,8 @@
   "file_too_big": "Soubor je příliš velký",
   "filter_by_agency": "Filtrovat podle agentury...",
   "filter_by_value_label_not_valid": "Neplatná hodnota filtru štítku",
+  "filter_pattern_language_not_valid": "Jazyk vyhledávání není mezi vrácenými jazyky",
+  "filter_pattern_not_valid": "Vzor filtru vyhledávání není platný",
   "flag_selector_search_flag": "Hledat vlajku...",
   "footer-cloud-address": "Letovická 1421/22, Řečkovice, 621 00 Brno, Česká republika",
   "footer-cloud-sent-by": "\uD83D\uDC2D Odesláno pomocí Tolgee – Podívejte se na náš <link>blog</link> a sociální sítě! \uD83E\uDDC0",
@@ -2817,6 +2819,12 @@
       }
     }
   },
+  "translations_search_help_docs_link": "Přečtěte si více v dokumentaci",
+  "translations_search_help_key": "Hledat pouze v názvech klíčů",
+  "translations_search_help_language": "Hledat pouze v jednom jazyce",
+  "translations_search_help_negation": "Vyloučit odpovídající klíče",
+  "translations_search_help_phrase": "Použijte uvozovky pro fráze s mezerami",
+  "translations_search_help_translation": "Hledat pouze v textech překladů",
   "translations_select_all": "Vybrat vše",
   "translations_selected_count": "Vybráno {count, number} / {total, number}",
   "translations_shortcut_click": "Klik",
