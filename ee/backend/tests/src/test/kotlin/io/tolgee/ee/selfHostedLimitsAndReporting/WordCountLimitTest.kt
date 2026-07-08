@@ -89,6 +89,42 @@ class WordCountLimitTest : AbstractSpringTest() {
     editTranslation(testData, WordCountLimitTestData.wordsText(500))
   }
 
+  @Test
+  fun `does not throw when a translation edit pushes instance words over the limit and auto-upgrade is enabled`() {
+    saveSubscription {
+      includedWords = 100
+      wordsLimit = 100
+      autoUpgradeEnabled = true
+    }
+    val testData = saveTestData(initialWordCount = 99)
+    editTranslation(testData, WordCountLimitTestData.wordsText(101))
+  }
+
+  @Test
+  fun `throws when a translation edit pushes instance words over the limit and auto-upgrade is disabled`() {
+    saveSubscription {
+      includedWords = 100
+      wordsLimit = 100
+      autoUpgradeEnabled = false
+    }
+    val testData = saveTestData(initialWordCount = 99)
+    assertThatThrownBy {
+      editTranslation(testData, WordCountLimitTestData.wordsText(101))
+    }.hasRootCauseInstanceOf(PlanLimitExceededWordsException::class.java)
+  }
+
+  @Test
+  fun `throws when auto-upgrade is absent on an old-server subscription (defaults to false, blocking)`() {
+    saveSubscription {
+      includedWords = 100
+      wordsLimit = 100
+    }
+    val testData = saveTestData(initialWordCount = 99)
+    assertThatThrownBy {
+      editTranslation(testData, WordCountLimitTestData.wordsText(101))
+    }.hasRootCauseInstanceOf(PlanLimitExceededWordsException::class.java)
+  }
+
   private fun editTranslation(
     testData: WordCountLimitTestData,
     newText: String,

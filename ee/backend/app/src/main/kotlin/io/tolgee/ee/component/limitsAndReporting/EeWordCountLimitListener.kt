@@ -66,6 +66,10 @@ class EeWordCountLimitListener(
       return
     }
 
+    if (limits.autoUpgradeEnabled) {
+      return
+    }
+
     WordsLimitChecker(limits = limits).check(wordCount!!)
   }
 
