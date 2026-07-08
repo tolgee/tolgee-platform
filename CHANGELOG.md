@@ -1,3 +1,10 @@
+## [3.209.3](https://github.com/tolgee/tolgee-platform/compare/v3.209.2...v3.209.3) (2026-07-08)
+
+
+### Bug Fixes
+
+* hide and purge projects when their organization is deleted ([#3783](https://github.com/tolgee/tolgee-platform/issues/3783)) ([779cfe3](https://github.com/tolgee/tolgee-platform/commit/779cfe37df21bd8acb8a34810bd32100f8288565))
+
 ## [3.209.2](https://github.com/tolgee/tolgee-platform/compare/v3.209.1...v3.209.2) (2026-07-07)
 
 
