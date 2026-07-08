@@ -1,8 +1,8 @@
 package io.tolgee.ee.api.v2.hateoas.model.prompt
 
-import com.fasterxml.jackson.databind.JsonNode
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
+import tools.jackson.databind.JsonNode
 
 @Relation(collectionRelation = "promptResponse", itemRelation = "promptResponses")
 data class PromptResponseModel(

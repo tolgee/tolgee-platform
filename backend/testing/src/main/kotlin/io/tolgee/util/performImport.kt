@@ -1,6 +1,5 @@
 package io.tolgee.util
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.fixtures.AuthorizedRequestFactory
 import org.springframework.core.io.Resource
 import org.springframework.mock.web.MockMultipartFile
@@ -8,6 +7,7 @@ import org.springframework.mock.web.MockPart
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+import tools.jackson.module.kotlin.jacksonObjectMapper
 
 fun performImport(
   mvc: MockMvc,

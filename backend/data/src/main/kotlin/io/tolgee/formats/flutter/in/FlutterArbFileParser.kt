@@ -1,9 +1,9 @@
 package io.tolgee.formats.flutter.`in`
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.formats.flutter.FlutterArbModel
 import io.tolgee.formats.flutter.FlutterArbTranslationModel
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.module.kotlin.readValue
 
 class FlutterArbFileParser(
   private val bytes: ByteArray,

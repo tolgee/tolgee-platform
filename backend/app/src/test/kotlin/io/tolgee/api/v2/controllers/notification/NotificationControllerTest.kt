@@ -1,6 +1,5 @@
 package io.tolgee.api.v2.controllers.notification
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.development.testDataBuilder.data.NotificationsTestData
 import io.tolgee.dtos.request.notification.NotificationsMarkSeenRequest
 import io.tolgee.fixtures.andAssertThatJson
@@ -11,6 +10,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.web.servlet.ResultActions
+import tools.jackson.databind.ObjectMapper
 
 class NotificationControllerTest : AuthorizedControllerTest() {
   @Autowired

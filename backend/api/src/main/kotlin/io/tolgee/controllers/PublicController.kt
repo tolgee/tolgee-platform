@@ -1,6 +1,5 @@
 package io.tolgee.controllers
 
-import com.fasterxml.jackson.databind.node.TextNode
 import io.swagger.v3.oas.annotations.Operation
 import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.constants.Message
@@ -36,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import tools.jackson.databind.node.StringNode
 
 @RestController
 @RequestMapping("/api/public")
@@ -111,7 +111,7 @@ class PublicController(
   @Operation(summary = "Validate if email is not in use")
   @OpenApiHideFromPublicDocs
   fun validateEmail(
-    @RequestBody email: TextNode,
+    @RequestBody email: StringNode,
   ): Boolean {
     return userAccountService.findActive(email.asText()) == null
   }

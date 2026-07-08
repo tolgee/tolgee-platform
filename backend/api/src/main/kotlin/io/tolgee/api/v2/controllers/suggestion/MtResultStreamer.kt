@@ -1,6 +1,5 @@
 package io.tolgee.api.v2.controllers.suggestion
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.sentry.Sentry
 import io.tolgee.constants.MtServiceType
 import io.tolgee.dtos.cacheable.ProjectDto
@@ -27,6 +26,7 @@ import kotlinx.coroutines.runBlocking
 import org.springframework.context.ApplicationContext
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
+import tools.jackson.databind.ObjectMapper
 import java.io.OutputStream
 import java.io.OutputStreamWriter
 

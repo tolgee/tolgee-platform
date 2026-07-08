@@ -1,9 +1,9 @@
 package io.tolgee.component
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.BadRequestException
 import org.springframework.stereotype.Component
+import tools.jackson.databind.ObjectMapper
 
 @Component
 class KeyCustomValuesValidator(

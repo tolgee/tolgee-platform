@@ -1,6 +1,5 @@
 package io.tolgee.unit.formats.apple.out
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.apple.out.AppleXcstringsExporter
@@ -12,6 +11,7 @@ import io.tolgee.unit.util.assertFile
 import io.tolgee.unit.util.getExported
 import io.tolgee.util.buildExportTranslationList
 import org.junit.jupiter.api.Test
+import tools.jackson.module.kotlin.jacksonObjectMapper
 
 class AppleXcstringsExporterTest {
   @Test

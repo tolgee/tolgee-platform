@@ -1,6 +1,5 @@
 package io.tolgee.mcp.tools
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.modelcontextprotocol.server.McpSyncServer
 import io.tolgee.api.v2.controllers.translation.TranslationsController
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
@@ -13,6 +12,7 @@ import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.executeInNewTransaction
 import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
+import tools.jackson.databind.ObjectMapper
 
 @Component
 class TranslationMcpTools(

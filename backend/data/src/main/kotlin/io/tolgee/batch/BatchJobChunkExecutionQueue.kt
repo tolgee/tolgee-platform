@@ -1,6 +1,5 @@
 package io.tolgee.batch
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.Metrics
 import io.tolgee.batch.data.BatchJobChunkExecutionDto
 import io.tolgee.batch.data.BatchJobType
@@ -24,6 +23,7 @@ import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedDeque
 import java.util.concurrent.atomic.AtomicInteger

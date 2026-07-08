@@ -1,7 +1,5 @@
 package io.tolgee.unit.formats.yaml.`in`
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import io.tolgee.formats.yaml.`in`.YamlFileProcessor
 import io.tolgee.testing.assert
 import io.tolgee.util.FileProcessorContextMockUtil
@@ -14,6 +12,8 @@ import io.tolgee.util.custom
 import io.tolgee.util.description
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.dataformat.yaml.YAMLFactory
 
 class RubyYamlFileProcessorTest {
   lateinit var mockUtil: FileProcessorContextMockUtil

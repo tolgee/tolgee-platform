@@ -1,9 +1,9 @@
 package io.tolgee.activity.data
 
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.databind.DeserializationContext
-import com.fasterxml.jackson.databind.JsonDeserializer
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import tools.jackson.core.JsonParser
+import tools.jackson.databind.DeserializationContext
+import tools.jackson.databind.ValueDeserializer
+import tools.jackson.databind.annotation.JsonDeserialize
 
 /**
  * Backs `ActivityModifiedEntity.describingRelations`. Relation names live
@@ -20,7 +20,7 @@ class DescribingRelationsMap(
   )
 }
 
-class DescribingRelationsMapDeserializer : JsonDeserializer<DescribingRelationsMap>() {
+class DescribingRelationsMapDeserializer : ValueDeserializer<DescribingRelationsMap>() {
   override fun deserialize(
     p: JsonParser,
     ctxt: DeserializationContext,

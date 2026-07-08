@@ -1,9 +1,9 @@
 package io.tolgee.activity.data
 
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.databind.DeserializationContext
-import com.fasterxml.jackson.databind.JsonDeserializer
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import tools.jackson.core.JsonParser
+import tools.jackson.databind.DeserializationContext
+import tools.jackson.databind.ValueDeserializer
+import tools.jackson.databind.annotation.JsonDeserialize
 
 /**
  * Memory-tight `Map<String, PropertyModification>` backing
@@ -168,7 +168,7 @@ class PropertyModifications private constructor(
  * Reads the `{"name":{"old":..,"new":..}}` JSON shape into a [PropertyModifications].
  * Serialization is handled by Jackson's default Map serializer via the [Map] interface.
  */
-class PropertyModificationsDeserializer : JsonDeserializer<PropertyModifications>() {
+class PropertyModificationsDeserializer : ValueDeserializer<PropertyModifications>() {
   override fun deserialize(
     p: JsonParser,
     ctxt: DeserializationContext,

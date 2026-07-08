@@ -1,6 +1,5 @@
 package io.tolgee.ee.api.v2.controllers
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.api.SubscriptionStatus
 import io.tolgee.constants.Feature
 import io.tolgee.ee.EeLicensingMockRequestUtil
@@ -20,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpMethod
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.web.client.RestTemplate
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.util.Date
 
 class EeLicenseControllerTest : AuthorizedControllerTest() {

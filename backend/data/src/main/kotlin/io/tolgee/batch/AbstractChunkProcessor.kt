@@ -1,7 +1,7 @@
 package io.tolgee.batch
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.batch.data.BatchJobDto
+import tools.jackson.databind.ObjectMapper
 
 abstract class AbstractChunkProcessor<RequestType, ParamsType, TargetItemType>(
   private val objectMapper: ObjectMapper,

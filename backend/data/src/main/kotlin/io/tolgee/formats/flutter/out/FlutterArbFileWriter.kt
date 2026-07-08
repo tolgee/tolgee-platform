@@ -1,8 +1,8 @@
 package io.tolgee.formats.flutter.out
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.formats.flutter.FlutterArbModel
 import io.tolgee.formats.flutter.FlutterArbTranslationModel
+import tools.jackson.databind.ObjectMapper
 import java.io.InputStream
 
 class FlutterArbFileWriter(

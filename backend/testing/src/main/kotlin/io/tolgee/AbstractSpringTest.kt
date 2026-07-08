@@ -1,7 +1,5 @@
 package io.tolgee
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.component.AllCachesProvider
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.SchedulingManager
@@ -67,6 +65,8 @@ import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.TransactionDefinition
 import org.springframework.transaction.TransactionStatus
 import org.springframework.transaction.support.TransactionTemplate
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.module.kotlin.readValue
 import java.time.Duration
 import java.util.Date
 

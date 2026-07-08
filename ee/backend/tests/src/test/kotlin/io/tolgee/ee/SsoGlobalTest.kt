@@ -1,6 +1,5 @@
 package io.tolgee.ee
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.SsoTestData
@@ -35,6 +34,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.web.client.RestTemplate
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.util.Date
 import java.util.HashMap
 

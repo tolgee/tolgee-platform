@@ -1,6 +1,5 @@
 package io.tolgee
 
-import com.fasterxml.jackson.databind.JsonNode
 import io.modelcontextprotocol.client.McpClient
 import io.modelcontextprotocol.client.McpSyncClient
 import io.modelcontextprotocol.client.transport.HttpClientStreamableHttpTransport
@@ -15,6 +14,7 @@ import org.junit.jupiter.api.TestInstance
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.test.context.TestPropertySource
+import tools.jackson.databind.JsonNode
 import java.time.Duration
 
 // OSIV is disabled to replicate production MCP environment where tool handlers

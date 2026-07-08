@@ -1,7 +1,7 @@
 package io.tolgee.websocket
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.springframework.data.redis.core.StringRedisTemplate
+import tools.jackson.module.kotlin.jacksonObjectMapper
 
 class RedisWebsocketEventPublisher(
   private val redisTemplate: StringRedisTemplate,

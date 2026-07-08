@@ -16,7 +16,6 @@
 
 package io.tolgee.util
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.sentry.Sentry
 import io.tolgee.exceptions.ErrorException
 import io.tolgee.exceptions.ErrorResponseBody
@@ -27,6 +26,7 @@ import org.hibernate.Session
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
+import tools.jackson.databind.ObjectMapper
 import java.io.OutputStream
 import java.io.OutputStreamWriter
 

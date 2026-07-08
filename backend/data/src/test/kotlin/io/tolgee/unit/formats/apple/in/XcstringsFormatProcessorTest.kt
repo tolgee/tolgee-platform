@@ -1,6 +1,5 @@
 package io.tolgee.unit.formats.apple.`in`
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.formats.apple.`in`.xcstrings.XcstringsFileProcessor
 import io.tolgee.testing.assert
 import io.tolgee.util.FileProcessorContextMockUtil
@@ -12,6 +11,7 @@ import io.tolgee.util.assertTranslations
 import io.tolgee.util.description
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import tools.jackson.module.kotlin.jacksonObjectMapper
 
 class XcstringsFormatProcessorTest {
   lateinit var mockUtil: FileProcessorContextMockUtil

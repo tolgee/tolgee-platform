@@ -1,10 +1,10 @@
 package io.tolgee.testing.assertions
 
-import com.fasterxml.jackson.core.JsonProcessingException
 import io.tolgee.fixtures.mapResponseTo
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.assertj.core.api.AbstractAssert
 import org.springframework.test.web.servlet.MvcResult
+import tools.jackson.core.JacksonException
 import java.io.UnsupportedEncodingException
 
 class ErrorResponseAssert(
@@ -36,7 +36,7 @@ class ErrorResponseAssert(
     get() {
       return try {
         actual!!.mapResponseTo()
-      } catch (e: JsonProcessingException) {
+      } catch (e: JacksonException) {
         throw RuntimeException("Can not parse error response.")
       } catch (e: UnsupportedEncodingException) {
         throw RuntimeException("Can not parse error response.")
@@ -46,7 +46,7 @@ class ErrorResponseAssert(
     get() {
       return try {
         actual!!.mapResponseTo()
-      } catch (e: JsonProcessingException) {
+      } catch (e: JacksonException) {
         try {
           throw RuntimeException(
             """

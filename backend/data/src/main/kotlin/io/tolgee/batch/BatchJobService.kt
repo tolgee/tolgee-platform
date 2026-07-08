@@ -1,6 +1,5 @@
 package io.tolgee.batch
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.batch.data.AllIncompleteJobsResult
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.BatchJobType
@@ -41,6 +40,7 @@ import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.event.TransactionalEventListener
+import tools.jackson.databind.ObjectMapper
 import java.sql.Timestamp
 import java.time.Duration
 import java.util.Date

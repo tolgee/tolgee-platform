@@ -189,9 +189,8 @@ dependencies {
     implementation libs.postHog
     implementation libs.micrometerPrometheus
     implementation 'org.dom4j:dom4j:2.1.4'
-    implementation libs.jacksonKotlin
     implementation("org.apache.commons:commons-configuration2:2.15.0")
-    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVersion"
+    implementation "tools.jackson.dataformat:jackson-dataformat-yaml:$jacksonVersion"
     implementation("com.fasterxml.woodstox:woodstox-core:7.1.1")
 
     /**

@@ -1,6 +1,5 @@
 package io.tolgee.ee.service.qa
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.posthog.server.PostHog
 import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.data.BatchJobType
@@ -35,6 +34,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.test.context.bean.override.mockito.MockitoBean
+import tools.jackson.module.kotlin.jacksonObjectMapper
 
 @SpringBootTest
 @AutoConfigureMockMvc

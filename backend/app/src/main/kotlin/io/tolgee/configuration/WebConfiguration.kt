@@ -4,9 +4,6 @@
 
 package io.tolgee.configuration
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.activity.ActivityHandlerInterceptor
 import io.tolgee.component.TestClockHeaderFilter
 import io.tolgee.component.VersionFilter
@@ -25,6 +22,9 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
+import tools.jackson.databind.DeserializationFeature
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.module.kotlin.jacksonMapperBuilder
 import java.security.SecureRandom
 import java.util.concurrent.TimeUnit
 
@@ -76,7 +76,9 @@ class WebConfiguration(
   @Bean
   @Primary
   fun objectMapper(): ObjectMapper {
-    return jacksonObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+    return jacksonMapperBuilder()
+      .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+      .build()
   }
 
   @Bean

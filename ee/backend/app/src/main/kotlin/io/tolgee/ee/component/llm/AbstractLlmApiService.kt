@@ -1,9 +1,5 @@
 package io.tolgee.ee.component.llm
 
-import com.fasterxml.jackson.core.JsonProcessingException
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.sentry.Sentry
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
 import io.tolgee.dtos.LlmParams
@@ -13,6 +9,10 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.ResponseEntity
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
+import tools.jackson.core.JacksonException
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.module.kotlin.readValue
 
 val DEFAULT_ATTEMPTS = listOf(30)
 
@@ -37,7 +37,7 @@ abstract class AbstractLlmApiService {
       try {
         val errorResponse: JsonNode = objectMapper.readValue(errorBody)
         return errorResponse
-      } catch (jsonEx: JsonProcessingException) {
+      } catch (jsonEx: JacksonException) {
         logger.debug("Failed to parse error body: ${jsonEx.message}")
         return null
       }

@@ -1,6 +1,5 @@
 package io.tolgee.api.v2.controllers.v2ImportController
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.fixtures.AuthorizedRequestFactory
@@ -17,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import kotlin.time.measureTime
 
 /**

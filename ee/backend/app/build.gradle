@@ -71,7 +71,7 @@ dependencies {
     implementation libs.jjwtImpl
     implementation libs.jjwtJackson
     implementation libs.hibernateTypes
-    implementation libs.jacksonKotlin
+    implementation libs.jacksonModuleKotlin
     implementation libs.commonsCodec
 
     /**

@@ -1,13 +1,13 @@
 package io.tolgee.formats.yaml.`in`
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.formats.ImportFileProcessor
 import io.tolgee.formats.genericStructuredFile.`in`.GenericStructuredProcessor
 import io.tolgee.formats.genericStructuredFile.`in`.GenericStructuredRawDataToTextConvertor
 import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.service.dataImport.processors.FileProcessorContext
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.module.kotlin.readValue
 
 class YamlFileProcessor(
   override val context: FileProcessorContext,
