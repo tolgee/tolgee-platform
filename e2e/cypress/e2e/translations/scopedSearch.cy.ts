@@ -62,10 +62,31 @@ describe('Scoped search', () => {
     cy.contains('Cool key 04').should('be.visible');
   });
 
-  it('shows syntax help popover', () => {
+  it('shows syntax help popover with docs link', () => {
     cy.gcy('translations-search-help-button').click();
     cy.gcy('translations-search-help-popover')
       .should('be.visible')
       .and('contain', 'description:cart');
+    cy.gcy('translations-search-help-docs-link')
+      .should('have.attr', 'href')
+      .and('include', 'docs.tolgee.io');
+  });
+
+  it('suggests qualifiers while typing and completes on click', () => {
+    cy.gcy('global-search-field').type('des');
+    cy.gcy('translations-search-suggestion-item')
+      .contains('description:')
+      .click();
+    cy.gcy('global-search-field')
+      .find('input')
+      .should('have.value', 'description:');
+  });
+
+  it('completes qualifier with keyboard', () => {
+    cy.gcy('global-search-field').type('key{enter}');
+    cy.gcy('global-search-field').find('input').should('have.value', 'key:');
+    cy.focused().type('*01');
+    cy.contains('Cool key 01').should('be.visible');
+    cy.contains('Cool key 02').should('not.exist');
   });
 });

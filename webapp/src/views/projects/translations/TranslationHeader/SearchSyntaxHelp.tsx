@@ -1,5 +1,12 @@
 import { useState } from 'react';
-import { Box, IconButton, Popover, styled, Typography } from '@mui/material';
+import {
+  Box,
+  IconButton,
+  Link,
+  Popover,
+  styled,
+  Typography,
+} from '@mui/material';
 import { HelpCircle } from '@untitled-ui/icons-react';
 import { T } from '@tolgee/react';
 
@@ -142,6 +149,19 @@ export const SearchSyntaxHelp = () => {
               ))}
             </tbody>
           </StyledExamples>
+          <Typography variant="body2">
+            <Link
+              href="https://docs.tolgee.io/platform/translation_process/scoped_search"
+              target="_blank"
+              rel="noreferrer"
+              data-cy="translations-search-help-docs-link"
+            >
+              <T
+                keyName="translations_search_help_docs_link"
+                defaultValue="Read more in the documentation"
+              />
+            </Link>
+          </Typography>
         </StyledContent>
       </Popover>
     </>
