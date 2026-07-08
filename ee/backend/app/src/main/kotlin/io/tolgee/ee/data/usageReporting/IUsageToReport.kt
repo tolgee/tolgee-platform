@@ -7,9 +7,13 @@ interface IUsageToReport {
 
   val lastReportedSeats: Long
 
+  val lastReportedWords: Long
+
   val keysToReport: Long
 
   val seatsToReport: Long
+
+  val wordsToReport: Long
 
   val reportedAt: Date
 }

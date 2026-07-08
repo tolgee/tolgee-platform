@@ -145,4 +145,14 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="dkrizan" id="1751900000000-3">
+        <addColumn tableName="usage_to_report">
+            <column name="words_to_report" type="BIGINT" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_reported_words" type="BIGINT" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

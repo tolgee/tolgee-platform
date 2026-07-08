@@ -9,7 +9,8 @@ import java.util.Date
 
 /**
  * Entity that stores information about usage reporting for the instance.
- * Used to track the number of keys and seats that need to be reported to the Tolgee Cloud from a Self-hosted instance.
+ * Used to track the number of keys, seats and words that need to be reported to the Tolgee Cloud from a Self-hosted
+ * instance.
  */
 @Entity
 @Table(schema = "ee")
@@ -33,6 +34,11 @@ class UsageToReport :
   override var lastReportedSeats: Long = 0
 
   /**
+   * Number of words reported in the last report
+   */
+  override var lastReportedWords: Long = 0
+
+  /**
    * Number of keys that need to be reported in the next report
    */
   override var keysToReport: Long = 0
@@ -41,6 +47,11 @@ class UsageToReport :
    * Number of seats that need to be reported in the next report
    */
   override var seatsToReport: Long = 0
+
+  /**
+   * Number of words that need to be reported in the next report
+   */
+  override var wordsToReport: Long = 0
 
   /**
    * Timestamp of when the last report was made

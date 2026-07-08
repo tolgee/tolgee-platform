@@ -19,10 +19,11 @@ class TolgeeCloudLicencingClientStub(
     subscription: EeSubscriptionDto,
     keys: Long?,
     seats: Long?,
+    words: Long?,
   ) {
     // no-op reporting unless told otherwise
     if (enableReporting) {
-      super.reportUsageRemote(subscription, keys, seats)
+      super.reportUsageRemote(subscription, keys, seats, words)
     }
   }
 }

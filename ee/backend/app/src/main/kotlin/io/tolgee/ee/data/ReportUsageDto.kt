@@ -17,4 +17,9 @@ class ReportUsageDto(
     description = "Number of languages in the project. If not provided, the number of languages will not be updated.",
   )
   var seats: Long? = null,
+  @field:Min(0)
+  @Schema(
+    description = "Number of words in the project. If not provided, the number of words will not be updated.",
+  )
+  var words: Long? = null,
 )

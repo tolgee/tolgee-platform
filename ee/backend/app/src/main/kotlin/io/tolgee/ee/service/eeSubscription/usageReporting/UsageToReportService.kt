@@ -5,6 +5,7 @@ import io.tolgee.constants.Caches
 import io.tolgee.ee.data.usageReporting.UsageToReportDto
 import io.tolgee.ee.model.UsageToReport
 import io.tolgee.service.key.KeyService
+import io.tolgee.service.organization.OrganizationStatsService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.util.tryUntilItDoesntBreakConstraint
 import jakarta.persistence.EntityManager
@@ -32,6 +33,7 @@ class UsageToReportService(
   private val currentDateProvider: CurrentDateProvider,
   private val keyService: KeyService,
   private val userAccountService: UserAccountService,
+  private val organizationStatsService: OrganizationStatsService,
 ) {
   /**
    * Retrieves the current usage data and reporting status.
@@ -68,12 +70,14 @@ class UsageToReportService(
     entityManager
       .createQuery(
         """
-          |select 
+          |select
           |new io.tolgee.ee.data.usageReporting.UsageToReportDto(
-          |    lru.lastReportedKeys, 
-          |     lru.lastReportedSeats, 
-          |     lru.keysToReport, 
-          |     lru.seatsToReport, 
+          |    lru.lastReportedKeys,
+          |     lru.lastReportedSeats,
+          |     lru.lastReportedWords,
+          |     lru.keysToReport,
+          |     lru.seatsToReport,
+          |     lru.wordsToReport,
           |     lru.reportedAt)
           |from UsageToReport lru
           |
@@ -88,6 +92,7 @@ class UsageToReportService(
       UsageToReport().apply {
         keysToReport = keyService.countAllOnInstance()
         seatsToReport = userAccountService.countAllEnabled()
+        wordsToReport = organizationStatsService.countAllWordsOnInstance()
         // we can use this far in past distant date, because we haven't reported yes
         reportedAt = Date(1)
       }
@@ -119,6 +124,18 @@ class UsageToReportService(
       .executeUpdate()
   }
 
+  @CacheEvict(Caches.EE_LAST_REPORTED_USAGE, key = "1")
+  fun storeCurrentWordsUsage(words: Long) {
+    entityManager
+      .createQuery(
+        """
+      update UsageToReport lru
+      set lru.wordsToReport = :wordsToReport
+      """,
+      ).setParameter("wordsToReport", words)
+      .executeUpdate()
+  }
+
   /**
    * Stores current usage data without reporting it immediately.
    *
@@ -128,17 +145,22 @@ class UsageToReportService(
    *
    * @param keys The current number of keys, or null if unchanged
    * @param seats The current number of seats, or null if unchanged
+   * @param words The current number of words, or null if unchanged
    */
   @CacheEvict(Caches.EE_LAST_REPORTED_USAGE, key = "1")
   fun storeCurrentUsage(
     keys: Long?,
     seats: Long?,
+    words: Long? = null,
   ) {
     if (keys != null) {
       storeCurrentKeysUsage(keys)
     }
     if (seats != null) {
       storeCurrentSeatsUsage(seats)
+    }
+    if (words != null) {
+      storeCurrentWordsUsage(words)
     }
   }
 
@@ -152,17 +174,22 @@ class UsageToReportService(
    *
    * @param keys The number of keys that were reported, or null if unchanged
    * @param seats The number of seats that were reported, or null if unchanged
+   * @param words The number of words that were reported, or null if unchanged
    */
   @CacheEvict(Caches.EE_LAST_REPORTED_USAGE, key = "1")
   fun storeOnReport(
     keys: Long?,
     seats: Long?,
+    words: Long? = null,
   ) {
     if (keys != null) {
       storeOnReportKeys(keys)
     }
     if (seats != null) {
       storeOnReportSeats(seats)
+    }
+    if (words != null) {
+      storeOnReportWords(words)
     }
   }
 
@@ -185,13 +212,28 @@ class UsageToReportService(
     entityManager
       .createQuery(
         """
-      update UsageToReport lru  
+      update UsageToReport lru
       set lru.lastReportedSeats = :lastReportedSeats,
           lru.seatsToReport = :seatsToReport,
           lru.reportedAt = :reportedAt
       """,
       ).setParameter("lastReportedSeats", seats)
       .setParameter("seatsToReport", seats)
+      .setParameter("reportedAt", currentDateProvider.date)
+      .executeUpdate()
+  }
+
+  private fun storeOnReportWords(words: Long) {
+    entityManager
+      .createQuery(
+        """
+      update UsageToReport lru
+      set lru.lastReportedWords = :lastReportedWords,
+          lru.wordsToReport = :wordsToReport,
+          lru.reportedAt = :reportedAt
+      """,
+      ).setParameter("lastReportedWords", words)
+      .setParameter("wordsToReport", words)
       .setParameter("reportedAt", currentDateProvider.date)
       .executeUpdate()
   }

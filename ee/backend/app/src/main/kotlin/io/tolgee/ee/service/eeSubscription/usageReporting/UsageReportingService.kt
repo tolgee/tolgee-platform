@@ -32,18 +32,20 @@ class UsageReportingService(
    * @param subscription The current subscription information
    * @param keys The number of keys to report, or null if unchanged
    * @param seats The number of seats to report, or null if unchanged
+   * @param words The number of words to report, or null if unchanged
    */
   fun reportUsage(
     subscription: EeSubscriptionDto?,
     keys: Long? = null,
     seats: Long? = null,
+    words: Long? = null,
   ) {
     if (isReportingTooSoon()) {
-      usageToReportService.storeCurrentUsage(keys = keys, seats = seats)
+      usageToReportService.storeCurrentUsage(keys = keys, seats = seats, words = words)
       return
     }
 
-    reportAndStore(subscription, keys, seats)
+    reportAndStore(subscription, keys, seats, words)
   }
 
   /**
@@ -67,9 +69,15 @@ class UsageReportingService(
 
         if (
           usageToReport.keysToReport != usageToReport.lastReportedKeys ||
-          usageToReport.seatsToReport != usageToReport.lastReportedSeats
+          usageToReport.seatsToReport != usageToReport.lastReportedSeats ||
+          usageToReport.wordsToReport != usageToReport.lastReportedWords
         ) {
-          reportAndStore(subscription, usageToReport.keysToReport, usageToReport.seatsToReport)
+          reportAndStore(
+            subscription,
+            usageToReport.keysToReport,
+            usageToReport.seatsToReport,
+            usageToReport.wordsToReport,
+          )
         }
       }
     } catch (e: Exception) {
@@ -89,25 +97,28 @@ class UsageReportingService(
    * @param subscription The current subscription information
    * @param keys The number of keys to report, or null if unchanged
    * @param seats The number of seats to report, or null if unchanged
+   * @param words The number of words to report, or null if unchanged
    */
   private fun reportAndStore(
     subscription: EeSubscriptionDto?,
     keys: Long?,
     seats: Long?,
+    words: Long?,
   ) {
-    reportUsageRemote(subscription, keys, seats)
-    usageToReportService.storeOnReport(keys = keys, seats = seats)
+    reportUsageRemote(subscription, keys, seats, words)
+    usageToReportService.storeOnReport(keys = keys, seats = seats, words = words)
   }
 
   private fun reportUsageRemote(
     subscription: EeSubscriptionDto?,
     keys: Long?,
     seats: Long?,
+    words: Long?,
   ) {
     if (subscription != null) {
       catchingService.catchingSpendingLimits {
         catchingService.catchingLicenseNotFound {
-          client.reportUsageRemote(subscription = subscription, keys = keys, seats = seats)
+          client.reportUsageRemote(subscription = subscription, keys = keys, seats = seats, words = words)
         }
       }
     }
