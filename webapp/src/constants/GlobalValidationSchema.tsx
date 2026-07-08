@@ -431,12 +431,19 @@ export class Validation {
       is: false,
       then: Yup.string().required(),
     }),
-    includedUsage: Yup.object().when(['metricType', 'free'], {
+    tiers: Yup.array().when(['metricType', 'free'], {
       is: (metricType: any, free: any) =>
         metricType === 'HOSTED_WORDS' && !free,
-      then: Yup.object({
-        words: Yup.number().moreThan(0).required(),
-      }),
+      then: Yup.array().of(
+        Yup.object({
+          includedWords: Yup.number().moreThan(0).required(),
+          includedMtCredits: Yup.number().min(0),
+          eurMonthly: Yup.number().moreThan(0).required(),
+          eurYearly: Yup.number().min(0),
+          usdMonthly: Yup.number().min(0),
+          usdYearly: Yup.number().min(0),
+        })
+      ),
     }),
   });
 
