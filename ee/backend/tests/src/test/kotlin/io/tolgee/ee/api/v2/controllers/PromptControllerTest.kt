@@ -11,6 +11,7 @@ import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.enums.LlmProviderType
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -38,6 +39,12 @@ class PromptControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     internalProperties.fakeLlmProviders = true
     this.userAccount = testData.projectEditor.self
     enabledFeaturesProvider.forceEnabled = setOf(Feature.AI_PROMPT_CUSTOMIZATION)
+  }
+
+  @AfterEach
+  fun cleanup() {
+    testDataService.cleanTestData(testData.root)
+    enabledFeaturesProvider.forceEnabled = null
   }
 
   @Test
@@ -193,6 +200,59 @@ class PromptControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       node("usage.inputTokens").isEqualTo(42)
       node("usage.outputTokens").isEqualTo(21)
       node("usage.cachedTokens").isEqualTo(1)
+    }
+  }
+
+  @Test
+  fun `escapeJson helper escapes value for json embedding`() {
+    performAuthPost(
+      "/v2/projects/${testData.promptProject.self.id}/prompts/run",
+      PromptRunDto(
+        template =
+          """{"description": "{{escapeJson key.description}}", "missing": "{{escapeJson key.nonexistent}}"}""",
+        keyId = testData.keys[3].self.id,
+        targetLanguageId = testData.czech.self.id,
+        provider = "default",
+        basicPromptOptions = null,
+      ),
+    ).andIsOk.andAssertThatJson {
+      node("prompt")
+        .isString
+        .contains("""{"description": "Has \"quotes\" and\nnewline \\ backslash", "missing": ""}""")
+    }
+  }
+
+  @Test
+  fun `escapeJson does not double-escape an already escaped translation`() {
+    performAuthPost(
+      "/v2/projects/${testData.promptProject.self.id}/prompts/run",
+      PromptRunDto(
+        template = "bare={{source.translation}} wrapped={{escapeJson source.translation}}",
+        keyId = testData.keys[3].self.id,
+        targetLanguageId = testData.czech.self.id,
+        provider = "default",
+        basicPromptOptions = null,
+      ),
+    ).andIsOk.andAssertThatJson {
+      node("prompt").isString.contains("""bare=Says \"hi\"""")
+      node("prompt").isString.contains("""wrapped=Says \"hi\"""")
+      node("prompt").isString.doesNotContain("""\\\"""")
+    }
+  }
+
+  @Test
+  fun `default translationInfo fragment escapes the translation`() {
+    performAuthPost(
+      "/v2/projects/${testData.promptProject.self.id}/prompts/run",
+      PromptRunDto(
+        template = "{{fragment.translationInfo}}",
+        keyId = testData.keys[3].self.id,
+        targetLanguageId = testData.czech.self.id,
+        provider = "default",
+        basicPromptOptions = null,
+      ),
+    ).andIsOk.andAssertThatJson {
+      node("prompt").isString.contains("""Translate "Says \"hi\"" from English to Czech.""")
     }
   }
 }

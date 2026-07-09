@@ -290,6 +290,8 @@ declare namespace DataCy {
         "glossary-view-button": true;
         "glossary-view-language-select": true;
         "handlebars-editor": true;
+        "handlebars-tooltip": true;
+        "handlebars-tooltip-helper-description": true;
         "import-conflict-resolution-dialog": true;
         "import-conflicts-not-resolved-dialog": true;
         "import-conflicts-not-resolved-dialog-cancel-button": true;

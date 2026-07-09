@@ -1,9 +1,15 @@
 import { login } from '../../common/apiCalls/common';
 import { prompt } from '../../common/apiCalls/testData/testData';
 import { waitForGlobalLoading } from '../../common/loading';
-import { openAdvancedAiPlayground } from '../../common/prompt';
+import {
+  getAutocompleteOption,
+  openAdvancedAiPlayground,
+} from '../../common/prompt';
 import { gcy } from '../../common/shared';
-import { visitTranslations } from '../../common/translations';
+import {
+  getTranslationCell,
+  visitTranslations,
+} from '../../common/translations';
 import { buildXpath } from '../../common/XpathBuilder';
 
 describe('custom prompt', () => {
@@ -207,6 +213,61 @@ describe('custom prompt', () => {
     testVariables({
       '{{translationMemory.json}}': 'Czech translation 2',
     });
+  });
+
+  it('suggests escapeJson helper and variables after accepting it', () => {
+    openAdvancedAiPlayground();
+    getPromptEditor()
+      .clear()
+      .type('{{esc', { parseSpecialCharSequences: false });
+    getAutocompleteOption('escapeJson').should('be.visible').click();
+    getPromptEditor().should('contain.text', '{{escapeJson');
+
+    getAutocompleteOption('key').should('be.visible');
+    getAutocompleteOption('escapeJson').should('not.exist');
+  });
+
+  it('does not suggest escapeJson helper in argument or nested position', () => {
+    openAdvancedAiPlayground();
+    getPromptEditor()
+      .clear()
+      .type('{{escapeJson esc', { parseSpecialCharSequences: false });
+    getAutocompleteOption('escapeJson').should('not.exist');
+
+    getPromptEditor()
+      .clear()
+      .type('{{key.', { parseSpecialCharSequences: false });
+    getAutocompleteOption('escapeJson').should('not.exist');
+  });
+
+  it('shows tooltip for escapeJson helper', () => {
+    openAdvancedAiPlayground();
+    getPromptEditor()
+      .clear()
+      .type('{{escapeJson key.name}}', { parseSpecialCharSequences: false });
+    cy.gcy('handlebars-editor')
+      .find('.cm-line')
+      .first()
+      .trigger('mousemove', 50, 10);
+    cy.gcy('handlebars-tooltip-helper-description').should('be.visible');
+  });
+
+  it('escapeJson helper escapes key description for json embedding', () => {
+    getTranslationCell('Key 4', 'cs').click();
+    gcy('llm-machine-translation-customize').click();
+    gcy('ai-prompt-rendered-expand-button').click();
+    gcy('ai-prompt-tab-advanced').click();
+
+    getPromptEditor().clear().type('"{{escapeJson key.description}}"', {
+      parseSpecialCharSequences: false,
+    });
+    gcy('ai-prompt-preview-button').click();
+    waitForGlobalLoading();
+
+    gcy('ai-prompt-rendered').should(
+      'contain',
+      'Has \\"quotes\\" and\\nnewline \\\\ backslash'
+    );
   });
 
   function testVariables(data: Record<string, string>) {

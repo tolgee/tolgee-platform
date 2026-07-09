@@ -5,7 +5,17 @@ import { RefObject } from 'react';
 import { components } from 'tg.service/apiSchema.generated';
 import { useTranslate } from '@tolgee/react';
 
+import { getHandlebarsHelpers } from './handlebarsHelpers';
+
 type PromptVariableDto = components['schemas']['PromptVariableDto'];
+
+// Attrs must stay an object literal: `npm run generate-data-cy` scans for `'data-cy': '<literal>'`
+// and misses `setAttribute('data-cy', ...)`, which would drop these values from dataCyType.d.ts.
+function applyAttrs(el: HTMLElement, attrs: Record<string, string>) {
+  Object.entries(attrs).forEach(([name, value]) =>
+    el.setAttribute(name, value)
+  );
+}
 
 export const handlebarsTooltip = (
   variablesRef: RefObject<PromptVariableDto[] | undefined>,
@@ -22,6 +32,42 @@ export const handlebarsTooltip = (
         .substring(node.from, node.to);
       const path = variableName.split('.');
 
+      const helper =
+        path.length === 1
+          ? getHandlebarsHelpers(t).find((h) => h.name === variableName)
+          : undefined;
+
+      if (helper) {
+        return {
+          pos: node.from,
+          end: node.to,
+          above: false,
+          strictSide: true,
+          create() {
+            const dom = document.createElement('div');
+            applyAttrs(dom, { 'data-cy': 'handlebars-tooltip' });
+
+            const headerEl = document.createElement('div');
+            headerEl.classList.add('header');
+            const titleEl = document.createElement('div');
+            titleEl.classList.add('title');
+            titleEl.textContent = helper.detail;
+            headerEl.appendChild(titleEl);
+            dom.appendChild(headerEl);
+
+            const contentEl = document.createElement('div');
+            contentEl.classList.add('content');
+            applyAttrs(contentEl, {
+              'data-cy': 'handlebars-tooltip-helper-description',
+            });
+            contentEl.textContent = helper.description;
+            dom.appendChild(contentEl);
+
+            return { dom };
+          },
+        };
+      }
+
       let variable: PromptVariableDto | undefined = {
         name: '',
         props: variablesRef.current ?? undefined,
@@ -37,6 +83,7 @@ export const handlebarsTooltip = (
         strictSide: true,
         create() {
           const dom = document.createElement('div');
+          applyAttrs(dom, { 'data-cy': 'handlebars-tooltip' });
 
           const title =
             variable?.type === 'FRAGMENT'

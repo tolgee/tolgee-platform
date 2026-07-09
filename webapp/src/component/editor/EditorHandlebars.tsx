@@ -6,11 +6,12 @@ import { EditorView, ViewUpdate, keymap, KeyBinding } from '@codemirror/view';
 import { styled, useTheme } from '@mui/material';
 import { htmlIsolatesPlugin } from '@tginternal/editor';
 import { handlebarsLanguage } from '@xiechao/codemirror-lang-handlebars';
-import { autocompletion } from '@codemirror/autocomplete';
+import { autocompletion, Completion } from '@codemirror/autocomplete';
 
 import { Direction } from 'tg.fixtures/getLanguageDirection';
 import { useScrollMargins } from 'tg.hooks/useScrollMargins';
 import { handlebarsAutocomplete } from './utils/handlebarsAutocomplete';
+import { getHandlebarsHelpers } from './utils/handlebarsHelpers';
 import { components } from 'tg.service/apiSchema.generated';
 import { handlebarsTooltip } from './utils/handlebarsTooltip';
 import {
@@ -154,9 +155,20 @@ export const EditorHandlebars: React.FC<
   });
   const { t } = useTranslate();
 
+  const helperCompletions: Completion[] = getHandlebarsHelpers(t).map(
+    (helper) => ({
+      label: helper.name,
+      detail: helper.detail,
+      apply: helper.name + ' ',
+      type: 'function',
+    })
+  );
+  const helperCompletionsRef = useRef(helperCompletions);
+
   keyBindings.current = shortcuts;
   variableRefs.current = availableVariables;
   unknownVariableMessageRef.current = unknownVariableMessage;
+  helperCompletionsRef.current = helperCompletions;
 
   useEffect(() => {
     const shortcutsUptoDate = shortcuts?.map((value, i) => {
@@ -193,9 +205,12 @@ export const EditorHandlebars: React.FC<
           }),
           handlebarsLanguage,
           autocompletion({
-            override: [handlebarsAutocomplete(variableRefs)],
+            override: [
+              handlebarsAutocomplete(variableRefs, helperCompletionsRef),
+            ],
             icons: false,
-            activateOnCompletion: (c) => c.type === 'object',
+            activateOnCompletion: (c) =>
+              c.type === 'object' || c.type === 'function',
             activateOnTyping: true,
           }),
           errorPlugin(),
