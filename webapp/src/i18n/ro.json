@@ -1467,6 +1467,7 @@
   "llm_provider_form_temperature": "Temperatură",
   "llm_provider_form_temperature_hint": "Controlează gradul de aleatorietate în răspunsurile LLM. Valorile mai mici (ex. 0) produc traduceri mai consecvente, valorile mai mari (ex. 1) produc rezultate mai variate.",
   "llm_provider_form_type": "Tip",
+  "llm_provider_max_tokens_exceeded": "Răspunsul LLM a fost întrerupt de limita de tokeni de ieșire",
   "llm_provider_not_found": "Furnizorul LLM nu a fost găsit \"{value}\"",
   "llm_provider_not_returned_json": "Furnizorul LLM nu a returnat json",
   "llm_provider_pricing_context_and_screenshots": "Context + capturi de ecran",

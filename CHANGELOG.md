@@ -1,3 +1,10 @@
+## [3.209.5](https://github.com/tolgee/tolgee-platform/compare/v3.209.4...v3.209.5) (2026-07-09)
+
+
+### Bug Fixes
+
+* don't fail whole machine translation job on unparseable LLM response ([#3797](https://github.com/tolgee/tolgee-platform/issues/3797)) ([6389545](https://github.com/tolgee/tolgee-platform/commit/6389545ed2aa6590b6376083cb11b238effbd446)), closes [#2092](https://github.com/tolgee/tolgee-platform/issues/2092) [#1793](https://github.com/tolgee/tolgee-platform/issues/1793)
+
 ## [3.209.4](https://github.com/tolgee/tolgee-platform/compare/v3.209.3...v3.209.4) (2026-07-08)
 
 

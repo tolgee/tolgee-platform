@@ -1463,6 +1463,7 @@
   "llm_provider_form_temperature": "Temperatura",
   "llm_provider_form_temperature_hint": "Controla la aleatoriedad en las respuestas del LLM. Valores más bajos (p. ej., 0) producen traducciones más consistentes, valores más altos (p. ej., 1) producen resultados más variados.",
   "llm_provider_form_type": "Tipo",
+  "llm_provider_max_tokens_exceeded": "La respuesta del LLM fue cortada por el límite de tokens de salida",
   "llm_provider_not_found": "Proveedor de LLM no encontrado \"{value}\"",
   "llm_provider_not_returned_json": "El proveedor de LLM no devolvió json",
   "llm_provider_pricing_context_and_screenshots": "Contexto + capturas de pantalla",
