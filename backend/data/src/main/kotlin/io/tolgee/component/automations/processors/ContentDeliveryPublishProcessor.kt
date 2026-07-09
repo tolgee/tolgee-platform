@@ -1,7 +1,7 @@
 package io.tolgee.component.automations.processors
 
 import io.tolgee.activity.ActivityService
-import io.tolgee.batch.RequeueWithDelayException
+import io.tolgee.batch.ChunkItemFailedException
 import io.tolgee.component.automations.AutomationProcessor
 import io.tolgee.component.contentDelivery.ContentDeliveryUploader
 import io.tolgee.constants.Message
@@ -30,12 +30,12 @@ class ContentDeliveryPublishProcessor(
       contentDeliveryUploader.upload(contentDeliveryConfigId = config.id)
     } catch (e: Throwable) {
       when (e) {
-        is FileStoreException -> throw RequeueWithDelayException(
+        is FileStoreException -> throw ChunkItemFailedException(
           Message.CANNOT_STORE_FILE_TO_CONTENT_STORAGE,
           cause = e,
         )
 
-        else -> throw RequeueWithDelayException(
+        else -> throw ChunkItemFailedException(
           Message.UNEXPECTED_ERROR_WHILE_PUBLISHING_TO_CONTENT_STORAGE,
           cause = e,
           delayInMs = 60000,

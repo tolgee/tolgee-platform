@@ -2,7 +2,7 @@ package io.tolgee.component.automations.processors
 
 import io.tolgee.activity.ActivityService
 import io.tolgee.api.IProjectActivityModelAssembler
-import io.tolgee.batch.RequeueWithDelayException
+import io.tolgee.batch.ChunkItemFailedException
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.automations.AutomationProcessor
 import io.tolgee.constants.Message
@@ -47,13 +47,13 @@ class WebhookProcessor(
       updateEntity(config, true)
       if (webhookAutoDisableChecker.checkAfterFailure(config)) return
       when (e) {
-        is WebhookRespondedWithNon200Status -> throw RequeueWithDelayException(
+        is WebhookRespondedWithNon200Status -> throw ChunkItemFailedException(
           Message.WEBHOOK_RESPONDED_WITH_NON_200_STATUS,
           cause = e,
           delayInMs = 5000,
         )
 
-        else -> throw RequeueWithDelayException(
+        else -> throw ChunkItemFailedException(
           Message.UNEXPECTED_ERROR_WHILE_EXECUTING_WEBHOOK,
           cause = e,
           delayInMs = 5000,

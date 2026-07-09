@@ -150,7 +150,7 @@ class LlmPropertiesServiceMergeTest {
   }
 
   @Test
-  fun `merge - list maxTokens default (2000) doesn't override map`() {
+  fun `merge - list maxTokens default doesn't override map`() {
     val props = LlmProperties()
     props.providerDefaults =
       mutableMapOf(
@@ -163,7 +163,7 @@ class LlmPropertiesServiceMergeTest {
       mutableListOf(
         LlmProvider(
           name = "my-provider",
-          // maxTokens defaults to 2000
+          // maxTokens keeps the default
         ),
       )
 

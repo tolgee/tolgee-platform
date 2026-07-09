@@ -20,7 +20,7 @@ open class FailedDontRequeueException(
   cause: Throwable,
 ) : ChunkFailedException(message, successfulTargets, cause)
 
-open class RequeueWithDelayException(
+open class ChunkItemFailedException(
   message: Message,
   successfulTargets: List<Any> = listOf(),
   cause: Throwable,
@@ -30,7 +30,7 @@ open class RequeueWithDelayException(
 ) : ChunkFailedException(message, successfulTargets, cause)
 
 open class MultipleItemsFailedException(
-  val exceptions: List<RequeueWithDelayException>,
+  val exceptions: List<ChunkItemFailedException>,
   override val successfulTargets: List<Any>,
 ) : ExceptionWithMessage(Message.MULTIPLE_ITEMS_IN_CHUNK_FAILED),
   HasSuccessfulTargets
