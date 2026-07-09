@@ -750,7 +750,7 @@ class TestDataService(
   private fun encodePassword(rawPassword: String?): String? {
     rawPassword ?: return null
     return passwordHashCache.computeIfAbsent(rawPassword) {
-      passwordEncoder.encode(rawPassword)
+      passwordEncoder.encode(rawPassword)!!
     }
   }
 
