@@ -273,6 +273,23 @@ class PromptControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   @Test
+  fun `renders a plain string variable without html escaping`() {
+    performAuthPost(
+      "/v2/projects/${testData.promptProject.self.id}/prompts/run",
+      PromptRunDto(
+        template = "{{key.description}}",
+        keyId = testData.keys[3].self.id,
+        targetLanguageId = testData.czech.self.id,
+        provider = "default",
+        basicPromptOptions = null,
+      ),
+    ).andIsOk.andAssertThatJson {
+      node("prompt").isString.contains("""Has "quotes"""")
+      node("prompt").isString.doesNotContain("&quot;")
+    }
+  }
+
+  @Test
   fun `escapeJson renders empty for the variable context instead of dumping it`() {
     performAuthPost(
       "/v2/projects/${testData.promptProject.self.id}/prompts/run",

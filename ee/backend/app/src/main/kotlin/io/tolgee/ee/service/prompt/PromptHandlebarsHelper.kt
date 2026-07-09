@@ -24,11 +24,6 @@ object PromptHandlebarsHelper {
       Helper<Any?> { value, _ -> escapeJson(value) },
     )
 
-  /**
-   * Turns a resolved variable value into what Handlebars should render. A [JsonEscapedString] has
-   * to pass through untouched — rewrapping it loses the provenance [escapeJson] relies on, and
-   * pre-escaped translations would get escaped twice.
-   */
   fun toRenderable(value: Any?): Any? {
     if (value is JsonEscapedString) return value
     if (value is String) return Handlebars.SafeString(value)

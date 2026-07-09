@@ -56,6 +56,13 @@ class PromptHandlebarsHelperTest {
   }
 
   @Test
+  fun `stringifies boolean values`() {
+    render("{{escapeJson v}}", mapOf("v" to true))
+      .assert
+      .isEqualTo("true")
+  }
+
+  @Test
   fun `leaves an already escaped value untouched`() {
     val escaped = PromptHandlebarsHelper.escapeJson("say \"hi\"")
     render("{{escapeJson v}}", mapOf("v" to escaped))
@@ -91,5 +98,13 @@ class PromptHandlebarsHelperTest {
       .toRenderable(escaped)
       .assert
       .isSameAs(escaped)
+  }
+
+  @Test
+  fun `toRenderable marks a plain string as safe so it is not html-escaped`() {
+    PromptHandlebarsHelper
+      .toRenderable("a & \"b\"")
+      .assert
+      .isInstanceOf(Handlebars.SafeString::class.java)
   }
 }
