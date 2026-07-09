@@ -55,7 +55,7 @@ class AuthTest : AbstractControllerTest() {
   @BeforeEach
   fun setup() {
     project = dbPopulator.createBase().project
-    authMvc = MockMvcBuilders.standaloneSetup(publicController).setControllerAdvice(ExceptionHandlers()).build()
+    authMvc = MockMvcBuilders.standaloneSetup(publicController!!).setControllerAdvice(ExceptionHandlers()).build()
   }
 
   @AfterEach
