@@ -7,4 +7,5 @@ data class WebhookRequest(
   val projectId: Long?,
   val eventType: WebhookEventType,
   val activityData: IProjectActivityModel?,
+  val contentDeliveryConfig: ContentDeliveryPublishWebhookData? = null,
 )

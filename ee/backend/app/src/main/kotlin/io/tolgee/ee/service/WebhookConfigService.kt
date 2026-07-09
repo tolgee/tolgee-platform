@@ -51,6 +51,8 @@ class WebhookConfigService(
     urlSecurity.validateUrl(dto.url, webhookProperties.allowLocalAddresses)
     val webhookConfig = WebhookConfig(project)
     webhookConfig.url = dto.url
+    webhookConfig.eventTypes =
+      dto.eventTypes?.toMutableSet() ?: mutableSetOf(WebhookEventType.PROJECT_ACTIVITY)
     webhookConfig.webhookSecret = generateRandomWebhookSecret()
     webhookConfigRepository.save(webhookConfig)
     automationService.createForWebhookConfig(webhookConfig)
@@ -90,6 +92,7 @@ class WebhookConfigService(
         webhookConfig.autoDisabled = false
       }
     }
+    dto.eventTypes?.let { webhookConfig.eventTypes = it.toMutableSet() }
     automationService.updateForWebhookConfig(webhookConfig)
     return webhookConfigRepository.save(webhookConfig)
   }

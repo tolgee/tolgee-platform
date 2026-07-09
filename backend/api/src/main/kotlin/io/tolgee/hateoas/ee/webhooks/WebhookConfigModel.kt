@@ -1,6 +1,7 @@
 package io.tolgee.hateoas.ee.webhooks
 
 import io.swagger.v3.oas.annotations.media.Schema
+import io.tolgee.component.automations.processors.WebhookEventType
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
 import java.io.Serializable
@@ -29,5 +30,7 @@ class WebhookConfigModel(
     description = """Date of the last webhook request.""",
   )
   var lastExecuted: Long?,
+  @Schema(description = "Event types this webhook is subscribed to.")
+  val eventTypes: Set<WebhookEventType>,
 ) : RepresentationModel<WebhookConfigModel>(),
   Serializable

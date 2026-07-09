@@ -962,10 +962,12 @@ declare namespace DataCy {
         "user-switch-item": true;
         "user-switch-search": true;
         "webhook-auto-disabled-label": true;
+        "webhook-event-types-selector": true;
         "webhook-form-cancel": true;
         "webhook-form-delete": true;
         "webhook-form-save": true;
         "webhook-form-url": true;
+        "webhook-item-event-types": true;
         "webhook-item-toggle": true;
         "webhooks-add-item-button": true;
         "webhooks-item-edit": true;

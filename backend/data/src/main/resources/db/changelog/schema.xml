@@ -5775,4 +5775,34 @@
         ]]></sql>
         <rollback/>
     </changeSet>
+
+    <changeSet author="dkrizan" id="webhook-config-add-event-types">
+        <comment>Add event_types jsonb column to webhook_config for per-event-type subscription.</comment>
+        <addColumn tableName="webhook_config">
+            <column name="event_types" type="jsonb"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="dkrizan" id="webhook-config-backfill-event-types">
+        <comment>Existing webhooks keep their current behaviour: PROJECT_ACTIVITY only.</comment>
+        <sql dbms="postgresql">
+            UPDATE webhook_config
+            SET event_types = '["PROJECT_ACTIVITY"]'::jsonb
+            WHERE event_types IS NULL;
+        </sql>
+    </changeSet>
+
+    <changeSet author="dkrizan" id="webhook-config-event-types-default">
+        <comment>Default new rows to PROJECT_ACTIVITY at the DB level.</comment>
+        <sql dbms="postgresql">
+            ALTER TABLE webhook_config
+            ALTER COLUMN event_types SET DEFAULT '["PROJECT_ACTIVITY"]'::jsonb;
+        </sql>
+    </changeSet>
+
+    <changeSet author="dkrizan" id="webhook-config-event-types-not-null">
+        <comment>event_types must always be present.</comment>
+        <addNotNullConstraint columnDataType="jsonb" columnName="event_types"
+            tableName="webhook_config" validate="true"/>
+    </changeSet>
 </databaseChangeLog>

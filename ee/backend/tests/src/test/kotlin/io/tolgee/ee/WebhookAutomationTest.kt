@@ -1,6 +1,7 @@
 package io.tolgee.ee
 
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.component.automations.processors.WebhookEventType
 import io.tolgee.development.testDataBuilder.data.WebhooksTestData
 import io.tolgee.ee.service.WebhookConfigService
 import io.tolgee.fixtures.andIsOk
@@ -223,6 +224,24 @@ class WebhookAutomationTest : ProjectAuthControllerTest("/v2/projects/") {
     modifyTranslationData()
 
     // Wait a bit and verify webhook was NOT called
+    Thread.sleep(2000)
+    getWebhookRestTemplateInvocationCount().assert.isEqualTo(invocationsBefore)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `does not send activity webhook when not subscribed to PROJECT_ACTIVITY`() {
+    val testData = WebhooksTestData()
+    testData.webhookConfig.self.eventTypes = mutableSetOf(WebhookEventType.CONTENT_DELIVERY_PUBLISH)
+    currentDateProvider.forcedDate = currentDateProvider.date
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    this.projectSupplier = { testData.projectBuilder.self }
+    mockWebhookResponse(HttpStatus.OK)
+
+    val invocationsBefore = getWebhookRestTemplateInvocationCount()
+    modifyTranslationData()
+
     Thread.sleep(2000)
     getWebhookRestTemplateInvocationCount().assert.isEqualTo(invocationsBefore)
   }

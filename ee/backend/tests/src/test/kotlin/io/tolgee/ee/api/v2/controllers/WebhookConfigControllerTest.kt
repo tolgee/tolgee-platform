@@ -204,4 +204,29 @@ class WebhookConfigControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       node("url").isEqualTo("https://new-url.com")
     }
   }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `creates webhook with explicit event types`() {
+    performProjectAuthPost(
+      "webhook-configs",
+      mapOf(
+        "url" to "https://hello.com",
+        "eventTypes" to listOf("CONTENT_DELIVERY_PUBLISH"),
+      ),
+    ).andIsOk.andAssertThatJson {
+      node("eventTypes").isArray.containsExactly("CONTENT_DELIVERY_PUBLISH")
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `defaults event types to project activity when omitted`() {
+    performProjectAuthPost(
+      "webhook-configs",
+      mapOf("url" to "https://hello.com"),
+    ).andIsOk.andAssertThatJson {
+      node("eventTypes").isArray.containsExactly("PROJECT_ACTIVITY")
+    }
+  }
 }

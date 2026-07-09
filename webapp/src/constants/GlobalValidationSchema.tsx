@@ -462,6 +462,7 @@ export class Validation {
 
   static readonly WEBHOOK_FORM = Yup.object().shape({
     url: Yup.string().required().max(255),
+    eventTypes: Yup.array().of(Yup.string().required()).min(1).required(),
   });
 
   static readonly NEW_KEY_FORM = (t: TranslateFunction) =>

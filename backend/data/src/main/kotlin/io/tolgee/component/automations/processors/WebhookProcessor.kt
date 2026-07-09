@@ -2,35 +2,26 @@ package io.tolgee.component.automations.processors
 
 import io.tolgee.activity.ActivityService
 import io.tolgee.api.IProjectActivityModelAssembler
-import io.tolgee.batch.RequeueWithDelayException
-import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.automations.AutomationProcessor
-import io.tolgee.constants.Message
 import io.tolgee.model.automations.AutomationAction
-import io.tolgee.model.webhook.WebhookConfig
-import io.tolgee.security.ProjectHolder
-import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Component
 
 @Component
 class WebhookProcessor(
-  val projectHolder: ProjectHolder,
-  val activityModelAssembler: IProjectActivityModelAssembler,
-  val activityService: ActivityService,
-  val currentDateProvider: CurrentDateProvider,
-  val webhookExecutor: WebhookExecutor,
-  val entityManager: EntityManager,
-  val webhookAutoDisableChecker: WebhookAutoDisableChecker,
+  private val activityModelAssembler: IProjectActivityModelAssembler,
+  private val activityService: ActivityService,
+  private val webhookDeliveryManager: WebhookDeliveryManager,
 ) : AutomationProcessor {
   override fun process(
     action: AutomationAction,
     activityRevisionId: Long?,
   ) {
     activityRevisionId ?: return
+    val config = action.webhookConfig ?: return
+    if (!config.eventTypes.contains(WebhookEventType.PROJECT_ACTIVITY)) return
+
     val view = activityService.findProjectActivity(activityRevisionId) ?: return
     val activityModel = activityModelAssembler.toModel(view)
-    val config = action.webhookConfig ?: return
-    if (!config.enabled) return
 
     val data =
       WebhookRequest(
@@ -40,42 +31,6 @@ class WebhookProcessor(
         activityData = activityModel,
       )
 
-    try {
-      webhookExecutor.signAndExecute(config, data)
-      updateEntity(webhookConfig = config, failing = false)
-    } catch (e: Exception) {
-      updateEntity(config, true)
-      if (webhookAutoDisableChecker.checkAfterFailure(config)) return
-      when (e) {
-        is WebhookRespondedWithNon200Status -> throw RequeueWithDelayException(
-          Message.WEBHOOK_RESPONDED_WITH_NON_200_STATUS,
-          cause = e,
-          delayInMs = 5000,
-        )
-
-        else -> throw RequeueWithDelayException(
-          Message.UNEXPECTED_ERROR_WHILE_EXECUTING_WEBHOOK,
-          cause = e,
-          delayInMs = 5000,
-        )
-      }
-    }
-  }
-
-  fun updateEntity(
-    webhookConfig: WebhookConfig,
-    failing: Boolean,
-  ) {
-    webhookConfig.lastExecuted = currentDateProvider.date
-    if (!failing) {
-      webhookConfig.firstFailed = null
-      webhookConfig.autoDisableNotified = false
-      entityManager.persist(webhookConfig)
-      return
-    }
-    if (webhookConfig.firstFailed == null) {
-      webhookConfig.firstFailed = currentDateProvider.date
-    }
-    entityManager.persist(webhookConfig)
+    webhookDeliveryManager.signExecuteAndHandle(config, data)
   }
 }

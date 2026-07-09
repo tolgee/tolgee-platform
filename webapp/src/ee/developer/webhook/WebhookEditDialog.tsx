@@ -18,8 +18,12 @@ import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
+import { EventTypesSelector } from './EventTypesSelector';
 
 type WebhookConfigModel = components['schemas']['WebhookConfigModel'];
+type WebhookEventType = NonNullable<
+  components['schemas']['WebhookConfigRequest']['eventTypes']
+>[number];
 
 const StyledDialogContent = styled(DialogContent)`
   display: grid;
@@ -84,6 +88,9 @@ export const WebhookEditDialog = ({ onClose, data }: Props) => {
       <Formik
         initialValues={{
           url: data?.url ?? '',
+          eventTypes: (data?.eventTypes ?? [
+            'PROJECT_ACTIVITY',
+          ]) as WebhookEventType[],
         }}
         validationSchema={Validation.WEBHOOK_FORM}
         validateOnBlur={false}
@@ -141,6 +148,9 @@ export const WebhookEditDialog = ({ onClose, data }: Props) => {
                   variant="standard"
                   data-cy="webhook-form-url"
                 />
+              </Box>
+              <Box sx={{ gridColumn: '1 / span 2', display: 'grid' }}>
+                <EventTypesSelector />
               </Box>
             </StyledDialogContent>
             <DialogActions sx={{ justifyContent: 'space-between' }}>
