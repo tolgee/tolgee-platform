@@ -2,6 +2,7 @@ package io.tolgee.ee.unit
 
 import io.tolgee.ee.component.PromptLazyMap
 import io.tolgee.ee.component.PromptLazyMap.Companion.Variable
+import io.tolgee.ee.service.prompt.PromptHandlebarsHelper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -22,6 +23,13 @@ class PromptLazyMapTest {
   fun `evaluates lazyValue when value is null`() {
     val map = buildMap("key" to Variable(name = "key", lazyValue = { "computed" }))
     assertThat(map["key"].toString()).isEqualTo("computed")
+  }
+
+  @Test
+  fun `keeps an already escaped value untouched`() {
+    val escaped = PromptHandlebarsHelper.escapeJson("say \"hi\"")
+    val map = buildMap("key" to Variable(name = "key", value = escaped))
+    assertThat(map["key"]).isSameAs(escaped)
   }
 
   @Test

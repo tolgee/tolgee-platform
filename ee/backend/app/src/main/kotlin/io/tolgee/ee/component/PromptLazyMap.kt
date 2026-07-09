@@ -1,7 +1,7 @@
 package io.tolgee.ee.component
 
-import com.github.jknack.handlebars.Handlebars
 import io.tolgee.ee.data.prompt.PromptVariableDto
+import io.tolgee.ee.service.prompt.PromptHandlebarsHelper
 import io.tolgee.model.enums.BasicPromptOption
 import io.tolgee.model.enums.PromptVariableType
 
@@ -25,7 +25,7 @@ class PromptLazyMap : AbstractMap<String, Any?>() {
     }
 
     val stringValue = promptValue?.lazyValue?.invoke() ?: promptValue?.value
-    return stringValue?.let { if (it is String) Handlebars.SafeString(it) else it }
+    return stringValue?.let { PromptHandlebarsHelper.toRenderable(it) }
   }
 
   override val entries: Set<Map.Entry<String, Any?>>

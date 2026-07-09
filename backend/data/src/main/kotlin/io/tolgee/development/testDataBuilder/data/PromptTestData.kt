@@ -27,6 +27,7 @@ class PromptTestData : BaseTestData() {
   lateinit var german: LanguageBuilder
   lateinit var chinese: LanguageBuilder
   lateinit var keys: MutableList<KeyBuilder>
+  lateinit var keyWithoutTranslations: KeyBuilder
   lateinit var customPrompt: PromptBuilder
   lateinit var llmProvider: LlmProviderBuilder
   lateinit var unrelatedLlmProvider: LlmProviderBuilder
@@ -221,6 +222,12 @@ class PromptTestData : BaseTestData() {
           }
         }
       }
+  }
+
+  fun addKeyWithoutTranslations() {
+    promptProject.build {
+      keyWithoutTranslations = addKey("Key without translations") {}
+    }
   }
 
   fun addLanguageConfig() {

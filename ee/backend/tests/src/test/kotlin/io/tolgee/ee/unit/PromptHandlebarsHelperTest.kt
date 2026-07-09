@@ -1,12 +1,12 @@
 package io.tolgee.ee.unit
 
 import com.github.jknack.handlebars.Handlebars
-import io.tolgee.ee.service.prompt.PromptHandlebarsHelpers
+import io.tolgee.ee.service.prompt.PromptHandlebarsHelper
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 
-class PromptHandlebarsHelpersTest {
-  private val handlebars = PromptHandlebarsHelpers.register(Handlebars())
+class PromptHandlebarsHelperTest {
+  private val handlebars = PromptHandlebarsHelper.register(Handlebars())
 
   private fun render(
     template: String,
@@ -57,7 +57,7 @@ class PromptHandlebarsHelpersTest {
 
   @Test
   fun `leaves an already escaped value untouched`() {
-    val escaped = PromptHandlebarsHelpers.escapeJson("say \"hi\"")
+    val escaped = PromptHandlebarsHelper.escapeJson("say \"hi\"")
     render("{{escapeJson v}}", mapOf("v" to escaped))
       .assert
       .isEqualTo("""say \"hi\"""")
@@ -68,5 +68,28 @@ class PromptHandlebarsHelpersTest {
     render("{{escapeJson (escapeJson v)}}", mapOf("v" to "say \"hi\""))
       .assert
       .isEqualTo("""say \"hi\"""")
+  }
+
+  @Test
+  fun `renders empty for the whole context`() {
+    render("{{escapeJson}}", mapOf("v" to "value"))
+      .assert
+      .isEqualTo("")
+  }
+
+  @Test
+  fun `renders empty for an object value`() {
+    render("{{escapeJson v}}", mapOf("v" to mapOf("nested" to "value")))
+      .assert
+      .isEqualTo("")
+  }
+
+  @Test
+  fun `toRenderable keeps an escaped value as the same instance`() {
+    val escaped = PromptHandlebarsHelper.escapeJson("say \"hi\"")
+    PromptHandlebarsHelper
+      .toRenderable(escaped)
+      .assert
+      .isSameAs(escaped)
   }
 }

@@ -192,7 +192,7 @@ class PromptVariablesHelper(
 
     result.add(Variable("languageName", language?.name))
     result.add(Variable("languageTag", language?.tag))
-    result.add(Variable("translation", PromptHandlebarsHelpers.escapeJson(translation?.text ?: "")))
+    result.add(Variable("translation", PromptHandlebarsHelper.escapeJson(translation?.text)))
     result.add(Variable("languageNote", language?.aiTranslatorPromptDescription ?: ""))
     result.add(cjkVariable(language?.tag))
     return result

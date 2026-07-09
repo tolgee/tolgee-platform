@@ -25,6 +25,7 @@ class PromptControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @BeforeEach
   fun setup() {
     testData = PromptTestData()
+    testData.addKeyWithoutTranslations()
     testDataService.saveTestData(testData.root)
     llmProperties.enabled = true
     llmProperties.providers =
@@ -237,6 +238,53 @@ class PromptControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       node("prompt").isString.contains("""bare=Says \"hi\"""")
       node("prompt").isString.contains("""wrapped=Says \"hi\"""")
       node("prompt").isString.doesNotContain("""\\\"""")
+    }
+  }
+
+  @Test
+  fun `keeps translation truthiness and empty rendering`() {
+    val template = "[{{source.translation}}]{{#if source.translation}}yes{{else}}no{{/if}}"
+
+    performAuthPost(
+      "/v2/projects/${testData.promptProject.self.id}/prompts/run",
+      PromptRunDto(
+        template = template,
+        keyId = testData.keyWithoutTranslations.self.id,
+        targetLanguageId = testData.czech.self.id,
+        provider = "default",
+        basicPromptOptions = null,
+      ),
+    ).andIsOk.andAssertThatJson {
+      node("prompt").isString.contains("[]no")
+    }
+
+    performAuthPost(
+      "/v2/projects/${testData.promptProject.self.id}/prompts/run",
+      PromptRunDto(
+        template = template,
+        keyId = testData.keys[3].self.id,
+        targetLanguageId = testData.czech.self.id,
+        provider = "default",
+        basicPromptOptions = null,
+      ),
+    ).andIsOk.andAssertThatJson {
+      node("prompt").isString.contains("""[Says \"hi\"]yes""")
+    }
+  }
+
+  @Test
+  fun `escapeJson renders empty for the variable context instead of dumping it`() {
+    performAuthPost(
+      "/v2/projects/${testData.promptProject.self.id}/prompts/run",
+      PromptRunDto(
+        template = "bare=[{{escapeJson}}] object=[{{escapeJson source}}]",
+        keyId = testData.keys[3].self.id,
+        targetLanguageId = testData.czech.self.id,
+        provider = "default",
+        basicPromptOptions = null,
+      ),
+    ).andIsOk.andAssertThatJson {
+      node("prompt").isString.contains("bare=[] object=[]")
     }
   }
 

@@ -42,7 +42,6 @@ export function getPromptEditor() {
 }
 
 export function getAutocompleteOption(label: string) {
-  // the completion popup is CodeMirror-owned DOM and can't carry a data-cy
   return cy
     .gcy('handlebars-editor')
     .find(`.cm-tooltip-autocomplete .cm-completionLabel:contains("${label}")`);
