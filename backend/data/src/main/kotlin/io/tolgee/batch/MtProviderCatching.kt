@@ -7,6 +7,7 @@ import io.tolgee.exceptions.FormalityNotSupportedException
 import io.tolgee.exceptions.LanguageNotSupportedException
 import io.tolgee.exceptions.LlmContentFilterException
 import io.tolgee.exceptions.LlmEmptyResponseException
+import io.tolgee.exceptions.LlmProviderMaxTokensExceededException
 import io.tolgee.exceptions.LlmProviderNotReturnedJsonException
 import io.tolgee.exceptions.LlmRateLimitedException
 import io.tolgee.exceptions.OutOfCreditsException
@@ -46,6 +47,10 @@ class MtProviderCatching(
       } catch (e: LlmProviderNotReturnedJsonException) {
         exceptions.add(
           RequeueWithDelayException(Message.LLM_PROVIDER_NOT_RETURNED_JSON, successfulTargets, e, maxRetries = 0),
+        )
+      } catch (e: LlmProviderMaxTokensExceededException) {
+        exceptions.add(
+          RequeueWithDelayException(Message.LLM_PROVIDER_MAX_TOKENS_EXCEEDED, successfulTargets, e, maxRetries = 0),
         )
       } catch (e: LlmRateLimitedException) {
         exceptions.add(

@@ -5,6 +5,7 @@ import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
 import io.tolgee.dtos.LlmParams
 import io.tolgee.dtos.PromptResult
 import io.tolgee.exceptions.LlmEmptyResponseException
+import io.tolgee.exceptions.LlmProviderMaxTokensExceededException
 import io.tolgee.util.Logging
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
@@ -53,6 +54,10 @@ class AnthropicApiService :
       )
 
     setSentryContext(request, response)
+
+    if (response.body?.stop_reason == "max_tokens") {
+      throw LlmProviderMaxTokensExceededException()
+    }
 
     return PromptResult(
       response.body
@@ -168,6 +173,7 @@ class AnthropicApiService :
     class ResponseBody(
       val content: List<ResponseMessage>,
       val usage: ResponseUsage,
+      val stop_reason: String? = null,
     )
 
     class ResponseMessage(
