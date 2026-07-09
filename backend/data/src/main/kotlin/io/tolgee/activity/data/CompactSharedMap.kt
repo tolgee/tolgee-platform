@@ -19,26 +19,34 @@ package io.tolgee.activity.data
  *
  * Concrete subclasses pick the appropriate [NameSchema.Companion.Scope]
  * and provide a Jackson deserializer that round-trips the legacy JSON shape.
+ *
+ * This type deliberately does NOT implement `Map<String, V>` itself. Hibernate 7's
+ * hibernate-models introspection reads the value type-argument (index 1) of the first
+ * `Map` supertype it finds; a one-type-parameter intermediate like
+ * `CompactSharedMap<V> : Map<String, V>` makes it read a non-existent argument and crash
+ * with IndexOutOfBoundsException when such a value is a JSONB entity attribute. The
+ * concrete subclasses implement `Map<String, ConcreteV>` directly instead.
+ * See https://github.com/hibernate/hibernate-models/issues/263
  */
 abstract class CompactSharedMap<V> protected constructor(
   internal val schema: NameSchema,
-) : Map<String, V> {
+) {
   internal val indices = IntArrayList(2)
   internal var valuesArray: Array<Any?> = EMPTY_VALUES
 
-  override val size: Int
+  val size: Int
     get() = indices.size
 
-  override fun isEmpty(): Boolean = indices.isEmpty()
+  fun isEmpty(): Boolean = indices.isEmpty()
 
   fun isNotEmpty(): Boolean = !isEmpty()
 
-  override fun containsKey(key: String): Boolean {
+  fun containsKey(key: String): Boolean {
     val schemaIdx = schema.indexOfOrMinusOne(key)
     return schemaIdx >= 0 && indices.contains(schemaIdx)
   }
 
-  override fun containsValue(value: V): Boolean {
+  fun containsValue(value: V): Boolean {
     for (i in 0 until size) {
       if (valuesArray[i] == value) return true
     }
@@ -46,14 +54,14 @@ abstract class CompactSharedMap<V> protected constructor(
   }
 
   @Suppress("UNCHECKED_CAST")
-  override operator fun get(key: String): V? {
+  operator fun get(key: String): V? {
     val schemaIdx = schema.indexOfOrMinusOne(key)
     if (schemaIdx < 0) return null
     val localIdx = indices.indexOf(schemaIdx)
     return if (localIdx >= 0) valuesArray[localIdx] as V? else null
   }
 
-  override val keys: Set<String>
+  val keys: Set<String>
     get() {
       val result = LinkedHashSet<String>(size)
       for (i in 0 until size) result.add(schema.nameAt(indices[i]))
@@ -61,11 +69,11 @@ abstract class CompactSharedMap<V> protected constructor(
     }
 
   @Suppress("UNCHECKED_CAST")
-  override val values: Collection<V>
+  val values: Collection<V>
     get() = (0 until size).map { valuesArray[it] as V }
 
   @Suppress("UNCHECKED_CAST")
-  override val entries: Set<Map.Entry<String, V>>
+  val entries: Set<Map.Entry<String, V>>
     get() {
       val result = LinkedHashSet<Map.Entry<String, V>>(size)
       for (i in 0 until size) {
