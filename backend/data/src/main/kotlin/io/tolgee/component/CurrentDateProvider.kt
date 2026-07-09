@@ -29,7 +29,7 @@ import java.util.Optional
 class CurrentDateProvider(
   @Suppress("SpringJavaInjectionPointsAutowiringInspection") @Lazy
   auditingHandler: AuditingHandler,
-  private val entityManager: EntityManager,
+  @Lazy private val entityManager: EntityManager,
   private val applicationEventPublisher: ApplicationEventPublisher,
   private val transactionManager: PlatformTransactionManager,
 ) : Logging,

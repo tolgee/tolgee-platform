@@ -12,7 +12,7 @@ import tools.jackson.databind.annotation.JsonDeserialize
 @JsonDeserialize(using = DescribingDataMapDeserializer::class)
 class DescribingDataMap(
   schema: NameSchema,
-) : CompactSharedMap<Any?>(schema) {
+) : CompactSharedMap<Any?>(schema), Map<String, Any?> {
   constructor() : this(NameSchema.anonymous())
   constructor(entityClass: String) : this(
     NameSchema.forEntityClass(entityClass, NameSchema.Companion.Scope.DESCRIBING_DATA),
