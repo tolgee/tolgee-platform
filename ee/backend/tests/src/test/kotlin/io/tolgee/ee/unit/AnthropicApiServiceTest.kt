@@ -78,6 +78,34 @@ class AnthropicApiServiceTest {
   }
 
   @Test
+  fun `does not send sampling parameters`() {
+    val config = createConfig(format = "json_schema")
+    val params = createParams(shouldOutputJson = true)
+    val restTemplate = createCapturingRestTemplate()
+
+    service.translate(params, config, restTemplate)
+
+    val bodyMap = objectMapper.readValue<Map<String, Any>>(capturedRequestBody!!)
+
+    assertThat(bodyMap).doesNotContainKey("temperature")
+    assertThat(bodyMap).doesNotContainKey("top_p")
+    assertThat(bodyMap).doesNotContainKey("top_k")
+  }
+
+  @Test
+  fun `sends max_tokens from provider config`() {
+    val config = createConfig(format = "json_schema")
+    val params = createParams(shouldOutputJson = true)
+    val restTemplate = createCapturingRestTemplate()
+
+    service.translate(params, config, restTemplate)
+
+    val bodyMap = objectMapper.readValue<Map<String, Any>>(capturedRequestBody!!)
+
+    assertThat(bodyMap["max_tokens"]).isEqualTo(1000)
+  }
+
+  @Test
   fun `omits output_config when shouldOutputJson is false`() {
     val config = createConfig(format = "json_schema")
     val params = createParams(shouldOutputJson = false)

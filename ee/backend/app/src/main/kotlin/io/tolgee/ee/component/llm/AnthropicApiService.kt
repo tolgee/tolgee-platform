@@ -126,7 +126,6 @@ class AnthropicApiService :
       val stream: Boolean = false,
       val messages: List<RequestMessage>,
       val model: String?,
-      val temperature: Long? = 0,
       @JsonInclude(JsonInclude.Include.NON_NULL)
       val output_config: OutputConfig? = null,
     )
