@@ -38,9 +38,15 @@ class MtProviderCatching(
       } catch (e: LlmContentFilterException) {
         throw FailedDontRequeueException(Message.LLM_CONTENT_FILTER, successfulTargets, e)
       } catch (e: LlmEmptyResponseException) {
-        throw FailedDontRequeueException(Message.LLM_PROVIDER_EMPTY_RESPONSE, successfulTargets, e)
+        // maxRetries = 0: malformed responses are consistent for the same input, retrying doesn't
+        // help — but the remaining items of the chunk must still be processed
+        exceptions.add(
+          RequeueWithDelayException(Message.LLM_PROVIDER_EMPTY_RESPONSE, successfulTargets, e, maxRetries = 0),
+        )
       } catch (e: LlmProviderNotReturnedJsonException) {
-        throw FailedDontRequeueException(Message.LLM_PROVIDER_NOT_RETURNED_JSON, successfulTargets, e)
+        exceptions.add(
+          RequeueWithDelayException(Message.LLM_PROVIDER_NOT_RETURNED_JSON, successfulTargets, e, maxRetries = 0),
+        )
       } catch (e: LlmRateLimitedException) {
         exceptions.add(
           RequeueWithDelayException(
