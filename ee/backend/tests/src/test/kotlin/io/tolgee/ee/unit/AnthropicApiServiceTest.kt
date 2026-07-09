@@ -256,9 +256,6 @@ class AnthropicApiServiceTest {
     override fun close() {}
 
     @Deprecated("Deprecated in Java")
-    override fun getRawStatusCode() = 200
-
-    @Deprecated("Deprecated in Java")
     override fun getStatusText() = "OK"
   }
 }

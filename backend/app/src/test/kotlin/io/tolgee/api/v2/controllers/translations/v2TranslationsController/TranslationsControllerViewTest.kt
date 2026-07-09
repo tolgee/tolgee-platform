@@ -21,8 +21,8 @@ import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.test.web.servlet.ResultActions
 import java.math.BigDecimal
 import kotlin.system.measureTimeMillis

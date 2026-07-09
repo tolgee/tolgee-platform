@@ -28,6 +28,7 @@ import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
 import org.springframework.test.context.bean.override.mockito.MockitoBean
@@ -119,7 +120,7 @@ class SsoGlobalTest : AuthorizedControllerTest() {
     val response =
       ssoMultiTenantsMocks.authorize(
         "domain.com",
-        ResponseEntity<OAuth2TokenResponse>(null, null, 401),
+        ResponseEntity<OAuth2TokenResponse>(null, null as HttpHeaders?, 401),
       )
     assertThat(response.response.status).isEqualTo(401)
     assertThat(response.response.contentAsString).contains(Message.SSO_TOKEN_EXCHANGE_FAILED.code)

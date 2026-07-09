@@ -10,8 +10,8 @@ import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 
 @SpringBootTest
 @AutoConfigureMockMvc
