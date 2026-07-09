@@ -1,6 +1,7 @@
 package io.tolgee.api.v2.controllers.v2ImportController
 
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.development.testDataBuilder.data.dataImport.ImportNamespaceSelectionTestData
 import io.tolgee.development.testDataBuilder.data.dataImport.ImportNamespacesTestData
 import io.tolgee.development.testDataBuilder.data.dataImport.ImportTestData
 import io.tolgee.fixtures.andAssertThatJson
@@ -150,6 +151,46 @@ class V2ImportControllerManipulationTest : ProjectAuthControllerTest("/v2/projec
           .find { it.name == "de" }!!
       importLanguage.translations
         .any { it.conflict != null }
+        .assert
+        .isEqualTo(false)
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `it marks keys existing in selected namespace as importable when createNewKeys is disabled`() {
+    val testData = ImportNamespaceSelectionTestData()
+    testDataService.saveTestData(testData.root)
+    projectSupplier = { testData.project }
+    userAccount = testData.userAccount
+    val path = "import/result/files/${testData.flatFile.id}/select-namespace"
+    performProjectAuthPut(path, mapOf("namespace" to "web")).andIsOk
+
+    executeInNewTransaction {
+      val file =
+        importService.findFile(projectId = project.id, authorId = userAccount!!.id, testData.flatFile.id)!!
+      file.keys
+        .all { it.shouldBeImported }
+        .assert
+        .isEqualTo(true)
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `it marks keys missing in selected namespace as not importable when createNewKeys is disabled`() {
+    val testData = ImportNamespaceSelectionTestData()
+    testDataService.saveTestData(testData.root)
+    projectSupplier = { testData.project }
+    userAccount = testData.userAccount
+    val path = "import/result/files/${testData.webFile.id}/select-namespace"
+    performProjectAuthPut(path, mapOf("namespace" to null)).andIsOk
+
+    executeInNewTransaction {
+      val file =
+        importService.findFile(projectId = project.id, authorId = userAccount!!.id, testData.webFile.id)!!
+      file.keys
+        .any { it.shouldBeImported }
         .assert
         .isEqualTo(false)
     }
