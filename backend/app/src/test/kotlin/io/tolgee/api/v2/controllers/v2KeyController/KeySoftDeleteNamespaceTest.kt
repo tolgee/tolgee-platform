@@ -10,7 +10,7 @@ import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import tools.jackson.module.kotlin.jacksonObjectMapper
 import tools.jackson.module.kotlin.readValue
@@ -84,6 +84,6 @@ class KeySoftDeleteNamespaceTest : ProjectAuthControllerTest("/v2/projects/") {
   private fun getUsedNamespaceNames(): List<String?> {
     val json = performProjectAuthGet("used-namespaces").andIsOk.andGetContentAsString
     val tree = jacksonObjectMapper().readTree(json)
-    return tree.path("_embedded").path("namespaces").map { it.path("name").textValue() }
+    return tree.path("_embedded").path("namespaces").values().map { it.path("name").textValue() }
   }
 }
