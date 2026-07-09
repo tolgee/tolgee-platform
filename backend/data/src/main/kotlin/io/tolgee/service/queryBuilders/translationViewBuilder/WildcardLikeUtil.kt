@@ -3,21 +3,14 @@ package io.tolgee.service.queryBuilders.translationViewBuilder
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.BadRequestException
 
-/**
- * Translates user-facing wildcard patterns (`*` = any sequence) into SQL LIKE patterns.
- */
 object WildcardLikeUtil {
   const val ESCAPE_CHAR = '\\'
 
+  // mirrored in webapp buildSearchRequestParams.ts — a change here needs a frontend update
   const val MAX_PATTERN_LENGTH = 500
   const val MAX_WILDCARDS = 5
   const val MAX_PATTERNS_PER_PARAM = 20
 
-  /**
-   * `%`, `_` and the escape char in the input are matched literally; without any `*` the
-   * pattern gets contains semantics (consistent with the `search` param), with `*` it is
-   * anchored (`cart*` = starts with).
-   */
   fun toLikePattern(input: String): String {
     val escaped =
       input
@@ -30,11 +23,18 @@ object WildcardLikeUtil {
 
   fun validatePatterns(patterns: List<String>?) {
     if (patterns == null) return
-    if (patterns.size > MAX_PATTERNS_PER_PARAM) throw BadRequestException(Message.FILTER_PATTERN_NOT_VALID)
+    if (patterns.size > MAX_PATTERNS_PER_PARAM) {
+      throw BadRequestException(Message.FILTER_PATTERN_NOT_VALID, listOf(MAX_PATTERNS_PER_PARAM))
+    }
     patterns.forEach {
-      if (it.length > MAX_PATTERN_LENGTH) throw BadRequestException(Message.FILTER_PATTERN_NOT_VALID)
-      if (it.count { char -> char == '*' } > MAX_WILDCARDS) {
+      if (it.isEmpty()) {
         throw BadRequestException(Message.FILTER_PATTERN_NOT_VALID)
+      }
+      if (it.length > MAX_PATTERN_LENGTH) {
+        throw BadRequestException(Message.FILTER_PATTERN_NOT_VALID, listOf(MAX_PATTERN_LENGTH))
+      }
+      if (it.count { char -> char == '*' } > MAX_WILDCARDS) {
+        throw BadRequestException(Message.FILTER_PATTERN_NOT_VALID, listOf(MAX_WILDCARDS))
       }
     }
   }

@@ -26,6 +26,8 @@ import {
   buildSearchRequestParams,
   getReferencedLanguageTags,
 } from '../../searchQuery/buildSearchRequestParams';
+import { addSearchedIfMissing } from '../../searchQuery/addSearchedIfMissing';
+import { adoptFetchedLanguages } from '../../searchQuery/adoptFetchedLanguages';
 
 const PAGE_SIZE = 60;
 
@@ -59,21 +61,6 @@ const addBaseIfMissing = (languages: string[] | undefined, base: string) => {
     return [...languages, base];
   }
   return languages;
-};
-
-// the backend resolves language-scoped search only within the requested languages
-const addSearchedIfMissing = (
-  languages: string[] | undefined,
-  searched: string[]
-) => {
-  if (!languages || languages.length === 0) {
-    return languages;
-  }
-  const missing = searched.filter((tag) => !languages.includes(tag));
-  if (missing.length === 0) {
-    return languages;
-  }
-  return [...languages, ...missing];
 };
 
 const shaveBy = (
@@ -163,12 +150,17 @@ export const useTranslationsService = (props: Props) => {
     [urlSearch, props.allLanguageTags]
   );
 
+  const referencedLanguageTags = useMemo(
+    () => getReferencedLanguageTags(searchParams),
+    [searchParams]
+  );
+
   const requestQuery: TranslationsQueryType = {
     ...query,
-    // smuggle in base lang if not present
     languages: addSearchedIfMissing(
       addBaseIfMissing(query.languages, props.baseLang!),
-      getReferencedLanguageTags(searchParams)
+      referencedLanguageTags,
+      props.baseLang!
     ),
     ...filtersQuery,
     filterKeyName: props.keyName ? [props.keyName] : undefined,
@@ -194,6 +186,10 @@ export const useTranslationsService = (props: Props) => {
     path,
     query: requestQuery,
     options: {
+      // deep-linked queries like ?search=de:foo parse correctly only once the
+      // project languages are known; without a search term the requests may
+      // run in parallel
+      enabled: !urlSearch || props.allLanguageTags !== undefined,
       cacheTime: 0,
       keepPreviousData: true,
       getNextPageParam: (lastPage) => {
@@ -213,13 +209,18 @@ export const useTranslationsService = (props: Props) => {
       onSuccess(data) {
         const flatKeys = flattenKeys(data);
 
-        const selectedLanguages = languages?.length
-          ? shaveBy(
-              data.pages[0].selectedLanguages.map((l) => l.tag),
-              languages
-            )
-          : data.pages[0].selectedLanguages.map((l) => l.tag);
-        if (query.languages?.toString() !== selectedLanguages?.toString()) {
+        const searchInjectedTags = referencedLanguageTags.filter(
+          (tag) => !query.languages?.includes(tag)
+        );
+        const selectedLanguages = adoptFetchedLanguages({
+          fetchedTags: data.pages[0].selectedLanguages.map((l) => l.tag),
+          currentSelection: languages,
+          searchInjectedTags,
+        });
+        if (
+          selectedLanguages &&
+          query.languages?.toString() !== selectedLanguages.toString()
+        ) {
           // update language selection to the fetched one
           // if there are some languages which are not permitted or were deleted
           _setLanguages(() => selectedLanguages);

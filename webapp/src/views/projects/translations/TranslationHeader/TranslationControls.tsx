@@ -78,6 +78,7 @@ export const TranslationControls: React.FC<React.PropsWithChildren<Props>> = ({
   const view = useTranslationsSelector((v) => v.view);
   const selectedLanguages = useTranslationsSelector((c) => c.selectedLanguages);
   const allLanguages = useTranslationsSelector((c) => c.languages);
+  const languageTags = allLanguages?.map((l) => l.tag) ?? [];
   const filters = useTranslationsSelector((c) => c.filters);
   const order = useTranslationsSelector((c) => c.order);
   const { setFilters, removeFilter, addFilter } = useTranslationsActions();
@@ -96,7 +97,7 @@ export const TranslationControls: React.FC<React.PropsWithChildren<Props>> = ({
             value={search || ''}
             onSearchChange={setSearch}
             placeholder={t('standard_search_label')}
-            languageTags={allLanguages?.map((l) => l.tag) ?? []}
+            languageTags={languageTags}
           />
           <TranslationFilters
             projectId={project.id}

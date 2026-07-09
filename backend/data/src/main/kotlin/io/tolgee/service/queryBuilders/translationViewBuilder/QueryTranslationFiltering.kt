@@ -259,7 +259,7 @@ class QueryTranslationFiltering(
 
   // ─── entity-specific subquery helpers ───────────────────────────────────
 
-  private fun buildTranslationExists(
+  fun buildTranslationExists(
     languageIds: List<Long>,
     extra: (Root<Translation>) -> Predicate = { cb.conjunction() },
   ): Predicate =

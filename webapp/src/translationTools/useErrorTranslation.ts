@@ -521,6 +521,18 @@ export function useErrorTranslation() {
       case 'filter_by_value_label_not_valid':
         return t('filter_by_value_label_not_valid');
 
+      // Scoped search
+      case 'filter_pattern_not_valid':
+        return t(
+          'filter_pattern_not_valid',
+          'Search filter pattern is not valid'
+        );
+      case 'filter_pattern_language_not_valid':
+        return t(
+          'filter_pattern_language_not_valid',
+          'Search language is not among the returned languages'
+        );
+
       // Suggestions
       case 'suggestion_not_found':
         return t('suggestion_not_found');

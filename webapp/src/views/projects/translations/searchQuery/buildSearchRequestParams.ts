@@ -1,8 +1,18 @@
 import { operations } from 'tg.service/apiSchema.generated';
 
-import { parseSearchQuery, ScopedToken } from './parseSearchQuery';
+import {
+  findLanguageTag,
+  ParsedToken,
+  parseSearchQuery,
+  ScopedToken,
+} from './parseSearchQuery';
 
 type TranslationsQuery = operations['getTranslations']['parameters']['query'];
+
+// these mirror the backend limits in WildcardLikeUtil and must stay in sync
+const MAX_PATTERN_LENGTH = 500;
+const MAX_WILDCARDS = 5;
+const MAX_PATTERNS_PER_PARAM = 20;
 
 export type SearchRequestParams = Pick<
   TranslationsQuery,
@@ -17,31 +27,59 @@ export type SearchRequestParams = Pick<
   | 'filterNoTranslationPattern'
 >;
 
-const PATTERN_PARAMS = {
-  key: ['filterKeyPattern', 'filterNoKeyPattern'],
-  description: ['filterDescriptionPattern', 'filterNoDescriptionPattern'],
-  namespace: ['filterNamespacePattern', 'filterNoNamespacePattern'],
-} as const;
-
-function paramValue(token: ScopedToken): string {
-  if (token.qualifier === 'language') {
-    return `${token.languageTag},${token.value}`;
-  }
-  if (token.qualifier === 'translation') {
-    return `*,${token.value}`;
-  }
-  return token.value;
-}
-
 type PatternParamName = Exclude<keyof SearchRequestParams, 'search'>;
 
-function paramName(token: ScopedToken): PatternParamName {
-  if (token.qualifier === 'language' || token.qualifier === 'translation') {
-    return token.negated
-      ? 'filterNoTranslationPattern'
-      : 'filterTranslationPattern';
+const PATTERN_PARAMS = {
+  key: { base: 'filterKeyPattern', negated: 'filterNoKeyPattern' },
+  description: {
+    base: 'filterDescriptionPattern',
+    negated: 'filterNoDescriptionPattern',
+  },
+  namespace: {
+    base: 'filterNamespacePattern',
+    negated: 'filterNoNamespacePattern',
+  },
+} as const;
+
+export function buildSearchRequestParams(
+  input: string | undefined,
+  languageTags: string[]
+): SearchRequestParams {
+  const parsed = parseSearchQuery(input ?? '', languageTags);
+  const textPartOf = (token: ParsedToken) =>
+    token.type === 'text' && isQualifierEscape(token, languageTags)
+      ? token.value
+      : token.raw;
+  if (!parsed.hasRecognizedQualifiers) {
+    if (parsed.tokens.some((token) => isQualifierEscape(token, languageTags))) {
+      const search = parsed.tokens.map(textPartOf).join(' ');
+      return { search: search || undefined };
+    }
+    return { search: input || undefined };
   }
-  return PATTERN_PARAMS[token.qualifier][token.negated ? 1 : 0];
+  const result: SearchRequestParams = {};
+  const textParts: string[] = [];
+  for (const token of parsed.tokens) {
+    if (token.type === 'text') {
+      textParts.push(textPartOf(token));
+      continue;
+    }
+    if (token.type === 'ignored') {
+      continue;
+    }
+    const name = paramName(token);
+    const values = result[name] ?? [];
+    const value = paramValue(token, languageTags);
+    // the backend validates only the pattern part after the language prefix
+    const pattern = isTranslationScoped(token) ? patternOf(value) : value;
+    if (exceedsLimits(pattern) || values.length >= MAX_PATTERNS_PER_PARAM) {
+      textParts.push(token.raw);
+      continue;
+    }
+    result[name] = [...values, value];
+  }
+  result.search = textParts.join(' ') || undefined;
+  return result;
 }
 
 /**
@@ -56,38 +94,72 @@ export function getReferencedLanguageTags(
     ...(params.filterTranslationPattern ?? []),
     ...(params.filterNoTranslationPattern ?? []),
   ];
-  const tags = values
-    .map((value) => value.slice(0, value.indexOf(',')))
-    .filter((tag) => tag && tag !== '*');
+  const tags = values.map(languageTagOf).filter((tag) => tag && tag !== '*');
   return [...new Set(tags)];
 }
 
-/**
- * Turns the raw search field input into request params. Without any recognized
- * scoped qualifier the input is passed through verbatim as `search`, exactly
- * matching the behavior before the query language existed.
- */
-export function buildSearchRequestParams(
-  input: string | undefined,
+function isTranslationScoped(token: ScopedToken): boolean {
+  return token.qualifier === 'language' || token.qualifier === 'translation';
+}
+
+function paramName(token: ScopedToken): PatternParamName {
+  if (isTranslationScoped(token)) {
+    return token.negated
+      ? 'filterNoTranslationPattern'
+      : 'filterTranslationPattern';
+  }
+  const names = PATTERN_PARAMS[token.qualifier as keyof typeof PATTERN_PARAMS];
+  return token.negated ? names.negated : names.base;
+}
+
+function paramValue(token: ScopedToken, languageTags: string[]): string {
+  if (isTranslationScoped(token)) {
+    return translationParamValue(token, languageTags);
+  }
+  return token.value;
+}
+
+function translationParamValue(
+  token: ScopedToken,
   languageTags: string[]
-): SearchRequestParams {
-  const parsed = parseSearchQuery(input ?? '', languageTags);
-  if (!parsed.hasScopedTokens) {
-    return { search: input || undefined };
+): string {
+  if (token.qualifier === 'language') {
+    return `${token.languageTag},${token.value}`;
   }
-  const result: SearchRequestParams = {};
-  const textParts: string[] = [];
-  for (const token of parsed.tokens) {
-    if (token.type === 'text') {
-      textParts.push(token.value);
-      continue;
+  const separatorIndex = token.quoted ? -1 : token.value.indexOf(',');
+  if (separatorIndex > 0) {
+    const prefix = token.value.slice(0, separatorIndex);
+    const rest = token.value.slice(separatorIndex + 1);
+    if (prefix === '*' && rest) {
+      return token.value;
     }
-    if (token.type === 'ignored') {
-      continue;
+    const tag = findLanguageTag(languageTags, prefix);
+    if (tag && rest) {
+      return `${tag},${rest}`;
     }
-    const name = paramName(token);
-    result[name] = [...(result[name] ?? []), paramValue(token)];
   }
-  result.search = textParts.join(' ') || undefined;
-  return result;
+  return `*,${token.value}`;
+}
+
+function languageTagOf(paramValue: string): string {
+  return paramValue.slice(0, paramValue.indexOf(','));
+}
+
+function patternOf(paramValue: string): string {
+  return paramValue.slice(paramValue.indexOf(',') + 1);
+}
+
+function exceedsLimits(value: string): boolean {
+  if (value.length > MAX_PATTERN_LENGTH) {
+    return true;
+  }
+  return value.split('*').length - 1 > MAX_WILDCARDS;
+}
+
+/** a quoted token whose content would otherwise parse as a qualifier, e.g. `"key:foo"` */
+function isQualifierEscape(token: ParsedToken, languageTags: string[]) {
+  if (token.type !== 'text' || !token.raw.startsWith('"')) {
+    return false;
+  }
+  return parseSearchQuery(token.value, languageTags).hasRecognizedQualifiers;
 }

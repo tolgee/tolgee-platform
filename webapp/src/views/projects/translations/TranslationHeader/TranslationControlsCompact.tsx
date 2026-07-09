@@ -121,6 +121,7 @@ export const TranslationControlsCompact: React.FC<
   const { t } = useTranslate();
   const project = useProject();
   const allLanguages = useTranslationsSelector((c) => c.languages);
+  const languageTags = allLanguages?.map((l) => l.tag) ?? [];
 
   const { setSearch, changeView, selectLanguages, setOrder } =
     useTranslationsActions();
@@ -178,7 +179,7 @@ export const TranslationControlsCompact: React.FC<
                 width: '100%',
               }}
               setSearchOpen={setSearchOpen}
-              languageTags={allLanguages?.map((l) => l.tag) ?? []}
+              languageTags={languageTags}
             />
             <StyledIconButton size="small" onClick={() => setSearchOpen(false)}>
               <XClose />

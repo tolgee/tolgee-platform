@@ -32,7 +32,6 @@ class TranslationsTestData {
   lateinit var projectBuilder: ProjectBuilder
   lateinit var aKeyGermanTranslation: Translation
   lateinit var keysOnlyUser: UserAccount
-  lateinit var cartTitleKey: Key
 
   val root: TestDataBuilder =
     TestDataBuilder().apply {
@@ -296,45 +295,6 @@ class TranslationsTestData {
         language = englishLanguage
         text = "desc-ws text"
       }
-    }
-  }
-
-  fun addPatternSearchData() {
-    projectBuilder.apply {
-      cartTitleKey =
-        addKey { name = "cart.title" }
-          .build {
-            setDescription("shopping cart heading")
-            addTranslation {
-              language = englishLanguage
-              text = "Add to cart"
-            }
-            addTranslation {
-              language = germanLanguage
-              text = "Warenkorb hinzufügen"
-            }
-          }.self
-      addKey { name = "cart_subtitle" }.build {
-        addTranslation {
-          language = englishLanguage
-          text = "Cart subtitle"
-        }
-      }
-      addKey("shop", "checkout.title").build {
-        setDescription("legacy checkout")
-        addTranslation {
-          language = englishLanguage
-          text = "Checkout"
-        }
-      }
-      addKey { name = "my.cart" }.build {
-        addTranslation {
-          language = englishLanguage
-          text = "cart, with comma"
-        }
-      }
-      addKey { name = "100%_done" }
-      addKey { name = "100%xdone" }
     }
   }
 

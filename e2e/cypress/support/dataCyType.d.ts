@@ -247,6 +247,7 @@ declare namespace DataCy {
         "global-paginated-list": true;
         "global-plus-button": true;
         "global-search-field": true;
+        "global-search-field-clear": true;
         "global-user-menu-button": true;
         "glossaries-empty-add-button": true;
         "glossaries-list-more-button": true;

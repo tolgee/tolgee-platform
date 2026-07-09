@@ -135,6 +135,8 @@ export const formerUserTestData = generateTestDataObject('former-user');
 
 export const namespaces = generateTestDataObject('namespaces');
 
+export const scopedSearch = generateTestDataObject('scoped-search');
+
 export const tasks = generateTestDataObject('task');
 
 export const prompt = generateTestDataObject('prompt');

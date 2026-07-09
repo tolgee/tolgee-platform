@@ -15,7 +15,11 @@ data class TranslationFilterByPattern(
     fun parseList(strings: List<String>): List<TranslationFilterByPattern> =
       strings.map {
         val separatorIndex = it.indexOf(',')
-        if (separatorIndex < 1) throw BadRequestException(Message.FILTER_PATTERN_NOT_VALID)
+        val missingOrEmptyLanguageTag = separatorIndex < 1
+        val emptyPattern = separatorIndex == it.length - 1
+        if (missingOrEmptyLanguageTag || emptyPattern) {
+          throw BadRequestException(Message.FILTER_PATTERN_NOT_VALID)
+        }
         val tag = it.substring(0, separatorIndex)
         TranslationFilterByPattern(
           languageTag = tag.takeUnless { t -> t == "*" },

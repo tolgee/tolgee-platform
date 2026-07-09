@@ -12,16 +12,20 @@ import { T } from '@tolgee/react';
 
 import { stopAndPrevent } from 'tg.fixtures/eventHandler';
 
+import { DOCS_LINKS } from 'tg.constants/docLinks';
+
+import { pickLanguageExampleTag, QUALIFIER_HINTS } from './qualifierHints';
+
 const StyledContent = styled(Box)`
   padding: ${({ theme }) => theme.spacing(2)};
-  max-width: 400px;
+  max-width: ${({ theme }) => theme.spacing(50)};
   display: grid;
   gap: ${({ theme }) => theme.spacing(1)};
 `;
 
 const StyledExamples = styled('table')`
   border-spacing: 0px ${({ theme }) => theme.spacing(0.5)};
-  font-size: 14px;
+  font-size: ${({ theme }) => theme.typography.body2.fontSize};
 `;
 
 const StyledSyntax = styled('td')`
@@ -31,15 +35,18 @@ const StyledSyntax = styled('td')`
   color: ${({ theme }) => theme.palette.primary.main};
 `;
 
-const EXAMPLES = [
+const hintNode = (
+  hint: { keyName: string; defaultValue: string },
+  params?: Record<string, string>
+) => (
+  // @tolgee-ignore
+  <T keyName={hint.keyName} defaultValue={hint.defaultValue} params={params} />
+);
+
+const buildExamples = (languageExampleTag: string) => [
   {
     syntax: 'description:cart',
-    hint: (
-      <T
-        keyName="translations_search_help_description"
-        defaultValue="Search only in key descriptions"
-      />
-    ),
+    hint: hintNode(QUALIFIER_HINTS.description),
   },
   {
     syntax: 'key:cart*',
@@ -61,30 +68,15 @@ const EXAMPLES = [
   },
   {
     syntax: 'namespace:web',
-    hint: (
-      <T
-        keyName="translations_search_help_namespace"
-        defaultValue="Search only in namespaces"
-      />
-    ),
+    hint: hintNode(QUALIFIER_HINTS.namespace),
   },
   {
     syntax: 'translation:cart',
-    hint: (
-      <T
-        keyName="translations_search_help_translation"
-        defaultValue="Search only in translation texts"
-      />
-    ),
+    hint: hintNode(QUALIFIER_HINTS.translation),
   },
   {
-    syntax: 'de:Warenkorb',
-    hint: (
-      <T
-        keyName="translations_search_help_language"
-        defaultValue="Search only in one language"
-      />
-    ),
+    syntax: `${languageExampleTag}:cart`,
+    hint: hintNode(QUALIFIER_HINTS.language, { tag: languageExampleTag }),
   },
   {
     syntax: '-description:legacy',
@@ -106,8 +98,14 @@ const EXAMPLES = [
   },
 ];
 
-export const SearchSyntaxHelp = () => {
+type Props = {
+  languageTags: string[];
+};
+
+export const SearchSyntaxHelp = ({ languageTags }: Props) => {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+  const languageExampleTag = pickLanguageExampleTag(languageTags);
+  const examples = buildExamples(languageExampleTag);
 
   return (
     <>
@@ -141,7 +139,7 @@ export const SearchSyntaxHelp = () => {
           </Typography>
           <StyledExamples>
             <tbody>
-              {EXAMPLES.map((example) => (
+              {examples.map((example) => (
                 <tr key={example.syntax}>
                   <StyledSyntax>{example.syntax}</StyledSyntax>
                   <td>{example.hint}</td>
@@ -151,7 +149,7 @@ export const SearchSyntaxHelp = () => {
           </StyledExamples>
           <Typography variant="body2">
             <Link
-              href="https://docs.tolgee.io/platform/translation_process/scoped_search"
+              href={DOCS_LINKS.scopedSearch}
               target="_blank"
               rel="noreferrer"
               data-cy="translations-search-help-docs-link"

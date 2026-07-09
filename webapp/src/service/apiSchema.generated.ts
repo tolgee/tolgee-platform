@@ -2884,6 +2884,7 @@ export interface components {
         | "filter_by_value_state_not_valid"
         | "filter_by_value_qa_check_type_not_valid"
         | "filter_pattern_not_valid"
+        | "filter_pattern_language_not_valid"
         | "import_has_expired"
         | "tag_not_from_project"
         | "translation_text_too_long"
@@ -6674,6 +6675,7 @@ export interface components {
         | "filter_by_value_state_not_valid"
         | "filter_by_value_qa_check_type_not_valid"
         | "filter_pattern_not_valid"
+        | "filter_pattern_language_not_valid"
         | "import_has_expired"
         | "tag_not_from_project"
         | "translation_text_too_long"
@@ -17254,6 +17256,9 @@ export interface operations {
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
          */
         filterKeyPattern?: string[];
         /**
@@ -17263,6 +17268,9 @@ export interface operations {
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
          */
         filterNoKeyPattern?: string[];
         /**
@@ -17273,6 +17281,9 @@ export interface operations {
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
          */
         filterDescriptionPattern?: string[];
         /**
@@ -17283,6 +17294,9 @@ export interface operations {
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
          */
         filterNoDescriptionPattern?: string[];
         /**
@@ -17293,6 +17307,9 @@ export interface operations {
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
          */
         filterNamespacePattern?: string[];
         /**
@@ -17303,29 +17320,40 @@ export interface operations {
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
          */
         filterNoNamespacePattern?: string[];
         /**
          * Selects only keys with a translation text matching the provided pattern,
          * in the format: languageTag,pattern. Use `*` as the language tag to match any of the returned languages.
-         * The language must be included in the returned languages, otherwise the filter doesn't apply.
+         * The language tag is matched case-insensitively and must be included in the returned languages,
+         * otherwise the request fails with 400.
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
          */
         filterTranslationPattern?: string[];
         /**
          * Selects only keys with no translation text matching the provided pattern,
          * in the format: languageTag,pattern. Use `*` as the language tag to match against any of the returned
          * languages. Keys with no translation in the specified language always match.
-         * The language must be included in the returned languages, otherwise the filter doesn't apply.
+         * The language tag is matched case-insensitively and must be included in the returned languages,
+         * otherwise the request fails with 400.
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
          */
         filterNoTranslationPattern?: string[];
         /** Selects only keys with provided tag */
@@ -17475,6 +17503,9 @@ export interface operations {
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
          */
         filterKeyPattern?: string[];
         /**
@@ -17484,6 +17515,9 @@ export interface operations {
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
          */
         filterNoKeyPattern?: string[];
         /**
@@ -17494,6 +17528,9 @@ export interface operations {
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
          */
         filterDescriptionPattern?: string[];
         /**
@@ -17504,6 +17541,9 @@ export interface operations {
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
          */
         filterNoDescriptionPattern?: string[];
         /**
@@ -17514,6 +17554,9 @@ export interface operations {
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
          */
         filterNamespacePattern?: string[];
         /**
@@ -17524,29 +17567,40 @@ export interface operations {
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
          */
         filterNoNamespacePattern?: string[];
         /**
          * Selects only keys with a translation text matching the provided pattern,
          * in the format: languageTag,pattern. Use `*` as the language tag to match any of the returned languages.
-         * The language must be included in the returned languages, otherwise the filter doesn't apply.
+         * The language tag is matched case-insensitively and must be included in the returned languages,
+         * otherwise the request fails with 400.
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
          */
         filterTranslationPattern?: string[];
         /**
          * Selects only keys with no translation text matching the provided pattern,
          * in the format: languageTag,pattern. Use `*` as the language tag to match against any of the returned
          * languages. Keys with no translation in the specified language always match.
-         * The language must be included in the returned languages, otherwise the filter doesn't apply.
+         * The language tag is matched case-insensitively and must be included in the returned languages,
+         * otherwise the request fails with 400.
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
          */
         filterNoTranslationPattern?: string[];
         /** Selects only keys with provided tag */
@@ -17732,6 +17786,9 @@ export interface operations {
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
          */
         filterKeyPattern?: string[];
         /**
@@ -17741,6 +17798,9 @@ export interface operations {
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
          */
         filterNoKeyPattern?: string[];
         /**
@@ -17751,6 +17811,9 @@ export interface operations {
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
          */
         filterDescriptionPattern?: string[];
         /**
@@ -17761,6 +17824,9 @@ export interface operations {
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
          */
         filterNoDescriptionPattern?: string[];
         /**
@@ -17771,6 +17837,9 @@ export interface operations {
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
          */
         filterNamespacePattern?: string[];
         /**
@@ -17781,29 +17850,40 @@ export interface operations {
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
          */
         filterNoNamespacePattern?: string[];
         /**
          * Selects only keys with a translation text matching the provided pattern,
          * in the format: languageTag,pattern. Use `*` as the language tag to match any of the returned languages.
-         * The language must be included in the returned languages, otherwise the filter doesn't apply.
+         * The language tag is matched case-insensitively and must be included in the returned languages,
+         * otherwise the request fails with 400.
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
          */
         filterTranslationPattern?: string[];
         /**
          * Selects only keys with no translation text matching the provided pattern,
          * in the format: languageTag,pattern. Use `*` as the language tag to match against any of the returned
          * languages. Keys with no translation in the specified language always match.
-         * The language must be included in the returned languages, otherwise the filter doesn't apply.
+         * The language tag is matched case-insensitively and must be included in the returned languages,
+         * otherwise the request fails with 400.
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
          */
         filterNoTranslationPattern?: string[];
         /** Selects only keys with provided tag */
@@ -22790,6 +22870,9 @@ export interface operations {
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
          */
         filterKeyPattern?: string[];
         /**
@@ -22799,6 +22882,9 @@ export interface operations {
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
          */
         filterNoKeyPattern?: string[];
         /**
@@ -22809,6 +22895,9 @@ export interface operations {
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
          */
         filterDescriptionPattern?: string[];
         /**
@@ -22819,6 +22908,9 @@ export interface operations {
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
          */
         filterNoDescriptionPattern?: string[];
         /**
@@ -22829,6 +22921,9 @@ export interface operations {
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
          */
         filterNamespacePattern?: string[];
         /**
@@ -22839,29 +22934,40 @@ export interface operations {
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
          */
         filterNoNamespacePattern?: string[];
         /**
          * Selects only keys with a translation text matching the provided pattern,
          * in the format: languageTag,pattern. Use `*` as the language tag to match any of the returned languages.
-         * The language must be included in the returned languages, otherwise the filter doesn't apply.
+         * The language tag is matched case-insensitively and must be included in the returned languages,
+         * otherwise the request fails with 400.
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
          */
         filterTranslationPattern?: string[];
         /**
          * Selects only keys with no translation text matching the provided pattern,
          * in the format: languageTag,pattern. Use `*` as the language tag to match against any of the returned
          * languages. Keys with no translation in the specified language always match.
-         * The language must be included in the returned languages, otherwise the filter doesn't apply.
+         * The language tag is matched case-insensitively and must be included in the returned languages,
+         * otherwise the request fails with 400.
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
          */
         filterNoTranslationPattern?: string[];
         /** Selects only keys with provided tag */
@@ -23191,6 +23297,9 @@ export interface operations {
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
          */
         filterKeyPattern?: string[];
         /**
@@ -23200,6 +23309,9 @@ export interface operations {
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
          */
         filterNoKeyPattern?: string[];
         /**
@@ -23210,6 +23322,9 @@ export interface operations {
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
          */
         filterDescriptionPattern?: string[];
         /**
@@ -23220,6 +23335,9 @@ export interface operations {
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
          */
         filterNoDescriptionPattern?: string[];
         /**
@@ -23230,6 +23348,9 @@ export interface operations {
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
          */
         filterNamespacePattern?: string[];
         /**
@@ -23240,29 +23361,40 @@ export interface operations {
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
          */
         filterNoNamespacePattern?: string[];
         /**
          * Selects only keys with a translation text matching the provided pattern,
          * in the format: languageTag,pattern. Use `*` as the language tag to match any of the returned languages.
-         * The language must be included in the returned languages, otherwise the filter doesn't apply.
+         * The language tag is matched case-insensitively and must be included in the returned languages,
+         * otherwise the request fails with 400.
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
          */
         filterTranslationPattern?: string[];
         /**
          * Selects only keys with no translation text matching the provided pattern,
          * in the format: languageTag,pattern. Use `*` as the language tag to match against any of the returned
          * languages. Keys with no translation in the specified language always match.
-         * The language must be included in the returned languages, otherwise the filter doesn't apply.
+         * The language tag is matched case-insensitively and must be included in the returned languages,
+         * otherwise the request fails with 400.
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
          */
         filterNoTranslationPattern?: string[];
         /** Selects only keys with provided tag */
