@@ -30,8 +30,8 @@ class MtProviderCatchingTest {
       }
 
     processed.assert.isEqualTo(chunk)
-    thrown.assert.isInstanceOf(RequeueWithDelayException::class.java)
-    thrown as RequeueWithDelayException
+    thrown.assert.isInstanceOf(ChunkItemFailedException::class.java)
+    thrown as ChunkItemFailedException
     thrown.tolgeeMessage.assert.isEqualTo(Message.LLM_PROVIDER_NOT_RETURNED_JSON)
     thrown.successfulTargets.assert.containsExactly(chunk[0], chunk[2])
     thrown.maxRetries.assert.isEqualTo(0)
@@ -50,8 +50,8 @@ class MtProviderCatchingTest {
       }
 
     processed.assert.isEqualTo(chunk)
-    thrown.assert.isInstanceOf(RequeueWithDelayException::class.java)
-    thrown as RequeueWithDelayException
+    thrown.assert.isInstanceOf(ChunkItemFailedException::class.java)
+    thrown as ChunkItemFailedException
     thrown.tolgeeMessage.assert.isEqualTo(Message.LLM_PROVIDER_MAX_TOKENS_EXCEEDED)
     thrown.successfulTargets.assert.containsExactly(chunk[0], chunk[2])
     thrown.maxRetries.assert.isEqualTo(0)
@@ -70,8 +70,8 @@ class MtProviderCatchingTest {
       }
 
     processed.assert.isEqualTo(chunk)
-    thrown.assert.isInstanceOf(RequeueWithDelayException::class.java)
-    thrown as RequeueWithDelayException
+    thrown.assert.isInstanceOf(ChunkItemFailedException::class.java)
+    thrown as ChunkItemFailedException
     thrown.tolgeeMessage.assert.isEqualTo(Message.LLM_PROVIDER_EMPTY_RESPONSE)
     thrown.successfulTargets.assert.containsExactly(chunk[0], chunk[2])
     thrown.maxRetries.assert.isEqualTo(0)

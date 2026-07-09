@@ -27,7 +27,7 @@ class MtProviderCatching(
     coroutineContext: CoroutineContext,
     fn: (item: BatchTranslationTargetItem) -> Unit,
   ) {
-    val exceptions = mutableListOf<RequeueWithDelayException>()
+    val exceptions = mutableListOf<ChunkItemFailedException>()
     val successfulTargets = mutableListOf<BatchTranslationTargetItem>()
     chunk.forEach { item ->
       coroutineContext.ensureActive()
@@ -42,19 +42,19 @@ class MtProviderCatching(
         // maxRetries = 0: malformed responses are consistent for the same input, retrying doesn't
         // help — but the remaining items of the chunk must still be processed
         exceptions.add(
-          RequeueWithDelayException(Message.LLM_PROVIDER_EMPTY_RESPONSE, successfulTargets, e, maxRetries = 0),
+          ChunkItemFailedException(Message.LLM_PROVIDER_EMPTY_RESPONSE, successfulTargets, e, maxRetries = 0),
         )
       } catch (e: LlmProviderNotReturnedJsonException) {
         exceptions.add(
-          RequeueWithDelayException(Message.LLM_PROVIDER_NOT_RETURNED_JSON, successfulTargets, e, maxRetries = 0),
+          ChunkItemFailedException(Message.LLM_PROVIDER_NOT_RETURNED_JSON, successfulTargets, e, maxRetries = 0),
         )
       } catch (e: LlmProviderMaxTokensExceededException) {
         exceptions.add(
-          RequeueWithDelayException(Message.LLM_PROVIDER_MAX_TOKENS_EXCEEDED, successfulTargets, e, maxRetries = 0),
+          ChunkItemFailedException(Message.LLM_PROVIDER_MAX_TOKENS_EXCEEDED, successfulTargets, e, maxRetries = 0),
         )
       } catch (e: LlmRateLimitedException) {
         exceptions.add(
-          RequeueWithDelayException(
+          ChunkItemFailedException(
             Message.LLM_RATE_LIMITED,
             successfulTargets,
             e,
@@ -74,14 +74,14 @@ class MtProviderCatching(
       } catch (e: EntityNotFoundException) {
         throw FailedDontRequeueException(Message.TRANSLATION_FAILED, successfulTargets, e)
       } catch (e: Throwable) {
-        exceptions.add(RequeueWithDelayException(Message.TRANSLATION_FAILED, successfulTargets, e))
+        exceptions.add(ChunkItemFailedException(Message.TRANSLATION_FAILED, successfulTargets, e))
       }
     }
     if (exceptions.isNotEmpty()) {
       if (exceptions.size == 1) {
         // remap with using successfulTargets declared above
         val exception = exceptions.first()
-        throw RequeueWithDelayException(
+        throw ChunkItemFailedException(
           message = exception.tolgeeMessage ?: Message.TRANSLATION_FAILED,
           successfulTargets = successfulTargets,
           cause = exception.cause,
