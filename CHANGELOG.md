@@ -1,3 +1,10 @@
+## [3.209.6](https://github.com/tolgee/tolgee-platform/compare/v3.209.5...v3.209.6) (2026-07-09)
+
+
+### Bug Fixes
+
+* raise default LLM max tokens, drop temperature from Anthropic requests ([#3798](https://github.com/tolgee/tolgee-platform/issues/3798)) ([92913db](https://github.com/tolgee/tolgee-platform/commit/92913dbef2a54a8e91b4a1fa78e4c1895a9fe4ac)), closes [#3797](https://github.com/tolgee/tolgee-platform/issues/3797) [tolgee/deployment#755](https://github.com/tolgee/deployment/issues/755)
+
 ## [3.209.5](https://github.com/tolgee/tolgee-platform/compare/v3.209.4...v3.209.5) (2026-07-09)
 
 
