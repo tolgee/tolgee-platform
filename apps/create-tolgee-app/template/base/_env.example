@@ -1,0 +1,18 @@
+# Tolgee instance the plugin targets. Used by `tolgee-app register` and
+# `tolgee-app dev`. When this points at localhost, the dev command skips
+# Cloudflare (Tolgee can reach the plugin directly).
+TOLGEE_URL={{tolgeeUrl}}
+
+# Force-disable the tunnel even when Tolgee is remote. Useful with a
+# custom proxy / Named Tunnel you boot yourself.
+# TOLGEE_DEV_TUNNEL=none
+
+# Ports the dev servers bind to. Override when running multiple plugins
+# side-by-side so each one gets its own pair.
+# VITE_PORT=5180
+# SERVER_PORT=5181
+
+# Webhook signing secret. In dev you do NOT need to set this — the server reads
+# it from .tolgee-dev/install.json (written by `tolgee-app register`). Set it
+# only in production deploys, where there is no install file.
+# TOLGEE_WEBHOOK_SECRET=tgappw_xxx

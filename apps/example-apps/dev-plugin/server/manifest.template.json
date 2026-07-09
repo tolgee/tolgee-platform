@@ -1,0 +1,125 @@
+{
+  "id": "tolgee-dev-plugin",
+  "name": "Tolgee Dev Plugin",
+  "version": "0.1.0",
+  "baseUrl": "__BASE_URL__",
+  "decoratorsUrl": "__BASE_URL__/decorators",
+  "scopes": ["translations.view", "keys.view"],
+  "webhooks": {
+    "events": [
+      "SET_TRANSLATIONS",
+      "SET_TRANSLATION_STATE",
+      "CREATE_KEY",
+      "KEY_DELETE"
+    ],
+    "url": "__BASE_URL__/webhook"
+  },
+  "modules": {
+    "project-dashboard-page": [
+      {
+        "key": "hello",
+        "title": "Hello World",
+        "icon": "👋",
+        "entry": "/"
+      }
+    ],
+    "translation-tools-panel": [
+      {
+        "key": "activity",
+        "title": "Activity",
+        "icon": "BarChart01",
+        "entry": "/tools-panel"
+      }
+    ],
+    "translation-tools-panel-empty": [
+      {
+        "key": "languages",
+        "title": "Languages",
+        "icon": "Globe01",
+        "entry": "/tools-panel-empty"
+      }
+    ],
+    "key-edit-tab": [
+      {
+        "key": "audit",
+        "title": "Audit",
+        "icon": "Shield01",
+        "entry": "/key-edit-tab/audit"
+      }
+    ],
+    "key-action": [
+      {
+        "key": "view-source",
+        "type": "link",
+        "icon": "Link04",
+        "tooltip": "View source",
+        "urlTemplate": "https://example.com/source/{keyName}",
+        "visibility": "on-hover"
+      },
+      {
+        "key": "open-audit",
+        "type": "tab",
+        "icon": "Shield01",
+        "tooltip": "Audit info",
+        "dynamic": true,
+        "tabKey": "audit"
+      }
+    ],
+    "translation-action": [
+      {
+        "key": "show-activity",
+        "type": "panel",
+        "icon": "BarChart01",
+        "tooltip": "Show activity",
+        "dynamic": true,
+        "panelKey": "activity",
+        "visibility": "always"
+      }
+    ],
+    "modal": [
+      {
+        "key": "explain",
+        "title": "Explain this key",
+        "icon": "Lightbulb01",
+        "entry": "/modal/explain",
+        "width": 600,
+        "height": 360
+      }
+    ],
+    "bulk-action": [
+      {
+        "key": "bulk-explain",
+        "title": "Explain selection",
+        "icon": "Target01",
+        "type": "modal",
+        "modalKey": "explain"
+      }
+    ],
+    "translations-toolbar-action": [
+      {
+        "key": "toolbar-explain",
+        "title": "Explain view",
+        "icon": "Download01",
+        "type": "modal",
+        "modalKey": "explain"
+      }
+    ],
+    "project-menu-action": [
+      {
+        "key": "menu-explain",
+        "title": "Configure",
+        "icon": "Settings01",
+        "type": "modal",
+        "modalKey": "explain"
+      }
+    ],
+    "shortcut": [
+      {
+        "key": "shortcut-explain",
+        "combination": "Mod+Shift+E",
+        "type": "modal",
+        "modalKey": "explain"
+      }
+    ]
+  }
+}

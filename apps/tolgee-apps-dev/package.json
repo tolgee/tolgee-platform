@@ -1,0 +1,30 @@
+{
+  "name": "@tolgee/apps-dev",
+  "version": "0.0.1-alpha.7",
+  "description": "Dev toolchain for Tolgee Apps — `tolgee-app dev` (tunnel + manifest repoint) and `tolgee-app register` (browser install).",
+  "type": "module",
+  "bin": {
+    "tolgee-app": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup"
+  },
+  "dependencies": {
+    "cloudflared": "^0.7.1",
+    "open": "^10.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.12.3",
+    "tsup": "^8.3.5",
+    "typescript": "~6.0.2"
+  },
+  "engines": {
+    "node": ">=20.12"
+  }
+}

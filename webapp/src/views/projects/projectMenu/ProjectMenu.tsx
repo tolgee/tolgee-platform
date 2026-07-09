@@ -24,6 +24,9 @@ import { createAdder } from 'tg.fixtures/pluginAdder';
 import { useAddProjectMenuItems } from 'tg.ee';
 import { useProject } from 'tg.hooks/useProject';
 import { useBranchLinks } from 'tg.component/branching/useBranchLinks';
+import { useApiQuery } from 'tg.service/http/useQueryApi';
+import { useAppTriggers, useAppTriggerDispatch } from '../apps/useAppTriggers';
+import { AppIcon } from '../apps/AppIcon';
 
 export const ProjectMenu = () => {
   const project = useProject();
@@ -157,6 +160,24 @@ export const ProjectMenu = () => {
 
   const items = addEeItems(baseItems);
 
+  const projectApps = useApiQuery({
+    url: '/v2/projects/{projectId}/apps',
+    method: 'get',
+    path: { projectId: project.id },
+  });
+
+  const enabledAppPages = (projectApps.data?._embedded?.projectApps ?? [])
+    .filter((app) => app.enabled)
+    .flatMap((app) =>
+      (app.modules?.['project-dashboard-page'] ?? []).map((module) => ({
+        installId: app.id,
+        appName: app.name,
+        moduleKey: module.key,
+        title: module.title,
+        icon: module.icon,
+      }))
+    );
+
   return (
     <SideMenu>
       <SideLogo hidden={!topBarHeight} />
@@ -177,7 +198,42 @@ export const ProjectMenu = () => {
           />
         );
       })}
+      {enabledAppPages.map((page) => (
+        <SideMenuItem
+          key={`app-${page.installId}-${page.moduleKey}`}
+          linkTo={LINKS.PROJECT_APP_PAGE.build({
+            [PARAMS.PROJECT_ID]: project.id,
+            [PARAMS.APP_INSTALL_ID]: page.installId,
+            [PARAMS.APP_MODULE_KEY]: page.moduleKey,
+          })}
+          text={page.title}
+          icon={<AppIcon icon={page.icon} fontSize="1em" />}
+          data-cy={`project-menu-item-app-${page.installId}-${page.moduleKey}`}
+        />
+      ))}
+      <ProjectMenuActionItems />
     </SideMenu>
+  );
+};
+
+const ProjectMenuActionItems = () => {
+  const project = useProject();
+  const triggers = useAppTriggers(project.id, 'project-menu-action');
+  const dispatch = useAppTriggerDispatch();
+  return (
+    <>
+      {triggers.map((trigger) => (
+        <SideMenuItem
+          key={`app-action-${trigger.install.id}-${trigger.item.key}`}
+          onClick={() =>
+            dispatch(trigger, { templateVars: { projectId: project.id } })
+          }
+          text={trigger.item.title ?? trigger.item.key}
+          icon={<AppIcon icon={trigger.item.icon ?? '🔘'} fontSize="1em" />}
+          data-cy={`project-menu-item-app-action-${trigger.install.id}-${trigger.item.key}`}
+        />
+      ))}
+    </>
   );
 };
 

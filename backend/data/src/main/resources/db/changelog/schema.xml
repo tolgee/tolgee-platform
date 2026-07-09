@@ -5627,6 +5627,325 @@
             <sql>DROP INDEX CONCURRENTLY IF EXISTS user_account_normalized_email;</sql>
         </rollback>
     </changeSet>
+    <changeSet author="jcizmar" id="1747180800000-1">
+        <createTable tableName="app_install">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="app_installPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="organization_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="author_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="manifest_url" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="app_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="base_url" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="manifest_json" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="jcizmar" id="1747180800000-2">
+        <addUniqueConstraint columnNames="organization_id, app_id"
+                             constraintName="app_install_organization_id_app_id_unique"
+                             tableName="app_install"/>
+    </changeSet>
+    <changeSet author="jcizmar" id="1747180800000-3">
+        <createIndex indexName="IDX_app_install_organization_id" tableName="app_install">
+            <column name="organization_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="jcizmar" id="1747180800000-4">
+        <createIndex indexName="IDX_app_install_author_id" tableName="app_install">
+            <column name="author_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="jcizmar" id="1747180800000-5">
+        <addForeignKeyConstraint baseColumnNames="organization_id"
+                                 baseTableName="app_install"
+                                 constraintName="FK_app_install_organization"
+                                 deferrable="false"
+                                 initiallyDeferred="false"
+                                 referencedColumnNames="id"
+                                 referencedTableName="organization"
+                                 validate="true"/>
+    </changeSet>
+    <changeSet author="jcizmar" id="1747180800000-6">
+        <addForeignKeyConstraint baseColumnNames="author_id"
+                                 baseTableName="app_install"
+                                 constraintName="FK_app_install_author"
+                                 deferrable="false"
+                                 initiallyDeferred="false"
+                                 referencedColumnNames="id"
+                                 referencedTableName="user_account"
+                                 validate="true"/>
+    </changeSet>
+    <changeSet author="jcizmar" id="1747180800000-7">
+        <createTable tableName="app_enabled_for_project">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="app_enabled_for_projectPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="app_install_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="project_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="author_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="jcizmar" id="1747180800000-8">
+        <addUniqueConstraint columnNames="app_install_id, project_id"
+                             constraintName="app_enabled_for_project_unique"
+                             tableName="app_enabled_for_project"/>
+    </changeSet>
+    <changeSet author="jcizmar" id="1747180800000-9">
+        <createIndex indexName="IDX_app_enabled_for_project_app_install_id" tableName="app_enabled_for_project">
+            <column name="app_install_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="jcizmar" id="1747180800000-10">
+        <createIndex indexName="IDX_app_enabled_for_project_project_id" tableName="app_enabled_for_project">
+            <column name="project_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="jcizmar" id="1747180800000-11">
+        <addForeignKeyConstraint baseColumnNames="app_install_id"
+                                 baseTableName="app_enabled_for_project"
+                                 constraintName="FK_app_enabled_for_project_app_install"
+                                 deferrable="false"
+                                 initiallyDeferred="false"
+                                 referencedColumnNames="id"
+                                 referencedTableName="app_install"
+                                 validate="true"/>
+    </changeSet>
+    <changeSet author="jcizmar" id="1747180800000-12">
+        <addForeignKeyConstraint baseColumnNames="project_id"
+                                 baseTableName="app_enabled_for_project"
+                                 constraintName="FK_app_enabled_for_project_project"
+                                 deferrable="false"
+                                 initiallyDeferred="false"
+                                 referencedColumnNames="id"
+                                 referencedTableName="project"
+                                 validate="true"/>
+    </changeSet>
+    <changeSet author="jcizmar" id="1747180800000-13">
+        <addForeignKeyConstraint baseColumnNames="author_id"
+                                 baseTableName="app_enabled_for_project"
+                                 constraintName="FK_app_enabled_for_project_author"
+                                 deferrable="false"
+                                 initiallyDeferred="false"
+                                 referencedColumnNames="id"
+                                 referencedTableName="user_account"
+                                 validate="true"/>
+    </changeSet>
+    <changeSet author="jcizmar" id="1747180800000-14">
+        <createTable tableName="app_install_granted_scope">
+            <column name="app_install_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="scope" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="jcizmar" id="1747180800000-15">
+        <addPrimaryKey columnNames="app_install_id, scope"
+                       constraintName="app_install_granted_scopePK"
+                       tableName="app_install_granted_scope"/>
+    </changeSet>
+    <changeSet author="jcizmar" id="1747180800000-16">
+        <addForeignKeyConstraint baseColumnNames="app_install_id"
+                                 baseTableName="app_install_granted_scope"
+                                 constraintName="FK_app_install_granted_scope_app_install"
+                                 deferrable="false"
+                                 initiallyDeferred="false"
+                                 referencedColumnNames="id"
+                                 referencedTableName="app_install"
+                                 onDelete="CASCADE"
+                                 validate="true"/>
+    </changeSet>
+    <changeSet author="jcizmar" id="1747267200000-1">
+        <addColumn tableName="app_install">
+            <column name="webhook_url" type="VARCHAR(2048)"/>
+            <column name="client_id" type="VARCHAR(64)"/>
+            <column name="client_secret_hash" type="VARCHAR(128)"/>
+            <column name="client_secret_prefix" type="VARCHAR(16)"/>
+            <column name="webhook_secret" type="VARCHAR(128)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jcizmar" id="1747267200000-2">
+        <addUniqueConstraint columnNames="client_id"
+                             constraintName="app_install_client_id_unique"
+                             tableName="app_install"/>
+        <addUniqueConstraint columnNames="client_secret_hash"
+                             constraintName="app_install_client_secret_hash_unique"
+                             tableName="app_install"/>
+    </changeSet>
+    <changeSet author="jcizmar" id="1747267200000-3">
+        <createTable tableName="app_install_webhook_subscription">
+            <column name="app_install_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="event" type="VARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="jcizmar" id="1747267200000-4">
+        <addPrimaryKey columnNames="app_install_id, event"
+                       constraintName="app_install_webhook_subscriptionPK"
+                       tableName="app_install_webhook_subscription"/>
+    </changeSet>
+    <changeSet author="jcizmar" id="1747267200000-5">
+        <addForeignKeyConstraint baseColumnNames="app_install_id"
+                                 baseTableName="app_install_webhook_subscription"
+                                 constraintName="FK_app_install_webhook_subscription_app_install"
+                                 deferrable="false"
+                                 initiallyDeferred="false"
+                                 referencedColumnNames="id"
+                                 referencedTableName="app_install"
+                                 onDelete="CASCADE"
+                                 validate="true"/>
+    </changeSet>
+    <changeSet author="jcizmar" id="1747267200000-6">
+        <addColumn tableName="webhook_config">
+            <column name="app_install_id" type="BIGINT"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jcizmar" id="1747267200000-7">
+        <createIndex indexName="IDX_webhook_config_app_install_id" tableName="webhook_config">
+            <column name="app_install_id"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="app_install_id"
+                                 baseTableName="webhook_config"
+                                 constraintName="FK_webhook_config_app_install"
+                                 deferrable="false"
+                                 initiallyDeferred="false"
+                                 referencedColumnNames="id"
+                                 referencedTableName="app_install"
+                                 onDelete="CASCADE"
+                                 validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1781105628176-3">
+        <dropPrimaryKey constraintName="app_install_granted_scopePK" tableName="app_install_granted_scope"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1781105628176-4">
+        <dropPrimaryKey constraintName="app_install_webhook_subscriptionPK" tableName="app_install_webhook_subscription"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1781105628176-1">
+        <modifyDataType columnName="event" newDataType="varchar(255)" tableName="app_install_webhook_subscription"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1781105628176-2">
+        <dropNotNullConstraint columnDataType="clob" columnName="manifest_json" tableName="app_install"/>
+    </changeSet>
+    <changeSet author="jancizmar" id="ai-match-stats-1-translation-ai-match">
+        <createTable tableName="translation_ai_match">
+            <column name="translation_id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="translation_ai_matchPK"/>
+            </column>
+            <column name="project_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="language_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="match_score" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="reviewed_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="word_count" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="prompt_id" type="BIGINT"/>
+            <column name="mt_provider" type="VARCHAR(255)"/>
+            <column name="prompt_version_ts" type="TIMESTAMP WITHOUT TIME ZONE"/>
+        </createTable>
+        <addForeignKeyConstraint
+                baseColumnNames="translation_id"
+                baseTableName="translation_ai_match"
+                constraintName="fk_translation_ai_match_translation"
+                referencedColumnNames="id"
+                referencedTableName="translation"
+                onDelete="CASCADE"/>
+        <createIndex indexName="ix_translation_ai_match_project_reviewed" tableName="translation_ai_match">
+            <column name="project_id"/>
+            <column name="reviewed_at"/>
+        </createIndex>
+        <createIndex indexName="ix_translation_ai_match_project_language" tableName="translation_ai_match">
+            <column name="project_id"/>
+            <column name="language_id"/>
+        </createIndex>
+        <createIndex indexName="ix_translation_ai_match_project_prompt" tableName="translation_ai_match">
+            <column name="project_id"/>
+            <column name="prompt_id"/>
+            <column name="prompt_version_ts"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="jancizmar" id="ai-match-stats-2-refresh-state">
+        <createTable tableName="ai_match_refresh_state">
+            <column name="project_id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="ai_match_refresh_statePK"/>
+            </column>
+            <column name="last_processed_activity_revision_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint
+                baseColumnNames="project_id"
+                baseTableName="ai_match_refresh_state"
+                constraintName="fk_ai_match_refresh_state_project"
+                referencedColumnNames="id"
+                referencedTableName="project"
+                onDelete="CASCADE"/>
+    </changeSet>
+    <changeSet author="jancizmar" id="ai-match-stats-3-activity-revision-project-id-idx" runInTransaction="false">
+        <comment>
+            Composite (project_id, id) index on activity_revision so the AI-match watermark scan
+            (AiMatchStatsProvider.getAffectedSince / getMaxRevisionId: project_id = ? AND id > ?
+            ORDER BY id) is an index range scan instead of fetching all of a project's revisions.
+            Matters for projects with millions of historical revisions where only a few are new.
+        </comment>
+        <sql dbms="postgresql">
+            CREATE INDEX CONCURRENTLY IF NOT EXISTS activity_revision_project_id_id
+                ON activity_revision (project_id, id);
+        </sql>
+        <rollback>
+            <sql>DROP INDEX CONCURRENTLY IF EXISTS activity_revision_project_id_id;</sql>
+        </rollback>
+    </changeSet>
 
     <changeSet author="dkrizan" id="user-account-normalize-username-casing-and-dedup">
         <comment>
