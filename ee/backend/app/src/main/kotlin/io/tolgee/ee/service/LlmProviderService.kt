@@ -28,7 +28,7 @@ import io.tolgee.repository.LlmProviderRepository
 import io.tolgee.service.LlmPropertiesService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.util.UrlSecurity
-import org.springframework.boot.web.client.RestTemplateBuilder
+import org.springframework.boot.restclient.RestTemplateBuilder
 import org.springframework.cache.Cache
 import org.springframework.cache.CacheManager
 import org.springframework.cache.set
