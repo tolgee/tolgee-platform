@@ -3,7 +3,6 @@ package io.tolgee.configuration
 import io.tolgee.component.ExceptionHandlerFilter
 import io.tolgee.component.TestClockHeaderFilter
 import io.tolgee.component.VersionFilter
-import org.springframework.boot.autoconfigure.security.SecurityProperties
 import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -13,7 +12,9 @@ class FiltersConfiguration {
   @Bean("filterRegistrationVersion")
   fun versionFilter(versionFilter: VersionFilter): FilterRegistrationBean<*> {
     val registration = FilterRegistrationBean(versionFilter)
-    registration.order = SecurityProperties.DEFAULT_FILTER_ORDER - 1
+    // Just before Spring Security's filter chain (its default order is -100;
+    // Boot 4 removed the SecurityProperties.DEFAULT_FILTER_ORDER constant).
+    registration.order = -101
     return registration
   }
 

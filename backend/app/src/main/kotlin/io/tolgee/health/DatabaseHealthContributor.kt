@@ -1,18 +1,15 @@
 package io.tolgee.health
 
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.actuate.health.Health
-import org.springframework.boot.actuate.health.HealthContributor
-import org.springframework.boot.actuate.health.HealthIndicator
+import org.springframework.boot.health.contributor.Health
+import org.springframework.boot.health.contributor.HealthIndicator
 import org.springframework.stereotype.Component
 import java.sql.SQLException
 import java.sql.Statement
 import javax.sql.DataSource
 
 @Component("Database")
-class DatabaseHealthContributor :
-  HealthIndicator,
-  HealthContributor {
+class DatabaseHealthContributor : HealthIndicator {
   @Autowired
   private lateinit var ds: DataSource
 

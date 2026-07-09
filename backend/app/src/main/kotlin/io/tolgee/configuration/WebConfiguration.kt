@@ -9,7 +9,7 @@ import io.tolgee.component.TestClockHeaderFilter
 import io.tolgee.component.VersionFilter
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import jakarta.servlet.MultipartConfigElement
-import org.springframework.boot.web.servlet.MultipartConfigFactory
+import org.springframework.boot.servlet.MultipartConfigFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
