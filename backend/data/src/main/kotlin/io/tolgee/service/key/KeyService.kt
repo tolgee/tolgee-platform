@@ -483,12 +483,12 @@ class KeyService(
     return keyRepository.findSoftDeletedByProjectId(projectId, branch, pageable)
   }
 
-  fun findSoftDeletedIdsBefore(
-    before: Date,
+  fun findSoftDeletedIdsDeletedBeforeAndIdAfter(
+    deletedBefore: Date,
     afterId: Long,
     pageable: Pageable,
   ): List<Long> {
-    return keyRepository.findSoftDeletedIdsBefore(before, afterId, pageable)
+    return keyRepository.findSoftDeletedIdsDeletedBeforeAndIdAfter(deletedBefore, afterId, pageable)
   }
 
   fun findSoftDeletedByIdsAndProjectId(

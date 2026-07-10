@@ -557,11 +557,11 @@ interface KeyRepository : JpaRepository<Key, Long> {
 
   @Query(
     "select k.id from Key k " +
-      "where k.deletedAt is not null and k.deletedAt < :before and k.id > :afterId " +
+      "where k.deletedAt is not null and k.deletedAt < :deletedBefore and k.id > :afterId " +
       "order by k.id",
   )
-  fun findSoftDeletedIdsBefore(
-    before: Date,
+  fun findSoftDeletedIdsDeletedBeforeAndIdAfter(
+    deletedBefore: Date,
     afterId: Long,
     pageable: Pageable,
   ): List<Long>

@@ -46,7 +46,7 @@ class KeyTrashPurgeScheduler(
     while (true) {
       val batch =
         executeInNewTransaction(transactionManager) {
-          keyService.findSoftDeletedIdsBefore(cutoffDate, afterId, PageRequest.of(0, BATCH_SIZE))
+          keyService.findSoftDeletedIdsDeletedBeforeAndIdAfter(cutoffDate, afterId, PageRequest.of(0, BATCH_SIZE))
         }
 
       if (batch.isEmpty()) break
