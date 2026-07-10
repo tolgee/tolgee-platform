@@ -485,9 +485,10 @@ class KeyService(
 
   fun findSoftDeletedIdsBefore(
     before: Date,
+    afterId: Long,
     pageable: Pageable,
-  ): Page<Long> {
-    return keyRepository.findSoftDeletedIdsBefore(before, pageable)
+  ): List<Long> {
+    return keyRepository.findSoftDeletedIdsBefore(before, afterId, pageable)
   }
 
   fun findSoftDeletedByIdsAndProjectId(
