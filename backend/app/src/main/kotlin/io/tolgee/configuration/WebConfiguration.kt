@@ -23,7 +23,7 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import tools.jackson.databind.DeserializationFeature
-import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.json.JsonMapper
 import tools.jackson.module.kotlin.jacksonMapperBuilder
 import java.security.SecureRandom
 import java.util.concurrent.TimeUnit
@@ -73,9 +73,11 @@ class WebConfiguration(
     return SecureRandom()
   }
 
+  // Declared as JsonMapper (not ObjectMapper) so Boot's @ConditionalOnMissingBean(JsonMapper)
+  // jacksonJsonMapper backs off, leaving this as the single primary mapper.
   @Bean
   @Primary
-  fun objectMapper(): ObjectMapper {
+  fun objectMapper(): JsonMapper {
     return jacksonMapperBuilder()
       .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
       .build()
