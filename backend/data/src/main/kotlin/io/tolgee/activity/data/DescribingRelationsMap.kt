@@ -13,7 +13,8 @@ import tools.jackson.databind.annotation.JsonDeserialize
 @JsonDeserialize(using = DescribingRelationsMapDeserializer::class)
 class DescribingRelationsMap(
   schema: NameSchema,
-) : CompactSharedMap<EntityDescriptionRef>(schema), Map<String, EntityDescriptionRef> {
+) : CompactSharedMap<EntityDescriptionRef>(schema),
+  Map<String, EntityDescriptionRef> {
   constructor() : this(NameSchema.anonymous())
   constructor(entityClass: String) : this(
     NameSchema.forEntityClass(entityClass, NameSchema.Companion.Scope.DESCRIBING_RELATIONS),
