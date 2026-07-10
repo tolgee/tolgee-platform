@@ -11,7 +11,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 @SpringBootApplication(
   scanBasePackages = ["io.tolgee"],
 )
-@EnableJpaAuditing
+@EnableJpaAuditing(dateTimeProviderRef = "currentDateProvider")
 @EntityScan("io.tolgee.model")
 @ConfigurationPropertiesScan
 @EnableJpaRepositories("io.tolgee.repository")
