@@ -197,6 +197,8 @@ class ImportService(
     val dataManager = ImportDataManager(applicationContext, import)
     file.namespace = getSafeNamespace(namespace)
     importFileRepository.save(file)
+    val settings = importSettingsService.get(import.author, projectId)
+    dataManager.applyKeyCreateChange(settings.createNewKeys)
     file.languages.forEach {
       dataManager.resetLanguage(it)
       dataManager.resetCollisionsBetweenFiles(it, null)
