@@ -1,18 +1,20 @@
 package io.tolgee.configuration
 
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Lazy
 import org.springframework.http.MediaType
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
+import org.springframework.http.converter.HttpMessageConverter
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
 @Configuration
-@Lazy(false)
-class OctetStreamSupportConfiguration(
-  converter: MappingJackson2HttpMessageConverter,
-) {
-  init {
-    val supportedMediaTypes = converter.supportedMediaTypes.toMutableList()
-    supportedMediaTypes.add(MediaType("application", "octet-stream"))
-    converter.supportedMediaTypes = supportedMediaTypes
+class OctetStreamSupportConfiguration : WebMvcConfigurer {
+  override fun extendMessageConverters(converters: MutableList<HttpMessageConverter<*>>) {
+    converters
+      .filterIsInstance<JacksonJsonHttpMessageConverter>()
+      .forEach { converter ->
+        val supportedMediaTypes = converter.supportedMediaTypes.toMutableList()
+        supportedMediaTypes.add(MediaType("application", "octet-stream"))
+        converter.supportedMediaTypes = supportedMediaTypes
+      }
   }
 }
