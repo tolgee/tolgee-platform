@@ -88,4 +88,31 @@ export class E2TranslationsView {
     gcy('glossary-panel-container').should('exist');
     return new E2GlossaryPanel();
   }
+
+  getSearchField() {
+    return gcy('global-search-field').find('.cm-content');
+  }
+
+  getKeyCell(key: string) {
+    return gcyAdvanced({ value: 'translations-table-cell', key });
+  }
+
+  searchFor(query: string) {
+    this.getSearchField().type(query);
+    return this;
+  }
+
+  clearSearchWithButton() {
+    gcy('global-search-field-clear').click();
+    return this;
+  }
+
+  getSearchSuggestions() {
+    return cy.get('.cm-tooltip-autocomplete');
+  }
+
+  getSearchHelp() {
+    gcy('translations-search-help-button').click();
+    return gcy('translations-search-help-popover');
+  }
 }
