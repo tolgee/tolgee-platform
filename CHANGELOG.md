@@ -1,3 +1,10 @@
+## [3.211.1](https://github.com/tolgee/tolgee-platform/compare/v3.211.0...v3.211.1) (2026-07-10)
+
+
+### Bug Fixes
+
+* recompute importable keys when import file namespace changes ([#3796](https://github.com/tolgee/tolgee-platform/issues/3796)) ([2337b86](https://github.com/tolgee/tolgee-platform/commit/2337b866b11906a4ca375d0afc5c117e77c971ba))
+
 # [3.211.0](https://github.com/tolgee/tolgee-platform/compare/v3.210.0...v3.211.0) (2026-07-10)
 
 
