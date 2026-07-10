@@ -61,7 +61,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
 
   @Query(
     """
-    from Key k
+    select k from Key k
     left join k.namespace ns
     left join k.branch br
     where
@@ -103,7 +103,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
 
   @Query(
     """
-      from Key k
+      select k from Key k
         left join k.branch b
         left join fetch k.namespace
         left join fetch k.keyMeta
@@ -363,7 +363,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
 
   @Query(
     """
-    from Language l
+    select l from Language l
     join l.translations t
     where t.key.id = :keyId
       and l.project.id = :projectId

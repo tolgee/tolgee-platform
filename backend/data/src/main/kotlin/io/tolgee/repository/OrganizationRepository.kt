@@ -119,7 +119,7 @@ interface OrganizationRepository : JpaRepository<Organization, Long> {
 
   @Query(
     """
-    from Organization o 
+    select o from Organization o 
     join o.memberRoles mr on mr.user = :user
     join mr.user u
     where o.name = u.name and mr.type = 1 and o.deletedAt is null
@@ -184,7 +184,7 @@ interface OrganizationRepository : JpaRepository<Organization, Long> {
 
   @Query(
     """
-    from Organization o 
+    select o from Organization o 
     join o.projects p on p.id = :projectId and p.deletedAt is null
     join fetch o.basePermission
     where o.deletedAt is null

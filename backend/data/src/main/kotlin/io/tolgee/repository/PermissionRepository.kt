@@ -79,7 +79,7 @@ interface PermissionRepository : JpaRepository<Permission, Long> {
 
   @Query(
     """
-    from Permission p 
+    select p from Permission p 
     join p.project pr
     join pr.organizationOwner oo on oo.id = :organizationId 
     where p.user.id = :userId
