@@ -232,9 +232,21 @@ class TranslationSuggestionServiceEeImpl(
     translationSuggestionRepository.deleteAll(suggestions)
   }
 
+  override fun deleteAllByKeyIds(keyIds: Collection<Long>) {
+    keyIds.chunked(IN_CLAUSE_BATCH_SIZE).forEach { chunk ->
+      val suggestions = translationSuggestionRepository.getAllByKeyIds(chunk)
+      translationSuggestionRepository.deleteAll(suggestions)
+    }
+  }
+
   private fun checkSuggestionValid(text: String) {
     if (text.length > tolgeeProperties.maxTranslationTextLength) {
       throw BadRequestException(Message.TRANSLATION_TEXT_TOO_LONG, listOf(tolgeeProperties.maxTranslationTextLength))
     }
+  }
+
+  companion object {
+    // Keep the "in :keyIds" bind list well under PostgreSQL's 65535 prepared-statement parameter limit.
+    private const val IN_CLAUSE_BATCH_SIZE = 30_000
   }
 }

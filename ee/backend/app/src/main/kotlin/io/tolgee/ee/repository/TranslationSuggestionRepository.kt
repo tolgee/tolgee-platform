@@ -133,4 +133,12 @@ interface TranslationSuggestionRepository : JpaRepository<TranslationSuggestion,
     """,
   )
   fun getAllByProject(id: Long): List<TranslationSuggestion>
+
+  @Query(
+    """
+      from TranslationSuggestion ts
+      where ts.key.id in :keyIds
+    """,
+  )
+  fun getAllByKeyIds(keyIds: Collection<Long>): List<TranslationSuggestion>
 }

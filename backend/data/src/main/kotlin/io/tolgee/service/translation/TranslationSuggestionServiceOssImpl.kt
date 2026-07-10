@@ -20,4 +20,8 @@ class TranslationSuggestionServiceOssImpl : TranslationSuggestionService {
   override fun deleteAllByProject(id: Long) {
     // doing nothing
   }
+
+  override fun deleteAllByKeyIds(keyIds: Collection<Long>) {
+    // doing nothing
+  }
 }

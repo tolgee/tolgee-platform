@@ -41,6 +41,17 @@ class KeyTrashPurgeSchedulerTest : AbstractSpringTest() {
               text = "Key 3"
             }
           }
+          addKey { name = "keyWithSuggestion" }.build {
+            addTranslation {
+              language = englishLanguage
+              text = "Key with suggestion"
+            }
+            addSuggestion {
+              language = englishLanguage
+              author = user
+              translation = "Suggested translation"
+            }
+          }
         }
       }
     executeInNewTransaction {
@@ -81,6 +92,28 @@ class KeyTrashPurgeSchedulerTest : AbstractSpringTest() {
         .isFalse()
       keyService
         .findOptional(key2Id)
+        .isPresent.assert
+        .isFalse()
+    }
+  }
+
+  @Test
+  fun `purges keys that have translation suggestions`() {
+    val keyId =
+      testData.projectBuilder.data.keys[3]
+        .self.id
+
+    executeInNewTransaction {
+      keyService.softDeleteMultiple(listOf(keyId), deletedBy = testData.user)
+    }
+
+    moveCurrentDate(Duration.ofDays(8))
+
+    keyTrashPurgeScheduler.purge()
+
+    executeInNewTransaction {
+      keyService
+        .findOptional(keyId)
         .isPresent.assert
         .isFalse()
     }
