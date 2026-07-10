@@ -63,7 +63,7 @@ interface LanguageStatsRepository : JpaRepository<LanguageStats, Long> {
 
   @Query(
     """
-    from LanguageStats ls
+    select ls from LanguageStats ls
     join fetch ls.language l
     join fetch l.project
     left join ls.branch b
