@@ -36,7 +36,7 @@ class WebhookExecutor(
     val fullyEncoded =
       config.url.contains("%") &&
         Regex("%(?![0-9A-Fa-f]{2})").find(config.url) == null
-    val uri = UriComponentsBuilder.fromUriString(config.url).build(fullyEncoded)
+    val uri = UriComponentsBuilder.fromUriString(config.url).build(fullyEncoded).toUri()
     
     try {
       val responseEntity: ResponseEntity<String> =
