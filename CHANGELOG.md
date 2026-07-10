@@ -1,3 +1,10 @@
+# [3.211.0](https://github.com/tolgee/tolgee-platform/compare/v3.210.0...v3.211.0) (2026-07-10)
+
+
+### Features
+
+* add escapeJson helper for custom AI prompts ([#3799](https://github.com/tolgee/tolgee-platform/issues/3799)) ([63991d4](https://github.com/tolgee/tolgee-platform/commit/63991d49563f76609822bf8cbfcae8b16dd4ea66)), closes [#3683](https://github.com/tolgee/tolgee-platform/issues/3683)
+
 # [3.210.0](https://github.com/tolgee/tolgee-platform/compare/v3.209.6...v3.210.0) (2026-07-10)
 
 
