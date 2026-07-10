@@ -1,3 +1,10 @@
+# [3.210.0](https://github.com/tolgee/tolgee-platform/compare/v3.209.6...v3.210.0) (2026-07-10)
+
+
+### Features
+
+* scoped search query language in translations view ([#3794](https://github.com/tolgee/tolgee-platform/issues/3794)) ([0623ea1](https://github.com/tolgee/tolgee-platform/commit/0623ea1d4e8a4eef4793c966401597db940523db))
+
 ## [3.209.6](https://github.com/tolgee/tolgee-platform/compare/v3.209.5...v3.209.6) (2026-07-09)
 
 
