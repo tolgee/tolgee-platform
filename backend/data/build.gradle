@@ -127,6 +127,9 @@ dependencies {
      * Liquibase
      */
     implementation libs.liquibaseCore
+    // Boot 4 split Liquibase auto-configuration into this module; it registers the
+    // EntityManagerFactory depends-on that makes our SpringLiquibase beans run before the EMF.
+    implementation 'org.springframework.boot:spring-boot-liquibase'
     liquibaseRuntime libs.liquibaseCore
     liquibaseRuntime libs.jacksonModuleKotlin
     liquibaseRuntime libs.liquibasePicoli
