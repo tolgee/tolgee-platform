@@ -2,6 +2,7 @@ package io.tolgee.util
 
 import io.tolgee.fixtures.AuthorizedRequestFactory
 import org.springframework.core.io.Resource
+import org.springframework.http.MediaType
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.mock.web.MockPart
 import org.springframework.test.web.servlet.MockMvc
@@ -38,6 +39,7 @@ fun performSingleStepImport(
   projectId: Long,
   files: List<Pair<String, Resource>>?,
   params: Map<String, Any?> = mapOf(),
+  paramsContentType: MediaType? = null,
 ): ResultActions {
   val builder =
     MockMvcRequestBuilders
@@ -54,7 +56,9 @@ fun performSingleStepImport(
     )
   }
 
-  builder.part(MockPart("params", jacksonObjectMapper().writeValueAsBytes(params)))
+  val paramsPart = MockPart("params", jacksonObjectMapper().writeValueAsBytes(params))
+  paramsContentType?.let { paramsPart.headers.contentType = it }
+  builder.part(paramsPart)
 
   return mvc.perform(AuthorizedRequestFactory.addToken(builder))
 }
