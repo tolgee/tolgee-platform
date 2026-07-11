@@ -77,13 +77,14 @@ class ActivityService(
     jdbcTemplate.batchUpdate(
       "INSERT INTO activity_modified_entity " +
         "(entity_class, entity_id, describing_data, " +
-        "describing_relations, modifications, revision_type, activity_revision_id, branch_id, additional_description) " +
+        "describing_relations, modifications, revision_type, activity_revision_id, branch_id, " +
+        "additional_description) " +
         "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
       list,
       1000,
-    ) { ps, (entityInstance, modifiedEntity) ->
-      // the entity id can be null in some cases (probably when the id it's not allocated in batch)
-      val entityId = if (modifiedEntity.entityId == 0L) entityInstance.id else modifiedEntity.entityId
+    ) { ps, entry ->
+      val modifiedEntity = entry.value
+      val entityId = entry.resolvedEntityId
       ps.setString(1, modifiedEntity.entityClass)
       ps.setLong(2, entityId)
       ps.setObject(3, getJsonbObject(modifiedEntity.describingData))

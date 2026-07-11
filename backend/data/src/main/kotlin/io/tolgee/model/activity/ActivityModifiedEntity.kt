@@ -37,10 +37,11 @@ class ActivityModifiedEntity(
   @Id
   val entityClass: String,
   /**
-   * ID of the modified entity
+   * ID of the modified entity. Can be recorded before the entity's id is allocated;
+   * the interceptor sets the real id as soon as it's known.
    */
   @Id
-  val entityId: Long,
+  var entityId: Long,
 ) : Serializable,
   ActivityEntityWithDescription {
   @Column(name = "branch_id")

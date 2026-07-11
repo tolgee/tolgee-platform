@@ -1,6 +1,6 @@
 package io.tolgee.activity.groups
 
-import java.util.*
+import java.util.Date
 
 data class ActivityGroupDto(
   val id: Long,

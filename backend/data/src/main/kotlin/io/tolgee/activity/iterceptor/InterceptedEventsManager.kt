@@ -34,7 +34,6 @@ import org.springframework.beans.factory.config.BeanDefinition.SCOPE_SINGLETON
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
-import java.util.IdentityHashMap
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KCallable
 import kotlin.reflect.KProperty
@@ -202,18 +201,24 @@ class InterceptedEventsManager(
     revisionType: RevisionType,
     state: Array<out Any>? = null,
   ): ActivityModifiedEntity {
+    val classMap = activityHolder.modifiedEntities.computeIfAbsent(entity::class) { mutableMapOf() }
+    if (entity.id != 0L) {
+      // the entity may have been recorded before its id was allocated
+      classMap.remove(entity)?.let {
+        it.entityId = entity.id
+        classMap.putIfAbsent(entity.id, it)
+      }
+    }
     val activityModifiedEntity =
-      activityHolder.modifiedEntities
-        .computeIfAbsent(entity::class) { IdentityHashMap() }
-        .computeIfAbsent(
-          entity,
-        ) {
-          ActivityModifiedEntity(
-            activityRevision,
-            entity::class.simpleName!!,
-            entity.id,
-          ).also { it.revisionType = revisionType }
-        }
+      classMap.computeIfAbsent(
+        if (entity.id != 0L) entity.id else entity,
+      ) {
+        ActivityModifiedEntity(
+          activityRevision,
+          entity::class.simpleName!!,
+          entity.id,
+        ).also { it.revisionType = revisionType }
+      }
 
     activityModifiedEntity.branchId = resolveBranchId(entity, revisionType, state)
 

@@ -10,7 +10,6 @@ import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
 import jakarta.annotation.PreDestroy
 import org.springframework.context.ApplicationContext
-import java.util.IdentityHashMap
 import kotlin.reflect.KClass
 
 open class ActivityHolder(
@@ -98,4 +97,21 @@ open class ActivityHolder(
   }
 }
 
-typealias ModifiedEntitiesType = MutableMap<KClass<out EntityWithId>, IdentityHashMap<EntityWithId, ActivityModifiedEntity>>
+/**
+ * Inner map key is the entity id when it's already allocated, otherwise the entity
+ * instance itself (some ids are only assigned later in the transaction). Keying purely
+ * by instance would record the same row twice when Hibernate yields multiple instances
+ * of it in one transaction (e.g. after an entityManager.clear()).
+ */
+typealias ModifiedEntitiesType =
+  MutableMap<KClass<out EntityWithId>, MutableMap<Any, ActivityModifiedEntity>>
+
+val Map.Entry<Any, ActivityModifiedEntity>.resolvedEntityId: Long
+  get() {
+    val key = key
+    return when {
+      key is Long -> key
+      key is EntityWithId && key.id != 0L -> key.id
+      else -> value.entityId
+    }
+  }

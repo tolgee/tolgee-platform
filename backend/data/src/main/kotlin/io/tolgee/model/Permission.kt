@@ -24,6 +24,7 @@ import jakarta.persistence.OneToOne
 import jakarta.persistence.PrePersist
 import jakarta.persistence.PreUpdate
 import jakarta.persistence.Table
+import jakarta.persistence.Transient
 import org.hibernate.Hibernate
 import org.hibernate.annotations.Parameter
 import org.hibernate.annotations.Type

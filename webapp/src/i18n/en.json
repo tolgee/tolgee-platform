@@ -1925,6 +1925,7 @@
   "project_dashboard_strings_count_plural": "{value, plural, one {String} other {Strings}}",
   "project_dashboard_tag_count_plural": "{value, plural, one {Tag} other {Tags}}",
   "project_dashboard_task_count_plural": "{value, plural, one {Task} other {Tasks}}",
+  "project_activity_title": "Project Activity",
   "project_dashboard_title": "Project Dashboard",
   "project_dashboard_translated_percent": "Translated",
   "project_dashboard_translations_less_then_1_percent": "< 1%",

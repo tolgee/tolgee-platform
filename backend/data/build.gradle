@@ -138,6 +138,7 @@ dependencies {
     liquibaseRuntime libs.kotlinReflect
     liquibaseRuntime sourceSets.main.output
     liquibaseRuntime 'org.springframework.boot:spring-boot-starter-data-jpa'
+    liquibaseRuntime libs.springJooq
 
     /**
      * Testing

@@ -19,7 +19,7 @@ export const ActivityView = () => {
   });
 
   return (
-    <BaseProjectView windowTitle={t('project-activity-title')}>
+    <BaseProjectView windowTitle={t('project_activity_title')}>
       <ProjectLanguagesProvider>
         <PaginatedHateoasList
           loadable={groupsLoadable}

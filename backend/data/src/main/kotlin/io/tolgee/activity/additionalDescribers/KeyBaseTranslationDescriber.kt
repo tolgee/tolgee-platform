@@ -3,6 +3,7 @@ package io.tolgee.activity.additionalDescribers
 import io.tolgee.activity.ActivityAdditionalDescriber
 import io.tolgee.activity.ModifiedEntitiesType
 import io.tolgee.activity.data.RevisionType
+import io.tolgee.activity.resolvedEntityId
 import io.tolgee.model.activity.ActivityDescribingEntity
 import io.tolgee.model.activity.ActivityEntityWithDescription
 import io.tolgee.model.activity.ActivityModifiedEntity
@@ -29,8 +30,9 @@ class KeyBaseTranslationDescriber(
     val toDescribe = getToDescribe(activityRevision, modifiedEntities)
     val newKeyIds =
       modifiedEntities[Key::class]
+        ?.entries
         ?.mapNotNull {
-          if (it.value.revisionType == RevisionType.ADD) it.key.id else null
+          if (it.value.revisionType == RevisionType.ADD) it.resolvedEntityId else null
         }?.toSet() ?: emptySet()
 
     toDescribe.removeIf { (id, entity) ->
@@ -74,7 +76,8 @@ class KeyBaseTranslationDescriber(
         it.entityId to it
       }
 
-    val modifiedEntities = allModifiedEntities[Key::class]?.map { it.key.id to it.value } ?: emptyList()
+    val modifiedEntities =
+      allModifiedEntities[Key::class]?.entries?.map { it.resolvedEntityId to it.value } ?: emptyList()
 
     return (describingRelations + modifiedEntities).toMutableList()
   }
