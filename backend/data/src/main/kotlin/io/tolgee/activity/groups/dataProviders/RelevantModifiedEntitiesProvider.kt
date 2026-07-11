@@ -46,18 +46,20 @@ class RelevantModifiedEntitiesProvider(
       .from(activityModifiedEntityTable)
       .join(activityRevisionTable)
       .on(
-        DSL.field("ame.activity_revision_id", Long::class.java)
+        DSL
+          .field("ame.activity_revision_id", Long::class.java)
           .eq(DSL.field("ar.id", Long::class.java)),
-      )
-      .join(activityRevisionActivityGroupsTable)
+      ).join(activityRevisionActivityGroupsTable)
       .on(
-        DSL.field("ar.id", Long::class.java)
+        DSL
+          .field("ar.id", Long::class.java)
           .eq(DSL.field("arag.activity_revisions_id", Long::class.java)),
-      )
-      .where(
-        DSL.and(entityClassField.`in`(entityClasses)).and(
-          groupType.matcher?.match(sqlContext),
-        ).and(additionalFilter?.let { it(sqlContext) } ?: DSL.noCondition()),
+      ).where(
+        DSL
+          .and(entityClassField.`in`(entityClasses))
+          .and(
+            groupType.matcher?.match(sqlContext),
+          ).and(additionalFilter?.let { it(sqlContext) } ?: DSL.noCondition()),
       )
 
   private fun getDataQuery() =

@@ -1,6 +1,6 @@
 package io.tolgee.activity.groups
 
-import com.posthog.java.PostHog
+import com.posthog.server.PostHog
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.batch.BatchJobService
 import io.tolgee.development.testDataBuilder.data.BaseTestData
@@ -18,13 +18,11 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.MockBean
 import java.time.Duration
 
 class ActivityGroupsCreationTest : ProjectAuthControllerTest("/v2/projects/") {
   private lateinit var testData: BaseTestData
 
-  @MockBean
   @Autowired
   lateinit var postHog: PostHog
 
@@ -137,16 +135,17 @@ class ActivityGroupsCreationTest : ProjectAuthControllerTest("/v2/projects/") {
       val activityRevision = findLastActivityRevision()
       val groups = getActivityGroupsForRevision(activityRevision)
       val group = groups.single()
-      entityManager.createQuery(
-        """
+      entityManager
+        .createQuery(
+          """
         select count(ar) from ActivityRevision ar
         join ar.activityGroups ag
         where ag.id = :groupId
       """,
-      )
-        .setParameter("groupId", group.id)
+        ).setParameter("groupId", group.id)
         .singleResult
-        .assert.isEqualTo(count.toLong())
+        .assert
+        .isEqualTo(count.toLong())
     }
   }
 
@@ -162,7 +161,10 @@ class ActivityGroupsCreationTest : ProjectAuthControllerTest("/v2/projects/") {
     executeInNewTransaction {
       val activityRevision = findLastActivityRevision()
       val groups = getActivityGroupsForRevision(activityRevision)
-      groups.single().type.assert.isEqualTo(activityGroupType)
+      groups
+        .single()
+        .type.assert
+        .isEqualTo(activityGroupType)
     }
   }
 
@@ -172,10 +174,12 @@ class ActivityGroupsCreationTest : ProjectAuthControllerTest("/v2/projects/") {
       val groups = getActivityGroupsForRevision(activityRevision)
       val group = groups.single()
       val modifiedEntities = getModifiedEntitiesForGroup(group)
-      modifiedEntities.filter { it.entityClass == Translation::class.simpleName }
+      modifiedEntities
+        .filter { it.entityClass == Translation::class.simpleName }
         .last()
         .modifications["text"]!!
-        .new.assert.isEqualTo(value)
+        .new.assert
+        .isEqualTo(value)
     }
   }
 
@@ -187,39 +191,42 @@ class ActivityGroupsCreationTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   private fun findLastActivityRevision(): ActivityRevision {
-    return entityManager.createQuery(
-      """
+    return entityManager
+      .createQuery(
+        """
       select ar from ActivityRevision ar
       order by ar.timestamp desc
       limit 1
     """,
-      ActivityRevision::class.java,
-    ).singleResult
+        ActivityRevision::class.java,
+      ).singleResult
   }
 
   private fun getActivityGroupsForRevision(activityRevision: ActivityRevision): MutableList<ActivityGroup> {
-    return entityManager.createQuery(
-      """
+    return entityManager
+      .createQuery(
+        """
       select ag from ActivityGroup ag
       join fetch ag.activityRevisions ar
       where ar.id = :activityRevisionId
     """,
-      ActivityGroup::class.java,
-    ).setParameter("activityRevisionId", activityRevision.id)
+        ActivityGroup::class.java,
+      ).setParameter("activityRevisionId", activityRevision.id)
       .resultList
   }
 
   private fun getModifiedEntitiesForGroup(group: ActivityGroup): MutableList<ActivityModifiedEntity> {
-    return entityManager.createQuery(
-      """
+    return entityManager
+      .createQuery(
+        """
       select ame from ActivityModifiedEntity ame
       join fetch ame.activityRevision ar
       join fetch ar.activityGroups ag
       where ag.id = :groupId
       order by ar.timestamp
     """,
-      ActivityModifiedEntity::class.java,
-    ).setParameter("groupId", group.id)
+        ActivityModifiedEntity::class.java,
+      ).setParameter("groupId", group.id)
       .resultList
   }
 }

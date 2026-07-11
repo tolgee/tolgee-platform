@@ -94,14 +94,14 @@ class ModifiedEntitiesViewProvider(
             },
           ),
         )
-      }
-      ?.toMap()
+      }?.toMap()
   }
 
   private fun fetchAllowedRevisionRelations(): Map<Long, List<ActivityDescribingEntity>> {
     val revisionIds = modifiedEntities.map { it.activityRevision.id }
     val allowedTypes = ActivityType.entries.filter { !it.onlyCountsInList }
-    return activityRevisionRepository.getRelationsForRevisions(revisionIds, allowedTypes)
+    return activityRevisionRepository
+      .getRelationsForRevisions(revisionIds, allowedTypes)
       .groupBy { it.activityRevision.id }
   }
 
@@ -126,8 +126,7 @@ class ModifiedEntitiesViewProvider(
           return@mapNotNull (entityClassName to ids.map { it to existingIds.contains(it) })
         }
         return@mapNotNull null
-      }
-      .flatMap { (entityClassName, existingIds) -> existingIds.map { (entityClassName to it.first) to it.second } }
+      }.flatMap { (entityClassName, existingIds) -> existingIds.map { (entityClassName to it.first) to it.second } }
       .toMap()
   }
 
@@ -138,7 +137,8 @@ class ModifiedEntitiesViewProvider(
     val entity = describingEntities.find { it.entityClass == value.entityClass && it.entityId == value.entityId }
 
     val relations =
-      entity?.describingRelations
+      entity
+        ?.describingRelations
         ?.map { it.key to extractCompressedRef(it.value, describingEntities) }
         ?.toMap()
 

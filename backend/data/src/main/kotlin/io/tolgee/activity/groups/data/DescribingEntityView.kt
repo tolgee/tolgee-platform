@@ -8,6 +8,7 @@ class DescribingEntityView(
   val data: Map<String, Any?>,
   val describingRelations: Map<String, EntityDescriptionRef?>,
   override val activityRevisionId: Long,
+  override val additionalDescription: Map<String, Any?>? = null,
 ) : ActivityEntityView {
   inline fun <reified T> getFieldFromViewNullable(name: String): T? {
     return this.data[name] as? T

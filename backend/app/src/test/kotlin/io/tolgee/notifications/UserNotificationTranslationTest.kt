@@ -16,7 +16,7 @@
 
 package io.tolgee.notifications
 
-import io.tolgee.development.testDataBuilder.data.NotificationsTestData
+import io.tolgee.development.testDataBuilder.data.UserNotificationsTestData
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.fixtures.andIsCreated
@@ -26,11 +26,11 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class UserNotificationTranslationTest : AbstractNotificationTest() {
-  lateinit var testData: NotificationsTestData
+  lateinit var testData: UserNotificationsTestData
 
   @BeforeEach
   override fun setupTests() {
-    testData = NotificationsTestData()
+    testData = UserNotificationsTestData()
     testDataService.saveTestData(testData.root)
 
     super.setupTests()
@@ -49,7 +49,9 @@ class UserNotificationTranslationTest : AbstractNotificationTest() {
 
     waitUntilUserNotificationDispatch()
 
-    userNotificationRepository.findAllByRecipient(testData.alice).assert
+    userNotificationRepository
+      .findAllByRecipient(testData.alice)
+      .assert
       .satisfiesOnlyOnce { it.type.assert.isEqualTo(NotificationType.ACTIVITY_SOURCE_STRINGS_UPDATED) }
       .noneSatisfy { it.type.assert.isEqualTo(NotificationType.ACTIVITY_TRANSLATIONS_UPDATED) }
 
@@ -64,7 +66,9 @@ class UserNotificationTranslationTest : AbstractNotificationTest() {
 
     waitUntilUserNotificationDispatch()
 
-    userNotificationRepository.findAllByRecipient(testData.alice).assert
+    userNotificationRepository
+      .findAllByRecipient(testData.alice)
+      .assert
       .satisfiesOnlyOnce { it.type.assert.isEqualTo(NotificationType.ACTIVITY_SOURCE_STRINGS_UPDATED) }
       .satisfiesOnlyOnce { it.type.assert.isEqualTo(NotificationType.ACTIVITY_TRANSLATIONS_UPDATED) }
   }
@@ -105,7 +109,9 @@ class UserNotificationTranslationTest : AbstractNotificationTest() {
 
     waitUntilUserNotificationDispatch()
 
-    userNotificationRepository.findAllByRecipient(testData.alice).assert
+    userNotificationRepository
+      .findAllByRecipient(testData.alice)
+      .assert
       .noneMatch { it.type == NotificationType.ACTIVITY_TRANSLATION_OUTDATED }
       .noneMatch { it.type == NotificationType.ACTIVITY_TRANSLATIONS_UPDATED }
   }

@@ -16,24 +16,24 @@
 
 package io.tolgee.notifications
 
-import io.tolgee.development.testDataBuilder.data.NotificationsTestData
+import io.tolgee.development.testDataBuilder.data.UserNotificationsTestData
 import io.tolgee.dtos.request.key.ComplexEditKeyDto
 import io.tolgee.dtos.request.key.KeyScreenshotDto
 import io.tolgee.fixtures.andGetContentAsJsonMap
 import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.generateImage
 import io.tolgee.testing.assert
-import io.tolgee.util.generateImage
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.mock.web.MockMultipartFile
 
 class RemappedNotificationsTest : AbstractNotificationTest() {
-  lateinit var testData: NotificationsTestData
+  lateinit var testData: UserNotificationsTestData
 
   @BeforeEach
   override fun setupTests() {
-    testData = NotificationsTestData()
+    testData = UserNotificationsTestData()
     testDataService.saveTestData(testData.root)
 
     super.setupTests()
@@ -91,8 +91,7 @@ class RemappedNotificationsTest : AbstractNotificationTest() {
       .satisfiesOnlyOnce {
         it.type.assert.isEqualTo(NotificationType.ACTIVITY_TRANSLATIONS_UPDATED)
         it.modifiedEntities.assert.hasSize(1)
-      }
-      .satisfiesOnlyOnce {
+      }.satisfiesOnlyOnce {
         it.type.assert.isEqualTo(NotificationType.ACTIVITY_KEYS_CREATED)
         it.modifiedEntities.assert.hasSize(8) // 2 keys + 6 translations
       }
@@ -102,8 +101,7 @@ class RemappedNotificationsTest : AbstractNotificationTest() {
       .satisfiesOnlyOnce {
         it.type.assert.isEqualTo(NotificationType.ACTIVITY_TRANSLATIONS_UPDATED)
         it.modifiedEntities.assert.hasSize(1)
-      }
-      .satisfiesOnlyOnce {
+      }.satisfiesOnlyOnce {
         it.type.assert.isEqualTo(NotificationType.ACTIVITY_KEYS_CREATED)
         it.modifiedEntities.assert.hasSize(8) // 2 keys + 6 translations
       }
@@ -113,8 +111,7 @@ class RemappedNotificationsTest : AbstractNotificationTest() {
       .satisfiesOnlyOnce {
         it.type.assert.isEqualTo(NotificationType.ACTIVITY_TRANSLATIONS_UPDATED)
         it.modifiedEntities.assert.hasSize(1)
-      }
-      .satisfiesOnlyOnce {
+      }.satisfiesOnlyOnce {
         it.type.assert.isEqualTo(NotificationType.ACTIVITY_KEYS_CREATED)
         it.modifiedEntities.assert.hasSize(6) // 2 keys + 4 translations
       }
@@ -140,8 +137,7 @@ class RemappedNotificationsTest : AbstractNotificationTest() {
       .satisfiesOnlyOnce {
         it.type.assert.isEqualTo(NotificationType.ACTIVITY_TRANSLATIONS_UPDATED)
         it.modifiedEntities.assert.hasSize(1)
-      }
-      .satisfiesOnlyOnce {
+      }.satisfiesOnlyOnce {
         it.type.assert.isEqualTo(NotificationType.ACTIVITY_KEYS_CREATED)
         it.modifiedEntities.assert.hasSize(8) // 2 keys + 6 translations
       }
@@ -151,8 +147,7 @@ class RemappedNotificationsTest : AbstractNotificationTest() {
       .satisfiesOnlyOnce {
         it.type.assert.isEqualTo(NotificationType.ACTIVITY_TRANSLATIONS_UPDATED)
         it.modifiedEntities.assert.hasSize(1)
-      }
-      .satisfiesOnlyOnce {
+      }.satisfiesOnlyOnce {
         it.type.assert.isEqualTo(NotificationType.ACTIVITY_KEYS_CREATED)
         it.modifiedEntities.assert.hasSize(8) // 2 keys + 6 translations
       }
@@ -204,15 +199,12 @@ class RemappedNotificationsTest : AbstractNotificationTest() {
       .hasSize(4)
       .satisfiesOnlyOnce {
         it.type.assert.isEqualTo(NotificationType.ACTIVITY_KEYS_UPDATED)
-      }
-      .satisfiesOnlyOnce {
+      }.satisfiesOnlyOnce {
         it.type.assert.isEqualTo(NotificationType.ACTIVITY_KEYS_SCREENSHOTS_UPLOADED)
-      }
-      .satisfiesOnlyOnce {
+      }.satisfiesOnlyOnce {
         it.type.assert.isEqualTo(NotificationType.ACTIVITY_SOURCE_STRINGS_UPDATED)
         it.modifiedEntities.assert.hasSize(1)
-      }
-      .satisfiesOnlyOnce {
+      }.satisfiesOnlyOnce {
         it.type.assert.isEqualTo(NotificationType.ACTIVITY_TRANSLATIONS_UPDATED)
         it.modifiedEntities.assert.hasSize(1)
       }
@@ -221,11 +213,9 @@ class RemappedNotificationsTest : AbstractNotificationTest() {
       .hasSize(3)
       .satisfiesOnlyOnce {
         it.type.assert.isEqualTo(NotificationType.ACTIVITY_KEYS_UPDATED)
-      }
-      .satisfiesOnlyOnce {
+      }.satisfiesOnlyOnce {
         it.type.assert.isEqualTo(NotificationType.ACTIVITY_KEYS_SCREENSHOTS_UPLOADED)
-      }
-      .satisfiesOnlyOnce {
+      }.satisfiesOnlyOnce {
         it.type.assert.isEqualTo(NotificationType.ACTIVITY_SOURCE_STRINGS_UPDATED)
         it.modifiedEntities.assert.hasSize(1)
       }

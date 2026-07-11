@@ -34,9 +34,10 @@ class GroupDataProvider(
         jooqContext = jooqContext,
       ).provide()
 
-    return result.map { (groupId, counts) ->
-      groupId to (counts[simpleNameString] ?: 0)
-    }.toMap()
+    return result
+      .map { (groupId, counts) ->
+        groupId to (counts[simpleNameString] ?: 0)
+      }.toMap()
   }
 
   fun provideRelevantModifiedEntities(
@@ -74,17 +75,16 @@ class GroupDataProvider(
           DSL
             .and(
               context.groupIdField.eq(groupId),
-            )
-            .and(
+            ).and(
               DSL.or(
                 relatedMappings.flatMap { mapping ->
                   mapping.entities.map {
-                    DSL.condition(
-                      "(${context.describingRelationsField.name} -> ? -> 'entityId')::bigint = ?",
-                      mapping.field,
-                      it.entityId,
-                    )
-                      .and(context.entityClassField.eq(mapping.entityClass.simpleName))
+                    DSL
+                      .condition(
+                        "(${context.describingRelationsField.name} -> ? -> 'entityId')::bigint = ?",
+                        mapping.field,
+                        it.entityId,
+                      ).and(context.entityClassField.eq(mapping.entityClass.simpleName))
                   }
                 },
               ),

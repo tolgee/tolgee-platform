@@ -24,10 +24,11 @@ class RootActivityProviderTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   private fun getLatestRevisionId(): Long? {
-    return entityManager.createQuery(
-      "select max(r.id) from ActivityRevision r",
-      Long::class.java,
-    ).singleResult
+    return entityManager
+      .createQuery(
+        "select max(r.id) from ActivityRevision r",
+        Long::class.java,
+      ).singleResult
   }
 
   private fun importData() {
@@ -37,7 +38,9 @@ class RootActivityProviderTest : ProjectAuthControllerTest("/v2/projects/") {
     testData.setAllResolved()
     testData.setAllOverride()
     testDataService.saveTestData(testData.root)
-    val user = testData.root.data.userAccounts[0].self
+    val user =
+      testData.root.data.userAccounts[0]
+        .self
     val projectId = testData.project.id
     loginAsUser(user.username)
     val path = "/v2/projects/$projectId/import/apply"

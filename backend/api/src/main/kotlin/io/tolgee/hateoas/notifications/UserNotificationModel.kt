@@ -22,7 +22,7 @@ import io.tolgee.model.views.activity.SimpleModifiedEntityView
 import io.tolgee.notifications.NotificationType
 import org.springframework.hateoas.RepresentationModel
 import java.io.Serializable
-import java.util.*
+import java.util.Date
 
 @Suppress("unused")
 class UserNotificationModel(
@@ -34,4 +34,5 @@ class UserNotificationModel(
   val unread: Boolean,
   val markedDoneAt: Date?,
   val lastUpdated: Date,
-) : RepresentationModel<UserNotificationModel>(), Serializable
+) : RepresentationModel<UserNotificationModel>(),
+  Serializable

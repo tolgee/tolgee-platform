@@ -28,28 +28,27 @@ class CountsProvider(
           groupIdField,
           entityClassField,
           countField,
-        )
-        .from(activityModifiedEntityTable)
+        ).from(activityModifiedEntityTable)
         .join(activityRevisionTable)
         .on(
-          DSL.field("ame.activity_revision_id", Long::class.java)
+          DSL
+            .field("ame.activity_revision_id", Long::class.java)
             .eq(DSL.field("ar.id", Long::class.java)),
-        )
-        .join(activityRevisionActivityGroupsTable)
+        ).join(activityRevisionActivityGroupsTable)
         .on(
-          DSL.field("ar.id", Long::class.java)
+          DSL
+            .field("ar.id", Long::class.java)
             .eq(DSL.field("arag.activity_revisions_id", Long::class.java)),
-        )
-        .join(activityGroupTable).on(
+        ).join(activityGroupTable)
+        .on(
           groupIdField.eq(DSL.field("ag.id", Long::class.java)),
-        )
-        .where(
-          groupIdField.`in`(groupIds)
+        ).where(
+          groupIdField
+            .`in`(groupIds)
             .and(entityClassField.`in`(entityClasses))
             .and(groupType.matcher?.match(sqlContext))
             .and(getStringMatcherCondition()),
-        )
-        .groupBy(entityClassField, groupIdField)
+        ).groupBy(entityClassField, groupIdField)
         .fetch()
 
     return queryResult.groupBy { groupIdField.get(it)!! }.mapValues { rows ->
@@ -69,7 +68,8 @@ class CountsProvider(
   }
 
   private fun getStringMatcherCondition(): Condition {
-    return groupType.matchingStringProvider?.provide(sqlContext)
+    return groupType.matchingStringProvider
+      ?.provide(sqlContext)
       ?.eq(DSL.field("ag.matching_string", String::class.java)) ?: DSL.noCondition()
   }
 }

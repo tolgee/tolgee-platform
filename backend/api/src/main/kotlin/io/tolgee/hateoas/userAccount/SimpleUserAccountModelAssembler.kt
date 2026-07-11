@@ -3,6 +3,7 @@ package io.tolgee.hateoas.userAccount
 import io.tolgee.api.SimpleUserAccount
 import io.tolgee.api.v2.controllers.V2UserController
 import io.tolgee.dtos.cacheable.UserAccountDto
+import io.tolgee.model.UserAccount
 import io.tolgee.service.AvatarService
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.stereotype.Component
@@ -10,11 +11,23 @@ import org.springframework.stereotype.Component
 @Component
 class SimpleUserAccountModelAssembler(
   private val avatarService: AvatarService,
-) : RepresentationModelAssemblerSupport<SimpleUserAccount, SimpleUserAccountModel>(
+) : RepresentationModelAssemblerSupport<UserAccount, SimpleUserAccountModel>(
     V2UserController::class.java,
     SimpleUserAccountModel::class.java,
   ) {
-  override fun toModel(entity: SimpleUserAccount): SimpleUserAccountModel {
+  override fun toModel(entity: UserAccount): SimpleUserAccountModel {
+    val avatar = avatarService.getAvatarLinks(entity.avatarHash)
+
+    return SimpleUserAccountModel(
+      id = entity.id,
+      username = entity.username,
+      name = entity.name,
+      avatar = avatar,
+      deleted = entity.deletedAt != null,
+    )
+  }
+
+  fun toModel(entity: SimpleUserAccount): SimpleUserAccountModel {
     val avatar = avatarService.getAvatarLinks(entity.avatarHash)
 
     return SimpleUserAccountModel(

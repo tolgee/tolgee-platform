@@ -15,8 +15,9 @@ class ChildItemsProvider(
   }
 
   private fun getItemsRaw(): List<Array<Any?>> {
-    return entityManager.createNativeQuery(
-      """
+    return entityManager
+      .createNativeQuery(
+        """
       select entity_class, ame.describing_data, modifications, ame.entity_id id, 'AME' as type, 
       (ame.describing_relations -> :describingField -> 'entityId')::bigint as parent_id
       from activity_modified_entity ame
@@ -38,9 +39,8 @@ class ChildItemsProvider(
                                   )
       order by id
     """,
-      Array::class.java,
-    )
-      .setParameter("entityClass", treeItem.entityClass.simpleName)
+        Array::class.java,
+      ).setParameter("entityClass", treeItem.entityClass.simpleName)
       .setParameter("describingField", treeItem.describingField)
       .setParameter("revisionIds", activityRevisionId)
       .setParameter("ids", parentIds)

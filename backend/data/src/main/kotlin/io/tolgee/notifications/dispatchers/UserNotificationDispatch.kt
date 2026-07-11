@@ -64,7 +64,8 @@ class UserNotificationDispatch(
 
   private fun handleActivityNotification(e: NotificationCreateEvent) {
     val users =
-      userAccountService.getAllConnectedUserProjectMetadataViews(e.notification.projectId)
+      userAccountService
+        .getAllConnectedUserProjectMetadataViews(e.notification.projectId)
         .filter {
           it.notificationPreferences?.disabledNotifications?.contains(e.notification.type) != true &&
             it.userAccountId != e.responsibleUserId

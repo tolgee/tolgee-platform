@@ -9,7 +9,10 @@ class SetTranslationMatchingStringProvider : MatchingStringProvider {
     if (context.modifiedEntity.entityClass != Translation::class.simpleName) {
       return null
     }
-    return context.modifiedEntity.describingRelations?.get("language")?.entityId?.toString()
+    return context.modifiedEntity.describingRelations
+      ?.get("language")
+      ?.entityId
+      ?.toString()
       ?: throw IllegalStateException("Language not found")
   }
 

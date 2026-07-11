@@ -19,4 +19,5 @@ open class LanguageModel(
   override var flagEmoji: String?,
   @Schema(example = "false", description = "Whether is base language of project")
   var base: Boolean,
-) : RepresentationModel<LanguageModel>(), ILanguageModel
+) : RepresentationModel<LanguageModel>(),
+  ILanguageModel

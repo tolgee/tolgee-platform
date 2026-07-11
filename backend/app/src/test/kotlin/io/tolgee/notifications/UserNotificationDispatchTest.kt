@@ -16,23 +16,23 @@
 
 package io.tolgee.notifications
 
-import io.tolgee.development.testDataBuilder.data.NotificationsTestData
+import io.tolgee.development.testDataBuilder.data.UserNotificationsTestData
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.generateImage
 import io.tolgee.testing.assert
-import io.tolgee.util.generateImage
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.mock.web.MockMultipartFile
 
 class UserNotificationDispatchTest : AbstractNotificationTest() {
-  lateinit var testData: NotificationsTestData
+  lateinit var testData: UserNotificationsTestData
 
   @BeforeEach
   override fun setupTests() {
-    testData = NotificationsTestData()
+    testData = UserNotificationsTestData()
     testDataService.saveTestData(testData.root)
 
     super.setupTests()
@@ -174,11 +174,17 @@ class UserNotificationDispatchTest : AbstractNotificationTest() {
     frenchCzechTranslatorNotifications[0].modifiedEntities.assert.hasSize(2)
     bobNotifications[0].modifiedEntities.assert.hasSize(2)
 
-    frenchTranslatorNotifications[0].modifiedEntities.first()
-      .entityId.assert.isEqualTo(testData.key1FrTranslation.id)
+    frenchTranslatorNotifications[0]
+      .modifiedEntities
+      .first()
+      .entityId.assert
+      .isEqualTo(testData.key1FrTranslation.id)
 
-    czechTranslatorNotifications[0].modifiedEntities.first()
-      .entityId.assert.isEqualTo(testData.key1CzTranslation.id)
+    czechTranslatorNotifications[0]
+      .modifiedEntities
+      .first()
+      .entityId.assert
+      .isEqualTo(testData.key1CzTranslation.id)
 
     ensureNoUserNotificationDispatch()
   }

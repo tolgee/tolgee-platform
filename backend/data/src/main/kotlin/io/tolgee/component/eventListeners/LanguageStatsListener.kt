@@ -134,7 +134,11 @@ class LanguageStatsListener(
     event: OnProjectActivityEvent,
     branchIds: MutableSet<Long?>,
   ) {
-    val keyIds = event.modifiedEntities[Key::class]?.keys.orEmpty()
+    val keyIds =
+      event.modifiedEntities[Key::class]
+        ?.keys
+        .orEmpty()
+        .map { it.id }
     if (keyIds.isEmpty()) return
 
     keyIds.chunked(IN_CLAUSE_BATCH_SIZE).forEach { chunk ->
@@ -146,7 +150,11 @@ class LanguageStatsListener(
     event: OnProjectActivityEvent,
     branchIds: MutableSet<Long?>,
   ) {
-    val translationIds = event.modifiedEntities[Translation::class]?.keys.orEmpty()
+    val translationIds =
+      event.modifiedEntities[Translation::class]
+        ?.keys
+        .orEmpty()
+        .map { it.id }
     if (translationIds.isEmpty()) return
 
     translationIds.chunked(IN_CLAUSE_BATCH_SIZE).forEach { chunk ->

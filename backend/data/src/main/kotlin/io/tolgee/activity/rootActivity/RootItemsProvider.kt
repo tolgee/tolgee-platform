@@ -71,7 +71,8 @@ class RootItemsProvider(
         .and(adeEntityId.notIn(adeSubQuery))
 
     val unionQuery =
-      ameSelect.unionAll(adeSelect)
+      ameSelect
+        .unionAll(adeSelect)
         .orderBy(field("id"))
         .limit(limit)
         .offset(offset)

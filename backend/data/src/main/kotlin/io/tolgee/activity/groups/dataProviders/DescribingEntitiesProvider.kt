@@ -24,7 +24,8 @@ class DescribingEntitiesProvider(
 
   fun provide(): Map<ModifiedEntityView, List<DescribingEntityView>> {
     val views =
-      query.fetch()
+      query
+        .fetch()
         .map {
           DescribingEntityView(
             entityId = it.get(entityIdField),
@@ -58,7 +59,8 @@ class DescribingEntitiesProvider(
   val condition by lazy {
     DSL.or(
       refs.map { (entity, ref) ->
-        DSL.condition(entityClassField.eq(ref.entityClass))
+        DSL
+          .condition(entityClassField.eq(ref.entityClass))
           .and(entityIdField.eq(ref.entityId))
           .and(activityRevisionIdField.eq(entity.activityRevisionId))
       },

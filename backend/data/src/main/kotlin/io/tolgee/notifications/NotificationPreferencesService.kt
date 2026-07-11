@@ -33,7 +33,8 @@ class NotificationPreferencesService(
   private val securityService: SecurityService,
 ) {
   fun getAllPreferences(user: Long): Map<String, NotificationPreferencesDto> {
-    return notificationPreferencesRepository.findAllByUserAccountId(user)
+    return notificationPreferencesRepository
+      .findAllByUserAccountId(user)
       .associate {
         val key = it.project?.id?.toString() ?: "global"
         val dto = NotificationPreferencesDto.fromEntity(it)

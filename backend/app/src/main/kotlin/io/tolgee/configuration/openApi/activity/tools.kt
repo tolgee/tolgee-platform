@@ -11,7 +11,8 @@ fun getEntitySchema(
   entityClass: KClass<*>,
 ): Schema<*> {
   val resolved =
-    ModelConverters.getInstance()
+    ModelConverters
+      .getInstance()
       .readAllAsResolvedSchema(AnnotatedType(entityClass.java))
 
   resolved.referencedSchemas.forEach(openApi.components.schemas::putIfAbsent)

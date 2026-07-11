@@ -11,8 +11,7 @@ import org.springframework.stereotype.Component
 @Component
 class SetTranslationsGroupModelProvider(
   private val groupDataProvider: GroupDataProvider,
-) :
-  GroupModelProvider<SetTranslationsGroupModel, SetTranslationsGroupItemModel> {
+) : GroupModelProvider<SetTranslationsGroupModel, SetTranslationsGroupItemModel> {
   override fun provideGroup(groupIds: List<Long>): Map<Long, SetTranslationsGroupModel> {
     val translationCounts =
       groupDataProvider.provideCounts(

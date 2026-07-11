@@ -8,7 +8,7 @@ import org.springframework.hateoas.server.core.Relation
 data class SimpleUserAccountModel(
   val id: Long,
   val username: String,
-  var name: String,
+  var name: String?,
   var avatar: Avatar?,
   var deleted: Boolean,
 ) : RepresentationModel<SimpleUserAccountModel>()

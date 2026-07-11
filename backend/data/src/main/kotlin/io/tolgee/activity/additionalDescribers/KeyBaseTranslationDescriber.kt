@@ -28,9 +28,10 @@ class KeyBaseTranslationDescriber(
     val relevantTranslationDescribingEntities = getRelevantDescribingEntities(activityRevision)
     val toDescribe = getToDescribe(activityRevision, modifiedEntities)
     val newKeyIds =
-      modifiedEntities[Key::class]?.mapNotNull {
-        if (it.value.revisionType == RevisionType.ADD) it.key.id else null
-      }?.toSet() ?: emptySet()
+      modifiedEntities[Key::class]
+        ?.mapNotNull {
+          if (it.value.revisionType == RevisionType.ADD) it.key.id else null
+        }?.toSet() ?: emptySet()
 
     toDescribe.removeIf { (id, entity) ->
       // if entity is modified in current revision, we take it from there
@@ -88,11 +89,11 @@ class KeyBaseTranslationDescriber(
 
     val keyIds = toDescribe.map { it.first }
     val result =
-      entityManager.createQuery(
-        "select t.key.id, t.text from Translation t where t.key.id in :keyIds and t.language.id = :languageId",
-        Array<Any>::class.java,
-      )
-        .setParameter("keyIds", keyIds.toSet())
+      entityManager
+        .createQuery(
+          "select t.key.id, t.text from Translation t where t.key.id in :keyIds and t.language.id = :languageId",
+          Array<Any>::class.java,
+        ).setParameter("keyIds", keyIds.toSet())
         .setParameter("languageId", activityRevision.baseLanguageId)
         .resultList
 
@@ -122,24 +123,27 @@ class KeyBaseTranslationDescriber(
   ): Map<Long, ActivityModifiedEntity> {
     val baseLanguageId = activityRevision.baseLanguageId
 
-    return modifiedEntities[Translation::class]?.values?.mapNotNull {
-      val languageId = it.languageId ?: return@mapNotNull null
-      if (languageId != baseLanguageId) return@mapNotNull null
-      val keyId = it.keyId ?: return@mapNotNull null
-      keyId to it
-    }?.toMap() ?: emptyMap()
+    return modifiedEntities[Translation::class]
+      ?.values
+      ?.mapNotNull {
+        val languageId = it.languageId ?: return@mapNotNull null
+        if (languageId != baseLanguageId) return@mapNotNull null
+        val keyId = it.keyId ?: return@mapNotNull null
+        keyId to it
+      }?.toMap() ?: emptyMap()
   }
 
   private fun getRelevantDescribingEntities(activityRevision: ActivityRevision): Map<Long, ActivityDescribingEntity> {
     val baseLanguageId = activityRevision.baseLanguageId
 
-    return activityRevision.describingRelations.mapNotNull {
-      if (it.entityClass != "Translation") return@mapNotNull null
-      val languageId = it.languageId ?: return@mapNotNull null
-      if (languageId != baseLanguageId) return@mapNotNull null
-      val keyId = it.keyId ?: return@mapNotNull null
-      keyId to it
-    }.toMap()
+    return activityRevision.describingRelations
+      .mapNotNull {
+        if (it.entityClass != "Translation") return@mapNotNull null
+        val languageId = it.languageId ?: return@mapNotNull null
+        if (languageId != baseLanguageId) return@mapNotNull null
+        val keyId = it.keyId ?: return@mapNotNull null
+        keyId to it
+      }.toMap()
   }
 
   val ActivityEntityWithDescription.languageId: Long?

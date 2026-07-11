@@ -41,12 +41,13 @@ class BatchJobListener(
       e.job.projectId,
     )
 
+    val projectId = e.job.projectId ?: return
     val job = entityManager.getReference(BatchJob::class.java, e.job.id)
     applicationEventPublisher.publishEvent(
       NotificationCreateEvent(
         NotificationCreateDto(
           type = NotificationType.BATCH_JOB_ERRORED,
-          projectId = e.job.projectId,
+          projectId = projectId,
           batchJob = job,
         ),
         source = e,

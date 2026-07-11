@@ -25,7 +25,7 @@ import io.tolgee.notifications.dto.NotificationCreateDto
 import io.tolgee.notifications.dto.UserNotificationParamsDto
 import io.tolgee.repository.notifications.UserNotificationRepository
 import org.springframework.stereotype.Component
-import java.util.*
+import java.util.EnumSet
 
 typealias UserNotificationDebounceResult = Pair<List<UserNotification>, List<UserNotificationParamsDto>>
 
@@ -115,8 +115,11 @@ class UserNotificationDebouncer(
     entities: List<ActivityModifiedEntity>?,
   ): List<UserNotification> {
     val keyId =
-      entities?.find { it.entityClass == Translation::class.simpleName }
-        ?.describingRelations?.get("key")?.entityId ?: 0L
+      entities
+        ?.find { it.entityClass == Translation::class.simpleName }
+        ?.describingRelations
+        ?.get("key")
+        ?.entityId ?: 0L
 
     return userNotificationRepository.findCandidatesForTranslationUpdateNotificationDebouncing(
       type,
@@ -132,8 +135,11 @@ class UserNotificationDebouncer(
     entities: List<ActivityModifiedEntity>?,
   ): List<UserNotification> {
     val translationId =
-      entities?.find { it.entityClass == TranslationComment::class.simpleName }
-        ?.describingRelations?.get("translation")?.entityId ?: 0L
+      entities
+        ?.find { it.entityClass == TranslationComment::class.simpleName }
+        ?.describingRelations
+        ?.get("translation")
+        ?.entityId ?: 0L
 
     return userNotificationRepository.findCandidatesForCommentNotificationDebouncing(
       projectId,

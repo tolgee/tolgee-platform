@@ -26,7 +26,9 @@ class TranslationMatcher(
     }
 
     val entityId =
-      context.modifiedEntity.describingRelations?.get("language")?.entityId
+      context.modifiedEntity.describingRelations
+        ?.get("language")
+        ?.entityId
         // non-base is the default, so we return true if it is not base translation
         ?: return type == Type.NON_BASE
 

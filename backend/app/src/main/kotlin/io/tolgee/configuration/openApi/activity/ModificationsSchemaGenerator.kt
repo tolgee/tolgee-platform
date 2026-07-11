@@ -54,15 +54,17 @@ class ModificationsSchemaGenerator(
     val schemaSimpleProps = schema.properties?.filterKeys { it in simplePropNames } ?: emptyMap()
 
     val singlePropChangeMap =
-      schemaSimpleProps.map { (name, prop) ->
-        name to prop.toChangeSchema()
-      }.toMap()
+      schemaSimpleProps
+        .map { (name, prop) ->
+          name to prop.toChangeSchema()
+        }.toMap()
 
     val complexProps = loggedProps.getComplexProps()
     val complexPropChangeMap =
-      complexProps.map {
-        it.name to getModificationSchemaForComplexProp(it.returnType.classifier as KClass<*>)
-      }.toMap()
+      complexProps
+        .map {
+          it.name to getModificationSchemaForComplexProp(it.returnType.classifier as KClass<*>)
+        }.toMap()
 
     return singlePropChangeMap + complexPropChangeMap
   }
@@ -96,7 +98,8 @@ class ModificationsSchemaGenerator(
   private fun KClass<*>.getDescriptionProps(): List<KProperty1<out Any, *>> {
     return memberProperties
       .filter { it.findAnnotation<ActivityDescribingProp>() != null }
-      .map { it }.filter { it.returnType.classifier.isSimpleType() }
+      .map { it }
+      .filter { it.returnType.classifier.isSimpleType() }
   }
 
   private fun List<KProperty1<out Any, *>>.getSimpleProps(): List<KProperty1<out Any, *>> {
@@ -124,9 +127,17 @@ class ModificationsSchemaGenerator(
   companion object {
     val simpleTypes =
       setOf(
-        Int::class, Long::class, Double::class, Float::class,
-        Boolean::class, Char::class, Byte::class, Short::class,
-        String::class, Enum::class, Map::class,
+        Int::class,
+        Long::class,
+        Double::class,
+        Float::class,
+        Boolean::class,
+        Char::class,
+        Byte::class,
+        Short::class,
+        String::class,
+        Enum::class,
+        Map::class,
       )
   }
 }

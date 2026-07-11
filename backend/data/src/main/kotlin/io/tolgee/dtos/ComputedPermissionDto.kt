@@ -101,7 +101,7 @@ class ComputedPermissionDto(
   companion object {
     fun getEmptyPermission(
       scopes: Array<Scope>,
-      type: ProjectPermissionType?,
+      type: ProjectPermissionType,
     ): IPermission {
       return object : IPermission {
         override val scopes: Array<Scope>

@@ -45,7 +45,9 @@ data class UserProjectMetadata(
     get() = projectNotificationPreferences ?: globalNotificationPreferences
 }
 
-class UserAccountProjectPermissionsNotificationPreferencesDataView(data: Map<String, Any>) {
+class UserAccountProjectPermissionsNotificationPreferencesDataView(
+  data: Map<String, Any>,
+) {
   init {
     println(data["permittedViewLanguages"])
   }

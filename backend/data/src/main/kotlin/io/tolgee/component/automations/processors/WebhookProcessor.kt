@@ -27,8 +27,7 @@ class WebhookProcessor(
     activityRevisionId: Long?,
   ) {
     activityRevisionId ?: return
-    val projectId = action.automation.project.id
-    val view = activityService.getProjectActivity(projectId = projectId, revisionId = activityRevisionId) ?: return
+    val view = activityService.findProjectActivity(activityRevisionId) ?: return
     val activityModel = activityModelAssembler.toModel(view)
     val config = action.webhookConfig ?: return
     if (!config.enabled) return

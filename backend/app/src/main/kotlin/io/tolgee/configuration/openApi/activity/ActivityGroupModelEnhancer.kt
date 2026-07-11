@@ -27,17 +27,19 @@ class ActivityGroupModelEnhancer(
   }
 
   private fun generateSchemas(): MutableList<Schema<Any>> {
-    return ActivityGroupType.entries.map {
-      val schemaName = it.getSchemaName()
-      Schema<Any>().apply {
-        name = schemaName
-        properties = getPropertiesForActivitySchema(it)
-        type = baseType
-        required = newRequired
+    return ActivityGroupType.entries
+      .map {
+        val schemaName = it.getSchemaName()
+        Schema<Any>().apply {
+          name = schemaName
+          properties = getPropertiesForActivitySchema(it)
+          type = baseType
+          required = newRequired
+        }
+      }.toMutableList()
+      .also { schemas ->
+        openApi.components.schemas.putAll(schemas.associateBy { it.name })
       }
-    }.toMutableList().also { schemas ->
-      openApi.components.schemas.putAll(schemas.associateBy { it.name })
-    }
   }
 
   private fun getPropertiesForActivitySchema(type: ActivityGroupType): MutableMap<String, Schema<Any>> {
@@ -100,8 +102,9 @@ class ActivityGroupModelEnhancer(
     activityType: ActivityGroupType,
   ): Schema<*> {
     val oldTypeProperty = properties["type"] ?: throw IllegalStateException("Type property not found")
-    val newType = oldTypeProperty.clone()
-    @Suppress("TYPE_MISMATCH_WARNING")
+
+    @Suppress("UNCHECKED_CAST")
+    val newType = oldTypeProperty.clone() as Schema<Any>
     newType.enum = newType.enum.filter { it == activityType.name }
     return newType
   }

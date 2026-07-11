@@ -5,6 +5,8 @@ import io.tolgee.constants.Caches
 import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.events.OnProjectSoftDeleted
 import io.tolgee.model.Project
+import io.tolgee.notifications.NotificationPreferencesService
+import io.tolgee.notifications.UserNotificationService
 import io.tolgee.repository.ProjectRepository
 import io.tolgee.repository.qa.ProjectQaConfigRepository
 import io.tolgee.security.ProjectHolder
@@ -22,8 +24,6 @@ import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.label.LabelService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
-import io.tolgee.notifications.NotificationPreferencesService
-import io.tolgee.notifications.UserNotificationService
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.translationMemory.TranslationMemoryManagementService

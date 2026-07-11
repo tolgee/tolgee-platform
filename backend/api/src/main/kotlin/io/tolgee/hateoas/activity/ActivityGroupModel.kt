@@ -15,4 +15,5 @@ class ActivityGroupModel(
   val author: SimpleUserAccountModel?,
   val data: Any?,
   var mentionedLanguageIds: List<Long>,
-) : RepresentationModel<ActivityGroupModel>(), Serializable
+) : RepresentationModel<ActivityGroupModel>(),
+  Serializable

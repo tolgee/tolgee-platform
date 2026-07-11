@@ -306,7 +306,7 @@ class QaActivityListener(
     val languageEntities = event.modifiedEntities[Language::class] ?: return emptyList()
     return languageEntities
       .filter { (_, entity) -> entity.modifications.containsKey("tag") }
-      .map { (id, _) -> id }
+      .map { (language, _) -> language.id }
   }
 
   // endregion

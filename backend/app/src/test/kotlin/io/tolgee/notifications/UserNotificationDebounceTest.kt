@@ -16,7 +16,7 @@
 
 package io.tolgee.notifications
 
-import io.tolgee.development.testDataBuilder.data.NotificationsTestData
+import io.tolgee.development.testDataBuilder.data.UserNotificationsTestData
 import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.dtos.request.translation.comment.TranslationCommentWithLangKeyDto
@@ -27,11 +27,11 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class UserNotificationDebounceTest : AbstractNotificationTest() {
-  lateinit var testData: NotificationsTestData
+  lateinit var testData: UserNotificationsTestData
 
   @BeforeEach
   override fun setupTests() {
-    testData = NotificationsTestData()
+    testData = UserNotificationsTestData()
     testDataService.saveTestData(testData.root)
 
     super.setupTests()

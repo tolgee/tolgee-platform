@@ -25,12 +25,6 @@ private fun Date.addToCalendar(
   return calendar.time
 }
 
-fun Date.addMilliseconds(milliseconds: Int): Date {
-  val calendar = toUtcCalendar()
-  calendar.add(Calendar.MILLISECOND, milliseconds)
-  return calendar.time
-}
-
 private fun Date.toUtcCalendar(): Calendar {
   val calendar = getUtcCalendar()
   calendar.time = this

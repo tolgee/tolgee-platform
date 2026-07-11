@@ -143,7 +143,7 @@ class UserNotificationsTestData {
               addKey {
                 name = "some-key"
 
-                this@NotificationsTestData.keyCalmProject = this@addKey
+                this@UserNotificationsTestData.keyCalmProject = this@addKey
               }
 
             addTranslation {
@@ -151,7 +151,7 @@ class UserNotificationsTestData {
               language = en.self
               text = "Some translation"
 
-              this@NotificationsTestData.keyCalmEnTranslation = this@addTranslation
+              this@UserNotificationsTestData.keyCalmEnTranslation = this@addTranslation
             }
           }
         }
@@ -161,7 +161,7 @@ class UserNotificationsTestData {
         name = "ACME Corporation"
         slug = "acme"
 
-        this@NotificationsTestData.acme = this@addOrganization
+        this@UserNotificationsTestData.acme = this@addOrganization
       }.build {
         addRole {
           user = orgAdmin
@@ -209,7 +209,7 @@ class UserNotificationsTestData {
             addKey {
               name = "some-key"
 
-              this@NotificationsTestData.keyProject1 = this@addKey
+              this@UserNotificationsTestData.keyProject1 = this@addKey
             }
 
           addTranslation {
@@ -218,7 +218,7 @@ class UserNotificationsTestData {
             text = "Some translation"
             state = TranslationState.REVIEWED
 
-            this@NotificationsTestData.key1EnTranslation = this@addTranslation
+            this@UserNotificationsTestData.key1EnTranslation = this@addTranslation
           }
 
           addTranslation {
@@ -227,7 +227,7 @@ class UserNotificationsTestData {
             text = "Some french translation"
             state = TranslationState.REVIEWED
 
-            this@NotificationsTestData.key1FrTranslation = this@addTranslation
+            this@UserNotificationsTestData.key1FrTranslation = this@addTranslation
           }
 
           addTranslation {
@@ -235,7 +235,7 @@ class UserNotificationsTestData {
             language = cz.self
             text = "Some czech translation"
 
-            this@NotificationsTestData.key1CzTranslation = this@addTranslation
+            this@UserNotificationsTestData.key1CzTranslation = this@addTranslation
           }
 
           // --- --- ---
@@ -309,7 +309,7 @@ class UserNotificationsTestData {
             addKey {
               name = "some-key"
 
-              this@NotificationsTestData.keyProject2 = this@addKey
+              this@UserNotificationsTestData.keyProject2 = this@addKey
             }
 
           addTranslation {
@@ -317,7 +317,7 @@ class UserNotificationsTestData {
             language = en.self
             text = "Some translation"
 
-            this@NotificationsTestData.key2EnTranslation = this@addTranslation
+            this@UserNotificationsTestData.key2EnTranslation = this@addTranslation
           }
 
           addPermission {

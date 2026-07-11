@@ -41,7 +41,8 @@ class ActivityModifiedEntity(
    */
   @Id
   val entityId: Long,
-) : Serializable, ActivityEntityWithDescription {
+) : Serializable,
+  ActivityEntityWithDescription {
   @Column(name = "branch_id")
   var branchId: Long? = null
 

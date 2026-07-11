@@ -18,8 +18,7 @@ import org.springframework.stereotype.Component
 @Component
 class CreateKeyGroupModelProvider(
   private val groupDataProvider: GroupDataProvider,
-) :
-  GroupModelProvider<CreateKeyGroupModel, CreateKeyGroupItemModel> {
+) : GroupModelProvider<CreateKeyGroupModel, CreateKeyGroupItemModel> {
   override fun provideGroup(groupIds: List<Long>): Map<Long, CreateKeyGroupModel> {
     val keyCounts =
       groupDataProvider.provideCounts(ActivityGroupType.CREATE_KEY, groupIds = groupIds, entityClass = Key::class)
@@ -77,10 +76,12 @@ class CreateKeyGroupModelProvider(
     return entities.map { entity ->
       val baseTranslation =
         relatedEntities[entity]
-          ?.get(translationMapping)?.singleOrNull()
+          ?.get(translationMapping)
+          ?.singleOrNull()
 
       val baseTranslationText =
-        baseTranslation?.modifications
+        baseTranslation
+          ?.modifications
           ?.get("text")
           ?.new as? String
 

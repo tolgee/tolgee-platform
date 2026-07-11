@@ -34,7 +34,8 @@ class ProjectCreationGroupViewTest : AuthorizedControllerTest() {
     userAccount = testData.user
     val projectId = performProjectCreation()
     performAuthGet("/v2/projects/$projectId/activity/groups")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("_embedded.groups") {
           isArray.hasSizeGreaterThan(0)
           node("[0]") {

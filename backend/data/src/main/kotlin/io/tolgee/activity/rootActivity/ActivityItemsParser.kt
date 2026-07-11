@@ -47,10 +47,11 @@ class ActivityItemsParser(
   }
 
   private fun getNewFromModifications(modifications: Map<String, Any?>?): Map<String, Any?>? {
-    return modifications?.map {
-      @Suppress("UNCHECKED_CAST")
-      it.key to ((it.value as? Map<String, Any?>)?.get("new"))
-    }?.toMap()
+    return modifications
+      ?.map {
+        @Suppress("UNCHECKED_CAST")
+        it.key to ((it.value as? Map<String, Any?>)?.get("new"))
+      }?.toMap()
   }
 
   private fun Any?.parseJsonOrNull(): Map<String, Any?>? {
@@ -64,7 +65,9 @@ class ActivityItemsParser(
     return null
   }
 
-  enum class Type(val value: String) {
+  enum class Type(
+    val value: String,
+  ) {
     MODIFIED_ENTITY("AME"),
     DESCRIBING_ENTITY("ADE"),
     ;

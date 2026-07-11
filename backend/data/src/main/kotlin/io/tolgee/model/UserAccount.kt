@@ -28,8 +28,8 @@ import jakarta.persistence.OrderBy
 import jakarta.persistence.Transient
 import jakarta.validation.constraints.NotBlank
 import org.hibernate.annotations.ColumnDefault
-import org.hibernate.annotations.Type
 import org.hibernate.annotations.SQLRestriction
+import org.hibernate.annotations.Type
 import java.util.Date
 
 @Entity

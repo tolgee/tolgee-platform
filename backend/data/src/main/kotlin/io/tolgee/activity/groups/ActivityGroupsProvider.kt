@@ -16,7 +16,7 @@ import org.jooq.impl.DSL.table
 import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
-import java.util.*
+import java.util.Date
 
 class ActivityGroupsProvider(
   val projectId: Long,
@@ -54,41 +54,52 @@ class ActivityGroupsProvider(
       where = where.and(field("ag.author_id").`in`(filters.filterAuthorUserIdIn))
     }
 
-    val count = jooqContext.selectCount().from(from).where(where).fetchOne(0, Long::class.java)!!
+    val count =
+      jooqContext
+        .selectCount()
+        .from(from)
+        .where(where)
+        .fetchOne(0, Long::class.java)!!
 
     val result =
-      jooqContext.select(
-        field("ag.id"),
-        field("ag.type"),
-        field("ag.author_id"),
-        max(field("ar.timestamp")),
-        field("ua.id"),
-        field("ua.username"),
-        field("ua.name"),
-        field("ua.avatar_hash"),
-        field("ua.deleted_at").isNotNull,
-        lmeJsonArrayAggField,
-        ldeJsonArrayAggField,
-      )
-        .from(from)
+      jooqContext
+        .select(
+          field("ag.id"),
+          field("ag.type"),
+          field("ag.author_id"),
+          max(field("ar.timestamp")),
+          field("ua.id"),
+          field("ua.username"),
+          field("ua.name"),
+          field("ua.avatar_hash"),
+          field("ua.deleted_at").isNotNull,
+          lmeJsonArrayAggField,
+          ldeJsonArrayAggField,
+        ).from(from)
         .leftJoin(table("activity_revision_activity_groups").`as`("arag"))
         .on(field("ag.id").eq(field("arag.activity_groups_id")))
         .leftJoin(table("activity_revision").`as`("ar"))
         .on(field("ar.id").eq(field("arag.activity_revisions_id")))
-        .leftJoin(table("user_account").`as`("ua")).on(field("ag.author_id").eq(field("ua.id")))
-        .leftJoin(table("activity_modified_entity").`as`("lme")).on(
-          field("ar.id").eq(field("lme.activity_revision_id"))
+        .leftJoin(table("user_account").`as`("ua"))
+        .on(field("ag.author_id").eq(field("ua.id")))
+        .leftJoin(table("activity_modified_entity").`as`("lme"))
+        .on(
+          field("ar.id")
+            .eq(field("lme.activity_revision_id"))
             .and(field("lme.entity_class").eq("Language")),
-        ).leftJoin(table("activity_describing_entity").`as`("lde")).on(
-          field("ar.id").eq(field("lde.activity_revision_id"))
+        ).leftJoin(table("activity_describing_entity").`as`("lde"))
+        .on(
+          field("ar.id")
+            .eq(field("lde.activity_revision_id"))
             .and(field("lde.entity_class").eq("Language")),
-        )
-        .where(where)
+        ).where(where)
         .groupBy(field("ag.id"), field("ua.id"))
         .having(having)
         .orderBy(max(field("ar.timestamp")).desc(), orderedTypesField?.desc())
         .limit(pageable.pageSize)
-        .offset(pageable.offset).fetch().map {
+        .offset(pageable.offset)
+        .fetch()
+        .map {
           ActivityGroupView(
             it[0] as Long,
             ActivityGroupType.valueOf(it[1] as String),
@@ -120,11 +131,12 @@ class ActivityGroupsProvider(
   }
 
   private val dataViews by lazy {
-    byType.flatMap { (type, items) ->
-      val provider =
-        type.modelProviderFactoryClass?.let { applicationContext.getBean(it.java) }
-      provider?.provideGroup(items.map { it.id })?.map { it.key to it.value } ?: emptyList()
-    }.toMap()
+    byType
+      .flatMap { (type, items) ->
+        val provider =
+          type.modelProviderFactoryClass?.let { applicationContext.getBean(it.java) }
+        provider?.provideGroup(items.map { it.id })?.map { it.key to it.value } ?: emptyList()
+      }.toMap()
   }
 
   private val byType by lazy { page.groupBy { it.type } }

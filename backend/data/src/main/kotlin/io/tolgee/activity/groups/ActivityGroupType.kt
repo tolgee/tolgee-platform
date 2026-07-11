@@ -461,7 +461,8 @@ enum class ActivityGroupType(
         ?.arguments ?: return null
 
     val groupType =
-      arguments.firstOrNull()
+      arguments
+        .firstOrNull()
         ?.type
         ?.classifier as? KClass<*>
 

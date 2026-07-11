@@ -7,7 +7,9 @@ import org.jooq.Field
 import org.jooq.JSON
 import org.jooq.impl.DSL
 
-class EqualsValueMatcher(val value: Any?) : ActivityGroupValueMatcher {
+class EqualsValueMatcher(
+  val value: Any?,
+) : ActivityGroupValueMatcher {
   override fun match(value: Any?): Boolean {
     if (value is PropertyModification) {
       return value.new == this.value

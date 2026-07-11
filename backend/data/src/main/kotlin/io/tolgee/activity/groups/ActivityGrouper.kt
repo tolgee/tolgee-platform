@@ -22,13 +22,13 @@ class ActivityGrouper(
   }
 
   private fun addToGroup(groupId: Long) {
-    entityManager.createNativeQuery(
-      """
+    entityManager
+      .createNativeQuery(
+        """
       insert into activity_revision_activity_groups (activity_revisions_id, activity_groups_id) 
       values (:activityRevisionId, :activityGroupId)
     """,
-    )
-      .setParameter("activityRevisionId", activityRevision.id)
+      ).setParameter("activityRevisionId", activityRevision.id)
       .setParameter("activityGroupId", groupId)
       .executeUpdate()
   }
@@ -37,27 +37,30 @@ class ActivityGrouper(
     type: ActivityGroupType,
     matchingStrings: Set<String?>,
   ): Map<String?, Long> {
-    return activityGroupService.getOrCreateCurrentActivityGroupDto(
-      type,
-      matchingStrings,
-      activityRevision.projectId,
-      activityRevision.authorId,
-    ).mapValues { it.value.id }
+    return activityGroupService
+      .getOrCreateCurrentActivityGroupDto(
+        type,
+        matchingStrings,
+        activityRevision.projectId,
+        activityRevision.authorId,
+      ).mapValues { it.value.id }
   }
 
   private fun findGroupTypes(): Map<ActivityGroupType, Set<String?>> {
-    return ActivityGroupType.entries.mapNotNull { activityGroupType ->
-      val matchingEntities = activityGroupType.matchingEntities
-      if (matchingEntities.isEmpty()) {
-        return@mapNotNull null
-      }
-      activityGroupType to
-        activityGroupType.matchingEntities.map { entity ->
-          activityGroupType.matchingStringProvider?.provide(
-            entity.getStoringContext(),
-          )
-        }.toSet()
-    }.toMap()
+    return ActivityGroupType.entries
+      .mapNotNull { activityGroupType ->
+        val matchingEntities = activityGroupType.matchingEntities
+        if (matchingEntities.isEmpty()) {
+          return@mapNotNull null
+        }
+        activityGroupType to
+          activityGroupType.matchingEntities
+            .map { entity ->
+              activityGroupType.matchingStringProvider?.provide(
+                entity.getStoringContext(),
+              )
+            }.toSet()
+      }.toMap()
   }
 
   private val ActivityGroupType.matchingEntities: List<ActivityModifiedEntity>

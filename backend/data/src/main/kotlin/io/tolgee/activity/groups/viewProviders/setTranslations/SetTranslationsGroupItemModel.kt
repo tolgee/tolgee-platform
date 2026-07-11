@@ -7,6 +7,6 @@ import org.springframework.hateoas.server.core.Relation
 @Relation(collectionRelation = "items", itemRelation = "item")
 class SetTranslationsGroupItemModel(
   val id: Long,
-  val text: PropertyModification<String>,
+  val text: PropertyModification,
   val key: ActivityGroupKeyModel,
 )

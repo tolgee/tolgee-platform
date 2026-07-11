@@ -1,5 +1,6 @@
 package io.tolgee.hateoas.key
 
+import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.api.IKeyModel
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation

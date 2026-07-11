@@ -32,17 +32,19 @@ class ProjectActivityModelEnhancer(
   }
 
   private fun generateSchemas(): MutableList<Schema<Any>> {
-    return ActivityType.entries.map {
-      val schemaName = it.getSchemaName()
-      Schema<Any>().apply {
-        name = schemaName
-        properties = getPropertiesForActivitySchema(it)
-        type = baseType
-        required = baseRequired
+    return ActivityType.entries
+      .map {
+        val schemaName = it.getSchemaName()
+        Schema<Any>().apply {
+          name = schemaName
+          properties = getPropertiesForActivitySchema(it)
+          type = baseType
+          required = baseRequired
+        }
+      }.toMutableList()
+      .also { schemas ->
+        openApi.components.schemas.putAll(schemas.associateBy { it.name })
       }
-    }.toMutableList().also { schemas ->
-      openApi.components.schemas.putAll(schemas.associateBy { it.name })
-    }
   }
 
   private fun getPropertiesForActivitySchema(activityType: ActivityType): MutableMap<String, Schema<Any>> {
@@ -54,11 +56,13 @@ class ProjectActivityModelEnhancer(
 
   private fun getNewModifiedEntitiesProperty(activityType: ActivityType): Schema<Any> {
     val properties =
-      activityType.typeDefinitions?.map { (entityClass, definition) ->
-        val schema = activityType.createModifiedEntityModel(entityClass)
-        schema.properties["modifications"] = ModificationsSchemaGenerator(openApi).getModificationSchema(entityClass, definition)
-        entityClass.simpleName to schema
-      }?.toMap()
+      activityType.typeDefinitions
+        ?.map { (entityClass, definition) ->
+          val schema = activityType.createModifiedEntityModel(entityClass)
+          schema.properties["modifications"] =
+            ModificationsSchemaGenerator(openApi).getModificationSchema(entityClass, definition)
+          entityClass.simpleName to schema
+        }?.toMap()
 
     return Schema<Any>().apply {
       name = activityType.getModifiedEntitiesSchemaName()
@@ -71,8 +75,9 @@ class ProjectActivityModelEnhancer(
     activityType: ActivityType,
   ): Schema<*> {
     val oldTypeProperty = properties["type"] ?: throw IllegalStateException("Type property not found")
-    val newType = oldTypeProperty.clone()
-    @Suppress("TYPE_MISMATCH_WARNING")
+
+    @Suppress("UNCHECKED_CAST")
+    val newType = oldTypeProperty.clone() as Schema<Any>
     newType.enum = newType.enum.filter { it == activityType.name }
     return newType
   }
