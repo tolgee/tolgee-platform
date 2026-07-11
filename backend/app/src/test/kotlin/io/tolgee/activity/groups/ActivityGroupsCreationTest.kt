@@ -80,7 +80,7 @@ class ActivityGroupsCreationTest : ProjectAuthControllerTest("/v2/projects/") {
     assertGroupsForActivity(
       ActivityGroupType.EDIT_KEY_NAME,
       ActivityGroupType.EDIT_KEY_TAGS,
-      ActivityGroupType.SET_TRANSLATIONS,
+      ActivityGroupType.SET_BASE_TRANSLATION,
       ActivityGroupType.REVIEW,
     )
   }
@@ -112,7 +112,7 @@ class ActivityGroupsCreationTest : ProjectAuthControllerTest("/v2/projects/") {
 
     executeTranslationUpdate("Test 4")
     assertGroupRevisionsCount(1)
-    assertLastGroupType(ActivityGroupType.SET_TRANSLATIONS)
+    assertLastGroupType(ActivityGroupType.SET_BASE_TRANSLATION)
     assertLastValue("Test 4")
   }
 
@@ -126,7 +126,7 @@ class ActivityGroupsCreationTest : ProjectAuthControllerTest("/v2/projects/") {
 
     asserGroupCount(1)
     assertGroupRevisionsCount(3)
-    assertLastGroupType(ActivityGroupType.SET_TRANSLATIONS)
+    assertLastGroupType(ActivityGroupType.SET_BASE_TRANSLATION)
     assertLastValue("Test 3")
   }
 

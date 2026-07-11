@@ -23,6 +23,8 @@ class ActivityGroupsProvider(
   val pageable: Pageable,
   val filters: ActivityGroupFilters,
   applicationContext: ApplicationContext,
+  val branchId: Long? = null,
+  val defaultBranchId: Long? = null,
 ) {
   fun get(): PageImpl<ActivityGroupView> {
     page.forEach {
@@ -35,6 +37,20 @@ class ActivityGroupsProvider(
   private val page by lazy {
     val from = table("activity_group").`as`("ag")
     var where = field("ag.project_id").eq(projectId)
+
+    where =
+      if (branchId != null) {
+        where.and(field("ag.branch_id", Long::class.java).eq(branchId))
+      } else {
+        where.and(
+          field("ag.branch_id", Long::class.java)
+            .isNull
+            .or(
+              defaultBranchId?.let { field("ag.branch_id", Long::class.java).eq(it) }
+                ?: DSL.noCondition(),
+            ),
+        )
+      }
 
     var having = DSL.noCondition()
 
@@ -135,8 +151,14 @@ class ActivityGroupsProvider(
       .flatMap { (type, items) ->
         val provider =
           type.modelProviderFactoryClass?.let { applicationContext.getBean(it.java) }
-        provider?.provideGroup(items.map { it.id })?.map { it.key to it.value } ?: emptyList()
+        val ids = items.map { it.id }
+        provider?.provideGroup(ids)?.map { it.key to it.value }
+          ?: genericGroupModelProvider.provideCounts(type, ids).map { it.key to it.value }
       }.toMap()
+  }
+
+  private val genericGroupModelProvider by lazy {
+    applicationContext.getBean(io.tolgee.activity.groups.viewProviders.generic.GenericGroupModelProvider::class.java)
   }
 
   private val byType by lazy { page.groupBy { it.type } }

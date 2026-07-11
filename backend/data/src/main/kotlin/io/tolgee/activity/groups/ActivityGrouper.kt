@@ -13,10 +13,19 @@ class ActivityGrouper(
   private val applicationContext: ApplicationContext,
 ) {
   fun addToGroup() {
-    val groupTypes = findGroupTypes()
-    groupTypes.forEach { (type, matchingStrings) ->
-      getActivityGroupIds(type, matchingStrings).forEach { group ->
-        addToGroup(group.value)
+    ActivityGroupType.entries.forEach { type ->
+      val matchingEntities = type.matchingEntities
+      if (matchingEntities.isEmpty()) {
+        return@forEach
+      }
+      matchingEntities.groupBy { it.branchId }.forEach { (branchId, entities) ->
+        val matchingStrings =
+          entities
+            .map { type.matchingStringProvider?.provide(it.getStoringContext()) }
+            .toSet()
+        getActivityGroupIds(type, matchingStrings, branchId).forEach { group ->
+          addToGroup(group.value)
+        }
       }
     }
   }
@@ -36,6 +45,7 @@ class ActivityGrouper(
   private fun getActivityGroupIds(
     type: ActivityGroupType,
     matchingStrings: Set<String?>,
+    branchId: Long?,
   ): Map<String?, Long> {
     return activityGroupService
       .getOrCreateCurrentActivityGroupDto(
@@ -43,24 +53,8 @@ class ActivityGrouper(
         matchingStrings,
         activityRevision.projectId,
         activityRevision.authorId,
+        branchId,
       ).mapValues { it.value.id }
-  }
-
-  private fun findGroupTypes(): Map<ActivityGroupType, Set<String?>> {
-    return ActivityGroupType.entries
-      .mapNotNull { activityGroupType ->
-        val matchingEntities = activityGroupType.matchingEntities
-        if (matchingEntities.isEmpty()) {
-          return@mapNotNull null
-        }
-        activityGroupType to
-          activityGroupType.matchingEntities
-            .map { entity ->
-              activityGroupType.matchingStringProvider?.provide(
-                entity.getStoringContext(),
-              )
-            }.toSet()
-      }.toMap()
   }
 
   private val ActivityGroupType.matchingEntities: List<ActivityModifiedEntity>

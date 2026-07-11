@@ -5821,4 +5821,9 @@
             <column name="additional_description" type="jsonb"/>
         </addColumn>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1783771000000-1">
+        <addColumn tableName="activity_group">
+            <column name="branch_id" type="bigint"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

@@ -16,6 +16,8 @@ class DefaultMatcher<T : Any>(
   val allowedValues: Map<KProperty1<T, *>, Any?>? = null,
   val deniedValues: Map<KProperty1<T, *>, Any?>? = null,
 ) : ModifiedEntityMatcher {
+  override val relevantEntityClasses: Set<KClass<*>> = setOf(entityClass)
+
   override fun match(context: StoringContext): Boolean {
     if (context.modifiedEntity.entityClass != entityClass.simpleName) {
       return false

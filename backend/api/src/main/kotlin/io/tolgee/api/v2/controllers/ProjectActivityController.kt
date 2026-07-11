@@ -143,12 +143,19 @@ class ProjectActivityController(
   fun getActivityGroups(
     @ParameterObject pageable: Pageable,
     @ParameterObject activityGroupFilters: ActivityGroupFilters,
+    @RequestParam(required = false) branch: String? = null,
   ): PagedModel<ActivityGroupModel> {
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
+    val activeBranch = branchService.getActiveNonDefaultBranch(projectHolder.project.id, branch)
+    val defaultBranchId =
+      if (activeBranch == null) branchService.getDefaultBranch(projectHolder.project.id)?.id else null
     val views =
       activityGroupService.getProjectActivityGroups(
         projectId = projectHolder.project.id,
         pageable,
         activityGroupFilters,
+        branchId = activeBranch?.id,
+        defaultBranchId = defaultBranchId,
       )
     return groupPagedResourcesAssembler.toModel(views, groupModelAssembler)
   }

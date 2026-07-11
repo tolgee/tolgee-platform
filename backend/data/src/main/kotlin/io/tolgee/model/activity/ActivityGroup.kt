@@ -1,6 +1,7 @@
 package io.tolgee.model.activity
 
 import io.tolgee.activity.groups.ActivityGroupType
+import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
@@ -37,6 +38,9 @@ class ActivityGroup(
    * Project of the change
    */
   var projectId: Long? = null
+
+  @Column(name = "branch_id")
+  var branchId: Long? = null
 
   @ManyToMany(mappedBy = "activityGroups")
   var activityRevisions: MutableList<ActivityRevision> = mutableListOf()

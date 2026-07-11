@@ -24,6 +24,7 @@ interface ActivityGroupRepository : JpaRepository<ActivityGroup, Long> {
         AND ag.author_id = :authorId
         AND ag.type = :groupTypeName
         AND (ag.matching_string = :matchingString or (:matchingString is null))
+        AND ((ag.branch_id = :branchId) or (ag.branch_id is null and :branchId is null))
       GROUP BY ag.id
       order by ag.id desc
       limit 1
@@ -34,5 +35,6 @@ interface ActivityGroupRepository : JpaRepository<ActivityGroup, Long> {
     authorId: Long?,
     projectId: Long?,
     matchingString: String?,
+    branchId: Long?,
   ): List<Array<Any?>>
 }

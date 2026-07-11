@@ -27,7 +27,7 @@ class ActivityRevisionInitializer(
     revision.isInitializedByInterceptor = true
     revision.authorId = userAccount?.id ?: revision.authorId
     revision.organizationId = organizationId ?: revision.organizationId
-    revision.projectId = project?.id ?: revision.projectId
+    project?.let { revision.setProject(it) }
     revision.type = activityHolder.activity ?: revision.type
   }
 

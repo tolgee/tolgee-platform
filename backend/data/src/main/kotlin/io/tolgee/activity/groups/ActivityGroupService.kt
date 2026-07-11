@@ -4,6 +4,7 @@ import io.tolgee.activity.ModifiedEntitiesType
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.dtos.queryResults.ActivityGroupView
 import io.tolgee.dtos.request.ActivityGroupFilters
+import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.activity.ActivityGroup
 import io.tolgee.model.activity.ActivityRevision
 import io.tolgee.repository.activity.ActivityGroupRepository
@@ -32,10 +33,11 @@ class ActivityGroupService(
     matchingStrings: Set<String?>,
     projectId: Long?,
     authorId: Long?,
+    branchId: Long? = null,
   ): Map<String?, ActivityGroupDto> {
     return matchingStrings.associateWith { matchingString ->
-      val existing = findSuitableExistingSuitableGroupDto(type, matchingString, projectId, authorId)
-      val group = existing ?: createActivityGroupDto(type, matchingString, projectId, authorId)
+      val existing = findSuitableExistingSuitableGroupDto(type, matchingString, projectId, authorId, branchId)
+      val group = existing ?: createActivityGroupDto(type, matchingString, projectId, authorId, branchId)
       group
     }
   }
@@ -45,8 +47,9 @@ class ActivityGroupService(
     matchingString: String?,
     projectId: Long?,
     authorId: Long?,
+    branchId: Long?,
   ): ActivityGroupDto {
-    val entity = createActivityGroup(type, matchingString, projectId, authorId)
+    val entity = createActivityGroup(type, matchingString, projectId, authorId, branchId)
     return ActivityGroupDto(
       entity.id,
       entity.type,
@@ -61,12 +64,14 @@ class ActivityGroupService(
     matchingString: String?,
     projectId: Long?,
     authorId: Long?,
+    branchId: Long?,
   ): ActivityGroup {
     return ActivityGroup(
       type = type,
     ).also {
       it.authorId = authorId
       it.projectId = projectId
+      it.branchId = branchId
       activityGroupRepository.saveAndFlush(it)
       it.matchingString = matchingString
     }
@@ -77,8 +82,9 @@ class ActivityGroupService(
     matchingString: String?,
     projectId: Long?,
     authorId: Long?,
+    branchId: Long?,
   ): ActivityGroupDto? {
-    val latest = findLatest(type, matchingString, authorId, projectId) ?: return null
+    val latest = findLatest(type, matchingString, authorId, projectId, branchId) ?: return null
     if (latest.isTooOld || latest.lastActivityTooEarly) {
       return null
     }
@@ -90,6 +96,7 @@ class ActivityGroupService(
     matchingString: String?,
     authorId: Long?,
     projectId: Long?,
+    branchId: Long?,
   ): ActivityGroupDto? {
     val result =
       activityGroupRepository.findLatest(
@@ -97,6 +104,7 @@ class ActivityGroupService(
         matchingString = matchingString,
         authorId = authorId,
         projectId = projectId,
+        branchId = branchId,
       )
 
     if (result.isEmpty()) {
@@ -119,13 +127,33 @@ class ActivityGroupService(
     )
   }
 
+  fun getGroupInProject(
+    groupId: Long,
+    projectId: Long,
+  ): ActivityGroup {
+    val group = activityGroupRepository.findById(groupId).orElse(null)
+    if (group == null || group.projectId != projectId) {
+      throw NotFoundException()
+    }
+    return group
+  }
+
   @Transactional
   fun getProjectActivityGroups(
     projectId: Long,
     pageable: Pageable,
     activityGroupFilters: ActivityGroupFilters,
+    branchId: Long? = null,
+    defaultBranchId: Long? = null,
   ): PageImpl<ActivityGroupView> {
-    return ActivityGroupsProvider(projectId, pageable, activityGroupFilters, applicationContext).get()
+    return ActivityGroupsProvider(
+      projectId,
+      pageable,
+      activityGroupFilters,
+      applicationContext,
+      branchId,
+      defaultBranchId,
+    ).get()
   }
 
   private val ActivityGroupDto.isTooOld: Boolean

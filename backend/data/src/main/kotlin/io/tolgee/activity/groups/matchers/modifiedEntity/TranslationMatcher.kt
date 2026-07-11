@@ -4,10 +4,13 @@ import io.tolgee.activity.data.RevisionType
 import io.tolgee.model.translation.Translation
 import org.jooq.Condition
 import org.jooq.impl.DSL
+import kotlin.reflect.KClass
 
 class TranslationMatcher(
   private val type: Type = Type.BASE,
 ) : ModifiedEntityMatcher {
+  override val relevantEntityClasses: Set<KClass<*>> = setOf(Translation::class)
+
   private val defaultMatcher by lazy {
     DefaultMatcher(
       entityClass = Translation::class,

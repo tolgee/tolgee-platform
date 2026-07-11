@@ -1,21 +1,37 @@
 import React, { FC } from 'react';
-import { components } from 'tg.service/apiSchema.generated';
-import { CollapsibleActivityGroup } from './CollapsibleActivityGroup';
+import { Box, styled } from '@mui/material';
 
-type Group = components['schemas']['ActivityGroupCreateProjectModel'];
+import { CircledLanguageIcon } from 'tg.component/languages/CircledLanguageIcon';
 
-export const CreateProjectActivityGroup: FC<{
-  group: Group;
-}> = ({ group }) => {
+const StyledLanguages = styled(Box)`
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 8px 0;
+`;
+
+export const CreateProjectExpandedContent: FC<{
+  data: Record<string, any> | undefined;
+}> = ({ data }) => {
+  const languages = (data?.languages || []) as {
+    id: number;
+    name: string;
+    tag: string;
+    flagEmoji: string;
+  }[];
+
   return (
-    <CollapsibleActivityGroup
-      expandedChildren={<ExpandedContent group={group} />}
-    >
-      {group.author?.name} Created project {group.data?.name}
-    </CollapsibleActivityGroup>
+    <Box data-cy="activity-group-create-project-detail">
+      <Box>{data?.name}</Box>
+      <StyledLanguages>
+        {languages.map((language) => (
+          <Box key={language.id} display="flex" gap="4px" alignItems="center">
+            <CircledLanguageIcon flag={language.flagEmoji} size={18} />
+            {language.name}
+          </Box>
+        ))}
+      </StyledLanguages>
+    </Box>
   );
-};
-
-const ExpandedContent: FC<{ group: Group }> = (props) => {
-  return <pre>{JSON.stringify(props.group, null, 2)}</pre>;
 };

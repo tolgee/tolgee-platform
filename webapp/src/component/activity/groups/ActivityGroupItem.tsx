@@ -1,23 +1,68 @@
 import React, { FC } from 'react';
 import { components } from 'tg.service/apiSchema.generated';
-import { CreateProjectActivityGroup } from './groupTypeComponents/CreateProjectActivityGroup';
-import { CollapsibleActivityGroup } from './groupTypeComponents/CollapsibleActivityGroup';
-import { CreateKeysActivityGroup } from './groupTypeComponents/CreateKeysActivityGroup';
-import { SetTranslationsActivityGroup } from './groupTypeComponents/SetTranslationsActivityGroup';
+import { ActivityGroupCard } from './ActivityGroupCard';
+import { GenericGroupExpandedContent } from './GenericGroupExpandedContent';
+import { CreateKeysExpandedContent } from './groupTypeComponents/CreateKeysActivityGroup';
+import { CreateProjectExpandedContent } from './groupTypeComponents/CreateProjectActivityGroup';
+import { groupsConfiguration } from './groupsConfiguration';
+
+type ActivityGroupModel = components['schemas']['ActivityGroupModel'];
 
 export const ActivityGroupItem: FC<{
-  item: components['schemas']['ActivityGroupModel'];
-}> = (props) => {
-  switch (props.item.type) {
+  item: ActivityGroupModel;
+}> = ({ item }) => {
+  const label = groupsConfiguration[item.type]?.label ?? item.type;
+  const data = ('data' in item ? item.data : undefined) as
+    | Record<string, any>
+    | undefined;
+
+  switch (item.type) {
     case 'CREATE_PROJECT':
-      return <CreateProjectActivityGroup group={props.item} />;
+      return (
+        <ActivityGroupCard
+          item={item}
+          expandedContent={<CreateProjectExpandedContent data={data} />}
+        >
+          {label}
+        </ActivityGroupCard>
+      );
     case 'CREATE_KEY':
-      return <CreateKeysActivityGroup group={props.item} />;
+      return (
+        <ActivityGroupCard
+          item={item}
+          count={data?.keyCount}
+          expandedContent={<CreateKeysExpandedContent groupId={item.id} />}
+        >
+          {label}
+        </ActivityGroupCard>
+      );
     case 'SET_TRANSLATIONS':
-      return <SetTranslationsActivityGroup group={props.item} />;
+      return (
+        <ActivityGroupCard
+          item={item}
+          count={data?.translationCount}
+          expandedContent={<GenericGroupExpandedContent groupId={item.id} />}
+        >
+          {label}
+        </ActivityGroupCard>
+      );
     default:
       return (
-        <CollapsibleActivityGroup>{props.item.type}</CollapsibleActivityGroup>
+        <ActivityGroupCard
+          item={item}
+          count={sumCounts(data)}
+          expandedContent={<GenericGroupExpandedContent groupId={item.id} />}
+        >
+          {label}
+        </ActivityGroupCard>
       );
   }
 };
+
+function sumCounts(data: Record<string, any> | undefined): number | undefined {
+  const counts = data?.counts as Record<string, number> | undefined;
+  if (!counts) {
+    return undefined;
+  }
+  return Object.values(counts).reduce((a, b) => a + b, 0);
+}

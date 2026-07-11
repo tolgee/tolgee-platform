@@ -430,6 +430,10 @@ export interface paths {
   "/v2/projects/{projectId}/activity/group-items/create-key/{groupId}": {
     get: operations["getCreateKeyItems"];
   };
+  "/v2/projects/{projectId}/activity/group-items/generic/{groupId}": {
+    /** Returns the modified entities of the group as generic items (any group type). */
+    get: operations["getGenericItems"];
+  };
   "/v2/projects/{projectId}/activity/groups": {
     /** This endpoints returns the activity grouped by time windows so it's easier to read on the frontend. */
     get: operations["getActivityGroups"];
@@ -4424,6 +4428,11 @@ export interface components {
         | "KEY_USED_BY_ANOTHER_INSTANCE"
         | "UNKNOWN";
     };
+    EntityDescriptionRef: {
+      entityClass: string;
+      /** Format: int64 */
+      entityId: number;
+    };
     EntityDescriptionWithRelations: {
       data: { [key: string]: unknown };
       entityClass: string;
@@ -4942,6 +4951,18 @@ export interface components {
     GenerateSlugDto: {
       name: string;
       oldSlug?: string;
+    };
+    GenericGroupItemModel: {
+      describingRelations: {
+        [key: string]: components["schemas"]["EntityDescriptionRef"];
+      };
+      description: { [key: string]: unknown };
+      entityClass: string;
+      /** Format: int64 */
+      entityId: number;
+      modifications: {
+        [key: string]: components["schemas"]["PropertyModification"];
+      };
     };
     GetKeysRequestDto: {
       keys: components["schemas"]["KeyDefinitionDto"][];
@@ -6232,6 +6253,12 @@ export interface components {
     PagedModelCreateKeyGroupItemModel: {
       _embedded?: {
         items?: components["schemas"]["CreateKeyGroupItemModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelGenericGroupItemModel: {
+      _embedded?: {
+        genericGroupItemModelList?: components["schemas"]["GenericGroupItemModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
     };
@@ -15291,6 +15318,55 @@ export interface operations {
       };
     };
   };
+  /** Returns the modified entities of the group as generic items (any group type). */
+  getGenericItems: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+      path: {
+        groupId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/hal+json": components["schemas"]["PagedModelGenericGroupItemModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
   /** This endpoints returns the activity grouped by time windows so it's easier to read on the frontend. */
   getActivityGroups: {
     parameters: {
@@ -15381,6 +15457,7 @@ export interface operations {
           | "UNIGNORE_QA_ISSUE";
         filterLanguageIdIn?: number[];
         filterAuthorUserIdIn?: number[];
+        branch?: string;
       };
       path: {
         projectId: number;
