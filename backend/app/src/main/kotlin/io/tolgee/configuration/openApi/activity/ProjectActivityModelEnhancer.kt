@@ -25,10 +25,10 @@ class ProjectActivityModelEnhancer(
   private val baseType = baseSchema.type
 
   fun enhance() {
-    baseSchema.required = null
-    baseSchema.properties = null
-    baseSchema.type = null
-    baseSchema.oneOf = generateSchemas()
+    // Registers per-activity-type schemas (ProjectActivity<Type>Model) as standalone
+    // named schemas. The base ProjectActivityModel stays generic — replacing it with a
+    // oneOf union breaks every consumer typing modifiedEntities as a plain map.
+    generateSchemas()
   }
 
   private fun generateSchemas(): MutableList<Schema<Any>> {
@@ -54,15 +54,26 @@ class ProjectActivityModelEnhancer(
     return newProperties
   }
 
+  @Suppress("UNCHECKED_CAST")
   private fun getNewModifiedEntitiesProperty(activityType: ActivityType): Schema<Any> {
-    val properties =
+    val typeDefinitions =
       activityType.typeDefinitions
-        ?.map { (entityClass, definition) ->
+        ?: return baseProperties["modifiedEntities"] as Schema<Any>
+
+    val properties =
+      typeDefinitions
+        .map { (entityClass, definition) ->
           val schema = activityType.createModifiedEntityModel(entityClass)
           schema.properties["modifications"] =
             ModificationsSchemaGenerator(openApi).getModificationSchema(entityClass, definition)
-          entityClass.simpleName to schema
-        }?.toMap()
+          // one activity can modify many entities of the same class
+          val arraySchema =
+            Schema<Any>().apply {
+              type = "array"
+              items = schema
+            }
+          entityClass.simpleName to arraySchema
+        }.toMap()
 
     return Schema<Any>().apply {
       name = activityType.getModifiedEntitiesSchemaName()

@@ -15,17 +15,30 @@ import io.tolgee.activity.groups.viewProviders.createProject.CreateProjectGroupM
 import io.tolgee.activity.groups.viewProviders.setTranslations.SetTranslationsGroupModelProvider
 import io.tolgee.model.Language
 import io.tolgee.model.Project
+import io.tolgee.model.Prompt
 import io.tolgee.model.Screenshot
+import io.tolgee.model.TranslationSuggestion
+import io.tolgee.model.branching.Branch
 import io.tolgee.model.contentDelivery.ContentDeliveryConfig
 import io.tolgee.model.contentDelivery.ContentStorage
 import io.tolgee.model.enums.TranslationState
+import io.tolgee.model.enums.TranslationSuggestionState
+import io.tolgee.model.enums.qa.QaIssueState
+import io.tolgee.model.glossary.Glossary
+import io.tolgee.model.glossary.GlossaryTerm
+import io.tolgee.model.glossary.GlossaryTermTranslation
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyMeta
 import io.tolgee.model.key.Namespace
 import io.tolgee.model.key.Tag
 import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
+import io.tolgee.model.qa.TranslationQaIssue
+import io.tolgee.model.task.Task
+import io.tolgee.model.task.TaskKey
+import io.tolgee.model.translation.Label
 import io.tolgee.model.translation.Translation
 import io.tolgee.model.translation.TranslationComment
+import io.tolgee.model.translationMemory.TranslationMemory
 import io.tolgee.model.webhook.WebhookConfig
 import kotlin.reflect.KClass
 
@@ -220,6 +233,7 @@ enum class ActivityGroupType(
       ActivityType.COMPLEX_EDIT,
       ActivityType.BATCH_TAG_KEYS,
       ActivityType.BATCH_UNTAG_KEYS,
+      ActivityType.COMPLEX_TAG_OPERATION,
     ),
     matcher =
       DefaultMatcher(
@@ -389,7 +403,7 @@ enum class ActivityGroupType(
   ),
 
   CONTENT_DELIVERY_CONFIG_DELETE(
-    listOf(ActivityType.CONTENT_DELIVERY_CONFIG_UPDATE),
+    listOf(ActivityType.CONTENT_DELIVERY_CONFIG_DELETE),
     matcher =
       DefaultMatcher(
         entityClass = ContentDeliveryConfig::class,
@@ -434,7 +448,7 @@ enum class ActivityGroupType(
   ),
 
   WEBHOOK_CONFIG_UPDATE(
-    listOf(ActivityType.WEBHOOK_CONFIG_CREATE),
+    listOf(ActivityType.WEBHOOK_CONFIG_UPDATE),
     matcher =
       DefaultMatcher(
         entityClass = WebhookConfig::class,
@@ -443,11 +457,400 @@ enum class ActivityGroupType(
   ),
 
   WEBHOOK_CONFIG_DELETE(
-    listOf(ActivityType.WEBHOOK_CONFIG_CREATE),
+    listOf(ActivityType.WEBHOOK_CONFIG_DELETE),
     matcher =
       DefaultMatcher(
         entityClass = WebhookConfig::class,
         revisionTypes = listOf(RevisionType.DEL),
+      ),
+  ),
+
+  EDIT_KEY_CHARACTER_LIMIT(
+    listOf(ActivityType.KEY_CHARACTER_LIMIT_EDIT),
+    matcher =
+      DefaultMatcher(
+        entityClass = Key::class,
+        revisionTypes = listOf(RevisionType.MOD),
+        modificationProps = listOf(Key::maxCharLimit),
+      ),
+  ),
+
+  SOFT_DELETE_KEY(
+    listOf(ActivityType.KEY_SOFT_DELETE),
+    matcher =
+      DefaultMatcher(
+        entityClass = Key::class,
+        revisionTypes = listOf(RevisionType.MOD),
+        modificationProps = listOf(Key::deletedAt),
+        allowedValues = mapOf(Key::deletedAt to notNull()),
+      ),
+  ),
+
+  RESTORE_KEY(
+    listOf(ActivityType.KEY_RESTORE, ActivityType.BATCH_KEY_RESTORE),
+    matcher =
+      DefaultMatcher(
+        entityClass = Key::class,
+        revisionTypes = listOf(RevisionType.MOD),
+        modificationProps = listOf(Key::deletedAt),
+        allowedValues = mapOf(Key::deletedAt to null),
+      ),
+  ),
+
+  HARD_DELETE_KEY(
+    listOf(ActivityType.KEY_HARD_DELETE, ActivityType.BATCH_KEY_HARD_DELETE),
+    matcher =
+      DefaultMatcher(
+        entityClass = Key::class,
+        revisionTypes = listOf(RevisionType.DEL),
+      ),
+  ),
+
+  SET_TRANSLATION_LABELS(
+    listOf(
+      ActivityType.TRANSLATION_LABEL_ASSIGN,
+      ActivityType.BATCH_ASSIGN_TRANSLATION_LABEL,
+      ActivityType.BATCH_UNASSIGN_TRANSLATION_LABEL,
+      ActivityType.TRANSLATION_LABELS_EDIT,
+    ),
+    matcher =
+      DefaultMatcher(
+        entityClass = Translation::class,
+        revisionTypes = listOf(RevisionType.MOD),
+        modificationProps = listOf(Translation::labels),
+      ),
+  ),
+
+  CREATE_TRANSLATION_LABEL(
+    listOf(ActivityType.TRANSLATION_LABEL_CREATE),
+    matcher =
+      DefaultMatcher(
+        entityClass = Label::class,
+        revisionTypes = listOf(RevisionType.ADD),
+      ),
+  ),
+
+  EDIT_TRANSLATION_LABEL(
+    listOf(ActivityType.TRANSLATION_LABEL_UPDATE),
+    matcher =
+      DefaultMatcher(
+        entityClass = Label::class,
+        revisionTypes = listOf(RevisionType.MOD),
+      ),
+  ),
+
+  DELETE_TRANSLATION_LABEL(
+    listOf(ActivityType.TRANSLATION_LABEL_DELETE),
+    matcher =
+      DefaultMatcher(
+        entityClass = Label::class,
+        revisionTypes = listOf(RevisionType.DEL),
+      ),
+  ),
+
+  CREATE_TASK(
+    listOf(ActivityType.TASK_CREATE, ActivityType.TASKS_CREATE),
+    matcher =
+      DefaultMatcher(
+        entityClass = Task::class,
+        revisionTypes = listOf(RevisionType.ADD),
+      ),
+  ),
+
+  EDIT_TASK(
+    listOf(ActivityType.TASK_UPDATE),
+    matcher =
+      DefaultMatcher(
+        entityClass = Task::class,
+        revisionTypes = listOf(RevisionType.MOD),
+        modificationProps = listOf(Task::name, Task::description, Task::type, Task::dueDate, Task::assignees),
+      ),
+  ),
+
+  FINISH_TASK(
+    listOf(ActivityType.TASK_FINISH),
+    matcher =
+      DefaultMatcher(
+        entityClass = Task::class,
+        revisionTypes = listOf(RevisionType.MOD),
+        modificationProps = listOf(Task::state, Task::closedAt),
+      ),
+  ),
+
+  CLOSE_TASK(
+    listOf(ActivityType.TASK_CLOSE),
+    matcher =
+      DefaultMatcher(
+        entityClass = Task::class,
+        revisionTypes = listOf(RevisionType.MOD),
+        modificationProps = listOf(Task::state, Task::closedAt),
+      ),
+  ),
+
+  REOPEN_TASK(
+    listOf(ActivityType.TASK_REOPEN),
+    matcher =
+      DefaultMatcher(
+        entityClass = Task::class,
+        revisionTypes = listOf(RevisionType.MOD),
+        modificationProps = listOf(Task::state, Task::closedAt),
+      ),
+  ),
+
+  UPDATE_TASK_KEYS(
+    listOf(ActivityType.TASK_KEYS_UPDATE),
+    matcher =
+      DefaultMatcher(
+        entityClass = TaskKey::class,
+        revisionTypes = listOf(RevisionType.ADD, RevisionType.DEL),
+      ),
+  ),
+
+  CREATE_GLOSSARY(
+    listOf(ActivityType.GLOSSARY_CREATE),
+    matcher =
+      DefaultMatcher(
+        entityClass = Glossary::class,
+        revisionTypes = listOf(RevisionType.ADD),
+      ),
+  ),
+
+  EDIT_GLOSSARY(
+    listOf(ActivityType.GLOSSARY_UPDATE),
+    matcher =
+      DefaultMatcher(
+        entityClass = Glossary::class,
+        revisionTypes = listOf(RevisionType.MOD),
+      ),
+  ),
+
+  DELETE_GLOSSARY(
+    listOf(ActivityType.GLOSSARY_DELETE),
+    matcher =
+      DefaultMatcher(
+        entityClass = Glossary::class,
+        revisionTypes = listOf(RevisionType.DEL),
+      ),
+  ),
+
+  IMPORT_GLOSSARY(
+    listOf(ActivityType.GLOSSARY_IMPORT),
+    matcher =
+      DefaultMatcher(
+        entityClass = GlossaryTerm::class,
+        revisionTypes = listOf(RevisionType.ADD, RevisionType.MOD),
+      ).or(
+        DefaultMatcher(
+          entityClass = GlossaryTermTranslation::class,
+          revisionTypes = listOf(RevisionType.ADD, RevisionType.MOD),
+        ),
+      ),
+  ),
+
+  CREATE_GLOSSARY_TERM(
+    listOf(ActivityType.GLOSSARY_TERM_CREATE),
+    matcher =
+      DefaultMatcher(
+        entityClass = GlossaryTerm::class,
+        revisionTypes = listOf(RevisionType.ADD),
+      ),
+  ),
+
+  EDIT_GLOSSARY_TERM(
+    listOf(ActivityType.GLOSSARY_TERM_UPDATE),
+    matcher =
+      DefaultMatcher(
+        entityClass = GlossaryTerm::class,
+        revisionTypes = listOf(RevisionType.MOD),
+      ),
+  ),
+
+  DELETE_GLOSSARY_TERM(
+    listOf(ActivityType.GLOSSARY_TERM_DELETE),
+    matcher =
+      DefaultMatcher(
+        entityClass = GlossaryTerm::class,
+        revisionTypes = listOf(RevisionType.DEL),
+      ),
+  ),
+
+  SET_GLOSSARY_TERM_TRANSLATION(
+    listOf(ActivityType.GLOSSARY_TERM_TRANSLATION_UPDATE),
+    matcher =
+      DefaultMatcher(
+        entityClass = GlossaryTermTranslation::class,
+        revisionTypes = listOf(RevisionType.ADD, RevisionType.MOD),
+        modificationProps = listOf(GlossaryTermTranslation::text),
+      ),
+  ),
+
+  CREATE_TRANSLATION_MEMORY(
+    listOf(ActivityType.TRANSLATION_MEMORY_CREATE),
+    matcher =
+      DefaultMatcher(
+        entityClass = TranslationMemory::class,
+        revisionTypes = listOf(RevisionType.ADD),
+      ),
+  ),
+
+  EDIT_TRANSLATION_MEMORY(
+    listOf(ActivityType.TRANSLATION_MEMORY_UPDATE),
+    matcher =
+      DefaultMatcher(
+        entityClass = TranslationMemory::class,
+        revisionTypes = listOf(RevisionType.MOD),
+      ),
+  ),
+
+  DELETE_TRANSLATION_MEMORY(
+    listOf(ActivityType.TRANSLATION_MEMORY_DELETE),
+    matcher =
+      DefaultMatcher(
+        entityClass = TranslationMemory::class,
+        revisionTypes = listOf(RevisionType.DEL),
+      ),
+  ),
+
+  CREATE_SUGGESTION(
+    listOf(ActivityType.CREATE_SUGGESTION),
+    matcher =
+      DefaultMatcher(
+        entityClass = TranslationSuggestion::class,
+        revisionTypes = listOf(RevisionType.ADD),
+      ),
+  ),
+
+  DELETE_SUGGESTION(
+    listOf(ActivityType.DELETE_SUGGESTION),
+    matcher =
+      DefaultMatcher(
+        entityClass = TranslationSuggestion::class,
+        revisionTypes = listOf(RevisionType.DEL),
+      ),
+  ),
+
+  DECLINE_SUGGESTION(
+    listOf(ActivityType.DECLINE_SUGGESTION),
+    matcher =
+      DefaultMatcher(
+        entityClass = TranslationSuggestion::class,
+        revisionTypes = listOf(RevisionType.MOD),
+        modificationProps = listOf(TranslationSuggestion::state),
+        allowedValues = mapOf(TranslationSuggestion::state to TranslationSuggestionState.DECLINED),
+      ),
+  ),
+
+  ACCEPT_SUGGESTION(
+    listOf(ActivityType.ACCEPT_SUGGESTION),
+    matcher =
+      DefaultMatcher(
+        entityClass = TranslationSuggestion::class,
+        revisionTypes = listOf(RevisionType.MOD),
+        modificationProps = listOf(TranslationSuggestion::state),
+        allowedValues = mapOf(TranslationSuggestion::state to TranslationSuggestionState.ACCEPTED),
+      ),
+  ),
+
+  SET_SUGGESTION_ACTIVE(
+    listOf(ActivityType.SUGGESTION_SET_ACTIVE, ActivityType.REVERSE_SUGGESTION),
+    matcher =
+      DefaultMatcher(
+        entityClass = TranslationSuggestion::class,
+        revisionTypes = listOf(RevisionType.MOD),
+        modificationProps = listOf(TranslationSuggestion::state),
+        allowedValues = mapOf(TranslationSuggestion::state to TranslationSuggestionState.ACTIVE),
+      ),
+  ),
+
+  CREATE_AI_PROMPT(
+    listOf(ActivityType.AI_PROMPT_CREATE),
+    matcher =
+      DefaultMatcher(
+        entityClass = Prompt::class,
+        revisionTypes = listOf(RevisionType.ADD),
+      ),
+  ),
+
+  EDIT_AI_PROMPT(
+    listOf(ActivityType.AI_PROMPT_UPDATE),
+    matcher =
+      DefaultMatcher(
+        entityClass = Prompt::class,
+        revisionTypes = listOf(RevisionType.MOD),
+      ),
+  ),
+
+  DELETE_AI_PROMPT(
+    listOf(ActivityType.AI_PROMPT_DELETE),
+    matcher =
+      DefaultMatcher(
+        entityClass = Prompt::class,
+        revisionTypes = listOf(RevisionType.DEL),
+      ),
+  ),
+
+  CREATE_BRANCH(
+    listOf(ActivityType.BRANCH_CREATE),
+    matcher =
+      DefaultMatcher(
+        entityClass = Branch::class,
+        revisionTypes = listOf(RevisionType.ADD),
+      ),
+  ),
+
+  RENAME_BRANCH(
+    listOf(ActivityType.BRANCH_RENAME),
+    matcher =
+      DefaultMatcher(
+        entityClass = Branch::class,
+        revisionTypes = listOf(RevisionType.MOD),
+        modificationProps = listOf(Branch::name),
+      ),
+  ),
+
+  CHANGE_BRANCH_PROTECTION(
+    listOf(ActivityType.BRANCH_PROTECTION_CHANGE),
+    matcher =
+      DefaultMatcher(
+        entityClass = Branch::class,
+        revisionTypes = listOf(RevisionType.MOD),
+        modificationProps = listOf(Branch::isProtected),
+      ),
+  ),
+
+  MERGE_BRANCH(
+    listOf(ActivityType.BRANCH_MERGE),
+    matcher =
+      DefaultMatcher(
+        entityClass = Key::class,
+        revisionTypes = listOf(RevisionType.ADD, RevisionType.MOD, RevisionType.DEL),
+      ).or(
+        DefaultMatcher(
+          entityClass = Translation::class,
+          revisionTypes = listOf(RevisionType.ADD, RevisionType.MOD, RevisionType.DEL),
+        ),
+      ),
+  ),
+
+  IGNORE_QA_ISSUE(
+    listOf(ActivityType.QA_ISSUE_IGNORE),
+    matcher =
+      DefaultMatcher(
+        entityClass = TranslationQaIssue::class,
+        revisionTypes = listOf(RevisionType.MOD, RevisionType.ADD),
+        modificationProps = listOf(TranslationQaIssue::state),
+        allowedValues = mapOf(TranslationQaIssue::state to QaIssueState.IGNORED),
+      ),
+  ),
+
+  UNIGNORE_QA_ISSUE(
+    listOf(ActivityType.QA_ISSUE_UNIGNORE),
+    matcher =
+      DefaultMatcher(
+        entityClass = TranslationQaIssue::class,
+        revisionTypes = listOf(RevisionType.MOD),
+        modificationProps = listOf(TranslationQaIssue::state),
+        allowedValues = mapOf(TranslationQaIssue::state to QaIssueState.OPEN),
       ),
   ),
 

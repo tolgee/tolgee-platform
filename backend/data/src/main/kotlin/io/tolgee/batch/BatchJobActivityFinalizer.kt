@@ -56,6 +56,7 @@ class BatchJobActivityFinalizer(
 
         mergeDescribingEntities(activityRevisionIdToMergeInto, revisionIds)
         mergeModifiedEntities(activityRevisionIdToMergeInto, revisionIds)
+        mergeActivityGroups(activityRevisionIdToMergeInto, revisionIds)
         deleteUnusedRevisions(revisionIds)
         setJobIdAndAuthorIdToRevision(activityRevisionIdToMergeInto, job)
         applicationEventPublisher.publishEvent(OnBatchJobFinalized(job, activityRevisionIdToMergeInto))
@@ -118,6 +119,38 @@ class BatchJobActivityFinalizer(
       ).setParameter("activityRevisionIdToMergeInto", activityRevisionIdToMergeInto)
       .setParameter("jobId", job.id)
       .setParameter("authorId", TypedParameterValue(StandardBasicTypes.LONG, job.authorId))
+      .executeUpdate()
+  }
+
+  private fun mergeActivityGroups(
+    activityRevisionIdToMergeInto: Long,
+    revisionIds: MutableList<Long>,
+  ) {
+    if (revisionIds.isEmpty()) {
+      return
+    }
+    entityManager
+      .createNativeQuery(
+        """
+        insert into activity_revision_activity_groups (activity_revisions_id, activity_groups_id)
+        select distinct :activityRevisionIdToMergeInto, activity_groups_id
+        from activity_revision_activity_groups
+        where activity_revisions_id in (:revisionIds)
+          and activity_groups_id not in (
+            select activity_groups_id from activity_revision_activity_groups
+            where activity_revisions_id = :activityRevisionIdToMergeInto
+          )
+        """,
+      ).setParameter("activityRevisionIdToMergeInto", activityRevisionIdToMergeInto)
+      .setParameter("revisionIds", revisionIds)
+      .executeUpdate()
+
+    entityManager
+      .createNativeQuery(
+        """
+          delete from activity_revision_activity_groups where activity_revisions_id in (:revisionIds)
+        """,
+      ).setParameter("revisionIds", revisionIds)
       .executeUpdate()
   }
 

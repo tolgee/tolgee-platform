@@ -1,9 +1,11 @@
-import React, { FC } from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { Box, Button } from '@mui/material';
 
-export const CollapsibleActivityGroup: FC<{
-  expandedChildren?: React.ReactNode;
-}> = (props) => {
+export const CollapsibleActivityGroup: FC<
+  PropsWithChildren<{
+    expandedChildren?: React.ReactNode;
+  }>
+> = (props) => {
   const [expanded, setExpanded] = React.useState(false);
 
   const expandedContent = expanded

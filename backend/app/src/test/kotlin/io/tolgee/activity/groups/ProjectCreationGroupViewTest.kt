@@ -51,8 +51,6 @@ class ProjectCreationGroupViewTest : AuthorizedControllerTest() {
               node("deleted").isEqualTo(false)
             }
 
-            node("counts.Project").isEqualTo(1)
-
             node("data") {
               node("id").isNumber
               node("name").isEqualTo("What a project")

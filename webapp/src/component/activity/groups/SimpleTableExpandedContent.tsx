@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { UseQueryResult } from 'react-query';
 import { PaginatedHateoasList } from '../../common/list/PaginatedHateoasList';
 import {
@@ -25,7 +25,7 @@ export const SimpleTableExpandedContent: FC<SimpleTableExpandedContentProps> = (
 
   const fields = getFields(loadable);
 
-  const Table: FC = (props) => {
+  const Table: FC<PropsWithChildren> = (props) => {
     return <TheTable headItems={fields}>{props.children}</TheTable>;
   };
 
@@ -45,7 +45,7 @@ export const SimpleTableExpandedContent: FC<SimpleTableExpandedContentProps> = (
   );
 };
 
-const TheTable: FC<{ headItems: string[] }> = (props) => {
+const TheTable: FC<PropsWithChildren<{ headItems: string[] }>> = (props) => {
   return (
     <Table>
       <TableHead>
