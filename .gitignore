@@ -22,6 +22,7 @@ e2e/cypress/videos
 e2e/cypress/screenshots
 e2e/cypress/downloads
 e2e/cypress/fixtures/generated
+e2e/server.log
 e2e/node_modules
 e2e/cypress/integration/examples/
 .gradle

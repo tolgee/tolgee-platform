@@ -117,6 +117,11 @@ export const [
     [languagesLoadable.data]
   );
 
+  const allLanguageTags = useMemo(
+    () => allowedLanguages?.map((l) => l.tag),
+    [allowedLanguages]
+  );
+
   const translationService = useTranslationsService({
     projectId: props.projectId,
     branchName: props.branchName,
@@ -129,6 +134,7 @@ export const [
     initialLangs: initialLangs,
     baseLang: props.baseLang,
     prefilter: props.prefilter,
+    allLanguageTags,
   });
 
   const aiPlaygroundService = useAiPlaygroundService({

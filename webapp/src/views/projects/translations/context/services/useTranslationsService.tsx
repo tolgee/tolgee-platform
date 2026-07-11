@@ -22,6 +22,12 @@ import { PrefilterType } from '../../prefilters/usePrefilter';
 import { useConfig } from 'tg.globalContext/helpers';
 import { useQaChecksEnabled } from 'tg.ee';
 import { useTranslationFiltersService } from './useTranslationFilterService';
+import {
+  buildSearchRequestParams,
+  getReferencedLanguageTags,
+} from '../../searchQuery/buildSearchRequestParams';
+import { addSearchedIfMissing } from '../../searchQuery/addSearchedIfMissing';
+import { adoptFetchedLanguages } from '../../searchQuery/adoptFetchedLanguages';
 
 const PAGE_SIZE = 60;
 
@@ -44,6 +50,7 @@ type Props = {
   updateLocalStorageLanguages?: boolean;
   baseLang: string | undefined;
   prefilter?: PrefilterType;
+  allLanguageTags?: string[];
 };
 
 const addBaseIfMissing = (languages: string[] | undefined, base: string) => {
@@ -134,15 +141,32 @@ export const useTranslationsService = (props: Props) => {
       ? [props.keyNamespace]
       : filtersQuery.filterNamespace;
 
+  const searchParams = useMemo(
+    () =>
+      buildSearchRequestParams(
+        urlSearch as string | undefined,
+        props.allLanguageTags ?? []
+      ),
+    [urlSearch, props.allLanguageTags]
+  );
+
+  const referencedLanguageTags = useMemo(
+    () => getReferencedLanguageTags(searchParams),
+    [searchParams]
+  );
+
   const requestQuery: TranslationsQueryType = {
     ...query,
-    // smuggle in base lang if not present
-    languages: addBaseIfMissing(query.languages, props.baseLang!),
+    languages: addSearchedIfMissing(
+      addBaseIfMissing(query.languages, props.baseLang!),
+      referencedLanguageTags,
+      props.baseLang!
+    ),
     ...filtersQuery,
     filterKeyName: props.keyName ? [props.keyName] : undefined,
     filterNamespace,
     filterKeyId: props.keyId ? [props.keyId] : undefined,
-    search: urlSearch as string,
+    ...searchParams,
     filterRevisionId:
       props.prefilter?.activity !== undefined
         ? [props.prefilter.activity]
@@ -162,6 +186,10 @@ export const useTranslationsService = (props: Props) => {
     path,
     query: requestQuery,
     options: {
+      // deep-linked queries like ?search=de:foo parse correctly only once the
+      // project languages are known; without a search term the requests may
+      // run in parallel
+      enabled: !urlSearch || props.allLanguageTags !== undefined,
       cacheTime: 0,
       keepPreviousData: true,
       getNextPageParam: (lastPage) => {
@@ -181,13 +209,18 @@ export const useTranslationsService = (props: Props) => {
       onSuccess(data) {
         const flatKeys = flattenKeys(data);
 
-        const selectedLanguages = languages?.length
-          ? shaveBy(
-              data.pages[0].selectedLanguages.map((l) => l.tag),
-              languages
-            )
-          : data.pages[0].selectedLanguages.map((l) => l.tag);
-        if (query.languages?.toString() !== selectedLanguages?.toString()) {
+        const searchInjectedTags = referencedLanguageTags.filter(
+          (tag) => !query.languages?.includes(tag)
+        );
+        const selectedLanguages = adoptFetchedLanguages({
+          fetchedTags: data.pages[0].selectedLanguages.map((l) => l.tag),
+          currentSelection: languages,
+          searchInjectedTags,
+        });
+        if (
+          selectedLanguages &&
+          query.languages?.toString() !== selectedLanguages.toString()
+        ) {
           // update language selection to the fetched one
           // if there are some languages which are not permitted or were deleted
           _setLanguages(() => selectedLanguages);

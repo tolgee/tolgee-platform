@@ -247,6 +247,7 @@ declare namespace DataCy {
         "global-paginated-list": true;
         "global-plus-button": true;
         "global-search-field": true;
+        "global-search-field-clear": true;
         "global-user-menu-button": true;
         "glossaries-empty-add-button": true;
         "glossaries-list-more-button": true;
@@ -290,6 +291,8 @@ declare namespace DataCy {
         "glossary-view-button": true;
         "glossary-view-language-select": true;
         "handlebars-editor": true;
+        "handlebars-tooltip": true;
+        "handlebars-tooltip-helper-description": true;
         "import-conflict-resolution-dialog": true;
         "import-conflicts-not-resolved-dialog": true;
         "import-conflicts-not-resolved-dialog-cancel-button": true;
@@ -915,6 +918,9 @@ declare namespace DataCy {
         "translations-outdated-indicator": true;
         "translations-row": true;
         "translations-row-checkbox": true;
+        "translations-search-help-button": true;
+        "translations-search-help-docs-link": true;
+        "translations-search-help-popover": true;
         "translations-select-all-button": true;
         "translations-shortcuts-command": true;
         "translations-state-filter": true;

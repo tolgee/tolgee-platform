@@ -22,7 +22,8 @@ function getValue(context: CompletionContext, from: number, to?: number) {
 
 export const handlebarsAutocomplete =
   (
-    variablesRef: RefObject<PromptVariableDto[] | undefined>
+    variablesRef: RefObject<PromptVariableDto[] | undefined>,
+    helpersRef?: RefObject<Completion[] | undefined>
   ): CompletionSource =>
   (context) => {
     const tree = syntaxTree(context.state);
@@ -33,14 +34,24 @@ export const handlebarsAutocomplete =
     let to: CompletionResult['to'] = undefined;
 
     let path: string[] = [];
+    let isNameSlot = false;
 
     if (nodeBefore.name === '{{') {
+      from = context.pos;
+      isNameSlot = true;
+    }
+
+    if (
+      nodeBefore.name === 'Insert' &&
+      getValue(context, context.pos - 1, context.pos) === ' '
+    ) {
       from = context.pos;
     }
 
     if (nodeBefore.name === 'Identifier') {
       from = nodeBefore.from;
       to = nodeBefore.to;
+      isNameSlot = nodeBefore.prevSibling?.name === '{{';
 
       const idValue = getValue(context, from, to);
       path = idValue.split('.').slice(0, -1);
@@ -61,22 +72,26 @@ export const handlebarsAutocomplete =
         (item) => (variables = variables?.find((i) => i.name === item)?.props)
       );
 
-      const result = {
+      const options: Completion[] =
+        variables?.map(
+          ({ name, value, props }) =>
+            ({
+              label: name,
+              detail: trimDetail(value),
+              apply: name + (props ? '.' : postfix),
+              type: props ? 'object' : 'variable',
+            } satisfies Completion)
+        ) || [];
+
+      if (isNameSlot && !path.length) {
+        options.push(...(helpersRef?.current ?? []));
+      }
+
+      return {
         from: from,
         to,
-        options:
-          variables?.map(
-            ({ name, value, props }) =>
-              ({
-                label: name,
-                detail: trimDetail(value),
-                apply: name + (props ? '.' : postfix),
-                type: props ? 'object' : 'variable',
-              } satisfies Completion)
-          ) || [],
+        options,
       };
-
-      return result;
     }
 
     return null;

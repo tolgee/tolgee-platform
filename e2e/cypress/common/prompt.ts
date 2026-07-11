@@ -41,6 +41,12 @@ export function getPromptEditor() {
     .getElement();
 }
 
+export function getAutocompleteOption(label: string) {
+  return cy
+    .gcy('handlebars-editor')
+    .find(`.cm-tooltip-autocomplete .cm-completionLabel:contains("${label}")`);
+}
+
 export function visitAiSettings(projectId: number) {
   return cy.visit(`${HOST}/projects/${projectId}/ai/prompts`);
 }

@@ -33,6 +33,8 @@ spring:
 tolgee:
   authentication:
     enabled: false
+  internal:
+    orphan-project-purge-enabled: true
   postgres-autostart:
     enabled: true
   cache:

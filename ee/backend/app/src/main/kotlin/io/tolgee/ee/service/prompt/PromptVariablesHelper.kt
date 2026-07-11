@@ -2,7 +2,6 @@ package io.tolgee.ee.service.prompt
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.component.machineTranslation.metadata.TranslationGlossaryItem
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.LanguageDto
@@ -193,7 +192,7 @@ class PromptVariablesHelper(
 
     result.add(Variable("languageName", language?.name))
     result.add(Variable("languageTag", language?.tag))
-    result.add(Variable("translation", escapeAsJson(translation?.text) ?: ""))
+    result.add(Variable("translation", PromptHandlebarsHelper.escapeJson(translation?.text)))
     result.add(Variable("languageNote", language?.aiTranslatorPromptDescription ?: ""))
     result.add(cjkVariable(language?.tag))
     return result
@@ -382,13 +381,6 @@ class PromptVariablesHelper(
     variables.add(fragments)
 
     return variables
-  }
-
-  fun escapeAsJson(text: String?): String? {
-    return text?.let {
-      val objectMapper: ObjectMapper = jacksonObjectMapper()
-      objectMapper.writeValueAsString(text).removeSurrounding("\"")
-    }
   }
 
   fun encodeScreenshot(

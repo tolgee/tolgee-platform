@@ -149,7 +149,7 @@ class PromptServiceEeImpl(
     try {
       val params = promptVariablesHelper.getVariables(projectId, keyId, targetLanguageId)
 
-      val handlebars = Handlebars()
+      val handlebars = PromptHandlebarsHelper.register(Handlebars())
 
       val paramsForFragments = createVariablesLazyMap(params)
 

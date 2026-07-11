@@ -5,9 +5,11 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
 import io.tolgee.dtos.LlmParams
 import io.tolgee.ee.component.llm.AnthropicApiService
+import io.tolgee.exceptions.LlmProviderMaxTokensExceededException
 import io.tolgee.model.enums.LlmProviderPriority
 import io.tolgee.model.enums.LlmProviderType
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders
@@ -78,6 +80,44 @@ class AnthropicApiServiceTest {
   }
 
   @Test
+  fun `does not send sampling parameters`() {
+    val config = createConfig(format = "json_schema")
+    val params = createParams(shouldOutputJson = true)
+    val restTemplate = createCapturingRestTemplate()
+
+    service.translate(params, config, restTemplate)
+
+    val bodyMap = objectMapper.readValue<Map<String, Any>>(capturedRequestBody!!)
+
+    assertThat(bodyMap).doesNotContainKey("temperature")
+    assertThat(bodyMap).doesNotContainKey("top_p")
+    assertThat(bodyMap).doesNotContainKey("top_k")
+  }
+
+  @Test
+  fun `sends max_tokens from provider config`() {
+    val config = createConfig(format = "json_schema")
+    val params = createParams(shouldOutputJson = true)
+    val restTemplate = createCapturingRestTemplate()
+
+    service.translate(params, config, restTemplate)
+
+    val bodyMap = objectMapper.readValue<Map<String, Any>>(capturedRequestBody!!)
+
+    assertThat(bodyMap["max_tokens"]).isEqualTo(1000)
+  }
+
+  @Test
+  fun `throws when response is truncated by max_tokens`() {
+    val config = createConfig(format = "json_schema")
+    val params = createParams(shouldOutputJson = true)
+    val restTemplate = createCapturingRestTemplate(stopReason = "max_tokens")
+
+    assertThatThrownBy { service.translate(params, config, restTemplate) }
+      .isInstanceOf(LlmProviderMaxTokensExceededException::class.java)
+  }
+
+  @Test
   fun `omits output_config when shouldOutputJson is false`() {
     val config = createConfig(format = "json_schema")
     val params = createParams(shouldOutputJson = false)
@@ -122,10 +162,10 @@ class AnthropicApiServiceTest {
     )
   }
 
-  private fun createCapturingRestTemplate(): RestTemplate {
+  private fun createCapturingRestTemplate(stopReason: String = "end_turn"): RestTemplate {
     val responseJson =
       """
-      {"content":[{"text":"result"}],"usage":{"input_tokens":10,"output_tokens":5}}
+      {"content":[{"text":"result"}],"usage":{"input_tokens":10,"output_tokens":5},"stop_reason":"$stopReason"}
       """.trimIndent()
 
     val factory =

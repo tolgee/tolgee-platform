@@ -37,6 +37,12 @@ class InternalProperties {
 
   var disableInitialUserCreation: Boolean = false
 
+  /**
+   * Scheduled hard-deletion of projects whose owning organization was soft-deleted.
+   * Enabled via application.yaml; disabled in tests so the purge never races the per-test DB reset.
+   */
+  var orphanProjectPurgeEnabled: Boolean = false
+
   var useInMemoryFileStorage: Boolean = false
 
   var clearLiquibaseChecksums: Boolean = false

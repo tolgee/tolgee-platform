@@ -240,6 +240,7 @@ class GlossaryTermService(
     glossaryTermRepository.saveAll(terms)
   }
 
+  @Transactional
   fun getHighlights(
     organizationId: Long,
     projectId: Long,

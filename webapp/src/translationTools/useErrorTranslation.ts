@@ -214,6 +214,11 @@ export function useErrorTranslation() {
         return t('llm_content_filter');
       case 'llm_provider_empty_response':
         return t('llm_provider_empty_response');
+      case 'llm_provider_max_tokens_exceeded':
+        return t(
+          'llm_provider_max_tokens_exceeded',
+          'LLM response was cut off by the output token limit'
+        );
       case 'label_already_exists':
         return t('label_already_exists', { value: params?.[0] || '' });
       case 'cannot_modify_reviewed_translation':
@@ -520,6 +525,18 @@ export function useErrorTranslation() {
         return t('label_not_found');
       case 'filter_by_value_label_not_valid':
         return t('filter_by_value_label_not_valid');
+
+      // Scoped search
+      case 'filter_pattern_not_valid':
+        return t(
+          'filter_pattern_not_valid',
+          'Search filter pattern is not valid'
+        );
+      case 'filter_pattern_language_not_valid':
+        return t(
+          'filter_pattern_language_not_valid',
+          'Search language is not among the returned languages'
+        );
 
       // Suggestions
       case 'suggestion_not_found':

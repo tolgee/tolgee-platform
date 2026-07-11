@@ -1,6 +1,9 @@
 package io.tolgee.service.queryBuilders.translationViewBuilder
 
+import io.tolgee.constants.Message
+import io.tolgee.dtos.request.translation.TranslationFilterByPattern
 import io.tolgee.dtos.request.translation.TranslationFilters
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Language_
 import io.tolgee.model.UserAccount_
 import io.tolgee.model.activity.ActivityDescribingEntity
@@ -25,6 +28,7 @@ import io.tolgee.model.translation.Translation_
 import jakarta.persistence.EntityManager
 import jakarta.persistence.Tuple
 import jakarta.persistence.criteria.CriteriaBuilder
+import jakarta.persistence.criteria.Expression
 import jakarta.persistence.criteria.JoinType
 import jakarta.persistence.criteria.Predicate
 import jakarta.persistence.criteria.Subquery
@@ -54,6 +58,7 @@ class QueryGlobalFiltering(
     filterHasNoScreenshot()
     filterHasDescription()
     filterHasNoDescription()
+    filterPatterns()
     filterSearch()
     filterRevisionId()
     filterFailedTargets()
@@ -72,6 +77,113 @@ class QueryGlobalFiltering(
       )
     }
   }
+
+  private fun filterPatterns() {
+    applyFieldPatterns(params.filterKeyPattern, queryBase.keyNameExpression, negated = false, nullable = false)
+    applyFieldPatterns(params.filterNoKeyPattern, queryBase.keyNameExpression, negated = true, nullable = false)
+    applyFieldPatterns(
+      params.filterDescriptionPattern,
+      queryBase.descriptionExpression,
+      negated = false,
+      nullable = true,
+    )
+    applyFieldPatterns(
+      params.filterNoDescriptionPattern,
+      queryBase.descriptionExpression,
+      negated = true,
+      nullable = true,
+    )
+    applyFieldPatterns(
+      params.filterNamespacePattern,
+      queryBase.namespaceNameExpression,
+      negated = false,
+      nullable = true,
+    )
+    applyFieldPatterns(
+      params.filterNoNamespacePattern,
+      queryBase.namespaceNameExpression,
+      negated = true,
+      nullable = true,
+    )
+    applyTranslationPatterns(params.filterTranslationPattern, negated = false)
+    applyTranslationPatterns(params.filterNoTranslationPattern, negated = true)
+  }
+
+  private fun applyFieldPatterns(
+    patterns: List<String>?,
+    field: Expression<String>,
+    negated: Boolean,
+    nullable: Boolean,
+  ) {
+    WildcardLikeUtil.validatePatterns(patterns)
+    patterns?.forEach { pattern ->
+      queryBase.whereConditions.add(fieldPatternPredicate(field, pattern, negated, nullable))
+    }
+  }
+
+  private fun fieldPatternPredicate(
+    field: Expression<String>,
+    pattern: String,
+    negated: Boolean,
+    nullable: Boolean,
+  ): Predicate {
+    val like = patternLike(field, pattern)
+    if (!nullable) return negateIfNeeded(like, negated)
+    if (!negated) return like
+    // `NOT (NULL LIKE x)` is NULL and drops the row — keys without the joined value must match
+    return cb.or(cb.isNull(field), cb.not(like))
+  }
+
+  private fun applyTranslationPatterns(
+    values: List<String>?,
+    negated: Boolean,
+  ) {
+    val parsed = values?.let { TranslationFilterByPattern.parseList(it) } ?: return
+    WildcardLikeUtil.validatePatterns(parsed.map { it.pattern })
+    parsed.forEach { filter ->
+      val predicate =
+        queryBase.queryTranslationFiltering.buildTranslationExists(patternLanguageIds(filter.languageTag)) {
+          patternLike(it.get(Translation_.text), filter.pattern)
+        }
+      queryBase.whereConditions.add(negateIfNeeded(predicate, negated))
+    }
+  }
+
+  private fun negateIfNeeded(
+    predicate: Predicate,
+    negated: Boolean,
+  ): Predicate {
+    if (!negated) return predicate
+    return cb.not(predicate)
+  }
+
+  /**
+   * A filter silently dropped would return the unfiltered superset — dangerous for
+   * select-all driven batch operations — so an unresolvable language tag is an error.
+   */
+  private fun patternLanguageIds(languageTag: String?): List<Long> {
+    if (languageTag == null) {
+      val all = queryBase.languages.map { it.id }
+      if (all.isEmpty()) throw BadRequestException(Message.FILTER_PATTERN_LANGUAGE_NOT_VALID, listOf("*"))
+      return all
+    }
+    val language =
+      queryBase.languages.find { it.tag.equals(languageTag, ignoreCase = true) }
+        ?: throw BadRequestException(Message.FILTER_PATTERN_LANGUAGE_NOT_VALID, listOf(languageTag))
+    return listOf(language.id)
+  }
+
+  private fun patternLike(
+    field: Expression<String>,
+    pattern: String,
+  ): Predicate =
+    // fold both sides in the database — JVM and Postgres disagree on some case
+    // mappings (e.g. ß), so folding the pattern in the JVM breaks exact matches
+    cb.like(
+      cb.upper(field),
+      cb.upper(cb.literal(WildcardLikeUtil.toLikePattern(pattern))),
+      WildcardLikeUtil.ESCAPE_CHAR,
+    )
 
   private fun filterSearch() {
     val search = params.search
