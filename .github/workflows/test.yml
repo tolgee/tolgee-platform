@@ -279,6 +279,10 @@ jobs:
         env:
           TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
 
+      - name: Verify translation-key type-check is active
+        run: npm run tsc:prod:selftest
+        working-directory: ./webapp
+
       - name: Check missing translation keys
         run: npm run tsc:prod
         working-directory: ./webapp

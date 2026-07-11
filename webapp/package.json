@@ -84,6 +84,7 @@
     "tsc": "npm run --prefix ../library build:types && tsc && if [ -d ../../billing/frontend ]; then tsc -p ../../billing/frontend/tsconfig.json; fi",
     "unused-exports": "ts-unused-exports tsconfig.json --findCompletelyUnusedFiles --ignoreFiles=GoToDocsButton",
     "tsc:prod": "npm run --prefix ../library build:types && tsc --project tsconfig.prod.json",
+    "tsc:prod:selftest": "tsc --project tsconfig.selftest.json",
     "load-translations": "tolgee pull",
     "check-translations": "tolgee extract check",
     "tag-keys:deprecated": "tolgee tag --filter-not-extracted --filter-tag production --tag deprecated",
