@@ -1,6 +1,6 @@
 import { Button, Card, styled, Typography } from '@mui/material';
 import Box from '@mui/material/Box';
-import { T } from '@tolgee/react';
+import { T, TranslationKey } from '@tolgee/react';
 import React from 'react';
 
 const StyledCard = styled(Card)`
@@ -33,7 +33,7 @@ const StyledButton = styled(Button)`
 `;
 
 type EmptyMessageTranslation = {
-  keyName: string;
+  keyName: TranslationKey;
   defaultValue?: string;
   params?: Record<string, React.ReactNode>;
 };

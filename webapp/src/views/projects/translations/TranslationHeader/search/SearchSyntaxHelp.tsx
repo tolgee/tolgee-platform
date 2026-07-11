@@ -8,7 +8,7 @@ import {
   Typography,
 } from '@mui/material';
 import { HelpCircle } from '@untitled-ui/icons-react';
-import { T } from '@tolgee/react';
+import { T, TranslationKey } from '@tolgee/react';
 
 import { stopAndPrevent } from 'tg.fixtures/eventHandler';
 
@@ -36,7 +36,7 @@ const StyledSyntax = styled('td')`
 `;
 
 const hintNode = (
-  hint: { keyName: string; defaultValue: string },
+  hint: { keyName: TranslationKey; defaultValue: string },
   params?: Record<string, string>
 ) => (
   // @tolgee-ignore
