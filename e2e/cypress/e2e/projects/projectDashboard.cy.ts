@@ -3,7 +3,7 @@ import { projectListData } from '../../common/apiCalls/testData/testData';
 import { createComment, resolveComment } from '../../common/comments';
 import { HOST } from '../../common/constants';
 import { createProject, enterProject } from '../../common/projects';
-import { gcy, selectInProjectMenu } from '../../common/shared';
+import { gcy, gcyAdvanced, selectInProjectMenu } from '../../common/shared';
 import { getCell } from '../../common/state';
 import { createTag } from '../../common/tags';
 import { createTranslation } from '../../common/translations';
@@ -35,31 +35,20 @@ describe('Project stats', () => {
 
     selectInProjectMenu('Project Dashboard');
 
-    cy.gcy('activity-compact')
-      .contains('Comment state change')
-      .should('be.visible');
-    cy.gcy('activity-compact').contains('Added comment').should('be.visible');
-    cy.gcy('activity-compact')
-      .contains('Set translation state')
-      .should('be.visible');
-    cy.gcy('activity-compact')
-      .contains('Key tags updated')
-      .should('be.visible');
-    cy.gcy('activity-compact').contains('Created key').should('be.visible');
-    cy.gcy('activity-compact').contains('Created project').should('be.visible');
+    assertGroupVisible('SET_TRANSLATION_COMMENT_STATE');
+    assertGroupVisible('ADD_TRANSLATION_COMMENT');
+    assertGroupVisible('REVIEW');
+    assertGroupVisible('EDIT_KEY_TAGS');
+    assertGroupVisible('CREATE_KEY');
+    assertGroupVisible('CREATE_PROJECT');
 
-    openActivityDetail('Created key');
-
-    // activity is accessible through external link
-    cy.url().then((url) => {
-      const activityId = new URL(url).searchParams.get('activity');
-      const projectId = new URL(url).pathname.match(/[0-9]+/)[0];
-      cy.visit(
-        HOST + `/projects/${projectId}/activity-detail?activity=${activityId}`
-      );
-      cy.waitForDom();
-      cy.gcy('activity-detail-dialog').contains('Created key');
-    });
+    // expandable group detail
+    gcyAdvanced({ value: 'activity-group-item', type: 'CREATE_KEY' })
+      .findDcy('activity-group-expand-button')
+      .click();
+    cy.gcy('activity-group-create-key-item')
+      .contains('new translation')
+      .should('be.visible');
   });
 
   it('Global statistics', () => {
@@ -100,13 +89,8 @@ describe('Project stats', () => {
   });
 });
 
-const openActivityDetail = (label: string) => {
-  cy.gcy('activity-compact')
-    .contains(label)
-    .closestDcy('activity-compact')
-    .findDcy('activity-compact-detail-button')
-    .click({ force: true });
-  cy.gcy('activity-detail-dialog').contains(label);
+const assertGroupVisible = (type: string) => {
+  gcyAdvanced({ value: 'activity-group-item', type }).should('be.visible');
 };
 
 const checkLabelRow = (
