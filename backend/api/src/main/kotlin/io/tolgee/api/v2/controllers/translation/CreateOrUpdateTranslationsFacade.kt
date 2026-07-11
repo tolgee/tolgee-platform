@@ -32,12 +32,13 @@ class CreateOrUpdateTranslationsFacade(
     @RequestBody @Valid
     dto: SetTranslationsWithKeyDto,
   ): SetTranslationsResponseModel {
-    val key = keyService.find(projectHolder.projectEntity.id, dto.key, dto.namespace) ?: return create(dto)
+    val key = keyService.find(projectHolder.projectEntity.id, dto.key, dto.namespace, dto.branch) ?: return create(dto)
     return setTranslations(dto, key)
   }
 
   private fun create(dto: SetTranslationsWithKeyDto): SetTranslationsResponseModel {
     securityService.checkProjectPermission(projectHolder.project.id, Scope.KEYS_EDIT)
+    securityService.checkBranchModify(projectHolder.projectEntity, dto.branch)
     activityHolder.activity = ActivityType.CREATE_KEY
     val key = keyService.create(projectHolder.projectEntity, dto.key, dto.namespace)
     val convertedToPlurals = dto.translations.convertToPluralIfAnyIsPlural()
@@ -74,15 +75,21 @@ class CreateOrUpdateTranslationsFacade(
     dto: SetTranslationsWithKeyDto,
     key: Key? = null,
   ): SetTranslationsResponseModel {
-    val keyNotNull = key ?: keyService.get(projectHolder.project.id, dto.key, dto.namespace)
-    securityService.checkLanguageTranslatePermissionsByTag(dto.translations.keys, projectHolder.project.id)
+    val keyNotNull = key ?: keyService.get(projectHolder.project.id, dto.key, dto.namespace, dto.branch)
+    securityService.checkBranchModify(keyNotNull)
+    securityService.checkLanguageTranslatePermissionsByTag(
+      dto.translations.keys,
+      projectHolder.project.id,
+      keyNotNull.id,
+    )
 
     val modifiedTranslations = translationService.setForKey(keyNotNull, dto.translations)
 
     val translations =
       dto.languagesToReturn
         ?.let { languagesToReturn ->
-          translationService.findForKeyByLanguages(keyNotNull, languagesToReturn)
+          translationService
+            .findForKeyByLanguages(keyNotNull, languagesToReturn)
             .associateBy { it.language.tag }
         }
         ?: modifiedTranslations

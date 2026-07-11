@@ -4,6 +4,7 @@ import io.tolgee.api.IProjectActivityModel
 
 data class WebhookRequest(
   val webhookConfigId: Long?,
+  val projectId: Long?,
   val eventType: WebhookEventType,
   val activityData: IProjectActivityModel?,
 )

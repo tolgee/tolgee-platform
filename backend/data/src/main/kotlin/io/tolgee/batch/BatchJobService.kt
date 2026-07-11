@@ -43,7 +43,7 @@ import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.event.TransactionalEventListener
 import java.sql.Timestamp
 import java.time.Duration
-import java.util.*
+import java.util.Date
 
 @Service
 class BatchJobService(
@@ -67,8 +67,8 @@ class BatchJobService(
   @Transactional
   fun startJob(
     request: Any,
-    project: Project,
-    author: UserAccount?,
+    project: Project? = null,
+    author: UserAccount? = null,
     type: BatchJobType,
     isHidden: Boolean = false,
     debounceDuration: Duration? = null,
@@ -79,7 +79,7 @@ class BatchJobService(
 
     val params =
       BatchOperationParams(
-        projectId = project.id,
+        projectId = project?.id,
         type = type,
         request = request,
         target = target,
@@ -100,8 +100,8 @@ class BatchJobService(
         this.author = author
         this.target = target
         this.totalItems = target.size
-        this.chunkSize = processor.getChunkSize(projectId = project.id, request = request)
-        this.jobCharacter = processor.getJobCharacter()
+        this.chunkSize = processor.getChunkSize(projectId = project?.id, request = request)
+        this.jobCharacter = processor.getJobCharacter(request = request, projectId = project?.id)
         this.maxPerJobConcurrency = processor.getMaxPerJobConcurrency()
         this.type = type
         this.hidden = isHidden
@@ -118,7 +118,7 @@ class BatchJobService(
 
     entityManager.flushAndClear()
 
-    val executions = storeExecutions(chunked, job)
+    val executions = storeExecutions(chunked = chunked, job = job, executeAfter = processor.getExecuteAfter(request))
 
     applicationContext.publishEvent(OnBatchJobCreated(job, executions))
 
@@ -128,12 +128,14 @@ class BatchJobService(
   private fun storeExecutions(
     chunked: List<List<Any>>,
     job: BatchJob,
+    executeAfter: Date?,
   ): List<BatchJobChunkExecution> {
     val executions =
       List(chunked.size) { chunkNumber ->
         BatchJobChunkExecution().apply {
           batchJob = job
           this.chunkNumber = chunkNumber
+          this.executeAfter = executeAfter
         }
       }
 
@@ -148,12 +150,12 @@ class BatchJobService(
     val sequenceIdProvider = SequenceIdProvider(SEQUENCE_NAME, ALLOCATION_SIZE)
     jdbcTemplate.batchUpdate(
       """
-        insert into tolgee_batch_job_chunk_execution 
-        (id, batch_job_id, chunk_number, status, created_at, updated_at, success_targets) 
-        values (?, ?, ?, ?, ?, ?, ?)
+        insert into tolgee_batch_job_chunk_execution
+        (id, batch_job_id, chunk_number, status, created_at, updated_at, success_targets, execute_after)
+        values (?, ?, ?, ?, ?, ?, ?, ?)
         """,
       executions,
-      100,
+      5000,
     ) { ps, execution ->
       val id = sequenceIdProvider.next(ps.connection)
       execution.id = id
@@ -170,6 +172,7 @@ class BatchJobService(
           value = objectMapper.writeValueAsString(execution.successTargets)
         },
       )
+      ps.setTimestamp(8, execution.executeAfter?.time?.let { Timestamp(it) })
     }
   }
 
@@ -222,6 +225,26 @@ class BatchJobService(
     return this.findJobDto(id) ?: throw NotFoundException(Message.BATCH_JOB_NOT_FOUND)
   }
 
+  fun getJobDto(
+    projectId: Long,
+    id: Long,
+  ): BatchJobDto {
+    val job =
+      batchJobRepository.findByIdAndProjectId(id, projectId)
+        ?: throw NotFoundException(Message.BATCH_JOB_NOT_FOUND)
+    return BatchJobDto.fromEntity(job)
+  }
+
+  /**
+   * Gets job DTO directly from database, bypassing the cache.
+   * Use this when you need to read the most recent committed state,
+   * especially in race-condition-sensitive code paths like finalizeIfCompleted.
+   */
+  fun getJobDtoNoCache(id: Long): BatchJobDto {
+    val entity = findJobEntity(id) ?: throw NotFoundException(Message.BATCH_JOB_NOT_FOUND)
+    return BatchJobDto.fromEntity(entity)
+  }
+
   fun getViews(
     projectId: Long,
     userAccount: UserAccountDto?,
@@ -272,7 +295,8 @@ class BatchJobService(
   fun getErrorMessages(jobs: Iterable<IBatchJob>): Map<Long, Message> {
     val needsErrorMessage = jobs.filter { it.status == BatchJobStatus.FAILED }.map { it.id }.toList()
 
-    return batchJobRepository.getErrorMessages(needsErrorMessage)
+    return batchJobRepository
+      .getErrorMessages(needsErrorMessage)
       .groupBy { it.batchJobId }
       .mapValues { it.value.maxBy { value -> value.updatedAt }.errorMessage }
   }
@@ -289,7 +313,8 @@ class BatchJobService(
       }
     val needsProgress = cachedProgresses.filter { it.value == null }.map { it.key }.toList()
     val progresses =
-      batchJobRepository.getProgresses(needsProgress)
+      batchJobRepository
+        .getProgresses(needsProgress)
         .associate { it[0] as Long to it[1] as Long }
 
     return jobs.associate { it.id to (cachedProgresses[it.id] ?: progresses[it.id] ?: 0).toInt() }
@@ -300,6 +325,16 @@ class BatchJobService(
     return getView(job)
   }
 
+  fun getView(
+    projectId: Long,
+    jobId: Long,
+  ): BatchJobView {
+    val job =
+      batchJobRepository.findByIdAndProjectId(jobId, projectId)
+        ?: throw NotFoundException(Message.BATCH_JOB_NOT_FOUND)
+    return getView(job)
+  }
+
   fun getView(job: BatchJob): BatchJobView {
     val progress = getProgresses(listOf(job))[job.id] ?: 0
     val errorMessage = getErrorMessages(listOf(job))[job.id]
@@ -307,15 +342,15 @@ class BatchJobService(
   }
 
   fun getAllUnlockedChunksForJobs(jobIds: Iterable<Long>): List<JobUnlockedChunk> {
-    return entityManager.createQuery(
-      """
+    return entityManager
+      .createQuery(
+        """
           select new io.tolgee.batch.data.JobUnlockedChunk(bjce.batchJob.id, bjce.id)
           from BatchJobChunkExecution bjce
           where bjce.batchJob.id in :jobIds
       """,
-      JobUnlockedChunk::class.java,
-    )
-      .setParameter("jobIds", jobIds)
+        JobUnlockedChunk::class.java,
+      ).setParameter("jobIds", jobIds)
       .setHint(
         "jakarta.persistence.lock.timeout",
         LockOptions.SKIP_LOCKED,
@@ -325,89 +360,104 @@ class BatchJobService(
   fun getProcessor(type: BatchJobType): ChunkProcessor<Any, Any, Any> =
     applicationContext.getBean(type.processor.java) as ChunkProcessor<Any, Any, Any>
 
+  @Transactional
   fun deleteAllByProjectId(projectId: Long) {
-    val batchJobs = getAllByProjectId(projectId)
-    val batchJobIds = batchJobs.map { it.id }
-    val executions = findAllExecutionsByBatchJobIdIn(batchJobIds)
-    val executionIds = executions.map { it.id }
-    setActivityRevisionFieldsToNull(batchJobIds, executionIds)
-    deleteExecutions(executions)
-    batchJobRepository.deleteAll(batchJobs)
-  }
+    // Use bulk JPQL queries with project.id to avoid loading millions of entities into memory
+    // and to avoid Hibernate 6.6's CHECK_ON_FLUSH validation issues
 
-  private fun deleteExecutions(executions: List<BatchJobChunkExecution>) {
-    entityManager.createQuery(
-      """
-      delete from BatchJobChunkExecution e where e.id in :executionIds
-      """.trimIndent(),
-    ).setParameter("executionIds", executions.map { it.id })
+    // Clear ActivityRevision references to batch jobs and executions for this project
+    entityManager
+      .createQuery(
+        """
+        UPDATE ActivityRevision ar SET ar.batchJob = null
+        WHERE ar.batchJob.project.id = :projectId
+        """.trimIndent(),
+      ).setParameter("projectId", projectId)
       .executeUpdate()
-  }
 
-  private fun setActivityRevisionFieldsToNull(
-    batchJobIds: List<Long>,
-    executionIds: List<Long>,
-  ) {
-    entityManager.createQuery(
-      """
-      update ActivityRevision ar set ar.batchJob = null, ar.batchJobChunkExecution = null
-      where ar.batchJob.id in :batchJobIds or ar.batchJobChunkExecution.id in :executionIds
-      """.trimIndent(),
-    ).setParameter("batchJobIds", batchJobIds)
-      .setParameter("executionIds", executionIds)
+    entityManager
+      .createQuery(
+        """
+        UPDATE ActivityRevision ar SET ar.batchJobChunkExecution = null
+        WHERE ar.batchJobChunkExecution.batchJob.project.id = :projectId
+        """.trimIndent(),
+      ).setParameter("projectId", projectId)
       .executeUpdate()
-  }
 
-  private fun findAllExecutionsByBatchJobIdIn(jobIds: List<Long>): List<BatchJobChunkExecution> {
-    return entityManager.createQuery(
-      """
-      from BatchJobChunkExecution e
-      where e.batchJob.id in :jobIds
-      """.trimIndent(),
-      BatchJobChunkExecution::class.java,
-    )
-      .setParameter("jobIds", jobIds)
-      .resultList
+    // Delete executions for batch jobs in this project
+    entityManager
+      .createQuery(
+        """
+        DELETE FROM BatchJobChunkExecution e WHERE e.batchJob.project.id = :projectId
+        """.trimIndent(),
+      ).setParameter("projectId", projectId)
+      .executeUpdate()
+
+    // Delete batch jobs for this project
+    entityManager
+      .createQuery("DELETE FROM BatchJob b WHERE b.project.id = :projectId")
+      .setParameter("projectId", projectId)
+      .executeUpdate()
   }
 
   fun getAllByProjectId(projectId: Long): List<BatchJob> {
     return batchJobRepository.findAllByProjectId(projectId)
   }
 
+  fun hasActiveJobForProject(
+    projectId: Long,
+    type: BatchJobType,
+  ): Boolean {
+    return entityManager
+      .createQuery(
+        """
+        select count(j) > 0 from BatchJob j
+        where j.project.id = :projectId
+          and j.type = :type
+          and j.status not in :completedStatuses
+        """.trimIndent(),
+        java.lang.Boolean::class.java,
+      ).setParameter("projectId", projectId)
+      .setParameter("type", type)
+      .setParameter("completedStatuses", BatchJobStatus.entries.filter { it.completed })
+      .singleResult
+      .booleanValue()
+  }
+
   fun getExecutions(batchJobId: Long): List<BatchJobChunkExecution> {
-    return entityManager.createQuery(
-      """
-      from BatchJobChunkExecution e
-      where e.batchJob.id = :id
-      """.trimIndent(),
-      BatchJobChunkExecution::class.java,
-    )
-      .setParameter("id", batchJobId)
+    return entityManager
+      .createQuery(
+        """
+        from BatchJobChunkExecution e
+        where e.batchJob.id = :id
+        """.trimIndent(),
+        BatchJobChunkExecution::class.java,
+      ).setParameter("id", batchJobId)
       .resultList
   }
 
   fun getAllIncompleteJobIds(projectId: Long): List<AllIncompleteJobsResult> {
-    return entityManager.createQuery(
-      """select new io.tolgee.batch.data.AllIncompleteJobsResult(j.id, j.totalChunks) from BatchJob j
+    return entityManager
+      .createQuery(
+        """select new io.tolgee.batch.data.AllIncompleteJobsResult(j.id, j.status, j.totalChunks) from BatchJob j
       where j.project.id = :projectId
       and j.status not in :completedStatuses
     """,
-      AllIncompleteJobsResult::class.java,
-    )
-      .setParameter("projectId", projectId)
+        AllIncompleteJobsResult::class.java,
+      ).setParameter("projectId", projectId)
       .setParameter("completedStatuses", BatchJobStatus.entries.filter { it.completed })
       .resultList
   }
 
   fun getExecution(id: Long): BatchJobChunkExecution {
-    return entityManager.createQuery(
-      """from BatchJobChunkExecution bjce
+    return entityManager
+      .createQuery(
+        """from BatchJobChunkExecution bjce
       join fetch bjce.batchJob bk
       where bjce.id = :id
     """,
-      BatchJobChunkExecution::class.java,
-    )
-      .setParameter("id", id)
+        BatchJobChunkExecution::class.java,
+      ).setParameter("id", id)
       .singleResult ?: throw NotFoundException()
   }
 
@@ -415,6 +465,21 @@ class BatchJobService(
     lockedJobIds: Iterable<Long>,
     before: Date,
   ): List<BatchJob> = batchJobRepository.getCompletedJobs(lockedJobIds, before)
+
+  fun findExistingJobIds(jobIds: Iterable<Long>): Set<Long> {
+    val idList = jobIds.toList()
+    if (idList.isEmpty()) return emptySet()
+    @Suppress("UNCHECKED_CAST")
+    return entityManager
+      .createNativeQuery(
+        """
+        SELECT id FROM tolgee_batch_job WHERE id IN :ids
+        """,
+      ).setParameter("ids", idList)
+      .resultList
+      .map { (it as Number).toLong() }
+      .toSet()
+  }
 
   fun getStuckJobIds(jobIds: MutableSet<Long>): List<Long> {
     return batchJobRepository.getStuckJobIds(jobIds, currentDateProvider.date.addMinutes(-2))

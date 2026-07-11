@@ -16,4 +16,13 @@ open class ImportAddFilesParams(
   override var structureDelimiter: Char? = '.',
   @field:Hidden
   override var storeFilesToFileStorage: Boolean = true,
+  @field:Parameter(
+    description = IImportAddFilesParams.BRANCH_DESCRIPTION,
+    example = IImportAddFilesParams.BRANCH_EXAMPLE,
+  )
+  @field:Schema(
+    description = IImportAddFilesParams.BRANCH_DESCRIPTION,
+    example = IImportAddFilesParams.BRANCH_EXAMPLE,
+  )
+  override var branch: String? = null,
 ) : IImportAddFilesParams

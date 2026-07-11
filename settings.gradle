@@ -18,16 +18,16 @@ pluginManagement {
             }
 
             if (requested.id.id == 'org.liquibase.gradle') {
-                useModule('org.liquibase.gradle:org.liquibase.gradle.gradle.plugin:2.2.1')
+                useModule('org.liquibase.gradle:org.liquibase.gradle.gradle.plugin:2.2.2')
             }
             if (requested.id.id == 'org.hibernate.orm') {
                 useVersion(hibernateVersion)
             }
             if (requested.id.id == 'io.sentry.jvm.gradle') {
-                useVersion('4.0.0')
+                useVersion('5.7.0')
             }
             if(requested.id.id == 'org.gradle.test-retry') {
-                useVersion('1.5.8')
+                useVersion('1.6.2')
             }
         }
     }
@@ -37,12 +37,11 @@ dependencyResolutionManagement {
     versionCatalogs {
         libs {
             library('stripe', 'com.stripe', 'stripe-java').version('22.11.0')
-            library('sendInBlue', 'com.sendinblue', 'sib-api-v3-sdk').version('5.3.0')
             library('jacksonModuleKotlin', 'com.fasterxml.jackson.module', 'jackson-module-kotlin').version(jacksonVersion)
             library('jacksonDataFormatXml', 'com.fasterxml.jackson.dataformat', 'jackson-dataformat-xml').version(jacksonVersion)
             library('kotlin', 'org.jetbrains.kotlin', 'kotlin-gradle-plugin').version(kotlinVersion)
             library('kotlinReflect', 'org.jetbrains.kotlin', 'kotlin-reflect').version(kotlinVersion)
-            library('kotlinCoroutines', 'org.jetbrains.kotlinx', 'kotlinx-coroutines-core').version('1.6.1')
+            library('kotlinCoroutines', 'org.jetbrains.kotlinx', 'kotlinx-coroutines-core').version('1.10.2')
             library('springDocWebmvcApi', 'org.springdoc', 'springdoc-openapi-starter-webmvc-api').version(springDocVersion)
             library('springDocOpenApiUi', 'org.springdoc', 'springdoc-openapi-starter-webmvc-ui').version(springDocVersion)
             library('springDocOpenApiKotlin', 'org.springdoc', 'springdoc-openapi-kotlin').version(springDocVersion)
@@ -51,33 +50,80 @@ dependencyResolutionManagement {
             library('jjwtApi', 'io.jsonwebtoken', 'jjwt-api').version(jjwtVersion)
             library('jjwtImpl', 'io.jsonwebtoken', 'jjwt-impl').version(jjwtVersion)
             library('jjwtJackson', 'io.jsonwebtoken', 'jjwt-jackson').version(jjwtVersion)
-            library('assertJCore', 'org.assertj:assertj-core:3.24.2')
+            library('assertJCore', 'org.assertj:assertj-core:3.27.3')
             library('springmockk', 'com.ninja-squad:springmockk:3.0.1')
-            library('mockito', 'org.mockito.kotlin:mockito-kotlin:5.0.0')
+            library('mockito', 'org.mockito.kotlin:mockito-kotlin:5.4.0')
             library('commonsCodec', 'commons-codec:commons-codec:1.15')
+            library('commonsLang', "org.apache.commons:commons-lang3:$commonsLang3Version")
             library('icu4j', 'com.ibm.icu:icu4j:74.2')
             library('jsonUnitAssert', 'net.javacrumbs.json-unit:json-unit-assertj:2.38.0')
             library('amazonS3', "software.amazon.awssdk:s3:$amazonAwsSdkVersion")
+            library('cloudfront', "software.amazon.awssdk:cloudfront:$amazonAwsSdkVersion")
             library('amazonSTS', "software.amazon.awssdk:sts:$amazonAwsSdkVersion")
             library('amazonTranslate', "software.amazon.awssdk:translate:$amazonAwsSdkVersion")
-            library('googleCloud', "com.google.cloud:libraries-bom:24.0.0")
-            library('liquibaseCore', "org.liquibase:liquibase-core:4.26.0")
-            library('liquibaseHibernate', "org.liquibase.ext:liquibase-hibernate6:4.26.0")
+            library('googleCloud', "com.google.cloud:libraries-bom:26.61.0")
+            // Security override: forces the grpc family ahead of the version libraries-bom pulls
+            // (CVE in grpc-netty-shaded). Temporary — drop it once libraries-bom ships grpc >= 1.75.0.
+            // Imported as a platform in every module that uses libs.googleCloud.
+            library('grpcBom', "io.grpc:grpc-bom:1.75.0")
+            library('liquibaseCore', "org.liquibase:liquibase-core:4.30.0")
+            library('liquibaseHibernate', "org.liquibase.ext:liquibase-hibernate6:4.30.0")
             library('liquibasePicoli', "info.picocli:picocli:4.6.3")
-            library('hibernateTypes', "io.hypersistence:hypersistence-utils-hibernate-63:3.7.4")
-            library('redissonSpringBootStarter', "org.redisson:redisson-spring-boot-starter:3.26.0")
-            library('postHog', 'com.posthog.java:posthog:1.1.1')
-            library('micrometerPrometheus', "io.micrometer:micrometer-registry-prometheus:1.9.12")
+            library('hibernateTypes', "io.hypersistence:hypersistence-utils-hibernate-63:3.14.1")
+            library('redissonSpringBootStarter', "org.redisson:redisson-spring-boot-starter:3.27.0")
+            library('postHog', "com.posthog:posthog-server:1.1.0")
+            library('micrometerPrometheus', "io.micrometer:micrometer-registry-prometheus:1.13.3")
             library('mailjet', "com.mailjet:mailjet-client:5.2.5")
-            library('azureBlob', 'com.azure.spring:spring-cloud-azure-starter-storage-blob:5.11.0')
+            library('azureBlob', 'com.azure.spring:spring-cloud-azure-starter-storage-blob:5.23.0')
             library('slackApiClient', "com.slack.api:slack-api-client:$slackSdkVersion")
             library('slackApiModelKotlinExtension', "com.slack.api:slack-api-model-kotlin-extension:$slackSdkVersion")
             library('slackApiClientKotlinExtension', "com.slack.api:slack-api-client-kotlin-extension:$slackSdkVersion")
             library('commonsText', 'org.apache.commons:commons-text:1.10.0')
-            library('springJooq', "org.springframework.boot:spring-boot-starter-jooq:3.3.0")
+            library('springJooq', "org.springframework.boot:spring-boot-starter-jooq:$springBootVersion")
+            library('jakartaMail', 'org.eclipse.angus', 'jakarta.mail').version('2.0.4')
+            library('mcpBom', 'io.modelcontextprotocol.sdk', 'mcp-bom').version('0.18.0')
+            library('mcp', 'io.modelcontextprotocol.sdk', 'mcp').withoutVersion()
+            library('mcpSpringWebmvc', 'io.modelcontextprotocol.sdk', 'mcp-spring-webmvc').withoutVersion()
+
+            // OpenTelemetry Java Agent for bytecode instrumentation
+            // See: https://opentelemetry.io/docs/zero-code/java/agent/
+            library('opentelemetryJavaagent', 'io.opentelemetry.javaagent', 'opentelemetry-javaagent').version(opentelemetryJavaagentVersion)
+            library('opentelemetryInstrumentationAnnotations', 'io.opentelemetry.instrumentation', 'opentelemetry-instrumentation-annotations').version(opentelemetryInstrumentationVersion)
+            // OpenTelemetry API for context propagation in TaskDecorators
+            // Agent 2.24.0 targets API 1.58.0 - see https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases
+            library('opentelemetryApi', 'io.opentelemetry', 'opentelemetry-api').version(opentelemetryApiVersion)
+            library('opentelemetryContext', 'io.opentelemetry', 'opentelemetry-context').version(opentelemetryApiVersion)
+            library('opentelemetryExtensionKotlin', 'io.opentelemetry', 'opentelemetry-extension-kotlin').version(opentelemetryApiVersion)
+            library('vaadinJson', "com.vaadin.external.google:android-json:0.0.20131108.vaadin1")
+        }
+    }
+
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        def jitpackDependencies = [
+            "com.github.transferwise"
+        ]
+
+        mavenCentral() {
+            content {
+                jitpackDependencies.forEach {
+                    excludeGroup(it)
+                }
+            }
+        }
+
+        maven {
+            url 'https://jitpack.io'
+            content {
+                jitpackDependencies.forEach {
+                    includeGroup(it)
+                }
+            }
         }
     }
 }
+
+rootProject.name = "tolgee-platform"
 
 include ':server-app'
 project(':server-app').projectDir = new File('backend/app')
@@ -85,11 +131,20 @@ project(':server-app').projectDir = new File('backend/app')
 include ':data'
 project(':data').projectDir = new File('backend/data')
 
-include ':billing-app'
-project(':billing-app').projectDir = new File('../billing/app')
+gradle.ext.billingAppDirectory = new File('../billing/app')
+gradle.ext.billingTestDirectory = new File('../billing/tests')
+gradle.ext.eeAppDirectory = new File('./ee/backend/app')
+gradle.ext.eeAppDirectoryExists = gradle.ext.eeAppDirectory.exists()
 
-include ':billing-test'
-project(':billing-test').projectDir = new File('../billing/tests')
+if (gradle.ext.billingAppDirectory.exists()) {
+    include ':billing-app'
+    project(':billing-app').projectDir = gradle.ext.billingAppDirectory
+}
+
+if (gradle.ext.billingTestDirectory.exists()) {
+    include ':billing-test'
+    project(':billing-test').projectDir = gradle.ext.billingTestDirectory
+}
 
 include ':testing'
 project(':testing').projectDir = new File('backend/testing')
@@ -97,11 +152,13 @@ project(':testing').projectDir = new File('backend/testing')
 include ':misc'
 project(':misc').projectDir = new File('backend/misc')
 
-include ':ee-app'
-project(':ee-app').projectDir = new File('ee/backend/app')
+if (gradle.ext.eeAppDirectoryExists) {
+    include ':ee-app'
+    project(':ee-app').projectDir = new File('ee/backend/app')
 
-include ':ee-test'
-project(':ee-test').projectDir = new File('ee/backend/tests')
+    include ':ee-test'
+    project(':ee-test').projectDir = new File('ee/backend/tests')
+}
 
 include ':development'
 project(':development').projectDir = new File('backend/development')
@@ -111,3 +168,6 @@ project(':api').projectDir = new File('backend/api')
 
 include ':security'
 project(':security').projectDir = new File('backend/security')
+
+include ':ktlint'
+project(':ktlint').projectDir = new File('backend/ktlint')

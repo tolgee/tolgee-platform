@@ -5,7 +5,9 @@ import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 
-class TestDataBuilder(fn: (TestDataBuilder.() -> Unit) = {}) {
+class TestDataBuilder(
+  fn: (TestDataBuilder.() -> Unit) = {},
+) {
   companion object {
     operator fun invoke(fn: (TestDataBuilder.() -> Unit) = {}) = TestDataBuilder(fn)
   }
@@ -15,6 +17,7 @@ class TestDataBuilder(fn: (TestDataBuilder.() -> Unit) = {}) {
     val projects = mutableListOf<ProjectBuilder>()
     val organizations = mutableListOf<OrganizationBuilder>()
     val mtCreditBuckets = mutableListOf<MtCreditBucketBuilder>()
+    val invitations = mutableListOf<InvitationBuilder>()
 
     /**
      * These data are populated by external modules and saved via one of the
@@ -64,6 +67,13 @@ class TestDataBuilder(fn: (TestDataBuilder.() -> Unit) = {}) {
     data.organizations.add(builder)
     ft(builder.self)
     return builder
+  }
+
+  fun addAdmin(): UserAccountBuilder {
+    return addUserAccount {
+      username = "admin@admin.com"
+      role = UserAccount.Role.ADMIN
+    }
   }
 
   init {

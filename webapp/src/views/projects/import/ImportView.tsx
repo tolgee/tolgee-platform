@@ -21,11 +21,16 @@ import { useImportDataHelper } from './hooks/useImportDataHelper';
 import { BaseProjectView } from '../BaseProjectView';
 import { ImportResultLoadingOverlay } from './component/ImportResultLoadingOverlay';
 import { ImportSettingsPanel } from './component/ImportSettingsPanel';
+import { TranslatedWarningBox } from 'tg.translationTools/TranslatedWarningBox';
+import { useBranchEditAccess } from 'tg.views/projects/translations/context/services/useBranchEditAccess';
 
-export const ImportView: FunctionComponent = () => {
+export const ImportView: FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const dataHelper = useImportDataHelper();
 
   const project = useProject();
+  const canEditProtectedBranch = useBranchEditAccess({ projectId: project.id });
 
   const applyImportHelper = useApplyImportHelper(dataHelper);
 
@@ -57,6 +62,9 @@ export const ImportView: FunctionComponent = () => {
   }, [applyImportHelper.error]);
 
   const onApply = () => {
+    if (!canEditProtectedBranch) {
+      return;
+    }
     dataHelper.touchApply();
     if (dataHelper.isValid) {
       applyImportHelper.onApplyImport();
@@ -87,6 +95,7 @@ export const ImportView: FunctionComponent = () => {
       ]}
       maxWidth="wide"
       overflow="auto"
+      branching
     >
       <ImportConflictResolutionDialog
         row={resolveRow}
@@ -97,7 +106,10 @@ export const ImportView: FunctionComponent = () => {
           onNewFiles={dataHelper.onNewFiles}
           loading={loading}
           operationStatus={applyImportHelper.status}
+          importedKeys={applyImportHelper.importedKeys}
+          totalKeys={applyImportHelper.totalKeys}
           importDone={applyImportHelper.loaded}
+          disabled={!canEditProtectedBranch}
           operation={
             applyImportHelper.loading
               ? 'apply'
@@ -122,6 +134,11 @@ export const ImportView: FunctionComponent = () => {
             error={e}
             addFilesMutation={dataHelper.addFilesMutation}
           />
+        ))}
+        {dataHelper.addFilesMutation.data?.warnings.map((item) => (
+          <Box key={item.code} mt={4} data-cy="import-file-warnings">
+            <TranslatedWarningBox code={item.code} />
+          </Box>
         ))}
         <Box position="relative">
           <ImportResultLoadingOverlay loading={isProgressOverlayActive} />
@@ -157,6 +174,7 @@ export const ImportView: FunctionComponent = () => {
                   variant="contained"
                   color="primary"
                   data-cy="import_apply_import_button"
+                  disabled={!canEditProtectedBranch}
                   onClick={onApply}
                 >
                   <T keyName="import_apply_button" />

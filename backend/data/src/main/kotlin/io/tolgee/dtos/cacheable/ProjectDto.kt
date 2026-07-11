@@ -3,6 +3,8 @@ package io.tolgee.dtos.cacheable
 import io.tolgee.api.ISimpleProject
 import io.tolgee.api.ProjectIdAndBaseLanguageId
 import io.tolgee.model.Project
+import io.tolgee.model.enums.SuggestionsMode
+import io.tolgee.model.enums.TranslationProtection
 import java.io.Serializable
 
 data class ProjectDto(
@@ -15,7 +17,14 @@ data class ProjectDto(
   override var avatarHash: String? = null,
   override var icuPlaceholders: Boolean,
   override val baseLanguageId: Long?,
-) : Serializable, ISimpleProject, ProjectIdAndBaseLanguageId {
+  var useNamespaces: Boolean,
+  var useBranching: Boolean,
+  var useQaChecks: Boolean,
+  var suggestionsMode: SuggestionsMode,
+  var translationProtection: TranslationProtection,
+) : Serializable,
+  ISimpleProject,
+  ProjectIdAndBaseLanguageId {
   companion object {
     fun fromEntity(entity: Project) =
       ProjectDto(
@@ -28,6 +37,11 @@ data class ProjectDto(
         avatarHash = entity.avatarHash,
         icuPlaceholders = entity.icuPlaceholders,
         baseLanguageId = entity.baseLanguageId,
+        useNamespaces = entity.useNamespaces,
+        useBranching = entity.useBranching,
+        useQaChecks = entity.useQaChecks,
+        suggestionsMode = entity.suggestionsMode,
+        translationProtection = entity.translationProtection,
       )
   }
 }

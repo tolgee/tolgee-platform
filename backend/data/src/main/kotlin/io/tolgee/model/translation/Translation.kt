@@ -4,26 +4,40 @@ import io.tolgee.activity.annotation.ActivityDescribingProp
 import io.tolgee.activity.annotation.ActivityEntityDescribingPaths
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
+import io.tolgee.activity.propChangesProvider.LabelPropChangesProvider
 import io.tolgee.constants.Message
 import io.tolgee.constants.MtServiceType
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Language
 import io.tolgee.model.StandardAuditModel
+import io.tolgee.model.branching.BranchMergeableEntity
+import io.tolgee.model.branching.snapshot.TranslationSnapshot
+import io.tolgee.model.enums.BranchKeyMergeResolutionType
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
+import io.tolgee.model.qa.TranslationQaIssue
+import io.tolgee.service.branching.chooseThreeWay
+import io.tolgee.service.branching.isConflictingThreeWay
+import io.tolgee.service.branching.mergeSetsWithBase
 import io.tolgee.util.TranslationStatsUtil
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
 import jakarta.persistence.Enumerated
 import jakarta.persistence.FetchType
+import jakarta.persistence.Index
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.JoinTable
+import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
+import jakarta.persistence.OrderBy
 import jakarta.persistence.PrePersist
 import jakarta.persistence.PreUpdate
 import jakarta.persistence.Table
 import jakarta.persistence.UniqueConstraint
 import jakarta.validation.constraints.NotNull
+import org.hibernate.annotations.BatchSize
 import org.hibernate.annotations.ColumnDefault
 
 @Entity
@@ -34,6 +48,10 @@ import org.hibernate.annotations.ColumnDefault
       name = "translation_key_language",
     ),
   ],
+  indexes = [
+    Index(columnList = "key_id"),
+    Index(columnList = "language_id"),
+  ],
 )
 @ActivityLoggedEntity
 @EntityListeners(Translation.Companion.UpdateStatsListener::class, Translation.Companion.StateListener::class)
@@ -43,9 +61,10 @@ class Translation(
   @ActivityLoggedProp
   @ActivityDescribingProp
   var text: String? = null,
-) : StandardAuditModel() {
+) : StandardAuditModel(),
+  BranchMergeableEntity<Translation, TranslationSnapshot> {
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
-  @field:NotNull
+  @NotNull
   lateinit var key: Key
 
   @ManyToOne
@@ -71,15 +90,38 @@ class Translation(
   var mtProvider: MtServiceType? = null
 
   @OneToMany(mappedBy = "translation", orphanRemoval = true)
-  var comments: MutableList<TranslationComment> = mutableListOf()
+  var comments: MutableSet<TranslationComment> = mutableSetOf()
+
+  @OneToMany(mappedBy = "translation", orphanRemoval = true)
+  var qaIssues: MutableSet<TranslationQaIssue> = mutableSetOf()
 
   var wordCount: Int? = null
 
   var characterCount: Int? = null
 
   @ActivityLoggedProp
-  @field:ColumnDefault("false")
+  @ColumnDefault("false")
   var outdated: Boolean = false
+
+  @ColumnDefault("true")
+  var qaChecksStale: Boolean = true
+
+  @ManyToMany
+  @JoinTable(
+    name = "translation_label",
+    joinColumns = [JoinColumn(name = "translation_id")],
+    inverseJoinColumns = [JoinColumn(name = "label_id")],
+  )
+  @OrderBy("name ASC")
+  @ActivityLoggedProp(LabelPropChangesProvider::class)
+  @BatchSize(size = 1000)
+  var labels: MutableSet<Label> = mutableSetOf()
+
+  @ActivityLoggedProp
+  var promptId: Long? = null
+
+  val isUntranslated: Boolean
+    get() = state == TranslationState.UNTRANSLATED
 
   constructor(text: String? = null, key: Key, language: Language) : this(text) {
     this.key = key
@@ -90,6 +132,7 @@ class Translation(
     this.outdated = false
     this.mtProvider = null
     this.auto = false
+    this.promptId = null
   }
 
   fun clear() {
@@ -103,6 +146,16 @@ class Translation(
       !this.outdated &&
       this.mtProvider == null &&
       !this.auto
+  }
+
+  fun addLabel(label: Label) {
+    labels.add(label)
+    label.translations.add(this)
+  }
+
+  fun removeLabel(label: Label) {
+    labels.remove(label)
+    label.translations.remove(this)
   }
 
   override fun equals(other: Any?): Boolean {
@@ -134,6 +187,19 @@ class Translation(
   }
 
   companion object {
+    fun differ(
+      source: Translation?,
+      target: Translation?,
+    ): Boolean {
+      if (source == null && target == null) {
+        return false
+      }
+      if (source == null || target == null) {
+        return true
+      }
+      return (source.text != target.text)
+    }
+
     class UpdateStatsListener {
       @PrePersist
       @PreUpdate
@@ -159,11 +225,57 @@ class Translation(
           translation.state = TranslationState.TRANSLATED
         }
         if (translation.text.isNullOrEmpty() &&
-          translation.state != TranslationState.UNTRANSLATED && translation.state != TranslationState.DISABLED
+          translation.state != TranslationState.UNTRANSLATED &&
+          translation.state != TranslationState.DISABLED
         ) {
           translation.state = TranslationState.UNTRANSLATED
         }
       }
     }
+  }
+
+  override fun resolveKey(): Key? = key
+
+  override fun isModified(oldState: Map<String, Any>): Boolean {
+    return oldState["text"] != this.text || oldState["state"] != this.state || oldState["labels"] != this.labels
+  }
+
+  override fun hasChanged(snapshot: TranslationSnapshot): Boolean {
+    if (this.text.orEmpty() != snapshot.value || this.state != snapshot.state) {
+      return true
+    }
+    val labelNames = this.labels.map { it.name }.toSet()
+    return labelNames != snapshot.labels
+  }
+
+  override fun isConflicting(
+    source: Translation,
+    snapshot: TranslationSnapshot,
+  ): Boolean {
+    return isConflictingThreeWay(source.text.orEmpty(), this.text.orEmpty(), snapshot.value) ||
+      isConflictingThreeWay(source.state, this.state, snapshot.state)
+  }
+
+  override fun merge(
+    source: Translation,
+    snapshot: TranslationSnapshot?,
+    resolution: BranchKeyMergeResolutionType,
+  ) {
+    this.text = chooseThreeWay(source.text, this.text, snapshot?.value, resolution)
+    this.state = chooseThreeWay(source.state, this.state, snapshot?.state, resolution) ?: this.state
+    this.outdated = chooseThreeWay(source.outdated, this.outdated, null, resolution) ?: false
+    this.auto = chooseThreeWay(source.auto, this.auto, null, resolution) ?: false
+    this.mtProvider = chooseThreeWay(source.mtProvider, this.mtProvider, null, resolution)
+
+    val snapshotLabels = snapshot?.labels?.toSet() ?: emptySet()
+    val sourceByName = source.labels.associateBy { it.name }
+    val targetByName = this.labels.associateBy { it.name }
+    val finalLabels =
+      mergeSetsWithBase(snapshotLabels, sourceByName.keys, targetByName.keys)
+        .mapNotNull { name -> sourceByName[name] ?: targetByName[name] }
+        .toMutableSet()
+
+    this.labels.clear()
+    this.labels.addAll(finalLabels)
   }
 }

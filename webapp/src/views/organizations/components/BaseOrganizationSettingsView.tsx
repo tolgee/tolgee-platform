@@ -12,10 +12,10 @@ import { BaseSettingsView } from 'tg.component/layout/BaseSettingsView/BaseSetti
 import { SettingsMenuItem } from 'tg.component/layout/BaseSettingsView/SettingsMenu';
 import {
   useConfig,
-  useIsAdmin,
+  useIsAdminOrSupporter,
   usePreferredOrganization,
 } from 'tg.globalContext/helpers';
-import { Usage } from 'tg.component/billing/Usage';
+import { CriticalUsageCircle } from 'tg.ee';
 
 type OrganizationModel = components['schemas']['OrganizationModel'];
 
@@ -23,20 +23,16 @@ type Props = BaseViewProps & {
   link: Link;
 };
 
-export const BaseOrganizationSettingsView: React.FC<Props> = ({
-  children,
-  loading,
-  navigation,
-  link,
-  ...otherProps
-}) => {
+export const BaseOrganizationSettingsView: React.FC<
+  React.PropsWithChildren<Props>
+> = ({ children, loading, navigation, link, ...otherProps }) => {
   const config = useConfig();
   const match = useRouteMatch();
   const organizationSlug = match.params[PARAMS.ORGANIZATION_SLUG];
   const { t } = useTranslate();
   const history = useHistory();
   const { preferredOrganization } = usePreferredOrganization();
-  const isAdmin = useIsAdmin();
+  const isAdminOrSupporter = useIsAdminOrSupporter();
 
   const handleOrganizationSelect = (organization: OrganizationModel) => {
     const redirectLink =
@@ -49,6 +45,9 @@ export const BaseOrganizationSettingsView: React.FC<Props> = ({
     );
   };
 
+  const canManageOrganization =
+    preferredOrganization?.currentUserRole === 'OWNER' || isAdminOrSupporter;
+
   const menuItems: SettingsMenuItem[] = [
     {
       link: LINKS.ORGANIZATION_PROFILE.build({
@@ -58,7 +57,7 @@ export const BaseOrganizationSettingsView: React.FC<Props> = ({
     },
   ];
 
-  if (preferredOrganization?.currentUserRole === 'OWNER' || isAdmin) {
+  if (canManageOrganization) {
     menuItems.push({
       link: LINKS.ORGANIZATION_MEMBERS.build({
         [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
@@ -71,11 +70,50 @@ export const BaseOrganizationSettingsView: React.FC<Props> = ({
       }),
       label: t('organization_menu_member_privileges'),
     });
+  }
+
+  menuItems.push({
+    link: LINKS.ORGANIZATION_GLOSSARIES.build({
+      [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
+    }),
+    label: t('organization_menu_glossaries'),
+  });
+
+  // TM browse is gated server-side to actual org members — hide the link for project-only
+  // viewers so they don't land on a 403. Glossary stays visible for parity since it carries
+  // no virtual cross-project content.
+  if (preferredOrganization?.currentUserRole != null || isAdminOrSupporter) {
+    menuItems.push({
+      link: LINKS.ORGANIZATION_TRANSLATION_MEMORIES.build({
+        [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
+      }),
+      label: t(
+        'organization_menu_translation_memories',
+        'Translation memories'
+      ),
+    });
+  }
+
+  if (canManageOrganization) {
     menuItems.push({
       link: LINKS.ORGANIZATION_APPS.build({
         [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
       }),
       label: t('organization_menu_apps'),
+    });
+    if (config.llm.enabled) {
+      menuItems.push({
+        link: LINKS.ORGANIZATION_LLM_PROVIDERS.build({
+          [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
+        }),
+        label: t('organization_menu_llm_providers'),
+      });
+    }
+    menuItems.push({
+      link: LINKS.ORGANIZATION_SSO.build({
+        [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
+      }),
+      label: t('organization_menu_sso_login'),
     });
     if (config.billing.enabled) {
       menuItems.push({
@@ -116,7 +154,7 @@ export const BaseOrganizationSettingsView: React.FC<Props> = ({
       {...otherProps}
       loading={organizationLoadable.isLoading || loading}
       navigation={[...navigationPrefix, ...(navigation || [])]}
-      navigationRight={<Usage />}
+      navigationRight={<CriticalUsageCircle />}
       menuItems={menuItems}
       hideChildrenOnLoading={false}
     >

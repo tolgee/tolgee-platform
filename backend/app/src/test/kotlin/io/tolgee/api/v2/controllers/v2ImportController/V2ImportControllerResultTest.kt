@@ -12,7 +12,7 @@ import org.apache.commons.lang3.time.DateUtils
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.*
+import java.util.Date
 
 class V2ImportControllerResultTest : AuthorizedControllerTest() {
   @BeforeEach
@@ -30,10 +30,14 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
     val testData = ImportTestData()
     testDataService.saveTestData(testData.root)
 
-    loginAsUser(testData.root.data.userAccounts[0].self.username)
+    loginAsUser(
+      testData.root.data.userAccounts[0]
+        .self.username,
+    )
 
     performAuthGet("/v2/projects/${testData.project.id}/import/result")
-      .andPrettyPrint.andAssertThatJson {
+      .andPrettyPrint
+      .andAssertThatJson {
         node("_embedded.languages") {
           isArray.isNotEmpty
           node("[0]") {
@@ -54,7 +58,10 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
 
     setForcedDate(DateUtils.addHours(Date(), 2))
 
-    loginAsUser(testData.root.data.userAccounts[0].self.username)
+    loginAsUser(
+      testData.root.data.userAccounts[0]
+        .self.username,
+    )
 
     performAuthGet("/v2/projects/${testData.project.id}/import/result")
       .andIsNotFound
@@ -68,13 +75,16 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
     val testData = ImportTestData()
     testDataService.saveTestData(testData.root)
 
-    loginAsUser(testData.root.data.userAccounts[0].self.username)
+    loginAsUser(
+      testData.root.data.userAccounts[0]
+        .self.username,
+    )
 
     performAuthGet(
       "/v2/projects/${testData.project.id}" +
         "/import/result/languages/${testData.importEnglish.id}",
-    )
-      .andPrettyPrint.andAssertThatJson {
+    ).andPrettyPrint
+      .andAssertThatJson {
         node("name").isEqualTo("en")
         node("existingLanguageName").isEqualTo("English")
         node("importFileName").isEqualTo("multilang.json")
@@ -88,10 +98,14 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
     val testData = ImportTestData()
     testDataService.saveTestData(testData.root)
 
-    loginAsUser(testData.root.data.userAccounts[0].self.username)
+    loginAsUser(
+      testData.root.data.userAccounts[0]
+        .self.username,
+    )
 
     performAuthGet("/v2/projects/${testData.project.id}/import/result?page=0&size=2")
-      .andPrettyPrint.andAssertThatJson { node("_embedded.languages").isArray.isNotEmpty.hasSize(2) }
+      .andPrettyPrint
+      .andAssertThatJson { node("_embedded.languages").isArray.isNotEmpty.hasSize(2) }
   }
 
   @Test
@@ -99,12 +113,16 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
     val testData = ImportTestData()
     testData.addPluralImport()
     testDataService.saveTestData(testData.root)
-    loginAsUser(testData.root.data.userAccounts[0].self.username)
+    loginAsUser(
+      testData.root.data.userAccounts[0]
+        .self.username,
+    )
     performAuthGet(
       "/v2/projects/${testData.project.id}" +
         "/import/result/languages/${testData.importEnglish.id}/translations",
     ).andIsOk
-      .andPrettyPrint.andAssertThatJson {
+      .andPrettyPrint
+      .andAssertThatJson {
         node("_embedded.translations") {
           isArray.isNotEmpty.hasSize(6)
           node("[1]") {
@@ -123,12 +141,16 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
     val testData = ImportTestData()
     testData.addPluralImport()
     testDataService.saveTestData(testData.root)
-    loginAsUser(testData.root.data.userAccounts[0].self.username)
+    loginAsUser(
+      testData.root.data.userAccounts[0]
+        .self.username,
+    )
     performAuthGet(
       "/v2/projects/${testData.project.id}" +
         "/import/result/languages/${testData.importEnglish.id}/translations?onlyConflicts=true",
     ).andIsOk
-      .andPrettyPrint.andAssertThatJson {
+      .andPrettyPrint
+      .andAssertThatJson {
         node("_embedded.translations") {
           isArray.isNotEmpty.hasSize(3)
           node("[1]") {
@@ -152,14 +174,18 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
     val testData = ImportTestData()
     testDataService.saveTestData(testData.root)
 
-    loginAsUser(testData.root.data.userAccounts[0].self.username)
+    loginAsUser(
+      testData.root.data.userAccounts[0]
+        .self.username,
+    )
 
     performAuthGet(
       "/v2/projects/${testData.project.id}" +
         "/import/result/languages/${testData.importEnglish.id}" +
         "/translations?search=extraordinary",
     ).andIsOk
-      .andPrettyPrint.andAssertThatJson {
+      .andPrettyPrint
+      .andAssertThatJson {
         node("_embedded.translations") {
           isArray.isNotEmpty.hasSize(1)
           node("[0]") {
@@ -173,7 +199,8 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
         "/import/result/languages/${testData.importEnglish.id}" +
         "/translations?search=Imported",
     ).andIsOk
-      .andPrettyPrint.andAssertThatJson {
+      .andPrettyPrint
+      .andAssertThatJson {
         node("_embedded.translations") {
           isArray.isNotEmpty.hasSize(1)
           node("[0]") {
@@ -188,13 +215,17 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
     val testData = ImportTestData()
     testDataService.saveTestData(testData.root)
 
-    loginAsUser(testData.root.data.userAccounts[0].self.username)
+    loginAsUser(
+      testData.root.data.userAccounts[0]
+        .self.username,
+    )
 
     performAuthGet(
       "/v2/projects/${testData.project.id}" +
         "/import/result/languages/${testData.importEnglish.id}/translations?size=2",
     ).andIsOk
-      .andPrettyPrint.andAssertThatJson { node("_embedded.translations").isArray.hasSize(2) }
+      .andPrettyPrint
+      .andAssertThatJson { node("_embedded.translations").isArray.hasSize(2) }
   }
 
   @Test
@@ -202,19 +233,24 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
     val testData = ImportTestData()
     testDataService.saveTestData(testData.root)
 
-    loginAsUser(testData.root.data.userAccounts[0].self.username)
+    loginAsUser(
+      testData.root.data.userAccounts[0]
+        .self.username,
+    )
 
     performAuthGet(
       "/v2/projects/${testData.project.id}" +
         "/import/result/languages/${testData.importEnglish.id}/translations?onlyConflicts=false",
     ).andIsOk
-      .andPrettyPrint.andAssertThatJson { node("_embedded.translations").isArray.hasSize(5) }
+      .andPrettyPrint
+      .andAssertThatJson { node("_embedded.translations").isArray.hasSize(5) }
 
     performAuthGet(
       "/v2/projects/${testData.project.id}" +
         "/import/result/languages/${testData.importEnglish.id}/translations?onlyConflicts=true",
     ).andIsOk
-      .andPrettyPrint.andAssertThatJson { node("_embedded.translations").isArray.hasSize(3) }
+      .andPrettyPrint
+      .andAssertThatJson { node("_embedded.translations").isArray.hasSize(3) }
   }
 
   @Test
@@ -222,37 +258,50 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
     val testData = ImportTestData()
     testData.translationWithConflict.resolve()
     testDataService.saveTestData(testData.root)
-    loginAsUser(testData.root.data.userAccounts[0].self.username)
+    loginAsUser(
+      testData.root.data.userAccounts[0]
+        .self.username,
+    )
 
     performAuthGet(
       "/v2/projects/${testData.project.id}" +
         "/import/result/languages/${testData.importEnglish.id}/" +
         "translations?onlyConflicts=true",
     ).andIsOk
-      .andPrettyPrint.andAssertThatJson { node("_embedded.translations").isArray.hasSize(3) }
+      .andPrettyPrint
+      .andAssertThatJson { node("_embedded.translations").isArray.hasSize(3) }
 
     performAuthGet(
       "/v2/projects/${testData.project.id}" +
         "/import/result/languages/${testData.importEnglish.id}/translations?onlyUnresolved=true",
     ).andIsOk
-      .andPrettyPrint.andAssertThatJson { node("_embedded.translations").isArray.hasSize(2) }
+      .andPrettyPrint
+      .andAssertThatJson { node("_embedded.translations").isArray.hasSize(2) }
   }
 
   @Test
   fun `import is isolated`() {
     val testData = ImportTestData()
     testDataService.saveTestData(testData.root)
-    loginAsUser(testData.root.data.userAccounts[0].self.username)
+    loginAsUser(
+      testData.root.data.userAccounts[0]
+        .self.username,
+    )
 
     performAuthGet("/v2/projects/${testData.project.id}/import/result").andIsOk
 
     val testData2 = ImportTestData()
     testData2.userAccount.username = "user2"
     testDataService.saveTestData(testData2.root)
-    loginAsUser(testData2.root.data.userAccounts[0].self.username)
+    loginAsUser(
+      testData2.root.data.userAccounts[0]
+        .self.username,
+    )
 
-    performAuthGet("/v2/projects/${testData2.project.id}/import/result").andIsOk
-      .andPrettyPrint.andAssertThatJson {
+    performAuthGet("/v2/projects/${testData2.project.id}/import/result")
+      .andIsOk
+      .andPrettyPrint
+      .andAssertThatJson {
         node("_embedded.languages") {
           isArray.hasSize(3)
           node("[0].totalCount").isEqualTo(5)
@@ -261,10 +310,15 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
 
     performAuthDelete("/v2/projects/${testData2.project.id}/import", null).andIsOk
 
-    loginAsUser(testData.root.data.userAccounts[0].self.username)
+    loginAsUser(
+      testData.root.data.userAccounts[0]
+        .self.username,
+    )
 
-    performAuthGet("/v2/projects/${testData.project.id}/import/result").andIsOk
-      .andPrettyPrint.andAssertThatJson {
+    performAuthGet("/v2/projects/${testData.project.id}/import/result")
+      .andIsOk
+      .andPrettyPrint
+      .andAssertThatJson {
         node("_embedded.languages") {
           isArray.hasSize(3)
           node("[0].totalCount").isEqualTo(5)
@@ -279,9 +333,13 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
     testData.setAllResolved()
     testData.setAllOverride()
     testDataService.saveTestData(testData.root)
-    val user = testData.root.data.userAccounts[0].self
+    val user =
+      testData.root.data.userAccounts[0]
+        .self
     val projectId = testData.project.id
-    val fileId = testData.importBuilder.data.importFiles[0].self.id
+    val fileId =
+      testData.importBuilder.data.importFiles[0]
+        .self.id
     loginAsUser(user.username)
     val path = "/v2/projects/$projectId/import/result/files/$fileId/issues"
     performAuthGet(path).andIsOk.andPrettyPrint.andAssertThatJson {

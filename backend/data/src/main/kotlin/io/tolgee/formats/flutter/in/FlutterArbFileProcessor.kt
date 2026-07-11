@@ -10,8 +10,7 @@ import io.tolgee.service.dataImport.processors.FileProcessorContext
 class FlutterArbFileProcessor(
   override val context: FileProcessorContext,
   private val objectMapper: ObjectMapper,
-) :
-  ImportFileProcessor() {
+) : ImportFileProcessor() {
   override fun process() {
     parsed.translations.forEach { (keyName, item) ->
       val converted = convertMessage(item.value)
@@ -33,7 +32,11 @@ class FlutterArbFileProcessor(
   }
 
   private val parsed by lazy {
-    FlutterArbFileParser(context.file.data, objectMapper).parse()
+    try {
+      FlutterArbFileParser(context.file.data, objectMapper).parse()
+    } catch (e: Exception) {
+      throw FlutterArbFileParseException(context.file.name, e)
+    }
   }
 
   fun convertMessage(text: String?): MessageConvertorResult {

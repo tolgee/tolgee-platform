@@ -1,6 +1,6 @@
 import { FunctionComponent, useState } from 'react';
 import { Alert, Box, Dialog, DialogContent, DialogTitle } from '@mui/material';
-import { Warning } from '@mui/icons-material';
+import { AlertTriangle } from '@untitled-ui/icons-react';
 import { T } from '@tolgee/react';
 import { useProject } from 'tg.hooks/useProject';
 import { components } from 'tg.service/apiSchema.generated';
@@ -9,10 +9,12 @@ import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useFileIssueTranslation } from 'tg.translationTools/useFileIssueTranslation';
 import { useFileIssuePeramTranslation } from 'tg.translationTools/useFileIssueParamTranslation';
 
-export const ImportFileIssuesDialog: FunctionComponent<{
-  row?: components['schemas']['ImportLanguageModel'];
-  onClose: () => void;
-}> = (props) => {
+export const ImportFileIssuesDialog: FunctionComponent<
+  React.PropsWithChildren<{
+    row?: components['schemas']['ImportLanguageModel'];
+    onClose: () => void;
+  }>
+> = (props) => {
   const translateFileIssue = useFileIssueTranslation();
   const translateFileParamIssue = useFileIssuePeramTranslation();
   const project = useProject();
@@ -61,7 +63,7 @@ export const ImportFileIssuesDialog: FunctionComponent<{
                 sortBy={[]}
                 renderItem={(i) => (
                   <>
-                    <Alert severity="warning" icon={<Warning />}>
+                    <Alert severity="warning" icon={<AlertTriangle />}>
                       {i.type && translateFileIssue(i.type.toLowerCase())}
                       &nbsp;(
                       {i.params &&

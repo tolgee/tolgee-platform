@@ -7,7 +7,7 @@ import io.tolgee.model.batch.IBatchJob
 
 class BatchJobDto(
   override var id: Long,
-  val projectId: Long,
+  val projectId: Long?,
   val authorId: Long?,
   val target: List<Any>,
   val totalItems: Int,
@@ -31,7 +31,7 @@ class BatchJobDto(
     fun fromEntity(entity: BatchJob): BatchJobDto {
       return BatchJobDto(
         id = entity.id,
-        projectId = entity.project.id,
+        projectId = entity.project?.id,
         authorId = entity.author?.id,
         target = entity.target,
         totalItems = entity.totalItems,

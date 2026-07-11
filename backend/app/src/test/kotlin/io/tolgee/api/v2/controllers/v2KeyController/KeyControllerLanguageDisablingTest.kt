@@ -8,6 +8,7 @@ import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.node
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
@@ -33,9 +34,24 @@ class KeyControllerLanguageDisablingTest : ProjectAuthControllerTest("/v2/projec
   @ProjectJWTAuthTestMethod
   fun `get disabled languages`() {
     performProjectAuthGet("keys/${testData.key.self.id}/disabled-languages")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("_embedded.languages[0].id").isEqualTo(testData.german.self.id)
         node("_embedded.languages[1].id").isEqualTo(testData.czech.self.id)
+      }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `get all disabled languages`() {
+    performProjectAuthGet("all-keys-with-disabled-languages")
+      .andIsOk
+      .andAssertThatJson {
+        node("_embedded.keys") {
+          isArray.hasSize(1)
+          node("[0].disabledLanguages[0].id").isEqualTo(testData.german.self.id)
+          node("[0].disabledLanguages[1].id").isEqualTo(testData.czech.self.id)
+        }
       }
   }
 
@@ -53,12 +69,21 @@ class KeyControllerLanguageDisablingTest : ProjectAuthControllerTest("/v2/projec
       node("_embedded.languages[1].id").isEqualTo(testData.czech.self.id)
     }
 
-    translationService.find(testData.key.self, testData.french.self).get()
-      .state.assert.isEqualTo(TranslationState.DISABLED)
-    translationService.find(testData.key.self, testData.french.self).get()
-      .state.assert.isEqualTo(TranslationState.DISABLED)
-    translationService.find(testData.key.self, testData.german.self).get()
-      .state.assert.isEqualTo(TranslationState.UNTRANSLATED)
+    translationService
+      .find(testData.key.self, testData.french.self)
+      .get()
+      .state.assert
+      .isEqualTo(TranslationState.DISABLED)
+    translationService
+      .find(testData.key.self, testData.french.self)
+      .get()
+      .state.assert
+      .isEqualTo(TranslationState.DISABLED)
+    translationService
+      .find(testData.key.self, testData.german.self)
+      .get()
+      .state.assert
+      .isEqualTo(TranslationState.UNTRANSLATED)
   }
 
   @Test

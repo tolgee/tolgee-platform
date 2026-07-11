@@ -21,4 +21,6 @@ import java.io.Serializable
 data class Bucket(
   val tokens: Int,
   val refillAt: Long,
+  val strikeCount: Int = 0,
+  val lastStrikeAt: Long = 0,
 ) : Serializable

@@ -7,18 +7,28 @@ import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.Index
+import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
+import jakarta.persistence.Table
 import jakarta.validation.constraints.Size
 import org.hibernate.annotations.ColumnDefault
 
 @Entity
+@Table(
+  indexes = [
+    Index(columnList = "import_id"),
+  ],
+)
 class ImportFile(
   @field:Size(max = 2000)
   @Column(length = 2000)
   var name: String?,
-  @ManyToOne(optional = false)
-  val import: Import,
+  @field:ManyToOne(optional = false)
+  @get:ManyToOne(optional = false)
+  @JoinColumn(name = "import_id")
+  val importData: Import,
 ) : StandardAuditModel() {
   @OneToMany(mappedBy = "file", orphanRemoval = true)
   var issues: MutableList<ImportFileIssue> = mutableListOf()
@@ -30,6 +40,11 @@ class ImportFile(
   var languages: MutableList<ImportLanguage> = mutableListOf()
 
   var namespace: String? = null
+
+  /**
+   * The actual detected namespace, even if we decide we want to use a different value in the `namespace` column.
+   */
+  var detectedNamespace: String? = null
 
   @ColumnDefault("false")
   var needsParamConversion = false
@@ -49,9 +64,10 @@ class ImportFile(
   ): ImportFileIssue {
     return ImportFileIssue(file = this, type = type).apply {
       this.params =
-        params.map {
-          ImportFileIssueParam(this, it.key, it.value.shortenWithEllipsis())
-        }.toMutableList()
+        params
+          .map {
+            ImportFileIssueParam(this, it.key, it.value.shortenWithEllipsis())
+          }.toMutableList()
     }
   }
 

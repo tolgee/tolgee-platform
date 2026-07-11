@@ -1,6 +1,6 @@
 import { RefObject, useEffect, useMemo, useRef } from 'react';
 import { minimalSetup } from 'codemirror';
-import { Compartment, EditorState, Prec } from '@codemirror/state';
+import { Compartment, EditorState, Prec, Extension } from '@codemirror/state';
 import { EditorView, ViewUpdate, keymap, KeyBinding } from '@codemirror/view';
 import { styled, useTheme } from '@mui/material';
 import {
@@ -9,10 +9,13 @@ import {
   TolgeeHighlight,
   htmlIsolatesPlugin,
   generatePlaceholdersStyle,
+  KeyNamePlugin,
+  generateKeyNameStyle,
 } from '@tginternal/editor';
 
 import { Direction } from 'tg.fixtures/getLanguageDirection';
 import { useScrollMargins } from 'tg.hooks/useScrollMargins';
+import { visibleKeyNameSpacesPlugin } from './utils/codemirrorVisibleWhitespace';
 
 const StyledEditor = styled('div')`
   font-size: 14px;
@@ -53,13 +56,18 @@ const StyledEditor = styled('div')`
     padding: 4px 8px;
     margin-top: 4px;
   }
+
+  & .cm-keyname-space-indicator {
+    background-color: ${({ theme }) => theme.palette.label.lightBlue};
+    border-radius: 2px;
+  }
 `;
 
 export type EditorProps = {
   value: string;
   onChange?: (val: string) => void;
   background?: string;
-  mode: 'placeholders' | 'syntax' | 'plain';
+  mode: 'placeholders' | 'syntax' | 'plain' | 'keyName';
   autofocus?: boolean;
   minHeight?: number | string;
   onBlur?: () => void;
@@ -80,7 +88,7 @@ function useRefGroup<T>(value: T): RefObject<T> {
   return refObject;
 }
 
-export const Editor: React.FC<EditorProps> = ({
+export const Editor: React.FC<React.PropsWithChildren<EditorProps>> = ({
   value,
   onChange,
   onFocus,
@@ -110,10 +118,19 @@ export const Editor: React.FC<EditorProps> = ({
   const languageCompartment = useRef<Compartment>(new Compartment());
 
   const StyledEditorWrapper = useMemo(() => {
-    return generatePlaceholdersStyle({
+    // Compose both placeholder and keyName styles unconditionally — switching
+    // the wrapper based on `mode` would unmount the styled component on every
+    // mode change and tear down the underlying CodeMirror EditorView with it,
+    // breaking any test or interaction that toggles modes mid-edit.
+    const withPlaceholders = generatePlaceholdersStyle({
       styled,
       colors: theme.palette.placeholders,
       component: StyledEditor,
+    });
+    return generateKeyNameStyle({
+      styled,
+      colors: theme.palette.placeholders.variant,
+      component: withPlaceholders,
     });
   }, [theme.palette.placeholders]);
 
@@ -169,22 +186,29 @@ export const Editor: React.FC<EditorProps> = ({
   }, [theme.palette.mode]);
 
   useEffect(() => {
-    const placholderPlugins =
-      mode === 'placeholders'
-        ? [
-            PlaceholderPlugin({
-              examplePluralNum,
-              nested: Boolean(nested),
-              tooltips: true,
-            }),
-          ]
-        : [];
+    const placeholderPlugins: Extension[] = [];
+    switch (mode) {
+      case 'placeholders':
+        placeholderPlugins.push(
+          PlaceholderPlugin({
+            examplePluralNum,
+            nested: Boolean(nested),
+            tooltips: true,
+          })
+        );
+        break;
+      case 'keyName':
+        placeholderPlugins.push(KeyNamePlugin(), visibleKeyNameSpacesPlugin());
+        break;
+    }
     const syntaxPlugins =
-      mode === 'plain' ? [] : [tolgeeSyntax(Boolean(nested))];
+      mode === 'plain' || mode === 'keyName'
+        ? []
+        : [tolgeeSyntax(Boolean(nested))];
     editor.current?.dispatch({
       selection: editor.current.state.selection,
       effects: [
-        placeholders.current?.reconfigure(placholderPlugins),
+        placeholders.current?.reconfigure(placeholderPlugins),
         languageCompartment.current.reconfigure(syntaxPlugins),
       ],
     });
@@ -230,6 +254,7 @@ export const Editor: React.FC<EditorProps> = ({
     <StyledEditorWrapper
       data-cy="global-editor"
       ref={ref}
+      key={theme.palette.mode}
       dir={direction}
       style={{
         minHeight,

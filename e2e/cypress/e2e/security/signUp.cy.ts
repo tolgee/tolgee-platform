@@ -29,12 +29,13 @@ import {
   signUpAfter,
   visitSignUp,
 } from '../../common/login';
+import { getInput } from '../../common/xPath';
 import { ProjectDTO } from '../../../../webapp/src/service/response.types';
 import { waitForGlobalLoading } from '../../common/loading';
 
 const TEST_USERNAME = 'johndoe@doe.com';
 
-const createProjectWithInvitation = (name: string) => {
+const createProjectWithInvitation = (name: string, email?: string) => {
   return login().then(() =>
     createProject({
       name,
@@ -49,7 +50,7 @@ const createProjectWithInvitation = (name: string) => {
     }).then((projectResponse: { body: ProjectDTO }) => {
       return v2apiFetch(`projects/${projectResponse.body.id}/invite`, {
         method: 'PUT',
-        body: { type: 'VIEW', name: 'Franta' },
+        body: { type: 'VIEW', name: 'Franta', ...(email ? { email } : {}) },
       }).then((invitation) => {
         logout();
         return {
@@ -93,7 +94,7 @@ context('Sign up', () => {
       cy.wait(['@signUp']);
       cy.contains('Thank you for signing up!').should('be.visible');
 
-      cy.contains('Verify your email now');
+      cy.contains('Check your inbox');
       setProperty('recaptcha.siteKey', recaptchaSiteKey);
     });
   });
@@ -118,8 +119,9 @@ context('Sign up', () => {
     cy.wait(['@signUp']);
     cy.contains('Thank you for signing up!').should('be.visible');
 
-    cy.contains('Verify your email now');
+    cy.contains('Check your inbox');
 
+    cy.wait(1000);
     getUser(TEST_USERNAME).then((u) => {
       expect(u[0]).be.equal(TEST_USERNAME);
       expect(u[1]).be.not.null;
@@ -138,12 +140,12 @@ context('Sign up', () => {
     fillAndSubmitSignUpForm(TEST_USERNAME);
     cy.contains('Thank you for signing up!').should('be.visible');
 
-    cy.contains('Verify your email now');
+    cy.contains('Check your inbox');
 
     gcy('resend-email-button').click();
     cy.contains('Your verification link has been resent.');
 
-    // Emails sent after registration are no longer valid
+    // Email sent after registration are no longer valid
     getParsedEmailVerificationByIndex(1).then((r) => {
       cy.wrap(r.fromAddress).should('contain', 'no-reply@tolgee.io');
       cy.wrap(r.toAddress).should('contain', TEST_USERNAME);
@@ -176,6 +178,11 @@ context('Sign up', () => {
       fillAndSubmitSignUpForm(TEST_USERNAME);
       cy.contains('Projects').should('be.visible');
       cy.visit(invitationLink);
+      cy.gcy('accept-invitation-info-text').should(
+        'contain',
+        'admin invited you to the project Test'
+      );
+      cy.gcy('accept-invitation-accept').should('be.visible').click();
       assertMessage('Invitation successfully accepted');
     });
   });
@@ -184,12 +191,48 @@ context('Sign up', () => {
     disableEmailVerification();
     createProjectWithInvitation('Crazy project').then(({ invitationLink }) => {
       cy.visit(invitationLink);
-      assertMessage('Log in or sign up first please');
+      cy.gcy('accept-invitation-accept').should('be.visible').click();
+      cy.gcy('pending-invitation-banner').should('be.visible');
       cy.visit(HOST + '/sign_up');
+      cy.gcy('pending-invitation-banner').should('be.visible');
       fillAndSubmitSignUpForm(TEST_USERNAME, false);
       assertMessage('Thank you for signing up!');
       cy.contains('Crazy project').should('be.visible');
     });
+  });
+
+  it('Invitation can be declined right away', () => {
+    disableEmailVerification();
+    createProjectWithInvitation('Crazy project').then(({ invitationLink }) => {
+      cy.visit(invitationLink);
+      cy.gcy('accept-invitation-decline').should('be.visible').click();
+      cy.gcy('login-button').should('be.visible');
+      cy.gcy('pending-invitation-banner').should('not.exist');
+    });
+  });
+
+  it('Invitation can be declined later', () => {
+    disableEmailVerification();
+    createProjectWithInvitation('Crazy project').then(({ invitationLink }) => {
+      cy.visit(invitationLink);
+      cy.gcy('accept-invitation-accept').should('be.visible').click();
+      cy.gcy('login-button').should('be.visible');
+      cy.gcy('pending-invitation-dismiss').should('be.visible').click();
+      cy.gcy('pending-invitation-banner').should('not.exist');
+    });
+  });
+
+  it('Prefills email on sign up from email-bound invitation', () => {
+    disableEmailVerification();
+    createProjectWithInvitation('Email bound project', TEST_USERNAME).then(
+      ({ invitationLink }) => {
+        cy.visit(invitationLink);
+        cy.gcy('accept-invitation-accept').should('be.visible').click();
+        cy.gcy('pending-invitation-banner').should('be.visible');
+        cy.visit(HOST + '/sign_up');
+        cy.xpath(getInput('email')).should('have.value', TEST_USERNAME);
+      }
+    );
   });
 
   it('Allows sign up when user has invitation', () => {
@@ -197,7 +240,8 @@ context('Sign up', () => {
     disableRegistration();
     createProjectWithInvitation('Crazy project').then(({ invitationLink }) => {
       cy.visit(invitationLink);
-      assertMessage('Log in or sign up first please');
+      cy.gcy('accept-invitation-accept').should('be.visible').click();
+      cy.gcy('pending-invitation-banner').should('be.visible');
       cy.visit(HOST + '/sign_up');
       fillAndSubmitSignUpForm(TEST_USERNAME, false);
       assertMessage('Thank you for signing up!');
@@ -209,7 +253,7 @@ context('Sign up', () => {
     disableEmailVerification();
     createProjectWithInvitation('Crazy project').then(({ invitationLink }) => {
       cy.visit(HOST + '/login');
-      loginWithFakeGithub();
+      loginWithFakeGithub(TEST_USERNAME);
       cy.contains('Projects').should('be.visible');
       cy.log(invitationLink);
       cy.visit(invitationLink);
@@ -223,9 +267,11 @@ context('Sign up', () => {
     disableEmailVerification();
     createProjectWithInvitation('Crazy project').then(({ invitationLink }) => {
       cy.visit(invitationLink);
-      assertMessage('Log in or sign up first please');
+      cy.gcy('accept-invitation-accept').click();
+      cy.gcy('pending-invitation-banner').should('be.visible');
       cy.intercept('/api/public/authorize_oauth/github**').as('GithubSignup');
-      loginWithFakeGithub();
+      loginWithFakeGithub(TEST_USERNAME);
+      cy.contains('Projects').should('be.visible');
       cy.wait('@GithubSignup').then((interception) => {
         assert.isTrue(interception.request.url.includes('invitationCode'));
       });

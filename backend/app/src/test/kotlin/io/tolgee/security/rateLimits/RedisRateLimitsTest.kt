@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.util.TestPropertyValues
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.test.context.ContextConfiguration
@@ -22,7 +23,6 @@ import org.springframework.test.context.ContextConfiguration
   properties = [
     "tolgee.cache.enabled=true",
     "tolgee.cache.use-redis=true",
-    "spring.redis.port=56379",
     "tolgee.rate-limits.ip-request-limit=2",
     "tolgee.rate-limits.ip-request-window=10000",
   ],
@@ -36,6 +36,9 @@ class RedisRateLimitsTest : AuthorizedControllerTest() {
     class Initializer : ApplicationContextInitializer<ConfigurableApplicationContext> {
       override fun initialize(configurableApplicationContext: ConfigurableApplicationContext) {
         redisRunner.run()
+        TestPropertyValues
+          .of("spring.data.redis.port=${RedisRunner.port}")
+          .applyTo(configurableApplicationContext)
       }
     }
 

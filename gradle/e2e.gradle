@@ -1,4 +1,5 @@
 apply from: './gradle/utils.gradle'
+
 import groovy.io.FileType
 
 import java.time.Duration
@@ -8,7 +9,6 @@ ext {
     BILLING_E2E_DIR = "${project.projectDir}/../billing/e2e"
     WEBAPP_DIR = "${project.projectDir}/webapp"
 }
-
 
 def getE2eChunks() {
     def totalJobs = System.getenv("E2E_TOTAL_JOBS")
@@ -50,29 +50,39 @@ def getE2eTestsToRun() {
     return chunks[Integer.parseInt(jobIndex)]
 }
 
-task waitForRunningContainer(type: Task, group: "e2e") {
+def getE2eSpecsOverride() {
+    def overrideSpecs = project.findProperty("specs")
+    if (overrideSpecs == null) {
+        return null
+    }
+    def trimmed = overrideSpecs.toString().trim()
+    return trimmed.isEmpty() ? null : trimmed
+}
+
+tasks.register('waitForRunningContainer', Task) {
     doLast {
         while (true) {
-            def pb = new ProcessBuilder("docker-compose", "logs", "-f")
+            def pb = new ProcessBuilder(dockerCommandName(), "compose", "logs", "-f")
             pb.directory(new File(E2E_DIR))
             def proc = pb.start()
             BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()))
             String s = null
             while ((s = stdInput.readLine()) != null) {
                 println(s)
-                if (s.contains("Tomcat started on port(s):")) {
+                if (s.contains("Tomcat started on port")) {
                     return
                 }
             }
             if (proc.exitValue() != 0) {
-                throw new RuntimeException("Docker-compose logs retuned non zero exit code")
+                throw new RuntimeException("docker compose logs returned non zero exit code")
             }
         }
     }
     timeout = Duration.ofSeconds(120)
 }
 
-task installE2eDeps(type: Exec, group: "e2e") {
+tasks.register('installE2eDeps', Exec) {
+    group = 'e2e'
     onlyIf { System.getenv("SKIP_INSTALL_E2E_DEPS") != "true" }
     inputs.file("$E2E_DIR/package.json")
     inputs.file("$E2E_DIR/package-lock.json")
@@ -82,10 +92,13 @@ task installE2eDeps(type: Exec, group: "e2e") {
     workingDir E2E_DIR
 }
 
-task runE2e(type: Exec, group: "e2e") {
+tasks.register('runE2e', Exec) {
+    group = 'e2e'
     dependsOn "runDockerE2e", "installE2eDeps"
-    def specs = getE2eTestsToRun().join(",")
+    def overrideSpecs = getE2eSpecsOverride()
+    def specs = overrideSpecs != null ? overrideSpecs : getE2eTestsToRun().join(",")
 
+    environment     "CYPRESS_HOST", "http://localhost:8201"
     commandLine npmCommandName, "run", "cy:run", "--", "--spec", specs
 
     workingDir E2E_DIR
@@ -93,7 +106,8 @@ task runE2e(type: Exec, group: "e2e") {
     finalizedBy "saveServerLogs", "stopDockerE2e", "cleanupDockerE2e"
 }
 
-task printE2eGroups() {
+tasks.register('printE2eGroups') {
+    group = 'e2e'
     doLast {
         getE2eChunks().indexed().forEach { index, chunk ->
             println("Chunk: $index")
@@ -102,68 +116,85 @@ task printE2eGroups() {
     }
 }
 
-task saveServerLogs(type: Exec, group: "e2E") {
-    commandLine "bash", "-c", "docker-compose logs > server.log"
-    workingDir E2E_DIR
+tasks.register('saveServerLogs', Exec) {
+    group = 'e2e'
+    workingDir = file(E2E_DIR)
+    def outFile = file("$E2E_DIR/server.log")
+    def outStream = null
+    doFirst {
+        outFile.parentFile.mkdirs()
+        outStream = new FileOutputStream(outFile)
+        standardOutput = outStream
+        errorOutput = outStream
+    }
+    commandLine dockerCommandName(), "compose", "logs"
+    ignoreExitValue = true
+    doLast {
+        try { outStream?.close() } catch (ignored) {}
+    }
+    finalizedBy "stopDockerE2e"
 }
 
-task openE2e(type: Exec, group: "e2e") {
+tasks.register('openE2e', Exec) {
+    group = 'e2e'
     dependsOn "runDockerE2e", "installE2eDeps"
 
-    commandLine npmCommandName, "run", "cy:open"
+    def overrideSpecs = getE2eSpecsOverride()
+    if (overrideSpecs != null) {
+        commandLine npmCommandName, "run", "cy:open", "--", "--spec", overrideSpecs
+    } else {
+        commandLine npmCommandName, "run", "cy:open"
+    }
 
     workingDir E2E_DIR
 
     finalizedBy "stopDockerE2e", "cleanupDockerE2e"
 }
 
-task openE2eDev(type: Exec, group: "e2e") {
-    commandLine npmCommandName, "run", "cy:open"
+tasks.register('openE2eDev', Exec) {
+    def overrideSpecs = getE2eSpecsOverride()
+    if (overrideSpecs != null) {
+        commandLine npmCommandName, "run", "cy:open", "--", "--spec", overrideSpecs
+    } else {
+        commandLine npmCommandName, "run", "cy:open"
+    }
 
     environment "CYPRESS_HOST", "http://localhost:8081"
 
     workingDir E2E_DIR
 }
 
-task openBillingE2eDev(type: Exec, group: "e2e") {
-    commandLine npmCommandName, "run", "cy:open"
-
-    environment "CYPRESS_HOST", "http://localhost:8081"
-
-    workingDir BILLING_E2E_DIR
-}
-
-task runWebAppNpmStartE2eDev(type: Exec, group: "e2e") {
-    commandLine npmCommandName, "run", "start", "--", "--port", "8081", "--host"
-
-    environment "VITE_APP_API_URL", "http://localhost:8201"
-
-    workingDir WEBAPP_DIR
-}
-
-task runDockerE2e(type: Exec, group: "e2e") {
+tasks.register('runDockerE2e', Exec) {
+    group = 'e2e'
     dependsOn "tagDockerLocal"
-    commandLine "docker-compose", "up", "-d"
+    commandLine dockerCommandName(), "compose", "up", "-d"
     workingDir E2E_DIR
     finalizedBy "waitForRunningContainer"
 }
 
-task runDockerE2eDev(type: Exec, group: "e2e") {
-    commandLine "docker-compose", "up", "-d", "fakesmtp"
+tasks.register('runDockerE2eDev', Exec) {
+    group = 'e2e'
+    commandLine dockerCommandName(), "compose", "up", "-d", "fakesmtp"
     workingDir E2E_DIR
 }
 
-task stopDockerE2e(type: Exec, group: "e2e") {
-    commandLine "docker-compose", "stop"
+tasks.register('stopDockerE2e', Exec) {
+    group = 'e2e'
+    commandLine dockerCommandName(), "compose", "stop"
     workingDir E2E_DIR
+    ignoreExitValue = true
+    finalizedBy "cleanupDockerE2e"
 }
 
-task cleanupDockerE2e(type: Exec, group: "e2e") {
-    commandLine "docker-compose", "rm", "-f"
+tasks.register('cleanupDockerE2e', Exec) {
+    group = 'e2e'
+    commandLine dockerCommandName(), "compose", "rm", "-f"
     workingDir E2E_DIR
+    ignoreExitValue = true
 }
 
-task tagDockerLocal(type: Exec) {
+tasks.register('tagDockerLocal', Exec) {
+    group = 'e2e'
     dependsOn "docker"
-    commandLine "docker", "tag", "tolgee/tolgee", "tolgee/tolgee:local"
+    commandLine dockerCommandName(), "tag", "tolgee/tolgee", "tolgee/tolgee:local"
 }

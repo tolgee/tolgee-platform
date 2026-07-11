@@ -9,6 +9,7 @@ import { T } from '@tolgee/react';
 import { OperationStatusType } from '../component/ImportFileInput';
 import { ApiError } from 'tg.service/http/ApiError';
 import { errorAction } from 'tg.service/http/errorAction';
+import { useBranchFromUrlPath } from 'tg.component/branching/useBranchFromUrlPath';
 
 export const useApplyImportHelper = (
   dataHelper: ReturnType<typeof useImportDataHelper>
@@ -19,6 +20,9 @@ export const useApplyImportHelper = (
   const [status, setStatus] = useState(
     undefined as OperationStatusType | undefined
   );
+
+  const [importedKeys, setImportedKeys] = useState<number | null>(null);
+  const [totalKeys, setTotalKeys] = useState<number | null>(null);
 
   const importApplyMutation = useNdJsonStreamedMutation({
     url: '/v2/projects/{projectId}/import/apply-streaming',
@@ -33,11 +37,18 @@ export const useApplyImportHelper = (
         errorAction(data.errorResponseBody.code);
         throw new ApiError(data.errorResponseBody.code, data.errorResponseBody);
       }
-      return setStatus(data.status);
+      setStatus(data.status);
+      if (data.importedKeys != null) {
+        setImportedKeys(data.importedKeys);
+      }
+      if (data.totalKeys != null) {
+        setTotalKeys(data.totalKeys);
+      }
     },
   });
 
   const project = useProject();
+  const branch = useBranchFromUrlPath();
   const error = importApplyMutation.error;
 
   const message = useMessage();
@@ -53,7 +64,9 @@ export const useApplyImportHelper = (
           path: {
             projectId: project.id,
           },
-          query: {},
+          query: {
+            branch,
+          },
         },
         {
           onSuccess(data) {
@@ -93,6 +106,8 @@ export const useApplyImportHelper = (
   const clear = () => {
     importApplyMutation.reset();
     setStatus(undefined);
+    setImportedKeys(null);
+    setTotalKeys(null);
   };
 
   return {
@@ -103,6 +118,8 @@ export const useApplyImportHelper = (
     loading: importApplyMutation.isLoading,
     loaded: importApplyMutation.isSuccess,
     status,
+    importedKeys,
+    totalKeys,
     clear,
   };
 };

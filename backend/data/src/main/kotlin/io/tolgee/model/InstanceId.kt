@@ -2,7 +2,7 @@ package io.tolgee.model
 
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
-import java.util.*
+import java.util.UUID
 
 @Entity
 class InstanceId : AuditModel() {

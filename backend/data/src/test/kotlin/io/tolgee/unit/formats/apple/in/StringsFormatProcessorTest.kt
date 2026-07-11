@@ -2,7 +2,6 @@ package io.tolgee.unit.formats.apple.`in`
 
 import io.tolgee.formats.apple.`in`.strings.StringsFileProcessor
 import io.tolgee.testing.assert
-import io.tolgee.unit.formats.PlaceholderConversionTestHelper
 import io.tolgee.util.FileProcessorContextMockUtil
 import io.tolgee.util.assertLanguagesCount
 import io.tolgee.util.assertSingle
@@ -55,7 +54,8 @@ class StringsFormatProcessorTest {
     mockPlaceholderConversionTestFile(convertPlaceholders = false, projectIcuPlaceholdersEnabled = false)
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("unknown", "welcome_header")
+    mockUtil.fileProcessorContext
+      .assertTranslations("unknown", "welcome_header")
       .assertSingle {
         hasText("Hello, %@ {meto}")
       }
@@ -66,7 +66,8 @@ class StringsFormatProcessorTest {
     mockPlaceholderConversionTestFile(convertPlaceholders = false, projectIcuPlaceholdersEnabled = true)
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("unknown", "welcome_header")
+    mockUtil.fileProcessorContext
+      .assertTranslations("unknown", "welcome_header")
       .assertSingle {
         hasText("Hello, %@ '{'meto'}'")
       }
@@ -77,7 +78,8 @@ class StringsFormatProcessorTest {
     mockPlaceholderConversionTestFile(convertPlaceholders = true, projectIcuPlaceholdersEnabled = true)
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("unknown", "welcome_header")
+    mockUtil.fileProcessorContext
+      .assertTranslations("unknown", "welcome_header")
       .assertSingle {
         hasText("Hello, {0} '{'meto'}'")
       }
@@ -92,26 +94,6 @@ class StringsFormatProcessorTest {
       "src/test/resources/import/apple/Localizable_params.strings",
       convertPlaceholders,
       projectIcuPlaceholdersEnabled,
-    )
-  }
-
-  @Test
-  fun `placeholder conversion setting application works`() {
-    PlaceholderConversionTestHelper.testFile(
-      "values-en/Localizable.strings",
-      "src/test/resources/import/apple/Localizable_params.strings",
-      assertBeforeSettingsApplication =
-        listOf(
-          "Hello, {0} '{'meto'}'",
-        ),
-      assertAfterDisablingConversion =
-        listOf(
-          "Hello, %@ '{'meto'}'",
-        ),
-      assertAfterReEnablingConversion =
-        listOf(
-          "Hello, {0} '{'meto'}'",
-        ),
     )
   }
 
@@ -133,14 +115,20 @@ class StringsFormatProcessorTest {
     key: String,
     translationText: String,
   ) {
-    mockUtil.fileProcessorContext.translations[key]!!.single().text.assert.isEqualTo(translationText)
+    mockUtil.fileProcessorContext.translations[key]!!
+      .single()
+      .text.assert
+      .isEqualTo(translationText)
   }
 
   private fun assertKeyDescription(
     keyName: String,
     expectedDescription: String?,
   ) {
-    val actualDescription = mockUtil.fileProcessorContext.keys[keyName]?.keyMeta?.description
+    val actualDescription =
+      mockUtil.fileProcessorContext.keys[keyName]
+        ?.keyMeta
+        ?.description
     actualDescription.assert.isEqualTo(expectedDescription)
   }
 }

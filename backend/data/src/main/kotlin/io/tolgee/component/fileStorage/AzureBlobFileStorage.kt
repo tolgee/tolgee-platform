@@ -55,7 +55,7 @@ open class AzureBlobFileStorage(
   override fun pruneDirectory(path: String) {
     val prefix = path.removePrefix("/").removeSuffix("/") + "/"
     val options = ListBlobsOptions()
-    options.setPrefix(prefix)
+    options.prefix = prefix
     client.listBlobs(options, null).forEach {
       client.getBlobClient(it.name).delete()
     }

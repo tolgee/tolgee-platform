@@ -4,8 +4,8 @@
 
 package io.tolgee.api.v2.controllers.v2ImageUploadController
 
+import io.tolgee.fixtures.generateImage
 import io.tolgee.testing.AuthorizedControllerTest
-import io.tolgee.util.generateImage
 import org.junit.jupiter.api.AfterAll
 import org.springframework.core.io.InputStreamSource
 import org.springframework.mock.web.MockMultipartFile

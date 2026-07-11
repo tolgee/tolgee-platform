@@ -15,7 +15,9 @@ import org.springframework.data.redis.core.RedisOperations
 @ConditionalOnClass(Redisson::class, RedisOperations::class)
 @AutoConfigureAfter(ConditionalRedissonAutoConfiguration::class)
 @ConditionalOnExpression("\${tolgee.cache.enabled:false} == false")
-class NoOpCacheConfiguration(val tolgeeProperties: TolgeeProperties) {
+class NoOpCacheConfiguration(
+  val tolgeeProperties: TolgeeProperties,
+) {
   @Bean
   fun cacheManager(): CacheManager {
     return NoOpCacheManager()

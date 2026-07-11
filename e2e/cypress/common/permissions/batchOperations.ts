@@ -63,7 +63,7 @@ export function testBatchOperations(projectInfo: ProjectInfo) {
         'translations.batch-machine',
         () => checkTargetLanguages(translateLanguageIds, projectInfo),
       ],
-      'Pre-translate by TM': [
+      'Translate from memory': [
         'translations.batch-by-tm',
         () => checkTargetLanguages(translateLanguageIds, projectInfo),
       ],

@@ -32,6 +32,12 @@ class PathParser(
         items.add(ObjectPathItem(itemValue, buffer.originalString()))
       }
 
+      State.IN_ESCAPE -> {
+        buffer.append('\\', path.length - 1)
+        itemValue = buffer.toString()
+        items.add(ObjectPathItem(itemValue, buffer.originalString()))
+      }
+
       else -> {}
     }
 
@@ -60,7 +66,16 @@ class PathParser(
             buffer.append('[', index)
           }
 
-          '\\' -> state = State.IN_ESCAPE
+          '\\' -> {
+            when (isEscapingSupported) {
+              true -> state = State.IN_ESCAPE
+              false -> {
+                state = State.NORMAL
+                buffer.append('\\', index)
+              }
+            }
+          }
+
           else -> {
             state = State.NORMAL
             buffer.append(ch, index)
@@ -69,6 +84,9 @@ class PathParser(
       }
 
       State.IN_ESCAPE -> {
+        if (!wasCharacterEscaped(ch)) {
+          buffer.append('\\', index)
+        }
         buffer.append(ch, index)
         state = State.NORMAL
       }
@@ -138,6 +156,24 @@ class PathParser(
       handleChar(ch, index)
     }
   }
+
+  private fun wasCharacterEscaped(ch: Char): Boolean {
+    if (arraySupport && ch == '[') {
+      return true
+    }
+
+    if (structureDelimiter != null && ch == structureDelimiter) {
+      return true
+    }
+
+    if (ch == '\\') {
+      return true
+    }
+
+    return false
+  }
+
+  val isEscapingSupported = arraySupport || structureDelimiter != null
 }
 
 private class StringBuilderWithIndexes(

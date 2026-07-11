@@ -2,7 +2,7 @@ import React from 'react';
 import { styled } from '@mui/material';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 
-const MENU_WIDTH = 60;
+export const MENU_WIDTH = 60;
 
 const StyledMenuWrapper = styled('div')`
   min-width: ${MENU_WIDTH}px;
@@ -20,7 +20,9 @@ const StyledMenuFixed = styled('menu')`
   flex-direction: column;
 `;
 
-export const SideMenu: React.FC = ({ children }) => {
+export const SideMenu: React.FC<React.PropsWithChildren<unknown>> = ({
+  children,
+}) => {
   const topBannerHeight = useGlobalContext((c) => c.layout.topBannerHeight);
 
   return (

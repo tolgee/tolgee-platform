@@ -1,6 +1,7 @@
 package io.tolgee.repository
 
 import io.tolgee.model.key.Namespace
+import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
@@ -9,6 +10,7 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 
 @Repository
+@Lazy
 interface NamespaceRepository : JpaRepository<Namespace, Long> {
   fun findByNameAndProjectId(
     name: String,
@@ -17,12 +19,28 @@ interface NamespaceRepository : JpaRepository<Namespace, Long> {
 
   @Query(
     """
-    select ns.id, count(k.id) from Key k join k.namespace ns on ns.id in :namespaceIds group by ns.id
+    select ns.id, count(k.id) from Key k join k.namespace ns on ns.id in :namespaceIds where k.deletedAt is null group by ns.id
   """,
   )
   fun getKeysInNamespaceCount(namespaceIds: Collection<Long>): List<Array<Long>>
 
+  @Query(
+    """
+    select ns.id, count(k.id) from Key k join k.namespace ns on ns.id in :namespaceIds group by ns.id
+  """,
+  )
+  fun getKeysInNamespaceCountIncludingSoftDeleted(namespaceIds: Collection<Long>): List<Array<Long>>
+
   fun getAllByProjectId(id: Long): List<Namespace>
+
+  @Query(
+    """
+    select ns from Namespace ns
+    where ns.project.id = :projectId
+      and exists (select k from Key k where k.namespace = ns and k.deletedAt is null)
+  """,
+  )
+  fun getAllWithActiveKeysByProjectId(projectId: Long): List<Namespace>
 
   fun getAllByProjectId(
     id: Long,
@@ -31,7 +49,22 @@ interface NamespaceRepository : JpaRepository<Namespace, Long> {
 
   @Query(
     """
-    select count(k) > 0 from Key k where k.namespace is null and k.project.id = :projectId
+      from Namespace ns where ns.project.id = :id and (
+        cast(:search as string) is null
+        or cast(:search as string) = ''
+        or lower(ns.name) like lower(concat('%', cast(:search as string),'%'))
+    )
+    """,
+  )
+  fun getByProjectAndSearch(
+    id: Long,
+    search: String?,
+    pageable: Pageable,
+  ): Page<Namespace>
+
+  @Query(
+    """
+    select count(k) > 0 from Key k where k.namespace is null and k.project.id = :projectId and k.deletedAt is null
   """,
   )
   fun isDefaultUsed(projectId: Long): Boolean

@@ -65,7 +65,8 @@ fun List<ImportTranslationInContextAssertions>.assertMultiple(
 }
 
 fun FileProcessorContext.assertLanguagesCount(languagesCount: Int): FileProcessorContext {
-  this.languages.size.assert.isEqualTo(languagesCount)
+  this.languages.size.assert
+    .isEqualTo(languagesCount)
   return this
 }
 
@@ -77,7 +78,8 @@ fun ImportTranslationInContextAssertions.hasKeyDescription(description: String) 
 }
 
 fun ImportTranslationInContextAssertions.isPlural(isPlural: Boolean = true) {
-  this.translation.isPlural.assert.isEqualTo(isPlural)
+  this.translation.isPlural.assert
+    .isEqualTo(isPlural)
 }
 
 data class ImportTranslationInContextAssertions(
@@ -86,7 +88,8 @@ data class ImportTranslationInContextAssertions(
   val keyName: String,
 ) {
   fun hasText(text: String): ImportTranslationInContextAssertions {
-    this.translation.text.assert.isEqualTo(text)
+    this.translation.text.assert
+      .isEqualTo(text)
     return this
   }
 

@@ -16,7 +16,8 @@ import org.springframework.test.web.servlet.ResultActions
 
 abstract class ProjectAuthControllerTest(
   val projectUrlPrefix: String = "/api/project/",
-) : AuthorizedControllerTest(), AuthRequestPerformer {
+) : AuthorizedControllerTest(),
+  AuthRequestPerformer {
   // for api key auth methods
   val apiKey: ApiKeyDTO
     get() {
@@ -39,7 +40,7 @@ abstract class ProjectAuthControllerTest(
 
   private var _projectAuthRequestPerformer: ProjectAuthRequestPerformer? = null
 
-  private var projectAuthRequestPerformer: ProjectAuthRequestPerformer
+  var projectAuthRequestPerformer: ProjectAuthRequestPerformer
     get() {
       return _projectAuthRequestPerformer
         ?: throw Exception("Method not annotated with ApiKeyAccessTestMethod nor ProjectJWTAuthTestMethod?")

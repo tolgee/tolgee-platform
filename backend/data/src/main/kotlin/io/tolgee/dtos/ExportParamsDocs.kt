@@ -66,4 +66,13 @@ The `{snakeLanguageTag}` placeholder is the same as `{languageTag}` but in snake
 The Android specific `{androidLanguageTag}` placeholder is the same as `{languageTag}` 
 but in Android format. (e.g., en-rUS)
 """
+
+  const val HTML_ESCAPE_DESCRIPTION =
+    """If true, HTML tags are escaped in the exported file. (Supported in the XLIFF format only).
+
+e.g. Key <b>hello</b> will be exported as &lt;b&gt;hello&lt;/b&gt;"""
+
+  const val FILTER_BRANCH_DESCRIPTION = """Filter translations with branch. 
+
+By default, default branch is exported."""
 }

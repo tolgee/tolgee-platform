@@ -32,7 +32,9 @@ const WhiteBox = styled(Box)`
   border-radius: 8px;
 `;
 
-export const EnableMfaDialog: FunctionComponent = () => {
+export const EnableMfaDialog: FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const [recoveryCodesPw, setRecoveryCodesPw] = useState<string | null>(null);
   const history = useHistory();
 

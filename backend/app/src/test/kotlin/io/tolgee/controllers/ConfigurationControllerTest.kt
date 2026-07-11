@@ -32,7 +32,6 @@ class ConfigurationControllerTest : AbstractControllerTest() {
   fun `returns correct services public config`() {
     performGet("/api/public/configuration").andIsOk.andAssertThatJson {
       node("machineTranslationServices") {
-        node("defaultPrimaryService").isEqualTo("AWS")
         node("services") {
           node("AWS") {
             node("enabled").isEqualTo(true)

@@ -6,6 +6,8 @@ import { getLanguageDirection } from 'tg.fixtures/getLanguageDirection';
 import { RefObject } from 'react';
 import { EditorView } from 'codemirror';
 import { useProject } from 'tg.hooks/useProject';
+import { CharacterCounter } from '../cell/CharacterCounter';
+import { getVisibleCharCount } from '../cell/getVisibleCharCount';
 
 type Props = {
   locale: string;
@@ -17,6 +19,8 @@ type Props = {
   autofocus?: boolean;
   activeEditorRef?: RefObject<EditorView | null>;
   mode: 'placeholders' | 'syntax';
+  baseValue?: TolgeeFormat;
+  maxCharLimit?: number | null;
 };
 
 export const PluralEditor = ({
@@ -29,6 +33,8 @@ export const PluralEditor = ({
   activeEditorRef,
   editorProps,
   mode,
+  baseValue,
+  maxCharLimit,
 }: Props) => {
   function handleChange(text: string, variant: string) {
     onChange?.({ ...value, variants: { ...value.variants, [variant]: text } });
@@ -38,6 +44,17 @@ export const PluralEditor = ({
 
   const editorMode = project.icuPlaceholders ? mode : 'plain';
 
+  function getExactForms() {
+    if (!baseValue) {
+      return [];
+    }
+    return Object.keys(baseValue.variants)
+      .filter((key) => /^=\d+(\.\d+)?$/.test(key))
+      .map((key) => parseFloat(key.substring(1)));
+  }
+
+  const exactForms = getExactForms();
+
   return (
     <TranslationPlurals
       value={value}
@@ -45,27 +62,40 @@ export const PluralEditor = ({
       showEmpty
       activeVariant={activeVariant}
       variantPaddingTop="8px"
+      exactForms={exactForms}
       render={({ content, variant, exampleValue }) => {
         const variantOrOther = variant || 'other';
         return (
-          <EditorWrapper data-cy="translation-editor" data-cy-variant={variant}>
-            <Editor
-              mode={editorMode}
-              value={content}
-              onChange={(value) => handleChange(value, variantOrOther)}
-              onFocus={() => onActiveVariantChange?.(variantOrOther)}
-              direction={getLanguageDirection(locale)}
-              autofocus={variantOrOther === activeVariant ? autofocus : false}
-              minHeight={value.parameter ? 'unset' : '100px'}
-              locale={locale}
-              editorRef={
-                variantOrOther === activeVariant ? activeEditorRef : undefined
-              }
-              examplePluralNum={exampleValue}
-              nested={Boolean(variant)}
-              {...editorProps}
+          <>
+            <EditorWrapper
+              data-cy="translation-editor"
+              data-cy-variant={variant}
+            >
+              <Editor
+                mode={editorMode}
+                value={content || ''}
+                onChange={(value) => handleChange(value, variantOrOther)}
+                onFocus={() => onActiveVariantChange?.(variantOrOther)}
+                direction={getLanguageDirection(locale)}
+                autofocus={variantOrOther === activeVariant ? autofocus : false}
+                minHeight={value.parameter ? 'unset' : '100px'}
+                locale={locale}
+                editorRef={
+                  variantOrOther === activeVariant ? activeEditorRef : undefined
+                }
+                examplePluralNum={exampleValue}
+                nested={Boolean(variant)}
+                {...editorProps}
+              />
+            </EditorWrapper>
+            <CharacterCounter
+              currentCount={getVisibleCharCount({
+                text: content,
+                nested: Boolean(variant),
+              })}
+              maxLimit={maxCharLimit}
             />
-          </EditorWrapper>
+          </>
         );
       }}
     />

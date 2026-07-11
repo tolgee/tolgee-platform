@@ -18,6 +18,11 @@ class SentryBeforeSendCallback : SentryOptions.BeforeSendCallback {
       listOf(
         "FailedDontRequeueException",
         "ClientAbortException",
+        "AsyncRequestNotUsableException",
+        // Spring Security firewall rejecting malformed requests (suspicious user agents, headers, etc.)
+        "RequestRejectedException",
+        // Client hit a URL whose handler expects a path variable that wasn't provided
+        "MissingPathVariableException",
       )
   }
 

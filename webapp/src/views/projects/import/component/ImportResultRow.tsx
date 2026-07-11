@@ -7,9 +7,13 @@ import {
   TableCell,
   TableRow,
 } from '@mui/material';
-import { CheckCircle, Error, Warning } from '@mui/icons-material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
+import {
+  CheckCircle,
+  AlertCircle,
+  AlertTriangle,
+  Trash01,
+  Edit02,
+} from '@untitled-ui/icons-react';
 import clsx from 'clsx';
 
 import { ChipButton } from 'tg.component/common/buttons/ChipButton';
@@ -18,6 +22,7 @@ import { components } from 'tg.service/apiSchema.generated';
 import { LanguageSelector } from './LanguageSelector';
 import { ImportNamespaceSelector } from './ImportNamespaceSelector';
 import { useImportLanguageHelper } from '../hooks/useImportLanguageHelper';
+import { useProject } from 'tg.hooks/useProject';
 
 const StyledTableRow = styled(TableRow)`
   &:hover {
@@ -57,8 +62,7 @@ const StyledTableRow = styled(TableRow)`
   }
 
   & .pencil {
-    position: absolute;
-    right: ${({ theme }) => theme.spacing(0.5)};
+    padding-left: ${({ theme }) => theme.spacing(0.5)};
   }
 `;
 
@@ -69,6 +73,7 @@ export const ImportResultRow = (props: {
   onShowData: () => void;
 }) => {
   const helper = useImportLanguageHelper(props.row);
+  const project = useProject();
 
   return (
     <React.Fragment>
@@ -79,9 +84,11 @@ export const ImportResultRow = (props: {
             row={props.row}
           />
         </TableCell>
-        <TableCell scope="row" data-cy="import-result-namespace-cell">
-          <ImportNamespaceSelector row={props.row} />
-        </TableCell>
+        {project.useNamespaces && (
+          <TableCell scope="row" data-cy="import-result-namespace-cell">
+            <ImportNamespaceSelector row={props.row} />
+          </TableCell>
+        )}
         <TableCell scope="row" data-cy="import-result-file-cell">
           <span>
             {props.row.importFileName} ({props.row.name})
@@ -93,14 +100,18 @@ export const ImportResultRow = (props: {
                 onClick={() => {
                   props.onShowFileIssues();
                 }}
-                beforeIcon={<Warning className="warningIcon" />}
+                beforeIcon={
+                  <AlertTriangle
+                    className="warningIcon"
+                    width={18}
+                    height={18}
+                  />
+                }
               >
                 {props.row.importFileIssueCount}
               </ChipButton>
             </Box>
-          ) : (
-            <></>
-          )}
+          ) : null}
         </TableCell>
         <TableCell
           scope="row"
@@ -129,26 +140,34 @@ export const ImportResultRow = (props: {
             className="resolveButton"
           >
             {props.row.resolvedCount < props.row.conflictCount ? (
-              <Error className={clsx('resolvedIcon', 'resolvedErrorIcon')} />
+              <AlertCircle
+                className={clsx('resolvedIcon', 'resolvedErrorIcon')}
+                width={18}
+                height={18}
+              />
             ) : (
               <CheckCircle
                 className={clsx('resolvedIcon', 'resolvedSuccessIcon')}
+                width={18}
+                height={18}
               />
             )}
             {props.row.resolvedCount} / {props.row.conflictCount}
             {props.row.conflictCount > 0 && (
-              <EditIcon className={clsx('pencil', 'helperIcon')} />
+              <Edit02
+                className={clsx('pencil', 'helperIcon')}
+                width={20}
+                height={20}
+              />
             )}
           </Button>
         </TableCell>
         <TableCell scope="row" align={'right'}>
           <IconButton
             onClick={helper.onDelete}
-            size="small"
-            style={{ padding: 0 }}
             data-cy="import-result-delete-language-button"
           >
-            <DeleteIcon />
+            <Trash01 width={20} height={20} />
           </IconButton>
         </TableCell>
       </StyledTableRow>

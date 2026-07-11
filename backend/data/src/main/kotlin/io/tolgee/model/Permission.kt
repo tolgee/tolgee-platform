@@ -5,6 +5,7 @@ import io.tolgee.dtos.cacheable.IPermission
 import io.tolgee.dtos.request.project.LanguagePermissions
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.translationAgency.TranslationAgency
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
@@ -14,6 +15,7 @@ import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
+import jakarta.persistence.Index
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.JoinTable
 import jakarta.persistence.ManyToMany
@@ -21,13 +23,22 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToOne
 import jakarta.persistence.PrePersist
 import jakarta.persistence.PreUpdate
+import jakarta.persistence.Table
 import org.hibernate.Hibernate
 import org.hibernate.annotations.Parameter
 import org.hibernate.annotations.Type
+import org.springframework.beans.factory.annotation.Configurable
 
 @Suppress("LeakingThis")
 @Entity
 @EntityListeners(Permission.Companion.PermissionListeners::class)
+@Table(
+  indexes = [
+    Index(columnList = "user_id"),
+    Index(columnList = "project_id"),
+    Index(columnList = "agency_id"),
+  ],
+)
 class Permission(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,7 +52,10 @@ class Permission(
   var organization: Organization? = null,
   @OneToOne(fetch = FetchType.LAZY)
   var invitation: Invitation? = null,
-) : AuditModel(), IPermission {
+  @ManyToOne(fetch = FetchType.LAZY, optional = true)
+  var agency: TranslationAgency? = null,
+) : AuditModel(),
+  IPermission {
   @Type(
     EnumArrayType::class,
     parameters = [
@@ -85,15 +99,22 @@ class Permission(
   var translateLanguages: MutableSet<Language> = mutableSetOf()
 
   /**
-   * Languages for TRANSLATIONS_EDIT scope.
-   * When specified, user is restricted to edit specific language translations.
+   * Languages for TRANSLATIONS_SUGGEST scope.
+   * When specified, user is restricted to suggest specific language translations.
+   */
+  @ManyToMany(fetch = FetchType.EAGER)
+  var suggestLanguages: MutableSet<Language> = mutableSetOf()
+
+  /**
+   * Languages for TRANSLATIONS_VIEW scope.
+   * When specified, user is restricted to view specific language translations.
    */
   @ManyToMany(fetch = FetchType.LAZY)
   var viewLanguages: MutableSet<Language> = mutableSetOf()
 
   /**
-   * Languages for TRANSLATIONS_EDIT scope.
-   * When specified, user is restricted to edit specific language translations.
+   * Languages for TRANSLATIONS_STATE_EDIT scope.
+   * When specified, user is restricted to change state only to specific language translations.
    */
   @ManyToMany(fetch = FetchType.LAZY)
   var stateChangeLanguages: MutableSet<Language> = mutableSetOf()
@@ -107,6 +128,7 @@ class Permission(
     type: ProjectPermissionType? = ProjectPermissionType.VIEW,
     languagePermissions: LanguagePermissions? = null,
     scopes: Array<Scope>? = null,
+    agency: TranslationAgency? = null,
   ) : this(
     id = id,
     user = user,
@@ -120,15 +142,13 @@ class Permission(
     this.viewLanguages = languagePermissions?.view?.toMutableSet() ?: mutableSetOf()
     this.translateLanguages = languagePermissions?.translate?.toMutableSet() ?: mutableSetOf()
     this.stateChangeLanguages = languagePermissions?.stateChange?.toMutableSet() ?: mutableSetOf()
+    this.suggestLanguages = languagePermissions?.suggest?.toMutableSet() ?: mutableSetOf()
+    this.agency = agency
   }
 
   @ManyToOne
   var project: Project? = null
 
-  val userId: Long?
-    get() = this.user?.id
-  val invitationId: Long?
-    get() = this.invitation?.id
   override val projectId: Long?
     get() = this.project?.id
   override val organizationId: Long?
@@ -170,7 +190,11 @@ class Permission(
       return fetchedStateChangeLanguageIds
     }
 
+  override val suggestLanguageIds: Set<Long>?
+    get() = this.suggestLanguages.map { it.id }.toSet()
+
   companion object {
+    @Configurable
     class PermissionListeners {
       @PrePersist
       @PreUpdate
@@ -181,7 +205,8 @@ class Permission(
         if (!((permission._scopes == null) xor (permission.type == null))) {
           throw IllegalStateException("Exactly one of scopes or type has to be set")
         }
-        if (permission.organization != null && (
+        if (permission.organization != null &&
+          (
             permission.viewLanguages.isNotEmpty() ||
               permission.translateLanguages.isNotEmpty() ||
               permission.stateChangeLanguages.isNotEmpty()

@@ -24,7 +24,8 @@ import java.io.UnsupportedEncodingException
 @AutoConfigureMockMvc
 @SpringBootTest
 abstract class AbstractControllerTest :
-  AbstractSpringTest(), RequestPerformer {
+  AbstractSpringTest(),
+  RequestPerformer {
   @Autowired
   protected lateinit var mvc: MockMvc
 
@@ -50,7 +51,8 @@ abstract class AbstractControllerTest :
   ): DefaultAuthenticationResult {
     val response =
       doAuthentication(userName, password)
-        .andReturn().response.contentAsString
+        .andReturn()
+        .response.contentAsString
     val userAccount = userAccountService.findActive(userName) ?: throw NotFoundException()
     return DefaultAuthenticationResult(
       mapper.readValue(response, HashMap::class.java)["accessToken"] as String,
@@ -67,7 +69,8 @@ abstract class AbstractControllerTest :
     request.password = password
     val jsonRequest = mapper.writeValueAsString(request)
     return mvc.perform(
-      MockMvcRequestBuilders.post("/api/public/generatetoken")
+      MockMvcRequestBuilders
+        .post("/api/public/generatetoken")
         .content(jsonRequest)
         .accept(MediaType.ALL)
         .contentType(MediaType.APPLICATION_JSON),

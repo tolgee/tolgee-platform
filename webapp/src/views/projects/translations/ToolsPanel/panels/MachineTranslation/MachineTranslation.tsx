@@ -3,16 +3,30 @@ import { Button, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { LoadingSkeletonFadingIn } from 'tg.component/LoadingSkeleton';
 import { GoToBilling } from 'tg.component/GoToBilling';
+import { AdminAccessAlert } from 'tg.component/common/AdminAccessAlert';
+import { useIsAdminAccess } from 'tg.hooks/useIsAdminAccess';
 import { stringHash } from 'tg.fixtures/stringHash';
 
 import { useMTStreamed } from './useMTStreamed';
 import { TabMessage } from '../../common/TabMessage';
 import { PanelContentProps } from '../../common/types';
 import { MachineTranslationItem } from './MachineTranslationItem';
+import { useGlobalActions } from 'tg.globalContext/GlobalContext';
+import { MachineTranslationPromptWrapper } from './MachineTranslationPromptWrapper';
 
 const StyledContainer = styled('div')`
   display: flex;
   flex-direction: column;
+  .promptWrapper {
+    margin-top: 4px;
+    margin-bottom: 4px;
+  }
+  .promptWrapper + * {
+    margin-top: 12px;
+  }
+  * + .promptWrapper {
+    margin-top: 12px;
+  }
 `;
 
 const StyledValue = styled('div')`
@@ -32,7 +46,9 @@ const OutOfCreditsWrapper = styled('div')`
   border-radius: 8px;
 `;
 
-export const MachineTranslation: React.FC<PanelContentProps> = ({
+export const MachineTranslation: React.FC<
+  React.PropsWithChildren<PanelContentProps>
+> = ({
   keyData,
   language,
   project,
@@ -41,6 +57,10 @@ export const MachineTranslation: React.FC<PanelContentProps> = ({
   activeVariant,
 }) => {
   const { t } = useTranslate();
+  const { increaseCreditPlanLimitErrors, increaseCreditSpendingLimitErrors } =
+    useGlobalActions();
+
+  const isAdminAccess = useIsAdminAccess(project.computedPermission);
 
   const deps = {
     keyId: keyData.keyId,
@@ -76,10 +96,27 @@ export const MachineTranslation: React.FC<PanelContentProps> = ({
     (provider) => [provider, data.result[provider]] as const
   );
   const arrayResults = Object.values(data?.result || {});
-  const outOfCredit =
-    arrayResults.every((i) => i?.errorMessage === 'OUT_OF_CREDITS') &&
-    Boolean(arrayResults.length);
+
+  const outOfPlanCredits =
+    arrayResults.every(
+      (i) => i?.errorMessage?.toLowerCase() === 'out_of_credits'
+    ) && Boolean(arrayResults.length);
+
+  const outOfCreditsSpendingLimitExceeded =
+    arrayResults.every(
+      (i) => i?.errorMessage?.toLowerCase() === 'credit_spending_limit_exceeded'
+    ) && Boolean(arrayResults.length);
+
   const contextPresent = keyData.contextPresent;
+
+  useEffect(() => {
+    if (outOfPlanCredits) {
+      increaseCreditPlanLimitErrors();
+    }
+    if (outOfCreditsSpendingLimitExceeded) {
+      increaseCreditSpendingLimitErrors();
+    }
+  }, [outOfPlanCredits, outOfCreditsSpendingLimitExceeded]);
 
   useEffect(() => {
     setItemsCount(arrayResults.length);
@@ -97,7 +134,10 @@ export const MachineTranslation: React.FC<PanelContentProps> = ({
 
   return (
     <StyledContainer>
-      {outOfCredit ? (
+      {isAdminAccess && (
+        <AdminAccessAlert sx={{ m: 1 }} data-cy="mt-admin-access-info" />
+      )}
+      {outOfPlanCredits ? (
         <OutOfCreditsWrapper>
           <StyledError
             sx={{ display: 'grid', gap: 0.5, justifyItems: 'start' }}
@@ -116,19 +156,40 @@ export const MachineTranslation: React.FC<PanelContentProps> = ({
         <TabMessage>{t('translation_tools_base_empty')}</TabMessage>
       ) : (
         !nothingFetched &&
-        results?.map(([provider, data]) => {
-          return (
-            <MachineTranslationItem
-              key={provider}
-              data={data}
-              provider={provider}
-              isFetching={machineLoadable.isFetching}
-              languageTag={language.tag}
-              setValue={setValue}
-              contextPresent={contextPresent}
-              pluralVariant={activeVariant}
-            />
-          );
+        results?.map(([provider, result]) => {
+          const props = {
+            data: result,
+            provider: provider,
+            isFetching: machineLoadable.isFetching,
+            languageTag: language.tag,
+            setValue: setValue,
+            contextPresent: contextPresent,
+            pluralVariant: activeVariant,
+          };
+          if (provider === 'PROMPT') {
+            return (
+              <MachineTranslationPromptWrapper
+                key={provider}
+                className="promptWrapper"
+                promptId={data?.promptId}
+              >
+                <MachineTranslationItem
+                  {...props}
+                  data-cy="translation-tools-machine-translation-item-prompt"
+                  showIcon={false}
+                  sx={{ margin: 0, padding: '8px' }}
+                />
+              </MachineTranslationPromptWrapper>
+            );
+          } else {
+            return (
+              <MachineTranslationItem
+                key={provider}
+                {...props}
+                data-cy="translation-tools-machine-translation-item"
+              />
+            );
+          }
         })
       )}
     </StyledContainer>

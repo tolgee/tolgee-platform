@@ -17,4 +17,6 @@ class ProjectActivityModel(
   override val meta: Map<String, Any?>?,
   override val counts: MutableMap<String, Long>?,
   override val params: Any?,
-) : RepresentationModel<ProjectActivityModel>(), Serializable, IProjectActivityModel
+) : RepresentationModel<ProjectActivityModel>(),
+  Serializable,
+  IProjectActivityModel

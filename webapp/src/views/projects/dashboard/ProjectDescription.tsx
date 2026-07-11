@@ -1,11 +1,12 @@
-import { Edit } from '@mui/icons-material';
-import { Box, IconButton, Link as MuiLink, styled } from '@mui/material';
+import { Edit02 } from '@untitled-ui/icons-react';
+import { Box, IconButton, styled } from '@mui/material';
 import ReactMarkdown from 'react-markdown';
 import { Link } from 'react-router-dom';
 
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { MarkdownLink } from 'tg.component/common/MarkdownLink';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -31,7 +32,9 @@ type Props = {
   description: string;
 };
 
-export const ProjectDescription: React.FC<Props> = ({ description }) => {
+export const ProjectDescription: React.FC<React.PropsWithChildren<Props>> = ({
+  description,
+}) => {
   const project = useProject();
   const permissions = useProjectPermissions();
   const canManage = permissions.satisfiesPermission('project.edit');
@@ -42,26 +45,17 @@ export const ProjectDescription: React.FC<Props> = ({ description }) => {
         <StyledTileEdit>
           <IconButton
             component={Link}
-            size="small"
             color="inherit"
             to={LINKS.PROJECT_EDIT.build({ [PARAMS.PROJECT_ID]: project.id })}
           >
-            <Edit fontSize="small" />
+            <Edit02 width={20} height={20} />
           </IconButton>
         </StyledTileEdit>
       )}
       <StyledContent>
         <ReactMarkdown
           components={{
-            a: (props) => (
-              <MuiLink
-                href={props.href || ''}
-                target="_blank"
-                rel="nofollow noreferrer noopener"
-              >
-                {props.children}
-              </MuiLink>
-            ),
+            a: MarkdownLink,
           }}
         >
           {description}

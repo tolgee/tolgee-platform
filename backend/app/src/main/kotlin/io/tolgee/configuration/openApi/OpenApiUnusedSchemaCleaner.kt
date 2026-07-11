@@ -3,7 +3,9 @@ package io.tolgee.configuration.openApi
 import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.media.Schema
 
-class OpenApiUnusedSchemaCleaner(private val openApi: OpenAPI) {
+class OpenApiUnusedSchemaCleaner(
+  private val openApi: OpenAPI,
+) {
   private val usedSchemas = mutableSetOf<String>()
 
   fun clean() {
@@ -13,7 +15,9 @@ class OpenApiUnusedSchemaCleaner(private val openApi: OpenAPI) {
   }
 
   private fun removeUnused() {
-    val toRemove = openApi.components.schemas.keys.filter { !usedSchemas.contains(it) }
+    val toRemove =
+      openApi.components.schemas.keys
+        .filter { !usedSchemas.contains(it) }
     toRemove.forEach {
       openApi.components.schemas.remove(it)
     }
@@ -22,7 +26,10 @@ class OpenApiUnusedSchemaCleaner(private val openApi: OpenAPI) {
   private fun recursivelyWalkAllUsedSchemas() {
     var new: Set<String> = usedSchemas
     while (new.isNotEmpty()) {
-      val used = openApi.components.schemas.filter { usedSchemas.contains(it.key) }.values
+      val used =
+        openApi.components.schemas
+          .filter { usedSchemas.contains(it.key) }
+          .values
       val names = mutableSetOf<String>()
       used.forEach {
         names.addAll(it.getAllNamesRecursively())

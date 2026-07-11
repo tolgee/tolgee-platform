@@ -21,10 +21,10 @@ import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.web.client.RestTemplate
 
 class OrganizationSlackControllerTest : AuthorizedControllerTest() {
@@ -36,7 +36,7 @@ class OrganizationSlackControllerTest : AuthorizedControllerTest() {
 
   lateinit var testData: SlackTestData
 
-  @MockBean
+  @MockitoBean
   @Autowired
   lateinit var restTemplate: RestTemplate
 
@@ -71,7 +71,9 @@ class OrganizationSlackControllerTest : AuthorizedControllerTest() {
     performAuthDelete(
       "/v2/organizations/${testData.organization.id}/slack/workspaces/${testData.slackWorkspace.id}",
     ).andIsOk
-    io.tolgee.testing.assertions.Assertions.assertThat(slackWorkspaceService.find(testData.slackWorkspace.id)).isNull()
+    io.tolgee.testing.assertions.Assertions
+      .assertThat(slackWorkspaceService.find(testData.slackWorkspace.id))
+      .isNull()
   }
 
   @Test
@@ -112,7 +114,8 @@ class OrganizationSlackControllerTest : AuthorizedControllerTest() {
       ),
     ).andIsOk
 
-    Assertions.assertThat(slackWorkspaceService.findAllWorkspaces(testData.slackWorkspace.organization.id))
+    Assertions
+      .assertThat(slackWorkspaceService.findAllWorkspaces(testData.slackWorkspace.organization.id))
       .isNotEmpty()
   }
 

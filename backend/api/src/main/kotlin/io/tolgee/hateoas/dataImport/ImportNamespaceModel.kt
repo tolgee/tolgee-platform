@@ -15,4 +15,5 @@ open class ImportNamespaceModel(
   val id: Long?,
   @Schema(description = "", example = "homepage")
   val name: String,
-) : RepresentationModel<ImportNamespaceModel>(), Serializable
+) : RepresentationModel<ImportNamespaceModel>(),
+  Serializable

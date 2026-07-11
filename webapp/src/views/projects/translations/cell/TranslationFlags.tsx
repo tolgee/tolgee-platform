@@ -1,5 +1,5 @@
-import { styled } from '@mui/material';
-import { Clear, FlagCircle } from '@mui/icons-material';
+import { Box, styled } from '@mui/material';
+import { Flag02 } from '@untitled-ui/icons-react';
 import { useTranslate } from '@tolgee/react';
 
 import { components } from 'tg.service/apiSchema.generated';
@@ -7,39 +7,41 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { AutoTranslationIcon } from 'tg.component/AutoTranslationIcon';
 import { TranslationFlagIcon } from 'tg.component/TranslationFlagIcon';
+
 import { useTranslationsActions } from '../context/TranslationsContext';
+import { TranslationTaskIndicator } from 'tg.ee';
+import { CloseButton } from 'tg.component/common/buttons/CloseButton';
+import React from 'react';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
 type KeyWithTranslationsModel =
   components['schemas']['KeyWithTranslationsModel'];
 
 const StyledWrapper = styled('div')`
   display: flex;
-  gap: 2px;
 `;
 
-const StyledClearButton = styled(Clear)`
-  padding-left: 2px;
-  font-size: 18px;
-  display: none;
-`;
-
-const ActiveFlagCircle = styled(FlagCircle)`
+const ActiveFlagCircle = styled(Flag02)`
   color: ${({ theme }) => theme.palette.primary.main};
 `;
 
-const StyledContainer = styled('div')`
+export const StyledTranslationFlagsContainer = styled(Box)`
   display: inline-flex;
   flex-grow: 0;
   align-items: center;
-  height: 20px;
+  height: 24px;
   border: 1px solid transparent;
-  padding: 0px 4px;
-  margin-left: -4px;
   border-radius: 10px;
+  padding: 3px 8px;
 
-  &:hover .clearButton {
-    display: block;
+  &:hover {
+    border: 1px solid ${({ theme }) => theme.palette.tokens.border.secondary};
   }
+
+  &.clickDisabled {
+    cursor: default;
+  }
+
   &:hover {
     border: 1px solid ${({ theme }) => theme.palette.divider1};
     transition: all 0.1s;
@@ -52,14 +54,20 @@ type Props = {
   className?: string;
 };
 
-export const TranslationFlags: React.FC<Props> = ({
+export const TranslationFlags: React.FC<React.PropsWithChildren<Props>> = ({
   keyData,
   lang,
   className,
 }) => {
   const project = useProject();
+  const { satisfiesPermissionWithBranching } = useProjectPermissions();
   const { t } = useTranslate();
   const translation = keyData.translations[lang];
+  const task = keyData.tasks?.find((t) => t.languageTag === lang);
+
+  const canChangeState = satisfiesPermissionWithBranching(
+    'translations.state-edit'
+  );
 
   const { updateTranslation } = useTranslationsActions();
 
@@ -74,7 +82,7 @@ export const TranslationFlags: React.FC<Props> = ({
     e.stopPropagation();
     clearAutoTranslatedState
       .mutateAsync({
-        path: { projectId: project.id, translationId: translation!.id },
+        path: { projectId: project.id, translationId: translation!.id! },
       })
       .then(() => {
         updateTranslation({
@@ -98,7 +106,7 @@ export const TranslationFlags: React.FC<Props> = ({
       .mutateAsync({
         path: {
           projectId: project.id,
-          translationId: translation!.id,
+          translationId: translation!.id!,
           state: false,
         },
       })
@@ -111,37 +119,45 @@ export const TranslationFlags: React.FC<Props> = ({
       });
   };
 
-  if (translation?.auto || translation?.outdated) {
-    return (
-      <StyledWrapper className={className}>
-        {translation.auto && (
-          <StyledContainer data-cy="translations-auto-translated-indicator">
+  return (
+    <StyledWrapper className={className}>
+      {task && <TranslationTaskIndicator task={task} />}
+      {translation?.auto && (
+        <CloseButton
+          data-cy="translations-auto-translated-clear-button"
+          onClose={(e) =>
+            handleClearAutoTranslated(
+              e as React.MouseEvent<SVGSVGElement, MouseEvent>
+            )
+          }
+          xs
+        >
+          <StyledTranslationFlagsContainer data-cy="translations-auto-translated-indicator">
             <AutoTranslationIcon provider={translation.mtProvider} />
-            <StyledClearButton
-              role="button"
-              onClick={handleClearAutoTranslated}
-              data-cy="translations-auto-translated-clear-button"
-              className="clearButton"
-            />
-          </StyledContainer>
-        )}
-        {translation.outdated && (
-          <StyledContainer data-cy="translations-outdated-indicator">
+          </StyledTranslationFlagsContainer>
+        </CloseButton>
+      )}
+      {translation?.outdated && (
+        <CloseButton
+          data-cy="translations-outdated-clear-button"
+          onClose={
+            canChangeState
+              ? (e) =>
+                  handleClearOutdated(
+                    e as React.MouseEvent<SVGSVGElement, MouseEvent>
+                  )
+              : undefined
+          }
+          xs
+        >
+          <StyledTranslationFlagsContainer data-cy="translations-outdated-indicator">
             <TranslationFlagIcon
               tooltip={t('translations_cell_outdated')}
               icon={<ActiveFlagCircle />}
             />
-            <StyledClearButton
-              role="button"
-              onClick={handleClearOutdated}
-              data-cy="translations-outdated-clear-button"
-              className="clearButton"
-            />
-          </StyledContainer>
-        )}
-      </StyledWrapper>
-    );
-  } else {
-    return null;
-  }
+          </StyledTranslationFlagsContainer>
+        </CloseButton>
+      )}
+    </StyledWrapper>
+  );
 };

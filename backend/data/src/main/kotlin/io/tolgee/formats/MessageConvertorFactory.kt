@@ -2,7 +2,7 @@ package io.tolgee.formats
 
 class MessageConvertorFactory(
   private val message: String,
-  private val forceIsPlural: Boolean? = null,
+  private val forceIsPlural: Boolean,
   private val isProjectIcuPlaceholdersEnabled: Boolean = false,
   private val paramConvertorFactory: () -> FromIcuPlaceholderConvertor,
 ) {
@@ -11,7 +11,16 @@ class MessageConvertorFactory(
       message = message,
       argumentConvertorFactory = getParamConvertorFactory(),
       forceIsPlural = forceIsPlural,
+      keepEscaping = keepEscaping,
     )
+  }
+
+  private val keepEscaping by lazy {
+    if (forceIsPlural) {
+      return@lazy false
+    }
+
+    return@lazy !isProjectIcuPlaceholdersEnabled
   }
 
   private fun getParamConvertorFactory() =

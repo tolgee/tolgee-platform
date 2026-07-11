@@ -24,11 +24,12 @@ import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import jakarta.persistence.Temporal
 import jakarta.persistence.TemporalType
+import jakarta.persistence.Transient
 import org.hibernate.annotations.Type
 import org.springframework.beans.factory.ObjectFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
-import java.util.*
+import java.util.Date
 
 @Entity
 @Table(
@@ -36,6 +37,7 @@ import java.util.*
     Index(columnList = "projectId"),
     Index(columnList = "authorId"),
     Index(columnList = "type"),
+    Index(columnList = "organizationId"),
     Index(columnList = "timestamp"),
   ],
 )
@@ -75,6 +77,8 @@ class ActivityRevision : java.io.Serializable {
    */
   var projectId: Long? = null
 
+  var organizationId: Long? = null
+
   @OneToMany(mappedBy = "activityRevision")
   var describingRelations: MutableList<ActivityDescribingEntity> = mutableListOf()
 
@@ -102,11 +106,9 @@ class ActivityRevision : java.io.Serializable {
    * This flag is set to true when the instance is initialized by the interceptor.
    */
   @Transient
-  @Column(insertable = false, updatable = false)
   var isInitializedByInterceptor: Boolean = false
 
   @Transient
-  @Column(insertable = false, updatable = false)
   var cancelledBatchJobExecutionCount: Int? = null
 
   @ManyToMany

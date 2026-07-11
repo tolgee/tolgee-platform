@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.activity.ActivityHandlerInterceptor
+import io.tolgee.component.TestClockHeaderFilter
 import io.tolgee.component.VersionFilter
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import jakarta.servlet.MultipartConfigElement
@@ -29,7 +30,10 @@ import java.util.concurrent.TimeUnit
 
 @Configuration
 @EnableScheduling
-@EnableAsync
+// proxyTargetClass reason: Prefer CGLIB-proxies. Otherwise, we would need to include
+// all necessary methods in interfaces every time we implement an interface in a component
+// class when we need to use it with `@Autowired`.
+@EnableAsync(proxyTargetClass = true)
 class WebConfiguration(
   private val tolgeeProperties: TolgeeProperties,
   private val activityInterceptor: ActivityHandlerInterceptor,
@@ -47,15 +51,17 @@ class WebConfiguration(
   }
 
   override fun addResourceHandlers(registry: ResourceHandlerRegistry) {
-    registry.addResourceHandler("/**/*.js", "/**/*.woff2", "/**/*.css", "/**/*.svg")
+    registry
+      .addResourceHandler("/**/*.js", "/**/*.woff2", "/**/*.css", "/**/*.svg")
       .addResourceLocations("classpath:/static/")
       .setCacheControl(CacheControl.maxAge(365, TimeUnit.DAYS))
   }
 
   override fun addCorsMappings(registry: CorsRegistry) {
-    registry.addMapping("/**")
+    registry
+      .addMapping("/**")
       .allowedMethods("HEAD", "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
-      .exposedHeaders(VersionFilter.TOLGEE_VERSION_HEADER_NAME)
+      .exposedHeaders(VersionFilter.TOLGEE_VERSION_HEADER_NAME, TestClockHeaderFilter.TOLGEE_TEST_CLOCK_HEADER_NAME)
   }
 
   override fun addInterceptors(registry: InterceptorRegistry) {

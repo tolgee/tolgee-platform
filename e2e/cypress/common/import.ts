@@ -32,8 +32,12 @@ export const findResolutionRow = (key: string) => {
     .closestDcy('import-resolution-dialog-data-row');
 };
 
-export const visitImport = (projectId: number) => {
-  cy.visit(`${HOST}/projects/${projectId}/import`);
+export const visitImport = (projectId: number, branchName?: string) => {
+  cy.visit(
+    `${HOST}/projects/${projectId}/import${
+      branchName ? `/tree/${encodeURIComponent(branchName)}` : ''
+    }`
+  );
   waitForGlobalLoading(undefined, 10000);
 };
 

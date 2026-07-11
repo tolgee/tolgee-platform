@@ -1,16 +1,20 @@
 package io.tolgee.unit.formats.xliff.out
 
 import io.tolgee.dtos.request.export.ExportParams
+import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.ExportMessageFormat
 import io.tolgee.formats.xliff.out.XliffFileExporter
 import io.tolgee.model.Language
 import io.tolgee.model.enums.TranslationState
+import io.tolgee.service.export.ExportFilePathProvider
+import io.tolgee.service.export.ExportFileStructureTemplateProvider
 import io.tolgee.service.export.dataProvider.ExportKeyView
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.unit.util.assertFile
 import io.tolgee.unit.util.getExported
+import io.tolgee.util.XmlSecurity
 import io.tolgee.util.buildExportTranslationList
 import org.junit.jupiter.api.Test
 import org.w3c.dom.Attr
@@ -21,7 +25,6 @@ import org.w3c.dom.NodeList
 import org.xml.sax.InputSource
 import java.io.StringReader
 import javax.xml.XMLConstants
-import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.transform.Source
 import javax.xml.transform.stream.StreamSource
 import javax.xml.validation.SchemaFactory
@@ -45,6 +48,11 @@ class XliffFileExporterTest {
         baseTranslationsProvider = baseProvider,
         baseLanguage = Language().apply { tag = "en" },
         projectIcuPlaceholdersSupport = true,
+        filePathProvider =
+          ExportFilePathProvider(
+            template = ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate(),
+            extension = params.format?.extension ?: "xliff",
+          ),
       ).produceFiles()
 
     assertThat(files).hasSize(2)
@@ -118,6 +126,11 @@ class XliffFileExporterTest {
         baseTranslationsProvider = baseProvider,
         baseLanguage = Language().apply { tag = "en" },
         projectIcuPlaceholdersSupport = true,
+        filePathProvider =
+          ExportFilePathProvider(
+            template = ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate(),
+            extension = params.format?.extension ?: "xliff",
+          ),
       ).produceFiles()
 
     assertThat(files).hasSize(2)
@@ -148,6 +161,23 @@ class XliffFileExporterTest {
         baseTranslationsProvider = { listOf() },
         baseLanguage = Language().apply { tag = "en" },
         projectIcuPlaceholdersSupport = true,
+        filePathProvider =
+          ExportFilePathProvider(
+            template =
+              ExportFileStructureTemplateProvider(
+                params,
+                listOf(
+                  ExportTranslationView(
+                    1,
+                    "<p>Sweat jesus, this is HTML!</p>",
+                    TranslationState.TRANSLATED,
+                    ExportKeyView(1, "html_key", description = "Omg!\n  This is really.    \n preserved"),
+                    "en",
+                  ),
+                ),
+              ).validateAndGetTemplate(),
+            extension = params.format?.extension ?: "xliff",
+          ),
       ).produceFiles()
 
     val fileContent = files["en.xliff"]!!.bufferedReader().readText()
@@ -200,7 +230,7 @@ class XliffFileExporterTest {
   }
 
   private fun String.parseToDocument(): Document {
-    val dbf = DocumentBuilderFactory.newInstance()
+    val dbf = XmlSecurity.newSecureDocumentBuilderFactory()
     val db = dbf.newDocumentBuilder()
     val input = InputSource()
     input.characterStream = StringReader(this)
@@ -237,10 +267,16 @@ class XliffFileExporterTest {
         baseTranslationsProvider = baseProvider,
         baseLanguage = Language().apply { tag = "en" },
         projectIcuPlaceholdersSupport = true,
+        filePathProvider =
+          ExportFilePathProvider(
+            template = ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate(),
+            extension = params.format?.extension ?: "xliff",
+          ),
       ).produceFiles()
 
     val validator: Validator
-    javaClass.classLoader.getResourceAsStream("import/xliff/xliff-core-1.2-transitional.xsd")
+    javaClass.classLoader
+      .getResourceAsStream("import/xliff/xliff-core-1.2-transitional.xsd")
       .use { xsdInputStream ->
         validator =
           try {
@@ -378,7 +414,11 @@ class XliffFileExporterTest {
     val exporter =
       getExporter(
         built.translations,
-        exportParams = ExportParams(messageFormat = ExportMessageFormat.RUBY_SPRINTF),
+        exportParams =
+          ExportParams(
+            messageFormat = ExportMessageFormat.RUBY_SPRINTF,
+            format = ExportFormat.XLIFF,
+          ),
       )
     val data = getExported(exporter)
     data.assertFile(
@@ -393,12 +433,78 @@ class XliffFileExporterTest {
     |    <body>
     |      <trans-unit id="item">
     |        <source xml:space="preserve"/>
-    |        <target xml:space="preserve">I will be first '{'icuParam'}' %&lt;hello&gt;d</target>
+    |        <target xml:space="preserve">I will be first {icuParam} %&lt;hello&gt;d</target>
     |      </trans-unit>
     |    </body>
     |  </file>
     |</xliff>
     |
+      """.trimMargin(),
+    )
+  }
+
+  @Test
+  fun `exports with HTML escaping when escapeHtml is true`() {
+    val built =
+      buildExportTranslationList {
+        add(
+          languageTag = "en",
+          keyName = "simple_html",
+          text = "<b>Bold text</b> and <i>italic text</i>",
+        )
+        add(
+          languageTag = "en",
+          keyName = "nested_html",
+          text = "<div><p>Nested <b>bold</b> text</p></div>",
+        )
+        add(
+          languageTag = "en",
+          keyName = "mixed_entities",
+          text = "<span>Copyright © 2024 & <b>Terms</b></span>",
+        )
+        add(
+          languageTag = "en",
+          keyName = "html_attributes",
+          text = "<a href='https://example.com' class='link'>Click here</a>",
+        )
+      }
+
+    val exporter =
+      getExporter(
+        built.translations,
+        exportParams = ExportParams(escapeHtml = true, format = ExportFormat.XLIFF),
+      )
+    val data = getExported(exporter)
+    data.assertFile(
+      "en.xliff",
+      """
+      |<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+      |<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+      |  <file datatype="plaintext" original="" source-language="en" target-language="en">
+      |    <header>
+      |      <tool tool-id="tolgee.io" tool-name="Tolgee"/>
+      |    </header>
+      |    <body>
+      |      <trans-unit id="simple_html">
+      |        <source xml:space="preserve"/>
+      |        <target xml:space="preserve">&lt;b&gt;Bold text&lt;/b&gt; and &lt;i&gt;italic text&lt;/i&gt;</target>
+      |      </trans-unit>
+      |      <trans-unit id="nested_html">
+      |        <source xml:space="preserve"/>
+      |        <target xml:space="preserve">&lt;div&gt;&lt;p&gt;Nested &lt;b&gt;bold&lt;/b&gt; text&lt;/p&gt;&lt;/div&gt;</target>
+      |      </trans-unit>
+      |      <trans-unit id="mixed_entities">
+      |        <source xml:space="preserve"/>
+      |        <target xml:space="preserve">&lt;span&gt;Copyright © 2024 &amp; &lt;b&gt;Terms&lt;/b&gt;&lt;/span&gt;</target>
+      |      </trans-unit>
+      |      <trans-unit id="html_attributes">
+      |        <source xml:space="preserve"/>
+      |        <target xml:space="preserve">&lt;a href='https://example.com' class='link'&gt;Click here&lt;/a&gt;</target>
+      |      </trans-unit>
+      |    </body>
+      |  </file>
+      |</xliff>
+      |
       """.trimMargin(),
     )
   }
@@ -414,8 +520,31 @@ class XliffFileExporterTest {
       baseLanguage = Language().apply { tag = "en" },
       baseTranslationsProvider = { listOf() },
       projectIcuPlaceholdersSupport = isProjectIcuPlaceholdersEnabled,
+      filePathProvider =
+        ExportFilePathProvider(
+          template = ExportFileStructureTemplateProvider(exportParams, translations).validateAndGetTemplate(),
+          extension = exportParams.format.extension,
+        ),
     )
   }
 
-  private fun getExportParams() = ExportParams()
+  private fun getExportParams() = ExportParams().apply { format = ExportFormat.XLIFF }
+
+  @Test
+  fun `exports cleanly when translation text contains XML 1_0-invalid characters`() {
+    val built =
+      buildExportTranslationList {
+        add(
+          languageTag = "de",
+          keyName = "poisoned",
+          text = "Hello\u000Bworld",
+        )
+      }
+
+    val files = getExporter(built.translations).produceFiles()
+
+    val xml = files["de.xliff"]!!.bufferedReader().readText()
+    assertThat(xml).contains("Helloworld")
+    assertThat(xml).doesNotContain("")
+  }
 }

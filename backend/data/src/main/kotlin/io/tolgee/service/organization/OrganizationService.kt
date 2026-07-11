@@ -16,11 +16,14 @@ import io.tolgee.model.Permission
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
+import io.tolgee.model.enums.ThirdPartyAuthType
+import io.tolgee.model.isAdmin
 import io.tolgee.repository.OrganizationRepository
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.AvatarService
-import io.tolgee.service.InvitationService
 import io.tolgee.service.QuickStartService
+import io.tolgee.service.TenantService
+import io.tolgee.service.invitation.InvitationService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.UserPreferencesService
@@ -39,6 +42,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.awt.Dimension
 import java.io.InputStream
 import io.tolgee.dtos.cacheable.OrganizationDto as CachedOrganizationDto
 
@@ -46,6 +50,7 @@ import io.tolgee.dtos.cacheable.OrganizationDto as CachedOrganizationDto
 @Transactional
 class OrganizationService(
   private val organizationRepository: OrganizationRepository,
+  private val tenantService: TenantService?,
   private val authenticationFacade: AuthenticationFacade,
   private val slugGenerator: SlugGenerator,
   private val organizationRoleService: OrganizationRoleService,
@@ -76,7 +81,7 @@ class OrganizationService(
     userAccount: UserAccount,
   ): Organization {
     if (createDto.slug != null && !validateSlugUniqueness(createDto.slug!!)) {
-      throw ValidationException(Message.ADDRESS_PART_NOT_UNIQUE)
+      throw ValidationException(Message.SLUG_NOT_UNIQUE)
     }
 
     val slug =
@@ -126,15 +131,18 @@ class OrganizationService(
   /**
    * Returns any organizations accessible by user.
    */
+  @Transactional(readOnly = true)
   fun findPreferred(
     userAccountId: Long,
     exceptOrganizationId: Long = 0,
   ): Organization? {
-    return organizationRepository.findPreferred(
-      userId = userAccountId,
-      exceptOrganizationId,
-      PageRequest.of(0, 1),
-    ).content.firstOrNull()
+    return organizationRepository
+      .findPreferred(
+        userId = userAccountId,
+        exceptOrganizationId,
+        PageRequest.of(0, 1),
+      ).content
+      .firstOrNull()
   }
 
   /**
@@ -145,13 +153,18 @@ class OrganizationService(
     exceptOrganizationId: Long = 0,
   ): Organization? {
     return findPreferred(userAccount.id, exceptOrganizationId) ?: let {
-      if (tolgeeProperties.authentication.userCanCreateOrganizations || userAccount.role == UserAccount.Role.ADMIN) {
+      val canCreateOrganizations =
+        tolgeeProperties.authentication.userCanCreateOrganizations &&
+          userAccount.thirdPartyAuthType !== ThirdPartyAuthType.SSO
+
+      if (canCreateOrganizations || userAccount.isAdmin()) {
         return@let createPreferred(userAccount)
       }
       null
     }
   }
 
+  @Transactional(readOnly = true)
   fun findPermittedPaged(
     pageable: Pageable,
     requestParamsDto: OrganizationRequestParamsDto,
@@ -165,6 +178,7 @@ class OrganizationService(
     )
   }
 
+  @Transactional(readOnly = true)
   fun findPermittedPaged(
     pageable: Pageable,
     filterCurrentUserOwner: Boolean = false,
@@ -180,27 +194,33 @@ class OrganizationService(
     )
   }
 
+  @Transactional(readOnly = true)
   fun get(id: Long): Organization {
     return organizationRepository.find(id) ?: throw NotFoundException(Message.ORGANIZATION_NOT_FOUND)
   }
 
+  @Transactional(readOnly = true)
   fun find(id: Long): Organization? {
     return organizationRepository.find(id)
   }
 
+  @Transactional(readOnly = true)
   fun get(slug: String): Organization {
     return find(slug) ?: throw NotFoundException(Message.ORGANIZATION_NOT_FOUND)
   }
 
+  @Transactional(readOnly = true)
   fun find(slug: String): Organization? {
     return organizationRepository.findBySlug(slug)
   }
 
+  @Transactional(readOnly = true)
   @Cacheable(cacheNames = [Caches.ORGANIZATIONS], key = "{'id', #id}")
   fun findDto(id: Long): CachedOrganizationDto? {
     return find(id)?.let { CachedOrganizationDto.fromEntity(it) }
   }
 
+  @Transactional(readOnly = true)
   @Cacheable(cacheNames = [Caches.ORGANIZATIONS], key = "{'slug', #slug}")
   fun findDto(slug: String): CachedOrganizationDto? {
     return find(slug)?.let { CachedOrganizationDto.fromEntity(it) }
@@ -218,7 +238,7 @@ class OrganizationService(
 
     val newSlug = editDto.slug ?: organization.slug
     if (newSlug != organization.slug && !validateSlugUniqueness(newSlug)) {
-      throw ValidationException(Message.ADDRESS_PART_NOT_UNIQUE)
+      throw ValidationException(Message.SLUG_NOT_UNIQUE)
     }
 
     organization.name = editDto.name
@@ -237,8 +257,14 @@ class OrganizationService(
     ],
   )
   fun delete(organization: Organization) {
+    val tenant = organization.ssoTenant
+    if (tenant != null && tenant.enabled) {
+      tenant.enabled = false
+      tenantService?.save(tenant)
+    }
     organization.deletedAt = currentDateProvider.date
     save(organization)
+    projectService.softDeleteAllInOrganization(organization.id)
     eventPublisher.publishEvent(BeforeOrganizationDeleteEvent(organization))
     organization.preferredBy
       .toList() // we need to clone it so hibernate doesn't change it concurrently
@@ -301,21 +327,24 @@ class OrganizationService(
     organization: Organization,
     avatar: InputStream,
   ) {
-    avatarService.setAvatar(organization, avatar)
+    avatarService.setAvatar(organization, avatar, Dimension(300, 300))
   }
 
   /**
    * Checks slug uniqueness
    * @return Returns true if valid
    */
+  @Transactional(readOnly = true)
   fun validateSlugUniqueness(slug: String): Boolean {
     return !organizationRepository.organizationWithSlugExists(slug)
   }
 
+  @Transactional(readOnly = true)
   fun isThereAnotherOwner(id: Long): Boolean {
     return organizationRoleService.isAnotherOwnerInOrganization(id)
   }
 
+  @Transactional(readOnly = true)
   fun generateSlug(
     name: String,
     oldSlug: String? = null,
@@ -331,13 +360,8 @@ class OrganizationService(
   /**
    * Returns all organizations which are owned only by the specified user
    */
+  @Transactional(readOnly = true)
   fun getAllSingleOwnedByUser(userAccount: UserAccount) = organizationRepository.getAllSingleOwnedByUser(userAccount)
-
-  fun getOrganizationAndCheckUserIsOwner(organizationId: Long): Organization {
-    val organization = this.get(organizationId)
-    organizationRoleService.checkUserIsOwner(organization.id)
-    return organization
-  }
 
   @Caching(
     evict = [
@@ -349,6 +373,7 @@ class OrganizationService(
     organizationRepository.save(organization)
   }
 
+  @Transactional(readOnly = true)
   fun findAllPaged(
     pageable: Pageable,
     search: String?,
@@ -357,10 +382,12 @@ class OrganizationService(
     return organizationRepository.findAllViews(pageable, search, userId)
   }
 
+  @Transactional(readOnly = true)
   fun findAllByName(name: String): List<Organization> {
     return organizationRepository.findAllByName(name)
   }
 
+  @Transactional(readOnly = true)
   fun getProjectOwner(projectId: Long): Organization {
     return organizationRepository.getProjectOwner(projectId)
   }
@@ -377,6 +404,7 @@ class OrganizationService(
     permissionService.save(basePermission)
   }
 
+  @Transactional(readOnly = true)
   fun findPrivateView(
     id: Long,
     currentUserId: Long,
@@ -387,6 +415,7 @@ class OrganizationService(
     }
   }
 
+  @Transactional(readOnly = true)
   fun findView(
     id: Long,
     currentUserId: Long,

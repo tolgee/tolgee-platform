@@ -54,7 +54,7 @@ export type EditorProps = {
   editorRef?: React.RefObject<EditorView | null>;
 };
 
-export const EditorJson: React.FC<EditorProps> = ({
+export const EditorJson: React.FC<React.PropsWithChildren<EditorProps>> = ({
   value,
   onChange,
   onFocus,
@@ -183,6 +183,7 @@ export const EditorJson: React.FC<EditorProps> = ({
     <>
       {globalStyles}
       <StyledEditor
+        key={theme.palette.mode}
         ref={ref}
         style={{
           minHeight,

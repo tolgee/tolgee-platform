@@ -7,7 +7,7 @@ import {
   styled,
   Tooltip,
 } from '@mui/material';
-import { ArrowDropDown } from '@mui/icons-material';
+import { ArrowDropDown } from 'tg.component/CustomIcons';
 
 import { OrganizationRoleType } from 'tg.service/response.types';
 import { components } from 'tg.service/apiSchema.generated';
@@ -29,7 +29,7 @@ type Props = {
   onSelect: (value: RoleType) => void;
 };
 
-export const RoleMenu: React.FC<Props> = (props) => {
+export const RoleMenu: React.FC<React.PropsWithChildren<Props>> = (props) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const translateRole = useOrgRoleTranslation();

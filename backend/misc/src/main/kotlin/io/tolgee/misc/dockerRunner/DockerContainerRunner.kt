@@ -2,7 +2,8 @@ package io.tolgee.misc.dockerRunner
 
 import io.tolgee.fixtures.waitFor
 import java.io.File
-import java.util.*
+import java.util.Locale
+import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 class DockerContainerRunner(
@@ -130,15 +131,18 @@ class DockerContainerRunner(
       .directory(workingDir)
       .redirectOutput(ProcessBuilder.Redirect.PIPE)
       .redirectError(ProcessBuilder.Redirect.PIPE)
-      .start().also { it.waitFor(timeoutAmount, timeoutUnit) }
+      .start()
+      .also { it.waitFor(timeoutAmount, timeoutUnit) }
   }
 
   private fun String?.containsTimes(string2: String): Int {
-    return this?.windowed(string2.length) {
-      if (it == string2) 1 else 0
-    }?.sum() ?: 0
+    return this
+      ?.windowed(string2.length) {
+        if (it == string2) 1 else 0
+      }?.sum() ?: 0
   }
 
-  class CommandRunFailedException(val output: String) :
-    RuntimeException("Command execution failed\n\nOutput:\n$output")
+  class CommandRunFailedException(
+    val output: String,
+  ) : RuntimeException("Command execution failed\n\nOutput:\n$output")
 }

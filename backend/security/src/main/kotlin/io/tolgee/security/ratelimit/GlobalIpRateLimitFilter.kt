@@ -16,17 +16,21 @@
 
 package io.tolgee.security.ratelimit
 
+import io.tolgee.Metrics
 import io.tolgee.security.authentication.AuthenticationFacade
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 
 @Component
 class GlobalIpRateLimitFilter(
   private val rateLimitService: RateLimitService,
+  @Lazy
   private val authenticationFacade: AuthenticationFacade,
+  private val metrics: Metrics,
 ) : OncePerRequestFilter() {
   override fun doFilterInternal(
     request: HttpServletRequest,
@@ -34,13 +38,22 @@ class GlobalIpRateLimitFilter(
     filterChain: FilterChain,
   ) {
     if (!authenticationFacade.isAuthenticated) {
-      rateLimitService.consumeGlobalIpRateLimitPolicy(request)
+      try {
+        rateLimitService.consumeGlobalIpRateLimitPolicy(request)
+      } catch (ex: RateLimitBlockedException) {
+        // HTTP 444 (nginx "No Response") - intentionally drop connection without response body.
+        // This saves bandwidth from clients that repeatedly ignore rate limits.
+        metrics.rateLimitConnectionDropsCounter.increment()
+        response.status = 444
+        return
+      }
     }
 
     filterChain.doFilter(request, response)
   }
 
   override fun shouldNotFilter(request: HttpServletRequest): Boolean {
-    return request.method == "OPTIONS"
+    val path = request.requestURI.removePrefix(request.contextPath)
+    return request.method == "OPTIONS" || path == "/actuator" || path.startsWith("/actuator/")
   }
 }

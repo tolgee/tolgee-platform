@@ -29,6 +29,7 @@ data class FileProcessorContext(
   val importSettings: IImportSettings =
     object : IImportSettings {
       override var overrideKeyDescriptions: Boolean = false
+      override var createNewKeys: Boolean = true
       override var convertPlaceholdersToIcu: Boolean = true
     },
   val projectIcuPlaceholdersEnabled: Boolean = true,
@@ -132,8 +133,15 @@ data class FileProcessorContext(
     if (text.isNullOrBlank()) {
       return
     }
+
+    var validText = text.trim()
+    if (validText.length > KeyMeta.DESCRIPTION_MAX_LEN) {
+      fileEntity.addIssue(FileIssueType.DESCRIPTION_TOO_LONG, mapOf(FileIssueParamType.KEY_NAME to key))
+      validText = validText.substring(0, KeyMeta.DESCRIPTION_MAX_LEN).trim()
+    }
+
     val keyMeta = getOrCreateKeyMeta(key)
-    keyMeta.description = text.trim()
+    keyMeta.description = validText
   }
 
   fun addKeyCodeReference(
@@ -141,6 +149,9 @@ data class FileProcessorContext(
     path: String,
     line: Long? = null,
   ) {
+    if (path.isEmpty()) {
+      return
+    }
     val keyMeta = getOrCreateKeyMeta(key)
     keyMeta.addCodeReference {
       this.path = path
@@ -182,7 +193,8 @@ data class FileProcessorContext(
   val mapping: ImportFileMapping? by lazy {
     val mappings = singleStepImportParams?.fileMappings ?: return@lazy null
 
-    mappings.filter { it.fileName == this.file.name }
+    mappings
+      .filter { it.fileName == this.file.name }
       .getOrThrowIfMoreThanOne {
         BadRequestException(Message.TOO_MANY_MAPPINGS_FOR_FILE, listOf(this.file.name))
       }

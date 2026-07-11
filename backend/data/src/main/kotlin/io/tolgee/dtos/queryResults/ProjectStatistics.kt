@@ -8,4 +8,6 @@ data class ProjectStatistics(
   val keyCount: Long,
   val languageCount: Long,
   val translationStatePercentages: Map<TranslationState, BigDecimal>,
+  val qaIssueCount: Long,
+  val qaChecksStaleCount: Long,
 )

@@ -34,7 +34,7 @@ class ProjectsAutoTranslationSettingsController(
   private val autoTranslateService: AutoTranslationService,
   private val autoTranslationSettingsModelAssembler: AutoTranslationSettingsModelAssembler,
 ) {
-  @PutMapping("/{projectId}/per-language-auto-translation-settings")
+  @PutMapping("/{projectId:[0-9]+}/per-language-auto-translation-settings")
   @Operation(
     summary = "Set per-language auto-translation settings",
   )
@@ -47,7 +47,7 @@ class ProjectsAutoTranslationSettingsController(
     return autoTranslationSettingsModelAssembler.toCollectionModel(config)
   }
 
-  @GetMapping("/{projectId}/per-language-auto-translation-settings")
+  @GetMapping("/{projectId:[0-9]+}/per-language-auto-translation-settings")
   @Operation(summary = "Get per-language auto-translation settings")
   @UseDefaultPermissions
   @AllowApiAccess
@@ -56,7 +56,7 @@ class ProjectsAutoTranslationSettingsController(
     return autoTranslationSettingsModelAssembler.toCollectionModel(configs)
   }
 
-  @PutMapping("/{projectId}/auto-translation-settings")
+  @PutMapping("/{projectId:[0-9]+}/auto-translation-settings")
   @Operation(
     summary = "Set default auto translation settings for project",
     description =
@@ -74,7 +74,7 @@ class ProjectsAutoTranslationSettingsController(
     return autoTranslationSettingsModelAssembler.toModel(config)
   }
 
-  @GetMapping("/{projectId}/auto-translation-settings")
+  @GetMapping("/{projectId:[0-9]+}/auto-translation-settings")
   @Operation(
     summary = "Get default auto-translation settings for project",
     description =

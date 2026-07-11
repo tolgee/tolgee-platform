@@ -9,9 +9,11 @@ export function useBatchOperationTypeTranslate() {
   return (type: BatchJobType) => {
     switch (type) {
       case 'DELETE_KEYS':
-        return t('batch_operation_type_delete_keys');
+        return t('batch_operation_type_moving_keys_to_trash');
       case 'MACHINE_TRANSLATE':
         return t('batch_operation_type_machine_translation');
+      case 'AI_PLAYGROUND_TRANSLATE':
+        return t('batch_operation_type_ai_playground_translate');
       case 'PRE_TRANSLATE_BT_TM':
         return t('batch_operation_type_machine_pre_translate_by_tm');
       case 'COPY_TRANSLATIONS':
@@ -30,6 +32,16 @@ export function useBatchOperationTypeTranslate() {
         return t('batch_operation_type_auto_translate');
       case 'AUTOMATION':
         return t('batch_operation_type_automation');
+      case 'ASSIGN_TRANSLATION_LABEL':
+        return t('batch_operation_type_assign_translation_label');
+      case 'UNASSIGN_TRANSLATION_LABEL':
+        return t('batch_operation_type_unassign_translation_label');
+      case 'RESTORE_KEYS':
+        return t('batch_operation_type_restore_keys');
+      case 'HARD_DELETE_KEYS':
+        return t('batch_operation_type_hard_delete_keys');
+      case 'QA_CHECK':
+        return t('batch_operation_type_qa_check');
       default:
         return type;
     }

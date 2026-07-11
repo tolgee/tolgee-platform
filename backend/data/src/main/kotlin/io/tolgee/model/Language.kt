@@ -7,6 +7,7 @@ import io.tolgee.activity.annotation.ActivityReturnsExistence
 import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.events.OnLanguagePrePersist
 import io.tolgee.model.mtServiceConfig.MtServiceConfig
+import io.tolgee.model.task.Task
 import io.tolgee.model.translation.Translation
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -18,7 +19,6 @@ import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import jakarta.persistence.PrePersist
 import jakarta.persistence.Table
-import jakarta.persistence.UniqueConstraint
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotEmpty
 import jakarta.validation.constraints.Size
@@ -26,21 +26,11 @@ import org.springframework.beans.factory.ObjectFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.context.ApplicationEventPublisher
-import java.util.*
+import java.util.Date
 
 @Entity
 @EntityListeners(Language.Companion.LanguageListeners::class)
 @Table(
-  uniqueConstraints = [
-    UniqueConstraint(
-      columnNames = ["project_id", "name"],
-      name = "language_project_name",
-    ),
-    UniqueConstraint(
-      columnNames = ["project_id", "tag"],
-      name = "language_tag_name",
-    ),
-  ],
   indexes = [
     Index(
       columnList = "tag",
@@ -50,11 +40,18 @@ import java.util.*
       columnList = "tag, project_id",
       name = "index_tag_project",
     ),
+    Index(
+      columnList = "project_id",
+      name = "index_project_id",
+    ),
   ],
 )
 @ActivityLoggedEntity
 @ActivityReturnsExistence
-class Language : StandardAuditModel(), ILanguage, SoftDeletable {
+class Language :
+  StandardAuditModel(),
+  ILanguage,
+  SoftDeletable {
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "language", orphanRemoval = true)
   var translations: MutableList<Translation> = mutableListOf()
 
@@ -87,10 +84,12 @@ class Language : StandardAuditModel(), ILanguage, SoftDeletable {
   @OneToOne(mappedBy = "targetLanguage", orphanRemoval = true, fetch = FetchType.LAZY)
   var autoTranslationConfig: AutoTranslationConfig? = null
 
-  @OneToOne(mappedBy = "language", orphanRemoval = true, fetch = FetchType.LAZY)
-  var stats: LanguageStats? = null
+  @OneToMany(mappedBy = "language", orphanRemoval = true, fetch = FetchType.LAZY)
+  var stats: MutableList<LanguageStats> = mutableListOf()
 
-  @field:Size(max = 2000)
+  @OneToMany(mappedBy = "language", orphanRemoval = true, fetch = FetchType.LAZY)
+  var tasks: MutableList<Task> = mutableListOf()
+
   @ActivityLoggedProp
   @Column(columnDefinition = "text")
   override var aiTranslatorPromptDescription: String? = null

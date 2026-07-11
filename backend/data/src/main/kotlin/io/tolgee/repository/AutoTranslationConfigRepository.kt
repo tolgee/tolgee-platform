@@ -2,11 +2,13 @@ package io.tolgee.repository
 
 import io.tolgee.model.AutoTranslationConfig
 import io.tolgee.model.Project
+import org.springframework.context.annotation.Lazy
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 
 @Repository
+@Lazy
 interface AutoTranslationConfigRepository : JpaRepository<AutoTranslationConfig, Long> {
   fun findOneByProjectAndTargetLanguageId(
     project: Project,

@@ -15,14 +15,17 @@ class IcuToApplePlaceholderConvertor : FromIcuPlaceholderConvertor {
     return baseToCLikePlaceholderConvertor.convert(node)
   }
 
-  override fun convertText(string: String): String {
-    return escapePercentSign(string)
+  override fun convertText(
+    node: MessagePatternUtil.TextNode,
+    keepEscaping: Boolean,
+  ): String {
+    return escapePercentSign(node.getText(keepEscaping))
   }
 
   override fun convertReplaceNumber(
     node: MessagePatternUtil.MessageContentsNode,
     argName: String?,
   ): String {
-    return "%lld"
+    return baseToCLikePlaceholderConvertor.convertReplaceNumber(argName?.toIntOrNull())
   }
 }

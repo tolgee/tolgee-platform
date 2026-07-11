@@ -1,14 +1,22 @@
 /// <reference types="cypress" />
 import * as totp from 'totp-generator';
 import { HOST, PASSWORD, USERNAME } from '../../common/constants';
+import { ssoOrganizationsLoginTestData } from '../../common/apiCalls/testData/testData';
 import { getAnyContainingText } from '../../common/xPath';
 import {
   createUser,
   deleteAllEmails,
+  disableEmailVerification,
   getParsedResetPasswordEmail,
   login,
+  logout,
+  enableOrganizationsSsoProvider,
+  disableOrganizationsSsoProvider,
+  enableGlobalSsoProvider,
+  disableGlobalSsoProvider,
   userDisableMfa,
   userEnableMfa,
+  deleteUserSql,
 } from '../../common/apiCalls/common';
 import { assertMessage, getPopover } from '../../common/shared';
 import {
@@ -17,9 +25,14 @@ import {
   checkAnonymousUserIdentified,
   loginViaForm,
   loginWithFakeGithub,
+  loginWithFakeGoogle,
   loginWithFakeOAuth2,
+  loginWithFakeSso,
 } from '../../common/login';
 import { waitForGlobalLoading } from '../../common/loading';
+
+const TEST_USERNAME = 'johndoe@doe.com';
+const TEST_USERNAME_SSO = 'johndoe@domain.com';
 
 context('Login', () => {
   beforeEach(() => {
@@ -52,18 +65,6 @@ context('Login', () => {
     cy.gcy('login-button').should('be.visible').click();
     cy.xpath(getAnyContainingText('Login')).should('be.visible');
     cy.contains('Invalid credentials').should('be.visible');
-  });
-
-  it('login with github', () => {
-    checkAnonymousIdSet();
-
-    loginWithFakeGithub();
-
-    checkAnonymousIdUnset();
-    checkAnonymousUserIdentified();
-  });
-  it('login with oauth2', () => {
-    loginWithFakeOAuth2();
   });
 
   it('logout', () => {
@@ -145,5 +146,86 @@ context('Login', () => {
       cy.gcy('login-button').should('not.exist');
       cy.xpath("//*[@aria-controls='user-menu']").should('be.visible');
     });
+  });
+});
+
+context('Login third party', () => {
+  beforeEach(() => {
+    deleteUserSql(TEST_USERNAME);
+    disableEmailVerification();
+    cy.visit(HOST);
+  });
+
+  afterEach(() => {
+    deleteUserSql(TEST_USERNAME);
+  });
+
+  it('login with github', () => {
+    checkAnonymousIdSet();
+
+    loginWithFakeGithub(TEST_USERNAME);
+    cy.contains('Projects').should('be.visible');
+
+    checkAnonymousIdUnset();
+    checkAnonymousUserIdentified();
+  });
+  it('login with google', () => {
+    checkAnonymousIdSet();
+
+    loginWithFakeGoogle(TEST_USERNAME);
+    cy.contains('Projects').should('be.visible');
+
+    checkAnonymousIdUnset();
+    checkAnonymousUserIdentified();
+  });
+  it('login with oauth2', { retries: { runMode: 5 } }, () => {
+    loginWithFakeOAuth2(TEST_USERNAME);
+    cy.contains('Projects').should('be.visible');
+  });
+});
+
+context('SSO Organizations Login', () => {
+  beforeEach(() => {
+    deleteUserSql(TEST_USERNAME_SSO);
+    disableEmailVerification();
+    ssoOrganizationsLoginTestData.clean();
+    ssoOrganizationsLoginTestData.generate();
+    enableOrganizationsSsoProvider();
+
+    cy.visit(HOST);
+  });
+
+  it('login with organizations sso', { retries: { runMode: 5 } }, () => {
+    cy.contains('SSO login').click();
+    cy.xpath("//*[@name='domain']").type('domain.com');
+    loginWithFakeSso(TEST_USERNAME_SSO);
+    cy.contains('Projects').should('be.visible');
+  });
+
+  afterEach(() => {
+    logout();
+    disableOrganizationsSsoProvider();
+    ssoOrganizationsLoginTestData.clean();
+    deleteUserSql(TEST_USERNAME_SSO);
+  });
+});
+
+context('SSO Global Login', () => {
+  beforeEach(() => {
+    deleteUserSql(TEST_USERNAME_SSO);
+    disableEmailVerification();
+    enableGlobalSsoProvider();
+    cy.visit(HOST);
+  });
+
+  it('login with global sso', { retries: { runMode: 5 } }, () => {
+    loginWithFakeSso(TEST_USERNAME_SSO);
+    cy.contains('Projects').should('be.visible');
+  });
+
+  afterEach(() => {
+    logout();
+    disableGlobalSsoProvider();
+    deleteUserSql(TEST_USERNAME_SSO);
   });
 });

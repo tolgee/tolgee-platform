@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { Box, Link, styled } from '@mui/material';
-import { ArrowDropDown } from '@mui/icons-material';
+import { ArrowDropDown } from 'tg.component/CustomIcons';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { OrganizationItem } from './OrganizationItem';
@@ -20,7 +20,7 @@ type Props = {
   ownedOnly?: boolean;
 };
 
-export const OrganizationSwitch: React.FC<Props> = ({
+export const OrganizationSwitch: React.FC<React.PropsWithChildren<Props>> = ({
   onSelect,
   ownedOnly,
 }) => {
@@ -66,7 +66,11 @@ export const OrganizationSwitch: React.FC<Props> = ({
           {preferredOrganization && (
             <OrganizationItem data={preferredOrganization} />
           )}
-          <ArrowDropDown fontSize={'small'} sx={{ marginRight: '-6px' }} />
+          <ArrowDropDown
+            width={20}
+            height={20}
+            style={{ marginRight: '-6px' }}
+          />
         </StyledLink>
 
         <OrganizationPopover

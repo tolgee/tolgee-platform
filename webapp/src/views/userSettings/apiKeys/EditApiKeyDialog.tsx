@@ -4,7 +4,7 @@ import { T, useTranslate } from '@tolgee/react';
 
 import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
-import { CheckBoxGroupMultiSelect } from 'tg.component/common/form/fields/CheckBoxGroupMultiSelect';
+import { CheckBoxGroupMultiSelect } from 'tg.component/PermissionsSettings/CheckBoxGroupMultiSelect';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { components } from 'tg.service/apiSchema.generated';
@@ -21,7 +21,9 @@ interface Props {
   onSaved?: (data: components['schemas']['ApiKeyModel']) => void;
 }
 
-export const EditApiKeyDialog: FunctionComponent<Props> = (props) => {
+export const EditApiKeyDialog: FunctionComponent<
+  React.PropsWithChildren<Props>
+> = (props) => {
   const history = useHistory();
   const onDialogClose = () => {
     history.push(LINKS.USER_API_KEYS.build());
@@ -50,11 +52,6 @@ export const EditApiKeyDialog: FunctionComponent<Props> = (props) => {
     options: {
       enabled: !!apiKeyLoadable.data,
     },
-  });
-
-  const availableScopesLoadable = useApiQuery({
-    url: '/v2/api-keys/availableScopes',
-    method: 'get',
   });
 
   const editMutation = useApiMutation({
@@ -117,40 +114,38 @@ export const EditApiKeyDialog: FunctionComponent<Props> = (props) => {
       </DialogTitle>
       <DialogContent>
         <>
-          {(availableScopesLoadable.isLoading ||
-            apiKeyLoadable.isLoading ||
-            projectLoadable.isLoading) && <BoxLoading />}
-          {projectLoadable.data &&
-            availableScopesLoadable.data &&
-            apiKeyLoadable.data && (
-              <StandardForm
-                onSubmit={handleEdit}
-                saveActionLoadable={editMutation}
-                onCancel={() => onDialogClose()}
-                initialValues={getInitialValues()}
-                validationSchema={Validation.EDIT_API_KEY}
-              >
-                <>
-                  <TextField
-                    inputProps={{
-                      'data-cy': 'generate-api-key-dialog-description-input',
-                    }}
-                    autoFocus
-                    name="description"
-                    placeholder={t('api-key-description-placeholder')}
-                    label={<T keyName="api-key-form-description" />}
-                  />
+          {(apiKeyLoadable.isLoading || projectLoadable.isLoading) && (
+            <BoxLoading />
+          )}
+          {projectLoadable.data && apiKeyLoadable.data && (
+            <StandardForm
+              onSubmit={handleEdit}
+              saveActionLoadable={editMutation}
+              onCancel={() => onDialogClose()}
+              initialValues={getInitialValues()}
+              validationSchema={Validation.EDIT_API_KEY}
+            >
+              <>
+                <TextField
+                  inputProps={{
+                    'data-cy': 'generate-api-key-dialog-description-input',
+                  }}
+                  autoFocus
+                  name="description"
+                  placeholder={t('api-key-description-placeholder')}
+                  label={<T keyName="api-key-form-description" />}
+                />
 
-                  <Box mt={2}>
-                    <CheckBoxGroupMultiSelect
-                      label="Scopes"
-                      name="scopes"
-                      options={availableScopes}
-                    />
-                  </Box>
-                </>
-              </StandardForm>
-            )}
+                <Box mt={2}>
+                  <CheckBoxGroupMultiSelect
+                    label="Scopes"
+                    name="scopes"
+                    options={availableScopes}
+                  />
+                </Box>
+              </>
+            </StandardForm>
+          )}
         </>
       </DialogContent>
     </Dialog>

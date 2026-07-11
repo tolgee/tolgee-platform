@@ -1,6 +1,6 @@
 package io.tolgee.controllers.internal.e2eData
 
-import io.swagger.v3.oas.annotations.Hidden
+import io.tolgee.controllers.internal.InternalController
 import io.tolgee.development.DbPopulatorReal
 import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.exceptions.NotFoundException
@@ -12,16 +12,9 @@ import io.tolgee.util.executeInNewRepeatableTransaction
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.TransactionDefinition
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
 
-@RestController
-@CrossOrigin(origins = ["*"])
-@Hidden
-@RequestMapping(value = ["internal/e2e-data/organizations"])
-@Transactional
+@InternalController(["internal/e2e-data/organizations"])
 class OrganizationE2eDataController(
   private val organizationService: OrganizationService,
   private val userAccountService: UserAccountService,
@@ -47,13 +40,19 @@ class OrganizationE2eDataController(
           organizationRoleService.grantMemberRoleToUser(user, organization)
         }
 
+        dataItem.managedMembers.forEach { memberUserName ->
+          val user = userAccountService.findActive(memberUserName) ?: throw NotFoundException()
+          organizationRoleService.grantMemberRoleToUser(user, organization)
+          organizationRoleService.setManaged(user, organization, true)
+        }
+
         dataItem.otherOwners.forEach { memberUserName ->
           val user = userAccountService.findActive(memberUserName) ?: throw NotFoundException()
           organizationRoleService.grantOwnerRoleToUser(user, organization)
         }
       }
     }
-    return organizations.map { it.name to mapOf("slug" to it.slug) }.toMap()
+    return organizations.associate { it.name to mapOf("slug" to it.slug) }
   }
 
   @GetMapping(value = ["/clean"])
@@ -104,6 +103,7 @@ class OrganizationE2eDataController(
       val owner: UserData,
       val otherOwners: MutableList<String> = mutableListOf(),
       val members: MutableList<String> = mutableListOf(),
+      val managedMembers: MutableList<String> = mutableListOf(),
     )
 
     val data =
@@ -142,6 +142,15 @@ class OrganizationE2eDataController(
           owner = UserData("admin"),
           otherOwners = mutableListOf("evan@netsuite.com"),
           members = mutableListOf("gates@microsoft.com", "cukrberg@facebook.com"),
+          managedMembers = mutableListOf("LonelyDev@tolgee.io"),
+        ),
+        OrganizationDataItem(
+          dto =
+            OrganizationDto(
+              name = "What a nice organization",
+              description = "We are very nice",
+            ),
+          owner = UserData("LonelyDev@tolgee.io", "Lonely Developer"),
         ),
         OrganizationDataItem(
           dto =

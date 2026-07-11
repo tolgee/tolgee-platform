@@ -12,4 +12,5 @@ open class NamespaceModel(
   val id: Long,
   @Schema(description = "", example = "homepage")
   val name: String,
-) : RepresentationModel<NamespaceModel>(), Serializable
+) : RepresentationModel<NamespaceModel>(),
+  Serializable

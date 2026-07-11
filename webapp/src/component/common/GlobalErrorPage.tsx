@@ -4,7 +4,9 @@ import Typography from '@mui/material/Typography';
 import { LINKS } from 'tg.constants/links';
 
 import { GlobalError } from 'tg.error/GlobalError';
+import { ApiError } from 'tg.service/http/ApiError';
 import { tokenService } from 'tg.service/TokenService';
+import { useErrorTranslation } from 'tg.translationTools/useErrorTranslation';
 
 const StyledImage = styled('img')`
   filter: grayscale(50%);
@@ -14,16 +16,21 @@ const StyledImage = styled('img')`
 `;
 
 type Props = {
-  error: GlobalError;
+  error: GlobalError | ApiError;
 };
 
 export default function GlobalErrorPage({ error }: Props) {
   const dev = process.env.NODE_ENV === 'development';
+  const translateError = useErrorTranslation();
 
   return (
     <Box p={4}>
       <Box mb={5}>
-        <Typography variant="h4">Unexpected error occurred</Typography>
+        <Typography variant="h4">
+          {error instanceof ApiError && error.code
+            ? translateError(error.code, error.params)
+            : 'Unexpected error occurred'}
+        </Typography>
       </Box>
 
       {!dev && (
@@ -37,7 +44,7 @@ export default function GlobalErrorPage({ error }: Props) {
         </Box>
       )}
 
-      {error.publicInfo && (
+      {error instanceof GlobalError && error.publicInfo && (
         <Box mb={5}>
           <Typography variant="h4">{error.publicInfo}</Typography>
         </Box>
@@ -63,7 +70,7 @@ export default function GlobalErrorPage({ error }: Props) {
       </Typography>
       {dev && (
         <Box mt={5}>
-          {error.debugInfo && (
+          {error instanceof GlobalError && error.debugInfo && (
             <>
               <Typography variant="h5">Debug information</Typography>
               <pre>{error.debugInfo}</pre>
@@ -72,7 +79,9 @@ export default function GlobalErrorPage({ error }: Props) {
           <Typography variant="h5">Stack trace</Typography>
           <pre>{error.stack}</pre>
 
-          {error.e && <pre>{error.e && error.e.stack}</pre>}
+          {error instanceof GlobalError && error.e && (
+            <pre>{error.e && error.e.stack}</pre>
+          )}
         </Box>
       )}
     </Box>

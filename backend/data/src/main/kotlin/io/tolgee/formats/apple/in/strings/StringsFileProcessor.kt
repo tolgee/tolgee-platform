@@ -25,7 +25,10 @@ class StringsFileProcessor(
   }
 
   private fun parseFileToContext() {
-    val bufferedInputStream = context.file.data.inputStream().buffered()
+    val bufferedInputStream =
+      context.file.data
+        .inputStream()
+        .buffered()
     val encoding = detectEncoding(bufferedInputStream)
     val string = bufferedInputStream.reader(encoding).use { it.readText() }
     string.forEachIndexed { index, char ->

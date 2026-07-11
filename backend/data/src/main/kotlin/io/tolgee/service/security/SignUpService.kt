@@ -4,81 +4,61 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.exceptions.AuthenticationException
-import io.tolgee.exceptions.BadRequestException
-import io.tolgee.model.Invitation
 import io.tolgee.model.UserAccount
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.service.EmailVerificationService
-import io.tolgee.service.InvitationService
-import io.tolgee.service.QuickStartService
-import io.tolgee.service.organization.OrganizationService
+import io.tolgee.service.TenantService
+import org.springframework.context.ApplicationContext
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 class SignUpService(
-  private val invitationService: InvitationService,
+  private val applicationContext: ApplicationContext,
   private val userAccountService: UserAccountService,
   private val tolgeeProperties: TolgeeProperties,
   private val jwtService: JwtService,
   private val emailVerificationService: EmailVerificationService,
-  private val organizationService: OrganizationService,
-  private val quickStartService: QuickStartService,
+  private val tenantService: TenantService,
   private val passwordEncoder: PasswordEncoder,
+  private val registrationEmailValidator: RegistrationEmailValidator,
 ) {
   @Transactional
   fun signUp(dto: SignUpDto): JwtAuthenticationResponse? {
-    userAccountService.findActive(dto.email)?.let {
-      throw BadRequestException(Message.USERNAME_ALREADY_EXISTS)
-    }
+    registrationEmailValidator.validate(dto.email)
 
     val user = dtoToEntity(dto)
+    checkNotManagedByOrganization(user.domain)
     signUp(user, dto.invitationCode, dto.organizationName, dto.userSource)
 
-    if (!tolgeeProperties.authentication.needsEmailVerification) {
-      return JwtAuthenticationResponse(jwtService.emitToken(user.id, true))
+    if (tolgeeProperties.authentication.needsEmailVerification) {
+      emailVerificationService.createForUser(user, dto.callbackUrl)
     }
 
-    emailVerificationService.createForUser(user, dto.callbackUrl)
-    return JwtAuthenticationResponse(jwtService.emitToken(user.id, true))
+    return JwtAuthenticationResponse(jwtService.emitToken(user.id, isSuper = true))
   }
 
+  private fun checkNotManagedByOrganization(domain: String?) {
+    if (tenantService.getEnabledConfigByDomainOrNull(domain) != null) {
+      // There is sso configured for the domain - don't allow sign up
+      throw AuthenticationException(Message.USE_SSO_FOR_AUTHENTICATION_INSTEAD, listOf(domain))
+    }
+  }
+
+  @Transactional
   fun signUp(
     entity: UserAccount,
     invitationCode: String?,
     organizationName: String?,
     userSource: String? = null,
   ): UserAccount {
-    val invitation = findAndCheckInvitationOnRegistration(invitationCode)
-    val user = userAccountService.createUser(entity, userSource)
-    if (invitation != null) {
-      invitationService.accept(invitation.code, user)
-    }
-
-    val canCreateOrganization = tolgeeProperties.authentication.userCanCreateOrganizations
-    if (canCreateOrganization && (invitation == null || !organizationName.isNullOrBlank())) {
-      val name = if (organizationName.isNullOrBlank()) user.name else organizationName
-      val organization = organizationService.createPreferred(user, name)
-      quickStartService.create(user, organization)
-    }
-    return user
+    return SignUpProcessor(applicationContext, entity, invitationCode, organizationName, userSource).process()
   }
 
   fun dtoToEntity(request: SignUpDto): UserAccount {
     val encodedPassword = passwordEncoder.encode(request.password!!)
-    return UserAccount(name = request.name, username = request.email, password = encodedPassword)
-  }
-
-  @Transactional
-  fun findAndCheckInvitationOnRegistration(invitationCode: String?): Invitation? {
-    if (invitationCode == null) {
-      if (!tolgeeProperties.authentication.registrationsAllowed) {
-        throw AuthenticationException(Message.REGISTRATIONS_NOT_ALLOWED)
-      }
-      return null
-    }
-    return invitationService.getInvitation(invitationCode)
+    return UserAccount(name = request.name, username = request.email.lowercase(), password = encodedPassword)
   }
 }

@@ -1,15 +1,24 @@
 package io.tolgee.api.v2.controllers
 
+import io.tolgee.config.TestEmailConfiguration
+import io.tolgee.dtos.misc.CreateOrganizationInvitationParams
 import io.tolgee.dtos.misc.CreateProjectInvitationParams
+import io.tolgee.dtos.request.organization.OrganizationInviteUserDto
 import io.tolgee.dtos.request.project.LanguagePermissions
+import io.tolgee.dtos.request.project.ProjectInviteUserDto
 import io.tolgee.fixtures.EmailTestUtil
+import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.equalsPermissionType
 import io.tolgee.fixtures.generateUniqueString
-import io.tolgee.model.Invitation
+import io.tolgee.hateoas.invitation.OrganizationInvitationModel
+import io.tolgee.hateoas.invitation.ProjectInvitationModel
+import io.tolgee.model.Organization
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
@@ -31,7 +40,7 @@ class V2InvitationControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `does not return when has no project permission`() {
-    val base = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase()
     val project = base.project
     userAccount = dbPopulator.createUserIfNotExists("pavol")
     performAuthGet("/v2/projects/${project.id}/invitations").andIsNotFound
@@ -39,9 +48,8 @@ class V2InvitationControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `deletes translate invitation with languages`() {
-    val base = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase()
     val project = base.project
-    tolgeeProperties.frontEndUrl = "https://dummyUrl.com"
     val invitation = createTranslateInvitation(project)
 
     performAuthDelete("/v2/invitations/${invitation.id}").andIsOk
@@ -50,8 +58,45 @@ class V2InvitationControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `project invitation contains creator info`() {
+    val base = dbPopulator.createBase()
+    val project = base.project
+    val invitation = createTranslateInvitation(project)
+    assertThat(invitation.createdBy?.name).isEqualTo("admin")
+  }
+
+  @Test
+  fun `organization invitation contains creator info`() {
+    val base = dbPopulator.createBase()
+    val invitation = createOrganizationInvitation(base.organization)
+    assertThat(invitation.createdBy?.name).isEqualTo("admin")
+  }
+
+  @Test
+  fun `deletes invitations created by deleted user`() {
+    val base = dbPopulator.createBase()
+    val newUser = dbPopulator.createUserIfNotExists("manager")
+    permissionService.grantFullAccessToProject(newUser, base.project)
+
+    loginAsUser(newUser.username)
+    val invitation = createTranslateInvitation(base.project)
+    performAuthGet("/api/public/invitation_info/${invitation.code}")
+      .andIsOk
+      .andAssertThatJson {
+        node("createdBy.name").isEqualTo(newUser.name)
+      }
+    performAuthDelete("/v2/user")
+    loginAsUser(base.userAccount)
+    performAuthGet("/api/public/invitation_info/${invitation.code}")
+      .andIsBadRequest
+      .andAssertThatJson {
+        node("code").isEqualTo("invitation_code_does_not_exist_or_expired")
+      }
+  }
+
+  @Test
   fun `deletes edit invitation`() {
-    val base = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase()
     val project = base.project
 
     val invitation =
@@ -68,15 +113,16 @@ class V2InvitationControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `accepts invitation`() {
-    val base = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase()
     val project = base.project
     val code =
-      invitationService.create(
-        CreateProjectInvitationParams(
-          project,
-          ProjectPermissionType.EDIT,
-        ),
-      ).code
+      invitationService
+        .create(
+          CreateProjectInvitationParams(
+            project,
+            ProjectPermissionType.EDIT,
+          ),
+        ).code
 
     val newUser = dbPopulator.createUserIfNotExists(generateUniqueString(), "pwd")
     loginAsUser(newUser.username)
@@ -87,17 +133,18 @@ class V2InvitationControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `accepts translate invitation with languages`() {
-    val base = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase()
     val project = base.project
     val code =
-      invitationService.create(
-        CreateProjectInvitationParams(
-          project,
-          ProjectPermissionType.TRANSLATE,
-          LanguagePermissions(translate = project.languages, null, null),
-          null,
-        ),
-      ).code
+      invitationService
+        .create(
+          CreateProjectInvitationParams(
+            project,
+            ProjectPermissionType.TRANSLATE,
+            LanguagePermissions(translate = project.languages, null, null, null),
+            null,
+          ),
+        ).code
     val newUser = dbPopulator.createUserIfNotExists(generateUniqueString(), "pwd")
     loginAsUser(newUser.username)
 
@@ -116,16 +163,115 @@ class V2InvitationControllerTest : AuthorizedControllerTest() {
     type.assert.equalsPermissionType(expectedType)
   }
 
-  private fun createTranslateInvitation(project: Project): Invitation {
-    return invitationService.create(
-      CreateProjectInvitationParams(
-        project = project,
-        type = ProjectPermissionType.TRANSLATE,
-        languagePermissions = LanguagePermissions(translate = project.languages, view = null, stateChange = null),
-        name = "Franta",
-        email = "a@a.a",
-        scopes = null,
-      ),
-    )
+  @Test
+  fun `rejects project invitation when email does not match`() {
+    val base = dbPopulator.createBase()
+    val code = createProjectInvitationCode(base.project, email = "target@example.com")
+
+    val newUser = dbPopulator.createUserIfNotExists("other@example.com", "pwd")
+    loginAsUser(newUser.username)
+    performAuthPut("/v2/invitations/$code/accept", null)
+      .andIsBadRequest
+      .andAssertThatJson {
+        node("code").isEqualTo("invitation_email_mismatch")
+      }
+
+    assertThat(invitationService.getForProject(base.project)).hasSize(1)
+    assertThat(permissionService.getProjectPermissionScopesNoApiKey(base.project.id, newUser)).isNullOrEmpty()
+  }
+
+  @Test
+  fun `accepts project invitation when email matches case insensitive`() {
+    val base = dbPopulator.createBase()
+    val code = createProjectInvitationCode(base.project, email = "Target@Example.COM")
+
+    val newUser = dbPopulator.createUserIfNotExists("target@example.com", "pwd")
+    loginAsUser(newUser.username)
+    performAuthPut("/v2/invitations/$code/accept", null).andIsOk
+
+    assertInvitationAccepted(base.project, newUser, ProjectPermissionType.EDIT)
+  }
+
+  @Test
+  fun `rejects organization invitation when email does not match`() {
+    val base = dbPopulator.createBase()
+    val code = createOrganizationInvitationCode(base.organization, email = "target@example.com")
+
+    val newUser = dbPopulator.createUserIfNotExists("other@example.com", "pwd")
+    loginAsUser(newUser.username)
+    performAuthPut("/v2/invitations/$code/accept", null)
+      .andIsBadRequest
+      .andAssertThatJson {
+        node("code").isEqualTo("invitation_email_mismatch")
+      }
+  }
+
+  @Test
+  fun `accepts link invitation without email for any user`() {
+    val base = dbPopulator.createBase()
+    val code = createProjectInvitationCode(base.project)
+
+    val newUser = dbPopulator.createUserIfNotExists("anyone@example.com", "pwd")
+    loginAsUser(newUser.username)
+    performAuthPut("/v2/invitations/$code/accept", null).andIsOk
+
+    assertInvitationAccepted(base.project, newUser, ProjectPermissionType.EDIT)
+  }
+
+  private fun createProjectInvitationCode(
+    project: Project,
+    type: ProjectPermissionType = ProjectPermissionType.EDIT,
+    email: String? = null,
+  ): String =
+    invitationService
+      .create(
+        CreateProjectInvitationParams(
+          project,
+          type,
+          email = email,
+        ),
+      ).code
+
+  private fun createOrganizationInvitationCode(
+    organization: Organization,
+    type: OrganizationRoleType = OrganizationRoleType.MEMBER,
+    email: String? = null,
+  ): String =
+    invitationService
+      .create(
+        CreateOrganizationInvitationParams(
+          organization = organization,
+          type = type,
+          email = email,
+        ),
+      ).code
+
+  private fun createTranslateInvitation(project: Project): ProjectInvitationModel {
+    val result =
+      performAuthPut(
+        "/v2/projects/${project.id}/invite",
+        ProjectInviteUserDto(
+          ProjectPermissionType.TRANSLATE,
+          translateLanguages = project.languages.map { it.id }.toSet(),
+          name = "Franta",
+          email = "a@a.a",
+        ),
+      ).andIsOk
+
+    return mapper.readValue(result.andReturn().response.contentAsByteArray, ProjectInvitationModel::class.java)
+  }
+
+  private fun createOrganizationInvitation(organization: Organization): OrganizationInvitationModel {
+    val result =
+      performAuthPut(
+        "/v2/organizations/${organization.id}/invite",
+        OrganizationInviteUserDto(
+          roleType = OrganizationRoleType.MEMBER,
+          name = "Franta",
+          email = "a@a.a",
+        ),
+      ).andIsOk
+
+    return mapper.readValue(result.andReturn().response.contentAsByteArray, OrganizationInvitationModel::class.java)
   }
 }

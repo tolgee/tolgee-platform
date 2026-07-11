@@ -17,7 +17,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import java.util.*
+import java.util.Date
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -119,7 +119,7 @@ class TranslationsControllerHistoryTest : ProjectAuthControllerTest("/v2/project
         translationService.find(emptyKey, lang).get()
       }
 
-    performProjectAuthGet("/translations/${translation.id}/history").andPrettyPrint.andAssertThatJson {
+    performProjectAuthGet("/translations/${translation!!.id}/history").andPrettyPrint.andAssertThatJson {
       node("page.totalElements").isEqualTo(0)
     }
   }

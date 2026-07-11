@@ -1,4 +1,4 @@
-import { Settings } from '@mui/icons-material';
+import { Settings01 } from '@untitled-ui/icons-react';
 import { IconButton, Tooltip, styled } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { Link } from 'react-router-dom';
@@ -26,7 +26,7 @@ export const ProjectSettingsRight = ({ project }: Props) => {
           component={Link}
           to={LINKS.PROJECT_EDIT.build({ [PARAMS.PROJECT_ID]: project.id })}
         >
-          <Settings />
+          <Settings01 />
         </IconButton>
       </Tooltip>
     </StyledContainer>

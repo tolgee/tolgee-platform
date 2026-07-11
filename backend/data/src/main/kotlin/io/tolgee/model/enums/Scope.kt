@@ -11,6 +11,7 @@ enum class Scope(
 ) {
   TRANSLATIONS_VIEW("translations.view"),
   TRANSLATIONS_EDIT("translations.edit"),
+  TRANSLATIONS_SUGGEST("translations.suggest"),
   KEYS_EDIT("keys.edit"),
   SCREENSHOTS_UPLOAD("screenshots.upload"),
   SCREENSHOTS_DELETE("screenshots.delete"),
@@ -35,19 +36,33 @@ enum class Scope(
   CONTENT_DELIVERY_MANAGE("content-delivery.manage"),
   CONTENT_DELIVERY_PUBLISH("content-delivery.publish"),
   WEBHOOKS_MANAGE("webhooks.manage"),
+  TASKS_VIEW("tasks.view"),
+  TASKS_EDIT("tasks.edit"),
+  PROMPTS_VIEW("prompts.view"),
+  PROMPTS_EDIT("prompts.edit"),
+  TRANSLATION_LABEL_MANAGE("translation-labels.manage"),
+  TRANSLATION_LABEL_ASSIGN("translation-labels.assign"),
+  ALL_VIEW("all.view"),
+  BRANCH_MANAGEMENT("branch.management"),
+  BRANCH_PROTECTED_MODIFY("branch.protected-modify"),
   ;
 
   fun expand() = Scope.expand(this)
 
+  fun isReadOnly() = Scope.isReadOnly(this)
+
   companion object {
+    val readOnlyScopes by lazy { ALL_VIEW.expand() }
+
     private val keysView = HierarchyItem(KEYS_VIEW)
     private val translationsView = HierarchyItem(TRANSLATIONS_VIEW, listOf(keysView))
     private val screenshotsView = HierarchyItem(SCREENSHOTS_VIEW, listOf(keysView))
-    private val translationsEdit =
-      HierarchyItem(
-        TRANSLATIONS_EDIT,
-        listOf(translationsView),
-      )
+    private val translationsEdit = HierarchyItem(TRANSLATIONS_EDIT, listOf(translationsView))
+    private val tasksView = HierarchyItem(TASKS_VIEW, listOf(translationsView))
+    private val activityView = HierarchyItem(ACTIVITY_VIEW)
+    private val membersView = HierarchyItem(MEMBERS_VIEW)
+    private val batchJobsView = HierarchyItem(BATCH_JOBS_VIEW)
+    private val promptsView = HierarchyItem(PROMPTS_VIEW)
 
     val hierarchy =
       HierarchyItem(
@@ -82,12 +97,23 @@ enum class Scope(
               screenshotsView,
             ),
           ),
-          HierarchyItem(ACTIVITY_VIEW),
-          HierarchyItem(LANGUAGES_EDIT),
+          HierarchyItem(TASKS_EDIT, listOf(tasksView)),
+          HierarchyItem(
+            PROMPTS_EDIT,
+            listOf(
+              promptsView,
+              HierarchyItem(PROJECT_EDIT),
+              HierarchyItem(LANGUAGES_EDIT),
+              translationsView,
+              screenshotsView,
+            ),
+          ),
+          activityView,
+          HierarchyItem(LANGUAGES_EDIT, listOf(HierarchyItem(PROMPTS_VIEW))),
           HierarchyItem(PROJECT_EDIT),
           HierarchyItem(
             MEMBERS_EDIT,
-            listOf(HierarchyItem(MEMBERS_VIEW)),
+            listOf(membersView),
           ),
           HierarchyItem(
             TRANSLATIONS_COMMENTS_SET_STATE,
@@ -98,27 +124,55 @@ enum class Scope(
             listOf(translationsView),
           ),
           HierarchyItem(
+            TRANSLATION_LABEL_MANAGE,
+            listOf(translationsView),
+          ),
+          HierarchyItem(
+            TRANSLATION_LABEL_ASSIGN,
+            listOf(translationsView),
+          ),
+          HierarchyItem(
             TRANSLATIONS_COMMENTS_EDIT,
             listOf(translationsView),
           ),
           HierarchyItem(
             TRANSLATIONS_STATE_EDIT,
-            listOf(HierarchyItem(TRANSLATIONS_VIEW)),
+            listOf(translationsView),
           ),
-          HierarchyItem(BATCH_JOBS_VIEW),
+          HierarchyItem(
+            TRANSLATIONS_SUGGEST,
+            listOf(translationsView),
+          ),
+          batchJobsView,
           HierarchyItem(BATCH_JOBS_CANCEL),
           HierarchyItem(BATCH_PRE_TRANSLATE_BY_TM, listOf(translationsEdit)),
           HierarchyItem(BATCH_MACHINE_TRANSLATE, listOf(translationsEdit)),
           HierarchyItem(CONTENT_DELIVERY_MANAGE, listOf(HierarchyItem(CONTENT_DELIVERY_PUBLISH))),
           HierarchyItem(WEBHOOKS_MANAGE),
+          HierarchyItem(
+            ALL_VIEW,
+            listOf(
+              translationsView,
+              screenshotsView,
+              activityView,
+              membersView,
+              keysView,
+              batchJobsView,
+              tasksView,
+              promptsView,
+            ),
+          ),
+          HierarchyItem(BRANCH_MANAGEMENT),
+          HierarchyItem(BRANCH_PROTECTED_MODIFY, listOf(translationsEdit)),
         ),
       )
 
     private fun expand(item: HierarchyItem): MutableSet<Scope> {
       val descendants =
-        item.requires.flatMap {
-          expand(it)
-        }.toMutableSet()
+        item.requires
+          .flatMap {
+            expand(it)
+          }.toMutableSet()
 
       descendants.add(item.scope)
       return descendants
@@ -161,8 +215,28 @@ enum class Scope(
       return expand(permittedScopes.toTypedArray())
     }
 
+    /**
+     * Returns all possible scopes that contain required scope
+     *
+     * Example: When permittedScope === KEYS_VIEW, it returns [KEYS_VIEW, KEYS_EDIT, ADMIN]
+     * when user has any of these scopes, he effectively has KEYS_VIEW
+     */
+    fun selfAndAncestors(
+      permittedScope: Scope,
+      root: HierarchyItem = hierarchy,
+    ): List<Scope> {
+      val result = mutableSetOf<Scope>()
+      root.requires.forEach {
+        result.addAll(selfAndAncestors(permittedScope, it))
+      }
+      if (result.isNotEmpty() || root.scope === permittedScope) {
+        result.add(root.scope)
+      }
+      return result.toList()
+    }
+
     fun fromValue(value: String): Scope {
-      for (scope in values()) {
+      for (scope in entries) {
         if (scope.value == value) {
           return scope
         }
@@ -172,14 +246,26 @@ enum class Scope(
 
     fun parse(scopes: Collection<String>?): Set<Scope> {
       scopes ?: return setOf()
-      return scopes.map { stringScope ->
-        Scope.values().find { it.value == stringScope } ?: throw BadRequestException(
-          Message.SCOPE_NOT_FOUND,
-          listOf(stringScope),
-        )
-      }.toSet()
+      return scopes
+        .map { stringScope ->
+          Scope.entries.find { it.value == stringScope } ?: throw BadRequestException(
+            Message.SCOPE_NOT_FOUND,
+            listOf(stringScope),
+          )
+        }.toSet()
+    }
+
+    fun isReadOnly(scope: Scope): Boolean {
+      return readOnlyScopes.contains(scope)
+    }
+
+    fun areAllReadOnly(scopes: Array<Scope>?): Boolean {
+      return scopes?.all { isReadOnly(it) } ?: true
     }
   }
 
-  data class HierarchyItem(val scope: Scope, val requires: List<HierarchyItem> = listOf())
+  data class HierarchyItem(
+    val scope: Scope,
+    val requires: List<HierarchyItem> = listOf(),
+  )
 }

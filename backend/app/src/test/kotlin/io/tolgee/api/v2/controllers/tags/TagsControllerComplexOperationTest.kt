@@ -42,6 +42,8 @@ class TagsControllerComplexOperationTest : ProjectAuthControllerTest("/v2/projec
         (null to "test key") to listOf("test", "existing tag", "existing tag 2", "new tag"),
         (null to "no tag key") to listOf("other tag"),
         (null to "existing tag key 2") to listOf("existing tag 2", "other tag"),
+        // branched key keeps untouched
+        (null to "branch key") to listOf("existing tag 2"),
       ),
     )
   }
@@ -64,6 +66,7 @@ class TagsControllerComplexOperationTest : ProjectAuthControllerTest("/v2/projec
         (null to "test key") to listOf("test", "existing tag", "existing tag 2", "new tag"),
         (null to "no tag key") to listOf("other tag"),
         (null to "existing tag key 2") to listOf("existing tag 2", "new tag"),
+        (null to "branch key") to listOf("existing tag 2"),
       ),
     )
   }
@@ -130,6 +133,7 @@ class TagsControllerComplexOperationTest : ProjectAuthControllerTest("/v2/projec
         (null to "test key") to listOf("test", "existing tag 2"),
         (null to "no tag key") to listOf(),
         (null to "existing tag key 2") to listOf(),
+        (null to "branch key") to listOf("existing tag 2"),
       ),
     )
   }
@@ -152,6 +156,7 @@ class TagsControllerComplexOperationTest : ProjectAuthControllerTest("/v2/projec
         (null to "test key") to listOf("test"),
         (null to "no tag key") to listOf(),
         (null to "existing tag key 2") to listOf(),
+        (null to "branch key") to listOf("existing tag 2"),
       ),
     )
   }

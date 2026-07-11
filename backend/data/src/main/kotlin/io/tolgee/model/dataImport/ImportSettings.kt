@@ -1,22 +1,31 @@
 package io.tolgee.model.dataImport
 
-import io.tolgee.api.IImportSettings
+import io.tolgee.api.IStoredImportSettings
 import io.tolgee.model.AuditModel
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
 import jakarta.persistence.IdClass
+import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
+import jakarta.persistence.Table
 import org.hibernate.annotations.ColumnDefault
 
 @Entity
 @IdClass(ImportSettingsId::class)
+@Table(
+  indexes = [
+    Index(columnList = "project_id"),
+    Index(columnList = "user_account_id"),
+  ],
+)
 class ImportSettings(
   @Id
   @ManyToOne
   val project: Project,
-) : AuditModel(), IImportSettings {
+) : AuditModel(),
+  IStoredImportSettings {
   @ManyToOne
   @Id
   lateinit var userAccount: UserAccount
@@ -24,6 +33,10 @@ class ImportSettings(
   @ColumnDefault("false")
   override var overrideKeyDescriptions: Boolean = false
 
+  @Deprecated("Removed in favor of ICU conversion being always enabled")
   @ColumnDefault("true")
-  override var convertPlaceholdersToIcu: Boolean = true
+  var convertPlaceholdersToIcu: Boolean = true
+
+  @ColumnDefault("true")
+  override var createNewKeys: Boolean = true
 }

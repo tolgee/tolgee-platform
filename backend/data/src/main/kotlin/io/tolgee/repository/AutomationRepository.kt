@@ -1,11 +1,13 @@
 package io.tolgee.repository
 
 import io.tolgee.model.automations.Automation
+import org.springframework.context.annotation.Lazy
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 
 @Repository
+@Lazy
 interface AutomationRepository : JpaRepository<Automation?, Long?> {
   @Query(
     """

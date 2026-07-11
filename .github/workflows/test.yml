@@ -1,6 +1,7 @@
 name: Test
 
 on:
+  workflow_dispatch:
   push:
     branches: [main, release]
   pull_request:
@@ -8,65 +9,30 @@ on:
 jobs:
   backend-build:
     name: Build backend 🏗️
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v3
-        with:
-          java-version: 17
-          distribution: adopt
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
 
-      - name: Setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: "18.x"
-
-      - name: Cache Gradle packages
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
-
-      - name: Compile kotlin
-        run: ./gradlew compileTestKotlin --parallel
-
+      # Don't build test classes here; they'll only be used once during the test run anyway.
+      # This amortizes the cost of compilation across each test job, rather than paying it upfront.
+      # Test emails are built nonetheless, as they may be used by multiple subprojects...
+      #
+      # Note: seems like running in parallel has the weird side effect of causing Spring dependency management to hang
+      # It's very occasional, and doesn't seem to occur locally, but parallel being the issue is possible
+      # See: https://github.com/spring-gradle-plugins/dependency-management-plugin/issues/370
       - name: Build backend
-        run: ./gradlew bootJar --parallel
+        run: ./gradlew classes jar bootJar buildTestEmails
 
-      - name: Tar build assets
-        run: |
-          tar -czf ~/backend-api.tgz ./backend/api/build
-          tar -czf ~/backend-app.tgz ./backend/app/build
-          tar -czf ~/backend-data.tgz ./backend/data/build
-          tar -czf ~/backend-misc.tgz ./backend/misc/build
-          tar -czf ~/backend-security.tgz ./backend/security/build
-          tar -czf ~/backend-testing.tgz ./backend/testing/build
-          tar -czf ~/backend-development.tgz ./backend/development/build
-          tar -czf ~/ee-backend-app.tgz ./ee/backend/app/build
-          tar -czf ~/ee-backend-tests.tgz ./ee/backend/tests/build
-
-      - uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: backend
-          path: |
-            ~/backend-api.tgz
-            ~/backend-app.tgz
-            ~/backend-data.tgz
-            ~/backend-misc.tgz
-            ~/backend-security.tgz
-            ~/backend-testing.tgz
-            ~/backend-development.tgz
-            ~/ee-backend-app.tgz
-            ~/ee-backend-tests.tgz
+      - name: Upload backend build result
+        uses: ./.github/actions/upload-backend-build
 
   backend-test:
-    name: BT ‍🔎
+    name: BT ‍🔎 (${{ matrix.command }}${{ matrix.shard_total != '' && format(' shard {0}/{1}', matrix.shard_index, matrix.shard_total) || '' }})
     needs: [backend-build]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -75,83 +41,107 @@ jobs:
             "server-app:runContextRecreatingTests",
             "server-app:runStandardTests",
             "server-app:runWebsocketTests",
+            "server-app:runWithoutEeTests",
             "ee-test:test",
             "data:test",
             "security:test",
+            "ktlint:test",
           ]
+        shard_index: [""]
+        shard_total: [""]
+        include:
+          - command: "server-app:runStandardTests"
+            shard_index: "0"
+            shard_total: "2"
+          - command: "server-app:runStandardTests"
+            shard_index: "1"
+            shard_total: "2"
+        exclude:
+          - command: "server-app:runStandardTests"
+            shard_index: ""
+            shard_total: ""
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-java@v3
-        with:
-          java-version: 17
-          distribution: adopt
+      - uses: actions/checkout@v4
 
-      - name: Setup node
-        uses: actions/setup-node@v3
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
         with:
-          node-version: "18.x"
-
-      - name: Cache Gradle packages
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
+          node: "false"
 
       - name: Download backend build result
-        uses: actions/download-artifact@v3
-        with:
-          name: backend
-          path: ~/
+        uses: ./.github/actions/download-backend-build
 
-      - name: Un-tar build results
+      - name: Remove ee
+        if: matrix.command == 'server-app:runWithoutEeTests'
         run: |
-          tar -xzf ~/backend-api.tgz ./backend/api/build
-          tar -xzf ~/backend-app.tgz ./backend/app/build
-          tar -xzf ~/backend-data.tgz ./backend/data/build
-          tar -xzf ~/backend-misc.tgz ./backend/misc/build
-          tar -xzf ~/backend-security.tgz ./backend/security/build
-          tar -xzf ~/backend-testing.tgz ./backend/testing/build
-          tar -xzf ~/backend-development.tgz ./backend/development/build
-          tar -xzf ~/ee-backend-app.tgz ./ee/backend/app/build
-          tar -xzf ~/ee-backend-tests.tgz ./ee/backend/tests/build
+          rm -rf ./ee
 
       - name: Run backend tests
         uses: nick-fields/retry@v2
         with:
           timeout_minutes: 30
           max_attempts: ${{ github.event_name == 'push' && 5 || 1 }}
-          command: ./gradlew ${{ matrix.command }} -x classes -x compileKotlin -x compileJava
+          # Print free memory for debugging purposes
+          command: ./gradlew ${{ matrix.command }}
         env:
           SKIP_SERVER_BUILD: true
+          SKIP_EMAIL_BUILD: true
           CI_RELEASE: ${{ github.event_name == 'push' && true || false }}
+          SHARD_INDEX: ${{ matrix.shard_index }}
+          SHARD_TOTAL: ${{ matrix.shard_total }}
 
       - name: Get report name
         id: reportName
+        if: always()
         run: |
           reportName=${{ matrix.command }}
-          echo "reportName=${reportName//\:/_}" >> $GITHUB_OUTPUT
+          suffix=${{ matrix.shard_total != '' && format('_shard{0}', matrix.shard_index) || '' }}
+          echo "reportName=${reportName//\:/_}${suffix}" >> $GITHUB_OUTPUT
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: backend_test_reports_${{ steps.version.outputs.reportName }}
+          name: backend_test_reports_${{ steps.reportName.outputs.reportName }}
           path: |
             ./**/build/reports/**/*
 
       - name: Test Report
         uses: dorny/test-reporter@v1
-        if: always()
+        if: ${{ always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
         with:
-          name: Backend Tests
+          name: Test report for ${{ matrix.command }}
           path: "**/build/test-results/**/TEST-*.xml"
+          fail-on-error: false
           reporter: java-junit
 
+      - name: Setup Node
+        if: ${{ always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Convert JUnit to CTRF
+        if: ${{ always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
+        continue-on-error: true
+        run: npx --yes junit-to-ctrf "**/build/test-results/**/TEST-*.xml" --output "ctrf/ctrf-report.json"
+
+      - name: Flaky tests report (CTRF)
+        if: ${{ always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
+        uses: ctrf-io/github-test-reporter@v1
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          title: CTRF Test report for ${{ matrix.command }}
+          report-path: |
+            ctrf/ctrf-report.json
+          github-report: true
+          flaky-report: true
+          flaky-rate-report: true
 
   e2e:
     needs: [frontend-build, backend-build, e2e-install-deps]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     name: E2E testing ‍🔎
     strategy:
       fail-fast: false
@@ -159,65 +149,29 @@ jobs:
         total_jobs: [15]
         job_index: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v3
-        with:
-          java-version: 17
-          distribution: adopt
-
-      - name: Setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: "18.x"
-
-      - name: Cache Gradle packages
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
-
-      - name: Cache node modules
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: cache-node-modules-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
 
       - name: Download backend build result
-        uses: actions/download-artifact@v3
-        with:
-          name: backend
-          path: ~/
-
-      - name: Un-tar build results
-        run: |
-          tar -xzf ~/backend-api.tgz ./backend/api/build
-          tar -xzf ~/backend-app.tgz ./backend/app/build
-          tar -xzf ~/backend-data.tgz ./backend/data/build
-          tar -xzf ~/backend-misc.tgz ./backend/misc/build
-          tar -xzf ~/backend-security.tgz ./backend/security/build
-          tar -xzf ~/backend-testing.tgz ./backend/testing/build
-          tar -xzf ~/backend-development.tgz ./backend/development/build
-          tar -xzf ~/ee-backend-app.tgz ./ee/backend/app/build
-          tar -xzf ~/ee-backend-tests.tgz ./ee/backend/tests/build
+        uses: ./.github/actions/download-backend-build
 
       - name: Download frontend build result
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: webapp
           path: ./webapp/dist
 
       - name: Download dependencies
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: e2e_deps
           path: ~/
 
       - name: Untar node modules
         run: |
-          tar -xzf ~/node_modules.tgz ./e2e/node_modules
+          tar --zstd -xf ~/node_modules.tar.zst ./e2e/node_modules
 
       - name: Create cache directory
         run: |
@@ -225,7 +179,7 @@ jobs:
 
       - name: Untar Cypress cache
         run: |
-          tar -xzf ~/cypress_cache.tgz
+          tar --zstd -xf ~/cypress_cache.tar.zst
         working-directory: /home/runner/.cache/
 
       - name: Run e2e test
@@ -240,21 +194,22 @@ jobs:
           TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
           SKIP_WEBAPP_BUILD: true
           SKIP_SERVER_BUILD: true
+          SKIP_EMAIL_BUILD: true
           SKIP_INSTALL_E2E_DEPS: true
           E2E_TOTAL_JOBS: ${{matrix.total_jobs}}
           E2E_JOB_INDEX: ${{matrix.job_index}}
           CI_RELEASE: ${{ github.event_name == 'push' && true || false }}
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: e2e
+          name: e2e_${{ matrix.job_index }}
           path: |
             ./e2e/cypress/videos/**/*
             ./e2e/cypress/screenshots/**/*
             ./e2e/server
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: e2e_server_log_${{ matrix.job_index }}
@@ -263,33 +218,12 @@ jobs:
 
   frontend-build:
     name: Build frontend 🏗️
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v3
-        with:
-          java-version: 17
-          distribution: adopt
-
-      - name: Cache Gradle packages
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
-
-      - name: Setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: "18.x"
-
-      - name: Cache node modules
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: cache-node-modules-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
 
       - name: Build webapp
         run: ./gradlew buildWebapp
@@ -298,32 +232,39 @@ jobs:
           TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
 
       - name: Upload built webapp
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: webapp
           path: webapp/dist
 
   frontend-code-check:
     name: Frontend static check 🪲
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Install dependencies
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
+        with:
+          java: "false"
+
+      - name: Install library dependencies
+        run: npm ci
+        working-directory: ./library
+
+      - name: Lint library
+        run: npm run lint
+        working-directory: ./library
+
+      - name: Install webapp dependencies
         run: npm ci
         working-directory: ./webapp
 
-      - name: Cache node modules
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: cache-node-modules-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
-
-      - name: Typescript
+      - name: Typescript on webapp
         run: npm run tsc
         working-directory: ./webapp
 
-      - name: Eslint
+      - name: Eslint on webapp
         run: npm run eslint
         working-directory: ./webapp
 
@@ -338,6 +279,10 @@ jobs:
         env:
           TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
 
+      - name: Verify translation-key type-check is active
+        run: npm run tsc:prod:selftest
+        working-directory: ./webapp
+
       - name: Check missing translation keys
         run: npm run tsc:prod
         working-directory: ./webapp
@@ -345,22 +290,158 @@ jobs:
         env:
           TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
 
+      - name: Check it builds without ee directory
+        run: |
+          rm -rf ./src/ee
+          npm --prefix ../library install
+          npm install
+          npm run tsc
+          npm run build
+        working-directory: ./webapp
+
+  frontend-test:
+    name: Frontend unit tests 🧪
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
+        with:
+          java: "false"
+
+      - name: Install library dependencies
+        run: npm ci
+        working-directory: ./library
+
+      - name: Install webapp dependencies
+        run: npm ci
+        working-directory: ./webapp
+
+      - name: Run webapp unit tests
+        run: npm test
+        working-directory: ./webapp
+
+  schema-check:
+    name: Schema Check 📋
+    needs: [backend-build]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
+
+      - name: Download backend build result
+        uses: ./.github/actions/download-backend-build
+
+      - name: Install webapp dependencies
+        run: npm ci
+        working-directory: ./webapp
+
+      - name: Start backend
+        run: |
+          ./gradlew server-app:bootRun --args='--spring.profiles.active=dev' &
+          echo "Waiting for backend to start..."
+          timeout 180 bash -c 'until curl -s http://localhost:8080/actuator/health > /dev/null 2>&1; do sleep 2; done'
+          echo "Backend is ready"
+        env:
+          SKIP_SERVER_BUILD: true
+
+      - name: Generate schema
+        run: npm run schema
+        working-directory: ./webapp
+        env:
+          VITE_APP_API_URL: http://localhost:8080
+
+      - name: Check for uncommitted schema changes
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "❌ Schema files have changed! Please run 'npm run schema' locally and commit the changes."
+            echo ""
+            echo "Changed files:"
+            git status --porcelain
+            echo ""
+            echo "Diff:"
+            git diff
+            exit 1
+          fi
+          echo "✅ Schema files are up to date"
+
+  migration-check:
+    name: Migration Check 🗃️
+    needs: [backend-build]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
+        with:
+          node: "false"
+
+      - name: Download backend build result
+        uses: ./.github/actions/download-backend-build
+
+      - name: Generate migration diff
+        run: ./gradlew diffChangeLog
+        env:
+          SKIP_SERVER_BUILD: true
+
+      - name: Check for uncommitted migration changes
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "❌ Migration files are out of date! Please run './gradlew diffChangeLog' locally and commit the changes."
+            echo ""
+            echo "Changed files:"
+            git status --porcelain
+            echo ""
+            echo "Diff:"
+            git diff
+            exit 1
+          fi
+          echo "✅ Migration files are up to date"
+
+  data-cy-check:
+    name: DataCy Check 🏷️
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
+        with:
+          java: "false"
+          npm-cache: "false"
+
+      - name: Generate dataCy types
+        run: node ./scripts/generate-data-cy.mjs
+        working-directory: ./webapp
+
+      - name: Check for uncommitted dataCy changes
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "❌ dataCyType.d.ts is out of date! Please run 'npm run generate-data-cy' in webapp/ and commit the changes."
+            echo ""
+            echo "Changed files:"
+            git status --porcelain
+            echo ""
+            echo "Diff:"
+            git diff
+            exit 1
+          fi
+          echo "✅ dataCyType.d.ts is up to date"
+
   e2e-code-checks:
     name: E2E Static Check 🪲
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Setup node
-        uses: actions/setup-node@v3
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
         with:
-          node-version: "18.x"
-
-      - name: Cache node modules
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: cache-node-modules-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+          java: "false"
 
       - name: Install dependencies
         run: npm ci
@@ -376,20 +457,14 @@ jobs:
 
   e2e-install-deps:
     name: Install E2E dependencies ⬇️
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Setup node
-        uses: actions/setup-node@v3
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
         with:
-          node-version: "18.x"
-
-      - name: Cache node modules
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: cache-node-modules-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+          java: "false"
 
       - name: Install dependencies
         run: npm ci
@@ -397,44 +472,135 @@ jobs:
 
       - name: Tar node modules
         run: |
-          tar -czf ~/node_modules.tgz ./e2e/node_modules
+          tar --zstd -cf ~/node_modules.tar.zst ./e2e/node_modules
 
       - name: Tar Cypress cache
         run: |
-          tar -czf ~/cypress_cache.tgz ./Cypress
+          tar --zstd -cf ~/cypress_cache.tar.zst ./Cypress
         working-directory: /home/runner/.cache/
 
-      - uses: actions/upload-artifact@v3
-        if: always()
+      - uses: actions/upload-artifact@v4
         with:
           name: e2e_deps
           path: |
-            ~/node_modules.tgz
-            ~/cypress_cache.tgz
+            ~/node_modules.tar.zst
+            ~/cypress_cache.tar.zst
 
   backend-code-checks:
     name: Ktlint 🪲
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v3
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
         with:
-          java-version: 17
-          distribution: adopt
-
-      - name: Setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: "18.x"
-
-      - name: Cache Gradle packages
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
+          node: "false"
 
       - name: Run ktlint
         run: ./gradlew ktlintCheck
+
+  email-code-checks:
+    name: Email templates static check 🪲
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
+        with:
+          java: 'false'
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ./email
+
+      - name: TypeScript
+        run: npm run tsc
+        working-directory: ./email
+
+      - name: ESLint
+        run: npm run eslint
+        working-directory: ./email
+
+  everything-passed:
+    name: Everything passed 🎉
+    needs:
+      - backend-build
+      - backend-test
+      - backend-code-checks
+      - email-code-checks
+      - frontend-build
+      - frontend-code-check
+      - frontend-test
+      - schema-check
+      - migration-check
+      - data-cy-check
+      - e2e
+      - e2e-code-checks
+      - e2e-install-deps
+    runs-on: ubuntu-24.04
+    if: always()
+    steps:
+      - run: |
+          # Check the results of all jobs
+          failed_jobs=()
+
+          if [[ "${{ needs.backend-build.result }}" != "success" ]]; then
+            failed_jobs+=("backend-build")
+          fi
+
+          if [[ "${{ needs.backend-test.result }}" != "success" ]]; then
+            failed_jobs+=("backend-test")
+          fi
+
+          if [[ "${{ needs.backend-code-checks.result }}" != "success" ]]; then
+            failed_jobs+=("backend-code-checks")
+          fi
+
+          if [[ "${{ needs.frontend-build.result }}" != "success" ]]; then
+            failed_jobs+=("frontend-build")
+          fi
+
+          if [[ "${{ needs.frontend-code-check.result }}" != "success" ]]; then
+            failed_jobs+=("frontend-code-check")
+          fi
+
+          if [[ "${{ needs.frontend-test.result }}" != "success" ]]; then
+            failed_jobs+=("frontend-test")
+          fi
+
+          if [[ "${{ needs.schema-check.result }}" != "success" ]]; then
+            failed_jobs+=("schema-check")
+          fi
+
+          if [[ "${{ needs.migration-check.result }}" != "success" ]]; then
+            failed_jobs+=("migration-check")
+          fi
+
+          if [[ "${{ needs.data-cy-check.result }}" != "success" ]]; then
+            failed_jobs+=("data-cy-check")
+          fi
+
+          if [[ "${{ needs.e2e.result }}" != "success" ]]; then
+            failed_jobs+=("e2e")
+          fi
+
+          if [[ "${{ needs.e2e-code-checks.result }}" != "success" ]]; then
+            failed_jobs+=("e2e-code-checks")
+          fi
+
+          if [[ "${{ needs.e2e-install-deps.result }}" != "success" ]]; then
+            failed_jobs+=("e2e-install-deps")
+          fi
+
+          if [[ "${{ needs.email-code-checks.result }}" != "success" ]]; then
+            failed_jobs+=("email-code-checks")
+          fi
+
+          if [[ "${#failed_jobs[@]}" -gt 0 ]]; then
+            echo "The following jobs failed: ${failed_jobs[*]}"
+            exit 1
+          fi
+
+          echo "Everything passed 🎉"

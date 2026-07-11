@@ -20,4 +20,5 @@ open class LanguageAiPromptCustomizationModel(
   )
   val description: String?,
   val language: LanguageModel,
-) : RepresentationModel<LanguageAiPromptCustomizationModel>(), Serializable
+) : RepresentationModel<LanguageAiPromptCustomizationModel>(),
+  Serializable

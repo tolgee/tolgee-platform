@@ -6,7 +6,7 @@ import io.tolgee.formats.paramConvertors.out.IcuToApplePlaceholderConvertor
 
 class IcuToAppleMessageConvertor(
   private val message: String,
-  private val forceIsPlural: Boolean?,
+  private val forceIsPlural: Boolean,
   private val isProjectIcuPlaceholdersEnabled: Boolean = true,
 ) {
   fun convert(): PossiblePluralConversionResult {

@@ -6,7 +6,6 @@ package io.tolgee.configuration.tolgee
 
 import io.tolgee.configuration.annotations.AdditionalDocsProperties
 import io.tolgee.configuration.annotations.DocProperty
-import io.tolgee.exceptions.BadRequestException
 import jakarta.validation.constraints.Size
 import org.springframework.boot.context.properties.ConfigurationProperties
 
@@ -81,14 +80,16 @@ class AuthenticationProperties(
     description =
       "Whether users are allowed to register on Tolgee.\n" +
         "When set to `false`, existing users must send invites " +
-        "to projects to new users for them to be able to register.",
+        "to projects to new users for them to be able to register.\n" +
+        "When SSO is enabled, users can still register via SSO, " +
+        "even if this setting is set to `false`.",
   )
   var registrationsAllowed: Boolean = false,
   @E2eRuntimeMutable
   @DocProperty(
     description =
       "Whether users need to verify their email addresses when creating their account. " +
-        "Requires a valid [SMTP configuration](#SMTP).",
+        "Requires a valid [SMTP configuration](#tolgee-_-smtp).",
   )
   var needsEmailVerification: Boolean = false,
   @DocProperty(
@@ -127,9 +128,9 @@ class AuthenticationProperties(
   var createDemoForInitialUser: Boolean = true,
   @DocProperty(
     description = "Expiration time of a generated image access token in milliseconds.",
-    defaultExplanation = "= 10 minutes",
+    defaultExplanation = "= 2 hours",
   )
-  var securedImageTimestampMaxAge: Long = 10 * 60 * 1000,
+  var securedImageTimestampMaxAge: Long = 2 * 60 * 60 * 1000,
   @E2eRuntimeMutable
   @DocProperty(
     description =
@@ -137,16 +138,48 @@ class AuthenticationProperties(
         "When `false`, only administrators can create organizations.\n" +
         "By default, when the user has no organization, one is created for them; " +
         "this doesn't apply when this setting is set to `false`. " +
-        "In that case, the user without organization has no permissions on the server.",
+        "In that case, the user without organization has no permissions on the server.\n\n" +
+        "When SSO authentication is enabled, users created by SSO don't have their " +
+        "own organization automatically created no matter the value of this setting.",
   )
   var userCanCreateOrganizations: Boolean = true,
+  @DocProperty(
+    description =
+      "When enabled, registrations from disposable / throw-away email providers " +
+        "(e.g. `mailinator.com`) are rejected. The blocklist is a bundled snapshot of the " +
+        "community-maintained [disposable-email-domains]" +
+        "(https://github.com/disposable-email-domains/disposable-email-domains) list.\n\n" +
+        "Use `blockedEmailDomains` to block additional domains and `allowedEmailDomains` " +
+        "to allow domains that the bundled list flags by mistake.",
+  )
+  var blockDisposableEmails: Boolean = true,
+  @DocProperty(
+    description =
+      "When enabled, sign-ups whose email is a " +
+        "[subaddressing](https://en.wikipedia.org/wiki/Email_address#Subaddressing) " +
+        "alias of an existing account are rejected. For example, when `foo@gmail.com` already exists, " +
+        "`foo+anything@gmail.com` is treated as the same account. The comparison is also case-insensitive.\n\n" +
+        ":::note\n" +
+        "This only affects **new registrations** — existing accounts and login are unaffected.\n" +
+        ":::",
+  )
+  var blockEmailAliases: Boolean = true,
+  @DocProperty(
+    description =
+      "Additional email domains to block from registration, on top of the bundled disposable-domain list. " +
+        "Matched case-insensitively against the domain part of the email.",
+  )
+  var blockedEmailDomains: MutableList<String> = mutableListOf(),
+  @DocProperty(
+    description =
+      "Email domains that are always allowed to register, even if present in the bundled disposable-domain " +
+        "list or in `blockedEmailDomains`. Takes precedence over both. Useful for rescuing a domain that the " +
+        "bundled list flags by mistake.",
+  )
+  var allowedEmailDomains: MutableList<String> = mutableListOf(),
   var github: GithubAuthenticationProperties = GithubAuthenticationProperties(),
   var google: GoogleAuthenticationProperties = GoogleAuthenticationProperties(),
   var oauth2: OAuth2AuthenticationProperties = OAuth2AuthenticationProperties(),
-) {
-  fun checkAllowedRegistrations() {
-    if (!this.registrationsAllowed) {
-      throw BadRequestException(io.tolgee.constants.Message.REGISTRATIONS_NOT_ALLOWED)
-    }
-  }
-}
+  var ssoGlobal: SsoGlobalProperties = SsoGlobalProperties(),
+  var ssoOrganizations: SsoOrganizationsProperties = SsoOrganizationsProperties(),
+)

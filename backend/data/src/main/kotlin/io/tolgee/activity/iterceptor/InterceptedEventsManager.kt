@@ -7,21 +7,24 @@ import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.activity.data.EntityDescriptionRef
 import io.tolgee.activity.data.EntityDescriptionWithRelations
+import io.tolgee.activity.data.ModifiedCollectionKey
 import io.tolgee.activity.data.PropertyModification
 import io.tolgee.activity.data.RevisionType
 import io.tolgee.activity.propChangesProvider.PropChangesProvider
 import io.tolgee.component.ActivityHolderProvider
-import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.events.OnProjectActivityEvent
 import io.tolgee.model.EntityWithId
 import io.tolgee.model.activity.ActivityDescribingEntity
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
-import io.tolgee.security.ProjectHolder
-import io.tolgee.security.ProjectNotSelectedException
-import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.model.branching.Branch
+import io.tolgee.model.branching.BranchVersionedEntity
+import io.tolgee.model.branching.EntityWithBranch
+import io.tolgee.model.key.Key
+import io.tolgee.util.extractEntityId
 import jakarta.persistence.EntityManager
-import org.apache.commons.lang3.exception.ExceptionUtils.*
+import jakarta.persistence.FlushModeType
+import org.apache.commons.lang3.exception.ExceptionUtils.getRootCause
 import org.hibernate.Transaction
 import org.hibernate.action.spi.BeforeTransactionCompletionProcess
 import org.hibernate.collection.spi.AbstractPersistentCollection
@@ -32,14 +35,17 @@ import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 import java.util.IdentityHashMap
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KCallable
-import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.KProperty
 import kotlin.reflect.full.hasAnnotation
+import kotlin.reflect.jvm.javaField
 
 @Component
 @Scope(SCOPE_SINGLETON)
 class InterceptedEventsManager(
   private val applicationContext: ApplicationContext,
+  private val preCommitEventPublisher: PreCommitEventPublisher,
 ) {
   private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -62,27 +68,42 @@ class InterceptedEventsManager(
       return
     }
 
+    // Identify the field by invoking each collection-typed getter and
+    // matching the returned collection by reference. We can't use
+    // Hibernate's collection.role here because it is null when the
+    // interceptor fires for not-yet-persisted owners.
     val ownerField =
-      collectionOwner::class.members.find {
-        it.parameters.size == 1 && it.callIfInitialized(collectionOwner) === collection
-      } ?: return
+      getCollectionMembers(collectionOwner)
+        .find { it.callIfInitialized(collectionOwner) === collection }
+        ?: return
+    val fieldName = ownerField.name
 
-    val provider = getChangesProvider(collectionOwner, ownerField.name) ?: return
+    val provider = getChangesProvider(collectionOwner, fieldName) ?: return
 
-    val stored = (collection.storedSnapshot as? HashMap<*, *>)?.values?.toList()
+    val storedSnapshotCollection = (collection.storedSnapshot as? HashMap<*, *>)?.values
+    val stored = storedSnapshotCollection?.toList()
 
+    val collectionKey =
+      ModifiedCollectionKey(
+        entityClass = collectionOwner::class.simpleName!!,
+        entityId = collectionOwner.id,
+        fieldName = fieldName,
+      )
     val old =
-      activityHolder.modifiedCollections.computeIfAbsent(collectionOwner to ownerField.name) {
+      activityHolder.modifiedCollections.computeIfAbsent(collectionKey) {
         stored
       }
 
     val changes = provider.getChanges(old, collection) ?: return
     val activityModifiedEntity = getModifiedEntity(collectionOwner, RevisionType.MOD)
 
-    val newChanges = activityModifiedEntity.modifications + mutableMapOf(ownerField.name to changes)
-    activityModifiedEntity.modifications = (newChanges).toMutableMap()
+    activityModifiedEntity.modifications.put(fieldName, changes)
 
     activityModifiedEntity.setEntityDescription(collectionOwner)
+    preCommitEventPublisher.onCollectionUpdate(
+      collectionOwner,
+      storedSnapshotCollection,
+    )
   }
 
   private fun KCallable<*>.callIfInitialized(instance: Any?): Any? {
@@ -113,17 +134,27 @@ class InterceptedEventsManager(
       return
     }
 
-    val activityModifiedEntity = getModifiedEntity(entity, revisionType)
+    // Check for forced revision type (e.g., for soft-delete patterns)
+    val effectiveRevisionType =
+      activityHolder.forcedRevisionTypes[entity::class to entity.id] ?: revisionType
+
+    val activityModifiedEntity =
+      getModifiedEntity(
+        entity,
+        effectiveRevisionType,
+        currentState ?: previousState,
+      )
 
     val changesMap = getChangesMap(entity, currentState, previousState, propertyNames)
 
     activityModifiedEntity.revisionType =
       when {
         // when we are replacing ADD with MOD, we want to keep ADD
-        activityModifiedEntity.revisionType == RevisionType.ADD && revisionType == RevisionType.MOD -> RevisionType.ADD
-        else -> revisionType
+        activityModifiedEntity.revisionType == RevisionType.ADD && effectiveRevisionType == RevisionType.MOD ->
+          RevisionType.ADD
+        else -> effectiveRevisionType
       }
-    activityModifiedEntity.modifications.putAll(changesMap)
+    activityModifiedEntity.modifications.addAll(changesMap)
 
     activityModifiedEntity.setEntityDescription(entity)
   }
@@ -145,14 +176,31 @@ class InterceptedEventsManager(
   }
 
   private fun ActivityModifiedEntity.setEntityDescription(entity: EntityWithId) {
-    val describingData = getChangeEntityDescription(entity, activityRevision)
-    this.describingData = describingData.first?.filter { !this.modifications.keys.contains(it.key) }
-    this.describingRelations = describingData.second
+    val (rawData, rawRelations) = getChangeEntityDescription(entity, activityRevision)
+    this.describingData =
+      rawData?.let { data ->
+        val compact =
+          io.tolgee.activity.data
+            .DescribingDataMap(this.entityClass)
+        for ((k, v) in data) {
+          if (!this.modifications.keys.contains(k)) compact.put(k, v)
+        }
+        compact
+      }
+    this.describingRelations =
+      rawRelations?.let { rels ->
+        val compact =
+          io.tolgee.activity.data
+            .DescribingRelationsMap(this.entityClass)
+        rels.forEach { (k, v) -> compact.put(k, v) }
+        compact
+      }
   }
 
   private fun getModifiedEntity(
     entity: EntityWithId,
     revisionType: RevisionType,
+    state: Array<out Any>? = null,
   ): ActivityModifiedEntity {
     val activityModifiedEntity =
       activityHolder.modifiedEntities
@@ -167,7 +215,74 @@ class InterceptedEventsManager(
           ).also { it.revisionType = revisionType }
         }
 
+    activityModifiedEntity.branchId = resolveBranchId(entity, revisionType, state)
+
     return activityModifiedEntity
+  }
+
+  private fun resolveBranchId(
+    entity: EntityWithId,
+    revisionType: RevisionType,
+    state: Array<out Any>? = null,
+  ): Long? {
+    if (entity is Branch) {
+      // Invalidate cache when a branch is created/modified/deleted
+      try {
+        defaultBranchIdCache.remove(entity.project.id)
+      } catch (_: UninitializedPropertyAccessException) {
+        // project not yet set on new branch
+      }
+      if (!revisionType.isDel()) {
+        return entity.id
+      }
+    }
+
+    if (entity is Key) {
+      return extractEntityId(entity.branch)
+    }
+
+    // For BranchVersionedEntity find Key in the state array to avoid lazy loading
+    if (entity is BranchVersionedEntity) {
+      val key = state?.firstNotNullOfOrNull { it as? Key } ?: entity.resolveKey()
+      return key?.let { extractEntityId(it.branch) }
+    }
+
+    val projectId = resolveProjectIdSafely(entity)
+    return defaultBranchId(projectId)
+  }
+
+  private fun resolveProjectIdSafely(entity: EntityWithId): Long? {
+    return try {
+      (entity as? EntityWithBranch)?.resolveProject()?.id
+    } catch (_: Exception) {
+      null
+    }
+  }
+
+  private val defaultBranchIdCache = ConcurrentHashMap<Long, Long>()
+
+  private fun defaultBranchId(projectId: Long?): Long? {
+    if (projectId == null) {
+      return null
+    }
+    val cached =
+      defaultBranchIdCache.computeIfAbsent(projectId) {
+        entityManager
+          .createQuery(
+            """
+            select b.id
+            from Branch b
+            where b.project.id = :projectId
+              and b.isDefault = true
+              and b.deletedAt is null
+            """,
+            Long::class.java,
+          ).setParameter("projectId", projectId)
+          .setFlushMode(FlushModeType.COMMIT)
+          .resultList
+          .firstOrNull() ?: NO_DEFAULT_BRANCH
+      }
+    return if (cached == NO_DEFAULT_BRANCH) null else cached
   }
 
   private fun getChangeEntityDescription(
@@ -179,7 +294,8 @@ class InterceptedEventsManager(
         entity,
       )
     val relations =
-      rootDescription?.relations
+      rootDescription
+        ?.relations
         ?.map { it.key to compressRelation(it.value, activityRevision) }
         ?.toMap()
 
@@ -194,9 +310,10 @@ class InterceptedEventsManager(
       activityHolder
         .getDescribingRelationFromCache(value.entityId, value.entityClass) {
           val compressedRelations =
-            value.relations.map { relation ->
-              relation.key to compressRelation(relation.value, activityRevision)
-            }.toMap()
+            value.relations
+              .map { relation ->
+                relation.key to compressRelation(relation.value, activityRevision)
+              }.toMap()
 
           val activityDescribingEntity =
             ActivityDescribingEntity(
@@ -224,43 +341,75 @@ class InterceptedEventsManager(
       return mapOf()
     }
 
-    return propertyNames.asSequence().mapIndexedNotNull { idx, propertyName ->
-      val old = previousState?.get(idx)
-      val new = currentState?.get(idx)
-      val provider = getChangesProvider(entity, propertyName) ?: return@mapIndexedNotNull null
-      propertyName to (provider.getChanges(old, new) ?: return@mapIndexedNotNull null)
-    }.toMap()
+    return propertyNames
+      .asSequence()
+      .mapIndexedNotNull { idx, propertyName ->
+        val old = previousState?.get(idx)
+        val new = currentState?.get(idx)
+        val provider = getChangesProvider(entity, propertyName) ?: return@mapIndexedNotNull null
+        propertyName to (provider.getChanges(old, new) ?: return@mapIndexedNotNull null)
+      }.toMap()
   }
 
   fun getChangesProvider(
     entity: Any,
     propertyName: String,
   ): PropChangesProvider? {
-    val propertyAnnotation = getEntityAnnotatedMembers(entity)[propertyName] ?: return null
-    val providerClass = propertyAnnotation.modificationProvider
-    return applicationContext.getBean(providerClass.java)
+    val perClass = providerCache.computeIfAbsent(entity::class.java) { ConcurrentHashMap() }
+    val cached =
+      perClass.computeIfAbsent(propertyName) {
+        val annotation = getEntityAnnotatedMembers(entity)[propertyName] ?: return@computeIfAbsent NO_PROVIDER
+        applicationContext.getBean(annotation.modificationProvider.java)
+      }
+    return cached.takeUnless { it === NO_PROVIDER }
   }
 
   private fun getEntityAnnotatedMembers(entity: Any): Map<String, ActivityLoggedProp> {
     return annotatedMembersCache.computeIfAbsent(entity::class.java) {
-      entity::class.members.mapNotNull {
-        val annotation = it.findAnnotation<ActivityLoggedProp>() ?: return@mapNotNull null
-        it.name to annotation
-      }.toMap()
+      entity::class
+        .members
+        .mapNotNull {
+          if (it !is KProperty<*>) return@mapNotNull null
+          val annotation = it.javaField?.getAnnotation(ActivityLoggedProp::class.java) ?: return@mapNotNull null
+          it.name to annotation
+        }.toMap()
     }
   }
 
   private fun getEntityIgnoredMembers(entity: Any): Set<String> {
     return ignoredMembersCache.computeIfAbsent(entity::class.java) {
-      entity::class.members.filter { it.hasAnnotation<ActivityIgnoredProp>() }.map { it.name }.toSet()
+      entity::class
+        .members
+        .filter {
+          it is KProperty<*> && (it.javaField?.isAnnotationPresent(ActivityIgnoredProp::class.java) ?: false)
+        }.map { it.name }
+        .toSet()
     }
   }
 
-  private val annotatedMembersCache: MutableMap<Class<*>, Map<String, ActivityLoggedProp>> = mutableMapOf()
-  private val ignoredMembersCache: MutableMap<Class<*>, Set<String>> = mutableMapOf()
+  private val annotatedMembersCache: ConcurrentHashMap<Class<*>, Map<String, ActivityLoggedProp>> = ConcurrentHashMap()
+  private val ignoredMembersCache: ConcurrentHashMap<Class<*>, Set<String>> = ConcurrentHashMap()
+  private val collectionMembersCache: ConcurrentHashMap<Class<*>, List<KCallable<*>>> = ConcurrentHashMap()
+  private val providerCache: ConcurrentHashMap<Class<*>, ConcurrentHashMap<String, PropChangesProvider>> =
+    ConcurrentHashMap()
+
+  private fun getCollectionMembers(entity: Any): List<KCallable<*>> {
+    return collectionMembersCache.computeIfAbsent(entity::class.java) {
+      entity::class
+        .members
+        .filter { member ->
+          if (member !is KProperty<*>) return@filter false
+          if (member.parameters.size != 1) return@filter false
+          val fieldType = member.javaField?.type ?: return@filter false
+          Collection::class.java.isAssignableFrom(fieldType) ||
+            Map::class.java.isAssignableFrom(fieldType)
+        }
+    }
+  }
 
   private fun shouldHandleActivity(entity: Any?) =
-    entity is EntityWithId && entity::class.hasAnnotation<ActivityLoggedEntity>() &&
+    entity is EntityWithId &&
+      entity::class.hasAnnotation<ActivityLoggedEntity>() &&
       !entity.disableActivityLogging
 
   private val activityRevision: ActivityRevision
@@ -278,15 +427,7 @@ class InterceptedEventsManager(
 
   private fun initializeActivityRevision() {
     activityHolder.activityRevision.also { revision ->
-      revision.isInitializedByInterceptor = true
-      revision.authorId = userAccount?.id
-      try {
-        revision.setProject(projectHolder.project)
-        activityHolder.organizationId = projectHolder.project.organizationOwnerId
-      } catch (e: ProjectNotSelectedException) {
-        logger.debug("Project is not set in ProjectHolder. Activity will be stored without projectId.")
-      }
-      revision.type = activityHolder.activity
+      ActivityRevisionInitializer(applicationContext, revision, activityHolder).initialize()
     }
   }
 
@@ -322,7 +463,6 @@ class InterceptedEventsManager(
       OnProjectActivityEvent(
         activityRevision,
         activityHolder.modifiedEntities,
-        activityHolder.organizationId,
         activityHolder.utmData,
         activityHolder.businessEventData,
       ),
@@ -331,14 +471,6 @@ class InterceptedEventsManager(
 
   private val entityManager: EntityManager by lazy {
     applicationContext.getBean(EntityManager::class.java)
-  }
-
-  private val authenticationFacade: AuthenticationFacade by lazy {
-    applicationContext.getBean(AuthenticationFacade::class.java)
-  }
-
-  private val projectHolder: ProjectHolder by lazy {
-    applicationContext.getBean(ProjectHolder::class.java)
   }
 
   private val activityService: ActivityService by lazy {
@@ -352,6 +484,17 @@ class InterceptedEventsManager(
   private val activityHolder
     get() = activityHolderProvider.getActivityHolder()
 
-  private val userAccount: UserAccountDto?
-    get() = authenticationFacade.authenticatedUserOrNull
+  companion object {
+    // Sentinel value for "queried but no default branch found"
+    private const val NO_DEFAULT_BRANCH = -1L
+
+    /** Sentinel for [providerCache] entries that have no provider — ConcurrentHashMap doesn't allow nulls. */
+    private val NO_PROVIDER: PropChangesProvider =
+      object : PropChangesProvider {
+        override fun getChanges(
+          old: Any?,
+          new: Any?,
+        ) = null
+      }
+  }
 }

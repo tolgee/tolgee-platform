@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { Formik, Field } from 'formik';
 import {
   Dialog,
@@ -46,7 +45,10 @@ type Props = {
   onClose: () => void;
 };
 
-export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
+export const InviteDialog: React.FC<React.PropsWithChildren<Props>> = ({
+  open,
+  onClose,
+}) => {
   const { t } = useTranslate();
   const organization = useOrganization();
   const invite = useApiMutation({
@@ -54,11 +56,6 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
     method: 'put',
     invalidatePrefix: '/v2/organizations/{organizationId}/invitations',
   });
-
-  const yupSchema = useMemo(
-    () => Validation.INVITE_DIALOG_ORGANIZATION(t),
-    [t]
-  );
 
   return (
     <Dialog {...{ open, onClose }} fullWidth>
@@ -68,7 +65,7 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
           type: 'email' as 'email' | 'link',
           text: '',
         }}
-        validationSchema={yupSchema}
+        validationSchema={Validation.INVITE_DIALOG_ORGANIZATION(t)}
         validateOnMount={true}
         onSubmit={(data) => {
           invite.mutate(

@@ -1,5 +1,5 @@
 import { styled } from '@mui/material';
-import { CompareArrows } from '@mui/icons-material';
+import { SwitchHorizontal01 } from '@untitled-ui/icons-react';
 import { ConnectionItem, UserInfo } from './ConnectionItem';
 
 export const StyledContainer = styled('div')`
@@ -21,7 +21,7 @@ export const Connection = ({ first, second }: Props) => {
   return (
     <StyledContainer>
       <ConnectionItem data={first} />
-      <CompareArrows />
+      <SwitchHorizontal01 />
       <ConnectionItem data={second} />
     </StyledContainer>
   );

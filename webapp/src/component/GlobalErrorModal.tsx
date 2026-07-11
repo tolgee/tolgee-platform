@@ -1,5 +1,5 @@
 import { Dialog, DialogContent, IconButton, styled } from '@mui/material';
-import { Close } from '@mui/icons-material';
+import { XClose } from '@untitled-ui/icons-react';
 
 import GlobalErrorPage from './common/GlobalErrorPage';
 import {
@@ -27,7 +27,7 @@ export const GlobalErrorModal = () => {
     <Dialog open={true} maxWidth="lg" onClose={handleClose}>
       <CloseIcon>
         <IconButton onClick={handleClose} size="large">
-          <Close />
+          <XClose />
         </IconButton>
       </CloseIcon>
 

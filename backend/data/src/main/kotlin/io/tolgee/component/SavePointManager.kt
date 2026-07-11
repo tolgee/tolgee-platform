@@ -5,7 +5,7 @@ import org.hibernate.internal.SessionImpl
 import org.hibernate.resource.transaction.backend.jdbc.internal.JdbcResourceLocalTransactionCoordinatorImpl
 import org.springframework.stereotype.Component
 import java.sql.Savepoint
-import java.util.*
+import java.util.UUID
 
 @Component
 class SavePointManager(
@@ -41,7 +41,8 @@ class SavePointManager(
   }
 
   fun getSession(): SessionImpl {
-    return entityManager.unwrap(SessionImpl::class.java)
+    return entityManager
+      .unwrap(SessionImpl::class.java)
       ?.let { it as? SessionImpl ?: throw IllegalStateException("Session is not SessionImpl") }
       ?: throw IllegalStateException("Session is null")
   }

@@ -14,7 +14,9 @@ import io.tolgee.model.key.Key
 import io.tolgee.model.views.TranslationMemoryItemView
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authentication.ReadOnlyOperation
 import io.tolgee.security.authorization.RequiresProjectPermissions
+import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.security.SecurityService
@@ -22,6 +24,7 @@ import io.tolgee.service.translation.TranslationMemoryService
 import io.tolgee.util.disableAccelBuffering
 import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.hateoas.PagedModel
@@ -36,7 +39,7 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/v2/projects/{projectId:[0-9]+}/suggest", "/v2/projects/suggest"])
-@Tag(name = "Translation suggestion")
+@Tag(name = "Translation suggestion panel tools")
 @Suppress("SpringJavaInjectionPointsAutowiringInspection", "MVCPathVariableInspection")
 class TranslationSuggestionController(
   private val projectHolder: ProjectHolder,
@@ -72,12 +75,17 @@ class TranslationSuggestionController(
         "If an error occurs when for any service provider used," +
         " the error information is returned as a part of the result item, while the response has 200 status code.",
   )
-  @RequiresProjectPermissions([Scope.TRANSLATIONS_EDIT])
+  @UseDefaultPermissions
   @AllowApiAccess
   fun suggestMachineTranslationsStreaming(
     @RequestBody @Valid
     dto: SuggestRequestDto,
   ): ResponseEntity<StreamingResponseBody> {
+    securityService.checkScopeOrAssignedToTask(
+      Scope.TRANSLATIONS_EDIT,
+      dto.targetLanguageId,
+      dto.keyId ?: -1,
+    )
     return ResponseEntity.ok().disableAccelBuffering().body(
       machineTranslationSuggestionFacade.suggestStreaming(dto),
     )
@@ -90,32 +98,39 @@ class TranslationSuggestionController(
       "Suggests machine translations from translation memory. " +
         "The result is always sorted by similarity, so sorting is not supported.",
   )
-  @RequiresProjectPermissions([Scope.TRANSLATIONS_EDIT])
+  @ReadOnlyOperation
+  @UseDefaultPermissions
   @AllowApiAccess
   fun suggestTranslationMemory(
     @RequestBody @Valid
     dto: SuggestRequestDto,
     @ParameterObject pageable: Pageable,
   ): PagedModel<TranslationMemoryItemModel> {
+    securityService.checkScopeOrAssignedToTask(
+      Scope.TRANSLATIONS_EDIT,
+      dto.targetLanguageId,
+      dto.keyId ?: -1,
+    )
     val targetLanguage = languageService.get(dto.targetLanguageId, projectHolder.project.id)
-
-    securityService.checkLanguageTranslatePermission(projectHolder.project.id, listOf(targetLanguage.id))
+    val project = projectHolder.project
 
     val data =
       dto.baseText?.let { baseText ->
         translationMemoryService.getSuggestions(
-          baseText,
+          baseTranslationText = baseText,
           isPlural = dto.isPlural ?: false,
           keyId = null,
-          targetLanguage,
-          pageable,
+          projectId = project.id,
+          organizationId = project.organizationOwnerId,
+          targetLanguageTag = targetLanguage.tag,
+          pageable = pageable,
         )
       }
         ?: let {
           val keyId = dto.keyId ?: throw BadRequestException(Message.KEY_NOT_FOUND)
           val key = keyService.findOptional(keyId).orElseThrow { NotFoundException(Message.KEY_NOT_FOUND) }
           key.checkInProject()
-          translationMemoryService.getSuggestions(key, targetLanguage, pageable)
+          translationMemoryService.getSuggestions(key, targetLanguage.tag, pageable)
         }
     return arraytranslationMemoryItemModelAssembler.toModel(data, translationMemoryItemModelAssembler)
   }

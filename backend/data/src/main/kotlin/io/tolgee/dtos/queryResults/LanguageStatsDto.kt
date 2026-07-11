@@ -1,6 +1,7 @@
 package io.tolgee.dtos.queryResults
 
 import io.tolgee.api.ILanguageStats
+import java.util.Date
 
 data class LanguageStatsDto(
   override val languageId: Long,
@@ -14,4 +15,8 @@ data class LanguageStatsDto(
   override val untranslatedPercentage: Double,
   override val translatedPercentage: Double,
   override val reviewedPercentage: Double,
+  override val translationsUpdatedAt: Date?,
+  override val qaIssueCount: Long,
+  override val qaChecksStaleCount: Long,
+  val isDefaultBranch: Boolean?,
 ) : ILanguageStats

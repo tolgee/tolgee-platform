@@ -17,7 +17,7 @@ import {
   YAxis,
 } from 'recharts';
 
-import { useCurrentLanguage } from 'tg.hooks/useCurrentLanguage';
+import { useCurrentLanguage } from '@tginternal/library/hooks/useCurrentLanguage';
 
 // seconds * minutes * hours * milliseconds = 1 day
 const DAY = 60 * 60 * 24 * 1000;
@@ -50,7 +50,9 @@ type Props = {
   dailyActivity?: { [key: string]: number };
 };
 
-export const DailyActivityChart: React.FC<Props> = ({ dailyActivity }) => {
+export const DailyActivityChart: React.FC<React.PropsWithChildren<Props>> = ({
+  dailyActivity,
+}) => {
   const language = useCurrentLanguage();
 
   const [period, setPeriod] = useState<'week' | 'month' | 'year' | 'all'>(
@@ -155,9 +157,7 @@ export const DailyActivityChart: React.FC<Props> = ({ dailyActivity }) => {
         </LineChart>
       </ResponsiveContainer>
     </StyledContainer>
-  ) : (
-    <></>
-  );
+  ) : null;
 };
 
 const getAllDates = (firstDate: Date, lastDate: Date) => {

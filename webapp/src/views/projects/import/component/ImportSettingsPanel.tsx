@@ -5,8 +5,8 @@ import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { LoadingCheckboxWithSkeleton } from 'tg.component/common/form/LoadingCheckboxWithSkeleton';
-import { HelpOutline } from '@mui/icons-material';
-import { DOC_LINKS } from '../../../../docLinks';
+import { HelpCircle } from '@untitled-ui/icons-react';
+import { DOCS_LINKS } from 'tg.constants/docLinks';
 
 type ImportSettingRequest = components['schemas']['ImportSettingsRequest'];
 type ImportSettingModel = components['schemas']['ImportSettingsModel'];
@@ -15,7 +15,7 @@ const StyledPanelBox = styled(Box)`
   margin-top: 24px;
   border: 1px solid ${({ theme }) => theme.palette.tokens.border.secondary};
   display: flex;
-  width: 1200px;
+  width: 100%;
   padding: 6px 16px;
   justify-content: center;
   align-items: center;
@@ -25,7 +25,9 @@ const StyledPanelBox = styled(Box)`
     theme.palette.tokens.background['paper-3']};
 `;
 
-export const ImportSettingsPanel: FC = (props) => {
+export const ImportSettingsPanel: FC<React.PropsWithChildren<unknown>> = (
+  props
+) => {
   const project = useProject();
   const { t } = useTranslate();
 
@@ -98,24 +100,6 @@ export const ImportSettingsPanel: FC = (props) => {
         color: theme.palette.tokens.text.primary,
       })}
     >
-      {project.icuPlaceholders && (
-        <LoadingCheckboxWithSkeleton
-          loading={loadingItems.has('convertPlaceholdersToIcu')}
-          onChange={(e) => {
-            onChange('convertPlaceholdersToIcu', e.target.checked);
-          }}
-          data-cy={'import-convert-placeholders-to-icu-checkbox'}
-          hint={t('import_convert_placeholders_to_icu_checkbox_label_hint')}
-          label={t('import_convert_placeholders_to_icu_checkbox_label')}
-          checked={state?.convertPlaceholdersToIcu}
-          {...additionalCheckboxProps}
-          customHelpIcon={
-            <StyledLink href={DOC_LINKS.importingPlaceholders}>
-              <HelpOutline className="icon" />
-            </StyledLink>
-          }
-        />
-      )}
       <LoadingCheckboxWithSkeleton
         loading={loadingItems.has('overrideKeyDescriptions')}
         onChange={(e) => {
@@ -126,10 +110,23 @@ export const ImportSettingsPanel: FC = (props) => {
         label={t('import_override_key_descriptions_label')}
         checked={state?.overrideKeyDescriptions}
         customHelpIcon={
-          <StyledLink href={DOC_LINKS.importOverridingDescriptions}>
-            <HelpOutline className="icon" />
+          <StyledLink href={DOCS_LINKS.importOverridingDescriptions}>
+            <Box display="flex">
+              <HelpCircle className="icon" />
+            </Box>
           </StyledLink>
         }
+        {...additionalCheckboxProps}
+      />
+      <LoadingCheckboxWithSkeleton
+        loading={loadingItems.has('createNewKeys')}
+        onChange={(e) => {
+          onChange('createNewKeys', e.target.checked);
+        }}
+        data-cy={''}
+        hint={t('import_only_update_without_add_key_label_hint')}
+        label={t('import_only_update_without_add_key_label')}
+        checked={state?.createNewKeys}
         {...additionalCheckboxProps}
       />
     </StyledPanelBox>
@@ -143,8 +140,12 @@ const additionalCheckboxProps = {
 
 const StyledLink = styled('a')`
   color: ${({ theme }) => theme.palette.tokens.icon.primary};
+  display: inline-flex;
+  align-items: center;
 
   .icon {
-    font-size: 16px;
+    width: 15px;
+    height: 15px;
+    display: block;
   }
 `;

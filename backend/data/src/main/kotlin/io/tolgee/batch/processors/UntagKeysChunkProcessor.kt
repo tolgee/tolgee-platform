@@ -1,6 +1,8 @@
 package io.tolgee.batch.processors
 
-import io.tolgee.batch.ChunkProcessor
+import com.fasterxml.jackson.databind.ObjectMapper
+import io.tolgee.batch.AbstractChunkProcessor
+import io.tolgee.batch.ProgressManager
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.request.UntagKeysRequest
 import io.tolgee.model.batch.params.UntagKeysParams
@@ -14,23 +16,23 @@ import kotlin.coroutines.CoroutineContext
 class UntagKeysChunkProcessor(
   private val entityManager: EntityManager,
   private val tagService: TagService,
-) : ChunkProcessor<UntagKeysRequest, UntagKeysParams, Long> {
+  private val progressManager: ProgressManager,
+  objectMapper: ObjectMapper,
+) : AbstractChunkProcessor<UntagKeysRequest, UntagKeysParams, Long>(objectMapper) {
   override fun process(
     job: BatchJobDto,
     chunk: List<Long>,
     coroutineContext: CoroutineContext,
-    onProgress: (Int) -> Unit,
   ) {
     @Suppress("UNCHECKED_CAST")
     val subChunked = chunk.chunked(100) as List<List<Long>>
-    var progress = 0
     val params = getParams(job)
+    val projectId = job.projectId ?: throw IllegalArgumentException("Project id is required")
     subChunked.forEach { subChunk ->
       coroutineContext.ensureActive()
-      tagService.untagKeys(job.projectId, subChunk.associateWith { params.tags })
+      tagService.untagKeys(projectId, subChunk.associateWith { params.tags })
       entityManager.flush()
-      progress += subChunk.size
-      onProgress.invoke(progress)
+      progressManager.reportSingleChunkProgress(job.id, subChunk.size)
     }
   }
 
@@ -51,4 +53,9 @@ class UntagKeysChunkProcessor(
       this.tags = data.tags
     }
   }
+
+  override fun getChunkSize(
+    request: UntagKeysRequest,
+    projectId: Long?,
+  ): Int = 5000
 }

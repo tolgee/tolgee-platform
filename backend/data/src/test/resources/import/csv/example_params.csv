@@ -1,0 +1,3 @@
+"key","en","cs"
+"key","Hello {icuPara}","Ahoj {icuPara}"
+"plural","{icuPara, plural, one {Hello one # {icuParam}} other {Hello other {icuParam}}}","{icuPara, plural, one {Ahoj jedno # {icuParam}} other {Ahoj jiné {icuParam}}}"

@@ -1,14 +1,14 @@
 import React from 'react';
 import clsx from 'clsx';
 import { T, useTranslate } from '@tolgee/react';
-import { Menu, MenuItem, styled, Tooltip } from '@mui/material';
-import { Check, MoreVert } from '@mui/icons-material';
+import { Menu, MenuItem, styled, Tooltip, useTheme } from '@mui/material';
+import { Check, DotsVertical } from '@untitled-ui/icons-react';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { confirmation } from 'tg.hooks/confirmation';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { UserName } from 'tg.component/common/UserName';
-import { useCurrentLanguage } from 'tg.hooks/useCurrentLanguage';
+import { useCurrentLanguage } from '@tginternal/library/hooks/useCurrentLanguage';
 import { SmallActionButton } from '../../common/SmallActionButton';
 
 type TranslationCommentModel = components['schemas']['TranslationCommentModel'];
@@ -99,8 +99,13 @@ type Props = {
     | undefined;
 };
 
-export const Comment: React.FC<Props> = ({ data, onDelete, onChangeState }) => {
+export const Comment: React.FC<React.PropsWithChildren<Props>> = ({
+  data,
+  onDelete,
+  onChangeState,
+}) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const theme = useTheme();
   const lang = useCurrentLanguage();
   const date = new Date(data.createdAt);
   const { t } = useTranslate();
@@ -162,7 +167,7 @@ export const Comment: React.FC<Props> = ({ data, onDelete, onChangeState }) => {
       <StyledMenu className="hoverVisible">
         {(onDelete || unresolveVisible) && (
           <StyledSmallActionButton onClick={handleClick} data-cy="comment-menu">
-            <MoreVert fontSize="small" />
+            <DotsVertical width={20} height={20} />
           </StyledSmallActionButton>
         )}
       </StyledMenu>
@@ -173,7 +178,11 @@ export const Comment: React.FC<Props> = ({ data, onDelete, onChangeState }) => {
               onClick={handleResolve}
               data-cy="comment-resolve"
             >
-              <Check fontSize="small" color="primary" />
+              <Check
+                width={20}
+                height={20}
+                color={theme.palette.primary.main}
+              />
             </SmallActionButton>
           </StyledResolveButton>
         </Tooltip>

@@ -18,13 +18,15 @@ import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { components } from 'tg.service/apiSchema.generated';
 import { useProject } from 'tg.hooks/useProject';
 import { useDebounce } from 'use-debounce';
-import { Warning } from '@mui/icons-material';
+import { AlertTriangle } from '@untitled-ui/icons-react';
 import { messageService } from 'tg.service/MessageService';
 
-export const ProjectTransferModal: FC<{
-  open: boolean;
-  onClose: () => void;
-}> = (props) => {
+export const ProjectTransferModal: FC<
+  React.PropsWithChildren<{
+    open: boolean;
+    onClose: () => void;
+  }>
+> = (props) => {
   const project = useProject();
 
   const [search, setSearch] = useState(undefined as string | undefined);
@@ -91,7 +93,7 @@ export const ProjectTransferModal: FC<{
       </DialogTitle>
       <DialogContent>
         <Box minWidth={500} mb={2}>
-          <Alert severity="warning" icon={<Warning />}>
+          <Alert severity="warning" icon={<AlertTriangle />}>
             <T keyName="tranfer_project_dialog_warning" />
           </Alert>
           <Autocomplete

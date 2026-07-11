@@ -5,8 +5,11 @@ class NoOpFromIcuPlaceholderConvertor : FromIcuPlaceholderConvertor {
     return node.patternString
   }
 
-  override fun convertText(string: String): String {
-    return string
+  override fun convertText(
+    node: MessagePatternUtil.TextNode,
+    keepEscaping: Boolean,
+  ): String {
+    return node.getText(keepEscaping)
   }
 
   override fun convertReplaceNumber(

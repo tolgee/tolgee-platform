@@ -39,14 +39,14 @@ fun convertMessage(
     return message.toConvertorResult()
   }
   if (!convertPlaceholders || convertorFactory == null) {
-    return message.escapeIcu(true).toConvertorResult()
+    return message.escapeIcu(isInPlural).toConvertorResult()
   }
 
   val convertor = convertorFactory()
   val converted =
     message.replaceMatchedAndUnmatched(
       regex = convertor.regex,
-      matchedCallback = { it ->
+      matchedCallback = {
         convertor.convert(it, isInPlural)
       },
       unmatchedCallback = {

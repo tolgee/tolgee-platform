@@ -16,10 +16,13 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
 import java.sql.Timestamp
 import java.time.Duration
+import java.time.LocalDate
+import java.time.ZoneId.systemDefault
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAccessor
-import java.util.*
+import java.util.Date
+import java.util.Optional
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -29,7 +32,8 @@ class CurrentDateProvider(
   private val entityManager: EntityManager,
   private val applicationEventPublisher: ApplicationEventPublisher,
   private val transactionManager: PlatformTransactionManager,
-) : Logging, DateTimeProvider {
+) : Logging,
+  DateTimeProvider {
   var forcedDate: Date? = null
     set(value) {
       if (field != value) {
@@ -84,19 +88,28 @@ class CurrentDateProvider(
       return forcedDate ?: Date()
     }
 
+  val localDate: LocalDate
+    get() {
+      return date.toInstant().atZone(systemDefault()).toLocalDate()
+    }
+
   override fun getNow(): Optional<TemporalAccessor> {
     return Optional.of(date.toInstant())
   }
 
   private fun getServerTimeEntity(): ForcedServerDateTime? =
-    entityManager.createQuery(
-      "select st from ForcedServerDateTime st where st.id = 1",
-      ForcedServerDateTime::class.java,
-    ).resultList.singleOrNull()
+    entityManager
+      .createQuery(
+        "select st from ForcedServerDateTime st where st.id = 1",
+        ForcedServerDateTime::class.java,
+      ).resultList
+      .singleOrNull()
 
   private fun getForcedTime(): Timestamp? =
-    entityManager.createNativeQuery(
-      "select st.time from public.forced_server_date_time st where st.id = 1",
-      Timestamp::class.java,
-    ).resultList.singleOrNull() as Timestamp?
+    entityManager
+      .createNativeQuery(
+        "select st.time from public.forced_server_date_time st where st.id = 1",
+        Timestamp::class.java,
+      ).resultList
+      .singleOrNull() as Timestamp?
 }

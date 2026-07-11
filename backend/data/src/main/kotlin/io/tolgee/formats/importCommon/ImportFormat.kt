@@ -2,17 +2,47 @@ package io.tolgee.formats.importCommon
 
 import io.tolgee.formats.paramConvertors.`in`.AppleToIcuPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.`in`.CToIcuPlaceholderConvertor
+import io.tolgee.formats.paramConvertors.`in`.I18nextToIcuPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.`in`.JavaToIcuPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.`in`.PhpToIcuPlaceholderConvertor
+import io.tolgee.formats.paramConvertors.`in`.PythonBraceToIcuPlaceholderConvertor
+import io.tolgee.formats.paramConvertors.`in`.PythonToIcuPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.`in`.RubyToIcuPlaceholderConvertor
 import io.tolgee.formats.po.`in`.PoToIcuMessageConvertor
 
 enum class ImportFormat(
   val fileFormat: ImportFileFormat,
   val pluralsViaNesting: Boolean = false,
+  val pluralsViaSuffixesParser: PluralsKeyParser? = null,
   val messageConvertorOrNull: ImportMessageConvertor? = null,
   val rootKeyIsLanguageTag: Boolean = false,
 ) {
+  CSV_ICU(
+    ImportFileFormat.CSV,
+    messageConvertorOrNull =
+      GenericMapPluralImportRawDataConvertor(
+        canContainIcu = true,
+        toIcuPlaceholderConvertorFactory = null,
+      ),
+  ),
+  CSV_JAVA(
+    ImportFileFormat.CSV,
+    messageConvertorOrNull = GenericMapPluralImportRawDataConvertor { JavaToIcuPlaceholderConvertor() },
+  ),
+  CSV_PHP(
+    ImportFileFormat.CSV,
+    messageConvertorOrNull = GenericMapPluralImportRawDataConvertor { PhpToIcuPlaceholderConvertor() },
+  ),
+  CSV_RUBY(
+    ImportFileFormat.CSV,
+    messageConvertorOrNull = GenericMapPluralImportRawDataConvertor { RubyToIcuPlaceholderConvertor() },
+  ),
+
+  JSON_I18NEXT(
+    ImportFileFormat.JSON,
+    messageConvertorOrNull = GenericMapPluralImportRawDataConvertor { I18nextToIcuPlaceholderConvertor() },
+    pluralsViaSuffixesParser = I18nextToIcuPlaceholderConvertor.I18NEXT_PLURAL_SUFFIX_KEY_PARSER,
+  ),
   JSON_ICU(
     ImportFileFormat.JSON,
     messageConvertorOrNull =
@@ -78,7 +108,14 @@ enum class ImportFormat(
     ImportFileFormat.PO,
     messageConvertorOrNull = PoToIcuMessageConvertor { RubyToIcuPlaceholderConvertor() },
   ),
-//  PO_PYTHON(messageConvertorOrNull = BasePoToIcuMessageConvertor { PythonToIcuPlaceholderConvertor() }),
+  PO_PYTHON(
+    ImportFileFormat.PO,
+    messageConvertorOrNull = PoToIcuMessageConvertor { PythonToIcuPlaceholderConvertor() },
+  ),
+  PO_PYTHON_BRACE(
+    ImportFileFormat.PO,
+    messageConvertorOrNull = PoToIcuMessageConvertor { PythonBraceToIcuPlaceholderConvertor() },
+  ),
 
   STRINGS(
     ImportFileFormat.STRINGS,
@@ -91,6 +128,15 @@ enum class ImportFormat(
   APPLE_XLIFF(
     ImportFileFormat.XLIFF,
     messageConvertorOrNull = appleConvertor,
+  ),
+
+  APPLE_XCSTRINGS(
+    fileFormat = ImportFileFormat.XCSTRINGS,
+    messageConvertorOrNull =
+      GenericMapPluralImportRawDataConvertor(
+        optimizePlurals = true,
+        canContainIcu = false,
+      ) { AppleToIcuPlaceholderConvertor() },
   ),
 
   // properties don't store plurals in map, but it doesn't matter.
@@ -114,6 +160,10 @@ enum class ImportFormat(
   ),
 
   ANDROID_XML(
+    ImportFileFormat.XML,
+    messageConvertorOrNull = GenericMapPluralImportRawDataConvertor { JavaToIcuPlaceholderConvertor() },
+  ),
+  COMPOSE_XML(
     ImportFileFormat.XML,
     messageConvertorOrNull = GenericMapPluralImportRawDataConvertor { JavaToIcuPlaceholderConvertor() },
   ),
@@ -181,6 +231,36 @@ enum class ImportFormat(
 
   XLIFF_RUBY(
     ImportFileFormat.XLIFF,
+    messageConvertorOrNull = GenericMapPluralImportRawDataConvertor { RubyToIcuPlaceholderConvertor() },
+  ),
+
+  RESX_ICU(
+    ImportFileFormat.RESX,
+    messageConvertorOrNull =
+      GenericMapPluralImportRawDataConvertor(
+        canContainIcu = true,
+        toIcuPlaceholderConvertorFactory = null,
+      ),
+  ),
+
+  XLSX_ICU(
+    ImportFileFormat.XLSX,
+    messageConvertorOrNull =
+      GenericMapPluralImportRawDataConvertor(
+        canContainIcu = true,
+        toIcuPlaceholderConvertorFactory = null,
+      ),
+  ),
+  XLSX_JAVA(
+    ImportFileFormat.XLSX,
+    messageConvertorOrNull = GenericMapPluralImportRawDataConvertor { JavaToIcuPlaceholderConvertor() },
+  ),
+  XLSX_PHP(
+    ImportFileFormat.XLSX,
+    messageConvertorOrNull = GenericMapPluralImportRawDataConvertor { PhpToIcuPlaceholderConvertor() },
+  ),
+  XLSX_RUBY(
+    ImportFileFormat.XLSX,
     messageConvertorOrNull = GenericMapPluralImportRawDataConvertor { RubyToIcuPlaceholderConvertor() },
   ),
 

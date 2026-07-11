@@ -4,7 +4,7 @@ import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.formats.xliff.model.XliffFile
 import io.tolgee.formats.xliff.model.XliffModel
 import io.tolgee.formats.xliff.model.XliffTransUnit
-import java.util.*
+import java.util.Locale
 import javax.xml.XMLConstants
 import javax.xml.namespace.QName
 import javax.xml.stream.XMLEventReader
@@ -54,13 +54,16 @@ class XliffParser(
                 result.files.add(file)
                 file.original =
                   startElement
-                    .getAttributeByName(QName(null, "original"))?.value
+                    .getAttributeByName(QName(null, "original"))
+                    ?.value
                 file.sourceLanguage =
                   startElement
-                    .getAttributeByName(QName(null, "source-language"))?.value
+                    .getAttributeByName(QName(null, "source-language"))
+                    ?.value
                 file.targetLanguage =
                   startElement
-                    .getAttributeByName(QName(null, "target-language"))?.value
+                    .getAttributeByName(QName(null, "target-language"))
+                    ?.value
               }
 
               "trans-unit" -> {

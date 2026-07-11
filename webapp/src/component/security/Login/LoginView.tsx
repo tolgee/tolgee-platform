@@ -17,20 +17,33 @@ import { LoginCredentialsForm } from './LoginCredentialsForm';
 import { LoginTotpForm } from './LoginTotpForm';
 import { LoginMoreInfo } from './LoginMoreInfo';
 
-export const LoginView: FunctionComponent = () => {
+export const LoginView: FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const { t } = useTranslate();
   const credentialsRef = useRef({ username: '', password: '' });
   const [mfaRequired, setMfaRequired] = useState(false);
 
-  const error = useGlobalContext((c) => c.auth.loginLoadable.error);
-  const isLoading = useGlobalContext((c) => c.auth.loginLoadable.isLoading);
+  const error = useGlobalContext(
+    (c) =>
+      c.auth.loginLoadable.error ||
+      c.auth.authorizeOAuthLoadable.error ||
+      c.auth.redirectSsoUrlLoadable.error
+  );
+  const isLoading = useGlobalContext(
+    (c) =>
+      c.auth.loginLoadable.isLoading ||
+      c.auth.authorizeOAuthLoadable.isLoading ||
+      c.auth.redirectSsoUrlLoadable.isLoading
+  );
 
   const isSmall = useMediaQuery(SPLIT_CONTENT_BREAK_POINT);
 
   const registrationAllowed = useGlobalContext(
     (c) =>
-      c.initialData.serverConfiguration.allowRegistrations ||
-      c.auth.allowRegistration
+      (c.initialData.serverConfiguration.allowRegistrations ||
+        c.auth.allowRegistration) &&
+      c.initialData.serverConfiguration.nativeEnabled
   );
 
   useReportOnce('LOGIN_PAGE_OPENED');

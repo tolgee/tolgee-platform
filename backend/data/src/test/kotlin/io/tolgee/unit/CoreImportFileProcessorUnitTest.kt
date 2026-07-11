@@ -1,11 +1,11 @@
 package io.tolgee.unit
 
+import io.tolgee.api.IImportSettings
 import io.tolgee.component.KeyCustomValuesValidator
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.dtos.dataImport.ImportFileDto
-import io.tolgee.dtos.request.dataImport.ImportSettingsRequest
 import io.tolgee.formats.ImportFileProcessor
 import io.tolgee.formats.ImportFileProcessorFactory
 import io.tolgee.model.Language
@@ -21,12 +21,14 @@ import io.tolgee.service.dataImport.CoreImportFilesProcessor
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 import io.tolgee.service.key.KeyMetaService
+import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.translation.TranslationService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
@@ -53,6 +55,7 @@ class CoreImportFileProcessorUnitTest {
   private lateinit var keyMetaServiceMock: KeyMetaService
   private lateinit var tolgeePropertiesMock: TolgeeProperties
   private lateinit var keyCustomValuesValidatorMock: KeyCustomValuesValidator
+  private lateinit var keyServiceMock: KeyService
 
   @BeforeEach
   fun setup() {
@@ -67,6 +70,7 @@ class CoreImportFileProcessorUnitTest {
     keyMetaServiceMock = mock()
     tolgeePropertiesMock = mock()
     keyCustomValuesValidatorMock = mock()
+    keyServiceMock = mock()
 
     importFile = ImportFile("lgn.json", importMock)
     importFileDto = ImportFileDto("lng.json", "".toByteArray())
@@ -75,12 +79,14 @@ class CoreImportFileProcessorUnitTest {
     existingTranslation = Translation("helllo").also { it.key = Key(name = "colliding key") }
     processor =
       CoreImportFilesProcessor(
-        applicationContextMock, importMock,
+        applicationContextMock,
+        importMock,
         importSettings =
-          ImportSettingsRequest(
-            overrideKeyDescriptions = false,
-            convertPlaceholdersToIcu = true,
-          ),
+          object : IImportSettings {
+            override var overrideKeyDescriptions: Boolean = false
+            override var convertPlaceholdersToIcu: Boolean = true
+            override var createNewKeys: Boolean = false
+          },
       )
 
     whenever(applicationContextMock.getBean(ImportFileProcessorFactory::class.java)).thenReturn(
@@ -94,6 +100,8 @@ class CoreImportFileProcessorUnitTest {
     whenever(applicationContextMock.getBean(TolgeeProperties::class.java)).thenReturn(tolgeePropertiesMock)
     whenever(applicationContextMock.getBean(KeyCustomValuesValidator::class.java))
       .thenReturn(keyCustomValuesValidatorMock)
+    whenever(applicationContextMock.getBean(KeyService::class.java)).thenReturn(keyServiceMock)
+    whenever(keyServiceMock.getAllByBranch(any(), anyOrNull())).thenReturn(emptySet())
     whenever(tolgeePropertiesMock.maxTranslationTextLength).then { 10000L }
 
     whenever(importFileProcessorFactoryMock.getProcessor(eq(importFileDto), any())).thenReturn(typeProcessorMock)
@@ -129,7 +137,7 @@ class CoreImportFileProcessorUnitTest {
     fileProcessorContext.addTranslation("not colliding key", "lng", "not colliding value")
     fileProcessorContext.addTranslation("equal key", "lng", "equal text")
 
-    whenever(translationServiceMock.getAllByLanguageId(any())).thenReturn(
+    whenever(translationServiceMock.getAllByLanguageId(any(), anyOrNull())).thenReturn(
       listOf(
         existingTranslation,
         Translation("equal text").also {
@@ -154,7 +162,7 @@ class CoreImportFileProcessorUnitTest {
     fileProcessorContext.addKeyCodeReference("test_key", "hello.php", 10)
     fileProcessorContext.addKeyCodeReference("test_key", "hello2.php", 10)
     fileProcessorContext.addKeyDescription("test_key", "test comment")
-    whenever(translationServiceMock.getAllByLanguageId(any())).thenReturn(listOf())
+    whenever(translationServiceMock.getAllByLanguageId(any(), anyOrNull())).thenReturn(listOf())
 
     processor.processFiles(listOf(importFileDto))
     verify(keyMetaServiceMock).save(

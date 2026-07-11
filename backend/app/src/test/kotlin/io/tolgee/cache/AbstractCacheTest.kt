@@ -27,11 +27,11 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.cache.CacheManager
 import org.springframework.cache.transaction.TransactionAwareCacheManagerProxy
-import java.util.*
+import org.springframework.test.context.bean.override.mockito.MockitoBean
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
+import java.util.Optional
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 abstract class AbstractCacheTest : AbstractSpringTest() {
@@ -39,28 +39,28 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
   // Otherwise, the org creation during initial user creation will cause everything to fail
   @Suppress("LateinitVarOverridesLateinitVar")
   @Autowired
-  @MockBean
+  @MockitoBean
   override lateinit var organizationService: OrganizationService
 
   @Autowired
-  @MockBean
+  @MockitoBean
   lateinit var userAccountRepository: UserAccountRepository
 
   @Suppress("LateinitVarOverridesLateinitVar")
   @Autowired
-  @MockBean
+  @MockitoBean
   override lateinit var projectRepository: ProjectRepository
 
   @Autowired
-  @MockBean
+  @MockitoBean
   lateinit var permissionRepository: PermissionRepository
 
   @Autowired
-  @SpyBean
+  @MockitoSpyBean
   lateinit var googleTranslationProvider: GoogleTranslationProvider
 
   @Autowired
-  @SpyBean
+  @MockitoSpyBean
   lateinit var awsTranslationProvider: AwsMtValueProvider
 
   val unwrappedCacheManager
@@ -70,7 +70,7 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
         this.get(cacheManager) as CacheManager
       }
 
-  private final val paramsEnGoogle by lazy {
+  private val paramsEnGoogle by lazy {
     TranslationParams(
       text = "Hello",
       textRaw = "raw-text",
@@ -78,7 +78,6 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
       sourceLanguageTag = "en",
       targetLanguageTag = "de",
       serviceInfo = MtServiceInfo(MtServiceType.GOOGLE, null),
-      metadata = null,
       isBatch = false,
     )
   }
@@ -124,10 +123,12 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
     whenever(permissionRepository.findOneByProjectIdAndUserIdAndOrganizationId(1, 1))
       .then { Permission.PermissionWithLanguageIdsWrapper(permission, null, null, null) }
     permissionService.find(1, 1)
-    Mockito.verify(permissionRepository, times(1))
+    Mockito
+      .verify(permissionRepository, times(1))
       .findOneByProjectIdAndUserIdAndOrganizationId(1, 1)
     permissionService.find(1, 1)
-    Mockito.verify(permissionRepository, times(1))
+    Mockito
+      .verify(permissionRepository, times(1))
       .findOneByProjectIdAndUserIdAndOrganizationId(1, 1)
   }
 
@@ -140,14 +141,16 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
     ).then { Permission.PermissionWithLanguageIdsWrapper(permission, null, null, null) }
 
     permissionService.find(organizationId = 1)
-    Mockito.verify(permissionRepository, times(1))
+    Mockito
+      .verify(permissionRepository, times(1))
       .findOneByProjectIdAndUserIdAndOrganizationId(
         null,
         null,
         organizationId = 1,
       )
     permissionService.find(organizationId = 1)
-    Mockito.verify(permissionRepository, times(1))
+    Mockito
+      .verify(permissionRepository, times(1))
       .findOneByProjectIdAndUserIdAndOrganizationId(
         null,
         null,

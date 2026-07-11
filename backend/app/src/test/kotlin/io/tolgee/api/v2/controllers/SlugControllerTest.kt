@@ -34,7 +34,7 @@ class SlugControllerTest : AuthorizedControllerTest() {
       Project(
         name = "aaa",
         slug = "hello-1",
-      ).also { it.organizationOwner = dbPopulator.createBase("proj").organization },
+      ).also { it.organizationOwner = dbPopulator.createBase().organization },
     )
     performAuthGet("/v2/slug/validate-project/hello-1").andIsOk.andAssertThatJson {
       isEqualTo(false)
@@ -44,7 +44,8 @@ class SlugControllerTest : AuthorizedControllerTest() {
   @Test
   fun testGenerateOrganizationSlug() {
     performAuthPost("/v2/slug/generate-organization", GenerateSlugDto("Hello world"))
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         isEqualTo("hello-world")
       }
 
@@ -56,7 +57,8 @@ class SlugControllerTest : AuthorizedControllerTest() {
     )
 
     performAuthPost("/v2/slug/generate-organization", GenerateSlugDto("Hello world"))
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         isEqualTo("hello-world1")
       }
   }
@@ -71,7 +73,8 @@ class SlugControllerTest : AuthorizedControllerTest() {
     )
 
     performAuthPost("/v2/slug/generate-organization", GenerateSlugDto("Hello world", "hello-world"))
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         isEqualTo("hello-world")
       }
   }
@@ -82,10 +85,11 @@ class SlugControllerTest : AuthorizedControllerTest() {
       Project(
         name = "aaa",
         slug = "hello-world",
-      ).also { it.organizationOwner = dbPopulator.createBase("proj").organization },
+      ).also { it.organizationOwner = dbPopulator.createBase().organization },
     )
     performAuthPost("/v2/slug/generate-project", GenerateSlugDto("Hello world"))
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         isEqualTo("hello-world1")
       }
   }

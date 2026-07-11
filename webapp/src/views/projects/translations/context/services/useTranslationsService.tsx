@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { InfiniteData } from 'react-query';
 import { useDebouncedCallback } from 'use-debounce';
 import { T } from '@tolgee/react';
-
 import {
   useApiInfiniteQuery,
   useApiMutation,
@@ -17,10 +16,19 @@ import {
   ChangeScreenshotNum,
   KeyUpdateData,
   UpdateTranslation,
+  ValueUpdate,
 } from '../types';
 import { PrefilterType } from '../../prefilters/usePrefilter';
+import { useConfig } from 'tg.globalContext/helpers';
+import { useQaChecksEnabled } from 'tg.ee';
+import { useTranslationFiltersService } from './useTranslationFilterService';
+import {
+  buildSearchRequestParams,
+  getReferencedLanguageTags,
+} from '../../searchQuery/buildSearchRequestParams';
+import { addSearchedIfMissing } from '../../searchQuery/addSearchedIfMissing';
+import { adoptFetchedLanguages } from '../../searchQuery/adoptFetchedLanguages';
 
-const MAX_LANGUAGES = 10;
 const PAGE_SIZE = 60;
 
 type TranslationsQueryType =
@@ -31,19 +39,9 @@ type TranslationsResponse =
   components['schemas']['KeysWithTranslationsPageModel'];
 type TranslationModel = components['schemas']['TranslationViewModel'];
 
-type FiltersType = Pick<
-  TranslationsQueryType,
-  | 'filterHasNoScreenshot'
-  | 'filterHasScreenshot'
-  | 'filterTranslatedAny'
-  | 'filterUntranslatedAny'
-  | 'filterTranslatedInLang'
-  | 'filterUntranslatedInLang'
-  | 'filterNamespace'
->;
-
 type Props = {
   projectId: number;
+  branchName?: string;
   keyName?: string;
   keyNamespace?: string;
   keyId?: number;
@@ -52,6 +50,7 @@ type Props = {
   updateLocalStorageLanguages?: boolean;
   baseLang: string | undefined;
   prefilter?: PrefilterType;
+  allLanguageTags?: string[];
 };
 
 const addBaseIfMissing = (languages: string[] | undefined, base: string) => {
@@ -80,13 +79,12 @@ const flattenKeys = (
   data?.pages.filter(Boolean).flatMap((p) => p._embedded?.keys || []) || [];
 
 export const useTranslationsService = (props: Props) => {
-  const [filters, _setFilters] = useUrlSearchState('filters', {
-    defaultVal: JSON.stringify({}),
+  const config = useConfig();
+  const qaChecksEnabled = useQaChecksEnabled();
+
+  const [order, setOrder] = useUrlSearchState('order', {
+    defaultVal: 'keyName',
   });
-  const parsedFilters = useMemo(
-    () => (filters ? JSON.parse(filters as string) : {}) as FiltersType,
-    [filters]
-  );
 
   const [_, setUrlLanguages] = useUrlSearchState('languages', {});
 
@@ -105,7 +103,6 @@ export const useTranslationsService = (props: Props) => {
 
   const [query, setQuery] = useState<Omit<TranslationsQueryType, 'search'>>({
     size: props.pageSize || PAGE_SIZE,
-    sort: ['keyNamespace', 'keyName'],
     languages: props.initialLangs || [],
   });
 
@@ -127,25 +124,60 @@ export const useTranslationsService = (props: Props) => {
     [props.projectId]
   );
 
+  const {
+    filters,
+    filtersQuery,
+    addFilter,
+    removeFilter,
+    setFilters,
+    updateSelectedLanguages,
+  } = useTranslationFiltersService({
+    selectedLanguages: query.languages,
+    baseLang: props.baseLang,
+  });
+
   const filterNamespace =
     props.keyNamespace !== undefined
       ? [props.keyNamespace]
-      : parsedFilters.filterNamespace;
+      : filtersQuery.filterNamespace;
+
+  const searchParams = useMemo(
+    () =>
+      buildSearchRequestParams(
+        urlSearch as string | undefined,
+        props.allLanguageTags ?? []
+      ),
+    [urlSearch, props.allLanguageTags]
+  );
+
+  const referencedLanguageTags = useMemo(
+    () => getReferencedLanguageTags(searchParams),
+    [searchParams]
+  );
 
   const requestQuery: TranslationsQueryType = {
     ...query,
-    // smuggle in base lang if not present
-    languages: addBaseIfMissing(query.languages, props.baseLang!),
-    ...parsedFilters,
+    languages: addSearchedIfMissing(
+      addBaseIfMissing(query.languages, props.baseLang!),
+      referencedLanguageTags,
+      props.baseLang!
+    ),
+    ...filtersQuery,
     filterKeyName: props.keyName ? [props.keyName] : undefined,
     filterNamespace,
     filterKeyId: props.keyId ? [props.keyId] : undefined,
-    search: urlSearch as string,
+    ...searchParams,
     filterRevisionId:
       props.prefilter?.activity !== undefined
-        ? [props.prefilter?.activity]
+        ? [props.prefilter.activity]
         : undefined,
     filterFailedKeysOfJob: props.prefilter?.failedJob,
+    filterTaskNumber:
+      props.prefilter?.task !== undefined ? [props.prefilter.task] : undefined,
+    filterTaskKeysNotDone: props.prefilter?.taskFilterNotDone || undefined,
+    branch: props.branchName,
+    sort: ['keyNamespace', order, 'keyId'],
+    includeQaIssues: qaChecksEnabled,
   };
 
   const translations = useApiInfiniteQuery({
@@ -154,6 +186,10 @@ export const useTranslationsService = (props: Props) => {
     path,
     query: requestQuery,
     options: {
+      // deep-linked queries like ?search=de:foo parse correctly only once the
+      // project languages are known; without a search term the requests may
+      // run in parallel
+      enabled: !urlSearch || props.allLanguageTags !== undefined,
       cacheTime: 0,
       keepPreviousData: true,
       getNextPageParam: (lastPage) => {
@@ -173,13 +209,18 @@ export const useTranslationsService = (props: Props) => {
       onSuccess(data) {
         const flatKeys = flattenKeys(data);
 
-        const selectedLanguages = languages?.length
-          ? shaveBy(
-              data.pages[0].selectedLanguages.map((l) => l.tag),
-              languages
-            )
-          : data.pages[0].selectedLanguages.map((l) => l.tag);
-        if (query.languages?.toString() !== selectedLanguages?.toString()) {
+        const searchInjectedTags = referencedLanguageTags.filter(
+          (tag) => !query.languages?.includes(tag)
+        );
+        const selectedLanguages = adoptFetchedLanguages({
+          fetchedTags: data.pages[0].selectedLanguages.map((l) => l.tag),
+          currentSelection: languages,
+          searchInjectedTags,
+        });
+        if (
+          selectedLanguages &&
+          query.languages?.toString() !== selectedLanguages.toString()
+        ) {
           // update language selection to the fetched one
           // if there are some languages which are not permitted or were deleted
           _setLanguages(() => selectedLanguages);
@@ -206,6 +247,28 @@ export const useTranslationsService = (props: Props) => {
       },
     },
   });
+
+  const currentFetchedLangs = useMemo(() => {
+    const langs = shaveBy(
+      translations.data?.pages[0]?.selectedLanguages.map((l) => l.tag),
+      languages
+    );
+
+    if (languages) {
+      // sort selected languages
+      langs?.sort((l1, l2) => languages!.indexOf(l1) - languages!.indexOf(l2));
+    }
+    return langs;
+  }, [translations.data]);
+
+  // memoize so we keep the same reference when possible
+  const [selectedLanguages, translationsLanguages] = useMemo(
+    () => [
+      putBaseLangFirst(languages || currentFetchedLangs, props.baseLang),
+      putBaseLangFirst(currentFetchedLangs, props.baseLang),
+    ],
+    [languages, currentFetchedLangs, props.baseLang]
+  );
 
   const allIds = useApiMutation({
     url: '/v2/projects/{projectId}/translations/select-all',
@@ -255,14 +318,20 @@ export const useTranslationsService = (props: Props) => {
   };
 
   const setLanguages = (value: string[] | undefined) => {
-    if (value && value.length > 10) {
+    const limit = config.translationsViewLanguagesLimit;
+    if (limit >= 0 && value && value.length > limit) {
       messaging.error(
         <T
           keyName="translations_languages_limit_reached"
-          params={{ max: MAX_LANGUAGES }}
+          params={{ max: limit }}
         />
       );
-      return;
+      if (value.length - limit > 1) {
+        // handle edge case when limit was lowered and user had more languages selected
+        value = value.slice(0, limit);
+      } else {
+        return;
+      }
     }
     if (props.updateLocalStorageLanguages) {
       projectPreferencesService.setForProject(props.projectId, value);
@@ -274,13 +343,9 @@ export const useTranslationsService = (props: Props) => {
 
   const updateQuery = (q: Partial<typeof query>) => {
     refetchTranslations(() => {
-      setQuery({ ...query, ...q });
-    });
-  };
-
-  const setFilters = (filters: FiltersType) => {
-    refetchTranslations(() => {
-      _setFilters(JSON.stringify(filters));
+      const combined = { ...query, ...q };
+      updateSelectedLanguages(combined.languages);
+      setQuery(combined);
     });
   };
 
@@ -290,7 +355,9 @@ export const useTranslationsService = (props: Props) => {
       data.forEach((mod) => {
         result = result?.map((k) => {
           if (k.keyId === mod.keyId) {
-            return { ...k, ...mod.value };
+            const value =
+              typeof mod.value === 'function' ? mod.value(k) : mod.value;
+            return { ...k, ...value };
           } else {
             return k;
           }
@@ -300,16 +367,28 @@ export const useTranslationsService = (props: Props) => {
     });
   };
 
-  const updateScreenshotCount = (data: ChangeScreenshotNum) =>
+  const updateScreenshots = (data: ChangeScreenshotNum) =>
     updateTranslationKeys([
-      { keyId: data.keyId, value: { screenshotCount: data.screenshotCount } },
+      {
+        keyId: data.keyId,
+        value: (existing) => {
+          const value =
+            typeof data.screenshots === 'function'
+              ? data.screenshots(existing.screenshots || [])
+              : data.screenshots;
+          return {
+            screenshots: value,
+            screenshotCount: value.length,
+          };
+        },
+      },
     ]);
 
   const changeTranslations = (
     data: {
       keyId: number;
       language: string;
-      value: Partial<TranslationModel> | undefined;
+      value: ValueUpdate<Partial<TranslationModel>> | undefined;
     }[]
   ) => {
     setFixedTranslations((fixedTranslations) => {
@@ -317,6 +396,10 @@ export const useTranslationsService = (props: Props) => {
       data.forEach((mod) => {
         result = result?.map((k) => {
           if (k.keyId === mod.keyId) {
+            const value =
+              typeof mod.value === 'function'
+                ? mod.value(k.translations[mod.language])
+                : mod.value;
             return {
               ...k,
               translations: {
@@ -324,7 +407,7 @@ export const useTranslationsService = (props: Props) => {
                 [mod.language]: mod.value
                   ? {
                       ...k.translations[mod.language],
-                      ...mod.value,
+                      ...value,
                     }
                   : (undefined as any),
               },
@@ -337,34 +420,13 @@ export const useTranslationsService = (props: Props) => {
     });
   };
 
-  const updateTranslation = (data: UpdateTranslation) =>
+  const updateTranslation = (data: UpdateTranslation) => {
     changeTranslations([
       { keyId: data.keyId, language: data.lang, value: data.data },
     ]);
+  };
 
   const totalCount = translations.data?.pages[0].page?.totalElements;
-
-  const currentFetchedLangs = useMemo(() => {
-    const langs = shaveBy(
-      translations.data?.pages[0]?.selectedLanguages.map((l) => l.tag),
-      languages
-    );
-
-    if (languages) {
-      // sort selected languages
-      langs?.sort((l1, l2) => languages!.indexOf(l1) - languages!.indexOf(l2));
-    }
-    return langs;
-  }, [translations.data]);
-
-  // memoize so we keep the same reference when possible
-  const [selectedLanguages, translationsLanguages] = useMemo(
-    () => [
-      putBaseLangFirst(languages || currentFetchedLangs, props.baseLang),
-      putBaseLangFirst(currentFetchedLangs, props.baseLang),
-    ],
-    [languages, currentFetchedLangs, props.baseLang]
-  );
 
   return {
     isLoading: translations.isLoading,
@@ -373,11 +435,13 @@ export const useTranslationsService = (props: Props) => {
     isLoadingAllIds: allIds.isLoading,
     hasNextPage: translations.hasNextPage,
     query,
-    filters: parsedFilters,
+    order,
+    filters,
     fetchNextPage: translations.fetchNextPage,
     selectedLanguages,
     translationsLanguages,
     data: translations.data,
+    dataUpdatedAt: translations.dataUpdatedAt,
     fixedTranslations,
     totalCount:
       totalCount !== undefined ? totalCount + manuallyInserted : undefined,
@@ -388,12 +452,15 @@ export const useTranslationsService = (props: Props) => {
     setSearch,
     setLanguages,
     setUrlSearch,
-    setFilters,
+    setOrder,
     updateTranslationKeys,
     updateTranslation,
     insertAsFirst,
     urlSearch: urlSearch as string | undefined,
-    updateScreenshotCount,
+    updateScreenshots,
     getAllIds,
+    addFilter,
+    removeFilter,
+    setFilters,
   };
 };

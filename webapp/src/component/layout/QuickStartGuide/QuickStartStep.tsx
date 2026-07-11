@@ -2,7 +2,7 @@ import clsx from 'clsx';
 import { Box, styled } from '@mui/material';
 import { Link, useRouteMatch } from 'react-router-dom';
 import { ItemType } from './types';
-import { Check } from '@mui/icons-material';
+import { Check } from '@untitled-ui/icons-react';
 import { StyledLink } from './StyledComponents';
 import {
   useGlobalActions,
@@ -52,9 +52,9 @@ type Props = {
 
 export const QuickStartStep = ({ item, index, projectId, done }: Props) => {
   const projectRoute = useRouteMatch(LINKS.PROJECT.template);
-  const { quickStartBegin, setQuickStartOpen } = useGlobalActions();
+  const { quickStartBegin, setQuickStartFloatingOpen } = useGlobalActions();
   const quickStartFloating = useGlobalContext(
-    (c) => c.quickStartGuide.floating
+    (c) => c.layout.quickStartFloating
   );
 
   const isInProject = !isNaN(Number(projectRoute?.params[PARAMS.PROJECT_ID]));
@@ -97,7 +97,7 @@ export const QuickStartStep = ({ item, index, projectId, done }: Props) => {
                         if (action.highlightItems) {
                           quickStartBegin(item.step, action.highlightItems);
                           if (quickStartFloating) {
-                            setQuickStartOpen(false);
+                            setQuickStartFloatingOpen(false);
                           }
                         }
                       }

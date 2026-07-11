@@ -17,7 +17,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpHeaders
 import java.math.BigDecimal
-import java.util.*
+import java.util.Date
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -84,7 +84,7 @@ class PatControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `regenerate works`() {
-    val oldToken = testData.expiredPat.token
+    val oldToken = testData.expiredPat.tokenHash
     val expiresAt = Date().time + 10000
     performAuthPut(
       "/v2/pats/${testData.expiredPat.id}/regenerate",
@@ -96,14 +96,20 @@ class PatControllerTest : AuthorizedControllerTest() {
       node("expiresAt").isEqualTo(expiresAt)
     }
 
-    patService.get(testData.expiredPat.id).token.assert.isNotEqualTo(oldToken)
+    patService
+      .get(testData.expiredPat.id)
+      .tokenHash.assert
+      .isNotEqualTo(oldToken)
   }
 
   @Test
   fun `regenerate works (never expires)`() {
-    val oldToken = testData.expiredPat.token
+    val oldToken = testData.pat.tokenHash
+    testData.pat.expiresAt.assert
+      .isNull()
+
     performAuthPut(
-      "/v2/pats/${testData.expiredPat.id}/regenerate",
+      "/v2/pats/${testData.pat.id}/regenerate",
       mapOf(
         "expiresAt" to null,
       ),
@@ -112,7 +118,10 @@ class PatControllerTest : AuthorizedControllerTest() {
       node("expiresAt").isEqualTo(null)
     }
 
-    patService.get(testData.expiredPat.id).token.assert.isNotEqualTo(oldToken)
+    patService
+      .get(testData.pat.id)
+      .tokenHash.assert
+      .isNotEqualTo(oldToken)
   }
 
   @Test
@@ -126,6 +135,11 @@ class PatControllerTest : AuthorizedControllerTest() {
     ).andIsOk.andAssertThatJson {
       node("description").isString.isEqualTo(description)
     }
+
+    patService
+      .get(testData.expiredPat.id)
+      .description.assert
+      .isEqualTo(description)
   }
 
   @Test

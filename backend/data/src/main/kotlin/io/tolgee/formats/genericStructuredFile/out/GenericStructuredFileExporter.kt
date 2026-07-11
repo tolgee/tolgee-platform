@@ -2,9 +2,13 @@ package io.tolgee.formats.genericStructuredFile.out
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.dtos.IExportParams
+import io.tolgee.exceptions.ExportCollidingKeysException
+import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.ExportMessageFormat
+import io.tolgee.formats.formKeywords
 import io.tolgee.formats.generic.IcuToGenericFormatMessageConvertor
 import io.tolgee.formats.nestedStructureModel.StructureModelBuilder
+import io.tolgee.formats.path.ObjectPathItem
 import io.tolgee.service.export.ExportFilePathProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.export.exporters.FileExporter
@@ -13,27 +17,51 @@ import java.io.InputStream
 class GenericStructuredFileExporter(
   val translations: List<ExportTranslationView>,
   val exportParams: IExportParams,
-  val fileExtension: String,
   private val projectIcuPlaceholdersSupport: Boolean,
   private val objectMapper: ObjectMapper,
   private val rootKeyIsLanguageTag: Boolean = false,
   private val supportArrays: Boolean,
   private val messageFormat: ExportMessageFormat,
+  private val customPrettyPrinter: CustomPrettyPrinter,
+  private val filePathProvider: ExportFilePathProvider,
 ) : FileExporter {
   val result: LinkedHashMap<String, StructureModelBuilder> = LinkedHashMap()
 
   override fun produceFiles(): Map<String, InputStream> {
     prepare()
-    return result.asSequence().map { (fileName, modelBuilder) ->
-      fileName to
-        objectMapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(modelBuilder.result)
-          .inputStream()
-    }.toMap()
+    return result
+      .asSequence()
+      .map { (fileName, modelBuilder) ->
+        fileName to
+          objectMapper
+            .writer(customPrettyPrinter)
+            .writeValueAsBytes(modelBuilder.result)
+            .inputStream()
+      }.toMap()
   }
 
   private fun prepare() {
+    if (pluralsViaSuffixes) {
+      checkPluralSuffixCollisions()
+    }
     translations.forEach { translation ->
       addTranslationToBuilder(translation)
+    }
+  }
+
+  private fun checkPluralSuffixCollisions() {
+    val allKeyNames = translations.map { it.key.name }.toSet()
+    translations.filter { it.key.isPlural }.forEach { translation ->
+      for (suffix in formKeywords) {
+        val suffixedName = "${translation.key.name}_$suffix"
+        if (suffixedName in allKeyNames) {
+          throw ExportCollidingKeysException(
+            pluralKey = translation.key.name,
+            collidingKey = suffixedName,
+            suffix = suffix,
+          )
+        }
+      }
     }
   }
 
@@ -54,8 +82,14 @@ class GenericStructuredFileExporter(
     )
   }
 
+  private val pluralsViaSuffixes
+    get() = messageFormat == ExportMessageFormat.I18NEXT
+
+  private val pluralsViaNestingForApple
+    get() = exportParams.format == ExportFormat.APPLE_SDK
+
   private val pluralsViaNesting
-    get() = messageFormat != ExportMessageFormat.ICU
+    get() = !pluralsViaSuffixes && !pluralsViaNestingForApple && messageFormat != ExportMessageFormat.ICU
 
   private val placeholderConvertorFactory
     get() = messageFormat.paramConvertorFactory
@@ -64,10 +98,43 @@ class GenericStructuredFileExporter(
     if (pluralsViaNesting) {
       return addNestedPlural(translation)
     }
+    if (pluralsViaNestingForApple) {
+      return addNestedPlural(translation, appleStructure = true)
+    }
+    if (pluralsViaSuffixes) {
+      return addSuffixedPlural(translation)
+    }
     return addSingularTranslation(translation)
   }
 
-  private fun addNestedPlural(translation: ExportTranslationView) {
+  private fun addNestedPlural(
+    translation: ExportTranslationView,
+    appleStructure: Boolean = false,
+  ) {
+    val pluralForms =
+      convertMessageForNestedPlural(translation.text) ?: let {
+        // this should never happen, but if it does, it's better to add a null key then crash or ignore it
+        addNullValue(translation)
+        return
+      }
+
+    val nestedInside =
+      if (appleStructure) {
+        listOf(ObjectPathItem("variations", "variations"), ObjectPathItem("plural", "plural"))
+      } else {
+        emptyList()
+      }
+
+    val builder = getFileContentResultBuilder(translation)
+    builder.addValue(
+      translation.languageTag,
+      translation.key.name,
+      pluralForms,
+      nestInside = nestedInside,
+    )
+  }
+
+  private fun addSuffixedPlural(translation: ExportTranslationView) {
     val pluralForms =
       convertMessageForNestedPlural(translation.text) ?: let {
         // this should never happen, but if it does, it's better to add a null key then crash or ignore it
@@ -76,11 +143,13 @@ class GenericStructuredFileExporter(
       }
 
     val builder = getFileContentResultBuilder(translation)
-    builder.addValue(
-      translation.languageTag,
-      translation.key.name,
-      pluralForms,
-    )
+    pluralForms.forEach { (keyword, form) ->
+      builder.addValue(
+        translation.languageTag,
+        "${translation.key.name}_$keyword",
+        form,
+      )
+    }
   }
 
   private fun addNullValue(translation: ExportTranslationView) {
@@ -105,8 +174,8 @@ class GenericStructuredFileExporter(
   ) = IcuToGenericFormatMessageConvertor(
     text,
     isPlural,
-    projectIcuPlaceholdersSupport,
-    placeholderConvertorFactory,
+    isProjectIcuPlaceholdersEnabled = projectIcuPlaceholdersSupport,
+    paramConvertorFactory = placeholderConvertorFactory,
   )
 
   private fun convertMessageForNestedPlural(text: String?): Map<String, String>? {
@@ -124,10 +193,5 @@ class GenericStructuredFileExporter(
     }
   }
 
-  private val pathProvider by lazy {
-    ExportFilePathProvider(
-      exportParams,
-      fileExtension,
-    )
-  }
+  private val pathProvider = filePathProvider
 }

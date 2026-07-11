@@ -5,6 +5,7 @@ import {
 } from '../apiCalls/testData/testData';
 import { visitProjectDashboard } from '../shared';
 import { selectLangsInLocalstorage } from '../translations';
+import { testAi } from './ai';
 import { testBatchOperations } from './batchOperations';
 import { testDashboard } from './dashboard';
 import { testDeveloper } from './developer';
@@ -12,6 +13,7 @@ import { testExport } from './export';
 import { testIntegration } from './integration';
 import { testKeys } from './keys';
 import { testMembers } from './members';
+import { testMyTasks } from './myTasks';
 import {
   getProjectInfo,
   pageAcessibleWithoutErrors,
@@ -55,8 +57,9 @@ export function checkPermissions(projectInfo: ProjectInfo, settings: Settings) {
           testDashboard(projectInfo);
           break;
         case 'project-menu-item-translations':
-          testKeys(projectInfo);
+          testMyTasks(projectInfo);
           testTranslations(projectInfo);
+          testKeys(projectInfo);
           testBatchOperations(projectInfo);
           break;
         case 'project-menu-item-members':
@@ -70,6 +73,9 @@ export function checkPermissions(projectInfo: ProjectInfo, settings: Settings) {
           break;
         case 'project-menu-item-integrate':
           testIntegration(projectInfo);
+          break;
+        case 'project-menu-item-ai':
+          testAi(projectInfo);
           break;
       }
     }
@@ -91,7 +97,7 @@ export function visitProjectWithPermissions(
   return new Cypress.Promise<ProjectInfo>((resolve) => {
     generatePermissionsData
       .clean()
-      .then(() => generatePermissionsData.generate(options))
+      .then(() => generatePermissionsData.generate(options, true))
       .then((res) => {
         return res.body.projects[0].id;
       })

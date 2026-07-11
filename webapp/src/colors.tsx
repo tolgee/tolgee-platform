@@ -103,7 +103,31 @@ export type Placeholders = {
   variable: Placeholder;
   tag: Placeholder;
   variant: Placeholder;
+  entity: Placeholder;
   inactive: Placeholder;
+};
+
+export type Label = {
+  lightSkyBlue: string;
+  skyBlue: string;
+  lightBlue: string;
+  blue: string;
+  lightPurple: string;
+  purple: string;
+  lightPink: string;
+  pink: string;
+  lightRed: string;
+  red: string;
+  lightGrey: string;
+  grey: string;
+  lightTeal: string;
+  teal: string;
+  lightGreen: string;
+  green: string;
+  lightYellow: string;
+  yellow: string;
+  lightOrange: string;
+  orange: string;
 };
 
 export type QuickStart = {
@@ -169,7 +193,7 @@ export const colors = {
     globalLoading: '#c9a2b5',
     marker: {
       primary: '#ff0000',
-      secondary: '#ffc0cb',
+      secondary: '#ffc0cb54',
     },
     tooltip: {
       background: '#ffffff',
@@ -227,6 +251,11 @@ export const colors = {
         border: '#BBC2CB',
         background: '#F0F2F4',
         text: '#4D5B6E',
+      },
+      entity: {
+        border: '#F9C4D6',
+        background: '#FCDEE9',
+        text: '#822343',
       },
       inactive: {
         background: '#e3e7ea',
@@ -294,7 +323,7 @@ export const colors = {
     globalLoading: '#ff6995',
     marker: {
       primary: '#ff0000',
-      secondary: '#ffc0cb',
+      secondary: '#ffc0cb51',
     },
     tooltip: {
       background: '#394556',
@@ -350,6 +379,11 @@ export const colors = {
       variant: {
         border: '#4D5B6E',
         background: '#4D5B6E',
+        text: '#F0F2F4',
+      },
+      entity: {
+        border: '#96506F',
+        background: '#96506F',
         text: '#F0F2F4',
       },
       inactive: {

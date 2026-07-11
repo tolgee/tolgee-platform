@@ -1,15 +1,13 @@
 import { Box, IconButton, styled } from '@mui/material';
 import { T } from '@tolgee/react';
 import { useMemo } from 'react';
-import { RocketIcon } from 'tg.component/CustomIcons';
-import {
-  useGlobalActions,
-  useGlobalContext,
-} from 'tg.globalContext/GlobalContext';
+import { X } from '@untitled-ui/icons-react';
+
+import { useGlobalContext } from 'tg.globalContext/GlobalContext';
+import { RocketFilled } from 'tg.component/CustomIcons';
 import { BottomLinks } from './BottomLinks';
 import { items } from './quickStartConfig';
 import { QuickStartStep } from './QuickStartStep';
-import { KeyboardArrowUp } from '@mui/icons-material';
 import { QuickStartFinishStep } from './QuickStartFinishStep';
 
 const StyledContainer = styled(Box)`
@@ -52,10 +50,13 @@ const StyledArrow = styled(Box)`
   transition: opacity 0.2s ease-in-out;
 `;
 
-export const QuickStartGuide = () => {
+type Props = {
+  onClose: () => void;
+};
+
+export const QuickStartGuide = ({ onClose }: Props) => {
   const projectId = useGlobalContext((c) => c.quickStartGuide.lastProjectId);
   const completed = useGlobalContext((c) => c.quickStartGuide.completed);
-  const { setQuickStartOpen } = useGlobalActions();
   const topBarHeight = useGlobalContext((c) => c.layout.topBarHeight);
   const allCompleted = useMemo(
     () => items.every((i) => completed.includes(i.step)),
@@ -67,11 +68,11 @@ export const QuickStartGuide = () => {
       <StyledArrow sx={{ opacity: topBarHeight ? 1 : 0 }} />
       <StyledHeader>
         <Box display="flex" gap="12px" alignItems="center">
-          <RocketIcon fontSize="small" />
+          <RocketFilled width={20} height={20} />
           <T keyName="guide_title" />
         </Box>
-        <IconButton onClick={() => setQuickStartOpen(false)}>
-          <KeyboardArrowUp />
+        <IconButton onClick={() => onClose()}>
+          <X />
         </IconButton>
       </StyledHeader>
       <Box />

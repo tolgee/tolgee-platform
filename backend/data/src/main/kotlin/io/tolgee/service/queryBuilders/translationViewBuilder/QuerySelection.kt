@@ -11,7 +11,6 @@ class QuerySelection : LinkedHashMap<String, Selection<*>>() {
     field: Pair<LanguageDto, KProperty1<TranslationView, *>>,
     value: Selection<*>,
   ) {
-    this[KeyWithTranslationsView::translations.name + "." + field.first.tag + "." + field.second.name] =
-      value
+    this[KeyWithTranslationsView.translationProperty(field.first.tag, field.second.name)] = value
   }
 }

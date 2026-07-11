@@ -20,7 +20,8 @@ class EntityUtil(
       entityManager
         .metamodel
         .entities
-        .find { it.name == entitySimpleName }?.javaType
+        .find { it.name == entitySimpleName }
+        ?.javaType
     }
   }
 

@@ -1,9 +1,14 @@
 package io.tolgee.batch
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.opentelemetry.api.trace.Span
+import io.opentelemetry.api.trace.StatusCode
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import io.sentry.Sentry
 import io.tolgee.Metrics
 import io.tolgee.activity.ActivityHolder
+import io.tolgee.batch.data.BatchJobDto
+import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.data.ExecutionQueueItem
 import io.tolgee.batch.data.QueueEventType
 import io.tolgee.batch.events.JobQueueItemsEvent
@@ -14,6 +19,8 @@ import io.tolgee.constants.Message
 import io.tolgee.model.batch.BatchJobChunkExecution
 import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.pubSub.RedisPubSubReceiverConfiguration
+import io.tolgee.service.project.ProjectService
+import io.tolgee.tracing.TolgeeTracingContext
 import io.tolgee.util.Logging
 import io.tolgee.util.addSeconds
 import io.tolgee.util.executeInNewTransaction
@@ -21,14 +28,14 @@ import io.tolgee.util.logger
 import jakarta.persistence.EntityManager
 import jakarta.persistence.LockModeType
 import org.hibernate.LockOptions
-import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Lazy
-import org.springframework.context.event.EventListener
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.UnexpectedRollbackException
+import java.util.concurrent.CancellationException
+import kotlin.coroutines.coroutineContext
 
 @Service
 class BatchJobActionService(
@@ -38,87 +45,135 @@ class BatchJobActionService(
   private val usingRedisProvider: UsingRedisProvider,
   @Lazy
   private val progressManager: ProgressManager,
-  @Lazy
-  private val batchJobService: BatchJobService,
   private val batchJobChunkExecutionQueue: BatchJobChunkExecutionQueue,
   @Lazy
   private val redisTemplate: StringRedisTemplate,
-  private val concurrentExecutionLauncher: BatchJobConcurrentLauncher,
   private val savePointManager: SavePointManager,
   private val currentDateProvider: CurrentDateProvider,
   private val activityHolder: ActivityHolder,
   private val metrics: Metrics,
+  private val tracingContext: TolgeeTracingContext,
+  @Lazy
+  private val projectService: ProjectService,
 ) : Logging {
-  companion object {
-    const val MIN_TIME_BETWEEN_OPERATIONS = 100
-  }
+  @WithSpan
+  suspend fun handleItem(
+    executionItem: ExecutionQueueItem,
+    batchJobDto: BatchJobDto,
+  ) {
+    // Set tracing context for this batch job execution.
+    // This adds project/org context to all spans within this coroutine.
+    // Note: We look up organizationId here rather than caching in BatchJobDto to avoid
+    // eager loading the Project->Organization relationship at DTO creation time.
+    val organizationId =
+      batchJobDto.projectId?.let {
+        projectService.findDto(it)?.organizationOwnerId
+      }
+    tracingContext.setContext(batchJobDto.projectId, organizationId)
 
-  @EventListener(ApplicationReadyEvent::class)
-  fun run() {
-    concurrentExecutionLauncher.run { executionItem, coroutineContext ->
-      var retryExecution: BatchJobChunkExecution? = null
-      try {
-        val execution =
-          catchingExceptions(executionItem) {
-            executeInNewTransaction(transactionManager) { transactionStatus ->
+    // Add batch job specific attributes to the current span
+    // Note: project/org context is already set via tracingContext.setContext() above
+    val span = Span.current()
+    span.setAttribute("batch.job.id", batchJobDto.id)
+    span.setAttribute("batch.job.type", batchJobDto.type.name)
+    span.setAttribute("batch.chunk.execution.id", executionItem.chunkExecutionId)
 
-              val lockedExecution =
-                getPendingUnlockedExecutionItem(executionItem)
-                  ?: return@executeInNewTransaction null
+    val coroutineContext = coroutineContext
+    var retryExecution: BatchJobChunkExecution? = null
+    try {
+      val execution =
+        catchingExceptions(executionItem) {
+          executeInNewTransaction(transactionManager) { transactionStatus ->
 
-              publishRemoveConsuming(executionItem)
+            val lockedExecution =
+              getPendingUnlockedExecutionItem(executionItem)
+                ?: return@executeInNewTransaction null
 
-              progressManager.handleJobRunning(lockedExecution.batchJob.id)
-              val batchJobDto = batchJobService.getJobDto(lockedExecution.batchJob.id)
+            publishRemoveConsuming(executionItem)
 
-              logger.debug("Job ${batchJobDto.id}: 🟡 Processing chunk ${lockedExecution.id}")
-              val savepoint = savePointManager.setSavepoint()
-              val util = ChunkProcessingUtil(lockedExecution, applicationContext, coroutineContext)
-              util.processChunk()
+            progressManager.handleJobRunning(batchJobDto)
 
-              if (transactionStatus.isRollbackOnly) {
-                logger.debug("Job ${batchJobDto.id}: 🛑 Rollbacking chunk ${lockedExecution.id}")
-                savePointManager.rollbackSavepoint(savepoint)
-                // we have rolled back the transaction, so no targets were actually successfull
-                lockedExecution.successTargets = listOf()
-                entityManager.clear()
-                rollbackActivity()
-              }
+            logger.debug("Job ${batchJobDto.id}: 🟡 Processing chunk ${lockedExecution.id}")
+            val savepoint = savePointManager.setSavepoint()
+            val util = ChunkProcessingUtil(lockedExecution, applicationContext, coroutineContext, batchJobDto)
+            util.processChunk()
 
-              progressManager.handleProgress(lockedExecution)
-              entityManager.persist(entityManager.merge(lockedExecution))
-
-              if (lockedExecution.retry) {
-                retryExecution = util.retryExecution
-                entityManager.persist(util.retryExecution)
-                entityManager.flush()
-              }
-
-              logger.debug("Job ${batchJobDto.id}: ✅ Processed chunk ${lockedExecution.id}")
-              return@executeInNewTransaction lockedExecution
+            if (transactionStatus.isRollbackOnly) {
+              logger.debug("Job ${batchJobDto.id}: 🛑 Rollbacking chunk ${lockedExecution.id}")
+              savePointManager.rollbackSavepoint(savepoint)
+              // we have rolled back the transaction, so no targets were actually successfull
+              lockedExecution.successTargets = listOf()
+              entityManager.clear()
+              rollbackActivity()
             }
-          }
-        execution?.let {
-          logger.debug("Job: ${it.batchJob.id} - Handling execution committed ${it.id} (standard flow)")
-          progressManager.handleChunkCompletedCommitted(it)
-        }
-        addRetryExecutionToQueue(retryExecution, jobCharacter = executionItem.jobCharacter)
-      } catch (e: Throwable) {
-        progressManager.rollbackSetToRunning(executionItem.chunkExecutionId, executionItem.jobId)
-        when (e) {
-          is UnexpectedRollbackException -> {
-            logger.debug(
-              "Job ${executionItem.jobId}: ⚠️ Chunk ${executionItem.chunkExecutionId}" +
-                " thrown UnexpectedRollbackException",
-            )
-          }
 
-          else -> {
-            logger.error("Job ${executionItem.jobId}: ⚠️ Chunk ${executionItem.chunkExecutionId} thrown error", e)
-            Sentry.captureException(e)
+            progressManager.handleProgress(lockedExecution, batchJobDto)
+            entityManager.persist(entityManager.merge(lockedExecution))
+
+            if (lockedExecution.retry) {
+              retryExecution = util.retryExecution
+              entityManager.persist(util.retryExecution)
+              entityManager.flush()
+            }
+
+            logger.debug("Job ${batchJobDto.id}: ✅ Processed chunk ${lockedExecution.id}")
+            return@executeInNewTransaction lockedExecution
           }
+        }
+      execution?.let {
+        logger.debug("Job: ${it.batchJob.id} - Handling execution committed ${it.id} (standard flow)")
+        progressManager.handleChunkCompletedCommitted(it, batchJobDto = batchJobDto)
+      }
+      addRetryExecutionToQueue(retryExecution, jobCharacter = executionItem.jobCharacter, jobType = batchJobDto.type)
+    } catch (e: Throwable) {
+      when (e) {
+        is CancellationException -> {
+          // Coroutine was cancelled - don't record as span error (expected control flow)
+          logger.debug(
+            "Job ${executionItem.jobId}: ⚠️ Chunk ${executionItem.chunkExecutionId} was cancelled",
+          )
+          handleCancelledExecution(executionItem)
+        }
+
+        is UnexpectedRollbackException -> {
+          recordSpanError(span, e)
+          logger.debug(
+            "Job ${executionItem.jobId}: ⚠️ Chunk ${executionItem.chunkExecutionId}" +
+              " thrown UnexpectedRollbackException",
+          )
+        }
+
+        else -> {
+          recordSpanError(span, e)
+          logger.error("Job ${executionItem.jobId}: ⚠️ Chunk ${executionItem.chunkExecutionId} thrown error", e)
+          Sentry.captureException(e)
         }
       }
+    }
+  }
+
+  private fun handleCancelledExecution(executionItem: ExecutionQueueItem) {
+    try {
+      val execution =
+        executeInNewTransaction(transactionManager) {
+          val exec = entityManager.find(BatchJobChunkExecution::class.java, executionItem.chunkExecutionId)
+          if (exec != null && !exec.status.completed) {
+            exec.status = BatchJobChunkExecutionStatus.CANCELLED
+            entityManager.persist(exec)
+            progressManager.handleProgress(exec)
+          }
+          exec
+        }
+      execution?.let {
+        // Always call handleChunkCompletedCommitted — if the coroutine was cancelled after the
+        // chunk's transaction committed but before handleChunkCompletedCommitted ran in the normal
+        // flow, the committed count would be permanently stuck and the job cache, project lock,
+        // and Redis state would never be cleaned up. The idempotency guard inside
+        // handleChunkCompletedCommitted prevents double-counting when it was already called.
+        progressManager.handleChunkCompletedCommitted(it)
+      }
+    } catch (e: Exception) {
+      logger.warn("Failed to handle cancelled execution ${executionItem.chunkExecutionId}", e)
     }
   }
 
@@ -127,10 +182,19 @@ class BatchJobActionService(
     activityHolder.activityRevision.describingRelations.clear()
   }
 
+  private fun recordSpanError(
+    span: Span,
+    e: Throwable,
+  ) {
+    span.recordException(e)
+    span.setStatus(StatusCode.ERROR)
+  }
+
   private fun getPendingUnlockedExecutionItem(executionItem: ExecutionQueueItem): BatchJobChunkExecution? {
     val lockedExecution = getExecutionIfCanAcquireLockInDb(executionItem.chunkExecutionId)
 
     if (lockedExecution == null) {
+      metrics.batchJobManagementItemAlreadyLockedCounter.increment()
       logger.debug("⚠️ Chunk ${executionItem.chunkExecutionId} (job: ${executionItem.jobId}) is locked, skipping")
       progressManager.finalizeIfCompleted(executionItem.jobId)
       return null
@@ -147,9 +211,10 @@ class BatchJobActionService(
   private fun addRetryExecutionToQueue(
     retryExecution: BatchJobChunkExecution?,
     jobCharacter: JobCharacter,
+    jobType: BatchJobType,
   ) {
     retryExecution?.let {
-      batchJobChunkExecutionQueue.addToQueue(it, jobCharacter)
+      batchJobChunkExecutionQueue.addToQueue(it, jobCharacter, jobType)
       logger.debug("Job ${it.batchJob.id}: Added chunk ${it.id} for re-trial")
     }
   }
@@ -192,7 +257,7 @@ class BatchJobActionService(
         execution
       }
     executeInNewTransaction(transactionManager) {
-      progressManager.handleProgress(execution, failOnly = true)
+      progressManager.handleProgress(execution)
     }
     progressManager.handleChunkCompletedCommitted(execution)
   }
@@ -206,27 +271,22 @@ class BatchJobActionService(
     }
   }
 
+  @WithSpan
   private fun getExecutionIfCanAcquireLockInDb(id: Long): BatchJobChunkExecution? {
     entityManager.createNativeQuery("""SET enable_seqscan=off""")
-    return entityManager.createQuery(
-      """
-      from BatchJobChunkExecution bjce
-      where bjce.id = :id
-      """.trimIndent(),
-      BatchJobChunkExecution::class.java,
-    )
-      .setParameter("id", id)
+    return entityManager
+      .createQuery(
+        """
+        from BatchJobChunkExecution bjce
+        where bjce.id = :id
+        """.trimIndent(),
+        BatchJobChunkExecution::class.java,
+      ).setParameter("id", id)
       .setLockMode(LockModeType.PESSIMISTIC_WRITE)
       .setHint(
         "jakarta.persistence.lock.timeout",
         LockOptions.SKIP_LOCKED,
-      ).resultList.singleOrNull()
-  }
-
-  fun cancelLocalJob(jobId: Long) {
-    batchJobChunkExecutionQueue.removeJobExecutions(jobId)
-    concurrentExecutionLauncher.runningJobs.filter { it.value.first.id == jobId }.forEach {
-      it.value.second.cancel()
-    }
+      ).resultList
+      .singleOrNull()
   }
 }

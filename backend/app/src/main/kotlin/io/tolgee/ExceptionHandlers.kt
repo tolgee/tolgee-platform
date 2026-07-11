@@ -12,14 +12,16 @@ import io.tolgee.exceptions.ErrorException
 import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.exceptions.ErrorResponseTyped
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.security.ratelimit.RateLimitBlockedException
 import io.tolgee.security.ratelimit.RateLimitResponseBody
 import io.tolgee.security.ratelimit.RateLimitedException
+import io.tolgee.util.Logging
+import io.tolgee.util.logger
 import jakarta.persistence.EntityNotFoundException
 import jakarta.servlet.http.HttpServletRequest
 import org.apache.catalina.connector.ClientAbortException
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.hibernate.QueryException
-import org.slf4j.LoggerFactory
 import org.springframework.dao.InvalidDataAccessApiUsageException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -28,6 +30,7 @@ import org.springframework.transaction.TransactionSystemException
 import org.springframework.validation.BindException
 import org.springframework.validation.FieldError
 import org.springframework.validation.ObjectError
+import org.springframework.web.HttpMediaTypeNotSupportedException
 import org.springframework.web.HttpRequestMethodNotSupportedException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.MissingServletRequestParameterException
@@ -36,14 +39,15 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 import org.springframework.web.multipart.MaxUploadSizeExceededException
 import org.springframework.web.multipart.support.MissingServletRequestPartException
+import org.springframework.web.servlet.resource.NoResourceFoundException
+import java.io.IOException
 import java.io.Serializable
-import java.util.*
+import java.util.Arrays
+import java.util.Collections
 import java.util.function.Consumer
 
 @RestControllerAdvice
-class ExceptionHandlers {
-  private val logger = LoggerFactory.getLogger(this::class.java)
-
+class ExceptionHandlers : Logging {
   @ExceptionHandler(MethodArgumentNotValidException::class)
   fun handleValidationExceptions(
     ex: MethodArgumentNotValidException,
@@ -52,7 +56,7 @@ class ExceptionHandlers {
     ex.bindingResult.allErrors.forEach(
       Consumer { error: ObjectError ->
         val fieldName = (error as FieldError).field
-        val errorMessage = error.getDefaultMessage()
+        val errorMessage = error.defaultMessage
         errors[fieldName] = errorMessage ?: ""
       },
     )
@@ -90,7 +94,7 @@ class ExceptionHandlers {
 
     ex.bindingResult.allErrors.forEach { error: ObjectError ->
       val fieldName = (error as FieldError).field
-      val errorMessage = error.getDefaultMessage()
+      val errorMessage = error.defaultMessage
       errors[fieldName] = errorMessage ?: ""
     }
 
@@ -163,6 +167,7 @@ class ExceptionHandlers {
   )
   @ExceptionHandler(ErrorException::class)
   fun handleServerError(ex: ErrorException): ResponseEntity<ErrorResponseBody> {
+    logger.debug("Exception with response status {} caught", ex.httpStatus, ex)
     return ResponseEntity(ex.errorResponseBody, ex.httpStatus)
   }
 
@@ -191,6 +196,14 @@ class ExceptionHandlers {
     return ResponseEntity(ErrorResponseBody(ex.msg.code, null), HttpStatus.NOT_FOUND)
   }
 
+  @ExceptionHandler(HttpMediaTypeNotSupportedException::class)
+  fun handleMediaTypeNotSupported(ex: HttpMediaTypeNotSupportedException): ResponseEntity<ErrorResponseBody> {
+    return ResponseEntity(
+      ErrorResponseBody(Message.UNSUPPORTED_MEDIA_TYPE.code, listOf(ex.contentType?.toString())),
+      HttpStatus.UNSUPPORTED_MEDIA_TYPE,
+    )
+  }
+
   @ExceptionHandler(MaxUploadSizeExceededException::class)
   fun handleFileSizeLimitExceeded(ex: MaxUploadSizeExceededException): ResponseEntity<ErrorResponseBody> {
     return ResponseEntity(
@@ -210,6 +223,7 @@ class ExceptionHandlers {
 
   @ExceptionHandler(HttpRequestMethodNotSupportedException::class)
   fun handleFileSizeLimitExceeded(ex: HttpRequestMethodNotSupportedException): ResponseEntity<Void> {
+    logger.debug(ex.message, ex)
     return ResponseEntity(HttpStatus.METHOD_NOT_ALLOWED)
   }
 
@@ -236,14 +250,44 @@ class ExceptionHandlers {
 
   @ExceptionHandler(RateLimitedException::class)
   fun handleRateLimited(ex: RateLimitedException): ResponseEntity<RateLimitResponseBody> {
+    logger.debug("Rate limited", ex)
     return ResponseEntity(
       RateLimitResponseBody(Message.RATE_LIMITED, ex.retryAfter, ex.global),
       HttpStatus.TOO_MANY_REQUESTS,
     )
   }
 
+  @ExceptionHandler(RateLimitBlockedException::class)
+  fun handleRateLimitBlocked(ex: RateLimitBlockedException): ResponseEntity<Unit> {
+    logger.debug("Rate limit blocked (strike {})", ex.strikeCount)
+    return ResponseEntity.status(444).build()
+  }
+
+  @ExceptionHandler(NoResourceFoundException::class)
+  fun handleNoResourceFound(ex: NoResourceFoundException): ResponseEntity<ErrorResponseBody> {
+    logger.debug("No resource found", ex)
+    return ResponseEntity(
+      ErrorResponseBody(Message.RESOURCE_NOT_FOUND.code, listOf(ex.resourcePath)),
+      HttpStatus.NOT_FOUND,
+    )
+  }
+
+  fun handleBrokenPipe(ex: Throwable): ResponseEntity<ErrorResponseBody> {
+    logger.debug("Client aborted: ${ex.javaClass.simpleName}}: ${ex.message}")
+    return ResponseEntity(HttpStatus.BAD_GATEWAY)
+  }
+
   @ExceptionHandler(Throwable::class)
   fun handleOtherExceptions(ex: Throwable): ResponseEntity<ErrorResponseBody> {
+    if (ex is IOException && ex.message?.contains("Broken pipe") == true) {
+      return handleBrokenPipe(ex)
+    }
+
+    val rootCause = ExceptionUtils.getRootCause(ex)
+    if (rootCause is IOException && rootCause.message?.contains("Broken pipe") == true) {
+      return handleBrokenPipe(ex)
+    }
+
     Sentry.captureException(ex)
     logger.error(ex.stackTraceToString())
     return ResponseEntity(

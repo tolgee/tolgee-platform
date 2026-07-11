@@ -7,13 +7,8 @@ object LanguageTagConvertor {
     suitableTags: Array<String>,
     desiredTag: String,
   ): String? {
-    // in Tolgee platform Traditional Chinese is zh-Hant, but AWS translate has is as zh-TW
-    if (desiredTag === "zh-Hant" && suitableTags.contains("zh-TW")) {
-      return "zh-TW"
-    }
-
     return findSuitableTag(desiredTag) { newTag ->
-      suitableTags.contains(newTag)
+      suitableTags.any { it.equals(newTag, ignoreCase = true) }
     }
   }
 

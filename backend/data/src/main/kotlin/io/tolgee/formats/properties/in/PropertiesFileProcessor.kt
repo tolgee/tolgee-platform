@@ -6,7 +6,6 @@ import io.tolgee.formats.MessageConvertorResult
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 import org.apache.commons.configuration2.PropertiesConfiguration
 import org.apache.commons.configuration2.io.FileHandler
-import java.util.*
 
 class PropertiesFileProcessor(
   override val context: FileProcessorContext,
@@ -42,7 +41,9 @@ class PropertiesFileProcessor(
   }
 
   private val keyValueMap by lazy {
-    preparedConfig.keys.asSequence().map { key -> key to preparedConfig.getString(key) }
+    preparedConfig.keys
+      .asSequence()
+      .map { key -> key to preparedConfig.getString(key) }
       .toMap(LinkedHashMap())
   }
 

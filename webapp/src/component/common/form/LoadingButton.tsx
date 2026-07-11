@@ -1,16 +1,20 @@
-import { ComponentProps, FunctionComponent } from 'react';
+import { ComponentProps } from 'react';
 import { Box, Button } from '@mui/material';
 import { SpinnerProgress } from 'tg.component/SpinnerProgress';
+import React from 'react';
 
-const LoadingButton: FunctionComponent<
-  ComponentProps<typeof Button> & { loading?: boolean }
-> = (props) => {
+type Props = ComponentProps<typeof Button> & { loading?: boolean };
+
+const LoadingButton = React.forwardRef(function LoadingButton(
+  props: Props,
+  ref
+) {
   const { disabled, children, loading, ...otherProps } = props;
 
   const isDisabled = loading || disabled;
 
   return (
-    <Button disabled={isDisabled} {...otherProps}>
+    <Button disabled={isDisabled} ref={ref as any} {...otherProps}>
       {loading && (
         <Box
           display="flex"
@@ -29,6 +33,6 @@ const LoadingButton: FunctionComponent<
       {children}
     </Button>
   );
-};
+});
 
 export default LoadingButton;

@@ -9,6 +9,8 @@ import org.springframework.hateoas.server.core.Relation
 @Suppress("unused")
 @Relation(collectionRelation = "keys", itemRelation = "key")
 open class KeyWithTranslationsModel(
+  @Schema(description = "The time when the key was created")
+  val createdAt: Long,
   @Schema(description = "Id of key record")
   val keyId: Long,
   @Schema(description = "Name of key", example = "this_is_super_key")
@@ -17,12 +19,16 @@ open class KeyWithTranslationsModel(
   val keyIsPlural: Boolean,
   @Schema(description = "The placeholder name for plural parameter", example = "value")
   val keyPluralArgName: String?,
+  @Schema(description = "Branch of key", example = "feature-branch")
+  val branch: String?,
   @Schema(description = "The namespace id of the key", example = "100000282")
   val keyNamespaceId: Long?,
   @Schema(description = "The namespace of the key", example = "homepage")
   val keyNamespace: String?,
   @Schema(description = "The namespace of the key", example = "homepage")
   val keyDescription: String?,
+  @Schema(description = "Maximum character limit for translations of this key")
+  val keyMaxCharLimit: Int?,
   @Schema(description = "Tags of key")
   val keyTags: List<TagModel>,
   @Schema(description = "Count of screenshots provided for the key", example = "1")
@@ -45,4 +51,6 @@ open class KeyWithTranslationsModel(
     """,
   )
   val translations: Map<String, TranslationViewModel>,
+  @Schema(description = "Tasks related to this key")
+  val tasks: List<KeyTaskViewModel>?,
 ) : RepresentationModel<KeyWithTranslationsModel>()

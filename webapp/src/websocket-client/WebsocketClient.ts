@@ -1,11 +1,10 @@
-import { CompatClient, Stomp } from '@stomp/stompjs';
-// @ts-ignore
+import { CompatClient, Stomp } from '@stomp/stompjs'; // @ts-ignore
 import SockJS from 'sockjs-client/dist/sockjs';
 import { components } from 'tg.service/apiSchema.generated';
 
 type BatchJobModelStatus = components['schemas']['BatchJobModel']['status'];
 
-type TranslationsClientOptions = {
+type WebsocketClientOptions = {
   serverUrl?: string;
   authentication: {
     jwtToken: string;
@@ -28,30 +27,39 @@ type Subscription<T extends string> = {
   unsubscribe?: () => void;
 };
 
-export const WebsocketClient = (options: TranslationsClientOptions) => {
+export const WebsocketClient = (options: WebsocketClientOptions) => {
   options.serverUrl = options.serverUrl || window.origin;
 
-  let _client: CompatClient | undefined;
+  let client: CompatClient | undefined;
+  let deactivated = false;
   let connected = false;
-  const subscriptions: Subscription<any>[] = [];
+  let connecting = false;
+  let subscriptions: Subscription<any>[] = [];
 
   const resubscribe = () => {
-    subscriptions.forEach(() => {
-      if (_client) {
-        subscriptions.forEach((subscription) => {
-          subscribeToStompChannel(subscription);
-        });
-      }
-    });
+    if (deactivated) {
+      return;
+    }
+
+    if (client) {
+      subscriptions.forEach((subscription) => {
+        subscribeToStompChannel(subscription);
+      });
+    }
   };
 
-  const subscribeToStompChannel = (subscription) => {
-    if (connected) {
-      const stompSubscription = _client!.subscribe(
+  const subscribeToStompChannel = (subscription: Subscription<any>) => {
+    if (connected && client) {
+      const stompSubscription = client.subscribe(
         subscription.channel,
         function (message) {
-          const parsed = JSON.parse(message.body) as Message;
-          subscription.callback(parsed as any);
+          try {
+            const parsed = JSON.parse(message.body) as Message;
+            subscription.callback(parsed);
+          } catch (e: any) {
+            // eslint-disable-next-line no-console
+            console.error(`WebSocket: error parsing message: ${e.message}`);
+          }
         }
       );
       subscription.unsubscribe = stompSubscription.unsubscribe;
@@ -60,49 +68,54 @@ export const WebsocketClient = (options: TranslationsClientOptions) => {
   };
 
   function initClient() {
-    _client = Stomp.over(() => new SockJS(`${options.serverUrl}/websocket`));
-    _client.configure({
+    client = Stomp.over(() => new SockJS(`${options.serverUrl}/websocket`));
+    client.configure({
       reconnectDelay: 3000,
-      debug: (msg) => {},
+      debug: () => {},
     });
   }
 
   function connectIfNotAlready() {
-    const client = getClient();
+    if (deactivated || connected || connecting) {
+      return;
+    }
+
+    connecting = true;
+
+    const stompClient = getClient();
 
     const onConnected = function () {
       connected = true;
+      connecting = false;
       resubscribe();
       options.onConnected?.();
     };
 
     const onDisconnect = function () {
       connected = false;
-      subscriptions.forEach((s) => {
-        s.unsubscribe = undefined;
-        s.id = undefined;
-      });
+      connecting = false;
       options.onConnectionClose?.();
     };
 
     const onError = () => {
+      connecting = false;
       options.onError?.();
     };
 
-    client.connect(
-      { ...options.authentication },
-      onConnected,
-      onError,
-      onDisconnect
-    );
+    const headers: Record<string, string> | null = {
+      jwtToken: options.authentication.jwtToken,
+      Authorization: `Bearer ${options.authentication.jwtToken}`,
+    };
+
+    stompClient.connect(headers, onConnected, onError, onDisconnect);
   }
 
   const getClient = () => {
-    if (_client !== undefined) {
-      return _client;
+    if (client !== undefined) {
+      return client;
     }
     initClient();
-    return _client!;
+    return client!;
   };
 
   /**
@@ -111,10 +124,14 @@ export const WebsocketClient = (options: TranslationsClientOptions) => {
    * @param callback Callback function to be executed when event is triggered
    * @return Function Function unsubscribing the event listening
    */
-  function subscribe<T extends Channel>(
+  function subscribe<T extends ChannelProject | ChannelUser>(
     channel: T,
     callback: (data: Data<T>) => void
   ): () => void {
+    if (deactivated) {
+      return () => {};
+    }
+
     connectIfNotAlready();
     const subscription: Subscription<any> = { channel, callback };
     subscriptions.push(subscription);
@@ -122,20 +139,36 @@ export const WebsocketClient = (options: TranslationsClientOptions) => {
 
     return () => {
       subscription.unsubscribe?.();
+      removeSubscription(subscription);
     };
   }
 
   function disconnect() {
-    if (_client) {
-      _client.disconnect();
+    if (client) {
+      client.disconnect();
     }
   }
 
-  return Object.freeze({ subscribe, disconnect });
+  function deactivate() {
+    deactivated = true;
+    disconnect();
+  }
+
+  function removeSubscription(subscription: Subscription<any>) {
+    subscriptions = subscriptions.filter((it) => it !== subscription);
+  }
+
+  return Object.freeze({ subscribe, deactivate });
 };
 
-export type EventType = 'translation-data-modified' | 'batch-job-progress';
-export type Channel = `/projects/${number}/${EventType}`;
+export type EventTypeProject =
+  | 'translation-data-modified'
+  | 'batch-job-progress'
+  | 'qa-issues-updated';
+export type ChannelProject = `/projects/${number}/${EventTypeProject}`;
+
+export type EventTypeUser = 'notifications-changed';
+export type ChannelUser = `/users/${number}/${EventTypeUser}`;
 
 export type TranslationsModifiedData = WebsocketEvent<{
   translations: EntityModification<'translation'>[] | null;
@@ -149,6 +182,21 @@ export type BatchJobProgress = WebsocketEvent<{
   total: number;
   errorMessage: string | undefined;
 }>;
+
+export type NotificationsChanged = WebsocketEvent<{
+  currentlyUnseenCount: number;
+  newNotification?: components['schemas']['NotificationModel'];
+}>;
+
+export type QaIssueUpdate = {
+  translationId: number;
+  keyId: number;
+  languageTag: string;
+  qaIssueCount: number;
+  qaChecksStale: boolean;
+  qaIssues: components['schemas']['QaIssueModel'][];
+};
+export type QaIssuesUpdatedData = WebsocketEvent<QaIssueUpdate[]>;
 
 export type EntityModification<T> = T extends keyof schemas
   ? {
@@ -213,4 +261,8 @@ export type Data<T> = T extends `/projects/${number}/translation-data-modified`
   ? TranslationsModifiedData
   : T extends `/projects/${number}/batch-job-progress`
   ? BatchJobProgress
+  : T extends `/projects/${number}/qa-issues-updated`
+  ? QaIssuesUpdatedData
+  : T extends `/users/${number}/notifications-changed`
+  ? NotificationsChanged
   : never;

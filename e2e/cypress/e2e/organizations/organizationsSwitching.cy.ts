@@ -63,7 +63,7 @@ describe('Organization switching', () => {
   it('switches organization correctly from user menu', () => {
     gcy('global-user-menu-button').click();
     gcy('user-menu-organization-switch').click();
-    gcy('organization-switch-item').contains('Microsoft').click();
+    gcy('switch-popover-item').contains('Microsoft').click();
     assertOrganizationIsPreferred('Microsoft');
   });
 

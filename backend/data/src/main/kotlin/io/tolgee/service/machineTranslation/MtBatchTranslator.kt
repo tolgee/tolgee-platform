@@ -14,7 +14,6 @@ class MtBatchTranslator(
   fun translate(batch: List<MtBatchItemParams>): List<MtTranslatorResult> {
     val result = mutableListOf<MtTranslatorResult>()
     context.prepareKeys(batch)
-    context.prepareMetadata(batch)
 
     batch.forEach { item ->
       result.add(translateItem(item))
@@ -134,6 +133,7 @@ class MtBatchTranslator(
       actualPrice = actualPrice,
       contextDescription = contextDescription,
       service = item.service,
+      promptId = item.promptId,
       targetLanguageId = item.targetLanguageId,
       baseBlank = baseBlank,
       exception = exception,
@@ -146,6 +146,7 @@ class MtBatchTranslator(
       actualPrice = 0,
       contextDescription = null,
       service = item.service,
+      promptId = item.promptId,
       targetLanguageId = item.targetLanguageId,
       baseBlank = true,
       exception = null,
@@ -165,6 +166,19 @@ class MtBatchTranslator(
     val pluralFormsWithReplacedParam =
       if (isPlural) context.getPluralFormsReplacingReplaceParam(baseTranslationText) else null
 
+    val provider = context.applicationContext.getBean(item.service.providerClass)
+    val metadata =
+      provider.getMetadata(
+        context.project.organizationOwnerId,
+        context.project.id,
+        item.keyId,
+        item.targetLanguageId,
+        item.promptId,
+      )
+
+    val providerContext =
+      if (provider.supportsContext) buildContext(item, baseTranslationText) else null
+
     return TranslationParams(
       text = withReplacedParams,
       textRaw = baseTranslationText,
@@ -172,7 +186,8 @@ class MtBatchTranslator(
       sourceLanguageTag = context.baseLanguage.tag,
       targetLanguageTag = targetLanguageTag,
       serviceInfo = context.getServiceInfo(item.targetLanguageId, item.service),
-      metadata = context.getMetadata(item),
+      metadata = metadata,
+      context = providerContext,
       isBatch = context.isBatch,
       pluralForms = pluralForms?.forms,
       pluralFormExamples =
@@ -183,6 +198,19 @@ class MtBatchTranslator(
             it,
           )
         },
+    )
+  }
+
+  private fun buildContext(
+    item: MtBatchItemParams,
+    baseTranslationText: String,
+  ): String? {
+    val keyId = item.keyId ?: return null
+    return MetadataProvider(context).getContext(
+      context.baseLanguage,
+      context.getLanguage(item.targetLanguageId),
+      MetadataKey(keyId, baseTranslationText, item.targetLanguageId),
+      context.keys[keyId]?.description,
     )
   }
 

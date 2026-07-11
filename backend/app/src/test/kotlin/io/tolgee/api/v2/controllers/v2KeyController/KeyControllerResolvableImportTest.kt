@@ -8,10 +8,11 @@ import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.generateImage
 import io.tolgee.fixtures.node
+import io.tolgee.model.key.screenshotReference.KeyInScreenshotPosition
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
-import io.tolgee.util.generateImage
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Value
@@ -19,6 +20,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.core.io.Resource
 import kotlin.properties.Delegates
+import kotlin.time.measureTime
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -37,17 +39,19 @@ class KeyControllerResolvableImportTest : ProjectAuthControllerTest("/v2/project
     projectSupplier = { testData.projectBuilder.self }
     userAccount = testData.user
     uploadedImageId =
-      imageUploadService.store(
-        generateImage(),
-        userAccount!!,
-        ImageUploadInfoDto(location = "My cool frame"),
-      ).id
+      imageUploadService
+        .store(
+          generateImage(),
+          userAccount!!,
+          ImageUploadInfoDto(location = "My cool frame"),
+        ).id
     uploadedImageId2 =
-      imageUploadService.store(
-        generateImage(),
-        testData.viewOnlyUser,
-        ImageUploadInfoDto(location = "My cool frame"),
-      ).id
+      imageUploadService
+        .store(
+          generateImage(),
+          testData.viewOnlyUser,
+          ImageUploadInfoDto(location = "My cool frame"),
+        ).id
   }
 
   @Test
@@ -145,6 +149,285 @@ class KeyControllerResolvableImportTest : ProjectAuthControllerTest("/v2/project
       assertTranslationText("namespace-1", "key-1", "en", "new")
       assertTranslationText("namespace-1", "key-2", "en", "existing translation")
     }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `merges positions of duplicate screenshot references for the same key`() {
+    val imageId = storeUnscaledImage()
+    performProjectAuthPost(
+      "keys/import-resolvable",
+      mapOf(
+        "keys" to
+          listOf(
+            mapOf(
+              "name" to "merge-key",
+              "namespace" to "namespace-1",
+              "screenshots" to
+                listOf(
+                  mapOf(
+                    "text" to "First text",
+                    "uploadedImageId" to imageId,
+                    "positions" to
+                      listOf(
+                        mapOf("x" to 100, "y" to 150, "width" to 80, "height" to 100),
+                        mapOf("x" to 500, "y" to 200, "width" to 30, "height" to 20),
+                      ),
+                  ),
+                  mapOf(
+                    "text" to "Second text",
+                    "uploadedImageId" to imageId,
+                    "positions" to
+                      listOf(
+                        mapOf("x" to 10, "y" to 20, "width" to 5, "height" to 5),
+                      ),
+                  ),
+                ),
+            ),
+          ),
+      ),
+    ).andIsOk
+
+    executeInNewTransaction {
+      val references = getReferences("namespace-1", "merge-key")
+      references.assert.hasSize(1)
+      val reference = references.single()
+      reference.originalText.assert.isEqualTo("First text")
+      reference.positions.assert.isEqualTo(
+        listOf(
+          KeyInScreenshotPosition(100, 150, 80, 100),
+          KeyInScreenshotPosition(500, 200, 30, 20),
+          KeyInScreenshotPosition(10, 20, 5, 5),
+        ),
+      )
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `keeps first non-null text when merging duplicate screenshot references`() {
+    val imageId = storeUnscaledImage()
+    performProjectAuthPost(
+      "keys/import-resolvable",
+      mapOf(
+        "keys" to
+          listOf(
+            mapOf(
+              "name" to "merge-key",
+              "namespace" to "namespace-1",
+              "screenshots" to
+                listOf(
+                  mapOf(
+                    "uploadedImageId" to imageId,
+                    "positions" to
+                      listOf(
+                        mapOf("x" to 100, "y" to 150, "width" to 80, "height" to 100),
+                      ),
+                  ),
+                  mapOf(
+                    "text" to "Second text",
+                    "uploadedImageId" to imageId,
+                    "positions" to
+                      listOf(
+                        mapOf("x" to 10, "y" to 20, "width" to 5, "height" to 5),
+                      ),
+                  ),
+                ),
+            ),
+          ),
+      ),
+    ).andIsOk
+
+    executeInNewTransaction {
+      val reference = getReferences("namespace-1", "merge-key").single()
+      reference.originalText.assert.isEqualTo("Second text")
+      reference.positions.assert.isEqualTo(
+        listOf(
+          KeyInScreenshotPosition(100, 150, 80, 100),
+          KeyInScreenshotPosition(10, 20, 5, 5),
+        ),
+      )
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `merges duplicate screenshot references across separate key entries with the same name`() {
+    val imageId = storeUnscaledImage()
+    performProjectAuthPost(
+      "keys/import-resolvable",
+      mapOf(
+        "keys" to
+          listOf(
+            mapOf(
+              "name" to "merge-key",
+              "namespace" to "namespace-1",
+              "screenshots" to
+                listOf(
+                  mapOf(
+                    "text" to "First text",
+                    "uploadedImageId" to imageId,
+                    "positions" to
+                      listOf(
+                        mapOf("x" to 100, "y" to 150, "width" to 80, "height" to 100),
+                      ),
+                  ),
+                ),
+            ),
+            mapOf(
+              "name" to "merge-key",
+              "namespace" to "namespace-1",
+              "screenshots" to
+                listOf(
+                  mapOf(
+                    "text" to "Second text",
+                    "uploadedImageId" to imageId,
+                    "positions" to
+                      listOf(
+                        mapOf("x" to 10, "y" to 20, "width" to 5, "height" to 5),
+                      ),
+                  ),
+                ),
+            ),
+          ),
+      ),
+    ).andIsOk
+
+    executeInNewTransaction {
+      val references = getReferences("namespace-1", "merge-key")
+      references.assert.hasSize(1)
+      val reference = references.single()
+      reference.originalText.assert.isEqualTo("First text")
+      reference.positions.assert.isEqualTo(
+        listOf(
+          KeyInScreenshotPosition(100, 150, 80, 100),
+          KeyInScreenshotPosition(10, 20, 5, 5),
+        ),
+      )
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `merging a duplicate reference with no positions keeps the existing positions`() {
+    val imageId = storeUnscaledImage()
+    performProjectAuthPost(
+      "keys/import-resolvable",
+      mapOf(
+        "keys" to
+          listOf(
+            mapOf(
+              "name" to "merge-key",
+              "namespace" to "namespace-1",
+              "screenshots" to
+                listOf(
+                  mapOf(
+                    "text" to "First text",
+                    "uploadedImageId" to imageId,
+                    "positions" to
+                      listOf(
+                        mapOf("x" to 100, "y" to 150, "width" to 80, "height" to 100),
+                      ),
+                  ),
+                  mapOf(
+                    "text" to "Second text",
+                    "uploadedImageId" to imageId,
+                  ),
+                ),
+            ),
+          ),
+      ),
+    ).andIsOk
+
+    executeInNewTransaction {
+      val reference = getReferences("namespace-1", "merge-key").single()
+      reference.originalText.assert.isEqualTo("First text")
+      reference.positions.assert.isEqualTo(
+        listOf(
+          KeyInScreenshotPosition(100, 150, 80, 100),
+        ),
+      )
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `does not duplicate identical positions when merging duplicate references`() {
+    val imageId = storeUnscaledImage()
+    performProjectAuthPost(
+      "keys/import-resolvable",
+      mapOf(
+        "keys" to
+          listOf(
+            mapOf(
+              "name" to "merge-key",
+              "namespace" to "namespace-1",
+              "screenshots" to
+                listOf(
+                  mapOf(
+                    "text" to "First text",
+                    "uploadedImageId" to imageId,
+                    "positions" to
+                      listOf(
+                        mapOf("x" to 100, "y" to 150, "width" to 80, "height" to 100),
+                      ),
+                  ),
+                  mapOf(
+                    "text" to "Second text",
+                    "uploadedImageId" to imageId,
+                    "positions" to
+                      listOf(
+                        mapOf("x" to 100, "y" to 150, "width" to 80, "height" to 100),
+                      ),
+                  ),
+                ),
+            ),
+          ),
+      ),
+    ).andIsOk
+
+    executeInNewTransaction {
+      val reference = getReferences("namespace-1", "merge-key").single()
+      reference.positions.assert.isEqualTo(
+        listOf(
+          KeyInScreenshotPosition(100, 150, 80, 100),
+        ),
+      )
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `it imports a lot of data (and set outdated) in time`() {
+    val lotOfKeys = testData.addLotOfKeys(5000)
+    testDataService.saveTestData(testData.root)
+
+    val toImport =
+      lotOfKeys.map {
+        mapOf(
+          "name" to it.name,
+          "translations" to
+            mapOf(
+              "en" to
+                mapOf(
+                  "text" to "new",
+                  "resolution" to "OVERRIDE",
+                ),
+            ),
+        )
+      }
+
+    val time =
+      measureTime {
+        performProjectAuthPost(
+          "keys/import-resolvable",
+          mapOf(
+            "keys" to toImport,
+          ),
+        ).andIsOk
+      }
+
+    time.inWholeSeconds.assert.isLessThan(10)
   }
 
   @Test
@@ -329,19 +612,88 @@ class KeyControllerResolvableImportTest : ProjectAuthControllerTest("/v2/project
     ).andIsOk
   }
 
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `option force-override works`() {
+    performProjectAuthPost(
+      "keys/import-resolvable",
+      mapOf(
+        "keys" to
+          listOf(
+            mapOf(
+              "name" to "key-1",
+              "namespace" to "namespace-1",
+              "translations" to
+                mapOf(
+                  "de" to
+                    mapOf(
+                      "text" to "new",
+                      "resolution" to "FORCE_OVERRIDE",
+                    ),
+                  "en" to
+                    mapOf(
+                      "text" to "new",
+                      "resolution" to "FORCE_OVERRIDE",
+                    ),
+                ),
+            ),
+            mapOf(
+              "name" to "key-2",
+              "namespace" to "namespace-1",
+              "translations" to
+                mapOf(
+                  "en" to
+                    mapOf(
+                      "text" to "existing translation",
+                      "resolution" to "FORCE_OVERRIDE",
+                    ),
+                ),
+            ),
+          ),
+      ),
+    ).andIsOk
+
+    executeInNewTransaction {
+      assertTranslationText("namespace-1", "key-1", "de", "new")
+      assertTranslationText("namespace-1", "key-1", "en", "new")
+      assertTranslationText("namespace-1", "key-2", "en", "existing translation")
+    }
+  }
+
+  // 1000x1000 stays under ImageConverter's 3MP resize threshold, so the stored screenshot keeps
+  // the source dimensions and screenshot positions are persisted without coordinate scaling.
+  private fun storeUnscaledImage() =
+    imageUploadService
+      .store(
+        generateImage(1000, 1000),
+        userAccount!!,
+        ImageUploadInfoDto(location = "merge frame"),
+      ).id
+
+  fun getReferences(
+    namespace: String?,
+    keyName: String,
+  ) = projectService
+    .get(testData.projectBuilder.self.id)
+    .keys
+    .find { it.name == keyName && it.namespace?.name == namespace }!!
+    .keyScreenshotReferences
+
   fun assertTranslationText(
     namespace: String?,
     keyName: String,
     languageTag: String,
     expectedText: String,
   ) {
-    projectService.get(testData.projectBuilder.self.id)
+    projectService
+      .get(testData.projectBuilder.self.id)
       .keys
       .find { it.name == keyName && it.namespace?.name == namespace }!!
       .translations
       .find { it.language.tag == languageTag }!!
       .text
-      .assert.isEqualTo(
+      .assert
+      .isEqualTo(
         expectedText,
       )
   }

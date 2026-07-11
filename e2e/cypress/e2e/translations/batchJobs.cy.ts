@@ -9,14 +9,14 @@ import {
   selectOperation,
 } from '../../common/batchOperations';
 import { TestDataStandardResponse } from '../../common/apiCalls/testData/generator';
-import { login } from '../../common/apiCalls/common';
-import { selectNamespace } from '../../common/namespace';
+import { enableNamespaces, login } from '../../common/apiCalls/common';
 import { assertHasState } from '../../common/state';
 import {
   assertExportLanguagesSelected,
   checkZipContent,
   getFileName,
 } from '../../common/export';
+import { selectNamespace } from '../../compounds/E2NamespaceSelector';
 
 describe('Batch jobs', { scrollBehavior: false }, () => {
   const downloadsFolder = Cypress.config('downloadsFolder');
@@ -39,7 +39,7 @@ describe('Batch jobs', { scrollBehavior: false }, () => {
     selectAll();
     selectOperation('Delete');
     executeBatchOperationWithConfirmation();
-    gcy('global-empty-list').should('be.visible');
+    gcy('global-empty-state').should('be.visible');
   });
 
   it('will delete all except first one', () => {
@@ -51,6 +51,7 @@ describe('Batch jobs', { scrollBehavior: false }, () => {
   });
 
   it('will change namespace', () => {
+    enableNamespaces(project.id);
     selectAll();
     selectOperation('Change namespace');
     selectNamespace('new-namespace');
@@ -74,6 +75,20 @@ describe('Batch jobs', { scrollBehavior: false }, () => {
     cy.gcy('tag-autocomplete-option').contains('new-tag').click();
     executeBatchOperation();
     cy.gcy('translations-tag').should('not.exist');
+  });
+
+  it('assigns and unassigns label to translations', () => {
+    selectAll();
+    selectOperation('Assign labels');
+    chooseLabelInSelector('Label 1');
+    executeBatchOperation();
+    gcy('translation-label').contains('Label 1').should('be.visible');
+
+    selectAll();
+    selectOperation('Unassign labels');
+    chooseLabelInSelector('Label 1');
+    executeBatchOperation();
+    gcy('translation-label').should('not.exist');
   });
 
   it('will clear translations', () => {
@@ -101,7 +116,7 @@ describe('Batch jobs', { scrollBehavior: false }, () => {
 
   it('will pre-translate with TM', () => {
     cy.gcy('translations-row-checkbox').first().click();
-    selectOperation('Pre-translate by TM');
+    selectOperation('Translate from memory');
     assertLanguagesSelected(['German']);
     executeBatchOperation();
   });
@@ -111,7 +126,7 @@ describe('Batch jobs', { scrollBehavior: false }, () => {
     selectOperation('Machine translation');
     assertLanguagesSelected(['German']);
     executeBatchOperation();
-    getCell('en translated with GOOGLE from en to de').should('be.visible');
+    getCell('en translated with PROMPT from en to de').should('be.visible');
     cy.gcy('translations-auto-translated-indicator').should('exist');
   });
 
@@ -155,6 +170,20 @@ describe('Batch jobs', { scrollBehavior: false }, () => {
   const visit = () => {
     visitTranslations(project.id);
   };
+
+  const chooseLabelInSelector = (label: string) => {
+    selectLanguage('English');
+    gcy('batch-operations-section').within(() => {
+      gcy('translation-label-control').click();
+    });
+    gcy('search-select-search').type(label);
+    gcy('label-autocomplete-option')
+      .contains(label)
+      .should('be.visible')
+      .click();
+    dismissMenu();
+    gcy('translation-label').contains(label).should('be.visible');
+  };
 });
 
 function selectLanguage(language = 'German') {
@@ -170,6 +199,8 @@ function assertLanguagesSelected(languages: string[]) {
   cy.gcy('batch-operations-section')
     .findDcy('translations-language-select-form-control')
     .click();
+
+  cy.gcy('translations-language-select-item').should('be.visible');
 
   languages.forEach((language) => {
     cy.gcy('translations-language-select-item')

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Box, styled, Tooltip } from '@mui/material';
-import { MoreVert } from '@mui/icons-material';
+import { DotsVertical } from '@untitled-ui/icons-react';
 
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { components } from 'tg.service/apiSchema.generated';
@@ -13,7 +13,7 @@ import { mapHistoryToActivity } from './mapHistoryToActivity';
 import { SmallActionButton } from '../../common/SmallActionButton';
 import { getNoDiffChange } from 'tg.component/activity/types/getNoDiffChange';
 import { UserName } from 'tg.component/common/UserName';
-import { useCurrentLanguage } from 'tg.hooks/useCurrentLanguage';
+import { useCurrentLanguage } from '@tginternal/library/hooks/useCurrentLanguage';
 import { LimitedHeightText } from 'tg.component/LimitedHeightText';
 
 type TranslationHistoryModel = components['schemas']['TranslationHistoryModel'];
@@ -91,7 +91,7 @@ type Props = {
   languageTag: string;
 };
 
-export const HistoryItem: React.FC<Props> = ({
+export const HistoryItem: React.FC<React.PropsWithChildren<Props>> = ({
   entry,
   showDifferences,
   languageTag,
@@ -154,7 +154,7 @@ export const HistoryItem: React.FC<Props> = ({
           className="hoverVisible"
           onClick={() => setDetailOpen(true)}
         >
-          <MoreVert fontSize="small" color="inherit" />
+          <DotsVertical width={20} height={20} color="inherit" />
         </StyledSmallActionButton>
       </Box>
       {detailOpen && (

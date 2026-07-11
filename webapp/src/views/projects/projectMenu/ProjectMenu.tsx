@@ -1,164 +1,207 @@
-import { Devices, PersonOutline, Code } from '@mui/icons-material';
 import { useTranslate } from '@tolgee/react';
-import LanguageIcon from '@mui/icons-material/Language';
 import {
-  ExportIcon,
-  ImportIcon,
-  ProjectsIcon,
-  SettingsIcon,
-  TranslationIcon,
-} from 'tg.component/CustomIcons';
-import { LINKS, PARAMS } from 'tg.constants/links';
+  Code02,
+  FileDownload03,
+  Globe01,
+  HomeLine,
+  LayoutAlt04,
+  Settings01,
+  Translate01,
+  UploadCloud02,
+  User01,
+} from '@untitled-ui/icons-react';
+import { Link, LINKS, PARAMS } from 'tg.constants/links';
 import { useConfig } from 'tg.globalContext/helpers';
 
 import { SideMenu } from './SideMenu';
-import { SideMenuItem } from './SideMenuItem';
+import { SideMenuItem, SideMenuItemQuickStart } from './SideMenuItem';
 import { SideLogo } from './SideLogo';
-import DashboardIcon from '@mui/icons-material/Dashboard';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
+import { Integration, Stars } from 'tg.component/CustomIcons';
+import { FC } from 'react';
+import { createAdder } from 'tg.fixtures/pluginAdder';
+import { useAddProjectMenuItems } from 'tg.ee';
+import { useProject } from 'tg.hooks/useProject';
+import { useBranchLinks } from 'tg.component/branching/useBranchLinks';
 
-export const ProjectMenu = ({ id }) => {
+export const ProjectMenu = () => {
+  const project = useProject();
+  const { withBranchLink } = useBranchLinks();
   const { satisfiesPermission } = useProjectPermissions();
   const config = useConfig();
-
-  const canViewKeys = satisfiesPermission('keys.view');
-  const canViewTranslations = satisfiesPermission('translations.view');
-  const canEditProject = satisfiesPermission('project.edit');
-  const canEditLanguages = satisfiesPermission('languages.edit');
-  const canViewUsers =
-    config.authentication && satisfiesPermission('members.view');
-  const canImport = canViewKeys && satisfiesPermission('translations.edit');
-  const canIntegrate = canViewKeys;
   const canPublishCd = satisfiesPermission('content-delivery.publish');
-  const canManageWebhooks = satisfiesPermission('webhooks.manage');
-  const canViewDeveloper = canPublishCd || canManageWebhooks;
+  const projectIdParams = { [PARAMS.PROJECT_ID]: project.id };
 
   const { t } = useTranslate();
 
   const topBarHeight = useGlobalContext((c) => c.layout.topBarHeight);
 
+  const baseItems = [
+    {
+      id: 'projects',
+      condition: () => true,
+      link: LINKS.PROJECTS,
+      icon: HomeLine,
+      text: t('project_menu_projects'),
+      dataCy: 'project-menu-item-projects',
+    },
+    {
+      id: 'dashboard',
+      condition: () => true,
+      link: LINKS.PROJECT_DASHBOARD,
+      icon: LayoutAlt04,
+      text: t('project_menu_dashboard', 'Project Dashboard'),
+      dataCy: 'project-menu-item-dashboard',
+    },
+    {
+      id: 'translations',
+      condition: ({ satisfiesPermission }) => satisfiesPermission('keys.view'),
+      link: LINKS.PROJECT_TRANSLATIONS,
+      icon: Translate01,
+      text: t('project_menu_translations'),
+      dataCy: 'project-menu-item-translations',
+      matchAsPrefix: true,
+      quickStart: { itemKey: 'menu_translations' },
+    },
+    {
+      id: 'languages',
+      condition: ({ satisfiesPermission }) =>
+        satisfiesPermission('languages.edit'),
+      link: LINKS.PROJECT_LANGUAGES,
+      icon: Globe01,
+      text: t('project_menu_languages'),
+      dataCy: 'project-menu-item-languages',
+      matchAsPrefix: true,
+      quickStart: { itemKey: 'menu_languages' },
+    },
+    {
+      id: 'members',
+      condition: ({ satisfiesPermission }) =>
+        config.authentication && satisfiesPermission('members.view'),
+      link: LINKS.PROJECT_PERMISSIONS,
+      icon: User01,
+      text: t('project_menu_members'),
+      dataCy: 'project-menu-item-members',
+      quickStart: { itemKey: 'menu_members' },
+    },
+    {
+      id: 'import',
+      condition: ({ satisfiesPermission }) =>
+        satisfiesPermission('translations.edit') &&
+        satisfiesPermission('keys.view'),
+      link: LINKS.PROJECT_IMPORT,
+      icon: UploadCloud02,
+      text: t('project_menu_import'),
+      dataCy: 'project-menu-item-import',
+      quickStart: { itemKey: 'menu_import' },
+    },
+    {
+      id: 'export',
+      condition: ({ satisfiesPermission }) =>
+        satisfiesPermission('translations.view'),
+      link: LINKS.PROJECT_EXPORT,
+      icon: FileDownload03,
+      text: t('project_menu_export'),
+      dataCy: 'project-menu-item-export',
+      quickStart: { itemKey: 'menu_export' },
+    },
+    {
+      id: 'developer',
+      condition: ({ satisfiesPermission }) =>
+        satisfiesPermission('content-delivery.publish') ||
+        satisfiesPermission('webhooks.manage'),
+      link: canPublishCd
+        ? LINKS.PROJECT_CONTENT_STORAGE
+        : LINKS.PROJECT_WEBHOOKS,
+      icon: Code02,
+      text: t('project_menu_developer'),
+      dataCy: 'project-menu-item-developer',
+      quickStart: { itemKey: 'menu_developer' },
+      matchAsPrefix: LINKS.PROJECT_DEVELOPER.build(projectIdParams),
+    },
+    {
+      id: 'integrate',
+      condition: ({ satisfiesPermission }) => satisfiesPermission('keys.view'),
+      link: LINKS.PROJECT_INTEGRATE,
+      icon: Integration,
+      text: t('project_menu_integrate'),
+      dataCy: 'project-menu-item-integrate',
+      quickStart: { itemKey: 'menu_integrate' },
+    },
+    {
+      id: 'ai',
+      condition: ({ satisfiesPermission }) =>
+        satisfiesPermission('prompts.view') && config.llm.enabled,
+      link: LINKS.PROJECT_CONTEXT_DATA,
+      icon: Stars,
+      text: t('project_menu_ai'),
+      matchAsPrefix: LINKS.PROJECT_AI.build(projectIdParams),
+      dataCy: 'project-menu-item-ai',
+    },
+    {
+      id: 'settings',
+      condition: ({ satisfiesPermission }) =>
+        satisfiesPermission('project.edit') ||
+        satisfiesPermission('translation-labels.manage'),
+      link: LINKS.PROJECT_EDIT,
+      icon: Settings01,
+      text: t('project_menu_project_settings'),
+      dataCy: 'project-menu-item-settings',
+      matchAsPrefix: true,
+      quickStart: { itemKey: 'menu_settings' },
+    },
+  ] satisfies ProjectMenuItem[];
+
+  const addEeItems = useAddProjectMenuItems();
+
+  const items = addEeItems(baseItems);
+
   return (
     <SideMenu>
       <SideLogo hidden={!topBarHeight} />
-      <SideMenuItem
-        linkTo={LINKS.PROJECTS.build({ [PARAMS.PROJECT_ID]: id })}
-        icon={<ProjectsIcon />}
-        text={t('project_menu_projects')}
-        data-cy="project-menu-item-projects"
-      />
-      <SideMenuItem
-        linkTo={LINKS.PROJECT_DASHBOARD.build({ [PARAMS.PROJECT_ID]: id })}
-        icon={<DashboardIcon />}
-        text={t('project_menu_dashboard', 'Project Dashboard')}
-        data-cy="project-menu-item-dashboard"
-      />
-      {canViewKeys && (
-        <SideMenuItem
-          linkTo={LINKS.PROJECT_TRANSLATIONS.build({
-            [PARAMS.PROJECT_ID]: id,
-          })}
-          icon={<TranslationIcon />}
-          text={t('project_menu_translations')}
-          data-cy="project-menu-item-translations"
-          matchAsPrefix
-          quickStart={{ itemKey: 'menu_translations' }}
-        />
-      )}
-      <>
-        {canEditProject && (
+      {items.map((item, index) => {
+        if (!item.condition({ config, satisfiesPermission, project }))
+          return null;
+        const { dataCy, icon: Icon, link, ...rest } = item;
+        return (
           <SideMenuItem
-            linkTo={LINKS.PROJECT_EDIT.build({
-              [PARAMS.PROJECT_ID]: id,
+            key={item.id}
+            linkTo={withBranchLink(link, {
+              [PARAMS.PROJECT_ID]: project.id,
+              [PARAMS.ORGANIZATION_SLUG]: project.organizationOwner?.slug || '',
             })}
-            matchAsPrefix
-            icon={<SettingsIcon />}
-            text={t('project_menu_project_settings')}
-            data-cy="project-menu-item-settings"
-            quickStart={{ itemKey: 'menu_settings' }}
+            {...rest}
+            icon={<Icon />}
+            data-cy={dataCy}
           />
-        )}
-        {canEditLanguages && (
-          <SideMenuItem
-            linkTo={LINKS.PROJECT_LANGUAGES.build({
-              [PARAMS.PROJECT_ID]: id,
-            })}
-            matchAsPrefix
-            icon={<LanguageIcon />}
-            text={t('project_menu_languages')}
-            data-cy="project-menu-item-languages"
-            quickStart={{
-              itemKey: 'menu_languages',
-            }}
-          />
-        )}
-        {canViewUsers && (
-          <>
-            <SideMenuItem
-              linkTo={LINKS.PROJECT_PERMISSIONS.build({
-                [PARAMS.PROJECT_ID]: id,
-              })}
-              icon={<PersonOutline />}
-              text={t('project_menu_members')}
-              data-cy="project-menu-item-members"
-              quickStart={{
-                itemKey: 'menu_members',
-              }}
-            />
-          </>
-        )}
-        {canImport && (
-          <SideMenuItem
-            linkTo={LINKS.PROJECT_IMPORT.build({
-              [PARAMS.PROJECT_ID]: id,
-            })}
-            icon={<ImportIcon />}
-            text={t('project_menu_import')}
-            data-cy="project-menu-item-import"
-            quickStart={{ itemKey: 'menu_import' }}
-          />
-        )}
-      </>
-
-      {canViewTranslations && (
-        <SideMenuItem
-          linkTo={LINKS.PROJECT_EXPORT.build({
-            [PARAMS.PROJECT_ID]: id,
-          })}
-          icon={<ExportIcon />}
-          text={t('project_menu_export')}
-          data-cy="project-menu-item-export"
-          quickStart={{ itemKey: 'menu_export' }}
-        />
-      )}
-      {canViewDeveloper && (
-        <SideMenuItem
-          linkTo={(canPublishCd
-            ? LINKS.PROJECT_CONTENT_STORAGE
-            : LINKS.PROJECT_WEBHOOKS
-          ).build({
-            [PARAMS.PROJECT_ID]: id,
-          })}
-          icon={<Code />}
-          text={t('project_menu_developer')}
-          data-cy="project-menu-item-developer"
-          quickStart={{ itemKey: 'menu_developer' }}
-          matchAsPrefix={LINKS.PROJECT_DEVELOPER.build({
-            [PARAMS.PROJECT_ID]: id,
-          })}
-        />
-      )}
-      {canIntegrate && (
-        <SideMenuItem
-          linkTo={LINKS.PROJECT_INTEGRATE.build({
-            [PARAMS.PROJECT_ID]: id,
-          })}
-          icon={<Devices />}
-          text={t('project_menu_integrate')}
-          data-cy="project-menu-item-integrate"
-          quickStart={{ itemKey: 'menu_integrate' }}
-        />
-      )}
+        );
+      })}
     </SideMenu>
   );
 };
+
+export type ProjectMenuItem = {
+  id: string;
+  condition: (props: ConditionProps) => boolean;
+  link: Link;
+  icon: FC<React.PropsWithChildren<unknown>>;
+  text: string;
+  dataCy: string;
+  matchAsPrefix?: boolean | string;
+  quickStart?: SideMenuItemQuickStart;
+};
+
+type ConditionProps = {
+  config: ReturnType<typeof useConfig>;
+  satisfiesPermission: ReturnType<
+    typeof useProjectPermissions
+  >['satisfiesPermission'];
+  project: ReturnType<typeof useProject>;
+};
+
+export const addProjectMenuItems = createAdder<ProjectMenuItem>({
+  referencingProperty: 'id',
+});
+
+export type ProjectMenuItemsAdder = ReturnType<typeof addProjectMenuItems>;

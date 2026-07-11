@@ -1,24 +1,27 @@
 import { useEffect, useState } from 'react';
 import { WebsocketClient } from 'tg.websocket-client/WebsocketClient';
 
-export const useWebsocketService = (jwtToken: string | undefined) => {
+export const useWebsocketService = (
+  jwtToken: string | undefined,
+  allowPrivate: boolean
+) => {
   const [client, setClient] = useState<ReturnType<typeof WebsocketClient>>();
   const [clientConnected, setClientConnected] = useState<boolean>();
 
   useEffect(() => {
-    if (jwtToken) {
+    if (allowPrivate) {
       const newClient = WebsocketClient({
-        authentication: { jwtToken: jwtToken },
+        authentication: { jwtToken: jwtToken! },
         serverUrl: import.meta.env.VITE_APP_API_URL,
         onConnected: () => setClientConnected(true),
         onConnectionClose: () => setClientConnected(false),
       });
       setClient(newClient);
       return () => {
-        newClient.disconnect();
+        newClient.deactivate();
       };
     }
-  }, [jwtToken]);
+  }, [jwtToken, allowPrivate]);
 
   return {
     client,

@@ -2,6 +2,7 @@ package io.tolgee.development.testDataBuilder.builders
 
 import io.tolgee.development.testDataBuilder.FT
 import io.tolgee.model.Screenshot
+import io.tolgee.model.TranslationSuggestion
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyMeta
 import io.tolgee.model.key.Tag
@@ -32,6 +33,14 @@ class KeyBuilder(
     return addOperation(projectBuilder.data.translations, builder, ft)
   }
 
+  fun addSuggestion(ft: FT<TranslationSuggestion>): SuggestionBuilder {
+    val builder =
+      SuggestionBuilder(this)
+    return addOperation(projectBuilder.data.suggestions, builder, ft)
+  }
+
+  val translations get() = projectBuilder.data.translations.filter { it.self.key === self }
+
   fun addMeta(ft: FT<KeyMeta>): KeyMetaBuilder {
     data.meta = KeyMetaBuilder(keyBuilder = this).apply { ft(this.self) }
     return data.meta!!
@@ -55,7 +64,8 @@ class KeyBuilder(
   ): ScreenshotBuilder {
     val converter = file?.let { ImageConverter(file.inputStream) }
     val image = converter?.getImage()
-    val thumbnail = converter?.getThumbnail()
+    val middleSized = converter?.getThumbnail(600)
+    val thumbnail = converter?.getThumbnail(200)
 
     val screenshotBuilder =
       projectBuilder.addScreenshot {
@@ -65,6 +75,7 @@ class KeyBuilder(
 
     screenshotBuilder.image = image
     screenshotBuilder.thumbnail = thumbnail
+    screenshotBuilder.middleSized = middleSized
 
     val reference =
       projectBuilder.addScreenshotReference {
@@ -79,8 +90,8 @@ class KeyBuilder(
   fun addTranslation(
     languageTag: String,
     text: String?,
-  ) {
-    addTranslation {
+  ): TranslationBuilder {
+    return addTranslation {
       this.language = projectBuilder.getLanguageByTag(languageTag)!!.self
       this.text = text
     }
@@ -96,7 +107,13 @@ class KeyBuilder(
 
     val tags =
       projectBuilder.data.keys
-        .mapNotNull { it.data.meta?.self?.tags }.flatten().filter { it.name == name }.distinct()
+        .mapNotNull {
+          it.data.meta
+            ?.self
+            ?.tags
+        }.flatten()
+        .filter { it.name == name }
+        .distinct()
 
     if (tags.size > 1) {
       throw IllegalStateException("More than one tag with name $name in the project")

@@ -1,6 +1,6 @@
 import { styled } from '@mui/material';
 import { T } from '@tolgee/react';
-import { Check, Clear } from '@mui/icons-material';
+import { Check, XClose } from '@untitled-ui/icons-react';
 
 import { DiffValue } from '../types';
 
@@ -33,7 +33,7 @@ export const getValue = (value: string, type: 'removed' | 'added') => {
   if (value === 'RESOLVED') {
     return (
       <StyledResolved className={type}>
-        <Check fontSize="small" />
+        <Check width={20} height={20} />
         <div>
           <T keyName="translations_comments_resolved" />
         </div>
@@ -42,7 +42,7 @@ export const getValue = (value: string, type: 'removed' | 'added') => {
   } else {
     return (
       <StyledNeedsResolution className={type}>
-        <Clear fontSize="small" />
+        <XClose width={20} height={20} />
         <div>
           <T keyName="translations_comments_needs_resolution" />
         </div>

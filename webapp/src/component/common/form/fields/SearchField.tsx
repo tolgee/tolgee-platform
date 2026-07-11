@@ -1,6 +1,6 @@
 import React, { ComponentProps, useEffect, useState } from 'react';
 import { IconButton, InputAdornment, TextField, useTheme } from '@mui/material';
-import { Search, Clear } from '@mui/icons-material';
+import { SearchSm, XClose } from '@untitled-ui/icons-react';
 import { useTranslate } from '@tolgee/react';
 import { useDebounce } from 'use-debounce';
 import { stopAndPrevent } from 'tg.fixtures/eventHandler';
@@ -8,7 +8,8 @@ import { stopAndPrevent } from 'tg.fixtures/eventHandler';
 const SearchField = (
   props: {
     initial?: string;
-    onSearch: (value: string) => void;
+    onSearch?: (value: string) => void;
+    clearCallbackRef?: React.MutableRefObject<(() => void) | null>;
   } & ComponentProps<typeof TextField>
 ) => {
   const [search, setSearch] = useState(props.initial || '');
@@ -16,13 +17,20 @@ const SearchField = (
   const theme = useTheme();
   const { t } = useTranslate();
 
-  const { onSearch, ...otherProps } = props;
+  const { onSearch, clearCallbackRef, ...otherProps } = props;
 
   useEffect(() => {
     if (debouncedSearch !== props.initial) {
-      onSearch(debouncedSearch);
+      onSearch?.(debouncedSearch);
     }
   }, [debouncedSearch]);
+
+  if (clearCallbackRef !== undefined) {
+    clearCallbackRef.current = () => {
+      setSearch('');
+      onSearch?.('');
+    };
+  }
 
   return (
     <TextField
@@ -31,7 +39,7 @@ const SearchField = (
       InputProps={{
         startAdornment: (
           <InputAdornment position="start">
-            <Search />
+            <SearchSm width={20} height={20} />
           </InputAdornment>
         ),
         endAdornment: Boolean(search) && (
@@ -45,7 +53,7 @@ const SearchField = (
               onMouseDown={stopAndPrevent()}
               edge="start"
             >
-              <Clear fontSize="small" />
+              <XClose />
             </IconButton>
           </InputAdornment>
         ),

@@ -16,14 +16,15 @@
 
 package io.tolgee.security.authorization
 
+import io.tolgee.dtos.cacheable.isAdmin
+import io.tolgee.dtos.cacheable.isSupporterOrAdmin
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
-import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.RequestContextService
 import io.tolgee.security.authentication.AuthenticationFacade
-import io.tolgee.service.EmailVerificationService
+import io.tolgee.security.authentication.isReadOnly
 import io.tolgee.service.organization.OrganizationRoleService
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -34,7 +35,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.method.HandlerMethod
 
 /**
- * This interceptor performs authorization step to access organization-related endpoints.
+ * This interceptor performs an authorization step to access organization-related endpoints.
  * By default, the user needs to have access to at least 1 project on the target org to access it.
  */
 @Component
@@ -45,8 +46,6 @@ class OrganizationAuthorizationInterceptor(
   @Lazy
   private val requestContextService: RequestContextService,
   private val organizationHolder: OrganizationHolder,
-  @Lazy
-  private val emailVerificationService: EmailVerificationService,
 ) : AbstractAuthorizationInterceptor() {
   private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -55,19 +54,15 @@ class OrganizationAuthorizationInterceptor(
     response: HttpServletResponse,
     handler: HandlerMethod,
   ): Boolean {
-    val user = authenticationFacade.authenticatedUser
-    checkEmailVerificationOrThrow(emailVerificationService::isVerified, user, handler)
-
-    val userId = user.id
+    val userId = authenticationFacade.authenticatedUser.id
     val organization =
       requestContextService.getTargetOrganization(request)
         // Two possible scenarios: we're on `GET/POST /v2/organization`, or the organization was not found.
-        // In both cases, there is no authorization to perform and we simply continue.
+        // In both cases, there is no authorization to perform, and we simply continue.
         // It is not the job of the interceptor to return a 404 error.
         ?: return true
 
     var bypassed = false
-    val isAdmin = authenticationFacade.authenticatedUser.role == UserAccount.Role.ADMIN
     val requiredRole = getRequiredRole(request, handler)
     logger.debug(
       "Checking access to org#{} by user#{} (Requires {})",
@@ -77,22 +72,27 @@ class OrganizationAuthorizationInterceptor(
     )
 
     if (!organizationRoleService.canUserViewStrict(userId, organization.id)) {
-      if (!isAdmin) {
+      if (!canBypass(request, handler)) {
         logger.debug(
           "Rejecting access to org#{} for user#{} - No view permissions",
           organization.id,
           userId,
         )
 
-        // Security consideration: if the user cannot see the organization, pretend it does not exist.
-        throw NotFoundException()
+        if (!canBypassForReadOnly()) {
+          // Security consideration: if the user cannot see the organization, pretend it does not exist.
+          throw NotFoundException()
+        }
+
+        // Admin access for read-only operations is allowed, but it's not enough for the current operation.
+        throw PermissionException()
       }
 
       bypassed = true
     }
 
     if (requiredRole != null && !organizationRoleService.isUserOfRole(userId, organization.id, requiredRole)) {
-      if (!isAdmin) {
+      if (!canBypass(request, handler)) {
         logger.debug(
           "Rejecting access to org#{} for user#{} - Insufficient role",
           organization.id,
@@ -139,5 +139,21 @@ class OrganizationAuthorizationInterceptor(
     }
 
     return orgPermission?.role
+  }
+
+  private fun canBypass(
+    request: HttpServletRequest,
+    handler: HandlerMethod,
+  ): Boolean {
+    if (authenticationFacade.authenticatedUser.isAdmin()) {
+      return true
+    }
+
+    val forReadOnly = handler.isReadOnly(request.method)
+    return forReadOnly && canBypassForReadOnly()
+  }
+
+  private fun canBypassForReadOnly(): Boolean {
+    return authenticationFacade.authenticatedUser.isSupporterOrAdmin()
   }
 }

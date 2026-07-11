@@ -1,13 +1,11 @@
 package io.tolgee.hateoas.project
 
-import io.tolgee.api.v2.controllers.organization.OrganizationController
 import io.tolgee.api.v2.controllers.project.ProjectsController
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.hateoas.language.LanguageModelAssembler
 import io.tolgee.hateoas.organization.SimpleOrganizationModelAssembler
 import io.tolgee.hateoas.permission.ComputedPermissionModelAssembler
 import io.tolgee.hateoas.permission.PermissionModelAssembler
-import io.tolgee.model.UserAccount
 import io.tolgee.model.views.ProjectWithStatsView
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.AvatarService
@@ -15,7 +13,6 @@ import io.tolgee.service.language.LanguageService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
-import org.springframework.hateoas.server.mvc.linkTo
 import org.springframework.stereotype.Component
 
 @Component
@@ -34,7 +31,6 @@ class ProjectWithStatsModelAssembler(
     ProjectWithStatsModel::class.java,
   ) {
   override fun toModel(view: ProjectWithStatsView): ProjectWithStatsModel {
-    val link = linkTo<ProjectsController> { get(view.id) }.withSelfRel()
     val baseLanguage =
       languageService.getProjectLanguages(view.id).find { it.base } ?: let {
         projectService.getOrAssignBaseLanguage(view.id)
@@ -44,8 +40,8 @@ class ProjectWithStatsModelAssembler(
         view.organizationRole,
         view.organizationOwner.basePermission,
         view.directPermission,
-        UserAccount.Role.USER,
-      ).getAdminPermissions(userRole = authenticationFacade.authenticatedUserOrNull?.role)
+        authenticationFacade.authenticatedUserOrNull?.role,
+      )
 
     return ProjectWithStatsModel(
       id = view.id,
@@ -61,10 +57,6 @@ class ProjectWithStatsModelAssembler(
       stats = view.stats,
       languages = view.languages.map { languageModelAssembler.toModel(it) },
       icuPlaceholders = view.icuPlaceholders,
-    ).add(link).also { model ->
-      view.organizationOwner.slug.let {
-        model.add(linkTo<OrganizationController> { get(it) }.withRel("organizationOwner"))
-      }
-    }
+    )
   }
 }

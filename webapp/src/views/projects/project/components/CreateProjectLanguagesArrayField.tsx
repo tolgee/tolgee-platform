@@ -7,7 +7,9 @@ import { CreateLanguagesField } from 'tg.component/languages/CreateLanguagesFiel
 
 import { CreateProjectValueType } from '../ProjectCreateView';
 
-export const CreateProjectLanguagesArrayField: FC = () => {
+export const CreateProjectLanguagesArrayField: FC<
+  React.PropsWithChildren<unknown>
+> = () => {
   const formikContext = useFormikContext<CreateProjectValueType>();
 
   const languagesMeta = formikContext.getFieldMeta('languages');

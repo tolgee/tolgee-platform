@@ -1,21 +1,24 @@
 package io.tolgee.service.key
 
 import io.tolgee.constants.Message
+import io.tolgee.dtos.CreateScreenshotResult
 import io.tolgee.dtos.KeyImportResolvableResult
+import io.tolgee.dtos.cacheable.LanguageDto
+import io.tolgee.dtos.request.KeyInScreenshotPositionDto
 import io.tolgee.dtos.request.ScreenshotInfoDto
 import io.tolgee.dtos.request.translation.importKeysResolvable.ImportKeysResolvableItemDto
 import io.tolgee.dtos.request.translation.importKeysResolvable.ImportTranslationResolution
 import io.tolgee.dtos.request.translation.importKeysResolvable.ImportTranslationResolvableDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.exceptions.PermissionException
 import io.tolgee.formats.convertToIcuPlurals
 import io.tolgee.formats.convertToPluralIfAnyIsPlural
 import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.Project_
 import io.tolgee.model.Screenshot
-import io.tolgee.model.UploadedImage
+import io.tolgee.model.branching.Branch
+import io.tolgee.model.branching.Branch_
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Key_
@@ -23,7 +26,6 @@ import io.tolgee.model.key.Namespace
 import io.tolgee.model.key.Namespace_
 import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
 import io.tolgee.model.translation.Translation
-import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.ImageUploadService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.security.SecurityService
@@ -39,6 +41,7 @@ class ResolvingKeyImporter(
   val applicationContext: ApplicationContext,
   val keysToImport: List<ImportKeysResolvableItemDto>,
   val projectEntity: Project,
+  val branch: String? = null,
 ) {
   private val entityManager = applicationContext.getBean(EntityManager::class.java)
   private val keyService = applicationContext.getBean(KeyService::class.java)
@@ -46,13 +49,13 @@ class ResolvingKeyImporter(
   private val translationService = applicationContext.getBean(TranslationService::class.java)
   private val screenshotService = applicationContext.getBean(ScreenshotService::class.java)
   private val imageUploadService = applicationContext.getBean(ImageUploadService::class.java)
-  private val authenticationFacade = applicationContext.getBean(AuthenticationFacade::class.java)
   private val securityService = applicationContext.getBean(SecurityService::class.java)
 
   private val errors = mutableListOf<List<Serializable?>>()
   private var importedKeys: List<Key> = emptyList()
   private val updatedTranslationIds = mutableListOf<Long>()
   private val isPluralChangedForKeys = mutableMapOf<Long, String>()
+  private val outdatedKeys: MutableList<Long> = mutableListOf()
 
   operator fun invoke(): KeyImportResolvableResult {
     importedKeys = tryImport()
@@ -67,7 +70,7 @@ class ResolvingKeyImporter(
 
     val result =
       keysToImport.map keys@{ keyToImport ->
-        val (key, isKeyNew) = getOrCreateKey(keyToImport)
+        val (key, _) = getOrCreateKey(keyToImport)
         val isExistingKeyPlural = key.isPlural
         val translationsToModify = mutableListOf<TranslationToModify>()
 
@@ -83,6 +86,24 @@ class ResolvingKeyImporter(
           val translationExists = !isEmpty && !isNew
 
           if (validate(translationExists, resolvable, key, language.tag)) return@translations
+
+          if (language.base) {
+            if (isNew || existingTranslation?.text != resolvable.text) {
+              outdatedKeys.add(key.id)
+            }
+          }
+
+          if (resolvable.resolution == ImportTranslationResolution.FORCE_OVERRIDE) {
+            val updated =
+              forceAddOrUpdateTranslation(
+                key,
+                language,
+                resolvable.text,
+                existingTranslation,
+              )
+            translationsToModify.add(updated)
+            return@translations
+          }
 
           if (isEmpty || (!isNew && resolvable.resolution == ImportTranslationResolution.OVERRIDE)) {
             translationsToModify.add(TranslationToModify(existingTranslation!!, resolvable.text, false))
@@ -104,8 +125,27 @@ class ResolvingKeyImporter(
       }
 
     translationService.onKeyIsPluralChanged(isPluralChangedForKeys, true, updatedTranslationIds)
+    translationService.setOutdatedBatch(outdatedKeys)
 
     return result
+  }
+
+  private fun forceAddOrUpdateTranslation(
+    key: Key,
+    language: LanguageDto,
+    translationText: String,
+    existingTranslation: Translation?,
+  ): TranslationToModify {
+    if (existingTranslation == null) {
+      val translation =
+        Translation(translationText).apply {
+          this.key = key
+          this.language = entityManager.getReference(Language::class.java, language.id)
+        }
+      return TranslationToModify(translation, translationText, true)
+    }
+
+    return TranslationToModify(existingTranslation, translationText, false)
   }
 
   private fun handlePluralizationAndSave(
@@ -115,9 +155,14 @@ class ResolvingKeyImporter(
   ) {
     val translationsToModifyMap = translationsToModify.associateWith { it.text }
 
-    // when existing key is plural, we are converting all to plurals
+    // when an existing key is plural, we are converting all to plurals
     if (isExistingKeyPlural) {
-      translationsToModifyMap.convertToIcuPlurals(null).convertedStrings.forEach {
+      val converted = translationsToModifyMap.convertToIcuPlurals(key.pluralArgName)
+      if (key.pluralArgName.isNullOrBlank()) {
+        key.pluralArgName = converted.argName
+        keyService.save(key)
+      }
+      converted.convertedStrings.forEach {
         it.key.text = it.value
       }
       translationsToModify.save()
@@ -130,6 +175,7 @@ class ResolvingKeyImporter(
     // if anything from the new translations is plural, we are converting the key to plural
     if (convertedToPlurals != null) {
       key.isPlural = true
+      key.pluralArgName = convertedToPlurals.argName
       keyService.save(key)
       translationsToModify.forEach { translation ->
         translation.text = convertedToPlurals.convertedStrings[translation]
@@ -144,7 +190,7 @@ class ResolvingKeyImporter(
 
   private fun List<TranslationToModify>.save() {
     this.forEach {
-      translationService.setTranslation(it.translation, it.text)
+      translationService.setTranslationText(it.translation, it.text)
       updatedTranslationIds.add(it.translation.id)
     }
   }
@@ -162,7 +208,7 @@ class ResolvingKeyImporter(
       }
 
     val images = imageUploadService.find(uploadedImagesIds)
-    checkImageUploadPermissions(images)
+    securityService.checkImageUploadPermissions(projectEntity.id, images)
 
     val createdScreenshots =
       images.associate {
@@ -172,37 +218,63 @@ class ResolvingKeyImporter(
     val locations = images.map { it.location }
 
     val allReferences =
-      screenshotService.getKeyScreenshotReferences(
-        importedKeys,
-        locations,
-      ).toMutableList()
+      screenshotService
+        .getKeyScreenshotReferences(
+          importedKeys,
+          locations,
+        ).toMutableList()
 
     val referencesToDelete = mutableListOf<KeyScreenshotReference>()
 
+    val mergedReferences = linkedMapOf<Pair<Long, Long>, MergedReferenceData>()
+
     keysToImport.forEach {
-      val key = getOrCreateKey(it)
+      val (key, _) = getOrCreateKey(it)
       it.screenshots?.forEach { screenshot ->
         val screenshotResult =
           createdScreenshots[screenshot.uploadedImageId]
             ?: throw NotFoundException(Message.ONE_OR_MORE_IMAGES_NOT_FOUND)
-        val info = ScreenshotInfoDto(screenshot.text, screenshot.positions)
 
-        screenshotService.addReference(
-          key = key.first,
-          screenshot = screenshotResult.screenshot,
-          info = info,
-          originalDimension = screenshotResult.originalDimension,
-          targetDimension = screenshotResult.targetDimension,
-        )
+        val referenceKey = key.id to screenshotResult.screenshot.id
+        val existing = mergedReferences[referenceKey]
+        if (existing != null) {
+          screenshot.positions?.let { newPositions ->
+            val combined: MutableList<KeyInScreenshotPositionDto> =
+              existing.mergedInfo.positions?.toMutableList() ?: mutableListOf()
+            combined.addAll(newPositions.filter { it !in combined })
+            existing.mergedInfo.positions = combined
+          }
+          if (existing.mergedInfo.text == null) {
+            existing.mergedInfo.text = screenshot.text
+          }
+          return@forEach
+        }
+
+        mergedReferences[referenceKey] =
+          MergedReferenceData(
+            key = key,
+            screenshotResult = screenshotResult,
+            mergedInfo = ScreenshotInfoDto(screenshot.text, screenshot.positions?.toMutableList()),
+          )
 
         val toDelete =
           allReferences.filter { reference ->
-            reference.key.id == key.first.id &&
+            reference.key.id == key.id &&
               reference.screenshot.location == screenshotResult.screenshot.location
           }
 
         referencesToDelete.addAll(toDelete)
       }
+    }
+
+    mergedReferences.values.forEach { refData ->
+      screenshotService.addReference(
+        key = refData.key,
+        screenshot = refData.screenshotResult.screenshot,
+        info = refData.mergedInfo,
+        originalDimension = refData.screenshotResult.originalDimension,
+        targetDimension = refData.screenshotResult.targetDimension,
+      )
     }
 
     screenshotService.removeScreenshotReferences(referencesToDelete)
@@ -211,17 +283,6 @@ class ResolvingKeyImporter(
       .map { (uploadedImageId, screenshotResult) ->
         uploadedImageId to screenshotResult.screenshot
       }.toMap()
-  }
-
-  private fun checkImageUploadPermissions(images: List<UploadedImage>) {
-    if (images.isNotEmpty()) {
-      securityService.checkScreenshotsUploadPermission(projectEntity.id)
-    }
-    images.forEach { image ->
-      if (authenticationFacade.authenticatedUser.id != image.userAccount.id) {
-        throw PermissionException(Message.CURRENT_USER_DOES_NOT_OWN_IMAGE)
-      }
-    }
   }
 
   private fun checkLanguagePermissions(keys: List<ImportKeysResolvableItemDto>) {
@@ -245,6 +306,10 @@ class ResolvingKeyImporter(
     key: Key,
     languageTag: String,
   ): Boolean {
+    if (resolvable.resolution == ImportTranslationResolution.FORCE_OVERRIDE) {
+      return false
+    }
+
     if (translationExists && resolvable.resolution == ImportTranslationResolution.NEW) {
       errors.add(
         listOf(Message.TRANSLATION_EXISTS.code, key.namespace?.name, key.name, languageTag),
@@ -282,6 +347,7 @@ class ResolvingKeyImporter(
           project = projectEntity,
           name = keyToImport.name,
           namespace = keyToImport.namespace,
+          branch = branch ?: keyToImport.branch,
           isPlural = false,
         )
       }
@@ -299,26 +365,52 @@ class ResolvingKeyImporter(
     @Suppress("UNCHECKED_CAST")
     val namespaceJoin: Join<Key, Namespace> = root.fetch(Key_.namespace, JoinType.LEFT) as Join<Key, Namespace>
 
-    val predicates =
-      keys.map { (namespace, name) ->
-        cb.and(
-          cb.equal(root.get(Key_.name), name),
-          cb.equalNullable(namespaceJoin.get(Namespace_.name), namespace),
+    @Suppress("UNCHECKED_CAST")
+    val branchJoin: Join<Key, Branch> = root.fetch(Key_.branch, JoinType.LEFT) as Join<Key, Branch>
+
+    val branchPredicate =
+      if (branch.isNullOrEmpty()) {
+        cb.or(
+          branchJoin.get(Branch_.id).isNull,
+          cb.isTrue(branchJoin.get(Branch_.isDefault)),
         )
-      }.toTypedArray()
+      } else {
+        cb.and(
+          cb.equal(branchJoin.get(Branch_.name), cb.literal(branch)),
+          cb.isNull(branchJoin.get(Branch_.deletedAt)),
+        )
+      }
+
+    val predicates =
+      keys
+        .map { (namespace, name) ->
+          cb.and(
+            cb.equal(root.get(Key_.name), name),
+            cb.equalNullable(namespaceJoin.get(Namespace_.name), namespace),
+          )
+        }.toTypedArray()
 
     val projectIdPath = root.get(Key_.project).get(Project_.id)
 
-    query.where(cb.and(cb.equal(projectIdPath, projectId), cb.or(*predicates)))
+    query.where(
+      cb.and(
+        cb.equal(projectIdPath, projectId),
+        cb.isNull(root.get(Key_.deletedAt)),
+        branchPredicate,
+        cb.or(*predicates),
+      ),
+    )
 
     return this.entityManager.createQuery(query).resultList
   }
 
   private val existingKeys by lazy {
-    this.getAllByNamespaceAndName(
-      projectId = projectEntity.id,
-      keys = keysToImport.map { it.namespace to it.name },
-    ).associateBy { (it.namespace?.name to it.name) }.toMutableMap()
+    this
+      .getAllByNamespaceAndName(
+        projectId = projectEntity.id,
+        keys = keysToImport.map { it.namespace to it.name },
+      ).associateBy { (it.namespace?.name to it.name) }
+      .toMutableMap()
   }
 
   private val languages by lazy {
@@ -327,17 +419,26 @@ class ResolvingKeyImporter(
   }
 
   private val keyLanguagesMap by lazy {
-    keysToImport.mapNotNull {
-      val key = existingKeys[it.namespace to it.name] ?: return@mapNotNull null
-      val keyLanguages = it.translations.keys.mapNotNull { tag -> languages[tag] }
-      key to keyLanguages
-    }.toMap()
+    keysToImport
+      .mapNotNull {
+        val key = existingKeys[it.namespace to it.name] ?: return@mapNotNull null
+        val keyLanguages = it.translations.keys.mapNotNull { tag -> languages[tag] }
+        key to keyLanguages
+      }.toMap()
   }
 
   private val existingTranslations by lazy {
-    translationService.get(keyLanguagesMap)
-      .groupBy { it.key.namespace?.name to it.key.name }.map { (key, translations) ->
+    translationService
+      .get(keyLanguagesMap)
+      .groupBy { it.key.namespace?.name to it.key.name }
+      .map { (key, translations) ->
         key to translations.associateBy { it.language.tag }
       }.toMap()
   }
+
+  private data class MergedReferenceData(
+    val key: Key,
+    val screenshotResult: CreateScreenshotResult,
+    val mergedInfo: ScreenshotInfoDto,
+  )
 }

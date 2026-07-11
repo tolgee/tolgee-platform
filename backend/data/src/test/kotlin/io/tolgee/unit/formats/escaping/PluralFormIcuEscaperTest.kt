@@ -32,8 +32,8 @@ class PluralFormIcuEscaperTest {
       "we are not entering escaped section: '' " +
         "so it doesn't ' have to be doubled. " +
         "This sequence: { should be immediately closed",
-    )
-      .escaped.assert.isEqualTo(
+    ).escaped.assert
+      .isEqualTo(
         "we are not entering escaped section: '' " +
           "so it doesn't ' have to be doubled. " +
           "This sequence: '{' should be immediately closed",

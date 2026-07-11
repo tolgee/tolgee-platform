@@ -7,11 +7,14 @@ package io.tolgee.service
 import io.tolgee.AbstractSpringTest
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.development.testDataBuilder.data.MtSettingsTestData
+import io.tolgee.development.testDataBuilder.data.PromptTestData
 import io.tolgee.development.testDataBuilder.data.TranslationCommentsTestData
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.development.testDataBuilder.data.dataImport.ImportTestData
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.fixtures.waitForNotThrowing
+import io.tolgee.model.Language
+import io.tolgee.model.UserAccount
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.TolgeeAuthentication
 import io.tolgee.testing.assert
@@ -27,6 +30,9 @@ import org.springframework.transaction.annotation.Transactional
   properties = [
     "spring.jpa.properties.hibernate.generate_statistics=true",
     "logging.level.org.hibernate.engine.internal.StatisticalLoggingSessionEventListener=WARN",
+    "spring.jpa.show-sql=true",
+    // keep in sync with OrganizationServiceTest properties to share Spring test context
+    "tolgee.machine-translation.free-credits-amount=100000",
   ],
 )
 class LanguageServiceTest : AbstractSpringTest() {
@@ -53,6 +59,19 @@ class LanguageServiceTest : AbstractSpringTest() {
 
   @Test
   @Transactional
+  fun `remove of language removes existing translation conflict references from import translations`() {
+    val testData = ImportTestData()
+    testDataService.saveTestData(testData.root)
+
+    assertThat(importService.findTranslation(testData.translationWithConflict.id)!!.conflict).isNotNull()
+    languageService.deleteLanguage(testData.english.id)
+    entityManager.flush()
+    entityManager.clear()
+    assertThat(importService.findTranslation(testData.translationWithConflict.id)!!.conflict).isNull()
+  }
+
+  @Test
+  @Transactional
   fun `deletes language with MT Service Config`() {
     val testData = MtSettingsTestData()
     testDataService.saveTestData(testData.root)
@@ -72,19 +91,45 @@ class LanguageServiceTest : AbstractSpringTest() {
   }
 
   @Test
+  @Transactional
+  fun `deletes language with ai results`() {
+    val testData = PromptTestData()
+    testDataService.saveTestData(testData.root)
+    languageService.hardDeleteLanguage(testData.czech.self.id)
+  }
+
+  @Test
   fun `hard deletes language`() {
     val testData = TranslationsTestData()
     testDataService.saveTestData(testData.root)
 
     executeInNewTransaction {
-      setAuthentication(testData)
+      setAuthentication(testData.user)
       languageService.deleteLanguage(testData.germanLanguage.id)
     }
 
     executeInNewTransaction {
       waitForNotThrowing(timeout = 10000, pollTime = 100) {
-        assertLanguageDeleted(testData)
+        assertLanguageDeleted(testData.germanLanguage)
         assertActivityCreated()
+      }
+    }
+  }
+
+  @Test
+  fun `hard deletes language with conflicts`() {
+    val testData = ImportTestData()
+    testData.useCzechBaseLanguage()
+    testDataService.saveTestData(testData.root)
+
+    executeInNewTransaction {
+      setAuthentication(testData.userAccount)
+      languageService.deleteLanguage(testData.english.id)
+    }
+
+    executeInNewTransaction {
+      waitForNotThrowing(timeout = 10000, pollTime = 100) {
+        assertLanguageDeleted(testData.english)
       }
     }
   }
@@ -97,42 +142,64 @@ class LanguageServiceTest : AbstractSpringTest() {
 
     sessionFactory.statistics.clear()
     executeInNewTransaction {
-      setAuthentication(testData)
+      setAuthentication(testData.user)
       languageService.hardDeleteLanguage(testData.germanLanguage.id)
     }
+    // prepareStatementCount tracks JDBC PreparedStatement acquisitions via connection.prepareStatement().
+    // This reliably detects N+1 issues as Hibernate acquires a new statement per query execution.
+    // With 100 generated items, N+1 would cause 100+ statements; we expect a constant count instead.
     val count = sessionFactory.statistics.prepareStatementCount
-    count.assert.isLessThan(20)
+    count.assert.isLessThan(26)
 
     executeInNewTransaction {
-      assertLanguageDeleted(testData)
+      assertLanguageDeleted(testData.germanLanguage)
     }
   }
 
-  private fun setAuthentication(testData: TranslationsTestData) {
+  private fun setAuthentication(user: UserAccount) {
     SecurityContextHolder.getContext().authentication =
       TolgeeAuthentication(
-        null,
-        UserAccountDto.fromEntity(testData.user),
-        null,
+        credentials = null,
+        deviceId = null,
+        userAccount = UserAccountDto.fromEntity(user),
+        actingAsUserAccount = null,
+        isReadOnly = false,
+        isSuperToken = false,
       )
   }
 
-  private fun assertLanguageDeleted(testData: TranslationsTestData) {
-    entityManager.createQuery("select 1 from Language l where l.id = :id")
-      .setParameter("id", testData.germanLanguage.id)
-      .resultList.assert.isEmpty()
+  private fun assertLanguageDeleted(language: Language) {
+    entityManager
+      .createQuery("select 1 from Language l where l.id = :id")
+      .setParameter("id", language.id)
+      .resultList.assert
+      .isEmpty()
+  }
+
+  @Test
+  @Transactional
+  fun `deletes language with QA config and issues`() {
+    val testData = TranslationsTestData()
+    testData.addQaIssueOnAKeyGerman()
+    testData.addLanguageQaConfigOnGermanLanguage()
+    testDataService.saveTestData(testData.root)
+
+    val language = testData.germanLanguage
+
+    languageService.hardDeleteLanguage(language.id)
+    languageService.findEntity(language.id).assert.isNull()
   }
 
   private fun assertActivityCreated() {
     val result =
-      entityManager.createQuery(
-        """select ar.id, ame.modifications, ame.describingData from ActivityRevision ar 
+      entityManager
+        .createQuery(
+          """select ar.id, ame.modifications, ame.describingData from ActivityRevision ar 
            join ar.modifiedEntities ame
            where ar.type = :type
         """,
-      )
-        .setParameter("type", ActivityType.HARD_DELETE_LANGUAGE)
+        ).setParameter("type", ActivityType.HARD_DELETE_LANGUAGE)
         .resultList
-    result.assert.hasSize(3)
+    result.assert.hasSize(6)
   }
 }

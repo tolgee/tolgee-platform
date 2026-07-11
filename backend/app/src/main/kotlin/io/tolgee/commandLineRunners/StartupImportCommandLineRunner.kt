@@ -12,8 +12,9 @@ import org.springframework.stereotype.Component
 class StartupImportCommandLineRunner(
   val tolgeeProperties: TolgeeProperties,
   val startupImportService: StartupImportService,
-) :
-  CommandLineRunner, ApplicationListener<ContextClosedEvent>, Ordered {
+) : CommandLineRunner,
+  ApplicationListener<ContextClosedEvent>,
+  Ordered {
   override fun run(vararg args: String) {
     startupImportService.importFiles()
   }

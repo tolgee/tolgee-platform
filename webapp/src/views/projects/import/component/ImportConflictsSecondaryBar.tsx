@@ -6,7 +6,7 @@ import {
   Switch,
   Typography,
 } from '@mui/material';
-import { CheckCircle, Warning } from '@mui/icons-material';
+import { CheckCircle, AlertTriangle } from '@untitled-ui/icons-react';
 import { T } from '@tolgee/react';
 import clsx from 'clsx';
 
@@ -33,11 +33,13 @@ const StyledCounter = styled('div')`
   }
 `;
 
-export const ImportConflictsSecondaryBar: FunctionComponent<{
-  onShowResolvedToggle: () => void;
-  showResolved: boolean;
-  languageData: components['schemas']['ImportLanguageModel'];
-}> = (props) => {
+export const ImportConflictsSecondaryBar: FunctionComponent<
+  React.PropsWithChildren<{
+    onShowResolvedToggle: () => void;
+    showResolved: boolean;
+    languageData: components['schemas']['ImportLanguageModel'];
+  }>
+> = (props) => {
   const resolvedCount = props.languageData.resolvedCount;
 
   return (
@@ -53,7 +55,7 @@ export const ImportConflictsSecondaryBar: FunctionComponent<{
               {resolvedCount !== undefined ? resolvedCount : '??'}
             </Typography>
 
-            <Warning className={clsx('validIcon', 'conflictsIcon')} />
+            <AlertTriangle className={clsx('validIcon', 'conflictsIcon')} />
 
             <Typography
               variant="body1"

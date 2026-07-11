@@ -10,6 +10,7 @@ import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andIsUnauthorized
 import io.tolgee.fixtures.andPrettyPrint
+import io.tolgee.fixtures.satisfies
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
@@ -39,7 +40,7 @@ class SecuredV2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest()
   @Test
   fun getScreenshotFileNoTimestamp() {
     val image = imageUploadService.store(screenshotFile, userAccount!!, null)
-    performAuthGet("/uploaded-images/${image.filename}.jpg").andIsNotFound
+    performGet("/uploaded-images/${image.filename}.jpg").andIsNotFound
   }
 
   @Test
@@ -55,7 +56,7 @@ class SecuredV2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest()
       )
 
     moveCurrentDate(Duration.ofSeconds(10))
-    performAuthGet("/uploaded-images/${image.filename}.jpg?token=$token").andIsUnauthorized
+    performGet("/uploaded-images/${image.filename}.jpg?token=$token").andIsUnauthorized
   }
 
   @Test
@@ -71,8 +72,10 @@ class SecuredV2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest()
       )
 
     val storedImage =
-      performAuthGet("/uploaded-images/${image.filename}.png?token=$token")
-        .andIsOk.andReturn().response.contentAsByteArray
+      performGet("/uploaded-images/${image.filename}.png?token=$token")
+        .andIsOk
+        .andReturn()
+        .response.contentAsByteArray
 
     assertThat(storedImage).isEqualTo(fileStorage.readFile("uploadedImages/" + image.filename + ".png"))
   }

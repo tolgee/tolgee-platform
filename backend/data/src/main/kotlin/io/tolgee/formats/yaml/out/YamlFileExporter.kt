@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.dtos.IExportParams
 import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.ExportMessageFormat
+import io.tolgee.formats.genericStructuredFile.out.CustomPrettyPrinter
 import io.tolgee.formats.genericStructuredFile.out.GenericStructuredFileExporter
 import io.tolgee.formats.nestedStructureModel.StructureModelBuilder
+import io.tolgee.service.export.ExportFilePathProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.export.exporters.FileExporter
 import java.io.InputStream
@@ -15,9 +17,9 @@ class YamlFileExporter(
   val exportParams: IExportParams,
   objectMapper: ObjectMapper,
   projectIcuPlaceholdersSupport: Boolean,
+  customPrettyPrinter: CustomPrettyPrinter,
+  filePathProvider: ExportFilePathProvider,
 ) : FileExporter {
-  private val fileExtension: String = exportParams.format.extension
-
   private val messageFormat =
     when (exportParams.format) {
       ExportFormat.YAML_RUBY -> ExportMessageFormat.RUBY_SPRINTF
@@ -29,11 +31,12 @@ class YamlFileExporter(
       translations = translations,
       exportParams = exportParams,
       projectIcuPlaceholdersSupport = projectIcuPlaceholdersSupport,
-      fileExtension = fileExtension,
       objectMapper = objectMapper,
       rootKeyIsLanguageTag = rootKeyIsLanguageTag,
-      messageFormat = messageFormat,
       supportArrays = supportArrays,
+      messageFormat = messageFormat,
+      customPrettyPrinter = customPrettyPrinter,
+      filePathProvider = filePathProvider,
     )
 
   private val rootKeyIsLanguageTag

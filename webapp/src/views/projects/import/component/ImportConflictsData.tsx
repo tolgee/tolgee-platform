@@ -1,4 +1,5 @@
 import React, { FunctionComponent, useState } from 'react';
+import { KeyName } from 'tg.component/KeyName/KeyName';
 import { Box, Grid, Pagination, Typography } from '@mui/material';
 import { T } from '@tolgee/react';
 
@@ -11,9 +12,11 @@ import { ImportConflictsDataHeader } from './ImportConflictsDataHeader';
 import { ImportConflictsSecondaryBar } from './ImportConflictsSecondaryBar';
 import { useConflictsHelper } from '../hooks/useConflictsHelper';
 
-export const ImportConflictsData: FunctionComponent<{
-  row: components['schemas']['ImportLanguageModel'];
-}> = (props) => {
+export const ImportConflictsData: FunctionComponent<
+  React.PropsWithChildren<{
+    row: components['schemas']['ImportLanguageModel'];
+  }>
+> = (props) => {
   const languageId = props.row.id;
   const [showResolved, setShowResolved] = useState(true);
   const [page, setPage] = useState(0);
@@ -57,7 +60,9 @@ export const ImportConflictsData: FunctionComponent<{
                       variant={'body2'}
                       data-cy="import-resolution-dialog-key-name"
                     >
-                      <b>{t.keyName}</b>
+                      <b>
+                        <KeyName name={t.keyName} />
+                      </b>
                     </Typography>
                   </Box>
                 </Grid>

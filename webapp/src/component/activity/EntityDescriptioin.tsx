@@ -13,7 +13,7 @@ type Props = {
   showAllReferences?: boolean;
 };
 
-export const EntityDescription: React.FC<Props> = ({
+export const EntityDescription: React.FC<React.PropsWithChildren<Props>> = ({
   entity,
   showAllReferences,
 }) => {

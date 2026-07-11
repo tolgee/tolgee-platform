@@ -1,5 +1,5 @@
 import { IconButton, Tooltip } from '@mui/material';
-import { Clear } from '@mui/icons-material';
+import { XClose } from '@untitled-ui/icons-react';
 import { T, useTranslate } from '@tolgee/react';
 
 import { confirmation } from 'tg.hooks/confirmation';
@@ -52,7 +52,7 @@ export const RemoveUserButton = (props: {
         onClick={removeUser}
         size="small"
       >
-        <Clear />
+        <XClose />
       </IconButton>
     </Tooltip>
   );

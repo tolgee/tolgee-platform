@@ -42,3 +42,46 @@ export const useDeleteTag = () =>
     url: '/v2/projects/{projectId}/keys/{keyId}/tags/{tagId}',
     method: 'delete',
   });
+
+export const usePutTask = () =>
+  useApiMutation({
+    url: '/v2/projects/{projectId}/tasks/{taskNumber}',
+    method: 'put',
+  });
+
+export const useFinishTask = () =>
+  useApiMutation({
+    url: '/v2/projects/{projectId}/tasks/{taskNumber}/finish',
+    method: 'put',
+    invalidatePrefix: ['/v2/projects/{projectId}/tasks', '/v2/user-tasks'],
+  });
+
+export const usePutTaskTranslation = () =>
+  useApiMutation({
+    url: '/v2/projects/{projectId}/tasks/{taskNumber}/keys/{keyId}',
+    method: 'put',
+  });
+
+export const usePutLabel = () =>
+  useApiMutation({
+    url: '/v2/projects/{projectId}/translations/{translationId}/label/{labelId}',
+    method: 'put',
+  });
+
+export const useRemoveLabel = () =>
+  useApiMutation({
+    url: '/v2/projects/{projectId}/translations/{translationId}/label/{labelId}',
+    method: 'delete',
+  });
+
+export const usePutLabelWithoutTranslation = () =>
+  useApiMutation({
+    url: '/v2/projects/{projectId}/translations/label',
+    method: 'put',
+  });
+
+export const usePostTranslationSuggestion = () =>
+  useApiMutation({
+    url: '/v2/projects/{projectId}/languages/{languageId}/key/{keyId}/suggestion',
+    method: 'post',
+  });

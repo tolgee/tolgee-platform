@@ -1,23 +1,25 @@
 import React, { useState } from 'react';
 import { Box, IconButton } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
-import { Settings } from '@mui/icons-material';
+import { Settings01 } from '@untitled-ui/icons-react';
 
-import { LanguageItem } from '../LanguageItem';
+import { LanguageItem } from '../../../../component/languages/LanguageItem';
 import {
   TABLE_CENTERED,
   TABLE_FIRST_CELL,
   TABLE_LAST_CELL,
-} from '../tableStyles';
+} from '../../../../component/languages/tableStyles';
 import { ServiceAvatar } from './ServiceAvatar';
-import { LanguageSettingsDialog } from './LanguageSettingsDialog';
+import { LanguageSettingsDialog } from './LanguageSettings/LanguageSettingsDialog';
 import { RowData, ServiceType } from './types';
 
 type Props = {
   rowData: RowData;
 };
 
-export const LanguageRow: React.FC<Props> = ({ rowData }) => {
+export const LanguageRow: React.FC<React.PropsWithChildren<Props>> = ({
+  rowData,
+}) => {
   const { t } = useTranslate();
 
   const { inheritedFromDefault, settings } = rowData;
@@ -83,7 +85,7 @@ export const LanguageRow: React.FC<Props> = ({ rowData }) => {
           data-cy="machine-translations-settings-language-options"
           data-cy-language={rowData.settings.language?.tag || 'default'}
         >
-          <Settings />
+          <Settings01 />
         </IconButton>
       </Box>
       {settingsOpen && (

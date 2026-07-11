@@ -1,10 +1,14 @@
 package io.tolgee.unit.formats.po.out
 
 import io.tolgee.dtos.request.export.ExportParams
+import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.ExportMessageFormat
+import io.tolgee.formats.po.PO_MSGCTXT_KEY_SEPARATOR
 import io.tolgee.formats.po.out.PoFileExporter
 import io.tolgee.model.ILanguage
 import io.tolgee.model.enums.TranslationState
+import io.tolgee.service.export.ExportFilePathProvider
+import io.tolgee.service.export.ExportFileStructureTemplateProvider
 import io.tolgee.service.export.dataProvider.ExportKeyView
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.testing.assert
@@ -29,10 +33,11 @@ class PoFileExporterTest {
       "MIME-Version: 1.0\n"
       "Content-Type: text/plain; charset=UTF-8\n"
       "Content-Transfer-Encoding: 8bit\n"
-      "Plural-Forms: nplurals = 3; plural = (n === 1 ? 0 : (n >= 2 && n <= 4) ? 1 : 2)\n"
+      "Plural-Forms: nplurals=3; plural=(n == 1 ? 0 : (n >= 2 && n <= 4) ? 1 : 2)\n"
       "X-Generator: Tolgee\n"
-      
+
       msgid "key"
+      msgid_plural "key"
       msgstr[0] "%d den"
       msgstr[1] "dny"
       msgstr[2] "%d dnů"${"\n"}
@@ -46,10 +51,11 @@ class PoFileExporterTest {
       "MIME-Version: 1.0\n"
       "Content-Type: text/plain; charset=UTF-8\n"
       "Content-Transfer-Encoding: 8bit\n"
-      "Plural-Forms: nplurals = 2; plural = (n !== 1)\n"
+      "Plural-Forms: nplurals=2; plural=(n != 1)\n"
       "X-Generator: Tolgee\n"
-      
+
       msgid "key"
+      msgid_plural "key"
       msgstr[0] "%d day"
       msgstr[1] "%d days"${"\n"}
       """.trimIndent(),
@@ -68,9 +74,9 @@ class PoFileExporterTest {
       "MIME-Version: 1.0\n"
       "Content-Type: text/plain; charset=UTF-8\n"
       "Content-Transfer-Encoding: 8bit\n"
-      "Plural-Forms: nplurals = 2; plural = (n !== 1)\n"
+      "Plural-Forms: nplurals=2; plural=(n != 1)\n"
       "X-Generator: Tolgee\n"
-      
+
       msgid "key"
       msgstr "Hello! %s, how are you?"${"\n"}
       """.trimIndent(),
@@ -84,7 +90,7 @@ class PoFileExporterTest {
       "MIME-Version: 1.0\n"
       "Content-Type: text/plain; charset=UTF-8\n"
       "Content-Transfer-Encoding: 8bit\n"
-      "Plural-Forms: nplurals = 3; plural = (n === 1 ? 0 : (n >= 2 && n <= 4) ? 1 : 2)\n"
+      "Plural-Forms: nplurals=3; plural=(n == 1 ? 0 : (n >= 2 && n <= 4) ? 1 : 2)\n"
       "X-Generator: Tolgee\n"
 
       msgid "key"
@@ -109,10 +115,14 @@ class PoFileExporterTest {
       "MIME-Version: 1.0\n"
       "Content-Type: text/plain; charset=UTF-8\n"
       "Content-Transfer-Encoding: 8bit\n"
-      "Plural-Forms: nplurals = 3; plural = (n === 1 ? 0 : (n >= 2 && n <= 4) ? 1 : 2)\n"
+      "Plural-Forms: nplurals=3; plural=(n == 1 ? 0 : (n >= 2 && n <= 4) ? 1 : 2)\n"
       "X-Generator: Tolgee\n"
 
       msgid ""
+      "I am key\n"
+      "Look at me\n"
+      "Hello!"
+      msgid_plural ""
       "I am key\n"
       "Look at me\n"
       "Hello!"
@@ -148,17 +158,125 @@ class PoFileExporterTest {
       "MIME-Version: 1.0\n"
       "Content-Type: text/plain; charset=UTF-8\n"
       "Content-Transfer-Encoding: 8bit\n"
-      "Plural-Forms: nplurals = 2; plural = (n !== 1)\n"
+      "Plural-Forms: nplurals=2; plural=(n != 1)\n"
       "X-Generator: Tolgee\n"
-      
+
       msgid "key"
       msgstr ""
       "\" \n"
       " \\\" \\\\"
-      
+
       """.trimIndent(),
     )
   }
+
+  @Test
+  fun `exports msgctxt for keys containing separator`() {
+    val data =
+      getExported(
+        getExporter(
+          listOf(
+            translationView(1, "menu${PO_MSGCTXT_KEY_SEPARATOR}Open", "Öffnen"),
+            translationView(2, "verb${PO_MSGCTXT_KEY_SEPARATOR}Open", "Öffnen (Verb)"),
+            translationView(3, "Open", "Öffnen (kein Kontext)"),
+          ),
+        ),
+      )
+    data.assertFile(
+      "de.po",
+      """
+    |msgid ""
+    |msgstr ""
+    |"Language: de\n"
+    |"MIME-Version: 1.0\n"
+    |"Content-Type: text/plain; charset=UTF-8\n"
+    |"Content-Transfer-Encoding: 8bit\n"
+    |"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+    |"X-Generator: Tolgee\n"
+    |
+    |msgctxt "menu"
+    |msgid "Open"
+    |msgstr "Öffnen"
+    |
+    |msgctxt "verb"
+    |msgid "Open"
+    |msgstr "Öffnen (Verb)"
+    |
+    |msgid "Open"
+    |msgstr "Öffnen (kein Kontext)"
+    |
+      """.trimMargin(),
+    )
+  }
+
+  @Test
+  fun `exports plural with msgctxt and uses split msgid as msgid_plural fallback`() {
+    val data =
+      getExported(
+        getExporter(
+          listOf(
+            translationView(
+              keyId = 1,
+              keyName = "items${PO_MSGCTXT_KEY_SEPARATOR}%d item",
+              text = "{count, plural, one {# Element} other {# Elemente}}",
+              isPlural = true,
+            ),
+          ),
+        ),
+      )
+    data.assertFile(
+      "de.po",
+      """
+    |msgid ""
+    |msgstr ""
+    |"Language: de\n"
+    |"MIME-Version: 1.0\n"
+    |"Content-Type: text/plain; charset=UTF-8\n"
+    |"Content-Transfer-Encoding: 8bit\n"
+    |"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+    |"X-Generator: Tolgee\n"
+    |
+    |msgctxt "items"
+    |msgid "%d item"
+    |msgid_plural "%d item"
+    |msgstr[0] "%d Element"
+    |msgstr[1] "%d Elemente"
+    |
+      """.trimMargin(),
+    )
+  }
+
+  @Test
+  fun `escapes quotes and newlines inside msgctxt`() {
+    val data =
+      getExported(
+        getExporter(
+          listOf(
+            translationView(
+              keyId = 1,
+              keyName = "a \"quoted\" ctx\nwith newline${PO_MSGCTXT_KEY_SEPARATOR}Save",
+              text = "Speichern",
+            ),
+          ),
+        ),
+      )
+    data["de.po"].assert.contains("msgctxt ")
+    data["de.po"].assert.contains("\\\"quoted\\\"")
+    data["de.po"].assert.contains("msgid \"Save\"")
+  }
+
+  private fun translationView(
+    keyId: Long,
+    keyName: String,
+    text: String,
+    isPlural: Boolean = false,
+  ) = ExportTranslationView(
+    keyId,
+    text,
+    TranslationState.TRANSLATED,
+    ExportKeyView(keyId, keyName, isPlural = isPlural),
+    "de",
+  )
 
   @Test
   fun `honors the provided fileStructureTemplate`() {
@@ -267,10 +385,11 @@ class PoFileExporterTest {
     |"MIME-Version: 1.0\n"
     |"Content-Type: text/plain; charset=UTF-8\n"
     |"Content-Transfer-Encoding: 8bit\n"
-    |"Plural-Forms: nplurals = 3; plural = (n === 1 ? 0 : (n >= 2 && n <= 4) ? 1 : 2)\n"
+    |"Plural-Forms: nplurals=3; plural=(n == 1 ? 0 : (n >= 2 && n <= 4) ? 1 : 2)\n"
     |"X-Generator: Tolgee\n"
     |
     |msgid "key3"
+    |msgid_plural "key3"
     |msgstr[0] "%d den %s"
     |msgstr[1] "%d dny"
     |msgstr[2] "%d dní"
@@ -314,10 +433,11 @@ class PoFileExporterTest {
     |"MIME-Version: 1.0\n"
     |"Content-Type: text/plain; charset=UTF-8\n"
     |"Content-Transfer-Encoding: 8bit\n"
-    |"Plural-Forms: nplurals = 3; plural = (n === 1 ? 0 : (n >= 2 && n <= 4) ? 1 : 2)\n"
+    |"Plural-Forms: nplurals=3; plural=(n == 1 ? 0 : (n >= 2 && n <= 4) ? 1 : 2)\n"
     |"X-Generator: Tolgee\n"
     |
     |msgid "key3"
+    |msgid_plural "key3"
     |msgstr[0] "# den {icuParam}"
     |msgstr[1] "# dny"
     |msgstr[2] "# dní"
@@ -360,11 +480,18 @@ class PoFileExporterTest {
       exportParams = params,
       projectIcuPlaceholdersSupport = isProjectIcuPlaceholdersEnabled,
       baseLanguage = baseLanguageMock,
-      baseTranslationsProvider = { listOf() },
+      filePathProvider =
+        ExportFilePathProvider(
+          template = ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate(),
+          extension = params.format.extension,
+        ),
     )
   }
 
   private fun getExportParams(): ExportParams {
-    return ExportParams().also { it.messageFormat = ExportMessageFormat.PHP_SPRINTF }
+    return ExportParams().also {
+      it.messageFormat = ExportMessageFormat.PHP_SPRINTF
+      it.format = ExportFormat.PO
+    }
   }
 }

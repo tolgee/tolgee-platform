@@ -6,6 +6,8 @@ import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.api.v2.controllers.IController
 import io.tolgee.component.KeyComplexEditHelper
+import io.tolgee.constants.Feature
+import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.queryResults.KeyView
 import io.tolgee.dtos.request.GetKeysRequestDto
@@ -16,6 +18,7 @@ import io.tolgee.dtos.request.key.DeleteKeysDto
 import io.tolgee.dtos.request.key.EditKeyDto
 import io.tolgee.dtos.request.translation.ImportKeysDto
 import io.tolgee.dtos.request.translation.importKeysResolvable.ImportKeysResolvableDto
+import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.key.KeyImportResolvableResultModel
 import io.tolgee.hateoas.key.KeyModel
@@ -37,11 +40,14 @@ import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
 import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authentication.ReadOnlyOperation
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.key.KeySearchResultView
 import io.tolgee.service.key.KeyService
+import io.tolgee.service.project.ProjectFeatureGuard
 import io.tolgee.service.security.SecurityService
+import io.tolgee.util.withoutSort
 import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.context.ApplicationContext
@@ -70,7 +76,7 @@ import org.springframework.web.bind.annotation.RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(
   value = [
-    "/v2/projects/{projectId}/keys",
+    "/v2/projects/{projectId:[0-9]+}/keys",
     "/v2/projects/keys",
   ],
 )
@@ -91,6 +97,7 @@ class KeyController(
   private val screenshotModelAssembler: ScreenshotModelAssembler,
   private val keyWithScreenshotsModelAssembler: KeyWithScreenshotsModelAssembler,
   private val languageModelAssembler: LanguageModelAssembler,
+  private val projectFeatureGuard: ProjectFeatureGuard,
 ) : IController {
   @PostMapping(value = ["/create", ""])
   @Operation(summary = "Create new key")
@@ -102,7 +109,7 @@ class KeyController(
   @OpenApiHideFromPublicDocs(
     paths = [
       // inconsistent REST path
-      "/v2/projects/{projectId}/keys/create",
+      "/v2/projects/{projectId:[0-9]+}/keys/create",
     ],
   )
   fun create(
@@ -113,7 +120,9 @@ class KeyController(
     checkTranslatePermission(dto)
     checkCanStoreBigMeta(dto)
     checkStateChangePermission(dto)
-
+    checkNamespaceFeature(dto.namespace)
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, dto.branch)
+    securityService.checkBranchModify(projectHolder.projectEntity, dto.branch)
     val key = keyService.create(projectHolder.projectEntity, dto)
     return ResponseEntity(keyWithDataModelAssembler.toModel(key), HttpStatus.CREATED)
   }
@@ -142,8 +151,11 @@ class KeyController(
     @ParameterObject
     @SortDefault("id")
     pageable: Pageable,
+    @RequestParam
+    branch: String? = null,
   ): PagedModel<KeyModel> {
-    val data = keyService.getPaged(projectHolder.project.id, pageable)
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
+    val data = keyService.getPaged(projectHolder.project.id, branch, pageable)
     return keyPagedResourcesAssembler.toModel(data, keyModelAssembler)
   }
 
@@ -161,23 +173,31 @@ class KeyController(
   ): KeyModel {
     val key = keyService.findOptional(id).orElseThrow { NotFoundException() }
     key.checkInProject()
+    checkNamespaceFeature(dto.namespace)
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, dto.branch)
     keyService.edit(id, dto)
-    val view = KeyView(key.id, key.name, key?.namespace?.name, key.keyMeta?.description, key.keyMeta?.custom)
+    val view =
+      KeyView(key.id, key.name, key?.namespace?.name, key.keyMeta?.description, key.keyMeta?.custom, key.branch?.name)
     return keyModelAssembler.toModel(view)
   }
 
   @DeleteMapping(value = ["/{ids:[0-9,]+}"])
   @Transactional
   @Operation(summary = "Delete one or multiple keys")
-  @RequestActivity(ActivityType.KEY_DELETE)
+  @RequestActivity(ActivityType.KEY_SOFT_DELETE)
   @RequiresProjectPermissions([Scope.KEYS_DELETE])
   @AllowApiAccess
   @OpenApiOrderExtension(5)
   fun delete(
     @PathVariable ids: Set<Long>,
   ) {
-    keyService.findAllWithProjectsAndMetas(ids).forEach { it.checkInProject() }
-    keyService.deleteMultiple(ids)
+    keyService.findAllWithProjectsAndMetas(ids).forEach {
+      it.run {
+        checkInProject()
+        checkBranchPermission()
+      }
+    }
+    keyService.softDeleteMultiple(ids)
   }
 
   @PutMapping(value = ["/{id}/complex-update"])
@@ -193,6 +213,8 @@ class KeyController(
     @RequestBody @Valid
     dto: ComplexEditKeyDto,
   ): KeyWithDataModel {
+    checkNamespaceFeature(dto.namespace)
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, dto.branch)
     return KeyComplexEditHelper(applicationContext, id, dto).doComplexUpdate()
   }
 
@@ -204,7 +226,7 @@ class KeyController(
       "Delete one or multiple keys by their IDs in request body. Useful for larger requests" +
         " esxceeding allowed URL length.",
   )
-  @RequestActivity(ActivityType.KEY_DELETE)
+  @RequestActivity(ActivityType.KEY_SOFT_DELETE)
   @RequiresProjectPermissions([Scope.KEYS_DELETE])
   @AllowApiAccess
   fun delete(
@@ -227,19 +249,20 @@ class KeyController(
   fun importKeys(
     @RequestBody @Valid
     dto: ImportKeysDto,
+    @RequestParam branch: String?,
   ) {
-    securityService.checkLanguageTranslatePermissionByTag(
-      projectHolder.project.id,
-      dto.keys.flatMap { it.translations.keys }.toSet(),
-    )
-
-    keyService.importKeys(dto.keys, projectHolder.projectEntity)
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
+    keyService.importKeys(dto.keys, projectHolder.projectEntity, branch)
   }
 
   @PostMapping("/import-resolvable")
   @Operation(
     summary = "Import keys (resolvable)",
-    description = "Import's new keys with translations. Translations can be updated, when specified.",
+    description = """
+      Import's new keys with translations. Translations can be updated, when specified.\n\n
+      DEPRECATED: Use /v2/projects/{projectId}/single-step-import-resolvable instead.
+    """,
+    deprecated = true,
   )
   @RequestActivity(ActivityType.IMPORT)
   @UseDefaultPermissions // Security: permissions are handled in service
@@ -247,9 +270,11 @@ class KeyController(
   fun importKeys(
     @RequestBody @Valid
     dto: ImportKeysResolvableDto,
+    @RequestParam branch: String? = null,
   ): KeyImportResolvableResultModel {
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
     val uploadedImageToScreenshotMap =
-      keyService.importKeysResolvable(dto.keys, projectHolder.projectEntity)
+      keyService.importKeysResolvable(dto.keys, projectHolder.projectEntity, branch)
     val screenshots =
       uploadedImageToScreenshotMap.screenshots
         .map { (uploadedImageId, screenshot) ->
@@ -268,7 +293,9 @@ class KeyController(
     summary = "Search for keys",
     description =
       "This endpoint helps you to find desired key by keyName, " +
-        "base translation or translation in specified language.",
+        "base translation or translation in specified language." +
+        "\n\n" +
+        "Sort is ignored for this request.",
   )
   @RequiresProjectPermissions([Scope.KEYS_VIEW])
   @AllowApiAccess
@@ -279,15 +306,18 @@ class KeyController(
     @RequestParam
     @Parameter(description = "Language to search in")
     languageTag: String? = null,
+    @RequestParam
+    branch: String? = null,
     @ParameterObject pageable: Pageable,
   ): PagedModel<KeySearchSearchResultModel> {
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
     languageTag?.let {
       securityService.checkLanguageViewPermissionByTag(projectHolder.project.id, listOf(languageTag))
     }
     projectHolder.projectEntity.baseLanguage?.let {
       securityService.checkLanguageViewPermissionByTag(projectHolder.project.id, listOf(it.tag))
     }
-    val result = keyService.searchKeys(search, languageTag, projectHolder.project, pageable)
+    val result = keyService.searchKeys(search, languageTag, projectHolder.project, branch, pageable.withoutSort)
     return pagedResourcesAssembler.toModel(result, keySearchResultModelAssembler)
   }
 
@@ -298,14 +328,18 @@ class KeyController(
       "Returns information about keys. (KeyData, Screenshots, Translation in specified language)" +
         "If key is not found, it's not included in the response.",
   )
+  @ReadOnlyOperation
   @RequiresProjectPermissions([Scope.KEYS_VIEW, Scope.SCREENSHOTS_VIEW, Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   fun getInfo(
     @RequestBody
     @Valid
     dto: GetKeysRequestDto,
+    @RequestParam
+    branch: String? = null,
   ): CollectionModel<KeyWithDataModel> {
-    val result = keyService.getKeysInfo(dto, projectHolder.project.id)
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
+    val result = keyService.getKeysInfo(dto, projectHolder.project.id, branch)
     return keyWithScreenshotsModelAssembler.toCollectionModel(result)
   }
 
@@ -348,6 +382,10 @@ class KeyController(
     keyService.checkInProject(this, projectHolder.project.id)
   }
 
+  private fun Key.checkBranchPermission() {
+    securityService.checkBranchModify(this)
+  }
+
   private fun Project.checkScreenshotsUploadPermission() {
     securityService.checkScreenshotsUploadPermission(this.id)
   }
@@ -377,6 +415,12 @@ class KeyController(
   private fun checkScreenshotUploadPermissions(dto: CreateKeyDto) {
     if (dto.screenshotUploadedImageIds != null || !dto.screenshots.isNullOrEmpty()) {
       projectHolder.projectEntity.checkScreenshotsUploadPermission()
+    }
+  }
+
+  private fun checkNamespaceFeature(namespace: String?) {
+    if (!projectHolder.projectEntity.useNamespaces && namespace != null) {
+      throw ValidationException(Message.NAMESPACE_CANNOT_BE_USED_WHEN_FEATURE_IS_DISABLED)
     }
   }
 }

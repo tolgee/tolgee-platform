@@ -12,4 +12,5 @@ class ContentStorageModel(
   val publicUrlPrefix: String?,
   val azureContentStorageConfig: AzureContentStorageConfigModel?,
   val s3ContentStorageConfig: S3ContentStorageConfigModel?,
-) : RepresentationModel<ContentStorageModel>(), Serializable
+) : RepresentationModel<ContentStorageModel>(),
+  Serializable

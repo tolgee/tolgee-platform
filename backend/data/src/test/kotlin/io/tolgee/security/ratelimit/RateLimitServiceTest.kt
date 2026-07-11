@@ -18,8 +18,10 @@ package io.tolgee.security.ratelimit
 
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.LockingProvider
+import io.tolgee.component.ResilientCacheAccessor
 import io.tolgee.configuration.tolgee.RateLimitProperties
 import io.tolgee.model.UserAccount
+import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -28,12 +30,15 @@ import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.times
+import org.mockito.kotlin.whenever
+import org.springframework.cache.Cache
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.web.servlet.HandlerMapping
 import java.time.Duration
-import java.util.*
+import java.util.Date
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 
@@ -57,6 +62,10 @@ class RateLimitServiceTest {
 
   private val rateLimitProperties = Mockito.spy(RateLimitProperties::class.java)
 
+  private val authenticationFacade = Mockito.mock(AuthenticationFacade::class.java)
+
+  private val resilientCacheAccessor = ResilientCacheAccessor()
+
   private val rateLimitService =
     Mockito.spy(
       RateLimitService(
@@ -64,6 +73,8 @@ class RateLimitServiceTest {
         lockingProvider,
         currentDateProvider,
         rateLimitProperties,
+        authenticationFacade,
+        resilientCacheAccessor,
       ),
     )
 
@@ -217,6 +228,141 @@ class RateLimitServiceTest {
     assertThat(authPolicy).isNull()
   }
 
+  @Test
+  fun `strike count increments on rate limit violations`() {
+    Mockito.`when`(rateLimitProperties.maxStrikesBeforeBlock).thenReturn(5)
+    Mockito.`when`(rateLimitProperties.strikeResetWindowMs).thenReturn(60_000L)
+
+    val testPolicy = RateLimitPolicy("strike_test", 2, Duration.ofSeconds(10), false)
+
+    // Use up tokens
+    rateLimitService.consumeBucket(testPolicy)
+    rateLimitService.consumeBucket(testPolicy)
+
+    // First violation - strike 1
+    val ex1 = assertThrows<RateLimitedException> { rateLimitService.consumeBucket(testPolicy) }
+    assertThat(ex1.strikeCount).isEqualTo(1)
+
+    // Second violation - strike 2
+    val ex2 = assertThrows<RateLimitedException> { rateLimitService.consumeBucket(testPolicy) }
+    assertThat(ex2.strikeCount).isEqualTo(2)
+
+    // Third violation - strike 3
+    val ex3 = assertThrows<RateLimitedException> { rateLimitService.consumeBucket(testPolicy) }
+    assertThat(ex3.strikeCount).isEqualTo(3)
+  }
+
+  @Test
+  fun `strikes reset after strike window passes`() {
+    val baseTime = currentDateProvider.date.time
+    Mockito.`when`(rateLimitProperties.maxStrikesBeforeBlock).thenReturn(5)
+    Mockito.`when`(rateLimitProperties.strikeResetWindowMs).thenReturn(1000L) // 1 second window
+
+    val testPolicy = RateLimitPolicy("strike_reset_test", 1, Duration.ofSeconds(10), false)
+
+    // Consume the only token
+    rateLimitService.consumeBucket(testPolicy)
+
+    // Get a strike
+    val ex1 = assertThrows<RateLimitedException> { rateLimitService.consumeBucket(testPolicy) }
+    assertThat(ex1.strikeCount).isEqualTo(1)
+
+    // Get another strike
+    val ex2 = assertThrows<RateLimitedException> { rateLimitService.consumeBucket(testPolicy) }
+    assertThat(ex2.strikeCount).isEqualTo(2)
+
+    // Advance time past the strike window
+    Mockito.`when`(currentDateProvider.date).thenReturn(Date(baseTime + 1500))
+
+    // Strike count should reset
+    val ex3 = assertThrows<RateLimitedException> { rateLimitService.consumeBucket(testPolicy) }
+    assertThat(ex3.strikeCount).isEqualTo(1)
+  }
+
+  @Test
+  fun `connection dropped after max strikes exceeded`() {
+    Mockito.`when`(rateLimitProperties.maxStrikesBeforeBlock).thenReturn(3)
+    Mockito.`when`(rateLimitProperties.strikeResetWindowMs).thenReturn(60_000L)
+
+    val testPolicy = RateLimitPolicy("block_test", 1, Duration.ofSeconds(10), false)
+
+    // Use up the token
+    rateLimitService.consumeBucket(testPolicy)
+
+    // Get 3 strikes (max allowed)
+    assertThrows<RateLimitedException> { rateLimitService.consumeBucket(testPolicy) }
+    assertThrows<RateLimitedException> { rateLimitService.consumeBucket(testPolicy) }
+    assertThrows<RateLimitedException> { rateLimitService.consumeBucket(testPolicy) }
+
+    // 4th violation should trigger block
+    assertThrows<RateLimitBlockedException> { rateLimitService.consumeBucket(testPolicy) }
+  }
+
+  @Test
+  fun `connection dropping disabled when maxStrikesBeforeBlock is 0`() {
+    Mockito.`when`(rateLimitProperties.maxStrikesBeforeBlock).thenReturn(0)
+    Mockito.`when`(rateLimitProperties.strikeResetWindowMs).thenReturn(60_000L)
+
+    val testPolicy = RateLimitPolicy("no_block_test", 1, Duration.ofSeconds(10), false)
+
+    // Use up the token
+    rateLimitService.consumeBucket(testPolicy)
+
+    // Should always throw RateLimitedException, never RateLimitBlockedException
+    repeat(10) {
+      val ex = assertThrows<RateLimitedException> { rateLimitService.consumeBucket(testPolicy) }
+      assertThat(ex.strikeCount).isEqualTo(it + 1)
+    }
+  }
+
+  @Test
+  fun `strikes persist across bucket refills`() {
+    val baseTime = currentDateProvider.date.time
+    Mockito.`when`(rateLimitProperties.maxStrikesBeforeBlock).thenReturn(5)
+    Mockito.`when`(rateLimitProperties.strikeResetWindowMs).thenReturn(60_000L)
+
+    val testPolicy = RateLimitPolicy("refill_strike_test", 1, Duration.ofSeconds(1), false)
+
+    // Use up token and get a strike
+    rateLimitService.consumeBucket(testPolicy)
+    val ex1 = assertThrows<RateLimitedException> { rateLimitService.consumeBucket(testPolicy) }
+    assertThat(ex1.strikeCount).isEqualTo(1)
+
+    // Wait for bucket refill but not strike window
+    Mockito.`when`(currentDateProvider.date).thenReturn(Date(baseTime + 2000))
+
+    // Use up token and get another strike - count should continue from 1
+    rateLimitService.consumeBucket(testPolicy)
+    val ex2 = assertThrows<RateLimitedException> { rateLimitService.consumeBucket(testPolicy) }
+    assertThat(ex2.strikeCount).isEqualTo(2)
+  }
+
+  @Test
+  fun `corrupted cache entry is treated as cache miss`() {
+    // Simulate corrupted cache entry by using a RateLimitService with a mock ResilientCacheAccessor
+    // that throws RedisException on the first get, then returns null (as it would after eviction)
+    val mockAccessor = Mockito.mock(ResilientCacheAccessor::class.java)
+
+    // The real ResilientCacheAccessor catches RedisException and returns null.
+    // We simulate that behavior directly — a corrupted entry results in null from the accessor.
+    whenever(mockAccessor.get(any<Cache>(), any(), eq(Bucket::class.java))).thenReturn(null)
+
+    val serviceWithMockAccessor =
+      RateLimitService(
+        cacheManager,
+        lockingProvider,
+        currentDateProvider,
+        rateLimitProperties,
+        authenticationFacade,
+        mockAccessor,
+      )
+
+    val testPolicy = RateLimitPolicy("corrupted_test", 5, Duration.ofSeconds(1), false)
+
+    // Should succeed — null bucket means fresh bucket is created
+    serviceWithMockAccessor.consumeBucket(testPolicy)
+  }
+
   // --- HELPERS
   private fun makeFakeGenericRequest(): MockHttpServletRequest {
     val fakeRequest = MockHttpServletRequest()
@@ -243,6 +389,14 @@ class RateLimitServiceTest {
       } finally {
         lock.unlock()
       }
+    }
+
+    override fun <T> withLockingIfFree(
+      name: String,
+      leaseTime: java.time.Duration,
+      fn: () -> T,
+    ): T? {
+      TODO("Not yet implemented")
     }
   }
 

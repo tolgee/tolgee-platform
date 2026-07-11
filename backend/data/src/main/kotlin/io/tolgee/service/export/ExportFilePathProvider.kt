@@ -1,13 +1,11 @@
 package io.tolgee.service.export
 
 import com.ibm.icu.util.ULocale
-import io.tolgee.constants.Message
-import io.tolgee.dtos.IExportParams
-import io.tolgee.exceptions.BadRequestException
 import io.tolgee.service.export.dataProvider.ExportTranslationView
+import io.tolgee.util.PathSecurity
 
 class ExportFilePathProvider(
-  private val params: IExportParams,
+  private val template: String,
   private val extension: String,
 ) {
   /**
@@ -15,69 +13,32 @@ class ExportFilePathProvider(
    */
   fun getFilePath(
     namespace: String?,
-    languageTag: String,
+    languageTag: String? = null,
     replaceExtension: Boolean = true,
   ): String {
-    val template = validateAndGetTemplate()
     return template
       .replacePlaceholder(ExportFilePathPlaceholder.NAMESPACE, namespace ?: "")
-      .replaceLanguageTag(languageTag)
+      .replaceLanguageTag(languageTag ?: "all")
       .replaceExtensionIfEnabled(replaceExtension)
       .finalizePath()
   }
 
   fun replaceExtensionAndFinalize(path: String): String {
-    return path.replaceExtensionIfEnabled(true)
+    return path
+      .replaceExtensionIfEnabled(true)
       .finalizePath()
   }
 
   private fun String.finalizePath(): String {
     return this
       .replaceMultipleSlashes()
-      .removeZipSlipString()
+      .let { PathSecurity.sanitizePath(it) }
       .removeLeadingSlash()
   }
 
   private fun String.removeLeadingSlash(): String {
     return this.removePrefix("/")
   }
-
-  private fun getTemplate(): String {
-    return params.fileStructureTemplate ?: params.format.defaultFileStructureTemplate
-  }
-
-  private fun validateAndGetTemplate(): String {
-    validateTemplate()
-    return getTemplate()
-  }
-
-  private fun validateTemplate() {
-    val containsLanguageTag =
-      arrayOf(
-        ExportFilePathPlaceholder.LANGUAGE_TAG,
-        ExportFilePathPlaceholder.ANDROID_LANGUAGE_TAG,
-        ExportFilePathPlaceholder.SNAKE_LANGUAGE_TAG,
-      ).any { getTemplate().contains(it.placeholder) }
-
-    if (!containsLanguageTag) {
-      throw getMissingPlaceholderException(
-        ExportFilePathPlaceholder.LANGUAGE_TAG,
-        ExportFilePathPlaceholder.ANDROID_LANGUAGE_TAG,
-        ExportFilePathPlaceholder.SNAKE_LANGUAGE_TAG,
-      )
-    }
-
-    val containsExtension = getTemplate().contains(ExportFilePathPlaceholder.EXTENSION.placeholder)
-    if (!containsExtension) {
-      throw getMissingPlaceholderException(ExportFilePathPlaceholder.EXTENSION)
-    }
-  }
-
-  private fun getMissingPlaceholderException(vararg placeholder: ExportFilePathPlaceholder) =
-    BadRequestException(
-      Message.MISSING_PLACEHOLDER_IN_TEMPLATE,
-      placeholder.toList(),
-    )
 
   private fun String.replaceMultipleSlashes() = this.replace(MULTIPLE_SLASHES, "/")
 
@@ -90,24 +51,24 @@ class ExportFilePathProvider(
     if (replaceExtension) {
       val placeholder = ExportFilePathPlaceholder.EXTENSION
 
-      return this.replace(
-        "/+\\.${placeholder.placeholderForRegex}".toRegex(),
-        ".${placeholder.placeholder}",
-      )
-        .replacePlaceholder(placeholder, extension)
+      return this
+        .replace(
+          "/+\\.${placeholder.placeholderForRegex}".toRegex(),
+          ".${placeholder.placeholder}",
+        ).replacePlaceholder(placeholder, extension)
     }
     return this
   }
 
   private fun String.replaceLanguageTag(languageTag: String): String {
-    return this.replacePlaceholder(ExportFilePathPlaceholder.LANGUAGE_TAG, languageTag)
+    return this
+      .replacePlaceholder(ExportFilePathPlaceholder.LANGUAGE_TAG, languageTag)
       .replacePlaceholder(
         ExportFilePathPlaceholder.ANDROID_LANGUAGE_TAG,
         convertBCP47ToAndroidResourceFormat(languageTag),
-      )
-      .replacePlaceholder(
+      ).replacePlaceholder(
         ExportFilePathPlaceholder.SNAKE_LANGUAGE_TAG,
-        convertBCP47ToAndroidResourceFormat(getSnakeLanguageTag(languageTag)),
+        getSnakeLanguageTag(languageTag),
       )
   }
 
@@ -133,8 +94,4 @@ class ExportFilePathProvider(
       "$language-r$country"
     }
   }
-}
-
-private fun String.removeZipSlipString(): String {
-  return this.replace("../", "")
 }

@@ -39,7 +39,7 @@ type Props = {
   showAllReferences?: boolean;
 };
 
-export const ActivityEntities: React.FC<Props> = ({
+export const ActivityEntities: React.FC<React.PropsWithChildren<Props>> = ({
   activity,
   diffEnabled,
   showAllReferences,
@@ -47,7 +47,7 @@ export const ActivityEntities: React.FC<Props> = ({
   return (
     <StyledFields>
       {activity.entities.map((entity, i) => {
-        if (!entity?.fields.length) {
+        if (!entity?.fields.length && !entity?.references.length) {
           return null;
         }
         return (

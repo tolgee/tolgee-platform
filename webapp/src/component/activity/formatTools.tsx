@@ -1,9 +1,10 @@
+import { DiffValue, FieldOptionsObj } from './types';
 import { getTextDiff } from './types/getTextDiff';
 import { getAutoChange } from './types/getAutoChange';
 import { getStateChange } from './types/getStateChange';
-import { DiffValue, FieldOptionsObj } from './types';
 import { getGeneralChange } from './types/getGeneralChange';
 import { getCommentStateChange } from './types/getCommentStateChange';
+import { getQaIssueStateChange } from './types/getQaIssueStateChange';
 import { getKeyTagsChange } from './types/getKeyTagsChange';
 import { getLanguageFlagChange } from './types/getLanguageFlagChange';
 import { getProjectLanguageChange } from './types/getProjectLanguageChange';
@@ -16,6 +17,11 @@ import { getBatchKeyTagListChange } from './types/getBatchKeyTagListChange';
 import { getBatchNamespaceChange } from './types/getBatchNamespaceChange';
 import { getBatchStateChange } from './types/getBatchStateChange';
 import { getDefaultNamespaceChange } from './types/getDefaultNamespaceChange';
+import { getDateChange } from './types/getDateChange';
+import { getTaskStateChange } from './types/getTaskStateChange';
+import { getTaskTypeChange } from './types/getTaskTypeChange';
+import { getTranslationLabelChange } from 'tg.component/activity/types/getTranslationLabelsChange';
+import { getBranchProtected } from 'tg.component/activity/types/getBranchProtectedChange';
 
 type Props = {
   value: DiffValue<any>;
@@ -37,6 +43,8 @@ export const formatDiff = ({
       return getStateChange(value);
     case 'comment_state':
       return getCommentStateChange(value);
+    case 'qa_issue_state':
+      return getQaIssueStateChange(value);
     case 'key_tags':
       return getKeyTagsChange(value);
     case 'text':
@@ -63,6 +71,16 @@ export const formatDiff = ({
       return getBatchStateChange(value);
     case 'default_namespace':
       return getDefaultNamespaceChange(value);
+    case 'date':
+      return getDateChange(value);
+    case 'task_state':
+      return getTaskStateChange(value);
+    case 'task_type':
+      return getTaskTypeChange(value);
+    case 'translation_labels':
+      return getTranslationLabelChange(value);
+    case 'branch_protected':
+      return getBranchProtected(value);
     default:
       return diffEnabled ? getGeneralChange(value) : getNoDiffChange(value);
   }

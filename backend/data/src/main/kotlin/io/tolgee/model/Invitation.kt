@@ -2,9 +2,11 @@ package io.tolgee.model
 
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Entity
+import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
+import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
 import jakarta.persistence.UniqueConstraint
@@ -22,10 +24,10 @@ class Invitation(
   var id: Long? = null,
   var code: @NotBlank String,
 ) : AuditModel() {
-  @OneToOne(mappedBy = "invitation", cascade = [CascadeType.ALL])
+  @OneToOne(mappedBy = "invitation", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, optional = true)
   var permission: Permission? = null
 
-  @OneToOne(mappedBy = "invitation", cascade = [CascadeType.ALL])
+  @OneToOne(mappedBy = "invitation", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, optional = true)
   var organizationRole: OrganizationRole? = null
 
   constructor(
@@ -39,6 +41,9 @@ class Invitation(
   var name: String? = null
 
   var email: String? = null
+
+  @ManyToOne(optional = true, fetch = FetchType.LAZY)
+  var createdBy: UserAccount? = null
 
   override fun equals(other: Any?): Boolean {
     if (this === other) return true

@@ -1,3 +1,3 @@
 package io.tolgee.openApiDocs
 
-annotation class OpenApiSelfHostedExtension()
+annotation class OpenApiSelfHostedExtension

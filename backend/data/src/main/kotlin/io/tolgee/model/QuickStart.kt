@@ -5,13 +5,20 @@ import io.tolgee.dtos.queryResults.organization.IQuickStart
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
+import jakarta.persistence.Index
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.MapsId
 import jakarta.persistence.OneToOne
+import jakarta.persistence.Table
 import org.hibernate.annotations.Type
 
 @Entity
+@Table(
+  indexes = [
+    Index(columnList = "organization_id"),
+  ],
+)
 data class QuickStart(
   @OneToOne
   @MapsId

@@ -31,9 +31,7 @@ class Tag : StandardAuditModel() {
 
     other as Tag
 
-    if (name != other.name) return false
-
-    return true
+    return name == other.name
   }
 
   override fun hashCode(): Int {

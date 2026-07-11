@@ -6,7 +6,9 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
+import io.tolgee.dtos.cacheable.isAdmin
 import io.tolgee.dtos.request.apiKey.CreateApiKeyDto
 import io.tolgee.dtos.request.apiKey.RegenerateApiKeyDto
 import io.tolgee.dtos.request.apiKey.V2EditApiKeyDto
@@ -21,7 +23,6 @@ import io.tolgee.hateoas.apiKey.RevealedApiKeyModel
 import io.tolgee.hateoas.apiKey.RevealedApiKeyModelAssembler
 import io.tolgee.hateoas.project.SimpleProjectModelAssembler
 import io.tolgee.model.ApiKey
-import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 import io.tolgee.openApiDocs.OpenApiOrderExtension
@@ -31,6 +32,7 @@ import io.tolgee.security.authentication.AuthTokenType
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.security.authorization.RequiresProjectPermissions
+import io.tolgee.service.project.ProjectFeatureGuard
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PermissionService
@@ -67,9 +69,10 @@ class ApiKeyController(
   private val pagedResourcesAssembler: PagedResourcesAssembler<ApiKey>,
   private val permissionService: PermissionService,
   private val simpleProjectModelAssembler: SimpleProjectModelAssembler,
+  private val projectFeatureGuard: ProjectFeatureGuard,
 ) {
   @PostMapping(path = ["/api-keys"])
-  @Operation(summary = "Crete API key", description = "Creates new API key with provided scopes")
+  @Operation(summary = "Create API key", description = "Creates new API key with provided scopes")
   @RequiresSuperAuthentication
   @OpenApiOrderExtension(1)
   fun create(
@@ -77,18 +80,19 @@ class ApiKeyController(
     dto: CreateApiKeyDto,
   ): RevealedApiKeyModel {
     val project = projectService.get(dto.projectId)
-    if (authenticationFacade.authenticatedUser.role != UserAccount.Role.ADMIN) {
+    if (!authenticationFacade.authenticatedUser.isAdmin()) {
       securityService.checkApiKeyScopes(dto.scopes, project)
     }
-    return apiKeyService.create(
-      userAccount = authenticationFacade.authenticatedUserEntity,
-      scopes = dto.scopes,
-      project = project,
-      expiresAt = dto.expiresAt,
-      description = dto.description,
-    ).let {
-      revealedApiKeyModelAssembler.toModel(it)
-    }
+    return apiKeyService
+      .create(
+        userAccount = authenticationFacade.authenticatedUserEntity,
+        scopes = dto.scopes,
+        project = project,
+        expiresAt = dto.expiresAt,
+        description = dto.description,
+      ).let {
+        revealedApiKeyModelAssembler.toModel(it)
+      }
   }
 
   @Operation(summary = "Get one API key", description = "Returns specific API key info")
@@ -132,6 +136,7 @@ class ApiKeyController(
     return ApiKeyWithLanguagesModel(
       apiKeyModelAssembler.toModel(apiKey),
       permittedLanguageIds = translateLanguageIds,
+      branchingEnabled = projectFeatureGuard.isFeatureEnabled(Feature.BRANCHING, apiKey.project),
     )
   }
 
@@ -142,7 +147,8 @@ class ApiKeyController(
     pageable: Pageable,
     @RequestParam filterProjectId: Long?,
   ): PagedModel<ApiKeyModel> {
-    return apiKeyService.getAllByUser(authenticationFacade.authenticatedUser.id, filterProjectId, pageable)
+    return apiKeyService
+      .getAllByUser(authenticationFacade.authenticatedUser.id, filterProjectId, pageable)
       .let { pagedResourcesAssembler.toModel(it, apiKeyModelAssembler) }
   }
 
@@ -151,7 +157,8 @@ class ApiKeyController(
   @RequiresProjectPermissions([Scope.ADMIN])
   @OpenApiOrderExtension(5)
   fun allByProject(pageable: Pageable): PagedModel<ApiKeyModel> {
-    return apiKeyService.getAllByProject(projectHolder.project.id, pageable)
+    return apiKeyService
+      .getAllByProject(projectHolder.project.id, pageable)
       .let { pagedResourcesAssembler.toModel(it, apiKeyModelAssembler) }
   }
 
@@ -222,6 +229,7 @@ class ApiKeyController(
       translateLanguageIds = computed.translateLanguageIds.toNormalizedPermittedLanguageSet(),
       viewLanguageIds = computed.viewLanguageIds.toNormalizedPermittedLanguageSet(),
       stateChangeLanguageIds = computed.stateChangeLanguageIds.toNormalizedPermittedLanguageSet(),
+      suggestLanguageIds = computed.suggestLanguageIds.toNormalizedPermittedLanguageSet(),
       scopes = securityService.getCurrentPermittedScopes(projectIdNotNull).toTypedArray(),
       project = simpleProjectModelAssembler.toModel(projectService.get(projectIdNotNull)),
     )
@@ -311,7 +319,7 @@ class ApiKeyController(
   )
   @Deprecated(message = "Don't use this endpoint, it's useless.")
   val scopes: Map<String, List<String>> by lazy {
-    ProjectPermissionType.values()
+    ProjectPermissionType.entries
       .associate { it -> it.name to it.availableScopes.map { it.value }.toList() }
   }
 }

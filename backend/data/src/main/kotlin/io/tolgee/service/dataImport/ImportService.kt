@@ -1,17 +1,18 @@
 package io.tolgee.service.dataImport
 
 import io.sentry.Sentry
-import io.tolgee.api.IImportSettings
+import io.tolgee.api.IStoredImportSettings
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.component.reporting.BusinessEventPublisher
 import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
+import io.tolgee.dtos.ImportResult
 import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
-import io.tolgee.dtos.request.SingleStepImportRequest
 import io.tolgee.events.OnImportSoftDeleted
+import io.tolgee.events.OnProjectActivityEvent
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.exceptions.ImportConflictNotResolvedException
@@ -26,6 +27,7 @@ import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.dataImport.ImportTranslation
 import io.tolgee.model.dataImport.issues.ImportFileIssue
 import io.tolgee.model.dataImport.issues.ImportFileIssueParam
+import io.tolgee.model.enums.ConflictType
 import io.tolgee.model.views.ImportFileIssueView
 import io.tolgee.model.views.ImportLanguageView
 import io.tolgee.model.views.ImportTranslationView
@@ -36,11 +38,14 @@ import io.tolgee.repository.dataImport.ImportRepository
 import io.tolgee.repository.dataImport.ImportTranslationRepository
 import io.tolgee.repository.dataImport.issues.ImportFileIssueParamRepository
 import io.tolgee.repository.dataImport.issues.ImportFileIssueRepository
-import io.tolgee.service.dataImport.status.ImportApplicationStatus
+import io.tolgee.service.branching.BranchService
+import io.tolgee.service.dataImport.status.ImportApplicationStatusItem
+import io.tolgee.util.PathSecurity
 import io.tolgee.util.getSafeNamespace
 import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Lazy
+import org.springframework.context.event.EventListener
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.jdbc.core.JdbcTemplate
@@ -48,7 +53,6 @@ import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.interceptor.TransactionInterceptor
-import java.io.Serializable
 
 @Service
 @Transactional
@@ -73,6 +77,8 @@ class ImportService(
   private val jdbcTemplate: JdbcTemplate,
   @Lazy
   private val importSettingsService: ImportSettingsService,
+  @Lazy
+  private val branchService: BranchService,
 ) {
   @Transactional
   fun addFiles(
@@ -80,10 +86,11 @@ class ImportService(
     project: Project,
     userAccount: UserAccount,
     params: ImportAddFilesParams = ImportAddFilesParams(),
-  ): MutableList<ErrorResponseBody> {
+  ): Pair<List<ErrorResponseBody>, List<ErrorResponseBody>> {
     val import =
-      findNotExpired(project.id, userAccount.id) ?: Import(project).also {
+      findNotExpired(project.id, userAccount.id, params.branch) ?: Import(project).also {
         it.author = userAccount
+        it.branch = branchService.getActiveOrDefault(project.id, params.branch)
       }
 
     val languages = findLanguages(import)
@@ -105,89 +112,48 @@ class ImportService(
         projectIcuPlaceholdersEnabled = project.icuPlaceholders,
         importSettings = importSettingsService.get(userAccount, project.id),
       )
-    val errors = fileProcessor.processFiles(files)
+    fileProcessor.processFiles(files)
 
     if (findLanguages(import).isEmpty()) {
       TransactionInterceptor.currentTransactionStatus().setRollbackOnly()
     }
-    return errors
-  }
-
-  @Transactional
-  fun singleStepImport(
-    files: List<ImportFileDto>,
-    project: Project,
-    userAccount: UserAccount,
-    params: SingleStepImportRequest,
-    reportStatus: (ImportApplicationStatus) -> Unit,
-  ) {
-    reportStatus(ImportApplicationStatus.ANALYZING_FILES)
-    val import = Import(project).also { it.author = userAccount }
-
-    publishImportBusinessEvent(project.id, userAccount.id)
-
-    val importId = "single-step-p${project.id}-a${userAccount.id}-${currentDateProvider.date.time}"
-    Sentry.addBreadcrumb("Import ID: $importId")
-    self.saveFilesToFileStorage(importId, files, params.storeFilesToFileStorage)
-
-    val fileProcessor =
-      CoreImportFilesProcessor(
-        applicationContext = applicationContext,
-        // for single step import the import entity is passed only as a holder for the import data like
-        // author, project, file issues, etc
-        import = import,
-        params = params,
-        importSettings = params,
-        saveData = false,
-      )
-    val errors = fileProcessor.processFiles(files)
-
-    if (errors.isNotEmpty()) {
-      @Suppress("UNCHECKED_CAST")
-      throw BadRequestException(Message.IMPORT_FAILED, errors as List<Serializable>)
-    }
-
-    if (fileProcessor.importDataManager.storedLanguages.isEmpty()) {
-      throw BadRequestException(Message.NO_DATA_TO_IMPORT)
-    }
-
-    entityManager.clear()
-
-    StoredDataImporter(
-      applicationContext,
-      import,
-      params.forceMode,
-      reportStatus,
-      importSettings = params,
-      _importDataManager = fileProcessor.importDataManager,
-      isSingleStepImport = true,
-    ).doImport()
+    return fileProcessor.errors to fileProcessor.warnings
   }
 
   @Transactional(noRollbackFor = [ImportConflictNotResolvedException::class])
   fun import(
     projectId: Long,
     authorId: Long,
+    branch: String? = null,
     forceMode: ForceMode = ForceMode.NO_FORCE,
-    reportStatus: (ImportApplicationStatus) -> Unit = {},
-  ) {
-    import(getNotExpired(projectId, authorId), forceMode, reportStatus)
+    reportStatus: (ImportApplicationStatusItem) -> Unit = {},
+  ): ImportResult {
+    return import(getNotExpired(projectId, authorId, branch), forceMode, reportStatus)
   }
 
   @Transactional(noRollbackFor = [ImportConflictNotResolvedException::class])
   fun import(
     import: Import,
     forceMode: ForceMode = ForceMode.NO_FORCE,
-    reportStatus: (ImportApplicationStatus) -> Unit = {},
-  ) {
+    reportStatus: (ImportApplicationStatusItem) -> Unit = {},
+  ): ImportResult {
     Sentry.addBreadcrumb("Import ID: ${import.id}")
     val providedSettingsOrFromDb = importSettingsService.get(import.author, import.project.id)
-    StoredDataImporter(applicationContext, import, forceMode, reportStatus, providedSettingsOrFromDb).doImport()
+    val result =
+      StoredDataImporter(
+        applicationContext,
+        import,
+        forceMode,
+        reportStatus,
+        providedSettingsOrFromDb,
+        errorOnUnresolvedConflict = true,
+      ).doImport()
     deleteImport(import)
     publishImportBusinessEvent(import.project.id, import.author.id)
+    return result
   }
 
-  private fun publishImportBusinessEvent(
+  fun publishImportBusinessEvent(
     projectId: Long,
     authorId: Long,
   ) {
@@ -208,7 +174,7 @@ class ImportService(
     if (importLanguage.existingLanguage == existingLanguage) {
       return
     }
-    val import = importLanguage.file.import
+    val import = importLanguage.file.importData
     Sentry.addBreadcrumb("Import ID: ${import.id}")
     val dataManager = ImportDataManager(applicationContext, import)
     val oldExistingLanguage = importLanguage.existingLanguage
@@ -226,11 +192,13 @@ class ImportService(
     namespace: String?,
   ) {
     val file = findFile(projectId, authorId, fileId) ?: throw NotFoundException()
-    val import = file.import
+    val import = file.importData
     Sentry.addBreadcrumb("Import ID: ${import.id}")
     val dataManager = ImportDataManager(applicationContext, import)
     file.namespace = getSafeNamespace(namespace)
     importFileRepository.save(file)
+    val settings = importSettingsService.get(import.author, projectId)
+    dataManager.applyKeyCreateChange(settings.createNewKeys)
     file.languages.forEach {
       dataManager.resetLanguage(it)
       dataManager.resetCollisionsBetweenFiles(it, null)
@@ -250,8 +218,9 @@ class ImportService(
   fun getNotExpired(
     projectId: Long,
     authorId: Long,
+    branch: String? = null,
   ): Import {
-    return findNotExpired(projectId, authorId) ?: throw NotFoundException()
+    return findNotExpired(projectId, authorId, branch) ?: throw NotFoundException()
   }
 
   fun findDeleted(importId: Long): Import? {
@@ -261,23 +230,26 @@ class ImportService(
   private fun findNotExpired(
     projectId: Long,
     userAccountId: Long,
+    branch: String? = null,
   ): Import? {
-    val import = this.find(projectId, userAccountId)
+    val import = this.find(projectId, userAccountId, branch)
     return removeExpiredImportService.removeIfExpired(import)
   }
 
   fun find(
     projectId: Long,
     authorId: Long,
+    branch: String? = null,
   ): Import? {
-    return this.importRepository.findByProjectIdAndAuthorId(projectId, authorId)
+    return this.importRepository.findByProjectIdAndAuthorId(projectId, authorId, branch)
   }
 
   fun get(
     projectId: Long,
     authorId: Long,
+    branch: String? = null,
   ): Import {
-    return this.find(projectId, authorId) ?: throw NotFoundException()
+    return this.find(projectId, authorId, branch) ?: throw NotFoundException()
   }
 
   fun get(id: Long): Import {
@@ -289,30 +261,31 @@ class ImportService(
   @Suppress("UNCHECKED_CAST")
   fun findKeys(import: Import): List<ImportKey> {
     var result: List<ImportKey> =
-      entityManager.createQuery(
-        """
+      entityManager
+        .createQuery(
+          """
             select distinct ik from ImportKey ik 
             left join fetch ik.keyMeta ikm
             left join fetch ikm.comments ikc
             join ik.file if
-            where if.import = :import
+            where if.importData = :import
             """,
-      )
-        .setParameter("import", import)
+        ).setParameter("import", import)
         .resultList as List<ImportKey>
 
     // when we are import very lot of keys, we need to split it to multiple queries due to parameter limit
     result =
       result.chunked(30000).flatMap { subresult ->
-        entityManager.createQuery(
-          """
+        entityManager
+          .createQuery(
+            """
             select distinct ik from ImportKey ik 
             left join fetch ik.keyMeta ikm
             left join fetch ikm.codeReferences ikc
             join ik.file if
             where ik in :keys
         """,
-        ).setParameter("keys", subresult)
+          ).setParameter("keys", subresult)
           .resultList as List<ImportKey>
       }
 
@@ -330,6 +303,7 @@ class ImportService(
   }
 
   fun onExistingLanguageRemoved(language: Language) {
+    this.importTranslationRepository.removeExistingLanguageConflictReferences(language)
     this.importLanguageRepository.removeExistingLanguageReference(language)
   }
 
@@ -348,9 +322,10 @@ class ImportService(
   fun getResult(
     projectId: Long,
     userId: Long,
+    branch: String?,
     pageable: Pageable,
   ): Page<ImportLanguageView> {
-    return this.getNotExpired(projectId, userId).let {
+    return this.getNotExpired(projectId, userId, branch).let {
       this.importLanguageRepository.findImportLanguagesView(it.id, pageable)
     }
   }
@@ -395,14 +370,15 @@ class ImportService(
   fun deleteImport(
     projectId: Long,
     authorId: Long,
-  ) = this.deleteImport(get(projectId, authorId))
+    branch: String? = null,
+  ) = this.deleteImport(get(projectId, authorId, branch))
 
   @Transactional
   fun deleteLanguage(language: ImportLanguage) {
-    val import = language.file.import
+    val import = language.file.importData
     this.importTranslationRepository.deleteAllByLanguage(language)
     this.importLanguageRepository.delete(language)
-    if (this.findLanguages(import = language.file.import).isEmpty()) {
+    if (this.findLanguages(import = language.file.importData).isEmpty()) {
       deleteImport(import)
       return
     }
@@ -410,6 +386,20 @@ class ImportService(
     entityManager.refresh(entityManager.merge(import))
     val dataManager = ImportDataManager(applicationContext, import)
     dataManager.resetCollisionsBetweenFiles(language, null)
+  }
+
+  @EventListener
+  fun deleteExistingImportsOnUseNamespacesModification(event: OnProjectActivityEvent) {
+    val modifiedProjects = event.modifiedEntities[Project::class]
+
+    modifiedProjects
+      ?.values
+      ?.filter { project -> project.modifications.containsKey("useNamespaces") }
+      ?.forEach { project ->
+        getAllByProject(project.entityId).forEach { import ->
+          deleteImport(import)
+        }
+      }
   }
 
   fun findTranslation(translationId: Long): ImportTranslation? {
@@ -423,12 +413,28 @@ class ImportService(
     return importTranslationRepository.findByIdAndLanguageId(translationId, languageId)
   }
 
+  fun checkTranslationIsEditable(translation: ImportTranslation): BadRequestException? {
+    if (translation.conflictType == ConflictType.CANNOT_EDIT_REVIEWED) {
+      return BadRequestException(Message.CANNOT_MODIFY_REVIEWED_TRANSLATION)
+    }
+
+    if (translation.conflictType == ConflictType.CANNOT_EDIT_DISABLED) {
+      return BadRequestException(Message.CANNOT_MODIFY_DISABLED_TRANSLATION)
+    }
+    return null
+  }
+
   fun resolveTranslationConflict(
     translationId: Long,
     languageId: Long,
     override: Boolean,
   ) {
     val translation = findTranslation(translationId, languageId) ?: throw NotFoundException()
+
+    if (override) {
+      checkTranslationIsEditable(translation)?.let { throw it }
+    }
+
     translation.override = override
     translation.resolve()
     importTranslationRepository.save(translation)
@@ -440,8 +446,10 @@ class ImportService(
   ) {
     val translations = findTranslations(language.id)
     translations.forEach {
-      it.resolve()
-      it.override = override
+      if (!override || ConflictType.isOverridable(it.conflictType)) {
+        it.resolve()
+        it.override = override
+      }
     }
     this.importTranslationRepository.saveAll(translations)
   }
@@ -502,7 +510,8 @@ class ImportService(
     fileName: String,
   ): String {
     val notBlankFilename = fileName.ifBlank { "blank_name" }
-    return "${getFileStorageImportRoot(importId)}/$notBlankFilename"
+    val sanitized = PathSecurity.sanitizePath(notBlankFilename)
+    return "${getFileStorageImportRoot(importId)}/$sanitized"
   }
 
   private fun getFileStorageImportRoot(importId: String) = "importFiles/$importId"
@@ -512,9 +521,10 @@ class ImportService(
     importLanguageIds: List<Long>,
   ) {
     val languageIdStrings = importLanguageIds.map { it.toString() }
-    entityManager.createNativeQuery(
-      """
-      with deleted as (  
+    entityManager
+      .createNativeQuery(
+        """
+      with deleted as (
         delete from import_file_issue_param
         where issue_id in (
           select import_file_issue.id from import_file_issue
@@ -528,8 +538,7 @@ class ImportService(
       delete from import_file_issue
       where id in (select issue_id from deleted)
     """,
-    )
-      .setParameter("ids", ids)
+      ).setParameter("ids", ids)
       .setParameter("importLanguageIds", languageIdStrings)
       .executeUpdate()
   }
@@ -549,8 +558,8 @@ class ImportService(
   fun applySettings(
     userAccount: UserAccount,
     projectId: Long,
-    oldSettings: IImportSettings,
-    newSettings: IImportSettings,
+    oldSettings: IStoredImportSettings,
+    newSettings: IStoredImportSettings,
   ) {
     find(projectId, userAccount.id)?.let {
       applySettings(it, oldSettings, newSettings)
@@ -560,13 +569,9 @@ class ImportService(
 
   fun applySettings(
     import: Import,
-    oldSettings: IImportSettings,
-    newSettings: IImportSettings,
+    oldSettings: IStoredImportSettings,
+    newSettings: IStoredImportSettings,
   ) {
     ImportDataManager(applicationContext, import).applySettings(oldSettings, newSettings)
-  }
-
-  fun findTranslationsForPlaceholderConversion(importId: Long): List<ImportTranslation> {
-    return importTranslationRepository.findTranslationsForPlaceholderConversion(importId)
   }
 }

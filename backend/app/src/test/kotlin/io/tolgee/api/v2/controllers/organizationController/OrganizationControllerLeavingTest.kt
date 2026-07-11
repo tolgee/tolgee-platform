@@ -52,17 +52,20 @@ class OrganizationControllerLeavingTest : BaseOrganizationControllerTest() {
     testDataService.saveTestData(testData.root)
     userAccount = me
 
-    permissionService.getProjectPermissionData(
-      testData.projectBuilder.self.id,
-      me.id,
-    ).directPermissions.assert.isNotNull
+    permissionService
+      .getProjectPermissionData(
+        testData.projectBuilder.self.id,
+        me.id,
+      ).directPermissions.assert.isNotNull
 
     performAuthPut("/v2/organizations/${testData.organizationBuilder.self.id}/leave", null).andIsOk
 
-    permissionService.getProjectPermissionData(
-      testData.projectBuilder.self.id,
-      me.id,
-    ).directPermissions.assert.isNull()
+    permissionService
+      .getProjectPermissionData(
+        testData.projectBuilder.self.id,
+        me.id,
+      ).directPermissions.assert
+      .isNull()
   }
 
   @Test
@@ -74,6 +77,7 @@ class OrganizationControllerLeavingTest : BaseOrganizationControllerTest() {
     performAuthPut("/v2/organizations/${organization.id}/leave", null)
       .andIsBadRequest
       .andAssertError
-      .isCustomValidation.hasMessage("organization_has_no_other_owner")
+      .isCustomValidation
+      .hasMessage("organization_has_no_other_owner")
   }
 }

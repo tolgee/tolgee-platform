@@ -6,8 +6,12 @@ import io.tolgee.api.ISimpleProject
 import io.tolgee.api.ProjectIdAndBaseLanguageId
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.automations.Automation
+import io.tolgee.model.branching.Branch
 import io.tolgee.model.contentDelivery.ContentDeliveryConfig
 import io.tolgee.model.contentDelivery.ContentStorage
+import io.tolgee.model.enums.SuggestionsMode
+import io.tolgee.model.enums.TranslationProtection
+import io.tolgee.model.glossary.Glossary
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Namespace
 import io.tolgee.model.mtServiceConfig.MtServiceConfig
@@ -15,19 +19,46 @@ import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.model.webhook.WebhookConfig
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.project.ProjectService
-import jakarta.persistence.*
+import jakarta.persistence.CascadeType
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.EntityListeners
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
+import jakarta.persistence.FetchType
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.Index
+import jakarta.persistence.ManyToMany
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToMany
+import jakarta.persistence.OneToOne
+import jakarta.persistence.OrderBy
+import jakarta.persistence.PostLoad
+import jakarta.persistence.PrePersist
+import jakarta.persistence.PreUpdate
+import jakarta.persistence.Table
+import jakarta.persistence.Transient
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
 import org.hibernate.annotations.ColumnDefault
+import org.hibernate.annotations.Filter
+import org.hibernate.annotations.SQLRestriction
 import org.springframework.beans.factory.ObjectFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
-import java.util.*
-import kotlin.jvm.Transient
+import java.util.Date
+import java.util.Optional
 
 @Entity
-@Table(uniqueConstraints = [UniqueConstraint(columnNames = ["address_part"], name = "project_address_part_unique")])
+@Table(
+  indexes = [
+    Index(columnList = "user_owner_id"),
+    Index(columnList = "organization_owner_id"),
+  ],
+)
 @EntityListeners(Project.Companion.ProjectListener::class)
 @ActivityLoggedEntity
 class Project(
@@ -42,7 +73,6 @@ class Project(
   @ActivityLoggedProp
   @Column(length = 2000)
   override var description: String? = null,
-  @field:Size(max = 2000)
   @Column(columnDefinition = "text")
   @ActivityLoggedProp
   var aiTranslatorPromptDescription: String? = null,
@@ -51,7 +81,12 @@ class Project(
   @field:Size(min = 3, max = 60)
   @field:Pattern(regexp = "^[a-z0-9-]*[a-z]+[a-z0-9-]*$", message = "invalid_pattern")
   override var slug: String? = null,
-) : AuditModel(), ModelWithAvatar, EntityWithId, SoftDeletable, ISimpleProject, ProjectIdAndBaseLanguageId {
+) : AuditModel(),
+  ModelWithAvatar,
+  EntityWithId,
+  SoftDeletable,
+  ISimpleProject,
+  ProjectIdAndBaseLanguageId {
   @OrderBy("id")
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "project")
   var languages: MutableSet<Language> = LinkedHashSet()
@@ -69,7 +104,7 @@ class Project(
   @Deprecated(message = "Project can be owned only by organization")
   var userOwner: UserAccount? = null
 
-  @ManyToOne(optional = true)
+  @ManyToOne(optional = true, fetch = FetchType.LAZY)
   lateinit var organizationOwner: Organization
 
   @OneToOne(fetch = FetchType.LAZY, cascade = [CascadeType.PERSIST])
@@ -89,11 +124,17 @@ class Project(
   @ActivityLoggedProp
   var defaultNamespace: Namespace? = null
 
+  @ManyToMany(fetch = FetchType.LAZY, mappedBy = "assignedProjects")
+  @field:Filter(
+    name = "deletedFilter",
+    condition = "(deleted_at IS NULL)",
+  )
+  var glossaries: MutableSet<Glossary> = mutableSetOf()
+
   @ActivityLoggedProp
   override var avatarHash: String? = null
 
   @Transient
-  @Column(insertable = false, updatable = false)
   override var disableActivityLogging = false
 
   @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "project")
@@ -111,9 +152,39 @@ class Project(
   @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "project")
   var slackConfigs: MutableList<SlackConfig> = mutableListOf()
 
+  @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.PERSIST], mappedBy = "project")
+  @SQLRestriction("deleted_at IS NULL")
+  var branches: MutableList<Branch> = mutableListOf()
+
   @ColumnDefault("true")
   override var icuPlaceholders: Boolean = true
 
+  @ColumnDefault("false")
+  @ActivityLoggedProp
+  var useNamespaces: Boolean = false
+
+  @ColumnDefault("false")
+  @ActivityLoggedProp
+  var useBranching: Boolean = false
+
+  @ColumnDefault("false")
+  @ActivityLoggedProp
+  var useQaChecks: Boolean = false
+
+  @ColumnDefault("DISABLED")
+  @ActivityLoggedProp
+  @Enumerated(EnumType.STRING)
+  var suggestionsMode: SuggestionsMode = SuggestionsMode.DISABLED
+
+  @ColumnDefault("NONE")
+  @ActivityLoggedProp
+  @Enumerated(EnumType.STRING)
+  var translationProtection: TranslationProtection = TranslationProtection.NONE
+
+  @ColumnDefault("0")
+  var lastTaskNumber: Long = 0
+
+  @ActivityLoggedProp
   override var deletedAt: Date? = null
 
   constructor(name: String, description: String? = null, slug: String?, organizationOwner: Organization) :
@@ -129,8 +200,20 @@ class Project(
     return findLanguageOptional(tag).orElse(null)
   }
 
-  fun getLanguage(tag: String): Language {
-    return findLanguage(tag) ?: throw NotFoundException()
+  fun hasDefaultBranch(): Boolean {
+    return branches.any { it.isDefault }
+  }
+
+  fun getDefaultBranch(): Branch? {
+    return branches.find { it.isDefault }
+  }
+
+  /**
+   * organizationOwner is a lateinit var, and in should never be null, but for some edge cases on some old
+   * instances it can still be missing.
+   */
+  fun isOrganizationOwnerInitialized(): Boolean {
+    return this::organizationOwner.isInitialized
   }
 
   companion object {

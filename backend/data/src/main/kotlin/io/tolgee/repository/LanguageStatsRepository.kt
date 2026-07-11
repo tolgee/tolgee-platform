@@ -2,6 +2,7 @@ package io.tolgee.repository
 
 import io.tolgee.dtos.queryResults.LanguageStatsDto
 import io.tolgee.model.LanguageStats
+import org.springframework.context.annotation.Lazy
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
 
 @Repository
+@Lazy
 interface LanguageStatsRepository : JpaRepository<LanguageStats, Long> {
   @Modifying
   @Transactional
@@ -18,6 +20,15 @@ interface LanguageStatsRepository : JpaRepository<LanguageStats, Long> {
   """,
   )
   fun deleteAllByLanguage(languageId: Long)
+
+  @Modifying
+  @Transactional
+  @Query(
+    """
+    delete from LanguageStats ls where ls.branch.id = :branchId
+  """,
+  )
+  fun deleteAllByBranchId(branchId: Long)
 
   @Query(
     """
@@ -32,21 +43,48 @@ interface LanguageStatsRepository : JpaRepository<LanguageStats, Long> {
       ls.reviewedKeys,
       ls.untranslatedPercentage,
       ls.translatedPercentage,
-      ls.reviewedPercentage
+      ls.reviewedPercentage,
+      ls.translationsUpdatedAt,
+      ls.qaIssueCount,
+      ls.qaChecksStaleCount,
+      b.isDefault
     )
     from LanguageStats ls
-    where ls.language.project.id in :projectIds
+    left join ls.branch b
+    where ls.language.project.id = :projectId
+      and ls.language.deletedAt is null
+      and ((b.id = :branchId and b.deletedAt is null) or (:branchId is null and (b is null or b.isDefault)))
   """,
   )
-  fun getDtosByProjectIds(projectIds: List<Long>): List<LanguageStatsDto>
+  fun getDtosByProjectIdAndBranchId(
+    projectId: Long,
+    branchId: Long?,
+  ): List<LanguageStatsDto>
 
   @Query(
     """
     from LanguageStats ls
     join fetch ls.language l
     join fetch l.project
-    where l.project.id in :projectIds
+    left join ls.branch b
+    where l.project.id = :projectId
+      and l.deletedAt is null
+      and ((b.id = :branchId and b.deletedAt is null) or (:branchId is null and (b is null or b.isDefault)))
   """,
   )
-  fun getAllByProjectIds(projectIds: List<Long>): List<LanguageStats>
+  fun getAllByProjectIdAndBranchId(
+    projectId: Long,
+    branchId: Long?,
+  ): List<LanguageStats>
+
+  @Query(
+    """
+    select distinct b.id
+    from LanguageStats ls
+    left join ls.branch b
+    where ls.language.project.id = :projectId
+      and (b is null or b.deletedAt is null)
+  """,
+  )
+  fun getDistinctBranchIdsByProjectId(projectId: Long): List<Long?>
 }

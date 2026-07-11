@@ -8,7 +8,6 @@ import { Link, useRouteMatch } from 'react-router-dom';
 import { BaseProjectView } from '../BaseProjectView';
 import { MachineTranslation } from './MachineTranslation/MachineTranslation';
 import { LanguageEditDialog } from './LanguageEdit/LanguageEditDialog';
-import { AiCustomization } from './AiCustomization/AiCustomization';
 import { QuickStartHighlightInPortal } from 'tg.component/layout/QuickStartGuide/QuickStartHighlightInPortal';
 
 const StyledTabs = styled(Tabs)`
@@ -29,7 +28,6 @@ export const LanguageSettingsView = () => {
   const pageLanguages = useRouteMatch(LINKS.PROJECT_LANGUAGES.template);
   const pageEditLanguage = useRouteMatch(LINKS.PROJECT_EDIT_LANGUAGE.template);
   const pageMT = useRouteMatch(LINKS.PROJECT_LANGUAGES_MT.template);
-  const pageAI = useRouteMatch(LINKS.PROJECT_LANGUAGES_AI.template);
 
   const isInIndex = pageLanguages?.isExact || pageEditLanguage?.isExact;
 
@@ -51,15 +49,7 @@ export const LanguageSettingsView = () => {
     >
       <StyledTabWrapper>
         <StyledTabs
-          value={
-            isInIndex
-              ? 'languages'
-              : pageMT?.isExact
-              ? 'mt'
-              : pageAI?.isExact
-              ? 'ai'
-              : undefined
-          }
+          value={isInIndex ? 'languages' : pageMT?.isExact ? 'mt' : undefined}
         >
           <Tab
             value="languages"
@@ -81,15 +71,6 @@ export const LanguageSettingsView = () => {
             data-cy="languages-menu-machine-translation"
             sx={{ overflow: 'visible' }}
           />
-          <Tab
-            value="ai"
-            component={Link}
-            to={LINKS.PROJECT_LANGUAGES_AI.build({
-              [PARAMS.PROJECT_ID]: project.id,
-            })}
-            label={t('languages_menu_ai_prompt_customization')}
-            data-cy="languages-menu-ai-prompt-customization"
-          />
         </StyledTabs>
       </StyledTabWrapper>
 
@@ -97,8 +78,6 @@ export const LanguageSettingsView = () => {
         <ProjectLanguages />
       ) : pageMT?.isExact ? (
         <MachineTranslation />
-      ) : pageAI ? (
-        <AiCustomization />
       ) : null}
 
       {pageEditLanguage?.isExact && <LanguageEditDialog />}

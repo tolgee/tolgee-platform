@@ -1,4 +1,3 @@
-import { useMediaQuery } from '@mui/material';
 import { useState } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import {
@@ -10,20 +9,16 @@ import { useApiQuery } from 'tg.service/http/useQueryApi';
 import type { useInitialDataService } from './useInitialDataService';
 
 export const useQuickStartGuideService = (
-  initialData: ReturnType<typeof useInitialDataService>
+  initialData: ReturnType<typeof useInitialDataService>,
+  isEmailVerified: boolean
 ) => {
   const [active, setActive] = useState<HighlightItem[]>([]);
   const [activeStep, setActiveStep] = useState<ItemStep>();
+  const [floatingOpen, setFloatingOpen] = useState(false);
   const [floatingForced, setFloatingForced] = useState(false);
-  const floating =
-    useMediaQuery(`@media (max-width: ${1200}px)`) || floatingForced;
   const match = useRouteMatch(LINKS.PROJECT.template);
   const projectIdParam = match?.params[PARAMS.PROJECT_ID];
   const projectId = isNaN(projectIdParam) ? undefined : projectIdParam;
-  const [floatingOpen, setFloatingOpen] = useState(false);
-  const isVerified =
-    initialData.state?.userInfo?.emailAwaitingVerification === null ||
-    !initialData.state?.serverConfiguration.needsEmailVerification;
   const organizationSlug = initialData.state?.preferredOrganization?.slug;
   const isOwner =
     initialData.state?.preferredOrganization?.currentUserRole === 'OWNER';
@@ -33,9 +28,14 @@ export const useQuickStartGuideService = (
     method: 'get',
     path: { slug: organizationSlug! },
     query: { size: 1, sort: ['id,desc'] },
+    fetchOptions: {
+      disableAutoErrorHandle: true,
+      disableAuthRedirect: true,
+      disableErrorNotification: true,
+    },
     options: {
       enabled:
-        projectId === undefined && Boolean(organizationSlug) && isVerified,
+        projectId === undefined && Boolean(organizationSlug) && isEmailVerified,
     },
   });
 
@@ -78,13 +78,11 @@ export const useQuickStartGuideService = (
 
   const enabled =
     initialData.state?.preferredOrganization?.quickStart?.finished === false &&
+    isEmailVerified &&
     isOwner;
 
   const open =
-    enabled &&
-    (floating
-      ? floatingOpen
-      : initialData.state?.preferredOrganization?.quickStart?.open);
+    enabled && initialData.state?.preferredOrganization?.quickStart?.open;
 
   const state = {
     enabled,
@@ -92,19 +90,19 @@ export const useQuickStartGuideService = (
     active: active[0],
     lastProjectId,
     completed: allCompleted,
-    floating,
+    floatingOpen,
+    floatingForced,
   };
 
   const actions = {
     quickStartFinish: initialData.actions.finishGuide,
-    setQuickStartOpen: floating
-      ? setFloatingOpen
-      : initialData.actions.setQuickStartOpen,
+    setQuickStartOpen: initialData.actions.setQuickStartOpen,
+    setQuickStartFloatingOpen: setFloatingOpen,
+    setQuickStartFloatingForced: setFloatingForced,
     quickStartBegin,
     quickStartVisited,
     quickStartCompleteStep,
     quickStartSkipTips: skipTips,
-    quickStartForceFloating: setFloatingForced,
   };
 
   return { state, actions };

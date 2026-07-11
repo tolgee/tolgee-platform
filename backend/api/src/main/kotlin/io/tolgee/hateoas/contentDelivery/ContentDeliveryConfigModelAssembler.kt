@@ -2,14 +2,14 @@ package io.tolgee.hateoas.contentDelivery
 
 import io.tolgee.api.v2.controllers.contentDelivery.ContentDeliveryConfigController
 import io.tolgee.configuration.tolgee.TolgeeProperties
-import io.tolgee.hateoas.ee.contentStorage.IContentStorageModelAssembler
+import io.tolgee.hateoas.ee.contentStorage.ContentStorageModelAssembler
 import io.tolgee.model.contentDelivery.ContentDeliveryConfig
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.stereotype.Component
 
 @Component
 class ContentDeliveryConfigModelAssembler(
-  private val contentStorageModelAssembler: IContentStorageModelAssembler,
+  private val contentStorageModelAssembler: ContentStorageModelAssembler,
   private val tolgeeProperties: TolgeeProperties,
 ) : RepresentationModelAssemblerSupport<ContentDeliveryConfig, ContentDeliveryConfigModel>(
     ContentDeliveryConfigController::class.java,
@@ -21,10 +21,14 @@ class ContentDeliveryConfigModelAssembler(
       name = entity.name,
       slug = entity.slug,
       pruneBeforePublish = entity.pruneBeforePublish,
+      zip = entity.zip,
       storage = entity.contentStorage?.let { contentStorageModelAssembler.toModel(it) },
       publicUrl = getPublicUrl(entity),
       autoPublish = entity.automationActions.isNotEmpty(),
       lastPublished = entity.lastPublished?.time,
+      lastPublishedFiles = entity.lastPublishedFiles ?: listOf(),
+      escapeHtml = entity.escapeHtml,
+      branchName = entity.branch?.name,
     ).also {
       it.copyPropsFrom(entity)
     }

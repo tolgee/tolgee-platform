@@ -16,7 +16,6 @@
 
 package io.tolgee.security.ratelimit
 
-import io.tolgee.configuration.tolgee.RateLimitProperties
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.security.authentication.AuthenticationFacade
 import jakarta.servlet.DispatcherType
@@ -33,9 +32,9 @@ import java.time.Duration
 @Component
 class RateLimitInterceptor(
   private val authenticationFacade: AuthenticationFacade,
-  private val rateLimitProperties: RateLimitProperties,
   private val rateLimitService: RateLimitService,
-) : HandlerInterceptor, Ordered {
+) : HandlerInterceptor,
+  Ordered {
   override fun preHandle(
     request: HttpServletRequest,
     response: HttpServletResponse,
@@ -62,25 +61,19 @@ class RateLimitInterceptor(
       AnnotationUtils.getAnnotation(handler.method, RateLimited::class.java)
         ?: return null
 
-    if (!shouldRateLimit(annotation)) {
+    if (!rateLimitService.shouldRateLimit(annotation.isAuthentication)) {
       return null
     }
 
-    val bucketName = getBucketName(request, annotation, account)
+    val bucketName =
+      getBucketName(request, annotation, account)
+
     return RateLimitPolicy(
       bucketName,
       annotation.limit,
       Duration.ofMillis(annotation.refillDurationInMs),
       false,
     )
-  }
-
-  private fun shouldRateLimit(annotation: RateLimited): Boolean {
-    @Suppress("DEPRECATION") // TODO: remove for Tolgee 4 release
-    if (!rateLimitProperties.enabled) return false
-
-    return (annotation.isAuthentication && rateLimitProperties.authenticationLimits) ||
-      (!annotation.isAuthentication && rateLimitProperties.endpointLimits)
   }
 
   private fun getBucketName(

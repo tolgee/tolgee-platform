@@ -1,8 +1,8 @@
 package io.tolgee.unit.cachePurging
 
 import com.azure.identity.ClientSecretCredential
-import io.tolgee.component.contentDelivery.cachePurging.AzureContentDeliveryCachePurging
-import io.tolgee.component.contentDelivery.cachePurging.AzureCredentialProvider
+import io.tolgee.component.contentDelivery.cachePurging.azureFrontDoor.AzureContentDeliveryCachePurging
+import io.tolgee.component.contentDelivery.cachePurging.azureFrontDoor.AzureCredentialProvider
 import io.tolgee.model.contentDelivery.AzureFrontDoorConfig
 import io.tolgee.model.contentDelivery.ContentDeliveryConfig
 import io.tolgee.testing.assert
@@ -20,7 +20,7 @@ import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
 import org.springframework.web.client.RestTemplate
 
-class AzureContentStorageConfigCachePurgingTest() {
+class AzureContentStorageConfigCachePurgingTest {
   @Test
   fun `correctly purges`() {
     val config =
@@ -54,7 +54,7 @@ class AzureContentStorageConfigCachePurgingTest() {
     val credentialMck: ClientSecretCredential =
       Mockito.mock(ClientSecretCredential::class.java, Mockito.RETURNS_DEEP_STUBS)
     whenever(azureCredentialProviderMock.get(config)).thenReturn(credentialMck)
-    whenever(credentialMck.getToken(any()).block().token).thenReturn("token")
+    whenever(credentialMck.getToken(any()).block()!!.token).thenReturn("token")
 
     val contentDeliveryConfig = mock<ContentDeliveryConfig>()
     whenever(contentDeliveryConfig.slug).thenReturn("fake-slug")
@@ -66,7 +66,7 @@ class AzureContentStorageConfigCachePurgingTest() {
     val httpEntity = invocation.arguments[2] as HttpEntity<*>
     val headers = httpEntity.headers
     headers["Authorization"].assert.isEqualTo(listOf("Bearer token"))
-    assertThatJson(httpEntity.body) {
+    assertThatJson(httpEntity.body!!) {
       node("contentPaths").isArray.containsExactly("/fake-content-root/fake-slug/*")
     }
     url.assert.isEqualTo(

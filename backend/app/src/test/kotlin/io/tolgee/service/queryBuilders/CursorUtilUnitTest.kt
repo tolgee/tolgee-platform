@@ -9,7 +9,8 @@ import net.javacrumbs.jsonunit.assertj.assertThatJson
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.data.domain.Sort
-import java.util.*
+import java.sql.Timestamp
+import java.util.Base64
 
 class CursorUtilUnitTest {
   lateinit var cursor: String
@@ -22,6 +23,8 @@ class CursorUtilUnitTest {
         keyName = "Super key",
         keyIsPlural = false,
         keyPluralArgName = null,
+        keyMaxCharLimit = null,
+        branch = null,
         keyNamespaceId = null,
         keyNamespace = null,
         keyDescription = "Super key description",
@@ -38,8 +41,11 @@ class CursorUtilUnitTest {
                 mtProvider = null,
                 commentCount = 0,
                 unresolvedCommentCount = 1,
+                activeSuggestionCount = 0,
+                totalSuggestionCount = 0,
               ),
           ),
+        createdAt = Timestamp(1000003022),
         contextPresent = false,
       )
     cursor =

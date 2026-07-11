@@ -8,7 +8,7 @@ import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { DeleteUserMessages } from './DeleteUserMessages';
 
-export const DeleteUserButton: FC = () => {
+export const DeleteUserButton: FC<React.PropsWithChildren<unknown>> = () => {
   const { logout } = useGlobalActions();
   const user = useUser();
   const message = useMessage();

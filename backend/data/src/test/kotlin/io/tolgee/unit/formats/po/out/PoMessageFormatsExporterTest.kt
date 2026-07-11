@@ -4,6 +4,7 @@ import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.formats.ExportMessageFormat
 import io.tolgee.formats.po.out.PoFileExporter
 import io.tolgee.model.ILanguage
+import io.tolgee.service.export.ExportFilePathProvider
 import io.tolgee.unit.util.assertFile
 import io.tolgee.unit.util.getExported
 import io.tolgee.util.buildExportTranslationList
@@ -25,7 +26,7 @@ class PoMessageFormatsExporterTest {
     |"MIME-Version: 1.0\n"
     |"Content-Type: text/plain; charset=UTF-8\n"
     |"Content-Transfer-Encoding: 8bit\n"
-    |"Plural-Forms: nplurals = 3; plural = (n === 1 ? 0 : (n >= 2 && n <= 4) ? 1 : 2)\n"
+    |"Plural-Forms: nplurals=3; plural=(n == 1 ? 0 : (n >= 2 && n <= 4) ? 1 : 2)\n"
     |"X-Generator: Tolgee\n"
     |
     |msgid "key3"
@@ -35,28 +36,51 @@ class PoMessageFormatsExporterTest {
     )
   }
 
-//  @Test
-//  fun python() {
-//    val exporter = getExporter(PoSupportedMessageFormat.PYTHON)
-//    val data = getExported(exporter)
-//    data.assertFile(
-//      "cs.po",
-//      """
-//    |msgid ""
-//    |msgstr ""
-//    |"Language: cs\n"
-//    |"MIME-Version: 1.0\n"
-//    |"Content-Type: text/plain; charset=UTF-8\n"
-//    |"Content-Transfer-Encoding: 8bit\n"
-//    |"Plural-Forms: nplurals = 3; plural = (n === 1 ? 0 : (n >= 2 && n <= 4) ? 1 : 2)\n"
-//    |"X-Generator: Tolgee\n"
-//    |
-//    |msgid "key3"
-//    |msgstr "%(2)d %(1)s %(0)s"
-//    |
-//      """.trimMargin(),
-//    )
-//  }
+  @Test
+  fun python() {
+    val exporter = getExporter(ExportMessageFormat.PYTHON_PERCENT)
+    val data = getExported(exporter)
+    data.assertFile(
+      "cs.po",
+      """
+    |msgid ""
+    |msgstr ""
+    |"Language: cs\n"
+    |"MIME-Version: 1.0\n"
+    |"Content-Type: text/plain; charset=UTF-8\n"
+    |"Content-Transfer-Encoding: 8bit\n"
+    |"Plural-Forms: nplurals=3; plural=(n == 1 ? 0 : (n >= 2 && n <= 4) ? 1 : 2)\n"
+    |"X-Generator: Tolgee\n"
+    |
+    |msgid "key3"
+    |msgstr "%(2)d %(1)s %(0)s"
+    |
+      """.trimMargin(),
+    )
+  }
+
+  @Test
+  fun pythonBrace() {
+    val exporter = getExporter(ExportMessageFormat.PYTHON_BRACE)
+    val data = getExported(exporter)
+    data.assertFile(
+      "cs.po",
+      """
+    |msgid ""
+    |msgstr ""
+    |"Language: cs\n"
+    |"MIME-Version: 1.0\n"
+    |"Content-Type: text/plain; charset=UTF-8\n"
+    |"Content-Transfer-Encoding: 8bit\n"
+    |"Plural-Forms: nplurals=3; plural=(n == 1 ? 0 : (n >= 2 && n <= 4) ? 1 : 2)\n"
+    |"X-Generator: Tolgee\n"
+    |
+    |msgid "key3"
+    |msgstr "{2:d} {1} {0}"
+    |
+      """.trimMargin(),
+    )
+  }
 
   @Test
   fun c() {
@@ -71,7 +95,7 @@ class PoMessageFormatsExporterTest {
     |"MIME-Version: 1.0\n"
     |"Content-Type: text/plain; charset=UTF-8\n"
     |"Content-Transfer-Encoding: 8bit\n"
-    |"Plural-Forms: nplurals = 3; plural = (n === 1 ? 0 : (n >= 2 && n <= 4) ? 1 : 2)\n"
+    |"Plural-Forms: nplurals=3; plural=(n == 1 ? 0 : (n >= 2 && n <= 4) ? 1 : 2)\n"
     |"X-Generator: Tolgee\n"
     |
     |msgid "key3"
@@ -93,11 +117,20 @@ class PoMessageFormatsExporterTest {
 
     val baseLanguageMock = mock<ILanguage>()
     whenever(baseLanguageMock.tag).thenAnswer { "en" }
+    val params =
+      ExportParams().also {
+        it.messageFormat = importFormat
+      }
     return PoFileExporter(
       translations = built.translations,
-      exportParams = ExportParams().also { it.messageFormat = importFormat },
+      exportParams = params,
       baseLanguage = baseLanguageMock,
-      baseTranslationsProvider = { listOf() },
+      projectIcuPlaceholdersSupport = true,
+      filePathProvider =
+        ExportFilePathProvider(
+          template = "{languageTag}.{extension}",
+          extension = "po",
+        ),
     )
   }
 }

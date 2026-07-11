@@ -1,7 +1,5 @@
 import { keyframes, styled } from '@mui/material';
 
-import { TOP_BAR_HEIGHT } from 'tg.component/layout/TopBar/TopBar';
-
 export type PositionType = 'left' | 'right';
 
 export const NAMESPACE_BANNER_SPACING = 8;
@@ -37,6 +35,7 @@ export const CELL_HIGHLIGHT_ON_HOVER = 'cellhighlightOnHover';
 export const CELL_CLICKABLE = 'cellClickable';
 export const CELL_SPACE_TOP = 'cellSpaceTop';
 export const CELL_SPACE_BOTTOM = 'cellSpaceBottom';
+export const CELL_LOWERED = 'cellLowered';
 
 const combine = (first: string, second: string) =>
   `${first}.${second}, ${first} .${second}`;
@@ -45,6 +44,8 @@ export const StyledCell = styled('div')<{ position?: PositionType }>`
   ${combine('&', CELL_CLICKABLE)} {
     cursor: pointer;
     &:hover {
+      --cell-background: ${({ position, theme }) =>
+        getCellGradientBackground(position, theme.palette.cell.hover)};
       background: ${({ position, theme }) =>
         getCellGradientBackground(position, theme.palette.cell.hover)};
       transition: background 0.1s ease-in;
@@ -52,7 +53,7 @@ export const StyledCell = styled('div')<{ position?: PositionType }>`
   }
 
   ${combine('&', CELL_PLAIN)} {
-    scroll-margin-top: ${TOP_BAR_HEIGHT}px;
+    scroll-margin-top: ${({ theme }) => theme.mixins.toolbar.minHeight}px;
     scroll-margin-left: 10px;
     scroll-margin-right: 10px;
     position: relative;
@@ -93,7 +94,18 @@ export const StyledCell = styled('div')<{ position?: PositionType }>`
         : '0px 0px 10px rgba(0, 0, 0, 0.2)'} !important;
   }
 
+  ${combine('&', CELL_LOWERED)} {
+    --cell-background: ${({ theme }) => theme.palette.cell.selected};
+    background: ${({ theme }) => theme.palette.cell.selected} !important;
+    box-shadow: ${({ theme }) =>
+        theme.palette.mode === 'dark'
+          ? '0px 0px 8px 0px rgba(0, 0, 0, 0.6)'
+          : '0px 0px 8px 0px rgba(0, 0, 0, 0.2)'}
+      inset !important;
+  }
+
   ${combine('&', CELL_SELECTED)} {
+    --cell-background: ${({ theme }) => theme.palette.cell.selected};
     background: ${({ theme }) => theme.palette.cell.selected} !important;
   }
 

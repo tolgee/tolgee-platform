@@ -12,8 +12,8 @@ import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
-import io.tolgee.repository.UserAccountRepository
 import io.tolgee.security.InitialPasswordManager
+import io.tolgee.service.key.NamespaceService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
@@ -28,18 +28,19 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
-import java.util.*
+import java.util.Locale
+import java.util.UUID
 
 @Service
 class DbPopulatorReal(
   private val entityManager: EntityManager,
-  private val userAccountRepository: UserAccountRepository,
   private val userAccountService: UserAccountService,
   private val languageService: LanguageService,
   private val tolgeeProperties: TolgeeProperties,
   private val initialPasswordManager: InitialPasswordManager,
   private val slugGenerator: SlugGenerator,
   private val organizationRoleService: OrganizationRoleService,
+  private val namespaceService: NamespaceService,
   private val projectService: ProjectService,
   private val organizationService: OrganizationService,
   private val apiKeyService: ApiKeyService,
@@ -53,8 +54,8 @@ class DbPopulatorReal(
   @Transactional
   fun autoPopulate() {
     // do not populate if db is not empty
-    if (userAccountRepository.count() == 0L) {
-      this.populate("Application")
+    if (userAccountService.countAll() == 0L) {
+      this.populate()
     }
   }
 
@@ -170,32 +171,26 @@ class DbPopulatorReal(
   }
 
   @Transactional
-  fun createBase(
-    projectName: String,
-    username: String,
-  ): Base {
-    return createBase(projectName, username, null)
+  fun createBase(username: String): Base {
+    return createBase(UUID.randomUUID().toString(), username, null)
   }
 
   @Transactional
-  fun createBase(projectName: String): Base {
-    return createBase(projectName, tolgeeProperties.authentication.initialUsername)
+  fun createBase(): Base {
+    return createBase(tolgeeProperties.authentication.initialUsername)
   }
 
-  fun populate(projectName: String): Base {
+  fun populate(): Base {
     return executeInNewTransaction(platformTransactionManager) {
-      populate(projectName, tolgeeProperties.authentication.initialUsername)
+      populate(userName = tolgeeProperties.authentication.initialUsername)
     }.also {
       languageStatsService.refreshLanguageStats(it.project.id)
     }
   }
 
   @Transactional
-  fun populate(
-    projectName: String,
-    userName: String,
-  ): Base {
-    val base = createBase(projectName, userName)
+  fun populate(userName: String): Base {
+    val base = createBase(userName)
     val project = projectService.get(base.project.id)
     createApiKey(project)
     createTranslation(project, "Hello world!", "Hallo Welt!", en, de)
@@ -304,8 +299,10 @@ class DbPopulatorReal(
   ) {
     val key = Key()
     key.name = "sampleApp." +
-      english.replace(" ", "_")
-        .lowercase(Locale.getDefault()).replace("\\.+$".toRegex(), "")
+      english
+        .replace(" ", "_")
+        .lowercase(Locale.getDefault())
+        .replace("\\.+$".toRegex(), "")
     key.project = project
     val translation = Translation()
     translation.language = en
@@ -319,6 +316,13 @@ class DbPopulatorReal(
     translationDe.text = deutsch
     entityManager.persist(translationDe)
     entityManager.flush()
+  }
+
+  fun createNamespace(
+    project: Project,
+    name: String = UUID.randomUUID().toString(),
+  ) {
+    namespaceService.create(name, project.id)
   }
 
   companion object {

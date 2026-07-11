@@ -8,5 +8,4 @@ enum class BatchJobStatus(
   SUCCESS(true),
   FAILED(true),
   CANCELLED(true),
-  DEBOUNCED(true),
 }

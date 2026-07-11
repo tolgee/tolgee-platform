@@ -8,7 +8,6 @@ export const parseErrorResponse = (errorData: ApiError): string[] => {
   }
 
   if (errorData.CUSTOM_VALIDATION) {
-    //todo pretty print message with params
     return Object.keys(errorData.CUSTOM_VALIDATION);
   }
 

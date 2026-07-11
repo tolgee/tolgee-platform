@@ -18,11 +18,13 @@ class ImportProperties {
         "\n" +
         ":::info\n" +
         "Your folder structure should look like:\n" +
+        "```\n" +
         "importDir\n" +
         "└─Project # the foler name is the project name\n" +
         "  └─validation # the foler name is namespace\n" +
         "    ├─ en.json # the file name is the target language\n" +
         "    └─ de.json # second project language\n" +
+        "```\n" +
         ":::\n\n",
   )
   var dir: String? = null
@@ -55,4 +57,12 @@ class ImportProperties {
         "Such data is not automatically removed after successful import. You have to clean-up manually!",
   )
   var storeFilesForDebugging: Boolean = false
+
+  @DocProperty(
+    description =
+      "Number of keys/translations persisted per flushAndClear batch by the data importer. " +
+        "Smaller values reduce peak memory at the cost of more flushes; larger values do the opposite. " +
+        "Lower this in environments where the import OOMs at scale.",
+  )
+  var flushBatchSize: Int = 10_000
 }

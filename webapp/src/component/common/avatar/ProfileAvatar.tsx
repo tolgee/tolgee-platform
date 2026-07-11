@@ -1,6 +1,6 @@
 import { Box, IconButton, styled } from '@mui/material';
 import React, { createRef, FC, useRef, useState } from 'react';
-import EditIcon from '@mui/icons-material/Edit';
+import { Edit02 } from '@untitled-ui/icons-react';
 import { T } from '@tolgee/react';
 import { ReactCropperElement } from 'react-cropper';
 import { messageService } from 'tg.service/MessageService';
@@ -9,6 +9,7 @@ import { AvatarEditMenu } from './AvatarEditMenu';
 import { AvatarEditDialog } from './AvatarEditDialog';
 import { useConfig } from 'tg.globalContext/helpers';
 import { components } from 'tg.service/apiSchema.generated';
+import { CropperOptions } from './AvatarEdit';
 
 export type AvatarOwner = {
   name?: string;
@@ -53,14 +54,23 @@ const file2Base64 = (file: File): Promise<string> => {
   });
 };
 
-const ALLOWED_UPLOAD_TYPES = ['image/png', 'image/jpeg', 'image/gif'];
+const ALLOWED_UPLOAD_TYPES = [
+  'image/png',
+  'image/jpeg',
+  'image/gif',
+  'image/webp',
+];
 
-export const ProfileAvatar: FC<{
-  disabled?: boolean;
-  onUpload: (blob: Blob) => Promise<any>;
-  onRemove: () => Promise<any>;
-  owner: AvatarOwner;
-}> = (props) => {
+export const ProfileAvatar: FC<
+  React.PropsWithChildren<{
+    disabled?: boolean;
+    onUpload: (blob: Blob) => Promise<any>;
+    onRemove: () => Promise<any>;
+    owner: AvatarOwner;
+    cropperProps?: Partial<CropperOptions>;
+    preview?: (props: AvatarOwner) => React.ReactNode;
+  }>
+> = (props) => {
   const fileRef = createRef<HTMLInputElement>();
   const [uploaded, setUploaded] = useState(null as string | null | undefined);
   const cropperRef = createRef<ReactCropperElement>();
@@ -127,7 +137,11 @@ export const ProfileAvatar: FC<{
         }}
         sx={{ cursor: props.disabled ? 'default' : 'pointer' }}
       >
-        <AvatarImg owner={props.owner} size={200} />
+        {props.preview ? (
+          props.preview(props.owner)
+        ) : (
+          <AvatarImg owner={props.owner} size={200} />
+        )}
         {!props.disabled && (
           <EditButtonWrapper>
             <StyledEditButton
@@ -136,7 +150,7 @@ export const ProfileAvatar: FC<{
               ref={editAvatarRef as any}
               className="button"
             >
-              <EditIcon />
+              <Edit02 />
             </StyledEditButton>
           </EditButtonWrapper>
         )}
@@ -159,6 +173,7 @@ export const ProfileAvatar: FC<{
           src={uploaded}
           cropperRef={cropperRef as any}
           isUploading={uploading}
+          cropperProps={props.cropperProps}
           onCancel={() => {
             setUploaded(undefined);
           }}

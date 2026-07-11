@@ -1,0 +1,16 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "welcome-message-escaped": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hello, %@ {meto}"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+} 

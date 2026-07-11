@@ -6,6 +6,7 @@ import io.tolgee.batch.events.JobQueueItemsEvent
 import io.tolgee.fixtures.RedisRunner
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.pubSub.RedisPubSubReceiverConfiguration.Companion.JOB_QUEUE_TOPIC
+import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -16,24 +17,25 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.SpyBean
+import org.springframework.boot.test.util.TestPropertyValues
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ContextConfiguration
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 
 @SpringBootTest(
   properties = [
     "tolgee.cache.use-redis=true",
     "tolgee.cache.enabled=true",
     "tolgee.websocket.use-redis=true",
-    "spring.redis.port=56379",
   ],
   webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
 )
 @ContextConfiguration(initializers = [BatchJobsGeneralWithRedisTest.Companion.Initializer::class])
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@ContextRecreatingTest
 class BatchJobsGeneralWithRedisTest : AbstractBatchJobsGeneralTest() {
   companion object {
     val redisRunner = RedisRunner()
@@ -47,6 +49,9 @@ class BatchJobsGeneralWithRedisTest : AbstractBatchJobsGeneralTest() {
     class Initializer : ApplicationContextInitializer<ConfigurableApplicationContext> {
       override fun initialize(configurableApplicationContext: ConfigurableApplicationContext) {
         redisRunner.run()
+        TestPropertyValues
+          .of("spring.data.redis.port=${RedisRunner.port}")
+          .applyTo(configurableApplicationContext)
       }
     }
   }
@@ -54,7 +59,7 @@ class BatchJobsGeneralWithRedisTest : AbstractBatchJobsGeneralTest() {
   @Autowired
   lateinit var jobConcurrentLauncher: BatchJobConcurrentLauncher
 
-  @SpyBean
+  @MockitoSpyBean
   @Autowired
   lateinit var redisTemplate: StringRedisTemplate
 

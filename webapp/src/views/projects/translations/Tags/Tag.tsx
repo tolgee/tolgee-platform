@@ -1,8 +1,9 @@
-import { styled } from '@mui/material';
-import { Close } from '@mui/icons-material';
+import { styled, SxProps } from '@mui/material';
 
 import { Wrapper } from './Wrapper';
 import clsx from 'clsx';
+import { CloseButton } from 'tg.component/common/buttons/CloseButton';
+import { MouseEvent } from 'react';
 
 const StyledTag = styled('div')`
   margin-left: 6px;
@@ -14,15 +15,6 @@ const StyledTag = styled('div')`
   white-space: nowrap;
 `;
 
-const StyledCloseIcon = styled(Close)`
-  margin-left: -6px;
-  padding: 1px;
-  cursor: pointer;
-  width: 20px;
-  height: 20px;
-  color: ${({ theme }) => theme.palette.text.secondary};
-`;
-
 const StyledWrapper = styled(Wrapper)`
   &.selected {
     border-color: ${({ theme }) => theme.palette.primary.main};
@@ -32,32 +24,30 @@ const StyledWrapper = styled(Wrapper)`
 
 type Props = {
   name: string;
-  onDelete?: React.MouseEventHandler<SVGElement>;
+  onDelete?: (e: MouseEvent) => void;
   onClick?: (name: string) => void;
   selected?: boolean;
   className?: string;
+  sx?: SxProps;
 };
 
-export const Tag: React.FC<Props> = ({
+export const Tag: React.FC<React.PropsWithChildren<Props>> = ({
   name,
   onDelete,
   onClick,
   selected,
   className,
+  sx,
 }) => {
   return (
-    <StyledWrapper
-      onClick={onClick ? () => onClick?.(name) : undefined}
-      className={clsx({ selected }, className)}
-    >
-      <StyledTag>{name}</StyledTag>
-      {onDelete && (
-        <StyledCloseIcon
-          role="button"
-          data-cy="translations-tag-close"
-          onClick={onDelete}
-        />
-      )}
-    </StyledWrapper>
+    <CloseButton onClose={onDelete} data-cy="translations-tag-close" xs>
+      <StyledWrapper
+        onClick={onClick ? () => onClick?.(name) : undefined}
+        className={clsx({ selected }, className)}
+        sx={sx}
+      >
+        <StyledTag>{name}</StyledTag>
+      </StyledWrapper>
+    </CloseButton>
   );
 };

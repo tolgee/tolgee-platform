@@ -2,7 +2,6 @@ package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import io.tolgee.api.EeInvitationService
 import io.tolgee.constants.Message
 import io.tolgee.dtos.misc.CreateOrganizationInvitationParams
 import io.tolgee.dtos.misc.CreateProjectInvitationParams
@@ -15,17 +14,23 @@ import io.tolgee.hateoas.invitation.OrganizationInvitationModel
 import io.tolgee.hateoas.invitation.OrganizationInvitationModelAssembler
 import io.tolgee.hateoas.invitation.ProjectInvitationModel
 import io.tolgee.hateoas.invitation.ProjectInvitationModelAssembler
+import io.tolgee.hateoas.invitation.PublicInvitationModelAssembler
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.RequiresSuperAuthentication
+import io.tolgee.security.authentication.WriteOperation
 import io.tolgee.security.authorization.RequiresOrganizationRole
 import io.tolgee.security.authorization.RequiresProjectPermissions
-import io.tolgee.service.InvitationService
+import io.tolgee.service.TranslationAgencyService
+import io.tolgee.service.invitation.EeInvitationService
+import io.tolgee.service.invitation.InvitationService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
+import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.SecurityService
 import jakarta.validation.Valid
 import org.springframework.hateoas.CollectionModel
@@ -53,10 +58,29 @@ class V2InvitationController(
   private val eeInvitationService: EeInvitationService,
   private val organizationService: OrganizationService,
   private val organizationInvitationModelAssembler: OrganizationInvitationModelAssembler,
+  private val permissionService: PermissionService,
+  private val authenticationFacade: AuthenticationFacade,
+  private val translationAgencyService: TranslationAgencyService,
+  private val publicInvitationModelAssembler: PublicInvitationModelAssembler,
 ) {
   @GetMapping("/v2/invitations/{code}/accept")
-  @Operation(summary = "Accepts invitation to project or organization")
+  @WriteOperation
+  @Operation(
+    summary =
+      "Accepts invitation to project or organization " +
+        "(deprecated: use PUT method instead)",
+    deprecated = true,
+  )
   fun acceptInvitation(
+    @PathVariable("code") code: String?,
+  ): ResponseEntity<Void> {
+    invitationService.accept(code)
+    return ResponseEntity(HttpStatus.OK)
+  }
+
+  @PutMapping("/v2/invitations/{code}/accept")
+  @Operation(summary = "Accepts invitation to project or organization")
+  fun acceptInvitationPut(
     @PathVariable("code") code: String?,
   ): ResponseEntity<Void> {
     invitationService.accept(code)
@@ -80,7 +104,9 @@ class V2InvitationController(
     }
 
     invitation.organizationRole?.let {
-      organizationRoleService.checkUserIsOwner(invitation.organizationRole!!.organization!!.id)
+      organizationRoleService.checkUserCanDeleteInvitation(
+        invitation.organizationRole!!.organization!!.id,
+      )
     }
 
     invitationService.delete(invitation)
@@ -100,7 +126,7 @@ class V2InvitationController(
     return projectInvitationModelAssembler.toCollectionModel(invitations)
   }
 
-  @PutMapping("/v2/projects/{projectId}/invite")
+  @PutMapping("/v2/projects/{projectId:[0-9]+}/invite")
   @Operation(summary = "Generate user invitation link for project")
   @RequiresProjectPermissions([Scope.MEMBERS_EDIT])
   @RequiresSuperAuthentication
@@ -109,18 +135,37 @@ class V2InvitationController(
     invitation: ProjectInviteUserDto,
   ): ProjectInvitationModel {
     validatePermissions(invitation)
+    val currentUserPermissions =
+      permissionService.findPermissionNonCached(
+        projectHolder.project.id,
+        authenticationFacade.authenticatedUser.id,
+      )
 
     val languagesPermissions = projectPermissionFacade.getLanguages(invitation, projectHolder.project.id)
 
     val params =
-      CreateProjectInvitationParams(
-        project = projectHolder.projectEntity,
-        type = invitation.type,
-        scopes = invitation.scopes,
-        email = invitation.email,
-        name = invitation.name,
-        languagePermissions = languagesPermissions,
-      )
+      if (invitation.agencyId != null) {
+        val agency = translationAgencyService.findById(invitation.agencyId!!)
+        CreateProjectInvitationParams(
+          project = projectHolder.projectEntity,
+          type = invitation.type,
+          scopes = invitation.scopes,
+          email = agency.email,
+          name = "Agency invitation",
+          languagePermissions = languagesPermissions,
+          agencyId = agency.id,
+        )
+      } else {
+        CreateProjectInvitationParams(
+          project = projectHolder.projectEntity,
+          type = invitation.type,
+          scopes = invitation.scopes,
+          email = invitation.email,
+          name = invitation.name,
+          languagePermissions = languagesPermissions,
+          agencyId = currentUserPermissions?.agency?.id,
+        )
+      }
 
     val created =
       if (!params.scopes.isNullOrEmpty()) {

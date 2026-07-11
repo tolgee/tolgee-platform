@@ -1,0 +1,31 @@
+# Snyk (https://snyk.io) policy file.
+# Documented risk-acceptances for advisories with no clean upstream fix. These
+# are browser-side issues whose only input crosses no trust boundary, so the
+# real-world impact is negligible. Re-review on expiry.
+version: v1.25.0
+ignore:
+  SNYK-JS-ZXCVBN-3257741:
+    - '*':
+        reason: >-
+          ReDoS in the client-side password-strength estimator. The only input
+          is the user's own password as they type it, so the worst case is a
+          user slowing down their own browser tab. No cross-user or server
+          impact. zxcvbn is unmaintained with no patched release; migrating to
+          @zxcvbn-ts/core is tracked as separate tech-debt.
+        expires: 2027-06-11T00:00:00.000Z
+  SNYK-JS-INFLIGHT-6095116:
+    - '*':
+        reason: >-
+          Memory leak in a deprecated package reached only via
+          react-query > broadcast-channel > rimraf > glob, a Node-only
+          leader-election path that is not exercised in the browser bundle. No
+          upstream fix exists (package is deprecated).
+        expires: 2027-06-11T00:00:00.000Z
+  SNYK-JS-D3COLOR-1076592:
+    - '*':
+        reason: >-
+          ReDoS in d3-color via recharts. The parsed color strings come from the
+          app's own chart configuration, not attacker-controlled input. The fix
+          requires a major d3 bump that risks breaking recharts; deferred as
+          low-risk.
+        expires: 2027-06-11T00:00:00.000Z

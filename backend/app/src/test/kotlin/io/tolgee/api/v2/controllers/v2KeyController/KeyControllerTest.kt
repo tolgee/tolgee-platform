@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import java.math.BigDecimal
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -43,9 +44,11 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   fun `returns all keys`() {
     testData.addNKeys(120)
+    testData.addNBranchedKeys(10)
     saveTestDataAndPrepare()
     performProjectAuthGet("keys")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("_embedded.keys") {
           isArray.hasSize(20)
           node("[0].id").isValidId
@@ -53,9 +56,11 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
           node("[2].namespace").isEqualTo("null")
           node("[1].description").isEqualTo("description")
         }
+        node("page.totalElements").isNumber.isEqualTo(BigDecimal(123))
       }
     performProjectAuthGet("keys?page=1")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("_embedded.keys") {
           isArray.hasSize(20)
           node("[0].id").isValidId
@@ -71,7 +76,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     saveTestDataAndPrepare()
     val keyId = testData.keyWithReferences.id
     performProjectAuthGet("keys/$keyId")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("id").isValidId
         node("name").isEqualTo("key_with_referecnces")
         node("namespace").isNull()
@@ -86,14 +92,16 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     saveTestDataAndPrepare()
 
     performProjectAuthPost("keys", CreateKeyDto(name = ""))
-      .andIsBadRequest.andPrettyPrint.andAssertThatJson {
+      .andIsBadRequest.andPrettyPrint
+      .andAssertThatJson {
         node("STANDARD_VALIDATION") {
           node("name").isString
         }
       }
 
     performProjectAuthPost("keys", CreateKeyDto(name = LONGER_NAME))
-      .andIsBadRequest.andPrettyPrint.andAssertThatJson {
+      .andIsBadRequest.andPrettyPrint
+      .andAssertThatJson {
         node("STANDARD_VALIDATION") {
           node("name").isEqualTo("length must be between 1 and 2000")
         }
@@ -108,7 +116,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     performProjectAuthPost("keys", CreateKeyDto(name = "first_key"))
       .andIsBadRequest
       .andAssertError
-      .isCustomValidation.hasMessage("key_exists")
+      .isCustomValidation
+      .hasMessage("key_exists")
   }
 
   @ProjectJWTAuthTestMethod
@@ -117,7 +126,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     saveTestDataAndPrepare()
 
     performProjectAuthPut("keys/${testData.firstKey.id}", EditKeyDto(name = "test"))
-      .andIsOk.andPrettyPrint.andAssertThatJson {
+      .andIsOk.andPrettyPrint
+      .andAssertThatJson {
         node("name").isEqualTo("test")
       }
   }
@@ -128,7 +138,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     saveTestDataAndPrepare()
 
     performProjectAuthPut("keys/${testData.firstKey.id}", EditKeyDto(name = "name", description = "desc"))
-      .andIsOk.andPrettyPrint.andAssertThatJson {
+      .andIsOk.andPrettyPrint
+      .andAssertThatJson {
         node("description").isEqualTo("desc")
       }
   }
@@ -151,7 +162,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
     projectSupplier = { testData.project2 }
     performProjectAuthPut("keys/${testData.firstKey.id}", EditKeyDto(name = "aasda"))
-      .andIsBadRequest.andAssertThatJson {
+      .andIsBadRequest
+      .andAssertThatJson {
         node("code").isEqualTo("key_not_from_project")
       }
   }
@@ -162,7 +174,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     saveTestDataAndPrepare()
 
     performProjectAuthDelete("keys/${testData.firstKey.id}", null).andIsOk
-    assertThat(keyService.findOptional(testData.firstKey.id)).isEmpty
+    assertThat(keyService.findOptional(testData.firstKey.id)).isPresent
+    assertThat(keyService.findOptional(testData.firstKey.id).get().deletedAt).isNotNull()
   }
 
   @ProjectJWTAuthTestMethod
@@ -171,7 +184,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     saveTestDataAndPrepare()
 
     performProjectAuthDelete("keys/${testData.keyWithReferences.id}", null).andIsOk
-    assertThat(keyService.findOptional(testData.keyWithReferences.id)).isEmpty
+    assertThat(keyService.findOptional(testData.keyWithReferences.id)).isPresent
+    assertThat(keyService.findOptional(testData.keyWithReferences.id).get().deletedAt).isNotNull()
   }
 
   @ProjectJWTAuthTestMethod
@@ -189,7 +203,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     saveTestDataAndPrepare()
 
     performProjectAuthDelete("keys/${testData.keyWithReferences.id},${testData.keyWithReferences.id}", null).andIsOk
-    assertThat(keyService.findOptional(testData.keyWithReferences.id)).isEmpty
+    assertThat(keyService.findOptional(testData.keyWithReferences.id)).isPresent
+    assertThat(keyService.findOptional(testData.keyWithReferences.id).get().deletedAt).isNotNull()
   }
 
   @ProjectJWTAuthTestMethod
@@ -199,7 +214,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
     projectSupplier = { testData.project2 }
     performProjectAuthDelete("keys/${testData.firstKey.id}", null)
-      .andIsBadRequest.andAssertThatJson {
+      .andIsBadRequest
+      .andAssertThatJson {
         node("code").isEqualTo("key_not_from_project")
       }
   }
@@ -211,8 +227,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
     projectSupplier = { testData.project }
     performProjectAuthDelete("keys/${testData.firstKey.id},${testData.secondKey.id}", null).andIsOk
-    assertThat(keyService.findOptional(testData.firstKey.id)).isEmpty
-    assertThat(keyService.findOptional(testData.secondKey.id)).isEmpty
+    assertThat(keyService.findOptional(testData.firstKey.id).get().deletedAt).isNotNull()
+    assertThat(keyService.findOptional(testData.secondKey.id).get().deletedAt).isNotNull()
   }
 
   @ProjectJWTAuthTestMethod
@@ -225,8 +241,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       "keys",
       mapOf("ids" to listOf(testData.firstKey.id, testData.secondKey.id)),
     ).andIsOk
-    assertThat(keyService.findOptional(testData.firstKey.id)).isEmpty
-    assertThat(keyService.findOptional(testData.secondKey.id)).isEmpty
+    assertThat(keyService.findOptional(testData.firstKey.id).get().deletedAt).isNotNull()
+    assertThat(keyService.findOptional(testData.secondKey.id).get().deletedAt).isNotNull()
   }
 
   @ProjectJWTAuthTestMethod
@@ -236,7 +252,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
     projectSupplier = { testData.project2 }
     performProjectAuthDelete("keys/${testData.secondKey.id},${testData.firstKey.id}", null)
-      .andIsBadRequest.andAssertThatJson {
+      .andIsBadRequest
+      .andAssertThatJson {
         node("code").isEqualTo("key_not_from_project")
       }
   }
@@ -283,18 +300,35 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
     executeInNewTransaction {
       val firstKey = keyService.get(testData.firstKey.id)
-      firstKey.translations.find { it.language.tag == "en" }.assert.isNull()
-      firstKey.keyMeta?.description.assert.isNull()
+      firstKey.translations
+        .find { it.language.tag == "en" }
+        .assert
+        .isNull()
+      firstKey.keyMeta
+        ?.description.assert
+        .isNull()
 
       val key =
         projectService.get(testData.project.id).keys.find {
           it.name == "new_key"
         }
-      key!!.keyMeta!!.description.assert.isEqualTo("description")
+      key!!
+        .keyMeta!!
+        .description.assert
+        .isEqualTo("description")
 
       key.assert.isNotNull()
-      key.keyMeta!!.tags.assert.hasSize(3)
-      key.translations.find { it.language.tag == "en" }!!.text.assert.isEqualTo("hello")
+      key.keyMeta!!
+        .tags.assert
+        .hasSize(3)
+      key.translations
+        .find { it.language.tag == "en" }!!
+        .text.assert
+        .isEqualTo("hello")
+      key.branch.assert.isNotNull
+      key.branch
+        ?.name.assert
+        .isEqualTo("main")
     }
   }
 

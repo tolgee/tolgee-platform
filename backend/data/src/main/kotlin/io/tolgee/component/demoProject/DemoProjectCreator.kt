@@ -25,6 +25,7 @@ import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.service.translation.TranslationCommentService
 import io.tolgee.service.translation.TranslationService
+import io.tolgee.service.translationMemory.TranslationMemoryManagementService
 import org.springframework.context.ApplicationContext
 import java.awt.Dimension
 
@@ -48,6 +49,7 @@ class DemoProjectCreator(
     addComments()
     project.baseLanguage = languages["en"]
     projectService.save(project)
+    translationMemoryManagementService.createProjectTm(project)
     return project
   }
 
@@ -82,11 +84,12 @@ class DemoProjectCreator(
    * Map of Pair(languageTag, keyName) -> Translation
    */
   private val translations by lazy {
-    DemoProjectData.translations.flatMap { (languageTag, translations) ->
-      translations.map { (key, text) ->
-        setTranslation(key, languageTag, text)
-      }
-    }.associateBy { it.language.tag to it.key.name }
+    DemoProjectData.translations
+      .flatMap { (languageTag, translations) ->
+        translations.map { (key, text) ->
+          setTranslation(key, languageTag, text)
+        }
+      }.associateBy { it.language.tag to it.key.name }
   }
 
   private fun addBigMeta() {
@@ -113,17 +116,18 @@ class DemoProjectCreator(
     translation: String,
   ): Translation {
     val language = languages[languageTag]!!
-    return translationService.setTranslation(getOrCreateKey(keyName), language, translation).also {
+    return translationService.setTranslationText(getOrCreateKey(keyName), language, translation).also {
       it.state = TranslationState.REVIEWED
     }
   }
 
   private fun tagKeys() {
     val tagsMap =
-      DemoProjectData.tags.mapNotNull {
-        val key = keys[it.key] ?: return@mapNotNull null
-        key to it.value
-      }.toMap()
+      DemoProjectData.tags
+        .mapNotNull {
+          val key = keys[it.key] ?: return@mapNotNull null
+          key to it.value
+        }.toMap()
     tagService.tagKeys(tagsMap)
   }
 
@@ -150,18 +154,29 @@ class DemoProjectCreator(
   }
 
   private fun saveScreenshot(): Screenshot {
-    applicationContext.getResource("classpath:demoProject/screenshot.png").inputStream
-      .use { screenshotImage ->
-        applicationContext.getResource("classpath:demoProject/screenshot-thumbnail.png").inputStream
-          .use { screenshotThumbnail ->
-            return screenshotService.saveScreenshot(
-              screenshotImage.readAllBytes(),
-              screenshotThumbnail.readAllBytes(),
-              null,
-              Dimension(SCREENSHOT_WIDTH, SCREENSHOT_HEIGHT),
-            )
-          }
-      }
+    val image =
+      applicationContext
+        .getResource("classpath:demoProject/screenshot.png")
+        .inputStream
+        .use { it.readAllBytes() }
+    val middleSized =
+      applicationContext
+        .getResource("classpath:demoProject/screenshot-middle-sized.png")
+        .inputStream
+        .use { it.readAllBytes() }
+    val thumbnail =
+      applicationContext
+        .getResource("classpath:demoProject/screenshot-thumbnail.png")
+        .inputStream
+        .use { screenshotThumbnail -> screenshotThumbnail.readAllBytes() }
+
+    return screenshotService.saveScreenshot(
+      image,
+      middleSized,
+      thumbnail,
+      null,
+      Dimension(SCREENSHOT_WIDTH, SCREENSHOT_HEIGHT),
+    )
   }
 
   val keys: MutableMap<String, Key> = mutableMapOf()
@@ -193,7 +208,7 @@ class DemoProjectCreator(
   }
 
   private fun getOrCreateKeyMeta(key: Key): KeyMeta {
-    return key.keyMeta ?: let {
+    return key.keyMeta ?: run {
       val keyMeta = KeyMeta()
       keyMeta.key = key
       key.keyMeta = keyMeta
@@ -262,5 +277,9 @@ class DemoProjectCreator(
 
   private val translationCommentService: TranslationCommentService by lazy {
     applicationContext.getBean(TranslationCommentService::class.java)
+  }
+
+  private val translationMemoryManagementService: TranslationMemoryManagementService by lazy {
+    applicationContext.getBean(TranslationMemoryManagementService::class.java)
   }
 }

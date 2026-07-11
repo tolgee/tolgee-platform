@@ -29,11 +29,13 @@ class BatchJobCancellationManager(
   private val redisTemplate: StringRedisTemplate,
   private val entityManager: EntityManager,
   private val transactionManager: PlatformTransactionManager,
-  private val batchJobActionService: BatchJobActionService,
   private val progressManager: ProgressManager,
   private val activityHolder: ActivityHolder,
   private val batchJobService: BatchJobService,
   private val batchJobStatusProvider: BatchJobStatusProvider,
+  private val batchJobChunkExecutionQueue: BatchJobChunkExecutionQueue,
+  private val concurrentExecutionLauncher: BatchJobConcurrentLauncher,
+  private val batchProperties: io.tolgee.configuration.tolgee.BatchProperties,
 ) : Logging {
   @Transactional
   fun cancel(id: Long) {
@@ -50,10 +52,12 @@ class BatchJobCancellationManager(
   }
 
   /**
-   * Sends request to cancel job executions on all instances
+   * Sends request to cancel job executions on all instances.
    *
-   * If using redis, it rends a message to redis channel
-   * If not, it just cancels local jobs
+   * When using Redis, also broadcasts the cancel message so other instances cancel
+   * their running coroutines for this job. The local instance always cancels
+   * directly (not via the Redis loopback) so cancellation does not depend on
+   * the Redis pub/sub round-trip latency.
    */
   private fun cancelLocalAndRemoteExecutions(id: Long) {
     if (usingRedisProvider.areWeUsingRedis) {
@@ -61,14 +65,13 @@ class BatchJobCancellationManager(
         RedisPubSubReceiverConfiguration.JOB_CANCEL_TOPIC,
         jacksonObjectMapper().writeValueAsString(id),
       )
-      return
     }
-    batchJobActionService.cancelLocalJob(id)
+    cancelLocalJob(id)
   }
 
   @EventListener(JobCancelEvent::class)
   fun cancelJobListener(event: JobCancelEvent) {
-    batchJobActionService.cancelLocalJob(event.jobId)
+    cancelLocalJob(event.jobId)
   }
 
   fun cancelJob(jobId: Long) {
@@ -100,20 +103,19 @@ class BatchJobCancellationManager(
     }
 
   private fun getUnlockedPendingExecutions(jobId: Long): MutableList<BatchJobChunkExecution> =
-    entityManager.createQuery(
-      """
+    entityManager
+      .createQuery(
+        """
             from BatchJobChunkExecution bjce  
             where bjce.batchJob.id = :id
             and status = :status
           """,
-      BatchJobChunkExecution::class.java,
-    )
-      .setLockMode(LockModeType.PESSIMISTIC_WRITE)
+        BatchJobChunkExecution::class.java,
+      ).setLockMode(LockModeType.PESSIMISTIC_WRITE)
       .setHint(
         "jakarta.persistence.lock.timeout",
         LockOptions.SKIP_LOCKED,
-      )
-      .setParameter("id", jobId)
+      ).setParameter("id", jobId)
       .setParameter("status", BatchJobChunkExecutionStatus.PENDING)
       .resultList
 
@@ -134,8 +136,8 @@ class BatchJobCancellationManager(
   }
 
   private fun tryWaitForBatchJobCompletedStatus(jobId: Long) {
-    waitFor(pollTime = 200, timeout = 2000) {
-      executeInNewTransaction(transactionManager) {
+    waitFor(pollTime = 200, timeout = batchProperties.cancellationTimeoutMs) {
+      executeInNewTransaction(transactionManager, readOnly = true) {
         batchJobService.getJobDto(jobId).status.completed
       }
     }
@@ -163,15 +165,15 @@ class BatchJobCancellationManager(
   }
 
   private fun getStatuses(jobId: Long): MutableList<BatchJobChunkExecutionStatus> =
-    entityManager.createQuery(
-      """
+    entityManager
+      .createQuery(
+        """
             select e.status from BatchJobChunkExecution e 
             where e.batchJob.id = :id 
             group by e.status
             """,
-      BatchJobChunkExecutionStatus::class.java,
-    )
-      .setParameter("id", jobId)
+        BatchJobChunkExecutionStatus::class.java,
+      ).setParameter("id", jobId)
       .resultList
 
   fun cancelExecution(execution: BatchJobChunkExecution) {
@@ -184,5 +186,12 @@ class BatchJobCancellationManager(
   private fun incrementCancelledCount() {
     val current = activityHolder.activityRevision.cancelledBatchJobExecutionCount ?: 0
     activityHolder.activityRevision.cancelledBatchJobExecutionCount = current + 1
+  }
+
+  fun cancelLocalJob(jobId: Long) {
+    batchJobChunkExecutionQueue.removeJobExecutions(jobId)
+    concurrentExecutionLauncher.runningJobs.filter { it.value.first.id == jobId }.forEach {
+      it.value.second.cancel()
+    }
   }
 }

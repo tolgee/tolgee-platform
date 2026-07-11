@@ -6,7 +6,7 @@ import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 
 @Component
-class SdkInfoProvider() {
+class SdkInfoProvider {
   fun getSdkInfo(request: HttpServletRequest? = null): Map<String, String?>? {
     val safeRequest = request ?: getRequest() ?: return null
     return mapOf(

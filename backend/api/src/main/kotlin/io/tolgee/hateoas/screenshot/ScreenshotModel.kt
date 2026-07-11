@@ -3,7 +3,7 @@ package io.tolgee.hateoas.screenshot
 import io.swagger.v3.oas.annotations.media.Schema
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
-import java.util.*
+import java.util.Date
 
 @Suppress("unused")
 @Relation(collectionRelation = "screenshots", itemRelation = "screenshot")
@@ -23,7 +23,9 @@ When images are secured. Encrypted timestamp is appended to the filename.
   """,
   )
   val thumbnail: String,
+  val middleSized: String?,
   val fileUrl: String,
+  val middleSizedUrl: String?,
   val thumbnailUrl: String,
   val createdAt: Date?,
   val keyReferences: List<KeyInScreenshotModel>,

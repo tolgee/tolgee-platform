@@ -1,6 +1,6 @@
 package io.tolgee.controllers.internal.e2eData
 
-import io.swagger.v3.oas.annotations.Hidden
+import io.tolgee.controllers.internal.InternalController
 import io.tolgee.development.testDataBuilder.TestDataService
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.dtos.request.key.CreateKeyDto
@@ -8,24 +8,17 @@ import io.tolgee.service.key.KeyService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.UserAccountService
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
 
-@RestController
-@CrossOrigin(origins = ["*"])
-@Hidden
-@RequestMapping(value = ["internal/e2e-data/translations"])
-@Transactional
+@InternalController(["internal/e2e-data/translations"])
 class TranslationsE2eDataController(
   private val keyService: KeyService,
   private val projectService: ProjectService,
   private val testDataService: TestDataService,
   private val userAccountService: UserAccountService,
 ) {
-  @GetMapping(value = ["/generate/{projectId}/{number}"])
+  @GetMapping(value = ["/generate/{projectId:[0-9]+}/{number}"])
   @Transactional
   fun generateKeys(
     @PathVariable projectId: Long,
@@ -54,6 +47,16 @@ class TranslationsE2eDataController(
     val testData = TranslationsTestData()
     testData.addKeysWithScreenshots()
     testData.addTranslationsWithStates()
+    testData.addCommentStatesData()
+    testDataService.saveTestData(testData.root)
+    return mapOf("id" to testData.project.id)
+  }
+
+  @GetMapping(value = ["/generate-for-description-filters"])
+  @Transactional
+  fun generateForDescriptionFilters(): Map<String, Long> {
+    val testData = TranslationsTestData()
+    testData.addKeysWithDescriptions()
     testDataService.saveTestData(testData.root)
     return mapOf("id" to testData.project.id)
   }

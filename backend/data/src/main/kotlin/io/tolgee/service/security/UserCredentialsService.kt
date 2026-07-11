@@ -19,7 +19,7 @@ class UserCredentialsService(
     password: String,
   ): UserAccount {
     val userAccount =
-      userAccountService.findActive(username)
+      userAccountService.findActiveOrDisabled(username)
         ?: throw AuthenticationException(Message.BAD_CREDENTIALS)
 
     if (userAccount.accountType == UserAccount.AccountType.MANAGED) {
@@ -27,6 +27,11 @@ class UserCredentialsService(
     }
 
     checkNativeUserCredentials(userAccount, password)
+
+    if (userAccount.disabledAt != null) {
+      throw AuthenticationException(Message.USER_ACCOUNT_DISABLED)
+    }
+
     return userAccount
   }
 

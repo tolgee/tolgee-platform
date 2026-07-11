@@ -1,5 +1,5 @@
 import { styled, useTheme } from '@mui/material';
-import { FlagImage } from 'tg.component/languages/FlagImage';
+import { FlagImage } from '@tginternal/library/components/languages/FlagImage';
 import { components } from 'tg.service/apiSchema.generated';
 import { TranslationFlags } from '../cell/TranslationFlags';
 
@@ -12,11 +12,7 @@ const StyledLanguage = styled('div')`
   grid-area: language;
   gap: 8px;
   align-items: center;
-  font-size: 13px;
-`;
-
-const StyledLanguageName = styled('div')`
-  padding-right: 8px;
+  font-size: 14px;
 `;
 
 type Props = {
@@ -36,7 +32,7 @@ export const TranslationLanguage = ({
   return (
     <StyledLanguage className={className}>
       <FlagImage flagEmoji={language.flagEmoji!} height={16} />
-      <StyledLanguageName
+      <div
         data-cy="translations-table-cell-language"
         style={{
           fontWeight: language.base ? 'bold' : 'normal',
@@ -46,7 +42,7 @@ export const TranslationLanguage = ({
         }}
       >
         {language.name}
-      </StyledLanguageName>
+      </div>
       <TranslationFlags keyData={keyData} lang={language.tag} />
     </StyledLanguage>
   );

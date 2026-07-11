@@ -6,10 +6,11 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.stereotype.Component
 
 @Component
-class LanguageModelAssembler : RepresentationModelAssemblerSupport<LanguageDto, LanguageModel>(
-  V2LanguagesController::class.java,
-  LanguageModel::class.java,
-) {
+class LanguageModelAssembler :
+  RepresentationModelAssemblerSupport<LanguageDto, LanguageModel>(
+    V2LanguagesController::class.java,
+    LanguageModel::class.java,
+  ) {
   override fun toModel(languageDto: LanguageDto): LanguageModel {
     return LanguageModel(
       id = languageDto.id,

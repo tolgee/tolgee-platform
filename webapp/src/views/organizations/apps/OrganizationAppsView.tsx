@@ -1,11 +1,13 @@
 import { FunctionComponent } from 'react';
-import { SlackApp } from './slack/SlackApp';
 import { useTranslate } from '@tolgee/react';
 import { BaseOrganizationSettingsView } from '../components/BaseOrganizationSettingsView';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useOrganization } from '../useOrganization';
+import { apps } from 'tg.ee';
 
-export const OrganizationAppsView: FunctionComponent = () => {
+export const OrganizationAppsView: FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const organization = useOrganization();
   const { t } = useTranslate();
 
@@ -29,7 +31,9 @@ export const OrganizationAppsView: FunctionComponent = () => {
       hideChildrenOnLoading={false}
       maxWidth="normal"
     >
-      <SlackApp />
+      {apps.map((App, index) => (
+        <App key={index} />
+      ))}
     </BaseOrganizationSettingsView>
   );
 };

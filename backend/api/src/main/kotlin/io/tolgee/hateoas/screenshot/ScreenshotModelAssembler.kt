@@ -24,16 +24,20 @@ class ScreenshotModelAssembler(
   ) {
   override fun toModel(entity: Screenshot): ScreenshotModel {
     val filenameWithSignature = getFilenameWithSignature(entity.filename)
+    val middleSizedFilenameWithSignature = entity.middleSizedFilename?.let { getFilenameWithSignature(it) }
     val thumbnailFilenameWithSignature = getFilenameWithSignature(entity.thumbnailFilename)
 
     val fileUrl = getFileUrl(filenameWithSignature)
+    val middleSizedUrl = middleSizedFilenameWithSignature?.let { getFileUrl(it) }
     val thumbnailUrl = getFileUrl(thumbnailFilenameWithSignature)
 
     return ScreenshotModel(
       id = entity.id,
       filename = filenameWithSignature,
+      middleSized = middleSizedFilenameWithSignature,
       thumbnail = thumbnailFilenameWithSignature,
       fileUrl = fileUrl,
+      middleSizedUrl = middleSizedUrl,
       thumbnailUrl = thumbnailUrl,
       createdAt = entity.createdAt,
       keyReferences =
@@ -58,8 +62,7 @@ class ScreenshotModelAssembler(
       location = entity.location,
       width = entity.width,
       height = entity.height,
-    )
-      .add(Link.of(fileUrl, "file"))
+    ).add(Link.of(fileUrl, "file"))
       .add(Link.of(thumbnailUrl, "thumbnail"))
   }
 
@@ -68,8 +71,11 @@ class ScreenshotModelAssembler(
     if (!fileUrl.matches(Regex("^https?://.*$"))) {
       val builder = ServletUriComponentsBuilder.fromCurrentRequestUri()
       fileUrl =
-        builder.replacePath(fileUrl)
-          .replaceQuery("").build().toUriString()
+        builder
+          .replacePath(fileUrl)
+          .replaceQuery("")
+          .build()
+          .toUriString()
     }
     return fileUrl
   }

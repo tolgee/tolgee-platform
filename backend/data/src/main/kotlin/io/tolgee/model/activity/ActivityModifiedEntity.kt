@@ -1,22 +1,30 @@
 package io.tolgee.model.activity
 
 import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
-import io.tolgee.activity.data.EntityDescriptionRef
-import io.tolgee.activity.data.PropertyModification
+import io.tolgee.activity.data.DescribingDataMap
+import io.tolgee.activity.data.DescribingRelationsMap
+import io.tolgee.activity.data.PropertyModifications
 import io.tolgee.activity.data.RevisionType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Enumerated
 import jakarta.persistence.Id
 import jakarta.persistence.IdClass
+import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
+import jakarta.persistence.Table
+import org.hibernate.annotations.Immutable
 import org.hibernate.annotations.Type
 import java.io.Serializable
 
-/**
- * Entity which is modified by the activity.
- */
+/** Insert-only record of one entity touched by an activity. */
 @Entity
+@Immutable
+@Table(
+  indexes = [
+    Index(columnList = "activity_revision_id,branch_id"),
+  ],
+)
 @IdClass(ActivityModifiedEntityId::class)
 class ActivityModifiedEntity(
   @ManyToOne
@@ -34,27 +42,23 @@ class ActivityModifiedEntity(
   @Id
   val entityId: Long,
 ) : Serializable, ActivityEntityWithDescription {
-  /**
-   * Map of field to object containing old and new values
-   */
-  @Column(columnDefinition = "jsonb")
-  @Type(JsonBinaryType::class)
-  var modifications: MutableMap<String, PropertyModification> = mutableMapOf()
+  @Column(name = "branch_id")
+  var branchId: Long? = null
 
-  /**
-   * Data, which are describing the entity, but are not modified by the change
-   */
+  /** Field-name → (old, new) map of modifications captured for this entity. */
   @Column(columnDefinition = "jsonb")
   @Type(JsonBinaryType::class)
-  var describingData: Map<String, Any?>? = null
+  var modifications: PropertyModifications = PropertyModifications(entityClass)
 
-  /**
-   * Relations describing the entity.
-   * e.g. For translation, we would also need key and language data
-   */
+  /** Scalar data describing the entity, but not modified by the change. */
   @Column(columnDefinition = "jsonb")
   @Type(JsonBinaryType::class)
-  override var describingRelations: Map<String, EntityDescriptionRef>? = null
+  var describingData: DescribingDataMap? = null
+
+  /** Related-entity refs describing the entity (e.g. a Translation's key and language). */
+  @Column(columnDefinition = "jsonb")
+  @Type(JsonBinaryType::class)
+  override var describingRelations: DescribingRelationsMap? = null
 
   @Column(columnDefinition = "jsonb")
   @Type(JsonBinaryType::class)

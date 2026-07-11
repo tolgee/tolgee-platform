@@ -1,18 +1,20 @@
 package io.tolgee.model
 
-import jakarta.persistence.Column
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.MappedSuperclass
 import jakarta.persistence.SequenceGenerator
+import jakarta.persistence.Transient
 import org.springframework.data.util.ProxyUtils
 
 const val SEQUENCE_NAME = "hibernate_sequence"
 const val ALLOCATION_SIZE = 1000
 
 @MappedSuperclass
-abstract class StandardAuditModel : AuditModel(), EntityWithId {
+abstract class StandardAuditModel :
+  AuditModel(),
+  EntityWithId {
   @Id
   @SequenceGenerator(
     name = "sequenceGenerator",
@@ -27,7 +29,6 @@ abstract class StandardAuditModel : AuditModel(), EntityWithId {
   override var id: Long = 0
 
   @Transient
-  @Column(insertable = false, updatable = false)
   override var disableActivityLogging = false
 
   override fun equals(other: Any?): Boolean {

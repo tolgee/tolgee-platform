@@ -1,13 +1,18 @@
-import { defineConfig, loadEnv } from 'vite';
+import { defineConfig, loadEnv, UserConfigFn } from 'vite';
 import react from '@vitejs/plugin-react';
 import viteTsconfigPaths from 'vite-tsconfig-paths';
 import svgr from 'vite-plugin-svgr';
+import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import mdx from '@mdx-js/rollup';
-import { viteStaticCopy } from 'vite-plugin-static-copy';
-import { resolve } from 'path';
+import { resolve } from 'node:path';
+import { existsSync } from 'node:fs';
 
 import { extractDataCy } from './dataCy.plugin';
 import rehypeHighlight from 'rehype-highlight';
+import { sentryVitePlugin } from '@sentry/vite-plugin';
+
+const billingFrontendDir = resolve(__dirname, '../../billing/frontend');
+const hasBilling = existsSync(billingFrontendDir);
 
 export default defineConfig(({ mode }) => {
   process.env = { ...process.env, ...loadEnv(mode, process.cwd()) };
@@ -17,29 +22,87 @@ export default defineConfig(({ mode }) => {
     base: '/',
     plugins: [
       react(),
-      viteTsconfigPaths(),
-      svgr(),
-      mdx({ rehypePlugins: [rehypeHighlight] }),
-      extractDataCy(),
-      viteStaticCopy({
-        targets: [
-          {
-            src: resolve(
-              'node_modules',
-              '@tginternal',
-              'language-util',
-              'flags'
-            ),
-            dest: '',
-          },
+      viteTsconfigPaths({
+        projects: [
+          resolve(__dirname, 'tsconfig.vite.json'),
+          resolve(__dirname, '../library/tsconfig.json'),
+          ...(hasBilling
+            ? [resolve(billingFrontendDir, 'tsconfig.vite.json')]
+            : []),
         ],
       }),
+      svgr(),
+      mdx({ rehypePlugins: [rehypeHighlight] }),
+      nodePolyfills(),
+      extractDataCy(),
+      sentryVitePlugin({
+        authToken: process.env.SENTRY_AUTH_TOKEN,
+        org: 'tolgee',
+        project: 'tolgee-client',
+      }),
     ],
+    resolve: {
+      preserveSymlinks: true,
+      dedupe: [
+        '@codemirror/lint',
+        '@codemirror/state',
+        '@codemirror/view',
+        '@emotion/react',
+        '@emotion/styled',
+        '@mui/material',
+        '@mui/x-date-pickers',
+        '@tginternal/language-util',
+        '@tolgee/react',
+        '@untitled-ui/icons-react',
+        'date-fns',
+        'react',
+        'react-dom',
+        'react-router-dom',
+        'react-query',
+        'formik',
+        'yup',
+        'clsx',
+      ],
+      alias: {
+        '@tginternal/library': resolve(__dirname, '../library/src'),
+        ...(hasBilling && {
+          'tg.billing': resolve(billingFrontendDir, 'src'),
+          'tg.service/billingApiSchema.generated': resolve(
+            billingFrontendDir,
+            'billingApiSchema.generated'
+          ),
+        }),
+      },
+    },
+    optimizeDeps: {
+      exclude: ['@tginternal/library'],
+    },
     server: {
       // this ensures that the browser opens upon server start
-      // open: true,
+      open: true,
+      host: process.env.VITE_HOST || undefined,
       // this sets a default port to 3000
       port: Number(process.env.VITE_PORT) || 3000,
+      // this enables direct access to library sources
+      fs: {
+        allow: [
+          resolve(__dirname, '../library/src'),
+          ...(hasBilling ? [billingFrontendDir] : []),
+          __dirname,
+        ],
+      },
+    },
+    preview: {
+      port:
+        Number(process.env.VITE_PREVIEW_PORT) ||
+        (Number(process.env.VITE_PORT)
+          ? Number(process.env.VITE_PORT) + 1000
+          : 4173),
+    },
+    build: {
+      rollupOptions: {
+        external: ['src/eeModule.ee.tsx', 'src/eeModule.oss.tsx'],
+      },
     },
   };
-});
+}) satisfies UserConfigFn;

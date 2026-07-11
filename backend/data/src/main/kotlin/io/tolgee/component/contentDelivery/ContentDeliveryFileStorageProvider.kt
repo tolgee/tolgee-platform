@@ -46,7 +46,7 @@ class ContentDeliveryFileStorageProvider(
       (tolgeeProperties.contentDelivery.storage.s3.enabled) xor (tolgeeProperties.contentDelivery.storage.azure.enabled)
 
     if (!isSingleSet) {
-      throw RuntimeException("Exactly one content storage must be set")
+      throw RuntimeException("You have to configure exactly one content storage via configuration properties")
     }
 
     if (tolgeeProperties.contentDelivery.storage.s3.enabled) {
@@ -58,6 +58,19 @@ class ContentDeliveryFileStorageProvider(
     }
 
     throw RuntimeException("No Content Storage is set")
+  }
+
+  fun isServerContentDeliveryConfigured(): Boolean {
+    if (tolgeeProperties.contentDelivery.publicUrlPrefix.isNullOrEmpty()) {
+      return false
+    }
+
+    return try {
+      getDefaultStorageProperties()
+      true
+    } catch (e: Throwable) {
+      false
+    }
   }
 
   private fun bypassForTesting(): FileStorage? {
@@ -86,7 +99,8 @@ class ContentDeliveryFileStorageProvider(
         override fun storeFile(
           storageFilePath: String,
           bytes: ByteArray,
-        ) {}
+        ) {
+        }
 
         override fun fileExists(storageFilePath: String): Boolean = true
 

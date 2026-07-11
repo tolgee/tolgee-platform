@@ -6,7 +6,7 @@ import io.tolgee.dtos.request.ImportFileMapping
 import io.tolgee.dtos.request.SingleStepImportRequest
 import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.formats.yaml.`in`.YamlFileProcessor
-import io.tolgee.unit.formats.PlaceholderConversionTestHelper
+import io.tolgee.testing.assert
 import io.tolgee.util.FileProcessorContextMockUtil
 import io.tolgee.util.assertLanguagesCount
 import io.tolgee.util.assertSingle
@@ -32,31 +32,38 @@ class YamlFileProcessorTest {
     mockUtil.mockIt("en.yml", "src/test/resources/import/yaml/icu.yaml")
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "relations")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "relations")
       .assertSingle {
         hasText("{count, plural, one {# relace} few {# relace} many {# relace} other {# relací}")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "redactions.edit.heading")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "redactions.edit.heading")
       .assertSingle {
         hasText("Upravit redakci")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "redactions.edit.title")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "redactions.edit.title")
       .assertSingle {
         hasText("Upravit redakci")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "redactions.index.empty")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "redactions.index.empty")
       .assertSingle {
         hasText("Žádné opravy k ukázání.")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "redactions.index.heading")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "redactions.index.heading")
       .assertSingle {
         hasText("Seznam oprav")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "redactions.index.title")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "redactions.index.title")
       .assertSingle {
         hasText("Seznam oprav {hello}")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "some_text_with_params")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "some_text_with_params")
       .assertSingle {
         hasText("Toto je text s parametry: {param1} a {param2}")
       }
@@ -72,31 +79,38 @@ class YamlFileProcessorTest {
     mockUtil.mockIt("en.yml", "src/test/resources/import/yaml/java.yaml")
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "relations")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "relations")
       .assertSingle {
         hasText("{0, number} relací")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "redactions.edit.heading")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "redactions.edit.heading")
       .assertSingle {
         hasText("Upravit redakci")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "redactions.edit.title")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "redactions.edit.title")
       .assertSingle {
         hasText("Upravit redakci")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "redactions.index.empty")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "redactions.index.empty")
       .assertSingle {
         hasText("Žádné opravy k ukázání.")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "redactions.index.heading")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "redactions.index.heading")
       .assertSingle {
         hasText("Seznam oprav")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "redactions.index.title")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "redactions.index.title")
       .assertSingle {
         hasText("Seznam oprav {0}")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "some_text_with_params")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "some_text_with_params")
       .assertSingle {
         hasText("Toto je text s parametry: {0} {1, number}")
       }
@@ -112,7 +126,8 @@ class YamlFileProcessorTest {
     mockUtil.mockIt("en.yml", "src/test/resources/import/yaml/unknown.yaml")
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "not-valid-bcp47-tag!.relations.part_of_relations")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "not-valid-bcp47-tag!.relations.part_of_relations")
       .assertSingle {
         hasText("Some text without params")
       }
@@ -128,18 +143,26 @@ class YamlFileProcessorTest {
       }
     processFile()
     // it's escaped because ICU doesn't php doesn't contain ICU
-    mockUtil.fileProcessorContext.assertTranslations("en", "some_text_with_params")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "some_text_with_params")
       .assertSingle {
         hasText("Toto je text s parametry: '{'param1'}' a '{'param2'}'")
       }
   }
 
   @Test
-  fun `placeholder conversion setting application works`() {
-    PlaceholderConversionTestHelper.testFile(
-      "en.yaml",
-      "src/test/resources/import/yaml/java.yaml",
-      assertBeforeSettingsApplication =
+  fun `converts java-style placeholders in YAML`() {
+    val processor =
+      mockUtil.mockCoreProcessor(
+        fileName = "en.yaml",
+        resourcesFilePath = "src/test/resources/import/yaml/java.yaml",
+      )
+    processor.processFiles(listOf(mockUtil.importFileDto))
+    mockUtil
+      .getSavedTranslations()
+      .map { it.text }
+      .assert
+      .isEqualTo(
         listOf(
           "{0, number} relací",
           "Upravit redakci",
@@ -149,19 +172,7 @@ class YamlFileProcessorTest {
           "Seznam oprav {0}",
           "Toto je text s parametry: {0} {1, number}",
         ),
-      assertAfterDisablingConversion =
-        listOf(
-          "%d relací",
-          "Seznam oprav %s",
-          "Toto je text s parametry: %s %d",
-        ),
-      assertAfterReEnablingConversion =
-        listOf(
-          "{0, number} relací",
-          "Seznam oprav {0}",
-          "Toto je text s parametry: {0} {1, number}",
-        ),
-    )
+      )
   }
 
   private fun processFile() {

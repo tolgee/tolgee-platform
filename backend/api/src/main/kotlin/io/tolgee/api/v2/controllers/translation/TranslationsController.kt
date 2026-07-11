@@ -15,11 +15,13 @@ import io.tolgee.activity.ActivityService
 import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.api.v2.controllers.IController
-import io.tolgee.component.ProjectTranslationLastModifiedManager
+import io.tolgee.component.ProjectLastModifiedManager
+import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.constants.Feature
+import io.tolgee.constants.Message
 import io.tolgee.dtos.queryResults.TranslationHistoryView
 import io.tolgee.dtos.request.translation.GetTranslationsParams
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
-import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.hateoas.translations.KeysWithTranslationsPageModel
 import io.tolgee.hateoas.translations.KeysWithTranslationsPagedResourcesAssembler
@@ -31,6 +33,7 @@ import io.tolgee.hateoas.translations.TranslationModelAssembler
 import io.tolgee.model.enums.AssignableTranslationState
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.translation.Translation
+import io.tolgee.model.views.KeyTaskView
 import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.ProjectHolder
@@ -38,14 +41,17 @@ import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
+import io.tolgee.security.ratelimit.RateLimitService
 import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.language.LanguageService
+import io.tolgee.service.project.ProjectFeatureGuard
 import io.tolgee.service.queryBuilders.CursorUtil
 import io.tolgee.service.security.SecurityService
+import io.tolgee.service.task.ITaskService
 import io.tolgee.service.translation.TranslationService
+import io.tolgee.service.translation.TranslationSuggestionService
 import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
-import org.springframework.beans.propertyeditors.CustomCollectionEditor
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
@@ -53,13 +59,10 @@ import org.springframework.data.domain.Sort
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.data.web.SortDefault
 import org.springframework.hateoas.PagedModel
-import org.springframework.http.CacheControl
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.bind.WebDataBinder
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.InitBinder
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -69,7 +72,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.context.request.WebRequest
-import java.util.concurrent.TimeUnit
+import java.time.Duration
 
 @Suppress("MVCPathVariableInspection", "SpringJavaInjectionPointsAutowiringInspection")
 @RestController
@@ -98,8 +101,13 @@ class TranslationsController(
   private val authenticationFacade: AuthenticationFacade,
   private val screenshotService: ScreenshotService,
   private val activityService: ActivityService,
-  private val projectTranslationLastModifiedManager: ProjectTranslationLastModifiedManager,
   private val createOrUpdateTranslationsFacade: CreateOrUpdateTranslationsFacade,
+  private val taskService: ITaskService,
+  private val translationSuggestionService: TranslationSuggestionService,
+  private val projectLastModifiedManager: ProjectLastModifiedManager,
+  private val projectFeatureGuard: ProjectFeatureGuard,
+  private val rateLimitService: RateLimitService,
+  private val tolgeeProperties: TolgeeProperties,
 ) : IController {
   @GetMapping(value = ["/{languages}"])
   @Operation(
@@ -129,7 +137,7 @@ class TranslationsController(
       description =
         "Comma-separated language tags to return translations in. " +
           "Languages you are not permitted to see will be silently dropped and not returned.",
-      example = "en,de,fr",
+      example = """["en","de","fr"]""",
     )
     @PathVariable("languages")
     languages: Set<String>,
@@ -145,44 +153,52 @@ When null, resulting file will be a flat key-value object.
     )
     @RequestParam(value = "structureDelimiter", defaultValue = ".", required = false)
     structureDelimiter: Char?,
+    @Parameter(
+      description =
+        "Enables filtering of returned keys by their tags.\n" +
+          "Only keys with at least one provided tag will be returned.\n" +
+          "Optional, filtering is not applied if not specified.",
+      example = """["productionReady", "nextRelease"]""",
+    )
+    @RequestParam(value = "filterTag", required = false)
+    filterTag: List<String>? = null,
+    @Parameter(description = "Branch name to return translations from")
+    branch: String? = null,
     request: WebRequest,
   ): ResponseEntity<Map<String, Any>>? {
-    val lastModified: Long = projectTranslationLastModifiedManager.getLastModified(projectHolder.project.id)
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
+    return projectLastModifiedManager.onlyWhenProjectDataChanged(request) {
+      rateLimitService.checkPerUserRateLimit(
+        "translations",
+        limit = tolgeeProperties.rateLimits.translationRequestLimit,
+        refillDuration = Duration.ofMillis(tolgeeProperties.rateLimits.translationRequestWindow),
+      )
+      val permittedTags =
+        securityService
+          .filterViewPermissionByTag(projectId = projectHolder.project.id, languageTags = languages)
 
-    if (request.checkNotModified(lastModified)) {
-      return null
-    }
-
-    val permittedTags =
-      securityService
-        .filterViewPermissionByTag(projectId = projectHolder.project.id, languageTags = languages)
-
-    val response =
       translationService.getTranslations(
         languageTags = permittedTags,
         namespace = ns,
+        branch = branch,
         projectId = projectHolder.project.id,
         structureDelimiter = request.getStructureDelimiter(),
+        filterTag = filterTag,
       )
-
-    return ResponseEntity.ok()
-      .lastModified(lastModified)
-      .cacheControl(CacheControl.maxAge(0, TimeUnit.SECONDS))
-      .body(
-        response,
-      )
+    }
   }
 
   @PutMapping("")
   @Operation(summary = "Update translations for existing key", description = "Sets translations for existing key")
   @RequestActivity(ActivityType.SET_TRANSLATIONS)
-  @RequiresProjectPermissions([Scope.TRANSLATIONS_EDIT])
+  @UseDefaultPermissions
   @AllowApiAccess
   @OpenApiOrderExtension(2)
   fun setTranslations(
     @RequestBody @Valid
     dto: SetTranslationsWithKeyDto,
   ): SetTranslationsResponseModel {
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, dto.branch)
     return createOrUpdateTranslationsFacade.setTranslations(dto)
   }
 
@@ -200,13 +216,14 @@ When null, resulting file will be a flat key-value object.
     @RequestBody @Valid
     dto: SetTranslationsWithKeyDto,
   ): SetTranslationsResponseModel {
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, dto.branch)
     return createOrUpdateTranslationsFacade.createOrUpdateTranslations(dto)
   }
 
   @PutMapping("/{translationId}/set-state/{state}")
   @Operation(summary = "Set translation state")
   @RequestActivity(ActivityType.SET_TRANSLATION_STATE)
-  @RequiresProjectPermissions([Scope.TRANSLATIONS_STATE_EDIT])
+  @UseDefaultPermissions
   @AllowApiAccess
   fun setTranslationState(
     @PathVariable translationId: Long,
@@ -215,16 +232,8 @@ When null, resulting file will be a flat key-value object.
     val translation = translationService.get(translationId)
     translation.checkFromProject()
     securityService.checkStateChangePermission(translation)
+    securityService.checkBranchModify(translation)
     return translationModelAssembler.toModel(translationService.setStateBatch(translation, state.translationState))
-  }
-
-  @InitBinder("translationFilters")
-  fun customizeBinding(binder: WebDataBinder) {
-    binder.registerCustomEditor(
-      List::class.java,
-      TranslationFilters::filterKeyName.name,
-      CustomCollectionEditor(List::class.java),
-    )
   }
 
   @GetMapping(value = [""])
@@ -239,6 +248,12 @@ When null, resulting file will be a flat key-value object.
     params: GetTranslationsParams,
     @ParameterObject pageable: Pageable,
   ): KeysWithTranslationsPageModel {
+    rateLimitService.checkPerUserRateLimit(
+      "translations",
+      limit = tolgeeProperties.rateLimits.translationRequestLimit,
+      refillDuration = Duration.ofMillis(tolgeeProperties.rateLimits.translationRequestWindow),
+    )
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, params.branch)
     val languages =
       languageService.getLanguagesForTranslationsView(
         params.languages,
@@ -253,6 +268,8 @@ When null, resulting file will be a flat key-value object.
         .getViewData(projectHolder.project.id, pageableWithSort, params, languages)
 
     addScreenshotsToResponse(data)
+    addTasksToResponse(data)
+    addSuggestionsToResponse(projectHolder.project.id, data, languages.map { it.id })
 
     val cursor = if (data.content.isNotEmpty()) CursorUtil.getCursor(data.content.last(), data.sort) else null
     return pagedAssembler.toTranslationModel(data, languages, cursor)
@@ -270,6 +287,46 @@ When null, resulting file will be a flat key-value object.
     data.content.forEach { it.screenshots = keysWithScreenshots[it.keyId] ?: listOf() }
   }
 
+  private fun addTasksToResponse(data: Page<KeyWithTranslationsView>) {
+    val user = authenticationFacade.authenticatedUser
+    val keyIds = data.content.map { key -> key.keyId }
+
+    val translationsWithTasks = taskService.getKeysWithTasks(user.id, keyIds)
+
+    data.content.forEach { key ->
+      key.tasks =
+        translationsWithTasks[key.keyId]?.map {
+          KeyTaskView(
+            it.taskNumber,
+            it.languageId,
+            it.languageTag,
+            it.taskDone,
+            it.taskAssigned,
+            it.taskType,
+          )
+        }
+    }
+  }
+
+  private fun addSuggestionsToResponse(
+    projectId: Long,
+    data: Page<KeyWithTranslationsView>,
+    languageIds: Collection<Long>,
+  ) {
+    val keyIds = data.content.map { key -> key.keyId }
+    val keysWithSuggestions =
+      translationSuggestionService.getKeysWithSuggestions(
+        projectId,
+        keyIds,
+        languageIds.toList(),
+      )
+    data.content.forEach { key ->
+      key.translations.forEach { (tag, translation) ->
+        translation.suggestions = keysWithSuggestions[Pair(key.keyId, tag)]
+      }
+    }
+  }
+
   @PutMapping(value = ["/{translationId:[0-9]+}/dismiss-auto-translated-state"])
   @Operation(summary = "Dismiss auto-translated", description = """Removes "auto translated" indication""")
   @RequestActivity(ActivityType.DISMISS_AUTO_TRANSLATED_STATE)
@@ -281,6 +338,7 @@ When null, resulting file will be a flat key-value object.
     val translation = translationService.get(translationId)
     translation.checkFromProject()
     securityService.checkStateChangePermission(translation)
+    securityService.checkBranchModify(translation)
     translationService.dismissAutoTranslated(translation)
     return translationModelAssembler.toModel(translation)
   }
@@ -301,6 +359,7 @@ When null, resulting file will be a flat key-value object.
   ): TranslationModel {
     val translation = translationService.get(translationId)
     translation.checkFromProject()
+    securityService.checkBranchModify(translation)
     translationService.setOutdated(translation, state)
     return translationModelAssembler.toModel(translation)
   }
@@ -336,7 +395,7 @@ When null, resulting file will be a flat key-value object.
 
   private fun Translation.checkFromProject() {
     if (this.key.project.id != projectHolder.project.id) {
-      throw BadRequestException(io.tolgee.constants.Message.TRANSLATION_NOT_FROM_PROJECT)
+      throw BadRequestException(Message.TRANSLATION_NOT_FROM_PROJECT)
     }
   }
 

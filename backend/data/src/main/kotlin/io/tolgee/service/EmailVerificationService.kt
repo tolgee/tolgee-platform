@@ -59,9 +59,9 @@ class EmailVerificationService(
       userAccountService.saveAndFlush(userAccount)
 
       if (newEmail != null) {
-        emailVerificationSender.sendEmailVerification(userAccount.id, newEmail, resultCallbackUrl, code, false)
+        emailVerificationSender.sendEmailVerification(userAccount, newEmail, resultCallbackUrl, code, false)
       } else {
-        emailVerificationSender.sendEmailVerification(userAccount.id, userAccount.username, resultCallbackUrl, code)
+        emailVerificationSender.sendEmailVerification(userAccount, userAccount.username, resultCallbackUrl, code)
       }
       return emailVerification
     }
@@ -76,18 +76,17 @@ class EmailVerificationService(
     newEmail: String? = null,
   ) {
     if (newEmail == null && isVerified(userAccount)) {
-      throw BadRequestException(io.tolgee.constants.Message.EMAIL_ALREADY_VERIFIED)
+      throw BadRequestException(Message.EMAIL_ALREADY_VERIFIED)
     }
 
-    val email = newEmail ?: getEmail(userAccount)
-    val policy = rateLimitService.getIEmailVerificationIpRateLimitPolicy(request, email)
+    val effectiveNewEmail = newEmail ?: userAccount.emailVerification?.newEmail
+    val email = effectiveNewEmail ?: userAccount.username
+    val policy = rateLimitService.getEmailVerificationIpRateLimitPolicy(request, email)
 
     if (policy != null) {
-      rateLimitService.consumeBucketUnless(policy) {
-        createForUser(userAccount, callbackUrl, email)
-        isVerified(userAccount)
-      }
+      rateLimitService.consumeBucket(policy)
     }
+    createForUser(userAccount, callbackUrl, effectiveNewEmail)
   }
 
   fun getEmail(userAccount: UserAccount): String {
@@ -106,11 +105,8 @@ class EmailVerificationService(
   }
 
   fun check(userAccount: UserAccount) {
-    if (
-      tolgeeProperties.authentication.needsEmailVerification &&
-      userAccount.emailVerification != null
-    ) {
-      throw AuthenticationException(io.tolgee.constants.Message.EMAIL_NOT_VERIFIED)
+    if (!isVerified(userAccount)) {
+      throw AuthenticationException(Message.EMAIL_NOT_VERIFIED)
     }
   }
 
@@ -151,7 +147,7 @@ class EmailVerificationService(
     user: UserAccount,
   ) {
     newEmail?.let {
-      user.username = newEmail
+      user.username = it.lowercase()
     }
   }
 
@@ -165,7 +161,7 @@ class EmailVerificationService(
     var resultCallbackUrl = tolgeeProperties.frontEndUrl ?: callbackUrl
 
     if (resultCallbackUrl == null) {
-      throw BadRequestException(io.tolgee.constants.Message.MISSING_CALLBACK_URL)
+      throw BadRequestException(Message.MISSING_CALLBACK_URL)
     }
 
     resultCallbackUrl += "/login/verify_email"

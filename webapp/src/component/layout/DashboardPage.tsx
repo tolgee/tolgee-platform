@@ -4,19 +4,13 @@ import { Box, styled } from '@mui/material';
 import { TopBar } from './TopBar/TopBar';
 import { TopBanner } from './TopBanner/TopBanner';
 import { TopSpacer } from './TopSpacer';
-import {
-  useGlobalActions,
-  useGlobalContext,
-} from 'tg.globalContext/GlobalContext';
-import { RightSidePanel } from './RightSidePanel';
-import { QuickStartGuide } from './QuickStartGuide/QuickStartGuide';
-import { useIsEmailVerified } from 'tg.globalContext/helpers';
+import { useGlobalContext } from 'tg.globalContext/GlobalContext';
+import { RightSideLayout } from './RightSideLayout';
 
 const StyledMain = styled(Box)`
-  display: flex;
-  position: relative;
-  flex-grow: 1;
-  justify-content: stretch;
+  display: grid;
+  width: 100%;
+  min-height: 100%;
   container: main-container / inline-size;
   position: relative;
 `;
@@ -42,31 +36,24 @@ const AdminFrame = styled(Box)`
 type Props = {
   isAdminAccess?: boolean;
   fixedContent?: React.ReactNode;
+  hideQuickStart?: boolean;
+  rightPanelContent?: (width: number) => React.ReactNode;
 };
 
-export const DashboardPage: FunctionComponent<Props> = ({
+export const DashboardPage: FunctionComponent<
+  React.PropsWithChildren<Props>
+> = ({
   children,
   isAdminAccess = false,
   fixedContent,
+  hideQuickStart,
+  rightPanelContent,
 }) => {
   const isDebuggingCustomerAccount = useGlobalContext(
     (c) => Boolean(c.auth.jwtToken) && Boolean(c.auth.adminToken)
   );
 
   const rightPanelWidth = useGlobalContext((c) => c.layout.rightPanelWidth);
-
-  const isEmailVerified = useIsEmailVerified();
-
-  const { setQuickStartOpen } = useGlobalActions();
-  const quickStartEnabled = useGlobalContext(
-    (c) => c.quickStartGuide.enabled && c.initialData.userInfo
-  );
-  const quickStartOpen = useGlobalContext((c) =>
-    Boolean(c.quickStartGuide.open)
-  );
-  const quickStartFloating = useGlobalContext(
-    (c) => c.quickStartGuide.floating
-  );
 
   return (
     <>
@@ -81,6 +68,7 @@ export const DashboardPage: FunctionComponent<Props> = ({
         flexGrow={1}
       >
         <TopBar
+          hideQuickStart={hideQuickStart}
           isAdminAccess={isAdminAccess}
           isDebuggingCustomerAccount={isDebuggingCustomerAccount}
         />
@@ -94,17 +82,10 @@ export const DashboardPage: FunctionComponent<Props> = ({
             {children}
           </StyledMain>
         </StyledHorizontal>
-        {quickStartEnabled &&
-          (quickStartOpen || quickStartFloating) &&
-          isEmailVerified && (
-            <RightSidePanel
-              open={quickStartOpen}
-              onClose={() => setQuickStartOpen(false)}
-              floating={quickStartFloating}
-            >
-              <QuickStartGuide />
-            </RightSidePanel>
-          )}
+        <RightSideLayout
+          rightPanelContent={rightPanelContent}
+          hideQuickStart={hideQuickStart}
+        />
       </Box>
     </>
   );

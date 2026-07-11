@@ -16,53 +16,31 @@
 
 package io.tolgee.security.authorization
 
-import io.tolgee.activity.ActivityHolder
-import io.tolgee.constants.Message
-import io.tolgee.exceptions.NotFoundException
-import io.tolgee.exceptions.PermissionException
-import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
-import io.tolgee.security.OrganizationHolder
-import io.tolgee.security.ProjectHolder
+import io.tolgee.security.ProjectContextService
 import io.tolgee.security.RequestContextService
-import io.tolgee.security.authentication.AuthenticationFacade
-import io.tolgee.service.EmailVerificationService
-import io.tolgee.service.organization.OrganizationService
-import io.tolgee.service.security.SecurityService
+import io.tolgee.security.authentication.isReadOnly
+import io.tolgee.tracing.TolgeeTracingContext
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import org.slf4j.LoggerFactory
-import org.springframework.context.annotation.Lazy
 import org.springframework.core.annotation.AnnotationUtils
 import org.springframework.stereotype.Component
 import org.springframework.web.method.HandlerMethod
 
 /**
- * This interceptor performs authorization step to perform operations on a project or organization.
+ * This interceptor performs an authorization step to perform operations on a project or organization.
  */
 @Component
 class ProjectAuthorizationInterceptor(
-  private val authenticationFacade: AuthenticationFacade,
-  private val organizationService: OrganizationService,
-  private val securityService: SecurityService,
   private val requestContextService: RequestContextService,
-  private val projectHolder: ProjectHolder,
-  private val organizationHolder: OrganizationHolder,
-  private val activityHolder: ActivityHolder,
-  @Lazy
-  private val emailVerificationService: EmailVerificationService,
+  private val projectContextService: ProjectContextService,
+  private val tracingContext: TolgeeTracingContext,
 ) : AbstractAuthorizationInterceptor() {
-  private val logger = LoggerFactory.getLogger(this::class.java)
-
   override fun preHandleInternal(
     request: HttpServletRequest,
     response: HttpServletResponse,
     handler: HandlerMethod,
   ): Boolean {
-    val user = authenticationFacade.authenticatedUser
-    checkEmailVerificationOrThrow(emailVerificationService::isVerified, user, handler)
-
-    val userId = user.id
     val project =
       requestContextService.getTargetProject(request)
         // Two possible scenarios: we're on a "global" route, or the project was not found.
@@ -70,89 +48,20 @@ class ProjectAuthorizationInterceptor(
         // It is not the job of the interceptor to return a 404 error.
         ?: return true
 
-    var bypassed = false
-    val isAdmin = authenticationFacade.authenticatedUser.role == UserAccount.Role.ADMIN
     val requiredScopes = getRequiredScopes(request, handler)
+    val isWriteOperation = !handler.isReadOnly(request.method)
 
-    val formattedRequirements = requiredScopes?.joinToString(", ") { it.value } ?: "read-only"
-    logger.debug("Checking access to proj#${project.id} by user#$userId (Requires $formattedRequirements)")
+    projectContextService.setup(
+      project,
+      requiredScopes,
+      useDefaultPermissions = requiredScopes == null,
+      isWriteOperation = isWriteOperation,
+    )
 
-    val scopes = securityService.getCurrentPermittedScopes(project.id)
-
-    if (scopes.isEmpty()) {
-      if (!isAdmin) {
-        logger.debug(
-          "Rejecting access to proj#{} for user#{} - No view permissions",
-          project.id,
-          userId,
-        )
-
-        // Security consideration: if the user cannot see the project, pretend it does not exist.
-        throw NotFoundException()
-      }
-
-      bypassed = true
-    }
-
-    val missingScopes = getMissingScopes(requiredScopes, scopes.toSet())
-
-    if (missingScopes.isNotEmpty()) {
-      if (!isAdmin || authenticationFacade.isProjectApiKeyAuth) {
-        logger.debug(
-          "Rejecting access to proj#{} for user#{} - Insufficient permissions",
-          project.id,
-          userId,
-        )
-
-        throw PermissionException(
-          Message.OPERATION_NOT_PERMITTED,
-          missingScopes.map { it.value },
-        )
-      }
-
-      bypassed = true
-    }
-
-    if (authenticationFacade.isProjectApiKeyAuth) {
-      val pak = authenticationFacade.projectApiKey
-      // Verify the key matches the project
-      if (project.id != pak.projectId) {
-        logger.debug(
-          "Rejecting access to proj#{} for user#{} via pak#{} - API Key mismatch",
-          project.id,
-          userId,
-          pak.id,
-        )
-
-        throw PermissionException(Message.PAK_CREATED_FOR_DIFFERENT_PROJECT)
-      }
-    }
-
-    if (bypassed) {
-      logger.info(
-        "Use of admin privileges: user#{} failed local security checks for proj#{} - bypassing for {} {}",
-        userId,
-        project.id,
-        request.method,
-        request.requestURI,
-      )
-    }
-
-    projectHolder.project = project
-    activityHolder.activityRevision.setProject(project)
-    organizationHolder.organization = organizationService.findDto(project.organizationOwnerId)
-      ?: throw NotFoundException(Message.ORGANIZATION_NOT_FOUND)
+    // Add project/org context to OpenTelemetry traces
+    tracingContext.setContext(project.id, project.organizationOwnerId)
 
     return true
-  }
-
-  private fun getMissingScopes(
-    requiredScopes: Array<Scope>?,
-    permittedScopes: Collection<Scope>?,
-  ): Set<Scope> {
-    val permitted = permittedScopes?.toSet() ?: setOf()
-    val required = requiredScopes?.toSet() ?: setOf()
-    return required - permitted
   }
 
   private fun getRequiredScopes(

@@ -66,6 +66,7 @@ describe('Project stats', () => {
     enterProject('Project 2');
     createTag('test_tag');
     selectInProjectMenu('Project Dashboard');
+    cy.gcy('project-dashboard-task-count').contains(1).should('be.visible');
     cy.gcy('project-dashboard-language-count')
       .contains('2')
       .should('be.visible');

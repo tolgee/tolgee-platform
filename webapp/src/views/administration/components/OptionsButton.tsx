@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { MoreVert } from '@mui/icons-material';
+import { DotsVertical } from '@untitled-ui/icons-react';
 import { IconButton, Menu, MenuItem } from '@mui/material';
 import { useTranslate, T } from '@tolgee/react';
 
@@ -94,7 +94,7 @@ export function OptionsButton({ user }: Props) {
         onClick={(e) => setAnchor(e.target as HTMLElement)}
         data-cy="administration-user-menu"
       >
-        <MoreVert />
+        <DotsVertical />
       </IconButton>
       {anchor && (
         <Menu

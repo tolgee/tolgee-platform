@@ -17,6 +17,7 @@ import { components } from 'tg.service/apiSchema.generated';
 import { ImportFileIssuesDialog } from './ImportFileIssuesDialog';
 import { ImportResultRow } from './ImportResultRow';
 import { ImportTranslationsDialog } from './ImportTranslationsDialog';
+import { useProject } from 'tg.hooks/useProject';
 
 type ImportResultProps = {
   result?: components['schemas']['PagedModelImportLanguageModel'];
@@ -30,7 +31,10 @@ const StyledTable = styled(Table)`
   }
 `;
 
-export const ImportResult: FunctionComponent<ImportResultProps> = (props) => {
+export const ImportResult: FunctionComponent<
+  React.PropsWithChildren<ImportResultProps>
+> = (props) => {
+  const project = useProject();
   const rows = props.result?._embedded?.languages;
   const [viewFileIssuesRow, setViewFileIssuesRow] = useState(
     undefined as components['schemas']['ImportLanguageModel'] | undefined
@@ -40,7 +44,7 @@ export const ImportResult: FunctionComponent<ImportResultProps> = (props) => {
   );
 
   if (!rows) {
-    return <></>;
+    return null;
   }
 
   return (
@@ -63,9 +67,11 @@ export const ImportResult: FunctionComponent<ImportResultProps> = (props) => {
                 <TableCell>
                   <T keyName="import_result_language_name_header" />
                 </TableCell>
-                <TableCell>
-                  <T keyName="import_namespace_name_header" />
-                </TableCell>
+                {project.useNamespaces && (
+                  <TableCell>
+                    <T keyName="import_namespace_name_header" />
+                  </TableCell>
+                )}
                 <TableCell>
                   <T keyName="import_result_file_name_header" />
                 </TableCell>

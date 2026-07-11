@@ -55,7 +55,7 @@ class SelectAllController(
     paths = [
       // should be included in keys, not in translations
       "/v2/projects/translations/select-all",
-      "/v2/projects/{projectId}/translations/select-all",
+      "/v2/projects/{projectId:[0-9]+}/translations/select-all",
     ],
   )
   fun selectKeys(

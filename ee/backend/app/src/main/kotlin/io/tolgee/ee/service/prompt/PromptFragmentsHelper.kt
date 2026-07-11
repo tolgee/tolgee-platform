@@ -1,0 +1,256 @@
+package io.tolgee.ee.service.prompt
+
+import io.tolgee.ee.component.PromptLazyMap.Companion.Variable
+import io.tolgee.model.enums.BasicPromptOption
+import io.tolgee.model.enums.PromptVariableType
+import org.springframework.stereotype.Component
+
+@Component
+class PromptFragmentsHelper {
+  fun getAllFragments(): MutableList<Variable> {
+    val result = mutableListOf<Variable>()
+
+    result.add(
+      Variable(
+        "intro",
+        """
+        You are a translator providing services within a software localization platform that requires strict adherence to instructions.
+        Each translation is associated with a translation key, which typically reflects the structure of the app—so similar keys are often related in meaning.
+        """.trimIndent(),
+        type = PromptVariableType.FRAGMENT,
+      ),
+    )
+
+    result.add(
+      Variable(
+        "styleInfo",
+        """
+        Don't add any extra dots, spaces or additional marks.
+        Keep original line breaks in the text.
+        Keep the style of source text.
+        All translations are part of software product, don't transform them into sentences.
+        
+        {{#if target.isCJK}}
+        Add space between {{target.languageName}} characters and latin words
+        {{/if}}
+        """.trimIndent(),
+        type = PromptVariableType.FRAGMENT,
+      ),
+    )
+
+    result.add(
+      Variable(
+        "projectDescription",
+        """
+        {{#if project.description}}
+        Here is user defined description for the project:
+        ```
+        {{project.description}}
+        ```
+        {{/if}}
+        """.trimIndent(),
+        type = PromptVariableType.FRAGMENT,
+        option = BasicPromptOption.PROJECT_DESCRIPTION,
+      ),
+    )
+
+    result.add(
+      Variable(
+        "languageNotes",
+        """
+        {{#if target.languageNote}}
+        Here is user defined note:
+        ```
+        {{target.languageNote}}
+        ```
+        {{/if}}          
+        """.trimIndent(),
+        type = PromptVariableType.FRAGMENT,
+        option = BasicPromptOption.LANGUAGE_NOTES,
+      ),
+    )
+
+    result.add(
+      Variable(
+        "translationMemory",
+        """
+        {{#if translationMemory.json}}
+        These are some results from translation memory from the same project. You may use this as a inspiraton:
+        
+        {{translationMemory.json}}
+        {{/if}}
+        """.trimIndent(),
+        type = PromptVariableType.FRAGMENT,
+        option = BasicPromptOption.TM_SUGGESTIONS,
+      ),
+    )
+
+    result.add(
+      Variable(
+        "glossary",
+        """
+        {{#if glossary.json}}
+        Use these glossary terms when the source text contains them, adapting the form to fit the context:
+        {{glossary.json}}
+        
+        Field descriptions:
+        source: the term as it appears in the source text.
+        target: how the term should be translated in {{target.languageName}}. When present, use it and adapt its form to the context. When absent, translate the term naturally like any other word.
+        description: extra guidance on how to handle this term; follow it.
+        isCaseSensitive: If true, strictly follow the term casing, otherwise adjust casing to fit the context
+        {{#if glossary.hasAbbreviation}}
+        isAbbreviation: the term is an abbreviation.
+        {{/if}}
+        {{#if glossary.hasForbiddenTerm}}
+        isForbidden = Do not use it in the resulting translation.
+        {{/if}}
+        {{#if glossary.hasNonTranslatable}}
+        isNonTranslatable = Do not translate this term to {{target.languageName}}, keep it as it is in {{source.languageName}}.
+        {{/if}}
+        
+        {{/if}}
+        """.trimIndent(),
+        type = PromptVariableType.FRAGMENT,
+        option = BasicPromptOption.GLOSSARY,
+      ),
+    )
+
+    result.add(
+      Variable(
+        "relatedKeys",
+        """
+        {{#if relatedKeys.json}}
+        Here is list of translations used in the same context:
+        
+        {{relatedKeys.json}}
+        {{/if}}
+        """.trimIndent(),
+        type = PromptVariableType.FRAGMENT,
+        option = BasicPromptOption.KEY_CONTEXT,
+      ),
+    )
+
+    result.add(
+      Variable(
+        "icuInfo",
+        """
+        If a message contains text inside curly braces `{}`, treat it as an ICU parameter or placeholder. 
+        Never translate, modify, reorder, or remove placeholder names or variables inside `{}`. 
+        Exception: in ICU plural or select structures, translate only the human-readable text within each branch (e.g. the word "item" in one {# item}).
+        
+        The translated string must contain every `{}` placeholder from the source. The number of placeholders and their exact content must match the source.
+        
+        If a placeholder `{}` changes position in the translation compared to the source, ensure capitalization still matches the source style and follows the target language grammar.
+        
+        Adapt existing punctuation to the conventions of the target language, but do not add punctuation that is not present in the source unless the target language grammar requires it.
+        
+        {{#if target.pluralFormExamples}}
+        Translate ICU message plural forms, these are examples of source strings with placeholder replaced with example number
+        for {{target.languageName}}:
+        {{target.pluralFormExamples}}
+        
+        Please include exactly these forms in the response exactly in this order: {{target.exactForms}}. So it will look like this:
+        ```
+        {{target.exampleIcuPlural}}
+        ```
+        Always replace number with # in the plural.
+        {{/if}}
+        
+        Translation can contain also different i18n placeholder formats.
+        If you spot some kind, don't translate them and keep them in the original format.
+        """.trimIndent(),
+        type = PromptVariableType.FRAGMENT,
+      ),
+    )
+
+    result.add(
+      Variable(
+        "keyName",
+        """
+        You are working with translation key "{{key.name}}" (no need to mention it in response).
+        """.trimIndent(),
+        type = PromptVariableType.FRAGMENT,
+        option = BasicPromptOption.KEY_NAME,
+      ),
+    )
+
+    result.add(
+      Variable(
+        "keyDescription",
+        """
+        {{#if key.description}}
+        User provided additional description of the key:
+        ```
+        {{key.description}}
+        ```
+        {{/if}}
+        """.trimIndent(),
+        type = PromptVariableType.FRAGMENT,
+        option = BasicPromptOption.KEY_DESCRIPTION,
+      ),
+    )
+
+    result.add(
+      Variable(
+        "charLimit",
+        """
+        {{#if key.maxCharLimit}}
+        IMPORTANT: The translation MUST NOT exceed {{key.maxCharLimit}} characters.
+        Keep the translation concise to fit within this limit.
+        {{#if target.pluralFormExamples}}
+        This limit applies to each plural variant separately.
+        {{/if}}
+        {{/if}}
+        """.trimIndent(),
+        type = PromptVariableType.FRAGMENT,
+      ),
+    )
+
+    result.add(
+      Variable(
+        "screenshot",
+        """{{screenshots.first}}""",
+        type = PromptVariableType.FRAGMENT,
+        option = BasicPromptOption.SCREENSHOT,
+      ),
+    )
+
+    result.add(
+      Variable(
+        "translationInfo",
+        """
+        Translate "{{source.translation}}" from {{source.languageName}} to {{target.languageName}}.
+        """.trimIndent(),
+        type = PromptVariableType.FRAGMENT,
+      ),
+    )
+
+    result.add(
+      Variable(
+        "translateJson",
+        """
+        Return translation output and briefly describe the translation context (just a few words).
+        Follow this json format:
+        ```
+        {
+           "output": <translation>,
+           "contextDescription": <description>
+        }
+        ```
+        $LLM_MARK_JSON
+        """.trimIndent(),
+        type = PromptVariableType.FRAGMENT,
+      ),
+    )
+
+    return result
+  }
+
+  companion object {
+    /**
+     * Signifies that model should return json, some models have a property for that
+     * others just need a strong wording, so it's up to the provider class to deal with this
+     */
+    val LLM_MARK_JSON = "[[output_valid_json]]"
+  }
+}

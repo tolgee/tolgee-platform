@@ -11,6 +11,7 @@ import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andIsUnauthorized
 import io.tolgee.fixtures.generateUniqueString
+import io.tolgee.fixtures.satisfies
 import io.tolgee.model.Permission
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.authentication.JwtService
@@ -42,19 +43,19 @@ class SecuredKeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() 
   @Test
   fun getScreenshotFileNoTimestamp() {
     executeInNewTransaction {
-      val base = dbPopulator.createBase(generateUniqueString())
+      val base = dbPopulator.createBase()
       val project = base.project
       val key = keyService.create(project, CreateKeyDto("test"))
       val screenshot = screenshotService.store(screenshotFile, key, null)
 
-      performAuthGet("/screenshots/${screenshot.filename}").andIsNotFound
+      performGet("/screenshots/${screenshot.filename}").andIsNotFound
     }
   }
 
   @Test
   fun getScreenshotFileInvalidTimestamp() {
     executeInNewTransaction {
-      val base = dbPopulator.createBase(generateUniqueString())
+      val base = dbPopulator.createBase()
       val project = base.project
       val key = keyService.create(project, CreateKeyDto("test"))
       val screenshot = screenshotService.store(screenshotFile, key, null)
@@ -71,14 +72,15 @@ class SecuredKeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() 
         )
 
       moveCurrentDate(Duration.ofSeconds(10))
-      performAuthGet("/screenshots/${screenshot.filename}?token=$token").andIsUnauthorized
+      performGet("/screenshots/${screenshot.filename}?token=$token").andIsUnauthorized
     }
   }
 
+  // Renamed from getScreenshotFile to avoid Spring bean introspection conflict
   @Test
-  fun getScreenshotFile() {
+  fun performGetScreenshotFile() {
     executeInNewTransaction {
-      val base = dbPopulator.createBase(generateUniqueString())
+      val base = dbPopulator.createBase()
       val project = base.project
       val key = keyService.create(project, CreateKeyDto("test"))
       val screenshot = screenshotService.store(screenshotFile, key, null)
@@ -94,7 +96,7 @@ class SecuredKeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() 
           ),
         )
 
-      performAuthGet("/screenshots/${screenshot.filename}?token=$token").andIsOk
+      performGet("/screenshots/${screenshot.filename}?token=$token").andIsOk
     }
   }
 
@@ -168,9 +170,9 @@ class SecuredKeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() 
       // Login as someone who has 0 access to the project and see if it works
       loginAsUser(newUserRandom)
 
-      performAuthGet("/screenshots/${screenshot.filename}?token=$token").andIsOk
+      performGet("/screenshots/${screenshot.filename}?token=$token").andIsOk
       permissionService.delete(userPermission)
-      performAuthGet("/screenshots/${screenshot.filename}?token=$token").andIsNotFound
+      performGet("/screenshots/${screenshot.filename}?token=$token").andIsNotFound
     }
   }
 }

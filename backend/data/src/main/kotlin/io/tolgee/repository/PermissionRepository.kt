@@ -2,11 +2,13 @@ package io.tolgee.repository
 
 import io.tolgee.model.Language
 import io.tolgee.model.Permission
+import org.springframework.context.annotation.Lazy
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 
 @Repository
+@Lazy
 interface PermissionRepository : JpaRepository<Permission, Long> {
   @Query(
     """
@@ -35,16 +37,12 @@ interface PermissionRepository : JpaRepository<Permission, Long> {
 
   fun getAllByProjectAndUserNotNull(project: io.tolgee.model.Project?): Set<Permission>
 
-  fun deleteByIdIn(ids: Collection<Long>)
-
-  @Query("select p.id from Permission p where p.project.id = :projectId")
-  fun getIdsByProject(projectId: Long): List<Long>
-
   @Query(
     """select p from Permission p
         left join fetch p.viewLanguages
         left join fetch p.translateLanguages
         left join fetch p.stateChangeLanguages
+        left join fetch p.suggestLanguages
         where p.project.id = :projectId""",
   )
   fun getByProjectWithFetchedLanguages(projectId: Long): List<Permission>
@@ -55,6 +53,7 @@ interface PermissionRepository : JpaRepository<Permission, Long> {
     left join p.translateLanguages tl on tl = :language
     left join p.viewLanguages vl on vl = :language
     left join p.stateChangeLanguages scl on scl = :language
+    left join p.suggestLanguages sul on sul = :language
     where tl.id is not null or vl.id is not null or scl.id is not null
   """,
   )
@@ -88,13 +87,6 @@ interface PermissionRepository : JpaRepository<Permission, Long> {
 
   @Query(
     """
-      from Permission p where p.organization.id in :ids
-    """,
-  )
-  fun getOrganizationBasePermissions(ids: Iterable<Long>): List<Permission>
-
-  @Query(
-    """
     from Permission p 
     join p.project pr
     join pr.organizationOwner oo on oo.id = :organizationId 
@@ -105,4 +97,12 @@ interface PermissionRepository : JpaRepository<Permission, Long> {
     organizationId: Long,
     userId: Long,
   ): List<Permission>
+
+  @Query(
+    """
+    from Permission p 
+    where p.agency.id = :agencyId
+  """,
+  )
+  fun findAllByAgencyId(agencyId: Long): List<Permission>
 }

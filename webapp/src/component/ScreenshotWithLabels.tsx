@@ -1,12 +1,18 @@
+/* eslint-disable react/no-unknown-property */
 import { Tooltip, useTheme } from '@mui/material';
+import { KeyName } from 'tg.component/KeyName/KeyName';
+import { CSSProperties, useEffect, useState } from 'react';
+import { useImagePreload } from 'tg.fixtures/useImagePreload';
 
 import { components } from 'tg.service/apiSchema.generated';
+import { isScreenshotExpired } from 'tg.views/projects/translations/Screenshots/isScreenshotExpired';
 
 type KeyInScreenshotModel = components['schemas']['KeyInScreenshotModel'];
 
 const STROKE_WIDTH = 4;
 
 export type ScreenshotProps = {
+  id: number;
   src: string;
   width: number | undefined;
   height: number | undefined;
@@ -15,74 +21,115 @@ export type ScreenshotProps = {
 };
 
 type Props = {
-  className?: string;
   screenshot: ScreenshotProps;
   showTooltips?: boolean;
+  objectFit?: 'contain' | 'cover';
+  scaleHighlight?: number;
+  showSecondaryHighlights?: boolean;
+  className?: string;
+  style?: CSSProperties;
+  onSrcExpired: () => void;
 };
 
-export const ScreenshotWithLabels: React.FC<Props> = ({
+export const ScreenshotWithLabels: React.FC<React.PropsWithChildren<Props>> = ({
   screenshot,
   showTooltips,
+  objectFit = 'contain',
+  scaleHighlight = 1,
+  showSecondaryHighlights = false,
   className,
+  style,
+  onSrcExpired,
 }) => {
-  const imageRefs = screenshot.keyReferences?.filter((ref) => ref.position);
+  const strokeWidth = STROKE_WIDTH * scaleHighlight;
   const theme = useTheme();
+  const [srcExpired, setSrcExpired] = useState(false);
+  useEffect(() => {
+    setSrcExpired(false);
+  }, [screenshot.src]);
 
-  return !imageRefs?.length ? (
-    <img
-      src={screenshot.src}
-      className={className}
-      style={{ maxWidth: '100%' }}
-      data-cy="screenshot-image"
-      alt="Screenshot"
-    />
-  ) : (
+  const { size, isLoading } = useImagePreload({
+    src: screenshot.src,
+    onSrcExpired() {
+      setSrcExpired(true);
+      onSrcExpired();
+    },
+  });
+
+  const ready = !srcExpired && !isLoading;
+
+  const screenshotWidth = screenshot.width || size.width;
+  const screenshotHeight = screenshot.height || size.height;
+
+  return (
     <svg
-      viewBox={`0 0 ${screenshot.width} ${screenshot.height}`}
+      viewBox={`0 0 ${screenshotWidth} ${screenshotHeight}`}
       className={className}
       style={{
-        width: screenshot.width,
+        width: screenshotWidth,
         maxWidth: '100%',
+        ...style,
       }}
+      preserveAspectRatio={objectFit === 'cover' ? 'xMinYMin slice' : undefined}
       data-cy="screenshot-image"
     >
-      <image
-        href={screenshot.src}
-        width={screenshot.width}
-        height={screenshot.height}
-      />
-      {screenshot.keyReferences?.map((key, i) => {
-        if (key.position) {
-          const rectangle = (
-            <rect
-              key={i}
-              width={key.position.width + STROKE_WIDTH}
-              height={key.position.height + STROKE_WIDTH}
-              x={key.position.x - STROKE_WIDTH / 2}
-              y={key.position.y - STROKE_WIDTH / 2}
-              fill="transparent"
-              stroke={
-                key.keyId === screenshot.highlightedKeyId
-                  ? theme.palette.marker.primary
-                  : theme.palette.marker.secondary
+      {ready && (
+        <>
+          <image
+            href={screenshot.src}
+            width={screenshotWidth}
+            height={screenshotHeight}
+            onError={() => {
+              if (isScreenshotExpired(screenshot.src)) {
+                setSrcExpired(true);
+                onSrcExpired();
               }
-              strokeWidth={STROKE_WIDTH}
-              paintOrder="stroke"
-              rx={STROKE_WIDTH / 2}
-            />
-          );
-          if (showTooltips) {
-            return (
-              <Tooltip key={i} title={key.keyName} placement="right">
-                {rectangle}
-              </Tooltip>
-            );
-          } else {
-            return rectangle;
-          }
-        }
-        return null;
-      })}
+            }}
+          />
+          {screenshot.keyReferences
+            ?.filter(
+              (key) =>
+                showSecondaryHighlights ||
+                key.keyId === screenshot.highlightedKeyId
+            )
+            ?.map((key, i) => {
+              if (key.position) {
+                const rectangle = (
+                  <rect
+                    key={i}
+                    width={key.position.width + strokeWidth}
+                    height={key.position.height + strokeWidth}
+                    x={key.position.x - strokeWidth / 2}
+                    y={key.position.y - strokeWidth / 2}
+                    fill="transparent"
+                    stroke={
+                      key.keyId === screenshot.highlightedKeyId
+                        ? theme.palette.marker.primary
+                        : theme.palette.marker.secondary
+                    }
+                    strokeWidth={strokeWidth}
+                    paintOrder="stroke"
+                    rx={strokeWidth / 2}
+                  />
+                );
+                if (showTooltips) {
+                  return (
+                    <Tooltip
+                      key={i}
+                      title={<KeyName name={key.keyName} />}
+                      placement="right"
+                    >
+                      {rectangle}
+                    </Tooltip>
+                  );
+                } else {
+                  return rectangle;
+                }
+              }
+              return null;
+            })}
+        </>
+      )}
     </svg>
   );
 };

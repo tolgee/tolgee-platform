@@ -48,7 +48,7 @@ const StyledAlerts = styled('div')`
 const StyledPaper = styled(Paper)`
   display: grid;
   grid-template-columns: 1fr;
-  background: ${({ theme }) => theme.palette.login.backgroundPrimary};
+  background: ${({ theme }) => theme.palette.tokens.background['paper-1']};
 
   &.split {
     grid-template-columns: 1fr 1fr;
@@ -96,7 +96,7 @@ type Props = {
   maxWidth?: number;
 };
 
-export const CompactView: React.FC<Props> = ({
+export const CompactView: React.FC<React.PropsWithChildren<Props>> = ({
   windowTitle,
   primaryContent,
   secondaryContent,

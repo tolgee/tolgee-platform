@@ -1,8 +1,10 @@
 package io.tolgee.repository.activity
 
 import io.tolgee.activity.data.ActivityType
+import io.tolgee.dtos.queryResults.ActivityRevisionInfo
 import io.tolgee.model.activity.ActivityDescribingEntity
 import io.tolgee.model.activity.ActivityRevision
+import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
@@ -10,17 +12,43 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 
 @Repository
+@Lazy
 interface ActivityRevisionRepository : JpaRepository<ActivityRevision, Long> {
   @Query(
-    """
+    value = """
     from ActivityRevision ar
     where ar.projectId = :projectId and ar.type is not null and ar.batchJobChunkExecution is null and ar.type in :types
+    and exists (
+      select 1
+      from ActivityModifiedEntity me
+      where me.activityRevision = ar
+        and (
+          (:branchId is not null and me.branchId = :branchId)
+          or (:branchId is null and (me.branchId is null or me.branchId = :defaultBranchId))
+        )
+    )
+  """,
+    countQuery = """
+    select count(ar.id)
+    from ActivityRevision ar
+    where ar.projectId = :projectId and ar.type is not null and ar.batchJobChunkExecution is null and ar.type in :types
+    and exists (
+      select 1
+      from ActivityModifiedEntity me
+      where me.activityRevision = ar
+        and (
+          (:branchId is not null and me.branchId = :branchId)
+          or (:branchId is null and (me.branchId is null or me.branchId = :defaultBranchId))
+        )
+    )
   """,
   )
   fun getForProject(
     projectId: Long,
     pageable: Pageable,
     types: List<ActivityType>,
+    branchId: Long? = null,
+    defaultBranchId: Long? = null,
   ): Page<ActivityRevision>
 
   @Query(
@@ -42,14 +70,17 @@ interface ActivityRevisionRepository : JpaRepository<ActivityRevision, Long> {
       select ar.id, me.entityClass, count(me)
       from ActivityRevision ar 
       join ar.modifiedEntities me
+      left join Branch b on me.branchId = b.id
       where ar.id in :revisionIds
       and ar.type in :allowedTypes
+      and ((b.id = :branchId and b.deletedAt is null) or (:branchId is null and (b is null or b.isDefault)))
       group by ar.id, me.entityClass
     """,
   )
   fun getModifiedEntityTypeCounts(
     revisionIds: List<Long>,
     allowedTypes: Collection<ActivityType>,
+    branchId: Long? = null,
   ): List<Array<Any>>
 
   @Query(
@@ -72,4 +103,26 @@ interface ActivityRevisionRepository : JpaRepository<ActivityRevision, Long> {
     projectId: Long?,
     revisionId: Long,
   ): ActivityRevision?
+
+  @Query(
+    """
+    select new io.tolgee.dtos.queryResults.ActivityRevisionInfo(
+      ar.id,
+      ar.projectId,
+      size(ar.modifiedEntities),
+      ar.type,
+      case 
+          when exists (
+              select 1 from ActivityModifiedEntity me
+              where me.activityRevision = ar 
+              and me.entityClass in ('Translation', 'Key', 'Project', 'Language')
+          ) then true 
+          else false 
+      end
+    )
+    from ActivityRevision ar
+    where ar.id = :id
+  """,
+  )
+  fun findInfo(id: Long): ActivityRevisionInfo?
 }

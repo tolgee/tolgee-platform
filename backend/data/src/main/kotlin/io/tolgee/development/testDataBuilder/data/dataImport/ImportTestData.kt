@@ -6,6 +6,7 @@ import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
+import io.tolgee.model.branching.Branch
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportKey
 import io.tolgee.model.dataImport.ImportLanguage
@@ -26,6 +27,8 @@ class ImportTestData {
   lateinit var importEnglish: ImportLanguage
   lateinit var translationWithConflict: ImportTranslation
   lateinit var newLongKey: ImportKey
+  lateinit var featureBranch: Branch
+  lateinit var defaultBranch: Branch
   var project: Project
   var userAccount: UserAccount
   val projectBuilder get() = root.data.projects[0]
@@ -38,159 +41,160 @@ class ImportTestData {
           name = "Frantisek Dobrota"
         }.self
       project =
-        addProject { name = "test" }.build project@{
-          addPermission {
-            project = this@project.self
-            user = this@ImportTestData.userAccount
-            type = ProjectPermissionType.MANAGE
-          }
+        addProject { name = "test" }
+          .build project@{
+            addPermission {
+              project = this@project.self
+              user = this@ImportTestData.userAccount
+              type = ProjectPermissionType.MANAGE
+            }
 
-          val key =
+            val key =
+              addKey {
+                name = "what a key"
+              }.self
             addKey {
-              name = "what a key"
+              name = "what a nice key"
             }.self
-          addKey {
-            name = "what a nice key"
-          }.self
-          addKey {
-            name = "what a beautiful key"
-          }.self
-          addKey {
-            name = "another nice key"
-          }.self
-          addKey {
-            name = "extraordinary key"
-          }.self
-          addKey {
-            name = "this is another key"
-          }.self
-          english =
-            addLanguage {
-              name = "English"
-              tag = "en"
+            addKey {
+              name = "what a beautiful key"
             }.self
-          german =
-            addLanguage {
-              name = "German"
-              tag = "de"
+            addKey {
+              name = "another nice key"
             }.self
-          czech =
-            addLanguage {
-              name = "Czech"
-              tag = "cs"
+            addKey {
+              name = "extraordinary key"
             }.self
-          french =
-            addLanguage {
-              name = "French"
-              tag = "fr"
+            addKey {
+              name = "this is another key"
             }.self
-          conflict =
+            english =
+              addLanguage {
+                name = "English"
+                tag = "en"
+              }.self
+            german =
+              addLanguage {
+                name = "German"
+                tag = "de"
+              }.self
+            czech =
+              addLanguage {
+                name = "Czech"
+                tag = "cs"
+              }.self
+            french =
+              addLanguage {
+                name = "French"
+                tag = "fr"
+              }.self
+            conflict =
+              addTranslation {
+                this.language = english
+                this.key = key
+              }.self
             addTranslation {
               this.language = english
-              this.key = key
+              this.key = this@project.data.keys[1].self
             }.self
-          addTranslation {
-            this.language = english
-            this.key = this@project.data.keys[1].self
-          }.self
-          addTranslation {
-            this.language = english
-            this.key = this@project.data.keys[2].self
-          }.self
-          addTranslation {
-            this.language = english
-            this.key = this@project.data.keys[3].self
-          }.self
-          addTranslation {
-            this.auto = true
-            this.mtProvider = MtServiceType.GOOGLE
-            this.language = french
-            this.key = this@project.data.keys[0].self
-            this.text = "What a french text"
-          }.self
-          addTranslation {
-            this.auto = true
-            this.mtProvider = MtServiceType.GOOGLE
-            this.language = french
-            this.key = this@project.data.keys[1].self
-            this.text = "What a french text 2"
-          }.self
-          importBuilder =
-            addImport {
-              author = userAccount
-            }.build {
-              addImportFile {
-                name = "multilang.json"
+            addTranslation {
+              this.language = english
+              this.key = this@project.data.keys[2].self
+            }.self
+            addTranslation {
+              this.language = english
+              this.key = this@project.data.keys[3].self
+            }.self
+            addTranslation {
+              this.auto = true
+              this.mtProvider = MtServiceType.GOOGLE
+              this.language = french
+              this.key = this@project.data.keys[0].self
+              this.text = "What a french text"
+            }.self
+            addTranslation {
+              this.auto = true
+              this.mtProvider = MtServiceType.GOOGLE
+              this.language = french
+              this.key = this@project.data.keys[1].self
+              this.text = "What a french text 2"
+            }.self
+            importBuilder =
+              addImport {
+                author = userAccount
               }.build {
-                importEnglish =
+                addImportFile {
+                  name = "multilang.json"
+                }.build {
+                  importEnglish =
+                    addImportLanguage {
+                      name = "en"
+                      existingLanguage = english
+                    }.self
+                  importFrench =
+                    addImportLanguage {
+                      name = "fr"
+                    }.self
                   addImportLanguage {
-                    name = "en"
-                    existingLanguage = english
-                  }.self
-                importFrench =
-                  addImportLanguage {
-                    name = "fr"
-                  }.self
-                addImportLanguage {
-                  name = "de"
-                  existingLanguage = german
-                }
-
-                val addedKey =
-                  addImportKey {
-                    name = "what a key"
-                  }.build {
-                    addMeta {
-                      description = "This is a key"
-                    }
+                    name = "de"
+                    existingLanguage = german
                   }
-                addImportKey {
-                  name = "what a nice key"
-                }
-                addImportKey {
-                  name = "what a beautiful key"
-                }
-                addImportKey {
-                  name = (1..2000).joinToString("") { "a" }
-                  newLongKey = this
-                }
-                addImportKey {
-                  name = "extraordinary key"
-                }
-                addImportKey {
-                  name = "this is another key"
-                }
 
-                translationWithConflict =
+                  val addedKey =
+                    addImportKey {
+                      name = "what a key"
+                    }.build {
+                      addMeta {
+                        description = "This is a key"
+                      }
+                    }
+                  addImportKey {
+                    name = "what a nice key"
+                  }
+                  addImportKey {
+                    name = "what a beautiful key"
+                  }
+                  addImportKey {
+                    name = (1..2000).joinToString("") { "a" }
+                    newLongKey = this
+                  }
+                  addImportKey {
+                    name = "extraordinary key"
+                  }
+                  addImportKey {
+                    name = "this is another key"
+                  }
+
+                  translationWithConflict =
+                    addImportTranslation {
+                      this.language = importEnglish
+                      this.key = addedKey.self
+                      this.conflict = this@ImportTestData.conflict
+                      this.text = "Overridden"
+                    }.self
                   addImportTranslation {
                     this.language = importEnglish
-                    this.key = addedKey.self
-                    this.conflict = this@ImportTestData.conflict
-                    this.text = "Overridden"
-                  }.self
-                addImportTranslation {
-                  this.language = importEnglish
-                  this.key = data.importKeys[1].self
-                  this.conflict = projectBuilder.data.translations[1].self
-                  this.text = "Imported text"
-                }
-                addImportTranslation {
-                  this.language = importEnglish
-                  this.key = data.importKeys[2].self
-                  this.conflict = projectBuilder.data.translations[2].self
-                }
-                addImportTranslation {
-                  this.language = importEnglish
-                  this.key = data.importKeys[4].self
-                }
-                addImportTranslation {
-                  this.language = importEnglish
-                  this.key = data.importKeys[5].self
+                    this.key = data.importKeys[1].self
+                    this.conflict = projectBuilder.data.translations[1].self
+                    this.text = "Imported text"
+                  }
+                  addImportTranslation {
+                    this.language = importEnglish
+                    this.key = data.importKeys[2].self
+                    this.conflict = projectBuilder.data.translations[2].self
+                  }
+                  addImportTranslation {
+                    this.language = importEnglish
+                    this.key = data.importKeys[4].self
+                  }
+                  addImportTranslation {
+                    this.language = importEnglish
+                    this.key = data.importKeys[5].self
+                  }
                 }
               }
-            }
-          import = importBuilder.self
-        }.self
+            import = importBuilder.self
+          }.self
     }
 
   fun useTranslateOnlyUser(): UserAccount {
@@ -208,6 +212,27 @@ class ImportTestData {
       translateLanguages.add(english)
     }
     return user.self
+  }
+
+  fun addKeyWithTag(keyTag: String): io.tolgee.model.key.Key {
+    return this.projectBuilder
+      .addKey {
+        name = "key with tag"
+        this.keyMeta
+      }.build {
+        addTag(keyTag)
+      }.self
+  }
+
+  fun addDefaultBranch(): Branch {
+    defaultBranch =
+      projectBuilder
+        .addBranch {
+          name = "main"
+          isDefault = true
+          isProtected = true
+        }.self
+    return defaultBranch
   }
 
   fun useViewEnOnlyUser(): UserAccount {
@@ -300,36 +325,39 @@ class ImportTestData {
     addFileIssues()
     val projectBuilder = this.root.data.projects[0]
     val import = projectBuilder.data.imports[0]
-    import.addImportFile {
-      name = "another.json"
-    }.build {
-      val fr =
-        addImportLanguage {
-          name = "fr"
-          existingLanguage = french
-        }.self
-      (1..300).forEach { num ->
-        projectBuilder.addKey {
-          name = "this_is_key_$num"
-        }.build keyBuilder@{
-          projectBuilder.addTranslation {
-            this.key = this@keyBuilder.self
-            this.language = english
-            this.text = "I am translation $num"
-          }.build buildTranslation@{
-            addImportKey {
-              name = this@keyBuilder.self.name
-              addImportTranslation {
-                language = fr
-                this.key = this@addImportKey
-                text = "I am import translation $num"
-                conflict = this@buildTranslation.self
-              }
+    import
+      .addImportFile {
+        name = "another.json"
+      }.build {
+        val fr =
+          addImportLanguage {
+            name = "fr"
+            existingLanguage = french
+          }.self
+        (1..300).forEach { num ->
+          projectBuilder
+            .addKey {
+              name = "this_is_key_$num"
+            }.build keyBuilder@{
+              projectBuilder
+                .addTranslation {
+                  this.key = this@keyBuilder.self
+                  this.language = english
+                  this.text = "I am translation $num"
+                }.build buildTranslation@{
+                  addImportKey {
+                    name = this@keyBuilder.self.name
+                    addImportTranslation {
+                      language = fr
+                      this.key = this@addImportKey
+                      text = "I am import translation $num"
+                      conflict = this@buildTranslation.self
+                    }
+                  }
+                }
             }
-          }
         }
       }
-    }
   }
 
   fun addKeyMetadata() {
@@ -342,6 +370,7 @@ class ImportTestData {
         path = "./code/exist.extension"
         line = 10
         fromImport = true
+        author = userAccount
       }
       description = "This is a key"
     }
@@ -363,10 +392,12 @@ class ImportTestData {
         path = "./code/exist.extension"
         line = 10
         fromImport = true
+        author = userAccount
       }
       addCodeReference(userAccount) {
         path = "./code/notExist.extendison"
         fromImport = false
+        author = userAccount
       }
     }
 
@@ -379,31 +410,35 @@ class ImportTestData {
         path = "./code/exist.extension"
         line = 10
         fromImport = true
+        author = userAccount
       }
     }
   }
 
   fun addFilesWithNamespaces(): AddFilesWithNamespacesResult {
     var importFrenchInNs: ImportLanguage? = null
-    importBuilder.addImportFile {
-      name = "file.json"
-      namespace = "homepage"
-    }.build {
-      addImportLanguage {
-        name = "fr"
-        importFrenchInNs = this
-      }.build addFrLang@{
-        addImportKey {
-          name = "what a key"
-        }.build addImportKey@{
-          addImportTranslation {
-            language = this@addFrLang.self
-            this.key = this@addImportKey.self
-            text = "Texto text"
+    importBuilder
+      .addImportFile {
+        name = "file.json"
+        namespace = "homepage"
+        detectedNamespace = "homepage"
+      }.build {
+        addImportLanguage {
+          name = "fr"
+          existingLanguage = french
+          importFrenchInNs = this
+        }.build addFrLang@{
+          addImportKey {
+            name = "what a key with a namespace"
+          }.build addImportKey@{
+            addImportTranslation {
+              language = this@addFrLang.self
+              this.key = this@addImportKey.self
+              text = "Texto text"
+            }
           }
         }
       }
-    }
     importBuilder.addImportFile {
       name = "file2.json"
       namespace = "homepage"
@@ -429,6 +464,37 @@ class ImportTestData {
           language = importEnglish
         }
       }
+    }
+  }
+
+  fun addImportKeyThatDoesntExistInProject() {
+    importBuilder.data.importFiles[0].build {
+      val key =
+        addImportKey {
+          name = "I'm new key in project"
+        }
+      addImportTranslation {
+        text = "Hey!"
+        this.key = key.self
+        language = importEnglish
+      }
+    }
+  }
+
+  fun useCzechBaseLanguage() {
+    project.baseLanguage = czech
+  }
+
+  fun addBranch() {
+    this.projectBuilder.apply {
+      featureBranch =
+        addBranch {
+          name = "feature"
+          project = projectBuilder.self
+          isProtected = false
+          isDefault = false
+          originBranch = this
+        }.self
     }
   }
 

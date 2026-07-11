@@ -3,9 +3,8 @@ package io.tolgee.api.v2.controllers.translationSuggestionController
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.component.EeSubscriptionInfoProvider
 import io.tolgee.component.machineTranslation.MtValueProvider
-import io.tolgee.component.machineTranslation.providers.tolgee.EeTolgeeTranslateApiService
-import io.tolgee.component.machineTranslation.providers.tolgee.TolgeeTranslateParams
-import io.tolgee.component.mtBucketSizeProvider.MtBucketSizeProvider
+import io.tolgee.component.machineTranslation.providers.LlmTranslationProvider
+import io.tolgee.component.machineTranslation.providers.ProviderTranslateParams
 import io.tolgee.constants.MtServiceType
 import io.tolgee.development.testDataBuilder.data.SuggestionTestData
 import io.tolgee.dtos.request.SuggestRequestDto
@@ -16,17 +15,15 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.mockito.kotlin.KArgumentCaptor
-import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.cache.Cache
 import org.springframework.cache.CacheManager
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.ResultActions
-import java.util.*
+import java.util.Date
 
 @SpringBootTest(
   properties = [
@@ -36,31 +33,27 @@ import java.util.*
   ],
 )
 class TranslationSuggestionWithCacheTest : ProjectAuthControllerTest("/v2/projects/") {
+  private var previousFreeCreditsAmount: Long? = null
   lateinit var testData: SuggestionTestData
 
   @Autowired
-  @MockBean
-  lateinit var mtBucketSizeProvider: MtBucketSizeProvider
+  @MockitoBean
+  lateinit var llmTranslationProvider: LlmTranslationProvider
 
   @Autowired
-  @MockBean
-  lateinit var eeTolgeeTranslateApiService: EeTolgeeTranslateApiService
-
-  @Autowired
-  @MockBean
+  @MockitoBean
   lateinit var eeSubscriptionInfoProvider: EeSubscriptionInfoProvider
 
   @Suppress("LateinitVarOverridesLateinitVar")
   @Autowired
   override lateinit var cacheManager: CacheManager
 
-  lateinit var cacheMock: Cache
-
-  lateinit var tolgeeTranslateParamsCaptor: KArgumentCaptor<TolgeeTranslateParams>
+  lateinit var tolgeeTranslateParamsCaptor: KArgumentCaptor<ProviderTranslateParams>
 
   @BeforeEach
   fun setup() {
-    Mockito.clearInvocations(eeTolgeeTranslateApiService)
+    previousFreeCreditsAmount = machineTranslationProperties.freeCreditsAmount
+    Mockito.clearInvocations(llmTranslationProvider)
     setForcedDate(Date())
     initTestData()
     initMachineTranslationProperties(1000)
@@ -72,25 +65,24 @@ class TranslationSuggestionWithCacheTest : ProjectAuthControllerTest("/v2/projec
   @AfterEach
   fun clear() {
     clearForcedDate()
+    previousFreeCreditsAmount?.let { machineTranslationProperties.freeCreditsAmount = it }
   }
 
   private fun mockDefaultMtBucketSize(size: Long) {
-    whenever(mtBucketSizeProvider.getSize(anyOrNull())).thenAnswer {
-      size
-    }
+    machineTranslationProperties.freeCreditsAmount = size
   }
 
   private fun initMachineTranslationMocks() {
     tolgeeTranslateParamsCaptor = argumentCaptor()
 
     whenever(
-      eeTolgeeTranslateApiService.translate(
+      llmTranslationProvider.translate(
         tolgeeTranslateParamsCaptor.capture(),
       ),
     ).thenAnswer {
       MtValueProvider.MtResult(
-        "Translated with Tolgee Translator",
-        ((it.arguments[0] as? TolgeeTranslateParams)?.text?.length ?: 0) * 100,
+        "Translated with LLM Prompt",
+        ((it.arguments[0] as? ProviderTranslateParams)?.text?.length ?: 0) * 100,
       )
     }
   }
@@ -104,7 +96,7 @@ class TranslationSuggestionWithCacheTest : ProjectAuthControllerTest("/v2/projec
   @ProjectJWTAuthTestMethod
   fun `translating is optimized`() {
     mockDefaultMtBucketSize(6000)
-    testData.enableTolgee()
+    testData.enablePrompt()
     testData.addAiDescriptions()
     saveTestData()
 

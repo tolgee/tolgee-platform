@@ -46,7 +46,7 @@ const StyledH3 = styled(Typography)`
 
 type Props = {
   modifyValue?: (code: string) => string;
-  content: React.FC<any>;
+  content: React.FC<React.PropsWithChildren<any>>;
 };
 
 function replaceRecursively(
@@ -71,7 +71,7 @@ function replaceRecursively(
   return children;
 }
 
-export const MdxProvider: FC<Props> = (props) => {
+export const MdxProvider: FC<React.PropsWithChildren<Props>> = (props) => {
   const Content = props.content;
   const modifyValue = props.modifyValue ?? ((text: string) => text);
 

@@ -1,6 +1,7 @@
 package io.tolgee.api.v2.controllers.v2ProjectsController
 
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.development.testDataBuilder.data.ProjectsTestData
 import io.tolgee.fixtures.andAssertThatJson
@@ -8,26 +9,26 @@ import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
-import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.isPermissionScopes
 import io.tolgee.fixtures.node
 import io.tolgee.model.Permission
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ProjectPermissionType
+import io.tolgee.testing.WithoutEeTest
 import io.tolgee.testing.assertions.Assertions.assertThat
-import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@WithoutEeTest
 class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   fun getAll() {
     executeInNewTransaction {
-      dbPopulator.createBase("one", "kim")
-      dbPopulator.createBase("two", "kim")
+      dbPopulator.createBase("kim")
+      dbPopulator.createBase("kim")
 
       loginAsUser("kim")
 
@@ -63,7 +64,8 @@ class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
     performAuthGet("/v2/projects").andPrettyPrint.andAssertThatJson.node("_embedded.projects").let {
       it.isArray.hasSize(1)
-      it.node("[0].computedPermission.permittedLanguageIds")
+      it
+        .node("[0].computedPermission.permittedLanguageIds")
         .isArray
         .hasSize(1)
         .containsAll(listOf(baseTestData.englishLanguage.id))
@@ -77,7 +79,8 @@ class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     userAccount = testData.user
 
     performAuthGet("/v2/projects/with-stats?sort=id")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("_embedded.projects") {
           isArray.hasSize(2)
           node("[0].organizationOwner.name").isEqualTo("test_username")
@@ -114,7 +117,8 @@ class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     userAccount = testData.userWithTranslatePermission
 
     performAuthGet("/v2/projects/with-stats?sort=id")
-      .andIsOk.andAssertThatJson.node("_embedded.projects")
+      .andIsOk.andAssertThatJson
+      .node("_embedded.projects")
       .let {
         it.isArray.hasSize(1)
         it.node("[0].computedPermission.permittedLanguageIds").isArray.hasSize(2).containsAll(
@@ -128,7 +132,7 @@ class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   fun `get single returns permissions`() {
-    val base = dbPopulator.createBase("one")
+    val base = dbPopulator.createBase()
     userAccount = dbPopulator.createUserIfNotExists("another-user")
     permissionService.create(
       Permission(
@@ -141,13 +145,21 @@ class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     performAuthGet("/v2/projects/${base.project.id}").andPrettyPrint.andAssertThatJson.let {
       it.node("organizationOwner.name").isEqualTo(base.userAccount.username)
       it.node("directPermission.scopes").isPermissionScopes(ProjectPermissionType.TRANSLATE)
-      it.node("computedPermission.permittedLanguageIds").isArray.hasSize(1).contains(base.project.languages.first().id)
+      it
+        .node("computedPermission.permittedLanguageIds")
+        .isArray
+        .hasSize(1)
+        .contains(
+          base.project.languages
+            .first()
+            .id,
+        )
     }
   }
 
   @Test
   fun getNotPermitted() {
-    val base = dbPopulator.createBase("one")
+    val base = dbPopulator.createBase()
 
     val account = dbPopulator.createUserIfNotExists("peter")
     loginAsUser(account.name)
@@ -174,12 +186,14 @@ class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
     performAuthGet("/v2/projects/${directPermissionProject.id}/users?sort=id")
       .andIsOk.andPrettyPrint.andAssertThatJson
-      .node("_embedded.users").let {
+      .node("_embedded.users")
+      .let {
         it.isArray.hasSize(3)
         it.node("[0].organizationRole").isEqualTo("MEMBER")
         it.node("[1].organizationRole").isEqualTo("OWNER")
         it.node("[2].directPermission.scopes").isPermissionScopes(ProjectPermissionType.TRANSLATE)
-        it.node("[2].computedPermission.permittedLanguageIds")
+        it
+          .node("[2].computedPermission.permittedLanguageIds")
           .isArray
           .hasSize(2)
           .containsAll(directPermissionProject.languages.map { it.id })
@@ -195,7 +209,9 @@ class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     loginAsUser(usersAndOrganizations[1].name)
 
     performAuthPut("/v2/projects/${repo.id}/users/${user.id}/set-permissions/EDIT", null)
-      .andIsBadRequest.andReturn().let {
+      .andIsBadRequest
+      .andReturn()
+      .let {
         assertThat(it).error().hasCode("user_has_no_project_access")
       }
   }
@@ -210,7 +226,9 @@ class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     loginAsUser(usersAndOrganizations[1].name)
 
     performAuthPut("/v2/projects/${repo.id}/users/${user.id}/set-permissions/EDIT", null)
-      .andIsBadRequest.andReturn().let {
+      .andIsBadRequest
+      .andReturn()
+      .let {
         assertThat(it).error().hasCode("user_is_organization_owner")
       }
   }
@@ -227,7 +245,9 @@ class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     loginAsUser(usersAndOrganizations[1].name)
 
     performAuthPut("/v2/projects/${repo.id}/users/${usersAndOrganizations[1].id}/set-permissions/EDIT", null)
-      .andIsBadRequest.andReturn().let {
+      .andIsBadRequest
+      .andReturn()
+      .let {
         assertThat(it).error().hasCode("cannot_set_your_own_permissions")
       }
   }
@@ -244,18 +264,21 @@ class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
     performAuthPut("/v2/projects/${repo.id}/users/${user.id}/revoke-access", null).andIsOk
 
-    permissionService.getProjectPermissionScopesNoApiKey(repo.id, user)
+    permissionService
+      .getProjectPermissionScopesNoApiKey(repo.id, user)
       .let { assertThat(it).isEmpty() }
   }
 
   @Test
   fun revokeUsersAccessOwn() {
-    val base = dbPopulator.createBase("base", "jirina")
+    val base = dbPopulator.createBase("jirina")
 
     loginAsUser("jirina")
 
     performAuthPut("/v2/projects/${base.project.id}/users/${base.userAccount.id}/revoke-access", null)
-      .andIsBadRequest.andReturn().let { assertThat(it).error().hasCode("can_not_revoke_own_permissions") }
+      .andIsBadRequest
+      .andReturn()
+      .let { assertThat(it).error().hasCode("can_not_revoke_own_permissions") }
   }
 
   @Test
@@ -268,14 +291,28 @@ class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     loginAsUser(usersAndOrganizations[1].name)
 
     performAuthPut("/v2/projects/${repo.id}/users/${user.id}/revoke-access", null)
-      .andIsBadRequest.andReturn().let { assertThat(it).error().hasCode("user_is_organization_member") }
+      .andIsBadRequest
+      .andReturn()
+      .let { assertThat(it).error().hasCode("user_is_organization_member") }
   }
 
   @Test
   fun deleteProject() {
-    val base = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase()
     performAuthDelete("/v2/projects/${base.project.id}", null).andIsOk
     val project = projectService.find(base.project.id)
-    Assertions.assertThat(project).isNull()
+    assertThat(project).isNull()
+  }
+
+  @Test
+  fun `test bad request error is returned when requested url with wrong pattern`() {
+    performAuthGet("/v2/projects/export&format=JSON")
+      .andIsNotFound
+      .andPrettyPrint
+      .andAssertThatJson
+      .let {
+        it.node("code").isEqualTo(Message.RESOURCE_NOT_FOUND.code)
+        it.node("params[0]").isEqualTo("v2/projects/export&format=JSON")
+      }
   }
 }

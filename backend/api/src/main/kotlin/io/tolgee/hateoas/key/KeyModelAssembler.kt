@@ -6,10 +6,11 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.stereotype.Component
 
 @Component
-class KeyModelAssembler : RepresentationModelAssemblerSupport<KeyView, KeyModel>(
-  TranslationsController::class.java,
-  KeyModel::class.java,
-) {
+class KeyModelAssembler :
+  RepresentationModelAssemblerSupport<KeyView, KeyModel>(
+    TranslationsController::class.java,
+    KeyModel::class.java,
+  ) {
   @Suppress("UNCHECKED_CAST")
   override fun toModel(view: KeyView) =
     KeyModel(
@@ -18,5 +19,7 @@ class KeyModelAssembler : RepresentationModelAssemblerSupport<KeyView, KeyModel>
       namespace = view.namespace,
       description = view.description,
       custom = view.custom as? Map<String, Any?>?,
+      maxCharLimit = view.maxCharLimit,
+      branch = view.branch,
     )
 }

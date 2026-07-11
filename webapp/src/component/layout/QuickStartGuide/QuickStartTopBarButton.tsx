@@ -1,11 +1,12 @@
-import { Box, Button, styled } from '@mui/material';
-import { RocketIcon } from 'tg.component/CustomIcons';
+import { Box, Button, styled, Tooltip } from '@mui/material';
 import {
   useGlobalActions,
   useGlobalContext,
 } from 'tg.globalContext/GlobalContext';
+import { RocketFilled } from 'tg.component/CustomIcons';
 import { items } from './quickStartConfig';
 import { QuickStartProgress } from './QuickStartProgress';
+import { useTranslate } from '@tolgee/react';
 
 const StyledContainer = styled(Box)`
   position: relative;
@@ -17,27 +18,44 @@ const StyledButton = styled(Button)`
 `;
 
 export const QuickStartTopBarButton = () => {
+  const { t } = useTranslate();
   const guideEnabled = useGlobalContext((c) => c.quickStartGuide.enabled);
   const guideOpen = useGlobalContext((c) => c.quickStartGuide.open);
+  const guideFloatingOpen = useGlobalContext(
+    (c) => c.quickStartGuide.floatingOpen
+  );
+  const quickStartFloating = useGlobalContext(
+    (c) => c.layout.quickStartFloating
+  );
   const completedSteps = useGlobalContext(
     (c) => c.quickStartGuide.completed.length
   );
   const allSteps = items.length;
-  const { setQuickStartOpen } = useGlobalActions();
+  const { setQuickStartOpen, setQuickStartFloatingOpen } = useGlobalActions();
+
+  const handleClick = () => {
+    quickStartFloating
+      ? setQuickStartFloatingOpen(!guideFloatingOpen)
+      : setQuickStartOpen(!guideOpen);
+  };
 
   return (
     <>
       {guideEnabled && (
         <StyledContainer>
-          <StyledButton
-            onClick={() => setQuickStartOpen(!guideOpen)}
-            color="inherit"
+          <Tooltip
+            title={t('guide_title')}
+            placement="bottom-end"
+            classes={{ tooltip: 'tooltip' }}
+            disableInteractive
           >
-            <Box display="flex" gap={1} alignItems="center">
-              <RocketIcon fontSize="small" />
-              <QuickStartProgress percent={completedSteps / allSteps} />
-            </Box>
-          </StyledButton>
+            <StyledButton onClick={handleClick} color="inherit">
+              <Box display="flex" gap={1} alignItems="center">
+                <RocketFilled width={20} height={20} />
+                <QuickStartProgress percent={completedSteps / allSteps} />
+              </Box>
+            </StyledButton>
+          </Tooltip>
         </StyledContainer>
       )}
     </>

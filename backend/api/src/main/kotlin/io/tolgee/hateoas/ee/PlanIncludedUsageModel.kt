@@ -8,7 +8,8 @@ import java.io.Serializable
 @Relation(collectionRelation = "prices", itemRelation = "prices")
 open class PlanIncludedUsageModel(
   val seats: Long = -1L,
-  var translationSlots: Long = -1L,
   var translations: Long = -1L,
   var mtCredits: Long = -1L,
-) : RepresentationModel<PlanIncludedUsageModel>(), Serializable
+  var keys: Long = -1L,
+) : RepresentationModel<PlanIncludedUsageModel>(),
+  Serializable

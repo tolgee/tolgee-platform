@@ -11,6 +11,9 @@ type TranslationsQueryType =
 export type DeletableKeyWithTranslationsModelType =
   components['schemas']['KeyWithTranslationsModel'] & { deleted?: boolean };
 
+type ScreenshotModel = components['schemas']['ScreenshotModel'];
+type LanguageModel = components['schemas']['LanguageModel'];
+
 export interface CellPosition {
   keyId: number;
   language: string | undefined;
@@ -31,7 +34,7 @@ export type AddTranslation = KeyWithTranslationsModel;
 export type UpdateTranslation = {
   keyId: number;
   lang: string;
-  data: Partial<TranslationViewModel>;
+  data: ValueUpdate<Partial<TranslationViewModel>>;
 };
 
 export type RemoveTag = {
@@ -45,10 +48,26 @@ export type AddTag = {
   onSuccess?: () => void;
 };
 
+export type LabelOperation = {
+  keyId: number;
+  language: LanguageModel;
+  labelId: number;
+};
+
+export type AddLabel = LabelOperation & {
+  translationId?: number;
+};
+
+export type RemoveLabel = LabelOperation & {
+  translationId: number;
+};
+
 export type AfterCommand = 'EDIT_NEXT';
 
 export type ChangeValue = {
   after?: AfterCommand;
+  preventTaskResolution?: boolean;
+  suggestionOnly?: boolean;
   onSuccess?: () => void;
 };
 
@@ -71,9 +90,15 @@ export type SetTranslationState = {
   state: StateInType;
 };
 
+export type SetTaskTranslationState = {
+  done: boolean;
+  taskNumber: number;
+  keyId: number;
+};
+
 export type ChangeScreenshotNum = {
   keyId: number;
-  screenshotCount: number | undefined;
+  screenshots: ValueUpdate<ScreenshotModel[]>;
 };
 
 export type Direction = 'DOWN';
@@ -98,9 +123,21 @@ export type Edit = CellPosition & {
   activeVariant: string;
 };
 
-export type EditMode = 'general' | 'advanced' | 'context' | 'comments';
+export type EditMode =
+  | 'general'
+  | 'advanced'
+  | 'context'
+  | 'comments'
+  | 'qa_checks';
+
+export type ValueUpdate<Data, Update = Data> =
+  | Update
+  | ((data: Data) => Update);
 
 export type KeyUpdateData = {
   keyId: number;
-  value: Partial<DeletableKeyWithTranslationsModelType>;
+  value: ValueUpdate<
+    DeletableKeyWithTranslationsModelType,
+    Partial<DeletableKeyWithTranslationsModelType>
+  >;
 };

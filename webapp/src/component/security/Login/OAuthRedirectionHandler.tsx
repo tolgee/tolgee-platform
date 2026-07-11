@@ -10,37 +10,68 @@ import {
 import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 
 interface OAuthRedirectionHandlerProps {}
-const LOCAL_STORAGE_STATE_KEY = 'oauth2State';
-
 export const OAuthRedirectionHandler: FunctionComponent<
-  OAuthRedirectionHandlerProps
+  React.PropsWithChildren<OAuthRedirectionHandlerProps>
 > = () => {
-  const allowPrivate = useGlobalContext((c) => c.auth.allowPrivate);
   const loginLoadable = useGlobalContext((c) => c.auth.authorizeOAuthLoadable);
 
-  const { loginWithOAuthCode } = useGlobalActions();
+  const {
+    loginWithOAuthCode,
+    getLastSsoDomain,
+    getOAuthStateKey,
+    getSsoStateKey,
+    clearOAuthStateKey,
+    clearSsoStateKey,
+  } = useGlobalActions();
   const match = useRouteMatch();
   const history = useHistory();
 
   useEffect(() => {
     const url = new URLSearchParams(window.location.search);
+    const type = match.params[PARAMS.SERVICE_TYPE];
     const code = url.get('code');
+    let domain: string | undefined = undefined;
 
-    if (match.params[PARAMS.SERVICE_TYPE] == 'oauth2') {
+    function checkState(
+      storedState: string | undefined,
+      clearfn: () => void
+    ): boolean {
       const state = url.get('state');
-      const storedState = localStorage.getItem(LOCAL_STORAGE_STATE_KEY);
       if (storedState !== state) {
         history.replace(LINKS.LOGIN.build());
-        return;
+        return false;
       } else {
-        localStorage.removeItem(LOCAL_STORAGE_STATE_KEY);
+        clearfn();
+        return true;
       }
     }
 
-    if (code && !allowPrivate) {
-      loginWithOAuthCode(match.params[PARAMS.SERVICE_TYPE], code);
+    if (
+      type == 'oauth2' &&
+      !checkState(getOAuthStateKey(), clearOAuthStateKey)
+    ) {
+      return;
     }
-  }, [allowPrivate]);
+
+    if (type == 'sso') {
+      if (!checkState(getSsoStateKey(), clearSsoStateKey)) {
+        return;
+      }
+
+      domain = getLastSsoDomain();
+      if (!domain) {
+        history.replace(LINKS.LOGIN.build());
+        return;
+      }
+    }
+
+    if (!code) {
+      history.replace(LINKS.LOGIN.build());
+      return;
+    }
+
+    loginWithOAuthCode(type, code, domain);
+  }, []);
 
   if (loginLoadable.error) {
     return (

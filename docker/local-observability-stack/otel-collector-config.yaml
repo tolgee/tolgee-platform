@@ -1,0 +1,52 @@
+# =============================================================================
+# LOCAL DEVELOPMENT ONLY - Do not use in production.
+# =============================================================================
+#
+# OpenTelemetry Collector - Trace Ingestion
+#
+# Purpose:
+#   Receives traces from the OTEL Java Agent and forwards them to Tempo.
+#   100% of traces are kept — matches production behaviour (Alloy also
+#   forwards 100%). No tail_sampling: at 100% it adds memory pressure and
+#   30s of visibility delay for zero benefit (see deployment/azure/production
+#   /alloy/values.yaml for the longer explanation and the prerequisites for
+#   re-enabling it cluster-wide).
+#
+# Part of: Tolgee Local Observability Stack
+#   See: docs/observability/
+#
+# =============================================================================
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:
+    timeout: 1s
+    send_batch_size: 1024
+
+exporters:
+  otlp/tempo:
+    endpoint: tempo:4317
+    tls:
+      insecure: true
+
+  debug:
+    verbosity: detailed
+
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+
+service:
+  extensions: [health_check]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp/tempo, debug]

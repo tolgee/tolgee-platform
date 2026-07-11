@@ -27,7 +27,8 @@ class InitialUserCreatorCommandLineRunner(
   private val passwordEncoder: PasswordEncoder,
   private val internalProperties: InternalProperties,
   private val quickStartService: QuickStartService,
-) : CommandLineRunner, ApplicationListener<ContextClosedEvent> {
+) : CommandLineRunner,
+  ApplicationListener<ContextClosedEvent> {
   private val logger = LoggerFactory.getLogger(this::class.java)
 
   @Transactional
@@ -45,7 +46,7 @@ class InitialUserCreatorCommandLineRunner(
 
   fun createInitialUser() {
     logger.info("Creating initial user...")
-    val initialUsername = properties.authentication.initialUsername
+    val initialUsername = properties.authentication.initialUsername.lowercase()
 
     // Check if the account already exists.
     // This can only be the case on Tolgee 3.x series and should be removed on Tolgee 4.

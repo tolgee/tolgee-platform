@@ -1,5 +1,6 @@
 package io.tolgee.service.security
 
+import io.tolgee.api.isMfaEnabled
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.demoProject.DemoProjectData
 import io.tolgee.configuration.tolgee.TolgeeProperties
@@ -9,6 +10,8 @@ import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.dtos.queryResults.UserAccountView
 import io.tolgee.dtos.request.UserUpdatePasswordRequestDto
 import io.tolgee.dtos.request.UserUpdateRequestDto
+import io.tolgee.dtos.request.task.UserAccountFilters
+import io.tolgee.dtos.request.userAccount.UserAccountPermissionsFilters
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.events.OnUserCountChanged
 import io.tolgee.events.user.OnUserCreated
@@ -18,6 +21,9 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.ThirdPartyAuthType
+import io.tolgee.model.notifications.Notification
+import io.tolgee.model.notifications.NotificationType
 import io.tolgee.model.views.ExtendedUserAccountInProject
 import io.tolgee.model.views.UserAccountInProjectView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
@@ -25,10 +31,14 @@ import io.tolgee.model.views.UserProjectMetadataView
 import io.tolgee.notifications.NotificationPreferencesService
 import io.tolgee.notifications.UserNotificationService
 import io.tolgee.repository.UserAccountRepository
+import io.tolgee.service.AiPlaygroundResultService
 import io.tolgee.service.AvatarService
 import io.tolgee.service.EmailVerificationService
+import io.tolgee.service.notification.NotificationService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.util.Logging
+import io.tolgee.util.addMinutes
+import io.tolgee.util.logger
 import jakarta.persistence.EntityManager
 import jakarta.servlet.http.HttpServletRequest
 import org.apache.commons.lang3.time.DateUtils
@@ -40,15 +50,19 @@ import org.springframework.cache.annotation.Cacheable
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.InputStream
-import java.util.*
+import java.util.Calendar
+import java.util.Date
 
 @Service
+@Suppress("SelfReferenceConstructorParameter")
 class UserAccountService(
+  @Lazy
   private val userAccountRepository: UserAccountRepository,
   private val applicationEventPublisher: ApplicationEventPublisher,
   private val tolgeeProperties: TolgeeProperties,
@@ -61,10 +75,15 @@ class UserAccountService(
   @Lazy private val userNotificationService: UserNotificationService,
   @Lazy private val notificationPreferencesService: NotificationPreferencesService,
   private val cacheManager: CacheManager,
-  @Suppress("SelfReferenceConstructorParameter")
   @Lazy
   private val self: UserAccountService,
+  @Lazy
+  private val mfaService: MfaService,
 ) : Logging {
+  @Autowired
+  @Lazy
+  private lateinit var aiPlaygroundResultService: AiPlaygroundResultService
+
   @Autowired
   lateinit var emailVerificationService: EmailVerificationService
 
@@ -72,10 +91,17 @@ class UserAccountService(
   @Lazy
   lateinit var permissionService: PermissionService
 
+  @Autowired
+  private lateinit var notificationService: NotificationService
+
   private val emailValidator = EmailValidator()
 
   fun findActive(username: String): UserAccount? {
     return userAccountRepository.findActive(username)
+  }
+
+  fun findActiveOrDisabled(username: String): UserAccount? {
+    return userAccountRepository.findActiveOrDisabled(username)
   }
 
   operator fun get(username: String): UserAccount {
@@ -86,10 +112,12 @@ class UserAccountService(
     return userAccountRepository.findActive(id)
   }
 
+  @Transactional
   fun findInitialUser(): UserAccount? {
     return userAccountRepository.findInitialUser()
   }
 
+  @Transactional
   fun get(id: Long): UserAccount {
     return this.findActive(id) ?: throw NotFoundException(Message.USER_NOT_FOUND)
   }
@@ -97,9 +125,14 @@ class UserAccountService(
   @Cacheable(cacheNames = [Caches.USER_ACCOUNTS], key = "#id")
   @Transactional
   fun findDto(id: Long): UserAccountDto? {
-    return userAccountRepository.findActive(id)?.let {
+    return findActive(id)?.let {
       UserAccountDto.fromEntity(it)
     }
+  }
+
+  @Transactional
+  fun findAll(ids: List<Long>): List<UserAccountDto> {
+    return userAccountRepository.findAllById(ids).map { UserAccountDto.fromEntity(it) }
   }
 
   @Transactional
@@ -143,7 +176,13 @@ class UserAccountService(
 
   @Transactional
   fun createUser(
+    /**
+     * the user account to be created
+     */
     userAccount: UserAccount,
+    /**
+     * The answer for the "Where did you hear about us?"
+     */
     userSource: String? = null,
   ): UserAccount {
     applicationEventPublisher.publishEvent(OnUserCreated(this, userAccount, userSource))
@@ -199,6 +238,12 @@ class UserAccountService(
     toDelete.preferences?.let {
       entityManager.remove(it)
     }
+    // Clear the reference to avoid Hibernate 6.6's CHECK_ON_FLUSH validation error
+    // when the removed preferences entity is still referenced by the UserAccount
+    toDelete.preferences = null
+    toDelete.invitations?.forEach {
+      entityManager.remove(it)
+    }
     organizationService.getAllSingleOwnedByUser(toDelete).forEach {
       it.preferredBy.removeIf { preferences ->
         preferences.userAccount.id == toDelete.id
@@ -212,6 +257,7 @@ class UserAccountService(
     userNotificationService.deleteAllByUserId(toDelete.id)
     notificationPreferencesService.deleteAllByUserId(toDelete.id)
 
+    aiPlaygroundResultService.deleteResultsByUser(toDelete.id)
     userAccountRepository.softDeleteUser(toDelete, currentDateProvider.date)
     applicationEventPublisher.publishEvent(OnUserCountChanged(decrease = true, this))
   }
@@ -226,11 +272,16 @@ class UserAccountService(
   }
 
   fun findByThirdParty(
-    type: String,
+    type: ThirdPartyAuthType,
     id: String,
-  ): Optional<UserAccount> {
+  ): UserAccount? {
     return userAccountRepository.findThirdByThirdParty(id, type)
   }
+
+  fun findEnabledBySsoDomain(
+    type: String,
+    idSub: String,
+  ): UserAccount? = userAccountRepository.findEnabledBySsoDomain(idSub, type)
 
   @Transactional
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
@@ -258,7 +309,7 @@ class UserAccountService(
     userAccount: UserAccount,
     password: String?,
   ): UserAccount {
-    userAccount.tokensValidNotBefore = DateUtils.truncate(Date(), Calendar.SECOND)
+    resetTokensValidNotBefore(userAccount)
     userAccount.password = passwordEncoder.encode(password)
     return userAccountRepository.save(userAccount)
   }
@@ -283,33 +334,99 @@ class UserAccountService(
   fun enableMfaTotp(
     userAccount: UserAccount,
     key: ByteArray,
+    initialOtp: String,
   ): UserAccount {
+    // Validate the OTP and seed `totpLastUsedTimeStep` from the matched step so
+    // the same code can't be replayed against the login endpoint immediately after enable.
+    val matchedStep =
+      mfaService.findMatchingTimeStep(key, initialOtp, minExclusiveTimeStep = null)
+        ?: throw ValidationException(Message.INVALID_OTP_CODE)
     userAccount.totpKey = key
-    userAccount.tokensValidNotBefore = DateUtils.truncate(Date(), Calendar.SECOND)
-    return userAccountRepository.save(userAccount)
+    userAccount.totpLastUsedTimeStep = matchedStep
+    resetTokensValidNotBefore(userAccount)
+    val savedUser = userAccountRepository.save(userAccount)
+    notifySelf(userAccount, NotificationType.MFA_ENABLED)
+    return savedUser
   }
 
   @Transactional
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
   fun disableMfaTotp(userAccount: UserAccount): UserAccount {
     userAccount.totpKey = null
+    userAccount.totpLastUsedTimeStep = null
     // note: if support for more MFA methods is added, this should be only done if no other MFA method is enabled
     userAccount.mfaRecoveryCodes = emptyList()
-    userAccount.tokensValidNotBefore = DateUtils.truncate(Date(), Calendar.SECOND)
-    return userAccountRepository.save(userAccount)
+    resetTokensValidNotBefore(userAccount)
+    val savedUser = userAccountRepository.save(userAccount)
+    notifySelf(userAccount, NotificationType.MFA_DISABLED)
+    return savedUser
+  }
+
+  private fun notifySelf(
+    userAccount: UserAccount,
+    notificationType: NotificationType,
+  ) {
+    notificationService.notify(
+      Notification().apply {
+        this.user = userAccount
+        this.type = notificationType
+        this.originatingUser = userAccount
+      },
+    )
+  }
+
+  /**
+   * Verifies a TOTP code against [userAccount] and atomically advances the stored
+   * [UserAccount.totpLastUsedTimeStep] so the same (or earlier) time step cannot be accepted
+   * again. This enforces RFC 6238 §5.2 replay prevention on top of the ±1 drift tolerance
+   * in [MfaService.findMatchingTimeStep].
+   *
+   * Throws [AuthenticationException] with [Message.INVALID_OTP_CODE] on every failure mode:
+   * missing/empty TOTP key, no matching code in the allowed window, or a concurrent request
+   * that already bumped the counter at or past the matched step.
+   */
+  @Transactional
+  @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
+  fun consumeTotpCode(
+    userAccount: UserAccount,
+    code: String,
+  ): UserAccount {
+    if (!MfaService.mfaEnabled(userAccount.totpKey)) {
+      throw AuthenticationException(Message.INVALID_OTP_CODE)
+    }
+    val key = userAccount.totpKey!!
+    val matchedStep =
+      mfaService.findMatchingTimeStep(key, code, userAccount.totpLastUsedTimeStep)
+        ?: throw AuthenticationException(Message.INVALID_OTP_CODE)
+    val rowsAffected =
+      userAccountRepository.updateTotpLastUsedTimeStepIfGreater(userAccount.id, matchedStep)
+    if (rowsAffected == 0) {
+      logger.warn(
+        "TOTP replay rejected for user {}: concurrent bump lost the race",
+        userAccount.id,
+      )
+      throw AuthenticationException(Message.INVALID_OTP_CODE)
+    }
+    // Keep the in-memory entity consistent for the remainder of this request.
+    userAccount.totpLastUsedTimeStep = matchedStep
+    return userAccount
   }
 
   @Transactional
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
   fun consumeMfaRecoveryCode(
     userAccount: UserAccount,
-    token: String,
+    recoveryCode: String,
   ): UserAccount {
-    if (!userAccount.mfaRecoveryCodes.contains(token)) {
+    if (!userAccount.mfaRecoveryCodes.contains(recoveryCode)) {
       throw AuthenticationException(Message.INVALID_OTP_CODE)
     }
 
-    userAccount.mfaRecoveryCodes = userAccount.mfaRecoveryCodes.minus(token)
+    userAccount.mfaRecoveryCodes = userAccount.mfaRecoveryCodes.minus(recoveryCode)
+
+    // Burn the current and next TOTP windows
+    val burnThrough = mfaService.currentTimeStep() + 1L
+    userAccount.totpLastUsedTimeStep = maxOf(burnThrough, userAccount.totpLastUsedTimeStep ?: burnThrough)
     return userAccountRepository.save(userAccount)
   }
 
@@ -321,6 +438,27 @@ class UserAccountService(
   ): UserAccount {
     userAccount.mfaRecoveryCodes = codes
     return userAccountRepository.save(userAccount)
+  }
+
+  @Transactional
+  @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#userAccount.id")
+  fun updateSsoSession(
+    userAccount: UserAccount,
+    refreshToken: String?,
+  ): UserAccount {
+    userAccount.ssoRefreshToken = refreshToken
+    userAccount.ssoSessionExpiry = getCurrentSsoExpiration(userAccount.thirdPartyAuthType)
+    return userAccountRepository.save(userAccount)
+  }
+
+  fun getCurrentSsoExpiration(type: ThirdPartyAuthType?): Date? {
+    return currentDateProvider.date.addMinutes(
+      when (type) {
+        ThirdPartyAuthType.SSO -> tolgeeProperties.authentication.ssoOrganizations.sessionExpirationMinutes
+        ThirdPartyAuthType.SSO_GLOBAL -> tolgeeProperties.authentication.ssoGlobal.sessionExpirationMinutes
+        else -> return null
+      },
+    )
   }
 
   @Transactional
@@ -351,8 +489,15 @@ class UserAccountService(
     pageable: Pageable,
     search: String?,
     exceptUserId: Long? = null,
+    filters: UserAccountFilters = UserAccountFilters(),
   ): Page<UserAccountInProjectView> {
-    return userAccountRepository.getAllInProject(projectId, pageable, search = search, exceptUserId)
+    return userAccountRepository.getAllInProject(
+      projectId,
+      pageable,
+      search = search,
+      exceptUserId,
+      filters,
+    )
   }
 
   fun getAllInProjectWithPermittedLanguages(
@@ -360,8 +505,9 @@ class UserAccountService(
     pageable: Pageable,
     search: String?,
     exceptUserId: Long? = null,
+    filters: UserAccountFilters = UserAccountFilters(),
   ): Page<ExtendedUserAccountInProject> {
-    val users = getAllInProject(projectId, pageable, search, exceptUserId)
+    val users = getAllInProject(projectId, pageable, search, exceptUserId, filters)
     val organizationBasePermission = organizationService.getProjectOwner(projectId = projectId).basePermission
 
     val permittedLanguageMap =
@@ -378,6 +524,7 @@ class UserAccountService(
         directPermission = it.directPermission,
         organizationBasePermission = organizationBasePermission,
         permittedLanguageIds = permittedLanguageMap[it.id],
+        mfaEnabled = it.isMfaEnabled,
         avatarHash = it.avatarHash,
       )
     }
@@ -425,10 +572,12 @@ class UserAccountService(
     val matches = passwordEncoder.matches(dto.currentPassword, userAccount.password)
     if (!matches) throw PermissionException(Message.WRONG_CURRENT_PASSWORD)
 
-    userAccount.tokensValidNotBefore = DateUtils.truncate(Date(), Calendar.SECOND)
+    resetTokensValidNotBefore(userAccount)
     userAccount.password = passwordEncoder.encode(dto.password)
     userAccount.passwordChanged = true
-    return userAccountRepository.save(userAccount)
+    val savedUser = userAccountRepository.save(userAccount)
+    notifySelf(userAccount, NotificationType.PASSWORD_CHANGED)
+    return savedUser
   }
 
   private fun updateUserEmail(
@@ -436,19 +585,32 @@ class UserAccountService(
     dto: UserUpdateRequestDto,
     request: HttpServletRequest,
   ) {
-    if (userAccount.username != dto.email) {
-      if (!emailValidator.isValid(dto.email, null)) {
-        // todo: Allow to specify STANDARD_VALIDATION typed errors to show errors on specific fields
-        throw ValidationException(Message.VALIDATION_EMAIL_IS_NOT_VALID)
-      }
-
-      this.findActive(dto.email)?.let { throw ValidationException(Message.USERNAME_ALREADY_EXISTS) }
-      if (tolgeeProperties.authentication.needsEmailVerification) {
-        emailVerificationService.resendEmailVerification(userAccount, request, dto.callbackUrl, dto.email)
-      } else {
-        userAccount.username = dto.email
-      }
+    val newEmail = dto.email.lowercase()
+    if (userAccount.username == newEmail) {
+      return
     }
+
+    if (!emailValidator.isValid(newEmail, null)) {
+      // todo: Allow to specify STANDARD_VALIDATION typed errors to show errors on specific fields
+      throw ValidationException(Message.VALIDATION_EMAIL_IS_NOT_VALID)
+    }
+
+    this.findActive(newEmail)?.let { throw ValidationException(Message.USERNAME_ALREADY_EXISTS) }
+    if (tolgeeProperties.authentication.needsEmailVerification) {
+      emailVerificationService.resendEmailVerification(userAccount, request, dto.callbackUrl, newEmail)
+      return
+    }
+
+    userAccount.username = newEmail
+  }
+
+  fun invalidateTokens(userAccount: UserAccount): UserAccount {
+    resetTokensValidNotBefore(userAccount)
+    return userAccountRepository.save(userAccount)
+  }
+
+  private fun resetTokensValidNotBefore(userAccount: UserAccount) {
+    userAccount.tokensValidNotBefore = DateUtils.truncate(currentDateProvider.date, Calendar.SECOND)
   }
 
   private fun publishUserInfoUpdatedEvent(
@@ -517,45 +679,72 @@ class UserAccountService(
     // We need to migrate what's owned by `___implicit_user` to the initial user
     val initialUser = findInitialUser() ?: throw IllegalStateException("Initial user does not exist?")
 
-    legacyImplicitUser.apiKeys?.forEach {
+    // Collect entities to transfer before modifying collections
+    // This avoids issues with Hibernate 6.6's stricter orphanRemoval handling
+    val apiKeysToTransfer = legacyImplicitUser.apiKeys?.toList() ?: emptyList()
+    val patsToTransfer = legacyImplicitUser.pats?.toList() ?: emptyList()
+    val permissionsToTransfer = legacyImplicitUser.permissions.toList()
+    val organizationRolesToTransfer = legacyImplicitUser.organizationRoles.toList()
+    val preferencesToTransfer = legacyImplicitUser.preferences
+
+    // Detach the legacy user to prevent orphanRemoval from deleting reassigned entities
+    entityManager.detach(legacyImplicitUser)
+
+    // Transfer entities to the initial user
+    apiKeysToTransfer.forEach {
       it.userAccount = initialUser
-      initialUser.apiKeys!!.add(it)
       entityManager.merge(it)
     }
 
-    legacyImplicitUser.pats?.forEach {
+    patsToTransfer.forEach {
       it.userAccount = initialUser
-      initialUser.pats!!.add(it)
       entityManager.merge(it)
     }
 
-    legacyImplicitUser.permissions.forEach {
+    permissionsToTransfer.forEach {
       it.user = initialUser
-      initialUser.permissions.add(it)
       entityManager.merge(it)
     }
 
-    legacyImplicitUser.preferences?.let {
+    preferencesToTransfer?.let {
       it.userAccount = initialUser
       entityManager.merge(it)
     }
 
-    legacyImplicitUser.organizationRoles.forEach {
+    organizationRolesToTransfer.forEach {
       it.user = initialUser
-      initialUser.organizationRoles.add(it)
       entityManager.merge(it)
     }
-
-    legacyImplicitUser.apiKeys?.clear()
-    legacyImplicitUser.pats?.clear()
-    legacyImplicitUser.permissions.clear()
-    legacyImplicitUser.organizationRoles.clear()
 
     entityManager.flush()
     userAccountRepository.save(initialUser)
 
-    userAccountRepository.deleteById(legacyImplicitUser.id)
+    // Re-fetch and delete the legacy user (it's detached so we need to get it fresh)
+    findActive("___implicit_user")?.let {
+      userAccountRepository.deleteById(it.id)
+    }
   }
 
   fun findActiveView(id: Long): UserAccountView? = userAccountRepository.findActiveView(id)
+
+  fun findWithMinimalPermissions(
+    filters: UserAccountPermissionsFilters,
+    projectId: Long,
+    search: String?,
+    pageable: Pageable,
+  ): PageImpl<UserAccount> {
+    val ids =
+      userAccountRepository.findUsersWithMinimalPermissions(
+        filters.filterId ?: listOf(),
+        filters.filterMinimalScopeExtended,
+        filters.filterMinimalPermissionType,
+        projectId,
+        filters.filterViewLanguageId,
+        filters.filterEditLanguageId,
+        filters.filterStateLanguageId,
+        search,
+        pageable,
+      )
+    return PageImpl(userAccountRepository.findAllById(ids.content), pageable, ids.totalElements)
+  }
 }

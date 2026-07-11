@@ -1,8 +1,8 @@
 package io.tolgee.formats.generic
 
-import io.tolgee.formats.BaseIcuMessageConvertor
 import io.tolgee.formats.DEFAULT_PLURAL_ARGUMENT_NAME
 import io.tolgee.formats.FromIcuPlaceholderConvertor
+import io.tolgee.formats.MessageConvertorFactory
 import io.tolgee.formats.PossiblePluralConversionResult
 import io.tolgee.formats.toIcuPluralString
 
@@ -41,11 +41,11 @@ class IcuToGenericFormatMessageConvertor(
 
   private fun getConvertorResult(): PossiblePluralConversionResult? {
     message ?: return null
-    return BaseIcuMessageConvertor(
+    return MessageConvertorFactory(
       message = message,
-      argumentConvertorFactory = paramConvertorFactory,
       forceIsPlural = forceIsPlural,
-      keepEscaping = isProjectIcuPlaceholdersEnabled,
-    ).convert()
+      isProjectIcuPlaceholdersEnabled = isProjectIcuPlaceholdersEnabled,
+      paramConvertorFactory = paramConvertorFactory,
+    ).create().convert()
   }
 }

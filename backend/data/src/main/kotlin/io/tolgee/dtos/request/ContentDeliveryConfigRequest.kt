@@ -1,6 +1,7 @@
 package io.tolgee.dtos.request
 
 import io.swagger.v3.oas.annotations.media.Schema
+import io.tolgee.dtos.ExportParamsDocs
 import io.tolgee.dtos.IExportParams
 import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.ExportMessageFormat
@@ -8,7 +9,7 @@ import io.tolgee.model.enums.TranslationState
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
 
-class ContentDeliveryConfigRequest() : IExportParams {
+class ContentDeliveryConfigRequest : IExportParams {
   @field:NotBlank
   var name: String = ""
 
@@ -44,6 +45,11 @@ class ContentDeliveryConfigRequest() : IExportParams {
   )
   var pruneBeforePublish = true
 
+  @Schema(
+    description = "Whether to export all files as a single zip archive (translations.zip).",
+  )
+  var zip: Boolean = false
+
   override var languages: Set<String>? = null
   override var format: ExportFormat = ExportFormat.JSON
   override var structureDelimiter: Char? = '.'
@@ -71,4 +77,11 @@ class ContentDeliveryConfigRequest() : IExportParams {
   override var messageFormat: ExportMessageFormat? = null
 
   override var fileStructureTemplate: String? = null
+
+  @Schema(
+    description = ExportParamsDocs.HTML_ESCAPE_DESCRIPTION,
+  )
+  override var escapeHtml: Boolean? = false
+
+  override var filterBranch: String? = null
 }

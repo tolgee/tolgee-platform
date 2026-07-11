@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { MoreVert } from '@mui/icons-material';
+import { DotsVertical } from '@untitled-ui/icons-react';
 import { Box, IconButton, styled } from '@mui/material';
 
 import { components } from 'tg.service/apiSchema.generated';
@@ -81,29 +81,36 @@ export const ActivityCompact = ({ data, diffEnabled, onDetailOpen }: Props) => {
 
   let fieldsNum = 0;
 
-  activity.entities.forEach((e) => {
-    fieldsNum += e.fields.length;
-  });
+  const description = activity.options?.description?.(data);
 
   const limitedFields: Field[] = [];
 
   const maxFields =
     actionsConfiguration[data.type]?.compactFieldCount || MAX_FIELDS;
 
-  activity.entities.slice(0, MAX_ENTITIES).forEach((e) => {
-    e.fields.slice(0, maxFields).forEach((f) => {
-      limitedFields.push(f);
+  if (!description) {
+    activity.entities.forEach((e) => {
+      fieldsNum += e.fields.length;
     });
-  });
+    activity.entities.slice(0, MAX_ENTITIES).forEach((e) => {
+      e.fields.slice(0, maxFields).forEach((f) => {
+        limitedFields.push(f);
+      });
+    });
+  }
 
   return (
-    <StyledContainer data-cy="activity-compact">
+    <StyledContainer data-cy="activity-compact" data-cy-type={data.type}>
       <StyledUser>
         <ActivityUser item={data} onlyTime />
       </StyledUser>
       <StyledContent>
         <ActivityTitle activity={activity} />
-        <ActivityFields fields={limitedFields} diffEnabled={diffEnabled} />
+        {description ? (
+          description
+        ) : (
+          <ActivityFields fields={limitedFields} diffEnabled={diffEnabled} />
+        )}
         {fieldsNum > maxFields && (
           <StyledMoreIndicator onClick={() => onDetailOpen(data)}>
             ...
@@ -118,7 +125,7 @@ export const ActivityCompact = ({ data, diffEnabled, onDetailOpen }: Props) => {
           size="small"
           onClick={() => onDetailOpen(data)}
         >
-          <MoreVert />
+          <DotsVertical />
         </IconButton>
       </StyledAction>
     </StyledContainer>

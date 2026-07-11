@@ -8,23 +8,44 @@ import { useProject } from 'tg.hooks/useProject';
 import { queryEncode } from 'tg.hooks/useUrlSearchState';
 import { KeyReferenceData } from '../types';
 import { CircledLanguageIcon } from 'tg.component/languages/CircledLanguageIcon';
+import { KeyName } from 'tg.component/KeyName/KeyName';
 
 type Props = {
   data: KeyReferenceData;
 };
 
-export const KeyReference: React.FC<Props> = ({ data }) => {
+export const KeyReference: React.FC<React.PropsWithChildren<Props>> = ({
+  data,
+}) => {
   const project = useProject();
 
   const href = data.exists
-    ? LINKS.PROJECT_TRANSLATIONS_SINGLE.build({
-        [PARAMS.PROJECT_ID]: project.id,
-      }) +
-      queryEncode({
-        id: data.id,
-        languages: data.languages?.map((l) => l.tag),
-      })
+    ? data.activityType === 'KEY_SOFT_DELETE'
+      ? LINKS.PROJECT_TRANSLATIONS_TRASH.build({
+          [PARAMS.PROJECT_ID]: project.id,
+        }) +
+        queryEncode({
+          search: data.keyName,
+        })
+      : LINKS.PROJECT_TRANSLATIONS_SINGLE.build({
+          [PARAMS.PROJECT_ID]: project.id,
+        }) +
+        queryEncode({
+          id: data.id,
+          languages: data.languages?.map((l) => l.tag),
+        })
     : undefined;
+
+  const includedLanguages = new Set();
+  const uniqueLanguages =
+    data.languages?.filter((l) => {
+      if (includedLanguages.has(l.tag)) {
+        return false;
+      } else {
+        includedLanguages.add(l.tag);
+        return true;
+      }
+    }) || [];
 
   const content = (
     <>
@@ -32,10 +53,10 @@ export const KeyReference: React.FC<Props> = ({ data }) => {
         {data.namespace && (
           <span className="referencePrefix">{data.namespace}</span>
         )}
-        {data.keyName}
+        <KeyName name={data.keyName} />
         {data.languages && ' '}
       </span>
-      {data.languages?.map((l, i) => (
+      {uniqueLanguages.map((l, i) => (
         <React.Fragment key={i}>
           <Tooltip title={`${l.name} (${l.tag})`}>
             <span>

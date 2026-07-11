@@ -18,6 +18,7 @@ package io.tolgee.security.ratelimit
 
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.LockingProvider
+import io.tolgee.component.ResilientCacheAccessor
 import io.tolgee.configuration.tolgee.RateLimitProperties
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.fixtures.andIsOk
@@ -37,7 +38,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.method.HandlerMethod
 import org.springframework.web.servlet.HandlerMapping
-import java.util.*
+import java.util.Date
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.reflect.jvm.javaMethod
@@ -58,18 +59,20 @@ class RateLimitInterceptorTest {
         TestLockingProvider(),
         currentDateProvider,
         rateLimitProperties,
+        authenticationFacade,
+        ResilientCacheAccessor(),
       ),
     )
 
   private val rateLimitInterceptor =
     RateLimitInterceptor(
       authenticationFacade,
-      rateLimitProperties,
       rateLimitService,
     )
 
   private val mockMvc =
-    MockMvcBuilders.standaloneSetup(TestController::class.java)
+    MockMvcBuilders
+      .standaloneSetup(TestController::class.java)
       .addInterceptors(rateLimitInterceptor)
       .build()
 
@@ -77,6 +80,8 @@ class RateLimitInterceptorTest {
   fun setupMocks() {
     Mockito.`when`(currentDateProvider.date).thenReturn(Date())
     Mockito.`when`(userAccount.id).thenReturn(1337L)
+    // Disable strike-based connection dropping for tests
+    Mockito.`when`(rateLimitProperties.maxStrikesBeforeBlock).thenReturn(0)
   }
 
   @AfterEach
@@ -127,6 +132,29 @@ class RateLimitInterceptorTest {
     mockMvc.perform(get("/rate-limited-shared-2")).andIsOk
     mockMvc.perform(get("/rate-limited-shared")).andIsRateLimited
     mockMvc.perform(get("/rate-limited-shared-2")).andIsRateLimited
+  }
+
+  @Test
+  fun `it throws RateLimitBlockedException after max strikes when blocking is enabled`() {
+    // Enable blocking with max 2 strikes
+    Mockito.`when`(rateLimitProperties.maxStrikesBeforeBlock).thenReturn(2)
+    Mockito.`when`(rateLimitProperties.strikeResetWindowMs).thenReturn(60_000L)
+
+    // First 2 requests use up tokens
+    mockMvc.perform(get("/rate-limited")).andIsOk
+    mockMvc.perform(get("/rate-limited")).andIsOk
+
+    // Next 2 requests are rate limited (strikes 1 and 2)
+    mockMvc.perform(get("/rate-limited")).andIsRateLimited
+    mockMvc.perform(get("/rate-limited")).andIsRateLimited
+
+    // 3rd violation exceeds max strikes - RateLimitBlockedException should propagate
+    // (In a real setup, this is caught by the filters which return HTTP 444)
+    val exception =
+      org.junit.jupiter.api.assertThrows<jakarta.servlet.ServletException> {
+        mockMvc.perform(get("/rate-limited"))
+      }
+    assertThat(exception.cause).isInstanceOf(RateLimitBlockedException::class.java)
   }
 
   @Test
@@ -260,6 +288,14 @@ class RateLimitInterceptorTest {
         lock.unlock()
       }
     }
+
+    override fun <T> withLockingIfFree(
+      name: String,
+      leaseTime: java.time.Duration,
+      fn: () -> T,
+    ): T? {
+      TODO("Not yet implemented")
+    }
   }
 
   @RateLimited(2)
@@ -305,17 +341,21 @@ class RateLimitInterceptorTest {
 
   class FakeController {
     @RateLimited(2)
-    fun fakeHandler() {}
+    fun fakeHandler() {
+    }
 
     @RateLimited(2, bucketName = "uwu")
-    fun fakeHandlerWithExplicitBucket() {}
+    fun fakeHandlerWithExplicitBucket() {
+    }
 
     @RateLimited(2, pathVariablesToDiscriminate = 0)
-    fun fakeHandlerWithoutMajorDiscriminator() {}
+    fun fakeHandlerWithoutMajorDiscriminator() {
+    }
 
     fun fakeHandlerWithoutRateLimit() {}
 
     @InheritedRateLimit
-    fun fakeHandlerInherit() {}
+    fun fakeHandlerInherit() {
+    }
   }
 }

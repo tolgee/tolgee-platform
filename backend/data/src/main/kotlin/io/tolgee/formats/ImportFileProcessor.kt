@@ -8,7 +8,9 @@ abstract class ImportFileProcessor {
   abstract fun process()
 
   val languageNameGuesses: List<String> by lazy {
-    val fileName = context.file.name
+    val filePath = context.file.name
+
+    val fileName = filePath.substringAfterLast("/")
 
     val result =
       arrayOf(

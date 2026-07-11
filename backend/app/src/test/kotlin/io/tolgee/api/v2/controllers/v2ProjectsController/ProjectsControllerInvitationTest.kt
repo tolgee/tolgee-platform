@@ -14,8 +14,8 @@ import io.tolgee.fixtures.andGetContentAsString
 import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
-import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.node
+import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.Invitation
 import io.tolgee.model.Permission
 import io.tolgee.model.Project
@@ -42,7 +42,6 @@ class ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projects
   @BeforeEach
   @AfterEach
   fun reset() {
-    tolgeeProperties.frontEndUrl = null
     emailTestUtil.initMocks()
   }
 
@@ -55,9 +54,8 @@ class ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projects
 
   @Test
   fun `returns project invitations`() {
-    val base = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase()
     val project = base.project
-    tolgeeProperties.frontEndUrl = "https://dummyUrl.com"
     createTranslateInvitation(project)
     performAuthGet("/v2/projects/${project.id}/invitations").andIsOk.andAssertThatJson {
       node("_embedded.invitations[0]") {
@@ -79,15 +77,23 @@ class ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projects
   @ProjectJWTAuthTestMethod
   fun `invites user to project with languages (translate)`() {
     val result =
-      invitationTestUtil.perform { getLang ->
-        type = ProjectPermissionType.TRANSLATE
-        languages = setOf(getLang("en"))
-      }.andIsOk
-
+      invitationTestUtil
+        .perform { getLang ->
+          type = ProjectPermissionType.TRANSLATE
+          languages = setOf(getLang("en"))
+        }.andIsOk
     executeInNewTransaction {
       val invitation = invitationTestUtil.getInvitation(result)
-      invitation.permission?.translateLanguages!!.map { it.tag }.assert.contains("en") // stores
-      invitation.permission?.viewLanguages!!.map { it.tag }.assert.contains() // ads also to view
+      invitation.permission
+        ?.translateLanguages!!
+        .map { it.tag }
+        .assert
+        .contains("en") // stores
+      invitation.permission
+        ?.viewLanguages!!
+        .map { it.tag }
+        .assert
+        .contains() // ads also to view
     }
   }
 
@@ -95,50 +101,61 @@ class ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projects
   @ProjectJWTAuthTestMethod
   fun `invites user to project with languages (review)`() {
     val result =
-      invitationTestUtil.perform { getLang ->
-        type = ProjectPermissionType.REVIEW
-        translateLanguages = setOf(getLang("en"))
-        stateChangeLanguages = setOf(getLang("en"))
-      }.andIsOk
-
+      invitationTestUtil
+        .perform { getLang ->
+          type = ProjectPermissionType.REVIEW
+          translateLanguages = setOf(getLang("en"))
+          stateChangeLanguages = setOf(getLang("en"))
+        }.andIsOk
     executeInNewTransaction {
       val invitation = invitationTestUtil.getInvitation(result)
-      invitation.permission?.stateChangeLanguages!!.map { it.tag }.assert.contains("en") // stores
-      invitation.permission?.viewLanguages!!.map { it.tag }.assert.contains() // ads also to view
+      invitation.permission
+        ?.stateChangeLanguages!!
+        .map { it.tag }
+        .assert
+        .contains("en") // stores
+      invitation.permission
+        ?.viewLanguages!!
+        .map { it.tag }
+        .assert
+        .contains() // ads also to view
     }
   }
 
   @Test
   @ProjectJWTAuthTestMethod
   fun `cannot set different languages (review)`() {
-    val result =
-      invitationTestUtil.perform { getLang ->
+    invitationTestUtil
+      .perform { getLang ->
         type = ProjectPermissionType.REVIEW
         translateLanguages = setOf(getLang("en"))
         stateChangeLanguages = setOf()
-      }
-        .andIsBadRequest
-        .andHasErrorMessage(
-          Message.CANNOT_SET_DIFFERENT_TRANSLATE_AND_STATE_CHANGE_LANGUAGES_FOR_LEVEL_BASED_PERMISSIONS,
-        )
+      }.andIsBadRequest
+      .andHasErrorMessage(
+        Message.CANNOT_SET_DIFFERENT_TRANSLATE_AND_STATE_CHANGE_LANGUAGES_FOR_LEVEL_BASED_PERMISSIONS,
+      )
   }
 
   @Test
   @ProjectJWTAuthTestMethod
   fun `validates languages and permission (lower)`() {
-    invitationTestUtil.perform { getLang ->
-      type = ProjectPermissionType.VIEW
-      translateLanguages = setOf(getLang("en"))
-    }.andIsBadRequest.andHasErrorMessage(Message.ONLY_TRANSLATE_OR_REVIEW_PERMISSION_ACCEPTS_TRANSLATE_LANGUAGES)
+    invitationTestUtil
+      .perform { getLang ->
+        type = ProjectPermissionType.VIEW
+        translateLanguages = setOf(getLang("en"))
+      }.andIsBadRequest
+      .andHasErrorMessage(Message.ONLY_TRANSLATE_OR_REVIEW_PERMISSION_ACCEPTS_TRANSLATE_LANGUAGES)
   }
 
   @Test
   @ProjectJWTAuthTestMethod
   fun `validates languages and permission (higher)`() {
-    invitationTestUtil.perform { getLang ->
-      type = ProjectPermissionType.EDIT
-      translateLanguages = setOf(getLang("en"))
-    }.andIsBadRequest.andHasErrorMessage(Message.ONLY_TRANSLATE_OR_REVIEW_PERMISSION_ACCEPTS_TRANSLATE_LANGUAGES)
+    invitationTestUtil
+      .perform { getLang ->
+        type = ProjectPermissionType.EDIT
+        translateLanguages = setOf(getLang("en"))
+      }.andIsBadRequest
+      .andHasErrorMessage(Message.ONLY_TRANSLATE_OR_REVIEW_PERMISSION_ACCEPTS_TRANSLATE_LANGUAGES)
   }
 
   @Test
@@ -161,23 +178,26 @@ class ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projects
   @ProjectJWTAuthTestMethod
   fun `sends invitation e-mail`() {
     val code = inviteWithUserWithNameAndEmail()
-    emailTestUtil.verifyEmailSent()
+    waitForNotThrowing(timeout = 2000, pollTime = 25) {
+      emailTestUtil.verifyEmailSent()
+    }
 
     val messageContent = emailTestUtil.messageContents.single()
     assertThat(messageContent).contains(code)
-    assertThat(messageContent).contains("http://localhost/")
+    assertThat(messageContent).contains("https://dummy-url.com")
     emailTestUtil.assertEmailTo.isEqualTo(INVITED_EMAIL)
   }
 
   @Test
   @ProjectJWTAuthTestMethod
   fun `uses frontEnd url when possible`() {
-    tolgeeProperties.frontEndUrl = "dummy_fe_url"
     inviteWithUserWithNameAndEmail()
-    emailTestUtil.verifyEmailSent()
+    waitForNotThrowing(timeout = 2000, pollTime = 25) {
+      emailTestUtil.verifyEmailSent()
+    }
 
     val messageContent = emailTestUtil.messageContents.single()
-    assertThat(messageContent).contains("dummy_fe_url")
+    assertThat(messageContent).contains("https://dummy-url.com")
   }
 
   @Test
@@ -254,7 +274,7 @@ class ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projects
       CreateProjectInvitationParams(
         project = project,
         type = ProjectPermissionType.TRANSLATE,
-        languagePermissions = LanguagePermissions(translate = project.languages, view = null, stateChange = null),
+        languagePermissions = LanguagePermissions(translate = project.languages),
         name = "Franta",
         email = "a@a.a",
         scopes = null,

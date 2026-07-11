@@ -5,11 +5,25 @@ import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.UserAccount
 import io.tolgee.model.automations.AutomationAction
-import jakarta.persistence.*
+import jakarta.persistence.CascadeType
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.FetchType
+import jakarta.persistence.Index
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToMany
+import jakarta.persistence.Table
 import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Type
 
 @Entity
+@Table(
+  indexes = [
+    Index(columnList = "project_id"),
+    Index(columnList = "user_account_id"),
+    Index(columnList = "organization_slack_workspace_id"),
+  ],
+)
 class SlackConfig(
   @ManyToOne(fetch = FetchType.LAZY)
   var project: Project,

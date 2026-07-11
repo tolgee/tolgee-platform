@@ -6,7 +6,9 @@ import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.web.filter.OncePerRequestFilter
 
-class TransferEncodingHeaderDebugFilter : OncePerRequestFilter(), Logging {
+class TransferEncodingHeaderDebugFilter :
+  OncePerRequestFilter(),
+  Logging {
   init {
     logger.debug("TransferEncodingHeaderDebugFilter init")
   }

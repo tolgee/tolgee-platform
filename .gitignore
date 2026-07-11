@@ -11,6 +11,8 @@ bin
 server.iml
 trace.db
 
+/.tolgee-data
+
 webapp/node_modules/
 webapp/lib
 webapp/dist
@@ -19,9 +21,12 @@ webapp/.env.dev
 e2e/cypress/videos
 e2e/cypress/screenshots
 e2e/cypress/downloads
+e2e/cypress/fixtures/generated
+e2e/server.log
 e2e/node_modules
 e2e/cypress/integration/examples/
 .gradle
+.kotlin
 
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
@@ -42,12 +47,14 @@ e2e/cypress/integration/examples/
 /webapp/.env.development.local
 /webapp/.env.test.local
 /webapp/.env.production.local
+/webapp/src/eeSetup/eeModule.current.tsx
 
 /webapp/npm-debug.log*
 /webapp/yarn-debug.log*
 /webapp/yarn-error.log*
 
 /**/.vscode
+/**/.history
 
 /**/.idea
 .VERSION
@@ -70,3 +77,20 @@ backend/app/src/main/resources/application-js-e2e.properties
 
 ngrok.yml
 ngrok.local.yml
+
+# Local developer workstuff
+/.local
+
+# IDEs and tools
+.cursorrules
+.cursorignore
+
+# Sentry Config File
+/webapp/.env.sentry-build-plugin
+
+# Worktree
+/worktree-env.sh
+
+# mcp-publisher auth tokens
+/.mcpregistry_github_token
+/.mcpregistry_registry_token

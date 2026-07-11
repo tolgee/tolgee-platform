@@ -11,13 +11,17 @@ buildscript {
 }
 
 plugins {
-    id("org.jlleitschuh.gradle.ktlint") version "12.0.3"
+    id("org.jlleitschuh.gradle.ktlint") version "${ktlintGradlePluginVersion}"
+    id "org.gradle.test-retry"
 }
 
 subprojects {
     if (project.projectDir.exists()) {
         apply {
             plugin("org.jlleitschuh.gradle.ktlint")
+        }
+        extensions.configure(org.jlleitschuh.gradle.ktlint.KtlintExtension) {
+            it.version.set(ktlintVersion)
         }
     }
 }
@@ -34,22 +38,25 @@ if (System.getenv().containsKey("VERSION")) {
 
 apply plugin: 'idea'
 
-repositories {
-    mavenCentral()
-}
-
 def unpackTarget = "${project.buildDir}/dependency"
 
 project(':server-app').afterEvaluate {
-    task unpack(type: Copy) {
-        from(zipTree(project(':server-app').tasks.findByName("bootJar").outputs.files.singleFile))
-        into(unpackTarget)
+    tasks.register('unpack', Copy) {
+        // cleanup the unpackTarget first so we don't have duplicated dependencies or other files, which
+        // can be there from previous builds
+        doFirst {
+            delete(unpackTarget)
+        }
+        from project(':server-app').tasks.named('bootJar').map {
+            zipTree(it.outputs.files.singleFile)
+        }
+        into unpackTarget
         if (System.getenv("SKIP_SERVER_BUILD") != "true") {
             dependsOn "bootJar"
         }
     }
 
-    task addVersionFile(type: Task) {
+    tasks.register('addVersionFile', Task) {
         mustRunAfter unpack
         doLast {
             def file = new File("${unpackTarget}/BOOT-INF/classes/.VERSION")
@@ -61,9 +68,11 @@ project(':server-app').afterEvaluate {
     apply from: "./gradle/docker.gradle"
     apply from: "./gradle/e2e.gradle"
 
-    project.tasks.findByName("docker").mustRunAfter(copyDist)
+    tasks.named("docker") {
+        mustRunAfter copyDist
+    }
 
-    task packResources(type: Zip) {
+    tasks.register('packResources', Zip) {
         dependsOn "unpack"
         dependsOn "copyDist"
         dependsOn "addVersionFile"
@@ -73,22 +82,26 @@ project(':server-app').afterEvaluate {
         entryCompression ZipEntryCompression.STORED
     }
 
-    task build {
-        dependsOn project(':server-app').tasks.findByName("build")
+    tasks.register('build') {
+        dependsOn ':server-app:build'
         dependsOn runE2e
     }
 
-    task check {
-        dependsOn project(':server-app').tasks.findByName("check")
+    tasks.register('check') {
+        dependsOn ':server-app:check'
         dependsOn ktlint
     }
 
-    task bootJar {
-        dependsOn project(':server-app').tasks.findByName("bootJar")
+    tasks.register('bootJar') {
+        dependsOn ':server-app:bootJar'
     }
 
-    task startDbChangelogContainer {
+    tasks.register('startDbChangelogContainer') {
         doLast {
+            exec {
+                ignoreExitValue = true
+                commandLine "docker", "rm", "--force", "--volumes", dbSchemaContainerName
+            }
             exec {
                 commandLine "docker", "run", "-e", "POSTGRES_PASSWORD=postgres", "-d", "-p55538:5432", "--name", dbSchemaContainerName, "postgres:13"
             }
@@ -96,69 +109,109 @@ project(':server-app').afterEvaluate {
         }
     }
 
-    task stopDbChangelogContainer(type: Exec) {
-        commandLine "docker", "rm", "--force", dbSchemaContainerName
-        mustRunAfter project(':data').tasks.findByName("diffChangelog")
-        mustRunAfter project(':ee-app').tasks.findByName("diffChangelog")
+    tasks.register('stopDbChangelogContainer', Exec) {
+        mustRunAfter ':data:diffChangelog'
+        mustRunAfter ':ee-app:diffChangelog'
+
+        commandLine "docker", "rm", "--force", "--volumes", dbSchemaContainerName
     }
 
-    task diffChangeLog {
-        subprojects.forEach({
-            it.tasks.findByName("diffChangelog")?.mustRunAfter(project(':server-app').tasks.findByName("bootRun"))
-        })
-
-        project(':server-app').tasks.findByName("bootRun").mustRunAfter(startDbChangelogContainer)
-
+    tasks.register('diffChangeLog') {
+        project(':server-app').tasks.named("bootRun") {
+            mustRunAfter(startDbChangelogContainer)
+        }
 
         finalizedBy = [
-                startDbChangelogContainer,
-                project(':server-app').tasks.findByName("bootRun"),
-                project(':data').tasks.findByName("diffChangelog"),
-                project(':ee-app').tasks.findByName("diffChangelog"),
+            startDbChangelogContainer,
+            ':server-app:bootRun',
+            ':data:diffChangelog',
         ]
 
-        def billingDiffChangelog = project(':billing-app').tasks.findByName("diffChangelog")
+        if (gradle.ext.billingAppDirectory.exists()) {
+            finalizedBy.add(':billing-app:diffChangelog')
+        }
 
-        if (billingDiffChangelog != null) {
-            finalizedBy.add(billingDiffChangelog)
+        if (gradle.ext.eeAppDirectoryExists) {
+            finalizedBy.add(':ee-app:diffChangelog')
         }
 
         finalizedBy.add(stopDbChangelogContainer)
 
-
         doFirst {
-            project(':server-app').bootRun.systemProperty('spring.profiles.active', 'dbschema')
+            project(':server-app').bootRun
+                .systemProperty('spring.profiles.active', 'dbschema')
+                // Use an unlikely-to-be-used port
+                .systemProperty('server.port', '61987')
         }
     }
-}
 
-ktlint {
-    debug = true
-    verbose = true
-}
-
-rootProject.subprojects {
-    afterEvaluate {
-        tasks.findByName("compileKotlin")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-        tasks.findByName("bootBuildInfo")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-        tasks.findByName("compileJava")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-        tasks.findByName("bootJarMainClassName")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-        tasks.findByName("jar")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-        tasks.findByName("bootJar")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-        tasks.findByName("classes")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-        tasks.findByName("classes")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-        tasks.findByName("compileTestKotlin")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
+    subprojects.forEach {
+        it.tasks.matching { task -> task.name == 'diffChangelog' }.configureEach {
+            mustRunAfter ':server-app:bootRun'
+        }
     }
 }
 
 subprojects {
-    task allDeps(type: DependencyReportTask) {}
+    tasks.register('allDeps', DependencyReportTask)
+
     ext['hibernate.version'] = hibernateVersion
     ext['commons-lang3.version'] = commonsLang3Version
+    ext['jackson.version'] = jacksonVersion
+    ext['tomcat.version'] = tomcatVersion
+    ext['netty.version'] = nettyVersion
+    ext['thymeleaf.version'] = thymeleafVersion
+    ext['postgresql.version'] = postgresqlVersion
+    ext['spring-framework.version'] = springFrameworkVersion
+    ext['spring-data-bom.version'] = springDataBomVersion
+    ext['spring-hateoas.version'] = springHateoasVersion
+    ext['spring-retry.version'] = springRetryVersion
+    ext['micrometer.version'] = micrometerVersion
+    ext['reactor-bom.version'] = reactorBomVersion
 
-    tasks.withType(Test) {
+    tasks.withType(Test).configureEach {
         testLogging {
             events "passed", "skipped", "failed", "started"
         }
+    }
+
+    tasks.matching {
+        it.name in [
+            "classes",
+            "compileJava",
+            "compileKotlin",
+            "kaptKotlin",
+            "kaptGenerateStubsKotlin",
+            "bootBuildInfo",
+            "bootJarMainClassName",
+            "jar",
+            "bootJar"
+        ]
+    }.configureEach {
+        onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
+    }
+}
+
+// Define the setTestRetry method at the root level so it can be used by all subprojects
+ext.setTestRetry = { test ->
+    boolean isCiServer = System.getenv().containsKey("CI")
+    boolean isRelease = System.getenv().get("CI_RELEASE") == "true"
+    boolean detectFlaky = System.getenv().get("DETECT_FLAKY_TESTS") == "true"
+
+    test.retry {
+        if (isCiServer) {
+            maxFailures = 20
+            maxRetries = 5
+        }
+        // Flaky-detection runs collect flakes from the test reports instead of
+        // failing the build, so a run with only flaky tests stays green.
+        failOnPassedAfterRetry = !isRelease && !detectFlaky
+    }
+
+    if (detectFlaky) {
+        // Merge retries into a single <testcase> so a test that failed then
+        // passed is recorded as <flakyFailure> while a test that failed every
+        // attempt is recorded as <failure>.
+        test.reports.junitXml.mergeReruns = true
     }
 }

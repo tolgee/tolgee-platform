@@ -1,8 +1,7 @@
 package io.tolgee.unit.formats.android.`in`
 
-import io.tolgee.formats.android.`in`.AndroidStringsXmlProcessor
+import io.tolgee.formats.xmlResources.`in`.XmlResourcesProcessor
 import io.tolgee.testing.assert
-import io.tolgee.unit.formats.PlaceholderConversionTestHelper
 import io.tolgee.util.FileProcessorContextMockUtil
 import io.tolgee.util.assertKey
 import io.tolgee.util.assertLanguagesCount
@@ -27,12 +26,14 @@ class AndroidXmlFormatProcessorTest {
   fun `returns correct parsed result`() {
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "app_name")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "app_name")
       .assertSingle {
         hasText("Tolgee test")
       }
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "dogs_count")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "dogs_count")
       .assertSinglePlural {
         hasText(
           """
@@ -45,27 +46,32 @@ class AndroidXmlFormatProcessorTest {
         isPluralOptimized()
       }
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "string_array[0]")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "string_array[0]")
       .assertSingle {
         hasText("First item")
       }
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "string_array[1]")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "string_array[1]")
       .assertSingle {
         hasText("Second item")
       }
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "with_spaces")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "with_spaces")
       .assertSingle {
         hasText("Hello!")
       }
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "with_html")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "with_html")
       .assertSingle {
         hasText("<b>Hello!</b>")
       }
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "with_xliff_gs")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "with_xliff_gs")
       .assertSingle {
         hasText(
           "<b>Hello!\n" +
@@ -75,11 +81,39 @@ class AndroidXmlFormatProcessorTest {
         )
       }
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "with_params")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "with_params")
       .assertSingle {
         hasText("{0, number} {3} {2, number, .00} {3, number, scientific} %+d")
       }
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "escape_sequence_within_quoted_spaces")
+      .assertSingle {
+        hasText("Test        ntest")
+      }
+    mockUtil.fileProcessorContext.assertLanguagesCount(1)
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "backslash_at_the_end")
+      .assertSingle {
+        hasText("Test")
+      }
+    mockUtil.fileProcessorContext.assertKey("app_name") {
+      custom.assert.isNull()
+      description.assert.isEqualTo("This is a comment")
+    }
+    mockUtil.fileProcessorContext.assertKey("dogs_count") {
+      custom.assert.isNull()
+      description.assert.isEqualTo("This is a comment above a plural")
+    }
+    mockUtil.fileProcessorContext.assertKey("string_array") {
+      custom.assert.isNull()
+      description.assert.isEqualTo("This is a comment above an array item #2")
+    }
+    mockUtil.fileProcessorContext.assertKey("with_spaces") {
+      custom.assert.isNull()
+      description.assert.isEqualTo("and only the last one will be kept")
+    }
   }
 
   @Test
@@ -87,7 +121,8 @@ class AndroidXmlFormatProcessorTest {
     mockPlaceholderConversionTestFile(convertPlaceholders = false, projectIcuPlaceholdersEnabled = false)
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "dogs_count")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "dogs_count")
       .assertSinglePlural {
         hasText(
           """
@@ -99,11 +134,13 @@ class AndroidXmlFormatProcessorTest {
         )
         isPluralOptimized()
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "string_array[0]")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "string_array[0]")
       .assertSingle {
         hasText("First item %d {escape}")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "with_params")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "with_params")
       .assertSingle {
         hasText("%d %4${'$'}s %.2f %e %+d {escape}")
       }
@@ -114,7 +151,8 @@ class AndroidXmlFormatProcessorTest {
     mockPlaceholderConversionTestFile(convertPlaceholders = false, projectIcuPlaceholdersEnabled = true)
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "dogs_count")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "dogs_count")
       .assertSinglePlural {
         hasText(
           """
@@ -126,11 +164,13 @@ class AndroidXmlFormatProcessorTest {
         )
         isPluralOptimized()
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "string_array[0]")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "string_array[0]")
       .assertSingle {
         hasText("First item %d '{'escape'}'")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "with_params")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "with_params")
       .assertSingle {
         hasText("%d %4${'$'}s %.2f %e %+d '{'escape'}'")
       }
@@ -141,7 +181,8 @@ class AndroidXmlFormatProcessorTest {
     mockPlaceholderConversionTestFile(convertPlaceholders = true, projectIcuPlaceholdersEnabled = true)
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "dogs_count")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "dogs_count")
       .assertSinglePlural {
         hasText(
           """
@@ -153,15 +194,18 @@ class AndroidXmlFormatProcessorTest {
         )
         isPluralOptimized()
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "string_array[0]")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "string_array[0]")
       .assertSingle {
         hasText("First item {0, number} '{'escape'}'")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "string_array[1]")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "string_array[1]")
       .assertSingle {
         hasText("Second item {0, number}")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "with_params")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "with_params")
       .assertSingle {
         hasText("{0, number} {3} {2, number, .00} {3, number, scientific} %+d '{'escape'}'")
       }
@@ -169,35 +213,6 @@ class AndroidXmlFormatProcessorTest {
       custom.assert.isNull()
       description.assert.isNull()
     }
-  }
-
-  @Test
-  fun `placeholder conversion setting application works`() {
-    PlaceholderConversionTestHelper.testFile(
-      "values-en/strings.xml",
-      "src/test/resources/import/android/strings_params_everywhere.xml",
-      assertBeforeSettingsApplication =
-        listOf(
-          "{0, plural,\none {# dog {1} '{'escape'}'}\nother {# dogs {1}}\n}",
-          "First item {0, number} '{'escape'}'",
-          "Second item {0, number}",
-          "{0, number} {3} {2, number, .00} {3, number, scientific} %+d '{'escape'}'",
-        ),
-      assertAfterDisablingConversion =
-        listOf(
-          "{value, plural,\none {%d dog %s '{'escape'}'}\nother {%d dogs %s}\n}",
-          "First item %d '{'escape'}'",
-          "Second item %d",
-          "%d %4\$s %.2f %e %+d '{'escape'}'",
-        ),
-      assertAfterReEnablingConversion =
-        listOf(
-          "{0, plural,\none {# dog {1} '{'escape'}'}\nother {# dogs {1}}\n}",
-          "First item {0, number} '{'escape'}'",
-          "Second item {0, number}",
-          "{0, number} {3} {2, number, .00} {3, number, scientific} %+d '{'escape'}'",
-        ),
-    )
   }
 
   private fun mockPlaceholderConversionTestFile(
@@ -213,6 +228,6 @@ class AndroidXmlFormatProcessorTest {
   }
 
   private fun processFile() {
-    AndroidStringsXmlProcessor(mockUtil.fileProcessorContext).process()
+    XmlResourcesProcessor(mockUtil.fileProcessorContext).process()
   }
 }

@@ -19,11 +19,11 @@ class OpenApiConfiguration {
   fun openAPI(): OpenAPI? {
     return OpenAPI()
       .info(
-        Info().title("Tolgee API")
+        Info()
+          .title("Tolgee API")
           .description("Tolgee Platform REST API reference")
           .version("v1.0"),
-      )
-      .externalDocs(
+      ).externalDocs(
         ExternalDocumentation()
           .description("Tolgee documentation")
           .url("https://tolgee.io"),
@@ -34,7 +34,7 @@ class OpenApiConfiguration {
   fun internalV1OpenApi(): GroupedOpenApi? {
     return internalGroupForPaths(
       paths = arrayOf("/api/**"),
-      excludedPaths = arrayOf(BILLING_EXCLUSION, API_REPOSITORY_EXCLUDE),
+      excludedPaths = BILLING + arrayOf(API_REPOSITORY),
       name = "V1 Internal - for Tolgee Web application",
     )
   }
@@ -43,7 +43,7 @@ class OpenApiConfiguration {
   fun internalV2OpenApi(): GroupedOpenApi? {
     return internalGroupForPaths(
       paths = arrayOf("/v2/**"),
-      excludedPaths = arrayOf(BILLING_EXCLUSION, API_REPOSITORY_EXCLUDE),
+      excludedPaths = BILLING + arrayOf(API_REPOSITORY),
       name = "V2 Internal - for Tolgee Web application",
     )
   }
@@ -52,7 +52,7 @@ class OpenApiConfiguration {
   fun internalAllOpenApi(): GroupedOpenApi? {
     return internalGroupForPaths(
       paths = arrayOf("/v2/**", "/api/**"),
-      excludedPaths = arrayOf(BILLING_EXCLUSION, API_REPOSITORY_EXCLUDE),
+      excludedPaths = BILLING + arrayOf(API_REPOSITORY),
       name = "All Internal - for Tolgee Web application",
     )
   }
@@ -61,7 +61,7 @@ class OpenApiConfiguration {
   fun apiKeyAllOpenApi(): GroupedOpenApi? {
     return pakGroupForPaths(
       paths = arrayOf("/api/**", "/v2/**"),
-      excludedPaths = arrayOf(BILLING_EXCLUSION, API_REPOSITORY_EXCLUDE),
+      excludedPaths = BILLING + arrayOf(API_REPOSITORY),
       name = "Accessible with Project API key (All)",
     )
   }
@@ -70,7 +70,7 @@ class OpenApiConfiguration {
   fun apiKeyV1OpenApi(): GroupedOpenApi? {
     return pakGroupForPaths(
       paths = arrayOf("/api/**"),
-      excludedPaths = arrayOf(BILLING_EXCLUSION, API_REPOSITORY_EXCLUDE),
+      excludedPaths = BILLING + arrayOf(API_REPOSITORY),
       name = "Accessible with Project API key (V1)",
     )
   }
@@ -79,7 +79,7 @@ class OpenApiConfiguration {
   fun apiKeyV2OpenApi(): GroupedOpenApi? {
     return pakGroupForPaths(
       paths = arrayOf("/v2/**"),
-      excludedPaths = arrayOf(BILLING_EXCLUSION, API_REPOSITORY_EXCLUDE),
+      excludedPaths = BILLING + arrayOf(API_REPOSITORY),
       name = "Accessible with Project API key (V2)",
     )
   }
@@ -88,7 +88,7 @@ class OpenApiConfiguration {
   fun allPublicApi(): GroupedOpenApi? {
     return publicApiGroupForPaths(
       paths = arrayOf("/v2/**", "/api/**"),
-      excludedPaths = arrayOf(API_REPOSITORY_EXCLUDE),
+      excludedPaths = arrayOf(API_REPOSITORY),
       name = "Public API (All)",
     )
   }
@@ -96,8 +96,10 @@ class OpenApiConfiguration {
   @Bean
   fun billingOpenApi(): GroupedOpenApi? {
     return internalGroupForPaths(
-      paths = arrayOf("/v2/**/billing/**"),
-      excludedPaths = arrayOf("/v2/public/billing/webhook"),
+      paths = BILLING,
+      // public billing session endpoints are server-side integration points, not part of any generated
+      // frontend client, so keep them out of the billing schema too.
+      excludedPaths = arrayOf("/v2/public/billing/webhook", BILLING_PUBLIC_SESSION, BILLING_PUBLIC_SESSION_SUB),
       name = "V2 Billing",
     )
   }
@@ -110,14 +112,14 @@ class OpenApiConfiguration {
     return OpenApiGroupBuilder(name) {
       builder.pathsToExclude(*excludedPaths, "/api/project/{$PROJECT_ID_PARAMETER}/sources/**")
       builder.pathsToMatch(*paths)
-      customizeOperations { operation, _, path ->
+      customizeOperations { operation, _, path, _ ->
         val isParameterConsumed =
           operation.isProjectIdConsumed()
         val pathContainsProjectId = path.contains("{$PROJECT_ID_PARAMETER}")
         val parameterIsMissingAtAll = !pathContainsProjectId && !isParameterConsumed
         val otherMethodPathContainsProjectId =
           handlerPaths[
-            operationHandlers[operation.operationId]
+            operationHandlers[operation]
               ?.method,
           ]?.any { it.contains("{projectId}") }
             ?: false
@@ -141,7 +143,7 @@ class OpenApiConfiguration {
 
   private fun Operation.isProjectIdConsumed() =
     parameters?.any {
-      it.name == PROJECT_ID_PARAMETER
+      it.name == PROJECT_ID_PARAMETER && it.`in` == "path"
     } == true
 
   private fun Operation.addProjectIdPathParam() {
@@ -166,9 +168,10 @@ class OpenApiConfiguration {
     name: String,
   ): GroupedOpenApi? {
     return OpenApiGroupBuilder(name) {
-      builder.pathsToExclude(*excludedPaths)
+      builder
+        .pathsToExclude(*excludedPaths)
         .pathsToMatch(*paths)
-      customizeOperations { operation, handler, path ->
+      customizeOperations { operation, handler, path, _ ->
         if (isApiAccessAllowed(handler)) {
           if (!path.matches(PATH_WITH_PROJECT_ID_REGEX)) {
             if (!containsProjectIdParam(path)) {
@@ -188,9 +191,10 @@ class OpenApiConfiguration {
     name: String,
   ): GroupedOpenApi? {
     return OpenApiGroupBuilder(name) {
-      builder.pathsToExclude(*excludedPaths)
+      builder
+        .pathsToExclude(*excludedPaths)
         .pathsToMatch(*paths)
-      customizeOperations { operation, handler, path ->
+      customizeOperations { operation, handler, path, _ ->
         val isProjectPath = isProjectPath(path)
         val containsProjectIdParam = containsProjectIdParam(path)
         if (isProjectPath && !containsProjectIdParam) {
@@ -225,8 +229,24 @@ class OpenApiConfiguration {
     method.getAnnotation(OpenApiHideFromPublicDocs::class.java)
 
   companion object {
-    private const val API_REPOSITORY_EXCLUDE = "/api/repository/**"
-    private const val BILLING_EXCLUSION = "/v2/**/billing/**"
+    private const val API_REPOSITORY = "/api/repository/**"
+    private const val BILLING_MAIN = "/v2/**/billing/**"
+    private const val BILLING_LICENSING = "/v2/**/licensing/**"
+    private const val BILLING_TELEMETRY = "/v2/**/telemetry/**"
+    private const val BILLING_TRANSLATOR = "/v2/**/translator/**"
+    private const val BILLING_LLM = "/v2/**/llm/**"
+    private const val BILLING_PUBLIC_SESSION = "/v2/public/session"
+    private const val BILLING_PUBLIC_SESSION_SUB = "/v2/public/session/**"
+    private val BILLING =
+      arrayOf(
+        BILLING_MAIN,
+        BILLING_LICENSING,
+        BILLING_TELEMETRY,
+        BILLING_TRANSLATOR,
+        BILLING_LLM,
+        BILLING_PUBLIC_SESSION,
+        BILLING_PUBLIC_SESSION_SUB,
+      )
     private val PATH_WITH_PROJECT_ID_REGEX = "^/(?:api|v2)/projects?/\\{$PROJECT_ID_PARAMETER}.*".toRegex()
   }
 }

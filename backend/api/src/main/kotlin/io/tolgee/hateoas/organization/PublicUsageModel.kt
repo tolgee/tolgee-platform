@@ -8,6 +8,12 @@ import java.io.Serializable
 @Suppress("unused")
 @Relation(collectionRelation = "plans", itemRelation = "plan")
 open class PublicUsageModel(
+  @Schema(
+    description =
+      "Whether the current plan is pay-as-you-go of fixed. " +
+        "For pay-as-you-go plans, the spending limit is the top limit.",
+  )
+  val isPayAsYouGo: Boolean,
   val organizationId: Long,
   @Schema(description = "Current balance of standard credits. Standard credits are refilled every month")
   val creditBalance: Long,
@@ -21,6 +27,8 @@ open class PublicUsageModel(
   val creditBalanceNextRefillAt: Long,
   @Schema(description = "Currently used credits over credits included in plan and extra credits")
   val currentPayAsYouGoMtCredits: Long,
+  @Schema(description = "Currently used credits including credits used over the limit")
+  val usedMtCredits: Long,
   @Schema(
     description =
       "The maximum amount organization can spend" +
@@ -29,30 +37,10 @@ open class PublicUsageModel(
   val availablePayAsYouGoMtCredits: Long,
   @Schema(
     description =
-      "Extra credits, which are neither refilled nor reset every month. These credits are " +
-        "used when there are no standard credits",
-  )
-  val extraCreditBalance: Long,
-  @Schema(
-    description = """How many translations can be stored within your organization""",
-  )
-  val translationSlotsLimit: Long,
-  @Schema(
-    description =
-      "How many translation slots are included in current subscription plan. " +
-        "How many translation slots can organization use without additional costs",
-  )
-  val includedTranslationSlots: Long,
-  @Schema(
-    description =
       "How many translations are included in current subscription plan. " +
         "How many translations can organization use without additional costs",
   )
   val includedTranslations: Long,
-  @Schema(
-    description = """How many translations slots are currently used by organization""",
-  )
-  val currentTranslationSlots: Long,
   @Schema(
     description = """How many non-empty translations are currently stored by organization""",
   )
@@ -63,4 +51,46 @@ open class PublicUsageModel(
         "(For pay us you go, the top limit is the spending limit)",
   )
   val translationsLimit: Long,
-) : RepresentationModel<PublicUsageModel>(), Serializable
+  @Schema(
+    description =
+      "How many keys are included in current subscription plan. " +
+        "How many keys can organization use without additional costs.",
+  )
+  val includedKeys: Long,
+  @Schema(
+    description = """How many keys are currently stored by organization""",
+  )
+  val currentKeys: Long,
+  @Schema(
+    description =
+      "How many keys can be stored until reaching the limit. " +
+        "(For pay us you go, the top limit is the spending limit)",
+  )
+  val keysLimit: Long,
+  @Schema(
+    description =
+      "How many seats are included in current subscription plan. " +
+        "How many seats can organization use without additional costs.",
+  )
+  val includedSeats: Long,
+  @Schema(
+    description = """How seats are currently used by organization""",
+  )
+  val currentSeats: Long,
+  @Schema(
+    description =
+      "How many seats can be stored until reaching the limit. " +
+        "(For pay us you go, the top limit is the spending limit)",
+  )
+  val seatsLimit: Long,
+) : RepresentationModel<PublicUsageModel>(),
+  Serializable {
+  @Schema(
+    deprecated = true,
+    description =
+      "Customers were able to buy extra credits separately in the past.\n\n" +
+        "This option is not available anymore and this field is kept only for " +
+        "backward compatibility purposes and is always 0.",
+  )
+  val extraCreditBalance: Long = 0
+}

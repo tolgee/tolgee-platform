@@ -1,7 +1,8 @@
 import { T, useTranslate } from '@tolgee/react';
-import { IconButton, styled, Tooltip } from '@mui/material';
-import { Clear, Link } from '@mui/icons-material';
+import { Box, IconButton, styled, Tooltip } from '@mui/material';
+import { XClose, Link02 } from '@untitled-ui/icons-react';
 
+import { AgencyLabel } from 'tg.ee';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { LINKS, PARAMS } from 'tg.constants/links';
@@ -27,7 +28,7 @@ const StyledListItem = styled('div')`
   padding: ${({ theme }) => theme.spacing(1)};
   flex-wrap: wrap;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
 `;
 
 const StyledItemText = styled('div')`
@@ -57,7 +58,9 @@ type Props = {
   invitation: UserAccountInProjectModel;
 };
 
-export const InvitationItem: React.FC<Props> = ({ invitation }) => {
+export const InvitationItem: React.FC<React.PropsWithChildren<Props>> = ({
+  invitation,
+}) => {
   const { t } = useTranslate();
   const languages = useProjectLanguages();
   const { satisfiesPermission } = useProjectPermissions();
@@ -78,17 +81,26 @@ export const InvitationItem: React.FC<Props> = ({ invitation }) => {
   const handleGetLink = () => {
     navigator.clipboard.writeText(
       LINKS.ACCEPT_INVITATION.buildWithOrigin({
-        [PARAMS.INVITATION_CODE]: invitation.code,
+        [PARAMS.INVITATION_CODE]: invitation.code!,
       })
     );
     messageService.success(<T keyName="invite_user_invitation_copy_success" />);
   };
 
   return (
-    <StyledListItem>
-      <StyledItemText>
-        {invitation.invitedUserName || invitation.invitedUserEmail}{' '}
-      </StyledItemText>
+    <StyledListItem data-cy="project-members-invitation-item">
+      <Box display="flex" alignItems="center" gap={1}>
+        <StyledItemText>
+          {invitation.invitedUserName || invitation.invitedUserEmail}{' '}
+        </StyledItemText>
+        {invitation.permission.agency && (
+          <Tooltip title={t('invite_user_agency_tooltip')}>
+            <span>
+              <AgencyLabel agency={invitation.permission.agency} />
+            </span>
+          </Tooltip>
+        )}
+      </Box>
       <StyledItemActions>
         <ScopesInfo scopes={invitation.permission.scopes} />
 
@@ -105,18 +117,20 @@ export const InvitationItem: React.FC<Props> = ({ invitation }) => {
           </StyledPermissions>
         </Tooltip>
 
-        <Tooltip title={t('invite_user_invitation_copy_button')}>
-          <IconButton size="small" onClick={handleGetLink}>
-            <Link />
-          </IconButton>
-        </Tooltip>
+        {invitation.code && (
+          <Tooltip title={t('invite_user_invitation_copy_button')}>
+            <IconButton size="small" onClick={handleGetLink}>
+              <Link02 />
+            </IconButton>
+          </Tooltip>
+        )}
         <Tooltip title={t('invite_user_invitation_cancel_button')}>
           <IconButton
             size="small"
             onClick={handleCancel}
             disabled={!canEditMembers}
           >
-            <Clear />
+            <XClose />
           </IconButton>
         </Tooltip>
       </StyledItemActions>

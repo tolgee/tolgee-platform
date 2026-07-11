@@ -38,18 +38,20 @@ class AutoTranslationEventHandler(
       return
     }
 
-    if (event.activityRevision.modifiedEntities.any { it.entityClass == Translation::class.simpleName }) {
-      autoTranslationService.autoTranslateViaBatchJob(
-        projectId = projectId,
-        keyIds = keyIds,
-        isBatch = true,
-        baseLanguageId = baseLanguageId ?: return,
-        isHiddenJob = event.isLowVolumeActivity(),
-      )
-    }
+    autoTranslationService.autoTranslateViaBatchJob(
+      projectId = projectId,
+      keyIds = keyIds,
+      isBatch = true,
+      baseLanguageId = baseLanguageId ?: return,
+      isHiddenJob = event.isLowVolumeActivity(),
+    )
   }
 
   private fun shouldRunTheOperation(): Boolean {
+    if (event.activityRevision.modifiedEntities.none { it.entityClass == Translation::class.simpleName }) {
+      return false
+    }
+
     val configs =
       autoTranslationService.getConfigs(
         entityManager.getReference(Project::class.java, projectId),
@@ -87,8 +89,10 @@ class AutoTranslationEventHandler(
   }
 
   private fun getKeyId(modifiedEntity: ActivityModifiedEntity) =
-    modifiedEntity.describingRelations?.values
-      ?.find { it.entityClass == Key::class.simpleName }?.entityId
+    modifiedEntity.describingRelations
+      ?.values
+      ?.find { it.entityClass == Key::class.simpleName }
+      ?.entityId
 
   private fun ActivityModifiedEntity.isTextChanged(): Boolean {
     val modification = this.modifications["text"] ?: return false
@@ -99,7 +103,8 @@ class AutoTranslationEventHandler(
   private fun ActivityModifiedEntity.isTranslation() = entityClass == Translation::class.simpleName
 
   private fun ActivityModifiedEntity.isBaseTranslation(): Boolean {
-    return describingRelations?.values
+    return describingRelations
+      ?.values
       ?.any { it.entityClass == Language::class.simpleName && it.entityId == baseLanguageId }
       ?: false
   }

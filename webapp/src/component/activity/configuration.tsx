@@ -1,5 +1,6 @@
 import { T } from '@tolgee/react';
 import { ActivityOptions, ActivityTypeEnum } from './types';
+import { BranchNameChipNode } from 'tg.component/branching/BranchNameChip';
 
 export const actionsConfiguration: Partial<
   Record<ActivityTypeEnum, ActivityOptions>
@@ -42,6 +43,38 @@ export const actionsConfiguration: Partial<
     entities: { Key: [] },
     titleReferences: [],
   },
+  KEY_SOFT_DELETE: {
+    label(params) {
+      return <T keyName="activity_key_soft_delete" params={params} />;
+    },
+    entities: { Key: [] },
+    titleReferences: [],
+  },
+  KEY_RESTORE: {
+    label(params) {
+      return <T keyName="activity_key_restore" params={params} />;
+    },
+    entities: { Key: [] },
+  },
+  KEY_HARD_DELETE: {
+    label(params) {
+      return <T keyName="activity_key_hard_delete" params={params} />;
+    },
+    entities: { Key: [] },
+    titleReferences: [],
+  },
+  BATCH_KEY_RESTORE: {
+    label(params) {
+      return <T keyName="activity_batch_key_restore" params={params} />;
+    },
+    entities: { Params: true },
+  },
+  BATCH_KEY_HARD_DELETE: {
+    label(params) {
+      return <T keyName="activity_batch_key_hard_delete" params={params} />;
+    },
+    entities: { Params: true },
+  },
   KEY_NAME_EDIT: {
     label(params) {
       return <T keyName="activity_key_name_edit" params={params} />;
@@ -64,7 +97,7 @@ export const actionsConfiguration: Partial<
     },
     entities: {
       Translation: true,
-      Key: ['name', 'namespace'],
+      Key: ['name', 'namespace', 'maxCharLimit'],
       Screenshot: true,
     },
   },
@@ -131,6 +164,12 @@ export const actionsConfiguration: Partial<
       return <T keyName="activity_key_tags_edit" params={params} />;
     },
     entities: { KeyMeta: true },
+  },
+  KEY_CHARACTER_LIMIT_EDIT: {
+    label(params) {
+      return <T keyName="activity_key_character_limit_edit" params={params} />;
+    },
+    entities: { Key: ['maxCharLimit'] },
   },
   TRANSLATION_HISTORY_ADD: {
     label(params) {
@@ -325,6 +364,246 @@ export const actionsConfiguration: Partial<
   COMPLEX_TAG_OPERATION: {
     label(params) {
       return <T keyName="activity_complex_tag_operation" params={params} />;
+    },
+  },
+  TASK_CREATE: {
+    label() {
+      return <T keyName="activity_task_create" />;
+    },
+    entities: {
+      Task: true,
+    },
+  },
+  TASKS_CREATE: {
+    label() {
+      return <T keyName="activity_tasks_create" />;
+    },
+    entities: {
+      Task: true,
+    },
+  },
+  TASK_UPDATE: {
+    label() {
+      return <T keyName="activity_task_update" />;
+    },
+    entities: {
+      Task: true,
+    },
+  },
+  TASK_FINISH: {
+    label() {
+      return <T keyName="activity_task_finish" />;
+    },
+    entities: {
+      Task: [],
+    },
+  },
+  TASK_CLOSE: {
+    label() {
+      return <T keyName="activity_task_close" />;
+    },
+    entities: {
+      Task: [],
+    },
+  },
+  TASK_REOPEN: {
+    label() {
+      return <T keyName="activity_task_reopen" />;
+    },
+    entities: {
+      Task: [],
+    },
+  },
+  TASK_KEYS_UPDATE: {
+    label() {
+      return <T keyName="activity_task_keys_update" />;
+    },
+    entities: {
+      Task: [],
+    },
+  },
+  ORDER_TRANSLATION: {
+    label() {
+      return <T keyName="activity_order_translation" />;
+    },
+    entities: {
+      Task: true,
+    },
+  },
+  TRANSLATION_LABEL_ASSIGN: {
+    label(params) {
+      return <T keyName="activity_translation_labels_edit" params={params} />;
+    },
+    entities: {
+      Translation: true,
+    },
+  },
+  TRANSLATION_LABEL_CREATE: {
+    label(params) {
+      return <T keyName="activity_translation_label_create" params={params} />;
+    },
+    entities: {
+      Label: true,
+    },
+  },
+  TRANSLATION_LABEL_UPDATE: {
+    label(params) {
+      return <T keyName="activity_translation_label_update" params={params} />;
+    },
+    entities: {
+      Label: true,
+    },
+  },
+  TRANSLATION_LABEL_DELETE: {
+    label(params) {
+      return <T keyName="activity_translation_label_delete" params={params} />;
+    },
+    entities: {
+      Label: true,
+    },
+  },
+  BATCH_ASSIGN_TRANSLATION_LABEL: {
+    label(params) {
+      return (
+        <T
+          keyName="activity_batch_operation_assign_translation_label"
+          params={params}
+        />
+      );
+    },
+    entities: { Params: true },
+  },
+  BATCH_UNASSIGN_TRANSLATION_LABEL: {
+    label(params) {
+      return (
+        <T
+          keyName="activity_batch_operation_unassign_translation_label"
+          params={params}
+        />
+      );
+    },
+    entities: { Params: true },
+  },
+  CREATE_SUGGESTION: {
+    label(params) {
+      return <T keyName="activity_create_suggestion" params={params} />;
+    },
+    entities: {
+      TranslationSuggestion: true,
+    },
+    description(data) {
+      const translation =
+        data.modifiedEntities?.TranslationSuggestion?.[0]?.modifications
+          ?.translation?.new;
+      return typeof translation === 'string' ? translation : undefined;
+    },
+  },
+  ACCEPT_SUGGESTION: {
+    label(params) {
+      return <T keyName="activity_accept_suggestion" params={params} />;
+    },
+    entities: {
+      TranslationSuggestion: true,
+      Translation: true,
+    },
+    description(data) {
+      return data.modifiedEntities?.TranslationSuggestion?.[0]?.description
+        ?.translation as any as string;
+    },
+  },
+  DECLINE_SUGGESTION: {
+    label(params) {
+      return <T keyName="activity_decline_suggestion" params={params} />;
+    },
+    entities: {
+      TranslationSuggestion: true,
+    },
+    description(data) {
+      return data.modifiedEntities?.TranslationSuggestion?.[0]?.description
+        ?.translation as any as string;
+    },
+  },
+  DELETE_SUGGESTION: {
+    label(params) {
+      return <T keyName="activity_delete_suggestion" params={params} />;
+    },
+    entities: {
+      TranslationSuggestion: true,
+    },
+    description(data) {
+      return data.modifiedEntities?.TranslationSuggestion?.[0]?.description
+        ?.translation as any as string;
+    },
+  },
+  SUGGESTION_SET_ACTIVE: {
+    label(params) {
+      return <T keyName="activity_suggestions_set_active" params={params} />;
+    },
+    entities: {
+      TranslationSuggestion: true,
+    },
+    description(data) {
+      return data.modifiedEntities?.TranslationSuggestion?.[0]?.description
+        ?.translation as any as string;
+    },
+  },
+  QA_ISSUE_IGNORE: {
+    label(params) {
+      return <T keyName="activity_qa_issue_ignore" params={params} />;
+    },
+    entities: { TranslationQaIssue: ['state'] },
+    titleReferences: ['key'],
+  },
+  QA_ISSUE_UNIGNORE: {
+    label(params) {
+      return <T keyName="activity_qa_issue_unignore" params={params} />;
+    },
+    entities: { TranslationQaIssue: ['state'] },
+    titleReferences: ['key'],
+  },
+  BRANCH_CREATE: {
+    label(params) {
+      return <T keyName="activity_branch_create" params={params} />;
+    },
+    entities: {
+      Branch: [],
+    },
+  },
+  BRANCH_RENAME: {
+    label(params) {
+      return <T keyName="activity_branch_rename" params={params} />;
+    },
+    entities: {
+      Branch: ['name'],
+    },
+  },
+  BRANCH_DELETE: {
+    label(params) {
+      return <T keyName="activity_branch_delete" params={params} />;
+    },
+    entities: {
+      Branch: [],
+    },
+  },
+  BRANCH_PROTECTION_CHANGE: {
+    label(params) {
+      return <T keyName="activity_branch_protection_change" params={params} />;
+    },
+    entities: {
+      Branch: ['isProtected'],
+    },
+  },
+  BRANCH_MERGE: {
+    label(params) {
+      return (
+        <T
+          keyName="activity_branch_merge"
+          params={{ ...params, branch: <BranchNameChipNode size={'small'} /> }}
+        />
+      );
+    },
+    entities: {
+      Branch: [],
     },
   },
 };

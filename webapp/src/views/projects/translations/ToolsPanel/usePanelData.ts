@@ -1,0 +1,74 @@
+import { useProject } from 'tg.hooks/useProject';
+import {
+  useTranslationsActions,
+  useTranslationsSelector,
+} from '../context/TranslationsContext';
+import { useMemo } from 'react';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { useBranchEditAccess } from '../context/services/useBranchEditAccess';
+
+export const usePanelData = () => {
+  const project = useProject();
+  const keyId = useTranslationsSelector((c) => c.cursor?.keyId);
+  const languageTag = useTranslationsSelector((c) => c.cursor?.language);
+  const activeVariant = useTranslationsSelector((c) => c.cursor?.activeVariant);
+  const translations = useTranslationsSelector((c) => c.translations);
+  const languages = useTranslationsSelector((c) => c.languages);
+  const { setEditValueString, appendEditValueString } =
+    useTranslationsActions();
+
+  const keyData = useMemo(() => {
+    return translations?.find((t) => t.keyId === keyId);
+  }, [keyId, translations]);
+
+  const language = useMemo(() => {
+    return languages?.find((l) => l.tag === languageTag);
+  }, [languageTag, languages]);
+
+  const baseLanguage = useMemo(() => {
+    return languages?.find((l) => l.base);
+  }, [languages]);
+  const translation = language?.tag
+    ? keyData?.translations[language.tag]
+    : undefined;
+
+  const editingText = useTranslationsSelector(
+    (c) => c.cursor?.value.variants[c.cursor?.activeVariant ?? 'other']
+  );
+  const editingFullValue = useTranslationsSelector((c) => c.cursor?.value);
+  const isModified = useTranslationsSelector((c) => c.cursor?.changed ?? false);
+
+  const projectPermissions = useProjectPermissions();
+  const canEditProtectedBranch = useBranchEditAccess();
+
+  const dataProps = {
+    project,
+    keyData: keyData!,
+    language: language!,
+    baseLanguage: baseLanguage!,
+    activeVariant: keyData?.keyIsPlural ? activeVariant! : undefined,
+    editingText,
+    editingFullValue: keyData?.keyIsPlural ? editingFullValue : undefined,
+    isModified,
+    setValue: setEditValueString,
+    appendValue: appendEditValueString,
+    editEnabled: language
+      ? canEditProtectedBranch &&
+        ((projectPermissions.satisfiesLanguageAccess(
+          'translations.edit',
+          language.id
+        ) &&
+          translation?.state !== 'DISABLED') ||
+          Boolean(
+            keyData?.tasks?.find(
+              (t) =>
+                t.languageTag === language.tag &&
+                t.userAssigned &&
+                t.type === 'TRANSLATE'
+            )
+          ))
+      : false,
+    projectPermissions,
+  };
+  return dataProps;
+};

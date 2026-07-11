@@ -8,7 +8,7 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.request.slack.SlackUserLoginDto
 import io.tolgee.exceptions.BadRequestException
 import org.springframework.stereotype.Component
-import java.util.*
+import java.util.Base64
 
 @Component
 class SlackUserLoginUrlProvider(

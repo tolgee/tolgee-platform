@@ -5,6 +5,7 @@ import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.UserAccount
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
+import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
@@ -17,6 +18,10 @@ import jakarta.persistence.UniqueConstraint
       columnNames = ["slack_team_id"],
       name = "organization_slack_workspace_slack_team_id_unique",
     ),
+  ],
+  indexes = [
+    Index(columnList = "organization_id"),
+    Index(columnList = "author_id"),
   ],
 )
 class OrganizationSlackWorkspace : StandardAuditModel() {

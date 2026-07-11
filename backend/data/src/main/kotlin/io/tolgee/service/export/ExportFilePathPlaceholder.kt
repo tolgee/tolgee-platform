@@ -1,6 +1,8 @@
 package io.tolgee.service.export
 
-enum class ExportFilePathPlaceholder(val value: String) {
+enum class ExportFilePathPlaceholder(
+  val value: String,
+) {
   NAMESPACE("namespace"),
   LANGUAGE_TAG("languageTag"),
   ANDROID_LANGUAGE_TAG("androidLanguageTag"),

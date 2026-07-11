@@ -13,8 +13,10 @@ import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 
-class AppleXliffFileProcessor(override val context: FileProcessorContext, private val parsed: XliffModel) :
-  ImportFileProcessor() {
+class AppleXliffFileProcessor(
+  override val context: FileProcessorContext,
+  private val parsed: XliffModel,
+) : ImportFileProcessor() {
   /**
    * file -> Map (KeyName -> Map (Form -> Pair (Source, Target )))
    */

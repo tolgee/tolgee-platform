@@ -1,8 +1,9 @@
 import { useRef, useState } from 'react';
-import { Box, Select, styled } from '@mui/material';
+import { Box, styled } from '@mui/material';
 
 import { SearchSelectPopover } from './SearchSelectPopover';
 import { SearchSelectContent } from './SearchSelectContent';
+import { Select } from 'tg.component/common/Select';
 
 export type SelectItem<T> = {
   value: T;
@@ -33,6 +34,8 @@ type Props<T> = {
   SelectProps?: React.ComponentProps<typeof Select>;
   compareFunction?: (prompt: string, label: string) => boolean;
   noContain?: boolean;
+  minHeight?: boolean;
+  dataCy?: string;
 };
 
 export function SearchSelect<T extends React.Key>({
@@ -50,6 +53,8 @@ export function SearchSelect<T extends React.Key>({
   SelectProps,
   compareFunction,
   noContain,
+  minHeight = false,
+  dataCy = 'search-select',
 }: Props<T>) {
   const anchorEl = useRef<HTMLAnchorElement>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -71,7 +76,7 @@ export function SearchSelect<T extends React.Key>({
     <StyledInputContent style={{ contain: noContain ? undefined : 'size' }}>
       {renderValue
         ? renderValue(value)
-        : (valueItem ? valueItem.name : value) || ''}
+        : (((valueItem ? valueItem.name : value) || '') as React.ReactNode)}
     </StyledInputContent>
   );
 
@@ -85,7 +90,7 @@ export function SearchSelect<T extends React.Key>({
   const valueItem = items.find((i) => i.value === value);
 
   return (
-    <Box display="flex" data-cy="search-select">
+    <Box display="grid" data-cy={dataCy}>
       <Select
         ref={anchorEl}
         onOpen={handleOpen}
@@ -95,6 +100,7 @@ export function SearchSelect<T extends React.Key>({
         value={myRenderValue()}
         displayEmpty
         multiple
+        minHeight={minHeight}
         renderValue={myRenderValue}
         {...SelectProps}
       />

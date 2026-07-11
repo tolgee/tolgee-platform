@@ -114,8 +114,12 @@ class AllOrganizationOwnerJobTest : AbstractSpringTest() {
     allOrganizationOwnerJobRunner.run()
     transactionTemplate.execute {
       val createdOrganization =
-        userAccountRepository.findByUsername("user2").get()
-          .organizationRoles.single().organization
+        userAccountRepository
+          .findByExactUsername("user2")
+          .get()
+          .organizationRoles
+          .single()
+          .organization
       assertThat(createdOrganization?.name).isEqualTo("User with no role")
     }
   }
@@ -124,8 +128,13 @@ class AllOrganizationOwnerJobTest : AbstractSpringTest() {
   fun `it keeps user direct permissions`() {
     allOrganizationOwnerJobRunner.run()
     transactionTemplate.execute {
-      val user2 = userAccountRepository.findByUsername("user2").get()
-      assertThat(user2.permissions.single().project?.name).isEqualTo("Project 2")
+      val user2 = userAccountRepository.findByExactUsername("user2").get()
+      assertThat(
+        user2.permissions
+          .single()
+          .project
+          ?.name,
+      ).isEqualTo("Project 2")
     }
   }
 

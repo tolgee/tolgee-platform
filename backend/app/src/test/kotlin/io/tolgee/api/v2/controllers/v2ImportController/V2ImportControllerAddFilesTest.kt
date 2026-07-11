@@ -6,18 +6,20 @@ import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
-import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.node
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
+import io.tolgee.repository.dataImport.ImportTranslationRepository
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.util.InMemoryFileStorage
 import io.tolgee.util.performImport
+import net.javacrumbs.jsonunit.core.internal.Node.JsonMap
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.Resource
 import org.springframework.test.web.servlet.ResultActions
@@ -25,6 +27,9 @@ import org.springframework.transaction.annotation.Transactional
 
 @Transactional
 class V2ImportControllerAddFilesTest : ProjectAuthControllerTest("/v2/projects/") {
+  @Autowired
+  private lateinit var importTranslationRepository: ImportTranslationRepository
+
   @Value("classpath:import/zipOfJsons.zip")
   lateinit var zipOfJsons: Resource
 
@@ -74,7 +79,7 @@ class V2ImportControllerAddFilesTest : ProjectAuthControllerTest("/v2/projects/"
   @Test
   fun `it parses zip file stores it for debugging and saves issues`() {
     tolgeeProperties.import.storeFilesForDebugging = true
-    val base = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase()
     commitTransaction()
 
     val fileName = "zipOfUnknown.zip"
@@ -87,7 +92,7 @@ class V2ImportControllerAddFilesTest : ProjectAuthControllerTest("/v2/projects/"
 
   @Test
   fun `doesn't store file for when disabled`() {
-    val base = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase()
     commitTransaction()
 
     val fileName = "zipOfUnknown.zip"
@@ -105,10 +110,11 @@ class V2ImportControllerAddFilesTest : ProjectAuthControllerTest("/v2/projects/"
 
   @Test
   fun `it handles po file`() {
-    val base = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase()
 
     performImport(projectId = base.project.id, listOf(Pair("example.po", poFile)))
-      .andPrettyPrint.andAssertThatJson {
+      .andPrettyPrint
+      .andAssertThatJson {
         node("result._embedded.languages").isArray.hasSize(1)
       }.andReturn()
 
@@ -118,27 +124,29 @@ class V2ImportControllerAddFilesTest : ProjectAuthControllerTest("/v2/projects/"
       assertThat(it.files).hasSize(1)
       assertThat(it.files[0].languages[0].translations).hasSize(8)
       // correctly assigns isPlural
-      assertThat(it.files[0].keys[4].translations[0].isPlural).isTrue()
-      assertThat(it.files[0].keys[3].translations[0].isPlural).isFalse()
+      assertThat(importTranslationRepository.findByKeyId(it.files[0].keys[4].id)[0].isPlural).isTrue()
+      assertThat(importTranslationRepository.findByKeyId(it.files[0].keys[3].id)[0].isPlural).isFalse()
     }
   }
 
   @Test
   fun `it handles xliff file`() {
-    val base = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase()
 
     performImport(projectId = base.project.id, listOf(Pair("example.xliff", xliffFile)))
-      .andPrettyPrint.andAssertThatJson {
+      .andPrettyPrint
+      .andAssertThatJson {
         node("result._embedded.languages").isArray.hasSize(2)
       }.andReturn()
   }
 
   @Test
   fun `it returns error when json could not be parsed`() {
-    val base = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase()
 
     performImport(projectId = base.project.id, listOf(Pair("error.json", errorJson)))
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("errors[0].code").isEqualTo("cannot_parse_file")
         node("errors[0].params[0]").isEqualTo("error.json")
         node("errors[0].params[1]").isString.contains("Unrecognized token")
@@ -147,12 +155,13 @@ class V2ImportControllerAddFilesTest : ProjectAuthControllerTest("/v2/projects/"
 
   @Test
   fun `it throws when more then 100 languages`() {
-    val base = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase()
 
     val data = (1..101).map { "simple$it.json" to simpleJson }
 
     performImport(projectId = base.project.id, data)
-      .andIsBadRequest.andPrettyPrint.andAssertThatJson {
+      .andIsBadRequest.andPrettyPrint
+      .andAssertThatJson {
         node("code").isEqualTo("cannot_add_more_then_100_languages")
       }
   }
@@ -175,7 +184,7 @@ class V2ImportControllerAddFilesTest : ProjectAuthControllerTest("/v2/projects/"
 
   @Test
   fun `it imports nested keys with provided delimiter`() {
-    val base = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase()
 
     performImport(projectId = base.project.id, listOf("nested.json" to nested), mapOf("structureDelimiter" to ";"))
       .andIsOk
@@ -183,13 +192,16 @@ class V2ImportControllerAddFilesTest : ProjectAuthControllerTest("/v2/projects/"
     entityManager.clear()
 
     importService.find(base.project.id, base.userAccount.id)?.let {
-      it.files[0].keys.find { it.name == "this;nested;a" }.assert.isNotNull
+      it.files[0]
+        .keys
+        .find { it.name == "this;nested;a" }
+        .assert.isNotNull
     }
   }
 
   @Test
   fun `it saves proper data and returns correct response`() {
-    val base = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase()
     commitTransaction()
 
     performImport(projectId = base.project.id, listOf(Pair("zipOfJsons.zip", zipOfJsons)))
@@ -201,7 +213,7 @@ class V2ImportControllerAddFilesTest : ProjectAuthControllerTest("/v2/projects/"
 
   @Test
   fun `it adds a file with long translation text and stores issues`() {
-    val base = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase()
     commitTransaction()
     tolgeeProperties.maxTranslationTextLength = 20
 
@@ -217,14 +229,20 @@ class V2ImportControllerAddFilesTest : ProjectAuthControllerTest("/v2/projects/"
         assertThat(it.files).hasSize(1)
         assertThat(it.files[0].issues).hasSize(1)
         assertThat(it.files[0].issues[0].type).isEqualTo(FileIssueType.TRANSLATION_TOO_LONG)
-        assertThat(it.files[0].issues[0].params?.get(0)?.value).isEqualTo("too_long")
+        assertThat(
+          it.files[0]
+            .issues[0]
+            .params
+            ?.get(0)
+            ?.value,
+        ).isEqualTo("too_long")
       }
     }
   }
 
   @Test
   fun `gracefully handles missing files part`() {
-    val base = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase()
     commitTransaction()
 
     executeInNewTransaction {
@@ -241,7 +259,9 @@ class V2ImportControllerAddFilesTest : ProjectAuthControllerTest("/v2/projects/"
 
   @Test
   fun `pre-selects namespaces and languages correctly`() {
-    val base = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase()
+    base.project.useNamespaces = true
+    projectService.save(base.project)
     commitTransaction()
     tolgeeProperties.maxTranslationTextLength = 20
 
@@ -249,23 +269,54 @@ class V2ImportControllerAddFilesTest : ProjectAuthControllerTest("/v2/projects/"
       performImport(
         projectId = base.project.id,
         listOf(Pair("namespaces.zip", namespacesZip)),
-      ).andIsOk
+      ).andIsOk.andAssertThatJson {
+        node("warnings").isArray.isEmpty()
+      }
     }
 
     executeInNewTransaction {
       importService.find(base.project.id, base.userAccount.id)?.let {
         assertThat(it.files).hasSize(4)
         val homepageEn = it.files.find { it.namespace == "homepage" && it.name == "homepage/en.json" }
-        homepageEn!!.languages[0].existingLanguage?.tag.assert.isEqualTo("en")
+        homepageEn!!
+          .languages[0]
+          .existingLanguage
+          ?.tag.assert
+          .isEqualTo("en")
         val movies = it.files.find { it.namespace == "movies" && it.name == "movies/de.json" }
-        movies!!.languages[0].existingLanguage?.tag.assert.isEqualTo("de")
+        movies!!
+          .languages[0]
+          .existingLanguage
+          ?.tag.assert
+          .isEqualTo("de")
+      }
+    }
+  }
+
+  @Test
+  fun `returns warning and blank namespaces when namespaces are detected but disabled`() {
+    val base = dbPopulator.createBase()
+    base.project.useNamespaces = false
+    projectService.save(base.project)
+    commitTransaction()
+
+    executeInNewTransaction {
+      performImport(
+        projectId = base.project.id,
+        listOf(Pair("namespaces.zip", namespacesZip)),
+      ).andIsOk.andAssertThatJson {
+        node("warnings").isArray.hasSize(1)
+        node("warnings[0].code").isEqualTo("namespace_cannot_be_used_when_feature_is_disabled")
+        node("result._embedded.languages").isArray.allSatisfy {
+          (it as JsonMap)["namespace"].assert.isNull()
+        }
       }
     }
   }
 
   @Test
   fun `works fine with Mac generated zip`() {
-    val base = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase()
     commitTransaction()
     tolgeeProperties.maxTranslationTextLength = 20
 
@@ -299,6 +350,45 @@ class V2ImportControllerAddFilesTest : ProjectAuthControllerTest("/v2/projects/"
         node("result._embedded.languages[1].conflictCount").isEqualTo(1)
       }
     }
+  }
+
+  @Test
+  fun `correctly reports collisions between files`() {
+    val testData = ImportCleanTestData()
+    testDataService.saveTestData(testData.root)
+
+    loginAsUser(testData.userAccount.username)
+    performImport(
+      projectId = testData.project.id,
+      listOf(
+        Pair("en.json", simpleJson),
+      ),
+    ).andIsOk
+    performImport(
+      projectId = testData.project.id,
+      listOf(
+        Pair("en.json", simpleJson),
+      ),
+    ).andIsOk.andPrettyPrint.andAssertThatJson {
+      node("result._embedded.languages[1].importFileIssueCount").isEqualTo(1)
+    }
+  }
+
+  @Test
+  fun `import gets deleted after namespaces feature is toggled`() {
+    val base = dbPopulator.createBase()
+
+    performImport(projectId = base.project.id, listOf("simple.json" to simpleJson))
+      .andIsOk
+
+    assertThat(importService.getAllByProject(base.project.id)).isNotEmpty()
+
+    val project = projectService.get(base.project.id)
+    project.useNamespaces = !project.useNamespaces
+    projectService.save(project)
+    commitTransaction()
+
+    assertThat(importService.getAllByProject(project.id)).isEmpty()
   }
 
   private fun validateSavedJsonImportData(

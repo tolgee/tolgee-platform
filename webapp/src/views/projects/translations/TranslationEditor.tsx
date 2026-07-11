@@ -1,14 +1,22 @@
 import { EditorView } from 'codemirror';
 import { PluralEditor } from './translationVisual/PluralEditor';
 import { useTranslationCell } from './useTranslationCell';
+import { getEditorActions } from './cell/editorMainActions/getEditorActions';
+import { useProject } from 'tg.hooks/useProject';
 
 type Props = {
   mode: 'placeholders' | 'syntax';
   tools: ReturnType<typeof useTranslationCell>;
   editorRef: React.RefObject<EditorView>;
+  maxCharLimit?: number | null;
 };
 
-export const TranslationEditor = ({ mode, tools, editorRef }: Props) => {
+export const TranslationEditor = ({
+  mode,
+  tools,
+  editorRef,
+  maxCharLimit,
+}: Props) => {
   const {
     editVal,
     language,
@@ -18,7 +26,23 @@ export const TranslationEditor = ({ mode, tools, editorRef }: Props) => {
     handleSave,
     handleClose,
     handleInsertBase,
+    baseValue,
+    translation,
+    prefilteredTask,
+    tasks,
   } = tools;
+
+  const project = useProject();
+
+  const primaryAction = getEditorActions({
+    onSave: handleSave,
+    translation,
+    currentTask: prefilteredTask?.number,
+    tasks,
+    languageId: language.id,
+    project,
+    value: editVal?.value,
+  })?.[0]?.action;
 
   return (
     <PluralEditor
@@ -30,12 +54,17 @@ export const TranslationEditor = ({ mode, tools, editorRef }: Props) => {
       autofocus={true}
       activeEditorRef={editorRef}
       mode={mode}
+      baseValue={baseValue}
+      maxCharLimit={maxCharLimit}
       editorProps={{
         shortcuts: [
           { key: 'Escape', run: () => (handleClose(true), true) },
           { key: `Mod-e`, run: () => (setState(), true) },
-          { key: 'Mod-Enter', run: () => (handleSave('EDIT_NEXT'), true) },
-          { key: 'Enter', run: () => (handleSave(), true) },
+          {
+            key: 'Mod-Enter',
+            run: () => (primaryAction?.({ after: 'EDIT_NEXT' }), true),
+          },
+          { key: 'Enter', run: () => (primaryAction?.({}), true) },
           {
             key: 'Mod-Insert',
             mac: 'Cmd-Shift-s',

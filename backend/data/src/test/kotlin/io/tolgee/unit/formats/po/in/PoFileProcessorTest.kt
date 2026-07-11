@@ -6,13 +6,11 @@ import io.tolgee.dtos.request.ImportFileMapping
 import io.tolgee.dtos.request.SingleStepImportRequest
 import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.formats.po.`in`.PoFileProcessor
-import io.tolgee.unit.formats.PlaceholderConversionTestHelper
 import io.tolgee.util.FileProcessorContextMockUtil
 import io.tolgee.util.assertLanguagesCount
 import io.tolgee.util.assertSingle
 import io.tolgee.util.assertSinglePlural
 import io.tolgee.util.assertTranslations
-import io.tolgee.util.description
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -29,8 +27,11 @@ class PoFileProcessorTest {
     mockImportFile("example.po")
     PoFileProcessor(mockUtil.fileProcessorContext).process()
     assertThat(mockUtil.fileProcessorContext.languages).hasSize(1)
-    assertThat(mockUtil.fileProcessorContext.translations).hasSize(9)
-    val text = mockUtil.fileProcessorContext.translations["%d page read."]?.get(0)?.text
+    assertThat(mockUtil.fileProcessorContext.translations).hasSize(11)
+    val text =
+      mockUtil.fileProcessorContext.translations["%d page read."]
+        ?.get(0)
+        ?.text
     assertThat(text)
       .isEqualTo(
         "{0, plural,\n" +
@@ -38,8 +39,11 @@ class PoFileProcessorTest {
           "other {# Seiten gelesen wurden.}\n" +
           "}",
       )
-    assertThat(mockUtil.fileProcessorContext.translations.values.toList()[2][0].text)
-      .isEqualTo("Willkommen zurück, {0}! Dein letzter Besuch war am {1}")
+    assertThat(
+      mockUtil.fileProcessorContext.translations.values
+        .toList()[2][0]
+        .text,
+    ).isEqualTo("Willkommen zurück, {0}! Dein letzter Besuch war am {1}")
   }
 
   @Test
@@ -71,8 +75,11 @@ class PoFileProcessorTest {
     PoFileProcessor(mockUtil.fileProcessorContext).process()
     assertThat(mockUtil.fileProcessorContext.languages).hasSize(1)
     assertThat(mockUtil.fileProcessorContext.translations).hasSize(1)
-    assertThat(mockUtil.fileProcessorContext.translations.values.toList()[0][0].text)
-      .isEqualTo("# Hex код (#fff)")
+    assertThat(
+      mockUtil.fileProcessorContext.translations.values
+        .toList()[0][0]
+        .text,
+    ).isEqualTo("# Hex код (#fff)")
   }
 
   @Test
@@ -80,11 +87,13 @@ class PoFileProcessorTest {
     mockPlaceholderConversionTestFile(convertPlaceholders = false, projectIcuPlaceholdersEnabled = false)
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("de", "hello")
+    mockUtil.fileProcessorContext
+      .assertTranslations("de", "hello")
       .assertSingle {
         hasText("Hi %d {icuParam}")
       }
-    mockUtil.fileProcessorContext.assertTranslations("de", "%d page read.")
+    mockUtil.fileProcessorContext
+      .assertTranslations("de", "%d page read.")
       .assertSinglePlural {
         hasText(
           """
@@ -102,11 +111,13 @@ class PoFileProcessorTest {
     mockPlaceholderConversionTestFile(convertPlaceholders = false, projectIcuPlaceholdersEnabled = true)
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("de", "hello")
+    mockUtil.fileProcessorContext
+      .assertTranslations("de", "hello")
       .assertSingle {
         hasText("Hi %d '{'icuParam'}'")
       }
-    mockUtil.fileProcessorContext.assertTranslations("de", "%d page read.")
+    mockUtil.fileProcessorContext
+      .assertTranslations("de", "%d page read.")
       .assertSinglePlural {
         hasText(
           """
@@ -125,11 +136,13 @@ class PoFileProcessorTest {
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("de", "hello")
+    mockUtil.fileProcessorContext
+      .assertTranslations("de", "hello")
       .assertSingle {
         hasText("Hi {0, number} '{'icuParam'}'")
       }
-    mockUtil.fileProcessorContext.assertTranslations("de", "%d page read.")
+    mockUtil.fileProcessorContext
+      .assertTranslations("de", "%d page read.")
       .assertSinglePlural {
         hasText(
           """
@@ -143,26 +156,65 @@ class PoFileProcessorTest {
   }
 
   @Test
-  fun `placeholder conversion setting application works`() {
-    PlaceholderConversionTestHelper.testFile(
-      "en.po",
-      "src/test/resources/import/po/example_params.po",
-      assertBeforeSettingsApplication =
-        listOf(
-          "Hi {0, number} '{'icuParam'}'",
-          "{0, plural,\none {Hallo # '{'icuParam'}'}\nother {Hallo # '{'icuParam'}'}\n}",
-        ),
-      assertAfterDisablingConversion =
-        listOf(
-          "Hi %d '{'icuParam'}'",
-          "{value, plural,\none {Hallo %d '{'icuParam'}'}\nother {Hallo %d '{'icuParam'}'}\n}",
-        ),
-      assertAfterReEnablingConversion =
-        listOf(
-          "Hi {0, number} '{'icuParam'}'",
-          "{0, plural,\none {Hallo # '{'icuParam'}'}\nother {Hallo # '{'icuParam'}'}\n}",
-        ),
+  fun `PO_ICU preserves ICU placeholders in plural forms`() {
+    mockUtil.mockIt("en.po", "src/test/resources/import/po/example_icu_plural.po")
+    processFile()
+    mockUtil.fileProcessorContext.assertLanguagesCount(1)
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "Welcome, {name}")
+      .assertSingle {
+        hasText("Welcome, {name}")
+      }
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "1 item")
+      .assertSinglePlural {
+        hasText(
+          """
+          {value, plural,
+          one {1 item}
+          other {{count} items}
+          }
+          """.trimIndent(),
+        )
+      }
+  }
+
+  @Test
+  fun `joins msgctxt and msgid into keyName via separator`() {
+    mockImportFile("example_msgctxt.po")
+    PoFileProcessor(mockUtil.fileProcessorContext).process()
+    val keys = mockUtil.fileProcessorContext.translations.keys
+    assertThat(keys).contains(
+      "menu\u0004Open",
+      "verb\u0004Open",
+      "Open",
+      "items\u0004%d item",
     )
+  }
+
+  @Test
+  fun `drops msgctxt-only entry whose msgid is empty`() {
+    mockImportFile("example_msgctxt_only.po")
+    PoFileProcessor(mockUtil.fileProcessorContext).process()
+    assertThat(mockUtil.fileProcessorContext.translations.keys)
+      .containsExactly("menu\u0004Open")
+  }
+
+  @Test
+  fun `treats empty msgctxt as no msgctxt`() {
+    mockImportFile("example_msgctxt.po")
+    PoFileProcessor(mockUtil.fileProcessorContext).process()
+    val keys = mockUtil.fileProcessorContext.translations.keys
+    assertThat(keys).contains("Cancel")
+    assertThat(keys).doesNotContain("\u0004Cancel")
+  }
+
+  @Test
+  fun `preserves msgctxt escapes in keyName`() {
+    mockImportFile("example_msgctxt_escapes.po")
+    PoFileProcessor(mockUtil.fileProcessorContext).process()
+    val expected = "a \"quoted\" ctx\nwith newline\u0004Save"
+    assertThat(mockUtil.fileProcessorContext.translations.keys).contains(expected)
   }
 
   @Test

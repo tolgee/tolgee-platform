@@ -6,7 +6,7 @@ import io.tolgee.constants.Feature
 import io.tolgee.ee.EeLicensingMockRequestUtil
 import io.tolgee.ee.model.EeSubscription
 import io.tolgee.ee.repository.EeSubscriptionRepository
-import io.tolgee.ee.service.EeSubscriptionServiceImpl
+import io.tolgee.ee.service.eeSubscription.EeSubscriptionServiceImpl
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
@@ -17,14 +17,14 @@ import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpMethod
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.web.client.RestTemplate
-import java.util.*
+import java.util.Date
 
 class EeLicenseControllerTest : AuthorizedControllerTest() {
   @Autowired
-  @MockBean
+  @MockitoBean
   lateinit var restTemplate: RestTemplate
 
   @BeforeEach
@@ -35,6 +35,9 @@ class EeLicenseControllerTest : AuthorizedControllerTest() {
         username = "franta"
         role = UserAccount.Role.ADMIN
         user = this
+      }
+      addProject { name = "test" }.build {
+        addKey("hehe")
       }
     }
     userAccount = user
@@ -63,7 +66,8 @@ class EeLicenseControllerTest : AuthorizedControllerTest() {
 
       verify {
         performAuthPut("/v2/ee-license/set-license-key", mapOf("licenseKey" to "mock-mock"))
-          .andIsOk.andPrettyPrint.andAssertThatJson {
+          .andIsOk.andPrettyPrint
+          .andAssertThatJson {
           }
         val body = captor.allValues.single().body as String
 
@@ -73,8 +77,16 @@ class EeLicenseControllerTest : AuthorizedControllerTest() {
 
         req["licenseKey"].assert.isEqualTo("mock-mock")
         req["seats"].assert.isEqualTo(1)
+        req["keys"].assert.isEqualTo(1)
 
-        getSubscription().assert.isNotNull
+        val subscription = getSubscription()
+        subscription.assert.isNotNull
+        subscription!!.includedKeys.assert.isEqualTo(10)
+        subscription.includedSeats.assert.isEqualTo(10)
+        subscription.seatsLimit.assert.isEqualTo(10)
+        subscription.includedKeys.assert.isEqualTo(10)
+        subscription.keysLimit.assert.isEqualTo(10)
+        subscription.isPayAsYouGo.assert.isEqualTo(false)
       }
     }
   }
@@ -143,7 +155,11 @@ class EeLicenseControllerTest : AuthorizedControllerTest() {
           null,
         ).andIsOk
 
-        eeSubscriptionRepository.findAll().single().status.assert.isEqualTo(SubscriptionStatus.ACTIVE)
+        eeSubscriptionRepository
+          .findAll()
+          .single()
+          .status.assert
+          .isEqualTo(SubscriptionStatus.ACTIVE)
         captor.allValues.assert.hasSize(1)
       }
     }
@@ -191,7 +207,6 @@ class EeLicenseControllerTest : AuthorizedControllerTest() {
         name = "Plaaan"
         status = SubscriptionStatus.ERROR
         currentPeriodEnd = Date()
-        cancelAtPeriodEnd = false
         enabledFeatures = Feature.values()
         lastValidCheck = Date()
       },

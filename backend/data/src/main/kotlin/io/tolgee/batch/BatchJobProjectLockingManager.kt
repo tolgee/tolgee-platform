@@ -2,6 +2,7 @@ package io.tolgee.batch
 
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.component.UsingRedisProvider
+import io.tolgee.configuration.tolgee.BatchProperties
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import org.redisson.api.RMap
@@ -22,16 +23,35 @@ class BatchJobProjectLockingManager(
   @Lazy
   private val redissonClient: RedissonClient,
   private val usingRedisProvider: UsingRedisProvider,
+  private val batchProperties: BatchProperties,
 ) : Logging {
   companion object {
     private val localProjectLocks by lazy {
       ConcurrentHashMap<Long, Long?>()
     }
+
+    /**
+     * JVM-local cache of the project lock state. Under high contention (many chunks from
+     * competing jobs), the lock check is called thousands of times per second. Without
+     * caching, every check would be a Redis round-trip. This cache short-circuits the
+     * common "still locked by another job" case with a configurable TTL, and is eagerly
+     * invalidated on unlock so newly-eligible jobs can acquire the lock immediately.
+     */
+    private val localProjectLockCache = ConcurrentHashMap<Long, LockCacheEntry>()
+    private const val LOCK_CACHE_TTL_MS = 1000L
   }
 
-  fun canLockJobForProject(batchJobId: Long): Boolean {
-    val jobDto = batchJobService.getJobDto(batchJobId)
-    if (!jobDto.type.exclusive) {
+  private data class LockCacheEntry(
+    val lockedJobId: Long,
+    val timestamp: Long,
+  )
+
+  fun canLockJobForProject(
+    batchJobId: Long,
+    batchJobDto: BatchJobDto? = null,
+  ): Boolean {
+    val jobDto = batchJobDto ?: batchJobService.getJobDto(batchJobId)
+    if (!batchProperties.isExclusive(jobDto.type)) {
       return true
     }
     return tryLockJobForProject(jobDto)
@@ -47,9 +67,12 @@ class BatchJobProjectLockingManager(
   }
 
   fun unlockJobForProject(
-    projectId: Long,
+    projectId: Long?,
     jobId: Long,
   ) {
+    projectId ?: return
+    // Eagerly invalidate the local cache so other jobs can acquire the lock immediately
+    localProjectLockCache.remove(projectId)
     getMap().compute(projectId) { _, lockedJobId ->
       logger.debug("Unlocking job: $jobId for project $projectId")
       if (lockedJobId == jobId) {
@@ -69,10 +92,24 @@ class BatchJobProjectLockingManager(
   }
 
   private fun tryLockWithRedisson(batchJobDto: BatchJobDto): Boolean {
+    val projectId = batchJobDto.projectId ?: return true
+
+    // Check local cache first to avoid Redis round-trip for the common "still locked" case
+    val cached = localProjectLockCache[projectId]
+    if (cached != null &&
+      cached.lockedJobId != batchJobDto.id &&
+      cached.lockedJobId != 0L &&
+      System.currentTimeMillis() - cached.timestamp < LOCK_CACHE_TTL_MS
+    ) {
+      return false
+    }
+
     val computed =
-      getRedissonProjectLocks().compute(batchJobDto.projectId) { _, value ->
+      getRedissonProjectLocks().compute(projectId) { _, value ->
         computeFnBody(batchJobDto, value)
       }
+    // Update local cache with the result
+    localProjectLockCache[projectId] = LockCacheEntry(computed ?: 0L, System.currentTimeMillis())
     return computed == batchJobDto.id
   }
 
@@ -84,8 +121,9 @@ class BatchJobProjectLockingManager(
   }
 
   private fun tryLockLocal(toLock: BatchJobDto): Boolean {
+    val projectId = toLock.projectId ?: return true
     val computed =
-      localProjectLocks.compute(toLock.projectId) { _, value ->
+      localProjectLocks.compute(projectId) { _, value ->
         val newLocked = computeFnBody(toLock, value)
         logger.debug("While trying to lock ${toLock.id} for project ${toLock.projectId} new lock value is $newLocked")
         newLocked
@@ -97,6 +135,12 @@ class BatchJobProjectLockingManager(
     toLock: BatchJobDto,
     currentValue: Long?,
   ): Long {
+    val projectId =
+      toLock.projectId
+        ?: throw IllegalStateException(
+          "Project id is required. " +
+            "Locking for project should not happen for non-project jobs.",
+        )
     // nothing is locked
     if (currentValue == 0L) {
       logger.debug("Locking job ${toLock.id} for project ${toLock.projectId}, nothing is locked")
@@ -107,7 +151,7 @@ class BatchJobProjectLockingManager(
     if (currentValue == null) {
       logger.debug("Getting initial locked state from DB state")
       // we have to find out from database if there is any running job for the project
-      val initial = getInitialJobId(toLock.projectId)
+      val initial = getInitialJobId(projectId)
       logger.debug("Initial locked job $initial for project ${toLock.projectId}")
       if (initial == null) {
         logger.debug("No job found, locking ${toLock.id}")
@@ -125,12 +169,34 @@ class BatchJobProjectLockingManager(
 
   private fun getInitialJobId(projectId: Long): Long? {
     val jobs = batchJobService.getAllIncompleteJobIds(projectId)
+
+    // First priority: Find actually RUNNING jobs from database
+    // This prevents phantom locks from PENDING jobs that have chunks in queue but aren't executing
+    val runningJob =
+      jobs.find { incompleteJob ->
+        incompleteJob.status == io.tolgee.model.batch.BatchJobStatus.RUNNING
+      }
+    if (runningJob != null) {
+      logger.debug("Found RUNNING job ${runningJob.jobId} for project $projectId")
+      return runningJob.jobId
+    }
+
+    // Fallback: Use original logic for jobs that have started processing
     val unlockedChunkCounts =
       batchJobService
         .getAllUnlockedChunksForJobs(jobs.map { it.jobId })
-        .groupBy { it.batchJobId }.map { it.key to it.value.count() }.toMap()
+        .groupBy { it.batchJobId }
+        .map { it.key to it.value.count() }
+        .toMap()
     // we are looking for a job that has already started and preferably for a locked one
-    return jobs.find { it.totalChunks != unlockedChunkCounts[it.jobId] }?.jobId ?: jobs.firstOrNull()?.jobId
+    val startedJob = jobs.find { it.totalChunks != unlockedChunkCounts[it.jobId] }
+    if (startedJob != null) {
+      logger.debug("Found started job ${startedJob.jobId} for project $projectId (fallback logic)")
+      return startedJob.jobId
+    }
+
+    logger.debug("No RUNNING or PENDING jobs found for project $projectId, allowing new job to acquire lock")
+    return null
   }
 
   private fun getRedissonProjectLocks(): RMap<Long, Long> {

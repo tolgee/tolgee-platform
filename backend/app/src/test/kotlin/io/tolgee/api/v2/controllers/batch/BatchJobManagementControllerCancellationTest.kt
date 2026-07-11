@@ -1,66 +1,33 @@
 package io.tolgee.api.v2.controllers.batch
 
-import io.tolgee.ProjectAuthControllerTest
-import io.tolgee.batch.BatchJobActivityFinalizer
-import io.tolgee.batch.BatchJobChunkExecutionQueue
-import io.tolgee.batch.BatchJobConcurrentLauncher
-import io.tolgee.batch.BatchJobTestUtil
-import io.tolgee.batch.processors.MachineTranslationChunkProcessor
-import io.tolgee.development.testDataBuilder.data.BatchJobsTestData
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.waitFor
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.model.batch.BatchJobStatus
-import io.tolgee.service.machineTranslation.MtCreditBucketService
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
-import io.tolgee.util.BatchDumper
-import io.tolgee.util.Logging
 import io.tolgee.util.StuckBatchJobTestUtil
 import kotlinx.coroutines.ensureActive
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.SpyBean
+import org.springframework.boot.test.context.SpringBootTest
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.coroutines.CoroutineContext
 
-class BatchJobManagementControllerCancellationTest : ProjectAuthControllerTest("/v2/projects/"), Logging {
-  lateinit var testData: BatchJobsTestData
-
-  @Autowired
-  @SpyBean
-  lateinit var machineTranslationChunkProcessor: MachineTranslationChunkProcessor
-
-  @Autowired
-  lateinit var batchJobConcurrentLauncher: BatchJobConcurrentLauncher
-
-  @Suppress("LateinitVarOverridesLateinitVar")
-  @Autowired
-  @SpyBean
-  override lateinit var mtCreditBucketService: MtCreditBucketService
-
-  @SpyBean
-  @Autowired
-  lateinit var batchJobActivityFinalizer: BatchJobActivityFinalizer
-
-  @Autowired
-  lateinit var batchDumper: BatchDumper
-
-  lateinit var util: BatchJobTestUtil
-
-  @Autowired
-  lateinit var batchJobChunkExecutionQueue: BatchJobChunkExecutionQueue
-
+@SpringBootTest
+class BatchJobManagementControllerCancellationTest :
+  AbstractBatchJobManagementControllerTest(
+    "/v2/projects/",
+  ) {
   @Autowired
   lateinit var stuckBatchJobTestUtil: StuckBatchJobTestUtil
 
@@ -68,15 +35,6 @@ class BatchJobManagementControllerCancellationTest : ProjectAuthControllerTest("
 
   @BeforeEach
   fun setup() {
-    batchJobChunkExecutionQueue.clear()
-    testData = BatchJobsTestData()
-    batchJobChunkExecutionQueue.populateQueue()
-    Mockito.reset(
-      mtCreditBucketService,
-      machineTranslationChunkProcessor,
-      batchJobActivityFinalizer,
-    )
-    util = BatchJobTestUtil(applicationContext, testData)
     simulateLongRunningChunkRun = true
   }
 
@@ -106,7 +64,7 @@ class BatchJobManagementControllerCancellationTest : ProjectAuthControllerTest("
           }
         }
         it.callRealMethod()
-      }.whenever(machineTranslationChunkProcessor).process(any(), any(), any(), any())
+      }.whenever(machineTranslationChunkProcessor).process(any(), any(), any())
 
       performProjectAuthPost(
         "start-batch-job/machine-translate",
@@ -114,7 +72,9 @@ class BatchJobManagementControllerCancellationTest : ProjectAuthControllerTest("
           "keyIds" to keyIds,
           "targetLanguageIds" to
             listOf(
-              testData.projectBuilder.getLanguageByTag("cs")!!.self.id,
+              testData.projectBuilder
+                .getLanguageByTag("cs")!!
+                .self.id,
             ),
         ),
       ).andIsOk
@@ -129,13 +89,19 @@ class BatchJobManagementControllerCancellationTest : ProjectAuthControllerTest("
 
       waitForNotThrowing(pollTime = 100) {
         executeInNewTransaction {
-          util.getSingleJob().status.assert.isEqualTo(BatchJobStatus.CANCELLED)
+          val currentJob = util.getSingleJob()
+          currentJob.status.assert.isEqualTo(BatchJobStatus.CANCELLED)
+
           verify(batchJobActivityFinalizer, times(1)).finalizeActivityWhenJobCompleted(any())
 
           // assert activity stored
-          entityManager.createQuery("""from ActivityRevision ar where ar.batchJob.id = :id""")
-            .setParameter("id", job.id).resultList
-            .assert.hasSize(1)
+          val activityRevisions =
+            entityManager
+              .createQuery("""from ActivityRevision ar where ar.batchJob.id = :id""")
+              .setParameter("id", job.id)
+              .resultList
+
+          activityRevisions.assert.hasSize(1)
         }
       }
     }
@@ -176,12 +142,9 @@ class BatchJobManagementControllerCancellationTest : ProjectAuthControllerTest("
 
     performProjectAuthPut("batch-jobs/${job.id}/cancel").andIsOk
 
-    util.getSingleJob().status.assert.isEqualTo(BatchJobStatus.CANCELLED)
-  }
-
-  private fun saveAndPrepare() {
-    testDataService.saveTestData(testData.root)
-    userAccount = testData.user
-    this.projectSupplier = { testData.projectBuilder.self }
+    util
+      .getSingleJob()
+      .status.assert
+      .isEqualTo(BatchJobStatus.CANCELLED)
   }
 }

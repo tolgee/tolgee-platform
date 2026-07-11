@@ -11,10 +11,14 @@ import { useApiQuery } from 'tg.service/http/useQueryApi';
 import DashboardProjectListItem from 'tg.views/projects/DashboardProjectListItem';
 import { Button, styled } from '@mui/material';
 import { Link } from 'react-router-dom';
-import { useIsAdmin, usePreferredOrganization } from 'tg.globalContext/helpers';
+import {
+  useIsAdminOrSupporter,
+  useIsOrganizationOwnerOrMaintainer,
+  usePreferredOrganization,
+} from 'tg.globalContext/helpers';
 import { OrganizationSwitch } from 'tg.component/organizationSwitch/OrganizationSwitch';
-import { Usage } from 'tg.component/billing/Usage';
 import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
+import { CriticalUsageCircle } from 'tg.ee';
 
 const StyledWrapper = styled('div')`
   display: flex;
@@ -49,14 +53,14 @@ export const ProjectListView = () => {
 
   const { t } = useTranslate();
 
-  const isOrganizationOwner =
-    preferredOrganization?.currentUserRole === 'OWNER';
+  const isOrganizationOwnerOrMaintainer = useIsOrganizationOwnerOrMaintainer();
 
-  const isAdmin = useIsAdmin();
+  const isAdminOrSupporter = useIsAdminOrSupporter();
 
-  const isAdminAccess = !preferredOrganization?.currentUserRole && isAdmin;
+  const isAdminAccess =
+    !preferredOrganization?.currentUserRole && isAdminOrSupporter;
 
-  const addAllowed = isOrganizationOwner || isAdminAccess;
+  const addAllowed = isOrganizationOwnerOrMaintainer || isAdminAccess;
 
   const showSearch =
     search || (listPermitted.data?.page?.totalElements ?? 0) > 5;
@@ -86,7 +90,7 @@ export const ProjectListView = () => {
             [<OrganizationSwitch key={0} />],
             [t('projects_title'), LINKS.PROJECTS.build()],
           ]}
-          navigationRight={<Usage />}
+          navigationRight={<CriticalUsageCircle />}
           loading={listPermitted.isFetching}
         >
           <PaginatedHateoasList
@@ -98,7 +102,7 @@ export const ProjectListView = () => {
               <EmptyListMessage
                 loading={listPermitted.isFetching}
                 hint={
-                  isOrganizationOwner ? (
+                  isOrganizationOwnerOrMaintainer ? (
                     <Button
                       component={Link}
                       to={LINKS.PROJECT_ADD.build()}

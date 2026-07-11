@@ -6,7 +6,6 @@ import io.tolgee.dtos.request.SingleStepImportRequest
 import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.formats.json.`in`.JsonFileProcessor
 import io.tolgee.testing.assert
-import io.tolgee.unit.formats.PlaceholderConversionTestHelper
 import io.tolgee.util.FileProcessorContextMockUtil
 import io.tolgee.util.assertKey
 import io.tolgee.util.assertLanguagesCount
@@ -38,35 +37,43 @@ class JsonFormatProcessorTest {
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
     mockUtil.fileProcessorContext.assertTranslations("example", "common.save")
     mockUtil.fileProcessorContext.assertTranslations("example", "array[0]")
-    mockUtil.fileProcessorContext.assertTranslations("example", "array[1]")
+    mockUtil.fileProcessorContext
+      .assertTranslations("example", "array[1]")
       .assertSingle {
         hasText("two")
       }
-    mockUtil.fileProcessorContext.assertTranslations("example", "array[2]")
+    mockUtil.fileProcessorContext
+      .assertTranslations("example", "array[2]")
       .assertSingle {
         hasText("three")
       }
-    mockUtil.fileProcessorContext.assertTranslations("example", "a.b.c")
+    mockUtil.fileProcessorContext
+      .assertTranslations("example", "a.b.c")
       .assertSingle {
         hasText("This is nested hard.")
       }
-    mockUtil.fileProcessorContext.assertTranslations("example", "a.b.d[0]")
+    mockUtil.fileProcessorContext
+      .assertTranslations("example", "a.b.d[0]")
       .assertSingle {
         hasText("one")
       }
-    mockUtil.fileProcessorContext.assertTranslations("example", "a.b.d[1]")
+    mockUtil.fileProcessorContext
+      .assertTranslations("example", "a.b.d[1]")
       .assertSingle {
         hasText("two")
       }
-    mockUtil.fileProcessorContext.assertTranslations("example", "a.b.d[2]")
+    mockUtil.fileProcessorContext
+      .assertTranslations("example", "a.b.d[2]")
       .assertSingle {
         hasText("three")
       }
-    mockUtil.fileProcessorContext.assertTranslations("example", "boolean")
+    mockUtil.fileProcessorContext
+      .assertTranslations("example", "boolean")
       .assertSingle {
         hasText("true")
       }
-    mockUtil.fileProcessorContext.keys.assert.containsKeys("null")
+    mockUtil.fileProcessorContext.keys.assert
+      .containsKeys("null")
   }
 
   @Test
@@ -74,11 +81,13 @@ class JsonFormatProcessorTest {
     mockUtil.mockIt("example.json", "src/test/resources/import/json/example_root_array.json")
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("example", "[0]")
+    mockUtil.fileProcessorContext
+      .assertTranslations("example", "[0]")
       .assertSingle {
         hasText("item 1")
       }
-    mockUtil.fileProcessorContext.assertTranslations("example", "[1]")
+    mockUtil.fileProcessorContext
+      .assertTranslations("example", "[1]")
       .assertSingle {
         hasText("item 2")
       }
@@ -88,11 +97,13 @@ class JsonFormatProcessorTest {
   fun `import with placeholder conversion (disabled ICU)`() {
     mockPlaceholderConversionTestFile(convertPlaceholders = false, projectIcuPlaceholdersEnabled = false)
     processFile()
-    mockUtil.fileProcessorContext.assertTranslations("en", "key")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "key")
       .assertSingle {
         hasText("Hello {icuPara}")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "plural")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "plural")
       .assertSinglePlural {
         hasText(
           """
@@ -112,11 +123,13 @@ class JsonFormatProcessorTest {
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "key")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "key")
       .assertSingle {
         hasText("Hello {icuPara}")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "plural")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "plural")
       .assertSinglePlural {
         hasText(
           """
@@ -134,11 +147,13 @@ class JsonFormatProcessorTest {
   fun `import with placeholder conversion (with conversion)`() {
     mockPlaceholderConversionTestFile(convertPlaceholders = true, projectIcuPlaceholdersEnabled = true)
     processFile()
-    mockUtil.fileProcessorContext.assertTranslations("en", "key")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "key")
       .assertSingle {
         hasText("Hello {icuPara}")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "plural")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "plural")
       .assertSinglePlural {
         hasText(
           """
@@ -157,27 +172,6 @@ class JsonFormatProcessorTest {
   }
 
   @Test
-  fun `placeholder conversion setting application works`() {
-    PlaceholderConversionTestHelper.testFile(
-      "en.json",
-      "src/test/resources/import/json/java.json",
-      assertBeforeSettingsApplication =
-        listOf(
-          "%D this is java {1, number}",
-          "%D this is java",
-        ),
-      assertAfterDisablingConversion =
-        listOf(
-          "%D this is java %d",
-        ),
-      assertAfterReEnablingConversion =
-        listOf(
-          "%D this is java {1, number}",
-        ),
-    )
-  }
-
-  @Test
   fun `respects provided format`() {
     mockUtil.mockIt("en.json", "src/test/resources/import/json/icu.json")
     mockUtil.fileProcessorContext.params =
@@ -186,11 +180,32 @@ class JsonFormatProcessorTest {
       }
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "key")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "key")
       .assertSingle {
         // it's escaped, because php cannot contain ICU
         hasText("'{'param'}'")
       }
+  }
+
+  @Test
+  fun `converts java-style placeholders in JSON`() {
+    val processor =
+      mockUtil.mockCoreProcessor(
+        fileName = "en.json",
+        resourcesFilePath = "src/test/resources/import/json/java.json",
+      )
+    processor.processFiles(listOf(mockUtil.importFileDto))
+    mockUtil
+      .getSavedTranslations()
+      .map { it.text }
+      .assert
+      .isEqualTo(
+        listOf(
+          "%D this is java {1, number}",
+          "%D this is java",
+        ),
+      )
   }
 
   private fun mockPlaceholderConversionTestFile(

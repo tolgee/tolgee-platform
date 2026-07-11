@@ -1,6 +1,6 @@
 import { ComponentProps, FunctionComponent, useRef, useState } from 'react';
-import { Button, styled, Tooltip, Popover, Checkbox } from '@mui/material';
-import { ArrowDropDown, CheckBoxOutlineBlank } from '@mui/icons-material';
+import { Button, Checkbox, Popover, styled, Tooltip } from '@mui/material';
+import { ArrowDropDown, CheckBoxOutlineBlank } from 'tg.component/CustomIcons';
 import { useTranslate } from '@tolgee/react';
 
 import { LanguagesPermittedList } from 'tg.component/languages/LanguagesPermittedList';
@@ -8,25 +8,25 @@ import { SearchSelectMulti } from 'tg.component/searchSelect/SearchSelectMulti';
 import { StyledInputContent } from 'tg.component/searchSelect/SearchStyled';
 import { CircledLanguageIcon } from 'tg.component/languages/CircledLanguageIcon';
 import { LanguageModel } from 'tg.component/PermissionsSettings/types';
-import { isAllLanguages } from 'tg.ee/PermissionsAdvanced/hierarchyTools';
 import { CompactMenuItem } from 'tg.component/ListComponents';
+import { isAllLanguages } from 'tg.component/PermissionsSettings/hierarchyTools';
 
 const StyledButton = styled(Button)`
-  padding: 0px;
-  padding-left: 7px;
-  padding-right: 5px;
+  padding: 0 5px 0 7px;
   background: ${({ theme }) => theme.palette.background.default};
 `;
 
-export const LanguagePermissionsMenu: FunctionComponent<{
-  selected: number[];
-  onSelect: (value: number[]) => void;
-  buttonProps?: ComponentProps<typeof Button>;
-  disabled?: boolean | number[];
-  allLanguages: LanguageModel[];
-  selectAllButton?: boolean;
-  emptyLabel?: string;
-}> = (props) => {
+export const LanguagePermissionsMenu: FunctionComponent<
+  React.PropsWithChildren<{
+    selected: number[];
+    onSelect: (value: number[]) => void;
+    buttonProps?: ComponentProps<typeof Button>;
+    disabled?: boolean | number[];
+    allLanguages: LanguageModel[];
+    selectAllButton?: boolean;
+    emptyLabel?: string;
+  }>
+> = (props) => {
   const anchorEl = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
   const { t } = useTranslate();
@@ -140,8 +140,8 @@ export const LanguagePermissionsMenu: FunctionComponent<{
             maxWidth={400}
             renderOption={(renderProps, option) => (
               <CompactMenuItem
-                key={option.value}
                 {...renderProps}
+                key={option.value}
                 data-cy="search-select-item"
                 disabled={disabledLanguages.includes(option.value)}
               >

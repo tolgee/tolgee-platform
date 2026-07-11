@@ -12,11 +12,13 @@ fun <T> executeInNewTransaction(
   transactionManager: PlatformTransactionManager,
   isolationLevel: Int = TransactionDefinition.ISOLATION_READ_COMMITTED,
   propagationBehavior: Int = TransactionDefinition.PROPAGATION_REQUIRES_NEW,
+  readOnly: Boolean = false,
   fn: (ts: TransactionStatus) -> T,
 ): T {
   val tt = TransactionTemplate(transactionManager)
   tt.propagationBehavior = propagationBehavior
   tt.isolationLevel = isolationLevel
+  tt.isReadOnly = readOnly
 
   return tt.execute { ts ->
     fn(ts)
@@ -25,12 +27,14 @@ fun <T> executeInNewTransaction(
 
 fun <T> executeInNewTransaction(
   transactionManager: PlatformTransactionManager,
+  readOnly: Boolean = false,
   fn: (ts: TransactionStatus) -> T,
 ): T {
   return executeInNewTransaction(
     transactionManager = transactionManager,
     fn = fn,
     propagationBehavior = TransactionDefinition.PROPAGATION_REQUIRES_NEW,
+    readOnly = readOnly,
   )
 }
 
@@ -65,5 +69,7 @@ fun <T> executeInNewRepeatableTransaction(
   throw RepeatedlyCannotSerializeTransactionException(exception!!, repeats)
 }
 
-class RepeatedlyCannotSerializeTransactionException(cause: Throwable, repeats: Int) :
-  RuntimeException("Retry failed $repeats times.", cause)
+class RepeatedlyCannotSerializeTransactionException(
+  cause: Throwable,
+  repeats: Int,
+) : RuntimeException("Retry failed $repeats times.", cause)

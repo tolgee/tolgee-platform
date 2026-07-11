@@ -2,8 +2,8 @@ export class Link {
   _template: string;
 
   /**
-   * Constructor is private to avoid creating of unrefactorable links
-   * @param template
+   * Private to force construction via `ofRoot` / `ofParent`, so all links are
+   * refactor-safe and composed from the existing hierarchy.
    */
   private constructor(template: string) {
     this._template = template;
@@ -30,9 +30,8 @@ export class Link {
     return new Link(`${link ? link.template : ''}/${itemTemplate}`);
   }
 
-  public build(params?: { [key: string]: string | number }): string {
+  public build(params: { [key: string]: string | number } = {}): string {
     let link = this.template;
-    params = params ? params : {};
     for (const param of Object.keys(params)) {
       link = link.replace(`:${param}`, params[param].toString());
     }
@@ -59,8 +58,14 @@ export enum PARAMS {
   USER_ID = 'userID',
   VERIFICATION_CODE = 'verificationCode',
   ORGANIZATION_SLUG = 'slug',
+  GLOSSARY_ID = 'glossaryId',
+  TRANSLATION_MEMORY_ID = 'translationMemoryId',
   TRANSLATION_ID = 'translationId',
   PLAN_ID = 'planId',
+  TA_ID = 'taId',
+  BRANCH = 'branch',
+  MERGE_ID = 'mergeId',
+  PLAN_MIGRATION_ID = 'migrationId',
 }
 
 export class LINKS {
@@ -76,6 +81,8 @@ export class LINKS {
     LINKS.LOGIN,
     'auth_callback/' + p(PARAMS.SERVICE_TYPE)
   );
+
+  static SSO_LOGIN = Link.ofRoot('sso');
 
   static EMAIL_VERIFICATION = Link.ofParent(
     LINKS.LOGIN,
@@ -97,6 +104,12 @@ export class LINKS {
     'accept_invitation/' + p(PARAMS.INVITATION_CODE)
   );
 
+  static SSO_MIGRATION = Link.ofRoot('sso_migration');
+
+  static ACCEPT_AUTH_PROVIDER_CHANGE = Link.ofRoot(
+    'accept_auth_provider_change'
+  );
+
   static GO_TO_CLOUD_BILLING = Link.ofRoot('billing');
   static GO_TO_SELF_HOSTED_BILLING = Link.ofRoot('billing-self-hosted');
 
@@ -107,6 +120,11 @@ export class LINKS {
    */
 
   static USER_SETTINGS = Link.ofRoot('account');
+
+  static USER_ACCOUNT_NOTIFICATIONS = Link.ofParent(
+    LINKS.USER_SETTINGS,
+    'notifications'
+  );
 
   static USER_API_KEYS = Link.ofParent(LINKS.USER_SETTINGS, 'apiKeys');
 
@@ -161,6 +179,8 @@ export class LINKS {
     'disable-mfa'
   );
 
+  static MY_TASKS = Link.ofRoot('my-tasks');
+
   /**
    * Notifications
    */
@@ -189,36 +209,6 @@ export class LINKS {
   static ADMINISTRATION_EE_LICENSE = Link.ofParent(
     LINKS.ADMINISTRATION,
     'ee-license'
-  );
-
-  static ADMINISTRATION_BILLING_CLOUD_PLANS = Link.ofParent(
-    LINKS.ADMINISTRATION,
-    'cloud-plans'
-  );
-
-  static ADMINISTRATION_BILLING_CLOUD_PLAN_EDIT = Link.ofParent(
-    LINKS.ADMINISTRATION_BILLING_CLOUD_PLANS,
-    p(PARAMS.PLAN_ID)
-  );
-
-  static ADMINISTRATION_BILLING_CLOUD_PLAN_CREATE = Link.ofParent(
-    LINKS.ADMINISTRATION_BILLING_CLOUD_PLANS,
-    'create'
-  );
-
-  static ADMINISTRATION_BILLING_EE_PLANS = Link.ofParent(
-    LINKS.ADMINISTRATION,
-    'ee-plans'
-  );
-
-  static ADMINISTRATION_BILLING_EE_PLAN_EDIT = Link.ofParent(
-    LINKS.ADMINISTRATION_BILLING_EE_PLANS,
-    p(PARAMS.PLAN_ID)
-  );
-
-  static ADMINISTRATION_BILLING_EE_PLAN_CREATE = Link.ofParent(
-    LINKS.ADMINISTRATION_BILLING_EE_PLANS,
-    'create'
   );
 
   /**
@@ -256,19 +246,48 @@ export class LINKS {
 
   static ORGANIZATION_INVOICES = Link.ofParent(LINKS.ORGANIZATION, 'invoices');
 
+  static ORGANIZATION_SSO = Link.ofParent(LINKS.ORGANIZATION, 'sso');
+
   static ORGANIZATION_BILLING_TEST_CLOCK_HELPER = Link.ofParent(
     LINKS.ORGANIZATION,
     'billing-test-clock-helper'
   );
 
-  static ORGANIZATION_BILLING_PLANS_EDIT = Link.ofParent(
-    LINKS.ORGANIZATION,
-    'billing-plans-edit'
-  );
-
   static ORGANIZATION_SUBSCRIPTIONS_SELF_HOSTED_EE = Link.ofParent(
     LINKS.ORGANIZATION_SUBSCRIPTIONS,
     'self-hosted-ee'
+  );
+
+  static ORGANIZATION_LLM_PROVIDERS = Link.ofParent(
+    LINKS.ORGANIZATION,
+    'llm-providers'
+  );
+
+  static ORGANIZATION_LLM_PROVIDERS_SERVER = Link.ofParent(
+    LINKS.ORGANIZATION_LLM_PROVIDERS,
+    'server'
+  );
+
+  static ORGANIZATION_GLOSSARIES = Link.ofParent(
+    LINKS.ORGANIZATION,
+    'glossaries'
+  );
+
+  static ORGANIZATION_GLOSSARY = Link.ofParent(
+    LINKS.ORGANIZATION_GLOSSARIES,
+    p(PARAMS.GLOSSARY_ID)
+  );
+
+  static ORGANIZATION_GLOSSARY_VIEW = LINKS.ORGANIZATION_GLOSSARY;
+
+  static ORGANIZATION_TRANSLATION_MEMORIES = Link.ofParent(
+    LINKS.ORGANIZATION,
+    'translation-memories'
+  );
+
+  static ORGANIZATION_TRANSLATION_MEMORY = Link.ofParent(
+    LINKS.ORGANIZATION_TRANSLATION_MEMORIES,
+    p(PARAMS.TRANSLATION_MEMORY_ID)
   );
 
   /**
@@ -300,9 +319,43 @@ export class LINKS {
 
   static PROJECT_TRANSLATIONS = Link.ofParent(LINKS.PROJECT, 'translations');
 
+  static PROJECT_TRANSLATIONS_WITH_BRANCH = Link.ofParent(
+    LINKS.PROJECT_TRANSLATIONS,
+    'tree/' + p(PARAMS.BRANCH)
+  );
+
+  static PROJECT_TRANSLATIONS_TRASH = Link.ofParent(
+    LINKS.PROJECT_TRANSLATIONS,
+    'trash'
+  );
+
+  static PROJECT_TRANSLATIONS_TRASH_BRANCHED = Link.ofParent(
+    LINKS.PROJECT_TRANSLATIONS_TRASH,
+    'tree/' + p(PARAMS.BRANCH) + '*'
+  );
+
   static PROJECT_TRANSLATIONS_SINGLE = Link.ofParent(
     LINKS.PROJECT_TRANSLATIONS,
     'single'
+  );
+
+  static PROJECT_TRANSLATIONS_SINGLE_WITH_BRANCH = Link.ofParent(
+    LINKS.PROJECT_TRANSLATIONS_SINGLE,
+    'tree/' + p(PARAMS.BRANCH)
+  );
+
+  static PROJECT_TASKS = Link.ofParent(LINKS.PROJECT, 'tasks');
+
+  static PROJECT_BRANCHES = Link.ofParent(LINKS.PROJECT, 'branches');
+
+  static PROJECT_BRANCHES_MERGES = Link.ofParent(
+    LINKS.PROJECT_BRANCHES,
+    'merges'
+  );
+
+  static PROJECT_BRANCHES_MERGE = Link.ofParent(
+    LINKS.PROJECT_BRANCHES,
+    'merge/' + p(PARAMS.MERGE_ID)
   );
 
   static PROJECT_EXPORT = Link.ofParent(LINKS.PROJECT, 'export');
@@ -315,6 +368,12 @@ export class LINKS {
   static PROJECT_ACTIVITY_GROUPS = Link.ofParent(LINKS.PROJECT, 'activity');
 
   static PROJECT_DASHBOARD = LINKS.PROJECT;
+
+  static PROJECT_AI = Link.ofParent(LINKS.PROJECT, 'ai');
+
+  static PROJECT_CONTEXT_DATA = Link.ofParent(LINKS.PROJECT_AI, 'context-data');
+
+  static PROJECT_AI_PROMPTS = Link.ofParent(LINKS.PROJECT_AI, 'prompts');
 
   static PROJECT_INTEGRATE = Link.ofParent(LINKS.PROJECT, 'integrate');
 
@@ -335,12 +394,12 @@ export class LINKS {
 
   static PROJECT_EDIT = Link.ofParent(LINKS.PROJECT_MANAGE, 'edit');
   static PROJECT_EDIT_ADVANCED = Link.ofParent(LINKS.PROJECT_EDIT, 'advanced');
+  static PROJECT_EDIT_QA = Link.ofParent(LINKS.PROJECT_EDIT, 'qa');
+  static PROJECT_EDIT_LABELS = Link.ofParent(LINKS.PROJECT_EDIT, 'labels');
 
   static PROJECT_LANGUAGES = Link.ofParent(LINKS.PROJECT, 'languages');
 
   static PROJECT_LANGUAGES_MT = Link.ofParent(LINKS.PROJECT_LANGUAGES, 'mt');
-
-  static PROJECT_LANGUAGES_AI = Link.ofParent(LINKS.PROJECT_LANGUAGES, 'ai');
 
   static PROJECT_EDIT_LANGUAGE = Link.ofParent(
     LINKS.PROJECT_LANGUAGES,
@@ -368,6 +427,8 @@ export class LINKS {
     'activity-detail'
   );
 
+  static GO_TO_PROJECT_TASK = Link.ofParent(LINKS.PROJECT, 'task');
+
   /**
    * Slack
    */
@@ -375,4 +436,97 @@ export class LINKS {
   static SLACK = Link.ofRoot('slack');
   static SLACK_CONNECT = Link.ofParent(LINKS.SLACK, 'connect');
   static SLACK_CONNECTED = Link.ofParent(LINKS.SLACK, 'connected');
+
+  /**
+   * Represents a generated link for branched project views
+   */
+  static PROJECT_TRANSLATIONS_BRANCHED = Link.ofParent(
+    LINKS.PROJECT_TRANSLATIONS,
+    'tree/' + p(PARAMS.BRANCH) + '*'
+  );
+  static PROJECT_TRANSLATIONS_SINGLE_BRANCHED = Link.ofParent(
+    LINKS.PROJECT_TRANSLATIONS_SINGLE,
+    'tree/' + p(PARAMS.BRANCH) + '*'
+  );
+  static PROJECT_DASHBOARD_BRANCHED = Link.ofParent(
+    LINKS.PROJECT,
+    'tree/' + p(PARAMS.BRANCH) + '*'
+  );
+  static PROJECT_IMPORT_BRANCHED = Link.ofParent(
+    LINKS.PROJECT_IMPORT,
+    'tree/' + p(PARAMS.BRANCH) + '*'
+  );
+  static PROJECT_EXPORT_BRANCHED = Link.ofParent(
+    LINKS.PROJECT_EXPORT,
+    'tree/' + p(PARAMS.BRANCH) + '*'
+  );
+  static PROJECT_TASKS_BRANCHED = Link.ofParent(LINKS.PROJECT_TASKS, '*');
 }
+
+export enum QUERY {
+  TRANSLATIONS_PREFILTERS_ACTIVITY = 'activity',
+  TRANSLATIONS_PREFILTERS_FAILED_JOB = 'failedJob',
+  TRANSLATIONS_PREFILTERS_TASK = 'task',
+  TRANSLATIONS_PREFILTERS_TASK_HIDE_CLOSED = 'taskHideClosed',
+  TRANSLATIONS_TASK_DETAIL = 'taskDetail',
+  TRANSLATIONS_VIEW = 'view',
+  TASKS_FILTERS_SHOW_ALL = 'showAll',
+  TRANSLATIONS_AI_PLAYGROUND = 'aiPlayground',
+  TRANSLATIONS_AI_PLAYGROUND_PROMPT = 'prompt',
+}
+
+export const getProjectTranslationsUrl = (
+  projectId: number,
+  options?: {
+    languages?: string[];
+    filters?: Record<string, unknown>;
+  }
+) => {
+  const base = LINKS.PROJECT_TRANSLATIONS.build({
+    [PARAMS.PROJECT_ID]: projectId,
+  });
+  const params = new URLSearchParams();
+  if (options?.languages?.length) {
+    options.languages.forEach((l) => params.append('languages', l));
+  }
+  if (options?.filters && Object.keys(options.filters).length > 0) {
+    params.set('filters', JSON.stringify(options.filters));
+  }
+  const query = params.toString();
+  return query ? `${base}?${query}` : base;
+};
+
+export const getTaskUrl = (projectId: number, taskNumber: number) => {
+  return `${LINKS.GO_TO_PROJECT_TASK.build({
+    [PARAMS.PROJECT_ID]: projectId,
+  })}?number=${taskNumber}`;
+};
+
+export const getAiPlaygroundUrl = (
+  projectId: number,
+  promptId?: number,
+  view?: 'TABLE'
+) => {
+  let link = `${LINKS.PROJECT_TRANSLATIONS.build({
+    [PARAMS.PROJECT_ID]: projectId,
+  })}?${QUERY.TRANSLATIONS_AI_PLAYGROUND}=1`;
+  if (promptId !== undefined) {
+    link += `&${QUERY.TRANSLATIONS_AI_PLAYGROUND_PROMPT}=${promptId}`;
+  }
+  if (view === 'TABLE') {
+    link += `&${QUERY.TRANSLATIONS_VIEW}=${view}`;
+  }
+  return link;
+};
+
+export const getGlossaryTermSearchUrl = (
+  organizationSlug: string,
+  glossaryId: number,
+  search: string
+) => {
+  const encodedSearch = encodeURIComponent(search.toString());
+  return `${LINKS.ORGANIZATION_GLOSSARY.build({
+    [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
+    [PARAMS.GLOSSARY_ID]: glossaryId,
+  })}?search=${encodedSearch}`;
+};

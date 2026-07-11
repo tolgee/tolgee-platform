@@ -8,8 +8,8 @@ import {
   styled,
 } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
+import { Moon01, Sun } from '@untitled-ui/icons-react';
 import { useThemeContext } from '../../../ThemeProvider';
-import { DarkMode, LightMode } from '@mui/icons-material';
 
 const StyledButtonGroup = styled(ButtonGroup)`
   & .${buttonGroupClasses.grouped} {
@@ -38,7 +38,7 @@ export const ThemeItem = () => {
             color={mode === 'light' ? 'primary' : 'default'}
             onClick={() => setMode('light')}
           >
-            <LightMode fontSize="small" />
+            <Sun height={18} />
           </Button>
         </Tooltip>
         <Tooltip
@@ -50,7 +50,7 @@ export const ThemeItem = () => {
             color={mode === 'dark' ? 'primary' : 'default'}
             onClick={() => setMode('dark')}
           >
-            <DarkMode fontSize="small" />
+            <Moon01 height={18} />
           </Button>
         </Tooltip>
         <Button

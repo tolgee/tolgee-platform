@@ -7,9 +7,11 @@ import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
+import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.isValidId
+import io.tolgee.fixtures.satisfies
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.translation.Translation
@@ -67,7 +69,8 @@ class TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/pr
   fun `normalizes plurals on set for existing`() {
     testData.addPluralKey()
     saveTestData()
-    performUpdatePluralKey("Hello! {count, plural, other {test}}").andIsOk
+    performUpdatePluralKey("Hello! {count, plural, other {test}}")
+      .andIsOk
       .andAssertThatJson {
         node("translations.en.text").isString.isEqualTo("{count, plural,\nother {Hello! test}\n}")
         node("keyIsPlural").isBoolean.isTrue
@@ -112,13 +115,19 @@ class TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/pr
   fun `works with empty string`() {
     val key = testData.addPluralKey()
     saveTestData()
-    performUpdatePluralKey("").andIsOk
+    performUpdatePluralKey("")
+      .andIsOk
       .andAssertThatJson {
         node("translations.en.text").isEqualTo(null)
       }
 
     executeInNewTransaction {
-      keyService.get(key.id).translations.find { it.language.tag == "en" }!!.text.assert.isNull()
+      keyService
+        .get(key.id)
+        .translations
+        .find { it.language.tag == "en" }!!
+        .text.assert
+        .isNull()
     }
   }
 
@@ -201,7 +210,8 @@ class TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/pr
   fun `sets translation state`() {
     saveTestData()
     val id = testData.aKeyGermanTranslation.id
-    performProjectAuthPut("/translations/$id/set-state/TRANSLATED", null).andIsOk
+    performProjectAuthPut("/translations/$id/set-state/TRANSLATED", null)
+      .andIsOk
       .andAssertThatJson {
         node("state").isEqualTo("TRANSLATED")
         node("id").isValidId.satisfies { id ->
@@ -330,7 +340,7 @@ class TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/pr
 
   @ProjectJWTAuthTestMethod
   @Test
-  fun `updates outdated flag when base updated`() {
+  fun `updates outdated flag and base state when base updated`() {
     testData.addTranslationsWithStates()
     saveTestData()
     performProjectAuthPut(
@@ -343,6 +353,7 @@ class TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/pr
       ),
     ).andAssertThatJson {
       node("translations.en.outdated").isEqualTo(false)
+      node("translations.en.state").isEqualTo("TRANSLATED")
       node("translations.de.outdated").isEqualTo(true)
     }
   }
@@ -387,6 +398,20 @@ class TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/pr
     val translation = testData.aKeyGermanTranslation
     testOutdated(translation, false)
     testOutdated(translation, true)
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `cannot set translations for key in branch without branch provided`() {
+    saveTestData()
+    performProjectAuthPut(
+      "/translations",
+      SetTranslationsWithKeyDto(
+        "branch key",
+        null,
+        mutableMapOf("en" to "Cannot do that"),
+      ),
+    ).andIsNotFound
   }
 
   private fun testOutdated(

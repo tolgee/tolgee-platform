@@ -1,7 +1,7 @@
 import { Box, styled } from '@mui/material';
 
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
-import { useCurrentLanguage } from 'tg.hooks/useCurrentLanguage';
+import { useCurrentLanguage } from '@tginternal/library/hooks/useCurrentLanguage';
 import { ActivityModel } from './types';
 import { UserName } from '../common/UserName';
 
@@ -36,7 +36,10 @@ type Props = {
   onlyTime?: boolean;
 };
 
-export const ActivityUser: React.FC<Props> = ({ item, onlyTime }) => {
+export const ActivityUser: React.FC<React.PropsWithChildren<Props>> = ({
+  item,
+  onlyTime,
+}) => {
   const date = new Date(item.timestamp);
   const lang = useCurrentLanguage();
 

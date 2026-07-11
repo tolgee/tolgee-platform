@@ -5,20 +5,33 @@ import { useTranslationCell } from '../useTranslationCell';
 import { TranslationVisual } from '../translationVisual/TranslationVisual';
 import { ControlsTranslation } from '../cell/ControlsTranslation';
 import { TranslationFlags } from '../cell/TranslationFlags';
+import { AiPlaygroundPreview } from '../translationVisual/AiPlaygroundPreview';
+import { TranslationLabels } from 'tg.views/projects/translations/TranslationsList/TranslationLabels';
+import { SuggestionsFirst } from '../Suggestions/SuggestionsFirst';
+import { useQaChecksEnabled, useQaDisabledLanguageIds } from 'tg.ee';
+import { getFirstPluralVariantWithQaIssues } from 'tg.fixtures/qaUtils';
 
 const StyledContainer = styled('div')`
   display: grid;
   grid-template-columns: auto 1fr;
   grid-template-rows: 1fr auto;
   grid-template-areas:
-    'translation translation '
-    'flags       controls  ';
+    'translation translation translation '
+    'flags       labels      controls  ';
 
   .flags {
-    padding: 0px 12px 4px 16px;
+    padding: 0 8px 1px 4px;
     grid-area: flags;
     display: flex;
     align-items: center;
+    & > div:first-child {
+      margin-left: 2px;
+    }
+  }
+
+  .labels {
+    padding: 0 0 3px 0;
+    min-width: 0;
   }
 
   .controls {
@@ -29,10 +42,14 @@ const StyledContainer = styled('div')`
 `;
 
 const StyledTranslation = styled('div')`
+  display: grid;
+  grid-auto-rows: max-content;
   grid-area: translation;
   min-height: 23px;
   margin: 8px 12px 0px 16px;
   position: relative;
+  gap: 8px;
+  align-content: start;
 `;
 
 type Props = {
@@ -44,7 +61,7 @@ type Props = {
   tools: ReturnType<typeof useTranslationCell>;
 };
 
-export const TranslationRead: React.FC<Props> = ({
+export const TranslationRead: React.FC<React.PropsWithChildren<Props>> = ({
   width,
   active,
   lastFocusable,
@@ -53,28 +70,33 @@ export const TranslationRead: React.FC<Props> = ({
 }) => {
   const {
     isEditing,
+    isEditingRow,
+    editingLanguageTag,
     handleOpen,
     handleClose,
     setState: handleStateChange,
     translation,
     language,
     canChangeState,
-    editEnabled,
     keyData,
+    setAssignedTaskState,
+    aiPlaygroundEnabled,
+    aiPlaygroundData,
+    cellClickable,
+    addLabel,
+    removeLabel,
   } = tools;
 
-  const toggleEdit = () => {
-    if (isEditing) {
-      handleClose();
-    } else {
-      handleOpen();
-    }
-  };
+  const qaChecksEnabled = useQaChecksEnabled();
+  const qaDisabledLanguageIds = useQaDisabledLanguageIds();
+  const languageQaEnabled =
+    qaChecksEnabled && !qaDisabledLanguageIds.has(language.id);
+
+  const toggleEdit = () => (isEditing ? handleClose() : handleOpen());
 
   const state = translation?.state || 'UNTRANSLATED';
 
   const disabled = state === 'DISABLED';
-  const editable = editEnabled && !disabled;
 
   return (
     <StyledContainer
@@ -82,35 +104,78 @@ export const TranslationRead: React.FC<Props> = ({
       data-cy="translations-table-cell"
       data-cy-language={language.tag}
       data-cy-key={keyData.keyName}
-      onClick={editable && !isEditing ? () => toggleEdit() : undefined}
+      onClick={cellClickable ? toggleEdit : undefined}
     >
       <StyledTranslation>
         <TranslationVisual
           width={width}
           text={translation?.text}
           locale={language.tag}
+          targetLocale={editingLanguageTag}
           disabled={disabled}
+          showHighlights={isEditingRow && language.base}
           isPlural={keyData.keyIsPlural}
+          qaIssues={languageQaEnabled ? translation?.qaIssues : undefined}
+          translationId={translation?.id}
         />
+        {Boolean(translation?.totalSuggestionCount) && (
+          <SuggestionsFirst
+            suggestions={translation!.suggestions ?? []}
+            count={translation!.activeSuggestionCount}
+            isPlural={keyData.keyIsPlural}
+            locale={language.tag}
+          />
+        )}
+        {aiPlaygroundData && (
+          <AiPlaygroundPreview
+            translation={aiPlaygroundData.translation}
+            tooltip={aiPlaygroundData.contextDescription}
+            isPlural={keyData.keyIsPlural}
+            locale={language.tag}
+          />
+        )}
       </StyledTranslation>
       <TranslationFlags
         className="flags"
         keyData={keyData}
         lang={language.tag}
       />
-      <ControlsTranslation
-        onEdit={() => handleOpen()}
-        onComments={() => handleOpen('comments')}
-        commentsCount={translation?.commentCount}
-        unresolvedCommentCount={translation?.unresolvedCommentCount}
-        stateChangeEnabled={canChangeState}
-        editEnabled={editable}
-        state={state}
-        onStateChange={handleStateChange}
-        active={active}
-        lastFocusable={lastFocusable}
-        className="controls"
+      <TranslationLabels
+        labels={translation?.labels}
+        className="labels"
+        onSelect={(label) => addLabel(label.id)}
+        onDelete={(labelId) => removeLabel(labelId)}
       />
+      {!aiPlaygroundEnabled && (
+        <ControlsTranslation
+          onEdit={() => handleOpen()}
+          onComments={() => handleOpen('comments')}
+          onQaIssues={() =>
+            handleOpen(
+              'qa_checks',
+              keyData.keyIsPlural
+                ? getFirstPluralVariantWithQaIssues(
+                    translation?.qaIssues,
+                    language.tag
+                  )
+                : undefined
+            )
+          }
+          commentsCount={translation?.commentCount}
+          unresolvedCommentCount={translation?.unresolvedCommentCount}
+          qaIssueCount={translation?.qaIssueCount}
+          qaChecksStale={translation?.qaChecksStale}
+          stateChangeEnabled={canChangeState}
+          editEnabled={cellClickable}
+          state={state}
+          onStateChange={handleStateChange}
+          active={active}
+          lastFocusable={lastFocusable}
+          className="controls"
+          tasks={keyData.tasks?.filter((t) => t.languageTag === language.tag)}
+          onTaskStateChange={setAssignedTaskState}
+        />
+      )}
     </StyledContainer>
   );
 };

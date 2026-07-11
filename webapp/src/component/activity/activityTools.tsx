@@ -173,6 +173,7 @@ export const buildActivity = (
     entities: [],
     references: [],
     counts: data.counts || {},
+    params: data.params,
     options: options!,
   };
 
@@ -238,6 +239,20 @@ export const buildActivity = (
     });
 
     result.references = reduceReferences(allReferences);
+
+    // Stamp activity type on all key references
+    result.entities.forEach((entity) => {
+      entity.references.forEach((ref) => {
+        if (ref.type === 'key') {
+          ref.activityType = data.type;
+        }
+      });
+    });
+    result.references.forEach((ref) => {
+      if (ref.type === 'key') {
+        ref.activityType = data.type;
+      }
+    });
   }
 
   return result;

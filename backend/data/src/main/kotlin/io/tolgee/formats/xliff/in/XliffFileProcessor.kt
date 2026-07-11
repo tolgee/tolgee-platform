@@ -8,10 +8,12 @@ import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.formats.xliff.`in`.parser.XliffParser
 import io.tolgee.formats.xliff.model.XliffModel
 import io.tolgee.service.dataImport.processors.FileProcessorContext
+import io.tolgee.util.XmlSecurity
 import javax.xml.stream.XMLEventReader
-import javax.xml.stream.XMLInputFactory
 
-class XliffFileProcessor(override val context: FileProcessorContext) : ImportFileProcessor() {
+class XliffFileProcessor(
+  override val context: FileProcessorContext,
+) : ImportFileProcessor() {
   override fun process() {
     val parsed =
       try {
@@ -45,7 +47,7 @@ class XliffFileProcessor(override val context: FileProcessorContext) : ImportFil
   }
 
   private val xmlEventReader: XMLEventReader by lazy {
-    val inputFactory: XMLInputFactory = XMLInputFactory.newDefaultFactory()
+    val inputFactory = XmlSecurity.newSecureXmlInputFactory()
     inputFactory.createXMLEventReader(context.file.data.inputStream())
   }
 }

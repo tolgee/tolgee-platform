@@ -18,6 +18,8 @@ package io.tolgee.security.authentication
 
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.configuration.tolgee.AuthenticationProperties
+import io.tolgee.configuration.tolgee.InternalProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.ApiKeyDto
 import io.tolgee.dtos.cacheable.PatDto
@@ -27,6 +29,7 @@ import io.tolgee.model.UserAccount
 import io.tolgee.security.ratelimit.RateLimitPolicy
 import io.tolgee.security.ratelimit.RateLimitService
 import io.tolgee.security.ratelimit.RateLimitedException
+import io.tolgee.security.thirdParty.SsoDelegate
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PatService
 import io.tolgee.service.security.UserAccountService
@@ -43,7 +46,7 @@ import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.security.core.context.SecurityContextHolder
 import java.time.Duration
-import java.util.*
+import java.util.Date
 
 class AuthenticationFilterTest {
   companion object {
@@ -60,7 +63,11 @@ class AuthenticationFilterTest {
 
   private val currentDateProvider = Mockito.mock(CurrentDateProvider::class.java)
 
+  private val tolgeeProperties = Mockito.mock(TolgeeProperties::class.java)
+
   private val authProperties = Mockito.mock(AuthenticationProperties::class.java)
+
+  private val internalProperties = Mockito.mock(InternalProperties::class.java)
 
   private val rateLimitService = Mockito.mock(RateLimitService::class.java)
 
@@ -80,15 +87,18 @@ class AuthenticationFilterTest {
 
   private val userAccount = Mockito.mock(UserAccount::class.java, Mockito.RETURNS_DEFAULTS)
 
+  private val ssoDelegate = Mockito.mock(SsoDelegate::class.java)
+
   private val authenticationFilter =
     AuthenticationFilter(
-      authProperties,
+      tolgeeProperties,
       currentDateProvider,
       rateLimitService,
       jwtService,
       userAccountService,
       pakService,
       patService,
+      ssoDelegate,
     )
 
   private val authenticationFacade =
@@ -103,29 +113,39 @@ class AuthenticationFilterTest {
     val now = Date()
     Mockito.`when`(currentDateProvider.date).thenReturn(now)
 
+    Mockito.`when`(tolgeeProperties.authentication).thenReturn(authProperties)
+    Mockito.`when`(tolgeeProperties.internal).thenReturn(internalProperties)
     Mockito.`when`(authProperties.enabled).thenReturn(true)
+    Mockito.`when`(internalProperties.verifySsoAccountAvailableBypass).thenReturn(null)
 
-    Mockito.`when`(rateLimitService.getIpAuthRateLimitPolicy(any()))
+    Mockito
+      .`when`(rateLimitService.getIpAuthRateLimitPolicy(any()))
       .thenReturn(
         RateLimitPolicy("test policy", 5, Duration.ofSeconds(1), true),
       )
 
-    Mockito.`when`(rateLimitService.consumeBucketUnless(any(), any()))
+    Mockito
+      .`when`(rateLimitService.consumeBucketUnless(any(), any()))
       .then {
         val fn = it.getArgument<() -> Boolean>(1)
         fn()
       }
 
-    Mockito.`when`(jwtService.validateToken(TEST_VALID_TOKEN))
+    Mockito
+      .`when`(jwtService.validateToken(TEST_VALID_TOKEN))
       .thenReturn(
         TolgeeAuthentication(
-          "uwu",
-          userAccountDto,
-          null,
+          credentials = "uwu",
+          deviceId = null,
+          userAccount = userAccountDto,
+          actingAsUserAccount = null,
+          isReadOnly = false,
+          isSuperToken = false,
         ),
       )
 
-    Mockito.`when`(jwtService.validateToken(TEST_INVALID_TOKEN))
+    Mockito
+      .`when`(jwtService.validateToken(TEST_INVALID_TOKEN))
       .thenThrow(AuthenticationException(Message.INVALID_JWT_TOKEN))
 
     Mockito.`when`(pakService.parseApiKey(TEST_VALID_PAK)).thenReturn(TEST_VALID_PAK)
@@ -155,6 +175,8 @@ class AuthenticationFilterTest {
     Mockito.`when`(userAccount.needsSuperJwt).thenReturn(false)
     Mockito.`when`(userAccountDto.id).thenReturn(TEST_USER_ID)
 
+    Mockito.`when`(ssoDelegate.verifyUserSsoAccountAvailable(userAccountDto)).thenReturn(true)
+
     SecurityContextHolder.getContext().authentication = null
   }
 
@@ -162,7 +184,9 @@ class AuthenticationFilterTest {
   fun resetMocks() {
     Mockito.reset(
       currentDateProvider,
+      tolgeeProperties,
       authProperties,
+      internalProperties,
       rateLimitService,
       jwtService,
       pakService,
@@ -293,7 +317,8 @@ class AuthenticationFilterTest {
     val res = MockHttpServletResponse()
     val chain = MockFilterChain()
 
-    Mockito.`when`(rateLimitService.consumeBucketUnless(any(), any()))
+    Mockito
+      .`when`(rateLimitService.consumeBucketUnless(any(), any()))
       .thenThrow(RateLimitedException(1000L, true))
 
     req.addHeader("Authorization", "Bearer $TEST_VALID_TOKEN")

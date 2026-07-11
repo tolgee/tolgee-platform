@@ -1,31 +1,40 @@
-import { FunctionComponent } from 'react';
+import React from 'react';
 import { styled } from '@mui/material';
 
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { useProject } from 'tg.hooks/useProject';
+import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 
 import { ProjectMenu } from './projectMenu/ProjectMenu';
 
 const StyledContent = styled('div')`
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  position: relative;
+  display: grid;
   max-width: 100%;
 `;
 
-export const ProjectPage: FunctionComponent = ({ children }) => {
+type Props = {
+  rightPanelContent?: (width: number) => React.ReactNode;
+};
+
+export const ProjectPage: React.FC<React.PropsWithChildren<Props>> = ({
+  children,
+  rightPanelContent,
+}) => {
   const project = useProject();
 
-  const isAdminAccess = project.computedPermission.origin === 'SERVER_ADMIN';
+  const isAdminAccess =
+    project.computedPermission.origin === 'SERVER_ADMIN' ||
+    project.computedPermission.origin === 'SERVER_SUPPORTER';
 
   return (
     <DashboardPage
       isAdminAccess={isAdminAccess}
-      fixedContent={<ProjectMenu id={project.id} />}
+      fixedContent={<ProjectMenu />}
+      rightPanelContent={rightPanelContent}
     >
-      <StyledContent>{children}</StyledContent>
+      <React.Suspense fallback={<FullPageLoading />}>
+        <StyledContent>{children}</StyledContent>
+      </React.Suspense>
     </DashboardPage>
   );
 };

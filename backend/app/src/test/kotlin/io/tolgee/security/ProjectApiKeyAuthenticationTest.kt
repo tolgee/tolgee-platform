@@ -6,7 +6,6 @@ import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andIsUnauthorized
-import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.authentication.JwtService
@@ -36,20 +35,22 @@ class ProjectApiKeyAuthenticationTest : AbstractControllerTest() {
 
   @Test
   fun `access with legacy key works`() {
-    val base = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase()
     val apiKey = apiKeyService.create(base.userAccount, setOf(*Scope.values()), base.project)
     mvc.perform(MockMvcRequestBuilders.get("/v2/projects/translations?ak=" + apiKey.key)).andIsOk
   }
 
   @Test
   fun accessWithApiKey_failure_wrong_key() {
-    mvc.perform(MockMvcRequestBuilders.get("/v2/projects/translations?ak=wrong_api_key"))
-      .andExpect(MockMvcResultMatchers.status().isUnauthorized).andReturn()
+    mvc
+      .perform(MockMvcRequestBuilders.get("/v2/projects/translations?ak=wrong_api_key"))
+      .andExpect(MockMvcResultMatchers.status().isUnauthorized)
+      .andReturn()
   }
 
   @Test
   fun accessWithApiKey_failure_api_path() {
-    val base = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase()
     val apiKey = apiKeyService.create(base.userAccount, setOf(*Scope.entries.toTypedArray()), base.project)
     mvc.perform(MockMvcRequestBuilders.get("/v2/projects?ak=${apiKey.key}")).andIsForbidden
   }
@@ -72,8 +73,12 @@ class ProjectApiKeyAuthenticationTest : AbstractControllerTest() {
 
     waitForNotThrowing(throwableClass = AssertionError::class, timeout = 5000) {
       executeInNewTransaction {
-        apiKeyService.get(testData.frantasKey.id).lastUsedAt?.time
-          .assert.isEqualTo(currentDateProvider.forcedDate!!.time)
+        apiKeyService
+          .get(testData.frantasKey.id)
+          .lastUsedAt
+          ?.time
+          .assert
+          .isEqualTo(currentDateProvider.forcedDate!!.time)
       }
     }
   }
@@ -144,7 +149,7 @@ class ProjectApiKeyAuthenticationTest : AbstractControllerTest() {
     ).andIsOk
 
     // Revoke user permissions
-    val tokenFrantisek = jwtService.emitToken(testData.frantisekDobrota.id, true)
+    val tokenFrantisek = jwtService.emitToken(testData.frantisekDobrota.id, isSuper = true)
     performPut(
       "/v2/projects/${testData.frantasProject.id}/users/${testData.user.id}/set-permissions/VIEW",
       null,

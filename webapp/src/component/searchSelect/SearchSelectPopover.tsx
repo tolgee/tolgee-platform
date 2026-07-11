@@ -6,7 +6,7 @@ type Props = {
   onClose: () => void;
 };
 
-export const SearchSelectPopover: React.FC<Props> = ({
+export const SearchSelectPopover: React.FC<React.PropsWithChildren<Props>> = ({
   anchorEl,
   open,
   onClose,

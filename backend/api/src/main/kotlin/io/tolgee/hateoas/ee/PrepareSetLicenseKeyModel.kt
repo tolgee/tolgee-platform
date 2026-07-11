@@ -11,4 +11,5 @@ open class PrepareSetLicenseKeyModel(
   val perSetPrice: BigDecimal,
   val currentSeats: Long,
   val total: Long,
-) : RepresentationModel<PrepareSetLicenseKeyModel>(), Serializable
+) : RepresentationModel<PrepareSetLicenseKeyModel>(),
+  Serializable

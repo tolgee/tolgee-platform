@@ -1,5 +1,5 @@
 {
-  "$schema": "https://tolgee.io/cli-schema.json",
+  "$schema": "https://docs.tolgee.io/cli-schema.json",
   "projectId": 1,
   "patterns": ["./src/**/*.ts?(x)"],
   "strictNamespace": false,

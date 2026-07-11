@@ -4,6 +4,7 @@ import io.tolgee.dtos.queryResults.organization.OrganizationView
 import io.tolgee.model.Organization
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
+import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
@@ -11,6 +12,7 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 
 @Repository
+@Lazy
 interface OrganizationRepository : JpaRepository<Organization, Long> {
   @Query(
     """
@@ -137,13 +139,23 @@ interface OrganizationRepository : JpaRepository<Organization, Long> {
         from Organization o
         join o.basePermission bp
         left join OrganizationRole r on r.user.id = :userId and r.organization = o
-        where (:search is null or (lower(o.name) like lower(concat('%', cast(:search as text), '%'))))
+        where (
+              lower(o.name) like lower(concat('%', coalesce(:search, ''), '%')) or
+              lower(o.slug) like lower(concat('%', coalesce(:search, ''), '%')) or
+              lower(cast(o.id as string)) like lower(concat(coalesce(:search, ''), '%')) or
+              :search is null
+              )
         and o.deletedAt is null
         """,
     countQuery =
       """select count(o)
         from Organization o
-        where (:search is null or (lower(o.name) like lower(concat('%', cast(:search as text), '%'))))
+        where (
+              lower(o.name) like lower(concat('%', coalesce(:search, ''), '%')) or
+              lower(o.slug) like lower(concat('%', coalesce(:search, ''), '%')) or
+              lower(cast(o.id as string)) like lower(concat(coalesce(:search, ''), '%')) or
+              :search is null
+              )
         and o.deletedAt is null
         """,
   )
@@ -218,4 +230,39 @@ interface OrganizationRepository : JpaRepository<Organization, Long> {
     id: Long,
     currentUserId: Long,
   ): OrganizationView?
+
+  /**
+   * Returns all organizations where user is counted as seat
+   * For translation agencies, we don't count them as seats
+   */
+  @Query(
+    """
+      select distinct o.id from Organization o
+        left join o.memberRoles orl
+        left join o.projects pr
+        left join pr.permissions perm on perm.agency is null
+        where orl.user.id = :userId or perm.user.id = :userId
+  """,
+  )
+  fun getAllUsersOrganizationsToCountUsageFor(userId: Long): Set<Long>
+
+  @Query(
+    """
+      select ua.id $ALL_USERS_IN_ORGANIZATION_QUERY_TO_COUNT_USAGE_FOR
+    """,
+  )
+  fun getAllUserIdsInOrganizationToCountSeats(organizationId: Long): Set<Long>
+
+  companion object {
+    /**
+     * Query to count all users in organization to count seats
+     */
+    const val ALL_USERS_IN_ORGANIZATION_QUERY_TO_COUNT_USAGE_FOR = """from UserAccount ua
+      left join ua.organizationRoles orl
+      left join orl.organization o on o.deletedAt is null and o.id = :organizationId
+      left join ua.permissions p on p.agency is null
+      left join p.project pr on pr.deletedAt is null and pr.organizationOwner.id = :organizationId 
+      where ua.deletedAt is null and ua.disabledAt is null
+      and (pr is not null or o is not null)"""
+  }
 }

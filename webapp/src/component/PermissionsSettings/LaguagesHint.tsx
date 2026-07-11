@@ -1,8 +1,8 @@
 import { styled } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { CircledLanguageIcon } from 'tg.component/languages/CircledLanguageIcon';
-import { LanguageScope } from 'tg.ee/PermissionsAdvanced/hierarchyTools';
 import { LanguageModel, PermissionModel } from './types';
+import { LanguageScope } from './hierarchyTools';
 
 const StyledHint = styled('div')`
   display: grid;

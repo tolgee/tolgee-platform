@@ -23,7 +23,7 @@ type Props = {
   onDirtyChange: (dirty: boolean) => void;
 };
 
-export const KeyCreateDialog: React.FC<Props> = ({
+export const KeyCreateDialog: React.FC<React.PropsWithChildren<Props>> = ({
   onClose,
   onDirtyChange,
 }) => {
@@ -41,11 +41,17 @@ export const KeyCreateDialog: React.FC<Props> = ({
         ...value,
         commentCount: 0,
         unresolvedCommentCount: 0,
+        activeSuggestionCount: 0,
+        totalSuggestionCount: 0,
+        qaIssueCount: 0,
+        qaChecksStale: false,
         fromTranslationMemory: false,
+        labels: [],
       };
     });
 
     insertTranslation({
+      createdAt: Date.now(),
       keyId: data.id,
       keyNamespace: data.namespace,
       keyDescription: data.description,

@@ -9,6 +9,7 @@ import io.tolgee.formats.normalizePlurals
 import io.tolgee.formats.optimizePluralForms
 import io.tolgee.formats.optimizePossiblePlural
 import io.tolgee.formats.orderPluralForms
+import io.tolgee.formats.toIcuPluralString
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 
@@ -25,30 +26,63 @@ class PluralsFormUtilTest {
   @Test
   fun `orders plural forms`() {
     orderPluralForms(mapOf("many" to "", "one" to "", "=1" to "", "zero" to ""))
-      .keys.assert.containsExactly("zero", "one", "many", "=1")
+      .keys.assert
+      .containsExactly("=1", "zero", "one", "many")
+  }
+
+  @Test
+  fun `orders multiple exact-match selectors numerically before keywords`() {
+    orderPluralForms(mapOf("other" to "x", "=2" to "x", "one" to "x", "=0" to "x", "=10" to "x"))
+      .keys.assert
+      .containsExactly("=0", "=2", "=10", "one", "other")
+  }
+
+  @Test
+  fun `exact-match selectors with distinct values are preserved by optimizePluralForms`() {
+    optimizePluralForms(mapOf("=0" to "no items", "one" to "one item", "other" to "# items"))
+      .keys.assert
+      .containsExactly("=0", "one", "other")
+  }
+
+  @Test
+  fun `toIcuPluralString preserves exact-match plural selectors`() {
+    val input = "{count, plural, =0 {You have no likes.} one {You have # like.} other {You have # likes.}}"
+    val forms = getPluralForms(input)!!.forms
+    val output = forms.toIcuPluralString(addNewLines = false, argName = "count")
+    assert(output.indexOf("=0") < output.indexOf("one")) {
+      "=0 should come before 'one' in: $output"
+    }
+    assert(output.indexOf("=0") < output.indexOf("other")) {
+      "=0 should come before 'other' in: $output"
+    }
   }
 
   @Test
   fun `optimizes the forms`() {
     optimizePluralForms(mapOf("other" to "same", "many" to "same", "one" to "different", "zero" to "same"))
-      .keys.assert.containsExactly("one", "other")
+      .keys.assert
+      .containsExactly("one", "other")
   }
 
   @Test
   fun `optimizes the ICU plural`() {
     optimizePossiblePlural("{0, plural, one {same} other {other} many {same} few {same}}")
-      .assert.isEqualTo("{0, plural,\none {same}\nfew {same}\nmany {same}\nother {other}\n}")
+      .assert
+      .isEqualTo("{0, plural,\none {same}\nfew {same}\nmany {same}\nother {other}\n}")
 
     optimizePossiblePlural("{0, plural, one {same} other {same} many {same} few {same}}")
-      .assert.isEqualTo("{0, plural,\nother {same}\n}")
+      .assert
+      .isEqualTo("{0, plural,\nother {same}\n}")
   }
 
   @Test
   fun `returns correct plural forms`() {
     getPluralForms("Hello!").assert.isNull()
     getPluralForms("{hi, number, .00}").assert.isNull()
-    getPluralForms("{count, plural, other {Hello! {hi, number, .00}}}")!!.forms
-      .assert.isEqualTo(
+    getPluralForms("{count, plural, other {Hello! {hi, number, .00}}}")!!
+      .forms
+      .assert
+      .isEqualTo(
         mapOf("other" to "Hello! {hi, number, .00}"),
       )
   }
@@ -61,7 +95,8 @@ class PluralsFormUtilTest {
         "other {{tireCount, plural, one {# cars each have one tire} other {# cars each have # tires}}}" +
         "}",
     )!!
-      .forms.assert.isEqualTo(
+      .forms.assert
+      .isEqualTo(
         mapOf(
           "one" to "{tireCount, plural, one {# car has one tire} other {# car has # tires}}",
           "other" to "{tireCount, plural, one {# cars each have one tire} other {# cars each have # tires}}",
@@ -123,7 +158,8 @@ class PluralsFormUtilTest {
   @Test
   fun `works with escaping correct plural forms`() {
     getPluralForms("{count, plural, other {Hello! {hi, number, .00} '{escaped}'}}")!!
-      .forms.assert.isEqualTo(
+      .forms.assert
+      .isEqualTo(
         mapOf("other" to "Hello! {hi, number, .00} '{escaped}'"),
       )
   }
@@ -150,35 +186,45 @@ class PluralsFormUtilTest {
   fun `converts text to plural`() {
     "Simple one".convertToIcuPlural(null).assert.isEqualTo("{value, plural,\nother {Simple one}\n}")
 
-    "Simple one with # hash".convertToIcuPlural(
-      null,
-    ).assert.isEqualTo("{value, plural,\nother {Simple one with '#' hash}\n}")
+    "Simple one with # hash"
+      .convertToIcuPlural(
+        null,
+      ).assert
+      .isEqualTo("{value, plural,\nother {Simple one with '#' hash}\n}")
 
     "This one would break stuff }"
-      .convertToIcuPlural(null).assert.isEqualTo("{value, plural,\nother {This one would break stuff '}'}\n}")
+      .convertToIcuPlural(null)
+      .assert
+      .isEqualTo("{value, plural,\nother {This one would break stuff '}'}\n}")
 
     "This one has valid param: {name} and would break stuff }"
-      .convertToIcuPlural(null).assert
+      .convertToIcuPlural(null)
+      .assert
       .isEqualTo("{name, plural,\nother {This one has valid param: {name} and would break stuff '}'}\n}")
 
-    "{0, plural, one {# dog} other {# dogs}} This will break it too }".convertToIcuPlural(null)
-      .assert.isEqualTo(
+    "{0, plural, one {# dog} other {# dogs}} This will break it too }"
+      .convertToIcuPlural(null)
+      .assert
+      .isEqualTo(
         "{0, plural,\n" +
           "one {# dog This will break it too '}'}\n" +
           "other {# dogs This will break it too '}'}\n" +
           "}",
       )
 
-    "This } is invalid".convertToIcuPlural(null)
-      .assert.isEqualTo("{value, plural,\nother {This '}' is invalid}\n}")
+    "This } is invalid"
+      .convertToIcuPlural(null)
+      .assert
+      .isEqualTo("{value, plural,\nother {This '}' is invalid}\n}")
   }
 
   @Test
   fun `works with multiple first leve plurals`() {
-    "{0, plural, one {# dog} other {# dogs}} {0, plural, one {# dog} other {# dogs}}".convertToIcuPlural(
-      null,
-    )
-      .assert.isEqualTo(
+    "{0, plural, one {# dog} other {# dogs}} {0, plural, one {# dog} other {# dogs}}"
+      .convertToIcuPlural(
+        null,
+      ).assert
+      .isEqualTo(
         "{0, plural,\n" +
           "one {# dog {0, plural, one {# dog} other {# dogs}}}\n" +
           "other {# dogs {0, plural, one {# dog} other {# dogs}}}\n" +
@@ -188,16 +234,21 @@ class PluralsFormUtilTest {
 
   @Test
   fun `uses first param when converting to plural`() {
-    "Use {me} not {notme}".convertToIcuPlural(null)
-      .assert.isEqualTo(
+    "Use {me} not {notme}"
+      .convertToIcuPlural(null)
+      .assert
+      .isEqualTo(
         "{me, plural,\nother {Use {me} not {notme}}\n}",
       )
   }
 
   @Test
   fun `respects the provided arg name`() {
-    mapOf(1 to "Oh my god").convertToIcuPlurals("myArgName").convertedStrings
-      .assert.isEqualTo(
+    mapOf(1 to "Oh my god")
+      .convertToIcuPlurals("myArgName")
+      .convertedStrings
+      .assert
+      .isEqualTo(
         mapOf(
           1 to
             "{myArgName, plural,\nother {Oh my god}\n}",
@@ -211,8 +262,10 @@ class PluralsFormUtilTest {
       1 to "{first, plural, other {a}}",
       2 to "{second, plural, other {a}}",
       3 to "{first, plural, other {a}}",
-    ).convertToIcuPlurals(null).convertedStrings[2]
-      .assert.isEqualTo(
+    ).convertToIcuPlurals(null)
+      .convertedStrings[2]
+      .assert
+      .isEqualTo(
         "{first, plural,\nother {a}\n}",
       )
   }
@@ -227,7 +280,8 @@ class PluralsFormUtilTest {
   @Test
   fun `works with massive escaping`() {
     normalizePlurals(mapOf(0 to "{value, plural, one {'{'} few {'''{'''} many {'''{'''} other {}}"))[0]
-      .assert.isEqualTo(
+      .assert
+      .isEqualTo(
         "{value, plural,\none {'{'}\nfew {'''{'''}\nmany {'''{'''}\nother {}\n}",
       )
   }

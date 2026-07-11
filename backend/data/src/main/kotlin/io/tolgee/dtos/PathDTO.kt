@@ -1,7 +1,7 @@
 package io.tolgee.dtos
 
 import io.tolgee.helpers.TextHelper.splitOnNonEscapedDelimiter
-import java.util.*
+import java.util.LinkedList
 import java.util.stream.Collectors
 
 class PathDTO private constructor() {
@@ -11,14 +11,16 @@ class PathDTO private constructor() {
     get() = fullPath.last()
   val fullPathString: String
     get() =
-      fullPath.stream().map { i: String ->
-        i.replace(
-          ("\\" + DELIMITER).toRegex(),
-          "\\\\" + DELIMITER,
+      fullPath
+        .stream()
+        .map { i: String ->
+          i.replace(
+            ("\\" + DELIMITER).toRegex(),
+            "\\\\" + DELIMITER,
+          )
+        }.collect(
+          Collectors.joining("."),
         )
-      }.collect(
-        Collectors.joining("."),
-      )
   val path: List<String>
     get() {
       val path = LinkedList(fullPath)

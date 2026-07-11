@@ -20,8 +20,8 @@ npm install @tolgee/vue
 Add this to your `.env.development.local`.
 
 ```dotenv
-VUE_APP_TOLGEE_API_URL={{{apiUrl}}}
-VUE_APP_TOLGEE_API_KEY={{{apiKey}}}
+VITE_APP_TOLGEE_API_URL={{{apiUrl}}}
+VITE_APP_TOLGEE_API_KEY={{{apiKey}}}
 ```
 
 ## Use TolgeeProvider
@@ -38,8 +38,8 @@ const tolgee = Tolgee()
     language: 'en',
 
     // for development
-    apiUrl: process.env.VUE_APP_TOLGEE_API_URL,
-    apiKey: process.env.VUE_APP_TOLGEE_API_KEY,
+    apiUrl: process.env.VITE_APP_TOLGEE_API_URL,
+    apiKey: process.env.VITE_APP_TOLGEE_API_KEY,
 
     // for production
     staticData: {

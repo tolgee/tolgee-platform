@@ -1,5 +1,6 @@
 package io.tolgee.util
 
+import org.w3c.dom.Comment
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.Node
@@ -7,7 +8,6 @@ import org.w3c.dom.NodeList
 import org.xml.sax.InputSource
 import java.io.StringReader
 import java.io.StringWriter
-import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.transform.OutputKeys
 import javax.xml.transform.Transformer
 import javax.xml.transform.TransformerFactory
@@ -15,7 +15,7 @@ import javax.xml.transform.dom.DOMSource
 import javax.xml.transform.stream.StreamResult
 
 fun buildDom(builder: Document.() -> Unit): DomBuilder {
-  val documentBuilderFactory = DocumentBuilderFactory.newInstance()
+  val documentBuilderFactory = XmlSecurity.newSecureDocumentBuilderFactory()
   val documentBuilder = documentBuilderFactory.newDocumentBuilder()
   val document = documentBuilder.newDocument()
 
@@ -24,7 +24,9 @@ fun buildDom(builder: Document.() -> Unit): DomBuilder {
   return domBuilder
 }
 
-class DomBuilder(val document: Document) {
+class DomBuilder(
+  val document: Document,
+) {
   companion object {
     private val xmlTransformer by lazy {
       val transformer: Transformer = TransformerFactory.newInstance().newTransformer()
@@ -53,6 +55,12 @@ inline fun Document.element(
   return element
 }
 
+fun Element.comment(comment: String): Comment {
+  val commentNode = this.ownerDocument.createComment(comment)
+  this.appendChild(commentNode)
+  return commentNode
+}
+
 inline fun Element.element(
   name: String,
   builder: (Element.() -> Unit) = {},
@@ -68,14 +76,14 @@ fun Element.attr(
   value: String?,
 ) {
   val attr = this.ownerDocument.createAttribute(name)
-  attr.value = value ?: ""
+  attr.value = sanitizeXmlText(value ?: "")
   this.setAttributeNode(attr)
 }
 
 fun Element.appendXmlOrText(content: String?) {
-  val contentNotNull = content ?: ""
+  val contentNotNull = sanitizeXmlText(content ?: "")
   try {
-    val documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
+    val documentBuilder = XmlSecurity.newSecureDocumentBuilderFactory().newDocumentBuilder()
     val doc: Document = documentBuilder.parse(InputSource(StringReader("<root>$contentNotNull</root>")))
     val childNodes: NodeList = doc.documentElement.childNodes
     for (i in 0 until childNodes.length) {

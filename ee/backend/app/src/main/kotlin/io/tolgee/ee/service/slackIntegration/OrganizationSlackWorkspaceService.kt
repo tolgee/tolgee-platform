@@ -153,7 +153,8 @@ class OrganizationSlackWorkspaceService(
     delete(organizationSlackWorkspace)
     val uninstall =
       slackClient.methods().appsUninstall(
-        AppsUninstallRequest.builder()
+        AppsUninstallRequest
+          .builder()
           .token(organizationSlackWorkspace.accessToken)
           .clientId(slackProperties.clientId)
           .clientSecret(slackProperties.clientSecret)

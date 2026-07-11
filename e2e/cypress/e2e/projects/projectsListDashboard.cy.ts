@@ -66,7 +66,7 @@ const getNthLanguageInProject = (projectName: string, nth: number) => {
     .contains(projectName)
     .closestDcy('dashboard-projects-list-item')
     .should('be.visible')
-    .findDcy('project-list-languages-item')
+    .findDcy('language-icon-list-item')
     .should('be.visible')
     .eq(nth);
 };

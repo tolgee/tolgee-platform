@@ -24,9 +24,7 @@ class KeysWithTranslationsPagedResourcesAssembler(
   ): KeysWithTranslationsPageModel {
     val pageModel = toModel(entities, keyWithTranslationsModelAssembler)
     return KeysWithTranslationsPageModel(
-      content = pageModel.content,
-      metadata = pageModel.metadata,
-      links = pageModel.links.toList().toTypedArray(),
+      pageModel,
       selectedLanguages =
         selectedLanguages.map {
           languageModelAssembler.toModel(it)

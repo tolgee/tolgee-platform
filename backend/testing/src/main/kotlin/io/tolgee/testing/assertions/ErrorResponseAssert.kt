@@ -7,8 +7,9 @@ import org.assertj.core.api.AbstractAssert
 import org.springframework.test.web.servlet.MvcResult
 import java.io.UnsupportedEncodingException
 
-class ErrorResponseAssert(mvcResult: MvcResult?) :
-  AbstractAssert<ErrorResponseAssert?, MvcResult?>(mvcResult, ErrorResponseAssert::class.java) {
+class ErrorResponseAssert(
+  mvcResult: MvcResult?,
+) : AbstractAssert<ErrorResponseAssert?, MvcResult?>(mvcResult, ErrorResponseAssert::class.java) {
   val isStandardValidation: StandardValidationMessageAssert
     get() {
       val standardValidation = standardMap["STANDARD_VALIDATION"]

@@ -9,7 +9,7 @@ export const tolgeeColors = {
     '400': '#f06695',
     '500': '#ec407a',
     '600': '#d73a6f',
-    '700': '#a82d57',
+    '700': '#a52c55',
     '800': '#822343',
     '900': '#631b33',
   },
@@ -125,6 +125,10 @@ export const tolgeePalette = {
       menuHover: tolgeeColors['grey']['800'],
       menuSelected: tolgeeColors['pink']['600'],
       menuSelectedBg: '#1f2d400f',
+      onDark: '#ffffffcc',
+      onDarkHover: '#ffffffe5',
+      backgroundDark: '#36455be5',
+      backgroundDarkHover: '#36455b',
     },
     state: {
       untranslated: tolgeeColors['grey']['200'],
@@ -156,6 +160,7 @@ export const tolgeePalette = {
       dark: '#a52c55',
       light: '#ef6694',
       contrast: '#ffffff',
+      disabled: '#ec407a4d',
       _states: {
         hover: '#ec407a0a',
         selected: '#ec407a14',
@@ -169,6 +174,7 @@ export const tolgeePalette = {
       dark: '#007a6b',
       light: '#33bfae',
       contrast: '#ffffff',
+      disabled: '#00af9a4d',
       _states: {
         hover: '#00af9a0a',
         selected: '#00af9a14',
@@ -255,6 +261,7 @@ export const tolgeePalette = {
       default: tolgeeColors['lightGrey']['50'],
       hover: '#1f2d4005',
       selected: '#1f2d400a',
+      danger: '#d600270a',
       onDefault: '#ffffff',
       onDefaultGrey: '#1f2d400a',
       'paper-1': '#ffffff',
@@ -291,8 +298,23 @@ export const tolgeePalette = {
       pricingActive: '#00af9a26',
       pricing: '#1f2d400d',
     },
-    divider: '#1f2d401f',
     _components: {
+      buttonToggle: {
+        enabled: '#ffffff',
+        textEnabled: '#1f2d40de',
+        hovered: '#1f2d400a',
+        textHovered: '#1f2d40',
+        active: '#1f2d40de',
+        textActive: '#ffffff',
+        activeHover: '#1f2d40',
+        textActiveHover: '#ffffff',
+      },
+      task: {
+        state: {
+          review: '#00b9624d',
+          translate: '#1f2d4014',
+        },
+      },
       alert: {
         success: {
           background: tolgeeColors['green']['50'],
@@ -319,6 +341,9 @@ export const tolgeePalette = {
       },
       backdrop: {
         fill: '#1f2d4080',
+      },
+      dropzone: {
+        active: '#e8fcf8f0',
       },
       breadcrumbs: {
         collapseFill: tolgeeColors['grey']['50'],
@@ -399,8 +424,31 @@ export const tolgeePalette = {
         fill: '#627082e5',
       },
     },
+    divider: '#1f2d401f',
     _native: {
       'scrollbar-bg': tolgeeColors['grey']['200'],
+    },
+    label: {
+      lightSkyBlue: '#b3edfc',
+      lightBlue: '#a4d0ff',
+      lightPurple: '#ddc9ff',
+      lightPink: '#ffbddc',
+      lightRed: '#fdcdbe',
+      skyBlue: '#1cd2ff',
+      blue: '#1188ff',
+      purple: '#9154fb',
+      pink: '#ec407a',
+      red: '#ff2e2e',
+      lightGrey: '#d1d8e2',
+      lightTeal: '#9df5e3',
+      lightGreen: '#b1f6c6',
+      lightYellow: '#ffea92',
+      lightOrange: '#ffe0b2',
+      grey: '#6c7b8f',
+      teal: '#00af9a',
+      green: '#00b962',
+      yellow: '#ffce00',
+      orange: '#ff9800',
     },
   },
   Dark: {
@@ -416,6 +464,10 @@ export const tolgeePalette = {
       menuHover: tolgeeColors['grey']['50'],
       menuSelected: tolgeeColors['pink']['400'],
       menuSelectedBg: '#ffffff1f',
+      onDark: '#ffffffcc',
+      onDarkHover: '#ffffffe5',
+      backgroundDark: '#36455be5',
+      backgroundDarkHover: '#36455b',
     },
     state: {
       untranslated: tolgeeColors['grey']['400'],
@@ -447,6 +499,7 @@ export const tolgeePalette = {
       dark: '#a84768',
       light: '#f384aa',
       contrast: '#000000de',
+      disabled: '#f066954d',
       _states: {
         hover: '#f0669514',
         selected: '#f0669529',
@@ -460,6 +513,7 @@ export const tolgeePalette = {
       dark: '#6ba095',
       light: '#adeade',
       contrast: '#000000de',
+      disabled: '#99e5d64d',
       _states: {
         hover: '#99e5d614',
         selected: '#99e5d629',
@@ -546,6 +600,7 @@ export const tolgeePalette = {
       default: tolgeeColors['grey']['900'],
       hover: '#ffffff05',
       selected: '#ffffff0a',
+      danger: '#f9c4d614',
       onDefault: '#182230b2',
       onDefaultGrey: '#ffffff0a',
       'paper-1': tolgeeColors['grey']['800'],
@@ -582,8 +637,23 @@ export const tolgeePalette = {
       pricingActive: '#00af9a33',
       pricing: '#1f2d400d',
     },
-    divider: '#ffffff1f',
     _components: {
+      buttonToggle: {
+        enabled: '#182230',
+        textEnabled: '#ffffff',
+        hovered: '#000000de',
+        textHovered: '#ffffff',
+        active: '#ffffff',
+        textActive: '#1f2d40de',
+        activeHover: '#ffffffe5',
+        textActiveHover: '#000000de',
+      },
+      task: {
+        state: {
+          review: '#33d5894d',
+          translate: '#ffffff1f',
+        },
+      },
       alert: {
         success: {
           background: tolgeeColors['green']['900'],
@@ -610,6 +680,9 @@ export const tolgeePalette = {
       },
       backdrop: {
         fill: '#101926b2',
+      },
+      dropzone: {
+        active: '#234b56f0',
       },
       breadcrumbs: {
         collapseFill: tolgeeColors['grey']['600'],
@@ -690,8 +763,31 @@ export const tolgeePalette = {
         fill: '#627082e5',
       },
     },
+    divider: '#ffffff1f',
     _native: {
       'scrollbar-bg': tolgeeColors['grey']['700'],
+    },
+    label: {
+      lightSkyBlue: '#b3edfcd9',
+      lightBlue: '#a4d0ffd9',
+      lightPurple: '#ddc9ffd9',
+      lightPink: '#ffbddcd9',
+      lightRed: '#fdcdbed9',
+      skyBlue: '#1cd2ffd9',
+      blue: '#1188ffd9',
+      purple: '#9154fbd9',
+      pink: '#ec407ad9',
+      red: '#ff2e2ed9',
+      lightGrey: '#d1d8e2d9',
+      lightTeal: '#9df5e3d9',
+      lightGreen: '#b1f6c6d9',
+      lightYellow: '#ffea92d9',
+      lightOrange: '#ffe0b2d9',
+      grey: '#6c7b8fd9',
+      teal: '#00af9ad9',
+      green: '#00b962d9',
+      yellow: '#ffce00d9',
+      orange: '#ff9800d9',
     },
   },
 } as const;

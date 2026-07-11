@@ -7,7 +7,11 @@ import { signUpService } from '../service/SignUpService';
 import { checkParamNameIsValid } from '@tginternal/editor';
 import { validateObject } from 'tg.fixtures/validateObject';
 
-type TFunType = TFnType<DefaultParamType, string, TranslationKey>;
+export type TranslateFunction = TFnType<
+  DefaultParamType,
+  string,
+  TranslationKey
+>;
 
 type AccountType =
   components['schemas']['PrivateUserAccountModel']['accountType'];
@@ -35,10 +39,51 @@ Yup.setLocale({
       />
     ),
   },
+  number: {
+    min: ({ min }) => (
+      <T
+        keyName="validation_schema_number_min_message"
+        params={{ min: min.toString() }}
+      />
+    ),
+  },
 });
 
+const isValidBranchName = (name: string | undefined): boolean => {
+  if (!name) return false;
+
+  // Allowed characters only: a-z, 0-9, . - _ / (lowercase)
+  if (!/^[a-z0-9.\-_/]+$/.test(name)) return false;
+
+  // Start: letter, number, or dot
+  if (!/^[a-z0-9.]/.test(name)) return false;
+
+  // End: letter, number, or dot
+  if (!/[a-z0-9.]$/.test(name)) return false;
+
+  // No consecutive slashes
+  if (name.includes('//')) return false;
+
+  // No consecutive dots
+  if (name.includes('..')) return false;
+
+  // Check slash-separated parts
+  const parts = name.split('/');
+  for (let i = 1; i < parts.length; i++) {
+    // Parts after first slash cannot start with dot
+    if (parts[i].startsWith('.')) return false;
+  }
+
+  // No part can end with .lock
+  for (const part of parts) {
+    if (part.endsWith('.lock')) return false;
+  }
+
+  return true;
+};
+
 export class Validation {
-  static readonly USER_PASSWORD = (t: TFunType) =>
+  static readonly USER_PASSWORD = (t: TranslateFunction) =>
     Yup.string().min(8).max(50).required();
 
   static readonly RESET_PASSWORD_REQUEST = Yup.object().shape({
@@ -57,7 +102,7 @@ export class Validation {
       }
     }, signUpService.validateEmail);
 
-  static readonly SIGN_UP = (t: TFunType, orgRequired: boolean) =>
+  static readonly SIGN_UP = (t: TranslateFunction, orgRequired: boolean) =>
     Yup.object().shape({
       password: Validation.USER_PASSWORD(t),
       name: Yup.string().required(),
@@ -93,13 +138,13 @@ export class Validation {
           : Yup.string().email().required(),
     });
 
-  static readonly USER_PASSWORD_CHANGE = (t: TFunType) =>
+  static readonly USER_PASSWORD_CHANGE = (t: TranslateFunction) =>
     Yup.object().shape({
       currentPassword: Yup.string().max(50).required(),
       password: Validation.USER_PASSWORD(t),
     });
 
-  static readonly PASSWORD_RESET = (t: TFunType) =>
+  static readonly PASSWORD_RESET = (t: TranslateFunction) =>
     Yup.object().shape({
       password: Validation.USER_PASSWORD(t),
     });
@@ -153,7 +198,10 @@ export class Validation {
   static readonly TRANSLATION_TRANSLATION = Yup.string();
 
   static readonly LANGUAGE_NAME = Yup.string().required().max(100);
-  static readonly LANGUAGE_TAG = (t: TFunType, existingTags?: string[]) =>
+  static readonly LANGUAGE_TAG = (
+    t: TranslateFunction,
+    existingTags?: string[]
+  ) =>
     Yup.string()
       .required()
       .max(20)
@@ -168,7 +216,7 @@ export class Validation {
   static readonly LANGUAGE_ORIGINAL_NAME = Yup.string().required().max(100);
   static readonly LANGUAGE_FLAG_EMOJI = Yup.string().required().max(20);
 
-  static readonly LANGUAGE = (t: TFunType, existingTags?: string[]) =>
+  static readonly LANGUAGE = (t: TranslateFunction, existingTags?: string[]) =>
     Yup.object().shape({
       name: Validation.LANGUAGE_NAME,
       originalName: Validation.LANGUAGE_ORIGINAL_NAME,
@@ -192,7 +240,7 @@ export class Validation {
 
   static readonly PROJECT_CREATION = (t: (string) => string) =>
     Yup.object().shape({
-      name: Yup.string().required().min(3).max(50),
+      name: Yup.string().trim().required().min(3).max(50),
       languages: Yup.array()
         .required()
         .min(1, t('project_creation_add_at_least_one_language'))
@@ -209,8 +257,37 @@ export class Validation {
     });
 
   static readonly PROJECT_SETTINGS = Yup.object().shape({
-    name: Yup.string().required().min(3).max(100),
+    name: Yup.string().trim().required().min(3).max(100),
     description: Yup.string().nullable().min(3).max(2000),
+  });
+
+  static readonly TRANSLATION_MEMORY_CREATE_EDIT = Yup.object().shape({
+    name: Yup.string().required().min(1).max(100),
+    baseLanguage: Yup.object()
+      .required()
+      .shape({
+        tag: Yup.string().min(1).required(),
+      }),
+    defaultPenalty: Yup.number()
+      .transform((value, originalValue) =>
+        originalValue === '' || originalValue === null ? 0 : value
+      )
+      .typeError(() => (
+        <T
+          keyName="validation_must_be_whole_number"
+          defaultValue="Must be a whole number between 0 and 100"
+        />
+      ))
+      .integer(() => (
+        <T
+          keyName="validation_must_be_whole_number"
+          defaultValue="Must be a whole number between 0 and 100"
+        />
+      ))
+      .min(0)
+      .max(100)
+      .required(),
+    writeOnlyReviewed: Yup.boolean().required(),
   });
 
   private static slugValidation(min: number, max: number) {
@@ -225,7 +302,7 @@ export class Validation {
   }
 
   static readonly ORGANIZATION_CREATE_OR_EDIT = (
-    t: TFunType,
+    t: TranslateFunction,
     slugInitialValue?: string
   ) => {
     const slugSyncValidation = Validation.slugValidation(3, 60).required();
@@ -257,7 +334,7 @@ export class Validation {
     });
   };
 
-  static readonly INVITE_DIALOG_PROJECT = (t: TFunType) =>
+  static readonly INVITE_DIALOG_PROJECT = (t: TranslateFunction) =>
     Yup.object({
       permission: Yup.string(),
       permissionLanguages: Yup.array(Yup.string()),
@@ -267,11 +344,16 @@ export class Validation {
           ? Yup.string()
               .email(t('validation_email_is_not_valid'))
               .required(t('Validation - required field'))
-          : Yup.string().required(t('Validation - required field'))
+          : val === 'link'
+          ? Yup.string().required(t('Validation - required field'))
+          : Yup.string()
+      ),
+      agency: Yup.number().when('type', (val: string) =>
+        val === 'agency' ? Yup.string().required() : Yup.string()
       ),
     });
 
-  static readonly INVITE_DIALOG_ORGANIZATION = (t: TFunType) =>
+  static readonly INVITE_DIALOG_ORGANIZATION = (t: TranslateFunction) =>
     Yup.object({
       permission: Yup.string(),
       type: Yup.string(),
@@ -298,18 +380,25 @@ export class Validation {
 
   static readonly CLOUD_PLAN_FORM = Yup.object({
     name: Yup.string().required(),
-    stripeProductId: Yup.string().when('free', {
-      is: false,
+    type: Yup.string().required(),
+    stripeProductId: Yup.string().when(['free', 'newStripeProduct'], {
+      is: (free: any, newStripeProduct: any) => !free && !newStripeProduct,
       then: Yup.string().required(),
     }),
     prices: Yup.object().when('type', {
       is: 'PAY_AS_YOU_GO',
       then: Yup.object({
-        perThousandMtCredits: Yup.number().moreThan(0),
-        perThousandTranslations: Yup.number().moreThan(0),
+        perThousandMtCredits: Yup.number().min(0),
+        perThousandTranslations: Yup.number().min(0),
+        perSeat: Yup.number().min(0),
+        perThousandKeys: Yup.number().min(0),
       }),
     }),
     free: Yup.boolean(),
+    stripeProductName: Yup.string().when(['free', 'newStripeProduct'], {
+      is: (free: any, newStripeProduct: any) => !free && newStripeProduct,
+      then: Yup.string().required(),
+    }),
   });
 
   static readonly EE_PLAN_FORM = Yup.object({
@@ -375,7 +464,7 @@ export class Validation {
     url: Yup.string().required().max(255),
   });
 
-  static readonly NEW_KEY_FORM = (t: TFnType) =>
+  static readonly NEW_KEY_FORM = (t: TranslateFunction) =>
     Yup.object().shape({
       name: Yup.string().required(),
       pluralParameter: Yup.string().when('isPlural', {
@@ -386,15 +475,153 @@ export class Validation {
           (value) => checkParamNameIsValid(value ?? '')
         ),
       }),
+      maxCharLimit: Yup.mixed().test(
+        'positive-integer',
+        t('validation_positive_integer_required'),
+        (value) => value === undefined || (Number.isInteger(value) && value > 0)
+      ),
     });
 
-  static readonly KEY_SETTINGS_FORM = (t: TFnType) =>
+  static readonly KEY_SETTINGS_FORM = (t: TranslateFunction) =>
     Yup.object().shape({
       custom: Yup.string().test(
         'invalid-custom-values',
         t('validation_invalid_custom_values'),
         validateObject
       ),
+      maxCharLimit: Yup.mixed().test(
+        'positive-integer',
+        t('validation_positive_integer_required'),
+        (value) => value === undefined || (Number.isInteger(value) && value > 0)
+      ),
+    });
+
+  static readonly CREATE_TASK_FORM = (t: TranslateFunction) =>
+    Yup.object().shape({
+      name: Yup.string().min(3).optional(),
+      languages: Yup.array(Yup.number()).min(
+        1,
+        t('validation_no_language_selected')
+      ),
+    });
+
+  static readonly UPDATE_TASK_FORM = (t: TranslateFunction) =>
+    Yup.object().shape({
+      name: Yup.string().min(3).optional(),
+    });
+
+  private static readonly validateUrlWithPort = (
+    value: string | undefined
+  ): boolean => {
+    if (!value) return false;
+    const urlPattern = /^(http|https):\/\/[\w.-]+(:\d+)?(\/[^\s]*)?$/;
+    return urlPattern.test(value);
+  };
+
+  static readonly SSO_PROVIDER_ENABLED = (t: TranslateFunction) =>
+    Yup.object().shape({
+      force: Yup.boolean().required(),
+      clientId: Yup.string().required().max(255),
+      domain: Yup.string().required().max(255),
+      clientSecret: Yup.string().required().max(255),
+      authorizationUri: Yup.string()
+        .required()
+        .max(255)
+        .test(
+          'is-valid-url-with-port',
+          t('sso_invalid_url_format'),
+          Validation.validateUrlWithPort
+        ),
+      tokenUri: Yup.string()
+        .required()
+        .max(255)
+        .test(
+          'is-valid-url-with-port',
+          t('sso_invalid_url_format'),
+          Validation.validateUrlWithPort
+        ),
+    });
+
+  static readonly SSO_PROVIDER_DISABLED = (t: TranslateFunction) =>
+    Yup.object().shape({
+      force: Yup.boolean().required(),
+      clientId: Yup.string().max(255),
+      domain: Yup.string().max(255),
+      clientSecret: Yup.string().max(255),
+      authorizationUri: Yup.string().max(255),
+      tokenUri: Yup.string().max(255),
+    });
+
+  static readonly TRANSLATION_AGENCY_FORM = () =>
+    Yup.object().shape({
+      name: Yup.string().min(3).required(),
+      email: Yup.string().min(3).required(),
+    });
+
+  static readonly PROMPT_RENAME = () =>
+    Yup.object().shape({
+      name: Yup.string().required(),
+    });
+
+  static readonly PROMPT_SAVE_AS = () =>
+    Yup.object().shape({
+      name: Yup.string().required(),
+    });
+
+  static readonly GLOSSARY_CREATE_FORM = (t: TranslateFunction) =>
+    Yup.object().shape({
+      name: Yup.string().min(3).required(),
+      baseLanguage: Yup.object()
+        .required()
+        .shape({
+          tag: Yup.string().min(1).required(),
+        }),
+      assignedProjects: Yup.array().of(
+        Yup.object().shape({
+          id: Yup.number().required(),
+        })
+      ),
+    });
+
+  static readonly GLOSSARY_TERM_CREATE_FORM = (t: TranslateFunction) =>
+    Yup.object().shape({
+      text: Yup.string().required(),
+      description: Yup.string().optional().nullable(),
+      nonTranslatable: Yup.boolean(),
+      caseSensitive: Yup.boolean(),
+      abbreviation: Yup.boolean(),
+      forbidden: Yup.boolean(),
+    });
+
+  static readonly TRANSLATION_LABEL = (t: TranslateFunction) =>
+    Yup.object().shape({
+      name: Yup.string().required().min(3).max(100),
+      description: Yup.string().nullable().min(3).max(2000),
+      color: Yup.string()
+        .required()
+        .matches(/^#[0-9A-F]{6}$/i, t('validation_invalid_hex_color')),
+    });
+
+  static readonly BRANCH = (t: TranslateFunction) =>
+    Yup.object().shape({
+      name: Yup.string()
+        .required()
+        .min(2)
+        .max(100)
+        .test(
+          'valid-branch-name',
+          t('validation_invalid_branch_name'),
+          (value) => isValidBranchName(value)
+        ),
+    });
+
+  static readonly BRANCH_MERGE = (t: TranslateFunction) => Yup.object({});
+
+  static readonly PLAN_MIGRATION_FORM = () =>
+    Yup.object().shape({
+      monthlyOffsetDays: Yup.number().required().min(0),
+      yearlyOffsetDays: Yup.number().required().min(0),
+      customEmailBody: Yup.string().nullable(),
     });
 }
 

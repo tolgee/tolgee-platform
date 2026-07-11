@@ -5,9 +5,11 @@ import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.formats.paramConvertors.`in`.CToIcuPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.`in`.JavaToIcuPlaceholderConvertor.Companion.JAVA_DETECTION_REGEX
 import io.tolgee.formats.paramConvertors.`in`.PhpToIcuPlaceholderConvertor
+import io.tolgee.formats.paramConvertors.`in`.PythonBraceToIcuPlaceholderConvertor
+import io.tolgee.formats.paramConvertors.`in`.PythonToIcuPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.`in`.RubyToIcuPlaceholderConvertor
 
-class PoFormatDetector() {
+class PoFormatDetector {
   companion object {
     private val possibleFormats =
       mapOf(
@@ -47,22 +49,34 @@ class PoFormatDetector() {
               0.7,
             ),
           ),
-//        ImportFormat.PO_PYTHON to
-//          arrayOf(
-//            FormatDetectionUtil.regexFactor(
-//              PHP_PLACEHOLDER_REGEX,
-//              1.05,
-//            ),
-//          ),
+        ImportFormat.PO_PYTHON to
+          arrayOf(
+            FormatDetectionUtil.regexFactor(
+              PythonToIcuPlaceholderConvertor.PYTHON_DETECTION_REGEX,
+              1.0,
+            ),
+          ),
+        ImportFormat.PO_PYTHON_BRACE to
+          arrayOf(
+            FormatDetectionUtil.regexFactor(
+              PythonBraceToIcuPlaceholderConvertor.PYTHON_BRACE_DETECTION_REGEX,
+              // A plain "{name}" matches both ICU and PYTHON_BRACE.
+              // Weight below ICU, since ICU is preferred.
+              0.9,
+            ),
+          ),
       )
   }
 
   fun detectByFlag(flag: String): ImportFormat? {
     return when (flag) {
-      "php-format" -> return ImportFormat.PO_PHP
-      "c-format" -> return ImportFormat.PO_C
-      "java-format" -> return ImportFormat.PO_JAVA
-      "icu-format" -> return ImportFormat.PO_ICU
+      "php-format" -> ImportFormat.PO_PHP
+      "c-format" -> ImportFormat.PO_C
+      "java-format" -> ImportFormat.PO_JAVA
+      "icu-format" -> ImportFormat.PO_ICU
+      "ruby-format" -> ImportFormat.PO_RUBY
+      "python-format" -> ImportFormat.PO_PYTHON
+      "python-brace-format" -> ImportFormat.PO_PYTHON_BRACE
       else -> null
     }
   }

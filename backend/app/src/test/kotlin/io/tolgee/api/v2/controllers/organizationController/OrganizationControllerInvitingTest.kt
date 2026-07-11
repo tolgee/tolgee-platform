@@ -12,6 +12,8 @@ import io.tolgee.fixtures.andGetContentAsString
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
+import io.tolgee.fixtures.satisfies
+import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.Organization
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.testing.AuthorizedControllerTest
@@ -46,7 +48,6 @@ class OrganizationControllerInvitingTest : AuthorizedControllerTest() {
         "This is description",
         "test-org",
       )
-    tolgeeProperties.frontEndUrl = null
     emailTestUtil.initMocks()
   }
 
@@ -64,7 +65,8 @@ class OrganizationControllerInvitingTest : AuthorizedControllerTest() {
         )
       loginAsUser("hellouser")
       performAuthGet("/v2/organizations/${organization.id}/invitations")
-        .andIsOk.andAssertThatJson {
+        .andIsOk
+        .andAssertThatJson {
           node("_embedded.organizationInvitations").let { projectsNode ->
             projectsNode.isArray.hasSize(1)
             projectsNode.node("[0].id").isEqualTo(invitation.id)
@@ -106,7 +108,7 @@ class OrganizationControllerInvitingTest : AuthorizedControllerTest() {
       performAuthGet("/v2/invitations/${invitation.code}/accept").andIsOk
       assertThatThrownBy { invitationService.getInvitation(invitation.code) }
         .isInstanceOf(BadRequestException::class.java)
-      organizationRoleService.isUserMemberOrOwner(invitedUser.id, organization.id).let {
+      organizationRoleService.hasAnyOrganizationRole(invitedUser.id, organization.id).let {
         assertThat(it).isTrue
       }
     }
@@ -169,11 +171,13 @@ class OrganizationControllerInvitingTest : AuthorizedControllerTest() {
     val organization = prepareTestOrganization()
 
     val code = inviteWithUserWithNameAndEmail(organization.id)
-    emailTestUtil.verifyEmailSent()
+    waitForNotThrowing(timeout = 2000, pollTime = 25) {
+      emailTestUtil.verifyEmailSent()
+    }
 
     val messageContent = emailTestUtil.messageContents.single()
     assertThat(messageContent).contains(code)
-    assertThat(messageContent).contains("http://localhost/")
+    assertThat(messageContent).contains("https://dummy-url.com")
     emailTestUtil.assertEmailTo.isEqualTo(INVITED_EMAIL)
   }
 
@@ -183,7 +187,9 @@ class OrganizationControllerInvitingTest : AuthorizedControllerTest() {
     val organization = prepareTestOrganization()
 
     inviteWithUserWithNameAndEmail(organization.id)
-    emailTestUtil.verifyEmailSent()
+    waitForNotThrowing(timeout = 2000, pollTime = 25) {
+      emailTestUtil.verifyEmailSent()
+    }
 
     val messageContent = emailTestUtil.messageContents.single()
     assertThat(messageContent).doesNotContain("<a href='https://evil.local")
@@ -205,6 +211,33 @@ class OrganizationControllerInvitingTest : AuthorizedControllerTest() {
       OrganizationInviteUserDto(
         roleType = OrganizationRoleType.MEMBER,
         email = TEST_USERNAME,
+        name = INVITED_NAME,
+      ),
+    ).andIsBadRequest
+  }
+
+  @Test
+  fun `does not invite when email already member regardless of casing`() {
+    val organization = prepareTestOrganization()
+    performAuthPut(
+      "/v2/organizations/${organization.id}/invite",
+      OrganizationInviteUserDto(
+        roleType = OrganizationRoleType.MEMBER,
+        email = TEST_USERNAME.uppercase(),
+        name = INVITED_NAME,
+      ),
+    ).andIsBadRequest
+  }
+
+  @Test
+  fun `does not invite when email already invited regardless of casing`() {
+    val organization = prepareTestOrganization()
+    performCreateInvitation(organization.id).andIsOk
+    performAuthPut(
+      "/v2/organizations/${organization.id}/invite",
+      OrganizationInviteUserDto(
+        roleType = OrganizationRoleType.MEMBER,
+        email = INVITED_EMAIL.uppercase(),
         name = INVITED_NAME,
       ),
     ).andIsBadRequest

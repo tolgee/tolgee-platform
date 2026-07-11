@@ -24,7 +24,9 @@ export const API_KEY_PLACEHOLDER = '{{{apiKey}}}';
 const API_URL_PLACEHOLDER = '{{{apiUrl}}}';
 const PROJECT_ID = '{{{projectId}}}';
 
-export const IntegrateView: FunctionComponent = () => {
+export const IntegrateView: FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const project = useProject();
 
   const {

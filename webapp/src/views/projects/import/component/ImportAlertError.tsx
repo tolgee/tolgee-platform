@@ -12,16 +12,20 @@ import {
   Collapse,
   IconButton,
 } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
+import { XClose } from '@untitled-ui/icons-react';
 import { T } from '@tolgee/react';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { useImportDataHelper } from '../hooks/useImportDataHelper';
 
-export const ImportAlertError: FunctionComponent<{
-  error: components['schemas']['ImportAddFilesResultModel']['errors'][0];
-  addFilesMutation: ReturnType<typeof useImportDataHelper>['addFilesMutation'];
-}> = (props) => {
+export const ImportAlertError: FunctionComponent<
+  React.PropsWithChildren<{
+    error: components['schemas']['ImportAddFilesResultModel']['errors'][0];
+    addFilesMutation: ReturnType<
+      typeof useImportDataHelper
+    >['addFilesMutation'];
+  }>
+> = (props) => {
   const [moreOpen, setMoreOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
 
@@ -73,7 +77,7 @@ export const ImportAlertError: FunctionComponent<{
                   setCollapsed(true);
                 }}
               >
-                <CloseIcon fontSize="inherit" />
+                <XClose />
               </IconButton>
             </>
           }

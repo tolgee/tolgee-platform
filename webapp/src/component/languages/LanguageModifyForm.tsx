@@ -19,7 +19,7 @@ type Props = {
   existingTags: string[];
 };
 
-export const LanguageModifyForm: FC<Props> = ({
+export const LanguageModifyForm: FC<React.PropsWithChildren<Props>> = ({
   preferredEmojis,
   values,
   onModified,
@@ -27,7 +27,9 @@ export const LanguageModifyForm: FC<Props> = ({
   inDialog,
   existingTags,
 }) => {
-  const Wrapper: FunctionComponent = (wrapperProps) =>
+  const Wrapper: FunctionComponent<React.PropsWithChildren<unknown>> = (
+    wrapperProps
+  ) =>
     inDialog ? (
       <Dialog open={true}>
         <DialogContent

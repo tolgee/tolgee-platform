@@ -5,8 +5,8 @@ import { tokenService } from '../TokenService';
 import { getUtmCookie } from 'tg.fixtures/utmCookie';
 import { handleApiError } from './handleApiError';
 import { ApiError } from './ApiError';
-import { errorAction } from './errorAction';
 import { globalContext } from 'tg.globalContext/globalActions';
+import { testClockStore } from '../useTestClock';
 
 let requests: { [address: string]: number } = {};
 const detectLoop = (url) => {
@@ -56,15 +56,14 @@ export class ApiHttpService {
 
         fetch(this.apiUrl + input, init)
           .then(async (r) => {
+            this.handleTestClock(r);
             if (r.status >= 400) {
               const responseData = await ApiHttpService.getResObject(r);
               const resultError = new ApiError('Api error', responseData);
+
               resultError.setErrorHandler(() =>
                 handleApiError(r, responseData, init, options)
               );
-              if (r.status === 400) {
-                errorAction(responseData.code);
-              }
 
               if (
                 r.status == 403 &&
@@ -99,18 +98,33 @@ export class ApiHttpService {
             }
             // eslint-disable-next-line no-console
             console.error(e);
-            globalContext.actions?.setGlobalError(
-              new GlobalError(
-                'Error while loading resource',
-                input.toString(),
-                e
-              )
-            );
+            if (!options.disableAutoErrorHandle) {
+              globalContext.actions?.setGlobalError(
+                new GlobalError(
+                  'Error while loading resource',
+                  input.toString(),
+                  e
+                )
+              );
+            }
             reject(e);
           });
       };
       fetchIt();
     });
+  }
+
+  private handleTestClock(r: Response) {
+    const headerValue = r.headers.get('X-Tolgee-Test-Clock');
+    if (!headerValue) {
+      return undefined;
+    }
+    try {
+      const time = parseInt(headerValue);
+      testClockStore.setState({ time });
+    } catch (e) {
+      return;
+    }
   }
 
   async get<T = any>(
@@ -190,16 +204,11 @@ export class ApiHttpService {
 
   buildQuery(object: { [key: string]: any }): string {
     return Object.keys(object)
-      .filter((k) => !!object[k])
+      .filter((k) => object[k] !== null && object[k] !== undefined)
       .map((k) => {
         if (Array.isArray(object[k])) {
           return object[k]
-            .map(
-              (v) =>
-                encodeURIComponent(k) +
-                '=' +
-                (v === '' ? '%02%03' : encodeURIComponent(v))
-            )
+            .map((v) => encodeURIComponent(k) + '=' + encodeURIComponent(v))
             .join('&');
         } else {
           return encodeURIComponent(k) + '=' + encodeURIComponent(object[k]);

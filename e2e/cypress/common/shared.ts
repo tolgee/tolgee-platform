@@ -1,5 +1,9 @@
 /// <reference types="cypress" />
-import { getAnyContainingAriaLabelAttribute, getInput } from './xPath';
+import {
+  getAnyContainingAriaLabelAttribute,
+  getInput,
+  getTextArea,
+} from './xPath';
 import { Scope } from './types';
 import { waitForGlobalLoading } from './loading';
 import { HOST } from './constants';
@@ -13,8 +17,9 @@ export const allScopes: Scope[] = [
 ];
 
 export const clickAdd = () => {
-  cy.wait(100);
-  cy.xpath(getAnyContainingAriaLabelAttribute('add')).click();
+  cy.xpath(getAnyContainingAriaLabelAttribute('add'))
+    .should('be.visible')
+    .click();
 };
 
 export const getPopover = () => {
@@ -75,7 +80,11 @@ export const confirmStandard = () => {
 };
 
 export const assertMessage = (message: string) => {
-  return gcy('global-snackbars').should('contain', message);
+  return gcy('notistack-snackbar').should('contain', message);
+};
+
+export const assertNotMessage = (message: string) => {
+  return gcy('notistack-snackbar').should('not.contain', message);
 };
 
 export const assertTooltip = (message: string) => {
@@ -103,26 +112,23 @@ export const toggleInMultiselect = (
   chainable.find('div').first().click();
 
   getPopover().within(() => {
-    // first select all
+    // first select all (only real language items, not the All/Base/None actions)
     getPopover()
-      .get('input')
-      .each(
-        // cy.xpath(`.//*[text() = '${val}']/ancestor/ancestor::li//input`).each(
-        ($input) => {
-          const isChecked = $input.is(':checked');
-          if (!isChecked) {
-            cy.wrap($input).click();
-          }
+      .get('li[data-cy="translations-language-select-item"] input')
+      .each(($input) => {
+        const isChecked = $input.is(':checked');
+        if (!isChecked) {
+          cy.wrap($input).click();
         }
-      );
+      });
 
     // unselect necessary
     getPopover()
-      .get('.MuiListItemText-primary')
-      .each(($label) => {
-        const labelText = $label.text();
+      .get('li[data-cy="translations-language-select-item"]')
+      .each(($li) => {
+        const labelText = $li.find('.MuiListItemText-primary').text();
         if (!renderedValues.includes(labelText)) {
-          cy.wrap($label).click();
+          cy.wrap($li).find('.MuiListItemText-primary').click();
         }
       });
   });
@@ -130,16 +136,39 @@ export const toggleInMultiselect = (
   waitForGlobalLoading();
 };
 
+export const assertMultiselect = (chainable: Chainable, values: string[]) => {
+  chainable.find('div').first().click();
+
+  getPopover().within(() => {
+    getPopover()
+      .get('li[data-cy="translations-language-select-item"]')
+      .each(($li) => {
+        const labelText = $li.find('.MuiListItemText-primary').text();
+        const input = cy.wrap($li).find('input');
+        if (values.includes(labelText)) {
+          input.should('be.checked');
+        } else {
+          input.should('not.be.checked');
+        }
+      });
+  });
+  dismissMenu();
+};
+
 export const getInputByName = (name: string): Chainable => {
   return cy.xpath(getInput(name));
 };
 
+export const getTextAreaByName = (name: string): Chainable => {
+  return cy.xpath(getTextArea(name));
+};
+
 export const switchToOrganizationWithSearch = (name: string): Chainable => {
   cy.gcy('organization-switch').click();
-  cy.gcy('organization-switch-search').type(name);
+  cy.gcy('switch-popover-search').type(name);
   cy.waitForDom();
 
-  gcy('organization-switch-item')
+  gcy('switch-popover-item')
     .should('have.length', 1)
     .contains(name)
     .scrollIntoView()
@@ -151,7 +180,7 @@ export const switchToOrganization = (name: string): Chainable => {
   cy.waitForDom();
   cy.gcy('organization-switch').click();
   cy.waitForDom();
-  cy.gcy('organization-switch-item').contains(name).scrollIntoView().click();
+  cy.gcy('switch-popover-item').contains(name).scrollIntoView().click();
   return assertSwitchedToOrganization(name);
 };
 
@@ -190,4 +219,8 @@ export const visitProjectDeveloperHooks = (projectId: number) => {
 
 export const dismissMenu = () => {
   cy.focused().type('{esc}');
+};
+
+export const assertMissingFeature = () => {
+  gcy('disabled-feature-banner').should('be.visible');
 };

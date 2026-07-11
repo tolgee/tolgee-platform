@@ -4,8 +4,11 @@ import io.tolgee.AbstractSpringTest
 import io.tolgee.batch.processors.AutomationChunkProcessor
 import io.tolgee.batch.processors.DeleteKeysChunkProcessor
 import io.tolgee.batch.processors.PreTranslationByTmChunkProcessor
+import io.tolgee.batch.state.BatchJobStateProvider
+import io.tolgee.configuration.tolgee.BatchProperties
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.BatchJobsTestData
+import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.testing.WebsocketTest
 import io.tolgee.testing.assert
@@ -15,24 +18,29 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.SpyBean
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import java.time.Duration
-import java.util.*
+import java.util.Date
 import kotlin.math.ceil
 
 @WebsocketTest
-abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
+abstract class AbstractBatchJobsGeneralTest :
+  AbstractSpringTest(),
+  Logging {
   private lateinit var testData: BatchJobsTestData
 
   @Autowired
   lateinit var batchJobService: BatchJobService
 
-  @SpyBean
+  @Autowired
+  lateinit var batchProperties: BatchProperties
+
+  @MockitoSpyBean
   @Autowired
   lateinit var preTranslationByTmChunkProcessor: PreTranslationByTmChunkProcessor
 
-  @Suppress("unused") // Used to instrument it in other places via @SpyBean
-  @SpyBean
+  @Suppress("unused") // Used to instrument it in other places via @MockitoSpyBean
+  @MockitoSpyBean
   @Autowired
   lateinit var deleteKeysChunkProcessor: DeleteKeysChunkProcessor
 
@@ -49,29 +57,39 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
   lateinit var batchJobConcurrentLauncher: BatchJobConcurrentLauncher
 
   @Autowired
-  @SpyBean
+  @MockitoSpyBean
   lateinit var batchJobProjectLockingManager: BatchJobProjectLockingManager
 
   @Autowired
-  @SpyBean
+  @MockitoSpyBean
   lateinit var automationChunkProcessor: AutomationChunkProcessor
 
   @Autowired
-  @SpyBean
+  @MockitoSpyBean
   lateinit var progressManager: ProgressManager
+
+  @MockitoSpyBean
+  @Autowired
+  lateinit var autoTranslationService: io.tolgee.service.translation.AutoTranslationService
+
+  @Autowired
+  lateinit var batchJobStateProvider: BatchJobStateProvider
 
   lateinit var util: BatchJobTestUtil
 
   @BeforeEach
   fun setup() {
+    batchJobStateProvider.clearAllState()
     Mockito.reset(batchJobProjectLockingManager)
     Mockito.reset(progressManager)
+    Mockito.reset(autoTranslationService)
     batchJobChunkExecutionQueue.clear()
     Mockito.reset(preTranslationByTmChunkProcessor)
     Mockito.clearInvocations(preTranslationByTmChunkProcessor)
     batchJobChunkExecutionQueue.populateQueue()
 
     testData = BatchJobsTestData()
+    testData.addTranslationOperationData(1000)
     testDataService.saveTestData(testData.root)
     util = BatchJobTestUtil(applicationContext, testData)
 
@@ -93,8 +111,12 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
     val job = util.runChunkedJob(1000)
     job.totalItems.assert.isEqualTo(1000)
     util.assertPreTranslationProcessExecutedTimes(ceil(job.totalItems.toDouble() / 10).toInt())
-    util.waitForCompleted(job).status.assert.isEqualTo(BatchJobStatus.SUCCESS)
-    util.assertTotalWebsocketMessagesCount(101)
+    util
+      .waitForCompleted(job)
+      .status.assert
+      .isEqualTo(BatchJobStatus.SUCCESS)
+    // 1 start + 100 progress + 1 success = 102
+    util.assertTotalWebsocketMessagesCount(102)
   }
 
   @Test
@@ -102,7 +124,8 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
     val job = util.runChunkedJob(1000)
     util.makePreTranslateProcessorThrowOutOfCreditsTimes(50)
     util.waitForJobFailed(job)
-    util.assertTotalWebsocketMessagesCount(51)
+    // 1 start + 50 progress + 1 failure = 52
+    util.assertTotalWebsocketMessagesCount(52)
     util.assertMessagesContain("out_of_credits")
     util.assertJobFailedWithMessage(job, Message.OUT_OF_CREDITS)
     util.assertJobStateCacheCleared(job)
@@ -115,7 +138,8 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
     util.verifyConstantRepeats(3, 2000)
     util.waitForJobFailed(job)
     util.assertTotalExecutionsCount(job, 103)
-    util.assertTotalWebsocketMessagesCount(100)
+    // 1 start + variable progress + 1 failure = 101
+    util.assertTotalWebsocketMessagesCount(101)
     util.assertStatusReported(BatchJobStatus.FAILED)
     util.assertJobStateCacheCleared(job)
   }
@@ -154,7 +178,8 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
 
     util.waitForJobFailed(job)
     util.assertTotalExecutionsCount(job, 103)
-    util.assertTotalWebsocketMessagesCount(100)
+    // 1 start + variable progress + 1 failure = 101
+    util.assertTotalWebsocketMessagesCount(101)
     util.assertStatusReported(BatchJobStatus.FAILED)
     util.assertJobStateCacheCleared(job)
   }
@@ -164,9 +189,13 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
     util.makeDeleteChunkProcessorReportProgressOnEachItem()
     val job = util.runSingleChunkJob(100)
 
-    util.waitForCompleted(job).status.assert.isEqualTo(BatchJobStatus.SUCCESS)
+    util
+      .waitForCompleted(job)
+      .status.assert
+      .isEqualTo(BatchJobStatus.SUCCESS)
     util.assertTotalExecutionsCount(job, 1)
-    util.assertTotalWebsocketMessagesCount(101)
+    // 1 start + 100 progress + 1 success = 102
+    util.assertTotalWebsocketMessagesCount(102)
     util.assertStatusReported(BatchJobStatus.SUCCESS)
     util.assertJobStateCacheCleared(job)
   }
@@ -285,20 +314,26 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
   @Test
   fun `debounces job`() {
     currentDateProvider.forcedDate = currentDateProvider.date
-    val startTie = currentDateProvider.date
+    currentDateProvider.date
 
     util.makeAutomationChunkProcessorPass()
     val firstJobId = util.runDebouncedJob().id
 
     repeat(2) {
       Thread.sleep(500)
-      util.runDebouncedJob().id.assert.isEqualTo(firstJobId)
+      util
+        .runDebouncedJob()
+        .id.assert
+        .isEqualTo(firstJobId)
     }
     currentDateProvider.move(Duration.ofSeconds(5))
 
     Thread.sleep(500)
     repeat(2) {
-      util.runDebouncedJob().id.assert.isEqualTo(firstJobId)
+      util
+        .runDebouncedJob()
+        .id.assert
+        .isEqualTo(firstJobId)
     }
     currentDateProvider.move(Duration.ofSeconds(10))
     Thread.sleep(500)
@@ -310,14 +345,66 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
     repeat(7) {
       currentDateProvider.move(Duration.ofSeconds(2))
       Thread.sleep(20)
-      util.runDebouncedJob().id.assert.isEqualTo(anotherJobId)
+      util
+        .runDebouncedJob()
+        .id.assert
+        .isEqualTo(anotherJobId)
       currentDateProvider.move(Duration.ofSeconds(3))
       Thread.sleep(20)
-      util.runDebouncedJob().id.assert.isEqualTo(anotherJobId)
+      util
+        .runDebouncedJob()
+        .id.assert
+        .isEqualTo(anotherJobId)
     }
 
     currentDateProvider.move(Duration.ofSeconds(5))
     Thread.sleep(500)
-    util.runDebouncedJob().id.assert.isNotEqualTo(anotherJobId)
+    util
+      .runDebouncedJob()
+      .id.assert
+      .isNotEqualTo(anotherJobId)
+  }
+
+  @Test
+  fun `mt job respects maxPerJobConcurrency`() {
+    val mtDefault = batchProperties.maxPerMtJobConcurrency
+    val maxConcurrency = 1
+    batchProperties.maxPerMtJobConcurrency = maxConcurrency
+
+    try {
+      val mtJob = util.runMtJob(100)
+      util.assertAllowedMaxPerJobConcurrency(mtJob, maxConcurrency)
+      util.assertMaxPerJobConcurrencyIsLessThanOrEqualTo(mtJob, maxConcurrency)
+      util.waitForJobSuccess(mtJob)
+      util.assertJobUnlocked()
+    } finally {
+      batchProperties.maxPerMtJobConcurrency = mtDefault
+    }
+  }
+
+  @Test
+  fun `MultipleItemsFailedException retries the job`() {
+    util.makeAutoTranslationFailOnTwoFirstItemsInChunk()
+    val job = util.runMtJob(5) // one chunk
+
+    util.waitForRetryExecutionCreated(100)
+    moveCurrentDate(Duration.ofMillis(100))
+
+    util.waitForJobSuccess(job)
+
+    // Verify it's retried
+    val executions = batchJobService.getExecutions(job.id)
+    executions.assert.size().isEqualTo(2) // 1 initial + 1 retry
+    executions
+      .last()
+      .status.assert
+      .isEqualTo(BatchJobChunkExecutionStatus.SUCCESS)
+
+    executions
+      .last()
+      .successTargets!!
+      .assert
+      .size()
+      .isEqualTo(2) // 2 failed items in a chunk are retried successfully
   }
 }

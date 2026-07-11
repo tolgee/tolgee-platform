@@ -1,35 +1,34 @@
 package io.tolgee.batch.processors
 
-import io.tolgee.batch.ChunkProcessor
+import com.fasterxml.jackson.databind.ObjectMapper
+import io.tolgee.batch.AbstractChunkProcessor
 import io.tolgee.batch.JobCharacter
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.batch.request.MachineTranslationRequest
-import io.tolgee.constants.MtServiceType
+import io.tolgee.configuration.tolgee.BatchProperties
 import io.tolgee.model.batch.params.MachineTranslationJobParams
-import io.tolgee.service.machineTranslation.MtServiceConfigService
-import io.tolgee.service.project.ProjectService
 import org.springframework.stereotype.Component
 import kotlin.coroutines.CoroutineContext
 
 @Component
 class MachineTranslationChunkProcessor(
   private val genericAutoTranslationChunkProcessor: GenericAutoTranslationChunkProcessor,
-  private val mtServiceConfigService: MtServiceConfigService,
-  private val projectService: ProjectService,
-) : ChunkProcessor<MachineTranslationRequest, MachineTranslationJobParams, BatchTranslationTargetItem> {
+  private val batchProperties: BatchProperties,
+  objectMapper: ObjectMapper,
+) : AbstractChunkProcessor<MachineTranslationRequest, MachineTranslationJobParams, BatchTranslationTargetItem>(
+    objectMapper,
+  ) {
   override fun process(
     job: BatchJobDto,
     chunk: List<BatchTranslationTargetItem>,
     coroutineContext: CoroutineContext,
-    onProgress: (Int) -> Unit,
   ) {
     @Suppress("UNCHECKED_CAST")
     genericAutoTranslationChunkProcessor.process(
       job,
       chunk,
       coroutineContext,
-      onProgress,
       useMachineTranslation = true,
       useTranslationMemory = false,
     )
@@ -48,22 +47,20 @@ class MachineTranslationChunkProcessor(
   }
 
   override fun getMaxPerJobConcurrency(): Int {
-    return 1
+    return batchProperties.maxPerMtJobConcurrency
   }
 
-  override fun getJobCharacter(): JobCharacter {
+  override fun getJobCharacter(
+    request: MachineTranslationRequest,
+    projectId: Long?,
+  ): JobCharacter {
     return JobCharacter.SLOW
   }
 
   override fun getChunkSize(
     request: MachineTranslationRequest,
-    projectId: Long,
+    projectId: Long?,
   ): Int {
-    val languageIds = request.targetLanguageIds
-    val services = mtServiceConfigService.getPrimaryServices(languageIds, projectId).values.toSet()
-    if (services.map { it?.serviceType }.contains(MtServiceType.TOLGEE)) {
-      return 2
-    }
     return 5
   }
 

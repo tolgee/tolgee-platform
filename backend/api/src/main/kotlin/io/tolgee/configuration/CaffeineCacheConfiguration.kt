@@ -20,11 +20,14 @@ import java.util.concurrent.TimeUnit
 @ConditionalOnClass(Redisson::class, RedisOperations::class)
 @AutoConfigureAfter(ConditionalRedissonAutoConfiguration::class)
 @ConditionalOnExpression("\${tolgee.cache.use-redis:false} == false and \${tolgee.cache.enabled:false}")
-class CaffeineCacheConfiguration(val tolgeeProperties: TolgeeProperties) {
+class CaffeineCacheConfiguration(
+  val tolgeeProperties: TolgeeProperties,
+) {
   @Bean
   fun caffeineConfig(): Caffeine<Any, Any> {
     val builder =
-      Caffeine.newBuilder()
+      Caffeine
+        .newBuilder()
         .expireAfterWrite(tolgeeProperties.cache.defaultTtl, TimeUnit.MILLISECONDS)
         .expireAfterAccess(tolgeeProperties.cache.defaultTtl, TimeUnit.MILLISECONDS)
     if (tolgeeProperties.cache.caffeineMaxSize > 0) {

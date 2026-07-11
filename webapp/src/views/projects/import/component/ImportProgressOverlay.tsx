@@ -12,9 +12,8 @@ import { ImportProgressBar } from './ImportProgress';
 import { ImportOperationStatus } from './ImportOperationStatus';
 import { ImportOperationTitle } from './ImportOperationTitle';
 import { Link } from 'react-router-dom';
-import { LINKS, PARAMS } from 'tg.constants/links';
 import { T } from '@tolgee/react';
-import { useProject } from 'tg.hooks/useProject';
+import { useBranchLinks } from 'tg.component/branching/useBranchLinks';
 
 const StyledRoot = styled(Box)`
   position: absolute;
@@ -38,10 +37,13 @@ export const ImportProgressOverlay = (props: {
   importDone: boolean;
   loading: boolean;
   operationStatus?: OperationStatusType;
+  importedKeys?: number | null;
+  totalKeys?: number | null;
   onImportMore: () => void;
   onActiveChange: (isActive: boolean) => void;
+  branch?: string;
 }) => {
-  const project = useProject();
+  const { buildLink } = useBranchLinks();
 
   const [{ visible, filesUploaded, operation }, setState] = useState({
     visible: false,
@@ -112,6 +114,13 @@ export const ImportProgressOverlay = (props: {
           <ImportProgressBar
             loading={props.loading}
             loaded={showFilesUploaded || showImportDone}
+            importedKeys={operation === 'apply' ? props.importedKeys : null}
+            totalKeys={operation === 'apply' ? props.totalKeys : null}
+            indeterminate={
+              operation !== 'apply' ||
+              props.importedKeys == null ||
+              props.totalKeys == null
+            }
           />
         </ImportInputAreaLayoutCenter>
         <ImportInputAreaLayoutBottom>
@@ -120,9 +129,7 @@ export const ImportProgressOverlay = (props: {
               <Button
                 component={Link}
                 color="primary"
-                to={LINKS.PROJECT_TRANSLATIONS.build({
-                  [PARAMS.PROJECT_ID]: project.id,
-                })}
+                to={buildLink('translations', props.branch)}
               >
                 <T keyName="import-done-go-to-translations-button" />
               </Button>
@@ -135,7 +142,11 @@ export const ImportProgressOverlay = (props: {
               </Button>
             </Box>
           ) : (
-            <ImportOperationStatus status={props.operationStatus} />
+            <ImportOperationStatus
+              status={props.operationStatus}
+              importedKeys={props.importedKeys}
+              totalKeys={props.totalKeys}
+            />
           )}
         </ImportInputAreaLayoutBottom>
       </ImportInputAreaLayout>

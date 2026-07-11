@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { T, TFnType, useTranslate } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import { Formik } from 'formik';
 
 import { components } from 'tg.service/apiSchema.generated';
@@ -15,6 +15,7 @@ import { messageService } from 'tg.service/MessageService';
 import { TolgeeFormat, tolgeeFormatGenerateIcu } from '@tginternal/editor';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { useHistory } from 'react-router-dom';
+import { useTranslationsSelector } from 'tg.views/projects/translations/context/TranslationsContext';
 
 type KeyWithDataModel = components['schemas']['KeyWithDataModel'];
 
@@ -25,6 +26,7 @@ export type ValuesCreateType = {
   description: string | undefined;
   isPlural: boolean;
   pluralParameter: string;
+  maxCharLimit: number | undefined;
 };
 
 type Props = {
@@ -35,7 +37,7 @@ type Props = {
   autofocus?: boolean;
 };
 
-export const KeyCreateForm: React.FC<Props> = ({
+export const KeyCreateForm: React.FC<React.PropsWithChildren<Props>> = ({
   baseLanguage,
   onSuccess,
   onCancel,
@@ -47,6 +49,7 @@ export const KeyCreateForm: React.FC<Props> = ({
   const permissions = useProjectPermissions();
   const { refetchUsage } = useGlobalActions();
   const history = useHistory();
+  const { selected } = useTranslationsSelector((c) => c.branches);
 
   const keyName = useUrlSearch().key as string;
   const namespace =
@@ -70,6 +73,8 @@ export const KeyCreateForm: React.FC<Props> = ({
           'application/json': {
             ...values,
             isPlural: Boolean(values.isPlural),
+            maxCharLimit: values.maxCharLimit || undefined,
+            branch: selected?.name,
             translations: {
               [baseLanguage]: tolgeeFormatGenerateIcu(
                 {
@@ -116,9 +121,10 @@ export const KeyCreateForm: React.FC<Props> = ({
         namespace,
         isPlural: false,
         pluralParameter: 'value',
+        maxCharLimit: undefined,
       }}
       onSubmit={handleSubmit}
-      validationSchema={Validation.NEW_KEY_FORM(t as TFnType)}
+      validationSchema={Validation.NEW_KEY_FORM(t)}
     >
       {(formik) => {
         useEffect(() => {

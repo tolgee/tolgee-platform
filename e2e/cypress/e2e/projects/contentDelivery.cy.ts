@@ -31,12 +31,16 @@ describe('Content delivery', () => {
     contentDeliveryTestData.clean();
   });
 
-  it('publishes content manually', () => {
+  it('publishes content manually and shows files', () => {
     gcyAdvanced({ value: 'content-delivery-list-item', name: 'Azure' })
       .findDcy('content-delivery-item-publish')
       .click();
     waitForGlobalLoading();
     assertMessage('Content published successfully!');
+    gcyAdvanced({ value: 'content-delivery-list-item', name: 'Azure' })
+      .findDcy('content-delivery-files-button')
+      .click();
+    gcy('content-delivery-published-file').should('contain', 'en.json');
   });
 
   it('creates content delivery', () => {
@@ -96,6 +100,28 @@ describe('Content delivery', () => {
       .should('be.checked');
   });
 
+  it('stores zip export setting', () => {
+    cy.gcy('content-delivery-add-button').click();
+    fillContentDeliveryConfigForm('ZipTest');
+    cy.gcy('content-delivery-zip-export-checkbox')
+      .find('input')
+      .should('not.be.checked')
+      .click();
+    saveForm();
+    waitForGlobalLoading();
+    openEditDialog('ZipTest');
+    cy.gcy('content-delivery-zip-export-checkbox')
+      .find('input')
+      .should('be.checked')
+      .click();
+    saveForm();
+    waitForGlobalLoading();
+    openEditDialog('ZipTest');
+    cy.gcy('content-delivery-zip-export-checkbox')
+      .find('input')
+      .should('not.be.checked');
+  });
+
   it('creates content delivery config with proper export params ', () => {
     testExportFormats(
       () => {
@@ -142,6 +168,32 @@ describe('Content delivery', () => {
     );
   });
 
+  it('stores content delivery configuration for XLIFF format with HTML escaping', () => {
+    cy.gcy('content-delivery-add-button').click();
+    fillContentDeliveryConfigForm('XLIFF Test');
+
+    // Select XLIFF format
+    cy.gcy('export-format-selector').click();
+    cy.gcy('export-format-selector-item').contains('XLIFF').click();
+
+    // Enable HTML escaping
+    cy.gcy('export-escape_html-selector')
+      .find('input')
+      .should('not.be.checked')
+      .click();
+
+    // Save the configuration
+    saveForm();
+    waitForGlobalLoading();
+
+    // Verify the settings persist
+    openEditDialog('XLIFF Test');
+    cy.gcy('export-escape_html-selector').find('input').should('be.checked');
+
+    // Verify format is still XLIFF
+    gcy('export-format-selector').should('contain', 'XLIFF');
+  });
+
   it('updates existing content delivery', () => {
     const name = 'Azure edited';
     gcyAdvanced({ value: 'content-delivery-list-item', name: 'Azure' })
@@ -177,6 +229,7 @@ describe('Content delivery', () => {
     deleteContentDeliveryConfig('Azure');
     deleteContentDeliveryConfig('S3');
     deleteContentDeliveryConfig('Custom Slug');
+    deleteContentDeliveryConfig('Zip Enabled');
 
     cy.contains('Only single content delivery configuration enabled');
     cy.gcy('content-delivery-add-button').should('be.disabled');

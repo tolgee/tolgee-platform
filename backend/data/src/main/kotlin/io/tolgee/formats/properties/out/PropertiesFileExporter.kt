@@ -1,7 +1,7 @@
 package io.tolgee.formats.properties.out
 
 import io.tolgee.dtos.IExportParams
-import io.tolgee.formats.NoOpFromIcuPlaceholderConvertor
+import io.tolgee.formats.ExportMessageFormat
 import io.tolgee.formats.generic.IcuToGenericFormatMessageConvertor
 import io.tolgee.service.export.ExportFilePathProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
@@ -23,9 +23,8 @@ class PropertiesFileExporter(
   val translations: List<ExportTranslationView>,
   val exportParams: IExportParams,
   private val projectIcuPlaceholdersSupport: Boolean,
+  private val filePathProvider: ExportFilePathProvider,
 ) : FileExporter {
-  private val fileExtension: String = "properties"
-
   val result: MutableMap<String, PropertiesConfiguration> = mutableMapOf()
 
   private fun prepare() {
@@ -47,19 +46,23 @@ class PropertiesFileExporter(
       text,
       plural,
       projectIcuPlaceholdersSupport,
-      paramConvertorFactory =
-        exportParams.messageFormat?.paramConvertorFactory
-          ?: { NoOpFromIcuPlaceholderConvertor() },
+      paramConvertorFactory = messageFormat.paramConvertorFactory,
     ).convert()
+  }
+
+  private val messageFormat by lazy {
+    exportParams.messageFormat ?: ExportMessageFormat.ICU
   }
 
   override fun produceFiles(): Map<String, InputStream> {
     prepare()
-    return result.asSequence().map { (fileName, properties) ->
-      // convert properties to bytes
-      val bytes = properties.asByteArray()
-      fileName to ByteArrayInputStream(bytes)
-    }.toMap()
+    return result
+      .asSequence()
+      .map { (fileName, properties) ->
+        // convert properties to bytes
+        val bytes = properties.asByteArray()
+        fileName to ByteArrayInputStream(bytes)
+      }.toMap()
   }
 
   private fun PropertiesConfiguration.asByteArray(): ByteArray {
@@ -71,13 +74,6 @@ class PropertiesFileExporter(
 
   private fun computeFileName(translation: ExportTranslationView): String {
     return filePathProvider.getFilePath(translation)
-  }
-
-  private val filePathProvider by lazy {
-    ExportFilePathProvider(
-      exportParams,
-      fileExtension,
-    )
   }
 }
 

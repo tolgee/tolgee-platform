@@ -1,25 +1,16 @@
 package io.tolgee.util
 
 import java.awt.Dimension
-import java.awt.Image
 import java.awt.RenderingHints
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
-import javax.imageio.IIOImage
-import javax.imageio.ImageIO
-import javax.imageio.ImageWriteParam
-import javax.imageio.ImageWriter
 import kotlin.math.floor
 import kotlin.math.sqrt
 
 class ImageConverter(
-  private val imageStream: InputStream,
-) {
-  private val sourceBufferedImage: BufferedImage by lazy {
-    ImageIO.read(imageStream)
-  }
-
+  imageStream: InputStream,
+) : ImageProcessor(imageStream) {
   val originalDimension: Dimension by lazy {
     Dimension(sourceBufferedImage.width, sourceBufferedImage.height)
   }
@@ -54,50 +45,38 @@ class ImageConverter(
     return writeImage(resizedImage, compressionQuality)
   }
 
-  private fun writeImage(
-    bufferedImage: BufferedImage,
-    compressionQuality: Float,
-  ): ByteArrayOutputStream {
-    val imageWriter = getWriter()
-    val writerParams = getWriterParams(imageWriter, compressionQuality)
-    val outputStream = ByteArrayOutputStream()
-    val imageOutputStream = ImageIO.createImageOutputStream(outputStream)
-    imageWriter.output = imageOutputStream
-    imageWriter.write(null, IIOImage(bufferedImage, null, null), writerParams)
-    outputStream.close()
-    imageOutputStream.close()
-    imageWriter.dispose()
-    return outputStream
-  }
-
-  private fun getWriterParams(
-    writer: ImageWriter,
-    compressionQuality: Float,
-  ): ImageWriteParam? {
-    val writerParams = writer.defaultWriteParam
-    if (compressionQuality > 0) {
-      writerParams.compressionMode = ImageWriteParam.MODE_EXPLICIT
-      writerParams.compressionQuality = compressionQuality
-    }
-    return writerParams
-  }
-
   private fun getScaledImage(targetDimension: Dimension): BufferedImage {
-    val resized = BufferedImage(targetDimension.width, targetDimension.height, sourceBufferedImage.type)
+    val resized = BufferedImage(targetDimension.width, targetDimension.height, getSafeImageType())
     val g = resized.createGraphics()
     g.setRenderingHint(
       RenderingHints.KEY_INTERPOLATION,
       RenderingHints.VALUE_INTERPOLATION_BILINEAR,
     )
     g.drawImage(
-      sourceBufferedImage, 0, 0, targetDimension.width, targetDimension.height, 0, 0, sourceBufferedImage.width,
-      sourceBufferedImage.height, null,
+      sourceBufferedImage,
+      0,
+      0,
+      targetDimension.width,
+      targetDimension.height,
+      0,
+      0,
+      sourceBufferedImage.width,
+      sourceBufferedImage.height,
+      null,
     )
     g.dispose()
     return resized
   }
 
-  private fun getWriter() = ImageIO.getImageWritersByFormatName("png").next() as ImageWriter
+  private fun getSafeImageType(): Int {
+    if (sourceBufferedImage.type != BufferedImage.TYPE_CUSTOM) {
+      return sourceBufferedImage.type
+    }
+    if (sourceBufferedImage.colorModel.hasAlpha()) {
+      return BufferedImage.TYPE_INT_ARGB
+    }
+    return BufferedImage.TYPE_INT_RGB
+  }
 
   val targetDimension: Dimension by lazy {
     val imagePxs = sourceBufferedImage.height * sourceBufferedImage.width
@@ -109,26 +88,5 @@ class ImageConverter(
       return@lazy Dimension(newWidth, newHeight)
     }
     return@lazy Dimension(sourceBufferedImage.width, sourceBufferedImage.height)
-  }
-
-  private fun convertToBufferedImage(
-    img: Image,
-    width: Int,
-    height: Int,
-  ): BufferedImage {
-    if (img is BufferedImage) {
-      return img
-    }
-
-    val bi =
-      BufferedImage(
-        width,
-        height,
-        BufferedImage.TYPE_INT_ARGB,
-      )
-    val graphics2D = bi.createGraphics()
-    graphics2D.drawImage(img, 0, 0, null)
-    graphics2D.dispose()
-    return bi
   }
 }

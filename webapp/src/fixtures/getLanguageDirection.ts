@@ -1,4 +1,4 @@
-export const getLanguageDirection = (languageTag: string): Direction => {
+export const getLanguageDirection = (languageTag?: string): Direction => {
   const rtlLangs = [
     'ar',
     'arc',
@@ -10,11 +10,12 @@ export const getLanguageDirection = (languageTag: string): Direction => {
     'ks',
     'ku',
     'ps',
+    'ug',
     'ur',
     'yi',
   ];
-  const languageIso = languageTag.replace(/^([a-zA-Z]+)(.*?)$/, '$1');
-  return rtlLangs.indexOf(languageIso) > -1 ? 'rtl' : 'ltr';
+  const languageIso = languageTag?.replace(/^([a-zA-Z]+)(.*?)$/, '$1');
+  return rtlLangs.indexOf(languageIso || '') > -1 ? 'rtl' : 'ltr';
 };
 
 export type Direction = 'ltr' | 'rtl';

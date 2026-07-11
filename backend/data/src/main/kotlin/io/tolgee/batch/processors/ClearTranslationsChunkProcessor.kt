@@ -1,6 +1,8 @@
 package io.tolgee.batch.processors
 
-import io.tolgee.batch.ChunkProcessor
+import com.fasterxml.jackson.databind.ObjectMapper
+import io.tolgee.batch.AbstractChunkProcessor
+import io.tolgee.batch.ProgressManager
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.request.ClearTranslationsRequest
 import io.tolgee.model.batch.params.ClearTranslationsJobParams
@@ -14,23 +16,22 @@ import kotlin.coroutines.CoroutineContext
 class ClearTranslationsChunkProcessor(
   private val translationService: TranslationService,
   private val entityManager: EntityManager,
-) : ChunkProcessor<ClearTranslationsRequest, ClearTranslationsJobParams, Long> {
+  private val progressManager: ProgressManager,
+  objectMapper: ObjectMapper,
+) : AbstractChunkProcessor<ClearTranslationsRequest, ClearTranslationsJobParams, Long>(objectMapper) {
   override fun process(
     job: BatchJobDto,
     chunk: List<Long>,
     coroutineContext: CoroutineContext,
-    onProgress: ((Int) -> Unit),
   ) {
     val subChunked = chunk.chunked(100)
-    var progress: Int = 0
     val params = getParams(job)
     subChunked.forEach { subChunk ->
       coroutineContext.ensureActive()
       @Suppress("UNCHECKED_CAST")
       translationService.clearBatch(subChunk, params.languageIds)
       entityManager.flush()
-      progress += subChunk.size
-      onProgress.invoke(progress)
+      progressManager.reportSingleChunkProgress(job.id, subChunk.size)
     }
   }
 
@@ -51,4 +52,9 @@ class ClearTranslationsChunkProcessor(
       languageIds = data.languageIds
     }
   }
+
+  override fun getChunkSize(
+    request: ClearTranslationsRequest,
+    projectId: Long?,
+  ): Int = 5000
 }

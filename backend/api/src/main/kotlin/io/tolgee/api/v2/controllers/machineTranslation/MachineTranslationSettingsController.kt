@@ -19,6 +19,7 @@ import io.tolgee.service.machineTranslation.MtServiceConfigService
 import org.springframework.hateoas.CollectionModel
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -34,7 +35,7 @@ class MachineTranslationSettingsController(
   private val languageConfigItemModelAssembler: LanguageConfigItemModelAssembler,
   private val mtServiceConfigService: MtServiceConfigService,
 ) {
-  @GetMapping("/{projectId}/machine-translation-service-settings")
+  @GetMapping("/{projectId:[0-9]+}/machine-translation-service-settings")
   @Operation(summary = "Get machine translation settings")
   @UseDefaultPermissions
   @AllowApiAccess
@@ -43,9 +44,9 @@ class MachineTranslationSettingsController(
     return languageConfigItemModelAssembler.toCollectionModel(data)
   }
 
-  @PutMapping("/{projectId}/machine-translation-service-settings")
+  @PutMapping("/{projectId:[0-9]+}/machine-translation-service-settings")
   @Operation(summary = "Sets machine translation settings")
-  @RequiresProjectPermissions([ Scope.LANGUAGES_EDIT ])
+  @RequiresProjectPermissions([Scope.LANGUAGES_EDIT])
   @AllowApiAccess
   fun setMachineTranslationSettings(
     @RequestBody dto: SetMachineTranslationSettingsDto,
@@ -54,25 +55,35 @@ class MachineTranslationSettingsController(
     return getMachineTranslationSettings()
   }
 
-  @GetMapping("/{projectId}/machine-translation-language-info")
+  @PutMapping("/{projectId:[0-9]+}/machine-translation-service-settings/set-default-prompt/{promptId}")
+  @Operation(summary = "Sets machine translation default prompt for all languages")
+  @RequiresProjectPermissions([Scope.LANGUAGES_EDIT])
+  fun setMachineTranslationSettings(
+    @PathVariable promptId: Long,
+  ) {
+    mtServiceConfigService.setDefaultPrompt(projectHolder.projectEntity, promptId)
+  }
+
+  @GetMapping("/{projectId:[0-9]+}/machine-translation-language-info")
   @Operation(
     summary = "Machine translation info",
     description =
       "Get enabled services " +
         "and configured formality for each language",
   )
-  @RequiresProjectPermissions([ Scope.LANGUAGES_EDIT ])
+  @RequiresProjectPermissions([Scope.LANGUAGES_EDIT])
   @AllowApiAccess
   fun getMachineTranslationLanguageInfo(): CollectionModel<LanguageInfoModel> {
     val data = mtServiceConfigService.getLanguageInfo(projectHolder.project)
     return CollectionModel.of(
-      data.map {
-        LanguageInfoModel(
-          it.language.id,
-          it.language.tag,
-          supportedServices = it.supportedServices,
-        )
-      }.sortedBy { it.languageId },
+      data
+        .map {
+          LanguageInfoModel(
+            it.language?.id,
+            it.language?.tag,
+            supportedServices = it.supportedServices,
+          )
+        }.sortedBy { it.languageId },
     )
   }
 }

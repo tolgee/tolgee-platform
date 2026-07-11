@@ -6,7 +6,7 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import { styled } from '@mui/material/styles';
 import { TransitionProps } from '@mui/material/transitions';
-import CloseIcon from '@mui/icons-material/Close';
+import { XClose } from '@untitled-ui/icons-react';
 import { T } from '@tolgee/react';
 import { useTheme } from '@mui/material';
 
@@ -26,10 +26,12 @@ const Transition = React.forwardRef(function Transition(
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-export const ImportConflictResolutionDialog: FunctionComponent<{
-  row?: components['schemas']['ImportLanguageModel'];
-  onClose: () => void;
-}> = (props) => {
+export const ImportConflictResolutionDialog: FunctionComponent<
+  React.PropsWithChildren<{
+    row?: components['schemas']['ImportLanguageModel'];
+    onClose: () => void;
+  }>
+> = (props) => {
   const theme = useTheme();
   return (
     <div>
@@ -51,7 +53,7 @@ export const ImportConflictResolutionDialog: FunctionComponent<{
               data-cy="import-resolution-dialog-close-button"
               size="large"
             >
-              <CloseIcon />
+              <XClose />
             </IconButton>
             <StyledTitle variant="h6">
               <T keyName="import_resolve_conflicts_title" />

@@ -24,9 +24,6 @@ spring:
         types:
           print:
             banner: false
-        enhancer:
-          enableLazyInitialization: true
-          enableDirtyTracking: true
         dialect: io.tolgee.dialects.postgres.CustomPostgreSQLDialect
   batch:
     job:
@@ -40,6 +37,8 @@ spring:
 tolgee:
   authentication:
     enabled: false
+  internal:
+    orphan-project-purge-enabled: true
   postgres-autostart:
     enabled: true
   cache:
@@ -54,6 +53,8 @@ server:
   error:
     include-exception: false
     include-stacktrace: never
+  tomcat:
+    max-part-count: 500
 sentry:
   dsn: ${tolgee.sentry.server-dsn:}
   traces-sample-rate: ${tolgee.sentry.traces-sample-rate:}

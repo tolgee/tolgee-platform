@@ -1,6 +1,6 @@
 package io.tolgee.activity
 
-import com.posthog.java.PostHog
+import com.posthog.server.PostHog
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.batch.BatchJobService
 import io.tolgee.development.testDataBuilder.data.BaseTestData
@@ -9,10 +9,10 @@ import io.tolgee.fixtures.AuthorizedRequestFactory
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
+import io.tolgee.fixtures.assertPostHogEventReported
 import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
 import io.tolgee.fixtures.waitFor
-import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
@@ -20,22 +20,16 @@ import net.javacrumbs.jsonunit.assertj.JsonAssert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
-import org.mockito.kotlin.any
-import org.mockito.kotlin.argThat
-import org.mockito.kotlin.eq
-import org.mockito.kotlin.times
-import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpHeaders
 import org.springframework.test.web.servlet.ResultActions
 import java.math.BigDecimal
-import java.util.function.Consumer
 
+@SpringBootTest
 class ActivityLogTest : ProjectAuthControllerTest("/v2/projects/") {
   private lateinit var testData: BaseTestData
 
-  @MockBean
   @Autowired
   lateinit var postHog: PostHog
 
@@ -103,7 +97,10 @@ class ActivityLogTest : ProjectAuthControllerTest("/v2/projects/") {
 
     val keyIds = keys.map { it.id }.toList()
 
-    val csLanguageId = testData.projectBuilder.getLanguageByTag("cs")!!.self.id
+    val csLanguageId =
+      testData.projectBuilder
+        .getLanguageByTag("cs")!!
+        .self.id
     performProjectAuthPost(
       "start-batch-job/machine-translate",
       mapOf(
@@ -140,20 +137,10 @@ class ActivityLogTest : ProjectAuthControllerTest("/v2/projects/") {
       },
     ).andIsOk
 
-    var params: Map<String, Any?>? = null
-    waitForNotThrowing(timeout = 10000) {
-      verify(postHog, times(1)).capture(
-        any(),
-        eq("SET_TRANSLATIONS"),
-        argThat {
-          params = this
-          true
-        },
-      )
-    }
-    params!!["utm_hello"].assert.isEqualTo("hello")
-    params!!["sdkType"].assert.isEqualTo("Unreal")
-    params!!["sdkVersion"].assert.isEqualTo("1.0.0")
+    val params = assertPostHogEventReported(postHog, "SET_TRANSLATIONS")
+    params["utm_hello"].assert.isEqualTo("hello")
+    params["sdkType"].assert.isEqualTo("Unreal")
+    params["sdkVersion"].assert.isEqualTo("1.0.0")
   }
 
   @Test
@@ -166,11 +153,12 @@ class ActivityLogTest : ProjectAuthControllerTest("/v2/projects/") {
       }
     key.setNamespace("ns")
     val translation =
-      key.addTranslation {
-        language = testData.englishLanguage
-        text = "t"
-        state = TranslationState.REVIEWED
-      }.self
+      key
+        .addTranslation {
+          language = testData.englishLanguage
+          text = "t"
+          state = TranslationState.REVIEWED
+        }.self
 
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
@@ -235,13 +223,11 @@ class ActivityLogTest : ProjectAuthControllerTest("/v2/projects/") {
 
   private fun ResultActions.waitForJobCompleted() =
     andAssertThatJson {
-      node("id").isNumber.satisfies(
-        Consumer {
-          waitFor(pollTime = 2000) {
-            val job = batchJobService.findJobDto(it.toLong())
-            job?.status?.completed == true
-          }
-        },
-      )
+      node("id").isNumber.satisfies({
+        waitFor(pollTime = 2000) {
+          val job = batchJobService.findJobDto(it.toLong())
+          job?.status?.completed == true
+        }
+      })
     }
 }

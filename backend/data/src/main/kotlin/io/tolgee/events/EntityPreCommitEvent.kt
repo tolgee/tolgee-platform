@@ -2,7 +2,7 @@ package io.tolgee.events
 
 import io.tolgee.activity.iterceptor.PreCommitEventPublisher
 
-interface EntityPreCommitEvent {
+interface EntityPreCommitEvent<T : Any> {
   val source: PreCommitEventPublisher
-  val entity: Any?
+  val entity: T?
 }

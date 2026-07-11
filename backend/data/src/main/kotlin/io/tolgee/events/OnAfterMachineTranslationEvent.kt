@@ -8,5 +8,5 @@ class OnAfterMachineTranslationEvent(
   /**
    * The actual total price of translation actually consumed
    */
-  val actualSumPrice: Int,
+  val actualSumPriceInCents: Int,
 ) : ApplicationEvent(source)

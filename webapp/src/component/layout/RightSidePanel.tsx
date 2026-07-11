@@ -1,12 +1,7 @@
 import { Box, ClickAwayListener, styled } from '@mui/material';
-import clsx from 'clsx';
-import { useEffect, useRef } from 'react';
-import {
-  useGlobalActions,
-  useGlobalContext,
-} from 'tg.globalContext/GlobalContext';
+import { useRef } from 'react';
+import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { useDebounce } from 'use-debounce';
-import { useResizeObserver } from 'usehooks-ts';
 
 const StyledPanel = styled(Box)`
   position: fixed;
@@ -27,47 +22,35 @@ const StyledPanel = styled(Box)`
 `;
 
 type Props = {
-  children: React.ReactNode;
-  onClose: () => void;
-  floating: boolean;
-  open: boolean;
+  children?: React.ReactNode;
+  floating?: boolean;
+  open?: boolean;
+  onClose?: () => void;
+  width: number;
 };
 
 export const RightSidePanel = ({
   children,
   floating,
+  open = true,
   onClose,
-  open,
+  width,
 }: Props) => {
-  const { setRightPanelWidth } = useGlobalActions();
-
   const containerRef = useRef<HTMLDivElement>(null);
   const topBannerHeight = useGlobalContext((c) => c.layout.topBannerHeight);
   const topBarHeight = useGlobalContext((c) => c.layout.topBarHeight);
 
-  useResizeObserver({
-    ref: containerRef,
-    onResize({ width = 0 }) {
-      if (!floating && open) {
-        setRightPanelWidth(width);
-      } else {
-        setRightPanelWidth(0);
-      }
-    },
-  });
-  useEffect(() => {
-    if (!floating && open) {
-      setRightPanelWidth(containerRef.current?.offsetWidth || 0);
-    } else {
-      setRightPanelWidth(0);
-    }
-    return () => setRightPanelWidth(0);
-  }, [floating, open]);
-
   const [openedDebounced] = useDebounce(open, 100);
 
-  const handleClickAway =
-    openedDebounced && floating ? () => onClose() : () => {};
+  const handleClickAway = () => {
+    if (openedDebounced && floating) {
+      onClose?.();
+    }
+  };
+
+  if (!width) {
+    return null;
+  }
 
   return (
     <ClickAwayListener onClickAway={handleClickAway}>
@@ -76,11 +59,11 @@ export const RightSidePanel = ({
           top: topBannerHeight,
           transform: `translate(0px, ${topBarHeight}px)`,
           paddingBottom: topBarHeight + 'px',
+          width,
         }}
         style={{
           right: open ? '0%' : '-105%',
         }}
-        className={clsx({ floating })}
         ref={containerRef}
       >
         {children}

@@ -1,24 +1,25 @@
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { styled } from '@mui/material';
-import React from 'react';
 import {
-  TolgeeFormat,
   getPluralVariants,
   getVariantExample,
+  TolgeeFormat,
 } from '@tginternal/editor';
 
 const StyledContainer = styled('div')`
   display: grid;
   gap: 2px;
+  grid-template-rows: auto 1fr;
 `;
 
 const StyledContainerSimple = styled('div')`
-  padding-top: 4px;
+  display: grid;
 `;
 
 const StyledVariants = styled('div')`
   display: grid;
   grid-template-columns: 56px 1fr;
+  align-content: start;
   gap: 8px;
 `;
 
@@ -54,7 +55,7 @@ const StyledVariantContent = styled('div')`
 `;
 
 type RenderProps = {
-  content: string;
+  content: string | undefined;
   variant: string | undefined;
   locale: string;
   exampleValue?: number;
@@ -67,6 +68,8 @@ type Props = {
   showEmpty?: boolean;
   activeVariant?: string;
   variantPaddingTop?: number | string;
+  exactForms?: number[];
+  extraPadding?: boolean;
 };
 
 export const TranslationPlurals = ({
@@ -76,19 +79,13 @@ export const TranslationPlurals = ({
   showEmpty,
   activeVariant,
   variantPaddingTop,
+  exactForms,
+  extraPadding = true,
 }: Props) => {
-  const variants = useMemo(() => {
-    const existing = new Set(Object.keys(value.variants));
-    const required = getPluralVariants(locale);
-    required.forEach((val) => existing.delete(val));
-    const result = Array.from(existing).map((value) => {
-      return [value, getVariantExample(locale, value)] as const;
-    });
-    required.forEach((value) => {
-      result.push([value, getVariantExample(locale, value)]);
-    });
-    return result;
-  }, [locale]);
+  const variants = useMemo(
+    () => getForms(locale, value, exactForms),
+    [locale, exactForms, value]
+  );
 
   if (value.parameter) {
     return (
@@ -128,7 +125,7 @@ export const TranslationPlurals = ({
     );
   }
   return (
-    <StyledContainerSimple>
+    <StyledContainerSimple sx={{ paddingTop: extraPadding ? '4px' : 0 }}>
       {render({
         content: value.variants['other'] ?? '',
         locale,
@@ -137,3 +134,27 @@ export const TranslationPlurals = ({
     </StyledContainerSimple>
   );
 };
+
+function getForms(locale: string, value: TolgeeFormat, exactForms?: number[]) {
+  const forms: Set<string> = new Set();
+  getPluralVariants(locale).forEach((value) => forms.add(value));
+  Object.keys(value.variants).forEach((value) => forms.add(value));
+  (exactForms || [])
+    .map((value) => `=${value.toString()}`)
+    .forEach((value) => forms.add(value));
+
+  const formsArray = sortExactForms(forms);
+
+  return formsArray.map((value) => {
+    return [value, getVariantExample(locale, value)] as const;
+  });
+}
+
+function sortExactForms(forms: Set<string>) {
+  return [...forms].sort((a, b) => {
+    if (a.startsWith('=') && b.startsWith('=')) {
+      return Number(a.substring(1)) - Number(b.substring(1));
+    }
+    return 0;
+  });
+}

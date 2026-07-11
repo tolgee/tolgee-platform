@@ -5,17 +5,15 @@ import { Pagination } from '@mui/material';
 export type OverridableListWrappers<
   WrapperComponent extends
     | keyof JSX.IntrinsicElements
-    | JSXElementConstructor<any>,
-  ListComponent extends keyof JSX.IntrinsicElements | JSXElementConstructor<any>
+    | JSXElementConstructor<any> = typeof Paper,
+  ListComponent extends
+    | keyof JSX.IntrinsicElements
+    | JSXElementConstructor<any> = typeof List
 > = {
   wrapperComponent?: WrapperComponent;
-  wrapperComponentProps?: WrapperComponent extends typeof Paper
-    ? React.ComponentProps<typeof Paper>
-    : React.ComponentProps<WrapperComponent>;
+  wrapperComponentProps?: React.ComponentProps<WrapperComponent>;
   listComponent?: ListComponent;
-  listComponentProps?: ListComponent extends typeof List
-    ? React.ComponentProps<typeof List>
-    : React.ComponentProps<ListComponent>;
+  listComponentProps?: React.ComponentProps<ListComponent>;
 };
 
 export const SimpleList = <
@@ -33,6 +31,8 @@ export const SimpleList = <
       onPageChange: (page: number) => void;
     };
     renderItem: (item: DataItem) => ReactNode;
+    itemSeparator?: () => ReactNode;
+    getKey?: (item: DataItem) => React.Key;
   } & OverridableListWrappers<WrapperComponent, ListComponent>
 ) => {
   const { data, pagination } = props;
@@ -48,8 +48,11 @@ export const SimpleList = <
       <Wrapper {...wrapperProps}>
         <ListWrapper data-cy="global-list-items" {...props.listComponentProps}>
           {data.map((item, index) => (
-            <React.Fragment key={(item as any).id || index}>
+            <React.Fragment
+              key={props.getKey?.(item) ?? (item as any).id ?? index}
+            >
               {props.renderItem(item)}
+              {index < data.length - 1 && props.itemSeparator?.()}
             </React.Fragment>
           ))}
         </ListWrapper>

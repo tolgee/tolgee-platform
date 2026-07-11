@@ -1,0 +1,136 @@
+import { gcyAdvanced } from '../common/shared';
+import { E2NamespaceSelector } from './E2NamespaceSelector';
+
+export class E2KeyCreateDialog {
+  fill({
+    key,
+    translation,
+    tag,
+    namespace,
+    description,
+    plural,
+    maxCharLimit,
+  }: KeyDialogFillProps) {
+    this.getKeyNameInput().type(key);
+    if (namespace) {
+      this.selectNamespace(namespace);
+    }
+    if (description) {
+      this.getDescriptionInput().type(description);
+    }
+    if (tag) {
+      this.addNewTag(tag);
+    }
+    if (maxCharLimit !== undefined) {
+      this.setCharLimit(maxCharLimit);
+    }
+
+    this.setSingularTranslation(translation);
+    this.setPluralTranslation(plural);
+  }
+
+  setCharLimit(limit: number) {
+    cy.gcy('key-char-limit-checkbox').click();
+    cy.gcy('key-char-limit-input').find('input').clear().type(limit.toString());
+  }
+
+  getSaveButton() {
+    return cy.gcy('global-form-save-button');
+  }
+
+  save() {
+    this.getSaveButton().click();
+  }
+
+  fillAndSave(props: KeyDialogFillProps) {
+    this.fill(props);
+    this.save();
+  }
+
+  getKeyNameInput() {
+    return cy.gcy('translation-create-key-input');
+  }
+
+  getDescriptionInput() {
+    return cy.gcy('translation-create-description-input');
+  }
+
+  getTagInput() {
+    return cy.gcy('translations-tag-input');
+  }
+
+  getTagAutocompleteOption() {
+    return cy.gcy('tag-autocomplete-option');
+  }
+
+  getTranslationInput() {
+    return cy.gcy('translation-editor').first();
+  }
+
+  switchToSyntaxMode() {
+    cy.gcy('translations-cell-switch-mode').click();
+  }
+
+  getTranslationContentEditable() {
+    return cy.gcy('translation-editor').first().find('[contenteditable]');
+  }
+
+  setSingularTranslation(translation?: string) {
+    if (!translation) {
+      return;
+    }
+    this.getTranslationInput().type(translation);
+  }
+
+  addNewTag(tag: string) {
+    this.getTagInput().type(tag);
+    this.getTagAutocompleteOption().contains(`Add "${tag}"`).click();
+  }
+
+  enablePlural() {
+    cy.gcy('key-plural-checkbox').click();
+  }
+
+  getVariantEditor(variant: string) {
+    return gcyAdvanced({ value: 'translation-editor', variant }).find(
+      '[contenteditable]'
+    );
+  }
+
+  setPluralTranslation(plural?: KeyDialogFillProps['plural']) {
+    if (!plural) {
+      return;
+    }
+
+    cy.gcy('key-plural-checkbox').click();
+    if (plural.variableName) {
+      cy.gcy('key-plural-variable-name').clear().type(plural.variableName);
+    }
+    Object.entries(plural.formValues).forEach(([key, value]) => {
+      gcyAdvanced({ value: 'translation-editor', variant: key })
+        .find('[contenteditable]')
+        .type(value);
+    });
+  }
+
+  selectNamespace(namespace: string) {
+    new E2NamespaceSelector().selectNamespace(namespace);
+  }
+
+  getNamespaceSelectElement() {
+    return new E2NamespaceSelector().getNamespaceSelect();
+  }
+}
+
+export type KeyDialogFillProps = {
+  key: string;
+  translation?: string;
+  plural?: {
+    variableName?: string;
+    formValues: Record<string, string>;
+  };
+  tag?: string;
+  namespace?: string;
+  description?: string;
+  maxCharLimit?: number;
+};

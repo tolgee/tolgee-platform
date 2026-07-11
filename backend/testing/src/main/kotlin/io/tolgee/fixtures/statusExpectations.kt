@@ -19,6 +19,9 @@ import java.nio.charset.StandardCharsets
 val ResultActions.andIsOk: ResultActions
   get() = this.tryPrettyPrinting { this.andExpect(status().isOk) }
 
+val ResultActions.andIsNoContent: ResultActions
+  get() = this.tryPrettyPrinting { this.andExpect(status().isNoContent) }
+
 val ResultActions.andIsUnauthorized: ResultActions
   get() = this.tryPrettyPrinting { this.andExpect(status().isUnauthorized) }
 
@@ -36,6 +39,9 @@ val ResultActions.andIsNotModified: ResultActions
 
 val ResultActions.andIsRateLimited: ResultActions
   get() = this.tryPrettyPrinting { this.andExpect(status().isTooManyRequests) }
+
+val ResultActions.andIsBlocked: ResultActions
+  get() = this.tryPrettyPrinting { this.andExpect(status().`is`(444)) }
 
 fun ResultActions.andHasErrorMessage(message: Message): ResultActions {
   return this.tryPrettyPrinting {

@@ -9,6 +9,7 @@ export const useReportEvent = () => {
   const reportMutation = useApiMutation({
     url: '/v2/public/business-events/report',
     method: 'post',
+    options: { noGlobalLoading: true },
   });
   const isAuthenticated = tokenService.getToken() !== null;
   const storedPreferredOrganization = usePreferredOrganization();

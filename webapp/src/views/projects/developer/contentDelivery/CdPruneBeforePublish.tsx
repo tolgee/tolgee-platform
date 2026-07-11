@@ -1,7 +1,13 @@
 import { Field } from 'formik';
 import { useTranslate } from '@tolgee/react';
-import { Checkbox, FormControlLabel, Tooltip, styled } from '@mui/material';
-import { Help } from '@mui/icons-material';
+import {
+  Box,
+  Checkbox,
+  FormControlLabel,
+  Tooltip,
+  styled,
+} from '@mui/material';
+import { HelpCircle } from '@untitled-ui/icons-react';
 import { FC } from 'react';
 
 const StyledLabel = styled('div')`
@@ -10,15 +16,18 @@ const StyledLabel = styled('div')`
   align-items: center;
 `;
 
-const StyledHelpIcon = styled(Help)`
-  font-size: 17px;
+const StyledHelpIcon = styled(HelpCircle)`
+  width: 17px;
+  height: 17px;
 `;
 
 type Props = {
   className?: string;
 };
 
-export const CdPruneBeforePublish: FC<Props> = ({ className }) => {
+export const CdPruneBeforePublish: FC<React.PropsWithChildren<Props>> = ({
+  className,
+}) => {
   const { t } = useTranslate();
 
   return (
@@ -39,7 +48,9 @@ export const CdPruneBeforePublish: FC<Props> = ({ className }) => {
                     'content_delivery_translations_prune_before_publish_hint'
                   )}
                 >
-                  <StyledHelpIcon />
+                  <Box display="flex">
+                    <StyledHelpIcon />
+                  </Box>
                 </Tooltip>
               </StyledLabel>
             }

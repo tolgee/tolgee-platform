@@ -13,13 +13,17 @@ class BusinessEventReportingActivityListener(
   fun listen(event: OnProjectActivityEvent) {
     val userId = event.activityRevision.authorId ?: return
     val activityName = event.activityRevision.type?.name ?: return
-    val projectId = event.activityRevision.projectId ?: return
+    val projectId = event.activityRevision.projectId
+    val organizationId = event.activityRevision.organizationId
+
+    if (projectId == null && organizationId == null) return
 
     applicationEventPublisher.publishEvent(
       OnBusinessEventToCaptureEvent(
         eventName = activityName,
         userAccountId = userId,
         projectId = projectId,
+        organizationId = organizationId,
         utmData = event.utmData,
         data = event.sdkInfo,
       ),

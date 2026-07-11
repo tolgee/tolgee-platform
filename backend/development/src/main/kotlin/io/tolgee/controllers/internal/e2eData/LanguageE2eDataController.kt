@@ -1,21 +1,14 @@
 package io.tolgee.controllers.internal.e2eData
 
-import io.swagger.v3.oas.annotations.Hidden
+import io.tolgee.controllers.internal.InternalController
 import io.tolgee.development.testDataBuilder.TestDataService
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.UserAccountService
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
 
-@RestController
-@CrossOrigin(origins = ["*"])
-@Hidden
-@RequestMapping(value = ["internal/e2e-data/languages"])
-@Transactional
+@InternalController(["internal/e2e-data/languages"])
 class LanguageE2eDataController(
   private val testDataService: TestDataService,
   private val projectService: ProjectService,
@@ -60,7 +53,11 @@ class LanguageE2eDataController(
           }
         }
       }
-    return mapOf<String, Any>("id" to data.data.projects[0].self.id)
+    return mapOf<String, Any>(
+      "id" to
+        data.data.projects[0]
+          .self.id,
+    )
   }
 
   @GetMapping(value = ["/clean"])

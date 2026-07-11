@@ -1,6 +1,7 @@
 import { T, useTranslate } from '@tolgee/react';
-import { assertUnreachable } from 'tg.fixtures/assertUnreachable';
+import { assertUnreachableReturnNull } from 'tg.fixtures/assertUnreachable';
 import { components } from 'tg.service/apiSchema.generated';
+import { DOCS_LINKS } from 'tg.constants/docLinks';
 import { Announcement } from './Announcement';
 import { BannerLink } from './BannerLink';
 
@@ -75,8 +76,144 @@ export function useAnnouncement() {
           />
         );
 
+      case 'FEATURE_TASKS':
+        return (
+          <Announcement
+            content={<T keyName="announcement_feature_tasks" />}
+            link="https://tolgee.io/blog/new-feature-tasks"
+          />
+        );
+
+      case 'FEATURE_LLM_PROVIDERS_AND_PLAYGROUND':
+        return (
+          <Announcement
+            content={
+              <T
+                keyName="announcement_llm_providers_and_playground"
+                params={{
+                  linkPlayground: (
+                    <BannerLink href="https://docs.tolgee.io/platform/translation_process/ai-playground" />
+                  ),
+                  linkProviders: (
+                    <BannerLink href="https://docs.tolgee.io/platform/projects_and_organizations/llm-providers" />
+                  ),
+                }}
+              />
+            }
+          />
+        );
+
+      case 'FEATURE_GLOSSARIES_AND_PLAYGROUND':
+        return (
+          <Announcement
+            content={
+              <T
+                keyName="announcement_glossaries_and_playground"
+                params={{
+                  linkPlayground: (
+                    <BannerLink href="https://docs.tolgee.io/platform/translation_process/ai-playground" />
+                  ),
+                  linkGlossaries: (
+                    <BannerLink href="https://docs.tolgee.io/platform/projects_and_organizations/glossaries" />
+                  ),
+                }}
+              />
+            }
+          />
+        );
+
+      case 'FEATURE_LABELS':
+        return (
+          <Announcement
+            content={<T keyName="announcement_labels" />}
+            link="https://docs.tolgee.io/platform/translation_process/labels"
+          />
+        );
+
+      case 'FEATURE_SUGGESTIONS_AND_LABELS':
+        return (
+          <Announcement
+            content={
+              <T
+                keyName="announcement_suggestions_and_labels"
+                params={{
+                  linkSuggestions: (
+                    <BannerLink href="https://docs.tolgee.io/platform/projects_and_organizations/suggestions" />
+                  ),
+                  linkLabels: (
+                    <BannerLink href="https://docs.tolgee.io/platform/translation_process/labels" />
+                  ),
+                }}
+              />
+            }
+          />
+        );
+
+      case 'FEATURE_IMPROVED_FIGMA_ANDROID_AND_IOS':
+        return (
+          <Announcement
+            content={
+              <T
+                keyName="announcement_improved_figma_android_and_ios"
+                params={{
+                  linkFigma: (
+                    <BannerLink href="https://docs.tolgee.io/platform/integrations/figma_plugin/setup" />
+                  ),
+                  linkAndroid: (
+                    <BannerLink href="https://docs.tolgee.io/android-sdk" />
+                  ),
+                  linkIos: <BannerLink href="https://docs.tolgee.io/ios-sdk" />,
+                }}
+              />
+            }
+          />
+        );
+
+      case 'FEATURE_BRANCHING':
+        return (
+          <Announcement
+            content={
+              <T
+                keyName="announcement_branching"
+                defaultValue="We've released Branching!"
+              />
+            }
+            link="https://docs.tolgee.io/platform/branching/overview"
+          />
+        );
+
+      case 'FEATURE_TRANSLATION_MEMORY_MANAGEMENT':
+        return (
+          <Announcement
+            content={
+              <T
+                keyName="announcement_translation_memory_management"
+                defaultValue="We've released Translation Memory management!"
+              />
+            }
+            link={DOCS_LINKS.translationMemoryManagement}
+          />
+        );
+
+      case 'FEATURE_QA_CHECKS_AND_TRANSLATION_MEMORY':
+        return (
+          <Announcement
+            content={
+              <T
+                keyName="announcement_qa_checks_and_translation_memory"
+                params={{
+                  linkQa: <BannerLink href={DOCS_LINKS.qaChecks} />,
+                  linkTm: (
+                    <BannerLink href={DOCS_LINKS.translationMemoryManagement} />
+                  ),
+                }}
+              />
+            }
+          />
+        );
+
       default:
-        assertUnreachable(value);
+        return assertUnreachableReturnNull(value);
     }
   };
 }

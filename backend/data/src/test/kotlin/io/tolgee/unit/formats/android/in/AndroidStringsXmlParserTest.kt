@@ -1,13 +1,15 @@
 package io.tolgee.unit.formats.android.`in`
 
-import AndroidStringsXmlParser
-import io.tolgee.formats.android.AndroidStringValue
-import io.tolgee.formats.android.AndroidStringsXmlModel
-import io.tolgee.formats.android.StringUnit
+import io.tolgee.formats.android.`in`.AndroidStringUnescaper
+import io.tolgee.formats.xmlResources.StringUnit
+import io.tolgee.formats.xmlResources.XmlResourcesParsingConstants
+import io.tolgee.formats.xmlResources.XmlResourcesStringValue
+import io.tolgee.formats.xmlResources.XmlResourcesStringsModel
+import io.tolgee.formats.xmlResources.`in`.XmlResourcesParser
 import io.tolgee.testing.assert
+import io.tolgee.util.XmlSecurity
 import org.junit.jupiter.api.Test
 import javax.xml.stream.XMLEventReader
-import javax.xml.stream.XMLInputFactory
 
 class AndroidStringsXmlParserTest {
   @Test
@@ -65,7 +67,7 @@ class AndroidStringsXmlParserTest {
   }
 
   private fun getReader(data: String): XMLEventReader {
-    val inputFactory: XMLInputFactory = XMLInputFactory.newInstance()
+    val inputFactory = XmlSecurity.newSecureXmlInputFactory()
     return inputFactory.createXMLEventReader(data.byteInputStream())
   }
 
@@ -79,12 +81,17 @@ class AndroidStringsXmlParserTest {
     )
   }
 
-  private fun parse(reader: XMLEventReader): AndroidStringsXmlModel {
-    val parser = AndroidStringsXmlParser(reader)
+  private fun parse(reader: XMLEventReader): XmlResourcesStringsModel {
+    val parser =
+      XmlResourcesParser(
+        reader,
+        AndroidStringUnescaper.defaultFactory,
+        XmlResourcesParsingConstants.androidSupportedTags,
+      )
     return parser.parse()
   }
 
-  private fun parseSingleStringUnit(data: String): AndroidStringValue? {
+  private fun parseSingleStringUnit(data: String): XmlResourcesStringValue? {
     val unit = parse(getReaderWithSingleStringUnit(data)).items["name"] as StringUnit
     unit.value.assert.isNotNull()
     return unit.value

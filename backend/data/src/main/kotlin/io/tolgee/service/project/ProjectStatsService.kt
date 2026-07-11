@@ -4,6 +4,9 @@ import io.tolgee.dtos.queryResults.LanguageStatsDto
 import io.tolgee.model.ILanguage
 import io.tolgee.model.Project
 import io.tolgee.model.Project_
+import io.tolgee.model.branching.Branch
+import io.tolgee.model.branching.Branch_
+import io.tolgee.model.key.Key_
 import io.tolgee.model.views.projectStats.ProjectStatsView
 import io.tolgee.repository.activity.ActivityRevisionRepository
 import io.tolgee.service.queryBuilders.ProjectStatsProvider
@@ -13,21 +16,26 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 
-@Transactional
+@Transactional(readOnly = true)
 @Service
 class ProjectStatsService(
   private val entityManager: EntityManager,
   private val activityRevisionRepository: ActivityRevisionRepository,
 ) {
-  fun getProjectStats(projectId: Long): ProjectStatsView {
-    return ProjectStatsProvider(entityManager, projectId).getResult()
+  fun getProjectStats(
+    projectId: Long,
+    branchId: Long? = null,
+  ): ProjectStatsView {
+    return ProjectStatsProvider(entityManager, projectId, branchId).getResult()
   }
 
   fun getProjectDailyActivity(projectId: Long): Map<LocalDate, Long> {
-    return activityRevisionRepository.getProjectDailyActivity(projectId).map {
-      val date = LocalDate.parse(it[1] as String)
-      LocalDate.from(date) to it[0] as Long
-    }.toMap()
+    return activityRevisionRepository
+      .getProjectDailyActivity(projectId)
+      .map {
+        val date = LocalDate.parse(it[1] as String)
+        LocalDate.from(date) to it[0] as Long
+      }.toMap()
   }
 
   fun getProjectsTotals(projectIds: Iterable<Long>): Map<Long, ProjectTotals> {
@@ -36,6 +44,7 @@ class ProjectStatsService(
     val root = query.from(Project::class.java)
     val languages = root.join(Project_.languages, JoinType.LEFT)
     val keys = root.join(Project_.keys, JoinType.LEFT)
+    val branch = keys.join(Key_.branch, JoinType.LEFT)
     val keyCountSelect = cb.countDistinct(keys)
     val languageCountSelect = cb.countDistinct(languages)
     query.multiselect(
@@ -43,7 +52,16 @@ class ProjectStatsService(
       keyCountSelect,
       languageCountSelect,
     )
-    query.where(root.get(Project_.id).`in`(*projectIds.toList().toTypedArray()))
+    query.where(
+      cb.and(
+        root.get(Project_.id).`in`(*projectIds.toList().toTypedArray()),
+        cb.or(
+          cb.isNull(keys.get(Key_.branch)),
+          cb.isTrue(branch.get(Branch_.isDefault)),
+        ),
+        cb.isNull(keys.get(Key_.deletedAt)),
+      ),
+    )
     query.groupBy(root.get(Project_.id))
     return entityManager.createQuery(query).resultList.associate { tuple ->
       tuple.get(root.get(Project_.id)) to ProjectTotals(tuple.get(languageCountSelect), tuple.get(keyCountSelect))
@@ -60,6 +78,14 @@ class ProjectStatsService(
 
     val baseWordsCount = baseStats.translatedWords + baseStats.reviewedWords
     val nonBaseLanguages = languageStats.filterNot { it.languageId == baseLanguage.id }
+
+    if (nonBaseLanguages.isEmpty()) {
+      return ProjectStateTotals(
+        baseWordsCount = baseWordsCount,
+        translatedPercent = baseStats.translatedPercentage,
+        reviewedPercent = baseStats.reviewedPercentage,
+      )
+    }
 
     val allNonBaseTotalBaseWords = baseWordsCount * nonBaseLanguages.size
     val allNonBaseTotalTranslatedWords = nonBaseLanguages.sumOf { it.translatedWords }

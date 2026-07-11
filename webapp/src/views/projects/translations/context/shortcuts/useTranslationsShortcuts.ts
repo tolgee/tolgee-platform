@@ -16,6 +16,7 @@ import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { CellPosition } from '../types';
 import { getMeta } from 'tg.fixtures/isMac';
 import { isElementInput } from 'tg.fixtures/isElementInput';
+import { useBranchEditAccess } from '../services/useBranchEditAccess';
 
 export const KEY_MAP = {
   MOVE: ARROWS,
@@ -37,8 +38,9 @@ export const useTranslationsShortcuts = () => {
   const cursorKeyId = useTranslationsSelector((c) => c.cursor?.keyId);
   const cursorLanguage = useTranslationsSelector((c) => c.cursor?.language);
   const view = useTranslationsSelector((c) => c.view);
-  const { satisfiesPermission, satisfiesLanguageAccess } =
+  const { satisfiesLanguageAccess, satisfiesPermissionWithBranching } =
     useProjectPermissions();
+  const canEditProtectedBranch = useBranchEditAccess();
   const elementsRef = useTranslationsSelector((c) => c.elementsRef);
   const fixedTranslations = useTranslationsSelector((c) => c.translations);
   const allLanguages = useTranslationsSelector((c) => c.languages);
@@ -48,13 +50,20 @@ export const useTranslationsShortcuts = () => {
   const hasCorrectTarget = (target: Element) =>
     target === document.body || root?.contains(target);
 
-  const canEditKey = satisfiesPermission('keys.edit');
+  const canEditKey = satisfiesPermissionWithBranching('keys.edit');
 
   const isTranslation = (position: CellPosition | undefined) =>
     position?.language;
 
   const getLanguageId = (langTag?: string) => {
     return allLanguages?.find((l) => l.tag === langTag)?.id;
+  };
+
+  const getCurrentKey = () => {
+    const focused = getCurrentlyFocused(elementsRef.current);
+    if (focused?.language && focused.keyId) {
+      return fixedTranslations?.find((t) => t.keyId === focused.keyId);
+    }
   };
 
   const getCurrentTranslation = () => {
@@ -93,15 +102,22 @@ export const useTranslationsShortcuts = () => {
   const getEnterHandler = () => {
     const focused = getCurrentlyFocused(elementsRef.current);
     if (focused) {
-      const canTranslate = satisfiesLanguageAccess(
-        'translations.edit',
-        getLanguageId(focused.language)
+      const translation = getCurrentTranslation();
+      const keyData = getCurrentKey();
+      const firstTask = keyData?.tasks?.find(
+        (t) => t.languageTag === focused.language
       );
+      const canTranslate =
+        canEditProtectedBranch &&
+        (satisfiesLanguageAccess(
+          'translations.edit',
+          getLanguageId(focused.language)
+        ) ||
+          (firstTask?.userAssigned && firstTask.type === 'TRANSLATE'));
       if (
         (isTranslation(focused) && canTranslate) ||
         (!isTranslation(focused) && canEditKey)
       ) {
-        const translation = getCurrentTranslation();
         if (translation?.state === 'DISABLED') {
           return;
         }
@@ -117,6 +133,12 @@ export const useTranslationsShortcuts = () => {
   };
 
   const getCancelHandler = () => {
+    const root = document.getElementById('root');
+    const activeElement = document.activeElement;
+    if (cursorKeyId && root?.contains(activeElement)) {
+      setEdit(undefined);
+      return;
+    }
     const focused = getCurrentlyFocused(elementsRef.current);
     if (focused) {
       // @ts-ignore
@@ -126,26 +148,31 @@ export const useTranslationsShortcuts = () => {
 
   const getChangeStateHandler = () => {
     const focused = getCurrentlyFocused(elementsRef.current);
-    const canTranslate = satisfiesLanguageAccess(
-      'translations.state-edit',
-      getLanguageId(focused?.language)
+    const translation = fixedTranslations?.find(
+      (t) => t.keyId === focused?.keyId
+    )?.translations[focused?.language || ''];
+    const keyData = getCurrentKey();
+    const firstTask = keyData?.tasks?.find(
+      (t) => t.languageTag === focused?.language
     );
+    const canTranslate =
+      satisfiesLanguageAccess(
+        'translations.state-edit',
+        getLanguageId(focused?.language)
+      ) ||
+      (firstTask?.userAssigned && firstTask.type === 'REVIEW');
 
     if (focused?.language && canTranslate) {
-      const translation = fixedTranslations?.find(
-        (t) => t.keyId === focused.keyId
-      )?.translations[focused.language];
-
       const newState =
         translation?.state && TRANSLATION_STATES[translation.state]?.next;
 
-      if (translation && newState) {
+      if (translation?.id && newState) {
         return (e: KeyboardEvent) => {
           e.preventDefault();
           setTranslationState({
             keyId: focused.keyId,
             language: focused.language as string,
-            translationId: translation.id,
+            translationId: translation.id!,
             state: newState,
           });
         };

@@ -6,7 +6,7 @@ import { Box, Button, styled } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
-import { Edit } from '@mui/icons-material';
+import { Edit02 } from '@untitled-ui/icons-react';
 import { ApiKeyExpiryInfo } from './ApiKeyExpiryInfo';
 import { NewApiKeyInfo } from './NewApiKeyInfo';
 
@@ -105,7 +105,7 @@ export const ApiKeyListItem = (props: {
           })}
         >
           {props.apiKey.description}
-          <Edit className="edit-icon" sx={{ width: '15px' }} />{' '}
+          <Edit02 className="edit-icon" style={{ width: '15px' }} />
         </StyledDescription>
         <StyledProjectLink
           to={LINKS.PROJECT.build({

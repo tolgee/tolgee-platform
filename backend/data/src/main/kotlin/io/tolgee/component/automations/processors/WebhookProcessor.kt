@@ -2,7 +2,7 @@ package io.tolgee.component.automations.processors
 
 import io.tolgee.activity.ActivityService
 import io.tolgee.api.IProjectActivityModelAssembler
-import io.tolgee.batch.RequeueWithDelayException
+import io.tolgee.batch.ChunkItemFailedException
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.automations.AutomationProcessor
 import io.tolgee.constants.Message
@@ -20,6 +20,7 @@ class WebhookProcessor(
   val currentDateProvider: CurrentDateProvider,
   val webhookExecutor: WebhookExecutor,
   val entityManager: EntityManager,
+  val webhookAutoDisableChecker: WebhookAutoDisableChecker,
 ) : AutomationProcessor {
   override fun process(
     action: AutomationAction,
@@ -30,10 +31,12 @@ class WebhookProcessor(
     val view = activityService.getProjectActivity(projectId = projectId, revisionId = activityRevisionId) ?: return
     val activityModel = activityModelAssembler.toModel(view)
     val config = action.webhookConfig ?: return
+    if (!config.enabled) return
 
     val data =
       WebhookRequest(
         webhookConfigId = config.id,
+        projectId = config.project.id,
         eventType = WebhookEventType.PROJECT_ACTIVITY,
         activityData = activityModel,
       )
@@ -43,14 +46,15 @@ class WebhookProcessor(
       updateEntity(webhookConfig = config, failing = false)
     } catch (e: Exception) {
       updateEntity(config, true)
+      if (webhookAutoDisableChecker.checkAfterFailure(config)) return
       when (e) {
-        is WebhookRespondedWithNon200Status -> throw RequeueWithDelayException(
+        is WebhookRespondedWithNon200Status -> throw ChunkItemFailedException(
           Message.WEBHOOK_RESPONDED_WITH_NON_200_STATUS,
           cause = e,
           delayInMs = 5000,
         )
 
-        else -> throw RequeueWithDelayException(
+        else -> throw ChunkItemFailedException(
           Message.UNEXPECTED_ERROR_WHILE_EXECUTING_WEBHOOK,
           cause = e,
           delayInMs = 5000,
@@ -63,8 +67,16 @@ class WebhookProcessor(
     webhookConfig: WebhookConfig,
     failing: Boolean,
   ) {
-    webhookConfig.firstFailed = if (failing) currentDateProvider.date else null
     webhookConfig.lastExecuted = currentDateProvider.date
+    if (!failing) {
+      webhookConfig.firstFailed = null
+      webhookConfig.autoDisableNotified = false
+      entityManager.persist(webhookConfig)
+      return
+    }
+    if (webhookConfig.firstFailed == null) {
+      webhookConfig.firstFailed = currentDateProvider.date
+    }
     entityManager.persist(webhookConfig)
   }
 }

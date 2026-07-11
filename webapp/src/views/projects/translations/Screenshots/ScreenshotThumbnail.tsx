@@ -1,8 +1,6 @@
-import { FunctionComponent, useState } from 'react';
-import { Box, IconButton, styled, Tooltip } from '@mui/material';
-import ClearIcon from '@mui/icons-material/Clear';
+import { FunctionComponent } from 'react';
+import { Box, styled, SxProps } from '@mui/material';
 import { T } from '@tolgee/react';
-import clsx from 'clsx';
 
 import { confirmation } from 'tg.hooks/confirmation';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
@@ -10,85 +8,62 @@ import {
   ScreenshotProps,
   ScreenshotWithLabels,
 } from 'tg.component/ScreenshotWithLabels';
-
-export interface ScreenshotThumbnailProps {
-  onClick: () => void;
-  screenshot: ScreenshotProps;
-  onDelete: () => void;
-}
+import { stopAndPrevent } from 'tg.fixtures/eventHandler';
+import { CloseButton } from 'tg.component/common/buttons/CloseButton';
 
 const StyledScreenshotWithLabels = styled(ScreenshotWithLabels)`
   width: 100%;
   height: 100%;
   object-fit: contain;
   z-index: 1;
-  transition: transform 0.1s, filter 0.5s;
-
-  &:hover {
-    transform: scale(1.1);
-  }
 `;
 
 const StyledScreenshotBox = styled(Box)`
   position: relative;
+  align-items: center;
   width: 100px;
   height: 100px;
-  align-items: center;
   justify-content: center;
   display: flex;
-  margin: 1px;
   cursor: pointer;
-  overflow: visible;
 `;
 
 const StyledScreenshotOverflowWrapper = styled(Box)`
   overflow: hidden;
+  position: relative;
   width: 100%;
   height: 100%;
-`;
+  border-radius: 4px;
+  background: ${({ theme }) => theme.palette.tokens.text._states.selected};
 
-const StyledDeleteIconButton = styled(IconButton)`
-  position: absolute;
-  z-index: 2;
-  font-size: 20px;
-  right: -8px;
-  top: -8px;
-  padding: 2px;
-  background-color: rgba(62, 62, 62, 0.9);
-  color: rgba(255, 255, 255, 0.8);
-  visibility: hidden;
-  opacity: 0;
-  transition: visibility 0.1s linear, opacity 0.1s linear;
-
-  &:hover {
-    background-color: rgba(62, 62, 62, 1);
-    color: rgba(255, 255, 255, 0.9);
-  }
-
-  &.hover {
-    opacity: 1;
-    visibility: visible;
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    border-radius: 4px;
+    border: 1px solid ${({ theme }) => theme.palette.tokens.border.primary};
+    pointer-events: none;
   }
 `;
 
-const StyledDeleteIcon = styled(ClearIcon)`
-  font-size: 20px;
-`;
+type Props = {
+  onClick: () => void;
+  screenshot: ScreenshotProps;
+  onDelete: () => void;
+  sx?: SxProps;
+  objectFit: 'contain' | 'cover';
+  scaleHighlight?: number;
+  onSrcExpired: () => void;
+};
 
 export const ScreenshotThumbnail: FunctionComponent<
-  ScreenshotThumbnailProps
+  React.PropsWithChildren<Props>
 > = (props) => {
-  const [hover, setHover] = useState(false);
   const { satisfiesPermission } = useProjectPermissions();
   const canDeleteScreenshots = satisfiesPermission('screenshots.delete');
-
-  const onMouseOver = () => {
-    setHover(true);
-  };
-
-  const onMouseOut = () => {
-    setHover(false);
-  };
 
   const onDeleteClick = () => {
     confirmation({
@@ -99,33 +74,35 @@ export const ScreenshotThumbnail: FunctionComponent<
   };
 
   return (
-    <>
+    <CloseButton
+      onClose={
+        canDeleteScreenshots
+          ? (e) => {
+              stopAndPrevent()(e);
+              onDeleteClick();
+            }
+          : undefined
+      }
+      data-cy="screenshot-thumbnail-delete"
+    >
       <StyledScreenshotBox
-        onMouseOver={onMouseOver}
-        onMouseOut={onMouseOut}
+        sx={props.sx}
         data-cy="screenshot-thumbnail"
+        onMouseDown={stopAndPrevent()}
+        onClick={stopAndPrevent()}
       >
-        {canDeleteScreenshots && (
-          <Tooltip
-            title={<T keyName="translations.screenshots.delete_tooltip" />}
-          >
-            <StyledDeleteIconButton
-              className={clsx({ hover })}
-              onClick={onDeleteClick}
-              size="large"
-              data-cy="screenshot-thumbnail-delete"
-            >
-              <StyledDeleteIcon />
-            </StyledDeleteIconButton>
-          </Tooltip>
-        )}
         <StyledScreenshotOverflowWrapper
           key={props.screenshot.highlightedKeyId}
           onClick={props.onClick}
         >
-          <StyledScreenshotWithLabels screenshot={props.screenshot} />
+          <StyledScreenshotWithLabels
+            screenshot={props.screenshot}
+            objectFit={props.objectFit}
+            scaleHighlight={props.scaleHighlight}
+            onSrcExpired={props.onSrcExpired}
+          />
         </StyledScreenshotOverflowWrapper>
       </StyledScreenshotBox>
-    </>
+    </CloseButton>
   );
 };

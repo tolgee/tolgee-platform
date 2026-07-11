@@ -43,7 +43,7 @@ class SmtpProperties {
   @DocProperty(description = "Whether SSL is enabled.")
   var sslEnabled: Boolean = false
 
-  @DocProperty(description = "Whether SSL is required.")
+  @DocProperty(description = "Whether TLS is required.")
   var tlsRequired: Boolean = false
 
   @DocProperty(description = "The sender name and address in standard SMTP format.")

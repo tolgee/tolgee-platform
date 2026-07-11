@@ -12,18 +12,20 @@ import io.tolgee.model.UserAccount
 import io.tolgee.repository.UploadedImageRepository
 import io.tolgee.util.ImageConverter
 import org.slf4j.LoggerFactory
+import org.springframework.context.annotation.Lazy
 import org.springframework.core.io.InputStreamSource
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
 import java.time.temporal.ChronoUnit
-import java.util.*
+import java.util.Date
 import java.util.concurrent.ThreadLocalRandom
 import kotlin.streams.asSequence
 
 @Service
 class ImageUploadService(
+  @Lazy
   val uploadedImageRepository: UploadedImageRepository,
   val fileStorage: FileStorage,
   val dateProvider: CurrentDateProvider,
@@ -61,9 +63,11 @@ class ImageUploadService(
 
     save(uploadedImageEntity)
     val processedImage = imageConverter.getImage()
-    val processedThumbnail = imageConverter.getThumbnail()
+    val processedMiddleSized = imageConverter.getThumbnail(600)
+    val processedThumbnail = imageConverter.getThumbnail(200)
 
     fileStorage.storeFile(uploadedImageEntity.filePath, processedImage.toByteArray())
+    fileStorage.storeFile(uploadedImageEntity.middleSizedFilePath, processedMiddleSized.toByteArray())
     fileStorage.storeFile(uploadedImageEntity.thumbnailFilePath, processedThumbnail.toByteArray())
 
     return uploadedImageEntity
@@ -91,7 +95,8 @@ class ImageUploadService(
 
   private fun generateFilename(): String {
     val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
-    return ThreadLocalRandom.current()
+    return ThreadLocalRandom
+      .current()
       .ints(100L, 0, charPool.size)
       .asSequence()
       .map(charPool::get)
@@ -111,6 +116,8 @@ class ImageUploadService(
 
   val UploadedImage.filePath
     get() = "$UPLOADED_IMAGES_STORAGE_FOLDER_NAME/" + this.filenameWithExtension
+  val UploadedImage.middleSizedFilePath
+    get() = "$UPLOADED_IMAGES_STORAGE_FOLDER_NAME/" + this.middleSizedWithExtension
   val UploadedImage.thumbnailFilePath
     get() = "$UPLOADED_IMAGES_STORAGE_FOLDER_NAME/" + this.thumbnailFilenameWithExtension
 }

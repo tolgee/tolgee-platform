@@ -3,8 +3,8 @@ import { Box, Button, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
 import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
+import { DragDropArea } from 'tg.component/common/DragDropArea';
 import { useConfig } from 'tg.globalContext/helpers';
-import { ImportFileDropzone } from './ImportFileDropzone';
 import { ImportProgressOverlay } from './ImportProgressOverlay';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 import { FilesType } from 'tg.fixtures/FileUploadFixtures';
@@ -33,11 +33,14 @@ type ImportFileInputProps = {
   loading: boolean;
   operation?: OperationType;
   operationStatus?: OperationStatusType;
+  importedKeys?: number | null;
+  totalKeys?: number | null;
   importDone: boolean;
   onImportMore: () => void;
   filesUploaded?: boolean;
   onProgressOverlayActiveChange: (isActive: boolean) => void;
   isProgressOverlayActive: boolean;
+  disabled?: boolean;
 };
 
 export type ValidationResult = {
@@ -55,7 +58,9 @@ const StyledRoot = styled(Box)(({ theme }) => ({
   marginTop: '16px',
 }));
 
-const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
+const ImportFileInput: FunctionComponent<
+  React.PropsWithChildren<ImportFileInputProps>
+> = (props) => {
   const { t } = useTranslate();
   const fileRef = React.createRef<HTMLInputElement>();
   const config = useConfig();
@@ -71,28 +76,12 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
       e.preventDefault();
     };
 
-    const pasteListener = (e: ClipboardEvent) => {
-      const files: File[] = [];
-      if (!e.clipboardData?.files.length) {
-        return;
-      }
-      for (let i = 0; i < e.clipboardData.files.length; i++) {
-        const item = e.clipboardData.files.item(i);
-        if (item) {
-          files.push(item);
-        }
-      }
-      props.onNewFiles(files.map((f) => ({ file: f, name: f.name })));
-    };
-
     window.addEventListener('dragover', listener, false);
     window.addEventListener('drop', listener, false);
-    document.addEventListener('paste', pasteListener);
 
     return () => {
       window.removeEventListener('dragover', listener, false);
       window.removeEventListener('drop', listener, false);
-      document.removeEventListener('paste', pasteListener);
     };
   }, []);
 
@@ -112,6 +101,9 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
   }
 
   const onNewFiles = (files: FilesType) => {
+    if (props.disabled) {
+      return;
+    }
     resetInput();
     const validation = validate(files.map((f) => f.file));
     if (validation.valid) {
@@ -148,12 +140,12 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
     return { ...result, valid };
   };
 
-  /*
-                @ts-ignore */
+  /* @ts-ignore */
   return (
-    <ImportFileDropzone
-      onNewFiles={onNewFiles}
-      active={!props.isProgressOverlayActive}
+    <DragDropArea
+      onFilesReceived={onNewFiles}
+      active={!props.isProgressOverlayActive && !props.disabled}
+      maxItems={MAX_FILE_COUNT}
     >
       <QuickStartHighlight
         offset={10}
@@ -169,6 +161,8 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
               onImportMore={props.onImportMore}
               filesUploaded={props.filesUploaded}
               operationStatus={props.operationStatus}
+              importedKeys={props.importedKeys}
+              totalKeys={props.totalKeys}
               onActiveChange={(isActive) =>
                 props.onProgressOverlayActiveChange(isActive)
               }
@@ -183,6 +177,7 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
                 onChange={(e) => onFileSelected(e)}
                 multiple
                 webkitdirectory
+                disabled={props.disabled}
               />
               <ImportInputAreaLayoutTitle>
                 <T keyName="import_file_input_drop_file_text" />
@@ -195,6 +190,7 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
                 }
                 variant="outlined"
                 color="primary"
+                disabled={props.disabled}
               >
                 <T keyName="import_file_input_select_file_button" />
               </Button>
@@ -205,7 +201,7 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
           </ImportInputAreaLayout>
         </StyledRoot>
       </QuickStartHighlight>
-    </ImportFileDropzone>
+    </DragDropArea>
   );
 };
 export default ImportFileInput;

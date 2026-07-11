@@ -51,7 +51,7 @@ class ContentStorageService(
     id: Long,
     dto: ContentStorageRequest,
   ): ContentStorage {
-    val contentStorage = get(id)
+    val contentStorage = get(projectId, id)
     getProcessor(getStorageType(dto)).fillDtoSecrets(contentStorage, dto)
     validateStorage(dto)
     clearOther(contentStorage)
@@ -91,16 +91,18 @@ class ContentStorageService(
     projectId: Long,
     contentDeliveryConfigId: Long,
   ): ContentStorage {
-    return contentStorageRepository.getByProjectIdAndId(projectId, contentDeliveryConfigId)
+    return contentStorageRepository.findByProjectIdAndId(projectId, contentDeliveryConfigId)
+      ?: throw NotFoundException()
   }
 
   fun testStorage(
     dto: ContentStorageRequest,
     id: Long? = null,
+    projectId: Long? = null,
   ): StorageTestResult {
     val config: StorageConfig = getNonNullConfig(dto)
-    if (id != null) {
-      val existing = get(id)
+    if (id != null && projectId != null) {
+      val existing = get(projectId, id)
       getProcessor(config.contentStorageType).fillDtoSecrets(existing, dto)
     }
     try {

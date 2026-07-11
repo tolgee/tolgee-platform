@@ -8,7 +8,6 @@ import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportTranslation
 import io.tolgee.security.authentication.TolgeeAuthentication
-import io.tolgee.security.authentication.TolgeeAuthenticationDetails
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -85,9 +84,13 @@ class ImportServiceTest : AbstractSpringTest() {
 
   private fun checkImportHardDeleted(id: Long) {
     executeInNewTransaction {
-      entityManager.createQuery("from Import i where i.id = :id", Import::class.java)
+      entityManager
+        .createQuery("from Import i where i.id = :id", Import::class.java)
         .setParameter("id", id)
-        .resultList.firstOrNull().assert.isNull()
+        .resultList
+        .firstOrNull()
+        .assert
+        .isNull()
     }
   }
 
@@ -122,9 +125,12 @@ class ImportServiceTest : AbstractSpringTest() {
         testDataService.saveTestData(testData.root)
         SecurityContextHolder.getContext().authentication =
           TolgeeAuthentication(
-            null,
-            UserAccountDto.fromEntity(testData.userAccount),
-            TolgeeAuthenticationDetails(false),
+            credentials = null,
+            deviceId = null,
+            userAccount = UserAccountDto.fromEntity(testData.userAccount),
+            actingAsUserAccount = null,
+            isReadOnly = false,
+            isSuperToken = false,
           )
         testData
       }
@@ -136,7 +142,12 @@ class ImportServiceTest : AbstractSpringTest() {
     executeInNewTransaction {
       keyService.find(testData.project.id, "what a key", "homepage").assert.isNotNull
       val whatAKey = keyService.find(testData.project.id, "what a key", null)
-      whatAKey!!.keyMeta!!.comments.assert.hasSize(2).anyMatch { it.text == "hello1" }.anyMatch { it.text == "hello2" }
+      whatAKey!!
+        .keyMeta!!
+        .comments.assert
+        .hasSize(2)
+        .anyMatch { it.text == "hello1" }
+        .anyMatch { it.text == "hello2" }
     }
   }
 }

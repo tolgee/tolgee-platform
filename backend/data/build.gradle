@@ -6,8 +6,6 @@ buildscript {
     repositories {
         mavenCentral()
     }
-    dependencies {
-    }
 }
 
 plugins {
@@ -17,10 +15,11 @@ plugins {
     id 'org.liquibase.gradle'
     id 'org.jetbrains.kotlin.jvm'
     id "kotlin-jpa"
-    id "org.jetbrains.kotlin.kapt"
+    id "org.jetbrains.kotlin.kapt" // kapt still needed for Hibernate -- https://hibernate.atlassian.net/browse/HHH-15376
     id "kotlin-allopen"
     id "org.hibernate.orm"
     id "io.sentry.jvm.gradle"
+    id "org.gradle.test-retry"
 }
 
 group = 'io.tolgee'
@@ -32,11 +31,14 @@ if (System.getenv().containsKey("VERSION")) {
 }
 
 configurations {
+    ktlint
     developmentOnly
     runtimeClasspath {
         extendsFrom developmentOnly
     }
-    ktlint
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
 }
 
 apply plugin: 'java'
@@ -46,14 +48,9 @@ apply plugin: 'io.spring.dependency-management'
 apply plugin: "org.jetbrains.kotlin.plugin.jpa"
 apply plugin: "org.jetbrains.kotlin.plugin.spring"
 apply plugin: "kotlin-allopen"
-apply plugin: "kotlin-kapt"
+apply plugin: "kotlin-kapt" // kapt still needed for Hibernate -- https://hibernate.atlassian.net/browse/HHH-15376
 apply plugin: 'kotlin'
 apply plugin: 'org.hibernate.orm'
-
-repositories {
-    mavenCentral()
-    jcenter()
-}
 
 idea {
     module {
@@ -71,15 +68,21 @@ allOpen {
     annotation("org.springframework.beans.factory.annotation.Configurable")
 }
 
+apply from: "$rootDir/gradle/email.gradle"
 apply from: "$rootDir/gradle/liquibase.gradle"
 
 configureLiquibase("public", "hibernate:spring:io.tolgee", 'src/main/resources/db/changelog/schema.xml')
 
-diff.dependsOn compileKotlin
-diffChangelog.dependsOn compileKotlin
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
 
 kotlin {
-    jvmToolchain(17)
+    compilerOptions {
+        freeCompilerArgs.addAll("-Xjsr305=strict")
+    }
 }
 
 dependencies {
@@ -93,13 +96,22 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-starter-hateoas"
     implementation("org.springframework.data:spring-data-envers")
     implementation("org.springframework.boot:spring-boot-starter-security")
-    implementation 'org.springframework.boot:spring-boot-starter-mail'
-    implementation('org.springframework.boot:spring-boot-starter-test')
-    kapt "org.springframework.boot:spring-boot-configuration-processor"
-    implementation "org.springframework.boot:spring-boot-configuration-processor"
+    implementation('org.springframework.boot:spring-boot-starter-mail') {
+        exclude group: 'org.eclipse.angus', module: 'jakarta.mail'
+    }
+    implementation libs.jakartaMail
+    testImplementation('org.springframework.boot:spring-boot-starter-test')
     implementation "org.springframework.boot:spring-boot-starter-batch"
     implementation "org.springframework.boot:spring-boot-starter-websocket"
     implementation libs.springJooq
+    implementation "org.springframework.boot:spring-boot-starter-thymeleaf"
+    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+
+    implementation('com.github.transferwise:spring-icu:0.3.0') {
+        exclude group: 'org.springframework', module: 'spring-context'
+        exclude group: 'com.ibm.icu', module: 'icu4j'
+        exclude group: 'org.springframework', module: 'spring-beans'
+    }
 
     /**
      * DB
@@ -135,6 +147,7 @@ dependencies {
     testImplementation libs.mockito
     implementation libs.jsonUnitAssert
     testImplementation(project(":testing"))
+    ktlint(project(":ktlint"))
 
     /**
      * Kotlin
@@ -142,6 +155,13 @@ dependencies {
     implementation libs.kotlinReflect
     liquibaseRuntime libs.kotlinReflect
     implementation libs.kotlinCoroutines
+
+    /**
+     * OpenTelemetry Kotlin extension for coroutine context propagation
+     * and instrumentation annotations for @WithSpan
+     */
+    implementation libs.opentelemetryExtensionKotlin
+    implementation libs.opentelemetryInstrumentationAnnotations
 
     /**
      * SPRING DOC
@@ -158,12 +178,13 @@ dependencies {
     implementation libs.jjwtImpl
     implementation libs.jjwtJackson
     implementation libs.jacksonModuleKotlin
-    implementation 'net.datafaker:datafaker:1.5.0'
+    implementation 'net.datafaker:datafaker:2.4.4'
     implementation 'jaxen:jaxen:1.2.0'
-    implementation libs.sendInBlue
     implementation(libs.mailjet) {
-        exclude group: 'org.json', module: 'json'
+        // (Formerly) not OSS, still unclear licensing status, conflicts with Vaadin used by Spring
+        exclude group: "org.json", module: "json"
     }
+    implementation libs.vaadinJson
     implementation libs.hibernateTypes
     liquibaseRuntime libs.hibernateTypes
     implementation 'com.eatthepath:java-otp:0.4.0'
@@ -171,13 +192,22 @@ dependencies {
     implementation libs.micrometerPrometheus
     implementation 'org.dom4j:dom4j:2.1.4'
     implementation libs.jacksonKotlin
-    implementation("org.apache.commons:commons-configuration2:2.10.1")
+    implementation("org.apache.commons:commons-configuration2:2.15.0")
     implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVersion"
+    implementation("com.fasterxml.woodstox:woodstox-core:7.1.1")
+
+    /**
+     * Table formats
+     */
+    implementation("com.opencsv:opencsv:5.11.1")
+    implementation 'org.apache.poi:poi:5.4.0'
+    implementation 'org.apache.poi:poi-ooxml:5.4.0'
 
     /**
      * Google translation API
      */
     implementation platform(libs.googleCloud)
+    implementation platform(libs.grpcBom)
     implementation 'com.google.cloud:google-cloud-translate'
 
     /**
@@ -185,6 +215,7 @@ dependencies {
      */
     implementation libs.amazonS3
     implementation libs.amazonTranslate
+    implementation libs.cloudfront
 
     /**
      * MISC MODULE
@@ -195,11 +226,10 @@ dependencies {
     /**
      * AZURE
      */
-    implementation(libs.azureBlob) {
-        exclude group: 'io.netty', module: 'netty-codec-http'
-    }
-    implementation('io.netty:netty-codec-http:4.1.108.Final')
-    implementation('com.azure:azure-identity:1.12.0')
+    implementation(libs.azureBlob)
+    implementation('io.netty:netty-codec-http:4.2.5.Final')
+    implementation('io.netty:netty-codec-http2:4.2.5.Final')
+    implementation('io.netty:netty-handler:4.2.5.Final')
 
     /**
      * SLACK SDK
@@ -207,44 +237,57 @@ dependencies {
     implementation libs.slackApiClient
     implementation libs.slackApiModelKotlinExtension
     implementation libs.slackApiClientKotlinExtension
+
+    /**
+     * HANDLEBARS
+     */
+    implementation('com.github.jknack:handlebars:4.4.0')
 }
 
-test {
+tasks.named('test', Test) {
     useJUnitPlatform()
     maxHeapSize = "4096m"
+    rootProject.setTestRetry(it)
 }
 
 sourceSets {
     main.kotlin.srcDirs = ['src/main/kotlin', 'src/main/java']
     test.kotlin.srcDirs = ['src/test/kotlin', 'src/test/java']
+
+    main.resources.srcDirs += 'build/generated/resources/main'
+    test.resources.srcDirs += 'build/generated/resources/test'
 }
 
 dependencyManagement {
+    applyMavenExclusions = false
+
     imports {
-        mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
+        mavenBom(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES) {
+            bomProperty "kotlin.version", "${kotlinVersion}"
+        }
+        mavenBom 'org.junit:junit-bom:5.11.4'
     }
 }
 
-jar {
+tasks.named('jar', Jar) {
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
 }
 
-tasks.named('compileJava') {
-    inputs.files(tasks.named('processResources'))
+tasks.named('processResources') {
+    dependsOn 'copyEmailResources', 'copyEmailTemplates', 'copyEmailLocaleData'
+}
+
+tasks.named('processTestResources') {
+    dependsOn 'copyTestEmailTemplates'
 }
 
 ktlint {
-    debug = true
-    verbose = true
     filter {
         exclude("**/PluralData.kt")
     }
 }
 
 hibernate {
-    enhancement {
-        enableDirtyTracking = false
-        enableAssociationManagement = false
-        enableExtendedEnhancement = false
-    }
+    // Block is required for Bytecode Enhancement to happen
+    enhancement {}
 }

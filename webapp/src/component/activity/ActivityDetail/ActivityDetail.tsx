@@ -96,12 +96,19 @@ export const ActivityDetail = ({ data, diffEnabled, activity }: Props) => {
             | EntityOptions
             | undefined;
           if (options) {
-            return buildEntity(
+            const entity = buildEntity(
               e.entityClass as EntityEnum,
               e,
               options,
               Object.keys(options?.fields || {})
             );
+            // Stamp activity type on key references
+            entity.references.forEach((ref) => {
+              if (ref.type === 'key') {
+                ref.activityType = data.type;
+              }
+            });
+            return entity;
           }
         })
         .filter(Boolean) as Entity[];

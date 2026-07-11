@@ -1,39 +1,59 @@
 package io.tolgee
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.tolgee.activity.ActivityService
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.component.AllCachesProvider
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.component.SchedulingManager
 import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.component.machineTranslation.MtServiceManager
+import io.tolgee.config.TestEmailConfiguration
+import io.tolgee.config.TestPostHogConfiguration
 import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
-import io.tolgee.configuration.tolgee.machineTranslation.*
+import io.tolgee.configuration.tolgee.machineTranslation.AwsMachineTranslationProperties
+import io.tolgee.configuration.tolgee.machineTranslation.AzureCognitiveTranslationProperties
+import io.tolgee.configuration.tolgee.machineTranslation.BaiduMachineTranslationProperties
+import io.tolgee.configuration.tolgee.machineTranslation.DeeplMachineTranslationProperties
+import io.tolgee.configuration.tolgee.machineTranslation.GoogleMachineTranslationProperties
+import io.tolgee.configuration.tolgee.machineTranslation.LlmProperties
+import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationProperties
 import io.tolgee.constants.MtServiceType
 import io.tolgee.development.DbPopulatorReal
 import io.tolgee.development.testDataBuilder.TestDataService
-import io.tolgee.repository.*
+import io.tolgee.fixtures.andGetContentAsString
+import io.tolgee.fixtures.andIsOk
+import io.tolgee.repository.EmailVerificationRepository
+import io.tolgee.repository.OrganizationRepository
+import io.tolgee.repository.OrganizationRoleRepository
+import io.tolgee.repository.ProjectRepository
 import io.tolgee.security.InitialPasswordManager
 import io.tolgee.service.EmailVerificationService
 import io.tolgee.service.ImageUploadService
-import io.tolgee.service.InvitationService
 import io.tolgee.service.dataImport.ImportService
+import io.tolgee.service.invitation.InvitationService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.NamespaceService
 import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.key.TagService
 import io.tolgee.service.language.LanguageService
-import io.tolgee.service.machineTranslation.MtCreditBucketService
 import io.tolgee.service.machineTranslation.MtService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
+import io.tolgee.service.machineTranslation.mtCreditsConsumption.MtCreditBucketService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.LanguageStatsService
 import io.tolgee.service.project.ProjectService
-import io.tolgee.service.security.*
+import io.tolgee.service.security.ApiKeyService
+import io.tolgee.service.security.MfaService
+import io.tolgee.service.security.PatService
+import io.tolgee.service.security.PermissionService
+import io.tolgee.service.security.UserAccountService
+import io.tolgee.service.security.UserPreferencesService
 import io.tolgee.service.translation.TranslationCommentService
 import io.tolgee.service.translation.TranslationService
+import io.tolgee.service.translationMemory.TranslationMemoryManagementService
 import io.tolgee.testing.AbstractTransactionalTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
@@ -41,15 +61,18 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.cache.CacheManager
 import org.springframework.context.ApplicationContext
+import org.springframework.context.annotation.Import
+import org.springframework.test.web.servlet.ResultActions
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.TransactionDefinition
 import org.springframework.transaction.TransactionStatus
 import org.springframework.transaction.support.TransactionTemplate
 import java.time.Duration
-import java.util.*
+import java.util.Date
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest
+@Import(TestEmailConfiguration::class, TestPostHogConfiguration::class)
 abstract class AbstractSpringTest : AbstractTransactionalTest() {
   @Autowired
   protected lateinit var dbPopulator: DbPopulatorReal
@@ -65,9 +88,6 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
 
   @Autowired
   protected lateinit var languageService: LanguageService
-
-  @Autowired
-  protected lateinit var keyRepository: KeyRepository
 
   @Autowired
   protected lateinit var userAccountService: UserAccountService
@@ -131,7 +151,7 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   lateinit var fileStorage: FileStorage
 
   @Autowired
-  lateinit var machineTranslationProperties: MachineTranslationProperties
+  open lateinit var machineTranslationProperties: MachineTranslationProperties
 
   @Autowired
   lateinit var awsMachineTranslationProperties: AwsMachineTranslationProperties
@@ -149,10 +169,10 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   lateinit var baiduMachineTranslationProperties: BaiduMachineTranslationProperties
 
   @Autowired
-  lateinit var tolgeeMachineTranslationProperties: TolgeeMachineTranslationProperties
+  lateinit var llmProperties: LlmProperties
 
   @Autowired
-  lateinit var internalProperties: InternalProperties
+  open lateinit var internalProperties: InternalProperties
 
   @Autowired
   lateinit var mtServiceConfigService: MtServiceConfigService
@@ -174,9 +194,6 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
 
   @Autowired
   lateinit var mtServiceManager: MtServiceManager
-
-  @Autowired
-  lateinit var activityService: ActivityService
 
   @Autowired
   lateinit var userPreferencesService: UserPreferencesService
@@ -208,6 +225,15 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   @Autowired
   lateinit var allCachesProvider: AllCachesProvider
 
+  @Autowired
+  lateinit var objectMapper: ObjectMapper
+
+  @Autowired
+  lateinit var schedulingManager: SchedulingManager
+
+  @Autowired
+  lateinit var translationMemoryManagementService: TranslationMemoryManagementService
+
   @BeforeEach
   fun clearCaches() {
     allCachesProvider.getAllCaches().forEach { cacheName ->
@@ -238,8 +264,6 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
     baiduMachineTranslationProperties.defaultEnabled = enabledServices.contains(MtServiceType.BAIDU)
     baiduMachineTranslationProperties.appId = "dummy"
     baiduMachineTranslationProperties.appSecret = "dummy"
-    tolgeeMachineTranslationProperties.url = "http://localhost:8081"
-    tolgeeMachineTranslationProperties.defaultEnabled = enabledServices.contains(MtServiceType.TOLGEE)
     internalProperties.fakeMtProviders = false
   }
 
@@ -251,7 +275,7 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
     )
   }
 
-  open fun setForcedDate(date: Date) {
+  open fun setForcedDate(date: Date = Date()) {
     currentDateProvider.forcedDate = date
   }
 
@@ -268,5 +292,20 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
 
   open fun moveCurrentDate(duration: Duration) {
     currentDateProvider.move(duration)
+  }
+
+  protected inline fun <reified T> ResultActions.getContent(): T {
+    val stringContent = this.andGetContentAsString
+    return objectMapper.readValue(stringContent)
+  }
+
+  protected fun ResultActions.getIdFromResponse(): Long {
+    this.andIsOk
+    val response: Map<String, Any> = getContent()
+    try {
+      return (response["id"] as Number).toLong()
+    } catch (e: Exception) {
+      throw Error("Response does not contain id", e)
+    }
   }
 }

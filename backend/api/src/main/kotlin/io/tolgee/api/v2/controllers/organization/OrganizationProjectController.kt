@@ -6,6 +6,7 @@ package io.tolgee.api.v2.controllers.organization
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.dtos.request.project.ProjectFilters
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.facade.ProjectWithStatsFacade
 import io.tolgee.hateoas.project.ProjectModel
@@ -19,7 +20,6 @@ import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.data.web.SortDefault
-import org.springframework.hateoas.MediaTypes
 import org.springframework.hateoas.PagedModel
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -50,9 +50,11 @@ class OrganizationProjectController(
     @PathVariable("id") id: Long,
     @ParameterObject pageable: Pageable,
     @RequestParam("search") search: String?,
+    @ParameterObject filters: ProjectFilters,
   ): PagedModel<ProjectModel> {
     return organizationService.find(id)?.let { organization ->
-      projectService.findPermittedInOrganizationPaged(pageable, search, organizationId = organization.id)
+      projectService
+        .findPermittedInOrganizationPaged(pageable, search, organizationId = organization.id, filters = filters)
         .let { projects ->
           pagedProjectResourcesAssembler.toModel(projects, projectModelAssembler)
         }
@@ -69,9 +71,10 @@ class OrganizationProjectController(
     @PathVariable("slug") slug: String,
     @ParameterObject pageable: Pageable,
     @RequestParam("search") search: String?,
+    @ParameterObject filters: ProjectFilters,
   ): PagedModel<ProjectModel> {
     return organizationService.find(slug)?.let {
-      getAllProjects(it.id, pageable, search)
+      getAllProjects(it.id, pageable, search, filters)
     } ?: throw NotFoundException()
   }
 
@@ -81,7 +84,7 @@ class OrganizationProjectController(
       "Returns all projects (including statistics)" +
         " where current user has any permission (except none)",
   )
-  @GetMapping("/{organizationId:[0-9]+}/projects-with-stats", produces = [MediaTypes.HAL_JSON_VALUE])
+  @GetMapping("/{organizationId:[0-9]+}/projects-with-stats")
   @UseDefaultPermissions
   fun getAllWithStatistics(
     @ParameterObject pageable: Pageable,
@@ -98,7 +101,7 @@ class OrganizationProjectController(
       "Returns all projects (including statistics) " +
         "where current user has any permission (except none)",
   )
-  @GetMapping("/{slug:.*[a-z].*}/projects-with-stats", produces = [MediaTypes.HAL_JSON_VALUE])
+  @GetMapping("/{slug:.*[a-z].*}/projects-with-stats")
   @UseDefaultPermissions
   fun getAllWithStatistics(
     @ParameterObject
@@ -108,7 +111,7 @@ class OrganizationProjectController(
     @PathVariable("slug") organizationSlug: String,
   ): PagedModel<ProjectWithStatsModel> {
     return organizationService.findDto(organizationSlug)?.let { organization ->
-      return getAllWithStatistics(pageable, search, organization.id)
+      getAllWithStatistics(pageable, search, organization.id)
     } ?: throw NotFoundException()
   }
 }

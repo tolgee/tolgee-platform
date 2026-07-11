@@ -16,6 +16,7 @@
 
 package io.tolgee.security.ratelimit
 
+import io.tolgee.Metrics
 import io.tolgee.security.authentication.AuthenticationFacade
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -33,7 +34,9 @@ class GlobalIpRateLimitFilterTest {
 
   private val authenticationFacade = Mockito.mock(AuthenticationFacade::class.java)
 
-  private val rateLimitFilter = GlobalIpRateLimitFilter(rateLimitService, authenticationFacade)
+  private val metrics = Mockito.mock(Metrics::class.java)
+
+  private val rateLimitFilter = GlobalIpRateLimitFilter(rateLimitService, authenticationFacade, metrics)
 
   @BeforeEach
   fun setupMocks() {
@@ -62,7 +65,8 @@ class GlobalIpRateLimitFilterTest {
     val res = MockHttpServletResponse()
     val chain = MockFilterChain()
 
-    Mockito.`when`(rateLimitService.consumeGlobalIpRateLimitPolicy(any()))
+    Mockito
+      .`when`(rateLimitService.consumeGlobalIpRateLimitPolicy(any()))
       .thenThrow(RateLimitedException(1000, true))
 
     assertThrows<RateLimitedException> { rateLimitFilter.doFilter(req, res, chain) }
@@ -75,7 +79,51 @@ class GlobalIpRateLimitFilterTest {
     val chain = MockFilterChain()
     req.method = "OPTIONS"
 
-    Mockito.`when`(rateLimitService.consumeGlobalIpRateLimitPolicy(any()))
+    Mockito
+      .`when`(rateLimitService.consumeGlobalIpRateLimitPolicy(any()))
+      .thenThrow(RateLimitedException(1000, true))
+
+    assertDoesNotThrow { rateLimitFilter.doFilter(req, res, chain) }
+  }
+
+  @Test
+  fun `it skips rate limiting for actuator endpoints`() {
+    val req = MockHttpServletRequest()
+    val res = MockHttpServletResponse()
+    val chain = MockFilterChain()
+    req.requestURI = "/actuator/health"
+
+    Mockito
+      .`when`(rateLimitService.consumeGlobalIpRateLimitPolicy(any()))
+      .thenThrow(RateLimitedException(1000, true))
+
+    assertDoesNotThrow { rateLimitFilter.doFilter(req, res, chain) }
+  }
+
+  @Test
+  fun `it skips rate limiting for bare actuator endpoint`() {
+    val req = MockHttpServletRequest()
+    val res = MockHttpServletResponse()
+    val chain = MockFilterChain()
+    req.requestURI = "/actuator"
+
+    Mockito
+      .`when`(rateLimitService.consumeGlobalIpRateLimitPolicy(any()))
+      .thenThrow(RateLimitedException(1000, true))
+
+    assertDoesNotThrow { rateLimitFilter.doFilter(req, res, chain) }
+  }
+
+  @Test
+  fun `it skips rate limiting for actuator endpoints with context path`() {
+    val req = MockHttpServletRequest()
+    val res = MockHttpServletResponse()
+    val chain = MockFilterChain()
+    req.contextPath = "/api"
+    req.requestURI = "/api/actuator/health"
+
+    Mockito
+      .`when`(rateLimitService.consumeGlobalIpRateLimitPolicy(any()))
       .thenThrow(RateLimitedException(1000, true))
 
     assertDoesNotThrow { rateLimitFilter.doFilter(req, res, chain) }

@@ -2,8 +2,6 @@ package io.tolgee.controllers
 
 import io.tolgee.component.emailContacts.EmailServiceManager
 import io.tolgee.component.emailContacts.MailJetEmailServiceManager
-import io.tolgee.component.emailContacts.SendInBlueEmailServiceManager
-import io.tolgee.configuration.tolgee.SendInBlueProperties
 import io.tolgee.dtos.request.UserUpdateRequestDto
 import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.fixtures.EmailTestUtil
@@ -26,7 +24,7 @@ import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
@@ -36,17 +34,10 @@ import org.springframework.web.client.RestTemplate
 @AutoConfigureMockMvc
 class MarketingEmailingTest : AuthorizedControllerTest() {
   @Autowired
-  lateinit var sendInBlueProperties: SendInBlueProperties
-
-  @Autowired
-  @MockBean
+  @MockitoBean
   lateinit var mailjetEmailServiceManager: MailJetEmailServiceManager
 
-  @Autowired
-  @MockBean
-  lateinit var sendInBlueEmailServiceManager: SendInBlueEmailServiceManager
-
-  @MockBean
+  @MockitoBean
   @Autowired
   private val restTemplate: RestTemplate? = null
 
@@ -73,16 +64,13 @@ class MarketingEmailingTest : AuthorizedControllerTest() {
   @BeforeEach
   fun setup() {
     Mockito.clearInvocations(mailjetEmailServiceManager)
-    tolgeeProperties.frontEndUrl = "https://aaa"
     tolgeeProperties.smtp.from = "aa@aa.com"
     emailTestUtil.initMocks()
   }
 
   @AfterEach
   fun cleanUp() {
-    sendInBlueProperties.listId = null
     tolgeeProperties.authentication.needsEmailVerification = false
-    tolgeeProperties.frontEndUrl = null
   }
 
   private val testMail = "mail@test.com"
@@ -98,7 +86,6 @@ class MarketingEmailingTest : AuthorizedControllerTest() {
 
   @Test
   fun `adds contact after verification when needs-verification is on`() {
-    tolgeeProperties.frontEndUrl = "https://aaa"
     tolgeeProperties.authentication.needsEmailVerification = true
     val dto = SignUpDto(name = testName, password = "aaaaaaaaaa", email = testMail)
     performPost("/api/public/sign_up", dto)
@@ -150,15 +137,19 @@ class MarketingEmailingTest : AuthorizedControllerTest() {
 
   private fun acceptEmailVerification(user: UserAccount) {
     val emailVerificationCode = user.emailVerification!!.code
-    mvc.perform(MockMvcRequestBuilders.get("/api/public/verify_email/${user.id}/$emailVerificationCode"))
-      .andExpect(MockMvcResultMatchers.status().isOk).andReturn()
+    mvc
+      .perform(MockMvcRequestBuilders.get("/api/public/verify_email/${user.id}/$emailVerificationCode"))
+      .andExpect(MockMvcResultMatchers.status().isOk)
+      .andReturn()
   }
 
   private fun verifyEmailUpdated() {
     Thread.sleep(100)
     forServiceManagers {
       val lastInvocation =
-        Mockito.mockingDetails(it).invocations
+        Mockito
+          .mockingDetails(it)
+          .invocations
           .last { it.method.name == "updateContact" }
       val invocationNewEmail = lastInvocation.arguments[1]
       val invocationNewName = lastInvocation.arguments[2]
@@ -174,7 +165,9 @@ class MarketingEmailingTest : AuthorizedControllerTest() {
   ) {
     forServiceManagers {
       val lastInvocation =
-        Mockito.mockingDetails(it).invocations
+        Mockito
+          .mockingDetails(it)
+          .invocations
           .last { it.method.name == "submitNewContact" }
       val invocationEmail = lastInvocation.arguments[1]
       val invocationName = lastInvocation.arguments[0]
@@ -186,6 +179,5 @@ class MarketingEmailingTest : AuthorizedControllerTest() {
 
   private fun forServiceManagers(fn: (EmailServiceManager) -> Unit) {
     fn(mailjetEmailServiceManager)
-    fn(sendInBlueEmailServiceManager)
   }
 }

@@ -1,11 +1,13 @@
-import { Info } from '@mui/icons-material';
-import { styled, Tooltip } from '@mui/material';
+import { InfoCircle } from '@untitled-ui/icons-react';
+import { Box, styled, Tooltip } from '@mui/material';
 
 import { ScopesHint } from './ScopesHint';
 import { PermissionModelScope } from './types';
 
-const StyledInfo = styled(Info)`
+const StyledInfo = styled(InfoCircle)`
   opacity: 0.5;
+  width: 22px;
+  height: 22px;
 `;
 
 type Props = {
@@ -15,7 +17,9 @@ type Props = {
 export function ScopesInfo({ scopes }: Props) {
   return (
     <Tooltip title={<ScopesHint scopes={scopes} />}>
-      <StyledInfo fontSize="small" color="inherit" />
+      <Box display="flex">
+        <StyledInfo />
+      </Box>
     </Tooltip>
   );
 }

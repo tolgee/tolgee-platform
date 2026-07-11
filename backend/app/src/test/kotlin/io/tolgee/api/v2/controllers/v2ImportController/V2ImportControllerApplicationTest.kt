@@ -21,7 +21,9 @@ class V2ImportControllerApplicationTest : ProjectAuthControllerTest("/v2/project
     testData.setAllResolved()
     testData.setAllOverride()
     testDataService.saveTestData(testData.root)
-    val user = testData.root.data.userAccounts[0].self
+    val user =
+      testData.root.data.userAccounts[0]
+        .self
     val projectId = testData.project.id
     loginAsUser(user.username)
     val path = "/v2/projects/$projectId/import/apply"
@@ -35,7 +37,9 @@ class V2ImportControllerApplicationTest : ProjectAuthControllerTest("/v2/project
   fun `it applies the import with force override`() {
     val testData = ImportTestData()
     testDataService.saveTestData(testData.root)
-    val user = testData.root.data.userAccounts[0].self
+    val user =
+      testData.root.data.userAccounts[0]
+        .self
     val projectId = testData.project.id
     loginAsUser(user.username)
     val path = "/v2/projects/$projectId/import/apply?forceMode=OVERRIDE"
@@ -49,7 +53,9 @@ class V2ImportControllerApplicationTest : ProjectAuthControllerTest("/v2/project
   fun `it applies the import with force keep`() {
     val testData = ImportTestData()
     testDataService.saveTestData(testData.root)
-    val user = testData.root.data.userAccounts[0].self
+    val user =
+      testData.root.data.userAccounts[0]
+        .self
     val projectId = testData.project.id
     loginAsUser(user.username)
     val path = "/v2/projects/$projectId/import/apply?forceMode=KEEP"
@@ -61,14 +67,20 @@ class V2ImportControllerApplicationTest : ProjectAuthControllerTest("/v2/project
     val testData = ImportTestData()
     testData.addEmptyKey()
     testDataService.saveTestData(testData.root)
-    val user = testData.root.data.userAccounts[0].self
+    val user =
+      testData.root.data.userAccounts[0]
+        .self
     val projectId = testData.project.id
     loginAsUser(user.username)
     val path = "/v2/projects/$projectId/import/apply?forceMode=KEEP"
     performAuthPut(path, null).andIsOk
 
     executeInNewTransaction {
-      projectService.get(testData.project.id).keys.find { it.name == "empty key" }.assert.isNotNull
+      projectService
+        .get(testData.project.id)
+        .keys
+        .find { it.name == "empty key" }
+        .assert.isNotNull
     }
   }
 
@@ -93,7 +105,9 @@ class V2ImportControllerApplicationTest : ProjectAuthControllerTest("/v2/project
   @Test
   fun `it checks language permissions`() {
     val testData = ImportTestData()
-    testData.importBuilder.data.importFiles[0].data.importKeys.removeIf { it.self == testData.newLongKey }
+    testData.importBuilder.data.importFiles[0]
+      .data.importKeys
+      .removeIf { it.self == testData.newLongKey }
     val resolveFrench = testData.addFrenchTranslations()
     resolveFrench()
 
@@ -116,7 +130,9 @@ class V2ImportControllerApplicationTest : ProjectAuthControllerTest("/v2/project
   @Test
   fun `it checks permissions (view only)`() {
     val testData = ImportTestData()
-    testData.importBuilder.data.importFiles[0].data.importKeys.removeIf { it.self == testData.newLongKey }
+    testData.importBuilder.data.importFiles[0]
+      .data.importKeys
+      .removeIf { it.self == testData.newLongKey }
     val resolveFrench = testData.addFrenchTranslations()
     resolveFrench()
 
@@ -134,7 +150,9 @@ class V2ImportControllerApplicationTest : ProjectAuthControllerTest("/v2/project
   @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_VIEW])
   fun `it checks permissions with API key (view only)`() {
     val testData = ImportTestData()
-    testData.importBuilder.data.importFiles[0].data.importKeys.removeIf { it.self == testData.newLongKey }
+    testData.importBuilder.data.importFiles[0]
+      .data.importKeys
+      .removeIf { it.self == testData.newLongKey }
     val resolveFrench = testData.addFrenchTranslations()
     resolveFrench()
 
@@ -150,7 +168,9 @@ class V2ImportControllerApplicationTest : ProjectAuthControllerTest("/v2/project
   fun `it sets outdated on update`() {
     val testData = ImportTestData()
     testDataService.saveTestData(testData.root)
-    val user = testData.root.data.userAccounts[0].self
+    val user =
+      testData.root.data.userAccounts[0]
+        .self
     val projectId = testData.project.id
     loginAsUser(user.username)
     val path = "/v2/projects/$projectId/import/apply?forceMode=OVERRIDE"
@@ -158,8 +178,10 @@ class V2ImportControllerApplicationTest : ProjectAuthControllerTest("/v2/project
 
     executeInNewTransaction {
       val key =
-        projectService.get(testData.project.id)
-          .keys.find { it.name == "what a nice key" }!!
+        projectService
+          .get(testData.project.id)
+          .keys
+          .find { it.name == "what a nice key" }!!
 
       val untouched = key.translations.find { it.language == testData.french }!!
       untouched.outdated.assert.isEqualTo(true)

@@ -40,17 +40,7 @@ class BusinessEventPublisher(
   }
 
   fun publish(event: OnBusinessEventToCaptureEvent) {
-    applicationEventPublisher.publishEvent(
-      event.copy(
-        utmData = event.utmData ?: getUtmData(),
-        userAccountId =
-          event.userAccountId
-            ?: event.userAccountDto?.id
-            ?: authenticationFacade.authenticatedUserOrNull?.id,
-        userAccountDto = event.userAccountDto ?: authenticationFacade.authenticatedUserOrNull,
-        data = getDataWithSdkInfo(event.data),
-      ),
-    )
+    applicationEventPublisher.publishEvent(getEnrichedEvent(event))
   }
 
   fun publish(event: IdentifyRequest) {
@@ -69,11 +59,12 @@ class BusinessEventPublisher(
     onceIn: Duration,
     keyProvider: (e: OnBusinessEventToCaptureEvent) -> String = { it.eventName + "_" + it.userAccountId },
   ) {
-    val key = keyProvider(event)
+    val enrichedEvent = getEnrichedEvent(event)
+    val key = keyProvider(enrichedEvent)
     val shouldPublish = shouldPublishOnceInTime(key, onceIn)
     logger.debug("Publishing event $key: $shouldPublish")
     if (shouldPublish) {
-      publish(event)
+      applicationEventPublisher.publishEvent(enrichedEvent)
       cachePublished(key)
     }
   }
@@ -97,6 +88,18 @@ class BusinessEventPublisher(
     }
 
     return false
+  }
+
+  private fun getEnrichedEvent(event: OnBusinessEventToCaptureEvent): OnBusinessEventToCaptureEvent {
+    return event.copy(
+      utmData = event.utmData ?: getUtmData(),
+      userAccountId =
+        event.userAccountId
+          ?: event.userAccountDto?.id
+          ?: authenticationFacade.authenticatedUserOrNull?.id,
+      userAccountDto = event.userAccountDto ?: authenticationFacade.authenticatedUserOrNull,
+      data = getDataWithSdkInfo(event.data),
+    )
   }
 
   private fun getEventThrottlingCache(): Cache? = cacheManager.getCache(Caches.BUSINESS_EVENT_THROTTLING)

@@ -7,13 +7,15 @@ import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.cacheable.ProjectDto
-import io.tolgee.dtos.request.project.CreateProjectRequest
 import io.tolgee.dtos.request.project.EditProjectRequest
+import io.tolgee.dtos.request.project.ProjectFilters
+import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.dtos.response.ProjectDTO
 import io.tolgee.dtos.response.ProjectDTO.Companion.fromEntityAndPermission
+import io.tolgee.events.OnProjectSoftDeleted
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.model.Language
+import io.tolgee.exceptions.ProjectNotFoundException
 import io.tolgee.model.Organization
 import io.tolgee.model.OrganizationRole
 import io.tolgee.model.Permission
@@ -25,10 +27,11 @@ import io.tolgee.notifications.NotificationPreferencesService
 import io.tolgee.notifications.UserNotificationService
 import io.tolgee.repository.ProjectRepository
 import io.tolgee.security.ProjectHolder
-import io.tolgee.security.ProjectNotSelectedException
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.service.AiPlaygroundResultService
 import io.tolgee.service.AvatarService
 import io.tolgee.service.bigMeta.BigMetaService
+import io.tolgee.service.branching.BranchService
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.NamespaceService
@@ -40,12 +43,14 @@ import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
+import io.tolgee.service.translationMemory.TranslationMemoryManagementService
 import io.tolgee.util.Logging
 import io.tolgee.util.SlugGenerator
 import jakarta.persistence.EntityManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
+import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
@@ -53,38 +58,35 @@ import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.InputStream
+import java.io.Serializable
 
 @Transactional
 @Service
 class ProjectService(
   private val projectRepository: ProjectRepository,
   private val entityManager: EntityManager,
-  private val screenshotService: ScreenshotService,
   private val authenticationFacade: AuthenticationFacade,
-  private val slugGenerator: SlugGenerator,
+  private val permissionService: PermissionService,
+  private val namespaceService: NamespaceService,
+  @Lazy
+  private val languageService: LanguageService,
+  private val currentDateProvider: CurrentDateProvider,
+  private val applicationContext: ApplicationContext,
   private val avatarService: AvatarService,
   private val activityHolder: ActivityHolder,
-  @Lazy private val projectHolder: ProjectHolder,
-  @Lazy private val batchJobService: BatchJobService,
-  @Lazy private val userNotificationService: UserNotificationService,
-  @Lazy private val notificationPreferencesService: NotificationPreferencesService,
-  private val currentDateProvider: CurrentDateProvider,
+  private val projectHolder: ProjectHolder,
+  private val slugGenerator: SlugGenerator,
+  @Lazy
+  private val organizationService: OrganizationService,
+  private val screenshotService: ScreenshotService,
+  @Lazy
+  private val batchJobService: BatchJobService,
+  @Lazy
+  private val branchService: BranchService,
 ) : Logging {
   @set:Autowired
   @set:Lazy
   lateinit var keyService: KeyService
-
-  @set:Autowired
-  @set:Lazy
-  lateinit var organizationService: OrganizationService
-
-  @set:Autowired
-  @set:Lazy
-  lateinit var languageService: LanguageService
-
-  @set:Autowired
-  @set:Lazy
-  lateinit var namespaceService: NamespaceService
 
   @set:Autowired
   @set:Lazy
@@ -104,17 +106,21 @@ class ProjectService(
 
   @set:Autowired
   @set:Lazy
-  lateinit var permissionService: PermissionService
-
-  @set:Autowired
-  @set:Lazy
   lateinit var apiKeyService: ApiKeyService
 
   @set:Autowired
   @set:Lazy
   lateinit var bigMetaService: BigMetaService
 
-  @Transactional
+  @set:Autowired
+  @set:Lazy
+  lateinit var aiPlaygroundResultService: AiPlaygroundResultService
+
+  @set:Autowired
+  @set:Lazy
+  lateinit var translationMemoryManagementService: TranslationMemoryManagementService
+
+  @Transactional(readOnly = true)
   @Cacheable(cacheNames = [Caches.PROJECTS], key = "#id")
   fun findDto(id: Long): ProjectDto? {
     return projectRepository.find(id)?.let {
@@ -122,51 +128,42 @@ class ProjectService(
     }
   }
 
-  @Transactional
+  @Transactional(readOnly = true)
   @Cacheable(cacheNames = [Caches.PROJECTS], key = "#id")
   fun getDto(id: Long): ProjectDto {
-    return findDto(id) ?: throw NotFoundException(Message.PROJECT_NOT_FOUND)
+    return findDto(id) ?: throw ProjectNotFoundException(id)
   }
 
+  @Transactional(readOnly = true)
   fun get(id: Long): Project {
-    return find(id) ?: throw NotFoundException(Message.PROJECT_NOT_FOUND)
+    return find(id) ?: throw ProjectNotFoundException(id)
   }
 
+  @Transactional(readOnly = true)
   fun find(id: Long): Project? {
     return projectRepository.find(id)
   }
 
-  @Transactional
+  @Transactional(readOnly = true)
+  fun findAll(ids: Iterable<Long>): List<Project> {
+    return projectRepository.findAllById(ids)
+  }
+
+  @Transactional(readOnly = true)
+  fun findDeleted(id: Long): Project? {
+    return projectRepository.findDeleted(id)
+  }
+
+  @Transactional(readOnly = true)
   fun getView(id: Long): ProjectWithLanguagesView {
     val perms = permissionService.getProjectPermissionData(id, authenticationFacade.authenticatedUser.id)
     val withoutPermittedLanguages =
       projectRepository.findViewById(authenticationFacade.authenticatedUser.id, id)
-        ?: throw NotFoundException(Message.PROJECT_NOT_FOUND)
+        ?: throw ProjectNotFoundException(id)
     return ProjectWithLanguagesView.fromProjectView(
       withoutPermittedLanguages,
       perms.directPermissions?.translateLanguageIds?.toList(),
     )
-  }
-
-  @Transactional
-  @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#result.id")
-  fun createProject(dto: CreateProjectRequest): Project {
-    val project = Project()
-    project.name = dto.name
-    project.icuPlaceholders = dto.icuPlaceholders
-
-    project.organizationOwner = organizationService.get(dto.organizationId)
-
-    if (dto.slug == null) {
-      project.slug = generateSlug(dto.name, null)
-    }
-
-    save(project)
-
-    val createdLanguages = dto.languages!!.map { languageService.createLanguage(it, project) }
-    project.baseLanguage = getOrAssignBaseLanguage(dto, createdLanguages)
-
-    return project
   }
 
   @Transactional
@@ -176,18 +173,31 @@ class ProjectService(
     dto: EditProjectRequest,
   ): Project {
     val project =
-      projectRepository.findById(id)
+      projectRepository
+        .findById(id)
         .orElseThrow { NotFoundException() }!!
+    val wasBranchingEnabled = project.useBranching
+    val oldBaseLanguageId = project.baseLanguage?.id
+    val oldName = project.name
+
+    if (!dto.useNamespaces && project.namespaces.isNotEmpty()) {
+      throw ValidationException(Message.NAMESPACES_CANNOT_BE_DISABLED_WHEN_NAMESPACE_EXISTS)
+    }
+
     project.name = dto.name
     project.description = dto.description
     project.icuPlaceholders = dto.icuPlaceholders
+    project.useNamespaces = dto.useNamespaces
+    project.useBranching = dto.useBranching
+    project.suggestionsMode = dto.suggestionsMode
+    project.translationProtection = dto.translationProtection
 
     if (project.defaultNamespace != null) {
       namespaceService.deleteUnusedNamespaces(listOf(project.defaultNamespace!!))
     }
 
     if (dto.defaultNamespaceId != null) {
-      var namespace =
+      val namespace =
         project.namespaces.find { it.id == dto.defaultNamespaceId }
           ?: throw BadRequestException(Message.NAMESPACE_NOT_FROM_PROJECT)
       project.defaultNamespace = namespace
@@ -199,6 +209,9 @@ class ProjectService(
       val language =
         project.languages.find { it.id == dto.baseLanguageId }
           ?: throw BadRequestException(Message.LANGUAGE_NOT_FROM_PROJECT)
+      if (language.id != oldBaseLanguageId) {
+        resolveSharedTmConflicts(project.id, language.tag, dto.unassignConflictingTms == true)
+      }
       project.baseLanguage = language
       languageService.evictCacheForProject(project.id)
     }
@@ -209,35 +222,130 @@ class ProjectService(
       project.slug = newSlug
     }
 
-    // if project has null slag, generate it
+    // if a project has null slug, generate it
     if (project.slug == null) {
       project.slug = generateSlug(project.name, null)
     }
 
     entityManager.persist(project)
+
+    if (!wasBranchingEnabled && dto.useBranching) {
+      branchService.enableBranchingOnProject(project.id)
+    }
+
+    val newBaseLanguageId = project.baseLanguage?.id
+    if (newBaseLanguageId != null && newBaseLanguageId != oldBaseLanguageId) {
+      // Project TM content is virtual (computed from translations at read time), so no rebuild
+      // is needed — only the TM's sourceLanguageTag needs to track the project's base language.
+      translationMemoryManagementService.updateProjectTmSourceLanguage(project.id)
+    }
+    if (project.name != oldName) {
+      translationMemoryManagementService.renameProjectTm(project.id, project.name)
+    }
     return project
   }
 
+  /**
+   * Shared TMs declare a source language; changing the project base to a different language
+   * would leave them misaligned. Without [unassignConflictingTms] this rejects the change and
+   * echoes the offending TMs back so the UI can render a confirmation dialog. With the flag —
+   * which the frontend only sets after the user explicitly confirms in that dialog — the
+   * conflicting assignments are detached in the same transaction as the base-language change.
+   *
+   * No feature gate on the unassign side on purpose: a project whose org has lost the TM
+   * feature can still carry leftover shared-TM assignments, and must be able to rescue itself
+   * via a base-language change. `PROJECT_EDIT` is sufficient authorisation.
+   */
+  private fun resolveSharedTmConflicts(
+    projectId: Long,
+    newBaseLanguageTag: String,
+    unassignConflictingTms: Boolean,
+  ) {
+    val conflicts =
+      translationMemoryManagementService
+        .getSharedTmAssignmentsForProject(projectId)
+        .filter { it.translationMemory.sourceLanguageTag != newBaseLanguageTag }
+    if (conflicts.isEmpty()) return
+    if (!unassignConflictingTms) {
+      val payload: List<Serializable> =
+        conflicts.map {
+          hashMapOf<String, Any>(
+            "id" to it.translationMemory.id,
+            "name" to it.translationMemory.name,
+          )
+        }
+      throw BadRequestException(
+        Message.CANNOT_CHANGE_PROJECT_BASE_LANGUAGE_TM_CONFLICT,
+        payload,
+      )
+    }
+    translationMemoryManagementService.unassignSharedTmsByProject(
+      projectId = projectId,
+      translationMemoryIds = conflicts.map { it.translationMemory.id },
+    )
+  }
+
+  @Transactional(readOnly = true)
   fun findAllPermitted(userAccount: UserAccount): List<ProjectDTO> {
-    return projectRepository.findAllPermitted(userAccount.id).asSequence()
+    return projectRepository
+      .findAllPermitted(userAccount.id)
+      .asSequence()
       .map { result ->
         val project = result[0] as Project
         val permission = result[1] as Permission?
         val organization = result[2] as Organization
         val organizationRole = result[3] as OrganizationRole?
         val scopes =
-          permissionService.computeProjectPermission(
-            organizationRole?.type,
-            organization.basePermission,
-            permission,
-            userAccount.role ?: UserAccount.Role.USER,
-          ).scopes
+          permissionService
+            .computeProjectPermission(
+              organizationRole?.type,
+              organization.basePermission,
+              permission,
+              userAccount.role ?: UserAccount.Role.USER,
+            ).scopes
         fromEntityAndPermission(project, scopes)
       }.toList()
   }
 
+  @Transactional(readOnly = true)
   fun findAllInOrganization(organizationId: Long): List<Project> {
     return this.projectRepository.findAllByOrganizationOwnerId(organizationId)
+  }
+
+  @Transactional(readOnly = true)
+  fun findAllActiveInOrganization(organizationId: Long): List<Project> {
+    return projectRepository.findAllByOrganizationOwnerIdAndDeletedAtIsNull(organizationId)
+  }
+
+  @Transactional
+  @CacheEvict(cacheNames = [Caches.PROJECTS], allEntries = true)
+  fun softDeleteAllInOrganization(organizationId: Long) {
+    findAllActiveInOrganization(organizationId).forEach { softDeleteProject(it) }
+  }
+
+  @Transactional(readOnly = true)
+  fun findIdsInDeletedOrganizations(pageable: Pageable): Page<Long> {
+    return projectRepository.findIdsInDeletedOrganizations(pageable)
+  }
+
+  @Transactional(readOnly = true)
+  fun findIncludingDeleted(id: Long): Project? {
+    return projectRepository.findById(id).orElse(null)
+  }
+
+  @Transactional(readOnly = true)
+  fun findAllActive(): List<Project> {
+    return projectRepository.findAllByDeletedAtIsNull()
+  }
+
+  @Transactional(readOnly = true)
+  fun findAllWithQaEnabledInOrganization(organizationId: Long): List<Project> {
+    return projectRepository.findAllByOrganizationOwnerIdAndUseQaChecksTrueAndDeletedAtIsNull(organizationId)
+  }
+
+  @Transactional(readOnly = true)
+  fun findAllWithQaEnabled(): List<Project> {
+    return projectRepository.findAllByUseQaChecksTrueAndDeletedAtIsNull()
   }
 
   private fun addPermittedLanguagesToProjects(
@@ -261,62 +369,19 @@ class ProjectService(
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#id")
   fun deleteProject(id: Long) {
     val project = get(id)
-    languageService.evictCacheForProject(project.id)
-    project.deletedAt = currentDateProvider.date
-    save(project)
+    softDeleteProject(project)
+    applicationContext.publishEvent(OnProjectSoftDeleted(project))
   }
 
-  @Transactional
-  @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#id")
-  fun hardDeleteProject(id: Long) {
-    traceLogMeasureTime("deleteProject") {
-      val project = get(id)
-
-      try {
-        projectHolder.project
-      } catch (e: ProjectNotSelectedException) {
-        projectHolder.project = ProjectDto.fromEntity(project)
-      }
-
-      importService.getAllByProject(id).forEach {
-        importService.hardDeleteImport(it)
-      }
-
-      // otherwise we cannot delete the languages
-      project.baseLanguage = null
-      projectRepository.saveAndFlush(project)
-
-      traceLogMeasureTime("deleteProject: delete api keys") {
-        apiKeyService.deleteAllByProject(project.id)
-      }
-
-      traceLogMeasureTime("deleteProject: delete permissions") {
-        permissionService.deleteAllByProject(project.id)
-      }
-
-      traceLogMeasureTime("deleteProject: delete screenshots") {
-        screenshotService.deleteAllByProject(project.id)
-      }
-
-      mtServiceConfigService.deleteAllByProjectId(project.id)
-
-      traceLogMeasureTime("deleteProject: delete languages") {
-        languageService.deleteAllByProject(project.id)
-      }
-
-      traceLogMeasureTime("deleteProject: delete keys") {
-        keyService.deleteAllByProject(project.id)
-      }
-
-      avatarService.unlinkAvatarFiles(project)
-      batchJobService.deleteAllByProjectId(project.id)
-      bigMetaService.deleteAllByProjectId(project.id)
-
-      userNotificationService.deleteAllByProjectId(project.id)
-      notificationPreferencesService.deleteAllByProjectId(project.id)
-
-      projectRepository.delete(project)
+  private fun softDeleteProject(project: Project) {
+    val currentDate = currentDateProvider.date
+    val languages = project.languages
+    languages.forEach {
+      it.deletedAt = currentDate
     }
+    languageService.saveAll(languages)
+    project.deletedAt = currentDate
+    save(project)
   }
 
   /**
@@ -350,10 +415,12 @@ class ProjectService(
     avatarService.setAvatar(project, avatar)
   }
 
+  @Transactional(readOnly = true)
   fun validateSlugUniqueness(slug: String): Boolean {
     return projectRepository.countAllBySlug(slug) < 1
   }
 
+  @Transactional(readOnly = true)
   fun generateSlug(
     name: String,
     oldSlug: String? = null,
@@ -366,24 +433,29 @@ class ProjectService(
     }
   }
 
+  @Transactional(readOnly = true)
   fun findPermittedInOrganizationPaged(
     pageable: Pageable,
     search: String?,
     organizationId: Long? = null,
+    filters: ProjectFilters? = null,
   ): Page<ProjectWithLanguagesView> {
     return findPermittedInOrganizationPaged(
       pageable = pageable,
       search = search,
       organizationId = organizationId,
       userAccountId = authenticationFacade.authenticatedUser.id,
+      filters = filters,
     )
   }
 
+  @Transactional(readOnly = true)
   fun findPermittedInOrganizationPaged(
     pageable: Pageable,
     search: String?,
     organizationId: Long? = null,
     userAccountId: Long,
+    filters: ProjectFilters? = ProjectFilters(),
   ): Page<ProjectWithLanguagesView> {
     val withoutPermittedLanguages =
       projectRepository.findAllPermitted(
@@ -391,6 +463,7 @@ class ProjectService(
         pageable,
         search,
         organizationId,
+        filters ?: ProjectFilters(),
       )
     return addPermittedLanguagesToProjects(withoutPermittedLanguages, userAccountId)
   }
@@ -409,22 +482,12 @@ class ProjectService(
     return project
   }
 
+  @Transactional(readOnly = true)
   fun refresh(project: Project): Project {
     if (project.id == 0L) {
       return project
     }
     return this.projectRepository.findById(project.id).orElseThrow { NotFoundException() }
-  }
-
-  private fun getOrAssignBaseLanguage(
-    dto: CreateProjectRequest,
-    createdLanguages: List<Language>,
-  ): Language {
-    if (dto.baseLanguageTag != null) {
-      return createdLanguages.find { it.tag == dto.baseLanguageTag }
-        ?: throw BadRequestException(Message.LANGUAGE_WITH_BASE_LANGUAGE_TAG_NOT_FOUND)
-    }
-    return createdLanguages[0]
   }
 
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#projectId")
@@ -438,6 +501,7 @@ class ProjectService(
     save(project)
   }
 
+  @Transactional(readOnly = true)
   fun findAllByNameAndOrganizationOwner(
     name: String,
     organization: Organization,
@@ -445,6 +509,7 @@ class ProjectService(
     return projectRepository.findAllByNameAndOrganizationOwner(name, organization)
   }
 
+  @Transactional(readOnly = true)
   fun getProjectsWithDirectPermissions(
     id: Long,
     userIds: List<Long>,
@@ -454,5 +519,14 @@ class ProjectService(
       .map { it[0] as Long to it[1] as Project }
       .groupBy { it.first }
       .mapValues { it.value.map { it.second } }
+  }
+
+  fun updateLastTaskNumber(
+    projectId: Long,
+    taskNumber: Long,
+  ) {
+    val project = get(projectId)
+    project.lastTaskNumber = taskNumber
+    projectRepository.saveAndFlush(project)
   }
 }

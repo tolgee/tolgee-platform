@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.dtos.request.GenerateSlugDto
 import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
+import io.tolgee.security.authentication.ReadOnlyOperation
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
 import jakarta.validation.Valid
@@ -46,6 +47,7 @@ class SlugController(
   }
 
   @PostMapping("/generate-organization", produces = [MediaType.APPLICATION_JSON_VALUE])
+  @ReadOnlyOperation
   @Operation(summary = "Generate organization slug")
   fun generateOrganizationSlug(
     @RequestBody @Valid
@@ -55,6 +57,7 @@ class SlugController(
   }
 
   @PostMapping("/generate-project", produces = [MediaType.APPLICATION_JSON_VALUE])
+  @ReadOnlyOperation
   @Operation(summary = "Generate project slug")
   @OpenApiHideFromPublicDocs
   fun generateProjectSlug(

@@ -1,31 +1,33 @@
 package io.tolgee.formats.po.out
 
 import io.tolgee.dtos.IExportParams
-import io.tolgee.formats.NoOpFromIcuPlaceholderConvertor
+import io.tolgee.formats.ExportMessageFormat
 import io.tolgee.formats.getPluralData
 import io.tolgee.formats.po.PO_FILE_MSG_ID_PLURAL_CUSTOM_KEY
+import io.tolgee.formats.po.PO_MSGCTXT_KEY_SEPARATOR
 import io.tolgee.model.ILanguage
 import io.tolgee.service.export.ExportFilePathProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.export.exporters.FileExporter
 import java.io.InputStream
+import kotlin.text.split
 
 class PoFileExporter(
   val translations: List<ExportTranslationView>,
   val exportParams: IExportParams,
-  baseTranslationsProvider: () -> List<ExportTranslationView>,
   val baseLanguage: ILanguage,
   private val projectIcuPlaceholdersSupport: Boolean = true,
+  private val filePathProvider: ExportFilePathProvider,
 ) : FileExporter {
-  val fileExtension: String = "po"
-
   private val preparedResult: LinkedHashMap<String, StringBuilder> = LinkedHashMap()
 
   override fun produceFiles(): Map<String, InputStream> {
     prepareResult()
-    return preparedResult.asSequence().map { (fileName, content) ->
-      fileName to content.toString().byteInputStream()
-    }.toMap()
+    return preparedResult
+      .asSequence()
+      .map { (fileName, content) ->
+        fileName to content.toString().byteInputStream()
+      }.toMap()
   }
 
   private fun prepareResult() {
@@ -33,7 +35,8 @@ class PoFileExporter(
       val resultBuilder = getResultStringBuilder(translation)
       val converted = convertMessage(translation)
       resultBuilder.appendLine()
-      resultBuilder.writeMsgId(translation.key.name)
+      resultBuilder.writeMsgCtxt(translation.key.name.getMsgCtxt())
+      resultBuilder.writeMsgId(translation.key.name.getMsgId())
       resultBuilder.writeMsgIdPlural(translation, converted)
       resultBuilder.writeMsgStr(converted)
     }
@@ -43,16 +46,24 @@ class PoFileExporter(
     return IcuToPoMessageConvertor(
       message = translation.text ?: "",
       languageTag = translation.languageTag,
-      placeholderConvertor =
-        exportParams.messageFormat?.paramConvertorFactory?.invoke()
-          ?: NoOpFromIcuPlaceholderConvertor(),
+      placeholderConvertorFactory = messageFormat.paramConvertorFactory,
       forceIsPlural = translation.key.isPlural,
       projectIcuPlaceholdersSupport = projectIcuPlaceholdersSupport,
     ).convert()
   }
 
+  private fun StringBuilder.writeMsgCtxt(msgctxt: String?) {
+    if (!msgctxt.isNullOrEmpty()) {
+      this.append(convertToPoMultilineString("msgctxt", msgctxt))
+    }
+  }
+
   private fun StringBuilder.writeMsgId(keyName: String) {
     this.append(convertToPoMultilineString("msgid", keyName))
+  }
+
+  private val messageFormat by lazy {
+    exportParams.messageFormat ?: ExportMessageFormat.ICU
   }
 
   private fun getResultStringBuilder(translation: ExportTranslationView): StringBuilder {
@@ -60,13 +71,6 @@ class PoFileExporter(
     return preparedResult.computeIfAbsent(path) {
       initPoFile(translation)
     }
-  }
-
-  private val filePathProvider by lazy {
-    ExportFilePathProvider(
-      exportParams,
-      fileExtension,
-    )
   }
 
   private fun initPoFile(translation: ExportTranslationView): StringBuilder {
@@ -106,7 +110,8 @@ class PoFileExporter(
     translation: ExportTranslationView,
     converted: ToPoConversionResult,
   ) {
-    val msgIdPlural = translation.key.custom?.get(PO_FILE_MSG_ID_PLURAL_CUSTOM_KEY) as? String ?: return
+    val msgIdPlural =
+      translation.key.custom?.get(PO_FILE_MSG_ID_PLURAL_CUSTOM_KEY) as? String ?: translation.key.name.getMsgId()
     if (converted.isPlural()) {
       this.append(
         convertToPoMultilineString(
@@ -115,5 +120,15 @@ class PoFileExporter(
         ),
       )
     }
+  }
+
+  private fun String.getMsgId(): String {
+    val parts = split(PO_MSGCTXT_KEY_SEPARATOR, limit = 2)
+    return parts.last()
+  }
+
+  private fun String.getMsgCtxt(): String? {
+    val parts = split(PO_MSGCTXT_KEY_SEPARATOR, limit = 2)
+    return parts.takeIf { parts.size > 1 }?.first()
   }
 }

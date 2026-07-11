@@ -1,0 +1,3 @@
+#: light_interface.c:404
+msgid "simple message"
+msgstr "einfache Nachricht"

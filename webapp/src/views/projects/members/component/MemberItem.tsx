@@ -1,6 +1,7 @@
 import { T, useTranslate } from '@tolgee/react';
-import { Chip, styled } from '@mui/material';
+import { Chip, styled, Tooltip } from '@mui/material';
 
+import { AgencyLabel } from 'tg.ee';
 import { PermissionsMenu } from 'tg.component/PermissionsSettings/PermissionsMenu';
 import { useProject } from 'tg.hooks/useProject';
 import { useUser } from 'tg.globalContext/helpers';
@@ -14,6 +15,7 @@ import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
 import { LanguagePermissionSummary } from 'tg.component/PermissionsSettings/LanguagePermissionsSummary';
 import { ScopesInfo } from 'tg.component/PermissionsSettings/ScopesInfo';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
+import { MfaBadge } from '@tginternal/library/components/MfaBadge';
 
 type UserAccountInProjectModel =
   components['schemas']['UserAccountInProjectModel'];
@@ -34,6 +36,10 @@ const StyledListItem = styled('div')`
 const StyledItemText = styled('div')`
   flex-grow: 1;
   padding: ${({ theme }) => theme.spacing(1)};
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
 `;
 
 const StyledItemActions = styled('div')`
@@ -54,7 +60,9 @@ type Props = {
   user: UserAccountInProjectModel;
 };
 
-export const MemberItem: React.FC<Props> = ({ user }) => {
+export const MemberItem: React.FC<React.PropsWithChildren<Props>> = ({
+  user,
+}) => {
   const project = useProject();
   const currentUser = useUser();
   const { t } = useTranslate();
@@ -94,9 +102,17 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
           {user.organizationRole && (
             <Chip size="small" label={project.organizationOwner?.name} />
           )}
+          {user.directPermission?.agency && (
+            <Tooltip title={t('member_item_agency_tooltip')}>
+              <span>
+                <AgencyLabel agency={user.directPermission.agency} />
+              </span>
+            </Tooltip>
+          )}
         </StyledItemText>
       </StyledItemUser>
       <StyledItemActions>
+        <MfaBadge enabled={user.mfaEnabled} />
         <ScopesInfo scopes={user.computedPermission.scopes} />
         <LanguagePermissionSummary
           permissions={user.computedPermission}

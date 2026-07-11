@@ -6,6 +6,8 @@ val IGNORED_REGEXES by lazy {
     "^[\\w-_]+\\.xcloc/contents.json$".toRegex(),
     "^.+\\.xcloc/Source Contents/Localizable.xcstrings$".toRegex(),
     "^.+\\.xcloc/Source Contents/.*InfoPlist.xcstrings$".toRegex(),
+    // .DS_Store files
+    """(.*/|^)\.DS_Store$""".toRegex(),
   )
 }
 

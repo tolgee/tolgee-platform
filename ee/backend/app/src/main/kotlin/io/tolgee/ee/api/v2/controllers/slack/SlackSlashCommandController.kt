@@ -8,9 +8,15 @@ import io.tolgee.constants.Feature
 import io.tolgee.dtos.request.slack.SlackCommandDto
 import io.tolgee.dtos.response.SlackMessageDto
 import io.tolgee.dtos.slackintegration.SlackConfigDto
-import io.tolgee.ee.component.slackIntegration.*
+import io.tolgee.ee.component.slackIntegration.slashcommand.SlackBotInfoProvider
+import io.tolgee.ee.component.slackIntegration.slashcommand.SlackErrorProvider
+import io.tolgee.ee.component.slackIntegration.slashcommand.SlackExceptionHandler
+import io.tolgee.ee.component.slackIntegration.slashcommand.SlackRequestValidation
+import io.tolgee.ee.component.slackIntegration.slashcommand.SlackSlackCommandBlocksProvider
+import io.tolgee.ee.component.slackIntegration.slashcommand.asSlackResponseString
 import io.tolgee.ee.service.slackIntegration.OrganizationSlackWorkspaceService
-import io.tolgee.ee.service.slackIntegration.SlackConfigService
+import io.tolgee.ee.service.slackIntegration.SlackConfigManageService
+import io.tolgee.ee.service.slackIntegration.SlackConfigReadService
 import io.tolgee.ee.service.slackIntegration.SlackUserConnectionService
 import io.tolgee.ee.service.slackIntegration.SlackWorkspaceNotFound
 import io.tolgee.exceptions.NotFoundException
@@ -23,8 +29,15 @@ import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.util.I18n
 import io.tolgee.util.Logging
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.CrossOrigin
+import org.springframework.web.bind.annotation.ModelAttribute
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestHeader
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 
+@Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/v2/public/slack"])
@@ -34,16 +47,17 @@ import org.springframework.web.bind.annotation.*
 )
 class SlackSlashCommandController(
   private val projectService: ProjectService,
-  private val slackConfigService: SlackConfigService,
+  private val slackConfigManageService: SlackConfigManageService,
+  private val slackConfigReadService: SlackConfigReadService,
   private val slackUserConnectionService: SlackUserConnectionService,
-  private val slackExecutor: SlackExecutor,
+  private val slackBotInfoProvider: SlackBotInfoProvider,
   private val permissionService: PermissionService,
   private val i18n: I18n,
   private val organizationSlackWorkspaceService: OrganizationSlackWorkspaceService,
   private val slackRequestValidation: SlackRequestValidation,
   private val slackErrorProvider: SlackErrorProvider,
   private val slackExceptionHandler: SlackExceptionHandler,
-  private val slackHelpBlocksProvider: SlackHelpBlocksProvider,
+  private val slackSlackCommandBlocksProvider: SlackSlackCommandBlocksProvider,
   private val tolgeeProperties: TolgeeProperties,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
 ) : Logging {
@@ -58,7 +72,7 @@ class SlackSlashCommandController(
     return slackExceptionHandler.handle {
       slackRequestValidation.validate(slackSignature, timestamp, body)
       val token = checkIfTokenIsPresent(payload.team_id)
-      if (!slackExecutor.isBotInChannel(payload, token)) {
+      if (!slackBotInfoProvider.isBotInChannel(payload, token)) {
         throw SlackErrorException(slackErrorProvider.getBotNotInChannelError())
       }
 
@@ -89,7 +103,7 @@ class SlackSlashCommandController(
 
         "subscriptions" -> listOfSubscriptions(payload).asSlackResponseString
 
-        "help" -> slackHelpBlocksProvider.getHelpBlocks().asSlackResponseString
+        "help" -> slackSlackCommandBlocksProvider.getHelpBlocks().asSlackResponseString
 
         "logout" -> logout(payload.user_id, payload.team_id).asSlackResponseString
         else -> {
@@ -104,9 +118,10 @@ class SlackSlashCommandController(
       return tolgeeProperties.slack.token!!
     }
 
-    return organizationSlackWorkspaceService.findBySlackTeamId(
-      teamId,
-    )?.accessToken ?: throw SlackErrorException(slackErrorProvider.getWorkspaceNotFoundError())
+    return organizationSlackWorkspaceService
+      .findBySlackTeamId(
+        teamId,
+      )?.accessToken ?: throw SlackErrorException(slackErrorProvider.getWorkspaceNotFoundError())
   }
 
   private fun String?.toLongOrThrowInvalidCommand(): Long {
@@ -128,11 +143,11 @@ class SlackSlashCommandController(
     slackUserConnectionService.findBySlackId(payload.user_id, payload.team_id)
       ?: throw SlackErrorException(slackErrorProvider.getUserNotConnectedError(payload))
 
-    if (slackConfigService.getAllByChannelId(payload.channel_id).isEmpty()) {
+    if (slackConfigReadService.getAllByChannelId(payload.channel_id).isEmpty()) {
       throw SlackErrorException(slackErrorProvider.getNotSubscribedYetError())
     }
 
-    return slackExecutor.getListOfSubscriptions(payload.user_id, payload.channel_id)
+    return slackSlackCommandBlocksProvider.getListOfSubscriptionsBlocks(payload.user_id, payload.channel_id)
   }
 
   private fun login(payload: SlackCommandDto): SlackMessageDto {
@@ -146,7 +161,7 @@ class SlackSlashCommandController(
 
     return SlackMessageDto(
       blocks =
-        slackExecutor.getLoginRedirectBlocks(
+        slackSlackCommandBlocksProvider.getLoginRedirectBlocks(
           payload.channel_id,
           payload.user_id,
           workspace,
@@ -161,7 +176,7 @@ class SlackSlashCommandController(
     languageTag: String?,
     optionsMap: Map<String, String>,
   ): SlackMessageDto? {
-    checkFeatureEnabled(payload.team_id)
+    checkFeatureEnabled(payload.team_id, projectId)
 
     val events: MutableSet<SlackEventType> = mutableSetOf()
 
@@ -219,9 +234,9 @@ class SlackSlashCommandController(
         isGlobal = isGlobal,
       )
     try {
-      val config = slackConfigService.createOrUpdate(slackConfigDto)
+      val config = slackConfigManageService.createOrUpdate(slackConfigDto)
       return SlackMessageDto(
-        blocks = slackExecutor.getSuccessfullySubscribedBlocks(config),
+        blocks = slackSlackCommandBlocksProvider.getSuccessfullySubscribedBlocks(config),
       )
     } catch (e: SlackWorkspaceNotFound) {
       throw SlackErrorException(slackErrorProvider.getWorkspaceNotFoundError())
@@ -236,7 +251,7 @@ class SlackSlashCommandController(
     val user = getUserAccount(payload)
     checkPermissions(projectId, user.id)
 
-    slackConfigService.delete(projectId, payload.channel_id, languageTag)
+    slackConfigManageService.delete(projectId, payload.channel_id, languageTag)
 
     return SlackMessageDto(
       text = i18n.translate("slack.common.message.unsubscribed-successfully"),
@@ -249,7 +264,8 @@ class SlackSlashCommandController(
   ) {
     try {
       if (
-        permissionService.getProjectPermissionScopesNoApiKey(projectId, userAccountId)
+        permissionService
+          .getProjectPermissionScopesNoApiKey(projectId, userAccountId)
           ?.contains(Scope.ACTIVITY_VIEW) != true
       ) {
         throw SlackErrorException(slackErrorProvider.getNoPermissionError())
@@ -259,10 +275,31 @@ class SlackSlashCommandController(
     }
   }
 
-  private fun checkFeatureEnabled(teamId: String) {
+  private fun checkFeatureEnabled(
+    teamId: String,
+    projectId: Long? = null,
+  ) {
     val workspace = organizationSlackWorkspaceService.findBySlackTeamId(teamId)
+
+    // this enables us to bypass the check locally for local development when billing is enabled,
+    // and we are using slack with single workspace global server configuration
+    // in that case workspace is null
+    if (workspace == null) {
+      // we prevent only project commands, which should be enough to prevent users from using it when they don't have
+      // the feature enabled
+      if (projectId != null) {
+        val project = projectService.get(projectId)
+        checkPermissionForOrganizationId(project.organizationOwner.id)
+      }
+      return
+    }
+
+    checkPermissionForOrganizationId(workspace.organization.id)
+  }
+
+  fun checkPermissionForOrganizationId(organizationId: Long) {
     if (!enabledFeaturesProvider.isFeatureEnabled(
-        organizationId = workspace?.organization?.id,
+        organizationId,
         Feature.SLACK_INTEGRATION,
       )
     ) {

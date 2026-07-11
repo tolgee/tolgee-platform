@@ -1,6 +1,7 @@
 package io.tolgee.hateoas.project.stats
 
 import org.springframework.hateoas.RepresentationModel
+import java.util.Date
 
 open class LanguageStatsModel(
   val languageId: Long?,
@@ -17,4 +18,7 @@ open class LanguageStatsModel(
   val untranslatedKeyCount: Long,
   val untranslatedWordCount: Long,
   val untranslatedPercentage: Double,
+  val translationsUpdatedAt: Date?,
+  val qaIssueCount: Long = 0,
+  val qaChecksStaleCount: Long = 0,
 ) : RepresentationModel<LanguageStatsModel>()

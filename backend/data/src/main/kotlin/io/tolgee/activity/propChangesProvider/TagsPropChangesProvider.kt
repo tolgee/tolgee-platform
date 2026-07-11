@@ -10,21 +10,11 @@ class TagsPropChangesProvider : PropChangesProvider {
     old: Any?,
     new: Any?,
   ): PropertyModification? {
-    if (old is Collection<*> && new is Collection<*>) {
-      if (old === new) {
-        return null
-      }
-
-      val oldTagNames = mapSetToTagNames(old)
-      val newTagNames = mapSetToTagNames(new)
-      if (oldTagNames.containsAll(newTagNames) && newTagNames.containsAll(oldTagNames)) {
-        return null
-      }
-
-      return PropertyModification(oldTagNames, newTagNames)
-    }
-    return null
+    val baseCollectionChangesProvider =
+      BaseCollectionChangesProvider(
+        old as Collection<Any?>?,
+        new as Collection<Any?>?,
+      ) { (it as? Tag)?.name }
+    return baseCollectionChangesProvider.provide()
   }
-
-  private fun mapSetToTagNames(collection: Collection<*>) = collection.mapNotNull { (it as? Tag)?.name }
 }

@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
-import { IconButton, MenuItem, Popover, styled } from '@mui/material';
-import { Link } from 'react-router-dom';
+import { IconButton, MenuItem, Popover, styled, Tooltip } from '@mui/material';
 
-import { useUserMenuItems } from 'tg.hooks/useUserMenuItems';
 import { UserAvatar } from 'tg.component/common/avatar/UserAvatar';
 
 import { ThemeItem } from './ThemeItem';
 import { LanguageItem } from './LanguageItem';
-import { T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
+import { UserMenuItems } from './UserMenuItems';
 
 const StyledIconButton = styled(IconButton)`
   width: 40px;
@@ -31,8 +30,8 @@ const StyledDivider = styled('div')`
 `;
 
 export const UserUnverifiedEmailMenu = () => {
+  const { t } = useTranslate();
   const [anchorEl, setAnchorEl] = useState(null);
-  const userMenuItems = useUserMenuItems();
   const { logout } = useGlobalActions();
 
   const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -46,16 +45,23 @@ export const UserUnverifiedEmailMenu = () => {
 
   return (
     <div>
-      <StyledIconButton
-        color="inherit"
-        data-cy="global-user-menu-button"
-        aria-controls="user-menu"
-        aria-haspopup="true"
-        onClick={handleOpen}
-        size="large"
+      <Tooltip
+        title={t('user_profile_title')}
+        placement="bottom-end"
+        classes={{ tooltip: 'tooltip' }}
+        disableInteractive
       >
-        <UserAvatar />
-      </StyledIconButton>
+        <StyledIconButton
+          color="inherit"
+          data-cy="global-user-menu-button"
+          aria-controls="user-menu"
+          aria-haspopup="true"
+          onClick={handleOpen}
+          size="large"
+        >
+          <UserAvatar />
+        </StyledIconButton>
+      </Tooltip>
       <StyledPopover
         id="user-menu"
         keepMounted
@@ -72,18 +78,7 @@ export const UserUnverifiedEmailMenu = () => {
         }}
         classes={{ paper: 'paper' }}
       >
-        {userMenuItems.map((item, index) => (
-          <MenuItem
-            key={index}
-            component={Link}
-            to={item.link}
-            selected={item.isSelected}
-            onClick={handleClose}
-            data-cy="user-menu-user-settings"
-          >
-            {item.label}
-          </MenuItem>
-        ))}
+        <UserMenuItems onClose={handleClose} />
 
         <StyledDivider />
         <LanguageItem />

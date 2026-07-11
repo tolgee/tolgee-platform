@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @Suppress("MVCPathVariableInspection")
@@ -37,7 +38,7 @@ import org.springframework.web.bind.annotation.RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(
   value = [
-    "/v2/projects/{projectId}/",
+    "/v2/projects/{projectId:[0-9]+}/",
     "/v2/projects/",
   ],
 )
@@ -60,8 +61,9 @@ class NamespaceController(
     @ParameterObject
     @SortDefault("id")
     pageable: Pageable,
+    @RequestParam("search") search: String?,
   ): PagedModel<NamespaceModel> {
-    val namespaces = namespaceService.getAllInProject(projectHolder.project.id, pageable)
+    val namespaces = namespaceService.getAllInProject(projectHolder.project.id, pageable, search)
     return pagedResourcesAssembler.toModel(namespaces, namespaceModelAssembler)
   }
 
@@ -75,11 +77,17 @@ class NamespaceController(
   @OpenApiOrderExtension(2)
   fun getUsedNamespaces(): CollectionModel<UsedNamespaceModel> {
     val namespaces =
-      namespaceService.getAllInProject(projectHolder.project.id)
-        .map { it.id as Long? to it.name as String? }.toMutableList()
+      namespaceService
+        .getAllWithActiveKeysInProject(projectHolder.project.id)
+        .map { it.id as Long? to it.name as String? }
+        .toMutableList()
     val isDefaultUsed = namespaceService.isDefaultUsed(projectHolder.project.id)
     if (isDefaultUsed) {
       namespaces.add(0, null to null)
+    }
+    val defaultNamespace = projectHolder.projectEntity.defaultNamespace
+    if (defaultNamespace != null && namespaces.none { it.first == defaultNamespace.id }) {
+      namespaces.add(defaultNamespace.id as Long? to defaultNamespace.name as String?)
     }
     return usedNamespaceModelAssembler.toCollectionModel(namespaces)
   }
@@ -87,7 +95,7 @@ class NamespaceController(
   @PutMapping(value = ["/namespaces/{id}"])
   @Operation(summary = "Update namespace")
   @RequestActivity(ActivityType.NAMESPACE_EDIT)
-  @RequiresProjectPermissions([ Scope.KEYS_EDIT ])
+  @RequiresProjectPermissions([Scope.KEYS_EDIT])
   @AllowApiAccess
   @OpenApiOrderExtension(4)
   fun update(

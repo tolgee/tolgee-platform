@@ -8,9 +8,9 @@ import {
 } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { getTextWidth } from 'tg.fixtures/getTextWidth';
-import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-
+import { BatchOperation, useBatchOperations } from './operations';
 import { BatchActions } from './types';
+import { useProject } from 'tg.hooks/useProject';
 
 const StyledSeparator = styled('div')`
   width: 100%;
@@ -26,80 +26,15 @@ type Props = {
 export const BatchSelect = ({ value, onChange }: Props) => {
   const theme = useTheme();
   const { t } = useTranslate();
-  const { satisfiesPermission } = useProjectPermissions();
-  const canEditKey = satisfiesPermission('keys.edit');
-  const canDeleteKey = satisfiesPermission('keys.delete');
-  const canMachineTranslate = satisfiesPermission('translations.batch-machine');
-  const canPretranslate = satisfiesPermission('translations.batch-by-tm');
-  const canChangeState = satisfiesPermission('translations.state-edit');
-  const canViewTranslations = satisfiesPermission('translations.view');
-  const canEditTranslations = satisfiesPermission('translations.edit');
+  const project = useProject();
+  const { operations } = useBatchOperations();
 
-  const options: {
-    id: BatchActions;
-    label: string;
-    divider?: boolean;
-    enabled?: boolean;
-  }[] = [
-    {
-      id: 'machine_translate',
-      label: t('batch_operations_machine_translate'),
-      enabled: canMachineTranslate,
-    },
-    {
-      id: 'pre_translate',
-      label: t('batch_operations_pre_translate'),
-      enabled: canPretranslate,
-    },
-    {
-      id: 'mark_as_translated',
-      label: t('batch_operations_mark_as_translated'),
-      enabled: canChangeState,
-    },
-    {
-      id: 'mark_as_reviewed',
-      label: t('batch_operations_mark_as_reviewed'),
-      enabled: canChangeState,
-    },
-    {
-      id: 'copy_translations',
-      label: t('batch_operations_copy_translations'),
-      enabled: canEditTranslations,
-    },
-    {
-      id: 'clear_translations',
-      label: t('batch_operation_clear_translations'),
-      enabled: canEditTranslations,
-    },
-    {
-      id: 'export_translations',
-      label: t('batch_operations_export_translations'),
-      enabled: canViewTranslations,
-    },
-    {
-      id: 'add_tags',
-      label: t('batch_operations_add_tags'),
-      divider: true,
-      enabled: canEditKey,
-    },
-    {
-      id: 'remove_tags',
-      label: t('batch_operations_remove_tags'),
-      enabled: canEditKey,
-    },
-    {
-      id: 'change_namespace',
-      label: t('batch_operations_change_namespace'),
-      enabled: canEditKey,
-    },
-    {
-      id: 'delete',
-      label: t('batch_operations_delete'),
-      enabled: canDeleteKey,
-    },
-  ];
+  hideChangeNamespaceOperationIfNamespacesAreDisabled(
+    project.useNamespaces,
+    operations
+  );
 
-  const option = options.find((o) => o.id === value);
+  const option = operations.find((o) => o.id === value);
 
   const width = useMemo(() => {
     if (option?.label) {
@@ -116,14 +51,14 @@ export const BatchSelect = ({ value, onChange }: Props) => {
   return (
     <Autocomplete
       sx={{ width: normalizedWidth }}
-      value={options.find((o) => o.id === value) || null}
+      value={operations.find((o) => o.id === value) || null}
       onChange={(_, value) => {
         onChange(value?.id);
       }}
       renderOption={(props, o) => (
         <React.Fragment key={o.id}>
           {o.divider && <StyledSeparator />}
-          {o.enabled === false ? (
+          {!o.enabled ? (
             <ListItem data-cy="batch-select-item" disabled={true}>
               {o.label}
             </ListItem>
@@ -134,7 +69,7 @@ export const BatchSelect = ({ value, onChange }: Props) => {
           )}
         </React.Fragment>
       )}
-      options={options}
+      options={operations.filter((o) => !o.hidden)}
       renderInput={(params) => {
         return (
           <TextField {...params} placeholder={t('batch_select_placeholder')} />
@@ -146,3 +81,15 @@ export const BatchSelect = ({ value, onChange }: Props) => {
     />
   );
 };
+
+function hideChangeNamespaceOperationIfNamespacesAreDisabled(
+  useNamespaces: boolean,
+  operations: BatchOperation[]
+) {
+  const changeNamespaceOperation = operations.find(
+    (operation) => operation.id === 'change_namespace'
+  );
+  if (changeNamespaceOperation != undefined) {
+    changeNamespaceOperation.hidden = !useNamespaces;
+  }
+}

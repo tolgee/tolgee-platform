@@ -1,8 +1,10 @@
 package io.tolgee.repository
 
+import io.tolgee.dtos.request.project.ProjectFilters
 import io.tolgee.model.Organization
 import io.tolgee.model.Project
 import io.tolgee.model.views.ProjectView
+import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
@@ -11,10 +13,16 @@ import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
 
 @Repository
+@Lazy
 interface ProjectRepository : JpaRepository<Project, Long> {
   companion object {
     const val BASE_VIEW_QUERY = """select r.id as id, r.name as name, r.description as description,
         r.slug as slug, r.avatarHash as avatarHash,
+        r.useNamespaces as useNamespaces,
+        r.useBranching as useBranching,
+        r.useQaChecks as useQaChecks,
+        r.suggestionsMode as suggestionsMode,
+        r.translationProtection as translationProtection,
         dn as defaultNamespace, o as organizationOwner,
         role.type as organizationRole, p as directPermission, r.icuPlaceholders as icuPlaceholders
         from Project r
@@ -25,6 +33,21 @@ interface ProjectRepository : JpaRepository<Project, Long> {
         left join fetch o.basePermission
         left join OrganizationRole role on role.organization = o and role.user.id = :userAccountId
         """
+
+    const val FILTERS = """
+        (
+            :#{#filters.filterId} is null
+            or r.id in :#{#filters.filterId}
+        )
+        and (
+            :#{#filters.filterNotId} is null
+            or r.id not in :#{#filters.filterNotId}
+        )
+        and (
+            :#{#filters.filterBaseLanguageTag} is null
+            or bl.tag = :#{#filters.filterBaseLanguageTag}
+        )
+    """
   }
 
   @Query(
@@ -46,12 +69,24 @@ interface ProjectRepository : JpaRepository<Project, Long> {
         where (
             (p is not null and (p.type <> 'NONE' or p.type is null)) or 
             (role is not null and (o.basePermission.type <> 'NONE' or o.basePermission.type is null) and p is null) or
-            (ua.role = 'ADMIN' and :organizationId is not null))
+            ((ua.role = 'ADMIN' or ua.role = 'SUPPORTER') and :organizationId is not null))
         and (
             :search is null or (lower(r.name) like lower(concat('%', cast(:search as text), '%'))
             or lower(o.name) like lower(concat('%', cast(:search as text),'%')))
         )
         and (:organizationId is null or o.id = :organizationId) and r.deletedAt is null
+        and (
+            :#{#filters.filterId} is null
+            or r.id in :#{#filters.filterId}
+        )
+        and (
+            :#{#filters.filterNotId} is null
+            or r.id not in :#{#filters.filterNotId}
+        )
+        and (
+            :#{#filters.filterBaseLanguageTag} is null
+            or bl.tag = :#{#filters.filterBaseLanguageTag}
+        )
     """,
   )
   fun findAllPermitted(
@@ -59,9 +94,21 @@ interface ProjectRepository : JpaRepository<Project, Long> {
     pageable: Pageable,
     @Param("search") search: String? = null,
     organizationId: Long? = null,
+    filters: ProjectFilters,
   ): Page<ProjectView>
 
   fun findAllByOrganizationOwnerId(organizationOwnerId: Long): List<Project>
+
+  @Query("select p.id from Project p where p.organizationOwner.deletedAt is not null")
+  fun findIdsInDeletedOrganizations(pageable: Pageable): Page<Long>
+
+  fun findAllByOrganizationOwnerIdAndDeletedAtIsNull(organizationOwnerId: Long): List<Project>
+
+  fun findAllByDeletedAtIsNull(): List<Project>
+
+  fun findAllByOrganizationOwnerIdAndUseQaChecksTrueAndDeletedAtIsNull(organizationOwnerId: Long): List<Project>
+
+  fun findAllByUseQaChecksTrueAndDeletedAtIsNull(): List<Project>
 
   fun countAllBySlug(slug: String): Long
 
@@ -132,4 +179,20 @@ interface ProjectRepository : JpaRepository<Project, Long> {
   """,
   )
   fun find(id: Long): Project?
+
+  @Query(
+    """
+    from Project p
+    left join fetch p.branches
+    where p.id = :id and p.deletedAt is null
+    """,
+  )
+  fun findWithBranches(id: Long): Project?
+
+  @Query(
+    """
+    from Project where id = :id and deletedAt is not null
+  """,
+  )
+  fun findDeleted(id: Long): Project?
 }

@@ -4,7 +4,7 @@
 
 package io.tolgee.dtos.response
 
-import java.util.*
+import java.util.Date
 
 data class ScreenshotDTO(
   val id: Long,

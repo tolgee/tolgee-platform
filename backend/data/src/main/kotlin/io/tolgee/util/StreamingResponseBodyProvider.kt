@@ -61,6 +61,7 @@ class StreamingResponseBodyProvider(
           } catch (e: Throwable) {
             val message = getErrorMessage(e)
             writer.writeJson(StreamedErrorMessage(message))
+            logger.debug("Error while streaming response body", e)
             if (e !is ExpectedException) {
               Sentry.captureException(e)
             }
@@ -88,5 +89,7 @@ class StreamingResponseBodyProvider(
         )
     }
 
-  data class StreamedErrorMessage(val error: ErrorResponseBody)
+  data class StreamedErrorMessage(
+    val error: ErrorResponseBody,
+  )
 }

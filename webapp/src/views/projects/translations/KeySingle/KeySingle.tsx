@@ -1,4 +1,5 @@
 import { styled } from '@mui/material';
+import { KeyName } from 'tg.component/KeyName/KeyName';
 import { T, useTranslate } from '@tolgee/react';
 import { useQueryClient } from 'react-query';
 import { useHistory } from 'react-router-dom';
@@ -8,6 +9,7 @@ import { LanguagesSelect } from 'tg.component/common/form/LanguagesSelect/Langua
 import { BaseProjectView } from 'tg.views/projects/BaseProjectView';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
+import { useUrlSearch } from 'tg.hooks/useUrlSearch';
 import { queryEncode } from 'tg.hooks/useUrlSearchState';
 import { invalidateUrlPrefix } from 'tg.service/http/useQueryApi';
 import {
@@ -37,7 +39,10 @@ type Props = {
   keyId?: number;
 };
 
-export const KeySingle: React.FC<Props> = ({ keyName, keyId }) => {
+export const KeySingle: React.FC<React.PropsWithChildren<Props>> = ({
+  keyName,
+  keyId,
+}) => {
   const queryClient = useQueryClient();
   const project = useProject();
   const { t } = useTranslate();
@@ -55,6 +60,21 @@ export const KeySingle: React.FC<Props> = ({ keyName, keyId }) => {
   );
 
   const translation = translations?.[0];
+
+  if (keyId && translation?.branch) {
+    const { id: _id, ...searchWithoutId } = useUrlSearch();
+
+    history.replace(
+      LINKS.PROJECT_TRANSLATIONS_SINGLE_WITH_BRANCH.build({
+        [PARAMS.PROJECT_ID]: project.id,
+        [PARAMS.BRANCH]: translation.branch,
+      }) +
+        queryEncode({
+          ...searchWithoutId,
+          key: translation.keyName,
+        })
+    );
+  }
 
   const selectedLanguagesMapped = selectedLanguages
     ?.map((l) => {
@@ -81,13 +101,14 @@ export const KeySingle: React.FC<Props> = ({ keyName, keyId }) => {
         ],
         [
           keyExists ? (
-            translation!.keyName
+            <KeyName name={translation!.keyName} />
           ) : (
             <T keyName="translation_single_create_title" />
           ),
           window.location.pathname + window.location.search,
         ],
       ]}
+      branching
     >
       <StyledContainer style={{ marginBottom: bottomPanelHeight + 20 }}>
         {keyExists ? (

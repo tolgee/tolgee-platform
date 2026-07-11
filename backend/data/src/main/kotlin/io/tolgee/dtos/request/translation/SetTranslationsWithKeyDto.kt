@@ -35,4 +35,6 @@ If not provided, only modified translation will be provided.
     example = """["en", "de", "fr"]""",
   )
   val languagesToReturn: Set<String>? = null,
+  @Schema(description = "Branch name to set translations for")
+  val branch: String? = null,
 )

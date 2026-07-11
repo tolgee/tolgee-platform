@@ -29,7 +29,7 @@ export const UserProfileAvatar = () => {
   const user = useUser();
 
   if (!user) {
-    return <></>;
+    return null;
   }
 
   return (

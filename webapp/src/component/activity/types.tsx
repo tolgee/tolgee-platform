@@ -1,5 +1,9 @@
 import { TranslateParams } from '@tolgee/react';
 import { components } from 'tg.service/apiSchema.generated';
+import {
+  BranchReferenceData,
+  TaskReferenceData,
+} from '../../eeSetup/EeModuleType';
 
 type ModifiedEntityModel = components['schemas']['ModifiedEntityModel'];
 export type TranslationHistoryModel =
@@ -17,7 +21,12 @@ export type ActivityTypeEnum =
   | ActionType
   | 'TRANSLATION_HISTORY_ADD'
   | 'TRANSLATION_HISTORY_MODIFY'
-  | 'TRANSLATION_HISTORY_DELETE';
+  | 'TRANSLATION_HISTORY_DELETE'
+  | 'KEY_SOFT_DELETE'
+  | 'KEY_RESTORE'
+  | 'KEY_HARD_DELETE'
+  | 'BATCH_KEY_RESTORE'
+  | 'BATCH_KEY_HARD_DELETE';
 
 export type ChangeTypeOfKeys<
   T extends Record<string, unknown>,
@@ -45,7 +54,12 @@ export type EntityEnum =
   | 'Params'
   | 'ContentDeliveryConfig'
   | 'WebhookConfig'
-  | 'ContentStorage';
+  | 'ContentStorage'
+  | 'Task'
+  | 'Label'
+  | 'TranslationSuggestion'
+  | 'TranslationQaIssue'
+  | 'Branch';
 
 export type FieldTypeEnum =
   | 'text'
@@ -65,7 +79,13 @@ export type FieldTypeEnum =
   | 'batch_translation_state'
   | 'batch_boolean'
   | 'state_array'
-  | 'language_tags';
+  | 'language_tags'
+  | 'date'
+  | 'task_state'
+  | 'task_type'
+  | 'translation_labels'
+  | 'qa_issue_state'
+  | 'branch_protected';
 
 export type FieldOptionsObj = {
   label?: (params?: TranslateParams) => React.ReactElement;
@@ -88,6 +108,7 @@ export type KeyReferenceData = {
   languages?: LanguageReferenceType[];
   id?: number;
   exists?: boolean;
+  activityType?: ActivityTypeEnum;
 };
 
 export type LanguageReferenceData = {
@@ -121,7 +142,9 @@ export type Reference =
   | CommentReferenceData
   | ContentDeliveryConfigReferenceData
   | ContentStorageReferenceData
-  | WebhookConfigReferenceData;
+  | WebhookConfigReferenceData
+  | TaskReferenceData
+  | BranchReferenceData;
 
 export type ReferenceBuilder = (
   data: ModifiedEntityModel
@@ -155,12 +178,13 @@ export type Activity = {
   entities: Entity[];
   references: Reference[];
   counts: Record<string, number>;
+  params: any;
   options: ActivityOptions;
 };
 
 export type ActivityOptions = {
   label: (params?: TranslateParams) => React.ReactElement;
-  description?: (data: ProjectActivityModel) => string;
+  description?: (data: ProjectActivityModel) => string | undefined;
   entities?: Partial<Record<EntityEnum, boolean | string[]>>;
   titleReferences?: string[];
   compactFieldCount?: number;

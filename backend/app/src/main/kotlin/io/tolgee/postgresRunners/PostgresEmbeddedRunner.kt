@@ -45,7 +45,7 @@ class PostgresEmbeddedRunner(
   private fun buildProcess(): ProcessBuilder {
     val processBuilder =
       ProcessBuilder()
-        .command("bash", "-c", "postgres-entrypoint.sh postgres")
+        .command("bash", "-c", "docker-entrypoint.sh postgres")
 
     initProcessEnv(processBuilder)
     return processBuilder
@@ -111,11 +111,12 @@ class PostgresEmbeddedRunner(
     while (running.get()) {
       try {
         val allNull =
-          loggerMap.entries.map { (inputStream, logger) ->
-            val line = inputStream.bufferedReader().readLine()
-            logLine(line, logger)
-            line == null
-          }.all { it }
+          loggerMap.entries
+            .map { (inputStream, logger) ->
+              val line = inputStream.bufferedReader().readLine()
+              logLine(line, logger)
+              line == null
+            }.all { it }
         if (allNull) {
           break
         }

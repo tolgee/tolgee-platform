@@ -8,6 +8,7 @@ import io.tolgee.dtos.WithRelatedKeysInOrder
 import io.tolgee.model.enums.AssignableTranslationState
 import io.tolgee.sharedDocs.Key
 import io.tolgee.util.getSafeNamespace
+import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
 import org.hibernate.validator.constraints.Length
@@ -49,6 +50,10 @@ class CreateKeyDto(
         "If null, value will be guessed from the values provided in translations.",
   )
   val pluralArgName: String? = null,
+  @Schema(description = "Maximum character limit for translations of this key. Null means no limit.")
+  @field:Min(1)
+  val maxCharLimit: Int? = null,
+  val branch: String? = null,
 ) : WithRelatedKeysInOrder {
   @JsonSetter("namespace")
   fun setJsonNamespace(namespace: String?) {

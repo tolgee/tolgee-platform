@@ -1,15 +1,23 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- This is a comment -->
     <string name="app_name">Tolgee test</string>
+    <!-- This is a comment above a plural -->
     <plurals name="dogs_count">
+        <!-- This comment will be ignored -->
         <item quantity="one">%d dog</item>
         <item quantity="other">%d dogs</item>
     </plurals>
+    <!-- This comment will be ignored -->
     <string-array name="string_array">
+        <!-- This is a comment above an array item -->
         <item>First item</item>
+        <!-- This is a comment above an array item #2 -->
         <item>Second item</item>
     </string-array>
+    <!-- Multiple comments will be ignored -->
+    <!-- and only the last one will be kept -->
     <string name="with_spaces">
-        Hello!
+        <!-- This is a comment inside a string and will be ignored -->Hello!
     </string>
     <string name="with_html">
         <b>Hello!</b>
@@ -23,4 +31,6 @@
     <string name="with_params">
         %d %4$s %.2f %e %+d
     </string>
+    <string name="escape_sequence_within_quoted_spaces">Test"\        n"test</string>
+    <string name="backslash_at_the_end">Test\</string>
 </resources>

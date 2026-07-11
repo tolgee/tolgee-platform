@@ -51,7 +51,7 @@ class BigMetaServiceTest : ProjectAuthControllerTest("/v2/projects/") {
     bigMetaService.findExistingKeysDistancesDtosByIds(listOf(testData.yepKey.id)).assert.hasSize(1)
 
     executeInNewTransaction {
-      keyService.delete(testData.yepKey.id)
+      keyService.hardDelete(testData.yepKey.id)
     }
 
     waitForNotThrowing(pollTime = 1000) {

@@ -4,7 +4,6 @@ import {
   useTranslationsSelector,
   useTranslationsActions,
 } from '../context/TranslationsContext';
-import { encodeFilter, toggleFilter } from '../Filters/tools';
 import { Tag } from './Tag';
 
 type TagModel = components['schemas']['TagModel'];
@@ -15,8 +14,12 @@ type Props = {
   deleteEnabled: boolean;
 };
 
-export const Tags: React.FC<Props> = ({ tags, keyId, deleteEnabled }) => {
-  const { removeTag, setFilters } = useTranslationsActions();
+export const Tags: React.FC<React.PropsWithChildren<Props>> = ({
+  tags,
+  keyId,
+  deleteEnabled,
+}) => {
+  const { removeTag, removeFilter, addFilter } = useTranslationsActions();
   const filters = useTranslationsSelector((c) => c.filters);
 
   const handleTagDelete = (tagId: number) => {
@@ -24,15 +27,11 @@ export const Tags: React.FC<Props> = ({ tags, keyId, deleteEnabled }) => {
   };
 
   const handleTagClick = (tagName: string) => {
-    const newFilters = toggleFilter(
-      filters,
-      [],
-      encodeFilter({
-        filter: 'filterTag',
-        value: tagName,
-      })
-    );
-    setFilters(newFilters);
+    if (filters.filterTag?.includes(tagName)) {
+      removeFilter('filterTag', tagName);
+    } else {
+      addFilter('filterTag', tagName);
+    }
   };
 
   return (

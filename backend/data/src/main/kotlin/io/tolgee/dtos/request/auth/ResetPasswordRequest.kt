@@ -8,5 +8,5 @@ data class ResetPasswordRequest(
   var callbackUrl: String? = null,
   @field:Email
   @field:NotBlank
-  var email: String? = null,
+  var email: String,
 )

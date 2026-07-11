@@ -1,12 +1,11 @@
 import { useState } from 'react';
-import { Add } from '@mui/icons-material';
+import { Plus } from '@untitled-ui/icons-react';
 import { Box, Button, Link, Typography } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
 import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
 import { BoxLoading } from 'tg.component/common/BoxLoading';
-import { PaidFeatureBanner } from 'tg.ee/common/PaidFeatureBanner';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { useEnabledFeatures } from 'tg.globalContext/helpers';
 import { useProject } from 'tg.hooks/useProject';
@@ -16,6 +15,7 @@ import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { CdNotConfiguredAlert } from '../CdNotConfiguredAlert';
 import { CdDialog } from './CdDialog';
 import { CdItem } from './CdItem';
+import { DisabledFeatureBanner } from 'tg.component/common/DisabledFeatureBanner';
 
 export const CdList = () => {
   const project = useProject();
@@ -37,7 +37,7 @@ export const CdList = () => {
   });
 
   const { isEnabled } = useEnabledFeatures();
-  const isPaid = isEnabled('MULTIPLE_CONTENT_DELIVERY_CONFIGS');
+  const isFeatureEnabled = isEnabled('MULTIPLE_CONTENT_DELIVERY_CONFIGS');
   const { satisfiesPermission } = useProjectPermissions();
 
   const listSize =
@@ -46,7 +46,8 @@ export const CdList = () => {
   const listEmpty = listSize === 0;
 
   const canAdd =
-    (isPaid || listEmpty) && satisfiesPermission('content-delivery.manage');
+    (isFeatureEnabled || listEmpty) &&
+    satisfiesPermission('content-delivery.manage');
 
   if (!contentDeliveryConfigured) {
     return <CdNotConfiguredAlert />;
@@ -89,7 +90,7 @@ export const CdList = () => {
             color="primary"
             onClick={() => setFormOpen(true)}
             disabled={!canAdd}
-            startIcon={<Add />}
+            startIcon={<Plus width={19} height={19} />}
             data-cy="content-delivery-add-button"
           >
             {t('content_delivery_add_button')}
@@ -122,9 +123,9 @@ export const CdList = () => {
           }
         />
 
-        {!isPaid && !listEmpty && (
+        {!isFeatureEnabled && !listEmpty && (
           <Box mt={6}>
-            <PaidFeatureBanner
+            <DisabledFeatureBanner
               customTitle={
                 listSize === 1
                   ? t('content_delivery_not_enabled_title')

@@ -3,20 +3,33 @@ package io.tolgee.model.dataImport
 import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.model.StandardAuditModel
+import io.tolgee.model.enums.ConflictType
 import io.tolgee.model.translation.Translation
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
+import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
+import jakarta.persistence.Table
 import jakarta.validation.constraints.NotNull
 import org.apache.commons.codec.digest.MurmurHash3
 import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Type
 import java.nio.ByteBuffer
-import java.util.*
+import java.util.Base64
 
 @Entity
+@Table(
+  indexes = [
+    Index(
+      name = "import_translation_language_id_id",
+      columnList = "language_id",
+    ),
+    Index(columnList = "key_id"),
+    Index(columnList = "conflict_id"),
+  ],
+)
 class ImportTranslation(
   @Column(columnDefinition = "text")
   var text: String?,
@@ -34,6 +47,12 @@ class ImportTranslation(
    */
   @field:NotNull
   var override: Boolean = false
+
+  /**
+   * Conflict type (translation can be disabled or reviewed (with suggestions mode enforced))
+   */
+  @Enumerated(EnumType.STRING)
+  var conflictType: ConflictType? = null
 
   /**
    * Whether user explicitely resolved this conflict
@@ -78,11 +97,15 @@ class ImportTranslation(
       return "__null_value"
     }
     val hash =
-      MurmurHash3.hash128(this.toByteArray()).asSequence().flatMap {
-        val buffer = ByteBuffer.allocate(java.lang.Long.BYTES)
-        buffer.putLong(it)
-        buffer.array().asSequence()
-      }.toList().toByteArray()
+      MurmurHash3
+        .hash128(this.toByteArray())
+        .asSequence()
+        .flatMap {
+          val buffer = ByteBuffer.allocate(java.lang.Long.BYTES)
+          buffer.putLong(it)
+          buffer.array().asSequence()
+        }.toList()
+        .toByteArray()
     return Base64.getEncoder().encodeToString(hash)
   }
 }

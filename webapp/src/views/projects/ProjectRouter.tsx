@@ -1,31 +1,29 @@
-import { Route, Switch, useRouteMatch } from 'react-router-dom';
+import React from 'react';
+import { Redirect, Route, Switch, useRouteMatch } from 'react-router-dom';
 
 import { PrivateRoute } from 'tg.component/common/PrivateRoute';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { ProjectContext } from 'tg.hooks/ProjectContext';
+import { HideObserver } from 'tg.component/layout/TopBar/HideObserver';
+import { ActivityDetailRedirect } from 'tg.component/security/ActivityDetailRedirect';
+import { LanguageSettingsView } from 'tg.views/projects/languages/LanguageSettingsView';
 
-import { ProjectPage } from './ProjectPage';
 import { ExportView } from './export/ExportView';
 import { ImportView } from './import/ImportView';
 import { ProjectMembersView } from './members/ProjectMembersView';
 import { ProjectSettingsView } from './project/ProjectSettingsView';
 import { TranslationsView } from './translations/TranslationsView';
-import { LanguageSettingsView } from 'tg.views/projects/languages/LanguageSettingsView';
+import { TrashView } from './translations/trash/TrashView';
 import { SingleKeyView } from './translations/SingleKeyView';
-import React from 'react';
-import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 import { DashboardView } from './dashboard/DashboardView';
 import { WebsocketPreview } from './WebsocketPreview';
 import { DeveloperView } from './developer/DeveloperView';
-import { HideObserver } from 'tg.component/layout/TopBar/HideObserver';
-import { ActivityDetailRedirect } from 'tg.component/security/ActivityDetailRedirect';
+import { TaskRedirect } from './TaskRedirect';
 import { ActivityView } from './ActivityView';
-
-const IntegrateView = React.lazy(() =>
-  import('tg.views/projects/integrate/IntegrateView').then((r) => ({
-    default: r.IntegrateView,
-  }))
-);
+import { routes } from 'tg.ee';
+import { IntegrateView } from './integrate/IntegrateView';
+import { AiView } from './ai/AiView';
+import { BRANCH_ROUTES } from '../../branching/branchRoutes';
 
 export const ProjectRouter = () => {
   const match = useRouteMatch();
@@ -37,67 +35,108 @@ export const ProjectRouter = () => {
   );
 
   return (
-    <Switch>
-      <ProjectContext id={Number(projectId)}>
-        <ProjectPage>
-          {matchedTranslations?.isExact && <HideObserver />}
-          <React.Suspense fallback={<FullPageLoading />}>
-            <Route exact path={LINKS.PROJECT_TRANSLATIONS_SINGLE.template}>
-              <SingleKeyView />
-            </Route>
+    <ProjectContext id={Number(projectId)}>
+      {matchedTranslations?.isExact && <HideObserver />}
+      <Switch>
+        <Route exact path={LINKS.PROJECT_TRANSLATIONS_SINGLE.template}>
+          <SingleKeyView />
+        </Route>
 
-            <Route exact path={LINKS.PROJECT_TRANSLATIONS.template}>
-              <TranslationsView />
-            </Route>
+        <Route exact path={LINKS.PROJECT_TRANSLATIONS_TRASH.template}>
+          <TrashView />
+        </Route>
 
-            <Route path={LINKS.PROJECT_EDIT.template}>
-              <ProjectSettingsView />
-            </Route>
+        <Route exact path={LINKS.PROJECT_TRANSLATIONS.template}>
+          <TranslationsView />
+        </Route>
 
-            <Route path={LINKS.PROJECT_LANGUAGES.template}>
-              <LanguageSettingsView />
-            </Route>
+        <Route path={LINKS.PROJECT_EDIT.template}>
+          <ProjectSettingsView />
+        </Route>
 
-            <Route exact path={LINKS.PROJECT_PERMISSIONS.template}>
-              <ProjectMembersView />
-            </Route>
+        <Route path={LINKS.PROJECT_LANGUAGES.template}>
+          <LanguageSettingsView />
+        </Route>
 
-            <PrivateRoute exact path={LINKS.PROJECT_IMPORT.template}>
-              <ImportView />
-            </PrivateRoute>
+        <Route exact path={LINKS.PROJECT_PERMISSIONS.template}>
+          <ProjectMembersView />
+        </Route>
 
-            <Route path={LINKS.PROJECT_EXPORT.template}>
-              <ExportView />
-            </Route>
+        <PrivateRoute exact path={LINKS.PROJECT_IMPORT.template}>
+          <ImportView />
+        </PrivateRoute>
 
-            <Route exact path={LINKS.PROJECT_INTEGRATE.template}>
-              <IntegrateView />
-            </Route>
+        <Route path={LINKS.PROJECT_EXPORT.template}>
+          <ExportView />
+        </Route>
 
-            <Route exact path={LINKS.PROJECT_DASHBOARD.template}>
-              <DashboardView />
-            </Route>
+        <Route exact path={LINKS.PROJECT_INTEGRATE.template}>
+          <IntegrateView />
+        </Route>
 
-            <Route path={LINKS.PROJECT_DEVELOPER.template}>
-              <DeveloperView />
-            </Route>
+        <Route exact path={LINKS.PROJECT_DASHBOARD.template}>
+          <DashboardView />
+        </Route>
 
-            <Route path={LINKS.GO_TO_PROJECT_ACTIVITY_DETAIL.template}>
-              <ActivityDetailRedirect />
-            </Route>
+        <Route path={LINKS.PROJECT_DEVELOPER.template}>
+          <DeveloperView />
+        </Route>
 
-            <Route exact path={LINKS.PROJECT_ACTIVITY_GROUPS.template}>
-              <ActivityView />
-            </Route>
-            {/*
-              Preview section...
-            */}
-            <Route exact path={LINKS.PROJECT_WEBSOCKETS_PREVIEW.template}>
-              <WebsocketPreview />
-            </Route>
-          </React.Suspense>
-        </ProjectPage>
-      </ProjectContext>
-    </Switch>
+        {/* /ai redirects to the default Context Data tab; /ai/* renders AiView. */}
+        <Route exact path={LINKS.PROJECT_AI.template}>
+          <Redirect
+            to={LINKS.PROJECT_CONTEXT_DATA.build({
+              [PARAMS.PROJECT_ID]: projectId,
+            })}
+          />
+        </Route>
+        <Route path={LINKS.PROJECT_AI.template}>
+          <AiView />
+        </Route>
+
+        <Route exact path={LINKS.PROJECT_ACTIVITY_GROUPS.template}>
+          <ActivityView />
+        </Route>
+
+        <Route path={LINKS.GO_TO_PROJECT_ACTIVITY_DETAIL.template}>
+          <ActivityDetailRedirect />
+        </Route>
+
+        <Route path={LINKS.GO_TO_PROJECT_TASK.template}>
+          <TaskRedirect />
+        </Route>
+
+        {/* Internal preview route (websockets debugging). */}
+        <Route exact path={LINKS.PROJECT_WEBSOCKETS_PREVIEW.template}>
+          <WebsocketPreview />
+        </Route>
+
+        {/*Branched views*/}
+        <Route exact path={BRANCH_ROUTES.translation.branched}>
+          <SingleKeyView />
+        </Route>
+
+        <Route exact path={BRANCH_ROUTES.translations.branched}>
+          <TranslationsView />
+        </Route>
+
+        <Route exact path={BRANCH_ROUTES.dashboard.branched}>
+          <DashboardView />
+        </Route>
+
+        <Route exact path={BRANCH_ROUTES.import.branched}>
+          <ImportView />
+        </Route>
+
+        <Route exact path={BRANCH_ROUTES.export.branched}>
+          <ExportView />
+        </Route>
+
+        <Route exact path={LINKS.PROJECT_TRANSLATIONS_TRASH_BRANCHED.template}>
+          <TrashView />
+        </Route>
+      </Switch>
+      <routes.Project />
+    </ProjectContext>
   );
 };

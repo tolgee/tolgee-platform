@@ -12,7 +12,9 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.client.RestTemplate
 
-class HttpClientMocker(private val restTemplate: RestTemplate) {
+class HttpClientMocker(
+  private val restTemplate: RestTemplate,
+) {
   data class VerifyTools(
     val captor: KArgumentCaptor<HttpEntity<*>> = argumentCaptor(),
   )

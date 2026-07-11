@@ -35,7 +35,7 @@ import org.springframework.web.bind.annotation.RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(
   value = [
-    "/v2/projects/{projectId}/content-delivery-configs",
+    "/v2/projects/{projectId:[0-9]+}/content-delivery-configs",
   ],
 )
 @Tag(name = "Content Delivery", description = "Endpoints for Content Delivery management")

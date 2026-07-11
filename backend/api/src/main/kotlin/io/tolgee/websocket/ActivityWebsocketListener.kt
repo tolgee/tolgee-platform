@@ -6,6 +6,7 @@ import io.tolgee.batch.WebsocketProgressInfo
 import io.tolgee.batch.events.OnBatchJobCancelled
 import io.tolgee.batch.events.OnBatchJobFailed
 import io.tolgee.batch.events.OnBatchJobProgress
+import io.tolgee.batch.events.OnBatchJobStarted
 import io.tolgee.batch.events.OnBatchJobSucceeded
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Message
@@ -116,6 +117,22 @@ class ActivityWebsocketListener(
     )
   }
 
+  @EventListener(OnBatchJobStarted::class)
+  fun onBatchJobStarted(event: OnBatchJobStarted) {
+    if (event.job.hidden) return
+    websocketEventPublisher(
+      "/projects/${event.job.projectId}/${WebsocketEventType.BATCH_JOB_PROGRESS.typeName}",
+      WebsocketEvent(
+        actor = getActorInfo(event.job.authorId),
+        data = WebsocketProgressInfo(event.job.id, 0L, event.job.totalItems.toLong(), BatchJobStatus.RUNNING),
+        sourceActivity = null,
+        activityId = null,
+        dataCollapsed = false,
+        timestamp = currentDateProvider.date.time,
+      ),
+    )
+  }
+
   @TransactionalEventListener(OnBatchJobSucceeded::class, phase = TransactionPhase.AFTER_COMMIT)
   fun onBatchJobSucceeded(event: OnBatchJobSucceeded) {
     onBatchJobCompleted(event)
@@ -156,13 +173,14 @@ class ActivityWebsocketListener(
     data["modifications"] = it.modifications
     data["changeType"] = it.revisionType
     data["relations"] =
-      it.describingRelations?.map { relationsEntry ->
-        relationsEntry.key to
-          relationDescriptionExtractor.extract(
-            relationsEntry.value,
-            it.activityRevision.describingRelations,
-          )
-      }?.toMap()
+      it.describingRelations
+        ?.map { relationsEntry ->
+          relationsEntry.key to
+            relationDescriptionExtractor.extract(
+              relationsEntry.value,
+              it.activityRevision.describingRelations,
+            )
+        }?.toMap()
     return data
   }
 }

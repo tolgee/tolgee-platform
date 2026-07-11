@@ -8,12 +8,17 @@ import {
 } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { useEffect } from 'react';
+import { useHistory } from 'react-router-dom';
 
+import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProjectContext } from 'tg.hooks/ProjectContext';
 import { TranslatedError } from 'tg.translationTools/TranslatedError';
 import { useBatchOperationStatusTranslate } from 'tg.translationTools/useBatchOperationStatusTranslate';
+import { useBatchOperationActionPhrase } from 'tg.translationTools/useBatchOperationActionPhrase';
+import { AnimatedStars } from 'tg.component/AnimatedStars';
+import { ShimmerText } from 'tg.component/ShimmerText';
 
 import { BatchJobModel } from '../types';
 import { BatchProgress } from './BatchProgress';
@@ -22,6 +27,7 @@ import { useBatchOperationTypeTranslate } from 'tg.translationTools/useBatchOper
 import { useOperationCancel } from './useOperationCancel';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { useLoadingRegister } from 'tg.component/GlobalLoading';
+import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 
 type Props = {
   operation: BatchJobModel;
@@ -36,6 +42,11 @@ export const BatchOperationDialog = ({
 }: Props) => {
   const { t } = useTranslate();
   const project = useProject();
+  const history = useHistory();
+  const { incrementPlanLimitErrors, incrementSpendingLimitErrors } =
+    useGlobalActions();
+
+  const isDeleteJob = operation.type === 'DELETE_KEYS';
 
   const liveBatch = useProjectContext((c) =>
     c.batchOperations?.find((o) => o.id === operation.id)
@@ -54,6 +65,12 @@ export const BatchOperationDialog = ({
   const statusColor = getStatusColor(data.status);
   const statusLabel = useBatchOperationStatusTranslate()(data.status);
   const typeLabel = useBatchOperationTypeTranslate()(data.type);
+  const getActionPhrase = useBatchOperationActionPhrase();
+  const isAiJob = [
+    'AI_PLAYGROUND_TRANSLATE',
+    'MACHINE_TRANSLATE',
+    'AUTO_TRANSLATE',
+  ].includes(data.type);
   const isFinalizing =
     data.status === 'RUNNING' && data.progress === data.totalItems;
 
@@ -72,6 +89,15 @@ export const BatchOperationDialog = ({
     }
   }, [isFinished]);
 
+  useEffect(() => {
+    if (data.errorMessage === 'out_of_credits') {
+      incrementPlanLimitErrors();
+    }
+    if (data.errorMessage === 'credit_spending_limit_exceeded') {
+      incrementSpendingLimitErrors();
+    }
+  }, [data.errorMessage]);
+
   return (
     <Dialog open>
       <DialogTitle sx={{ width: 'min(80vw, 400px)' }}>{typeLabel}</DialogTitle>
@@ -87,15 +113,22 @@ export const BatchOperationDialog = ({
               }}
             />
           </Box>
-          {(isFinished || data.status === 'PENDING' || isFinalizing) && (
-            <Box
-              data-cy="batch-operation-dialog-end-status"
-              color={isFinalizing ? undefined : statusColor}
-            >
-              {isFinalizing
-                ? t('batch-operation-dialog-finalizing')
-                : statusLabel}
+          {data.status === 'RUNNING' && !isFinalizing ? (
+            <Box display="flex" alignItems="center" gap={0.5}>
+              {isAiJob && <AnimatedStars />}
+              <ShimmerText>{getActionPhrase(data.type)}</ShimmerText>
             </Box>
+          ) : (
+            (isFinished || data.status === 'PENDING' || isFinalizing) && (
+              <Box
+                data-cy="batch-operation-dialog-end-status"
+                color={isFinalizing ? undefined : statusColor}
+              >
+                {isFinalizing
+                  ? t('batch-operation-dialog-finalizing')
+                  : statusLabel}
+              </Box>
+            )
           )}
         </Box>
         {data.errorMessage && (
@@ -118,6 +151,23 @@ export const BatchOperationDialog = ({
           >
             {t('batch_operations_dialog_cancel_job')}
           </LoadingButton>
+        ) : isFinished && isDeleteJob ? (
+          <Button
+            onClick={() => {
+              onClose();
+              history.push(
+                LINKS.PROJECT_TRANSLATIONS_TRASH.build({
+                  [PARAMS.PROJECT_ID]: project.id,
+                })
+              );
+            }}
+            data-cy="batch-operation-dialog-view-trash"
+          >
+            <T
+              keyName="batch_operations_dialog_view_trash"
+              defaultValue="View Trash"
+            />
+          </Button>
         ) : (
           <div />
         )}

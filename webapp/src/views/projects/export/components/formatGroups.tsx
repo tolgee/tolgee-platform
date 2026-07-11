@@ -12,6 +12,7 @@ export interface FormatItem {
   defaultStructureDelimiter?: string;
   showSupportArrays?: boolean;
   defaultSupportArrays?: boolean;
+  showEscapeHtml?: boolean;
   structured?: boolean;
   format: components['schemas']['ExportParams']['format'];
   messageFormat?: MessageFormat;
@@ -54,6 +55,7 @@ export const formatGroups: FormatGroup[] = [
         extension: 'xliff',
         name: <T keyName="export-format-xliff" />,
         format: 'XLIFF',
+        showEscapeHtml: true,
         supportedMessageFormats: [
           'ICU',
           'JAVA_STRING_FORMAT',
@@ -92,6 +94,8 @@ export const formatGroups: FormatGroup[] = [
           'JAVA_STRING_FORMAT',
           'ICU',
           'RUBY_SPRINTF',
+          'PYTHON_PERCENT',
+          'PYTHON_BRACE',
         ],
       },
       {
@@ -143,6 +147,32 @@ export const formatGroups: FormatGroup[] = [
           'C_SPRINTF',
         ],
       },
+      {
+        id: 'generic_csv',
+        extension: 'csv',
+        name: <T keyName="export-format-csv" />,
+        format: 'CSV',
+        supportedMessageFormats: [
+          'ICU',
+          'JAVA_STRING_FORMAT',
+          'PHP_SPRINTF',
+          'C_SPRINTF',
+          'RUBY_SPRINTF',
+        ],
+      },
+      {
+        id: 'generic_xlsx',
+        extension: 'xlsx',
+        name: <T keyName="export-format-xlsx" />,
+        format: 'XLSX',
+        supportedMessageFormats: [
+          'ICU',
+          'JAVA_STRING_FORMAT',
+          'PHP_SPRINTF',
+          'C_SPRINTF',
+          'RUBY_SPRINTF',
+        ],
+      },
     ],
   },
   {
@@ -160,6 +190,18 @@ export const formatGroups: FormatGroup[] = [
         name: <T keyName="export-format-apple-xliff" />,
         format: 'APPLE_XLIFF',
       },
+      {
+        id: 'apple_xcstrings',
+        extension: 'xcstrings',
+        name: <T keyName="export-format-apple-xcstrings" />,
+        format: 'APPLE_XCSTRINGS',
+      },
+      {
+        id: 'apple_sdk',
+        extension: 'json',
+        name: <T keyName="export-format-apple-sdk" />,
+        format: 'APPLE_SDK',
+      },
     ],
   },
   {
@@ -170,6 +212,23 @@ export const formatGroups: FormatGroup[] = [
         extension: 'xml',
         name: <T keyName="export-format-android-xml" />,
         format: 'ANDROID_XML',
+      },
+      {
+        id: 'android_sdk',
+        extension: 'json',
+        name: <T keyName="export-format-android-sdk" />,
+        format: 'ANDROID_SDK',
+      },
+    ],
+  },
+  {
+    name: 'Compose Multiplatform',
+    formats: [
+      {
+        id: 'compose_xml',
+        extension: 'xml',
+        name: <T keyName="export-format-compose-xml" />,
+        format: 'COMPOSE_XML',
       },
     ],
   },
@@ -193,6 +252,51 @@ export const formatGroups: FormatGroup[] = [
         messageFormat: 'RUBY_SPRINTF',
         name: <T keyName="export-format-ruby-yaml" />,
         format: 'YAML_RUBY',
+      },
+    ],
+  },
+  {
+    name: 'i18next',
+    formats: [
+      {
+        id: 'i18next_flat_json',
+        extension: 'json',
+        messageFormat: 'I18NEXT',
+        defaultStructureDelimiter: '',
+        structured: false,
+        showSupportArrays: true,
+        defaultSupportArrays: true,
+        name: <T keyName="export-format-i18next-json" />,
+        format: 'JSON_I18NEXT',
+        matchByExportParams: (params) =>
+          params.format === 'JSON_I18NEXT' &&
+          (params.structureDelimiter === '' ||
+            params.structureDelimiter == null) &&
+          !params.supportArrays,
+      },
+      {
+        id: 'i18next_structured_json',
+        extension: 'json',
+        messageFormat: 'I18NEXT',
+        defaultStructureDelimiter: '.',
+        structured: true,
+        showSupportArrays: true,
+        defaultSupportArrays: true,
+        name: <T keyName="export-format-i18next-json-structured" />,
+        format: 'JSON_I18NEXT',
+        matchByExportParams: (params) =>
+          params.format === 'JSON_I18NEXT' && params.structureDelimiter === '.',
+      },
+    ],
+  },
+  {
+    name: '.NET',
+    formats: [
+      {
+        id: 'resx_icu',
+        extension: 'resx',
+        name: <T keyName="export-format-resx-xml" />,
+        format: 'RESX_ICU',
       },
     ],
   },

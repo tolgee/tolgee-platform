@@ -5,13 +5,18 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.dtos.request.slack.SlackEventDto
-import io.tolgee.ee.component.slackIntegration.SlackExecutor
-import io.tolgee.ee.component.slackIntegration.SlackHelpBlocksProvider
-import io.tolgee.ee.component.slackIntegration.SlackRequestValidation
+import io.tolgee.ee.component.slackIntegration.SlackChannelMessagesOperations
+import io.tolgee.ee.component.slackIntegration.slashcommand.SlackRequestValidation
+import io.tolgee.ee.component.slackIntegration.slashcommand.SlackSlackCommandBlocksProvider
 import io.tolgee.ee.service.slackIntegration.OrganizationSlackWorkspaceService
 import io.tolgee.exceptions.SlackErrorException
 import io.tolgee.util.Logging
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.CrossOrigin
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestHeader
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 import java.net.URLDecoder
 
 @RestController
@@ -24,8 +29,8 @@ import java.net.URLDecoder
 class SlackEventsController(
   private val objectMapper: ObjectMapper,
   private val slackRequestValidation: SlackRequestValidation,
-  private val slackHelpBlocksProvider: SlackHelpBlocksProvider,
-  private val slackExecutor: SlackExecutor,
+  private val slackSlackCommandBlocksProvider: SlackSlackCommandBlocksProvider,
+  private val slackChannelMessagesOperations: SlackChannelMessagesOperations,
   private val organizationSlackWorkspaceService: OrganizationSlackWorkspaceService,
 ) : Logging {
   @Suppress("UastIncorrectHttpHeaderInspection")
@@ -41,7 +46,7 @@ class SlackEventsController(
     @RequestHeader("X-Slack-Request-Timestamp") timestamp: String,
     @RequestBody payload: String,
   ) {
-    val event: SlackEventDto = validateAndParsePayload(payload, slackSignature, timestamp)
+    val event: SlackEventDto = parseInteractivityPayload(payload, slackSignature, timestamp)
 
     // Since we cannot respond to the event directly, we have to send a message to the channel.
     // Sometimes Tolgee might be unable to do it, because the token might be missing in Tolgee DB.
@@ -50,22 +55,26 @@ class SlackEventsController(
       event.actions.forEach {
         when (it.value) {
           "help_btn" ->
-            slackExecutor.sendBlocksMessage(
-              event.team.id,
+            slackChannelMessagesOperations.sendMessage(
+              SlackChannelMessagesOperations.SlackTeamId(event.team.id),
               event.channel.id,
-              slackHelpBlocksProvider.getHelpBlocks(),
+              slackSlackCommandBlocksProvider.getHelpBlocks(),
             )
 
           "help_advanced_subscribe_btn" ->
-            slackExecutor.sendBlocksMessage(
-              event.team.id,
+            slackChannelMessagesOperations.sendMessage(
+              SlackChannelMessagesOperations.SlackTeamId(event.team.id),
               event.channel.id,
-              slackHelpBlocksProvider.getAdvancedSubscriptionHelpBlocks(),
+              slackSlackCommandBlocksProvider.getAdvancedSubscriptionHelpBlocks(),
             )
         }
       }
     } catch (e: SlackErrorException) {
-      slackExecutor.sendBlocksMessage(event.team.id, event.channel.id, e.blocks)
+      slackChannelMessagesOperations.sendMessage(
+        SlackChannelMessagesOperations.SlackTeamId(event.team.id),
+        event.channel.id,
+        e.blocks,
+      )
     }
   }
 
@@ -103,17 +112,27 @@ class SlackEventsController(
     return null
   }
 
+  private fun parseInteractivityPayload(
+    payload: String,
+    slackSignature: String,
+    timestamp: String,
+  ): SlackEventDto {
+    val decodedPayload = decodePayload(payload)
+    // Redirect buttons are handled by Slack client-side and may not carry a valid signature.
+    if (decodedPayload.contains("\"value\":\"redirect\"")) {
+      return objectMapper.readValue(decodedPayload)
+    }
+    return validateAndParsePayload(payload, slackSignature, timestamp)
+  }
+
   private inline fun <reified T> validateAndParsePayload(
     payload: String,
     slackSignature: String,
     timestamp: String,
   ): T {
-    val decodedPayload = URLDecoder.decode(payload.substringAfter("="), "UTF-8")
-    if (decodedPayload.contains("\"value\":\"redirect\"")) {
-      return objectMapper.readValue(decodedPayload)
-    }
-
     slackRequestValidation.validate(slackSignature, timestamp, payload)
-    return objectMapper.readValue(decodedPayload)
+    return objectMapper.readValue(decodePayload(payload))
   }
+
+  private fun decodePayload(payload: String): String = URLDecoder.decode(payload.substringAfter("="), "UTF-8")
 }

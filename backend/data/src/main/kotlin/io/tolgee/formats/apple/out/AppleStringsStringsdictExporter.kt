@@ -10,6 +10,8 @@ class AppleStringsStringsdictExporter(
   val translations: List<ExportTranslationView>,
   val exportParams: IExportParams,
   private val isProjectIcuPlaceholdersEnabled: Boolean = true,
+  private val stringsFilePathProvider: ExportFilePathProvider,
+  private val stringsdictFilePathProvider: ExportFilePathProvider,
 ) : FileExporter {
   private val preparedFiles = mutableMapOf<String, PreparedFile>()
 
@@ -22,7 +24,9 @@ class AppleStringsStringsdictExporter(
     preparedFiles.forEach {
       if (it.value.hasSingle) {
         val path = stringsFilePathProvider.replaceExtensionAndFinalize(it.key)
-        result[path] = it.value.stringsWriter.result.byteInputStream()
+        result[path] =
+          it.value.stringsWriter.result
+            .byteInputStream()
       }
       if (it.value.hasPlural) {
         val path = stringsdictFilePathProvider.replaceExtensionAndFinalize(it.key)
@@ -38,17 +42,6 @@ class AppleStringsStringsdictExporter(
       translation.languageTag,
       replaceExtension = false,
     )
-  }
-
-  private val stringsFilePathProvider by lazy {
-    ExportFilePathProvider(
-      exportParams,
-      "strings",
-    )
-  }
-
-  private val stringsdictFilePathProvider by lazy {
-    ExportFilePathProvider(exportParams, "stringsdict")
   }
 
   private fun handleTranslation(it: ExportTranslationView) {

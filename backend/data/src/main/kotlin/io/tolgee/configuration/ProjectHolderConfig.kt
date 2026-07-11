@@ -1,19 +1,20 @@
 package io.tolgee.configuration
 
 import io.tolgee.configuration.TransactionScopeConfig.Companion.SCOPE_TRANSACTION
+import io.tolgee.dtos.cacheable.ProjectDto
+import io.tolgee.model.Project
 import io.tolgee.security.ProjectHolder
-import io.tolgee.security.ProjectNotSelectedException
 import io.tolgee.service.project.ProjectService
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.beans.factory.config.BeanDefinition.SCOPE_PROTOTYPE
-import org.springframework.beans.factory.support.ScopeNotActiveException
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Lazy
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Scope
 import org.springframework.context.annotation.ScopedProxyMode
 import org.springframework.web.context.annotation.RequestScope
+import org.springframework.web.context.request.RequestContextHolder
 
 @Configuration
 class ProjectHolderConfig {
@@ -31,22 +32,43 @@ class ProjectHolderConfig {
     return ProjectHolder(projectService)
   }
 
+  /**
+   * Dispatches to either [requestProjectHolder] or [transactionProjectHolder]
+   * depending on whether a request scope is currently active.
+   */
   @Bean
   @Primary
-  @Scope(SCOPE_PROTOTYPE, proxyMode = ScopedProxyMode.TARGET_CLASS)
-  fun projectHolder(applicationContext: ApplicationContext): ProjectHolder {
-    return try {
-      applicationContext.getBean("requestProjectHolder", ProjectHolder::class.java).also {
-        try {
-          // we must try to access something to get the exception thrown
-          it.project
-        } catch (e: ProjectNotSelectedException) {
-          // ProjectNotSelectedException is normal, since project is not set initially
-          return it
-        }
+  fun projectHolder(
+    applicationContext: ApplicationContext,
+    // @Lazy breaks the ProjectService ↔ ProjectHolder constructor cycle; the
+    // dispatcher overrides every accessor, so the field is never read.
+    @Lazy projectService: ProjectService,
+  ): ProjectHolder = DispatchingProjectHolder(applicationContext, projectService)
+
+  private class DispatchingProjectHolder(
+    private val applicationContext: ApplicationContext,
+    projectService: ProjectService,
+  ) : ProjectHolder(projectService) {
+    override var project: ProjectDto
+      get() = current().project
+      set(value) {
+        current().project = value
       }
-    } catch (e: ScopeNotActiveException) {
-      return applicationContext.getBean("transactionProjectHolder", ProjectHolder::class.java)
+
+    override val projectOrNull: ProjectDto?
+      get() = current().projectOrNull
+
+    override val projectEntity: Project
+      get() = current().projectEntity
+
+    private fun current(): ProjectHolder {
+      val name =
+        if (RequestContextHolder.getRequestAttributes() != null) {
+          "requestProjectHolder"
+        } else {
+          "transactionProjectHolder"
+        }
+      return applicationContext.getBean(name, ProjectHolder::class.java)
     }
   }
 }

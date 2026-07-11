@@ -22,7 +22,8 @@ class OpenApiTest : AbstractControllerTest() {
   @Test
   fun `all internal is generated`() {
     performGet("/v3/api-docs/All Internal - for Tolgee Web application")
-      .andIsOk.andPrettyPrint.andAssertThatJson {
+      .andIsOk.andPrettyPrint
+      .andAssertThatJson {
         node("paths./v2/projects/{projectId}/keys/{keyId}/tags.put.summary")
           .isEqualTo("Tag key")
       }
@@ -31,7 +32,8 @@ class OpenApiTest : AbstractControllerTest() {
   @Test
   fun `internal api doesn't contain API key endpoints`() {
     performGet("/v3/api-docs/V2 Internal - for Tolgee Web application")
-      .andIsOk.andPrettyPrint.andAssertThatJson {
+      .andIsOk.andPrettyPrint
+      .andAssertThatJson {
         node("paths").isObject.doesNotContainKey("/v2/projects/languages")
       }
   }
@@ -46,7 +48,8 @@ class OpenApiTest : AbstractControllerTest() {
   @Test
   fun `all public works`() {
     performGet("/v3/api-docs/Public API (All)").andIsOk.andAssertThatJson {
-      node("paths").isObject
+      node("paths")
+        .isObject
         .doesNotContainKey("/v2/projects/languages")
         .containsKey("/v2/projects/{projectId}/languages")
     }

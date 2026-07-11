@@ -1,14 +1,19 @@
 package io.tolgee.model
 
 import io.hypersistence.utils.hibernate.type.array.ListArrayType
+import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.api.IUserAccount
 import io.tolgee.api.SimpleUserAccount
+import io.tolgee.component.ThirdPartyAuthTypeConverter
+import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.model.notifications.NotificationPreferences
 import io.tolgee.model.notifications.UserNotification
 import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.model.slackIntegration.SlackUserConnection
+import io.tolgee.model.task.Task
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
+import jakarta.persistence.Convert
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
@@ -16,16 +21,19 @@ import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
+import jakarta.persistence.ManyToMany
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import jakarta.persistence.OrderBy
+import jakarta.persistence.Transient
 import jakarta.validation.constraints.NotBlank
 import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Type
-import org.hibernate.annotations.Where
-import java.util.*
+import org.hibernate.annotations.SQLRestriction
+import java.util.Date
 
 @Entity
+@ActivityLoggedEntity
 data class UserAccount(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,12 +44,28 @@ data class UserAccount(
   override var name: String = "",
   @Enumerated(EnumType.STRING)
   var role: Role? = Role.USER,
+  /**
+   * This property is redundant - it's value can be derived from other existing properties.
+   * Kept for legacy reasons.
+   *
+   * It's value follows these rules, but there are some edge cases related to old accounts:
+   * - NATIVE ->      password != null && thirdPartyAuthType == GITHUB | GOOGLE | OAUTH | null
+   * - THIRD_PARTY -> password == null && thirdPartyAuthType == GITHUB | GOOGLE | OAUTH
+   * - MANAGED ->     password == null && thirdPartyAuthType == SSO | SSO_GLOBAL
+   */
   @Enumerated(EnumType.STRING)
   @Column(name = "account_type")
   override var accountType: AccountType? = AccountType.LOCAL,
-) : AuditModel(), ModelWithAvatar, IUserAccount, SimpleUserAccount {
+) : AuditModel(),
+  ModelWithAvatar,
+  IUserAccount,
+  SimpleUserAccount,
+  EntityWithId {
   @Column(name = "totp_key", columnDefinition = "bytea")
   override var totpKey: ByteArray? = null
+
+  @Column(name = "totp_last_used_time_step")
+  var totpLastUsedTimeStep: Long? = null
 
   @Type(ListArrayType::class)
   @Column(name = "mfa_recovery_codes", columnDefinition = "text[]")
@@ -56,8 +80,24 @@ data class UserAccount(
   @OneToOne(mappedBy = "userAccount", fetch = FetchType.LAZY, optional = true)
   var emailVerification: EmailVerification? = null
 
+  @OneToOne(
+    mappedBy = "userAccount",
+    fetch = FetchType.LAZY,
+    cascade = [CascadeType.REMOVE],
+    orphanRemoval = true,
+    optional = true,
+  )
+  var authProviderChangeRequest: AuthProviderChangeRequest? = null
+
   @Column(name = "third_party_auth_type")
-  var thirdPartyAuthType: String? = null
+  @Convert(converter = ThirdPartyAuthTypeConverter::class)
+  var thirdPartyAuthType: ThirdPartyAuthType? = null
+
+  @Column(name = "sso_refresh_token", columnDefinition = "TEXT")
+  var ssoRefreshToken: String? = null
+
+  @Column(name = "sso_session_expiry")
+  var ssoSessionExpiry: Date? = null
 
   @Column(name = "third_party_auth_id")
   var thirdPartyAuthId: String? = null
@@ -77,6 +117,9 @@ data class UserAccount(
 
   @OneToMany(mappedBy = "userAccount", orphanRemoval = true)
   var apiKeys: MutableList<ApiKey>? = mutableListOf()
+
+  @OneToMany(mappedBy = "createdBy", orphanRemoval = true)
+  var invitations: MutableList<Invitation>? = mutableListOf()
 
   override var avatarHash: String? = null
 
@@ -109,16 +152,19 @@ data class UserAccount(
   @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], orphanRemoval = true, mappedBy = "recipient")
   var userNotifications: MutableList<UserNotification> = mutableListOf()
 
-  @Where(clause = "project_id IS NOT NULL")
+  @SQLRestriction("project_id IS NOT NULL")
   @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], orphanRemoval = true, mappedBy = "userAccount")
   var projectNotificationPreferences: MutableList<NotificationPreferences> = mutableListOf()
 
-  @Where(clause = "project_id IS NULL")
+  @SQLRestriction("project_id IS NULL")
   @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], orphanRemoval = true, mappedBy = "userAccount")
   private var _globalNotificationPreferences: MutableList<NotificationPreferences> = mutableListOf()
 
   override val deleted: Boolean
     get() = deletedAt != null
+
+  @ManyToMany(mappedBy = "assignees")
+  var tasks: MutableSet<Task> = mutableSetOf()
 
   constructor(
     id: Long?,
@@ -128,7 +174,7 @@ data class UserAccount(
     permissions: MutableSet<Permission>,
     role: Role = Role.USER,
     accountType: AccountType = AccountType.LOCAL,
-    thirdPartyAuthType: String?,
+    thirdPartyAuthType: ThirdPartyAuthType?,
     thirdPartyAuthId: String?,
     resetPasswordCode: String?,
   ) : this(id = 0L, username = "", password, name = "") {
@@ -146,6 +192,7 @@ data class UserAccount(
   enum class Role {
     USER,
     ADMIN,
+    SUPPORTER,
   }
 
   enum class AccountType {
@@ -153,4 +200,19 @@ data class UserAccount(
     MANAGED,
     THIRD_PARTY,
   }
+
+  @Transient
+  override var disableActivityLogging: Boolean = false
+}
+
+fun UserAccount.isAdmin(): Boolean {
+  return role == UserAccount.Role.ADMIN
+}
+
+fun UserAccount.isSupporter(): Boolean {
+  return role == UserAccount.Role.SUPPORTER
+}
+
+fun UserAccount.isSupporterOrAdmin(): Boolean {
+  return role == UserAccount.Role.SUPPORTER || role == UserAccount.Role.ADMIN
 }

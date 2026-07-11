@@ -1,0 +1,180 @@
+package io.tolgee.unit.formats.i18next.out
+
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.tolgee.dtos.request.export.ExportParams
+import io.tolgee.exceptions.ExportCollidingKeysException
+import io.tolgee.formats.ExportFormat
+import io.tolgee.formats.genericStructuredFile.out.CustomPrettyPrinter
+import io.tolgee.formats.json.out.JsonFileExporter
+import io.tolgee.service.export.ExportFilePathProvider
+import io.tolgee.service.export.ExportFileStructureTemplateProvider
+import io.tolgee.service.export.dataProvider.ExportTranslationView
+import io.tolgee.unit.util.assertFile
+import io.tolgee.unit.util.getExported
+import io.tolgee.util.buildExportTranslationList
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.jupiter.api.Test
+
+class I18nextFileExporterTest {
+  @Test
+  fun `exports with placeholders (ICU placeholders disabled)`() {
+    val exporter = getIcuPlaceholdersDisabledExporter()
+    val data = getExported(exporter)
+    data.assertFile(
+      "cs.json",
+      """
+    |{
+    |  "key3_one": "# den {icuParam}",
+    |  "key3_few": "# dny",
+    |  "key3_other": "# dní",
+    |  "item": "I will be first {icuParam, number}"
+    |}
+      """.trimMargin(),
+    )
+  }
+
+  private fun getIcuPlaceholdersDisabledExporter(): JsonFileExporter {
+    val built =
+      buildExportTranslationList {
+        add(
+          languageTag = "cs",
+          keyName = "key3",
+          text = "{count, plural, one {'#' den '{'icuParam'}'} few {'#' dny} other {'#' dní}}",
+        ) {
+          key.isPlural = true
+        }
+        add(
+          languageTag = "cs",
+          keyName = "item",
+          text = "I will be first {icuParam, number}",
+        )
+      }
+    return getExporter(
+      built.translations,
+      false,
+      exportParams = ExportParams(format = ExportFormat.JSON_I18NEXT),
+    )
+  }
+
+  @Test
+  fun `exports with placeholders (ICU placeholders enabled)`() {
+    val exporter = getIcuPlaceholdersEnabledExporter()
+    val data = getExported(exporter)
+    data.assertFile(
+      "cs.json",
+      """
+    |{
+    |  "key3_one": "{{count, number}} den {{icuParam, number}}",
+    |  "key3_few": "{{count, number}} dny",
+    |  "key3_other": "{{count, number}} dní",
+    |  "item": "I will be first {icuParam} {{hello, number}}"
+    |}
+      """.trimMargin(),
+    )
+  }
+
+  @Test
+  fun `correct exports translation with colon`() {
+    val exporter =
+      getExporter(
+        getTranslationWithColon(),
+        exportParams = ExportParams(format = ExportFormat.JSON_I18NEXT),
+      )
+    val data = getExported(exporter)
+    data.assertFile(
+      "cs.json",
+      """
+    |{
+    |  "item": "name : {{name}}"
+    |}
+      """.trimMargin(),
+    )
+  }
+
+  @Test
+  fun `throws on plural suffix collision with existing key`() {
+    val built =
+      buildExportTranslationList {
+        add(
+          languageTag = "en",
+          keyName = "profile.my-goals.plan",
+          text = "{count, plural, other {Other}}",
+        ) {
+          key.isPlural = true
+        }
+        add(
+          languageTag = "en",
+          keyName = "profile.my-goals.plan_other",
+          text = "Some translation",
+        )
+      }
+    val exporter =
+      getExporter(
+        built.translations,
+        exportParams = ExportParams(format = ExportFormat.JSON_I18NEXT),
+      )
+    assertThatThrownBy { exporter.produceFiles() }
+      .isInstanceOf(ExportCollidingKeysException::class.java)
+      .satisfies({ ex ->
+        val bre = ex as ExportCollidingKeysException
+        assertThat(bre.pluralKey).isEqualTo("profile.my-goals.plan")
+        assertThat(bre.collidingKey).isEqualTo("profile.my-goals.plan_other")
+        assertThat(bre.suffix).isEqualTo("other")
+      })
+  }
+
+  private fun getTranslationWithColon(): MutableList<ExportTranslationView> {
+    val built =
+      buildExportTranslationList {
+        add(
+          languageTag = "cs",
+          keyName = "item",
+          text = "name : {name}",
+        )
+      }
+    return built.translations
+  }
+
+  private fun getIcuPlaceholdersEnabledExporter(): JsonFileExporter {
+    val built =
+      buildExportTranslationList {
+        add(
+          languageTag = "cs",
+          keyName = "key3",
+          text = "{count, plural, one {# den {icuParam, number}} few {# dny} other {# dní}}",
+        ) {
+          key.isPlural = true
+        }
+        add(
+          languageTag = "cs",
+          keyName = "item",
+          text = "I will be first '{'icuParam'}' {hello, number}",
+        )
+      }
+    return getExporter(
+      built.translations,
+      true,
+      exportParams = ExportParams(format = ExportFormat.JSON_I18NEXT),
+    )
+  }
+
+  private fun getExporter(
+    translations: List<ExportTranslationView>,
+    isProjectIcuPlaceholdersEnabled: Boolean = true,
+    exportParams: ExportParams = ExportParams(),
+  ): JsonFileExporter {
+    return JsonFileExporter(
+      translations = translations,
+      exportParams = exportParams,
+      projectIcuPlaceholdersSupport = isProjectIcuPlaceholdersEnabled,
+      objectMapper = jacksonObjectMapper(),
+      customPrettyPrinter = CustomPrettyPrinter(),
+      filePathProvider =
+        ExportFilePathProvider(
+          template = ExportFileStructureTemplateProvider(exportParams, translations).validateAndGetTemplate(),
+          extension = exportParams.format.extension,
+        ),
+    )
+  }
+}

@@ -1,5 +1,6 @@
 package io.tolgee.api.v2.controllers.v2KeyController
 
+import io.tolgee.Metrics
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.KeysTestData
@@ -14,8 +15,10 @@ import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
+import io.tolgee.fixtures.generateImage
 import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
+import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.enums.AssignableTranslationState
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.TranslationState
@@ -25,7 +28,6 @@ import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
-import io.tolgee.util.generateImage
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -43,6 +45,9 @@ class KeyControllerComplexEditTest : ProjectAuthControllerTest("/v2/projects/") 
 
   @Autowired
   lateinit var bigMetaService: BigMetaService
+
+  @Autowired
+  lateinit var metrics: Metrics
 
   val screenshotFile: InputStreamSource by lazy {
     generateImage(2000, 3000)
@@ -170,10 +175,10 @@ class KeyControllerComplexEditTest : ProjectAuthControllerTest("/v2/projects/") 
 
   private fun verifyStates(statesToVerify: Map<String, TranslationState>) {
     executeInNewTransaction {
-      val key = keyService.find(testData.keyWithReferences.id)
+      val key = keyService.get(testData.keyWithReferences.id)
       assertThat(key).isNotNull
       statesToVerify.forEach {
-        val state = key!!.translations.find { translation -> translation.language.tag == it.key }!!.state
+        val state = key.translations.find { translation -> translation.language.tag == it.key }!!.state
         assertThat(state)
           .describedAs("State for ${it.key} is not ${it.value}")
           .isEqualTo(it.value)
@@ -304,19 +309,23 @@ class KeyControllerComplexEditTest : ProjectAuthControllerTest("/v2/projects/") 
   @Test
   fun `stores big meta`() {
     this.userAccount = testData.enOnlyUserAccount
-    performProjectAuthPut(
-      "keys/${testData.firstKey.id}/complex-update",
-      ComplexEditKeyDto(
-        name = testData.firstKey.name,
-        relatedKeysInOrder =
-          mutableListOf(
-            RelatedKeyDto(null, "first_key"),
-            RelatedKeyDto(null, testData.firstKey.name),
-          ),
-      ),
-    ).andIsOk
-
-    bigMetaService.getCloseKeyIds(testData.firstKey.id).assert.hasSize(1)
+    val thirdKey = testData.addThirdKey()
+    testDataService.saveTestData(testData.root)
+    verifyKeysDistancesStoredAsynchronously {
+      performProjectAuthPut(
+        "keys/${testData.firstKey.id}/complex-update",
+        ComplexEditKeyDto(
+          name = testData.firstKey.name,
+          relatedKeysInOrder =
+            mutableListOf(
+              RelatedKeyDto(null, testData.firstKey.name),
+              RelatedKeyDto(null, testData.secondKey.name),
+              RelatedKeyDto(null, thirdKey.name),
+            ),
+        ),
+      ).andIsOk
+    }
+    bigMetaService.getCloseKeyIds(testData.firstKey.id).assert.hasSize(2)
   }
 
   @Test
@@ -517,5 +526,43 @@ class KeyControllerComplexEditTest : ProjectAuthControllerTest("/v2/projects/") 
         isPlural = true,
       ),
     )
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `changing char limit succeeds even with longer existing translations`() {
+    // First, set a long translation on the key
+    performProjectAuthPut(
+      "keys/${testData.firstKey.id}/complex-update",
+      ComplexEditKeyDto(
+        name = testData.firstKey.name,
+        translations = mapOf("en" to "This is a very long translation that exceeds any small limit"),
+      ),
+    ).andIsOk
+
+    // Now change maxCharLimit to a small value without modifying translations
+    performProjectAuthPut(
+      "keys/${testData.firstKey.id}/complex-update",
+      ComplexEditKeyDto(
+        name = testData.firstKey.name,
+        maxCharLimit = 10,
+      ),
+    ).andIsOk
+
+    // Verify the limit was set
+    executeInNewTransaction {
+      val key = keyService.get(testData.firstKey.id)
+      assertThat(key.maxCharLimit).isEqualTo(10)
+    }
+  }
+
+  private fun verifyKeysDistancesStoredAsynchronously(storeBigMeta: () -> ResultActions) {
+    val synMetricBefore = metrics.bigMetaStoringTimer.count()
+    val asynMetricBefore = metrics.bigMetaStoringAsyncTimer.count()
+    storeBigMeta()
+    assertThat(metrics.bigMetaStoringTimer.count()).isEqualTo(synMetricBefore + 1)
+    waitForNotThrowing(pollTime = 50, timeout = 2000) {
+      assertThat(metrics.bigMetaStoringAsyncTimer.count()).isEqualTo(asynMetricBefore + 1)
+    }
   }
 }

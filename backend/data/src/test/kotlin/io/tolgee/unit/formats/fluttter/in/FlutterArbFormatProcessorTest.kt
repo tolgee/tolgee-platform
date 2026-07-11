@@ -31,12 +31,14 @@ class FlutterArbFormatProcessorTest {
   fun `returns correct parsed result`() {
     FlutterArbFileProcessor(mockUtil.fileProcessorContext, jacksonObjectMapper()).process()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "helloWorld")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "helloWorld")
       .assertSingle {
         hasText("Hello World!")
       }
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "dogsCount")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "dogsCount")
       .assertSinglePlural {
         hasText(
           """
@@ -49,7 +51,8 @@ class FlutterArbFormatProcessorTest {
         isPluralOptimized()
       }
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "simpleDogCount")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "simpleDogCount")
       .assertSingle {
         hasText("Dogs count: {count}")
       }
@@ -82,11 +85,13 @@ class FlutterArbFormatProcessorTest {
     mockPlaceholderConversionTestFile(convertPlaceholders = false, projectIcuPlaceholdersEnabled = false)
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "helloWorld")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "helloWorld")
       .assertSingle {
         hasText("Hello World! {name}")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "dogsCount")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "dogsCount")
       .assertSinglePlural {
         hasText(
           """
@@ -105,11 +110,13 @@ class FlutterArbFormatProcessorTest {
     mockPlaceholderConversionTestFile(convertPlaceholders = false, projectIcuPlaceholdersEnabled = true)
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "helloWorld")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "helloWorld")
       .assertSingle {
         hasText("Hello World! {name}")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "dogsCount")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "dogsCount")
       .assertSinglePlural {
         hasText(
           """
@@ -132,11 +139,13 @@ class FlutterArbFormatProcessorTest {
     mockPlaceholderConversionTestFile(convertPlaceholders = true, projectIcuPlaceholdersEnabled = true)
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "helloWorld")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "helloWorld")
       .assertSingle {
         hasText("Hello World! {name}")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "dogsCount")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "dogsCount")
       .assertSinglePlural {
         hasText(
           """

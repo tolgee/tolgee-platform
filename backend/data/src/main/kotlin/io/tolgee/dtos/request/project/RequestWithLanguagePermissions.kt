@@ -6,12 +6,15 @@ interface RequestWithLanguagePermissions {
   @get:Schema(deprecated = true, description = "Deprecated -> use translate languages")
   var languages: Set<Long>?
 
-  @get:Schema(deprecated = true, description = "Languages user can translate to")
+  @get:Schema(description = "Languages user can translate to")
   var translateLanguages: Set<Long>?
 
-  @get:Schema(deprecated = true, description = "Languages user can view")
+  @get:Schema(description = "Languages user can view")
   var viewLanguages: Set<Long>?
 
-  @get:Schema(deprecated = true, description = "Languages user can change translation state (review)")
+  @get:Schema(description = "Languages user can change translation state (review)")
   var stateChangeLanguages: Set<Long>?
+
+  @get:Schema(description = "Languages user can suggest translation")
+  var suggestLanguages: Set<Long>?
 }

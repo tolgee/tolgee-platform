@@ -2,11 +2,13 @@ package io.tolgee.repository
 
 import io.tolgee.dtos.queryResults.organization.QuickStartView
 import io.tolgee.model.QuickStart
+import org.springframework.context.annotation.Lazy
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 
 @Repository
+@Lazy
 interface QuickStartRepository : JpaRepository<QuickStart, Long> {
   fun findByUserAccountId(userAccountId: Long): QuickStart?
 

@@ -1,12 +1,12 @@
 import { FunctionComponent, useMemo, useState } from 'react';
 import { Button, Popover, styled } from '@mui/material';
-import { ArrowDropDown } from '@mui/icons-material';
 import { supportedFlags } from '@tginternal/language-util';
 import { useField } from 'formik';
 import countryFlagEmoji from 'country-flag-emoji';
-import { FlagImage } from '../FlagImage';
+import { FlagImage } from '@tginternal/library/components/languages/FlagImage';
 import { FlagInfo } from './types';
 import { FlagSelectorContent } from './FlagSelectorContent';
+import { ArrowDropDown } from 'tg.component/CustomIcons';
 
 const FLAGS_INFO: FlagInfo[] = [
   { code: 'empty', emoji: '🏳️', name: 'No flag' },
@@ -24,10 +24,12 @@ const StyledImage = styled(FlagImage)`
   height: 50px;
 `;
 
-export const FlagSelector: FunctionComponent<{
-  preferredEmojis: string[];
-  name: string;
-}> = (props) => {
+export const FlagSelector: FunctionComponent<
+  React.PropsWithChildren<{
+    preferredEmojis: string[];
+    name: string;
+  }>
+> = (props) => {
   const [field, _, helpers] = useField(props.name);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 

@@ -1,21 +1,23 @@
 import { FC, ReactNode } from 'react';
-import { Box, MenuItem } from '@mui/material';
+import { Box, MenuItem, SxProps } from '@mui/material';
 
-import { Select } from 'tg.component/common/form/fields/Select';
 import { components } from 'tg.service/apiSchema.generated';
 import { FieldLabel } from 'tg.component/FormField';
 import { useTranslate } from '@tolgee/react';
+import { Select } from 'tg.component/common/Select';
 
 type NamespaceModel = components['schemas']['NamespaceModel'];
 
 type NamespaceItem = {
-  value: number | '';
+  value: number | string;
   label: string;
 };
 
-const NamespaceValue: FC<{
-  namespace?: NamespaceItem;
-}> = (props) => {
+const NamespaceValue: FC<
+  React.PropsWithChildren<{
+    namespace?: NamespaceItem;
+  }>
+> = (props) => {
   const { t } = useTranslate();
   return (
     <Box
@@ -29,15 +31,25 @@ const NamespaceValue: FC<{
   );
 };
 
-export const DefaultNamespaceSelect: FC<{
+type Props = {
   namespaces: Partial<NamespaceModel>[];
   label?: ReactNode;
   name: string;
-  valueKey?: keyof NamespaceModel;
-}> = (props) => {
+  hidden: boolean;
+  value: number | undefined;
+  onChange: (nsId: number | undefined) => void;
+  sx?: SxProps;
+};
+
+export const DefaultNamespaceSelect = (props: Props) => {
   const { t } = useTranslate();
+
+  if (props.hidden) {
+    return null;
+  }
+
   const namespaces = props.namespaces.map(({ id, name }) => ({
-    value: id ?? ('' as const),
+    value: id ?? '',
     label: name ?? t('namespace_default'),
   }));
 
@@ -49,7 +61,14 @@ export const DefaultNamespaceSelect: FC<{
         sx={{ mt: 0 }}
         name={props.name}
         size="small"
+        minHeight={false}
         displayEmpty={true}
+        value={props.value ?? ''}
+        onChange={(e) =>
+          props.onChange(
+            (e.target.value || undefined) as unknown as number | undefined
+          )
+        }
         renderValue={(v) => {
           return (
             <NamespaceValue
@@ -59,7 +78,7 @@ export const DefaultNamespaceSelect: FC<{
         }}
       >
         {namespaces.map((namespace) => (
-          <MenuItem key={namespace.value} value={namespace.value as any}>
+          <MenuItem key={namespace.value} value={namespace.value}>
             <NamespaceValue namespace={namespace} />
           </MenuItem>
         ))}

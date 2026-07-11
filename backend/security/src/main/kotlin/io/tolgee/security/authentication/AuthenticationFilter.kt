@@ -17,12 +17,15 @@
 package io.tolgee.security.authentication
 
 import io.tolgee.component.CurrentDateProvider
-import io.tolgee.configuration.tolgee.AuthenticationProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
+import io.tolgee.exceptions.AuthExpiredException
 import io.tolgee.exceptions.AuthenticationException
+import io.tolgee.security.BILLING_API_KEY_PREFIX
 import io.tolgee.security.PAT_PREFIX
 import io.tolgee.security.ratelimit.RateLimitService
+import io.tolgee.security.thirdParty.SsoDelegate
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PatService
 import io.tolgee.service.security.UserAccountService
@@ -35,18 +38,29 @@ import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 
 @Component
+@Lazy
 class AuthenticationFilter(
-  private val authenticationProperties: AuthenticationProperties,
+  private val tolgeeProperties: TolgeeProperties,
   @Lazy
   private val currentDateProvider: CurrentDateProvider,
   @Lazy
   private val rateLimitService: RateLimitService,
   @Lazy
   private val jwtService: JwtService,
+  @Lazy
   private val userAccountService: UserAccountService,
+  @Lazy
   private val apiKeyService: ApiKeyService,
+  @Lazy
   private val patService: PatService,
+  @Lazy
+  private val ssoDelegate: SsoDelegate,
 ) : OncePerRequestFilter() {
+  private val authenticationProperties
+    get() = tolgeeProperties.authentication
+  private val internalProperties
+    get() = tolgeeProperties.internal
+
   override fun doFilterInternal(
     request: HttpServletRequest,
     response: HttpServletResponse,
@@ -75,6 +89,8 @@ class AuthenticationFilter(
     if (authorization != null) {
       if (authorization.startsWith("Bearer ")) {
         val auth = jwtService.validateToken(authorization.substring(7))
+        checkIfSsoUserStillValid(auth.principal)
+
         SecurityContextHolder.getContext().authentication = auth
         return
       }
@@ -84,6 +100,10 @@ class AuthenticationFilter(
 
     val apiKey = request.getHeader("X-API-Key") ?: request.getParameter("ak")
     if (apiKey != null) {
+      if (apiKey.startsWith(BILLING_API_KEY_PREFIX)) {
+        return // Skip - handled by billing stats controller
+      }
+
       if (apiKey.startsWith(PAT_PREFIX)) {
         patAuth(apiKey)
         return
@@ -100,10 +120,33 @@ class AuthenticationFilter(
     if (!authenticationProperties.enabled) {
       SecurityContextHolder.getContext().authentication =
         TolgeeAuthentication(
-          null,
-          initialUser,
-          TolgeeAuthenticationDetails(true),
+          credentials = null,
+          deviceId = null,
+          userAccount = initialUser,
+          actingAsUserAccount = null,
+          isReadOnly = false,
+          isSuperToken = true,
         )
+    }
+  }
+
+  private fun checkIfSsoUserStillValid(userDto: UserAccountDto) {
+    when (internalProperties.verifySsoAccountAvailableBypass) {
+      true -> {
+        // Bypass user validity check
+        return
+      }
+
+      false -> {
+        // Always fail user validity check
+        throw AuthExpiredException(Message.SSO_CANT_VERIFY_USER)
+      }
+
+      null -> {
+        if (!ssoDelegate.verifyUserSsoAccountAvailable(userDto)) {
+          throw AuthExpiredException(Message.SSO_CANT_VERIFY_USER)
+        }
+      }
     }
   }
 
@@ -125,12 +168,17 @@ class AuthenticationFilter(
       userAccountService.findDto(pak.userAccountId)
         ?: throw AuthenticationException(Message.USER_NOT_FOUND)
 
+    checkIfSsoUserStillValid(userAccount)
+
     apiKeyService.updateLastUsedAsync(pak.id)
     SecurityContextHolder.getContext().authentication =
       TolgeeAuthentication(
-        pak,
-        userAccount,
-        TolgeeAuthenticationDetails(false),
+        credentials = pak,
+        deviceId = null,
+        userAccount = userAccount,
+        actingAsUserAccount = null,
+        isReadOnly = false,
+        isSuperToken = false,
       )
   }
 
@@ -148,12 +196,17 @@ class AuthenticationFilter(
       userAccountService.findDto(pat.userAccountId)
         ?: throw AuthenticationException(Message.USER_NOT_FOUND)
 
+    checkIfSsoUserStillValid(userAccount)
+
     patService.updateLastUsedAsync(pat.id)
     SecurityContextHolder.getContext().authentication =
       TolgeeAuthentication(
-        pat,
-        userAccount,
-        TolgeeAuthenticationDetails(false),
+        credentials = pat,
+        deviceId = null,
+        userAccount = userAccount,
+        actingAsUserAccount = null,
+        isReadOnly = false,
+        isSuperToken = false,
       )
   }
 

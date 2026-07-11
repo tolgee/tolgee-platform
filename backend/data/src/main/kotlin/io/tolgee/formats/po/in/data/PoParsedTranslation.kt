@@ -1,6 +1,7 @@
 package io.tolgee.formats.po.`in`.data
 
 class PoParsedTranslation {
+  var msgctxt: StringBuilder = StringBuilder()
   var msgid: StringBuilder = StringBuilder()
   var msgidPlural: StringBuilder = StringBuilder()
   var msgstr: StringBuilder = StringBuilder()

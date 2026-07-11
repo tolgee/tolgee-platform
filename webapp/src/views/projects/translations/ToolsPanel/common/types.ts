@@ -1,6 +1,8 @@
+import type { TolgeeFormat } from '@tginternal/editor';
 import { components } from 'tg.service/apiSchema.generated';
 import { DeletableKeyWithTranslationsModelType } from '../../context/types';
 import { LanguageModel } from 'tg.component/PermissionsSettings/types';
+import type { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
 export type ProjectModel = components['schemas']['ProjectModel'];
 export type TranslationViewModel =
@@ -12,19 +14,26 @@ export type PanelContentData = {
   language: LanguageModel;
   baseLanguage: LanguageModel;
   activeVariant: string | undefined;
+  editingText: string | undefined;
+  editingFullValue: TolgeeFormat | undefined;
+  isModified: boolean;
   editEnabled: boolean;
+  projectPermissions: ReturnType<typeof useProjectPermissions>;
 };
 
 export type PanelContentProps = PanelContentData & {
   setItemsCount: (value: number | undefined) => void;
   setValue: (value: string) => void;
+  appendValue: (value: string) => void;
 };
 
 export type PanelConfig = {
   id: string;
   icon: React.ReactNode;
   name: React.ReactNode;
-  component: React.FC<PanelContentProps>;
-  itemsCountComponent?: React.FC<PanelContentData>;
+  component: React.FC<React.PropsWithChildren<PanelContentProps>>;
+  itemsCountFunction?: (props: PanelContentData) => number | React.ReactNode;
   displayPanel?: (value: PanelContentData) => boolean;
+  hideWhenCountZero?: boolean;
+  hideCount?: boolean;
 };

@@ -1,41 +1,38 @@
 import React from 'react';
-import { styled, Box } from '@mui/material';
+import { styled } from '@mui/material';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { CellStateBar } from '../cell/CellStateBar';
-import { FlagImage } from 'tg.component/languages/FlagImage';
+import { LanguageHeading } from 'tg.component/languages/LanguageHeading';
 
 type LanguageModel = components['schemas']['LanguageModel'];
+export type CellLanguageModel = Pick<
+  LanguageModel,
+  'base' | 'flagEmoji' | 'name'
+>;
 
 const StyledContent = styled('div')`
   display: flex;
   align-items: center;
   padding: 8px 12px;
   flex-shrink: 0;
-  gap: 8px;
 `;
 
 type Props = {
-  language: LanguageModel;
-  colIndex: number;
-  onResize: (colIndex: number) => void;
+  language: CellLanguageModel;
+  onResize?: () => void;
 };
 
-export const CellLanguage: React.FC<Props> = ({
+export const CellLanguage: React.FC<React.PropsWithChildren<Props>> = ({
   language,
   onResize,
-  colIndex,
 }) => {
-  const handleResize = () => onResize(colIndex);
   return (
     <>
       <StyledContent>
-        <FlagImage flagEmoji={language.flagEmoji!} height={20} />
-        <Box sx={{ fontWeight: language.base ? 'bold' : 'normal' }}>
-          {language.name}
-        </Box>
+        <LanguageHeading language={language} />
       </StyledContent>
-      <CellStateBar onResize={handleResize} />
+      {onResize && <CellStateBar onResize={onResize} />}
     </>
   );
 };

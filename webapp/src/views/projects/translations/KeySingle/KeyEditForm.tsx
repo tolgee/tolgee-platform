@@ -1,4 +1,4 @@
-import { Box, Button, styled, useMediaQuery } from '@mui/material';
+import { Box, Button, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { useHistory } from 'react-router-dom';
 import { LINKS, PARAMS } from 'tg.constants/links';
@@ -12,7 +12,6 @@ import {
   useTranslationsActions,
   useTranslationsSelector,
 } from '../context/TranslationsContext';
-import { ScreenshotGallery } from '../Screenshots/ScreenshotGallery';
 import { Tag } from '../Tags/Tag';
 import { TagInput } from '../Tags/TagInput';
 import { CellTranslation } from '../TranslationsList/CellTranslation';
@@ -50,13 +49,6 @@ const StyledField = styled('div')`
   border-style: solid;
 `;
 
-const StyledGalleryField = styled('div')`
-  border-color: ${({ theme }) => theme.palette.divider1};
-  border-width: 1px;
-  border-style: solid;
-  padding: 2px;
-`;
-
 const StyledLanguageField = styled('div')`
   border-color: ${({ theme }) => theme.palette.divider1};
   border-width: 1px 1px 1px 0px;
@@ -71,13 +63,12 @@ const StyledActions = styled('div')`
   margin-top: 20px;
 `;
 
-export const KeyEditForm: React.FC = () => {
+export const KeyEditForm: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { addTag, removeTag, updateKey } = useTranslationsActions();
   const { t } = useTranslate();
   const project = useProject();
-  const { satisfiesPermission } = useProjectPermissions();
-  const canViewScreenshots = satisfiesPermission('screenshots.view');
-  const editEnabled = satisfiesPermission('keys.edit');
+  const { satisfiesPermissionWithBranching } = useProjectPermissions();
+  const editEnabled = satisfiesPermissionWithBranching('keys.edit');
 
   const keyData = useTranslationsSelector((c) => c.translations)?.[0];
   const translationOpen = useTranslationsSelector((c) =>
@@ -87,9 +78,9 @@ export const KeyEditForm: React.FC = () => {
   const languages = useTranslationsSelector((c) => c.languages);
   const selectedLanguages = useTranslationsSelector((c) => c.selectedLanguages);
   const history = useHistory();
-
-  const isSmall = useMediaQuery(`@media (max-width: ${800}px)`);
-  const toolsPanelOpen = translationOpen && !isSmall;
+  const sidePanelWidth = useTranslationsSelector(
+    (c) => c.layout.sidePanelWidth
+  );
 
   const urlId = useUrlSearch().id as string | undefined;
   const [_urlKey, setUrlKey] = useUrlSearchState('key');
@@ -190,15 +181,17 @@ export const KeyEditForm: React.FC = () => {
           </StyledField>
         </div>
 
-        <div>
-          <FieldLabel>
-            <T keyName="translation_single_label_namespace" />
-          </FieldLabel>
-          <NamespaceSelector
-            value={keyData.keyNamespace}
-            onChange={handleNamespaceChange}
-          />
-        </div>
+        {project.useNamespaces && (
+          <div>
+            <FieldLabel>
+              <T keyName="translation_single_label_namespace" />
+            </FieldLabel>
+            <NamespaceSelector
+              value={keyData.keyNamespace}
+              onChange={handleNamespaceChange}
+            />
+          </div>
+        )}
 
         <div>
           <FieldLabel>
@@ -249,17 +242,6 @@ export const KeyEditForm: React.FC = () => {
           </Box>
         </div>
 
-        {canViewScreenshots && (
-          <div>
-            <FieldLabel>
-              <T keyName="translation_single_label_screenshots" />
-            </FieldLabel>
-            <StyledGalleryField>
-              <ScreenshotGallery keyId={keyData!.keyId} />
-            </StyledGalleryField>
-          </div>
-        )}
-
         <StyledActions>
           {editEnabled && (
             <Button
@@ -273,9 +255,9 @@ export const KeyEditForm: React.FC = () => {
           )}
         </StyledActions>
       </StyledContainer>
-      {toolsPanelOpen && (
+      {translationOpen && Boolean(sidePanelWidth) && (
         <Box ml="-1px" mt="25px">
-          <FloatingToolsPanel />
+          <FloatingToolsPanel width={sidePanelWidth} />
         </Box>
       )}
     </Box>

@@ -1,8 +1,14 @@
 package io.tolgee.service.language
 
 import io.tolgee.model.Language
+import io.tolgee.model.task.Task
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.LanguageRepository
+import io.tolgee.repository.TranslationRepository
+import io.tolgee.repository.qa.LanguageQaConfigRepository
+import io.tolgee.service.AiPlaygroundResultService
+import io.tolgee.service.task.ITaskService
+import io.tolgee.service.translation.TranslationSuggestionService
 import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
 
@@ -21,35 +27,59 @@ class LanguageHardDeleter(
   fun delete() {
     val languageWithData = getWithFetchedTranslations(language)
     val allTranslations = getAllTranslations(languageWithData)
-    languageWithData.translations = allTranslations
-    languageRepository.delete(language)
+    val tasks = getAllTasks(languageWithData)
+    translationSuggestionService.deleteAllByLanguage(language.id)
+    translationRepository.deleteAll(allTranslations)
+    taskService.deleteAll(tasks)
+    aiPlaygroundResultService.deleteResultsByLanguage(language.id)
+    languageQaConfigRepository.deleteAllByLanguageId(language.id)
+    languageRepository.delete(languageWithData)
     entityManager.flush()
   }
 
   private fun getAllTranslations(languageWithData: Language) =
-    languageWithData.translations.chunked(30000).flatMap {
-      entityManager.createQuery(
-        """from Translation t
+    languageWithData.translations
+      .chunked(30000)
+      .flatMap {
+        val withComments =
+          entityManager
+            .createQuery(
+              """from Translation t
             join fetch t.key k
             left join fetch k.keyMeta km
             left join fetch k.namespace
+            left join fetch k.branch
             left join fetch t.comments
+            left join fetch t.labels
+            left join fetch t.qaIssues
             where t.id in :ids""",
-        Translation::class.java,
-      )
-        .setParameter("ids", it.map { it.id })
-        .resultList
-    }.toMutableList()
+              Translation::class.java,
+            ).setParameter("ids", it.map { it.id })
+            .resultList
+
+        withComments
+      }.toMutableList()
+
+  fun getAllTasks(languageWithData: Language) =
+    entityManager
+      .createQuery(
+        """from Task tk
+            join fetch tk.keys
+            where tk.language = :languageWithData""",
+        Task::class.java,
+      ).setParameter("languageWithData", languageWithData)
+      .resultList
+      .toMutableList()
 
   private fun getWithFetchedTranslations(language: Language): Language {
-    return entityManager.createQuery(
-      """
+    return entityManager
+      .createQuery(
+        """
           from Language l
           left join fetch l.translations t
           where l = :language""",
-      Language::class.java,
-    )
-      .setParameter("language", language)
+        Language::class.java,
+      ).setParameter("language", language)
       .singleResult
   }
 
@@ -59,5 +89,25 @@ class LanguageHardDeleter(
 
   private val languageRepository by lazy {
     applicationContext.getBean(LanguageRepository::class.java)
+  }
+
+  private val translationRepository by lazy {
+    applicationContext.getBean(TranslationRepository::class.java)
+  }
+
+  private val taskService by lazy {
+    applicationContext.getBean(ITaskService::class.java)
+  }
+
+  private val aiPlaygroundResultService by lazy {
+    applicationContext.getBean(AiPlaygroundResultService::class.java)
+  }
+
+  private val translationSuggestionService by lazy {
+    applicationContext.getBean(TranslationSuggestionService::class.java)
+  }
+
+  private val languageQaConfigRepository by lazy {
+    applicationContext.getBean(LanguageQaConfigRepository::class.java)
   }
 }

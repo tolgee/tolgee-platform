@@ -14,7 +14,6 @@ plugins {
     id 'java'
     id 'org.jetbrains.kotlin.jvm'
     id "kotlin-jpa"
-    id "org.jetbrains.kotlin.kapt"
     id "kotlin-allopen"
 }
 
@@ -33,19 +32,16 @@ apply plugin: 'idea'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: "org.jetbrains.kotlin.plugin.jpa"
 apply plugin: "kotlin-allopen"
-apply plugin: "kotlin-kapt"
 
-repositories {
-    mavenCentral()
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
 }
 
 kotlin {
-    jvmToolchain(17)
-}
-
-idea {
-    module {
-        generatedSourceDirs += files('build/generated/source/kapt/main', 'build/generated/source/kaptKotlin/main')
+    compilerOptions {
+        freeCompilerArgs.addAll("-Xjsr305=strict")
     }
 }
 
@@ -63,15 +59,22 @@ dependencies {
     /**
      * SPRING
      */
-    api 'org.springframework.boot:spring-boot-starter-web'
-    api 'org.springframework.boot:spring-boot-starter-data-jpa'
-    api "org.springframework.boot:spring-boot-configuration-processor"
-    api project(":data")
-    api project(":ee-app")
-    api libs.springDocOpenApiCommon
-    api libs.springDocWebmvcApi
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-hateoas'
+    implementation "org.springframework.boot:spring-boot-configuration-processor"
+    implementation project(":data")
+    implementation project(":api")
+    implementation libs.springDocOpenApiCommon
+    implementation libs.springDocWebmvcApi
     implementation libs.kotlinReflect
     implementation libs.kotlinCoroutines
+
+    if (gradle.ext.eeAppDirectoryExists) {
+        implementation project(":ee-app")
+    }
+
+    ktlint(project(":ktlint"))
 }
 
 sourceSets {
@@ -80,11 +83,15 @@ sourceSets {
 }
 
 dependencyManagement {
+    applyMavenExclusions = false
+
     imports {
-        mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
+        mavenBom(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES) {
+            bomProperty "kotlin.version", "${kotlinVersion}"
+        }
     }
 }
 
-jar {
+tasks.named('jar', Jar) {
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
 }

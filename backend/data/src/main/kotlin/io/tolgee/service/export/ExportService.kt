@@ -1,12 +1,18 @@
 package io.tolgee.service.export
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.component.reporting.BusinessEventPublisher
 import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
 import io.tolgee.dtos.IExportParams
 import io.tolgee.dtos.cacheable.LanguageDto
+import io.tolgee.dtos.request.export.ExportParams
+import io.tolgee.service.branching.BranchService
 import io.tolgee.service.export.dataProvider.ExportDataProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.project.ProjectService
+import io.tolgee.util.Logging
+import io.tolgee.util.logger
+import io.tolgee.util.trace
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Service
 import java.io.InputStream
@@ -18,37 +24,37 @@ class ExportService(
   private val projectService: ProjectService,
   private val applicationContext: ApplicationContext,
   private val businessEventPublisher: BusinessEventPublisher,
-) {
+  private val objectMapper: ObjectMapper,
+  private val branchService: BranchService,
+) : Logging {
   fun export(
     projectId: Long,
     exportParams: IExportParams,
   ): Map<String, InputStream> {
-    val data = getDataForExport(projectId, exportParams)
-    val baseLanguage = getProjectBaseLanguage(projectId)
-    val project = projectService.get(projectId)
-    val baseTranslationsProvider =
-      getBaseTranslationsProvider(
-        exportParams = exportParams,
-        projectId = projectId,
-        baseLanguage = baseLanguage,
-      )
-
-    return fileExporterFactory.create(
-      data = data,
-      exportParams = exportParams,
-      baseTranslationsProvider = baseTranslationsProvider,
-      baseLanguage,
-      projectIcuPlaceholdersSupport = project.icuPlaceholders,
-    ).produceFiles().also {
-      businessEventPublisher.publishOnceInTime(
-        OnBusinessEventToCaptureEvent(
-          eventName = "EXPORT",
+    traceLogExportInfo(exportParams, projectId)
+    validateBranch(projectId, exportParams)
+    return traceLogMeasureTime("Export project $projectId data") {
+      val data = getDataForExport(projectId, exportParams)
+      val baseLanguage = getProjectBaseLanguage(projectId)
+      val project = projectService.get(projectId)
+      val baseTranslationsProvider =
+        getBaseTranslationsProvider(
+          exportParams = exportParams,
           projectId = projectId,
-        ),
-        Duration.ofDays(1),
-      ) {
-        "EXPORT_$projectId"
-      }
+          baseLanguage = baseLanguage,
+        )
+
+      fileExporterFactory
+        .create(
+          data = data,
+          exportParams = exportParams,
+          baseTranslationsProvider = baseTranslationsProvider,
+          baseLanguage,
+          projectIcuPlaceholdersSupport = project.icuPlaceholders,
+        ).produceFiles()
+        .also {
+          publishBusinessEvent(projectId)
+        }
     }
   }
 
@@ -81,5 +87,44 @@ class ExportService(
 
   private fun getProjectBaseLanguage(projectId: Long): LanguageDto {
     return projectService.getOrAssignBaseLanguage(projectId)
+  }
+
+  private fun publishBusinessEvent(projectId: Long) {
+    businessEventPublisher.publishOnceInTime(
+      OnBusinessEventToCaptureEvent(
+        eventName = "EXPORT",
+        projectId = projectId,
+      ),
+      Duration.ofDays(1),
+    ) {
+      "EXPORT_$projectId"
+    }
+  }
+
+  private fun validateBranch(
+    projectId: Long,
+    exportParams: IExportParams,
+  ) {
+    exportParams.filterBranch?.let {
+      branchService.getActiveBranch(projectId, it)
+    }
+  }
+
+  private fun traceLogExportInfo(
+    exportParams: IExportParams,
+    projectId: Long,
+  ) {
+    logger.trace {
+      // we don't want to log params which are other then ExportParams, since it can fail on serialization
+      val params = exportParams as? ExportParams
+
+      val json =
+        try {
+          objectMapper.writeValueAsString(params)
+        } catch (_: Exception) {
+          "[cannot serialize params]"
+        }
+      "Exporting project $projectId with params $json"
+    }
   }
 }

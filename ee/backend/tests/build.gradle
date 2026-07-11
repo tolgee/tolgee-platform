@@ -2,8 +2,6 @@ buildscript {
     repositories {
         mavenCentral()
     }
-    dependencies {
-    }
 }
 
 plugins {
@@ -13,6 +11,7 @@ plugins {
     id "java"
     id "kotlin-allopen"
     id "io.sentry.jvm.gradle"
+    id "org.gradle.test-retry"
 }
 
 apply plugin: "kotlin-allopen"
@@ -28,13 +27,10 @@ allOpen {
     annotation("org.springframework.boot.test.context.SpringBootTest")
 }
 
-repositories {
-    mavenCentral()
-}
-
-test {
+tasks.named('test', Test) {
     useJUnitPlatform()
     maxHeapSize = "4096m"
+    rootProject.setTestRetry(it)
 }
 
 dependencies {
@@ -42,26 +38,49 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation "org.springframework.boot:spring-boot-starter-hateoas"
+    implementation libs.jjwtApi
+    implementation libs.jjwtImpl
+    implementation libs.jjwtJackson
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+
     testImplementation(project(":testing"))
+    testImplementation(project(":security"))
     testImplementation(project(":ee-app"))
     testImplementation(project(":server-app"))
     testImplementation(project(":api"))
     testImplementation(project(":data"))
     testImplementation(project(":misc"))
+    testImplementation "org.springframework.boot:spring-boot-starter-websocket"
     testImplementation libs.jsonUnitAssert
     testImplementation libs.mockito
     testImplementation libs.stripe
     testImplementation libs.jacksonModuleKotlin
+    testImplementation('com.github.jknack:handlebars:4.4.0')
+    testImplementation platform(libs.mcpBom)
+    testImplementation libs.mcp
+    ktlint(project(":ktlint"))
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
 }
 
 kotlin {
-    jvmToolchain(17)
+    compilerOptions {
+        freeCompilerArgs.addAll("-Xjsr305=strict")
+    }
 }
 
 dependencyManagement {
+    applyMavenExclusions = false
+
     imports {
-        mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
+        mavenBom(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES) {
+            bomProperty "kotlin.version", "${kotlinVersion}"
+        }
+        mavenBom 'org.junit:junit-bom:5.11.4'
     }
 }

@@ -27,8 +27,25 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority
 
 class TolgeeAuthentication(
   private val credentials: Any?,
+  /**
+   * Device id - unique for each token. For activity logging.
+   */
+  val deviceId: String?,
   private val userAccount: UserAccountDto,
-  private val details: TolgeeAuthenticationDetails?,
+  /**
+   * If this is an impersonation token, this property will contain
+   * the user account, which initiated the impersonation.
+   */
+  val actingAsUserAccount: UserAccountDto?,
+  /**
+   * Whether the token can be used only for read-only requests.
+   */
+  val isReadOnly: Boolean,
+  /**
+   * Whether the user is super-authenticated
+   */
+  val isSuperToken: Boolean = false,
+  private val details: TolgeeAuthenticationDetails? = null,
 ) : Authentication {
   var userAccountEntity: UserAccount? = null
   var userAccountView: UserAccountView? = null
@@ -41,15 +58,38 @@ class TolgeeAuthentication(
 
   override fun getAuthorities(): Collection<GrantedAuthority> {
     return when (userAccount.role) {
-      UserAccount.Role.USER -> listOf(SimpleGrantedAuthority(ROLE_USER))
+      UserAccount.Role.USER ->
+        listOf(
+          SimpleGrantedAuthority(ROLE_USER),
+        )
+
+      UserAccount.Role.SUPPORTER ->
+        listOf(
+          SimpleGrantedAuthority(ROLE_USER),
+          SimpleGrantedAuthority(ROLE_SUPPORTER),
+        )
+
       UserAccount.Role.ADMIN ->
         listOf(
           SimpleGrantedAuthority(ROLE_USER),
+          SimpleGrantedAuthority(ROLE_SUPPORTER),
           SimpleGrantedAuthority(ROLE_ADMIN),
         )
+
       null -> emptyList()
-    }
+    } + authorityFromIsReadOnly
   }
+
+  private val authorityFromIsReadOnly: GrantedAuthority
+    get() {
+      return SimpleGrantedAuthority(
+        if (isReadOnly) {
+          ROLE_READ_ONLY
+        } else {
+          ROLE_READ_WRITE
+        },
+      )
+    }
 
   override fun getCredentials(): Any? {
     return credentials
@@ -73,6 +113,9 @@ class TolgeeAuthentication(
 
   companion object {
     const val ROLE_USER = "ROLE_USER"
+    const val ROLE_SUPPORTER = "ROLE_SUPPORTER"
     const val ROLE_ADMIN = "ROLE_ADMIN"
+    const val ROLE_READ_ONLY = "ROLE_READ_ONLY"
+    const val ROLE_READ_WRITE = "ROLE_READ_WRITE"
   }
 }

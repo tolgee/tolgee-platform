@@ -7,6 +7,7 @@ import io.tolgee.activity.groups.ActivityGroupService
 import io.tolgee.activity.projectActivity.ModificationsByRevisionsProvider
 import io.tolgee.activity.projectActivity.ProjectActivityViewByPageableProvider
 import io.tolgee.activity.projectActivity.ProjectActivityViewByRevisionProvider
+import io.tolgee.dtos.queryResults.ActivityRevisionInfo
 import io.tolgee.dtos.queryResults.TranslationHistoryView
 import io.tolgee.events.OnProjectActivityStoredEvent
 import io.tolgee.model.activity.ActivityModifiedEntity
@@ -14,6 +15,8 @@ import io.tolgee.model.activity.ActivityRevision
 import io.tolgee.model.views.activity.ModifiedEntityView
 import io.tolgee.model.views.activity.ProjectActivityView
 import io.tolgee.repository.activity.ActivityModifiedEntityRepository
+import io.tolgee.repository.activity.ActivityRevisionRepository
+import io.tolgee.service.branching.BranchService
 import io.tolgee.util.Logging
 import io.tolgee.util.flushAndClear
 import jakarta.persistence.EntityManager
@@ -34,19 +37,25 @@ class ActivityService(
   private val jdbcTemplate: JdbcTemplate,
   private val activityGroupService: ActivityGroupService,
   private val describers: List<ActivityAdditionalDescriber>,
+  private val activityRevisionRepository: ActivityRevisionRepository,
+  private val branchService: BranchService,
 ) : Logging {
   @Transactional
   fun storeActivityData(
     activityRevision: ActivityRevision,
     modifiedEntities: ModifiedEntitiesType,
   ) {
+    if (!activityRevision.shouldSaveWithoutModification() && modifiedEntities.isEmpty()) {
+      return
+    }
+
     // let's keep the persistent context small
     entityManager.flushAndClear()
 
     runAdditionalDescribers(activityRevision, modifiedEntities)
 
     val mergedActivityRevision = persistActivityRevision(activityRevision)
-    persistedDescribingRelations(mergedActivityRevision)
+    persistDescribingRelations(mergedActivityRevision)
     mergedActivityRevision.modifiedEntities = persistModifiedEntities(modifiedEntities)
 
     activityGroupService.addToGroup(activityRevision, modifiedEntities)
@@ -68,10 +77,10 @@ class ActivityService(
     jdbcTemplate.batchUpdate(
       "INSERT INTO activity_modified_entity " +
         "(entity_class, entity_id, describing_data, " +
-        "describing_relations, modifications, revision_type, activity_revision_id, additional_description) " +
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        "describing_relations, modifications, revision_type, activity_revision_id, branch_id, additional_description) " +
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
       list,
-      100,
+      1000,
     ) { ps, (entityInstance, modifiedEntity) ->
       // the entity id can be null in some cases (probably when the id it's not allocated in batch)
       val entityId = if (modifiedEntity.entityId == 0L) entityInstance.id else modifiedEntity.entityId
@@ -82,19 +91,20 @@ class ActivityService(
       ps.setObject(5, getJsonbObject(modifiedEntity.modifications))
       ps.setInt(6, RevisionType.entries.indexOf(modifiedEntity.revisionType))
       ps.setLong(7, modifiedEntity.activityRevision.id)
-      ps.setObject(8, getJsonbObject(modifiedEntity.additionalDescription))
+      ps.setObject(8, modifiedEntity.branchId)
+      ps.setObject(9, getJsonbObject(modifiedEntity.additionalDescription))
     }
 
     return list.map { it.value }.toMutableList()
   }
 
-  private fun persistedDescribingRelations(activityRevision: ActivityRevision) {
+  private fun persistDescribingRelations(activityRevision: ActivityRevision) {
     jdbcTemplate.batchUpdate(
       "INSERT INTO activity_describing_entity " +
         "(entity_class, entity_id, data, describing_relations, activity_revision_id, additional_description) " +
         "VALUES (?, ?, ?, ?, ?, ?)",
       activityRevision.describingRelations,
-      100,
+      1000,
     ) { ps, entity ->
       ps.setString(1, entity.entityClass)
       ps.setLong(2, entity.entityId)
@@ -122,31 +132,47 @@ class ActivityService(
     }
   }
 
-  @Transactional
-  fun getProjectActivity(
+  @Transactional(readOnly = true)
+  fun findProjectActivity(
     projectId: Long,
     pageable: Pageable,
+    branchName: String? = null,
   ): Page<ProjectActivityView> {
+    val branch = branchService.getActiveNonDefaultBranch(projectId, branchName)
+    val defaultBranchId = if (branch == null) branchService.getDefaultBranch(projectId)?.id else null
     return ProjectActivityViewByPageableProvider(
       applicationContext = applicationContext,
       projectId = projectId,
       pageable = pageable,
+      branchId = branch?.id,
+      defaultBranchId = defaultBranchId,
     ).get()
   }
 
-  @Transactional
-  fun getProjectActivity(
+  @Transactional(readOnly = true)
+  fun findProjectActivity(revisionId: Long): ProjectActivityView? {
+    return ProjectActivityViewByRevisionProvider(
+      applicationContext = applicationContext,
+      revisionId = revisionId,
+    ).get()
+  }
+
+  @Transactional(readOnly = true)
+  fun findProjectActivity(
     projectId: Long,
     revisionId: Long,
+    branchName: String? = null,
   ): ProjectActivityView? {
+    val branch = branchService.getActiveNonDefaultBranch(projectId, branchName)
     return ProjectActivityViewByRevisionProvider(
       applicationContext = applicationContext,
       revisionId = revisionId,
       projectId = projectId,
+      branchId = branch?.id,
     ).get()
   }
 
-  @Transactional
+  @Transactional(readOnly = true)
   fun getTranslationHistory(
     translationId: Long,
     pageable: Pageable,
@@ -163,9 +189,38 @@ class ActivityService(
     revisionId: Long,
     pageable: Pageable,
     filterEntityClass: List<String>?,
+    branchName: String? = null,
   ): Page<ModifiedEntityView> {
+    val branch = branchService.getActiveNonDefaultBranch(projectId, branchName)
     val provider =
-      ModificationsByRevisionsProvider(applicationContext, projectId, listOf(revisionId), pageable, filterEntityClass)
+      ModificationsByRevisionsProvider(
+        applicationContext,
+        projectId,
+        listOf(revisionId),
+        pageable,
+        filterEntityClass,
+        branch?.id,
+      )
     return provider.get()
+  }
+
+  fun hasModifiedEntitiesOnBranch(
+    revisionId: Long,
+    branchId: Long,
+  ): Boolean {
+    return activityModifiedEntityRepository.hasModifiedEntitiesOnBranch(revisionId, branchId)
+  }
+
+  fun findActivityRevisionInfo(id: Long): ActivityRevisionInfo? {
+    return activityRevisionRepository.findInfo(id)
+  }
+
+  fun findModifiedEntitiesByRevisionId(revisionId: Long): List<ActivityModifiedEntity> {
+    return activityModifiedEntityRepository.findByRevisionId(revisionId)
+  }
+
+  private fun ActivityRevision.shouldSaveWithoutModification(): Boolean {
+    val type = this.type ?: return true
+    return type.saveWithoutModification
   }
 }

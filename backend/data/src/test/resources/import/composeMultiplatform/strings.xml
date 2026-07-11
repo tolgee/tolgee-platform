@@ -1,0 +1,34 @@
+<resources>
+    <!-- This is a comment -->
+    <string name="app_name">Tolgee test</string>
+    <!-- This is a comment above a plural -->
+    <plurals name="dogs_count">
+        <!-- This comment will be ignored -->
+        <item quantity="one">%1$d dog</item>
+        <item quantity="other">%1$d dogs</item>
+    </plurals>
+    <!-- This comment will be ignored -->
+    <string-array name="string_array">
+        <!-- This is a comment above an array item -->
+        <item>First item</item>
+        <!-- This is a comment above an array item #2 -->
+        <item>Second item</item>
+    </string-array>
+    <!-- Multiple comments will be ignored -->
+    <!-- and only the last one will be kept -->
+    <string name="with_spaces">
+        <!-- This is a comment inside a string and will be ignored -->Hello!
+    </string>
+    <string name="with_html">
+        <b>Hello!</b>
+    </string>
+    <string name="with_tags_multiline">
+        <b>Hello!
+            %1$d
+        </b>
+        Dont'translate this
+    </string>
+    <string name="with_params">
+        %1$d %4$s %3$.2f %4$e %5$+d
+    </string>
+</resources>

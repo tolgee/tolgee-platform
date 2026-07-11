@@ -1,11 +1,10 @@
 import { styled } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
-import {
-  MachineTranslationIcon,
-  TranslationMemoryIcon,
-} from 'tg.component/CustomIcons';
-import { useServiceImg } from 'tg.views/projects/translations/ToolsPanel/panels/MachineTranslation/useServiceImg';
+import { Mt, TranslationMemory } from 'tg.component/CustomIcons';
+import { useServiceImg } from 'tg.hooks/useServiceImg';
 import { TranslationFlagIcon } from './TranslationFlagIcon';
+import { useServiceName } from 'tg.hooks/useServiceName';
+import { ServiceType } from 'tg.views/projects/languages/MachineTranslation/types';
 
 const StyledImgWrapper = styled('div')`
   display: flex;
@@ -21,16 +20,18 @@ const StyledProviderImg = styled('img')`
 `;
 
 type Props = {
-  provider?: string;
+  provider?: ServiceType;
   noTooltip?: boolean;
 };
 
-export const AutoTranslationIcon: React.FC<Props> = ({
+export const AutoTranslationIcon: React.FC<React.PropsWithChildren<Props>> = ({
   provider,
   noTooltip,
 }) => {
   const getProviderImg = useServiceImg();
+  const getServiceName = useServiceName();
   const providerImg = getProviderImg(provider, false);
+  const providerName = provider && getServiceName(provider);
   const { t } = useTranslate();
 
   return (
@@ -39,7 +40,7 @@ export const AutoTranslationIcon: React.FC<Props> = ({
         !noTooltip &&
         (provider
           ? t('translations_auto_translated_provider', {
-              provider: provider,
+              provider: providerName,
             })
           : t('translations_auto_translated_tm'))
       }
@@ -48,9 +49,9 @@ export const AutoTranslationIcon: React.FC<Props> = ({
           {provider && providerImg ? (
             <StyledProviderImg src={providerImg} />
           ) : provider ? (
-            <MachineTranslationIcon />
+            <Mt />
           ) : (
-            <TranslationMemoryIcon />
+            <TranslationMemory />
           )}
         </StyledImgWrapper>
       }

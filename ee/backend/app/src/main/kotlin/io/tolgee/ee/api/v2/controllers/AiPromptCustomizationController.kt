@@ -2,8 +2,6 @@ package io.tolgee.ee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
-import io.tolgee.constants.Feature
 import io.tolgee.ee.api.v2.hateoas.assemblers.LanguageAiPromptCustomizationModelAssembler
 import io.tolgee.ee.data.SetLanguagePromptCustomizationRequest
 import io.tolgee.ee.data.SetProjectPromptCustomizationRequest
@@ -34,7 +32,6 @@ import org.springframework.web.bind.annotation.RestController
 @OpenApiEeExtension
 class AiPromptCustomizationController(
   private val projectHolder: ProjectHolder,
-  private val enabledFeaturesProvider: EnabledFeaturesProvider,
   private val aiPromptCustomizationService: AiPromptCustomizationService,
   private val languageService: LanguageService,
   private val languageAiPromptCustomizationModelAssembler: LanguageAiPromptCustomizationModelAssembler,
@@ -56,10 +53,6 @@ class AiPromptCustomizationController(
   fun setPromptProjectCustomization(
     @Valid @RequestBody dto: SetProjectPromptCustomizationRequest,
   ): ProjectAiPromptCustomizationModel {
-    enabledFeaturesProvider.checkFeatureEnabled(
-      projectHolder.project.organizationOwnerId,
-      Feature.AI_PROMPT_CUSTOMIZATION,
-    )
     val project = aiPromptCustomizationService.setProjectPromptCustomization(projectHolder.project.id, dto)
     return ProjectAiPromptCustomizationModel(
       project.aiTranslatorPromptDescription,
@@ -74,10 +67,6 @@ class AiPromptCustomizationController(
     @Valid @RequestBody dto: SetLanguagePromptCustomizationRequest,
     @PathVariable languageId: Long,
   ): LanguageAiPromptCustomizationModel {
-    enabledFeaturesProvider.checkFeatureEnabled(
-      projectHolder.project.organizationOwnerId,
-      Feature.AI_PROMPT_CUSTOMIZATION,
-    )
     aiPromptCustomizationService.setLanguagePromptCustomization(projectHolder.project.id, languageId, dto)
     return languageAiPromptCustomizationModelAssembler.toModel(
       languageService.get(
@@ -88,16 +77,18 @@ class AiPromptCustomizationController(
   }
 
   @GetMapping("projects/{projectId:[0-9]+}/language-ai-prompt-customizations")
-  @Operation(summary = "Sets project level prompt customization")
+  @Operation(summary = "Returns language level prompt customization")
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
   @RequiresProjectPermissions(scopes = [Scope.PROJECT_EDIT, Scope.LANGUAGES_EDIT])
   fun getLanguagePromptCustomizations(): CollectionModel<LanguageAiPromptCustomizationModel> {
     val languages =
-      languageService.getProjectLanguages(projectHolder.project.id).filter {
-        !it.base
-      }.sortedBy {
-        it.tag
-      }
+      languageService
+        .getProjectLanguages(projectHolder.project.id)
+        .filter {
+          !it.base
+        }.sortedBy {
+          it.tag
+        }
     return languageAiPromptCustomizationModelAssembler.toCollectionModel(languages)
   }
 }

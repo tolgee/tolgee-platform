@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+import React, { StrictMode, Suspense } from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
 import { StyledEngineProvider } from '@mui/material/styles';
 import {
@@ -8,14 +8,12 @@ import {
   TolgeeProvider,
 } from '@tolgee/react';
 import { FormatIcu } from '@tolgee/format-icu';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { QueryClientProvider } from 'react-query';
-import { ReactQueryDevtools } from 'react-query/devtools';
 
 import { BrowserRouter } from 'react-router-dom';
 import { SnackbarProvider } from 'notistack';
 import 'reflect-metadata';
-import 'regenerator-runtime/runtime';
 
 import { GlobalLoading, LoadingProvider } from 'tg.component/GlobalLoading';
 import { GlobalErrorModal } from 'tg.component/GlobalErrorModal';
@@ -26,10 +24,13 @@ import ErrorBoundary from './component/ErrorBoundary';
 import { FullPageLoading } from './component/common/FullPageLoading';
 import { ThemeProvider } from './ThemeProvider';
 
-import reportWebVitals from './reportWebVitals';
-import { MuiLocalizationProvider } from 'tg.component/MuiLocalizationProvider';
+import { MuiLocalizationProvider } from '@tginternal/library/components/MuiLocalizationProvider';
 import { languageStorage, queryClient } from './initialSetup';
+import { GlobalStyles } from './GlobalStyles';
 import { branchName } from './branch.json';
+import { showConsoleHello } from './showConsoleHello';
+
+showConsoleHello();
 
 function getFeatureName(branch: string) {
   const parts = branch.split('/');
@@ -44,7 +45,7 @@ const tolgee = Tolgee()
   .init({
     defaultLanguage: 'en',
     fallbackLanguage: 'en',
-    apiUrl: import.meta.env.VITE_APP_TOLGEE_API_URL,
+    apiUrl: import.meta.env.VITE_APP_TOLGEE_API_URL || 'https://app.tolgee.io',
     apiKey: import.meta.env.VITE_APP_TOLGEE_API_KEY,
     tagNewKeys: [`draft: ${getFeatureName(branchName)}`],
     staticData: {
@@ -55,6 +56,8 @@ const tolgee = Tolgee()
       de: () => import('./i18n/de.json').then((m) => m.default),
       pt: () => import('./i18n/pt.json').then((m) => m.default),
       da: () => import('./i18n/da.json').then((m) => m.default),
+      ja: () => import('./i18n/ja.json').then((m) => m.default),
+      zh: () => import('./i18n/zh.json').then((m) => m.default),
     },
   });
 
@@ -75,9 +78,16 @@ const MainWrapper = () => {
                 <QueryClientProvider client={queryClient}>
                   {/* @ts-ignore */}
                   <ErrorBoundary>
-                    <SnackbarProvider data-cy="global-snackbars">
+                    <SnackbarProvider
+                      anchorOrigin={{ horizontal: 'right', vertical: 'top' }}
+                      SnackbarProps={{
+                        // @ts-ignore
+                        'data-cy': 'notistack-snackbar',
+                      }}
+                    >
                       <GlobalContext>
                         <BottomPanelProvider>
+                          <GlobalStyles />
                           <MuiLocalizationProvider>
                             <App />
                             <GlobalErrorModal />
@@ -86,7 +96,6 @@ const MainWrapper = () => {
                       </GlobalContext>
                     </SnackbarProvider>
                   </ErrorBoundary>
-                  <ReactQueryDevtools />
                 </QueryClientProvider>
               </BrowserRouter>
             </TolgeeProvider>
@@ -97,9 +106,9 @@ const MainWrapper = () => {
   );
 };
 
-ReactDOM.render(<MainWrapper />, document.getElementById('root'));
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+const root = createRoot(document.getElementById('root')!);
+root.render(
+  <StrictMode>
+    <MainWrapper />
+  </StrictMode>
+);

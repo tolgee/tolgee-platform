@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional
     "spring.jpa.properties.hibernate.generate_statistics=true",
     "logging.level.org.hibernate.engine.internal.StatisticalLoggingSessionEventListener=WARN",
     "spring.jpa.show-sql=true",
+    "tolgee.machine-translation.free-credits-amount=100000",
   ],
 )
 class OrganizationServiceTest : AbstractSpringTest() {
@@ -43,8 +44,10 @@ class OrganizationServiceTest : AbstractSpringTest() {
 
     val organization =
       assertSingleStatement {
-        entityManager.createQuery("from Organization where id = :id", Organization::class.java)
-          .setParameter("id", testData.jirinaOrg.id).singleResult
+        entityManager
+          .createQuery("from Organization where id = :id", Organization::class.java)
+          .setParameter("id", testData.jirinaOrg.id)
+          .singleResult
       }
 
     assertSingleStatement {
@@ -66,12 +69,16 @@ class OrganizationServiceTest : AbstractSpringTest() {
     executeInNewTransaction {
       val bucket =
         assertSingleStatement {
-          entityManager.createQuery("from MtCreditBucket mb where mb.organization.id = :id", MtCreditBucket::class.java)
-            .setParameter("id", testData.jirinaOrg.id).singleResult
+          entityManager
+            .createQuery("from MtCreditBucket mb where mb.organization.id = :id", MtCreditBucket::class.java)
+            .setParameter("id", testData.jirinaOrg.id)
+            .singleResult
         }
 
       assertSingleStatement {
-        bucket.organization?.name.assert.isEqualTo(testData.jirinaOrg.name)
+        bucket.organization
+          ?.name.assert
+          .isEqualTo(testData.jirinaOrg.name)
       }
     }
   }
@@ -79,7 +86,8 @@ class OrganizationServiceTest : AbstractSpringTest() {
   fun <T> assertSingleStatement(fn: () -> T): T {
     sessionFactory.statistics.clear()
     val result = fn()
-    sessionFactory.statistics.prepareStatementCount.assert.isEqualTo(1)
+    sessionFactory.statistics.prepareStatementCount.assert
+      .isEqualTo(1)
     return result
   }
 }

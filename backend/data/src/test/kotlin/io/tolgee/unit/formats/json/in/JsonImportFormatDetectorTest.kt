@@ -1,7 +1,6 @@
 package io.tolgee.unit.formats.json.`in`
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.formats.json.`in`.JsonImportFormatDetector
@@ -17,6 +16,11 @@ class JsonImportFormatDetectorTest {
   @BeforeEach
   fun setup() {
     mockUtil = FileProcessorContextMockUtil()
+  }
+
+  @Test
+  fun `detected i18next`() {
+    "src/test/resources/import/i18next/example.json".assertDetected(ImportFormat.JSON_I18NEXT)
   }
 
   @Test
@@ -40,7 +44,7 @@ class JsonImportFormatDetectorTest {
   }
 
   private fun parseFile(path: String): Map<*, *> {
-    return ObjectMapper(YAMLFactory()).readValue<Map<*, *>>(
+    return jacksonObjectMapper().readValue<Map<*, *>>(
       File(path)
         .readBytes(),
     )

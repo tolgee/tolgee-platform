@@ -1,8 +1,8 @@
 package io.tolgee.service.organization
 
+import io.tolgee.repository.OrganizationRepository.Companion.ALL_USERS_IN_ORGANIZATION_QUERY_TO_COUNT_USAGE_FOR
 import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Service
-import java.math.BigDecimal
 
 @Service
 class OrganizationStatsService(
@@ -15,8 +15,7 @@ class OrganizationStatsService(
         select count(l) from Language l 
         where l.project.id = :projectId and l.project.deletedAt is null
         """.trimIndent(),
-      )
-      .setParameter("projectId", projectId)
+      ).setParameter("projectId", projectId)
       .singleResult as Long
   }
 
@@ -24,43 +23,77 @@ class OrganizationStatsService(
     return entityManager
       .createQuery(
         """
-        select count(k) from Key k
-        where k.project.id = :projectId and k.project.deletedAt is null
+        select count(distinct k.name, k.namespace) from Key k
+        where k.project.id = :projectId and k.project.deletedAt is null and k.deletedAt is null
         """.trimIndent(),
-      )
-      .setParameter("projectId", projectId)
+      ).setParameter("projectId", projectId)
       .singleResult as Long
   }
 
-  fun getCurrentTranslationSlotCount(organizationId: Long): Long {
-    val result =
-      entityManager.createNativeQuery(
+  fun getSeatCountToCountSeats(organizationId: Long): Long {
+    return entityManager
+      .createQuery(
         """
-        select 
-           (select sum(keyCount * languageCount) as translationCount
-            from (select p.id as projectId, count(l.id) as languageCount
-                  from project as p
-                           join language as l on l.project_id = p.id
-                  where p.organization_owner_id = :organizationId and p.deleted_at is null
-                  group by p.id) as languageCounts
-                     join (select p.id as projectId, count(k.id) as keyCount
-                           from project as p
-                                    join key as k on k.project_id = p.id
-                           where p.organization_owner_id = :organizationId and p.deleted_at is null
-                           group by p.id) as keyCounts on keyCounts.projectId = languageCounts.projectId)
+        select count(distinct ua.id) $ALL_USERS_IN_ORGANIZATION_QUERY_TO_COUNT_USAGE_FOR
         """.trimIndent(),
-      ).setParameter("organizationId", organizationId).singleResult as BigDecimal? ?: 0
-    return result.toLong()
+      ).setParameter("organizationId", organizationId)
+      .singleResult as Long
   }
 
-  fun getCurrentTranslationCount(organizationId: Long): Long {
-    return entityManager.createQuery(
-      """
-      select count(t) from Translation t where 
-        t.language.deletedAt is null and
-        t.key.project.organizationOwner.id = :organizationId and 
-        t.state <> io.tolgee.model.enums.TranslationState.UNTRANSLATED and t.key.project.deletedAt is null
-      """.trimIndent(),
-    ).setParameter("organizationId", organizationId).singleResult as Long? ?: 0
+  fun getTranslationCount(organizationId: Long): Long {
+    return entityManager
+      .createNativeQuery(
+        """
+        with org_keys as materialized (
+          select k.id, k.project_id, k.name, k.namespace_id
+          from key k
+          join project p on p.id = k.project_id and p.deleted_at is null
+          left join branch b on b.id = k.branch_id
+          where p.organization_owner_id = :organizationId
+            and k.deleted_at is null
+            and (k.branch_id is null or b.deleted_at is null)
+            and (p.use_branching = true or k.branch_id is null or b.is_default = true)
+        ),
+        org_translations as materialized (
+          select ok.project_id, ok.name, ok.namespace_id, t.language_id
+          from org_keys ok
+          join translation t on t.key_id = ok.id
+            and t.text is not null
+            and t.text <> ''
+        )
+        select count(*) from (
+          select distinct ot.project_id, ot.name, ot.namespace_id, ot.language_id
+          from org_translations ot
+          where exists (
+            select 1 from language l
+            where l.id = ot.language_id
+              and l.deleted_at is null
+          )
+        ) sub
+        """.trimIndent(),
+      ).setParameter("organizationId", organizationId)
+      .singleResult
+      .let { (it as Number).toLong() }
+  }
+
+  fun getKeyCount(organizationId: Long): Long {
+    return (
+      entityManager
+        .createNativeQuery(
+          """
+          select count(*) from (
+              select distinct k.project_id, k.name, k.namespace_id
+              from key k
+              join project p on p.id = k.project_id and p.deleted_at is null
+              left join branch b on b.id = k.branch_id
+              where p.organization_owner_id = :organizationId
+                and k.deleted_at is null
+                and (k.branch_id is null or b.deleted_at is null)
+                and (p.use_branching = true or k.branch_id is null or b.is_default = true)
+          ) sub
+          """.trimIndent(),
+        ).setParameter("organizationId", organizationId)
+        .singleResult as Number
+    ).toLong()
   }
 }

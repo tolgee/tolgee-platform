@@ -1,10 +1,13 @@
 package io.tolgee.websocket
 
+import io.tolgee.dtos.cacheable.ApiKeyDto
+import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.enums.Scope
-import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.authentication.TolgeeAuthentication
 import io.tolgee.service.security.SecurityService
+import io.tolgee.util.logger
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Lazy
 import org.springframework.messaging.Message
 import org.springframework.messaging.MessageChannel
 import org.springframework.messaging.MessagingException
@@ -21,8 +24,10 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @Configuration
 @EnableWebSocketMessageBroker
 class WebSocketConfig(
-  private val jwtService: JwtService,
+  @Lazy
   private val securityService: SecurityService,
+  @Lazy
+  private val websocketAuthenticationResolver: WebsocketAuthenticationResolver,
 ) : WebSocketMessageBrokerConfigurer {
   override fun configureMessageBroker(config: MessageBrokerRegistry) {
     config.enableSimpleBroker("/")
@@ -42,33 +47,89 @@ class WebSocketConfig(
           val accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor::class.java)
 
           if (accessor?.command == StompCommand.CONNECT) {
-            val tokenString = accessor.getNativeHeader("jwtToken")?.firstOrNull()
-            accessor.user = if (tokenString == null) null else jwtService.validateToken(tokenString)
+            accessor.user = websocketAuthenticationResolver.resolve(accessor)
           }
 
+          val authentication = accessor?.user as? TolgeeAuthentication
+
           if (accessor?.command == StompCommand.SUBSCRIBE) {
-            val projectId =
-              accessor.destination?.let {
-                "/projects/([0-9]+)".toRegex().find(it)?.groupValues
-                  ?.getOrNull(1)?.toLong()
-              }
-
-            if (projectId != null) {
-              val user =
-                (accessor.user as? TolgeeAuthentication)?.principal
-                  ?: throw MessagingException("Unauthenticated")
-
-              try {
-                securityService.checkProjectPermissionNoApiKey(projectId = projectId, Scope.KEYS_VIEW, user)
-              } catch (e: Exception) {
-                throw MessagingException("Forbidden")
-              }
-            }
+            checkProjectPathPermissionsAuth(authentication, accessor.destination)
+            checkUserPathPermissionsAuth(authentication, accessor.destination)
           }
 
           return message
         }
       },
     )
+  }
+
+  fun checkProjectPathPermissionsAuth(
+    authentication: TolgeeAuthentication?,
+    destination: String?,
+  ) {
+    val projectId =
+      destination?.let {
+        "/projects/([0-9]+)"
+          .toRegex()
+          .find(it)
+          ?.groupValues
+          ?.getOrNull(1)
+          ?.toLong()
+      } ?: return
+
+    if (authentication == null) {
+      throw MessagingException("Unauthenticated")
+    }
+
+    val apiKey = authentication.credentials as? ApiKeyDto
+    val user = authentication.principal
+
+    try {
+      securityService.checkProjectPermission(
+        projectId = projectId,
+        requiredPermission = Scope.KEYS_VIEW,
+        user = user,
+        apiKey = apiKey,
+      )
+    } catch (e: PermissionException) {
+      logger().debug("User / API key does not have required scopes", e)
+      throwForbidden()
+    }
+
+    return
+  }
+
+  fun checkUserPathPermissionsAuth(
+    authentication: TolgeeAuthentication?,
+    destination: String?,
+  ) {
+    val userId =
+      destination?.let {
+        "/users/([0-9]+)"
+          .toRegex()
+          .find(it)
+          ?.groupValues
+          ?.getOrNull(1)
+          ?.toLong()
+      } ?: return
+
+    if (authentication == null) {
+      throw MessagingException("Unauthenticated")
+    }
+
+    val creds = authentication.credentials
+    if (creds is ApiKeyDto) {
+      // API keys must not subscribe to user topics
+      throw MessagingException("Forbidden")
+    }
+
+    val user = (authentication as? TolgeeAuthentication)?.principal
+    if (user?.id != userId) {
+      throw MessagingException("Forbidden")
+    }
+  }
+
+  private fun throwForbidden() {
+    throw MessagingException("Forbidden")
   }
 }

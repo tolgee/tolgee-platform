@@ -7,21 +7,27 @@ import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
 import jakarta.persistence.FetchType
+import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 import jakarta.persistence.Temporal
 import jakarta.persistence.TemporalType
+import jakarta.persistence.Transient
 import jakarta.persistence.UniqueConstraint
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotEmpty
 import jakarta.validation.constraints.NotNull
-import java.util.*
+import java.util.Date
 
 @Entity
 @Table(
   uniqueConstraints = [
     UniqueConstraint(columnNames = ["keyHash"], name = "api_key_hash_unique"),
     UniqueConstraint(columnNames = ["key"], name = "api_key_unique"),
+  ],
+  indexes = [
+    Index(columnList = "project_id"),
+    Index(columnList = "user_account_id"),
   ],
 )
 class ApiKey(
@@ -34,20 +40,19 @@ class ApiKey(
   @NotNull
   @NotEmpty
   @Enumerated(EnumType.STRING)
-  @field:ElementCollection(targetClass = Scope::class, fetch = FetchType.EAGER)
+  @ElementCollection(targetClass = Scope::class, fetch = FetchType.EAGER)
   var scopesEnum: MutableSet<Scope?>,
 ) : StandardAuditModel() {
-  @field:NotBlank
+  @NotBlank
   var description: String = ""
 
-  @field:NotBlank
+  @NotBlank
   var keyHash: String = ""
 
   /**
    * Encoded key with project id
    */
   @Transient
-  @Column(insertable = false, updatable = false)
   var encodedKey: String? = null
 
   @ManyToOne

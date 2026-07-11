@@ -5,6 +5,7 @@ import io.tolgee.configuration.tolgee.machineTranslation.DeeplMachineTranslation
 import io.tolgee.model.mtServiceConfig.Formality
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
+import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
@@ -24,26 +25,35 @@ class DeeplApiService(
     sourceTag: String,
     targetTag: String,
     formality: Formality,
+    context: String? = null,
   ): String? {
     val headers = HttpHeaders()
     headers.contentType = MediaType.APPLICATION_FORM_URLENCODED
+    headers.set("Authorization", "DeepL-Auth-Key ${deeplMachineTranslationProperties.authKey}")
 
     val requestBody: MultiValueMap<String, String> = LinkedMultiValueMap()
     // Mandatory parameters
-    requestBody.add("auth_key", deeplMachineTranslationProperties.authKey)
     requestBody.add("text", text)
     requestBody.add("source_lang", sourceTag.uppercase())
     requestBody.add("target_lang", targetTag.uppercase())
-
+    deeplMachineTranslationProperties.optionalParameters?.forEach {
+      requestBody.add(it.key, it.value)
+    }
     addFormality(requestBody, formality)
+    context?.takeIf { it.isNotBlank() }?.let { requestBody.add("context", it) }
+
+    val request = HttpEntity(requestBody, headers)
 
     val response =
       restTemplate.postForEntity<DeeplResponse>(
         apiEndpointFromKey(),
-        requestBody,
+        request,
       )
 
-    return response.body?.translations?.first()?.text
+    return response.body
+      ?.translations
+      ?.first()
+      ?.text
       ?: throw RuntimeException(response.toString())
   }
 

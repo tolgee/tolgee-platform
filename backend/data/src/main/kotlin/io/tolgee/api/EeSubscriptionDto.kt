@@ -4,7 +4,7 @@ import io.tolgee.constants.Feature
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import org.hibernate.annotations.ColumnDefault
-import java.util.*
+import java.util.Date
 
 data class EeSubscriptionDto(
   @field:NotBlank
@@ -17,4 +17,10 @@ data class EeSubscriptionDto(
   var enabledFeatures: Array<Feature>,
   var status: SubscriptionStatus = SubscriptionStatus.ACTIVE,
   var lastValidCheck: Date? = null,
+  var nonCommercial: Boolean = false,
+  var includedKeys: Long,
+  var includedSeats: Long,
+  var isPayAsYouGo: Boolean,
+  var keysLimit: Long,
+  var seatsLimit: Long,
 )

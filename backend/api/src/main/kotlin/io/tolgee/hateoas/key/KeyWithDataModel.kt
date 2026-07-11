@@ -38,4 +38,9 @@ open class KeyWithDataModel(
   val pluralArgName: String?,
   @Schema(description = "Custom values of the key")
   val custom: Map<String, Any?>,
-) : RepresentationModel<KeyWithDataModel>(), Serializable
+  @Schema(description = "Maximum character limit for translations of this key")
+  val maxCharLimit: Int?,
+  @Schema(description = "Branch of the key")
+  val branch: String?,
+) : RepresentationModel<KeyWithDataModel>(),
+  Serializable

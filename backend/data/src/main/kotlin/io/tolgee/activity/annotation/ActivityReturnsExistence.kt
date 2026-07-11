@@ -1,4 +1,4 @@
 package io.tolgee.activity.annotation
 
-@Target(allowedTargets = [AnnotationTarget.CLASS])
+@Target(AnnotationTarget.CLASS)
 annotation class ActivityReturnsExistence

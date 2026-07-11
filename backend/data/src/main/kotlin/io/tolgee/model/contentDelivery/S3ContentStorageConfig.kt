@@ -1,5 +1,6 @@
 package io.tolgee.model.contentDelivery
 
+import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
@@ -34,4 +35,9 @@ class S3ContentStorageConfig(
 
   @field:NotBlank
   override var signingRegion: String = ""
+
+  @field:Schema(
+    description = "Specifies an optional subfolder structure within s3 bucket to which content will be stored",
+  )
+  override var path: String? = ""
 }

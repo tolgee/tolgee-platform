@@ -2,7 +2,7 @@ import { Box, Button, ButtonGroup, Typography } from '@mui/material';
 import { T } from '@tolgee/react';
 import { useEffect, useState } from 'react';
 import { FullPageLoading } from 'tg.component/common/FullPageLoading';
-import { PermissionsAdvanced } from 'tg.ee/PermissionsAdvanced/PermissionsAdvanced';
+import { PermissionsAdvanced } from './PermissionsAdvanced';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 
 import { PermissionsBasic } from './PermissionsBasic';
@@ -25,14 +25,16 @@ type Props = {
   height?: number;
   allLangs?: LanguageModel[];
   hideNone?: boolean;
+  disabled?: boolean;
 };
 
-export const PermissionsSettings: React.FC<Props> = ({
+export const PermissionsSettings: React.FC<React.PropsWithChildren<Props>> = ({
   title,
   permissions,
   onChange,
   allLangs,
   hideNone,
+  disabled,
 }) => {
   const [tab, setTab] = useState<TabsType>(
     permissions.type ? 'basic' : 'advanced'
@@ -69,6 +71,7 @@ export const PermissionsSettings: React.FC<Props> = ({
         viewLanguages: permissions.viewLanguageIds || [],
         translateLanguages: permissions.translateLanguageIds || [],
         stateChangeLanguages: permissions.stateChangeLanguageIds || [],
+        suggestLanguages: permissions.suggestLanguageIds || [],
       });
     }
   }, [dependenciesLoadable.data, rolesLoadable.data, advancedState]);
@@ -104,7 +107,7 @@ export const PermissionsSettings: React.FC<Props> = ({
         mb={2}
       >
         <Typography variant="h5">{title}</Typography>
-        <ButtonGroup size="small">
+        <ButtonGroup size="small" disabled={disabled}>
           <Button
             color={tab === 'basic' ? 'primary' : 'default'}
             onClick={handleChange('basic')}
@@ -130,6 +133,7 @@ export const PermissionsSettings: React.FC<Props> = ({
             roles={rolesLoadable.data as RolesMap}
             allLangs={allLangs}
             hideNone={hideNone}
+            disabled={disabled}
           />
         )}
         {tab === 'advanced' && (

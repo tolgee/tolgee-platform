@@ -3,7 +3,7 @@ package io.tolgee.model.activity
 import io.tolgee.activity.data.EntityDescriptionRef
 
 interface ActivityEntityWithDescription {
-  var describingRelations: Map<String, EntityDescriptionRef>?
+  val describingRelations: Map<String, EntityDescriptionRef>?
 
   /**
    * This field is filled by components implementing [io.tolgee.activity.ActivityAdditionalDescriber]

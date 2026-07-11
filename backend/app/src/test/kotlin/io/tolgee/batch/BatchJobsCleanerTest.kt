@@ -5,6 +5,7 @@ import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.model.batch.BatchJobStatus
+import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assert
 import io.tolgee.util.StuckBatchJobTestUtil
 import org.junit.jupiter.api.AfterEach
@@ -18,6 +19,7 @@ import org.springframework.test.annotation.DirtiesContext
   properties = ["tolgee.batch.scheduled-handle-stuck-job-delay=200"],
 )
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@ContextRecreatingTest
 class BatchJobsCleanerTest : AbstractSpringTest() {
   @Autowired
   lateinit var jobConcurrentLauncher: BatchJobConcurrentLauncher
@@ -53,14 +55,38 @@ class BatchJobsCleanerTest : AbstractSpringTest() {
     val successWithRetriedChunks = createSuccessWithRetriedChunks()
 
     waitForNotThrowing(timeout = 2000, pollTime = 100) {
-      batchJobService.getJobDto(cancelledJob.id).status.assert.isEqualTo(BatchJobStatus.CANCELLED)
-      batchJobService.getJobDto(failedJob.id).status.assert.isEqualTo(BatchJobStatus.FAILED)
-      batchJobService.getJobDto(successBatchJob.id).status.assert.isEqualTo(BatchJobStatus.SUCCESS)
-      batchJobService.getJobDto(noExecutionBatchJob.id).status.assert.isEqualTo(BatchJobStatus.SUCCESS)
-      batchJobService.getJobDto(runningJob.id).status.assert.isEqualTo(BatchJobStatus.RUNNING)
-      batchJobService.getJobDto(pendingJob.id).status.assert.isEqualTo(BatchJobStatus.PENDING)
-      batchJobService.getJobDto(dontTouchJob.id).status.assert.isEqualTo(BatchJobStatus.FAILED)
-      batchJobService.getJobDto(successWithRetriedChunks.id).status.assert.isEqualTo(BatchJobStatus.SUCCESS)
+      batchJobService
+        .getJobDto(cancelledJob.id)
+        .status.assert
+        .isEqualTo(BatchJobStatus.CANCELLED)
+      batchJobService
+        .getJobDto(failedJob.id)
+        .status.assert
+        .isEqualTo(BatchJobStatus.FAILED)
+      batchJobService
+        .getJobDto(successBatchJob.id)
+        .status.assert
+        .isEqualTo(BatchJobStatus.SUCCESS)
+      batchJobService
+        .getJobDto(noExecutionBatchJob.id)
+        .status.assert
+        .isEqualTo(BatchJobStatus.SUCCESS)
+      batchJobService
+        .getJobDto(runningJob.id)
+        .status.assert
+        .isEqualTo(BatchJobStatus.RUNNING)
+      batchJobService
+        .getJobDto(pendingJob.id)
+        .status.assert
+        .isEqualTo(BatchJobStatus.PENDING)
+      batchJobService
+        .getJobDto(dontTouchJob.id)
+        .status.assert
+        .isEqualTo(BatchJobStatus.FAILED)
+      batchJobService
+        .getJobDto(successWithRetriedChunks.id)
+        .status.assert
+        .isEqualTo(BatchJobStatus.SUCCESS)
     }
   }
 

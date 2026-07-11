@@ -3,7 +3,7 @@ package io.tolgee.fixtures
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import java.nio.charset.StandardCharsets
-import java.util.*
+import java.util.HexFormat
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
@@ -49,7 +49,9 @@ fun verifyWebhookSignatureHeader(
   return true
 }
 
-class SignatureVerificationException(message: String) : Exception(message)
+class SignatureVerificationException(
+  message: String,
+) : Exception(message)
 
 fun computeHmacSha256(
   key: String,

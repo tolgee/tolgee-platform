@@ -47,6 +47,7 @@ class MachineTranslationSettingsControllerTest : ProjectAuthControllerTest() {
     googleMachineTranslationProperties.defaultEnabled = true
     googleMachineTranslationProperties.defaultPrimary = true
     googleMachineTranslationProperties.apiKey = "dummy"
+    llmProperties.enabled = true
   }
 
   @Test
@@ -139,8 +140,38 @@ class MachineTranslationSettingsControllerTest : ProjectAuthControllerTest() {
 
     executeInNewTransaction {
       val germanSetting =
-        mtServiceConfigService.getProjectSettings(testData.projectBuilder.self)
+        mtServiceConfigService
+          .getProjectSettings(testData.projectBuilder.self)
           .find { it.targetLanguage?.id == testData.germanLanguage.id }
+      germanSetting!!.awsFormality.assert.isEqualTo(Formality.FORMAL)
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `formality can be set for default`() {
+    performAuthPut(
+      "/v2/projects/${project.id}/machine-translation-service-settings",
+      SetMachineTranslationSettingsDto(
+        listOf(
+          MachineTranslationLanguagePropsDto(
+            targetLanguageId = null,
+            primaryService = MtServiceType.GOOGLE,
+            enabledServicesInfo =
+              setOf(
+                MtServiceInfo(MtServiceType.GOOGLE, null),
+                MtServiceInfo(MtServiceType.AWS, Formality.FORMAL),
+              ),
+          ),
+        ),
+      ),
+    )
+
+    executeInNewTransaction {
+      val germanSetting =
+        mtServiceConfigService
+          .getProjectSettings(testData.projectBuilder.self)
+          .find { it.targetLanguage?.id == null }
       germanSetting!!.awsFormality.assert.isEqualTo(Formality.FORMAL)
     }
   }
@@ -155,7 +186,7 @@ class MachineTranslationSettingsControllerTest : ProjectAuthControllerTest() {
           MachineTranslationLanguagePropsDto(
             targetLanguageId = testData.germanLanguage.id,
             primaryService = MtServiceType.AWS,
-            primaryServiceInfo = MtServiceInfo(MtServiceType.TOLGEE, Formality.FORMAL),
+            primaryServiceInfo = MtServiceInfo(MtServiceType.AWS, Formality.FORMAL, promptId = null),
           ),
         ),
       ),
@@ -175,14 +206,14 @@ class MachineTranslationSettingsControllerTest : ProjectAuthControllerTest() {
     performSet(testData.englishLanguage, MtServiceType.AWS, Formality.FORMAL).andIsBadRequest
     performSet(testData.germanLanguage, MtServiceType.AWS, Formality.FORMAL).andIsOk
     performSet(testData.germanLanguage, MtServiceType.AWS, Formality.DEFAULT).andIsOk
-    performSet(testData.germanLanguage, MtServiceType.TOLGEE, Formality.FORMAL).andIsOk
-    performSet(testData.englishLanguage, MtServiceType.TOLGEE, Formality.FORMAL).andIsOk
+    performSet(testData.germanLanguage, MtServiceType.PROMPT, Formality.FORMAL).andIsBadRequest
+    performSet(testData.englishLanguage, MtServiceType.PROMPT, Formality.FORMAL).andIsBadRequest
     performSet(
       MachineTranslationLanguagePropsDto(
         testData.englishLanguage.id,
-        primaryServiceInfo = MtServiceInfo(MtServiceType.TOLGEE, Formality.FORMAL),
+        primaryServiceInfo = MtServiceInfo(MtServiceType.PROMPT, Formality.FORMAL),
       ),
-    ).andIsOk
+    ).andIsBadRequest
   }
 
   private fun performSet(
@@ -263,7 +294,21 @@ class MachineTranslationSettingsControllerTest : ProjectAuthControllerTest() {
     ).andPrettyPrint.andAssertThatJson {
       node("_embedded.languageInfos") {
         isArray
-        node("[1]") {
+        node("[0]") {
+          node("languageTag").isEqualTo(null)
+          node("supportedServices") {
+            isArray
+            node("[0]") {
+              node("serviceType").isEqualTo("GOOGLE")
+              node("formalitySupported").isEqualTo(false)
+            }
+            node("[1]") {
+              node("serviceType").isEqualTo("AWS")
+              node("formalitySupported").isEqualTo(true)
+            }
+          }
+        }
+        node("[2]") {
           node("languageTag").isEqualTo("de")
           node("supportedServices") {
             isArray

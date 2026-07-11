@@ -1,0 +1,108 @@
+# =============================================================================
+# LOCAL DEVELOPMENT ONLY - Do not use in production.
+# =============================================================================
+#
+# Tempo - Trace Storage & Metrics Generation
+#
+# Purpose:
+#   Stores distributed traces and generates RED metrics (Rate, Errors, Duration)
+#   from ingested spans. Metrics are pushed to Prometheus via remote_write.
+#
+# Part of: Tolgee Local Observability Stack
+#   See: docs/observability/
+#
+# =============================================================================
+
+stream_over_http_enabled: true
+server:
+  http_listen_port: 3200
+  log_level: info
+  # Default 16 MiB is too small to fetch any trace that approaches our
+  # 20 MB max_bytes_per_trace cap. The /api/traces/<id> HTTP handler proxies
+  # through internal gRPC calls (query_frontend → querier → ingester); every
+  # hop must accept the larger message size. 32 MiB matches the per-trace
+  # ceiling with comfortable headroom.
+  grpc_server_max_send_msg_size: 33554432
+  grpc_server_max_recv_msg_size: 33554432
+  http_server_read_timeout: 60s
+  http_server_write_timeout: 60s
+
+querier:
+  frontend_worker:
+    grpc_client_config:
+      max_send_msg_size: 33554432
+      max_recv_msg_size: 33554432
+
+ingester_client:
+  grpc_client_config:
+    max_send_msg_size: 33554432
+    max_recv_msg_size: 33554432
+
+query_frontend:
+  search:
+    duration_slo: 5s
+    throughput_bytes_slo: 1.073741824e+09
+  trace_by_id:
+    duration_slo: 5s
+
+distributor:
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4317
+        http:
+          endpoint: 0.0.0.0:4318
+
+ingester:
+  max_block_duration: 5m
+
+compactor:
+  compaction:
+    block_retention: 48h
+
+# Metrics Generator - derives metrics from ingested traces
+# See: https://grafana.com/docs/tempo/latest/metrics-from-traces/span-metrics/
+metrics_generator:
+  processor:
+    span_metrics:
+      dimensions:
+        # HTTP attributes (stable semantic conventions)
+        - http.request.method
+        - http.route
+        - http.response.status_code
+        # Database attributes
+        - db.system
+        - db.operation
+      enable_target_info: true
+    local_blocks:
+      flush_to_storage: true  # enables queries against historical data
+  traces_storage:
+    path: /var/tempo/generator/traces
+  storage:
+    path: /var/tempo/generator/wal
+    remote_write:
+      - url: http://prometheus:9090/api/v1/write
+        send_exemplars: true
+  registry:
+    external_labels:
+      source: tempo
+
+storage:
+  trace:
+    backend: local
+    wal:
+      path: /var/tempo/wal
+    local:
+      path: /var/tempo/blocks
+
+overrides:
+  defaults:
+    global:
+      # Default 5 MB is too small once Tolgee batch jobs produce traces with
+      # large db.statement / activity-log spans. 20 MB gives ~5x headroom over
+      # observed peak (100k-key import ≈ 4.4 MB) while still tripping fast on
+      # any regression that re-introduces framework noise.
+      max_bytes_per_trace: 20971520  # 20 MB
+    metrics_generator:
+      processors: [service-graphs, span-metrics, local-blocks]

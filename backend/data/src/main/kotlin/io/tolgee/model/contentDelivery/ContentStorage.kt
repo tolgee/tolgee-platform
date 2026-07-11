@@ -7,12 +7,19 @@ import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
+import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToOne
+import jakarta.persistence.Table
 import jakarta.validation.constraints.NotBlank
 
 @Entity
 @ActivityLoggedEntity
+@Table(
+  indexes = [
+    Index(columnList = "project_id"),
+  ],
+)
 class ContentStorage(
   @ManyToOne(fetch = FetchType.LAZY)
   var project: Project,

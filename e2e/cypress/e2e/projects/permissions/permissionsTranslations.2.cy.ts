@@ -11,7 +11,9 @@ describe('Permissions translations 2', () => {
       (projectInfo) => {
         checkPermissions(projectInfo, {
           'project-menu-item-dashboard': RUN,
+          'project-menu-item-translations': RUN,
           'project-menu-item-export': RUN,
+          'project-menu-item-integrate': SKIP,
         });
       }
     );

@@ -28,12 +28,18 @@ class KeyWithScreenshotsModelAssembler(
         entity.translations.associate {
           it.language.tag to translationModelAssembler.toModel(it)
         },
-      tags = entity.keyMeta?.tags?.map { tagModelAssembler.toModel(it) }?.toSet() ?: setOf(),
+      tags =
+        entity.keyMeta
+          ?.tags
+          ?.map { tagModelAssembler.toModel(it) }
+          ?.toSet() ?: setOf(),
       screenshots = screenshots.map { screenshotModelAssembler.toModel(it) },
       description = entity.keyMeta?.description,
       isPlural = entity.isPlural,
       pluralArgName = entity.pluralArgName,
       custom = entity.keyMeta?.custom ?: mapOf(),
+      maxCharLimit = entity.maxCharLimit,
+      branch = entity.branch?.name,
     )
   }
 }

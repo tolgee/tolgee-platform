@@ -8,7 +8,13 @@ import org.springframework.transaction.annotation.Transactional
 class MtService(
   private val applicationContext: ApplicationContext,
 ) {
-  @Transactional
+  /**
+   * noRollbackFor: batch chunk processing catches provider exceptions and commits the chunk
+   * transaction with the successfully translated items. Without it, an exception passing
+   * through this boundary marks the shared transaction rollback-only, and the whole chunk
+   * (including already translated items) gets rolled back to the savepoint.
+   */
+  @Transactional(noRollbackFor = [Exception::class])
   fun getMachineTranslations(
     projectId: Long,
     isBatch: Boolean,
@@ -19,7 +25,7 @@ class MtService(
     return getMachineTranslations(projectId, isBatch, params)
   }
 
-  @Transactional
+  @Transactional(noRollbackFor = [Exception::class])
   fun getMachineTranslations(
     projectId: Long,
     isBatch: Boolean,

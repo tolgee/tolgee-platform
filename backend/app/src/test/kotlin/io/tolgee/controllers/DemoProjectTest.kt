@@ -5,6 +5,7 @@ import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.Project
+import io.tolgee.model.translationMemory.TranslationMemoryType
 import io.tolgee.testing.AbstractControllerTest
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -12,8 +13,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 
 @AutoConfigureMockMvc
-class DemoProjectTest :
-  AbstractControllerTest() {
+class DemoProjectTest : AbstractControllerTest() {
   val demoOrganizationName = "Oh my organization"
 
   @Test
@@ -34,9 +34,16 @@ class DemoProjectTest :
       assertPlural()
       assertDescriptionAdded()
       assertTranslationHasComment()
+      assertProjectTmCreated()
     }
 
     assertStatsCreated()
+  }
+
+  private fun assertProjectTmCreated() {
+    val tm = translationMemoryManagementService.getProjectTm(project.id)!!
+    tm.type.assert.isEqualTo(TranslationMemoryType.PROJECT)
+    tm.sourceLanguageTag.assert.isEqualTo("en")
   }
 
   private fun assertTranslationHasComment() {
@@ -46,7 +53,8 @@ class DemoProjectTest :
       .single { it.language.tag == "de" }
       .comments
       .single()
-      .text.assert.isEqualTo("This is wrong!")
+      .text.assert
+      .isEqualTo("This is wrong!")
   }
 
   private fun assertStatsCreated() {
@@ -96,12 +104,18 @@ class DemoProjectTest :
 
   private fun assertTagged() {
     val key = getAddButtonKey()
-    key.keyMeta?.tags?.map { it.name }?.contains("button")
+    key.keyMeta
+      ?.tags
+      ?.map { it.name }
+      ?.contains("button")
   }
 
   fun assertDescriptionAdded() {
     val key = getAddButtonKey()
-    key.keyMeta!!.description.assert.isNotNull().isNotEmpty()
+    key.keyMeta!!
+      .description.assert
+      .isNotNull()
+      .isNotEmpty()
   }
 
   val keyCount = DemoProjectData.translations["en"]!!.size

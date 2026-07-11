@@ -7,7 +7,8 @@ import io.tolgee.model.Language
 import io.tolgee.model.key.Key
 import io.tolgee.model.mtServiceConfig.Formality
 import net.datafaker.Faker
-import java.util.*
+import java.util.Locale
+import java.util.UUID
 
 class SuggestionTestData : BaseTestData() {
   var germanLanguage: Language
@@ -103,34 +104,34 @@ class SuggestionTestData : BaseTestData() {
 
   private fun ProjectBuilder.addKeyDistances() {
     this.addKeysDistance(data.keys[0].self, data.keys[1].self) {
-      score = 10000
+      distance = 1000.0
     }
     this.addKeysDistance(data.keys[0].self, data.keys[2].self) {
-      score = 8000
+      distance = 8.0
     }
     this.addKeysDistance(data.keys[0].self, data.keys[3].self) {
-      score = 8000
+      distance = 8.0
     }
     this.addKeysDistance(data.keys[0].self, data.keys[4].self) {
-      score = 8000
+      distance = 8.0
     }
     this.addKeysDistance(data.keys[1].self, data.keys[2].self) {
-      score = 2000
+      distance = 2.0
     }
     this.addKeysDistance(data.keys[1].self, data.keys[3].self) {
-      score = 1000
+      distance = 1.0
     }
     this.addKeysDistance(data.keys[1].self, data.keys[4].self) {
-      score = 1000
+      distance = 1.0
     }
     this.addKeysDistance(data.keys[2].self, data.keys[3].self) {
-      score = 1000
+      distance = 1.0
     }
     this.addKeysDistance(data.keys[2].self, data.keys[4].self) {
-      score = 1000
+      distance = 1.0
     }
     this.addKeysDistance(data.keys[3].self, data.keys[4].self) {
-      score = 1000
+      distance = 1.0
     }
   }
 
@@ -152,12 +153,11 @@ class SuggestionTestData : BaseTestData() {
     }
   }
 
-  fun enableTolgee(formality: Formality = Formality.DEFAULT) {
+  fun enablePrompt(formality: Formality = Formality.DEFAULT) {
     projectBuilder.addMtServiceConfig {
       this.targetLanguage = germanLanguage
-      this.enabledServices = mutableSetOf(MtServiceType.TOLGEE)
-      this.primaryService = MtServiceType.TOLGEE
-      this.tolgeeFormality = formality
+      this.enabledServices = mutableSetOf(MtServiceType.PROMPT)
+      this.primaryService = MtServiceType.PROMPT
     }
   }
 
@@ -171,7 +171,7 @@ class SuggestionTestData : BaseTestData() {
           MtServiceType.DEEPL,
           MtServiceType.AZURE,
           MtServiceType.BAIDU,
-          MtServiceType.TOLGEE,
+          MtServiceType.PROMPT,
         )
       this.primaryService = MtServiceType.AWS
     }
@@ -256,16 +256,17 @@ class SuggestionTestData : BaseTestData() {
     isPlural: Boolean,
   ): Key {
     val isNotPluralString = if (isPlural) "" else "not plural"
-    return projectBuilder.addKey(name) {
-      this.self.isPlural = isPlural
-      addTranslation {
-        language = englishLanguage
-        text = "{value, plural, one {# dog} other {# dogs}}$isNotPluralString"
-      }
-      addTranslation {
-        language = germanLanguage
-        text = "{value, plural, one {# Hund} other {# Hunde}}$isNotPluralString"
-      }
-    }.self
+    return projectBuilder
+      .addKey(name) {
+        this.self.isPlural = isPlural
+        addTranslation {
+          language = englishLanguage
+          text = "{value, plural, one {# dog} other {# dogs}}$isNotPluralString"
+        }
+        addTranslation {
+          language = germanLanguage
+          text = "{value, plural, one {# Hund} other {# Hunde}}$isNotPluralString"
+        }
+      }.self
   }
 }

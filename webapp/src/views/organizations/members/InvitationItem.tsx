@@ -1,6 +1,6 @@
 import { T, useTranslate } from '@tolgee/react';
 import { IconButton, styled, Tooltip } from '@mui/material';
-import { Link, Clear } from '@mui/icons-material';
+import { Link02, XClose } from '@untitled-ui/icons-react';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
@@ -51,7 +51,9 @@ type Props = {
   invitation: OrganizationInvitationModel;
 };
 
-export const InvitationItem: React.FC<Props> = ({ invitation }) => {
+export const InvitationItem: React.FC<React.PropsWithChildren<Props>> = ({
+  invitation,
+}) => {
   const { t } = useTranslate();
   const translateRole = useOrgRoleTranslation();
 
@@ -84,15 +86,17 @@ export const InvitationItem: React.FC<Props> = ({ invitation }) => {
           <StyledPermission>{translateRole(invitation.type)}</StyledPermission>
         </Tooltip>
 
-        <Tooltip title={t('invite_user_invitation_copy_button')}>
-          <IconButton
-            data-cy="organization-invitation-copy-button"
-            size="small"
-            onClick={handleGetLink}
-          >
-            <Link />
-          </IconButton>
-        </Tooltip>
+        {invitation.code && (
+          <Tooltip title={t('invite_user_invitation_copy_button')}>
+            <IconButton
+              data-cy="organization-invitation-copy-button"
+              size="small"
+              onClick={handleGetLink}
+            >
+              <Link02 />
+            </IconButton>
+          </Tooltip>
+        )}
 
         <Tooltip title={t('invite_user_invitation_cancel_button')}>
           <IconButton
@@ -100,7 +104,7 @@ export const InvitationItem: React.FC<Props> = ({ invitation }) => {
             size="small"
             onClick={handleCancel}
           >
-            <Clear />
+            <XClose />
           </IconButton>
         </Tooltip>
       </StyledItemActions>

@@ -7,4 +7,5 @@ export type KeyFormType = {
   isPlural: boolean;
   pluralParameter: string;
   custom: string;
+  maxCharLimit: number | undefined;
 };

@@ -1,9 +1,10 @@
 import {
-  ArrowUpward,
-  ArrowDownward,
-  ArrowBack,
-  ArrowForward,
-} from '@mui/icons-material';
+  ArrowUp,
+  ArrowDown,
+  ArrowLeft,
+  ArrowRight,
+  CornerDownLeft,
+} from '@untitled-ui/icons-react';
 
 interface CommandIconProps {
   children: React.ReactNode;
@@ -27,20 +28,6 @@ export const KeyCtrl = () => (
   </SvgTemplate>
 );
 
-export const KeyEnter = () => (
-  <SvgTemplate>
-    <g
-      fill="none"
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth="1.2"
-    >
-      <path d="M12 3.53088v3c0 1-1 2-2 2H4M7 11.53088l-3-3 3-3" />
-    </g>
-  </SvgTemplate>
-);
-
 export const KeyShift = () => (
   <SvgTemplate>
     <g
@@ -56,10 +43,12 @@ export const KeyShift = () => (
   </SvgTemplate>
 );
 
-export const KeyUp = () => <ArrowUpward style={svgStyle} />;
+export const KeyEnter = () => <CornerDownLeft style={svgStyle} />;
 
-export const KeyDown = () => <ArrowDownward style={svgStyle} />;
+export const KeyUp = () => <ArrowUp style={svgStyle} />;
 
-export const KeyLeft = () => <ArrowBack style={svgStyle} />;
+export const KeyDown = () => <ArrowDown style={svgStyle} />;
 
-export const KeyRight = () => <ArrowForward style={svgStyle} />;
+export const KeyLeft = () => <ArrowLeft style={svgStyle} />;
+
+export const KeyRight = () => <ArrowRight style={svgStyle} />;

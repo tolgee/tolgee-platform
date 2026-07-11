@@ -8,7 +8,7 @@ import {
 } from '../../common/translations';
 import { waitForGlobalLoading } from '../../common/loading';
 import { createKey, deleteProject } from '../../common/apiCalls/common';
-import { confirmStandard } from '../../common/shared';
+import { confirmStandard, gcyAdvanced } from '../../common/shared';
 
 describe('Translations Base', () => {
   let project: ProjectDTO = null;
@@ -23,7 +23,7 @@ describe('Translations Base', () => {
 
   it('will switch translation to plural, without a problem', () => {
     cy.wait(100);
-    cy.gcy('global-empty-list').should('be.visible');
+    cy.gcy('global-empty-state').should('be.visible');
     createTranslation({
       key: 'Test key',
       translation: 'Translated key with { stuff to escape',
@@ -31,7 +31,7 @@ describe('Translations Base', () => {
 
     getCell('Test key').click();
     cy.gcy('key-plural-checkbox').click();
-    cy.gcy('translations-cell-save-button').click();
+    cy.gcy('translations-cell-main-action-button').click();
     waitForGlobalLoading();
     getTranslationCell('Test key', 'en')
       .contains("Translated key with '{' stuff to escape")
@@ -51,13 +51,34 @@ describe('Translations Base', () => {
     cy.gcy('key-plural-variable-name')
       .find('input')
       .should('have.value', 'testValue');
-    cy.gcy('translations-cell-save-button').click();
+    cy.gcy('translations-cell-main-action-button').click();
     waitForGlobalLoading();
     cy.waitForDom();
     getTranslationCell('Test key', 'en')
       .findDcy('translation-plural-parameter')
       .contains('testValue')
       .should('be.visible');
+  });
+
+  it('shows base and existing exact forms', () => {
+    createKey(
+      project.id,
+      'Test key',
+      {
+        en: 'You have {testValue, plural, one {# item} =2 {Two items} other {# items}}',
+        cs: 'Máte {testValue, plural, one {# položku} =4 {# položky } few {# položky} other {# položek}}',
+      },
+      { isPlural: true }
+    );
+    visitTranslations(project.id);
+    waitForGlobalLoading();
+    getTranslationCell('Test key', 'cs').click();
+    gcyAdvanced({ value: 'translation-editor', variant: '=2' }).should(
+      'be.visible'
+    );
+    gcyAdvanced({ value: 'translation-editor', variant: '=4' }).should(
+      'be.visible'
+    );
   });
 
   it('will change plural parameter name for all translations', () => {
@@ -74,9 +95,8 @@ describe('Translations Base', () => {
     waitForGlobalLoading();
 
     getCell('Test key').click();
-    cy.gcy('key-plural-checkbox-expand').click();
     cy.gcy('key-plural-variable-name').clear().type('testVariable');
-    cy.gcy('translations-cell-save-button').click();
+    cy.gcy('translations-cell-main-action-button').click();
     waitForGlobalLoading();
   });
 
@@ -95,7 +115,7 @@ describe('Translations Base', () => {
 
     getCell('Test key').click();
     cy.gcy('key-plural-checkbox').click();
-    cy.gcy('translations-cell-save-button').click();
+    cy.gcy('translations-cell-main-action-button').click();
     waitForGlobalLoading();
 
     cy.gcy('global-confirmation-dialog').should('be.visible');

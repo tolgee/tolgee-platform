@@ -1,9 +1,8 @@
-import { PaletteColor } from '@mui/material/styles';
-import { PaletteColorOptions } from '@mui/material';
+import API from '@openreplay/tracker';
+import type { PaletteColor, PaletteColorOptions } from '@mui/material';
 import {
   Activity,
   Cell,
-  colors,
   Editor,
   Emphasis,
   ExampleBanner,
@@ -12,6 +11,7 @@ import {
   Login,
   Marker,
   Navbar,
+  Label,
   Placeholders,
   QuickStart,
   RevisionFilterBanner,
@@ -20,10 +20,12 @@ import {
   Tooltip,
   TopBanner,
 } from './colors';
-import { tolgeeColors, tolgeePalette } from 'figmaTheme';
+import { tolgeeColors, tolgeePalette } from './figmaTheme';
 
 declare module '*.svg' {
-  const content: React.FunctionComponent<React.SVGAttributes<SVGElement>>;
+  const content: React.FunctionComponent<
+    React.PropsWithChildren<React.SVGAttributes<SVGElement>>
+  >;
   export default content;
 }
 
@@ -60,6 +62,7 @@ declare module '@mui/material/styles/createPalette' {
     login: Login;
     input: Input;
     revisionFilterBanner: RevisionFilterBanner;
+    label: Label;
   }
 
   interface PaletteOptions {
@@ -87,6 +90,7 @@ declare module '@mui/material/styles/createPalette' {
     login: Login;
     input: Input;
     revisionFilterBanner: RevisionFilterBanner;
+    label: Label;
   }
 }
 
@@ -96,10 +100,9 @@ declare module '@mui/material/Button' {
   }
 }
 
-declare module '@mui/material/ButtonBase' {
-  interface ButtonBaseOwnProps<TProps, T extends React.ElementType<TProps>>
-    extends TProps {
-    component?: T;
+declare global {
+  interface Window {
+    openReplayTracker?: API;
   }
 }
 
@@ -107,4 +110,8 @@ declare module 'react' {
   interface HTMLAttributes<T> extends AriaAttributes, DOMAttributes<T> {
     webkitdirectory?: boolean;
   }
+
+  type KeyOf<T> = {
+    [K in keyof T]-?: T[K] extends Key ? K : never;
+  }[keyof T];
 }

@@ -6,4 +6,12 @@ interface AdditionalTestDataSaver {
   fun save(builder: TestDataBuilder)
 
   fun clean(builder: TestDataBuilder)
+
+  fun beforeSave(builder: TestDataBuilder) {}
+
+  fun afterSave(builder: TestDataBuilder) {}
+
+  fun beforeClean(builder: TestDataBuilder) {}
+
+  fun afterClean(builder: TestDataBuilder) {}
 }

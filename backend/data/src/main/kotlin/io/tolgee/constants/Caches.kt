@@ -19,6 +19,11 @@ interface Caches {
     const val EE_SUBSCRIPTION = "eeSubscription"
     const val LANGUAGES = "languages"
     const val ORGANIZATION_ROLES = "organizationRoles"
+    const val SSO_TENANTS = "ssoTenants"
+    const val LLM_PROVIDERS = "llmProviders"
+    const val LANGUAGE_TOOL_RESULTS = "languageToolResults"
+
+    const val EE_LAST_REPORTED_USAGE = "eeLastReportedUsage"
 
     val caches =
       listOf(
@@ -37,6 +42,10 @@ interface Caches {
         EE_SUBSCRIPTION,
         LANGUAGES,
         ORGANIZATION_ROLES,
+        SSO_TENANTS,
+        EE_LAST_REPORTED_USAGE,
+        LLM_PROVIDERS,
+        LANGUAGE_TOOL_RESULTS,
       )
   }
 }

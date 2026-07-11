@@ -8,6 +8,7 @@ import io.tolgee.model.key.Key
 import io.tolgee.model.key.Namespace
 
 class NamespacesTestData : BaseTestData() {
+  var keyWithoutNs: Key
   var keyInNs1: Key
   var singleKeyInNs2: Key
   lateinit var defaultUnusedProject: Project
@@ -24,7 +25,7 @@ class NamespacesTestData : BaseTestData() {
     }
 
     projectBuilder.apply {
-      addKeyWithTranslation("key", null)
+      keyWithoutNs = addKeyWithTranslation("key", null)
       keyInNs1 = addKeyWithTranslation("key", "ns-1")
       singleKeyInNs2 = addKeyWithTranslation("key", "ns-2")
       addKeyWithTranslation("key2", null)
@@ -38,6 +39,7 @@ class NamespacesTestData : BaseTestData() {
     root.apply {
       addProject {
         name = "Project 2"
+        useNamespaces = true
       }.build {
         addKeyWithTranslation("key", null)
         addKeyWithTranslation("key", "ns-1")
@@ -46,6 +48,7 @@ class NamespacesTestData : BaseTestData() {
     root.apply {
       addProject {
         name = "Project 3"
+        useNamespaces = true
         defaultUnusedProject = this
       }.build {
         addKeyWithTranslation("key", "ns-1")
@@ -54,6 +57,7 @@ class NamespacesTestData : BaseTestData() {
     root.apply {
       addProject {
         name = "Project 4"
+        useNamespaces = true
         dotProject = this
       }.build {
         addKeyWithTranslation("key", "ns.1")
@@ -66,17 +70,18 @@ class NamespacesTestData : BaseTestData() {
     namespace: String?,
   ): Key {
     val keyBuilder =
-      this.addKey {
-        name = keyName
-      }.build {
-        setNamespace(namespace)?.self?.let {
-          namespaces[it.project to it.name] = it
+      this
+        .addKey {
+          name = keyName
+        }.build {
+          setNamespace(namespace)?.self?.let {
+            namespaces[it.project to it.name] = it
+          }
+          addTranslation {
+            language = englishLanguage
+            text = "hello"
+          }
         }
-        addTranslation {
-          language = englishLanguage
-          text = "hello"
-        }
-      }
     return keyBuilder.self
   }
 }

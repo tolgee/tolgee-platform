@@ -1,11 +1,16 @@
 package io.tolgee.batch
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.opentelemetry.api.trace.Span
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import io.sentry.Sentry
+import io.tolgee.Metrics
 import io.tolgee.activity.ActivityHolder
+import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.component.CurrentDateProvider
-import io.tolgee.component.machineTranslation.TranslationApiRateLimitException
 import io.tolgee.exceptions.ExceptionWithMessage
+import io.tolgee.exceptions.ExpectedUserError
+import io.tolgee.exceptions.LlmRateLimitedException
 import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.batch.BatchJobChunkExecution
@@ -17,7 +22,9 @@ import jakarta.persistence.EntityManager
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.hibernate.LockOptions
 import org.springframework.context.ApplicationContext
-import java.util.*
+import java.lang.RuntimeException
+import java.util.Date
+import kotlin.collections.sorted
 import kotlin.coroutines.CoroutineContext
 import kotlin.math.pow
 import kotlin.system.measureTimeMillis
@@ -26,17 +33,22 @@ open class ChunkProcessingUtil(
   val execution: BatchJobChunkExecution,
   private val applicationContext: ApplicationContext,
   private val coroutineContext: CoroutineContext,
+  private val batchJobDto: BatchJobDto? = null,
 ) : Logging {
+  @WithSpan
   open fun processChunk() {
+    // Add batch job span attributes for tracing
+    val span = Span.current()
+    span.setAttribute("batch.job.id", job.id)
+    span.setAttribute("batch.job.type", job.type.name)
+    span.setAttribute("batch.chunk.execution.id", execution.id)
+    span.setAttribute("batch.chunk.number", execution.chunkNumber.toLong())
+
     val time =
       measureTimeMillis {
-        handleActivity()
         try {
-          processor.process(job, toProcess, coroutineContext) {
-            if (it != toProcess.size) {
-              progressManager.publishSingleChunkProgress(job.id, it)
-            }
-          }
+          handleActivity()
+          processor.process(job, toProcess, coroutineContext)
           successfulTargets = toProcess
           execution.status = BatchJobChunkExecutionStatus.SUCCESS
         } catch (e: Throwable) {
@@ -47,17 +59,23 @@ open class ChunkProcessingUtil(
           }
         }
       }
+
+    // Record chunk execution time metric
+    metrics.recordChunkExecutionTime(job.type.name, execution.status.name, time)
+
     logger.debug("Chunk ${execution.id} executed in ${time}ms")
   }
 
   private fun handleActivity() {
     val activityRevision = activityHolder.activityRevision
     activityRevision.batchJobChunkExecution = execution
-    val batchJobDto = batchJobService.getJobDto(job.id)
-    val project = projectService.get(batchJobDto.projectId)
-    activityRevision.setProject(project)
-    activityHolder.activity = batchJobDto.type.activityType
-    activityRevision.authorId = batchJobDto.authorId
+    job.projectId?.let {
+      val project = projectService.getDto(it)
+      activityRevision.setProject(project)
+      activityRevision.organizationId = project.organizationOwnerId
+    }
+    activityHolder.activity = job.type.activityType
+    activityRevision.authorId = job.authorId
   }
 
   private fun handleException(exception: Throwable) {
@@ -66,14 +84,30 @@ open class ChunkProcessingUtil(
       return
     }
 
-    execution.stackTrace = exception.stackTraceToString()
     execution.status = BatchJobChunkExecutionStatus.FAILED
     execution.errorMessage = (exception as? ExceptionWithMessage)?.tolgeeMessage
-    execution.errorKey = ExceptionUtils.getRootCause(exception)?.javaClass?.simpleName
+    if (exception !is MultipleItemsFailedException) {
+      execution.stackTrace = exception.stackTraceToString().take(MAX_STACK_TRACE_LENGTH)
+      execution.errorKey = ExceptionUtils.getRootCause(exception)?.javaClass?.simpleName
+    } else {
+      execution.stackTrace =
+        exception.exceptions
+          .distinctBy { it.code }
+          .mapIndexed { index, e -> "Exception $index:\n${e.stackTraceToString()}" }
+          .joinToString("\n\n")
+          .take(MAX_STACK_TRACE_LENGTH)
+      execution.errorKey =
+        exception.exceptions
+          .map { ExceptionUtils.getRootCause(it)?.javaClass?.simpleName }
+          .filterNotNull()
+          .distinct()
+          .sorted()
+          .joinToString(",")
+    }
 
     logException(exception)
 
-    if (exception is ChunkFailedException) {
+    if (exception is HasSuccessfulTargets) {
       successfulTargets = exception.successfulTargets
       successfulTargets?.let { execution.successTargets = it }
     }
@@ -86,26 +120,42 @@ open class ChunkProcessingUtil(
   }
 
   private fun logException(exception: Throwable) {
-    val knownCauses =
-      listOf(
-        OutOfCreditsException::class.java,
-        TranslationApiRateLimitException::class.java,
-      )
-
-    val isKnownCause = knownCauses.any { ExceptionUtils.indexOfType(exception, it) > -1 }
-    if (!isKnownCause) {
-      Sentry.captureException(exception)
-      logger.error(exception.message, exception)
+    if (exception is MultipleItemsFailedException) {
+      exception.exceptions.forEach { logKnownException(it) }
+      return
     }
+    logKnownException(exception)
+  }
+
+  private fun logKnownException(exception: Throwable) {
+    if (isExpectedUserError(exception)) {
+      logger.info("Skipping Sentry capture for expected user error: ${exception.message}", exception)
+      return
+    }
+    Sentry.captureException(exception)
+    logger.error(exception.message, exception)
+  }
+
+  private fun isExpectedUserError(exception: Throwable): Boolean {
+    if (knownCauses.any { ExceptionUtils.indexOfType(exception, it) > -1 }) return true
+    if (exception is MultipleItemsFailedException) {
+      return exception.exceptions.isNotEmpty() && exception.exceptions.all { isExpectedUserError(it) }
+    }
+    return ExceptionUtils.getThrowableList(exception).any { it is ExpectedUserError }
   }
 
   private fun retryFailedExecution(exception: Throwable) {
     var maxRetries = job.type.maxRetries
     var waitTime = job.type.defaultRetryWaitTimeInMs
 
-    if (exception is RequeueWithDelayException) {
+    if (exception is ChunkItemFailedException) {
       maxRetries = exception.maxRetries
       waitTime = getWaitTime(exception)
+    } else if (exception is MultipleItemsFailedException) {
+      // do not retry more than a minimum number required among all exceptions
+      maxRetries = exception.exceptions.minOfOrNull { it.maxRetries } ?: maxRetries
+      // do wait for the maximum amount of time among all exceptions
+      waitTime = exception.exceptions.maxOfOrNull { getWaitTime(it) } ?: waitTime
     }
 
     logger.debug(
@@ -114,7 +164,9 @@ open class ChunkProcessingUtil(
     )
     if (errorKeyRetries >= maxRetries && maxRetries != -1) {
       logger.debug("Max retries reached for job execution ${execution.id}")
-      Sentry.captureException(exception)
+      if (!isExpectedUserError(exception)) {
+        Sentry.captureException(exception)
+      }
       return
     }
 
@@ -123,10 +175,17 @@ open class ChunkProcessingUtil(
     execution.retry = true
   }
 
-  private fun getWaitTime(exception: RequeueWithDelayException) =
+  private val knownCauses: List<Class<out RuntimeException>> by lazy {
+    listOf(
+      OutOfCreditsException::class.java,
+      LlmRateLimitedException::class.java,
+    )
+  }
+
+  private fun getWaitTime(exception: ChunkItemFailedException) =
     exception.delayInMs * (exception.increaseFactor.toDouble().pow(errorKeyRetries.toDouble())).toInt()
 
-  private val job by lazy { batchJobService.getJobDto(execution.batchJob.id) }
+  private val job by lazy { batchJobDto ?: batchJobService.getJobDto(execution.batchJob.id) }
 
   private val activityHolder by lazy {
     applicationContext.getBean(ActivityHolder::class.java)
@@ -152,8 +211,12 @@ open class ChunkProcessingUtil(
     batchJobService.getProcessor(job.type)
   }
 
-  private val projectService: ProjectService by lazy {
+  private val projectService by lazy {
     applicationContext.getBean(ProjectService::class.java)
+  }
+
+  private val metrics by lazy {
+    applicationContext.getBean(Metrics::class.java)
   }
 
   private var successfulTargets: List<Any>? = null
@@ -165,11 +228,12 @@ open class ChunkProcessingUtil(
   }
 
   private val previousSuccessfulTargets by lazy {
-    previousExecutions.flatMap {
-      // this is important!!
-      // we want the equals check to be run on the correct type with correct class instances
-      convertChunkToItsType(it.successTargets)
-    }.toSet()
+    previousExecutions
+      .flatMap {
+        // this is important!!
+        // we want the equals check to be run on the correct type with correct class instances
+        convertChunkToItsType(it.successTargets)
+      }.toSet()
   }
 
   /**
@@ -209,21 +273,24 @@ open class ChunkProcessingUtil(
 
   @Suppress("UNCHECKED_CAST")
   private val previousExecutions: List<BatchJobChunkExecution> by lazy {
-    entityManager.createQuery(
-      """
-      from BatchJobChunkExecution 
-      where chunkNumber = :chunkNumber 
-          and batchJob.id = :batchJobId
-          and status = :status
-      """.trimIndent(),
-    )
-      .setParameter("chunkNumber", execution.chunkNumber)
+    entityManager
+      .createQuery(
+        """
+        from BatchJobChunkExecution 
+        where chunkNumber = :chunkNumber 
+            and batchJob.id = :batchJobId
+            and status = :status
+        """.trimIndent(),
+      ).setParameter("chunkNumber", execution.chunkNumber)
       .setParameter("batchJobId", job.id)
       .setParameter("status", BatchJobChunkExecutionStatus.FAILED)
       .setHint(
         "jakarta.persistence.lock.timeout",
         LockOptions.NO_WAIT,
-      )
-      .resultList as List<BatchJobChunkExecution>
+      ).resultList as List<BatchJobChunkExecution>
+  }
+
+  companion object {
+    private const val MAX_STACK_TRACE_LENGTH = 65535
   }
 }

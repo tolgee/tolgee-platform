@@ -14,7 +14,9 @@ const StyledContainer = styled('div')`
   flex-direction: column;
 `;
 
-export const TranslationMemory: React.FC<PanelContentProps> = ({
+export const TranslationMemory: React.FC<
+  React.PropsWithChildren<PanelContentProps>
+> = ({
   keyData,
   language,
   baseLanguage,
@@ -37,6 +39,11 @@ export const TranslationMemory: React.FC<PanelContentProps> = ({
     url: '/v2/projects/{projectId}/suggest/translation-memory',
     method: 'post',
     // @ts-ignore add all dependencies to properly update query
+    // Limited to 2 suggestions: more rows pushed the FloatingToolsPanel
+    // content past its viewport-bound max-height in the cell-edit overlay,
+    // hiding the Comments tab content underneath and breaking the
+    // permissions e2e tests that wait on `comment-text` visibility.
+    // Bumping the count again needs explicit panel-overflow handling first.
     query: { hash: dependenciesHash, size: 2 },
     path: { projectId: project.id },
     content: {
@@ -75,7 +82,7 @@ export const TranslationMemory: React.FC<PanelContentProps> = ({
           />
         ))
       ) : (
-        <TabMessage>
+        <TabMessage data-cy="translation-tools-translation-memory-empty">
           {t('translation_tools_nothing_found', 'Nothing found')}
         </TabMessage>
       )}

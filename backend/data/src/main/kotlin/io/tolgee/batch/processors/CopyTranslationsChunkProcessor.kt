@@ -1,6 +1,8 @@
 package io.tolgee.batch.processors
 
-import io.tolgee.batch.ChunkProcessor
+import com.fasterxml.jackson.databind.ObjectMapper
+import io.tolgee.batch.AbstractChunkProcessor
+import io.tolgee.batch.ProgressManager
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.request.CopyTranslationRequest
 import io.tolgee.model.batch.params.CopyTranslationJobParams
@@ -14,22 +16,21 @@ import kotlin.coroutines.CoroutineContext
 class CopyTranslationsChunkProcessor(
   private val translationService: TranslationService,
   private val entityManager: EntityManager,
-) : ChunkProcessor<CopyTranslationRequest, CopyTranslationJobParams, Long> {
+  private val progressManager: ProgressManager,
+  objectMapper: ObjectMapper,
+) : AbstractChunkProcessor<CopyTranslationRequest, CopyTranslationJobParams, Long>(objectMapper) {
   override fun process(
     job: BatchJobDto,
     chunk: List<Long>,
     coroutineContext: CoroutineContext,
-    onProgress: ((Int) -> Unit),
   ) {
     val subChunked = chunk.chunked(1000)
-    var progress: Int = 0
     val params = getParams(job)
     subChunked.forEach { subChunk ->
       coroutineContext.ensureActive()
       translationService.copyBatch(subChunk, params.sourceLanguageId, params.targetLanguageIds)
       entityManager.flush()
-      progress += subChunk.size
-      onProgress.invoke(progress)
+      progressManager.reportSingleChunkProgress(job.id, subChunk.size)
     }
   }
 
@@ -51,4 +52,9 @@ class CopyTranslationsChunkProcessor(
       targetLanguageIds = data.targetLanguageIds
     }
   }
+
+  override fun getChunkSize(
+    request: CopyTranslationRequest,
+    projectId: Long?,
+  ): Int = 5000
 }

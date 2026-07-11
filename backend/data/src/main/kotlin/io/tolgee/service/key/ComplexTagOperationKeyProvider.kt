@@ -3,6 +3,7 @@ package io.tolgee.service.key
 import io.tolgee.dtos.request.ComplexTagKeysRequest
 import io.tolgee.dtos.request.KeyId
 import io.tolgee.model.Project_
+import io.tolgee.model.branching.Branch_
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyMeta
 import io.tolgee.model.key.KeyMeta_
@@ -14,13 +15,13 @@ import jakarta.persistence.EntityManager
 import jakarta.persistence.criteria.CriteriaBuilder
 import jakarta.persistence.criteria.Join
 import jakarta.persistence.criteria.JoinType
-import jakarta.persistence.criteria.Path
 import jakarta.persistence.criteria.Predicate
 import org.springframework.context.ApplicationContext
 
 class ComplexTagOperationKeyProvider(
   private val projectId: Long,
   private val request: ComplexTagKeysRequest,
+  private val branch: String?,
   private val applicationContext: ApplicationContext,
 ) {
   private val cb: CriteriaBuilder = entityManager.criteriaBuilder
@@ -28,6 +29,7 @@ class ComplexTagOperationKeyProvider(
   private val root = query.from(Key::class.java)
   private val namespace = root.join(Key_.namespace, JoinType.LEFT)
   private val keyMeta = root.fetch(Key_.keyMeta, JoinType.LEFT)
+  private val branchJoin = root.join(Key_.branch, JoinType.LEFT)
 
   val filtered: List<Key> by lazy {
     @Suppress("UNCHECKED_CAST")
@@ -35,17 +37,19 @@ class ComplexTagOperationKeyProvider(
 
     val conditions = getBaseConditions()
 
-    request.filterKeys?.map {
-      getKeyCondition(it)
-    }?.let {
-      conditions.add(cb.or(*it.toTypedArray()))
-    }
+    request.filterKeys
+      ?.map {
+        getKeyCondition(it)
+      }?.let {
+        conditions.add(cb.or(*it.toTypedArray()))
+      }
 
-    request.filterKeysNot?.map {
-      getKeyCondition(it)
-    }?.let {
-      conditions.add(cb.not(cb.or(*it.toTypedArray())))
-    }
+    request.filterKeysNot
+      ?.map {
+        getKeyCondition(it)
+      }?.let {
+        conditions.add(cb.not(cb.or(*it.toTypedArray())))
+      }
 
     conditions.add(root.get(Key_.id).`in`(filteredByTagFiltersKeyIds))
 
@@ -53,33 +57,38 @@ class ComplexTagOperationKeyProvider(
     entityManager.createQuery(query).resultList
   }
 
-  val rest: List<Key> by lazy {
-    val returnedIds = filtered.map { it.id }
-    val cb = entityManager.criteriaBuilder
-    val query = cb.createQuery(Key::class.java)
-    val root = query.from(Key::class.java)
-    val keyMeta = root.fetch(Key_.keyMeta, JoinType.LEFT)
-    @Suppress("UNCHECKED_CAST")
-    (keyMeta as Join<Key, KeyMeta>).fetch(KeyMeta_.tags, JoinType.LEFT) as Join<KeyMeta, Tag>
-    entityManager.createQuery(
-      query.select(root)
-        .where(
-          cb.and(
-            cb.equal(root.get(Key_.project).get(Project_.id), projectId),
-            cb.notIn(root.get(Key_.id), returnedIds),
-          ),
-        ),
-    ).resultList
+  val restKeyIds: List<Long> by lazy {
+    val allIds = allProjectKeyIds
+    val filteredIdSet = filtered.map { it.id }.toHashSet()
+    allIds.filter { it !in filteredIdSet }
   }
 
-  private fun CriteriaBuilder.notIn(
-    path: Path<Long>,
-    collection: Collection<*>,
-  ): Predicate {
-    if (collection.isEmpty()) {
-      return this.and()
-    }
-    return this.not(path.`in`(collection))
+  private val allProjectKeyIds: List<Long> by lazy {
+    val cb = entityManager.criteriaBuilder
+    val query = cb.createQuery(Long::class.java)
+    val root = query.from(Key::class.java)
+    val branchJoin = root.join(Key_.branch, JoinType.LEFT)
+    entityManager
+      .createQuery(
+        query
+          .select(root.get(Key_.id))
+          .where(
+            cb.and(
+              cb.equal(root.get(Key_.project).get(Project_.id), projectId),
+              if (branch.isNullOrEmpty()) {
+                cb.or(
+                  branchJoin.get(Branch_.id).isNull,
+                  cb.isTrue(branchJoin.get(Branch_.isDefault)),
+                )
+              } else {
+                cb.and(
+                  cb.equal(branchJoin.get(Branch_.name), cb.literal(branch)),
+                  cb.isNull(branchJoin.get(Branch_.deletedAt)),
+                )
+              },
+            ),
+          ),
+      ).resultList
   }
 
   private fun getKeyCondition(key: KeyId): Predicate? {
@@ -96,7 +105,18 @@ class ComplexTagOperationKeyProvider(
   private fun getBaseConditions() =
     mutableListOf(
       cb.equal(root.get(Key_.project).get(Project_.id), projectId),
-    )
+      if (branch.isNullOrEmpty()) {
+        cb.or(
+          branchJoin.get(Branch_.id).isNull,
+          cb.isTrue(branchJoin.get(Branch_.isDefault)),
+        )
+      } else {
+        cb.and(
+          cb.equal(branchJoin.get(Branch_.name), cb.literal(branch)),
+          cb.isNull(branchJoin.get(Branch_.deletedAt)),
+        )
+      },
+    ).filterNotNull().toMutableList()
 
   /**
    * It's extremely and inconvenient hard to write criteria query for this, so we will first get all the key ids

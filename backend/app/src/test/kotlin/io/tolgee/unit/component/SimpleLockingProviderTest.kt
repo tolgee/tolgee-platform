@@ -62,7 +62,8 @@ class SimpleLockingProviderTest {
     action: suspend () -> Unit,
   ) {
     measureTimeMillis {
-      coroutineScope { // scope for coroutines
+      coroutineScope {
+        // scope for coroutines
         repeat(threads) {
           launch {
             repeat(repeats) { action() }

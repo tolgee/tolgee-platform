@@ -9,7 +9,7 @@ import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { useUser } from 'tg.globalContext/helpers';
 import { UserAvatar } from 'tg.component/common/avatar/UserAvatar';
 import { TolgeeLogo } from 'tg.component/common/icons/TolgeeLogo';
-import { SlackIcon } from 'tg.component/CustomIcons';
+import { Slack } from 'tg.component/CustomIcons';
 import { LINKS } from 'tg.constants/links';
 import { TranslatedError } from 'tg.translationTools/TranslatedError';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
@@ -127,12 +127,7 @@ export const SlackConnectView = () => {
                       description: user?.username,
                     }}
                     second={{
-                      platformImage: (
-                        <SlackIcon
-                          fontSize="inherit"
-                          style={{ fontSize: 20 }}
-                        />
-                      ),
+                      platformImage: <Slack width={20} height={20} />,
                       image: (
                         <StyledImage src={connectionInfo.data?.slackAvatar} />
                       ),

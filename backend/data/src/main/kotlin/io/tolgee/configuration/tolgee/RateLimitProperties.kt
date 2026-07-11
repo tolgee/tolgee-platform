@@ -9,7 +9,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties
   description =
     "Configuration of the rate limit behavior of the server.\n" +
       "Rate limits are used to protect against server overload and/or abuse, and are enabled by default.\n\n" +
-      // TODO: dedicated documentation section somewhere about rate limits & link it here
       "You can disable global, per-endpoint and auth-related rate limits, or configure global rate limits.\n" +
       "Per-endpoint and auth-related rate limits are fixed and cannot be configured.\n\n",
 )
@@ -56,7 +55,39 @@ class RateLimitProperties(
     defaultExplanation = "= 1 minute",
   )
   var userRequestWindow: Long = 1 * 60 * 1000,
-  var emailVerificationRequestLimit: Int = 5,
+  var emailVerificationRequestLimit: Int = 2,
   var emailVerificationRequestWindow: Long = 1 * 60 * 1000,
   var emailVerificationRequestLimitEnabled: Boolean = true,
+  @DocProperty(description = "Amount of export requests a user can do in a single time window.")
+  var exportRequestLimit: Int = 100,
+  @DocProperty(description = "Size, in milliseconds, of the time window for export-based limiting.")
+  var exportRequestWindow: Long = 5 * 60 * 1000,
+  @DocProperty(description = "Amount of translation requests a user can do in a single time window.")
+  var translationRequestLimit: Int = 100,
+  @DocProperty(
+    description = "Size, in milliseconds, of the time window for translation-based limiting.",
+    defaultExplanation = "= 5 minutes",
+  )
+  var translationRequestWindow: Long = 5 * 60 * 1000,
+  @DocProperty(description = "Amount of activity requests a user can do in a single time window.")
+  var activityRequestLimit: Int = 100,
+  @DocProperty(
+    description = "Size, in milliseconds, of the time window for activity-based limiting.",
+    defaultExplanation = "= 5 minutes",
+  )
+  var activityRequestWindow: Long = 5 * 60 * 1000,
+  @DocProperty(
+    description =
+      "Number of rate limit violations before the server stops responding to the client.\n" +
+        "After this threshold, the connection is dropped without sending a response body, saving bandwidth.\n" +
+        "Set to 0 to disable connection dropping (always send 429 responses).",
+  )
+  var maxStrikesBeforeBlock: Int = 3,
+  @DocProperty(
+    description =
+      "Time window, in milliseconds, after which strikes are reset if the client behaves well.\n" +
+        "If a client doesn't hit rate limits for this duration, their strike count is reset to zero.",
+    defaultExplanation = "= 1 minute",
+  )
+  var strikeResetWindowMs: Long = 60_000,
 )

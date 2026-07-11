@@ -19,6 +19,10 @@ export const useOpenPanels = () => {
     if (mode === 'comments' && !result.includes('comments')) {
       result.push('comments');
     }
+
+    if (mode === 'qa_checks' && !result.includes('qa_checks')) {
+      result.push('qa_checks');
+    }
     return result;
   });
 
@@ -27,5 +31,13 @@ export const useOpenPanels = () => {
     localStorage.setItem(OPEN_PANELS_KEY, JSON.stringify(value));
   }
 
-  return [openPanels, setOpenPanels] as const;
+  function togglePanelOpen(id: string) {
+    if (openPanels.includes(id)) {
+      setOpenPanels(openPanels.filter((i) => i !== id));
+    } else {
+      setOpenPanels([...openPanels, id]);
+    }
+  }
+
+  return { openPanels, setOpenPanels, togglePanelOpen } as const;
 };

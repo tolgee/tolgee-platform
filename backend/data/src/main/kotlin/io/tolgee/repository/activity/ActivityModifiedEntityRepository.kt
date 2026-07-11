@@ -4,6 +4,7 @@ import io.tolgee.activity.data.ActivityType
 import io.tolgee.dtos.queryResults.TranslationHistoryView
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityModifiedEntityId
+import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
@@ -11,6 +12,7 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 
 @Repository
+@Lazy
 interface ActivityModifiedEntityRepository : JpaRepository<ActivityModifiedEntity, ActivityModifiedEntityId> {
   @Query(
     """
@@ -32,11 +34,25 @@ interface ActivityModifiedEntityRepository : JpaRepository<ActivityModifiedEntit
 
   @Query(
     """
+    select case when count(ame) > 0 then true else false end
+    from ActivityModifiedEntity ame
+    where ame.activityRevision.id = :revisionId and ame.branchId = :branchId
+    """,
+  )
+  fun hasModifiedEntitiesOnBranch(
+    revisionId: Long,
+    branchId: Long,
+  ): Boolean
+
+  @Query(
+    """
       from ActivityModifiedEntity ame
+        left join Branch b on ame.branchId = b.id
         where ame.activityRevision.projectId = :projectId 
         and ame.activityRevision.id in :revisionIds
         and cast(empty_json(ame.modifications) as boolean) = false 
         and (:filterEntityClass is null or ame.entityClass in :filterEntityClass)
+        and ((b.id = :branchId and b.deletedAt is null) or (:branchId is null and (b is null or b.isDefault)))
         order by ame.activityRevision.id, ame.entityClass, ame.entityId
     """,
   )
@@ -45,5 +61,14 @@ interface ActivityModifiedEntityRepository : JpaRepository<ActivityModifiedEntit
     revisionIds: List<Long>,
     filterEntityClass: List<String>?,
     pageable: Pageable,
+    branchId: Long? = null,
   ): Page<ActivityModifiedEntity>
+
+  @Query(
+    """
+    from ActivityModifiedEntity ame
+    where ame.activityRevision.id = :revisionId
+    """,
+  )
+  fun findByRevisionId(revisionId: Long): List<ActivityModifiedEntity>
 }

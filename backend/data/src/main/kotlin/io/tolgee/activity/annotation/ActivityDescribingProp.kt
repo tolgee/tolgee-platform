@@ -1,4 +1,4 @@
 package io.tolgee.activity.annotation
 
-@Target(allowedTargets = [AnnotationTarget.PROPERTY])
+@Target(AnnotationTarget.FIELD)
 annotation class ActivityDescribingProp

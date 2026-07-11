@@ -1,0 +1,65 @@
+package io.tolgee.batch.processors
+
+import com.fasterxml.jackson.databind.ObjectMapper
+import io.tolgee.batch.AbstractChunkProcessor
+import io.tolgee.batch.ProgressManager
+import io.tolgee.batch.data.BatchJobDto
+import io.tolgee.batch.request.LabelTranslationsRequest
+import io.tolgee.model.batch.params.TranslationLabelParams
+import jakarta.persistence.EntityManager
+import kotlinx.coroutines.ensureActive
+import kotlin.coroutines.CoroutineContext
+
+abstract class AbstractTranslationLabelChunkProcessor(
+  private val entityManager: EntityManager,
+  private val progressManager: ProgressManager,
+  objectMapper: ObjectMapper,
+) : AbstractChunkProcessor<LabelTranslationsRequest, TranslationLabelParams, Long>(objectMapper) {
+  override fun process(
+    job: BatchJobDto,
+    chunk: List<Long>,
+    coroutineContext: CoroutineContext,
+  ) {
+    val subChunked = chunk.chunked(100)
+    val params = getParams(job)
+
+    subChunked.forEach { subChunk ->
+      coroutineContext.ensureActive()
+
+      process(subChunk, params.languageIds, params.labelIds)
+
+      entityManager.flush()
+      progressManager.reportSingleChunkProgress(job.id, subChunk.size)
+    }
+  }
+
+  override fun getTarget(data: LabelTranslationsRequest): List<Long> {
+    return data.keyIds
+  }
+
+  override fun getParamsType(): Class<TranslationLabelParams> {
+    return TranslationLabelParams::class.java
+  }
+
+  override fun getTargetItemType(): Class<Long> {
+    return Long::class.java
+  }
+
+  override fun getParams(data: LabelTranslationsRequest): TranslationLabelParams {
+    return TranslationLabelParams(
+      labelIds = data.labelIds,
+      languageIds = data.languageIds,
+    )
+  }
+
+  override fun getChunkSize(
+    request: LabelTranslationsRequest,
+    projectId: Long?,
+  ): Int = 5000
+
+  abstract fun process(
+    subChunk: List<Long>,
+    languageIds: List<Long>,
+    labelIds: List<Long>,
+  )
+}

@@ -16,6 +16,7 @@ const dotenvPlugin = require('cypress-dotenv');
 const { isFileExist } = require('cy-verify-downloads');
 const path = require('path');
 const unzipping = require('./unzipping');
+const { readFile } = require('xlsx');
 
 /**
  * @type {Cypress.PluginConfig}
@@ -24,6 +25,7 @@ module.exports = (on, config) => {
   on('task', {
     isFileExist,
     unzipping: unzipping.unzip,
+    readXlsx: readFile,
   });
 
   return dotenvPlugin(config, {

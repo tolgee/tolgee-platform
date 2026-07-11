@@ -18,7 +18,7 @@ package io.tolgee.dtos.cacheable
 
 import io.tolgee.model.Pat
 import java.io.Serializable
-import java.util.*
+import java.util.Date
 
 data class PatDto(
   val id: Long,

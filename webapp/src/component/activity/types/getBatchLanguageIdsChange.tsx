@@ -1,55 +1,67 @@
-import { DiffValue } from '../types';
-import { styled } from '@mui/material';
 import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
 import { CircledLanguageIcon } from 'tg.component/languages/CircledLanguageIcon';
-
-const StyledContainer = styled('span')`
-  display: div;
-`;
-
-const StyledLanguage = styled('span')`
-  gap: 4px;
-  background: ${({ theme }) => theme.palette.emphasis[100]};
-  border-radius: 4px;
-  border: 1px solid ${({ theme }) => theme.palette.emphasis[200]};
-  padding: 0px 4px;
-  & + & {
-    margin-left: 4px;
-  }
-`;
-
-const StyledName = styled('span')`
-  overflow: hidden;
-  text-overflow: ellipsis;
-`;
+import { DiffValue } from '../types';
+import { StyledReferences } from '../references/AnyReference';
+import { useTranslate } from '@tolgee/react';
+import { Box, Tooltip } from '@mui/material';
 
 type Props = {
   input: DiffValue<number[]>;
 };
 
-const LanguageIdsComponent: React.FC<Props> = ({ input }) => {
+const DISPLAY_MAX_ITEMS = 3;
+
+const LanguageReference = ({ id }: { id: number }) => {
   const allLangs = useProjectLanguages();
+  const language = allLangs.find((lang) => lang.id === id);
+  return (
+    <span key={id} className="reference referenceComposed">
+      {language && <span className="referenceText">{language.name} </span>}
+      <CircledLanguageIcon flag={language?.flagEmoji} size={14} />
+    </span>
+  );
+};
+
+const LanguageIdsComponent: React.FC<React.PropsWithChildren<Props>> = ({
+  input,
+}) => {
   const newInput = input.new;
+
+  let displayed = input.new || [];
+  let other: number[] = [];
+
+  if (displayed?.length > DISPLAY_MAX_ITEMS) {
+    displayed = input.new?.slice(0, DISPLAY_MAX_ITEMS - 1) || [];
+    other = input.new?.slice(DISPLAY_MAX_ITEMS - 1) || [];
+  }
+
+  const { t } = useTranslate();
   if (newInput) {
     return (
-      <StyledContainer>
-        {input.new?.map((langId) => {
-          const language = allLangs.find((lang) => lang.id === langId);
-          return (
-            <StyledLanguage key={langId}>
-              {language?.name && <StyledName>{language.name}</StyledName>}
-              <CircledLanguageIcon
-                size={14}
-                flag={language?.flagEmoji}
-                display="inline-block"
-                position="relative"
-                top="3px"
-                marginLeft="2px"
-              />
-            </StyledLanguage>
-          );
-        })}
-      </StyledContainer>
+      <StyledReferences>
+        {displayed?.map((langId) => (
+          <LanguageReference key={langId} id={langId} />
+        ))}
+        {Boolean(other?.length) && (
+          <Tooltip
+            title={
+              <Box display="grid" gap="1px" fontSize={15}>
+                {other?.map((langId) => (
+                  <StyledReferences key={langId}>
+                    <LanguageReference key={langId} id={langId} />
+                  </StyledReferences>
+                ))}
+              </Box>
+            }
+          >
+            <span className="reference referenceComposed">
+              <span className="referenceText">
+                {t('activity_batch_more_items', { value: other!.length })}
+              </span>
+            </span>
+          </Tooltip>
+        )}
+      </StyledReferences>
     );
   } else {
     return null;

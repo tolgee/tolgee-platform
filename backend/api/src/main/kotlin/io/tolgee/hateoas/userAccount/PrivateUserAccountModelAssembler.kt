@@ -1,5 +1,6 @@
 package io.tolgee.hateoas.userAccount
 
+import io.tolgee.api.isMfaEnabled
 import io.tolgee.api.v2.controllers.V2UserController
 import io.tolgee.dtos.queryResults.UserAccountView
 import io.tolgee.model.UserAccount
@@ -21,10 +22,12 @@ class PrivateUserAccountModelAssembler(
       id = view.id,
       username = view.username,
       name = view.name,
+      domain = view.domain,
       emailAwaitingVerification = view.emailAwaitingVerification,
       mfaEnabled = view.isMfaEnabled,
       avatar = avatar,
       accountType = view.accountType ?: UserAccount.AccountType.LOCAL,
+      thirdPartyAuthType = view.thirdPartyAuthType,
       globalServerRole = view.role ?: UserAccount.Role.USER,
       deletable = view.isDeletable,
       needsSuperJwtToken = view.needsSuperJwt,

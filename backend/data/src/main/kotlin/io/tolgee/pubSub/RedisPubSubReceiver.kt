@@ -1,6 +1,6 @@
 package io.tolgee.pubSub
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.batch.events.JobCancelEvent
 import io.tolgee.batch.events.JobQueueItemsEvent
 import io.tolgee.util.Logging
@@ -12,20 +12,23 @@ import org.springframework.messaging.simp.SimpMessagingTemplate
 class RedisPubSubReceiver(
   private val template: SimpMessagingTemplate,
   private val applicationEventPublisher: ApplicationEventPublisher,
+  private val objectMapper: ObjectMapper,
 ) : Logging {
   fun receiveWebsocketMessage(message: String) {
-    val data = jacksonObjectMapper().readValue(message, RedisWebsocketEventWrapper::class.java)
-    template.convertAndSend(data.destination, data.message)
-    logger.debug("Sending message to ${data.destination}")
+    val data = objectMapper.readValue(message, RedisWebsocketEventWrapper::class.java)
+    data.message?.let {
+      template.convertAndSend(data.destination, it)
+      logger.debug("Sending message to ${data.destination}")
+    }
   }
 
   fun receiveJobQueueMessage(message: String) {
-    val data = jacksonObjectMapper().readValue(message, JobQueueItemsEvent::class.java)
+    val data = objectMapper.readValue(message, JobQueueItemsEvent::class.java)
     applicationEventPublisher.publishEvent(data)
   }
 
   fun receiveJobCancel(message: String) {
-    val data = jacksonObjectMapper().readValue(message, Long::class.java)
+    val data = objectMapper.readValue(message, Long::class.java)
     applicationEventPublisher.publishEvent(JobCancelEvent(data))
   }
 }

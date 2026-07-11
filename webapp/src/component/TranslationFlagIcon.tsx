@@ -1,9 +1,10 @@
 import { Tooltip, styled } from '@mui/material';
 
-const StyledImgWrapper = styled('div')`
+export const StyledImgWrapper = styled('div')`
   display: flex;
   & svg {
-    font-size: 16px;
+    width: 16px;
+    height: 16px;
   }
 `;
 
@@ -21,7 +22,10 @@ const getContent = (props: { icon: React.ReactNode }) => {
   return <StyledImgWrapper>{props.icon}</StyledImgWrapper>;
 };
 
-export const TranslationFlagIcon: React.FC<Props> = ({ icon, tooltip }) => {
+export const TranslationFlagIcon: React.FC<React.PropsWithChildren<Props>> = ({
+  icon,
+  tooltip,
+}) => {
   return !tooltip ? (
     getContent({ icon })
   ) : (

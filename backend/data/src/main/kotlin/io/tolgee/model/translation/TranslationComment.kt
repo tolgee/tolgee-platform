@@ -20,7 +20,11 @@ import org.hibernate.validator.constraints.Length
 @ActivityLoggedEntity
 @ActivityEntityDescribingPaths(paths = ["translation"])
 @Table(
-  indexes = [Index(columnList = "state")],
+  indexes = [
+    Index(columnList = "state"),
+    Index(columnList = "translation_id"),
+    Index(columnList = "author_id"),
+  ],
 )
 class TranslationComment(
   @field:Length(max = 10000)

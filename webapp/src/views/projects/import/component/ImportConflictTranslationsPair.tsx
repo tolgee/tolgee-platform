@@ -6,17 +6,21 @@ import { components } from 'tg.service/apiSchema.generated';
 
 import { ImportConflictTranslation } from './ImportConflictTranslation';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { useConflictHintTranslate } from '../hooks/useConflictHintTranslate';
 
-export const ImportConflictTranslationsPair: FunctionComponent<{
-  translation: components['schemas']['ImportTranslationModel'];
-  row: components['schemas']['ImportLanguageModel'];
-}> = ({ translation, row }) => {
+export const ImportConflictTranslationsPair: FunctionComponent<
+  React.PropsWithChildren<{
+    translation: components['schemas']['ImportTranslationModel'];
+    row: components['schemas']['ImportLanguageModel'];
+  }>
+> = ({ translation, row }) => {
   const project = useProject();
   const [expanded, setExpanded] = useState(false);
   const [leftExpandable, setLeftExpandable] = useState(false);
   const [rightExpandable, setRightExpandable] = useState(false);
   const [keepLoaded, setKeepLoaded] = useState(false);
   const [overrideLoaded, setOverrideLoaded] = useState(false);
+  const translateConflictHint = useConflictHintTranslate();
 
   const setOverrideMutation = useApiMutation({
     url: '/v2/projects/{projectId}/import/result/languages/{languageId}/translations/{translationId}/resolve/set-override',
@@ -101,6 +105,8 @@ export const ImportConflictTranslationsPair: FunctionComponent<{
           expandable={leftExpandable || rightExpandable}
           languageTag={row.existingLanguageTag || 'en'}
           isPlural={translation.existingKeyIsPlural || translation.isPlural}
+          disabled={!translation.isOverridable}
+          conflictHint={translateConflictHint(translation.conflictType)}
         />
       </Grid>
     </>

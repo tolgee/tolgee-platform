@@ -2,29 +2,48 @@ package io.tolgee.batch.data
 
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.batch.ChunkProcessor
+import io.tolgee.batch.processors.AiPlaygroundChunkProcessor
+import io.tolgee.batch.processors.AssignTranslationLabelChunkProcessor
 import io.tolgee.batch.processors.AutoTranslateChunkProcessor
 import io.tolgee.batch.processors.AutomationChunkProcessor
 import io.tolgee.batch.processors.ClearTranslationsChunkProcessor
 import io.tolgee.batch.processors.CopyTranslationsChunkProcessor
 import io.tolgee.batch.processors.DeleteKeysChunkProcessor
+import io.tolgee.batch.processors.HardDeleteKeysChunkProcessor
 import io.tolgee.batch.processors.MachineTranslationChunkProcessor
+import io.tolgee.batch.processors.NoOpChunkProcessor
 import io.tolgee.batch.processors.PreTranslationByTmChunkProcessor
+import io.tolgee.batch.processors.QaCheckChunkProcessor
+import io.tolgee.batch.processors.RestoreKeysChunkProcessor
 import io.tolgee.batch.processors.SetKeysNamespaceChunkProcessor
 import io.tolgee.batch.processors.SetTranslationsStateChunkProcessor
 import io.tolgee.batch.processors.TagKeysChunkProcessor
+import io.tolgee.batch.processors.TrialExpirationNoticeProcessor
+import io.tolgee.batch.processors.UnassignTranslationLabelChunkProcessor
 import io.tolgee.batch.processors.UntagKeysChunkProcessor
 import kotlin.reflect.KClass
 
 enum class BatchJobType(
-  val activityType: ActivityType,
+  val activityType: ActivityType? = null,
   /**
    * 0 means no chunking
    */
   val maxRetries: Int,
   val processor: KClass<out ChunkProcessor<*, *, *>>,
   val defaultRetryWaitTimeInMs: Int = 2000,
-  val exclusive: Boolean = true,
+  /**
+   * Default value for whether this job type should be exclusive for a project
+   * (only one job can run at a time for a project).
+   *
+   * Can be overridden via `tolgee.batch.job-type-overrides.<TYPE>.exclusive`.
+   * Use [io.tolgee.configuration.tolgee.BatchProperties.isExclusive] to get the effective value.
+   */
+  val defaultExclusive: Boolean = true,
 ) {
+  AI_PLAYGROUND_TRANSLATE(
+    maxRetries = 3,
+    processor = AiPlaygroundChunkProcessor::class,
+  ),
   PRE_TRANSLATE_BT_TM(
     activityType = ActivityType.BATCH_PRE_TRANSLATE_BY_TM,
     maxRetries = 3,
@@ -39,11 +58,22 @@ enum class BatchJobType(
     activityType = ActivityType.AUTO_TRANSLATE,
     maxRetries = 3,
     processor = AutoTranslateChunkProcessor::class,
+    defaultExclusive = false,
   ),
   DELETE_KEYS(
-    activityType = ActivityType.KEY_DELETE,
+    activityType = ActivityType.KEY_SOFT_DELETE,
     maxRetries = 3,
     processor = DeleteKeysChunkProcessor::class,
+  ),
+  RESTORE_KEYS(
+    activityType = ActivityType.BATCH_KEY_RESTORE,
+    maxRetries = 3,
+    processor = RestoreKeysChunkProcessor::class,
+  ),
+  HARD_DELETE_KEYS(
+    activityType = ActivityType.BATCH_KEY_HARD_DELETE,
+    maxRetries = 3,
+    processor = HardDeleteKeysChunkProcessor::class,
   ),
   SET_TRANSLATIONS_STATE(
     activityType = ActivityType.BATCH_SET_TRANSLATION_STATE,
@@ -79,6 +109,31 @@ enum class BatchJobType(
     activityType = ActivityType.AUTOMATION,
     maxRetries = 3,
     processor = AutomationChunkProcessor::class,
-    exclusive = false,
+    defaultExclusive = false,
+  ),
+  BILLING_TRIAL_EXPIRATION_NOTICE(
+    maxRetries = 3,
+    processor = TrialExpirationNoticeProcessor::class,
+  ),
+  ASSIGN_TRANSLATION_LABEL(
+    activityType = ActivityType.BATCH_ASSIGN_TRANSLATION_LABEL,
+    maxRetries = 3,
+    processor = AssignTranslationLabelChunkProcessor::class,
+  ),
+  UNASSIGN_TRANSLATION_LABEL(
+    activityType = ActivityType.BATCH_UNASSIGN_TRANSLATION_LABEL,
+    maxRetries = 3,
+    processor = UnassignTranslationLabelChunkProcessor::class,
+  ),
+  QA_CHECK(
+    maxRetries = 3,
+    processor = QaCheckChunkProcessor::class,
+    defaultExclusive = false,
+  ),
+  NO_OP(
+    activityType = null,
+    maxRetries = 0,
+    processor = NoOpChunkProcessor::class,
+    defaultExclusive = false,
   ),
 }

@@ -1,9 +1,9 @@
 package io.tolgee.autoTranslating
 
-import io.tolgee.MachineTranslationTest
 import io.tolgee.constants.MtServiceType
 import io.tolgee.development.testDataBuilder.data.AutoTranslateTestData
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
+import io.tolgee.fixtures.MachineTranslationTest
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.node
@@ -145,8 +145,7 @@ class AutoTranslatingTest : MachineTranslationTest() {
           .get(testData.project.id, CREATE_KEY_NAME, null)
           .translations
           .find { it.language == testData.spanishLanguage },
-      )
-        .isNull()
+      ).isNull()
     }
   }
 
@@ -163,8 +162,8 @@ class AutoTranslatingTest : MachineTranslationTest() {
       keyName = "jaj",
       translations =
         mapOf(
-          "en" to "Hello2",
-          "de" to "Hallo2",
+          "en" to "Goodbye",
+          "de" to "Auf Wiedersehen",
         ),
     )
     waitForSpanishTranslationSet("jaj")
@@ -187,7 +186,11 @@ class AutoTranslatingTest : MachineTranslationTest() {
             .find {
               it.language == testData.spanishLanguage
             }
-        spanishTranslation?.text.isNullOrBlank().assert.isFalse()
+        spanishTranslation
+          ?.text
+          .isNullOrBlank()
+          .assert
+          .isFalse()
       }
     }
   }
@@ -247,6 +250,32 @@ class AutoTranslatingTest : MachineTranslationTest() {
     }
   }
 
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `auto translates even when result exceeds char limit`() {
+    saveTestData()
+    performProjectAuthPut(
+      "translations",
+      SetTranslationsWithKeyDto(
+        key = testData.keyWithCharLimit.name,
+        translations = mapOf("en" to "Hello"),
+      ),
+    ).andIsOk
+
+    waitForNotThrowing {
+      executeInNewTransaction {
+        val deTranslation =
+          keyService
+            .get(testData.project.id, testData.keyWithCharLimit.name, null)
+            .translations
+            .find { it.language == testData.germanLanguage }
+
+        assertThat(deTranslation).isNotNull
+        assertThat(deTranslation!!.text).isEqualTo(TRANSLATED_WITH_GOOGLE_RESPONSE)
+      }
+    }
+  }
+
   private fun testUsingMtWorks() {
     performCreateHalloKeyWithEnAndDeTranslations()
     waitForNotThrowing {
@@ -260,7 +289,8 @@ class AutoTranslatingTest : MachineTranslationTest() {
     Thread.sleep(2000)
     transactionTemplate.execute {
       val esTranslation =
-        keyService.get(testData.project.id, CREATE_KEY_NAME, null)
+        keyService
+          .get(testData.project.id, CREATE_KEY_NAME, null)
           .translations
           .find { it.language == testData.spanishLanguage }
 
@@ -269,8 +299,10 @@ class AutoTranslatingTest : MachineTranslationTest() {
   }
 
   private fun getCreatedEsTranslation() =
-    keyService.get(testData.project.id, CREATE_KEY_NAME, null)
-      .getLangTranslation(testData.spanishLanguage).text
+    keyService
+      .get(testData.project.id, CREATE_KEY_NAME, null)
+      .getLangTranslation(testData.spanishLanguage)
+      .text
 
   private fun performCreateHalloKeyWithEnAndDeTranslations(keyName: String = CREATE_KEY_NAME) {
     performCreateKey(
@@ -301,8 +333,10 @@ class AutoTranslatingTest : MachineTranslationTest() {
   }
 
   private fun getCreatedDeTranslation() =
-    keyService.get(testData.project.id, CREATE_KEY_NAME, null)
-      .getLangTranslation(testData.germanLanguage).text
+    keyService
+      .get(testData.project.id, CREATE_KEY_NAME, null)
+      .getLangTranslation(testData.germanLanguage)
+      .text
 
   private fun performSetConfig(
     usingTm: Boolean,

@@ -9,12 +9,14 @@ import io.tolgee.openApiDocs.OpenApiCloudExtension
 import io.tolgee.openApiDocs.OpenApiEeExtension
 import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.openApiDocs.OpenApiSelfHostedExtension
+import io.tolgee.openApiDocs.OpenApiUnstableOperationExtension
 import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authentication.isReadOnly
 import org.springdoc.core.models.GroupedOpenApi
 import org.springframework.web.method.HandlerMethod
 import java.lang.reflect.Method
 
-typealias OperationHandlers = HashMap<String, HandlerMethod>
+typealias OperationHandlers = java.util.IdentityHashMap<Operation, HandlerMethod>
 typealias HandlerPaths = HashMap<Method, MutableList<String>>
 
 class OpenApiGroupBuilder(
@@ -43,6 +45,8 @@ class OpenApiGroupBuilder(
 
     cleanUnusedModels()
 
+    sortOutput()
+
     return@lazy builder.build()
   }
 
@@ -50,6 +54,22 @@ class OpenApiGroupBuilder(
     builder.addOpenApiCustomizer {
       ProjectActivityModelEnhancer(it).enhance()
       ActivityGroupModelEnhancer(it).enhance()
+    }
+  }
+
+  private fun sortOutput() {
+    builder.addOpenApiCustomizer { openAPI ->
+      openAPI.paths =
+        Paths().apply {
+          openAPI.paths.toSortedMap().forEach { (key, value) ->
+            addPathItem(key, value)
+            value.parameters?.sortBy { it.name }
+          }
+        }
+      openAPI.components.schemas = openAPI.components.schemas.toSortedMap()
+      openAPI.components.schemas.forEach { (_, value) ->
+        value.properties = value.properties?.toSortedMap()
+      }
     }
   }
 
@@ -65,11 +85,13 @@ class OpenApiGroupBuilder(
   }
 
   private fun addMethodExtensions() {
-    customizeOperations { operation, handlerMethod, _ ->
+    customizeOperations { operation, handlerMethod, _, method ->
       addOperationOrder(handlerMethod, operation)
-      addOperationEeExtension(handlerMethod, operation)
-      addSelfHostedOperationEeExtension(handlerMethod, operation)
-      addCloudOperationEeExtension(handlerMethod, operation)
+      addExtensionFor(handlerMethod, operation, OpenApiEeExtension::class.java, "x-ee")
+      addExtensionFor(handlerMethod, operation, OpenApiCloudExtension::class.java, "x-cloud")
+      addExtensionFor(handlerMethod, operation, OpenApiSelfHostedExtension::class.java, "x-self-hosted")
+      addExtensionFor(handlerMethod, operation, OpenApiUnstableOperationExtension::class.java, "x-unstable")
+      addAccessModeExtension(handlerMethod, operation, method)
       operation
     }
   }
@@ -84,45 +106,36 @@ class OpenApiGroupBuilder(
     }
   }
 
-  private fun addOperationEeExtension(
+  private fun <T : Annotation> addExtensionFor(
     handlerMethod: HandlerMethod,
     operation: Operation,
+    annotationClass: Class<T>,
+    extensionName: String,
+    value: ((T) -> Any?)? = null,
   ) {
-    val eeExtensionAnnotation =
-      handlerMethod.getMethodAnnotation(OpenApiEeExtension::class.java)
-        ?: handlerMethod.method.declaringClass.getAnnotation(OpenApiEeExtension::class.java) ?: null
-    if (eeExtensionAnnotation != null) {
-      operation.addExtension("x-ee", true)
+    val annotation =
+      handlerMethod.getMethodAnnotation(annotationClass)
+        ?: handlerMethod.method.declaringClass.getAnnotation(annotationClass)
+    if (annotation == null) {
+      return
     }
+
+    operation.addExtension(extensionName, value?.invoke(annotation) ?: true)
   }
 
-  private fun addCloudOperationEeExtension(
+  private fun addAccessModeExtension(
     handlerMethod: HandlerMethod,
     operation: Operation,
+    method: PathItem.HttpMethod,
   ) {
-    val eeExtensionAnnotation =
-      handlerMethod.getMethodAnnotation(OpenApiCloudExtension::class.java)
-        ?: handlerMethod.method.declaringClass.getAnnotation(OpenApiCloudExtension::class.java) ?: null
-    if (eeExtensionAnnotation != null) {
-      operation.addExtension("x-cloud", true)
-    }
-  }
-
-  private fun addSelfHostedOperationEeExtension(
-    handlerMethod: HandlerMethod,
-    operation: Operation,
-  ) {
-    val eeExtensionAnnotation =
-      handlerMethod.getMethodAnnotation(OpenApiSelfHostedExtension::class.java)
-        ?: handlerMethod.method.declaringClass.getAnnotation(OpenApiSelfHostedExtension::class.java) ?: null
-    if (eeExtensionAnnotation != null) {
-      operation.addExtension("x-self-hosted", true)
-    }
+    val isReadOnly = handlerMethod.isReadOnly(httpMethod = method.name)
+    val accessMode = if (isReadOnly) "readOnly" else "readWrite"
+    operation.addExtension("x-access-mode", accessMode)
   }
 
   private fun addTagOrders() {
     val classTags = mutableMapOf<Class<*>, MutableSet<String>>()
-    customizeOperations { operation, handlerMethod, path ->
+    customizeOperations { operation, handlerMethod, path, _ ->
       classTags.computeIfAbsent(handlerMethod.method.declaringClass) { mutableSetOf() }.apply {
         addAll(operation.tags)
       }
@@ -131,27 +144,33 @@ class OpenApiGroupBuilder(
 
     builder.addOpenApiCustomizer { openApi ->
       val declaringClasses =
-        operationHandlers.mapNotNull {
-          it.value.method.declaringClass
-        }.toSet()
+        operationHandlers
+          .mapNotNull {
+            it.value.method.declaringClass
+          }.toSet()
 
       val tagOrders =
-        declaringClasses.flatMap { clazz ->
-          val orderAnnotation = clazz.getAnnotation(OpenApiOrderExtension::class.java) ?: return@flatMap listOf()
-          classTags[clazz]?.map { it to orderAnnotation.order } ?: listOf()
-        }.groupBy { it.first }.map {
-          val orders = it.value.map { it.second }.toSet()
-          if (orders.size > 1) {
-            throw RuntimeException("Multiple orders for tag ${it.key}: $orders")
-          }
-          it.key to orders.first()
-        }.toMap()
+        declaringClasses
+          .flatMap { clazz ->
+            val orderAnnotation = clazz.getAnnotation(OpenApiOrderExtension::class.java) ?: return@flatMap listOf()
+            classTags[clazz]?.map { it to orderAnnotation.order } ?: listOf()
+          }.groupBy { it.first }
+          .map {
+            val orders = it.value.map { it.second }.toSet()
+            if (orders.size > 1) {
+              throw RuntimeException("Multiple orders for tag ${it.key}: $orders")
+            }
+            it.key to orders.first()
+          }.toMap()
 
       val tagsMap = openApi?.tags?.associateBy { it.name }?.toMutableMap() ?: mutableMapOf()
       tagOrders.forEach { (tagName, order) ->
         val tag =
           tagsMap.computeIfAbsent(tagName) {
-            val tag = io.swagger.v3.oas.models.tags.Tag().name(tagName)
+            val tag =
+              io.swagger.v3.oas.models.tags
+                .Tag()
+                .name(tagName)
             openApi.tags.add(tag)
             tag
           }
@@ -167,7 +186,7 @@ class OpenApiGroupBuilder(
 
   private fun extractOperationHandlers() {
     builder.addOperationCustomizer { operation: Operation, handlerMethod: HandlerMethod ->
-      operationHandlers[operation.operationId] = handlerMethod
+      operationHandlers[operation] = handlerMethod
       operation
     }
   }
@@ -175,19 +194,21 @@ class OpenApiGroupBuilder(
   /**
    * If null is returned from callback function, operation is removed from the API.
    */
-  fun customizeOperations(fn: (Operation, HandlerMethod, path: String) -> Operation?) {
+  fun customizeOperations(fn: (Operation, HandlerMethod, path: String, method: PathItem.HttpMethod) -> Operation?) {
     builder.addOpenApiCustomizer { openApi ->
       val newPaths = Paths()
       openApi.paths.forEach { pathEntry ->
         val operations = ArrayList<Operation>()
         val newPathItem = PathItem()
         val oldPathItem = pathEntry.value
-        oldPathItem.readOperations().forEach { operation ->
+        oldPathItem.readOperationsMap().forEach { (method, operation) ->
           val newOperation =
             fn(
               operation,
-              operationHandlers[operation.operationId] ?: throw RuntimeException("Operation handler not found"),
+              operationHandlers[operation]
+                ?: throw RuntimeException("Operation handler not found for ${operation.operationId}"),
               pathEntry.key,
+              method,
             )
           if (newOperation != null) {
             operations.add(newOperation)
@@ -211,7 +232,7 @@ class OpenApiGroupBuilder(
   }
 
   private fun setResponseContentToJson() {
-    customizeOperations { operation, _, _ ->
+    customizeOperations { operation, _, _, _ ->
       val successResponse = operation.responses?.get("200")
       val content = successResponse?.content
       val anyContent = content?.get("*/*")
@@ -227,7 +248,7 @@ class OpenApiGroupBuilder(
     builder.addOpenApiCustomizer { openApi ->
       openApi.paths.forEach { (path, value) ->
         value.readOperations().forEach { operation ->
-          operationHandlers[operation.operationId]?.method?.let { method ->
+          operationHandlers[operation]?.method?.let { method ->
             handlerPaths[method] =
               handlerPaths[method].let {
                 it?.run {

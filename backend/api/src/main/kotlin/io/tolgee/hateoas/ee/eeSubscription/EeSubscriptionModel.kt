@@ -5,8 +5,14 @@ import io.tolgee.constants.Feature
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
 import java.io.Serializable
-import java.util.*
+import java.util.Date
 
+/**
+ * This model is used to present the current EeSubscription on
+ * Self-hosted instance.
+ *
+ * It's **not** used by Tolgee Cloud to present data about the Ee Subscription.
+ */
 @Suppress("unused")
 @Relation(collectionRelation = "plans", itemRelation = "plan")
 open class EeSubscriptionModel(
@@ -17,5 +23,8 @@ open class EeSubscriptionModel(
   val cancelAtPeriodEnd: Boolean,
   val currentUserCount: Long,
   val status: SubscriptionStatus,
+  val nonCommerical: Boolean,
   var lastValidCheck: Date?,
-) : RepresentationModel<EeSubscriptionModel>(), Serializable
+  val isPayAsYouGo: Boolean,
+) : RepresentationModel<EeSubscriptionModel>(),
+  Serializable

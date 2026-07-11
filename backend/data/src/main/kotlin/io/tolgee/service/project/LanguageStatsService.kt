@@ -1,13 +1,18 @@
 package io.tolgee.service.project
 
 import io.tolgee.component.LockingProvider
+import io.tolgee.constants.Feature
 import io.tolgee.dtos.queryResults.LanguageStatsDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
 import io.tolgee.model.LanguageStats
+import io.tolgee.model.branching.Branch
 import io.tolgee.model.views.projectStats.ProjectLanguageStatsResultView
 import io.tolgee.repository.LanguageStatsRepository
+import io.tolgee.repository.TranslationRepository
+import io.tolgee.repository.qa.LanguageQaConfigRepository
 import io.tolgee.service.language.LanguageService
+import io.tolgee.service.qa.TranslationQaIssueService
 import io.tolgee.service.queryBuilders.LanguageStatsProvider
 import io.tolgee.util.Logging
 import io.tolgee.util.debug
@@ -24,26 +29,52 @@ class LanguageStatsService(
   private val languageService: LanguageService,
   private val projectStatsService: ProjectStatsService,
   private val languageStatsRepository: LanguageStatsRepository,
+  private val translationRepository: TranslationRepository,
   private val entityManager: EntityManager,
   private val projectService: ProjectService,
   private val lockingProvider: LockingProvider,
   private val platformTransactionManager: PlatformTransactionManager,
+  private val translationQaIssueService: TranslationQaIssueService,
+  private val projectFeatureGuard: ProjectFeatureGuard,
+  private val languageQaConfigRepository: LanguageQaConfigRepository,
 ) : Logging {
-  fun refreshLanguageStats(projectId: Long) {
-    lockingProvider.withLocking("refresh-lang-stats-$projectId") {
+  fun refreshLanguageStats(
+    projectId: Long,
+    branchId: Long? = null,
+  ) {
+    lockingProvider.withLocking("refresh-lang-stats-$projectId-${branchId ?: "default"}") {
       executeInNewRepeatableTransaction(platformTransactionManager) tx@{
         val languages = languageService.findAll(projectId)
-        val allRawLanguageStats = getLanguageStatsRaw(projectId)
+        val allRawLanguageStats = getLanguageStatsRaw(projectId, branchId)
         try {
           val baseLanguage = projectService.getOrAssignBaseLanguage(projectId)
           val rawBaseLanguageStats =
             allRawLanguageStats.find { it.languageId == baseLanguage.id }
               ?: return@tx
-          val projectStats = projectStatsService.getProjectStats(projectId)
+          val projectStats = projectStatsService.getProjectStats(projectId, branchId)
           val languageStats =
-            languageStatsRepository.getAllByProjectIds(listOf(projectId))
-              .associateBy { it.language.id }
+            languageStatsRepository
+              .getAllByProjectIdAndBranchId(
+                projectId,
+                branchId,
+              ).associateBy { it.language.id }
               .toMutableMap()
+
+          val project = projectService.get(projectId)
+          val qaEnabled = projectFeatureGuard.isFeatureEnabled(Feature.QA_CHECKS, project)
+          val qaIssueCounts =
+            if (qaEnabled) {
+              translationQaIssueService.getOpenIssueCountsByLanguageId(projectId, branchId)
+            } else {
+              emptyMap()
+            }
+          val qaChecksStaleCountMap =
+            if (qaEnabled) {
+              translationQaIssueService.getStaleCountsByLanguageId(projectId, branchId)
+            } else {
+              emptyMap()
+            }
+          val qaDisabledLanguageIds = resolveQaDisabledLanguageIds(projectId, qaEnabled)
 
           allRawLanguageStats
             .sortedBy { it.languageName }
@@ -53,11 +84,17 @@ class LanguageStatsService(
               val translatedOrReviewedKeys = rawLanguageStats.translatedKeys + rawLanguageStats.reviewedKeys
               val translatedOrReviewedWords = rawLanguageStats.translatedWords + rawLanguageStats.reviewedWords
               val untranslatedWords = baseWords - translatedOrReviewedWords
-              val language = languages.find { it.id == rawLanguageStats.languageId } ?: return@tx
+              val language = languages.find { it.id == rawLanguageStats.languageId } ?: return@forEach
               val stats =
                 languageStats.computeIfAbsent(language.id) {
-                  LanguageStats(entityManager.getReference(Language::class.java, language.id))
+                  LanguageStats(
+                    entityManager.getReference(Language::class.java, language.id),
+                    branchId?.let { entityManager.getReference(Branch::class.java, it) },
+                  )
                 }
+
+              val lastUpdatedAt = translationRepository.getLastModifiedDate(language.id)
+
               stats.apply {
                 translatedKeys = rawLanguageStats.translatedKeys
                 translatedWords = rawLanguageStats.translatedWords
@@ -68,17 +105,22 @@ class LanguageStatsService(
                 untranslatedKeys = projectStats.keyCount - translatedOrReviewedKeys
                 this.untranslatedWords = baseWords - translatedOrReviewedWords
                 untranslatedPercentage = untranslatedWords.toDouble() / baseWords * 100
+                translationsUpdatedAt = lastUpdatedAt
+                qaIssueCount = qaIssueCounts[language.id]?.takeIf { language.id !in qaDisabledLanguageIds } ?: 0
+                qaChecksStaleCount =
+                  qaChecksStaleCountMap[language.id]?.takeIf { language.id !in qaDisabledLanguageIds } ?: 0
               }
             }
 
           languageStats.values.forEach {
-            it.language.stats = it
             languageStatsRepository.save(it)
           }
           logger.debug {
             "Language stats refreshed for project $projectId: ${
               languageStats.values.joinToString("\n") {
-                "${it.language.id} reviewed words: ${it.reviewedWords} translated words:${it.translatedWords}"
+                "Lang: ${it.language.tag} ${it.branch?.let {
+                  "(branch: ${it.name}) "
+                } ?: ""}- reviewed words: ${it.reviewedWords} translated words:${it.translatedWords}"
               }
             }"
           }
@@ -89,8 +131,18 @@ class LanguageStatsService(
     }
   }
 
+  fun refreshLanguageStatsAllBranches(projectId: Long) {
+    val branchIds = languageStatsRepository.getDistinctBranchIdsByProjectId(projectId)
+    for (branchId in branchIds) {
+      refreshLanguageStats(projectId, branchId)
+    }
+  }
+
   fun getLanguageStatsDtos(projectIds: List<Long>): Map<Long, List<LanguageStatsDto>> {
-    val data = languageStatsRepository.getDtosByProjectIds(projectIds).groupByProjects()
+    val data =
+      projectIds.associateWith { projectId ->
+        languageStatsRepository.getDtosByProjectIdAndBranchId(projectId, null)
+      }
 
     val emptyProjectsIds = projectIds.filter { data[it].isNullOrEmpty() }
     if (emptyProjectsIds.isEmpty()) {
@@ -101,18 +153,46 @@ class LanguageStatsService(
       refreshLanguageStats(it)
     }
 
-    return languageStatsRepository.getDtosByProjectIds(projectIds).groupByProjects()
+    return projectIds.associateWith { projectId ->
+      languageStatsRepository.getDtosByProjectIdAndBranchId(projectId, null)
+    }
   }
 
-  private fun List<LanguageStatsDto>.groupByProjects(): Map<Long, List<LanguageStatsDto>> {
-    return this.groupBy { it.projectId }
+  @Transactional(readOnly = true)
+  fun getLanguageStats(
+    projectId: Long,
+    branchId: Long? = null,
+  ): List<LanguageStatsDto> {
+    return languageStatsRepository.getDtosByProjectIdAndBranchId(projectId, branchId)
   }
 
-  fun getLanguageStats(projectId: Long): List<LanguageStatsDto> {
-    return getLanguageStatsDtos(listOf(projectId))[projectId] ?: emptyList()
+  fun getLanguageStats(
+    projectId: Long,
+    expectedLangs: Set<Long>,
+    branchId: Long? = null,
+  ): List<LanguageStatsDto> {
+    val data = getLanguageStats(projectId, branchId)
+    val missingStats = expectedLangs.minus(data.map { it.languageId }.toSet())
+    if (missingStats.isEmpty()) {
+      return data
+    }
+
+    refreshLanguageStats(projectId, branchId)
+    return languageStatsRepository.getDtosByProjectIdAndBranchId(projectId, branchId)
   }
 
-  private fun getLanguageStatsRaw(projectId: Long): List<ProjectLanguageStatsResultView> {
-    return LanguageStatsProvider(entityManager, listOf(projectId)).getResultForSingleProject()
+  private fun getLanguageStatsRaw(
+    projectId: Long,
+    branchId: Long?,
+  ): List<ProjectLanguageStatsResultView> {
+    return LanguageStatsProvider(entityManager, projectId, branchId).getResultForSingleProject()
+  }
+
+  private fun resolveQaDisabledLanguageIds(
+    projectId: Long,
+    qaEnabled: Boolean,
+  ): Set<Long> {
+    if (!qaEnabled) return emptySet()
+    return languageQaConfigRepository.findDisabledLanguageIds(projectId)
   }
 }

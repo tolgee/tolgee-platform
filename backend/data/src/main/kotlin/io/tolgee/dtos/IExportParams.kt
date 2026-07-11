@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import io.swagger.v3.oas.annotations.Hidden
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.dtos.ExportParamsDocs.FILE_STRUCTURE_TEMPLATE_DESCRIPTION
+import io.tolgee.dtos.ExportParamsDocs.FILTER_BRANCH_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.FILTER_KEY_ID_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.FILTER_KEY_ID_NOT_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.FILTER_KEY_PREFIX_DESCRIPTION
@@ -13,6 +14,7 @@ import io.tolgee.dtos.ExportParamsDocs.FILTER_TAG_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.FILTER_TAG_IN_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.FILTER_TAG_NOT_IN_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.FORMAT_DESCRIPTION
+import io.tolgee.dtos.ExportParamsDocs.HTML_ESCAPE_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.LANGUAGES_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.LANGUAGES_EXAMPLE
 import io.tolgee.dtos.ExportParamsDocs.MESSAGE_FORMAT_DESCRIPTION
@@ -94,6 +96,16 @@ interface IExportParams {
   )
   var fileStructureTemplate: String?
 
+  @get:Schema(
+    description = HTML_ESCAPE_DESCRIPTION,
+  )
+  var escapeHtml: Boolean?
+
+  @get:Schema(
+    description = FILTER_BRANCH_DESCRIPTION,
+  )
+  var filterBranch: String?
+
   fun copyPropsFrom(other: IExportParams) {
     this.languages = other.languages
     this.format = other.format
@@ -109,6 +121,8 @@ interface IExportParams {
     this.messageFormat = other.messageFormat
     this.supportArrays = other.supportArrays
     this.fileStructureTemplate = other.fileStructureTemplate
+    this.escapeHtml = other.escapeHtml
+    this.filterBranch = other.filterBranch
   }
 
   @get:Hidden

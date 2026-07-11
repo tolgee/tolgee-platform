@@ -4,11 +4,13 @@ import io.tolgee.model.enums.OrganizationRoleType
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
+import jakarta.persistence.FetchType
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
 import jakarta.persistence.UniqueConstraint
 import jakarta.validation.constraints.NotNull
+import org.hibernate.annotations.ColumnDefault
 
 @Entity
 @Table(
@@ -20,7 +22,7 @@ import jakarta.validation.constraints.NotNull
   ],
 )
 class OrganizationRole(
-  @OneToOne
+  @OneToOne(fetch = FetchType.LAZY)
   var invitation: Invitation? = null,
   @Enumerated(EnumType.ORDINAL)
   var type: OrganizationRoleType,
@@ -37,6 +39,11 @@ class OrganizationRole(
 
   @ManyToOne
   var user: UserAccount? = null
+
+  // Unique constraint manually created in the schema:
+  // - Only one role where managed is true per user
+  @ColumnDefault("false")
+  var managed: Boolean = false
 
   @ManyToOne
   @NotNull

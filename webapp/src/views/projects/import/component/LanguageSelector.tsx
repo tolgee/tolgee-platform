@@ -8,7 +8,7 @@ import {
   Select,
   styled,
 } from '@mui/material';
-import { Add, Clear } from '@mui/icons-material';
+import { Plus, XClose } from '@untitled-ui/icons-react';
 import { T } from '@tolgee/react';
 import { useQueryClient } from 'react-query';
 
@@ -20,10 +20,11 @@ import { useImportLanguageHelper } from '../hooks/useImportLanguageHelper';
 import { components } from 'tg.service/apiSchema.generated';
 import { LanguagesAddDialog } from 'tg.component/languages/LanguagesAddDialog';
 import { useState } from 'react';
-import { FlagImage } from 'tg.component/languages/FlagImage';
+import { FlagImage } from '@tginternal/library/components/languages/FlagImage';
 
 const StyledItem = styled(MenuItem)`
   padding: ${({ theme }) => theme.spacing(1, 2)};
+
   &.addNewItem {
     color: ${({ theme }) => theme.palette.primary.main};
   }
@@ -35,7 +36,7 @@ const StyledItemContent = styled('div')`
   align-items: center;
 `;
 
-const StyledAddIcon = styled(Add)`
+const StyledPlusIcon = styled(Plus)`
   margin-right: ${({ theme }) => theme.spacing(1)};
   margin-left: -2px;
 `;
@@ -45,10 +46,12 @@ const StyledInputAdornment = styled(InputAdornment)`
 `;
 
 const NEW_LANGUAGE_VALUE = '__new_language';
-export const LanguageSelector: React.FC<{
-  value?: number;
-  row: components['schemas']['ImportLanguageModel'];
-}> = (props) => {
+export const LanguageSelector: React.FC<
+  React.PropsWithChildren<{
+    value?: number;
+    row: components['schemas']['ImportLanguageModel'];
+  }>
+> = (props) => {
   const queryClient = useQueryClient();
   const languages = useProjectLanguages();
   const importData = useImportDataHelper();
@@ -77,7 +80,7 @@ export const LanguageSelector: React.FC<{
 
   items.push(
     <StyledItem key={0} value={NEW_LANGUAGE_VALUE} className="addNewItem">
-      <StyledAddIcon fontSize="small" />
+      <StyledPlusIcon width={18} height={18} />
       <T keyName="import_result_language_menu_add_new" />
     </StyledItem>
   );
@@ -103,12 +106,10 @@ export const LanguageSelector: React.FC<{
                   size="small"
                   data-cy="import-row-language-select-clear-button"
                 >
-                  <Clear />
+                  <XClose />
                 </IconButton>
               </StyledInputAdornment>
-            ) : (
-              <></>
-            )
+            ) : null
           }
           labelId="import_row_language_select"
           value={props.value || ''}

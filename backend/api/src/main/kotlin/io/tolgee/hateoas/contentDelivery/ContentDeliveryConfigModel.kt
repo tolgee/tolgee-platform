@@ -1,5 +1,6 @@
 package io.tolgee.hateoas.contentDelivery
 
+import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.dtos.IExportParams
 import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.ExportMessageFormat
@@ -16,11 +17,20 @@ class ContentDeliveryConfigModel(
   val name: String,
   val slug: String,
   val pruneBeforePublish: Boolean,
+  val zip: Boolean,
   val storage: ContentStorageModel?,
   val publicUrl: String?,
   val autoPublish: Boolean,
   val lastPublished: Long?,
-) : RepresentationModel<ContentDeliveryConfigModel>(), Serializable, IExportParams {
+  val lastPublishedFiles: Collection<String>,
+  override var escapeHtml: Boolean?,
+  @Schema(
+    description = "Branch name this CDN config is associated with. Null means default branch or no branching.",
+  )
+  val branchName: String? = null,
+) : RepresentationModel<ContentDeliveryConfigModel>(),
+  Serializable,
+  IExportParams {
   override var languages: Set<String>? = null
   override var format: ExportFormat = ExportFormat.JSON
   override var structureDelimiter: Char? = null
@@ -35,4 +45,7 @@ class ContentDeliveryConfigModel(
   override var messageFormat: ExportMessageFormat? = null
   override var supportArrays: Boolean = false
   override var fileStructureTemplate: String? = null
+  override var filterBranch: String?
+    get() = branchName
+    set(_) {} // no-op; branchName is the source of truth
 }

@@ -12,7 +12,9 @@ type Props = {
   className: string;
 };
 
-export const MessageFormatSelector: React.FC<Props> = ({ className }) => {
+export const MessageFormatSelector: React.FC<
+  React.PropsWithChildren<Props>
+> = ({ className }) => {
   const { t } = useTranslate();
   const [field, _, fieldHelperProps] = useField('messageFormat');
 

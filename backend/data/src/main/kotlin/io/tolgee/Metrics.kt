@@ -1,30 +1,271 @@
 package io.tolgee
 
 import io.micrometer.core.instrument.Counter
+import io.micrometer.core.instrument.DistributionSummary
 import io.micrometer.core.instrument.Gauge
 import io.micrometer.core.instrument.MeterRegistry
+import io.micrometer.core.instrument.Timer
 import org.springframework.stereotype.Component
-import java.util.concurrent.ConcurrentLinkedQueue
+import java.time.Duration
 
 @Component
 class Metrics(
   private val meterRegistry: MeterRegistry,
 ) {
-  fun registerJobQueue(queue: ConcurrentLinkedQueue<*>) {
-    Gauge.builder("tolgee.batch.job.execution.queue.size", queue) { it.size.toDouble() }
+  fun registerJobQueue(sizeProvider: () -> Int) {
+    Gauge
+      .builder("tolgee.batch.job.execution.queue.size", sizeProvider) { it().toDouble() }
       .description("Size of the queue of batch job executions")
       .register(meterRegistry)
   }
 
+  // ==========================================================================
+  // Rate Limiting Metrics
+  // ==========================================================================
+
+  val rateLimitConnectionDropsCounter: Counter by lazy {
+    Counter
+      .builder("tolgee.ratelimit.connection_drops")
+      .description("Number of connections dropped due to repeated rate limit violations")
+      .register(meterRegistry)
+  }
+
+  // ==========================================================================
+  // Batch Job Metrics
+  // ==========================================================================
+
+  val batchJobManagementItemAlreadyQueuedCounter: Counter by lazy {
+    Counter
+      .builder("tolgee.batch.job.execution.queue.already_queued")
+      .description("Number of executions that were already queued, but retrieved again from db")
+      .register(meterRegistry)
+  }
+
+  val batchJobManagementItemAlreadyLockedCounter: Counter by lazy {
+    Counter
+      .builder("tolgee.batch.job.execution.queue.already_locked")
+      .description(
+        "Number of executions that were already locked (by scheduled db retrieved or other pod) and are preprocessed redundantly",
+      ).register(meterRegistry)
+  }
+
   val batchJobManagementFailureWithRetryCounter: Counter by lazy {
-    Counter.builder("tolgee.batch.job.execution.management.failure.retried")
+    Counter
+      .builder("tolgee.batch.job.execution.management.failure.retried")
       .description("Total number of failures when trying to store data about batch job execution (retried)")
       .register(meterRegistry)
   }
 
   val batchJobManagementTotalFailureFailedCounter: Counter by lazy {
-    Counter.builder("tolgee.batch.job.execution.management.failure.failed")
+    Counter
+      .builder("tolgee.batch.job.execution.management.failure.failed")
       .description("Total number of failures when trying to store data about batch job execution (execution failed)")
+      .register(meterRegistry)
+  }
+
+  val bigMetaStoringTimer: Timer by lazy {
+    Timer
+      .builder("tolgee.big_meta.storing.timer")
+      .description("Time spent storing big meta data (sync)")
+      .register(meterRegistry)
+  }
+
+  val bigMetaStoringAsyncTimer: Timer by lazy {
+    Timer
+      .builder("tolgee.big_meta.storing-async.timer")
+      .description("Time spent storing big meta data (async)")
+      .register(meterRegistry)
+  }
+
+  val bigMetaDeletingAsyncTimer: Timer by lazy {
+    Timer
+      .builder("tolgee.big_meta.deleting-async.timer")
+      .description("Time spent deleting big meta data (async)")
+      .register(meterRegistry)
+  }
+
+  val bigMetaNewDistancesComputeTimer: Timer by lazy {
+    Timer
+      .builder("tolgee.big_meta.new_distances.compute.timer")
+      .description("Time spent computing new distances for big meta data")
+      .register(meterRegistry)
+  }
+
+  // ==========================================================================
+  // Batch Job Performance Metrics
+  // ==========================================================================
+
+  /**
+   * Distribution of items processed per job.
+   */
+  val batchJobItemsProcessed: DistributionSummary by lazy {
+    DistributionSummary
+      .builder("tolgee.batch.job.items_processed")
+      .description("Number of items processed per batch job")
+      .publishPercentileHistogram()
+      .register(meterRegistry)
+  }
+
+  fun recordJobCompleted(
+    jobType: String,
+    status: String,
+    durationMs: Long,
+  ) {
+    Timer
+      .builder("tolgee.batch.job.duration")
+      .description("Total duration of batch jobs from creation to completion")
+      .publishPercentileHistogram()
+      .tag("job_type", jobType)
+      .tag("status", status)
+      .register(meterRegistry)
+      .record(Duration.ofMillis(durationMs.coerceAtLeast(0)))
+
+    Counter
+      .builder("tolgee.batch.job.completed")
+      .tag("job_type", jobType)
+      .tag("status", status)
+      .description("Total number of completed batch jobs")
+      .register(meterRegistry)
+      .increment()
+  }
+
+  fun recordJobStarted(
+    jobType: String,
+    jobCharacter: String,
+  ) {
+    Counter
+      .builder("tolgee.batch.job.started")
+      .tag("job_type", jobType)
+      .tag("job_character", jobCharacter)
+      .description("Total number of started batch jobs")
+      .register(meterRegistry)
+      .increment()
+  }
+
+  /**
+   * Records queue wait time with tags.
+   */
+  fun recordQueueWaitTime(
+    jobType: String,
+    jobCharacter: String,
+    waitTimeMs: Long,
+  ) {
+    Timer
+      .builder("tolgee.batch.job.queue_wait")
+      .description("Time jobs wait before first chunk executes")
+      .publishPercentileHistogram()
+      .tag("job_type", jobType)
+      .tag("job_character", jobCharacter)
+      .register(meterRegistry)
+      .record(Duration.ofMillis(waitTimeMs.coerceAtLeast(0)))
+  }
+
+  /**
+   * Records chunk execution time with tags.
+   */
+  fun recordChunkExecutionTime(
+    jobType: String,
+    status: String,
+    executionTimeMs: Long,
+  ) {
+    Timer
+      .builder("tolgee.batch.chunk.execution")
+      .description("Time to execute a single batch job chunk")
+      .publishPercentileHistogram()
+      .tag("job_type", jobType)
+      .tag("status", status)
+      .register(meterRegistry)
+      .record(Duration.ofMillis(executionTimeMs.coerceAtLeast(0)))
+  }
+
+  // ==========================================================================
+  // Machine Translation Provider Metrics
+  // ==========================================================================
+
+  /**
+   * Records the duration of a single call to a machine-translation provider
+   * (one text/key). Tagged by service (GOOGLE, AWS, DEEPL, AZURE, BAIDU, PROMPT)
+   * and outcome (success / error).
+   */
+  fun recordMtProviderCall(
+    service: String,
+    outcome: String,
+    durationMs: Long,
+  ) {
+    Timer
+      .builder("tolgee.mt.provider.call")
+      .description("Time spent calling a machine-translation provider (per text/key)")
+      .publishPercentileHistogram()
+      .tag("service", service)
+      .tag("outcome", outcome)
+      .register(meterRegistry)
+      .record(Duration.ofMillis(durationMs.coerceAtLeast(0)))
+  }
+
+  /**
+   * Records the duration of a single translation-memory lookup
+   * (TranslationMemoryService.getAutoTranslatedValue, the path hit by
+   * AUTO_TRANSLATE / PRE_TRANSLATE_BT_TM chunks before the LLM call).
+   * Tagged by outcome: hit (TM returned a value), miss (no match), error.
+   */
+  fun recordTranslationMemoryLookup(
+    outcome: String,
+    durationMs: Long,
+  ) {
+    Timer
+      .builder("tolgee.translation.memory.lookup")
+      .description("Time spent looking up a translation-memory match for a single (key, target-language) pair")
+      .publishPercentileHistogram()
+      .tag("outcome", outcome)
+      .register(meterRegistry)
+      .record(Duration.ofMillis(durationMs.coerceAtLeast(0)))
+  }
+
+  // Branch operations - Priority 1 (Must Have)
+  val branchCreateTimer: Timer by lazy {
+    Timer
+      .builder("tolgee.branch.create.timer")
+      .description("Time spent creating branches")
+      .register(meterRegistry)
+  }
+
+  val branchDeleteTimer: Timer by lazy {
+    Timer
+      .builder("tolgee.branch.delete.timer")
+      .description("Time spent deleting branches (includes cleanup)")
+      .register(meterRegistry)
+  }
+
+  // Merge operations
+  val branchMergePreviewTimer: Timer by lazy {
+    Timer
+      .builder("tolgee.branch.merge.preview.timer")
+      .description("Time spent generating merge preview")
+      .register(meterRegistry)
+  }
+
+  val branchMergeApplyTimer: Timer by lazy {
+    Timer
+      .builder("tolgee.branch.merge.apply.timer")
+      .description("Time spent applying merge")
+      .register(meterRegistry)
+  }
+
+  fun branchMergeConflictCounter(resolution: String): Counter =
+    meterRegistry.counter("tolgee.branch.merge.conflicts.total", "resolution", resolution)
+
+  // Branch operations - Priority 2 (Should Have)
+  val branchCleanupBatchesCounter: Counter by lazy {
+    Counter
+      .builder("tolgee.branch.cleanup.batches.total")
+      .description("Number of cleanup batches processed")
+      .register(meterRegistry)
+  }
+
+  val languageStatsRefreshTimer: Timer by lazy {
+    Timer
+      .builder("tolgee.language_stats.refresh.timer")
+      .description("Time spent refreshing language stats")
       .register(meterRegistry)
   }
 }

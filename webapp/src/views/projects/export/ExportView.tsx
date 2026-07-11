@@ -1,5 +1,4 @@
 import { FunctionComponent } from 'react';
-import { Route } from 'react-router-dom';
 import { useTranslate } from '@tolgee/react';
 
 import { LINKS, PARAMS } from 'tg.constants/links';
@@ -7,7 +6,9 @@ import { useProject } from 'tg.hooks/useProject';
 import { ExportForm } from './ExportForm';
 import { BaseProjectView } from '../BaseProjectView';
 
-export const ExportView: FunctionComponent = () => {
+export const ExportView: FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const project = useProject();
   const { t } = useTranslate();
 
@@ -23,10 +24,9 @@ export const ExportView: FunctionComponent = () => {
         ],
       ]}
       maxWidth="narrow"
+      branching
     >
-      <Route exact path={LINKS.PROJECT_EXPORT.template}>
-        <ExportForm />
-      </Route>
+      <ExportForm />
     </BaseProjectView>
   );
 };

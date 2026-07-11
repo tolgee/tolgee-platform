@@ -1,6 +1,6 @@
 import React from 'react';
-import { T } from '@tolgee/react';
-import { CameraAlt, Edit } from '@mui/icons-material';
+import { useTranslate } from '@tolgee/react';
+import { CameraPlus, Edit02 } from '@untitled-ui/icons-react';
 import { styled } from '@mui/material';
 
 import { CELL_SHOW_ON_HOVER } from './styles';
@@ -15,26 +15,22 @@ const StyledControls = styled('div')`
 type ControlsProps = {
   editEnabled?: boolean;
   onEdit?: () => void;
-  onScreenshots?: () => void;
-  screenshotRef?: React.Ref<any>;
-  screenshotsPresent?: boolean;
-  screenshotsOpen?: boolean;
+  onAddScreenshot?: () => void;
 };
 
-export const ControlsKey: React.FC<ControlsProps> = ({
+export const ControlsKey: React.FC<React.PropsWithChildren<ControlsProps>> = ({
   editEnabled,
   onEdit,
-  onScreenshots,
-  screenshotRef,
-  screenshotsPresent,
-  screenshotsOpen,
+  onAddScreenshot,
 }) => {
   const { satisfiesPermission } = useProjectPermissions();
   const canViewScreenshots = satisfiesPermission('screenshots.view');
 
   // right section
   const displayEdit = editEnabled && onEdit;
-  const displayScreenshots = onScreenshots && canViewScreenshots;
+  const displayScreenshots = onAddScreenshot && canViewScreenshots;
+
+  const { t } = useTranslate();
 
   return (
     <StyledControls>
@@ -43,28 +39,22 @@ export const ControlsKey: React.FC<ControlsProps> = ({
           onClick={onEdit}
           data-cy="translations-cell-edit-button"
           className={CELL_SHOW_ON_HOVER}
-          tooltip={<T keyName="translations_cell_edit" />}
+          tooltip={t('translations_cell_edit')}
         >
-          <Edit fontSize="small" />
+          <Edit02 />
         </ControlsButton>
       )}
       {displayScreenshots && (
-        <ControlsButton
-          onClick={onScreenshots}
-          ref={screenshotRef}
-          tooltip={<T keyName="translations_screenshots_tooltip" />}
-          data-cy="translations-cell-screenshots-button"
-          className={
-            screenshotsPresent || screenshotsOpen
-              ? undefined
-              : CELL_SHOW_ON_HOVER
-          }
-        >
-          <CameraAlt
-            fontSize="small"
-            color={screenshotsPresent ? 'primary' : undefined}
-          />
-        </ControlsButton>
+        <>
+          <ControlsButton
+            tooltip={t('translations_screenshots_add_tooltip')}
+            data-cy="translations-cell-screenshots-button"
+            className={CELL_SHOW_ON_HOVER}
+            onClick={onAddScreenshot}
+          >
+            <CameraPlus />
+          </ControlsButton>
+        </>
       )}
     </StyledControls>
   );

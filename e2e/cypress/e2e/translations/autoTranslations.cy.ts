@@ -54,10 +54,10 @@ describe('Translation memory', () => {
       .contains('mytranslation')
       .should('be.visible');
     cy.gcy('translations-table-cell')
-      .contains('mytranslation translated with GOOGLE from en to cs')
+      .contains('mytranslation translated with PROMPT from en to cs')
       .should('be.visible');
     getAutoTranslatedIndicator(
-      'mytranslation translated with GOOGLE from en to cs'
+      'mytranslation translated with PROMPT from en to cs'
     ).should('be.visible');
   });
 
@@ -78,6 +78,7 @@ describe('Translation memory', () => {
       .should('have.length', 2);
     getAutoTranslatedIndicator('Studený přeložený text 1')
       .should('be.visible')
+      .parent()
       .findDcy('translations-auto-translated-clear-button')
       .invoke('show')
       .click();
@@ -97,12 +98,12 @@ describe('Translation memory', () => {
     waitForGlobalLoading();
     cy.gcy('translations-table-cell').contains('mykey').should('be.visible');
     getAutoTranslatedIndicator(
-      'New translation translated with GOOGLE from en to cs'
+      'New translation translated with PROMPT from en to cs'
     ).should('be.visible');
 
     cy.gcy('translations-table-cell')
       .filter(
-        ':contains("New translation translated with GOOGLE from en to cs")'
+        ':contains("New translation translated with PROMPT from en to cs")'
       )
       .first()
       .trigger('mouseover')
@@ -111,7 +112,7 @@ describe('Translation memory', () => {
 
     waitForGlobalLoading();
     getAutoTranslatedIndicator(
-      'New translation translated with GOOGLE from en to cs'
+      'New translation translated with PROMPT from en to cs'
     ).should('not.exist');
   });
 
@@ -126,11 +127,11 @@ describe('Translation memory', () => {
     waitForGlobalLoading();
     cy.gcy('translations-table-cell').contains('mykey').should('be.visible');
     getAutoTranslatedIndicator(
-      'New translation translated with GOOGLE from en to cs'
+      'New translation translated with PROMPT from en to cs'
     ).should('be.visible');
 
     editCell(
-      'New translation translated with GOOGLE from en to cs',
+      'New translation translated with PROMPT from en to cs',
       'Translation edited',
       true
     );
@@ -153,10 +154,10 @@ describe('Translation memory', () => {
 
     waitForGlobalLoading();
     cy.gcy('translations-table-cell')
-      .contains('Hello first translated with GOOGLE from en to cs')
+      .contains('Hello first translated with PROMPT from en to cs')
       .should('exist');
     cy.gcy('translations-table-cell')
-      .contains('Hello second translated with GOOGLE from en to cs')
+      .contains('Hello second translated with PROMPT from en to cs')
       .should('exist');
   });
 

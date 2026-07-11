@@ -11,5 +11,6 @@ class ExtendedUserAccountInProject(
   val organizationBasePermission: Permission,
   val directPermission: Permission?,
   val permittedLanguageIds: List<Long>?,
+  val mfaEnabled: Boolean,
   val avatarHash: String?,
 )

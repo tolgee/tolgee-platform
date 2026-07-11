@@ -9,6 +9,7 @@ import io.tolgee.model.dataImport.WithKeyMeta
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Tag
 import io.tolgee.repository.TagRepository
+import io.tolgee.service.security.SecurityService
 import io.tolgee.util.Logging
 import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
@@ -26,7 +27,10 @@ class TagService(
   private val keyService: KeyService,
   private val entityManager: EntityManager,
   private val applicationContext: ApplicationContext,
+  @Lazy
+  private val securityService: SecurityService,
 ) : Logging {
+  @Transactional
   fun tagKey(
     key: Key,
     tagName: String,
@@ -35,7 +39,8 @@ class TagService(
     val tag =
       find(key.project, tagName)?.let {
         if (!keyMeta.tags.contains(it)) {
-          it.keyMetas.add(keyMeta)
+          // Don't access it.keyMetas - triggers lazy load of all KeyMeta for this tag
+          // Only update owning side (keyMeta.tags) - JPA will sync the join table
           keyMeta.tags.add(it)
         }
         it
@@ -60,6 +65,7 @@ class TagService(
   /**
    * @param map key entity to list of tags
    */
+  @Transactional
   fun tagKeys(map: Map<Key, List<String>>) {
     if (map.isEmpty()) {
       return
@@ -72,6 +78,7 @@ class TagService(
   /**
    * @param map keyId entity to list of tags
    */
+  @Transactional
   fun tagKeysById(
     projectId: Long,
     map: Map<Long, List<String>>,
@@ -94,34 +101,37 @@ class TagService(
     val existingTags =
       this.getFromProject(projectId, map.values.flatten().toSet()).associateBy { it.name }.toMutableMap()
 
-    return map.map { (keyId, tagsToAdd) ->
-      keyId to
-        tagsToAdd.map { tagToAdd ->
-          val keyWithData = keysByIdMap[keyId] ?: throw NotFoundException(Message.KEY_NOT_FOUND)
-          val keyMeta = keyMetaService.getOrCreateForKey(keyWithData)
-          val tag =
-            existingTags[tagToAdd]?.let {
-              if (!keyMeta.tags.contains(it)) {
-                it.keyMetas.add(keyMeta)
-                keyMeta.tags.add(it)
+    return map
+      .map { (keyId, tagsToAdd) ->
+        keyId to
+          tagsToAdd.map { tagToAdd ->
+            val keyWithData = keysByIdMap[keyId] ?: throw NotFoundException(Message.KEY_NOT_FOUND)
+            val keyMeta = keyMetaService.getOrCreateForKey(keyWithData)
+            val tag =
+              existingTags[tagToAdd]?.let {
+                if (!keyMeta.tags.contains(it)) {
+                  // Don't access it.keyMetas directly - it triggers massive query for all KeyMeta on this tag
+                  // Instead, just update the owning side (keyMeta.tags)
+                  keyMeta.tags.add(it)
+                }
+                it
+              } ?: let {
+                Tag().apply {
+                  project = keysByIdMap[keyId]?.project ?: throw NotFoundException(Message.KEY_NOT_FOUND)
+                  keyMetas.add(keyMeta)
+                  name = tagToAdd
+                  keyMeta.tags.add(this)
+                  existingTags[tagToAdd] = this
+                }
               }
-              it
-            } ?: let {
-              Tag().apply {
-                project = keysByIdMap[keyId]?.project ?: throw NotFoundException(Message.KEY_NOT_FOUND)
-                keyMetas.add(keyMeta)
-                name = tagToAdd
-                keyMeta.tags.add(this)
-                existingTags[tagToAdd] = this
-              }
-            }
-          tagRepository.save(tag)
-          keyMetaService.save(keyMeta)
-          tag
-        }
-    }.toMap()
+            tagRepository.save(tag)
+            keyMetaService.save(keyMeta)
+            tag
+          }
+      }.toMap()
   }
 
+  @Transactional
   fun untagKeys(
     projectId: Long,
     map: Map<Long, List<String>>,
@@ -182,13 +192,9 @@ class TagService(
     tag: Tag,
   ) {
     key.keyMeta?.let { keyMeta ->
-      tag.keyMetas.remove(keyMeta)
       keyMeta.tags.remove(tag)
-      tagRepository.save(tag)
       keyMetaService.save(keyMeta)
-      if (tag.keyMetas.size < 1) {
-        tagRepository.delete(tag)
-      }
+      tagRepository.deleteUnusedByIdIn(listOf(tag.id))
     }
   }
 
@@ -197,13 +203,14 @@ class TagService(
     key: Key,
     newTags: List<String>,
   ) {
-    key.keyMeta?.tags?.forEach { oldTag ->
-      if (newTags.find { oldTag.name == it } == null) {
-        this.remove(key, oldTag)
-      }
+    val tagsToRemove = key.keyMeta?.tags?.filter { it.name !in newTags } ?: emptyList()
+
+    tagsToRemove.forEach {
+      this.remove(key, it)
     }
-    newTags.forEach { tagName ->
-      this.tagKey(key, tagName)
+
+    newTags.forEach {
+      tagKey(key, it)
     }
   }
 
@@ -271,28 +278,25 @@ class TagService(
   }
 
   private fun deleteAllTagsForKeys(keys: Iterable<WithKeyMeta>) {
-    val tagIds = keys.flatMap { it.keyMeta?.tags?.map { it.id } ?: listOf() }.toSet()
-    // get tags with fetched keyMetas
-    val tagKeyMetasMap =
-      traceLogMeasureTime("tagService: deleteAllTagsForKeys: getTagsWithKeyMetas") {
-        tagRepository.getTagsWithKeyMetas(tagIds).associate {
-          it.id to it.keyMetas
-        }
-      }
-    keys.forEach { key ->
-      key.keyMeta?.let { keyMeta ->
-        keyMeta.tags.forEach { tag ->
-          // remove from tagsKeyMetas to find out whether to delete the tag
-          val tagKeyMetas = tagKeyMetasMap[tag.id]
-          tagKeyMetas?.removeIf { it.id == keyMeta.id }
-          if (tagKeyMetas?.isEmpty() != false) {
-            tagRepository.delete(tag)
-          }
-        }
-        keyMeta.tags.clear()
-        keyMetaService.save(keyMeta)
-      }
+    val keyMetas = keys.mapNotNull { it.keyMeta }
+    if (keyMetas.isEmpty()) return
+
+    val tagIds = keyMetas.flatMap { km -> km.tags.map { it.id } }.toSet()
+    if (tagIds.isEmpty()) return
+
+    // Clear tags from each keyMeta (owning side): removes join-table entries
+    // and triggers activity logging via @ActivityLoggedProp on KeyMeta.tags.
+    keyMetas.forEach { keyMeta ->
+      keyMeta.tags.clear()
+      keyMetaService.save(keyMeta)
     }
+
+    // Delete tags that have no remaining keyMetas, atomically.
+    // deleteUnusedByIdIn re-checks NOT EXISTS at delete time, so two concurrent
+    // transactions cannot both skip the delete and leave orphaned tags.
+    // flushAutomatically = true ensures key_meta_tags removals are written
+    // before the DELETE FROM tag runs (Hibernate would not auto-flush across tables).
+    tagRepository.deleteUnusedByIdIn(tagIds)
   }
 
   /**
@@ -300,26 +304,31 @@ class TagService(
    * So we can go for native query.
    */
   fun deleteAllByProject(projectId: Long) {
-    entityManager.createNativeQuery(
-      """
+    entityManager
+      .createNativeQuery(
+        """
       delete from key_meta_tags kmt 
         where kmt.key_metas_id in 
         (select km.id from key_meta km join key k on km.key_id = k.id where k.project_id = :projectId)""",
-    ).setParameter("projectId", projectId).executeUpdate()
-    entityManager.createNativeQuery(
-      """
+      ).setParameter("projectId", projectId)
+      .executeUpdate()
+    entityManager
+      .createNativeQuery(
+        """
       delete from tag where project_id = :projectId
       """,
-    ).setParameter("projectId", projectId).executeUpdate()
+      ).setParameter("projectId", projectId)
+      .executeUpdate()
   }
 
   @Transactional
   fun complexTagOperation(
     projectId: Long,
     req: ComplexTagKeysRequest,
+    branch: String?,
   ) {
     val provider =
-      ComplexTagOperationKeyProvider(projectId, req, applicationContext)
+      ComplexTagOperationKeyProvider(projectId, req, branch, applicationContext)
 
     if (req.tagFiltered != null || req.untagFiltered != null) {
       val untagFilteredWithAppliedWildcards = req.untagFiltered?.applyWildcards(projectId)?.toList()
@@ -328,7 +337,10 @@ class TagService(
 
     if (req.tagOther != null || req.untagOther != null) {
       val untagOtherWithAppliedWildcards = req.untagOther?.applyWildcards(projectId)?.toList()
-      tagAndUntag(req.tagOther, untagOtherWithAppliedWildcards, provider.rest)
+      provider.restKeyIds.chunked(COMPLEX_TAG_BATCH_SIZE).forEach { chunkIds ->
+        val keys = keyService.getKeysWithTagsById(projectId, chunkIds)
+        tagAndUntag(req.tagOther, untagOtherWithAppliedWildcards, keys.toList())
+      }
     }
   }
 
@@ -375,7 +387,9 @@ class TagService(
     keyId: Long,
     tagName: String,
   ): Tag {
-    return tagKeysById(projectId, mapOf(keyId to listOf(tagName))).values.singleOrNull()?.singleOrNull()
+    val key = keyService.getKeysWithTagsById(projectId, listOf(keyId)).singleOrNull() ?: throw NotFoundException()
+    securityService.checkBranchModify(key)
+    return tagKeys(listOf(key), mapOf(key.id to listOf(tagName))).values.singleOrNull()?.singleOrNull()
       ?: throw IllegalStateException("No single tag found in result.")
   }
 
@@ -386,7 +400,22 @@ class TagService(
     tagId: Long,
   ) {
     val key = keyService.getKeysWithTagsById(projectId, listOf(keyId)).singleOrNull() ?: throw NotFoundException()
-    val tag = getWithKeyMetasFetched(projectId, tagId)
+    securityService.checkBranchModify(key)
+    removeKeyTag(key, tagId)
+  }
+
+  @Transactional
+  fun removeKeyTag(
+    key: Key,
+    tagId: Long,
+  ) {
+    val tag =
+      tagRepository.findByIdAndProjectId(tagId, key.project.id)
+        ?: throw NotFoundException(Message.TAG_NOT_FOUND)
     remove(key, tag)
+  }
+
+  companion object {
+    private const val COMPLEX_TAG_BATCH_SIZE = 5000
   }
 }

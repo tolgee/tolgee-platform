@@ -6,7 +6,10 @@ interface FromIcuPlaceholderConvertor {
   /**
    * This method is called on the text parts (not argument parts) of the message
    */
-  fun convertText(string: String): String
+  fun convertText(
+    node: MessagePatternUtil.TextNode,
+    keepEscaping: Boolean,
+  ): String
 
   /**
    * How to # in ICU plural form

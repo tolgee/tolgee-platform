@@ -50,6 +50,6 @@ class AndroidStringsUnescaperTest {
     isFirst: Boolean = true,
     isLast: Boolean = true,
   ) {
-    AndroidStringUnescaper(this, isFirst = isFirst, isLast = isLast).unescaped.assert.isEqualTo(expected)
+    AndroidStringUnescaper(this.asSequence(), isFirst = isFirst, isLast = isLast).result.assert.isEqualTo(expected)
   }
 }

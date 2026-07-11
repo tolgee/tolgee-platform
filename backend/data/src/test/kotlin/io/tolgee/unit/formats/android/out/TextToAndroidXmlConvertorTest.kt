@@ -1,13 +1,14 @@
 package io.tolgee.unit.formats.android.out
 
-import io.tolgee.formats.android.AndroidStringValue
-import io.tolgee.formats.android.out.TextToAndroidXmlConvertor
+import io.tolgee.formats.ExportFormat
+import io.tolgee.formats.xmlResources.XmlResourcesStringValue
+import io.tolgee.formats.xmlResources.out.TextToXmlResourcesConvertor
 import io.tolgee.testing.assert
+import io.tolgee.util.XmlSecurity
 import org.assertj.core.api.AbstractStringAssert
 import org.junit.jupiter.api.Test
 import org.w3c.dom.Document
 import org.w3c.dom.Node
-import javax.xml.parsers.DocumentBuilderFactory
 
 class TextToAndroidXmlConvertorTest {
   @Test
@@ -54,7 +55,8 @@ class TextToAndroidXmlConvertorTest {
   fun `unsupported tags are converted to CDATA nodes`() {
     var nodes =
       "What a <unsupported attr=\"https://example.com\">link ' %% \" </unsupported>."
-        .convertedNodes().toList()
+        .convertedNodes()
+        .toList()
     nodes[0].assertTextContent("What a ")
     nodes[1].nodeAssertCdataNodeText(
       "<unsupported attr=\\\"https://example.com\\\">link \\' \\% \\\" " +
@@ -120,6 +122,25 @@ class TextToAndroidXmlConvertorTest {
     "a\n\na".assertSingleTextNode("a\\n\\na")
   }
 
+  @Test
+  fun `doesnt fail with malformed XML`() {
+    "<unclosed>tag".assertSingleTextNode().isEqualTo("<unclosed>tag")
+  }
+
+  @Test
+  fun `escapes special characters in malformed XML`() {
+    "<tag attr='value\">text with ' and \" characters</tag"
+      .assertSingleTextNode()
+      .isEqualTo("<tag attr=\\'value\\\">text with \\' and \\\" characters</tag")
+  }
+
+  @Test
+  fun `escapes special characters in malformed XML #2`() {
+    "text ' text <>"
+      .assertSingleTextNode()
+      .isEqualTo("text \\' text <>")
+  }
+
   private fun Node.assertTextContent(text: String) {
     this.nodeType.assert.isEqualTo(Node.TEXT_NODE)
     this.textContent.assert.isEqualTo(text)
@@ -155,7 +176,11 @@ class TextToAndroidXmlConvertorTest {
   }
 
   private fun String.getConverted(isWrappedWithCdata: Boolean = false) =
-    TextToAndroidXmlConvertor(document, AndroidStringValue(this, isWrappedWithCdata)).convert()
+    TextToXmlResourcesConvertor(
+      document,
+      XmlResourcesStringValue(this, isWrappedWithCdata),
+      ExportFormat.ANDROID_XML,
+    ).convert()
 
   private fun String.convertedNodes(isWrappedWithCdata: Boolean = false): Collection<Node> {
     val result = this.getConverted(isWrappedWithCdata)
@@ -165,7 +190,7 @@ class TextToAndroidXmlConvertorTest {
   }
 
   private val document: Document by lazy {
-    val factory = DocumentBuilderFactory.newInstance()
+    val factory = XmlSecurity.newSecureDocumentBuilderFactory()
     val builder = factory.newDocumentBuilder()
     builder.newDocument()
   }

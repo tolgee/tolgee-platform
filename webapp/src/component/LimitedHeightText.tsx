@@ -1,32 +1,7 @@
 import React, { useState, useRef, useEffect, RefObject } from 'react';
 import { Popper, keyframes, styled } from '@mui/material';
 import { useTimer } from '../fixtures/useTimer';
-
-function getInheritedBackgroundColor(el) {
-  // get default style for current browser
-  const defaultStyle = getDefaultBackground(); // typically "rgba(0, 0, 0, 0)"
-
-  // get computed color for el
-  const backgroundColor = window.getComputedStyle(el).backgroundColor;
-
-  // if we got a real value, return it
-  if (backgroundColor != defaultStyle) return backgroundColor;
-
-  // if we've reached the top parent el without getting an explicit color, return default
-  if (!el.parentElement) return defaultStyle;
-
-  // otherwise, recurse and try again on parent element
-  return getInheritedBackgroundColor(el.parentElement);
-}
-
-function getDefaultBackground() {
-  // have to add to the document in order to use getComputedStyle
-  const div = document.createElement('div');
-  document.head.appendChild(div);
-  const bg = window.getComputedStyle(div).backgroundColor;
-  document.head.removeChild(div);
-  return bg;
-}
+import { getEffectiveBackgroundColor } from 'tg.fixtures/getEffectiveElementBackground';
 
 const fadeIn = keyframes`
   from {
@@ -41,6 +16,7 @@ const StyledContainer = styled('div')`
   position: relative;
   display: grid;
   animation: ${fadeIn} 0.1s ease-in-out;
+  overflow: hidden;
 
   & .text {
     overflow: hidden;
@@ -69,7 +45,7 @@ type Props = {
   overlay?: boolean;
 };
 
-export const LimitedHeightText: React.FC<Props> = ({
+export const LimitedHeightText: React.FC<React.PropsWithChildren<Props>> = ({
   maxLines,
   children,
   lang,
@@ -86,9 +62,10 @@ export const LimitedHeightText: React.FC<Props> = ({
   const detectExpandability = () => {
     const textElement = textRef.current;
     if (textElement != null) {
-      // values should be the same, however firefox applies some weird rounding
-      // so by adding one we eliminate that
-      setExpandable(textElement.clientHeight + 1 < textElement.scrollHeight);
+      // Use a 2px threshold to account for browser rounding differences
+      const heightDifference =
+        textElement.scrollHeight - textElement.clientHeight;
+      setExpandable(heightDifference > 2);
     }
   };
 
@@ -170,7 +147,7 @@ export const LimitedHeightText: React.FC<Props> = ({
             className="text"
             style={{
               width: textRef.current?.clientWidth + 'px',
-              background: getInheritedBackgroundColor(textRef.current),
+              background: getEffectiveBackgroundColor(textRef.current),
               color: window.getComputedStyle(textRef.current).color,
               wordBreak: wrap,
               top: -overlayPadding,

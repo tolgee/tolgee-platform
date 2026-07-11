@@ -42,10 +42,11 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
   @Test
   fun `returns correct data`() {
     testData.generateLotOfData()
+    testData.addDeletedBranch()
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     performProjectAuthGet("/translations?sort=id").andPrettyPrint.andIsOk.andAssertThatJson {
-      node("page.totalElements").isNumber.isGreaterThan(BigDecimal(100))
+      node("page.totalElements").isNumber.isEqualTo(BigDecimal(101))
       node("page.size").isEqualTo(20)
       node("selectedLanguages") {
         isArray.hasSize(2)
@@ -71,7 +72,15 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
             node("fromTranslationMemory").isEqualTo(false)
             node("commentCount").isEqualTo(1)
           }
-          node("translations").isObject.doesNotContainKey("en")
+          node("translations.en") {
+            node("id").isNull()
+            node("text").isNull()
+            node("state").isEqualTo("UNTRANSLATED")
+            node("auto").isEqualTo(false)
+            node("mtProvider").isNull()
+            node("fromTranslationMemory").isEqualTo(false)
+            node("commentCount").isEqualTo(0)
+          }
         }
         node("[1]") {
           node("translations.en.auto").isEqualTo(true)
@@ -94,6 +103,31 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
           }
         }
       }
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `return translations from non-branched keys`() {
+    testData.generateBranchedData(10)
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthGet("/translations?sort=id").andPrettyPrint.andIsOk.andAssertThatJson {
+      // 2 keys from the default branch, 10 keys from the feature branch should be filtered out
+      node("_embedded.keys").isArray.hasSize(2)
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `return translations from default branch only`() {
+    testData.generateBranchedData(5, "main", true)
+    testData.generateBranchedData(10)
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthGet("/translations?sort=id").andPrettyPrint.andIsOk.andAssertThatJson {
+      // 2 non-branched keys + 5 keys from the default branch, 10 keys from the feature branch should be filtered out
+      node("_embedded.keys").isArray.hasSize(7)
     }
   }
 
@@ -188,7 +222,8 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     performProjectAuthGet("/translations?sort=translations.en.text,asc&size=1000")
-      .andPrettyPrint.andIsOk.andAssertThatJson {
+      .andPrettyPrint.andIsOk
+      .andAssertThatJson {
         node("_embedded.keys[0].keyName").isEqualTo("A key")
       }
   }
@@ -200,8 +235,10 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     performProjectAuthGet("/translations?languages=en").andPrettyPrint.andIsOk.andAssertThatJson {
-      node("_embedded.keys[10].translations").isObject
-        .doesNotContainKey("de").containsKey("en")
+      node("_embedded.keys[10].translations")
+        .isObject
+        .doesNotContainKey("de")
+        .containsKey("en")
       node("selectedLanguages") {
         isArray.hasSize(1)
         node("[0].tag").isEqualTo("en")
@@ -234,9 +271,12 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     performProjectAuthGet("/translations?languages=en&languages=de")
-      .andPrettyPrint.andIsOk.andAssertThatJson {
-        node("_embedded.keys[10].translations").isObject
-          .containsKey("de").containsKey("en")
+      .andPrettyPrint.andIsOk
+      .andAssertThatJson {
+        node("_embedded.keys[10].translations")
+          .isObject
+          .containsKey("de")
+          .containsKey("en")
         node("selectedLanguages") {
           isArray.hasSize(2)
           node("[0].tag").isEqualTo("en")
@@ -245,12 +285,31 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
       }
   }
 
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `returns keys filtered by provided tags`() {
+    testData.addFewKeysWithTags()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthGet("/translations/en,de?filterTag=Another cool tag&filterTag=Unknown Tag")
+      .andPrettyPrint.andIsOk
+      .andAssertThatJson {
+        node("en")
+          .isObject
+          .containsOnlyKeys("Another key with tag")
+        node("de")
+          .isObject
+          .containsOnlyKeys("Another key with tag")
+      }
+  }
+
   @ProjectApiKeyAuthTestMethod
   @Test
   fun `works with API key`() {
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
-    performProjectAuthGet("/translations").andPrettyPrint.andIsOk
+    performProjectAuthGet("/translations")
+      .andPrettyPrint.andIsOk
       .andAssertThatJson {
         node("page.totalElements").isEqualTo(2)
       }
@@ -281,7 +340,8 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
   fun `works with API key in query`() {
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
-    performProjectAuthGet("/translations").andPrettyPrint.andIsOk
+    performProjectAuthGet("/translations")
+      .andPrettyPrint.andIsOk
       .andAssertThatJson {
         node("page.totalElements").isEqualTo(2)
       }
@@ -339,7 +399,8 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
   fun `returns all translations map`() {
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
-    performProjectAuthGet("/translations/en,de").andPrettyPrint.andIsOk
+    performProjectAuthGet("/translations/en,de")
+      .andPrettyPrint.andIsOk
       .andAssertThatJson { node("de").isObject }
   }
 
@@ -459,11 +520,12 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
   }
 
   fun getLastRevision(): ActivityRevision? {
-    return entityManager.createQuery(
-      """
+    return entityManager
+      .createQuery(
+        """
         from ActivityRevision ar order by ar.id desc limit 1
-      """.trimMargin(),
-      ActivityRevision::class.java,
-    ).singleResult
+        """.trimMargin(),
+        ActivityRevision::class.java,
+      ).singleResult
   }
 }

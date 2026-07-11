@@ -5,8 +5,9 @@ import org.assertj.core.api.AbstractAssert
 import org.assertj.core.api.IntegerAssert
 import org.assertj.core.api.StringAssert
 
-class StandardValidationMessageAssert(val data: Map<String, String>) :
-  AbstractAssert<StandardValidationMessageAssert?, Map<String, String>>(
+class StandardValidationMessageAssert(
+  val data: Map<String, String>,
+) : AbstractAssert<StandardValidationMessageAssert?, Map<String, String>>(
     data,
     StandardValidationMessageAssert::class.java,
   ) {

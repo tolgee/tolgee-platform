@@ -2,14 +2,25 @@ spring:
   jpa:
     show-sql: true
 tolgee:
+  llm:
+    enabled: true
+    providers:
+      - name: "server-provider"
+        type: "OPENAI"
+        api-url: "https://mock.test"
+        token-price-in-credits-input: 2.0
+        token-price-in-credits-output: 1.5
   billing:
     enabled: false
-  frontend-url: http://localhost:8081
+  frontend-url: http://localhost:${TOLGEE_E2E_FRONTEND_PORT:8202}
   authentication:
     enabled: true
     needs-email-verification: true
     registrations-allowed: true
     initial-password: "admin"
+    google:
+      client-id: dummy_client_id
+      client-secret: dummy_client_secret
     github:
       client-id: dummy_client_id
       client-secret: dummy_client_secret
@@ -23,19 +34,32 @@ tolgee:
       authorization-url: "https://dummy-url.com/authorize"
       token-url: "https://dummy-url.com/oauth/token"
       user-url: "https://dummy-url.com/userinfo"
+    sso-organizations:
+      enabled: false
+    sso-global:
+      enabled: false
+      authorization-uri: "https://dummy-url.com"
+      client-id: "dummy_client_id"
+      client-secret: "clientSecret"
+      domain: "domain.com"
+      token-uri: "http://tokenUri"
     create-demo-for-initial-user: false
   rate-limits: # tests go brrrr but then get 429'd and no longer go brrrr
     global-limits: false
     endpoint-limits: false
     authentication-limits: false
-  file-storage-url: http://localhost:8201
+    email-verification-request-limit-enabled: false
+  file-storage-url: http://localhost:${TOLGEE_E2E_PORT:8201}
   internal:
     controller-enabled: true
-    fake-github-login: true
+    fake-third-party-login: true
     fake-mt-providers: true
+    verify-sso-account-available-bypass: true
+    fake-llm-providers: true
+    disable-url-ssrf-protection: true
   smtp:
     host: localhost
-    port: 21025
+    port: ${TOLGEE_E2E_SMTP_PORT:21025}
     ssl-enabled: false
     auth: false
     tls-enabled: false
@@ -49,8 +73,12 @@ tolgee:
   recaptcha:
     site-key: 6Le0X08dAAAAALfQQk1NeWd-kXqvzLVk8HqoZpRw
     secret-key: dummy_secret_key
-  content-delivery:  
+  content-delivery:
     public-url-prefix: https://cdndev.tolg.ee/i18n
+    storage:
+      azure:
+        connection-string: "dummy-connection-string"
+        container-name: "dummy-container-name"
   machine-translation:
     free-credits-amount: 1000000000
     google:
@@ -63,10 +91,10 @@ tolgee:
   batch:
     concurrency: 10
   postgres-autostart:
-    container-name: tolgee-postgres-e2e
-    port: 58532
+    container-name: ${TOLGEE_E2E_PG_CONTAINER:tolgee-postgres-e2e}
+    port: ${TOLGEE_E2E_PG_PORT:58532}
 server:
-  port: 8201
+  port: ${TOLGEE_E2E_PORT:8201}
   error:
     include-exception: true
     include-stacktrace: always
@@ -75,3 +103,4 @@ logging:
     io.tolgee.service: TRACE
     io.tolgee.controllers.internal.e2eData.OrganizationE2eDataController: TRACE
     io.tolgee.controllers.internal.e2eData.ProjectsE2eDataController: TRACE
+    io.tolgee.ExceptionHandlers: DEBUG

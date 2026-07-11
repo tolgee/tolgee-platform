@@ -6,9 +6,19 @@ import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.model.webhook.WebhookConfig
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
+import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
+import jakarta.persistence.Table
 
 @Entity
+@Table(
+  indexes = [
+    Index(columnList = "automation_id"),
+    Index(columnList = "content_delivery_config_id"),
+    Index(columnList = "webhook_config_id"),
+    Index(columnList = "slack_config_id"),
+  ],
+)
 class AutomationAction(
   @ManyToOne(fetch = FetchType.LAZY)
   var automation: Automation,

@@ -1,10 +1,20 @@
 package io.tolgee.exceptions
 
+import io.tolgee.constants.Message
 import org.springframework.http.HttpStatus
-import org.springframework.web.bind.annotation.ResponseStatus
+import java.io.Serializable
 
-@ResponseStatus(HttpStatus.UNAUTHORIZED)
-class AuthenticationException(message: io.tolgee.constants.Message) : ErrorException(message) {
+open class AuthenticationException : ErrorException {
+  constructor(message: Message) : super(message)
+
+  constructor(message: Message, params: List<Serializable?>? = null, cause: Exception? = null) : super(
+    message,
+    params,
+    cause,
+  )
+
+  constructor(code: String, params: List<Serializable?>? = null, cause: Exception? = null) : super(code, params, cause)
+
   override val httpStatus: HttpStatus
     get() = HttpStatus.UNAUTHORIZED
 }

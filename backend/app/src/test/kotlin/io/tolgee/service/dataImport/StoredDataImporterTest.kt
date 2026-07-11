@@ -6,7 +6,6 @@ import io.tolgee.development.testDataBuilder.data.dataImport.ImportTestData
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.security.authentication.TolgeeAuthentication
-import io.tolgee.security.authentication.TolgeeAuthenticationDetails
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -25,11 +24,14 @@ class StoredDataImporterTest : AbstractSpringTest() {
     object : IImportSettings {
       override var convertPlaceholdersToIcu: Boolean = true
       override var overrideKeyDescriptions: Boolean = false
+      override var createNewKeys: Boolean = true
     }
 
   @BeforeEach
   fun setup() {
     importTestData = ImportTestData()
+    importTestData.addFilesWithNamespaces()
+
     storedDataImporter =
       StoredDataImporter(
         applicationContext,
@@ -41,9 +43,12 @@ class StoredDataImporterTest : AbstractSpringTest() {
   fun login() {
     SecurityContextHolder.getContext().authentication =
       TolgeeAuthentication(
-        null,
-        UserAccountDto.fromEntity(importTestData.userAccount),
-        TolgeeAuthenticationDetails(false),
+        credentials = null,
+        deviceId = null,
+        userAccount = UserAccountDto.fromEntity(importTestData.userAccount),
+        actingAsUserAccount = null,
+        isReadOnly = false,
+        isSuperToken = false,
       )
   }
 
@@ -58,9 +63,17 @@ class StoredDataImporterTest : AbstractSpringTest() {
       assertThat(it.text).isEqualTo(importTestData.translationWithConflict.text)
     }
     val overriddenTranslation = translationService.find(importTestData.translationWithConflict.conflict!!.id)!!
-    val keptTranslation = importTestData.root.data.projects[0].data.translations[1].self
+    val keptTranslation =
+      translationService.find(
+        importTestData.root.data.projects[0]
+          .data.translations[1]
+          .self.id,
+      )!!
     assertThat(overriddenTranslation.text).isEqualTo(importTestData.translationWithConflict.text)
     assertThat(keptTranslation.text).isEqualTo("What a text")
+
+    val keyWithNamespace = keyService.find(importTestData.project.id, "what a key with a namespace", "homepage")!!
+    assertThat(keyWithNamespace.namespace?.name).isEqualTo("homepage")
   }
 
   @Test
@@ -106,7 +119,10 @@ class StoredDataImporterTest : AbstractSpringTest() {
     login()
     storedDataImporter.doImport()
     val overriddenTranslation = translationService.find(importTestData.translationWithConflict.conflict!!.id)!!
-    val forceOverriddenTranslationId = importTestData.root.data.projects[0].data.translations[1].self.id
+    val forceOverriddenTranslationId =
+      importTestData.root.data.projects[0]
+        .data.translations[1]
+        .self.id
     val forceOverriddenTranslation = translationService.find(forceOverriddenTranslationId)!!
     assertThat(overriddenTranslation.text).isEqualTo(importTestData.translationWithConflict.text)
     assertThat(forceOverriddenTranslation.text).isEqualTo("Imported text")
@@ -127,7 +143,12 @@ class StoredDataImporterTest : AbstractSpringTest() {
     storedDataImporter.doImport()
     entityManager.flush()
     entityManager.clear()
-    val key1 = entityManager.merge(importTestData.root.data.projects[0].data.keys[2].self)
+    val key1 =
+      entityManager.merge(
+        importTestData.root.data.projects[0]
+          .data.keys[2]
+          .self,
+      )
     entityManager.refresh(key1)
     entityManager.refresh(key1.keyMeta)
 
@@ -158,9 +179,63 @@ class StoredDataImporterTest : AbstractSpringTest() {
 
     storedDataImporter.doImport()
     val overriddenTranslation = translationService.find(importTestData.translationWithConflict.conflict!!.id)!!
-    val forceKeptTranslationId = importTestData.root.data.projects[0].data.translations[1].self.id
+    val forceKeptTranslationId =
+      importTestData.root.data.projects[0]
+        .data.translations[1]
+        .self.id
     val forceKeptTranslation = translationService.find(forceKeptTranslationId)!!
     assertThat(overriddenTranslation.text).isEqualTo(importTestData.translationWithConflict.text)
     assertThat(forceKeptTranslation.text).isEqualTo("What a text")
+  }
+
+  @Test
+  fun `only updates old keys but does not add new ones when option disabled`() {
+    defaultImportSettings.createNewKeys = false
+    storedDataImporter =
+      StoredDataImporter(
+        applicationContext,
+        importTestData.import,
+        ForceMode.OVERRIDE,
+        importSettings = defaultImportSettings,
+      )
+    importTestData.addImportKeyThatDoesntExistInProject()
+    testDataService.saveTestData(importTestData.root)
+    login()
+
+    storedDataImporter.doImport()
+    val projectId =
+      importTestData.root.data.projects[0]
+        .self.id
+    val importedKey = keyService.find(projectId, "I'm new key in project", null)
+    assertThat(importedKey).isNull()
+
+    val forceOverriddenTranslationId =
+      importTestData.root.data.projects[0]
+        .data.translations[1]
+        .self.id
+    val forceOverriddenTranslation = translationService.find(forceOverriddenTranslationId)!!
+    assertThat(forceOverriddenTranslation.text).isEqualTo("Imported text")
+  }
+
+  @Test
+  fun `add new key when option enabled`() {
+    defaultImportSettings.createNewKeys = true
+    storedDataImporter =
+      StoredDataImporter(
+        applicationContext,
+        importTestData.import,
+        ForceMode.OVERRIDE,
+        importSettings = defaultImportSettings,
+      )
+    importTestData.addImportKeyThatDoesntExistInProject()
+    testDataService.saveTestData(importTestData.root)
+    login()
+
+    storedDataImporter.doImport()
+    val projectId =
+      importTestData.root.data.projects[0]
+        .self.id
+    val importedKey = keyService.find(projectId, "I'm new key in project", null)
+    assertThat(importedKey).isNotNull()
   }
 }

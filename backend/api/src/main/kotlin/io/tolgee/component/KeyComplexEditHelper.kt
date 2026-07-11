@@ -23,6 +23,7 @@ import io.tolgee.service.key.TagService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
+import io.tolgee.service.translation.applyMaxCharLimit
 import io.tolgee.util.executeInNewRepeatableTransaction
 import org.springframework.context.ApplicationContext
 import org.springframework.transaction.PlatformTransactionManager
@@ -66,6 +67,7 @@ class KeyComplexEditHelper(
   private var isNamespaceChanged: Boolean = false
   private var isCustomDataChanged: Boolean = false
   private var isDescriptionChanged: Boolean = false
+  private var isMaxCharLimitChanged: Boolean = false
   private var isIsPluralChanged: Boolean = false
   private var newIsPlural by Delegates.notNull<Boolean>()
 
@@ -81,11 +83,13 @@ class KeyComplexEditHelper(
   }
 
   private val existingTranslations: MutableMap<String, Translation> by lazy {
-    translationService.getKeyTranslations(
-      languages,
-      projectHolder.projectEntity,
-      key,
-    ).associateBy { it.language.tag }.toMutableMap()
+    translationService
+      .getKeyTranslations(
+        languages,
+        projectHolder.projectEntity,
+        key,
+      ).associateBy { it.language.tag }
+      .toMutableMap()
   }
 
   fun doComplexUpdate(): KeyWithDataModel {
@@ -110,7 +114,7 @@ class KeyComplexEditHelper(
   private fun storeBigMeta() {
     if (isBigMetaProvided) {
       securityService.checkBigMetaUploadPermission(projectHolder.project.id)
-      bigMetaService.store(dto.relatedKeysInOrder!!, projectHolder.projectEntity)
+      bigMetaService.store(dto.relatedKeysInOrder!!, projectHolder.projectEntity, forKeyId = key.id)
     }
   }
 
@@ -138,6 +142,11 @@ class KeyComplexEditHelper(
       keyService.save(key)
     }
 
+    if (isMaxCharLimitChanged) {
+      key.applyMaxCharLimit(dto.maxCharLimit)
+      keyService.save(key)
+    }
+
     if (isCustomDataChanged) {
       dto.custom?.let { newCustomValues ->
         keyCustomValuesValidator.validate(newCustomValues)
@@ -148,7 +157,7 @@ class KeyComplexEditHelper(
     }
 
     if (isKeyNameModified || isNamespaceChanged) {
-      edited = keyService.edit(key, dto.name, dto.namespace)
+      edited = keyService.edit(key, dto.name, dto.namespace, dto.branch)
     }
 
     return keyWithDataModelAssembler.toModel(edited)
@@ -164,33 +173,39 @@ class KeyComplexEditHelper(
     if (dtoTags !== null && areTagsModified) {
       activityHolder.businessEventData["usesTags"] = "true"
       key.project.checkKeysEditPermission()
+      securityService.checkBranchModify(key)
       tagService.updateTags(key, dtoTags)
     }
   }
 
   private fun doStateUpdate() {
     if (areStatesModified) {
-      securityService.checkLanguageChangeStatePermissionsByLanguageId(modifiedStates!!.keys, projectHolder.project.id)
+      securityService.checkLanguageChangeStatePermissionsByLanguageId(
+        modifiedStates!!.keys,
+        projectHolder.project.id,
+        key.id,
+      )
       translationService.setStateBatch(
         states =
-          modifiedStates!!.map {
-            val translation =
-              existingTranslations[languageById(it.key).tag] ?: throw NotFoundException(
-                Message.TRANSLATION_NOT_FOUND,
-              )
+          modifiedStates!!
+            .map {
+              val translation =
+                existingTranslations[languageById(it.key).tag] ?: throw NotFoundException(
+                  Message.TRANSLATION_NOT_FOUND,
+                )
 
-            translation to it.value
-          }.toMap(),
+              translation to it.value
+            }.toMap(),
       )
     }
   }
 
   private fun doTranslationsUpdate() {
     if (modifiedTranslations != null && areTranslationsModified) {
-      projectHolder.projectEntity.checkTranslationsEditPermission()
       securityService.checkLanguageTranslatePermissionsByLanguageId(
         modifiedTranslations!!.keys,
         projectHolder.project.id,
+        keyId,
       )
 
       val modifiedTranslations = getModifiedTranslationsByTag()
@@ -198,9 +213,10 @@ class KeyComplexEditHelper(
 
       val existingTranslationsByTag = getExistingTranslationsByTag()
       val oldTranslations =
-        modifiedTranslations.map {
-          it.key to existingTranslationsByTag[it.key]
-        }.toMap()
+        modifiedTranslations
+          .map {
+            it.key to existingTranslationsByTag[it.key]
+          }.toMap()
 
       val translations =
         translationService.setForKey(
@@ -274,12 +290,17 @@ class KeyComplexEditHelper(
       possibleOperations.add(ActivityType.SCREENSHOT_DELETE)
     }
 
+    if (isMaxCharLimitChanged) {
+      possibleOperations.add(ActivityType.KEY_CHARACTER_LIMIT_EDIT)
+    }
+
     return possibleOperations
   }
 
   private fun prepareData() {
     key = keyService.get(keyId)
     key.checkInProject()
+    securityService.checkBranchModify(key)
     prepareModifiedTranslations()
     prepareModifiedStates()
     newIsPlural = dto.isPlural ?: key.isPlural
@@ -293,8 +314,11 @@ class KeyComplexEditHelper(
     isNamespaceChanged = key.namespace?.name != dto.namespace
     isDescriptionChanged = key.keyMeta?.description != dto.description
     isIsPluralChanged =
-      dto.isPlural != null && key.isPlural != dto.isPlural ||
-      (dto.isPlural == true && key.pluralArgName != dto.pluralArgName)
+      (dto.isPlural != null && key.isPlural != dto.isPlural) ||
+      (dto.isPlural == true && dto.pluralArgName != null && key.pluralArgName != dto.pluralArgName)
+    isMaxCharLimitChanged =
+      dto.maxCharLimit != null &&
+      key.maxCharLimit != dto.maxCharLimit.let { if (it != null && it <= 0) null else it }
     isCustomDataChanged = dto.custom != null &&
       objectMapper.writeValueAsString(key.keyMeta?.custom) != objectMapper.writeValueAsString(dto.custom)
     isScreenshotDeleted = !dto.screenshotIdsToDelete.isNullOrEmpty()
@@ -313,24 +337,36 @@ class KeyComplexEditHelper(
     return !currentTagsContainAllNewTags || !newTagsContainAllCurrentTags
   }
 
-  val requireKeyEditPermission
+  private val requireKeyEditPermission
     get() =
       isKeyNameModified ||
         isNamespaceChanged ||
         isDescriptionChanged ||
+        isMaxCharLimitChanged ||
         isIsPluralChanged ||
         isCustomDataChanged
 
   private fun prepareModifiedTranslations() {
     modifiedTranslations =
-      dto.translations?.filter { it.value != existingTranslations[it.key]?.text }
+      dto.translations
+        ?.filter { it.value != existingTranslations[it.key]?.text }
         ?.mapKeys { languageByTag(it.key).id }
   }
 
   private fun prepareModifiedStates() {
     modifiedStates =
-      dto.states?.filter { it.value.translationState != existingTranslations[it.key]?.state }
-        ?.map { languageByTag(it.key).id to it.value.translationState }?.toMap()
+      dto.states
+        ?.filter {
+          // When updating translation, we automatically set it to TRANSLATED state
+          // While executing complex edit, user can prevent this by setting the state to REVIEWED
+          // In that case, we have to add it to modified states too
+          val tryingToKeepReviewState =
+            modifiedTranslations?.get(languageByTag(it.key).id) != null &&
+              it.value.translationState == TranslationState.REVIEWED
+
+          it.value.translationState != existingTranslations[it.key]?.state || tryingToKeepReviewState
+        }?.map { languageByTag(it.key).id to it.value.translationState }
+        ?.toMap()
   }
 
   private fun languageByTag(tag: String): Language {
@@ -390,10 +426,6 @@ class KeyComplexEditHelper(
 
   private fun Project.checkKeysEditPermission() {
     securityService.checkProjectPermission(this.id, Scope.KEYS_EDIT)
-  }
-
-  private fun Project.checkTranslationsEditPermission() {
-    securityService.checkProjectPermission(this.id, Scope.TRANSLATIONS_EDIT)
   }
 
   private fun Key.checkInProject() {

@@ -44,9 +44,12 @@ export type Props = {
   enableEmpty?: boolean;
   placeholder?: string;
   placement?: 'top';
+  className?: string;
 };
 
-export const LanguagesSelect: FunctionComponent<Props> = (props) => {
+export const LanguagesSelect: FunctionComponent<
+  React.PropsWithChildren<Props>
+> = (props) => {
   const menuProps: Partial<MenuProps> = {
     variant: 'menu',
     PaperProps: {
@@ -70,6 +73,7 @@ export const LanguagesSelect: FunctionComponent<Props> = (props) => {
       data-cy="translations-language-select-form-control"
       variant="outlined"
       size="small"
+      className={props.className}
     >
       {props.placeholder && props.value.length === 0 && (
         <InputLabel focused={false} shrink={false}>
@@ -95,6 +99,7 @@ export const LanguagesSelect: FunctionComponent<Props> = (props) => {
           value: props.value,
           disabledLanguages: props.disabledLanguages,
           enableEmpty: props.enableEmpty,
+          context: props.context,
         })}
       </StyledSelect>
     </FormControl>

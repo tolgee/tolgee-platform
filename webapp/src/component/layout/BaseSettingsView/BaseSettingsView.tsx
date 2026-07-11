@@ -1,23 +1,20 @@
-import { Box, Container, styled, Typography } from '@mui/material';
+import { Box, styled } from '@mui/material';
 
-import {
-  BaseView,
-  BaseViewProps,
-  getBaseViewWidth,
-} from 'tg.component/layout/BaseView';
+import { BaseView, BaseViewProps } from 'tg.component/layout/BaseView';
 import { SettingsMenu, SettingsMenuItem } from './SettingsMenu';
-import { BaseViewAddButton } from '../BaseViewAddButton';
+import { getBaseViewWidth } from 'tg.component/layout/BaseViewWidth';
+import { HeaderBar } from 'tg.component/layout/HeaderBar';
 
 const StyledWrapper = styled('div')`
   display: grid;
-  grid-template: auto / auto 1fr;
   gap: 32px;
+  grid-template-columns: auto 1fr;
   @container main-container (max-width: 800px) {
-    grid-template: auto auto / auto;
+    grid-template-columns: none;
   }
 `;
 
-const StyledContainer = styled(Container)`
+const StyledContainer = styled(Box)`
   display: grid;
   padding: 0px !important;
   container: main-container / inline-size;
@@ -28,49 +25,42 @@ const StyledMenu = styled('div')`
 `;
 
 const StyledContent = styled(Box)`
-  display: grid;
+  flex-grow: 1;
 `;
 
 type Props = BaseViewProps & {
   menuItems: SettingsMenuItem[];
 };
 
-export const BaseSettingsView: React.FC<Props> = ({
+export const BaseSettingsView: React.FC<React.PropsWithChildren<Props>> = ({
   children,
-  title,
   menuItems,
-  addLinkTo,
   maxWidth = 'normal',
-  onAdd,
-  addLabel,
+  allCentered = true,
   ...otherProps
 }) => {
   const containerMaxWidth = getBaseViewWidth(maxWidth);
   return (
-    <BaseView {...otherProps}>
+    <BaseView {...otherProps} allCentered={false} headerBarDisable>
       <StyledWrapper>
         <StyledMenu>
           <SettingsMenu items={menuItems} />
         </StyledMenu>
 
-        <StyledContainer style={{ maxWidth: containerMaxWidth }}>
-          <StyledContent>
-            {title && (
-              <Box sx={{ mb: 2, display: 'flex' }}>
-                <Box sx={{ flexGrow: 1 }}>
-                  <Typography variant="h6">{title}</Typography>
-                </Box>
-                {(addLinkTo || onAdd) && (
-                  <Box>
-                    <BaseViewAddButton
-                      label={addLabel}
-                      addLinkTo={addLinkTo}
-                      onClick={onAdd}
-                    ></BaseViewAddButton>
-                  </Box>
-                )}
-              </Box>
-            )}
+        <StyledContainer>
+          <StyledContent
+            justifySelf={allCentered ? 'center' : undefined}
+            width={
+              allCentered ? `min(${containerMaxWidth}px, 100%)` : undefined
+            }
+            maxWidth={containerMaxWidth}
+          >
+            <HeaderBar
+              noBorder
+              reducedSpacing
+              titleVariant="h6"
+              {...otherProps}
+            />
             {children}
           </StyledContent>
         </StyledContainer>

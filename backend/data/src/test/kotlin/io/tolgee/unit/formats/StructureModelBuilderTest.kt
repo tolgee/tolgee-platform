@@ -260,7 +260,27 @@ class StructureModelBuilderTest {
     }
   }
 
-  class PluralValue(val key: String, val pluralForms: Map<String, String>)
+  @Test
+  fun `does not throw on collision between plural and non-plural`() {
+    listOf(
+      PluralValue("key", mapOf("other" to "Collision!")),
+      "key.other",
+    ).testResult(
+      '.',
+      true,
+      rootKeyIsLanguageTag = true,
+    ) {
+      node("en") {
+        isObject.hasSize(1)
+        node("key.other").isEqualTo("Collision!")
+      }
+    }
+  }
+
+  class PluralValue(
+    val key: String,
+    val pluralForms: Map<String, String>,
+  )
 
   private inline fun List<Any>.testResult(
     delimiter: Char,

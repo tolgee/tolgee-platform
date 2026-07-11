@@ -7,6 +7,8 @@ import {
 } from 'formik';
 import { Box, Button, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
+import { useState } from 'react';
+import clsx from 'clsx';
 
 import { NamespaceSelector } from 'tg.component/NamespaceSelector/NamespaceSelector';
 import { EditorWrapper } from 'tg.component/editor/EditorWrapper';
@@ -24,8 +26,10 @@ import { CircledLanguageIcon } from 'tg.component/languages/CircledLanguageIcon'
 import { PluralEditor } from '../translationVisual/PluralEditor';
 import type { ValuesCreateType } from './KeyCreateForm';
 import { PluralFormCheckbox } from 'tg.component/common/form/PluralFormCheckbox';
+import { CharLimitCheckbox } from 'tg.component/common/form/CharLimitCheckbox';
 import { ControlsEditorSmall } from '../cell/ControlsEditorSmall';
-import { useState } from 'react';
+import { getVisibleCharCount } from '../cell/getVisibleCharCount';
+import { KeyNameWhitespaceWarning } from '../KeyNameWhitespaceWarning';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -35,8 +39,13 @@ const StyledContainer = styled('div')`
 
 const StyledKeyNsContainer = styled('div')`
   display: grid;
-  grid-template-columns: 1fr 300px;
   gap: 0px 16px;
+  grid-template-columns: 1fr;
+
+  &.useNamespaces {
+    grid-template-columns: 1fr 300px;
+  }
+
   @media (max-width: 800px) {
     grid-template-columns: 1fr;
   }
@@ -52,7 +61,6 @@ const StyledTags = styled('div')`
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
-  overflow: hidden;
 
   & > * {
     margin: 0px 3px 3px 0px;
@@ -66,7 +74,10 @@ type Props = {
   autofocus?: boolean;
 };
 
-export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
+export const FormBody: React.FC<React.PropsWithChildren<Props>> = ({
+  onCancel,
+  autofocus,
+}) => {
   const { t } = useTranslate();
   const form = useFormikContext<ValuesCreateType>();
   const project = useProject();
@@ -77,6 +88,21 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
 
   const [mode, setMode] = useState<'placeholders' | 'syntax'>('placeholders');
 
+  const maxCharLimit = form.values.maxCharLimit;
+  const isBaseOverCharLimit =
+    maxCharLimit != null &&
+    maxCharLimit > 0 &&
+    Object.values(form.values.baseValue.variants ?? {}).some(
+      (v) => getVisibleCharCount({ text: v, nested: isPlural }) > maxCharLimit
+    );
+
+  const handleEnterSubmit = () => {
+    if (!isBaseOverCharLimit) {
+      form.handleSubmit();
+    }
+    return true;
+  };
+
   const actualParameter = isPlural
     ? form.values.pluralParameter || 'value'
     : undefined;
@@ -84,7 +110,9 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
   return (
     <>
       <StyledContainer>
-        <StyledKeyNsContainer>
+        <StyledKeyNsContainer
+          className={clsx({ useNamespaces: project.useNamespaces })}
+        >
           <FastField name="name">
             {({ field, form, meta }: FieldProps<any>) => {
               return (
@@ -97,7 +125,7 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
                   <EditorWrapper>
                     <StyledEdtorWrapper data-cy="translation-create-key-input">
                       <Editor
-                        mode="plain"
+                        mode="keyName"
                         value={field.value}
                         onChange={(val) => {
                           form.setFieldValue(field.name, val);
@@ -110,39 +138,50 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
                         shortcuts={[
                           {
                             key: 'Enter',
-                            run: () => (form.handleSubmit(), true),
+                            run: handleEnterSubmit,
                           },
                         ]}
                       />
                     </StyledEdtorWrapper>
                   </EditorWrapper>
-                  <FieldError error={meta.touched && meta.error} />
+                  {meta.touched && meta.error ? (
+                    <FieldError error={meta.error} />
+                  ) : (
+                    <KeyNameWhitespaceWarning
+                      value={field.value}
+                      onTrim={() =>
+                        form.setFieldValue(field.name, field.value.trim())
+                      }
+                    />
+                  )}
                 </div>
               );
             }}
           </FastField>
 
-          <FastField name="namespace">
-            {({ field, form }: FieldProps<any>) => {
-              return (
-                <div>
-                  <FieldLabel>
-                    <LabelHint title={t('translation_single_namespace_hint')}>
-                      <T keyName="translation_single_label_namespace" />
-                    </LabelHint>
-                  </FieldLabel>
-                  <StyledEdtorWrapper data-cy="translation-create-namespace-input">
-                    <NamespaceSelector
-                      value={field.value}
-                      onChange={(value) =>
-                        form.setFieldValue(field.name, value)
-                      }
-                    />
-                  </StyledEdtorWrapper>
-                </div>
-              );
-            }}
-          </FastField>
+          {project.useNamespaces && (
+            <FastField name="namespace">
+              {({ field, form }: FieldProps<any>) => {
+                return (
+                  <div>
+                    <FieldLabel>
+                      <LabelHint title={t('translation_single_namespace_hint')}>
+                        <T keyName="translation_single_label_namespace" />
+                      </LabelHint>
+                    </FieldLabel>
+                    <StyledEdtorWrapper data-cy="translation-create-namespace-input">
+                      <NamespaceSelector
+                        value={field.value}
+                        onChange={(value) =>
+                          form.setFieldValue(field.name, value)
+                        }
+                      />
+                    </StyledEdtorWrapper>
+                  </div>
+                );
+              }}
+            </FastField>
+          )}
         </StyledKeyNsContainer>
 
         <FastField name={`description`}>
@@ -164,7 +203,7 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
                     shortcuts={[
                       {
                         key: 'Enter',
-                        run: () => (form.handleSubmit(), true),
+                        run: handleEnterSubmit,
                       },
                     ]}
                     onBlur={() => form.setFieldTouched(field.name, true)}
@@ -213,10 +252,14 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
           )}
         />
 
-        <PluralFormCheckbox
-          isPluralName="isPlural"
-          pluralParameterName="pluralParameter"
-        />
+        <Box display="flex" gap={4} alignItems="flex-start">
+          <PluralFormCheckbox
+            isPluralName="isPlural"
+            pluralParameterName="pluralParameter"
+          />
+
+          <CharLimitCheckbox fieldName="maxCharLimit" />
+        </Box>
 
         <Field key={baseLang.tag} name="baseValue">
           {({ field, meta }) => (
@@ -242,13 +285,14 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
                 }}
                 locale={baseLang.tag}
                 mode={mode}
+                maxCharLimit={maxCharLimit}
                 editorProps={{
                   autoScrollIntoView: true,
                   scrollMargins: { bottom: 150 },
                   shortcuts: [
                     {
                       key: 'Enter',
-                      run: () => (form.handleSubmit(), true),
+                      run: handleEnterSubmit,
                     },
                   ],
                 }}
@@ -271,7 +315,7 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
             loading={form.isSubmitting}
             color="primary"
             variant="contained"
-            disabled={!form.isValid}
+            disabled={!form.isValid || isBaseOverCharLimit}
             type="submit"
             onClick={() => form.handleSubmit()}
           >

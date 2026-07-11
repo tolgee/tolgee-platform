@@ -23,14 +23,10 @@ class InvitationEmailSender(
         subject = "Invitation to Tolgee",
         text =
           """
-          Hello! 👋<br/><br/>
           Good news. ${getInvitationSentence(invitation)}<br/><br/>
           
           To accept the invitation, <b>follow this link</b>:<br/>
           <a href="$url">$url</a><br/><br/>
-          
-          Regards,<br/>
-          Tolgee
           """.trimIndent(),
       )
     tolgeeEmailSender.sendEmail(params)
@@ -54,7 +50,7 @@ class InvitationEmailSender(
     return "You have been invited to $toWhat $escapedName in Tolgee."
   }
 
-  private fun getInvitationAcceptUrl(code: String): String {
+  fun getInvitationAcceptUrl(code: String): String {
     return "${frontendUrlProvider.url}/accept_invitation/$code"
   }
 }

@@ -14,7 +14,9 @@ type Props = {
   className: string;
 };
 
-export const FormatSelector: React.FC<Props> = ({ className }) => {
+export const FormatSelector: React.FC<React.PropsWithChildren<Props>> = ({
+  className,
+}) => {
   const { t } = useTranslate();
   const [field, _, fieldHelperProps] = useField('format');
 

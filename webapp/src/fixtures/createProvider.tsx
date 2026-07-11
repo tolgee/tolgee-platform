@@ -24,7 +24,10 @@ export const createProvider = <StateType, Actions, ProviderProps>(
   const StateContext = createContext<StateType>(null as any);
   const DispatchContext = React.createContext<Actions>(null as any);
 
-  const Provider: React.FC<ProviderProps> = ({ children, ...props }) => {
+  const Provider: React.FC<React.PropsWithChildren<ProviderProps>> = ({
+    children,
+    ...props
+  }) => {
     const result = controller(props as any);
     const resultIsArray = Array.isArray(result);
 

@@ -4,12 +4,17 @@ import io.tolgee.model.Project
 import io.tolgee.model.dataImport.ImportKey
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Tag
+import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
+import org.springframework.stereotype.Repository
+import org.springframework.transaction.annotation.Transactional
 
+@Repository
+@Lazy
 interface TagRepository : JpaRepository<Tag, Long> {
   fun findByProjectAndName(
     project: Project,
@@ -58,45 +63,65 @@ interface TagRepository : JpaRepository<Tag, Long> {
   )
   fun getImportKeysWithTags(keyIds: Iterable<Long>): List<ImportKey>
 
+  /**
+   * Deletes tags atomically: only removes a tag if it has no remaining keyMeta links at delete time.
+   *
+   * This avoids the race condition where two concurrent transactions each check emptiness before
+   * either has flushed their join-table removal — both see the other's link, both skip the delete,
+   * and the tag survives with zero keyMetas.
+   *
+   * flushAutomatically = true is required so that pending key_meta_tags removals are written
+   * before this DELETE FROM tag runs (same reason as deleteByIdIn).
+   */
+  @Transactional
+  @Modifying(flushAutomatically = true)
   @Query(
     """
-    from Tag t
-    join fetch t.keyMetas
-    where t.id in :tagIds
+    delete from Tag t where t.id in :tagIds
+    and not exists (
+        select km from KeyMeta km
+        join km.tags tg
+        where tg.id = t.id
+    )
     """,
   )
-  fun getTagsWithKeyMetas(tagIds: Iterable<Long>): List<Tag>
+  fun deleteUnusedByIdIn(tagIds: Collection<Long>)
 
   fun findAllByProjectId(projectId: Long): List<Tag>
 
   @Modifying(flushAutomatically = true)
   @Query(
     """
-    delete from Tag t 
-      where t.id in 
-        (select tag.id from Tag tag left join tag.keyMetas km group by tag.id having count(km) = 0)
-      and t.project.id = :projectId
+    with keys as (
+        select t.id from tag t
+        left join key_meta_tags kmt on t.id = kmt.tags_id
+        left join key_meta km on kmt.key_metas_id = km.id
+        where t.project_id = :projectId
+        group by t.id having count(km) = 0
+    )
+      delete from tag t
+      where t.id in (select * from keys)
   """,
+    nativeQuery = true,
+    countQuery = """
+      select count(t.id) from tag t
+      left join key_meta_tags kmt on t.id = kmt.tags_id
+      left join key_meta km on kmt.key_metas_id = km.id
+      where t.project_id = :projectId
+      group by t.id having count(km) = 0
+    """,
   )
   fun deleteAllUnused(projectId: Long)
 
-  @Modifying(flushAutomatically = true)
   @Query(
     """
-    delete from Tag t 
-    where (t.id in (select tag.id from Tag tag join tag.keyMetas km join km.key k where k in :keys))
+    from Tag t where t.project.id = :projectId and t.id = :tagId
   """,
   )
-  fun deleteAllByKeyIn(keys: Collection<Key>)
-
-  @Query(
-    """
-    from Tag t
-    join fetch t.keyMetas km
-    where km.key.id in :keyIds
-  """,
-  )
-  fun getAllByKeyIds(keyIds: Collection<Long>): List<Tag>
+  fun findByIdAndProjectId(
+    tagId: Long,
+    projectId: Long,
+  ): Tag?
 
   @Query(
     """

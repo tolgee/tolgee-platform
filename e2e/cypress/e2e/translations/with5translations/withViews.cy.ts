@@ -4,17 +4,21 @@ import {
   confirmDiscard,
   create4Translations,
   editCell,
+  editKeyName,
   forEachView,
   getCell,
   getCellCancelButton,
   getCellInsertBaseButton,
   getCellSaveButton,
+  openKeyEditDialog,
   selectLangsInLocalstorage,
   translationsBeforeEach,
+  typeNewKeyName,
   visitTranslations,
 } from '../../../common/translations';
 import { gcy } from '../../../common/shared';
-import { selectNamespace } from '../../../common/namespace';
+import { enableNamespaces } from '../../../common/apiCalls/common';
+import { selectNamespace } from '../../../compounds/E2NamespaceSelector';
 
 describe('Views with 5 Translations', () => {
   let project: ProjectDTO = null;
@@ -32,15 +36,15 @@ describe('Views with 5 Translations', () => {
   forEachView(
     () => project.id,
     () => {
-      it('will edit key', () => {
-        editCell('Cool key 01', 'Cool key edited');
+      it('edits key', () => {
+        editKeyName('Cool key 01', 'Cool key edited');
 
         cy.contains('Cool key edited').should('be.visible');
         cy.contains('Cool key 02').should('be.visible');
         cy.contains('Cool key 04').should('be.visible');
       });
 
-      it('insert base into translation', () => {
+      it('inserts base into translation', () => {
         selectLangsInLocalstorage(project.id, ['en', 'cs']);
         visitTranslations(project.id);
 
@@ -53,7 +57,7 @@ describe('Views with 5 Translations', () => {
           .should('be.visible');
       });
 
-      it('will edit translation', () => {
+      it('edits translation', () => {
         editCell('Cool translated text 1', 'Super cool changed text...');
         cy.xpath(
           `${getAnyContainingText(
@@ -64,7 +68,8 @@ describe('Views with 5 Translations', () => {
         cy.contains('Cool translated text 2').should('be.visible');
       });
 
-      it('will edit key namespace', () => {
+      it('edits key namespace', () => {
+        enableNamespaces(project.id);
         getCell('Cool key 01').click();
 
         selectNamespace('test-ns');
@@ -80,15 +85,17 @@ describe('Views with 5 Translations', () => {
           .should('be.visible');
       });
 
-      it('will cancel key edit without confirmation', () => {
-        editCell('Cool key 01', 'Cool key edited', false);
+      it('cancels key edit without confirmation', () => {
+        openKeyEditDialog('Cool key 01');
+        typeNewKeyName('Cool key edited');
+
         getCellCancelButton().click();
 
         cy.contains('Cool key edited').should('not.exist');
         cy.contains('Cool key 01').should('be.visible');
       });
 
-      it('will ask for confirmation on changed edit', () => {
+      it('asks for confirmation on changed edit', () => {
         editCell('Cool translated text 1', 'Cool translation edited', false);
         cy.contains('Cool translated text 4').click();
         cy.contains(`Discard changes?`).should('be.visible');

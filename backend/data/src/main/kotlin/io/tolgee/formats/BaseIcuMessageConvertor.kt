@@ -17,6 +17,8 @@ class BaseIcuMessageConvertor(
 
   private var firstArgName: String? = null
 
+  private var variantOffsets: MutableMap<String, Int>? = null
+
   private lateinit var tree: MessagePatternUtil.MessageNode
 
   private fun addToResult(
@@ -113,6 +115,7 @@ class BaseIcuMessageConvertor(
       result,
       pluralArgName,
       firstArgName = firstArgName,
+      variantOffsets = variantOffsets,
     )
   }
 
@@ -151,12 +154,7 @@ class BaseIcuMessageConvertor(
     form: String?,
   ) {
     val formPlaceholderConvertor = getFormPlaceholderConvertor(form)
-    if (keepEscaping) {
-      val convertedPatternString = formPlaceholderConvertor.convertText(node.patternString)
-      addToResult(convertedPatternString, form)
-      return
-    }
-    val convertedText = formPlaceholderConvertor.convertText(node.text)
+    val convertedText = formPlaceholderConvertor.convertText(node, keepEscaping)
     addToResult(convertedText, form)
   }
 
@@ -207,10 +205,15 @@ class BaseIcuMessageConvertor(
 
   private fun handlePlural(node: MessagePatternUtil.ArgNode) {
     pluralArgName = node.name
+    val offsets = mutableMapOf<String, Int>()
     node.complexStyle?.variants?.forEach {
+      offsets[it.selector!!] = it.contentStartIndex
       handleNode(it.message, it.selector)
     } ?: run {
       addToResult(node.patternString)
+    }
+    if (offsets.isNotEmpty()) {
+      variantOffsets = offsets
     }
   }
 }

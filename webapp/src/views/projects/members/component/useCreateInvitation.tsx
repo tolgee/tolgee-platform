@@ -5,9 +5,10 @@ import {
   LanguagePermissions,
   PermissionSettingsState,
 } from 'tg.component/PermissionsSettings/types';
-import { getScopeLanguagePermission } from 'tg.ee/PermissionsAdvanced/hierarchyTools';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { getScopeLanguagePermission } from 'tg.component/PermissionsSettings/hierarchyTools';
+import { languagePermissionsForRole } from './useUpdatePermissions';
 
 type Props = {
   projectId: number;
@@ -18,6 +19,7 @@ export type CreateInvitationData = {
   permissions: PermissionSettingsState;
   email?: string;
   name?: string;
+  agency?: string;
 };
 
 export const useCreateInvitation = ({ projectId, allLangs }: Props) => {
@@ -30,7 +32,12 @@ export const useCreateInvitation = ({ projectId, allLangs }: Props) => {
   const messages = useMessage();
 
   return {
-    async createInvitation({ permissions, email, name }: CreateInvitationData) {
+    async createInvitation({
+      permissions,
+      email,
+      name,
+      agency,
+    }: CreateInvitationData) {
       if (permissions.tab === 'advanced' && permissions.advancedState.scopes) {
         if (permissions.advancedState.scopes.length === 0) {
           messages.error(<T keyName="scopes_at_least_one_scope_error" />);
@@ -54,25 +61,19 @@ export const useCreateInvitation = ({ projectId, allLangs }: Props) => {
             'application/json': {
               email,
               name,
+              agencyId: Number(agency),
               scopes: permissions.advancedState.scopes,
               ...languagePermissions,
             },
           },
         });
       } else if (permissions.tab === 'basic' && permissions.basicState.role) {
-        let languagePermissions: LanguagePermissions = {};
         const role = permissions.basicState.role;
 
-        if (role === 'REVIEW') {
-          languagePermissions = {
-            translateLanguages: permissions.basicState.languages,
-            stateChangeLanguages: permissions.basicState.languages,
-          };
-        } else if (role === 'TRANSLATE') {
-          languagePermissions = {
-            translateLanguages: permissions.basicState.languages,
-          };
-        }
+        const languagePermissions = languagePermissionsForRole(
+          role,
+          permissions.basicState.languages
+        );
 
         return invite.mutateAsync({
           path: {
@@ -83,6 +84,7 @@ export const useCreateInvitation = ({ projectId, allLangs }: Props) => {
               type: role,
               email,
               name,
+              agencyId: Number(agency),
               ...languagePermissions,
             },
           },

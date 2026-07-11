@@ -1,7 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
 import { T } from '@tolgee/react';
-import { useDebounce } from 'use-debounce';
-import ReactList from 'react-list';
 import {
   TolgeeFormat,
   getTolgeeFormat,
@@ -9,221 +6,103 @@ import {
 } from '@tginternal/editor';
 
 import { useProject } from 'tg.hooks/useProject';
+import { useQaChecksEnabled } from 'tg.ee';
 import { messageService } from 'tg.service/MessageService';
 
-import { components } from 'tg.service/apiSchema.generated';
 import {
   useDeleteTag,
+  usePostTranslationSuggestion,
   usePutKey,
   usePutTag,
   usePutTranslation,
 } from 'tg.service/TranslationHooks';
-import { confirmation } from 'tg.hooks/confirmation';
+import { components } from 'tg.service/apiSchema.generated';
 
-import { useTranslationsService } from './useTranslationsService';
-import { useRefsService } from './useRefsService';
+import type { useTranslationsService } from './useTranslationsService';
+import type { useRefsService } from './useRefsService';
+import { AfterCommand, ChangeValue, SetEdit } from '../types';
+import type { useTaskService } from './useTaskService';
 import {
-  AfterCommand,
-  ChangeValue,
-  DeletableKeyWithTranslationsModelType,
-  Direction,
-  Edit,
-  EditorProps,
-  SetEdit,
-} from '../types';
-import { getPluralVariants } from '@tginternal/editor';
+  composeValue,
+  resolvePluralParameter,
+  taskEditControlsShouldBeVisible,
+} from './utils';
+import type { usePositionService } from './usePositionService';
+import { TranslationViewModel } from '../../ToolsPanel/common/types';
+import { getTranslationPermissions } from '../../cell/editorMainActions/getEditorActions';
+import { applyQaReplacement, QaReplacementParams } from 'tg.fixtures/qaUtils';
 
-/**
- * Kinda hacky way how to update react-list size cache, when editor gets open
- */
-function updateListSizes(list: ReactList, currentIndex: number) {
-  // @ts-ignore
-  const cache = list.cache as Record<number, number>;
-  // @ts-ignore
-  const from = list.state.from as number;
-  // @ts-ignore
-  const itemEls = list.items.children;
-  const elementIndex = currentIndex - from;
-  const previousSize = cache[currentIndex];
-  const currentSize = itemEls[elementIndex]?.['offsetHeight'];
-  // console.log({ previousSize, currentSize });
-  if (currentSize !== previousSize && typeof currentSize === 'number') {
-    cache[currentIndex] = currentSize;
-    // @ts-ignore
-    list.updateFrameAndClearCache();
-    list.setState((state) => ({ ...state }));
-  }
-}
-
-type KeyWithTranslationsModelType =
-  components['schemas']['KeyWithTranslationsModel'];
+type LanguageModel = components['schemas']['LanguageModel'];
+type TranslationModel = components['schemas']['TranslationViewModel'];
 
 type Props = {
-  translations: ReturnType<typeof useTranslationsService>;
+  positionService: ReturnType<typeof usePositionService>;
+  translationService: ReturnType<typeof useTranslationsService>;
   viewRefs: ReturnType<typeof useRefsService>;
+  taskService: ReturnType<typeof useTaskService>;
+  branchName?: string;
+  allLanguages: LanguageModel[];
 };
 
-function generateCurrentValue(
-  position: EditorProps,
-  textValue: string | undefined,
-  key: DeletableKeyWithTranslationsModelType | undefined,
-  raw: boolean
-): Edit {
-  const result: Edit = {
-    ...position,
-    activeVariant: position.activeVariant ?? 'other',
-    value: { variants: { other: textValue } },
-  };
-  if (position.language && key?.keyIsPlural) {
-    const format = getTolgeeFormat(textValue ?? '', key.keyIsPlural, raw);
-    const variants = getPluralVariants(position.language);
-    if (!position.activeVariant) {
-      result.activeVariant = variants[0];
-    }
-    result.value = format;
-    result.value.parameter = key.keyPluralArgName ?? 'value';
-  }
-  return result;
-}
+export type CorrectTranslationParams = {
+  translationId: number;
+  translationText: string;
+  issue: QaReplacementParams;
+  pluralVariant?: string;
+};
 
-function composeValue(position: Edit, raw: boolean) {
-  if (position.value) {
-    return tolgeeFormatGenerateIcu(position.value, raw);
-  }
-  return position.value;
-}
-
-function serializeVariants(
-  variants: Record<string, string | undefined> | undefined
+function findTranslationInList(
+  translations:
+    | ReturnType<typeof useTranslationsService>['fixedTranslations']
+    | undefined,
+  translationId: number
 ) {
-  if (!variants) {
-    return '';
+  for (const key of translations ?? []) {
+    for (const [langTag, translation] of Object.entries(key.translations) as [
+      string,
+      TranslationModel
+    ][]) {
+      if (translation.id === translationId) {
+        return {
+          keyId: key.keyId,
+          keyName: key.keyName,
+          keyNamespace: key.keyNamespace,
+          keyIsPlural: key.keyIsPlural,
+          keyPluralArgName: key.keyPluralArgName,
+          languageTag: langTag,
+          translation,
+          tasks: key.tasks,
+        };
+      }
+    }
   }
-  return Object.entries(variants)
-    .sort(([keyA], [keyB]) => keyA.localeCompare(keyB))
-    .map(([_, value]) => value)
-    .filter((value) => Boolean(value))
-    .join('<%>');
+  return null;
 }
 
-export const useEditService = ({ translations, viewRefs }: Props) => {
-  const [position, setPosition] = useState<Edit | undefined>(undefined);
-  const currentIndex = useMemo(() => {
-    return translations.fixedTranslations?.findIndex(
-      (i) => i.keyId === position?.keyId
-    );
-  }, [position?.keyId]);
-
-  const key = useMemo(() => {
-    if (position?.keyId) {
-      return translations?.fixedTranslations?.find(
-        (t) => t.keyId === position?.keyId
-      );
-    }
-  }, [position?.keyId, translations]);
-
-  useEffect(() => {
-    if (viewRefs.reactList && currentIndex !== undefined) {
-      updateListSizes(viewRefs.reactList, currentIndex);
-    }
-  }, [position, currentIndex]);
+export const useEditService = ({
+  positionService,
+  translationService,
+  taskService,
+  branchName,
+  allLanguages,
+}: Props) => {
+  const {
+    position,
+    key,
+    moveEditToDirection,
+    updatePosition,
+    setPositionAndFocus,
+    getEditOldValue,
+  } = positionService;
 
   const project = useProject();
+  const qaChecksEnabled = useQaChecksEnabled();
 
   const putKey = usePutKey();
   const putTranslation = usePutTranslation();
   const putTag = usePutTag();
   const deleteTag = useDeleteTag();
-
-  const originalValue = useMemo(() => {
-    const value = position?.language
-      ? key?.translations?.[position.language]?.text
-      : key?.keyName;
-
-    return serializeVariants(
-      getTolgeeFormat(
-        value ?? '',
-        Boolean(key?.keyIsPlural),
-        !project.icuPlaceholders
-      )?.variants
-    );
-  }, [key, position?.language, Boolean(position?.value.parameter)]);
-
-  const [debouncedPosition] = useDebounce(position, 100, { maxWait: 100 });
-
-  useEffect(() => {
-    if (!debouncedPosition) {
-      return;
-    }
-    const newValue = serializeVariants(debouncedPosition.value.variants);
-
-    const isChanged = newValue !== originalValue;
-
-    if (isChanged !== debouncedPosition.changed) {
-      setPosition(() => ({
-        ...debouncedPosition,
-        changed: isChanged,
-      }));
-    }
-  }, [debouncedPosition]);
-
-  useEffect(() => {
-    // field is also focused, which breaks the scrolling
-    // so we need to make it async
-    setTimeout(() => {
-      // avoiding scrolling to keys when edited
-      // as they are edited in dialog
-      if (position && position.language) {
-        viewRefs.scrollToElement({
-          keyId: position.keyId,
-          language: position.language,
-          options: { block: 'center', inline: 'center', behavior: 'smooth' },
-        });
-      }
-    });
-  }, [position?.keyId, position?.language]);
-
-  const updatePosition = (newPos: Partial<Edit>) => {
-    setPosition((pos) => (pos ? { ...pos, ...newPos } : pos));
-  };
-
-  const moveEditToDirection = (direction: Direction | undefined) => {
-    const currentIndex =
-      translations.fixedTranslations?.findIndex(
-        (k) => k.keyId === position?.keyId
-      ) || 0;
-    if (currentIndex === -1 || !direction) {
-      clearPosition();
-      return;
-    }
-    let nextKey = undefined as KeyWithTranslationsModelType | undefined;
-    if (direction === 'DOWN') {
-      nextKey = translations.fixedTranslations?.[currentIndex + 1];
-    } else if (direction === 'UP') {
-      nextKey = translations.fixedTranslations?.[currentIndex - 1];
-    }
-    setPositionAndFocus(
-      nextKey
-        ? {
-            keyId: nextKey.keyId,
-            language: position?.language,
-          }
-        : undefined
-    );
-  };
-
-  const getEditOldValue = (): string | undefined => {
-    const key = translations.fixedTranslations?.find(
-      (k) => k.keyId === position?.keyId
-    );
-    if (key) {
-      return (
-        (position?.language
-          ? key.translations[position.language]?.text
-          : key.keyName) || ''
-      );
-    }
-  };
+  const postSuggestion = usePostTranslationSuggestion();
 
   const mutateTranslationKey = async (payload: SetEdit) => {
     if (payload.value !== getEditOldValue()) {
@@ -238,91 +117,89 @@ export const useEditService = ({ translations, viewRefs }: Props) => {
     }
   };
 
-  const mutateTranslation = async (
-    payload: SetEdit,
-    languagesToReturn?: string[]
-  ) => {
-    const { language, value } = payload;
-    const { keyName, keyNamespace } = key!;
+  const saveTranslationValue = async (params: {
+    keyId: number;
+    keyName: string;
+    keyNamespace?: string;
+    language: string;
+    value: string;
+  }) => {
+    if (qaChecksEnabled) {
+      // Mark stale before save to avoid race with websocket.
+      translationService.changeTranslations([
+        {
+          keyId: params.keyId,
+          language: params.language,
+          value: { qaChecksStale: true, qaIssues: [] },
+        },
+      ]);
+    }
 
-    const newVal =
-      payload.value !== getEditOldValue()
-        ? await putTranslation.mutateAsync({
-            path: { projectId: project.id },
-            content: {
-              'application/json': {
-                key: keyName,
-                namespace: keyNamespace,
-                translations: {
-                  [language!]: value,
-                },
-                languagesToReturn,
-              },
-            },
-          })
-        : null;
-    return newVal;
-  };
+    const result = await putTranslation.mutateAsync({
+      path: { projectId: project.id },
+      content: {
+        'application/json': {
+          key: params.keyName,
+          namespace: params.keyNamespace,
+          branch: branchName,
+          translations: {
+            [params.language]: params.value,
+          },
+          languagesToReturn: translationService.selectedLanguages,
+        },
+      },
+    });
 
-  const setPositionAndFocus = (pos: EditorProps | undefined) => {
-    if (!pos) {
-      clearPosition();
-    } else {
-      const key = translations.fixedTranslations?.find(
-        (key) => key.keyId === pos.keyId
-      );
-
-      const textValue = pos.language
-        ? key?.translations[pos.language]?.text
-        : key?.keyName;
-
-      setPosition(() =>
-        generateCurrentValue(pos, textValue, key, !project.icuPlaceholders)
+    if (result?.translations) {
+      Object.entries(result.translations).forEach(([lang, translation]) =>
+        translationService.changeTranslations([
+          { keyId: params.keyId, language: lang, value: translation },
+        ])
       );
     }
-    // make it async if someone is stealing focus
-    setTimeout(() => {
-      // focus cell when closing editor
-      if (pos === undefined && position) {
-        const newPosition = {
-          keyId: position.keyId,
-          language: position.language,
-        };
-        viewRefs.focusCell(newPosition);
-      }
-    });
+
+    return result;
   };
 
-  const confirmUnsavedChanges = (newPosition?: Partial<Edit>) => {
-    return new Promise<boolean>((resolve) => {
-      const fieldIsDifferent =
-        newPosition?.keyId !== undefined &&
-        (newPosition?.keyId !== position?.keyId ||
-          newPosition?.language !== position?.language);
+  /**
+   * Creates a translation suggestion via the API and updates the local state.
+   */
+  const suggestTranslationValue = async (params: {
+    keyId: number;
+    language: string;
+    value: string;
+  }) => {
+    const languageId = allLanguages.find((l) => l.tag === params.language)?.id;
+    if (languageId === undefined) return;
 
-      if (
-        position?.changed &&
-        position.keyId !== undefined &&
-        (!newPosition || fieldIsDifferent)
-      ) {
-        confirmation({
-          title: <T keyName="translations_discard_unsaved_title" />,
-          message: <T keyName="translations_discard_unsaved_message" />,
-          cancelButtonText: <T keyName="back_to_editing" />,
-          confirmButtonText: (
-            <T keyName="translations_discard_button_confirm" />
-          ),
-          onConfirm() {
-            resolve(true);
-          },
-          onCancel() {
-            resolve(false);
-          },
-        });
-      } else {
-        resolve(true);
-      }
+    const result = await postSuggestion.mutateAsync({
+      path: {
+        projectId: project.id,
+        keyId: params.keyId,
+        languageId: languageId,
+      },
+      content: {
+        'application/json': {
+          translation: params.value,
+        },
+      },
     });
+
+    const lang = allLanguages.find((lang) => lang.id === result?.languageId);
+
+    if (result && lang) {
+      translationService.updateTranslation({
+        keyId: result.keyId,
+        lang: lang.tag,
+        data(value) {
+          return {
+            suggestions: [result],
+            activeSuggestionCount: (value.activeSuggestionCount ?? 0) + 1,
+            totalSuggestionCount: (value.totalSuggestionCount ?? 0) + 1,
+          } satisfies Partial<TranslationViewModel>;
+        },
+      });
+    }
   };
 
   const changeField = async (data: ChangeValue) => {
@@ -336,24 +213,19 @@ export const useEditService = ({ translations, viewRefs }: Props) => {
       return messageService.error(<T keyName="global_empty_value" />);
     }
 
-    if (language) {
-      // update translation
-      const result = await mutateTranslation(
-        {
-          ...data,
-          value: value as string,
+    if (language && data.suggestionOnly) {
+      if (value !== getEditOldValue()) {
+        await suggestTranslationValue({ keyId, language, value });
+      }
+    } else if (language) {
+      if (value !== getEditOldValue()) {
+        await saveTranslationValue({
           keyId,
+          keyName: key!.keyName,
+          keyNamespace: key!.keyNamespace,
           language,
-        },
-        translations.selectedLanguages
-      );
-
-      if (result?.translations) {
-        Object.entries(result.translations).forEach(([lang, translation]) =>
-          translations.changeTranslations([
-            { keyId, language: lang, value: translation },
-          ])
-        );
+          value,
+        });
       }
     } else {
       // update key
@@ -363,12 +235,113 @@ export const useEditService = ({ translations, viewRefs }: Props) => {
         keyId,
         language,
       });
-      translations.updateTranslationKeys([
+      translationService.updateTranslationKeys([
         { keyId, value: { keyName: value } },
       ]);
     }
-    doAfterCommand(data.after);
+
+    if (language && !data.preventTaskResolution) {
+      const translationKey = translationService.fixedTranslations?.find(
+        (k) => k.keyId === keyId
+      );
+      const firstTask = translationKey?.tasks?.find(
+        (t) => t.languageTag === language
+      );
+
+      if (firstTask && taskEditControlsShouldBeVisible(firstTask)) {
+        await taskService.setTaskTranslationState({
+          keyId: position.keyId,
+          taskNumber: firstTask.number,
+          done: true,
+        });
+      }
+    }
+
     data.onSuccess?.();
+    doAfterCommand(data.after);
+  };
+
+  const getPermissionsForTranslation = (
+    found: NonNullable<ReturnType<typeof findTranslationInList>>
+  ) => {
+    const languageId = allLanguages.find(
+      (l) => l.tag === found.languageTag
+    )?.id;
+    if (!languageId) return null;
+    return getTranslationPermissions({
+      project,
+      languageId,
+      translationState: found.translation.state,
+      tasks: found.tasks,
+    });
+  };
+
+  const canEditTranslation = (translationId: number) => {
+    const found = findTranslationInList(
+      translationService.fixedTranslations,
+      translationId
+    );
+    if (!found) return false;
+
+    const permissions = getPermissionsForTranslation(found);
+    if (!permissions) return false;
+
+    return permissions.canSave || permissions.canSuggest;
+  };
+
+  /**
+   * Applies a QA correction and saves (or suggests) the translation directly,
+   * without opening the editor.
+   */
+  const correctTranslation = async (params: CorrectTranslationParams) => {
+    const found = findTranslationInList(
+      translationService.fixedTranslations,
+      params.translationId
+    );
+    if (!found) return;
+
+    const correctedVariant = applyQaReplacement(
+      params.translationText,
+      params.issue
+    );
+
+    // For plurals, reconstruct the full ICU text with the corrected variant
+    let value: string;
+    if (
+      found.keyIsPlural &&
+      params.pluralVariant &&
+      found.translation.text != null
+    ) {
+      const raw = !project.icuPlaceholders;
+      const format = getTolgeeFormat(found.translation.text, true, raw);
+      format.parameter = resolvePluralParameter(
+        found.keyPluralArgName,
+        format.parameter
+      );
+      format.variants[params.pluralVariant] = correctedVariant;
+      value = tolgeeFormatGenerateIcu(format, raw);
+    } else {
+      value = correctedVariant;
+    }
+
+    const permissions = getPermissionsForTranslation(found);
+    if (!permissions) return;
+
+    if (permissions.canSave) {
+      await saveTranslationValue({
+        keyId: found.keyId,
+        keyName: found.keyName,
+        keyNamespace: found.keyNamespace,
+        language: found.languageTag,
+        value,
+      });
+    } else if (permissions.canSuggest) {
+      await suggestTranslationValue({
+        keyId: found.keyId,
+        language: found.languageTag,
+        value,
+      });
+    }
   };
 
   const doAfterCommand = (command?: AfterCommand) => {
@@ -381,10 +354,6 @@ export const useEditService = ({ translations, viewRefs }: Props) => {
         setPositionAndFocus(undefined);
     }
   };
-
-  function clearPosition() {
-    setPosition(undefined);
-  }
 
   const setEditValue = (newValue: TolgeeFormat) => {
     updatePosition({
@@ -404,20 +373,27 @@ export const useEditService = ({ translations, viewRefs }: Props) => {
     }
   };
 
+  const appendEditValueString = (value: string) => {
+    if (!position) {
+      return;
+    }
+
+    const activeVariant = position.activeVariant ?? 'other';
+    const currentValue = position.value.variants[activeVariant] ?? '';
+    setEditValueString(currentValue + value);
+  };
+
   return {
-    position,
-    clearPosition,
-    updatePosition,
-    setPositionAndFocus,
     changeField,
-    confirmUnsavedChanges,
+    canEditTranslation,
+    correctTranslation,
     setEditValue,
     setEditValueString,
+    appendEditValueString,
     isLoading:
       putKey.isLoading ||
       putTranslation.isLoading ||
       putTag.isLoading ||
       deleteTag.isLoading,
-    moveEditToDirection,
   };
 };

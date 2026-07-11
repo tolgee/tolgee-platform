@@ -16,9 +16,6 @@
 
 package io.tolgee.security.authentication
 
-data class TolgeeAuthenticationDetails(
-  /**
-   * Whether the user is super-authenticated
-   */
-  val isSuperToken: Boolean,
-)
+import java.io.Serializable
+
+class TolgeeAuthenticationDetails : Serializable

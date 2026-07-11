@@ -2,16 +2,32 @@ package io.tolgee.formats
 
 import com.ibm.icu.text.PluralRules
 import io.tolgee.formats.escaping.ForceIcuEscaper
-import io.tolgee.formats.escaping.IcuUnescper
+import io.tolgee.formats.escaping.IcuUnescaper
 import io.tolgee.formats.escaping.PluralFormIcuEscaper
 import io.tolgee.util.nullIfEmpty
+
+val allPluralKeywords =
+  listOf(
+    PluralRules.KEYWORD_ZERO,
+    PluralRules.KEYWORD_ONE,
+    PluralRules.KEYWORD_TWO,
+    PluralRules.KEYWORD_FEW,
+    PluralRules.KEYWORD_MANY,
+    PluralRules.KEYWORD_OTHER,
+  )
+
+fun getPluralFormsForLocaleOrAll(languageTag: String): List<String> {
+  val locale = getULocaleFromTag(languageTag)
+  return PluralRules.forLocale(locale)?.keywords?.toList() ?: allPluralKeywords
+}
 
 fun getPluralFormsForLocale(languageTag: String): MutableSet<String> {
   val uLocale = getULocaleFromTag(languageTag)
   val pluralRules = PluralRules.forLocale(uLocale)
-  return pluralRules.keywords.sortedBy {
-    formKeywords.indexOf(it)
-  }.toMutableSet()
+  return pluralRules.keywords
+    .sortedBy {
+      formKeywords.indexOf(it)
+    }.toMutableSet()
 }
 
 fun populateForms(
@@ -24,17 +40,24 @@ fun populateForms(
 }
 
 fun orderPluralForms(pluralForms: Map<String, String>): Map<String, String> {
-  return pluralForms.entries.sortedBy {
-    val formIndex = formKeywords.indexOf(it.key)
-    if (formIndex == -1) {
-      "A_$it"
-    } else {
-      formIndex.toString()
-    }
-  }.associate { it.key to it.value }
+  return pluralForms.entries
+    .sortedWith(
+      compareBy(
+        { parseExactPluralFormKey(it.key) ?: Double.MAX_VALUE },
+        { formKeywords.indexOf(it.key) },
+        { it.key },
+      ),
+    ).associate { it.key to it.value }
 }
 
 val formKeywords = listOf("zero", "one", "two", "few", "many", "other")
+
+private fun parseExactPluralFormKey(key: String): Double? {
+  if (!key.startsWith("=")) {
+    return null
+  }
+  return key.substring(1).toDoubleOrNull()
+}
 
 /**
  * It takes the plurals and optimizes them by removing the unnecessary forms
@@ -75,8 +98,11 @@ fun getPluralFormsReplacingReplaceParam(
         return noOpConvertor.convert(node)
       }
 
-      override fun convertText(string: String): String {
-        return noOpConvertor.convertText(string)
+      override fun convertText(
+        node: MessagePatternUtil.TextNode,
+        keepEscaping: Boolean,
+      ): String {
+        return noOpConvertor.convertText(node, keepEscaping)
       }
 
       override fun convertReplaceNumber(
@@ -100,12 +126,14 @@ private fun getPluralFormsFromConversionResult(converted: PossiblePluralConversi
   return PluralForms(
     converted.formsResult ?: return null,
     converted.argName ?: throw IllegalStateException("Plural argument name not found"),
+    offsets = converted.variantOffsets,
   )
 }
 
 data class PluralForms(
   val forms: Map<String, String>,
   val argName: String,
+  val offsets: Map<String, Int>? = null,
 ) {
   val icuString: String
     get() = forms.toIcuPluralString(optimize = false, argName = argName)
@@ -147,41 +175,43 @@ fun <T> Map<T, String?>.convertToIcuPlurals(newPluralArgName: String?): ConvertT
   val possibleArgNames = mutableListOf<String>()
   val invalid = mutableSetOf<T>()
   val formResults =
-    this.map { entry ->
-      entry.value ?: return@map entry.key to null
-      entry.key to (
-        try {
-          val value = entry.value ?: return@map entry.key to null
-          val converted =
-            convertIcuStringNoOp(value)
+    this
+      .map { entry ->
+        entry.value ?: return@map entry.key to null
+        entry.key to (
+          try {
+            val value = entry.value ?: return@map entry.key to null
+            val converted =
+              convertIcuStringNoOp(value)
 
-          (converted.argName ?: converted.firstArgName)?.let {
-            possibleArgNames.add(it)
+            (converted.argName ?: converted.firstArgName)?.let {
+              possibleArgNames.add(it)
+            }
+
+            converted.formsResult
+          } catch (e: Exception) {
+            null
+          } ?: let {
+            invalid.add(entry.key)
+            mapOf("other" to entry.value!!)
           }
-
-          converted.formsResult
-        } catch (e: Exception) {
-          null
-        } ?: let {
-          invalid.add(entry.key)
-          mapOf("other" to entry.value!!)
-        }
-      )
-    }.toMap()
+        )
+      }.toMap()
 
   val argName = getArgName(possibleArgNames, newPluralArgName)
   val convertedStrings =
-    formResults.map { (key, forms) ->
-      val preparedForms = forms?.preparePluralForms(escapeHash = invalid.contains(key))
-      key to preparedForms.preparedFormsToIcuPlural(argName)
-    }.toMap()
+    formResults
+      .map { (key, forms) ->
+        val preparedForms = forms?.preparePluralForms(escapeHash = invalid.contains(key))
+        key to preparedForms.preparedFormsToIcuPlural(argName)
+      }.toMap()
   return ConvertToIcuPluralResult(convertedStrings, argName)
 }
 
 private fun convertIcuStringNoOp(string: String) =
   BaseIcuMessageConvertor(
     string,
-    { NoOpFromIcuPlaceholderConvertor() },
+    { IcuToIcuPlaceholderConvertor() },
     keepEscaping = true,
   ).convert()
 
@@ -199,22 +229,23 @@ fun <T> normalizePlurals(
 ): Map<T, String?> {
   val invalidStrings = mutableListOf<String>()
   val formResults =
-    strings.map {
-      val text = it.value?.nullIfEmpty ?: return@map it.key to null
+    strings
+      .map {
+        val text = it.value?.nullIfEmpty ?: return@map it.key to null
 
-      val forms =
-        try {
-          getPluralForms(text)
-        } catch (e: Exception) {
-          null
+        val forms =
+          try {
+            getPluralForms(text)
+          } catch (e: Exception) {
+            null
+          }
+
+        if (forms == null) {
+          invalidStrings.add(text)
         }
 
-      if (forms == null) {
-        invalidStrings.add(text)
-      }
-
-      it.key to forms
-    }.toMap()
+        it.key to forms
+      }.toMap()
 
   if (invalidStrings.isNotEmpty()) {
     throw StringIsNotPluralException(invalidStrings)
@@ -244,7 +275,7 @@ fun String.forceEscapePluralForms(): MessageConvertorResult? {
  */
 fun String.unescapePluralForms(): String? {
   val forms = getPluralForms(this)
-  val unescaped = forms?.forms?.mapValues { IcuUnescper(it.value, isPlural = true).unescaped }
+  val unescaped = forms?.forms?.mapValues { IcuUnescaper(it.value, isPlural = true).unescaped }
   return unescaped?.toIcuPluralString(optimize = false, argName = forms.argName)
 }
 
@@ -257,10 +288,11 @@ private fun <T> pluralFormsToSameArgName(
 ): ConvertToIcuPluralResult<T> {
   val argName = getArgName(formResults.values, pluralArgName)
   val convertedStrings =
-    formResults.map { (key, forms) ->
-      val preparedForms = forms?.forms?.preparePluralForms()
-      key to preparedForms.preparedFormsToIcuPlural(argName)
-    }.toMap()
+    formResults
+      .map { (key, forms) ->
+        val preparedForms = forms?.forms?.preparePluralForms()
+        key to preparedForms.preparedFormsToIcuPlural(argName)
+      }.toMap()
   return ConvertToIcuPluralResult(convertedStrings, argName)
 }
 
@@ -293,7 +325,9 @@ fun Map<String, String>.toIcuPluralString(
   ).convert()
 }
 
-class StringIsNotPluralException(val invalidStrings: List<String>) : RuntimeException("String is not a plural")
+class StringIsNotPluralException(
+  val invalidStrings: List<String>,
+) : RuntimeException("String is not a plural")
 
 private fun String.preparePluralForm(escapeHash: Boolean = false): String {
   return try {
@@ -354,8 +388,10 @@ private fun getArgName(
   }
 
   val possibleArgNameSet = possibleArgNames.toSet()
-  return possibleArgNameSet.map { argName ->
-    argName to
-      possibleArgNames.count { it == argName }
-  }.maxByOrNull { it.second }?.first ?: DEFAULT_PLURAL_ARGUMENT_NAME
+  return possibleArgNameSet
+    .map { argName ->
+      argName to
+        possibleArgNames.count { it == argName }
+    }.maxByOrNull { it.second }
+    ?.first ?: DEFAULT_PLURAL_ARGUMENT_NAME
 }

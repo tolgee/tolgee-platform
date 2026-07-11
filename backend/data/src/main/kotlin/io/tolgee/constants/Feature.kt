@@ -18,4 +18,19 @@ enum class Feature {
   MULTIPLE_CONTENT_DELIVERY_CONFIGS,
   AI_PROMPT_CUSTOMIZATION,
   SLACK_INTEGRATION,
+  TASKS,
+  SSO,
+  ORDER_TRANSLATION,
+  GLOSSARY,
+  TRANSLATION_LABELS,
+  BRANCHING,
+  QA_CHECKS,
+  TRANSLATION_MEMORY,
+  ;
+
+  companion object {
+    fun findByName(name: String): Feature? {
+      return entries.find { it.name == name }
+    }
+  }
 }

@@ -6,12 +6,19 @@ export type BatchActions =
   | 'pre_translate'
   | 'mark_as_reviewed'
   | 'mark_as_translated'
+  | 'task_create'
+  | 'task_add_keys'
+  | 'task_remove_keys'
+  | 'order_translation'
   | 'add_tags'
   | 'remove_tags'
   | 'change_namespace'
   | 'copy_translations'
   | 'clear_translations'
-  | 'export_translations';
+  | 'export_translations'
+  | 'assign_translation_labels'
+  | 'unassign_translation_labels'
+  | 'qa_recheck';
 
 export type BatchJobModel = components['schemas']['BatchJobModel'];
 

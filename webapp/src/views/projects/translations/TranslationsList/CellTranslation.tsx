@@ -4,6 +4,7 @@ import { components } from 'tg.service/apiSchema.generated';
 
 import {
   CELL_CLICKABLE,
+  CELL_LOWERED,
   CELL_PLAIN,
   CELL_RAISED,
   StyledCell,
@@ -27,9 +28,10 @@ type Props = {
   active: boolean;
   lastFocusable: boolean;
   className?: string;
+  readonly?: boolean;
 };
 
-export const CellTranslation: React.FC<Props> = ({
+export const CellTranslation: React.FC<React.PropsWithChildren<Props>> = ({
   data,
   language,
   colIndex,
@@ -38,6 +40,7 @@ export const CellTranslation: React.FC<Props> = ({
   active,
   lastFocusable,
   className,
+  readonly,
 }) => {
   const cellRef = useRef<HTMLDivElement>(null);
 
@@ -51,7 +54,7 @@ export const CellTranslation: React.FC<Props> = ({
     cellRef: cellRef,
   });
 
-  const { isEditing, editEnabled: canEditTranslation } = tools;
+  const { isEditing, aiPlaygroundEnabled, cellClickable } = tools;
 
   const handleResize = () => {
     onResize?.(colIndex || 0);
@@ -59,24 +62,24 @@ export const CellTranslation: React.FC<Props> = ({
 
   const state = translation?.state || 'UNTRANSLATED';
 
-  const disabled = state === 'DISABLED';
-  const editable = canEditTranslation && !disabled;
-
   return (
     <StyledCell
-      className={clsx({
-        [CELL_PLAIN]: true,
-        [CELL_RAISED]: isEditing,
-        [CELL_CLICKABLE]: editable && !isEditing,
-        className,
-      })}
+      className={clsx(
+        {
+          [CELL_PLAIN]: true,
+          [aiPlaygroundEnabled ? CELL_LOWERED : CELL_RAISED]:
+            !readonly && isEditing,
+          [CELL_CLICKABLE]: !readonly && cellClickable,
+        },
+        className
+      )}
       tabIndex={0}
       ref={cellRef}
       data-cy="translations-table-cell-translation"
       data-cy-lang={language.tag}
     >
       <CellStateBar state={state} onResize={handleResize} />
-      {isEditing ? (
+      {!readonly && isEditing && !aiPlaygroundEnabled ? (
         <TranslationWrite tools={tools} />
       ) : (
         <TranslationRead
@@ -85,6 +88,7 @@ export const CellTranslation: React.FC<Props> = ({
           tools={tools}
           width={width}
           colIndex={colIndex}
+          readonly={readonly}
         />
       )}
     </StyledCell>

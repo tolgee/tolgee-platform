@@ -7,8 +7,9 @@ import { LanguageReference } from './LanguageReference';
 import { ContentDeliveryReference } from './ContentDeliveryReference';
 import { ContentStorageReference } from './ContentStorageReference';
 import { WebhookConfigReference } from './WebhookConfigReference';
-
-const StyledReferences = styled(Box)`
+import { TaskReference } from 'tg.ee';
+import { BranchReference } from 'tg.ee';
+export const StyledReferences = styled(Box)`
   display: flex;
   gap: 3px;
   white-space: nowrap;
@@ -78,12 +79,18 @@ const getReference = (reference: Reference) => {
       return <ContentStorageReference data={reference} />;
     case 'webhook_config':
       return <WebhookConfigReference data={reference} />;
+    case 'task':
+      return <TaskReference data={reference} />;
+    case 'branch':
+      return <BranchReference data={reference} />;
     default:
       return null;
   }
 };
 
-export const AnyReference: React.FC<Props> = ({ data }) => {
+export const AnyReference: React.FC<React.PropsWithChildren<Props>> = ({
+  data,
+}) => {
   return (
     <StyledReferences>
       {data.map((ref, i) => {

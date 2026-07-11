@@ -16,6 +16,7 @@ data class ProjectInviteUserDto(
   override var translateLanguages: Set<Long>? = null,
   override var viewLanguages: Set<Long>? = null,
   override var stateChangeLanguages: Set<Long>? = null,
+  override var suggestLanguages: Set<Long>? = null,
   @Schema(
     description = """Email to send invitation to""",
   )
@@ -27,4 +28,8 @@ data class ProjectInviteUserDto(
   )
   @field:Size(max = 250)
   val name: String? = null,
+  @Schema(
+    description = """Id of invited agency""",
+  )
+  val agencyId: Long? = null,
 ) : RequestWithLanguagePermissions

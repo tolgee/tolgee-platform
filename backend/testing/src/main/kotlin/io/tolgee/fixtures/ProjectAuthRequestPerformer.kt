@@ -18,7 +18,7 @@ abstract class ProjectAuthRequestPerformer(
     get() = projectSupplier?.invoke() ?: defaultProject
 
   val defaultProject: Project by lazy {
-    dbPopulator.createBase(generateUniqueString(), username = userAccountProvider.invoke().username).project
+    dbPopulator.createBase(userAccountProvider.invoke().username).project
   }
 
   var projectSupplier: (() -> Project)? = null

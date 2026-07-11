@@ -9,12 +9,15 @@ import org.junit.jupiter.api.AfterEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.mock.web.MockMultipartFile
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
 import java.time.Duration
-import java.util.*
+import java.util.Date
 
-abstract class AuthorizedControllerTest : AbstractControllerTest(), AuthRequestPerformer {
+abstract class AuthorizedControllerTest :
+  AbstractControllerTest(),
+  AuthRequestPerformer {
   private var _userAccount: UserAccount? = null
 
   var userAccount: UserAccount?
@@ -66,7 +69,15 @@ abstract class AuthorizedControllerTest : AbstractControllerTest(), AuthRequestP
     init(generateJwtToken(_userAccount!!.id))
   }
 
-  protected fun generateJwtToken(userAccountId: Long) = jwtService.emitToken(userAccountId, true)
+  protected fun generateJwtToken(userAccountId: Long) = jwtService.emitToken(userAccountId, isSuper = true)
+
+  protected fun setSecurityContext(userAccount: UserAccount) {
+    val token = jwtService.emitToken(userAccount.id, isSuper = true)
+    val auth = jwtService.validateToken(token)
+    val context = SecurityContextHolder.createEmptyContext()
+    context.authentication = auth
+    SecurityContextHolder.setContext(context)
+  }
 
   fun refreshUser() {
     _userAccount = userAccountService.findActive(_userAccount!!.id)
@@ -74,6 +85,7 @@ abstract class AuthorizedControllerTest : AbstractControllerTest(), AuthRequestP
 
   fun logout() {
     _userAccount = null
+    SecurityContextHolder.clearContext()
   }
 
   override fun perform(builder: MockHttpServletRequestBuilder): ResultActions {

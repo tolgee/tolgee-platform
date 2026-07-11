@@ -10,4 +10,5 @@ open class PatWithUserModel(
   @Schema(hidden = true)
   patModel: PatModel,
   val user: SimpleUserAccountModel,
-) : IPatModel by patModel, RepresentationModel<PatWithUserModel>()
+) : RepresentationModel<PatWithUserModel>(),
+  IPatModel by patModel

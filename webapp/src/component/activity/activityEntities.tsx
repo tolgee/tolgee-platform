@@ -8,6 +8,7 @@ import {
   Reference,
   WebhookConfigReferenceData,
 } from './types';
+import { BranchReferenceData } from '../../eeSetup/EeModuleType';
 
 export const activityEntities: Record<EntityEnum, EntityOptions> = {
   Translation: {
@@ -23,6 +24,14 @@ export const activityEntities: Record<EntityEnum, EntityOptions> = {
         compute: ({ auto, mtProvider }) => mtProvider || auto || undefined,
       },
       outdated: { type: 'outdated' },
+      labels: {
+        type: 'translation_labels',
+        label(params) {
+          return (
+            <T keyName="activity_entity_translation.labels" params={params} />
+          );
+        },
+      },
     },
     references: ({ relations }) => {
       const result: Reference[] = [];
@@ -97,6 +106,13 @@ export const activityEntities: Record<EntityEnum, EntityOptions> = {
         type: 'namespace',
         label(params) {
           return <T keyName="activity_entity_key.namespace" params={params} />;
+        },
+      },
+      maxCharLimit: {
+        label(params) {
+          return (
+            <T keyName="activity_entity_key.max_char_limit" params={params} />
+          );
         },
       },
     },
@@ -206,6 +222,33 @@ export const activityEntities: Record<EntityEnum, EntityOptions> = {
       name: {
         label(params) {
           return <T keyName="activity_entity_project.name" params={params} />;
+        },
+      },
+      description: {
+        label(params) {
+          return (
+            <T keyName="activity_entity_project.description" params={params} />
+          );
+        },
+      },
+      suggestionsMode: {
+        label(params) {
+          return (
+            <T
+              keyName="activity_entity_project.suggestion_mode"
+              params={params}
+            />
+          );
+        },
+      },
+      translationProtection: {
+        label(params) {
+          return (
+            <T
+              keyName="activity_entity_project.translation_protection"
+              params={params}
+            />
+          );
         },
       },
       baseLanguage: {
@@ -378,6 +421,172 @@ export const activityEntities: Record<EntityEnum, EntityOptions> = {
           return <T keyName="activity_entity_content_delivery_config.name" />;
         },
       },
+    },
+  },
+  Task: {
+    label() {
+      return <T keyName="activity_entity_task" />;
+    },
+    fields: {
+      name: {
+        type: 'text',
+        label() {
+          return <T keyName="activity_entity_task.name" />;
+        },
+      },
+      type: {
+        type: 'task_type',
+        label() {
+          return <T keyName="activity_entity_task.type" />;
+        },
+      },
+      state: {
+        type: 'task_state',
+        label() {
+          return <T keyName="activity_entity_task.state" />;
+        },
+      },
+      description: {
+        type: 'text',
+        label() {
+          return <T keyName="activity_entity_task.description" />;
+        },
+      },
+      dueDate: {
+        type: 'date',
+        label() {
+          return <T keyName="activity_entity_task.due_date" />;
+        },
+      },
+    },
+    references: (props) => {
+      const result: Reference[] = [];
+      const name = props.description?.name ?? props.modifications?.name?.new;
+      const taskType =
+        props.description?.type ?? props.modifications?.description?.new;
+      const number =
+        props.description?.number ?? props.modifications?.number?.new;
+      if (name && taskType && number) {
+        result.push({
+          type: 'task',
+          taskType: taskType as any,
+          name: name as unknown as string,
+          number: Number(number),
+        });
+      }
+      return result;
+    },
+  },
+  Label: {
+    label(params) {
+      return <T keyName="activity_entity_translation_label" params={params} />;
+    },
+    fields: {
+      name: {
+        type: 'text',
+        label(params) {
+          return (
+            <T
+              keyName="activity_entity_translation_label.name"
+              params={params}
+            />
+          );
+        },
+      },
+      color: {
+        type: 'text',
+        label(params) {
+          return (
+            <T
+              keyName="activity_entity_translation_label.color"
+              params={params}
+            />
+          );
+        },
+      },
+      description: {
+        type: 'text',
+        label(params) {
+          return (
+            <T
+              keyName="activity_entity_translation_label.description"
+              params={params}
+            />
+          );
+        },
+      },
+    },
+  },
+  TranslationSuggestion: {
+    label(params) {
+      return <T keyName="activity_entity_suggestion" params={params} />;
+    },
+    description: ['key'],
+    fields: {
+      translation: {
+        type: 'text',
+        label: () => <T keyName="activity_entity_suggestion.translation" />,
+      },
+      state: {
+        type: 'text',
+        label: () => <T keyName="activity_entity_suggestion.state" />,
+      },
+    },
+    references: ({ relations }) => {
+      const result: Reference[] = [];
+      const keyRef = getKeyWithLanguages(relations);
+      if (keyRef) {
+        result.push(keyRef);
+      }
+      return result;
+    },
+  },
+  TranslationQaIssue: {
+    label(params) {
+      return <T keyName="activity_entity_qa_issue" params={params} />;
+    },
+    fields: {
+      state: {
+        type: 'qa_issue_state',
+      },
+    },
+    references: ({ relations }) => {
+      const result: Reference[] = [];
+      const translationRelations = relations?.translation?.relations;
+      const keyRef = getKeyWithLanguages(translationRelations);
+      if (keyRef) {
+        result.push(keyRef);
+      }
+      return result;
+    },
+  },
+  Branch: {
+    label(params) {
+      return <T keyName="activity_entity_branch" params={params} />;
+    },
+    fields: {
+      name: {
+        type: 'text',
+        label(params) {
+          return <T keyName="activity_entity_branch.name" params={params} />;
+        },
+      },
+      isProtected: {
+        type: 'branch_protected',
+        label(params) {
+          return (
+            <T keyName="activity_entity_branch.is_protected" params={params} />
+          );
+        },
+      },
+    },
+    references: ({ modifications, description }) => {
+      const name = (modifications?.['name']?.new ||
+        modifications?.['name']?.old ||
+        description?.['name']) as unknown as string | null | undefined;
+      return name
+        ? ([{ type: 'branch', name: name }] as BranchReferenceData[])
+        : undefined;
     },
   },
 };

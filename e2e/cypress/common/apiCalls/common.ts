@@ -1,7 +1,7 @@
-import { API_URL, PASSWORD, USERNAME } from '../constants';
+import { API_URL, MAIL_API_URL, PASSWORD, USERNAME } from '../constants';
 import { ArgumentTypes, Scope } from '../types';
 import { components } from '../../../../webapp/src/service/apiSchema.generated';
-import bcrypt = require('bcryptjs');
+import * as bcrypt from 'bcryptjs';
 import Chainable = Cypress.Chainable;
 
 type AccountType =
@@ -156,8 +156,17 @@ export const createTestProject = () =>
     ],
   });
 
+export function enableNamespaces(projectId: number) {
+  internalFetch(`e2e-data/projects/enable-namespaces?projectId=${projectId}`, {
+    method: 'PUT',
+  });
+  cy.reload();
+}
+
 type CreateKeyOptions = {
   isPlural?: boolean;
+  branch?: string;
+  maxCharLimit?: number;
 };
 
 export const createKey = (
@@ -188,12 +197,25 @@ export const createKeyPromise = (
 export const setTranslations = (
   projectId,
   key: string,
-  translations: { [lang: string]: string }
+  translations: { [lang: string]: string },
+  branch?: string
 ) =>
   v2apiFetch(`projects/${projectId}/translations`, {
-    body: { key, translations },
+    body: { key, translations, branch },
     method: 'POST',
   });
+
+export const enableOrganizationsSsoProvider = () =>
+  setProperty('authentication.ssoOrganizations.enabled', true);
+
+export const disableOrganizationsSsoProvider = () =>
+  setProperty('authentication.ssoOrganizations.enabled', false);
+
+export const enableGlobalSsoProvider = () =>
+  setProperty('authentication.ssoGlobal.enabled', true);
+
+export const disableGlobalSsoProvider = () =>
+  setProperty('authentication.ssoGlobal.enabled', false);
 
 export const deleteProject = (id: number) => {
   return v2apiFetch(`projects/${id}`, { method: 'DELETE' });
@@ -219,24 +241,30 @@ export const deleteUser = () => {
 
 export const deleteUserSql = (username: string) => {
   const sql = `
-      delete
-      from permission
-      where user_id in (select id from user_account where username = '${username}');
-      delete
-      from email_verification
-      where user_account_id in (select id from user_account where username = '${username}');
-      delete
-      from organization_role
-      where user_id in (select id from user_account where username = '${username}');
-      delete
-      from user_preferences
-      where user_account_id in (select id from user_account where username = '${username}');
-      delete
-      from quick_start
-      where user_account_id in (select id from user_account where username = '${username}');
-      delete
-      from user_account
-      where username = '${username}';
+    delete
+    from permission
+    where user_id in (select id from user_account where username = '${username}');
+    delete
+    from email_verification
+    where user_account_id in (select id from user_account where username = '${username}');
+    delete
+    from organization_role
+    where user_id in (select id from user_account where username = '${username}');
+    delete
+    from user_preferences
+    where user_account_id in (select id from user_account where username = '${username}');
+    delete
+    from quick_start
+    where user_account_id in (select id from user_account where username = '${username}');
+    delete
+    from notification
+    where user_id in (select id from user_account where username = '${username}');
+    delete
+    from notification_setting
+    where user_id in (select id from user_account where username = '${username}');
+    delete
+    from user_account
+    where username = '${username}';
   `;
 
   return internalFetch(`sql/execute`, { method: 'POST', body: sql });
@@ -245,7 +273,7 @@ export const deleteUserSql = (username: string) => {
 export const getUser = (username: string) => {
   const sql = `select user_account.username, email_verification.id
                from user_account
-                        join email_verification on email_verification.user_account_id = user_account.id
+                      join email_verification on email_verification.user_account_id = user_account.id
                where username = '${username}'`;
   return internalFetch(`sql/list`, { method: 'POST', body: sql }).then((r) => {
     return r.body[0];
@@ -342,44 +370,189 @@ export const addScreenshot = (
   });
 };
 
-export const getParsedEmailVerification = () =>
-  getAllEmails().then((r) => {
+export const getLastEmail = () =>
+  getLatestEmail().then((r) => {
     return {
-      verifyEmailLink: r[0].html.replace(/.*(http:\/\/[\w:/]*).*/gs, '$1'),
-      fromAddress: r[0].from.value[0].address,
-      toAddress: r[0].to.value[0].address,
-      text: r[0].text,
+      fromAddress: r.From.Address,
+      toAddress: r.To[0].Address,
+      subject: r.Subject,
+      html: r.HTML,
     };
   });
 
-export const getParsedEmailVerificationByIndex = (index: number) =>
-  getAllEmails().then((r) => {
+export const getAssignedEmailNotification = () =>
+  getLatestEmail().then((r) => {
+    const content = r.HTML;
+    const result = [...content.matchAll(/href="(.*?)"/g)];
     return {
-      verifyEmailLink: r[index].html.replace(/.*(http:\/\/[\w:/]*).*/gs, '$1'),
-      fromAddress: r[index].from.value[0].address,
-      toAddress: r[index].to.value[0].address,
-      text: r[index].text,
+      taskLink: result[0][1],
+      myTasksLink: result[2][1],
+      fromAddress: r.From.Address,
+      toAddress: r.To[0].Address,
+      content: r.HTML,
     };
   });
+
+const parseEmailVerification = (email: EmailSummary) => ({
+  verifyEmailLink: (email.HTML.match(/href="([^"]+)"/i) || ['', ''])[1],
+  fromAddress: email.From.Address,
+  toAddress: email.To[0].Address,
+  content: email.HTML,
+});
+
+export const getParsedEmailVerification = () =>
+  getLatestEmail().then(parseEmailVerification);
+
+export const getParsedEmailVerificationByIndex = (index: number) => {
+  if (index === 0) {
+    return getLatestEmail().then(parseEmailVerification);
+  } else {
+    return getAllEmails().then((emails) => {
+      if (!emails || index < 0 || index >= emails.length) {
+        throw new Error(
+          `Email at index ${index} not found. Total: ${emails?.length ?? 0}`
+        );
+      }
+      return getEmail(emails[index].ID).then(parseEmailVerification);
+    });
+  }
+};
 
 export const getParsedEmailInvitationLink = () =>
-  getAllEmails().then(
-    (emails) =>
-      emails[0].html.replace(/.*(http:\/\/[\w:/]*).*/gs, '$1') as string
+  getLatestEmail().then(
+    (email) =>
+      email.HTML.replace(
+        /.*(https?:\/\/[\w:/.-]*accept_invitation[\w:/.-]*).*/gs,
+        '$1'
+      ) as string
   );
 
-export const getAllEmails = () =>
-  cy.request('http://localhost:21080/api/emails').then((r) => r.body);
+export const getAgencyInvitationLinks = () =>
+  getAllEmails().then((emails) => {
+    const email = emails.find((e) =>
+      e.Subject.includes('New translation request')
+    );
+    if (!email) {
+      throw new Error('Agency invitation email not found');
+    }
+    return getEmail(email.ID).then((e) => {
+      const links = Array.from(
+        e.HTML.matchAll(/(http:\/\/[\w:/]*)/g),
+        (m) => m[0]
+      );
+
+      const invitation = links.find((l) => l.includes('accept_invitation'));
+      const project = links.find(
+        (l) => l.includes('/projects/') && !l.includes('/task')
+      );
+      const tasks = links.filter((l) => l.includes('/task'));
+      return {
+        invitation,
+        project,
+        tasks,
+      };
+    });
+  });
+
+export const getOrderConfirmation = () =>
+  getAllEmails().then((emails) => {
+    const email = emails.find((e) =>
+      e.Subject.includes('Your translation order to')
+    );
+    return getEmail(email.ID).then((e) => {
+      const links = Array.from(
+        e.HTML.matchAll(/(http:\/\/[\w:/]*)/g),
+        (m) => m[0]
+      );
+      const project = links.find(
+        (l) => l.includes('/projects/') && !l.includes('/task')
+      );
+      const tasks = links.filter((l) => l.includes('/task'));
+      return {
+        project,
+        tasks,
+        content: e.HTML,
+      };
+    });
+  });
+
+type Email = {
+  ID: string;
+  To: any;
+  From: any;
+  Subject: string;
+};
+
+type EmailSummary = {
+  HTML: string;
+  Subject: string;
+  To: any;
+  From: any;
+};
+
+function fetchEmails(limit = 0) {
+  let options = { url: `${MAIL_API_URL}/api/v1/messages` };
+  if (limit) {
+    options = { ...options, ...{ qs: { limit } } };
+  }
+  return cy.request(options).then((r) => {
+    return r.body.messages as Email[];
+  });
+}
+
+export const getAllEmails = () => fetchEmails();
+
+export const getLatestEmail = (): Cypress.Chainable<EmailSummary> => {
+  const promise = new Cypress.Promise<EmailSummary>((resolve, reject) => {
+    const attempt = (count: number) => {
+      cy.request({
+        url: `${MAIL_API_URL}/api/v1/message/latest`,
+        failOnStatusCode: false,
+      }).then((r) => {
+        const body = r.body as EmailSummary | undefined;
+        const hasMessage =
+          r.status === 200 && body && (body.HTML || body.Subject);
+
+        if (hasMessage) {
+          resolve(body!);
+          return;
+        }
+
+        if (count < 3) {
+          cy.wait(250).then(() => attempt(count + 1));
+        } else {
+          reject(
+            new Error(
+              `Failed to fetch latest email after ${count + 1} attempt(s).`
+            )
+          );
+        }
+      });
+    };
+
+    attempt(0);
+  });
+
+  return cy.wrap(promise);
+};
+
+export const getEmail = (id) =>
+  cy
+    .request({ url: `${MAIL_API_URL}/api/v1/message/${id}` })
+    .then((r) => r.body as EmailSummary);
+
 export const deleteAllEmails = () =>
-  cy.request({ url: 'http://localhost:21080/api/emails', method: 'DELETE' });
+  cy.request({
+    url: `${MAIL_API_URL}/api/v1/messages`,
+    method: 'DELETE',
+  });
 
 export const getParsedResetPasswordEmail = () =>
-  getAllEmails().then((r) => {
+  getLatestEmail().then((r) => {
     return {
-      resetLink: r[0].html.replace(/.*(http:\/\/[\w:/=]*).*/gs, '$1'),
-      fromAddress: r[0].from.value[0].address,
-      toAddress: r[0].to.value[0].address,
-      text: r[0].text,
+      resetLink: (r.HTML.match(/href="([^"]+)"/i) || ['', ''])[1],
+      fromAddress: r.From.Address,
+      toAddress: r.To[0].Address,
     };
   });
 
@@ -440,3 +613,9 @@ export const setContentStorageBypass = (value: boolean) =>
 
 export const setWebhookControllerStatus = (value: number) =>
   setProperty('internal.webhookControllerStatus', value);
+
+export const triggerWebhookAutoDisableCheck = () =>
+  internalFetch('webhook-auto-disable/check-all', { method: 'POST' });
+
+export const setTranslationsViewLanguagesLimit = (value: number) =>
+  setProperty('translationsViewLanguagesLimit', value);

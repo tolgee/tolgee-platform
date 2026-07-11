@@ -48,6 +48,7 @@ export const [ProjectContext, useProjectActions, useProjectContext] =
       path: { projectId: id },
       options: {
         enabled: Boolean(connected),
+        noGlobalLoading: true,
         staleTime: 0,
         onSuccess(data) {
           setBatchOperations(

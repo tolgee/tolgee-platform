@@ -8,7 +8,7 @@ import { useConfig, useIsEmailVerified } from 'tg.globalContext/helpers';
 
 type Props = BaseViewProps;
 
-export const BaseUserSettingsView: React.FC<Props> = ({
+export const BaseUserSettingsView: React.FC<React.PropsWithChildren<Props>> = ({
   children,
   navigation,
   ...otherProps
@@ -26,6 +26,10 @@ export const BaseUserSettingsView: React.FC<Props> = ({
         {
           link: LINKS.USER_ACCOUNT_SECURITY.build(),
           label: t('user-account-security-title'),
+        },
+        {
+          link: LINKS.USER_ACCOUNT_NOTIFICATIONS.build(),
+          label: t('user_menu_notifications'),
         },
       ]
     : [];

@@ -8,12 +8,13 @@ import {
   visitTranslations,
 } from '../../common/translations';
 import { waitForGlobalLoading } from '../../common/loading';
-import { deleteProject } from '../../common/apiCalls/common';
+import { deleteProject, enableNamespaces } from '../../common/apiCalls/common';
 import {
   getAnyContainingText,
   getClosestContainingText,
 } from '../../common/xPath';
 import { visitProjectLanguages } from '../../common/shared';
+import { E2TranslationsView } from '../../compounds/E2TranslationsView';
 
 describe('Translations Base', () => {
   let project: ProjectDTO = null;
@@ -42,17 +43,22 @@ describe('Translations Base', () => {
   });
 
   it(
-    'will create translation',
+    'will create translation without namespace',
     {
       retries: { openMode: 0, runMode: 10 },
     },
     () => {
       cy.wait(100);
-      cy.gcy('global-empty-list').should('be.visible');
-      createTranslation({
+      cy.gcy('global-empty-state').should('be.visible');
+
+      const translationsView = new E2TranslationsView();
+      const keyCreateDialog = translationsView.openKeyCreateDialog();
+      keyCreateDialog.getNamespaceSelectElement().should('not.exist');
+      keyCreateDialog.fillAndSave({
         key: 'Test key',
         translation: 'Translated test key',
       });
+
       cy.contains('Key created').should('be.visible');
       cy.wait(100);
       cy.xpath(getAnyContainingText('Key', 'a'))
@@ -79,10 +85,12 @@ describe('Translations Base', () => {
   );
 
   it('will create translation with plural', () => {
-    cy.gcy('global-empty-list').should('be.visible');
+    cy.gcy('global-empty-state').should('be.visible');
     createTranslation({
       key: 'test-key',
-      translation: { one: '# key', other: '# keys' },
+      plural: {
+        formValues: { one: '# key', other: '# keys' },
+      },
     });
     getTranslationCell('test-key', 'en')
       .findDcy('translation-plural-parameter')
@@ -95,11 +103,13 @@ describe('Translations Base', () => {
   });
 
   it('will create translation with plural and custom variable name', () => {
-    cy.gcy('global-empty-list').should('be.visible');
+    cy.gcy('global-empty-state').should('be.visible');
     createTranslation({
       key: 'test-key',
-      translation: { one: '# key', other: '# keys' },
-      variableName: 'testVariable',
+      plural: {
+        variableName: 'testVariable',
+        formValues: { one: '# key', other: '# keys' },
+      },
     });
     getTranslationCell('test-key', 'en')
       .findDcy('translation-plural-parameter')
@@ -112,9 +122,14 @@ describe('Translations Base', () => {
   });
 
   it('will create translation with namespace', () => {
+    enableNamespaces(project.id);
     cy.wait(100);
-    cy.gcy('global-empty-list').should('be.visible');
-    createTranslation({
+    cy.gcy('global-empty-state').should('be.visible');
+
+    const translationsView = new E2TranslationsView();
+    const keyCreateDialog = translationsView.openKeyCreateDialog();
+    keyCreateDialog.getNamespaceSelectElement().should('exist');
+    keyCreateDialog.fillAndSave({
       key: 'Test key',
       translation: 'Translated test key',
       namespace: 'test-ns',
@@ -127,7 +142,7 @@ describe('Translations Base', () => {
 
   it('will create key with description', () => {
     cy.wait(100);
-    cy.gcy('global-empty-list').should('be.visible');
+    cy.gcy('global-empty-state').should('be.visible');
     createTranslation({
       key: 'Test key',
       translation: 'Translated test key',

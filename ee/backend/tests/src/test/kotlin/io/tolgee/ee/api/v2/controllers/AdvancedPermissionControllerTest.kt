@@ -38,11 +38,14 @@ class AdvancedPermissionControllerTest : AuthorizedControllerTest() {
         "stateChangeLanguages=${getLang("en")}" +
         "&scopes=translations.edit&scopes=translations.state-edit&"
     }) { data, getLangId ->
-      Assertions.assertThat(data.computedPermissions.translateLanguageIds)
+      Assertions
+        .assertThat(data.computedPermissions.translateLanguageIds)
         .containsExactlyInAnyOrder(getLangId("en"), getLangId("de"))
-      Assertions.assertThat(data.computedPermissions.viewLanguageIds)
+      Assertions
+        .assertThat(data.computedPermissions.viewLanguageIds)
         .containsExactlyInAnyOrder(getLangId("de"), getLangId("en"))
-      Assertions.assertThat(data.computedPermissions.stateChangeLanguageIds)
+      Assertions
+        .assertThat(data.computedPermissions.stateChangeLanguageIds)
         .containsExactlyInAnyOrder(getLangId("en"))
     }
   }
@@ -51,68 +54,79 @@ class AdvancedPermissionControllerTest : AuthorizedControllerTest() {
   @ProjectJWTAuthTestMethod
   fun `fails to set user's permission when feature disabled`() {
     enabledFeaturesProvider.forceEnabled = setOf()
-    permissionTestUtil.performSetPermissions(
-      "",
-    ) { getLang -> "scopes=screenshots.upload&viewLanguages=${getLang("en")}" }
+    permissionTestUtil
+      .performSetPermissions(
+        "",
+      ) { getLang -> "scopes=screenshots.upload&viewLanguages=${getLang("en")}" }
       .andIsBadRequest
       .andHasErrorMessage(Message.FEATURE_NOT_ENABLED)
   }
 
   @Test
   fun `validates permissions (view languages and scopes)`() {
-    permissionTestUtil.performSetPermissions(
-      "",
-    ) { getLang -> "scopes=screenshots.upload&viewLanguages=${getLang("en")}" }
+    permissionTestUtil
+      .performSetPermissions(
+        "",
+      ) { getLang -> "scopes=screenshots.upload&viewLanguages=${getLang("en")}" }
       .andIsBadRequest
       .andHasErrorMessage(Message.CANNOT_SET_VIEW_LANGUAGES_WITHOUT_TRANSLATIONS_VIEW_SCOPE)
   }
 
   @Test
   fun `validates permissions (translate languages and scopes)`() {
-    permissionTestUtil.performSetPermissions(
-      "",
-    ) { getLang -> "scopes=translations.view&translateLanguages=${getLang("en")}" }
+    permissionTestUtil
+      .performSetPermissions(
+        "",
+      ) { getLang -> "scopes=translations.view&translateLanguages=${getLang("en")}" }
       .andIsBadRequest
       .andHasErrorMessage(Message.CANNOT_SET_TRANSLATE_LANGUAGES_WITHOUT_TRANSLATIONS_EDIT_SCOPE)
   }
 
   @Test
   fun `validates permissions (state change languages and scopes)`() {
-    permissionTestUtil.performSetPermissions(
-      "",
-    ) { getLang -> "scopes=translations.view&stateChangeLanguages=${getLang("en")}" }
+    permissionTestUtil
+      .performSetPermissions(
+        "",
+      ) { getLang -> "scopes=translations.view&stateChangeLanguages=${getLang("en")}" }
       .andIsBadRequest
       .andHasErrorMessage(Message.CANNOT_SET_STATE_CHANGE_LANGUAGES_WITHOUT_TRANSLATIONS_STATE_EDIT_SCOPE)
   }
 
   @Test
   fun `validates permissions (empty scopes)`() {
-    permissionTestUtil.performSetPermissions(
-      "",
-    ) { "" }
+    permissionTestUtil
+      .performSetPermissions(
+        "",
+      ) { "" }
       .andIsBadRequest
       .andHasErrorMessage(Message.SCOPES_HAS_TO_BE_SET)
   }
 
   @Test
   fun `validates permissions (admin and viewLanguages)`() {
-    permissionTestUtil.performSetPermissions("") { getLang ->
-      "scopes=admin&viewLanguages=${getLang("en")}"
-    }.andIsBadRequest.andHasErrorMessage(Message.CANNOT_SET_LANGUAGE_PERMISSIONS_FOR_ADMIN_SCOPE)
+    permissionTestUtil
+      .performSetPermissions("") { getLang ->
+        "scopes=admin&viewLanguages=${getLang("en")}"
+      }.andIsBadRequest
+      .andHasErrorMessage(Message.CANNOT_SET_LANGUAGE_PERMISSIONS_FOR_ADMIN_SCOPE)
   }
 
   @Test
   fun `validates permissions (admin and translateLanguages)`() {
-    permissionTestUtil.performSetPermissions("") { getLang ->
-      "scopes=admin&translateLanguages=${getLang("en")}"
-    }.andIsBadRequest.andHasErrorMessage(Message.CANNOT_SET_LANGUAGE_PERMISSIONS_FOR_ADMIN_SCOPE)
+    permissionTestUtil
+      .performSetPermissions("") { getLang ->
+        "scopes=admin&translateLanguages=${getLang("en")}"
+      }.andIsBadRequest
+      .andHasErrorMessage(Message.CANNOT_SET_LANGUAGE_PERMISSIONS_FOR_ADMIN_SCOPE)
   }
 
   @Test
   fun `validates permissions (admin and stateChangeLanguages)`() {
-    permissionTestUtil.performSetPermissions("") { getLang ->
-      "scopes=admin&stateChangeLanguages=${getLang("en")}"
-    }.andIsBadRequest.andHasErrorMessage(Message.CANNOT_SET_LANGUAGE_PERMISSIONS_FOR_ADMIN_SCOPE)
+    permissionTestUtil
+      .performSetPermissions("") { getLang ->
+        "scopes=admin&stateChangeLanguages=${getLang("en")}"
+      }.andIsBadRequest
+      .andHasErrorMessage(Message.CANNOT_SET_LANGUAGE_PERMISSIONS_FOR_ADMIN_SCOPE)
   }
 
   @Test
@@ -162,7 +176,8 @@ class AdvancedPermissionControllerTest : AuthorizedControllerTest() {
       "scopes=translations.edit&scopes=translations.state-edit&translateLanguages=${getLang("en")}&" +
         "stateChangeLanguages=${getLang("de")}&viewLanguages=${getLang("en")}"
     }) { data, getLangId ->
-      Assertions.assertThat(data.computedPermissions.viewLanguageIds)
+      Assertions
+        .assertThat(data.computedPermissions.viewLanguageIds)
         .containsExactlyInAnyOrder(getLangId("en"), getLangId("de"))
     }
   }

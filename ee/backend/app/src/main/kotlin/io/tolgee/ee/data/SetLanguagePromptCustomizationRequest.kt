@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Size
 class SetLanguagePromptCustomizationRequest(
   @Schema(
     description =
-      "The language description used in the  prompt that " +
+      "The language description used in the prompt that " +
         "helps AI translator to fine tune results for specific language",
     example =
       "For arabic language, we are super formal. Always use these translations: \n" +

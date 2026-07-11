@@ -35,7 +35,10 @@ class BlockXmlParser {
   }
 
   private fun getAttributes(event: StartElement) =
-    event.attributes.asSequence().map { it.name.localPart to it.value }.toMap()
+    event.attributes
+      .asSequence()
+      .map { it.name.localPart to it.value }
+      .toMap()
 
   private var idCounter = 0
   val rootModel = ModelElement("root", idCounter++, null)
@@ -46,7 +49,8 @@ class BlockXmlParser {
 
   companion object {
     fun escapeXml(s: String): String {
-      return s.replace("&", "&amp;")
+      return s
+        .replace("&", "&amp;")
         .replace("<", "&lt;")
         .replace(">", "&gt;")
     }

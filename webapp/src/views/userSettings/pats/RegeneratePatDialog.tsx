@@ -18,9 +18,11 @@ import { useHistory, useRouteMatch } from 'react-router-dom';
 type RevealedPatModel = components['schemas']['RevealedPatModel'];
 type RegeneratePatDto = components['schemas']['RegeneratePatDto'];
 
-export const RegeneratePatDialog: FunctionComponent<{
-  onGenerated: (pat: RevealedPatModel) => void;
-}> = (props) => {
+export const RegeneratePatDialog: FunctionComponent<
+  React.PropsWithChildren<{
+    onGenerated: (pat: RevealedPatModel) => void;
+  }>
+> = (props) => {
   const history = useHistory();
   const expirationDateOptions = useExpirationDateOptions();
 
@@ -49,7 +51,7 @@ export const RegeneratePatDialog: FunctionComponent<{
   });
 
   if (!patLoadable.data) {
-    return <></>;
+    return null;
   }
 
   let initialExpiresAt = patLoadable.data.expiresAt;

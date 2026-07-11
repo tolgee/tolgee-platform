@@ -14,4 +14,9 @@ open class ApiKeyWithLanguagesModel(
     deprecated = true,
   )
   val permittedLanguageIds: Set<Long>?,
-) : RepresentationModel<ApiKeyWithLanguagesModel>(), IApiKeyModel by apiKeyModel
+  @Schema(
+    description = "Whether branching is enabled and active on this project.",
+  )
+  val branchingEnabled: Boolean = false,
+) : RepresentationModel<ApiKeyWithLanguagesModel>(),
+  IApiKeyModel by apiKeyModel

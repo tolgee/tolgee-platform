@@ -5,7 +5,7 @@ import io.tolgee.hateoas.userAccount.SimpleUserAccountModelAssembler
 import io.tolgee.model.translation.TranslationComment
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.stereotype.Component
-import java.util.*
+import java.util.Date
 
 @Component
 class TranslationCommentModelAssembler(

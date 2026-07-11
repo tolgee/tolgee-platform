@@ -1,8 +1,11 @@
 package io.tolgee.service
 
+import io.sentry.Sentry
 import io.tolgee.component.HttpClient
 import io.tolgee.configuration.tolgee.TelemetryProperties
 import io.tolgee.dtos.TelemetryReportRequest
+import io.tolgee.util.Logging
+import io.tolgee.util.logger
 import jakarta.persistence.EntityManager
 import org.springframework.http.HttpMethod
 import org.springframework.scheduling.annotation.Scheduled
@@ -15,7 +18,7 @@ class TelemetryService(
   private val entityManager: EntityManager,
   private val httpClient: HttpClient,
   private val telemetryProperties: TelemetryProperties,
-) {
+) : Logging {
   companion object {
     const val TELEMETRY_REPORT_PERIOD_MS = 24 * 60 * 60 * 1000L
   }
@@ -27,12 +30,17 @@ class TelemetryService(
     val data: TelemetryReportRequest = getTelemetryData()
     if (data.projectsCount == 0L) return
     if (data.usersCount == 0L) return
-    httpClient.requestForJson(
-      "${telemetryProperties.server}/v2/public/telemetry/report",
-      data,
-      HttpMethod.POST,
-      Unit::class.java,
-    )
+    try {
+      httpClient.requestForJson(
+        "${telemetryProperties.server}/v2/public/telemetry/report",
+        data,
+        HttpMethod.POST,
+        Unit::class.java,
+      )
+    } catch (e: Exception) {
+      Sentry.captureException(e)
+      logger.error("Cannot send telemetry data", e)
+    }
   }
 
   private fun getTelemetryData(): TelemetryReportRequest {
@@ -47,47 +55,52 @@ class TelemetryService(
   }
 
   private fun getUsersCount(): Long {
-    return entityManager.createQuery(
-      """
+    return entityManager
+      .createQuery(
+        """
       select count(u) from UserAccount u
     """,
-      Long::class.javaObjectType,
-    ).singleResult
+        Long::class.javaObjectType,
+      ).singleResult
   }
 
   private fun getDistinctLanguagesCount(): Long {
-    return entityManager.createQuery(
-      """
+    return entityManager
+      .createQuery(
+        """
       select count(distinct l.tag) from Language l
     """,
-      Long::class.javaObjectType,
-    ).singleResult
+        Long::class.javaObjectType,
+      ).singleResult
   }
 
   private fun getLanguagesCount(): Long {
-    return entityManager.createQuery(
-      """
+    return entityManager
+      .createQuery(
+        """
       select count(l) from Language l
     """,
-      Long::class.javaObjectType,
-    ).singleResult
+        Long::class.javaObjectType,
+      ).singleResult
   }
 
   private fun getTranslationsCount(): Long {
-    return entityManager.createQuery(
-      """
+    return entityManager
+      .createQuery(
+        """
       select count(t) from Translation t
     """,
-      Long::class.javaObjectType,
-    ).singleResult
+        Long::class.javaObjectType,
+      ).singleResult
   }
 
   private fun getProjectsCount(): Long {
-    return entityManager.createQuery(
-      """
+    return entityManager
+      .createQuery(
+        """
       select count(p) from Project p
     """,
-      Long::class.javaObjectType,
-    ).singleResult
+        Long::class.javaObjectType,
+      ).singleResult
   }
 }

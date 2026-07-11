@@ -1,6 +1,6 @@
 import { Button } from '@mui/material';
 import { Link } from 'react-router-dom';
-import { Add } from '@mui/icons-material';
+import { Plus } from '@untitled-ui/icons-react';
 import { T } from '@tolgee/react';
 
 export const BaseViewAddButton = (props: {
@@ -12,7 +12,7 @@ export const BaseViewAddButton = (props: {
     data-cy="global-plus-button"
     component={props.addLinkTo ? Link : Button}
     to={props.addLinkTo}
-    startIcon={<Add />}
+    startIcon={<Plus width={19} height={19} />}
     color="primary"
     variant="contained"
     aria-label="add"

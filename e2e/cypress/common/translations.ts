@@ -7,16 +7,18 @@ import {
 import { HOST } from './constants';
 import { ProjectDTO } from '../../../webapp/src/service/response.types';
 import { waitForGlobalLoading } from './loading';
-import { assertMessage, dismissMenu, gcyAdvanced } from './shared';
+import { dismissMenu, gcy, gcyAdvanced } from './shared';
+import { buildXpath } from './XpathBuilder';
+import { KeyDialogFillProps } from '../compounds/E2KeyCreateDialog';
+import { E2TranslationsView } from '../compounds/E2TranslationsView';
 import Chainable = Cypress.Chainable;
-import { selectNamespace } from './namespace';
 
 export function getCellCancelButton() {
   return cy.gcy('translations-cell-cancel-button');
 }
 
 export function getCellSaveButton() {
-  return cy.gcy('translations-cell-save-button');
+  return cy.gcy('translations-cell-main-action-button').contains('Save');
 }
 
 export function getCellInsertBaseButton() {
@@ -27,63 +29,17 @@ export const getCell = (value: string) => {
   return cy.gcy('translations-table-cell').contains(value);
 };
 
-export const getTranslationCell = (key: string, language: string) => {
-  return gcyAdvanced({ value: 'translations-table-cell', key, language });
-};
-
 export const getPluralEditor = (variant: string) => {
   return gcyAdvanced({ value: 'translation-editor', variant }).find(
     '[contenteditable]'
   );
 };
 
-type Props = {
-  key: string;
-  translation?: string | Record<string, string>;
-  tag?: string;
-  namespace?: string;
-  description?: string;
-  variableName?: string;
-};
-
-export function createTranslation({
-  key,
-  translation,
-  tag,
-  namespace,
-  description,
-  variableName,
-}: Props) {
+export function createTranslation(props: KeyDialogFillProps) {
   waitForGlobalLoading();
-  cy.gcy('translations-add-button').click();
-  cy.gcy('translation-create-key-input').type(key);
-  if (namespace) {
-    selectNamespace(namespace);
-  }
-  if (description) {
-    cy.gcy('translation-create-description-input').type(description);
-  }
-  if (tag) {
-    cy.gcy('translations-tag-input').type(tag);
-    cy.gcy('tag-autocomplete-option').contains(`Add "${tag}"`).click();
-  }
-  if (typeof translation === 'string') {
-    cy.gcy('translation-editor').first().type(translation);
-  } else if (typeof translation === 'object') {
-    cy.gcy('key-plural-checkbox').click();
-    if (variableName) {
-      cy.gcy('key-plural-checkbox-expand').click();
-      cy.gcy('key-plural-variable-name').type(variableName);
-    }
-    Object.entries(translation).forEach(([key, value]) => {
-      gcyAdvanced({ value: 'translation-editor', variant: key })
-        .find('[contenteditable]')
-        .type(value);
-    });
-  }
-
-  cy.gcy('global-form-save-button').click();
-  assertMessage('Key created');
+  const translationsView = new E2TranslationsView();
+  const keyCreateDialog = translationsView.openKeyCreateDialog();
+  keyCreateDialog.fillAndSave(props);
 }
 
 export function selectLangsInLocalstorage(projectId: number, langs: string[]) {
@@ -119,8 +75,40 @@ export function translationsBeforeEach(
   });
 }
 
-export const visitTranslations = (projectId: number) => {
-  return cy.visit(`${HOST}/projects/${projectId}/translations`);
+export const visitTranslations = (projectId: number, branchName?: string) => {
+  return cy.visit(
+    `${HOST}/projects/${projectId}/translations${
+      branchName ? `/tree/${encodeURIComponent(branchName)}` : ''
+    }`
+  );
+};
+
+export function openKeyEditDialog(keyName: string) {
+  getKeyCell(keyName).click();
+  gcy('translations-key-edit-key-field').should('be.visible');
+}
+
+export function typeNewKeyName(newName: string) {
+  // select all, delete and type new text
+  gcy('translations-key-edit-key-field')
+    .should('be.visible')
+    .find('[contenteditable]')
+    .clear()
+    .type(newName);
+}
+
+export function saveKeyEditDialog() {
+  getCellSaveButton().click();
+  waitForGlobalLoading();
+}
+
+export const editKeyName = (keyName: string, newName?: string) => {
+  openKeyEditDialog(keyName);
+
+  if (newName !== undefined) {
+    typeNewKeyName(newName);
+    saveKeyEditDialog();
+  }
 };
 
 export const editCell = (oldValue: string, newValue?: string, save = true) => {
@@ -133,11 +121,7 @@ export const editCell = (oldValue: string, newValue?: string, save = true) => {
 
   if (newValue !== undefined) {
     // select all, delete and type new text
-    cy.gcy('global-editor')
-      .first()
-      .find('[contenteditable]')
-      .clear()
-      .type(newValue);
+    getTranslationEditor().clear().type(newValue);
 
     if (save) {
       getCellSaveButton().click();
@@ -145,6 +129,68 @@ export const editCell = (oldValue: string, newValue?: string, save = true) => {
     waitForGlobalLoading();
   }
 };
+
+export function getTranslationEditor() {
+  return buildXpath()
+    .descendant()
+    .withDataCy('global-editor')
+    .descendant()
+    .withAttribute('contenteditable')
+    .getElement();
+}
+
+function getKeyCellXpath(key: string) {
+  return buildXpath()
+    .descendant()
+    .withDataCy('translations-key-name')
+    .descendantOrSelf()
+    .hasText(key);
+}
+
+function getKeyCell(key: string) {
+  return getKeyCellXpath(key).getElement();
+}
+
+export function getTranslationCell(key: string, languageTag: string) {
+  return getKeyCellXpath(key)
+    .closestAncestor()
+    .withDataCy('translations-row')
+    .descendant()
+    .attributeEquals('data-cy-language', languageTag)
+    .getElement();
+}
+
+export function editTranslation({
+  key,
+  languageTag,
+  newValue,
+}: {
+  key: string;
+  languageTag: string;
+  newValue: string;
+}) {
+  const translationCell = getTranslationCell(key, languageTag);
+
+  translationCell.click();
+  getTranslationEditor().clear().type(newValue);
+  getCellSaveButton().click();
+}
+
+export function openTranslationEditorWithMt(
+  projectId: number,
+  key: string,
+  languageTag: string
+) {
+  selectLangsInLocalstorage(projectId, ['en', languageTag]);
+  visitTranslations(projectId);
+  waitForGlobalLoading(100, 30000);
+  getTranslationCell(key, languageTag).click();
+  cy.gcy('global-editor').should('be.visible');
+}
+
+export function waitForMtResult() {
+  cy.gcy('translation-tools-machine-translation-item').should('be.visible');
+}
 
 export function confirmDiscard() {
   cy.gcy('global-confirmation-confirm').contains('Discard').click();
@@ -158,6 +204,20 @@ export const toggleLang = (lang) => {
     .click();
   dismissMenu();
   // wait for loading to disappear
+  waitForGlobalLoading();
+};
+
+export const selectAllLanguages = () => {
+  cy.gcy('translations-language-select-form-control').click();
+  cy.gcy('translations-language-select-all').click();
+  dismissMenu();
+  waitForGlobalLoading();
+};
+
+export const selectBaseLanguage = () => {
+  cy.gcy('translations-language-select-form-control').click();
+  cy.gcy('translations-language-select-base').click();
+  dismissMenu();
   waitForGlobalLoading();
 };
 

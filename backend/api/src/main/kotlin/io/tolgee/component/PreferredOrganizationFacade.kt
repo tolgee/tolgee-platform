@@ -8,6 +8,7 @@ import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.security.UserPreferencesService
 import org.springframework.stereotype.Component
 
+@Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @Component
 class PreferredOrganizationFacade(
   private val authenticationFacade: AuthenticationFacade,

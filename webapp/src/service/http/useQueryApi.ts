@@ -6,13 +6,14 @@ import {
   UseInfiniteQueryOptions,
   useMutation,
   UseMutationOptions,
+  useQueries,
   useQuery,
   useQueryClient,
   UseQueryOptions,
 } from 'react-query';
 
 import { paths } from '../apiSchema.generated';
-import { paths as billingPaths } from '../billingApiSchema.generated';
+import { paths as billingPaths } from 'tg.service/billingApiSchema.generated';
 import { ApiError } from './ApiError';
 
 import { RequestOptions } from './ApiHttpService';
@@ -22,6 +23,10 @@ import {
   ResponseContent,
 } from './ApiSchemaHttpService';
 
+export type CustomOptions = {
+  noGlobalLoading?: boolean;
+};
+
 export type QueryProps<
   Url extends keyof Paths,
   Method extends keyof Paths[Url],
@@ -30,8 +35,23 @@ export type QueryProps<
   url: Url;
   method: Method;
   fetchOptions?: RequestOptions;
-  options?: UseQueryOptions<ResponseContent<Url, Method, Paths>, ApiError>;
+  options?: UseQueryOptions<ResponseContent<Url, Method, Paths>, ApiError> &
+    CustomOptions;
 } & RequestParamsType<Url, Method, Paths>;
+
+export type QueriesProps<
+  Url extends keyof Paths,
+  Method extends keyof Paths[Url],
+  Paths = paths
+> = {
+  queries: ({
+    url: Url;
+    method: Method;
+  } & RequestParamsType<Url, Method, Paths>)[];
+  fetchOptions?: RequestOptions;
+  options?: UseQueryOptions<ResponseContent<Url, Method, Paths>, ApiError> &
+    CustomOptions;
+};
 
 export type InfiniteQueryProps<
   Url extends keyof Paths,
@@ -44,8 +64,16 @@ export type InfiniteQueryProps<
   options?: UseInfiniteQueryOptions<
     ResponseContent<Url, Method, Paths>,
     ApiError
-  >;
+  > &
+    CustomOptions;
 } & RequestParamsType<Url, Method, Paths>;
+
+type Split<S extends string> = S extends `${infer Prefix}/${infer Rest}`
+  ? Prefix | `${Prefix}/${Split<Rest>}`
+  : S;
+
+// Create a union of all possible prefixes for all paths
+type Prefix = Split<keyof (paths & billingPaths)> | '/';
 
 export type MutationProps<
   Url extends keyof Paths,
@@ -59,8 +87,9 @@ export type MutationProps<
     ResponseContent<Url, Method, Paths>,
     ApiError,
     RequestParamsType<Url, Method, Paths>
-  >;
-  invalidatePrefix?: string;
+  > &
+    CustomOptions;
+  invalidatePrefix?: Prefix | Prefix[];
 };
 
 export const useApiInfiniteQuery = <
@@ -97,7 +126,12 @@ export const useApiQuery = <
   const { url, method, fetchOptions, options, ...request } = props;
 
   return useQuery<ResponseContent<Url, Method, Paths>, ApiError>(
-    [url, (request as any)?.path, (request as any)?.query],
+    [
+      url,
+      (request as any)?.path,
+      (request as any)?.query,
+      (request as any)?.content,
+    ],
     ({ signal }) =>
       apiSchemaHttpService.schemaRequest<Url, Method, Paths>(url, method, {
         signal,
@@ -108,6 +142,32 @@ export const useApiQuery = <
       options as UseQueryOptions<any, ApiError>,
       Boolean(fetchOptions?.disableAutoErrorHandle)
     )
+  );
+};
+
+export const useApiQueries = <
+  Url extends keyof Paths,
+  Method extends keyof Paths[Url],
+  Paths = paths
+>(
+  props: QueryProps<Url, Method, Paths>[]
+) => {
+  return useQueries(
+    props.map((query) => {
+      const { url, method, fetchOptions, options, ...request } = query;
+      return {
+        queryKey: [url, (request as any)?.path, (request as any)?.query],
+        queryFn: () =>
+          apiSchemaHttpService.schemaRequest<Url, Method, Paths>(url, method, {
+            ...fetchOptions,
+            disableAutoErrorHandle: true,
+          })(request),
+        options: autoErrorHandling(
+          options as UseQueryOptions<any, ApiError>,
+          Boolean(fetchOptions?.disableAutoErrorHandle)
+        ),
+      };
+    })
   );
 };
 
@@ -128,7 +188,7 @@ function autoErrorHandling(
 }
 
 function getApiMutationOptions(
-  invalidatePrefix: string | undefined,
+  invalidatePrefix: undefined | string | string[],
   queryClient: QueryClient
 ) {
   return (options: UseQueryOptions<any, ApiError> | undefined) => ({
@@ -217,8 +277,18 @@ export const matchUrlPrefix = (prefix: string) => {
   };
 };
 
-export const invalidateUrlPrefix = (queryClient: QueryClient, prefix: string) =>
-  queryClient.invalidateQueries(matchUrlPrefix(prefix));
+export const invalidateUrlPrefix = (
+  queryClient: QueryClient,
+  prefix: string | string[]
+) => {
+  if (typeof prefix === 'string') {
+    queryClient.invalidateQueries(matchUrlPrefix(prefix));
+  } else if (Array.isArray(prefix)) {
+    prefix.forEach((p) => {
+      queryClient.invalidateQueries(matchUrlPrefix(p));
+    });
+  }
+};
 
 export const useBillingApiQuery = <
   Url extends keyof billingPaths,
@@ -226,6 +296,13 @@ export const useBillingApiQuery = <
 >(
   props: QueryProps<Url, Method, billingPaths>
 ) => useApiQuery<Url, Method, billingPaths>(props);
+
+export const useBillingApiInfiniteQuery = <
+  Url extends keyof billingPaths,
+  Method extends keyof billingPaths[Url]
+>(
+  props: InfiniteQueryProps<Url, Method, billingPaths>
+) => useApiInfiniteQuery<Url, Method, billingPaths>(props);
 
 export const useBillingApiMutation = <
   Url extends keyof billingPaths,
@@ -261,25 +338,40 @@ export const useNdJsonStreamedMutation = <
       ...fetchOptions,
     })(request);
     const reader = response.body?.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
     const result: any[] = [];
+
+    const handleLine = (text: string) => {
+      const parsed = getParsedJsonOrNull(text);
+      if (!parsed) {
+        // eslint-disable-next-line no-console
+        console.warn('Invalid json', text);
+        return;
+      }
+      if (parsed['error']) {
+        const error = parsed['error'];
+        throw new ApiError('Api error', error);
+      }
+      result.push(parsed);
+      onData(parsed);
+    };
+
     while (reader) {
       const { done, value } = await reader.read();
-      const text = new TextDecoder().decode(value);
-      if (text) {
-        const parsed = getParsedJsonOrNull(text);
-        if (!parsed) {
-          continue;
-        }
-        if (parsed['error']) {
-          const error = parsed['error'];
-          throw new ApiError('Api error', error);
-        }
-        result.push(parsed);
-        onData(parsed);
+      buffer += decoder.decode(value);
+      let splitPos;
+      while ((splitPos = buffer.indexOf('\n')) > -1) {
+        const text = buffer.substring(0, splitPos);
+        buffer = buffer.substring(splitPos + 1);
+        handleLine(text);
       }
       if (done) {
         break;
       }
+    }
+    if (buffer) {
+      handleLine(buffer);
     }
     return result;
   }, customOptions(options as any) as any);

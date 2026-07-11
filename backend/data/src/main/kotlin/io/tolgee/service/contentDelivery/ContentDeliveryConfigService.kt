@@ -1,7 +1,7 @@
 package io.tolgee.service.contentDelivery
 
-import io.tolgee.component.ContentStorageProvider
 import io.tolgee.component.contentDelivery.ContentDeliveryUploader
+import io.tolgee.component.contentStorageProvider.ContentStorageProvider
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
@@ -13,16 +13,19 @@ import io.tolgee.model.contentDelivery.ContentDeliveryConfig
 import io.tolgee.model.contentDelivery.ContentStorage
 import io.tolgee.repository.contentDelivery.ContentDeliveryConfigRepository
 import io.tolgee.service.automations.AutomationService
+import io.tolgee.service.branching.BranchService
+import io.tolgee.service.project.ProjectFeatureGuard
 import io.tolgee.service.project.ProjectService
 import io.tolgee.util.SlugGenerator
 import jakarta.persistence.EntityManager
-import jakarta.transaction.Transactional
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import kotlin.random.Random
 
+@Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @Service
 class ContentDeliveryConfigService(
   private val contentDeliveryConfigRepository: ContentDeliveryConfigRepository,
@@ -34,20 +37,27 @@ class ContentDeliveryConfigService(
   @Lazy
   private val contentDeliveryUploader: ContentDeliveryUploader,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
+  @Lazy
+  private val branchService: BranchService,
+  private val projectFeatureGuard: ProjectFeatureGuard,
 ) {
   @Transactional
   fun create(
     projectId: Long,
     dto: ContentDeliveryConfigRequest,
   ): ContentDeliveryConfig {
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, dto.filterBranch)
     val project = entityManager.getReference(Project::class.java, projectId)
     checkMultipleConfigsFeature(project)
     val config = ContentDeliveryConfig(project)
     config.name = dto.name
     config.contentStorage = getStorage(projectId, dto.contentStorageId)
+    config.branch = branchService.getActiveOrDefault(projectId, dto.filterBranch)
     config.copyPropsFrom(dto)
     setSlugForCreation(config, dto)
     config.pruneBeforePublish = dto.pruneBeforePublish
+    config.zip = dto.zip
+    config.escapeHtml = dto.escapeHtml
     contentDeliveryConfigRepository.save(config)
     if (dto.autoPublish) {
       automationService.createForContentDelivery(config)
@@ -133,6 +143,12 @@ class ContentDeliveryConfigService(
     config.contentStorage = getStorage(projectId, dto.contentStorageId)
     config.name = dto.name
     config.pruneBeforePublish = dto.pruneBeforePublish
+    config.zip = dto.zip
+    val newBranch = branchService.getActiveOrDefault(projectId, dto.filterBranch)
+    if (newBranch?.isDefault == false || config.branch?.isDefault == false) {
+      projectFeatureGuard.checkEnabled(Feature.BRANCHING)
+    }
+    config.branch = newBranch
     config.copyPropsFrom(dto)
     handleUpdateAutoPublish(dto, config)
     return save(config)
@@ -209,5 +225,19 @@ class ContentDeliveryConfigService(
 
   fun save(config: ContentDeliveryConfig): ContentDeliveryConfig {
     return contentDeliveryConfigRepository.save(config)
+  }
+
+  @Transactional
+  fun deleteAllByBranchId(
+    projectId: Long,
+    branchId: Long,
+  ) {
+    val configs = contentDeliveryConfigRepository.findAllByProjectIdAndBranchId(projectId, branchId)
+    configs.forEach { config ->
+      config.automationActions.map { it.automation }.forEach {
+        automationService.delete(it)
+      }
+      contentDeliveryConfigRepository.deleteById(config.id)
+    }
   }
 }

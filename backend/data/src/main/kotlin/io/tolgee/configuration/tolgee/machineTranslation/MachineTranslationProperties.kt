@@ -14,11 +14,11 @@ open class MachineTranslationProperties(
   var deepl: DeeplMachineTranslationProperties = DeeplMachineTranslationProperties(),
   var azure: AzureCognitiveTranslationProperties = AzureCognitiveTranslationProperties(),
   var baidu: BaiduMachineTranslationProperties = BaiduMachineTranslationProperties(),
-  var tolgee: TolgeeMachineTranslationProperties = TolgeeMachineTranslationProperties(),
   @DocProperty(
     description =
       "Amount of machine translations users of the Free tier can request per month. " +
-        "Used by Tolgee Cloud, see [pricing](/pricing). Set to `-1` to disable credit-based limitation.",
+        "Used by Tolgee Cloud, see [pricing](https://tolgee.io/pricing). " +
+        "Set to `-1` to disable credit-based limitation.",
   )
   var freeCreditsAmount: Long = -1,
 )

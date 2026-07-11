@@ -2,19 +2,19 @@ import React, { useRef, useState } from 'react';
 import clsx from 'clsx';
 import { useTranslate } from '@tolgee/react';
 import { Box, Menu, MenuItem, styled } from '@mui/material';
-import { Edit } from '@mui/icons-material';
+import { Edit02 } from '@untitled-ui/icons-react';
 import { useHistory } from 'react-router-dom';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { useProject } from 'tg.hooks/useProject';
-import { LINKS, PARAMS } from 'tg.constants/links';
+import { getProjectTranslationsUrl, LINKS, PARAMS } from 'tg.constants/links';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { useConfig, usePreferredOrganization } from 'tg.globalContext/helpers';
-import { useCurrentLanguage } from 'tg.hooks/useCurrentLanguage';
+import { useCurrentLanguage } from '@tginternal/library/hooks/useCurrentLanguage';
 import { PercentFormat } from './PercentFormat';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
-import { StringsHint } from 'tg.component/billing/Hints';
+import { StringsHint } from 'tg.component/common/StringsHint';
 
 const StyledTiles = styled(Box)`
   display: grid;
@@ -101,6 +101,9 @@ const StyledTileDescription = styled('div')`
   @container (max-width: 800px) {
     font-size: 14px;
   }
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
 const StyledTileEdit = styled(Box)`
@@ -111,9 +114,11 @@ const StyledTileEdit = styled(Box)`
   color: ${({ theme }) => theme.palette.text.secondary};
 `;
 
-export const ProjectTotals: React.FC<{
-  stats: components['schemas']['ProjectStatsModel'];
-}> = ({ stats }) => {
+export const ProjectTotals: React.FC<
+  React.PropsWithChildren<{
+    stats: components['schemas']['ProjectStatsModel'];
+  }>
+> = ({ stats }) => {
   const { t } = useTranslate();
   const project = useProject();
   const history = useHistory();
@@ -146,9 +151,9 @@ export const ProjectTotals: React.FC<{
     setAnchorEl(null);
   };
 
-  const redirectToLanguages = () => {
+  const redirectToTasks = () => {
     history.push(
-      LINKS.PROJECT_LANGUAGES.build({ [PARAMS.PROJECT_ID]: project.id })
+      LINKS.PROJECT_TASKS.build({ [PARAMS.PROJECT_ID]: project.id })
     );
   };
 
@@ -159,15 +164,14 @@ export const ProjectTotals: React.FC<{
   };
 
   const redirectToTranslations = () => {
-    history.push(
-      LINKS.PROJECT_TRANSLATIONS.build({ [PARAMS.PROJECT_ID]: project.id })
-    );
+    history.push(getProjectTranslationsUrl(project.id));
   };
 
   const redirectToTag = (tag: string) => () => {
     history.push(
-      LINKS.PROJECT_TRANSLATIONS.build({ [PARAMS.PROJECT_ID]: project.id }) +
-        `?filters=${encodeURIComponent(JSON.stringify({ filterTag: [tag] }))}`
+      getProjectTranslationsUrl(project.id, {
+        filters: { filterTag: [tag] },
+      })
     );
   };
 
@@ -182,9 +186,9 @@ export const ProjectTotals: React.FC<{
   const { satisfiesPermission } = useProjectPermissions();
 
   const canViewMembers = satisfiesPermission('members.view');
-  const canEditLanguages = satisfiesPermission('languages.edit');
   const canViewKeys = satisfiesPermission('keys.view');
   const canEditMembers = satisfiesPermission('members.edit');
+  const canViewTasks = satisfiesPermission('tasks.view');
 
   const tagsPresent = Boolean(stats.tagCount);
   const tagsClickable = tagsPresent && canViewKeys;
@@ -201,25 +205,20 @@ export const ProjectTotals: React.FC<{
       <StyledTiles data-cy="project-dashboard-project-totals">
         <StyledTile
           gridArea="languages"
-          onClick={canEditLanguages ? redirectToLanguages : undefined}
-          className={clsx({ clickable: canEditLanguages })}
-          data-cy="project-dashboard-language-count"
+          onClick={canViewTasks ? redirectToTasks : undefined}
+          className={clsx({ clickable: canViewTasks })}
+          data-cy="project-dashboard-task-count"
         >
           <StyledTileDataItem>
             <StyledTileValue>
-              {Number(stats.languageCount).toLocaleString(locale)}
+              {Number(stats.taskCount).toLocaleString(locale)}
             </StyledTileValue>
             <StyledTileDescription>
-              {t('project_dashboard_language_count', 'Languages', {
-                count: stats.languageCount,
+              {t('project_dashboard_task_count_plural', {
+                value: stats.taskCount,
               })}
             </StyledTileDescription>
           </StyledTileDataItem>
-          {canEditLanguages && (
-            <StyledTileEdit>
-              <Edit fontSize="small" />
-            </StyledTileEdit>
-          )}
         </StyledTile>
 
         <StyledTile
@@ -233,8 +232,8 @@ export const ProjectTotals: React.FC<{
               {Number(stats.keyCount).toLocaleString(locale)}
             </StyledTileValue>
             <StyledTileDescription>
-              {t('project_dashboard_key_count', 'Keys', {
-                count: stats.keyCount,
+              {t('project_dashboard_key_count_plural', 'Keys', {
+                value: stats.keyCount,
               })}
             </StyledTileDescription>
           </StyledTileDataItem>
@@ -243,8 +242,8 @@ export const ProjectTotals: React.FC<{
               {Number(stats.baseWordsCount).toLocaleString(locale)}
             </StyledTileValue>
             <StyledTileDescription>
-              {t('project_dashboard_base_words_count', 'Base words', {
-                count: stats.baseWordsCount,
+              {t('project_dashboard_base_words_count_plural', {
+                value: stats.baseWordsCount,
               })}
             </StyledTileDescription>
           </StyledTileDataItem>
@@ -261,7 +260,7 @@ export const ProjectTotals: React.FC<{
               <PercentFormat number={stats.translatedPercentage} />
             </StyledTileValue>
             <StyledTileDescription>
-              {t('project_dashboard_translated_percent', 'Translated')}
+              {t('project_dashboard_translated_percent')}
             </StyledTileDescription>
           </StyledTileDataItem>
           <StyledTileDataItem data-cy="project-dashboard-reviewed-percentage">
@@ -285,7 +284,11 @@ export const ProjectTotals: React.FC<{
               {Number(stringsCount).toLocaleString(locale)}
             </StyledTileValue>
             <StyledTileDescription>
-              <StringsHint>{t('project_dashboard_strings_count')}</StringsHint>
+              <StringsHint>
+                {t('project_dashboard_strings_count_plural', {
+                  value: Number(stringsCount),
+                })}
+              </StringsHint>
             </StyledTileDescription>
           </StyledTileDataItem>
         </StyledTile>
@@ -301,12 +304,14 @@ export const ProjectTotals: React.FC<{
               {Number(stats.membersCount).toLocaleString(locale)}
             </StyledTileValue>
             <StyledTileDescription>
-              {t('project_dashboard_member_count', 'Members')}
+              {t('project_dashboard_member_count_plural', {
+                value: Number(stats.membersCount),
+              })}
             </StyledTileDescription>
           </StyledTileDataItem>
           {membersEditable && (
             <StyledTileEdit>
-              <Edit fontSize="small" />
+              <Edit02 width={20} height={20} />
             </StyledTileEdit>
           )}
         </StyledTile>
@@ -325,7 +330,9 @@ export const ProjectTotals: React.FC<{
               {Number(stats.tagCount).toLocaleString(locale)}
             </StyledTileValue>
             <StyledTileDescription>
-              {t('project_dashboard_tag_count', 'Tags')}
+              {t('project_dashboard_tag_count_plural', {
+                value: Number(stats.tagCount),
+              })}
             </StyledTileDescription>
           </StyledTileDataItem>
         </StyledTile>

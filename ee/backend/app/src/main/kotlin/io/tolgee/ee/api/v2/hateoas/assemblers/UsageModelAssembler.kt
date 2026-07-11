@@ -3,9 +3,9 @@ package io.tolgee.ee.api.v2.hateoas.assemblers
 import io.tolgee.ee.data.ProportionalUsagePeriod
 import io.tolgee.ee.data.SumUsageItem
 import io.tolgee.ee.data.UsageData
-import io.tolgee.hateoas.ee.uasge.AverageProportionalUsageItemModel
-import io.tolgee.hateoas.ee.uasge.SumUsageItemModel
-import io.tolgee.hateoas.ee.uasge.UsageModel
+import io.tolgee.hateoas.ee.uasge.proportional.AverageProportionalUsageItemModel
+import io.tolgee.hateoas.ee.uasge.proportional.SumUsageItemModel
+import io.tolgee.hateoas.ee.uasge.proportional.UsageModel
 import org.springframework.hateoas.server.RepresentationModelAssembler
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
@@ -18,9 +18,11 @@ class UsageModelAssembler : RepresentationModelAssembler<UsageData, UsageModel> 
       subscriptionPrice = data.subscriptionPrice,
       seats = this.periodToModel(data.seatsUsage),
       translations = this.periodToModel(data.translationsUsage),
+      keys = this.periodToModel(data.keysUsage),
       credits = data.creditsUsage?.let { sumToModel(it) },
       total = data.total,
       appliedStripeCredits = data.appliedStripeCredits,
+      carryOverTotal = data.carryOverTotal,
     )
   }
 
@@ -49,7 +51,9 @@ class UsageModelAssembler : RepresentationModelAssembler<UsageData, UsageModel> 
     if (sumMs == 0L) {
       return 0.toBigDecimal()
     }
-    return this.sumOf { property(it) * it.milliseconds }.toBigDecimal()
+    return this
+      .sumOf { property(it) * it.milliseconds }
+      .toBigDecimal()
       .divide(sumMs.toBigDecimal(), 2, RoundingMode.HALF_UP)
   }
 }

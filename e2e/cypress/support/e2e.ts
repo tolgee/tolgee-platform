@@ -35,6 +35,11 @@ Cypress.on('uncaught:exception', (err, runnable) => {
   if (err.hasOwnProperty('code') && typeof err.code == 'string') {
     return false;
   }
+
+  // resize observer throwing these errors sometimes, doesn't seem to affect anything
+  if (err.message.includes('ResizeObserver loop')) {
+    return false;
+  }
 });
 
 Cypress.on('window:before:load', (win) => {
@@ -48,4 +53,11 @@ before(() => {
   setFeature('PROJECT_LEVEL_CONTENT_STORAGES', true);
   setFeature('MULTIPLE_CONTENT_DELIVERY_CONFIGS', true);
   setFeature('AI_PROMPT_CUSTOMIZATION', true);
+  setFeature('TASKS', true);
+  setFeature('SSO', true);
+  setFeature('GLOSSARY', true);
+  setFeature('TRANSLATION_LABELS', true);
+  setFeature('BRANCHING', true);
+  setFeature('QA_CHECKS', true);
+  setFeature('TRANSLATION_MEMORY', true);
 });

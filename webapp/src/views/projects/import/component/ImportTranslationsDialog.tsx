@@ -1,4 +1,5 @@
 import React, { FunctionComponent, useState } from 'react';
+import { KeyName } from 'tg.component/KeyName/KeyName';
 import { Box, Grid, styled } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import IconButton from '@mui/material/IconButton';
@@ -7,7 +8,7 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import { useTheme } from '@mui/material/styles';
 import { TransitionProps } from '@mui/material/transitions';
-import CloseIcon from '@mui/icons-material/Close';
+import { XClose } from '@untitled-ui/icons-react';
 import { T } from '@tolgee/react';
 
 import SearchField from 'tg.component/common/form/fields/SearchField';
@@ -40,10 +41,12 @@ const Transition = React.forwardRef(function Transition(
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-export const ImportTranslationsDialog: FunctionComponent<{
-  row?: components['schemas']['ImportLanguageModel'];
-  onClose: () => void;
-}> = (props) => {
+export const ImportTranslationsDialog: FunctionComponent<
+  React.PropsWithChildren<{
+    row?: components['schemas']['ImportLanguageModel'];
+    onClose: () => void;
+  }>
+> = (props) => {
   const project = useProject();
   const theme = useTheme();
   const [search, setSearch] = useState(undefined as string | undefined);
@@ -87,7 +90,7 @@ export const ImportTranslationsDialog: FunctionComponent<{
               aria-label="close"
               size="large"
             >
-              <CloseIcon />
+              <XClose />
             </IconButton>
             <StyledTitle variant="h6">
               <T keyName="import_show_translations_title" />
@@ -116,7 +119,9 @@ export const ImportTranslationsDialog: FunctionComponent<{
                 >
                   <Grid container spacing={2}>
                     <Grid item lg={4} md={3} sm xs>
-                      <Box>{i.keyName}</Box>
+                      <Box>
+                        <KeyName name={i.keyName} />
+                      </Box>
                       {i.keyDescription && (
                         <StyledDescription>
                           {i.keyDescription}

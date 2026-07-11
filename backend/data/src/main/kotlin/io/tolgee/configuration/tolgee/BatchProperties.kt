@@ -1,11 +1,79 @@
 package io.tolgee.configuration.tolgee
 
+import io.tolgee.batch.data.BatchJobType
 import io.tolgee.configuration.annotations.DocProperty
 import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties(prefix = "tolgee.batch")
 @DocProperty(description = "Configuration of batch operations.", displayName = "Batch operations")
 class BatchProperties {
+  @DocProperty(
+    description =
+      "Per-job-type overrides. Keys are batch job type names (e.g. MACHINE_TRANSLATE), " +
+        "values are settings objects. Currently supports 'exclusive' (boolean) to override " +
+        "whether a job type requires project-level exclusive locking.",
+  )
+  var jobTypeOverrides: Map<BatchJobType, BatchJobTypeOverrideProperties> = emptyMap()
+
   @DocProperty(description = "How many parallel jobs can be run at once on single Tolgee instance")
   var concurrency: Int = 1
+
+  @DocProperty(
+    description =
+      "Concurrency among all tolgee instances per one machine translation job\n." +
+        "Higher concurrency provides faster and distributed processing, but can lead to hitting rate limit\n" +
+        "on OpenAI, as well as getting over the limit of availableCredits: at the beginning, we only check, that\n" +
+        "the organization has `availableCredits > 0` and only when we have the result from OpenAI,we are able to\n" +
+        "calculate how many credits to charge the organization. In the Tolgee Cloud it is set to 1. ",
+    defaultValue = "-1",
+    defaultExplanation = "Unlimited (within tolgee.batch.concurrency)",
+  )
+  var maxPerMtJobConcurrency: Int = -1
+
+  @DocProperty(description = "Enable scheduled cleanup of old batch jobs")
+  var oldJobCleanupEnabled: Boolean = true
+
+  @DocProperty(description = "Retention period in days for completed batch jobs (SUCCESS, CANCELLED)")
+  var completedJobRetentionDays: Int = 3
+
+  @DocProperty(description = "Retention period in days for failed batch jobs")
+  var failedJobRetentionDays: Int = 30
+
+  @DocProperty(
+    description = "Delay between old batch job cleanup runs in milliseconds",
+    defaultExplanation = "8 hours",
+  )
+  var oldJobCleanupDelayInMs: Long = 28800000
+
+  @DocProperty(description = "Batch size for deleting old jobs (to avoid long-running transactions)")
+  var jobCleanupBatchSize: Int = 1000
+
+  @DocProperty(
+    description =
+      "Lock lease time in milliseconds for old job cleanup " +
+        "(to prevent lock expiration during long cleanups)",
+    defaultExplanation = "1 day",
+  )
+  var jobCleanupLockLeaseTimeMs: Long = 86400000
+
+  @DocProperty(
+    description =
+      "Timeout in milliseconds to wait for running job chunks to complete when cancelling a batch job. " +
+        "AI translation operations can take longer, so this should be set high enough to accommodate them.",
+    defaultExplanation = "30 seconds",
+  )
+  var cancellationTimeoutMs: Long = 30000
+
+  fun isExclusive(type: BatchJobType): Boolean {
+    return jobTypeOverrides[type]?.exclusive ?: type.defaultExclusive
+  }
+}
+
+class BatchJobTypeOverrideProperties {
+  @DocProperty(
+    description =
+      "Whether this job type requires project-level exclusive locking. " +
+        "When false, multiple jobs of this type can run concurrently for the same project.",
+  )
+  var exclusive: Boolean? = null
 }

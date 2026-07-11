@@ -21,37 +21,38 @@ class ImportCleanTestData {
           name = "Frantisek Dobrota"
         }.self
       project =
-        addProject { name = "test" }.build project@{
-          addPermission {
-            project = this@project.self
-            user = this@ImportCleanTestData.userAccount
-            type = ProjectPermissionType.MANAGE
-          }
+        addProject { name = "test" }
+          .build project@{
+            addPermission {
+              project = this@project.self
+              user = this@ImportCleanTestData.userAccount
+              type = ProjectPermissionType.MANAGE
+            }
 
-          val key =
-            addKey {
-              name = "key1"
+            val key =
+              addKey {
+                name = "key1"
+              }.self
+            english =
+              addLanguage {
+                name = "English"
+                tag = "en"
+              }.self
+            french =
+              addLanguage {
+                name = "French"
+                tag = "fr"
+              }.self
+            addTranslation {
+              this.language = english
+              this.key = key
+              this.text = "test"
             }.self
-          english =
-            addLanguage {
-              name = "English"
-              tag = "en"
+            addTranslation {
+              this.language = french
+              this.key = key
+              this.text = "test"
             }.self
-          french =
-            addLanguage {
-              name = "French"
-              tag = "fr"
-            }.self
-          addTranslation {
-            this.language = english
-            this.key = key
-            this.text = "test"
           }.self
-          addTranslation {
-            this.language = french
-            this.key = key
-            this.text = "test"
-          }.self
-        }.self
     }
 }

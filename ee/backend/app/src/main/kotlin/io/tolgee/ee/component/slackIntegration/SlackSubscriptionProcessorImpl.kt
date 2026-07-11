@@ -4,6 +4,8 @@ import io.tolgee.activity.data.ActivityType
 import io.tolgee.activity.projectActivity.ProjectActivityViewByRevisionProvider
 import io.tolgee.api.IProjectActivityModelAssembler
 import io.tolgee.component.automations.processors.SlackSubscriptionProcessor
+import io.tolgee.ee.component.slackIntegration.data.SlackRequest
+import io.tolgee.ee.component.slackIntegration.notification.SlackAutomationMessageSender
 import io.tolgee.model.automations.AutomationAction
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
@@ -11,7 +13,7 @@ import org.springframework.stereotype.Component
 @Component
 class SlackSubscriptionProcessorImpl(
   private val activityModelAssembler: IProjectActivityModelAssembler,
-  private val slackExecutor: SlackExecutor,
+  private val slackAutomationMessageSender: SlackAutomationMessageSender,
   private val applicationContext: ApplicationContext,
 ) : SlackSubscriptionProcessor {
   override fun process(
@@ -24,7 +26,7 @@ class SlackSubscriptionProcessorImpl(
       ProjectActivityViewByRevisionProvider(
         applicationContext = applicationContext,
         activityRevisionId,
-        onlyCountInListAbove = 10,
+        onlyCountInListAbove = SlackAutomationMessageSender.MAX_NEW_MESSAGES_TO_SEND,
       ).get() ?: return
 
     val activityModel = activityModelAssembler.toModel(view)
@@ -33,11 +35,10 @@ class SlackSubscriptionProcessorImpl(
     val config = action.slackConfig ?: return
 
     when (activityModel.type) {
-      ActivityType.CREATE_KEY -> slackExecutor.sendMessageOnKeyAdded(config, data)
-      in translationActivities ->
-        slackExecutor.sendMessageOnTranslationSet(config, data)
-      ActivityType.IMPORT -> slackExecutor.sendMessageOnImport(config, data)
-      else -> { }
+      ActivityType.CREATE_KEY -> slackAutomationMessageSender.sendMessageOnKeyAdded(config, data)
+      in translationActivities -> slackAutomationMessageSender.sendMessageOnTranslationSet(config, data)
+      ActivityType.IMPORT -> slackAutomationMessageSender.sendMessageOnImport(config, data)
+      else -> {}
     }
   }
 
@@ -50,6 +51,7 @@ class SlackSubscriptionProcessorImpl(
         ActivityType.BATCH_MACHINE_TRANSLATE,
         ActivityType.BATCH_COPY_TRANSLATIONS,
         ActivityType.BATCH_CLEAR_TRANSLATIONS,
+        ActivityType.AUTO_TRANSLATE,
       )
   }
 }

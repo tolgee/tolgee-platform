@@ -64,6 +64,7 @@ describe('Administration', () => {
     visitAdministration();
     gcy('settings-menu-item').contains('Users').click();
     changeUserRole('John User', 'Admin');
+    changeUserRole('John User', 'Supporter');
     changeUserRole('John User', 'User');
     getUserRoleSelect('Peter Administrator')
       .find('div')
@@ -115,7 +116,7 @@ function getUserRoleSelect(user: string) {
   return getUserListItem(user).findDcy('administration-user-role-select');
 }
 
-function changeUserRole(user: string, role: 'Admin' | 'User') {
+function changeUserRole(user: string, role: 'Admin' | 'Supporter' | 'User') {
   selectInSelect(getUserRoleSelect(user), role);
   confirmStandard();
   assertMessage('Role changed');
@@ -123,10 +124,10 @@ function changeUserRole(user: string, role: 'Admin' | 'User') {
 
 function assertOrganizationAddButtonVisible() {
   gcy('organization-switch').click();
-  gcy('organization-switch-new').should('be.visible');
+  gcy('switch-popover-new').should('be.visible');
 }
 
 function assertOrganizationAddButtonNotVisible() {
   gcy('organization-switch').click();
-  gcy('organization-switch-new').should('not.exist');
+  gcy('switch-popover-new').should('not.exist');
 }

@@ -16,7 +16,9 @@ type Props = {
   activity: Activity;
 };
 
-export const ActivityTitle: React.FC<Props> = ({ activity }) => {
+export const ActivityTitle: React.FC<React.PropsWithChildren<Props>> = ({
+  activity,
+}) => {
   let references = 0;
   const filteredReferences: Reference[] = [];
   const titleReferences = activity.options?.titleReferences;
@@ -28,16 +30,19 @@ export const ActivityTitle: React.FC<Props> = ({ activity }) => {
     }
   });
 
-  const titleParameters = {
+  let titleParameters = {
     references,
     KeyCount: 0,
     TranslationCount: 0,
     KeyMeta: 0,
+    KeyMetaCount: 0,
   };
 
   Object.entries(activity.counts || {}).forEach(([entity, value]) => {
     titleParameters[`${entity}Count`] = value;
   });
+
+  titleParameters = { ...titleParameters, ...activity?.params };
 
   const title = activity.translation;
 

@@ -3,6 +3,7 @@ package io.tolgee.ee.api.v2.controllers
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.component.contentDelivery.ContentDeliveryFileStorageProvider
 import io.tolgee.component.fileStorage.AzureBlobFileStorage
+import io.tolgee.component.fileStorage.S3FileStorage
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.ContentDeliveryConfigTestData
@@ -11,8 +12,10 @@ import io.tolgee.ee.service.ContentStorageService
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
+import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.isValidId
+import io.tolgee.fixtures.node
 import io.tolgee.model.contentDelivery.ContentStorage
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
@@ -25,8 +28,8 @@ import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.data.domain.Pageable
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.test.web.servlet.ResultActions
 import java.math.BigDecimal
 import java.util.function.Consumer
@@ -37,7 +40,7 @@ class ContentStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") 
   @Autowired
   private lateinit var contentStorageService: ContentStorageService
 
-  @SpyBean
+  @MockitoSpyBean
   @Autowired
   private lateinit var contentDeliveryFileStorageProvider: ContentDeliveryFileStorageProvider
 
@@ -70,6 +73,39 @@ class ContentStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") 
       azureContentStorageConfig.connectionString.assert.isEqualTo("fakeConnectionString")
       azureContentStorageConfig.containerName.assert.isEqualTo("fakeContainerName")
     }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `creates Content Storage with custom path`() {
+    doAnswer {
+      mock<S3FileStorage>()
+    }.whenever(contentDeliveryFileStorageProvider).getStorage(any())
+
+    performProjectAuthPost(
+      "content-storages",
+      mapOf(
+        "name" to "s3",
+        "s3ContentStorageConfig" to
+          mapOf(
+            "bucketName" to "bucketName",
+            "accessKey" to "accessKey",
+            "secretKey" to "secretKey",
+            "endpoint" to "endpoint",
+            "signingRegion" to "signingRegion",
+            "path" to "custom/path",
+          ),
+      ),
+    ).andIsOk
+    val all =
+      contentStorageService
+        .getAllInProject(project.id, Pageable.ofSize(100))
+        .sortedBy { it.id }
+    all
+      .last()
+      .s3ContentStorageConfig!!
+      .path.assert
+      .isEqualTo("custom/path")
   }
 
   @Test
@@ -113,11 +149,21 @@ class ContentStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") 
 
     executeInNewTransaction {
       val updatedStorage = contentStorageService.get(storage.id)
-      updatedStorage.s3ContentStorageConfig!!.bucketName.assert.isEqualTo("new bucketName")
-      updatedStorage.s3ContentStorageConfig!!.accessKey.assert.isEqualTo("new accessKey")
-      updatedStorage.s3ContentStorageConfig!!.secretKey.assert.isEqualTo("new secretKey")
-      updatedStorage.s3ContentStorageConfig!!.endpoint.assert.isEqualTo("new endpoint")
-      updatedStorage.s3ContentStorageConfig!!.signingRegion.assert.isEqualTo("new signingRegion")
+      updatedStorage.s3ContentStorageConfig!!
+        .bucketName.assert
+        .isEqualTo("new bucketName")
+      updatedStorage.s3ContentStorageConfig!!
+        .accessKey.assert
+        .isEqualTo("new accessKey")
+      updatedStorage.s3ContentStorageConfig!!
+        .secretKey.assert
+        .isEqualTo("new secretKey")
+      updatedStorage.s3ContentStorageConfig!!
+        .endpoint.assert
+        .isEqualTo("new endpoint")
+      updatedStorage.s3ContentStorageConfig!!
+        .signingRegion.assert
+        .isEqualTo("new signingRegion")
       updatedStorage.azureContentStorageConfig.assert.isNull()
     }
 
@@ -139,8 +185,12 @@ class ContentStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") 
 
     executeInNewTransaction {
       val updatedStorage = contentStorageService.get(storage.id)
-      updatedStorage.s3ContentStorageConfig!!.accessKey.assert.isEqualTo("new accessKey")
-      updatedStorage.s3ContentStorageConfig!!.secretKey.assert.isEqualTo("new secretKey")
+      updatedStorage.s3ContentStorageConfig!!
+        .accessKey.assert
+        .isEqualTo("new accessKey")
+      updatedStorage.s3ContentStorageConfig!!
+        .secretKey.assert
+        .isEqualTo("new secretKey")
       updatedStorage.azureContentStorageConfig.assert.isNull()
     }
   }
@@ -249,6 +299,50 @@ class ContentStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") 
           ),
       ),
     ).andIsOk
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `cannot update storage of another project`() {
+    val foreignStorageId = testData.unrelatedAzureContentStorage.self.id
+    performProjectAuthPut(
+      "content-storages/$foreignStorageId",
+      mapOf(
+        "name" to "Updated by other project",
+        "azureContentStorageConfig" to
+          mapOf(
+            "connectionString" to "otherProjectConnectionString",
+            "containerName" to "otherProjectContainerName",
+          ),
+      ),
+    ).andIsNotFound
+
+    executeInNewTransaction {
+      val storage = contentStorageService.get(foreignStorageId)
+      storage.name.assert.isEqualTo("Unrelated Azure")
+      storage.azureContentStorageConfig!!
+        .connectionString.assert
+        .isEqualTo("unrelatedConnectionString")
+      storage.azureContentStorageConfig!!
+        .containerName.assert
+        .isEqualTo("unrelatedContainerName")
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `cannot test storage of another project`() {
+    val foreignStorageId = testData.unrelatedAzureContentStorage.self.id
+    performProjectAuthPost(
+      "content-storages/$foreignStorageId/test",
+      mapOf(
+        "name" to "azure",
+        "azureContentStorageConfig" to
+          mapOf(
+            "containerName" to "fakeContainerName",
+          ),
+      ),
+    ).andIsNotFound
   }
 
   private fun performCreate(): Pair<ContentStorage, ResultActions> {

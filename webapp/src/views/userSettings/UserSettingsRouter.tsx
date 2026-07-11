@@ -8,6 +8,7 @@ import { UserProfileView } from './userProfile/UserProfileView';
 import { ApiKeysView } from './apiKeys/ApiKeysView';
 import { AccountSecurityView } from './accountSecurity/AccountSecurityView';
 import { PatsView } from './pats/PatsView';
+import { NotificationsView } from 'tg.views/userSettings/notifications/NotificationsView';
 
 export const UserSettingsRouter = () => {
   return (
@@ -35,6 +36,10 @@ export const UserSettingsRouter = () => {
 
         <PrivateRoute path={LINKS.USER_PATS.template}>
           <PatsView />
+        </PrivateRoute>
+
+        <PrivateRoute path={LINKS.USER_ACCOUNT_NOTIFICATIONS.template}>
+          <NotificationsView />
         </PrivateRoute>
       </Switch>
     </DashboardPage>

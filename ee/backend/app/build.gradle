@@ -2,7 +2,6 @@ buildscript {
     repositories {
         mavenCentral()
     }
-    dependencies {}
 }
 
 plugins {
@@ -31,11 +30,7 @@ allOpen {
     annotation("org.springframework.boot.test.context.SpringBootTest")
 }
 
-repositories {
-    mavenCentral()
-}
-
-test {
+tasks.named('test', Test) {
     useJUnitPlatform()
     maxHeapSize = "4096m"
 }
@@ -46,7 +41,11 @@ configureLiquibase("ee", "hibernate:spring:io.tolgee.ee.model", 'src/main/resour
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-websocket")
+    implementation("org.springframework.boot:spring-boot-starter-security")
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation libs.kotlinCoroutines
+
     implementation(project(":data"))
     implementation(project(":security"))
     implementation(project(":api"))
@@ -60,10 +59,17 @@ dependencies {
     implementation libs.springDocOpenApiUi
     implementation libs.springDocOpenApiCommon
 
+    /**
+     * DB
+     */
+    implementation 'org.postgresql:postgresql'
 
     /**
      * MISC
      */
+    implementation libs.jjwtApi
+    implementation libs.jjwtImpl
+    implementation libs.jjwtJackson
     implementation libs.hibernateTypes
     implementation libs.jacksonKotlin
     implementation libs.commonsCodec
@@ -89,18 +95,45 @@ dependencies {
     implementation libs.slackApiClient
     implementation libs.slackApiModelKotlinExtension
     implementation libs.slackApiClientKotlinExtension
+
+    /**
+     * Excel file generation
+     */
+    implementation 'org.apache.poi:poi-ooxml:5.4.0'
+    implementation 'org.apache.commons:commons-collections4:4.4'
+
+    implementation("com.github.ben-manes.caffeine:caffeine")
+
+    /**
+     * HANDLEBARS
+     */
+    implementation('com.github.jknack:handlebars:4.4.0')
+
+    ktlint(project(":ktlint"))
 }
 
-kotlin {
-    jvmToolchain(17)
-}
-
-dependencyManagement {
-    imports {
-        mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 
-jar {
+kotlin {
+    compilerOptions {
+        freeCompilerArgs.addAll("-Xjsr305=strict")
+    }
+}
+
+dependencyManagement {
+    applyMavenExclusions = false
+
+    imports {
+        mavenBom(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES) {
+            bomProperty "kotlin.version", "${kotlinVersion}"
+        }
+    }
+}
+
+tasks.named('jar', Jar) {
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
 }

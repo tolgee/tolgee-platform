@@ -1,5 +1,6 @@
 import {
   editCell,
+  editKeyName,
   toggleLang,
   visitTranslations,
 } from '../../common/translations';
@@ -24,12 +25,12 @@ describe('Single key form', () => {
     translationSingleTestData.clean();
   });
 
-  it('will create translation with EDIT permissions', () => {
+  it('creates translation with EDIT permissions', () => {
     logInAs('pepa');
     createKey();
   });
 
-  it('will edit translation with EDIT permissions', () => {
+  it('edits translation with EDIT permissions', () => {
     logInAs('pepa');
     visitEditKey();
     editKey();
@@ -59,7 +60,7 @@ describe('Single key form', () => {
     cantRemoveKey();
   });
 
-  it('will use language select correctly', () => {
+  it('uses language select correctly', () => {
     logInAs('franta');
     // changing langs in translations list should influnece
     // default language in localstorage
@@ -117,7 +118,7 @@ describe('Single key form', () => {
 
   function editKey() {
     cy.contains('Z translation').should('be.visible');
-    editCell('A key', 'Edited A key');
+    editKeyName('A key', 'Edited A key');
     cy.gcy('translation-edit-key-field')
       .contains('Edited A key')
       .should('be.visible');

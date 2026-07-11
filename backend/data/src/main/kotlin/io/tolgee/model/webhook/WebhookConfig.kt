@@ -9,13 +9,20 @@ import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.automations.AutomationAction
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
+import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
+import jakarta.persistence.Table
 import jakarta.validation.constraints.NotBlank
-import java.util.*
+import java.util.Date
 
 @Entity
 @ActivityLoggedEntity
+@Table(
+  indexes = [
+    Index(columnList = "project_id"),
+  ],
+)
 class WebhookConfig(
   @ManyToOne(fetch = FetchType.LAZY)
   var project: Project,
@@ -28,6 +35,9 @@ class WebhookConfig(
   @NotBlank
   var webhookSecret: String = ""
 
+  @ActivityLoggedProp
+  var enabled: Boolean = true
+
   @OneToMany(mappedBy = "webhookConfig", orphanRemoval = true)
   var automationActions: MutableList<AutomationAction> = mutableListOf()
 
@@ -36,4 +46,10 @@ class WebhookConfig(
 
   @ActivityIgnoredProp
   var lastExecuted: Date? = null
+
+  @ActivityIgnoredProp
+  var autoDisableNotified: Boolean = false
+
+  @ActivityIgnoredProp
+  var autoDisabled: Boolean = false
 }

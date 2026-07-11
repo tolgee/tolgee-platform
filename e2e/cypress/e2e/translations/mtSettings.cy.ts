@@ -7,6 +7,7 @@ import { deleteProject } from '../../common/apiCalls/common';
 import { HOST } from '../../common/constants';
 import { waitForGlobalLoading } from '../../common/loading';
 import { gcyAdvanced } from '../../common/shared';
+import { buildXpath } from '../../common/XpathBuilder';
 
 describe('Machine translation settings', () => {
   let project: ProjectDTO = null;
@@ -24,10 +25,14 @@ describe('Machine translation settings', () => {
     }
   });
 
-  it('will update default settings', { retries: 5 }, () => {
+  it('updates default settings', { retries: 5 }, () => {
     cy.gcy('machine-translations-settings-language-options').first().click();
     getEnableCheckbox('GOOGLE').click();
     getPrimaryRadio('AWS').click();
+    getFormalitySelect('AWS').click();
+    cy.gcy('mt-language-dialog-formality-select-item')
+      .contains('Formal')
+      .click();
     cy.gcy('mt-language-dialog-auto-for-import').click();
     cy.gcy('mt-language-dialog-auto-machine-translation').click();
     cy.gcy('mt-language-dialog-auto-translation-memory').click();
@@ -41,21 +46,10 @@ describe('Machine translation settings', () => {
     cy.gcy('project-menu-item-translations').click();
 
     openEditor('Studený přeložený text 1');
-    cy.gcy('translation-tools-machine-translation-item')
-      .contains('Cool translated text 1 translated with AWS from en to cs')
-      .should('be.visible');
-    cy.gcy('translation-tools-machine-translation-item').should(
-      'have.length',
-      1
-    );
-    cy.gcy('global-editor').type('{esc}');
-    createTranslation({ key: 'aaa_key', translation: 'test translation' });
-    cy.contains('test translation translated with AWS from en to cs').should(
-      'be.visible'
-    );
+    assertSingleMtTranslation();
   });
 
-  it('will update language specific settings', { retries: 5 }, () => {
+  it('updates language specific settings', { retries: 5 }, () => {
     gcyAdvanced({
       value: 'machine-translations-settings-language-options',
       language: 'es',
@@ -86,7 +80,7 @@ describe('Machine translation settings', () => {
     );
     cy.gcy('translation-tools-machine-translation-item')
       .contains(
-        'Cool translated text 1 translated with AWS from en to es FORMAL'
+        'Cool translated text 1 translated FORMAL with AWS from en to es'
       )
       .should('be.visible');
     cy.gcy('global-editor').type('{esc}');
@@ -100,10 +94,62 @@ describe('Machine translation settings', () => {
 
     createTranslation({ key: 'aaa_key', translation: 'test translation' });
     cy.contains(
-      'test translation translated with AWS from en to es FORMAL'
+      'test translation translated FORMAL with AWS from en to es'
     ).should('be.visible');
     cy.contains('from en to cs').should('not.exist');
   });
+
+  it(
+    'preserves settings across language configurations',
+    { retries: 5 },
+    () => {
+      // This checks for the case where modifying one language
+      // doesn't affect the other languages.
+      // To be exact, the Spanish language supports formality, while
+      // the Czech language doesn't. This used to reset the Spanish
+      // settings when changing the Czech settings, because of a bug.
+
+      gcyAdvanced({
+        value: 'machine-translations-settings-language-options',
+        language: 'es',
+      }).click();
+
+      getPrimaryRadio('AWS').click();
+      getFormalitySelect('AWS').click();
+      cy.gcy('mt-language-dialog-formality-select-item')
+        .contains('Formal')
+        .click();
+      cy.gcy('mt-language-dialog-save').click();
+
+      waitForGlobalLoading();
+
+      getAvatarPrimary('AWS', 'es').should('be.visible');
+
+      gcyAdvanced({
+        value: 'machine-translations-settings-language-options',
+        language: 'cs',
+      }).click();
+
+      getPrimaryRadio('AWS').click();
+      cy.gcy('mt-language-dialog-save').click();
+
+      waitForGlobalLoading();
+
+      getAvatarPrimary('AWS', 'cs').should('be.visible');
+
+      // Re-open Spanish settings
+      gcyAdvanced({
+        value: 'machine-translations-settings-language-options',
+        language: 'es',
+      }).click();
+
+      // Verify AWS is still primary
+      getPrimaryRadio('AWS').find('input').should('be.checked');
+
+      // Verify formality is still set to Formal
+      getFormalitySelect('AWS').should('contain', 'Formal');
+    }
+  );
 
   const visit = () => {
     cy.visit(`${HOST}/projects/${project.id}/languages/mt`);
@@ -147,4 +193,20 @@ describe('Machine translation settings', () => {
       language,
     });
   };
+
+  function assertSingleMtTranslation(
+    text = 'Cool translated text 1 translated FORMAL with AWS from en to cs'
+  ) {
+    buildXpath()
+      .descendantOrSelf()
+      .withDataCy('translation-tools-machine-translation-item')
+      .descendantOrSelf()
+      .containsText(text)
+      .getElement()
+      .should('be.visible');
+    cy.gcy('translation-tools-machine-translation-item').should(
+      'have.length',
+      1
+    );
+  }
 });

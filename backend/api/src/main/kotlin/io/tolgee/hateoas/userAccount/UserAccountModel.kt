@@ -9,10 +9,11 @@ import org.springframework.hateoas.server.core.Relation
 data class UserAccountModel(
   val id: Long,
   val username: String,
-  var name: String?,
-  var emailAwaitingVerification: String?,
-  var avatar: Avatar?,
-  var globalServerRole: UserAccount.Role,
-  var deleted: Boolean,
-  var disabled: Boolean,
+  val name: String?,
+  val emailAwaitingVerification: String?,
+  val avatar: Avatar?,
+  val globalServerRole: UserAccount.Role,
+  val mfaEnabled: Boolean,
+  val deleted: Boolean,
+  val disabled: Boolean,
 ) : RepresentationModel<UserAccountModel>()

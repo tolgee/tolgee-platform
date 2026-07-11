@@ -17,6 +17,7 @@ import io.tolgee.service.dataImport.CoreImportFilesProcessor
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 import io.tolgee.service.key.KeyMetaService
+import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
 import org.mockito.Mockito
 import org.mockito.kotlin.any
@@ -60,6 +61,7 @@ class FileProcessorContextMockUtil {
     object : IImportSettings {
       override var overrideKeyDescriptions: Boolean = false
       override var convertPlaceholdersToIcu: Boolean = convertPlaceholders
+      override var createNewKeys: Boolean = true
     }
 
   private fun mockApplicationContext(): ApplicationContext {
@@ -70,10 +72,17 @@ class FileProcessorContextMockUtil {
     mockImportFileProcessorFactory(applicationContextMock)
     mockLanguageService(applicationContextMock)
     mockKeyMetaService(applicationContextMock)
+    mockKeyService(applicationContextMock)
     val validator = Mockito.mock(KeyCustomValuesValidator::class.java)
     Mockito.`when`(applicationContextMock.getBean(KeyCustomValuesValidator::class.java)).thenReturn(validator)
     Mockito.`when`(validator.isValid(any())).thenReturn(true)
     return applicationContextMock
+  }
+
+  private fun mockKeyService(applicationContextMock: ApplicationContext) {
+    val keyService = mock<KeyService>()
+    whenever(applicationContextMock.getBean(KeyService::class.java))
+      .thenReturn(keyService)
   }
 
   private fun mockKeyMetaService(applicationContextMock: ApplicationContext) {
@@ -89,9 +98,11 @@ class FileProcessorContextMockUtil {
   }
 
   private fun mockImportFileProcessorFactory(applicationContextMock: ApplicationContext): ImportFileProcessorFactory {
+    val tolgeeProps = mockTolgeeProperties(applicationContextMock)
     return ImportFileProcessorFactory(
       objectMapper = jacksonObjectMapper(),
       yamlObjectMapper = ObjectMapper(YAMLFactory()),
+      tolgeeProperties = tolgeeProps,
     ).also {
       whenever(applicationContextMock.getBean(ImportFileProcessorFactory::class.java))
         .thenReturn(it)
@@ -147,7 +158,8 @@ class FileProcessorContextMockUtil {
 
   fun getSavedTranslations(): List<ImportTranslation> {
     @Suppress("UNCHECKED_CAST")
-    return Mockito.mockingDetails(importServiceMock)
+    return Mockito
+      .mockingDetails(importServiceMock)
       .invocations
       .filter { it.method == ImportService::saveTranslations.javaMethod }
       .flatMap { it.arguments.first() as List<ImportTranslation> }

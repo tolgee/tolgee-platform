@@ -1,65 +1,39 @@
-import { default as React, FunctionComponent, ReactNode } from 'react';
-import {
-  FormControl,
-  FormControlProps,
-  FormHelperText,
-  InputLabel,
-  Select as MUISelect,
-  styled,
-} from '@mui/material';
-import { useField } from 'formik';
+import { FunctionComponent, ReactNode, ComponentProps } from 'react';
+import { Select as TolgeeSelect } from 'tg.component/common/Select';
+import { FieldValidator, useField } from 'formik';
 
 interface PGSelectProps {
   name: string;
   label?: ReactNode;
   renderValue?: (v: any) => ReactNode;
   displayEmpty?: boolean;
+  validate?: FieldValidator;
 }
 
-type Props = PGSelectProps & FormControlProps;
+type Props = PGSelectProps & Partial<ComponentProps<typeof TolgeeSelect>>;
 
-const StyledFormControl = styled(FormControl)`
-  margin-top: ${({ theme }) => theme.spacing(2)};
-  margin-bottom: ${({ theme }) => theme.spacing(2)};
-  min-width: 120px;
-`;
+export const Select: FunctionComponent<React.PropsWithChildren<Props>> = (
+  props
+) => {
+  const [field, meta] = useField({
+    name: props.name,
+    validate: props.validate,
+  });
 
-export const Select: FunctionComponent<Props> = (props) => {
-  const [field, meta, helpers] = useField(props.name);
-
-  const { renderValue, displayEmpty, ...formControlProps } = props;
+  const { renderValue, displayEmpty, label, ...formControlProps } = props;
 
   return (
-    <StyledFormControl
-      variant={props.variant}
-      error={!!meta.error}
+    <TolgeeSelect
+      data-cy="global-form-select"
+      labelId={'select_' + field.name + '_label'}
+      label={label}
+      error={meta.touched ? meta.error : undefined}
+      displayEmpty={displayEmpty}
+      {...field}
+      renderValue={typeof renderValue === 'function' ? renderValue : undefined}
       {...formControlProps}
     >
-      {props.label && (
-        <InputLabel
-          variant={props.variant}
-          id={'select_' + field.name + '_label'}
-        >
-          {props.label}
-        </InputLabel>
-      )}
-      <MUISelect
-        data-cy="global-form-select"
-        name={field.name}
-        labelId={'select_' + field.name + '_label'}
-        label={props.label}
-        value={field.value}
-        onChange={(e) => helpers.setValue(e.target.value)}
-        displayEmpty={displayEmpty}
-        renderValue={
-          typeof renderValue === 'function'
-            ? renderValue
-            : (value) => value as ReactNode
-        }
-      >
-        {props.children}
-      </MUISelect>
-      {meta.error && <FormHelperText>{meta.error}</FormHelperText>}
-    </StyledFormControl>
+      {props.children}
+    </TolgeeSelect>
   );
 };

@@ -6,7 +6,7 @@ import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.InputStream
 import java.io.UnsupportedEncodingException
-import java.util.*
+import java.util.Collections
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -31,7 +31,9 @@ import java.util.*
  *
  * @since 1.3
  */
-open class MimeMessageParser(message: jakarta.mail.internet.MimeMessage) {
+open class MimeMessageParser(
+  message: jakarta.mail.internet.MimeMessage,
+) {
   /** The MimeMessage to convert  */
   private val mimeMessage: jakarta.mail.internet.MimeMessage
 
@@ -170,14 +172,20 @@ open class MimeMessageParser(message: jakarta.mail.internet.MimeMessage) {
     if (isMimeType(
         part,
         "text/plain",
-      ) && plainContent == null && !jakarta.mail.Part.ATTACHMENT.equals(part.disposition, ignoreCase = true)
+      ) &&
+      plainContent == null &&
+      !jakarta.mail.Part.ATTACHMENT
+        .equals(part.disposition, ignoreCase = true)
     ) {
       plainContent = part.content.toString()
     } else {
       if (isMimeType(
           part,
           "text/html",
-        ) && htmlContent == null && !jakarta.mail.Part.ATTACHMENT.equals(part.disposition, ignoreCase = true)
+        ) &&
+        htmlContent == null &&
+        !jakarta.mail.Part.ATTACHMENT
+          .equals(part.disposition, ignoreCase = true)
       ) {
         htmlContent = part.content.toString()
       } else {
@@ -350,7 +358,8 @@ open class MimeMessageParser(message: jakarta.mail.internet.MimeMessage) {
     }
     result =
       if (result != null && !result.isEmpty()) {
-        jakarta.mail.internet.MimeUtility.decodeText(result)
+        jakarta.mail.internet.MimeUtility
+          .decodeText(result)
       } else {
         null
       }

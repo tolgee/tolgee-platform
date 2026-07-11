@@ -7,7 +7,7 @@ import {
   Tab,
   styled,
 } from '@mui/material';
-import { useTranslate, T, TFnType } from '@tolgee/react';
+import { useTranslate, T } from '@tolgee/react';
 import { Formik } from 'formik';
 import { Button } from '@mui/material';
 import { getFirstPluralParameter } from '@tginternal/editor';
@@ -65,7 +65,7 @@ type Props = {
   initialTab: TabsType;
 };
 
-export const KeyEditModal: React.FC<Props> = ({
+export const KeyEditModal: React.FC<React.PropsWithChildren<Props>> = ({
   onClose,
   initialTab,
   data,
@@ -125,13 +125,14 @@ export const KeyEditModal: React.FC<Props> = ({
       extractedArgName ||
       'value',
     custom: JSON.stringify(customValues ?? {}, null, 2),
+    maxCharLimit: keyInfoLoadable.data?.maxCharLimit ?? undefined,
   } satisfies KeyFormType;
 
   return (
     <Formik
       initialValues={initialValues}
       enableReinitialize
-      validationSchema={Validation.KEY_SETTINGS_FORM(t as TFnType)}
+      validationSchema={Validation.KEY_SETTINGS_FORM(t)}
       onSubmit={async (values, helpers) => {
         const custom = JSON.parse(values.custom);
         try {
@@ -147,6 +148,8 @@ export const KeyEditModal: React.FC<Props> = ({
                   isPlural: values.isPlural,
                   pluralArgName: values.pluralParameter,
                   custom,
+                  maxCharLimit:
+                    values.maxCharLimit != null ? values.maxCharLimit : 0,
                   warnOnDataLoss: !warningOpen,
                 },
               },
@@ -181,6 +184,7 @@ export const KeyEditModal: React.FC<Props> = ({
               keyTags: data.tags,
               keyIsPlural: data.isPlural,
               keyPluralArgName: data.pluralArgName,
+              keyMaxCharLimit: values.maxCharLimit ?? undefined,
             },
           });
         } catch (e) {
@@ -239,7 +243,7 @@ export const KeyEditModal: React.FC<Props> = ({
                 <T keyName="global_cancel_button" />
               </Button>
               <LoadingButton
-                data-cy="translations-cell-save-button"
+                data-cy="translations-cell-main-action-button"
                 loading={updateKeyLoadable.isLoading}
                 color="primary"
                 variant="contained"

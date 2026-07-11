@@ -35,6 +35,14 @@ class Screenshot : StandardAuditModel() {
       return "$pathWithSlash$hash.$extension"
     }
 
+  val middleSizedFilename: String?
+    get() {
+      if (!hasMiddleSized) {
+        return null
+      }
+      return "$pathWithSlash${hash}_middle_sized.$extension"
+    }
+
   val thumbnailFilename: String
     get() {
       if (!hasThumbnail) {
@@ -55,6 +63,9 @@ class Screenshot : StandardAuditModel() {
 
   @ColumnDefault("false")
   var hasThumbnail: Boolean = true
+
+  @ColumnDefault("false")
+  var hasMiddleSized: Boolean = true
 
   var location: String? = null
 

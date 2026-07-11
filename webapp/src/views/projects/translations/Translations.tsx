@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react';
 import { T, useTranslate } from '@tolgee/react';
-import { Box, Button, styled, useMediaQuery } from '@mui/material';
+import { Box, Button, styled } from '@mui/material';
 import { Link } from 'react-router-dom';
 
 import { LINKS, PARAMS } from 'tg.constants/links';
@@ -12,6 +12,8 @@ import {
   useGlobalActions,
   useGlobalContext,
 } from 'tg.globalContext/GlobalContext';
+import { TranslationsTaskDetail, TaskAllDonePlaceholder } from 'tg.ee';
+import { EmptyState } from 'tg.component/common/EmptyState';
 
 import {
   useTranslationsActions,
@@ -25,7 +27,8 @@ import { BaseProjectView } from '../BaseProjectView';
 import { TranslationsToolbar } from './TranslationsToolbar';
 import { BatchOperationsChangeIndicator } from './BatchOperations/BatchOperationsChangeIndicator';
 import { FloatingToolsPanel } from './ToolsPanel/FloatingToolsPanel';
-import { Prefilter } from './prefilters/Prefilter';
+import { countFilters } from './TranslationFilters/summary';
+import { AiPlayground } from './ToolsPanel/AiPlayground';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -33,10 +36,9 @@ const StyledContainer = styled('div')`
 `;
 
 export const Translations = () => {
-  const { setQuickStartOpen, quickStartForceFloating } = useGlobalActions();
+  const { setQuickStartFloatingForced } = useGlobalActions();
   const prefilter = useTranslationsSelector((c) => c.prefilter);
   const quickStartEnabled = useGlobalContext((c) => c.quickStartGuide.enabled);
-  const isSmall = useMediaQuery(`@media (max-width: ${800}px)`);
   const { t } = useTranslate();
   const project = useProject();
   const projectPermissions = useProjectPermissions();
@@ -45,10 +47,15 @@ export const Translations = () => {
   const isFetching = useTranslationsSelector((c) => c.isFetching);
   const view = useTranslationsSelector((v) => v.view);
   const translations = useTranslationsSelector((c) => c.translations);
-  const sidePanelOpen = useTranslationsSelector((c) => c.sidePanelOpen);
+  const sidePanelWidth = useTranslationsSelector(
+    (c) => c.layout.sidePanelWidth
+  );
+  const mainContentWidth = useTranslationsSelector(
+    (c) => c.layout.mainContentWidth
+  );
 
   const filtersOrSearchApplied = useTranslationsSelector((c) =>
-    Boolean(Object.values(c.filters).filter(Boolean).length || c.urlSearch)
+    Boolean(countFilters(c.filters) !== 0 || c.urlSearch)
   );
 
   const memoizedFiltersOrSearchApplied = useMemo(
@@ -59,6 +66,8 @@ export const Translations = () => {
   const { setSearchImmediate, setFilters } = useTranslationsActions();
 
   const { onKey } = useTranslationsShortcuts();
+
+  const branchingDisabled = prefilter?.task !== undefined;
 
   useEffect(() => {
     document.body?.addEventListener('keydown', onKey);
@@ -84,14 +93,13 @@ export const Translations = () => {
 
   // hide quick start panel
   useEffect(() => {
-    if (sidePanelOpen && quickStartEnabled) {
-      quickStartForceFloating(true);
-      setQuickStartOpen(true);
+    if (sidePanelWidth && quickStartEnabled) {
+      setQuickStartFloatingForced(true);
       return () => {
-        quickStartForceFloating(false);
+        setQuickStartFloatingForced(false);
       };
     }
-  }, [sidePanelOpen, quickStartEnabled]);
+  }, [sidePanelWidth, quickStartEnabled]);
 
   const renderPlaceholder = () =>
     memoizedFiltersOrSearchApplied ? (
@@ -105,6 +113,13 @@ export const Translations = () => {
       >
         <T keyName="translations_nothing_found" />
       </EmptyListMessage>
+    ) : prefilter?.task && prefilter.taskFilterNotDone ? (
+      <EmptyState loading={isLoading || isFetching}>
+        <TaskAllDonePlaceholder
+          taskNumber={prefilter.task}
+          projectId={project.id}
+        />
+      </EmptyState>
     ) : (
       <EmptyListMessage
         loading={isLoading || isFetching}
@@ -134,8 +149,6 @@ export const Translations = () => {
       </EmptyListMessage>
     );
 
-  const toolsPanelOpen = sidePanelOpen && !isSmall;
-
   return (
     <BaseProjectView
       windowTitle={t('translations_view_title')}
@@ -147,22 +160,26 @@ export const Translations = () => {
           }),
         ],
       ]}
-      wrapperProps={{ pb: 0 }}
+      wrapperProps={{ style: { paddingBottom: 0, paddingTop: '3px' } }}
+      rightPanelContent={(width) => <AiPlayground width={width} />}
+      branching={!branchingDisabled}
     >
       <BatchOperationsChangeIndicator />
-      {prefilter && <Prefilter prefilter={prefilter} />}
       <TranslationsHeader />
       <StyledContainer>
         {translationsEmpty ? (
           renderPlaceholder()
         ) : view === 'TABLE' ? (
-          <TranslationsTable key="table" toolsPanelOpen={toolsPanelOpen} />
+          <TranslationsTable key="table" width={mainContentWidth} />
         ) : (
-          <TranslationsList key="list" toolsPanelOpen={toolsPanelOpen} />
+          <TranslationsList key="list" width={mainContentWidth} />
         )}
-        {toolsPanelOpen && <FloatingToolsPanel />}
+        {Boolean(sidePanelWidth) && (
+          <FloatingToolsPanel width={sidePanelWidth} />
+        )}
       </StyledContainer>
       <TranslationsToolbar />
+      <TranslationsTaskDetail />
     </BaseProjectView>
   );
 };

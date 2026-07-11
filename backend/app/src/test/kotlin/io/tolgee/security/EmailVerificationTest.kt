@@ -4,6 +4,7 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.fixtures.EmailTestUtil
+import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.testing.AbstractControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -24,8 +25,11 @@ class EmailVerificationTest : AbstractControllerTest() {
   @Autowired
   override lateinit var tolgeeProperties: TolgeeProperties
 
+  private var defaultFrontendUrl: String? = null
+
   @BeforeEach
   fun setup() {
+    defaultFrontendUrl = tolgeeProperties.frontEndUrl
     resetProperties()
     tolgeeProperties.authentication.needsEmailVerification = true
     emailTestUtil.initMocks()
@@ -38,7 +42,7 @@ class EmailVerificationTest : AbstractControllerTest() {
 
   private fun resetProperties() {
     tolgeeProperties.authentication.needsEmailVerification = false
-    tolgeeProperties.frontEndUrl = "dummy_frontend_url"
+    tolgeeProperties.frontEndUrl = defaultFrontendUrl
     tolgeeProperties.smtp.from = "aaa@aaa.aa"
   }
 
@@ -62,8 +66,10 @@ class EmailVerificationTest : AbstractControllerTest() {
   fun verifiesEmail() {
     val createUser = dbPopulator.createUserIfNotExists(initialUsername)
     val emailVerification = emailVerificationService.createForUser(createUser)
-    mvc.perform(get("/api/public/verify_email/${createUser.id}/${emailVerification!!.code}"))
-      .andExpect(status().isOk).andReturn()
+    mvc
+      .perform(get("/api/public/verify_email/${createUser.id}/${emailVerification!!.code}"))
+      .andExpect(status().isOk)
+      .andReturn()
 
     assertThat(emailVerificationRepository.findById(emailVerification.id!!)).isEmpty
   }
@@ -73,18 +79,35 @@ class EmailVerificationTest : AbstractControllerTest() {
   fun verifiesNewEmail() {
     val createUser = dbPopulator.createUserIfNotExists(initialUsername)
     val emailVerification = emailVerificationService.createForUser(createUser, newEmail = "this.is@new.email")
-    mvc.perform(get("/api/public/verify_email/${createUser.id}/${emailVerification!!.code}"))
-      .andExpect(status().isOk).andReturn()
+    mvc
+      .perform(get("/api/public/verify_email/${createUser.id}/${emailVerification!!.code}"))
+      .andExpect(status().isOk)
+      .andReturn()
     assertThat(emailVerificationRepository.findById(emailVerification.id!!)).isEmpty
     assertThat(userAccountService.findActive(createUser.username)!!.username).isEqualTo("this.is@new.email")
+  }
+
+  @Test
+  @Transactional
+  fun verifiesNewEmailLowercased() {
+    val createUser = dbPopulator.createUserIfNotExists(initialUsername)
+    val emailVerification = emailVerificationService.createForUser(createUser, newEmail = "This.Is@New.Email")
+    mvc
+      .perform(get("/api/public/verify_email/${createUser.id}/${emailVerification!!.code}"))
+      .andExpect(status().isOk)
+      .andReturn()
+    assertThat(emailVerificationRepository.findById(emailVerification.id!!)).isEmpty
+    assertThat(userAccountService.findActive("this.is@new.email")!!.username).isEqualTo("this.is@new.email")
   }
 
   @Test
   fun doesNotVerifyWithWrongCode() {
     val createUser = dbPopulator.createUserIfNotExists(initialUsername)
     val emailVerification = emailVerificationService.createForUser(createUser)
-    mvc.perform(get("/api/public/verify_email/${createUser.id}/wrong_code"))
-      .andExpect(status().isBadRequest).andReturn()
+    mvc
+      .perform(get("/api/public/verify_email/${createUser.id}/wrong_code"))
+      .andExpect(status().isBadRequest)
+      .andReturn()
 
     assertThat(emailVerificationRepository.findById(emailVerification!!.id!!)).isPresent
   }
@@ -94,8 +117,10 @@ class EmailVerificationTest : AbstractControllerTest() {
   fun doesNotVerifyWithWrongUser() {
     val createUser = dbPopulator.createUserIfNotExists(initialUsername)
     val emailVerification = emailVerificationService.createForUser(createUser)
-    mvc.perform(get("/api/public/verify_email/${createUser.id + 1L}/${emailVerification!!.code}"))
-      .andExpect(status().isNotFound).andReturn()
+    mvc
+      .perform(get("/api/public/verify_email/${createUser.id + 1L}/${emailVerification!!.code}"))
+      .andExpect(status().isNotFound)
+      .andReturn()
 
     assertThat(emailVerificationRepository.findById(emailVerification.id!!)).isPresent
   }
@@ -103,13 +128,13 @@ class EmailVerificationTest : AbstractControllerTest() {
   val signUpDto = SignUpDto("Test Name", "aaa@aaa.com", null, "testtest")
 
   protected fun perform(): MvcResult {
-    return mvc.perform(
-      post("/api/public/sign_up")
-        .content(mapper.writeValueAsString(signUpDto))
-        .accept(MediaType.ALL)
-        .contentType(MediaType.APPLICATION_JSON),
-    )
-      .andReturn()
+    return mvc
+      .perform(
+        post("/api/public/sign_up")
+          .content(mapper.writeValueAsString(signUpDto))
+          .accept(MediaType.ALL)
+          .contentType(MediaType.APPLICATION_JSON),
+      ).andReturn()
   }
 
   @Test
@@ -120,7 +145,7 @@ class EmailVerificationTest : AbstractControllerTest() {
 
     assertThat(emailTestUtil.messageArgumentCaptor.firstValue.subject).isEqualTo("Tolgee e-mail verification")
 
-    assertThat(getMessageContent()).contains("dummy_frontend_url/login/verify_email/${user.id}/")
+    assertThat(getMessageContent()).contains("https://dummy-url.com/login/verify_email/${user.id}/")
 
     assertThat(userAccountService.findActive(user.id)).isNotNull
   }
@@ -131,7 +156,7 @@ class EmailVerificationTest : AbstractControllerTest() {
     perform()
     val user = userAccountService.findActive(signUpDto.email) ?: throw NotFoundException()
 
-    assertThat(getMessageContent()).contains("dummy_frontend_url/login/verify_email/${user.id}/")
+    assertThat(getMessageContent()).contains("https://dummy-url.com/login/verify_email/${user.id}/")
 
     assertThat(userAccountService.findActive(user.id)).isNotNull
   }
@@ -150,5 +175,30 @@ class EmailVerificationTest : AbstractControllerTest() {
     val user = userAccountService.findActive(signUpDto.email) ?: throw NotFoundException()
 
     assertThat(getMessageContent()).contains("dummyCallbackUrl/login/verify_email/${user.id}/")
+  }
+
+  @Test
+  @Transactional
+  fun `resend preserves new email and sends to it`() {
+    val user = dbPopulator.createUserIfNotExists(initialUsername)
+    emailVerificationService.createForUser(user, newEmail = "new@email.com")
+
+    // Clear the mock to only capture the resend
+    emailTestUtil.initMocks()
+
+    // Resend without explicit newEmail — should preserve the pending new email
+    emailVerificationService.resendEmailVerification(
+      user,
+      org.springframework.mock.web
+        .MockHttpServletRequest(),
+    )
+
+    // newEmail should still be set in the DB
+    val verification = emailVerificationRepository.findById(user.emailVerification!!.id!!).get()
+    assertThat(verification.newEmail).isEqualTo("new@email.com")
+
+    // Email should be sent to the new address, not the old one
+    emailTestUtil.verifyEmailSent()
+    emailTestUtil.assertEmailTo.isEqualTo("new@email.com")
   }
 }

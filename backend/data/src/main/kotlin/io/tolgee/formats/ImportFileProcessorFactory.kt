@@ -2,16 +2,21 @@ package io.tolgee.formats
 
 import StringsdictFileProcessor
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.exceptions.ImportCannotParseFileException
-import io.tolgee.formats.android.`in`.AndroidStringsXmlProcessor
 import io.tolgee.formats.apple.`in`.strings.StringsFileProcessor
+import io.tolgee.formats.apple.`in`.xcstrings.XcstringsFileProcessor
+import io.tolgee.formats.csv.`in`.CsvFileProcessor
 import io.tolgee.formats.flutter.`in`.FlutterArbFileProcessor
 import io.tolgee.formats.importCommon.ImportFileFormat
 import io.tolgee.formats.json.`in`.JsonFileProcessor
 import io.tolgee.formats.po.`in`.PoFileProcessor
 import io.tolgee.formats.properties.`in`.PropertiesFileProcessor
+import io.tolgee.formats.resx.`in`.ResxProcessor
 import io.tolgee.formats.xliff.`in`.XliffFileProcessor
+import io.tolgee.formats.xlsx.`in`.XlsxFileProcessor
+import io.tolgee.formats.xmlResources.`in`.XmlResourcesProcessor
 import io.tolgee.formats.yaml.`in`.YamlFileProcessor
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 import io.tolgee.service.dataImport.processors.ImportArchiveProcessor
@@ -24,11 +29,12 @@ class ImportFileProcessorFactory(
   private val objectMapper: ObjectMapper,
   @Qualifier("yamlObjectMapper")
   private val yamlObjectMapper: ObjectMapper,
+  private val tolgeeProperties: TolgeeProperties,
 ) {
   fun getArchiveProcessor(file: ImportFileDto): ImportArchiveProcessor {
     return when (file.name.fileNameExtension) {
-      "zip" -> ZipTypeProcessor()
-      else -> throw ImportCannotParseFileException(file.name, "No matching processor")
+      "zip" -> ZipTypeProcessor(tolgeeProperties.maxUploadFileSize.toLong() * 1024L)
+      else -> throw noMatchingProcessorException(file.name, listOf("zip"))
     }
   }
 
@@ -39,9 +45,17 @@ class ImportFileProcessorFactory(
     val format =
       findFormatInMapping(context)
         ?: ImportFileFormat.findByExtension(file.name.fileNameExtension)
-        ?: throw ImportCannotParseFileException(file.name, "No matching processor")
+        ?: throw noMatchingProcessorException(file.name, ImportFileFormat.supportedExtensions)
 
     return getProcessor(format, context)
+  }
+
+  private fun noMatchingProcessorException(
+    filename: String,
+    supportedExtensions: List<String>,
+  ): ImportCannotParseFileException {
+    val message = "No matching processor. Supported file extensions: ${supportedExtensions.joinToString(", ")}"
+    return ImportCannotParseFileException(filename, message)
   }
 
   private fun findFormatInMapping(context: FileProcessorContext) = context.mapping?.format?.fileFormat
@@ -57,9 +71,13 @@ class ImportFileProcessorFactory(
       ImportFileFormat.STRINGSDICT -> StringsdictFileProcessor(context)
       ImportFileFormat.XLIFF -> XliffFileProcessor(context)
       ImportFileFormat.PROPERTIES -> PropertiesFileProcessor(context)
-      ImportFileFormat.XML -> AndroidStringsXmlProcessor(context)
+      ImportFileFormat.XML -> XmlResourcesProcessor(context)
       ImportFileFormat.ARB -> FlutterArbFileProcessor(context, objectMapper)
       ImportFileFormat.YAML -> YamlFileProcessor(context, yamlObjectMapper)
+      ImportFileFormat.CSV -> CsvFileProcessor(context)
+      ImportFileFormat.RESX -> ResxProcessor(context)
+      ImportFileFormat.XLSX -> XlsxFileProcessor(context)
+      ImportFileFormat.XCSTRINGS -> XcstringsFileProcessor(context, objectMapper)
     }
   }
 

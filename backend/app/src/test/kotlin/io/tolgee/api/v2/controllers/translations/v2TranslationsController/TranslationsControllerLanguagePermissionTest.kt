@@ -84,20 +84,22 @@ class TranslationsControllerLanguagePermissionTest : ProjectAuthControllerTest("
   @ProjectJWTAuthTestMethod
   fun `returns only permitted languages (all translation endpoint)`() {
     userAccount = testData.viewEnOnlyUser
-    performProjectAuthGet("/translations/en,de").andAssertThatJson {
-      node("de").isAbsent()
-      node("en").isPresent
-    }.andIsOk
+    performProjectAuthGet("/translations/en,de")
+      .andAssertThatJson {
+        node("de").isAbsent()
+        node("en").isPresent
+      }.andIsOk
   }
 
   @Test
   @ProjectJWTAuthTestMethod
   fun `returns only permitted languages (translation view endpoint)`() {
     userAccount = testData.viewEnOnlyUser
-    performProjectAuthGet("/translations?languages=en&languages=de").andAssertThatJson {
-      node("_embedded.keys[0].translations.de").isAbsent()
-      node("_embedded.keys[0].translations.en").isPresent
-    }.andIsOk
+    performProjectAuthGet("/translations?languages=en&languages=de")
+      .andAssertThatJson {
+        node("_embedded.keys[0].translations.de").isAbsent()
+        node("_embedded.keys[0].translations.en").isPresent
+      }.andIsOk
   }
 
   private fun performUpdate(lang: String) =

@@ -18,7 +18,7 @@ type Props = {
   onChange: (value: string) => void;
 };
 
-export const NamespaceNewDialog: React.FC<Props> = ({
+export const NamespaceNewDialog: React.FC<React.PropsWithChildren<Props>> = ({
   namespace,
   onClose,
   onChange,

@@ -10,7 +10,9 @@ import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
 
 @Component
-class ActivityDatabaseInterceptor : Interceptor, Logging {
+class ActivityDatabaseInterceptor :
+  Interceptor,
+  Logging {
   @Autowired
   lateinit var applicationContext: ApplicationContext
 
@@ -61,7 +63,7 @@ class ActivityDatabaseInterceptor : Interceptor, Logging {
     propertyNames: Array<out String>?,
     types: Array<out Type>?,
   ): Boolean {
-    preCommitEventsPublisher.onUpdate(entity)
+    preCommitEventsPublisher.onUpdate(entity, previousState, propertyNames)
     interceptedEventsManager.onFieldModificationsActivity(
       entity,
       currentState,

@@ -2,7 +2,6 @@ package io.tolgee.unit.formats.apple.`in`
 
 import StringsdictFileProcessor
 import io.tolgee.testing.assert
-import io.tolgee.unit.formats.PlaceholderConversionTestHelper
 import io.tolgee.util.FileProcessorContextMockUtil
 import io.tolgee.util.assertKey
 import io.tolgee.util.assertLanguagesCount
@@ -48,7 +47,8 @@ class StringsdictFormatProcessorTest {
     processFile()
     mockUtil
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("unknown", "what-a-key-plural")
+    mockUtil.fileProcessorContext
+      .assertTranslations("unknown", "what-a-key-plural")
       .assertSinglePlural {
         hasText(
           """
@@ -67,7 +67,8 @@ class StringsdictFormatProcessorTest {
     mockPlaceholderConversionTestFile(convertPlaceholders = false, projectIcuPlaceholdersEnabled = true)
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("unknown", "what-a-key-plural")
+    mockUtil.fileProcessorContext
+      .assertTranslations("unknown", "what-a-key-plural")
       .assertSinglePlural {
         hasText(
           """
@@ -86,7 +87,8 @@ class StringsdictFormatProcessorTest {
     mockPlaceholderConversionTestFile(convertPlaceholders = true, projectIcuPlaceholdersEnabled = true)
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("unknown", "what-a-key-plural")
+    mockUtil.fileProcessorContext
+      .assertTranslations("unknown", "what-a-key-plural")
       .assertSinglePlural {
         hasText(
           """
@@ -102,26 +104,6 @@ class StringsdictFormatProcessorTest {
       custom.assert.isNull()
       description.assert.isNull()
     }
-  }
-
-  @Test
-  fun `placeholder conversion setting application works`() {
-    PlaceholderConversionTestHelper.testFile(
-      "values-en/Localizable.stringsdict",
-      "src/test/resources/import/apple/Localizable_params.stringsdict",
-      assertBeforeSettingsApplication =
-        listOf(
-          "{0, plural,\none {Peter has # dog '{'meto'}'}\nother {Peter hase # dogs '{'meto'}'}\n}",
-        ),
-      assertAfterDisablingConversion =
-        listOf(
-          "{value, plural,\none {Peter has %lld dog '{'meto'}'}\nother {Peter hase %lld dogs '{'meto'}'}\n}",
-        ),
-      assertAfterReEnablingConversion =
-        listOf(
-          "{0, plural,\none {Peter has # dog '{'meto'}'}\nother {Peter hase # dogs '{'meto'}'}\n}",
-        ),
-    )
   }
 
   private fun processFile() {

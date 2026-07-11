@@ -52,20 +52,22 @@ class GenericMapPluralImportRawDataConvertor(
   ): MessageConvertorResult? {
     var pluralArgName = DEFAULT_PLURAL_ARGUMENT_NAME
     val converted =
-      rawData.mapNotNull { (key, value) ->
-        if (key !is String || value !is String?) {
-          return null
-        }
-        if (value == null) {
-          return@mapNotNull null
-        }
-        val convertedMessage = baseImportRawDataConverter.convertMessage(value, true)
-        val message = convertedMessage.message ?: return@mapNotNull null
-        convertedMessage.pluralArgName?.let {
-          pluralArgName = it
-        }
-        key to message
-      }.toMap().toIcuPluralString(optimize = optimizePlurals, argName = pluralArgName)
+      rawData
+        .mapNotNull { (key, value) ->
+          if (key !is String || value !is String?) {
+            return null
+          }
+          if (value == null) {
+            return@mapNotNull null
+          }
+          val convertedMessage = baseImportRawDataConverter.convertMessage(value, true)
+          val message = convertedMessage.message ?: return@mapNotNull null
+          convertedMessage.pluralArgName?.let {
+            pluralArgName = it
+          }
+          key to message
+        }.toMap()
+        .toIcuPluralString(optimize = optimizePlurals, argName = pluralArgName)
 
     return MessageConvertorResult(converted, pluralArgName)
   }

@@ -10,6 +10,7 @@ class AutoTranslateTestData : BaseTestData() {
   lateinit var spanishLanguage: Language
   lateinit var baseTranslationNotExistKey: Key
   lateinit var baseTranslationUntranslated: Key
+  lateinit var keyWithCharLimit: Key
 
   init {
     root.apply {
@@ -85,19 +86,25 @@ class AutoTranslateTestData : BaseTestData() {
             language = germanLanguage
           }
         }
+        addKey {
+          name = "key-with-char-limit"
+          maxCharLimit = 5
+          keyWithCharLimit = this
+        }
       }
     }
   }
 
   fun createAnotherThisIsBeautifulKey(): Key {
-    return projectBuilder.addKey {
-      name = "another-this-is-b"
-    }.build {
-      addTranslation {
-        language = englishLanguage
-        text = "This is beautiful"
-      }
-    }.self
+    return projectBuilder
+      .addKey {
+        name = "another-this-is-b"
+      }.build {
+        addTranslation {
+          language = englishLanguage
+          text = "This is beautiful"
+        }
+      }.self
   }
 
   fun disableAutoTranslating() {

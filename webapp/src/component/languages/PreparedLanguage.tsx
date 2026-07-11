@@ -1,9 +1,10 @@
-import { Box, IconButton, styled } from '@mui/material';
-import { Close, Edit } from '@mui/icons-material';
+import { Box, IconButton, styled, Tooltip } from '@mui/material';
+import { XClose, Edit02 } from '@untitled-ui/icons-react';
 
 import { components } from 'tg.service/apiSchema.generated';
 
-import { FlagImage } from './FlagImage';
+import { FlagImage } from '@tginternal/library/components/languages/FlagImage';
+import { useTranslate } from '@tolgee/react';
 
 const StyledContainer = styled('div')`
   background: ${({ theme }) => theme.palette.languageChips.background};
@@ -30,11 +31,14 @@ const StyledIconButton = styled(IconButton)`
 `;
 
 export const PreparedLanguage: React.FC<
-  components['schemas']['LanguageRequest'] & {
-    onReset: () => void;
-    onEdit: () => void;
-  }
+  React.PropsWithChildren<
+    components['schemas']['LanguageRequest'] & {
+      onReset: () => void;
+      onEdit: () => void;
+    }
+  >
 > = (props) => {
+  const { t } = useTranslate();
   return (
     <>
       <StyledContainer data-cy="languages-prepared-language-box">
@@ -43,21 +47,35 @@ export const PreparedLanguage: React.FC<
           {props.name} | {props.originalName} ({props.tag})
         </Box>
         <Box display="flex" alignItems="center">
-          <StyledIconButton
-            data-cy="languages-create-customize-button"
-            size="small"
-            className="editButton"
-            onClick={props.onEdit}
+          <Tooltip
+            title={t('create_project_edit_prepared_languages')}
+            placement="bottom-end"
+            classes={{ tooltip: 'tooltip' }}
+            disableInteractive
           >
-            <Edit />
-          </StyledIconButton>
-          <StyledIconButton
-            size="small"
-            onClick={props.onReset}
-            data-cy="languages-create-cancel-prepared-button"
+            <StyledIconButton
+              data-cy="languages-create-customize-button"
+              size="small"
+              className="editButton"
+              onClick={props.onEdit}
+            >
+              <Edit02 />
+            </StyledIconButton>
+          </Tooltip>
+          <Tooltip
+            title={t('create_project_remove_prepared_languages')}
+            placement="bottom-end"
+            classes={{ tooltip: 'tooltip' }}
+            disableInteractive
           >
-            <Close />
-          </StyledIconButton>
+            <StyledIconButton
+              size="small"
+              onClick={props.onReset}
+              data-cy="languages-create-cancel-prepared-button"
+            >
+              <XClose />
+            </StyledIconButton>
+          </Tooltip>
         </Box>
       </StyledContainer>
     </>

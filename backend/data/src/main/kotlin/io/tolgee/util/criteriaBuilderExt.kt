@@ -8,54 +8,59 @@ import jakarta.persistence.criteria.Expression
 import jakarta.persistence.criteria.Predicate
 import jakarta.persistence.criteria.Root
 
-fun CriteriaBuilder.greaterThanNullable(
-  expression: Expression<String>,
-  value: String?,
+fun <Y : Comparable<Y>> CriteriaBuilder.greaterThanNullable(
+  expression: Expression<out Y>,
+  value: Y?,
 ): Predicate {
-  if (value == null) {
-    return expression.isNotNull
+  return if (value == null) {
+    expression.isNotNull
+  } else {
+    this.and(expression.isNotNull, this.greaterThan(expression, value))
   }
-  return this.and(expression.isNotNull, this.greaterThan(expression, value))
 }
 
-fun CriteriaBuilder.lessThanNullable(
-  expression: Expression<String>,
-  value: String?,
+fun <Y : Comparable<Y>> CriteriaBuilder.lessThanNullable(
+  expression: Expression<out Y>,
+  value: Y?,
 ): Predicate {
-  if (value == null) {
-    return this.isTrue(this.literal(false))
+  return if (value == null) {
+    this.isTrue(this.literal(false))
+  } else {
+    this.or(expression.isNull, this.lessThan(expression, value))
   }
-  return this.or(expression.isNull, this.lessThan(expression, value))
 }
 
-fun CriteriaBuilder.greaterThanOrEqualToNullable(
-  expression: Expression<String>,
-  value: String?,
+fun <Y : Comparable<Y>> CriteriaBuilder.greaterThanOrEqualToNullable(
+  expression: Expression<out Y>,
+  value: Y?,
 ): Predicate {
-  if (value == null) {
-    return this.isTrue(this.literal(true))
+  return if (value == null) {
+    this.isTrue(this.literal(true))
+  } else {
+    this.and(expression.isNotNull, this.greaterThanOrEqualTo(expression, value))
   }
-  return this.and(expression.isNotNull, this.greaterThanOrEqualTo(expression, value))
 }
 
-fun CriteriaBuilder.lessThanOrEqualToNullable(
-  expression: Expression<String>,
-  value: String?,
+fun <Y : Comparable<Y>> CriteriaBuilder.lessThanOrEqualToNullable(
+  expression: Expression<out Y>,
+  value: Y?,
 ): Predicate {
-  if (value == null) {
-    return this.isNull(expression)
+  return if (value == null) {
+    this.isNull(expression)
+  } else {
+    this.or(expression.isNull, this.lessThanOrEqualTo(expression, value))
   }
-  return this.or(expression.isNull, this.lessThanOrEqualTo(expression, value))
 }
 
-fun CriteriaBuilder.equalNullable(
-  expression: Expression<String>,
-  value: Any?,
+fun <Y> CriteriaBuilder.equalNullable(
+  expression: Expression<out Y>,
+  value: Y?,
 ): Predicate {
-  if (value == null) {
-    return this.isNull(expression)
+  return if (value == null) {
+    this.isNull(expression)
+  } else {
+    this.equal(expression, value)
   }
-  return this.equal(expression, value)
 }
 
 inline fun <reified RootT, reified Result> EntityManager.query(

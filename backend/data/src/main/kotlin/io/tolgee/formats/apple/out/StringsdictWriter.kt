@@ -2,6 +2,7 @@ package io.tolgee.formats.apple.out
 
 import io.tolgee.formats.MobileStringEscaper
 import io.tolgee.formats.paramConvertors.`in`.AppleToIcuPlaceholderConvertor.Companion.APPLE_PLACEHOLDER_REGEX
+import io.tolgee.util.replaceEntire
 import org.dom4j.Document
 import org.dom4j.DocumentHelper
 import org.dom4j.Element
@@ -99,16 +100,16 @@ class StringsdictWriter {
   }
 
   private fun getFormatSpecSignFromStrings(strings: Collection<String>): String? {
-    val mostCommon = mostCommonMatch(strings)
-    val filtered = mostCommon.filter { it != "%@" }
-    filtered.firstOrNull { it == "%d" || it == "%f" || it == "%lld" }?.let { return it.withoutPercentSign }
-    return filtered.firstOrNull()?.withoutPercentSign
+    val mostCommon = mostCommonMatch(strings).mapNotNull { it.onlyPlaceholderType }
+    val filtered = mostCommon.filter { it != "@" }.toList()
+    filtered.firstOrNull { it == "d" || it == "f" || it == "lld" }?.let { return it }
+    return filtered.firstOrNull()
   }
 
-  private val String.withoutPercentSign: String
-    get() = this.replace("^%".toRegex(), "")
+  private val String.onlyPlaceholderType: String?
+    get() = APPLE_PLACEHOLDER_REGEX.replaceEntire(this, "${'$'}{length}${'$'}{specifier}")
 
-  private fun mostCommonMatch(strings: Collection<String>): List<String> {
+  private fun mostCommonMatch(strings: Collection<String>): Sequence<String> {
     val matches = LinkedHashMap<String, Int>()
     for (str in strings) {
       val matchResult = APPLE_PLACEHOLDER_REGEX.findAll(str)
@@ -117,7 +118,10 @@ class StringsdictWriter {
         matches[matchText] = matches.getOrDefault(matchText, 0) + 1
       }
     }
-    return matches.asSequence().sortedByDescending { it.value }.map { it.key }.toList()
+    return matches
+      .asSequence()
+      .sortedByDescending { it.value }
+      .map { it.key }
   }
 
   private fun String.escaped(): String {

@@ -5,8 +5,9 @@ import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 const StyledDangerZone = styled(Box)`
   display: grid;
   border-radius: ${({ theme }) => theme.shape.borderRadius}px;
-  border: 1px solid ${({ theme }) => theme.palette.emphasis[300]};
+  border: 1px solid ${({ theme }) => theme.palette.tokens.border.secondary};
   gap: 16px;
+  background: ${({ theme }) => theme.palette.tokens.background.danger};
 `;
 
 const StyledDangerZonePart = styled(Box)`
@@ -23,7 +24,9 @@ type Props = {
   actions: DangerAction[];
 };
 
-export const DangerZone: React.FC<Props> = ({ actions }) => {
+export const DangerZone: React.FC<React.PropsWithChildren<Props>> = ({
+  actions,
+}) => {
   const rightPanelWidth = useGlobalContext((c) => c.layout.rightPanelWidth);
   const isSmOrLower = useMediaQuery(
     `@container (max-width: ${899 + rightPanelWidth}px)`

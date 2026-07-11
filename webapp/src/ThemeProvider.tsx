@@ -2,7 +2,6 @@ import React, { useContext, useState } from 'react';
 import { createTheme, PaletteMode, useMediaQuery } from '@mui/material';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 
-import { TOP_BAR_HEIGHT } from 'tg.component/layout/TopBar/TopBar';
 // @ts-ignore
 import RighteousLatinExtWoff2 from './fonts/Righteous/righteous-latin-ext.woff2';
 // @ts-ignore
@@ -10,13 +9,15 @@ import RighteousLatinWoff2 from './fonts/Righteous/righteous-latin.woff2';
 // @ts-ignore
 import RubikWoff2 from './fonts/Rubik/Rubik-Regular.woff2';
 import { colors } from './colors';
-import { tolgeeColors, tolgeePalette } from 'figmaTheme';
+import { tolgeeColors, tolgeePalette } from './figmaTheme';
+import { fromFigmaColor } from 'tg.fixtures/figma';
 
 const LOCALSTORAGE_THEME_MODE = 'themeMode';
 
 const { palette } = createTheme();
 const { augmentColor } = palette;
-const createColor = (mainColor) => augmentColor({ color: { main: mainColor } });
+const createColor = (mainColor: string) =>
+  augmentColor({ color: { main: mainColor } });
 
 const rubik = {
   fontFamily: 'Rubik',
@@ -60,7 +61,7 @@ const righteousLatinExt = {
     'U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF',
 };
 
-const getTheme = (mode: PaletteMode) => {
+export const getTheme = (mode: PaletteMode) => {
   const c = mode === 'light' ? colors.light : colors.dark;
   const tPalette = mode === 'light' ? tolgeePalette.Light : tolgeePalette.Dark;
 
@@ -124,13 +125,13 @@ const getTheme = (mode: PaletteMode) => {
     },
     palette: {
       mode,
-      primary: tPalette.primary,
+      primary: fromFigmaColor(tPalette.primary),
       primaryText: c.primaryText,
-      secondary: tPalette.secondary,
+      secondary: fromFigmaColor(tPalette.secondary),
       default: createColor(c.default),
-      info: tPalette.info,
-      warning: tPalette.warning,
-      error: tPalette.error,
+      info: fromFigmaColor(tPalette.info),
+      warning: fromFigmaColor(tPalette.warning),
+      error: fromFigmaColor(tPalette.error),
       common: {
         white: c.white,
       },
@@ -164,10 +165,11 @@ const getTheme = (mode: PaletteMode) => {
       login: c.login,
       input: c.input,
       revisionFilterBanner: c.revisionFilterBanner,
+      label: tPalette.label,
     },
     mixins: {
       toolbar: {
-        minHeight: TOP_BAR_HEIGHT,
+        minHeight: 52,
       },
     },
     components: {
@@ -225,10 +227,18 @@ const getTheme = (mode: PaletteMode) => {
             borderRadius: 3,
             padding: '6px 16px',
             minHeight: 40,
+            '&.Mui-disabled.MuiButton-containedPrimary': {
+              backgroundColor: tPalette.primary.disabled,
+            },
+            '&.Mui-disabled.MuiButton-containedSecondary': {
+              backgroundColor: tPalette.secondary.disabled,
+            },
           },
           sizeSmall: {
-            minHeight: 32,
-            padding: '4px 16px',
+            minHeight: 30,
+            padding: '4px 10px',
+            fontSize: '13px',
+            lineHeight: 'normal',
           },
         },
       },
@@ -268,10 +278,30 @@ const getTheme = (mode: PaletteMode) => {
           },
         },
       },
+      MuiMenu: {
+        styleOverrides: {
+          list: {
+            paddingTop: 8,
+            paddingBottom: 8,
+          },
+        },
+      },
+      MuiMenuItem: {
+        styleOverrides: {
+          root: {
+            '&.Mui-focusVisible': {
+              backgroundColor: tPalette.text._states.hover,
+            },
+          },
+        },
+      },
       MuiLink: {
         styleOverrides: {
           root: {
             textDecoration: 'none',
+            '&:hover': {
+              textDecoration: 'underline',
+            },
           },
         },
       },
@@ -286,6 +316,12 @@ const getTheme = (mode: PaletteMode) => {
   });
 };
 
+declare module '@mui/material/Button' {
+  interface ButtonPropsColorOverrides {
+    contrast: true;
+  }
+}
+
 const ThemeContext = React.createContext({
   mode: undefined as PaletteMode | undefined,
   setMode: (mode: PaletteMode | undefined) => {},
@@ -293,7 +329,9 @@ const ThemeContext = React.createContext({
 
 export const useThemeContext = () => useContext(ThemeContext);
 
-export const ThemeProvider: React.FC = ({ children }) => {
+export const ThemeProvider: React.FC<React.PropsWithChildren<unknown>> = ({
+  children,
+}) => {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)', {
     noSsr: true,
   });

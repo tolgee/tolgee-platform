@@ -17,7 +17,10 @@ import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { useTranslationsActions } from '../context/TranslationsContext';
+import {
+  useTranslationsActions,
+  useTranslationsSelector,
+} from '../context/TranslationsContext';
 import { confirmation } from 'tg.hooks/confirmation';
 import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
@@ -26,10 +29,9 @@ type Props = {
   onClose: () => void;
 };
 
-export const NamespaceRenameDialog: React.FC<Props> = ({
-  namespace,
-  onClose,
-}) => {
+export const NamespaceRenameDialog: React.FC<
+  React.PropsWithChildren<Props>
+> = ({ namespace, onClose }) => {
   const { t } = useTranslate();
 
   const { name, id } = namespace;
@@ -37,12 +39,16 @@ export const NamespaceRenameDialog: React.FC<Props> = ({
   const project = useProject();
 
   const messaging = useMessage();
-  const { refetchTranslations } = useTranslationsActions();
+  const { refetchTranslations, addFilter, removeFilter } =
+    useTranslationsActions();
+
+  const filters = useTranslationsSelector((c) => c.filters);
+  const isActive = filters['filterNamespace']?.includes(name);
 
   const namespaceUpdate = useApiMutation({
     url: '/v2/projects/{projectId}/namespaces/{id}',
     method: 'put',
-    invalidatePrefix: '/v2/projects/{projectId}/',
+    invalidatePrefix: '/v2/projects/{projectId}',
     options: {
       onSuccess() {
         refetchTranslations();
@@ -79,6 +85,10 @@ export const NamespaceRenameDialog: React.FC<Props> = ({
                       messaging.success(
                         <T keyName="namespace_rename_success" />
                       );
+                      if (isActive) {
+                        removeFilter('filterNamespace', name);
+                        addFilter('filterNamespace', values.namespace);
+                      }
                       onClose();
                     },
                   }

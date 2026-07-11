@@ -38,7 +38,8 @@ class CachingBatchJobService(
   )
   fun setRunningState(jobId: Long) {
     logger.debug("Setting running state for job $jobId")
-    entityManager.createQuery("""update BatchJob set status = :status where id = :id and status = :pendingStatus""")
+    entityManager
+      .createQuery("""update BatchJob set status = :status where id = :id and status = :pendingStatus""")
       .setParameter("status", BatchJobStatus.RUNNING)
       .setParameter("id", jobId)
       .setParameter("pendingStatus", BatchJobStatus.PENDING)

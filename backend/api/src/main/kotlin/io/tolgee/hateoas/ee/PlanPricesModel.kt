@@ -13,4 +13,6 @@ open class PlanPricesModel(
   val perThousandMtCredits: BigDecimal? = BigDecimal.ZERO,
   val subscriptionMonthly: BigDecimal = BigDecimal.ZERO,
   val subscriptionYearly: BigDecimal = BigDecimal.ZERO,
-) : RepresentationModel<PlanPricesModel>(), Serializable
+  val perThousandKeys: BigDecimal = BigDecimal.ZERO,
+) : RepresentationModel<PlanPricesModel>(),
+  Serializable

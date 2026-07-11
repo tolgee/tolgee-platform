@@ -2,8 +2,9 @@ ext {
     dockerPath = buildDir.absolutePath + "/docker"
 }
 
-task dockerPrepare {
+tasks.register('dockerPrepare') {
     doLast {
+        delete(dockerPath)
         copy {
             from(tasks.unpack.outputs, 'docker/app')
             into(dockerPath)
@@ -17,50 +18,64 @@ task dockerPrepare {
     dependsOn("unpack", "copyDist", "copyDockerIgnore", "addVersionFile")
 }
 
-task docker {
+// Builds Docker image for local development.
+// Single platform, no push, tagged as tolgee/tolgee.
+tasks.register('docker') {
     doLast {
         exec {
             workingDir dockerPath
-            commandLine "docker", "build", ".", "-t", "tolgee/tolgee"
-            environment.put("DOCKER_BUILDKIT", "0")
+            commandLine "docker", "build", ".",
+                "-t", "tolgee/tolgee",
+                "--build-arg", "OTEL_AGENT_VERSION=${opentelemetryJavaagentVersion}",
+                "--cache-from", "type=registry,ref=tolgee/tolgee:latest"
         }
     }
     dependsOn("dockerPrepare")
 }
 
-void createDockerBuildxTask(String taskName, boolean isPush) {
-    task(taskName) {
-        doLast {
-            if (project.hasProperty('dockerImageTag')) {
-                def commandParams = ["docker", "buildx", "build", ".", "-t", project.property('dockerImageTag'), "--platform", "linux/arm64,linux/amd64"]
-                if (isPush) {
-                    commandParams += ["--push"]
-                }
-                exec {
-                    workingDir dockerPath
-                    commandLine commandParams
-                }
-            } else {
-                throw new GradleException('A "dockerImageTag" project property must be defined! e.g. ./gradlew dockerBuildx -PdockerImageTag=myImageTag');
-            }
+// Builds and pushes multi-platform Docker image for CI.
+// Reads configuration from environment variables:
+//   - VERSION: image tag version (default: 'latest')
+//   - DOCKER_IMAGE: image name (default: 'tolgee/tolgee')
+//   - DOCKER_CACHE_FROM: cache source (optional, e.g., 'type=registry,ref=tolgee/tolgee:latest')
+//   - DOCKER_CACHE_TO: cache destination (optional, e.g., 'type=inline')
+// Requires: docker buildx create --use (run once before calling this task)
+task dockerPublish {
+    doLast {
+        def version = System.getenv('VERSION') ?: 'latest'
+        def imageName = System.getenv('DOCKER_IMAGE') ?: 'tolgee/tolgee'
+        def tag = "${imageName}:${version}"
+        def cacheFrom = System.getenv('DOCKER_CACHE_FROM')
+        def cacheTo = System.getenv('DOCKER_CACHE_TO')
+
+        def commandParams = ["docker", "buildx", "build", ".",
+            "-t", tag,
+            "--build-arg", "OTEL_AGENT_VERSION=${opentelemetryJavaagentVersion}",
+            "--platform", "linux/arm64,linux/amd64",
+            "--push"]
+
+        if (cacheFrom) {
+            commandParams += ["--cache-from", cacheFrom]
         }
-        dependsOn("dockerPrepare")
+        if (cacheTo) {
+            commandParams += ["--cache-to", cacheTo]
+        }
+
+        exec {
+            workingDir dockerPath
+            commandLine commandParams
+        }
+    }
+    dependsOn("dockerPrepare")
+}
+
+tasks.register('cleanDocker') {
+    doLast {
+        delete(dockerPath)
     }
 }
 
-createDockerBuildxTask("dockerBuildxPush", true)
-createDockerBuildxTask("dockerBuildx", false)
-
-task cleanDocker{
-    delete(dockerPath)
-}
-
-if (tasks.findByName("wrapper") == null) {
-    task wrapper(type: Wrapper) {
-    }
-}
-
-task copyDockerIgnore(type: Copy) {
+tasks.register('copyDockerIgnore', Copy) {
     from "docker/app/.dockerignore"
     into "build/docker"
 }

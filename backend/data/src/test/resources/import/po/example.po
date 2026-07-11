@@ -49,3 +49,9 @@ msgstr "aaa"
 
 msgid "This is a \"quote\""
 msgstr "Dies ist ein \"zitat\""
+
+msgid "Multiline message with \\n"
+msgstr "This\nis\na\nmultiline\nstring"
+
+msgid "Multiline message with \\n\\r"
+msgstr "This\r\nis\r\na\r\nmultiline\r\nstring"

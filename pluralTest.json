@@ -1,5 +1,0 @@
-{
-  "test2": "{count, plural, one {# test} other {# tests}}",
-  "test": "No plural!",
-  "hey": "{count, plural, one {# test} other {# tests}}"
-}

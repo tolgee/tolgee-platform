@@ -7,13 +7,14 @@ import {
 } from '../../../common/permissions/main';
 
 describe('Server admin 3', () => {
-  it('admin', () => {
+  it('Server admin', () => {
     visitProjectWithPermissions({ scopes: ['admin'] }).then((projectInfo) => {
       // login as admin
-      login('admin', 'admin');
+      login('Server admin', 'admin');
       checkPermissions(projectInfo, {
         'project-menu-item-dashboard': SKIP,
         'project-menu-item-translations': SKIP,
+        'project-menu-item-tasks': RUN,
         'project-menu-item-settings': RUN,
         'project-menu-item-languages': RUN,
         'project-menu-item-members': RUN,
@@ -21,6 +22,7 @@ describe('Server admin 3', () => {
         'project-menu-item-export': RUN,
         'project-menu-item-developer': RUN,
         'project-menu-item-integrate': RUN,
+        'project-menu-item-ai': RUN,
       });
     });
   });

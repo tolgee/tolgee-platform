@@ -47,7 +47,7 @@ type Props = {
   noNew?: boolean;
 };
 
-export const TagInput: React.FC<Props> = ({
+export const TagInput: React.FC<React.PropsWithChildren<Props>> = ({
   onClose,
   onAdd,
   className,

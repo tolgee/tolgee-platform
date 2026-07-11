@@ -8,11 +8,15 @@ import io.tolgee.util.appendXmlOrText
 import io.tolgee.util.attr
 import io.tolgee.util.buildDom
 import io.tolgee.util.element
+import io.tolgee.util.sanitizeXmlText
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import java.io.InputStream
 
-class XliffFileWriter(private val xliffModel: XliffModel, private val enableXmlContent: Boolean) {
+class XliffFileWriter(
+  private val xliffModel: XliffModel,
+  private val enableXmlContent: Boolean,
+) {
   private lateinit var xliffElement: Element
 
   fun produceFiles(): InputStream {
@@ -90,7 +94,7 @@ class XliffFileWriter(private val xliffModel: XliffModel, private val enableXmlC
 
   private fun Element.appendXmlIfEnabledOrText(content: String?) {
     if (!enableXmlContent) {
-      textContent = content
+      textContent = sanitizeXmlText(content ?: "")
       return
     }
     this.appendXmlOrText(content)

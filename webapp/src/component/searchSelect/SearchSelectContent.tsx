@@ -6,7 +6,7 @@ import {
   Tooltip,
   FormControl,
 } from '@mui/material';
-import { Add } from '@mui/icons-material';
+import { Plus } from '@untitled-ui/icons-react';
 import { useTranslate } from '@tolgee/react';
 
 import { SelectItem } from './SearchSelect';
@@ -106,8 +106,8 @@ export function SearchSelectContent<T extends React.Key>({
           PaperComponent={PaperComponent}
           renderOption={(props, option) => (
             <StyledCompactMenuItem
-              key={option.value}
               {...props}
+              key={option.value}
               selected={option.value === selected}
               data-cy="search-select-item"
             >
@@ -142,7 +142,7 @@ export function SearchSelectContent<T extends React.Key>({
                     sx={{ ml: 0.5 }}
                     data-cy="search-select-new"
                   >
-                    <Add />
+                    <Plus />
                   </IconButton>
                 </Tooltip>
               )}

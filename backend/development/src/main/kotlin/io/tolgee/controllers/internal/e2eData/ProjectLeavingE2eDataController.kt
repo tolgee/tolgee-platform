@@ -1,22 +1,15 @@
 package io.tolgee.controllers.internal.e2eData
 
-import io.swagger.v3.oas.annotations.Hidden
+import io.tolgee.controllers.internal.InternalController
 import io.tolgee.development.testDataBuilder.TestDataService
 import io.tolgee.development.testDataBuilder.data.ProjectLeavingTestData
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.UserAccountService
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
 
-@RestController
-@CrossOrigin(origins = ["*"])
-@Hidden
-@RequestMapping(value = ["internal/e2e-data/project-leaving"])
-@Transactional
+@InternalController(["internal/e2e-data/project-leaving"])
 class ProjectLeavingE2eDataController(
   private val testDataService: TestDataService,
   private val projectService: ProjectService,

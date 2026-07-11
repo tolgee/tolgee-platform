@@ -27,8 +27,12 @@ export function createExportableProject(): Chainable<ProjectDTO> {
   });
 }
 
-export const visitExport = (projectId: number) => {
-  return cy.visit(`${HOST}/projects/${projectId}/export`);
+export const visitExport = (projectId: number, branchName?: string) => {
+  return cy.visit(
+    `${HOST}/projects/${projectId}/export${
+      branchName ? `/tree/${encodeURIComponent(branchName)}` : ''
+    }`
+  );
 };
 
 export const create4Translations = (projectId: number) => {
@@ -51,6 +55,8 @@ export const exportToggleLanguage = (lang: string) => {
 
 export function assertExportLanguagesSelected(languages: string[]) {
   cy.gcy('export-language-selector').click();
+
+  cy.gcy('export-language-selector-item').should('be.visible');
 
   languages.forEach((language) => {
     cy.gcy('export-language-selector-item')
@@ -130,6 +136,7 @@ export const testExportFormats = (
       format: 'XLIFF',
       expectedParams: {
         format: 'XLIFF',
+        escapeHtml: false,
       },
     }
   );
@@ -162,7 +169,14 @@ export const testExportFormats = (
   });
 
   testFormatWithMessageFormats(
-    ['ICU', 'PHP Sprintf', 'C Sprintf', 'Ruby Sprintf', 'Java String.format'],
+    [
+      'ICU',
+      'PHP Sprintf',
+      'C Sprintf',
+      'Ruby Sprintf',
+      'Java String.format',
+      'Python Percent',
+    ],
     {
       format: 'Gettext (.po)',
       expectedParams: {
@@ -194,6 +208,13 @@ export const testExportFormats = (
   });
 
   testFormat(interceptFn, submitFn, clearCheckboxesAfter, afterFn, {
+    format: 'Compose Multiplatform .xml',
+    expectedParams: {
+      format: 'COMPOSE_XML',
+    },
+  });
+
+  testFormat(interceptFn, submitFn, clearCheckboxesAfter, afterFn, {
     format: 'Flutter .arb',
     expectedParams: {
       format: 'FLUTTER_ARB',
@@ -207,6 +228,41 @@ export const testExportFormats = (
       format: 'YAML_RUBY',
     },
   });
+
+  testFormat(interceptFn, submitFn, clearCheckboxesAfter, afterFn, {
+    format: 'Flat i18next .json',
+    expectedParams: {
+      format: 'JSON_I18NEXT',
+    },
+  });
+
+  testFormat(interceptFn, submitFn, clearCheckboxesAfter, afterFn, {
+    format: 'Structured i18next .json',
+    expectedParams: {
+      format: 'JSON_I18NEXT',
+      structureDelimiter: '.',
+    },
+  });
+
+  testFormatWithMessageFormats(
+    ['ICU', 'PHP Sprintf', 'C Sprintf', 'Ruby Sprintf', 'Java String.format'],
+    {
+      format: 'CSV',
+      expectedParams: {
+        format: 'CSV',
+      },
+    }
+  );
+
+  testFormatWithMessageFormats(
+    ['ICU', 'PHP Sprintf', 'C Sprintf', 'Ruby Sprintf', 'Java String.format'],
+    {
+      format: 'XLSX',
+      expectedParams: {
+        format: 'XLSX',
+      },
+    }
+  );
 };
 
 const testFormat = (
@@ -250,6 +306,7 @@ export type FormatTest = {
     format: string;
     structureDelimiter?: string;
     supportArrays?: boolean;
+    escapeHtml?: boolean;
   };
 };
 
@@ -259,6 +316,8 @@ const messageFormatParamMap = {
   'C Sprintf': 'C_SPRINTF' as MessageFormat,
   'Java String.format': 'JAVA_STRING_FORMAT' as MessageFormat,
   'Ruby Sprintf': 'RUBY_SPRINTF' as MessageFormat,
+  'Python Percent': 'PYTHON_PERCENT' as MessageFormat,
+  'Python Brace Format': 'PYTHON_BRACE' as MessageFormat,
 };
 
 type MessageFormat = components['schemas']['ExportParams']['messageFormat'];
@@ -268,11 +327,13 @@ type SupportedMessageFormat = keyof typeof messageFormatParamMap;
 export const getFileName = (
   projectName: string,
   extension: string,
-  language?: string
+  language?: string,
+  branchName?: string
 ) => {
   const dateStr = '_' + new Date().toISOString().split('T')[0];
   const languageStr = language ? `_${language}` : '';
-  return `${projectName}${languageStr}${dateStr}.${extension}`;
+  const branchStr = branchName ? `(${branchName})` : '';
+  return `${projectName}${branchStr}${languageStr}${dateStr}.${extension}`;
 };
 
 type ZipContentProps = {

@@ -4,6 +4,8 @@ import { diffWordsWithSpace } from 'diff';
 import { DiffValue } from '../types';
 import { getLanguageDirection } from 'tg.fixtures/getLanguageDirection';
 
+const maxDiffLength = 1_000;
+
 const StyledRemoved = styled('span')`
   color: ${({ theme }) => theme.palette.activity.removed};
   text-decoration: line-through;
@@ -21,7 +23,7 @@ export const getTextDiff = (
   const newInput = input?.new;
   const dir = languageTag ? getLanguageDirection(languageTag) : undefined;
   if (oldInput && newInput) {
-    const diffed = diffWordsWithSpace(oldInput, newInput);
+    const diffed = safeDiffWordsWithSpace(oldInput, newInput);
     return (
       <span dir={dir}>
         {diffed.map((part, i) =>
@@ -49,3 +51,18 @@ export const getTextDiff = (
     );
   }
 };
+
+/**
+ * Diffing is very expensive for large texts - freezes the UI.
+ */
+function safeDiffWordsWithSpace(oldInput: string, newInput: string) {
+  const tooLong = newInput.length + oldInput.length > maxDiffLength;
+  if (tooLong) {
+    return [
+      { value: newInput, added: true },
+      { value: oldInput, removed: true },
+    ];
+  }
+
+  return diffWordsWithSpace(oldInput, newInput);
+}

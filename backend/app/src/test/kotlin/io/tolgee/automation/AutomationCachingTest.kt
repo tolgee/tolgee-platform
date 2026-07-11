@@ -17,8 +17,8 @@ import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.cache.Cache
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 
 @AutoConfigureMockMvc
 @ContextRecreatingTest
@@ -34,7 +34,7 @@ class AutomationCachingTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var automationService: AutomationService
 
   @Suppress("LateinitVarOverridesLateinitVar")
-  @SpyBean
+  @MockitoSpyBean
   @Autowired
   override lateinit var entityManager: EntityManager
 
@@ -99,8 +99,10 @@ class AutomationCachingTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   private fun getEntityManagerInvocationsCount() =
-    Mockito.mockingDetails(entityManager)
-      .invocations.count {
+    Mockito
+      .mockingDetails(entityManager)
+      .invocations
+      .count {
         it.method.name == "createQuery" && (it.arguments[0] as? String)?.contains("Automation") == true
       }
 

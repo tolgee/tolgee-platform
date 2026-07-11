@@ -2,11 +2,14 @@ package io.tolgee.activity.data
 
 import io.tolgee.activity.PublicParamsProvider
 import io.tolgee.batch.BatchActivityParamsProvider
+import io.tolgee.batch.BranchMergeActivityParamsProvider
 import io.tolgee.model.EntityWithId
 import io.tolgee.model.Language
+import io.tolgee.model.glossary.Glossary
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyMeta
 import io.tolgee.model.translation.Translation
+import io.tolgee.model.translationMemory.TranslationMemory
 import kotlin.reflect.KClass
 
 enum class ActivityType(
@@ -64,7 +67,13 @@ enum class ActivityType(
   SCREENSHOT_ADD,
   KEY_TAGS_EDIT,
   KEY_NAME_EDIT,
+  KEY_CHARACTER_LIMIT_EDIT,
   KEY_DELETE(true),
+  KEY_SOFT_DELETE(true),
+  KEY_RESTORE,
+  KEY_HARD_DELETE(true),
+  BATCH_KEY_RESTORE(true),
+  BATCH_KEY_HARD_DELETE(true),
   CREATE_KEY(
     typeDefinitions =
       mapOf(
@@ -104,6 +113,8 @@ enum class ActivityType(
   BATCH_TAG_KEYS(true, paramsProvider = BatchActivityParamsProvider::class),
   BATCH_UNTAG_KEYS(true, paramsProvider = BatchActivityParamsProvider::class),
   BATCH_SET_KEYS_NAMESPACE(true, paramsProvider = BatchActivityParamsProvider::class),
+  BATCH_ASSIGN_TRANSLATION_LABEL(true, paramsProvider = BatchActivityParamsProvider::class),
+  BATCH_UNASSIGN_TRANSLATION_LABEL(true, paramsProvider = BatchActivityParamsProvider::class),
   AUTOMATION(onlyCountsInList = true, hideInList = true),
   CONTENT_DELIVERY_CONFIG_CREATE,
   CONTENT_DELIVERY_CONFIG_UPDATE,
@@ -115,4 +126,53 @@ enum class ActivityType(
   WEBHOOK_CONFIG_UPDATE,
   WEBHOOK_CONFIG_DELETE,
   COMPLEX_TAG_OPERATION(onlyCountsInList = true),
+  TASKS_CREATE,
+  TASK_CREATE,
+  TASK_UPDATE,
+  TASK_KEYS_UPDATE,
+  TASK_FINISH,
+  TASK_CLOSE,
+  TASK_REOPEN,
+  TASK_KEY_UPDATE(hideInList = true),
+  ORDER_TRANSLATION,
+  GLOSSARY_CREATE,
+  GLOSSARY_UPDATE,
+  GLOSSARY_DELETE(restrictEntitiesInList = arrayOf(Glossary::class)),
+  GLOSSARY_IMPORT(true),
+  GLOSSARY_TERM_CREATE,
+  GLOSSARY_TERM_UPDATE,
+  GLOSSARY_TERM_DELETE(onlyCountsInList = true),
+  GLOSSARY_TERM_TRANSLATION_UPDATE,
+  TRANSLATION_MEMORY_CREATE,
+  TRANSLATION_MEMORY_UPDATE,
+  TRANSLATION_MEMORY_DELETE(restrictEntitiesInList = arrayOf(TranslationMemory::class)),
+  TRANSLATION_MEMORY_ASSIGN_PROJECT,
+  TRANSLATION_MEMORY_UNASSIGN_PROJECT,
+  TRANSLATION_MEMORY_UPDATE_PROJECT_CONFIG,
+  TRANSLATION_MEMORY_ENTRY_CREATE,
+  TRANSLATION_MEMORY_ENTRY_UPDATE,
+  TRANSLATION_MEMORY_ENTRY_DELETE(onlyCountsInList = true),
+  TRANSLATION_MEMORY_IMPORT(onlyCountsInList = true),
+  TRANSLATION_MEMORY_COPY_FROM_PROJECT(onlyCountsInList = true),
+  TRANSLATION_LABELS_EDIT,
+  TRANSLATION_LABEL_ASSIGN,
+  TRANSLATION_LABEL_CREATE,
+  TRANSLATION_LABEL_UPDATE,
+  TRANSLATION_LABEL_DELETE,
+  CREATE_SUGGESTION,
+  DECLINE_SUGGESTION,
+  ACCEPT_SUGGESTION,
+  REVERSE_SUGGESTION,
+  DELETE_SUGGESTION,
+  SUGGESTION_SET_ACTIVE,
+  AI_PROMPT_CREATE,
+  AI_PROMPT_UPDATE,
+  AI_PROMPT_DELETE,
+  BRANCH_CREATE,
+  BRANCH_RENAME,
+  BRANCH_DELETE,
+  BRANCH_PROTECTION_CHANGE,
+  BRANCH_MERGE(onlyCountsInList = true, paramsProvider = BranchMergeActivityParamsProvider::class),
+  QA_ISSUE_IGNORE,
+  QA_ISSUE_UNIGNORE,
 }

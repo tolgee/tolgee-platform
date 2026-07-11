@@ -11,7 +11,9 @@ import io.tolgee.activity.data.ActivityType
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.project.CreateProjectRequest
 import io.tolgee.dtos.request.project.EditProjectRequest
+import io.tolgee.dtos.request.project.ProjectFilters
 import io.tolgee.dtos.request.project.SetPermissionLanguageParams
+import io.tolgee.dtos.request.task.UserAccountFilters
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.facade.ProjectPermissionFacade
 import io.tolgee.facade.ProjectWithStatsFacade
@@ -20,6 +22,7 @@ import io.tolgee.hateoas.project.ProjectModelAssembler
 import io.tolgee.hateoas.project.ProjectWithStatsModel
 import io.tolgee.hateoas.userAccount.UserAccountInProjectModel
 import io.tolgee.hateoas.userAccount.UserAccountInProjectModelAssembler
+import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.views.ExtendedUserAccountInProject
@@ -35,6 +38,7 @@ import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.ImageUploadService
 import io.tolgee.service.organization.OrganizationRoleService
+import io.tolgee.service.project.ProjectCreationService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.UserAccountService
@@ -42,7 +46,7 @@ import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
-import org.springframework.hateoas.MediaTypes
+import org.springframework.data.web.SortDefault
 import org.springframework.hateoas.PagedModel
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -59,7 +63,7 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 
-@Suppress(names = ["MVCPathVariableInspection", "SpringJavaInjectionPointsAutowiringInspection"])
+@Suppress("MVCPathVariableInspection", "SpringJavaInjectionPointsAutowiringInspection")
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/v2/projects"])
@@ -79,6 +83,7 @@ class ProjectsController(
   private val imageUploadService: ImageUploadService,
   private val projectPermissionFacade: ProjectPermissionFacade,
   private val projectWithStatsFacade: ProjectWithStatsFacade,
+  private val projectCreationService: ProjectCreationService,
 ) {
   @PostMapping(value = [""])
   @Operation(summary = "Create project", description = "Creates a new project with languages and initial settings.")
@@ -90,39 +95,45 @@ class ProjectsController(
     @RequestBody @Valid
     dto: CreateProjectRequest,
   ): ProjectModel {
-    organizationRoleService.checkUserIsOwner(dto.organizationId)
-    val project = projectService.createProject(dto)
+    organizationRoleService.checkUserCanCreateProject(dto.organizationId)
+    val project = projectCreationService.createProject(dto)
+    if (organizationRoleService.getType(dto.organizationId) == OrganizationRoleType.MAINTAINER) {
+      // Maintainers get full access to projects they create
+      permissionService.grantFullAccessToProject(authenticationFacade.authenticatedUserEntity, project)
+    }
     return projectModelAssembler.toModel(projectService.getView(project.id))
   }
 
-  @GetMapping("/{projectId}")
+  @GetMapping("/{projectId:[0-9]+}")
   @Operation(summary = "Get one project")
   @UseDefaultPermissions
   @AllowApiAccess
   @OpenApiOrderExtension(2)
-  fun get(
-    @PathVariable("projectId") projectId: Long,
-  ): ProjectModel {
-    return projectService.getView(projectId).let {
+  fun get(): ProjectModel {
+    return projectService.getView(projectHolder.project.id).let {
       projectModelAssembler.toModel(it)
     }
   }
 
   @Operation(summary = "Get all permitted", description = "Returns all projects where current user has any permission")
-  @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
+  @GetMapping("")
   @IsGlobalRoute
   @AllowApiAccess(tokenType = AuthTokenType.ONLY_PAT)
   @OpenApiOrderExtension(3)
   fun getAll(
-    @ParameterObject pageable: Pageable,
+    @ParameterObject
+    filters: ProjectFilters,
+    @ParameterObject
+    @SortDefault("name")
+    pageable: Pageable,
     @RequestParam("search") search: String?,
   ): PagedModel<ProjectModel> {
-    val projects = projectService.findPermittedInOrganizationPaged(pageable, search)
+    val projects = projectService.findPermittedInOrganizationPaged(pageable, search, filters = filters)
     return arrayResourcesAssembler.toModel(projects, projectModelAssembler)
   }
 
   @Operation(summary = "Update project settings")
-  @PutMapping(value = ["/{projectId}"])
+  @PutMapping(value = ["/{projectId:[0-9]+}"])
   @RequestActivity(ActivityType.EDIT_PROJECT)
   @RequiresProjectPermissions([Scope.PROJECT_EDIT])
   @RequiresSuperAuthentication
@@ -136,7 +147,7 @@ class ProjectsController(
     return projectModelAssembler.toModel(projectService.getView(project.id))
   }
 
-  @DeleteMapping(value = ["/{projectId}"])
+  @DeleteMapping(value = ["/{projectId:[0-9]+}"])
   @Operation(summary = "Delete project")
   @RequiresProjectPermissions([Scope.PROJECT_EDIT])
   @RequiresSuperAuthentication
@@ -152,7 +163,7 @@ class ProjectsController(
     summary = "Get all with stats",
     description = "Returns all projects (including statistics) where current user has any permission",
   )
-  @GetMapping("/with-stats", produces = [MediaTypes.HAL_JSON_VALUE])
+  @GetMapping("/with-stats")
   @IsGlobalRoute
   fun getAllWithStatistics(
     @ParameterObject pageable: Pageable,
@@ -162,28 +173,35 @@ class ProjectsController(
     return projectWithStatsFacade.getPagedModelWithStats(projects)
   }
 
-  @GetMapping("/{projectId}/users")
+  @GetMapping("/{projectId:[0-9]+}/users")
   @Operation(
     summary = "Get users with project access",
     description = "Returns all project users, who have permission to access project",
   )
-  @RequiresProjectPermissions([ Scope.MEMBERS_VIEW ])
+  @RequiresProjectPermissions([Scope.MEMBERS_VIEW])
   @RequiresSuperAuthentication
   @AllowApiAccess
   fun getAllUsers(
     @PathVariable("projectId") projectId: Long,
     @ParameterObject pageable: Pageable,
     @RequestParam("search", required = false) search: String?,
+    @ParameterObject filters: UserAccountFilters = UserAccountFilters(),
   ): PagedModel<UserAccountInProjectModel> {
-    return userAccountService.getAllInProjectWithPermittedLanguages(projectId, pageable, search).let { users ->
-      userArrayResourcesAssembler.toModel(users, userAccountInProjectModelAssembler)
-    }
+    return userAccountService
+      .getAllInProjectWithPermittedLanguages(
+        projectId,
+        pageable,
+        search,
+        filters = filters,
+      ).let { users ->
+        userArrayResourcesAssembler.toModel(users, userAccountInProjectModelAssembler)
+      }
   }
 
   @PutMapping("/{projectId:[0-9]+}/avatar", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
   @Operation(summary = "Upload project avatar")
   @ResponseStatus(HttpStatus.OK)
-  @RequiresProjectPermissions([ Scope.PROJECT_EDIT ])
+  @RequiresProjectPermissions([Scope.PROJECT_EDIT])
   @AllowApiAccess
   fun uploadAvatar(
     @RequestParam("avatar") avatar: MultipartFile,
@@ -197,7 +215,7 @@ class ProjectsController(
   @DeleteMapping("/{projectId:[0-9]+}/avatar")
   @Operation(summary = "Delete project avatar")
   @ResponseStatus(HttpStatus.OK)
-  @RequiresProjectPermissions([ Scope.PROJECT_EDIT ])
+  @RequiresProjectPermissions([Scope.PROJECT_EDIT])
   @AllowApiAccess
   fun removeAvatar(
     @PathVariable projectId: Long,
@@ -206,9 +224,9 @@ class ProjectsController(
     return projectModelAssembler.toModel(projectService.getView(projectId))
   }
 
-  @PutMapping("/{projectId}/users/{userId}/set-permissions/{permissionType}")
+  @PutMapping("/{projectId:[0-9]+}/users/{userId}/set-permissions/{permissionType}")
   @Operation(summary = "Set direct permission to user")
-  @RequiresProjectPermissions([ Scope.MEMBERS_EDIT ])
+  @RequiresProjectPermissions([Scope.MEMBERS_EDIT])
   @RequiresSuperAuthentication
   fun setUsersPermissions(
     @PathVariable("userId") userId: Long,
@@ -224,28 +242,28 @@ class ProjectsController(
     )
   }
 
-  @PutMapping("/{projectId}/users/{userId}/set-by-organization")
+  @PutMapping("/{projectId:[0-9]+}/users/{userId}/set-by-organization")
   @Operation(
     summary = "Remove direct project permission",
     description =
       "Removes user's direct project permission, explicitly set for the project. " +
         "User will have now base permissions from organization or no permission if they're not organization member.",
   )
-  @RequiresProjectPermissions([ Scope.MEMBERS_EDIT ])
+  @RequiresProjectPermissions([Scope.MEMBERS_EDIT])
   @RequiresSuperAuthentication
-  fun setOrganizationBase(
+  fun removeDirectProjectPermissions(
     @PathVariable("userId") userId: Long,
   ) {
     projectPermissionFacade.checkNotCurrentUser(userId)
-    permissionService.setOrganizationBasePermissions(
+    permissionService.removeDirectProjectPermissions(
       projectId = projectHolder.project.id,
       userId = userId,
     )
   }
 
-  @PutMapping("/{projectId}/users/{userId}/revoke-access")
+  @PutMapping("/{projectId:[0-9]+}/users/{userId}/revoke-access")
   @Operation(summary = "Revoke project access")
-  @RequiresProjectPermissions([ Scope.MEMBERS_EDIT ])
+  @RequiresProjectPermissions([Scope.MEMBERS_EDIT])
   @RequiresSuperAuthentication
   fun revokePermission(
     @PathVariable("projectId") projectId: Long,
@@ -254,7 +272,7 @@ class ProjectsController(
     if (userId == authenticationFacade.authenticatedUser.id) {
       throw BadRequestException(Message.CAN_NOT_REVOKE_OWN_PERMISSIONS)
     }
-    permissionService.revoke(projectId, userId)
+    permissionService.revoke(userId, projectId)
   }
 
   @PutMapping(value = ["/{projectId:[0-9]+}/leave"])

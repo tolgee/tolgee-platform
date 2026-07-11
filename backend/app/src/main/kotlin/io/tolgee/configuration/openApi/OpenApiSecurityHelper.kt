@@ -10,14 +10,16 @@ import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.security.authorization.IsGlobalRoute
 import org.springframework.web.method.HandlerMethod
 
-class OpenApiSecurityHelper(private val groupBuilder: OpenApiGroupBuilder) {
+class OpenApiSecurityHelper(
+  private val groupBuilder: OpenApiGroupBuilder,
+) {
   fun handleSecurity() {
     addSecurityToOperations()
     addSecuritySchemas()
   }
 
   private fun addSecurityToOperations() {
-    groupBuilder.customizeOperations { operation, handlerMethod, path ->
+    groupBuilder.customizeOperations { operation, handlerMethod, path, _ ->
       if (path.matches(OpenApiGroupBuilder.PUBLIC_ENDPOINT_REGEX)) {
         return@customizeOperations operation
       }
@@ -39,7 +41,8 @@ class OpenApiSecurityHelper(private val groupBuilder: OpenApiGroupBuilder) {
     path: String,
   ) {
     val pakOnly =
-      groupBuilder.isProjectPath(path) && !groupBuilder.containsProjectIdParam(path) &&
+      groupBuilder.isProjectPath(path) &&
+        !groupBuilder.containsProjectIdParam(path) &&
         !handlerMethod.hasMethodAnnotation(
           IsGlobalRoute::class.java,
         )
@@ -97,8 +100,7 @@ class OpenApiSecurityHelper(private val groupBuilder: OpenApiGroupBuilder) {
             .description(
               "It's not recommended to use API key in query param, " +
                 "since it can be stored in logs.$pakOnlyDescription",
-            )
-            .name("ak")
+            ).name("ak")
       }
     }
   }

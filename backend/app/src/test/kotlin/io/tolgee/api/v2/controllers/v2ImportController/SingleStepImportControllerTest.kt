@@ -1,13 +1,16 @@
 package io.tolgee.api.v2.controllers.v2ImportController
 
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.batch.data.BatchJobType
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.SingleStepImportTestData
 import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.enums.TranslationState
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.util.performSingleStepImport
@@ -33,9 +36,13 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
   @Value("classpath:import/xliff/simple.xliff")
   lateinit var simpleXliff: Resource
 
+  @Value("classpath:import/po/codeReferences.po")
+  lateinit var codeReferencesPo: Resource
+
   lateinit var testData: SingleStepImportTestData
 
   private val xliffFileName: String = "file.xliff"
+  private val poFileName = "file.po"
   private val jsonFileName = "en.json"
 
   @BeforeEach
@@ -54,7 +61,69 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
     )
     executeInNewTransaction {
       assertJsonImported()
-      getTestTranslation().key.keyMeta!!.tags.map { it.name }.assert.contains("new-tag")
+      getTestTranslation()
+        .key.keyMeta!!
+        .tags
+        .map { it.name }
+        .assert
+        .contains("new-tag")
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `resets translation state`() {
+    testData.addReviewedTranslation()
+    saveAndPrepare()
+
+    executeInNewTransaction {
+      getGermanTestTranslation().state.assert.isEqualTo(TranslationState.REVIEWED)
+    }
+
+    performImport(
+      projectId = testData.project.id,
+      listOf(Pair("de.json", simpleJson)),
+      params = mapOf("forceMode" to "OVERRIDE"),
+    )
+
+    executeInNewTransaction {
+      getGermanTestTranslation().state.assert.isEqualTo(TranslationState.TRANSLATED)
+    }
+  }
+
+  private fun getGermanTestTranslation() = getTestKeyTranslations().single { it.language.tag == "de" }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `import po with code references`() {
+    saveAndPrepare()
+    performImport(
+      projectId = testData.project.id,
+      listOf(Pair(poFileName, codeReferencesPo)),
+    )
+    executeInNewTransaction {
+      assertPoImported()
+      getTestTranslation()
+        .key.keyMeta!!
+        .codeReferences
+        .map { it.path }
+        .assert
+        .contains("dir/file.py")
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `does not create new key if option isn't enabled`() {
+    saveAndPrepare()
+    performImport(
+      projectId = testData.project.id,
+      listOf(Pair(jsonFileName, simpleJson)),
+      params = mapOf("createNewKeys" to false),
+    )
+
+    executeInNewTransaction {
+      keyService.find(testData.project.id, "test", null).assert.isNull()
     }
   }
 
@@ -71,7 +140,9 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
       ),
     )
     executeInNewTransaction {
-      getTestTranslation().language.tag.assert.isEqualTo("de")
+      getTestTranslation()
+        .language.tag.assert
+        .isEqualTo("de")
     }
   }
 
@@ -126,6 +197,7 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
   @ProjectJWTAuthTestMethod
   fun `maps namespace`() {
     saveAndPrepare()
+    enableNamespaces()
     performImport(
       projectId = testData.project.id,
       listOf(Pair(jsonFileName, simpleJson)),
@@ -138,8 +210,33 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `namespace mapping fails if namespaces are disabled`() {
+    saveAndPrepare()
+    performImport(
+      projectId = testData.project.id,
+      listOf(Pair(jsonFileName, simpleJson)),
+      getFileMappings(jsonFileName, namespace = "test"),
+    ).andIsBadRequest.andHasErrorMessage(Message.NAMESPACE_CANNOT_BE_USED_WHEN_FEATURE_IS_DISABLED)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `detected namespaces are ignored if namespaces are disabled`() {
+    saveAndPrepare()
+    performImport(
+      projectId = testData.project.id,
+      listOf(Pair("test-namespace/$jsonFileName", simpleJson)),
+    ).andIsOk
+    executeInNewTransaction {
+      getTestTranslation(namespace = null).assert.isNotNull
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `maps null namespace from non-null mapping`() {
     saveAndPrepare()
+    enableNamespaces()
     val fileName = "guessed-ns/en.json"
     performImport(
       projectId = testData.project.id,
@@ -150,6 +247,13 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
     executeInNewTransaction {
       getTestTranslation().assert.isNotNull
     }
+
+    performImport(
+      projectId = testData.project.id,
+      listOf(Pair(fileName, simpleJson)),
+      getFileMappings(fileName, namespace = ""),
+    ).andIsOk
+
     performImport(
       projectId = testData.project.id,
       listOf(Pair(fileName, simpleJson)),
@@ -202,12 +306,21 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
   @ProjectJWTAuthTestMethod
   fun `imports xliff file`() {
     saveAndPrepare()
-    val fileName = "en.xliff"
-    performImport(
-      projectId = testData.project.id,
-      listOf(Pair(fileName, appleXliffFile)),
-      getFileMappings(fileName, format = "APPLE_XLIFF", languageTag = "en"),
-    ).andIsOk
+    importXliffFile()
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `triggers auto translation`() {
+    testData.projectBuilder.addAutoTranslationConfig {
+      enableForImport = true
+      usingPrimaryMtService = true
+    }
+
+    saveAndPrepare()
+    importXliffFile()
+
+    assertAutoTranslationTriggered()
   }
 
   @Test
@@ -250,6 +363,42 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `doesn't remove other keys in different namespaces`() {
+    testData.addReviewedTranslation()
+    testData.addTranslationInDifferentNamespace()
+    saveAndPrepare()
+    val params = getFileMappings(jsonFileName)
+    params["removeOtherKeys"] = true
+
+    executeInNewTransaction {
+      keyService.find(testData.project.id, "test", null).assert.isNotNull()
+      keyService
+        .find(
+          testData.project.id,
+          "test_in_different_namespace",
+          "different_namespace",
+        ).assert
+        .isNotNull()
+    }
+
+    executeInNewTransaction {
+      performImport(
+        projectId = testData.project.id,
+        files = listOf(Pair(jsonFileName, newJson)),
+        params,
+      ).andIsOk
+    }
+
+    executeInNewTransaction {
+      // import with "new" key removes "test" key
+      keyService.find(testData.project.id, "new", null).assert.isNotNull()
+      keyService.find(testData.project.id, "test", null).assert.isNull()
+      keyService.find(testData.project.id, "test_in_different_namespace", "different_namespace").assert.isNotNull()
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `doesn't allow deletion when no permission to do so`() {
     testData.addConflictTranslation()
     testData.setUserScopes(arrayOf(Scope.TRANSLATIONS_VIEW, Scope.KEYS_CREATE, Scope.KEYS_VIEW))
@@ -266,9 +415,29 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
     }
   }
 
+  private fun importXliffFile() {
+    val fileName = "en.xliff"
+    performImport(
+      projectId = testData.project.id,
+      listOf(Pair(fileName, appleXliffFile)),
+      getFileMappings(fileName, format = "APPLE_XLIFF", languageTag = "en"),
+    ).andIsOk
+  }
+
+  private fun assertAutoTranslationTriggered() {
+    val job = entityManager.createQuery("from BatchJob bj", BatchJob::class.java).singleResult
+    job.type.assert.isEqualTo(BatchJobType.AUTO_TRANSLATE)
+  }
+
   private fun assertXliffDataImported() {
-    getTestKeyTranslations().find { it.language.tag == "de" }!!.text.assert.isEqualTo("Test cs")
-    getTestKeyTranslations().find { it.language.tag == "en" }!!.text.assert.isEqualTo("Test en")
+    getTestKeyTranslations()
+      .find { it.language.tag == "de" }!!
+      .text.assert
+      .isEqualTo("Test cs")
+    getTestKeyTranslations()
+      .find { it.language.tag == "en" }!!
+      .text.assert
+      .isEqualTo("Test en")
   }
 
   private fun getSimpleXliffMapping(languageMappings: Map<String?, String>): MutableMap<String, Any?> {
@@ -322,9 +491,19 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
     getTestTranslation().text.assert.isEqualTo("test")
   }
 
+  private fun assertPoImported() {
+    getTestTranslation().text.assert.isEqualTo("In English!")
+  }
+
   private fun saveAndPrepare() {
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     projectSupplier = { testData.project }
+  }
+
+  private fun enableNamespaces() {
+    val fetchedProject = projectService.find(testData.project.id)!!
+    fetchedProject.useNamespaces = true
+    projectService.save(fetchedProject)
   }
 }

@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      "@tginternal/library/*": ["./src/*"],
+      "tg.fixtures/*": ["../webapp/src/fixtures/*"] // TODO remove under https://github.com/tolgee/tolgee-platform/issues/3326
+    },
+    "lib": ["dom", "esnext"],
+    "target": "ESNext",
+    "types": ["vite/client"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "noFallthroughCasesInSwitch": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "@emotion/react"
+  },
+  "include": [
+    "src/**/*",
+    ".storybook/**/*",
+    "custom.d.ts",
+    "../webapp/src/custom.d.ts" // TODO remove under https://github.com/tolgee/tolgee-platform/issues/3326
+  ],
+  "exclude": ["dist", "node_modules"]
+}

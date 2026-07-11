@@ -1,5 +1,5 @@
-import { Help } from '@mui/icons-material';
-import { Tooltip, styled } from '@mui/material';
+import { HelpCircle } from '@untitled-ui/icons-react';
+import { SxProps, Tooltip, styled } from '@mui/material';
 
 const StyledLabelBody = styled('div')`
   display: inline-flex;
@@ -11,14 +11,22 @@ type Props = {
   size?: number;
   title: React.ReactNode;
   children: React.ReactNode;
+  sx?: SxProps;
+  disableInteractive?: boolean;
 };
 
-export const LabelHint = ({ children, title, size = 15 }: Props) => {
+export const LabelHint = ({
+  children,
+  title,
+  size = 15,
+  sx,
+  disableInteractive = true,
+}: Props) => {
   return (
-    <Tooltip title={title} disableInteractive>
-      <StyledLabelBody>
+    <Tooltip title={title} disableInteractive={disableInteractive}>
+      <StyledLabelBody {...{ sx }}>
         {children}
-        <Help style={{ fontSize: size }} />
+        <HelpCircle style={{ width: size, height: size }} />
       </StyledLabelBody>
     </Tooltip>
   );

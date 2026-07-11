@@ -37,7 +37,9 @@ class PropertiesImportFormatDetectorTest {
     val config = PropertiesConfiguration()
     val handler = FileHandler(config)
     handler.load(File(path).inputStream())
-    return config.keys.asSequence().map { key -> key to config.getString(key) }
+    return config.keys
+      .asSequence()
+      .map { key -> key to config.getString(key) }
       .toMap()
   }
 

@@ -1,5 +1,6 @@
 package io.tolgee.testing
 
+import io.tolgee.BatchJobTestListener
 import io.tolgee.CleanDbTestListener
 import jakarta.persistence.EntityManager
 import org.springframework.beans.factory.annotation.Autowired
@@ -16,6 +17,7 @@ import org.springframework.test.context.transaction.TransactionalTestExecutionLi
     DependencyInjectionTestExecutionListener::class,
     CleanDbTestListener::class,
     DirtiesContextTestExecutionListener::class,
+    BatchJobTestListener::class,
   ],
 )
 @ActiveProfiles(profiles = ["local"])

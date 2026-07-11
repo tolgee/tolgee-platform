@@ -6,13 +6,16 @@ import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.LanguageDto
+import io.tolgee.dtos.cacheable.OrganizationLanguageDto
 import io.tolgee.dtos.request.LanguageRequest
+import io.tolgee.dtos.request.language.LanguageFilters
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
 import io.tolgee.model.Language.Companion.fromRequestDTO
 import io.tolgee.model.Project
 import io.tolgee.model.enums.Scope
 import io.tolgee.repository.LanguageRepository
+import io.tolgee.repository.qa.LanguageQaConfigRepository
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.project.ProjectService
@@ -20,6 +23,7 @@ import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.AutoTranslationService
 import io.tolgee.service.translation.TranslationService
+import io.tolgee.service.translation.TranslationSuggestionService
 import jakarta.persistence.EntityManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.annotation.CacheEvict
@@ -31,9 +35,10 @@ import org.springframework.data.domain.Pageable
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.*
+import java.util.Optional
 
 @Service
+@Suppress("SelfReferenceConstructorParameter")
 class LanguageService(
   private val languageRepository: LanguageRepository,
   private val entityManager: EntityManager,
@@ -43,7 +48,7 @@ class LanguageService(
   private val securityService: SecurityService,
   @Lazy
   private val autoTranslationService: AutoTranslationService,
-  @Suppress("SelfReferenceConstructorParameter") @Lazy
+  @Lazy
   private val self: LanguageService,
   private val cacheManager: org.springframework.cache.CacheManager,
   private val currentDateProvider: CurrentDateProvider,
@@ -51,7 +56,12 @@ class LanguageService(
   private val activityHolder: ActivityHolder,
   private val authenticationFacade: AuthenticationFacade,
   private val applicationContext: ApplicationContext,
+  private val languageQaConfigRepository: LanguageQaConfigRepository,
 ) {
+  @Lazy
+  @Autowired
+  private lateinit var translationSuggestionService: TranslationSuggestionService
+
   @set:Autowired
   @set:Lazy
   lateinit var translationService: TranslationService
@@ -135,10 +145,11 @@ class LanguageService(
   ): Set<LanguageDto> {
     val all = self.getProjectLanguages(projectId)
     val viewLanguageIds =
-      permissionService.getProjectPermissionData(
-        projectId,
-        userId,
-      ).computedPermissions.viewLanguageIds
+      permissionService
+        .getProjectPermissionData(
+          projectId,
+          userId,
+        ).computedPermissions.viewLanguageIds
 
     val permitted =
       if (viewLanguageIds.isNullOrEmpty()) {
@@ -151,7 +162,8 @@ class LanguageService(
       .sortedBy { it.id }
       // base first
       .sortedBy { if (it.base) 0 else 1 }
-      .take(2).toSet()
+      .take(2)
+      .toSet()
   }
 
   @Transactional
@@ -171,6 +183,13 @@ class LanguageService(
     projectId: Long,
   ): LanguageDto? {
     return self.getProjectLanguages(projectId).singleOrNull { it.id == languageId }
+  }
+
+  fun findEntity(
+    projectId: Long,
+    tag: String,
+  ): Language? {
+    return languageRepository.find(projectId, tag)
   }
 
   fun findEntity(id: Long): Language? {
@@ -278,10 +297,11 @@ class LanguageService(
     languages: Set<String>,
   ): Set<LanguageDto> {
     val viewLanguageIds =
-      permissionService.getProjectPermissionData(
-        projectId,
-        userId,
-      ).computedPermissions.viewLanguageIds
+      permissionService
+        .getProjectPermissionData(
+          projectId,
+          userId,
+        ).computedPermissions.viewLanguageIds
     return if (viewLanguageIds.isNullOrEmpty()) {
       findByTags(languages, projectId)
     } else {
@@ -309,13 +329,16 @@ class LanguageService(
   fun deleteAllByProject(projectId: Long) {
     translationService.deleteAllByProject(projectId)
     autoTranslationService.deleteConfigsByProject(projectId)
-    entityManager.createNativeQuery(
-      "delete from language_stats " +
-        "where language_id in (select id from language where project_id = :projectId)",
-    )
-      .setParameter("projectId", projectId)
+    translationSuggestionService.deleteAllByProject(projectId)
+    entityManager
+      .createNativeQuery(
+        "delete from language_stats " +
+          "where language_id in (select id from language where project_id = :projectId)",
+      ).setParameter("projectId", projectId)
       .executeUpdate()
-    entityManager.createNativeQuery("DELETE FROM language WHERE project_id = :projectId")
+    languageQaConfigRepository.deleteAllByProjectId(projectId)
+    entityManager
+      .createNativeQuery("DELETE FROM language WHERE project_id = :projectId")
       .setParameter("projectId", projectId)
       .executeUpdate()
     evictCacheForProject(projectId)
@@ -345,11 +368,61 @@ class LanguageService(
     cacheManager.getCache(Caches.LANGUAGES)?.evict(language.project.id)
   }
 
+  fun getTagsByOrganization(organizationId: Long): Set<String> {
+    return this.languageRepository.findAllTagsByOrganizationId(
+      organizationId,
+      emptyList(),
+      true,
+    )
+  }
+
+  fun getTagsByOrganizationAndProjectIds(
+    organizationId: Long,
+    projectIds: List<Long>,
+  ): Set<String> {
+    return this.languageRepository.findAllTagsByOrganizationId(
+      organizationId,
+      projectIds,
+      false,
+    )
+  }
+
   fun getPaged(
     projectId: Long,
     pageable: Pageable,
+    filters: LanguageFilters?,
   ): Page<LanguageDto> {
-    return this.languageRepository.findAllByProjectId(projectId, pageable)
+    return this.languageRepository.findAllByProjectId(projectId, pageable, filters ?: LanguageFilters())
+  }
+
+  fun getPagedByOrganization(
+    organizationId: Long,
+    projectIds: List<Long>?,
+    pageable: Pageable,
+    search: String?,
+  ): Page<OrganizationLanguageDto> {
+    return this.languageRepository.findAllByOrganizationId(
+      organizationId,
+      projectIds ?: emptyList(),
+      projectIds == null,
+      pageable,
+      search,
+    )
+  }
+
+  fun getBasePagedByOrganization(
+    organizationId: Long,
+    projectIds: List<Long>?,
+    pageable: Pageable,
+    search: String?,
+  ): Page<OrganizationLanguageDto> {
+    return this.languageRepository.findAllBaseByOrganizationId(
+      organizationId,
+      projectIds ?: emptyList(),
+      projectIds == null,
+      pageable,
+      search,
+    )
   }
 
   fun findByIdIn(ids: Iterable<Long>): List<Language> {

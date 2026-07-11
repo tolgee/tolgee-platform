@@ -12,11 +12,17 @@ class AppleCollisionHandler : CollisionHandler {
   override fun handle(importTranslations: List<ImportTranslation>): List<ImportTranslation>? {
     val strings =
       importTranslations
-        .filter { it.key.file.name?.matches(STRINGS_FILE_REGEX) == true }
+        .filter {
+          it.key.file.name
+            ?.matches(STRINGS_FILE_REGEX) == true
+        }
 
     val stringsDict =
       importTranslations
-        .filter { it.key.file.name?.matches(STRINGSDICT_FILE_REGEX) == true }
+        .filter {
+          it.key.file.name
+            ?.matches(STRINGSDICT_FILE_REGEX) == true
+        }
 
     if (strings.isEmpty() || stringsDict.isEmpty()) {
       return null

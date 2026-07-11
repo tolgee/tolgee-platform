@@ -8,11 +8,15 @@ const StyledWrapper = styled('div')`
 
 type Props = {
   children: React.ReactNode;
+  'data-cy'?: string;
 };
 
-export const TabMessage: React.FC<Props> = ({ children }) => {
+export const TabMessage: React.FC<React.PropsWithChildren<Props>> = ({
+  children,
+  'data-cy': dataCy,
+}) => {
   return (
-    <StyledWrapper onMouseDown={(e) => e.preventDefault()}>
+    <StyledWrapper onMouseDown={(e) => e.preventDefault()} data-cy={dataCy}>
       {children}
     </StyledWrapper>
   );

@@ -17,15 +17,27 @@ class AwsMtValueProvider(
   private val awsMachineTranslationProperties: AwsMachineTranslationProperties,
   private val amazonTranslate: TranslateClient?,
 ) : AbstractMtValueProvider() {
+  override val placeholderProtector = HtmlNoTranslatePlaceholderProtector
+
   override val isEnabled: Boolean
     get() =
       awsMachineTranslationProperties.enabled
         ?: (awsMachineTranslationProperties.accessKey != null && awsMachineTranslationProperties.secretKey != null)
 
+  override fun getSuitableTag(tag: String): String? {
+    // AWS Translate does not support zh-Hant; use zh-TW for Chinese (Traditional).
+    // docs: https://docs.aws.amazon.com/translate/latest/dg/what-is-languages.html
+    if (tag.equals("zh-Hant", ignoreCase = true)) {
+      return super.getSuitableTag("zh-TW")
+    }
+    return super.getSuitableTag(tag)
+  }
+
   override fun translateViaProvider(params: ProviderTranslateParams): MtValueProvider.MtResult {
     val result =
       translateService.translateText(
-        TranslateTextRequest.builder()
+        TranslateTextRequest
+          .builder()
           .sourceLanguageCode(params.sourceLanguageTag)
           .targetLanguageCode(params.targetLanguageTag)
           .settings(getSettings(params))
@@ -56,7 +68,8 @@ class AwsMtValueProvider(
 
   private fun getSettings(params: ProviderTranslateParams): TranslationSettings {
     val formality = getAwsFormality(params) ?: return TranslationSettings.builder().build()
-    return TranslationSettings.builder()
+    return TranslationSettings
+      .builder()
       .formality(formality)
       .build()
   }

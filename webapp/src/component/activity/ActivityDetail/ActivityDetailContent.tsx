@@ -9,7 +9,7 @@ import {
   styled,
 } from '@mui/material';
 import { useMemo } from 'react';
-import { OpenInNew } from '@mui/icons-material';
+import { Share03 } from '@untitled-ui/icons-react';
 import { T, useTranslate } from '@tolgee/react';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
@@ -52,6 +52,7 @@ export const ActivityDetailContent = ({
   const filteredActivity = useMemo(() => buildActivity(data, true), [data]);
 
   const isBatch = !data?.modifiedEntities;
+  const isSoftDelete = data.type === 'KEY_SOFT_DELETE';
 
   return (
     <>
@@ -60,14 +61,28 @@ export const ActivityDetailContent = ({
           <ActivityTitle activity={filteredActivity} />
         </Box>
         <Box display="flex" marginLeft={2}>
-          {isBatch && (
+          {isSoftDelete && (
+            <Button
+              color="primary"
+              size="medium"
+              href={LINKS.PROJECT_TRANSLATIONS_TRASH.build({
+                [PARAMS.PROJECT_ID]: project.id,
+              })}
+              endIcon={<Share03 width={18} />}
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              <T keyName="activity_detail_trash_view_link" />
+            </Button>
+          )}
+          {isBatch && !isSoftDelete && (
             <Button
               color="primary"
               size="medium"
               href={`${LINKS.PROJECT_TRANSLATIONS.build({
                 [PARAMS.PROJECT_ID]: project.id,
               })}?activity=${data.revisionId}`}
-              endIcon={<OpenInNew fontSize="small" />}
+              endIcon={<Share03 width={18} />}
               target="_blank"
               rel="noreferrer noopener"
             >

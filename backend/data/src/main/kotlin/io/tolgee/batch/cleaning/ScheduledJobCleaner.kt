@@ -12,18 +12,24 @@ import io.tolgee.util.addSeconds
 import io.tolgee.util.logger
 import io.tolgee.util.runSentryCatching
 import jakarta.persistence.EntityManager
+import org.springframework.context.annotation.Lazy
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 
 @Component
 class ScheduledJobCleaner(
+  @Lazy
   private val batchJobService: BatchJobService,
+  @Lazy
   private val lockingManager: BatchJobProjectLockingManager,
   private val currentDateProvider: CurrentDateProvider,
+  @Lazy
   private val batchJobStateProvider: BatchJobStateProvider,
   private val entityManager: EntityManager,
+  @Lazy
   private val cachingBatchJobService: CachingBatchJobService,
+  @Lazy
   private val batchJobStatusProvider: BatchJobStatusProvider,
 ) : Logging {
   /**
@@ -35,7 +41,35 @@ class ScheduledJobCleaner(
     runSentryCatching {
       handleCompletedJobsCacheState()
       handleStuckJobs()
+      handleOrphanProjectLocks()
     }
+  }
+
+  /**
+   * Detects entries in `project_batch_job_locks` that point at a job id no longer present in
+   * `tolgee_batch_job` and resets them. This protects against orphan locks that survived job
+   * deletion through any path — the deletion cleanup is the first line of defense, this is
+   * the safety net for future regressions and pre-existing stale entries.
+   */
+  private fun handleOrphanProjectLocks() {
+    val lockedEntries =
+      lockingManager
+        .getMap()
+        .entries
+        .mapNotNull { entry ->
+          val jobId = entry.value ?: return@mapNotNull null
+          if (jobId == 0L) return@mapNotNull null
+          entry.key to jobId
+        }
+    if (lockedEntries.isEmpty()) return
+
+    val existingJobIds = batchJobService.findExistingJobIds(lockedEntries.map { it.second })
+    lockedEntries
+      .filter { it.second !in existingJobIds }
+      .forEach { (projectId, jobId) ->
+        logger.warn("Releasing orphan project lock: project=$projectId points at deleted job=$jobId")
+        lockingManager.unlockJobForProject(projectId, jobId)
+      }
   }
 
   private fun handleStuckJobs() {
@@ -47,9 +81,10 @@ class ScheduledJobCleaner(
 
   private fun handleCompletedJobsCacheState() {
     val lockedJobIds = lockingManager.getLockedJobIds() + batchJobStateProvider.getCachedJobIds()
-    batchJobService.getJobsCompletedBefore(lockedJobIds, currentDateProvider.date.addSeconds(-10))
+    batchJobService
+      .getJobsCompletedBefore(lockedJobIds, currentDateProvider.date.addSeconds(-10))
       .forEach {
-        unlockAndRemoveState(it.project.id, it.id)
+        unlockAndRemoveState(it.project?.id, it.id)
       }
   }
 
@@ -76,7 +111,8 @@ class ScheduledJobCleaner(
     stuckJob: StuckCompletedJob,
     newStatus: BatchJobStatus,
   ) {
-    entityManager.createNativeQuery("update tolgee_batch_job set status = :newStatus where id = :id")
+    entityManager
+      .createNativeQuery("update tolgee_batch_job set status = :newStatus where id = :id")
       .setParameter("newStatus", newStatus.name)
       .setParameter("id", stuckJob.id)
       .executeUpdate()
@@ -91,8 +127,9 @@ class ScheduledJobCleaner(
     // - have all chunks completed
     // - and we are obtaining the resulting chunk status by preferably filtering out chunks which have success status
     val data =
-      entityManager.createNativeQuery(
-        """
+      entityManager
+        .createNativeQuery(
+          """
         select tbj.id as id, tbj.project_id as projectId, tbjce2.status as status
         from tolgee_batch_job tbj
                  left join tolgee_batch_job_chunk_execution tbjce
@@ -108,9 +145,8 @@ class ScheduledJobCleaner(
           and tbjce.id is null and tbjce_success.id is null
         group by  tbj.id, tbj.project_id, tbjce2.status
       """,
-        Array<Any>::class.java,
-      )
-        .setParameter("chunkIncompleteStatuses", chunkIncompleteStatuses)
+          Array<Any>::class.java,
+        ).setParameter("chunkIncompleteStatuses", chunkIncompleteStatuses)
         .setParameter("jobIncompleteStatuses", jobIncompleteStatuses)
         .setParameter("successStatus", BatchJobChunkExecutionStatus.SUCCESS.name)
         .resultList as List<Array<Any>>

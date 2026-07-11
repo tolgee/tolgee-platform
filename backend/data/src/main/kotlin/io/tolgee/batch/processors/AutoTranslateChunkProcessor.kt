@@ -1,34 +1,37 @@
 package io.tolgee.batch.processors
 
-import io.tolgee.batch.ChunkProcessor
+import com.fasterxml.jackson.databind.ObjectMapper
+import io.tolgee.batch.AbstractChunkProcessor
 import io.tolgee.batch.JobCharacter
+import io.tolgee.batch.MtProviderCatching
+import io.tolgee.batch.ProgressManager
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.batch.request.AutoTranslationRequest
-import io.tolgee.constants.MtServiceType
+import io.tolgee.configuration.tolgee.BatchProperties
 import io.tolgee.model.batch.params.AutoTranslationJobParams
-import io.tolgee.service.machineTranslation.MtServiceConfigService
-import io.tolgee.service.project.ProjectService
 import io.tolgee.service.translation.AutoTranslationService
 import org.springframework.stereotype.Component
 import kotlin.coroutines.CoroutineContext
 
 @Component
 class AutoTranslateChunkProcessor(
-  private val genericAutoTranslationChunkProcessor: GenericAutoTranslationChunkProcessor,
-  private val mtServiceConfigService: MtServiceConfigService,
   private val autoTranslationService: AutoTranslationService,
-  private val projectService: ProjectService,
-) : ChunkProcessor<AutoTranslationRequest, AutoTranslationJobParams, BatchTranslationTargetItem> {
+  private val mtProviderCatching: MtProviderCatching,
+  private val batchProperties: BatchProperties,
+  private val progressManager: ProgressManager,
+  objectMapper: ObjectMapper,
+) : AbstractChunkProcessor<AutoTranslationRequest, AutoTranslationJobParams, BatchTranslationTargetItem>(objectMapper) {
   override fun process(
     job: BatchJobDto,
     chunk: List<BatchTranslationTargetItem>,
     coroutineContext: CoroutineContext,
-    onProgress: (Int) -> Unit,
   ) {
-    genericAutoTranslationChunkProcessor.iterateCatching(chunk, coroutineContext) { item ->
+    val projectId = job.projectId ?: throw IllegalArgumentException("Project id is required")
+    mtProviderCatching.iterateCatching(chunk, coroutineContext) { item ->
       val (keyId, languageId) = item
-      autoTranslationService.softAutoTranslate(job.projectId, keyId, languageId)
+      autoTranslationService.softAutoTranslate(projectId, keyId, languageId)
+      progressManager.reportSingleChunkProgress(job.id)
     }
   }
 
@@ -41,24 +44,21 @@ class AutoTranslateChunkProcessor(
   }
 
   override fun getMaxPerJobConcurrency(): Int {
-    return 1
+    return batchProperties.maxPerMtJobConcurrency
   }
 
-  override fun getJobCharacter(): JobCharacter {
+  override fun getJobCharacter(
+    request: AutoTranslationRequest,
+    projectId: Long?,
+  ): JobCharacter {
     return JobCharacter.SLOW
   }
 
   override fun getChunkSize(
     request: AutoTranslationRequest,
-    projectId: Long,
+    projectId: Long?,
   ): Int {
-    val languageIds = request.target.map { it.languageId }.distinct()
-    val project = projectService.getDto(projectId)
-    val services = mtServiceConfigService.getPrimaryServices(languageIds, project.id).values.toSet()
-    if (!services.mapNotNull { it?.serviceType }.contains(MtServiceType.TOLGEE)) {
-      return 5
-    }
-    return 2
+    return 3
   }
 
   override fun getTargetItemType(): Class<BatchTranslationTargetItem> {

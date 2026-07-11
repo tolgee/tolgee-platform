@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Logback configuration for Tolgee with OpenTelemetry trace correlation.
+
+  This configuration enables log-trace correlation by including trace_id and span_id
+  in log output when OpenTelemetry instrumentation is enabled. Grafana Loki extracts
+  these IDs to create "View Trace" links to Tempo.
+
+  For tracing setup, see: docs/observability/
+
+  OpenTelemetry MDC injection:
+  - Requires OTEL_INSTRUMENTATION_LOGBACK_MDC_ENABLED=true (or -Dotel.instrumentation.logback-mdc.enabled=true)
+  - Injects: trace_id, span_id, trace_flags into MDC context
+  - See: https://opentelemetry.io/docs/zero-code/java/agent/configuration/#enabling-mdc-auto-instrumentation
+-->
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+
+    <!--
+      Custom console pattern that includes trace context from MDC.
+      Format: trace_id=<32-char-hex> span_id=<16-char-hex>
+
+      When tracing is disabled, trace_id and span_id will be empty (MDC returns empty string).
+      The Grafana Loki derivedFields regex extracts trace_id for "View Trace" links.
+    -->
+    <property name="CONSOLE_LOG_PATTERN"
+              value="%clr(%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd'T'HH:mm:ss.SSSXXX}}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} trace_id=%X{trace_id} span_id=%X{span_id} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+</configuration>

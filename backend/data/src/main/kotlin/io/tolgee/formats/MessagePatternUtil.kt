@@ -2,7 +2,7 @@ package io.tolgee.formats
 
 import com.ibm.icu.text.MessagePattern
 import com.ibm.icu.text.MessagePatternUtil
-import java.util.*
+import java.util.Collections
 import kotlin.concurrent.Volatile
 
 /**
@@ -324,8 +324,7 @@ object MessagePatternUtil {
     val type: Type,
     start: Int,
     limit: Int,
-  ) :
-    Node(owningPattern, start, limit) {
+  ) : Node(owningPattern, start, limit) {
     /**
      * The type of a piece of MessageNode contents.
      * @stable ICU 49
@@ -395,6 +394,13 @@ object MessagePatternUtil {
      */
     override fun toString(): String {
       return "«$text»"
+    }
+
+    fun getText(keepEscaping: Boolean): String {
+      if (keepEscaping) {
+        return this.patternString
+      }
+      return this.text
     }
   }
 
@@ -606,7 +612,11 @@ object MessagePatternUtil {
     override fun toString(): String {
       val sb = StringBuilder()
       if (isSelectorNumeric) {
-        sb.append(selectorValue).append(" (").append(selector).append(") {")
+        sb
+          .append(selectorValue)
+          .append(" (")
+          .append(selector)
+          .append(") {")
       } else {
         sb.append(selector).append(" {")
       }
@@ -637,6 +647,12 @@ object MessagePatternUtil {
 
     var numericValue = MessagePattern.NO_NUMERIC_VALUE
     var msgNode: MessageNode? = null
+
+    /**
+     * The character position in the pattern string where the variant's content starts (after the '{').
+     */
+    val contentStartIndex: Int
+      get() = owningPattern.getPart(msgNode!!.start).limit
 
     override val patternString: String
       get() = msgNode?.contents?.joinToString("") { it.patternString } ?: ""

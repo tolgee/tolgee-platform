@@ -10,7 +10,7 @@ import {
   DialogContent,
   Link as MuiLink,
 } from '@mui/material';
-import { Clear, Info } from '@mui/icons-material';
+import { XClose, InfoCircle } from '@untitled-ui/icons-react';
 import { useUser } from 'tg.globalContext/helpers';
 import { Link } from 'react-router-dom';
 
@@ -20,6 +20,7 @@ import { UpdateRoleButton } from './UpdateRoleButton';
 import { useLeaveOrganization } from '../useLeaveOrganization';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
+import { MfaBadge } from '@tginternal/library/components/MfaBadge';
 
 type UserAccountWithOrganizationRoleModel =
   components['schemas']['UserAccountWithOrganizationRoleModel'];
@@ -42,6 +43,10 @@ const StyledItemText = styled('div')`
   padding: ${({ theme }) => theme.spacing(1)};
 `;
 
+const StyledMfaBadgeWrapper = styled('div')`
+  padding: ${({ theme }) => theme.spacing(1)};
+`;
+
 const StyledItemActions = styled('div')`
   display: flex;
   gap: ${({ theme }) => theme.spacing(1)};
@@ -49,7 +54,7 @@ const StyledItemActions = styled('div')`
   flex-wrap: wrap;
 `;
 
-const StyledInfo = styled(Info)`
+const StyledInfo = styled(InfoCircle)`
   opacity: 0.5;
 `;
 
@@ -65,7 +70,10 @@ type Props = {
   organizationId: number;
 };
 
-export const MemberItem: React.FC<Props> = ({ user, organizationId }) => {
+export const MemberItem: React.FC<React.PropsWithChildren<Props>> = ({
+  user,
+  organizationId,
+}) => {
   const { t } = useTranslate();
   const currentUser = useUser();
   const leaveOrganization = useLeaveOrganization();
@@ -79,6 +87,9 @@ export const MemberItem: React.FC<Props> = ({ user, organizationId }) => {
         <StyledItemText>
           {user.name} ({user.username}){' '}
         </StyledItemText>
+        <StyledMfaBadgeWrapper>
+          <MfaBadge enabled={user.mfaEnabled} />
+        </StyledMfaBadgeWrapper>
       </StyledItemUser>
       <StyledItemActions>
         {user.organizationRole ? (
@@ -101,7 +112,7 @@ export const MemberItem: React.FC<Props> = ({ user, organizationId }) => {
               onClick={() => leaveOrganization(organizationId)}
               data-cy="organization-member-leave-button"
             >
-              <Clear />
+              <XClose />
             </IconButton>
           </Tooltip>
         ) : (

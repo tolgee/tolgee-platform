@@ -10,12 +10,12 @@ import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.generateImage
 import io.tolgee.fixtures.isValidId
 import io.tolgee.model.enums.Scope
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
-import io.tolgee.util.generateImage
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -132,7 +132,10 @@ class KeyControllerPluralizationTest : ProjectAuthControllerTest("/v2/projects/"
       node("translations.cs.text").isString.isEqualTo(NORMALIZED_PLURAL)
     }
 
-    keyService.get(key.self.id).isPlural.assert.isEqualTo(true)
+    keyService
+      .get(key.self.id)
+      .isPlural.assert
+      .isEqualTo(true)
   }
 
   @ProjectApiKeyAuthTestMethod(
@@ -199,11 +202,15 @@ class KeyControllerPluralizationTest : ProjectAuthControllerTest("/v2/projects/"
       ),
     ).andIsOk.andAssertThatJson {
       node("isPlural").isBoolean.isTrue
-      node("translations.de.text").isString
+      node("translations.de.text")
+        .isString
         .isEqualTo(NORMALIZED_PLURAL.replace("dogsCount", "catsCount"))
     }
 
-    keyService.get(key.self.id).pluralArgName.assert.isEqualTo("catsCount")
+    keyService
+      .get(key.self.id)
+      .pluralArgName.assert
+      .isEqualTo("catsCount")
   }
 
   @ProjectJWTAuthTestMethod
@@ -296,10 +303,15 @@ class KeyControllerPluralizationTest : ProjectAuthControllerTest("/v2/projects/"
     executeInNewTransaction {
       val pluralKey = keyService.find(testData.project.id, "plural_key", null)
       pluralKey!!.isPlural.assert.isTrue()
-      pluralKey.translations.find { it.language.tag == "en" }!!
-        .text.assert.isEqualTo("{count, plural,\nother {Hello! I have {count} dogs.}\n}")
-      pluralKey.translations.find { it.language.tag == "cs" }!!
-        .text.assert.isEqualTo(
+      pluralKey.pluralArgName.assert.isEqualTo("count")
+      pluralKey.translations
+        .find { it.language.tag == "en" }!!
+        .text.assert
+        .isEqualTo("{count, plural,\nother {Hello! I have {count} dogs.}\n}")
+      pluralKey.translations
+        .find { it.language.tag == "cs" }!!
+        .text.assert
+        .isEqualTo(
           "{count, plural,\n" +
             "one {Ahoj! Já mám jednoho psa}\n" +
             "few {Ahoj! Já mám # psi}\n" +
@@ -309,8 +321,15 @@ class KeyControllerPluralizationTest : ProjectAuthControllerTest("/v2/projects/"
 
       val notPluralKey = keyService.find(testData.project.id, "not_plural_key", null)
       notPluralKey!!.isPlural.assert.isFalse()
-      notPluralKey.translations.find { it.language.tag == "en" }!!.text.assert.isEqualTo("Hello!")
-      notPluralKey.translations.find { it.language.tag == "cs" }!!.text.assert.isEqualTo("Ahoj!")
+      notPluralKey.pluralArgName.assert.isNull()
+      notPluralKey.translations
+        .find { it.language.tag == "en" }!!
+        .text.assert
+        .isEqualTo("Hello!")
+      notPluralKey.translations
+        .find { it.language.tag == "cs" }!!
+        .text.assert
+        .isEqualTo("Ahoj!")
     }
   }
 
@@ -318,11 +337,12 @@ class KeyControllerPluralizationTest : ProjectAuthControllerTest("/v2/projects/"
   @Test
   fun `correctly imports with resolvable endpoint`() {
     testData.projectBuilder.addCzech()
-    testData.projectBuilder.addKey {
-      name = "existing_non_plural"
-    }.build {
-      addTranslation("en", "Hello!")
-    }
+    testData.projectBuilder
+      .addKey {
+        name = "existing_non_plural"
+      }.build {
+        addTranslation("en", "Hello!")
+      }
     saveAndPrepare()
     performProjectAuthPost(
       "keys/import-resolvable",
@@ -379,10 +399,15 @@ class KeyControllerPluralizationTest : ProjectAuthControllerTest("/v2/projects/"
     executeInNewTransaction {
       val pluralKey = keyService.find(testData.project.id, "plural_key", null)
       pluralKey!!.isPlural.assert.isTrue()
-      pluralKey.translations.find { it.language.tag == "en" }!!
-        .text.assert.isEqualTo("{count, plural,\nother {Hello! I have {count} dogs.}\n}")
-      pluralKey.translations.find { it.language.tag == "cs" }!!
-        .text.assert.isEqualTo(
+      pluralKey.pluralArgName.assert.isEqualTo("count")
+      pluralKey.translations
+        .find { it.language.tag == "en" }!!
+        .text.assert
+        .isEqualTo("{count, plural,\nother {Hello! I have {count} dogs.}\n}")
+      pluralKey.translations
+        .find { it.language.tag == "cs" }!!
+        .text.assert
+        .isEqualTo(
           "{count, plural,\n" +
             "one {Ahoj! Já mám jednoho psa}\n" +
             "few {Ahoj! Já mám # psi}\n" +
@@ -392,15 +417,107 @@ class KeyControllerPluralizationTest : ProjectAuthControllerTest("/v2/projects/"
 
       val notPluralKey = keyService.find(testData.project.id, "not_plural_key", null)
       notPluralKey!!.isPlural.assert.isFalse()
-      notPluralKey.translations.find { it.language.tag == "en" }!!.text.assert.isEqualTo("Hello!")
-      notPluralKey.translations.find { it.language.tag == "cs" }!!.text.assert.isEqualTo("Ahoj!")
+      notPluralKey.pluralArgName.assert.isNull()
+      notPluralKey.translations
+        .find { it.language.tag == "en" }!!
+        .text.assert
+        .isEqualTo("Hello!")
+      notPluralKey.translations
+        .find { it.language.tag == "cs" }!!
+        .text.assert
+        .isEqualTo("Ahoj!")
 
       val existingNonPluralKey = keyService.find(testData.project.id, "existing_non_plural", null)
       existingNonPluralKey!!.isPlural.assert.isTrue()
-      existingNonPluralKey.translations.find { it.language.tag == "en" }!!
-        .text.assert.isEqualTo("{hello, plural,\nother {Hello!}\n}")
-      existingNonPluralKey.translations.find { it.language.tag == "cs" }!!
-        .text.assert.isEqualTo("{hello, plural,\none {# pes}\nother {# psů}\n}")
+      existingNonPluralKey.pluralArgName.assert.isEqualTo("hello")
+      existingNonPluralKey.translations
+        .find { it.language.tag == "en" }!!
+        .text.assert
+        .isEqualTo("{hello, plural,\nother {Hello!}\n}")
+      existingNonPluralKey.translations
+        .find { it.language.tag == "cs" }!!
+        .text.assert
+        .isEqualTo("{hello, plural,\none {# pes}\nother {# psů}\n}")
+    }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `backfills missing pluralArgName when re-importing an already-plural key`() {
+    testData.projectBuilder
+      .addKey {
+        name = "corrupted_plural"
+        isPlural = true
+      }.build {
+        addTranslation("en", "{count, plural,\nother {Hello! I have {count} dogs.}\n}")
+      }
+    saveAndPrepare()
+    performProjectAuthPost(
+      "keys/import-resolvable",
+      mapOf(
+        "keys" to
+          listOf(
+            mapOf(
+              "name" to "corrupted_plural",
+              "translations" to
+                mapOf(
+                  "en" to
+                    mapOf(
+                      "text" to "{count, plural, one {# dog} other {# dogs}}",
+                      "resolution" to "OVERRIDE",
+                    ),
+                ),
+            ),
+          ),
+      ),
+    ).andIsOk
+
+    executeInNewTransaction {
+      val key = keyService.find(testData.project.id, "corrupted_plural", null)
+      key!!.isPlural.assert.isTrue()
+      key.pluralArgName.assert.isEqualTo("count")
+    }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `keeps existing pluralArgName stable when re-importing an already-plural key`() {
+    testData.projectBuilder
+      .addKey {
+        name = "stable_plural"
+        isPlural = true
+        pluralArgName = "dogsCount"
+      }.build {
+        addTranslation("en", "{dogsCount, plural,\nother {I have # dogs.}\n}")
+      }
+    saveAndPrepare()
+    performProjectAuthPost(
+      "keys/import-resolvable",
+      mapOf(
+        "keys" to
+          listOf(
+            mapOf(
+              "name" to "stable_plural",
+              "translations" to
+                mapOf(
+                  "en" to
+                    mapOf(
+                      "text" to "{count, plural, one {# dog} other {# dogs}}",
+                      "resolution" to "OVERRIDE",
+                    ),
+                ),
+            ),
+          ),
+      ),
+    ).andIsOk
+
+    executeInNewTransaction {
+      val key = keyService.find(testData.project.id, "stable_plural", null)
+      key!!.pluralArgName.assert.isEqualTo("dogsCount")
+      key.translations
+        .find { it.language.tag == "en" }!!
+        .text.assert
+        .isEqualTo("{dogsCount, plural,\none {# dog}\nother {# dogs}\n}")
     }
   }
 }

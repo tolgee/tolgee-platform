@@ -29,9 +29,9 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
-import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
-import java.util.*
+import java.util.Date
+import java.util.Optional
 
 @Service
 class ApiKeyService(
@@ -42,7 +42,6 @@ class ApiKeyService(
   private val permissionService: PermissionService,
   private val entityManager: EntityManager,
   private val cacheManager: CacheManager,
-  private val transactionManager: PlatformTransactionManager,
 ) : Logging {
   private val cache: Cache? by lazy {
     cacheManager.getCache(Caches.PROJECT_API_KEYS)
@@ -167,7 +166,7 @@ class ApiKeyService(
       }
     }
 
-    return this.apiKeyRepository.save(entity)
+    return apiKeyRepository.save(entity)
   }
 
   fun encodeKey(
@@ -175,17 +174,27 @@ class ApiKeyService(
     projectId: Long,
   ): String {
     val stringToEncode = "${projectId}_$key"
-    return BaseEncoding.base32().omitPadding().lowerCase().encode(stringToEncode.toByteArray())
+    return BaseEncoding
+      .base32()
+      .omitPadding()
+      .lowerCase()
+      .encode(stringToEncode.toByteArray())
   }
 
   fun decodeKey(raw: String): DecodedApiKey? {
     return try {
-      val decoded = BaseEncoding.base32().omitPadding().lowerCase().decode(raw).decodeToString()
+      val decoded =
+        BaseEncoding
+          .base32()
+          .omitPadding()
+          .lowerCase()
+          .decode(raw)
+          .decodeToString()
       val (projectId, key) = decoded.split("_".toRegex(), 2)
       DecodedApiKey(projectId.toLong(), key)
-    } catch (e: IllegalArgumentException) {
+    } catch (_: IllegalArgumentException) {
       null
-    } catch (e: IndexOutOfBoundsException) {
+    } catch (_: IndexOutOfBoundsException) {
       null
     } catch (e: Exception) {
       Sentry.captureException(e)
@@ -243,11 +252,14 @@ class ApiKeyService(
   }
 
   private fun logTransactionIsolation() {
+    val isolationLevel =
+      entityManager
+        .createNativeQuery("show transaction_isolation")
+        .singleResult as String
+    val message = "Transaction isolation level: $isolationLevel"
+    Sentry.addBreadcrumb(message)
     if (logger.isDebugEnabled) {
-      val isolationLevel =
-        entityManager.createNativeQuery("show transaction_isolation")
-          .singleResult as String
-      logger.debug("Transaction isolation level: $isolationLevel")
+      logger.debug(message)
     }
   }
 

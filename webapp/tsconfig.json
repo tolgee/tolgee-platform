@@ -3,16 +3,15 @@
   "compilerOptions": {
     "lib": ["dom", "dom.iterable", "esnext"],
     "target": "ESNext",
-    "types": ["vite/client", "node"],
+    "types": ["vite/client", "node", "vitest/globals"],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
-    "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
@@ -24,5 +23,6 @@
     "preserveSymlinks": true,
     "emitDecoratorMetadata": true
   },
-  "include": ["src", "tolgee.dev.d.ts", "vite-env.d.ts"]
+  "include": ["src", "tolgee.dev.d.ts", "vite-env.d.ts"],
+  "exclude": ["src/eeSetup"]
 }

@@ -11,6 +11,7 @@ plugins {
     id 'org.springframework.boot' apply false
     id "kotlin-allopen"
     id "io.sentry.jvm.gradle"
+    id "org.gradle.test-retry"
 }
 
 group = 'io.tolgee.security'
@@ -21,12 +22,16 @@ apply plugin: "org.jetbrains.kotlin.plugin.spring"
 apply plugin: "kotlin-allopen"
 apply plugin: 'io.spring.dependency-management'
 
-repositories {
-    mavenCentral()
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
 }
 
 kotlin {
-    jvmToolchain(17)
+    compilerOptions {
+        freeCompilerArgs.addAll("-Xjsr305=strict")
+    }
 }
 
 allOpen {
@@ -71,11 +76,13 @@ dependencies {
     testImplementation('org.springframework.boot:spring-boot-starter-test')
     // implementation libs.springmockk
     testImplementation libs.mockito
+    ktlint(project(":ktlint"))
 }
 
-test {
+tasks.named('test', Test) {
     useJUnitPlatform()
     maxHeapSize = "4096m"
+    rootProject.setTestRetry(it)
 }
 
 sourceSets {
@@ -84,11 +91,15 @@ sourceSets {
 }
 
 dependencyManagement {
+    applyMavenExclusions = false
     imports {
-        mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
+        mavenBom(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES) {
+            bomProperty "kotlin.version", "${kotlinVersion}"
+        }
+        mavenBom 'org.junit:junit-bom:5.11.4'
     }
 }
 
-jar {
+tasks.named('jar', Jar) {
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
 }

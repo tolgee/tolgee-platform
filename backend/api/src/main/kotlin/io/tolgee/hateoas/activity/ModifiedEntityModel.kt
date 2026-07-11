@@ -14,4 +14,5 @@ data class ModifiedEntityModel(
   override var modifications: Map<String, PropertyModification>? = null,
   override var relations: Map<String, ExistenceEntityDescription>? = null,
   override val exists: Boolean? = null,
-) : IModifiedEntityModel, RepresentationModel<ModifiedEntityModel>()
+) : RepresentationModel<ModifiedEntityModel>(),
+  IModifiedEntityModel

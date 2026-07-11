@@ -1,6 +1,6 @@
 package io.tolgee.formats
 
-import io.tolgee.formats.android.AndroidParsingConstants
+import io.tolgee.formats.xmlResources.XmlResourcesParsingConstants
 
 class MobileStringEscaper(
   private val string: String,
@@ -14,6 +14,7 @@ class MobileStringEscaper(
   private val escapeQuotes: Boolean,
   // Android need 'u' and iOS 'U'
   private val utfSymbolCharacter: Char,
+  private val escapePercentWithBackslash: Boolean = true,
 ) {
   private enum class State {
     DEFAULT,
@@ -46,7 +47,7 @@ class MobileStringEscaper(
   }
 
   private val relevantSpaces =
-    if (escapeNewLines) AndroidParsingConstants.spacesWithoutNewLines else AndroidParsingConstants.spaces
+    if (escapeNewLines) XmlResourcesParsingConstants.spacesWithoutNewLines else XmlResourcesParsingConstants.spaces
 
   private fun handleChar(char: Char) {
     when (state) {
@@ -99,7 +100,7 @@ class MobileStringEscaper(
       }
 
       State.SPACES -> {
-        if (char in AndroidParsingConstants.spaces) {
+        if (char in XmlResourcesParsingConstants.spaces) {
           spaces.append(char)
         } else {
           handleSpacesEnd(char)
@@ -135,7 +136,8 @@ class MobileStringEscaper(
 
   private fun handlePercentEnd(char: Char?) {
     if (!keepPercentSignEscaped) {
-      val unescaped = percents.toString().replace("%%", "\\%")
+      val replacement = if (escapePercentWithBackslash) "\\%" else "%"
+      val unescaped = percents.toString().replace("%%", replacement)
       stringBuilder.append(unescaped)
     } else {
       stringBuilder.append(percents)

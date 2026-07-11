@@ -8,7 +8,7 @@ import {
   FormControl,
   AutocompleteProps,
 } from '@mui/material';
-import { Add } from '@mui/icons-material';
+import { Plus } from '@untitled-ui/icons-react';
 import { useTranslate } from '@tolgee/react';
 
 import { SelectItem } from 'tg.component/searchSelect/SearchSelect';
@@ -92,7 +92,7 @@ export function SearchSelectMulti<T extends React.Key>({
   }, [items, minWidth, maxWidth]);
 
   const defaultRenderOption: RenderOption<T> = (props, option) => (
-    <CompactMenuItem key={option.value} {...props} data-cy="search-select-item">
+    <CompactMenuItem {...props} key={option.value} data-cy="search-select-item">
       <Checkbox
         size="small"
         edge="start"
@@ -161,7 +161,7 @@ export function SearchSelectMulti<T extends React.Key>({
                     sx={{ ml: 0.5 }}
                     data-cy="search-select-new"
                   >
-                    {actionIcon || <Add />}
+                    {actionIcon || <Plus />}
                   </IconButton>
                 </Tooltip>
               )}

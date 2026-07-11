@@ -2,11 +2,14 @@ package io.tolgee.unit.formats.android.out
 
 import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.formats.ExportFormat
-import io.tolgee.formats.android.ANDROID_CDATA_CUSTOM_KEY
-import io.tolgee.formats.android.out.AndroidStringsXmlExporter
+import io.tolgee.formats.xmlResources.XML_RESOURCES_CDATA_CUSTOM_KEY
+import io.tolgee.formats.xmlResources.out.XmlResourcesExporter
+import io.tolgee.service.export.ExportFilePathProvider
+import io.tolgee.service.export.ExportFileStructureTemplateProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.testing.assert
 import io.tolgee.util.buildExportTranslationList
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class AndroidXmlFileExporterTest {
@@ -23,8 +26,9 @@ class AndroidXmlFileExporterTest {
     |<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     |  <string name="key1">Ahoj! I%d, %s, %e, %f</string>
     |  <string name="percent_no_placeholders">I am just a percent \% sign!</string>
-    |  <string name="percent_and_paceholders">I am not just a percent %s %% sign!</string>
-    |  <string name="percent_and_paceholders_and_tags"><![CDATA[I am not just a percent <b>%s</b> %% sign!]]></string>
+    |  <!-- This is a description -->
+    |  <string name="percent_and_placeholders">I am not just a percent %s %% sign!</string>
+    |  <string name="percent_and_placeholders_and_tags"><![CDATA[I am not just a percent <b>%s</b> %% sign!]]></string>
     |  <string name="forced_CDATA"><![CDATA[Forced CDATA <b>Hey!</b> sign!]]></string>
     |  <plurals name="Empty_plural">
     |    <item quantity="one"/>
@@ -32,6 +36,7 @@ class AndroidXmlFileExporterTest {
     |    <item quantity="many"/>
     |    <item quantity="other"/>
     |  </plurals>
+    |  <!-- This is a description above plural -->
     |  <plurals name="key3">
     |    <item quantity="one">%d den</item>
     |    <item quantity="few">%d dny</item>
@@ -42,6 +47,7 @@ class AndroidXmlFileExporterTest {
     |  <string name="key_with_unsupported_characters">OK!</string>
     |  <string name="unsupported_key_will_be_replaced">I have exact key name</string>
     |  <string-array name="i_am_array_item">
+    |    <!-- This is a description above array item -->
     |    <item>I will be first</item>
     |    <item>I will be second</item>
     |  </string-array>
@@ -56,8 +62,12 @@ class AndroidXmlFileExporterTest {
     |<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     |  <string name="i_am_array_english">This is english!</string>
     |  <plurals name="plural_with_placeholders">
-    |    <item quantity="one">%s dog</item>
-    |    <item quantity="other">%s dogs</item>
+    |    <item quantity="one">%1${'$'}s dog</item>
+    |    <item quantity="other">%1${'$'}s dogs</item>
+    |  </plurals>
+    |  <plurals name="numbered_plural">
+    |    <item quantity="one">%2${'$'}d store selected</item>
+    |    <item quantity="other">%2${'$'}d stores selected</item>
     |  </plurals>
     |</resources>
     |
@@ -114,13 +124,13 @@ class AndroidXmlFileExporterTest {
     |<?xml version="1.0" encoding="UTF-8" standalone="no"?>
     |<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     |  <plurals name="key3">
-    |    <item quantity="one"># den {icuParam}</item>
+    |    <item quantity="one"># den {icuParam} \'</item>
     |    <item quantity="few"># dny</item>
     |    <item quantity="many"># dní</item>
     |    <item quantity="other"># dní</item>
     |  </plurals>
     |  <string-array name="i_am_array_item">
-    |    <item>I will be first {icuParam}</item>
+    |    <item>I will be first {icuParam} \'{hey}\'</item>
     |  </string-array>
     |</resources>
     |
@@ -128,7 +138,7 @@ class AndroidXmlFileExporterTest {
     )
   }
 
-  private fun getExported(exporter: AndroidStringsXmlExporter): Map<String, String> {
+  private fun getExported(exporter: XmlResourcesExporter): Map<String, String> {
     val files = exporter.produceFiles()
     val data = files.map { it.key to it.value.bufferedReader().readText() }.toMap()
     return data
@@ -138,10 +148,10 @@ class AndroidXmlFileExporterTest {
     file: String,
     content: String,
   ) {
-    this[file]!!.assert.isEqualTo(content)
+    this[file]!!.assert.isEqualToNormalizingNewlines(content)
   }
 
-  private fun getExporter(params: ExportParams = getExportParams()): AndroidStringsXmlExporter {
+  private fun getExporter(params: ExportParams = getExportParams()): XmlResourcesExporter {
     val built =
       buildExportTranslationList {
         add(
@@ -160,13 +170,13 @@ class AndroidXmlFileExporterTest {
         )
         add(
           languageTag = "cs",
-          keyName = "percent and paceholders",
-          text =
-            "I am not just a percent {name} % sign!",
+          keyName = "percent and placeholders",
+          text = "I am not just a percent {name} % sign!",
+          description = "This is a description",
         )
         add(
           languageTag = "cs",
-          keyName = "percent and paceholders and tags",
+          keyName = "percent and placeholders and tags",
           text =
             "I am not just a percent <b>{name}</b> % sign!",
         )
@@ -176,7 +186,7 @@ class AndroidXmlFileExporterTest {
           text =
             "Forced CDATA <b>Hey!</b> sign!",
           fn = {
-            key.custom = mapOf(ANDROID_CDATA_CUSTOM_KEY to true)
+            key.custom = mapOf(XML_RESOURCES_CDATA_CUSTOM_KEY to true)
           },
         )
         add(
@@ -191,6 +201,7 @@ class AndroidXmlFileExporterTest {
           languageTag = "cs",
           keyName = "key3",
           text = "{count, plural, one {# den} few {# dny} other {# dní}}",
+          description = "This is a description above plural",
         ) {
           key.isPlural = true
         }
@@ -231,6 +242,7 @@ class AndroidXmlFileExporterTest {
           languageTag = "cs",
           keyName = "i_am_array_item[20]",
           text = "I will be first",
+          description = "This is a description above array item",
         )
 
         add(
@@ -262,11 +274,18 @@ class AndroidXmlFileExporterTest {
         ) {
           key.isPlural = true
         }
+        add(
+          languageTag = "en",
+          keyName = "numbered_plural",
+          text = "{1, plural, one {# store selected} other {# stores selected}}",
+        ) {
+          key.isPlural = true
+        }
       }
     return getExporter(built.translations, params = params)
   }
 
-  private fun getIcuPlaceholdersEnabledExporter(): AndroidStringsXmlExporter {
+  private fun getIcuPlaceholdersEnabledExporter(): XmlResourcesExporter {
     val built =
       buildExportTranslationList {
         add(
@@ -285,20 +304,20 @@ class AndroidXmlFileExporterTest {
     return getExporter(built.translations, true)
   }
 
-  private fun getIcuPlaceholdersDisabledExporter(): AndroidStringsXmlExporter {
+  private fun getIcuPlaceholdersDisabledExporter(): XmlResourcesExporter {
     val built =
       buildExportTranslationList {
         add(
           languageTag = "cs",
           keyName = "key3",
-          text = "{count, plural, one {'#' den '{'icuParam'}'} few {'#' dny} other {'#' dní}}",
+          text = "{count, plural, one {'#' den '{'icuParam'}' ''} few {'#' dny} other {'#' dní}}",
         ) {
           key.isPlural = true
         }
         add(
           languageTag = "cs",
           keyName = "i_am_array_item[20]",
-          text = "I will be first {icuParam}",
+          text = "I will be first {icuParam} '{hey}'",
         )
       }
     return getExporter(built.translations, false)
@@ -308,15 +327,36 @@ class AndroidXmlFileExporterTest {
     translations: List<ExportTranslationView>,
     isProjectIcuPlaceholdersEnabled: Boolean = true,
     params: ExportParams = getExportParams(),
-  ): AndroidStringsXmlExporter {
-    return AndroidStringsXmlExporter(
+  ): XmlResourcesExporter {
+    return XmlResourcesExporter(
       translations = translations,
       exportParams = params,
       isProjectIcuPlaceholdersEnabled = isProjectIcuPlaceholdersEnabled,
+      ExportFilePathProvider(
+        template = ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate(),
+        extension = params.format.extension,
+      ),
     )
   }
 
   private fun getExportParams(): ExportParams {
     return ExportParams().also { it.format = ExportFormat.ANDROID_XML }
+  }
+
+  @Test
+  fun `exports cleanly when translation text contains XML 1_0-invalid characters`() {
+    val built =
+      buildExportTranslationList {
+        add(
+          languageTag = "cs",
+          keyName = "poisoned",
+          text = "Hello\u000Bworld",
+        )
+      }
+
+    val xml = getExported(getExporter(built.translations))["values-cs/strings.xml"]!!
+
+    assertThat(xml).contains("Helloworld")
+    assertThat(xml).doesNotContain(Char(0x0B).toString())
   }
 }

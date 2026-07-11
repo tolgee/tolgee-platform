@@ -7,12 +7,16 @@ import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.request.ClearTranslationsRequest
 import io.tolgee.batch.request.CopyTranslationRequest
 import io.tolgee.batch.request.DeleteKeysRequest
+import io.tolgee.batch.request.HardDeleteKeysRequest
 import io.tolgee.batch.request.MachineTranslationRequest
 import io.tolgee.batch.request.PreTranslationByTmRequest
+import io.tolgee.batch.request.RestoreKeysRequest
 import io.tolgee.batch.request.SetKeysNamespaceRequest
 import io.tolgee.batch.request.SetTranslationsStateStateRequest
 import io.tolgee.batch.request.TagKeysRequest
 import io.tolgee.batch.request.UntagKeysRequest
+import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
+import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.hateoas.batch.BatchJobModel
@@ -23,6 +27,7 @@ import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
+import io.tolgee.service.AiPlaygroundResultService
 import io.tolgee.service.security.SecurityService
 import jakarta.validation.Valid
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -42,13 +47,15 @@ class StartBatchJobController(
   private val batchJobService: BatchJobService,
   private val authenticationFacade: AuthenticationFacade,
   private val batchJobModelAssembler: BatchJobModelAssembler,
+  private val aiPlaygroundResultService: AiPlaygroundResultService,
+  private val enabledFeaturesProvider: EnabledFeaturesProvider,
 ) {
   @PostMapping(value = ["/pre-translate-by-tm"])
   @Operation(
-    summary = "Pre-translate by TM",
+    summary = "Translate from memory",
     description = "Pre-translate provided keys to provided languages by TM.",
   )
-  @RequiresProjectPermissions([ Scope.BATCH_PRE_TRANSLATE_BY_TM ])
+  @RequiresProjectPermissions([Scope.BATCH_PRE_TRANSLATE_BY_TM])
   @AllowApiAccess
   fun translate(
     @Valid @RequestBody
@@ -56,12 +63,13 @@ class StartBatchJobController(
   ): BatchJobModel {
     securityService.checkLanguageTranslatePermission(projectHolder.project.id, data.targetLanguageIds)
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
-    return batchJobService.startJob(
-      data,
-      projectHolder.projectEntity,
-      authenticationFacade.authenticatedUserEntity,
-      BatchJobType.PRE_TRANSLATE_BT_TM,
-    ).model
+    return batchJobService
+      .startJob(
+        data,
+        projectHolder.projectEntity,
+        authenticationFacade.authenticatedUserEntity,
+        BatchJobType.PRE_TRANSLATE_BT_TM,
+      ).model
   }
 
   @PostMapping(value = ["/machine-translate"])
@@ -69,7 +77,7 @@ class StartBatchJobController(
     summary = "Machine Translation",
     description = "Translate provided keys to provided languages through primary MT provider.",
   )
-  @RequiresProjectPermissions([ Scope.BATCH_MACHINE_TRANSLATE ])
+  @RequiresProjectPermissions([Scope.BATCH_MACHINE_TRANSLATE])
   @AllowApiAccess
   fun machineTranslation(
     @Valid @RequestBody
@@ -77,34 +85,63 @@ class StartBatchJobController(
   ): BatchJobModel {
     securityService.checkLanguageTranslatePermission(projectHolder.project.id, data.targetLanguageIds)
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
-    return batchJobService.startJob(
-      data,
-      projectHolder.projectEntity,
-      authenticationFacade.authenticatedUserEntity,
-      BatchJobType.MACHINE_TRANSLATE,
-    ).model
+    return batchJobService
+      .startJob(
+        data,
+        projectHolder.projectEntity,
+        authenticationFacade.authenticatedUserEntity,
+        BatchJobType.MACHINE_TRANSLATE,
+      ).model
+  }
+
+  @PostMapping(value = ["/ai-playground-translate"])
+  @Operation(
+    summary = "Translates via llm and stores result in AiPlaygroundResult",
+  )
+  @RequiresProjectPermissions([Scope.PROMPTS_EDIT])
+  @AllowApiAccess
+  fun aiPlaygroundTranslate(
+    @Valid @RequestBody
+    data: MachineTranslationRequest,
+  ): BatchJobModel {
+    if (data.llmPrompt?.template !== null) {
+      enabledFeaturesProvider.checkFeatureEnabled(
+        projectHolder.project.organizationOwnerId,
+        Feature.AI_PROMPT_CUSTOMIZATION,
+      )
+    }
+    securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
+    aiPlaygroundResultService.removeResults(projectHolder.project.id, authenticationFacade.authenticatedUserEntity.id)
+    return batchJobService
+      .startJob(
+        data,
+        projectHolder.projectEntity,
+        authenticationFacade.authenticatedUserEntity,
+        BatchJobType.AI_PLAYGROUND_TRANSLATE,
+      ).model
   }
 
   @PostMapping(value = ["/delete-keys"])
   @Operation(summary = "Delete keys")
-  @RequiresProjectPermissions([ Scope.KEYS_DELETE ])
+  @RequiresProjectPermissions([Scope.KEYS_DELETE])
   @AllowApiAccess
   fun deleteKeys(
     @Valid @RequestBody
     data: DeleteKeysRequest,
   ): BatchJobModel {
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
-    return batchJobService.startJob(
-      data,
-      projectHolder.projectEntity,
-      authenticationFacade.authenticatedUserEntity,
-      BatchJobType.DELETE_KEYS,
-    ).model
+    return batchJobService
+      .startJob(
+        data,
+        projectHolder.projectEntity,
+        authenticationFacade.authenticatedUserEntity,
+        BatchJobType.DELETE_KEYS,
+      ).model
   }
 
   @PostMapping(value = ["/set-translation-state"])
   @Operation(summary = "Set translation state")
-  @RequiresProjectPermissions([ Scope.TRANSLATIONS_STATE_EDIT ])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_STATE_EDIT])
   @AllowApiAccess
   fun setTranslationState(
     @Valid @RequestBody
@@ -112,12 +149,13 @@ class StartBatchJobController(
   ): BatchJobModel {
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
     securityService.checkLanguageStateChangePermission(projectHolder.project.id, data.languageIds)
-    return batchJobService.startJob(
-      data,
-      projectHolder.projectEntity,
-      authenticationFacade.authenticatedUserEntity,
-      BatchJobType.SET_TRANSLATIONS_STATE,
-    ).model
+    return batchJobService
+      .startJob(
+        data,
+        projectHolder.projectEntity,
+        authenticationFacade.authenticatedUserEntity,
+        BatchJobType.SET_TRANSLATIONS_STATE,
+      ).model
   }
 
   @PostMapping(value = ["/clear-translations"])
@@ -125,7 +163,7 @@ class StartBatchJobController(
     summary = "Clear translation values",
     description = "Clear translation values for provided keys in selected languages.",
   )
-  @RequiresProjectPermissions([ Scope.TRANSLATIONS_EDIT ])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_EDIT])
   @AllowApiAccess
   fun clearTranslations(
     @Valid @RequestBody
@@ -133,12 +171,13 @@ class StartBatchJobController(
   ): BatchJobModel {
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
     securityService.checkLanguageTranslatePermission(projectHolder.project.id, data.languageIds)
-    return batchJobService.startJob(
-      data,
-      projectHolder.projectEntity,
-      authenticationFacade.authenticatedUserEntity,
-      BatchJobType.CLEAR_TRANSLATIONS,
-    ).model
+    return batchJobService
+      .startJob(
+        data,
+        projectHolder.projectEntity,
+        authenticationFacade.authenticatedUserEntity,
+        BatchJobType.CLEAR_TRANSLATIONS,
+      ).model
   }
 
   @PostMapping(value = ["/copy-translations"])
@@ -146,7 +185,7 @@ class StartBatchJobController(
     summary = "Copy translation values",
     description = "Copy translation values from one language to other languages.",
   )
-  @RequiresProjectPermissions([ Scope.TRANSLATIONS_EDIT ])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_EDIT])
   @AllowApiAccess
   fun copyTranslations(
     @Valid @RequestBody
@@ -155,17 +194,18 @@ class StartBatchJobController(
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
     securityService.checkLanguageTranslatePermission(projectHolder.project.id, data.targetLanguageIds)
     securityService.checkLanguageViewPermission(projectHolder.project.id, listOf(data.sourceLanguageId))
-    return batchJobService.startJob(
-      data,
-      projectHolder.projectEntity,
-      authenticationFacade.authenticatedUserEntity,
-      BatchJobType.COPY_TRANSLATIONS,
-    ).model
+    return batchJobService
+      .startJob(
+        data,
+        projectHolder.projectEntity,
+        authenticationFacade.authenticatedUserEntity,
+        BatchJobType.COPY_TRANSLATIONS,
+      ).model
   }
 
   @PostMapping(value = ["/tag-keys"])
   @Operation(summary = "Add tags")
-  @RequiresProjectPermissions([ Scope.KEYS_EDIT ])
+  @RequiresProjectPermissions([Scope.KEYS_EDIT])
   @AllowApiAccess
   fun tagKeys(
     @Valid @RequestBody
@@ -173,46 +213,85 @@ class StartBatchJobController(
   ): BatchJobModel {
     data.tags.validate()
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
-    return batchJobService.startJob(
-      data,
-      projectHolder.projectEntity,
-      authenticationFacade.authenticatedUserEntity,
-      BatchJobType.TAG_KEYS,
-    ).model
+    return batchJobService
+      .startJob(
+        data,
+        projectHolder.projectEntity,
+        authenticationFacade.authenticatedUserEntity,
+        BatchJobType.TAG_KEYS,
+      ).model
   }
 
   @PostMapping(value = ["/untag-keys"])
   @Operation(summary = "Remove tags")
-  @RequiresProjectPermissions([ Scope.KEYS_EDIT ])
+  @RequiresProjectPermissions([Scope.KEYS_EDIT])
   @AllowApiAccess
   fun untagKeys(
     @Valid @RequestBody
     data: UntagKeysRequest,
   ): BatchJobModel {
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
-    return batchJobService.startJob(
-      data,
-      projectHolder.projectEntity,
-      authenticationFacade.authenticatedUserEntity,
-      BatchJobType.UNTAG_KEYS,
-    ).model
+    return batchJobService
+      .startJob(
+        data,
+        projectHolder.projectEntity,
+        authenticationFacade.authenticatedUserEntity,
+        BatchJobType.UNTAG_KEYS,
+      ).model
   }
 
   @PostMapping(value = ["/set-keys-namespace"])
   @Operation(summary = "Set keys namespace")
-  @RequiresProjectPermissions([ Scope.KEYS_EDIT ])
+  @RequiresProjectPermissions([Scope.KEYS_EDIT])
   @AllowApiAccess
   fun setKeysNamespace(
     @Valid @RequestBody
     data: SetKeysNamespaceRequest,
   ): BatchJobModel {
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
-    return batchJobService.startJob(
-      data,
-      projectHolder.projectEntity,
-      authenticationFacade.authenticatedUserEntity,
-      BatchJobType.SET_KEYS_NAMESPACE,
-    ).model
+    return batchJobService
+      .startJob(
+        data,
+        projectHolder.projectEntity,
+        authenticationFacade.authenticatedUserEntity,
+        BatchJobType.SET_KEYS_NAMESPACE,
+      ).model
+  }
+
+  @PostMapping(value = ["/restore-keys"])
+  @Operation(summary = "Restore soft-deleted keys")
+  @RequiresProjectPermissions([Scope.KEYS_CREATE])
+  @AllowApiAccess
+  fun restoreKeys(
+    @Valid @RequestBody
+    data: RestoreKeysRequest,
+  ): BatchJobModel {
+    securityService.checkSoftDeletedKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
+    return batchJobService
+      .startJob(
+        data,
+        projectHolder.projectEntity,
+        authenticationFacade.authenticatedUserEntity,
+        BatchJobType.RESTORE_KEYS,
+      ).model
+  }
+
+  @PostMapping(value = ["/hard-delete-keys"])
+  @Operation(summary = "Permanently delete soft-deleted keys")
+  @RequiresProjectPermissions([Scope.KEYS_DELETE])
+  @AllowApiAccess
+  fun hardDeleteKeys(
+    @Valid @RequestBody
+    data: HardDeleteKeysRequest,
+  ): BatchJobModel {
+    securityService.checkSoftDeletedKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
+    return batchJobService
+      .startJob(
+        data,
+        projectHolder.projectEntity,
+        authenticationFacade.authenticatedUserEntity,
+        BatchJobType.HARD_DELETE_KEYS,
+      ).model
   }
 
   val BatchJob.model

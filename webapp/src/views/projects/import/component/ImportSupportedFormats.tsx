@@ -1,4 +1,4 @@
-import { Box, styled, Typography } from '@mui/material';
+import { Box, styled, Typography, Button } from '@mui/material';
 import { T } from '@tolgee/react';
 import React from 'react';
 import TolgeeLogo from 'tg.svgs/tolgeeLogo.svg?react';
@@ -8,8 +8,17 @@ import CLogo from 'tg.svgs/logos/c.svg?react';
 import PythonLogo from 'tg.svgs/logos/python.svg?react';
 import AppleLogo from 'tg.svgs/logos/apple.svg?react';
 import AndroidLogo from 'tg.svgs/logos/android.svg?react';
+import ComposeMultiplatformLogo from 'tg.svgs/logos/compose-multiplatform.svg?react';
 import FluttrerLogo from 'tg.svgs/logos/flutter.svg?react';
 import RailsLogo from 'tg.svgs/logos/rails.svg?react';
+import I18nextLogo from 'tg.svgs/logos/i18next.svg?react';
+import CsvLogo from 'tg.svgs/logos/csv.svg?react';
+import DotnetLogo from 'tg.svgs/logos/dotnet.svg?react';
+import XlsxLogo from 'tg.svgs/logos/xlsx.svg?react';
+import JavaLogo from 'tg.svgs/logos/java.svg?react';
+import FileYamlLogo from 'tg.svgs/logos/file-yaml.svg?react';
+import { ArrowUpRight } from '@untitled-ui/icons-react';
+import { DOCS_LINKS } from 'tg.constants/docLinks';
 
 const TechLogo = ({
   svg,
@@ -41,18 +50,30 @@ const FORMATS = [
     logoWidth: '24px',
   },
   {
+    name: 'Structured JSON',
+    logo: <IcuLogo />,
+  },
+  {
     name: 'XLIFF',
     logo: <IcuLogo />,
   },
   { name: 'PO PHP', logo: <PhoLogo /> },
   { name: 'PO C/C++', logo: <CLogo /> },
   { name: 'PO Python', logo: <PythonLogo /> },
+  { name: 'Java Properties', logo: <JavaLogo /> },
   { name: 'Apple Strings', logo: <AppleLogo /> },
   { name: 'Apple Stringsdict', logo: <AppleLogo /> },
+  { name: 'Apple Strings Catalog', logo: <AppleLogo /> },
   { name: 'Apple XLIFF', logo: <AppleLogo /> },
   { name: 'Android XML', logo: <AndroidLogo /> },
+  { name: 'Compose Multiplatform XML', logo: <ComposeMultiplatformLogo /> },
   { name: 'Flutter ARB', logo: <FluttrerLogo /> },
   { name: 'Ruby YAML', logo: <RailsLogo /> },
+  { name: 'Structured YAML', logo: <FileYamlLogo /> },
+  { name: 'i18next', logo: <I18nextLogo /> },
+  { name: 'CSV', logo: <CsvLogo /> },
+  { name: '.NET RESX', logo: <DotnetLogo /> },
+  { name: 'XLSX', logo: <XlsxLogo /> },
 ];
 
 export const ImportSupportedFormats = () => {
@@ -80,6 +101,32 @@ export const ImportSupportedFormats = () => {
           />
         ))}
       </StyledContainer>
+      <Box sx={{ mt: 3, textAlign: 'center' }}>
+        <Button
+          component="a"
+          href={DOCS_LINKS.supportedFormats}
+          target="_blank"
+          rel="noreferrer noopener"
+          variant="outlined"
+          size="small"
+          endIcon={<ArrowUpRight />}
+          sx={(theme) => ({
+            textTransform: 'none',
+            color: theme.palette.tokens.text.secondary,
+            borderColor: theme.palette.tokens.border.secondary,
+            '& .MuiButton-endIcon > svg': {
+              width: '1.25em',
+              height: '1.25em',
+            },
+            '&:hover': {
+              backgroundColor: theme.palette.tokens.background['paper-2'],
+              borderColor: theme.palette.tokens.text.secondary,
+            },
+          })}
+        >
+          <T keyName="import_file_supported_formats_see_all_button" />
+        </Button>
+      </Box>
     </>
   );
 };

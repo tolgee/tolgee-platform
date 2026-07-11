@@ -12,8 +12,12 @@ type Props = {
 
 export function LanguagePermissionSummary({ permissions, allLangs }: Props) {
   const { t } = useTranslate();
-  const { viewLanguageIds, translateLanguageIds, stateChangeLanguageIds } =
-    permissions;
+  const {
+    viewLanguageIds,
+    translateLanguageIds,
+    stateChangeLanguageIds,
+    suggestLanguageIds,
+  } = permissions;
 
   const categories: LanguagePermissionCategory[] = [
     {
@@ -25,6 +29,11 @@ export function LanguagePermissionSummary({ permissions, allLangs }: Props) {
       label: t('permission_type_edit'),
       data: translateLanguageIds,
       scope: 'translations.edit',
+    },
+    {
+      label: t('permission_type_suggest'),
+      data: suggestLanguageIds,
+      scope: 'translations.suggest',
     },
     {
       label: t('permission_type_view'),

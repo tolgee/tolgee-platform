@@ -10,6 +10,8 @@ import io.swagger.v3.oas.annotations.media.ExampleObject
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.activity.ActivityService
 import io.tolgee.activity.groups.ActivityGroupService
+import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.constants.Feature
 import io.tolgee.dtos.queryResults.ActivityGroupView
 import io.tolgee.dtos.request.ActivityGroupFilters
 import io.tolgee.exceptions.NotFoundException
@@ -25,10 +27,12 @@ import io.tolgee.model.views.activity.ProjectActivityView
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authorization.RequiresProjectPermissions
+import io.tolgee.security.ratelimit.RateLimitService
+import io.tolgee.service.branching.BranchService
+import io.tolgee.service.project.ProjectFeatureGuard
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
-import org.springframework.hateoas.MediaTypes
 import org.springframework.hateoas.PagedModel
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -36,12 +40,12 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
+import java.time.Duration
 
 @Suppress("MVCPathVariableInspection", "SpringJavaInjectionPointsAutowiringInspection")
 @RestController
 @CrossOrigin(origins = ["*"])
-@RequestMapping(value = ["/v2/projects/{projectId}/activity", "/v2/projects/activity"])
+@RequestMapping(value = ["/v2/projects/{projectId:[0-9]+}/activity", "/v2/projects/activity"])
 @Tag(name = "Projects")
 class ProjectActivityController(
   private val activityService: ActivityService,
@@ -53,28 +57,49 @@ class ProjectActivityController(
   private val activityGroupService: ActivityGroupService,
   private val groupPagedResourcesAssembler: PagedResourcesAssembler<ActivityGroupView>,
   private val groupModelAssembler: ActivityGroupModelAssembler,
-  private val requestMappingHandlerMapping: RequestMappingHandlerMapping,
+  private val branchService: BranchService,
+  private val projectFeatureGuard: ProjectFeatureGuard,
+  private val rateLimitService: RateLimitService,
+  private val tolgeeProperties: TolgeeProperties,
 ) {
   @Operation(summary = "Get project activity")
-  @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
-  @RequiresProjectPermissions([ Scope.ACTIVITY_VIEW ])
+  @GetMapping("")
+  @RequiresProjectPermissions([Scope.ACTIVITY_VIEW])
   @AllowApiAccess
   fun getActivity(
     @ParameterObject pageable: Pageable,
+    @RequestParam(required = false) branch: String? = null,
   ): PagedModel<ProjectActivityModel> {
-    val views = activityService.getProjectActivity(projectId = projectHolder.project.id, pageable)
+    rateLimitService.checkPerUserRateLimit(
+      "activity",
+      limit = tolgeeProperties.rateLimits.activityRequestLimit,
+      refillDuration = Duration.ofMillis(tolgeeProperties.rateLimits.activityRequestWindow),
+    )
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
+    val views =
+      activityService.findProjectActivity(
+        projectId = projectHolder.project.id,
+        pageable = pageable,
+        branchName = branch,
+      )
     return activityPagedResourcesAssembler.toModel(views, projectActivityModelAssembler)
   }
 
   @Operation(summary = "Get one revision data")
-  @GetMapping("/revisions/{revisionId}", produces = [MediaTypes.HAL_JSON_VALUE])
+  @GetMapping("/revisions/{revisionId}")
   @RequiresProjectPermissions([Scope.ACTIVITY_VIEW])
   @AllowApiAccess
   fun getSingleRevision(
     @PathVariable revisionId: Long,
+    @RequestParam(required = false) branch: String? = null,
   ): ProjectActivityModel {
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
     val views =
-      activityService.getProjectActivity(projectId = projectHolder.project.id, revisionId)
+      activityService.findProjectActivity(
+        projectId = projectHolder.project.id,
+        revisionId = revisionId,
+        branchName = branch,
+      )
         ?: throw NotFoundException()
     return projectActivityModelAssembler.toModel(views)
   }
@@ -82,6 +107,7 @@ class ProjectActivityController(
   @Operation(summary = "Get modified entities in revision")
   @GetMapping("/revisions/{revisionId}/modified-entities")
   @RequiresProjectPermissions([Scope.ACTIVITY_VIEW])
+  @AllowApiAccess
   fun getModifiedEntitiesByRevision(
     @ParameterObject pageable: Pageable,
     @PathVariable revisionId: Long,
@@ -91,13 +117,17 @@ class ProjectActivityController(
     )
     @RequestParam(required = false)
     filterEntityClass: List<String>?,
+    @RequestParam(required = false)
+    branch: String? = null,
   ): PagedModel<ModifiedEntityModel> {
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
     val page =
       activityService.getRevisionModifications(
         projectId = projectHolder.project.id,
         revisionId,
         pageable,
         filterEntityClass,
+        branch,
       )
     return modificationResourcesAssembler.toModel(page, modifiedEntityModelAssembler)
   }

@@ -27,4 +27,12 @@ class ImportFileMapping(
         "When null, Tolgee will try to guess the language from the file contents or file name.",
   )
   val languageTag: String? = null,
+  @Schema(
+    description =
+      "Tags of languages to be imported. When null, all languages from will be imported.\n\n" +
+        "This field is useful when the file contains multiple languages and you want to import only some of them. " +
+        "For example when importing Apple String Catalog (APPLE_XCSTRINGS), you might want only to import the base " +
+        "language.",
+  )
+  val languageTagsToImport: List<String>? = null,
 )

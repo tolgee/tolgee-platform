@@ -1,6 +1,6 @@
 package io.tolgee.facade
 
-import io.sentry.Sentry
+import io.tolgee.dtos.queryResults.LanguageStatsDto
 import io.tolgee.dtos.queryResults.ProjectStatistics
 import io.tolgee.hateoas.project.ProjectWithStatsModel
 import io.tolgee.hateoas.project.ProjectWithStatsModelAssembler
@@ -31,23 +31,21 @@ class ProjectWithStatsFacade(
     val projectIds = projects.content.map { it.id }
     val totals = projectStatsService.getProjectsTotals(projectIds)
     val languages = languageService.getDtosOfProjects(projectIds)
-    val languageStats = languageStatsService.getLanguageStatsDtos(projectIds)
+    val allLanguageStats =
+      languageStatsService
+        .getLanguageStatsDtos(projectIds)
+        .mapValues { (_, stats) -> dedupeLanguageStats(stats) }
 
     val projectsWithStatsContent =
       projects.content.map { projectWithLanguagesView ->
         val projectTotals = totals[projectWithLanguagesView.id]
         val baseLanguage = languages[projectWithLanguagesView.id]?.find { it.base }
-        val projectLanguageStats =
-          languageStats[projectWithLanguagesView.id]
+        val projectLanguageStats = allLanguageStats[projectWithLanguagesView.id] ?: emptyList()
 
-        var stateTotals: ProjectStatsService.ProjectStateTotals? = null
-        if (baseLanguage != null && projectLanguageStats != null) {
-          stateTotals =
-            projectStatsService.computeProjectTotals(
-              baseLanguage,
-              projectLanguageStats,
-            )
-        }
+        val stateTotals =
+          baseLanguage?.let {
+            projectStatsService.computeProjectTotals(it, projectLanguageStats)
+          }
 
         val translatedPercent = stateTotals?.translatedPercent.toPercentValue()
         val reviewedPercent = stateTotals?.reviewedPercent.toPercentValue()
@@ -56,6 +54,9 @@ class ProjectWithStatsFacade(
             2,
             RoundingMode.HALF_UP,
           )
+
+        val qaIssueCount = projectLanguageStats.sumOf { it.qaIssueCount }
+        val qaChecksStaleCount = projectLanguageStats.sumOf { it.qaChecksStaleCount }
 
         val projectStatistics =
           ProjectStatistics(
@@ -68,6 +69,8 @@ class ProjectWithStatsFacade(
                 TranslationState.REVIEWED to reviewedPercent,
                 TranslationState.UNTRANSLATED to untranslatedPercent,
               ),
+            qaIssueCount = qaIssueCount,
+            qaChecksStaleCount = qaChecksStaleCount,
           )
 
         val projectLanguages =
@@ -85,16 +88,20 @@ class ProjectWithStatsFacade(
     return pagedWithStatsResourcesAssembler.toModel(page, projectWithStatsModelAssembler)
   }
 
+  private fun dedupeLanguageStats(stats: List<LanguageStatsDto>): List<LanguageStatsDto> {
+    if (stats.isEmpty()) return stats
+    return stats
+      .groupBy { it.languageId }
+      .map { (_, items) ->
+        // Prefer default branch stats (isDefaultBranch = true) over legacy null-branch stats (isDefaultBranch = null)
+        items.firstOrNull { it.isDefaultBranch == true } ?: items.first()
+      }
+  }
+
   fun Double?.toPercentValue(): BigDecimal {
-    if (this == null || this.isNaN()) {
+    if (this == null || this.isNaN() || this.isInfinite()) {
       return BigDecimal(0)
     }
-    return try {
-      this.toBigDecimal().setScale(3, RoundingMode.HALF_UP)
-    } catch (e: NumberFormatException) {
-      Sentry.captureMessage("Failed to convert $this to BigDecimal")
-      Sentry.captureException(e)
-      BigDecimal(0)
-    }
+    return this.toBigDecimal().setScale(3, RoundingMode.HALF_UP)
   }
 }

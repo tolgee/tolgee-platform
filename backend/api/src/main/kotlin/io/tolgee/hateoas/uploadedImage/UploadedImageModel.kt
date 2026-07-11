@@ -2,7 +2,7 @@ package io.tolgee.hateoas.uploadedImage
 
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
-import java.util.*
+import java.util.Date
 
 @Suppress("unused")
 @Relation(collectionRelation = "uploadedImages", itemRelation = "uploadedImage")

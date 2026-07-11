@@ -10,9 +10,11 @@ import { messageService } from 'tg.service/MessageService';
 
 type OrganizationModel = components['schemas']['OrganizationModel'];
 
-export const OrganizationBasePermissionMenu: FunctionComponent<{
-  organization: OrganizationModel;
-}> = ({ organization }) => {
+export const OrganizationBasePermissionMenu: FunctionComponent<
+  React.PropsWithChildren<{
+    organization: OrganizationModel;
+  }>
+> = ({ organization }) => {
   const { t } = useTranslate();
 
   const { updatePermissions } = useUpdateBasePermissions({

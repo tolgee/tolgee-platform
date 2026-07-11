@@ -5,7 +5,10 @@ import io.tolgee.formats.flutter.FlutterArbModel
 import io.tolgee.formats.flutter.FlutterArbTranslationModel
 import java.io.InputStream
 
-class FlutterArbFileWriter(val model: FlutterArbModel, private val objectMapper: ObjectMapper) {
+class FlutterArbFileWriter(
+  val model: FlutterArbModel,
+  private val objectMapper: ObjectMapper,
+) {
   val result = mutableMapOf<String, Any?>()
 
   fun produceFile(): InputStream {

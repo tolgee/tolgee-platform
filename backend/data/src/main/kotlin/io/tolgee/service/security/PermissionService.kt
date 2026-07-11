@@ -22,6 +22,7 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.translationAgency.TranslationAgency
 import io.tolgee.model.views.UserProjectMetadataView
 import io.tolgee.repository.PermissionRepository
 import io.tolgee.service.CachedPermissionService
@@ -29,6 +30,7 @@ import io.tolgee.service.language.LanguageService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
+import jakarta.persistence.EntityManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Lazy
@@ -47,6 +49,7 @@ class PermissionService(
   private val userPreferencesService: UserPreferencesService,
   @Lazy
   private val applicationContext: ApplicationContext,
+  private val entityManager: EntityManager,
 ) {
   @set:Autowired
   @set:Lazy
@@ -60,19 +63,36 @@ class PermissionService(
   @set:Autowired
   lateinit var projectService: ProjectService
 
+  @Transactional(readOnly = true)
+  fun findPermissionNonCached(
+    projectId: Long? = null,
+    userId: Long? = null,
+    organizationId: Long? = null,
+  ): Permission? {
+    return permissionRepository.findOneByProjectIdAndUserIdAndOrganizationId(
+      projectId = projectId,
+      userId = userId,
+      organizationId = organizationId,
+    )
+  }
+
+  @Transactional(readOnly = true)
   fun getAllOfProject(project: Project?): Set<Permission> {
     return permissionRepository.getAllByProjectAndUserNotNull(project)
   }
 
+  @Transactional(readOnly = true)
   fun findById(id: Long): Permission? {
     return cachedPermissionService.find(id)
   }
 
+  @Transactional(readOnly = true)
   fun getProjectPermissionScopesNoApiKey(
     projectId: Long,
     userAccount: UserAccount,
   ) = getProjectPermissionScopesNoApiKey(projectId, userAccount.id)
 
+  @Transactional(readOnly = true)
   fun getProjectPermissionScopesNoApiKey(
     projectId: Long,
     userAccountId: Long,
@@ -80,6 +100,7 @@ class PermissionService(
     return getProjectPermissionData(projectId, userAccountId).computedPermissions.expandedScopes
   }
 
+  @Transactional(readOnly = true)
   fun getProjectPermissionData(
     project: ProjectDto,
     userAccountId: Long,
@@ -107,9 +128,19 @@ class PermissionService(
       organizationBasePermissions = organizationBasePermission,
       computedPermissions = computed,
       directPermissions = projectPermission,
+      suggestionsMode = project.suggestionsMode,
     )
   }
 
+  @Transactional(readOnly = true)
+  fun getUserProjectPermission(
+    projectId: Long,
+    userId: Long,
+  ): PermissionDto? {
+    return find(projectId, userId)
+  }
+
+  @Transactional(readOnly = true)
   fun getPermittedTranslateLanguagesForUserIds(
     userIds: List<Long>,
     projectId: Long,
@@ -126,6 +157,7 @@ class PermissionService(
     return result
   }
 
+  @Transactional(readOnly = true)
   fun getPermittedTranslateLanguagesForProjectIds(
     projectIds: List<Long>,
     userId: Long,
@@ -142,6 +174,7 @@ class PermissionService(
     return result
   }
 
+  @Transactional(readOnly = true)
   fun getProjectPermissionData(
     projectId: Long,
     userAccountId: Long,
@@ -166,6 +199,7 @@ class PermissionService(
     delete(permission)
   }
 
+  @Transactional(readOnly = true)
   fun get(permissionId: Long): Permission {
     return this.cachedPermissionService.find(permissionId) ?: throw NotFoundException()
   }
@@ -193,6 +227,7 @@ class PermissionService(
     create(permission)
   }
 
+  @Transactional(readOnly = true)
   fun computeProjectPermission(
     organizationRole: OrganizationRoleType?,
     organizationBasePermission: IPermission?,
@@ -203,7 +238,7 @@ class PermissionService(
       when {
         organizationRole == OrganizationRoleType.OWNER -> ComputedPermissionDto.ORGANIZATION_OWNER
         directPermission != null -> ComputedPermissionDto(directPermission, ComputedPermissionOrigin.DIRECT)
-        organizationRole == OrganizationRoleType.MEMBER && organizationBasePermission != null ->
+        organizationRole == OrganizationRoleType.MEMBER || organizationRole == OrganizationRoleType.MAINTAINER ->
           ComputedPermissionDto(
             organizationBasePermission,
             ComputedPermissionOrigin.ORGANIZATION_BASE,
@@ -212,9 +247,7 @@ class PermissionService(
         else -> ComputedPermissionDto.NONE
       }
 
-    return userRole?.let {
-      computed.getAdminPermissions(userRole)
-    } ?: computed
+    return computed.getAdminOrSupporterPermissions(userRole)
   }
 
   fun computeProjectPermission(userProjectMetadataView: UserProjectMetadataView): ComputedPermissionDto {
@@ -238,6 +271,10 @@ class PermissionService(
         invitation = invitation,
         project = params.project,
         type = type,
+        agency =
+          params.agencyId?.let {
+            entityManager.getReference(TranslationAgency::class.java, it)
+          },
       )
 
     setPermissionLanguages(permission, params.languagePermissions, params.project.id)
@@ -245,7 +282,7 @@ class PermissionService(
     return this.save(permission)
   }
 
-  @Transactional
+  @Transactional(readOnly = true)
   fun find(
     projectId: Long? = null,
     userId: Long? = null,
@@ -332,10 +369,12 @@ class PermissionService(
     permission.translateLanguages = languagePermissions.translate.standardize()
     permission.stateChangeLanguages = languagePermissions.stateChange.standardize()
     permission.viewLanguages = languagePermissions.view.standardize()
+    permission.suggestLanguages = languagePermissions.suggest.standardize()
 
     if (permission.viewLanguages.isNotEmpty()) {
       permission.viewLanguages.addAll(permission.translateLanguages)
       permission.viewLanguages.addAll(permission.stateChangeLanguages)
+      permission.viewLanguages.addAll(permission.suggestLanguages)
     }
   }
 
@@ -383,8 +422,8 @@ class PermissionService(
   }
 
   fun revoke(
-    projectId: Long,
     userId: Long,
+    projectId: Long,
   ) {
     val data = this.getProjectPermissionData(projectId, userId)
     if (data.organizationRole != null) {
@@ -428,6 +467,7 @@ class PermissionService(
     this.delete(permissionEntity)
   }
 
+  @Transactional(readOnly = true)
   fun getPermittedViewLanguages(
     projectId: Long,
     userId: Long,
@@ -452,12 +492,10 @@ class PermissionService(
   }
 
   @Transactional
-  fun setOrganizationBasePermissions(
+  fun removeDirectProjectPermissions(
     projectId: Long,
     userId: Long,
   ) {
-    val project = projectService.get(projectId)
-    organizationRoleService.checkUserIsMemberOrOwner(userId, project.organizationOwner.id)
     val permission = getProjectPermissionData(projectId, userId).directPermissions ?: return
     delete(permission.id)
   }
@@ -469,5 +507,14 @@ class PermissionService(
     val permissions = permissionRepository.findAllByOrganizationAndUserId(organizationId, userId)
     permissions.forEach { delete(it) }
     return permissions
+  }
+
+  fun deleteAll(permissions: List<Permission>) {
+    permissionRepository.deleteAll(permissions)
+  }
+
+  @Transactional(readOnly = true)
+  fun getAgencyPermissions(agencyId: Long): List<Permission> {
+    return permissionRepository.findAllByAgencyId(agencyId)
   }
 }

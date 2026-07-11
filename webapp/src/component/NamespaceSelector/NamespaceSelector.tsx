@@ -12,7 +12,7 @@ type Props = {
   SearchSelectProps?: Partial<ComponentProps<typeof SearchSelect>>;
 };
 
-export const NamespaceSelector: React.FC<Props> = ({
+export const NamespaceSelector: React.FC<React.PropsWithChildren<Props>> = ({
   value,
   onChange,
   namespaceData,

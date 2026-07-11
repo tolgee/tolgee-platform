@@ -16,14 +16,16 @@ type Props = {
   state: PermissionBasicState;
   onChange: (value: PermissionBasicState) => void;
   allLangs: LanguageModel[];
+  disabled?: boolean;
 };
 
-export const RoleLanguages: React.FC<Props> = ({
+export const RoleLanguages: React.FC<React.PropsWithChildren<Props>> = ({
   state,
   onChange,
   allLangs,
+  disabled,
 }) => {
-  const show = ['REVIEW', 'TRANSLATE'].includes(state.role!);
+  const show = ['SUGGEST', 'REVIEW', 'TRANSLATE'].includes(state.role!);
 
   const handleSelect = (values: number[]) => {
     onChange({
@@ -39,6 +41,7 @@ export const RoleLanguages: React.FC<Props> = ({
           selected={state.languages || []}
           onSelect={handleSelect}
           allLanguages={allLangs}
+          disabled={disabled}
         />
       </Box>
     </StyledContainer>
