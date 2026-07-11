@@ -2,6 +2,7 @@ package io.tolgee.activity.iterceptor
 
 import io.tolgee.activity.ActivityService
 import io.tolgee.activity.EntityDescriptionProvider
+import io.tolgee.activity.EntityIdentity
 import io.tolgee.activity.annotation.ActivityIgnoredProp
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
@@ -204,14 +205,14 @@ class InterceptedEventsManager(
     val classMap = activityHolder.modifiedEntities.computeIfAbsent(entity::class) { mutableMapOf() }
     if (entity.id != 0L) {
       // the entity may have been recorded before its id was allocated
-      classMap.remove(entity)?.let {
+      classMap.remove(EntityIdentity(entity))?.let {
         it.entityId = entity.id
         classMap.putIfAbsent(entity.id, it)
       }
     }
     val activityModifiedEntity =
       classMap.computeIfAbsent(
-        if (entity.id != 0L) entity.id else entity,
+        if (entity.id != 0L) entity.id else EntityIdentity(entity),
       ) {
         ActivityModifiedEntity(
           activityRevision,

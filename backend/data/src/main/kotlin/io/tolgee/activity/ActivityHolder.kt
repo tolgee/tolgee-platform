@@ -98,20 +98,34 @@ open class ActivityHolder(
 }
 
 /**
- * Inner map key is the entity id when it's already allocated, otherwise the entity
- * instance itself (some ids are only assigned later in the transaction). Keying purely
- * by instance would record the same row twice when Hibernate yields multiple instances
- * of it in one transaction (e.g. after an entityManager.clear()).
+ * Inner map key is the entity id when it's already allocated, otherwise an
+ * [EntityIdentity] of the instance (some ids are only assigned later in the
+ * transaction). Keying purely by instance would record the same row twice when
+ * Hibernate yields multiple instances of it in one transaction (e.g. after an
+ * entityManager.clear()).
  */
 typealias ModifiedEntitiesType =
   MutableMap<KClass<out EntityWithId>, MutableMap<Any, ActivityModifiedEntity>>
+
+/**
+ * Identity-based key for entities whose id is not allocated yet. Entity hashCode
+ * is id-based and mutates when the id gets assigned, which would strand the map
+ * entry in a stale hash bucket.
+ */
+class EntityIdentity(
+  val entity: EntityWithId,
+) {
+  override fun hashCode() = System.identityHashCode(entity)
+
+  override fun equals(other: Any?) = other is EntityIdentity && other.entity === entity
+}
 
 val Map.Entry<Any, ActivityModifiedEntity>.resolvedEntityId: Long
   get() {
     val key = key
     return when {
       key is Long -> key
-      key is EntityWithId && key.id != 0L -> key.id
+      key is EntityIdentity && key.entity.id != 0L -> key.entity.id
       else -> value.entityId
     }
   }

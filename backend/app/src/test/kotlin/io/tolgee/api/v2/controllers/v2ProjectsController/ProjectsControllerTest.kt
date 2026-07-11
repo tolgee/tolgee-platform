@@ -102,7 +102,7 @@ class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
                 {
                   "UNTRANSLATED": 25.0,
                   "TRANSLATED": 75.0,
-                  "REVIEWED": 0
+                  "REVIEWED": 0.0
                 }
               """,
             )
