@@ -18,5 +18,4 @@ class InitialDataModel(
   var announcement: AnnouncementDto? = null,
   var eeSubscription: InitialDataEeSubscriptionModel? = null,
   var qaCheckCategories: List<QaCheckCategoryModel>? = null,
-  var unreadNotifications: Int? = null,
 )

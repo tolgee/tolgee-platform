@@ -23,7 +23,6 @@ import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.translationAgency.TranslationAgency
-import io.tolgee.model.views.UserProjectMetadataView
 import io.tolgee.repository.PermissionRepository
 import io.tolgee.service.CachedPermissionService
 import io.tolgee.service.language.LanguageService
@@ -250,14 +249,6 @@ class PermissionService(
       }
 
     return computed.getAdminOrSupporterPermissions(userRole)
-  }
-
-  fun computeProjectPermission(userProjectMetadataView: UserProjectMetadataView): ComputedPermissionDto {
-    return computeProjectPermission(
-      userProjectMetadataView.organizationRole,
-      userProjectMetadataView.basePermissions,
-      userProjectMetadataView.permissions,
-    )
   }
 
   fun createForInvitation(

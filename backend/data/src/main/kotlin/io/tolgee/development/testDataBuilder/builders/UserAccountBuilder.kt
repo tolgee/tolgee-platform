@@ -7,7 +7,6 @@ import io.tolgee.model.Pat
 import io.tolgee.model.UserAccount
 import io.tolgee.model.UserPreferences
 import io.tolgee.model.notifications.Notification
-import io.tolgee.model.notifications.NotificationPreferences
 import io.tolgee.model.slackIntegration.SlackUserConnection
 import org.springframework.core.io.ClassPathResource
 
@@ -24,7 +23,6 @@ class UserAccountBuilder(
     var authProviderChangeRequest: AuthProviderChangeRequestBuilder? = null
     var pats: MutableList<PatBuilder> = mutableListOf()
     var slackUserConnections: MutableList<SlackUserConnectionBuilder> = mutableListOf()
-    var notificationPreferences: MutableList<NotificationPreferencesBuilder> = mutableListOf()
     var notifications: MutableList<NotificationBuilder> = mutableListOf()
   }
 
@@ -50,8 +48,6 @@ class UserAccountBuilder(
   fun addPat(ft: FT<Pat>) = addOperation(data.pats, ft)
 
   fun addSlackUserConnection(ft: FT<SlackUserConnection>) = addOperation(data.slackUserConnections, ft)
-
-  fun addNotificationPreferences(ft: FT<NotificationPreferences>) = addOperation(data.notificationPreferences, ft)
 
   fun addNotification(ft: FT<Notification>) = addOperation(data.notifications, ft)
 }

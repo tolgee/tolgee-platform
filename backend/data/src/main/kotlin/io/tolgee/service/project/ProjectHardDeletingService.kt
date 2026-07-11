@@ -5,8 +5,6 @@ import io.tolgee.constants.Caches
 import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.events.OnProjectSoftDeleted
 import io.tolgee.model.Project
-import io.tolgee.notifications.NotificationPreferencesService
-import io.tolgee.notifications.UserNotificationService
 import io.tolgee.repository.ProjectRepository
 import io.tolgee.repository.qa.ProjectQaConfigRepository
 import io.tolgee.security.ProjectHolder
@@ -64,10 +62,6 @@ class ProjectHardDeletingService(
   private val branchService: BranchService,
   private val entityManager: EntityManager,
   private val projectQaConfigRepository: ProjectQaConfigRepository,
-  @Lazy
-  private val userNotificationService: UserNotificationService,
-  @Lazy
-  private val notificationPreferencesService: NotificationPreferencesService,
 ) : Logging {
   @Transactional
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#project.id")
@@ -146,8 +140,6 @@ class ProjectHardDeletingService(
       entityManager.clear()
 
       bigMetaService.deleteAllByProjectId(projectId)
-      userNotificationService.deleteAllByProjectId(projectId)
-      notificationPreferencesService.deleteAllByProjectId(projectId)
       branchService.deleteAllByProjectId(projectId)
       projectQaConfigRepository.deleteAllByProjectId(projectId)
 

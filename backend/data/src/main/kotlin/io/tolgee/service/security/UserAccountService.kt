@@ -27,9 +27,6 @@ import io.tolgee.model.notifications.NotificationType
 import io.tolgee.model.views.ExtendedUserAccountInProject
 import io.tolgee.model.views.UserAccountInProjectView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
-import io.tolgee.model.views.UserProjectMetadataView
-import io.tolgee.notifications.NotificationPreferencesService
-import io.tolgee.notifications.UserNotificationService
 import io.tolgee.repository.UserAccountRepository
 import io.tolgee.service.AiPlaygroundResultService
 import io.tolgee.service.AvatarService
@@ -72,8 +69,6 @@ class UserAccountService(
   private val organizationService: OrganizationService,
   private val entityManager: EntityManager,
   private val currentDateProvider: CurrentDateProvider,
-  @Lazy private val userNotificationService: UserNotificationService,
-  @Lazy private val notificationPreferencesService: NotificationPreferencesService,
   private val cacheManager: CacheManager,
   @Lazy
   private val self: UserAccountService,
@@ -253,9 +248,6 @@ class UserAccountService(
     toDelete.organizationRoles.forEach {
       entityManager.remove(it)
     }
-
-    userNotificationService.deleteAllByUserId(toDelete.id)
-    notificationPreferencesService.deleteAllByUserId(toDelete.id)
 
     aiPlaygroundResultService.deleteResultsByUser(toDelete.id)
     userAccountRepository.softDeleteUser(toDelete, currentDateProvider.date)
@@ -528,10 +520,6 @@ class UserAccountService(
         avatarHash = it.avatarHash,
       )
     }
-  }
-
-  fun getAllConnectedUserProjectMetadataViews(projectId: Long): List<UserProjectMetadataView> {
-    return userAccountRepository.findAllUserProjectMetadataViews(projectId)
   }
 
   @Transactional

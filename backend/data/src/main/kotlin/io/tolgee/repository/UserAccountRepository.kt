@@ -6,7 +6,6 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.model.views.UserAccountInProjectView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
-import io.tolgee.model.views.UserProjectMetadataView
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -367,45 +366,6 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
   """,
   )
   fun findDemoByUsernames(usernames: List<String>): List<UserAccount>
-
-  @Query(
-    """
-      SELECT DISTINCT new io.tolgee.model.views.UserProjectMetadataView(
-        ua.id,
-        p.id,
-        org_r.type,
-        perm_org,
-        listagg(str(vl_org.id), ','),
-        perm,
-        listagg(str(vl.id), ','),
-        np_global,
-        np_project
-      )
-      FROM UserAccount ua
-			LEFT JOIN Project p ON p.id = :projectId
-      LEFT JOIN OrganizationRole org_r ON
-        org_r.user = ua AND
-        org_r.organization = p.organizationOwner
-      LEFT JOIN FETCH Permission perm ON
-        perm.user = ua AND
-        perm.project = p
-      LEFT JOIN perm.viewLanguages vl
-      LEFT JOIN FETCH Permission perm_org ON
-        org_r.user = ua AND
-        org_r.organization = p.organizationOwner AND
-        perm_org.organization = p.organizationOwner
-      LEFT JOIN perm_org.viewLanguages vl_org
-      LEFT JOIN FETCH NotificationPreferences np_global ON np_global.userAccount = ua AND np_global.project IS NULL
-      LEFT JOIN FETCH NotificationPreferences np_project ON np_project.userAccount = ua AND np_project.project = p
-      WHERE
-        ua.deletedAt IS NULL AND (
-          (perm._scopes IS NOT NULL AND cast(perm._scopes as string) != '{}') OR perm.type IS NOT NULL OR
-          (perm_org._scopes IS NOT NULL AND cast(perm_org._scopes as string) != '{}') OR perm_org.type IS NOT NULL
-        )
-      GROUP BY ua.id, p.id, org_r.type, perm_org, perm, np_global, np_project
-    """,
-  )
-  fun findAllUserProjectMetadataViews(projectId: Long): List<UserProjectMetadataView>
 
   @Query(
     nativeQuery = true,

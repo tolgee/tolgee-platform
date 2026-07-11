@@ -10,7 +10,6 @@ import io.tolgee.hateoas.initialData.InitialDataModel
 import io.tolgee.hateoas.qa.QaCheckCategoryModelAssembler
 import io.tolgee.hateoas.sso.PublicSsoTenantModelAssembler
 import io.tolgee.hateoas.userAccount.PrivateUserAccountModelAssembler
-import io.tolgee.notifications.UserNotificationService
 import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.TenantService
@@ -35,7 +34,6 @@ class InitialDataController(
   private val userPreferencesService: UserPreferencesService,
   private val preferredOrganizationFacade: PreferredOrganizationFacade,
   private val announcementController: AnnouncementController,
-  private val userNotificationService: UserNotificationService,
   private val tenantService: TenantService,
   private val authInfoModelAssembler: AuthInfoModelAssembler,
   private val privateUserAccountModelAssembler: PrivateUserAccountModelAssembler,
@@ -62,7 +60,6 @@ class InitialDataController(
       data.preferredOrganization = preferredOrganizationFacade.getPreferred()
       data.languageTag = userPreferencesService.find(userAccount.id)?.language
       data.announcement = announcementController.getLatest()
-      data.unreadNotifications = userNotificationService.getUnreadNotificationsCount(userAccount.id)
       data.eeSubscription = getEeSubscriptionModel()
     }
 

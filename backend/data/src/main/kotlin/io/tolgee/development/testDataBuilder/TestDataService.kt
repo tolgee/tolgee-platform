@@ -137,7 +137,6 @@ class TestDataService(
         ensureProjectTms(builder)
         saveTranslationMemoryData(builder)
         saveNotifications(builder)
-        saveNotificationPreferences(builder)
         finalize()
       }
 
@@ -156,15 +155,6 @@ class TestDataService(
       val slug = organization.slug
       if (slug.isEmpty()) {
         organization.slug = organizationService.generateSlug(organization.name)
-      }
-    }
-  }
-
-  private fun saveNotificationPreferences(builder: TestDataBuilder) {
-    // These depend on users and projects, so they must be stored only after all the projects have been stored.
-    builder.data.userAccounts.forEach {
-      it.data.notificationPreferences.forEach { entityBuilder ->
-        entityManager.persist(entityBuilder.self)
       }
     }
   }

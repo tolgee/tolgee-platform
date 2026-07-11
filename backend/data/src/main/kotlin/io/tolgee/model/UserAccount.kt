@@ -6,8 +6,6 @@ import io.tolgee.api.IUserAccount
 import io.tolgee.api.SimpleUserAccount
 import io.tolgee.component.ThirdPartyAuthTypeConverter
 import io.tolgee.model.enums.ThirdPartyAuthType
-import io.tolgee.model.notifications.NotificationPreferences
-import io.tolgee.model.notifications.UserNotification
 import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.model.slackIntegration.SlackUserConnection
 import io.tolgee.model.task.Task
@@ -28,7 +26,6 @@ import jakarta.persistence.OrderBy
 import jakarta.persistence.Transient
 import jakarta.validation.constraints.NotBlank
 import org.hibernate.annotations.ColumnDefault
-import org.hibernate.annotations.SQLRestriction
 import org.hibernate.annotations.Type
 import java.util.Date
 
@@ -149,17 +146,6 @@ data class UserAccount(
   @OneToMany(mappedBy = "userAccount", fetch = FetchType.LAZY, orphanRemoval = true)
   var slackConfig: MutableList<SlackConfig> = mutableListOf()
 
-  @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], orphanRemoval = true, mappedBy = "recipient")
-  var userNotifications: MutableList<UserNotification> = mutableListOf()
-
-  @SQLRestriction("project_id IS NOT NULL")
-  @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], orphanRemoval = true, mappedBy = "userAccount")
-  var projectNotificationPreferences: MutableList<NotificationPreferences> = mutableListOf()
-
-  @SQLRestriction("project_id IS NULL")
-  @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], orphanRemoval = true, mappedBy = "userAccount")
-  private var _globalNotificationPreferences: MutableList<NotificationPreferences> = mutableListOf()
-
   override val deleted: Boolean
     get() = deletedAt != null
 
@@ -185,9 +171,6 @@ data class UserAccount(
     this.thirdPartyAuthId = thirdPartyAuthId
     this.resetPasswordCode = resetPasswordCode
   }
-
-  val globalNotificationPreferences: NotificationPreferences?
-    get() = _globalNotificationPreferences.firstOrNull()
 
   enum class Role {
     USER,

@@ -23,8 +23,6 @@ import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.views.ProjectView
 import io.tolgee.model.views.ProjectWithLanguagesView
-import io.tolgee.notifications.NotificationPreferencesService
-import io.tolgee.notifications.UserNotificationService
 import io.tolgee.repository.ProjectRepository
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AuthenticationFacade
