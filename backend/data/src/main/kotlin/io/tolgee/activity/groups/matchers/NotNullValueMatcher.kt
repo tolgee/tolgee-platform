@@ -15,7 +15,8 @@ class NotNullValueMatcher : ActivityGroupValueMatcher {
   }
 
   override fun createChildSqlCondition(field: Field<JSON>): Condition {
-    return field.isNotNull
+    // an attribute set to null is JSON null, not SQL NULL
+    return DSL.condition("({0} is not null and {0}::jsonb <> 'null'::jsonb)", field)
   }
 
   override fun createRootSqlCondition(field: Field<JSON>): Condition {

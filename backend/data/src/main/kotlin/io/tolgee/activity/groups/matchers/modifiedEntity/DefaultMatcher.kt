@@ -106,28 +106,29 @@ class DefaultMatcher<T : Any>(
   }
 
   private fun getAllowedValuesCondition(context: SqlContext): Condition {
-    val allowedValues = allowedValues ?: return DSL.noCondition()
+    val allowedValues = this.allowedValues ?: return DSL.noCondition()
     val conditions = getValueMatcherConditions(context, allowedValues)
     return DSL.and(conditions)
   }
 
   private fun getDeniedValuesCondition(context: SqlContext): Condition {
-    val deniedValues = deniedValues ?: return DSL.noCondition()
+    val deniedValues = this.deniedValues ?: return DSL.noCondition()
     val conditions = getValueMatcherConditions(context, deniedValues)
     return DSL.not(DSL.or(conditions))
   }
 
   private fun getValueMatcherConditions(
     context: SqlContext,
-    values: Map<out Any, Any?>,
+    values: Map<KProperty1<T, *>, Any?>,
   ): List<Condition> {
-    return values.map {
+    return values.map { (property, requiredValue) ->
       val matcher =
-        when (val requiredValue = it.value) {
+        when (requiredValue) {
           is ActivityGroupValueMatcher -> requiredValue
           else -> EqualsValueMatcher(requiredValue)
         }
-      matcher.createRootSqlCondition(context.modificationsField)
+      val propertyField = DSL.jsonGetAttribute(context.modificationsField, property.name)
+      matcher.createRootSqlCondition(propertyField)
     }
   }
 }

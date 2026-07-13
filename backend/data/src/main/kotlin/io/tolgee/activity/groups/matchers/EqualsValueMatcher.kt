@@ -18,7 +18,12 @@ class EqualsValueMatcher(
   }
 
   override fun createChildSqlCondition(field: Field<JSON>): Condition {
-    return field.eq(jsonValue)
+    // json has no equality operator in postgres, so compare as jsonb;
+    // an absent attribute yields SQL NULL, an attribute set to null yields JSON null
+    if (value == null) {
+      return DSL.condition("({0} is null or {0}::jsonb = 'null'::jsonb)", field)
+    }
+    return DSL.condition("{0}::jsonb = {1}::jsonb", field, DSL.`val`(jsonValue))
   }
 
   override fun createRootSqlCondition(field: Field<JSON>): Condition {

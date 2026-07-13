@@ -276,7 +276,8 @@ enum class ActivityGroupType(
     matcher =
       DefaultMatcher(
         entityClass = Language::class,
-        revisionTypes = listOf(RevisionType.DEL),
+        // language deletion is a soft delete followed by an async hard delete
+        revisionTypes = listOf(RevisionType.DEL, RevisionType.MOD),
       ),
   ),
 
