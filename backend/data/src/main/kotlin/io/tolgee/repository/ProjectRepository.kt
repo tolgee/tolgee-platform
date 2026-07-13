@@ -60,6 +60,22 @@ interface ProjectRepository : JpaRepository<Project, Long> {
         and r.baseLanguage is not null and bl.deletedAt is null
         and o.deletedAt is null
         """
+
+    /**
+     * A project a below-member viewer may read: public, or held via any permission row.
+     *
+     * `r.deletedAt is null and o.deletedAt is null` are top-level so they also guard the permission-row
+     * branch, which [PUBLIC_PROJECT_VISIBILITY] does not — do not "deduplicate" them against the public
+     * branch, or that branch re-opens to soft-deleted projects/orgs. Splice consumers must join `r`/`bl`/`o`.
+     */
+    const val BELOW_MEMBER_ACCESSIBLE_PROJECT = """
+        (
+          r.deletedAt is null and o.deletedAt is null and (
+            ($PUBLIC_PROJECT_VISIBILITY)
+            or exists (select perm.id from Permission perm where perm.user.id = :userId and perm.project = r)
+          )
+        )
+        """
   }
 
   @Query(
@@ -144,6 +160,20 @@ interface ProjectRepository : JpaRepository<Project, Long> {
     """,
   )
   fun hasPublicProjects(organizationId: Long): Boolean
+
+  /** Ids of the org's projects a below-member viewer may read (see [BELOW_MEMBER_ACCESSIBLE_PROJECT]). */
+  @Query(
+    """select r.id from Project r
+        left join r.baseLanguage bl
+        left join r.organizationOwner o
+        where o.id = :organizationId
+        and $BELOW_MEMBER_ACCESSIBLE_PROJECT
+    """,
+  )
+  fun getBelowMemberAccessibleProjectIds(
+    organizationId: Long,
+    userId: Long,
+  ): List<Long>
 
   fun findAllByOrganizationOwnerId(organizationOwnerId: Long): List<Project>
 

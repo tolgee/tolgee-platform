@@ -3,6 +3,7 @@ package io.tolgee.ee.repository.glossary
 import io.tolgee.ee.data.glossary.GlossaryWithStats
 import io.tolgee.model.Project
 import io.tolgee.model.glossary.Glossary
+import io.tolgee.repository.ProjectRepository
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -16,25 +17,18 @@ import org.springframework.stereotype.Repository
 interface GlossaryRepository : JpaRepository<Glossary, Long> {
   companion object {
     /**
-     * An assigned project a below-member reader may see: publicly visible (the project half of
-     * [io.tolgee.repository.ProjectRepository.PUBLIC_PROJECT_VISIBILITY]) or one the user holds
-     * any permission row on. Expects aliases `ap` (assigned project), `apbl` (its base language)
-     * and a `:userId` parameter (nullable — unauthenticated readers match only public projects).
+     * The canonical [io.tolgee.repository.ProjectRepository.BELOW_MEMBER_ACCESSIBLE_PROJECT]; consuming
+     * queries must join its `r` (assigned project) / `bl` (base language) / `o` (org) aliases + `:userId`.
      */
-    const val ASSIGNED_PROJECT_BELOW_MEMBER_ACCESSIBLE = """
-      ap.deletedAt is null
-      and (
-        (ap.public = true and ap.baseLanguage is not null and apbl.deletedAt is null)
-        or exists (select uperm.id from Permission uperm where uperm.user.id = :userId and uperm.project = ap)
-      )
-    """
+    const val ASSIGNED_PROJECT_BELOW_MEMBER_ACCESSIBLE = ProjectRepository.BELOW_MEMBER_ACCESSIBLE_PROJECT
 
     /** A glossary a below-member reader may read: has at least one [ASSIGNED_PROJECT_BELOW_MEMBER_ACCESSIBLE] project. Expects alias `g`. */
     const val BELOW_MEMBER_ACCESSIBLE = """
       exists (
-        select ap.id from Glossary g2
-          join g2.assignedProjects ap
-          left join ap.baseLanguage apbl
+        select r.id from Glossary g2
+          join g2.assignedProjects r
+          left join r.baseLanguage bl
+          join r.organizationOwner o
         where g2.id = g.id and $ASSIGNED_PROJECT_BELOW_MEMBER_ACCESSIBLE
       )
     """
@@ -137,11 +131,12 @@ interface GlossaryRepository : JpaRepository<Glossary, Long> {
     select g.id as id,
       g.name as name,
       g.baseLanguageTag as baseLanguageTag,
-      min(ap.name) as firstAssignedProjectName,
-      count(ap) as assignedProjectsCount
+      min(r.name) as firstAssignedProjectName,
+      count(r) as assignedProjectsCount
     from Glossary g
-    join g.assignedProjects ap
-    left join ap.baseLanguage apbl
+    join g.assignedProjects r
+    left join r.baseLanguage bl
+    join r.organizationOwner o
     where g.organizationOwner.id = :organizationId
       and g.organizationOwner.deletedAt is null
       and (lower(g.name) like lower(concat('%', coalesce(:search, ''), '%')) or :search is null)
@@ -168,12 +163,13 @@ interface GlossaryRepository : JpaRepository<Glossary, Long> {
 
   @Query(
     """
-    select ap from Glossary g
-      join g.assignedProjects ap
-      left join ap.baseLanguage apbl
+    select r from Glossary g
+      join g.assignedProjects r
+      left join r.baseLanguage bl
+      join r.organizationOwner o
     where g.id = :glossaryId
       and $ASSIGNED_PROJECT_BELOW_MEMBER_ACCESSIBLE
-    order by ap.name
+    order by r.name
     """,
   )
   fun findBelowMemberAccessibleAssignedProjects(

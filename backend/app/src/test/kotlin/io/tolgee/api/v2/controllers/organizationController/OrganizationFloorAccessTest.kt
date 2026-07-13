@@ -15,11 +15,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.data.domain.PageRequest
 
-/**
- * The org view floor (`canUserViewStrictOrPublic` = permission/role standing OR a public project)
- * and the below-member surface scoping it enables. Below-member viewers (public-project community
- * users, direct-permission holders) hold no org role — the tests below pin that surface.
- */
+/** Covers the org view floor (see `OrganizationRoleService.canUserViewStrictOrPublic`) and the below-member surface scoping it enables. */
 class OrganizationFloorAccessTest : AuthorizedControllerTest() {
   lateinit var testData: PublicProjectsControllerTestData
 
@@ -89,6 +85,49 @@ class OrganizationFloorAccessTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `a floor viewer sees only public-project languages, not private-project ones`() {
+    userAccount = testData.nonMember
+    val languages = orgLanguageTags("/languages")
+    languages.assert.contains("en")
+    languages.assert.doesNotContain("de")
+    val baseLanguages = orgLanguageTags("/base-languages")
+    baseLanguages.assert.contains("en")
+    baseLanguages.assert.doesNotContain("de")
+  }
+
+  @Test
+  fun `a member sees languages of all organization projects, private included`() {
+    userAccount = testData.otherOrgMember
+    orgLanguageTags("/languages").assert.contains("en", "de")
+    orgLanguageTags("/base-languages").assert.contains("en", "de")
+  }
+
+  @Test
+  fun `a floor viewer cannot probe a private project's languages via the projectIds filter`() {
+    val privateId = testData.otherOrgPrivateProject.id
+    userAccount = testData.nonMember
+    orgLanguageTags("/languages", "&projectIds=$privateId").assert.isEmpty()
+    orgLanguageTags("/base-languages", "&projectIds=$privateId").assert.isEmpty()
+
+    userAccount = testData.otherOrgMember
+    orgLanguageTags("/languages", "&projectIds=$privateId").assert.contains("de")
+    orgLanguageTags("/base-languages", "&projectIds=$privateId").assert.contains("de")
+  }
+
+  private fun orgLanguageTags(
+    path: String,
+    query: String = "",
+  ): List<String> {
+    val response =
+      performAuthGet("/v2/organizations/${testData.otherOrg.id}$path?size=100$query").andIsOk.andReturn()
+    return jacksonObjectMapper()
+      .readTree(response.response.contentAsString)
+      .path("_embedded")
+      .path("languages")
+      .map { it.path("tag").asText() }
+  }
+
+  @Test
   fun `a floor viewer reports no role on the org endpoint`() {
     userAccount = testData.storedGuest
     performAuthGet("/v2/organizations/${testData.otherOrg.id}").andIsOk.andAssertThatJson {
@@ -98,9 +137,6 @@ class OrganizationFloorAccessTest : AuthorizedControllerTest() {
 
   @Test
   fun `the organizations listing stays membership-scoped - a floor viewer is not in it`() {
-    // The floor admits a community viewer to GET an org by id, but the /v2/organizations listing
-    // (the org switcher) is role/permission-scoped: a public-project-only viewer is not a member,
-    // so the org must not appear there (community users reach it via the community-projects page).
     userAccount = testData.nonMember
     performAuthGet("/v2/organizations?search=Vibrant").andIsOk.andAssertThatJson {
       node("page.totalElements").isEqualTo(0)
@@ -166,8 +202,6 @@ class OrganizationFloorAccessTest : AuthorizedControllerTest() {
       )
     }
     userAccount = testData.noneOnlyUser
-    // A NONE permission is still a permission row (standing), so the user is NOT a pure community
-    // viewer — limitedView is false — but they are below MEMBER, so the model is still reduced.
     performAuthGet("/v2/preferred-organization").andIsOk.andAssertThatJson {
       node("currentUserRole").isEqualTo(null)
       node("limitedView").isEqualTo(false)
@@ -248,8 +282,6 @@ class OrganizationFloorAccessTest : AuthorizedControllerTest() {
         .path("_embedded")
         .path("usersInOrganization")
         .map { it.path("username").asText() }
-    // stored_guest has neither an org role nor a project permission — only public-project floor
-    // access — so it must never surface in org member management (it would count as a paid seat).
     usernames.assert.doesNotContain("stored_guest")
   }
 
@@ -306,6 +338,25 @@ class OrganizationFloorAccessTest : AuthorizedControllerTest() {
         .canUserViewStrictOrPublic(testData.directPermissionUser.id, testData.otherOrg.id)
         .assert
         .isFalse()
+    }
+  }
+
+  @Test
+  fun `a permission-held project in a soft-deleted org is not below-member accessible`() {
+    executeInNewTransaction {
+      projectService
+        .getBelowMemberAccessibleProjectIds(testData.otherOrg.id, testData.guestWithPermission.id)
+        .assert
+        .contains(testData.otherOrgPrivateProject.id)
+    }
+    executeInNewTransaction {
+      organizationService.delete(organizationService.get(testData.otherOrg.id))
+    }
+    executeInNewTransaction {
+      projectService
+        .getBelowMemberAccessibleProjectIds(testData.otherOrg.id, testData.guestWithPermission.id)
+        .assert
+        .isEmpty()
     }
   }
 }

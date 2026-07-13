@@ -88,7 +88,6 @@ describe('Community preferred organization', () => {
       value: 'settings-menu-item',
       item: 'translation-memories',
     }).should('not.exist');
-    // A community viewer holds no org role, so there is nothing to leave — the button is disabled.
     gcy('organization-profile-leave-button').should('be.disabled');
   });
 });

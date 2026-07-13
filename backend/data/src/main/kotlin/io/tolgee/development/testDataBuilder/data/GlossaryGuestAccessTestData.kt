@@ -72,6 +72,11 @@ class GlossaryGuestAccessTestData : BaseTestData() {
       }.build {
         privateProject = self
         addBaseLanguage()
+        addLanguage {
+          name = "German"
+          tag = "de"
+          originalName = "Deutsch"
+        }
         addPermission {
           user = this@GlossaryGuestAccessTestData.directPermissionUser
           type = ProjectPermissionType.TRANSLATE

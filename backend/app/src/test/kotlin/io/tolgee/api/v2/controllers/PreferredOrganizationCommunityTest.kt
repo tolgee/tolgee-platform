@@ -52,9 +52,6 @@ class PreferredOrganizationCommunityTest : AuthorizedControllerTest() {
   fun `direct project permission user gets the reduced model with no role but a non-limited view`() {
     setPreferred(testData.directPermissionUser, testData.otherOrg.id)
     userAccount = testData.directPermissionUser
-    // A direct-permission holder is below MEMBER (reduced model, no subscription) but has real
-    // project standing — NOT a pure community viewer — so limitedView is false and their project
-    // list keeps the full (default) controls.
     performAuthGet("/v2/preferred-organization").andIsOk.andAssertThatJson {
       node("name").isEqualTo("Vibrant translators")
       node("currentUserRole").isEqualTo(null)

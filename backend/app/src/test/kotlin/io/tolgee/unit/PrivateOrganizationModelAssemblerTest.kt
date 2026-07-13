@@ -74,6 +74,23 @@ class PrivateOrganizationModelAssemblerTest {
   }
 
   @Test
+  fun `a below-member with standing gets no subscription but a non-limited view`() {
+    setup()
+
+    val model =
+      underTest.toModel(
+        view,
+        arrayOf(Feature.GLOSSARY),
+        isAtLeastMember = false,
+        limitedView = false,
+      )
+
+    model.limitedView.assert.isEqualTo(false)
+    model.activeCloudSubscription.assert.isNull()
+    verify(cloudSubscriptionModelProvider, never()).provide(any())
+  }
+
+  @Test
   fun `a member gets features, the cloud subscription and a non-limited view`() {
     setup()
     val subscription = Mockito.mock(PublicCloudSubscriptionModel::class.java)

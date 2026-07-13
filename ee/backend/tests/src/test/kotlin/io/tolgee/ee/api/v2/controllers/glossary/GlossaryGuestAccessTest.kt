@@ -185,6 +185,27 @@ class GlossaryGuestAccessTest : AuthorizedControllerTest() {
       }
   }
 
+  @Test
+  fun `guest export omits a private co-assigned project's languages`() {
+    // mixedGlossary is assigned to a public project (en) and a private project (en, de); a floor
+    // viewer must not receive the private-only "de" column, while a member does.
+    userAccount = testData.virtualGuest
+    exportLanguageHeaders(testData.mixedGlossary.id).assert.doesNotContain("de")
+
+    userAccount = testData.user
+    exportLanguageHeaders(testData.mixedGlossary.id).assert.contains("de")
+  }
+
+  private fun exportLanguageHeaders(glossaryId: Long): List<String> {
+    val csv =
+      performAuthGet("/v2/organizations/${testData.organization.id}/glossaries/$glossaryId/export")
+        .andIsOk
+        .andReturn()
+        .response.contentAsString
+    val headers = csv.lines()[0].split(",").map { it.trim().removeSurrounding("\"") }
+    return headers.drop(6)
+  }
+
   private fun assertGuestList(
     user: UserAccount,
     vararg expectedNames: String,

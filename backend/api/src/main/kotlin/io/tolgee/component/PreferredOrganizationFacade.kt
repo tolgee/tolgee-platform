@@ -36,8 +36,6 @@ class PreferredOrganizationFacade(
     val user = authenticationFacade.authenticatedUser
     val view = organizationService.findPrivateView(organizationId, user.id) ?: return null
     val isAtLeastMember = organizationRoleService.canUserViewAtLeastMember(user, organizationId)
-    // A pure community viewer holds no role and no direct project permission — they are admitted only
-    // by the public-project floor, so they have no projects to manage (drives the limited FE view).
     val limitedView =
       !user.isSupporterOrAdmin() && !organizationRoleService.canUserViewStrict(user.id, organizationId)
     return privateOrganizationModelAssembler.toModel(

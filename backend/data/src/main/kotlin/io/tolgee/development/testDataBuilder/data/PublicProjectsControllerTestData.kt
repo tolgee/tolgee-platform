@@ -149,7 +149,13 @@ class PublicProjectsControllerTestData : BaseTestData() {
         name = "Other org private project"
       }.build {
         otherOrgPrivateProject = self
-        addBaseLanguage()
+        val privateProjectSelf = self
+        addLanguage {
+          name = "German"
+          tag = "de"
+          originalName = "Deutsch"
+          privateProjectSelf.baseLanguage = this
+        }
         addPermission {
           user = this@PublicProjectsControllerTestData.guestWithPermission
           type = ProjectPermissionType.TRANSLATE
