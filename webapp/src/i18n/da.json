@@ -409,6 +409,8 @@
   "ai_prompt_delete_confirm": "Slet",
   "ai_prompt_editor_select_translation": "Ingen oversættelse valgt",
   "ai_prompt_editor_unknown_variable": "Ukendt variabel",
+  "ai_prompt_helper_escape_json_description": "Escaper værdien (anførselstegn, linjeskift, omvendte skråstreger), så den kan integreres sikkert i en JSON-streng eller et YAML-skalær med dobbelte anførselstegn.",
+  "ai_prompt_helper_escape_json_detail": "Escape til JSON",
   "ai_prompt_item_glossary": "Ordliste",
   "ai_prompt_item_glossary_hint": "Liste over ordlisteudtryk",
   "ai_prompt_item_key_context": "Nøglekontekst",

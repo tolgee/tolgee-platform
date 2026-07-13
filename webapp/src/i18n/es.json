@@ -408,6 +408,8 @@
   "ai_prompt_delete_confirm": "Eliminar",
   "ai_prompt_editor_select_translation": "No se seleccionó ninguna traducción",
   "ai_prompt_editor_unknown_variable": "Variable desconocida",
+  "ai_prompt_helper_escape_json_description": "Escapa el valor (comillas, saltos de línea, barras invertidas) para que pueda insertarse de forma segura dentro de una cadena JSON o un escalar YAML entre comillas dobles.",
+  "ai_prompt_helper_escape_json_detail": "Escape para JSON",
   "ai_prompt_item_glossary": "Glosario",
   "ai_prompt_item_glossary_hint": "Lista de términos del glosario",
   "ai_prompt_item_key_context": "Contexto clave",

@@ -409,6 +409,8 @@
   "ai_prompt_delete_confirm": "Ștergeți",
   "ai_prompt_editor_select_translation": "Nicio traducere selectată",
   "ai_prompt_editor_unknown_variable": "Variabilă necunoscută",
+  "ai_prompt_helper_escape_json_description": "Escapes valoarea (ghilimele, linii noi, backslash-uri), astfel încât să poată fi inclusă în siguranță într-un șir JSON sau un scalar YAML între ghilimele duble.",
+  "ai_prompt_helper_escape_json_detail": "Escape pentru JSON",
   "ai_prompt_item_glossary": "Glosar",
   "ai_prompt_item_glossary_hint": "Listă de termeni din glosar",
   "ai_prompt_item_key_context": "Contextul cheii",

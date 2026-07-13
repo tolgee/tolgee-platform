@@ -408,6 +408,8 @@
   "ai_prompt_delete_confirm": "删除",
   "ai_prompt_editor_select_translation": "未选择翻译",
   "ai_prompt_editor_unknown_variable": "未知变量",
+  "ai_prompt_helper_escape_json_description": "对值进行转义（引号、换行符、反斜杠），使其可以安全地嵌入 JSON 字符串或双引号 YAML 标量中。",
+  "ai_prompt_helper_escape_json_detail": "转义为 JSON",
   "ai_prompt_item_glossary": "术语表",
   "ai_prompt_item_glossary_hint": "术语列表",
   "ai_prompt_item_key_context": "词条上下文",

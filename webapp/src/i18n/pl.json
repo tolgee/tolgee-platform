@@ -323,6 +323,8 @@
   "ai_prompt_delete_confirm": "Usuń",
   "ai_prompt_editor_select_translation": "Brak tłumaczeń",
   "ai_prompt_editor_unknown_variable": "Nieznana zmienna",
+  "ai_prompt_helper_escape_json_description": "Escapuje wartość (cudzysłowy, nowe linie, ukośniki odwrotne), tak aby można ją było bezpiecznie osadzić w ciągu JSON lub skalarze YAML ujętym w cudzysłów.",
+  "ai_prompt_helper_escape_json_detail": "Escape dla JSON",
   "ai_prompt_item_glossary": "Glosariusz",
   "ai_prompt_item_glossary_hint": "Lista terminów glosariusza",
   "ai_prompt_item_key_context": "Kontekst klucza",

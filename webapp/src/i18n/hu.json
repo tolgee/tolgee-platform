@@ -408,6 +408,8 @@
   "ai_prompt_delete_confirm": "Törlés",
   "ai_prompt_editor_select_translation": "Nincs fordítás kiválasztva",
   "ai_prompt_editor_unknown_variable": "Ismeretlen változó",
+  "ai_prompt_helper_escape_json_description": "Escape-eli az értéket (idézőjelek, újsorok, fordított perjelek), így biztonságosan beágyazható egy JSON-karakterláncba vagy dupla idézőjeles YAML skalárba.",
+  "ai_prompt_helper_escape_json_detail": "Escape JSON-hoz",
   "ai_prompt_item_glossary": "Szójegyzék",
   "ai_prompt_item_glossary_hint": "Szójegyzék kifejezések listája",
   "ai_prompt_item_key_context": "Kulcskontextus",

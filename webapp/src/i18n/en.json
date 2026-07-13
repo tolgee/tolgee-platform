@@ -409,6 +409,8 @@
   "ai_prompt_delete_confirm": "Delete",
   "ai_prompt_editor_select_translation": "No translation selected",
   "ai_prompt_editor_unknown_variable": "Unknown variable",
+  "ai_prompt_helper_escape_json_description": "Escapes the value (quotes, newlines, backslashes), so it can be safely embedded inside a JSON string or a double-quoted YAML scalar.",
+  "ai_prompt_helper_escape_json_detail": "Escape for JSON",
   "ai_prompt_item_glossary": "Glossary",
   "ai_prompt_item_glossary_hint": "List of glossary terms",
   "ai_prompt_item_key_context": "Key context",

@@ -409,6 +409,8 @@
   "ai_prompt_delete_confirm": "Odstranit",
   "ai_prompt_editor_select_translation": "Není vybrán žádný překlad",
   "ai_prompt_editor_unknown_variable": "Neznámá proměnná",
+  "ai_prompt_helper_escape_json_description": "Escapuje hodnotu (uvozovky, nové řádky, zpětná lomítka), aby ji bylo možné bezpečně vložit do řetězce JSON nebo skaláru YAML v dvojitých uvozovkách.",
+  "ai_prompt_helper_escape_json_detail": "Escape pro JSON",
   "ai_prompt_item_glossary": "Glosář",
   "ai_prompt_item_glossary_hint": "Seznam termínů glosáře",
   "ai_prompt_item_key_context": "Kontext klíče",

@@ -1,3 +1,10 @@
+## [3.211.2](https://github.com/tolgee/tolgee-platform/compare/v3.211.1...v3.211.2) (2026-07-13)
+
+
+### Bug Fixes
+
+* handle Sonnet 5 adaptive thinking (safe parse + send disabled) ([#3802](https://github.com/tolgee/tolgee-platform/issues/3802)) ([7d0d8e8](https://github.com/tolgee/tolgee-platform/commit/7d0d8e8941e88dd7379aa6de6643f3a516cf0ce5))
+
 ## [3.211.1](https://github.com/tolgee/tolgee-platform/compare/v3.211.0...v3.211.1) (2026-07-10)
 
 

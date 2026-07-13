@@ -408,6 +408,8 @@
   "ai_prompt_delete_confirm": "Löschen",
   "ai_prompt_editor_select_translation": "Keine Übersetzung ausgewählt",
   "ai_prompt_editor_unknown_variable": "Unbekannte Variable",
+  "ai_prompt_helper_escape_json_description": "Maskiert den Wert (Anführungszeichen, Zeilenumbrüche, Backslashes), sodass er sicher in einen JSON-String oder einen doppelt angeführten YAML-Skalar eingebettet werden kann.",
+  "ai_prompt_helper_escape_json_detail": "Für JSON escapen",
   "ai_prompt_item_glossary": "Glossar",
   "ai_prompt_item_glossary_hint": "Liste der Glossarbegriffe",
   "ai_prompt_item_key_context": "Schlüsselkontext",
