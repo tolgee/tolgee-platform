@@ -57,6 +57,10 @@ dependencies {
 
     implementation libs.redissonSpringBootStarter
 
+    // Rate-limit filters use micrometer Counter directly; Redisson 4.x no longer
+    // exposes micrometer-core transitively (it's marked optional/provided there).
+    implementation 'io.micrometer:micrometer-core'
+
     /**
      * Misc
      */

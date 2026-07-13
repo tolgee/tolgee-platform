@@ -59,6 +59,8 @@ dependencies {
     implementation libs.springDocWebmvcApi
     implementation libs.springDocOpenApiUi
     implementation libs.redissonSpringBootStarter
+    // Redisson 4.x split the Spring cache manager out of core into this module.
+    implementation libs.redissonSpringCache
 
     /**
      * Misc
