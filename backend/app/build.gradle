@@ -109,6 +109,7 @@ dependencies {
      * TESTING
      */
     testImplementation libs.assertJCore
+    testImplementation libs.redissonSpringCache
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation('org.springframework.boot:spring-boot-starter-test')
     testImplementation("io.findify:s3mock_2.13:0.2.6")
