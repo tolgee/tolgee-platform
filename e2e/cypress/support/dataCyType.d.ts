@@ -25,6 +25,8 @@ declare namespace DataCy {
         "activity-group-expand-button": true;
         "activity-group-generic-item": true;
         "activity-group-item": true;
+        "activity-group-origin": true;
+        "activity-group-source-info": true;
         "activity-groups-list": true;
         "administration-access-message": true;
         "administration-debug-customer-account-message": true;

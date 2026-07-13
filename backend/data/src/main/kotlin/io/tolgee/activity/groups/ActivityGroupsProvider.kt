@@ -56,6 +56,8 @@ class ActivityGroupsProvider(
 
     val lmeJsonArrayAggField = jsonArrayAgg(field("lme.entity_id")).`as`("lme_entity_ids")
     val ldeJsonArrayAggField = jsonArrayAgg(field("lde.entity_id")).`as`("lde_entity_ids")
+    val sourceTypesAggField = DSL.field("json_agg(distinct ar.type)", String::class.java).`as`("source_types")
+    val originsAggField = DSL.field("json_agg(distinct ar.origin_type)", String::class.java).`as`("origin_types")
 
     if (filters.filterType != null) {
       where = where.and(field("ag.type").eq(filters.filterType!!.name))
@@ -91,6 +93,8 @@ class ActivityGroupsProvider(
           field("ua.deleted_at").isNotNull,
           lmeJsonArrayAggField,
           ldeJsonArrayAggField,
+          sourceTypesAggField,
+          originsAggField,
         ).from(from)
         .leftJoin(table("activity_revision_activity_groups").`as`("arag"))
         .on(field("ag.id").eq(field("arag.activity_groups_id")))
@@ -129,6 +133,9 @@ class ActivityGroupsProvider(
                 override val deleted: Boolean = it[8] as Boolean
               },
             mentionedLanguageIds = parseMentionedLanguageIds(it),
+            sourceActivityTypes =
+              it.getJsonValue<List<String?>>("source_types")?.filterNotNull() ?: emptyList(),
+            origins = it.getJsonValue<List<String?>>("origin_types")?.filterNotNull() ?: emptyList(),
           )
         }
 

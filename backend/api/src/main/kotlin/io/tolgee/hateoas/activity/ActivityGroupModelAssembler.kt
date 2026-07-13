@@ -1,5 +1,7 @@
 package io.tolgee.hateoas.activity
 
+import io.tolgee.activity.data.ActivityOrigin
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.dtos.queryResults.ActivityGroupView
 import io.tolgee.hateoas.userAccount.SimpleUserAccountModelAssembler
 import org.springframework.hateoas.server.RepresentationModelAssembler
@@ -20,6 +22,14 @@ class ActivityGroupModelAssembler(
         ),
       data = view.data,
       mentionedLanguageIds = view.mentionedLanguageIds,
+      sourceActivityTypes =
+        view.sourceActivityTypes.mapNotNull { type ->
+          ActivityType.entries.find { it.name == type }
+        },
+      origins =
+        view.origins.mapNotNull { origin ->
+          ActivityOrigin.entries.find { it.name == origin }
+        },
     )
   }
 }

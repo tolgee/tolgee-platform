@@ -1,6 +1,7 @@
 package io.tolgee.model.activity
 
 import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
+import io.tolgee.activity.data.ActivityOrigin
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.api.ProjectIdAndBaseLanguageId
 import io.tolgee.component.CurrentDateProvider
@@ -71,6 +72,14 @@ class ActivityRevision : java.io.Serializable {
 
   @Enumerated(EnumType.STRING)
   var type: ActivityType? = null
+
+  /**
+   * How the request producing this revision was authenticated (null for
+   * system-triggered activity, e.g. batch chunk processing).
+   */
+  @Enumerated(EnumType.STRING)
+  @Column(name = "origin_type")
+  var originType: ActivityOrigin? = null
 
   /**
    * Project of the change

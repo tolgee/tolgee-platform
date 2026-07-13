@@ -1,5 +1,7 @@
 package io.tolgee.hateoas.activity
 
+import io.tolgee.activity.data.ActivityOrigin
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.activity.groups.ActivityGroupType
 import io.tolgee.hateoas.userAccount.SimpleUserAccountModel
 import org.springframework.hateoas.RepresentationModel
@@ -15,5 +17,7 @@ class ActivityGroupModel(
   val author: SimpleUserAccountModel?,
   val data: Any?,
   var mentionedLanguageIds: List<Long>,
+  val sourceActivityTypes: List<ActivityType>,
+  val origins: List<ActivityOrigin>,
 ) : RepresentationModel<ActivityGroupModel>(),
   Serializable

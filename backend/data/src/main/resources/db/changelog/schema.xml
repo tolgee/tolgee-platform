@@ -5826,4 +5826,9 @@
             <column name="branch_id" type="bigint"/>
         </addColumn>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1783771000000-2">
+        <addColumn tableName="activity_revision">
+            <column name="origin_type" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

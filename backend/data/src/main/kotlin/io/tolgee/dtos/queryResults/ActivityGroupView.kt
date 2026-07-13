@@ -10,4 +10,6 @@ data class ActivityGroupView(
   var data: Any? = null,
   var author: SimpleUserAccount,
   var mentionedLanguageIds: List<Long>,
+  var sourceActivityTypes: List<String> = emptyList(),
+  var origins: List<String> = emptyList(),
 )
