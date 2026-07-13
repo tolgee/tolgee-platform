@@ -1,3 +1,10 @@
+## [3.211.3](https://github.com/tolgee/tolgee-platform/compare/v3.211.2...v3.211.3) (2026-07-13)
+
+
+### Bug Fixes
+
+* use key's configured plural arg name for machine translation ([#3786](https://github.com/tolgee/tolgee-platform/issues/3786)) ([453ed6b](https://github.com/tolgee/tolgee-platform/commit/453ed6b6264b805dadece30ec109148f82efb54a)), closes [#3772](https://github.com/tolgee/tolgee-platform/issues/3772)
+
 ## [3.211.2](https://github.com/tolgee/tolgee-platform/compare/v3.211.1...v3.211.2) (2026-07-13)
 
 
