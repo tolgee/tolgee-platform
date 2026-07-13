@@ -20444,11 +20444,6 @@ export interface components {
         | "KEY_USED_BY_ANOTHER_INSTANCE"
         | "UNKNOWN";
     };
-    EntityDescriptionRef: {
-      entityClass: string;
-      /** Format: int64 */
-      entityId: number;
-    };
     EntityDescriptionWithRelations: {
       data: { [key: string]: unknown };
       entityClass: string;
@@ -20969,9 +20964,6 @@ export interface components {
       oldSlug?: string;
     };
     GenericGroupItemModel: {
-      describingRelations: {
-        [key: string]: components["schemas"]["EntityDescriptionRef"];
-      };
       description: { [key: string]: unknown };
       entityClass: string;
       /** Format: int64 */
@@ -20979,6 +20971,15 @@ export interface components {
       modifications: {
         [key: string]: components["schemas"]["PropertyModification"];
       };
+      relations: {
+        [key: string]: components["schemas"]["GenericGroupItemRelationModel"];
+      };
+    };
+    GenericGroupItemRelationModel: {
+      data: { [key: string]: unknown };
+      entityClass: string;
+      /** Format: int64 */
+      entityId: number;
     };
     GetKeysRequestDto: {
       keys: components["schemas"]["KeyDefinitionDto"][];

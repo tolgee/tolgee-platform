@@ -250,6 +250,17 @@ enum class ActivityGroupType(
 
   IMPORT(
     listOf(ActivityType.IMPORT),
+    matcher =
+      DefaultMatcher(
+        entityClass = Key::class,
+        revisionTypes = listOf(RevisionType.ADD),
+      ).or(
+        DefaultMatcher(
+          entityClass = Translation::class,
+          revisionTypes = listOf(RevisionType.ADD, RevisionType.MOD),
+          modificationProps = listOf(Translation::text),
+        ),
+      ),
   ),
 
   CREATE_LANGUAGE(

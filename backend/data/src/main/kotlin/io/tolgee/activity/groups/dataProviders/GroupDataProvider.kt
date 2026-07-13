@@ -104,6 +104,16 @@ class GroupDataProvider(
     }
   }
 
+  fun getGenericRelations(
+    entities: List<ModifiedEntityView>,
+  ): Map<ModifiedEntityView, Map<String, DescribingEntityView>> {
+    return GenericRelationsProvider(
+      jooqContext = jooqContext,
+      objectMapper = objectMapper,
+      entities = entities,
+    ).provide()
+  }
+
   fun getDescribingEntities(
     entities: Iterable<ModifiedEntityView>,
     describingMapping: List<DescribingMapping>,
