@@ -32,8 +32,8 @@ describe('Public projects view', () => {
   it('lists public projects with the public badge + org and hides private ones', () => {
     publicProjectsData.generateStandard();
     visit();
-    gcy('dashboard-projects-list-item').should('have.length', 6);
-    gcy('project-list-public-badge').should('have.length', 6);
+    gcy('dashboard-projects-list-item').should('have.length', 7);
+    gcy('project-list-public-badge').should('have.length', 7);
     gcy('global-search-field').should('exist');
     cy.contains('Community Alpha').should('be.visible');
     cy.contains('Community Zeta').should('be.visible');
@@ -53,7 +53,7 @@ describe('Public projects view', () => {
     gcy('global-search-field').should('exist');
 
     gcy('global-search-field').find('input').clear();
-    gcy('dashboard-projects-list-item').should('have.length', 6);
+    gcy('dashboard-projects-list-item').should('have.length', 7);
     gcy('global-search-field').should('exist');
   });
 

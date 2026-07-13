@@ -5,8 +5,11 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.dtos.cacheable.OrganizationLanguageDto
 import io.tolgee.hateoas.language.OrganizationLanguageModel
 import io.tolgee.hateoas.language.OrganizationLanguageModelAssembler
+import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.language.LanguageService
+import io.tolgee.service.organization.OrganizationRoleService
+import io.tolgee.service.project.ProjectService
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
@@ -29,7 +32,22 @@ class OrganizationLanguageController(
   private val languageService: LanguageService,
   private val organizationLanguageModelAssembler: OrganizationLanguageModelAssembler,
   private val pagedOrganizationLanguageAssembler: PagedResourcesAssembler<OrganizationLanguageDto>,
+  private val authenticationFacade: AuthenticationFacade,
+  private val organizationRoleService: OrganizationRoleService,
+  private val projectService: ProjectService,
 ) {
+  private fun accessibleProjectIds(
+    organizationId: Long,
+    requested: List<Long>?,
+  ): List<Long>? {
+    val user = authenticationFacade.authenticatedUser
+    if (organizationRoleService.canUserViewAtLeastMember(user, organizationId)) {
+      return requested
+    }
+    val accessible = projectService.getBelowMemberAccessibleProjectIds(organizationId, user.id).toSet()
+    return requested?.filter { it in accessible } ?: accessible.toList()
+  }
+
   @Operation(
     summary = "Get all languages in use by projects owned by specified organization",
     description = "Returns all languages in use by projects owned by specified organization",
@@ -46,7 +64,13 @@ class OrganizationLanguageController(
     @RequestParam("projectIds") projectIds: List<Long>?,
     @PathVariable organizationId: Long,
   ): PagedModel<OrganizationLanguageModel> {
-    val languages = languageService.getPagedByOrganization(organizationId, projectIds, pageable, search)
+    val languages =
+      languageService.getPagedByOrganization(
+        organizationId,
+        accessibleProjectIds(organizationId, projectIds),
+        pageable,
+        search,
+      )
     return pagedOrganizationLanguageAssembler.toModel(languages, organizationLanguageModelAssembler)
   }
 
@@ -65,7 +89,13 @@ class OrganizationLanguageController(
     @RequestParam("projectIds") projectIds: List<Long>?,
     @PathVariable organizationId: Long,
   ): PagedModel<OrganizationLanguageModel> {
-    val languages = languageService.getBasePagedByOrganization(organizationId, projectIds, pageable, search)
+    val languages =
+      languageService.getBasePagedByOrganization(
+        organizationId,
+        accessibleProjectIds(organizationId, projectIds),
+        pageable,
+        search,
+      )
     return pagedOrganizationLanguageAssembler.toModel(languages, organizationLanguageModelAssembler)
   }
 }

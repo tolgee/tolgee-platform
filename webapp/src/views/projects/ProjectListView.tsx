@@ -25,6 +25,8 @@ export const ProjectListView = () => {
   const [search, setSearch] = useState('');
   const { preferredOrganization } = usePreferredOrganization();
 
+  const limitedView = Boolean(preferredOrganization?.limitedView);
+
   const listPermitted = useApiQuery({
     url: '/v2/organizations/{slug}/projects-with-stats',
     method: 'get',
@@ -92,6 +94,7 @@ export const ProjectListView = () => {
       >
         <ProjectsList
           loadable={listPermitted}
+          variant={limitedView ? 'public' : 'default'}
           onPageChange={setPage}
           emptyPlaceholder={
             <EmptyListMessage

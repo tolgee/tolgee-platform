@@ -5192,6 +5192,8 @@ export interface components {
       )[];
       /** Format: int64 */
       id: number;
+      /** @example false */
+      limitedView: boolean;
       /** @example Beautiful organization */
       name: string;
       organizationModel?: components["schemas"]["OrganizationModel"];

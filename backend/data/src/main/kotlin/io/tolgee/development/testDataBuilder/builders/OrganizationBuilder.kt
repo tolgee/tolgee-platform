@@ -14,6 +14,7 @@ import io.tolgee.model.glossary.Glossary
 import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
 import io.tolgee.model.translationMemory.TranslationMemory
 import org.springframework.core.io.ClassPathResource
+import java.util.Date
 
 class OrganizationBuilder(
   val testDataBuilder: TestDataBuilder,
@@ -87,4 +88,10 @@ class OrganizationBuilder(
   fun addGlossary(ft: FT<Glossary>) = addOperation(data.glossaries, ft)
 
   fun addTranslationMemory(ft: FT<TranslationMemory>) = addOperation(data.translationMemories, ft)
+
+  fun setDeletedAt(deletedAt: Date = Date()) {
+    testDataBuilder.rawUpdateAfterSave("update organization set deleted_at = :deletedAt where id = :id") {
+      mapOf("deletedAt" to deletedAt, "id" to self.id)
+    }
+  }
 }

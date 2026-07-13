@@ -10,7 +10,9 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Organization
 import io.tolgee.model.Project
 import io.tolgee.model.glossary.Glossary
+import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.GlossaryCleanupService
+import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.project.ProjectService
 import jakarta.transaction.Transactional
 import org.springframework.context.annotation.Primary
@@ -25,6 +27,8 @@ class GlossaryService(
   private val glossaryTermTranslationService: GlossaryTermTranslationService,
   private val projectService: ProjectService,
   private val currentDateProvider: CurrentDateProvider,
+  private val authenticationFacade: AuthenticationFacade,
+  private val organizationRoleService: OrganizationRoleService,
 ) : GlossaryCleanupService {
   fun findAll(organizationId: Long): List<Glossary> {
     return glossaryRepository.findByOrganizationId(organizationId)
@@ -35,6 +39,9 @@ class GlossaryService(
     pageable: Pageable,
     search: String?,
   ): Page<Glossary> {
+    if (isBelowMemberReader(organizationId)) {
+      return glossaryRepository.findByOrganizationIdBelowMemberPaged(organizationId, currentUserId(), pageable, search)
+    }
     return glossaryRepository.findByOrganizationIdPaged(organizationId, pageable, search)
   }
 
@@ -50,6 +57,14 @@ class GlossaryService(
     pageable: Pageable,
     search: String?,
   ): Page<GlossaryWithStats> {
+    if (isBelowMemberReader(organizationId)) {
+      return glossaryRepository.findByOrganizationIdWithStatsBelowMemberPaged(
+        organizationId,
+        currentUserId(),
+        pageable,
+        search,
+      )
+    }
     return glossaryRepository.findByOrganizationIdWithStatsPaged(organizationId, pageable, search)
   }
 
@@ -57,8 +72,18 @@ class GlossaryService(
     organizationId: Long,
     glossaryId: Long,
   ): Glossary? {
+    if (isBelowMemberReader(organizationId)) {
+      return glossaryRepository.findBelowMemberAccessible(organizationId, glossaryId, currentUserId())
+    }
     return glossaryRepository.find(organizationId, glossaryId)
   }
+
+  private fun isBelowMemberReader(organizationId: Long): Boolean {
+    val user = authenticationFacade.authenticatedUserOrNull ?: return true
+    return !organizationRoleService.canUserViewAtLeastMember(user, organizationId)
+  }
+
+  private fun currentUserId(): Long? = authenticationFacade.authenticatedUserOrNull?.id
 
   fun get(
     organizationId: Long,
@@ -133,6 +158,13 @@ class GlossaryService(
 
   fun getAssignedProjectsIds(glossary: Glossary): Set<Long> {
     return glossaryRepository.findAssignedProjectsIdsByGlossaryId(glossary.id)
+  }
+
+  fun getAssignedProjectsForCurrentUser(glossary: Glossary): Collection<Project> {
+    if (isBelowMemberReader(glossary.organizationOwner.id)) {
+      return glossaryRepository.findBelowMemberAccessibleAssignedProjects(glossary.id, currentUserId())
+    }
+    return glossary.assignedProjects
   }
 
   @Transactional

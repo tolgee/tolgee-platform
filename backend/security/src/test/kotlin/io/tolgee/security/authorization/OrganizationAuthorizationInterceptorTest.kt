@@ -36,6 +36,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito
 import org.mockito.kotlin.any
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
@@ -120,14 +122,14 @@ class OrganizationAuthorizationInterceptorTest {
   @Test
   fun `it hides the organization if the user cannot see it`() {
     Mockito
-      .`when`(organizationRoleService.canUserViewStrict(1337L, 1337L))
+      .`when`(organizationRoleService.canUserViewStrictOrPublic(1337L, 1337L))
       .thenReturn(false)
 
     mockMvc.perform(get("/v2/organizations/1337/default-perms")).andIsNotFound
     mockMvc.perform(get("/v2/organizations/1337/requires-owner")).andIsNotFound
 
     Mockito
-      .`when`(organizationRoleService.canUserViewStrict(1337L, 1337L))
+      .`when`(organizationRoleService.canUserViewStrictOrPublic(1337L, 1337L))
       .thenReturn(true)
 
     mockMvc.perform(get("/v2/organizations/1337/default-perms")).andIsOk
@@ -136,7 +138,7 @@ class OrganizationAuthorizationInterceptorTest {
   @Test
   fun `rejects access if the user does not have a sufficiently high role`() {
     Mockito
-      .`when`(organizationRoleService.canUserViewStrict(1337L, 1337L))
+      .`when`(organizationRoleService.canUserViewStrictOrPublic(1337L, 1337L))
       .thenReturn(true)
     Mockito
       .`when`(organizationRoleService.isUserOfRole(1337L, 1337L, OrganizationRoleType.OWNER))
@@ -153,7 +155,7 @@ class OrganizationAuthorizationInterceptorTest {
 
   @Test
   fun `it allows supporter to bypass checks for read-only organization endpoints`() {
-    Mockito.`when`(organizationRoleService.canUserViewStrict(1337L, 1337L)).thenReturn(false)
+    Mockito.`when`(organizationRoleService.canUserViewStrictOrPublic(1337L, 1337L)).thenReturn(false)
     Mockito.`when`(userAccount.role).thenReturn(UserAccount.Role.SUPPORTER)
 
     performReadOnlyRequests { all -> all.andIsOk }
@@ -161,7 +163,7 @@ class OrganizationAuthorizationInterceptorTest {
 
   @Test
   fun `it does not let supporter bypass checks for write organization endpoints`() {
-    Mockito.`when`(organizationRoleService.canUserViewStrict(1337L, 1337L)).thenReturn(false)
+    Mockito.`when`(organizationRoleService.canUserViewStrictOrPublic(1337L, 1337L)).thenReturn(false)
     Mockito.`when`(userAccount.role).thenReturn(UserAccount.Role.SUPPORTER)
 
     performWriteRequests { all -> all.andIsForbidden }
@@ -169,11 +171,35 @@ class OrganizationAuthorizationInterceptorTest {
 
   @Test
   fun `it allows admin to access any endpoint`() {
-    Mockito.`when`(organizationRoleService.canUserViewStrict(1337L, 1337L)).thenReturn(false)
+    Mockito.`when`(organizationRoleService.canUserViewStrictOrPublic(1337L, 1337L)).thenReturn(false)
     Mockito.`when`(userAccount.role).thenReturn(UserAccount.Role.ADMIN)
 
     performReadOnlyRequests { all -> all.andIsOk }
     performWriteRequests { all -> all.andIsOk }
+  }
+
+  @Test
+  fun `the interceptor consults the raw floor, never the admin-aware variant`() {
+    // Guards the raw-vs-admin split: swapping the interceptor to the admin-aware canUserViewOrPublic
+    // would fold in isSupporterOrAdmin() and suppress the admin-privileges audit log. The mocked
+    // outcome cannot catch that, so pin the method identity instead.
+    Mockito.`when`(organizationRoleService.canUserViewStrictOrPublic(1337L, 1337L)).thenReturn(true)
+
+    mockMvc.perform(get("/v2/organizations/1337/default-perms")).andIsOk
+
+    verify(organizationRoleService).canUserViewStrictOrPublic(1337L, 1337L)
+    verify(organizationRoleService, never()).canUserViewOrPublic(any<Long>(), any())
+  }
+
+  @Test
+  fun `the view floor grants default endpoints but not role-required ones`() {
+    Mockito.`when`(organizationRoleService.canUserViewStrictOrPublic(1337L, 1337L)).thenReturn(true)
+    Mockito
+      .`when`(organizationRoleService.isUserOfRole(1337L, 1337L, OrganizationRoleType.OWNER))
+      .thenReturn(false)
+
+    mockMvc.perform(get("/v2/organizations/1337/default-perms")).andIsOk
+    mockMvc.perform(get("/v2/organizations/1337/requires-owner")).andIsForbidden
   }
 
   private fun performReadOnlyRequests(condition: (ResultActions) -> Unit) {

@@ -141,6 +141,12 @@ class TestDataService(
       }
 
       updateLanguageStats(builder)
+
+      if (builder.afterSaveRawStates.isNotEmpty()) {
+        executeInNewTransaction(transactionManager) {
+          builder.afterSaveRawStates.forEach { it(entityManager) }
+        }
+      }
     } finally {
       activityHolder.enableAutoCompletion = true
       bypassableActivityListeners.forEach { it.bypass = false }
