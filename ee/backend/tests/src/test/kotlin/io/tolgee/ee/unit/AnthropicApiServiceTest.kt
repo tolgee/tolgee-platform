@@ -118,6 +118,39 @@ class AnthropicApiServiceTest {
   }
 
   @Test
+  fun `always sends thinking type=disabled to avoid billed adaptive thinking`() {
+    val config = createConfig(format = "json_schema")
+    val params = createParams(shouldOutputJson = true)
+    val restTemplate = createCapturingRestTemplate()
+
+    service.translate(params, config, restTemplate)
+
+    val bodyMap = objectMapper.readValue<Map<String, Any>>(capturedRequestBody!!)
+
+    @Suppress("UNCHECKED_CAST")
+    val thinking = bodyMap["thinking"] as Map<String, Any>
+    assertThat(thinking["type"]).isEqualTo("disabled")
+  }
+
+  @Test
+  fun `extracts text when response mixes thinking and text content items`() {
+    val config = createConfig(format = "json_schema")
+    val params = createParams(shouldOutputJson = true)
+    val restTemplate =
+      createCapturingRestTemplate(
+        content =
+          """[
+          {"type":"thinking","thinking":"Reasoning about the translation..."},
+          {"type":"text","text":"Ahoj svet"}
+        ]""",
+      )
+
+    val result = service.translate(params, config, restTemplate)
+
+    assertThat(result.response).isEqualTo("Ahoj svet")
+  }
+
+  @Test
   fun `omits output_config when shouldOutputJson is false`() {
     val config = createConfig(format = "json_schema")
     val params = createParams(shouldOutputJson = false)
@@ -162,10 +195,13 @@ class AnthropicApiServiceTest {
     )
   }
 
-  private fun createCapturingRestTemplate(stopReason: String = "end_turn"): RestTemplate {
+  private fun createCapturingRestTemplate(
+    stopReason: String = "end_turn",
+    content: String = """[{"type":"text","text":"result"}]""",
+  ): RestTemplate {
     val responseJson =
       """
-      {"content":[{"text":"result"}],"usage":{"input_tokens":10,"output_tokens":5},"stop_reason":"$stopReason"}
+      {"content":$content,"usage":{"input_tokens":10,"output_tokens":5},"stop_reason":"$stopReason"}
       """.trimIndent()
 
     val factory =
