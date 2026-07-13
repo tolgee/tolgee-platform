@@ -9,6 +9,7 @@ import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.ee.component.PromptLazyMap.Companion.Variable
 import io.tolgee.ee.service.glossary.GlossaryTermService
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.formats.DEFAULT_PLURAL_ARGUMENT_NAME
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.service.key.KeyService
@@ -225,6 +226,9 @@ class PromptVariablesHelper(
         )
       }
 
+    val pluralArgName =
+      key?.pluralArgName ?: pluralFormsWithReplacedParam?.argName ?: DEFAULT_PLURAL_ARGUMENT_NAME
+
     result.add(
       Variable(
         "pluralFormExamples",
@@ -242,7 +246,8 @@ class PromptVariablesHelper(
     result.add(
       Variable(
         "exampleIcuPlural",
-        value = pluralSourceExamples?.let { "{count, plural, ${it.map { "${it.key} {...}" }.joinToString(" ")}}" },
+        value =
+          pluralSourceExamples?.let { "{$pluralArgName, plural, ${it.map { "${it.key} {...}" }.joinToString(" ")}}" },
       ),
     )
     return result

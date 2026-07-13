@@ -121,7 +121,7 @@ class MtTranslatorContext(
       entityManger
         .createQuery(
           """
-        select new io.tolgee.service.machineTranslation.KeyForMt(k.id, k.name, ns.name, km.description, t.text, k.isPlural )
+        select new io.tolgee.service.machineTranslation.KeyForMt(k.id, k.name, ns.name, km.description, t.text, k.isPlural, k.pluralArgName )
         from Key k
         left join k.project.baseLanguage bl
         left join k.translations t on t.language.id = bl.id
