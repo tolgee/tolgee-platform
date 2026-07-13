@@ -33,6 +33,11 @@ const StyledLanguage = styled('span')`
   color: ${({ theme }) => theme.palette.text.secondary};
 `;
 
+const StyledSecondary = styled('div')`
+  color: ${({ theme }) => theme.palette.text.secondary};
+  font-size: 13px;
+`;
+
 const MAX_DISPLAYED_MODIFICATIONS = 3;
 const MAX_VALUE_LENGTH = 60;
 
@@ -58,9 +63,14 @@ export const GenericGroupExpandedContent: FC<{ groupId: number }> = (props) => {
             <StyledEntity>{item.entityClass}</StyledEntity>
           </TableCell>
           <TableCell>
-            {getTitle(item)}
-            {getLanguageTag(item) && (
-              <StyledLanguage> ({getLanguageTag(item)})</StyledLanguage>
+            <div>
+              {getTitle(item)}
+              {getLanguageTag(item) && (
+                <StyledLanguage> ({getLanguageTag(item)})</StyledLanguage>
+              )}
+            </div>
+            {getSubtitle(item) && (
+              <StyledSecondary>{getSubtitle(item)}</StyledSecondary>
             )}
           </TableCell>
           <TableCell>
@@ -139,6 +149,25 @@ function getTitle(item: GenericGroupItemModel): string {
   }
 
   return `#${item.entityId}`;
+}
+
+const SUBTITLE_FIELDS = ['translation', 'text', 'description'];
+
+/**
+ * The entity's own content, when the title had to be taken from a relation
+ * (e.g. a suggestion titled by its key still wants to show the suggested text).
+ */
+function getSubtitle(item: GenericGroupItemModel): string | undefined {
+  const title = getTitle(item);
+
+  for (const field of SUBTITLE_FIELDS) {
+    const described = item.description?.[field];
+    if (typeof described === 'string' && described && described !== title) {
+      return described;
+    }
+  }
+
+  return undefined;
 }
 
 function getLanguageTag(item: GenericGroupItemModel): string | undefined {

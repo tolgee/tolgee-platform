@@ -1,22 +1,32 @@
-import { gcy, selectInProjectMenu } from './shared';
+import { gcyAdvanced, selectInProjectMenu } from './shared';
 
-export function checkActivity(activityText: string) {
-  selectInProjectMenu('Project Dashboard');
-  cy.waitForDom();
-
-  gcy('activity-compact').contains(activityText).should('be.visible');
-
-  gcy('activity-compact')
-    .contains(activityText)
-    .closestDcy('activity-compact')
-    .findDcy('activity-compact-detail-button')
-    .click({ force: true });
+/**
+ * Expands the activity group of the given type on the project dashboard.
+ */
+export function expandActivityGroup(groupType: string) {
+  gcyAdvanced({ value: 'activity-group-item', type: groupType })
+    .should('be.visible')
+    .findDcy('activity-group-expand-button')
+    .click();
 
   return cy;
 }
 
-export function assertActivityDetails(expectedTexts: string[]) {
-  gcy('activity-detail-dialog').within(() => {
+/**
+ * Opens the project dashboard and expands the activity group of the given type.
+ */
+export function checkActivityGroup(groupType: string) {
+  selectInProjectMenu('Project Dashboard');
+  cy.waitForDom();
+
+  return expandActivityGroup(groupType);
+}
+
+export function assertActivityGroupDetails(
+  groupType: string,
+  expectedTexts: string[]
+) {
+  gcyAdvanced({ value: 'activity-group-item', type: groupType }).within(() => {
     expectedTexts.forEach((text) => {
       cy.contains(text).should('be.visible');
     });

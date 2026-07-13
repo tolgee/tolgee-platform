@@ -1,3 +1,7 @@
+import {
+  assertActivityGroupDetails,
+  expandActivityGroup,
+} from '../../../common/activities';
 import { login } from '../../../common/apiCalls/common';
 import { suggestionsTestData } from '../../../common/apiCalls/testData/testData';
 import { waitForGlobalLoading } from '../../../common/loading';
@@ -99,10 +103,8 @@ describe('Suggestions reviewer', () => {
       .findDcy('translation-suggestion')
       .should('have.length', 1);
     visitProjectDashboard(projectId);
-    gcyAdvanced({
-      value: 'activity-compact',
-      type: 'SUGGESTION_SET_ACTIVE',
-    }).should('contain', 'Navržený překlad');
+    expandActivityGroup('SET_SUGGESTION_ACTIVE');
+    assertActivityGroupDetails('SET_SUGGESTION_ACTIVE', ['Navržený překlad']);
   });
 
   it('reviewer can decline suggestion', () => {
@@ -120,10 +122,8 @@ describe('Suggestions reviewer', () => {
       .should('have.length', 1);
 
     visitProjectDashboard(projectId);
-    gcyAdvanced({
-      value: 'activity-compact',
-      type: 'DECLINE_SUGGESTION',
-    }).should('contain', 'Navržený překlad');
+    expandActivityGroup('DECLINE_SUGGESTION');
+    assertActivityGroupDetails('DECLINE_SUGGESTION', ['Navržený překlad']);
   });
 
   it('reviewer can delete his own suggestion', () => {
@@ -141,10 +141,8 @@ describe('Suggestions reviewer', () => {
       .should('not.exist');
 
     visitProjectDashboard(projectId);
-    gcyAdvanced({
-      value: 'activity-compact',
-      type: 'DELETE_SUGGESTION',
-    }).should('contain', 'Navržený překlad');
+    expandActivityGroup('DELETE_SUGGESTION');
+    assertActivityGroupDetails('DELETE_SUGGESTION', ['Navržený překlad']);
   });
 
   it('reviewer can accept his own suggestion', () => {
@@ -166,10 +164,8 @@ describe('Suggestions reviewer', () => {
     assertMessage('Suggestion accepted, other variants declined (1)');
 
     visitProjectDashboard(projectId);
-    gcyAdvanced({
-      value: 'activity-compact',
-      type: 'ACCEPT_SUGGESTION',
-    }).should('contain', 'Navržený překlad 0-1');
+    expandActivityGroup('ACCEPT_SUGGESTION');
+    assertActivityGroupDetails('ACCEPT_SUGGESTION', ['Navržený překlad 0-1']);
   });
 
   function acceptSuggestion() {

@@ -8,7 +8,10 @@ import { dismissMenu, gcy } from '../../common/shared';
 import { isDarkMode } from '../../common/helpers';
 import { E2TranslationLabel } from '../../compounds/E2TranslationLabel';
 import { E2TranslationsView } from '../../compounds/E2TranslationsView';
-import { assertActivityDetails, checkActivity } from '../../common/activities';
+import {
+  assertActivityGroupDetails,
+  checkActivityGroup,
+} from '../../common/activities';
 import { setFeature } from '../../common/features';
 import {
   findBatchOperation,
@@ -155,9 +158,8 @@ describe('Projects Settings - Labels', () => {
       4
     );
 
-    checkActivity('Translation labels updated');
-    assertActivityDetails([
-      'Translation labels updated',
+    checkActivityGroup('SET_TRANSLATION_LABELS');
+    assertActivityGroupDetails('SET_TRANSLATION_LABELS', [
       'first key',
       'label to assign 1',
     ]);
@@ -173,8 +175,8 @@ describe('Projects Settings - Labels', () => {
       'First label'
     );
 
-    checkActivity('Translation labels updated');
-    assertActivityDetails(['Translation labels updated', 'first key']);
+    checkActivityGroup('SET_TRANSLATION_LABELS');
+    assertActivityGroupDetails('SET_TRANSLATION_LABELS', ['first key']);
   });
 
   it('adds labels to translations and sorts them alphabetically', () => {
