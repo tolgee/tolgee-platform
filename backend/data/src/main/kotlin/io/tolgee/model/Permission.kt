@@ -24,8 +24,6 @@ import jakarta.persistence.OneToOne
 import jakarta.persistence.PrePersist
 import jakarta.persistence.PreUpdate
 import jakarta.persistence.Table
-import jakarta.persistence.Transient
-import org.hibernate.Hibernate
 import org.hibernate.annotations.Parameter
 import org.hibernate.annotations.Type
 import org.springframework.beans.factory.annotation.Configurable
@@ -95,7 +93,7 @@ class Permission(
    * Languages for TRANSLATIONS_EDIT scope.
    * When specified, user is restricted to edit specific language translations.
    */
-  @ManyToMany(fetch = FetchType.LAZY)
+  @ManyToMany(fetch = FetchType.EAGER)
   @JoinTable(name = "permission_languages", inverseJoinColumns = [JoinColumn(name = "languages_id")])
   var translateLanguages: MutableSet<Language> = mutableSetOf()
 
@@ -110,14 +108,14 @@ class Permission(
    * Languages for TRANSLATIONS_VIEW scope.
    * When specified, user is restricted to view specific language translations.
    */
-  @ManyToMany(fetch = FetchType.LAZY)
+  @ManyToMany(fetch = FetchType.EAGER)
   var viewLanguages: MutableSet<Language> = mutableSetOf()
 
   /**
    * Languages for TRANSLATIONS_STATE_EDIT scope.
    * When specified, user is restricted to change state only to specific language translations.
    */
-  @ManyToMany(fetch = FetchType.LAZY)
+  @ManyToMany(fetch = FetchType.EAGER)
   var stateChangeLanguages: MutableSet<Language> = mutableSetOf()
 
   constructor(
@@ -154,42 +152,14 @@ class Permission(
     get() = this.project?.id
   override val organizationId: Long?
     get() = this.organization?.id
-
-  @Transient
-  private var fetchedViewLanguageIds: Set<Long>? = null
-
-  @Transient
-  private var fetchedTranslateLanguageIds: Set<Long>? = null
-
-  @Transient
-  private var fetchedStateChangeLanguageIds: Set<Long>? = null
+  override val translateLanguageIds: Set<Long>?
+    get() = this.translateLanguages.map { it.id }.toSet()
 
   override val viewLanguageIds: Set<Long>?
-    get() {
-      if (fetchedViewLanguageIds == null || Hibernate.isInitialized(this.viewLanguages)) {
-        return this.viewLanguages.map { it.id }.toSet()
-      }
-
-      return fetchedViewLanguageIds
-    }
-
-  override val translateLanguageIds: Set<Long>?
-    get() {
-      if (fetchedTranslateLanguageIds == null || Hibernate.isInitialized(this.translateLanguages)) {
-        return this.translateLanguages.map { it.id }.toSet()
-      }
-
-      return fetchedTranslateLanguageIds
-    }
+    get() = this.viewLanguages.map { it.id }.toSet()
 
   override val stateChangeLanguageIds: Set<Long>?
-    get() {
-      if (fetchedStateChangeLanguageIds == null || Hibernate.isInitialized(this.stateChangeLanguages)) {
-        return this.stateChangeLanguages.map { it.id }.toSet()
-      }
-
-      return fetchedStateChangeLanguageIds
-    }
+    get() = this.stateChangeLanguages.map { it.id }.toSet()
 
   override val suggestLanguageIds: Set<Long>?
     get() = this.suggestLanguages.map { it.id }.toSet()
@@ -216,33 +186,6 @@ class Permission(
           throw IllegalStateException("Organization base permission cannot have language permissions")
         }
       }
-    }
-  }
-
-  class PermissionWithLanguageIdsWrapper(
-    val permission: Permission,
-    fetchedViewLanguageIds: Any?,
-    fetchedTranslateLanguageIds: Any?,
-    fetchedStateChangeLanguageIds: Any?,
-  ) {
-    init {
-      permission.fetchedViewLanguageIds = (fetchedViewLanguageIds as? String)
-        ?.split(',')
-        ?.map { e -> e.toLong() }
-        ?.toSet()
-        ?: emptySet()
-
-      permission.fetchedTranslateLanguageIds = (fetchedTranslateLanguageIds as? String)
-        ?.split(',')
-        ?.map { e -> e.toLong() }
-        ?.toSet()
-        ?: emptySet()
-
-      permission.fetchedStateChangeLanguageIds = (fetchedStateChangeLanguageIds as? String)
-        ?.split(',')
-        ?.map { e -> e.toLong() }
-        ?.toSet()
-        ?: emptySet()
     }
   }
 }

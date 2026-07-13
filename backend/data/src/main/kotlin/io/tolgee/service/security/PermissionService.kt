@@ -68,12 +68,11 @@ class PermissionService(
     userId: Long? = null,
     organizationId: Long? = null,
   ): Permission? {
-    return permissionRepository
-      .findOneByProjectIdAndUserIdAndOrganizationId(
-        projectId = projectId,
-        userId = userId,
-        organizationId = organizationId,
-      )?.permission
+    return permissionRepository.findOneByProjectIdAndUserIdAndOrganizationId(
+      projectId = projectId,
+      userId = userId,
+      organizationId = organizationId,
+    )
   }
 
   @Transactional(readOnly = true)
