@@ -14,20 +14,14 @@ export const parseContentDispositionFilename = (
 export const sanitizeFilename = (name: string) =>
   name.replace(/[/\\?%*:|"<>]/g, '_').trim() || 'download';
 
-/** Saves a response as a file download, using the Content-Disposition filename when present, else `fallbackName`. */
-export const downloadResponseAsFile = async (
-  response: Response,
-  fallbackName: string
-) => {
-  const blob = await response.blob();
+/** `filename` is used verbatim — callers must sanitize untrusted names first (cf. `downloadResponseAsFile`, which sanitizes a server-provided one). */
+export const downloadBlobAsFile = (blob: Blob, filename: string) => {
   const url = URL.createObjectURL(blob);
   try {
     const a = document.createElement('a');
     try {
       a.href = url;
-      a.download = sanitizeFilename(
-        parseContentDispositionFilename(response) ?? fallbackName
-      );
+      a.download = filename;
       a.click();
     } finally {
       a.remove();
@@ -37,4 +31,15 @@ export const downloadResponseAsFile = async (
     // the in-progress download in some browsers; defer the revoke past that.
     setTimeout(() => URL.revokeObjectURL(url), 7000);
   }
+};
+
+export const downloadResponseAsFile = async (
+  response: Response,
+  fallbackName: string
+) => {
+  const blob = await response.blob();
+  downloadBlobAsFile(
+    blob,
+    sanitizeFilename(parseContentDispositionFilename(response) ?? fallbackName)
+  );
 };

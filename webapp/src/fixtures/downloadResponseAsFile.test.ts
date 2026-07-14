@@ -1,10 +1,27 @@
+import { vi } from 'vitest';
+
+import { captureDownloadAnchor } from './captureDownloadAnchor.testUtils';
 import {
+  downloadBlobAsFile,
+  downloadResponseAsFile,
   parseContentDispositionFilename,
   sanitizeFilename,
 } from './downloadResponseAsFile';
 
 const responseWith = (contentDisposition: string | null): Response =>
   ({
+    headers: {
+      get: (name: string) =>
+        name === 'Content-Disposition' ? contentDisposition : null,
+    },
+  } as unknown as Response);
+
+const fileResponse = (
+  contentDisposition: string | null,
+  body = 'x'
+): Response =>
+  ({
+    blob: async () => new Blob([body]),
     headers: {
       get: (name: string) =>
         name === 'Content-Disposition' ? contentDisposition : null,
@@ -51,5 +68,59 @@ describe('sanitizeFilename', () => {
   it('falls back to "download" when nothing usable remains', () => {
     expect(sanitizeFilename('')).toBe('download');
     expect(sanitizeFilename('   ')).toBe('download');
+  });
+});
+
+describe('downloadBlobAsFile', () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+  });
+
+  it('downloads the blob under the given filename and defers the revoke', () => {
+    const { anchor, revokeObjectURL } = captureDownloadAnchor();
+    downloadBlobAsFile(new Blob(['x']), 'My File.zip');
+
+    expect(anchor.download).toBe('My File.zip');
+    expect(anchor.click).toHaveBeenCalledTimes(1);
+    expect(revokeObjectURL).not.toHaveBeenCalled();
+
+    vi.advanceTimersByTime(7000);
+    expect(revokeObjectURL).toHaveBeenCalledWith('blob:mock');
+  });
+});
+
+describe('downloadResponseAsFile', () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+  });
+
+  it('uses the Content-Disposition filename when present', async () => {
+    const { anchor } = captureDownloadAnchor();
+    await downloadResponseAsFile(
+      fileResponse('attachment; filename="Server Name.zip"'),
+      'fallback.zip'
+    );
+    expect(anchor.download).toBe('Server Name.zip');
+  });
+
+  it('falls back to the given name and sanitizes it when no header', async () => {
+    const { anchor } = captureDownloadAnchor();
+    await downloadResponseAsFile(fileResponse(null), 'a/b:c.zip');
+    expect(anchor.download).toBe('a_b_c.zip');
+  });
+
+  it('sanitizes reserved characters in the parsed server filename', async () => {
+    const { anchor } = captureDownloadAnchor();
+    await downloadResponseAsFile(
+      fileResponse('attachment; filename="a/b:c.zip"'),
+      'fallback.zip'
+    );
+    expect(anchor.download).toBe('a_b_c.zip');
   });
 });
