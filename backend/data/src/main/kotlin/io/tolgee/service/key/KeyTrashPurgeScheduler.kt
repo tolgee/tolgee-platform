@@ -65,27 +65,27 @@ class KeyTrashPurgeScheduler(
   }
 
   private fun purgeBatch(ids: List<Long>): Int {
-    if (tryPurge(ids)) {
-      logger.info("Purged {} expired trashed keys", ids.size)
-      return ids.size
-    }
-    // A single key failing the batch delete (e.g. a dangling FK) rolls back the whole
-    // transaction, so retry each key on its own to salvage the rest of the batch.
-    logger.warn("Batch purge of {} trashed keys failed, retrying individually", ids.size)
-    return ids.count { id -> tryPurge(listOf(id)) }
-  }
-
-  private fun tryPurge(ids: List<Long>): Boolean {
     try {
       executeInNewTransaction(transactionManager) {
         keyService.hardDeleteMultiple(ids)
       }
+      logger.info("Purged {} expired trashed keys", ids.size)
+      return ids.size
+    } catch (e: Exception) {
+      logger.warn("Batch purge of {} trashed keys failed, retrying individually", ids.size, e)
+    }
+    return ids.count { purgeSingle(it) }
+  }
+
+  private fun purgeSingle(id: Long): Boolean {
+    try {
+      executeInNewTransaction(transactionManager) {
+        keyService.hardDeleteMultiple(listOf(id))
+      }
       return true
     } catch (e: Exception) {
-      if (ids.size == 1) {
-        logger.error("Failed to purge trashed key {}", ids.single(), e)
-        Sentry.captureException(e)
-      }
+      logger.error("Failed to purge trashed key {}", id, e)
+      Sentry.captureException(e)
       return false
     }
   }
