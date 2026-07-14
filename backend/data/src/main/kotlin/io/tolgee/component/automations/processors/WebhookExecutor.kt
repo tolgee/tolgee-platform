@@ -32,13 +32,13 @@ class WebhookExecutor(
 
     val request = HttpEntity(stringData, headers)
 
-    // Treat as already-encoded only when every '%' starts a valid percent-encoded triplet.
-    val fullyEncoded =
-      config.url.contains("%") &&
-        Regex("%(?![0-9A-Fa-f]{2})").find(config.url) == null
-    val uri = UriComponentsBuilder.fromUriString(config.url).build(fullyEncoded).toUri()
-
     try {
+      // Treat as already-encoded only when every '%' starts a valid percent-encoded triplet.
+      val fullyEncoded =
+        config.url.contains("%") &&
+          Regex("%(?![0-9A-Fa-f]{2})").find(config.url) == null
+      val uri = UriComponentsBuilder.fromUriString(config.url).build(fullyEncoded).toUri()
+
       val responseEntity: ResponseEntity<String> =
         restTemplate.exchange(uri, HttpMethod.POST, request, String::class.java)
       if (!responseEntity.statusCode.is2xxSuccessful) {
