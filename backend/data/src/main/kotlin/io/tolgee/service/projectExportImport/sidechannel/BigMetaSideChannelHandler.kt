@@ -2,6 +2,7 @@ package io.tolgee.service.projectExportImport.sidechannel
 
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.model.keyBigMeta.KeysDistance
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.bigMeta.KeysDistanceDto
@@ -32,7 +33,7 @@ class BigMetaSideChannelHandler(
     json: ByteArray,
     context: SideChannelImportContext,
   ) {
-    val records = objectMapper.readValue(json, object : TypeReference<List<SerializedBigMeta>>() {})
+    val records = objectMapper.readValue<List<SerializedBigMeta>>(json)
     val dtos =
       records.mapNotNull { record ->
         val key1 = context.keyIdBySourceId[record.key1Id] ?: return@mapNotNull null
