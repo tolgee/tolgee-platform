@@ -75,8 +75,9 @@ class PromptFragmentsHelper {
         "translationMemory",
         """
         {{#if translationMemory.json}}
-        These are some results from translation memory from the same project. You may use this as a inspiraton:
-        
+        These are some results from translation memory from the same project, you may reuse them.
+        Their `{}` placeholders may differ from the source or appear translated, ignore that. Always keep the `{}` placeholders exactly as they appear in the source and never translate, replace, or modify them:
+
         {{translationMemory.json}}
         {{/if}}
         """.trimIndent(),
