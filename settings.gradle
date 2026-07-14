@@ -78,6 +78,8 @@ dependencyResolutionManagement {
             library('slackApiClient', "com.slack.api:slack-api-client:$slackSdkVersion")
             library('slackApiModelKotlinExtension', "com.slack.api:slack-api-model-kotlin-extension:$slackSdkVersion")
             library('slackApiClientKotlinExtension', "com.slack.api:slack-api-client-kotlin-extension:$slackSdkVersion")
+            library('commonsText', 'org.apache.commons:commons-text:1.10.0')
+            library('springJooq', "org.springframework.boot:spring-boot-starter-jooq:$springBootVersion")
             library('jakartaMail', 'org.eclipse.angus', 'jakarta.mail').version('2.0.4')
             library('mcpBom', 'io.modelcontextprotocol.sdk', 'mcp-bom').version('0.18.0')
             library('mcp', 'io.modelcontextprotocol.sdk', 'mcp').withoutVersion()

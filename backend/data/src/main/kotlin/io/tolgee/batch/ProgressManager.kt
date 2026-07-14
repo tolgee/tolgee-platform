@@ -282,7 +282,6 @@ class ProgressManager(
   }
 
   fun onJobCompletedCommitted(batchJob: BatchJobDto) {
-    eventPublisher.publishEvent(OnBatchJobStatusUpdated(batchJob.id, batchJob.projectId, batchJob.status))
     cachingBatchJobService.evictJobCache(batchJob.id)
     batchJobProjectLockingManager.unlockJobForProject(batchJob.projectId, batchJob.id)
     batchJobStateProvider.removeJobState(batchJob.id)

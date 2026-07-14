@@ -11,7 +11,7 @@ import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { ProjectTotals } from './ProjectTotals';
 import { LanguageStats } from './LanguageStats/LanguageStats';
 import { DailyActivityChart } from './DailyActivityChart';
-import { ActivityList } from './ActivityList';
+import { ActivityGroupsList } from './ActivityGroupsList';
 import { BaseProjectView } from '../BaseProjectView';
 import { ProjectDescription } from './ProjectDescription';
 import { useReportEvent } from 'tg.hooks/useReportEvent';
@@ -72,7 +72,7 @@ export const DashboardView = () => {
   const path = { projectId: project.id };
   const query = { size: 15, sort: ['timestamp,desc'], branch };
   const activityLoadable = useApiInfiniteQuery({
-    url: '/v2/projects/{projectId}/activity',
+    url: '/v2/projects/{projectId}/activity/groups',
     method: 'get',
     path,
     query,
@@ -159,7 +159,7 @@ export const DashboardView = () => {
                   gridArea="activityList"
                   data-cy="project-dashboard-activity-list"
                 >
-                  <ActivityList activityLoadable={activityLoadable} />
+                  <ActivityGroupsList activityLoadable={activityLoadable} />
                 </Box>
                 <Box
                   gridArea="activityChart"

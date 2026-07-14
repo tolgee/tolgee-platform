@@ -19,6 +19,7 @@ import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
+import io.tolgee.testing.satisfiesIf
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -189,7 +190,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
       node("name").isEqualTo("Test org")
       node("slug").isEqualTo("test-org")
       node("_links.self.href").isEqualTo("http://localhost/v2/organizations/test-org")
-      node("id").isNumber.satisfies {
+      node("id").isNumber.satisfiesIf {
         organizationService.find(it.toLong()) is Organization
       }
     }

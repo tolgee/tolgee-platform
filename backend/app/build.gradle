@@ -122,6 +122,7 @@ dependencies {
     testImplementation('io.netty:netty-codec-http:4.2.5.Final')
     testImplementation('io.netty:netty-codec-http2:4.2.5.Final')
     testImplementation('io.netty:netty-handler:4.2.5.Final')
+    testImplementation libs.springJooq
     ktlint(project(":ktlint"))
 
 
@@ -129,6 +130,7 @@ dependencies {
      * MISC
      */
     implementation libs.commonsCodec
+    implementation libs.commonsText
     implementation libs.commonsLang
     implementation libs.amazonS3
     implementation libs.amazonSTS

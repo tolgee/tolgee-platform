@@ -248,6 +248,7 @@ class UserAccountService(
     toDelete.organizationRoles.forEach {
       entityManager.remove(it)
     }
+
     aiPlaygroundResultService.deleteResultsByUser(toDelete.id)
     userAccountRepository.softDeleteUser(toDelete, currentDateProvider.date)
     applicationEventPublisher.publishEvent(OnUserCountChanged(decrease = true, this))

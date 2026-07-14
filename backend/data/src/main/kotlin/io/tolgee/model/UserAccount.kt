@@ -3,6 +3,7 @@ package io.tolgee.model
 import io.hypersistence.utils.hibernate.type.array.ListArrayType
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.api.IUserAccount
+import io.tolgee.api.SimpleUserAccount
 import io.tolgee.component.ThirdPartyAuthTypeConverter
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.model.slackIntegration.SlackConfig
@@ -37,7 +38,7 @@ data class UserAccount(
   @field:NotBlank
   override var username: String = "",
   var password: String? = null,
-  var name: String = "",
+  override var name: String = "",
   @Enumerated(EnumType.STRING)
   var role: Role? = Role.USER,
   /**
@@ -55,6 +56,7 @@ data class UserAccount(
 ) : AuditModel(),
   ModelWithAvatar,
   IUserAccount,
+  SimpleUserAccount,
   EntityWithId {
   @Column(name = "totp_key", columnDefinition = "bytea")
   override var totpKey: ByteArray? = null
@@ -143,6 +145,9 @@ data class UserAccount(
 
   @OneToMany(mappedBy = "userAccount", fetch = FetchType.LAZY, orphanRemoval = true)
   var slackConfig: MutableList<SlackConfig> = mutableListOf()
+
+  override val deleted: Boolean
+    get() = deletedAt != null
 
   @ManyToMany(mappedBy = "assignees")
   var tasks: MutableSet<Task> = mutableSetOf()

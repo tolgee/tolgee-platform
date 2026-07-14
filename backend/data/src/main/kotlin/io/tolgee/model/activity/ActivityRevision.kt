@@ -1,7 +1,9 @@
 package io.tolgee.model.activity
 
 import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
+import io.tolgee.activity.data.ActivityOrigin
 import io.tolgee.activity.data.ActivityType
+import io.tolgee.api.ProjectIdAndBaseLanguageId
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.batch.BatchJobChunkExecution
@@ -15,6 +17,7 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Index
+import jakarta.persistence.ManyToMany
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import jakarta.persistence.PrePersist
@@ -71,6 +74,14 @@ class ActivityRevision : java.io.Serializable {
   var type: ActivityType? = null
 
   /**
+   * How the request producing this revision was authenticated (null for
+   * system-triggered activity, e.g. batch chunk processing).
+   */
+  @Enumerated(EnumType.STRING)
+  @Column(name = "origin_type")
+  var originType: ActivityOrigin? = null
+
+  /**
    * Project of the change
    */
   var projectId: Long? = null
@@ -108,6 +119,20 @@ class ActivityRevision : java.io.Serializable {
 
   @Transient
   var cancelledBatchJobExecutionCount: Int? = null
+
+  @ManyToMany
+  var activityGroups: MutableList<ActivityGroup> = mutableListOf()
+
+  /**
+   * We need to store it to know which language was the base language when the change was made
+   * for group and filtering purposes
+   */
+  var baseLanguageId: Long? = null
+
+  fun setProject(project: ProjectIdAndBaseLanguageId) {
+    this.projectId = project.id
+    this.baseLanguageId = project.baseLanguageId
+  }
 
   companion object {
     @Configurable

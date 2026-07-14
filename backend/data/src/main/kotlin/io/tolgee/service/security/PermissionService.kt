@@ -229,7 +229,7 @@ class PermissionService(
   @Transactional(readOnly = true)
   fun computeProjectPermission(
     organizationRole: OrganizationRoleType?,
-    organizationBasePermission: IPermission,
+    organizationBasePermission: IPermission?,
     directPermission: IPermission?,
     userRole: UserAccount.Role? = null,
   ): ComputedPermissionDto {
@@ -237,7 +237,8 @@ class PermissionService(
       when {
         organizationRole == OrganizationRoleType.OWNER -> ComputedPermissionDto.ORGANIZATION_OWNER
         directPermission != null -> ComputedPermissionDto(directPermission, ComputedPermissionOrigin.DIRECT)
-        organizationRole == OrganizationRoleType.MEMBER || organizationRole == OrganizationRoleType.MAINTAINER ->
+        (organizationRole == OrganizationRoleType.MEMBER || organizationRole == OrganizationRoleType.MAINTAINER) &&
+          organizationBasePermission != null ->
           ComputedPermissionDto(
             organizationBasePermission,
             ComputedPermissionOrigin.ORGANIZATION_BASE,

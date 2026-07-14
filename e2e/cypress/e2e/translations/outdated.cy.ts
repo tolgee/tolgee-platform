@@ -1,7 +1,11 @@
 import { ProjectDTO } from '../../../../webapp/src/service/response.types';
 import { deleteProject } from '../../common/apiCalls/common';
 import { waitForGlobalLoading } from '../../common/loading';
-import { assertMessage, visitProjectDashboard } from '../../common/shared';
+import {
+  gcyAdvanced,
+  assertMessage,
+  visitProjectDashboard,
+} from '../../common/shared';
 
 import {
   create4Translations,
@@ -46,8 +50,10 @@ describe('Translation states', () => {
     getRemoveOutdatedIndicator('Studený přeložený text 1').click();
     visitProjectDashboard(project.id);
 
-    const lastActivity = cy.gcy('activity-compact').first();
-    lastActivity.contains('Updated state').should('be.visible');
+    gcyAdvanced({
+      value: 'activity-group-item',
+      type: 'SET_OUTDATED_FLAG',
+    }).should('be.visible');
   });
 
   it("won't mark empty translation", () => {

@@ -3,6 +3,7 @@ package io.tolgee.activity
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.activity.data.RevisionType
+import io.tolgee.activity.groups.ActivityGroupService
 import io.tolgee.activity.projectActivity.ModificationsByRevisionsProvider
 import io.tolgee.activity.projectActivity.ProjectActivityViewByPageableProvider
 import io.tolgee.activity.projectActivity.ProjectActivityViewByRevisionProvider
@@ -34,6 +35,8 @@ class ActivityService(
   private val activityModifiedEntityRepository: ActivityModifiedEntityRepository,
   private val objectMapper: ObjectMapper,
   private val jdbcTemplate: JdbcTemplate,
+  private val activityGroupService: ActivityGroupService,
+  private val describers: List<ActivityAdditionalDescriber>,
   private val activityRevisionRepository: ActivityRevisionRepository,
   private val branchService: BranchService,
 ) : Logging {
@@ -49,41 +52,58 @@ class ActivityService(
     // let's keep the persistent context small
     entityManager.flushAndClear()
 
-    val mergedActivityRevision = persistActivityRevision(activityRevision)
+    runAdditionalDescribers(activityRevision, modifiedEntities)
 
+    val mergedActivityRevision = persistActivityRevision(activityRevision)
     persistDescribingRelations(mergedActivityRevision)
     mergedActivityRevision.modifiedEntities = persistModifiedEntities(modifiedEntities)
+
+    activityGroupService.addToGroup(activityRevision, modifiedEntities)
+
     applicationContext.publishEvent(OnProjectActivityStoredEvent(this, mergedActivityRevision))
   }
 
+  private fun runAdditionalDescribers(
+    activityRevision: ActivityRevision,
+    modifiedEntities: ModifiedEntitiesType,
+  ) {
+    describers.forEach {
+      it.describe(activityRevision, modifiedEntities)
+    }
+  }
+
   private fun persistModifiedEntities(modifiedEntities: ModifiedEntitiesType): MutableList<ActivityModifiedEntity> {
-    val list = modifiedEntities.values.flatMap { it.values }.toMutableList()
+    val list = modifiedEntities.values.flatMap { it.entries }.toMutableList()
     jdbcTemplate.batchUpdate(
       "INSERT INTO activity_modified_entity " +
         "(entity_class, entity_id, describing_data, " +
-        "describing_relations, modifications, revision_type, activity_revision_id, branch_id) " +
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        "describing_relations, modifications, revision_type, activity_revision_id, branch_id, " +
+        "additional_description) " +
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
       list,
       1000,
-    ) { ps, entity ->
-      ps.setString(1, entity.entityClass)
-      ps.setLong(2, entity.entityId)
-      ps.setObject(3, getJsonbObject(entity.describingData))
-      ps.setObject(4, getJsonbObject(entity.describingRelations))
-      ps.setObject(5, getJsonbObject(entity.modifications))
-      ps.setInt(6, RevisionType.entries.indexOf(entity.revisionType))
-      ps.setLong(7, entity.activityRevision.id)
-      ps.setObject(8, entity.branchId)
+    ) { ps, entry ->
+      val modifiedEntity = entry.value
+      val entityId = entry.resolvedEntityId
+      ps.setString(1, modifiedEntity.entityClass)
+      ps.setLong(2, entityId)
+      ps.setObject(3, getJsonbObject(modifiedEntity.describingData))
+      ps.setObject(4, getJsonbObject(modifiedEntity.describingRelations))
+      ps.setObject(5, getJsonbObject(modifiedEntity.modifications))
+      ps.setInt(6, RevisionType.entries.indexOf(modifiedEntity.revisionType))
+      ps.setLong(7, modifiedEntity.activityRevision.id)
+      ps.setObject(8, modifiedEntity.branchId)
+      ps.setObject(9, getJsonbObject(modifiedEntity.additionalDescription))
     }
 
-    return list
+    return list.map { it.value }.toMutableList()
   }
 
   private fun persistDescribingRelations(activityRevision: ActivityRevision) {
     jdbcTemplate.batchUpdate(
       "INSERT INTO activity_describing_entity " +
-        "(entity_class, entity_id, data, describing_relations, activity_revision_id) " +
-        "VALUES (?, ?, ?, ?, ?)",
+        "(entity_class, entity_id, data, describing_relations, activity_revision_id, additional_description) " +
+        "VALUES (?, ?, ?, ?, ?, ?)",
       activityRevision.describingRelations,
       1000,
     ) { ps, entity ->
@@ -92,6 +112,7 @@ class ActivityService(
       ps.setObject(3, getJsonbObject(entity.data))
       ps.setObject(4, getJsonbObject(entity.describingRelations))
       ps.setLong(5, activityRevision.id)
+      ps.setObject(6, getJsonbObject(entity.additionalDescription))
     }
   }
 

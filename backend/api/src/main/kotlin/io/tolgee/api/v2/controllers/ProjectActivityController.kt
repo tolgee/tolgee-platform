@@ -9,9 +9,14 @@ import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.ExampleObject
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.activity.ActivityService
+import io.tolgee.activity.groups.ActivityGroupService
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Feature
+import io.tolgee.dtos.queryResults.ActivityGroupView
+import io.tolgee.dtos.request.ActivityGroupFilters
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.hateoas.activity.ActivityGroupModel
+import io.tolgee.hateoas.activity.ActivityGroupModelAssembler
 import io.tolgee.hateoas.activity.ModifiedEntityModel
 import io.tolgee.hateoas.activity.ModifiedEntityModelAssembler
 import io.tolgee.hateoas.activity.ProjectActivityModel
@@ -28,6 +33,7 @@ import io.tolgee.service.project.ProjectFeatureGuard
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
+import org.springframework.hateoas.MediaTypes
 import org.springframework.hateoas.PagedModel
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -49,6 +55,9 @@ class ProjectActivityController(
   private val modificationResourcesAssembler: PagedResourcesAssembler<ModifiedEntityView>,
   private val projectActivityModelAssembler: ProjectActivityModelAssembler,
   private val modifiedEntityModelAssembler: ModifiedEntityModelAssembler,
+  private val activityGroupService: ActivityGroupService,
+  private val groupPagedResourcesAssembler: PagedResourcesAssembler<ActivityGroupView>,
+  private val groupModelAssembler: ActivityGroupModelAssembler,
   private val branchService: BranchService,
   private val projectFeatureGuard: ProjectFeatureGuard,
   private val rateLimitService: RateLimitService,
@@ -122,5 +131,32 @@ class ProjectActivityController(
         branch,
       )
     return modificationResourcesAssembler.toModel(page, modifiedEntityModelAssembler)
+  }
+
+  @Operation(
+    summary = "Get project activity groups",
+    description = "This endpoints returns the activity grouped by time windows so it's easier to read on the frontend.",
+  )
+  @GetMapping("/groups", produces = [MediaTypes.HAL_JSON_VALUE])
+  @RequiresProjectPermissions([Scope.ACTIVITY_VIEW])
+  @AllowApiAccess
+  fun getActivityGroups(
+    @ParameterObject pageable: Pageable,
+    @ParameterObject activityGroupFilters: ActivityGroupFilters,
+    @RequestParam(required = false) branch: String? = null,
+  ): PagedModel<ActivityGroupModel> {
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
+    val activeBranch = branchService.getActiveNonDefaultBranch(projectHolder.project.id, branch)
+    val defaultBranchId =
+      if (activeBranch == null) branchService.getDefaultBranch(projectHolder.project.id)?.id else null
+    val views =
+      activityGroupService.getProjectActivityGroups(
+        projectId = projectHolder.project.id,
+        pageable,
+        activityGroupFilters,
+        branchId = activeBranch?.id,
+        defaultBranchId = defaultBranchId,
+      )
+    return groupPagedResourcesAssembler.toModel(views, groupModelAssembler)
   }
 }

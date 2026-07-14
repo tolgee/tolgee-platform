@@ -3,6 +3,8 @@ package io.tolgee.model
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.api.ISimpleProject
+import io.tolgee.api.ProjectIdAndBaseLanguageId
+import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.automations.Automation
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.contentDelivery.ContentDeliveryConfig
@@ -83,7 +85,8 @@ class Project(
   ModelWithAvatar,
   EntityWithId,
   SoftDeletable,
-  ISimpleProject {
+  ISimpleProject,
+  ProjectIdAndBaseLanguageId {
   @OrderBy("id")
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "project")
   var languages: MutableSet<Language> = LinkedHashSet()
@@ -97,7 +100,6 @@ class Project(
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "project")
   var apiKeys: MutableSet<ApiKey> = LinkedHashSet()
 
-  @Suppress("SetterBackingFieldAssignment")
   @ManyToOne(optional = true, fetch = FetchType.LAZY)
   @Deprecated(message = "Project can be owned only by organization")
   var userOwner: UserAccount? = null
@@ -135,16 +137,16 @@ class Project(
   @Transient
   override var disableActivityLogging = false
 
-  @OneToMany(orphanRemoval = true, mappedBy = "project")
+  @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "project")
   var automations: MutableList<Automation> = mutableListOf()
 
-  @OneToMany(orphanRemoval = true, mappedBy = "project")
+  @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "project")
   var contentDeliveryConfigs: MutableList<ContentDeliveryConfig> = mutableListOf()
 
-  @OneToMany(orphanRemoval = true, mappedBy = "project")
+  @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "project")
   var contentStorages: MutableList<ContentStorage> = mutableListOf()
 
-  @OneToMany(orphanRemoval = true, mappedBy = "project")
+  @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "project")
   var webhookConfigs: MutableList<WebhookConfig> = mutableListOf()
 
   @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "project")
@@ -239,4 +241,7 @@ class Project(
       }
     }
   }
+
+  override val baseLanguageId: Long?
+    get() = this.baseLanguage?.id
 }

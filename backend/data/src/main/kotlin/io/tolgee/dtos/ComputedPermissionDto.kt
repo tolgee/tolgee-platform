@@ -99,7 +99,7 @@ class ComputedPermissionDto(
   )
 
   companion object {
-    private fun getEmptyPermission(
+    fun getEmptyPermission(
       scopes: Array<Scope>,
       type: ProjectPermissionType,
     ): IPermission {

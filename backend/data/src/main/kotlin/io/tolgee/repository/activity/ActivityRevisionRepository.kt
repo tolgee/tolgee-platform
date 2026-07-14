@@ -2,6 +2,7 @@ package io.tolgee.repository.activity
 
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.dtos.queryResults.ActivityRevisionInfo
+import io.tolgee.model.activity.ActivityDescribingEntity
 import io.tolgee.model.activity.ActivityRevision
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
@@ -49,6 +50,20 @@ interface ActivityRevisionRepository : JpaRepository<ActivityRevision, Long> {
     branchId: Long? = null,
     defaultBranchId: Long? = null,
   ): Page<ActivityRevision>
+
+  @Query(
+    """
+      select dr
+      from ActivityRevision ar 
+      join ar.describingRelations dr
+      where ar.id in :revisionIds
+      and ar.type in :allowedTypes
+    """,
+  )
+  fun getRelationsForRevisions(
+    revisionIds: List<Long>,
+    allowedTypes: Collection<ActivityType>,
+  ): List<ActivityDescribingEntity>
 
   @Query(
     """

@@ -319,7 +319,7 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
 
   @Query(
     value = """
-    select ua from UserAccount ua where id in (:ids)
+    select ua from UserAccount ua where ua.id in (:ids)
   """,
   )
   fun getAllByIdsIncludingDeleted(ids: Set<Long>): MutableList<UserAccount>

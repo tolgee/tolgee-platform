@@ -3,7 +3,7 @@ import { useTranslate } from '@tolgee/react';
 import { useCurrentLanguage } from '@tginternal/library/hooks/useCurrentLanguage';
 
 const StyledContainer = styled('div')`
-  grid-column: 1 / span 3;
+  grid-column: 1 / -1;
   display: flex;
   align-items: center;
   position: sticky;

@@ -383,7 +383,7 @@ class ProjectService(
   }
 
   /**
-   * If base language is missing on project it selects language with lowest id
+   * If base language is missing on project it selects the language with the lowest id
    * It saves updated project and returns project's new baseLanguage
    */
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#projectId")
@@ -475,7 +475,7 @@ class ProjectService(
     projectRepository.save(project)
     if (isCreating) {
       projectHolder.project = ProjectDto.fromEntity(project)
-      activityHolder.activityRevision.projectId = projectHolder.project.id
+      activityHolder.activityRevision.setProject(project)
     }
     return project
   }

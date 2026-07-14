@@ -93,6 +93,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     implementation "org.springframework.boot:spring-boot-starter-validation"
+    implementation "org.springframework.boot:spring-boot-starter-hateoas"
     implementation("org.springframework.data:spring-data-envers")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation('org.springframework.boot:spring-boot-starter-mail') {
@@ -102,6 +103,7 @@ dependencies {
     testImplementation('org.springframework.boot:spring-boot-starter-test')
     implementation "org.springframework.boot:spring-boot-starter-batch"
     implementation "org.springframework.boot:spring-boot-starter-websocket"
+    implementation libs.springJooq
     implementation "org.springframework.boot:spring-boot-starter-thymeleaf"
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
@@ -136,6 +138,7 @@ dependencies {
     liquibaseRuntime libs.kotlinReflect
     liquibaseRuntime sourceSets.main.output
     liquibaseRuntime 'org.springframework.boot:spring-boot-starter-data-jpa'
+    liquibaseRuntime libs.springJooq
 
     /**
      * Testing
@@ -170,7 +173,7 @@ dependencies {
      * MISC
      */
     implementation libs.commonsCodec
-    implementation group: 'org.apache.commons', name: 'commons-text', version: '1.10.0'
+    implementation libs.commonsText
     implementation libs.icu4j
     implementation libs.jjwtApi
     implementation libs.jjwtImpl

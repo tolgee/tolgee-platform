@@ -1,6 +1,7 @@
 package io.tolgee.activity.iterceptor
 
 import io.tolgee.activity.ActivityHolder
+import io.tolgee.activity.data.ActivityOrigin
 import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.model.activity.ActivityRevision
@@ -27,9 +28,24 @@ class ActivityRevisionInitializer(
     revision.isInitializedByInterceptor = true
     revision.authorId = userAccount?.id ?: revision.authorId
     revision.organizationId = organizationId ?: revision.organizationId
-    revision.projectId = project?.id ?: revision.projectId
+    project?.let { revision.setProject(it) }
     revision.type = activityHolder.activity ?: revision.type
+    revision.originType = origin ?: revision.originType
   }
+
+  private val origin: ActivityOrigin?
+    get() {
+      if (authenticationFacade.authenticatedUserOrNull == null) {
+        return null
+      }
+      if (authenticationFacade.isProjectApiKeyAuth) {
+        return ActivityOrigin.API_KEY
+      }
+      if (authenticationFacade.isPersonalAccessTokenAuth) {
+        return ActivityOrigin.PAT
+      }
+      return ActivityOrigin.UI
+    }
 
   /**
    * Lazily retrieves a project from ProjectHolder.

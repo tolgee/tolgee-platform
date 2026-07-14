@@ -37,11 +37,13 @@ class ActivityModifiedEntity(
   @Id
   val entityClass: String,
   /**
-   * ID of the modified entity
+   * ID of the modified entity. Can be recorded before the entity's id is allocated;
+   * the interceptor sets the real id as soon as it's known.
    */
   @Id
-  val entityId: Long,
-) : Serializable {
+  var entityId: Long,
+) : Serializable,
+  ActivityEntityWithDescription {
   @Column(name = "branch_id")
   var branchId: Long? = null
 
@@ -58,7 +60,11 @@ class ActivityModifiedEntity(
   /** Related-entity refs describing the entity (e.g. a Translation's key and language). */
   @Column(columnDefinition = "jsonb")
   @Type(JsonBinaryType::class)
-  var describingRelations: DescribingRelationsMap? = null
+  override var describingRelations: DescribingRelationsMap? = null
+
+  @Column(columnDefinition = "jsonb")
+  @Type(JsonBinaryType::class)
+  override var additionalDescription: MutableMap<String, Any?>? = null
 
   @Enumerated
   var revisionType: RevisionType = RevisionType.MOD

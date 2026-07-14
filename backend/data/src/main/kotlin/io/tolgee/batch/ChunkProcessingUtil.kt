@@ -71,7 +71,7 @@ open class ChunkProcessingUtil(
     activityRevision.batchJobChunkExecution = execution
     job.projectId?.let {
       val project = projectService.getDto(it)
-      activityRevision.projectId = project.id
+      activityRevision.setProject(project)
       activityRevision.organizationId = project.organizationOwnerId
     }
     activityHolder.activity = job.type.activityType

@@ -103,3 +103,4 @@ springdoc:
 logging:
   level:
     "io.tolgee": DEBUG
+    org.jooq.Constants: off

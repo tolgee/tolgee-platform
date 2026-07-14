@@ -2,6 +2,7 @@ package io.tolgee.activity.iterceptor
 
 import io.tolgee.activity.ActivityService
 import io.tolgee.activity.EntityDescriptionProvider
+import io.tolgee.activity.EntityIdentity
 import io.tolgee.activity.annotation.ActivityIgnoredProp
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
@@ -146,7 +147,13 @@ class InterceptedEventsManager(
 
     val changesMap = getChangesMap(entity, currentState, previousState, propertyNames)
 
-    activityModifiedEntity.revisionType = effectiveRevisionType
+    activityModifiedEntity.revisionType =
+      when {
+        // when we are replacing ADD with MOD, we want to keep ADD
+        activityModifiedEntity.revisionType == RevisionType.ADD && effectiveRevisionType == RevisionType.MOD ->
+          RevisionType.ADD
+        else -> effectiveRevisionType
+      }
     activityModifiedEntity.modifications.addAll(changesMap)
 
     activityModifiedEntity.setEntityDescription(entity)
@@ -195,18 +202,24 @@ class InterceptedEventsManager(
     revisionType: RevisionType,
     state: Array<out Any>? = null,
   ): ActivityModifiedEntity {
+    val classMap = activityHolder.modifiedEntities.computeIfAbsent(entity::class) { mutableMapOf() }
+    if (entity.id != 0L) {
+      // the entity may have been recorded before its id was allocated
+      classMap.remove(EntityIdentity(entity))?.let {
+        it.entityId = entity.id
+        classMap.putIfAbsent(entity.id, it)
+      }
+    }
     val activityModifiedEntity =
-      activityHolder.modifiedEntities
-        .computeIfAbsent(entity::class) { mutableMapOf() }
-        .computeIfAbsent(
+      classMap.computeIfAbsent(
+        if (entity.id != 0L) entity.id else EntityIdentity(entity),
+      ) {
+        ActivityModifiedEntity(
+          activityRevision,
+          entity::class.simpleName!!,
           entity.id,
-        ) {
-          ActivityModifiedEntity(
-            activityRevision,
-            entity::class.simpleName!!,
-            entity.id,
-          ).also { it.revisionType = revisionType }
-        }
+        ).also { it.revisionType = revisionType }
+      }
 
     activityModifiedEntity.branchId = resolveBranchId(entity, revisionType, state)
 

@@ -10,6 +10,7 @@ import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andIsUnauthorized
+import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.satisfies
 import io.tolgee.model.Permission
 import io.tolgee.model.enums.Scope
@@ -17,6 +18,7 @@ import io.tolgee.security.authentication.JwtService
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assertions.Assertions.assertThat
+import io.tolgee.testing.satisfies
 import org.assertj.core.data.Offset
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test

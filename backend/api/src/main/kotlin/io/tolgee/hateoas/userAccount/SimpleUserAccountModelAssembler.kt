@@ -1,5 +1,6 @@
 package io.tolgee.hateoas.userAccount
 
+import io.tolgee.api.SimpleUserAccount
 import io.tolgee.api.v2.controllers.V2UserController
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.model.UserAccount
@@ -23,6 +24,18 @@ class SimpleUserAccountModelAssembler(
       name = entity.name,
       avatar = avatar,
       deleted = entity.deletedAt != null,
+    )
+  }
+
+  fun toModel(entity: SimpleUserAccount): SimpleUserAccountModel {
+    val avatar = avatarService.getAvatarLinks(entity.avatarHash)
+
+    return SimpleUserAccountModel(
+      id = entity.id,
+      username = entity.username,
+      name = entity.name,
+      avatar = avatar,
+      deleted = entity.deleted,
     )
   }
 

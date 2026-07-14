@@ -2,6 +2,7 @@ package io.tolgee.ee.component.qa
 
 import io.tolgee.activity.ActivityService
 import io.tolgee.activity.data.RevisionType
+import io.tolgee.activity.resolvedEntityId
 import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.data.BatchTranslationTargetItem
@@ -305,8 +306,9 @@ class QaActivityListener(
   private fun getLanguageTagChangedIds(event: OnProjectActivityEvent): List<Long> {
     val languageEntities = event.modifiedEntities[Language::class] ?: return emptyList()
     return languageEntities
-      .filter { (_, entity) -> entity.modifications.containsKey("tag") }
-      .map { (id, _) -> id }
+      .entries
+      .filter { it.value.modifications.containsKey("tag") }
+      .map { it.resolvedEntityId }
   }
 
   // endregion

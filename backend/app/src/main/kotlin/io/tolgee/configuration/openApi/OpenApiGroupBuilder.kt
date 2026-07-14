@@ -3,6 +3,8 @@ package io.tolgee.configuration.openApi
 import io.swagger.v3.oas.models.Operation
 import io.swagger.v3.oas.models.PathItem
 import io.swagger.v3.oas.models.Paths
+import io.tolgee.configuration.openApi.activity.ActivityGroupModelEnhancer
+import io.tolgee.configuration.openApi.activity.ProjectActivityModelEnhancer
 import io.tolgee.openApiDocs.OpenApiCloudExtension
 import io.tolgee.openApiDocs.OpenApiEeExtension
 import io.tolgee.openApiDocs.OpenApiOrderExtension
@@ -39,11 +41,20 @@ class OpenApiGroupBuilder(
 
     addExtensions()
 
+    updateActivitySchema()
+
     cleanUnusedModels()
 
     sortOutput()
 
     return@lazy builder.build()
+  }
+
+  private fun updateActivitySchema() {
+    builder.addOpenApiCustomizer {
+      ProjectActivityModelEnhancer(it).enhance()
+      ActivityGroupModelEnhancer(it).enhance()
+    }
   }
 
   private fun sortOutput() {

@@ -14,6 +14,7 @@ import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.satisfies
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
+import io.tolgee.testing.satisfies
 import org.assertj.core.data.Offset
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll

@@ -21,6 +21,7 @@ import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.NotificationTestUtil
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
+import io.tolgee.testing.satisfies
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

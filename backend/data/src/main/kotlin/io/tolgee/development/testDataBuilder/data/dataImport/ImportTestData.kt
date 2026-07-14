@@ -372,6 +372,7 @@ class ImportTestData {
         fromImport = true
         author = userAccount
       }
+      description = "This is a key"
     }
 
     projectBuilder.data.imports[0].data.importFiles[0].data.importKeys[2].addMeta {

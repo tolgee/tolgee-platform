@@ -40,7 +40,7 @@ class DemoProjectCreator(
 
   fun createDemoProject(): Project {
     activityHolder.activity = ActivityType.CREATE_PROJECT
-    activityHolder.activityRevision.projectId = project.id
+    activityHolder.activityRevision.setProject(project)
     setStates()
     addBigMeta()
     addScreenshots()

@@ -19,6 +19,15 @@ declare namespace DataCy {
         "activity-compact-detail-button": true;
         "activity-detail": true;
         "activity-detail-dialog": true;
+        "activity-group-count": true;
+        "activity-group-create-key-item": true;
+        "activity-group-create-project-detail": true;
+        "activity-group-expand-button": true;
+        "activity-group-generic-item": true;
+        "activity-group-item": true;
+        "activity-group-origin": true;
+        "activity-group-source-info": true;
+        "activity-groups-list": true;
         "administration-access-message": true;
         "administration-debug-customer-account-message": true;
         "administration-debug-customer-exit-button": true;

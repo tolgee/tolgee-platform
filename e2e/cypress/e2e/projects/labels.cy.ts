@@ -3,7 +3,10 @@ import { labelsTestData } from '../../common/apiCalls/testData/testData';
 import { assertMessage, assertMissingFeature, gcy } from '../../common/shared';
 import { E2ProjectLabelsSection } from '../../compounds/projectSettings/labels/E2ProjectLabelsSection';
 import { isDarkMode } from '../../common/helpers';
-import { assertActivityDetails, checkActivity } from '../../common/activities';
+import {
+  assertActivityGroupDetails,
+  checkActivityGroup,
+} from '../../common/activities';
 import { setFeature } from '../../common/features';
 
 let projectId = null;
@@ -97,9 +100,8 @@ describe('Projects Settings - Labels', () => {
     const labelModal = projectLabels.openCreateLabelModal();
     labelModal.fillAndSave('test-label', '#FF0055', 'New label description');
 
-    checkActivity('Created translation label');
-    assertActivityDetails([
-      'Created translation label',
+    checkActivityGroup('CREATE_TRANSLATION_LABEL');
+    assertActivityGroupDetails('CREATE_TRANSLATION_LABEL', [
       'test-label',
       'New label description',
     ]);
@@ -111,8 +113,8 @@ describe('Projects Settings - Labels', () => {
     const labelModal = projectLabels.openEditLabelModal('First label');
     labelModal.fillAndSave('Edited label', '#00FF00', 'Totally new text');
 
-    checkActivity('Edited translation label');
-    assertActivityDetails(['Edited translation label']);
+    checkActivityGroup('EDIT_TRANSLATION_LABEL');
+    assertActivityGroupDetails('EDIT_TRANSLATION_LABEL', ['Edited label']);
   });
 
   it('creates activity when label is deleted', () => {
@@ -120,9 +122,8 @@ describe('Projects Settings - Labels', () => {
 
     projectLabels.deleteLabel('First label');
 
-    checkActivity('Deleted translation label');
-    assertActivityDetails([
-      'Deleted translation label',
+    checkActivityGroup('DELETE_TRANSLATION_LABEL');
+    assertActivityGroupDetails('DELETE_TRANSLATION_LABEL', [
       'This is a description',
     ]);
   });

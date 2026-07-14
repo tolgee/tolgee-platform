@@ -1,6 +1,7 @@
 package io.tolgee.component.eventListeners
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.tolgee.activity.resolvedEntityId
 import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.batch.events.OnBatchJobFinalized
@@ -134,7 +135,11 @@ class LanguageStatsListener(
     event: OnProjectActivityEvent,
     branchIds: MutableSet<Long?>,
   ) {
-    val keyIds = event.modifiedEntities[Key::class]?.keys.orEmpty()
+    val keyIds =
+      event.modifiedEntities[Key::class]
+        ?.entries
+        .orEmpty()
+        .map { it.resolvedEntityId }
     if (keyIds.isEmpty()) return
 
     keyIds.chunked(IN_CLAUSE_BATCH_SIZE).forEach { chunk ->
@@ -146,7 +151,11 @@ class LanguageStatsListener(
     event: OnProjectActivityEvent,
     branchIds: MutableSet<Long?>,
   ) {
-    val translationIds = event.modifiedEntities[Translation::class]?.keys.orEmpty()
+    val translationIds =
+      event.modifiedEntities[Translation::class]
+        ?.entries
+        .orEmpty()
+        .map { it.resolvedEntityId }
     if (translationIds.isEmpty()) return
 
     translationIds.chunked(IN_CLAUSE_BATCH_SIZE).forEach { chunk ->

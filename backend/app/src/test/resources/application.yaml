@@ -39,6 +39,8 @@ spring:
     enabled: false
   datasource:
     maximum-pool-size: 100
+  jooq:
+    sql-dialect: postgres
 tolgee:
   slack:
     token: fakeToken
@@ -105,6 +107,7 @@ tolgee:
     scheduled-reporting-enabled: false
 logging:
   level:
+    org.jooq.Constants: off
     io.tolgee.websocket: DEBUG
     org.springframework.messaging.simp.stomp: DEBUG
     org.springframework.web.socket.messaging: DEBUG

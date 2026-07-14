@@ -19,6 +19,7 @@ import { DashboardView } from './dashboard/DashboardView';
 import { WebsocketPreview } from './WebsocketPreview';
 import { DeveloperView } from './developer/DeveloperView';
 import { TaskRedirect } from './TaskRedirect';
+import { ActivityView } from './ActivityView';
 import { routes } from 'tg.ee';
 import { IntegrateView } from './integrate/IntegrateView';
 import { AiView } from './ai/AiView';
@@ -91,6 +92,10 @@ export const ProjectRouter = () => {
         </Route>
         <Route path={LINKS.PROJECT_AI.template}>
           <AiView />
+        </Route>
+
+        <Route exact path={LINKS.PROJECT_ACTIVITY_GROUPS.template}>
+          <ActivityView />
         </Route>
 
         <Route path={LINKS.GO_TO_PROJECT_ACTIVITY_DETAIL.template}>
