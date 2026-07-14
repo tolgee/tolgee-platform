@@ -1,3 +1,10 @@
+## [3.211.4](https://github.com/tolgee/tolgee-platform/compare/v3.211.3...v3.211.4) (2026-07-14)
+
+
+### Bug Fixes
+
+* keep source ICU placeholders when AI translator uses translation memory ([#3755](https://github.com/tolgee/tolgee-platform/issues/3755)) ([6eff81a](https://github.com/tolgee/tolgee-platform/commit/6eff81a7a736c1b2bbc69f8e6cba7751c773f242)), closes [#3752](https://github.com/tolgee/tolgee-platform/issues/3752) [#3752](https://github.com/tolgee/tolgee-platform/issues/3752)
+
 ## [3.211.3](https://github.com/tolgee/tolgee-platform/compare/v3.211.2...v3.211.3) (2026-07-13)
 
 
