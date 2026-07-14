@@ -41,31 +41,21 @@ import org.springframework.stereotype.Component
 import kotlin.reflect.KClass
 
 /**
- * Deletes all of a project's in-scope content **in place**, keeping the project row (its id anchors the
+ * Deletes all of a project's in-scope content in place, keeping the project row (its id anchors the
  * re-imported FKs), its access (permissions, API keys), organization ownership, and the project-level
- * config that is intentionally not transferred (automations, webhooks, content delivery, Slack). This is
- * step 0 of the mirror import: after it runs the project holds none of its OWNED content, so the export
- * inserts cleanly with no merge/upsert.
+ * config that is not transferred (automations, webhooks, content delivery, Slack). Step 0 of the mirror
+ * import: afterwards the project owns no content, so the export inserts with no merge/upsert.
  *
- * Ordering reuses the proven sequence of [io.tolgee.service.project.ProjectHardDeletingService] — the
- * schema has almost no `ON DELETE CASCADE`, so children must go before parents — and adds the pieces that
- * service never needed: project-scoped deletion of tasks/task-keys and of the branch merge/snapshot
- * tables, plus detaching kept config whose FK points at a branch being wiped. Completeness is proven at
- * runtime by [assertCleared]; a new OWNED type that this clearer forgets fails that assertion (and the
- * `clear strategy` build guard forces it into [CLEARED_OWNED_TYPES]).
+ * Deletion order follows [io.tolgee.service.project.ProjectHardDeletingService] (the schema has almost no
+ * `ON DELETE CASCADE`, so children go before parents). [assertCleared] proves completeness at runtime, and
+ * the `clear strategy` build guard forces every OWNED type into [CLEARED_OWNED_TYPES].
  *
- * Must be called within the caller's transaction (the importer's): it is deliberately not `@Transactional`
- * so the wipe and the subsequent re-insert share one rollback boundary, and its flush/clear + `COUNT == 0`
- * backstop only make sense inside that transaction.
+ * Not `@Transactional`: it must run inside the importer's transaction so the wipe and re-insert share one
+ * rollback boundary.
  *
- * This is a **mirror transfer, not a backup/restore**: everything project-scoped is wiped so no
- * base-project row can interfere with the insert, but only in-scope data is restored — so a
- * non-OWNED wipe with no restore path is the normal, intended case, not an omission. Each non-OWNED
- * wipe below carries an inline disposition tag (an untagged delete is an OWNED type, restored via the
- * generic graph); a future editor adding a non-OWNED wipe should tag it with one of:
- *  - `DROPPED` — gone for good (transient or user-reconfigurable data),
- *  - `RESTORED_DEFAULT` — re-seeded by the importer as project creation would,
- *  - `RESTORED_SIDE_CHANNEL` — re-inserted by the importer from a dedicated export file.
+ * Each non-OWNED wipe below carries a disposition tag (an untagged delete is an OWNED type restored via
+ * the generic graph): `DROPPED` (gone for good), `RESTORED_DEFAULT` (re-seeded by the importer), or
+ * `RESTORED_SIDE_CHANNEL` (re-inserted from a dedicated export file).
  */
 @Component
 class ProjectContentClearer(
@@ -103,8 +93,8 @@ class ProjectContentClearer(
     // translation_label rows FK translation; clearing labels drops the join before translations are deleted.
     labelService.deleteLabelsByProjectId(projectId)
     deleteSuggestions(projectId)
-    // These two reuse the language/key delete subgraphs; their child rows cascade per the entities'
-    // @OneToMany mappings, so they must run before the project row but after the join tables above.
+    // Child rows cascade via @OneToMany, so these must run after the join tables above and before the
+    // project row.
     languageService.deleteAllByProject(projectId)
     keyService.deleteAllByProject(projectId)
 
@@ -170,10 +160,8 @@ class ProjectContentClearer(
   }
 
   private fun deleteBranchMergesAndSnapshots(projectId: Long) {
-    // Snapshots FK branch (and chain translation/keyMeta snapshots off the key snapshot); merges FK branch.
-    // All must go before the branch rows; the EE feature creates an initial snapshot per branch. The same
-    // table relationships are encoded in the EE BranchCleanupService (branch-scoped); keep both in sync if
-    // the branch-snapshot/merge schema changes.
+    // Snapshot and merge rows FK branch (no DB cascade), so they must go before the branch rows. Mirrors
+    // the table relationships in the EE branch-scoped BranchCleanupService.
     nativeUpdate(
       "DELETE FROM branch_translation_snapshot WHERE key_snapshot_id IN " +
         "(SELECT id FROM branch_key_snapshot WHERE project_id = :projectId)",
@@ -198,9 +186,8 @@ class ProjectContentClearer(
 
   /**
    * Proves the wipe is complete by running every OWNED type's project-scoped collector and asserting it
-   * returns nothing. Driven by the collectors (not a graph walk) so it catches exactly the unreachable
-   * types (`ProjectQaConfig`, `LanguageQaConfig`, unassigned `Label`) a missed clear path would leak. The
-   * caller must `flush()`+`clear()` first, or the bulk deletes' bypassed persistence context reads stale.
+   * returns nothing. The caller must `flush()`+`clear()` first, or the bulk deletes' bypassed persistence
+   * context reads stale.
    */
   private fun assertCleared(projectId: Long) {
     ProjectScopedCollectorQueries.queriesByClassName.forEach { (className, jpql) ->
@@ -234,8 +221,7 @@ class ProjectContentClearer(
   companion object {
     /**
      * Every OWNED type this clearer removes. The `clear strategy` build guard asserts this equals the set
-     * of OWNED types, so a newly classified OWNED entity can't ship until a developer wires its deletion
-     * here and records it in this set.
+     * of OWNED types, so a newly classified OWNED entity can't ship until its deletion is wired here.
      */
     val CLEARED_OWNED_TYPES: Set<KClass<*>> =
       setOf(

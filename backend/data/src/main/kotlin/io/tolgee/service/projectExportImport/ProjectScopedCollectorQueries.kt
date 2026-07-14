@@ -26,26 +26,22 @@ import kotlin.reflect.KClass
 
 /**
  * The per-OWNED-type project-scoped JPQL that discovers the rows to export, each keyed by a single
- * `:projectId` parameter. Row discovery is per-type rather than a graph walk because some OWNED types
- * have no navigable inverse path from `Project` (`ProjectQaConfig`, `LanguageQaConfig`, unassigned
- * `Label`s).
+ * `:projectId` parameter. Discovery is per-type rather than a graph walk because some OWNED types have no
+ * navigable inverse path from `Project` (`ProjectQaConfig`, `LanguageQaConfig`, unassigned `Label`s).
  *
- * Soft-delete is NOT enforced globally: there is no `@SQLRestriction` on `Language`/`Key`/`Branch`
- * (only on the `Project.branches` collection), so each query must itself filter `deletedAt IS NULL` at
- * every hop through a soft-deletable entity — otherwise a child of a soft-deleted key/language/branch
- * would be exported and dangle on import. `Screenshot` has no `project`/`key` FK, so it is collected
- * through a `DISTINCT` two-hop join via `KeyScreenshotReference`.
+ * There is no global `@SQLRestriction` on `Language`/`Key`/`Branch`, so each query must itself filter
+ * `deletedAt IS NULL` at every hop through a soft-deletable entity — otherwise a child of a soft-deleted
+ * parent is exported and dangles on import.
  */
 object ProjectScopedCollectorQueries {
   val queriesByClassName: Map<String, String> =
     buildMap {
       query(Language::class, "select e from Language e where e.project.id = :projectId and e.deletedAt is null")
       query(Namespace::class, "select e from Namespace e where e.project.id = :projectId")
-      // A key on a soft-deleted branch is deleted content (hidden everywhere in the app), so it and its
-      // children are excluded from the export — not exported with the branch nulled, which would resurrect
-      // them onto the default branch on import (colliding with real keys). The branch hop is nullable
-      // (NULL = legacy default branch), so it must be a LEFT JOIN — an implicit inner join via
-      // `...branch.deletedAt` would silently drop every row whose key/task has no branch at all.
+      // The branch hop is nullable (NULL = legacy default branch), so it must be a LEFT JOIN: an implicit
+      // inner join via `...branch.deletedAt` would silently drop every row whose key/task has no branch.
+      // Keys on a soft-deleted branch are excluded, not exported with the branch nulled (which would
+      // resurrect them onto the default branch on import).
       query(
         Key::class,
         "select e from Key e left join e.branch b " +

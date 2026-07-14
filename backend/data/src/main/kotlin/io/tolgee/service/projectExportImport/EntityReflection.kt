@@ -13,18 +13,12 @@ import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.jvm.javaField
 import kotlin.reflect.jvm.javaMethod
 
-/**
- * Reflective helpers for the export serializer, kept free of any JPA metamodel / Spring dependency so
- * they can be unit-tested directly against the entity classes.
- */
+/** Reflective helpers for the export serializer, free of any JPA metamodel / Spring dependency. */
 object EntityReflection {
   /**
-   * Whether the association [propertyName] of [entityClass] is the OWNING side. `@ManyToOne` is always
-   * owning; `@OneToOne`/`@OneToMany`/`@ManyToMany` are owning only when they carry no `mappedBy` (the
-   * inverse side names its owner via `mappedBy`).
-   *
-   * Mapping annotations are read off both the backing field and the getter, since either may carry a
-   * use-site-targeted (`@get:`/`@field:`) annotation.
+   * Whether the association [propertyName] of [entityClass] is the OWNING side (`@ManyToOne`, or a
+   * `mappedBy`-less `@OneToOne`/`@OneToMany`/`@ManyToMany`). Mapping annotations are read off both the
+   * backing field and the getter, since either may carry a `@get:`/`@field:` use-site target.
    */
   fun isOwningAssociation(
     entityClass: Class<*>,
@@ -41,24 +35,21 @@ object EntityReflection {
     return false
   }
 
-  /**
-   * Whether the column [propertyName] of [entityClass] is annotated [DoNotExport] (on the field or
-   * the getter) and must be skipped on export.
-   */
+  /** Whether the column [propertyName] of [entityClass] is annotated [DoNotExport] and skipped on export. */
   fun isDoNotExport(
     entityClass: Class<*>,
     propertyName: String,
   ): Boolean {
     val property = propertyOf(entityClass.kotlin, propertyName) ?: return false
-    // A `@DoNotExport` with no use-site target binds to the Kotlin property (only visible via Kotlin
-    // reflection); `@field:`/`@get:` variants land on the Java field/getter. Check all three.
+    // An untargeted `@DoNotExport` binds to the Kotlin property (Kotlin reflection only); `@field:`/`@get:`
+    // land on the Java field/getter. Check all three.
     if (property.annotations.any { it is DoNotExport }) return true
     return annotationMembers(property).any { it.isAnnotationPresent(DoNotExport::class.java) }
   }
 
   /**
-   * Reads the value of [propertyName] from [entity] through its Kotlin getter, force-initializing a
-   * lazy association in the process. Returns null when the property is absent.
+   * Reads [propertyName] from [entity] through its Kotlin getter, initializing a lazy association.
+   * Returns null when the property is absent.
    */
   fun readProperty(
     entity: Any,
@@ -77,10 +68,7 @@ object EntityReflection {
     propertyName: String,
   ): KProperty1<out Any, *>? = klass.memberProperties.find { it.name == propertyName }
 
-  /**
-   * The Java members a JPA/use-site-targeted annotation may live on: the backing field and the getter
-   * (`@field:`/`@get:`), so callers reading mapping or marker annotations see both placements.
-   */
+  /** The Java members a `@field:`/`@get:` annotation may live on: the backing field and the getter. */
   internal fun annotationMembers(property: KProperty1<out Any, *>): List<AnnotatedElement> =
     listOfNotNull(property.javaField, property.getter.javaMethod)
 }

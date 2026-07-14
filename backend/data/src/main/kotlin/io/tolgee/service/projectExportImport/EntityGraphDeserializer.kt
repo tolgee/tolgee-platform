@@ -21,21 +21,16 @@ import org.springframework.stereotype.Component
 
 /**
  * Inserts a project's exported OWNED graph onto a freshly cleared target project, mirroring
- * [EntityMetamodelReader] in reverse. Two phases in one transaction (the caller's), with auditing/activity
- * suppressed:
+ * [EntityMetamodelReader] in reverse over two phases in the caller's transaction:
  *
- * - **Phase A** walks the OWNED types in [OwnedTypeTopologicalOrder.insertOrder] and, for each row, builds
- *   a fresh entity, copies its columns, wires every singular FK whose target is another type (its parent
- *   row is already persisted, including the `Key.branch`/default-branch normalization), and persists it —
- *   so every row has a real PK before anything references it.
- * - **Phase B** wires the only thing phase A can't: self-referential FKs (`Branch.originBranch`, which may
- *   point at a later branch) and the to-many owning links (labels, tags, assignees); it also resets
- *   `Branch.pending` per the mirror's merge-state discard, and remaps `KeySnapshot`'s
- *   foreign-keys-in-disguise (originalKeyId/branchKeyId and the jsonb screenshot ids) onto the imported
- *   rows, which likewise need every Key and Screenshot registered first.
+ * - **Phase A** walks the OWNED types in [OwnedTypeTopologicalOrder.insertOrder] and persists each row
+ *   with its columns and cross-type singular FKs, so every row has a real PK before anything references it.
+ * - **Phase B** wires what phase A can't: self-referential FKs (`Branch.originBranch`, which may point at
+ *   a later branch), to-many owning links, and `KeySnapshot`'s remapped id references — all needing every
+ *   row registered first.
  *
- * Every lookup is keyed by the **source PK handle** (a scalar/string), never by an entity instance: an
- * unflushed entity has `id == 0` and a colliding hash, so unsaved entities must never enter a hash map.
+ * Every lookup is keyed by the source PK handle, never an entity instance: an unflushed entity has
+ * `id == 0` and a colliding hash, so unsaved entities must never enter a hash map.
  */
 @Component
 class EntityGraphDeserializer(
@@ -95,14 +90,13 @@ class EntityGraphDeserializer(
   }
 
   /**
-   * KeySnapshot's cross-entity references are foreign-keys-in-disguise — the plain `Long` columns
-   * originalKeyId/branchKeyId and the screenshotIds embedded in the `screenshotReferences` jsonb, none
-   * of them JPA associations — so [EntityMetamodelWriter.setBasicAttrs] copied the source ids verbatim.
-   * Remap them to the imported rows here in phase B, after every Key and Screenshot is registered.
+   * KeySnapshot's cross-entity references are soft FKs — the plain `Long` columns originalKeyId/branchKeyId
+   * and the screenshotIds in the `screenshotReferences` jsonb, none of them JPA associations — so
+   * [EntityMetamodelWriter.setBasicAttrs] copied the source ids verbatim. Remap them to the imported rows
+   * here in phase B, after every Key and Screenshot is registered.
    *
-   * Keep in sync with `BranchSnapshotService.createInitialSnapshot` (the authority that writes these
-   * columns): a new cross-entity id added there needs a remap here — the `snapshot columns are pinned`
-   * build guard fails until it is.
+   * The set of columns to remap mirrors `BranchSnapshotService.createInitialSnapshot`; the `snapshot
+   * columns are pinned` build guard fails until a new one added there is remapped here.
    */
   private fun remapSnapshotReferences(
     entity: KeySnapshot,
@@ -113,7 +107,7 @@ class EntityGraphDeserializer(
     entity.screenshotReferences =
       entity.screenshotReferences
         .mapNotNull { view ->
-          // Screenshot no longer referenced by any live key -> not in the export -> drop the dangling entry.
+          // A screenshot not in the export (no live key referenced it) has no imported row; drop the entry.
           val screenshot = context.entity(Screenshot::class.java.name, view.screenshotId) as? Screenshot
           screenshot?.let { view.copy(screenshotId = it.id) }
         }.toMutableSet()
@@ -128,9 +122,8 @@ class EntityGraphDeserializer(
   }
 
   /**
-   * Re-points the kept project row at its imported content. `baseLanguage` and `defaultNamespace` are the
-   * project's only associations to OWNED rows; they are wired from the source handles once languages and
-   * namespaces exist. Every other project association (org owner, glossaries) stays the target's.
+   * Re-points the kept project row at its imported content ([PROJECT_CONTENT_POINTERS], the project's only
+   * associations to OWNED rows). Every other project association stays the target's.
    */
   private fun wireProjectRootContentPointers(
     projectRecord: SerializedEntity,
@@ -153,10 +146,8 @@ class EntityGraphDeserializer(
     record: SerializedEntity,
     context: Context,
   ): Any? {
-    // Key.branch carries the source's branch handle, NULL meaning "legacy default". Both NULL and an
-    // explicit source-default handle collapse to the imported default branch so the two encodings
-    // can't diverge; any other handle remaps to its imported branch. Resolvable in phase A because every
-    // branch is inserted before any key (a key depends on its branch).
+    // Key.branch is NULL for the legacy default branch; both NULL and an explicit source-default handle
+    // collapse to the imported default branch so the two encodings can't diverge.
     if (type.javaType == Key::class.java && attr.name == "branch") {
       return resolveKeyBranch(record.assocs[attr.name], context)
     }
@@ -242,20 +233,15 @@ class EntityGraphDeserializer(
     return objectMapper.readValue(json, object : TypeReference<List<SerializedEntity>>() {})
   }
 
-  // A valid-JSON archive with the wrong value shape parses into Any/Any?, so casts here throw
-  // ClassCastException/NPE that escape the caller's JacksonException-only corrupt-archive guard and
-  // surface as 500s. Reject the shape as a corrupt archive instead, matching resolveReference's OWNED path.
+  // A wrong-shaped handle would otherwise throw ClassCastException/NPE past the caller's
+  // JacksonException-only guard and surface as a 500; reject it as a corrupt archive (400) instead.
   private fun requireNumericHandle(record: SerializedEntity): Long =
     (record.handle as? Number)?.toLong() ?: throw corruptArchive(record.handle)
 
   private fun corruptArchive(vararg params: Any?): BadRequestException =
     BadRequestException(Message.PROJECT_IMPORT_CORRUPT_ARCHIVE, params.map { it?.toString() ?: "" })
 
-  /**
-   * Owning singular FKs set in phase A: everything except self-references. Their target type precedes this
-   * type in the insert order (a row's parents are persisted before it), so each handle resolves to an
-   * already-persisted entity. Self-references can't (a branch may point at a later branch) and wait for B.
-   */
+  /** Owning singular FKs resolvable in phase A: everything except self-references (those wait for phase B). */
   private fun phaseASingularAssociations(type: EntityType<*>): List<SingularAttribute<*, *>> =
     owningSingularAssociations(type).filter {
       !it.isId && EntityMetamodelReader.associationTargetClassName(it) != type.javaType.name
@@ -302,13 +288,10 @@ class EntityGraphDeserializer(
     private var missingKeyIdCounter = 0L
 
     /**
-     * A distinct negative id for a snapshot key reference (originalKeyId/branchKeyId) whose target Key
-     * was not in the export — its source key was individually soft-deleted while its branch stayed live,
-     * so the Key collector skipped it. Negative so it can never collide with a real (positive) key id in
-     * BranchMergeAnalyzer's `sourceById`/`targetById`, and distinct per call so that analyzer's id-keyed
-     * maps don't collapse two missing refs onto one key. BranchMergeAnalyzer treats an id matching no
-     * live key as a deleted key — the correct three-way outcome — so we tolerate rather than throw
-     * (a project with a soft-deleted baseline key is a legitimate export).
+     * A sentinel id for a snapshot key reference whose target Key was not in the export (its source key was
+     * soft-deleted while its branch stayed live). Negative so it can't collide with a real key id, and
+     * distinct per call so two missing refs don't collapse onto one in BranchMergeAnalyzer's id-keyed maps,
+     * where an id matching no live key is correctly treated as a deleted key.
      */
     fun nextMissingKeyId(): Long = --missingKeyIdCounter
 

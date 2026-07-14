@@ -3,19 +3,13 @@ package io.tolgee.service.projectExportImport
 import jakarta.persistence.metamodel.EntityType
 
 /**
- * Orders the OWNED entity types for the two-phase insert: [insertOrder] lists every type *after* all OWNED
+ * Orders the OWNED entity types for the two-phase insert: [insertOrder] lists every type after all OWNED
  * types it points at through a singular owning FK, so an insert that resolves a parent reference always
  * finds the parent already persisted.
  *
- * The edge set is **all** singular owning associations to OWNED targets (required *and* nullable), not just
- * the required ones, so the order is also a safe child-before-parent basis (a nullable FK like `Key.branch`
- * still imposes an ordering); inserting over the superset trivially respects the required subset too. A
- * nullable owning FK is resolved in phase A exactly like a required one — which is precisely why it must be
- * an edge here; only self-references and to-many owning links are deferred to the deserializer's phase B.
- * Self-references (`Branch.originBranch`) are not edges — a self-referential table is filled in one
- * statement, and a self-edge would be a cycle. (The wipe side does not consume this order — [ProjectContentClearer] hand-
- * writes its delete sequence because the FK hazards it faces, join tables and non-OWNED branch-merge rows,
- * aren't expressible by singular-FK topology.)
+ * Edges are all singular owning FKs to OWNED targets, nullable included (a nullable FK like `Key.branch`
+ * is resolved in phase A too, so it still imposes an ordering). Self-references (`Branch.originBranch`)
+ * are excluded — phase B wires them, and a self-edge would be a cycle.
  */
 object OwnedTypeTopologicalOrder {
   fun insertOrder(entityManagerEntities: Collection<EntityType<*>>): List<EntityType<*>> {

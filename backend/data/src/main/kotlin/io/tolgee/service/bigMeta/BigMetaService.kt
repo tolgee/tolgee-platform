@@ -63,11 +63,10 @@ class BigMetaService(
 
   fun storeImportedDistances(distances: Collection<KeysDistanceDto>) {
     if (distances.isEmpty()) return
-    // A foreign archive's remapped pairs may be non-canonical; canonicalize to (min, max) — as
-    // KeysDistanceUtil does for runtime writes — so a later store()'s ON CONFLICT (key1id, key2id)
-    // upsert matches these rows instead of duplicating the pair. distinctBy drops a legacy archive's
-    // both-orderings duplicate of one pair, which would otherwise collide on the conflict target within
-    // a single batch — Postgres rejects that under reWriteBatchedInserts (default self-hosted config).
+    // Canonicalize each pair to (min, max) so a later store()'s ON CONFLICT (key1id, key2id) upsert
+    // matches these rows instead of duplicating the pair. distinctBy then drops a both-orderings
+    // duplicate of one pair, which would otherwise collide on the conflict target within a single batch
+    // (Postgres rejects that under reWriteBatchedInserts, the default self-hosted config).
     val canonical =
       distances
         .map { it.copy(key1Id = minOf(it.key1Id, it.key2Id), key2Id = maxOf(it.key1Id, it.key2Id)) }

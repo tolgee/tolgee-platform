@@ -42,10 +42,9 @@ class BranchMergeAnalyzer(
 
     val sourceById = sourceKeys.associateBy { it.id }
     val targetById = targetKeys.associateBy { it.id }
-    // A snapshot's branchKeyId/originalKeyId may be a distinct NEGATIVE sentinel when this project was
-    // admin-imported and the baseline key wasn't in the export (see EntityGraphDeserializer.remapKeyId).
-    // It never equals a live (positive) key id, so these lookups miss and the snapshot takes the deleted
-    // path — the intended outcome. Keep the sentinels distinct if you change how they're keyed here.
+    // A snapshot's branchKeyId/originalKeyId may be a negative sentinel from an admin import whose baseline
+    // key wasn't exported (see EntityGraphDeserializer.remapKeyId). It never equals a live key id, so these
+    // lookups miss and the snapshot correctly takes the deleted path.
     val snapshotByBranchKeyId = snapshots.associateBy { it.branchKeyId }
     val snapshotOriginalIds = snapshots.map { it.originalKeyId }.toSet()
     val sourceBySignature = sourceKeys.groupBy { KeySignature(it.namespace?.name, it.name) }

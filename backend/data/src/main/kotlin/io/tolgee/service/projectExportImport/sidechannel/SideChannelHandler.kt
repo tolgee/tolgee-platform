@@ -12,9 +12,9 @@ interface SideChannelHandler {
   val entityClass: KClass<*>
 
   /**
-   * The zip entry this handler owns — a `*.json` path under `sidechannels/`
-   * ([io.tolgee.service.projectExportImport.model.ExportZipLayout.SIDE_CHANNELS_DIR]), distinct from
-   * every other handler's. The reader routes by that prefix, so an entry off it is rejected on import.
+   * The `*.json` zip entry this handler owns, under
+   * [io.tolgee.service.projectExportImport.model.ExportZipLayout.SIDE_CHANNELS_DIR] and distinct from
+   * every other handler's; the reader routes by that prefix.
    */
   val entryName: String
 
@@ -22,9 +22,8 @@ interface SideChannelHandler {
   fun collectForExport(projectId: Long): List<Any>
 
   /**
-   * Restores [json] (this handler's [entryName] bytes) onto [context]'s target project, remapping source
-   * ids via [context]. May throw [com.fasterxml.jackson.core.JacksonException] on a malformed array; the
-   * caller translates that to a 400.
+   * Restores this handler's [entryName] bytes onto [context]'s target project, remapping source ids. May
+   * throw [com.fasterxml.jackson.core.JacksonException] on a malformed array, which the caller maps to 400.
    */
   fun restore(
     json: ByteArray,

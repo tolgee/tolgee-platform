@@ -122,9 +122,8 @@ object ProjectExportImportPolicyRegistry {
 
       classify(UserAccount::class, ExportImportPolicy.USER_REF)
       classify(Project::class, ExportImportPolicy.PROJECT_ROOT)
-      // BigMeta. Can't traverse the generic graph — its @IdClass components (key1Id/key2Id) are raw
-      // soft-FK scalars that are also the immutable PK — so it round-trips through a dedicated
-      // SideChannelHandler (bigMeta.json) instead.
+      // BigMeta can't travel the generic graph: its @IdClass components (key1Id/key2Id) are soft-FK
+      // scalars that are also the immutable PK, so a SideChannelHandler round-trips it instead.
       classify(KeysDistance::class, ExportImportPolicy.SIDE_CHANNEL)
 
       ignored(

@@ -13,18 +13,14 @@ import kotlin.reflect.jvm.javaField
 
 /**
  * Writes a [SerializedEntity]'s values back onto a freshly built entity instance — the inverse of
- * [EntityMetamodelReader], driven by the same JPA metamodel so a newly added `@Column` round-trips with
- * no code change. It only mutates fields; deciding *which* row a handle resolves to (and the two-phase
- * ordering) is the deserializer's job.
+ * [EntityMetamodelReader], driven by the same JPA metamodel.
  *
- * Construction goes through the JPA-mandated no-arg constructor (the `kotlin-jpa` plugin synthesises one
- * for every `@Entity`). That constructor does **not** run Kotlin field initializers, so collection fields
- * come back `null`; [newInstance] re-initializes them to empty collections to match a normally
- * constructed entity and avoid NPEs when Hibernate flushes inverse/owning collections.
+ * The JPA no-arg constructor does not run Kotlin field initializers, so collection fields come back
+ * `null`; [newInstance] re-initializes them to empty collections to avoid NPEs when Hibernate flushes.
  *
- * Values are written through the Kotlin **setter**, not the backing field directly: Tolgee's entities are
- * bytecode-enhanced with dirty tracking, so a raw field write on an already-managed entity (a Phase-B FK,
- * the project scalar mirror) would not be seen by the flush. The setter routes through the enhancement.
+ * Values are written through the Kotlin setter, not the backing field: Tolgee's entities are
+ * bytecode-enhanced with dirty tracking, so a raw field write on an already-managed entity would not be
+ * seen by the flush.
  */
 @Component
 class EntityMetamodelWriter(
@@ -42,10 +38,8 @@ class EntityMetamodelWriter(
   }
 
   /**
-   * Copies the persisted non-id, non-association columns from [record] onto [entity]. Each raw JSON value
-   * is converted to the field's declared generic type via Jackson, so enums, dates, embeddables and JSONB
-   * maps (`KeyMeta.custom`, `ProjectQaConfig.settings`) are reconstructed with their real key/value types
-   * rather than left as raw strings/maps.
+   * Copies the persisted non-id, non-association columns from [record] onto [entity], converting each raw
+   * JSON value to the field's declared generic type via Jackson.
    */
   fun setBasicAttrs(
     entity: Any,
@@ -65,10 +59,7 @@ class EntityMetamodelWriter(
     writeValue(entity, attributeName, target)
   }
 
-  /**
-   * Replaces the to-many owning collection [attributeName] with [targets], preserving the field's declared
-   * collection kind (Set vs List) so membership/ordering semantics match the source.
-   */
+  /** Replaces the to-many owning collection [attributeName] with [targets], preserving Set-vs-List kind. */
   fun setToManyAssociation(
     entity: Any,
     attributeName: String,

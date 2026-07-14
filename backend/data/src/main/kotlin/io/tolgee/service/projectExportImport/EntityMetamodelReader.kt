@@ -111,10 +111,9 @@ object EntityMetamodelReader {
   }
 
   /**
-   * Serializes one owning association whose live value is [value]. A to-one whose target is dropped as
-   * soft-deleted (so [assocValue] returns null) is only valid when the FK is nullable — otherwise the
-   * row should have been excluded by its collector's soft-delete hop-filter, so we fail loudly rather
-   * than emit an unsatisfiable null for a NOT-NULL column.
+   * Serializes one owning association. A to-one dropped as soft-deleted (null) is only valid when the FK
+   * is nullable; otherwise its collector's soft-delete hop-filter should have excluded the row, so fail
+   * loudly rather than emit an unsatisfiable null for a NOT-NULL column.
    */
   private fun serializeOwningAssociation(
     entityClass: Class<*>,

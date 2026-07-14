@@ -5,9 +5,8 @@ import kotlin.reflect.KClass
 /**
  * Exports the bytes an entity owns outside the database (screenshot images, the project avatar).
  *
- * [BlobEntry.name] must be derived from the entity's SOURCE handle, never from the source storage
- * path: that path is PK/timestamp/hash-derived and differs on the target instance, so import can only
- * locate a blob by the source handle (which it knows before computing the target-side path).
+ * [BlobEntry.name] must be derived from the entity's source handle, never its storage path: the path is
+ * PK/timestamp/hash-derived and differs on the target instance, so import can only locate a blob by handle.
  */
 interface BlobHandler {
   val entityClass: KClass<*>

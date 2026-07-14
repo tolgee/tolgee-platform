@@ -24,12 +24,12 @@ import java.util.zip.ZipOutputStream
 
 /**
  * Serializes one project's OWNED subgraph and its external blobs into a self-contained export zip
- * (layout: [ExportZipLayout]). Rows are discovered per-OWNED-type via [ProjectScopedCollectorQueries]
- * and read reflectively by [EntityMetamodelReader]. The whole zip is built into a temp file inside one
- * read-only REPEATABLE READ transaction so no DB/blob read happens lazily during streaming, and the
- * per-type collection walk (many separate queries) reads one stable snapshot — under READ COMMITTED a
- * concurrent commit between two collector queries would tear the graph (e.g. a Translation captured whose
- * Key was missed), producing a zip that fails to import.
+ * (layout: [ExportZipLayout]). Rows are discovered per-OWNED-type via [ProjectScopedCollectorQueries] and
+ * read reflectively by [EntityMetamodelReader].
+ *
+ * REPEATABLE READ so the per-type collector queries read one stable snapshot: under READ COMMITTED a
+ * concurrent commit between two queries could tear the graph (e.g. a Translation whose Key was missed),
+ * producing a zip that fails to import.
  */
 @Component
 class ProjectExportImportExporter(
@@ -99,17 +99,14 @@ class ProjectExportImportExporter(
     generator.writeStartArray()
     rows.forEach { objectMapper.writeValue(generator, toSerialized(it)) }
     generator.writeEndArray()
-    // close() (not flush) returns Jackson's pooled buffer; safe because AUTO_CLOSE_TARGET is off, so
-    // the underlying zip stream stays open.
+    // close(), not flush(), returns Jackson's pooled buffer; AUTO_CLOSE_TARGET is off so the zip stays open.
     generator.close()
     zip.closeEntry()
   }
 
   /**
-   * Writes the PROJECT_ROOT row's own scalar columns. The project is kept (not recreated) on import, but
-   * mirror semantics overwrite its scalars from source, so they must travel in the zip — the project
-   * is not an OWNED type and has no `entities/` file. Only attrs are consumed on import; its associations
-   * stay the target's.
+   * Writes the PROJECT_ROOT row's own scalar columns to `project.json`. The project is kept (not an OWNED
+   * type, no `entities/` file), but mirror semantics overwrite its scalars from source on import.
    */
   private fun writeProject(
     zip: ZipOutputStream,

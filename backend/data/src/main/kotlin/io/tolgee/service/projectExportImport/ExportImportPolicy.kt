@@ -17,10 +17,9 @@ enum class ExportImportPolicy {
   PROJECT_ROOT,
 
   /**
-   * Serialized and restored, but outside the generic graph: an entity the metamodel walk can't handle
-   * (e.g. `KeysDistance` — see its entry in `ProjectExportImportPolicyRegistry`). Each SIDE_CHANNEL type
-   * is round-tripped by a dedicated [io.tolgee.service.projectExportImport.sidechannel.SideChannelHandler],
-   * and `ProjectExportImportPolicyGuardTest` fails the build unless every SIDE_CHANNEL type has one.
+   * Serialized and restored outside the generic graph (the metamodel walk can't handle it, e.g.
+   * `KeysDistance`), by a dedicated
+   * [io.tolgee.service.projectExportImport.sidechannel.SideChannelHandler] per type.
    */
   SIDE_CHANNEL,
 
