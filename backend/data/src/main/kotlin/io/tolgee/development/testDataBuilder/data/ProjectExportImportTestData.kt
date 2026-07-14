@@ -234,8 +234,8 @@ class ProjectExportImportTestData(
           name = softDeletedKeyName
           deletedAt = Date()
         }.build {
-          // key-hop: a suggestion + QA issue with a LIVE language under the soft-deleted key. The key.deletedAt
-          // clause alone must exclude them, so the live language proves that clause independently of the language hop.
+          // key-hop: suggestion + QA issue on a LIVE language under the soft-deleted key — proves the
+          // key.deletedAt clause excludes them independently of the language-hop filter.
           addSuggestion {
             language = englishLanguage
             author = suggestionAuthor

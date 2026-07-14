@@ -179,11 +179,10 @@ class ProjectExportImportPolicyGuardTest : AbstractSpringTest() {
 
   @Test
   fun `snapshot columns are pinned (a new snapshot column may be a cross-entity id needing a remap)`() {
-    // The snapshot entities carry foreign-keys-in-disguise — plain Long columns (originalKeyId/
-    // branchKeyId) and jsonb-embedded screenshotIds — that the metamodel can't see as associations, so
-    // the categorical association guards above don't cover them. They are remapped by hand in
-    // EntityGraphDeserializer.remapSnapshotReferences. Pin the basic-column set of each snapshot type so
-    // adding a column fails the build and forces a decision: is it another cross-entity id to remap?
+    // The snapshot entities carry foreign-keys-in-disguise the metamodel can't see as associations —
+    // plain Long columns (originalKeyId/branchKeyId) and jsonb-embedded screenshotIds — so the
+    // categorical association guards above don't cover them. Pinning the basic-column set makes a new
+    // column fail the build (see the failure message).
     val pinned =
       mapOf(
         KeySnapshot::class.java to

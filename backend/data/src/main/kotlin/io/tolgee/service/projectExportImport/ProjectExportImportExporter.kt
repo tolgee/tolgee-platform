@@ -104,10 +104,7 @@ class ProjectExportImportExporter(
     zip.closeEntry()
   }
 
-  /**
-   * Writes the PROJECT_ROOT row's own scalar columns to `project.json`. The project is kept (not an OWNED
-   * type, no `entities/` file), but mirror semantics overwrite its scalars from source on import.
-   */
+  /** Writes the PROJECT_ROOT row's scalar columns to `project.json`; Project is not an OWNED type, so it has no `entities/` file. */
   private fun writeProject(
     zip: ZipOutputStream,
     project: Project,

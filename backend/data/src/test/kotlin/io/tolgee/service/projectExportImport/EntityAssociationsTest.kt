@@ -55,7 +55,6 @@ class EntityAssociationsTest {
     assertThat(EntityAssociations.isDroppableSingularAssociation(Key::class.java, "noSuchProperty")).isFalse()
   }
 
-  /** Reflection fixture (not a JPA entity): a nullable property whose NOT-NULL signal sits only on the getter. */
   private class GetterAnnotatedFixture {
     @get:ManyToOne(optional = false)
     val ref: Key? = null

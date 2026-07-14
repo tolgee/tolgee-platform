@@ -14,11 +14,7 @@ export const parseContentDispositionFilename = (
 export const sanitizeFilename = (name: string) =>
   name.replace(/[/\\?%*:|"<>]/g, '_').trim() || 'download';
 
-/**
- * Saves a streamed response (e.g. an `application/zip` attachment) to a file,
- * preferring the server's Content-Disposition filename and falling back to
- * `fallbackName`.
- */
+/** Saves a response as a file download, using the Content-Disposition filename when present, else `fallbackName`. */
 export const downloadResponseAsFile = async (
   response: Response,
   fallbackName: string

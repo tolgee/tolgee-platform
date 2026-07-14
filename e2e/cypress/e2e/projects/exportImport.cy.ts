@@ -59,7 +59,6 @@ describe('Project settings - Export & Import (server admin)', () => {
     gcy('project-settings-export-button').click();
     cy.verifyDownload(EXPORT_FILE);
 
-    // Re-select that archive for import (read from the downloads folder as binary).
     // The dropzone's hidden <input type=file> is a sibling of the dropzone div,
     // so scope the lookup to the whole section rather than the dropzone element.
     gcy('project-settings-export-import')
@@ -82,7 +81,6 @@ describe('Project settings - Export & Import (server admin)', () => {
     visitProjectSettings(projectId);
     gcy('project-settings-menu-export-import').click();
 
-    // A plain-text file renamed .zip has no readable manifest.
     gcy('project-settings-export-import')
       .find('[data-cy=file-dropzone-file-input]')
       .selectFile(

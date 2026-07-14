@@ -62,10 +62,8 @@ class ProjectExportImportControllerTest : AuthorizedControllerTest() {
   @Test
   fun `export returns a project zip for a super admin`() {
     userAccount = testData.adminUser
-    // The endpoint streams via StreamingResponseBody; asserting the HTTP contract (status + headers) is
-    // reliable, but draining the streamed body through MockMvc is not (the provider closes the request's
-    // Hibernate session, which conflicts with in-test async dispatch). The zip payload — including the
-    // manifest — is asserted directly from the exporter below and via the round-trip import tests.
+    // MockMvc can't reliably drain the StreamingResponseBody (async dispatch closes the Hibernate session),
+    // so assert only status + headers here; the payload is covered by the exporter and round-trip tests.
     val response =
       performAuthGet("/v2/administration/projects/${testData.project.id}/export")
         .andIsOk
@@ -269,10 +267,8 @@ class ProjectExportImportControllerTest : AuthorizedControllerTest() {
     return out.toByteArray()
   }
 
-  // Produce the export bytes straight from the exporter service rather than the streaming HTTP endpoint:
-  // MockMvc does not deterministically drain a StreamingResponseBody (its body is intermittently empty),
-  // which would make every import test flaky. The HTTP export contract is covered by
-  // `export returns a project zip` / `export is forbidden without super auth`.
+  // Export via the service, not the HTTP endpoint: MockMvc doesn't deterministically drain a
+  // StreamingResponseBody, which would make every import test flaky.
   private fun exportedZipBytes(): ByteArray {
     val export = exporter.exportToTempFile(testData.project.id, versionProvider.version)
     return try {

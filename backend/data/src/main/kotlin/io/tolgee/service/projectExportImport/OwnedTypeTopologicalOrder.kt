@@ -41,7 +41,6 @@ object OwnedTypeTopologicalOrder {
     return ordered
   }
 
-  /** OWNED types referenced by [type] through a singular owning FK, excluding self-references. */
   private fun dependencies(type: EntityType<*>): Set<String> {
     val selfName = type.javaType.name
     return type.singularAttributes

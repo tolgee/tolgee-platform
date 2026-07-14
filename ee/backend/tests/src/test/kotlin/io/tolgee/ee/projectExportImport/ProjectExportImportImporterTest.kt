@@ -177,8 +177,7 @@ class ProjectExportImportImporterTest : AbstractSpringTest() {
     assertThat(labelNamesOnTranslation(projectId, "Labeled")).containsExactly(source.assignedLabelName)
     assertThat(tagNamesOnKey(projectId, "rich-key")).contains(source.liveTagName)
     assertThat(taskKeyCount(projectId, source.liveTaskName)).isEqualTo(1)
-    // A screenshot shared by two source keys must re-materialize as one Screenshot with two references,
-    // not be duplicated per key.
+    // The screenshot shared by two source keys must re-materialize as a single Screenshot, not one per key.
     assertThat(screenshotCount(projectId)).isEqualTo(1)
     assertThat(keyScreenshotReferenceCount(projectId)).isEqualTo(2)
   }
@@ -838,7 +837,6 @@ class ProjectExportImportImporterTest : AbstractSpringTest() {
         .single()
     }
 
-  /** Re-zips [zip], dropping every entry whose name matches [drop] — used to simulate a missing blob. */
   @Test
   fun `rejects an archive whose avatar blob is a decodable but non-thumbnailable image`() {
     // 200x1 decodes and survives getThumbnail(200) but floors to a zero dimension at storeAvatarFiles'
@@ -965,7 +963,6 @@ class ProjectExportImportImporterTest : AbstractSpringTest() {
     }
   }
 
-  /** Attribute maps for one OWNED type, minus the attributes the mirror intentionally does not preserve. */
   private fun comparableAttrs(
     zip: ByteArray,
     type: String,
@@ -978,9 +975,8 @@ class ProjectExportImportImporterTest : AbstractSpringTest() {
     if (attr in EXCLUDED_ATTRS) return false
     // Branch.pending is reset to false on import, so it intentionally won't round-trip.
     if (type == "Branch" && attr == "pending") return false
-    // KeySnapshot.originalKeyId/branchKeyId/screenshotReferences are intentionally remapped to the new
-    // key/screenshot ids (like Branch.pending, they don't round-trip verbatim). The source test data
-    // currently carries no snapshots so this comparison never sees them; exclude them here if that changes.
+    // KeySnapshot.originalKeyId/branchKeyId/screenshotReferences are remapped to new ids on import, so
+    // they won't round-trip verbatim. Exclude them here (inert today — the source test data has no snapshots).
     if (type == "KeySnapshot" && attr in setOf("originalKeyId", "branchKeyId", "screenshotReferences")) return false
     return true
   }
