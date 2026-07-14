@@ -324,6 +324,7 @@ class OrganizationController(
     val currentTranslations = organizationStatsService.getTranslationCount(organization.id)
     val currentSeats = organizationStatsService.getSeatCountToCountSeats(organization.id)
     val currentKeys = organizationStatsService.getKeyCount(organization.id)
+    val currentWords = organizationStatsService.getWordCount(organization.id)
     val limits = limitsProvider.getLimits(organization.id)
 
     return PublicUsageModel(
@@ -345,6 +346,9 @@ class OrganizationController(
       currentKeys = currentKeys,
       currentSeats = currentSeats,
       usedMtCredits = creditBalances.usedCredits / 100,
+      includedWords = limits.words.included,
+      currentWords = currentWords,
+      wordsLimit = limits.words.limit,
     )
   }
 

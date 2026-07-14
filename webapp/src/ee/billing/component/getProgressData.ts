@@ -21,11 +21,17 @@ export const getProgressData = ({ usage }: { usage: UsageModel }) => {
     usage.usedMtCredits
   );
 
+  const wordsProgress = new ProgressItem(
+    usage.includedWords,
+    usage.currentWords
+  );
+
   const mostCriticalProgress = Math.max(
     creditProgress.progress,
     stringsProgress.progress,
     keysProgress.progress,
-    seatsProgress.progress
+    seatsProgress.progress,
+    wordsProgress.progress
   );
 
   const isCritical =
@@ -37,6 +43,7 @@ export const getProgressData = ({ usage }: { usage: UsageModel }) => {
     keysProgress,
     seatsProgress,
     creditProgress,
+    wordsProgress,
     mostCriticalProgress,
     isCritical,
   };

@@ -5758,6 +5758,11 @@ export interface components {
       currentTranslations: number;
       /**
        * Format: int64
+       * @description How many hosted words are currently stored by organization
+       */
+      currentWords: number;
+      /**
+       * Format: int64
        * @deprecated
        * @description Customers were able to buy extra credits separately in the past.
        *
@@ -5784,6 +5789,11 @@ export interface components {
        * @description How many translations are included in current subscription plan. How many translations can organization use without additional costs
        */
       includedTranslations: number;
+      /**
+       * Format: int64
+       * @description How many hosted words are included in current subscription plan (for word-based plans). How many words the organization can host without additional costs.
+       */
+      includedWords: number;
       /** @description Whether the current plan is pay-as-you-go of fixed. For pay-as-you-go plans, the spending limit is the top limit. */
       isPayAsYouGo: boolean;
       /**
@@ -5808,6 +5818,11 @@ export interface components {
        * @description Currently used credits including credits used over the limit
        */
       usedMtCredits: number;
+      /**
+       * Format: int64
+       * @description How many hosted words can be stored until reaching the limit.
+       */
+      wordsLimit: number;
     };
     QaCheckCategoryModel: {
       /** @enum {string} */
