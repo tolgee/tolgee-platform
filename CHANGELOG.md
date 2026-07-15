@@ -1,3 +1,10 @@
+## [3.212.1](https://github.com/tolgee/tolgee-platform/compare/v3.212.0...v3.212.1) (2026-07-15)
+
+
+### Bug Fixes
+
+* webhooks - don't encode URLs that already contain "%" ([#3803](https://github.com/tolgee/tolgee-platform/issues/3803)) ([0cac1cd](https://github.com/tolgee/tolgee-platform/commit/0cac1cd3a9923a8905cfce5495cbeae1802c4000)), closes [#3709](https://github.com/tolgee/tolgee-platform/issues/3709) [#3709](https://github.com/tolgee/tolgee-platform/issues/3709)
+
 # [3.212.0](https://github.com/tolgee/tolgee-platform/compare/v3.211.4...v3.212.0) (2026-07-15)
 
 
