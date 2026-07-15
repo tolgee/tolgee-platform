@@ -12,6 +12,7 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
+import org.springframework.web.util.UriComponentsBuilder
 
 @Component
 class WebhookExecutor(
@@ -32,8 +33,14 @@ class WebhookExecutor(
     val request = HttpEntity(stringData, headers)
 
     try {
+      // Treat as already-encoded only when every '%' starts a valid percent-encoded triplet.
+      val fullyEncoded =
+        config.url.contains("%") &&
+          Regex("%(?![0-9A-Fa-f]{2})").find(config.url) == null
+      val uri = UriComponentsBuilder.fromUriString(config.url).build(fullyEncoded).toUri()
+
       val responseEntity: ResponseEntity<String> =
-        restTemplate.exchange(config.url, HttpMethod.POST, request, String::class.java)
+        restTemplate.exchange(uri, HttpMethod.POST, request, String::class.java)
       if (!responseEntity.statusCode.is2xxSuccessful) {
         throw WebhookRespondedWithNon200Status(responseEntity.statusCode, responseEntity.body)
       }
