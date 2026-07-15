@@ -100,6 +100,7 @@ dependencies {
     }
     implementation libs.jakartaMail
     testImplementation('org.springframework.boot:spring-boot-starter-test')
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     implementation "org.springframework.boot:spring-boot-starter-batch"
     implementation "org.springframework.boot:spring-boot-starter-websocket"
     implementation "org.springframework.boot:spring-boot-starter-thymeleaf"
@@ -265,7 +266,6 @@ dependencyManagement {
         mavenBom(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES) {
             bomProperty "kotlin.version", "${kotlinVersion}"
         }
-        mavenBom 'org.junit:junit-bom:5.11.4'
     }
 }
 
