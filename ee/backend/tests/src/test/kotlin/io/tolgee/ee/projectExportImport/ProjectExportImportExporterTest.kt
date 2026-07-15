@@ -1,6 +1,5 @@
 package io.tolgee.ee.projectExportImport
 
-import com.fasterxml.jackson.core.type.TypeReference
 import io.tolgee.AbstractSpringTest
 import io.tolgee.development.testDataBuilder.data.ProjectExportImportTestData
 import io.tolgee.development.testDataBuilder.data.ProjectImportBranchedSourceTestData
@@ -17,6 +16,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import tools.jackson.core.type.TypeReference
 import java.io.ByteArrayInputStream
 import java.nio.file.Files
 import java.util.Date

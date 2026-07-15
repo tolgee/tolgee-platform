@@ -1,7 +1,5 @@
 package io.tolgee.service.projectExportImport
 
-import com.fasterxml.jackson.core.type.TypeReference
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Project
@@ -18,6 +16,8 @@ import jakarta.persistence.metamodel.EntityType
 import jakarta.persistence.metamodel.PluralAttribute
 import jakarta.persistence.metamodel.SingularAttribute
 import org.springframework.stereotype.Component
+import tools.jackson.core.type.TypeReference
+import tools.jackson.databind.ObjectMapper
 
 /**
  * Inserts a project's exported OWNED graph onto a freshly cleared target project, mirroring

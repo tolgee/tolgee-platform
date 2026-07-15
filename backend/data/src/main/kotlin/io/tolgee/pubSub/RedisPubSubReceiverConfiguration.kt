@@ -1,6 +1,5 @@
 package io.tolgee.pubSub
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression
 import org.springframework.context.ApplicationEventPublisher
@@ -12,6 +11,7 @@ import org.springframework.data.redis.listener.RedisMessageListenerContainer
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
+import tools.jackson.databind.ObjectMapper
 
 @Configuration
 @ConditionalOnExpression(

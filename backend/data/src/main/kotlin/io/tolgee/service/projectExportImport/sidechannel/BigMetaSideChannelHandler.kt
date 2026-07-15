@@ -1,8 +1,5 @@
 package io.tolgee.service.projectExportImport.sidechannel
 
-import com.fasterxml.jackson.core.type.TypeReference
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.model.keyBigMeta.KeysDistance
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.bigMeta.KeysDistanceDto
@@ -11,6 +8,9 @@ import io.tolgee.service.projectExportImport.model.SerializedBigMeta
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import org.springframework.stereotype.Component
+import tools.jackson.core.type.TypeReference
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.module.kotlin.readValue
 import kotlin.reflect.KClass
 
 /**
