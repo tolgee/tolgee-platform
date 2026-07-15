@@ -20,17 +20,13 @@ tasks.register('dockerPrepare') {
 
 // Builds Docker image for local development.
 // Single platform, no push, tagged as tolgee/tolgee.
-tasks.register('docker') {
-    doLast {
-        exec {
-            workingDir dockerPath
-            commandLine "docker", "build", ".",
-                "-t", "tolgee/tolgee",
-                "--build-arg", "OTEL_AGENT_VERSION=${opentelemetryJavaagentVersion}",
-                "--cache-from", "type=registry,ref=tolgee/tolgee:latest"
-        }
-    }
+tasks.register('docker', Exec) {
     dependsOn("dockerPrepare")
+    workingDir dockerPath
+    commandLine "docker", "build", ".",
+        "-t", "tolgee/tolgee",
+        "--build-arg", "OTEL_AGENT_VERSION=${opentelemetryJavaagentVersion}",
+        "--cache-from", "type=registry,ref=tolgee/tolgee:latest"
 }
 
 // Builds and pushes multi-platform Docker image for CI.
@@ -40,33 +36,30 @@ tasks.register('docker') {
 //   - DOCKER_CACHE_FROM: cache source (optional, e.g., 'type=registry,ref=tolgee/tolgee:latest')
 //   - DOCKER_CACHE_TO: cache destination (optional, e.g., 'type=inline')
 // Requires: docker buildx create --use (run once before calling this task)
-task dockerPublish {
-    doLast {
-        def version = System.getenv('VERSION') ?: 'latest'
-        def imageName = System.getenv('DOCKER_IMAGE') ?: 'tolgee/tolgee'
-        def tag = "${imageName}:${version}"
-        def cacheFrom = System.getenv('DOCKER_CACHE_FROM')
-        def cacheTo = System.getenv('DOCKER_CACHE_TO')
-
-        def commandParams = ["docker", "buildx", "build", ".",
-            "-t", tag,
-            "--build-arg", "OTEL_AGENT_VERSION=${opentelemetryJavaagentVersion}",
-            "--platform", "linux/arm64,linux/amd64",
-            "--push"]
-
-        if (cacheFrom) {
-            commandParams += ["--cache-from", cacheFrom]
-        }
-        if (cacheTo) {
-            commandParams += ["--cache-to", cacheTo]
-        }
-
-        exec {
-            workingDir dockerPath
-            commandLine commandParams
-        }
-    }
+tasks.register('dockerPublish', Exec) {
     dependsOn("dockerPrepare")
+    workingDir dockerPath
+
+    def version = System.getenv('VERSION') ?: 'latest'
+    def imageName = System.getenv('DOCKER_IMAGE') ?: 'tolgee/tolgee'
+    def tag = "${imageName}:${version}"
+    def cacheFrom = System.getenv('DOCKER_CACHE_FROM')
+    def cacheTo = System.getenv('DOCKER_CACHE_TO')
+
+    def commandParams = ["docker", "buildx", "build", ".",
+        "-t", tag,
+        "--build-arg", "OTEL_AGENT_VERSION=${opentelemetryJavaagentVersion}",
+        "--platform", "linux/arm64,linux/amd64",
+        "--push"]
+
+    if (cacheFrom) {
+        commandParams += ["--cache-from", cacheFrom]
+    }
+    if (cacheTo) {
+        commandParams += ["--cache-to", cacheTo]
+    }
+
+    commandLine commandParams
 }
 
 tasks.register('cleanDocker') {
