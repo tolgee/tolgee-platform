@@ -5,6 +5,7 @@ package io.tolgee.service.projectExportImport
  *
  * Every entity in the application must map to exactly one policy; a new unclassified entity fails
  * the build-gate guard (see `ProjectExportImportPolicyGuardTest`) until a developer assigns it one.
+ * See [ProjectExportImportPolicyRegistry.policyOf] for the one exception, the billing package.
  */
 enum class ExportImportPolicy {
   /** Project content that must round-trip: serialized on export, recreated on import. */
@@ -28,9 +29,22 @@ enum class ExportImportPolicy {
   ;
 
   /**
-   * True for policies the generic entity graph does not carry: a reference from an OWNED entity to such a
-   * target is dropped (nulled) on import, so a non-nullable FK to one is a build-gate violation.
+   * True for policies the generic entity graph does not carry.
    */
   val isNotGraphCarried: Boolean
-    get() = this == IGNORED || this == SIDE_CHANNEL
+    get() =
+      when (this) {
+        IGNORED, SIDE_CHANNEL -> true
+        OWNED, USER_REF, PROJECT_ROOT -> false
+      }
+
+  /**
+   * True for policies for which import may delete rows of.
+   */
+  val mayBeDeletedByImport: Boolean
+    get() =
+      when (this) {
+        OWNED, SIDE_CHANNEL, IGNORED -> true
+        USER_REF, PROJECT_ROOT -> false
+      }
 }
