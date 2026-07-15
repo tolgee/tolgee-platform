@@ -223,6 +223,11 @@ dependencies {
 
 }
 
+tasks.withType(Test).configureEach {
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+}
+
 tasks.named('test', Test) {
     useJUnitPlatform()
     maxHeapSize = "4096m"
