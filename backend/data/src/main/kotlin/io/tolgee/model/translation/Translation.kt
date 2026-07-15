@@ -10,6 +10,7 @@ import io.tolgee.constants.MtServiceType
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Language
 import io.tolgee.model.StandardAuditModel
+import io.tolgee.model.annotation.DoNotExport
 import io.tolgee.model.branching.BranchMergeableEntity
 import io.tolgee.model.branching.snapshot.TranslationSnapshot
 import io.tolgee.model.enums.BranchKeyMergeResolutionType
@@ -118,6 +119,7 @@ class Translation(
   var labels: MutableSet<Label> = mutableSetOf()
 
   @ActivityLoggedProp
+  @DoNotExport
   var promptId: Long? = null
 
   val isUntranslated: Boolean

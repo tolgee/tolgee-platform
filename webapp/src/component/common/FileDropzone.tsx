@@ -170,6 +170,7 @@ export const FileDropzone: React.FC<
         multiple={maxFiles > 1}
         style={{ display: 'none' }}
         onChange={handleFileChange}
+        data-cy="file-dropzone-file-input"
       />
 
       <DragDropArea

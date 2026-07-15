@@ -407,6 +407,15 @@ export function useErrorTranslation() {
         return t('no_data_to_import');
       case 'import_failed':
         return t('import_failed');
+      case 'project_import_version_mismatch':
+        return t('project_import_version_mismatch', {
+          manifestVersion: params?.[0] || '',
+          runningVersion: params?.[1] || '',
+        });
+      case 'project_import_missing_project_json':
+        return t('project_import_missing_project_json');
+      case 'project_import_corrupt_archive':
+        return t('project_import_corrupt_archive');
 
       // Machine translation
       case 'no_auto_translation_method':

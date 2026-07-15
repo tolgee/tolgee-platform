@@ -1,4 +1,5 @@
 import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { downloadBlobAsFile } from 'tg.fixtures/downloadResponseAsFile';
 
 // Keep filenames cross-platform-safe: replace path separators and the Windows-reserved set
 // with `_`, then collapse whitespace into single underscores. Falls back to `tm` when the
@@ -11,19 +12,10 @@ const sanitizeForFilename = (raw: string): string => {
   return cleaned || 'tm';
 };
 
-const downloadExported = async (response: Response, tmName: string) => {
+export const downloadExported = async (response: Response, tmName: string) => {
   const data = await response.blob();
-  const url = URL.createObjectURL(data);
-  const a = document.createElement('a');
-  try {
-    a.href = url;
-    const dateStr = new Date().toISOString().split('T')[0];
-    a.download = `tm_${sanitizeForFilename(tmName)}_${dateStr}.tmx`;
-    a.click();
-  } finally {
-    a.remove();
-    URL.revokeObjectURL(url);
-  }
+  const dateStr = new Date().toISOString().split('T')[0];
+  downloadBlobAsFile(data, `tm_${sanitizeForFilename(tmName)}_${dateStr}.tmx`);
 };
 
 export const useTmExport = (
