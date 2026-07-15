@@ -24,6 +24,9 @@ sentry {
     org = System.getenv("SENTRY_ORG")
     projectName = System.getenv("SENTRY_PROJECT")
     authToken = System.getenv("SENTRY_AUTH_TOKEN")
+    autoInstallation {
+        sentryVersion = '8.48.0'
+    }
 }
 
 group = 'io.tolgee'
