@@ -96,15 +96,15 @@ project(':server-app').afterEvaluate {
         dependsOn ':server-app:bootJar'
     }
 
-    tasks.register('startDbChangelogContainer') {
+    tasks.register('removeDbChangelogContainer', Exec) {
+        ignoreExitValue = true
+        commandLine "docker", "rm", "--force", "--volumes", dbSchemaContainerName
+    }
+
+    tasks.register('startDbChangelogContainer', Exec) {
+        dependsOn 'removeDbChangelogContainer'
+        commandLine "docker", "run", "-e", "POSTGRES_PASSWORD=postgres", "-d", "-p55538:5432", "--name", dbSchemaContainerName, "postgres:13"
         doLast {
-            exec {
-                ignoreExitValue = true
-                commandLine "docker", "rm", "--force", "--volumes", dbSchemaContainerName
-            }
-            exec {
-                commandLine "docker", "run", "-e", "POSTGRES_PASSWORD=postgres", "-d", "-p55538:5432", "--name", dbSchemaContainerName, "postgres:13"
-            }
             Thread.sleep(5000)
         }
     }
