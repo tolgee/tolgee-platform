@@ -1922,6 +1922,8 @@
   "project_dashboard_translations_less_then_1_percent": "< 1%",
   "project_dashboard_translations_percent": "{percent, number, :: %}",
   "project_deleted_message": "Projeto excluído!",
+  "project_import_corrupt_archive": "Este arquivo de exportação está corrompido e não pode ser importado. Certifique-se de que selecionou um zip de exportação de projeto Tolgee válido.",
+  "project_import_missing_project_json": "Este arquivo de exportação está incompleto e não pode ser importado. Certifique-se de que selecionou um zip de exportação de projeto Tolgee completo.",
   "project_import_version_mismatch": "Este arquivo foi exportado do Tolgee {manifestVersion}, mas esta instância executa {runningVersion}. A importação só é suportada entre versões correspondentes.",
   "project_integrate_description": "Use as integrações Tolgee para acelerar o processo de localização. As integrações Javascript permitem que você edite as traduções diretamente em sua aplicação. Isso também melhora a qualidade das traduções, já que coletamos o contexto da página e o fornecemos aos seus tradutores ou à nossa máquina de tradução AI. <link>Mais sobre as integrações Tolgee.</link>",
   "project_integrate_title": "Integrar",

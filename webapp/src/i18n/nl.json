@@ -1930,6 +1930,8 @@
   "project_dashboard_translations_less_then_1_percent": "< 1%",
   "project_dashboard_translations_percent": "{percent, number, :: %}",
   "project_deleted_message": "Project verwijderd!",
+  "project_import_corrupt_archive": "Dit exportarchief is corrupt en kan niet worden geïmporteerd. Zorg ervoor dat je een geldige Tolgee project export zip hebt geselecteerd.",
+  "project_import_missing_project_json": "Dit exportarchief is incompleet en kan niet worden geïmporteerd. Zorg ervoor dat je een compleet Tolgee project export zip hebt geselecteerd.",
   "project_import_version_mismatch": "Dit archief is geëxporteerd vanuit Tolgee {manifestVersion}, maar deze instantie draait {runningVersion}. Importeren wordt alleen ondersteund tussen overeenkomende versies.",
   "project_integrate_description": "Gebruik Tolgee-integraties om het lokalisatieproces te versnellen. Met Javascript-integraties kunt u vertalingen rechtstreeks in uw applicatie bewerken. Dit verbetert ook de kwaliteit van de vertalingen, omdat we de context van de pagina verzamelen en deze vervolgens aan uw vertalers of onze AI-machinevertaler verstrekken. <link>Meer informatie over Tolgee-integraties.</link>",
   "project_integrate_title": "Integreren",

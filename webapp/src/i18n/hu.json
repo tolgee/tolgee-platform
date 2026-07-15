@@ -1922,6 +1922,8 @@
   "project_dashboard_translations_less_then_1_percent": "< 1%",
   "project_dashboard_translations_percent": "{percent, number, :: %}",
   "project_deleted_message": "Projekt törölve!",
+  "project_import_corrupt_archive": "Ez az exportált archívum sérült, ezért nem importálható. Győződj meg róla, hogy érvényes Tolgee projekt export zip fájlt választottál ki.",
+  "project_import_missing_project_json": "Ez az exportált archívum hiányos, ezért nem importálható. Győződj meg róla, hogy egy teljes Tolgee projekt export zip fájlt választottál ki.",
   "project_import_version_mismatch": "Ez az archívum a Tolgee {manifestVersion} verzióból lett exportálva, de ez a példány {runningVersion} verziót futtat. Az importálás csak egyező verziók között támogatott.",
   "project_integrate_description": "Használja a Tolgee integrációkat a lokalizációs folyamat felgyorsításához. A Javascript integrációk lehetővé teszik a fordítások közvetlen szerkesztését az alkalmazásban. Ez javítja a fordítások minőségét, mivel összegyűjtjük az oldal kontextusát, majd átadjuk azt a fordítóknak vagy az AI gépi fordítónknak. <link>További információk a Tolgee integrációkról.</link>",
   "project_integrate_title": "Integrálás",

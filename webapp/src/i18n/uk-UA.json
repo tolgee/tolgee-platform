@@ -1709,6 +1709,8 @@
   "project_dashboard_translations_less_then_1_percent": "< 1%",
   "project_dashboard_translations_percent": "{percent, number, :: %}",
   "project_deleted_message": "Проєкт видалено!",
+  "project_import_corrupt_archive": "Цей архів експорту пошкоджений і не може бути імпортований. Переконайтеся, що ви вибрали дійсний zip-файл експорту проєкту Tolgee.",
+  "project_import_missing_project_json": "Цей архів експорту неповний і не може бути імпортований. Переконайтеся, що ви вибрали повний zip-файл експорту проєкту Tolgee.",
   "project_import_version_mismatch": "Цей архів було експортовано з Tolgee {manifestVersion}, але цей екземпляр працює на {runningVersion}. Імпорт підтримується лише між однаковими версіями.",
   "project_integrate_description": "Використовуйте інтеграції Tolgee, щоб прискорити процес локалізації. Інтеграції з Javascript дозволяють редагувати переклади безпосередньо у вашому додатку. Це також покращує якість перекладів, оскільки ми збираємо контекст сторінки і надаємо його вашим перекладачам або нашому AI перекладачу. <link>Детальніше про інтеграції Tolgee.</link>",
   "project_integrate_title": "Інтегрувати",

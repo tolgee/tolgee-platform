@@ -1932,6 +1932,8 @@
   "project_dashboard_translations_less_then_1_percent": "< 1%",
   "project_dashboard_translations_percent": "{percent, number, :: %}",
   "project_deleted_message": "Projekt byl odstraněn!",
+  "project_import_corrupt_archive": "Tento exportní archiv je poškozený a nelze jej importovat. Ujistěte se, že jste vybrali platný zip exportu projektu Tolgee.",
+  "project_import_missing_project_json": "Tento exportní archiv je nekompletní a nelze jej importovat. Ujistěte se, že jste vybrali kompletní zip exportu projektu Tolgee.",
   "project_import_version_mismatch": "Tento archiv byl exportován z Tolgee {manifestVersion}, ale tato instance běží na {runningVersion}. Import je podporován pouze mezi shodnými verzemi.",
   "project_integrate_description": "Pro zrychlení procesu lokalizace použijte Tolgee Integrace. Javascriptové integrace umožňují upravovat překlady přímo ve vaší aplikaci. Jelikož Tolgee shromažďuje kontext stránky, který následně poskytuje vašim překladatelům nebo Tolgee AI strojovému překladači, dokáže tak zajistit vyšší kvalitu překladů. <link>Více info o Tolgee integracích</link>",
   "project_integrate_title": "Integrovat",

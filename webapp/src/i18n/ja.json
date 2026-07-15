@@ -1932,6 +1932,8 @@
   "project_dashboard_translations_less_then_1_percent": "< 1%",
   "project_dashboard_translations_percent": "{percent, number, :: %}",
   "project_deleted_message": "プロジェクトが削除されました！",
+  "project_import_corrupt_archive": "このエクスポートアーカイブは破損しているためインポートできません。有効な Tolgee プロジェクトエクスポート zip を選択したことを確認してください",
+  "project_import_missing_project_json": "このエクスポートアーカイブは不完全なためインポートできません。完全な Tolgee プロジェクトエクスポート zip を選択したことを確認してください",
   "project_import_version_mismatch": "このアーカイブは Tolgee {manifestVersion} からエクスポートされましたが、このインスタンスは {runningVersion} で実行されています。\nインポートは一致するバージョン間でのみサポートされています。",
   "project_integrate_description": "Tolgee 統合を使用すると、ローカリゼーション プロセスをスピードアップできます。Javascript 統合により、アプリケーション内で直接翻訳を編集できます。\nページのコンテキストを収集して、それを翻訳者または AI 機械翻訳者に提供するため、翻訳の品質も向上します。<link>Tolgee 統合の詳細</link>。",
   "project_integrate_title": "統合",

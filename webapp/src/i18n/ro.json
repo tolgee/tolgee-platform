@@ -1925,6 +1925,8 @@
   "project_dashboard_translations_less_then_1_percent": "< 1%",
   "project_dashboard_translations_percent": "{percent, number, :: %}",
   "project_deleted_message": "Proiect șters!",
+  "project_import_corrupt_archive": "Această arhivă de export este corupă și nu poate fi importată. Asigurați-vă că ați selectat un fișier zip valid de export al proiectului Tolgee.",
+  "project_import_missing_project_json": "Această arhivă de export este incompletă și nu poate fi importată. Asigurați-vă că ați selectat un fișier zip complet de export al proiectului Tolgee.",
   "project_import_version_mismatch": "Această arhivă a fost exportată din Tolgee {manifestVersion}, dar această instanță rulează {runningVersion}. Importul este acceptat doar între versiuni identice.",
   "project_integrate_description": "Utilizați Integrările Tolgee pentru a accelera procesul de localizare. Integrările Javascript vă permit să editați traducerile direct în aplicația dvs. Acest lucru îmbunătățește, de asemenea, calitatea traducerilor, deoarece colectăm contextul paginii și îl furnizăm apoi traducătorilor dvs. sau traducătorului nostru automat AI. <link>Mai multe despre integrările Tolgee.</link>",
   "project_integrate_title": "Integrare",

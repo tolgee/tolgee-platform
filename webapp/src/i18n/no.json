@@ -1922,6 +1922,8 @@
   "project_dashboard_translations_less_then_1_percent": "< 1%",
   "project_dashboard_translations_percent": "{percent, number, :: %}",
   "project_deleted_message": "Prosjektet er slettet!",
+  "project_import_corrupt_archive": "Dette eksportarkivet er skadet og kan ikke importeres. Sørg for at du valgte en gyldig Tolgee-prosjekteksport-zip.",
+  "project_import_missing_project_json": "Dette eksportarkivet er ikke komplett og kan ikke importeres. Sørg for at du valgte en komplett Tolgee-prosjekteksport-zip.",
   "project_import_version_mismatch": "Dette arkivet ble eksportert fra Tolgee {manifestVersion}, men denne instansen kjører {runningVersion}. Import støttes kun mellom samsvarende versjoner.",
   "project_integrate_description": "Bruk Tolgee-integrasjoner for å fremskynde lokaliseringen. Javascript-integrasjoner lar deg redigere oversettelser direkte i applikasjonen din. Dette forbedrer også kvaliteten på oversettelsene, siden vi samler konteksten på siden og deretter gir den til oversetterne dine eller vår AI-maskinoversetter. <link>Mer om Tolgee-integrasjoner.</link>",
   "project_integrate_title": "Integrer",

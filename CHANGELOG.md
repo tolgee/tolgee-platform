@@ -1,3 +1,10 @@
+# [3.212.0](https://github.com/tolgee/tolgee-platform/compare/v3.211.4...v3.212.0) (2026-07-15)
+
+
+### Features
+
+* admin project export/import ([#3764](https://github.com/tolgee/tolgee-platform/issues/3764)) ([669d536](https://github.com/tolgee/tolgee-platform/commit/669d536fc3b20714c7a6c71a8bc42994e6b31584))
+
 ## [3.211.4](https://github.com/tolgee/tolgee-platform/compare/v3.211.3...v3.211.4) (2026-07-14)
 
 

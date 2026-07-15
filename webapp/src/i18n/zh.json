@@ -1924,6 +1924,8 @@
   "project_dashboard_translations_less_then_1_percent": "< 1%",
   "project_dashboard_translations_percent": "{percent, number, :: %}",
   "project_deleted_message": "项目已删除！",
+  "project_import_corrupt_archive": "此导出存档已损坏,无法导入。请确保您选择了有效的 Tolgee 项目导出 zip 文件。",
+  "project_import_missing_project_json": "此导出存档不完整,无法导入。请确保您选择了完整的 Tolgee 项目导出 zip 文件。",
   "project_import_version_mismatch": "此存档从 Tolgee {manifestVersion} 导出，但此实例运行的是 {runningVersion}。仅支持在相同版本之间导入。",
   "project_integrate_description": "使用 Tolgee 集成，加速本地化过程。Javascript 集成允许您直接在应用程序中编辑翻译。这也提高了翻译的质量，因为我们收集页面的上下文，然后将其提供给您的翻译人员或我们的 AI 机器翻译器。 <link>了解有关 Tolgee 集成的更多信息。</link>",
   "project_integrate_title": "集成",
