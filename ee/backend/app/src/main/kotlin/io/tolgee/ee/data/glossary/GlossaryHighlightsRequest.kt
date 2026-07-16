@@ -5,13 +5,12 @@ import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
 
-class GlossaryHighlightsRequest {
+class GlossaryHighlightsRequest(
   @Schema(example = "cs-CZ", description = "Language tag according to BCP 47 definition")
   @field:NotBlank
   @field:Size(max = 20)
   @field:Pattern(regexp = "^[^,]*$", message = "can not contain coma")
-  val languageTag: String = ""
-
+  val languageTag: String = "",
   @field:Size(max = 65536)
-  val text: String = ""
-}
+  val text: String = "",
+)
