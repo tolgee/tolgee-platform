@@ -8,11 +8,11 @@ import org.springframework.validation.annotation.Validated
 
 @Validated
 data class CreateProviderRequest(
-  val enabled: Boolean,
+  val enabled: Boolean = false,
   /**
    * When true, users with an email matching the organization's domain must sign in using SSO
    */
-  override val force: Boolean,
+  override val force: Boolean = false,
   @field:NotNull
   @field:Size(max = 255)
   override val clientId: String,
