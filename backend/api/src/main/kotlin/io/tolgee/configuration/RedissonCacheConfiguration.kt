@@ -26,12 +26,11 @@ class RedissonCacheConfiguration(
   private val allCachesProvider: AllCachesProvider,
 ) {
   @Bean
-  fun cacheManager(redissonClient: RedissonClient): CacheManager? {
-    val config: MutableMap<String, CacheConfig> = HashMap()
-    val caches = allCachesProvider.getAllCaches()
-    caches.forEach {
-      config[it] = CacheConfig(tolgeeProperties.cache.defaultTtl, tolgeeProperties.cache.defaultTtl)
-    }
+  fun cacheManager(redissonClient: RedissonClient): CacheManager {
+    val config =
+      allCachesProvider.getAllCaches().associateWith {
+        CacheConfig(tolgeeProperties.cache.defaultTtl, tolgeeProperties.cache.defaultTtl)
+      }
     val cacheManager = RedissonSpringCacheManager(redissonClient, config, EnumNameKryo5Codec())
     return TransactionAwareCacheManagerProxy(cacheManager)
   }
