@@ -13,28 +13,36 @@ import org.springframework.stereotype.Repository
 interface TranslationSuggestionRepository : JpaRepository<TranslationSuggestion, Long> {
   @Query(
     """
-      select distinct on (ts.language_id, ts.key_id)
-        ts.id as id,
-        ts.key_id as keyId,
-        ts.language_id as languageId,
-        l.tag as languageTag,
-        ts.translation as translation,
-        ts.state as state,
-        ts.is_plural as plural,
-        
-        u.id as authorId,
-        u.name as authorName,
-        u.username as authorUsername,
-        u.avatar_hash as authorAvatarHash,
-        u.deleted_at as authorDeletedAt
-      from translation_suggestion ts
-        left join language l on l.id = ts.language_id
-        left join user_account u on u.id = ts.author_id
-      where ts.key_id in :keyIds
-        and ts.project_id = :projectId
-        and ts.language_id in :languageIds
-        and ts.state = 'ACTIVE'
-      order by ts.language_id, ts.key_id, ts.created_at DESC
+      select id, keyId, languageId, languageTag, translation, state, plural,
+             authorId, authorName, authorUsername, authorAvatarHash, authorDeletedAt
+      from (
+        select
+          ts.id as id,
+          ts.key_id as keyId,
+          ts.language_id as languageId,
+          l.tag as languageTag,
+          ts.translation as translation,
+          ts.state as state,
+          ts.is_plural as plural,
+          u.id as authorId,
+          u.name as authorName,
+          u.username as authorUsername,
+          u.avatar_hash as authorAvatarHash,
+          u.deleted_at as authorDeletedAt,
+          row_number() over (
+            partition by ts.language_id, ts.key_id
+            order by ts.created_at desc, ts.id desc
+          ) as rn
+        from translation_suggestion ts
+          left join language l on l.id = ts.language_id
+          left join user_account u on u.id = ts.author_id
+        where ts.key_id in :keyIds
+          and ts.project_id = :projectId
+          and ts.language_id in :languageIds
+          and ts.state = 'ACTIVE'
+      ) sub
+      where sub.rn <= :maxPerKey
+      order by sub.languageId, sub.keyId, sub.rn
     """,
     nativeQuery = true,
   )
@@ -42,6 +50,7 @@ interface TranslationSuggestionRepository : JpaRepository<TranslationSuggestion,
     projectId: Long,
     languageIds: List<Long>,
     keyIds: List<Long>,
+    maxPerKey: Int,
   ): List<TranslationSuggestionView>
 
   @Query(

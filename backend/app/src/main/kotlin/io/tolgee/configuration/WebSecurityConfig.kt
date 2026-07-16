@@ -138,6 +138,9 @@ class WebSecurityConfig(
     registry
       .addInterceptor(organizationAuthorizationInterceptor)
       .addPathPatterns(*ORGANIZATION_ENDPOINTS)
+    // These authorization interceptors are NOT registered for /v2/public/**; routes there must stay free
+    // of {projectId}/{organizationId} path vars + @RequiresProjectPermissions — adding one would silently
+    // bypass authorization.
     registry
       .addInterceptor(projectAuthorizationInterceptor)
       .addPathPatterns(*PROJECT_ENDPOINTS)

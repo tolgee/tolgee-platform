@@ -17,6 +17,7 @@ data class PermissionDto(
   override val viewLanguageIds: Set<Long>?,
   override val stateChangeLanguageIds: Set<Long>?,
   override val suggestLanguageIds: Set<Long>?,
+  override val suggestManageLanguageIds: Set<Long>?,
 ) : Serializable,
   IPermission {
   override fun equals(other: Any?): Boolean {
@@ -33,6 +34,7 @@ data class PermissionDto(
     if (organizationId != other.organizationId) return false
     if (translateLanguageIds != other.translateLanguageIds) return false
     if (suggestLanguageIds != other.suggestLanguageIds) return false
+    if (suggestManageLanguageIds != other.suggestManageLanguageIds) return false
     if (type != other.type) return false
     if (granular != other.granular) return false
     if (viewLanguageIds != other.viewLanguageIds) return false
@@ -54,6 +56,7 @@ data class PermissionDto(
     result = 31 * result + (viewLanguageIds?.hashCode() ?: 0)
     result = 31 * result + (stateChangeLanguageIds?.hashCode() ?: 0)
     result = 31 * result + (suggestLanguageIds?.hashCode() ?: 0)
+    result = 31 * result + (suggestManageLanguageIds?.hashCode() ?: 0)
     return result
   }
 }

@@ -41,6 +41,7 @@ class ProjectWithStatsModelAssembler(
         view.organizationOwner.basePermission,
         view.directPermission,
         authenticationFacade.authenticatedUserOrNull?.role,
+        isProjectPublic = view.public,
       )
 
     return ProjectWithStatsModel(
@@ -56,6 +57,7 @@ class ProjectWithStatsModelAssembler(
       computedPermission = computedPermissionModelAssembler.toModel(computedPermissions),
       stats = view.stats,
       languages = view.languages.map { languageModelAssembler.toModel(it) },
+      public = view.public,
       icuPlaceholders = view.icuPlaceholders,
     )
   }

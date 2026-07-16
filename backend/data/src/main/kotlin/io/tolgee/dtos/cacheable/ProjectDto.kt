@@ -18,6 +18,7 @@ data class ProjectDto(
   var useNamespaces: Boolean,
   var useBranching: Boolean,
   var useQaChecks: Boolean,
+  var public: Boolean,
   var suggestionsMode: SuggestionsMode,
   var translationProtection: TranslationProtection,
 ) : Serializable,
@@ -36,6 +37,7 @@ data class ProjectDto(
         useNamespaces = entity.useNamespaces,
         useBranching = entity.useBranching,
         useQaChecks = entity.useQaChecks,
+        public = entity.public,
         suggestionsMode = entity.suggestionsMode,
         translationProtection = entity.translationProtection,
       )

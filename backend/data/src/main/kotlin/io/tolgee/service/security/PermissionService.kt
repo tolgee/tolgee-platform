@@ -120,6 +120,7 @@ class PermissionService(
         organizationBasePermission = organizationBasePermission,
         directPermission = projectPermission,
         userAccountService.findDto(userAccountId)?.role ?: throw IllegalStateException("User not found"),
+        isProjectPublic = project.public,
       )
 
     return ProjectPermissionData(
@@ -232,6 +233,7 @@ class PermissionService(
     organizationBasePermission: IPermission,
     directPermission: IPermission?,
     userRole: UserAccount.Role? = null,
+    isProjectPublic: Boolean = false,
   ): ComputedPermissionDto {
     val computed =
       when {
@@ -245,6 +247,10 @@ class PermissionService(
 
         else -> ComputedPermissionDto.NONE
       }
+
+    if (isProjectPublic && userRole != null) {
+      return computed.withCommunityFloor().getAdminOrSupporterPermissions(userRole)
+    }
 
     return computed.getAdminOrSupporterPermissions(userRole)
   }
@@ -361,11 +367,13 @@ class PermissionService(
     permission.stateChangeLanguages = languagePermissions.stateChange.standardize()
     permission.viewLanguages = languagePermissions.view.standardize()
     permission.suggestLanguages = languagePermissions.suggest.standardize()
+    permission.suggestManageLanguages = languagePermissions.suggestManage.standardize()
 
     if (permission.viewLanguages.isNotEmpty()) {
       permission.viewLanguages.addAll(permission.translateLanguages)
       permission.viewLanguages.addAll(permission.stateChangeLanguages)
       permission.viewLanguages.addAll(permission.suggestLanguages)
+      permission.viewLanguages.addAll(permission.suggestManageLanguages)
     }
   }
 

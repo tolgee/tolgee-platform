@@ -18,7 +18,7 @@ import { useProjectNamespaces } from 'tg.hooks/useProjectNamespaces';
 import { DefaultNamespaceSelect } from 'tg.views/projects/project/components/DefaultNamespaceSelect';
 import { LinkReadMore } from 'tg.component/LinkReadMore';
 import { useReportEvent } from 'tg.hooks/useReportEvent';
-import { useEnabledFeatures } from 'tg.globalContext/helpers';
+import { useEnabledFeatures, useIsAdmin } from 'tg.globalContext/helpers';
 import { ProjectSettingsTranslationMemory } from 'tg.ee';
 
 type EditProjectRequest = components['schemas']['EditProjectRequest'];
@@ -29,6 +29,7 @@ export const ProjectSettingsAdvanced = () => {
   const history = useHistory();
   const reportEvent = useReportEvent();
   const { isEnabled } = useEnabledFeatures();
+  const isAdmin = useIsAdmin();
 
   const { allNamespacesWithNone } = useProjectNamespaces();
   const isBranchingEnabled = isEnabled('BRANCHING');
@@ -43,6 +44,44 @@ export const ProjectSettingsAdvanced = () => {
     method: 'put',
     invalidatePrefix: '/v2/projects',
   });
+
+  const publishingLoadable = useApiMutation({
+    url: '/v2/projects/{projectId}/publishing',
+    method: 'put',
+    invalidatePrefix: '/v2/projects',
+  });
+
+  const canChangePublic =
+    project.organizationRole === 'OWNER' ||
+    project.computedPermission.origin === 'SERVER_ADMIN' ||
+    isAdmin;
+
+  const handlePublicSwitch = () => {
+    const value = !project.public;
+    confirmation({
+      title: value ? (
+        <T keyName="project_settings_make_public_dialog_title" />
+      ) : (
+        <T keyName="project_settings_make_private_dialog_title" />
+      ),
+      message: value ? (
+        <T
+          keyName="project_settings_make_public_confirmation"
+          params={{ name: project.name }}
+        />
+      ) : (
+        <T
+          keyName="project_settings_make_private_confirmation"
+          params={{ name: project.name }}
+        />
+      ),
+      onConfirm: () =>
+        publishingLoadable.mutate({
+          path: { projectId: project.id },
+          content: { 'application/json': { public: value } },
+        }),
+    });
+  };
 
   const updateSettings = (
     values: Partial<EditProjectRequest>,
@@ -93,6 +132,19 @@ export const ProjectSettingsAdvanced = () => {
   return (
     <Box display="grid" mb={8}>
       <Typography variant="h5" mt={4} mb="20px">
+        {t('project_settings_public_section_title')}
+      </Typography>
+
+      <SwitchWithDescription
+        data-cy="project-settings-public-switch"
+        title={t('project_settings_public_label')}
+        description={t('project_settings_public_hint')}
+        checked={project.public}
+        onSwitch={handlePublicSwitch}
+        disabled={publishingLoadable.isLoading || !canChangePublic}
+      />
+
+      <Typography variant="h5" mt={5} mb="20px">
         {t('project_settings_advanced_translations')}
       </Typography>
 

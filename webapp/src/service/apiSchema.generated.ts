@@ -819,7 +819,6 @@ export interface paths {
     post: operations["createSuggestion"];
   };
   "/v2/projects/{projectId}/languages/{languageId}/key/{keyId}/suggestion/{suggestionId}": {
-    /** User can only delete suggestion created by them */
     delete: operations["deleteSuggestion"];
   };
   "/v2/projects/{projectId}/languages/{languageId}/key/{keyId}/suggestion/{suggestionId}/accept": {
@@ -884,6 +883,10 @@ export interface paths {
     get: operations["getPrompt"];
     put: operations["updatePrompt"];
     delete: operations["deletePrompt"];
+  };
+  "/v2/projects/{projectId}/publishing": {
+    /** Marks the project as public or private. Only the organization owner or a server admin can change this. */
+    put: operations["setProjectPublic"];
   };
   "/v2/projects/{projectId}/qa-settings": {
     get: operations["getSettings"];
@@ -1186,6 +1189,10 @@ export interface paths {
     /** Get machine translation providers */
     get: operations["getInfo_4"];
   };
+  "/v2/public/projects/with-stats": {
+    /** Returns all public projects (including statistics), discoverable by anyone — no authentication required */
+    get: operations["getAllPublicWithStatistics"];
+  };
   "/v2/public/scope-info/hierarchy": {
     get: operations["getHierarchy"];
   };
@@ -1406,6 +1413,7 @@ export interface components {
         | "translations.view"
         | "translations.edit"
         | "translations.suggest"
+        | "translation-suggestions.manage"
         | "keys.edit"
         | "screenshots.upload"
         | "screenshots.delete"
@@ -1439,6 +1447,7 @@ export interface components {
         | "all.view"
         | "branch.management"
         | "branch.protected-modify"
+        | "organization-quotas.view"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -1456,6 +1465,14 @@ export interface components {
        * ]
        */
       suggestLanguageIds?: number[];
+      /**
+       * @description List of languages user can manage suggestions for. If null, managing suggestions for all languages is permitted.
+       * @example [
+       *   200001,
+       *   200004
+       * ]
+       */
+      suggestManageLanguageIds?: number[];
       /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example [
@@ -2092,7 +2109,8 @@ export interface components {
         | "ORGANIZATION_OWNER"
         | "NONE"
         | "SERVER_ADMIN"
-        | "SERVER_SUPPORTER";
+        | "SERVER_SUPPORTER"
+        | "COMMUNITY";
       permissionModel?: components["schemas"]["PermissionModel"];
       /**
        * @deprecated
@@ -2116,6 +2134,7 @@ export interface components {
         | "translations.view"
         | "translations.edit"
         | "translations.suggest"
+        | "translation-suggestions.manage"
         | "keys.edit"
         | "screenshots.upload"
         | "screenshots.delete"
@@ -2149,6 +2168,7 @@ export interface components {
         | "all.view"
         | "branch.management"
         | "branch.protected-modify"
+        | "organization-quotas.view"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -2166,6 +2186,14 @@ export interface components {
        * ]
        */
       suggestLanguageIds?: number[];
+      /**
+       * @description List of languages user can manage suggestions for. If null, managing suggestions for all languages is permitted.
+       * @example [
+       *   200001,
+       *   200004
+       * ]
+       */
+      suggestManageLanguageIds?: number[];
       /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example [
@@ -3401,6 +3429,7 @@ export interface components {
         | "translations.view"
         | "translations.edit"
         | "translations.suggest"
+        | "translation-suggestions.manage"
         | "keys.edit"
         | "screenshots.upload"
         | "screenshots.delete"
@@ -3433,7 +3462,8 @@ export interface components {
         | "translation-labels.assign"
         | "all.view"
         | "branch.management"
-        | "branch.protected-modify";
+        | "branch.protected-modify"
+        | "organization-quotas.view";
     };
     IdentifyRequest: {
       anonymousUserId: string;
@@ -4894,6 +4924,7 @@ export interface components {
         | "translations.view"
         | "translations.edit"
         | "translations.suggest"
+        | "translation-suggestions.manage"
         | "keys.edit"
         | "screenshots.upload"
         | "screenshots.delete"
@@ -4927,6 +4958,7 @@ export interface components {
         | "all.view"
         | "branch.management"
         | "branch.protected-modify"
+        | "organization-quotas.view"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -4944,6 +4976,14 @@ export interface components {
        * ]
        */
       suggestLanguageIds?: number[];
+      /**
+       * @description List of languages user can manage suggestions for. If null, managing suggestions for all languages is permitted.
+       * @example [
+       *   200001,
+       *   200004
+       * ]
+       */
+      suggestManageLanguageIds?: number[];
       /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example [
@@ -4990,6 +5030,7 @@ export interface components {
         | "translations.view"
         | "translations.edit"
         | "translations.suggest"
+        | "translation-suggestions.manage"
         | "keys.edit"
         | "screenshots.upload"
         | "screenshots.delete"
@@ -5023,6 +5064,7 @@ export interface components {
         | "all.view"
         | "branch.management"
         | "branch.protected-modify"
+        | "organization-quotas.view"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -5040,6 +5082,14 @@ export interface components {
        * ]
        */
       suggestLanguageIds?: number[];
+      /**
+       * @description List of languages user can manage suggestions for. If null, managing suggestions for all languages is permitted.
+       * @example [
+       *   200001,
+       *   200004
+       * ]
+       */
+      suggestManageLanguageIds?: number[];
       /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example [
@@ -5369,6 +5419,8 @@ export interface components {
       stateChangeLanguages?: number[];
       /** @description Languages user can suggest translation */
       suggestLanguages?: number[];
+      /** @description Languages user can manage suggestions for */
+      suggestManageLanguages?: number[];
       /** @description Languages user can translate to */
       translateLanguages?: number[];
       /** @enum {string} */
@@ -5404,6 +5456,8 @@ export interface components {
       organizationOwner?: components["schemas"]["SimpleOrganizationModel"];
       /** @enum {string} */
       organizationRole?: "MEMBER" | "OWNER" | "MAINTAINER";
+      /** @description Whether the project is public — discoverable and open to community suggestions */
+      public: boolean;
       slug?: string;
       /**
        * @description Suggestions for translations
@@ -5499,6 +5553,8 @@ export interface components {
       organizationOwner?: components["schemas"]["SimpleOrganizationModel"];
       /** @enum {string} */
       organizationRole?: "MEMBER" | "OWNER" | "MAINTAINER";
+      /** @description Whether the project is public — discoverable and open to community suggestions */
+      public: boolean;
       slug?: string;
       stats: components["schemas"]["ProjectStatistics"];
     };
@@ -6239,6 +6295,10 @@ export interface components {
        * @example We are Dunder Mifflin, a paper company. We sell paper. This is an project of translations for out paper selling app.
        */
       description?: string;
+    };
+    SetProjectPublicRequest: {
+      /** @description Whether the project should be public (discoverable and open to community suggestions) */
+      public: boolean;
     };
     SetTranslationsResponseModel: {
       /**
@@ -19316,7 +19376,6 @@ export interface operations {
       };
     };
   };
-  /** User can only delete suggestion created by them */
   deleteSuggestion: {
     parameters: {
       path: {
@@ -20319,6 +20378,51 @@ export interface operations {
         content: {
           "application/json": string;
         };
+      };
+    };
+  };
+  /** Marks the project as public or private. Only the organization owner or a server admin can change this. */
+  setProjectPublic: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ProjectModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetProjectPublicRequest"];
       };
     };
   };
@@ -24534,6 +24638,7 @@ export interface operations {
         viewLanguages?: number[];
         stateChangeLanguages?: number[];
         suggestLanguages?: number[];
+        suggestManageLanguages?: number[];
       };
     };
     responses: {
@@ -24584,6 +24689,7 @@ export interface operations {
         viewLanguages?: number[];
         stateChangeLanguages?: number[];
         suggestLanguages?: number[];
+        suggestManageLanguages?: number[];
       };
     };
     responses: {
@@ -25081,6 +25187,52 @@ export interface operations {
       };
     };
   };
+  /** Returns all public projects (including statistics), discoverable by anyone — no authentication required */
+  getAllPublicWithStatistics: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        search?: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelProjectWithStatsModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
   getHierarchy: {
     parameters: {
       query: {
@@ -25130,6 +25282,7 @@ export interface operations {
               | "translations.view"
               | "translations.edit"
               | "translations.suggest"
+              | "translation-suggestions.manage"
               | "keys.edit"
               | "screenshots.upload"
               | "screenshots.delete"
@@ -25163,6 +25316,7 @@ export interface operations {
               | "all.view"
               | "branch.management"
               | "branch.protected-modify"
+              | "organization-quotas.view"
             )[];
           };
         };

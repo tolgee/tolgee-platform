@@ -3,6 +3,7 @@ import { Redirect, Route, Switch } from 'react-router-dom';
 
 import { LINKS } from 'tg.constants/links';
 import { ProjectsRouter } from 'tg.views/projects/ProjectsRouter';
+import { CommunityProjectsView } from 'tg.views/projects/CommunityProjectsView';
 import { UserSettingsRouter } from 'tg.views/userSettings/UserSettingsRouter';
 import { OrganizationsRouter } from 'tg.views/organizations/OrganizationsRouter';
 import { AdministrationView } from 'tg.views/administration/AdministrationView';
@@ -26,6 +27,10 @@ const SlackConnectedView = React.lazy(
 );
 
 const SignUpView = React.lazy(() => import('./security/SignUp/SignUpView'));
+
+const PublicProjectListView = React.lazy(
+  () => import('tg.views/projects/public/PublicProjectListView')
+);
 
 const PasswordResetSetView = React.lazy(
   () => import('./security/ResetPasswordSetView')
@@ -67,6 +72,9 @@ export const RootRouter = () => {
         <Route path={LINKS.LOGIN.template}>
           <LoginRouter />
         </Route>
+        <Route exact path={LINKS.PUBLIC_PROJECTS.template}>
+          <PublicProjectListView />
+        </Route>
         <Route path={LINKS.ACCEPT_INVITATION.template}>
           <AcceptInvitationView />
         </Route>
@@ -102,6 +110,9 @@ export const RootRouter = () => {
             </PrivateRoute>
             <PrivateRoute path={LINKS.PROJECTS.template}>
               <ProjectsRouter />
+            </PrivateRoute>
+            <PrivateRoute exact path={LINKS.COMMUNITY_PROJECTS.template}>
+              <CommunityProjectsView />
             </PrivateRoute>
             <PrivateRoute path={`${LINKS.ORGANIZATIONS.template}`}>
               <OrganizationsRouter />

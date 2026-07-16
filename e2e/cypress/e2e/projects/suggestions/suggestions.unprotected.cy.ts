@@ -45,12 +45,12 @@ describe('Suggestions in when translations are not protected', () => {
     visitTranslations(projectId);
     getTranslationCell('key 0', 'cs').click();
     waitForGlobalLoading();
-    gcyAdvanced({
-      value: 'suggestion-action',
-      action: 'accept',
-    })
-      .first()
-      .click();
+    cy.gcy('translation-suggestion')
+      .contains('Navržený překlad 0-1')
+      .closest('[data-cy="translation-suggestion"]')
+      .within(() => {
+        gcyAdvanced({ value: 'suggestion-action', action: 'accept' }).click();
+      });
     waitForGlobalLoading();
     assertHasState('Navržený překlad 0-1', 'Reviewed');
   });

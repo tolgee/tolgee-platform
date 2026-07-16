@@ -2,6 +2,7 @@ package io.tolgee.api.v2.controllers.organizationController
 
 import io.tolgee.development.testDataBuilder.data.PermissionsTestData
 import io.tolgee.development.testDataBuilder.data.ProjectTranslationsStatsTestData
+import io.tolgee.development.testDataBuilder.data.PublicProjectsStatsTestData
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
@@ -131,6 +132,30 @@ class OrganizationProjectsControllerTest : AuthorizedControllerTest() {
       .andPrettyPrint
       .andAssertThatJson {
         node("_embedded.projects").isArray.hasSize(1)
+      }
+  }
+
+  @Test
+  fun `projects-with-stats serializes the public flag`() {
+    val testData = PublicProjectsStatsTestData()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.admin.self
+    val organizationId = testData.organizationBuilder.self.id
+
+    performAuthGet("/v2/organizations/$organizationId/projects-with-stats?search=alpha")
+      .andIsOk
+      .andAssertThatJson {
+        node("_embedded.projects").isArray.hasSize(1)
+        node("_embedded.projects[0].name").isEqualTo("Alpha Public")
+        node("_embedded.projects[0].public").isEqualTo(true)
+      }
+
+    performAuthGet("/v2/organizations/$organizationId/projects-with-stats?search=beta")
+      .andIsOk
+      .andAssertThatJson {
+        node("_embedded.projects").isArray.hasSize(1)
+        node("_embedded.projects[0].name").isEqualTo("Beta Private")
+        node("_embedded.projects[0].public").isEqualTo(false)
       }
   }
 

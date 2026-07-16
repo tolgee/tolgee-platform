@@ -1,4 +1,4 @@
-import { styled, Tooltip } from '@mui/material';
+import { styled } from '@mui/material';
 import { components } from 'tg.service/apiSchema.generated';
 import { TranslationSuggestion } from './TranslationSuggestion';
 import { useTranslate } from '@tolgee/react';
@@ -6,27 +6,30 @@ import { useTranslate } from '@tolgee/react';
 type TranslationSuggestionSimpleModel =
   components['schemas']['TranslationSuggestionSimpleModel'];
 
-const StyledContainer = styled('div')`
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: start;
-`;
-
-const StyledExtra = styled('div')`
-  display: flex;
-  padding: 1px 8px;
-  align-items: center;
-  border-radius: 13px;
-  background: ${({ theme }) => theme.palette.tokens.background.onDefaultGrey};
-  margin-top: 8px;
-  margin-left: 8px;
-`;
+// Mirror of TranslationSuggestionServiceEeImpl.MAX_DISPLAYED_SUGGESTIONS (backend caps the embed); keep in sync.
+export const MAX_DISPLAYED_SUGGESTIONS = 3;
 
 const StyledWrapper = styled('div')`
   display: grid;
-  gap: 8px;
   border-radius: 8px;
   background: ${({ theme }) => theme.palette.tokens.background.onDefaultGrey};
+`;
+
+const StyledShowAll = styled('button')`
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 0 0 6px 0;
+  font-size: 13px;
+  font-weight: ${({ theme }) => theme.typography.button.fontWeight};
+  letter-spacing: 0.46px;
+  text-transform: uppercase;
+  color: ${({ theme }) => theme.palette.text.secondary};
+
+  &:hover {
+    color: ${({ theme }) => theme.palette.text.primary};
+  }
 `;
 
 type Props = {
@@ -34,6 +37,7 @@ type Props = {
   suggestions: TranslationSuggestionSimpleModel[];
   isPlural: boolean;
   locale: string;
+  onShowAll?: () => void;
 };
 
 export const SuggestionsFirst = ({
@@ -41,27 +45,34 @@ export const SuggestionsFirst = ({
   suggestions,
   isPlural,
   locale,
+  onShowAll,
 }: Props) => {
   const { t } = useTranslate();
-  const extraCount = count - suggestions.length;
+  const displayed = suggestions.slice(0, MAX_DISPLAYED_SUGGESTIONS);
+  const hasMore = count > displayed.length;
   return (
-    <StyledContainer>
-      <StyledWrapper>
-        {suggestions.map((s) => (
-          <TranslationSuggestion
-            key={s.id}
-            suggestion={s}
-            isPlural={isPlural}
-            locale={locale}
-            maxLines={2}
-          />
-        ))}
-      </StyledWrapper>
-      {Boolean(extraCount) && (
-        <Tooltip title={t('suggestions_other_tooltip')}>
-          <StyledExtra>+{extraCount}</StyledExtra>
-        </Tooltip>
+    <StyledWrapper>
+      {displayed.map((s) => (
+        <TranslationSuggestion
+          key={s.id}
+          suggestion={s}
+          isPlural={isPlural}
+          locale={locale}
+          maxLines={2}
+        />
+      ))}
+      {hasMore && onShowAll && (
+        <StyledShowAll
+          type="button"
+          data-cy="suggestions-show-all"
+          onClick={(e) => {
+            e.stopPropagation();
+            onShowAll();
+          }}
+        >
+          {t('translation_tools_suggestions_show_all_label')}
+        </StyledShowAll>
       )}
-    </StyledContainer>
+    </StyledWrapper>
   );
 };

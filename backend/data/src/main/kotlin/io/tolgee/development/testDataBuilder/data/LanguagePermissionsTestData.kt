@@ -118,6 +118,47 @@ class LanguagePermissionsTestData(
       stateChangeLanguages = mutableSetOf(englishLanguage)
     }
 
+  val suggestManageScopeUser =
+    addUserAccountWithPermissions {
+      scopes = arrayOf(Scope.TRANSLATIONS_VIEW, Scope.TRANSLATION_SUGGESTIONS_MANAGE)
+      type = null
+      suggestManageLanguages = mutableSetOf(englishLanguage)
+    }
+
+  val stateChangeAndSuggestManageScopeUser =
+    addUserAccountWithPermissions {
+      scopes =
+        arrayOf(
+          Scope.TRANSLATIONS_VIEW,
+          Scope.TRANSLATIONS_STATE_EDIT,
+          Scope.TRANSLATION_SUGGESTIONS_MANAGE,
+        )
+      type = null
+      stateChangeLanguages = mutableSetOf(englishLanguage)
+      suggestManageLanguages = mutableSetOf(englishLanguage)
+    }
+
+  val suggestManageMultiLangUser =
+    addUserAccountWithPermissions {
+      scopes = arrayOf(Scope.TRANSLATIONS_VIEW, Scope.TRANSLATION_SUGGESTIONS_MANAGE)
+      type = null
+      suggestManageLanguages = mutableSetOf(englishLanguage, germanLanguage)
+    }
+
+  val suggestScopeUser =
+    addUserAccountWithPermissions {
+      scopes = arrayOf(Scope.TRANSLATIONS_VIEW, Scope.TRANSLATIONS_SUGGEST)
+      type = null
+      suggestLanguages = mutableSetOf(englishLanguage)
+    }
+
+  val suggestMultiLangUser =
+    addUserAccountWithPermissions {
+      scopes = arrayOf(Scope.TRANSLATIONS_VIEW, Scope.TRANSLATIONS_SUGGEST)
+      type = null
+      suggestLanguages = mutableSetOf(englishLanguage, germanLanguage)
+    }
+
   init {
     projectBuilder.apply {
       addApiKey {

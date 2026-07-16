@@ -4,9 +4,12 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
+import io.tolgee.constants.Message
 import io.tolgee.dtos.request.suggestion.SuggestionFilters
 import io.tolgee.ee.data.translationSuggestion.CreateTranslationSuggestionRequest
 import io.tolgee.ee.service.TranslationSuggestionServiceEeImpl
+import io.tolgee.exceptions.LanguageNotPermittedException
+import io.tolgee.exceptions.PermissionException
 import io.tolgee.hateoas.translations.suggestions.TranslationSuggestionAcceptResponse
 import io.tolgee.hateoas.translations.suggestions.TranslationSuggestionModel
 import io.tolgee.hateoas.translations.suggestions.TranslationSuggestionModelAssembler
@@ -65,11 +68,11 @@ class SuggestionController(
     @PathVariable languageId: Long,
     @PathVariable keyId: Long,
   ): PagedModel<TranslationSuggestionModel> {
-    securityService.checkLanguageSuggestPermission(
-      projectHolder.project.id,
+    val projectId = projectHolder.project.id
+    securityService.checkLanguageViewSuggestionsPermission(
+      projectId,
       listOf(languageId),
     )
-    val projectId = projectHolder.project.id
     val suggestions =
       translationSuggestionService.getSuggestionsPaged(
         pageable,
@@ -112,12 +115,8 @@ class SuggestionController(
   }
 
   @DeleteMapping("/{suggestionId:[0-9]+}")
-  @Operation(
-    summary = "Delete suggestion",
-    description = "User can only delete suggestion created by them",
-  )
+  @Operation(summary = "Delete suggestion")
   @AllowApiAccess
-  // user can only delete suggestion created by them; it's checked in the service
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @RequestActivity(ActivityType.DELETE_SUGGESTION)
   @OpenApiOrderExtension(4)
@@ -127,13 +126,28 @@ class SuggestionController(
     @PathVariable suggestionId: Long,
   ) {
     val projectId = projectHolder.project.id
-    translationSuggestionService.deleteSuggestionCreatedByUser(
-      projectId,
-      languageId,
-      keyId,
-      suggestionId,
-      authenticationFacade.authenticatedUser.id,
-    )
+    val suggestion = translationSuggestionService.getSuggestion(projectId, languageId, keyId, suggestionId)
+    checkCanDeleteSuggestion(projectId, suggestion, languageId)
+    translationSuggestionService.deleteSuggestion(suggestion)
+  }
+
+  private fun checkCanDeleteSuggestion(
+    projectId: Long,
+    suggestion: TranslationSuggestion,
+    languageId: Long,
+  ) {
+    if (suggestion.author?.id == authenticationFacade.authenticatedUser.id) {
+      return
+    }
+    try {
+      securityService.checkLanguageSuggestionsManagePermission(projectId, listOf(languageId))
+    } catch (e: LanguageNotPermittedException) {
+      // LanguageNotPermittedException is a PermissionException subtype — must be caught first and
+      // propagated as-is (LANGUAGE_NOT_PERMITTED); the generic arm below rewrites the message.
+      throw e
+    } catch (e: PermissionException) {
+      throw PermissionException(Message.USER_CAN_ONLY_DELETE_HIS_SUGGESTIONS)
+    }
   }
 
   @PutMapping("/{suggestionId:[0-9]+}/decline")

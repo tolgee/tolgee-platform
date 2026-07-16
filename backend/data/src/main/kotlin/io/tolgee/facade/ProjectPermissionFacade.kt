@@ -57,6 +57,11 @@ class ProjectPermissionFacade(
           params.suggestLanguages,
           projectId,
         ),
+      suggestManage =
+        this.getLanguagesAndCheckFromProject(
+          params.suggestManageLanguages,
+          projectId,
+        ),
     )
   }
 }
