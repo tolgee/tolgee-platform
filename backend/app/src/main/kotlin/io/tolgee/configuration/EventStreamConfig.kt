@@ -11,6 +11,7 @@ import tools.jackson.databind.ObjectMapper
 class EventStreamConfig(
   private val objectMapper: ObjectMapper,
 ) : WebMvcConfigurer {
+  @Suppress("DEPRECATION")
   override fun extendMessageConverters(converters: MutableList<HttpMessageConverter<*>>) {
     converters.add(EventStreamHttpMessageConverter(objectMapper))
     converters.add(JavascriptHttpMessageConverter(objectMapper))
