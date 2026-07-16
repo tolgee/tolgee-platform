@@ -1,3 +1,10 @@
+# [3.213.0](https://github.com/tolgee/tolgee-platform/compare/v3.212.1...v3.213.0) (2026-07-16)
+
+
+### Features
+
+* Community Translation v1 ([#3765](https://github.com/tolgee/tolgee-platform/issues/3765)) ([4a4ea3f](https://github.com/tolgee/tolgee-platform/commit/4a4ea3f55a583e8176c13c77dbd039d77aec56d5)), closes [#3770](https://github.com/tolgee/tolgee-platform/issues/3770) [#3771](https://github.com/tolgee/tolgee-platform/issues/3771) [#3776](https://github.com/tolgee/tolgee-platform/issues/3776) [#3785](https://github.com/tolgee/tolgee-platform/issues/3785) [#3774](https://github.com/tolgee/tolgee-platform/issues/3774) [#3775](https://github.com/tolgee/tolgee-platform/issues/3775) [#3770](https://github.com/tolgee/tolgee-platform/issues/3770) [#3777](https://github.com/tolgee/tolgee-platform/issues/3777) [#3792](https://github.com/tolgee/tolgee-platform/issues/3792)
+
 ## [3.212.1](https://github.com/tolgee/tolgee-platform/compare/v3.212.0...v3.212.1) (2026-07-15)
 
 
