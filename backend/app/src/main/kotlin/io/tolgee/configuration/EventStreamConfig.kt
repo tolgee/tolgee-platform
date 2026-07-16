@@ -11,6 +11,7 @@ import tools.jackson.databind.ObjectMapper
 class EventStreamConfig(
   private val objectMapper: ObjectMapper,
 ) : WebMvcConfigurer {
+  // The non-deprecated ServerBuilder API bypasses Spring HATEOAS's HAL converter registration.
   @Suppress("DEPRECATION")
   override fun extendMessageConverters(converters: MutableList<HttpMessageConverter<*>>) {
     converters.add(EventStreamHttpMessageConverter(objectMapper))
