@@ -21,7 +21,13 @@ class PostgresAutostartProperties {
         "This is default option when running Tolgee using Java. " +
         "See [Running with Java](/self_hosting/running_with_java.mdx).\n" +
         "- `EMBEDDED` - Tolgee tries to run it's embedded PostgreSQL " +
-        "which is bundled in the `tolgee/tolgee` Docker image.",
+        "which is bundled in the `tolgee/tolgee` Docker image.\n" +
+        "\n" +
+        "`EMBEDDED` is deprecated. Tolgee v4 removes the bundled PostgreSQL from the " +
+        "`tolgee/tolgee` image, so setups using it have to move to an external database " +
+        "before upgrading. See " +
+        "[Running with Docker](/self_hosting/running_with_docker" +
+        "#running-with-docker-compose-with-external-postgresql-database).",
   )
   var mode: PostgresAutostartMode = PostgresAutostartMode.DOCKER
 
