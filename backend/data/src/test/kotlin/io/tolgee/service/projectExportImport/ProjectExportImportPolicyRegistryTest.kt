@@ -13,6 +13,8 @@ import org.junit.jupiter.api.Test
  */
 class ProjectExportImportPolicyRegistryTest {
   private val fake = "io.tolgee.model.DefinitelyNotAnEntity"
+  private val billingPrefix = "io.tolgee.billing."
+  private val billingEntity = "${billingPrefix}data.model.Invoice"
 
   @Test
   fun `classifies the load-bearing entities as expected`() {
@@ -34,6 +36,21 @@ class ProjectExportImportPolicyRegistryTest {
   }
 
   @Test
+  fun `classifies every billing entity as IGNORED without listing it`() {
+    assertThat(ProjectExportImportPolicyRegistry.policyOf(billingEntity))
+      .isEqualTo(ExportImportPolicy.IGNORED)
+    assertThat(ProjectExportImportPolicyRegistry.policyOf("${billingPrefix}data.model.NotYetWrittenEntity"))
+      .isEqualTo(ExportImportPolicy.IGNORED)
+    assertThat(ProjectExportImportPolicyRegistry.unclassified(setOf(billingEntity, fake)))
+      .containsExactly(fake)
+  }
+
+  @Test
+  fun `the billing prefix does not classify a same-prefixed platform entity`() {
+    assertThat(ProjectExportImportPolicyRegistry.policyOf("io.tolgee.billingsomething.Foo")).isNull()
+  }
+
+  @Test
   fun `staleEntries flags classified names absent from the managed set`() {
     assertThat(ProjectExportImportPolicyRegistry.staleEntries(emptySet()))
       .isNotEmpty
@@ -41,9 +58,40 @@ class ProjectExportImportPolicyRegistryTest {
   }
 
   @Test
+  fun `mayBeDeletedByImport is pinned (only the billing repo reads it, so platform CI cannot see a wrong value)`() {
+    assertThat(ExportImportPolicy.entries.filterNot { it.mayBeDeletedByImport })
+      .containsExactlyInAnyOrder(ExportImportPolicy.USER_REF, ExportImportPolicy.PROJECT_ROOT)
+  }
+
+  @Test
+  fun `isNotGraphCarried is pinned (OWNED is its only divergence from mayBeDeletedByImport)`() {
+    assertThat(ExportImportPolicy.entries.filter { it.isNotGraphCarried })
+      .containsExactlyInAnyOrder(ExportImportPolicy.IGNORED, ExportImportPolicy.SIDE_CHANNEL)
+  }
+
+  @Test
+  fun `no billing entity is listed in the registry (a listed name would be stale on every platform-only build)`() {
+    val listedBillingNames =
+      ProjectExportImportPolicyRegistry.listedClassNames.filter { it.startsWith(billingPrefix) }
+    assertThat(listedBillingNames)
+      .withFailMessage(
+        "Billing entities must not be listed here. Remove: %s",
+        listedBillingNames,
+      ).isEmpty()
+  }
+
+  @Test
   fun `associationViolation rejects an unclassified target regardless of droppability`() {
     assertThat(ProjectExportImportPolicyRegistry.associationViolation(fake, droppable = true)).isNotNull()
     assertThat(ProjectExportImportPolicyRegistry.associationViolation(fake, droppable = false)).isNotNull()
+  }
+
+  @Test
+  fun `associationViolation treats a billing target as IGNORED rather than unclassified`() {
+    assertThat(ProjectExportImportPolicyRegistry.associationViolation(billingEntity, droppable = false))
+      .isNotNull()
+    assertThat(ProjectExportImportPolicyRegistry.associationViolation(billingEntity, droppable = true))
+      .isNull()
   }
 
   @Test

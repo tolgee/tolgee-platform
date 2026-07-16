@@ -195,23 +195,42 @@ object ProjectExportImportPolicyRegistry {
       )
     }
 
-  private fun MutableMap<String, ExportImportPolicy>.owned(vararg classes: KClass<*>) =
-    classes.forEach { classify(it, ExportImportPolicy.OWNED) }
+  /**
+   * Exporting a billing entity would break importing the project onto an instance of another edition
+   * (self-hosted -> cloud), so they all need to be IGNORED.
+   */
+  fun policyOf(entityClassName: String): ExportImportPolicy? {
+    if (isBillingEntity(entityClassName)) return ExportImportPolicy.IGNORED
+    return policies[entityClassName]
+  }
 
-  private fun MutableMap<String, ExportImportPolicy>.ignored(vararg classes: KClass<*>) =
-    classes.forEach { classify(it, ExportImportPolicy.IGNORED) }
+  fun isBillingEntity(entityClassName: String): Boolean {
+    return entityClassName.startsWith(BILLING_ENTITY_PACKAGE_PREFIX)
+  }
 
-  private fun MutableMap<String, ExportImportPolicy>.ignoredByName(vararg classNames: String) =
-    classNames.forEach { classifyUnique(it, ExportImportPolicy.IGNORED) }
+  private fun MutableMap<String, ExportImportPolicy>.owned(vararg classes: KClass<*>) {
+    return classes.forEach { classify(it, ExportImportPolicy.OWNED) }
+  }
+
+  private fun MutableMap<String, ExportImportPolicy>.ignored(vararg classes: KClass<*>) {
+    return classes.forEach { classify(it, ExportImportPolicy.IGNORED) }
+  }
+
+  private fun MutableMap<String, ExportImportPolicy>.ignoredByName(vararg classNames: String) {
+    return classNames.forEach { classifyUnique(it, ExportImportPolicy.IGNORED) }
+  }
 
   private fun MutableMap<String, ExportImportPolicy>.classify(
     klass: KClass<*>,
     policy: ExportImportPolicy,
+  ) {
     // Key by the JVM binary name (java.name) to match every lookup, which uses EntityType.javaType.name
     // — qualifiedName differs for a nested @Entity (`Outer.Inner` vs `Outer$Inner`).
-  ) = classifyUnique(klass.java.name, policy)
+    return classifyUnique(klass.java.name, policy)
+  }
 
-  fun policyOf(entityClassName: String): ExportImportPolicy? = policies[entityClassName]
+  val listedClassNames: Set<String>
+    get() = policies.keys
 
   val ownedClassNames: Set<String>
     get() = policies.filterValues { it == ExportImportPolicy.OWNED }.keys
@@ -219,9 +238,13 @@ object ProjectExportImportPolicyRegistry {
   val sideChannelClassNames: Set<String>
     get() = policies.filterValues { it == ExportImportPolicy.SIDE_CHANNEL }.keys
 
-  fun unclassified(managedEntityClassNames: Set<String>): Set<String> = managedEntityClassNames - policies.keys
+  fun unclassified(managedEntityClassNames: Set<String>): Set<String> {
+    return managedEntityClassNames.filterTo(mutableSetOf()) { policyOf(it) == null }
+  }
 
-  fun staleEntries(managedEntityClassNames: Set<String>): Set<String> = policies.keys - managedEntityClassNames
+  fun staleEntries(managedEntityClassNames: Set<String>): Set<String> {
+    return policies.keys - managedEntityClassNames
+  }
 
   /**
    * Validate one association of an OWNED entity pointing at [targetClassName]. [droppable] is true
@@ -238,6 +261,8 @@ object ProjectExportImportPolicyRegistry {
     }
     return null
   }
+
+  private const val BILLING_ENTITY_PACKAGE_PREFIX = "io.tolgee.billing."
 }
 
 internal fun MutableMap<String, ExportImportPolicy>.classifyUnique(
