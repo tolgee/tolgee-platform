@@ -33,9 +33,10 @@ tasks.register('docker') {
     dependsOn("dockerPrepare")
 }
 
-// Builds the slim Docker image for local development.
-// Single platform, no push, tagged as tolgee/tolgee:slim.
-// Uses Dockerfile.slim — JRE-only base, no embedded postgres.
+// Builds the slim Docker image, tagged as tolgee/tolgee:slim.
+// Uses Dockerfile.slim - JRE-only base, no embedded postgres.
+// The slim image is not published; it is built on demand by the EE image
+// build in the billing repo and by the slim smoke test.
 tasks.register('dockerSlim') {
     doLast {
         exec {
@@ -43,8 +44,7 @@ tasks.register('dockerSlim') {
             commandLine "docker", "build", ".",
                 "-f", "Dockerfile.slim",
                 "-t", "tolgee/tolgee:slim",
-                "--build-arg", "OTEL_AGENT_VERSION=${opentelemetryJavaagentVersion}",
-                "--cache-from", "type=registry,ref=tolgee/tolgee:slim"
+                "--build-arg", "OTEL_AGENT_VERSION=${opentelemetryJavaagentVersion}"
         }
     }
     dependsOn("dockerPrepare")
@@ -66,42 +66,6 @@ task dockerPublish {
         def cacheTo = System.getenv('DOCKER_CACHE_TO')
 
         def commandParams = ["docker", "buildx", "build", ".",
-            "-t", tag,
-            "--build-arg", "OTEL_AGENT_VERSION=${opentelemetryJavaagentVersion}",
-            "--platform", "linux/arm64,linux/amd64",
-            "--push"]
-
-        if (cacheFrom) {
-            commandParams += ["--cache-from", cacheFrom]
-        }
-        if (cacheTo) {
-            commandParams += ["--cache-to", cacheTo]
-        }
-
-        exec {
-            workingDir dockerPath
-            commandLine commandParams
-        }
-    }
-    dependsOn("dockerPrepare")
-}
-
-// Builds and pushes the multi-platform slim Docker image for CI.
-// Uses Dockerfile.slim — JRE-only base, no embedded postgres.
-// Tag mapping:
-//   - VERSION=latest   -> tolgee/tolgee:slim         (floating slim tag)
-//   - VERSION=vX.Y.Z   -> tolgee/tolgee:vX.Y.Z-slim  (versioned slim tag)
-// Other env vars match dockerPublish (DOCKER_IMAGE, DOCKER_CACHE_FROM, DOCKER_CACHE_TO).
-task dockerPublishSlim {
-    doLast {
-        def version = System.getenv('VERSION') ?: 'latest'
-        def imageName = System.getenv('DOCKER_IMAGE') ?: 'tolgee/tolgee'
-        def tag = version == 'latest' ? "${imageName}:slim" : "${imageName}:${version}-slim"
-        def cacheFrom = System.getenv('DOCKER_CACHE_FROM')
-        def cacheTo = System.getenv('DOCKER_CACHE_TO')
-
-        def commandParams = ["docker", "buildx", "build", ".",
-            "-f", "Dockerfile.slim",
             "-t", tag,
             "--build-arg", "OTEL_AGENT_VERSION=${opentelemetryJavaagentVersion}",
             "--platform", "linux/arm64,linux/amd64",

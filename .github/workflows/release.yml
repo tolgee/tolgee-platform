@@ -63,8 +63,6 @@ jobs:
           docker buildx create --use
           ./gradlew dockerPublish
           VERSION=latest ./gradlew dockerPublish
-          ./gradlew dockerPublishSlim
-          VERSION=latest ./gradlew dockerPublishSlim
         env:
           VERSION: ${{ steps.version.outputs.VERSION }}
           TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}

@@ -18,8 +18,8 @@ class EmbeddedPostgresDeprecationCommandLineRunner(
     }
 
     logger.warn(
-      "The embedded PostgreSQL bundled in the tolgee/tolgee image is deprecated and will be removed in a future " +
-        "major version. Migrate to an external database and use the slim tolgee/tolgee image. " +
+      "The embedded PostgreSQL bundled in the tolgee/tolgee image is deprecated and will be removed in Tolgee v4. " +
+        "Migrate to an external database before upgrading. " +
         "See https://docs.tolgee.io/platform/self_hosting/running_with_docker" +
         "#running-with-docker-compose-with-external-postgresql-database",
     )
