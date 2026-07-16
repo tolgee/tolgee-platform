@@ -1,6 +1,6 @@
 package io.tolgee.model.batch
 
-/** Stored by ordinal in Redis batch job state: append only — reordering silently restatuses in-flight chunks. */
+/** Ordinal-serialized by [io.tolgee.batch.state.RedisBatchJobStateStorage] — do not reorder. */
 enum class BatchJobChunkExecutionStatus(
   val completed: Boolean,
 ) {
