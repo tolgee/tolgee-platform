@@ -6,6 +6,7 @@ import io.tolgee.model.enums.Scope
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
+import org.redisson.client.codec.BaseCodec
 import org.redisson.client.codec.Codec
 import org.redisson.client.handler.State
 import org.redisson.codec.Kryo5Codec
@@ -37,8 +38,10 @@ class EnumNameKryo5CodecTest {
 
   @Test
   fun `keeps writing names when Redisson rebinds the codec to a classloader`() {
-    val rebound = EnumNameKryo5Codec(javaClass.classLoader, codec)
+    val rebound = BaseCodec.copy(javaClass.classLoader, codec)
 
+    assertThat(rebound).isInstanceOf(EnumNameKryo5Codec::class.java)
+    assertThat(rebound).isNotSameAs(codec)
     assertThat(rebound.encodeToBytes(Scope.ADMIN).stripKryoHighBits()).contains("ADMIN")
     assertThat(rebound.roundTrip(Scope.ADMIN)).isEqualTo(Scope.ADMIN)
   }
