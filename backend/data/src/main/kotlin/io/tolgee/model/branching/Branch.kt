@@ -17,6 +17,7 @@ import jakarta.persistence.OneToMany
 import jakarta.persistence.OrderBy
 import jakarta.persistence.Table
 import org.hibernate.annotations.ColumnDefault
+import org.hibernate.annotations.SQLRestriction
 import java.util.Date
 
 /**
@@ -58,8 +59,11 @@ class Branch(
   @Column(name = "revision")
   @ColumnDefault("0")
   var revision: Int = 0,
+  // Restricted to the single latest merge (see lastMerge); a fetch join can't filter its collection
+  // in Hibernate 7, so the restriction lives here instead of in the repository query.
   @OneToMany(targetEntity = BranchMerge::class, mappedBy = "sourceBranch", fetch = FetchType.LAZY)
   @OrderBy("createdAt DESC")
+  @SQLRestriction("id = (select max(m.id) from branch_merge m where m.source_branch_id = source_branch_id)")
   var merges: MutableList<BranchMerge> = mutableListOf(),
   var deletedAt: Date? = null,
 ) : StandardAuditModel() {
