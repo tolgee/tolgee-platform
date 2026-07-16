@@ -1,7 +1,11 @@
 package io.tolgee.cache
 
+import com.esotericsoftware.kryo.KryoException
+import io.netty.buffer.ByteBuf
 import io.netty.buffer.ByteBufUtil
 import io.tolgee.configuration.EnumNameKryo5Codec
+import io.tolgee.dtos.cacheable.PermissionDto
+import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -13,19 +17,20 @@ import org.redisson.codec.Kryo5Codec
 
 class EnumNameKryo5CodecTest {
   private val codec = EnumNameKryo5Codec()
+  private val ordinalCodec = Kryo5Codec()
 
   @Test
   fun `writes enum constant name instead of ordinal`() {
     assertThat(codec.encodeToBytes(Scope.ADMIN).stripKryoHighBits()).contains("ADMIN")
-    assertThat(Kryo5Codec().encodeToBytes(Scope.ADMIN).stripKryoHighBits()).doesNotContain("ADMIN")
+    assertThat(ordinalCodec.encodeToBytes(Scope.ADMIN).stripKryoHighBits()).doesNotContain("ADMIN")
   }
 
   @Test
   fun `does not read entries written by the ordinal codec`() {
-    assertThatThrownBy { codec.decode(Kryo5Codec().encode(Scope.ADMIN)) }.isInstanceOf(Throwable::class.java)
+    assertThatThrownBy { codec.decode(ordinalCodec.encode(Scope.ADMIN)) }.isInstanceOf(KryoException::class.java)
     assertThatThrownBy {
-      codec.decode(Kryo5Codec().encode(arrayOf(Scope.ADMIN, Scope.KEYS_EDIT)))
-    }.isInstanceOf(Throwable::class.java)
+      codec.decode(ordinalCodec.encode(arrayOf(Scope.ADMIN, Scope.KEYS_EDIT)))
+    }.isInstanceOf(KryoException::class.java)
   }
 
   @Test
@@ -34,6 +39,30 @@ class EnumNameKryo5CodecTest {
     assertThat(codec.roundTrip(Scope.ADMIN)).isEqualTo(Scope.ADMIN)
     assertThat(codec.roundTrip(ArrayList(scopes))).isEqualTo(scopes)
     assertThat(codec.roundTrip(scopes.toTypedArray())).isEqualTo(scopes.toTypedArray())
+  }
+
+  @Test
+  fun `round trips enum fields of a cached DTO, including a null enum`() {
+    val dto =
+      PermissionDto(
+        id = 1,
+        userId = 2,
+        invitationId = null,
+        scopes = arrayOf(Scope.ADMIN, Scope.KEYS_EDIT),
+        projectId = 3,
+        organizationId = null,
+        type = null,
+        granular = true,
+        viewLanguageIds = null,
+        stateChangeLanguageIds = null,
+        suggestLanguageIds = null,
+        suggestManageLanguageIds = null,
+      )
+
+    assertThat(codec.roundTrip(dto)).isEqualTo(dto)
+    assertThat(codec.roundTrip(dto.copy(type = ProjectPermissionType.MANAGE))).isEqualTo(
+      dto.copy(type = ProjectPermissionType.MANAGE),
+    )
   }
 
   @Test
@@ -48,7 +77,7 @@ class EnumNameKryo5CodecTest {
 
   private fun Codec.encode(value: Any) = valueEncoder.encode(value)
 
-  private fun Codec.decode(buffer: io.netty.buffer.ByteBuf) = valueDecoder.decode(buffer, State())
+  private fun Codec.decode(buffer: ByteBuf) = valueDecoder.decode(buffer, State())
 
   private fun Codec.encodeToBytes(value: Any): ByteArray = ByteBufUtil.getBytes(encode(value))
 
