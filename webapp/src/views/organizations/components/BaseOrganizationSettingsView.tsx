@@ -117,16 +117,10 @@ export const BaseOrganizationSettingsView: React.FC<
     });
     if (config.billing.enabled) {
       menuItems.push({
-        link: LINKS.ORGANIZATION_SUBSCRIPTIONS.build({
+        link: LINKS.ORGANIZATION_BILLING.build({
           [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
         }),
-        label: t('organization_menu_subscriptions'),
-      });
-      menuItems.push({
-        link: LINKS.ORGANIZATION_INVOICES.build({
-          [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
-        }),
-        label: t('organization_menu_invoices'),
+        label: t('organization_menu_billing', 'Billing'),
       });
       if (config.internalControllerEnabled) {
         menuItems.push({
