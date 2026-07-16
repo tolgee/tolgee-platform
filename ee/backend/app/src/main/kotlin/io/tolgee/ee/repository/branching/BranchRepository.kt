@@ -13,10 +13,9 @@ interface BranchRepository : BranchRepositoryOss {
     """
     select distinct b
     from Branch b
-      left join fetch b.merges m
+      left join fetch b.merges
     where b.project.id = :projectId and b.deletedAt IS NULL
       and (:search is null or lower(b.name) like lower(concat('%', cast(:search AS text), '%')))
-      and (m.id is null or m.id = (select max(m2.id) from BranchMerge m2 where m2.sourceBranch.id = b.id))
     order by b.isDefault desc, b.createdAt desc, b.id desc
   """,
   )
@@ -30,9 +29,8 @@ interface BranchRepository : BranchRepositoryOss {
     """
     select b
     from Branch b
-      left join fetch b.merges m
+      left join fetch b.merges
     where b.project.id = :projectId and b.id = :branchId and b.deletedAt IS NULL
-      and (m.id is null or m.id = (select max(m2.id) from BranchMerge m2 where m2.sourceBranch.id = b.id))
   """,
   )
   fun findActiveWithLatestMerge(
