@@ -32,7 +32,7 @@ class RedissonCacheConfiguration(
     caches.forEach {
       config[it] = CacheConfig(tolgeeProperties.cache.defaultTtl, tolgeeProperties.cache.defaultTtl)
     }
-    val cacheManager = RedissonSpringCacheManager(redissonClient, config)
+    val cacheManager = RedissonSpringCacheManager(redissonClient, config, EnumNameKryo5Codec())
     return TransactionAwareCacheManagerProxy(cacheManager)
   }
 }
