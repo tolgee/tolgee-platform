@@ -59,10 +59,12 @@ class EnumNameKryo5CodecTest {
         suggestManageLanguageIds = null,
       )
 
+    val withType = dto.copy(type = ProjectPermissionType.MANAGE)
+
     assertThat(codec.roundTrip(dto)).isEqualTo(dto)
-    assertThat(codec.roundTrip(dto.copy(type = ProjectPermissionType.MANAGE))).isEqualTo(
-      dto.copy(type = ProjectPermissionType.MANAGE),
-    )
+    assertThat(codec.roundTrip(withType)).isEqualTo(withType)
+    assertThat(codec.encodeToBytes(dto).stripKryoHighBits()).contains("ADMIN")
+    assertThat(ordinalCodec.encodeToBytes(dto).stripKryoHighBits()).doesNotContain("ADMIN")
   }
 
   @Test

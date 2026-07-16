@@ -53,10 +53,10 @@ class CacheWithRedisTest : AbstractCacheTest() {
   @Test
   fun `cache manager serializes enums by name`() {
     val codec =
-      RedissonSpringCacheManager::class.java.getDeclaredField("codec").run {
-        this.isAccessible = true
-        this.get(unwrappedCacheManager)
-      }
+      RedissonSpringCacheManager::class.java
+        .getDeclaredField("codec")
+        .apply { isAccessible = true }
+        .get(unwrappedCacheManager)
 
     assertThat(codec).isInstanceOf(EnumNameKryo5Codec::class.java)
   }
