@@ -26,8 +26,8 @@ class PostgresAutostartProperties {
         "`EMBEDDED` is deprecated. Tolgee v4 removes the bundled PostgreSQL from the " +
         "`tolgee/tolgee` image, so setups using it have to move to an external database " +
         "before upgrading. See " +
-        "[Running with Docker](/self_hosting/running_with_docker" +
-        "#running-with-docker-compose-with-external-postgresql-database).",
+        "[Migrate from the bundled database](/self_hosting/running_with_docker" +
+        "#migrate-from-the-bundled-database).",
   )
   var mode: PostgresAutostartMode = PostgresAutostartMode.DOCKER
 
