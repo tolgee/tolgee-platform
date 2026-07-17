@@ -10,6 +10,7 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.node
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
+import net.javacrumbs.jsonunit.core.internal.Node.JsonMap
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -274,15 +275,14 @@ class OrganizationFloorAccessTest : AuthorizedControllerTest() {
   @Test
   fun `a public-project floor viewer does not leak into org member management`() {
     userAccount = testData.otherOrgOwner
-    val response =
-      performAuthGet("/v2/organizations/${testData.otherOrg.id}/users?size=50").andIsOk.andReturn()
-    val usernames =
-      jacksonObjectMapper()
-        .readTree(response.response.contentAsString)
-        .path("_embedded")
-        .path("usersInOrganization")
-        .map { it.path("username").asText() }
-    usernames.assert.doesNotContain("stored_guest")
+    performAuthGet("/v2/organizations/${testData.otherOrg.id}/users?size=50").andIsOk.andAssertThatJson {
+      node("_embedded.usersInOrganization") {
+        isArray.isNotEmpty()
+        isArray.allSatisfy {
+          (it as JsonMap)["username"].assert.isNotEqualTo("stored_guest")
+        }
+      }
+    }
   }
 
   @Test
