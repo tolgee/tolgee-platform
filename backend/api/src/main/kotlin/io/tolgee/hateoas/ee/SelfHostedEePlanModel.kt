@@ -21,7 +21,7 @@ open class SelfHostedEePlanModel(
   val hasYearlyPrice: Boolean = false,
   val free: Boolean,
   val nonCommercial: Boolean,
-  val isPayAsYouGo: Boolean,
+  val isPayAsYouGo: Boolean = false,
   val archivedAt: Date? = null,
 ) : RepresentationModel<SelfHostedEePlanModel>() {
   /**
