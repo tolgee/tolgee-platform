@@ -504,7 +504,7 @@ jobs:
       contents: read
     services:
       postgres:
-        image: postgres:13
+        image: postgres:17
         env:
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: postgres
@@ -531,9 +531,6 @@ jobs:
         env:
           SKIP_SERVER_BUILD: true
 
-      # The slim image bundles no postgres server — must connect to the service
-      # container above. `--network host` puts the app on the runner's network
-      # so localhost:5432 resolves to the mapped postgres port.
       - name: Start slim image
         run: |
           docker run -d --name tolgee-slim --network host \
