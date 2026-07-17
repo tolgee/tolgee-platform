@@ -57,6 +57,14 @@ export interface paths {
     /** Returns current project batch job locks from Redis or local storage based on configuration */
     get: operations["getProjectLocks"];
   };
+  "/v2/administration/projects/{projectId}/export": {
+    /** Exports the whole project (content, branches, tasks, screenshots, settings) as a self-contained zip that can be imported onto a project on another instance running the same Tolgee version. */
+    get: operations["exportProject"];
+  };
+  "/v2/administration/projects/{projectId}/import": {
+    /** Wipes ALL in-scope content of this project and replaces it with the uploaded export zip (mirror / wipe-and-replace). The zip must come from an instance running the same Tolgee version. Users are matched by username (case-insensitive); content authored by a user not present on this instance is attributed to the importing admin. The project must be quiescent during the import — concurrent edits to it are not supported. Setting `ignoreVersion` bypasses the version check — unsupported: a cross-version import may complete yet silently corrupt the project's data. */
+    post: operations["importProject"];
+  };
   "/v2/administration/users": {
     get: operations["getUsers"];
   };
@@ -811,7 +819,6 @@ export interface paths {
     post: operations["createSuggestion"];
   };
   "/v2/projects/{projectId}/languages/{languageId}/key/{keyId}/suggestion/{suggestionId}": {
-    /** User can only delete suggestion created by them */
     delete: operations["deleteSuggestion"];
   };
   "/v2/projects/{projectId}/languages/{languageId}/key/{keyId}/suggestion/{suggestionId}/accept": {
@@ -876,6 +883,10 @@ export interface paths {
     get: operations["getPrompt"];
     put: operations["updatePrompt"];
     delete: operations["deletePrompt"];
+  };
+  "/v2/projects/{projectId}/publishing": {
+    /** Marks the project as public or private. Only the organization owner or a server admin can change this. */
+    put: operations["setProjectPublic"];
   };
   "/v2/projects/{projectId}/qa-settings": {
     get: operations["getSettings"];
@@ -1178,6 +1189,10 @@ export interface paths {
     /** Get machine translation providers */
     get: operations["getInfo_4"];
   };
+  "/v2/public/projects/with-stats": {
+    /** Returns all public projects (including statistics), discoverable by anyone — no authentication required */
+    get: operations["getAllPublicWithStatistics"];
+  };
   "/v2/public/scope-info/hierarchy": {
     get: operations["getHierarchy"];
   };
@@ -1407,6 +1422,7 @@ export interface components {
         | "translations.view"
         | "translations.edit"
         | "translations.suggest"
+        | "translation-suggestions.manage"
         | "keys.edit"
         | "screenshots.upload"
         | "screenshots.delete"
@@ -1440,6 +1456,7 @@ export interface components {
         | "all.view"
         | "branch.management"
         | "branch.protected-modify"
+        | "organization-quotas.view"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -1457,6 +1474,14 @@ export interface components {
        * ]
        */
       suggestLanguageIds?: number[];
+      /**
+       * @description List of languages user can manage suggestions for. If null, managing suggestions for all languages is permitted.
+       * @example [
+       *   200001,
+       *   200004
+       * ]
+       */
+      suggestManageLanguageIds?: number[];
       /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example [
@@ -2093,7 +2118,8 @@ export interface components {
         | "ORGANIZATION_OWNER"
         | "NONE"
         | "SERVER_ADMIN"
-        | "SERVER_SUPPORTER";
+        | "SERVER_SUPPORTER"
+        | "COMMUNITY";
       permissionModel?: components["schemas"]["PermissionModel"];
       /**
        * @deprecated
@@ -2117,6 +2143,7 @@ export interface components {
         | "translations.view"
         | "translations.edit"
         | "translations.suggest"
+        | "translation-suggestions.manage"
         | "keys.edit"
         | "screenshots.upload"
         | "screenshots.delete"
@@ -2150,6 +2177,7 @@ export interface components {
         | "all.view"
         | "branch.management"
         | "branch.protected-modify"
+        | "organization-quotas.view"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -2167,6 +2195,14 @@ export interface components {
        * ]
        */
       suggestLanguageIds?: number[];
+      /**
+       * @description List of languages user can manage suggestions for. If null, managing suggestions for all languages is permitted.
+       * @example [
+       *   200001,
+       *   200004
+       * ]
+       */
+      suggestManageLanguageIds?: number[];
       /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example [
@@ -2900,6 +2936,8 @@ export interface components {
         | "request_validation_error"
         | "filter_by_value_state_not_valid"
         | "filter_by_value_qa_check_type_not_valid"
+        | "filter_pattern_not_valid"
+        | "filter_pattern_language_not_valid"
         | "import_has_expired"
         | "tag_not_from_project"
         | "translation_text_too_long"
@@ -3141,6 +3179,7 @@ export interface components {
         | "translation_memory_import_empty"
         | "llm_content_filter"
         | "llm_provider_empty_response"
+        | "llm_provider_max_tokens_exceeded"
         | "label_not_found"
         | "label_not_from_project"
         | "label_already_exists"
@@ -3177,7 +3216,10 @@ export interface components {
         | "qa_checks_not_enabled"
         | "plan_migration_not_found"
         | "plan_has_migrations"
-        | "source_and_target_plan_must_be_different";
+        | "source_and_target_plan_must_be_different"
+        | "project_import_version_mismatch"
+        | "project_import_missing_project_json"
+        | "project_import_corrupt_archive";
       params?: unknown[];
     };
     ExistenceEntityDescription: {
@@ -3412,6 +3454,7 @@ export interface components {
         | "translations.view"
         | "translations.edit"
         | "translations.suggest"
+        | "translation-suggestions.manage"
         | "keys.edit"
         | "screenshots.upload"
         | "screenshots.delete"
@@ -3444,7 +3487,8 @@ export interface components {
         | "translation-labels.assign"
         | "all.view"
         | "branch.management"
-        | "branch.protected-modify";
+        | "branch.protected-modify"
+        | "organization-quotas.view";
     };
     IdentifyRequest: {
       anonymousUserId: string;
@@ -4905,6 +4949,7 @@ export interface components {
         | "translations.view"
         | "translations.edit"
         | "translations.suggest"
+        | "translation-suggestions.manage"
         | "keys.edit"
         | "screenshots.upload"
         | "screenshots.delete"
@@ -4938,6 +4983,7 @@ export interface components {
         | "all.view"
         | "branch.management"
         | "branch.protected-modify"
+        | "organization-quotas.view"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -4955,6 +5001,14 @@ export interface components {
        * ]
        */
       suggestLanguageIds?: number[];
+      /**
+       * @description List of languages user can manage suggestions for. If null, managing suggestions for all languages is permitted.
+       * @example [
+       *   200001,
+       *   200004
+       * ]
+       */
+      suggestManageLanguageIds?: number[];
       /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example [
@@ -5001,6 +5055,7 @@ export interface components {
         | "translations.view"
         | "translations.edit"
         | "translations.suggest"
+        | "translation-suggestions.manage"
         | "keys.edit"
         | "screenshots.upload"
         | "screenshots.delete"
@@ -5034,6 +5089,7 @@ export interface components {
         | "all.view"
         | "branch.management"
         | "branch.protected-modify"
+        | "organization-quotas.view"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -5051,6 +5107,14 @@ export interface components {
        * ]
        */
       suggestLanguageIds?: number[];
+      /**
+       * @description List of languages user can manage suggestions for. If null, managing suggestions for all languages is permitted.
+       * @example [
+       *   200001,
+       *   200004
+       * ]
+       */
+      suggestManageLanguageIds?: number[];
       /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example [
@@ -5384,6 +5448,8 @@ export interface components {
       stateChangeLanguages?: number[];
       /** @description Languages user can suggest translation */
       suggestLanguages?: number[];
+      /** @description Languages user can manage suggestions for */
+      suggestManageLanguages?: number[];
       /** @description Languages user can translate to */
       translateLanguages?: number[];
       /** @enum {string} */
@@ -5419,6 +5485,8 @@ export interface components {
       organizationOwner?: components["schemas"]["SimpleOrganizationModel"];
       /** @enum {string} */
       organizationRole?: "MEMBER" | "OWNER" | "MAINTAINER";
+      /** @description Whether the project is public — discoverable and open to community suggestions */
+      public: boolean;
       slug?: string;
       /**
        * @description Suggestions for translations
@@ -5514,6 +5582,8 @@ export interface components {
       organizationOwner?: components["schemas"]["SimpleOrganizationModel"];
       /** @enum {string} */
       organizationRole?: "MEMBER" | "OWNER" | "MAINTAINER";
+      /** @description Whether the project is public — discoverable and open to community suggestions */
+      public: boolean;
       slug?: string;
       stats: components["schemas"]["ProjectStatistics"];
     };
@@ -6276,6 +6346,10 @@ export interface components {
        */
       description?: string;
     };
+    SetProjectPublicRequest: {
+      /** @description Whether the project should be public (discoverable and open to community suggestions) */
+      public: boolean;
+    };
     SetTranslationsResponseModel: {
       /**
        * Format: int64
@@ -6722,6 +6796,8 @@ export interface components {
         | "request_validation_error"
         | "filter_by_value_state_not_valid"
         | "filter_by_value_qa_check_type_not_valid"
+        | "filter_pattern_not_valid"
+        | "filter_pattern_language_not_valid"
         | "import_has_expired"
         | "tag_not_from_project"
         | "translation_text_too_long"
@@ -6963,6 +7039,7 @@ export interface components {
         | "translation_memory_import_empty"
         | "llm_content_filter"
         | "llm_provider_empty_response"
+        | "llm_provider_max_tokens_exceeded"
         | "label_not_found"
         | "label_not_from_project"
         | "label_already_exists"
@@ -6999,7 +7076,10 @@ export interface components {
         | "qa_checks_not_enabled"
         | "plan_migration_not_found"
         | "plan_has_migrations"
-        | "source_and_target_plan_must_be_different";
+        | "source_and_target_plan_must_be_different"
+        | "project_import_version_mismatch"
+        | "project_import_missing_project_json"
+        | "project_import_corrupt_archive";
       params?: unknown[];
       success: boolean;
     };
@@ -8374,6 +8454,94 @@ export interface operations {
       404: {
         content: {
           "application/json": string;
+        };
+      };
+    };
+  };
+  /** Exports the whole project (content, branches, tasks, screenshots, settings) as a self-contained zip that can be imported onto a project on another instance running the same Tolgee version. */
+  exportProject: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["StreamingResponseBody"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  /** Wipes ALL in-scope content of this project and replaces it with the uploaded export zip (mirror / wipe-and-replace). The zip must come from an instance running the same Tolgee version. Users are matched by username (case-insensitive); content authored by a user not present on this instance is attributed to the importing admin. The project must be quiescent during the import — concurrent edits to it are not supported. Setting `ignoreVersion` bypasses the version check — unsupported: a cross-version import may complete yet silently corrupt the project's data. */
+  importProject: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+      query: {
+        /** Bypass the schema-version check. Unsupported; intended only for cross-version admin recovery — the import may complete yet silently corrupt data. */
+        ignoreVersion?: boolean;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          /** Format: binary */
+          file: string;
         };
       };
     };
@@ -17303,6 +17471,113 @@ export interface operations {
          * To filter default namespace, set to empty string.
          */
         filterNoNamespace?: string[];
+        /**
+         * Selects only keys with name matching the provided pattern.
+         *
+         * Pattern syntax: `*` matches any sequence of characters
+         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * Matching is case-insensitive. `%` and `_` are matched literally.
+         * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
+         */
+        filterKeyPattern?: string[];
+        /**
+         * Selects only keys with name not matching the provided pattern.
+         *
+         * Pattern syntax: `*` matches any sequence of characters
+         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * Matching is case-insensitive. `%` and `_` are matched literally.
+         * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
+         */
+        filterNoKeyPattern?: string[];
+        /**
+         * Selects only keys with description matching the provided pattern.
+         * Keys without a description never match.
+         *
+         * Pattern syntax: `*` matches any sequence of characters
+         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * Matching is case-insensitive. `%` and `_` are matched literally.
+         * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
+         */
+        filterDescriptionPattern?: string[];
+        /**
+         * Selects only keys with description not matching the provided pattern.
+         * Keys without a description always match.
+         *
+         * Pattern syntax: `*` matches any sequence of characters
+         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * Matching is case-insensitive. `%` and `_` are matched literally.
+         * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
+         */
+        filterNoDescriptionPattern?: string[];
+        /**
+         * Selects only keys with namespace matching the provided pattern.
+         * Keys in the default namespace never match.
+         *
+         * Pattern syntax: `*` matches any sequence of characters
+         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * Matching is case-insensitive. `%` and `_` are matched literally.
+         * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
+         */
+        filterNamespacePattern?: string[];
+        /**
+         * Selects only keys with namespace not matching the provided pattern.
+         * Keys in the default namespace always match.
+         *
+         * Pattern syntax: `*` matches any sequence of characters
+         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * Matching is case-insensitive. `%` and `_` are matched literally.
+         * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
+         */
+        filterNoNamespacePattern?: string[];
+        /**
+         * Selects only keys with a translation text matching the provided pattern,
+         * in the format: languageTag,pattern. Use `*` as the language tag to match any of the returned languages.
+         * The language tag is matched case-insensitively and must be included in the returned languages,
+         * otherwise the request fails with 400.
+         *
+         * Pattern syntax: `*` matches any sequence of characters
+         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * Matching is case-insensitive. `%` and `_` are matched literally.
+         * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
+         */
+        filterTranslationPattern?: string[];
+        /**
+         * Selects only keys with no translation text matching the provided pattern,
+         * in the format: languageTag,pattern. Use `*` as the language tag to match against any of the returned
+         * languages. Keys with no translation in the specified language always match.
+         * The language tag is matched case-insensitively and must be included in the returned languages,
+         * otherwise the request fails with 400.
+         *
+         * Pattern syntax: `*` matches any sequence of characters
+         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * Matching is case-insensitive. `%` and `_` are matched literally.
+         * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
+         */
+        filterNoTranslationPattern?: string[];
         /** Selects only keys with provided tag */
         filterTag?: string[];
         /** Selects only keys without provided tag */
@@ -17443,6 +17718,113 @@ export interface operations {
          * To filter default namespace, set to empty string.
          */
         filterNoNamespace?: string[];
+        /**
+         * Selects only keys with name matching the provided pattern.
+         *
+         * Pattern syntax: `*` matches any sequence of characters
+         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * Matching is case-insensitive. `%` and `_` are matched literally.
+         * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
+         */
+        filterKeyPattern?: string[];
+        /**
+         * Selects only keys with name not matching the provided pattern.
+         *
+         * Pattern syntax: `*` matches any sequence of characters
+         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * Matching is case-insensitive. `%` and `_` are matched literally.
+         * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
+         */
+        filterNoKeyPattern?: string[];
+        /**
+         * Selects only keys with description matching the provided pattern.
+         * Keys without a description never match.
+         *
+         * Pattern syntax: `*` matches any sequence of characters
+         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * Matching is case-insensitive. `%` and `_` are matched literally.
+         * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
+         */
+        filterDescriptionPattern?: string[];
+        /**
+         * Selects only keys with description not matching the provided pattern.
+         * Keys without a description always match.
+         *
+         * Pattern syntax: `*` matches any sequence of characters
+         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * Matching is case-insensitive. `%` and `_` are matched literally.
+         * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
+         */
+        filterNoDescriptionPattern?: string[];
+        /**
+         * Selects only keys with namespace matching the provided pattern.
+         * Keys in the default namespace never match.
+         *
+         * Pattern syntax: `*` matches any sequence of characters
+         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * Matching is case-insensitive. `%` and `_` are matched literally.
+         * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
+         */
+        filterNamespacePattern?: string[];
+        /**
+         * Selects only keys with namespace not matching the provided pattern.
+         * Keys in the default namespace always match.
+         *
+         * Pattern syntax: `*` matches any sequence of characters
+         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * Matching is case-insensitive. `%` and `_` are matched literally.
+         * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
+         */
+        filterNoNamespacePattern?: string[];
+        /**
+         * Selects only keys with a translation text matching the provided pattern,
+         * in the format: languageTag,pattern. Use `*` as the language tag to match any of the returned languages.
+         * The language tag is matched case-insensitively and must be included in the returned languages,
+         * otherwise the request fails with 400.
+         *
+         * Pattern syntax: `*` matches any sequence of characters
+         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * Matching is case-insensitive. `%` and `_` are matched literally.
+         * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
+         */
+        filterTranslationPattern?: string[];
+        /**
+         * Selects only keys with no translation text matching the provided pattern,
+         * in the format: languageTag,pattern. Use `*` as the language tag to match against any of the returned
+         * languages. Keys with no translation in the specified language always match.
+         * The language tag is matched case-insensitively and must be included in the returned languages,
+         * otherwise the request fails with 400.
+         *
+         * Pattern syntax: `*` matches any sequence of characters
+         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * Matching is case-insensitive. `%` and `_` are matched literally.
+         * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
+         */
+        filterNoTranslationPattern?: string[];
         /** Selects only keys with provided tag */
         filterTag?: string[];
         /** Selects only keys without provided tag */
@@ -17619,6 +18001,113 @@ export interface operations {
          * To filter default namespace, set to empty string.
          */
         filterNoNamespace?: string[];
+        /**
+         * Selects only keys with name matching the provided pattern.
+         *
+         * Pattern syntax: `*` matches any sequence of characters
+         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * Matching is case-insensitive. `%` and `_` are matched literally.
+         * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
+         */
+        filterKeyPattern?: string[];
+        /**
+         * Selects only keys with name not matching the provided pattern.
+         *
+         * Pattern syntax: `*` matches any sequence of characters
+         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * Matching is case-insensitive. `%` and `_` are matched literally.
+         * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
+         */
+        filterNoKeyPattern?: string[];
+        /**
+         * Selects only keys with description matching the provided pattern.
+         * Keys without a description never match.
+         *
+         * Pattern syntax: `*` matches any sequence of characters
+         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * Matching is case-insensitive. `%` and `_` are matched literally.
+         * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
+         */
+        filterDescriptionPattern?: string[];
+        /**
+         * Selects only keys with description not matching the provided pattern.
+         * Keys without a description always match.
+         *
+         * Pattern syntax: `*` matches any sequence of characters
+         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * Matching is case-insensitive. `%` and `_` are matched literally.
+         * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
+         */
+        filterNoDescriptionPattern?: string[];
+        /**
+         * Selects only keys with namespace matching the provided pattern.
+         * Keys in the default namespace never match.
+         *
+         * Pattern syntax: `*` matches any sequence of characters
+         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * Matching is case-insensitive. `%` and `_` are matched literally.
+         * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
+         */
+        filterNamespacePattern?: string[];
+        /**
+         * Selects only keys with namespace not matching the provided pattern.
+         * Keys in the default namespace always match.
+         *
+         * Pattern syntax: `*` matches any sequence of characters
+         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * Matching is case-insensitive. `%` and `_` are matched literally.
+         * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
+         */
+        filterNoNamespacePattern?: string[];
+        /**
+         * Selects only keys with a translation text matching the provided pattern,
+         * in the format: languageTag,pattern. Use `*` as the language tag to match any of the returned languages.
+         * The language tag is matched case-insensitively and must be included in the returned languages,
+         * otherwise the request fails with 400.
+         *
+         * Pattern syntax: `*` matches any sequence of characters
+         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * Matching is case-insensitive. `%` and `_` are matched literally.
+         * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
+         */
+        filterTranslationPattern?: string[];
+        /**
+         * Selects only keys with no translation text matching the provided pattern,
+         * in the format: languageTag,pattern. Use `*` as the language tag to match against any of the returned
+         * languages. Keys with no translation in the specified language always match.
+         * The language tag is matched case-insensitively and must be included in the returned languages,
+         * otherwise the request fails with 400.
+         *
+         * Pattern syntax: `*` matches any sequence of characters
+         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * Matching is case-insensitive. `%` and `_` are matched literally.
+         * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
+         */
+        filterNoTranslationPattern?: string[];
         /** Selects only keys with provided tag */
         filterTag?: string[];
         /** Selects only keys without provided tag */
@@ -18945,7 +19434,6 @@ export interface operations {
       };
     };
   };
-  /** User can only delete suggestion created by them */
   deleteSuggestion: {
     parameters: {
       path: {
@@ -19948,6 +20436,51 @@ export interface operations {
         content: {
           "application/json": string;
         };
+      };
+    };
+  };
+  /** Marks the project as public or private. Only the organization owner or a server admin can change this. */
+  setProjectPublic: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ProjectModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetProjectPublicRequest"];
       };
     };
   };
@@ -22596,6 +23129,113 @@ export interface operations {
          * To filter default namespace, set to empty string.
          */
         filterNoNamespace?: string[];
+        /**
+         * Selects only keys with name matching the provided pattern.
+         *
+         * Pattern syntax: `*` matches any sequence of characters
+         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * Matching is case-insensitive. `%` and `_` are matched literally.
+         * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
+         */
+        filterKeyPattern?: string[];
+        /**
+         * Selects only keys with name not matching the provided pattern.
+         *
+         * Pattern syntax: `*` matches any sequence of characters
+         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * Matching is case-insensitive. `%` and `_` are matched literally.
+         * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
+         */
+        filterNoKeyPattern?: string[];
+        /**
+         * Selects only keys with description matching the provided pattern.
+         * Keys without a description never match.
+         *
+         * Pattern syntax: `*` matches any sequence of characters
+         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * Matching is case-insensitive. `%` and `_` are matched literally.
+         * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
+         */
+        filterDescriptionPattern?: string[];
+        /**
+         * Selects only keys with description not matching the provided pattern.
+         * Keys without a description always match.
+         *
+         * Pattern syntax: `*` matches any sequence of characters
+         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * Matching is case-insensitive. `%` and `_` are matched literally.
+         * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
+         */
+        filterNoDescriptionPattern?: string[];
+        /**
+         * Selects only keys with namespace matching the provided pattern.
+         * Keys in the default namespace never match.
+         *
+         * Pattern syntax: `*` matches any sequence of characters
+         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * Matching is case-insensitive. `%` and `_` are matched literally.
+         * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
+         */
+        filterNamespacePattern?: string[];
+        /**
+         * Selects only keys with namespace not matching the provided pattern.
+         * Keys in the default namespace always match.
+         *
+         * Pattern syntax: `*` matches any sequence of characters
+         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * Matching is case-insensitive. `%` and `_` are matched literally.
+         * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
+         */
+        filterNoNamespacePattern?: string[];
+        /**
+         * Selects only keys with a translation text matching the provided pattern,
+         * in the format: languageTag,pattern. Use `*` as the language tag to match any of the returned languages.
+         * The language tag is matched case-insensitively and must be included in the returned languages,
+         * otherwise the request fails with 400.
+         *
+         * Pattern syntax: `*` matches any sequence of characters
+         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * Matching is case-insensitive. `%` and `_` are matched literally.
+         * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
+         */
+        filterTranslationPattern?: string[];
+        /**
+         * Selects only keys with no translation text matching the provided pattern,
+         * in the format: languageTag,pattern. Use `*` as the language tag to match against any of the returned
+         * languages. Keys with no translation in the specified language always match.
+         * The language tag is matched case-insensitively and must be included in the returned languages,
+         * otherwise the request fails with 400.
+         *
+         * Pattern syntax: `*` matches any sequence of characters
+         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * Matching is case-insensitive. `%` and `_` are matched literally.
+         * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
+         */
+        filterNoTranslationPattern?: string[];
         /** Selects only keys with provided tag */
         filterTag?: string[];
         /** Selects only keys without provided tag */
@@ -22916,6 +23556,113 @@ export interface operations {
          * To filter default namespace, set to empty string.
          */
         filterNoNamespace?: string[];
+        /**
+         * Selects only keys with name matching the provided pattern.
+         *
+         * Pattern syntax: `*` matches any sequence of characters
+         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * Matching is case-insensitive. `%` and `_` are matched literally.
+         * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
+         */
+        filterKeyPattern?: string[];
+        /**
+         * Selects only keys with name not matching the provided pattern.
+         *
+         * Pattern syntax: `*` matches any sequence of characters
+         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * Matching is case-insensitive. `%` and `_` are matched literally.
+         * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
+         */
+        filterNoKeyPattern?: string[];
+        /**
+         * Selects only keys with description matching the provided pattern.
+         * Keys without a description never match.
+         *
+         * Pattern syntax: `*` matches any sequence of characters
+         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * Matching is case-insensitive. `%` and `_` are matched literally.
+         * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
+         */
+        filterDescriptionPattern?: string[];
+        /**
+         * Selects only keys with description not matching the provided pattern.
+         * Keys without a description always match.
+         *
+         * Pattern syntax: `*` matches any sequence of characters
+         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * Matching is case-insensitive. `%` and `_` are matched literally.
+         * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
+         */
+        filterNoDescriptionPattern?: string[];
+        /**
+         * Selects only keys with namespace matching the provided pattern.
+         * Keys in the default namespace never match.
+         *
+         * Pattern syntax: `*` matches any sequence of characters
+         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * Matching is case-insensitive. `%` and `_` are matched literally.
+         * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
+         */
+        filterNamespacePattern?: string[];
+        /**
+         * Selects only keys with namespace not matching the provided pattern.
+         * Keys in the default namespace always match.
+         *
+         * Pattern syntax: `*` matches any sequence of characters
+         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * Matching is case-insensitive. `%` and `_` are matched literally.
+         * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
+         */
+        filterNoNamespacePattern?: string[];
+        /**
+         * Selects only keys with a translation text matching the provided pattern,
+         * in the format: languageTag,pattern. Use `*` as the language tag to match any of the returned languages.
+         * The language tag is matched case-insensitively and must be included in the returned languages,
+         * otherwise the request fails with 400.
+         *
+         * Pattern syntax: `*` matches any sequence of characters
+         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * Matching is case-insensitive. `%` and `_` are matched literally.
+         * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
+         */
+        filterTranslationPattern?: string[];
+        /**
+         * Selects only keys with no translation text matching the provided pattern,
+         * in the format: languageTag,pattern. Use `*` as the language tag to match against any of the returned
+         * languages. Keys with no translation in the specified language always match.
+         * The language tag is matched case-insensitively and must be included in the returned languages,
+         * otherwise the request fails with 400.
+         *
+         * Pattern syntax: `*` matches any sequence of characters
+         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * Matching is case-insensitive. `%` and `_` are matched literally.
+         * You can use this parameter multiple times; all patterns must match (logical AND).
+         * Limits: a pattern must not be empty, may be at most 500 characters long
+         * with at most 5 wildcards, and at most 20
+         * patterns may be provided per parameter; violations fail with 400.
+         */
+        filterNoTranslationPattern?: string[];
         /** Selects only keys with provided tag */
         filterTag?: string[];
         /** Selects only keys without provided tag */
@@ -23949,6 +24696,7 @@ export interface operations {
         viewLanguages?: number[];
         stateChangeLanguages?: number[];
         suggestLanguages?: number[];
+        suggestManageLanguages?: number[];
       };
     };
     responses: {
@@ -23999,6 +24747,7 @@ export interface operations {
         viewLanguages?: number[];
         stateChangeLanguages?: number[];
         suggestLanguages?: number[];
+        suggestManageLanguages?: number[];
       };
     };
     responses: {
@@ -24496,6 +25245,52 @@ export interface operations {
       };
     };
   };
+  /** Returns all public projects (including statistics), discoverable by anyone — no authentication required */
+  getAllPublicWithStatistics: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        search?: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelProjectWithStatsModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
   getHierarchy: {
     parameters: {
       query: {
@@ -24545,6 +25340,7 @@ export interface operations {
               | "translations.view"
               | "translations.edit"
               | "translations.suggest"
+              | "translation-suggestions.manage"
               | "keys.edit"
               | "screenshots.upload"
               | "screenshots.delete"
@@ -24578,6 +25374,7 @@ export interface operations {
               | "all.view"
               | "branch.management"
               | "branch.protected-modify"
+              | "organization-quotas.view"
             )[];
           };
         };

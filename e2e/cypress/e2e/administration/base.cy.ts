@@ -48,7 +48,7 @@ describe('Administration', () => {
       .findDcy('administration-organizations-projects-button')
       .click();
     assertAdminFrameVisible();
-    gcy('navigation-item').contains('Projects');
+    gcy('global-base-view-title').contains('Projects');
   });
 
   it('can access organization settings', () => {

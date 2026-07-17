@@ -56,6 +56,11 @@ export const projectListData = generateTestDataObject(
   'projects-list-dashboard'
 );
 
+export const publicProjectsData = {
+  ...generateTestDataObject('public-projects'),
+  generateFew: () => internalFetch('e2e-data/public-projects/generate-few'),
+};
+
 export const projectTestData = generateTestDataObject('projects');
 
 export const apiKeysTestData = generateTestDataObject('api-keys');
@@ -134,6 +139,8 @@ export const userDeletionTestData = generateTestDataObject('user-deletion');
 export const formerUserTestData = generateTestDataObject('former-user');
 
 export const namespaces = generateTestDataObject('namespaces');
+
+export const scopedSearch = generateTestDataObject('scoped-search');
 
 export const tasks = generateTestDataObject('task');
 

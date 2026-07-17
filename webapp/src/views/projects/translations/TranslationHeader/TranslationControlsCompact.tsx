@@ -24,7 +24,6 @@ import { useTranslate } from '@tolgee/react';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { LanguagesSelect } from 'tg.component/common/form/LanguagesSelect/LanguagesSelect';
 import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
-import { HeaderSearchField } from 'tg.component/layout/HeaderSearchField';
 import { TranslationFiltersPopup } from 'tg.views/projects/translations/TranslationFilters/TranslationFiltersPopup';
 import { TranslationSortMenu } from 'tg.component/translation/translationSort/TranslationSortMenu';
 import { Sort } from 'tg.component/CustomIcons';
@@ -41,6 +40,7 @@ import {
   useTranslationsSelector,
 } from '../context/TranslationsContext';
 import { ViewMode } from '../context/types';
+import { TranslationsSearchField } from './search/TranslationsSearchField';
 
 const StyledLanguagesSelect = styled(LanguagesSelect)`
   & .MuiInputBase-root {
@@ -77,8 +77,9 @@ const StyledSearchSpaced = styled('div')`
   grid-column: 1 / -1;
 `;
 
-const StyledSearch = styled(HeaderSearchField)`
+const StyledSearch = styled(TranslationsSearchField)`
   min-width: 200px;
+  flex-grow: 1;
 `;
 
 const StyledToggleButton = styled(Button)`
@@ -120,6 +121,7 @@ export const TranslationControlsCompact: React.FC<
   const { t } = useTranslate();
   const project = useProject();
   const allLanguages = useTranslationsSelector((c) => c.languages);
+  const languageTags = allLanguages?.map((l) => l.tag) ?? [];
 
   const { setSearch, changeView, selectLanguages, setOrder } =
     useTranslationsActions();
@@ -170,8 +172,6 @@ export const TranslationControlsCompact: React.FC<
             <StyledSearch
               value={search || ''}
               onSearchChange={handleSearchChange}
-              label={null}
-              variant="outlined"
               placeholder={t('standard_search_label')}
               style={{
                 height: 35,
@@ -179,6 +179,7 @@ export const TranslationControlsCompact: React.FC<
                 width: '100%',
               }}
               setSearchOpen={setSearchOpen}
+              languageTags={languageTags}
             />
             <StyledIconButton size="small" onClick={() => setSearchOpen(false)}>
               <XClose />

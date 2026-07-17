@@ -20,6 +20,7 @@ class PermissionModelAssembler :
       translateLanguageIds = entity.translateLanguageIds,
       stateChangeLanguageIds = entity.stateChangeLanguageIds,
       suggestLanguageIds = entity.suggestLanguageIds,
+      suggestManageLanguageIds = entity.suggestManageLanguageIds,
       type = entity.type,
     )
   }

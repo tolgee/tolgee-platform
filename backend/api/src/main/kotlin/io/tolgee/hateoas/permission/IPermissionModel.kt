@@ -45,4 +45,12 @@ interface IPermissionModel {
     example = "[200001, 200004]",
   )
   val suggestLanguageIds: Collection<Long>?
+
+  @get:Schema(
+    description =
+      "List of languages user can manage suggestions for. If null, managing " +
+        "suggestions for all languages is permitted.",
+    example = "[200001, 200004]",
+  )
+  val suggestManageLanguageIds: Collection<Long>?
 }

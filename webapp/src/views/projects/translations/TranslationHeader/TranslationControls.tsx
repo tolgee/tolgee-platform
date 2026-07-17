@@ -18,7 +18,6 @@ import { LanguagesSelect } from 'tg.component/common/form/LanguagesSelect/Langua
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { TranslationFilters } from 'tg.views/projects/translations/TranslationFilters/TranslationFilters';
 import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
-import { HeaderSearchField } from 'tg.component/layout/HeaderSearchField';
 
 import {
   useTranslationsActions,
@@ -32,6 +31,7 @@ import { useProject } from 'tg.hooks/useProject';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { applyBranchToUrl } from 'tg.component/branching/branchingPath';
 import { useTrashCount } from '../trash/useTrashCount';
+import { TranslationsSearchField } from './search/TranslationsSearchField';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -45,8 +45,8 @@ const StyledSpaced = styled('div')`
   padding: 0px 5px;
 `;
 
-const StyledTranslationsSearchField = styled(HeaderSearchField)`
-  width: 200px;
+const StyledTranslationsSearchField = styled(TranslationsSearchField)`
+  width: 320px;
 `;
 
 const StyledToggleButton = styled(Button)`
@@ -78,6 +78,7 @@ export const TranslationControls: React.FC<React.PropsWithChildren<Props>> = ({
   const view = useTranslationsSelector((v) => v.view);
   const selectedLanguages = useTranslationsSelector((c) => c.selectedLanguages);
   const allLanguages = useTranslationsSelector((c) => c.languages);
+  const languageTags = allLanguages?.map((l) => l.tag) ?? [];
   const filters = useTranslationsSelector((c) => c.filters);
   const order = useTranslationsSelector((c) => c.order);
   const { setFilters, removeFilter, addFilter } = useTranslationsActions();
@@ -95,9 +96,8 @@ export const TranslationControls: React.FC<React.PropsWithChildren<Props>> = ({
           <StyledTranslationsSearchField
             value={search || ''}
             onSearchChange={setSearch}
-            label={null}
-            variant="outlined"
             placeholder={t('standard_search_label')}
+            languageTags={languageTags}
           />
           <TranslationFilters
             projectId={project.id}

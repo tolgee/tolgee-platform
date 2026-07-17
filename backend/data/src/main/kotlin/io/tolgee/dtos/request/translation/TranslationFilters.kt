@@ -2,6 +2,7 @@ package io.tolgee.dtos.request.translation
 
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.ExampleObject
+import io.tolgee.service.queryBuilders.translationViewBuilder.WildcardLikeUtil
 
 open class TranslationFilters(
   @field:Parameter(
@@ -93,6 +94,75 @@ To filter default namespace, set to empty string.
   """,
   )
   var filterNoNamespace: List<String>? = null
+
+  @field:Parameter(
+    description = """Selects only keys with name matching the provided pattern.
+
+$PATTERN_GRAMMAR_DOC""",
+    examples = [ExampleObject("cart*"), ExampleObject("*_title"), ExampleObject("checkout")],
+  )
+  var filterKeyPattern: List<String>? = null
+
+  @field:Parameter(
+    description = """Selects only keys with name not matching the provided pattern.
+
+$PATTERN_GRAMMAR_DOC""",
+  )
+  var filterNoKeyPattern: List<String>? = null
+
+  @field:Parameter(
+    description = """Selects only keys with description matching the provided pattern.
+Keys without a description never match.
+
+$PATTERN_GRAMMAR_DOC""",
+  )
+  var filterDescriptionPattern: List<String>? = null
+
+  @field:Parameter(
+    description = """Selects only keys with description not matching the provided pattern.
+Keys without a description always match.
+
+$PATTERN_GRAMMAR_DOC""",
+  )
+  var filterNoDescriptionPattern: List<String>? = null
+
+  @field:Parameter(
+    description = """Selects only keys with namespace matching the provided pattern.
+Keys in the default namespace never match.
+
+$PATTERN_GRAMMAR_DOC""",
+  )
+  var filterNamespacePattern: List<String>? = null
+
+  @field:Parameter(
+    description = """Selects only keys with namespace not matching the provided pattern.
+Keys in the default namespace always match.
+
+$PATTERN_GRAMMAR_DOC""",
+  )
+  var filterNoNamespacePattern: List<String>? = null
+
+  @field:Parameter(
+    description = """Selects only keys with a translation text matching the provided pattern,
+in the format: languageTag,pattern. Use `*` as the language tag to match any of the returned languages.
+The language tag is matched case-insensitively and must be included in the returned languages,
+otherwise the request fails with 400.
+
+$PATTERN_GRAMMAR_DOC""",
+    examples = [ExampleObject("de,Warenkorb"), ExampleObject("*,cart*")],
+  )
+  var filterTranslationPattern: List<String>? = null
+
+  @field:Parameter(
+    description = """Selects only keys with no translation text matching the provided pattern,
+in the format: languageTag,pattern. Use `*` as the language tag to match against any of the returned
+languages. Keys with no translation in the specified language always match.
+The language tag is matched case-insensitively and must be included in the returned languages,
+otherwise the request fails with 400.
+
+$PATTERN_GRAMMAR_DOC""",
+  )
+  var filterNoTranslationPattern: List<String>? = null
 
   @field:Parameter(description = "Selects only keys with provided tag")
   var filterTag: List<String>? = null
@@ -201,4 +271,32 @@ A key matches if any of the selected check types is present in any of the select
 
   @field:Parameter(description = "If true, return only soft-deleted keys", hidden = true)
   var trashed: Boolean = false
+
+  companion object {
+    const val PATTERN_GRAMMAR_DOC = """Pattern syntax: `*` matches any sequence of characters
+(`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+Matching is case-insensitive. `%` and `_` are matched literally.
+You can use this parameter multiple times; all patterns must match (logical AND).
+Limits: a pattern must not be empty, may be at most ${WildcardLikeUtil.MAX_PATTERN_LENGTH} characters long
+with at most ${WildcardLikeUtil.MAX_WILDCARDS} wildcards, and at most ${WildcardLikeUtil.MAX_PATTERNS_PER_PARAM}
+patterns may be provided per parameter; violations fail with 400."""
+
+    /**
+     * Params carrying free text where a comma is data, not a separator. Controllers bind
+     * these verbatim via TranslationFiltersBindingCustomizer — a new pattern param must be
+     * added here, otherwise Spring comma-splits its single values.
+     */
+    val VERBATIM_LIST_PARAMS =
+      listOf(
+        TranslationFilters::filterKeyName.name,
+        TranslationFilters::filterKeyPattern.name,
+        TranslationFilters::filterNoKeyPattern.name,
+        TranslationFilters::filterDescriptionPattern.name,
+        TranslationFilters::filterNoDescriptionPattern.name,
+        TranslationFilters::filterNamespacePattern.name,
+        TranslationFilters::filterNoNamespacePattern.name,
+        TranslationFilters::filterTranslationPattern.name,
+        TranslationFilters::filterNoTranslationPattern.name,
+      )
+  }
 }

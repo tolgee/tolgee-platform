@@ -1,12 +1,16 @@
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { downloadBlobAsFile } from 'tg.fixtures/downloadResponseAsFile';
 
 export type TaskModel = components['schemas']['TaskModel'];
 export type TaskState = TaskModel['state'];
 
 function toFileName(label: string) {
-  return label.replace(/[\s]+/g, '_').toLowerCase();
+  return label.replace(/\s+/g, '_').toLowerCase();
 }
+
+export const taskReportFileName = (task: TaskModel) =>
+  `${toFileName(task.name || `task_${task.number}`)}_report.xlsx`;
 
 export const useTaskReport = () => {
   const reportMutation = useApiMutation({
@@ -24,15 +28,8 @@ export const useTaskReport = () => {
       },
       {
         async onSuccess(result) {
-          const res = result as unknown as Response;
-          const data = await res.blob();
-          const url = URL.createObjectURL(data);
-          const a = document.createElement('a');
-          a.download = `${toFileName(
-            task.name || `task_${task.number}`
-          )}_report.xlsx`;
-          a.href = url;
-          a.click();
+          const data = await (result as unknown as Response).blob();
+          downloadBlobAsFile(data, taskReportFileName(task));
         },
       }
     );

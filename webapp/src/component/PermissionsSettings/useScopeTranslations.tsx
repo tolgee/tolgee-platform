@@ -9,6 +9,9 @@ export const useScopeTranslations = () => {
     'translations.view': t('permissions_item_translations_view'),
     'translations.edit': t('permissions_item_translations_edit'),
     'translations.suggest': t('permissions_item_translations_suggest'),
+    'translation-suggestions.manage': t(
+      'permissions_item_translations_suggestions_manage'
+    ),
     'translation-comments.add': t('permissions_item_translations_comments_add'),
     'translation-comments.edit': t(
       'permissions_item_translations_comments_edit'
@@ -53,6 +56,7 @@ export const useScopeTranslations = () => {
     'all.view': t('permissions_item_all_view'),
     'branch.management': t('permissions_item_branch_management'),
     'branch.protected-modify': t('permissions_item_branch_protected_modify'),
+    'organization-quotas.view': t('permissions_item_organization_quotas_view'),
   };
 
   return {

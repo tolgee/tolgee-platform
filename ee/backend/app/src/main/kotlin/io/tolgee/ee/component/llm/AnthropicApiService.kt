@@ -5,6 +5,7 @@ import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
 import io.tolgee.dtos.LlmParams
 import io.tolgee.dtos.PromptResult
 import io.tolgee.exceptions.LlmEmptyResponseException
+import io.tolgee.exceptions.LlmProviderMaxTokensExceededException
 import io.tolgee.util.Logging
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
@@ -35,6 +36,7 @@ class AnthropicApiService :
         messages = messages,
         model = config.model,
         max_tokens = config.maxTokens,
+        thinking = Thinking(type = "disabled"),
         output_config =
           if (params.shouldOutputJson && config.format == "json_schema") {
             OutputConfig(format = OutputFormat())
@@ -54,11 +56,14 @@ class AnthropicApiService :
 
     setSentryContext(request, response)
 
+    if (response.body?.stop_reason == "max_tokens") {
+      throw LlmProviderMaxTokensExceededException()
+    }
+
     return PromptResult(
       response.body
         ?.content
-        ?.firstOrNull()
-        ?.text
+        ?.firstNotNullOfOrNull { it.text }
         ?: throw LlmEmptyResponseException(),
       usage =
         response.body?.usage?.let {
@@ -126,9 +131,13 @@ class AnthropicApiService :
       val stream: Boolean = false,
       val messages: List<RequestMessage>,
       val model: String?,
-      val temperature: Long? = 0,
+      val thinking: Thinking,
       @JsonInclude(JsonInclude.Include.NON_NULL)
       val output_config: OutputConfig? = null,
+    )
+
+    class Thinking(
+      val type: String,
     )
 
     class OutputConfig(
@@ -169,10 +178,12 @@ class AnthropicApiService :
     class ResponseBody(
       val content: List<ResponseMessage>,
       val usage: ResponseUsage,
+      val stop_reason: String? = null,
     )
 
     class ResponseMessage(
-      val text: String,
+      val type: String? = null,
+      val text: String? = null,
     )
 
     class ResponseUsage(

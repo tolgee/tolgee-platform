@@ -4,6 +4,7 @@ import { PanelHeader } from '../ToolsPanel/common/PanelHeader';
 import { T, useTranslate } from '@tolgee/react';
 import { components } from 'tg.service/apiSchema.generated';
 import { TranslationSuggestion } from './TranslationSuggestion';
+import { MAX_DISPLAYED_SUGGESTIONS } from './SuggestionsFirst';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { useTranslationsActions } from '../context/TranslationsContext';
@@ -12,6 +13,7 @@ import { useInfiniteSuggestions } from './useInfiniteSuggestions';
 import { LabelHint } from 'tg.component/common/LabelHint';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { useUser } from 'tg.globalContext/helpers';
+import { applyAcceptedSuggestion } from './utils';
 
 const FETCH_NEXT_PAGE_SCROLL_THRESHOLD_IN_PIXELS = 220;
 
@@ -88,6 +90,10 @@ export const SuggestionsList = ({
     'translations.state-edit',
     languageId
   );
+  const canModerateSuggestions = satisfiesLanguageAccess(
+    'translation-suggestions.manage',
+    languageId
+  );
   const user = useUser();
 
   const projectId = project.id;
@@ -132,11 +138,15 @@ export const SuggestionsList = ({
         lang: languageTag,
         data(translation) {
           const firstPage = suggestions.pages?.[0];
-          const firstSuggestion = firstPage?._embedded?.suggestions?.[0];
+          const shown =
+            firstPage?._embedded?.suggestions?.slice(
+              0,
+              MAX_DISPLAYED_SUGGESTIONS
+            ) ?? [];
           return {
             ...translation,
-            suggestions: firstSuggestion ? [firstSuggestion] : [],
-            activeSuggestionCount: firstPage.page?.totalElements ?? 0,
+            suggestions: shown,
+            activeSuggestionCount: firstPage?.page?.totalElements ?? 0,
           };
         },
       });
@@ -155,6 +165,10 @@ export const SuggestionsList = ({
 
   const suggestionsLoadable =
     showAll && allLoaded ? allSuggestions : activeSuggestions;
+
+  const activeCount =
+    activeSuggestions.data?.pages?.[0]?.page?.totalElements ??
+    translation.activeSuggestionCount;
 
   function handleDecline(suggestionId: number) {
     declineLoadable.mutate({
@@ -189,9 +203,10 @@ export const SuggestionsList = ({
             data(translation) {
               return {
                 ...translation,
-                text: data.accepted.translation,
-                suggestions: [],
-                activeSuggestionCount: 0,
+                ...applyAcceptedSuggestion(translation, {
+                  acceptedTranslation: data.accepted.translation,
+                  declinedCount: data.declined.length,
+                }),
               };
             },
           });
@@ -211,8 +226,11 @@ export const SuggestionsList = ({
   }
 
   function handleAccept(suggestionId: number) {
-    const firstPage = activeSuggestions.data?.pages?.[0];
-    acceptSuggestion(suggestionId, (firstPage?.page?.totalElements ?? 0) > 1);
+    acceptSuggestion(suggestionId, false);
+  }
+
+  function handleAcceptAndDeclineOthers(suggestionId: number) {
+    acceptSuggestion(suggestionId, true);
   }
 
   const handleFetchMore = () => {
@@ -310,6 +328,11 @@ export const SuggestionsList = ({
                     onAccept={
                       canReview ? () => handleAccept(item.id) : undefined
                     }
+                    onAcceptAndDeclineOthers={
+                      canReview && activeCount > 1
+                        ? () => handleAcceptAndDeclineOthers(item.id)
+                        : undefined
+                    }
                     onDecline={
                       canReview ? () => handleDecline(item.id) : undefined
                     }
@@ -317,7 +340,7 @@ export const SuggestionsList = ({
                       canReview ? () => handleReverse(item.id) : undefined
                     }
                     onDelete={
-                      user?.id === item.author.id
+                      user?.id === item.author.id || canModerateSuggestions
                         ? () => handleDelete(item.id)
                         : undefined
                     }

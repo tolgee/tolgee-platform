@@ -1,0 +1,4 @@
+{
+  "extends": "./tsconfig.prod.json",
+  "include": ["tolgee.prod.d.ts", "tolgee-key-check.selftest.tsx"]
+}

@@ -33,7 +33,7 @@ export const useInfiniteSuggestions = ({
 }: Props) => {
   const params: SuggestionParams = {
     query: {
-      sort: ['createdAt,desc'],
+      sort: ['createdAt,desc', 'id,desc'],
       filterState,
       // @ts-ignore force react-query cache only requests with the same count expected
       expectedCount,

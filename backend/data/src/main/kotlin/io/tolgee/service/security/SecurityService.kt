@@ -31,6 +31,7 @@ import io.tolgee.service.task.ITaskService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
+import org.springframework.web.context.request.RequestContextHolder
 
 @Service
 class SecurityService(
@@ -77,6 +78,19 @@ class SecurityService(
     return getCurrentPermittedScopes(projectHolder.project.id).containsAll(scopes)
   }
 
+  fun maskedMemberField(value: String?): String {
+    if (shouldExposeMemberInfo()) return value ?: ""
+    return ""
+  }
+
+  fun shouldExposeMemberInfo(): Boolean {
+    // Off-request threads (e.g. @Async activity-websocket broadcasts) have no request scope, where
+    // reading projectHolder.projectOrNull throws; there is also no caller whose scope could gate this.
+    if (RequestContextHolder.getRequestAttributes() == null) return true
+    if (projectHolder.projectOrNull == null) return true
+    return currentPermittedScopesContain(Scope.MEMBERS_VIEW)
+  }
+
   /**
    * Returns current permitted scopes, expanded
    */
@@ -118,26 +132,23 @@ class SecurityService(
     this.checkApiKeyScopes(listOf(requiredPermission), apiKey)
   }
 
-  fun hasTaskEditScopeOrIsAssigned(
+  fun checkTaskEditScopeOrAssigned(
     projectId: Long,
     taskNumber: Long,
-  ) {
-    try {
-      checkProjectPermission(projectId, Scope.TASKS_EDIT)
-    } catch (err: PermissionException) {
-      val assignees = taskService.findAssigneeById(projectId, taskNumber, activeUser.id)
-      if (assignees.isEmpty() || assignees[0].id != activeUser.id) {
-        throw err
-      }
-    }
-  }
+  ) = checkTaskScopeOrAssigned(projectId, taskNumber, Scope.TASKS_EDIT)
 
-  fun hasTaskViewScopeOrIsAssigned(
+  fun checkTaskViewScopeOrAssigned(
     projectId: Long,
     taskNumber: Long,
+  ) = checkTaskScopeOrAssigned(projectId, taskNumber, Scope.TASKS_VIEW)
+
+  private fun checkTaskScopeOrAssigned(
+    projectId: Long,
+    taskNumber: Long,
+    scope: Scope,
   ) {
     try {
-      checkProjectPermission(projectId, Scope.TASKS_VIEW)
+      checkProjectPermission(projectId, scope)
     } catch (err: PermissionException) {
       val assignees = taskService.findAssigneeById(projectId, taskNumber, activeUser.id)
       if (assignees.isEmpty() || assignees[0].id != activeUser.id) {
@@ -220,6 +231,16 @@ class SecurityService(
     }
   }
 
+  fun checkLanguageViewSuggestionsPermission(
+    projectId: Long,
+    languageIds: Collection<Long>,
+  ) {
+    passIfAnyPermissionCheckSucceeds(
+      { checkLanguageSuggestPermission(projectId, languageIds) },
+      { checkLanguageSuggestionsManagePermission(projectId, languageIds) },
+    )
+  }
+
   fun checkLanguageSuggestPermission(
     projectId: Long,
     languageIds: Collection<Long>,
@@ -229,6 +250,18 @@ class SecurityService(
       checkLanguagePermission(
         projectId,
       ) { data -> data.checkSuggestPermitted(*languageIds.toLongArray()) }
+    }
+  }
+
+  fun checkLanguageSuggestionsManagePermission(
+    projectId: Long,
+    languageIds: Collection<Long>,
+  ) {
+    checkProjectPermission(projectId, Scope.TRANSLATION_SUGGESTIONS_MANAGE)
+    runIfUserNotServerAdmin {
+      checkLanguagePermission(
+        projectId,
+      ) { data -> data.checkSuggestManagePermitted(*languageIds.toLongArray()) }
     }
   }
 

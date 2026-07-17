@@ -254,7 +254,7 @@ class BatchJobTestUtil(
 
   fun makePreTranslateProcessorRepeatedlyThrowRequeueException() {
     doThrow(
-      RequeueWithDelayException(
+      ChunkItemFailedException(
         message = Message.OUT_OF_CREDITS,
         successfulTargets = listOf(),
         cause = OutOfCreditsException(OutOfCreditsException.Reason.OUT_OF_CREDITS),

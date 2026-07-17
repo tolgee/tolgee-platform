@@ -43,6 +43,8 @@ class ScreenshotService(
 ) {
   companion object {
     const val SCREENSHOTS_STORAGE_FOLDER_NAME = "screenshots"
+    const val MIDDLE_SIZED_MAX_DIMENSION = 600
+    const val THUMBNAIL_MAX_DIMENSION = 200
   }
 
   @Transactional
@@ -60,8 +62,8 @@ class ScreenshotService(
 
     val converter = ImageConverter(screenshotImage.inputStream)
     val image = converter.getImage()
-    val middleSized = converter.getThumbnail(600)
-    val thumbnail = converter.getThumbnail(200)
+    val middleSized = converter.getThumbnail(MIDDLE_SIZED_MAX_DIMENSION)
+    val thumbnail = converter.getThumbnail(THUMBNAIL_MAX_DIMENSION)
 
     val screenshot =
       saveScreenshot(

@@ -14,6 +14,7 @@ export const SCOPE_TO_LANG_PROPERTY_MAP = {
   'translations.edit': 'translateLanguageIds',
   'translations.state-edit': 'stateChangeLanguageIds',
   'translations.suggest': 'suggestLanguageIds',
+  'translation-suggestions.manage': 'suggestManageLanguageIds',
 };
 
 export type ScopeWithLanguage = keyof typeof SCOPE_TO_LANG_PROPERTY_MAP;

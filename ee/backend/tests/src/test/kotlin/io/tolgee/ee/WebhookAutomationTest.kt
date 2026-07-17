@@ -27,6 +27,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.web.client.RestTemplate
+import java.net.URI
 import java.util.UUID
 
 @SpringBootTest
@@ -105,7 +106,7 @@ class WebhookAutomationTest : ProjectAuthControllerTest("/v2/projects/") {
       ResponseEntity.status(httpStatus).build<Any>()
     }.whenever(webhookRestTemplate)
       .exchange(
-        any<String>(),
+        any<URI>(),
         any<HttpMethod>(),
         any<HttpEntity<*>>(),
         any<Class<*>>(),
@@ -144,6 +145,7 @@ class WebhookAutomationTest : ProjectAuthControllerTest("/v2/projects/") {
           .last()
           .arguments
       callArguments[0]
+        .toString()
         .assert
         .isEqualTo(testData.webhookConfig.self.url)
       val httpEntity = callArguments[2] as HttpEntity<String>

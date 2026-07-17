@@ -12,6 +12,7 @@ enum class Scope(
   TRANSLATIONS_VIEW("translations.view"),
   TRANSLATIONS_EDIT("translations.edit"),
   TRANSLATIONS_SUGGEST("translations.suggest"),
+  TRANSLATION_SUGGESTIONS_MANAGE("translation-suggestions.manage"),
   KEYS_EDIT("keys.edit"),
   SCREENSHOTS_UPLOAD("screenshots.upload"),
   SCREENSHOTS_DELETE("screenshots.delete"),
@@ -45,6 +46,7 @@ enum class Scope(
   ALL_VIEW("all.view"),
   BRANCH_MANAGEMENT("branch.management"),
   BRANCH_PROTECTED_MODIFY("branch.protected-modify"),
+  ORGANIZATION_QUOTAS_VIEW("organization-quotas.view"),
   ;
 
   fun expand() = Scope.expand(this)
@@ -143,6 +145,10 @@ enum class Scope(
             TRANSLATIONS_SUGGEST,
             listOf(translationsView),
           ),
+          HierarchyItem(
+            TRANSLATION_SUGGESTIONS_MANAGE,
+            listOf(translationsView),
+          ),
           batchJobsView,
           HierarchyItem(BATCH_JOBS_CANCEL),
           HierarchyItem(BATCH_PRE_TRANSLATE_BY_TM, listOf(translationsEdit)),
@@ -160,6 +166,7 @@ enum class Scope(
               batchJobsView,
               tasksView,
               promptsView,
+              HierarchyItem(ORGANIZATION_QUOTAS_VIEW),
             ),
           ),
           HierarchyItem(BRANCH_MANAGEMENT),

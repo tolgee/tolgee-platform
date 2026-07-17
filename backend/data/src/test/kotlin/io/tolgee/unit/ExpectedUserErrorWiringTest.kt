@@ -1,6 +1,6 @@
 package io.tolgee.unit
 
-import io.tolgee.batch.RequeueWithDelayException
+import io.tolgee.batch.ChunkItemFailedException
 import io.tolgee.component.automations.processors.WebhookExecutionFailed
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.ExpectedUserError
@@ -22,10 +22,10 @@ class ExpectedUserErrorWiringTest {
   }
 
   @Test
-  fun `RequeueWithDelayException wrapping WebhookExecutionFailed exposes the marker via cause chain`() {
+  fun `ChunkItemFailedException wrapping WebhookExecutionFailed exposes the marker via cause chain`() {
     val webhookFailure = WebhookExecutionFailed(IOException("connection refused"))
     val wrapped =
-      RequeueWithDelayException(
+      ChunkItemFailedException(
         message = Message.UNEXPECTED_ERROR_WHILE_EXECUTING_WEBHOOK,
         cause = webhookFailure,
         delayInMs = 5000,

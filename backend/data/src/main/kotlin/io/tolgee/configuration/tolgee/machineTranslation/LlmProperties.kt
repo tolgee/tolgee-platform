@@ -167,7 +167,7 @@ class LlmProperties : MachineTranslationServiceProperties {
 
     companion object {
       val TYPE_DEFAULT: LlmProviderType = LlmProviderType.OPENAI
-      const val MAX_TOKENS_DEFAULT: Long = 2000
+      const val MAX_TOKENS_DEFAULT: Long = 8192
     }
   }
 

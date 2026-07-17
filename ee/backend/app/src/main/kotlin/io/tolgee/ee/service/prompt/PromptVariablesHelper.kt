@@ -2,7 +2,6 @@ package io.tolgee.ee.service.prompt
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.component.machineTranslation.metadata.TranslationGlossaryItem
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.LanguageDto
@@ -10,6 +9,7 @@ import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.ee.component.PromptLazyMap.Companion.Variable
 import io.tolgee.ee.service.glossary.GlossaryTermService
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.formats.DEFAULT_PLURAL_ARGUMENT_NAME
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.service.key.KeyService
@@ -193,7 +193,7 @@ class PromptVariablesHelper(
 
     result.add(Variable("languageName", language?.name))
     result.add(Variable("languageTag", language?.tag))
-    result.add(Variable("translation", escapeAsJson(translation?.text) ?: ""))
+    result.add(Variable("translation", PromptHandlebarsHelper.escapeJson(translation?.text)))
     result.add(Variable("languageNote", language?.aiTranslatorPromptDescription ?: ""))
     result.add(cjkVariable(language?.tag))
     return result
@@ -226,6 +226,9 @@ class PromptVariablesHelper(
         )
       }
 
+    val pluralArgName =
+      key?.pluralArgName ?: pluralFormsWithReplacedParam?.argName ?: DEFAULT_PLURAL_ARGUMENT_NAME
+
     result.add(
       Variable(
         "pluralFormExamples",
@@ -243,7 +246,8 @@ class PromptVariablesHelper(
     result.add(
       Variable(
         "exampleIcuPlural",
-        value = pluralSourceExamples?.let { "{count, plural, ${it.map { "${it.key} {...}" }.joinToString(" ")}}" },
+        value =
+          pluralSourceExamples?.let { "{$pluralArgName, plural, ${it.map { "${it.key} {...}" }.joinToString(" ")}}" },
       ),
     )
     return result
@@ -382,13 +386,6 @@ class PromptVariablesHelper(
     variables.add(fragments)
 
     return variables
-  }
-
-  fun escapeAsJson(text: String?): String? {
-    return text?.let {
-      val objectMapper: ObjectMapper = jacksonObjectMapper()
-      objectMapper.writeValueAsString(text).removeSurrounding("\"")
-    }
   }
 
   fun encodeScreenshot(

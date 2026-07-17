@@ -327,6 +327,7 @@ export type SetLicenseKeyDto = components['schemas']['SetLicenseKeyDto'];
 export type SetMachineTranslationSettingsDto = components['schemas']['SetMachineTranslationSettingsDto'];
 export type SetOrganizationRoleDto = components['schemas']['SetOrganizationRoleDto'];
 export type SetProjectPromptCustomizationRequest = components['schemas']['SetProjectPromptCustomizationRequest'];
+export type SetProjectPublicRequest = components['schemas']['SetProjectPublicRequest'];
 export type SetTranslationsResponseModel = components['schemas']['SetTranslationsResponseModel'];
 export type SetTranslationsStateStateRequest = components['schemas']['SetTranslationsStateStateRequest'];
 export type SetTranslationsWithKeyDto = components['schemas']['SetTranslationsWithKeyDto'];

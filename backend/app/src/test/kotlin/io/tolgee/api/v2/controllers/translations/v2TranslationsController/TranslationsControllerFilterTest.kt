@@ -631,7 +631,7 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
       "/translations?filterHasSuggestionsInLang=${testData.czechLanguage.tag}",
     ).andIsOk.andAssertThatJson {
       node("_embedded.keys") {
-        isArray.hasSize(2)
+        isArray.hasSize(4)
         node("[0].keyName").isEqualTo("key 0")
       }
     }
@@ -640,7 +640,7 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
       "/translations?filterHasNoSuggestionsInLang=${testData.czechLanguage.tag}",
     ).andIsOk.andAssertThatJson {
       node("_embedded.keys") {
-        isArray.hasSize(3)
+        isArray.hasSize(1)
         node("[0].keyName").isEqualTo("key 1")
       }
     }

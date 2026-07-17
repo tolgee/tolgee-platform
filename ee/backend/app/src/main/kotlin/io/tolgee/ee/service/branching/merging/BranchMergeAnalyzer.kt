@@ -42,6 +42,9 @@ class BranchMergeAnalyzer(
 
     val sourceById = sourceKeys.associateBy { it.id }
     val targetById = targetKeys.associateBy { it.id }
+    // A snapshot's branchKeyId/originalKeyId may be a negative sentinel from an admin import whose baseline
+    // key wasn't exported (see EntityGraphDeserializer.remapKeyId). It never equals a live key id, so these
+    // lookups miss and the snapshot correctly takes the deleted path.
     val snapshotByBranchKeyId = snapshots.associateBy { it.branchKeyId }
     val snapshotOriginalIds = snapshots.map { it.originalKeyId }.toSet()
     val sourceBySignature = sourceKeys.groupBy { KeySignature(it.namespace?.name, it.name) }

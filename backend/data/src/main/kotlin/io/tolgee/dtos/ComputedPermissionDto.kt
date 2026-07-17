@@ -35,6 +35,12 @@ class ComputedPermissionDto(
       suggestLanguageIds,
     )
 
+  fun checkSuggestManagePermitted(vararg languageIds: Long) =
+    checkLanguagePermitted(
+      languageIds.toList(),
+      suggestManageLanguageIds,
+    )
+
   private fun isAllLanguagesPermitted(languageIds: Collection<Long>?): Boolean {
     if (scopes.isEmpty()) {
       return false
@@ -88,6 +94,14 @@ class ComputedPermissionDto(
     return this
   }
 
+  fun withCommunityFloor(): ComputedPermissionDto {
+    val hasCommunityScopes = expandedScopes.toSet().containsAll(COMMUNITY.scopes.toList())
+    val viewAndSuggestUnrestricted = viewLanguageIds.isNullOrEmpty() && suggestLanguageIds.isNullOrEmpty()
+    if (hasCommunityScopes && viewAndSuggestUnrestricted) return this
+    if (scopes.isEmpty()) return COMMUNITY
+    return ComputedPermissionDto(getCommunityFlooredPermission(this), origin = origin)
+  }
+
   constructor(permission: IPermission) : this(
     permission,
     origin =
@@ -118,6 +132,8 @@ class ComputedPermissionDto(
           get() = null
         override val suggestLanguageIds: Set<Long>?
           get() = null
+        override val suggestManageLanguageIds: Set<Long>?
+          get() = null
         override val type: ProjectPermissionType
           get() = type
         override val granular: Boolean?
@@ -133,6 +149,17 @@ class ComputedPermissionDto(
         override val scopes: Array<Scope> by lazy {
           (base.scopes + extendedScopes).toSet().toTypedArray()
         }
+      }
+    }
+
+    private fun getCommunityFlooredPermission(base: IPermission): IPermission {
+      return object : IPermission by getExtendedPermission(base, COMMUNITY.scopes) {
+        // All-language view + suggest: a language-restricted base must not leave a member
+        // viewing/suggesting in fewer languages than a non-member.
+        override val viewLanguageIds: Set<Long>?
+          get() = null
+        override val suggestLanguageIds: Set<Long>?
+          get() = null
       }
     }
 
@@ -167,6 +194,23 @@ class ComputedPermissionDto(
             type = ProjectPermissionType.VIEW,
           ),
           origin = ComputedPermissionOrigin.SERVER_SUPPORTER,
+        )
+
+    val COMMUNITY
+      get() =
+        ComputedPermissionDto(
+          getEmptyPermission(
+            scopes =
+              arrayOf(
+                Scope.TRANSLATIONS_VIEW,
+                Scope.SCREENSHOTS_VIEW,
+                Scope.ACTIVITY_VIEW,
+                Scope.TRANSLATIONS_SUGGEST,
+                Scope.TRANSLATIONS_COMMENTS_ADD,
+              ),
+            type = ProjectPermissionType.VIEW,
+          ),
+          origin = ComputedPermissionOrigin.COMMUNITY,
         )
   }
 }

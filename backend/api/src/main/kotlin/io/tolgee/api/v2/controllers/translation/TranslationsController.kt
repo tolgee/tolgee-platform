@@ -22,7 +22,6 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.queryResults.TranslationHistoryView
 import io.tolgee.dtos.request.translation.GetTranslationsParams
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
-import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.hateoas.translations.KeysWithTranslationsPageModel
 import io.tolgee.hateoas.translations.KeysWithTranslationsPagedResourcesAssembler
@@ -53,7 +52,6 @@ import io.tolgee.service.translation.TranslationService
 import io.tolgee.service.translation.TranslationSuggestionService
 import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
-import org.springframework.beans.propertyeditors.CustomCollectionEditor
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
@@ -63,10 +61,8 @@ import org.springframework.data.web.SortDefault
 import org.springframework.hateoas.PagedModel
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.bind.WebDataBinder
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.InitBinder
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -238,15 +234,6 @@ When null, resulting file will be a flat key-value object.
     securityService.checkStateChangePermission(translation)
     securityService.checkBranchModify(translation)
     return translationModelAssembler.toModel(translationService.setStateBatch(translation, state.translationState))
-  }
-
-  @InitBinder("translationFilters")
-  fun customizeBinding(binder: WebDataBinder) {
-    binder.registerCustomEditor(
-      List::class.java,
-      TranslationFilters::filterKeyName.name,
-      CustomCollectionEditor(List::class.java),
-    )
   }
 
   @GetMapping(value = [""])

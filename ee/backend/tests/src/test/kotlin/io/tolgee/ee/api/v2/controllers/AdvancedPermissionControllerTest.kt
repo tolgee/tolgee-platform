@@ -93,6 +93,33 @@ class AdvancedPermissionControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `folds suggestions-manage languages into view languages`() {
+    permissionTestUtil.checkSetPermissionsWithLanguages("", { getLang ->
+      "scopes=translations.view&scopes=translation-suggestions.manage&" +
+        "viewLanguages=${getLang("en")}&suggestManageLanguages=${getLang("de")}"
+    }) { data, getLangId ->
+      Assertions
+        .assertThat(data.computedPermissions.viewLanguageIds)
+        .contains(getLangId("en"), getLangId("de"))
+    }
+  }
+
+  @Test
+  fun `sets suggestions-manage scope with its own language restriction`() {
+    permissionTestUtil.checkSetPermissionsWithLanguages("", { getLang ->
+      "scopes=translations.view&scopes=translation-suggestions.manage&" +
+        "suggestManageLanguages=${getLang("en")}"
+    }) { data, getLangId ->
+      Assertions
+        .assertThat(data.computedPermissions.scopes)
+        .contains(Scope.TRANSLATION_SUGGESTIONS_MANAGE)
+      Assertions
+        .assertThat(data.computedPermissions.suggestManageLanguageIds)
+        .containsExactlyInAnyOrder(getLangId("en"))
+    }
+  }
+
+  @Test
   fun `validates permissions (empty scopes)`() {
     permissionTestUtil
       .performSetPermissions(

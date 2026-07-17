@@ -39,6 +39,7 @@ class NotificationControllerTest : AuthorizedControllerTest() {
       node("_embedded.notificationModelList").isArray.hasSize(4)
       node("_embedded.notificationModelList[0].linkedTask.name").isEqualTo("Notification task 104")
       node("_embedded.notificationModelList[0].originatingUser.name").isEqualTo("originating user")
+      node("_embedded.notificationModelList[0].originatingUser.username").isEqualTo("notificationsOriginatingUser")
     }
   }
 

@@ -7,4 +7,5 @@ data class KeyForMt(
   val description: String?,
   var baseTranslation: String?,
   var isPlural: Boolean,
+  var pluralArgName: String? = null,
 )

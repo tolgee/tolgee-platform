@@ -9,4 +9,5 @@ export const DOCS_LINKS = {
   translationMemoryManagement: `${DOCS_ROOT}/platform/translation_process/managing_translation_memories`,
   poMsgctxt: `${DOCS_ROOT}/platform/formats/po#message-context-msgctxt-and-key-names`,
   supportedFormats: `${DOCS_ROOT}/platform/supported_formats`,
+  scopedSearch: `${DOCS_ROOT}/platform/translation_process/scoped_search`,
 };

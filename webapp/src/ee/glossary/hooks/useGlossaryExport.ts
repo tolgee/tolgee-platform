@@ -1,28 +1,19 @@
 import { useGlossary } from 'tg.ee.module/glossary/hooks/useGlossary';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { downloadBlobAsFile } from 'tg.fixtures/downloadResponseAsFile';
 
-const downloadExported = async (
+export const downloadExported = async (
   response: Response,
   glossaryName: string,
   branchName?: string
 ) => {
   const data = await response.blob();
-  const url = URL.createObjectURL(data);
-  try {
-    const a = document.createElement('a');
-    try {
-      a.href = url;
-      const dateStr = new Date().toISOString().split('T')[0];
-      const branchStr = branchName ? `(${branchName})` : '';
-      a.download =
-        'glossary_' + glossaryName + branchStr + '_' + dateStr + '.csv';
-      a.click();
-    } finally {
-      a.remove();
-    }
-  } finally {
-    setTimeout(() => URL.revokeObjectURL(url), 7000);
-  }
+  const dateStr = new Date().toISOString().split('T')[0];
+  const branchStr = branchName ? `(${branchName})` : '';
+  downloadBlobAsFile(
+    data,
+    `glossary_${glossaryName}${branchStr}_${dateStr}.csv`
+  );
 };
 
 export const useGlossaryExport = () => {

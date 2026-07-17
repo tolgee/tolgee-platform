@@ -72,7 +72,7 @@ describe('Options with 5 Translations', () => {
     });
 
     it('will search', () => {
-      cy.gcy('global-search-field').type('Cool key 04');
+      cy.gcy('global-search-field').find('.cm-content').type('Cool key 04');
       cy.contains('Cool key 01').should('not.exist');
       cy.contains('Cool key 04').should('be.visible');
     });
