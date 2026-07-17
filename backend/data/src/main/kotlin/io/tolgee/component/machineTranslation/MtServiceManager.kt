@@ -2,6 +2,7 @@ package io.tolgee.component.machineTranslation
 
 import io.sentry.Sentry
 import io.tolgee.Metrics
+import io.tolgee.component.ResilientCacheAccessor
 import io.tolgee.component.machineTranslation.providers.ProviderTranslateParams
 import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.constants.Caches
@@ -26,6 +27,7 @@ class MtServiceManager(
   private val internalProperties: InternalProperties,
   private val cacheManager: CacheManager,
   private val metrics: Metrics,
+  private val resilientCacheAccessor: ResilientCacheAccessor,
 ) {
   private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -179,11 +181,8 @@ class MtServiceManager(
   }
 
   private fun ProviderTranslateParams.findInCacheByParams(serviceType: MtServiceType): TranslateResult? {
-    return getCache()?.let { cache ->
-      val result = cache.get(this.cacheKey(serviceType.name))?.get() as? TranslateResult
-      result?.actualPrice = 0
-      return result
-    }
+    val cache = getCache() ?: return null
+    return resilientCacheAccessor.get(cache, this.cacheKey(serviceType.name), TranslateResult::class.java)
   }
 
   private fun ProviderTranslateParams.cacheResult(
