@@ -1,6 +1,7 @@
 package io.tolgee.configuration
 
 import io.tolgee.component.AllCachesProvider
+import io.tolgee.component.EnumNameKryo5Codec
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import org.redisson.Redisson
 import org.redisson.api.RedissonClient
@@ -28,7 +29,7 @@ class RedissonCacheConfiguration(
   @Bean
   fun cacheManager(redissonClient: RedissonClient): CacheManager {
     val config =
-      allCachesProvider.getAllCaches().associateWith {
+      allCachesProvider.getAllCaches().associateWithTo(mutableMapOf()) {
         CacheConfig(tolgeeProperties.cache.defaultTtl, tolgeeProperties.cache.defaultTtl)
       }
     val cacheManager = RedissonSpringCacheManager(redissonClient, config, EnumNameKryo5Codec())

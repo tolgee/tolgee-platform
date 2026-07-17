@@ -3,8 +3,7 @@ package io.tolgee.cache
 import com.esotericsoftware.kryo.KryoException
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.ByteBufUtil
-import io.tolgee.configuration.EnumNameKryo5Codec
-import io.tolgee.dtos.cacheable.PermissionDto
+import io.tolgee.component.EnumNameKryo5Codec
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -31,6 +30,18 @@ class EnumNameKryo5CodecTest {
     assertThatThrownBy {
       codec.decode(ordinalCodec.encode(arrayOf(Scope.ADMIN, Scope.KEYS_EDIT)))
     }.isInstanceOf(KryoException::class.java)
+    assertThatThrownBy { codec.decode(ordinalCodec.encode(permissionDtoFixture)) }
+      .isInstanceOf(KryoException::class.java)
+    assertThatThrownBy { codec.decode(ordinalCodec.encode(apiKeyDtoWithoutExpiryFixture)) }
+      .isInstanceOf(KryoException::class.java)
+  }
+
+  @Test
+  fun `writes names into map keys too, since Redisson encodes them with the value encoder`() {
+    val key = arrayListOf(1L, Scope.ADMIN)
+
+    assertThat(codec.encodeKeyToBytes(key).stripKryoHighBits()).contains("ADMIN")
+    assertThat(ordinalCodec.encodeKeyToBytes(key).stripKryoHighBits()).doesNotContain("ADMIN")
   }
 
   @Test
@@ -43,28 +54,13 @@ class EnumNameKryo5CodecTest {
 
   @Test
   fun `round trips enum fields of a cached DTO, including a null enum`() {
-    val dto =
-      PermissionDto(
-        id = 1,
-        userId = 2,
-        invitationId = null,
-        scopes = arrayOf(Scope.ADMIN, Scope.KEYS_EDIT),
-        projectId = 3,
-        organizationId = null,
-        type = null,
-        granular = true,
-        viewLanguageIds = null,
-        stateChangeLanguageIds = null,
-        suggestLanguageIds = null,
-        suggestManageLanguageIds = null,
-      )
+    val withType = permissionDtoFixture.copy(type = ProjectPermissionType.MANAGE)
 
-    val withType = dto.copy(type = ProjectPermissionType.MANAGE)
-
-    assertThat(codec.roundTrip(dto)).isEqualTo(dto)
+    assertThat(codec.roundTrip(permissionDtoFixture)).isEqualTo(permissionDtoFixture)
     assertThat(codec.roundTrip(withType)).isEqualTo(withType)
-    assertThat(codec.encodeToBytes(dto).stripKryoHighBits()).contains("ADMIN")
-    assertThat(ordinalCodec.encodeToBytes(dto).stripKryoHighBits()).doesNotContain("ADMIN")
+    assertThat(codec.roundTrip(apiKeyDtoWithoutExpiryFixture)).isEqualTo(apiKeyDtoWithoutExpiryFixture)
+    assertThat(codec.encodeToBytes(permissionDtoFixture).stripKryoHighBits()).contains("ADMIN")
+    assertThat(ordinalCodec.encodeToBytes(permissionDtoFixture).stripKryoHighBits()).doesNotContain("ADMIN")
   }
 
   @Test
@@ -83,10 +79,7 @@ class EnumNameKryo5CodecTest {
 
   private fun Codec.encodeToBytes(value: Any): ByteArray = ByteBufUtil.getBytes(encode(value))
 
-  private fun Codec.roundTrip(value: Any): Any? = decode(encode(value))
+  private fun Codec.encodeKeyToBytes(value: Any): ByteArray = ByteBufUtil.getBytes(mapKeyEncoder.encode(value))
 
-  private fun ByteArray.stripKryoHighBits(): String {
-    val ascii = map { (it.toInt() and 0x7F).toByte() }.toByteArray()
-    return String(ascii, Charsets.US_ASCII)
-  }
+  private fun Codec.roundTrip(value: Any): Any? = decode(encode(value))
 }
