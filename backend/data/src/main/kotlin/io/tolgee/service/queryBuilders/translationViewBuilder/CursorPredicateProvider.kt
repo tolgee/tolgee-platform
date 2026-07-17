@@ -35,7 +35,7 @@ class CursorPredicateProvider(
   operator fun invoke(): Predicate? {
     var result: Predicate? = null
     cursor?.entries?.reversed()?.forEach { (property, value) ->
-      val isUnique = property === KeyWithTranslationsView::keyId.name
+      val isUnique = property == KeyWithTranslationsView::keyId.name
       val (expression, colType) = resolveExpression(property)
       // parse the raw string from cursor into correct type for comparison
       val typedValue = parseValue(colType, value.value)
@@ -112,6 +112,7 @@ class CursorPredicateProvider(
       String::class.java -> raw as Comparable<Any>
       java.lang.Long::class.java -> raw.toLong() as Comparable<Any>
       java.sql.Timestamp::class.java -> java.sql.Timestamp(raw.toLong()) as Comparable<Any>
+      java.util.Date::class.java -> java.util.Date(raw.toLong()) as Comparable<Any>
       else -> throw IllegalArgumentException("Cannot parse value for type $javaType")
     }
   }
