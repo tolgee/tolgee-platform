@@ -23,6 +23,7 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import tools.jackson.databind.DeserializationFeature
+import tools.jackson.databind.cfg.DateTimeFeature
 import tools.jackson.databind.json.JsonMapper
 import tools.jackson.module.kotlin.jacksonMapperBuilder
 import java.security.SecureRandom
@@ -80,6 +81,7 @@ class WebConfiguration(
   fun objectMapper(): JsonMapper {
     return jacksonMapperBuilder()
       .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+      .enable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS)
       .build()
   }
 
