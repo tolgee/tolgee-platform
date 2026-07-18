@@ -25,8 +25,8 @@ import java.util.concurrent.ConcurrentHashMap
  * The full successTargets list is persisted to the database only (via BatchJobService)
  * and is never stored in Redis.
  *
- * These maps keep the default ordinal Kryo codec: switching them to a name-based codec would change the Redis key
- * prefix and split one job's in-flight state across two hashes during a rolling deploy.
+ * These maps serialize ExecutionState (incl. its BatchJobChunkExecutionStatus enum) on the RedissonClient default
+ * ordinal codec; a codec switch or enum reorder makes pre-deploy values unreadable, with no TTL to recover.
  */
 open class RedisBatchJobStateStorage(
   private val initializer: BatchJobStateInitializer,
