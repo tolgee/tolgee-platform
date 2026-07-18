@@ -41,9 +41,7 @@ class EnumNameKryo5CodecTest {
 
   @Test
   fun `reverse direction fails safe on small enums but silently misreads large ones`() {
-    // Reverse of the migration: an old / rolled-back instance runs the default ordinal codec over entries the name
-    // codec wrote. For small enums the name's leading bytes decode to an out-of-range ordinal and throw, so the
-    // @Cacheable error handler / ResilientCacheAccessor evict and recompute. Every security-critical fixture is here.
+    // Kryo's ordinal enum codec throws on an out-of-range decoded ordinal but silently returns a wrong in-range one.
     assertThatThrownBy { ordinalCodec.decode(codec.encode(Scope.ADMIN)) }.isInstanceOf(KryoException::class.java)
     assertThatThrownBy {
       ordinalCodec.decode(codec.encode(arrayOf(Scope.ADMIN, Scope.KEYS_EDIT)))
@@ -56,9 +54,6 @@ class EnumNameKryo5CodecTest {
       .describedAs("no Scope constant is silently readable by the ordinal codec")
       .isEmpty()
 
-    // Large enums are the dangerous half: a short name's leading bytes read back as an IN-range ordinal, so the
-    // ordinal codec returns a WRONG constant with no exception. ActivityType (101 constants) is the worked example.
-    // This is why a rollback cannot trust old entries and must let them expire / be evicted rather than read them.
     val silentlyMisread =
       ActivityType.entries.filter {
         val decoded = runCatching { ordinalCodec.decode(codec.encode(it)) }.getOrNull()
