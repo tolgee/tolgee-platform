@@ -25,9 +25,8 @@ import java.util.concurrent.ConcurrentHashMap
  * The full successTargets list is persisted to the database only (via BatchJobService)
  * and is never stored in Redis.
  *
- * These maps keep the Redisson client's default ordinal-based Kryo codec, unlike the Spring cache: a name-based codec
- * needs a new key prefix, which during a rolling deploy splits one job's in-flight state across two hashes while both
- * generations share the unversioned counters below.
+ * These maps keep the default ordinal Kryo codec: switching them to a name-based codec would change the Redis key
+ * prefix and split one job's in-flight state across two hashes during a rolling deploy.
  */
 open class RedisBatchJobStateStorage(
   private val initializer: BatchJobStateInitializer,

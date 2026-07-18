@@ -3,7 +3,10 @@ package io.tolgee.cache
 import com.esotericsoftware.kryo.KryoException
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.ByteBufUtil
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.component.EnumNameKryo5Codec
+import io.tolgee.component.machineTranslation.TranslateResult
+import io.tolgee.constants.MtServiceType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -37,6 +40,36 @@ class EnumNameKryo5CodecTest {
   }
 
   @Test
+  fun `reverse direction fails safe on small enums but silently misreads large ones`() {
+    // Reverse of the migration: an old / rolled-back instance runs the default ordinal codec over entries the name
+    // codec wrote. For small enums the name's leading bytes decode to an out-of-range ordinal and throw, so the
+    // @Cacheable error handler / ResilientCacheAccessor evict and recompute. Every security-critical fixture is here.
+    assertThatThrownBy { ordinalCodec.decode(codec.encode(Scope.ADMIN)) }.isInstanceOf(KryoException::class.java)
+    assertThatThrownBy {
+      ordinalCodec.decode(codec.encode(arrayOf(Scope.ADMIN, Scope.KEYS_EDIT)))
+    }.isInstanceOf(KryoException::class.java)
+    assertThatThrownBy { ordinalCodec.decode(codec.encode(permissionDtoFixture)) }
+      .isInstanceOf(KryoException::class.java)
+    assertThatThrownBy { ordinalCodec.decode(codec.encode(apiKeyDtoWithoutExpiryFixture)) }
+      .isInstanceOf(KryoException::class.java)
+    assertThat(Scope.entries.filter { runCatching { ordinalCodec.decode(codec.encode(it)) }.isSuccess })
+      .describedAs("no Scope constant is silently readable by the ordinal codec")
+      .isEmpty()
+
+    // Large enums are the dangerous half: a short name's leading bytes read back as an IN-range ordinal, so the
+    // ordinal codec returns a WRONG constant with no exception. ActivityType (101 constants) is the worked example.
+    // This is why a rollback cannot trust old entries and must let them expire / be evicted rather than read them.
+    val silentlyMisread =
+      ActivityType.entries.filter {
+        val decoded = runCatching { ordinalCodec.decode(codec.encode(it)) }.getOrNull()
+        decoded != null && decoded != it
+      }
+    assertThat(silentlyMisread)
+      .describedAs("large enums silently decode to a wrong constant under the ordinal codec")
+      .isNotEmpty()
+  }
+
+  @Test
   fun `writes names into map keys too, since Redisson encodes them with the value encoder`() {
     val key = arrayListOf(1L, Scope.ADMIN)
 
@@ -61,6 +94,15 @@ class EnumNameKryo5CodecTest {
     assertThat(codec.roundTrip(apiKeyDtoWithoutExpiryFixture)).isEqualTo(apiKeyDtoWithoutExpiryFixture)
     assertThat(codec.encodeToBytes(permissionDtoFixture).stripKryoHighBits()).contains("ADMIN")
     assertThat(ordinalCodec.encodeToBytes(permissionDtoFixture).stripKryoHighBits()).doesNotContain("ADMIN")
+  }
+
+  @Test
+  fun `round trips the MtServiceType field of a cached TranslateResult`() {
+    val result = TranslateResult(translatedText = "Hello", usedService = MtServiceType.AWS)
+
+    assertThat(codec.roundTrip(result)).isEqualTo(result)
+    assertThat(codec.encodeToBytes(result).stripKryoHighBits()).contains("AWS")
+    assertThat(ordinalCodec.encodeToBytes(result).stripKryoHighBits()).doesNotContain("AWS")
   }
 
   @Test

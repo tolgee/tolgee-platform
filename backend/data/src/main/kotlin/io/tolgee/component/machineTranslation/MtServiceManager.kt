@@ -164,20 +164,16 @@ class MtServiceManager(
     params: TranslationParams,
     e: Exception,
   ) {
-    val silentFail = !params.isBatch
-    if (!silentFail) {
-      throw e
-    } else {
-      logger.error(
-        """An exception occurred while translating 
-            |text "${params.text}" 
-            |from ${params.sourceLanguageTag} 
-            |to ${params.targetLanguageTag}"
-        """.trimMargin(),
-      )
-      logger.error(e.stackTraceToString())
-      Sentry.captureException(e)
-    }
+    if (params.isBatch) throw e
+    logger.error(
+      """An exception occurred while translating
+          |text "${params.text}"
+          |from ${params.sourceLanguageTag}
+          |to ${params.targetLanguageTag}
+      """.trimMargin(),
+    )
+    logger.error(e.stackTraceToString())
+    Sentry.captureException(e)
   }
 
   private fun ProviderTranslateParams.findInCacheByParams(serviceType: MtServiceType): TranslateResult? {

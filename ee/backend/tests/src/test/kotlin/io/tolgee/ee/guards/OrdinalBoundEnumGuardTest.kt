@@ -44,13 +44,13 @@ import kotlin.reflect.KClass
 import java.lang.reflect.Type as ReflectType
 
 /**
- * Each enum below is stored by ordinal somewhere that outlives the deploy that wrote it.
- *
  * Lives in `:ee-test` so the metamodel sees every module's entities: `:server-app` pulls `:ee-app` in only
  * conditionally, so from there the EE entities would vanish from the scan while the floors below still passed.
  */
 @SpringBootTest
-class OrdinalBoundEnumOrderTest : AbstractSpringTest() {
+class OrdinalBoundEnumGuardTest : AbstractSpringTest() {
+  // Redisson structures on the default codec are not auto-discovered like JPA columns: any such structure whose
+  // value transitively holds an enum must be listed here, or that enum serializes by ordinal with no guard.
   private val nonSpringCacheOrdinalCodecRedisTypes = listOf(ExecutionState::class.java, TokenBucket::class.java)
 
   private val pinnedOrders =
@@ -134,7 +134,7 @@ class OrdinalBoundEnumOrderTest : AbstractSpringTest() {
       .withFailMessage(
         "These enums are persisted by ordinal, so their constant order is part of the schema. Pin each above " +
           "(or map the column with @Enumerated(EnumType.STRING)):\n" +
-          unpinned.map { it.name }.sorted().joinToString("\n") { "  - $it" },
+          bulletList(unpinned),
       ).isEmpty()
   }
 
@@ -166,7 +166,7 @@ class OrdinalBoundEnumOrderTest : AbstractSpringTest() {
       .withFailMessage(
         "These enums are serialized by ordinal into Redis structures that keep the default codec, where entries " +
           "have no TTL and cannot be recomputed. Pin each above:\n" +
-          unpinned.map { it.name }.sorted().joinToString("\n") { "  - $it" },
+          bulletList(unpinned),
       ).isEmpty()
     assertThat(reachable)
       .describedAs("enum fields reachable from the default-codec Redis types")
@@ -289,12 +289,15 @@ class OrdinalBoundEnumOrderTest : AbstractSpringTest() {
     return elementTypeOf(declared).takeIf { it.isEnum }
   }
 
+  private fun bulletList(types: Collection<Class<*>>) =
+    types.map { it.name }.sorted().joinToString("\n") { "  - $it" }
+
   private fun elementTypeOf(declared: Class<*>): Class<*> {
     if (declared.isArray) return declared.componentType
     return declared
   }
 
-  /** A JPA map key with no `@MapKeyEnumerated` defaults to ORDINAL, exactly as a column with no `@Enumerated` does. */
+  /** A JPA map key with no `@MapKeyEnumerated` defaults to ORDINAL. */
   private fun isOrdinalBoundMapKey(member: AnnotatedElement): Boolean =
     member.getAnnotation(MapKeyEnumerated::class.java)?.value != EnumType.STRING
 
