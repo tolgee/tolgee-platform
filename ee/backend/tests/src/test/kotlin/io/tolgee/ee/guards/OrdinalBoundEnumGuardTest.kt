@@ -289,8 +289,7 @@ class OrdinalBoundEnumGuardTest : AbstractSpringTest() {
     return elementTypeOf(declared).takeIf { it.isEnum }
   }
 
-  private fun bulletList(types: Collection<Class<*>>) =
-    types.map { it.name }.sorted().joinToString("\n") { "  - $it" }
+  private fun bulletList(types: Collection<Class<*>>) = types.map { it.name }.sorted().joinToString("\n") { "  - $it" }
 
   private fun elementTypeOf(declared: Class<*>): Class<*> {
     if (declared.isArray) return declared.componentType
