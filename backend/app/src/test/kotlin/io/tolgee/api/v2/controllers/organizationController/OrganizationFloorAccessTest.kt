@@ -16,7 +16,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.data.domain.PageRequest
 
-/** Covers the org view floor (see `OrganizationRoleService.canUserViewStrictOrPublic`) and the below-member surface scoping it enables. */
 class OrganizationFloorAccessTest : AuthorizedControllerTest() {
   lateinit var testData: PublicProjectsControllerTestData
 
@@ -143,6 +142,11 @@ class OrganizationFloorAccessTest : AuthorizedControllerTest() {
       node("page.totalElements").isEqualTo(0)
     }
 
+    userAccount = testData.noneOnlyUser
+    performAuthGet("/v2/organizations?search=Vibrant").andIsOk.andAssertThatJson {
+      node("page.totalElements").isEqualTo(0)
+    }
+
     userAccount = testData.otherOrgMember
     performAuthGet("/v2/organizations?search=Vibrant").andIsOk.andAssertThatJson {
       node("_embedded.organizations").isArray.hasSize(1)
@@ -195,7 +199,7 @@ class OrganizationFloorAccessTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `a NONE permission grants standing, reports no role and the reduced model`() {
+  fun `a NONE-only permission is treated as a plain floor viewer, not standing`() {
     executeInNewTransaction {
       userPreferencesService.setPreferredOrganization(
         organizationService.get(testData.otherOrg.id),
@@ -204,10 +208,34 @@ class OrganizationFloorAccessTest : AuthorizedControllerTest() {
     }
     userAccount = testData.noneOnlyUser
     performAuthGet("/v2/preferred-organization").andIsOk.andAssertThatJson {
+      node("id").isEqualTo(testData.otherOrg.id)
       node("currentUserRole").isEqualTo(null)
-      node("limitedView").isEqualTo(false)
+      node("limitedView").isEqualTo(true)
       node("activeCloudSubscription").isEqualTo(null)
     }
+  }
+
+  @Test
+  fun `a NONE-only permission does not expose the private project's languages`() {
+    val publicId = testData.otherOrgPublicProject.id
+    val privateId = testData.otherOrgPrivateProject.id
+    userAccount = testData.noneOnlyUser
+    orgLanguageTags("/languages").let {
+      it.assert.contains("en")
+      it.assert.doesNotContain("de")
+    }
+    orgLanguageTags("/languages", "&projectIds=$publicId&projectIds=$privateId").let {
+      it.assert.contains("en")
+      it.assert.doesNotContain("de")
+    }
+  }
+
+  @Test
+  fun `a floor viewer sees an accessible public project's languages via the projectIds filter`() {
+    val publicId = testData.otherOrgPublicProject.id
+    userAccount = testData.nonMember
+    orgLanguageTags("/languages", "&projectIds=$publicId").assert.contains("en")
+    orgLanguageTags("/base-languages", "&projectIds=$publicId").assert.contains("en")
   }
 
   @Test
@@ -221,9 +249,9 @@ class OrganizationFloorAccessTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `leave for a revoked-permission user removes the revoked tie`() {
+  fun `a NONE-only permission on a private-only org grants no org access`() {
     userAccount = testData.revokedOnlyUser
-    performAuthPut("/v2/organizations/${testData.noPublicOrg.id}/leave", null).andIsOk
+    performAuthGet("/v2/organizations/${testData.noPublicOrg.id}").andIsNotFound
     executeInNewTransaction {
       organizationRoleService
         .canUserViewStrictOrPublic(testData.revokedOnlyUser.id, testData.noPublicOrg.id)
@@ -233,7 +261,7 @@ class OrganizationFloorAccessTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `a revoked NONE permission on a private-only org yields the reduced model`() {
+  fun `a stale preference to a private-only org heals away for a NONE-only user`() {
     executeInNewTransaction {
       userPreferencesService.setPreferredOrganization(
         organizationService.get(testData.noPublicOrg.id),
@@ -241,20 +269,13 @@ class OrganizationFloorAccessTest : AuthorizedControllerTest() {
       )
     }
     userAccount = testData.revokedOnlyUser
-    performAuthGet("/v2/preferred-organization").andIsOk.andAssertThatJson {
-      node("id").isEqualTo(testData.noPublicOrg.id)
-      node("currentUserRole").isEqualTo(null)
-      node("limitedView").isEqualTo(false)
-      node("activeCloudSubscription").isEqualTo(null)
-    }
-  }
-
-  @Test
-  fun `a NONE permission keeps org access and reports no role on the org endpoint`() {
-    userAccount = testData.revokedOnlyUser
-    performAuthGet("/v2/organizations/${testData.noPublicOrg.id}").andIsOk.andAssertThatJson {
-      node("currentUserRole").isEqualTo(null)
-    }
+    val response = performAuthGet("/v2/preferred-organization").andIsOk.andReturn()
+    val id =
+      jacksonObjectMapper()
+        .readTree(response.response.contentAsString)
+        .path("id")
+        .asLong()
+    id.assert.isNotEqualTo(testData.noPublicOrg.id)
   }
 
   @Test

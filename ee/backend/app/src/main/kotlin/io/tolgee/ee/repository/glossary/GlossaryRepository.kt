@@ -16,13 +16,8 @@ import org.springframework.stereotype.Repository
 @Lazy
 interface GlossaryRepository : JpaRepository<Glossary, Long> {
   companion object {
-    /**
-     * The canonical [io.tolgee.repository.ProjectRepository.BELOW_MEMBER_ACCESSIBLE_PROJECT]; consuming
-     * queries must join its `r` (assigned project) / `bl` (base language) / `o` (org) aliases + `:userId`.
-     */
     const val ASSIGNED_PROJECT_BELOW_MEMBER_ACCESSIBLE = ProjectRepository.BELOW_MEMBER_ACCESSIBLE_PROJECT
 
-    /** A glossary a below-member reader may read: has at least one [ASSIGNED_PROJECT_BELOW_MEMBER_ACCESSIBLE] project. Expects alias `g`. */
     const val BELOW_MEMBER_ACCESSIBLE = """
       exists (
         select r.id from Glossary g2
@@ -122,10 +117,6 @@ interface GlossaryRepository : JpaRepository<Glossary, Long> {
     search: String?,
   ): Page<GlossaryWithStats>
 
-  /**
-   * Below-member variant: joins only the projects the user can access, so private assigned projects
-   * leak neither into `firstAssignedProjectName` nor the count.
-   */
   @Query(
     """
     select g.id as id,
@@ -150,16 +141,6 @@ interface GlossaryRepository : JpaRepository<Glossary, Long> {
     pageable: Pageable,
     search: String?,
   ): Page<GlossaryWithStats>
-
-  @Query(
-    """
-    select gp.project_id
-    from glossary_project gp
-    where gp.glossary_id = :glossaryId
-    """,
-    nativeQuery = true,
-  )
-  fun findAssignedProjectsIdsByGlossaryId(glossaryId: Long): Set<Long>
 
   @Query(
     """

@@ -19,6 +19,7 @@ import { OrganizationFields } from './components/OrganizationFields';
 import { OrganizationProfileAvatar } from './OrganizationProfileAvatar';
 import { useLeaveOrganization } from './useLeaveOrganization';
 import { useIsAdmin } from 'tg.globalContext/helpers';
+import { isAtLeastMemberOrgRole } from 'tg.fixtures/organizationRole';
 
 type OrganizationBody = components['schemas']['OrganizationDto'];
 
@@ -54,7 +55,7 @@ export const OrganizationProfileView: FunctionComponent<
   const isAdmin = useIsAdmin();
 
   const readOnly = organization.data?.currentUserRole !== 'OWNER' && !isAdmin;
-  const hasNoRole = !organization.data?.currentUserRole;
+  const hasNoRole = !isAtLeastMemberOrgRole(organization.data?.currentUserRole);
 
   const onSubmit = (values: OrganizationBody) => {
     const toSave = {

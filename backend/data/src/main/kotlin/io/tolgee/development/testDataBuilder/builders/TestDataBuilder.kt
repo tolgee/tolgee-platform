@@ -29,10 +29,7 @@ class TestDataBuilder(
 
   val data = DATA()
 
-  /**
-   * Raw-state fixups TestDataService runs after the graph is saved — for states the JPA layer
-   * self-heals or forbids on entity save (soft deletes, missing base language).
-   */
+  /** Applied raw after save: states the JPA layer self-heals or forbids on entity save (soft deletes, missing base language). */
   val afterSaveRawStates = mutableListOf<(EntityManager) -> Unit>()
 
   fun rawStateAfterSave(fn: (EntityManager) -> Unit) {

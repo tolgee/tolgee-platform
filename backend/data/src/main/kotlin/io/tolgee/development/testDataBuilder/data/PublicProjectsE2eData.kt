@@ -2,10 +2,6 @@ package io.tolgee.development.testDataBuilder.data
 
 import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 
-/**
- * The inherited BaseTestData project ("Private project") stays non-public so the list endpoint's
- * exclusion of private projects can be asserted.
- */
 class PublicProjectsE2eData(
   count: Int = 6,
   includeForeignOrgProject: Boolean = true,
@@ -18,7 +14,6 @@ class PublicProjectsE2eData(
           name = "Community User"
         }
 
-      // a dropped organizationId filter in the org-scoped listing would surface this foreign project
       if (includeForeignOrgProject) {
         addProject(organizationOwner = communityUserBuilder.defaultOrganizationBuilder.self) {
           name = "Community Outsider"

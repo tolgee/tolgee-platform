@@ -5192,7 +5192,10 @@ export interface components {
       )[];
       /** Format: int64 */
       id: number;
-      /** @example false */
+      /**
+       * @description Whether the user views the organization purely via public-project access
+       * @example false
+       */
       limitedView: boolean;
       /** @example Beautiful organization */
       name: string;

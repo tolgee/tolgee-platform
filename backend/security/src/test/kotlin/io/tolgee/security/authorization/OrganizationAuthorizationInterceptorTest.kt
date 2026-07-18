@@ -180,9 +180,6 @@ class OrganizationAuthorizationInterceptorTest {
 
   @Test
   fun `the interceptor consults the raw floor, never the admin-aware variant`() {
-    // Guards the raw-vs-admin split: swapping the interceptor to the admin-aware canUserViewOrPublic
-    // would fold in isSupporterOrAdmin() and suppress the admin-privileges audit log. The mocked
-    // outcome cannot catch that, so pin the method identity instead.
     Mockito.`when`(organizationRoleService.canUserViewStrictOrPublic(1337L, 1337L)).thenReturn(true)
 
     mockMvc.perform(get("/v2/organizations/1337/default-perms")).andIsOk

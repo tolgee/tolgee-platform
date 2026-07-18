@@ -24,8 +24,7 @@ class PreferredOrganizationFacade(
     val user = authenticationFacade.authenticatedUser
     val preferences = userPreferencesService.findOrCreate(user.id)
     var preferred = preferences.preferredOrganization
-    if (preferred == null || !organizationRoleService.canUserViewOrPublic(user.id, preferred.id)) {
-      // This GET path intentionally persists a heal of the missing or stale preference.
+    if (preferred == null || !organizationRoleService.canUserViewOrPublic(user, preferred.id)) {
       preferred = userPreferencesService.refreshPreferredOrganization(user.id) ?: return null
     }
 

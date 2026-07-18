@@ -46,9 +46,6 @@ class GlossaryGuestAccessTest : AuthorizedControllerTest() {
 
   @Test
   fun `guest lists only glossaries assigned to accessible projects`() {
-    // storedGuest and noneOnlyUser hold permission rows on the private project, so its glossaries
-    // count as accessible for them; the degenerate (no base language) public project is not
-    // publicly visible, so its glossary stays hidden for everyone below MEMBER
     assertGuestList(
       testData.virtualGuest,
       "Mixed assignment glossary",
@@ -57,13 +54,11 @@ class GlossaryGuestAccessTest : AuthorizedControllerTest() {
     assertGuestList(
       testData.storedGuest,
       "Mixed assignment glossary",
-      "Private project glossary",
       "Public project glossary",
     )
     assertGuestList(
       testData.noneOnlyUser,
       "Mixed assignment glossary",
-      "Private project glossary",
       "Public project glossary",
     )
   }
@@ -114,10 +109,9 @@ class GlossaryGuestAccessTest : AuthorizedControllerTest() {
       .andIsOk
     performAuthGet("/v2/organizations/${testData.organization.id}/glossaries/${testData.privateGlossary.id}")
       .andIsNotFound
-    // a permission row on the private project makes its glossary accessible
     userAccount = testData.storedGuest
     performAuthGet("/v2/organizations/${testData.organization.id}/glossaries/${testData.privateGlossary.id}")
-      .andIsOk
+      .andIsNotFound
   }
 
   @Test
@@ -187,8 +181,6 @@ class GlossaryGuestAccessTest : AuthorizedControllerTest() {
 
   @Test
   fun `guest export omits a private co-assigned project's languages`() {
-    // mixedGlossary is assigned to a public project (en) and a private project (en, de); a floor
-    // viewer must not receive the private-only "de" column, while a member does.
     userAccount = testData.virtualGuest
     exportLanguageHeaders(testData.mixedGlossary.id).assert.doesNotContain("de")
 

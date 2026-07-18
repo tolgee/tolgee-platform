@@ -19,6 +19,7 @@ import { OrganizationSwitch } from 'tg.component/organizationSwitch/Organization
 import { useLatchedSearchVisibility } from 'tg.views/projects/useLatchedSearchVisibility';
 import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
 import { CriticalUsageCircle } from 'tg.ee';
+import { isAtLeastMemberOrgRole } from 'tg.fixtures/organizationRole';
 
 export const ProjectListView = () => {
   const [page, setPage] = useState(0);
@@ -50,7 +51,8 @@ export const ProjectListView = () => {
   const isAdminOrSupporter = useIsAdminOrSupporter();
 
   const isAdminAccess =
-    !preferredOrganization?.currentUserRole && isAdminOrSupporter;
+    !isAtLeastMemberOrgRole(preferredOrganization?.currentUserRole) &&
+    isAdminOrSupporter;
 
   const addAllowed = isOrganizationOwnerOrMaintainer || isAdminAccess;
 

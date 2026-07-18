@@ -40,7 +40,7 @@ interface OrganizationRepository : JpaRepository<Organization, Long> {
           and r.organization = o and (r.type = :roleType or :roleType is null)
         left join o.projects p on p.deletedAt is null
         left join p.permissions perm on perm.user.id = :userId
-        where (perm is not null or r is not null)
+        where ((perm is not null and (perm.type <> 'NONE' or perm.type is null)) or r is not null)
         and (:search is null or (lower(o.name) like lower(concat('%', cast(:search as text), '%'))))
         and (:exceptOrganizationId is null or (o.id <> :exceptOrganizationId)) and o.deletedAt is null
         """,
@@ -51,7 +51,7 @@ interface OrganizationRepository : JpaRepository<Organization, Long> {
           and r.organization = o and (r.type = :roleType or :roleType is null)
         left join o.projects p on p.deletedAt is null
         left join p.permissions perm on perm.user.id = :userId
-        where (perm is not null or r is not null)
+        where ((perm is not null and (perm.type <> 'NONE' or perm.type is null)) or r is not null)
         and (:search is null or (lower(o.name) like lower(concat('%', cast(:search as text), '%'))))
         and (:exceptOrganizationId is null or (o.id <> :exceptOrganizationId)) and o.deletedAt is null
         """,
@@ -72,7 +72,8 @@ interface OrganizationRepository : JpaRepository<Organization, Long> {
     left join o.memberRoles mr on mr.user.id = :userId
     left join o.projects p on p.deletedAt is null
     left join p.permissions perm on perm.user.id = :userId
-    where (perm is not null or mr is not null) and o.id <> :exceptOrganizationId and o.deletedAt is null
+    where ((perm is not null and (perm.type <> 'NONE' or perm.type is null)) or mr is not null)
+      and o.id <> :exceptOrganizationId and o.deletedAt is null
     group by mr.id, o.id, bp.id
     order by mr.id asc nulls last
   """,
@@ -90,7 +91,8 @@ interface OrganizationRepository : JpaRepository<Organization, Long> {
     left join o.memberRoles mr on mr.user.id = :userId
     left join o.projects p on p.deletedAt is null
     left join p.permissions perm on perm.user.id = :userId
-    where (perm is not null or mr is not null) and o.id = :organizationId and o.deletedAt is null
+    where ((perm is not null and (perm.type <> 'NONE' or perm.type is null)) or mr is not null)
+      and o.id = :organizationId and o.deletedAt is null
   """,
   )
   fun canUserView(

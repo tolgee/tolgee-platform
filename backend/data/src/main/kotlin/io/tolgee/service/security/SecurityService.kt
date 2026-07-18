@@ -70,10 +70,6 @@ class SecurityService(
   @set:Lazy
   lateinit var projectService: ProjectService
 
-  /**
-   * `null` in and out means "no filter" — a below-member viewer never gets `null` back, so callers
-   * must pass the result on to a query that scopes by it rather than treating `null` as "all".
-   */
   fun getAccessibleProjectIdsInOrganization(
     organizationId: Long,
     requestedProjectIds: List<Long>?,
@@ -82,8 +78,10 @@ class SecurityService(
     if (organizationRoleService.canUserViewAtLeastMember(user, organizationId)) {
       return requestedProjectIds
     }
-    val accessible = projectService.getBelowMemberAccessibleProjectIds(organizationId, user.id).toSet()
-    return requestedProjectIds?.filter { it in accessible } ?: accessible.toList()
+    val accessibleIds = projectService.getBelowMemberAccessibleProjectIds(organizationId, user.id)
+    if (requestedProjectIds == null) return accessibleIds
+    val accessibleSet = accessibleIds.toSet()
+    return requestedProjectIds.filter { it in accessibleSet }
   }
 
   fun checkAnyProjectPermission(projectId: Long) {

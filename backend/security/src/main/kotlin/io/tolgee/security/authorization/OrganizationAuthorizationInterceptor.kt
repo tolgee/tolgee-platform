@@ -72,6 +72,7 @@ class OrganizationAuthorizationInterceptor(
       requiredRole ?: "read-only",
     )
 
+    // raw floor, not canUserViewOrPublic: admin/supporter access must fall through to canBypass below to stay audit-logged
     if (!organizationRoleService.canUserViewStrictOrPublic(userId, organization.id)) {
       if (!canBypass(request, handler)) {
         logger.debug(

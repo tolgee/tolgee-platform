@@ -50,29 +50,22 @@ interface ProjectRepository : JpaRepository<Project, Long> {
         )
     """
 
-    /**
-     * Expects aliases `r` (Project), `bl` (base language), `o` (owning organization).
-     * `o.deletedAt is null` is load-bearing: org soft-delete leaves projects undeleted and
-     * public, so dropping it re-opens guest access to soft-deleted organizations.
-     */
+    /** `o.deletedAt is null` is load-bearing — dropping it re-opens guest access to soft-deleted orgs. */
     const val PUBLIC_PROJECT_VISIBILITY = """
         r.public = true and r.deletedAt is null and r.organizationOwner is not null
         and r.baseLanguage is not null and bl.deletedAt is null
         and o.deletedAt is null
         """
 
-    /**
-     * A project a below-member viewer may read: public, or held via any permission row.
-     *
-     * `r.deletedAt is null and o.deletedAt is null` are top-level so they also guard the permission-row
-     * branch, which [PUBLIC_PROJECT_VISIBILITY] does not — do not "deduplicate" them against the public
-     * branch, or that branch re-opens to soft-deleted projects/orgs. Splice consumers must join `r`/`bl`/`o`.
-     */
+    /** `r.deletedAt`/`o.deletedAt` sit top-level so they also guard the permission branch, which [PUBLIC_PROJECT_VISIBILITY] does not. */
     const val BELOW_MEMBER_ACCESSIBLE_PROJECT = """
         (
           r.deletedAt is null and o.deletedAt is null and (
             ($PUBLIC_PROJECT_VISIBILITY)
-            or exists (select perm.id from Permission perm where perm.user.id = :userId and perm.project = r)
+            or exists (
+              select perm.id from Permission perm
+              where perm.user.id = :userId and perm.project = r and (perm.type <> 'NONE' or perm.type is null)
+            )
           )
         )
         """
@@ -161,7 +154,6 @@ interface ProjectRepository : JpaRepository<Project, Long> {
   )
   fun hasPublicProjects(organizationId: Long): Boolean
 
-  /** Ids of the org's projects a below-member viewer may read (see [BELOW_MEMBER_ACCESSIBLE_PROJECT]). */
   @Query(
     """select r.id from Project r
         left join r.baseLanguage bl

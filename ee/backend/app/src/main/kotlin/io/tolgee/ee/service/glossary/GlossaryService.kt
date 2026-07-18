@@ -156,10 +156,6 @@ class GlossaryService(
     glossaryRepository.delete(glossary)
   }
 
-  fun getAssignedProjectsIds(glossary: Glossary): Set<Long> {
-    return glossaryRepository.findAssignedProjectsIdsByGlossaryId(glossary.id)
-  }
-
   fun getAssignedProjectsForCurrentUser(glossary: Glossary): Collection<Project> {
     if (isBelowMemberReader(glossary.organizationOwner.id)) {
       return glossaryRepository.findBelowMemberAccessibleAssignedProjects(glossary.id, currentUserId())

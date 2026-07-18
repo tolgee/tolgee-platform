@@ -47,10 +47,6 @@ class OrganizationRoleService(
   private val self: OrganizationRoleService,
   private val cacheManager: CacheManager,
 ) {
-  /**
-   * Strict = no public-project floor; do not substitute the `…OrPublic` variant, which silently
-   * over-grants org visibility to any authenticated user on a public-project org.
-   */
   fun canUserViewStrict(
     userId: Long,
     organizationId: Long,
@@ -81,12 +77,6 @@ class OrganizationRoleService(
     organizationId: Long,
   ): Boolean = user.isSupporterOrAdmin() || hasAnyOrganizationRole(user.id, organizationId)
 
-  /**
-   * The org view floor with no `isSupporterOrAdmin()` short-circuit, on purpose —
-   * [io.tolgee.security.authorization.OrganizationAuthorizationInterceptor] calls this variant so
-   * supporter/admin access instead routes through its `canBypass` (see there). Do not add an admin
-   * short-circuit or swap in [canUserViewOrPublic].
-   */
   fun canUserViewStrictOrPublic(
     userId: Long,
     organizationId: Long,
