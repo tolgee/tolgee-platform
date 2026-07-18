@@ -164,7 +164,9 @@ class MtServiceManager(
     params: TranslationParams,
     e: Exception,
   ) {
-    if (params.isBatch) throw e
+    if (params.isBatch) {
+      throw e
+    }
     logger.error(
       """An exception occurred while translating
           |text "${params.text}"
