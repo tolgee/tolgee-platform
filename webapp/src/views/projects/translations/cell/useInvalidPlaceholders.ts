@@ -19,6 +19,6 @@ export const useInvalidPlaceholders = ({
     if (!enabled || !icuPlaceholders) {
       return [];
     }
-    return getInvalidPlaceholders(currentTranslation || '', nested) ?? [];
+    return getInvalidPlaceholders(currentTranslation || '', nested);
   }, [currentTranslation, nested, enabled, icuPlaceholders]);
 };
