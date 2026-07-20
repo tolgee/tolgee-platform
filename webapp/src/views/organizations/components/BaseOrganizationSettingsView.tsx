@@ -16,6 +16,7 @@ import {
   usePreferredOrganization,
 } from 'tg.globalContext/helpers';
 import { CriticalUsageCircle } from 'tg.ee';
+import { isAtLeastMemberOrgRole } from 'tg.fixtures/organizationRole';
 
 type OrganizationModel = components['schemas']['OrganizationModel'];
 
@@ -54,6 +55,7 @@ export const BaseOrganizationSettingsView: React.FC<
         [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
       }),
       label: t('organization_menu_profile'),
+      'data-cy': 'profile',
     },
   ];
 
@@ -77,12 +79,14 @@ export const BaseOrganizationSettingsView: React.FC<
       [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
     }),
     label: t('organization_menu_glossaries'),
+    'data-cy': 'glossaries',
   });
 
-  // TM browse is gated server-side to actual org members — hide the link for project-only
-  // viewers so they don't land on a 403. Glossary stays visible for parity since it carries
-  // no virtual cross-project content.
-  if (preferredOrganization?.currentUserRole != null || isAdminOrSupporter) {
+  // hide the link; below-MEMBER users would hit a 403 on the TM endpoints
+  if (
+    isAtLeastMemberOrgRole(preferredOrganization?.currentUserRole) ||
+    isAdminOrSupporter
+  ) {
     menuItems.push({
       link: LINKS.ORGANIZATION_TRANSLATION_MEMORIES.build({
         [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
@@ -91,6 +95,7 @@ export const BaseOrganizationSettingsView: React.FC<
         'organization_menu_translation_memories',
         'Translation memories'
       ),
+      'data-cy': 'translation-memories',
     });
   }
 

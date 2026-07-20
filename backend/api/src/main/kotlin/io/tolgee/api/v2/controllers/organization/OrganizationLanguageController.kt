@@ -7,6 +7,7 @@ import io.tolgee.hateoas.language.OrganizationLanguageModel
 import io.tolgee.hateoas.language.OrganizationLanguageModelAssembler
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.language.LanguageService
+import io.tolgee.service.security.SecurityService
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
@@ -29,6 +30,7 @@ class OrganizationLanguageController(
   private val languageService: LanguageService,
   private val organizationLanguageModelAssembler: OrganizationLanguageModelAssembler,
   private val pagedOrganizationLanguageAssembler: PagedResourcesAssembler<OrganizationLanguageDto>,
+  private val securityService: SecurityService,
 ) {
   @Operation(
     summary = "Get all languages in use by projects owned by specified organization",
@@ -46,7 +48,13 @@ class OrganizationLanguageController(
     @RequestParam("projectIds") projectIds: List<Long>?,
     @PathVariable organizationId: Long,
   ): PagedModel<OrganizationLanguageModel> {
-    val languages = languageService.getPagedByOrganization(organizationId, projectIds, pageable, search)
+    val languages =
+      languageService.getPagedByOrganization(
+        organizationId,
+        securityService.getAccessibleProjectIdsInOrganization(organizationId, projectIds),
+        pageable,
+        search,
+      )
     return pagedOrganizationLanguageAssembler.toModel(languages, organizationLanguageModelAssembler)
   }
 
@@ -65,7 +73,13 @@ class OrganizationLanguageController(
     @RequestParam("projectIds") projectIds: List<Long>?,
     @PathVariable organizationId: Long,
   ): PagedModel<OrganizationLanguageModel> {
-    val languages = languageService.getBasePagedByOrganization(organizationId, projectIds, pageable, search)
+    val languages =
+      languageService.getBasePagedByOrganization(
+        organizationId,
+        securityService.getAccessibleProjectIdsInOrganization(organizationId, projectIds),
+        pageable,
+        search,
+      )
     return pagedOrganizationLanguageAssembler.toModel(languages, organizationLanguageModelAssembler)
   }
 }
