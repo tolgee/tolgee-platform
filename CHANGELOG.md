@@ -1,3 +1,10 @@
+# [3.214.0](https://github.com/tolgee/tolgee-platform/compare/v3.213.1...v3.214.0) (2026-07-20)
+
+
+### Features
+
+* warn about invalid ICU placeholders in the editor ([#3782](https://github.com/tolgee/tolgee-platform/issues/3782)) ([95838f5](https://github.com/tolgee/tolgee-platform/commit/95838f52443efa0028b7e9317138da33bd85204e)), closes [tolgee/editor#10](https://github.com/tolgee/editor/issues/10) [tolgee/editor#10](https://github.com/tolgee/editor/issues/10)
+
 ## [3.213.1](https://github.com/tolgee/tolgee-platform/compare/v3.213.0...v3.213.1) (2026-07-20)
 
 
