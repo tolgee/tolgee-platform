@@ -1,6 +1,5 @@
 package io.tolgee.api.v2.controllers.organizationController
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.development.testDataBuilder.data.PublicProjectsControllerTestData
 import io.tolgee.dtos.request.userAccount.UserAccountPermissionsFilters
 import io.tolgee.fixtures.andAssertThatJson
@@ -15,6 +14,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.data.domain.PageRequest
+import tools.jackson.module.kotlin.jacksonObjectMapper
 
 class OrganizationFloorAccessTest : AuthorizedControllerTest() {
   lateinit var testData: PublicProjectsControllerTestData
@@ -124,6 +124,7 @@ class OrganizationFloorAccessTest : AuthorizedControllerTest() {
       .readTree(response.response.contentAsString)
       .path("_embedded")
       .path("languages")
+      .values()
       .map { it.path("tag").asText() }
   }
 
