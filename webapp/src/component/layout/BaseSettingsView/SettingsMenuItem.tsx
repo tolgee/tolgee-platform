@@ -34,6 +34,7 @@ type Props = {
   selected?: boolean;
   matchAsPrefix?: boolean;
   hidden?: boolean;
+  dataCyItem?: string;
 };
 
 export const SettingsMenuItem: React.FC<React.PropsWithChildren<Props>> = ({
@@ -42,6 +43,7 @@ export const SettingsMenuItem: React.FC<React.PropsWithChildren<Props>> = ({
   selected,
   matchAsPrefix,
   hidden,
+  dataCyItem,
 }) => {
   const match = useLocation();
 
@@ -57,6 +59,7 @@ export const SettingsMenuItem: React.FC<React.PropsWithChildren<Props>> = ({
         aria-label={text}
         to={linkTo as string}
         data-cy="settings-menu-item"
+        data-cy-item={dataCyItem}
         tabIndex={hidden ? -1 : undefined}
         className={clsx('link', { selected: isSelected })}
       >

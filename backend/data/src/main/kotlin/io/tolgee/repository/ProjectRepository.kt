@@ -49,14 +49,35 @@ interface ProjectRepository : JpaRepository<Project, Long> {
             or bl.tag = :#{#filters.filterBaseLanguageTag}
         )
     """
+
+    /** `o.deletedAt is null` is load-bearing — dropping it re-opens guest access to soft-deleted orgs. */
+    const val PUBLIC_PROJECT_VISIBILITY = """
+        r.public = true and r.deletedAt is null and r.organizationOwner is not null
+        and r.baseLanguage is not null and bl.deletedAt is null
+        and o.deletedAt is null
+        """
+
+    /** `r.deletedAt`/`o.deletedAt` sit top-level so they also guard the permission branch, which [PUBLIC_PROJECT_VISIBILITY] does not. */
+    const val BELOW_MEMBER_ACCESSIBLE_PROJECT = """
+        (
+          r.deletedAt is null and o.deletedAt is null and (
+            ($PUBLIC_PROJECT_VISIBILITY)
+            or exists (
+              select perm.id from Permission perm
+              where perm.user.id = :userId and perm.project = r and (perm.type <> 'NONE' or perm.type is null)
+            )
+          )
+        )
+        """
   }
 
   @Query(
-    """select r, p, o, role from Project r 
+    """select r, p, o, role from Project r
         left join fetch Permission p on p.project = r and p.user.id = :userAccountId
         left join fetch Organization o on r.organizationOwner = o
         left join fetch OrganizationRole role on role.organization = o and role.user.id = :userAccountId
-        where (p is not null or (role is not null)) and r.deletedAt is null 
+        where (p is not null or role is not null)
+        and r.deletedAt is null
         order by r.name
         """,
   )
@@ -68,9 +89,11 @@ interface ProjectRepository : JpaRepository<Project, Long> {
         left join UserAccount ua on ua.id = :userAccountId
         left join o.basePermission
         where (
-            (p is not null and (p.type <> 'NONE' or p.type is null)) or 
-            (role is not null and (o.basePermission.type <> 'NONE' or o.basePermission.type is null) and p is null) or
-            ((ua.role = 'ADMIN' or ua.role = 'SUPPORTER') and :organizationId is not null))
+            (p is not null and (p.type <> 'NONE' or p.type is null)) or
+            (role is not null
+                and (o.basePermission.type <> 'NONE' or o.basePermission.type is null) and p is null) or
+            ((ua.role = 'ADMIN' or ua.role = 'SUPPORTER') and :organizationId is not null) or
+            (:organizationId is not null and $PUBLIC_PROJECT_VISIBILITY))
         and (
             :search is null or (lower(r.name) like lower(concat('%', cast(:search as text), '%'))
             or lower(o.name) like lower(concat('%', cast(:search as text),'%')))
@@ -108,8 +131,7 @@ interface ProjectRepository : JpaRepository<Project, Long> {
    */
   @Query(
     """$BASE_VIEW_QUERY
-        where r.public = true and r.deletedAt is null and r.organizationOwner is not null
-        and r.baseLanguage is not null and bl.deletedAt is null
+        where $PUBLIC_PROJECT_VISIBILITY
         and (
             :search is null or (lower(r.name) like lower(concat('%', cast(:search as text), '%'))
             or lower(o.name) like lower(concat('%', cast(:search as text),'%')))
@@ -121,6 +143,29 @@ interface ProjectRepository : JpaRepository<Project, Long> {
     pageable: Pageable,
     @Param("search") search: String? = null,
   ): Page<ProjectView>
+
+  @Query(
+    """select count(r) > 0 from Project r
+        left join r.baseLanguage bl
+        left join r.organizationOwner o
+        where $PUBLIC_PROJECT_VISIBILITY
+        and o.id = :organizationId
+    """,
+  )
+  fun hasPublicProjects(organizationId: Long): Boolean
+
+  @Query(
+    """select r.id from Project r
+        left join r.baseLanguage bl
+        left join r.organizationOwner o
+        where o.id = :organizationId
+        and $BELOW_MEMBER_ACCESSIBLE_PROJECT
+    """,
+  )
+  fun getBelowMemberAccessibleProjectIds(
+    organizationId: Long,
+    userId: Long,
+  ): List<Long>
 
   fun findAllByOrganizationOwnerId(organizationOwnerId: Long): List<Project>
 

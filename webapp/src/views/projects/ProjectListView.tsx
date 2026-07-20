@@ -19,11 +19,14 @@ import { OrganizationSwitch } from 'tg.component/organizationSwitch/Organization
 import { useLatchedSearchVisibility } from 'tg.views/projects/useLatchedSearchVisibility';
 import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
 import { CriticalUsageCircle } from 'tg.ee';
+import { isAtLeastMemberOrgRole } from 'tg.fixtures/organizationRole';
 
 export const ProjectListView = () => {
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState('');
   const { preferredOrganization } = usePreferredOrganization();
+
+  const limitedView = Boolean(preferredOrganization?.limitedView);
 
   const listPermitted = useApiQuery({
     url: '/v2/organizations/{slug}/projects-with-stats',
@@ -48,7 +51,8 @@ export const ProjectListView = () => {
   const isAdminOrSupporter = useIsAdminOrSupporter();
 
   const isAdminAccess =
-    !preferredOrganization?.currentUserRole && isAdminOrSupporter;
+    !isAtLeastMemberOrgRole(preferredOrganization?.currentUserRole) &&
+    isAdminOrSupporter;
 
   const addAllowed = isOrganizationOwnerOrMaintainer || isAdminAccess;
 
@@ -92,6 +96,7 @@ export const ProjectListView = () => {
       >
         <ProjectsList
           loadable={listPermitted}
+          variant={limitedView ? 'public' : 'default'}
           onPageChange={setPage}
           emptyPlaceholder={
             <EmptyListMessage

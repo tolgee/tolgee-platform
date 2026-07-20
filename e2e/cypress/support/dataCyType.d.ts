@@ -253,6 +253,7 @@ declare namespace DataCy {
         "global-search-field": true;
         "global-search-field-clear": true;
         "global-user-menu-button": true;
+        "glossaries": true;
         "glossaries-empty-add-button": true;
         "glossaries-list-more-button": true;
         "glossary-batch-delete-button": true;
@@ -538,6 +539,7 @@ declare namespace DataCy {
         "plan-limit-dialog-close": true;
         "plan-limit-exceeded-popover": true;
         "plan_seat_limit_exceeded_while_accepting_invitation_message": true;
+        "profile": true;
         "project-ai-prompt-dialog-description-input": true;
         "project-ai-prompt-dialog-save": true;
         "project-base-language-tm-conflict-confirm": true;
@@ -868,6 +870,7 @@ declare namespace DataCy {
         "translation-label-add": true;
         "translation-label-control": true;
         "translation-label-delete": true;
+        "translation-memories": true;
         "translation-memories-empty-add-button": true;
         "translation-memories-list-more-button": true;
         "translation-memory-delete-button": true;
