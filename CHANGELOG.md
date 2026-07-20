@@ -1,3 +1,11 @@
+## [3.213.1](https://github.com/tolgee/tolgee-platform/compare/v3.213.0...v3.213.1) (2026-07-20)
+
+
+### Bug Fixes
+
+* community access to public-project organizations ([#3808](https://github.com/tolgee/tolgee-platform/issues/3808)) ([6a7f73f](https://github.com/tolgee/tolgee-platform/commit/6a7f73f4811c357b09e0928816f1302f9e11c097)), closes [#3770](https://github.com/tolgee/tolgee-platform/issues/3770) [#3792](https://github.com/tolgee/tolgee-platform/issues/3792) [#3765](https://github.com/tolgee/tolgee-platform/issues/3765) [#3792](https://github.com/tolgee/tolgee-platform/issues/3792) [#3792](https://github.com/tolgee/tolgee-platform/issues/3792)
+* keep websocket connection alive when a subscription is denied ([#3809](https://github.com/tolgee/tolgee-platform/issues/3809)) ([1235ad1](https://github.com/tolgee/tolgee-platform/commit/1235ad17b1d474b638f9dfe5c08dfbef03d48294)), closes [#3529](https://github.com/tolgee/tolgee-platform/issues/3529) [#3621](https://github.com/tolgee/tolgee-platform/issues/3621) [#3621](https://github.com/tolgee/tolgee-platform/issues/3621)
+
 # [3.213.0](https://github.com/tolgee/tolgee-platform/compare/v3.212.1...v3.213.0) (2026-07-16)
 
 
