@@ -125,7 +125,18 @@ class KeyTrashPurgeSchedulerTest : AbstractSpringTest() {
         .findOptional(keyId)
         .isPresent.assert
         .isFalse()
+      countSuggestionsForKey(keyId).assert.isEqualTo(0L)
     }
+  }
+
+  private fun countSuggestionsForKey(keyId: Long): Long {
+    return entityManager
+      .createQuery(
+        "select count(ts) from TranslationSuggestion ts where ts.key.id = :keyId",
+        java.lang.Long::class.java,
+      ).setParameter("keyId", keyId)
+      .singleResult
+      .toLong()
   }
 
   @Test

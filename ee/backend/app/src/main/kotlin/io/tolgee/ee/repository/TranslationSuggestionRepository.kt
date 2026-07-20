@@ -117,28 +117,4 @@ interface TranslationSuggestionRepository : JpaRepository<TranslationSuggestion,
     translation: String,
     isPlural: Boolean,
   ): List<TranslationSuggestion>
-
-  @Query(
-    """
-      from TranslationSuggestion ts
-      where ts.language.id = :id
-    """,
-  )
-  fun getAllByLanguage(id: Long): List<TranslationSuggestion>
-
-  @Query(
-    """
-      from TranslationSuggestion ts
-      where ts.project.id = :id
-    """,
-  )
-  fun getAllByProject(id: Long): List<TranslationSuggestion>
-
-  @Query(
-    """
-      from TranslationSuggestion ts
-      where ts.key.id in :keyIds
-    """,
-  )
-  fun getAllByKeyIds(keyIds: Collection<Long>): List<TranslationSuggestion>
 }
