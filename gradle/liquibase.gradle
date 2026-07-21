@@ -36,6 +36,11 @@ ext {
                             "activity_sequence," +
                             "FK9xs5a07fba5yqje5jqm6qrehs," +
                             "column:enabled_features,"+
+                            // liquibase-hibernate7 emits a duplicate addDefaultValue(nextval) for every
+                            // sequence-generated @Id column, so the model never matches the schema.
+                            // Exclude id columns from the diff until fixed upstream.
+                            // https://github.com/liquibase/liquibase-hibernate/issues/919
+                            "column:(?i)^id\$,"+
                             "table:temp_unsuccessful_job_keys"
                 }
             }
