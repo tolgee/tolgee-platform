@@ -75,22 +75,27 @@ class EeSubscription :
   /**
    * How many keys are included in the subscription plan
    */
+  @ColumnDefault("0")
   override var includedKeys: Long = 0L
 
   /**
    * How many seats are included in the subscription plan
    */
+  @ColumnDefault("0")
   override var includedSeats: Long = 0L
 
   /**
    * How many keys can a customer use until they reach spending limit
    */
+  @ColumnDefault("0")
   var keysLimit: Long = 0L
 
   /**
    * How many seats can a customer use until they reach spending limit
    */
+  @ColumnDefault("0")
   var seatsLimit: Long = 0L
 
+  @ColumnDefault("false")
   var isPayAsYouGo: Boolean = false
 }
