@@ -92,8 +92,9 @@ class ProjectHardDeletingService(
         importService.hardDeleteImport(it)
       }
 
-      // otherwise we cannot delete the languages
+      // otherwise the project keeps referencing the language/namespace we are about to delete
       project.baseLanguage = null
+      project.defaultNamespace = null
       projectRepository.saveAndFlush(project)
 
       traceLogMeasureTime("deleteProject: delete api keys") {
