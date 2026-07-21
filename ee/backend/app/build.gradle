@@ -2,12 +2,18 @@ buildscript {
     repositories {
         mavenCentral()
     }
+    dependencies {
+        // See backend/data/build.gradle: liquibase-gradle 3.1.0 resolves liquibase.Scope at config
+        // time, so plugin + liquibase-core must share the buildscript classloader (plugins{} isolates
+        // them). Keep this in sync with libs.liquibaseCore.
+        classpath 'org.liquibase.gradle:org.liquibase.gradle.gradle.plugin:3.1.0'
+        classpath 'org.liquibase:liquibase-core:5.0.3'
+    }
 }
 
 plugins {
     id 'io.spring.dependency-management'
     id 'org.jetbrains.kotlin.jvm'
-    id 'org.liquibase.gradle'
     id 'org.springframework.boot' apply false
     id "java"
     id "kotlin-allopen"
@@ -18,6 +24,7 @@ plugins {
 apply plugin: "kotlin-allopen"
 apply plugin: "org.jetbrains.kotlin.plugin.spring"
 apply plugin: 'org.hibernate.orm'
+apply plugin: 'org.liquibase.gradle'
 
 allOpen {
     annotation("jakarta.persistence.Entity")
