@@ -52,7 +52,7 @@ class CacheFingerprintRegistryTest {
       } else {
         listOf(DirectAccessCacheTypeProvider { directTypes })
       }
-    return CacheFingerprintRegistry(ctx, CacheValueFingerprint(), providers)
+    return CacheFingerprintRegistry(ctx, CacheValueFingerprint(), providers).apply { afterSingletonsInstantiated() }
   }
 
   @Test
@@ -120,6 +120,7 @@ class CacheFingerprintRegistryTest {
     whenever(ctx.getType("goodBean")).thenReturn(ShapeACacheableBean::class.java)
 
     CacheFingerprintRegistry(ctx, CacheValueFingerprint(), emptyList())
+      .apply { afterSingletonsInstantiated() }
       .physicalName("annotatedCache")
       .assert
       .startsWith("annotatedCache${CacheFingerprintRegistry.SEPARATOR}")

@@ -75,16 +75,18 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
   lateinit var awsTranslationProvider: AwsMtValueProvider
 
   val unwrappedCacheManager: CacheManager
-    get() {
-      val delegate =
-        FingerprintingCacheManager::class.java.getDeclaredField("delegate").run {
-          this.isAccessible = true
-          this.get(cacheManager) as CacheManager
-        }
-      return TransactionAwareCacheManagerProxy::class.java.getDeclaredField("targetCacheManager").run {
-        this.isAccessible = true
-        this.get(delegate) as CacheManager
-      }
+    get() =
+      cacheManager
+        .unwrapField(FingerprintingCacheManager::class.java, "delegate")
+        .unwrapField(TransactionAwareCacheManagerProxy::class.java, "targetCacheManager")
+
+  private fun CacheManager.unwrapField(
+    clazz: Class<*>,
+    field: String,
+  ): CacheManager =
+    clazz.getDeclaredField(field).run {
+      this.isAccessible = true
+      this.get(this@unwrapField) as CacheManager
     }
 
   private val paramsEnGoogle by lazy {

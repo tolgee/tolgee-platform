@@ -25,16 +25,22 @@ class CacheFingerprintRegistry(
 ) : SmartInitializingSingleton {
   private val logger = LoggerFactory.getLogger(CacheFingerprintRegistry::class.java)
 
-  private val fingerprintByCacheName: Map<String, String> by lazy { buildFingerprints() }
+  // Reflecting over cached methods needs every singleton to exist, so the build cannot run before
+  // afterSingletonsInstantiated — building earlier would resolve against a half-initialized context.
+  private var fingerprintByCacheName: Map<String, String>? = null
 
-  /** Build the registry once all singletons exist but the context is not yet serving requests. */
   override fun afterSingletonsInstantiated() {
-    logger.info("Fingerprinted caches: {}", fingerprintByCacheName.keys.sorted())
+    val built = buildFingerprints()
+    fingerprintByCacheName = built
+    logger.info("Fingerprinted caches: {}", built.keys.sorted())
   }
 
   fun physicalName(cacheName: String): String {
     if (cacheName.contains(SEPARATOR)) return cacheName
-    val fp = fingerprintByCacheName[cacheName] ?: return cacheName
+    val fingerprints =
+      fingerprintByCacheName
+        ?: throw IllegalStateException("Cache '$cacheName' accessed before the fingerprint registry was built")
+    val fp = fingerprints[cacheName] ?: return cacheName
     return "$cacheName$SEPARATOR$fp"
   }
 
