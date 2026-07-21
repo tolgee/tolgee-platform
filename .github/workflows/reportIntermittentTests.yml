@@ -89,7 +89,9 @@ jobs:
       - name: Collect flaky and failed tests
         if: always()
         continue-on-error: true
-        run: python3 scripts/collect-flaky-tests.py "${{ steps.reportName.outputs.reportName }}"
+        run: |
+          python3 -m pip install --quiet defusedxml
+          python3 scripts/collect-flaky-tests.py "${{ steps.reportName.outputs.reportName }}"
 
       - uses: actions/upload-artifact@v4
         if: always()

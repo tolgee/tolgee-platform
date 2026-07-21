@@ -20,8 +20,12 @@ Usage:
 from __future__ import annotations
 
 import glob
+import os
 import sys
-import xml.etree.ElementTree as ET
+
+# defusedxml hardens parsing against XXE / entity-expansion. The input here is
+# trusted (Gradle-generated JUnit XML from the same CI job), but parse defensively.
+import defusedxml.ElementTree as ET
 
 XML_GLOB = "**/build/test-results/**/TEST-*.xml"
 
@@ -64,7 +68,12 @@ def main() -> int:
     if len(sys.argv) != 2:
         print(__doc__, file=sys.stderr)
         return 2
-    report = sys.argv[1]
+    # Strip any path components: the report name only ever forms a file name in
+    # the current directory, never a path into another directory.
+    report = os.path.basename(sys.argv[1])
+    if not report or report in (".", ".."):
+        print("Invalid report name", file=sys.stderr)
+        return 2
     flaky, failed = collect()
     write(f"flaky-tests-{report}.txt", flaky)
     write(f"failed-tests-{report}.txt", failed)
