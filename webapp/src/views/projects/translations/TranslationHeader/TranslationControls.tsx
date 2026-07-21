@@ -1,9 +1,4 @@
-import {
-  LayoutGrid02,
-  LayoutLeft,
-  Plus,
-  Trash01,
-} from '@untitled-ui/icons-react';
+import { LayoutGrid02, LayoutLeft, Trash01 } from '@untitled-ui/icons-react';
 import {
   Badge,
   Button,
@@ -13,6 +8,7 @@ import {
   Tooltip,
 } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
+import { AddButton } from '@tginternal/library/components/AddButton';
 
 import { LanguagesSelect } from 'tg.component/common/form/LanguagesSelect/LanguagesSelect';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
@@ -173,15 +169,12 @@ export const TranslationControls: React.FC<React.PropsWithChildren<Props>> = ({
 
           {canCreateKeys && (
             <QuickStartHighlight itemKey="add_key">
-              <Button
-                startIcon={<Plus width={19} height={19} />}
-                color="primary"
-                variant="contained"
+              <AddButton
                 onClick={handleAddTranslation}
                 data-cy="translations-add-button"
               >
                 <T keyName="key_add" />
-              </Button>
+              </AddButton>
             </QuickStartHighlight>
           )}
         </StyledSpaced>
