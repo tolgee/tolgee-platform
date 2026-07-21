@@ -14,6 +14,7 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import jakarta.validation.constraints.NotBlank
+import org.hibernate.annotations.ColumnDefault
 import java.util.Date
 
 @Entity
@@ -36,6 +37,7 @@ class WebhookConfig(
   var webhookSecret: String = ""
 
   @ActivityLoggedProp
+  @ColumnDefault("true")
   var enabled: Boolean = true
 
   @OneToMany(mappedBy = "webhookConfig", orphanRemoval = true)
@@ -48,8 +50,10 @@ class WebhookConfig(
   var lastExecuted: Date? = null
 
   @ActivityIgnoredProp
+  @ColumnDefault("false")
   var autoDisableNotified: Boolean = false
 
   @ActivityIgnoredProp
+  @ColumnDefault("false")
   var autoDisabled: Boolean = false
 }

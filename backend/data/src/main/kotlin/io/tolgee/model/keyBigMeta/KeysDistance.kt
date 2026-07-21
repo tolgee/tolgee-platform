@@ -41,6 +41,7 @@ class KeysDistance(
   @ColumnDefault("10000")
   var score: Long = 10000
 
+  @ColumnDefault("0")
   var distance: Double = 0.0
 
   var hits: Long = 1

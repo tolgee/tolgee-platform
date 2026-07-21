@@ -1,6 +1,7 @@
 package io.tolgee.model
 
 import io.tolgee.api.ISsoTenant
+import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
 import jakarta.persistence.OneToOne
@@ -17,6 +18,7 @@ class SsoTenant :
    * The domain column uses unique constraint.
    * When the tenant is enabled the domain must not be empty and must be unique across all enabled tenants.
    */
+  @Column(nullable = false)
   override var domain: String = ""
   override var clientId: String = ""
   override var clientSecret: String = ""
