@@ -28,7 +28,7 @@ class CacheWithExpiration(
       @Suppress("UNCHECKED_CAST")
       return cached.data as? T
     }
-    this.cache.evict(key)
+    cache.evict(key)
     return null
   }
 
@@ -37,14 +37,14 @@ class CacheWithExpiration(
     value: Any?,
     expiration: Duration,
   ) {
-    this.cache.put(key, CachedWithExpiration(currentDateProvider.date.time + expiration.toMillis(), value))
+    cache.put(key, CachedWithExpiration(currentDateProvider.date.time + expiration.toMillis(), value))
   }
 
   fun evict(key: Any) {
-    this.cache.evict(key)
+    cache.evict(key)
   }
 
   fun clear() {
-    this.cache.clear()
+    cache.clear()
   }
 }
