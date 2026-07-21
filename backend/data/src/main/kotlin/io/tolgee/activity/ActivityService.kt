@@ -42,6 +42,7 @@ class ActivityService(
     activityRevision: ActivityRevision,
     modifiedEntities: ModifiedEntitiesType,
   ) {
+    // Also load-bearing for project_contributor — see projectContributorTrigger.sql (unfiltered trigger).
     if (!activityRevision.shouldSaveWithoutModification() && modifiedEntities.isEmpty()) {
       return
     }
@@ -200,7 +201,7 @@ class ActivityService(
   }
 
   private fun ActivityRevision.shouldSaveWithoutModification(): Boolean {
-    val type = this.type ?: return true
+    val type = this.type ?: return false
     return type.saveWithoutModification
   }
 }
