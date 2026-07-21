@@ -5,7 +5,6 @@ import io.tolgee.component.cache.CacheValueFingerprint
 import io.tolgee.component.cache.DirectAccessCacheTypeProvider
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.cache.annotation.Cacheable
@@ -143,8 +142,8 @@ class CacheFingerprintRegistryTest {
   }
 
   @Test
-  fun `physicalName fails loud when queried before the registry is built`() {
+  fun `physicalName falls open to the bare name when queried before the registry is built`() {
     val reg = CacheFingerprintRegistry(mock<ApplicationContext>(), CacheValueFingerprint(), emptyList())
-    assertThrows<IllegalStateException> { reg.physicalName("anyCache") }
+    reg.physicalName("anyCache").assert.isEqualTo("anyCache")
   }
 }

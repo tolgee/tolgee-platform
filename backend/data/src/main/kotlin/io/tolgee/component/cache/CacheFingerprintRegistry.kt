@@ -27,6 +27,8 @@ class CacheFingerprintRegistry(
 
   // Reflecting over cached methods needs every singleton to exist, so the build cannot run before
   // afterSingletonsInstantiated — building earlier would resolve against a half-initialized context.
+  // @Volatile safely publishes the map (written once here, read from request threads).
+  @Volatile
   private var fingerprintByCacheName: Map<String, String>? = null
 
   override fun afterSingletonsInstantiated() {
@@ -37,9 +39,14 @@ class CacheFingerprintRegistry(
 
   fun physicalName(cacheName: String): String {
     if (cacheName.contains(SEPARATOR)) return cacheName
-    val fingerprints =
-      fingerprintByCacheName
-        ?: throw IllegalStateException("Cache '$cacheName' accessed before the fingerprint registry was built")
+    val fingerprints = fingerprintByCacheName
+    if (fingerprints == null) {
+      logger.warn(
+        "Cache '{}' accessed before the fingerprint registry was built; using the un-namespaced name",
+        cacheName,
+      )
+      return cacheName
+    }
     val fp = fingerprints[cacheName] ?: return cacheName
     return "$cacheName$SEPARATOR$fp"
   }
@@ -60,7 +67,7 @@ class CacheFingerprintRegistry(
       }
       fingerprints[cacheName] = fp
     }
-    return fingerprints
+    return fingerprints.toMap()
   }
 
   private fun scanAnnotatedCaches(): Map<String, String> {

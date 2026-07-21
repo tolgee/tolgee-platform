@@ -35,6 +35,12 @@ class CacheWithoutRedisTest : AbstractCacheTest() {
         .filter { Modifier.isStatic(it.modifiers) && it.type == String::class.java }
         .map { it.get(null) as String }
 
+    assertThat(cacheNames.filter { it.contains(CacheFingerprintRegistry.SEPARATOR) })
+      .describedAs(
+        "a logical cache name must not contain the physical-name separator '%s'",
+        CacheFingerprintRegistry.SEPARATOR,
+      ).isEmpty()
+
     val unfingerprinted = cacheNames.filter { cacheFingerprintRegistry.physicalName(it) == it }
 
     assertThat(unfingerprinted)

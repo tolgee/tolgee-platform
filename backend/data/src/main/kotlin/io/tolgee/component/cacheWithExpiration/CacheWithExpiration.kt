@@ -25,13 +25,8 @@ class CacheWithExpiration(
     it: CachedWithExpiration,
   ): T? {
     if (it.expiresAt > currentDateProvider.date.time) {
-      try {
-        @Suppress("UNCHECKED_CAST")
-        return it.data as? T
-      } catch (e: ClassCastException) {
-        this.cache.evict(key)
-        return null
-      }
+      @Suppress("UNCHECKED_CAST")
+      return it.data as? T
     }
     this.cache.evict(key)
     return null
