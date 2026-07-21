@@ -20,6 +20,7 @@ type PlanLimitPopoverProps = PlanLimitPopoverWrapperProps & {
   isPayAsYouGo?: boolean;
   progressData?: Partial<ProgressData>;
   actionButton?: React.ReactNode;
+  additionalContent?: React.ReactNode;
   loading?: boolean;
 };
 
@@ -31,7 +32,15 @@ const StyledDialogContent = styled(DialogContent)`
 
 export const GenericPlanLimitPopover: FC<
   React.PropsWithChildren<PlanLimitPopoverProps>
-> = ({ open, onClose, isPayAsYouGo, progressData, actionButton, loading }) => {
+> = ({
+  open,
+  onClose,
+  isPayAsYouGo,
+  progressData,
+  actionButton,
+  additionalContent,
+  loading,
+}) => {
   return (
     <PlanLimitPopoverWrapper
       open={open}
@@ -45,6 +54,7 @@ export const GenericPlanLimitPopover: FC<
         <DialogContentText id="alert-dialog-description">
           <T keyName="plan_limit_dialog_description" />
         </DialogContentText>
+        {additionalContent}
         {progressData && isPayAsYouGo !== undefined ? (
           <UsageDetailed {...progressData} isPayAsYouGo={isPayAsYouGo} />
         ) : (

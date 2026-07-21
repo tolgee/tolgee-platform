@@ -25,6 +25,9 @@ export const errorAction = (code: string) => {
     case 'plan_key_limit_exceeded':
       globalContext.actions?.incrementPlanLimitErrors();
       return true;
+    case 'plan_word_limit_exceeded':
+      globalContext.actions?.incrementPlanLimitErrors();
+      return true;
     default:
       return false;
   }

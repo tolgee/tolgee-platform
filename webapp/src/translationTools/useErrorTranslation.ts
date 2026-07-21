@@ -478,6 +478,11 @@ export function useErrorTranslation() {
         return t('date_has_to_be_in_the_future');
       case 'plan_key_limit_exceeded':
         return t('plan_key_limit_exceeded');
+      case 'plan_word_limit_exceeded':
+        return t(
+          'plan_word_limit_exceeded',
+          'Plan word limit exceeded. Upgrade your plan or enable auto-upgrade.'
+        );
       case 'keys_spending_limit_exceeded':
         return t('keys_spending_limit_exceeded');
 

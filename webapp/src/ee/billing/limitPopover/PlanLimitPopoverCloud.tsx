@@ -1,4 +1,4 @@
-import { Button } from '@mui/material';
+import { Button, DialogContentText } from '@mui/material';
 import { T } from '@tolgee/react';
 import { useHistory } from 'react-router-dom';
 
@@ -7,6 +7,11 @@ import {
   useOrganizationUsage,
   usePreferredOrganization,
 } from 'tg.globalContext/helpers';
+import LoadingButton from 'tg.component/common/form/LoadingButton';
+import {
+  useBillingApiMutation,
+  useBillingApiQuery,
+} from 'tg.service/http/useQueryApi';
 import { getProgressData } from '../component/getProgressData';
 import { GenericPlanLimitPopover } from './generic/GenericPlanLimitPopover';
 import React from 'react';
@@ -23,6 +28,45 @@ export const PlanLimitPopoverCloud: React.FC<
   const { usage } = useOrganizationUsage();
   const isOwner = preferredOrganization?.currentUserRole === 'OWNER';
   const history = useHistory();
+
+  const subscriptionLoadable = useBillingApiQuery({
+    url: '/v2/organizations/{organizationId}/billing/subscription',
+    method: 'get',
+    path: {
+      organizationId: preferredOrganization?.id || 0,
+    },
+    options: {
+      enabled: open && isOwner && preferredOrganization?.id !== undefined,
+    },
+  });
+
+  const subscription = subscriptionLoadable.data;
+  const wordsAutoUpgradeAvailable = Boolean(
+    subscription &&
+      subscription.plan.metricType === 'HOSTED_WORDS' &&
+      !subscription.plan.free &&
+      !subscription.autoUpgradeEnabled
+  );
+
+  const autoUpgradeMutation = useBillingApiMutation({
+    url: '/v2/organizations/{organizationId}/billing/auto-upgrade',
+    method: 'put',
+    invalidatePrefix: '/v2/organizations',
+  });
+
+  const handleEnableAutoUpgrade = () => {
+    autoUpgradeMutation.mutate(
+      {
+        path: { organizationId: preferredOrganization!.id },
+        content: { 'application/json': { enabled: true } },
+      },
+      {
+        onSuccess: () => {
+          onClose();
+        },
+      }
+    );
+  };
 
   const handleConfirm = () => {
     onClose();
@@ -41,15 +85,40 @@ export const PlanLimitPopoverCloud: React.FC<
       open={open}
       isPayAsYouGo={usage?.isPayAsYouGo}
       progressData={progressData}
+      additionalContent={
+        wordsAutoUpgradeAvailable && (
+          <DialogContentText data-cy="plan-limit-dialog-words-auto-upgrade-hint">
+            <T
+              keyName="plan_limit_dialog_words_auto_upgrade_hint"
+              defaultValue="Your plan's word limit was reached and auto-upgrade is disabled, so adding more content is blocked. Enable auto-upgrade to move to a higher word tier automatically, or upgrade your plan manually."
+            />
+          </DialogContentText>
+        )
+      }
       actionButton={
         isOwner && (
-          <Button
-            data-cy="global-confirmation-confirm"
-            color="primary"
-            onClick={handleConfirm}
-          >
-            <T keyName="plan_limit_dialog_go_to_billing" />
-          </Button>
+          <>
+            {wordsAutoUpgradeAvailable && (
+              <LoadingButton
+                data-cy="plan-limit-dialog-enable-auto-upgrade"
+                color="primary"
+                loading={autoUpgradeMutation.isLoading}
+                onClick={handleEnableAutoUpgrade}
+              >
+                <T
+                  keyName="plan_limit_dialog_enable_auto_upgrade"
+                  defaultValue="Enable auto-upgrade"
+                />
+              </LoadingButton>
+            )}
+            <Button
+              data-cy="global-confirmation-confirm"
+              color="primary"
+              onClick={handleConfirm}
+            >
+              <T keyName="plan_limit_dialog_go_to_billing" />
+            </Button>
+          </>
         )
       }
     />
