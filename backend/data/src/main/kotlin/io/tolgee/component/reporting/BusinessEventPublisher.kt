@@ -4,7 +4,7 @@ import io.sentry.Sentry
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.activity.UtmData
 import io.tolgee.component.CurrentDateProvider
-import io.tolgee.component.cache.CacheFingerprintRegistry
+import io.tolgee.component.ResilientCacheAccessor
 import io.tolgee.constants.Caches
 import io.tolgee.dtos.request.BusinessEventReportRequest
 import io.tolgee.dtos.request.IdentifyRequest
@@ -26,7 +26,7 @@ class BusinessEventPublisher(
   private val cacheManager: CacheManager,
   private val currentDateProvider: CurrentDateProvider,
   private val sdkInfoProvider: SdkInfoProvider,
-  private val cacheFingerprintRegistry: CacheFingerprintRegistry,
+  private val resilientCacheAccessor: ResilientCacheAccessor,
 ) : Logging {
   fun publish(request: BusinessEventReportRequest) {
     publish(
@@ -81,8 +81,7 @@ class BusinessEventPublisher(
   ): Boolean {
     val cache = getEventThrottlingCache()
     val cached =
-      cache?.get(key)?.get()
-        as? ThrottledEventInCache ?: return true
+      cache?.let { resilientCacheAccessor.get(it, key, ThrottledEventInCache::class.java) } ?: return true
 
     if (cached.publishedAt < currentDateProvider.date.time - onceIn.toMillis()) {
       cache.evict(key)
@@ -104,10 +103,7 @@ class BusinessEventPublisher(
     )
   }
 
-  private fun getEventThrottlingCache(): Cache? =
-    cacheManager.getCache(
-      cacheFingerprintRegistry.physicalName(Caches.BUSINESS_EVENT_THROTTLING, ThrottledEventInCache::class),
-    )
+  private fun getEventThrottlingCache(): Cache? = cacheManager.getCache(Caches.BUSINESS_EVENT_THROTTLING)
 
   fun getUtmData(): UtmData {
     return try {

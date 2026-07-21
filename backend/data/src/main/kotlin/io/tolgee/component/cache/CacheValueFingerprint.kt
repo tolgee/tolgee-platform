@@ -1,7 +1,7 @@
 package io.tolgee.component.cache
 
+import org.apache.commons.codec.digest.DigestUtils
 import org.springframework.stereotype.Component
-import java.security.MessageDigest
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.memberProperties
@@ -90,19 +90,10 @@ class CacheValueFingerprint {
 
   private fun shouldExpand(qualifiedName: String): Boolean = qualifiedName.startsWith(PROJECT_PACKAGE_PREFIX)
 
-  private fun shortHash(signature: String): String {
-    val digest = MessageDigest.getInstance("SHA-256").digest(signature.toByteArray(Charsets.UTF_8))
-    return buildString(FINGERPRINT_LENGTH) {
-      for (i in 0 until FINGERPRINT_LENGTH / 2) {
-        append(HEX[(digest[i].toInt() shr 4) and 0xF])
-        append(HEX[digest[i].toInt() and 0xF])
-      }
-    }
-  }
+  private fun shortHash(signature: String): String = DigestUtils.sha256Hex(signature).substring(0, FINGERPRINT_LENGTH)
 
   companion object {
     private const val PROJECT_PACKAGE_PREFIX = "io.tolgee"
     private const val FINGERPRINT_LENGTH = 12
-    private val HEX = "0123456789abcdef".toCharArray()
   }
 }

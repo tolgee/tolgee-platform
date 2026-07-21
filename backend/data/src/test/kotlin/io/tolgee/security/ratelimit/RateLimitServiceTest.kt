@@ -19,8 +19,6 @@ package io.tolgee.security.ratelimit
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.LockingProvider
 import io.tolgee.component.ResilientCacheAccessor
-import io.tolgee.component.cache.CacheFingerprintRegistry
-import io.tolgee.component.cache.CacheValueFingerprint
 import io.tolgee.configuration.tolgee.RateLimitProperties
 import io.tolgee.model.UserAccount
 import io.tolgee.security.authentication.AuthenticationFacade
@@ -37,7 +35,6 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.whenever
 import org.springframework.cache.Cache
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager
-import org.springframework.context.ApplicationContext
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.web.servlet.HandlerMapping
 import java.time.Duration
@@ -69,9 +66,6 @@ class RateLimitServiceTest {
 
   private val resilientCacheAccessor = ResilientCacheAccessor()
 
-  private val cacheFingerprintRegistry =
-    CacheFingerprintRegistry(Mockito.mock(ApplicationContext::class.java), CacheValueFingerprint())
-
   private val rateLimitService =
     Mockito.spy(
       RateLimitService(
@@ -81,7 +75,6 @@ class RateLimitServiceTest {
         rateLimitProperties,
         authenticationFacade,
         resilientCacheAccessor,
-        cacheFingerprintRegistry,
       ),
     )
 
@@ -362,7 +355,6 @@ class RateLimitServiceTest {
         rateLimitProperties,
         authenticationFacade,
         mockAccessor,
-        cacheFingerprintRegistry,
       )
 
     val testPolicy = RateLimitPolicy("corrupted_test", 5, Duration.ofSeconds(1), false)

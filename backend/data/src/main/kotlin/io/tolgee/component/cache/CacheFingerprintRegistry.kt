@@ -1,5 +1,6 @@
 package io.tolgee.component.cache
 
+import org.slf4j.LoggerFactory
 import org.springframework.cache.annotation.CachePut
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.context.ApplicationContext
@@ -7,8 +8,6 @@ import org.springframework.core.annotation.AnnotatedElementUtils
 import org.springframework.stereotype.Component
 import org.springframework.util.ClassUtils
 import java.lang.reflect.Method
-import java.util.concurrent.ConcurrentHashMap
-import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.jvm.kotlinFunction
 
@@ -18,23 +17,21 @@ import kotlin.reflect.jvm.kotlinFunction
  * the physical cache name changes, and stale entries are simply never read again (they expire by TTL)
  * instead of being silently mis-deserialized.
  *
- * Fingerprints for `@Cacheable`/`@CachePut` caches are discovered automatically from the annotated
- * methods' return types. Caches accessed directly (no annotation) resolve their physical name through
- * [physicalName] with the value type supplied at the call site.
- *
- * The scan is lazy: it runs on first cache access, once the application context is fully initialized.
+ * The value type of each cache comes from one of two sources, both resolved once at first access:
+ * `@Cacheable`/`@CachePut` methods (discovered by return type) and [DirectAccessCacheTypeProvider]s
+ * (declared types for caches used without an annotation). Because every cache name resolves through
+ * the single [physicalName], plain `cacheManager.getCache(name)` reaches the right physical cache
+ * everywhere — no per-call-site type wiring.
  */
 @Component
 class CacheFingerprintRegistry(
   private val applicationContext: ApplicationContext,
   private val fingerprint: CacheValueFingerprint,
+  private val directAccessCacheTypeProviders: List<DirectAccessCacheTypeProvider>,
 ) {
-  private val fingerprintByCacheName: Map<String, String> by lazy { scanAnnotatedCaches() }
+  private val logger = LoggerFactory.getLogger(CacheFingerprintRegistry::class.java)
 
-  // Direct-access overloads run on per-request hot paths; the fingerprint of a type never changes
-  // within a running JVM, so memoize it rather than repeating the reflective walk on every call.
-  private val fingerprintByType = ConcurrentHashMap<KType, String>()
-  private val fingerprintByClass = ConcurrentHashMap<KClass<*>, String>()
+  private val fingerprintByCacheName: Map<String, String> by lazy { buildFingerprints() }
 
   fun physicalName(cacheName: String): String {
     if (cacheName.contains(SEPARATOR)) return cacheName
@@ -42,15 +39,24 @@ class CacheFingerprintRegistry(
     return "$cacheName$SEPARATOR$fp"
   }
 
-  fun physicalName(
-    cacheName: String,
-    valueType: KType,
-  ): String = "$cacheName$SEPARATOR${fingerprintByType.getOrPut(valueType) { fingerprint.compute(valueType) }}"
-
-  fun physicalName(
-    cacheName: String,
-    valueType: KClass<*>,
-  ): String = "$cacheName$SEPARATOR${fingerprintByClass.getOrPut(valueType) { fingerprint.compute(valueType) }}"
+  private fun buildFingerprints(): Map<String, String> {
+    val fingerprints = HashMap<String, String>()
+    directAccessCacheTypeProviders.forEach { provider ->
+      provider.getDirectAccessCacheTypes().forEach { (cacheName, valueType) ->
+        fingerprints[cacheName] = fingerprint.compute(valueType)
+      }
+    }
+    scanAnnotatedCaches().forEach { (cacheName, fp) ->
+      fingerprints[cacheName]?.let {
+        logger.warn(
+          "Cache '{}' is both annotation-discovered and directly declared; using the annotation type",
+          cacheName,
+        )
+      }
+      fingerprints[cacheName] = fp
+    }
+    return fingerprints
+  }
 
   private fun scanAnnotatedCaches(): Map<String, String> {
     val returnTypesByCache = HashMap<String, MutableSet<KType>>()
@@ -62,7 +68,15 @@ class CacheFingerprintRegistry(
         if (cacheNames.isEmpty()) return@forEach
         // Resolving the Kotlin return type loads its class graph; a bean whose signature references
         // an optional dependency absent at runtime must not abort the whole scan.
-        val returnType = runCatching { method.kotlinFunction?.returnType }.getOrNull() ?: return@forEach
+        val returnType =
+          runCatching { method.kotlinFunction?.returnType }.getOrElse {
+            logger.warn(
+              "Could not resolve return type of cached method {}; its cache stays un-fingerprinted",
+              method,
+              it,
+            )
+            null
+          } ?: return@forEach
         cacheNames.forEach { cacheName ->
           returnTypesByCache.getOrPut(cacheName) { HashSet() }.add(returnType)
         }
@@ -74,15 +88,11 @@ class CacheFingerprintRegistry(
   private fun cacheNamesOf(method: Method): Set<String> {
     val names = LinkedHashSet<String>()
     AnnotatedElementUtils
-      .findMergedAnnotation(
-        method,
-        Cacheable::class.java,
-      )?.let { names.addAll(it.cacheNames.toList()) }
+      .findMergedAnnotation(method, Cacheable::class.java)
+      ?.let { names.addAll(it.cacheNames.toList()) }
     AnnotatedElementUtils
-      .findMergedAnnotation(
-        method,
-        CachePut::class.java,
-      )?.let { names.addAll(it.cacheNames.toList()) }
+      .findMergedAnnotation(method, CachePut::class.java)
+      ?.let { names.addAll(it.cacheNames.toList()) }
     return names
   }
 

@@ -1,6 +1,5 @@
 package io.tolgee.component
 
-import io.tolgee.component.cache.CacheFingerprintRegistry
 import io.tolgee.constants.Caches
 import io.tolgee.events.OnProjectActivityEvent
 import org.springframework.cache.Cache
@@ -13,7 +12,7 @@ import java.util.UUID
 class ProjectTranslationLastModifiedManager(
   val currentDateProvider: CurrentDateProvider,
   val cacheManager: CacheManager,
-  private val cacheFingerprintRegistry: CacheFingerprintRegistry,
+  private val resilientCacheAccessor: ResilientCacheAccessor,
 ) {
   /**
    * Returns the last modification information for a given project.
@@ -24,18 +23,12 @@ class ProjectTranslationLastModifiedManager(
    * @return LastModifiedInfo containing timestamp and ETag for the project
    */
   fun getLastModifiedInfo(projectId: Long): LastModifiedInfo {
-    return getCache()?.get(projectId)?.get() as? LastModifiedInfo
-      ?: let {
-        val now = getCurrentInfo()
-        getCache()?.put(projectId, now)
-        now
-      }
+    val cache = getCache()
+    return cache?.let { resilientCacheAccessor.get(it, projectId, LastModifiedInfo::class.java) }
+      ?: getCurrentInfo().also { cache?.put(projectId, it) }
   }
 
-  private fun getCache(): Cache? =
-    cacheManager.getCache(
-      cacheFingerprintRegistry.physicalName(Caches.PROJECT_TRANSLATIONS_MODIFIED, LastModifiedInfo::class),
-    )
+  private fun getCache(): Cache? = cacheManager.getCache(Caches.PROJECT_TRANSLATIONS_MODIFIED)
 
   @EventListener
   fun onActivity(event: OnProjectActivityEvent) {

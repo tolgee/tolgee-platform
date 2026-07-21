@@ -98,6 +98,20 @@ class CacheValueFingerprintTest {
     fingerprint.compute(listOfInt).assert.isNotEqualTo(fingerprint.compute(setOfInt))
   }
 
+  private data class Node(
+    val value: Int,
+    val next: Node?,
+  )
+
+  @Test
+  fun `handles self-referential types without infinite recursion`() {
+    fingerprint
+      .signature(Node::class.starProjectedType)
+      .assert
+      .contains("@io.tolgee.unit.cache.CacheValueFingerprintTest.Node")
+    fingerprint.compute(Node::class).assert.matches({ it.matches(Regex("[0-9a-f]{12}")) }, "12 hex chars")
+  }
+
   @Test
   fun `distinguishes nullability in isolation`() {
     val notNull = String::class.createType(nullable = false)
