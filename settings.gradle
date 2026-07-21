@@ -17,9 +17,6 @@ pluginManagement {
                 useModule("org.jetbrains.kotlin.plugin.jpa:org.jetbrains.kotlin.plugin.jpa.gradle.plugin:$kotlinVersion")
             }
 
-            if (requested.id.id == 'org.liquibase.gradle') {
-                useModule('org.liquibase.gradle:org.liquibase.gradle.gradle.plugin:2.2.2')
-            }
             if (requested.id.id == 'org.hibernate.orm') {
                 useVersion(hibernateVersion)
             }
@@ -65,8 +62,8 @@ dependencyResolutionManagement {
             // (CVE in grpc-netty-shaded). Temporary — drop it once libraries-bom ships grpc >= 1.75.0.
             // Imported as a platform in every module that uses libs.googleCloud.
             library('grpcBom', "io.grpc:grpc-bom:1.75.0")
-            library('liquibaseCore', "org.liquibase:liquibase-core:4.30.0")
-            library('liquibaseHibernate', "org.liquibase.ext:liquibase-hibernate6:4.30.0")
+            library('liquibaseCore', "org.liquibase:liquibase-core:5.0.3")
+            library('liquibaseHibernate', "org.liquibase.ext:liquibase-hibernate7:5.0.3")
             library('liquibasePicoli', "info.picocli:picocli:4.6.3")
             library('hibernateTypes', "io.hypersistence:hypersistence-utils-hibernate-73:3.15.3")
             library('redissonSpringBootStarter', "org.redisson:redisson-spring-boot-starter:4.6.1")

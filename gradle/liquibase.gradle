@@ -5,7 +5,7 @@ ext {
                 referenceUrl: referenceUrlPrefix +
                         '?dialect=io.tolgee.dialects.postgres.CustomPostgreSQLDialect' +
                         '&hibernate.physical_naming_strategy=org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy' +
-                        '&hibernate.implicit_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy',
+                        '&hibernate.implicit_naming_strategy=org.springframework.boot.hibernate.SpringImplicitNamingStrategy',
                 username    : 'postgres',
                 password    : 'postgres',
                 driver      : "org.postgresql.Driver"
@@ -15,7 +15,7 @@ ext {
             activities {
                 //noinspection GroovyAssignabilityCheck
                 main {
-                    changeLogFile "${project.projectDir}/${changeLogPah}"
+                    changelogFile "${project.projectDir}/${changeLogPah}"
                     url liveDb.url
                     referenceUrl liveDb.referenceUrl
                     username liveDb.username
