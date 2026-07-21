@@ -2,6 +2,7 @@ package io.tolgee.formats
 
 import io.tolgee.service.export.ExportFilePathProvider
 
+/** Ordinal-persisted by [io.tolgee.model.contentDelivery.ContentDeliveryConfig.format] — do not reorder. */
 enum class ExportFormat(
   val extension: String,
   val mediaType: String,

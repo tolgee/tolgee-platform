@@ -7,6 +7,7 @@ import org.springframework.core.annotation.AnnotatedElementUtils
 import org.springframework.stereotype.Component
 import org.springframework.util.ClassUtils
 import java.lang.reflect.Method
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.jvm.kotlinFunction
@@ -30,6 +31,11 @@ class CacheFingerprintRegistry(
 ) {
   private val fingerprintByCacheName: Map<String, String> by lazy { scanAnnotatedCaches() }
 
+  // Direct-access overloads run on per-request hot paths; the fingerprint of a type never changes
+  // within a running JVM, so memoize it rather than repeating the reflective walk on every call.
+  private val fingerprintByType = ConcurrentHashMap<KType, String>()
+  private val fingerprintByClass = ConcurrentHashMap<KClass<*>, String>()
+
   fun physicalName(cacheName: String): String {
     if (cacheName.contains(SEPARATOR)) return cacheName
     val fp = fingerprintByCacheName[cacheName] ?: return cacheName
@@ -39,12 +45,12 @@ class CacheFingerprintRegistry(
   fun physicalName(
     cacheName: String,
     valueType: KType,
-  ): String = "$cacheName$SEPARATOR${fingerprint.compute(valueType)}"
+  ): String = "$cacheName$SEPARATOR${fingerprintByType.getOrPut(valueType) { fingerprint.compute(valueType) }}"
 
   fun physicalName(
     cacheName: String,
     valueType: KClass<*>,
-  ): String = "$cacheName$SEPARATOR${fingerprint.compute(valueType)}"
+  ): String = "$cacheName$SEPARATOR${fingerprintByClass.getOrPut(valueType) { fingerprint.compute(valueType) }}"
 
   private fun scanAnnotatedCaches(): Map<String, String> {
     val returnTypesByCache = HashMap<String, MutableSet<KType>>()

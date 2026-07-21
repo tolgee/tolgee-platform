@@ -1,20 +1,33 @@
 package io.tolgee.cache
 
+import io.netty.buffer.Unpooled
+import io.tolgee.component.EnumNameKryo5Codec
+import io.tolgee.component.ResilientCacheAccessor
 import io.tolgee.component.cache.CacheFingerprintRegistry
+import io.tolgee.component.cache.CacheValueFingerprint
+import io.tolgee.component.machineTranslation.TranslateResult
 import io.tolgee.constants.Caches
+import io.tolgee.constants.MtServiceType
+import io.tolgee.dtos.cacheable.PermissionDto
 import io.tolgee.fixtures.RedisRunner
+import io.tolgee.model.Permission
 import io.tolgee.model.UserAccount
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.redisson.api.RedissonClient
 import org.redisson.client.codec.ByteArrayCodec
+import org.redisson.client.handler.State
 import org.redisson.codec.CompositeCodec
+import org.redisson.codec.Kryo5Codec
+import org.redisson.spring.cache.CacheConfig
 import org.redisson.spring.cache.RedissonSpringCacheManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -37,6 +50,8 @@ import org.springframework.test.context.ContextConfiguration
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class CacheWithRedisTest : AbstractCacheTest() {
   companion object {
+    private const val KEY = "permission-key"
+
     val redisRunner = RedisRunner()
 
     @AfterAll
@@ -61,6 +76,12 @@ class CacheWithRedisTest : AbstractCacheTest() {
   @Autowired
   lateinit var cacheFingerprintRegistry: CacheFingerprintRegistry
 
+  @Autowired
+  lateinit var cacheValueFingerprint: CacheValueFingerprint
+
+  @Autowired
+  lateinit var resilientCacheAccessor: ResilientCacheAccessor
+
   @Test
   fun `it has proper cache manager`() {
     assertThat(unwrappedCacheManager).isInstanceOf(RedissonSpringCacheManager::class.java)
@@ -78,19 +99,17 @@ class CacheWithRedisTest : AbstractCacheTest() {
   @Test
   fun `a shape change routes to a fresh physical cache without cross-version reads`() {
     val cacheName = "fingerprintIsolationTestCache"
-    val oldPhysical = cacheFingerprintRegistry.physicalName(cacheName, OldShape::class)
-    val newPhysical = cacheFingerprintRegistry.physicalName(cacheName, NewShape::class)
+    val oldPhysical = cacheName + CacheFingerprintRegistry.SEPARATOR + cacheValueFingerprint.compute(OldShape::class)
+    val newPhysical = cacheName + CacheFingerprintRegistry.SEPARATOR + cacheValueFingerprint.compute(NewShape::class)
     oldPhysical.assert.isNotEqualTo(newPhysical)
 
     cacheManager.getCache(oldPhysical)!!.put("k", "old-value")
 
-    // The new app version computes a different fingerprint -> different physical cache -> miss.
     cacheManager
       .getCache(newPhysical)!!
       .get("k", String::class.java)
       .assert
       .isNull()
-    // The old entry stays addressable under the old fingerprint, so rolling deploys coexist.
     cacheManager
       .getCache(oldPhysical)!!
       .get("k", String::class.java)
@@ -122,6 +141,58 @@ class CacheWithRedisTest : AbstractCacheTest() {
     verify(userAccountRepository, times(2)).findActive(userId)
   }
 
+  @Test
+  fun `writes enum names into redis`() {
+    permissionsCache.put(KEY, permissionDtoFixture)
+
+    val stored = rawPermissionsCache.readAllValues().map { it.stripKryoHighBits() }
+    assertThat(stored).hasSize(1)
+    assertThat(stored.single()).contains("ADMIN")
+    assertThat(permissionsCache.get(KEY)!!.get()).isEqualTo(permissionDtoFixture)
+  }
+
+  @Test
+  fun `evicts and misses when ResilientCacheAccessor reads a previous-deploy entry`() {
+    previousDeployPermissionsCache.put(KEY, permissionDtoFixture)
+    assertThat(rawPermissionsCache.readAllValues()).hasSize(1)
+
+    val value = resilientCacheAccessor.get(permissionsCache, KEY, PermissionDto::class.java)
+
+    assertThat(value).isNull()
+    assertThat(rawPermissionsCache.readAllValues()).isEmpty()
+  }
+
+  @Test
+  fun `falls back to the repository when the Cacheable path reads a previous-deploy entry`() {
+    whenever(permissionRepository.findOneByProjectIdAndUserIdAndOrganizationId(3, 2)).then { Permission(id = 1) }
+    previousDeployPermissionsCache.put(arrayListOf(2L, 3L, null), permissionDtoFixture)
+    assertThat(rawPermissionsCache.readAllValues()).hasSize(1)
+
+    val found = permissionService.find(projectId = 3, userId = 2)
+
+    assertThat(found).isNotNull
+    verify(permissionRepository, times(1)).findOneByProjectIdAndUserIdAndOrganizationId(3, 2)
+    assertThat(rawPermissionsCache.readAllValues())
+      .describedAs("stale entry evicted and recomputed under the same key")
+      .hasSize(1)
+  }
+
+  @Test
+  fun `falls back to the provider when the machine translation cache holds a previous-deploy entry`() {
+    doAnswer { googleResponse }.whenever(awsTranslationProvider).translate(any())
+    mtServiceManager.translate(paramsEnAws)
+    verify(awsTranslationProvider, times(1)).translate(any())
+
+    previousDeployCache(Caches.MACHINE_TRANSLATIONS).put(
+      machineTranslationCacheKey(),
+      TranslateResult(translatedText = "Hello", usedService = MtServiceType.AWS),
+    )
+
+    mtServiceManager.translate(paramsEnAws)
+
+    verify(awsTranslationProvider, times(2)).translate(any())
+  }
+
   /**
    * Truncates the raw bytes stored under a cache key so the codec can no longer deserialize them,
    * reproducing the KryoBufferUnderflowException that a cached object's shape change between
@@ -135,10 +206,36 @@ class CacheWithRedisTest : AbstractCacheTest() {
     val rawMap =
       redissonClient.getMap<Any, ByteArray>(
         cacheFingerprintRegistry.physicalName(cacheName),
-        CompositeCodec(redissonClient.config.codec, ByteArrayCodec.INSTANCE),
+        CompositeCodec(EnumNameKryo5Codec(), ByteArrayCodec.INSTANCE),
       )
     val stored = rawMap[key]
     stored.assert.isNotNull
     rawMap[key] = stored!!.copyOf(stored.size / 2)
+  }
+
+  private fun machineTranslationCacheKey(): String {
+    val rawKey = rawCache(Caches.MACHINE_TRANSLATIONS).readAllKeySet().single()
+    return EnumNameKryo5Codec().valueDecoder.decode(Unpooled.wrappedBuffer(rawKey), State()) as String
+  }
+
+  private val permissionsCache get() = cacheManager.getCache(Caches.PERMISSIONS)!!
+
+  private val rawPermissionsCache get() = rawCache(Caches.PERMISSIONS)
+
+  private fun rawCache(name: String) =
+    redissonClient.getMapCache<ByteArray, ByteArray>(
+      cacheFingerprintRegistry.physicalName(name),
+      ByteArrayCodec.INSTANCE,
+    )
+
+  private val previousDeployPermissionsCache get() = previousDeployCache(Caches.PERMISSIONS)
+
+  private fun previousDeployCache(name: String): org.springframework.cache.Cache {
+    val physicalName = cacheFingerprintRegistry.physicalName(name)
+    return RedissonSpringCacheManager(
+      redissonClient,
+      mapOf(physicalName to CacheConfig(tolgeeProperties.cache.defaultTtl, tolgeeProperties.cache.defaultTtl)),
+      Kryo5Codec(),
+    ).getCache(physicalName)!!
   }
 }

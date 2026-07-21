@@ -1,6 +1,7 @@
 package io.tolgee.configuration
 
 import org.redisson.api.RedissonClient
+import org.redisson.client.codec.Codec
 import org.redisson.spring.cache.CacheConfig
 import org.redisson.spring.cache.RedissonSpringCacheManager
 import java.util.concurrent.ConcurrentHashMap
@@ -14,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap
 class TolgeeRedissonSpringCacheManager(
   redissonClient: RedissonClient,
   private val defaultTtl: Long,
-) : RedissonSpringCacheManager(redissonClient, ConcurrentHashMap<String, CacheConfig>()) {
+  codec: Codec,
+) : RedissonSpringCacheManager(redissonClient, ConcurrentHashMap<String, CacheConfig>(), codec) {
   override fun createDefaultConfig(): CacheConfig = CacheConfig(defaultTtl, defaultTtl)
 }

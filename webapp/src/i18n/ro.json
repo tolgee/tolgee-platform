@@ -2759,6 +2759,7 @@
   "translation_single_no_permission_create": "Nu aveți permisiuni suficiente pentru a adăuga o nouă cheie",
   "translation_single_tag_placeholder": "Adaugă etichetă...",
   "translation_single_translations_title": "Traduceri",
+  "translations_invalid_icu_placeholders": "ICU invalid: {value}",
   "translations_key_created": "Cheie creată",
   "translations_key_delete_confirmation_text": "{count, plural, one {Sigur doriți să ștergeți 1 cheie selectată și traducerile sale?} other {Sigur doriți să ștergeți toate cheile selectate și traducerile lor?}}",
   "translations_key_edit_custom_properties_description": "Stocați valorile personalizate aici în format JSON. Cheile care încep cu `_` au o semnificație specială pentru Tolgee.",

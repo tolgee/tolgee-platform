@@ -1,5 +1,6 @@
 package io.tolgee.model.dataImport.issues.issueTypes
 
+/** Ordinal-persisted by [io.tolgee.model.dataImport.issues.ImportFileIssue.type] — do not reorder. */
 enum class FileIssueType {
   KEY_IS_NOT_STRING,
   MULTIPLE_VALUES_FOR_KEY_AND_LANGUAGE,

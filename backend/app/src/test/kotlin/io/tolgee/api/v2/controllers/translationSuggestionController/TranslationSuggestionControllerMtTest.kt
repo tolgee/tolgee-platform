@@ -381,9 +381,7 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
   @ProjectJWTAuthTestMethod
   fun `it doesn't consume when cached`() {
     saveTestData()
-    val valueWrapperMock = mock<Cache.ValueWrapper>()
-    whenever(cacheMock.get(any())).thenReturn(valueWrapperMock)
-    whenever(valueWrapperMock.get()).thenReturn(
+    whenever(cacheMock.get(any(), eq(TranslateResult::class.java))).thenReturn(
       TranslateResult(
         translatedText = "Yeey! Cached!",
         contextDescription = "context",

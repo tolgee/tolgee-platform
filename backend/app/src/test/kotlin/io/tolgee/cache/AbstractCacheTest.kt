@@ -12,9 +12,12 @@ import io.tolgee.model.Organization
 import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.announcement.Announcement
+import io.tolgee.repository.AnnouncementRepository
 import io.tolgee.repository.PermissionRepository
 import io.tolgee.repository.ProjectRepository
 import io.tolgee.repository.UserAccountRepository
+import io.tolgee.service.AnnouncementService
 import io.tolgee.service.machineTranslation.MtServiceInfo
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.testing.assertions.Assertions
@@ -57,6 +60,13 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
   lateinit var permissionRepository: PermissionRepository
 
   @Autowired
+  @MockitoBean
+  lateinit var announcementRepository: AnnouncementRepository
+
+  @Autowired
+  lateinit var announcementService: AnnouncementService
+
+  @Autowired
   @MockitoSpyBean
   lateinit var googleTranslationProvider: GoogleTranslationProvider
 
@@ -96,6 +106,8 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
   @BeforeEach
   fun setup() {
     cacheManager.getCache(Caches.MACHINE_TRANSLATIONS)!!.clear()
+    cacheManager.getCache(Caches.PERMISSIONS)!!.clear()
+    cacheManager.getCache(Caches.DISMISSED_ANNOUNCEMENT)!!.clear()
     Mockito.clearInvocations(googleTranslationProvider, awsTranslationProvider)
   }
 
@@ -164,6 +176,33 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
         1,
       )
   }
+
+  @Test
+  fun `caches dismissed announcement`() {
+    whenever(announcementRepository.isDismissed(1L, Announcement.FEATURE_BATCH_OPERATIONS)).then { true }
+
+    announcementService.isAnnouncementDismissed(Announcement.FEATURE_BATCH_OPERATIONS, 1)
+    announcementService.isAnnouncementDismissed(Announcement.FEATURE_BATCH_OPERATIONS, 1)
+
+    verify(announcementRepository, times(1)).isDismissed(1L, Announcement.FEATURE_BATCH_OPERATIONS)
+  }
+
+  @Test
+  fun `dismissing an announcement evicts the key it was cached under`() {
+    val user = UserAccount().apply { id = 1 }
+    whenever(userAccountRepository.findActive(1)).then { user }
+    whenever(announcementRepository.isDismissed(1L, Announcement.FEATURE_BATCH_OPERATIONS)).then { false }
+    announcementService.isAnnouncementDismissed(Announcement.FEATURE_BATCH_OPERATIONS, 1)
+    Assertions.assertThat(dismissedAnnouncementCache.get(dismissedAnnouncementKey)).isNotNull
+
+    announcementService.dismissAnnouncement(Announcement.FEATURE_BATCH_OPERATIONS, 1)
+
+    Assertions.assertThat(dismissedAnnouncementCache.get(dismissedAnnouncementKey)).isNull()
+  }
+
+  private val dismissedAnnouncementCache get() = cacheManager.getCache(Caches.DISMISSED_ANNOUNCEMENT)!!
+
+  private val dismissedAnnouncementKey get() = arrayListOf(Announcement.FEATURE_BATCH_OPERATIONS, 1L)
 
   val googleResponse = MtValueProvider.MtResult("Hello", 10)
 

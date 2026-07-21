@@ -19,7 +19,7 @@ import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.translation.SetTranslationTextUtil
 import io.tolgee.service.translation.TranslationService
-import io.tolgee.service.translation.TranslationSuggestionService
+import io.tolgee.service.translation.TranslationSuggestionServiceOssImpl
 import jakarta.persistence.EntityManager
 import org.springframework.context.annotation.Primary
 import org.springframework.data.domain.Page
@@ -33,11 +33,11 @@ class TranslationSuggestionServiceEeImpl(
   private val translationSuggestionRepository: TranslationSuggestionRepository,
   private val keyService: KeyService,
   private val languageService: LanguageService,
-  private val entityManager: EntityManager,
+  entityManager: EntityManager,
   private val authenticationFacade: AuthenticationFacade,
   private val translationService: TranslationService,
   private val tolgeeProperties: TolgeeProperties,
-) : TranslationSuggestionService {
+) : TranslationSuggestionServiceOssImpl(entityManager) {
   override fun getKeysWithSuggestions(
     projectId: Long,
     keyIds: List<Long>,
@@ -210,16 +210,6 @@ class TranslationSuggestionServiceEeImpl(
 
   fun deleteSuggestion(suggestion: TranslationSuggestion) {
     translationSuggestionRepository.delete(suggestion)
-  }
-
-  override fun deleteAllByLanguage(id: Long) {
-    val suggestions = translationSuggestionRepository.getAllByLanguage(id)
-    translationSuggestionRepository.deleteAll(suggestions)
-  }
-
-  override fun deleteAllByProject(id: Long) {
-    val suggestions = translationSuggestionRepository.getAllByProject(id)
-    translationSuggestionRepository.deleteAll(suggestions)
   }
 
   private fun checkSuggestionValid(text: String) {

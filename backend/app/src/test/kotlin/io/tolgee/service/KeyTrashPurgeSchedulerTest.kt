@@ -2,18 +2,27 @@ package io.tolgee.service
 
 import io.tolgee.AbstractSpringTest
 import io.tolgee.development.testDataBuilder.data.BaseTestData
+import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.KeyTrashPurgeScheduler
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import java.time.Duration
 import java.util.Date
 
 class KeyTrashPurgeSchedulerTest : AbstractSpringTest() {
   @Autowired
   lateinit var keyTrashPurgeScheduler: KeyTrashPurgeScheduler
+
+  @MockitoSpyBean
+  @Autowired
+  lateinit var keyServiceSpy: KeyService
 
   lateinit var testData: BaseTestData
 
@@ -39,6 +48,17 @@ class KeyTrashPurgeSchedulerTest : AbstractSpringTest() {
             addTranslation {
               language = englishLanguage
               text = "Key 3"
+            }
+          }
+          addKey { name = "keyWithSuggestion" }.build {
+            addTranslation {
+              language = englishLanguage
+              text = "Key with suggestion"
+            }
+            addSuggestion {
+              language = englishLanguage
+              author = user
+              translation = "Suggested translation"
             }
           }
         }
@@ -83,6 +103,76 @@ class KeyTrashPurgeSchedulerTest : AbstractSpringTest() {
         .findOptional(key2Id)
         .isPresent.assert
         .isFalse()
+    }
+  }
+
+  @Test
+  fun `purges keys that have translation suggestions`() {
+    val keyId =
+      testData.projectBuilder.data.keys[3]
+        .self.id
+
+    executeInNewTransaction {
+      keyService.softDeleteMultiple(listOf(keyId), deletedBy = testData.user)
+    }
+
+    moveCurrentDate(Duration.ofDays(8))
+
+    keyTrashPurgeScheduler.purge()
+
+    executeInNewTransaction {
+      keyService
+        .findOptional(keyId)
+        .isPresent.assert
+        .isFalse()
+      countSuggestionsForKey(keyId).assert.isEqualTo(0L)
+    }
+  }
+
+  private fun countSuggestionsForKey(keyId: Long): Long {
+    return entityManager
+      .createQuery(
+        "select count(ts) from TranslationSuggestion ts where ts.key.id = :keyId",
+        java.lang.Long::class.java,
+      ).setParameter("keyId", keyId)
+      .singleResult
+      .toLong()
+  }
+
+  @Test
+  fun `keeps purging when one key cannot be hard-deleted`() {
+    val goodKeyId =
+      testData.projectBuilder.data.keys[0]
+        .self.id
+    val poisonKeyId =
+      testData.projectBuilder.data.keys[1]
+        .self.id
+
+    executeInNewTransaction {
+      keyService.softDeleteMultiple(listOf(goodKeyId, poisonKeyId), deletedBy = testData.user)
+    }
+
+    doAnswer { invocation ->
+      val ids = invocation.getArgument<Collection<Long>>(0)
+      if (poisonKeyId in ids) throw RuntimeException("cannot delete key $poisonKeyId")
+      invocation.callRealMethod()
+    }.whenever(keyServiceSpy).hardDeleteMultiple(any())
+
+    moveCurrentDate(Duration.ofDays(8))
+
+    keyTrashPurgeScheduler.purge()
+
+    executeInNewTransaction {
+      // The healthy key is purged despite sharing the failing batch.
+      keyService
+        .findOptional(goodKeyId)
+        .isPresent.assert
+        .isFalse()
+      // The un-deletable key survives and will be retried on the next run.
+      keyService
+        .findOptional(poisonKeyId)
+        .isPresent.assert
+        .isTrue()
     }
   }
 

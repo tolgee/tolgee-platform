@@ -2,7 +2,7 @@ package io.tolgee.component.machineTranslation
 
 import io.sentry.Sentry
 import io.tolgee.Metrics
-import io.tolgee.component.cache.CacheFingerprintRegistry
+import io.tolgee.component.ResilientCacheAccessor
 import io.tolgee.component.machineTranslation.providers.ProviderTranslateParams
 import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.constants.Caches
@@ -27,7 +27,7 @@ class MtServiceManager(
   private val internalProperties: InternalProperties,
   private val cacheManager: CacheManager,
   private val metrics: Metrics,
-  private val cacheFingerprintRegistry: CacheFingerprintRegistry,
+  private val resilientCacheAccessor: ResilientCacheAccessor,
 ) {
   private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -164,28 +164,23 @@ class MtServiceManager(
     params: TranslationParams,
     e: Exception,
   ) {
-    val silentFail = !params.isBatch
-    if (!silentFail) {
+    if (params.isBatch) {
       throw e
-    } else {
-      logger.error(
-        """An exception occurred while translating 
-            |text "${params.text}" 
-            |from ${params.sourceLanguageTag} 
-            |to ${params.targetLanguageTag}"
-        """.trimMargin(),
-      )
-      logger.error(e.stackTraceToString())
-      Sentry.captureException(e)
     }
+    logger.error(
+      """An exception occurred while translating
+          |text "${params.text}"
+          |from ${params.sourceLanguageTag}
+          |to ${params.targetLanguageTag}
+      """.trimMargin(),
+    )
+    logger.error(e.stackTraceToString())
+    Sentry.captureException(e)
   }
 
   private fun ProviderTranslateParams.findInCacheByParams(serviceType: MtServiceType): TranslateResult? {
-    return getCache()?.let { cache ->
-      val result = cache.get(this.cacheKey(serviceType.name))?.get() as? TranslateResult
-      result?.actualPrice = 0
-      return result
-    }
+    val cache = getCache() ?: return null
+    return resilientCacheAccessor.get(cache, this.cacheKey(serviceType.name), TranslateResult::class.java)
   }
 
   private fun ProviderTranslateParams.cacheResult(
@@ -195,10 +190,7 @@ class MtServiceManager(
     getCache()?.put(this.cacheKey(serviceType.name), result)
   }
 
-  private fun getCache() =
-    cacheManager.getCache(
-      cacheFingerprintRegistry.physicalName(Caches.MACHINE_TRANSLATIONS, TranslateResult::class),
-    )
+  private fun getCache() = cacheManager.getCache(Caches.MACHINE_TRANSLATIONS)
 
   fun MtServiceType.getProvider(): MtValueProvider {
     return applicationContext.getBean(this.providerClass)

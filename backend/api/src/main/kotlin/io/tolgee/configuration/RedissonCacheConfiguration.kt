@@ -1,5 +1,6 @@
 package io.tolgee.configuration
 
+import io.tolgee.component.EnumNameKryo5Codec
 import io.tolgee.component.cache.CacheFingerprintRegistry
 import io.tolgee.component.cache.FingerprintingCacheManager
 import io.tolgee.configuration.tolgee.TolgeeProperties
@@ -26,7 +27,12 @@ class RedissonCacheConfiguration(
 ) {
   @Bean
   fun cacheManager(redissonClient: RedissonClient): CacheManager {
-    val redissonCacheManager = TolgeeRedissonSpringCacheManager(redissonClient, tolgeeProperties.cache.defaultTtl)
+    val redissonCacheManager =
+      TolgeeRedissonSpringCacheManager(
+        redissonClient,
+        tolgeeProperties.cache.defaultTtl,
+        EnumNameKryo5Codec(),
+      )
     return FingerprintingCacheManager(
       TransactionAwareCacheManagerProxy(redissonCacheManager),
       cacheFingerprintRegistry,

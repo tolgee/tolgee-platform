@@ -1,5 +1,6 @@
 package io.tolgee.unit.cache
 
+import io.tolgee.component.EnumNameKryo5Codec
 import io.tolgee.configuration.TolgeeRedissonSpringCacheManager
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
@@ -10,7 +11,7 @@ import org.redisson.spring.cache.CacheConfig
 class TolgeeRedissonSpringCacheManagerTest {
   @Test
   fun `applies the configured default ttl to every cache, even unregistered ones`() {
-    val manager = TolgeeRedissonSpringCacheManager(mock<RedissonClient>(), 4242L)
+    val manager = TolgeeRedissonSpringCacheManager(mock<RedissonClient>(), 4242L, EnumNameKryo5Codec())
 
     val createDefaultConfig =
       TolgeeRedissonSpringCacheManager::class.java
