@@ -1,5 +1,6 @@
 package io.tolgee.service.key
 
+import io.sentry.Sentry
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.LockingProvider
 import io.tolgee.component.SchedulingManager
@@ -39,25 +40,53 @@ class KeyTrashPurgeScheduler(
 
   private fun purgeExpiredKeys() {
     val cutoffDate = currentDateProvider.date.addDays(-RETENTION_DAYS)
+    var afterId = 0L
     var totalPurged = 0
 
-    do {
+    while (true) {
       val batch =
         executeInNewTransaction(transactionManager) {
-          keyService.findSoftDeletedIdsBefore(cutoffDate, PageRequest.of(0, BATCH_SIZE))
+          keyService.findSoftDeletedIdsDeletedBeforeAndIdAfter(cutoffDate, afterId, PageRequest.of(0, BATCH_SIZE))
         }
 
-      if (batch.isEmpty) break
+      if (batch.isEmpty()) break
+      // Advance past every key we attempted, deleted or not, so an un-deletable key can't
+      // wedge the run: it is skipped for the rest of this pass and retried on the next one.
+      afterId = batch.last()
 
-      executeInNewTransaction(transactionManager) {
-        keyService.hardDeleteMultiple(batch.content)
-      }
-      totalPurged += batch.numberOfElements
-      logger.info("Purged {} expired trashed keys", batch.numberOfElements)
-    } while (batch.hasNext())
+      totalPurged += purgeBatch(batch)
+
+      if (batch.size < BATCH_SIZE) break
+    }
 
     if (totalPurged > 0) {
       logger.info("Total purged {} expired trashed keys older than {}", totalPurged, cutoffDate)
+    }
+  }
+
+  private fun purgeBatch(ids: List<Long>): Int {
+    try {
+      executeInNewTransaction(transactionManager) {
+        keyService.hardDeleteMultiple(ids)
+      }
+      logger.info("Purged {} expired trashed keys", ids.size)
+      return ids.size
+    } catch (e: Exception) {
+      logger.warn("Batch purge of {} trashed keys failed, retrying individually", ids.size, e)
+    }
+    return ids.count { purgeSingle(it) }
+  }
+
+  private fun purgeSingle(id: Long): Boolean {
+    try {
+      executeInNewTransaction(transactionManager) {
+        keyService.hardDeleteMultiple(listOf(id))
+      }
+      return true
+    } catch (e: Exception) {
+      logger.error("Failed to purge trashed key {}", id, e)
+      Sentry.captureException(e)
+      return false
     }
   }
 

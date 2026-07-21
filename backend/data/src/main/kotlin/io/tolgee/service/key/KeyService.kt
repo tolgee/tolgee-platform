@@ -34,6 +34,7 @@ import io.tolgee.service.key.utils.KeyInfoProvider
 import io.tolgee.service.key.utils.KeysImporter
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
+import io.tolgee.service.translation.TranslationSuggestionService
 import io.tolgee.service.translation.applyMaxCharLimit
 import io.tolgee.service.translation.validateCharLimit
 import io.tolgee.util.Logging
@@ -75,6 +76,8 @@ class KeyService(
   private val branchMergeService: BranchMergeService,
   private val currentDateProvider: CurrentDateProvider,
   private val authenticationFacade: AuthenticationFacade,
+  @Lazy
+  private val translationSuggestionService: TranslationSuggestionService,
 ) : Logging {
   fun getAll(projectId: Long): Set<Key> {
     return keyRepository.getAllByProjectId(projectId)
@@ -356,6 +359,7 @@ class KeyService(
     screenshotService.deleteAllByKeyId(id)
     taskKeyRepository.deleteAllByKeyIdIn(listOf(id))
     branchMergeService.deleteChangesByKeyIds(listOf(id))
+    translationSuggestionService.deleteAllByKeyIds(listOf(id))
     // Flush and clear the persistence context to ensure deletions are synchronized
     // and to prevent Hibernate 6.6's CHECK_ON_FLUSH from seeing stale relationships
     entityManager.flush()
@@ -450,6 +454,8 @@ class KeyService(
 
     branchMergeService.deleteChangesByKeyIds(ids)
 
+    translationSuggestionService.deleteAllByKeyIds(ids)
+
     // Flush and clear the persistence context to ensure deletions are synchronized
     // and to prevent Hibernate 6.6's CHECK_ON_FLUSH from seeing stale relationships
     entityManager.flush()
@@ -477,11 +483,12 @@ class KeyService(
     return keyRepository.findSoftDeletedByProjectId(projectId, branch, pageable)
   }
 
-  fun findSoftDeletedIdsBefore(
-    before: Date,
+  fun findSoftDeletedIdsDeletedBeforeAndIdAfter(
+    deletedBefore: Date,
+    afterId: Long,
     pageable: Pageable,
-  ): Page<Long> {
-    return keyRepository.findSoftDeletedIdsBefore(before, pageable)
+  ): List<Long> {
+    return keyRepository.findSoftDeletedIdsDeletedBeforeAndIdAfter(deletedBefore, afterId, pageable)
   }
 
   fun findSoftDeletedByIdsAndProjectId(
