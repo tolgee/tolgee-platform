@@ -22,11 +22,11 @@ class CacheWithExpiration(
 
   private fun <T> getNotExpiredValue(
     key: Any,
-    it: CachedWithExpiration,
+    cached: CachedWithExpiration,
   ): T? {
-    if (it.expiresAt > currentDateProvider.date.time) {
+    if (cached.expiresAt > currentDateProvider.date.time) {
       @Suppress("UNCHECKED_CAST")
-      return it.data as? T
+      return cached.data as? T
     }
     this.cache.evict(key)
     return null
