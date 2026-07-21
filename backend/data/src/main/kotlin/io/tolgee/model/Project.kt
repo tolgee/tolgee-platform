@@ -170,7 +170,7 @@ class Project(
   var useQaChecks: Boolean = false
 
   @ColumnDefault("false")
-  @Column(name = "is_public")
+  @Column(name = "is_public", nullable = false)
   @ActivityLoggedProp
   var public: Boolean = false
 
