@@ -13,7 +13,6 @@ interface Caches {
     const val RATE_LIMITS = "rateLimits"
     const val MACHINE_TRANSLATIONS = "machineTranslations"
     const val PROJECT_TRANSLATIONS_MODIFIED = "projectTranslationsModified"
-    const val USAGE = "usage"
     const val DISMISSED_ANNOUNCEMENT = "dismissedAnnouncement"
     const val AUTOMATIONS = "automations"
     const val EE_SUBSCRIPTION = "eeSubscription"

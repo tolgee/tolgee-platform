@@ -11,12 +11,8 @@ class CacheWithExpiration(
   private val currentDateProvider: CurrentDateProvider,
   private val resilientCacheAccessor: ResilientCacheAccessor,
 ) {
-  fun <T : Any?> get(key: Any): T? {
-    resilientCacheAccessor.get(cache, key, CachedWithExpiration::class.java)?.let {
-      return getNotExpiredValue(key, it)
-    }
-    return null
-  }
+  fun <T : Any?> get(key: Any): T? =
+    resilientCacheAccessor.get(cache, key, CachedWithExpiration::class.java)?.let { getNotExpiredValue(key, it) }
 
   fun getWrapper(key: Any): ValueWrapper? {
     val cached = resilientCacheAccessor.get(cache, key, CachedWithExpiration::class.java) ?: return null

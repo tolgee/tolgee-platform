@@ -5,6 +5,7 @@ import io.tolgee.component.cache.CacheValueFingerprint
 import io.tolgee.component.cache.DirectAccessCacheTypeProvider
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.cache.annotation.Cacheable
@@ -124,5 +125,26 @@ class CacheFingerprintRegistryTest {
       .physicalName("annotatedCache")
       .assert
       .startsWith("annotatedCache${CacheFingerprintRegistry.SEPARATOR}")
+  }
+
+  @Test
+  fun `a type that fails to fingerprint does not abort the build`() {
+    val ctx = mock<ApplicationContext>()
+    whenever(ctx.beanDefinitionNames).thenReturn(emptyArray())
+    val fingerprint = mock<CacheValueFingerprint>()
+    whenever(fingerprint.compute(ShapeA::class)).thenThrow(RuntimeException("boom"))
+    whenever(fingerprint.compute(ShapeB::class)).thenReturn("goodfp")
+    val provider = DirectAccessCacheTypeProvider { mapOf("badCache" to ShapeA::class, "goodCache" to ShapeB::class) }
+
+    val reg = CacheFingerprintRegistry(ctx, fingerprint, listOf(provider)).apply { afterSingletonsInstantiated() }
+
+    reg.physicalName("goodCache").assert.isEqualTo("goodCache${CacheFingerprintRegistry.SEPARATOR}goodfp")
+    reg.physicalName("badCache").assert.isEqualTo("badCache")
+  }
+
+  @Test
+  fun `physicalName fails loud when queried before the registry is built`() {
+    val reg = CacheFingerprintRegistry(mock<ApplicationContext>(), CacheValueFingerprint(), emptyList())
+    assertThrows<IllegalStateException> { reg.physicalName("anyCache") }
   }
 }

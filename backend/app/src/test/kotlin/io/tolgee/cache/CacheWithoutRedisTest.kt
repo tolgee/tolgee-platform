@@ -30,15 +30,10 @@ class CacheWithoutRedisTest : AbstractCacheTest() {
 
   @Test
   fun `every cache constant is shape-fingerprinted`() {
-    // USAGE is declared in the platform Caches but owned by billing
-    // (BillingDirectAccessCacheTypeProvider), whose beans are absent from this platform-only context.
-    val ownedByModulesNotLoadedHere = setOf(Caches.USAGE)
-
     val cacheNames =
       Caches::class.java.fields
         .filter { Modifier.isStatic(it.modifiers) && it.type == String::class.java }
         .map { it.get(null) as String }
-        .filter { it !in ownedByModulesNotLoadedHere }
 
     val unfingerprinted = cacheNames.filter { cacheFingerprintRegistry.physicalName(it) == it }
 

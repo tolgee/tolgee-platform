@@ -153,8 +153,6 @@ class CacheWithRedisTest : AbstractCacheTest() {
 
     corruptStoredValue(Caches.PROJECT_TRANSLATIONS_MODIFIED, projectId)
 
-    // The direct read goes through ResilientCacheAccessor: a non-decodable entry heals to a miss
-    // and is recomputed, rather than throwing.
     val healed = projectTranslationLastModifiedManager.getLastModifiedInfo(projectId)
     healed.assert.isNotEqualTo(first)
   }
