@@ -1,6 +1,7 @@
 package io.tolgee.cache
 
 import io.tolgee.AbstractSpringTest
+import io.tolgee.component.cache.FingerprintingCacheManager
 import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.component.machineTranslation.TranslationParams
 import io.tolgee.component.machineTranslation.providers.AwsMtValueProvider
@@ -63,12 +64,18 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
   @MockitoSpyBean
   lateinit var awsTranslationProvider: AwsMtValueProvider
 
-  val unwrappedCacheManager
-    get() =
-      TransactionAwareCacheManagerProxy::class.java.getDeclaredField("targetCacheManager").run {
+  val unwrappedCacheManager: CacheManager
+    get() {
+      val delegate =
+        FingerprintingCacheManager::class.java.getDeclaredField("delegate").run {
+          this.isAccessible = true
+          this.get(cacheManager) as CacheManager
+        }
+      return TransactionAwareCacheManagerProxy::class.java.getDeclaredField("targetCacheManager").run {
         this.isAccessible = true
-        this.get(cacheManager) as CacheManager
+        this.get(delegate) as CacheManager
       }
+    }
 
   private val paramsEnGoogle by lazy {
     TranslationParams(

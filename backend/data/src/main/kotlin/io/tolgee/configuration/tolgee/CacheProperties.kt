@@ -42,8 +42,4 @@ class CacheProperties(
         "(https://github.com/ben-manes/caffeine/wiki/Eviction#size-based)",
   )
   var caffeineMaxSize: Long = -1,
-  @DocProperty(
-    description = "Whether to clean the cache on Tolgee startup",
-  )
-  var cleanOnStartup: Boolean = true,
 )

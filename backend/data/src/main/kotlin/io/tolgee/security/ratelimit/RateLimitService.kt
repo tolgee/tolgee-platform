@@ -19,6 +19,7 @@ package io.tolgee.security.ratelimit
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.LockingProvider
 import io.tolgee.component.ResilientCacheAccessor
+import io.tolgee.component.cache.CacheFingerprintRegistry
 import io.tolgee.configuration.tolgee.RateLimitProperties
 import io.tolgee.constants.Caches
 import io.tolgee.security.authentication.AuthenticationFacade
@@ -38,9 +39,10 @@ class RateLimitService(
   @Lazy
   private val authenticationFacade: AuthenticationFacade,
   private val resilientCacheAccessor: ResilientCacheAccessor,
+  private val cacheFingerprintRegistry: CacheFingerprintRegistry,
 ) {
   private val cache: Cache by lazy {
-    cacheManager.getCache(Caches.RATE_LIMITS)
+    cacheManager.getCache(cacheFingerprintRegistry.physicalName(Caches.RATE_LIMITS, Bucket::class))
       ?: throw RuntimeException("Could not initialize cache!")
   }
 

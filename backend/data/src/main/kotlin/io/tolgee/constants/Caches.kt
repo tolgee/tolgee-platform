@@ -24,28 +24,5 @@ interface Caches {
     const val LANGUAGE_TOOL_RESULTS = "languageToolResults"
 
     const val EE_LAST_REPORTED_USAGE = "eeLastReportedUsage"
-
-    val caches =
-      listOf(
-        USER_ACCOUNTS,
-        PROJECT_API_KEYS,
-        PERSONAL_ACCESS_TOKENS,
-        ORGANIZATIONS,
-        PROJECTS,
-        PERMISSIONS,
-        MACHINE_TRANSLATIONS,
-        PROJECT_TRANSLATIONS_MODIFIED,
-        BUSINESS_EVENT_THROTTLING,
-        USAGE,
-        DISMISSED_ANNOUNCEMENT,
-        AUTOMATIONS,
-        EE_SUBSCRIPTION,
-        LANGUAGES,
-        ORGANIZATION_ROLES,
-        SSO_TENANTS,
-        EE_LAST_REPORTED_USAGE,
-        LLM_PROVIDERS,
-        LANGUAGE_TOOL_RESULTS,
-      )
   }
 }

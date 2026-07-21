@@ -2,6 +2,7 @@ package io.tolgee.component.machineTranslation
 
 import io.sentry.Sentry
 import io.tolgee.Metrics
+import io.tolgee.component.cache.CacheFingerprintRegistry
 import io.tolgee.component.machineTranslation.providers.ProviderTranslateParams
 import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.constants.Caches
@@ -26,6 +27,7 @@ class MtServiceManager(
   private val internalProperties: InternalProperties,
   private val cacheManager: CacheManager,
   private val metrics: Metrics,
+  private val cacheFingerprintRegistry: CacheFingerprintRegistry,
 ) {
   private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -193,7 +195,10 @@ class MtServiceManager(
     getCache()?.put(this.cacheKey(serviceType.name), result)
   }
 
-  private fun getCache() = cacheManager.getCache(Caches.MACHINE_TRANSLATIONS)
+  private fun getCache() =
+    cacheManager.getCache(
+      cacheFingerprintRegistry.physicalName(Caches.MACHINE_TRANSLATIONS, TranslateResult::class),
+    )
 
   fun MtServiceType.getProvider(): MtValueProvider {
     return applicationContext.getBean(this.providerClass)
