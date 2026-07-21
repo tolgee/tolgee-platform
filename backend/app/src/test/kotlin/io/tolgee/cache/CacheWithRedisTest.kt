@@ -2,6 +2,7 @@ package io.tolgee.cache
 
 import io.netty.buffer.Unpooled
 import io.tolgee.component.EnumNameKryo5Codec
+import io.tolgee.component.ProjectTranslationLastModifiedManager
 import io.tolgee.component.ResilientCacheAccessor
 import io.tolgee.component.cache.CacheFingerprintRegistry
 import io.tolgee.component.cache.CacheValueFingerprint
@@ -32,6 +33,7 @@ import org.redisson.spring.cache.RedissonSpringCacheManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.util.TestPropertyValues
+import org.springframework.cache.Cache
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.test.annotation.DirtiesContext
@@ -81,6 +83,9 @@ class CacheWithRedisTest : AbstractCacheTest() {
 
   @Autowired
   lateinit var resilientCacheAccessor: ResilientCacheAccessor
+
+  @Autowired
+  lateinit var projectTranslationLastModifiedManager: ProjectTranslationLastModifiedManager
 
   @Test
   fun `it has proper cache manager`() {
@@ -139,6 +144,19 @@ class CacheWithRedisTest : AbstractCacheTest() {
 
     userAccountService.findDto(userId).assert.isNotNull
     verify(userAccountRepository, times(2)).findActive(userId)
+  }
+
+  @Test
+  fun `heals a corrupt project-translations-modified entry read directly`() {
+    val projectId = 9182L
+    val first = projectTranslationLastModifiedManager.getLastModifiedInfo(projectId)
+
+    corruptStoredValue(Caches.PROJECT_TRANSLATIONS_MODIFIED, projectId)
+
+    // The direct read goes through ResilientCacheAccessor: a non-decodable entry heals to a miss
+    // and is recomputed, rather than throwing.
+    val healed = projectTranslationLastModifiedManager.getLastModifiedInfo(projectId)
+    healed.assert.isNotEqualTo(first)
   }
 
   @Test
@@ -230,7 +248,7 @@ class CacheWithRedisTest : AbstractCacheTest() {
 
   private val previousDeployPermissionsCache get() = previousDeployCache(Caches.PERMISSIONS)
 
-  private fun previousDeployCache(name: String): org.springframework.cache.Cache {
+  private fun previousDeployCache(name: String): Cache {
     val physicalName = cacheFingerprintRegistry.physicalName(name)
     return RedissonSpringCacheManager(
       redissonClient,

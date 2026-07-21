@@ -1,6 +1,7 @@
 package io.tolgee.component.cacheWithExpiration
 
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.component.ResilientCacheAccessor
 import org.springframework.cache.Cache
 import org.springframework.cache.Cache.ValueWrapper
 import java.time.Duration
@@ -8,21 +9,19 @@ import java.time.Duration
 class CacheWithExpiration(
   private val cache: Cache,
   private val currentDateProvider: CurrentDateProvider,
+  private val resilientCacheAccessor: ResilientCacheAccessor,
 ) {
   fun <T : Any?> get(key: Any): T? {
-    this.cache.get(key, CachedWithExpiration::class.java)?.let {
+    resilientCacheAccessor.get(cache, key, CachedWithExpiration::class.java)?.let {
       return getNotExpiredValue(key, it)
     }
     return null
   }
 
   fun getWrapper(key: Any): ValueWrapper? {
-    this.cache.get(key)?.let { valueWrapper ->
-      val it = valueWrapper.get() as CachedWithExpiration? ?: return ValueWrapper { null }
-      val value = getNotExpiredValue<Any>(key, it)
-      return ValueWrapper { value }
-    }
-    return null
+    val cached = resilientCacheAccessor.get(cache, key, CachedWithExpiration::class.java) ?: return null
+    val value = getNotExpiredValue<Any>(key, cached)
+    return ValueWrapper { value }
   }
 
   private fun <T> getNotExpiredValue(

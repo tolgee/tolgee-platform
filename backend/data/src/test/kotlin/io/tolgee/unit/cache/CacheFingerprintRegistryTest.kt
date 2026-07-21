@@ -98,4 +98,30 @@ class CacheFingerprintRegistryTest {
       .assert
       .startsWith("annotatedCache${CacheFingerprintRegistry.SEPARATOR}")
   }
+
+  @Test
+  fun `the annotation type wins when a cache is both declared and annotated`() {
+    val reg =
+      registry(
+        beans = mapOf("bean" to ShapeBCacheableBean::class.java),
+        directTypes = mapOf("annotatedCache" to ShapeA::class),
+      )
+    reg
+      .physicalName("annotatedCache")
+      .assert
+      .isEqualTo("annotatedCache${CacheFingerprintRegistry.SEPARATOR}${CacheValueFingerprint().compute(ShapeB::class)}")
+  }
+
+  @Test
+  fun `a bean whose type cannot be resolved does not abort the scan`() {
+    val ctx = mock<ApplicationContext>()
+    whenever(ctx.beanDefinitionNames).thenReturn(arrayOf("badBean", "goodBean"))
+    whenever(ctx.getType("badBean")).thenThrow(RuntimeException("boom"))
+    whenever(ctx.getType("goodBean")).thenReturn(ShapeACacheableBean::class.java)
+
+    CacheFingerprintRegistry(ctx, CacheValueFingerprint(), emptyList())
+      .physicalName("annotatedCache")
+      .assert
+      .startsWith("annotatedCache${CacheFingerprintRegistry.SEPARATOR}")
+  }
 }
