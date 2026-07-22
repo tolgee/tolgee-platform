@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.messaging.simp.SimpMessagingTemplate
+import tools.jackson.databind.ObjectMapper
 
 @Configuration
 class WebsocketPublisherConfiguration(
@@ -15,7 +16,10 @@ class WebsocketPublisherConfiguration(
   @Bean
   fun websocketEventPublisher(): WebsocketEventPublisher {
     if (websocketProperties.useRedis) {
-      return RedisWebsocketEventPublisher(applicationContext.getBean(StringRedisTemplate::class.java))
+      return RedisWebsocketEventPublisher(
+        applicationContext.getBean(StringRedisTemplate::class.java),
+        applicationContext.getBean(ObjectMapper::class.java),
+      )
     }
     return SimpleWebsocketEventPublisher(applicationContext.getBean(SimpMessagingTemplate::class.java))
   }

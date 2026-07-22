@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.springframework.data.redis.core.StringRedisTemplate
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
@@ -31,6 +32,7 @@ class BatchJobChunkExecutionQueueTest {
         usingRedisProvider = mock<UsingRedisProvider>(),
         redisTemplate = mock<StringRedisTemplate>(),
         metrics = Metrics(SimpleMeterRegistry()),
+        objectMapper = jacksonObjectMapper(),
       )
     queue.clear()
   }
