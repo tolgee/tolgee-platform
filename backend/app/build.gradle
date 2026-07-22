@@ -144,6 +144,11 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-properties-migrator"
 
     implementation libs.springDocOpenApiCommon
+    // swagger-core (springdoc's engine) is Jackson 2 and needs the Jackson 2 Kotlin module to
+    // introspect Kotlin classes; it is registered on swagger's mapper via the ModelResolver bean in
+    // OpenApiConfiguration. The app itself serializes with Jackson 3 -- this is schema-generation
+    // only. Keep the version aligned with the jackson-databind 2.x that swagger-core pulls in.
+    implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.21.4'
     implementation libs.redissonSpringBootStarter
 
     /**
