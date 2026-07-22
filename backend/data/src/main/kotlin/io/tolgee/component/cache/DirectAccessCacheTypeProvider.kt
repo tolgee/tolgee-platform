@@ -12,6 +12,11 @@ import kotlin.reflect.KType
  * arguments are fingerprinted too — symmetric with the annotation path, which uses the method's
  * return `KType`. A module contributes one implementation for the direct-access caches it owns (its
  * value types may be module-private, so the declaration must live with the code that stores them).
+ *
+ * For a cache stored through `CacheWithExpiration`, declare the INNER payload type (e.g.
+ * `SubscriptionInfoDto`), never `CachedWithExpiration`: the wrapper's `data` field is `Any?` (an
+ * opaque leaf), so fingerprinting the wrapper would never move on a payload shape change and the
+ * cache would silently keep reading stale-shaped entries across a deploy.
  */
 fun interface DirectAccessCacheTypeProvider {
   fun getDirectAccessCacheTypes(): Map<String, KType>
