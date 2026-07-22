@@ -10,21 +10,22 @@ import io.tolgee.service.automations.AutomationService
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
-import jakarta.persistence.EntityManager
+import jakarta.persistence.EntityManagerFactory
+import org.hibernate.SessionFactory
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.cache.Cache
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 
 @AutoConfigureMockMvc
 @ContextRecreatingTest
 @SpringBootTest(
   properties = [
     "tolgee.cache.enabled=true",
+    // lets the test observe whether a query hit the database via Hibernate's statement counter
+    "spring.jpa.properties.hibernate.generate_statistics=true",
   ],
 )
 class AutomationCachingTest : ProjectAuthControllerTest("/v2/projects/") {
@@ -33,10 +34,8 @@ class AutomationCachingTest : ProjectAuthControllerTest("/v2/projects/") {
   @Autowired
   lateinit var automationService: AutomationService
 
-  @Suppress("LateinitVarOverridesLateinitVar")
-  @MockitoSpyBean
   @Autowired
-  override lateinit var entityManager: EntityManager
+  lateinit var entityManagerFactory: EntityManagerFactory
 
   @BeforeEach
   fun before() {
@@ -50,17 +49,16 @@ class AutomationCachingTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   @ProjectJWTAuthTestMethod
   fun `caches the automation`() {
-    val zeroInvocations = getEntityManagerInvocationsCount()
+    val zeroStatements = executedStatementCount()
     getAutomations(AutomationTriggerType.TRANSLATION_DATA_MODIFICATION, null)
 
-    // first time - not cached
-    val invocations = getEntityManagerInvocationsCount()
-    zeroInvocations.assert.isLessThan(invocations)
+    // first time - not cached, hits the database
+    val afterFirst = executedStatementCount()
+    zeroStatements.assert.isLessThan(afterFirst)
 
-    // second time cached
+    // second time - served from cache, no database access
     getAutomations(AutomationTriggerType.TRANSLATION_DATA_MODIFICATION, null)
-    val secondInvocations = getEntityManagerInvocationsCount()
-    secondInvocations.assert.isEqualTo(invocations)
+    executedStatementCount().assert.isEqualTo(afterFirst)
     getFromCache(AutomationTriggerType.TRANSLATION_DATA_MODIFICATION).assert.isNotNull
   }
 
@@ -98,13 +96,8 @@ class AutomationCachingTest : ProjectAuthControllerTest("/v2/projects/") {
     ).assert.isEmpty()
   }
 
-  private fun getEntityManagerInvocationsCount() =
-    Mockito
-      .mockingDetails(entityManager)
-      .invocations
-      .count {
-        it.method.name == "createQuery" && (it.arguments[0] as? String)?.contains("Automation") == true
-      }
+  private fun executedStatementCount() =
+    entityManagerFactory.unwrap(SessionFactory::class.java).statistics.prepareStatementCount
 
   private fun getAutomations(
     automationTriggerType: AutomationTriggerType,
