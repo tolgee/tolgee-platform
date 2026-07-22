@@ -1,6 +1,7 @@
 package io.tolgee.ee.unit
 
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.component.ResilientCacheAccessor
 import io.tolgee.component.adminMtServiceFilter.AdminMtServiceFilter
 import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.constants.Caches
@@ -90,6 +91,7 @@ class LlmProviderFallbackTest {
         llmProviderResolver = resolver,
         urlSecurity = mock<UrlSecurity>(),
         adminMtServiceFilter = adminMtServiceFilter,
+        resilientCacheAccessor = ResilientCacheAccessor(),
       )
   }
 

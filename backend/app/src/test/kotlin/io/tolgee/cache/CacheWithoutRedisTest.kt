@@ -3,6 +3,7 @@ package io.tolgee.cache
 import io.tolgee.component.cache.CacheFingerprintRegistry
 import io.tolgee.constants.Caches
 import io.tolgee.testing.ContextRecreatingTest
+import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -35,15 +36,17 @@ class CacheWithoutRedisTest : AbstractCacheTest() {
         .filter { Modifier.isStatic(it.modifiers) && it.type == String::class.java }
         .map { it.get(null) as String }
 
-    assertThat(cacheNames.filter { it.contains(CacheFingerprintRegistry.SEPARATOR) })
+    cacheNames
+      .filter { it.contains(CacheFingerprintRegistry.SEPARATOR) }
+      .assert
       .describedAs(
         "a logical cache name must not contain the physical-name separator '%s'",
         CacheFingerprintRegistry.SEPARATOR,
       ).isEmpty()
 
-    val unfingerprinted = cacheNames.filter { cacheFingerprintRegistry.physicalName(it) == it }
-
-    assertThat(unfingerprinted)
+    cacheNames
+      .filter { cacheFingerprintRegistry.physicalName(it) == it }
+      .assert
       .describedAs(
         "these caches are not shape-fingerprinted; declare each value type via a " +
           "DirectAccessCacheTypeProvider or a @Cacheable return type",
