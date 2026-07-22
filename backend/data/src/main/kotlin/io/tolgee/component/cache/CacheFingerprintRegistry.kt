@@ -4,6 +4,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.SmartInitializingSingleton
 import org.springframework.cache.annotation.CachePut
 import org.springframework.cache.annotation.Cacheable
+import org.springframework.cache.annotation.Caching
 import org.springframework.context.ApplicationContext
 import org.springframework.core.annotation.AnnotatedElementUtils
 import org.springframework.stereotype.Component
@@ -27,7 +28,6 @@ class CacheFingerprintRegistry(
 
   // Reflecting over cached methods needs every singleton to exist, so the build cannot run before
   // afterSingletonsInstantiated — building earlier would resolve against a half-initialized context.
-  // @Volatile safely publishes the map (written once here, read from request threads).
   @Volatile
   private var fingerprintByCacheName: Map<String, String>? = null
 
@@ -130,6 +130,13 @@ class CacheFingerprintRegistry(
     AnnotatedElementUtils
       .findMergedAnnotation(method, CachePut::class.java)
       ?.let { names.addAll(it.cacheNames.toList()) }
+    // findMergedAnnotation does not descend into the @Caching container, so unwrap it explicitly.
+    AnnotatedElementUtils
+      .findMergedAnnotation(method, Caching::class.java)
+      ?.let { caching ->
+        caching.cacheable.forEach { names.addAll(it.cacheNames.toList()) }
+        caching.put.forEach { names.addAll(it.cacheNames.toList()) }
+      }
     return names
   }
 

@@ -43,16 +43,29 @@ class ResilientCacheAccessor {
     return try {
       cache.get(key, type)
     } catch (e: RedisException) {
-      logger.warn(
-        "Suppressing RedisException for cache {} on key {}. " +
-          "This is likely due to outdated cache data, therefore this cache entry has been removed. " +
-          "If this re-occurs for the same cache and key, it is likely from a bug that should be reported.",
-        cache.name,
-        key,
-      )
-      logger.warn("The following error occurred while fetching the key", e)
-      cache.evictIfPresent(key)
+      handleRedisException(cache, key, e)
       null
     }
+  }
+
+  /**
+   * The single definition of the cache-read heal policy: log, evict the poison entry, and let the
+   * caller treat it as a miss. Both this accessor and the `@Cacheable` AOP error handler route here so
+   * the two access paths cannot drift.
+   */
+  fun handleRedisException(
+    cache: Cache,
+    key: Any,
+    e: RedisException,
+  ) {
+    logger.warn(
+      "Suppressing RedisException for cache {} on key {}. " +
+        "This is likely due to outdated cache data, therefore this cache entry has been removed. " +
+        "If this re-occurs for the same cache and key, it is likely from a bug that should be reported.",
+      cache.name,
+      key,
+    )
+    logger.warn("The following error occurred while fetching the key", e)
+    cache.evictIfPresent(key)
   }
 }

@@ -16,6 +16,7 @@
 
 package io.tolgee.unit.component
 
+import io.tolgee.component.ResilientCacheAccessor
 import io.tolgee.component.TolgeeCacheErrorHandler
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
@@ -30,7 +31,7 @@ import org.springframework.cache.Cache
 
 class TolgeeCacheErrorHandlerTest {
   private val cache = mock<Cache>()
-  private val handler = TolgeeCacheErrorHandler()
+  private val handler = TolgeeCacheErrorHandler(ResilientCacheAccessor())
 
   @BeforeEach
   fun setup() {
