@@ -7,7 +7,9 @@ import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import org.springframework.cache.annotation.CachePut
 import org.springframework.cache.annotation.Cacheable
+import org.springframework.cache.annotation.Caching
 import org.springframework.context.ApplicationContext
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
@@ -38,6 +40,16 @@ class CacheFingerprintRegistryTest {
 
     @Cacheable("annotatedCache")
     fun b(): ShapeB = ShapeB(1, 2)
+  }
+
+  class CachePutBean {
+    @CachePut("annotatedCache")
+    fun get(): ShapeA = ShapeA(1)
+  }
+
+  class CachingBean {
+    @Caching(cacheable = [Cacheable("annotatedCache")])
+    fun get(): ShapeA = ShapeA(1)
   }
 
   private fun registry(
@@ -86,6 +98,22 @@ class CacheFingerprintRegistryTest {
     val withShapeA = registry(beans = mapOf("bean" to ShapeACacheableBean::class.java)).physicalName("annotatedCache")
     val withShapeB = registry(beans = mapOf("bean" to ShapeBCacheableBean::class.java)).physicalName("annotatedCache")
     withShapeA.assert.isNotEqualTo(withShapeB)
+  }
+
+  @Test
+  fun `fingerprints a CachePut cache`() {
+    registry(beans = mapOf("bean" to CachePutBean::class.java))
+      .physicalName("annotatedCache")
+      .assert
+      .startsWith("annotatedCache${CacheFingerprintRegistry.SEPARATOR}")
+  }
+
+  @Test
+  fun `fingerprints a cache declared via the Caching container`() {
+    registry(beans = mapOf("bean" to CachingBean::class.java))
+      .physicalName("annotatedCache")
+      .assert
+      .startsWith("annotatedCache${CacheFingerprintRegistry.SEPARATOR}")
   }
 
   @Test

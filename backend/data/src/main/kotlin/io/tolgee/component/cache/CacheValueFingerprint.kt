@@ -6,6 +6,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.starProjectedType
+import kotlin.reflect.jvm.javaField
 import kotlin.reflect.jvm.jvmErasure
 
 /**
@@ -78,6 +79,9 @@ class CacheValueFingerprint {
     }
     out.append(name).append('(')
     klass.memberProperties
+      // Only backing-field-backed properties are serialized (Kryo writes fields); a computed property
+      // is behavior, not stored shape, and must not move the fingerprint.
+      .filter { it.javaField != null }
       .sortedBy { it.name }
       .forEachIndexed { index, property ->
         if (index > 0) out.append(',')

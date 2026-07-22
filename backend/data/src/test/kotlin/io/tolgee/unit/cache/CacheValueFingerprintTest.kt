@@ -7,6 +7,7 @@ import java.math.BigDecimal
 import kotlin.reflect.KTypeProjection
 import kotlin.reflect.full.createType
 import kotlin.reflect.full.starProjectedType
+import kotlin.reflect.typeOf
 
 class CacheValueFingerprintTest {
   private val fingerprint = CacheValueFingerprint()
@@ -48,6 +49,28 @@ class CacheValueFingerprintTest {
   @Test
   fun `is deterministic`() {
     fingerprint.compute(Money::class).assert.isEqualTo(fingerprint.compute(Money::class))
+  }
+
+  private data class WithComputed(
+    val a: Int,
+  ) {
+    val label get() = "x$a"
+  }
+
+  @Test
+  fun `ignores computed properties without a backing field`() {
+    fingerprint
+      .signature(WithComputed::class.starProjectedType)
+      .assert
+      .isEqualTo("io.tolgee.unit.cache.CacheValueFingerprintTest.WithComputed(a:kotlin.Int)")
+  }
+
+  @Test
+  fun `aggregation of multiple types is order-independent`() {
+    fingerprint
+      .compute(listOf(typeOf<Money>(), typeOf<FieldAdded>()))
+      .assert
+      .isEqualTo(fingerprint.compute(listOf(typeOf<FieldAdded>(), typeOf<Money>())))
   }
 
   @Test
