@@ -20,7 +20,6 @@ import org.redisson.client.RedisException
 import org.springframework.cache.Cache
 import org.springframework.cache.interceptor.SimpleCacheErrorHandler
 
-/** Routes the `@Cacheable` AOP path into the shared [ResilientCacheAccessor] heal policy. */
 class TolgeeCacheErrorHandler(
   private val resilientCacheAccessor: ResilientCacheAccessor,
 ) : SimpleCacheErrorHandler() {

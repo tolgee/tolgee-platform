@@ -9,7 +9,8 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.context.ApplicationContext
-import kotlin.reflect.KClass
+import kotlin.reflect.KType
+import kotlin.reflect.typeOf
 
 class CacheFingerprintRegistryTest {
   data class ShapeA(
@@ -41,7 +42,7 @@ class CacheFingerprintRegistryTest {
 
   private fun registry(
     beans: Map<String, Class<*>> = emptyMap(),
-    directTypes: Map<String, KClass<*>> = emptyMap(),
+    directTypes: Map<String, KType> = emptyMap(),
   ): CacheFingerprintRegistry {
     val ctx = mock<ApplicationContext>()
     whenever(ctx.beanDefinitionNames).thenReturn(beans.keys.toTypedArray())
@@ -58,7 +59,7 @@ class CacheFingerprintRegistryTest {
 
   @Test
   fun `is idempotent on already-physical names`() {
-    val reg = registry(directTypes = mapOf("rateLimits" to ShapeA::class))
+    val reg = registry(directTypes = mapOf("rateLimits" to typeOf<ShapeA>()))
     val physical = reg.physicalName("rateLimits")
     physical.assert.contains(CacheFingerprintRegistry.SEPARATOR)
     reg.physicalName(physical).assert.isEqualTo(physical)
@@ -66,7 +67,7 @@ class CacheFingerprintRegistryTest {
 
   @Test
   fun `fingerprints a directly-declared cache`() {
-    registry(directTypes = mapOf("rateLimits" to ShapeA::class))
+    registry(directTypes = mapOf("rateLimits" to typeOf<ShapeA>()))
       .physicalName("rateLimits")
       .assert
       .startsWith("rateLimits${CacheFingerprintRegistry.SEPARATOR}")
@@ -100,7 +101,7 @@ class CacheFingerprintRegistryTest {
     val reg =
       registry(
         beans = mapOf("bean" to ShapeBCacheableBean::class.java),
-        directTypes = mapOf("annotatedCache" to ShapeA::class),
+        directTypes = mapOf("annotatedCache" to typeOf<ShapeA>()),
       )
     reg
       .physicalName("annotatedCache")
@@ -127,9 +128,10 @@ class CacheFingerprintRegistryTest {
     val ctx = mock<ApplicationContext>()
     whenever(ctx.beanDefinitionNames).thenReturn(emptyArray())
     val fingerprint = mock<CacheValueFingerprint>()
-    whenever(fingerprint.compute(ShapeA::class)).thenThrow(RuntimeException("boom"))
-    whenever(fingerprint.compute(ShapeB::class)).thenReturn("goodfp")
-    val provider = DirectAccessCacheTypeProvider { mapOf("badCache" to ShapeA::class, "goodCache" to ShapeB::class) }
+    whenever(fingerprint.compute(typeOf<ShapeA>())).thenThrow(RuntimeException("boom"))
+    whenever(fingerprint.compute(typeOf<ShapeB>())).thenReturn("goodfp")
+    val provider =
+      DirectAccessCacheTypeProvider { mapOf("badCache" to typeOf<ShapeA>(), "goodCache" to typeOf<ShapeB>()) }
 
     val reg = CacheFingerprintRegistry(ctx, fingerprint, listOf(provider)).apply { afterSingletonsInstantiated() }
 
