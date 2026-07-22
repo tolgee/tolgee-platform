@@ -1,4 +1,5 @@
 import { Feature, QaCheckType } from 'tg.service/apiSchemaTypes';
+import { organizationHasSupportChat } from 'tg.fixtures/organizationEntitlement';
 
 import { useGlobalActions, useGlobalContext } from './GlobalContext';
 
@@ -82,5 +83,8 @@ export const useEnabledFeatures = () => {
     },
   };
 };
+
+export const useHasSupportChat = () =>
+  organizationHasSupportChat(usePreferredOrganization().preferredOrganization);
 
 const EMPTY_LIST = [];

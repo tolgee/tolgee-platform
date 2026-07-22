@@ -1,19 +1,14 @@
 import React from 'react';
-import { Redirect, Route, Switch } from 'react-router-dom';
+import { Route, Switch } from 'react-router-dom';
 
 import { LINKS } from 'tg.constants/links';
-import { ProjectsRouter } from 'tg.views/projects/ProjectsRouter';
-import { CommunityProjectsView } from 'tg.views/projects/CommunityProjectsView';
 import { UserSettingsRouter } from 'tg.views/userSettings/UserSettingsRouter';
-import { OrganizationsRouter } from 'tg.views/organizations/OrganizationsRouter';
 import { AdministrationView } from 'tg.views/administration/AdministrationView';
-import { RootView } from 'tg.views/RootView';
 import { routes } from 'tg.ee';
 
 import { PrivateRoute } from './common/PrivateRoute';
+import { DashboardRouter } from './DashboardRouter';
 import { OrganizationBillingRedirect } from './security/OrganizationBillingRedirect';
-import { RequirePreferredOrganization } from '../RequirePreferredOrganization';
-import { HelpMenu } from './HelpMenu';
 import { PublicOnlyRoute } from './common/PublicOnlyRoute';
 import { PreferredOrganizationRedirect } from './security/PreferredOrganizationRedirect';
 import { RecaptchaProvider } from 'tg.component/common/RecaptchaProvider';
@@ -96,30 +91,13 @@ export const RootRouter = () => {
         <PrivateRoute path={LINKS.USER_SETTINGS.template}>
           <UserSettingsRouter />
         </PrivateRoute>
-        <PrivateRoute path={`${LINKS.ADMINISTRATION.template}`}>
+        <PrivateRoute path={LINKS.ADMINISTRATION.template}>
           <AdministrationView />
         </PrivateRoute>
 
-        <RequirePreferredOrganization>
-          <Switch>
-            <PrivateRoute exact path={LINKS.ROOT.template}>
-              <RootView />
-            </PrivateRoute>
-            <PrivateRoute exact path={LINKS.PROJECTS.template}>
-              <Redirect to={LINKS.ROOT.template} />
-            </PrivateRoute>
-            <PrivateRoute path={LINKS.PROJECTS.template}>
-              <ProjectsRouter />
-            </PrivateRoute>
-            <PrivateRoute exact path={LINKS.COMMUNITY_PROJECTS.template}>
-              <CommunityProjectsView />
-            </PrivateRoute>
-            <PrivateRoute path={`${LINKS.ORGANIZATIONS.template}`}>
-              <OrganizationsRouter />
-            </PrivateRoute>
-          </Switch>
-          <HelpMenu />
-        </RequirePreferredOrganization>
+        <Route>
+          <DashboardRouter />
+        </Route>
       </Switch>
 
       <routes.Root />

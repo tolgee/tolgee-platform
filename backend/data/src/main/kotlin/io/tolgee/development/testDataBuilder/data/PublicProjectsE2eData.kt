@@ -14,6 +14,11 @@ class PublicProjectsE2eData(
           name = "Community User"
         }
 
+      addUserAccountWithoutOrganization {
+        username = "orgLessCommunityUser"
+        name = "Org Less Community User"
+      }
+
       if (includeForeignOrgProject) {
         addProject(organizationOwner = communityUserBuilder.defaultOrganizationBuilder.self) {
           name = "Community Outsider"

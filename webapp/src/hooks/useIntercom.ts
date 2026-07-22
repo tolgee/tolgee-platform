@@ -1,51 +1,52 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useTheme } from '@mui/material';
 import {
   useConfig,
+  useHasSupportChat,
   usePreferredOrganization,
   useUser,
 } from 'tg.globalContext/helpers';
-import { Intercom, show, update } from '@intercom/messenger-js-sdk';
+import { organizationCompanyInfo } from 'tg.fixtures/organizationEntitlement';
+import { Intercom, show, shutdown, update } from '@intercom/messenger-js-sdk';
 
 export function useIntercom() {
   const user = useUser();
-  const { preferredOrganization } = usePreferredOrganization();
   const config = useConfig();
   const appId = config?.intercomAppId;
 
-  const enabledFeatures = preferredOrganization?.enabledFeatures;
-
-  const hasStandardSupport =
-    enabledFeatures?.includes('STANDARD_SUPPORT') ||
-    enabledFeatures?.includes('PREMIUM_SUPPORT');
-
-  const available = !!(appId && user && hasStandardSupport);
-  const theme = useTheme();
-  const {
-    palette: { mode },
-  } = useTheme();
-
-  const darkMode = mode === 'dark';
+  const hasSupportChat = useHasSupportChat();
 
   const companyInfo = useCompanyInfo();
 
+  const available = !!(appId && user && companyInfo && hasSupportChat);
+  const theme = useTheme();
+  const darkMode = theme.palette.mode === 'dark';
+
+  const bootedRef = useRef(false);
+
   useEffect(() => {
-    if (appId && companyInfo && user) {
+    if (available) {
       Intercom({
         app_id: appId,
         hide_default_launcher: true,
-        user_id: user?.id.toString(),
-        name: user?.name,
-        email: user?.username,
+        user_id: user.id.toString(),
+        name: user.name,
+        email: user.username,
         action_color: theme.palette.primary.main,
         company: companyInfo,
       });
+      bootedRef.current = true;
+    } else if (bootedRef.current) {
+      shutdown();
+      bootedRef.current = false;
     }
-  }, [user, preferredOrganization, companyInfo, appId]);
+  }, [available, user, companyInfo, appId]);
 
   useEffect(() => {
-    update({ theme_mode: darkMode ? 'dark' : 'light' });
-  }, [darkMode]);
+    if (available) {
+      update({ theme_mode: darkMode ? 'dark' : 'light' });
+    }
+  }, [darkMode, available]);
 
   const openIntercom = () => {
     if (!available) {
@@ -62,17 +63,9 @@ export function useIntercom() {
 
 function useCompanyInfo() {
   const { preferredOrganization } = usePreferredOrganization();
-  const subscription = preferredOrganization?.activeCloudSubscription;
 
-  if (!preferredOrganization || !subscription) {
-    return null;
-  }
-
-  return {
-    company_id: preferredOrganization?.id,
-    name: preferredOrganization?.name,
-    plan: subscription?.plan?.name || 'free',
-    subscriptionStatus: subscription?.status || 'inactive',
-    enabledFeatures: preferredOrganization?.enabledFeatures.join(', '),
-  };
+  return useMemo(
+    () => organizationCompanyInfo(preferredOrganization),
+    [preferredOrganization]
+  );
 }
