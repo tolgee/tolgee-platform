@@ -47,11 +47,7 @@ class CacheFingerprintRegistryTest {
     whenever(ctx.beanDefinitionNames).thenReturn(beans.keys.toTypedArray())
     beans.forEach { (name, type) -> whenever(ctx.getType(name)).thenReturn(type) }
     val providers =
-      if (directTypes.isEmpty()) {
-        emptyList()
-      } else {
-        listOf(DirectAccessCacheTypeProvider { directTypes })
-      }
+      directTypes.takeIf { it.isNotEmpty() }?.let { listOf(DirectAccessCacheTypeProvider { it }) } ?: emptyList()
     return CacheFingerprintRegistry(ctx, CacheValueFingerprint(), providers).apply { afterSingletonsInstantiated() }
   }
 

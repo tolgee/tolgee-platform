@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.cache.Cache
 import java.util.Date
@@ -38,5 +39,25 @@ class CacheWithExpirationTest {
     whenever(resilientCacheAccessor.get(eq(cache), any(), eq(CachedWithExpiration::class.java))).thenReturn(null)
 
     cacheWithExpiration.getWrapper("k").assert.isNull()
+  }
+
+  @Test
+  fun `get returns the value for a present non-expired entry`() {
+    whenever(resilientCacheAccessor.get(eq(cache), any(), eq(CachedWithExpiration::class.java)))
+      .thenReturn(CachedWithExpiration(expiresAt = 9_999, data = "hello"))
+
+    cacheWithExpiration.get<String>("k").assert.isEqualTo("hello")
+  }
+
+  @Test
+  fun `an expired entry is evicted and read as absent`() {
+    whenever(resilientCacheAccessor.get(eq(cache), any(), eq(CachedWithExpiration::class.java)))
+      .thenReturn(CachedWithExpiration(expiresAt = 500, data = "stale"))
+
+    val wrapper = cacheWithExpiration.getWrapper("k")
+
+    wrapper.assert.isNotNull
+    wrapper!!.get().assert.isNull()
+    verify(cache).evict("k")
   }
 }
