@@ -58,7 +58,7 @@ dependencies {
     implementation(project(":security"))
     implementation(project(":api"))
     implementation "org.springframework.boot:spring-boot-starter-hateoas"
-    implementation "org.springframework.boot:spring-boot-starter-batch"
+    implementation "org.springframework.boot:spring-boot-starter-batch-jdbc"
 
     /**
      * SPRING DOC
