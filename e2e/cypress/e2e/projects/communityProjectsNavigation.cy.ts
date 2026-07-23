@@ -142,6 +142,17 @@ describe('Community projects navigation', () => {
     }).should('be.visible');
   });
 
+  it('does not offer the community entry for a user with no contributions', () => {
+    communityContributionData.clean();
+    visitProjects();
+    openSwitch();
+    gcy('switch-popover-item').should('exist');
+    gcyAdvanced({
+      value: 'switch-popover-footer-action',
+      action: 'organization-switch-community',
+    }).should('not.exist');
+  });
+
   it('shows the empty state and hides search when there are no contributions', () => {
     publicProjectsData.clean();
     communityContributionData.clean();

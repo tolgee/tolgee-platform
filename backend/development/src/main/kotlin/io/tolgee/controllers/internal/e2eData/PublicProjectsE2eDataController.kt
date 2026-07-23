@@ -18,20 +18,22 @@ class PublicProjectsE2eDataController(
   @Autowired
   private lateinit var entityManager: EntityManager
 
-  private lateinit var currentTestData: PublicProjectsE2eData
+  private var currentTestData: PublicProjectsE2eData? = null
 
   override val testData: TestDataBuilder
     get() {
-      currentTestData = PublicProjectsE2eData()
-      return currentTestData.root
+      val data = PublicProjectsE2eData()
+      currentTestData = data
+      return data.root
     }
 
   override fun afterTestDataStored(data: TestDataBuilder) {
-    val project = currentTestData.outsiderProject ?: return
+    val testData = currentTestData ?: return
+    val project = testData.outsiderProject ?: return
     entityManager.persist(
       ActivityRevision().apply {
         projectId = project.id
-        authorId = currentTestData.contributingUser.id
+        authorId = testData.contributingUser.id
       },
     )
     entityManager.flush()

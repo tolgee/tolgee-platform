@@ -14,21 +14,23 @@ class CommunityContributionE2eDataController : AbstractE2eDataController() {
   private lateinit var entityManager: EntityManager
 
   @Autowired
-  private lateinit var userAccountLookup: UserAccountService
+  private lateinit var userAccountService: UserAccountService
 
-  private lateinit var currentTestData: CommunityContributionE2eData
+  private var currentTestData: CommunityContributionE2eData? = null
 
   override val testData: TestDataBuilder
     get() {
-      currentTestData = CommunityContributionE2eData()
-      return currentTestData.root
+      val data = CommunityContributionE2eData()
+      currentTestData = data
+      return data.root
     }
 
   override fun afterTestDataStored(data: TestDataBuilder) {
-    val adminId = userAccountLookup.findActive(ADMIN_USERNAME)?.id ?: return
+    val testData = currentTestData ?: return
+    val adminId = userAccountService.findActive(ADMIN_USERNAME)?.id ?: return
     entityManager.persist(
       ActivityRevision().apply {
-        projectId = currentTestData.publicProject.id
+        projectId = testData.publicProject.id
         authorId = adminId
       },
     )

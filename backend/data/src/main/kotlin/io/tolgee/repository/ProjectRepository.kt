@@ -57,6 +57,7 @@ interface ProjectRepository : JpaRepository<Project, Long> {
         and o.deletedAt is null
         """
 
+    /** Embedding query must expose the `r`, `p` (Permission), `role` (OrganizationRole) aliases and bind `:userAccountId` — see [findAllPublic]. */
     const val NON_MEMBER_CONTRIBUTOR_FILTER = """
         p is null and role is null
         and exists (
