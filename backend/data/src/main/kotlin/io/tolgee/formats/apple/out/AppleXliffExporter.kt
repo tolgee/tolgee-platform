@@ -5,6 +5,7 @@ import io.tolgee.formats.PossiblePluralConversionResult
 import io.tolgee.formats.apple.APPLE_CORRESPONDING_STRINGS_FILE_ORIGINAL
 import io.tolgee.formats.apple.APPLE_FILE_ORIGINAL_CUSTOM_KEY
 import io.tolgee.formats.apple.APPLE_PLURAL_PROPERTY_CUSTOM_KEY
+import io.tolgee.formats.getPluralFormsForLocale
 import io.tolgee.formats.xliff.model.XliffFile
 import io.tolgee.formats.xliff.model.XliffModel
 import io.tolgee.formats.xliff.model.XliffTransUnit
@@ -231,10 +232,13 @@ class AppleXliffExporter(
     languageTag: String,
     conversionResult: PossiblePluralConversionResult?,
   ): Map<String, String> {
-    if (conversionResult?.formsResult == null) {
-      return emptyMap()
-    }
-    return io.tolgee.formats.populateForms(languageTag, conversionResult.formsResult)
+    val forms = conversionResult?.formsResult ?: return emptyMap()
+    // Apple's plural formats (stringsdict/xcstrings) accept any form the user actually wrote
+    // (e.g. "zero"), not just the forms CLDR defines for the target locale, so we keep every
+    // authored form in addition to filling in the ones CLDR expects (e.g. "many" for cs).
+    val otherForm = forms["other"] ?: ""
+    val allForms = getPluralFormsForLocale(languageTag) + forms.keys
+    return allForms.associateWith { forms[it] ?: otherForm }
   }
 
   private fun getResultXliffFile(
