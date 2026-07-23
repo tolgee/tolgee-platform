@@ -45,10 +45,12 @@ export const SettingsMenuItem: React.FC<React.PropsWithChildren<Props>> = ({
 }) => {
   const match = useLocation();
 
+  // Prefix must end at a path-segment boundary — otherwise /billing also
+  // matches /billing-test-clock-helper.
   const isSelected = selected
     ? true
     : matchAsPrefix
-    ? match.pathname.startsWith(String(linkTo))
+    ? match.pathname === linkTo || match.pathname.startsWith(`${linkTo}/`)
     : match.pathname === linkTo;
 
   return (
