@@ -8,6 +8,7 @@ import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.generateImage
 import io.tolgee.fixtures.node
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -29,6 +30,11 @@ class KeyControllerInfoTest : ProjectAuthControllerTest("/v2/projects/") {
       userAccount = testData.user
       uploadedImageId = imageUploadService.store(generateImage(), userAccount!!, null).id
     }
+  }
+
+  @AfterEach
+  fun cleanup() {
+    testDataService.cleanTestData(testData.root)
   }
 
   @Test
