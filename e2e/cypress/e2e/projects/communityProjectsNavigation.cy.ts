@@ -29,8 +29,6 @@ describe('Community projects navigation', () => {
     setBypassSeatCountCheck(true);
     login();
     communityContributionData.clean();
-    // Seeds a contribution by the admin login user on a public project it is not a member of, so the
-    // gated "Community translation" switcher entry renders.
     communityContributionData.generateStandard();
     organizationTestData.clean({ timeout: 120000 });
     organizationTestData.generate().then((res) => {
@@ -146,7 +144,6 @@ describe('Community projects navigation', () => {
 
   it('shows the empty state and hides search when there are no contributions', () => {
     publicProjectsData.clean();
-    // Default-on shows the admin's contributions; clear the seeded one so the list is genuinely empty.
     communityContributionData.clean();
     visitCommunity();
     waitForGlobalLoading();
@@ -211,11 +208,11 @@ describe('Community projects email-verification gate', () => {
 describe('Community projects list content', () => {
   beforeEach(() => {
     publicProjectsData.clean();
+    communityContributionData.clean();
     publicProjectsData.generateStandard();
     login('publicProjectsUser');
     cy.visit(`${HOST}/community-projects`);
     waitForGlobalLoading();
-    // These tests assert the full public listing, which is the toggle-off state.
     disableMyContributions();
   });
 
@@ -254,11 +251,11 @@ describe('Community projects list content', () => {
 describe('Community projects search threshold', () => {
   beforeEach(() => {
     publicProjectsData.clean();
+    communityContributionData.clean();
     publicProjectsData.generateFew();
     login('publicProjectsUser');
     cy.visit(`${HOST}/community-projects`);
     waitForGlobalLoading();
-    // The threshold applies to the full public listing, which is the toggle-off state.
     disableMyContributions();
   });
 
@@ -275,6 +272,7 @@ describe('Community projects search threshold', () => {
 describe('Community projects "My contributions only" toggle', () => {
   beforeEach(() => {
     publicProjectsData.clean();
+    communityContributionData.clean();
     publicProjectsData.generateStandard();
     login('publicProjectsUser');
     cy.visit(`${HOST}/community-projects`);
@@ -287,8 +285,6 @@ describe('Community projects "My contributions only" toggle', () => {
 
   it('defaults on and lists only public projects the user contributed to as a non-member', () => {
     gcy('community-my-contributions-toggle').find('input').should('be.checked');
-    // publicProjectsUser owns the "Community *" projects (a member of those); it only contributed to
-    // "Community Outsider", owned by another org.
     gcy('dashboard-projects-list-item').should('have.length', 1);
     cy.contains('Community Outsider').should('be.visible');
     cy.contains('Community Alpha').should('not.exist');

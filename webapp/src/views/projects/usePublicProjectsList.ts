@@ -4,8 +4,6 @@ import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useLatchedSearchVisibility } from 'tg.views/projects/useLatchedSearchVisibility';
 
 type Options = {
-  // Opt-in: only the community page exposes the "My contributions only" filter. The public homepage
-  // view shares this hook and must keep listing every public project.
   contributionFilter?: boolean;
 };
 

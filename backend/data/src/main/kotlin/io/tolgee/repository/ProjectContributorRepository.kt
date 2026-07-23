@@ -32,21 +32,21 @@ interface ProjectContributorRepository : Repository<ProjectContributor, ProjectC
     pageable: Pageable,
   ): Page<ProjectContributorView>
 
-  // Membership exclusion (`p is null and orl is null`) must match the mine-only filter in
-  // ProjectRepository.findAllPublic — the switcher entry and the community page share this predicate.
+  // Structurally mirrors the mine-only filter in ProjectRepository.findAllPublic so the switcher gate
+  // and the community-page listing cannot silently diverge — edit both together.
   @Query(
     """
-      select count(pc) > 0
-      from ProjectContributor pc
-      join Project r on r.id = pc.projectId
+      select count(r) > 0 from Project r
       left join r.baseLanguage bl
       left join r.organizationOwner o
       left join Permission p on p.project = r and p.user.id = :userId
-      left join OrganizationRole orl on orl.organization = o and orl.user.id = :userId
-      where pc.userId = :userId
-        and ${ProjectRepository.PUBLIC_PROJECT_VISIBILITY}
-        and p is null
-        and orl is null
+      left join OrganizationRole role on role.organization = o and role.user.id = :userId
+      where ${ProjectRepository.PUBLIC_PROJECT_VISIBILITY}
+        and p is null and role is null
+        and exists (
+          select 1 from ProjectContributor pc
+          where pc.projectId = r.id and pc.userId = :userId
+        )
     """,
   )
   fun hasNonMemberPublicContribution(userId: Long): Boolean

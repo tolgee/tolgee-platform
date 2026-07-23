@@ -16,21 +16,19 @@ class CommunityContributionE2eDataController : AbstractE2eDataController() {
   @Autowired
   private lateinit var userAccountLookup: UserAccountService
 
-  private lateinit var data: CommunityContributionE2eData
+  private lateinit var currentTestData: CommunityContributionE2eData
 
   override val testData: TestDataBuilder
     get() {
-      data = CommunityContributionE2eData()
-      return data.root
+      currentTestData = CommunityContributionE2eData()
+      return currentTestData.root
     }
 
-  // Seed a contribution by the seeded platform admin (the default e2e login user) on a public project it
-  // is not a member of, so the gated "Community translation" switcher entry renders for that user.
   override fun afterTestDataStored(data: TestDataBuilder) {
     val adminId = userAccountLookup.findActive(ADMIN_USERNAME)?.id ?: return
     entityManager.persist(
       ActivityRevision().apply {
-        projectId = this@CommunityContributionE2eDataController.data.publicProject.id
+        projectId = currentTestData.publicProject.id
         authorId = adminId
       },
     )

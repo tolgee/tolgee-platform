@@ -224,6 +224,17 @@ class PublicProjectsControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `filterContributed excludes a contributed project the user is a direct-permission member of`() {
+    recordActivity(testData.otherOrgPublicProject.id, testData.directPermissionUser.id)
+
+    userAccount = testData.directPermissionUser
+    performAuthGet("/v2/public/projects/with-stats?filterContributed=true").andIsOk.andAssertThatJson {
+      node("page.totalElements").isEqualTo(0)
+    }
+    projectContributorService.hasCommunityContributions(testData.directPermissionUser.id).assert.isFalse()
+  }
+
+  @Test
   fun `filterContributed returns nothing to an anonymous visitor`() {
     recordActivity(testData.publicProject.id, testData.nonMember.id)
 

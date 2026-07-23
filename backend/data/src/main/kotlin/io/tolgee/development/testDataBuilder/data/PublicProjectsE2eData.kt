@@ -8,7 +8,6 @@ class PublicProjectsE2eData(
   count: Int = 6,
   includeForeignOrgProject: Boolean = true,
 ) : BaseTestData("publicProjectsUser", "Private project") {
-  // publicProjectsUser is a non-member of this project — the seed target for a community contribution.
   var outsiderProject: Project? = null
   val contributingUser: UserAccount = userAccountBuilder.self
 

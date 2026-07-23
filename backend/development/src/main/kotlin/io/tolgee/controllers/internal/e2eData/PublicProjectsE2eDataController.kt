@@ -18,26 +18,20 @@ class PublicProjectsE2eDataController(
   @Autowired
   private lateinit var entityManager: EntityManager
 
-  private lateinit var data: PublicProjectsE2eData
+  private lateinit var currentTestData: PublicProjectsE2eData
 
-  // Each access builds a fresh graph (save assigns ids) and captures the instance so
-  // afterTestDataStored can read the just-persisted "Community Outsider" project to seed a contribution.
   override val testData: TestDataBuilder
     get() {
-      data = PublicProjectsE2eData()
-      return data.root
+      currentTestData = PublicProjectsE2eData()
+      return currentTestData.root
     }
 
-  // The community page reads contributions, not memberships. publicProjectsUser owns the "Community *"
-  // projects (a member of those), so it only qualifies as a contributor on the foreign-org project it
-  // is not a member of — seed one activity revision there so the mine-only view and the switcher entry
-  // have something to show.
   override fun afterTestDataStored(data: TestDataBuilder) {
-    val project = this.data.outsiderProject ?: return
+    val project = currentTestData.outsiderProject ?: return
     entityManager.persist(
       ActivityRevision().apply {
         projectId = project.id
-        authorId = this@PublicProjectsE2eDataController.data.contributingUser.id
+        authorId = currentTestData.contributingUser.id
       },
     )
     entityManager.flush()
