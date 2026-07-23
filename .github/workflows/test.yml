@@ -523,6 +523,29 @@ jobs:
         run: npm run eslint
         working-directory: ./email
 
+  client-checks:
+    name: Client tests & build 📦
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
+        with:
+          java: 'false'
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ./client
+
+      - name: Build
+        run: npm run build
+        working-directory: ./client
+
+      - name: Test
+        run: npm test
+        working-directory: ./client
+
   everything-passed:
     name: Everything passed 🎉
     needs:
@@ -530,6 +553,7 @@ jobs:
       - backend-test
       - backend-code-checks
       - email-code-checks
+      - client-checks
       - frontend-build
       - frontend-code-check
       - frontend-test
@@ -596,6 +620,10 @@ jobs:
 
           if [[ "${{ needs.email-code-checks.result }}" != "success" ]]; then
             failed_jobs+=("email-code-checks")
+          fi
+
+          if [[ "${{ needs.client-checks.result }}" != "success" ]]; then
+            failed_jobs+=("client-checks")
           fi
 
           if [[ "${#failed_jobs[@]}" -gt 0 ]]; then
