@@ -73,11 +73,11 @@ export interface paths {
   };
   "/v2/administration/users/{userId}/disable": {
     /** Disables user account. User will not be able to log in, but their user data will be preserved, so you can enable the user later using the `enable` endpoint. */
-    put: operations["disableUser"];
+    put: operations["disableUser_1"];
   };
   "/v2/administration/users/{userId}/enable": {
     /** Enables previously disabled user. */
-    put: operations["enableUser"];
+    put: operations["enableUser_1"];
   };
   "/v2/administration/users/{userId}/generate-token": {
     /** Generates a JWT token for the user with provided ID. This is useful, when need to debug of the user's account. Or when an operation is required to be executed on behalf of the user. */
@@ -376,8 +376,15 @@ export interface paths {
     get: operations["getUsage"];
   };
   "/v2/organizations/{organizationId}/users/{userId}": {
-    /** Remove user from organization. If user is managed by the organization, their account is disabled instead. */
     delete: operations["removeUser"];
+  };
+  "/v2/organizations/{organizationId}/users/{userId}/disable": {
+    /** Disables the account of a user managed by this organization. */
+    put: operations["disableUser"];
+  };
+  "/v2/organizations/{organizationId}/users/{userId}/enable": {
+    /** Re-enables the disabled account of a user managed by this organization. */
+    put: operations["enableUser"];
   };
   "/v2/organizations/{organizationId}/users/{userId}/set-role": {
     /** Sets user role in organization. Owner or Member. */
@@ -3103,6 +3110,7 @@ export interface components {
         | "native_authentication_disabled"
         | "invitation_organization_mismatch"
         | "user_is_managed_by_organization"
+        | "user_is_not_managed_by_organization"
         | "cannot_set_sso_provider_missing_fields"
         | "namespaces_cannot_be_disabled_when_namespace_exists"
         | "namespace_cannot_be_used_when_feature_is_disabled"
@@ -6935,6 +6943,7 @@ export interface components {
         | "native_authentication_disabled"
         | "invitation_organization_mismatch"
         | "user_is_managed_by_organization"
+        | "user_is_not_managed_by_organization"
         | "cannot_set_sso_provider_missing_fields"
         | "namespaces_cannot_be_disabled_when_namespace_exists"
         | "namespace_cannot_be_used_when_feature_is_disabled"
@@ -7741,8 +7750,10 @@ export interface components {
     };
     UserAccountWithOrganizationRoleModel: {
       avatar?: components["schemas"]["Avatar"];
+      disabled: boolean;
       /** Format: int64 */
       id: number;
+      managed: boolean;
       mfaEnabled: boolean;
       name: string;
       /** @enum {string} */
@@ -8574,7 +8585,7 @@ export interface operations {
     };
   };
   /** Disables user account. User will not be able to log in, but their user data will be preserved, so you can enable the user later using the `enable` endpoint. */
-  disableUser: {
+  disableUser_1: {
     parameters: {
       path: {
         userId: number;
@@ -8610,7 +8621,7 @@ export interface operations {
     };
   };
   /** Enables previously disabled user. */
-  enableUser: {
+  enableUser_1: {
     parameters: {
       path: {
         userId: number;
@@ -12920,8 +12931,81 @@ export interface operations {
       };
     };
   };
-  /** Remove user from organization. If user is managed by the organization, their account is disabled instead. */
   removeUser: {
+    parameters: {
+      path: {
+        organizationId: number;
+        userId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  /** Disables the account of a user managed by this organization. */
+  disableUser: {
+    parameters: {
+      path: {
+        organizationId: number;
+        userId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  /** Re-enables the disabled account of a user managed by this organization. */
+  enableUser: {
     parameters: {
       path: {
         organizationId: number;

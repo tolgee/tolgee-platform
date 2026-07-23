@@ -15,4 +15,6 @@ data class UserAccountWithOrganizationRoleModel(
   val projectsWithDirectPermission: List<SimpleProjectModel>,
   val mfaEnabled: Boolean,
   val avatar: Avatar?,
+  val managed: Boolean,
+  val disabled: Boolean,
 ) : RepresentationModel<UserAccountWithOrganizationRoleModel>()
