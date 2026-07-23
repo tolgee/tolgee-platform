@@ -1,5 +1,6 @@
 package io.tolgee.testing
 
+import io.tolgee.development.testDataBuilder.ContributorActivityRecorder
 import io.tolgee.fixtures.AuthRequestPerformer
 import io.tolgee.fixtures.AuthorizedRequestFactory.init
 import io.tolgee.fixtures.AuthorizedRequestPerformer
@@ -188,5 +189,15 @@ abstract class AuthorizedControllerTest :
   override fun moveCurrentDate(duration: Duration) {
     super.moveCurrentDate(duration)
     refreshJwtToken()
+  }
+
+  protected fun recordProjectActivity(
+    projectId: Long?,
+    authorId: Long?,
+    at: Date? = null,
+  ) {
+    executeInNewTransaction {
+      ContributorActivityRecorder.record(entityManager, currentDateProvider, projectId, authorId, at)
+    }
   }
 }
