@@ -37,7 +37,7 @@ interface LabelRepository : JpaRepository<Label, Long> {
 
   @Query(
     """
-    from Label l
+    select l from Label l
     join l.translations t
     where t.id in :translationIds
     order by l.name

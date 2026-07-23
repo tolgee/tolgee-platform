@@ -1,6 +1,5 @@
 package io.tolgee.unit.formats.i18next.out
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.exceptions.ExportCollidingKeysException
 import io.tolgee.formats.ExportFormat
@@ -15,6 +14,7 @@ import io.tolgee.util.buildExportTranslationList
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
+import tools.jackson.module.kotlin.jacksonObjectMapper
 
 class I18nextFileExporterTest {
   @Test

@@ -1,12 +1,12 @@
 package io.tolgee.ee.service.prompt
 
-import com.fasterxml.jackson.core.JsonProcessingException
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.dtos.PromptResult
 import io.tolgee.exceptions.LlmProviderNotReturnedJsonException
 import io.tolgee.util.updateStringsInJson
+import tools.jackson.core.JacksonException
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.module.kotlin.readValue
 
 class PromptResultParser(
   private val promptResult: PromptResult,
@@ -54,7 +54,7 @@ class PromptResultParser(
         // which is invalid utf-8 character breaking DB saving
         it.replace("\u0000", "")
       }
-    } catch (_: JsonProcessingException) {
+    } catch (_: JacksonException) {
       null
     }
   }

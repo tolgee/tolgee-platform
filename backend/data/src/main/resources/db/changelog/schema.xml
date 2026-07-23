@@ -5806,4 +5806,14 @@
     <changeSet author="jirikuchynka (generated)" id="1782996347000-3">
         <addForeignKeyConstraint baseColumnNames="permission_id" baseTableName="permission_suggest_manage_languages" constraintName="FK_perm_suggest_manage_languages_permission" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="permission" validate="true"/>
     </changeSet>
+    <changeSet author="bdshadow" id="spring-boot-4-translation-suggestion-fks-not-null">
+        <addNotNullConstraint columnDataType="bigint" columnName="author_id" tableName="translation_suggestion" validate="true"/>
+        <addNotNullConstraint columnDataType="bigint" columnName="key_id" tableName="translation_suggestion" validate="true"/>
+        <addNotNullConstraint columnDataType="bigint" columnName="language_id" tableName="translation_suggestion" validate="true"/>
+        <addNotNullConstraint columnDataType="bigint" columnName="project_id" tableName="translation_suggestion" validate="true"/>
+    </changeSet>
+    <changeSet author="bdshadow" id="spring-boot-4-element-collection-unique">
+        <addUniqueConstraint columnNames="api_key_id, scopes_enum" constraintName="UKnkeo2sck9a20va0ygd3evj3yq" tableName="api_key_scopes_enum"/>
+        <addUniqueConstraint columnNames="mt_service_config_id, enabled_services" constraintName="UKi6l1mfk5lkwhe66mb07r5q1ct" tableName="mt_service_config_enabled_services"/>
+    </changeSet>
 </databaseChangeLog>

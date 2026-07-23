@@ -8,9 +8,11 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.MapsId
 import jakarta.persistence.OneToOne
+import jakarta.persistence.Table
 import jakarta.validation.constraints.NotBlank
 
 @Entity
+@Table(name = "s3content_storage_config")
 class S3ContentStorageConfig(
   @MapsId
   @JoinColumn(name = "content_storage_id")

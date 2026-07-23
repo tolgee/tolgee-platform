@@ -91,7 +91,7 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
 
   @Query(
     """
-        from Translation t
+        select t from Translation t
         join fetch t.key k
         left join k.branch b
         left join fetch k.keyMeta
@@ -200,7 +200,7 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
 
   @Query(
     """
-    from Translation t
+    select t from Translation t
     join t.language l on l.tag in :languageTags
     where t.key.id in :keys
   """,
@@ -262,7 +262,7 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
 
   @Query(
     """
-    from Translation t
+    select t from Translation t
     join t.key k
     where k.project.id = :projectId
   """,

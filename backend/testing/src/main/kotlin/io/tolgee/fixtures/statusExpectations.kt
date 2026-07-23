@@ -1,7 +1,5 @@
 package io.tolgee.fixtures
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.constants.Message
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
@@ -12,6 +10,8 @@ import net.javacrumbs.jsonunit.assertj.assertThatJson
 import org.assertj.core.api.BigDecimalAssert
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import tools.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.module.kotlin.readValue
 import java.math.BigDecimal
 import java.nio.charset.StandardCharsets
 

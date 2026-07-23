@@ -1,6 +1,5 @@
 package io.tolgee.mcp.tools
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.modelcontextprotocol.server.McpSyncServer
 import io.tolgee.api.v2.controllers.NamespaceController
 import io.tolgee.mcp.McpRequestContext
@@ -9,6 +8,7 @@ import io.tolgee.mcp.buildSpec
 import io.tolgee.security.ProjectHolder
 import io.tolgee.service.key.NamespaceService
 import org.springframework.stereotype.Component
+import tools.jackson.databind.ObjectMapper
 
 @Component
 class NamespaceMcpTools(

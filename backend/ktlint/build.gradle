@@ -37,6 +37,7 @@ dependencies {
     // Not ideal, but doesn't work without, so there it is.
     // It brings stuff in the classpath that makes test work, and at least that way there's no version drift issues
     testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     ktlint sourceSets.main.output
 }
@@ -49,6 +50,6 @@ tasks.named('test', Test) {
 dependencyManagement {
     applyMavenExclusions = false
     imports {
-        mavenBom 'org.junit:junit-bom:5.11.4'
+        mavenBom 'org.junit:junit-bom:6.0.3'
     }
 }

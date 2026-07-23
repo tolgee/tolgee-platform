@@ -26,8 +26,8 @@ import jakarta.persistence.EntityManager
 import jakarta.persistence.FlushModeType
 import org.apache.commons.lang3.exception.ExceptionUtils.getRootCause
 import org.hibernate.Transaction
-import org.hibernate.action.spi.BeforeTransactionCompletionProcess
 import org.hibernate.collection.spi.AbstractPersistentCollection
+import org.hibernate.engine.spi.TransactionCompletionCallbacks.BeforeCompletionCallback
 import org.hibernate.event.spi.EventSource
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.config.BeanDefinition.SCOPE_SINGLETON
@@ -425,15 +425,15 @@ class InterceptedEventsManager(
   }
 
   private fun registerBeforeCompletion() {
-    entityManager.unwrap(EventSource::class.java).actionQueue.registerProcess(
-      BeforeTransactionCompletionProcess {
+    entityManager.unwrap(EventSource::class.java).actionQueue.registerCallback(
+      BeforeCompletionCallback {
         if (it.transaction.isActive) {
           if (!activityHolder.enableAutoCompletion) {
-            return@BeforeTransactionCompletionProcess
+            return@BeforeCompletionCallback
           }
           val activityRevision = activityHolder.activityRevision
           if (!activityRevision.isInitializedByInterceptor) {
-            return@BeforeTransactionCompletionProcess
+            return@BeforeCompletionCallback
           }
           logger.debug("Publishing project activity event")
           try {

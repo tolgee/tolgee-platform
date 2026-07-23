@@ -1,7 +1,5 @@
 package io.tolgee.util
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.formats.BaseIcuMessageConvertor
 import io.tolgee.formats.NoOpFromIcuPlaceholderConvertor
 import io.tolgee.formats.optimizePossiblePlural
@@ -9,6 +7,8 @@ import io.tolgee.model.dataImport.ImportKey
 import io.tolgee.model.dataImport.ImportTranslation
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 import io.tolgee.testing.assert
+import tools.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.module.kotlin.readValue
 
 fun FileProcessorContext.assertTranslations(
   language: String,

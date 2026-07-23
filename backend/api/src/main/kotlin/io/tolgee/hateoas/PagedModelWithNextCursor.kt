@@ -3,7 +3,7 @@ package io.tolgee.hateoas
 import io.swagger.v3.oas.annotations.media.Schema
 import org.springframework.hateoas.PagedModel
 
-open class PagedModelWithNextCursor<T>(
+open class PagedModelWithNextCursor<T : Any>(
   pagedModel: PagedModel<T>,
   @field:Schema(
     description = "Cursor to get next data",

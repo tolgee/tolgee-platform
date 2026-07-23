@@ -1,9 +1,9 @@
 package io.tolgee.testing.assertions
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.assertj.core.api.AbstractAssert
 import org.assertj.core.api.IntegerAssert
 import org.assertj.core.api.StringAssert
+import tools.jackson.module.kotlin.jacksonObjectMapper
 
 class StandardValidationMessageAssert(
   val data: Map<String, String>,

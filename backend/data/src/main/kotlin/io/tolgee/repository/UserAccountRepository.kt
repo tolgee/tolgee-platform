@@ -215,7 +215,7 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
 
   @Query(
     """
-    from UserAccount ua 
+    select ua from UserAccount ua 
       join OrganizationRole orl on orl.user = ua
       join Organization o on orl.organization = o
       where ua.thirdPartyAuthId = :thirdPartyAuthId

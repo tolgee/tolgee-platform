@@ -131,4 +131,7 @@
             </column>
         </createTable>
     </changeSet>
+    <changeSet author="bdshadow" id="spring-boot-4-ee-subscription-license-key-not-null">
+        <addNotNullConstraint columnDataType="varchar(255)" columnName="license_key" tableName="ee_subscription" validate="true"/>
+    </changeSet>
 </databaseChangeLog>

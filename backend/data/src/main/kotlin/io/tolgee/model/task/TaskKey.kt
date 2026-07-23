@@ -29,9 +29,9 @@ import jakarta.persistence.UniqueConstraint
   ],
 )
 class TaskKey(
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
   var task: Task = Task(),
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
   var key: Key = Key(),
   @ActivityLoggedProp
   var done: Boolean = false,

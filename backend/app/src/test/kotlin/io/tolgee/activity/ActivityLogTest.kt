@@ -130,7 +130,7 @@ class ActivityLogTest : ProjectAuthControllerTest("/v2/projects/") {
       "/v2/projects/${project.id}/translations",
       mapOf("key" to "key", "translations" to mapOf(testData.englishLanguage.tag to "Test")),
       HttpHeaders().also {
-        it["Authorization"] = listOf(AuthorizedRequestFactory.getBearerTokenString(generateJwtToken(userAccount!!.id)))
+        it["Authorization"] = AuthorizedRequestFactory.getBearerTokenString(generateJwtToken(userAccount!!.id))
         it["X-Tolgee-Utm"] = "eyJ1dG1faGVsbG8iOiJoZWxsbyJ9"
         it["X-Tolgee-SDK-Type"] = "Unreal"
         it["X-Tolgee-SDK-Version"] = "1.0.0"

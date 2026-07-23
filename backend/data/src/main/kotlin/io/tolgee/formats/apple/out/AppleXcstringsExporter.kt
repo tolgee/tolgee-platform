@@ -1,12 +1,12 @@
 package io.tolgee.formats.apple.out
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.node.ObjectNode
 import io.tolgee.dtos.IExportParams
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.service.export.ExportFilePathProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.export.exporters.FileExporter
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.node.ObjectNode
 import java.io.InputStream
 
 class AppleXcstringsExporter(
@@ -27,7 +27,7 @@ class AppleXcstringsExporter(
         objectMapper.createObjectNode().apply {
           put("sourceLanguage", baseLanguageTag)
           put("version", "1.0")
-          set<ObjectNode>("strings", jsonContent)
+          set("strings", jsonContent)
         }
       objectMapper.writeValueAsString(root).byteInputStream()
     }
@@ -41,7 +41,7 @@ class AppleXcstringsExporter(
       fileContent.get(translation.key.name)?.let {
         it as ObjectNode
       } ?: createKeyEntry(translation)
-    fileContent.set<ObjectNode>(translation.key.name, keyData)
+    fileContent.set(translation.key.name, keyData)
 
     val converted =
       IcuToAppleMessageConvertor(
@@ -65,7 +65,7 @@ class AppleXcstringsExporter(
       handleSingleTranslation(localizations, translation, converted.singleResult)
     }
 
-    keyData.set<ObjectNode>("localizations", localizations)
+    keyData.set("localizations", localizations)
   }
 
   private fun getAppleState(state: TranslationState): String? {
@@ -84,10 +84,10 @@ class AppleXcstringsExporter(
   ) {
     if (convertedText == null) return
 
-    localizations.set<ObjectNode>(
+    localizations.set(
       translation.languageTag,
       objectMapper.createObjectNode().apply {
-        set<ObjectNode>(
+        set(
           "stringUnit",
           objectMapper.createObjectNode().apply {
             getAppleState(translation.state)?.let { state ->
@@ -109,10 +109,10 @@ class AppleXcstringsExporter(
 
     val pluralForms = objectMapper.createObjectNode()
     forms.forEach { (form, text) ->
-      pluralForms.set<ObjectNode>(
+      pluralForms.set(
         form,
         objectMapper.createObjectNode().apply {
-          set<ObjectNode>(
+          set(
             "stringUnit",
             objectMapper.createObjectNode().apply {
               getAppleState(translation.state)?.let { state ->
@@ -125,13 +125,13 @@ class AppleXcstringsExporter(
       )
     }
 
-    localizations.set<ObjectNode>(
+    localizations.set(
       translation.languageTag,
       objectMapper.createObjectNode().apply {
-        set<ObjectNode>(
+        set(
           "variations",
           objectMapper.createObjectNode().apply {
-            set<ObjectNode>("plural", pluralForms)
+            set("plural", pluralForms)
           },
         )
       },

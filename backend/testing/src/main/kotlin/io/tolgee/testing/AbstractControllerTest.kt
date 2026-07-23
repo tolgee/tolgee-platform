@@ -1,17 +1,13 @@
 package io.tolgee.testing
 
-import com.fasterxml.jackson.core.JsonProcessingException
-import com.fasterxml.jackson.databind.JavaType
-import com.fasterxml.jackson.databind.type.TypeFactory
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.AbstractSpringTest
 import io.tolgee.dtos.security.LoginRequest
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.fixtures.RequestPerformer
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
@@ -19,6 +15,10 @@ import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+import tools.jackson.core.JacksonException
+import tools.jackson.databind.JavaType
+import tools.jackson.databind.type.TypeFactory
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.io.UnsupportedEncodingException
 
 @AutoConfigureMockMvc
@@ -40,7 +40,7 @@ abstract class AbstractControllerTest :
     val mapper = jacksonObjectMapper()
     return try {
       mapper.readValue(json, clazz)
-    } catch (e: JsonProcessingException) {
+    } catch (e: JacksonException) {
       throw RuntimeException(e)
     }
   }
@@ -83,7 +83,7 @@ abstract class AbstractControllerTest :
   ): T {
     return try {
       mapper.readValue(result.response.contentAsString, type)
-    } catch (e: JsonProcessingException) {
+    } catch (e: JacksonException) {
       throw RuntimeException(e)
     } catch (e: UnsupportedEncodingException) {
       throw RuntimeException(e)
@@ -96,7 +96,7 @@ abstract class AbstractControllerTest :
   ): T {
     return try {
       mapper.readValue(result.response.contentAsString, clazz)
-    } catch (e: JsonProcessingException) {
+    } catch (e: JacksonException) {
       throw RuntimeException(e)
     } catch (e: UnsupportedEncodingException) {
       throw RuntimeException(e)
@@ -111,9 +111,9 @@ abstract class AbstractControllerTest :
     return try {
       mapper.readValue(
         result.response.contentAsString,
-        TypeFactory.defaultInstance().constructCollectionType(collectionType, elementType),
+        TypeFactory.createDefaultInstance().constructCollectionType(collectionType, elementType),
       )
-    } catch (e: JsonProcessingException) {
+    } catch (e: JacksonException) {
       throw RuntimeException(e)
     } catch (e: UnsupportedEncodingException) {
       throw RuntimeException(e)

@@ -17,14 +17,11 @@ pluginManagement {
                 useModule("org.jetbrains.kotlin.plugin.jpa:org.jetbrains.kotlin.plugin.jpa.gradle.plugin:$kotlinVersion")
             }
 
-            if (requested.id.id == 'org.liquibase.gradle') {
-                useModule('org.liquibase.gradle:org.liquibase.gradle.gradle.plugin:2.2.2')
-            }
             if (requested.id.id == 'org.hibernate.orm') {
                 useVersion(hibernateVersion)
             }
             if (requested.id.id == 'io.sentry.jvm.gradle') {
-                useVersion('5.7.0')
+                useVersion('6.14.0')
             }
             if(requested.id.id == 'org.gradle.test-retry') {
                 useVersion('1.6.2')
@@ -37,8 +34,8 @@ dependencyResolutionManagement {
     versionCatalogs {
         libs {
             library('stripe', 'com.stripe', 'stripe-java').version('22.11.0')
-            library('jacksonModuleKotlin', 'com.fasterxml.jackson.module', 'jackson-module-kotlin').version(jacksonVersion)
-            library('jacksonDataFormatXml', 'com.fasterxml.jackson.dataformat', 'jackson-dataformat-xml').version(jacksonVersion)
+            library('jacksonModuleKotlin', 'tools.jackson.module', 'jackson-module-kotlin').version(jacksonVersion)
+            library('jacksonDataFormatXml', 'tools.jackson.dataformat', 'jackson-dataformat-xml').version(jacksonVersion)
             library('kotlin', 'org.jetbrains.kotlin', 'kotlin-gradle-plugin').version(kotlinVersion)
             library('kotlinReflect', 'org.jetbrains.kotlin', 'kotlin-reflect').version(kotlinVersion)
             library('kotlinCoroutines', 'org.jetbrains.kotlinx', 'kotlinx-coroutines-core').version('1.10.2')
@@ -46,7 +43,6 @@ dependencyResolutionManagement {
             library('springDocOpenApiUi', 'org.springdoc', 'springdoc-openapi-starter-webmvc-ui').version(springDocVersion)
             library('springDocOpenApiKotlin', 'org.springdoc', 'springdoc-openapi-kotlin').version(springDocVersion)
             library('springDocOpenApiCommon', 'org.springdoc', 'springdoc-openapi-starter-common').version(springDocVersion)
-            library('jacksonKotlin', 'com.fasterxml.jackson.module', 'jackson-module-kotlin').version('2.15.3')
             library('jjwtApi', 'io.jsonwebtoken', 'jjwt-api').version(jjwtVersion)
             library('jjwtImpl', 'io.jsonwebtoken', 'jjwt-impl').version(jjwtVersion)
             library('jjwtJackson', 'io.jsonwebtoken', 'jjwt-jackson').version(jjwtVersion)
@@ -66,15 +62,16 @@ dependencyResolutionManagement {
             // (CVE in grpc-netty-shaded). Temporary — drop it once libraries-bom ships grpc >= 1.75.0.
             // Imported as a platform in every module that uses libs.googleCloud.
             library('grpcBom', "io.grpc:grpc-bom:1.75.0")
-            library('liquibaseCore', "org.liquibase:liquibase-core:4.30.0")
-            library('liquibaseHibernate', "org.liquibase.ext:liquibase-hibernate6:4.30.0")
+            library('liquibaseCore', "org.liquibase:liquibase-core:5.0.3")
+            library('liquibaseHibernate', "org.liquibase.ext:liquibase-hibernate7:5.0.3")
             library('liquibasePicoli', "info.picocli:picocli:4.6.3")
-            library('hibernateTypes', "io.hypersistence:hypersistence-utils-hibernate-63:3.14.1")
-            library('redissonSpringBootStarter', "org.redisson:redisson-spring-boot-starter:3.27.0")
+            library('hibernateTypes', "io.hypersistence:hypersistence-utils-hibernate-73:3.15.3")
+            library('redissonSpringBootStarter', "org.redisson:redisson-spring-boot-starter:4.6.1")
+            library('redissonSpringCache', "org.redisson:redisson-spring-cache:4.6.1")
             library('postHog', "com.posthog:posthog-server:1.1.0")
             library('micrometerPrometheus', "io.micrometer:micrometer-registry-prometheus:1.13.3")
             library('mailjet', "com.mailjet:mailjet-client:5.2.5")
-            library('azureBlob', 'com.azure.spring:spring-cloud-azure-starter-storage-blob:5.23.0')
+            library('azureBlob', 'com.azure.spring:spring-cloud-azure-starter-storage-blob:7.3.0')
             library('slackApiClient', "com.slack.api:slack-api-client:$slackSdkVersion")
             library('slackApiModelKotlinExtension', "com.slack.api:slack-api-model-kotlin-extension:$slackSdkVersion")
             library('slackApiClientKotlinExtension', "com.slack.api:slack-api-client-kotlin-extension:$slackSdkVersion")

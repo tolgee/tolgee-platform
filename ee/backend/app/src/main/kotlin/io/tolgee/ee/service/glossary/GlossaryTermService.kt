@@ -71,7 +71,7 @@ class GlossaryTermService(
     val glossary = glossaryService.get(organizationId, glossaryId)
     val termIds = glossaryTermRepository.findByGlossaryIdsPaged(glossary, pageable, search, languageTags)
     val terms = glossaryTermRepository.findByIdsWithTranslations(termIds.content).associateBy { it.id }
-    return termIds.map { terms[it] }
+    return termIds.map { terms[it]!! }
   }
 
   fun findAllWithTranslations(

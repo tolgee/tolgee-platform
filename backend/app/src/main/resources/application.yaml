@@ -2,6 +2,7 @@ spring:
   autoconfigure:
     exclude:
       - org.redisson.spring.starter.RedissonAutoConfigurationV2
+      - org.redisson.spring.starter.RedissonAutoConfigurationV4
       - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
   data:
     redis:
@@ -46,9 +47,6 @@ server:
     enabled: true
     mime-types: "text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json"
     min-response-size: 1024
-  error:
-    include-exception: false
-    include-stacktrace: never
   tomcat:
     max-part-count: 500
 sentry:

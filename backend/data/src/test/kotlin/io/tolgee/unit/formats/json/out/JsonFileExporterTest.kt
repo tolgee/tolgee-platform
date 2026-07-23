@@ -1,7 +1,5 @@
 package io.tolgee.unit.formats.json.out
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.formats.ExportMessageFormat
 import io.tolgee.formats.genericStructuredFile.out.CustomPrettyPrinter
@@ -18,6 +16,8 @@ import io.tolgee.unit.util.getExported
 import io.tolgee.util.buildExportTranslationList
 import net.javacrumbs.jsonunit.assertj.assertThatJson
 import org.junit.jupiter.api.Test
+import tools.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.module.kotlin.readValue
 import java.io.InputStream
 
 class JsonFileExporterTest {

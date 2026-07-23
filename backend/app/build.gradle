@@ -24,6 +24,9 @@ sentry {
     org = System.getenv("SENTRY_ORG")
     projectName = System.getenv("SENTRY_PROJECT")
     authToken = System.getenv("SENTRY_AUTH_TOKEN")
+    autoInstallation {
+        sentryVersion = '8.48.0'
+    }
 }
 
 group = 'io.tolgee'
@@ -101,7 +104,7 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-starter-validation"
     implementation "org.springframework.boot:spring-boot-starter-hateoas"
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    implementation "org.springframework.boot:spring-boot-starter-batch"
+    implementation "org.springframework.boot:spring-boot-starter-batch-jdbc"
     implementation "org.springframework.boot:spring-boot-starter-actuator"
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
@@ -109,6 +112,7 @@ dependencies {
      * TESTING
      */
     testImplementation libs.assertJCore
+    testImplementation libs.redissonSpringCache
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation('org.springframework.boot:spring-boot-starter-test')
     testImplementation("io.findify:s3mock_2.13:0.2.6")
@@ -133,7 +137,6 @@ dependencies {
     implementation libs.amazonS3
     implementation libs.amazonSTS
     implementation libs.icu4j
-    implementation libs.jacksonKotlin
     implementation libs.jacksonModuleKotlin
     implementation libs.jacksonDataFormatXml
     implementation 'org.apache.httpcomponents.client5:httpclient5:5.4.4'
@@ -141,6 +144,11 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-properties-migrator"
 
     implementation libs.springDocOpenApiCommon
+    // swagger-core (springdoc's engine) is Jackson 2 and needs the Jackson 2 Kotlin module to
+    // introspect Kotlin classes; it is registered on swagger's mapper via the ModelResolver bean in
+    // OpenApiConfiguration. The app itself serializes with Jackson 3 -- this is schema-generation
+    // only. Keep the version aligned with the jackson-databind 2.x that swagger-core pulls in.
+    implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.21.4'
     implementation libs.redissonSpringBootStarter
 
     /**
@@ -221,6 +229,11 @@ dependencies {
     implementation libs.mcp
     implementation libs.mcpSpringWebmvc
 
+}
+
+tasks.withType(Test).configureEach {
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
 }
 
 tasks.named('test', Test) {

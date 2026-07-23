@@ -1,6 +1,5 @@
 package io.tolgee.ee.api.v2.controllers.task
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.config.TestEmailConfiguration
 import io.tolgee.constants.Feature
@@ -30,6 +29,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.math.BigDecimal
 
 @Import(TestEmailConfiguration::class)
@@ -466,7 +466,7 @@ class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
         }.andReturn()
         .response
         .let {
-          com.fasterxml.jackson.module.kotlin
+          tools.jackson.module.kotlin
             .jacksonObjectMapper()
             .readTree(it.contentAsString)["closedAt"]
             .asLong()

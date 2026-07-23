@@ -1,6 +1,5 @@
 package io.tolgee.formats.yaml.out
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.dtos.IExportParams
 import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.ExportMessageFormat
@@ -10,6 +9,7 @@ import io.tolgee.formats.nestedStructureModel.StructureModelBuilder
 import io.tolgee.service.export.ExportFilePathProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.export.exporters.FileExporter
+import tools.jackson.databind.ObjectMapper
 import java.io.InputStream
 
 class YamlFileExporter(

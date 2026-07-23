@@ -98,7 +98,9 @@ tasks.register('runE2e', Exec) {
     def overrideSpecs = getE2eSpecsOverride()
     def specs = overrideSpecs != null ? overrideSpecs : getE2eTestsToRun().join(",")
 
-    environment     "CYPRESS_HOST", "http://localhost:8201"
+    def e2eHost = "http://localhost:${System.getenv('TOLGEE_E2E_PORT') ?: '8201'}"
+    environment     "CYPRESS_HOST", e2eHost
+    environment     "CYPRESS_API_URL", e2eHost
     commandLine npmCommandName, "run", "cy:run", "--", "--spec", specs
 
     workingDir E2E_DIR

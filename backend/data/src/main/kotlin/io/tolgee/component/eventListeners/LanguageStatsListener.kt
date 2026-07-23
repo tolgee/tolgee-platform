@@ -1,6 +1,5 @@
 package io.tolgee.component.eventListeners
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.batch.events.OnBatchJobFinalized
@@ -20,6 +19,7 @@ import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 import org.springframework.transaction.event.TransactionalEventListener
+import tools.jackson.databind.ObjectMapper
 import kotlin.reflect.KClass
 
 @Component

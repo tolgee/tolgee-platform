@@ -75,6 +75,7 @@ dependencies {
     }
     implementation libs.jakartaMail
     implementation('org.springframework.boot:spring-boot-starter-test')
+    api "org.springframework.boot:spring-boot-webmvc-test"
     implementation "org.springframework.boot:spring-boot-starter-actuator"
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 

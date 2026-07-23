@@ -16,6 +16,7 @@ import jakarta.persistence.Table
 import jakarta.validation.constraints.Max
 import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.Size
+import org.hibernate.annotations.ColumnDefault
 
 @Entity
 @ActivityLoggedEntity
@@ -38,9 +39,11 @@ class TranslationMemory(
   @field:Max(100)
   @ActivityLoggedProp
   @Column(nullable = false)
+  @ColumnDefault("0")
   var defaultPenalty: Int = 0,
   @ActivityLoggedProp
   @Column(nullable = false)
+  @ColumnDefault("false")
   var writeOnlyReviewed: Boolean = false,
 ) : StandardAuditModel() {
   @ManyToOne(optional = false, fetch = FetchType.LAZY)

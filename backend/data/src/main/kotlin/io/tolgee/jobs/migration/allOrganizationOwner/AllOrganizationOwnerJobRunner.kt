@@ -1,20 +1,20 @@
 package io.tolgee.jobs.migration.allOrganizationOwner
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.jobs.migration.MigrationJobRunner
 import io.tolgee.repository.ProjectRepository
 import io.tolgee.repository.UserAccountRepository
 import org.apache.commons.codec.digest.DigestUtils
 import org.slf4j.LoggerFactory
-import org.springframework.batch.core.Job
-import org.springframework.batch.core.JobExecution
-import org.springframework.batch.core.JobParameter
-import org.springframework.batch.core.JobParameters
-import org.springframework.batch.core.launch.JobLauncher
+import org.springframework.batch.core.job.Job
+import org.springframework.batch.core.job.JobExecution
+import org.springframework.batch.core.job.parameters.JobParameter
+import org.springframework.batch.core.job.parameters.JobParameters
+import org.springframework.batch.core.launch.JobOperator
 import org.springframework.batch.core.repository.JobRepository
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
+import tools.jackson.module.kotlin.jacksonObjectMapper
 
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @Component
@@ -22,7 +22,7 @@ class AllOrganizationOwnerJobRunner(
   val tolgeeProperties: TolgeeProperties,
   @Qualifier(AllOrganizationOwnerJobConfiguration.JOB_NAME)
   val job: Job,
-  val jobLauncher: JobLauncher,
+  val jobOperator: JobOperator,
   val projectRepository: ProjectRepository,
   val userAccountRepository: UserAccountRepository,
   val jobRepository: JobRepository,
@@ -34,7 +34,7 @@ class AllOrganizationOwnerJobRunner(
 
     if (params != null) {
       return jobRepository.getLastJobExecution(AllOrganizationOwnerJobConfiguration.JOB_NAME, params)
-        ?: return jobLauncher.run(job, params)
+        ?: return jobOperator.start(job, params)
     }
     return null
   }
@@ -47,6 +47,6 @@ class AllOrganizationOwnerJobRunner(
     }
     val json = jacksonObjectMapper().writeValueAsBytes(mapOf("users" to userIds, "projects" to projectIds))
     val hash = DigestUtils.sha256Hex(json)
-    return JobParameters(mapOf("idsHash" to JobParameter(hash, String::class.java)))
+    return JobParameters(setOf(JobParameter("idsHash", hash, String::class.java)))
   }
 }

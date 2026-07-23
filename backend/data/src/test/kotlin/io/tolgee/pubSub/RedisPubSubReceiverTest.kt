@@ -1,7 +1,5 @@
 package io.tolgee.pubSub
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.events.JobQueueItemsEvent
 import org.assertj.core.api.Assertions.assertThat
@@ -11,13 +9,15 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.messaging.simp.SimpMessagingTemplate
+import tools.jackson.databind.DeserializationFeature
+import tools.jackson.module.kotlin.jacksonMapperBuilder
 
 class RedisPubSubReceiverTest {
   @Test
   fun `deserializes a queue event missing jobType and ignores unknown fields`() {
     val publisher = mock<ApplicationEventPublisher>()
     val objectMapper =
-      jacksonObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+      jacksonMapperBuilder().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false).build()
     val receiver = RedisPubSubReceiver(mock<SimpMessagingTemplate>(), publisher, objectMapper)
 
     // Payload as produced by an OLDER instance: no jobType, plus a hypothetical unknown field.

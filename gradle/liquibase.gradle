@@ -5,7 +5,7 @@ ext {
                 referenceUrl: referenceUrlPrefix +
                         '?dialect=io.tolgee.dialects.postgres.CustomPostgreSQLDialect' +
                         '&hibernate.physical_naming_strategy=org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy' +
-                        '&hibernate.implicit_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy',
+                        '&hibernate.implicit_naming_strategy=org.springframework.boot.hibernate.SpringImplicitNamingStrategy',
                 username    : 'postgres',
                 password    : 'postgres',
                 driver      : "org.postgresql.Driver"
@@ -15,7 +15,7 @@ ext {
             activities {
                 //noinspection GroovyAssignabilityCheck
                 main {
-                    changeLogFile "${project.projectDir}/${changeLogPah}"
+                    changelogFile "${project.projectDir}/${changeLogPah}"
                     url liveDb.url
                     referenceUrl liveDb.referenceUrl
                     username liveDb.username
@@ -24,6 +24,7 @@ ext {
                     excludeObjects "table:batch_job_execution_context," +
                             "batch_step_execution_seq," +
                             "batch_job_seq," +
+                            "batch_job_instance_seq," +
                             "batch_job_execution_seq," +
                             "batch_step_execution_context," +
                             "batch_step_execution," +
@@ -36,6 +37,11 @@ ext {
                             "activity_sequence," +
                             "FK9xs5a07fba5yqje5jqm6qrehs," +
                             "column:enabled_features,"+
+                            // liquibase-hibernate7 emits a duplicate addDefaultValue(nextval) for every
+                            // sequence-generated @Id column, so the model never matches the schema.
+                            // Exclude id columns from the diff until fixed upstream.
+                            // https://github.com/liquibase/liquibase-hibernate/issues/919
+                            "column:(?i)^id\$,"+
                             "table:temp_unsuccessful_job_keys"
                 }
             }

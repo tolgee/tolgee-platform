@@ -12,7 +12,7 @@ import io.tolgee.repository.UserAccountRepository
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.batch.core.Job
+import org.springframework.batch.core.job.Job
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 

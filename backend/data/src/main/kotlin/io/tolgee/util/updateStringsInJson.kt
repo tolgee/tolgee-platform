@@ -1,8 +1,8 @@
 package io.tolgee.util
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.TextNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.StringNode
+import tools.jackson.module.kotlin.jacksonObjectMapper
 
 fun updateStringsInJson(
   node: JsonNode?,
@@ -14,22 +14,22 @@ fun updateStringsInJson(
   return when {
     node.isObject -> {
       val objectNode = mapper.createObjectNode()
-      node.fields().forEach { (key, value) ->
-        objectNode.set<JsonNode>(key, updateStringsInJson(value, fn))
+      node.properties().forEach { (key, value) ->
+        objectNode.set(key, updateStringsInJson(value, fn))
       }
       objectNode
     }
 
     node.isArray -> {
       val arrayNode = mapper.createArrayNode()
-      node.elements().forEach { element ->
+      node.values().forEach { element ->
         arrayNode.add(updateStringsInJson(element, fn))
       }
       arrayNode
     }
 
     node.isTextual -> {
-      TextNode(fn(node.asText()))
+      StringNode(fn(node.asText()))
     }
 
     else -> node // Return unchanged for non-string nodes (e.g., numbers, booleans, null)

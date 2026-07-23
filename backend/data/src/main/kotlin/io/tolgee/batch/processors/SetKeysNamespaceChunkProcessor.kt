@@ -1,6 +1,5 @@
 package io.tolgee.batch.processors
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.batch.AbstractChunkProcessor
 import io.tolgee.batch.FailedDontRequeueException
 import io.tolgee.batch.ProgressManager
@@ -13,6 +12,7 @@ import jakarta.persistence.EntityManager
 import kotlinx.coroutines.ensureActive
 import org.apache.commons.lang3.exception.ExceptionUtils.getRootCauseMessage
 import org.springframework.stereotype.Component
+import tools.jackson.databind.ObjectMapper
 import kotlin.coroutines.CoroutineContext
 
 @Component

@@ -6,13 +6,21 @@ buildscript {
     repositories {
         mavenCentral()
     }
+    dependencies {
+        // liquibase-gradle 3.1.0 (the first release with Gradle 9 support) resolves liquibase.Scope
+        // at configuration time, so the plugin and liquibase-core must share the buildscript
+        // classloader. The plugins{} block isolates plugin classloaders, so the plugin is applied
+        // the legacy way (apply plugin below) with liquibase-core alongside it. Keep this in sync
+        // with libs.liquibaseCore (the version catalog isn't visible in a buildscript block).
+        classpath 'org.liquibase.gradle:org.liquibase.gradle.gradle.plugin:3.1.0'
+        classpath 'org.liquibase:liquibase-core:5.0.3'
+    }
 }
 
 plugins {
     id 'io.spring.dependency-management'
     id 'org.springframework.boot' apply false
     id 'java'
-    id 'org.liquibase.gradle'
     id 'org.jetbrains.kotlin.jvm'
     id "kotlin-jpa"
     id "org.jetbrains.kotlin.kapt" // kapt still needed for Hibernate -- https://hibernate.atlassian.net/browse/HHH-15376
@@ -51,6 +59,7 @@ apply plugin: "kotlin-allopen"
 apply plugin: "kotlin-kapt" // kapt still needed for Hibernate -- https://hibernate.atlassian.net/browse/HHH-15376
 apply plugin: 'kotlin'
 apply plugin: 'org.hibernate.orm'
+apply plugin: 'org.liquibase.gradle'
 
 idea {
     module {
@@ -100,7 +109,8 @@ dependencies {
     }
     implementation libs.jakartaMail
     testImplementation('org.springframework.boot:spring-boot-starter-test')
-    implementation "org.springframework.boot:spring-boot-starter-batch"
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    implementation "org.springframework.boot:spring-boot-starter-batch-jdbc"
     implementation "org.springframework.boot:spring-boot-starter-websocket"
     implementation "org.springframework.boot:spring-boot-starter-thymeleaf"
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
@@ -127,6 +137,9 @@ dependencies {
      * Liquibase
      */
     implementation libs.liquibaseCore
+    // Boot 4 split Liquibase auto-configuration into this module; it registers the
+    // EntityManagerFactory depends-on that makes our SpringLiquibase beans run before the EMF.
+    implementation 'org.springframework.boot:spring-boot-liquibase'
     liquibaseRuntime libs.liquibaseCore
     liquibaseRuntime libs.jacksonModuleKotlin
     liquibaseRuntime libs.liquibasePicoli
@@ -170,7 +183,7 @@ dependencies {
      * MISC
      */
     implementation libs.commonsCodec
-    implementation group: 'org.apache.commons', name: 'commons-text', version: '1.10.0'
+    implementation group: 'org.apache.commons', name: 'commons-text', version: '1.15.0'
     implementation libs.icu4j
     implementation libs.jjwtApi
     implementation libs.jjwtImpl
@@ -189,9 +202,8 @@ dependencies {
     implementation libs.postHog
     implementation libs.micrometerPrometheus
     implementation 'org.dom4j:dom4j:2.1.4'
-    implementation libs.jacksonKotlin
     implementation("org.apache.commons:commons-configuration2:2.15.0")
-    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVersion"
+    implementation "tools.jackson.dataformat:jackson-dataformat-yaml:$jacksonVersion"
     implementation("com.fasterxml.woodstox:woodstox-core:7.1.1")
 
     /**
@@ -225,9 +237,9 @@ dependencies {
      * AZURE
      */
     implementation(libs.azureBlob)
-    implementation('io.netty:netty-codec-http:4.2.5.Final')
-    implementation('io.netty:netty-codec-http2:4.2.5.Final')
-    implementation('io.netty:netty-handler:4.2.5.Final')
+    implementation('io.netty:netty-codec-http:4.2.15.Final')
+    implementation('io.netty:netty-codec-http2:4.2.15.Final')
+    implementation('io.netty:netty-handler:4.2.15.Final')
 
     /**
      * SLACK SDK
@@ -263,7 +275,6 @@ dependencyManagement {
         mavenBom(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES) {
             bomProperty "kotlin.version", "${kotlinVersion}"
         }
-        mavenBom 'org.junit:junit-bom:5.11.4'
     }
 }
 

@@ -1,6 +1,5 @@
 package io.tolgee.batch
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.batch.data.QueueEventType
 import io.tolgee.batch.events.JobQueueItemsEvent
 import io.tolgee.fixtures.RedisRunner
@@ -24,6 +23,7 @@ import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
+import tools.jackson.module.kotlin.jacksonObjectMapper
 
 @SpringBootTest(
   properties = [

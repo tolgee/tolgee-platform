@@ -1,13 +1,13 @@
 package io.tolgee.unit.formats.json.`in`
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.formats.json.`in`.JsonImportFormatDetector
 import io.tolgee.testing.assert
 import io.tolgee.util.FileProcessorContextMockUtil
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import tools.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.module.kotlin.readValue
 import java.io.File
 
 class JsonImportFormatDetectorTest {

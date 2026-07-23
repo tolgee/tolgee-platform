@@ -1,9 +1,9 @@
 package io.tolgee.service.projectExportImport
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.service.projectExportImport.model.ExportManifest
 import io.tolgee.service.projectExportImport.model.ExportZipLayout
 import org.springframework.stereotype.Component
+import tools.jackson.databind.ObjectMapper
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.nio.file.Paths

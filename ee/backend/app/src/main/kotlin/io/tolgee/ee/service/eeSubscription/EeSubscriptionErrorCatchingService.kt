@@ -1,6 +1,5 @@
 package io.tolgee.ee.service.eeSubscription
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.api.SubscriptionStatus
 import io.tolgee.constants.Message
 import io.tolgee.ee.service.NoActiveSubscriptionException
@@ -12,6 +11,7 @@ import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.web.client.HttpClientErrorException
+import tools.jackson.module.kotlin.jacksonObjectMapper
 
 @Component
 class EeSubscriptionErrorCatchingService(

@@ -1,7 +1,5 @@
 package io.tolgee.unit.formats.yaml.`in`
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import io.tolgee.dtos.request.ImportFileMapping
 import io.tolgee.dtos.request.SingleStepImportRequest
 import io.tolgee.formats.importCommon.ImportFormat
@@ -13,6 +11,8 @@ import io.tolgee.util.assertSingle
 import io.tolgee.util.assertTranslations
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.dataformat.yaml.YAMLFactory
 
 class YamlFileProcessorTest {
   lateinit var mockUtil: FileProcessorContextMockUtil

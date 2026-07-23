@@ -2,6 +2,7 @@ package io.tolgee.model.keyBigMeta
 
 import io.tolgee.model.AuditModel
 import io.tolgee.model.Project
+import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
 import jakarta.persistence.Id
@@ -17,16 +18,18 @@ import org.springframework.data.domain.Persistable
 @Table(
   indexes = [
     Index(columnList = "project_id"),
-    Index(columnList = "key1Id, key2Id", unique = true),
-    Index(columnList = "key1Id"),
-    Index(columnList = "key2Id"),
+    Index(columnList = "key1id, key2id", unique = true),
+    Index(columnList = "key1id"),
+    Index(columnList = "key2id"),
   ],
 )
 @IdClass(KeysDistanceId::class)
 class KeysDistance(
   @Id
+  @Column(name = "key1id")
   var key1Id: Long = 0,
   @Id
+  @Column(name = "key2id")
   var key2Id: Long = 0,
 ) : AuditModel(),
   Persistable<KeysDistanceId> {
@@ -38,6 +41,7 @@ class KeysDistance(
   @ColumnDefault("10000")
   var score: Long = 10000
 
+  @ColumnDefault("0")
   var distance: Double = 0.0
 
   var hits: Long = 1

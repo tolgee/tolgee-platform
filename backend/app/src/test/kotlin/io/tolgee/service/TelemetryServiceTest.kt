@@ -4,8 +4,6 @@
 
 package io.tolgee.service
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.AbstractSpringTest
 import io.tolgee.configuration.tolgee.TelemetryProperties
 import io.tolgee.development.testDataBuilder.data.BaseTestData
@@ -21,6 +19,8 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpMethod
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.web.client.RestTemplate
+import tools.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.module.kotlin.readValue
 
 @SpringBootTest(
   properties = [

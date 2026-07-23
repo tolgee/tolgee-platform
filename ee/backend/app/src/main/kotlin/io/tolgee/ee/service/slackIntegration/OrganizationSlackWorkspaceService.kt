@@ -1,7 +1,5 @@
 package io.tolgee.ee.service.slackIntegration
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.slack.api.Slack
 import com.slack.api.methods.request.apps.AppsUninstallRequest
 import com.slack.api.methods.response.apps.AppsUninstallResponse
@@ -26,6 +24,8 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.client.RestTemplate
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.module.kotlin.readValue
 
 @Service
 class OrganizationSlackWorkspaceService(

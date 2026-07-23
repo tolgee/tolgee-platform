@@ -36,6 +36,8 @@ tasks.named('test', Test) {
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-restclient")
+    implementation libs.jakartaMail
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation "org.springframework.boot:spring-boot-starter-hateoas"
     implementation libs.jjwtApi
@@ -43,6 +45,7 @@ dependencies {
     implementation libs.jjwtJackson
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     testImplementation(project(":testing"))
     testImplementation(project(":security"))
@@ -82,6 +85,5 @@ dependencyManagement {
         mavenBom(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES) {
             bomProperty "kotlin.version", "${kotlinVersion}"
         }
-        mavenBom 'org.junit:junit-bom:5.11.4'
     }
 }

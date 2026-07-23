@@ -1,8 +1,8 @@
 package io.tolgee.ee.service.prompt
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.jknack.handlebars.Handlebars
 import com.github.jknack.handlebars.Helper
+import tools.jackson.module.kotlin.jacksonObjectMapper
 
 object PromptHandlebarsHelper {
   const val ESCAPE_JSON = "escapeJson"

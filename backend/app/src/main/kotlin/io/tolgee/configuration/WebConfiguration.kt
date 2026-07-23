@@ -4,15 +4,12 @@
 
 package io.tolgee.configuration
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.activity.ActivityHandlerInterceptor
 import io.tolgee.component.TestClockHeaderFilter
 import io.tolgee.component.VersionFilter
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import jakarta.servlet.MultipartConfigElement
-import org.springframework.boot.web.servlet.MultipartConfigFactory
+import org.springframework.boot.servlet.MultipartConfigFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
@@ -25,6 +22,10 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
+import tools.jackson.databind.DeserializationFeature
+import tools.jackson.databind.cfg.DateTimeFeature
+import tools.jackson.databind.json.JsonMapper
+import tools.jackson.module.kotlin.jacksonMapperBuilder
 import java.security.SecureRandom
 import java.util.concurrent.TimeUnit
 
@@ -73,10 +74,15 @@ class WebConfiguration(
     return SecureRandom()
   }
 
+  // Declared as JsonMapper (not ObjectMapper) so Boot's @ConditionalOnMissingBean(JsonMapper)
+  // jacksonJsonMapper backs off, leaving this as the single primary mapper.
   @Bean
   @Primary
-  fun objectMapper(): ObjectMapper {
-    return jacksonObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+  fun objectMapper(): JsonMapper {
+    return jacksonMapperBuilder()
+      .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+      .enable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS)
+      .build()
   }
 
   @Bean
