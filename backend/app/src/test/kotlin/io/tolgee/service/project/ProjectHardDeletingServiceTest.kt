@@ -171,6 +171,41 @@ class ProjectHardDeletingServiceTest : AbstractSpringTest() {
     }
   }
 
+  @Test
+  fun `deletes project with contributor rows`() {
+    val testData = BaseTestData()
+    testDataService.saveTestData(testData.root)
+    val projectId = testData.projectBuilder.self.id
+    val userId = testData.user.id
+
+    executeInNewTransaction(platformTransactionManager) {
+      entityManager
+        .createNativeQuery(
+          "insert into project_contributor (project_id, user_id, first_contribution_at, last_contribution_at) " +
+            "values (:projectId, :userId, now(), now())",
+        ).setParameter("projectId", projectId)
+        .setParameter("userId", userId)
+        .executeUpdate()
+    }
+
+    executeInNewTransaction(platformTransactionManager) {
+      projectHardDeletingService.hardDeleteProject(testData.projectBuilder.self.refresh())
+    }
+
+    executeInNewTransaction {
+      val remaining =
+        (
+          entityManager
+            .createNativeQuery(
+              "select count(*) from project_contributor where project_id = :projectId and user_id = :userId",
+            ).setParameter("projectId", projectId)
+            .setParameter("userId", userId)
+            .singleResult as Number
+        ).toLong()
+      remaining.assert.isEqualTo(0)
+    }
+  }
+
   fun Project.refresh(): Project {
     return projectService.get(this.id)
   }

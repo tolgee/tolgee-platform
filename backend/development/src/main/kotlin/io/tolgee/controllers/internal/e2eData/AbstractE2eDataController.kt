@@ -1,9 +1,11 @@
 package io.tolgee.controllers.internal.e2eData
 
+import io.tolgee.component.CurrentDateProvider
 import io.tolgee.data.StandardTestDataResult
 import io.tolgee.data.service.TestDataGeneratingService
 import io.tolgee.development.testDataBuilder.TestDataService
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
+import io.tolgee.model.activity.ActivityRevision
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.UserAccountService
@@ -17,6 +19,7 @@ import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.GetMapping
 import java.io.FileNotFoundException
+import java.util.Date
 
 abstract class AbstractE2eDataController {
   abstract val testData: TestDataBuilder
@@ -45,7 +48,32 @@ abstract class AbstractE2eDataController {
   @Autowired
   private lateinit var testDataGeneratingService: TestDataGeneratingService
 
+  @Autowired
+  private lateinit var currentDateProvider: CurrentDateProvider
+
   open fun afterTestDataStored(data: TestDataBuilder) {}
+
+  // Persists a bare ActivityRevision to fire the track_project_contributor trigger.
+  // Twin: io.tolgee.contributors.ContributorActivityRecorder.
+  protected fun recordContributorActivity(
+    projectId: Long,
+    authorId: Long,
+    at: Date? = null,
+  ) {
+    val previousForcedDate = currentDateProvider.forcedDate
+    at?.let { currentDateProvider.forcedDate = it }
+    try {
+      entityManager.persist(
+        ActivityRevision().apply {
+          this.projectId = projectId
+          this.authorId = authorId
+        },
+      )
+      entityManager.flush()
+    } finally {
+      currentDateProvider.forcedDate = previousForcedDate
+    }
+  }
 
   @GetMapping(value = ["/generate-standard"])
   @Transactional
