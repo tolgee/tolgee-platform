@@ -1,3 +1,14 @@
+## [3.214.1](https://github.com/tolgee/tolgee-platform/compare/v3.214.0...v3.214.1) (2026-07-23)
+
+
+### Bug Fixes
+
+* exclude soft-deleted keys from the keys/info endpoint ([#3818](https://github.com/tolgee/tolgee-platform/issues/3818)) ([dd24ad1](https://github.com/tolgee/tolgee-platform/commit/dd24ad13a50d251ac80e6206e97e4bdc69aae705)), closes [#3817](https://github.com/tolgee/tolgee-platform/issues/3817) [#3486](https://github.com/tolgee/tolgee-platform/issues/3486)
+* hard-delete of a project with a default namespace fails on FK constraint ([#3810](https://github.com/tolgee/tolgee-platform/issues/3810)) ([769ae0f](https://github.com/tolgee/tolgee-platform/commit/769ae0ff37d53f0bfa9fc8b3e7abc68b13cad143)), closes [#3783](https://github.com/tolgee/tolgee-platform/issues/3783)
+* prevent long language names from shrinking dashboard progress bars ([#3811](https://github.com/tolgee/tolgee-platform/issues/3811)) ([0d09306](https://github.com/tolgee/tolgee-platform/commit/0d0930698740f6320e164375d12ac00f9b0e7ff0)), closes [#3657](https://github.com/tolgee/tolgee-platform/issues/3657) [#3657](https://github.com/tolgee/tolgee-platform/issues/3657)
+* purge trashed keys that have translation suggestions ([#3800](https://github.com/tolgee/tolgee-platform/issues/3800)) ([e0f4888](https://github.com/tolgee/tolgee-platform/commit/e0f48887d3aa2cca16cf2994ae3e7eb200bdb2f4))
+* serialize cached enums by name instead of ordinal ([#3807](https://github.com/tolgee/tolgee-platform/issues/3807)) ([323d271](https://github.com/tolgee/tolgee-platform/commit/323d271600c9e75519eaa8ffba76b73b58aafcb9))
+
 # [3.214.0](https://github.com/tolgee/tolgee-platform/compare/v3.213.1...v3.214.0) (2026-07-20)
 
 
