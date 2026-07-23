@@ -88,4 +88,14 @@ class MissingNumbersCheckTest {
   fun `all types are MISSING_NUMBERS`() {
     check.check(params("Bonjour", "Hello 42")).assertAllHaveType(QaCheckType.MISSING_NUMBERS)
   }
+
+  @Test
+  fun `does not report grouped number with space as missing`() {
+    check.check(params("Cuckoo's Nest (2,000 CZK)", "Kukaččí hnízdo (2 000 Kč)")).assertNoIssues()
+  }
+
+  @Test
+  fun `does not report grouped number with special characters as missing`() {
+    check.check(params("Cuckoo's Nest (2,000 CZK)", "Kukaččí hnízdo (2_0_00 Kč)")).assertNoIssues()
+  }
 }
