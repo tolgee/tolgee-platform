@@ -32,22 +32,16 @@ interface ProjectContributorRepository : Repository<ProjectContributor, ProjectC
     pageable: Pageable,
   ): Page<ProjectContributorView>
 
-  // Structurally mirrors the mine-only filter in ProjectRepository.findAllPublic so the switcher gate
-  // and the community-page listing cannot silently diverge — edit both together.
   @Query(
     """
       select count(r) > 0 from Project r
       left join r.baseLanguage bl
       left join r.organizationOwner o
-      left join Permission p on p.project = r and p.user.id = :userId
-      left join OrganizationRole role on role.organization = o and role.user.id = :userId
+      left join Permission p on p.project = r and p.user.id = :userAccountId
+      left join OrganizationRole role on role.organization = o and role.user.id = :userAccountId
       where ${ProjectRepository.PUBLIC_PROJECT_VISIBILITY}
-        and p is null and role is null
-        and exists (
-          select 1 from ProjectContributor pc
-          where pc.projectId = r.id and pc.userId = :userId
-        )
+        and ${ProjectRepository.NON_MEMBER_CONTRIBUTOR_FILTER}
     """,
   )
-  fun hasNonMemberPublicContribution(userId: Long): Boolean
+  fun hasNonMemberPublicContribution(userAccountId: Long): Boolean
 }

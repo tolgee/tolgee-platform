@@ -57,6 +57,14 @@ interface ProjectRepository : JpaRepository<Project, Long> {
         and o.deletedAt is null
         """
 
+    const val NON_MEMBER_CONTRIBUTOR_FILTER = """
+        p is null and role is null
+        and exists (
+            select 1 from ProjectContributor pc
+            where pc.projectId = r.id and pc.userId = :userAccountId
+        )
+        """
+
     /** `r.deletedAt`/`o.deletedAt` sit top-level so they also guard the permission branch, which [PUBLIC_PROJECT_VISIBILITY] does not. */
     const val BELOW_MEMBER_ACCESSIBLE_PROJECT = """
         (
@@ -136,16 +144,7 @@ interface ProjectRepository : JpaRepository<Project, Long> {
             :search is null or (lower(r.name) like lower(concat('%', cast(:search as text), '%'))
             or lower(o.name) like lower(concat('%', cast(:search as text),'%')))
         )
-        and (
-            :filterContributed = false
-            or (
-                p is null and role is null
-                and exists (
-                    select 1 from ProjectContributor pc
-                    where pc.projectId = r.id and pc.userId = :userAccountId
-                )
-            )
-        )
+        and (:filterContributed = false or ($NON_MEMBER_CONTRIBUTOR_FILTER))
     """,
   )
   fun findAllPublic(
