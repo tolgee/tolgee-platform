@@ -3748,6 +3748,7 @@ export interface components {
       announcement?: components["schemas"]["AnnouncementDto"];
       authInfo?: components["schemas"]["AuthInfoModel"];
       eeSubscription?: components["schemas"]["InitialDataEeSubscriptionModel"];
+      hasCommunityContributions: boolean;
       languageTag?: string;
       preferredOrganization?: components["schemas"]["PrivateOrganizationModel"];
       qaCheckCategories?: components["schemas"]["QaCheckCategoryModel"][];
@@ -25271,6 +25272,7 @@ export interface operations {
         /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
         search?: string;
+        filterContributed?: boolean;
       };
     };
     responses: {

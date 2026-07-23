@@ -10,11 +10,17 @@ import {
   setBypassSeatCountCheck,
 } from '../../common/apiCalls/common';
 import {
+  communityContributionData,
   organizationTestData,
   publicProjectsData,
 } from '../../common/apiCalls/testData/testData';
 import { gcy, gcyAdvanced, switchToOrganization } from '../../common/shared';
 import { waitForGlobalLoading } from '../../common/loading';
+
+const disableMyContributions = () => {
+  gcy('community-my-contributions-toggle').click();
+  waitForGlobalLoading();
+};
 
 describe('Community projects navigation', () => {
   let organizationData: Record<string, { slug: string }>;
@@ -22,6 +28,8 @@ describe('Community projects navigation', () => {
   beforeEach(() => {
     setBypassSeatCountCheck(true);
     login();
+    communityContributionData.clean();
+    communityContributionData.generateStandard();
     organizationTestData.clean({ timeout: 120000 });
     organizationTestData.generate().then((res) => {
       organizationData = res.body as any;
@@ -31,6 +39,7 @@ describe('Community projects navigation', () => {
 
   afterEach(() => {
     organizationTestData.clean();
+    communityContributionData.clean();
     setBypassSeatCountCheck(false);
   });
 
@@ -50,10 +59,7 @@ describe('Community projects navigation', () => {
     cy.waitForDom();
   };
 
-  // TODO: the "Community translation" switcher entry is currently disabled (it will return once
-  // contributor tracking lands in a future pitch). Re-enable these five skipped tests — the ones
-  // that drive `switch-popover-footer-action` — when the button is added back.
-  it.skip('navigates to the community page via the dropdown entry (mouse)', () => {
+  it('navigates to the community page via the dropdown entry (mouse)', () => {
     openSwitch();
     gcyAdvanced({
       value: 'switch-popover-footer-action',
@@ -62,7 +68,7 @@ describe('Community projects navigation', () => {
     cy.location('pathname').should('eq', '/community-projects');
   });
 
-  it.skip('navigates to the community page via the dropdown entry (keyboard)', () => {
+  it('navigates to the community page via the dropdown entry (keyboard)', () => {
     openSwitch();
     gcyAdvanced({
       value: 'switch-popover-footer-action',
@@ -113,7 +119,7 @@ describe('Community projects navigation', () => {
       .should('be.visible');
   });
 
-  it.skip('highlights no org row while on the community page but still offers the community entry', () => {
+  it('highlights no org row while on the community page but still offers the community entry', () => {
     visitCommunity();
     openSwitch();
     gcy('switch-popover-item').should('exist');
@@ -124,7 +130,7 @@ describe('Community projects navigation', () => {
     }).should('be.visible');
   });
 
-  it.skip('offers the community entry from a switcher outside the projects pages', () => {
+  it('offers the community entry from a switcher outside the projects pages', () => {
     cy.visit(
       `${HOST}/organizations/${organizationData['Tolgee'].slug}/members`
     );
@@ -136,8 +142,20 @@ describe('Community projects navigation', () => {
     }).should('be.visible');
   });
 
-  it('shows the empty state and hides search when there are no public projects', () => {
+  it('does not offer the community entry for a user with no contributions', () => {
+    communityContributionData.clean();
+    visitProjects();
+    openSwitch();
+    gcy('switch-popover-item').should('exist');
+    gcyAdvanced({
+      value: 'switch-popover-footer-action',
+      action: 'organization-switch-community',
+    }).should('not.exist');
+  });
+
+  it('shows the empty state and hides search when there are no contributions', () => {
     publicProjectsData.clean();
+    communityContributionData.clean();
     visitCommunity();
     waitForGlobalLoading();
     gcy('community-projects-view').should('be.visible');
@@ -146,7 +164,7 @@ describe('Community projects navigation', () => {
     gcy('global-list-search').should('not.exist');
   });
 
-  it.skip('closes the popover on Escape from the footer entry', () => {
+  it('closes the popover on Escape from the footer entry', () => {
     openSwitch();
     gcyAdvanced({
       value: 'switch-popover-footer-action',
@@ -201,10 +219,12 @@ describe('Community projects email-verification gate', () => {
 describe('Community projects list content', () => {
   beforeEach(() => {
     publicProjectsData.clean();
+    communityContributionData.clean();
     publicProjectsData.generateStandard();
     login('publicProjectsUser');
     cy.visit(`${HOST}/community-projects`);
     waitForGlobalLoading();
+    disableMyContributions();
   });
 
   afterEach(() => {
@@ -242,10 +262,12 @@ describe('Community projects list content', () => {
 describe('Community projects search threshold', () => {
   beforeEach(() => {
     publicProjectsData.clean();
+    communityContributionData.clean();
     publicProjectsData.generateFew();
     login('publicProjectsUser');
     cy.visit(`${HOST}/community-projects`);
     waitForGlobalLoading();
+    disableMyContributions();
   });
 
   afterEach(() => {
@@ -255,6 +277,35 @@ describe('Community projects search threshold', () => {
   it('hides the search field at or below the project threshold', () => {
     gcy('dashboard-projects-list-item').should('have.length', 5);
     gcy('global-list-search').should('not.exist');
+  });
+});
+
+describe('Community projects "My contributions only" toggle', () => {
+  beforeEach(() => {
+    publicProjectsData.clean();
+    communityContributionData.clean();
+    publicProjectsData.generateStandard();
+    login('publicProjectsUser');
+    cy.visit(`${HOST}/community-projects`);
+    waitForGlobalLoading();
+  });
+
+  afterEach(() => {
+    publicProjectsData.clean();
+  });
+
+  it('defaults on and lists only public projects the user contributed to as a non-member', () => {
+    gcy('community-my-contributions-toggle').find('input').should('be.checked');
+    gcy('dashboard-projects-list-item').should('have.length', 1);
+    cy.contains('Community Outsider').should('be.visible');
+    cy.contains('Community Alpha').should('not.exist');
+  });
+
+  it('lists all public projects once toggled off', () => {
+    disableMyContributions();
+    gcy('dashboard-projects-list-item').should('have.length', 7);
+    cy.contains('Community Alpha').should('be.visible');
+    cy.contains('Community Outsider').should('be.visible');
   });
 });
 

@@ -483,9 +483,10 @@ class ProjectService(
   fun findAllPublicPaged(
     pageable: Pageable,
     search: String?,
+    filterContributed: Boolean = false,
   ): Page<ProjectWithLanguagesView> {
     val userAccountId = authenticationFacade.authenticatedUserOrNull?.id ?: NO_USER_ID
-    val projects = projectRepository.findAllPublic(userAccountId, pageable, search)
+    val projects = projectRepository.findAllPublic(userAccountId, pageable, search, filterContributed)
     return projects.map { ProjectWithLanguagesView.fromProjectView(it, null) }
   }
 

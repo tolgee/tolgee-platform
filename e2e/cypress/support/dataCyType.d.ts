@@ -146,6 +146,7 @@ declare namespace DataCy {
         "comment-menu-needs-resolution": true;
         "comment-resolve": true;
         "comment-text": true;
+        "community-my-contributions-toggle": true;
         "community-projects-view": true;
         "community-translation-banner": true;
         "community-translation-item": true;
