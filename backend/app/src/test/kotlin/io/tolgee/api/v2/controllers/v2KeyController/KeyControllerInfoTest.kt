@@ -80,4 +80,29 @@ class KeyControllerInfoTest : ProjectAuthControllerTest("/v2/projects/") {
         }.andPrettyPrint
     }
   }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `excludes soft-deleted (trashed) keys`() {
+    val deletedKey = keyService.get(testData.project.id, "key-1", null)
+    keyService.softDeleteMultiple(listOf(deletedKey.id), testData.user)
+
+    performProjectAuthPost(
+      "keys/info",
+      mapOf(
+        "keys" to
+          listOf(
+            mapOf("name" to "key-1"),
+            mapOf("name" to "key-2"),
+          ),
+        "languageTags" to listOf("de"),
+      ),
+    ).andIsOk
+      .andAssertThatJson {
+        node("_embedded.keys") {
+          isArray.hasSize(1)
+          node("[0].name").isEqualTo("key-2")
+        }
+      }
+  }
 }
