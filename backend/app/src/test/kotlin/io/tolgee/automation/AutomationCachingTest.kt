@@ -24,8 +24,6 @@ import org.springframework.cache.Cache
 @SpringBootTest(
   properties = [
     "tolgee.cache.enabled=true",
-    // lets the test observe whether a query hit the database via Hibernate's statement counter
-    "spring.jpa.properties.hibernate.generate_statistics=true",
   ],
 )
 class AutomationCachingTest : ProjectAuthControllerTest("/v2/projects/") {
@@ -44,6 +42,9 @@ class AutomationCachingTest : ProjectAuthControllerTest("/v2/projects/") {
     userAccount = testData.user
     this.projectSupplier = { testData.projectBuilder.self }
     cacheManager.getCache(Caches.AUTOMATIONS)!!.clear()
+    // lets the test observe whether a query hit the database via Hibernate's statement counter.
+    // Enabled here rather than via a property so it survives @RedisTest replacing @SpringBootTest.
+    entityManagerFactory.unwrap(SessionFactory::class.java).statistics.isStatisticsEnabled = true
   }
 
   @Test
