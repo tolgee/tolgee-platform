@@ -136,12 +136,23 @@ interface ProjectRepository : JpaRepository<Project, Long> {
             :search is null or (lower(r.name) like lower(concat('%', cast(:search as text), '%'))
             or lower(o.name) like lower(concat('%', cast(:search as text),'%')))
         )
+        and (
+            :filterContributed = false
+            or (
+                p is null and role is null
+                and exists (
+                    select 1 from ProjectContributor pc
+                    where pc.projectId = r.id and pc.userId = :userAccountId
+                )
+            )
+        )
     """,
   )
   fun findAllPublic(
     userAccountId: Long,
     pageable: Pageable,
     @Param("search") search: String? = null,
+    @Param("filterContributed") filterContributed: Boolean = false,
   ): Page<ProjectView>
 
   @Query(

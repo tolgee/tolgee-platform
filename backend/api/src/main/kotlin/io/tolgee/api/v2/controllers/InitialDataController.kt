@@ -13,6 +13,7 @@ import io.tolgee.hateoas.userAccount.PrivateUserAccountModelAssembler
 import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.TenantService
+import io.tolgee.service.contributor.ProjectContributorService
 import io.tolgee.service.security.UserPreferencesService
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -40,6 +41,7 @@ class InitialDataController(
   private val publicSsoTenantModelAssembler: PublicSsoTenantModelAssembler,
   private val qaCheckCategoryModelAssembler: QaCheckCategoryModelAssembler,
   private val eeSubscriptionProvider: EeSubscriptionProvider?,
+  private val projectContributorService: ProjectContributorService,
 ) : IController {
   @GetMapping(value = [""])
   @Operation(summary = "Get initial data", description = "Returns initial data required by the UI to load")
@@ -61,6 +63,7 @@ class InitialDataController(
       data.languageTag = userPreferencesService.find(userAccount.id)?.language
       data.announcement = announcementController.getLatest()
       data.eeSubscription = getEeSubscriptionModel()
+      data.hasCommunityContributions = projectContributorService.hasCommunityContributions(userAccount.id)
     }
 
     return data

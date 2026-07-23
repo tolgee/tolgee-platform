@@ -17,6 +17,7 @@ class InitialDataControllerTest : AuthorizedControllerTest() {
       node("serverConfiguration.authentication").isEqualTo(true)
       node("userInfo.name").isEqualTo("admin")
       node("preferredOrganization.name").isEqualTo("admin")
+      node("hasCommunityContributions").isEqualTo(false)
     }
   }
 

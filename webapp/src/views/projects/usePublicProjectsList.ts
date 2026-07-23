@@ -3,9 +3,16 @@ import { useState } from 'react';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useLatchedSearchVisibility } from 'tg.views/projects/useLatchedSearchVisibility';
 
-export const usePublicProjectsList = () => {
+type Options = {
+  // Opt-in: only the community page exposes the "My contributions only" filter. The public homepage
+  // view shares this hook and must keep listing every public project.
+  contributionFilter?: boolean;
+};
+
+export const usePublicProjectsList = ({ contributionFilter }: Options = {}) => {
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState('');
+  const [myContributionsOnly, setMyContributionsOnly] = useState(true);
 
   const loadable = useApiQuery({
     url: '/v2/public/projects/with-stats',
@@ -15,6 +22,7 @@ export const usePublicProjectsList = () => {
       size: 20,
       search,
       sort: ['name,asc'],
+      filterContributed: contributionFilter ? myContributionsOnly : undefined,
     },
     options: {
       keepPreviousData: true,
@@ -31,5 +39,18 @@ export const usePublicProjectsList = () => {
     setPage(0);
   };
 
-  return { loadable, showSearch, search, onSearch, onPageChange: setPage };
+  const onToggleMyContributions = (value: boolean) => {
+    setMyContributionsOnly(value);
+    setPage(0);
+  };
+
+  return {
+    loadable,
+    showSearch,
+    search,
+    onSearch,
+    onPageChange: setPage,
+    myContributionsOnly,
+    onToggleMyContributions,
+  };
 };

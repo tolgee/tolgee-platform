@@ -1,11 +1,17 @@
 package io.tolgee.development.testDataBuilder.data
 
 import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
+import io.tolgee.model.Project
+import io.tolgee.model.UserAccount
 
 class PublicProjectsE2eData(
   count: Int = 6,
   includeForeignOrgProject: Boolean = true,
 ) : BaseTestData("publicProjectsUser", "Private project") {
+  // publicProjectsUser is a non-member of this project — the seed target for a community contribution.
+  var outsiderProject: Project? = null
+  val contributingUser: UserAccount = userAccountBuilder.self
+
   init {
     root.apply {
       val communityUserBuilder =
@@ -15,12 +21,13 @@ class PublicProjectsE2eData(
         }
 
       if (includeForeignOrgProject) {
-        addProject(organizationOwner = communityUserBuilder.defaultOrganizationBuilder.self) {
-          name = "Community Outsider"
-          public = true
-        }.build {
-          addBaseLanguage()
-        }
+        outsiderProject =
+          addProject(organizationOwner = communityUserBuilder.defaultOrganizationBuilder.self) {
+            name = "Community Outsider"
+            public = true
+          }.build {
+            addBaseLanguage()
+          }.self
       }
 
       listOf("Alpha", "Beta", "Gamma", "Delta", "Epsilon", "Zeta").take(count).forEach { suffix ->

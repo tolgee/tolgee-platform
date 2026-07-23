@@ -19,6 +19,10 @@ class ProjectContributorService(
     return projectContributorRepository.findContributors(projectId, withTotalOrder(pageable))
   }
 
+  fun hasCommunityContributions(userId: Long): Boolean {
+    return projectContributorRepository.hasNonMemberPublicContribution(userId)
+  }
+
   private fun withTotalOrder(pageable: Pageable): Pageable {
     val orders = pageable.sort.filter { it.property in ALLOWED_SORT_PROPERTIES }.toMutableList()
     if (orders.isEmpty()) {

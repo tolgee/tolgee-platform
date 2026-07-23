@@ -12,6 +12,7 @@ import { useIsEmailVerified } from 'tg.globalContext/helpers';
 import { ProjectsList } from 'tg.views/projects/ProjectsList';
 import { CommunityTranslationBanner } from 'tg.views/projects/public/CommunityTranslationBanner';
 import { usePublicProjectsList } from 'tg.views/projects/usePublicProjectsList';
+import { MyContributionsToggle } from 'tg.views/projects/MyContributionsToggle';
 import { CriticalUsageCircle } from 'tg.ee';
 
 // Flex column so the full-width banner keeps its content height — the surrounding grid layouts
@@ -25,8 +26,14 @@ const StyledContent = styled('div')`
 const CommunityProjects = () => {
   const { t } = useTranslate();
   const history = useHistory();
-  const { loadable, showSearch, onSearch, onPageChange } =
-    usePublicProjectsList();
+  const {
+    loadable,
+    showSearch,
+    onSearch,
+    onPageChange,
+    myContributionsOnly,
+    onToggleMyContributions,
+  } = usePublicProjectsList({ contributionFilter: true });
 
   return (
     <DashboardPage>
@@ -48,6 +55,12 @@ const CommunityProjects = () => {
         allCentered
         hideChildrenOnLoading={false}
         customButtons={[<CriticalUsageCircle key="usage" />]}
+        addComponent={
+          <MyContributionsToggle
+            checked={myContributionsOnly}
+            onChange={onToggleMyContributions}
+          />
+        }
         loading={loadable.isFetching}
       >
         <StyledContent>
