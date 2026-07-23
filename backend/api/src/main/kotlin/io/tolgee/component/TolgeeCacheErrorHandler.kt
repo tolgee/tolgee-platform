@@ -17,30 +17,19 @@
 package io.tolgee.component
 
 import org.redisson.client.RedisException
-import org.slf4j.LoggerFactory
 import org.springframework.cache.Cache
 import org.springframework.cache.interceptor.SimpleCacheErrorHandler
 
-class TolgeeCacheErrorHandler : SimpleCacheErrorHandler() {
-  private val logger = LoggerFactory.getLogger(TolgeeCacheErrorHandler::class.java)
-
+class TolgeeCacheErrorHandler(
+  private val resilientCacheAccessor: ResilientCacheAccessor,
+) : SimpleCacheErrorHandler() {
   override fun handleCacheGetError(
     exception: RuntimeException,
     cache: Cache,
     key: Any,
   ) {
     if (exception is RedisException) {
-      logger.warn(
-        "Suppressing RedisException for cache {} on key {}. " +
-          "This is likely due to outdated cache data, therefore this cache entry has been removed. " +
-          "If this re-occurs for the same cache and key, it is likely from a bug that should be reported.",
-        cache.name,
-        key,
-      )
-
-      logger.warn("The following error occurred while fetching the key", exception)
-
-      cache.evictIfPresent(key)
+      resilientCacheAccessor.handleRedisException(cache, key, exception)
       return
     }
 

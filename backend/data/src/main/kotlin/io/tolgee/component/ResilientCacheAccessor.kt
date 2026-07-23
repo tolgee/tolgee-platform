@@ -22,14 +22,10 @@ import org.springframework.cache.Cache
 import org.springframework.stereotype.Component
 
 /**
- * Provides resilient cache access for direct cache.get() calls.
- *
- * TolgeeCacheErrorHandler only covers @Cacheable annotations (Spring AOP).
- * Code that calls cache.get() directly (e.g. RateLimitService) needs this
- * component to handle deserialization errors gracefully.
- *
- * On RedisException (e.g. KryoBufferUnderflowException from schema changes),
- * logs a warning, evicts the bad entry, and returns null (cache miss).
+ * The single heal policy for a cache read that fails with a RedisException (e.g. a
+ * KryoBufferUnderflowException from a schema change): log, evict the bad entry, and treat it as a
+ * miss. Direct `cache.get()` callers (e.g. RateLimitService) use [get]; the `@Cacheable` AOP path
+ * routes into the same [handleRedisException] via TolgeeCacheErrorHandler, so both heal identically.
  */
 @Component
 class ResilientCacheAccessor {
@@ -43,16 +39,24 @@ class ResilientCacheAccessor {
     return try {
       cache.get(key, type)
     } catch (e: RedisException) {
-      logger.warn(
-        "Suppressing RedisException for cache {} on key {}. " +
-          "This is likely due to outdated cache data, therefore this cache entry has been removed. " +
-          "If this re-occurs for the same cache and key, it is likely from a bug that should be reported.",
-        cache.name,
-        key,
-      )
-      logger.warn("The following error occurred while fetching the key", e)
-      cache.evictIfPresent(key)
+      handleRedisException(cache, key, e)
       null
     }
+  }
+
+  fun handleRedisException(
+    cache: Cache,
+    key: Any,
+    e: RedisException,
+  ) {
+    logger.warn(
+      "Suppressing RedisException for cache {} on key {}. " +
+        "This is likely due to outdated cache data, therefore this cache entry has been removed. " +
+        "If this re-occurs for the same cache and key, it is likely from a bug that should be reported.",
+      cache.name,
+      key,
+    )
+    logger.warn("The following error occurred while fetching the key", e)
+    cache.evictIfPresent(key)
   }
 }
