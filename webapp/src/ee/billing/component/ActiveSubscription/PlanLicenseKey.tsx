@@ -35,6 +35,7 @@ export const PlanLicenseKey = ({ licenseKey, defaultOpen, custom }: Props) => {
         size="small"
         color={custom ? 'info' : 'primary'}
         variant="contained"
+        data-cy="active-plan-license-key-open-button"
       >
         <T keyName="active-plan-license-key-button" />
       </Button>

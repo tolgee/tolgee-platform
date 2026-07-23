@@ -15,6 +15,7 @@ declare namespace DataCy {
         "account-security-provider-disconnect": true;
         "account-security-set-password-instructions-sent": true;
         "active-plan-license-key-input": true;
+        "active-plan-license-key-open-button": true;
         "activity-compact": true;
         "activity-compact-detail-button": true;
         "activity-detail": true;
