@@ -523,6 +523,68 @@ jobs:
         run: npm run eslint
         working-directory: ./email
 
+  docker-slim-smoke:
+    name: Slim Docker smoke 🐳
+    needs: [backend-build]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
+        with:
+          node: "false"
+
+      - name: Download backend build result
+        uses: ./.github/actions/download-backend-build
+
+      - name: Build slim Docker image
+        run: ./gradlew dockerSlim
+        env:
+          SKIP_SERVER_BUILD: true
+
+      - name: Start slim image
+        run: |
+          docker run -d --name tolgee-slim --network host \
+            -e SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/postgres \
+            -e SPRING_DATASOURCE_USERNAME=postgres \
+            -e SPRING_DATASOURCE_PASSWORD=postgres \
+            tolgee/tolgee:slim
+
+      - name: Wait for app to report healthy
+        run: |
+          for i in $(seq 1 90); do
+            status=$(curl -fsS http://localhost:8080/actuator/health 2>/dev/null \
+              | jq -r '.status // empty')
+            if [ "$status" = "UP" ]; then
+              echo "Slim image healthy after $((i * 2))s"
+              exit 0
+            fi
+            echo "[$i] status=${status:-<unreachable>}; retrying in 2s"
+            sleep 2
+          done
+          echo "❌ Slim image did not report UP within 180s"
+          exit 1
+
+      - name: Dump container logs on failure
+        if: failure()
+        run: docker logs tolgee-slim || true
+
   everything-passed:
     name: Everything passed 🎉
     needs:
@@ -536,6 +598,7 @@ jobs:
       - schema-check
       - migration-check
       - data-cy-check
+      - docker-slim-smoke
       - e2e
       - e2e-code-checks
       - e2e-install-deps
@@ -580,6 +643,10 @@ jobs:
 
           if [[ "${{ needs.data-cy-check.result }}" != "success" ]]; then
             failed_jobs+=("data-cy-check")
+          fi
+
+          if [[ "${{ needs.docker-slim-smoke.result }}" != "success" ]]; then
+            failed_jobs+=("docker-slim-smoke")
           fi
 
           if [[ "${{ needs.e2e.result }}" != "success" ]]; then
