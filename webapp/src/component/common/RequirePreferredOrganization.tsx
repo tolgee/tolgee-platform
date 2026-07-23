@@ -1,4 +1,5 @@
 import { FC } from 'react';
+import { Box } from '@mui/material';
 import {
   useIsEmailVerified,
   usePreferredOrganization,
@@ -21,18 +22,21 @@ export const RequirePreferredOrganization: FC<
   if (!isEmailVerified) {
     return <>{props.children}</>;
   }
-  if (allowPrivate && !preferredOrganization && isFetching) {
-    return null;
-  }
+  const hasPrivateAccessWithoutOrganization =
+    allowPrivate && !preferredOrganization;
 
-  if (allowPrivate && !preferredOrganization && !isFetching) {
+  if (hasPrivateAccessWithoutOrganization) {
+    if (isFetching) {
+      return null;
+    }
+
     return (
       <DashboardPage>
         <CompactView
           primaryContent={
-            <>
+            <Box data-cy="no-permissions-message">
               <T keyName={'no-permissions-on-the-server'} />
-            </>
+            </Box>
           }
           title={<T keyName={'no-permissions-title'} />}
           windowTitle={t('no-permissions-title')}

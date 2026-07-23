@@ -50,6 +50,7 @@ class PublicProjectsControllerTestData : BaseTestData() {
   lateinit var softDeletedOrg: Organization
   lateinit var softDeletedOrgPublicProject: Project
   lateinit var softDeletedOrgMember: UserAccount
+  lateinit var orgLessCommunityUser: UserAccount
 
   init {
     root.apply {
@@ -60,6 +61,12 @@ class PublicProjectsControllerTestData : BaseTestData() {
         }
       nonMember = nonMemberBuilder.self
       nonMemberPersonalOrg = nonMemberBuilder.defaultOrganizationBuilder.self
+
+      orgLessCommunityUser =
+        addUserAccountWithoutOrganization {
+          username = "org_less_community_user"
+          name = "Org Less Community User"
+        }.self
 
       directPermissionUser =
         addUserAccount {

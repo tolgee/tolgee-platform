@@ -298,6 +298,7 @@ declare namespace DataCy {
         "handlebars-editor": true;
         "handlebars-tooltip": true;
         "handlebars-tooltip-helper-description": true;
+        "help-menu-button": true;
         "import-conflict-resolution-dialog": true;
         "import-conflicts-not-resolved-dialog": true;
         "import-conflicts-not-resolved-dialog-cancel-button": true;
@@ -484,6 +485,7 @@ declare namespace DataCy {
         "namespaces-select-text-field": true;
         "namespaces-selector": true;
         "navigation-item": true;
+        "no-permissions-message": true;
         "notifications-button": true;
         "notifications-count": true;
         "notifications-empty-message": true;

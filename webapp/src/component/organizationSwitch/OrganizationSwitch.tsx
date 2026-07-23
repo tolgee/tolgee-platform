@@ -65,11 +65,22 @@ export const OrganizationSwitch: React.FC<React.PropsWithChildren<Props>> = ({
 
   const isCommunitySurface = selectedSurface === 'community';
 
+  if (!preferredOrganization) {
+    if (!isCommunitySurface) {
+      return null;
+    }
+    return (
+      <Box display="flex" overflow="hidden">
+        <CommunityTranslationItem />
+      </Box>
+    );
+  }
+
   const switchLabel = isCommunitySurface ? (
     <CommunityTranslationItem />
-  ) : preferredOrganization ? (
+  ) : (
     <OrganizationItem data={preferredOrganization} />
-  ) : null;
+  );
 
   return (
     <Box display="flex" data-cy="organization-switch" overflow="hidden">
