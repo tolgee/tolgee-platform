@@ -1,4 +1,10 @@
-import { Checkbox, ListItemText, MenuItem, Divider } from '@mui/material';
+import {
+  Checkbox,
+  ListItemText,
+  MenuItem,
+  Divider,
+  Tooltip,
+} from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
 import { putBaseLangFirst } from 'tg.fixtures/putBaseLangFirst';
@@ -76,16 +82,33 @@ export const getLanguagesContent = ({
   };
 
   const languageItems = languages.map((lang) => (
-    <MenuItem
-      key={lang.tag}
-      value={lang.tag}
-      data-cy="translations-language-select-item"
-      onClick={handleLanguageChange(lang.tag)}
-      disabled={disabledLanguages?.includes(lang.id)}
-    >
-      <Checkbox checked={value?.includes(lang.tag)} size="small" />
-      <ListItemText primary={lang.name} />
-    </MenuItem>
+    <span key={lang.tag} style={{ display: 'inline-block', width: '100%' }}>
+      <MenuItem
+        value={lang.tag}
+        data-cy="translations-language-select-item"
+        onClick={handleLanguageChange(lang.tag)}
+        disabled={disabledLanguages?.includes(lang.id)}
+      >
+        <Checkbox checked={value?.includes(lang.tag)} size="small" />
+        <Tooltip title={lang.name} placement="right" >
+          <ListItemText
+            primary={lang.name}
+            sx={(theme) => ({
+              '& .MuiListItemText-primary': {
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                [theme.breakpoints.down('sm')]: {
+                  whiteSpace: 'normal',
+                  textOverflow: 'unset',
+                  overflow: 'visible',
+                },
+              },
+            })}
+          />
+        </Tooltip>
+      </MenuItem>
+    </span>
   ));
 
   if (isTranslations) {
