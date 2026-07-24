@@ -37,6 +37,11 @@ import kotlin.reflect.full.memberProperties
  * What this does NOT prove: that each allowlisted model is *served only from a correctly gated
  * endpoint*. That binding is documented on each allowlisted model class (the endpoint/scope it may
  * be served from) — honour it when wiring one into a new endpoint.
+ *
+ * Enforcement scope: this guard lives in the EE test module because the full-classpath scan must
+ * run where EE is present to also cover EE response models (e.g. BranchModel). Consequently a build
+ * that runs core (backend/api) tests WITHOUT EE does not run this guard — a core-only fork lacks
+ * this net and must re-add an equivalent core-scoped scan.
  */
 class UsernameDisclosureGuardTest {
   private val allowlistedModels: Set<KClass<*>> =
