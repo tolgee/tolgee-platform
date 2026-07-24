@@ -5,6 +5,7 @@ import io.tolgee.model.batch.BatchJobChunkExecution
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import org.redisson.api.RAtomicLong
+import org.redisson.api.RBatch
 import org.redisson.api.RMap
 import org.redisson.api.RedissonClient
 import java.util.concurrent.ConcurrentHashMap
@@ -45,6 +46,8 @@ open class RedisBatchJobStateStorage(
     private const val REDIS_CANCELLED_COUNT_KEY_PREFIX = "batch_job_cancelled:"
     private const val REDIS_COMMITTED_COUNT_KEY_PREFIX = "batch_job_committed:"
     private const val REDIS_STARTED_KEY_PREFIX = "batch_job_started:"
+
+    private const val CLEANUP_BATCH_SIZE = 100
   }
 
   // Local cache for initialization status - avoids Redis calls for already-initialized jobs
@@ -175,7 +178,7 @@ open class RedisBatchJobStateStorage(
   }
 
   override fun tryMarkJobStarted(jobId: Long): Boolean {
-    val bucket = redissonClient.getBucket<Boolean>("$REDIS_STARTED_KEY_PREFIX$jobId")
+    val bucket = redissonClient.getBucket<Boolean>(startedKey(jobId))
     return bucket.setIfAbsent(true)
   }
 
@@ -192,13 +195,12 @@ open class RedisBatchJobStateStorage(
 
   override fun removeJobState(jobId: Long) {
     logger.debug("Removing job state for job $jobId")
-    removeAllCounters(jobId)
-    val redisHash = getRedisHashForJob(jobId)
-    redisHash.delete()
-    // Also remove initialization and started markers
-    redissonClient.getBucket<Boolean>("$REDIS_STATE_INITIALIZED_KEY_PREFIX$jobId").delete()
-    redissonClient.getBucket<Boolean>("$REDIS_STARTED_KEY_PREFIX$jobId").delete()
-    // Clear local initialization cache to allow re-initialization if jobId is reused
+    val batch = redissonClient.createBatch()
+    addCounterDeletesToBatch(batch, jobId)
+    batch.getMap<Long, ExecutionState>(stateKey(jobId)).deleteAsync()
+    batch.getBucket<Boolean>(initializedKey(jobId)).deleteAsync()
+    batch.getBucket<Boolean>(startedKey(jobId)).deleteAsync()
+    batch.execute()
     localInitializedJobs.remove(jobId)
   }
 
@@ -213,25 +215,52 @@ open class RedisBatchJobStateStorage(
 
   /**
    * Cleans up batch job state hashes where all executions have a completed status.
-   *
-   * This uses HVALS to read all values from each hash. Because [ExecutionState] only
-   * stores lightweight metadata (no successTargets list), each value is ~50 bytes,
-   * making this operation fast even for jobs with thousands of chunks.
    */
   override fun clearUnusedStates() {
-    val keys = redissonClient.keys.getKeysByPattern("$REDIS_STATE_KEY_PREFIX*")
-    keys.forEach { key ->
-      val jobId = key.removePrefix(REDIS_STATE_KEY_PREFIX).toLongOrNull() ?: return@forEach
-      val redisHash = getRedisHashForJob(jobId)
-      val allCompleted = redisHash.readAllValues().all { state -> state.status.completed }
-      if (allCompleted) {
-        redisHash.delete()
-        redissonClient.getBucket<Boolean>("$REDIS_STATE_INITIALIZED_KEY_PREFIX$jobId").delete()
-        // Clear local initialization cache to allow re-initialization if jobId is reused
-        localInitializedJobs.remove(jobId)
-        // Do NOT remove counters here - they're needed until job status is properly updated
-        // Counters will be removed in removeJobState when job is finalized
+    getCachedJobIds().chunked(CLEANUP_BATCH_SIZE).forEach { clearCompletedStates(it) }
+  }
+
+  private fun clearCompletedStates(jobIds: List<Long>) {
+    val completedJobIds =
+      readStates(jobIds).mapNotNull { (jobId, values) ->
+        val allCompleted = values != null && values.all { it.status.completed }
+        jobId.takeIf { allCompleted }
       }
+    if (completedJobIds.isEmpty()) {
+      return
+    }
+
+    // Counters stay live until removeJobState finalizes the job; deleting them here corrupts status updates.
+    val deleteBatch = redissonClient.createBatch()
+    completedJobIds.forEach { jobId ->
+      deleteBatch.getMap<Long, ExecutionState>(stateKey(jobId)).deleteAsync()
+      deleteBatch.getBucket<Boolean>(initializedKey(jobId)).deleteAsync()
+    }
+    deleteBatch.execute()
+    completedJobIds.forEach { localInitializedJobs.remove(it) }
+  }
+
+  private fun readStates(jobIds: List<Long>): Map<Long, Collection<ExecutionState>?> {
+    return try {
+      val readBatch = redissonClient.createBatch()
+      val futures =
+        jobIds.associateWith { jobId ->
+          readBatch.getMap<Long, ExecutionState>(stateKey(jobId)).readAllValuesAsync()
+        }
+      readBatch.execute()
+      futures.mapValues { it.value.get() }
+    } catch (e: Exception) {
+      logger.warn("Pipelined batch-job state read failed; falling back to per-job reads", e)
+      jobIds.associateWith { readStateOrNull(it) }
+    }
+  }
+
+  private fun readStateOrNull(jobId: Long): Collection<ExecutionState>? {
+    return try {
+      getRedisHashForJob(jobId).readAllValues()
+    } catch (e: Exception) {
+      logger.warn("Failed to read batch job state for job $jobId during cleanup", e)
+      null
     }
   }
 
@@ -251,8 +280,14 @@ open class RedisBatchJobStateStorage(
   }
 
   private fun getRedisHashForJob(jobId: Long): RMap<Long, ExecutionState> {
-    return redissonClient.getMap("$REDIS_STATE_KEY_PREFIX$jobId")
+    return redissonClient.getMap(stateKey(jobId))
   }
+
+  private fun stateKey(jobId: Long) = "$REDIS_STATE_KEY_PREFIX$jobId"
+
+  private fun initializedKey(jobId: Long) = "$REDIS_STATE_INITIALIZED_KEY_PREFIX$jobId"
+
+  private fun startedKey(jobId: Long) = "$REDIS_STARTED_KEY_PREFIX$jobId"
 
   /**
    * Ensures Redis hash is initialized from DB. Uses local in-memory cache first for O(1) check,
@@ -270,7 +305,7 @@ open class RedisBatchJobStateStorage(
       return
     }
     // Check Redis marker for cross-instance coordination
-    val initKey = "$REDIS_STATE_INITIALIZED_KEY_PREFIX$jobId"
+    val initKey = initializedKey(jobId)
     if (redissonClient.getBucket<Boolean>(initKey).get() == true) {
       localInitializedJobs.add(jobId)
       return
@@ -295,14 +330,17 @@ open class RedisBatchJobStateStorage(
     }
   }
 
-  private fun removeAllCounters(jobId: Long) {
-    redissonClient.getAtomicLong("$REDIS_RUNNING_COUNT_KEY_PREFIX$jobId").delete()
-    redissonClient.getAtomicLong("$REDIS_COMPLETED_CHUNKS_COUNT_KEY_PREFIX$jobId").delete()
-    redissonClient.getAtomicLong("$REDIS_PROGRESS_COUNT_KEY_PREFIX$jobId").delete()
-    redissonClient.getAtomicLong("$REDIS_SINGLE_CHUNK_PROGRESS_COUNT_KEY_PREFIX$jobId").delete()
-    redissonClient.getAtomicLong("$REDIS_FAILED_COUNT_KEY_PREFIX$jobId").delete()
-    redissonClient.getAtomicLong("$REDIS_CANCELLED_COUNT_KEY_PREFIX$jobId").delete()
-    redissonClient.getAtomicLong("$REDIS_COMMITTED_COUNT_KEY_PREFIX$jobId").delete()
+  private fun addCounterDeletesToBatch(
+    batch: RBatch,
+    jobId: Long,
+  ) {
+    batch.getAtomicLong("$REDIS_RUNNING_COUNT_KEY_PREFIX$jobId").deleteAsync()
+    batch.getAtomicLong("$REDIS_COMPLETED_CHUNKS_COUNT_KEY_PREFIX$jobId").deleteAsync()
+    batch.getAtomicLong("$REDIS_PROGRESS_COUNT_KEY_PREFIX$jobId").deleteAsync()
+    batch.getAtomicLong("$REDIS_SINGLE_CHUNK_PROGRESS_COUNT_KEY_PREFIX$jobId").deleteAsync()
+    batch.getAtomicLong("$REDIS_FAILED_COUNT_KEY_PREFIX$jobId").deleteAsync()
+    batch.getAtomicLong("$REDIS_CANCELLED_COUNT_KEY_PREFIX$jobId").deleteAsync()
+    batch.getAtomicLong("$REDIS_COMMITTED_COUNT_KEY_PREFIX$jobId").deleteAsync()
   }
 
   private fun initializeCountersFromState(
