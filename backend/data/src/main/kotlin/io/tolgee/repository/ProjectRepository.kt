@@ -57,6 +57,17 @@ interface ProjectRepository : JpaRepository<Project, Long> {
         and o.deletedAt is null
         """
 
+    /**
+     * The exact inverse of `UserAccountRepository.getAllInProject`
+     */
+    const val NON_MEMBER_CONTRIBUTOR_FILTER = """
+        p is null and role is null
+        and exists (
+            select 1 from ProjectContributor pc
+            where pc.projectId = r.id and pc.userId = :userAccountId
+        )
+        """
+
     /** `r.deletedAt`/`o.deletedAt` sit top-level so they also guard the permission branch, which [PUBLIC_PROJECT_VISIBILITY] does not. */
     const val BELOW_MEMBER_ACCESSIBLE_PROJECT = """
         (
@@ -136,12 +147,14 @@ interface ProjectRepository : JpaRepository<Project, Long> {
             :search is null or (lower(r.name) like lower(concat('%', cast(:search as text), '%'))
             or lower(o.name) like lower(concat('%', cast(:search as text),'%')))
         )
+        and (:filterContributed = false or ($NON_MEMBER_CONTRIBUTOR_FILTER))
     """,
   )
   fun findAllPublic(
     userAccountId: Long,
     pageable: Pageable,
     @Param("search") search: String? = null,
+    @Param("filterContributed") filterContributed: Boolean = false,
   ): Page<ProjectView>
 
   @Query(
@@ -153,6 +166,22 @@ interface ProjectRepository : JpaRepository<Project, Long> {
     """,
   )
   fun hasPublicProjects(organizationId: Long): Boolean
+
+  // Membership inverse: see [NON_MEMBER_CONTRIBUTOR_FILTER].
+  @Query(
+    """
+      select count(pc) > 0 from ProjectContributor pc
+      join Project r on r.id = pc.projectId
+      left join r.baseLanguage bl
+      left join r.organizationOwner o
+      left join Permission p on p.project = r and p.user.id = :userAccountId
+      left join OrganizationRole role on role.organization = o and role.user.id = :userAccountId
+      where pc.userId = :userAccountId
+        and $PUBLIC_PROJECT_VISIBILITY
+        and p is null and role is null
+    """,
+  )
+  fun hasNonMemberPublicContribution(userAccountId: Long): Boolean
 
   @Query(
     """select r.id from Project r
