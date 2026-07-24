@@ -103,6 +103,8 @@ class SecurityService(
   }
 
   fun shouldExposeMemberCount(): Boolean {
+    // Order matters: off-request (e.g. @Async broadcasts) projectHolder.projectOrNull throws, so the
+    // request-scope check must short-circuit first.
     if (RequestContextHolder.getRequestAttributes() == null) return true
     if (projectHolder.projectOrNull == null) return true
     return currentPermittedScopesContain(Scope.MEMBERS_VIEW)
