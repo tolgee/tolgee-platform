@@ -339,6 +339,11 @@ jobs:
         run: npm test
         working-directory: ./webapp
 
+  # Runs the webapp unit suite with src/ee removed, so any unit test that
+  # reaches ee code through the tg.ee alias is exercised against the OSS stub
+  # (eeModule.oss) instead of the real ee module. Today no unit test does, so
+  # this only guards future ee-consuming tests; OSS type/build resolution is
+  # covered separately by frontend-code-check's "builds without ee directory".
   frontend-test-without-ee:
     name: Frontend unit tests without ee 🧪
     runs-on: ubuntu-24.04
