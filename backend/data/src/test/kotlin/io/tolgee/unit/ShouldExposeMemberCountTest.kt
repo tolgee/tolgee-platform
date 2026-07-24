@@ -7,9 +7,9 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
-class MemberInfoMaskingTest {
+class ShouldExposeMemberCountTest {
   @Test
-  fun `shouldExposeMemberInfo is true off-request without touching the project holder`() {
+  fun `shouldExposeMemberCount is true off-request without touching the project holder`() {
     val projectHolder =
       mock<ProjectHolder> {
         whenever(it.projectOrNull).thenThrow(IllegalStateException("project holder must not be read off-request"))
@@ -17,6 +17,6 @@ class MemberInfoMaskingTest {
     val securityService =
       SecurityService(mock(), mock(), mock(), projectHolder = projectHolder, branchService = mock())
 
-    assertThat(securityService.shouldExposeMemberInfo()).isTrue()
+    assertThat(securityService.shouldExposeMemberCount()).isTrue()
   }
 }
