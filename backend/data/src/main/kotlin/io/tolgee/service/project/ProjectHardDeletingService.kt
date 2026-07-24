@@ -117,6 +117,10 @@ class ProjectHardDeletingService(
 
       labelService.deleteLabelsByProjectId(projectId)
 
+      traceLogMeasureTime("deleteProject: delete tasks") {
+        deleteTasks(projectId)
+      }
+
       traceLogMeasureTime("deleteProject: delete languages") {
         languageService.deleteAllByProject(projectId)
       }
@@ -211,6 +215,29 @@ class ProjectHardDeletingService(
         .setParameter("projectId", projectId)
         .executeUpdate()
     }
+  }
+
+  private fun deleteTasks(projectId: Long) {
+    val projectTaskIds = "SELECT t.id FROM Task t WHERE t.project.id = :projectId"
+    // notification.linked_task_id -> task.id is RESTRICT, so task-linked notifications must go first.
+    entityManager
+      .createQuery("DELETE FROM Notification n WHERE n.project.id = :projectId OR n.linkedTask.id IN ($projectTaskIds)")
+      .setParameter("projectId", projectId)
+      .executeUpdate()
+    // task_assignees is a @ManyToMany join table with no entity, so it can only be cleared via native SQL.
+    entityManager
+      .createNativeQuery(
+        "delete from task_assignees where tasks_id in (select id from task where project_id = :projectId)",
+      ).setParameter("projectId", projectId)
+      .executeUpdate()
+    entityManager
+      .createQuery("DELETE FROM TaskKey tk WHERE tk.task.id IN ($projectTaskIds)")
+      .setParameter("projectId", projectId)
+      .executeUpdate()
+    entityManager
+      .createQuery("DELETE FROM Task t WHERE t.project.id = :projectId")
+      .setParameter("projectId", projectId)
+      .executeUpdate()
   }
 
   @TransactionalEventListener(phase = TransactionPhase.AFTER_COMPLETION)

@@ -14,12 +14,14 @@ import io.tolgee.development.testDataBuilder.data.ContentDeliveryConfigTestData
 import io.tolgee.development.testDataBuilder.data.MtSettingsTestData
 import io.tolgee.development.testDataBuilder.data.ProjectWithQaEntitiesTestData
 import io.tolgee.development.testDataBuilder.data.SuggestionsTestData
+import io.tolgee.development.testDataBuilder.data.TaskTestData
 import io.tolgee.development.testDataBuilder.data.WebhooksTestData
 import io.tolgee.dtos.BigMetaDto
 import io.tolgee.dtos.RelatedKeyDto
 import io.tolgee.fixtures.waitFor
 import io.tolgee.model.Project
 import io.tolgee.model.key.Namespace
+import io.tolgee.repository.notification.NotificationRepository
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.testing.assert
 import io.tolgee.util.executeInNewRepeatableTransaction
@@ -41,6 +43,9 @@ class ProjectHardDeletingServiceTest : AbstractSpringTest() {
   private lateinit var projectHardDeletingService: ProjectHardDeletingService
 
   private var testDataToClean: BaseTestData? = null
+
+  @Autowired
+  private lateinit var notificationRepository: NotificationRepository
 
   @AfterEach
   fun cleanTestDataAfterTest() {
@@ -213,6 +218,32 @@ class ProjectHardDeletingServiceTest : AbstractSpringTest() {
             .singleResult as Number
         ).toLong()
       remaining.assert.isEqualTo(0)
+    }
+  }
+
+  @Test
+  fun `deletes project with tasks`() {
+    val testData = TaskTestData()
+    testDataToClean = testData
+    testData.addNotifications()
+    testDataService.saveTestData(testData.root)
+    val taskNotificationId = testData.taskNotification.self.id
+    val projectNotificationId = testData.projectNotification.self.id
+
+    io.tolgee.util.executeInNewTransaction(platformTransactionManager) {
+      projectHardDeletingService.hardDeleteProject(testData.projectBuilder.self.refresh())
+    }
+
+    executeInNewTransaction {
+      projectService.find(testData.projectBuilder.self.id).assert.isNull()
+      notificationRepository
+        .findById(taskNotificationId)
+        .isPresent.assert
+        .isFalse()
+      notificationRepository
+        .findById(projectNotificationId)
+        .isPresent.assert
+        .isFalse()
     }
   }
 
