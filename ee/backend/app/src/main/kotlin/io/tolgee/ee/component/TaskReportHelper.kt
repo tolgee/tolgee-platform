@@ -29,7 +29,7 @@ class TaskReportHelper(
   }
 
   fun formatUserName(user: UserAccount): String {
-    return user.name
+    return user.name.ifBlank { "#${user.id}" }
   }
 
   fun capitalize(text: String): String {

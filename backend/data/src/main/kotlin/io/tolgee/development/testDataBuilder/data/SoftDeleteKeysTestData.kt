@@ -13,6 +13,8 @@ class SoftDeleteKeysTestData :
 
   init {
     root.apply {
+      user.name = "Soft Delete User"
+
       val user2Builder =
         addUserAccount {
           username = "soft-delete-keys-user2"

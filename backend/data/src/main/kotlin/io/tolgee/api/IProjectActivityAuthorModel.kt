@@ -5,7 +5,7 @@ import io.tolgee.dtos.Avatar
 interface IProjectActivityAuthorModel {
   val id: Long
 
-  @Deprecated("A user's username (their e-mail) is only disclosed on the project members list.")
+  @Deprecated(USERNAME_FIELD_DEPRECATION)
   val username: String?
   var name: String?
   var avatar: Avatar?

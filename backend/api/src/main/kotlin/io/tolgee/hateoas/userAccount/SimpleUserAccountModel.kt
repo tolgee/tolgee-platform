@@ -1,6 +1,7 @@
 package io.tolgee.hateoas.userAccount
 
 import io.swagger.v3.oas.annotations.media.Schema
+import io.tolgee.api.USERNAME_FIELD_DEPRECATION
 import io.tolgee.dtos.Avatar
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
@@ -12,13 +13,8 @@ data class SimpleUserAccountModel(
   var avatar: Avatar?,
   var deleted: Boolean,
 ) : RepresentationModel<SimpleUserAccountModel>() {
-  @Deprecated("A user's username (their e-mail) is only disclosed on the project members list.")
+  @Deprecated(USERNAME_FIELD_DEPRECATION)
   @Suppress("unused")
-  @get:Schema(
-    deprecated = true,
-    description =
-      "Deprecated: always empty. A user's username (their e-mail) is disclosed only " +
-        "on the project members list, never on author/actor references like this one.",
-  )
+  @get:Schema(deprecated = true, description = USERNAME_FIELD_DEPRECATION)
   val username: String = ""
 }

@@ -1402,7 +1402,7 @@ export interface components {
       userFullName?: string;
       /**
        * @deprecated
-       * @description Deprecated: always empty. A user's username (their e-mail) is disclosed only on the project members list, never as an API key's owner reference.
+       * @description Deprecated: always empty. A user's username (their e-mail) is returned only on member and admin listings and on the user's own account, never where a user is merely referenced (author, actor, key owner).
        */
       username?: string;
     };
@@ -5265,7 +5265,7 @@ export interface components {
       name?: string;
       /**
        * @deprecated
-       * @description Deprecated: always empty. A user's username (their e-mail) is disclosed only on the project members list, never on activity author references.
+       * @description Deprecated: always empty. A user's username (their e-mail) is returned only on member and admin listings and on the user's own account, never where a user is merely referenced (author, actor, key owner).
        */
       username?: string;
     };
@@ -6580,7 +6580,7 @@ export interface components {
       name?: string;
       /**
        * @deprecated
-       * @description Deprecated: always empty. A user's username (their e-mail) is disclosed only on the project members list, never on author/actor references like this one.
+       * @description Deprecated: always empty. A user's username (their e-mail) is returned only on member and admin listings and on the user's own account, never where a user is merely referenced (author, actor, key owner).
        */
       username: string;
     };

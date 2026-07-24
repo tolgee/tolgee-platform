@@ -34,6 +34,14 @@ data class UserAccount(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   override var id: Long = 0L,
+  /**
+   * A user's e-mail. Disclosing it to another user is a privacy leak, so a response model may carry
+   * it ONLY on these allowlisted surfaces: `UserAccountInProjectModel` (project members list),
+   * `UserAccountWithOrganizationRoleModel` (org members list), `PrivateUserAccountModel` (self),
+   * `UserAccountModel` (instance-admin user management), and the admin-only project export `UserRef`.
+   * Every other user reference (author/actor/owner) must leave the response model's username empty —
+   * see `SimpleUserAccountModel` / `ProjectActivityAuthorModel` / `ApiKeyModel`, which hard-empty it.
+   */
   @field:NotBlank
   override var username: String = "",
   var password: String? = null,

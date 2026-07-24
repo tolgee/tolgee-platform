@@ -103,8 +103,8 @@ class SecurityService(
   }
 
   fun shouldExposeMemberInfo(): Boolean {
-    // Off-request threads (e.g. @Async activity-websocket broadcasts) have no request scope, where
-    // reading projectHolder.projectOrNull throws; there is also no caller whose scope could gate this.
+    // Defensive: without a request scope reading projectHolder.projectOrNull throws, and without a
+    // project in scope there is no caller whose MEMBERS_VIEW could gate this — so default to exposing.
     if (RequestContextHolder.getRequestAttributes() == null) return true
     if (projectHolder.projectOrNull == null) return true
     return currentPermittedScopesContain(Scope.MEMBERS_VIEW)

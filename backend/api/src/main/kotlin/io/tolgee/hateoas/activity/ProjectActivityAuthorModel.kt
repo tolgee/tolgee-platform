@@ -2,6 +2,7 @@ package io.tolgee.hateoas.activity
 
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.api.IProjectActivityAuthorModel
+import io.tolgee.api.USERNAME_FIELD_DEPRECATION
 import io.tolgee.dtos.Avatar
 import org.springframework.hateoas.RepresentationModel
 
@@ -12,12 +13,7 @@ data class ProjectActivityAuthorModel(
   override var deleted: Boolean,
 ) : RepresentationModel<ProjectActivityAuthorModel>(),
   IProjectActivityAuthorModel {
-  @Deprecated("A user's username (their e-mail) is only disclosed on the project members list.")
-  @get:Schema(
-    deprecated = true,
-    description =
-      "Deprecated: always empty. A user's username (their e-mail) is disclosed only " +
-        "on the project members list, never on activity author references.",
-  )
+  @Deprecated(USERNAME_FIELD_DEPRECATION)
+  @get:Schema(deprecated = true, description = USERNAME_FIELD_DEPRECATION)
   override val username: String? = ""
 }
