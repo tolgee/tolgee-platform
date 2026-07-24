@@ -10,6 +10,9 @@ export const useUser = () => useGlobalContext((c) => c.initialData.userInfo);
 export const useIsEmailVerified = () =>
   useGlobalContext((c) => c.isEmailVerified);
 
+export const useHasCommunityContributions = () =>
+  useGlobalContext((c) => Boolean(c.initialData.hasCommunityContributions));
+
 export const useEmailAwaitingVerification = () =>
   useGlobalContext((c) => c.initialData.userInfo?.emailAwaitingVerification);
 

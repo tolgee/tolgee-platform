@@ -31,4 +31,17 @@ interface ProjectContributorRepository : Repository<ProjectContributor, ProjectC
     projectId: Long,
     pageable: Pageable,
   ): Page<ProjectContributorView>
+
+  @Query(
+    """
+      select count(r) > 0 from Project r
+      left join r.baseLanguage bl
+      left join r.organizationOwner o
+      left join Permission p on p.project = r and p.user.id = :userAccountId
+      left join OrganizationRole role on role.organization = o and role.user.id = :userAccountId
+      where ${ProjectRepository.PUBLIC_PROJECT_VISIBILITY}
+        and ${ProjectRepository.NON_MEMBER_CONTRIBUTOR_FILTER}
+    """,
+  )
+  fun hasNonMemberPublicContribution(userAccountId: Long): Boolean
 }

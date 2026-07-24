@@ -21,6 +21,10 @@ export const ssoOrganizationsLoginTestData = generateTestDataObject(
 
 export const organizationTestData = generateTestDataObject('organizations');
 
+export const communityContributionData = generateTestDataObject(
+  'community-contribution'
+);
+
 export const organizationNewTestData =
   generateTestDataObject('organization-new');
 
