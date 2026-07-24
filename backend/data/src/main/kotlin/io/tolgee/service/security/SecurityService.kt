@@ -102,11 +102,6 @@ class SecurityService(
     return getCurrentPermittedScopes(projectHolder.project.id).containsAll(scopes)
   }
 
-  fun maskedMemberField(value: String?): String {
-    if (shouldExposeMemberInfo()) return value ?: ""
-    return ""
-  }
-
   fun shouldExposeMemberInfo(): Boolean {
     // Off-request threads (e.g. @Async activity-websocket broadcasts) have no request scope, where
     // reading projectHolder.projectOrNull throws; there is also no caller whose scope could gate this.

@@ -9,7 +9,7 @@ import org.mockito.kotlin.whenever
 
 class MemberInfoMaskingTest {
   @Test
-  fun `maskedMemberField exposes the value off-request without touching the project holder`() {
+  fun `shouldExposeMemberInfo is true off-request without touching the project holder`() {
     val projectHolder =
       mock<ProjectHolder> {
         whenever(it.projectOrNull).thenThrow(IllegalStateException("project holder must not be read off-request"))
@@ -18,6 +18,5 @@ class MemberInfoMaskingTest {
       SecurityService(mock(), mock(), mock(), projectHolder = projectHolder, branchService = mock())
 
     assertThat(securityService.shouldExposeMemberInfo()).isTrue()
-    assertThat(securityService.maskedMemberField("translator@test.com")).isEqualTo("translator@test.com")
   }
 }

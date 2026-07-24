@@ -12,8 +12,14 @@ open class ApiKeyModel(
   override val id: Long,
   @Schema(description = "Description")
   override val description: String,
-  @Schema(description = "Username of user owner")
-  override var username: String? = null,
+  @Deprecated("A user's username (their e-mail) is only disclosed on the project members list.")
+  @Schema(
+    deprecated = true,
+    description =
+      "Deprecated: always empty. A user's username (their e-mail) is disclosed only " +
+        "on the project members list, never as an API key's owner reference.",
+  )
+  override var username: String? = "",
   @Schema(description = "Full name of user owner")
   override var userFullName: String? = null,
   @Schema(description = "Api key's project ID")

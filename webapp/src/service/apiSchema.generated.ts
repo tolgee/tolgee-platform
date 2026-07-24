@@ -1400,7 +1400,10 @@ export interface components {
       scopes: string[];
       /** @description Full name of user owner */
       userFullName?: string;
-      /** @description Username of user owner */
+      /**
+       * @deprecated
+       * @description Deprecated: always empty. A user's username (their e-mail) is disclosed only on the project members list, never as an API key's owner reference.
+       */
       username?: string;
     };
     ApiKeyPermissionsModel: {
@@ -5260,6 +5263,10 @@ export interface components {
       /** Format: int64 */
       id: number;
       name?: string;
+      /**
+       * @deprecated
+       * @description Deprecated: always empty. A user's username (their e-mail) is disclosed only on the project members list, never on activity author references.
+       */
       username?: string;
     };
     ProjectActivityModel: {
@@ -6571,6 +6578,10 @@ export interface components {
       /** Format: int64 */
       id: number;
       name?: string;
+      /**
+       * @deprecated
+       * @description Deprecated: always empty. A user's username (their e-mail) is disclosed only on the project members list, never on author/actor references like this one.
+       */
       username: string;
     };
     SingleStepImportRequest: {
