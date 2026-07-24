@@ -354,8 +354,8 @@ jobs:
         run: npm ci
         working-directory: ./library
 
-      # Remove ee before installing webapp deps so the prepare lifecycle hook
-      # (prepareEe.js) points the tg.ee symlink at the OSS stub module.
+      # Remove ee before installing webapp deps so the prepare hook (prepareEe.js)
+      # links the OSS stub (eeModule.current -> eeModule.oss) instead of the ee module.
       - name: Remove ee
         run: rm -rf ./src/ee
         working-directory: ./webapp
