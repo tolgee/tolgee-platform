@@ -34,10 +34,7 @@ data class UserAccount(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   override var id: Long = 0L,
-  /**
-   * A user's e-mail; exposed only on the allowlisted models in `UsernameDisclosureGuard` (plus the
-   * admin-only project export). Every other user reference must leave the response username empty.
-   */
+  /** A user's e-mail, not a handle. */
   @field:NotBlank
   override var username: String = "",
   var password: String? = null,

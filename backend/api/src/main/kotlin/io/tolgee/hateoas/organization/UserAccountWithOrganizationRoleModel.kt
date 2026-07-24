@@ -6,7 +6,6 @@ import io.tolgee.model.enums.OrganizationRoleType
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
 
-/** Discloses the user's e-mail; an allowlisted disclosure surface — see `UsernameDisclosureGuard.allowlistedModelNames`. */
 @Relation(collectionRelation = "usersInOrganization", itemRelation = "userAccount")
 data class UserAccountWithOrganizationRoleModel(
   val id: Long,

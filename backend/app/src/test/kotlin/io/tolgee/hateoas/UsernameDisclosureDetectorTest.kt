@@ -4,13 +4,8 @@ import io.tolgee.testing.security.UsernameDisclosureGuard
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-/**
- * Exercises the guard's offender predicate directly, so the true-branch (a model that DOES leak) is
- * covered — the two entrypoint scans only ever see stripped models and would stay green if the
- * predicate were silently neutered. Fixtures are plain classes, NOT RepresentationModel subtypes, so
- * the real classpath scan ignores them.
- */
 class UsernameDisclosureDetectorTest {
+  // Plain classes (NOT RepresentationModel) so the guard's real classpath scan ignores them.
   private class UsernameViaConstructor(
     val username: String,
   )

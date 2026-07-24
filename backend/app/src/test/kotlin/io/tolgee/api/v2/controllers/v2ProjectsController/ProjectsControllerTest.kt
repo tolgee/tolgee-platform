@@ -190,7 +190,6 @@ class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
         it.node("[0].organizationRole").isEqualTo("MEMBER")
         it.node("[1].organizationRole").isEqualTo("OWNER")
         it.node("[2].directPermission.scopes").isPermissionScopes(ProjectPermissionType.TRANSLATE)
-        // Allowlisted surface: must keep exposing the e-mail (do not "fix" this to expect "").
         it.node("[2].username").isEqualTo(directPermissionUser.username)
         it
           .node("[2].computedPermission.permittedLanguageIds")

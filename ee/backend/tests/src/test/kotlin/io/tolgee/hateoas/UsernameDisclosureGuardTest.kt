@@ -3,7 +3,6 @@ package io.tolgee.hateoas
 import io.tolgee.testing.security.UsernameDisclosureGuard
 import org.junit.jupiter.api.Test
 
-/** EE entrypoint for [UsernameDisclosureGuard]: also scans EE models and anchors an EE model (BranchModel). */
 class UsernameDisclosureGuardTest {
   @Test
   fun `no non-allowlisted response model can carry a username`() {

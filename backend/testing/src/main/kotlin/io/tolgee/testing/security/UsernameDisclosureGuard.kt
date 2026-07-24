@@ -8,14 +8,10 @@ import kotlin.reflect.KMutableProperty
 import kotlin.reflect.full.memberProperties
 
 /**
- * Enforces that a user's `username` (their e-mail) is disclosed only on allowlisted response models;
- * every other user-referencing model must strip it. Run from a core entrypoint (`:server-app`, built
- * in every build) and an EE entrypoint. Blind spots a maintainer must know: only `RepresentationModel`
- * subtypes are scanned (keep user responses on `RepresentationModel`); a `val` derived from a
- * differently-named field, or a differently-named property serialized to JSON `username`, is not seen.
+ * Only `RepresentationModel` subtypes are scanned; a plain data class used as a response body is not
+ * covered — keep user-referencing responses on `RepresentationModel`.
  */
 object UsernameDisclosureGuard {
-  /** Models that intentionally disclose username. Single source of truth; each carries its endpoint + gate. */
   val allowlistedModelNames: Set<String> =
     setOf(
       "io.tolgee.hateoas.userAccount.UserAccountInProjectModel", // project members — MEMBERS_VIEW + super-auth
@@ -24,7 +20,6 @@ object UsernameDisclosureGuard {
       "io.tolgee.hateoas.userAccount.UserAccountModel", // instance-admin — super-auth
     )
 
-  /** Known-stripped core models in three hateoas packages, anchored so the scan is proven to reach models it polices. */
   val corePolicedModelNames: Set<String> =
     setOf(
       "io.tolgee.hateoas.userAccount.SimpleUserAccountModel",
@@ -32,10 +27,6 @@ object UsernameDisclosureGuard {
       "io.tolgee.hateoas.activity.ProjectActivityAuthorModel",
     )
 
-  /**
-   * True when `username` is settable — a constructor parameter, or a `var` property an assembler
-   * could assign after construction. An immutable `val username = ""` body property is not settable.
-   */
   fun hasSettableUsername(model: KClass<*>): Boolean {
     val usernameProperty =
       runCatching { model.memberProperties.firstOrNull { it.name == "username" } }

@@ -64,7 +64,6 @@ class AdministrationControllerTest : AuthorizedControllerTest() {
         isArray.hasSizeGreaterThan(1)
         node("[0]") {
           node("name").isEqualTo("John User")
-          // Allowlisted surface: must keep exposing the e-mail (do not "fix" this to expect "").
           node("username").isEqualTo("user@user.com")
         }
       }

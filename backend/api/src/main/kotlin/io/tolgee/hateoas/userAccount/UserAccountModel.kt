@@ -5,7 +5,6 @@ import io.tolgee.model.UserAccount
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
 
-/** Discloses the user's e-mail; an allowlisted disclosure surface — see `UsernameDisclosureGuard.allowlistedModelNames`. */
 @Relation(collectionRelation = "users", itemRelation = "user")
 data class UserAccountModel(
   val id: Long,
