@@ -14,10 +14,10 @@ import kotlin.reflect.full.memberProperties
 object UsernameDisclosureGuard {
   val allowlistedModelNames: Set<String> =
     setOf(
-      "io.tolgee.hateoas.userAccount.UserAccountInProjectModel", // project members — MEMBERS_VIEW + super-auth
-      "io.tolgee.hateoas.organization.UserAccountWithOrganizationRoleModel", // org members — org-role
-      "io.tolgee.hateoas.userAccount.PrivateUserAccountModel", // self — GET /v2/user
-      "io.tolgee.hateoas.userAccount.UserAccountModel", // instance-admin — super-auth
+      "io.tolgee.hateoas.userAccount.UserAccountInProjectModel",
+      "io.tolgee.hateoas.organization.UserAccountWithOrganizationRoleModel",
+      "io.tolgee.hateoas.userAccount.PrivateUserAccountModel",
+      "io.tolgee.hateoas.userAccount.UserAccountModel",
     )
 
   val corePolicedModelNames: Set<String> =
