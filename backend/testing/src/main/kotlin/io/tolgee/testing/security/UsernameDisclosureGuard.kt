@@ -47,6 +47,18 @@ object UsernameDisclosureGuard {
       "io.tolgee.hateoas.userAccount.UserAccountModel",
     )
 
+  /**
+   * Known-stripped CORE models, in three distinct hateoas packages. Passed as anchors so the
+   * anti-vacuous check proves the scan actually reached models the offender loop *policies* (not
+   * only the allowlisted ones it skips). Always on the core classpath.
+   */
+  val corePolicedModelNames: Set<String> =
+    setOf(
+      "io.tolgee.hateoas.userAccount.SimpleUserAccountModel",
+      "io.tolgee.hateoas.apiKey.ApiKeyModel",
+      "io.tolgee.hateoas.activity.ProjectActivityAuthorModel",
+    )
+
   fun assertNoLeak(requiredAnchorClassNames: Set<String>) {
     val representationModel = Class.forName("org.springframework.hateoas.RepresentationModel")
     val scanner = ClassPathScanningCandidateComponentProvider(false)
