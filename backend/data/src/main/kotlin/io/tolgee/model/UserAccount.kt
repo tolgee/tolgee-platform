@@ -39,7 +39,7 @@ data class UserAccount(
    * only on a small allowlist of surfaces (members lists, self, instance-admin user management) plus
    * the admin-only project export; every other user reference (author/actor/owner) must leave the
    * response model's username empty. The allowlist and its enforcement live in
-   * `UsernameDisclosureGuardTest` (which runs with the EE test module).
+   * `UsernameDisclosureGuard` (run from both a core and an EE test entrypoint).
    */
   @field:NotBlank
   override var username: String = "",
