@@ -3,7 +3,7 @@ package io.tolgee.controllers.internal.e2eData
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.controllers.internal.InternalController
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
-import io.tolgee.development.testDataBuilder.data.ContributorsTestData
+import io.tolgee.development.testDataBuilder.data.MembersCommunityE2eData
 import io.tolgee.model.activity.ActivityRevision
 import jakarta.persistence.EntityManager
 import org.springframework.beans.factory.annotation.Autowired
@@ -17,10 +17,10 @@ class MembersCommunityE2eDataController : AbstractE2eDataController() {
   @Autowired
   private lateinit var currentDateProvider: CurrentDateProvider
 
-  private lateinit var data: ContributorsTestData
+  private lateinit var data: MembersCommunityE2eData
 
   override val testData: TestDataBuilder
-    get() = ContributorsTestData().also { data = it }.root
+    get() = MembersCommunityE2eData().also { data = it }.root
 
   override fun afterTestDataStored(data: TestDataBuilder) {
     try {

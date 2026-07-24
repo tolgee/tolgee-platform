@@ -9,8 +9,6 @@ import java.util.Date
 
 class ContributorsTestData {
   lateinit var project: Project
-  lateinit var publicProject: Project
-  lateinit var publicEmptyProject: Project
   lateinit var admin: UserAccount
   lateinit var contributor: UserAccount
   lateinit var contributor2: UserAccount
@@ -66,18 +64,6 @@ class ContributorsTestData {
             user = member
             type = ProjectPermissionType.VIEW
           }
-        }.self
-
-      publicProject =
-        addProject(organizationOwner = adminBuilder.defaultOrganizationBuilder.self) {
-          name = "Contributors public project"
-          public = true
-        }.self
-
-      publicEmptyProject =
-        addProject(organizationOwner = adminBuilder.defaultOrganizationBuilder.self) {
-          name = "Contributors public empty project"
-          public = true
         }.self
     }
 }
