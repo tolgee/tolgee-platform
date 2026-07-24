@@ -19,9 +19,9 @@ describe('Community tab on the Members page', () => {
     membersCommunityData.generateStandard().then((res) => {
       const project = getProjectByNameFromTestData(
         res.body,
-        'Members Community Public'
+        'Contributors public project'
       );
-      login('membersCommunityAdmin');
+      login('admin@contributors.com');
       visitProjectMembers(project.id);
       waitForGlobalLoading();
 
@@ -50,8 +50,8 @@ describe('Community tab on the Members page', () => {
         .should('be.visible')
         .and('contain', '2021');
 
-      cy.contains('cora.contributor@example.com').should('not.exist');
-      cy.contains('cody.contributor@example.com').should('not.exist');
+      cy.contains('contributor@contributors.com').should('not.exist');
+      cy.contains('contributor2@contributors.com').should('not.exist');
 
       gcy('project-members-tab-team').click();
       gcy('project-member-item').should('be.visible');
@@ -63,9 +63,9 @@ describe('Community tab on the Members page', () => {
     membersCommunityData.generateStandard().then((res) => {
       const project = getProjectByNameFromTestData(
         res.body,
-        'Members Community Public Empty'
+        'Contributors public empty project'
       );
-      login('membersCommunityAdmin');
+      login('admin@contributors.com');
       visitProjectMembers(project.id);
       waitForGlobalLoading();
 
@@ -79,9 +79,9 @@ describe('Community tab on the Members page', () => {
     membersCommunityData.generateStandard().then((res) => {
       const project = getProjectByNameFromTestData(
         res.body,
-        'Members Community Private'
+        'Contributors project'
       );
-      login('membersCommunityAdmin');
+      login('admin@contributors.com');
       visitProjectMembers(project.id);
       waitForGlobalLoading();
 
