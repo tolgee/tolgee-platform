@@ -5,6 +5,11 @@ import io.tolgee.model.UserAccount
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
 
+/**
+ * Discloses the user's e-mail (`username`). Allowlisted in `UsernameDisclosureGuardTest`. Served
+ * only by instance-admin user management (`AdministrationController`, `@RequiresSuperAuthentication`).
+ * Do not return this model from a less-gated endpoint — that would leak the e-mail.
+ */
 @Relation(collectionRelation = "users", itemRelation = "user")
 data class UserAccountModel(
   val id: Long,

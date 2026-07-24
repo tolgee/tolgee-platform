@@ -9,6 +9,12 @@ import io.tolgee.model.enums.OrganizationRoleType
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
 
+/**
+ * Discloses the user's e-mail (`username`). Allowlisted in `UsernameDisclosureGuardTest`. Served
+ * only by the project members list (`GET /v2/projects/{id}/users`,
+ * `@RequiresProjectPermissions([MEMBERS_VIEW])` + `@RequiresSuperAuthentication`). Do not return
+ * this model from a less-gated endpoint — that would leak the e-mail.
+ */
 @Relation(collectionRelation = "users", itemRelation = "user")
 data class UserAccountInProjectModel(
   val id: Long,

@@ -66,7 +66,7 @@ class AdministrationControllerTest : AuthorizedControllerTest() {
           node("name").isEqualTo("John User")
           // Instance-admin user management is an allowlisted surface that must keep exposing username
           // (the e-mail), unlike author/actor references where it is stripped to "".
-          node("username").isString.hasSizeGreaterThan(0)
+          node("username").isEqualTo("user@user.com")
         }
       }
     }

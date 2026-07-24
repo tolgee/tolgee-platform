@@ -187,12 +187,12 @@ class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       .node("_embedded.users")
       .let {
         it.isArray.hasSize(3)
-        // The members list is the allowlisted surface that must keep exposing username (the e-mail),
-        // unlike author/actor references where it is stripped to "".
-        it.node("[0].username").isString.hasSizeGreaterThan(0)
         it.node("[0].organizationRole").isEqualTo("MEMBER")
         it.node("[1].organizationRole").isEqualTo("OWNER")
         it.node("[2].directPermission.scopes").isPermissionScopes(ProjectPermissionType.TRANSLATE)
+        // The members list is the allowlisted surface that must keep exposing username (the e-mail),
+        // unlike author/actor references where it is stripped to "".
+        it.node("[2].username").isEqualTo(directPermissionUser.username)
         it
           .node("[2].computedPermission.permittedLanguageIds")
           .isArray

@@ -30,17 +30,24 @@ import kotlin.reflect.full.memberProperties
  * the guard cannot see reflectively: a `val` derived from a differently-named constructor field
  * (`val username = email`); that is not reachable by any assembler through the `username` name and
  * is not the pattern this codebase uses.
+ *
+ * Coverage boundary: this scans `RepresentationModel` response types only. A plain data class used
+ * as a response body would not be seen — so keep user-referencing responses on `RepresentationModel`.
+ *
+ * What this does NOT prove: that each allowlisted model is *served only from a correctly gated
+ * endpoint*. That binding is documented on each allowlisted model class (the endpoint/scope it may
+ * be served from) — honour it when wiring one into a new endpoint.
  */
 class UsernameDisclosureGuardTest {
   private val allowlistedModels: Set<KClass<*>> =
     setOf(
-      // project members list
+      // project members list — GET /v2/projects/{id}/users, MEMBERS_VIEW + super-auth
       UserAccountInProjectModel::class,
-      // org members list
+      // org members list — GET /v2/organizations/{id}/users, org-role gated
       UserAccountWithOrganizationRoleModel::class,
-      // self ("me")
+      // self ("me") — GET /v2/user, the caller's own e-mail
       PrivateUserAccountModel::class,
-      // instance-admin user management
+      // instance-admin user management — AdministrationController, super-auth
       UserAccountModel::class,
     )
 

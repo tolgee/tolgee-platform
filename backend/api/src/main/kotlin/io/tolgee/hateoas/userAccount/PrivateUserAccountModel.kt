@@ -6,6 +6,11 @@ import io.tolgee.model.enums.ThirdPartyAuthType
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
 
+/**
+ * The caller's OWN account (`GET /v2/user`), so `username` is the caller's own e-mail — self
+ * disclosure, not disclosure to another user. Allowlisted in `UsernameDisclosureGuardTest`. Do not
+ * reuse this model to represent a different user.
+ */
 @Relation(collectionRelation = "users", itemRelation = "user")
 data class PrivateUserAccountModel(
   val id: Long,
