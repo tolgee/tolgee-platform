@@ -2,6 +2,7 @@ package io.tolgee.service.contributor
 
 import io.tolgee.model.views.ProjectContributorView
 import io.tolgee.repository.ProjectContributorRepository
+import io.tolgee.repository.ProjectRepository
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
@@ -11,12 +12,17 @@ import org.springframework.stereotype.Service
 @Service
 class ProjectContributorService(
   private val projectContributorRepository: ProjectContributorRepository,
+  private val projectRepository: ProjectRepository,
 ) {
   fun getContributors(
     projectId: Long,
     pageable: Pageable,
   ): Page<ProjectContributorView> {
     return projectContributorRepository.findContributors(projectId, withTotalOrder(pageable))
+  }
+
+  fun hasCommunityContributions(userId: Long): Boolean {
+    return projectRepository.findNonMemberPublicContributionIds(userId, PageRequest.of(0, 1)).isNotEmpty()
   }
 
   private fun withTotalOrder(pageable: Pageable): Pageable {

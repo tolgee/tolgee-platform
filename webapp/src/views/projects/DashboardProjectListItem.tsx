@@ -173,6 +173,7 @@ const DashboardProjectListItem = ({ variant = 'default', ...p }: Props) => {
   const content = (
     <StyledContainer
       data-cy="dashboard-projects-list-item"
+      data-cy-name={p.name}
       isPublicVariant={isPublicVariant}
       onClick={() =>
         history.push(

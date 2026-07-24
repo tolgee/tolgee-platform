@@ -20,6 +20,7 @@ class PublicProjectsE2eData(
           public = true
         }.build {
           addBaseLanguage()
+          addContribution(author = userAccountBuilder.self)
         }
       }
 

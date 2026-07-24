@@ -7,7 +7,10 @@ import { OrganizationItem } from './OrganizationItem';
 import { CommunityTranslationItem } from './CommunityTranslationItem';
 import { useHistory } from 'react-router-dom';
 import { LINKS } from 'tg.constants/links';
-import { usePreferredOrganization } from 'tg.globalContext/helpers';
+import {
+  useHasCommunityContributions,
+  usePreferredOrganization,
+} from 'tg.globalContext/helpers';
 import { OrganizationPopover } from './OrganizationPopover';
 
 type OrganizationModel = components['schemas']['OrganizationModel'];
@@ -42,6 +45,7 @@ export const OrganizationSwitch: React.FC<React.PropsWithChildren<Props>> = ({
   const [isOpen, setIsOpen] = useState(false);
   const { preferredOrganization, updatePreferredOrganization } =
     usePreferredOrganization();
+  const hasCommunityContributions = useHasCommunityContributions();
   const history = useHistory();
 
   const handleClose = () => {
@@ -87,6 +91,11 @@ export const OrganizationSwitch: React.FC<React.PropsWithChildren<Props>> = ({
         anchorEl={anchorEl.current!}
         onAddNew={handleCreateNewOrg}
         communitySelected={isCommunitySurface}
+        onCommunityNavigate={
+          hasCommunityContributions
+            ? () => history.push(LINKS.COMMUNITY_PROJECTS.build())
+            : undefined
+        }
       />
     </Box>
   );
