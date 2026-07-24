@@ -119,6 +119,10 @@ class ContributorsTestData(
           public = true
         }.build {
           addBaseLanguage()
+          addPermission {
+            user = membersViewer
+            scopes = arrayOf(Scope.MEMBERS_VIEW)
+          }
           if (withE2eContributions) {
             listOf(contributor, contributor2).forEach { author ->
               addContribution(author = author, at = FIRST_CONTRIBUTION_AT)

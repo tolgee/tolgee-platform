@@ -171,7 +171,7 @@ class TestDataService(
     tryUntilItDoesntBreakConstraint {
       executeInNewTransaction(transactionManager) {
         builder.data.userAccounts.forEach {
-          userAccountService.findActive(it.self.username)?.let { user ->
+          userAccountService.findAllByUsername(it.self.username).forEach { user ->
             notificationService.deleteNotificationsOfUser(user.id)
             userAccountService.delete(user)
           }

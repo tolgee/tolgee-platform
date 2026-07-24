@@ -27,7 +27,10 @@ const RevokePermissionsButton = (props: {
   const revokeAccess = useApiMutation({
     url: '/v2/projects/{projectId}/users/{userId}/revoke-access',
     method: 'put',
-    invalidatePrefix: '/v2/projects/{projectId}/users',
+    invalidatePrefix: [
+      '/v2/projects/{projectId}/users',
+      '/v2/projects/{projectId}/contributors',
+    ],
   });
 
   const handleRevoke = () => {
