@@ -8,7 +8,6 @@ class ProjectActivityView(
   val type: ActivityType,
   var authorId: Long? = null,
   var authorName: String? = null,
-  var authorUsername: String? = null,
   var authorAvatarHash: String? = null,
   val authorDeleted: Boolean = false,
   var modifications: List<ModifiedEntityView>? = null,

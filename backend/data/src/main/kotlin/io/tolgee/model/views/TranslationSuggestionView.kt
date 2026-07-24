@@ -14,7 +14,6 @@ interface TranslationSuggestionView {
 
   var authorId: Long
   var authorName: String
-  var authorUsername: String
   var authorAvatarHash: String?
   var authorDeletedAt: Date?
 }

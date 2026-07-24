@@ -10,9 +10,11 @@ class TaskReportHelperTest {
   private val helper = TaskReportHelper(mock<TaskWithScopeView>(), emptyList())
 
   @Test
-  fun `formatUserName returns the name and never the e-mail`() {
-    val user = UserAccount(name = "Franta Dobrota", username = "franta@test.com")
-    assertThat(helper.formatUserName(user)).isEqualTo("Franta Dobrota")
+  fun `formatUserName carries the name and id (to disambiguate same-named users), never the e-mail`() {
+    val user = UserAccount(id = 7L, name = "Franta Dobrota", username = "franta@test.com")
+    val result = helper.formatUserName(user)
+    assertThat(result).isEqualTo("Franta Dobrota #7")
+    assertThat(result).doesNotContain("franta@test.com")
   }
 
   @Test

@@ -51,6 +51,14 @@ class V2UserControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `returns the caller's own username on the self endpoint`() {
+    // Self is an allowlisted disclosure surface: the caller's own e-mail must stay exposed.
+    performAuthGet("/v2/user").andIsOk.andAssertThatJson {
+      node("username").isEqualTo(userAccount!!.username)
+    }
+  }
+
+  @Test
   fun `it updates the user profile`() {
     val requestDTO =
       UserUpdateRequestDto(

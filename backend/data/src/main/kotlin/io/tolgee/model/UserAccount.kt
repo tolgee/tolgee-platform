@@ -35,11 +35,8 @@ data class UserAccount(
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   override var id: Long = 0L,
   /**
-   * A user's e-mail. Disclosing it to another user is a privacy leak: a response model may carry it
-   * only on a small allowlist of surfaces (members lists, self, instance-admin user management) plus
-   * the admin-only project export; every other user reference (author/actor/owner) must leave the
-   * response model's username empty. The allowlist and its enforcement live in
-   * `UsernameDisclosureGuard` (run from both a core and an EE test entrypoint).
+   * A user's e-mail; exposed only on the allowlisted models in `UsernameDisclosureGuard` (plus the
+   * admin-only project export). Every other user reference must leave the response username empty.
    */
   @field:NotBlank
   override var username: String = "",

@@ -102,10 +102,8 @@ class SecurityService(
     return getCurrentPermittedScopes(projectHolder.project.id).containsAll(scopes)
   }
 
-  // Gates a non-sensitive aggregate (the member count on the project stats endpoint), NOT any
-  // per-member field — sensitive fields like username are stripped at the response model instead.
-  // The fail-open defaults are intentional for that count: the projectless /v2/projects/stats view
-  // has no project in scope, and off-request there is no caller whose MEMBERS_VIEW could gate it.
+  // Returning true when there is no project in scope is deliberate: the projectless
+  // /v2/projects/stats view has no project to gate on, and the value it guards is only a count.
   fun shouldExposeMemberCount(): Boolean {
     if (RequestContextHolder.getRequestAttributes() == null) return true
     if (projectHolder.projectOrNull == null) return true

@@ -14,7 +14,7 @@ interface TranslationSuggestionRepository : JpaRepository<TranslationSuggestion,
   @Query(
     """
       select id, keyId, languageId, languageTag, translation, state, plural,
-             authorId, authorName, authorUsername, authorAvatarHash, authorDeletedAt
+             authorId, authorName, authorAvatarHash, authorDeletedAt
       from (
         select
           ts.id as id,
@@ -26,7 +26,6 @@ interface TranslationSuggestionRepository : JpaRepository<TranslationSuggestion,
           ts.is_plural as plural,
           u.id as authorId,
           u.name as authorName,
-          u.username as authorUsername,
           u.avatar_hash as authorAvatarHash,
           u.deleted_at as authorDeletedAt,
           row_number() over (
