@@ -66,6 +66,26 @@ class RefreshPreferredOrganizationTest : AbstractSpringTest() {
     assertThat(preferredOrganizationId(testData.nonMember)).isNotEqualTo(testData.otherOrg.id)
   }
 
+  @Test
+  fun `admin cannot view a soft-deleted organization`() {
+    executeInNewTransaction {
+      organizationService.delete(organizationService.get(testData.otherOrg.id))
+    }
+    executeInNewTransaction {
+      val admin = userAccountService.findDto(testData.serverAdmin.id)!!
+      assertThat(organizationRoleService.canUserViewOrPublic(admin, testData.otherOrg.id)).isFalse()
+    }
+  }
+
+  @Test
+  fun `evicts an admin's preference for a soft-deleted organization`() {
+    setPreferred(testData.serverAdmin, testData.otherOrg.id)
+    executeInNewTransaction {
+      organizationService.delete(organizationService.get(testData.otherOrg.id))
+    }
+    assertThat(preferredOrganizationId(testData.serverAdmin)).isNotEqualTo(testData.otherOrg.id)
+  }
+
   private fun setPreferred(
     user: UserAccount,
     organizationId: Long,
