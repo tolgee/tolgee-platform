@@ -22,7 +22,6 @@ data class KeyWithTranslationsView(
   val deletedAt: Timestamp? = null,
   val deletedByUserId: Long? = null,
   val deletedByUserName: String? = null,
-  val deletedByUserUsername: String? = null,
   val deletedByUserAvatarHash: String? = null,
   val deletedByUserDeletedAt: Timestamp? = null,
 ) : Cursorable {
@@ -88,7 +87,6 @@ data class KeyWithTranslationsView(
         deletedAt = if (trashed) data.removeFirst() as Timestamp? else null,
         deletedByUserId = if (trashed) data.removeFirst() as Long? else null,
         deletedByUserName = if (trashed) data.removeFirst() as String? else null,
-        deletedByUserUsername = if (trashed) data.removeFirst() as String? else null,
         deletedByUserAvatarHash = if (trashed) data.removeFirst() as String? else null,
         deletedByUserDeletedAt = if (trashed) data.removeFirst() as Timestamp? else null,
       )

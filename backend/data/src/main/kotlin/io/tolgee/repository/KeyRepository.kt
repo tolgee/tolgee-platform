@@ -198,7 +198,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
     select k.id as id, ns.name as namespace, km.description as description,
         k.name as name, bt.text as baseTranslation, t.text as translation,
         k.deleted_at as deletedAt, k.is_plural as plural,
-        dbu.id as deletedByUserId, dbu.username as deletedByUserUsername,
+        dbu.id as deletedByUserId,
         dbu.name as deletedByUserName, dbu.avatar_hash as deletedByUserAvatarHash,
         case when dbu.deleted_at is not null then true else false end as deletedByUserDeleted
         from key k
@@ -525,7 +525,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
       select k.id as id, ns.name as namespace, k.name as name,
              km.description as description, k.deleted_at as deletedAt,
              null as baseTranslation, null as translation, k.is_plural as plural,
-             dbu.id as deletedByUserId, dbu.username as deletedByUserUsername,
+             dbu.id as deletedByUserId,
              dbu.name as deletedByUserName, dbu.avatar_hash as deletedByUserAvatarHash,
              case when dbu.deleted_at is not null then true else false end as deletedByUserDeleted
       from key k
