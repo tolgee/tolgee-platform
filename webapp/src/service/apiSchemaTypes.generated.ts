@@ -266,6 +266,7 @@ export type ProjectActivityModel = components['schemas']['ProjectActivityModel']
 export type ProjectAiPromptCustomizationModel = components['schemas']['ProjectAiPromptCustomizationModel'];
 export type ProjectAssignmentDto = components['schemas']['ProjectAssignmentDto'];
 export type ProjectInvitationModel = components['schemas']['ProjectInvitationModel'];
+export type ProjectInviteContributorDto = components['schemas']['ProjectInviteContributorDto'];
 export type ProjectInviteUserDto = components['schemas']['ProjectInviteUserDto'];
 export type ProjectLockModel = components['schemas']['ProjectLockModel'];
 export type ProjectModel = components['schemas']['ProjectModel'];

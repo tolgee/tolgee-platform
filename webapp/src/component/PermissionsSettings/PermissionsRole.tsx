@@ -84,6 +84,8 @@ export const PermissionsRole: React.FC<React.PropsWithChildren<Props>> = ({
 
   return (
     <StyledListItem
+      data-cy="permissions-menu-role"
+      data-cy-role={role}
       onClick={handleSelect}
       className={clsx({ selected, disabled })}
     >

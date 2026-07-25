@@ -21,7 +21,7 @@ class OrganizationInvitationModelAssembler(
       entity.organizationRole!!.type!!,
       entity.createdAt!!,
       invitedUserName = entity.name,
-      invitedUserEmail = entity.email,
+      invitedUserEmail = entity.visibleEmail,
       createdBy = entity.createdBy?.let { simpleUserAccountModelAssembler.toModel(it) },
     ).add(linkTo<V2InvitationController> { acceptInvitation(entity.code) }.withRel("accept"))
       .add(linkTo<V2InvitationController> { deleteInvitation(entity.id!!) }.withRel("delete"))

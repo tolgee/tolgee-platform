@@ -536,6 +536,7 @@ declare namespace DataCy {
         "permissions-menu-granular": true;
         "permissions-menu-inherited-message": true;
         "permissions-menu-reset-to-organization": true;
+        "permissions-menu-role": true;
         "permissions-menu-save": true;
         "plan-limit-dialog-close": true;
         "plan-limit-exceeded-popover": true;
@@ -552,6 +553,7 @@ declare namespace DataCy {
         "project-branch-merge-change": true;
         "project-branch-merge-delete-branch-checkbox": true;
         "project-branch-merge-detail": true;
+        "project-contributor-invite-button": true;
         "project-contributor-item": true;
         "project-contributor-item-first-contribution": true;
         "project-contributor-item-last-contribution": true;

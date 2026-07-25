@@ -119,6 +119,19 @@ export const getScopeLanguagePermission = (
   return SCOPE_TO_LANG_PROPERTY_MAP[scope];
 };
 
+export const scopesToLanguagePermissions = (
+  advancedState: PermissionAdvancedState
+): LanguagePermissions => {
+  const languagePermissions: LanguagePermissions = {};
+  advancedState.scopes.forEach((scope) => {
+    const property = getScopeLanguagePermission(scope);
+    if (property) {
+      languagePermissions[property] = advancedState[property];
+    }
+  });
+  return languagePermissions;
+};
+
 export const getLanguagesUnion = (
   scopes: PermissionModelScope[],
   permittedLanguages: LanguagePermissions,

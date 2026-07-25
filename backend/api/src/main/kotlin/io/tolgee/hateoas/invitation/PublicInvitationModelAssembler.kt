@@ -21,7 +21,7 @@ class PublicInvitationModelAssembler(
       projectName = entity.permission?.project?.name,
       organizationName = entity.organizationRole?.organization?.name,
       createdBy = entity.createdBy?.let { simpleUserAccountModelAssembler.toModel(it) },
-      inviteeEmail = if (isAgencyInvitation) null else entity.email,
+      inviteeEmail = entity.visibleEmail.takeUnless { isAgencyInvitation },
     )
   }
 }

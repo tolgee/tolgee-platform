@@ -4,6 +4,7 @@ import io.tolgee.fixtures.AuthRequestPerformer
 import io.tolgee.fixtures.AuthorizedRequestFactory.init
 import io.tolgee.fixtures.AuthorizedRequestPerformer
 import io.tolgee.model.UserAccount
+import io.tolgee.model.activity.ActivityRevision
 import io.tolgee.security.authentication.JwtService
 import org.junit.jupiter.api.AfterEach
 import org.springframework.beans.factory.annotation.Autowired
@@ -188,5 +189,23 @@ abstract class AuthorizedControllerTest :
   override fun moveCurrentDate(duration: Duration) {
     super.moveCurrentDate(duration)
     refreshJwtToken()
+  }
+
+  // Contributor rows are created by the AFTER INSERT trigger in projectContributorTrigger.sql.
+  protected fun recordProjectActivity(
+    authorId: Long?,
+    projectId: Long,
+    at: Date? = null,
+  ) {
+    at?.let { currentDateProvider.forcedDate = it }
+    executeInNewTransaction {
+      entityManager.persist(
+        ActivityRevision().apply {
+          this.projectId = projectId
+          this.authorId = authorId
+        },
+      )
+      entityManager.flush()
+    }
   }
 }

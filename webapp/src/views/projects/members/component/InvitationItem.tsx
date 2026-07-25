@@ -91,7 +91,9 @@ export const InvitationItem: React.FC<React.PropsWithChildren<Props>> = ({
     <StyledListItem data-cy="project-members-invitation-item">
       <Box display="flex" alignItems="center" gap={1}>
         <StyledItemText>
-          {invitation.invitedUserName || invitation.invitedUserEmail}{' '}
+          {invitation.invitedUserName ||
+            invitation.invitedUserEmail ||
+            t('project_contributor_unnamed', 'Unnamed contributor')}{' '}
         </StyledItemText>
         {invitation.permission.agency && (
           <Tooltip title={t('invite_user_agency_tooltip')}>

@@ -6,6 +6,7 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.misc.CreateOrganizationInvitationParams
 import io.tolgee.dtos.misc.CreateProjectInvitationParams
 import io.tolgee.dtos.request.organization.OrganizationInviteUserDto
+import io.tolgee.dtos.request.project.ProjectInviteContributorDto
 import io.tolgee.dtos.request.project.ProjectInviteUserDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
@@ -15,7 +16,9 @@ import io.tolgee.hateoas.invitation.OrganizationInvitationModelAssembler
 import io.tolgee.hateoas.invitation.ProjectInvitationModel
 import io.tolgee.hateoas.invitation.ProjectInvitationModelAssembler
 import io.tolgee.hateoas.invitation.PublicInvitationModelAssembler
+import io.tolgee.model.Invitation
 import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
@@ -25,6 +28,7 @@ import io.tolgee.security.authentication.WriteOperation
 import io.tolgee.security.authorization.RequiresOrganizationRole
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.TranslationAgencyService
+import io.tolgee.service.contributor.ProjectContributorService
 import io.tolgee.service.invitation.EeInvitationService
 import io.tolgee.service.invitation.InvitationService
 import io.tolgee.service.organization.OrganizationRoleService
@@ -36,6 +40,7 @@ import jakarta.validation.Valid
 import org.springframework.hateoas.CollectionModel
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -45,6 +50,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
+@CrossOrigin(origins = ["*"])
 @RequestMapping("")
 @Tag(name = "Invitations", description = "These endpoints manage inviting new users to projects or organizations")
 class V2InvitationController(
@@ -62,6 +68,7 @@ class V2InvitationController(
   private val authenticationFacade: AuthenticationFacade,
   private val translationAgencyService: TranslationAgencyService,
   private val publicInvitationModelAssembler: PublicInvitationModelAssembler,
+  private val projectContributorService: ProjectContributorService,
 ) {
   @GetMapping("/v2/invitations/{code}/accept")
   @WriteOperation
@@ -134,7 +141,7 @@ class V2InvitationController(
     @RequestBody @Valid
     invitation: ProjectInviteUserDto,
   ): ProjectInvitationModel {
-    validatePermissions(invitation)
+    validatePermissions(invitation.type, invitation.scopes)
     val currentUserPermissions =
       permissionService.findPermissionNonCached(
         projectHolder.project.id,
@@ -167,18 +174,60 @@ class V2InvitationController(
         )
       }
 
-    val created =
-      if (!params.scopes.isNullOrEmpty()) {
-        eeInvitationService.create(params)
-      } else {
-        invitationService.create(params)
-      }
-
-    return projectInvitationModelAssembler.toModel(created)
+    return projectInvitationModelAssembler.toModel(createRouted(params))
   }
 
-  private fun validatePermissions(invitation: ProjectInviteUserDto) {
-    if (!(invitation.scopes.isNullOrEmpty() xor (invitation.type == null))) {
+  @PutMapping("/v2/projects/{projectId:[0-9]+}/invite-contributor")
+  @Operation(
+    summary = "Invite a project contributor as a member by user id",
+    description =
+      "Invites a contributor of the project as a member. The invitee is addressed by user id; " +
+        "the server resolves and stores their address to send the invitation and bind acceptance, " +
+        "but never returns it. Only visible contributors (non-members, not deleted or disabled) may " +
+        "be invited; any other id returns a uniform 404.",
+  )
+  @RequiresProjectPermissions([Scope.MEMBERS_EDIT])
+  @RequiresSuperAuthentication
+  fun inviteContributor(
+    @RequestBody @Valid
+    dto: ProjectInviteContributorDto,
+  ): ProjectInvitationModel {
+    validatePermissions(dto.type, dto.scopes)
+    if (dto.type == ProjectPermissionType.NONE) {
+      throw BadRequestException(Message.CANNOT_INVITE_CONTRIBUTOR_WITH_NO_PERMISSION)
+    }
+    val projectId = projectHolder.project.id
+    val user =
+      projectContributorService.findVisibleContributor(projectId, dto.userId)
+        ?: throw NotFoundException(Message.USER_NOT_FOUND)
+
+    val languagePermissions = projectPermissionFacade.getLanguages(dto, projectId)
+    val params =
+      CreateProjectInvitationParams(
+        project = projectHolder.projectEntity,
+        type = dto.type,
+        scopes = dto.scopes,
+        email = user.username,
+        name = user.name,
+        languagePermissions = languagePermissions,
+        emailHidden = true,
+      )
+
+    return projectInvitationModelAssembler.toModel(createRouted(params))
+  }
+
+  private fun createRouted(params: CreateProjectInvitationParams): Invitation {
+    if (!params.scopes.isNullOrEmpty()) {
+      return eeInvitationService.create(params)
+    }
+    return invitationService.create(params)
+  }
+
+  private fun validatePermissions(
+    type: ProjectPermissionType?,
+    scopes: Set<String>?,
+  ) {
+    if (!(scopes.isNullOrEmpty() xor (type == null))) {
       throw BadRequestException(Message.SET_EXACTLY_ONE_OF_SCOPES_OR_TYPE)
     }
   }
