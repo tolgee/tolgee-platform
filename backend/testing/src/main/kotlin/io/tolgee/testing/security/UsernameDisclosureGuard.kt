@@ -6,28 +6,23 @@ import org.springframework.core.type.filter.AssignableTypeFilter
 import kotlin.reflect.KClass
 import kotlin.reflect.full.memberProperties
 
-/**
- * Enforces that only sanctioned response models declare a `username` property (a user's e-mail).
- * Any other `RepresentationModel` that declares `username` fails the scan.
- *
- * Scope limits a maintainer must know:
- * - only `RepresentationModel` subtypes are scanned — keep user-referencing responses on it;
- * - it keys on a property literally named `username`, so an e-mail re-exposed under another field
- *   name is out of scope here;
- * - it checks that a model *declares* username, not the value it emits — the empty-value contract
- *   for the stripped models is pinned separately by value assertions in the guard's tests.
- */
+// Fails if any non-sanctioned RepresentationModel declares `username`. It checks declaration, not
+// value; the empty-value contract for stripped models is pinned by UsernameDisclosureGuardValueTest.
 object UsernameDisclosureGuard {
-  /** Models that intentionally expose a real username (the e-mail). */
+  // Models that intentionally expose a real username (the e-mail). Serve each only from the gated
+  // endpoint noted — returning one from a less-gated endpoint would leak the e-mail.
   val allowlistedModelNames: Set<String> =
     setOf(
+      // GET /v2/projects/{id}/users — MEMBERS_VIEW + super-auth
       "io.tolgee.hateoas.userAccount.UserAccountInProjectModel",
+      // GET /v2/organizations/{id}/users — org-member role
       "io.tolgee.hateoas.organization.UserAccountWithOrganizationRoleModel",
+      // GET /v2/user — self only
       "io.tolgee.hateoas.userAccount.PrivateUserAccountModel",
+      // GET /v2/administration/users — super-auth
       "io.tolgee.hateoas.userAccount.UserAccountModel",
     )
 
-  /** Models allowed to declare a `username` property but which must keep it empty (see value tests). */
   val strippedModelNames: Set<String> =
     setOf(
       "io.tolgee.hateoas.userAccount.SimpleUserAccountModel",
@@ -49,7 +44,6 @@ object UsernameDisclosureGuard {
         .distinct()
         .map { Class.forName(it).kotlin }
 
-    // Trips loudly if a whole response-model module drops off the classpath (today ~180 core, more with EE).
     assertThat(models)
       .`as`("suspiciously few response models scanned — a model-bearing module likely fell off the classpath")
       .hasSizeGreaterThan(50)
@@ -69,7 +63,7 @@ object UsernameDisclosureGuard {
       ).isEmpty()
   }
 
-  private fun declaresUsername(model: KClass<*>): Boolean =
+  fun declaresUsername(model: KClass<*>): Boolean =
     runCatching { model.memberProperties.any { it.name == "username" } }
       .getOrElse { throw AssertionError("Could not reflect over ${model.qualifiedName}", it) }
 }

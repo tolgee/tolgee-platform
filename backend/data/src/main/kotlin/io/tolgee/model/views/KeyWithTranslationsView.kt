@@ -63,8 +63,7 @@ data class KeyWithTranslationsView(
      * data for the returned view is empty at this point; it is populated later by Query 2 in
      * `TranslationViewDataProvider`.
      *
-     * The row layout is fixed to 12 key-level columns + optional 5 trashed-only columns. See
-     * `QueryBase.kt` for the full list and order.
+     * The row layout (columns and order) is defined in `QueryBase.kt`.
      */
     fun of(
       queryData: Array<Any?>,
