@@ -697,6 +697,10 @@ export interface paths {
   "/v2/projects/{projectId}/invite": {
     put: operations["inviteUser"];
   };
+  "/v2/projects/{projectId}/invite-contributor": {
+    /** Invites a contributor of the project as a member. The invitee is addressed by user id; the server resolves and stores their address to send the invitation and bind acceptance, but never returns it. Only visible contributors (non-members, not deleted or disabled) may be invited; any other id returns a uniform 404. */
+    put: operations["inviteContributor"];
+  };
   "/v2/projects/{projectId}/keys": {
     get: operations["getAll_7"];
     post: operations["create_6"];
@@ -2993,6 +2997,7 @@ export interface components {
         | "language_not_permitted"
         | "scopes_has_to_be_set"
         | "set_exactly_one_of_scopes_or_type"
+        | "cannot_invite_contributor_with_no_permission"
         | "translation_exists"
         | "import_keys_error"
         | "provide_only_one_of_screenshots_and_screenshot_uploaded_image_ids"
@@ -5418,6 +5423,38 @@ export interface components {
        */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
     };
+    ProjectInviteContributorDto: {
+      /**
+       * @deprecated
+       * @description Deprecated -> use translate languages
+       */
+      languages?: number[];
+      /**
+       * @description Granted scopes for the invited user
+       * @example [
+       *   "translations.view",
+       *   "translations.edit"
+       * ]
+       */
+      scopes?: string[];
+      /** @description Languages user can change translation state (review) */
+      stateChangeLanguages?: number[];
+      /** @description Languages user can suggest translation */
+      suggestLanguages?: number[];
+      /** @description Languages user can manage suggestions for */
+      suggestManageLanguages?: number[];
+      /** @description Languages user can translate to */
+      translateLanguages?: number[];
+      /** @enum {string} */
+      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
+      /**
+       * Format: int64
+       * @description Id of the contributor to invite as a member
+       */
+      userId: number;
+      /** @description Languages user can view */
+      viewLanguages?: number[];
+    };
     ProjectInviteUserDto: {
       /**
        * Format: int64
@@ -6832,6 +6869,7 @@ export interface components {
         | "language_not_permitted"
         | "scopes_has_to_be_set"
         | "set_exactly_one_of_scopes_or_type"
+        | "cannot_invite_contributor_with_no_permission"
         | "translation_exists"
         | "import_keys_error"
         | "provide_only_one_of_screenshots_and_screenshot_uploaded_image_ids"
@@ -17053,6 +17091,51 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["ProjectInviteUserDto"];
+      };
+    };
+  };
+  /** Invites a contributor of the project as a member. The invitee is addressed by user id; the server resolves and stores their address to send the invitation and bind acceptance, but never returns it. Only visible contributors (non-members, not deleted or disabled) may be invited; any other id returns a uniform 404. */
+  inviteContributor: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ProjectInvitationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ProjectInviteContributorDto"];
       };
     };
   };

@@ -1,7 +1,4 @@
-import { T } from '@tolgee/react';
-
 import { PermissionSettingsState } from 'tg.component/PermissionsSettings/types';
-import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { getInvitationPermissionBody } from './getInvitationPermissionBody';
 
@@ -9,34 +6,28 @@ type Props = {
   projectId: number;
 };
 
-export type CreateInvitationData = {
+export type CreateContributorInvitationData = {
+  userId: number;
   permissions: PermissionSettingsState;
-  email?: string;
-  name?: string;
-  agency?: string;
 };
 
-export const useCreateInvitation = ({ projectId }: Props) => {
+export const useCreateContributorInvitation = ({ projectId }: Props) => {
   const invite = useApiMutation({
-    url: '/v2/projects/{projectId}/invite',
+    url: '/v2/projects/{projectId}/invite-contributor',
     method: 'put',
-    invalidatePrefix: '/v2/projects/{projectId}/invitations',
+    invalidatePrefix: [
+      '/v2/projects/{projectId}/invitations',
+      '/v2/projects/{projectId}/contributors',
+    ],
   });
 
-  const messages = useMessage();
-
   return {
-    async createInvitation({
+    async createContributorInvitation({
+      userId,
       permissions,
-      email,
-      name,
-      agency,
-    }: CreateInvitationData) {
+    }: CreateContributorInvitationData) {
       const result = getInvitationPermissionBody(permissions);
       if (!result.ok) {
-        if (result.reason === 'empty-scopes') {
-          messages.error(<T keyName="scopes_at_least_one_scope_error" />);
-        }
         throw new Error('Incorrect data');
       }
 
@@ -44,9 +35,7 @@ export const useCreateInvitation = ({ projectId }: Props) => {
         path: { projectId },
         content: {
           'application/json': {
-            email,
-            name,
-            agencyId: Number(agency),
+            userId,
             ...result.body,
           },
         },

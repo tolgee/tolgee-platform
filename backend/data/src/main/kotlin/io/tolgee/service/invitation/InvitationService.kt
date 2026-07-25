@@ -60,6 +60,7 @@ class InvitationService(
   ): Invitation {
     checkEmailNotAlreadyInvited(params)
     val invitation = getInvitationInstance(params)
+    invitation.emailHidden = params.emailHidden
     invitation.permission = setPermissionFn(invitation)
     invitationEmailSender.sendInvitation(invitation)
     return invitationRepository.save(invitation)

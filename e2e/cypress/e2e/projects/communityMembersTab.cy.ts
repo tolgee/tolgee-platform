@@ -90,4 +90,43 @@ describe('Community tab on the Members page', () => {
       gcy('project-members-tab-community').should('not.exist');
     });
   });
+
+  it('invites a contributor as a member from the Community tab', () => {
+    membersCommunityData.generateStandard().then((res) => {
+      const project = getProjectByNameFromTestData(
+        res.body,
+        'Contributors public project'
+      );
+      login('admin@contributors.com');
+      visitProjectMembers(project.id);
+      waitForGlobalLoading();
+
+      cy.intercept('PUT', `/v2/projects/${project.id}/invite-contributor`).as(
+        'invite'
+      );
+
+      gcy('project-members-tab-community').click();
+      gcyAdvanced({
+        value: 'project-contributor-item',
+        name: 'Cora Contributor',
+      })
+        .findDcy('project-contributor-invite-button')
+        .click();
+
+      gcy('permissions-menu-basic').click();
+      gcyAdvanced({ value: 'permissions-menu-role', role: 'NONE' }).should(
+        'not.exist'
+      );
+      gcyAdvanced({
+        value: 'permissions-menu-role',
+        role: 'TRANSLATE',
+      }).click();
+      gcy('permissions-menu-save').click();
+
+      cy.wait('@invite').its('response.statusCode').should('eq', 200);
+
+      gcy('project-members-tab-team').click();
+      gcy('project-members-invitation-item').should('be.visible');
+    });
+  });
 });

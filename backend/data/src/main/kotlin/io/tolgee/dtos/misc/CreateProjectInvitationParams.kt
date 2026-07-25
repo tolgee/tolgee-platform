@@ -18,4 +18,5 @@ data class CreateProjectInvitationParams(
   override val email: String? = null,
   override val name: String? = null,
   override val agencyId: Long? = null,
+  val emailHidden: Boolean = false,
 ) : CreateInvitationParams

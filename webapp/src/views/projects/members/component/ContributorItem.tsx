@@ -1,9 +1,20 @@
+import { useState } from 'react';
 import { T, useTranslate } from '@tolgee/react';
-import { styled } from '@mui/material';
+import { Button, styled } from '@mui/material';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { useDateFormatter } from 'tg.hooks/useLocale';
+import { useProject } from 'tg.hooks/useProject';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
+import { useMessage } from 'tg.hooks/useSuccessMessage';
+import { PermissionsModal } from 'tg.component/PermissionsSettings/PermissionsModal';
+import {
+  PermissionModel,
+  PermissionSettingsState,
+} from 'tg.component/PermissionsSettings/types';
+import { useCreateContributorInvitation } from './useCreateContributorInvitation';
 
 type ContributorModel = components['schemas']['ContributorModel'];
 
@@ -41,6 +52,18 @@ const StyledItemDates = styled('div')`
   font-size: ${({ theme }) => theme.typography.caption.fontSize};
 `;
 
+const StyledItemActions = styled('div')`
+  display: flex;
+  gap: ${({ theme }) => theme.spacing(1)};
+  align-items: center;
+  margin-left: ${({ theme }) => theme.spacing(2)};
+`;
+
+const INITIAL_PERMISSIONS: PermissionModel = {
+  type: 'TRANSLATE',
+  scopes: [],
+};
+
 type Props = {
   contributor: ContributorModel;
 };
@@ -50,10 +73,37 @@ export const ContributorItem: React.FC<React.PropsWithChildren<Props>> = ({
 }) => {
   const { t } = useTranslate();
   const formatDate = useDateFormatter();
+  const project = useProject();
+  const allLangs = useProjectLanguages();
+  const messages = useMessage();
+  const { satisfiesPermission } = useProjectPermissions();
+  const canEditMembers = satisfiesPermission('members.edit');
+
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const { createContributorInvitation } = useCreateContributorInvitation({
+    projectId: project.id,
+  });
+
+  const contributorName =
+    contributor.name || t('project_contributor_unnamed', 'Unnamed contributor');
+
   const formatContribution = (value: string) =>
     formatDate(new Date(value), { dateStyle: 'medium' });
   const firstContribution = formatContribution(contributor.firstContributionAt);
   const lastContribution = formatContribution(contributor.lastContributionAt);
+
+  async function handleInvite(permissions: PermissionSettingsState) {
+    await createContributorInvitation({
+      userId: contributor.id,
+      permissions,
+    });
+    messages.success(
+      <T
+        keyName="invite_contributor_success_message"
+        defaultValue="Contributor invited as a member"
+      />
+    );
+  }
 
   return (
     <StyledListItem
@@ -62,10 +112,7 @@ export const ContributorItem: React.FC<React.PropsWithChildren<Props>> = ({
     >
       <StyledItemUser>
         <AvatarImg owner={{ ...contributor, type: 'USER' }} size={24} />
-        <StyledItemText>
-          {contributor.name ||
-            t('project_contributor_unnamed', 'Unnamed contributor')}
-        </StyledItemText>
+        <StyledItemText>{contributorName}</StyledItemText>
       </StyledItemUser>
       <StyledItemDates>
         <span data-cy="project-contributor-item-first-contribution">
@@ -83,6 +130,31 @@ export const ContributorItem: React.FC<React.PropsWithChildren<Props>> = ({
           />
         </span>
       </StyledItemDates>
+      {canEditMembers && (
+        <StyledItemActions>
+          <Button
+            size="small"
+            variant="outlined"
+            data-cy="project-contributor-invite-button"
+            onClick={() => setInviteOpen(true)}
+          >
+            <T
+              keyName="invite_contributor_button"
+              defaultValue="Invite as member"
+            />
+          </Button>
+        </StyledItemActions>
+      )}
+      {inviteOpen && (
+        <PermissionsModal
+          allLangs={allLangs}
+          title={contributorName}
+          permissions={INITIAL_PERMISSIONS}
+          onSubmit={handleInvite}
+          onClose={() => setInviteOpen(false)}
+          hideNone
+        />
+      )}
     </StyledListItem>
   );
 };

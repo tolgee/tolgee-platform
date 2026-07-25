@@ -42,6 +42,12 @@ class Invitation(
 
   var email: String? = null
 
+  var emailHidden: Boolean = false
+
+  // The email masked for API responses; the raw `email` must never reach the org.
+  val visibleEmail: String?
+    get() = email.takeUnless { emailHidden }
+
   @ManyToOne(optional = true, fetch = FetchType.LAZY)
   var createdBy: UserAccount? = null
 

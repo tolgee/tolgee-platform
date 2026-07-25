@@ -1,9 +1,6 @@
-import {
-  LanguagePermissions,
-  PermissionSettingsState,
-} from 'tg.component/PermissionsSettings/types';
+import { PermissionSettingsState } from 'tg.component/PermissionsSettings/types';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { getScopeLanguagePermission } from 'tg.component/PermissionsSettings/hierarchyTools';
+import { scopesToLanguagePermissions } from 'tg.component/PermissionsSettings/hierarchyTools';
 
 type Props = {
   organizationId?: number;
@@ -31,16 +28,9 @@ export const useUpdateBasePermissions = ({ organizationId }: Props) => {
       settingsState.tab === 'advanced' &&
       settingsState.advancedState.scopes
     ) {
-      const languagePermissions: LanguagePermissions = {};
-
-      settingsState.advancedState.scopes
-        .map(getScopeLanguagePermission)
-        .forEach((property) => {
-          if (property) {
-            languagePermissions[property] =
-              settingsState.advancedState[property];
-          }
-        });
+      const languagePermissions = scopesToLanguagePermissions(
+        settingsState.advancedState
+      );
 
       await editScopes.mutateAsync({
         path: { organizationId },

@@ -1,35 +1,12 @@
-import {
-  LanguagePermissions,
-  PermissionModelRole,
-  PermissionSettingsState,
-} from 'tg.component/PermissionsSettings/types';
+import { PermissionSettingsState } from 'tg.component/PermissionsSettings/types';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { getScopeLanguagePermission } from 'tg.component/PermissionsSettings/hierarchyTools';
+import { scopesToLanguagePermissions } from 'tg.component/PermissionsSettings/hierarchyTools';
+import { languagePermissionsForRole } from './permissionBody';
 
 type Props = {
   userId: number;
   projectId: number;
 };
-
-export function languagePermissionsForRole(
-  role: PermissionModelRole,
-  languages: number[] | undefined
-) {
-  let languagePermissions: LanguagePermissions = {};
-  if (role === 'REVIEW') {
-    languagePermissions = {
-      translateLanguages: languages,
-      stateChangeLanguages: languages,
-      suggestLanguages: languages,
-    };
-  } else if (role === 'TRANSLATE') {
-    languagePermissions = {
-      translateLanguages: languages,
-      suggestLanguages: languages,
-    };
-  }
-  return languagePermissions;
-}
 
 export const useUpdatePermissions = ({ userId, projectId }: Props) => {
   const editRole = useApiMutation({
@@ -64,16 +41,9 @@ export const useUpdatePermissions = ({ userId, projectId }: Props) => {
         settingsState.tab === 'advanced' &&
         settingsState.advancedState.scopes
       ) {
-        const languagePermissions: LanguagePermissions = {};
-
-        settingsState.advancedState.scopes
-          .map(getScopeLanguagePermission)
-          .forEach((property) => {
-            if (property) {
-              languagePermissions[property] =
-                settingsState.advancedState[property];
-            }
-          });
+        const languagePermissions = scopesToLanguagePermissions(
+          settingsState.advancedState
+        );
 
         await editScopes.mutateAsync({
           path: { userId, projectId },

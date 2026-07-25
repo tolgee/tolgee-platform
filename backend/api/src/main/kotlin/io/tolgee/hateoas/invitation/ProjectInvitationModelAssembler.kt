@@ -30,7 +30,7 @@ class ProjectInvitationModelAssembler(
       permittedLanguageIds = entity.permission!!.translateLanguages.map { it.id },
       createdAt = entity.createdAt!!,
       invitedUserName = entity.name,
-      invitedUserEmail = entity.email,
+      invitedUserEmail = entity.visibleEmail,
       permission = permissionWithAgencyModelAssembler.toModel(entity.permission!!),
       createdBy = entity.createdBy?.let { simpleUserAccountModelAssembler.toModel(it) },
     ).add(linkTo<V2InvitationController> { acceptInvitation(entity.code) }.withRel("accept"))

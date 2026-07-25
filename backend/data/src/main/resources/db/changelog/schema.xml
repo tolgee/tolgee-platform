@@ -5838,4 +5838,14 @@
             DELETE FROM project_contributor;
         </rollback>
     </changeSet>
+    <changeSet author="jirikuchynka" id="1784553600000-1">
+        <addColumn tableName="invitation">
+            <column name="email_hidden" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="invitation" columnName="email_hidden"/>
+        </rollback>
+    </changeSet>
 </databaseChangeLog>

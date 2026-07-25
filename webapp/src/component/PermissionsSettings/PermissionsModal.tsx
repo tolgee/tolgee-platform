@@ -33,6 +33,7 @@ export type PermissionModalProps = {
   onSubmit: (settings: PermissionSettingsState) => Promise<void>;
   isInheritedFromOrganization?: boolean;
   onResetToOrganization?: () => Promise<void>;
+  hideNone?: boolean;
 };
 
 export const PermissionsModal: React.FC<
@@ -45,6 +46,7 @@ export const PermissionsModal: React.FC<
   onSubmit,
   isInheritedFromOrganization,
   onResetToOrganization,
+  hideNone,
 }) => {
   const messages = useMessage();
   const [saveLoading, setSaveLoading] = useState(false);
@@ -99,6 +101,7 @@ export const PermissionsModal: React.FC<
           permissions={permissions}
           onChange={setSettingsState}
           allLangs={allLangs}
+          hideNone={hideNone}
         />
       </DialogContent>
       <Box display="flex" justifyContent="space-between">

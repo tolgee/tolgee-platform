@@ -1,5 +1,6 @@
 package io.tolgee.service.contributor
 
+import io.tolgee.model.UserAccount
 import io.tolgee.model.views.ProjectContributorView
 import io.tolgee.repository.ProjectContributorRepository
 import io.tolgee.repository.ProjectRepository
@@ -23,6 +24,13 @@ class ProjectContributorService(
 
   fun hasCommunityContributions(userId: Long): Boolean {
     return projectRepository.hasNonMemberPublicContribution(userId)
+  }
+
+  fun findVisibleContributor(
+    projectId: Long,
+    userId: Long,
+  ): UserAccount? {
+    return projectContributorRepository.findVisibleContributor(projectId, userId)
   }
 
   private fun withTotalOrder(pageable: Pageable): Pageable {

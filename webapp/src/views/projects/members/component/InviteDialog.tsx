@@ -60,7 +60,7 @@ export const InviteDialog: React.FC<React.PropsWithChildren<Props>> = ({
 }) => {
   const { t } = useTranslate();
   const project = useProject();
-  const langauges = useProjectLanguages();
+  const languages = useProjectLanguages();
   const config = useConfig();
   const { isEnabled } = useEnabledFeatures();
 
@@ -91,7 +91,6 @@ export const InviteDialog: React.FC<React.PropsWithChildren<Props>> = ({
 
   const { createInvitation, isLoading } = useCreateInvitation({
     projectId: project.id,
-    allLangs: langauges,
   });
 
   const [settingsState, setSettingsState] = useState<
@@ -245,7 +244,7 @@ export const InviteDialog: React.FC<React.PropsWithChildren<Props>> = ({
                   title={t('project_members_dialog_permission_title')}
                   permissions={initialPermissions}
                   onChange={setSettingsState}
-                  allLangs={langauges}
+                  allLangs={languages}
                   hideNone
                   disabled={disabled}
                 />
