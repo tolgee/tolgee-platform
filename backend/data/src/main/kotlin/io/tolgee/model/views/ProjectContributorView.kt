@@ -9,4 +9,5 @@ interface ProjectContributorView {
   val avatarHash: String?
   val firstContributionAt: Date
   val lastContributionAt: Date
+  val invitationPending: Boolean
 }

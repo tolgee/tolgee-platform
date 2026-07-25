@@ -2512,6 +2512,7 @@ export interface components {
       firstContributionAt: string;
       /** Format: int64 */
       id: number;
+      invitationPending: boolean;
       /** Format: date-time */
       lastContributionAt: string;
       name?: string;

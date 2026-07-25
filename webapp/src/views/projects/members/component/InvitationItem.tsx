@@ -71,7 +71,10 @@ export const InvitationItem: React.FC<React.PropsWithChildren<Props>> = ({
   const deleteInvitation = useApiMutation({
     url: '/v2/invitations/{invitationId}',
     method: 'delete',
-    invalidatePrefix: '/v2/projects/{projectId}/invitations',
+    invalidatePrefix: [
+      '/v2/projects/{projectId}/invitations',
+      '/v2/projects/{projectId}/contributors',
+    ],
   });
 
   const handleCancel = () => {
@@ -127,6 +130,7 @@ export const InvitationItem: React.FC<React.PropsWithChildren<Props>> = ({
         <Tooltip title={t('invite_user_invitation_cancel_button')}>
           <IconButton
             size="small"
+            data-cy="project-members-invitation-cancel-button"
             onClick={handleCancel}
             disabled={!canEditMembers}
           >

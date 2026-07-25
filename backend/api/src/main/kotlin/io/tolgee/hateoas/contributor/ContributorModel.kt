@@ -13,4 +13,5 @@ data class ContributorModel(
   val avatar: Avatar?,
   val firstContributionAt: Date,
   val lastContributionAt: Date,
+  val invitationPending: Boolean,
 ) : RepresentationModel<ContributorModel>()

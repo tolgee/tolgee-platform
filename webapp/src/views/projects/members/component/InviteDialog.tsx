@@ -52,11 +52,13 @@ const StyledButton = styled('span')`
 type Props = {
   open: boolean;
   onClose: () => void;
+  initialEmail?: string;
 };
 
 export const InviteDialog: React.FC<React.PropsWithChildren<Props>> = ({
   open,
   onClose,
+  initialEmail,
 }) => {
   const { t } = useTranslate();
   const project = useProject();
@@ -124,7 +126,7 @@ export const InviteDialog: React.FC<React.PropsWithChildren<Props>> = ({
       <Formik
         initialValues={{
           type: 'email' as 'email' | 'link' | 'agency',
-          text: '',
+          text: initialEmail ?? '',
           agency: preferredAgency?.toString() ?? '',
         }}
         enableReinitialize

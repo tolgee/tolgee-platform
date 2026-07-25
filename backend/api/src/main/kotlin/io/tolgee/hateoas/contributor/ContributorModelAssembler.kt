@@ -21,6 +21,7 @@ class ContributorModelAssembler(
       avatar = avatarService.getAvatarLinks(view.avatarHash),
       firstContributionAt = view.firstContributionAt,
       lastContributionAt = view.lastContributionAt,
+      invitationPending = view.invitationPending,
     )
   }
 }

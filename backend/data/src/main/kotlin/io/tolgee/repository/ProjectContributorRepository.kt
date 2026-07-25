@@ -12,7 +12,12 @@ interface ProjectContributorRepository : Repository<ProjectContributor, ProjectC
   @Query(
     """
       select u.id as id, u.username as username, u.name as name, u.avatarHash as avatarHash,
-        pc.firstContributionAt as firstContributionAt, pc.lastContributionAt as lastContributionAt
+        pc.firstContributionAt as firstContributionAt, pc.lastContributionAt as lastContributionAt,
+        (exists (
+          select 1 from Invitation i
+          join i.permission ip
+          where ip.project.id = pc.projectId and lower(i.email) = lower(u.username)
+        )) as invitationPending
       $VISIBLE_CONTRIBUTOR
     """,
   )

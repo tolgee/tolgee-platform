@@ -2,6 +2,7 @@ package io.tolgee.api.v2.controllers
 
 import io.tolgee.development.testDataBuilder.data.ContributorsTestData
 import io.tolgee.dtos.request.key.CreateKeyDto
+import io.tolgee.fixtures.EmailTestUtil
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsForbidden
@@ -26,11 +27,15 @@ class ProjectContributorsControllerTest : AuthorizedControllerTest() {
   @Autowired
   private lateinit var projectContributorService: ProjectContributorService
 
+  @Autowired
+  private lateinit var emailTestUtil: EmailTestUtil
+
   private val firstAt = Date(1_600_000_000_000)
   private val lastAt = Date(1_600_000_100_000)
 
   @BeforeEach
   fun setup() {
+    emailTestUtil.initMocks()
     testData = ContributorsTestData()
     testDataService.saveTestData(testData.root)
   }
@@ -336,6 +341,82 @@ class ProjectContributorsControllerTest : AuthorizedControllerTest() {
       .`as`("a user with activity that neither list accounts for")
       .containsAll(withActivity)
   }
+
+  @Test
+  fun `flags a contributor with a pending invitation to their address`() {
+    recordActivity(testData.contributor.id, lastAt)
+    recordActivity(testData.contributor2.id, lastAt)
+
+    userAccount = testData.admin
+    performAuthPut(
+      "/v2/projects/${testData.project.id}/invite",
+      mapOf("email" to testData.contributor.username, "type" to "TRANSLATE"),
+    ).andIsOk
+
+    val contributors =
+      projectContributorService
+        .getContributors(testData.project.id, PageRequest.of(0, 100))
+        .content
+        .associateBy { it.id }
+
+    assertThat(contributors[testData.contributor.id]!!.invitationPending).isTrue()
+    assertThat(contributors[testData.contributor2.id]!!.invitationPending).isFalse()
+  }
+
+  @Test
+  fun `matches a pending invitation whose address differs only in case, and serializes the flag`() {
+    recordActivity(testData.contributor.id, lastAt)
+    recordActivity(testData.contributor2.id, firstAt)
+
+    userAccount = testData.admin
+    performAuthPut(
+      "/v2/projects/${testData.project.id}/invite",
+      mapOf("email" to testData.contributor.username.uppercase(), "type" to "TRANSLATE"),
+    ).andIsOk
+
+    performAuthGet("/v2/projects/${testData.project.id}/contributors")
+      .andIsOk
+      .andAssertThatJson {
+        node("_embedded.contributors[0].id").isEqualTo(testData.contributor.id)
+        node("_embedded.contributors[0].invitationPending").isEqualTo(true)
+        node("_embedded.contributors[1].id").isEqualTo(testData.contributor2.id)
+        node("_embedded.contributors[1].invitationPending").isEqualTo(false)
+      }
+  }
+
+  @Test
+  fun `scopes invitationPending to the project being listed`() {
+    recordActivity(testData.contributor.id, lastAt)
+    recordActivity(testData.contributor.id, lastAt, projectId = testData.publicProject.id)
+
+    userAccount = testData.admin
+    performAuthPut(
+      "/v2/projects/${testData.publicProject.id}/invite",
+      mapOf("email" to testData.contributor.username, "type" to "TRANSLATE"),
+    ).andIsOk
+
+    assertThat(contributorsOf(testData.publicProject.id)[testData.contributor.id]!!.invitationPending).isTrue()
+    assertThat(contributorsOf(testData.project.id)[testData.contributor.id]!!.invitationPending).isFalse()
+  }
+
+  @Test
+  fun `does not treat an organization invitation as a pending project invitation`() {
+    recordActivity(testData.contributor.id, lastAt)
+
+    userAccount = testData.admin
+    performAuthPut(
+      "/v2/organizations/${testData.project.organizationOwner.id}/invite",
+      mapOf("roleType" to "MEMBER", "email" to testData.contributor.username),
+    ).andIsOk
+
+    assertThat(contributorsOf(testData.project.id)[testData.contributor.id]!!.invitationPending).isFalse()
+  }
+
+  private fun contributorsOf(projectId: Long) =
+    projectContributorService
+      .getContributors(projectId, PageRequest.of(0, 100))
+      .content
+      .associateBy { it.id }
 
   @Test
   fun `requires MEMBERS_VIEW`() {
