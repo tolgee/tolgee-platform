@@ -6,8 +6,7 @@ import org.springframework.core.type.filter.AssignableTypeFilter
 import kotlin.reflect.KClass
 import kotlin.reflect.full.memberProperties
 
-// Fails if any non-sanctioned RepresentationModel declares `username`. It checks declaration, not
-// value; the empty-value contract for stripped models is pinned by UsernameDisclosureGuardValueTest.
+// Checks declaration only; the empty-value contract is pinned by UsernameDisclosureGuardValueTest.
 object UsernameDisclosureGuard {
   // Models that intentionally expose a real username (the e-mail). Serve each only from the gated
   // endpoint noted — returning one from a less-gated endpoint would leak the e-mail.

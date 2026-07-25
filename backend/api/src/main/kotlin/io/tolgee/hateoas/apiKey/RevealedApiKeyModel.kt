@@ -16,7 +16,6 @@ open class RevealedApiKeyModel(
 ) : RepresentationModel<RevealedApiKeyModel>(),
   Serializable,
   IApiKeyModel by apiKeyModel {
-  // Explicit override (not delegated) so the deprecation reaches the generated schema.
   @Deprecated(USERNAME_FIELD_DEPRECATION)
   @get:Schema(deprecated = true, description = USERNAME_FIELD_DEPRECATION)
   override val username: String? = ""

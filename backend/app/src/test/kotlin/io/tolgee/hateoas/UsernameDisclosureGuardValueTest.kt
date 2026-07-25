@@ -10,7 +10,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import kotlin.reflect.KClass
 
-// The guard checks that a stripped model declares username, not the value; these pin the empty value.
 @Suppress("DEPRECATION")
 class UsernameDisclosureGuardValueTest {
   private class DeclaresUsername(
@@ -43,8 +42,8 @@ class UsernameDisclosureGuardValueTest {
 
     assertThat(instances.values).allSatisfy { assertThat(it).isEmpty() }
 
-    // Keep this set in sync with the guard: a stripped model with no value assertion would leak silently.
     assertThat(instances.keys.mapNotNull { it.qualifiedName })
+      .`as`("every strippedModelName must be value-asserted here, else a stripped model could re-leak silently")
       .containsExactlyInAnyOrderElementsOf(UsernameDisclosureGuard.strippedModelNames)
   }
 }
