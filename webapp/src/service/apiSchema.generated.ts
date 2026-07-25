@@ -3921,7 +3921,6 @@ export interface components {
       /** Format: int64 */
       deletedByUserId?: number;
       deletedByUserName?: string;
-      deletedByUserUsername?: string;
       description?: string;
       /** Format: int64 */
       id: number;
@@ -3939,7 +3938,6 @@ export interface components {
       /** Format: int64 */
       deletedByUserId?: number;
       deletedByUserName?: string;
-      deletedByUserUsername?: string;
       description?: string;
       /** Format: int64 */
       id: number;
