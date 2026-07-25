@@ -355,7 +355,7 @@ jobs:
         working-directory: ./library
 
       # Remove ee before installing webapp deps so the prepare hook (prepareEe.js)
-      # links the OSS stub (eeModule.current -> eeModule.oss) instead of the ee module.
+      # links the OSS stub instead of the ee module.
       - name: Remove ee
         run: rm -rf ./src/ee
         working-directory: ./webapp

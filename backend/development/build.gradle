@@ -80,7 +80,7 @@ dependencies {
 sourceSets {
     main.kotlin.srcDirs = ['src/main/kotlin', 'src/main/java']
     if (gradle.ext.eeAppDirectoryExists) {
-        main.kotlin.srcDirs += 'src/mainEe/kotlin'
+        main.kotlin.srcDirs += ['src/mainEe/kotlin', 'src/mainEe/java']
     }
     test.kotlin.srcDirs = ['src/test/kotlin', 'src/test/java']
 }
