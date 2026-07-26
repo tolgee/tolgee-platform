@@ -32,8 +32,12 @@ jobs:
   backend-build-without-ee:
     name: Build backend without ee 🏗️
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Setup environment
         uses: ./.github/actions/setup-env
@@ -342,8 +346,12 @@ jobs:
   frontend-test-without-ee:
     name: Frontend unit tests without ee 🧪
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Setup environment
         uses: ./.github/actions/setup-env
