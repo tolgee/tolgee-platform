@@ -29,11 +29,8 @@ class TaskReportHelper(
   }
 
   fun formatUserName(user: UserAccount): String {
-    val result = StringBuilder(user.name)
-    if (user.name != user.username) {
-      result.append(" (${user.username})")
-    }
-    return result.toString()
+    if (user.name.isBlank()) return "#${user.id}"
+    return user.name
   }
 
   fun capitalize(text: String): String {

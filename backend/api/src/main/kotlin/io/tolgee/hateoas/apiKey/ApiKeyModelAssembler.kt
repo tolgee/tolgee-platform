@@ -15,7 +15,6 @@ class ApiKeyModelAssembler :
     ApiKeyModel(
       id = entity.id,
       description = entity.description,
-      username = entity.userAccount.username,
       userFullName = entity.userAccount.name,
       projectId = entity.project.id,
       projectName = entity.project.name,

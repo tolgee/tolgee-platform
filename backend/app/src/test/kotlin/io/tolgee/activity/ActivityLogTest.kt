@@ -189,7 +189,7 @@ class ActivityLogTest : ProjectAuthControllerTest("/v2/projects/") {
 
   private fun JsonAssert.isValidAuthor() {
     node("id").isNumber
-    node("username").isEqualTo("test_username")
+    node("username").isEqualTo("")
     node("name").isEqualTo("Franta")
   }
 

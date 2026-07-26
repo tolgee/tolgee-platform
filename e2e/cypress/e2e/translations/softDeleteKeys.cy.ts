@@ -226,7 +226,7 @@ describe('Soft delete keys', () => {
     // Open filter and select "Deleted by" > user 1
     cy.gcy('translations-filter-select').click();
     cy.gcy('submenu-item').contains('Deleted by').click();
-    cy.gcy('filter-item').contains(users[0].username).click();
+    cy.gcy('filter-item').contains(users[0].name).click();
     cy.focused().type('{Esc}');
     cy.focused().type('{Esc}');
     waitForGlobalLoading();

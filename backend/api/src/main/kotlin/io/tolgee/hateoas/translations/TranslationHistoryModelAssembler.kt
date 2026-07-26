@@ -4,14 +4,12 @@ import io.tolgee.api.v2.controllers.translation.TranslationsController
 import io.tolgee.dtos.queryResults.TranslationHistoryView
 import io.tolgee.hateoas.userAccount.SimpleUserAccountModel
 import io.tolgee.service.AvatarService
-import io.tolgee.service.security.SecurityService
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.stereotype.Component
 
 @Component
 class TranslationHistoryModelAssembler(
   private val avatarService: AvatarService,
-  private val securityService: SecurityService,
 ) : RepresentationModelAssemblerSupport<TranslationHistoryView, TranslationHistoryModel>(
     TranslationsController::class.java,
     TranslationHistoryModel::class.java,
@@ -26,7 +24,6 @@ class TranslationHistoryModelAssembler(
           SimpleUserAccountModel(
             id = it,
             name = view.authorName,
-            username = securityService.maskedMemberField(view.authorEmail),
             avatar = avatar,
             deleted = view.authorDeletedAt != null,
           )

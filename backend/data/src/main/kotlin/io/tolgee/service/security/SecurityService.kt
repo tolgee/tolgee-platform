@@ -102,14 +102,9 @@ class SecurityService(
     return getCurrentPermittedScopes(projectHolder.project.id).containsAll(scopes)
   }
 
-  fun maskedMemberField(value: String?): String {
-    if (shouldExposeMemberInfo()) return value ?: ""
-    return ""
-  }
-
-  fun shouldExposeMemberInfo(): Boolean {
-    // Off-request threads (e.g. @Async activity-websocket broadcasts) have no request scope, where
-    // reading projectHolder.projectOrNull throws; there is also no caller whose scope could gate this.
+  fun shouldExposeMemberCount(): Boolean {
+    // Order matters: off-request (e.g. @Async broadcasts) projectHolder.projectOrNull throws, so the
+    // request-scope check must short-circuit first.
     if (RequestContextHolder.getRequestAttributes() == null) return true
     if (projectHolder.projectOrNull == null) return true
     return currentPermittedScopesContain(Scope.MEMBERS_VIEW)

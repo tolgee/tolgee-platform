@@ -64,6 +64,7 @@ class AdministrationControllerTest : AuthorizedControllerTest() {
         isArray.hasSizeGreaterThan(1)
         node("[0]") {
           node("name").isEqualTo("John User")
+          node("username").isEqualTo("user@user.com")
         }
       }
     }

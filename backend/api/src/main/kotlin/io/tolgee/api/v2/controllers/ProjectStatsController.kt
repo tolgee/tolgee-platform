@@ -118,7 +118,7 @@ class ProjectStatsController(
   }
 
   private fun visibleMembersCount(memberCount: Long): Long {
-    if (!securityService.shouldExposeMemberInfo()) return 0
+    if (!securityService.shouldExposeMemberCount()) return 0
     return memberCount
   }
 }

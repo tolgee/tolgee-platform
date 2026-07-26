@@ -1,6 +1,7 @@
 package io.tolgee.hateoas.apiKey
 
 import io.swagger.v3.oas.annotations.media.Schema
+import io.tolgee.api.USERNAME_FIELD_DEPRECATION
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
 
@@ -19,4 +20,8 @@ open class ApiKeyWithLanguagesModel(
   )
   val branchingEnabled: Boolean = false,
 ) : RepresentationModel<ApiKeyWithLanguagesModel>(),
-  IApiKeyModel by apiKeyModel
+  IApiKeyModel by apiKeyModel {
+  @Deprecated(USERNAME_FIELD_DEPRECATION)
+  @get:Schema(deprecated = true, description = USERNAME_FIELD_DEPRECATION)
+  override val username: String? = ""
+}

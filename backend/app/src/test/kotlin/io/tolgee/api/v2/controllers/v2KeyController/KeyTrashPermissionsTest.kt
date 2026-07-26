@@ -101,7 +101,7 @@ class KeyTrashPermissionsTest : ProjectAuthControllerTest("/v2/projects/") {
     performProjectAuthGet("keys/trash/deleters").andIsOk.andAssertThatJson {
       node("_embedded.users").isArray.isNotEmpty
       node("_embedded.users[0].id").isEqualTo(testData.user.id)
-      node("_embedded.users[0].username").isEqualTo(testData.user.username)
+      node("_embedded.users[0].username").isEqualTo("")
     }
   }
 

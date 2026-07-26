@@ -1392,7 +1392,10 @@ export interface components {
       scopes: string[];
       /** @description Full name of user owner */
       userFullName?: string;
-      /** @description Username of user owner */
+      /**
+       * @deprecated
+       * @description Deprecated: always empty. A user's username (their e-mail) is returned only on member and admin listings and on the user's own account, never where a user is merely referenced (author, actor, key owner).
+       */
       username?: string;
     };
     ApiKeyPermissionsModel: {
@@ -1515,6 +1518,10 @@ export interface components {
       projectName: string;
       scopes: string[];
       userFullName?: string;
+      /**
+       * @deprecated
+       * @description Deprecated: always empty. A user's username (their e-mail) is returned only on member and admin listings and on the user's own account, never where a user is merely referenced (author, actor, key owner).
+       */
       username?: string;
     };
     ApplyBranchMergeRequest: {
@@ -3898,7 +3905,6 @@ export interface components {
       /** Format: int64 */
       deletedByUserId?: number;
       deletedByUserName?: string;
-      deletedByUserUsername?: string;
       description?: string;
       /** Format: int64 */
       id: number;
@@ -3916,7 +3922,6 @@ export interface components {
       /** Format: int64 */
       deletedByUserId?: number;
       deletedByUserName?: string;
-      deletedByUserUsername?: string;
       description?: string;
       /** Format: int64 */
       id: number;
@@ -5234,6 +5239,10 @@ export interface components {
       /** Format: int64 */
       id: number;
       name?: string;
+      /**
+       * @deprecated
+       * @description Deprecated: always empty. A user's username (their e-mail) is returned only on member and admin listings and on the user's own account, never where a user is merely referenced (author, actor, key owner).
+       */
       username?: string;
     };
     ProjectActivityModel: {
@@ -6149,6 +6158,10 @@ export interface components {
       projectName: string;
       scopes: string[];
       userFullName?: string;
+      /**
+       * @deprecated
+       * @description Deprecated: always empty. A user's username (their e-mail) is returned only on member and admin listings and on the user's own account, never where a user is merely referenced (author, actor, key owner).
+       */
       username?: string;
     };
     RevealedPatModel: {
@@ -6513,6 +6526,10 @@ export interface components {
       /** Format: int64 */
       id: number;
       name?: string;
+      /**
+       * @deprecated
+       * @description Deprecated: always empty. A user's username (their e-mail) is returned only on member and admin listings and on the user's own account, never where a user is merely referenced (author, actor, key owner).
+       */
       username: string;
     };
     SingleStepImportRequest: {

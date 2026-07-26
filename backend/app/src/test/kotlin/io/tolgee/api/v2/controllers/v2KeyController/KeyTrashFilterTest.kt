@@ -181,7 +181,7 @@ class KeyTrashFilterTest : ProjectAuthControllerTest("/v2/projects/") {
           node("name").isEqualTo("key 01")
           node("deletedAt").isPresent()
           node("deletedBy.id").isEqualTo(testData.user.id)
-          node("deletedBy.username").isEqualTo("franta")
+          node("deletedBy.username").isEqualTo("")
         }
       }
   }

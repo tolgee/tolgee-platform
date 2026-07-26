@@ -17,7 +17,7 @@ interface ActivityModifiedEntityRepository : JpaRepository<ActivityModifiedEntit
   @Query(
     """
     select ame.modifications as modifications, ar.timestamp as timestamp,
-    u.name as authorName, u.avatarHash as authorAvatarHash, u.username as authorEmail,
+    u.name as authorName, u.avatarHash as authorAvatarHash,
     u.id as authorId, u.deletedAt as authorDeletedAt, ame.revisionType as revisionType
     from ActivityModifiedEntity ame 
     join ame.activityRevision ar

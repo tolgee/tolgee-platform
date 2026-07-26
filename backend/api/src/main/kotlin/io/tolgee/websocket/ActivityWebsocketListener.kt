@@ -53,10 +53,7 @@ class ActivityWebsocketListener(
   fun getActorInfo(userId: Long?): ActorInfo {
     return userId?.let {
       val user = userAccountService.findDto(userId) ?: return@let null
-      // These events fan out to every project subscriber and a recipient's MEMBERS_VIEW can't be
-      // checked per-recipient at fan-out, so the realtime channel never carries the author email (the
-      // `username` field) — REST applies the per-caller members.view gate.
-      val data = simpleUserAccountModelAssembler.toModel(user).copy(username = "")
+      val data = simpleUserAccountModelAssembler.toModel(user)
       ActorInfo(type = ActorType.USER, data = data)
     } ?: ActorInfo(type = ActorType.UNKNOWN, data = null)
   }
