@@ -26,8 +26,11 @@ class FingerprintingCacheManagerTest {
   }
 
   @Test
-  fun `delegates cache names untouched`() {
+  fun `exposes logical cache names`() {
     whenever(delegate.cacheNames).thenReturn(listOf("a--1", "b--2"))
-    manager.cacheNames.assert.containsExactly("a--1", "b--2")
+    whenever(registry.logicalName("a--1")).thenReturn("a")
+    whenever(registry.logicalName("b--2")).thenReturn("b")
+
+    manager.cacheNames.assert.containsExactlyInAnyOrder("a", "b")
   }
 }

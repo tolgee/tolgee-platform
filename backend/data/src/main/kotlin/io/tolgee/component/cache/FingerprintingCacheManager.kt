@@ -9,5 +9,6 @@ class FingerprintingCacheManager(
 ) : CacheManager {
   override fun getCache(name: String): Cache? = delegate.getCache(registry.physicalName(name))
 
-  override fun getCacheNames(): Collection<String> = delegate.cacheNames
+  // Expose logical names so the fingerprint doesn't leak into metrics, the actuator endpoint, or logs.
+  override fun getCacheNames(): Collection<String> = delegate.cacheNames.map { registry.logicalName(it) }.toSet()
 }

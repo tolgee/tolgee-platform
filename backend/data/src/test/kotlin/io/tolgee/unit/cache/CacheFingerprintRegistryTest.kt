@@ -52,6 +52,11 @@ class CacheFingerprintRegistryTest {
     fun get(): ShapeA = ShapeA(1)
   }
 
+  class CachingPutBean {
+    @Caching(put = [CachePut("annotatedCache")])
+    fun get(): ShapeA = ShapeA(1)
+  }
+
   private fun registry(
     beans: Map<String, Class<*>> = emptyMap(),
     directTypes: Map<String, KType> = emptyMap(),
@@ -117,6 +122,14 @@ class CacheFingerprintRegistryTest {
   }
 
   @Test
+  fun `fingerprints a CachePut cache declared via the Caching container`() {
+    registry(beans = mapOf("bean" to CachingPutBean::class.java))
+      .physicalName("annotatedCache")
+      .assert
+      .startsWith("annotatedCache${CacheFingerprintRegistry.SEPARATOR}")
+  }
+
+  @Test
   fun `aggregates multiple return types targeting the same cache`() {
     registry(beans = mapOf("bean" to MultiTypeCacheableBean::class.java))
       .physicalName("annotatedCache")
@@ -171,5 +184,14 @@ class CacheFingerprintRegistryTest {
   fun `physicalName falls open to the bare name when queried before the registry is built`() {
     val reg = CacheFingerprintRegistry(mock<ApplicationContext>(), CacheValueFingerprint(), emptyList())
     reg.physicalName("anyCache").assert.isEqualTo("anyCache")
+  }
+
+  @Test
+  fun `logicalName strips the fingerprint suffix and round-trips with physicalName`() {
+    val reg = registry(directTypes = mapOf("rateLimits" to typeOf<ShapeA>()))
+    val physical = reg.physicalName("rateLimits")
+
+    reg.logicalName(physical).assert.isEqualTo("rateLimits")
+    reg.logicalName("plainName").assert.isEqualTo("plainName")
   }
 }

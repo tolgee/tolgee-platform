@@ -38,7 +38,7 @@ class CacheFingerprintRegistry(
   }
 
   fun physicalName(cacheName: String): String {
-    if (cacheName.contains(SEPARATOR)) return cacheName
+    if (PHYSICAL_NAME_SUFFIX.containsMatchIn(cacheName)) return cacheName
     val fingerprints = fingerprintByCacheName
     if (fingerprints == null) {
       logger.warn(
@@ -50,6 +50,9 @@ class CacheFingerprintRegistry(
     val fp = fingerprints[cacheName] ?: return cacheName
     return "$cacheName$SEPARATOR$fp"
   }
+
+  /** Strips the fingerprint suffix so callers that enumerate caches (metrics, actuator) see logical names. */
+  fun logicalName(physicalName: String): String = physicalName.replace(PHYSICAL_NAME_SUFFIX, "")
 
   private fun buildFingerprints(): Map<String, String> {
     val fingerprints = HashMap<String, String>()
@@ -142,5 +145,6 @@ class CacheFingerprintRegistry(
 
   companion object {
     const val SEPARATOR = "--"
+    val PHYSICAL_NAME_SUFFIX = Regex("$SEPARATOR[0-9a-f]+$")
   }
 }
