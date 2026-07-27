@@ -277,9 +277,15 @@ class ProjectContributorsControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `allows a member holding exactly MEMBERS_VIEW`() {
+  fun `allows a member holding exactly MEMBERS_VIEW, and serves them the address`() {
+    recordActivity(testData.contributor.id, lastAt)
+
     userAccount = testData.membersViewer
-    performAuthGet("/v2/projects/${testData.project.id}/contributors").andIsOk
+    performAuthGet("/v2/projects/${testData.project.id}/contributors")
+      .andIsOk
+      .andAssertThatJson {
+        node("_embedded.contributors[0].username").isEqualTo(testData.contributor.username)
+      }
   }
 
   @Test
