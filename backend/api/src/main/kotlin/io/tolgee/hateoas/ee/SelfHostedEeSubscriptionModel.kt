@@ -27,5 +27,6 @@ open class SelfHostedEeSubscriptionModel(
   val limits: SelfHostedUsageLimitsModel,
   val boostEndsAt: Long? = null,
   val autoUpgradeEnabled: Boolean = true,
+  val scheduledDowngrade: SelfHostedEePlanModel? = null,
 ) : RepresentationModel<SelfHostedEeSubscriptionModel>(),
   Serializable
