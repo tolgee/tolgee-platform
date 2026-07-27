@@ -25,7 +25,6 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import tools.jackson.databind.ObjectMapper
 import tools.jackson.databind.json.JsonMapper
-import tools.jackson.module.kotlin.jacksonObjectMapper
 
 @Component
 class PromptVariablesHelper(
@@ -38,6 +37,12 @@ class PromptVariablesHelper(
   private val screenshotService: ScreenshotService,
   private val glossaryTermService: GlossaryTermService,
 ) {
+  private val nonNullMapper: ObjectMapper =
+    JsonMapper
+      .builder()
+      .changeDefaultPropertyInclusion { incl -> incl.withValueInclusion(JsonInclude.Include.NON_NULL) }
+      .build()
+
   /**
    * Determines if the given language tag corresponds to Chinese, Japanese, or Korean.
    *
@@ -112,11 +117,7 @@ class PromptVariablesHelper(
             }
           if (!closeItems.isNullOrEmpty()) {
             closeItems.joinToString("\n") {
-              JsonMapper
-                .builder()
-                .changeDefaultPropertyInclusion { incl -> incl.withValueInclusion(JsonInclude.Include.NON_NULL) }
-                .build()
-                .writeValueAsString(it)
+              nonNullMapper.writeValueAsString(it)
             }
           } else {
             null
@@ -152,11 +153,7 @@ class PromptVariablesHelper(
       Variable("json", description = "Glossary items", lazyValue = {
         if (glossaryTerms.isNotEmpty()) {
           glossaryTerms.joinToString("\n") {
-            JsonMapper
-              .builder()
-              .changeDefaultPropertyInclusion { incl -> incl.withValueInclusion(JsonInclude.Include.NON_NULL) }
-              .build()
-              .writeValueAsString(removeUnnecessaryFields(it))
+            nonNullMapper.writeValueAsString(removeUnnecessaryFields(it))
           }
         } else {
           null
@@ -301,11 +298,7 @@ class PromptVariablesHelper(
             }
           if (!closeItems.isNullOrEmpty()) {
             closeItems.joinToString("\n") {
-              JsonMapper
-                .builder()
-                .changeDefaultPropertyInclusion { incl -> incl.withValueInclusion(JsonInclude.Include.NON_NULL) }
-                .build()
-                .writeValueAsString(it)
+              nonNullMapper.writeValueAsString(it)
             }
           } else {
             null
