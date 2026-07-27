@@ -1,6 +1,8 @@
 package io.tolgee.configuration
 
 import com.github.benmanes.caffeine.cache.Caffeine
+import io.tolgee.component.cache.CacheFingerprintRegistry
+import io.tolgee.component.cache.FingerprintingCacheManager
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import org.redisson.Redisson
 import org.springframework.boot.autoconfigure.AutoConfigureAfter
@@ -22,6 +24,7 @@ import java.util.concurrent.TimeUnit
 @ConditionalOnExpression("\${tolgee.cache.use-redis:false} == false and \${tolgee.cache.enabled:false}")
 class CaffeineCacheConfiguration(
   val tolgeeProperties: TolgeeProperties,
+  private val cacheFingerprintRegistry: CacheFingerprintRegistry,
 ) {
   @Bean
   fun caffeineConfig(): Caffeine<Any, Any> {
@@ -40,6 +43,9 @@ class CaffeineCacheConfiguration(
   fun cacheManager(caffeine: Caffeine<Any, Any>): CacheManager {
     val caffeineCacheManager = CaffeineCacheManager()
     caffeineCacheManager.setCaffeine(caffeine)
-    return TransactionAwareCacheManagerProxy(caffeineCacheManager)
+    return FingerprintingCacheManager(
+      TransactionAwareCacheManagerProxy(caffeineCacheManager),
+      cacheFingerprintRegistry,
+    )
   }
 }
