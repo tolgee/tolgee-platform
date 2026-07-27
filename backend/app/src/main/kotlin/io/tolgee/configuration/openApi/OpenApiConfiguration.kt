@@ -21,16 +21,6 @@ import org.springframework.web.method.HandlerMethod
 
 @Configuration
 class OpenApiConfiguration {
-  /**
-   * springdoc 3.0.3's SpringDocHateoasConfiguration silently backs off under Spring Boot 4, so
-   * swagger's mapper is left without two things the generated schema depends on. We rebuild them on
-   * the ModelResolver's mapper here:
-   *  - the Jackson 2 Kotlin module: swagger-core is Jackson 2 and, without it, can't read Kotlin
-   *    property types/nullability (they degrade to `unknown` and lose required flags);
-   *  - SpringDocJackson2HalModule: makes swagger render RepresentationModel/PagedModel as HAL
-   *    (`_embedded`/`_links`) instead of the raw `content`/`links` shape the frontend can't consume.
-   * The app's own runtime serialization uses Jackson 3 and is unaffected by this swagger-only mapper.
-   */
   @Bean
   fun modelResolver(): ModelResolver {
     val mapper = Json.mapper().registerModule(kotlinModule())
@@ -40,10 +30,6 @@ class OpenApiConfiguration {
     return ModelResolver(mapper)
   }
 
-  /**
-   * Refines the `_embedded` collection schema (set up by the HAL module above) to the correct item
-   * type. Normally registered by SpringDocHateoasConfiguration, which backs off under Spring Boot 4.
-   */
   @Bean
   fun collectionModelContentConverter(linkRelationProvider: LinkRelationProvider): CollectionModelContentConverter {
     return CollectionModelContentConverter(linkRelationProvider)

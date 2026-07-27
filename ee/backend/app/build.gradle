@@ -3,9 +3,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        // See backend/data/build.gradle: liquibase-gradle 3.1.0 resolves liquibase.Scope at config
-        // time, so plugin + liquibase-core must share the buildscript classloader (plugins{} isolates
-        // them). Keep this in sync with libs.liquibaseCore.
+        // classloader-sharing rationale: see backend/data/build.gradle
         classpath 'org.liquibase.gradle:org.liquibase.gradle.gradle.plugin:3.1.0'
         classpath 'org.liquibase:liquibase-core:5.0.3'
     }

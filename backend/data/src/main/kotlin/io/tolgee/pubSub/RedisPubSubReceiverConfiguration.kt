@@ -75,9 +75,8 @@ class RedisPubSubReceiverConfiguration(
   fun redisJobPubsubContainer(): RedisMessageListenerContainer {
     val container = RedisMessageListenerContainer()
     container.setConnectionFactory(connectionFactory)
-    // The subscription task blocks its thread for the container's whole lifetime. It defaults to the
-    // taskExecutor, so a single-threaded taskExecutor would leave no thread to dispatch messages and
-    // they would never be delivered. Give the subscription its own executor.
+    // Own executor: the subscription blocks its thread for the container's lifetime, so sharing the
+    // single-threaded taskExecutor would leave no thread to dispatch messages.
     container.setSubscriptionExecutor(SimpleAsyncTaskExecutor("redis-job-subscription-"))
     container.setTaskExecutor(
       ThreadPoolTaskExecutor().apply {

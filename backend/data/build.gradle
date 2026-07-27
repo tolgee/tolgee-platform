@@ -7,11 +7,8 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        // liquibase-gradle 3.1.0 (the first release with Gradle 9 support) resolves liquibase.Scope
-        // at configuration time, so the plugin and liquibase-core must share the buildscript
-        // classloader. The plugins{} block isolates plugin classloaders, so the plugin is applied
-        // the legacy way (apply plugin below) with liquibase-core alongside it. Keep this in sync
-        // with libs.liquibaseCore (the version catalog isn't visible in a buildscript block).
+        // liquibase-gradle 3.1.0 resolves liquibase.Scope at config time, so plugin + liquibase-core must
+        // share the buildscript classloader (plugins{} isolates them). Keep in sync with libs.liquibaseCore.
         classpath 'org.liquibase.gradle:org.liquibase.gradle.gradle.plugin:3.1.0'
         classpath 'org.liquibase:liquibase-core:5.0.3'
     }
@@ -137,8 +134,6 @@ dependencies {
      * Liquibase
      */
     implementation libs.liquibaseCore
-    // Boot 4 split Liquibase auto-configuration into this module; it registers the
-    // EntityManagerFactory depends-on that makes our SpringLiquibase beans run before the EMF.
     implementation 'org.springframework.boot:spring-boot-liquibase'
     liquibaseRuntime libs.liquibaseCore
     liquibaseRuntime libs.jacksonModuleKotlin

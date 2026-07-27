@@ -35,9 +35,8 @@ class CurrentDateProvider(
   private var persistedDateLoaded = false
 
   var forcedDate: Date? = null
-    // Loaded lazily on first read rather than in the constructor: under Spring Boot 4 this
-    // singleton is reached by servlet-filter beans during web-server startup, which runs
-    // before Liquibase creates the forced_server_date_time table.
+    // Lazy, not constructor-loaded: servlet-filter beans reach this during startup, before Liquibase
+    // creates the forced_server_date_time table.
     get() {
       loadPersistedForcedDateOnce()
       return field

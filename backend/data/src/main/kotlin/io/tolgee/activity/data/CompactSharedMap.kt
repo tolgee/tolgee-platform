@@ -20,13 +20,7 @@ package io.tolgee.activity.data
  * Concrete subclasses pick the appropriate [NameSchema.Companion.Scope]
  * and provide a Jackson deserializer that round-trips the legacy JSON shape.
  *
- * This type deliberately does NOT implement `Map<String, V>` itself. Hibernate 7's
- * hibernate-models introspection reads the value type-argument (index 1) of the first
- * `Map` supertype it finds; a one-type-parameter intermediate like
- * `CompactSharedMap<V> : Map<String, V>` makes it read a non-existent argument and crash
- * with IndexOutOfBoundsException when such a value is a JSONB entity attribute. The
- * concrete subclasses implement `Map<String, ConcreteV>` directly instead.
- * See https://github.com/hibernate/hibernate-models/issues/263
+ * Base class must NOT implement `Map<String, V>` directly — it crashes Hibernate 7 introspection. See https://github.com/hibernate/hibernate-models/issues/263
  */
 abstract class CompactSharedMap<V> protected constructor(
   internal val schema: NameSchema,

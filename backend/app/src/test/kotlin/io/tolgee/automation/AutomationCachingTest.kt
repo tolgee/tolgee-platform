@@ -42,8 +42,6 @@ class AutomationCachingTest : ProjectAuthControllerTest("/v2/projects/") {
     userAccount = testData.user
     this.projectSupplier = { testData.projectBuilder.self }
     cacheManager.getCache(Caches.AUTOMATIONS)!!.clear()
-    // lets the test observe whether a query hit the database via Hibernate's statement counter.
-    // Enabled here rather than via a property so it survives @RedisTest replacing @SpringBootTest.
     entityManagerFactory.unwrap(SessionFactory::class.java).statistics.isStatisticsEnabled = true
   }
 
@@ -53,11 +51,9 @@ class AutomationCachingTest : ProjectAuthControllerTest("/v2/projects/") {
     val zeroStatements = executedStatementCount()
     getAutomations(AutomationTriggerType.TRANSLATION_DATA_MODIFICATION, null)
 
-    // first time - not cached, hits the database
     val afterFirst = executedStatementCount()
     zeroStatements.assert.isLessThan(afterFirst)
 
-    // second time - served from cache, no database access
     getAutomations(AutomationTriggerType.TRANSLATION_DATA_MODIFICATION, null)
     executedStatementCount().assert.isEqualTo(afterFirst)
     getFromCache(AutomationTriggerType.TRANSLATION_DATA_MODIFICATION).assert.isNotNull

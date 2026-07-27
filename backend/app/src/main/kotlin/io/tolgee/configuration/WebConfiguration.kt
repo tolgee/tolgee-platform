@@ -74,8 +74,6 @@ class WebConfiguration(
     return SecureRandom()
   }
 
-  // Declared as JsonMapper (not ObjectMapper) so Boot's @ConditionalOnMissingBean(JsonMapper)
-  // jacksonJsonMapper backs off, leaving this as the single primary mapper.
   @Bean
   @Primary
   fun objectMapper(): JsonMapper {
