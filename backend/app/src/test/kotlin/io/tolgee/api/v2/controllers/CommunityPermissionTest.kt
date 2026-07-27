@@ -279,7 +279,7 @@ class CommunityPermissionTest : ProjectAuthControllerTest("/v2/projects/") {
 
     userAccount = testData.manager
     performProjectAuthGet("keys/trash").andIsOk.andAssertThatJson {
-      node("_embedded.keys[0].deletedBy.username").isEqualTo("project_manager")
+      node("_embedded.keys[0].deletedBy.username").isEqualTo("")
     }
   }
 

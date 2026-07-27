@@ -93,7 +93,7 @@ class TranslationsControllerHistoryTest : ProjectAuthControllerTest("/v2/project
           node("revisionType").isEqualTo("MOD")
           node("author") {
             node("id").isNumber.isGreaterThan(0.toBigDecimal())
-            node("username").isEqualTo("franta")
+            node("username").isEqualTo("")
             node("name").isEqualTo("Frantisek")
             node("avatar") {
               node("large").isString.contains(".png")

@@ -241,7 +241,6 @@ class QueryBase<T>(
     this.deletedByJoin = deletedByJoin
     querySelection[KeyWithTranslationsView::deletedByUserId.name] = deletedByJoin.get(UserAccount_.id)
     querySelection[KeyWithTranslationsView::deletedByUserName.name] = deletedByJoin.get(UserAccount_.name)
-    querySelection[KeyWithTranslationsView::deletedByUserUsername.name] = deletedByJoin.get(UserAccount_.username)
     querySelection[KeyWithTranslationsView::deletedByUserAvatarHash.name] = deletedByJoin.get(UserAccount_.avatarHash)
     querySelection[KeyWithTranslationsView::deletedByUserDeletedAt.name] = deletedByJoin.get(UserAccount_.deletedAt)
   }

@@ -60,7 +60,6 @@ class ActivityViewByRevisionsProvider(
         timestamp = revision.timestamp.time,
         type = revision.type ?: ActivityType.UNKNOWN,
         authorId = revision.authorId,
-        authorUsername = author?.username,
         authorName = author?.name,
         authorAvatarHash = author?.avatarHash,
         authorDeleted = author?.deletedAt != null,

@@ -45,7 +45,7 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
       ),
     ).andIsOk.andPrettyPrint.andAssertThatJson {
       node("key").isString.hasSizeGreaterThan(10)
-      node("username").isEqualTo("test_username")
+      node("username").isEqualTo("")
       node("userFullName").isEqualTo("")
       node("projectId").isNumber.isGreaterThan(BigDecimal(0))
       node("id").isValidId
@@ -64,7 +64,7 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
       ),
     ).andIsOk.andPrettyPrint.andAssertThatJson {
       node("key").isString.hasSizeGreaterThan(10)
-      node("username").isEqualTo("test_username")
+      node("username").isEqualTo("")
       node("userFullName").isEqualTo("")
       node("projectId").isNumber.isGreaterThan(BigDecimal(0))
       node("id").isValidId
@@ -131,7 +131,7 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
         node("[0]") {
           node("key").isAbsent()
           node("description").isEqualTo("test_......ta_39")
-          node("username").isEqualTo("franta")
+          node("username").isEqualTo("")
           node("userFullName").isEqualTo("Franta Dobrota")
           node("projectId").isNumber.isGreaterThan(BigDecimal(0))
           node("id").isValidId
@@ -152,7 +152,7 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
           isArray.hasSize(1)
           node("[0]") {
             node("key").isAbsent()
-            node("username").isEqualTo("franta")
+            node("username").isEqualTo("")
             node("userFullName").isEqualTo("Franta Dobrota")
             node("projectId").isNumber.isGreaterThan(BigDecimal(0))
             node("id").isValidId

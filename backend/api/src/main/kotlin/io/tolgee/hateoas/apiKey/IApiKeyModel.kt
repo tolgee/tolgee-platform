@@ -1,8 +1,12 @@
 package io.tolgee.hateoas.apiKey
 
+import io.tolgee.api.USERNAME_FIELD_DEPRECATION
+
 interface IApiKeyModel {
   val id: Long
-  var username: String?
+
+  @Deprecated(USERNAME_FIELD_DEPRECATION)
+  val username: String?
   var userFullName: String?
   var projectId: Long
   var projectName: String

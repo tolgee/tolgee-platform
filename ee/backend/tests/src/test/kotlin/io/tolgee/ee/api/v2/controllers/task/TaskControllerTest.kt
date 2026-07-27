@@ -94,7 +94,7 @@ class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     performProjectAuthGet(
       "tasks/${testData.translateTask.self.number}",
     ).andAssertThatJson {
-      node("author.username").isEqualTo("project.user@test.com")
+      node("author.username").isEqualTo("")
     }
   }
 

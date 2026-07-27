@@ -4,7 +4,7 @@ import { components } from 'tg.service/apiSchema.generated';
 type InvitationData = components['schemas']['PublicInvitationModel'];
 
 export function InvitationInfoText({ data }: { data: InvitationData }) {
-  const username = data.createdBy?.name ?? data.createdBy?.username;
+  const username = data.createdBy?.name;
   const project = data.projectName;
   const organization = data.organizationName;
   const params = { username, project, organization, b: <b /> };

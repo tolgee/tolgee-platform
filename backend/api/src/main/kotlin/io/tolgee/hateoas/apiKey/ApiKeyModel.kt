@@ -1,6 +1,7 @@
 package io.tolgee.hateoas.apiKey
 
 import io.swagger.v3.oas.annotations.media.Schema
+import io.tolgee.api.USERNAME_FIELD_DEPRECATION
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
 import java.io.Serializable
@@ -12,8 +13,6 @@ open class ApiKeyModel(
   override val id: Long,
   @Schema(description = "Description")
   override val description: String,
-  @Schema(description = "Username of user owner")
-  override var username: String? = null,
   @Schema(description = "Full name of user owner")
   override var userFullName: String? = null,
   @Schema(description = "Api key's project ID")
@@ -41,4 +40,8 @@ open class ApiKeyModel(
   override var scopes: Set<String> = setOf(),
 ) : RepresentationModel<ApiKeyModel>(),
   Serializable,
-  IApiKeyModel
+  IApiKeyModel {
+  @Deprecated(USERNAME_FIELD_DEPRECATION)
+  @get:Schema(deprecated = true, description = USERNAME_FIELD_DEPRECATION)
+  override val username: String? = ""
+}

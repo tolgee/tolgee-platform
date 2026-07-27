@@ -116,7 +116,7 @@ class CommunitySuggestionTest : ProjectAuthControllerTest("/v2/projects/") {
 
     userAccount = testData.user
     performProjectAuthGet(path).andIsOk.andAssertThatJson {
-      node("_embedded.suggestions[0].author.username").isEqualTo("translator@test.com")
+      node("_embedded.suggestions[0].author.username").isEqualTo("")
     }
   }
 
@@ -133,7 +133,7 @@ class CommunitySuggestionTest : ProjectAuthControllerTest("/v2/projects/") {
 
     userAccount = testData.user
     performProjectAuthGet(path).andIsOk.andAssertThatJson {
-      node("_embedded.keys[0].translations.cs.suggestions[0].author.username").isEqualTo("reviewer@test.com")
+      node("_embedded.keys[0].translations.cs.suggestions[0].author.username").isEqualTo("")
     }
   }
 
@@ -163,7 +163,7 @@ class CommunitySuggestionTest : ProjectAuthControllerTest("/v2/projects/") {
 
     userAccount = testData.user
     performProjectAuthGet("activity").andIsOk.andAssertThatJson {
-      node("_embedded.activities[0].author.username").isEqualTo("suggestionsuggestionsTestUser")
+      node("_embedded.activities[0].author.username").isEqualTo("")
     }
   }
 
@@ -183,7 +183,7 @@ class CommunitySuggestionTest : ProjectAuthControllerTest("/v2/projects/") {
 
     userAccount = testData.user
     performProjectAuthGet("translations/$translationId/comments").andIsOk.andAssertThatJson {
-      node("_embedded.translationComments[0].author.username").isEqualTo("suggestionsuggestionsTestUser")
+      node("_embedded.translationComments[0].author.username").isEqualTo("")
     }
   }
 

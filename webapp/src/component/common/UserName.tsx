@@ -17,9 +17,11 @@ export const useUserName = () => {
   return (user: SimpleUser) => {
     if (user.deleted) {
       return t('former-user-name');
-    } else {
-      return user?.name || user?.username;
     }
+    return (
+      user.name ||
+      (user.id ? `#${user.id}` : t('translation_suggestion_unnamed_user'))
+    );
   };
 };
 
