@@ -9,12 +9,14 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 class FiltersConfiguration {
+  companion object {
+    private const val JUST_BEFORE_SECURITY_FILTER_ORDER = -101
+  }
+
   @Bean("filterRegistrationVersion")
   fun versionFilter(versionFilter: VersionFilter): FilterRegistrationBean<*> {
     val registration = FilterRegistrationBean(versionFilter)
-    // Just before Spring Security's filter chain (its default order is -100;
-    // Boot 4 removed the SecurityProperties.DEFAULT_FILTER_ORDER constant).
-    registration.order = -101
+    registration.order = JUST_BEFORE_SECURITY_FILTER_ORDER
     return registration
   }
 
