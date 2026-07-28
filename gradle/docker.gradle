@@ -33,6 +33,23 @@ tasks.register('docker') {
     dependsOn("dockerPrepare")
 }
 
+// Builds the slim Docker image, tagged as tolgee/tolgee:slim.
+// Uses Dockerfile.slim - JRE-only base, no embedded postgres.
+// The slim image is not published; it is built on demand by the EE image
+// build in the billing repo and by the slim smoke test.
+tasks.register('dockerSlim') {
+    doLast {
+        exec {
+            workingDir dockerPath
+            commandLine "docker", "build", ".",
+                "-f", "Dockerfile.slim",
+                "-t", "tolgee/tolgee:slim",
+                "--build-arg", "OTEL_AGENT_VERSION=${opentelemetryJavaagentVersion}"
+        }
+    }
+    dependsOn("dockerPrepare")
+}
+
 // Builds and pushes multi-platform Docker image for CI.
 // Reads configuration from environment variables:
 //   - VERSION: image tag version (default: 'latest')
