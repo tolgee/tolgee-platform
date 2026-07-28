@@ -29,6 +29,27 @@ jobs:
       - name: Upload backend build result
         uses: ./.github/actions/upload-backend-build
 
+  backend-build-without-ee:
+    name: Build backend without ee 🏗️
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
+        with:
+          node: "false"
+
+      - name: Remove ee
+        run: rm -rf ./ee
+
+      - name: Build backend without ee
+        run: ./gradlew classes jar bootJar
+
   backend-test:
     name: BT ‍🔎 (${{ matrix.command }}${{ matrix.shard_total != '' && format(' shard {0}/{1}', matrix.shard_index, matrix.shard_total) || '' }})
     needs: [backend-build]
@@ -322,6 +343,39 @@ jobs:
         run: npm test
         working-directory: ./webapp
 
+  frontend-test-without-ee:
+    name: Frontend unit tests without ee 🧪
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
+        with:
+          java: "false"
+
+      - name: Install library dependencies
+        run: npm ci
+        working-directory: ./library
+
+      # Remove ee before installing webapp deps so the prepare hook (prepareEe.js)
+      # links the OSS stub instead of the ee module.
+      - name: Remove ee
+        run: rm -rf ./src/ee
+        working-directory: ./webapp
+
+      - name: Install webapp dependencies
+        run: npm ci
+        working-directory: ./webapp
+
+      - name: Run webapp unit tests
+        run: npm test
+        working-directory: ./webapp
+
   schema-check:
     name: Schema Check 📋
     needs: [backend-build]
@@ -527,12 +581,14 @@ jobs:
     name: Everything passed 🎉
     needs:
       - backend-build
+      - backend-build-without-ee
       - backend-test
       - backend-code-checks
       - email-code-checks
       - frontend-build
       - frontend-code-check
       - frontend-test
+      - frontend-test-without-ee
       - schema-check
       - migration-check
       - data-cy-check
@@ -548,6 +604,10 @@ jobs:
 
           if [[ "${{ needs.backend-build.result }}" != "success" ]]; then
             failed_jobs+=("backend-build")
+          fi
+
+          if [[ "${{ needs.backend-build-without-ee.result }}" != "success" ]]; then
+            failed_jobs+=("backend-build-without-ee")
           fi
 
           if [[ "${{ needs.backend-test.result }}" != "success" ]]; then
@@ -568,6 +628,10 @@ jobs:
 
           if [[ "${{ needs.frontend-test.result }}" != "success" ]]; then
             failed_jobs+=("frontend-test")
+          fi
+
+          if [[ "${{ needs.frontend-test-without-ee.result }}" != "success" ]]; then
+            failed_jobs+=("frontend-test-without-ee")
           fi
 
           if [[ "${{ needs.schema-check.result }}" != "success" ]]; then
