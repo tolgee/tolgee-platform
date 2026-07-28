@@ -1,3 +1,5 @@
+[![MCP Toplist](https://mcptoplist.com/badge/io.github.tolgee%2Ftolgee.svg)](https://mcptoplist.com/server/io.github.tolgee%2Ftolgee)
+
 <h1 align="center" style="border-bottom: none">
     <b>
         <a href="https://tolgee.io">Tolgee</a><br>
