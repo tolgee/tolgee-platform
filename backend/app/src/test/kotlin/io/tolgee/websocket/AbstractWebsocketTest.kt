@@ -239,34 +239,30 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
   @ProjectJWTAuthTestMethod
   fun `doesn't subscribe as another user`() {
     currentUserWebsocket.listenForNotificationsChanged()
-    val spyingUserWebsocket =
-      WebsocketTestHelper(
-        port,
-        WebsocketTestHelper.Auth(jwtToken = jwtService.emitToken(anotherUser.id)),
-        testData.projectBuilder.self.id,
-        // anotherUser trying to spy on other user's websocket
-        testData.user.id,
+    anotherUserWebsocket.listenForNotificationsChanged()
+    val spiedInbox =
+      anotherUserWebsocket.subscribeAdditional(
+        "/users/${testData.user.id}/${WebsocketEventType.NOTIFICATIONS_CHANGED.typeName}",
       )
-    try {
-      spyingUserWebsocket.listenForNotificationsChanged()
-      spyingUserWebsocket.waitForForbidden()
-      saveNotificationForCurrentUser()
 
-      assertCurrentUserReceivedMessage()
-      spyingUserWebsocket.receivedMessages.assert.isEmpty()
-    } finally {
-      spyingUserWebsocket.stop()
-    }
+    saveNotificationFor(testData.user)
+    saveNotificationFor(anotherUser)
+
+    waitFor { anotherUserWebsocket.receivedMessages.isNotEmpty() }
+    assertCurrentUserReceivedMessage()
+    spiedInbox.assert.isEmpty()
   }
 
   private fun assertCurrentUserReceivedMessage() {
     waitFor { currentUserWebsocket.receivedMessages.isNotEmpty() }
   }
 
-  private fun saveNotificationForCurrentUser(): Notification {
+  private fun saveNotificationForCurrentUser(): Notification = saveNotificationFor(testData.user)
+
+  private fun saveNotificationFor(account: UserAccount): Notification {
     val notification =
       Notification().apply {
-        user = testData.user
+        user = account
         type = NotificationType.PASSWORD_CHANGED
       }
     notificationService.notify(notification)

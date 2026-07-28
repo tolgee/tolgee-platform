@@ -6,6 +6,7 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.node
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -20,26 +21,11 @@ class PublicProjectsControllerTest : AuthorizedControllerTest() {
   fun setup() {
     testData = PublicProjectsControllerTestData()
     testDataService.saveTestData(testData.root)
-    // Drive the degenerate-exclusion projects into states the JPA layer self-heals/forbids on entity
-    // save, via native SQL (the list query is a projection, so it never reloads them as entities).
-    executeInNewTransaction {
-      entityManager
-        .createNativeQuery("update project set base_language_id = null where id = :id")
-        .setParameter("id", testData.noBaseLanguageProject.id)
-        .executeUpdate()
-      entityManager
-        .createNativeQuery("update language set deleted_at = now() where project_id = :id")
-        .setParameter("id", testData.softDeletedBaseProject.id)
-        .executeUpdate()
-      entityManager
-        .createNativeQuery("update project set organization_owner_id = null where id = :id")
-        .setParameter("id", testData.orgLessProject.id)
-        .executeUpdate()
-      entityManager
-        .createNativeQuery("update project set deleted_at = now() where id = :id")
-        .setParameter("id", testData.deletedPublicProject.id)
-        .executeUpdate()
-    }
+  }
+
+  @AfterEach
+  fun cleanup() {
+    testDataService.cleanTestData(testData.root)
   }
 
   @Test
@@ -185,6 +171,25 @@ class PublicProjectsControllerTest : AuthorizedControllerTest() {
     performGet("/v2/public/projects/with-stats").andIsOk.andAssertThatJson {
       node("_embedded.projects").isArray.hasSize(2)
     }
+  }
+
+  @Test
+  fun `excludes a public project of a soft-deleted organization`() {
+    performGet("/v2/public/projects/with-stats").andIsOk.andAssertThatJson {
+      node("_embedded.projects").isArray.hasSize(2)
+    }
+  }
+
+  @Test
+  fun `hasPublicProjects matches the public listing visibility exactly`() {
+    val defaultOrg = testData.userAccountBuilder.defaultOrganizationBuilder.self
+    projectService.hasPublicProjects(defaultOrg.id).assert.isTrue()
+    projectService.hasPublicProjects(testData.otherOrg.id).assert.isTrue()
+    projectService.hasPublicProjects(testData.noPublicOrg.id).assert.isFalse()
+    projectService.hasPublicProjects(testData.noBaseLangOnlyOrg.id).assert.isFalse()
+    projectService.hasPublicProjects(testData.softDeletedBaseLangOnlyOrg.id).assert.isFalse()
+    projectService.hasPublicProjects(testData.deletedProjectOnlyOrg.id).assert.isFalse()
+    projectService.hasPublicProjects(testData.softDeletedOrg.id).assert.isFalse()
   }
 
   private fun baseLanguageId(projectId: Long): Long? =

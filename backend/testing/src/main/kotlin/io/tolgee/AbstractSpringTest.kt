@@ -2,7 +2,6 @@ package io.tolgee
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.tolgee.component.AllCachesProvider
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.SchedulingManager
 import io.tolgee.component.fileStorage.FileStorage
@@ -223,9 +222,6 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   lateinit var currentDateProvider: CurrentDateProvider
 
   @Autowired
-  lateinit var allCachesProvider: AllCachesProvider
-
-  @Autowired
   lateinit var objectMapper: ObjectMapper
 
   @Autowired
@@ -236,7 +232,7 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
 
   @BeforeEach
   fun clearCaches() {
-    allCachesProvider.getAllCaches().forEach { cacheName ->
+    cacheManager.cacheNames.forEach { cacheName ->
       cacheManager.getCache(cacheName)?.clear()
     }
   }

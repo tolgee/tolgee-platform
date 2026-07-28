@@ -7,7 +7,10 @@ import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsNoContent
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.node
+import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.testing.AuthorizedControllerTest
+import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -89,6 +92,30 @@ class AuthProviderChangeControllerEeTest : AuthorizedControllerTest() {
     }
     performAuthGet("/v2/user/managed-by").andIsOk.andAssertThatJson {
       node("name").isString.isEqualTo(testData.organization.name)
+    }
+  }
+
+  @Test
+  fun `accepting organizations sso keeps an existing organization role`() {
+    executeInNewTransaction {
+      organizationRoleService.grantRoleToUser(
+        userAccountService.get(testData.userChangeNoneToSsoOrganizations.id),
+        organizationService.get(testData.organization.id),
+        OrganizationRoleType.MEMBER,
+      )
+    }
+    userAccount = testData.userChangeNoneToSsoOrganizations
+    performAuthPost("/v2/auth-provider/change", mapOf("id" to testData.changeNoneToSsoOrganizations.identifier)).andIsOk
+    executeInNewTransaction {
+      organizationRoleService
+        .findType(testData.userChangeNoneToSsoOrganizations.id, testData.organization.id)
+        .assert
+        .isEqualTo(OrganizationRoleType.MEMBER)
+      organizationRoleService
+        .getManagedBy(testData.userChangeNoneToSsoOrganizations.id)
+        ?.id
+        .assert
+        .isEqualTo(testData.organization.id)
     }
   }
 

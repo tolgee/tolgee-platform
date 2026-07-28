@@ -52,6 +52,7 @@ dependencies {
     testImplementation(project(":data"))
     testImplementation(project(":misc"))
     testImplementation "org.springframework.boot:spring-boot-starter-websocket"
+    testImplementation libs.hibernateTypes
     testImplementation libs.jsonUnitAssert
     testImplementation libs.mockito
     testImplementation libs.stripe

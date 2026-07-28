@@ -8,6 +8,7 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.util.tryUntilItDoesntBreakConstraint
+import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 
 @Service
@@ -16,6 +17,7 @@ class UserPreferencesService(
   private val userPreferencesRepository: UserPreferencesRepository,
   private val userAccountService: UserAccountService,
   private val organizationService: OrganizationService,
+  @param:Lazy
   private val organizationRoleService: OrganizationRoleService,
 ) {
   fun setLanguage(
@@ -99,10 +101,7 @@ class UserPreferencesService(
   fun refreshPreferredOrganization(preferences: UserPreferences): Organization? {
     val canUserView =
       preferences.preferredOrganization?.let { po ->
-        organizationRoleService.canUserView(
-          preferences.userAccount.id,
-          po.id,
-        )
+        organizationRoleService.canUserViewOrPublic(preferences.userAccount.id, po.id)
       } ?: false
 
     if (!canUserView) {

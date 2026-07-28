@@ -24,6 +24,9 @@ import java.util.concurrent.ConcurrentHashMap
  *
  * The full successTargets list is persisted to the database only (via BatchJobService)
  * and is never stored in Redis.
+ *
+ * These maps serialize ExecutionState (incl. its BatchJobChunkExecutionStatus enum) on the RedissonClient default
+ * ordinal codec; a codec switch or enum reorder makes pre-deploy values unreadable, with no TTL to recover.
  */
 open class RedisBatchJobStateStorage(
   private val initializer: BatchJobStateInitializer,

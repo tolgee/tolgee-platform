@@ -2518,6 +2518,7 @@
   "translation_single_no_permission_create": "У вас недостатньо прав для додавання нового ключа",
   "translation_single_tag_placeholder": "Додати тег...",
   "translation_single_translations_title": "Переклади",
+  "translations_invalid_icu_placeholders": "Недійсний ICU: {value}",
   "translations_key_created": "Ключ створено",
   "translations_key_delete_confirmation_text": "{count, plural, one {Ви впевнені, що хочете видалити 1 вибраний ключ і його переклади?} other {Ви впевнені, що хочете видалити всі # вибрані ключі та їх переклади?}}",
   "translations_key_edit_custom_properties_description": "Зберігайте свої власні значення тут у форматі JSON. Ключі, що починаються з `_`, мають особливе значення для Tolgee.",

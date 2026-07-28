@@ -15,6 +15,7 @@ import io.tolgee.configuration.tolgee.machineTranslation.GoogleMachineTranslatio
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProperties
 import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationServiceProperties
 
+/** Ordinal-persisted by [io.tolgee.model.translation.Translation.mtProvider] — do not reorder. */
 enum class MtServiceType(
   val propertyClass: Class<out MachineTranslationServiceProperties>?,
   val providerClass: Class<out MtValueProvider>,

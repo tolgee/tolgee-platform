@@ -2727,6 +2727,7 @@
   "translation_single_no_permission_create": "Non hai permessi sufficienti per aggiungere una nuova chiave",
   "translation_single_tag_placeholder": "Aggiungi tag...",
   "translation_single_translations_title": "Traduzioni",
+  "translations_invalid_icu_placeholders": "ICU non valido: {value}",
   "translations_key_created": "Chiave creata",
   "translations_key_delete_confirmation_text": "{count, plural, one {Sei sicuro di voler eliminare 1 chiave selezionata e le sue traduzioni?} other {Sei sicuro di voler eliminare tutte le # chiavi selezionate e le loro traduzioni?} }",
   "translations_key_edit_custom_properties_description": "Memorizza qui i tuoi valori personalizzati in formato JSON. Le chiavi che iniziano con `_` hanno un significato speciale per Tolgee.",

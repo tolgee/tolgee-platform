@@ -1,5 +1,6 @@
 package io.tolgee.activity.data
 
+/** Ordinal-persisted by [io.tolgee.model.activity.ActivityModifiedEntity.revisionType] — do not reorder. */
 enum class RevisionType {
   ADD,
   MOD,

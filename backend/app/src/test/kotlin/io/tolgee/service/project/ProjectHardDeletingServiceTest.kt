@@ -19,6 +19,7 @@ import io.tolgee.dtos.BigMetaDto
 import io.tolgee.dtos.RelatedKeyDto
 import io.tolgee.fixtures.waitFor
 import io.tolgee.model.Project
+import io.tolgee.model.key.Namespace
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.testing.assert
 import io.tolgee.util.executeInNewRepeatableTransaction
@@ -132,6 +133,27 @@ class ProjectHardDeletingServiceTest : AbstractSpringTest() {
     testDataService.saveTestData(testData.root)
     executeInNewTransaction(platformTransactionManager) {
       projectHardDeletingService.hardDeleteProject(testData.projectBuilder.self.refresh())
+    }
+  }
+
+  @Test
+  fun `deletes project that has a default namespace`() {
+    val testData = BaseTestData()
+    val namespace = testData.projectBuilder.addNamespace { name = "homepage" }
+    testDataService.saveTestData(testData.root)
+
+    executeInNewTransaction(platformTransactionManager) {
+      val project = projectService.get(testData.projectBuilder.self.id)
+      project.defaultNamespace = entityManager.find(Namespace::class.java, namespace.self.id)
+      projectService.save(project)
+    }
+
+    executeInNewTransaction(platformTransactionManager) {
+      projectHardDeletingService.hardDeleteProject(testData.projectBuilder.self.refresh())
+    }
+
+    executeInNewTransaction {
+      projectService.find(testData.projectBuilder.self.id).assert.isNull()
     }
   }
 

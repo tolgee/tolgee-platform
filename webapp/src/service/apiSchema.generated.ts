@@ -5221,6 +5221,11 @@ export interface components {
       )[];
       /** Format: int64 */
       id: number;
+      /**
+       * @description Whether the user views the organization purely via public-project access
+       * @example false
+       */
+      limitedView: boolean;
       /** @example Beautiful organization */
       name: string;
       organizationModel?: components["schemas"]["OrganizationModel"];

@@ -12,4 +12,6 @@ interface TranslationSuggestionService {
   fun deleteAllByLanguage(id: Long)
 
   fun deleteAllByProject(id: Long)
+
+  fun deleteAllByKeyIds(keyIds: Collection<Long>)
 }

@@ -263,7 +263,8 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
         left join Project r on r.id = :projectId
         left join ua.permissions p on p.project.id = :projectId
         left join ua.organizationRoles orl on orl.organization = r.organizationOwner
-        where r.id = :projectId and (p is not null or orl is not null)
+        where r.id = :projectId
+        and (p is not null or orl is not null)
         and (:exceptUserId is null or ua.id <> :exceptUserId)
         and ((lower(ua.name)
         like lower(concat('%', cast(:search as text),'%'))

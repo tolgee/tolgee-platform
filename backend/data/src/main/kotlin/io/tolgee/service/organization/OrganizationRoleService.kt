@@ -18,6 +18,7 @@ import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.repository.OrganizationRepository
 import io.tolgee.repository.OrganizationRoleRepository
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.service.security.UserPreferencesService
@@ -41,6 +42,8 @@ class OrganizationRoleService(
   @param:Lazy
   private val userPreferencesService: UserPreferencesService,
   @param:Lazy
+  private val projectService: ProjectService,
+  @param:Lazy
   private val self: OrganizationRoleService,
   private val cacheManager: CacheManager,
 ) {
@@ -48,6 +51,36 @@ class OrganizationRoleService(
     userId: Long,
     organizationId: Long,
   ) = this.organizationRepository.canUserView(userId, organizationId)
+
+  fun checkUserCanViewOrPublic(organizationId: Long) {
+    if (canUserViewOrPublic(authenticationFacade.authenticatedUser, organizationId)) {
+      return
+    }
+    throw PermissionException(Message.USER_CANNOT_VIEW_THIS_ORGANIZATION)
+  }
+
+  fun canUserViewOrPublic(
+    userId: Long,
+    organizationId: Long,
+  ): Boolean {
+    val user = userAccountService.findDto(userId) ?: return false
+    return canUserViewOrPublic(user, organizationId)
+  }
+
+  fun canUserViewOrPublic(
+    user: UserAccountDto,
+    organizationId: Long,
+  ): Boolean = user.isSupporterOrAdmin() || canUserViewStrictOrPublic(user.id, organizationId)
+
+  fun canUserViewAtLeastMember(
+    user: UserAccountDto,
+    organizationId: Long,
+  ): Boolean = user.isSupporterOrAdmin() || hasAnyOrganizationRole(user.id, organizationId)
+
+  fun canUserViewStrictOrPublic(
+    userId: Long,
+    organizationId: Long,
+  ): Boolean = canUserViewStrict(userId, organizationId) || projectService.hasPublicProjects(organizationId)
 
   fun checkUserCanView(organizationId: Long) {
     checkUserCanView(
@@ -69,22 +102,6 @@ class OrganizationRoleService(
       throw PermissionException(Message.USER_CANNOT_VIEW_THIS_ORGANIZATION)
     }
   }
-
-  fun canUserView(
-    userId: Long,
-    organizationId: Long,
-  ): Boolean {
-    val userAccountDto =
-      userAccountService.findDto(userId)
-        ?: return false
-
-    return canUserView(userAccountDto, organizationId)
-  }
-
-  fun canUserView(
-    user: UserAccountDto,
-    organizationId: Long,
-  ) = user.isSupporterOrAdmin() || this.organizationRepository.canUserView(user.id, organizationId)
 
   /**
    * Verifies the user has a role equal or higher than a given role.
@@ -154,10 +171,7 @@ class OrganizationRoleService(
   fun hasAnyOrganizationRole(
     userId: Long,
     organizationId: Long,
-  ): Boolean {
-    val role = self.getDto(organizationId, userId).type
-    return role != null
-  }
+  ): Boolean = findType(userId, organizationId) != null
 
   fun isUserOwner(
     userId: Long,

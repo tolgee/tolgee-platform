@@ -2765,6 +2765,7 @@
   "translation_single_no_permission_create": "Du har ikke tilstrekkelige tillatelser til å legge til ny nøkkel",
   "translation_single_tag_placeholder": "Legg til tagg...",
   "translation_single_translations_title": "Oversettelser",
+  "translations_invalid_icu_placeholders": "Ugyldig ICU: {value}",
   "translations_key_created": "Nøkkel opprettet",
   "translations_key_delete_confirmation_text": "{count, plural, one {Er du sikker på at du vil slette 1 merket nøkkel og dens oversettelser?} other {Er du sikker på at du vil slette alle # merkede nøkler og deres oversettelser?}}",
   "translations_key_edit_custom_properties_description": "Lagre dine egendefinerte verdier her i JSON-format. Nøkler som begynner med `_` har en spesiell betydning for Tolgee.",

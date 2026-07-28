@@ -9,6 +9,7 @@ import io.tolgee.dtos.cacheable.automations.AutomationActionDto
 import io.tolgee.dtos.cacheable.automations.AutomationTriggerDto
 import kotlin.reflect.KClass
 
+/** Ordinal-persisted by [io.tolgee.model.automations.AutomationAction.type] — do not reorder. */
 enum class AutomationActionType(
   val processor: KClass<out AutomationProcessor>,
   val debouncingKeyProvider: ((BatchOperationParams, AutomationActionDto, AutomationTriggerDto) -> Any)? = null,

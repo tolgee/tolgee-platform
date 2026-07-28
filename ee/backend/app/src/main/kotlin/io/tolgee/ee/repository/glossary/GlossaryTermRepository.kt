@@ -12,18 +12,8 @@ import org.springframework.stereotype.Repository
 @Repository
 @Lazy
 interface GlossaryTermRepository : JpaRepository<GlossaryTerm, Long> {
-  @Query(
-    """
-    from GlossaryTerm
-    where glossary.organizationOwner.id = :organizationId
-      and glossary.organizationOwner.deletedAt is null
-      and glossary.id = :glossaryId
-      and id = :id
-  """,
-  )
-  fun find(
-    organizationId: Long,
-    glossaryId: Long,
+  fun findByGlossaryAndId(
+    glossary: Glossary,
     id: Long,
   ): GlossaryTerm?
 

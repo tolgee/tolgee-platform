@@ -82,6 +82,36 @@ class WebsocketTestHelper(
     )
   }
 
+  fun subscribeAdditional(path: String): LinkedBlockingDeque<String> {
+    val session = connection ?: error("listen() must be called before subscribeAdditional()")
+    val primary = sessionHandler ?: error("listen() must be called before subscribeAdditional()")
+    WebsocketTestSubscribeSync.awaitSubscribed(primary.subscribeCorrelationId, timeoutMs = 5000)
+
+    val inbox = LinkedBlockingDeque<String>()
+    session.subscribe(
+      StompHeaders().apply {
+        destination = path
+      },
+      MySessionHandler(path, inbox, UUID.randomUUID().toString()),
+    )
+
+    // A denied subscribe has no ack of its own; this trailing correlated subscribe is the barrier
+    // that guarantees the one above was processed before we return.
+    val barrierId = UUID.randomUUID().toString()
+    WebsocketTestSubscribeSync.register(barrierId)
+    session.subscribe(
+      StompHeaders().apply {
+        destination = primary.dest
+        add(WebsocketTestSubscribeSync.CORRELATION_HEADER, barrierId)
+      },
+      MySessionHandler(primary.dest, LinkedBlockingDeque(), barrierId),
+    )
+    WebsocketTestSubscribeSync.awaitSubscribed(barrierId, timeoutMs = 5000)
+    WebsocketTestSubscribeSync.cleanup(barrierId)
+    logger.debug("Additional SUBSCRIBE processed (sessionId={}, dest={})", session.sessionId, path)
+    return inbox
+  }
+
   private fun getAuthHeaders(): StompHeaders {
     return StompHeaders().apply {
       when {
@@ -118,29 +148,11 @@ class WebsocketTestHelper(
     Logging {
     var subscription: StompSession.Subscription? = null
 
-    // Append-only history of every status the session observed. The sequence
-    // matters because the ERROR frame and the transport close can fire in
-    // opposite orders under CI load — checking the full list (rather than
-    // just the latest value) lets a test pass when the expected rejection
-    // frame arrived at all, even if a CONNECTION_LOST was recorded first
-    // because the close fired before the frame was processed. If the list
-    // never contains the expected status, the wait fails — with the
-    // transitions logged so the failure points at the lost rejection frame.
     val statusTransitions: MutableList<AuthenticationStatus> =
       CopyOnWriteArrayList()
 
-    val authenticationStatus: AuthenticationStatus?
-      get() = statusTransitions.lastOrNull()
-
     enum class AuthenticationStatus {
       UNAUTHENTICATED,
-      FORBIDDEN,
-
-      // The transport closed before any ERROR frame was processed. NOT a
-      // valid substitute for UNAUTHENTICATED/FORBIDDEN — the wait helper
-      // fails if this is the only entry in the transitions list. Recorded
-      // so that the failure log shows what we did see when the expected
-      // rejection frame was lost in the server's flush-before-close window.
       CONNECTION_LOST,
     }
 
@@ -213,7 +225,6 @@ class WebsocketTestHelper(
         stompHeaders,
       )
 
-      handleForbidden(messageHeader)
       handleUnauthenticated(messageHeader)
 
       if (o !is ByteArray) {
@@ -225,13 +236,6 @@ class WebsocketTestHelper(
         receivedMessages.add(o.decodeToString())
       } catch (e: InterruptedException) {
         throw RuntimeException(e)
-      }
-    }
-
-    private fun handleForbidden(messageHeader: String?) {
-      if (messageHeader == "Forbidden") {
-        logger.debug("Authentication status -> FORBIDDEN (dest={})", dest)
-        recordStatus(AuthenticationStatus.FORBIDDEN)
       }
     }
 
@@ -273,15 +277,11 @@ class WebsocketTestHelper(
     stop()
   }
 
-  fun waitForForbidden() {
-    waitForAuthenticationStatus(MySessionHandler.AuthenticationStatus.FORBIDDEN)
-  }
-
   fun waitForUnauthenticated() {
     waitForAuthenticationStatus(MySessionHandler.AuthenticationStatus.UNAUTHENTICATED)
   }
 
-  fun waitForAuthenticationStatus(status: MySessionHandler.AuthenticationStatus) {
+  private fun waitForAuthenticationStatus(status: MySessionHandler.AuthenticationStatus) {
     try {
       waitFor(5000) {
         sessionHandler?.statusTransitions?.contains(status) == true

@@ -7,14 +7,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.api.isMfaEnabled
-import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
+import io.tolgee.component.PreferredOrganizationFacade
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.SuperTokenRequest
 import io.tolgee.dtos.request.UserUpdatePasswordRequestDto
 import io.tolgee.dtos.request.UserUpdateRequestDto
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.hateoas.organization.PrivateOrganizationModel
-import io.tolgee.hateoas.organization.PrivateOrganizationModelAssembler
 import io.tolgee.hateoas.organization.SimpleOrganizationModel
 import io.tolgee.hateoas.organization.SimpleOrganizationModelAssembler
 import io.tolgee.hateoas.sso.PublicSsoTenantModel
@@ -67,14 +66,13 @@ class V2UserController(
   private val publicSsoTenantModelAssembler: PublicSsoTenantModelAssembler,
   private val imageUploadService: ImageUploadService,
   private val organizationService: OrganizationService,
+  private val preferredOrganizationFacade: PreferredOrganizationFacade,
   private val organizationRoleService: OrganizationRoleService,
-  private val privateOrganizationModelAssembler: PrivateOrganizationModelAssembler,
   private val tenantService: TenantService,
   private val simpleOrganizationModelAssembler: SimpleOrganizationModelAssembler,
   private val passwordEncoder: PasswordEncoder,
   private val jwtService: JwtService,
   private val mfaService: MfaService,
-  private val enabledFeaturesProvider: EnabledFeaturesProvider,
   private val emailVerificationService: EmailVerificationService,
   @Qualifier("requestActivityHolder") private val request: ActivityHolder,
 ) {
@@ -246,15 +244,10 @@ class V2UserController(
   fun getManagedBy(): ResponseEntity<PrivateOrganizationModel> {
     val userAccount = authenticationFacade.authenticatedUser
     val org = organizationRoleService.getManagedBy(userId = userAccount.id) ?: return ResponseEntity.noContent().build()
-    val view =
-      organizationService.findPrivateView(org.id, authenticationFacade.authenticatedUser.id)
+    val model =
+      preferredOrganizationFacade.getPrivateModel(org.id)
         ?: return ResponseEntity.noContent().build()
-    return ResponseEntity.ok(
-      privateOrganizationModelAssembler.toModel(
-        view,
-        enabledFeaturesProvider.get(view.organization.id),
-      ),
-    )
+    return ResponseEntity.ok(model)
   }
 
   @PostMapping("")

@@ -63,7 +63,9 @@ class KeyInfoProvider(
 
     val keyPredicates = cb.or(*predicates.toTypedArray())
 
-    query.where(cb.and(keyPredicates, branchPredicate))
+    val notDeletedPredicate = cb.isNull(root.get(Key_.deletedAt))
+
+    query.where(cb.and(keyPredicates, branchPredicate, notDeletedPredicate))
     query.orderBy(cb.asc(namespace.get(Namespace_.name)), cb.asc(root.get(Key_.name)))
 
     val result = entityManager.createQuery(query).resultList

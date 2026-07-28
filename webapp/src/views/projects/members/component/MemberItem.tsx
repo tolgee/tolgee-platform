@@ -16,6 +16,7 @@ import { LanguagePermissionSummary } from 'tg.component/PermissionsSettings/Lang
 import { ScopesInfo } from 'tg.component/PermissionsSettings/ScopesInfo';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { MfaBadge } from '@tginternal/library/components/MfaBadge';
+import { isAtLeastMemberOrgRole } from 'tg.fixtures/organizationRole';
 
 type UserAccountInProjectModel =
   components['schemas']['UserAccountInProjectModel'];
@@ -85,7 +86,7 @@ export const MemberItem: React.FC<React.PropsWithChildren<Props>> = ({
     messages.success(<T keyName="permissions_set_message" />);
   }
 
-  const isOrganzationMember = Boolean(user.organizationRole);
+  const isOrganizationMember = isAtLeastMemberOrgRole(user.organizationRole);
   const hasDirectPermissions = Boolean(user.directPermission);
 
   async function handleResetToOrganization() {
@@ -136,9 +137,9 @@ export const MemberItem: React.FC<React.PropsWithChildren<Props>> = ({
             permissions: user.computedPermission,
             onSubmit: handleSubmit,
             isInheritedFromOrganization:
-              !hasDirectPermissions && isOrganzationMember,
+              !hasDirectPermissions && isOrganizationMember,
             onResetToOrganization:
-              hasDirectPermissions && isOrganzationMember
+              hasDirectPermissions && isOrganizationMember
                 ? handleResetToOrganization
                 : undefined,
           }}

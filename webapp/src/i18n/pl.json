@@ -2505,6 +2505,7 @@
   "translation_single_no_permission_create": "Nie masz wystarczających uprawnień do dodania nowego klucza",
   "translation_single_tag_placeholder": "Dodaj tag...",
   "translation_single_translations_title": "Tłumaczenia",
+  "translations_invalid_icu_placeholders": "Nieprawidłowy ICU: {value}",
   "translations_key_created": "Klucz utworzony",
   "translations_key_delete_confirmation_text": "{count, plural, one {Czy na pewno chcesz usunąć 1 zaznaczony klucz i jego tłumaczenia?} other {Czy na pewno chcesz usunąć wszystkie # zaznaczone klucze i ich tłumaczenia?}}",
   "translations_key_edit_custom_properties_description": "Przechowuj tutaj swoje niestandardowe wartości w formacie JSON. Klucze zaczynające się od `_` mają specjalne znaczenie dla Tolgee.",

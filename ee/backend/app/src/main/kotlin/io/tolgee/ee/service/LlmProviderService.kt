@@ -1,6 +1,7 @@
 package io.tolgee.ee.service
 
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.component.ResilientCacheAccessor
 import io.tolgee.component.adminMtServiceFilter.AdminMtServiceFilter
 import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
@@ -58,6 +59,7 @@ class LlmProviderService(
   private val llmProviderResolver: LlmProviderResolver,
   private val urlSecurity: UrlSecurity,
   private val adminMtServiceFilter: AdminMtServiceFilter,
+  private val resilientCacheAccessor: ResilientCacheAccessor,
 ) {
   private val cache: Cache by lazy { cacheManager.getCache(Caches.LLM_PROVIDERS) ?: throw InvalidStateException() }
   private var lastUsedMap: MutableMap<String, Long> = mutableMapOf()
@@ -237,7 +239,7 @@ class LlmProviderService(
       throw LlmProviderNotFoundException(name)
     }
 
-    val providerInfo = cache.get(name, ProviderInfo::class.java)
+    val providerInfo = resilientCacheAccessor.get(cache, name, ProviderInfo::class.java)
     val providers =
       providersWithPriority.filter {
         if (providerInfo != null) {
@@ -304,7 +306,7 @@ class LlmProviderService(
     name: String,
     providerId: Long,
   ) {
-    val providerInfo = cache.get(name, ProviderInfo::class.java) ?: ProviderInfo()
+    val providerInfo = resilientCacheAccessor.get(cache, name, ProviderInfo::class.java) ?: ProviderInfo()
     providerInfo.suspendMap.set(providerId, currentDateProvider.date.time + RATE_LIMIT_SUSPEND_PERIOD_MS)
     cache.set(name, providerInfo)
   }

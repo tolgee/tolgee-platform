@@ -58,7 +58,7 @@ class UserPreferencesController(
     @PathVariable organizationId: Long,
   ) {
     val organization = organizationService.get(organizationId)
-    organizationRoleService.checkUserCanView(organization.id)
+    organizationRoleService.checkUserCanViewOrPublic(organization.id)
     userPreferencesService.setPreferredOrganization(organization, authenticationFacade.authenticatedUserEntity)
   }
 

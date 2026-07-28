@@ -14,6 +14,7 @@ import { TranslationEditor } from '../TranslationEditor';
 import { MissingPlaceholders } from '../cell/MissingPlaceholders';
 
 import { useMissingPlaceholders } from '../cell/useMissingPlaceholders';
+import { useInvalidPlaceholders } from '../cell/useInvalidPlaceholders';
 import { TranslationVisual } from '../translationVisual/TranslationVisual';
 import { ControlsEditorReadOnly } from '../cell/ControlsEditorReadOnly';
 import { useBaseTranslation } from '../useBaseTranslation';
@@ -131,6 +132,12 @@ export const TranslationWrite: React.FC<React.PropsWithChildren<Props>> = ({
     enabled: baseLanguage !== language.tag,
   });
 
+  const invalidPlaceholders = useInvalidPlaceholders({
+    currentTranslation: value,
+    nested,
+    enabled: editEnabled,
+  });
+
   const handleModeToggle = () => {
     setMode((mode) => (mode === 'syntax' ? 'placeholders' : 'syntax'));
   };
@@ -221,6 +228,7 @@ export const TranslationWrite: React.FC<React.PropsWithChildren<Props>> = ({
                 </Tooltip>
                 <MissingPlaceholders
                   placeholders={missingPlaceholders}
+                  invalidPlaceholders={invalidPlaceholders}
                   onPlaceholderClick={handlePlaceholderClick}
                   variant={editVal.value.parameter ? activeVariant : undefined}
                   locale={language.tag}

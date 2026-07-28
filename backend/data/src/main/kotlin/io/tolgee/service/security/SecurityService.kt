@@ -25,8 +25,10 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.branching.BranchService
 import io.tolgee.service.label.LabelService
 import io.tolgee.service.language.LanguageService
+import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.project.ProjectFeatureGuard
 import io.tolgee.service.project.ProjectFeatureRegistry
+import io.tolgee.service.project.ProjectService
 import io.tolgee.service.task.ITaskService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
@@ -59,6 +61,28 @@ class SecurityService(
 
   @Autowired
   private lateinit var projectFeatureGuard: ProjectFeatureGuard
+
+  @set:Autowired
+  @set:Lazy
+  lateinit var organizationRoleService: OrganizationRoleService
+
+  @set:Autowired
+  @set:Lazy
+  lateinit var projectService: ProjectService
+
+  fun getAccessibleProjectIdsInOrganization(
+    organizationId: Long,
+    requestedProjectIds: List<Long>?,
+  ): List<Long>? {
+    val user = authenticationFacade.authenticatedUser
+    if (organizationRoleService.canUserViewAtLeastMember(user, organizationId)) {
+      return requestedProjectIds
+    }
+    val accessibleIds = projectService.getBelowMemberAccessibleProjectIds(organizationId, user.id)
+    if (requestedProjectIds == null) return accessibleIds
+    val accessibleSet = accessibleIds.toSet()
+    return requestedProjectIds.filter { it in accessibleSet }
+  }
 
   fun checkAnyProjectPermission(projectId: Long) {
     if (

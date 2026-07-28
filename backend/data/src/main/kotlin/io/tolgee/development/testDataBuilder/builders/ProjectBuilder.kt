@@ -38,6 +38,7 @@ import io.tolgee.model.translationMemory.TranslationMemory
 import io.tolgee.model.translationMemory.TranslationMemoryType
 import io.tolgee.model.webhook.WebhookConfig
 import org.springframework.core.io.ClassPathResource
+import java.util.Date
 
 class ProjectBuilder(
   organizationOwner: Organization? = null,
@@ -314,5 +315,23 @@ class ProjectBuilder(
             tm.data.projectAssignments.any { it.self.project === self }
         }
     if (!alreadyDeclared) addProjectTm()
+  }
+
+  fun setDeletedAt(deletedAt: Date = Date()) {
+    testDataBuilder.rawUpdateAfterSave("update project set deleted_at = :deletedAt where id = :id") {
+      mapOf("deletedAt" to deletedAt, "id" to self.id)
+    }
+  }
+
+  fun clearBaseLanguage() {
+    testDataBuilder.rawUpdateAfterSave("update project set base_language_id = null where id = :id") {
+      mapOf("id" to self.id)
+    }
+  }
+
+  fun clearOrganizationOwner() {
+    testDataBuilder.rawUpdateAfterSave("update project set organization_owner_id = null where id = :id") {
+      mapOf("id" to self.id)
+    }
   }
 }

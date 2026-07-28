@@ -156,6 +156,9 @@ export const useInitialDataService = () => {
         const data = await preferredOrganizationLoadable.mutateAsync({});
         setQuickStart(data.quickStart);
         setOrganization(data);
+      } catch {
+        // the global API error handler already surfaced the failure; callers fire-and-forget
+        // this on every project open, so a rethrow would be an unhandled rejection
       } finally {
         setOrganizationLoading(false);
       }

@@ -30,7 +30,7 @@ import { TooltipCard } from 'tg.component/common/TooltipCard';
 
 const StyledContainer = styled('div')`
   display: grid;
-  grid-template-columns: auto auto auto 10fr auto auto;
+  grid-template-columns: fit-content(40%) auto auto minmax(120px, 1fr) auto auto;
   margin: ${({ theme }) => theme.spacing(1, 0, 2, 0)};
 `;
 
@@ -51,6 +51,8 @@ const StyledRow = styled('div')`
 `;
 
 const StyledInfo = styled(Box)`
+  min-width: 0;
+  overflow: hidden;
   display: grid;
   grid-template-columns: auto auto 1fr;
   grid-template-areas:
@@ -58,6 +60,24 @@ const StyledInfo = styled(Box)`
     'flag tag  base';
   gap: 5px 10px;
   padding-left: ${({ theme }) => theme.spacing(1)};
+`;
+
+const StyledLanguageName = styled('div')`
+  grid-area: name;
+  justify-self: start;
+  max-width: 100%;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+const StyledTag = styled('div')`
+  grid-area: tag;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
 const StyledTooltip = styled(Tooltip)`
@@ -162,6 +182,12 @@ export const LanguageStats: FC<React.PropsWithChildren<Props>> = ({
           'translations.view',
           language.id
         );
+        const languageDisplayName =
+          item.languageName +
+          (item.languageOriginalName &&
+          item.languageOriginalName !== item.languageName
+            ? ' | ' + item.languageOriginalName
+            : '');
 
         return (
           <React.Fragment key={item.languageId}>
@@ -172,22 +198,18 @@ export const LanguageStats: FC<React.PropsWithChildren<Props>> = ({
               }
             >
               <StyledInfo>
-                <Box gridArea="name">
-                  {item.languageName +
-                    (item.languageOriginalName &&
-                    item.languageOriginalName !== item.languageName
-                      ? ' | ' + item.languageOriginalName
-                      : '')}
-                </Box>
+                <Tooltip title={languageDisplayName} disableInteractive>
+                  <StyledLanguageName>{languageDisplayName}</StyledLanguageName>
+                </Tooltip>
                 <Box gridArea="flag">
                   <CircledLanguageIcon
                     size={20}
                     flag={item.languageFlagEmoji || ''}
                   />
                 </Box>
-                <Box gridArea="tag">{item.languageTag}</Box>
+                <StyledTag>{item.languageTag}</StyledTag>
                 <Box gridArea="base">
-                  {language?.base && (
+                  {language.base && (
                     <Chip size="small" label={t('global_language_base')} />
                   )}
                 </Box>
@@ -198,7 +220,6 @@ export const LanguageStats: FC<React.PropsWithChildren<Props>> = ({
                   componentsProps={{
                     tooltip: { style: { maxWidth: '100vw' } },
                   }}
-                  className="test"
                   title={<LanguageLabels data={item} />}
                 >
                   <Box>
@@ -242,7 +263,7 @@ export const LanguageStats: FC<React.PropsWithChildren<Props>> = ({
                   </Tooltip>
                 )}
               <StyledActions>
-                <LanguageMenu language={language!} />
+                <LanguageMenu language={language} />
               </StyledActions>
             </StyledRow>
             {i + 1 < languageStats.length && <StyledSeparator />}

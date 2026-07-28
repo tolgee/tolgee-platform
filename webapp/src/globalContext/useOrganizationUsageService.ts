@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
+import { isAtLeastMemberOrgRole } from 'tg.fixtures/organizationRole';
 
 type OrganizationModel = components['schemas']['OrganizationModel'];
 type UsageModel = components['schemas']['PublicUsageModel'];
@@ -14,7 +15,9 @@ export const useOrganizationUsageService = ({
   organization,
   enabled,
 }: Props) => {
-  const isOrganizationMember = Boolean(organization?.currentUserRole);
+  const isOrganizationMember = isAtLeastMemberOrgRole(
+    organization?.currentUserRole
+  );
   const [organizationUsage, setOrganizationUsage] = useState<
     UsageModel | undefined
   >(undefined);
