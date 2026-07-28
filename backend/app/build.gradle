@@ -146,7 +146,7 @@ dependencies {
     implementation libs.springDocOpenApiCommon
     // Jackson-2 Kotlin module for swagger-core's schema introspection (registered on swagger's mapper
     // in OpenApiConfiguration; schema-gen only). Keep aligned with swagger-core's jackson-databind 2.x.
-    implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.21.4'
+    implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.21.5'
     implementation libs.redissonSpringBootStarter
 
     /**

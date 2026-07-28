@@ -158,6 +158,21 @@ subprojects {
     ext['hibernate.version'] = hibernateVersion
     ext['commons-lang3.version'] = commonsLang3Version
 
+    // The transitive Jackson 2 stack (pulled in by swagger/springdoc for schema generation) is pinned
+    // to a vulnerable 2.21.4 by Spring's dependency management; override it to the patched 2.21.5
+    // (CVE-2026-59889/54515). A catalog platform() BOM can't do this — dependency-management wins over
+    // Gradle platform/enforcedPlatform constraints, so it must go through the plugin's own override.
+    plugins.withId('io.spring.dependency-management') {
+        dependencyManagement {
+            dependencies {
+                dependencySet(group: 'com.fasterxml.jackson.core', version: '2.21.5') {
+                    entry 'jackson-databind'
+                    entry 'jackson-core'
+                }
+            }
+        }
+    }
+
     // Prepend the antlr4-runtime hibernate-jpamodelgen needs to the kapt worker bootclasspath, else an
     // older one wins and kapt fails: "Could not deserialize ATN with version 4 (expected 3)".
     tasks.matching { it.name == 'kaptKotlin' }.configureEach {
