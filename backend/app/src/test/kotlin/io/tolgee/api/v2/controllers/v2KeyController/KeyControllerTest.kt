@@ -40,6 +40,21 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     testData = KeysTestData()
   }
 
+  /**
+   * Hibernate 5 worded this "could not resolve property", Hibernate 6 "Could not resolve attribute" — the guard in
+   * ExceptionHandlers matches that text, so it rotted silently on the upgrade and the endpoint answered 500.
+   */
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `returns bad request when sorting by an unknown property`() {
+    saveTestDataAndPrepare()
+    performProjectAuthGet("keys?sort=keyName")
+      .andIsBadRequest
+      .andAssertThatJson {
+        node("code").isEqualTo("unknown_sort_property")
+      }
+  }
+
   @ProjectJWTAuthTestMethod
   @Test
   fun `returns all keys`() {
