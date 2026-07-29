@@ -24,6 +24,7 @@ import io.tolgee.service.language.LanguageService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PermissionService
+import io.tolgee.service.task.ITaskService
 import io.tolgee.service.translationMemory.TranslationMemoryManagementService
 import io.tolgee.util.Logging
 import jakarta.persistence.EntityManager
@@ -60,6 +61,7 @@ class ProjectHardDeletingService(
   private val translationMemoryManagementService: TranslationMemoryManagementService,
   private val labelService: LabelService,
   private val branchService: BranchService,
+  private val taskService: ITaskService,
   private val entityManager: EntityManager,
   private val projectQaConfigRepository: ProjectQaConfigRepository,
 ) : Logging {
@@ -118,7 +120,7 @@ class ProjectHardDeletingService(
       labelService.deleteLabelsByProjectId(projectId)
 
       traceLogMeasureTime("deleteProject: delete tasks") {
-        deleteTasks(projectId)
+        taskService.deleteAllByProjectId(projectId)
       }
 
       traceLogMeasureTime("deleteProject: delete languages") {
@@ -215,29 +217,6 @@ class ProjectHardDeletingService(
         .setParameter("projectId", projectId)
         .executeUpdate()
     }
-  }
-
-  private fun deleteTasks(projectId: Long) {
-    val projectTaskIds = "SELECT t.id FROM Task t WHERE t.project.id = :projectId"
-    // notification.linked_task_id -> task.id is RESTRICT, so task-linked notifications must go first.
-    entityManager
-      .createQuery("DELETE FROM Notification n WHERE n.project.id = :projectId OR n.linkedTask.id IN ($projectTaskIds)")
-      .setParameter("projectId", projectId)
-      .executeUpdate()
-    // task_assignees is a @ManyToMany join table with no entity, so it can only be cleared via native SQL.
-    entityManager
-      .createNativeQuery(
-        "delete from task_assignees where tasks_id in (select id from task where project_id = :projectId)",
-      ).setParameter("projectId", projectId)
-      .executeUpdate()
-    entityManager
-      .createQuery("DELETE FROM TaskKey tk WHERE tk.task.id IN ($projectTaskIds)")
-      .setParameter("projectId", projectId)
-      .executeUpdate()
-    entityManager
-      .createQuery("DELETE FROM Task t WHERE t.project.id = :projectId")
-      .setParameter("projectId", projectId)
-      .executeUpdate()
   }
 
   @TransactionalEventListener(phase = TransactionPhase.AFTER_COMPLETION)

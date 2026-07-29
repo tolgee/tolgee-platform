@@ -38,7 +38,7 @@ import io.tolgee.service.notification.NotificationService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.SecurityService
-import io.tolgee.service.task.ITaskService
+import io.tolgee.service.task.AbstractTaskService
 import io.tolgee.util.executeInNewRepeatableTransaction
 import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
@@ -59,7 +59,7 @@ import kotlin.math.max
 @Component
 class TaskService(
   private val taskRepository: TaskRepository,
-  private val entityManager: EntityManager,
+  entityManager: EntityManager,
   private val languageService: LanguageService,
   @Lazy
   private val securityService: SecurityService,
@@ -76,7 +76,7 @@ class TaskService(
   private val notificationService: NotificationService,
   @Lazy
   private val branchService: BranchService,
-) : ITaskService {
+) : AbstractTaskService(entityManager) {
   fun getAllPaged(
     projectId: Long,
     pageable: Pageable,
@@ -390,6 +390,7 @@ class TaskService(
   }
 
   override fun deleteAll(tasks: List<Task>) {
+    deleteNotificationsLinkedToTasks(tasks.map { it.id })
     for (task in tasks) {
       taskKeyRepository.deleteAll(task.keys)
       taskRepository.delete(task)
