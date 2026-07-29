@@ -3,6 +3,7 @@ package io.tolgee.ee.api.v2.controllers
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.api.SubscriptionStatus
 import io.tolgee.constants.Feature
+import io.tolgee.constants.Message
 import io.tolgee.ee.EeLicensingMockRequestUtil
 import io.tolgee.ee.model.EeSubscription
 import io.tolgee.ee.repository.EeSubscriptionRepository
@@ -17,8 +18,12 @@ import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
 import org.springframework.test.context.bean.override.mockito.MockitoBean
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
 import java.util.Date
 
@@ -197,6 +202,49 @@ class EeLicenseControllerTest : AuthorizedControllerTest() {
         val data = jacksonObjectMapper().readValue(body, Map::class.java)
         data["licenseKey"].assert.isEqualTo("mock")
       }
+    }
+  }
+
+  @Test
+  fun `releases a license key the remote no longer knows`() {
+    prepareSubscription()
+
+    mockReleaseKeyFailure(HttpStatus.NOT_FOUND, Message.LICENSE_KEY_NOT_FOUND.code)
+
+    performAuthPut("/v2/ee-license/release-license-key", null).andIsOk
+    eeSubscriptionRepository.findAll().assert.isEmpty()
+  }
+
+  @Test
+  fun `keeps the subscription when the remote fails for another reason`() {
+    prepareSubscription()
+
+    mockReleaseKeyFailure(HttpStatus.NOT_FOUND, Message.LICENSE_KEY_USED_BY_ANOTHER_INSTANCE.code)
+
+    performAuthPut("/v2/ee-license/release-license-key", null)
+      .andExpect(status().is5xxServerError)
+    eeSubscriptionRepository.findAll().assert.isNotEmpty()
+  }
+
+  private fun mockReleaseKeyFailure(
+    status: HttpStatus,
+    errorCode: String,
+  ) {
+    eeLicensingMockRequestUtil.mock {
+      whenReq {
+        this.method = { it == HttpMethod.POST }
+        this.url = { it.contains("/v2/public/licensing/release-key") }
+      }
+
+      thenThrow(
+        HttpClientErrorException.create(
+          status,
+          status.reasonPhrase,
+          HttpHeaders(),
+          """{"code": "$errorCode"}""".toByteArray(),
+          null,
+        ),
+      )
     }
   }
 
