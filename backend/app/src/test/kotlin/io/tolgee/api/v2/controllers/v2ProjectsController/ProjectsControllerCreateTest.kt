@@ -14,6 +14,7 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.satisfies
 import io.tolgee.model.Project
+import io.tolgee.model.UserAccount
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
@@ -158,6 +159,29 @@ class ProjectsControllerCreateTest : AuthorizedControllerTest() {
           assertThat(
             permissionService.getUserProjectPermission(it.id, maintainerAccount.id)?.type,
           ).isEqualTo(ProjectPermissionType.MANAGE)
+        }
+      }
+    }
+  }
+
+  @Test
+  fun `creates project for server admin who is not a member of the organization`() {
+    val owner = dbPopulator.createUserIfNotExists("outsiderOrgOwner")
+    val organization = dbPopulator.createOrganization("Outsider Organization", owner)
+    val adminAccount = dbPopulator.createUserIfNotExists("serverAdminUser")
+    adminAccount.role = UserAccount.Role.ADMIN
+    userAccountService.save(adminAccount)
+    loginAsUser("serverAdminUser")
+
+    val request =
+      CreateProjectRequest("aaa", listOf(languageDTO), organizationId = organization.id, icuPlaceholders = true)
+    performAuthPost("/v2/projects", request).andIsOk.andAssertThatJson {
+      node("id").asNumber().satisfies {
+        projectService.get(it.toLong()).let { project ->
+          assertThat(project.organizationOwner.id).isEqualTo(organization.id)
+          assertThat(
+            permissionService.getUserProjectPermission(project.id, adminAccount.id),
+          ).isNull()
         }
       }
     }

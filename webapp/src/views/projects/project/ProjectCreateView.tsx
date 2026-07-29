@@ -9,9 +9,12 @@ import { BaseFormView } from 'tg.component/layout/BaseFormView';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { LINKS, PARAMS } from 'tg.constants/links';
-import { components } from 'tg.service/apiSchema.generated';
-import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
-import { usePreferredOrganization } from 'tg.globalContext/helpers';
+import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { CreateProjectFormValues } from 'tg.views/projects/project/types';
+import {
+  useCanCreateProject,
+  usePreferredOrganization,
+} from 'tg.globalContext/helpers';
 import { OrganizationSwitch } from 'tg.component/organizationSwitch/OrganizationSwitch';
 import { messageService } from 'tg.service/MessageService';
 
@@ -19,8 +22,13 @@ import { BaseLanguageSelect } from 'tg.views/projects/project/components/BaseLan
 import { CreateProjectLanguagesArrayField } from 'tg.views/projects/project/components/CreateProjectLanguagesArrayField';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 
-export type CreateProjectValueType =
-  components['schemas']['CreateProjectRequest'];
+const RefusalMessage: FunctionComponent<
+  React.PropsWithChildren<{ dataCy: string }>
+> = ({ dataCy, children }) => (
+  <Typography variant="body2" color="error" data-cy={dataCy}>
+    {children}
+  </Typography>
+);
 
 export const ProjectCreateView: FunctionComponent<
   React.PropsWithChildren<unknown>
@@ -34,21 +42,26 @@ export const ProjectCreateView: FunctionComponent<
     invalidatePrefix: '/v2/projects',
   });
   const { t } = useTranslate();
-  const { preferredOrganization, updatePreferredOrganization } =
-    usePreferredOrganization();
+  const { preferredOrganization } = usePreferredOrganization();
+  const { canCreateProject, isFetching } = useCanCreateProject();
 
-  const onSubmit = (values: CreateProjectValueType) => {
-    values.name = values.name.trim();
-    values.languages = values.languages.filter((l) => !!l);
+  const onSubmit = (values: CreateProjectFormValues) => {
+    if (!preferredOrganization) {
+      return;
+    }
     createProjectLoadable.mutate(
       {
         content: {
-          'application/json': values,
+          'application/json': {
+            ...values,
+            name: values.name.trim(),
+            languages: values.languages.filter((l) => !!l),
+            organizationId: preferredOrganization.id,
+          },
         },
       },
       {
         onSuccess(data) {
-          updatePreferredOrganization(values.organizationId);
           messageService.success(<T keyName="project_created_message" />);
           history.push(
             LINKS.PROJECT_DASHBOARD.build({ [PARAMS.PROJECT_ID]: data.id })
@@ -59,24 +72,30 @@ export const ProjectCreateView: FunctionComponent<
     );
   };
 
-  const organizationsLoadable = useApiQuery({
-    url: '/v2/organizations',
-    method: 'get',
-    query: {
-      size: 100,
-      filterCurrentUserOwner: true,
-    },
-  });
-
-  const initialValues: CreateProjectValueType = {
+  const initialValues: CreateProjectFormValues = {
     name: '',
     languages: [
       { tag: 'en', name: 'English', originalName: 'English', flagEmoji: '🇬🇧' },
     ],
-    organizationId: preferredOrganization?.id || 0,
     baseLanguageTag: 'en',
     icuPlaceholders: true,
   };
+
+  const refusalMessage = preferredOrganization ? (
+    <RefusalMessage dataCy="project-create-no-permission-message">
+      <T
+        keyName="project_create_no_permission_message"
+        defaultValue="You don't have permission to create a project in this organization."
+      />
+    </RefusalMessage>
+  ) : (
+    <RefusalMessage dataCy="project-create-no-organization-message">
+      <T
+        keyName="project_create_no_organization_message"
+        defaultValue="You are not a member of any organization."
+      />
+    </RefusalMessage>
+  );
 
   return (
     <DashboardPage>
@@ -85,13 +104,14 @@ export const ProjectCreateView: FunctionComponent<
         windowTitle={t('create_project_view')}
         title={t('create_project_view')}
         initialValues={initialValues}
-        loading={organizationsLoadable.isLoading}
         onSubmit={onSubmit}
         saveActionLoadable={createProjectLoadable}
         validationSchema={Validation.PROJECT_CREATION(t)}
-        switcher={<OrganizationSwitch ownedOnly />}
+        disabled={isFetching}
+        submitDisabledReason={!canCreateProject ? refusalMessage : undefined}
+        switcher={<OrganizationSwitch />}
       >
-        {(props: FormikProps<CreateProjectValueType>) => {
+        {(props: FormikProps<CreateProjectFormValues>) => {
           return (
             <Box>
               <Box sx={{ mb: 1 }}>

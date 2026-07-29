@@ -18,6 +18,11 @@ class PublicProjectsE2eDataController(
   @GetMapping(value = ["/generate-few"])
   @Transactional
   fun generateFew(): StandardTestDataResult {
-    return generatingService.generate(PublicProjectsE2eData(count = 5, includeForeignOrgProject = false).root)
+    return generatingService.generate(
+      PublicProjectsE2eData(
+        count = 5,
+        scenario = PublicProjectsE2eData.Scenario.MINIMAL,
+      ).root,
+    )
   }
 }

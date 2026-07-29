@@ -1,8 +1,11 @@
-import { components } from 'tg.service/apiSchema.generated';
+import { PrivateOrganizationModel } from 'tg.service/apiSchemaTypes.generated';
 
-type OrganizationRole =
-  components['schemas']['PrivateOrganizationModel']['currentUserRole'];
+export type OrganizationRole = PrivateOrganizationModel['currentUserRole'];
 
 export const isAtLeastMemberOrgRole = (
   role: OrganizationRole | undefined | null
 ): boolean => Boolean(role);
+
+export const isOwnerOrMaintainerOrgRole = (
+  role: OrganizationRole | undefined | null
+): boolean => role === 'OWNER' || role === 'MAINTAINER';

@@ -2,6 +2,7 @@ package io.tolgee.api.v2.controllers
 
 import io.tolgee.development.testDataBuilder.data.PublicProjectsControllerTestData
 import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.UserAccount
 import io.tolgee.testing.AuthorizedControllerTest
@@ -9,18 +10,23 @@ import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import kotlin.properties.Delegates
 
 class PreferredOrganizationCommunityTest : AuthorizedControllerTest() {
   lateinit var testData: PublicProjectsControllerTestData
 
+  private var originalUserCanCreateOrganizations by Delegates.notNull<Boolean>()
+
   @BeforeEach
   fun setup() {
+    originalUserCanCreateOrganizations = tolgeeProperties.authentication.userCanCreateOrganizations
     testData = PublicProjectsControllerTestData()
     testDataService.saveTestData(testData.root)
   }
 
   @AfterEach
   fun clean() {
+    tolgeeProperties.authentication.userCanCreateOrganizations = originalUserCanCreateOrganizations
     testDataService.cleanTestData(testData.root)
   }
 
@@ -94,6 +100,50 @@ class PreferredOrganizationCommunityTest : AuthorizedControllerTest() {
     }
   }
 
+  @Test
+  fun `org-less user has no preferred organization until it adopts one with public projects`() {
+    disableOrganizationCreation()
+    loginAsOrgLessUser()
+
+    performAuthGet("/v2/preferred-organization").andIsForbidden
+    performAuthGet("/v2/public/initial-data").andIsOk.andAssertThatJson {
+      node("preferredOrganization").isEqualTo(null)
+    }
+
+    performAuthPut(
+      "/v2/user-preferences/set-preferred-organization/${testData.otherOrg.id}",
+      null,
+    ).andIsOk
+
+    assertStoredPreference(testData.orgLessCommunityUser.id, testData.otherOrg.id)
+    performAuthGet("/v2/preferred-organization").andIsOk.andAssertThatJson {
+      node("name").isEqualTo("Vibrant translators")
+      node("currentUserRole").isEqualTo(null)
+      node("limitedView").isEqualTo(true)
+    }
+  }
+
+  @Test
+  fun `org-less user cannot adopt an organization without public projects`() {
+    disableOrganizationCreation()
+    loginAsOrgLessUser()
+
+    performAuthPut(
+      "/v2/user-preferences/set-preferred-organization/${testData.noPublicOrg.id}",
+      null,
+    ).andIsForbidden
+    performAuthGet("/v2/preferred-organization").andIsForbidden
+    assertNoStoredPreference(testData.orgLessCommunityUser.id)
+  }
+
+  private fun loginAsOrgLessUser() {
+    userAccount = testData.orgLessCommunityUser
+  }
+
+  private fun disableOrganizationCreation() {
+    tolgeeProperties.authentication.userCanCreateOrganizations = false
+  }
+
   private fun setPreferred(
     user: UserAccount,
     organizationId: Long,
@@ -109,6 +159,12 @@ class PreferredOrganizationCommunityTest : AuthorizedControllerTest() {
   private fun unpublishOtherOrgProject() {
     executeInNewTransaction {
       projectService.get(testData.otherOrgPublicProject.id).public = false
+    }
+  }
+
+  private fun assertNoStoredPreference(userId: Long) {
+    executeInNewTransaction {
+      assertThat(userPreferencesService.find(userId)?.preferredOrganization).isNull()
     }
   }
 

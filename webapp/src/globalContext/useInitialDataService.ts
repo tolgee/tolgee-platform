@@ -10,7 +10,7 @@ type QuickStartModel = components['schemas']['QuickStartModel'];
 type InitialDataModel = components['schemas']['InitialDataModel'];
 
 export const useInitialDataService = () => {
-  const [organizationLoading, setOrganizationLoading] = useState(false);
+  const [isSwitchingOrganization, setIsSwitchingOrganization] = useState(false);
   const tolgee = useTolgee();
 
   const [organization, setOrganization] = useState<
@@ -145,7 +145,7 @@ export const useInitialDataService = () => {
 
   const updatePreferredOrganization = async (organizationId: number) => {
     if (organizationId !== preferredOrganization?.id) {
-      setOrganizationLoading(true);
+      setIsSwitchingOrganization(true);
       try {
         // set preferred organization
         await setPreferredOrganization.mutateAsync({
@@ -160,7 +160,7 @@ export const useInitialDataService = () => {
         // the global API error handler already surfaced the failure; callers fire-and-forget
         // this on every project open, so a rethrow would be an unhandled rejection
       } finally {
-        setOrganizationLoading(false);
+        setIsSwitchingOrganization(false);
       }
     }
   };
@@ -193,7 +193,7 @@ export const useInitialDataService = () => {
     setPreferredOrganization.isLoading ||
     preferredOrganizationLoadable.isLoading ||
     dismissAnnouncementLoadable.isLoading ||
-    organizationLoading;
+    isSwitchingOrganization;
 
   const state = initialData
     ? {

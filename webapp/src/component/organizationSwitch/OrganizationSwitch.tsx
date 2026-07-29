@@ -27,14 +27,12 @@ const StyledLink = styled(Link, {
 
 type Props = {
   onSelect?: (organization: OrganizationModel) => void;
-  ownedOnly?: boolean;
   selectedSurface?: SwitchSurface;
   plain?: boolean;
 };
 
 export const OrganizationSwitch: React.FC<React.PropsWithChildren<Props>> = ({
   onSelect,
-  ownedOnly,
   selectedSurface = 'organization',
   plain,
 }) => {
@@ -65,11 +63,22 @@ export const OrganizationSwitch: React.FC<React.PropsWithChildren<Props>> = ({
 
   const isCommunitySurface = selectedSurface === 'community';
 
+  if (!preferredOrganization) {
+    if (!isCommunitySurface) {
+      return null;
+    }
+    return (
+      <Box display="flex" overflow="hidden">
+        <CommunityTranslationItem />
+      </Box>
+    );
+  }
+
   const switchLabel = isCommunitySurface ? (
     <CommunityTranslationItem />
-  ) : preferredOrganization ? (
+  ) : (
     <OrganizationItem data={preferredOrganization} />
-  ) : null;
+  );
 
   return (
     <Box display="flex" data-cy="organization-switch" overflow="hidden">
@@ -79,7 +88,6 @@ export const OrganizationSwitch: React.FC<React.PropsWithChildren<Props>> = ({
       </StyledLink>
 
       <OrganizationPopover
-        ownedOnly={ownedOnly}
         open={isOpen}
         onClose={handleClose}
         selected={preferredOrganization}

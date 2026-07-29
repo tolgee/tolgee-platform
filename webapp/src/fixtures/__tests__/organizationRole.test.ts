@@ -1,4 +1,4 @@
-import { isAtLeastMemberOrgRole } from '../organizationRole';
+import { isAtLeastMemberOrgRole } from 'tg.fixtures/organizationRole';
 
 describe('isAtLeastMemberOrgRole', () => {
   it('treats MEMBER and above as members', () => {
