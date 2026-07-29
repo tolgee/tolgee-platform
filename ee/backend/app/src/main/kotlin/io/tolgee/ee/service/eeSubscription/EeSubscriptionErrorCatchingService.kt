@@ -4,7 +4,6 @@ import io.tolgee.api.SubscriptionStatus
 import io.tolgee.constants.Message
 import io.tolgee.ee.service.NoActiveSubscriptionException
 import io.tolgee.exceptions.BadRequestException
-import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.util.executeInNewTransaction
 import org.springframework.context.annotation.Lazy
@@ -23,7 +22,7 @@ class EeSubscriptionErrorCatchingService(
     return try {
       fn()
     } catch (e: HttpClientErrorException.BadRequest) {
-      val body = e.parseBody()
+      val body = e.parseErrorBody() ?: throw e
       when (body.code) {
         Message.SEATS_SPENDING_LIMIT_EXCEEDED.code,
         Message.KEYS_SPENDING_LIMIT_EXCEEDED.code,
@@ -57,7 +56,7 @@ class EeSubscriptionErrorCatchingService(
       subscription?.status = SubscriptionStatus.CANCELED
       return null
     } catch (e: HttpClientErrorException.BadRequest) {
-      val error = e.parseBody()
+      val error = e.parseErrorBody() ?: throw e
       if (error.code == Message.LICENSE_KEY_USED_BY_ANOTHER_INSTANCE.code) {
         setSubscriptionKeyUsedByOtherInstance()
         return null
@@ -70,18 +69,14 @@ class EeSubscriptionErrorCatchingService(
     try {
       return fn()
     } catch (e: HttpClientErrorException.BadRequest) {
-      if (e.message?.contains(Message.CREDIT_SPENDING_LIMIT_EXCEEDED.code) == true) {
-        throw OutOfCreditsException(OutOfCreditsException.Reason.SPENDING_LIMIT_EXCEEDED, e)
-      }
-      if (e.message?.contains(Message.OUT_OF_CREDITS.code) == true) {
-        throw OutOfCreditsException(OutOfCreditsException.Reason.OUT_OF_CREDITS, e)
+      when (e.parseErrorBody()?.code) {
+        Message.CREDIT_SPENDING_LIMIT_EXCEEDED.code ->
+          throw OutOfCreditsException(OutOfCreditsException.Reason.SPENDING_LIMIT_EXCEEDED, e)
+        Message.OUT_OF_CREDITS.code ->
+          throw OutOfCreditsException(OutOfCreditsException.Reason.OUT_OF_CREDITS, e)
       }
       throw e
     }
-  }
-
-  private fun HttpClientErrorException.parseBody(): ErrorResponseBody {
-    return jacksonObjectMapper().readValue(this.responseBodyAsString, ErrorResponseBody::class.java)
   }
 
   private fun setSubscriptionKeyUsedByOtherInstance() {
