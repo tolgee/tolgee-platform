@@ -22,6 +22,7 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ThirdPartyAuthType
+import io.tolgee.model.enums.UserDisabledBy
 import io.tolgee.model.notifications.Notification
 import io.tolgee.model.notifications.NotificationType
 import io.tolgee.model.views.ExtendedUserAccountInProject
@@ -105,6 +106,10 @@ class UserAccountService(
 
   fun findActive(id: Long): UserAccount? {
     return userAccountRepository.findActive(id)
+  }
+
+  fun findActiveOrDisabled(id: Long): UserAccount? {
+    return userAccountRepository.findActiveOrDisabled(id)
   }
 
   @Transactional
@@ -642,9 +647,21 @@ class UserAccountService(
 
   @Transactional
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#userId")
-  fun disable(userId: Long) {
-    val user = this.get(userId)
+  fun disable(
+    userId: Long,
+    disabledBy: UserDisabledBy,
+  ) {
+    val user = userAccountRepository.findActiveOrDisabled(userId) ?: throw NotFoundException(Message.USER_NOT_FOUND)
+    if (user.disabledAt != null) {
+      // an admin disable takes over an organization one, so an organization owner cannot enable their way out of it
+      if (disabledBy == UserDisabledBy.ADMIN && user.disabledBy != UserDisabledBy.ADMIN) {
+        user.disabledBy = UserDisabledBy.ADMIN
+        this.save(user)
+      }
+      return
+    }
     user.disabledAt = currentDateProvider.date
+    user.disabledBy = disabledBy
     this.save(user)
     this.applicationEventPublisher.publishEvent(OnUserCountChanged(decrease = true, this))
   }
@@ -652,8 +669,10 @@ class UserAccountService(
   @Transactional
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#userId")
   fun enable(userId: Long) {
-    val user = this.userAccountRepository.findDisabled(userId)
+    val user = userAccountRepository.findActiveOrDisabled(userId) ?: throw NotFoundException(Message.USER_NOT_FOUND)
+    if (user.disabledAt == null) return
     user.disabledAt = null
+    user.disabledBy = null
     this.save(user)
     this.applicationEventPublisher.publishEvent(OnUserCountChanged(decrease = false, this))
   }

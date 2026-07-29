@@ -15,6 +15,7 @@ import io.tolgee.model.Organization
 import io.tolgee.model.OrganizationRole
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.enums.UserDisabledBy
 import io.tolgee.repository.OrganizationRepository
 import io.tolgee.repository.OrganizationRoleRepository
 import io.tolgee.security.authentication.AuthenticationFacade
@@ -270,7 +271,7 @@ class OrganizationRoleService(
     userId: Long,
     organizationId: Long,
   ) {
-    if (!canRemoveUser(userId, organizationId)) {
+    if (isManagedBy(userId, organizationId)) {
       throw ValidationException(Message.USER_IS_MANAGED_BY_ORGANIZATION)
     }
 
@@ -278,42 +279,38 @@ class OrganizationRoleService(
   }
 
   @Transactional
-  fun removeOrDeactivateUser(
+  fun disableUser(
     userId: Long,
     organizationId: Long,
   ) {
-    if (!canRemoveUser(userId, organizationId)) {
-      userAccountService.disable(userId)
-      return
+    if (!isManagedBy(userId, organizationId)) {
+      throw ValidationException(Message.USER_IS_NOT_MANAGED_BY_ORGANIZATION)
     }
 
-    removeUserForReal(userId, organizationId)
+    userAccountService.disable(userId, UserDisabledBy.ORGANIZATION)
   }
 
-  /**
-   * Checks if a user is managed by the organization.
-   * We can't remove managed users from their organization.
-   */
-  private fun canRemoveUser(
+  @Transactional
+  fun enableUser(
     userId: Long,
     organizationId: Long,
-  ): Boolean {
-    val managedBy = getManagedBy(userId)
-    val isManaged = managedBy != null
-
-    if (!isManaged) {
-      // Not managed by any organization
-      return true
+  ) {
+    if (!isManagedBy(userId, organizationId)) {
+      throw ValidationException(Message.USER_IS_NOT_MANAGED_BY_ORGANIZATION)
     }
 
-    if (managedBy.id != organizationId) {
-      // Managed by another organization
-      return true
+    val user = userAccountService.findActiveOrDisabled(userId) ?: throw NotFoundException(Message.USER_NOT_FOUND)
+    if (user.disabledAt != null && user.disabledBy != UserDisabledBy.ORGANIZATION) {
+      throw ValidationException(Message.USER_DISABLED_BY_ADMIN)
     }
 
-    // User is managed by the organization - we can't remove them
-    return false
+    userAccountService.enable(userId)
   }
+
+  private fun isManagedBy(
+    userId: Long,
+    organizationId: Long,
+  ): Boolean = getManagedBy(userId)?.id == organizationId
 
   private fun removeUserForReal(
     userId: Long,
