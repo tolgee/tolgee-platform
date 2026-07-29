@@ -7,8 +7,6 @@ import { LoadableType, StandardForm } from '../common/form/StandardForm';
 import { BaseView, BaseViewProps } from './BaseView';
 
 interface BaseFormViewProps {
-  onInit?: () => Record<string, unknown>;
-  saving?: boolean;
   initialValues: Record<string, unknown>;
   onSubmit: (v: any) => void;
   onCancel?: () => void;
@@ -16,8 +14,9 @@ interface BaseFormViewProps {
   saveActionLoadable?: LoadableType;
   redirectAfter?: Link;
   customActions?: ReactNode;
-  submitButtons?: ReactNode;
   submitButtonInner?: ReactNode;
+  submitDisabledReason?: ReactNode;
+  disabled?: boolean;
   children?: ReactNode | ((formikProps: FormikProps<any>) => ReactNode);
 }
 
@@ -32,9 +31,10 @@ export const BaseFormView: FunctionComponent<
         onCancel={props.onCancel}
         validationSchema={props.validationSchema}
         customActions={props.customActions}
-        submitButtons={props.submitButtons}
         submitButtonInner={props.submitButtonInner}
         saveActionLoadable={props.saveActionLoadable}
+        submitDisabledReason={props.submitDisabledReason}
+        disabled={props.disabled}
       >
         {props.children}
       </StandardForm>

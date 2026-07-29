@@ -5,11 +5,15 @@ import {
   assertSwitchedToOrganization,
   gcy,
   gcyAdvanced,
+  selectOrganizationInSwitch,
   switchToOrganization,
 } from '../../common/shared';
 import { waitForGlobalLoading } from '../../common/loading';
 
 const SET_PREFERRED_ORG = '**/v2/user-preferences/set-preferred-organization/*';
+
+const SWITCH_RESPONSE_DELAY = 4000;
+const WHILE_SWITCH_IN_FLIGHT = 1500;
 
 describe('Community preferred organization', () => {
   let organizations: Record<string, { slug: string }>;
@@ -97,6 +101,45 @@ describe('Community preferred organization', () => {
       gcy('global-base-view-content').should('exist');
     });
 
+    it('disables the create submit on a foreign organization and creates in the switched-to one', () => {
+      cy.intercept('POST', '**/v2/projects').as('createProject');
+
+      cy.visit(`${HOST}/projects/add`);
+      waitForGlobalLoading();
+      gcy('global-form-save-button').should('be.enabled');
+      gcy('project-create-no-permission-message').should('not.exist');
+
+      openPublicProject();
+      assertSwitchedToOrganization('publicProjectsUser');
+
+      cy.visit(`${HOST}/projects/add`);
+      waitForGlobalLoading();
+      gcy('global-form-save-button').should('be.disabled');
+      gcy('project-create-no-permission-message').should('be.visible');
+
+      gcy('project-name-field').find('input').type('Switched org project');
+
+      switchToOrganization('Community User');
+      waitForGlobalLoading();
+      gcy('global-form-save-button').should('be.enabled');
+      gcy('project-create-no-permission-message').should('not.exist');
+      gcy('project-name-field')
+        .find('input')
+        .should('have.value', 'Switched org project');
+
+      gcy('global-form-save-button').click();
+      cy.wait('@createProject').its('response.statusCode').should('eq', 200);
+      waitForGlobalLoading();
+      cy.url().should('match', /\/projects\/[0-9]+/);
+
+      cy.visit(HOST);
+      waitForGlobalLoading();
+      assertSwitchedToOrganization('Community User');
+      gcy('dashboard-projects-list-item')
+        .contains('Switched org project')
+        .should('be.visible');
+    });
+
     it('shows glossaries but hides translation memories in the foreign org settings', () => {
       openPublicProject();
       cy.visit(
@@ -114,6 +157,61 @@ describe('Community preferred organization', () => {
         item: 'translation-memories',
       }).should('not.exist');
       gcy('organization-profile-leave-button').should('be.disabled');
+    });
+  });
+
+  describe('user who owns one organization and belongs to another', () => {
+    beforeEach(() => {
+      login('dualOrgCommunityUser');
+    });
+
+    it('blocks the submit while switching into an organization it cannot create in', () => {
+      cy.intercept('PUT', SET_PREFERRED_ORG, (req) => {
+        req.on('response', (res) => {
+          res.setDelay(SWITCH_RESPONSE_DELAY);
+        });
+      }).as('slowSwitch');
+
+      cy.visit(`${HOST}/projects/add`);
+      waitForGlobalLoading();
+      gcy('global-form-save-button').should('be.enabled');
+
+      selectOrganizationInSwitch('Community User');
+
+      gcy('global-form-save-button', {
+        timeout: WHILE_SWITCH_IN_FLIGHT,
+      }).should('be.disabled');
+      gcy('project-create-no-permission-message').should('not.exist');
+
+      cy.wait('@slowSwitch');
+      waitForGlobalLoading();
+      gcy('global-form-save-button').should('be.disabled');
+      gcy('project-create-no-permission-message').should('be.visible');
+    });
+  });
+
+  describe('supporter who owns no organization', () => {
+    beforeEach(() => {
+      login('supporterCommunityUser');
+    });
+
+    it('offers no project creation in organizations it only supports or belongs to', () => {
+      openPublicProject();
+      assertSwitchedToOrganization('publicProjectsUser');
+
+      cy.visit(HOST);
+      waitForGlobalLoading();
+      gcy('global-plus-button').should('not.exist');
+
+      cy.visit(`${HOST}/projects/add`);
+      waitForGlobalLoading();
+      gcy('global-form-save-button').should('be.disabled');
+      gcy('project-create-no-permission-message').should('be.visible');
+
+      switchToOrganization('Community User');
+      waitForGlobalLoading();
+      gcy('global-form-save-button').should('be.disabled');
+      gcy('project-create-no-permission-message').should('be.visible');
     });
   });
 
@@ -156,6 +254,28 @@ describe('Community preferred organization', () => {
         .contains('Community Outsider')
         .should('not.exist');
       gcy('no-permissions-message').should('not.exist');
+    });
+
+    it('disables the create submit after adopting a foreign organization', () => {
+      visitRootAndExpectNoOrganization();
+
+      openPublicProject();
+      assertSwitchedToOrganization('publicProjectsUser');
+
+      cy.visit(`${HOST}/projects/add`);
+      waitForGlobalLoading();
+      gcy('no-permissions-message').should('not.exist');
+      gcy('global-form-save-button').should('be.disabled');
+      gcy('project-create-no-permission-message').should('be.visible');
+
+      cy.intercept('POST', '**/v2/projects').as('createProject');
+      gcy('project-name-field').find('input').type('Not allowed{enter}');
+
+      // A full page load after the submit attempt, so a POST that did fire
+      // would already have been recorded by the time the count is asserted.
+      cy.visit(HOST);
+      waitForGlobalLoading();
+      cy.get('@createProject.all').should('have.length', 0);
     });
 
     it('still requires an organization to create a project', () => {

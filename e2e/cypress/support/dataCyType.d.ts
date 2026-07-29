@@ -553,6 +553,8 @@ declare namespace DataCy {
         "project-branch-merge-change": true;
         "project-branch-merge-delete-branch-checkbox": true;
         "project-branch-merge-detail": true;
+        "project-create-no-organization-message": true;
+        "project-create-no-permission-message": true;
         "project-dashboard-activity-chart": true;
         "project-dashboard-activity-list": true;
         "project-dashboard-base-word-count": true;

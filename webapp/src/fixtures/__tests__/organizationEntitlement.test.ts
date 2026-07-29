@@ -2,7 +2,7 @@ import { components } from 'tg.service/apiSchema.generated';
 import {
   organizationCompanyInfo,
   organizationHasSupportChat,
-} from '../organizationEntitlement';
+} from 'tg.fixtures/organizationEntitlement';
 
 type PrivateOrganization = components['schemas']['PrivateOrganizationModel'];
 type CloudSubscription = NonNullable<

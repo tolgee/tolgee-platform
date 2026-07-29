@@ -1,5 +1,6 @@
 import { Feature, QaCheckType } from 'tg.service/apiSchemaTypes';
 import { organizationHasSupportChat } from 'tg.fixtures/organizationEntitlement';
+import { isOwnerOrMaintainerOrgRole } from 'tg.fixtures/organizationRole';
 
 import { useGlobalActions, useGlobalContext } from './GlobalContext';
 
@@ -54,8 +55,26 @@ export const usePreferredOrganization = () => {
 
 export const useIsOrganizationOwnerOrMaintainer = () => {
   const { preferredOrganization } = usePreferredOrganization();
-  const role = preferredOrganization?.currentUserRole;
-  return ['OWNER', 'MAINTAINER'].includes(role || '');
+  return isOwnerOrMaintainerOrgRole(preferredOrganization?.currentUserRole);
+};
+
+export const useCanCreateProject = () => {
+  const { preferredOrganization, isFetching } = usePreferredOrganization();
+  const isAdmin = useIsAdmin();
+
+  if (isAdmin) {
+    return {
+      isFetching: false,
+      canCreateProject: true,
+    };
+  }
+
+  return {
+    isFetching: isFetching,
+    canCreateProject: isOwnerOrMaintainerOrgRole(
+      preferredOrganization?.currentUserRole
+    ),
+  };
 };
 
 export const useOrganizationUsage = () => {
