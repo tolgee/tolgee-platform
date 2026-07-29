@@ -8,6 +8,8 @@ export class E2ProjectMembersInvitationDialog {
   }
 
   clickInvite() {
+    // Submit silently no-ops until PermissionsSettings has emitted its state.
+    cy.gcy('permissions-menu').should('be.visible');
     cy.gcy('invitation-dialog-invite-button').click();
   }
 

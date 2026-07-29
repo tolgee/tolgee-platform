@@ -1,6 +1,7 @@
 package io.tolgee.batch
 
 import io.tolgee.AbstractSpringTest
+import io.tolgee.ActivityTestUtil
 import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.events.OnBatchJobFinalized
 import io.tolgee.batch.request.NoOpRequest
@@ -49,6 +50,9 @@ class BatchJobFinalizationWithoutActivityTest : AbstractSpringTest() {
   @Autowired
   lateinit var finalizedRecorder: FinalizedRecorder
 
+  @Autowired
+  lateinit var activityTestUtil: ActivityTestUtil
+
   @BeforeEach
   fun setup() {
     finalizedRecorder.events.clear()
@@ -75,7 +79,7 @@ class BatchJobFinalizationWithoutActivityTest : AbstractSpringTest() {
     }
 
     executeInNewTransaction(platformTransactionManager) {
-      countRevisionsOfJob(job).assert.isEqualTo(0)
+      activityTestUtil.countRevisionsOfJob(job.id).assert.isEqualTo(0)
     }
 
     waitForNotThrowing(pollTime = 100, timeout = 20_000) {
@@ -86,19 +90,6 @@ class BatchJobFinalizationWithoutActivityTest : AbstractSpringTest() {
         .isNull()
     }
   }
-
-  private fun countRevisionsOfJob(job: BatchJob): Long =
-    (
-      entityManager
-        .createNativeQuery(
-          """
-          select count(*) from activity_revision ar
-          left join tolgee_batch_job_chunk_execution e on e.id = ar.batch_job_chunk_execution_id
-          where ar.batch_job_id = :jobId or e.batch_job_id = :jobId
-          """,
-        ).setParameter("jobId", job.id)
-        .singleResult as Number
-    ).toLong()
 
   private fun runNoOpJob(): BatchJob =
     executeInNewTransaction(platformTransactionManager) {

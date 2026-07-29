@@ -1,4 +1,4 @@
-import { assertMessage, gcy } from '../../common/shared';
+import { assertMessage } from '../../common/shared';
 import { login } from '../../common/apiCalls/common';
 import {
   getProjectByNameFromTestData,
@@ -40,11 +40,13 @@ describe('Community tab on the Members page', () => {
 
       membersView.getMembers().should('not.be.visible');
 
-      gcy('project-contributor-item-first-contribution')
+      membersView
+        .getContributorFirstContributions()
         .first()
         .should('be.visible')
         .and('contain', '2019');
-      gcy('project-contributor-item-last-contribution')
+      membersView
+        .getContributorLastContributions()
         .first()
         .should('be.visible')
         .and('contain', '2021');
@@ -67,23 +69,18 @@ describe('Community tab on the Members page', () => {
       visitMembersOf('Contributors public project', res.body);
 
       membersView.openCommunityTab();
-      membersView
-        .getContributor('Cora Contributor')
-        .findDcy('project-contributor-invite-button')
-        .click();
+      const dialog = membersView.inviteContributor('Cora Contributor');
 
-      gcy('invitation-dialog-input-field')
+      dialog
+        .getEmailField()
         .find('input')
         .should('have.value', 'contributor@contributors.com');
-      // InviteDialog's submit silently no-ops until PermissionsSettings has emitted its state.
-      gcy('permissions-menu').should('be.visible');
-      gcy('invitation-dialog-invite-button').click();
+      dialog.clickInvite();
       assertMessage('Invitation was sent');
       waitForGlobalLoading();
 
       membersView
-        .getContributor('Cora Contributor')
-        .findDcy('project-contributor-invitation-pending')
+        .getContributorInvitationPending('Cora Contributor')
         .should('be.visible');
     });
   });
@@ -93,31 +90,21 @@ describe('Community tab on the Members page', () => {
       visitMembersOf('Contributors public project', res.body);
 
       membersView.openCommunityTab();
-      membersView
-        .getContributor('Cora Contributor')
-        .findDcy('project-contributor-invite-button')
-        .click();
-
-      gcy('permissions-menu').should('be.visible');
-      gcy('invitation-dialog-invite-button').click();
+      membersView.inviteContributor('Cora Contributor').clickInvite();
       assertMessage('Invitation was sent');
       waitForGlobalLoading();
 
       membersView
-        .getContributor('Cora Contributor')
-        .findDcy('project-contributor-invitation-pending')
+        .getContributorInvitationPending('Cora Contributor')
         .should('be.visible');
 
       membersView.openTeamTab();
-      gcy('project-members-invitation-item')
-        .findDcy('project-members-invitation-cancel-button')
-        .click();
+      membersView.cancelInvitation();
       waitForGlobalLoading();
 
       membersView.openCommunityTab();
       membersView
-        .getContributor('Cora Contributor')
-        .findDcy('project-contributor-invite-button')
+        .getContributorInviteButton('Cora Contributor')
         .should('be.visible');
     });
   });
@@ -137,8 +124,8 @@ describe('Community tab on the Members page', () => {
       membersView
         .getContributor('Cora Contributor')
         .should('contain', 'contributor@contributors.com');
-      gcy('project-contributor-invite-button').should('not.exist');
-      gcy('project-contributor-invitation-pending').should('not.exist');
+      membersView.getContributorInviteButtons().should('not.exist');
+      membersView.getContributorInvitationPendings().should('not.exist');
     });
   });
 

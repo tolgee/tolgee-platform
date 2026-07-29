@@ -1,6 +1,7 @@
 package io.tolgee.ee.service.qa
 
 import com.posthog.server.PostHog
+import io.tolgee.ActivityTestUtil
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.data.BatchJobType
@@ -58,6 +59,9 @@ class QaCheckFinalizationTest : ProjectAuthControllerTest("/v2/projects/") {
   @Autowired
   private lateinit var finalizedRecorder: FinalizedRecorder
 
+  @Autowired
+  private lateinit var activityTestUtil: ActivityTestUtil
+
   lateinit var testData: QaTestData
 
   @BeforeEach
@@ -92,7 +96,7 @@ class QaCheckFinalizationTest : ProjectAuthControllerTest("/v2/projects/") {
     }
 
     executeInNewTransaction(platformTransactionManager) {
-      countRevisionsOfJob(job).assert.isEqualTo(0)
+      activityTestUtil.countRevisionsOfJob(job.id).assert.isEqualTo(0)
     }
 
     waitForNotThrowing(pollTime = 100, timeout = 20_000) {
@@ -103,19 +107,6 @@ class QaCheckFinalizationTest : ProjectAuthControllerTest("/v2/projects/") {
         .isNull()
     }
   }
-
-  private fun countRevisionsOfJob(job: BatchJob): Long =
-    (
-      entityManager
-        .createNativeQuery(
-          """
-          select count(*) from activity_revision ar
-          left join tolgee_batch_job_chunk_execution e on e.id = ar.batch_job_chunk_execution_id
-          where ar.batch_job_id = :jobId or e.batch_job_id = :jobId
-          """,
-        ).setParameter("jobId", job.id)
-        .singleResult as Number
-    ).toLong()
 
   private fun startQaCheck(
     keyId: Long,

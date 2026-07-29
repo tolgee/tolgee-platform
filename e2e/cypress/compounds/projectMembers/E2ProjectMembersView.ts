@@ -39,4 +39,47 @@ export class E2ProjectMembersView {
   getMembers() {
     return cy.gcy('project-member-item');
   }
+
+  getContributorFirstContributions() {
+    return cy.gcy('project-contributor-item-first-contribution');
+  }
+
+  getContributorLastContributions() {
+    return cy.gcy('project-contributor-item-last-contribution');
+  }
+
+  getContributorInviteButtons() {
+    return cy.gcy('project-contributor-invite-button');
+  }
+
+  getContributorInviteButton(name: string) {
+    return this.getContributor(name).findDcy(
+      'project-contributor-invite-button'
+    );
+  }
+
+  getContributorInvitationPendings() {
+    return cy.gcy('project-contributor-invitation-pending');
+  }
+
+  getContributorInvitationPending(name: string) {
+    return this.getContributor(name).findDcy(
+      'project-contributor-invitation-pending'
+    );
+  }
+
+  inviteContributor(name: string) {
+    this.getContributorInviteButton(name).click();
+    return new E2ProjectMembersInvitationDialog();
+  }
+
+  getInvitations() {
+    return cy.gcy('project-members-invitation-item');
+  }
+
+  cancelInvitation() {
+    this.getInvitations()
+      .findDcy('project-members-invitation-cancel-button')
+      .click();
+  }
 }

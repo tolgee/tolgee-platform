@@ -30,4 +30,18 @@ class ActivityTestUtil(
       ).setParameter("afterId", afterId)
       .resultList
   }
+
+  fun countRevisionsOfJob(jobId: Long): Long {
+    return (
+      entityManager
+        .createNativeQuery(
+          """
+          select count(*) from activity_revision ar
+          left join tolgee_batch_job_chunk_execution e on e.id = ar.batch_job_chunk_execution_id
+          where ar.batch_job_id = :jobId or e.batch_job_id = :jobId
+          """,
+        ).setParameter("jobId", jobId)
+        .singleResult as Number
+    ).toLong()
+  }
 }

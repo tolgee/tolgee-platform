@@ -29,7 +29,7 @@ class InitialDataCommunityContributionsTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `reports hasCommunityContributions for a non-member contributor`() {
+  fun `reports community contributions for a non-member contributor`() {
     recordProjectActivity(testData.publicProject.id, testData.contributor.id, Date(1_600_000_000_000))
 
     userAccount = testData.contributor

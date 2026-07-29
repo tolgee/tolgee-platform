@@ -40,12 +40,12 @@ class ProjectHardDeletingServiceTest : AbstractSpringTest() {
   @Autowired
   private lateinit var projectHardDeletingService: ProjectHardDeletingService
 
-  private var contributorTestData: BaseTestData? = null
+  private var testDataToClean: BaseTestData? = null
 
   @AfterEach
-  fun cleanContributorTestData() {
-    contributorTestData?.let { testDataService.cleanTestData(it.root) }
-    contributorTestData = null
+  fun cleanTestDataAfterTest() {
+    testDataToClean?.let { testDataService.cleanTestData(it.root) }
+    testDataToClean = null
   }
 
   @Test
@@ -183,7 +183,7 @@ class ProjectHardDeletingServiceTest : AbstractSpringTest() {
   @Test
   fun `deletes project with contributor rows`() {
     val testData = BaseTestData()
-    contributorTestData = testData
+    testDataToClean = testData
     testDataService.saveTestData(testData.root)
     val projectId = testData.projectBuilder.self.id
     val userId = testData.user.id
