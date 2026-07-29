@@ -8,6 +8,7 @@ import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andIsUnauthorized
 import io.tolgee.model.Pat
+import io.tolgee.model.enums.UserDisabledBy
 import io.tolgee.testing.AbstractControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -81,7 +82,7 @@ class PatAuthTest : AbstractControllerTest() {
   @Test
   fun `user doesnt authorize with PAT when account is disabled`() {
     val pat = createUserWithPat()
-    userAccountService.disable(userAccountService.get("franta").id)
+    userAccountService.disable(userAccountService.get("franta").id, UserDisabledBy.ADMIN)
 
     performGet(
       "/v2/user",

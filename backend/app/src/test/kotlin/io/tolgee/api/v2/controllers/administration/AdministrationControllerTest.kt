@@ -10,6 +10,7 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.node
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.UserDisabledBy
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -165,5 +166,15 @@ class AdministrationControllerTest : AuthorizedControllerTest() {
     performAuthPut("/v2/administration/users/${testData.user.id}/enable", null).andIsOk
     performAuthPut("/v2/administration/users/${testData.user.id}/enable", null).andIsOk
     userAccountService.findActive(testData.user.id).assert.isNotNull
+  }
+
+  @Test
+  fun `admin disable records the admin as the origin`() {
+    performAuthPut("/v2/administration/users/${testData.user.id}/disable", null).andIsOk
+    assertThat(userAccountService.findActiveOrDisabled(testData.user.id)!!.disabledBy)
+      .isEqualTo(UserDisabledBy.ADMIN)
+
+    performAuthPut("/v2/administration/users/${testData.user.id}/enable", null).andIsOk
+    assertThat(userAccountService.findActiveOrDisabled(testData.user.id)!!.disabledBy).isNull()
   }
 }

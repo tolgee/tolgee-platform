@@ -15,6 +15,7 @@ import io.tolgee.model.Organization
 import io.tolgee.model.OrganizationRole
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.enums.UserDisabledBy
 import io.tolgee.repository.OrganizationRepository
 import io.tolgee.repository.OrganizationRoleRepository
 import io.tolgee.security.authentication.AuthenticationFacade
@@ -286,7 +287,7 @@ class OrganizationRoleService(
       throw ValidationException(Message.USER_IS_NOT_MANAGED_BY_ORGANIZATION)
     }
 
-    userAccountService.disable(userId)
+    userAccountService.disable(userId, UserDisabledBy.ORGANIZATION)
   }
 
   @Transactional
@@ -296,6 +297,11 @@ class OrganizationRoleService(
   ) {
     if (!isManagedBy(userId, organizationId)) {
       throw ValidationException(Message.USER_IS_NOT_MANAGED_BY_ORGANIZATION)
+    }
+
+    val user = userAccountService.findActiveOrDisabled(userId) ?: throw NotFoundException(Message.USER_NOT_FOUND)
+    if (user.disabledAt != null && user.disabledBy != UserDisabledBy.ORGANIZATION) {
+      throw ValidationException(Message.USER_DISABLED_BY_ADMIN)
     }
 
     userAccountService.enable(userId)

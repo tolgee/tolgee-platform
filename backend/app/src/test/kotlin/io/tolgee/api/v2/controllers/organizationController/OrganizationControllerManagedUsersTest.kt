@@ -11,6 +11,8 @@ import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andIsUnauthorized
 import io.tolgee.fixtures.node
+import io.tolgee.model.enums.UserDisabledBy
+import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -178,10 +180,69 @@ class OrganizationControllerManagedUsersTest : BaseOrganizationControllerTest() 
   }
 
   @Test
-  fun `org owner can re-enable a user a platform admin disabled (Q3 accepted authority boundary)`() {
-    userAccountService.disable(testData.managedMember.id)
+  fun `org owner cannot re-enable a user a platform admin disabled`() {
+    userAccountService.disable(testData.managedMember.id, UserDisabledBy.ADMIN)
+    enable(testData.managedMember.id)
+      .andIsBadRequest
+      .andAssertError
+      .isCustomValidation
+      .hasMessage(Message.USER_DISABLED_BY_ADMIN.code)
+    assertDisabledBy(testData.managedMember.id, UserDisabledBy.ADMIN)
+  }
+
+  @Test
+  fun `an org disable does not take over an admin disable`() {
+    userAccountService.disable(testData.managedMember.id, UserDisabledBy.ADMIN)
+    disable(testData.managedMember.id).andIsOk
+    assertDisabledBy(testData.managedMember.id, UserDisabledBy.ADMIN)
+    enable(testData.managedMember.id)
+      .andIsBadRequest
+      .andAssertError
+      .isCustomValidation
+      .hasMessage(Message.USER_DISABLED_BY_ADMIN.code)
+  }
+
+  @Test
+  fun `an admin disable takes over an org disable`() {
+    disable(testData.managedMember.id).andIsOk
+    userAccountService.disable(testData.managedMember.id, UserDisabledBy.ADMIN)
+    assertDisabledBy(testData.managedMember.id, UserDisabledBy.ADMIN)
+    enable(testData.managedMember.id)
+      .andIsBadRequest
+      .andAssertError
+      .isCustomValidation
+      .hasMessage(Message.USER_DISABLED_BY_ADMIN.code)
+  }
+
+  @Test
+  fun `an org disable records the organization as the origin`() {
+    disable(testData.managedMember.id).andIsOk
+    assertDisabledBy(testData.managedMember.id, UserDisabledBy.ORGANIZATION)
+  }
+
+  @Test
+  fun `enabling clears the disable origin`() {
+    disable(testData.managedMember.id).andIsOk
     enable(testData.managedMember.id).andIsOk
+    assertDisabledBy(testData.managedMember.id, null)
+  }
+
+  @Test
+  fun `a platform admin can enable a user the organization disabled`() {
+    disable(testData.managedMember.id).andIsOk
+    userAccountService.enable(testData.managedMember.id)
     assertMemberFlags("managed@acting.org", managed = true, disabled = false)
+    assertDisabledBy(testData.managedMember.id, null)
+  }
+
+  @Test
+  fun `admin-disabled managed user is hidden from the org listing`() {
+    assertSearchTotal("byadmin@acting.org", 0)
+  }
+
+  @Test
+  fun `org-disabled managed user stays visible in the org listing`() {
+    assertMemberFlags("byorg@acting.org", managed = true, disabled = true)
   }
 
   @Test
@@ -245,6 +306,17 @@ class OrganizationControllerManagedUsersTest : BaseOrganizationControllerTest() 
       }
   }
 
+  private fun assertSearchTotal(
+    search: String,
+    expected: Int,
+  ) {
+    performAuthGet("/v2/organizations/${testData.organization.id}/users?search=$search")
+      .andIsOk
+      .andAssertThatJson {
+        node("page.totalElements").isEqualTo(expected)
+      }
+  }
+
   private fun assertMemberFlags(
     search: String,
     managed: Boolean,
@@ -261,7 +333,14 @@ class OrganizationControllerManagedUsersTest : BaseOrganizationControllerTest() 
       }
   }
 
+  private fun assertDisabledBy(
+    userId: Long,
+    expected: UserDisabledBy?,
+  ) {
+    assertThat(userAccountService.findActiveOrDisabled(userId)!!.disabledBy).isEqualTo(expected)
+  }
+
   companion object {
-    private const val SEEDED_MEMBER_COUNT = 5
+    private const val SEEDED_MEMBER_COUNT = 6
   }
 }

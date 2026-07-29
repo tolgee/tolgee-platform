@@ -5,6 +5,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
+import io.tolgee.model.enums.UserDisabledBy
 import java.util.Date
 
 class DisableManagedUserTestData : BaseTestData() {
@@ -14,6 +15,8 @@ class DisableManagedUserTestData : BaseTestData() {
   lateinit var managedMember: UserAccount
   lateinit var nonManagedMember: UserAccount
   lateinit var disabledNonManagedMember: UserAccount
+  lateinit var adminDisabledManagedMember: UserAccount
+  lateinit var orgDisabledManagedMember: UserAccount
   lateinit var projectOnlyMember: UserAccount
   lateinit var multiProjectMember: UserAccount
 
@@ -41,6 +44,20 @@ class DisableManagedUserTestData : BaseTestData() {
         disabledNonManagedMember = this
       }
       addUserAccountWithoutOrganization {
+        username = "byadmin@acting.org"
+        name = "Admin Disabled Managed Member"
+        disabledAt = Date(1700000000000)
+        disabledBy = UserDisabledBy.ADMIN
+        adminDisabledManagedMember = this
+      }
+      addUserAccountWithoutOrganization {
+        username = "byorg@acting.org"
+        name = "Org Disabled Managed Member"
+        disabledAt = Date(1700000000000)
+        disabledBy = UserDisabledBy.ORGANIZATION
+        orgDisabledManagedMember = this
+      }
+      addUserAccountWithoutOrganization {
         username = "projectonly@acting.org"
         name = "Project Only Member"
         projectOnlyMember = this
@@ -64,6 +81,16 @@ class DisableManagedUserTestData : BaseTestData() {
         addRole {
           user = disabledNonManagedMember
           type = OrganizationRoleType.MEMBER
+        }
+        addRole {
+          user = adminDisabledManagedMember
+          type = OrganizationRoleType.MEMBER
+          managed = true
+        }
+        addRole {
+          user = orgDisabledManagedMember
+          type = OrganizationRoleType.MEMBER
+          managed = true
         }
         addRole {
           user = multiProjectMember
