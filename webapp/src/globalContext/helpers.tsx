@@ -62,18 +62,11 @@ export const useCanCreateProject = () => {
   const { preferredOrganization, isFetching } = usePreferredOrganization();
   const isAdmin = useIsAdmin();
 
-  if (isAdmin) {
-    return {
-      isFetching: false,
-      canCreateProject: true,
-    };
-  }
-
   return {
-    isFetching: isFetching,
-    canCreateProject: isOwnerOrMaintainerOrgRole(
-      preferredOrganization?.currentUserRole
-    ),
+    isFetching,
+    canCreateProject:
+      isAdmin ||
+      isOwnerOrMaintainerOrgRole(preferredOrganization?.currentUserRole),
   };
 };
 
