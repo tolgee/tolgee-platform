@@ -5876,4 +5876,24 @@
             END $$;
         </sql>
     </changeSet>
+    <changeSet author="jirikuchynka (generated)" id="1785252020000-1">
+        <addColumn tableName="user_account">
+            <column name="disabled_by" type="VARCHAR(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jirikuchynka" id="1785252020000-2">
+        <sql>
+            UPDATE user_account
+            SET disabled_by = 'ADMIN'
+            WHERE disabled_at IS NOT NULL AND is_demo = false;
+
+            UPDATE user_account
+            SET disabled_by = 'ORGANIZATION'
+            WHERE disabled_at IS NOT NULL AND is_demo = false
+              AND id IN (SELECT user_id FROM organization_role WHERE managed = true);
+        </sql>
+        <rollback>
+            UPDATE user_account SET disabled_by = NULL;
+        </rollback>
+    </changeSet>
 </databaseChangeLog>
