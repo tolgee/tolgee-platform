@@ -65,6 +65,9 @@ class EeWordCountReportingListener(
 
   @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
   fun onOrganizationDeleted(event: BeforeOrganizationDeleteEvent) {
+    if (billingConfProvider().enabled) {
+      return
+    }
     onWordCountChanged()
   }
 
