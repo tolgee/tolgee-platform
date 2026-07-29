@@ -4,6 +4,7 @@ import io.tolgee.AbstractSpringTest
 import io.tolgee.development.testDataBuilder.data.DisableManagedUserTestData
 import io.tolgee.events.OnUserCountChanged
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.model.enums.UserDisabledBy
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
@@ -23,7 +24,8 @@ class UserAccountDisableEnableEventTest : AbstractSpringTest() {
   @Test
   fun `disable publishes one decrease event on a real transition`() {
     val testData = saveTestData()
-    val events = captureUserCountEvents { userAccountService.disable(testData.managedMember.id) }
+    val events =
+      captureUserCountEvents { userAccountService.disable(testData.managedMember.id, UserDisabledBy.ORGANIZATION) }
     assertThat(events).hasSize(1)
     assertThat(events[0].decrease).isTrue()
   }
@@ -31,7 +33,7 @@ class UserAccountDisableEnableEventTest : AbstractSpringTest() {
   @Test
   fun `enable publishes one increase event on a real transition`() {
     val testData = saveTestData()
-    userAccountService.disable(testData.managedMember.id)
+    userAccountService.disable(testData.managedMember.id, UserDisabledBy.ORGANIZATION)
     val events = captureUserCountEvents { userAccountService.enable(testData.managedMember.id) }
     assertThat(events).hasSize(1)
     assertThat(events[0].decrease).isFalse()
@@ -40,7 +42,10 @@ class UserAccountDisableEnableEventTest : AbstractSpringTest() {
   @Test
   fun `disabling an already-disabled user publishes no event`() {
     val testData = saveTestData()
-    val events = captureUserCountEvents { userAccountService.disable(testData.disabledNonManagedMember.id) }
+    val events =
+      captureUserCountEvents {
+        userAccountService.disable(testData.disabledNonManagedMember.id, UserDisabledBy.ORGANIZATION)
+      }
     assertThat(events).isEmpty()
   }
 
@@ -52,8 +57,17 @@ class UserAccountDisableEnableEventTest : AbstractSpringTest() {
   }
 
   @Test
+  fun `an admin takeover of an org disable publishes no event`() {
+    val testData = saveTestData()
+    userAccountService.disable(testData.managedMember.id, UserDisabledBy.ORGANIZATION)
+    val events =
+      captureUserCountEvents { userAccountService.disable(testData.managedMember.id, UserDisabledBy.ADMIN) }
+    assertThat(events).isEmpty()
+  }
+
+  @Test
   fun `disable throws NotFound for a nonexistent user`() {
-    assertThrows<NotFoundException> { userAccountService.disable(NONEXISTENT_USER_ID) }
+    assertThrows<NotFoundException> { userAccountService.disable(NONEXISTENT_USER_ID, UserDisabledBy.ADMIN) }
   }
 
   @Test
