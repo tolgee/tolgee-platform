@@ -10,6 +10,8 @@ import io.tolgee.ee.component.PromptLazyMap.Companion.Variable
 import io.tolgee.ee.service.glossary.GlossaryTermService
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.formats.DEFAULT_PLURAL_ARGUMENT_NAME
+import io.tolgee.formats.getPluralForms
+import io.tolgee.formats.toIcuPluralString
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.service.key.KeyService
@@ -193,10 +195,15 @@ class PromptVariablesHelper(
 
     result.add(Variable("languageName", language?.name))
     result.add(Variable("languageTag", language?.tag))
-    result.add(Variable("translation", PromptHandlebarsHelper.escapeJson(translation?.text)))
+    result.add(Variable("translation", PromptHandlebarsHelper.escapeJson(singleLinePlural(translation?.text))))
     result.add(Variable("languageNote", language?.aiTranslatorPromptDescription ?: ""))
     result.add(cjkVariable(language?.tag))
     return result
+  }
+
+  private fun singleLinePlural(text: String?): String? {
+    val forms = getPluralForms(text) ?: return text
+    return forms.forms.toIcuPluralString(optimize = false, addNewLines = false, argName = forms.argName)
   }
 
   private fun getPluralVariables(
