@@ -2,6 +2,7 @@ package io.tolgee.hateoas.ee
 
 import io.tolgee.api.SubscriptionStatus
 import io.tolgee.constants.BillingPeriod
+import io.tolgee.constants.Currency
 import io.tolgee.hateoas.limits.SelfHostedUsageLimitsModel
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
@@ -28,5 +29,7 @@ open class SelfHostedEeSubscriptionModel(
   val boostEndsAt: Long? = null,
   val autoUpgradeEnabled: Boolean = true,
   val scheduledDowngrade: SelfHostedEePlanModel? = null,
+  // Nullable so a self-hosted server on an older version still deserializes this model.
+  val currency: Currency? = null,
 ) : RepresentationModel<SelfHostedEeSubscriptionModel>(),
   Serializable
