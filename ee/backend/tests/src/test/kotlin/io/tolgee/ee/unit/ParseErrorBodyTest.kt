@@ -33,10 +33,13 @@ class ParseErrorBodyTest {
   }
 
   @Test
-  fun `reads the code even when params arrive in a shape we cannot hold`() {
+  fun `keeps params it does not recognise rather than losing the code`() {
     val body = """{"code": "${Message.OUT_OF_CREDITS.code}", "params": [{"nested": 1}]}"""
 
-    assertThat(badRequest(body)?.code).isEqualTo(Message.OUT_OF_CREDITS.code)
+    val parsed = badRequest(body)
+
+    assertThat(parsed?.code).isEqualTo(Message.OUT_OF_CREDITS.code)
+    assertThat(parsed?.params).hasSize(1)
   }
 
   @Test
