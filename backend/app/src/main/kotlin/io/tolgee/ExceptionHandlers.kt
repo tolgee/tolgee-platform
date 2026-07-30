@@ -21,7 +21,9 @@ import jakarta.persistence.EntityNotFoundException
 import jakarta.servlet.http.HttpServletRequest
 import org.apache.catalina.connector.ClientAbortException
 import org.apache.commons.lang3.exception.ExceptionUtils
+import org.hibernate.query.PathException
 import org.hibernate.query.sqm.PathElementException
+import org.hibernate.query.sqm.TerminalPathException
 import org.springframework.dao.InvalidDataAccessApiUsageException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -229,7 +231,7 @@ class ExceptionHandlers : Logging {
 
   @ExceptionHandler(InvalidDataAccessApiUsageException::class)
   fun handleInvalidDataAccessApiUsage(ex: InvalidDataAccessApiUsageException): ResponseEntity<ErrorResponseBody> {
-    if (ExceptionUtils.getThrowableList(ex).any { it is PathElementException }) {
+    if (ExceptionUtils.getThrowableList(ex).any { it.isUnresolvablePath() }) {
       logger.debug("Unresolvable property in a query", ex)
       return ResponseEntity(
         ErrorResponseBody(Message.UNKNOWN_SORT_PROPERTY.code, null),
@@ -239,6 +241,9 @@ class ExceptionHandlers : Logging {
     Sentry.captureException(ex)
     throw ex
   }
+
+  private fun Throwable.isUnresolvablePath() =
+    this is PathElementException || this is TerminalPathException || this is PathException
 
   @ExceptionHandler(RateLimitedException::class)
   fun handleRateLimited(ex: RateLimitedException): ResponseEntity<RateLimitResponseBody> {
@@ -271,11 +276,12 @@ class ExceptionHandlers : Logging {
 
   @ExceptionHandler(Throwable::class)
   fun handleOtherExceptions(ex: Throwable): ResponseEntity<ErrorResponseBody> {
-    val clientAborted =
-      ExceptionUtils.getThrowableList(ex).any {
-        it is IOException && it.message?.contains("Broken pipe") == true
-      }
-    if (clientAborted) {
+    if (ex is IOException && ex.message?.contains("Broken pipe") == true) {
+      return handleBrokenPipe(ex)
+    }
+
+    val rootCause = ExceptionUtils.getRootCause(ex)
+    if (rootCause is IOException && rootCause.message?.contains("Broken pipe") == true) {
       return handleBrokenPipe(ex)
     }
 

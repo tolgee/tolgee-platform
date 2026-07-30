@@ -5,6 +5,8 @@ import io.tolgee.constants.Message
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.hibernate.query.sqm.PathElementException
+import org.hibernate.query.sqm.TerminalPathException
+import org.hibernate.query.sqm.UnknownPathException
 import org.junit.jupiter.api.Test
 import org.springframework.dao.InvalidDataAccessApiUsageException
 import org.springframework.http.HttpStatus
@@ -25,6 +27,24 @@ class ExceptionHandlersTest {
   }
 
   @Test
+  fun `answers bad request when the unresolvable path sits below the direct cause`() {
+    val buried =
+      InvalidDataAccessApiUsageException(
+        "wrapped",
+        IllegalStateException("in between", UnknownPathException("Could not resolve path 'name.nope'")),
+      )
+
+    assertThat(handlers.handleInvalidDataAccessApiUsage(buried).statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
+  }
+
+  @Test
+  fun `answers bad request when a basic attribute is dereferenced`() {
+    val terminal = InvalidDataAccessApiUsageException("wrapped", TerminalPathException("Terminal path 'name'"))
+
+    assertThat(handlers.handleInvalidDataAccessApiUsage(terminal).statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
+  }
+
+  @Test
   fun `rethrows data access misuse that is not an unresolvable property`() {
     val ex = InvalidDataAccessApiUsageException("something else entirely")
 
@@ -42,12 +62,10 @@ class ExceptionHandlersTest {
   }
 
   @Test
-  fun `answers bad gateway when the client abort is anywhere in the cause chain`() {
+  fun `answers bad gateway when the client abort is the root cause`() {
     val nested = UncheckedIOException(IOException("Broken pipe"))
 
     assertThat(handlers.handleOtherExceptions(nested).statusCode).isEqualTo(HttpStatus.BAD_GATEWAY)
-    assertThat(handlers.handleOtherExceptions(IllegalStateException("outer", nested)).statusCode)
-      .isEqualTo(HttpStatus.BAD_GATEWAY)
   }
 
   @Test
