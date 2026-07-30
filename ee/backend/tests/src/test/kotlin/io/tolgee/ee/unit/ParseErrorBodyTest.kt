@@ -33,6 +33,19 @@ class ParseErrorBodyTest {
   }
 
   @Test
+  fun `reads the code even when params arrive in a shape we cannot hold`() {
+    val body = """{"code": "${Message.OUT_OF_CREDITS.code}", "params": [{"nested": 1}]}"""
+
+    assertThat(badRequest(body)?.code).isEqualTo(Message.OUT_OF_CREDITS.code)
+  }
+
+  @Test
+  fun `returns null when the body has no textual code`() {
+    assertThat(badRequest("""{"params": ["a"]}""")).isNull()
+    assertThat(badRequest("""{"code": 42}""")).isNull()
+  }
+
+  @Test
   fun `returns null for a body that is not our error json`() {
     assertThat(badRequest("<html>502 Bad Gateway</html>")).isNull()
   }
