@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.math.BigDecimal
 
 @SpringBootTest
@@ -60,6 +61,32 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       .andAssertThatJson {
         node("code").isEqualTo("unknown_sort_property")
       }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `returns bad request when the sort direction is nonsense`() {
+    saveTestDataAndPrepare()
+    performProjectAuthGet("keys?sort=name,nonsensedirection")
+      .andIsBadRequest
+      .andAssertThatJson {
+        node("code").isEqualTo("unknown_sort_property")
+      }
+  }
+
+  /**
+   * Sorting by a to-many association raises UnsupportedOperationException rather than a path failure,
+   * so it never reaches the unknown-sort-property handler. Recorded as the current answer, not as the
+   * desired one — fixing it means validating sort input against the metamodel before the query runs.
+   */
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `still answers server error when sorting by a to-many association`() {
+    saveTestDataAndPrepare()
+    performProjectAuthGet("keys?sort=translations")
+      .andExpect(status().isInternalServerError)
+    performProjectAuthGet("keys?sort=keyMeta.tags")
+      .andExpect(status().isInternalServerError)
   }
 
   @ProjectJWTAuthTestMethod
