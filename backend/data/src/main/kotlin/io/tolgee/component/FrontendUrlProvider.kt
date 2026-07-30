@@ -21,13 +21,13 @@ class FrontendUrlProvider(
     }
 
   private fun getFromServerRequest(): String {
-    if (RequestContextHolder.getRequestAttributes() !is ServletRequestAttributes) {
-      throw IllegalStateException(
-        "Trying to find frontend url, but there is no current request. " +
-          "You will have to specify frontend url in application properties.",
-      )
-    }
-    val builder = ServletUriComponentsBuilder.fromCurrentRequestUri()
+    val attributes =
+      RequestContextHolder.getRequestAttributes() as? ServletRequestAttributes
+        ?: throw IllegalStateException(
+          "Trying to find frontend url, but there is no current request. " +
+            "You will have to specify frontend url in application properties.",
+        )
+    val builder = ServletUriComponentsBuilder.fromRequestUri(attributes.request)
     builder.replacePath("")
     builder.replaceQuery("")
     return builder.build().toUriString()
