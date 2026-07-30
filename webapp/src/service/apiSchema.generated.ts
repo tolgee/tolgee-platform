@@ -1172,7 +1172,7 @@ export interface paths {
     post: operations["identify"];
   };
   "/v2/public/business-events/report": {
-    post: operations["report_1"];
+    post: operations["report"];
   };
   "/v2/public/configuration-properties": {
     /** Return server configuration properties documentation */
@@ -1198,12 +1198,6 @@ export interface paths {
   };
   "/v2/public/scope-info/roles": {
     get: operations["getRoles"];
-  };
-  "/v2/public/session": {
-    post: operations["createSession"];
-  };
-  "/v2/public/session/event": {
-    post: operations["report"];
   };
   "/v2/public/slack": {
     post: operations["slackCommand"];
@@ -1326,9 +1320,6 @@ export interface components {
   schemas: {
     AcceptAuthProviderChangeRequest: {
       id: string;
-    };
-    AdsSessionResponse: {
-      sessionId: string;
     };
     AiPlaygroundResultModel: {
       contextDescription?: string;
@@ -1659,6 +1650,8 @@ export interface components {
         | "SET_KEYS_NAMESPACE"
         | "AUTOMATION"
         | "BILLING_TRIAL_EXPIRATION_NOTICE"
+        | "BILLING_AUTO_UPGRADE_NOTICE"
+        | "BILLING_AUTO_UPGRADE_RENEWAL"
         | "ASSIGN_TRANSLATION_LABEL"
         | "UNASSIGN_TRANSLATION_LABEL"
         | "QA_CHECK"
@@ -2517,14 +2510,6 @@ export interface components {
       sourceLanguageId: number;
       targetLanguageIds: number[];
     };
-    CreateAdsSessionRequest: {
-      c?: string;
-      cp?: string;
-      ct?: string;
-      m?: string;
-      s?: string;
-      t?: string;
-    };
     CreateApiKeyDto: {
       /** @description Description of the project API key */
       description?: string;
@@ -3136,11 +3121,14 @@ export interface components {
         | "cloud_plan_tier_missing_included_words"
         | "cloud_plan_tier_invalid_allowance_for_metric"
         | "cloud_plan_tier_missing_eur_price"
+        | "plan_tiers_disagree_on_billing_period"
+        | "self_hosted_plan_missing_included_words"
         | "stripe_product_id_required"
         | "stripe_product_name_required"
         | "subscription_not_scheduled_for_cancellation"
         | "cannot_cancel_trial"
         | "cannot_update_without_modification"
+        | "cannot_downgrade_word_tier"
         | "current_subscription_is_not_trialing"
         | "sorting_and_paging_is_not_supported_when_using_cursor"
         | "strings_metric_are_not_supported"
@@ -3790,6 +3778,8 @@ export interface components {
         | "SET_KEYS_NAMESPACE"
         | "AUTOMATION"
         | "BILLING_TRIAL_EXPIRATION_NOTICE"
+        | "BILLING_AUTO_UPGRADE_NOTICE"
+        | "BILLING_AUTO_UPGRADE_RENEWAL"
         | "ASSIGN_TRANSLATION_LABEL"
         | "UNASSIGN_TRANSLATION_LABEL"
         | "QA_CHECK"
@@ -5153,6 +5143,7 @@ export interface components {
       perSeat: number;
       perThousandKeys: number;
       perThousandMtCredits?: number;
+      perThousandMtCreditsUsd?: number;
       perThousandTranslations?: number;
       subscriptionMonthly: number;
       subscriptionMonthlyUsd: number;
@@ -6150,10 +6141,6 @@ export interface components {
        */
       name: string;
     };
-    ReportSessionConversionRequest: {
-      eventType: string;
-      sessionId: string;
-    };
     ResetPassword: {
       code: string;
       email: string;
@@ -7001,11 +6988,14 @@ export interface components {
         | "cloud_plan_tier_missing_included_words"
         | "cloud_plan_tier_invalid_allowance_for_metric"
         | "cloud_plan_tier_missing_eur_price"
+        | "plan_tiers_disagree_on_billing_period"
+        | "self_hosted_plan_missing_included_words"
         | "stripe_product_id_required"
         | "stripe_product_name_required"
         | "subscription_not_scheduled_for_cancellation"
         | "cannot_cancel_trial"
         | "cannot_update_without_modification"
+        | "cannot_downgrade_word_tier"
         | "current_subscription_is_not_trialing"
         | "sorting_and_paging_is_not_supported_when_using_cursor"
         | "strings_metric_are_not_supported"
@@ -25072,7 +25062,7 @@ export interface operations {
       };
     };
   };
-  report_1: {
+  report: {
     responses: {
       /** OK */
       200: unknown;
@@ -25407,80 +25397,6 @@ export interface operations {
         content: {
           "application/json": string;
         };
-      };
-    };
-  };
-  createSession: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["AdsSessionResponse"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json": string;
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json": string;
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateAdsSessionRequest"];
-      };
-    };
-  };
-  report: {
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json": string;
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json": string;
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ReportSessionConversionRequest"];
       };
     };
   };
