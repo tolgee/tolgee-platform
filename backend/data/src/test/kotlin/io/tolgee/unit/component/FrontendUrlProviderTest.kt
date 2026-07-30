@@ -9,11 +9,6 @@ import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 
-/**
- * Outside a request, the provider turns Spring's "No current ServletRequestAttributes" into an explanation of what
- * the operator has to configure. It recognises that case by matching Spring's message, so this drives the real
- * builder rather than asserting the literal against itself.
- */
 class FrontendUrlProviderTest {
   @Test
   fun `explains the missing configuration when there is no current request`() {
@@ -26,6 +21,12 @@ class FrontendUrlProviderTest {
 
   @Test
   fun `derives the url from the current request`() {
+    withCurrentRequest {
+      assertThat(FrontendUrlProvider(TolgeeProperties()).url).isEqualTo("https://app.example.com")
+    }
+  }
+
+  private fun withCurrentRequest(fn: () -> Unit) {
     val request =
       MockHttpServletRequest().apply {
         scheme = "https"
@@ -36,7 +37,7 @@ class FrontendUrlProviderTest {
       }
     RequestContextHolder.setRequestAttributes(ServletRequestAttributes(request))
     try {
-      assertThat(FrontendUrlProvider(TolgeeProperties()).url).isEqualTo("https://app.example.com")
+      fn()
     } finally {
       RequestContextHolder.resetRequestAttributes()
     }
@@ -44,9 +45,9 @@ class FrontendUrlProviderTest {
 
   @Test
   fun `prefers the configured url over the current request`() {
-    RequestContextHolder.resetRequestAttributes()
-
-    val properties = TolgeeProperties().apply { frontEndUrl = "https://configured.example.com" }
-    assertThat(FrontendUrlProvider(properties).url).isEqualTo("https://configured.example.com")
+    withCurrentRequest {
+      val properties = TolgeeProperties().apply { frontEndUrl = "https://configured.example.com" }
+      assertThat(FrontendUrlProvider(properties).url).isEqualTo("https://configured.example.com")
+    }
   }
 }

@@ -21,6 +21,7 @@ import jakarta.persistence.EntityNotFoundException
 import jakarta.servlet.http.HttpServletRequest
 import org.apache.catalina.connector.ClientAbortException
 import org.apache.commons.lang3.exception.ExceptionUtils
+import org.hibernate.query.sqm.PathElementException
 import org.springframework.dao.InvalidDataAccessApiUsageException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -228,14 +229,13 @@ class ExceptionHandlers : Logging {
 
   @ExceptionHandler(InvalidDataAccessApiUsageException::class)
   fun handleInvalidDataAccessApiUsage(ex: InvalidDataAccessApiUsageException): ResponseEntity<ErrorResponseBody> {
-    Sentry.captureException(ex)
-    val contains = ex.message?.contains("could not resolve attribute", true) ?: false
-    if (contains) {
+    if (ExceptionUtils.getThrowableList(ex).any { it is PathElementException }) {
       return ResponseEntity(
         ErrorResponseBody(Message.UNKNOWN_SORT_PROPERTY.code, null),
         HttpStatus.BAD_REQUEST,
       )
     }
+    Sentry.captureException(ex)
     throw ex
   }
 
