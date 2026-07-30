@@ -1,7 +1,7 @@
 package io.tolgee.ee.unit
 
 import io.tolgee.constants.Message
-import io.tolgee.ee.service.eeSubscription.parseErrorBody
+import io.tolgee.ee.service.eeSubscription.parseTolgeeErrorBody
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders
@@ -50,5 +50,5 @@ class ParseErrorBodyTest {
         HttpHeaders(),
         body.toByteArray(),
         null,
-      ).parseErrorBody()
+      ).parseTolgeeErrorBody()
 }
