@@ -13,10 +13,6 @@ import org.junit.jupiter.api.Test
 class SentryBeforeSendCallbackTest {
   private val callback = SentryBeforeSendCallback()
 
-  /**
-   * The literals below are spelled out rather than read from the production lists: taking the inputs
-   * from the constants under test makes the assertion follow any edit to them, including deletion.
-   */
   @Test
   fun `drops the websocket noise`() {
     assertThat(callback.execute(eventWithMessage("Failed to send message to MessageChannel x"), Hint())).isNull()

@@ -28,9 +28,8 @@ class ApplicationStopper(
   }
 
   /**
-   * A schema failure is the expected outcome of the stopRightAfterStart smoke check, so it exits 0.
-   * It arrives wrapped — Spring translates it into InvalidDataAccessResourceUsageException — so the
-   * whole chain has to be inspected, not just the thrown exception.
+   * Spring translates the schema failure into InvalidDataAccessResourceUsageException, so it arrives
+   * wrapped rather than as the thrown exception.
    */
   internal fun exitStatusFor(exception: Throwable?): Int {
     val schemaFailure =
