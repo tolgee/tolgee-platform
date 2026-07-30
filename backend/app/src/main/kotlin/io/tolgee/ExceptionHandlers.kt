@@ -230,6 +230,7 @@ class ExceptionHandlers : Logging {
   @ExceptionHandler(InvalidDataAccessApiUsageException::class)
   fun handleInvalidDataAccessApiUsage(ex: InvalidDataAccessApiUsageException): ResponseEntity<ErrorResponseBody> {
     if (ExceptionUtils.getThrowableList(ex).any { it is PathElementException }) {
+      logger.debug("Unresolvable property in a query", ex)
       return ResponseEntity(
         ErrorResponseBody(Message.UNKNOWN_SORT_PROPERTY.code, null),
         HttpStatus.BAD_REQUEST,
@@ -270,12 +271,11 @@ class ExceptionHandlers : Logging {
 
   @ExceptionHandler(Throwable::class)
   fun handleOtherExceptions(ex: Throwable): ResponseEntity<ErrorResponseBody> {
-    if (ex is IOException && ex.message?.contains("Broken pipe") == true) {
-      return handleBrokenPipe(ex)
-    }
-
-    val rootCause = ExceptionUtils.getRootCause(ex)
-    if (rootCause is IOException && rootCause.message?.contains("Broken pipe") == true) {
+    val clientAborted =
+      ExceptionUtils.getThrowableList(ex).any {
+        it is IOException && it.message?.contains("Broken pipe") == true
+      }
+    if (clientAborted) {
       return handleBrokenPipe(ex)
     }
 
