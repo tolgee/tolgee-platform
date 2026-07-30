@@ -75,18 +75,19 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   /**
-   * Sorting by a to-many association raises UnsupportedOperationException rather than a path failure,
-   * so it never reaches the unknown-sort-property handler. Recorded as the current answer, not as the
-   * desired one — fixing it means validating sort input against the metamodel before the query runs.
+   * Sorting by a to-many association raises UnsupportedOperationException before any path resolution,
+   * so it never reaches the unknown-sort-property handler. Asserted as "not answered as a client error
+   * yet" rather than "is a 500", so validating sort input against the metamodel — the fix for this and
+   * for the PropertyReferenceException gap — turns this into a failure that says the gap closed rather
+   * than one inviting someone to restore the 500.
    */
   @ProjectJWTAuthTestMethod
   @Test
-  fun `still answers server error when sorting by a to-many association`() {
+  fun `does not yet answer bad request when sorting by a to-many association`() {
     saveTestDataAndPrepare()
-    performProjectAuthGet("keys?sort=translations")
-      .andExpect(status().isInternalServerError)
-    performProjectAuthGet("keys?sort=keyMeta.tags")
-      .andExpect(status().isInternalServerError)
+    listOf("translations", "keyMeta.tags").forEach { sort ->
+      performProjectAuthGet("keys?sort=$sort").andExpect(status().is5xxServerError)
+    }
   }
 
   @ProjectJWTAuthTestMethod

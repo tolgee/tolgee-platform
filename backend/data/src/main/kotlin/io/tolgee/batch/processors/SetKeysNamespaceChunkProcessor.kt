@@ -12,7 +12,7 @@ import io.tolgee.service.key.KeyService
 import jakarta.persistence.EntityManager
 import kotlinx.coroutines.ensureActive
 import org.apache.commons.lang3.exception.ExceptionUtils
-import org.hibernate.exception.ConstraintViolationException
+import org.postgresql.util.PSQLException
 import org.springframework.stereotype.Component
 import kotlin.coroutines.CoroutineContext
 
@@ -51,11 +51,17 @@ class SetKeysNamespaceChunkProcessor(
     }
   }
 
-  private fun violatesKeyUniqueness(e: Throwable) =
+  /**
+   * Reads the constraint from the driver's ErrorResponse rather than from
+   * ConstraintViolationException.constraintName: Hibernate fills that in by searching the server's
+   * message for the English `violates unique constraint "`, so it is empty under a non-English
+   * lc_messages. The wire-protocol field is an identifier the server never localizes.
+   */
+  fun violatesKeyUniqueness(e: Throwable) =
     ExceptionUtils
       .getThrowableList(e)
-      .filterIsInstance<ConstraintViolationException>()
-      .any { it.constraintName in KEY_UNIQUENESS_INDEXES }
+      .filterIsInstance<PSQLException>()
+      .any { it.serverErrorMessage?.constraint in KEY_UNIQUENESS_INDEXES }
 
   override fun getTargetItemType(): Class<Long> {
     return Long::class.java
