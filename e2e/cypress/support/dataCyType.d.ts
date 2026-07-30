@@ -124,10 +124,13 @@ declare namespace DataCy {
         "batch-operations-submit-button": true;
         "batch-progress": true;
         "batch-select-item": true;
+        "billing-active-card-current-period": true;
+        "billing-active-card-subscribed-at": true;
         "billing-plan-included-credits": true;
         "billing-plan-included-keys": true;
         "billing-plan-included-seats": true;
         "billing-plan-included-strings": true;
+        "billing-plan-included-words": true;
         "billing-plan-subtitle": true;
         "billing-progress-label-item": true;
         "branch-default-chip": true;
