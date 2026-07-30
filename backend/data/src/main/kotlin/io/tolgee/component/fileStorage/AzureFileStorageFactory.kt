@@ -10,19 +10,20 @@ import org.springframework.stereotype.Component
 @Component
 class AzureFileStorageFactory {
   fun create(config: AzureBlobConfig): AzureBlobFileStorage {
+    val clientBuilder = buildWithConnectionString(config.connectionString)
     try {
-      val connectionString = config.connectionString
-      val blobServiceClient =
-        BlobServiceClientBuilder()
-          .connectionString(connectionString)
-          .buildClient()
-      val containerClient = blobServiceClient.getBlobContainerClient(config.containerName)
+      val containerClient = clientBuilder.buildClient().getBlobContainerClient(config.containerName)
       return AzureBlobFileStorage(containerClient)
     } catch (e: Exception) {
-      if (e is IllegalArgumentException && e.message == "Invalid connection string.") {
-        throw InvalidConnectionStringException()
-      }
       throw BadRequestException(Message.CANNOT_CREATE_AZURE_STORAGE_CLIENT)
+    }
+  }
+
+  private fun buildWithConnectionString(connectionString: String?): BlobServiceClientBuilder {
+    try {
+      return BlobServiceClientBuilder().connectionString(connectionString)
+    } catch (e: IllegalArgumentException) {
+      throw InvalidConnectionStringException()
     }
   }
 }

@@ -7,11 +7,6 @@ import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 
-/**
- * The factory tells a malformed connection string apart from any other Azure client failure by matching the SDK's
- * exception message exactly. These tests drive the real SDK so the match is checked against the wording it actually
- * emits, rather than against a mock repeating the literal back.
- */
 class AzureFileStorageFactoryTest {
   @Test
   fun `reports a malformed connection string as such`() {

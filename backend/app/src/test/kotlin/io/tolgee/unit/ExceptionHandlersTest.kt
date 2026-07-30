@@ -1,5 +1,6 @@
-package io.tolgee
+package io.tolgee.unit
 
+import io.tolgee.ExceptionHandlers
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
@@ -7,8 +8,7 @@ import java.io.IOException
 import java.io.UncheckedIOException
 
 /**
- * A client disconnecting mid-response is not a server fault, so it must not reach Sentry as one. The handler tells
- * that case apart by the socket message, which no compiler check protects.
+ * The client-abort branch is recognised by the socket's "Broken pipe" text, which no compiler check protects.
  */
 class ExceptionHandlersTest {
   private val handlers = ExceptionHandlers()
