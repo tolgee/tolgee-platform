@@ -23,6 +23,16 @@ class ParseErrorBodyTest {
   }
 
   @Test
+  fun `reads the params the server sends alongside the code`() {
+    val body = """{"code": "${Message.PLAN_KEY_LIMIT_EXCEEDED.code}", "params": ["100", "120"]}"""
+
+    val parsed = badRequest(body)
+
+    assertThat(parsed?.code).isEqualTo(Message.PLAN_KEY_LIMIT_EXCEEDED.code)
+    assertThat(parsed?.params).containsExactly("100", "120")
+  }
+
+  @Test
   fun `returns null for a body that is not our error json`() {
     assertThat(badRequest("<html>502 Bad Gateway</html>")).isNull()
   }
