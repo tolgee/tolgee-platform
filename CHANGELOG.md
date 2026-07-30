@@ -1,3 +1,12 @@
+# [3.215.0](https://github.com/tolgee/tolgee-platform/compare/v3.214.1...v3.215.0) (2026-07-30)
+
+
+### Features
+
+* auto-invalidate caches by value shape instead of wiping on startup ([#3813](https://github.com/tolgee/tolgee-platform/issues/3813)) ([7e1db10](https://github.com/tolgee/tolgee-platform/commit/7e1db10ceb734c412fab34cc27eccc30ff5e577c))
+* Community translation v1.1 — Contributors (pitch [#3806](https://github.com/tolgee/tolgee-platform/issues/3806)) ([#3819](https://github.com/tolgee/tolgee-platform/issues/3819)) ([3232c4f](https://github.com/tolgee/tolgee-platform/commit/3232c4fe61c87759ecd30bb1fbbfc63123919acb))
+* deprecate embedded postgres ahead of v4 ([#3610](https://github.com/tolgee/tolgee-platform/issues/3610)) ([3cef7ad](https://github.com/tolgee/tolgee-platform/commit/3cef7ad2fb0a878a5d9291b53892c5c6dc6930f6)), closes [tolgee/documentation#1121](https://github.com/tolgee/documentation/issues/1121) [tolgee/billing#274](https://github.com/tolgee/billing/issues/274) [#3193](https://github.com/tolgee/tolgee-platform/issues/3193)
+
 ## [3.214.1](https://github.com/tolgee/tolgee-platform/compare/v3.214.0...v3.214.1) (2026-07-23)
 
 
