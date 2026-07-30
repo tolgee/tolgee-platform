@@ -9,7 +9,7 @@ import org.springframework.web.client.RestClientResponseException
 private val objectMapper =
   jacksonObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
-fun RestClientResponseException.parseErrorBody(): ErrorResponseBody? {
+fun RestClientResponseException.parseTolgeeErrorBody(): ErrorResponseBody? {
   return try {
     objectMapper.readValue(this.responseBodyAsString, ErrorResponseBody::class.java)
   } catch (e: JacksonException) {

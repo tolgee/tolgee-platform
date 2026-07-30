@@ -21,7 +21,7 @@ class EeSubscriptionErrorCatchingService(
     return try {
       fn()
     } catch (e: HttpClientErrorException.BadRequest) {
-      val body = e.parseErrorBody() ?: throw e
+      val body = e.parseTolgeeErrorBody() ?: throw e
       when (body.code) {
         Message.SEATS_SPENDING_LIMIT_EXCEEDED.code,
         Message.KEYS_SPENDING_LIMIT_EXCEEDED.code,
@@ -55,7 +55,7 @@ class EeSubscriptionErrorCatchingService(
       subscription?.status = SubscriptionStatus.CANCELED
       return null
     } catch (e: HttpClientErrorException.BadRequest) {
-      val error = e.parseErrorBody() ?: throw e
+      val error = e.parseTolgeeErrorBody() ?: throw e
       if (error.code == Message.LICENSE_KEY_USED_BY_ANOTHER_INSTANCE.code) {
         setSubscriptionKeyUsedByOtherInstance()
         return null
@@ -68,7 +68,7 @@ class EeSubscriptionErrorCatchingService(
     try {
       return fn()
     } catch (e: HttpClientErrorException.BadRequest) {
-      when (e.parseErrorBody()?.code) {
+      when (e.parseTolgeeErrorBody()?.code) {
         Message.CREDIT_SPENDING_LIMIT_EXCEEDED.code ->
           throw OutOfCreditsException(OutOfCreditsException.Reason.SPENDING_LIMIT_EXCEEDED, e)
         Message.OUT_OF_CREDITS.code ->

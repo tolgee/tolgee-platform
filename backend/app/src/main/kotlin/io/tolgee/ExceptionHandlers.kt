@@ -242,6 +242,11 @@ class ExceptionHandlers : Logging {
     throw ex
   }
 
+  /**
+   * These three share no supertype — PathElementException is an IllegalArgumentException,
+   * TerminalPathException an IllegalStateException, PathException a SemanticException — so collapsing
+   * the chain to the last one answers 500 again for a dereferenced sort such as `?sort=name.nope`.
+   */
   private fun Throwable.isUnresolvablePath() =
     this is PathElementException || this is TerminalPathException || this is PathException
 
