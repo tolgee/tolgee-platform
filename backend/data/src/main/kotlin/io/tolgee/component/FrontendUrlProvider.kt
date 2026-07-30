@@ -29,6 +29,8 @@ class FrontendUrlProvider(
         )
     val builder = ServletUriComponentsBuilder.fromRequestUri(attributes.request)
     builder.replacePath("")
+    // fromRequestUri populates neither, but this url is embedded in outbound email and
+    // fromRequest does populate the query — so the stripping stays regardless.
     builder.replaceQuery("")
     builder.fragment(null)
     return builder.build().toUriString()
