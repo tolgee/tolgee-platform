@@ -27,19 +27,27 @@ class ApplicationStopper(
     }
   }
 
+  /**
+   * A schema failure is the expected outcome of the stopRightAfterStart smoke check, so it exits 0.
+   * It arrives wrapped — Spring translates it into InvalidDataAccessResourceUsageException — so the
+   * whole chain has to be inspected, not just the thrown exception.
+   */
+  internal fun exitStatusFor(exception: Throwable?): Int {
+    val schemaFailure =
+      ExceptionUtils.getThrowableList(exception).any {
+        it.javaClass.name.contains("SQLGrammarException")
+      }
+    if (schemaFailure) {
+      return 0
+    }
+    return 1
+  }
+
   @EventListener(ApplicationFailedEvent::class)
   fun handleApplicationFailed(event: ApplicationFailedEvent) {
     if (internalProperties.stopRightAfterStart) {
       log.info("Exiting: StopRightAfterStart property is set to true")
-      var exitStatus = 1
-      val schemaFailure =
-        ExceptionUtils.getThrowableList(event.exception).any {
-          it.javaClass.name.contains("SQLGrammarException")
-        }
-      if (schemaFailure) {
-        exitStatus = 0
-      }
-
+      val exitStatus = exitStatusFor(event.exception)
       SpringApplication.exit(applicationContext, { exitStatus })
       exitProcess(exitStatus)
     }

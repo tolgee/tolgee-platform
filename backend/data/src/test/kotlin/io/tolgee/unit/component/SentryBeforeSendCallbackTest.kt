@@ -1,33 +1,57 @@
 package io.tolgee.unit.component
 
+import com.azure.storage.blob.BlobServiceClientBuilder
 import io.sentry.Hint
 import io.sentry.SentryEvent
 import io.sentry.protocol.Message
 import io.sentry.protocol.SentryException
 import io.tolgee.component.SentryBeforeSendCallback
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 
-/**
- * Every literal here is owned by something outside this repository — Spring's websocket logging, the
- * Azure SDK, and the simple names of framework exception classes — so nothing fails at compile time
- * when one of them changes and the filter silently stops dropping the event.
- */
 class SentryBeforeSendCallbackTest {
   private val callback = SentryBeforeSendCallback()
 
+  /**
+   * The literals below are spelled out rather than read from the production lists: taking the inputs
+   * from the constants under test makes the assertion follow any edit to them, including deletion.
+   */
   @Test
-  fun `drops the messages we never want reported`() {
-    SentryBeforeSendCallback.IGNORED_MESSAGE_CONTAINS.forEach {
-      assertThat(callback.execute(eventWithMessage(it), Hint()))
-        .describedAs("event carrying %s", it)
-        .isNull()
-    }
+  fun `drops the websocket noise`() {
+    assertThat(callback.execute(eventWithMessage("Failed to send message to MessageChannel x"), Hint())).isNull()
+    assertThat(
+      callback.execute(eventWithMessage("Cannot render error page for request [/websocket/x]"), Hint()),
+    ).isNull()
   }
 
   @Test
+  fun `drops the exception types we never want reported`() {
+    listOf(
+      "FailedDontRequeueException",
+      "ClientAbortException",
+      "AsyncRequestNotUsableException",
+      "RequestRejectedException",
+      "MissingPathVariableException",
+    ).forEach {
+      assertThat(callback.execute(eventOfType(it), Hint())).describedAs("event of type %s", it).isNull()
+    }
+  }
+
+  /**
+   * Drives the Azure SDK for the wording rather than repeating it, so a reword fails here instead of
+   * silently letting these events through. AzureFileStorageFactory no longer depends on this string,
+   * but this filter still does.
+   */
+  @Test
   fun `drops an invalid azure connection string reported without an exception`() {
-    assertThat(callback.execute(eventWithMessage("Invalid connection string."), Hint())).isNull()
+    val fromSdk =
+      assertThatThrownBy { BlobServiceClientBuilder().connectionString("not a connection string") }
+        .isInstanceOf(IllegalArgumentException::class.java)
+        .actual()
+        .message!!
+
+    assertThat(callback.execute(eventWithMessage(fromSdk), Hint())).isNull()
   }
 
   @Test
@@ -36,16 +60,6 @@ class SentryBeforeSendCallbackTest {
     event.exceptions = listOf(SentryException().apply { type = "IllegalArgumentException" })
 
     assertThat(callback.execute(event, Hint())).isSameAs(event)
-  }
-
-  @Test
-  fun `drops the exception types we never want reported`() {
-    SentryBeforeSendCallback.IGNORED_EXCEPTIONS.forEach {
-      val event = SentryEvent()
-      event.exceptions = listOf(SentryException().apply { type = it })
-
-      assertThat(callback.execute(event, Hint())).describedAs("event of type %s", it).isNull()
-    }
   }
 
   @Test
@@ -59,5 +73,10 @@ class SentryBeforeSendCallbackTest {
   private fun eventWithMessage(formatted: String) =
     SentryEvent().apply {
       message = Message().apply { this.formatted = formatted }
+    }
+
+  private fun eventOfType(type: String) =
+    SentryEvent().apply {
+      exceptions = listOf(SentryException().apply { this.type = type })
     }
 }
