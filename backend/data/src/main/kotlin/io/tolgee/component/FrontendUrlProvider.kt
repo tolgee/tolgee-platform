@@ -29,7 +29,6 @@ class FrontendUrlProvider(
         )
     val builder = ServletUriComponentsBuilder.fromRequestUri(attributes.request)
     builder.replacePath("")
-    builder.replaceQuery("")
     return builder.build().toUriString()
   }
 

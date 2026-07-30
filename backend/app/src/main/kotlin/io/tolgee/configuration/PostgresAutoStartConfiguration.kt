@@ -38,10 +38,7 @@ class PostgresAutoStartConfiguration(
     return dataSourceBuilder.build()
   }
 
-  /**
-   * Postgres reports 57P03 while it is still starting; the message it pairs with that state is
-   * translated by lc_messages, so matching the text fails on a non-English server.
-   */
+  /** 57P03 is what Postgres reports while starting; the message it pairs with it is localized. */
   internal fun isStartingUp(e: Throwable): Boolean =
     ExceptionUtils.getThrowableList(e).any { it is SQLException && it.sqlState == POSTGRES_CANNOT_CONNECT_NOW }
 
