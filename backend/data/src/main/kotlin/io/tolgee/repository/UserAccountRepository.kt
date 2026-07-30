@@ -105,6 +105,9 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
   @Query("from UserAccount ua where ua.username = :username")
   fun findByExactUsername(username: String?): Optional<UserAccount>
 
+  @Query("from UserAccount ua where ua.username = :username")
+  fun findAllByExactUsername(username: String?): List<UserAccount>
+
   @Query(
     "from UserAccount ua where lower(ua.username) = lower(:username) " +
       "and ua.deletedAt is null and ua.disabledAt is null",

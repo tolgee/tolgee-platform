@@ -51,13 +51,15 @@ class BatchJobActivityFinalizer(
         val revisionIds = getRevisionIds(job.id)
         logger.debug("Merging revisions (${revisionIds.size})")
 
-        val activityRevisionIdToMergeInto = revisionIds.firstOrNull() ?: return@afterFlush
-        revisionIds.remove(activityRevisionIdToMergeInto)
+        val activityRevisionIdToMergeInto = revisionIds.firstOrNull()
+        if (activityRevisionIdToMergeInto != null) {
+          revisionIds.remove(activityRevisionIdToMergeInto)
 
-        mergeDescribingEntities(activityRevisionIdToMergeInto, revisionIds)
-        mergeModifiedEntities(activityRevisionIdToMergeInto, revisionIds)
-        deleteUnusedRevisions(revisionIds)
-        setJobIdAndAuthorIdToRevision(activityRevisionIdToMergeInto, job)
+          mergeDescribingEntities(activityRevisionIdToMergeInto, revisionIds)
+          mergeModifiedEntities(activityRevisionIdToMergeInto, revisionIds)
+          deleteUnusedRevisions(revisionIds)
+          setJobIdAndAuthorIdToRevision(activityRevisionIdToMergeInto, job)
+        }
         applicationEventPublisher.publishEvent(OnBatchJobFinalized(job, activityRevisionIdToMergeInto))
       } catch (e: Exception) {
         Sentry.captureException(e)

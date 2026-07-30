@@ -1,7 +1,9 @@
 package io.tolgee.controllers.internal.e2eData
 
+import io.tolgee.component.CurrentDateProvider
 import io.tolgee.data.StandardTestDataResult
 import io.tolgee.data.service.TestDataGeneratingService
+import io.tolgee.development.testDataBuilder.ContributorActivityRecorder
 import io.tolgee.development.testDataBuilder.TestDataService
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.service.organization.OrganizationService
@@ -17,6 +19,7 @@ import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.GetMapping
 import java.io.FileNotFoundException
+import java.util.Date
 
 abstract class AbstractE2eDataController {
   abstract val testData: TestDataBuilder
@@ -45,7 +48,18 @@ abstract class AbstractE2eDataController {
   @Autowired
   private lateinit var testDataGeneratingService: TestDataGeneratingService
 
+  @Autowired
+  private lateinit var currentDateProvider: CurrentDateProvider
+
   open fun afterTestDataStored(data: TestDataBuilder) {}
+
+  protected fun recordContributorActivity(
+    projectId: Long,
+    authorId: Long,
+    at: Date? = null,
+  ) {
+    ContributorActivityRecorder.record(entityManager, currentDateProvider, projectId, authorId, at)
+  }
 
   @GetMapping(value = ["/generate-standard"])
   @Transactional

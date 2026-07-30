@@ -561,6 +561,10 @@ export interface paths {
     /** Tests existing Content Storage with new configuration. (Uses existing secrets, if nulls provided) */
     post: operations["testExisting"];
   };
+  "/v2/projects/{projectId}/contributors": {
+    /** Returns users who have activity on the project but are not currently its members. Deleted and disabled users are excluded. Sortable by lastContributionAt and firstContributionAt only; any other sort property falls back to lastContributionAt descending. */
+    get: operations["getContributors"];
+  };
   "/v2/projects/{projectId}/current-batch-jobs": {
     /** Returns all running and pending batch operations. Completed batch operations are returned only if they are not older than 1 hour. If user doesn't have permission to view all batch operations, only their operations are returned. */
     get: operations["currentJobs"];
@@ -2502,6 +2506,18 @@ export interface components {
       publicUrlPrefix?: string;
       s3ContentStorageConfig?: components["schemas"]["S3ContentStorageConfigDto"];
     };
+    ContributorModel: {
+      avatar?: components["schemas"]["Avatar"];
+      /** Format: date-time */
+      firstContributionAt: string;
+      /** Format: int64 */
+      id: number;
+      invitationPending: boolean;
+      /** Format: date-time */
+      lastContributionAt: string;
+      name?: string;
+      username: string;
+    };
     CopyTranslationRequest: {
       keyIds: number[];
       /** Format: int64 */
@@ -3734,6 +3750,7 @@ export interface components {
       announcement?: components["schemas"]["AnnouncementDto"];
       authInfo?: components["schemas"]["AuthInfoModel"];
       eeSubscription?: components["schemas"]["InitialDataEeSubscriptionModel"];
+      hasCommunityContributions: boolean;
       languageTag?: string;
       preferredOrganization?: components["schemas"]["PrivateOrganizationModel"];
       qaCheckCategories?: components["schemas"]["QaCheckCategoryModel"][];
@@ -4631,6 +4648,12 @@ export interface components {
     PagedModelContentStorageModel: {
       _embedded?: {
         contentStorages?: components["schemas"]["ContentStorageModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelContributorModel: {
+      _embedded?: {
+        contributors?: components["schemas"]["ContributorModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
     };
@@ -15729,6 +15752,54 @@ export interface operations {
       };
     };
   };
+  /** Returns users who have activity on the project but are not currently its members. Deleted and disabled users are excluded. Sortable by lastContributionAt and firstContributionAt only; any other sort property falls back to lastContributionAt descending. */
+  getContributors: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelContributorModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
   /** Returns all running and pending batch operations. Completed batch operations are returned only if they are not older than 1 hour. If user doesn't have permission to view all batch operations, only their operations are returned. */
   currentJobs: {
     parameters: {
@@ -25203,6 +25274,7 @@ export interface operations {
         /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
         search?: string;
+        filterContributed?: boolean;
       };
     };
     responses: {

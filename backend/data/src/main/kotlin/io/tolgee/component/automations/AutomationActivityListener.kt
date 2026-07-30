@@ -42,7 +42,8 @@ class AutomationActivityListener(
   @TransactionalEventListener
   @Async
   fun listen(event: OnBatchJobFinalized) {
-    val revision = activityService.findActivityRevisionInfo(event.activityRevisionId) ?: return
+    val activityRevisionId = event.activityRevisionId ?: return
+    val revision = activityService.findActivityRevisionInfo(activityRevisionId) ?: return
     if (revision.modifiedEntityCount == 0) {
       return
     }

@@ -57,6 +57,18 @@ interface ProjectRepository : JpaRepository<Project, Long> {
         and o.deletedAt is null
         """
 
+    const val NON_MEMBER_FILTER = """
+        p is null and role is null
+        """
+
+    const val NON_MEMBER_CONTRIBUTOR_FILTER = """
+        $NON_MEMBER_FILTER
+        and exists (
+            select 1 from ProjectContributor pc
+            where pc.projectId = r.id and pc.userId = :userAccountId
+        )
+        """
+
     /** `r.deletedAt`/`o.deletedAt` sit top-level so they also guard the permission branch, which [PUBLIC_PROJECT_VISIBILITY] does not. */
     const val BELOW_MEMBER_ACCESSIBLE_PROJECT = """
         (
@@ -145,6 +157,22 @@ interface ProjectRepository : JpaRepository<Project, Long> {
   ): Page<ProjectView>
 
   @Query(
+    """$BASE_VIEW_QUERY
+        where $PUBLIC_PROJECT_VISIBILITY
+        and (
+            :search is null or (lower(r.name) like lower(concat('%', cast(:search as text), '%'))
+            or lower(o.name) like lower(concat('%', cast(:search as text),'%')))
+        )
+        and ($NON_MEMBER_CONTRIBUTOR_FILTER)
+    """,
+  )
+  fun findAllPublicContributed(
+    userAccountId: Long,
+    pageable: Pageable,
+    @Param("search") search: String? = null,
+  ): Page<ProjectView>
+
+  @Query(
     """select count(r) > 0 from Project r
         left join r.baseLanguage bl
         left join r.organizationOwner o
@@ -153,6 +181,24 @@ interface ProjectRepository : JpaRepository<Project, Long> {
     """,
   )
   fun hasPublicProjects(organizationId: Long): Boolean
+
+  @Query(
+    """
+      select pc.projectId from ProjectContributor pc
+      join Project r on r.id = pc.projectId
+      left join r.baseLanguage bl
+      left join r.organizationOwner o
+      left join Permission p on p.project = r and p.user.id = :userAccountId
+      left join OrganizationRole role on role.organization = o and role.user.id = :userAccountId
+      where pc.userId = :userAccountId
+        and $PUBLIC_PROJECT_VISIBILITY
+        and ($NON_MEMBER_FILTER)
+    """,
+  )
+  fun findNonMemberPublicContributionIds(
+    userAccountId: Long,
+    pageable: Pageable,
+  ): List<Long>
 
   @Query(
     """select r.id from Project r

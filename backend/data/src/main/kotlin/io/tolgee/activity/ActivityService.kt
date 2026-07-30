@@ -200,7 +200,7 @@ class ActivityService(
   }
 
   private fun ActivityRevision.shouldSaveWithoutModification(): Boolean {
-    val type = this.type ?: return true
+    val type = this.type ?: return false
     return type.saveWithoutModification
   }
 }

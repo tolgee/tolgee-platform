@@ -615,7 +615,7 @@ class TaskService(
     val task = getTask(project.id, taskNumber)
     val report = getReport(project, taskNumber)
 
-    val workbook = TaskReportHelper(task, report).generateExcelReport()
+    val workbook = TaskReportHelper(task, report, securityService::maskedMemberField).generateExcelReport()
 
     // Write the workbook to a byte array output stream
     val byteArrayOutputStream = ByteArrayOutputStream()

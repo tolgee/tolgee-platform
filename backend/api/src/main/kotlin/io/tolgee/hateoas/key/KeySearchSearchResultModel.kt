@@ -8,5 +8,6 @@ import org.springframework.hateoas.server.core.Relation
 @Relation(collectionRelation = "keys", itemRelation = "key")
 class KeySearchSearchResultModel(
   view: KeySearchResultView,
+  override val deletedByUserUsername: String?,
 ) : RepresentationModel<KeySearchSearchResultModel>(),
   KeySearchResultView by view
