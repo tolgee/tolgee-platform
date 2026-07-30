@@ -86,7 +86,12 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `does not yet answer bad request when sorting by a to-many association`() {
     saveTestDataAndPrepare()
     listOf("translations", "keyMeta.tags").forEach { sort ->
-      performProjectAuthGet("keys?sort=$sort").andExpect(status().is5xxServerError)
+      performProjectAuthGet("keys?sort=$sort")
+        .andExpect(status().is5xxServerError)
+        .andAssertThatJson {
+          node("code").isEqualTo("unexpected_error_occurred")
+          node("params").isEqualTo(listOf("java.lang.UnsupportedOperationException"))
+        }
     }
   }
 

@@ -15,7 +15,7 @@ class AzureFileStorageFactoryTest {
   }
 
   @Test
-  fun `reports a missing connection string as malformed`() {
+  fun `reports a missing connection string as invalid rather than as a client creation failure`() {
     assertThatThrownBy { create(connectionString = null) }
       .isInstanceOf(InvalidConnectionStringException::class.java)
   }
