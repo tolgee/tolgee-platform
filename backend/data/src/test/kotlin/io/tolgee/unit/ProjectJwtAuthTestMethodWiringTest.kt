@@ -22,6 +22,7 @@ class ProjectJwtAuthTestMethodWiringTest {
   @Test
   fun `every method annotated with ProjectJWTAuthTestMethod can actually run`() {
     val offenders = mutableListOf<String>()
+    var usages = 0
 
     repositoryRoot()
       .walkTopDown()
@@ -31,12 +32,18 @@ class ProjectJwtAuthTestMethodWiringTest {
         val lines = file.readLines()
         lines.forEachIndexed { index, line ->
           if (!line.trim().startsWith("@ProjectJWTAuthTestMethod")) return@forEachIndexed
+          usages++
           if (!annotationBlockAround(lines, index).any { block -> executionAnnotations.any { block.startsWith(it) } }) {
             offenders += "${file.name}:${index + 1}"
           }
         }
       }
 
+    // A scan that stops seeing the repository would report no offenders and pass, which is the same
+    // silent failure it exists to catch — so a floor well under the current count guards the scan itself.
+    assertThat(usages)
+      .describedAs("@ProjectJWTAuthTestMethod usages found; a collapse means repositoryRoot() resolved wrongly")
+      .isGreaterThan(300)
     assertThat(offenders)
       .describedAs("methods that carry @ProjectJWTAuthTestMethod but no annotation JUnit executes")
       .isEmpty()

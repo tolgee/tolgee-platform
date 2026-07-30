@@ -11,7 +11,8 @@ import io.tolgee.model.batch.params.SetKeysNamespaceParams
 import io.tolgee.service.key.KeyService
 import jakarta.persistence.EntityManager
 import kotlinx.coroutines.ensureActive
-import org.apache.commons.lang3.exception.ExceptionUtils.getRootCauseMessage
+import org.apache.commons.lang3.exception.ExceptionUtils
+import org.hibernate.exception.ConstraintViolationException
 import org.springframework.stereotype.Component
 import kotlin.coroutines.CoroutineContext
 
@@ -43,19 +44,18 @@ class SetKeysNamespaceChunkProcessor(
     try {
       fn.invoke()
     } catch (e: Exception) {
-      val rootCause = getRootCauseMessage(e)
-      val isKeyAlreadyInNamespace =
-        rootCause
-          .contains("key_project_id_name_namespace_id_idx")
-      val isKeyAlreadyInProjectWithoutNamespace =
-        rootCause
-          .contains("key_project_id_name_idx")
-      if (isKeyAlreadyInNamespace || isKeyAlreadyInProjectWithoutNamespace) {
-        throw FailedDontRequeueException(Message.KEY_EXISTS_IN_NAMESPACE, listOf(), e)
+      if (!violatesKeyUniqueness(e)) {
+        throw e
       }
-      throw e
+      throw FailedDontRequeueException(Message.KEY_EXISTS_IN_NAMESPACE, listOf(), e)
     }
   }
+
+  private fun violatesKeyUniqueness(e: Throwable) =
+    ExceptionUtils
+      .getThrowableList(e)
+      .filterIsInstance<ConstraintViolationException>()
+      .any { it.constraintName in KEY_UNIQUENESS_INDEXES }
 
   override fun getTargetItemType(): Class<Long> {
     return Long::class.java
@@ -79,4 +79,14 @@ class SetKeysNamespaceChunkProcessor(
     request: SetKeysNamespaceRequest,
     projectId: Long?,
   ): Int = 5000
+
+  companion object {
+    /**
+     * The unique indexes on `key` as created by schema.xml. Both were renamed once already —
+     * key_project_id_name_idx and key_project_id_name_namespace_id_idx were dropped by
+     * changeSet 1758202102054-2 — and the old guard went on matching the dropped names.
+     */
+    val KEY_UNIQUENESS_INDEXES =
+      setOf("key_project_branch_name_no_ns", "key_project_branch_name_ns")
+  }
 }
