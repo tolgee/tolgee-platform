@@ -2713,6 +2713,7 @@ export interface components {
       keys: components["schemas"]["CurrentUsageItemModel"];
       seats: components["schemas"]["CurrentUsageItemModel"];
       strings: components["schemas"]["CurrentUsageItemModel"];
+      words?: components["schemas"]["CurrentUsageItemModel"];
     };
     DeleteKeysDto: {
       /** @description IDs of keys to delete */
