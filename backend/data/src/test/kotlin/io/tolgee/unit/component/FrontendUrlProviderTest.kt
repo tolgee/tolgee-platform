@@ -27,6 +27,17 @@ class FrontendUrlProviderTest {
     }
   }
 
+  /** The url is embedded in outbound email, so nothing from the originating request may ride along. */
+  @Test
+  fun `carries no path, query or fragment from the originating request`() {
+    withCurrentRequest {
+      val url = FrontendUrlProvider(TolgeeProperties()).url
+
+      assertThat(url).doesNotContain("?").doesNotContain("#").doesNotContain("page=1")
+      assertThat(url).isEqualTo("https://app.example.com")
+    }
+  }
+
   @Test
   fun `explains the missing configuration when the current attributes are not servlet ones`() {
     RequestContextHolder.setRequestAttributes(NonServletRequestAttributes())
