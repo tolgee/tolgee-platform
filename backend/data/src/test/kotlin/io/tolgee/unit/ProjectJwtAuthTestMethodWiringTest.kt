@@ -16,8 +16,11 @@ import java.io.File
  * reflection from one module sees only its own.
  */
 class ProjectJwtAuthTestMethodWiringTest {
+  private val usage = Regex("@ProjectJWTAuthTestMethod\\b")
   private val executionAnnotations =
     listOf("@Test", "@ParameterizedTest", "@RepeatedTest", "@TestFactory", "@TestTemplate")
+  private val declaration =
+    Regex("^(private |internal |protected |public |open |override |abstract )*(fun|class|object) ")
 
   @Test
   fun `every method annotated with ProjectJWTAuthTestMethod can actually run`() {
@@ -31,9 +34,11 @@ class ProjectJwtAuthTestMethodWiringTest {
       .forEach { file ->
         val lines = file.readLines()
         lines.forEachIndexed { index, line ->
-          if (!line.trim().startsWith("@ProjectJWTAuthTestMethod")) return@forEachIndexed
+          // Must be an annotation line, not a mention of the name in a string or comment — this file
+          // names it in its own assertion messages.
+          if (!line.trim().startsWith("@") || !usage.containsMatchIn(line)) return@forEachIndexed
           usages++
-          if (!annotationBlockAround(lines, index).any { block -> executionAnnotations.any { block.startsWith(it) } }) {
+          if (!annotationBlockAround(lines, index).any { block -> executionAnnotations.any { block.contains(it) } }) {
             offenders += "${file.name}:${index + 1}"
           }
         }
@@ -72,11 +77,11 @@ class ProjectJwtAuthTestMethodWiringTest {
     return block
   }
 
-  private fun endsTheBlock(line: String) =
-    line == "}" || line.endsWith("{") || line.contains("fun ") || line.contains("class ")
+  private fun endsTheBlock(line: String) = line == "}" || declaration.containsMatchIn(line)
 
   /** Modules carry their own settings.gradle, so the outermost one is the repository root. */
   private fun repositoryRoot(): File {
+    System.getProperty("jwtAuthWiringScanRoot")?.let { return File(it) }
     var candidate: File? = File(System.getProperty("user.dir")).absoluteFile
     var outermost: File? = null
     while (candidate != null) {
