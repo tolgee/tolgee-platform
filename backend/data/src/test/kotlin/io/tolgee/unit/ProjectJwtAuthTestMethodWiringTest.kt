@@ -49,28 +49,31 @@ class ProjectJwtAuthTestMethodWiringTest {
       .isEmpty()
   }
 
+  /**
+   * Collects the annotations attached to the declaration below [at]. Walks up to the end of the
+   * previous declaration rather than stopping at the first line that is not an annotation, so the
+   * continuation lines of a multi-line annotation do not cut the block short.
+   */
   private fun annotationBlockAround(
     lines: List<String>,
     at: Int,
   ): List<String> {
     val block = mutableListOf<String>()
-    var i = at
-    while (i >= 0 && isAnnotationOrBlank(lines[i])) {
-      block += lines[i].trim()
-      i--
+    var above = at
+    while (above >= 0 && !endsTheBlock(lines[above].trim())) {
+      block += lines[above].trim()
+      above--
     }
-    i = at + 1
-    while (i < lines.size && isAnnotationOrBlank(lines[i])) {
-      block += lines[i].trim()
-      i++
+    var below = at + 1
+    while (below < lines.size && !endsTheBlock(lines[below].trim())) {
+      block += lines[below].trim()
+      below++
     }
     return block
   }
 
-  private fun isAnnotationOrBlank(line: String): Boolean {
-    val trimmed = line.trim()
-    return trimmed.startsWith("@") || trimmed.startsWith("//") || trimmed.isEmpty()
-  }
+  private fun endsTheBlock(line: String) =
+    line == "}" || line.endsWith("{") || line.contains("fun ") || line.contains("class ")
 
   /** Modules carry their own settings.gradle, so the outermost one is the repository root. */
   private fun repositoryRoot(): File {

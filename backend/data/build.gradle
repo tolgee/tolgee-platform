@@ -253,6 +253,17 @@ tasks.named('test', Test) {
     useJUnitPlatform()
     maxHeapSize = "4096m"
     rootProject.setTestRetry(it)
+
+    // ProjectJwtAuthTestMethodWiringTest scans every module's test sources, which are not otherwise
+    // inputs of this task — without this the scan is skipped as up-to-date on the very commits that
+    // add a wrongly annotated test elsewhere.
+    inputs.files(
+            fileTree(rootDir) {
+                include '**/src/test/**/*.kt'
+                exclude '**/build/**'
+                exclude '**/node_modules/**'
+            }
+    ).withPropertyName('jwtAuthWiringScanSources').withPathSensitivity(PathSensitivity.RELATIVE)
 }
 
 sourceSets {
