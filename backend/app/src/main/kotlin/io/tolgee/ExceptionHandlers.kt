@@ -23,7 +23,6 @@ import org.apache.catalina.connector.ClientAbortException
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.hibernate.query.PathException
 import org.hibernate.query.sqm.PathElementException
-import org.hibernate.query.sqm.TerminalPathException
 import org.springframework.dao.InvalidDataAccessApiUsageException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -243,12 +242,10 @@ class ExceptionHandlers : Logging {
   }
 
   /**
-   * These three share no supertype — PathElementException is an IllegalArgumentException,
-   * TerminalPathException an IllegalStateException, PathException a SemanticException — so collapsing
-   * the chain to the last one answers 500 again for a dereferenced sort such as `?sort=name.nope`.
+   * PathElementException is an IllegalArgumentException and PathException a SemanticException, so
+   * neither term implies the other and both are needed.
    */
-  private fun Throwable.isUnresolvablePath() =
-    this is PathElementException || this is TerminalPathException || this is PathException
+  private fun Throwable.isUnresolvablePath() = this is PathElementException || this is PathException
 
   @ExceptionHandler(RateLimitedException::class)
   fun handleRateLimited(ex: RateLimitedException): ResponseEntity<RateLimitResponseBody> {

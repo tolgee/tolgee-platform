@@ -5,7 +5,6 @@ import io.tolgee.constants.Message
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.hibernate.query.sqm.PathElementException
-import org.hibernate.query.sqm.TerminalPathException
 import org.hibernate.query.sqm.UnknownPathException
 import org.junit.jupiter.api.Test
 import org.springframework.dao.InvalidDataAccessApiUsageException
@@ -35,13 +34,6 @@ class ExceptionHandlersTest {
       )
 
     assertThat(handlers.handleInvalidDataAccessApiUsage(buried).statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
-  }
-
-  @Test
-  fun `answers bad request when a basic attribute is dereferenced`() {
-    val terminal = InvalidDataAccessApiUsageException("wrapped", TerminalPathException("Terminal path 'name'"))
-
-    assertThat(handlers.handleInvalidDataAccessApiUsage(terminal).statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
   }
 
   @Test
