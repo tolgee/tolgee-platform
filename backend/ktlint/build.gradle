@@ -19,7 +19,7 @@ group = 'io.tolgee.testing.ktlint'
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(javaVersion.toInteger())
     }
 }
 

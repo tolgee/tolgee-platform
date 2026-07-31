@@ -81,7 +81,7 @@ configureLiquibase("public", "hibernate:spring:io.tolgee", 'src/main/resources/d
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(javaVersion.toInteger())
     }
 }
 
