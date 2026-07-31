@@ -6,5 +6,9 @@ import io.tolgee.model.Pat
 class PatBuilder(
   val userAccountBuilder: UserAccountBuilder,
 ) : EntityDataBuilder<Pat, PatBuilder> {
-  override var self: Pat = Pat().apply { userAccount = userAccountBuilder.self }
+  // tokenHash is left blank on purpose: PatService.save (used by TestDataService) regenerates a
+  // unique hash when blank, which the unique pat_token_hash_unique constraint requires.
+  override var self: Pat =
+    Pat(description = "Test PAT")
+      .apply { userAccount = userAccountBuilder.self }
 }
