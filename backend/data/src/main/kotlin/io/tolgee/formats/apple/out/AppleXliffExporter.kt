@@ -5,6 +5,7 @@ import io.tolgee.formats.PossiblePluralConversionResult
 import io.tolgee.formats.apple.APPLE_CORRESPONDING_STRINGS_FILE_ORIGINAL
 import io.tolgee.formats.apple.APPLE_FILE_ORIGINAL_CUSTOM_KEY
 import io.tolgee.formats.apple.APPLE_PLURAL_PROPERTY_CUSTOM_KEY
+import io.tolgee.formats.formKeywords
 import io.tolgee.formats.getPluralFormsForLocale
 import io.tolgee.formats.xliff.model.XliffFile
 import io.tolgee.formats.xliff.model.XliffModel
@@ -233,12 +234,19 @@ class AppleXliffExporter(
     conversionResult: PossiblePluralConversionResult?,
   ): Map<String, String> {
     val forms = conversionResult?.formsResult ?: return emptyMap()
-    // Apple's plural formats (stringsdict/xcstrings) accept any form the user actually wrote
-    // (e.g. "zero"), not just the forms CLDR defines for the target locale, so we keep every
-    // authored form in addition to filling in the ones CLDR expects (e.g. "many" for cs).
     val otherForm = forms["other"] ?: ""
-    val allForms = getPluralFormsForLocale(languageTag) + forms.keys
-    return allForms.associateWith { forms[it] ?: otherForm }
+    // Apple's plural formats (stringsdict/xcstrings) take the CLDR forms for the locale plus any
+    // named category the user actually wrote (e.g. "zero" for en), but only the six named
+    // categories — Apple has no equivalent for ICU "=N" exact matches, so those are dropped.
+    val authoredNamedForms = forms.keys.filter { it in formKeywords }
+    val allForms = getPluralFormsForLocale(languageTag) + authoredNamedForms
+    val result = allForms.associateWithTo(mutableMapOf()) { forms[it] ?: otherForm }
+    // Apple can't express an "=0" exact match, so if the user wrote one and there is no explicit
+    // "zero", surface it as "zero" — the closest the format has.
+    if ("zero" !in result) {
+      forms["=0"]?.let { result["zero"] = it }
+    }
+    return result
   }
 
   private fun getResultXliffFile(
