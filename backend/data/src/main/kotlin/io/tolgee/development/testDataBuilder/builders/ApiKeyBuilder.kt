@@ -2,7 +2,6 @@ package io.tolgee.development.testDataBuilder.builders
 
 import io.tolgee.development.testDataBuilder.EntityDataBuilder
 import io.tolgee.model.ApiKey
-import io.tolgee.model.enums.Scope
 
 class ApiKeyBuilder(
   val projectBuilder: ProjectBuilder,
@@ -10,7 +9,7 @@ class ApiKeyBuilder(
   override var self: ApiKey =
     ApiKey(
       "test_api_key",
-      Scope.values().toMutableSet(),
+      mutableSetOf(),
     ).apply {
       project = projectBuilder.self
       projectBuilder.onlyUser?.let {

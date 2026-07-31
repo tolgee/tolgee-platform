@@ -19,7 +19,7 @@ import jakarta.validation.constraints.Size
   ],
 )
 class ImportLanguage(
-  @Size(max = 2000)
+  @param:Size(max = 2000)
   @Column(length = 2000)
   var name: String,
   @ManyToOne(optional = false)
