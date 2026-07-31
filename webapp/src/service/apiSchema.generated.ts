@@ -2060,6 +2060,7 @@ export interface components {
       maxCharLimit?: number;
       /** @description Name of the key */
       name: string;
+      /** @description The namespace of the key. (When empty or null default namespace will be used) */
       namespace?: string;
       /** @description The argument name for the plural. If null, value won't be modified. If isPlural is false, this value will be ignored. */
       pluralArgName?: string;
@@ -2590,6 +2591,7 @@ export interface components {
       maxCharLimit?: number;
       /** @description Name of the key */
       name: string;
+      /** @description The namespace of the key. (When empty or null default namespace will be used) */
       namespace?: string;
       /** @description The argument name for the plural. If null, value will be guessed from the values provided in translations. */
       pluralArgName?: string;
@@ -2766,6 +2768,7 @@ export interface components {
        */
       maxCharLimit?: number;
       name: string;
+      /** @description The namespace of the key. (When empty or null default namespace will be used) */
       namespace?: string;
     };
     EditProjectRequest: {
@@ -17403,25 +17406,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -24746,12 +24757,14 @@ export interface operations {
   createTask: {
     parameters: {
       query: {
+        /** Include keys with translation in certain states */
         filterState?: (
           | "UNTRANSLATED"
           | "TRANSLATED"
           | "REVIEWED"
           | "DISABLED"
         )[];
+        /** Include keys where translation is outdated */
         filterOutdated?: boolean;
       };
       path: {
@@ -24807,12 +24820,14 @@ export interface operations {
   calculateScope: {
     parameters: {
       query: {
+        /** Include keys with translation in certain states */
         filterState?: (
           | "UNTRANSLATED"
           | "TRANSLATED"
           | "REVIEWED"
           | "DISABLED"
         )[];
+        /** Include keys where translation is outdated */
         filterOutdated?: boolean;
       };
       path: {
@@ -24868,12 +24883,14 @@ export interface operations {
   createTasks: {
     parameters: {
       query: {
+        /** Include keys with translation in certain states */
         filterState?: (
           | "UNTRANSLATED"
           | "TRANSLATED"
           | "REVIEWED"
           | "DISABLED"
         )[];
+        /** Include keys where translation is outdated */
         filterOutdated?: boolean;
       };
       path: {
