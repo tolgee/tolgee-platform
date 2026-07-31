@@ -43,7 +43,6 @@ import io.tolgee.util.executeInNewRepeatableTransaction
 import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
 import org.apache.commons.io.output.ByteArrayOutputStream
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.context.annotation.Primary
 import org.springframework.dao.DataIntegrityViolationException
@@ -65,7 +64,6 @@ class TaskService(
   private val securityService: SecurityService,
   private val taskKeyRepository: TaskKeyRepository,
   private val authenticationFacade: AuthenticationFacade,
-  @Autowired
   private val platformTransactionManager: PlatformTransactionManager,
   private val currentDateProvider: CurrentDateProvider,
   private val keyService: KeyService,
