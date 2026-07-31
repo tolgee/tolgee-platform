@@ -24,7 +24,9 @@ pluginManagement {
                 useVersion('6.14.0')
             }
             if(requested.id.id == 'org.gradle.test-retry') {
-                useVersion('1.6.2')
+                // 1.6.5+ bundles ASM that understands Java 25 (class-file major 69);
+                // older versions fail test retry with "Unsupported class file major version 69".
+                useVersion('1.6.5')
             }
         }
     }
