@@ -54,8 +54,9 @@ class ContentDeliveryConfigBranchingTest : ProjectAuthControllerTest("/v2/projec
 
   @AfterEach
   fun after() {
-    batchJobConcurrentLauncher.pause = false
     enabledFeaturesProvider.forceEnabled = null
+    testDataService.cleanTestData(testData.root)
+    batchJobConcurrentLauncher.pause = false
   }
 
   @Test
