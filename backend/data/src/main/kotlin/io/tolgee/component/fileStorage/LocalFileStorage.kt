@@ -32,6 +32,7 @@ class LocalFileStorage(
   override fun storeFile(
     storageFilePath: String,
     bytes: ByteArray,
+    contentType: String?,
   ) {
     val file = getLocalFile(storageFilePath)
     try {

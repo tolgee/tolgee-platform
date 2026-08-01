@@ -13,8 +13,13 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.mockito.Mockito
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import software.amazon.awssdk.core.sync.RequestBody
+import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import software.amazon.awssdk.services.s3.model.S3Exception
 
 @ContextRecreatingTest
@@ -36,6 +41,8 @@ class FileStorageS3Test : AbstractFileStorageServiceTest() {
       endpoint = "http://localhost:29090"
       signingRegion = "dummy_signing_region"
     }
+
+  private val testFileBytes = testFileContent.toByteArray(Charsets.UTF_8)
 
   val s3 by lazy {
     S3ClientProvider(
@@ -63,8 +70,7 @@ class FileStorageS3Test : AbstractFileStorageServiceTest() {
   @Test
   fun testGetFile() {
     s3.putObject({ req -> req.bucket(BUCKET_NAME).key(testFilePath) }, RequestBody.fromString(testFileContent))
-    val fileByteContent = testFileContent.toByteArray(charset("UTF-8"))
-    assertThat(createFileStorage().readFile(testFilePath)).isEqualTo(fileByteContent)
+    assertThat(createFileStorage().readFile(testFilePath)).isEqualTo(testFileBytes)
   }
 
   @Test
@@ -81,15 +87,47 @@ class FileStorageS3Test : AbstractFileStorageServiceTest() {
 
   @Test
   fun testStoreFile() {
-    createFileStorage().storeFile(testFilePath, testFileContent.toByteArray(charset("UTF-8")))
-    assertThat(
-      s3.getObject { req -> req.bucket(BUCKET_NAME).key(testFilePath) }.readAllBytes(),
-    ).isEqualTo(testFileContent.toByteArray())
+    createFileStorage().storeFile(testFilePath, testFileBytes)
+    assertThat(getStoredObject().readAllBytes()).isEqualTo(testFileBytes)
+  }
+
+  @Test
+  fun `does not set a content type on the put request when none is given`() {
+    val spiedS3 = Mockito.spy(s3)
+    S3FileStorage(bucketName = BUCKET_NAME, path = null, s3 = spiedS3)
+      .storeFile("test/content-type/none.txt", testFileBytes)
+
+    val captor = argumentCaptor<PutObjectRequest>()
+    verify(spiedS3).putObject(captor.capture(), any<RequestBody>())
+    assertThat(captor.firstValue.contentType()).isNull()
+  }
+
+  @Test
+  fun `stores file with content type`() {
+    createFileStorage().storeFile(
+      "test/content-type/json.txt",
+      testFileBytes,
+      "application/json",
+    )
+    val stored = getStoredObject("test/content-type/json.txt")
+    assertThat(stored.readAllBytes()).isEqualTo(testFileBytes)
+    assertThat(stored.response().contentType()).isEqualTo("application/json")
+  }
+
+  @Test
+  fun `stores file with charset parameterised content type`() {
+    createFileStorage().storeFile(
+      "test/content-type/text.txt",
+      testFileBytes,
+      "text/plain; charset=UTF-8",
+    )
+    val stored = getStoredObject("test/content-type/text.txt")
+    assertThat(stored.response().contentType()).isEqualTo("text/plain; charset=UTF-8")
   }
 
   @Test
   fun testPruneDirectory() {
-    createFileStorage().storeFile(testFilePath, testFileContent.toByteArray(charset("UTF-8")))
+    createFileStorage().storeFile(testFilePath, testFileBytes)
     createFileStorage().pruneDirectory("test")
     assertThat(createFileStorage().fileExists(testFilePath)).isEqualTo(false)
   }
@@ -103,14 +141,13 @@ class FileStorageS3Test : AbstractFileStorageServiceTest() {
   @Test
   fun `stores files to path by config`() {
     val storage = s3FileStorageFactory.create(defaultProperties.copy(path = "content/path"))
-    storage.storeFile(
-      testFilePath,
-      testFileContent.toByteArray(charset("UTF-8")),
-    )
+    storage.storeFile(testFilePath, testFileBytes)
     assertThat(
       s3.getObject { req -> req.bucket(BUCKET_NAME).key("content/path/$testFilePath") }.readAllBytes(),
-    ).isEqualTo(testFileContent.toByteArray())
+    ).isEqualTo(testFileBytes)
   }
+
+  private fun getStoredObject(key: String = testFilePath) = s3.getObject { req -> req.bucket(BUCKET_NAME).key(key) }
 
   fun createFileStorage(): S3FileStorage {
     return s3FileStorageFactory.create(defaultProperties)

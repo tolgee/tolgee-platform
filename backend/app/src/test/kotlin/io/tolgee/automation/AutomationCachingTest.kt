@@ -12,6 +12,7 @@ import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import jakarta.persistence.EntityManagerFactory
 import org.hibernate.SessionFactory
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -43,6 +44,11 @@ class AutomationCachingTest : ProjectAuthControllerTest("/v2/projects/") {
     this.projectSupplier = { testData.projectBuilder.self }
     cacheManager.getCache(Caches.AUTOMATIONS)!!.clear()
     entityManagerFactory.unwrap(SessionFactory::class.java).statistics.isStatisticsEnabled = true
+  }
+
+  @AfterEach
+  fun after() {
+    testDataService.cleanTestData(testData.root)
   }
 
   @Test
