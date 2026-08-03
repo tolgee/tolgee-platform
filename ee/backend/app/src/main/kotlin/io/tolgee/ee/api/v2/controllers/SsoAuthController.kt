@@ -45,11 +45,24 @@ class SsoAuthController(
   private fun buildAuthUrl(
     tenant: SsoTenantConfig,
     state: String,
-  ): String =
-    "${tenant.authorizationUri}?" +
-      "client_id=${tenant.clientId}&" +
-      "redirect_uri=${frontendUrlProvider.url + "/login/auth_callback/sso"}&" +
-      "response_type=code&" +
-      "scope=openid profile email offline_access&" +
-      "state=$state"
+  ): String {
+    val url =
+      "${tenant.authorizationUri}?" +
+        "client_id=${tenant.clientId}&" +
+        "redirect_uri=${frontendUrlProvider.url + "/login/auth_callback/sso"}&" +
+        "response_type=code&" +
+        "scope=${getScope(tenant)}&" +
+        "state=$state"
+    if (!tenant.isGoogle) {
+      return url
+    }
+    return "$url&access_type=offline&prompt=consent"
+  }
+
+  private fun getScope(tenant: SsoTenantConfig): String {
+    if (tenant.isGoogle) {
+      return "openid profile email"
+    }
+    return "openid profile email offline_access"
+  }
 }

@@ -82,8 +82,11 @@ class SsoDelegateEe(
     val token =
       fetchToken(tenant, code, redirectUri)
         ?: throw SsoAuthorizationException(Message.SSO_TOKEN_EXCHANGE_FAILED)
+    val idToken =
+      token.id_token
+        ?: throw SsoAuthorizationException(Message.SSO_TOKEN_EXCHANGE_FAILED)
 
-    val userInfo = decodeIdTokenUnsafe(token.id_token)
+    val userInfo = decodeIdTokenUnsafe(idToken)
     return getTokenResponseForUser(userInfo, tenant, invitationCode, token.refresh_token)
   }
 
@@ -149,7 +152,7 @@ class SsoDelegateEe(
     userResponse: GenericUserResponse,
     tenant: SsoTenantConfig,
     invitationCode: String?,
-    refreshToken: String,
+    refreshToken: String?,
   ): JwtAuthenticationResponse {
     val email =
       userResponse.email ?: let {
@@ -220,13 +223,12 @@ class SsoDelegateEe(
   ): Boolean {
     val tenant = tenantService.getEnabledConfigByDomain(domain)
 
-    val response = fetchRefreshToken(tenant, refreshToken)
-    if (response?.refresh_token == null) {
-      return false
-    }
+    val response = fetchRefreshToken(tenant, refreshToken) ?: return false
 
     val userAccount = userAccountService.get(user.id)
-    userAccountService.updateSsoSession(userAccount, response.refresh_token)
+    // Providers that don't rotate refresh tokens (e.g. Google) omit refresh_token in the
+    // refresh response — a successful response means the old token is still valid.
+    userAccountService.updateSsoSession(userAccount, response.refresh_token ?: refreshToken)
     return true
   }
 
@@ -244,7 +246,7 @@ class SsoDelegateEe(
       add("grant_type", "refresh_token")
       add("client_id", tenant.clientId)
       add("client_secret", tenant.clientSecret)
-      add("scope", "offline_access openid")
+      add("scope", getRefreshScope(tenant))
       add("refresh_token", refreshToken)
     }
 
@@ -262,5 +264,12 @@ class SsoDelegateEe(
       logger.info("Failed to refresh token: ${e.message}")
     }
     return null
+  }
+
+  private fun getRefreshScope(tenant: SsoTenantConfig): String {
+    if (tenant.isGoogle) {
+      return "openid"
+    }
+    return "offline_access openid"
   }
 }
