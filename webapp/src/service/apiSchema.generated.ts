@@ -4342,6 +4342,7 @@ export interface components {
     };
     LlmProviderSimpleModel: {
       name: string;
+      /** @description Name of the concrete provider the server default ("default" provider) currently resolves to. It is only set on the synthetic "default" entry and is always null for concrete providers. Clients can rely on non-null resolvesToName to identify the server-default entry. */
       resolvesToName?: string;
       source?: string;
       /** Format: double */
