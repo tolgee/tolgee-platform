@@ -56,6 +56,12 @@ class SsoMultiTenantsMocks(
         defaultTokenWithoutRefreshToken,
         HttpStatus.OK,
       )
+
+    val minimalRefreshTokenResponse =
+      ResponseEntity(
+        OAuth2TokenResponse(id_token = null, scope = null, refresh_token = null),
+        HttpStatus.OK,
+      )
     val defaultTokenResponse2 =
       ResponseEntity(
         defaultToken2,

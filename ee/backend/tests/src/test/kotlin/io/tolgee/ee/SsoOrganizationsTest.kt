@@ -252,6 +252,44 @@ class SsoOrganizationsTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `doesn't authorize user when token response has no id token`() {
+    val response = loginAsSsoUser(tokenResponse = SsoMultiTenantsMocks.minimalRefreshTokenResponse)
+    assertThat(response.response.status).isEqualTo(401)
+    assertThat(response.response.contentAsString).contains(Message.SSO_TOKEN_EXCHANGE_FAILED.code)
+    val userName = SsoMultiTenantsMocks.jwtClaimsSet.get("email") as String
+    assertThrows<NotFoundException> { userAccountService.get(userName) }
+  }
+
+  @Test
+  fun `refresh succeeds when response contains only access token fields`() {
+    loginAsSsoUser()
+    val userName = SsoMultiTenantsMocks.jwtClaimsSet.get("email") as String
+    val user = userAccountService.get(userName)
+    val originalRefreshToken = user.ssoRefreshToken
+    originalRefreshToken.assert.isNotNull
+
+    whenever(
+      restTemplate?.exchange(
+        eq(testData.tenant.tokenUri),
+        eq(HttpMethod.POST),
+        any(HttpEntity::class.java),
+        eq(OAuth2TokenResponse::class.java),
+      ),
+    ).thenReturn(SsoMultiTenantsMocks.minimalRefreshTokenResponse)
+    currentDateProvider.forcedDate = Date(currentDateProvider.date.time + 600_000)
+
+    ssoDelegate
+      .verifyUserSsoAccountAvailable(userAccountService.getDto(user.id))
+      .assert
+      .isTrue()
+
+    userAccountService
+      .get(user.id)
+      .ssoRefreshToken.assert
+      .isEqualTo(originalRefreshToken)
+  }
+
+  @Test
   fun `refresh keeps old refresh token when response contains none`() {
     loginAsSsoUser()
     val userName = SsoMultiTenantsMocks.jwtClaimsSet.get("email") as String

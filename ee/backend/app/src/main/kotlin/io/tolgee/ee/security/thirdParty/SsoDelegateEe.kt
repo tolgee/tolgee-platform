@@ -82,8 +82,11 @@ class SsoDelegateEe(
     val token =
       fetchToken(tenant, code, redirectUri)
         ?: throw SsoAuthorizationException(Message.SSO_TOKEN_EXCHANGE_FAILED)
+    val idToken =
+      token.id_token
+        ?: throw SsoAuthorizationException(Message.SSO_TOKEN_EXCHANGE_FAILED)
 
-    val userInfo = decodeIdTokenUnsafe(token.id_token)
+    val userInfo = decodeIdTokenUnsafe(idToken)
     return getTokenResponseForUser(userInfo, tenant, invitationCode, token.refresh_token)
   }
 
