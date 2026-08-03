@@ -215,7 +215,11 @@ export const AiPrompt: React.FC<React.PropsWithChildren<Props>> = ({
                 value={i.name}
                 data-cy="ai-prompt-provider-item"
               >
-                {i.name}
+                {i.resolvesToName
+                  ? t('ai_prompt_provider_server_default', 'default ({name})', {
+                      name: i.resolvesToName,
+                    })
+                  : i.name}
               </MenuItem>
             ))}
           </Select>

@@ -205,6 +205,55 @@ class PromptControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   @Test
+  fun `runs prompt with default alias when no provider is named default`() {
+    llmProperties.providers =
+      mutableListOf(
+        LlmProperties.LlmProvider(
+          name = "gpt-6",
+          type = LlmProviderType.OPENAI,
+          tokenPriceInCreditsInput = 2.0,
+          tokenPriceInCreditsOutput = 2.0,
+          apiUrl = "http://test.com",
+        ),
+      )
+    performAuthPost(
+      "/v2/projects/${testData.promptProject.self.id}/prompts/run",
+      PromptRunDto(
+        template = "Hi LLM",
+        keyId =
+          testData.keys
+            .first()
+            .self.id,
+        targetLanguageId = testData.czech.self.id,
+        provider = "default",
+        basicPromptOptions = null,
+      ),
+    ).andIsOk.andAssertThatJson {
+      node("result").isString.contains("response from: gpt-6")
+    }
+  }
+
+  @Test
+  fun `saved prompt keeps the default alias unresolved in responses`() {
+    llmProperties.providers =
+      mutableListOf(
+        LlmProperties.LlmProvider(
+          name = "gpt-6",
+          type = LlmProviderType.OPENAI,
+          tokenPriceInCreditsInput = 2.0,
+          tokenPriceInCreditsOutput = 2.0,
+          apiUrl = "http://test.com",
+        ),
+      )
+    performAuthPost(
+      "/v2/projects/${testData.promptProject.self.id}/prompts",
+      PromptDto("Alias prompt", "default", "Hi LLM"),
+    ).andIsOk.andAssertThatJson {
+      node("providerName").isEqualTo("default")
+    }
+  }
+
+  @Test
   fun `escapeJson helper escapes value for json embedding`() {
     performAuthPost(
       "/v2/projects/${testData.promptProject.self.id}/prompts/run",

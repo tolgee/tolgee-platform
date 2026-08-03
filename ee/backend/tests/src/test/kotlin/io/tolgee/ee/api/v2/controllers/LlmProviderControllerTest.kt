@@ -49,6 +49,7 @@ class LlmProviderControllerTest : AuthorizedControllerTest() {
   fun resetSsrfProperties() {
     internalProperties.disableUrlSsrfProtection = true
     webhookProperties.allowLocalAddresses = false
+    llmProperties.defaultProvider = null
   }
 
   @Test
@@ -60,6 +61,63 @@ class LlmProviderControllerTest : AuthorizedControllerTest() {
       node("_embedded.providers").isArray.hasSize(2)
       node("_embedded.providers[0].name").isEqualTo("organization-provider")
       node("_embedded.providers[1].name").isEqualTo("default")
+    }
+  }
+
+  @Test
+  fun `all-available contains synthetic default entry resolving to configured default`() {
+    llmProperties.providers =
+      mutableListOf(
+        LlmProperties.LlmProvider(
+          name = "gpt-6",
+          type = LlmProviderType.OPENAI,
+          apiUrl = "http://test.com",
+        ),
+        LlmProperties.LlmProvider(
+          name = "claude",
+          type = LlmProviderType.ANTHROPIC,
+          apiUrl = "http://test.com",
+        ),
+      )
+    llmProperties.defaultProvider = "claude"
+    performAuthGet(
+      "/v2/organizations/${testData.organization.self.id}/llm-providers/all-available",
+    ).andIsOk.andAssertThatJson {
+      node("_embedded.providers").isArray.hasSize(4)
+      node("_embedded.providers[0].name").isEqualTo("default")
+      node("_embedded.providers[0].source").isEqualTo("server")
+      node("_embedded.providers[0].resolvesToName").isEqualTo("claude")
+      node("_embedded.providers[0].type").isEqualTo("ANTHROPIC")
+    }
+  }
+
+  @Test
+  fun `synthetic default entry resolves to first provider when not configured`() {
+    llmProperties.providers =
+      mutableListOf(
+        LlmProperties.LlmProvider(
+          name = "gpt-6",
+          type = LlmProviderType.OPENAI,
+          apiUrl = "http://test.com",
+        ),
+      )
+    performAuthGet(
+      "/v2/organizations/${testData.organization.self.id}/llm-providers/all-available",
+    ).andIsOk.andAssertThatJson {
+      node("_embedded.providers[0].name").isEqualTo("default")
+      node("_embedded.providers[0].resolvesToName").isEqualTo("gpt-6")
+    }
+  }
+
+  @Test
+  fun `real provider named default suppresses the synthetic entry`() {
+    // the setup's server provider keeps the Spring-default name "default"
+    performAuthGet(
+      "/v2/organizations/${testData.organization.self.id}/llm-providers/all-available",
+    ).andIsOk.andAssertThatJson {
+      node("_embedded.providers").isArray.hasSize(2)
+      node("_embedded.providers[1].name").isEqualTo("default")
+      node("_embedded.providers[1].resolvesToName").isEqualTo(null)
     }
   }
 

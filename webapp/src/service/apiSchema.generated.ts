@@ -4342,6 +4342,7 @@ export interface components {
     };
     LlmProviderSimpleModel: {
       name: string;
+      resolvesToName?: string;
       source?: string;
       /** Format: double */
       tokenPriceInCreditsInput?: number;

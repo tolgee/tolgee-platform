@@ -25,6 +25,29 @@ class LlmPropertiesService(
     return llmProperties.fallbacks[providerName]
   }
 
+  fun getDefaultProviderName(): String? {
+    val providers = getProviders()
+    val configured = resolveConfiguredDefault(providers)
+    return configured ?: providers.firstOrNull()?.name
+  }
+
+  private fun resolveConfiguredDefault(providers: List<LlmProvider>): String? {
+    var current = llmProperties.defaultProvider ?: return null
+    val tried = mutableSetOf<String>()
+    repeat(MAX_FALLBACK_DEPTH) {
+      if (providers.any { it.name == current }) {
+        return current
+      }
+      tried.add(current)
+      val fallback = llmProperties.fallbacks[current]
+      if (fallback == null || fallback in tried) {
+        return null
+      }
+      current = fallback
+    }
+    return null
+  }
+
   fun getProviders(): List<LlmProvider> {
     val result = getMergedProviders().toMutableList()
     if (subscriptionActive()) {
@@ -97,5 +120,10 @@ class LlmPropertiesService(
       base.maxTokens = listEntry.maxTokens
     }
     return base
+  }
+
+  companion object {
+    const val DEFAULT_PROVIDER_ALIAS = "default"
+    private const val MAX_FALLBACK_DEPTH = 10
   }
 }

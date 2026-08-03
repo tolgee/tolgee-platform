@@ -11,4 +11,5 @@ open class LlmProviderSimpleModel(
   var type: LlmProviderType,
   var tokenPriceInCreditsInput: Double?,
   var tokenPriceInCreditsOutput: Double?,
+  var resolvesToName: String? = null,
 ) : RepresentationModel<LlmProviderModel>()
