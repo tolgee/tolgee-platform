@@ -396,22 +396,30 @@ export class Validation {
       is: (metricType: any, free: any) =>
         metricType === 'HOSTED_WORDS' && !free,
       then: Yup.array().of(
-        Yup.object({
-          includedWords: Yup.number().moreThan(0).required(),
-          includedMtCredits: Yup.number().min(0),
-          // A tier needs a EUR price, but not necessarily a monthly one: an annual-only
-          // plan zeroes every monthly field and hides the column, so demanding monthly
-          // here makes such a plan impossible to save. The backend asks the same — a EUR
-          // price in either period.
-          eurMonthly: Yup.number().when('eurYearly', {
-            is: (eurYearly: any) => !(Number(eurYearly) > 0),
-            then: Yup.number().moreThan(0).required(),
-            otherwise: Yup.number().min(0),
-          }),
-          eurYearly: Yup.number().min(0),
-          usdMonthly: Yup.number().min(0),
-          usdYearly: Yup.number().min(0),
-        })
+        Yup.object().shape(
+          {
+            includedWords: Yup.number().moreThan(0).required(),
+            includedMtCredits: Yup.number().min(0),
+            // A tier needs a EUR price, but not necessarily a monthly one: an annual-only
+            // plan zeroes every monthly field and hides the column. The backend asks the
+            // same — a EUR price in either period. Required from both sides so the message
+            // lands on a field the current mode actually renders; the pair is declared
+            // below to keep Yup from seeing a cycle.
+            eurMonthly: Yup.number().when('eurYearly', {
+              is: (eurYearly: any) => !(Number(eurYearly) > 0),
+              then: Yup.number().moreThan(0).required(),
+              otherwise: Yup.number().min(0),
+            }),
+            eurYearly: Yup.number().when('eurMonthly', {
+              is: (eurMonthly: any) => !(Number(eurMonthly) > 0),
+              then: Yup.number().moreThan(0).required(),
+              otherwise: Yup.number().min(0),
+            }),
+            usdMonthly: Yup.number().min(0),
+            usdYearly: Yup.number().min(0),
+          },
+          [['eurMonthly', 'eurYearly']]
+        )
       ),
       otherwise: Yup.array().of(
         Yup.object({
@@ -443,22 +451,30 @@ export class Validation {
       is: (metricType: any, free: any) =>
         metricType === 'HOSTED_WORDS' && !free,
       then: Yup.array().of(
-        Yup.object({
-          includedWords: Yup.number().moreThan(0).required(),
-          includedMtCredits: Yup.number().min(0),
-          // A tier needs a EUR price, but not necessarily a monthly one: an annual-only
-          // plan zeroes every monthly field and hides the column, so demanding monthly
-          // here makes such a plan impossible to save. The backend asks the same — a EUR
-          // price in either period.
-          eurMonthly: Yup.number().when('eurYearly', {
-            is: (eurYearly: any) => !(Number(eurYearly) > 0),
-            then: Yup.number().moreThan(0).required(),
-            otherwise: Yup.number().min(0),
-          }),
-          eurYearly: Yup.number().min(0),
-          usdMonthly: Yup.number().min(0),
-          usdYearly: Yup.number().min(0),
-        })
+        Yup.object().shape(
+          {
+            includedWords: Yup.number().moreThan(0).required(),
+            includedMtCredits: Yup.number().min(0),
+            // A tier needs a EUR price, but not necessarily a monthly one: an annual-only
+            // plan zeroes every monthly field and hides the column. The backend asks the
+            // same — a EUR price in either period. Required from both sides so the message
+            // lands on a field the current mode actually renders; the pair is declared
+            // below to keep Yup from seeing a cycle.
+            eurMonthly: Yup.number().when('eurYearly', {
+              is: (eurYearly: any) => !(Number(eurYearly) > 0),
+              then: Yup.number().moreThan(0).required(),
+              otherwise: Yup.number().min(0),
+            }),
+            eurYearly: Yup.number().when('eurMonthly', {
+              is: (eurMonthly: any) => !(Number(eurMonthly) > 0),
+              then: Yup.number().moreThan(0).required(),
+              otherwise: Yup.number().min(0),
+            }),
+            usdMonthly: Yup.number().min(0),
+            usdYearly: Yup.number().min(0),
+          },
+          [['eurMonthly', 'eurYearly']]
+        )
       ),
     }),
   });

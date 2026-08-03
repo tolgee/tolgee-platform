@@ -38,6 +38,17 @@ describe('word-tier prices', () => {
     ).rejects.toThrow();
   });
 
+  it('reports the missing price on the yearly field when nothing is priced', async () => {
+    // With annual billing only the monthly column is not rendered, so an error attached solely
+    // to the monthly field would be invisible and Save would fail silently.
+    const error = await Validation.CLOUD_PLAN_FORM.validate(
+      plan({ eurMonthly: 0, eurYearly: 0 }),
+      { abortEarly: false }
+    ).catch((e) => e);
+
+    expect(error.inner.map((i: any) => i.path)).toContain('tiers[0].eurYearly');
+  });
+
   it('accepts a self-hosted tier priced yearly only', async () => {
     await expect(
       Validation.EE_PLAN_FORM.validate(plan({ eurMonthly: 0, eurYearly: 990 }))
