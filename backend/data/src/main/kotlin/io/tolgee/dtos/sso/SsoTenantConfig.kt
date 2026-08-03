@@ -1,6 +1,7 @@
 package io.tolgee.dtos.sso
 
 import io.tolgee.api.ISsoTenant
+import java.net.URI
 
 data class SsoTenantConfig(
   override val clientId: String,
@@ -15,6 +16,19 @@ data class SsoTenantConfig(
   override val global: Boolean,
   val organizationId: Long? = null,
 ) : ISsoTenant {
+  /**
+   * Google rejects the standard OIDC `offline_access` scope with `invalid_scope`;
+   * refresh tokens must be requested via `access_type=offline&prompt=consent` instead,
+   * and Google's refresh responses don't rotate the refresh token.
+   */
+  val isGoogle: Boolean
+    get() = isGoogleHost(authorizationUri) || isGoogleHost(tokenUri)
+
+  private fun isGoogleHost(uri: String): Boolean {
+    val host = runCatching { URI(uri).host }.getOrNull() ?: return false
+    return host == "accounts.google.com" || host == "googleapis.com" || host.endsWith(".googleapis.com")
+  }
+
   constructor(other: ISsoTenant, organizationId: Long?) : this(
     clientId = other.clientId,
     clientSecret = other.clientSecret,

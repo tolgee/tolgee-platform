@@ -4,5 +4,5 @@ package io.tolgee.ee.data
 class OAuth2TokenResponse(
   val id_token: String,
   val scope: String,
-  val refresh_token: String,
+  val refresh_token: String?,
 )
