@@ -483,6 +483,9 @@ class ImportService(
 
   fun getAllByProject(projectId: Long) = this.importRepository.findAllByProjectId(projectId)
 
+  fun getAllByProjectIncludingDeleted(projectId: Long) =
+    this.importRepository.findAllByProjectIdIncludingDeleted(projectId)
+
   fun saveAllFileIssueParams(params: List<ImportFileIssueParam>): MutableList<ImportFileIssueParam> =
     importFileIssueParamRepository.saveAll(params)
 

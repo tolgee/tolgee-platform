@@ -88,9 +88,14 @@ class ProjectHardDeletingService(
         importSettingsService.deleteAllByProject(projectId)
       }
 
-      importService.getAllByProject(projectId).forEach {
+      // includes soft-deleted imports — their import_language/import_key rows still reference
+      // the project's languages/keys we are about to delete
+      importService.getAllByProjectIncludingDeleted(projectId).forEach {
         importService.hardDeleteImport(it)
       }
+
+      deleteTasks(projectId)
+      deleteBranchMergeChanges(projectId)
 
       // otherwise the project keeps referencing the language/namespace we are about to delete
       project.baseLanguage = null
@@ -211,6 +216,34 @@ class ProjectHardDeletingService(
         .setParameter("projectId", projectId)
         .executeUpdate()
     }
+  }
+
+  /**
+   * Tasks (EE) reference the project's languages, keys and the project itself, but no service
+   * removes them on project deletion. Delete them and their children with native SQL so the
+   * table set stays consistent even when the EE module is absent.
+   */
+  private fun deleteTasks(projectId: Long) {
+    val taskIds = "select id from task where project_id = :projectId"
+    executeByProjectId("delete from task_key where task_id in ($taskIds)", projectId)
+    executeByProjectId("delete from task_assignees where tasks_id in ($taskIds)", projectId)
+    executeByProjectId("update notification set linked_task_id = null where linked_task_id in ($taskIds)", projectId)
+    executeByProjectId("delete from task where project_id = :projectId", projectId)
+  }
+
+  private fun deleteBranchMergeChanges(projectId: Long) {
+    val keyIds = "select id from key where project_id = :projectId"
+    executeByProjectId(
+      "delete from branch_merge_change where source_key_id in ($keyIds) or target_key_id in ($keyIds)",
+      projectId,
+    )
+  }
+
+  private fun executeByProjectId(
+    sql: String,
+    projectId: Long,
+  ) {
+    entityManager.createNativeQuery(sql).setParameter("projectId", projectId).executeUpdate()
   }
 
   @TransactionalEventListener(phase = TransactionPhase.AFTER_COMPLETION)

@@ -14,7 +14,9 @@ import io.tolgee.development.testDataBuilder.data.ContentDeliveryConfigTestData
 import io.tolgee.development.testDataBuilder.data.MtSettingsTestData
 import io.tolgee.development.testDataBuilder.data.ProjectWithQaEntitiesTestData
 import io.tolgee.development.testDataBuilder.data.SuggestionsTestData
+import io.tolgee.development.testDataBuilder.data.TaskTestData
 import io.tolgee.development.testDataBuilder.data.WebhooksTestData
+import io.tolgee.development.testDataBuilder.data.dataImport.ImportTestData
 import io.tolgee.dtos.BigMetaDto
 import io.tolgee.dtos.RelatedKeyDto
 import io.tolgee.fixtures.waitFor
@@ -28,6 +30,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import java.util.Date
 
 @SpringBootTest
 class ProjectHardDeletingServiceTest : AbstractSpringTest() {
@@ -213,6 +216,35 @@ class ProjectHardDeletingServiceTest : AbstractSpringTest() {
             .singleResult as Number
         ).toLong()
       remaining.assert.isEqualTo(0)
+    }
+  }
+
+  @Test
+  fun `deletes project with a soft-deleted import`() {
+    val testData = ImportTestData()
+    testData.importBuilder.self.deletedAt = Date()
+    testDataService.saveTestData(testData.root)
+
+    io.tolgee.util.executeInNewTransaction(platformTransactionManager) {
+      projectHardDeletingService.hardDeleteProject(testData.projectBuilder.self.refresh())
+    }
+
+    executeInNewTransaction {
+      projectService.find(testData.projectBuilder.self.id).assert.isNull()
+    }
+  }
+
+  @Test
+  fun `deletes project with tasks`() {
+    val testData = TaskTestData()
+    testDataService.saveTestData(testData.root)
+
+    io.tolgee.util.executeInNewTransaction(platformTransactionManager) {
+      projectHardDeletingService.hardDeleteProject(testData.projectBuilder.self.refresh())
+    }
+
+    executeInNewTransaction {
+      projectService.find(testData.projectBuilder.self.id).assert.isNull()
     }
   }
 
