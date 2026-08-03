@@ -1,7 +1,18 @@
+import { createContext, useContext } from 'react';
 import { useCurrentLanguage } from '@tginternal/library/hooks/useCurrentLanguage';
+
+/**
+ * The currency the surrounding screen is denominated in. Money is formatted with it unless a
+ * caller passes its own — an invoice, for instance, keeps the currency it was issued in even
+ * after the organization moves to another one.
+ */
+export const MoneyCurrencyContext = createContext<string>('EUR');
+
+export const MoneyCurrencyProvider = MoneyCurrencyContext.Provider;
 
 export const useMoneyFormatter = () => {
   const language = useCurrentLanguage();
+  const contextCurrency = useContext(MoneyCurrencyContext);
   return (number: number | undefined, options?: Intl.NumberFormatOptions) => {
     const maximumFractionDigits = options?.maximumFractionDigits ?? 2;
     const rounded = Number(number?.toFixed(maximumFractionDigits)) || 0;
@@ -14,7 +25,7 @@ export const useMoneyFormatter = () => {
 
     return new Intl.NumberFormat(language, {
       style: 'currency',
-      currency: 'EUR',
+      currency: contextCurrency,
       ...options,
       maximumFractionDigits,
       minimumFractionDigits,
