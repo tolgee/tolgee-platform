@@ -1,3 +1,10 @@
+# [3.216.0](https://github.com/tolgee/tolgee-platform/compare/v3.215.0...v3.216.0) (2026-08-03)
+
+
+### Features
+
+* support Google Workspace as SSO provider ([#3837](https://github.com/tolgee/tolgee-platform/issues/3837)) ([03b144d](https://github.com/tolgee/tolgee-platform/commit/03b144d6fcaa8e66c4964812ab9449f09f596043))
+
 # [3.215.0](https://github.com/tolgee/tolgee-platform/compare/v3.214.1...v3.215.0) (2026-07-30)
 
 
