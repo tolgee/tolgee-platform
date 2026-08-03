@@ -11,7 +11,8 @@ import io.tolgee.model.batch.params.SetKeysNamespaceParams
 import io.tolgee.service.key.KeyService
 import jakarta.persistence.EntityManager
 import kotlinx.coroutines.ensureActive
-import org.apache.commons.lang3.exception.ExceptionUtils.getRootCauseMessage
+import org.apache.commons.lang3.exception.ExceptionUtils
+import org.postgresql.util.PSQLException
 import org.springframework.stereotype.Component
 import kotlin.coroutines.CoroutineContext
 
@@ -43,19 +44,24 @@ class SetKeysNamespaceChunkProcessor(
     try {
       fn.invoke()
     } catch (e: Exception) {
-      val rootCause = getRootCauseMessage(e)
-      val isKeyAlreadyInNamespace =
-        rootCause
-          .contains("key_project_id_name_namespace_id_idx")
-      val isKeyAlreadyInProjectWithoutNamespace =
-        rootCause
-          .contains("key_project_id_name_idx")
-      if (isKeyAlreadyInNamespace || isKeyAlreadyInProjectWithoutNamespace) {
-        throw FailedDontRequeueException(Message.KEY_EXISTS_IN_NAMESPACE, listOf(), e)
+      if (!violatesKeyUniqueness(e)) {
+        throw e
       }
-      throw e
+      throw FailedDontRequeueException(Message.KEY_EXISTS_IN_NAMESPACE, listOf(), e)
     }
   }
+
+  /**
+   * Reads the constraint from the driver's ErrorResponse rather than from
+   * ConstraintViolationException.constraintName: Hibernate fills that in by searching the server's
+   * message for the English `violates unique constraint "`, so it is empty under a non-English
+   * lc_messages. The wire-protocol field is an identifier the server never localizes.
+   */
+  fun violatesKeyUniqueness(e: Throwable) =
+    ExceptionUtils
+      .getThrowableList(e)
+      .filterIsInstance<PSQLException>()
+      .any { it.serverErrorMessage?.constraint in KEY_UNIQUENESS_INDEXES }
 
   override fun getTargetItemType(): Class<Long> {
     return Long::class.java
@@ -79,4 +85,14 @@ class SetKeysNamespaceChunkProcessor(
     request: SetKeysNamespaceRequest,
     projectId: Long?,
   ): Int = 5000
+
+  companion object {
+    /**
+     * The unique indexes on `key` as created by schema.xml. Both were renamed once already —
+     * key_project_id_name_idx and key_project_id_name_namespace_id_idx were dropped by
+     * changeSet 1758202102054-2 — and the old guard went on matching the dropped names.
+     */
+    val KEY_UNIQUENESS_INDEXES =
+      setOf("key_project_branch_name_no_ns", "key_project_branch_name_ns")
+  }
 }
