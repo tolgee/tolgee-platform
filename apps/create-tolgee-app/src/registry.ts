@@ -38,7 +38,7 @@ export const CONNECT_MODES: {
   {
     value: 'auto',
     label: 'Self-register',
-    hint: 'App self-registers on boot using the server-wide registration secret',
+    hint: 'App self-registers on boot as a native (server-wide) app, using the registration secret',
   },
 ]
 

@@ -21,10 +21,17 @@ SERVER_PORT={{serverPort}}
 # TOLGEE_DEV_TUNNEL=none
 
 # --- Self-registration (connect mode "auto") ---------------------------------
-# The server registers itself on boot only when BOTH of these are set. The
-# registration secret is instance-wide and comes from the Tolgee administrator.
-# TOLGEE_ORGANIZATION_SLUG=my-org
+# The server registers itself on boot when this is set. The registration secret
+# is instance-wide and comes from the Tolgee administrator.
+#
+# This registers a NATIVE app: one owned by no organization. Which
+# organizations may use it is a server-admin decision, made in Tolgee under
+# Administration -> Apps; a project owner then enables it per project.
 # TOLGEE_APP_REGISTRATION_SECRET=
+#
+# Optional, and usually left unset: install the app into this ONE organization
+# instead of registering it server-wide.
+# TOLGEE_ORGANIZATION_SLUG=my-org
 
 # Credentials a successful registration returns. The client secret is shown
 # once, at first registration — paste it here to keep it.

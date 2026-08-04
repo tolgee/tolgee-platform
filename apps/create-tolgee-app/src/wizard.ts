@@ -125,13 +125,6 @@ export async function runWizard(
   let organizationSlug = ''
   let registrationSecret = ''
   if (connectMode === 'auto') {
-    organizationSlug = abortIfCancelled(
-      await text({
-        message: 'Organization slug to register the app in:',
-        placeholder: 'my-org',
-        validate: validateOrganizationSlug,
-      })
-    )
     registrationSecret = abortIfCancelled(
       await password({
         message: 'Registration secret (from the Tolgee server configuration):',
@@ -151,7 +144,7 @@ export async function runWizard(
       `App        ${id} (${name})`,
       `Directory  ${targetDir}`,
       `Tolgee     ${tolgeeUrl}`,
-      `Register   ${connectMode === 'auto' ? `self-register into "${organizationSlug}"` : 'manually in Tolgee'}`,
+      `Register   ${connectMode === 'auto' ? 'self-register as a native (server-wide) app' : 'manually in Tolgee'}`,
       `SDK        ${sdk.summary}`,
     ].join('\n'),
     'Summary'

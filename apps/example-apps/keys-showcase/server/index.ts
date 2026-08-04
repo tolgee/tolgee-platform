@@ -32,12 +32,12 @@ app.get('/manifest.json', (_req, res) => {
 })
 
 const connect = async (manifestUrl: string): Promise<void> => {
-  if (!config.registrationSecret || !config.organizationSlug) {
+  if (!config.registrationSecret) {
     console.log(
       'Manual mode — register the app yourself in Tolgee:\n' +
         '  Organization → Apps → Add app, then paste this manifest URL:\n' +
         `    ${manifestUrl}\n` +
-        '  Set TOLGEE_APP_REGISTRATION_SECRET and TOLGEE_ORGANIZATION_SLUG to auto-connect instead.'
+        '  Set TOLGEE_APP_REGISTRATION_SECRET to auto-connect instead.'
     )
     return
   }
@@ -46,23 +46,33 @@ const connect = async (manifestUrl: string): Promise<void> => {
     const result = await selfRegisterApp({
       tolgeeUrl: config.tolgeeUrl,
       registrationSecret: config.registrationSecret,
+      // Omitted by default, so the app registers server-wide, owned by no
+      // organization. Which organizations may use it is an admin decision.
       organizationSlug: config.organizationSlug,
       manifestUrl,
     })
 
+    const where = result.native
+      ? 'as a native (server-wide) app'
+      : `in organization "${config.organizationSlug}"`
+
     if (!result.created) {
       console.log(
-        `Auto-connect: install ${result.installId} already existed on ${config.tolgeeUrl}; ` +
+        `Auto-connect: install ${result.installId} already existed on ${config.tolgeeUrl} ${where}; ` +
           `its manifest URL now points at ${manifestUrl}.`
       )
       return
     }
 
     console.log(
-      `Auto-connect: registered install ${result.installId} on ${config.tolgeeUrl}.\n` +
+      `Auto-connect: registered install ${result.installId} on ${config.tolgeeUrl} ${where}.\n` +
         '  Save these into .env.local NOW — Tolgee never shows the secret again:\n' +
         `    TOLGEE_APP_CLIENT_ID=${result.clientId}\n` +
-        `    TOLGEE_APP_CLIENT_SECRET=${result.clientSecret}`
+        `    TOLGEE_APP_CLIENT_SECRET=${result.clientSecret}` +
+        (result.native
+          ? '\n  Next: grant it to an organization in Tolgee under ' +
+            'Administration → Apps, then enable it for a project.'
+          : '')
     )
   } catch (error) {
     // A failed registration must not take the manifest endpoint down with it —
@@ -71,8 +81,8 @@ const connect = async (manifestUrl: string): Promise<void> => {
       `Auto-connect failed against ${config.tolgeeUrl}: ` +
         (error instanceof Error ? error.message : String(error)) +
         '\n  Check that Tolgee runs with tolgee.apps.enabled=true and ' +
-        'tolgee.apps.allow-local-addresses=true, that TOLGEE_APP_REGISTRATION_SECRET matches ' +
-        'tolgee.apps.registration-secret, and that TOLGEE_ORGANIZATION_SLUG exists.\n' +
+        'tolgee.apps.allow-local-addresses=true, and that ' +
+        'TOLGEE_APP_REGISTRATION_SECRET matches tolgee.apps.registration-secret.\n' +
         `  Still serving the manifest — you can register ${manifestUrl} by hand.`
     )
   }

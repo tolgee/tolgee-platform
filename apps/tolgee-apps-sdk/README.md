@@ -128,22 +128,29 @@ Call `app.dispose()` when your UI unmounts.
 ### 1. `selfRegisterApp` — register without the UI
 
 Instead of pasting a manifest URL into Tolgee's admin UI, an app can register
-itself on startup. This is what a dev app does when its tunnel URL changes on
-every restart. It requires an instance-wide registration secret, which the
-Tolgee admin configures.
+itself on startup — no restart of Tolgee, no clicking. This is what a dev app
+does when its tunnel URL changes on every restart, and how a first-party app
+deployed alongside Tolgee connects itself. It requires an instance-wide
+registration secret, which the Tolgee admin configures.
 
 ```ts
 import { loadTolgeeAppConfig, selfRegisterApp } from '@tolgee/apps-sdk/server'
 
 const config = loadTolgeeAppConfig()
 
-const { installId, clientId, clientSecret, created } = await selfRegisterApp({
-  tolgeeUrl: config.tolgeeUrl,
-  registrationSecret: config.registrationSecret!,
-  organizationSlug: config.organizationSlug!,
-  manifestUrl: `${baseUrl}/manifest.json`,
-})
+const { installId, clientId, clientSecret, created, native } =
+  await selfRegisterApp({
+    tolgeeUrl: config.tolgeeUrl,
+    registrationSecret: config.registrationSecret!,
+    manifestUrl: `${baseUrl}/manifest.json`,
+  })
 ```
+
+Omitting `organizationSlug` — the normal case — registers a **native** app: one
+owned by no organization. Which organizations may use it is then a server-admin
+decision, made in Tolgee under **Administration → Apps**; a project owner
+enables it per project afterwards. Pass an `organizationSlug` only when you want
+the app installed into that one organization instead.
 
 Tolgee returns the client secret **only when it creates the install** — that's
 what `created` reflects. Persist it right away; a later call for an already

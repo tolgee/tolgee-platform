@@ -60,16 +60,21 @@ Pick whichever fits your setup.
 the manifest URL the server prints on boot (the tunnel one when tunnelling).
 Tolgee fetches the manifest and shows what the app contributes.
 
-**Automatically** — set both of these in `.env.local`:
+**Automatically** — set this in `.env.local`:
 
 ```dotenv
-TOLGEE_ORGANIZATION_SLUG=my-org
 TOLGEE_APP_REGISTRATION_SECRET=…
 ```
 
 The registration secret is server-wide and comes from whoever administers your
-Tolgee instance. With both set, the server registers itself on every boot and
-logs the result. The **first** registration prints a client id and a client
+Tolgee instance. With it set, the server registers itself on every boot and
+logs the result.
+
+This registers a **native** app — one owned by no organization. Which
+organizations may use it is a separate, admin-only decision, made in Tolgee
+under **Administration → Apps**; a project owner then enables it per project.
+(Setting `TOLGEE_ORGANIZATION_SLUG` too installs the app into that single
+organization instead, skipping the admin step.) The **first** registration prints a client id and a client
 secret — the secret is shown only that once, so paste both into `.env.local`:
 
 ```dotenv

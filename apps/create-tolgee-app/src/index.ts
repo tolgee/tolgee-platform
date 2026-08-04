@@ -93,14 +93,16 @@ const resolveAnswers = async (argv: string[]): Promise<Answers> => {
 
   const organizationSlug = flags.get('org') ?? ''
   const registrationSecret = flags.get('secret') ?? ''
-  if (connectMode === 'auto') {
+  if (connectMode === 'auto' && registrationSecret.length === 0) {
+    log.error('--connect=auto needs the registration secret: --secret=<secret>.')
+    process.exit(1)
+  }
+  // Optional: self-registration defaults to a native, server-wide app. --org narrows it to a
+  // single organization, so it is only validated when actually supplied.
+  if (organizationSlug.length > 0) {
     const slugError = validateOrganizationSlug(organizationSlug)
     if (slugError) {
-      log.error(`${slugError} Pass it with --org=<slug>.`)
-      process.exit(1)
-    }
-    if (registrationSecret.length === 0) {
-      log.error('--connect=auto needs the registration secret: --secret=<secret>.')
+      log.error(slugError)
       process.exit(1)
     }
   }
@@ -201,9 +203,13 @@ const envLocal = (answers: Answers): string => {
   if (answers.connectMode === 'auto') {
     lines.push(
       '',
-      '# Self-registration on server boot.',
-      `TOLGEE_ORGANIZATION_SLUG=${answers.organizationSlug}`,
+      '# Self-registration on server boot. Registers a native (server-wide) app;',
+      '# grant it to organizations under Administration -> Apps.',
       `TOLGEE_APP_REGISTRATION_SECRET=${answers.registrationSecret}`,
+      '# Set this only to install into one specific organization instead.',
+      ...(answers.organizationSlug
+        ? [`TOLGEE_ORGANIZATION_SLUG=${answers.organizationSlug}`]
+        : ['# TOLGEE_ORGANIZATION_SLUG=']),
       '',
       '# Filled in from the credentials the first successful registration prints.',
       '# TOLGEE_APP_CLIENT_ID=',
@@ -241,8 +247,18 @@ const nextSteps = (answers: Answers): string[] => {
 
   if (answers.connectMode === 'auto') {
     steps.push(
-      `The server registers itself in "${answers.organizationSlug}" on boot and prints`,
+      ...(answers.organizationSlug
+        ? [`The server registers itself in "${answers.organizationSlug}" on boot and prints`]
+        : [
+            'The server registers itself on boot as a native (server-wide) app and prints',
+          ]),
       'a one-time client secret — copy both credentials into .env.local.',
+      ...(answers.organizationSlug
+        ? []
+        : [
+            'Grant it to an organization in Administration → Apps before enabling it',
+            'for a project.',
+          ]),
       ...(isLocalUrl(answers.tolgeeUrl)
         ? []
         : [

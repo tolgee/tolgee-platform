@@ -83,21 +83,29 @@ Tolgee to follow along.
 
 ### Auto-connect mode
 
-Set both variables and the server self-registers on boot:
+Set the registration secret and the server self-registers on boot:
 
 ```bash
 cat >> .env.local <<'EOF'
 TOLGEE_APP_REGISTRATION_SECRET=<tolgee.apps.registration-secret from the server>
-TOLGEE_ORGANIZATION_SLUG=<your-org-slug>
 EOF
 
 npm run dev
 ```
 
+This registers a **native** app — one owned by no organization. Making it
+available to an organization is a separate, admin-only decision: in Tolgee go to
+**Administration → Apps**, open the app's **Organizations** dialog and grant the
+organizations that may use it. Only then can a project owner enable it for a
+project.
+
+(Setting `TOLGEE_ORGANIZATION_SLUG` as well installs the app into that single
+organization instead, skipping the admin step. Usually you don't want that.)
+
 On the **first** registration the server prints the app's credentials:
 
 ```
-Auto-connect: registered install 12 on http://localhost:8718.
+Auto-connect: registered install 12 on http://localhost:8718 as a native (server-wide) app.
   Save these into .env.local NOW — Tolgee never shows the secret again:
     TOLGEE_APP_CLIENT_ID=...
     TOLGEE_APP_CLIENT_SECRET=...

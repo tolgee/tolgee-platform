@@ -3,8 +3,13 @@ export type SelfRegisterInput = {
   tolgeeUrl: string
   /** Instance-wide secret Tolgee requires to accept a self-registration. */
   registrationSecret: string
-  /** Organization the app is installed into. */
-  organizationSlug: string
+  /**
+   * Organization to install into. Omit — the normal case — to register a
+   * **native** app: one owned by no organization, which a server admin then
+   * grants to organizations under Administration → Apps. Pass a slug only to
+   * install the app into that single organization instead.
+   */
+  organizationSlug?: string | null
   /** Publicly reachable URL Tolgee fetches the manifest from. */
   manifestUrl: string
 }
@@ -19,6 +24,8 @@ export type SelfRegisterResult = {
   clientSecret: string | null
   /** False when an existing install was repointed at `manifestUrl` instead. */
   created: boolean
+  /** True when the install belongs to no organization (see `organizationSlug`). */
+  native: boolean
 }
 
 /**
@@ -49,7 +56,10 @@ export const selfRegisterApp = async (
     },
     body: JSON.stringify({
       manifestUrl: input.manifestUrl,
-      organizationSlug: input.organizationSlug,
+      // Omitted entirely rather than sent as null/"" so Tolgee takes the native path.
+      ...(input.organizationSlug
+        ? { organizationSlug: input.organizationSlug }
+        : {}),
     }),
   })
 
@@ -76,6 +86,7 @@ export const selfRegisterApp = async (
     clientId: typeof body.clientId === 'string' ? body.clientId : null,
     clientSecret,
     created: clientSecret !== null,
+    native: !input.organizationSlug,
   }
 }
 
