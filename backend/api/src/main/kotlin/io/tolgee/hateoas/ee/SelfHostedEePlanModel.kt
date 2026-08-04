@@ -22,6 +22,7 @@ open class SelfHostedEePlanModel(
   val hasYearlyPrice: Boolean = false,
   val free: Boolean,
   val nonCommercial: Boolean,
+  val invoiced: Boolean,
   val isPayAsYouGo: Boolean,
   val archivedAt: Date? = null,
   val metricType: MetricType = MetricType.KEYS_SEATS,

@@ -3045,6 +3045,7 @@ export interface components {
         | "user_is_subscribed_to_paid_plan"
         | "cannot_create_free_plan_without_fixed_type"
         | "cannot_modify_plan_free_status"
+        | "plan_invoiced_requires_free"
         | "key_id_not_provided"
         | "free_self_hosted_seat_limit_exceeded"
         | "advanced_params_not_supported"
@@ -5703,6 +5704,7 @@ export interface components {
       /** Format: int64 */
       id: number;
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
+      invoiced: boolean;
       /** @enum {string} */
       metricType: "KEYS_SEATS" | "STRINGS" | "HOSTED_WORDS";
       name: string;
@@ -6291,6 +6293,7 @@ export interface components {
       /** Format: int64 */
       id: number;
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
+      invoiced: boolean;
       isPayAsYouGo: boolean;
       /** @enum {string} */
       metricType: "KEYS_SEATS" | "STRINGS" | "HOSTED_WORDS";
@@ -6915,6 +6918,7 @@ export interface components {
         | "user_is_subscribed_to_paid_plan"
         | "cannot_create_free_plan_without_fixed_type"
         | "cannot_modify_plan_free_status"
+        | "plan_invoiced_requires_free"
         | "key_id_not_provided"
         | "free_self_hosted_seat_limit_exceeded"
         | "advanced_params_not_supported"
