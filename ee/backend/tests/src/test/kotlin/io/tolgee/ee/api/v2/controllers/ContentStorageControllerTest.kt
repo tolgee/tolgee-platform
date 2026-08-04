@@ -58,8 +58,9 @@ class ContentStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") 
   }
 
   @AfterEach
-  fun clenup() {
+  fun cleanup() {
     enabledFeaturesProvider.forceEnabled = setOf()
+    testDataService.cleanTestData(testData.root)
   }
 
   @Test

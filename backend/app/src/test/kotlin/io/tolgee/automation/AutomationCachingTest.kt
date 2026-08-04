@@ -11,6 +11,7 @@ import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import jakarta.persistence.EntityManager
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
@@ -45,6 +46,11 @@ class AutomationCachingTest : ProjectAuthControllerTest("/v2/projects/") {
     userAccount = testData.user
     this.projectSupplier = { testData.projectBuilder.self }
     cacheManager.getCache(Caches.AUTOMATIONS)!!.clear()
+  }
+
+  @AfterEach
+  fun after() {
+    testDataService.cleanTestData(testData.root)
   }
 
   @Test

@@ -44,7 +44,7 @@ class FileStorageFsTest : AbstractFileStorageServiceTest() {
   @Test
   fun testStoreFile() {
     val filePath = "aaa/aaaa/aaa.txt"
-    fileStorage.storeFile("aaa/aaaa/aaa.txt", "hello".toByteArray(charset("UTF-8")))
+    fileStorage.storeFile(filePath, "hello".toByteArray(charset("UTF-8")))
     val file = File("${tolgeeProperties.fileStorage.fsDataPath}/$filePath")
     assertThat(file).exists()
     assertThat(file).hasContent("hello")

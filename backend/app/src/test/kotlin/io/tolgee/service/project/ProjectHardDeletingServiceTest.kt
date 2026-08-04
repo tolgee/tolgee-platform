@@ -121,6 +121,7 @@ class ProjectHardDeletingServiceTest : AbstractSpringTest() {
   @Test
   fun `deletes project with Content Delivery Configs`() {
     val testData = ContentDeliveryConfigTestData()
+    testDataToClean = testData
     testDataService.saveTestData(testData.root)
     executeInNewRepeatableTransaction(platformTransactionManager) {
       projectHardDeletingService.hardDeleteProject(testData.projectBuilder.self.refresh())
