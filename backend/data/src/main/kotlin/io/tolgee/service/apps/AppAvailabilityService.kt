@@ -33,9 +33,7 @@ class AppAvailabilityService(
     val existing = appAvailableForOrganizationRepository.findByAppInstallIdAndOrganizationId(installId, organizationId)
     if (existing != null) return existing
 
-    val install =
-      appInstallRepository.findByOrganizationIsNullAndId(installId)
-        ?: throw NotFoundException(Message.APP_INSTALL_NOT_FOUND)
+    val install = getNativeInstall(installId)
     val organization =
       entityManager.find(Organization::class.java, organizationId)
         ?: throw NotFoundException(Message.ORGANIZATION_NOT_FOUND)
@@ -51,7 +49,8 @@ class AppAvailabilityService(
 
   /**
    * Also disables the app in every project of the organization. Without that, an app whose
-   * availability was revoked would keep running in the projects that had already enabled it.
+   * availability was revoked would keep running in the projects that had already enabled it. A
+   * blanket grant still covers the organization, so it suppresses that cascade.
    */
   @Transactional
   fun revoke(
@@ -59,10 +58,34 @@ class AppAvailabilityService(
     organizationId: Long,
   ) {
     val native = appInstallRepository.findByOrganizationIsNullAndId(installId) ?: return
-    appEnabledForProjectRepository.deleteByAppInstallIdAndProjectOrganizationOwnerId(native.id, organizationId)
+    if (!native.availableToAllOrganizations) {
+      appEnabledForProjectRepository.deleteByAppInstallIdAndProjectOrganizationOwnerId(native.id, organizationId)
+    }
     val existing =
       appAvailableForOrganizationRepository.findByAppInstallIdAndOrganizationId(installId, organizationId) ?: return
     appAvailableForOrganizationRepository.delete(existing)
+  }
+
+  /** Idempotent. Leaves the explicit per-organization grants in place. */
+  @Transactional
+  fun grantToAllOrganizations(installId: Long) {
+    val install = getNativeInstall(installId)
+    install.availableToAllOrganizations = true
+    appInstallRepository.save(install)
+  }
+
+  /**
+   * Also disables the app in every project that was only ever covered by the blanket grant. Projects
+   * of an organization holding an explicit grant keep it.
+   */
+  @Transactional
+  fun revokeFromAllOrganizations(installId: Long) {
+    val install = getNativeInstall(installId)
+    install.availableToAllOrganizations = false
+    appInstallRepository.save(install)
+    appEnabledForProjectRepository.deleteAll(
+      appEnabledForProjectRepository.findAllWithoutExplicitOrganizationAvailability(install.id),
+    )
   }
 
   @Transactional(readOnly = true)
@@ -72,19 +95,28 @@ class AppAvailabilityService(
 
   @Transactional(readOnly = true)
   fun listNativeInstallsForOrganization(organizationId: Long): List<AppInstall> {
-    return appAvailableForOrganizationRepository.findNativeInstallsByOrganizationId(organizationId)
+    val explicit = appAvailableForOrganizationRepository.findNativeInstallsByOrganizationId(organizationId)
+    val blanket = appInstallRepository.findAllByOrganizationIsNullAndAvailableToAllOrganizationsIsTrue()
+    return (explicit + blanket).distinctBy { it.id }.sortedBy { it.name }
   }
 
   @Transactional(readOnly = true)
   fun isAvailableForOrganization(
     organizationId: Long,
-    installId: Long,
+    install: AppInstall,
   ): Boolean {
-    return appAvailableForOrganizationRepository.findByAppInstallIdAndOrganizationId(installId, organizationId) != null
+    if (install.availableToAllOrganizations) return true
+    return appAvailableForOrganizationRepository
+      .findByAppInstallIdAndOrganizationId(install.id, organizationId) != null
   }
 
   @Transactional
   fun removeAllForAppInstall(installId: Long) {
     appAvailableForOrganizationRepository.deleteByAppInstallId(installId)
+  }
+
+  private fun getNativeInstall(installId: Long): AppInstall {
+    return appInstallRepository.findByOrganizationIsNullAndId(installId)
+      ?: throw NotFoundException(Message.APP_INSTALL_NOT_FOUND)
   }
 }

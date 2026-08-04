@@ -24,6 +24,8 @@ interface AppInstallRepository : JpaRepository<AppInstall, Long> {
 
   fun findAllByOrganizationIsNull(pageable: Pageable): Page<AppInstall>
 
+  fun findAllByOrganizationIsNullAndAvailableToAllOrganizationsIsTrue(): List<AppInstall>
+
   fun findByOrganizationIsNullAndId(id: Long): AppInstall?
 
   fun findByOrganizationIsNullAndAppId(appId: String): AppInstall?

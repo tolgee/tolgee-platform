@@ -46,6 +46,30 @@ export interface paths {
     /** It checks whether the code from email is valid */
     get: operations["verifyEmail"];
   };
+  "/v2/administration/apps": {
+    /** Returns the apps registered at server level — those belonging to no organization. The client secret is never disclosed here. */
+    get: operations["list_12"];
+  };
+  "/v2/administration/apps/{installId}": {
+    /** Removes the native app from the server: its availability for every organization, its enablement in every project and the install itself. Its client credentials stop working. */
+    delete: operations["deregister"];
+  };
+  "/v2/administration/apps/{installId}/organizations": {
+    /** Returns the organizations allowed to enable this native app in their projects. */
+    get: operations["listOrganizations"];
+  };
+  "/v2/administration/apps/{installId}/organizations/all": {
+    /** Allows every organization — including organizations created later — to enable this native app. Explicit per-organization grants are kept, so revoking this falls back to them. Idempotent. */
+    put: operations["grantToAllOrganizations"];
+    /** Drops the blanket availability and disables the app in every project whose organization has no explicit grant. Idempotent. */
+    delete: operations["revokeFromAllOrganizations"];
+  };
+  "/v2/administration/apps/{installId}/organizations/{organizationId}": {
+    /** Allows the organization's projects to enable this native app. Idempotent. */
+    put: operations["grant"];
+    /** Revokes the explicit grant and disables the app in every project of that organization — unless the app is available to all organizations, which keeps covering it. Idempotent — no-op when it was not available. */
+    delete: operations["revoke"];
+  };
   "/v2/administration/batch-job-queue": {
     /** Returns all chunk execution items currently in the batch job queue */
     get: operations["getBatchJobQueue"];
@@ -56,14 +80,6 @@ export interface paths {
   "/v2/administration/project-batch-locks": {
     /** Returns current project batch job locks from Redis or local storage based on configuration */
     get: operations["getProjectLocks"];
-  };
-  "/v2/administration/projects/{projectId}/export": {
-    /** Exports the whole project (content, branches, tasks, screenshots, settings) as a self-contained zip that can be imported onto a project on another instance running the same Tolgee version. */
-    get: operations["exportProject"];
-  };
-  "/v2/administration/projects/{projectId}/import": {
-    /** Wipes ALL in-scope content of this project and replaces it with the uploaded export zip (mirror / wipe-and-replace). The zip must come from an instance running the same Tolgee version. Users are matched by username (case-insensitive); content authored by a user not present on this instance is attributed to the importing admin. The project must be quiescent during the import — concurrent edits to it are not supported. Setting `ignoreVersion` bypasses the version check — unsupported: a cross-version import may complete yet silently corrupt the project's data. */
-    post: operations["importProject"];
   };
   "/v2/administration/users": {
     get: operations["getUsers"];
@@ -207,6 +223,28 @@ export interface paths {
   "/v2/organizations/{id}/users": {
     /** Returns all users in organization. The result also contains users who are only members of projects in the organization. */
     get: operations["getAllUsers_1"];
+  };
+  "/v2/organizations/{organizationId}/apps": {
+    /** Returns all apps registered for the organization. */
+    get: operations["list_4"];
+    /** Fetches the manifest at the given URL and registers the app for the organization. */
+    post: operations["register"];
+  };
+  "/v2/organizations/{organizationId}/apps/preview": {
+    /** Fetches the manifest at the given URL and returns its parsed contents (including the requested scopes) without persisting anything. Used by the registration UI to show a consent prompt before installing. */
+    post: operations["preview"];
+  };
+  "/v2/organizations/{organizationId}/apps/{installId}": {
+    /** Removes the registered app from the organization. */
+    delete: operations["remove"];
+  };
+  "/v2/organizations/{organizationId}/apps/{installId}/manifest-url": {
+    /** Repoints an existing install at a new manifest URL and re-fetches the manifest from there. The new manifest must declare the same `id` as the original. Useful for development: a tunnel URL that changes on every restart can be swapped in without re-installing the app. */
+    patch: operations["updateManifestUrl"];
+  };
+  "/v2/organizations/{organizationId}/apps/{installId}/refresh": {
+    /** Re-fetches the manifest from the registered URL and updates the stored snapshot. */
+    post: operations["refresh"];
   };
   "/v2/organizations/{organizationId}/base-languages": {
     /** Returns all base languages in use by projects owned by specified organization */
@@ -463,6 +501,20 @@ export interface paths {
     /** Returns all API keys for specified project */
     get: operations["allByProject"];
   };
+  "/v2/projects/{projectId}/apps": {
+    /** Returns all apps registered in the project's organization, each annotated with whether it is enabled for this project. Requires project.edit: it discloses the organization's whole app inventory, including apps not enabled for this project. */
+    get: operations["list_11"];
+  };
+  "/v2/projects/{projectId}/apps/{installId}": {
+    /** Enables the given app install for this project. Idempotent. */
+    put: operations["enable"];
+    /** Disables the given app for this project. Idempotent — no-op if it wasn't enabled. */
+    delete: operations["disable"];
+  };
+  "/v2/projects/{projectId}/apps/{installId}/token": {
+    /** Issues a short-lived JWT bound to (install, project, current user) that the dashboard iframe uses to call Tolgee's REST API on behalf of the user. Returns 404 if the install is not enabled for this project. */
+    post: operations["mintToken"];
+  };
   "/v2/projects/{projectId}/auto-translation-settings": {
     /** Returns default auto translation settings for project (deprecated: use per language config with null language id) */
     get: operations["getAutoTranslationSettings"];
@@ -474,7 +526,7 @@ export interface paths {
     delete: operations["removeAvatar_1"];
   };
   "/v2/projects/{projectId}/batch-jobs": {
-    get: operations["list_4"];
+    get: operations["list_5"];
   };
   "/v2/projects/{projectId}/batch-jobs/{id}": {
     get: operations["get_22"];
@@ -560,10 +612,6 @@ export interface paths {
   "/v2/projects/{projectId}/content-storages/{id}/test": {
     /** Tests existing Content Storage with new configuration. (Uses existing secrets, if nulls provided) */
     post: operations["testExisting"];
-  };
-  "/v2/projects/{projectId}/contributors": {
-    /** Returns users who have activity on the project but are not currently its members. Deleted and disabled users are excluded. Sortable by lastContributionAt and firstContributionAt only; any other sort property falls back to lastContributionAt descending. */
-    get: operations["getContributors"];
   };
   "/v2/projects/{projectId}/current-batch-jobs": {
     /** Returns all running and pending batch operations. Completed batch operations are returned only if they are not older than 1 hour. If user doesn't have permission to view all batch operations, only their operations are returned. */
@@ -734,7 +782,7 @@ export interface paths {
     get: operations["selectKeys_2"];
   };
   "/v2/projects/{projectId}/keys/trash": {
-    get: operations["list_8"];
+    get: operations["list_9"];
   };
   "/v2/projects/{projectId}/keys/trash/deleters": {
     get: operations["listDeleters"];
@@ -823,6 +871,7 @@ export interface paths {
     post: operations["createSuggestion"];
   };
   "/v2/projects/{projectId}/languages/{languageId}/key/{keyId}/suggestion/{suggestionId}": {
+    /** User can only delete suggestion created by them */
     delete: operations["deleteSuggestion"];
   };
   "/v2/projects/{projectId}/languages/{languageId}/key/{keyId}/suggestion/{suggestionId}/accept": {
@@ -887,10 +936,6 @@ export interface paths {
     get: operations["getPrompt"];
     put: operations["updatePrompt"];
     delete: operations["deletePrompt"];
-  };
-  "/v2/projects/{projectId}/publishing": {
-    /** Marks the project as public or private. Only the organization owner or a server admin can change this. */
-    put: operations["setProjectPublic"];
   };
   "/v2/projects/{projectId}/qa-settings": {
     get: operations["getSettings"];
@@ -1058,7 +1103,7 @@ export interface paths {
   };
   "/v2/projects/{projectId}/translation-memories": {
     /** Always readable. When the TRANSLATION_MEMORY feature is not enabled for the organization, only the project-type assignment (if any) is returned so the settings page can still show the row that already drives in-project suggestions. */
-    get: operations["list_6"];
+    get: operations["list_7"];
   };
   "/v2/projects/{projectId}/translation-memories/project-tm-settings": {
     /** Sets TM-level flags on the project's own PROJECT-type TM. The shared-TM update endpoint rejects PROJECT TMs; this narrow endpoint exists so project admins can toggle the `writeOnlyReviewed` flag without org-level privileges. */
@@ -1172,6 +1217,14 @@ export interface paths {
     /** Sends a test request to the webhook */
     post: operations["test"];
   };
+  "/v2/public/apps/self-register": {
+    /** Registers the app described by the manifest, without a signed-in user. Requires the `X-Tolgee-App-Registration-Secret` header to match `tolgee.apps.registration-secret`. With an `organizationSlug` the app is installed into that organization; without one it is registered as a native (server-level) app that a server admin then makes available to organizations. Re-running it for an already-registered app repoints it at the new manifest URL; the one-time client secret is returned only when the install is first created. */
+    post: operations["selfRegister"];
+  };
+  "/v2/public/apps/token": {
+    /** OAuth 2.0 client-credentials grant. Returns a short-lived install-context access token the app's backend uses to call Tolgee's REST API as the install. */
+    post: operations["token"];
+  };
   "/v2/public/business-events/identify": {
     post: operations["identify"];
   };
@@ -1192,10 +1245,6 @@ export interface paths {
   "/v2/public/machine-translation-providers": {
     /** Get machine translation providers */
     get: operations["getInfo_4"];
-  };
-  "/v2/public/projects/with-stats": {
-    /** Returns all public projects (including statistics), discoverable by anyone — no authentication required */
-    get: operations["getAllPublicWithStatistics"];
   };
   "/v2/public/scope-info/hierarchy": {
     get: operations["getHierarchy"];
@@ -1417,7 +1466,6 @@ export interface components {
         | "translations.view"
         | "translations.edit"
         | "translations.suggest"
-        | "translation-suggestions.manage"
         | "keys.edit"
         | "screenshots.upload"
         | "screenshots.delete"
@@ -1451,7 +1499,6 @@ export interface components {
         | "all.view"
         | "branch.management"
         | "branch.protected-modify"
-        | "organization-quotas.view"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -1469,14 +1516,6 @@ export interface components {
        * ]
        */
       suggestLanguageIds?: number[];
-      /**
-       * @description List of languages user can manage suggestions for. If null, managing suggestions for all languages is permitted.
-       * @example [
-       *   200001,
-       *   200004
-       * ]
-       */
-      suggestManageLanguageIds?: number[];
       /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example [
@@ -1520,6 +1559,59 @@ export interface components {
       scopes: string[];
       userFullName?: string;
       username?: string;
+    };
+    AppAccessTokenModel: {
+      access_token: string;
+      /** Format: int64 */
+      expires_in: number;
+      token_type: string;
+    };
+    AppAvailableOrganizationModel: {
+      /** Format: int64 */
+      id: number;
+      /** @example Beautiful organization */
+      name: string;
+      /** @example btforg */
+      slug: string;
+    };
+    AppClientCredentialsRequest: {
+      client_id: string;
+      client_secret: string;
+      grant_type: string;
+    };
+    AppInstallModel: {
+      appId: string;
+      availableToAllOrganizations: boolean;
+      baseUrl: string;
+      clientId?: string;
+      clientSecret?: string;
+      clientSecretPrefix?: string;
+      /** Format: int64 */
+      id: number;
+      manifestUrl: string;
+      modules: components["schemas"]["AppManifestModules"];
+      name: string;
+      scopes: string[];
+      version: string;
+    };
+    AppManifestModules: {
+      "project-dashboard-page"?: components["schemas"]["ProjectDashboardPageModule"][];
+    };
+    AppManifestPreviewModel: {
+      appId: string;
+      baseUrl: string;
+      modules: components["schemas"]["AppManifestModules"];
+      name: string;
+      requestedScopes: string[];
+      version: string;
+    };
+    AppSelfRegisterRequest: {
+      manifestUrl: string;
+      /** @description Slug of the organization owning the app. Leave empty to register a native (server-level) app, which belongs to no organization and is made available to organizations by a server admin. */
+      organizationSlug?: string;
+    };
+    AppTokenModel: {
+      token: string;
     };
     ApplyBranchMergeRequest: {
       deleteBranch: boolean;
@@ -1582,7 +1674,6 @@ export interface components {
       /** @description If true, new keys will be automatically translated via batch operation using translation memory when 100% match is found */
       usingTranslationMemory: boolean;
     };
-    /** @example Links to avatar images */
     Avatar: {
       large: string;
       thumbnail: string;
@@ -1606,6 +1697,7 @@ export interface components {
        * @description The activity revision id, that stores the activity details of the job
        */
       activityRevisionId?: number;
+      /** @description The user who started the job */
       author?: components["schemas"]["SimpleUserAccountModel"];
       /**
        * Format: int64
@@ -1681,13 +1773,16 @@ export interface components {
        * @description Branch merge change id
        */
       id: number;
+      /** @description Merged branch key (post-merge result) */
       mergedKey?: components["schemas"]["BranchMergeKeyModel"];
       /**
        * @description Type of key conflict resolution
        * @enum {string}
        */
       resolution?: "SOURCE" | "TARGET";
+      /** @description Source branch key */
       sourceKey?: components["schemas"]["BranchMergeKeyModel"];
+      /** @description Target branch key */
       targetKey?: components["schemas"]["BranchMergeKeyModel"];
       /**
        * @description Change type
@@ -1708,16 +1803,18 @@ export interface components {
        * @description Branch merge session id
        */
       id: number;
+      /** @description Merged branch key (post-merge result) */
       mergedKey?: components["schemas"]["BranchMergeKeyModel"];
       /**
        * @description Type of key conflict resolution
        * @enum {string}
        */
       resolution?: "SOURCE" | "TARGET";
+      /** @description Source branch key */
       sourceKey: components["schemas"]["BranchMergeKeyModel"];
+      /** @description Target branch key */
       targetKey: components["schemas"]["BranchMergeKeyModel"];
     };
-    /** @description Target branch key */
     BranchMergeKeyModel: {
       /** @description Key description */
       keyDescription?: string;
@@ -1795,7 +1892,6 @@ export interface components {
        */
       uncompletedTasksCount: number;
     };
-    /** @description Ongoing (or applied) merge operation related to this branch. Null when the branch is not being merged yet */
     BranchMergeRefModel: {
       /**
        * Format: int64
@@ -1810,7 +1906,6 @@ export interface components {
       /** @description Target branch name */
       targetBranchName: string;
     };
-    /** @description Translations indexed by language tag */
     BranchMergeTranslationModel: {
       /**
        * Format: int64
@@ -1832,6 +1927,7 @@ export interface components {
     BranchModel: {
       /** @description Indicates whether this branch is currently active (visible and usable for editing translations and keys). Inactive branches are hidden but still stored in the project. */
       active: boolean;
+      /** @description User who created or owns this branch. Can be null for system-generated branches. */
       author?: components["schemas"]["SimpleUserAccountModel"];
       /**
        * Format: int64
@@ -1847,6 +1943,7 @@ export interface components {
       isDefault: boolean;
       /** @description Is branch protected */
       isProtected: boolean;
+      /** @description Ongoing (or applied) merge operation related to this branch. Null when the branch is not being merged yet */
       merge?: components["schemas"]["BranchMergeRefModel"];
       /** @description Human-readable name of the branch. Similar to Git branch names, it identifies the feature or purpose of this branch (e.g. 'feature-login-page') */
       name: string;
@@ -1855,7 +1952,7 @@ export interface components {
     };
     BusinessEventReportRequest: {
       anonymousUserId?: string;
-      data?: { [key: string]: { [key: string]: unknown } };
+      data?: { [key: string]: unknown };
       eventName: string;
       /** Format: int64 */
       organizationId?: number;
@@ -1877,6 +1974,16 @@ export interface components {
     CollectionModelAiPlaygroundResultModel: {
       _embedded?: {
         results?: components["schemas"]["AiPlaygroundResultModel"][];
+      };
+    };
+    CollectionModelAppAvailableOrganizationModel: {
+      _embedded?: {
+        organizations?: components["schemas"]["AppAvailableOrganizationModel"][];
+      };
+    };
+    CollectionModelAppInstallModel: {
+      _embedded?: {
+        appInstalls?: components["schemas"]["AppInstallModel"][];
       };
     };
     CollectionModelAutoTranslationConfigModel: {
@@ -1969,6 +2076,11 @@ export interface components {
         organizationInvitations?: components["schemas"]["OrganizationInvitationModel"][];
       };
     };
+    CollectionModelProjectAppModel: {
+      _embedded?: {
+        projectApps?: components["schemas"]["ProjectAppModel"][];
+      };
+    };
     CollectionModelProjectInvitationModel: {
       _embedded?: {
         invitations?: components["schemas"]["ProjectInvitationModel"][];
@@ -2048,7 +2160,7 @@ export interface components {
       /** @description Branch of the key. If not provided, default branch will be used */
       branch?: string;
       /** @description Custom values of the key. If not provided, custom values won't be modified */
-      custom?: { [key: string]: { [key: string]: unknown } };
+      custom?: { [key: string]: unknown };
       /** @description Description of the key. It's also used as a context for Tolgee AI translator */
       description?: string;
       /** @description If key is pluralized. If it will be reflected in the editor. If null, value won't be modified. */
@@ -2060,7 +2172,6 @@ export interface components {
       maxCharLimit?: number;
       /** @description Name of the key */
       name: string;
-      /** @description The namespace of the key. (When empty or null default namespace will be used) */
       namespace?: string;
       /** @description The argument name for the plural. If null, value won't be modified. If isPlural is false, this value will be ignored. */
       pluralArgName?: string;
@@ -2109,8 +2220,7 @@ export interface components {
         | "ORGANIZATION_OWNER"
         | "NONE"
         | "SERVER_ADMIN"
-        | "SERVER_SUPPORTER"
-        | "COMMUNITY";
+        | "SERVER_SUPPORTER";
       permissionModel?: components["schemas"]["PermissionModel"];
       /**
        * @deprecated
@@ -2134,7 +2244,6 @@ export interface components {
         | "translations.view"
         | "translations.edit"
         | "translations.suggest"
-        | "translation-suggestions.manage"
         | "keys.edit"
         | "screenshots.upload"
         | "screenshots.delete"
@@ -2168,7 +2277,6 @@ export interface components {
         | "all.view"
         | "branch.management"
         | "branch.protected-modify"
-        | "organization-quotas.view"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -2186,14 +2294,6 @@ export interface components {
        * ]
        */
       suggestLanguageIds?: number[];
-      /**
-       * @description List of languages user can manage suggestions for. If null, managing suggestions for all languages is permitted.
-       * @example [
-       *   200001,
-       *   200004
-       * ]
-       */
-      suggestManageLanguageIds?: number[];
       /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example [
@@ -2502,18 +2602,6 @@ export interface components {
       publicUrlPrefix?: string;
       s3ContentStorageConfig?: components["schemas"]["S3ContentStorageConfigDto"];
     };
-    ContributorModel: {
-      avatar?: components["schemas"]["Avatar"];
-      /** Format: date-time */
-      firstContributionAt: string;
-      /** Format: int64 */
-      id: number;
-      invitationPending: boolean;
-      /** Format: date-time */
-      lastContributionAt: string;
-      name?: string;
-      username: string;
-    };
     CopyTranslationRequest: {
       keyIds: number[];
       /** Format: int64 */
@@ -2591,7 +2679,6 @@ export interface components {
       maxCharLimit?: number;
       /** @description Name of the key */
       name: string;
-      /** @description The namespace of the key. (When empty or null default namespace will be used) */
       namespace?: string;
       /** @description The argument name for the plural. If null, value will be guessed from the values provided in translations. */
       pluralArgName?: string;
@@ -2620,7 +2707,6 @@ export interface components {
       /** @description Target translations to create, one per target language */
       translations: components["schemas"]["CreateMultipleTranslationMemoryEntriesTranslationRequest"][];
     };
-    /** @description Target translations to create, one per target language */
     CreateMultipleTranslationMemoryEntriesTranslationRequest: {
       /**
        * @description Target language tag according to BCP 47 definition
@@ -2719,6 +2805,7 @@ export interface components {
       limit: number;
     };
     CurrentUsageModel: {
+      /** @description For MT credits, the values are in full credits. Not Cents. */
       credits: components["schemas"]["CurrentUsageItemModel"];
       isPayAsYouGo: boolean;
       keys: components["schemas"]["CurrentUsageItemModel"];
@@ -2768,7 +2855,6 @@ export interface components {
        */
       maxCharLimit?: number;
       name: string;
-      /** @description The namespace of the key. (When empty or null default namespace will be used) */
       namespace?: string;
     };
     EditProjectRequest: {
@@ -2845,14 +2931,14 @@ export interface components {
         | "UNKNOWN";
     };
     EntityDescriptionWithRelations: {
-      data: { [key: string]: { [key: string]: unknown } };
+      data: { [key: string]: unknown };
       entityClass: string;
       /** Format: int64 */
       entityId: number;
     };
     ErrorResponseBody: {
       code: string;
-      params?: { [key: string]: unknown }[];
+      params?: unknown[];
     };
     ErrorResponseTyped: {
       /** @enum {string} */
@@ -3206,13 +3292,22 @@ export interface components {
         | "plan_migration_not_found"
         | "plan_has_migrations"
         | "source_and_target_plan_must_be_different"
-        | "project_import_version_mismatch"
-        | "project_import_missing_project_json"
-        | "project_import_corrupt_archive";
-      params?: { [key: string]: unknown }[];
+        | "app_manifest_fetch_failed"
+        | "app_manifest_invalid"
+        | "app_already_installed"
+        | "app_install_not_found"
+        | "invalid_app_credentials"
+        | "app_acting_as_user_not_project_member"
+        | "app_unsupported_grant_type"
+        | "app_self_registration_disabled"
+        | "invalid_app_registration_secret"
+        | "organization_has_no_owner"
+        | "app_not_available_for_organization"
+        | "initial_user_not_found";
+      params?: unknown[];
     };
     ExistenceEntityDescription: {
-      data: { [key: string]: { [key: string]: unknown } };
+      data: { [key: string]: unknown };
       entityClass: string;
       /** Format: int64 */
       entityId: number;
@@ -3443,7 +3538,6 @@ export interface components {
         | "translations.view"
         | "translations.edit"
         | "translations.suggest"
-        | "translation-suggestions.manage"
         | "keys.edit"
         | "screenshots.upload"
         | "screenshots.delete"
@@ -3476,8 +3570,7 @@ export interface components {
         | "translation-labels.assign"
         | "all.view"
         | "branch.management"
-        | "branch.protected-modify"
-        | "organization-quotas.view";
+        | "branch.protected-modify";
     };
     IdentifyRequest: {
       anonymousUserId: string;
@@ -3524,7 +3617,6 @@ export interface components {
         | "LANGUAGE_NAME";
       value?: string;
     };
-    /** @description Definition of mapping for each file to import. */
     ImportFileMapping: {
       /** @description Name of the file to import. This is the name of the file provided in `files` request part or in uploaded archive. */
       fileName: string;
@@ -3715,7 +3807,6 @@ export interface components {
       resolved: boolean;
       text?: string;
     };
-    /** @description Object mapping language tag to translation */
     ImportTranslationResolvableDto: {
       /**
        * @description Determines, how conflict is resolved.
@@ -3750,7 +3841,6 @@ export interface components {
       announcement?: components["schemas"]["AnnouncementDto"];
       authInfo?: components["schemas"]["AuthInfoModel"];
       eeSubscription?: components["schemas"]["InitialDataEeSubscriptionModel"];
-      hasCommunityContributions: boolean;
       languageTag?: string;
       preferredOrganization?: components["schemas"]["PrivateOrganizationModel"];
       qaCheckCategories?: components["schemas"]["QaCheckCategoryModel"][];
@@ -3787,43 +3877,7 @@ export interface components {
         | "QA_CHECK"
         | "NO_OP";
     };
-    JsonNode: {
-      array?: boolean;
-      bigDecimal?: boolean;
-      bigInteger?: boolean;
-      binary?: boolean;
-      boolean?: boolean;
-      container?: boolean;
-      double?: boolean;
-      embeddedValue?: boolean;
-      empty?: boolean;
-      float?: boolean;
-      floatingPointNumber?: boolean;
-      int?: boolean;
-      integralNumber?: boolean;
-      long?: boolean;
-      missingNode?: boolean;
-      /** @enum {string} */
-      nodeType?:
-        | "ARRAY"
-        | "BINARY"
-        | "BOOLEAN"
-        | "MISSING"
-        | "NULL"
-        | "NUMBER"
-        | "OBJECT"
-        | "POJO"
-        | "STRING";
-      null?: boolean;
-      number?: boolean;
-      object?: boolean;
-      pojo?: boolean;
-      short?: boolean;
-      string?: boolean;
-      /** @deprecated */
-      textual?: boolean;
-      valueNode?: boolean;
-    };
+    JsonNode: unknown;
     JwtAuthenticationResponse: {
       accessToken?: string;
       tokenType?: string;
@@ -3832,7 +3886,6 @@ export interface components {
       name: string;
       namespace?: string;
     };
-    /** @description Disabled languages */
     KeyDisabledLanguageModel: {
       /** Format: int64 */
       id: number;
@@ -3857,7 +3910,6 @@ export interface components {
        */
       namespace?: string;
     };
-    /** @description Exclude keys filtered by the provided key information */
     KeyId: {
       /**
        * Format: int64
@@ -3908,7 +3960,7 @@ export interface components {
        */
       branch?: string;
       /** @description Custom values of the key */
-      custom?: { [key: string]: { [key: string]: unknown } };
+      custom?: { [key: string]: unknown };
       /**
        * @description Description of key
        * @example This key is used on homepage. It's a label of sign up button.
@@ -3981,7 +4033,6 @@ export interface components {
       translation?: string;
       view?: components["schemas"]["KeySearchResultView"];
     };
-    /** @description Tasks related to this key */
     KeyTaskViewModel: {
       done: boolean;
       /** Format: int64 */
@@ -4019,7 +4070,7 @@ export interface components {
       /** @description Branch of the key */
       branch?: string;
       /** @description Custom values of the key */
-      custom: { [key: string]: { [key: string]: unknown } };
+      custom: { [key: string]: unknown };
       /**
        * @description Description of key
        * @example This key is used on homepage. It's a label of sign up button.
@@ -4230,6 +4281,7 @@ export interface components {
         | "AZURE"
         | "BAIDU"
         | "PROMPT";
+      /** @description Service info used for automated translating */
       primaryServiceInfo?: components["schemas"]["MtServiceInfo"];
       /**
        * Format: int64
@@ -4247,15 +4299,6 @@ export interface components {
       languageTag?: string;
       supportedServices: components["schemas"]["MtSupportedService"][];
     };
-    /**
-     * @description Maps the languages from imported files to languages existing in the Tolgee platform.
-     *
-     * Use this field only when your files contain multiple languages (e.g., XLIFF files).
-     *
-     * Otherwise, use the `languageTag` property of `fileMappings`.
-     *
-     * Example: In xliff files, there are `source-language` and `target-language` attributes defined on `file` element. Using this field you can map source and target values to languages stored in the Tolgee Platform.
-     */
     LanguageMapping: {
       /**
        * @description The language from the imported file.
@@ -4429,6 +4472,7 @@ export interface components {
         | "AZURE"
         | "BAIDU"
         | "PROMPT";
+      /** @description This service info will be used for automated translation */
       primaryServiceInfo?: components["schemas"]["MtServiceInfo"];
       /**
        * Format: int64
@@ -4452,7 +4496,7 @@ export interface components {
       targetLanguageIds: number[];
     };
     ModifiedEntityModel: {
-      description?: { [key: string]: { [key: string]: unknown } };
+      description?: { [key: string]: unknown };
       entityClass: string;
       /** Format: int64 */
       entityId: number;
@@ -4468,7 +4512,6 @@ export interface components {
       defaultEnabledForProject: boolean;
       enabled: boolean;
     };
-    /** @description Info about enabled services */
     MtServiceInfo: {
       /** @enum {string} */
       formality?: "FORMAL" | "INFORMAL" | "DEFAULT";
@@ -4579,10 +4622,7 @@ export interface components {
       type: "MEMBER" | "OWNER" | "MAINTAINER";
     };
     OrganizationInviteUserDto: {
-      /**
-       * Format: email
-       * @description Email to send invitation to
-       */
+      /** @description Email to send invitation to */
       email?: string;
       /** @description Name of invited user */
       name?: string;
@@ -4617,6 +4657,7 @@ export interface components {
       tag: string;
     };
     OrganizationModel: {
+      /** @example Links to avatar images */
       avatar?: components["schemas"]["Avatar"];
       basePermissions: components["schemas"]["PermissionModel"];
       /**
@@ -4655,6 +4696,12 @@ export interface components {
     PagedModelApiKeyModel: {
       _embedded?: {
         apiKeys?: components["schemas"]["ApiKeyModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelAppInstallModel: {
+      _embedded?: {
+        appInstalls?: components["schemas"]["AppInstallModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
     };
@@ -4697,12 +4744,6 @@ export interface components {
     PagedModelContentStorageModel: {
       _embedded?: {
         contentStorages?: components["schemas"]["ContentStorageModel"][];
-      };
-      page?: components["schemas"]["PageMetadata"];
-    };
-    PagedModelContributorModel: {
-      _embedded?: {
-        contributors?: components["schemas"]["ContributorModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
     };
@@ -4996,7 +5037,6 @@ export interface components {
         | "translations.view"
         | "translations.edit"
         | "translations.suggest"
-        | "translation-suggestions.manage"
         | "keys.edit"
         | "screenshots.upload"
         | "screenshots.delete"
@@ -5030,7 +5070,6 @@ export interface components {
         | "all.view"
         | "branch.management"
         | "branch.protected-modify"
-        | "organization-quotas.view"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -5048,14 +5087,6 @@ export interface components {
        * ]
        */
       suggestLanguageIds?: number[];
-      /**
-       * @description List of languages user can manage suggestions for. If null, managing suggestions for all languages is permitted.
-       * @example [
-       *   200001,
-       *   200004
-       * ]
-       */
-      suggestManageLanguageIds?: number[];
       /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example [
@@ -5102,7 +5133,6 @@ export interface components {
         | "translations.view"
         | "translations.edit"
         | "translations.suggest"
-        | "translation-suggestions.manage"
         | "keys.edit"
         | "screenshots.upload"
         | "screenshots.delete"
@@ -5136,7 +5166,6 @@ export interface components {
         | "all.view"
         | "branch.management"
         | "branch.protected-modify"
-        | "organization-quotas.view"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -5154,14 +5183,6 @@ export interface components {
        * ]
        */
       suggestLanguageIds?: number[];
-      /**
-       * @description List of languages user can manage suggestions for. If null, managing suggestions for all languages is permitted.
-       * @example [
-       *   200001,
-       *   200004
-       * ]
-       */
-      suggestManageLanguageIds?: number[];
       /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example [
@@ -5222,7 +5243,9 @@ export interface components {
       usage: components["schemas"]["UsageModel"];
     };
     PrivateOrganizationModel: {
+      /** @example Current active subscription info */
       activeCloudSubscription?: components["schemas"]["PublicCloudSubscriptionModel"];
+      /** @example Links to avatar images */
       avatar?: components["schemas"]["Avatar"];
       basePermissions: components["schemas"]["PermissionModel"];
       /**
@@ -5262,14 +5285,10 @@ export interface components {
       )[];
       /** Format: int64 */
       id: number;
-      /**
-       * @description Whether the user views the organization purely via public-project access
-       * @example false
-       */
-      limitedView: boolean;
       /** @example Beautiful organization */
       name: string;
       organizationModel?: components["schemas"]["OrganizationModel"];
+      /** @example Quick start data for current user */
       quickStart?: components["schemas"]["QuickStartModel"];
       /** @example btforg */
       slug: string;
@@ -5308,11 +5327,11 @@ export interface components {
     ProjectActivityModel: {
       author?: components["schemas"]["ProjectActivityAuthorModel"];
       counts?: { [key: string]: number };
-      meta?: { [key: string]: { [key: string]: unknown } };
+      meta?: { [key: string]: unknown };
       modifiedEntities?: {
         [key: string]: components["schemas"]["ModifiedEntityModel"][];
       };
-      params?: { [key: string]: unknown };
+      params?: unknown;
       /** Format: int64 */
       revisionId: number;
       /** Format: int64 */
@@ -5428,7 +5447,16 @@ export interface components {
        */
       description?: string;
     };
-    /** @description Project assignments with access settings. */
+    ProjectAppModel: {
+      appId: string;
+      baseUrl: string;
+      enabled: boolean;
+      /** Format: int64 */
+      id: number;
+      modules: components["schemas"]["AppManifestModules"];
+      name: string;
+      version: string;
+    };
     ProjectAssignmentDto: {
       /**
        * Format: int32
@@ -5444,6 +5472,12 @@ export interface components {
       readAccess: boolean;
       /** @description Whether the project can write to this TM */
       writeAccess: boolean;
+    };
+    ProjectDashboardPageModule: {
+      entry: string;
+      icon: string;
+      key: string;
+      title: string;
     };
     ProjectInvitationModel: {
       code?: string;
@@ -5473,10 +5507,7 @@ export interface components {
        * @description Id of invited agency
        */
       agencyId?: number;
-      /**
-       * Format: email
-       * @description Email to send invitation to
-       */
+      /** @description Email to send invitation to */
       email?: string;
       /**
        * @deprecated
@@ -5497,8 +5528,6 @@ export interface components {
       stateChangeLanguages?: number[];
       /** @description Languages user can suggest translation */
       suggestLanguages?: number[];
-      /** @description Languages user can manage suggestions for */
-      suggestManageLanguages?: number[];
       /** @description Languages user can translate to */
       translateLanguages?: number[];
       /** @enum {string} */
@@ -5521,6 +5550,10 @@ export interface components {
       computedPermission: components["schemas"]["ComputedPermissionModel"];
       defaultNamespace?: components["schemas"]["NamespaceModel"];
       description?: string;
+      /**
+       * @description Current user's direct permission
+       * @example MANAGE
+       */
       directPermission?: components["schemas"]["PermissionModel"];
       /** @description Whether to disable ICU placeholder visualization in the editor and it's support. */
       icuPlaceholders: boolean;
@@ -5530,8 +5563,6 @@ export interface components {
       organizationOwner?: components["schemas"]["SimpleOrganizationModel"];
       /** @enum {string} */
       organizationRole?: "MEMBER" | "OWNER" | "MAINTAINER";
-      /** @description Whether the project is public — discoverable and open to community suggestions */
-      public: boolean;
       slug?: string;
       /**
        * @description Suggestions for translations
@@ -5607,8 +5638,16 @@ export interface components {
     ProjectWithStatsModel: {
       avatar?: components["schemas"]["Avatar"];
       baseLanguage?: components["schemas"]["LanguageModel"];
+      /**
+       * @description Actual current user's permissions on this project. You can not sort data by this column!
+       * @example EDIT
+       */
       computedPermission: components["schemas"]["ComputedPermissionModel"];
       description?: string;
+      /**
+       * @description Current user's direct permission
+       * @example MANAGE
+       */
       directPermission?: components["schemas"]["PermissionModel"];
       /** @description Whether to disable ICU placeholder visualization in the editor and it's support. */
       icuPlaceholders: boolean;
@@ -5619,8 +5658,6 @@ export interface components {
       organizationOwner?: components["schemas"]["SimpleOrganizationModel"];
       /** @enum {string} */
       organizationRole?: "MEMBER" | "OWNER" | "MAINTAINER";
-      /** @description Whether the project is public — discoverable and open to community suggestions */
-      public: boolean;
       slug?: string;
       stats: components["schemas"]["ProjectStatistics"];
     };
@@ -5695,16 +5732,14 @@ export interface components {
     PromptVariableDto: {
       description?: string;
       name: string;
-      /** @description List of nested properties for this variable, allowing hierarchical structuring. */
       props?: components["schemas"]["PromptVariableDto"][];
       /** @enum {string} */
       type: "FRAGMENT" | "OBJECT" | "STRING";
       value?: string;
     };
-    /** @description Modified fields */
     PropertyModification: {
-      new?: { [key: string]: unknown };
-      old?: { [key: string]: unknown };
+      new?: unknown;
+      old?: unknown;
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -5750,7 +5785,6 @@ export interface components {
       /** @enum {string} */
       type: "PAY_AS_YOU_GO" | "FIXED";
     };
-    /** @example Current active subscription info */
     PublicCloudSubscriptionModel: {
       cancelAtPeriodEnd: boolean;
       /** @enum {string} */
@@ -5772,6 +5806,7 @@ export interface components {
     PublicConfigurationDTO: {
       allowRegistrations: boolean;
       appName: string;
+      appsEnabled: boolean;
       authMethods?: components["schemas"]["AuthMethodsDTO"];
       authentication: boolean;
       billing: components["schemas"]["PublicBillingConfigurationDTO"];
@@ -6137,7 +6172,6 @@ export interface components {
       /** Format: int32 */
       managementErrorRetrials: number;
     };
-    /** @example Quick start data for current user */
     QuickStartModel: {
       completedSteps: string[];
       finished: boolean;
@@ -6159,7 +6193,9 @@ export interface components {
        */
       expiresAt?: number;
     };
-    /** @description Keys in the document used as a context for machine translation. Keys in the same order as they appear in the document. The order is important! We are using it for graph distance calculation. */
+    RegisterAppRequest: {
+      manifestUrl: string;
+    };
     RelatedKeyDto: {
       branch?: string;
       keyName: string;
@@ -6179,7 +6215,6 @@ export interface components {
     };
     ResetPasswordRequest: {
       callbackUrl: string;
-      /** Format: email */
       email: string;
     };
     ResolveAllBranchMergeConflictsRequest: {
@@ -6235,6 +6270,9 @@ export interface components {
     S3ContentStorageConfigDto: {
       accessKey?: string;
       bucketName: string;
+      /** @enum {string} */
+      contentStorageType?: "S3" | "AZURE";
+      enabled?: boolean;
       endpoint: string;
       /** @description Specifies an optional subfolder structure within s3 bucket to which content will be stored */
       path: string;
@@ -6252,7 +6290,6 @@ export interface components {
       positions?: components["schemas"]["KeyInScreenshotPositionDto"][];
       text?: string;
     };
-    /** @description Screenshots of the key */
     ScreenshotModel: {
       /** Format: date-time */
       createdAt?: string;
@@ -6366,10 +6403,6 @@ export interface components {
        */
       description?: string;
     };
-    SetProjectPublicRequest: {
-      /** @description Whether the project should be public (discoverable and open to community suggestions) */
-      public: boolean;
-    };
     SetTranslationsResponseModel: {
       /**
        * Format: int64
@@ -6460,7 +6493,6 @@ export interface components {
     };
     SignUpDto: {
       callbackUrl?: string;
-      /** Format: email */
       email: string;
       invitationCode?: string;
       name: string;
@@ -6539,6 +6571,7 @@ export interface components {
       language: string;
     };
     SimpleOrganizationModel: {
+      /** @example Links to avatar images */
       avatar?: components["schemas"]["Avatar"];
       basePermissions: components["schemas"]["PermissionModel"];
       /** @example This is a beautiful organization full of beautiful and clever people */
@@ -6572,7 +6605,6 @@ export interface components {
       /** @enum {string} */
       type: "PROJECT" | "SHARED";
     };
-    /** @description User who created the comment */
     SimpleUserAccountModel: {
       avatar?: components["schemas"]["Avatar"];
       deleted: boolean;
@@ -6638,7 +6670,6 @@ export interface components {
       /** @description Keys created by this import will be tagged with these tags. It add tags only to new keys. The keys that already exist will not be tagged. */
       tagNewKeys: string[];
     };
-    /** @description List of keys to import */
     SingleStepImportResolvableItemRequest: {
       /**
        * @description Key name to set translations for
@@ -6675,7 +6706,6 @@ export interface components {
        */
       overrideMode?: "RECOMMENDED" | "ALL";
     };
-    /** @description Object mapping language tag to translation */
     SingleStepImportResolvableTranslationRequest: {
       /**
        * @description
@@ -7092,50 +7122,22 @@ export interface components {
         | "plan_migration_not_found"
         | "plan_has_migrations"
         | "source_and_target_plan_must_be_different"
-        | "project_import_version_mismatch"
-        | "project_import_missing_project_json"
-        | "project_import_corrupt_archive";
-      params?: { [key: string]: unknown }[];
+        | "app_manifest_fetch_failed"
+        | "app_manifest_invalid"
+        | "app_already_installed"
+        | "app_install_not_found"
+        | "invalid_app_credentials"
+        | "app_acting_as_user_not_project_member"
+        | "app_unsupported_grant_type"
+        | "app_self_registration_disabled"
+        | "invalid_app_registration_secret"
+        | "organization_has_no_owner"
+        | "app_not_available_for_organization"
+        | "initial_user_not_found";
+      params?: unknown[];
       success: boolean;
     };
     StreamingResponseBody: unknown;
-    StringNode: {
-      array?: boolean;
-      bigDecimal?: boolean;
-      bigInteger?: boolean;
-      binary?: boolean;
-      boolean?: boolean;
-      container?: boolean;
-      double?: boolean;
-      embeddedValue?: boolean;
-      empty?: boolean;
-      float?: boolean;
-      floatingPointNumber?: boolean;
-      int?: boolean;
-      integralNumber?: boolean;
-      long?: boolean;
-      missingNode?: boolean;
-      /** @enum {string} */
-      nodeType?:
-        | "ARRAY"
-        | "BINARY"
-        | "BOOLEAN"
-        | "MISSING"
-        | "NULL"
-        | "NUMBER"
-        | "OBJECT"
-        | "POJO"
-        | "STRING";
-      null?: boolean;
-      number?: boolean;
-      object?: boolean;
-      pojo?: boolean;
-      short?: boolean;
-      string?: boolean;
-      /** @deprecated */
-      textual?: boolean;
-      valueNode?: boolean;
-    };
     SuggestRequestDto: {
       /** @description Text value of base translation. Useful, when base translation is not stored yet. */
       baseText?: string;
@@ -7280,6 +7282,7 @@ export interface components {
       /** @enum {string} */
       type: "TRANSLATE" | "REVIEW";
     };
+    TextNode: unknown;
     TmAssignedProjectModel: {
       /** Format: int32 */
       penalty?: number;
@@ -7312,6 +7315,7 @@ export interface components {
       text: string;
     };
     TranslationCommentModel: {
+      /** @description User who created the comment */
       author: components["schemas"]["SimpleUserAccountModel"];
       /**
        * Format: date-time
@@ -7346,6 +7350,7 @@ export interface components {
       text: string;
     };
     TranslationHistoryModel: {
+      /** @description Author of the change */
       author?: components["schemas"]["SimpleUserAccountModel"];
       /** @description Modified fields */
       modifications?: {
@@ -7359,19 +7364,6 @@ export interface components {
        */
       timestamp: number;
     };
-    /**
-     * @description Results provided by enabled services.
-     * @example {
-     *   "GOOGLE": {
-     *     "output": "This was translated by Google",
-     *     "contextDescription": null
-     *   },
-     *   "TOLGEE": {
-     *     "output": "This was translated by Tolgee Translator",
-     *     "contextDescription": "This is an example in swagger"
-     *   }
-     * }
-     */
     TranslationItemModel: {
       contextDescription?: string;
       output: string;
@@ -7466,7 +7458,6 @@ export interface components {
       /** @description When true, only translations in REVIEWED state contribute to this TM. */
       writeOnlyReviewed: boolean;
     };
-    /** @description Cells of this row, already filtered by the requested languages */
     TranslationMemoryRowCellModel: {
       /**
        * Format: int64
@@ -7583,7 +7574,6 @@ export interface components {
       /** Format: date-time */
       updatedAt: string;
     };
-    /** @description First suggestion */
     TranslationSuggestionSimpleModel: {
       author: components["schemas"]["SimpleUserAccountModel"];
       /** Format: int64 */
@@ -7593,18 +7583,6 @@ export interface components {
       state: "ACTIVE" | "ACCEPTED" | "DECLINED";
       translation?: string;
     };
-    /**
-     * @description Translations object
-     * @example
-     *     {
-     *       "en": {
-     *         "id": 100000003,
-     *         "text": "This is super translation!"
-     *         "state": "TRANSLATED",
-     *         "commentCount": 1
-     *       }
-     *     }
-     */
     TranslationViewModel: {
       /**
        * Format: int64
@@ -7673,6 +7651,7 @@ export interface components {
        * @description When the key was deleted
        */
       deletedAt: string;
+      /** @description User who deleted the key */
       deletedBy?: components["schemas"]["SimpleUserAccountModel"];
       /** @description Description of the key */
       description?: string;
@@ -7839,6 +7818,10 @@ export interface components {
     };
     UserAccountInProjectModel: {
       avatar?: components["schemas"]["Avatar"];
+      /**
+       * @description Actual user's permissions on selected project. You can not sort data by this column!
+       * @example EDIT
+       */
       computedPermission: components["schemas"]["ComputedPermissionModel"];
       directPermission?: components["schemas"]["PermissionWithAgencyModel"];
       /** Format: int64 */
@@ -7884,7 +7867,7 @@ export interface components {
     };
     UserStorageResponse: {
       /** @description The data stored for the field */
-      data?: { [key: string]: unknown };
+      data?: unknown;
     };
     UserTotpDisableRequestDto: {
       password: string;
@@ -7966,33 +7949,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -8009,33 +7984,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -8068,33 +8035,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -8110,33 +8069,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -8152,33 +8103,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -8204,33 +8147,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -8242,33 +8177,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -8286,33 +8213,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -8335,33 +8254,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -8378,33 +8289,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -8425,39 +8328,31 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["StringNode"];
+        "application/json": components["schemas"]["TextNode"];
       };
     };
   };
@@ -8479,33 +8374,292 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
+        };
+      };
+    };
+  };
+  /** Returns the apps registered at server level — those belonging to no organization. The client secret is never disclosed here. */
+  list_12: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelAppInstallModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  /** Removes the native app from the server: its availability for every organization, its enablement in every project and the install itself. Its client credentials stop working. */
+  deregister: {
+    parameters: {
+      path: {
+        installId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  /** Returns the organizations allowed to enable this native app in their projects. */
+  listOrganizations: {
+    parameters: {
+      path: {
+        installId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelAppAvailableOrganizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  /** Allows every organization — including organizations created later — to enable this native app. Explicit per-organization grants are kept, so revoking this falls back to them. Idempotent. */
+  grantToAllOrganizations: {
+    parameters: {
+      path: {
+        installId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  /** Drops the blanket availability and disables the app in every project whose organization has no explicit grant. Idempotent. */
+  revokeFromAllOrganizations: {
+    parameters: {
+      path: {
+        installId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  /** Allows the organization's projects to enable this native app. Idempotent. */
+  grant: {
+    parameters: {
+      path: {
+        installId: number;
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  /** Revokes the explicit grant and disables the app in every project of that organization — unless the app is available to all organizations, which keeps covering it. Idempotent — no-op when it was not available. */
+  revoke: {
+    parameters: {
+      path: {
+        installId: number;
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
         };
       };
     };
@@ -8522,33 +8676,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -8575,33 +8721,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -8618,137 +8756,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Exports the whole project (content, branches, tasks, screenshots, settings) as a self-contained zip that can be imported onto a project on another instance running the same Tolgee version. */
-  exportProject: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["StreamingResponseBody"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Wipes ALL in-scope content of this project and replaces it with the uploaded export zip (mirror / wipe-and-replace). The zip must come from an instance running the same Tolgee version. Users are matched by username (case-insensitive); content authored by a user not present on this instance is attributed to the importing admin. The project must be quiescent during the import — concurrent edits to it are not supported. Setting `ignoreVersion` bypasses the version check — unsupported: a cross-version import may complete yet silently corrupt the project's data. */
-  importProject: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-      query: {
-        /** Bypass the schema-version check. Unsupported; intended only for cross-version admin recovery — the import may complete yet silently corrupt data. */
-        ignoreVersion?: boolean;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "multipart/form-data": {
-          /** Format: binary */
-          file: string;
+          "application/json": string;
         };
       };
     };
@@ -8775,33 +8801,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -8818,33 +8836,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -8862,33 +8872,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -8906,33 +8908,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -8954,33 +8948,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -8999,33 +8985,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -9042,33 +9020,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -9081,33 +9051,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -9129,33 +9091,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -9172,33 +9126,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -9219,33 +9165,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -9262,33 +9200,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -9311,33 +9241,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -9358,33 +9280,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -9406,33 +9320,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -9453,33 +9359,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -9506,33 +9404,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -9548,33 +9438,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -9586,33 +9468,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -9628,33 +9502,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -9670,33 +9536,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -9713,33 +9571,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -9755,33 +9605,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -9797,33 +9639,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -9840,33 +9674,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -9888,33 +9714,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -9927,33 +9745,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -9969,33 +9779,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -10016,33 +9818,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -10068,33 +9862,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -10111,33 +9897,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -10154,33 +9932,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -10197,33 +9967,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -10260,33 +10022,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -10303,33 +10057,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -10342,33 +10088,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -10385,33 +10123,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -10431,7 +10161,7 @@ export interface operations {
         size?: number;
         /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
-        filterCurrentUserOwner?: boolean;
+        filterCurrentUserOwner: boolean;
         search?: string;
       };
     };
@@ -10445,33 +10175,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -10487,33 +10209,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -10539,33 +10253,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -10586,33 +10292,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -10635,33 +10333,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -10682,33 +10372,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -10737,33 +10419,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -10785,33 +10459,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -10834,33 +10500,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -10897,33 +10555,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -10954,33 +10604,279 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
+        };
+      };
+    };
+  };
+  /** Returns all apps registered for the organization. */
+  list_4: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelAppInstallModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  /** Fetches the manifest at the given URL and registers the app for the organization. */
+  register: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AppInstallModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RegisterAppRequest"];
+      };
+    };
+  };
+  /** Fetches the manifest at the given URL and returns its parsed contents (including the requested scopes) without persisting anything. Used by the registration UI to show a consent prompt before installing. */
+  preview: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AppManifestPreviewModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RegisterAppRequest"];
+      };
+    };
+  };
+  /** Removes the registered app from the organization. */
+  remove: {
+    parameters: {
+      path: {
+        organizationId: number;
+        installId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  /** Repoints an existing install at a new manifest URL and re-fetches the manifest from there. The new manifest must declare the same `id` as the original. Useful for development: a tunnel URL that changes on every restart can be swapped in without re-installing the app. */
+  updateManifestUrl: {
+    parameters: {
+      path: {
+        organizationId: number;
+        installId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AppInstallModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RegisterAppRequest"];
+      };
+    };
+  };
+  /** Re-fetches the manifest from the registered URL and updates the stored snapshot. */
+  refresh: {
+    parameters: {
+      path: {
+        organizationId: number;
+        installId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AppInstallModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
         };
       };
     };
@@ -11012,33 +10908,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -11068,33 +10956,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -11115,33 +10995,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -11176,33 +11048,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -11224,33 +11088,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -11272,33 +11128,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -11321,33 +11169,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -11369,33 +11209,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -11417,33 +11249,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -11468,33 +11292,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -11524,33 +11340,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -11582,33 +11390,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -11630,33 +11430,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -11679,33 +11471,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -11733,33 +11517,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -11782,33 +11558,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -11832,33 +11600,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -11881,33 +11641,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -11936,33 +11688,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -11988,33 +11732,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -12046,33 +11782,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -12093,33 +11821,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -12151,33 +11871,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -12198,33 +11910,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -12245,33 +11949,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -12298,33 +11994,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -12345,33 +12033,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -12393,33 +12073,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -12442,33 +12114,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -12490,33 +12154,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -12547,33 +12203,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -12595,33 +12243,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -12646,33 +12286,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -12693,33 +12325,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -12746,33 +12370,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -12794,33 +12410,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -12839,33 +12447,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -12886,33 +12486,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -12933,33 +12525,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -12994,33 +12578,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -13041,33 +12617,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -13103,33 +12671,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -13154,33 +12714,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -13202,33 +12754,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -13250,33 +12794,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -13299,33 +12835,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -13347,33 +12875,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -13406,33 +12926,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -13454,33 +12966,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -13504,33 +13008,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -13561,33 +13057,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -13610,33 +13098,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -13664,33 +13144,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -13713,33 +13185,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -13763,33 +13227,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -13809,33 +13265,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -13857,33 +13305,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -13908,33 +13348,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -13961,33 +13393,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -14013,33 +13437,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -14058,33 +13474,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -14103,33 +13511,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -14155,33 +13555,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -14218,33 +13610,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -14275,33 +13659,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -14327,33 +13703,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -14369,33 +13737,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -14417,33 +13777,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -14464,33 +13816,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -14512,33 +13856,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -14561,33 +13897,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -14609,33 +13937,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -14657,33 +13977,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -14717,33 +14029,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -14760,33 +14064,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -14819,33 +14115,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -14866,33 +14154,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -14913,33 +14193,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -14961,33 +14233,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -15017,33 +14281,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -15068,33 +14324,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -15127,33 +14375,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -15174,33 +14414,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -15226,33 +14458,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -15273,33 +14497,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -15328,33 +14544,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -15380,33 +14588,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -15431,33 +14631,184 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
+        };
+      };
+    };
+  };
+  /** Returns all apps registered in the project's organization, each annotated with whether it is enabled for this project. Requires project.edit: it discloses the organization's whole app inventory, including apps not enabled for this project. */
+  list_11: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelProjectAppModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  /** Enables the given app install for this project. Idempotent. */
+  enable: {
+    parameters: {
+      path: {
+        projectId: number;
+        installId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ProjectAppModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  /** Disables the given app for this project. Idempotent — no-op if it wasn't enabled. */
+  disable: {
+    parameters: {
+      path: {
+        projectId: number;
+        installId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  /** Issues a short-lived JWT bound to (install, project, current user) that the dashboard iframe uses to call Tolgee's REST API on behalf of the user. Returns 404 if the install is not enabled for this project. */
+  mintToken: {
+    parameters: {
+      path: {
+        projectId: number;
+        installId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AppTokenModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
         };
       };
     };
@@ -15479,33 +14830,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -15527,33 +14870,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -15579,33 +14914,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -15634,38 +14961,30 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
   };
-  list_4: {
+  list_5: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -15689,33 +15008,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -15737,33 +15048,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -15782,33 +15085,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -15826,33 +15121,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -15887,33 +15174,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -15934,33 +15213,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -15989,33 +15260,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -16044,33 +15307,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -16091,33 +15346,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -16140,33 +15387,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -16184,33 +15423,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -16246,33 +15477,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -16295,33 +15518,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -16351,33 +15566,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -16399,33 +15606,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -16447,33 +15646,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -16491,33 +15682,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -16540,33 +15723,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -16593,33 +15768,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -16642,33 +15809,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -16690,33 +15849,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -16750,33 +15901,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -16797,33 +15940,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -16850,33 +15985,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -16898,33 +16025,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -16948,33 +16067,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -16992,33 +16103,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -17047,33 +16150,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -17094,33 +16189,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -17146,33 +16233,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -17199,33 +16278,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -17247,33 +16318,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -17296,33 +16359,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -17345,95 +16400,31 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
     requestBody: {
       content: {
         "application/json": components["schemas"]["ContentStorageRequest"];
-      };
-    };
-  };
-  /** Returns users who have activity on the project but are not currently its members. Deleted and disabled users are excluded. Sortable by lastContributionAt and firstContributionAt only; any other sort property falls back to lastContributionAt descending. */
-  getContributors: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-      query: {
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["PagedModelContributorModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
       };
     };
   };
@@ -17454,33 +16445,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -17513,7 +16496,7 @@ export interface operations {
          */
         languages?: string[];
         /** Format to export to */
-        format?:
+        format:
           | "JSON"
           | "JSON_TOLGEE"
           | "XLIFF"
@@ -17572,7 +16555,7 @@ export interface operations {
          *
          * This is possible only when single language is exported. Otherwise it returns "400 - Bad Request" response.
          */
-        zip?: boolean;
+        zip: boolean;
         /**
          * Message format to be used for export.
          *
@@ -17611,7 +16594,7 @@ export interface operations {
          *
          * e.g. Key hello[0] will be exported as {"hello": ["..."]}
          */
-        supportArrays?: boolean;
+        supportArrays: boolean;
         /**
          * If true, HTML tags are escaped in the exported file. (Supported in the XLIFF format only).
          *
@@ -17642,33 +16625,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -17716,33 +16691,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -17768,33 +16735,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -17815,33 +16774,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -17874,33 +16825,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -17928,33 +16871,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -17976,33 +16911,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -18024,33 +16951,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -18077,33 +16996,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -18126,33 +17037,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -18179,33 +17082,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -18236,33 +17131,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -18281,33 +17168,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -18343,33 +17222,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -18388,33 +17259,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -18434,33 +17297,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -18483,33 +17338,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -18528,33 +17375,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -18573,33 +17412,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -18618,33 +17449,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -18681,33 +17504,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -18727,33 +17542,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -18773,33 +17580,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -18820,33 +17619,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -18867,33 +17658,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -18928,33 +17711,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -18975,33 +17750,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -19024,33 +17791,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -19076,33 +17835,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -19128,33 +17879,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -19187,33 +17930,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -19243,33 +17978,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -19313,33 +18040,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -19563,38 +18282,30 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
   };
-  list_8: {
+  list_9: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -19818,33 +18529,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -19868,33 +18571,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -20117,33 +18812,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -20161,33 +18848,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -20209,33 +18888,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -20253,33 +18924,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -20301,33 +18964,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -20349,33 +19004,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -20402,33 +19049,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -20451,33 +19090,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -20505,33 +19136,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -20554,33 +19177,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -20618,33 +19233,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -20666,33 +19273,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -20714,33 +19313,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -20768,33 +19359,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -20817,33 +19400,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -20868,33 +19443,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -20924,33 +19491,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -20971,33 +19530,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -21026,33 +19577,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -21074,33 +19617,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -21123,33 +19658,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -21170,33 +19697,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -21231,33 +19750,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -21278,33 +19789,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -21331,33 +19834,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -21379,33 +19874,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -21428,33 +19915,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -21476,33 +19955,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -21540,33 +20011,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -21589,33 +20052,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -21625,6 +20080,7 @@ export interface operations {
       };
     };
   };
+  /** User can only delete suggestion created by them */
   deleteSuggestion: {
     parameters: {
       path: {
@@ -21640,33 +20096,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -21693,33 +20141,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -21743,33 +20183,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -21793,33 +20225,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -21836,33 +20260,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -21884,33 +20300,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -21932,33 +20340,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -21979,33 +20379,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -22026,33 +20418,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -22075,33 +20459,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -22131,33 +20507,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -22180,33 +20548,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -22236,33 +20596,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -22284,33 +20636,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -22336,33 +20680,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -22383,33 +20719,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -22444,33 +20772,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -22491,33 +20811,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -22543,33 +20855,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -22594,33 +20898,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -22641,33 +20937,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -22694,33 +20982,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -22742,33 +21022,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -22791,87 +21063,26 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
-      };
-    };
-  };
-  /** Marks the project as public or private. Only the organization owner or a server admin can change this. */
-  setProjectPublic: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["ProjectModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SetProjectPublicRequest"];
       };
     };
   };
@@ -22891,33 +21102,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -22938,33 +21141,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -22990,33 +21185,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -23033,33 +21220,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -23085,33 +21264,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -23133,33 +21304,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -23181,33 +21344,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -23230,33 +21385,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -23274,33 +21421,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -23327,33 +21466,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -23375,33 +21506,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -23430,33 +21553,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -23482,33 +21597,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -23534,33 +21641,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -23587,33 +21686,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -23640,33 +21731,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -23692,33 +21775,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -23744,33 +21819,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -23797,33 +21864,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -23850,33 +21909,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -23902,33 +21953,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -23954,33 +21997,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -24006,33 +22041,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -24058,33 +22085,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -24110,33 +22129,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -24162,33 +22173,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -24214,33 +22217,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -24269,33 +22264,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -24316,33 +22303,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -24367,33 +22346,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -24415,33 +22386,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -24468,33 +22431,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -24529,33 +22484,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -24580,33 +22527,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -24641,33 +22580,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -24723,33 +22654,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -24757,14 +22680,12 @@ export interface operations {
   createTask: {
     parameters: {
       query: {
-        /** Include keys with translation in certain states */
         filterState?: (
           | "UNTRANSLATED"
           | "TRANSLATED"
           | "REVIEWED"
           | "DISABLED"
         )[];
-        /** Include keys where translation is outdated */
         filterOutdated?: boolean;
       };
       path: {
@@ -24781,33 +22702,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -24820,14 +22733,12 @@ export interface operations {
   calculateScope: {
     parameters: {
       query: {
-        /** Include keys with translation in certain states */
         filterState?: (
           | "UNTRANSLATED"
           | "TRANSLATED"
           | "REVIEWED"
           | "DISABLED"
         )[];
-        /** Include keys where translation is outdated */
         filterOutdated?: boolean;
       };
       path: {
@@ -24844,33 +22755,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -24883,14 +22786,12 @@ export interface operations {
   createTasks: {
     parameters: {
       query: {
-        /** Include keys with translation in certain states */
         filterState?: (
           | "UNTRANSLATED"
           | "TRANSLATED"
           | "REVIEWED"
           | "DISABLED"
         )[];
-        /** Include keys where translation is outdated */
         filterOutdated?: boolean;
       };
       path: {
@@ -24903,33 +22804,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -24974,33 +22867,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -25022,33 +22907,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -25070,33 +22947,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -25124,33 +22993,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -25172,33 +23033,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -25220,33 +23073,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -25268,33 +23113,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -25316,33 +23153,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -25360,33 +23189,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -25415,33 +23236,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -25469,33 +23282,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -25517,33 +23322,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -25566,33 +23363,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -25617,33 +23406,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -25662,39 +23443,31 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
   };
   /** Always readable. When the TRANSLATION_MEMORY feature is not enabled for the organization, only the project-type assignment (if any) is returned so the settings page can still show the row that already drives in-project suggestions. */
-  list_6: {
+  list_7: {
     parameters: {
       path: {
         projectId: number;
@@ -25710,33 +23483,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -25754,33 +23519,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -25807,33 +23564,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -25860,33 +23609,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -25910,33 +23651,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -26169,33 +23902,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -26217,33 +23942,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -26270,33 +23987,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -26323,33 +24032,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -26375,33 +24076,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -26630,33 +24323,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -26700,33 +24385,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -26757,33 +24434,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -26805,33 +24474,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -26859,33 +24520,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -26908,33 +24561,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -26958,33 +24603,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -27008,33 +24645,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -27057,33 +24686,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -27114,33 +24735,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -27163,33 +24776,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -27208,33 +24813,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -27256,33 +24853,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -27300,33 +24889,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -27349,33 +24930,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -27399,33 +24972,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -27444,33 +25009,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -27494,33 +25051,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -27543,33 +25092,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -27591,33 +25132,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -27654,33 +25187,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -27698,33 +25223,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -27743,33 +25260,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -27789,7 +25298,6 @@ export interface operations {
         viewLanguages?: number[];
         stateChangeLanguages?: number[];
         suggestLanguages?: number[];
-        suggestManageLanguages?: number[];
       };
     };
     responses: {
@@ -27798,33 +25306,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -27848,7 +25348,6 @@ export interface operations {
         viewLanguages?: number[];
         stateChangeLanguages?: number[];
         suggestLanguages?: number[];
-        suggestManageLanguages?: number[];
       };
     };
     responses: {
@@ -27857,33 +25356,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -27912,33 +25403,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -27959,33 +25442,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -28012,33 +25487,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -28060,33 +25527,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -28109,33 +25568,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -28158,34 +25609,111 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
+      };
+    };
+  };
+  /** Registers the app described by the manifest, without a signed-in user. Requires the `X-Tolgee-App-Registration-Secret` header to match `tolgee.apps.registration-secret`. With an `organizationSlug` the app is installed into that organization; without one it is registered as a native (server-level) app that a server admin then makes available to organizations. Re-running it for an already-registered app repoints it at the new manifest URL; the one-time client secret is returned only when the install is first created. */
+  selfRegister: {
+    parameters: {
+      header: {
+        "X-Tolgee-App-Registration-Secret"?: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AppInstallModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AppSelfRegisterRequest"];
+      };
+    };
+  };
+  /** OAuth 2.0 client-credentials grant. Returns a short-lived install-context access token the app's backend uses to call Tolgee's REST API as the install. */
+  token: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AppAccessTokenModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AppClientCredentialsRequest"];
       };
     };
   };
@@ -28196,33 +25724,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -28239,33 +25759,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -28287,33 +25799,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -28329,33 +25833,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -28372,33 +25868,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -28419,88 +25907,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Returns all public projects (including statistics), discoverable by anyone — no authentication required */
-  getAllPublicWithStatistics: {
-    parameters: {
-      query: {
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-        search?: string;
-        filterContributed?: boolean;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["PagedModelProjectWithStatsModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -28521,33 +25946,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -28562,7 +25979,6 @@ export interface operations {
               | "translations.view"
               | "translations.edit"
               | "translations.suggest"
-              | "translation-suggestions.manage"
               | "keys.edit"
               | "screenshots.upload"
               | "screenshots.delete"
@@ -28596,7 +26012,6 @@ export interface operations {
               | "all.view"
               | "branch.management"
               | "branch.protected-modify"
-              | "organization-quotas.view"
             )[];
           };
         };
@@ -28604,33 +26019,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -28655,33 +26062,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -28713,33 +26112,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -28763,33 +26154,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -28816,33 +26199,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -28864,33 +26239,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -28912,33 +26279,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -28957,33 +26316,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -29012,33 +26363,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -29054,33 +26397,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -29101,33 +26436,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -29153,33 +26480,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -29200,33 +26519,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -29243,33 +26554,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -29286,33 +26589,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -29333,33 +26628,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -29376,33 +26663,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -29418,33 +26697,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -29461,33 +26732,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -29504,33 +26767,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -29551,33 +26806,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -29594,33 +26841,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -29678,33 +26917,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -29720,33 +26951,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -29770,33 +26993,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -29813,33 +27028,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -29863,33 +27070,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -29906,33 +27105,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -29954,33 +27145,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -30002,33 +27185,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -30050,33 +27225,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -30094,33 +27261,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -30137,33 +27296,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -30182,33 +27333,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };

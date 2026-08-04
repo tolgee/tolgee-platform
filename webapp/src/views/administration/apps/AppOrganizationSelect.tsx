@@ -12,16 +12,26 @@ export type SelectableOrganization = {
   name: string;
 };
 
+const ALL_ORGANIZATIONS_OPTION = { kind: 'all' } as const;
+
+type Option =
+  | typeof ALL_ORGANIZATIONS_OPTION
+  | ({ kind: 'organization' } & SelectableOrganization);
+
 type Props = {
   excludedIds: number[];
   disabled?: boolean;
+  allOptionVisible?: boolean;
   onSelect: (organization: SelectableOrganization) => void;
+  onSelectAll: () => void;
 };
 
 export const AppOrganizationSelect = ({
   excludedIds,
   disabled,
+  allOptionVisible,
   onSelect,
+  onSelectAll,
 }: Props) => {
   const { t } = useTranslate();
   const [search, setSearch] = useState('');
@@ -42,15 +52,27 @@ export const AppOrganizationSelect = ({
   });
 
   const excluded = new Set(excludedIds);
-  const options = (
+  const organizationOptions: Option[] = (
     organizationsLoadable.data?._embedded?.organizations ?? []
-  ).filter((organization) => !excluded.has(organization.id));
-
-  const getLabel = (organization: SelectableOrganization) =>
-    t('administration_apps_organization_option', '{name} (id: {id})', {
+  )
+    .filter((organization) => !excluded.has(organization.id))
+    .map((organization) => ({
+      kind: 'organization',
+      id: organization.id,
       name: organization.name,
-      id: String(organization.id),
-    });
+    }));
+
+  const options: Option[] = allOptionVisible
+    ? [ALL_ORGANIZATIONS_OPTION, ...organizationOptions]
+    : organizationOptions;
+
+  const getLabel = (option: Option) =>
+    option.kind === 'all'
+      ? t('administration_apps_organization_option_all', 'All organizations')
+      : t('administration_apps_organization_option', '{name} (id: {id})', {
+          name: option.name,
+          id: String(option.id),
+        });
 
   return (
     <Autocomplete
@@ -62,23 +84,38 @@ export const AppOrganizationSelect = ({
       filterOptions={(items) => items}
       value={null}
       onChange={(_, newValue) => {
-        if (newValue) {
-          onSelect({ id: newValue.id, name: newValue.name });
-          setSearch('');
+        if (!newValue) {
+          return;
         }
+        if (newValue.kind === 'all') {
+          onSelectAll();
+        } else {
+          onSelect({ id: newValue.id, name: newValue.name });
+        }
+        setSearch('');
       }}
       inputValue={search}
       onInputChange={(_, value) => setSearch(value)}
-      renderOption={(props, option) => (
-        <li
-          {...props}
-          key={option.id}
-          data-cy="administration-apps-organization-option"
-          data-cy-organization-id={option.id}
-        >
-          {getLabel(option)}
-        </li>
-      )}
+      renderOption={(props, option) =>
+        option.kind === 'all' ? (
+          <li
+            {...props}
+            key="all"
+            data-cy="administration-apps-organization-option-all"
+          >
+            {getLabel(option)}
+          </li>
+        ) : (
+          <li
+            {...props}
+            key={option.id}
+            data-cy="administration-apps-organization-option"
+            data-cy-organization-id={option.id}
+          >
+            {getLabel(option)}
+          </li>
+        )
+      }
       renderInput={(params) => (
         <TextField
           {...params}

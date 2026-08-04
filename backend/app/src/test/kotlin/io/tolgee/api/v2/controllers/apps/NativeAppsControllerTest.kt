@@ -1,5 +1,6 @@
 package io.tolgee.api.v2.controllers.apps
 
+import io.tolgee.development.testDataBuilder.data.LateAppsOrganizationTestData
 import io.tolgee.development.testDataBuilder.data.NativeAppsTestData
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
@@ -37,6 +38,8 @@ class NativeAppsControllerTest : AuthorizedControllerTest() {
 
   lateinit var testData: NativeAppsTestData
 
+  var lateTestData: LateAppsOrganizationTestData? = null
+
   @BeforeEach
   fun setup() {
     testData = NativeAppsTestData()
@@ -48,6 +51,8 @@ class NativeAppsControllerTest : AuthorizedControllerTest() {
   @AfterEach
   fun cleanup() {
     AppsTestFixtures.removeNativeInstalls(appInstallService)
+    lateTestData?.let { testDataService.cleanTestData(it.root) }
+    lateTestData = null
     testDataService.cleanTestData(testData.root)
   }
 
@@ -138,6 +143,9 @@ class NativeAppsControllerTest : AuthorizedControllerTest() {
     performAuthGet("${appsUrl(install)}/organizations").andIsForbidden
     performAuthPut(organizationUrl(install), null).andIsForbidden
     performAuthDelete(organizationUrl(install)).andIsForbidden
+    performAuthPut(allOrganizationsUrl(install), null).andIsForbidden
+    performAuthDelete(allOrganizationsUrl(install)).andIsForbidden
+    performAuthDelete(appsUrl(install)).andIsForbidden
   }
 
   @Test
@@ -232,6 +240,168 @@ class NativeAppsControllerTest : AuthorizedControllerTest() {
     appAvailabilityService.listNativeInstallsForOrganization(testData.organization.id).assert.isEmpty()
   }
 
+  @Test
+  fun `a project can enable a native app made available to all organizations without an explicit grant`() {
+    val install = createNativeInstall()
+
+    performAuthPut(allOrganizationsUrl(install), null).andIsOk
+
+    appAvailabilityService.listOrganizations(install.id).assert.isEmpty()
+    userAccount = testData.user
+    performAuthPut("${projectAppsUrl()}/${install.id}", null).andIsOk.andAssertThatJson {
+      node("appId").isEqualTo("test-app")
+      node("enabled").isEqualTo(true)
+    }
+    appEnablementService.isEnabledForProject(testData.project.id, install.id).assert.isTrue()
+  }
+
+  @Test
+  fun `the project listing shows a native app made available to all organizations`() {
+    val install = createNativeInstall()
+    performAuthPut(allOrganizationsUrl(install), null).andIsOk
+    userAccount = testData.user
+
+    performAuthGet(projectAppsUrl()).andIsOk.andAssertThatJson {
+      node("_embedded.projectApps").isArray.hasSize(1)
+      node("_embedded.projectApps[0].id").isEqualTo(install.id)
+    }
+  }
+
+  @Test
+  fun `the admin listing exposes the all-organizations flag`() {
+    val install = createNativeInstall()
+
+    performAuthGet("/v2/administration/apps").andIsOk.andAssertThatJson {
+      node("_embedded.appInstalls[0].availableToAllOrganizations").isEqualTo(false)
+    }
+
+    performAuthPut(allOrganizationsUrl(install), null).andIsOk
+
+    performAuthGet("/v2/administration/apps").andIsOk.andAssertThatJson {
+      node("_embedded.appInstalls[0].availableToAllOrganizations").isEqualTo(true)
+    }
+  }
+
+  @Test
+  fun `an organization created after the flag was set is covered as well`() {
+    val install = createNativeInstall()
+    performAuthPut(allOrganizationsUrl(install), null).andIsOk
+
+    lateTestData = LateAppsOrganizationTestData()
+    testDataService.saveTestData(lateTestData!!.root)
+    val late = lateTestData!!
+
+    val available = appAvailabilityService.listNativeInstallsForOrganization(late.organization.id)
+    available.map { it.id }.assert.containsExactly(install.id)
+    userAccount = late.user
+    performAuthPut("/v2/projects/${late.project.id}/apps/${install.id}", null).andIsOk
+    appEnablementService.isEnabledForProject(late.project.id, install.id).assert.isTrue()
+  }
+
+  @Test
+  fun `granting to all organizations is idempotent and keeps explicit grants intact`() {
+    val install = createNativeInstall()
+    grantAvailability(install)
+
+    performAuthPut(allOrganizationsUrl(install), null).andIsOk
+    performAuthPut(allOrganizationsUrl(install), null).andIsOk
+
+    appAvailabilityService.listOrganizations(install.id).assert.hasSize(1)
+    nativeInstall(install).availableToAllOrganizations.assert.isTrue()
+  }
+
+  @Test
+  fun `revoking from all organizations is idempotent`() {
+    val install = createNativeInstall()
+
+    performAuthDelete(allOrganizationsUrl(install)).andIsOk
+    performAuthPut(allOrganizationsUrl(install), null).andIsOk
+    performAuthDelete(allOrganizationsUrl(install)).andIsOk
+    performAuthDelete(allOrganizationsUrl(install)).andIsOk
+
+    nativeInstall(install).availableToAllOrganizations.assert.isFalse()
+  }
+
+  @Test
+  fun `revoking from all organizations disables the app only where it was not explicitly granted`() {
+    val install = createNativeInstall()
+    performAuthPut(allOrganizationsUrl(install), null).andIsOk
+    grantAvailability(install, testData.otherOrganization.id)
+    userAccount = testData.user
+    performAuthPut("${projectAppsUrl()}/${install.id}", null).andIsOk
+    userAccount = testData.otherOwner
+    performAuthPut("/v2/projects/${testData.otherProject.id}/apps/${install.id}", null).andIsOk
+
+    userAccount = testData.admin
+    performAuthDelete(allOrganizationsUrl(install)).andIsOk
+
+    appEnablementService.isEnabledForProject(testData.project.id, install.id).assert.isFalse()
+    appEnablementService.isEnabledForProject(testData.otherProject.id, install.id).assert.isTrue()
+  }
+
+  @Test
+  fun `granting and revoking a single organization leaves the all-organizations flag alone`() {
+    val install = createNativeInstall()
+    performAuthPut(allOrganizationsUrl(install), null).andIsOk
+
+    performAuthPut(organizationUrl(install), null).andIsOk
+    nativeInstall(install).availableToAllOrganizations.assert.isTrue()
+    userAccount = testData.user
+    performAuthPut("${projectAppsUrl()}/${install.id}", null).andIsOk
+
+    userAccount = testData.admin
+    performAuthDelete(organizationUrl(install)).andIsOk
+
+    nativeInstall(install).availableToAllOrganizations.assert.isTrue()
+    appAvailabilityService.listOrganizations(install.id).assert.isEmpty()
+    appEnablementService.isEnabledForProject(testData.project.id, install.id).assert.isTrue()
+  }
+
+  @Test
+  fun `deregistering a native app removes it everywhere`() {
+    val install = createNativeInstall()
+    performAuthPut(allOrganizationsUrl(install), null).andIsOk
+    grantAvailability(install, testData.otherOrganization.id)
+    userAccount = testData.user
+    performAuthPut("${projectAppsUrl()}/${install.id}", null).andIsOk
+    userAccount = testData.otherOwner
+    performAuthPut("/v2/projects/${testData.otherProject.id}/apps/${install.id}", null).andIsOk
+
+    userAccount = testData.admin
+    performAuthDelete(appsUrl(install)).andIsOk
+
+    AppsTestFixtures.nativeInstalls(appInstallService).assert.isEmpty()
+    appAvailabilityService.listOrganizations(install.id).assert.isEmpty()
+    appEnablementService.isEnabledForProject(testData.project.id, install.id).assert.isFalse()
+    appEnablementService.isEnabledForProject(testData.otherProject.id, install.id).assert.isFalse()
+  }
+
+  @Test
+  fun `the all-organizations and deregister endpoints reject an organization-owned install`() {
+    val install = registerOrganizationApp()
+
+    performAuthPut(allOrganizationsUrl(install), null).andIsNotFound
+    performAuthDelete(allOrganizationsUrl(install)).andIsNotFound
+    performAuthDelete(appsUrl(install)).andIsNotFound
+
+    appInstallService.find(testData.organization.id, install.id).assert.isNotNull
+  }
+
+  @Test
+  fun `the all-organizations and deregister endpoints reject a supporter`() {
+    val install = createNativeInstall()
+    userAccount = testData.supporter
+
+    performAuthPut(allOrganizationsUrl(install), null).andIsForbidden
+    performAuthDelete(allOrganizationsUrl(install)).andIsForbidden
+    performAuthDelete(appsUrl(install)).andIsForbidden
+
+    userAccount = testData.admin
+    nativeInstall(install).availableToAllOrganizations.assert.isFalse()
+  }
+
+  private fun nativeInstall(install: AppInstall) = appInstallService.getNative(install.id)
+
   private fun createNativeInstall(): AppInstall {
     AppsTestFixtures.mockManifest(appManifestHttpClient)
     return appInstallService
@@ -269,6 +439,8 @@ class NativeAppsControllerTest : AuthorizedControllerTest() {
     install: AppInstall,
     organizationId: Long = testData.organization.id,
   ) = "${appsUrl(install)}/organizations/$organizationId"
+
+  private fun allOrganizationsUrl(install: AppInstall) = "${appsUrl(install)}/organizations/all"
 
   private fun projectAppsUrl() = "/v2/projects/${testData.project.id}/apps"
 

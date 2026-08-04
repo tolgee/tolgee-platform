@@ -76,13 +76,65 @@ export const AppOrganizationsDialog = ({ install, onClose }: Props) => {
     invalidatePrefix: '/v2/administration/apps',
   });
 
+  const grantAllMutation = useApiMutation({
+    url: '/v2/administration/apps/{installId}/organizations/all',
+    method: 'put',
+    invalidatePrefix: '/v2/administration/apps',
+  });
+
+  const revokeAllMutation = useApiMutation({
+    url: '/v2/administration/apps/{installId}/organizations/all',
+    method: 'delete',
+    invalidatePrefix: '/v2/administration/apps',
+  });
+
   const organizations = organizationsLoadable.data?._embedded?.organizations;
   const items = organizations ?? [];
-  const updating = grantMutation.isLoading || revokeMutation.isLoading;
+  const availableToAll = install.availableToAllOrganizations;
+  const updating =
+    grantMutation.isLoading ||
+    revokeMutation.isLoading ||
+    grantAllMutation.isLoading ||
+    revokeAllMutation.isLoading;
 
   const handleAdd = (organizationId: number) => {
     grantMutation.mutate({
       path: { installId: install.id, organizationId },
+    });
+  };
+
+  const handleAddAll = () => {
+    grantAllMutation.mutate({
+      path: { installId: install.id },
+    });
+  };
+
+  const handleRemoveAll = () => {
+    confirmation({
+      title: (
+        <T
+          keyName="administration_apps_revoke_all_confirm_title"
+          defaultValue="Stop making the app available to all organizations?"
+        />
+      ),
+      message: (
+        <T
+          keyName="administration_apps_revoke_all_confirm_message"
+          defaultValue="{appName} will only be available to the organizations listed below. Projects that had access only through this setting will lose it, while explicitly granted organizations keep it."
+          params={{ appName: install.name }}
+        />
+      ),
+      confirmButtonText: (
+        <T
+          keyName="administration_apps_revoke_all_confirm_button"
+          defaultValue="Turn off"
+        />
+      ),
+      onConfirm: () => {
+        revokeAllMutation.mutate({
+          path: { installId: install.id },
+        });
+      },
     });
   };
 
@@ -94,7 +146,13 @@ export const AppOrganizationsDialog = ({ install, onClose }: Props) => {
           defaultValue="Remove organization access?"
         />
       ),
-      message: (
+      message: availableToAll ? (
+        <T
+          keyName="administration_apps_revoke_confirm_message_all"
+          defaultValue="{organizationName} loses its explicit grant. {appName} stays available to it while the app is available to all organizations, but access ends as soon as that is turned off."
+          params={{ appName: install.name, organizationName }}
+        />
+      ) : (
         <T
           keyName="administration_apps_revoke_confirm_message"
           defaultValue="{appName} will no longer be available to {organizationName}, and every project in that organization will lose access to it."
@@ -133,11 +191,47 @@ export const AppOrganizationsDialog = ({ install, onClose }: Props) => {
           />
         </Box>
 
+        {availableToAll && (
+          <Alert
+            severity="info"
+            data-cy="administration-apps-organizations-all-alert"
+            sx={{ mb: 2 }}
+            action={
+              isAdmin && (
+                <Button
+                  data-cy="administration-apps-organizations-all-disable"
+                  color="inherit"
+                  size="small"
+                  disabled={updating}
+                  onClick={handleRemoveAll}
+                >
+                  <T
+                    keyName="administration_apps_organizations_all_disable"
+                    defaultValue="Turn off"
+                  />
+                </Button>
+              )
+            }
+          >
+            <T
+              keyName="administration_apps_organizations_all_active"
+              defaultValue="This app is available to all organizations, including organizations created later."
+            />
+          </Alert>
+        )}
+
         <Typography variant="body2" color="text.secondary" mb={1}>
-          <T
-            keyName="administration_apps_organizations_dialog_description"
-            defaultValue="Organizations allowed to enable this app in their projects."
-          />
+          {availableToAll ? (
+            <T
+              keyName="administration_apps_organizations_dialog_description_explicit"
+              defaultValue="Organizations with an explicit grant. Only these keep the app if you turn off availability to all organizations."
+            />
+          ) : (
+            <T
+              keyName="administration_apps_organizations_dialog_description"
+              defaultValue="Organizations allowed to enable this app in their projects."
+            />
+          )}
         </Typography>
 
         {organizationsLoadable.isLoading && (
@@ -163,10 +257,17 @@ export const AppOrganizationsDialog = ({ install, onClose }: Props) => {
           <StyledList>
             {items.length === 0 && (
               <StyledEmpty data-cy="administration-apps-organizations-empty">
-                <T
-                  keyName="administration_apps_organizations_empty"
-                  defaultValue="This app is not available to any organization yet."
-                />
+                {availableToAll ? (
+                  <T
+                    keyName="administration_apps_organizations_empty_explicit"
+                    defaultValue="No organization has an explicit grant."
+                  />
+                ) : (
+                  <T
+                    keyName="administration_apps_organizations_empty"
+                    defaultValue="This app is not available to any organization yet."
+                  />
+                )}
               </StyledEmpty>
             )}
             {items.map((organization) => (
@@ -211,7 +312,9 @@ export const AppOrganizationsDialog = ({ install, onClose }: Props) => {
             <AppOrganizationSelect
               excludedIds={items.map((organization) => organization.id)}
               disabled={updating}
+              allOptionVisible={!availableToAll}
               onSelect={(organization) => handleAdd(organization.id)}
+              onSelectAll={handleAddAll}
             />
           </Box>
         )}

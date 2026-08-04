@@ -6136,4 +6136,11 @@
                                  referencedTableName="user_account"
                                  validate="true"/>
     </changeSet>
+    <changeSet author="jcizmar" id="1783771000000-26">
+        <addColumn tableName="app_install">
+            <column name="available_to_all_organizations" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

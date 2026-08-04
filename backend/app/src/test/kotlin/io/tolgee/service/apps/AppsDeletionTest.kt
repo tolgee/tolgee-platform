@@ -2,6 +2,7 @@ package io.tolgee.service.apps
 
 import io.tolgee.AbstractSpringTest
 import io.tolgee.development.testDataBuilder.data.AppsTestData
+import io.tolgee.model.Project
 import io.tolgee.service.project.ProjectHardDeletingService
 import io.tolgee.testing.assert
 import io.tolgee.util.executeInNewTransaction
@@ -83,6 +84,62 @@ class AppsDeletionTest : AbstractSpringTest() {
     appInstallService.remove(organizationId = null, installId = installId)
 
     appAvailabilityService.listOrganizations(installId).assert.isEmpty()
+  }
+
+  @Test
+  fun `removing a native install clears its enablements across every organization`() {
+    val installId = registerNativeInstall()
+    appAvailabilityService.grantToAllOrganizations(installId)
+    enableForProject(testData.projectBuilder.self.id, installId)
+    enableForProject(testData.otherProject.id, installId)
+
+    appInstallService.remove(organizationId = null, installId = installId)
+
+    appEnablementService.isEnabledForProject(testData.projectBuilder.self.id, installId).assert.isFalse()
+    appEnablementService.isEnabledForProject(testData.otherProject.id, installId).assert.isFalse()
+    AppsTestFixtures.nativeInstalls(appInstallService).assert.isEmpty()
+  }
+
+  @Test
+  fun `revoking the blanket availability keeps enablements of explicitly granted organizations`() {
+    val installId = registerNativeInstall()
+    appAvailabilityService.grantToAllOrganizations(installId)
+    appAvailabilityService.grant(
+      installId = installId,
+      organizationId = testData.otherOrganization.id,
+      author = testData.user,
+    )
+    enableForProject(testData.projectBuilder.self.id, installId)
+    enableForProject(testData.otherProject.id, installId)
+
+    appAvailabilityService.revokeFromAllOrganizations(installId)
+
+    appEnablementService.isEnabledForProject(testData.projectBuilder.self.id, installId).assert.isFalse()
+    appEnablementService.isEnabledForProject(testData.otherProject.id, installId).assert.isTrue()
+  }
+
+  private fun registerNativeInstall(): Long {
+    return executeInNewTransaction(platformTransactionManager) {
+      appInstallService
+        .selfRegister(
+          organization = null,
+          manifestUrl = AppsTestFixtures.MANIFEST_URL,
+          author = testData.user,
+        ).install.id
+    }
+  }
+
+  private fun enableForProject(
+    projectId: Long,
+    installId: Long,
+  ) {
+    executeInNewTransaction(platformTransactionManager) {
+      appEnablementService.enable(
+        project = entityManager.find(Project::class.java, projectId),
+        installId = installId,
+        author = testData.user,
+      )
+    }
   }
 
   private fun deleteRuleOf(constraintName: String): String {

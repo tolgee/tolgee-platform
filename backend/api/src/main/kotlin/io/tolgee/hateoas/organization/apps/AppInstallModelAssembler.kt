@@ -42,6 +42,7 @@ class AppInstallModelAssembler(
       scopes = entity.grantedScopes.map { it.value },
       clientId = entity.clientId,
       clientSecretPrefix = entity.clientSecretPrefix,
+      availableToAllOrganizations = entity.availableToAllOrganizations,
       clientSecret = plaintextClientSecret,
     )
   }

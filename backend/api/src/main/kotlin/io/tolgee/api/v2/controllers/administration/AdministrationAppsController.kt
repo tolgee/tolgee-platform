@@ -65,6 +65,20 @@ class AdministrationAppsController(
     return pagedAppInstallResourcesAssembler.toModel(installs, appInstallModelAssembler)
   }
 
+  @DeleteMapping("/{installId}")
+  @Operation(
+    summary = "Deregister a native app",
+    description =
+      "Removes the native app from the server: its availability for every organization, its " +
+        "enablement in every project and the install itself. Its client credentials stop working.",
+  )
+  @RequiresSuperAuthentication
+  fun deregister(
+    @PathVariable installId: Long,
+  ) {
+    appInstallService.remove(organizationId = null, installId = installId)
+  }
+
   @GetMapping("/{installId}/organizations")
   @Operation(
     summary = "List organizations the app is available to",
@@ -77,6 +91,35 @@ class AdministrationAppsController(
     val install = appInstallService.getNative(installId)
     val organizations = appAvailabilityService.listOrganizations(install.id)
     return appAvailableOrganizationModelAssembler.toCollectionModel(organizations)
+  }
+
+  @PutMapping("/{installId}/organizations/all")
+  @Operation(
+    summary = "Make the app available to all organizations",
+    description =
+      "Allows every organization — including organizations created later — to enable this native " +
+        "app. Explicit per-organization grants are kept, so revoking this falls back to them. " +
+        "Idempotent.",
+  )
+  @RequiresSuperAuthentication
+  fun grantToAllOrganizations(
+    @PathVariable installId: Long,
+  ) {
+    appAvailabilityService.grantToAllOrganizations(installId)
+  }
+
+  @DeleteMapping("/{installId}/organizations/all")
+  @Operation(
+    summary = "Revoke the app's availability for all organizations",
+    description =
+      "Drops the blanket availability and disables the app in every project whose organization has " +
+        "no explicit grant. Idempotent.",
+  )
+  @RequiresSuperAuthentication
+  fun revokeFromAllOrganizations(
+    @PathVariable installId: Long,
+  ) {
+    appAvailabilityService.revokeFromAllOrganizations(installId)
   }
 
   @PutMapping("/{installId}/organizations/{organizationId}")
@@ -100,7 +143,8 @@ class AdministrationAppsController(
   @Operation(
     summary = "Revoke the app's availability for an organization",
     description =
-      "Revokes availability and disables the app in every project of that organization. " +
+      "Revokes the explicit grant and disables the app in every project of that organization — " +
+        "unless the app is available to all organizations, which keeps covering it. " +
         "Idempotent — no-op when it was not available.",
   )
   @RequiresSuperAuthentication

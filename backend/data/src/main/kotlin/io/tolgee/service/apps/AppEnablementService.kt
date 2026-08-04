@@ -61,7 +61,7 @@ class AppEnablementService(
     val native =
       appInstallRepository.findByOrganizationIsNullAndId(installId)
         ?: throw NotFoundException(Message.APP_INSTALL_NOT_FOUND)
-    if (!appAvailabilityService.isAvailableForOrganization(organizationId, native.id)) {
+    if (!appAvailabilityService.isAvailableForOrganization(organizationId, native)) {
       throw BadRequestException(Message.APP_NOT_AVAILABLE_FOR_ORGANIZATION)
     }
     return native

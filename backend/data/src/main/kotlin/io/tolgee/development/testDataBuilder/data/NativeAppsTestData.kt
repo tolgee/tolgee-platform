@@ -4,6 +4,7 @@ import io.tolgee.model.UserAccount
 
 class NativeAppsTestData : AppsTestData() {
   lateinit var admin: UserAccount
+  lateinit var supporter: UserAccount
 
   init {
     root.apply {
@@ -11,6 +12,12 @@ class NativeAppsTestData : AppsTestData() {
         addUserAccount {
           username = "apps-test-admin@test.com"
           role = UserAccount.Role.ADMIN
+        }.self
+
+      supporter =
+        addUserAccount {
+          username = "apps-test-supporter@test.com"
+          role = UserAccount.Role.SUPPORTER
         }.self
     }
   }

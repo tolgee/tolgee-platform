@@ -55,6 +55,14 @@ class AppInstall : StandardAuditModel() {
   @Column(columnDefinition = "TEXT")
   lateinit var manifestJson: String
 
+  /**
+   * Blanket availability of a native app: every organization may enable it, including organizations
+   * that do not exist yet. Independent of the explicit [AppAvailableForOrganization] rows — clearing
+   * this flag falls back to exactly those.
+   */
+  @Column(name = "available_to_all_organizations", nullable = false)
+  var availableToAllOrganizations: Boolean = false
+
   @Enumerated(EnumType.STRING)
   @ElementCollection(targetClass = Scope::class, fetch = FetchType.EAGER)
   @CollectionTable(

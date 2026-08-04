@@ -17,6 +17,11 @@ open class AppInstallModel(
   val clientId: String?,
   val clientSecretPrefix: String?,
   /**
+   * Native apps only: whether every organization — including ones created later — may enable this
+   * app, on top of the explicitly granted ones.
+   */
+  val availableToAllOrganizations: Boolean = false,
+  /**
    * The OAuth client secret in plaintext. Present only in the response to registration — it is never
    * stored and cannot be retrieved again.
    */

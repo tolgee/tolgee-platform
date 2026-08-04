@@ -1,15 +1,17 @@
 import { useState } from 'react';
 import { T, useTranslate } from '@tolgee/react';
-import { Box, Button, ListItem, styled, Typography } from '@mui/material';
+import { Box, Button, Chip, ListItem, styled, Typography } from '@mui/material';
 
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
-import { useApiQuery } from 'tg.service/http/useQueryApi';
+import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { LINKS } from 'tg.constants/links';
 import { components } from 'tg.service/apiSchema.generated';
 import { AppSummary } from 'tg.component/apps/AppSummary';
 import { AppChips } from 'tg.component/apps/AppChips';
+import { confirmation } from 'tg.hooks/confirmation';
+import { useIsAdmin } from 'tg.globalContext/helpers';
 
 import { BaseAdministrationView } from '../components/BaseAdministrationView';
 import { AppOrganizationsDialog } from './AppOrganizationsDialog';
@@ -34,8 +36,9 @@ const StyledMeta = styled('div')`
 
 export const AdministrationApps = () => {
   const { t } = useTranslate();
+  const isAdmin = useIsAdmin();
   const [page, setPage] = useState(0);
-  const [selected, setSelected] = useState<AppInstallModel | null>(null);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
 
   const appsLoadable = useApiQuery({
     url: '/v2/administration/apps',
@@ -49,6 +52,44 @@ export const AdministrationApps = () => {
       keepPreviousData: true,
     },
   });
+
+  const deregisterMutation = useApiMutation({
+    url: '/v2/administration/apps/{installId}',
+    method: 'delete',
+    invalidatePrefix: '/v2/administration/apps',
+  });
+
+  const selected =
+    appsLoadable.data?._embedded?.appInstalls?.find(
+      (app) => app.id === selectedId
+    ) ?? null;
+
+  const handleDeregister = (app: AppInstallModel) => {
+    confirmation({
+      title: (
+        <T
+          keyName="administration_apps_deregister_confirm_title"
+          defaultValue="Deregister app?"
+        />
+      ),
+      message: (
+        <T
+          keyName="administration_apps_deregister_confirm_message"
+          defaultValue="{appName} will be removed from all organizations and from every project it is enabled in. Its client credentials will stop working."
+          params={{ appName: app.name }}
+        />
+      ),
+      confirmButtonText: (
+        <T
+          keyName="administration_apps_deregister_confirm_button"
+          defaultValue="Deregister"
+        />
+      ),
+      onConfirm: () => {
+        deregisterMutation.mutate({ path: { installId: app.id } });
+      },
+    });
+  };
 
   return (
     <StyledWrapper>
@@ -114,18 +155,47 @@ export const AdministrationApps = () => {
                     variant="outlined"
                     dataCy="administration-apps-item-scopes"
                   />
+                  {app.availableToAllOrganizations && (
+                    <Box>
+                      <Chip
+                        size="small"
+                        color="info"
+                        data-cy="administration-apps-item-all-organizations"
+                        label={
+                          <T
+                            keyName="administration_apps_item_all_organizations"
+                            defaultValue="All organizations"
+                          />
+                        }
+                      />
+                    </Box>
+                  )}
                 </StyledMeta>
-                <Box display="flex" alignItems="center">
+                <Box display="flex" alignItems="center" gap={1}>
                   <Button
                     data-cy="administration-apps-item-organizations-button"
                     variant="contained"
-                    onClick={() => setSelected(app)}
+                    onClick={() => setSelectedId(app.id)}
                   >
                     <T
                       keyName="administration_apps_manage_organizations"
                       defaultValue="Organizations"
                     />
                   </Button>
+                  {isAdmin && (
+                    <Button
+                      data-cy="administration-apps-item-deregister-button"
+                      variant="outlined"
+                      color="error"
+                      disabled={deregisterMutation.isLoading}
+                      onClick={() => handleDeregister(app)}
+                    >
+                      <T
+                        keyName="administration_apps_deregister"
+                        defaultValue="Deregister"
+                      />
+                    </Button>
+                  )}
                 </Box>
               </ListItem>
             )}
@@ -136,7 +206,7 @@ export const AdministrationApps = () => {
       {selected && (
         <AppOrganizationsDialog
           install={selected}
-          onClose={() => setSelected(null)}
+          onClose={() => setSelectedId(null)}
         />
       )}
     </StyledWrapper>
