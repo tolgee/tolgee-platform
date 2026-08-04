@@ -12,9 +12,15 @@ const TIME_FORMAT: Intl.DateTimeFormatOptions = { timeStyle: 'short' };
 const DATE_FORMAT: Intl.DateTimeFormatOptions = { dateStyle: 'medium' };
 
 const RELATIVE_DAYS_LIMIT = 7;
+const MS_PER_DAY = 86400000;
 
 function startOfDay(value: Date) {
   return new Date(value.getFullYear(), value.getMonth(), value.getDate());
+}
+
+/** Standalone in a table cell, so it reads as a sentence start even where the locale lowercases. */
+function capitalize(value: string, language: string) {
+  return value.charAt(0).toLocaleUpperCase(language) + value.slice(1);
 }
 
 type Props = {
@@ -26,12 +32,13 @@ type Props = {
  * because that is what matters when someone is checking whether a session is theirs.
  */
 export function SessionDate({ date }: Props) {
-  const language = useCurrentLanguage();
+  const language = useCurrentLanguage() ?? 'en';
   const formatDate = useDateFormatter();
 
   const value = new Date(date);
   const daysApart = Math.round(
-    (startOfDay(value).getTime() - startOfDay(new Date()).getTime()) / 86400000
+    (startOfDay(value).getTime() - startOfDay(new Date()).getTime()) /
+      MS_PER_DAY
   );
 
   return (
@@ -41,33 +48,30 @@ export function SessionDate({ date }: Props) {
   );
 
   function label() {
-    if (daysApart === 0) {
-      return (
-        <T
-          keyName="session-date-today"
-          defaultValue="Today {time}"
-          params={{ time: formatDate(value, TIME_FORMAT) }}
-        />
-      );
+    if (daysApart <= -RELATIVE_DAYS_LIMIT || daysApart > 0) {
+      return formatDate(value, DATE_FORMAT);
     }
 
-    if (daysApart === -1) {
-      return (
-        <T
-          keyName="session-date-yesterday"
-          defaultValue="Yesterday {time}"
-          params={{ time: formatDate(value, TIME_FORMAT) }}
-        />
-      );
-    }
-
-    if (daysApart > -RELATIVE_DAYS_LIMIT && daysApart < 0) {
-      return new Intl.RelativeTimeFormat(language, { numeric: 'auto' }).format(
+    // `numeric: 'auto'` is what turns -1 into the locale's "yesterday" rather than "1 day ago".
+    const relative = capitalize(
+      new Intl.RelativeTimeFormat(language, { numeric: 'auto' }).format(
         daysApart,
         'day'
-      );
+      ),
+      language
+    );
+
+    // "3 days ago" already implies imprecision, so a clock time only adds noise.
+    if (daysApart < -1) {
+      return relative;
     }
 
-    return formatDate(value, DATE_FORMAT);
+    return (
+      <T
+        keyName="session-date-relative"
+        defaultValue="{day} {time}"
+        params={{ day: relative, time: formatDate(value, TIME_FORMAT) }}
+      />
+    );
   }
 }

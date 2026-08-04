@@ -44,7 +44,6 @@ export function RevokeAllOtherSessionsButton() {
   return (
     <Button
       data-cy="sessions-revoke-all-others-button"
-      size="small"
       variant="outlined"
       color="error"
       onClick={onRevokeAll}

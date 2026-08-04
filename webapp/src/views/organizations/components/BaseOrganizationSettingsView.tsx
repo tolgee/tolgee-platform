@@ -55,7 +55,7 @@ export const BaseOrganizationSettingsView: React.FC<
         [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
       }),
       label: t('organization_menu_profile'),
-      'data-cy-item': 'profile',
+      'data-cy': 'profile',
     },
   ];
 
@@ -79,7 +79,7 @@ export const BaseOrganizationSettingsView: React.FC<
       [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
     }),
     label: t('organization_menu_glossaries'),
-    'data-cy-item': 'glossaries',
+    'data-cy': 'glossaries',
   });
 
   // hide the link; below-MEMBER users would hit a 403 on the TM endpoints
@@ -95,7 +95,7 @@ export const BaseOrganizationSettingsView: React.FC<
         'organization_menu_translation_memories',
         'Translation memories'
       ),
-      'data-cy-item': 'translation-memories',
+      'data-cy': 'translation-memories',
     });
   }
 

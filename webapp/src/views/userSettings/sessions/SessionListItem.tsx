@@ -209,8 +209,14 @@ export function SessionListItem({ session }: Props) {
           <StyledInlineLabel>
             <T keyName="sessions-column-last-used" defaultValue="Last used" />
           </StyledInlineLabel>
-          {/* A session exists because someone signed in, so it was used at least once. */}
-          <SessionDate date={session.lastUsedAt ?? session.createdAt} />
+          {session.isCurrent ? (
+            // The stamp is debounced, so for the session making this very request any timestamp
+            // is stale on arrival.
+            <T keyName="session-last-used-now" defaultValue="Active now" />
+          ) : (
+            // A session exists because someone signed in, so it was used at least once.
+            <SessionDate date={session.lastUsedAt ?? session.createdAt} />
+          )}
         </StyledCell>
       </StyledMeta>
 
