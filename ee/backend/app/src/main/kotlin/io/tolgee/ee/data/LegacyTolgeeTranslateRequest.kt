@@ -9,7 +9,7 @@ data class LegacyTolgeeTranslateRequest(
   val targetTag: String,
   val metadata: Metadata?,
   val formality: Formality?,
-  val isBatch: Boolean,
+  val isBatch: Boolean = false,
   val pluralForms: Map<String, String>? = null,
   val pluralFormExamples: Map<String, String>? = null,
 ) {
