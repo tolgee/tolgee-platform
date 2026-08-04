@@ -1,3 +1,10 @@
+## [3.216.1](https://github.com/tolgee/tolgee-platform/compare/v3.216.0...v3.216.1) (2026-08-04)
+
+
+### Bug Fixes
+
+* strip structural newlines from plural source in AI translator prompt ([#3830](https://github.com/tolgee/tolgee-platform/issues/3830)) ([b435134](https://github.com/tolgee/tolgee-platform/commit/b435134d8640d093865707f2e30122bcad6d8b46))
+
 # [3.216.0](https://github.com/tolgee/tolgee-platform/compare/v3.215.0...v3.216.0) (2026-08-03)
 
 
