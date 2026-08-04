@@ -1,6 +1,8 @@
 // Shared by the header row and every session row so their columns line up. The header lives in the
 // list's subheader slot, so both sit in the same box and only need matching columns and padding.
-export const SESSIONS_GRID_COLUMNS = '2.2fr 1.6fr 1.3fr 1.3fr auto';
+// The action column is fixed rather than `auto`: `auto` resolves to the button's width in a row but
+// to zero in the header's empty cell, which leaves every `fr` column a different width in the two.
+export const SESSIONS_GRID_COLUMNS = '2.2fr 1.6fr 1.3fr 1.3fr 96px';
 
 export const SESSIONS_ROW_PADDING = '8px 12px';
 

@@ -5,22 +5,15 @@ import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { confirmation } from 'tg.hooks/confirmation';
-import { useGlobalActions } from 'tg.globalContext/GlobalContext';
-import { useDateFormatter } from 'tg.hooks/useLocale';
-
 import { getUserAgentDisplay } from './getUserAgentDisplay';
 import { SessionAuthTypeLabel } from './SessionAuthTypeLabel';
 import { SessionLocation } from './SessionLocation';
+import { SessionDate } from './SessionDate';
 import {
   SESSIONS_GRID_COLUMNS,
   SESSIONS_ROW_PADDING,
   SESSIONS_WIDE_LAYOUT,
 } from './sessionsGrid';
-
-const DATE_FORMAT: Intl.DateTimeFormatOptions = {
-  dateStyle: 'medium',
-  timeStyle: 'short',
-};
 
 const StyledRoot = styled(Box)`
   display: grid;
@@ -125,8 +118,6 @@ type Props = {
 
 export function SessionListItem({ session }: Props) {
   const message = useMessage();
-  const { logout } = useGlobalActions();
-  const formatDate = useDateFormatter();
 
   const revokeMutation = useApiMutation({
     url: '/v2/user/sessions/{id}',
@@ -134,16 +125,9 @@ export function SessionListItem({ session }: Props) {
     invalidatePrefix: '/v2/user/sessions',
     options: {
       onSuccess: () => {
-        if (session.isCurrent) {
-          logout();
-        } else {
-          message.success(
-            <T
-              keyName="session-revoked-message"
-              defaultValue="Session revoked"
-            />
-          );
-        }
+        message.success(
+          <T keyName="session-revoked-message" defaultValue="Session revoked" />
+        );
       },
     },
   });
@@ -153,12 +137,7 @@ export function SessionListItem({ session }: Props) {
       confirmButtonText: (
         <T keyName="session-revoke-button" defaultValue="Revoke" />
       ),
-      message: session.isCurrent ? (
-        <T
-          keyName="session-revoke-current-confirmation-message"
-          defaultValue="This is the session you are using right now. Revoking it will log you out immediately. Do you want to continue?"
-        />
-      ) : (
+      message: (
         <T
           keyName="session-revoke-confirmation-message"
           defaultValue="Do you really want to revoke this session? The device using it will be logged out."
@@ -220,7 +199,7 @@ export function SessionListItem({ session }: Props) {
           <StyledInlineLabel>
             <T keyName="sessions-column-signed-in" defaultValue="Signed in" />
           </StyledInlineLabel>
-          {formatDate(session.createdAt, DATE_FORMAT)}
+          <SessionDate date={session.createdAt} />
         </StyledCell>
 
         <StyledCell
@@ -230,23 +209,22 @@ export function SessionListItem({ session }: Props) {
           <StyledInlineLabel>
             <T keyName="sessions-column-last-used" defaultValue="Last used" />
           </StyledInlineLabel>
-          {session.lastUsedAt ? (
-            formatDate(session.lastUsedAt, DATE_FORMAT)
-          ) : (
-            <T keyName="session-item-never-used" defaultValue="Never used" />
-          )}
+          {/* A session exists because someone signed in, so it was used at least once. */}
+          <SessionDate date={session.lastUsedAt ?? session.createdAt} />
         </StyledCell>
       </StyledMeta>
 
       <StyledAction>
-        <StyledRevokeButton
-          data-cy="session-list-item-revoke-button"
-          size="small"
-          variant="text"
-          onClick={onRevoke}
-        >
-          <T keyName="session-revoke-button" defaultValue="Revoke" />
-        </StyledRevokeButton>
+        {!session.isCurrent && (
+          <StyledRevokeButton
+            data-cy="session-list-item-revoke-button"
+            size="small"
+            variant="text"
+            onClick={onRevoke}
+          >
+            <T keyName="session-revoke-button" defaultValue="Revoke" />
+          </StyledRevokeButton>
+        )}
       </StyledAction>
     </StyledRoot>
   );

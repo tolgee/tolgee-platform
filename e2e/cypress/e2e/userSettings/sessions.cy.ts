@@ -74,10 +74,10 @@ describe('Active sessions', () => {
     row('10.10.0.11')
       .findDcy('session-list-item-location')
       .contains('Netherlands');
-    // no location resolved at all - the raw IP stays visible
+    // no location resolved - a private address reads as local rather than as a raw IP
     row('10.10.0.9')
       .findDcy('session-list-item-location')
-      .contains('10.10.0.9');
+      .contains('Local network');
   });
 
   it('marks exactly one session as the current one', () => {
@@ -133,15 +133,12 @@ describe('Active sessions', () => {
     });
   });
 
-  it('logs the user out when they revoke their own session', () => {
+  it('offers no revoke button for the current session', () => {
     visitSessions();
     gcy('session-list-item-current-badge')
       .closestDcy('session-list-item')
       .findDcy('session-list-item-revoke-button')
-      .click();
-    confirmStandard();
-
-    cy.url().should('include', '/login');
+      .should('not.exist');
   });
 
   it('drops the session of a signed-out browser', () => {

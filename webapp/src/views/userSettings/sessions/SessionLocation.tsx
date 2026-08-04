@@ -5,6 +5,7 @@ import { FlagImage } from '@tginternal/library/components/languages/FlagImage';
 import { components } from 'tg.service/apiSchema.generated';
 
 import { countryCodeToFlagEmoji } from './countryCodeToFlagEmoji';
+import { isLocalIp } from './isLocalIp';
 
 const StyledRoot = styled(Box)`
   display: flex;
@@ -43,12 +44,20 @@ export function SessionLocation({ session }: Props) {
   const label = city || country;
 
   if (!label) {
+    const fallback = !ip ? (
+      <T keyName="session-item-unknown-location" defaultValue="—" />
+    ) : isLocalIp(ip) ? (
+      <T keyName="session-location-local" defaultValue="Local network" />
+    ) : (
+      ip
+    );
+
     return (
-      <StyledRoot data-cy="session-list-item-location">
-        <StyledLabel>
-          {ip || <T keyName="session-item-unknown-location" defaultValue="—" />}
-        </StyledLabel>
-      </StyledRoot>
+      <Tooltip title={ip ?? ''} disableHoverListener={!ip}>
+        <StyledRoot data-cy="session-list-item-location">
+          <StyledLabel>{fallback}</StyledLabel>
+        </StyledRoot>
+      </Tooltip>
     );
   }
 
