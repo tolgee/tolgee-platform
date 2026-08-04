@@ -4,7 +4,6 @@ import io.tolgee.component.CurrentDateProvider
 import io.tolgee.controllers.internal.InternalController
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.data.SessionsTestData
-import io.tolgee.model.EmailVerification
 import jakarta.persistence.EntityManager
 import org.springframework.beans.factory.annotation.Autowired
 import java.sql.Timestamp
@@ -28,14 +27,6 @@ class SessionsE2eDataController : AbstractE2eDataController() {
 
   override fun afterTestDataStored(data: TestDataBuilder) {
     val sessionsData = currentTestData ?: return
-
-    entityManager.persist(
-      EmailVerification(
-        code = "sessions-e2e-verification-code",
-        userAccount = sessionsData.unverifiedUser,
-      ),
-    )
-    entityManager.flush()
 
     sessionsData.createdAtByDeviceId.forEach { (deviceId, createdAt) ->
       entityManager

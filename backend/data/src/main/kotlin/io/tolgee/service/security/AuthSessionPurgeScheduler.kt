@@ -64,16 +64,11 @@ class AuthSessionPurgeScheduler(
         -authenticationProperties.sessionAudit.expiredSessionRetentionDays.toInt(),
       )
     val purged =
-      purgeInBatches(cutoff) { batchCutoff ->
-        val batch =
-          executeInNewTransaction(transactionManager) {
-            userSessionRepository.findIdsToPurge(batchCutoff, PageRequest.of(0, BATCH_SIZE)).content
-          }
-        if (batch.isNotEmpty()) {
-          executeInNewTransaction(transactionManager) { userSessionRepository.deleteAllByIdIn(batch) }
-        }
-        batch.size
-      }
+      purgeInBatches(
+        cutoff = cutoff,
+        findBatch = { c, afterId -> userSessionRepository.findIdsToPurge(c, afterId, PageRequest.of(0, BATCH_SIZE)) },
+        deleteBatch = { ids -> userSessionRepository.deleteAllByIdIn(ids) },
+      )
 
     if (purged > 0) {
       logger.info("Purged {} expired sessions older than {}", purged, cutoff)
@@ -86,16 +81,16 @@ class AuthSessionPurgeScheduler(
         -authenticationProperties.sessionAudit.auditEventRetentionDays.toInt(),
       )
     val purged =
-      purgeInBatches(cutoff) { batchCutoff ->
-        val batch =
-          executeInNewTransaction(transactionManager) {
-            authAuditEventRepository.findIdsToPurge(batchCutoff, PageRequest.of(0, BATCH_SIZE)).content
-          }
-        if (batch.isNotEmpty()) {
-          executeInNewTransaction(transactionManager) { authAuditEventRepository.deleteAllByIdIn(batch) }
-        }
-        batch.size
-      }
+      purgeInBatches(
+        cutoff = cutoff,
+        findBatch = {
+          c,
+          afterId,
+          ->
+          authAuditEventRepository.findIdsToPurge(c, afterId, PageRequest.of(0, BATCH_SIZE))
+        },
+        deleteBatch = { ids -> authAuditEventRepository.deleteAllByIdIn(ids) },
+      )
 
     if (purged > 0) {
       logger.info("Purged {} auth audit events older than {}", purged, cutoff)
@@ -104,13 +99,28 @@ class AuthSessionPurgeScheduler(
 
   private fun purgeInBatches(
     cutoff: Date,
-    purgeBatch: (Date) -> Int,
+    findBatch: (Date, Long) -> List<Long>,
+    deleteBatch: (List<Long>) -> Unit,
   ): Int {
+    var afterId = 0L
     var total = 0
+
     while (true) {
-      val purged = purgeBatch(cutoff)
-      total += purged
-      if (purged < BATCH_SIZE) return total
+      val batch = executeInNewTransaction(transactionManager) { findBatch(cutoff, afterId) }
+      if (batch.isEmpty()) return total
+
+      // Advance past every id we attempted, deleted or not, so a row that cannot be deleted is
+      // skipped for the rest of this pass instead of being re-read forever.
+      afterId = batch.last()
+
+      try {
+        executeInNewTransaction(transactionManager) { deleteBatch(batch) }
+        total += batch.size
+      } catch (e: Exception) {
+        logger.warn("Purge of a batch of {} rows failed, skipping it until the next run", batch.size, e)
+      }
+
+      if (batch.size < BATCH_SIZE) return total
     }
   }
 

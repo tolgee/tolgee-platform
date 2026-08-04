@@ -17,7 +17,7 @@ import { EnableMfaDialog } from './EnableMfaDialog';
 import { MfaRecoveryCodesDialog } from './MfaRecoveryCodesDialog';
 import { DisableMfaDialog } from './DisableMfaDialog';
 import { ChangeAuthProvider } from './ChangeAuthProvider';
-import { SessionsSection } from './SessionsSection';
+import { AccountSessions } from 'tg.ee';
 
 export const AccountSecurityView: FunctionComponent<
   React.PropsWithChildren<unknown>
@@ -94,7 +94,7 @@ export const AccountSecurityView: FunctionComponent<
             <T keyName="account-security-set-password" />
           </LoadingButton>
         </Box>
-        <SessionsSection />
+        <AccountSessions />
       </BaseUserSettingsView>
     );
   }
@@ -127,7 +127,7 @@ export const AccountSecurityView: FunctionComponent<
         </>
       )}
 
-      <SessionsSection />
+      <AccountSessions />
 
       <Route exact path={LINKS.USER_ACCOUNT_SECURITY_MFA_ENABLE.template}>
         <EnableMfaDialog />

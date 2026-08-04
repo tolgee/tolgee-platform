@@ -730,6 +730,7 @@ declare namespace DataCy {
         "session-list-item-location": true;
         "session-list-item-revoke-button": true;
         "sessions-list-header": true;
+        "sessions-reveal-button": true;
         "sessions-revoke-all-others-button": true;
         "settings-menu-item": true;
         "sign-up-submit-button": true;

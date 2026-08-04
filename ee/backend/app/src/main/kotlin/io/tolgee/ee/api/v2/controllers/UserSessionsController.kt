@@ -6,13 +6,12 @@ import io.tolgee.api.v2.controllers.IController
 import io.tolgee.ee.api.v2.hateoas.assemblers.UserSessionModelAssembler
 import io.tolgee.ee.api.v2.hateoas.model.UserSessionModel
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.UserSession
 import io.tolgee.model.enums.UserSessionType
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.BypassEmailVerification
 import io.tolgee.security.authentication.BypassForcedSsoAuthentication
-import io.tolgee.security.authentication.ReadOnlyOperation
+import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.service.security.UserSessionService
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
@@ -36,10 +35,17 @@ class UserSessionsController(
   private val pagedResourcesAssembler: PagedResourcesAssembler<UserSession>,
   private val authenticationFacade: AuthenticationFacade,
 ) : IController {
+  /**
+   * Unlike the revoke endpoints, this one is gated: it is the only place in the API that discloses
+   * the approximate physical location a person signs in from, as a history across their devices, so
+   * a stolen token must not be enough to harvest it. Revoking stays ungated on purpose - a password
+   * prompt does not belong between someone and ejecting an intruder.
+   */
   @GetMapping(value = [""])
   @Operation(summary = "Get active sessions of the current user")
   @BypassEmailVerification
   @BypassForcedSsoAuthentication
+  @RequiresSuperAuthentication
   fun getAll(
     @ParameterObject pageable: Pageable,
   ): PagedModel<UserSessionModel> {
@@ -63,23 +69,6 @@ class UserSessionsController(
     userSessionService.revoke(session, authenticationFacade.authenticatedUser.id)
   }
 
-  /**
-   * Revoking your own session only ever reduces your own access, so it stays available to a
-   * read-only (supporter) principal - unlike the other two.
-   */
-  @DeleteMapping(value = ["/current"])
-  @Operation(summary = "Revoke the session of the current token")
-  @BypassEmailVerification
-  @BypassForcedSsoAuthentication
-  @ReadOnlyOperation
-  fun revokeCurrent() {
-    userSessionService.revokeCurrent(
-      userAccountId = authenticationFacade.authenticatedUser.id,
-      deviceId = authenticationFacade.deviceIdOrNull,
-      revokedById = authenticationFacade.authenticatedUser.id,
-    )
-  }
-
   @DeleteMapping(value = ["/other"])
   @Operation(summary = "Revoke all sessions except the current one")
   @BypassEmailVerification
@@ -93,8 +82,9 @@ class UserSessionsController(
   }
 
   /**
-   * Impersonation sessions are reported as missing rather than forbidden, so that probing by id
-   * cannot reveal the support access the listing hides.
+   * Everything the caller may not act on is reported as missing rather than forbidden: a distinct
+   * 403 would turn this endpoint into an oracle for which session ids exist on other accounts, and
+   * would reveal the impersonation sessions the listing deliberately hides.
    */
   private fun checkOwner(id: Long): UserSession {
     val session = userSessionService.find(id) ?: throw NotFoundException()
@@ -102,7 +92,7 @@ class UserSessionsController(
       throw NotFoundException()
     }
     if (session.userAccountId != authenticationFacade.authenticatedUser.id) {
-      throw PermissionException()
+      throw NotFoundException()
     }
     return session
   }

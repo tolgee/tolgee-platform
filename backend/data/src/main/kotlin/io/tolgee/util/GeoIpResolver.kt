@@ -7,6 +7,7 @@ import jakarta.annotation.PreDestroy
 import org.springframework.stereotype.Component
 import java.io.File
 import java.net.InetAddress
+import java.net.UnknownHostException
 
 /**
  * Resolves an IP to a coarse location using a MaxMind-format database. No database file ships with
@@ -17,14 +18,14 @@ import java.net.InetAddress
 class GeoIpResolver(
   private val tolgeeProperties: TolgeeProperties,
 ) : Logging {
-  private val reader: DatabaseReader? by lazy { openReader() }
+  private val readerLazy = lazy { openReader() }
 
   fun resolve(ip: String?): GeoIpLocation? {
-    val reader = this.reader ?: return null
-    if (ip.isNullOrBlank()) return null
+    val address = parseLiteral(ip) ?: return null
+    val reader = readerLazy.value ?: return null
 
     return try {
-      val response = reader.tryCity(InetAddress.getByName(ip)).orElse(null) ?: return null
+      val response = reader.tryCity(address).orElse(null) ?: return null
       GeoIpLocation(
         countryCode = response.country?.isoCode,
         country = response.country?.name,
@@ -58,8 +59,32 @@ class GeoIpResolver(
     }
   }
 
+  /**
+   * `InetAddress.getByName` resolves anything that is not a literal, and the address comes from
+   * attacker-controlled forwarding headers - so a hostname there would turn every authenticated
+   * request into a DNS lookup. A colon cannot appear in a hostname, and the IPv4 branch is
+   * digits-only, so neither form can reach a resolver.
+   */
+  private fun parseLiteral(ip: String?): InetAddress? {
+    val value = ip?.trim()
+    if (value.isNullOrEmpty()) return null
+    if (!value.contains(':') && !IPV4.matches(value)) return null
+
+    return try {
+      InetAddress.getByName(value)
+    } catch (e: UnknownHostException) {
+      logger.debug("Not an IP literal: $value", e)
+      null
+    }
+  }
+
   @PreDestroy
   fun close() {
-    runSentryCatching { reader?.close() }
+    if (!readerLazy.isInitialized()) return
+    runSentryCatching { readerLazy.value?.close() }
+  }
+
+  companion object {
+    private val IPV4 = Regex("""\d{1,3}(\.\d{1,3}){3}""")
   }
 }

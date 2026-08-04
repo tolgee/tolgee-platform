@@ -3,7 +3,6 @@ package io.tolgee.model.enums
 enum class AuthAuditEventType {
   LOGIN,
   LOGIN_FAILED_BAD_CREDENTIALS,
-  LOGIN_FAILED_MFA_REQUIRED,
   LOGIN_FAILED_INVALID_OTP,
   LOGIN_FAILED_THIRD_PARTY,
   TOKEN_REFRESH,

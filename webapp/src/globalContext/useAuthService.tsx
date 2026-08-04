@@ -38,6 +38,8 @@ export function getRedirectUrl(userId?: number) {
   }
 }
 
+const LOGOUT_REVOKE_TIMEOUT_MS = 3000;
+
 export const useAuthService = (
   initialData: ReturnType<typeof useInitialDataService>
 ) => {
@@ -360,7 +362,14 @@ export const useAuthService = (
     async logout() {
       if (tokenService.getToken()) {
         try {
-          await revokeCurrentSessionLoadable.mutateAsync({});
+          // Revoking needs the token, so it has to happen before the token is dropped - but a
+          // hung request must never leave the user looking signed in. Local sign-out wins the race.
+          await Promise.race([
+            revokeCurrentSessionLoadable.mutateAsync({}),
+            new Promise((resolve) =>
+              setTimeout(resolve, LOGOUT_REVOKE_TIMEOUT_MS)
+            ),
+          ]);
         } catch (e) {
           // the session may already be gone, log out regardless
         }

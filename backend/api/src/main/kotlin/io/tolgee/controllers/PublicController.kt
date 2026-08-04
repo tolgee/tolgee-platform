@@ -88,6 +88,10 @@ class PublicController(
     username: String,
     exception: AuthenticationException,
   ) {
+    // Every successful MFA login fails its first leg with MFA_ENABLED - the client only learns to
+    // ask for the OTP from that error - so recording it would mark each of them as a failed login.
+    if (exception.tolgeeMessage == Message.MFA_ENABLED) return
+
     authAuditService.recordIndependently(
       type = failedLoginType(exception.tolgeeMessage),
       userAccountId = userAccountService.findActiveOrDisabled(username)?.id,
@@ -97,7 +101,6 @@ class PublicController(
   }
 
   private fun failedLoginType(message: Message?): AuthAuditEventType {
-    if (message == Message.MFA_ENABLED) return AuthAuditEventType.LOGIN_FAILED_MFA_REQUIRED
     if (message == Message.INVALID_OTP_CODE) return AuthAuditEventType.LOGIN_FAILED_INVALID_OTP
     return AuthAuditEventType.LOGIN_FAILED_BAD_CREDENTIALS
   }

@@ -1,14 +1,14 @@
 import { useState } from 'react';
-import { Box, styled, Typography } from '@mui/material';
+import { Box, Button, styled, Typography } from '@mui/material';
 import { T } from '@tolgee/react';
 import { Link } from 'react-router-dom';
 
 import { LINKS } from 'tg.constants/links';
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
-import { SessionListItem } from '../sessions/SessionListItem';
-import { SessionsListHeader } from '../sessions/SessionsListHeader';
-import { RevokeAllOtherSessionsButton } from '../sessions/RevokeAllOtherSessionsButton';
+import { SessionListItem } from './SessionListItem';
+import { SessionsListHeader } from './SessionsListHeader';
+import { RevokeAllOtherSessionsButton } from './RevokeAllOtherSessionsButton';
 
 const StyledLink = styled(Link)`
   color: ${({ theme }) => theme.palette.primary.main};
@@ -37,6 +37,9 @@ const StyledHeading = styled(Box)`
 
 export const SessionsSection = () => {
   const [page, setPage] = useState(0);
+  // Listing requires super authentication, and fetching on mount would put a password prompt in
+  // front of anyone who opened Account Security to do something else entirely.
+  const [revealed, setRevealed] = useState(false);
 
   const list = useApiQuery({
     url: '/v2/user/sessions',
@@ -45,15 +48,18 @@ export const SessionsSection = () => {
       size: 20,
       page,
     },
+    options: {
+      enabled: revealed,
+    },
   });
 
   return (
     <Box mt={4} data-cy="account-security-sessions">
       <StyledHeading>
         <Typography variant="h6">
-          <T keyName="sessions_title" defaultValue="Active sessions" />
+          <T keyName="sessions-title" defaultValue="Active sessions" />
         </Typography>
-        <RevokeAllOtherSessionsButton />
+        {revealed && <RevokeAllOtherSessionsButton />}
       </StyledHeading>
 
       <Box sx={{ mt: 1, mb: 2 }}>
@@ -67,15 +73,28 @@ export const SessionsSection = () => {
         />
       </Box>
 
-      <StyledContainer>
-        <PaginatedHateoasList
-          wrapperComponentProps={{ className: 'listWrapper' }}
-          onPageChange={setPage}
-          loadable={list}
-          listComponentProps={{ subheader: <SessionsListHeader /> }}
-          renderItem={(session) => <SessionListItem session={session} />}
-        />
-      </StyledContainer>
+      {!revealed ? (
+        <Button
+          data-cy="sessions-reveal-button"
+          variant="outlined"
+          onClick={() => setRevealed(true)}
+        >
+          <T
+            keyName="sessions-reveal-button"
+            defaultValue="Show active sessions"
+          />
+        </Button>
+      ) : (
+        <StyledContainer>
+          <PaginatedHateoasList
+            wrapperComponentProps={{ className: 'listWrapper' }}
+            onPageChange={setPage}
+            loadable={list}
+            listComponentProps={{ subheader: <SessionsListHeader /> }}
+            renderItem={(session) => <SessionListItem session={session} />}
+          />
+        </StyledContainer>
+      )}
     </Box>
   );
 };

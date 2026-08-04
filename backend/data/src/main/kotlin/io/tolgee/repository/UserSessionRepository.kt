@@ -155,11 +155,12 @@ interface UserSessionRepository : JpaRepository<UserSession, Long> {
     @Param("city") city: String?,
   )
 
-  @Query("select us.id from UserSession us where us.expiresAt < :cutoff")
+  @Query("select us.id from UserSession us where us.expiresAt < :cutoff and us.id > :afterId order by us.id")
   fun findIdsToPurge(
     @Param("cutoff") cutoff: Date,
+    @Param("afterId") afterId: Long,
     pageable: Pageable,
-  ): Page<Long>
+  ): List<Long>
 
   fun deleteAllByIdIn(ids: Collection<Long>)
 }
