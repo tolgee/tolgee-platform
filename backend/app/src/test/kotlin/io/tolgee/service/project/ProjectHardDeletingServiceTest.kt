@@ -30,6 +30,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import java.util.Date
 
 @SpringBootTest
 class ProjectHardDeletingServiceTest : AbstractSpringTest() {
@@ -244,6 +245,46 @@ class ProjectHardDeletingServiceTest : AbstractSpringTest() {
         .findById(projectNotificationId)
         .isPresent.assert
         .isFalse()
+    }
+  }
+
+  @Test
+  fun `deletes project with a soft-deleted import referencing an existing language`() {
+    val testData = BaseTestData()
+    testDataToClean = testData
+    val importBuilder =
+      testData.projectBuilder
+        .addImport {
+          author = testData.user
+          deletedAt = Date()
+        }.build {
+          addImportFile {
+            name = "en.json"
+          }.build {
+            addImportLanguage {
+              name = "en"
+              existingLanguage = testData.englishLanguage
+            }
+          }
+        }
+    testDataService.saveTestData(testData.root)
+    val projectId = testData.projectBuilder.self.id
+    val importId = importBuilder.self.id
+
+    executeInNewTransaction(platformTransactionManager) {
+      projectHardDeletingService.hardDeleteProject(testData.projectBuilder.self.refresh())
+    }
+
+    executeInNewTransaction {
+      projectService.find(projectId).assert.isNull()
+      val remainingImports =
+        (
+          entityManager
+            .createNativeQuery("select count(*) from import where id = :importId")
+            .setParameter("importId", importId)
+            .singleResult as Number
+        ).toLong()
+      remainingImports.assert.isEqualTo(0)
     }
   }
 

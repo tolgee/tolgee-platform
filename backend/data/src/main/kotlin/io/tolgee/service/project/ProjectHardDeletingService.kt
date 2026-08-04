@@ -90,8 +90,8 @@ class ProjectHardDeletingService(
         importSettingsService.deleteAllByProject(projectId)
       }
 
-      importService.getAllByProject(projectId).forEach {
-        importService.hardDeleteImport(it)
+      traceLogMeasureTime("deleteProject: delete imports") {
+        importService.deleteAllByProject(projectId)
       }
 
       // otherwise the project keeps referencing the language/namespace we are about to delete

@@ -367,6 +367,13 @@ class ImportService(
   }
 
   @Transactional
+  fun deleteAllByProject(projectId: Long) {
+    importRepository.findAllByProjectIdIncludingDeleted(projectId).forEach {
+      hardDeleteImport(it)
+    }
+  }
+
+  @Transactional
   fun deleteImport(
     projectId: Long,
     authorId: Long,

@@ -34,6 +34,13 @@ interface ImportRepository : JpaRepository<Import, Long> {
 
   @Query(
     """
+    select i from Import i where i.project.id = :projectId
+  """,
+  )
+  fun findAllByProjectIdIncludingDeleted(projectId: Long): List<Import>
+
+  @Query(
+    """
     select distinct if.namespace from ImportFile if where if.importData.id = :importId
   """,
   )
