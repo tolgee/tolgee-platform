@@ -13,6 +13,7 @@ declare namespace DataCy {
         "account-security-initial-password-set": true;
         "account-security-provider-connect": true;
         "account-security-provider-disconnect": true;
+        "account-security-sessions": true;
         "account-security-set-password-instructions-sent": true;
         "active-plan-license-key-input": true;
         "activity-compact": true;
@@ -726,9 +727,9 @@ declare namespace DataCy {
         "session-list-item-last-used": true;
         "session-list-item-location": true;
         "session-list-item-revoke-button": true;
+        "sessions-list-header": true;
         "sessions-revoke-all-others-button": true;
         "settings-menu-item": true;
-        "settings-menu-item-sessions": true;
         "sign-up-submit-button": true;
         "signup-error-free-seat-limit": true;
         "signup-error-plan-seat-limit": true;
@@ -998,7 +999,6 @@ declare namespace DataCy {
         "user-menu-organization-settings": true;
         "user-menu-organization-switch": true;
         "user-menu-server-administration": true;
-        "user-menu-sessions": true;
         "user-menu-theme-switch": true;
         "user-menu-user-settings": true;
         "user-profile": true;

@@ -1,7 +1,28 @@
-import { Box, Tooltip } from '@mui/material';
+import { Box, styled, Tooltip } from '@mui/material';
 import { T } from '@tolgee/react';
+import { FlagImage } from '@tginternal/library/components/languages/FlagImage';
 
 import { components } from 'tg.service/apiSchema.generated';
+
+import { countryCodeToFlagEmoji } from './countryCodeToFlagEmoji';
+
+const StyledRoot = styled(Box)`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+`;
+
+const StyledFlag = styled(FlagImage)`
+  width: 18px;
+  flex-shrink: 0;
+`;
+
+const StyledLabel = styled(Box)`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
 
 type Props = {
   session: components['schemas']['UserSessionModel'];
@@ -9,12 +30,29 @@ type Props = {
 
 /**
  * Location is only present when the instance is configured with a GeoIP database, so the IP stays
- * the fallback rather than the primary display.
+ * the fallback rather than the primary display. The flag carries the country, which keeps long
+ * country names out of a column that has to stay narrow - the tooltip spells it out.
  */
 export function SessionLocation({ session }: Props) {
-  const { city, country, ip } = session;
+  const { city, country, countryCode, ip } = session;
 
-  const location =
+  const flagEmoji = countryCode
+    ? countryCodeToFlagEmoji(countryCode)
+    : undefined;
+
+  const label = city || country;
+
+  if (!label) {
+    return (
+      <StyledRoot data-cy="session-list-item-location">
+        <StyledLabel>
+          {ip || <T keyName="session-item-unknown-location" defaultValue="—" />}
+        </StyledLabel>
+      </StyledRoot>
+    );
+  }
+
+  const full =
     city && country ? (
       <T
         keyName="session-location"
@@ -22,22 +60,22 @@ export function SessionLocation({ session }: Props) {
         params={{ city, country }}
       />
     ) : (
-      country || city
+      label
     );
-
-  if (!location) {
-    return (
-      <Box data-cy="session-list-item-location">
-        {ip || <T keyName="session-item-unknown-location" defaultValue="—" />}
-      </Box>
-    );
-  }
 
   return (
-    <Tooltip title={ip ?? ''} disableHoverListener={!ip}>
-      <Box data-cy="session-list-item-location" sx={{ width: 'fit-content' }}>
-        {location}
-      </Box>
+    <Tooltip
+      title={
+        <Box>
+          <Box>{full}</Box>
+          {ip && <Box>{ip}</Box>}
+        </Box>
+      }
+    >
+      <StyledRoot data-cy="session-list-item-location">
+        {flagEmoji && <StyledFlag flagEmoji={flagEmoji} />}
+        <StyledLabel>{label}</StyledLabel>
+      </StyledRoot>
     </Tooltip>
   );
 }

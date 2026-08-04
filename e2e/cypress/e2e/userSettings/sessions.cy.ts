@@ -23,12 +23,11 @@ describe('Active sessions', () => {
   const row = (ip: string) =>
     gcyAdvanced({ value: 'session-list-item', 'session-ip': ip });
 
-  const visitSessions = () => cy.visit(`${HOST}/account/sessions`);
+  const visitSessions = () => cy.visit(`${HOST}/account/security`);
 
-  it('is reachable from the user menu', () => {
-    gcy('global-user-menu-button').click();
-    gcy('user-menu-sessions').click();
-    cy.url().should('include', '/account/sessions');
+  it('is part of the account security screen', () => {
+    visitSessions();
+    gcy('account-security-sessions').should('exist');
     gcy('session-list-item').should('exist');
   });
 
@@ -70,9 +69,7 @@ describe('Active sessions', () => {
 
   it('shows the location, falling back to the IP when there is none', () => {
     visitSessions();
-    row('10.10.0.1')
-      .findDcy('session-list-item-location')
-      .contains('Prague, Czechia');
+    row('10.10.0.1').findDcy('session-list-item-location').contains('Prague');
     // a session located to a country but no city shows the country alone
     row('10.10.0.11')
       .findDcy('session-list-item-location')

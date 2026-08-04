@@ -6,40 +6,117 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { confirmation } from 'tg.hooks/confirmation';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
+import { useDateFormatter } from 'tg.hooks/useLocale';
 
 import { getUserAgentDisplay } from './getUserAgentDisplay';
 import { SessionAuthTypeLabel } from './SessionAuthTypeLabel';
 import { SessionLocation } from './SessionLocation';
+import {
+  SESSIONS_GRID_COLUMNS,
+  SESSIONS_ROW_PADDING,
+  SESSIONS_WIDE_LAYOUT,
+} from './sessionsGrid';
+
+const DATE_FORMAT: Intl.DateTimeFormatOptions = {
+  dateStyle: 'medium',
+  timeStyle: 'short',
+};
 
 const StyledRoot = styled(Box)`
   display: grid;
-  gap: 0.5rem;
-
-  @container (min-width: 899px) {
-    grid-template-columns: 2fr 1fr 1fr 1fr auto;
-  }
-
-  border-bottom: 1px solid ${({ theme }) => theme.palette.emphasis.A100};
+  gap: 4px 8px;
   align-items: center;
+  padding: ${SESSIONS_ROW_PADDING};
+  border-bottom: 1px solid ${({ theme }) => theme.palette.divider1};
+  grid-template-areas:
+    'device action'
+    'meta   meta';
+  grid-template-columns: 1fr auto;
 
-  &:last-child {
+  &:last-of-type {
     border-bottom: none;
   }
 
-  padding: 0.5rem;
+  @container (min-width: ${SESSIONS_WIDE_LAYOUT}) {
+    grid-template-areas: 'device location created lastUsed action';
+    grid-template-columns: ${SESSIONS_GRID_COLUMNS};
+    align-items: center;
+  }
+`;
+
+/**
+ * Narrow: one wrapping line of labelled facts. Wide: `display: contents` dissolves this wrapper so
+ * the three cells become columns of the row's own grid.
+ */
+const StyledMeta = styled(Box)`
+  grid-area: meta;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 16px;
+
+  @container (min-width: ${SESSIONS_WIDE_LAYOUT}) {
+    display: contents;
+  }
 `;
 
 const StyledDevice = styled(Box)`
+  grid-area: device;
+  min-width: 0;
+`;
+
+const StyledDeviceName = styled(Box)`
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-weight: bold;
+  gap: 8px;
+  font-weight: 500;
   color: ${({ theme }) => theme.palette.text.primary};
+`;
+
+const StyledDeviceLabel = styled('span')`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 const StyledCaption = styled(Box)`
   font-size: 13px;
   color: ${({ theme }) => theme.palette.text.secondary};
+`;
+
+const StyledCell = styled(Box)`
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+  font-size: 14px;
+  color: ${({ theme }) => theme.palette.text.secondary};
+`;
+
+/** The column headings only exist in the wide layout, so narrow rows label themselves. */
+const StyledInlineLabel = styled('span')`
+  flex-shrink: 0;
+  font-size: 13px;
+  color: ${({ theme }) => theme.palette.text.disabled};
+
+  @container (min-width: ${SESSIONS_WIDE_LAYOUT}) {
+    display: none;
+  }
+`;
+
+/** One row per session means a wall of buttons - kept quiet until hovered. */
+const StyledRevokeButton = styled(Button)`
+  color: ${({ theme }) => theme.palette.text.secondary};
+
+  &:hover {
+    color: ${({ theme }) => theme.palette.error.main};
+    background: ${({ theme }) => theme.palette.error.main}14;
+  }
+`;
+
+const StyledAction = styled(Box)`
+  grid-area: action;
+  justify-self: end;
 `;
 
 type Props = {
@@ -49,6 +126,7 @@ type Props = {
 export function SessionListItem({ session }: Props) {
   const message = useMessage();
   const { logout } = useGlobalActions();
+  const formatDate = useDateFormatter();
 
   const revokeMutation = useApiMutation({
     url: '/v2/user/sessions/{id}',
@@ -96,16 +174,21 @@ export function SessionListItem({ session }: Props) {
 
   return (
     <StyledRoot data-cy="session-list-item" data-cy-session-ip={session.ip}>
-      <Box>
-        <StyledDevice data-cy="session-list-item-device" title={device?.title}>
-          {device ? (
-            device.label
-          ) : (
-            <T
-              keyName="session-item-unknown-device"
-              defaultValue="Unknown device"
-            />
-          )}
+      <StyledDevice>
+        <StyledDeviceName
+          data-cy="session-list-item-device"
+          title={device?.title}
+        >
+          <StyledDeviceLabel>
+            {device ? (
+              device.label
+            ) : (
+              <T
+                keyName="session-item-unknown-device"
+                defaultValue="Unknown device"
+              />
+            )}
+          </StyledDeviceLabel>
           {session.isCurrent && (
             <Chip
               data-cy="session-list-item-current-badge"
@@ -116,41 +199,55 @@ export function SessionListItem({ session }: Props) {
               }
             />
           )}
-        </StyledDevice>
+        </StyledDeviceName>
         <StyledCaption>
           <SessionAuthTypeLabel type={session.type} />
         </StyledCaption>
-      </Box>
-      <SessionLocation session={session} />
-      <Box data-cy="session-list-item-created">
-        <T
-          keyName="session-item-created"
-          defaultValue="Signed in on {date, date, long}"
-          params={{ date: session.createdAt }}
-        />
-      </Box>
-      <Box data-cy="session-list-item-last-used">
-        {session.lastUsedAt ? (
-          <T
-            keyName="session-item-last-used"
-            defaultValue="Last used on {date, date, long}"
-            params={{ date: session.lastUsedAt }}
-          />
-        ) : (
-          <T keyName="session-item-never-used" defaultValue="Never used" />
-        )}
-      </Box>
-      <Box>
-        <Button
+      </StyledDevice>
+
+      <StyledMeta>
+        <StyledCell sx={{ gridArea: 'location' }}>
+          <StyledInlineLabel>
+            <T keyName="sessions-column-location" defaultValue="Location" />
+          </StyledInlineLabel>
+          <SessionLocation session={session} />
+        </StyledCell>
+
+        <StyledCell
+          sx={{ gridArea: 'created' }}
+          data-cy="session-list-item-created"
+        >
+          <StyledInlineLabel>
+            <T keyName="sessions-column-signed-in" defaultValue="Signed in" />
+          </StyledInlineLabel>
+          {formatDate(session.createdAt, DATE_FORMAT)}
+        </StyledCell>
+
+        <StyledCell
+          sx={{ gridArea: 'lastUsed' }}
+          data-cy="session-list-item-last-used"
+        >
+          <StyledInlineLabel>
+            <T keyName="sessions-column-last-used" defaultValue="Last used" />
+          </StyledInlineLabel>
+          {session.lastUsedAt ? (
+            formatDate(session.lastUsedAt, DATE_FORMAT)
+          ) : (
+            <T keyName="session-item-never-used" defaultValue="Never used" />
+          )}
+        </StyledCell>
+      </StyledMeta>
+
+      <StyledAction>
+        <StyledRevokeButton
           data-cy="session-list-item-revoke-button"
           size="small"
-          variant="outlined"
-          color="error"
+          variant="text"
           onClick={onRevoke}
         >
           <T keyName="session-revoke-button" defaultValue="Revoke" />
-        </Button>
-      </Box>
+        </StyledRevokeButton>
+      </StyledAction>
     </StyledRoot>
   );
 }
