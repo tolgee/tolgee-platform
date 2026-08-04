@@ -160,6 +160,8 @@ export class LINKS {
     `edit/${p(PARAMS.PAT_ID)}`
   );
 
+  static USER_SESSIONS = Link.ofParent(LINKS.USER_SETTINGS, 'sessions');
+
   static USER_PROFILE = Link.ofParent(LINKS.USER_SETTINGS, 'profile');
 
   static USER_ACCOUNT_SECURITY = Link.ofParent(LINKS.USER_SETTINGS, 'security');

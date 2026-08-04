@@ -3,6 +3,7 @@ package io.tolgee.pubSub
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.batch.events.JobCancelEvent
 import io.tolgee.batch.events.JobQueueItemsEvent
+import io.tolgee.security.authentication.SessionEvictEvent
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import io.tolgee.websocket.RedisWebsocketEventWrapper
@@ -30,5 +31,10 @@ class RedisPubSubReceiver(
   fun receiveJobCancel(message: String) {
     val data = objectMapper.readValue(message, Long::class.java)
     applicationEventPublisher.publishEvent(JobCancelEvent(data))
+  }
+
+  fun receiveSessionEvict(message: String) {
+    val deviceId = objectMapper.readValue(message, String::class.java)
+    applicationEventPublisher.publishEvent(SessionEvictEvent(deviceId))
   }
 }

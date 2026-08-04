@@ -254,7 +254,6 @@ declare namespace DataCy {
         "global-search-field": true;
         "global-search-field-clear": true;
         "global-user-menu-button": true;
-        "glossaries": true;
         "glossaries-empty-add-button": true;
         "glossaries-list-more-button": true;
         "glossary-batch-delete-button": true;
@@ -540,7 +539,6 @@ declare namespace DataCy {
         "plan-limit-dialog-close": true;
         "plan-limit-exceeded-popover": true;
         "plan_seat_limit_exceeded_while_accepting_invitation_message": true;
-        "profile": true;
         "project-ai-prompt-dialog-description-input": true;
         "project-ai-prompt-dialog-save": true;
         "project-base-language-tm-conflict-confirm": true;
@@ -721,7 +719,16 @@ declare namespace DataCy {
         "sensitive-dialog-otp-input": true;
         "sensitive-dialog-password-input": true;
         "sensitive-protection-dialog": true;
+        "session-list-item": true;
+        "session-list-item-created": true;
+        "session-list-item-current-badge": true;
+        "session-list-item-device": true;
+        "session-list-item-last-used": true;
+        "session-list-item-location": true;
+        "session-list-item-revoke-button": true;
+        "sessions-revoke-all-others-button": true;
         "settings-menu-item": true;
+        "settings-menu-item-sessions": true;
         "sign-up-submit-button": true;
         "signup-error-free-seat-limit": true;
         "signup-error-plan-seat-limit": true;
@@ -879,7 +886,6 @@ declare namespace DataCy {
         "translation-label-add": true;
         "translation-label-control": true;
         "translation-label-delete": true;
-        "translation-memories": true;
         "translation-memories-empty-add-button": true;
         "translation-memories-list-more-button": true;
         "translation-memory-delete-button": true;
@@ -992,6 +998,7 @@ declare namespace DataCy {
         "user-menu-organization-settings": true;
         "user-menu-organization-switch": true;
         "user-menu-server-administration": true;
+        "user-menu-sessions": true;
         "user-menu-theme-switch": true;
         "user-menu-user-settings": true;
         "user-profile": true;

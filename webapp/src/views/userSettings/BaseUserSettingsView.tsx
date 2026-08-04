@@ -28,6 +28,11 @@ export const BaseUserSettingsView: React.FC<React.PropsWithChildren<Props>> = ({
           label: t('user-account-security-title'),
         },
         {
+          link: LINKS.USER_SESSIONS.build(),
+          label: t('user_menu_sessions', 'Active sessions'),
+          'data-cy': 'settings-menu-item-sessions',
+        },
+        {
           link: LINKS.USER_ACCOUNT_NOTIFICATIONS.build(),
           label: t('user_menu_notifications'),
         },

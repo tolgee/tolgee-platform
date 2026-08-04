@@ -74,6 +74,20 @@ export const useAuthService = (
     },
   });
 
+  const revokeCurrentSessionLoadable = useApiMutation({
+    url: '/v2/user/sessions/current',
+    method: 'delete',
+    fetchOptions: {
+      disableAuthRedirect: true,
+      disableErrorNotification: true,
+      disable404Redirect: true,
+      disableAutoErrorHandle: true,
+    },
+    options: {
+      noGlobalLoading: true,
+    },
+  });
+
   const acceptInvitationLoadable = useApiMutation({
     url: '/v2/invitations/{code}/accept',
     method: 'put',
@@ -343,7 +357,14 @@ export const useAuthService = (
     saveAfterLoginLink(url: string) {
       securityService.saveAfterLoginLink({ url, userId });
     },
-    logout() {
+    async logout() {
+      if (tokenService.getToken()) {
+        try {
+          await revokeCurrentSessionLoadable.mutateAsync({});
+        } catch (e) {
+          // the session may already be gone, log out regardless
+        }
+      }
       return setJwtToken(undefined);
     },
     waitForSuperToken(afterAction: SuperTokenAction) {

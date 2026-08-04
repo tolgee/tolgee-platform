@@ -8,6 +8,7 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andIsUnauthorized
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.enums.UserSessionType
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.testing.AbstractControllerTest
 import io.tolgee.testing.assert
@@ -149,7 +150,7 @@ class ProjectApiKeyAuthenticationTest : AbstractControllerTest() {
     ).andIsOk
 
     // Revoke user permissions
-    val tokenFrantisek = jwtService.emitToken(testData.frantisekDobrota.id, isSuper = true)
+    val tokenFrantisek = jwtService.emitToken(testData.frantisekDobrota.id, type = UserSessionType.TEST, isSuper = true)
     performPut(
       "/v2/projects/${testData.frantasProject.id}/users/${testData.user.id}/set-permissions/VIEW",
       null,

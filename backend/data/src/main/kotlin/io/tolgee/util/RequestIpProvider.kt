@@ -16,14 +16,20 @@ class RequestIpProvider {
       val ipList = request.getHeader(header)
       if (ipList != null && ipList.isNotEmpty() && !"unknown".equals(ipList, ignoreCase = true)) {
         val ip = ipList.split(",".toRegex()).dropLastWhile { it.isEmpty() }.firstOrNull()
-        return ip
+        return ip?.take(MAX_IP_LENGTH)
       }
     }
 
-    return request.remoteAddr
+    return request.remoteAddr?.take(MAX_IP_LENGTH)
   }
 
   companion object {
+    /**
+     * Forwarding headers are attacker-controlled, while the longest genuine IPv6 literal is 45
+     * characters. Truncating here keeps over-long values from breaking every consumer's column.
+     */
+    const val MAX_IP_LENGTH = 64
+
     private val IP_HEADER_CANDIDATES =
       arrayOf(
         "X-Forwarded-For",

@@ -9,6 +9,7 @@ export type SettingsMenuItem = {
   link: string;
   label: string;
   'data-cy'?: string;
+  'data-cy-item'?: string;
 };
 
 type Props = {
@@ -27,7 +28,8 @@ export const SettingsMenu: React.FC<React.PropsWithChildren<Props>> = ({
             matchAsPrefix={true}
             linkTo={item.link}
             text={item.label}
-            dataCyItem={item['data-cy']}
+            dataCy={item['data-cy']}
+            dataCyItem={item['data-cy-item']}
           />
         ))}
       </MenuList>

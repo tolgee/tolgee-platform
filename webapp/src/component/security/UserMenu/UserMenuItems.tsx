@@ -70,6 +70,21 @@ export const UserMenuItems: FC<
         </MenuItem>
       ),
     },
+    {
+      id: 'sessions',
+      enabled: config.authentication && !!user,
+      Component: (props: { onClose: () => void }) => (
+        <MenuItem
+          component={Link}
+          to={LINKS.USER_SESSIONS.build()}
+          selected={location.pathname === LINKS.USER_SESSIONS.build()}
+          onClick={props.onClose}
+          data-cy="user-menu-sessions"
+        >
+          {t('user_menu_sessions', 'Active sessions')}
+        </MenuItem>
+      ),
+    },
   ] satisfies UserMenuItem[];
 
   const items = addEeItems(baseItems);

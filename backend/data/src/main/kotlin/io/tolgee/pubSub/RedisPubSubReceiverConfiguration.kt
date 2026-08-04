@@ -29,6 +29,7 @@ class RedisPubSubReceiverConfiguration(
     const val WEBSOCKET_TOPIC = "websocket"
     const val JOB_QUEUE_TOPIC = "job_queue"
     const val JOB_CANCEL_TOPIC = "job_cancel"
+    const val SESSION_EVICT_TOPIC = "session_evict"
   }
 
   @Bean
@@ -49,6 +50,11 @@ class RedisPubSubReceiverConfiguration(
   @Bean
   fun redisJobCancelPubsubListenerAdapter(): MessageListenerAdapter {
     return MessageListenerAdapter(redisPubsubReceiver(), RedisPubSubReceiver::receiveJobCancel.name)
+  }
+
+  @Bean
+  fun redisSessionEvictPubsubListenerAdapter(): MessageListenerAdapter {
+    return MessageListenerAdapter(redisPubsubReceiver(), RedisPubSubReceiver::receiveSessionEvict.name)
   }
 
   @Bean
@@ -84,6 +90,7 @@ class RedisPubSubReceiverConfiguration(
     )
     container.addMessageListener(redisJobQueuePubsubListenerAdapter(), PatternTopic(JOB_QUEUE_TOPIC))
     container.addMessageListener(redisJobCancelPubsubListenerAdapter(), PatternTopic(JOB_CANCEL_TOPIC))
+    container.addMessageListener(redisSessionEvictPubsubListenerAdapter(), PatternTopic(SESSION_EVICT_TOPIC))
     return container
   }
 }

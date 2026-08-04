@@ -63,6 +63,12 @@ class ActivityRevision : java.io.Serializable {
    */
   var authorId: Long? = null
 
+  /**
+   * The impersonator, when the change was made through impersonation. Same no-foreign-key reasoning
+   * as [authorId].
+   */
+  var actingAuthorId: Long? = null
+
   @Column(columnDefinition = "jsonb")
   @Type(JsonBinaryType::class)
   var meta: MutableMap<String, Any?>? = null
