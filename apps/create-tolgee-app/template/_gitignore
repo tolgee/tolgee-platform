@@ -1,0 +1,18 @@
+node_modules
+dist
+dist-ssr
+*.local
+*.tsbuildinfo
+
+# Holds TOLGEE_APP_REGISTRATION_SECRET / TOLGEE_APP_CLIENT_SECRET — never commit.
+.env.local
+
+# Dev-tunnel state written by `npm run dev`.
+.tolgee-dev/
+
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.iml
+*.log

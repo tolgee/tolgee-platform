@@ -30,6 +30,12 @@ export const BaseAdministrationView: React.FC<
       label: t('administration_users'),
       condition: () => true,
     },
+    {
+      id: 'apps',
+      link: LINKS.ADMINISTRATION_APPS,
+      label: t('administration_apps', 'Apps'),
+      condition: () => true,
+    },
   ];
 
   const menuItems = addItems(baseItems);

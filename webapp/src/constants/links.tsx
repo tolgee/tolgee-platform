@@ -66,6 +66,8 @@ export enum PARAMS {
   BRANCH = 'branch',
   MERGE_ID = 'mergeId',
   PLAN_MIGRATION_ID = 'migrationId',
+  APP_INSTALL_ID = 'appInstallId',
+  APP_MODULE_KEY = 'appModuleKey',
 }
 
 export class LINKS {
@@ -193,6 +195,8 @@ export class LINKS {
   );
 
   static ADMINISTRATION_USERS = Link.ofParent(LINKS.ADMINISTRATION, 'users');
+
+  static ADMINISTRATION_APPS = Link.ofParent(LINKS.ADMINISTRATION, 'apps');
 
   static ADMINISTRATION_EE_LICENSE = Link.ofParent(
     LINKS.ADMINISTRATION,
@@ -369,6 +373,11 @@ export class LINKS {
 
   static PROJECT_INTEGRATE = Link.ofParent(LINKS.PROJECT, 'integrate');
 
+  static PROJECT_APP_PAGE = Link.ofParent(
+    LINKS.PROJECT,
+    'apps/' + p(PARAMS.APP_INSTALL_ID) + '/' + p(PARAMS.APP_MODULE_KEY)
+  );
+
   /**
    * Visible with edit permissions
    */
@@ -392,6 +401,7 @@ export class LINKS {
     LINKS.PROJECT_EDIT,
     'export-import'
   );
+  static PROJECT_EDIT_APPS = Link.ofParent(LINKS.PROJECT_EDIT, 'apps');
 
   static PROJECT_LANGUAGES = Link.ofParent(LINKS.PROJECT, 'languages');
 

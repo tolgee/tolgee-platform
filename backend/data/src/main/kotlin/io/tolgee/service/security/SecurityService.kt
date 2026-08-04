@@ -124,6 +124,32 @@ class SecurityService(
         .expand(
           getProjectPermissionScopesNoApiKey(projectId, authenticationFacade.authenticatedUser.id),
         ).toSet()
+
+    if (authenticationFacade.isAppAuth) {
+      val appAuth = authenticationFacade.appAuthentication
+      if (appAuth.projectId != null && appAuth.projectId != projectId) {
+        return emptySet()
+      }
+      val installScopes = Scope.expand(appAuth.appInstall.grantedScopes).toSet()
+
+      val actingAs = appAuth.actingAsUserAccount
+      if (actingAs != null) {
+        val actingAsScopes =
+          Scope
+            .expand(getProjectPermissionScopesNoApiKey(projectId, actingAs.id))
+            .toSet()
+        return installScopes.intersect(actingAsScopes)
+      }
+
+      if (appAuth.isInstallContext) {
+        // M2M token without an acting-as user — the app's own granted scopes, no user intersection.
+        return installScopes
+      }
+
+      // User-context JWT — intersect with the iframe user's project scopes.
+      return installScopes.intersect(projectScopes)
+    }
+
     val apiKey = activeApiKey ?: return projectScopes
 
     return Scope.expand(apiKey.scopes).toSet().intersect(projectScopes.toSet())

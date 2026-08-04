@@ -22,12 +22,16 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.AuthExpiredException
 import io.tolgee.exceptions.AuthenticationException
+import io.tolgee.exceptions.PermissionException
 import io.tolgee.security.BILLING_API_KEY_PREFIX
 import io.tolgee.security.PAT_PREFIX
 import io.tolgee.security.ratelimit.RateLimitService
 import io.tolgee.security.thirdParty.SsoDelegate
+import io.tolgee.service.apps.AppEnablementService
+import io.tolgee.service.apps.AppInstallService
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PatService
+import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.UserAccountService
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
@@ -48,14 +52,27 @@ class AuthenticationFilter(
   @Lazy
   private val jwtService: JwtService,
   @Lazy
+  private val appTokenService: AppTokenService,
+  @Lazy
+  private val appInstallService: AppInstallService,
+  @Lazy
+  private val appEnablementService: AppEnablementService,
+  @Lazy
   private val userAccountService: UserAccountService,
   @Lazy
   private val apiKeyService: ApiKeyService,
   @Lazy
   private val patService: PatService,
   @Lazy
+  private val permissionService: PermissionService,
+  @Lazy
   private val ssoDelegate: SsoDelegate,
 ) : OncePerRequestFilter() {
+  companion object {
+    private const val ACTING_AS_USER_HEADER = "X-Tolgee-Act-As-User-Id"
+    private val PROJECT_URL_REGEX = Regex("/v2/projects/(\\d+)")
+  }
+
   private val authenticationProperties
     get() = tolgeeProperties.authentication
   private val internalProperties
@@ -88,7 +105,19 @@ class AuthenticationFilter(
     val authorization = request.getHeader("Authorization")
     if (authorization != null) {
       if (authorization.startsWith("Bearer ")) {
-        val auth = jwtService.validateToken(authorization.substring(7))
+        val token = authorization.substring(7)
+
+        // Try app-token (audience `tg.app`) first. If validation returns null the token is not an
+        // app token (wrong audience / signature) and we fall through to the user JWT path. A
+        // well-formed app token that references a revoked or disabled entity throws instead.
+        val appAuth = tryAppTokenAuth(request, token)
+        if (appAuth != null) {
+          checkIfSsoUserStillValid(appAuth.principal)
+          SecurityContextHolder.getContext().authentication = appAuth
+          return
+        }
+
+        val auth = jwtService.validateToken(token)
         checkIfSsoUserStillValid(auth.principal)
 
         SecurityContextHolder.getContext().authentication = auth
@@ -128,6 +157,115 @@ class AuthenticationFilter(
           isSuperToken = true,
         )
     }
+  }
+
+  /**
+   * Returns an [AppAuthentication] if the token parses as an app token and live entity resolution
+   * succeeds. Returns null when the token is not an app token (so the caller falls back to user JWT
+   * validation). Throws for app tokens that are well-formed but reference revoked/missing entities
+   * or an install that is not enabled for the requested project.
+   */
+  private fun tryAppTokenAuth(
+    request: HttpServletRequest,
+    token: String,
+  ): AppAuthentication? {
+    val claims =
+      try {
+        appTokenService.validateToken(token)
+      } catch (_: AuthenticationException) {
+        return null
+      }
+
+    if (claims.isInstallContext) {
+      return installContextAuth(request, token, claims)
+    }
+    return userContextAuth(token, claims)
+  }
+
+  private fun userContextAuth(
+    token: String,
+    claims: AppTokenClaims,
+  ): AppAuthentication {
+    val install =
+      appInstallService.findForAppAuth(claims.installId)
+        ?: throw AuthenticationException(Message.INVALID_JWT_TOKEN)
+
+    val user =
+      userAccountService.findDto(claims.userId!!)
+        ?: throw AuthenticationException(Message.INVALID_JWT_TOKEN)
+
+    if (user.tokensValidNotBefore != null && claims.issuedAt.before(user.tokensValidNotBefore)) {
+      throw AuthExpiredException(Message.EXPIRED_JWT_TOKEN)
+    }
+
+    if (!appEnablementService.isEnabledForProject(claims.projectId!!, claims.installId)) {
+      throw AuthenticationException(Message.INVALID_JWT_TOKEN)
+    }
+
+    return AppAuthentication(
+      credentials = token,
+      appInstall = install,
+      userAccount = user,
+      projectId = claims.projectId,
+      isInstallContext = false,
+    )
+  }
+
+  private fun installContextAuth(
+    request: HttpServletRequest,
+    token: String,
+    claims: AppTokenClaims,
+  ): AppAuthentication {
+    val resolution =
+      appInstallService.resolveForAppAuth(claims.installId)
+        ?: throw AuthenticationException(Message.INVALID_JWT_TOKEN)
+
+    val projectId = extractProjectIdFromUrl(request)
+    if (projectId != null && !appEnablementService.isEnabledForProject(projectId, claims.installId)) {
+      throw AuthenticationException(Message.INVALID_APP_CREDENTIALS)
+    }
+
+    val actingAsUser = resolveActingAsUser(request, projectId)
+
+    return AppAuthentication(
+      credentials = token,
+      appInstall = resolution.install,
+      userAccount = resolution.authorPrincipal,
+      projectId = projectId,
+      isInstallContext = true,
+      actingAsUserAccount = actingAsUser,
+    )
+  }
+
+  /**
+   * Resolves the optional acted-as user for an install-context request. Acting-as is only meaningful
+   * within a project context (there is nothing to bound the acted-as user's permissions against
+   * otherwise), and the acted-as user must be a member of that project — so an install can never act
+   * as a user with more access than that user genuinely has.
+   */
+  private fun resolveActingAsUser(
+    request: HttpServletRequest,
+    projectId: Long?,
+  ): UserAccountDto? {
+    val raw = request.getHeader(ACTING_AS_USER_HEADER) ?: return null
+    if (projectId == null) {
+      throw PermissionException(Message.APP_ACTING_AS_USER_NOT_PROJECT_MEMBER)
+    }
+    val userId =
+      raw.toLongOrNull() ?: throw AuthenticationException(Message.INVALID_APP_CREDENTIALS)
+    val user =
+      userAccountService.findDto(userId)
+        ?: throw PermissionException(Message.APP_ACTING_AS_USER_NOT_PROJECT_MEMBER)
+    val scopes = permissionService.getProjectPermissionScopesNoApiKey(projectId, user.id)
+    if (scopes.isNullOrEmpty()) {
+      throw PermissionException(Message.APP_ACTING_AS_USER_NOT_PROJECT_MEMBER)
+    }
+    return user
+  }
+
+  private fun extractProjectIdFromUrl(request: HttpServletRequest): Long? {
+    val match = PROJECT_URL_REGEX.find(request.requestURI) ?: return null
+    return match.groupValues.getOrNull(1)?.toLongOrNull()
   }
 
   private fun checkIfSsoUserStillValid(userDto: UserAccountDto) {

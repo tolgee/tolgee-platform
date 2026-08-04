@@ -1,0 +1,32 @@
+# Copy to .env.local (gitignored) and fill in. create-tolgee-app already wrote
+# a .env.local for you; this file documents every variable the app reads.
+
+# Tolgee instance this app talks to.
+TOLGEE_URL={{tolgeeUrl}}
+
+# Ports the dev servers bind to. Vite serves the iframe, Express serves
+# /manifest.json. Change both when running two apps side by side.
+VITE_PORT={{vitePort}}
+SERVER_PORT={{serverPort}}
+
+# --- Dev tunnel --------------------------------------------------------------
+# Tolgee fetches the manifest and loads the iframe from its own server, so both
+# have to be reachable *from Tolgee*. When TOLGEE_URL is not localhost,
+# `npm run dev` opens a Cloudflare quick tunnel and registers the app with that
+# public URL — required against staging or production, which run with
+# tolgee.apps.allow-local-addresses disabled and reject localhost URLs.
+#
+# Set this to skip the tunnel and use http://localhost:<VITE_PORT> instead
+# (only useful when Tolgee can reach this machine some other way).
+# TOLGEE_DEV_TUNNEL=none
+
+# --- Self-registration (connect mode "auto") ---------------------------------
+# The server registers itself on boot only when BOTH of these are set. The
+# registration secret is instance-wide and comes from the Tolgee administrator.
+# TOLGEE_ORGANIZATION_SLUG=my-org
+# TOLGEE_APP_REGISTRATION_SECRET=
+
+# Credentials a successful registration returns. The client secret is shown
+# once, at first registration — paste it here to keep it.
+# TOLGEE_APP_CLIENT_ID=
+# TOLGEE_APP_CLIENT_SECRET=

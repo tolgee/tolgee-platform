@@ -12,6 +12,8 @@ tolgee:
         token-price-in-credits-output: 1.5
   billing:
     enabled: false
+  apps:
+    enabled: true
   frontend-url: http://localhost:${TOLGEE_E2E_FRONTEND_PORT:8202}
   authentication:
     enabled: true

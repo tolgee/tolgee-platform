@@ -1,0 +1,11 @@
+node_modules
+dist
+*.tsbuildinfo
+
+# Dev-tunnel state written by `npm run dev`.
+.tolgee-dev/
+
+# Local env overrides — holds the one-time client secret.
+.env.local
+
+.DS_Store

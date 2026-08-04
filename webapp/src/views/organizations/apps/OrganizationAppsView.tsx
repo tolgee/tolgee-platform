@@ -1,14 +1,18 @@
 import { FunctionComponent } from 'react';
+import { Box } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { BaseOrganizationSettingsView } from '../components/BaseOrganizationSettingsView';
 import { LINKS, PARAMS } from 'tg.constants/links';
+import { useConfig } from 'tg.globalContext/helpers';
 import { useOrganization } from '../useOrganization';
 import { apps } from 'tg.ee';
+import { RegisteredAppsSection } from './registeredApps/RegisteredAppsSection';
 
 export const OrganizationAppsView: FunctionComponent<
   React.PropsWithChildren<unknown>
 > = () => {
   const organization = useOrganization();
+  const config = useConfig();
   const { t } = useTranslate();
 
   if (!organization) {
@@ -31,9 +35,12 @@ export const OrganizationAppsView: FunctionComponent<
       hideChildrenOnLoading={false}
       maxWidth="normal"
     >
-      {apps.map((App, index) => (
-        <App key={index} />
-      ))}
+      <Box display="grid" gap={2}>
+        {apps.map((App, index) => (
+          <App key={index} />
+        ))}
+        {config.appsEnabled && <RegisteredAppsSection />}
+      </Box>
     </BaseOrganizationSettingsView>
   );
 };

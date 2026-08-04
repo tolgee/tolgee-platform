@@ -68,6 +68,17 @@ class ProjectContextService(
             userId,
           )
 
+          if (authenticationFacade.isAppAuth) {
+            // The user reached this project through an enabled app in a project they belong to; the
+            // empty scope set means the app's grantedScopes don't intersect the user's project
+            // scopes. Surface a 403 with the required scopes — hiding project existence is the wrong
+            // threat model here.
+            throw PermissionException(
+              Message.OPERATION_NOT_PERMITTED,
+              requiredScopes?.map { it.value } ?: emptyList(),
+            )
+          }
+
           if (!canBypassForReadOnly()) {
             // Security consideration: if the user cannot see the project, pretend it does not exist.
             throw ProjectNotFoundException(project.id)
@@ -131,7 +142,7 @@ class ProjectContextService(
   }
 
   private val canUseAdminPermissions
-    get() = !authenticationFacade.isProjectApiKeyAuth
+    get() = !authenticationFacade.isProjectApiKeyAuth && !authenticationFacade.isAppAuth
 
   private fun canBypass(isWriteOperation: Boolean): Boolean {
     if (!canUseAdminPermissions) return false
