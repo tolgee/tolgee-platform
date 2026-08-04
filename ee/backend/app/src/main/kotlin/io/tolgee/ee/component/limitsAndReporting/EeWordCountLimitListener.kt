@@ -39,6 +39,16 @@ class EeWordCountLimitListener(
     if (billingConfProvider().enabled) {
       return
     }
+    // Both guards read cached licence limits, while reading the word count runs a
+    // full-instance aggregation. Machine translation commits a transaction every few keys,
+    // so leaving these below the count charges instances that have no word limit to enforce
+    // one aggregation per chunk.
+    if (limits.words.limit < 0) {
+      return
+    }
+    if (limits.autoUpgradeEnabled) {
+      return
+    }
 
     increaseWordCount(event.getWordUsageIncreaseAmount())
     onWordCountChanged()
