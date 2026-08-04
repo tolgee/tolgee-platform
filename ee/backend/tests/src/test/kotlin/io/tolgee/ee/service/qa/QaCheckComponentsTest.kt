@@ -18,7 +18,12 @@ class QaCheckComponentsTest {
     scanner.addIncludeFilter(AssignableTypeFilter(QaCheck::class.java))
     val candidates = scanner.findCandidateComponents("io.tolgee.ee.service.qa")
 
-    val componentClasses = candidates.map { Class.forName(it.beanClassName) }
+    val componentClasses =
+      candidates
+        .map { Class.forName(it.beanClassName) }
+        // Classpath scanning also surfaces anonymous QaCheck doubles defined in tests (e.g.
+        // `object : QaCheck` in QaCheckRunnerServiceTest); only real top-level checks are validated.
+        .filter { !it.isAnonymousClass && !it.isLocalClass && !it.isSynthetic }
 
     // Every QaCheck implementation must be a Spring-managed component
     componentClasses.forEach { clazz ->

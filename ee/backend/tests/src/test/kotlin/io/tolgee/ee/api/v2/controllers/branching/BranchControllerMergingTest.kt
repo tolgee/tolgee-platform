@@ -23,11 +23,13 @@ import io.tolgee.model.branching.BranchMergeChange
 import io.tolgee.model.enums.BranchKeyMergeChangeType
 import io.tolgee.model.enums.BranchKeyMergeResolutionType
 import io.tolgee.model.key.Key
+import io.tolgee.service.branching.BranchService
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.findByIdOrNull
 
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
@@ -49,6 +51,9 @@ class BranchControllerMergingTest : ProjectAuthControllerTest("/v2/projects/") {
   @Autowired
   lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
 
+  @Autowired
+  lateinit var branchService: BranchService
+
   @BeforeEach
   fun setup() {
     testData = BranchMergeTestData()
@@ -56,6 +61,39 @@ class BranchControllerMergingTest : ProjectAuthControllerTest("/v2/projects/") {
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     enabledFeaturesProvider.forceEnabled = setOf(Feature.BRANCHING)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `lastMerge resolves to the highest-id merge`() {
+    val branch =
+      branchRepository.findActiveWithLatestMerge(
+        testData.projectBuilder.self.id,
+        testData.conflictsBranch.id,
+      )
+    branch!!
+      .lastMerge!!
+      .id.assert
+      .isEqualTo(testData.mergedConflictBranchMerge.id)
+    branch.lastMerge!!
+      .id.assert
+      .isGreaterThan(testData.conflictBranchMerge.id)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `branch list resolves each branch's own latest merge`() {
+    val branches = branchService.getBranches(testData.projectBuilder.self.id, PageRequest.of(0, 20), null)
+    val conflicts = branches.content.first { it.id == testData.conflictsBranch.id }
+    val feature = branches.content.first { it.id == testData.featureBranch.id }
+    // featureBranchMerge owns the globally-highest merge id, so a query that filters to the single
+    // global max would null out conflictsBranch's lastMerge — this assertion pins per-branch resolution.
+    conflicts.lastMerge!!
+      .id.assert
+      .isEqualTo(testData.mergedConflictBranchMerge.id)
+    feature.lastMerge!!
+      .id.assert
+      .isEqualTo(testData.featureBranchMerge.id)
   }
 
   @Test

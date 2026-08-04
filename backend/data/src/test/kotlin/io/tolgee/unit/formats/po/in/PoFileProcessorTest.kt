@@ -1,7 +1,5 @@
 package io.tolgee.unit.formats.po.`in`
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.dtos.request.ImportFileMapping
 import io.tolgee.dtos.request.SingleStepImportRequest
 import io.tolgee.formats.importCommon.ImportFormat
@@ -14,6 +12,8 @@ import io.tolgee.util.assertTranslations
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import tools.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.module.kotlin.readValue
 import java.io.File
 
 class PoFileProcessorTest {

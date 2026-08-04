@@ -1,6 +1,5 @@
 package io.tolgee.ee.service.qa
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.reporting.BusinessEventPublisher
 import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
@@ -23,6 +22,7 @@ import org.postgresql.util.PGobject
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import tools.jackson.databind.ObjectMapper
 import java.sql.Timestamp
 import java.sql.Types
 

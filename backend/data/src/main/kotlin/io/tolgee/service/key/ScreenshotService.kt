@@ -93,10 +93,10 @@ class ScreenshotService(
     val reference = KeyScreenshotReference()
     reference.key = key
     reference.screenshot = screenshot
-    screenshot.keyScreenshotReferences.add(reference)
-    key.keyScreenshotReferences.add(reference)
     reference.setInfo(info, originalDimension, targetDimension)
     entityManager.persist(reference)
+    screenshot.keyScreenshotReferences.add(reference)
+    key.keyScreenshotReferences.add(reference)
     return screenshot
   }
 

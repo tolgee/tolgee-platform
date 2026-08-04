@@ -1,7 +1,7 @@
 package io.tolgee.fixtures
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.module.kotlin.jacksonObjectMapper
 
 class NdJsonParser(
   objectMapper: ObjectMapper,

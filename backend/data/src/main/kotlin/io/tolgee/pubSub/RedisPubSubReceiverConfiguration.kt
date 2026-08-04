@@ -1,17 +1,18 @@
 package io.tolgee.pubSub
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.task.SimpleAsyncTaskExecutor
 import org.springframework.data.redis.connection.RedisConnectionFactory
 import org.springframework.data.redis.listener.PatternTopic
 import org.springframework.data.redis.listener.RedisMessageListenerContainer
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
+import tools.jackson.databind.ObjectMapper
 
 @Configuration
 @ConditionalOnExpression(
@@ -74,6 +75,9 @@ class RedisPubSubReceiverConfiguration(
   fun redisJobPubsubContainer(): RedisMessageListenerContainer {
     val container = RedisMessageListenerContainer()
     container.setConnectionFactory(connectionFactory)
+    // Own executor: the subscription blocks its thread for the container's lifetime, so sharing the
+    // single-threaded taskExecutor would leave no thread to dispatch messages.
+    container.setSubscriptionExecutor(SimpleAsyncTaskExecutor("redis-job-subscription-"))
     container.setTaskExecutor(
       ThreadPoolTaskExecutor().apply {
         corePoolSize = 1

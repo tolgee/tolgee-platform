@@ -31,7 +31,7 @@ import org.springframework.stereotype.Component
 class ResilientCacheAccessor {
   private val logger = LoggerFactory.getLogger(ResilientCacheAccessor::class.java)
 
-  fun <T> get(
+  fun <T : Any> get(
     cache: Cache,
     key: Any,
     type: Class<T>,

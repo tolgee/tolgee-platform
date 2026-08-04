@@ -50,7 +50,7 @@ class GithubOAuthDelegate(
     if (response != null && response.containsKey("access_token")) {
       val headers = HttpHeaders()
       headers["Authorization"] = "token " + response["access_token"]
-      val entity = HttpEntity<String?>(null, headers)
+      val entity = HttpEntity<String>(null, headers)
 
       // get github user data
       val exchange =

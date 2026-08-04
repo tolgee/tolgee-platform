@@ -1,6 +1,5 @@
 package io.tolgee.activity
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.sentry.Sentry
 import io.tolgee.component.reporting.SdkInfoProvider
 import io.tolgee.security.authentication.AuthenticationFacade
@@ -14,6 +13,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.method.HandlerMethod
 import org.springframework.web.servlet.HandlerInterceptor
 import org.springframework.web.servlet.ModelAndView
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 import java.util.Base64

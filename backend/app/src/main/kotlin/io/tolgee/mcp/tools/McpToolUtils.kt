@@ -50,7 +50,7 @@ fun McpSyncServer.addTool(
   )
 }
 
-fun <T> pagedResponse(
+fun <T : Any> pagedResponse(
   page: Page<T>,
   mapper: (T) -> Any?,
 ): Map<String, Any?> =

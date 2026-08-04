@@ -1,6 +1,5 @@
 package io.tolgee.ee.service
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.AbstractSpringTest
 import io.tolgee.api.SubscriptionStatus
 import io.tolgee.constants.Feature
@@ -23,6 +22,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import kotlin.properties.Delegates
 
 @Suppress("SpringBootApplicationProperties")

@@ -23,7 +23,7 @@ interface SideChannelHandler {
 
   /**
    * Restores this handler's [entryName] bytes onto [context]'s target project, remapping source ids. May
-   * throw [com.fasterxml.jackson.core.JacksonException] on a malformed array, which the caller maps to 400.
+   * throw [tools.jackson.core.JacksonException] on a malformed array, which the caller maps to 400.
    */
   fun restore(
     json: ByteArray,

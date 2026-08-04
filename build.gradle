@@ -96,15 +96,15 @@ project(':server-app').afterEvaluate {
         dependsOn ':server-app:bootJar'
     }
 
-    tasks.register('startDbChangelogContainer') {
+    tasks.register('removeDbChangelogContainer', Exec) {
+        ignoreExitValue = true
+        commandLine "docker", "rm", "--force", "--volumes", dbSchemaContainerName
+    }
+
+    tasks.register('startDbChangelogContainer', Exec) {
+        dependsOn 'removeDbChangelogContainer'
+        commandLine "docker", "run", "-e", "POSTGRES_PASSWORD=postgres", "-d", "-p55538:5432", "--name", dbSchemaContainerName, "postgres:13"
         doLast {
-            exec {
-                ignoreExitValue = true
-                commandLine "docker", "rm", "--force", "--volumes", dbSchemaContainerName
-            }
-            exec {
-                commandLine "docker", "run", "-e", "POSTGRES_PASSWORD=postgres", "-d", "-p55538:5432", "--name", dbSchemaContainerName, "postgres:13"
-            }
             Thread.sleep(5000)
         }
     }
@@ -157,17 +157,30 @@ subprojects {
 
     ext['hibernate.version'] = hibernateVersion
     ext['commons-lang3.version'] = commonsLang3Version
-    ext['jackson.version'] = jacksonVersion
-    ext['tomcat.version'] = tomcatVersion
-    ext['netty.version'] = nettyVersion
-    ext['thymeleaf.version'] = thymeleafVersion
-    ext['postgresql.version'] = postgresqlVersion
-    ext['spring-framework.version'] = springFrameworkVersion
-    ext['spring-data-bom.version'] = springDataBomVersion
-    ext['spring-hateoas.version'] = springHateoasVersion
-    ext['spring-retry.version'] = springRetryVersion
-    ext['micrometer.version'] = micrometerVersion
-    ext['reactor-bom.version'] = reactorBomVersion
+
+    // The transitive Jackson 2 stack (pulled in by swagger/springdoc for schema generation) is pinned
+    // to a vulnerable 2.21.4 by Spring's dependency management; override it to the patched 2.21.5
+    // (CVE-2026-59889/54515). A catalog platform() BOM can't do this — dependency-management wins over
+    // Gradle platform/enforcedPlatform constraints, so it must go through the plugin's own override.
+    plugins.withId('io.spring.dependency-management') {
+        dependencyManagement {
+            dependencies {
+                dependencySet(group: 'com.fasterxml.jackson.core', version: '2.21.5') {
+                    entry 'jackson-databind'
+                    entry 'jackson-core'
+                }
+            }
+        }
+    }
+
+    // Prepend the antlr4-runtime hibernate-jpamodelgen needs to the kapt worker bootclasspath, else an
+    // older one wins and kapt fails: "Could not deserialize ATN with version 4 (expected 3)".
+    tasks.matching { it.name == 'kaptKotlin' }.configureEach {
+        def antlrRuntimeJar = configurations.kapt.files.find { it.name.startsWith('antlr4-runtime') }
+        if (antlrRuntimeJar != null) {
+            kaptProcessJvmArgs.add('-Xbootclasspath/a:' + antlrRuntimeJar.absolutePath)
+        }
+    }
 
     tasks.withType(Test).configureEach {
         testLogging {

@@ -23,7 +23,7 @@ interface GlossaryTermRepository : JpaRepository<GlossaryTerm, Long> {
 
   @Query(
     """
-    from GlossaryTerm te
+    select te from GlossaryTerm te
     left join GlossaryTermTranslation tr on tr.term.id = te.id
       and tr.languageTag = te.glossary.baseLanguageTag
       and (:languageTags is null or tr.languageTag in :languageTags)

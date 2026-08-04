@@ -39,7 +39,7 @@ class BusinessEventControllerTest : ProjectAuthControllerTest("/v2/projects/") {
         "data" to mapOf("test" to "test"),
       ),
       HttpHeaders().also {
-        it["Authorization"] = listOf(AuthorizedRequestFactory.getBearerTokenString(generateJwtToken(userAccount!!.id)))
+        it["Authorization"] = AuthorizedRequestFactory.getBearerTokenString(generateJwtToken(userAccount!!.id))
       },
     ).andIsOk
 

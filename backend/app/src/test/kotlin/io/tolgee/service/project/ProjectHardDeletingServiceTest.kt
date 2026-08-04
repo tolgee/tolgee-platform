@@ -14,12 +14,14 @@ import io.tolgee.development.testDataBuilder.data.ContentDeliveryConfigTestData
 import io.tolgee.development.testDataBuilder.data.MtSettingsTestData
 import io.tolgee.development.testDataBuilder.data.ProjectWithQaEntitiesTestData
 import io.tolgee.development.testDataBuilder.data.SuggestionsTestData
+import io.tolgee.development.testDataBuilder.data.TaskTestData
 import io.tolgee.development.testDataBuilder.data.WebhooksTestData
 import io.tolgee.dtos.BigMetaDto
 import io.tolgee.dtos.RelatedKeyDto
 import io.tolgee.fixtures.waitFor
 import io.tolgee.model.Project
 import io.tolgee.model.key.Namespace
+import io.tolgee.repository.notification.NotificationRepository
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.testing.assert
 import io.tolgee.util.executeInNewRepeatableTransaction
@@ -28,6 +30,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import java.util.Date
 
 @SpringBootTest
 class ProjectHardDeletingServiceTest : AbstractSpringTest() {
@@ -41,6 +44,9 @@ class ProjectHardDeletingServiceTest : AbstractSpringTest() {
   private lateinit var projectHardDeletingService: ProjectHardDeletingService
 
   private var testDataToClean: BaseTestData? = null
+
+  @Autowired
+  private lateinit var notificationRepository: NotificationRepository
 
   @AfterEach
   fun cleanTestDataAfterTest() {
@@ -213,6 +219,72 @@ class ProjectHardDeletingServiceTest : AbstractSpringTest() {
             .singleResult as Number
         ).toLong()
       remaining.assert.isEqualTo(0)
+    }
+  }
+
+  @Test
+  fun `deletes project with tasks`() {
+    val testData = TaskTestData()
+    testDataToClean = testData
+    testData.addNotifications()
+    testDataService.saveTestData(testData.root)
+    val taskNotificationId = testData.taskNotification.self.id
+    val projectNotificationId = testData.projectNotification.self.id
+
+    io.tolgee.util.executeInNewTransaction(platformTransactionManager) {
+      projectHardDeletingService.hardDeleteProject(testData.projectBuilder.self.refresh())
+    }
+
+    executeInNewTransaction {
+      projectService.find(testData.projectBuilder.self.id).assert.isNull()
+      notificationRepository
+        .findById(taskNotificationId)
+        .isPresent.assert
+        .isFalse()
+      notificationRepository
+        .findById(projectNotificationId)
+        .isPresent.assert
+        .isFalse()
+    }
+  }
+
+  @Test
+  fun `deletes project with a soft-deleted import referencing an existing language`() {
+    val testData = BaseTestData()
+    testDataToClean = testData
+    val importBuilder =
+      testData.projectBuilder
+        .addImport {
+          author = testData.user
+          deletedAt = Date()
+        }.build {
+          addImportFile {
+            name = "en.json"
+          }.build {
+            addImportLanguage {
+              name = "en"
+              existingLanguage = testData.englishLanguage
+            }
+          }
+        }
+    testDataService.saveTestData(testData.root)
+    val projectId = testData.projectBuilder.self.id
+    val importId = importBuilder.self.id
+
+    executeInNewTransaction(platformTransactionManager) {
+      projectHardDeletingService.hardDeleteProject(testData.projectBuilder.self.refresh())
+    }
+
+    executeInNewTransaction {
+      projectService.find(projectId).assert.isNull()
+      val remainingImports =
+        (
+          entityManager
+            .createNativeQuery("select count(*) from import where id = :importId")
+            .setParameter("importId", importId)
+            .singleResult as Number
+        ).toLong()
+      remainingImports.assert.isEqualTo(0)
     }
   }
 

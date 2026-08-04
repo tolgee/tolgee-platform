@@ -27,6 +27,7 @@ class BranchMergeTestData : BaseTestData("branch_merge", "Project prepared for b
   lateinit var conflictsBranchKey: Key
   lateinit var conflictBranchMerge: BranchMerge
   lateinit var mergedConflictBranchMerge: BranchMerge
+  lateinit var featureBranchMerge: BranchMerge
   lateinit var tag1: Tag
   lateinit var tag2: Tag
   lateinit var tag3: Tag
@@ -329,6 +330,17 @@ class BranchMergeTestData : BaseTestData("branch_merge", "Project prepared for b
           targetKey = mainConflictKey
           resolution = BranchKeyMergeResolutionType.SOURCE
         }
+      }.self
+    // A second branch with its own merge, created last so it owns the globally-highest merge id. This
+    // makes lastMerge resolution discriminate per-branch: a query that selects the single global max
+    // merge would return this row for conflictsBranch too (and null it out), which the tests catch.
+    featureBranchMerge =
+      addBranchMerge {
+        sourceBranch = featureBranch
+        targetBranch = mainBranch
+        sourceRevision = featureBranch.revision + 1
+        targetRevision = mainBranch.revision + 1
+        mergedAt = Date()
       }.self
   }
 

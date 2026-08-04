@@ -40,7 +40,7 @@ class BatchJobTestListener :
     logger.info("Stopping all application batch job runners")
   }
 
-  private inline fun <reified T> TestContext.getBean(): T {
+  private inline fun <reified T : Any> TestContext.getBean(): T {
     return this.applicationContext.getBean(T::class.java)
   }
 

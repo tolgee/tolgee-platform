@@ -1,6 +1,5 @@
 package io.tolgee.ee.api.v2.controllers.translationMemory
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.TranslationMemoryTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
@@ -18,8 +17,9 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
+import tools.jackson.databind.ObjectMapper
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -208,7 +208,7 @@ class SharedTranslationMemoryControllerTest : AuthorizedControllerTest() {
         .andReturn()
 
     val tree =
-      com.fasterxml.jackson.databind
+      tools.jackson.databind
         .ObjectMapper()
         .readTree(result.response.contentAsString)
     val tms = tree.at("/_embedded/translationMemories")

@@ -1,14 +1,14 @@
 package io.tolgee.unit.formats.yaml.`in`
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.formats.yaml.`in`.YamlImportFormatDetector
 import io.tolgee.testing.assert
 import io.tolgee.util.FileProcessorContextMockUtil
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.dataformat.yaml.YAMLFactory
+import tools.jackson.module.kotlin.readValue
 import java.io.File
 
 class YamlImportFormatDetectorTest {

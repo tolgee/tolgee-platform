@@ -1,7 +1,7 @@
 package io.tolgee.component
 
 import io.sentry.protocol.User
-import io.sentry.spring.jakarta.SentryUserProvider
+import io.sentry.spring7.SentryUserProvider
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.util.RequestIpProvider
 import org.springframework.stereotype.Component

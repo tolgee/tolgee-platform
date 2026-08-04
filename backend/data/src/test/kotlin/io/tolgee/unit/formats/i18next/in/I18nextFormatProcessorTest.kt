@@ -1,6 +1,5 @@
 package io.tolgee.unit.formats.i18next.`in`
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.formats.json.`in`.JsonFileProcessor
 import io.tolgee.testing.assert
 import io.tolgee.util.FileProcessorContextMockUtil
@@ -13,6 +12,7 @@ import io.tolgee.util.custom
 import io.tolgee.util.description
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import tools.jackson.module.kotlin.jacksonObjectMapper
 
 class I18nextFormatProcessorTest {
   lateinit var mockUtil: FileProcessorContextMockUtil

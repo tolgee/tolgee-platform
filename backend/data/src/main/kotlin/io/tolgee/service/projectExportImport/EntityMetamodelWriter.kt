@@ -1,11 +1,11 @@
 package io.tolgee.service.projectExportImport
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.service.projectExportImport.model.SerializedEntity
 import jakarta.persistence.metamodel.EntityType
 import jakarta.persistence.metamodel.PluralAttribute
 import org.springframework.stereotype.Component
+import tools.jackson.databind.ObjectMapper
 import java.lang.reflect.Field
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.jvm.isAccessible

@@ -1,7 +1,5 @@
 package io.tolgee.ee.component.llm
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
 import io.tolgee.constants.Message
 import io.tolgee.dtos.LlmParams
@@ -17,6 +15,8 @@ import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException.BadRequest
 import org.springframework.web.client.RestTemplate
+import tools.jackson.databind.JsonNode
+import tools.jackson.module.kotlin.jacksonObjectMapper
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)

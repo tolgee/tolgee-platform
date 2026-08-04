@@ -7,7 +7,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
 @Configuration
 class WebMvcConfiguration : WebMvcConfigurer {
-  override fun configureMessageConverters(converters: MutableList<HttpMessageConverter<*>?>) {
+  override fun configureMessageConverters(converters: MutableList<HttpMessageConverter<*>>) {
     converters.removeIf { it is MappingJackson2XmlHttpMessageConverter }
   }
 }

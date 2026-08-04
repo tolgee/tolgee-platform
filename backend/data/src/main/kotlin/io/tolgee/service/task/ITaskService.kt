@@ -8,6 +8,8 @@ import io.tolgee.model.views.TranslationToTaskView
 interface ITaskService {
   fun deleteAll(tasks: List<Task>)
 
+  fun deleteAllByProjectId(projectId: Long)
+
   fun findAssigneeById(
     projectId: Long,
     taskNumber: Long,
