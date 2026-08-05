@@ -1,7 +1,7 @@
 package io.tolgee.service.security
 
 import io.tolgee.component.CurrentDateProvider
-import io.tolgee.configuration.SessionBookkeepingExecutorConfiguration
+import io.tolgee.configuration.SessionBookkeepingExecutor
 import io.tolgee.model.UserSession
 import io.tolgee.model.enums.AuthAuditEventType
 import io.tolgee.model.enums.UserSessionType
@@ -169,7 +169,7 @@ class UserSessionService(
     revokeAll(listOf(session), revokedById)
   }
 
-  @Async(SessionBookkeepingExecutorConfiguration.SESSION_BOOKKEEPING_EXECUTOR)
+  @Async(SessionBookkeepingExecutor.BEAN_NAME)
   @Transactional
   fun updateLastUsedAsync(
     deviceId: String,

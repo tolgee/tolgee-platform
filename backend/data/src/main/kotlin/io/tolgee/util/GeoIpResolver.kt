@@ -1,6 +1,7 @@
 package io.tolgee.util
 
 import com.maxmind.db.CHMCache
+import com.maxmind.db.Reader
 import com.maxmind.geoip2.DatabaseReader
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import jakarta.annotation.PreDestroy
@@ -50,9 +51,17 @@ class GeoIpResolver(
     }
 
     return try {
-      DatabaseReader.Builder(file).withCache(CHMCache()).build().also {
-        logger.info("GeoIP database loaded from $path")
-      }
+      // Read into memory rather than memory-mapping it: the file lives on a volume shared with
+      // other replicas, whose init containers replace it when a new month is published, and a
+      // mapping outliving the file it points at is a SIGBUS rather than an exception.
+      DatabaseReader
+        .Builder(file)
+        .fileMode(Reader.FileMode.MEMORY)
+        .withCache(CHMCache())
+        .build()
+        .also {
+          logger.info("GeoIP database loaded from $path")
+        }
     } catch (e: Exception) {
       logger.error("Failed to open GeoIP database at $path; locations disabled", e)
       null

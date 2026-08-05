@@ -27,6 +27,17 @@ const StyledContainer = styled(Box)`
   }
 `;
 
+/** DB-IP City Lite is CC-BY-4.0; using it obliges us to credit it wherever the data is shown. */
+const StyledAttribution = styled(Box)`
+  margin-top: 8px;
+  font-size: 12px;
+  color: ${({ theme }) => theme.palette.text.disabled};
+
+  & a {
+    color: inherit;
+  }
+`;
+
 const StyledHeading = styled(Box)`
   display: flex;
   align-items: center;
@@ -52,6 +63,10 @@ export const SessionsSection = () => {
       enabled: revealed,
     },
   });
+
+  const hasLocation = list.data?._embedded?.sessions?.some(
+    (session) => session.city || session.country
+  );
 
   return (
     <Box mt={4} data-cy="account-security-sessions">
@@ -94,6 +109,20 @@ export const SessionsSection = () => {
             renderItem={(session) => <SessionListItem session={session} />}
           />
         </StyledContainer>
+      )}
+
+      {revealed && hasLocation && (
+        <StyledAttribution>
+          <T
+            keyName="sessions-geoip-attribution"
+            defaultValue="IP geolocation by <link>DB-IP</link>"
+            params={{
+              link: (
+                <a href="https://db-ip.com" target="_blank" rel="noreferrer" />
+              ),
+            }}
+          />
+        </StyledAttribution>
       )}
     </Box>
   );

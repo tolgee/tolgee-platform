@@ -1,5 +1,6 @@
 package io.tolgee.configuration
 
+import io.sentry.spring.jakarta.SentryTaskDecorator
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
@@ -15,7 +16,7 @@ class SessionBookkeepingExecutorConfiguration {
    * The queue is bounded and overflow is discarded: a dropped stamp is re-issued by the next request
    * past the debounce interval, so losing one is cheaper than making callers wait.
    */
-  @Bean(SESSION_BOOKKEEPING_EXECUTOR)
+  @Bean(SessionBookkeepingExecutor.BEAN_NAME)
   fun sessionBookkeepingExecutor(): ThreadPoolTaskExecutor {
     return ThreadPoolTaskExecutor().apply {
       corePoolSize = 1
@@ -23,11 +24,14 @@ class SessionBookkeepingExecutorConfiguration {
       queueCapacity = 1000
       setThreadNamePrefix("session-bookkeeping-")
       setRejectedExecutionHandler(ThreadPoolExecutor.DiscardPolicy())
+      // the same tracing and error context every other executor in the app propagates
+      setTaskDecorator(
+        CompositeTaskDecorator(
+          OtelContextTaskDecorator(),
+          SentryTaskDecorator(),
+        ),
+      )
       initialize()
     }
-  }
-
-  companion object {
-    const val SESSION_BOOKKEEPING_EXECUTOR = "sessionBookkeepingExecutor"
   }
 }

@@ -126,12 +126,12 @@ dependencies {
     /**
      * Caching
      */
-    implementation("com.github.ben-manes.caffeine:caffeine:3.0.5")
+    implementation("com.github.ben-manes.caffeine:caffeine")
 
     /**
      * GeoIP (MaxMind-format .mmdb reader; the database file itself is not bundled)
      */
-    implementation("com.maxmind.geoip2:geoip2:4.2.0")
+    implementation("com.maxmind.geoip2:geoip2:5.2.0")
 
     /**
      * Liquibase
