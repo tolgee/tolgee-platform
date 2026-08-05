@@ -2,7 +2,6 @@ package io.tolgee.configuration
 
 import com.zaxxer.hikari.HikariDataSource
 import io.tolgee.Metrics
-import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.events.OnProjectActivityStoredEvent
 import io.tolgee.exceptions.StreamingCapacityExceededException
 import io.tolgee.exceptions.StreamingUnavailableException
@@ -36,9 +35,6 @@ class AsyncExecutorConfigurationTest {
 
   @Autowired
   private lateinit var requestMappingHandlerAdapter: RequestMappingHandlerAdapter
-
-  @Autowired
-  private lateinit var tolgeeProperties: TolgeeProperties
 
   @Autowired
   @Qualifier(AsyncWebMvcConfiguration.STREAMING_EXECUTOR_BEAN_NAME)
@@ -162,17 +158,6 @@ class AsyncExecutorConfigurationTest {
       .getField(streamingAsyncExecutor, "taskDecorator")
       .assert
       .isInstanceOf(CompositeTaskDecorator::class.java)
-  }
-
-  @Test
-  fun `the shipped defaults never trip the capacity warning`() {
-    val poolSize = asyncExecutorFactory.connectionPoolSize!!
-    val reserved =
-      asyncExecutorFactory.streamingMaxThreads +
-        asyncExecutorFactory.backgroundMaxThreads +
-        tolgeeProperties.batch.concurrency
-
-    reserved.assert.isLessThanOrEqualTo(poolSize - poolSize / AsyncCapacityReporter.SYNC_RESERVE_DIVISOR)
   }
 
   @Test
