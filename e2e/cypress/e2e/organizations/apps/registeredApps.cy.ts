@@ -1,16 +1,11 @@
 import { login } from '../../../common/apiCalls/common';
 import { appsTestData } from '../../../common/apiCalls/testData/testData';
-import { API_URL, HOST } from '../../../common/constants';
+import {
+  APP_MANIFEST_URL,
+  registerAppFromManifest,
+} from '../../../common/apps';
+import { HOST } from '../../../common/constants';
 import { gcy } from '../../../common/shared';
-
-const MANIFEST_URL = `${API_URL}/internal/e2e-data/apps/manifest.json`;
-
-const registerApp = () => {
-  gcy('organization-apps-register-button').click();
-  gcy('organization-apps-register-manifest-url').type(MANIFEST_URL);
-  gcy('organization-apps-register-continue').click();
-  gcy('organization-apps-register-submit').click();
-};
 
 describe('organization apps', () => {
   let organizationSlug: string;
@@ -35,7 +30,7 @@ describe('organization apps', () => {
 
   it('registers an app from a manifest URL and enables it for a project', () => {
     gcy('organization-apps-register-button').click();
-    gcy('organization-apps-register-manifest-url').type(MANIFEST_URL);
+    gcy('organization-apps-register-manifest-url').type(APP_MANIFEST_URL);
     gcy('organization-apps-register-continue').click();
     gcy('organization-apps-register-consent-scope').should(
       'contain',
@@ -60,8 +55,7 @@ describe('organization apps', () => {
   });
 
   it('refreshes an app manifest from the org settings', () => {
-    registerApp();
-    gcy('organization-apps-item').should('exist');
+    registerAppFromManifest();
 
     gcy('organization-apps-item-refresh').click();
     gcy('organization-apps-refresh-dialog').should('be.visible');
@@ -75,8 +69,7 @@ describe('organization apps', () => {
   });
 
   it('removes a registered app', () => {
-    registerApp();
-    gcy('organization-apps-item').should('exist');
+    registerAppFromManifest();
 
     gcy('organization-apps-item-remove').click();
     gcy('global-confirmation-confirm').click();
