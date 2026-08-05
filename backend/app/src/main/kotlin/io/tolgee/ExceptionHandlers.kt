@@ -13,7 +13,7 @@ import io.tolgee.exceptions.ErrorException
 import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.exceptions.ErrorResponseTyped
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.exceptions.StreamingCapacityExceededException
+import io.tolgee.exceptions.StreamingUnavailableException
 import io.tolgee.security.ratelimit.RateLimitBlockedException
 import io.tolgee.security.ratelimit.RateLimitResponseBody
 import io.tolgee.security.ratelimit.RateLimitedException
@@ -277,7 +277,7 @@ class ExceptionHandlers(
     ex: RejectedExecutionException,
     response: HttpServletResponse,
   ): ResponseEntity<ErrorResponseBody> {
-    if (!isStreamingRejection(ex)) {
+    if (!isStreamingUnavailable(ex)) {
       return handleOtherExceptions(ex)
     }
     logger.debug("Streaming pool saturated, rejecting request", ex)
@@ -300,8 +300,8 @@ class ExceptionHandlers(
     return serverBusy(response)
   }
 
-  private fun isStreamingRejection(ex: Throwable): Boolean =
-    generateSequence(ex) { it.cause }.any { it is StreamingCapacityExceededException }
+  private fun isStreamingUnavailable(ex: Throwable): Boolean =
+    generateSequence(ex) { it.cause }.any { it is StreamingUnavailableException }
 
   private fun serverBusy(response: HttpServletResponse): ResponseEntity<ErrorResponseBody> {
     dropStagedStreamingHeaders(response)

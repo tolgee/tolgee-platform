@@ -51,6 +51,17 @@ class AsyncCapacityReporterTest {
     events.infos.assert.anyMatch { it.contains("streaming threads") }
   }
 
+  /** Guards the two divisors against the reporter's reserve without restating either. */
+  @Test
+  fun `the shipped derivation never trips the reporter`() {
+    listOf(10, 20, 30, 60, 100, 200).forEach { poolSize ->
+      report(connectionPoolSize = poolSize, batchConcurrency = 1)
+        .warnings.assert
+        .describedAs("connection pool of $poolSize")
+        .isEmpty()
+    }
+  }
+
   private fun report(
     connectionPoolSize: Int?,
     batchConcurrency: Int,

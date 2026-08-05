@@ -48,6 +48,11 @@ class AsyncExecutorFactory(
       // ThreadPoolExecutor rejects allowCoreThreadTimeOut with a non-positive keep-alive.
       setAllowCoreThreadTimeOut(keepAliveSeconds > 0)
       setThreadNamePrefix(threadNamePrefix)
+      // Making these beans gave them a shutdown they never had. Without this, a task submitted by a
+      // request still in flight when the context starts closing is rejected into its caller.
+      setAcceptTasksAfterContextClose(true)
+      setWaitForTasksToCompleteOnShutdown(true)
+      setAwaitTerminationSeconds(SHUTDOWN_DRAIN_SECONDS)
       setRejectedExecutionHandler(rejectedExecutionHandler)
       setTaskDecorator(
         CompositeTaskDecorator(
@@ -72,6 +77,7 @@ class AsyncExecutorFactory(
     const val STREAMING_POOL_DIVISOR = 3
     const val BACKGROUND_POOL_DIVISOR = 6
     const val FALLBACK_CONNECTION_POOL_SIZE = 10
+    const val SHUTDOWN_DRAIN_SECONDS = 20
 
     const val UNBOUNDED_QUEUE = Int.MAX_VALUE
 

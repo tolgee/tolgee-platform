@@ -4,6 +4,7 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.tolgee.component.VersionFilter
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.StreamingCapacityExceededException
+import io.tolgee.exceptions.StreamingUnavailableException
 import io.tolgee.testing.assert
 import io.tolgee.util.StreamingResponseBodyProvider
 import org.junit.jupiter.api.Test
@@ -16,7 +17,8 @@ import org.springframework.web.context.request.async.AsyncRequestTimeoutExceptio
 import java.util.concurrent.RejectedExecutionException
 
 class ExceptionHandlersAsyncCapacityTest {
-  private val exceptionHandlers = ExceptionHandlers(Metrics(SimpleMeterRegistry()))
+  private val metrics = Metrics(SimpleMeterRegistry())
+  private val exceptionHandlers = ExceptionHandlers(metrics)
 
   @Test
   fun `answers a saturated streaming pool with 503 and Retry-After`() {
@@ -116,6 +118,46 @@ class ExceptionHandlersAsyncCapacityTest {
 
     response.isCommitted.assert.isFalse()
     result.statusCode.assert.isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
+  }
+
+  @Test
+  fun `counts a request that aged out of the queue`() {
+    val before = metrics.streamingQueueTimeoutCounter.count()
+
+    exceptionHandlers.handleAsyncRequestTimeout(
+      AsyncRequestTimeoutException(),
+      MockHttpServletRequest(),
+      MockHttpServletResponse(),
+    )
+
+    metrics.streamingQueueTimeoutCounter
+      .count()
+      .assert
+      .isEqualTo(before + 1)
+  }
+
+  /** A pool that is shutting down is unavailable, not overloaded — 503, but not a saturation count. */
+  @Test
+  fun `answers a shutdown rejection with 503 as well`() {
+    val shuttingDown =
+      TaskRejectedException("shutting down", StreamingUnavailableException("Streaming pool is shutting down"))
+
+    val result = exceptionHandlers.handleAsyncCapacityExceeded(shuttingDown, MockHttpServletResponse())
+
+    result.statusCode.assert.isEqualTo(HttpStatus.SERVICE_UNAVAILABLE)
+  }
+
+  @Test
+  fun `preserves every value of a repeated header it keeps`() {
+    val response = MockHttpServletResponse()
+    response.addHeader(HttpHeaders.VARY, "Origin")
+    response.addHeader(HttpHeaders.VARY, "Accept-Encoding")
+    response.setHeader(HttpHeaders.ETAG, "\"staged\"")
+
+    handle(response)
+
+    response.getHeaders(HttpHeaders.VARY).assert.containsExactly("Origin", "Accept-Encoding")
+    response.getHeader(HttpHeaders.ETAG).assert.isNull()
   }
 
   private fun handle(response: MockHttpServletResponse) =

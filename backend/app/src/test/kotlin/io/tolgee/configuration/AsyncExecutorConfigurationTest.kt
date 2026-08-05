@@ -5,6 +5,7 @@ import io.tolgee.Metrics
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.events.OnProjectActivityStoredEvent
 import io.tolgee.exceptions.StreamingCapacityExceededException
+import io.tolgee.exceptions.StreamingUnavailableException
 import io.tolgee.testing.assert
 import io.tolgee.websocket.ActivityWebsocketListener
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -188,6 +189,19 @@ class AsyncExecutorConfigurationTest {
   fun `the streaming bean itself carries the rejecting policy`() {
     streamingAsyncExecutor.threadPoolExecutor.rejectedExecutionHandler.assert
       .isInstanceOf(StreamingAbortPolicy::class.java)
+  }
+
+  @Test
+  fun `a shutting-down pool is not reported as saturation`() {
+    var counted = false
+    val policy = StreamingAbortPolicy { counted = true }
+    val executor = ThreadPoolExecutor(1, 1, 0, TimeUnit.SECONDS, java.util.concurrent.SynchronousQueue())
+    executor.shutdown()
+
+    assertThatThrownBy { policy.rejectedExecution({}, executor) }
+      .isInstanceOf(StreamingUnavailableException::class.java)
+      .isNotInstanceOf(StreamingCapacityExceededException::class.java)
+    counted.assert.isFalse()
   }
 
   @Test

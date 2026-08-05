@@ -20,7 +20,12 @@ class AsyncCapacityReporter(
     val connectionPoolSize = asyncExecutorFactory.connectionPoolSize
 
     if (connectionPoolSize == null) {
-      logger.info("Async capacity: $streaming streaming threads, $background background threads.")
+      logger.info(
+        "Async capacity: $streaming streaming threads, $background background threads. The DataSource " +
+          "does not report a pool size, so these were derived from an assumed " +
+          "${AsyncExecutorFactory.FALLBACK_CONNECTION_POOL_SIZE} connections — set " +
+          "tolgee.async.streaming.max-threads and tolgee.async.background.max-threads explicitly.",
+      )
       return
     }
 
