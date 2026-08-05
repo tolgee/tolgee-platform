@@ -17,6 +17,7 @@ import io.tolgee.security.ratelimit.RateLimitBlockedException
 import io.tolgee.security.ratelimit.RateLimitResponseBody
 import io.tolgee.security.ratelimit.RateLimitedException
 import io.tolgee.util.Logging
+import io.tolgee.util.StreamingResponseBodyProvider
 import io.tolgee.util.logger
 import jakarta.persistence.EntityNotFoundException
 import jakarta.servlet.http.HttpServletRequest
@@ -273,32 +274,30 @@ class ExceptionHandlers : Logging {
     ex: RejectedExecutionException,
     response: HttpServletResponse,
   ): ResponseEntity<ErrorResponseBody> {
-    // Spring wraps the policy's exception in TaskRejectedException. Any other rejection — a shutting
-    // down executor, some other pool — belongs on the generic path, Sentry included.
-    if (generateSequence(ex as Throwable) { it.cause }.none { it is StreamingCapacityExceededException }) {
+    if (!isStreamingRejection(ex)) {
       return handleOtherExceptions(ex)
     }
     logger.debug("Streaming pool saturated, rejecting request", ex)
     return serverBusy(response)
   }
 
-  /**
-   * A request that aged out of the streaming queue never started writing, so it is the same capacity
-   * condition as an outright rejection — and answering it generically would raise a Sentry event per
-   * overloaded request. A stream that timed out mid-write is a different animal: its response is
-   * already committed, nothing can be said to the client, and it is worth reporting.
-   */
   @ExceptionHandler(AsyncRequestTimeoutException::class)
   fun handleAsyncRequestTimeout(
     ex: AsyncRequestTimeoutException,
+    request: HttpServletRequest,
     response: HttpServletResponse,
   ): ResponseEntity<ErrorResponseBody> {
-    if (response.isCommitted) {
+    // A stream that ran and still timed out is a slowness regression, not capacity, and reporting it
+    // is the point. Only one that never left the queue is the same condition as a rejection.
+    if (request.getAttribute(StreamingResponseBodyProvider.STREAM_STARTED_ATTRIBUTE) != null) {
       return handleOtherExceptions(ex)
     }
     logger.debug("Request timed out waiting for a streaming thread", ex)
     return serverBusy(response)
   }
+
+  private fun isStreamingRejection(ex: Throwable): Boolean =
+    generateSequence(ex) { it.cause }.any { it is StreamingCapacityExceededException }
 
   private fun serverBusy(response: HttpServletResponse): ResponseEntity<ErrorResponseBody> {
     dropStagedStreamingHeaders(response)
@@ -308,13 +307,7 @@ class ExceptionHandlers : Logging {
       .body(ErrorResponseBody(Message.SERVER_BUSY.code, null))
   }
 
-  /**
-   * The streaming return-value handler stages Content-Disposition and an ETag before the task is
-   * submitted, and a caching proxy would happily key this 503 against that ETag. Only reset() clears
-   * them, but it also clears everything the filter chain has already written — CORS, the version
-   * header, and the security headers HeaderWriterFilter now writes eagerly. So everything unrelated
-   * to streaming is put back.
-   */
+  /** A caching proxy would key this 503 against the ETag the streaming handler already staged. */
   private fun dropStagedStreamingHeaders(response: HttpServletResponse) {
     if (response.isCommitted) return
     val preserved =

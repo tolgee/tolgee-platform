@@ -4,10 +4,12 @@ import io.tolgee.component.VersionFilter
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.StreamingCapacityExceededException
 import io.tolgee.testing.assert
+import io.tolgee.util.StreamingResponseBodyProvider
 import org.junit.jupiter.api.Test
 import org.springframework.core.task.TaskRejectedException
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
+import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.web.context.request.async.AsyncRequestTimeoutException
 import java.util.concurrent.RejectedExecutionException
@@ -87,7 +89,12 @@ class ExceptionHandlersAsyncCapacityTest {
     val response = MockHttpServletResponse()
     response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=export.zip")
 
-    val result = exceptionHandlers.handleAsyncRequestTimeout(AsyncRequestTimeoutException(), response)
+    val result =
+      exceptionHandlers.handleAsyncRequestTimeout(
+        AsyncRequestTimeoutException(),
+        MockHttpServletRequest(),
+        response,
+      )
 
     result.statusCode.assert.isEqualTo(HttpStatus.SERVICE_UNAVAILABLE)
     result.body
@@ -96,13 +103,17 @@ class ExceptionHandlersAsyncCapacityTest {
     response.getHeader(HttpHeaders.CONTENT_DISPOSITION).assert.isNull()
   }
 
+  /** A slow stream writes far less than one 8KB buffer, so commitment is not the signal. */
   @Test
-  fun `reports a stream that timed out after it started writing`() {
+  fun `reports a stream that ran and still timed out, even with nothing flushed`() {
+    val request = MockHttpServletRequest()
+    request.setAttribute(StreamingResponseBodyProvider.STREAM_STARTED_ATTRIBUTE, true)
     val response = MockHttpServletResponse()
-    response.flushBuffer()
 
-    val result = exceptionHandlers.handleAsyncRequestTimeout(AsyncRequestTimeoutException(), response)
+    val result =
+      exceptionHandlers.handleAsyncRequestTimeout(AsyncRequestTimeoutException(), request, response)
 
+    response.isCommitted.assert.isFalse()
     result.statusCode.assert.isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
   }
 

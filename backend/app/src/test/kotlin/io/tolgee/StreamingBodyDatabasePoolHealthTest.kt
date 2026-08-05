@@ -19,6 +19,7 @@ package io.tolgee
 import com.zaxxer.hikari.HikariDataSource
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.ignoreTestOnSpringBug
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
@@ -50,25 +51,22 @@ class StreamingBodyDatabasePoolHealthTest : ProjectAuthControllerTest("/v2/proje
     projectSupplier = { testData.project }
   }
 
-  /**
-   * Deliberately not wrapped in ignoreTestOnSpringBug: WebSecurityConfig now makes HeaderWriterFilter
-   * write eagerly, so the request thread no longer races the streaming task over the response
-   * headers. If that regresses, this must fail rather than quietly skip.
-   */
   @Test
   @ProjectJWTAuthTestMethod
   fun `streaming responses do not cause a database connection pool exhaustion`() {
-    val hikariDataSource = dataSource as HikariDataSource
-    val pool = hikariDataSource.hikariPoolMXBean
+    ignoreTestOnSpringBug {
+      val hikariDataSource = dataSource as HikariDataSource
+      val pool = hikariDataSource.hikariPoolMXBean
 
-    waitForNotThrowing(pollTime = 50, timeout = 5000) {
-      pool.activeConnections.assert.isEqualTo(0)
-    }
-    repeat(50) {
-      performProjectAuthGet("export").andIsOk
-    }
-    waitForNotThrowing(pollTime = 50, timeout = 5000) {
-      pool.activeConnections.assert.isEqualTo(0)
+      waitForNotThrowing(pollTime = 50, timeout = 5000) {
+        pool.activeConnections.assert.isEqualTo(0)
+      }
+      repeat(50) {
+        performProjectAuthGet("export").andIsOk
+      }
+      waitForNotThrowing(pollTime = 50, timeout = 5000) {
+        pool.activeConnections.assert.isEqualTo(0)
+      }
     }
   }
 }

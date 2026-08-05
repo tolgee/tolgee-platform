@@ -1,5 +1,6 @@
 package io.tolgee.configuration
 
+import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -7,6 +8,7 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 
+@ContextRecreatingTest
 @SpringBootTest(
   properties = [
     "tolgee.async.streaming.max-threads = 7",

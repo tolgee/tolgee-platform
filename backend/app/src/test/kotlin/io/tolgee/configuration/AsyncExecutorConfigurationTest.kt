@@ -15,8 +15,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.scheduling.annotation.Async
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import org.springframework.security.task.DelegatingSecurityContextAsyncTaskExecutor
-import org.springframework.security.web.SecurityFilterChain
-import org.springframework.security.web.header.HeaderWriterFilter
 import org.springframework.test.util.ReflectionTestUtils
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter
 import java.util.concurrent.CyclicBarrier
@@ -37,9 +35,6 @@ class AsyncExecutorConfigurationTest {
 
   @Autowired
   private lateinit var requestMappingHandlerAdapter: RequestMappingHandlerAdapter
-
-  @Autowired
-  private lateinit var securityFilterChain: SecurityFilterChain
 
   @Autowired
   private lateinit var tolgeeProperties: TolgeeProperties
@@ -130,17 +125,6 @@ class AsyncExecutorConfigurationTest {
 
     val delegate = ReflectionTestUtils.getField(installed!!, "delegate")
     delegate.assert.isSameAs(streamingAsyncExecutor)
-  }
-
-  @Test
-  fun `security headers are written before the chain, not while it unwinds`() {
-    val headerWriterFilter =
-      securityFilterChain.filters.filterIsInstance<HeaderWriterFilter>().single()
-
-    ReflectionTestUtils
-      .getField(headerWriterFilter, "shouldWriteHeadersEagerly")
-      .assert
-      .isEqualTo(true)
   }
 
   @Test

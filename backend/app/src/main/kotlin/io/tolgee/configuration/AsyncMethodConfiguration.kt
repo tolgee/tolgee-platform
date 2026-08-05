@@ -4,7 +4,6 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import org.springframework.beans.factory.ObjectProvider
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Primary
 import org.springframework.scheduling.annotation.AsyncConfigurer
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import java.util.concurrent.Executor
@@ -19,7 +18,6 @@ class AsyncMethodConfiguration(
 ) : AsyncConfigurer {
   override fun getAsyncExecutor(): Executor = backgroundAsyncExecutor()
 
-  @Primary
   @Bean(BACKGROUND_EXECUTOR_BEAN_NAME)
   fun backgroundAsyncExecutor(): ThreadPoolTaskExecutor {
     val factory = asyncExecutorFactory.getObject()

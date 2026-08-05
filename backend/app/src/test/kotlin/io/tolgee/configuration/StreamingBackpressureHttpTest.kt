@@ -1,6 +1,7 @@
 package io.tolgee.configuration
 
 import io.tolgee.Metrics
+import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
@@ -23,6 +24,7 @@ import java.util.concurrent.TimeUnit
  * an unset async result whether or not the 503 actually reaches a client. Only a real container
  * proves the rejection becomes a response.
  */
+@ContextRecreatingTest
 @SpringBootTest(
   webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
   properties = [

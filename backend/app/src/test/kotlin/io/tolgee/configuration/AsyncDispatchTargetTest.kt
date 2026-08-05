@@ -1,5 +1,6 @@
 package io.tolgee.configuration
 
+import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -11,6 +12,7 @@ import org.springframework.scheduling.annotation.Async
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 
+@ContextRecreatingTest
 @SpringBootTest
 @Import(AsyncDispatchTargetTest.AsyncProbeConfiguration::class)
 class AsyncDispatchTargetTest {

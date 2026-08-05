@@ -58,7 +58,7 @@ class ProjectExportImportController(
     val export = projectExportImportExporter.exportToTempFile(projectId, versionProvider.version)
     val tempFile = export.path
     // A saturated streaming pool rejects the body after this method returns, so the delete below
-    // never runs. Bound that rather than leaking the temp file for the life of the pod.
+    // never runs; this is the backstop, at JVM exit.
     tempFile.toFile().deleteOnExit()
     try {
       val body =

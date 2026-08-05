@@ -45,7 +45,6 @@ import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.access.intercept.AuthorizationFilter
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
-import org.springframework.security.web.header.HeaderWriterFilter
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
@@ -105,18 +104,6 @@ class WebSecurityConfig(
         it.requestMatchers("/api/**", "/v2/**").authenticated()
         it.anyRequest().permitAll()
       }.headers { headers ->
-        // Write the security headers before the chain proceeds. By default HeaderWriterFilter writes
-        // them while unwinding, which races a StreamingResponseBody task already writing the same
-        // response — spring-security#9175, the ConcurrentModificationException that
-        // io.tolgee.fixtures.springBug works around.
-        headers.withObjectPostProcessor(
-          object : ObjectPostProcessor<HeaderWriterFilter> {
-            override fun <O : HeaderWriterFilter?> postProcess(filter: O): O {
-              filter?.setShouldWriteHeadersEagerly(true)
-              return filter
-            }
-          },
-        )
         headers.xssProtection(Customizer.withDefaults())
         headers.contentTypeOptions(Customizer.withDefaults())
         headers.frameOptions {

@@ -27,6 +27,8 @@ import jakarta.persistence.EntityManager
 import org.hibernate.Session
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
+import org.springframework.web.context.request.RequestContextHolder
+import org.springframework.web.context.request.ServletRequestAttributes
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
 import tools.jackson.databind.ObjectMapper
 import java.io.OutputStream
@@ -42,7 +44,9 @@ class StreamingResponseBodyProvider(
     streamType: StreamType,
     fn: (os: OutputStream) -> Unit,
   ): StreamingResponseBody {
+    val request = (RequestContextHolder.getRequestAttributes() as? ServletRequestAttributes)?.request
     return StreamingResponseBody {
+      request?.setAttribute(STREAM_STARTED_ATTRIBUTE, true)
       val sample = Timer.start()
       val session = entityManager.unwrap(Session::class.java)
       try {
@@ -87,6 +91,11 @@ class StreamingResponseBodyProvider(
       (objectMapper.writeValueAsString(message) + "\n"),
     )
     this.flush()
+  }
+
+  companion object {
+    /** Distinguishes a stream that never left the queue from one that ran; see ExceptionHandlers. */
+    const val STREAM_STARTED_ATTRIBUTE = "io.tolgee.streamStarted"
   }
 
   private fun getErrorMessage(e: Throwable) =
