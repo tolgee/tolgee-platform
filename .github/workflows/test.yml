@@ -395,7 +395,7 @@ jobs:
 
       - name: Start backend
         run: |
-          ./gradlew server-app:bootRun --args='--spring.profiles.active=dev' &
+          ./gradlew server-app:bootRun --args='--spring.profiles.active=dev --tolgee.apps.enabled=true' &
           echo "Waiting for backend to start..."
           timeout 180 bash -c 'until curl -s http://localhost:8080/actuator/health > /dev/null 2>&1; do sleep 2; done'
           echo "Backend is ready"
