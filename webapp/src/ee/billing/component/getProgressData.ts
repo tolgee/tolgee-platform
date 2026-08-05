@@ -11,8 +11,13 @@ export const getProgressData = ({ usage }: { usage: UsageModel }) => {
 
   const keysProgress = new ProgressItem(usage.includedKeys, usage.currentKeys);
 
+  // A word plan neither charges nor enforces per seat — the server reports its seat limit as
+  // unlimited — yet the plan still carries an includedSeats allowance for the free tier. Showing
+  // a bar for it puts an organization permanently over a limit that does not exist, in red, with
+  // the top-bar critical warning stuck on.
+  const seatsEnforced = usage.seatsLimit !== -1;
   const seatsProgress = new ProgressItem(
-    usage.includedSeats,
+    seatsEnforced ? usage.includedSeats : 0,
     usage.currentSeats
   );
 

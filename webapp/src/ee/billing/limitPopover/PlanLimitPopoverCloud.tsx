@@ -41,11 +41,22 @@ export const PlanLimitPopoverCloud: React.FC<
   });
 
   const subscription = subscriptionLoadable.data;
+  const progressData = usage && getProgressData({ usage });
+
+  // The popover opens for any plan-limit error, including a batch job running out of MT credits,
+  // which shares the same counter. Offering auto-upgrade off the plan's metric alone told those
+  // users their word limit was exhausted and put a billing setting one click away for a problem
+  // that had nothing to do with words — so the words have to actually be exhausted.
+  const wordsExhausted = Boolean(
+    progressData?.wordsProgress.isInUse &&
+      progressData.wordsProgress.progress >= 1
+  );
   const wordsAutoUpgradeAvailable = Boolean(
     subscription &&
       subscription.plan.metricType === 'HOSTED_WORDS' &&
       !subscription.plan.free &&
-      !subscription.autoUpgradeEnabled
+      !subscription.autoUpgradeEnabled &&
+      wordsExhausted
   );
 
   const autoUpgradeMutation = useBillingApiMutation({
@@ -76,8 +87,6 @@ export const PlanLimitPopoverCloud: React.FC<
       })
     );
   };
-
-  const progressData = usage && getProgressData({ usage });
 
   return progressData ? (
     <GenericPlanLimitPopover
