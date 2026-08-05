@@ -1,13 +1,18 @@
 package io.tolgee.ee.component.limitsAndReporting
 
+import io.tolgee.activity.data.RevisionType
 import io.tolgee.component.publicBillingConfProvider.PublicBillingConfProvider
 import io.tolgee.ee.service.NoActiveSubscriptionException
 import io.tolgee.ee.service.eeSubscription.EeSubscriptionServiceImpl
 import io.tolgee.ee.service.eeSubscription.usageReporting.UsageReportingService
 import io.tolgee.events.BeforeOrganizationDeleteEvent
 import io.tolgee.events.OnProjectActivityEvent
+import io.tolgee.model.Language
 import io.tolgee.model.Organization
 import io.tolgee.model.Project
+import io.tolgee.model.activity.ActivityModifiedEntity
+import io.tolgee.model.branching.Branch
+import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.service.organization.OrganizationStatsService
 import io.tolgee.util.Logging
@@ -47,19 +52,25 @@ class EeWordCountReportingListener(
     }
 
     runSentryCatching {
-      val modifiedEntityClasses = event.modifiedEntities.keys.toSet()
-
-      val isTranslationsChanged = modifiedEntityClasses.any { it == Translation::class }
-
-      val isProjectDeletedChanged =
-        event.modifiedEntities[Project::class]?.any { it.value.modifications.contains("deletedAt") } == true
-
-      val isOrganizationDeletedChanged =
-        event.modifiedEntities[Organization::class]?.any { it.value.modifications.contains("deletedAt") } == true
-
-      if (isTranslationsChanged || isProjectDeletedChanged || isOrganizationDeletedChanged) {
+      if (event.changesWordCount()) {
         onWordCountChanged()
       }
+    }
+  }
+
+  /**
+   * Editing a translation changes the counted words directly. Everything else changes them by
+   * being soft-deleted or restored — the rows stay in the database but stop being counted — which
+   * only ever surfaces as a deletedAt modification on the owning entity. Missing one of these
+   * leaves the instance reporting words it no longer has, and being billed for them, while its
+   * own usage screen shows the correct figure.
+   */
+  private fun OnProjectActivityEvent.changesWordCount(): Boolean {
+    if (modifiedEntities.keys.any { it == Translation::class }) {
+      return true
+    }
+    return SOFT_DELETABLE_COUNTED_ENTITIES.any { type ->
+      modifiedEntities[type]?.any { it.value.isSoftDeletionChange() } == true
     }
   }
 
@@ -91,5 +102,21 @@ class EeWordCountReportingListener(
     } catch (e: NoActiveSubscriptionException) {
       logger.debug("No active subscription, skipping usage reporting.")
     }
+  }
+
+  /**
+   * Only a change to deletedAt counts. Creating an entity also lists the field among its
+   * modifications, and treating that as a deletion would report usage on every new key.
+   */
+  private fun ActivityModifiedEntity.isSoftDeletionChange(): Boolean =
+    revisionType == RevisionType.MOD && modifications.contains("deletedAt")
+
+  companion object {
+    /**
+     * Entities whose soft-deletion removes their words from the instance count — see the
+     * deleted_at filters in OrganizationStatsService.countAllWordsOnInstance.
+     */
+    private val SOFT_DELETABLE_COUNTED_ENTITIES =
+      listOf(Project::class, Organization::class, Key::class, Language::class, Branch::class)
   }
 }

@@ -90,6 +90,25 @@ class WordUsageReportingTest : AbstractSpringTest() {
   }
 
   @Test
+  fun `it reports word usage when a key is soft-deleted`() {
+    testWithTestData { testData, captor ->
+      val key =
+        testData.projectBuilder.data.keys
+          .first()
+          .self
+
+      // Soft-deleting a key touches only the key row, so nothing about the translations it owns
+      // is modified — yet their words stop counting. Without reporting that, the instance keeps
+      // being billed for words it no longer has.
+      keyService.softDeleteMultiple(listOf(key.id))
+
+      currentDateProvider.move(Duration.ofDays(1))
+      usageReportingService.reportIfNeeded()
+      captor.assertWords(organizationStatsService.countAllWordsOnInstance())
+    }
+  }
+
+  @Test
   fun `it reports word usage when organization is deleted`() {
     testWithTestData { testData, captor ->
       organizationService.delete(testData.projectBuilder.self.organizationOwner)
