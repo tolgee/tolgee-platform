@@ -15,6 +15,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
     "tolgee.async.streaming.queue-capacity = 9",
     "tolgee.async.streaming.keep-alive-seconds = 30",
     "tolgee.async.background.max-threads = 5",
+    "tolgee.async.background.keep-alive-seconds = 45",
   ],
 )
 class AsyncPropertyBindingTest {
@@ -42,5 +43,9 @@ class AsyncPropertyBindingTest {
       .backgroundAsyncExecutor()
       .corePoolSize.assert
       .isEqualTo(5)
+    asyncMethodConfiguration
+      .backgroundAsyncExecutor()
+      .keepAliveSeconds.assert
+      .isEqualTo(45)
   }
 }

@@ -12,6 +12,9 @@ import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.whenever
+import org.springframework.mock.web.MockHttpServletRequest
+import org.springframework.web.context.request.RequestContextHolder
+import org.springframework.web.context.request.ServletRequestAttributes
 import tools.jackson.databind.ObjectMapper
 import java.io.ByteArrayOutputStream
 import java.sql.Connection
@@ -64,6 +67,40 @@ class StreamingResponseBodyProviderMetricsTest {
       .writeTo(ByteArrayOutputStream())
 
     timerCount(StreamType.MT_SUGGEST).assert.isEqualTo(1L)
+  }
+
+  @Test
+  fun `records that the body started, so a timed-out stream is not mistaken for a queued one`() {
+    val request = MockHttpServletRequest()
+    RequestContextHolder.setRequestAttributes(ServletRequestAttributes(request))
+    try {
+      val body = provider.createStreamingResponseBody(StreamType.EXPORT_ZIP) { it.write(1) }
+      request.getAttribute(StreamingResponseBodyProvider.STREAM_STARTED_ATTRIBUTE).assert.isNull()
+
+      body.writeTo(ByteArrayOutputStream())
+
+      request
+        .getAttribute(StreamingResponseBodyProvider.STREAM_STARTED_ATTRIBUTE)
+        .assert
+        .isEqualTo(true)
+    } finally {
+      RequestContextHolder.resetRequestAttributes()
+    }
+  }
+
+  /** Pinned to literals: deriving them from StreamType.tag would keep green while Grafana breaks. */
+  @Test
+  fun `publishes the metric under the name and tag Grafana queries`() {
+    provider
+      .createStreamingResponseBody(StreamType.EXPORT_ZIP) { it.write(1) }
+      .writeTo(ByteArrayOutputStream())
+
+    meterRegistry
+      .find("tolgee.async.streaming.duration")
+      .tag("stream_type", "export_zip")
+      .timer()
+      .assert
+      .isNotNull
   }
 
   private fun timerCount(streamType: StreamType): Long =

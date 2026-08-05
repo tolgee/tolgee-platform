@@ -281,6 +281,13 @@ class Metrics(
       .register(meterRegistry)
   }
 
+  val streamingQueueTimeoutCounter: Counter by lazy {
+    Counter
+      .builder("tolgee.async.streaming.queue_timeout")
+      .description("Number of streaming requests that were queued and then aged out of the async timeout")
+      .register(meterRegistry)
+  }
+
   fun streamDurationTimer(streamType: StreamType): Timer =
     Timer
       .builder("tolgee.async.streaming.duration")

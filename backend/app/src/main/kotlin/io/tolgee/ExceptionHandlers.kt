@@ -4,6 +4,7 @@ import io.sentry.Sentry
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.tolgee.Metrics
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.validators.ValidationErrorType
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
@@ -53,7 +54,9 @@ import java.util.concurrent.RejectedExecutionException
 import java.util.function.Consumer
 
 @RestControllerAdvice
-class ExceptionHandlers : Logging {
+class ExceptionHandlers(
+  private val metrics: Metrics,
+) : Logging {
   @ExceptionHandler(MethodArgumentNotValidException::class)
   fun handleValidationExceptions(
     ex: MethodArgumentNotValidException,
@@ -292,6 +295,7 @@ class ExceptionHandlers : Logging {
     if (request.getAttribute(StreamingResponseBodyProvider.STREAM_STARTED_ATTRIBUTE) != null) {
       return handleOtherExceptions(ex)
     }
+    metrics.streamingQueueTimeoutCounter.increment()
     logger.debug("Request timed out waiting for a streaming thread", ex)
     return serverBusy(response)
   }

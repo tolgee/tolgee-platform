@@ -1,5 +1,6 @@
 package io.tolgee
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.tolgee.component.VersionFilter
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.StreamingCapacityExceededException
@@ -15,7 +16,7 @@ import org.springframework.web.context.request.async.AsyncRequestTimeoutExceptio
 import java.util.concurrent.RejectedExecutionException
 
 class ExceptionHandlersAsyncCapacityTest {
-  private val exceptionHandlers = ExceptionHandlers()
+  private val exceptionHandlers = ExceptionHandlers(Metrics(SimpleMeterRegistry()))
 
   @Test
   fun `answers a saturated streaming pool with 503 and Retry-After`() {

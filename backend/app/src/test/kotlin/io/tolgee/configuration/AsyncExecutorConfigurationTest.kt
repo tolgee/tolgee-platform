@@ -46,6 +46,10 @@ class AsyncExecutorConfigurationTest {
   @Autowired
   private lateinit var asyncMethodConfiguration: AsyncMethodConfiguration
 
+  @Autowired
+  @Qualifier(AsyncMethodConfiguration.BACKGROUND_EXECUTOR_BEAN_NAME)
+  private lateinit var backgroundAsyncExecutor: ThreadPoolTaskExecutor
+
   @Test
   fun `derives both pools from the database connection pool`() {
     (dataSource as HikariDataSource)
@@ -61,7 +65,7 @@ class AsyncExecutorConfigurationTest {
 
   @Test
   fun `no pool is left at the single-threaded default`() {
-    listOf(streamingAsyncExecutor, asyncMethodConfiguration.backgroundAsyncExecutor()).forEach { executor ->
+    listOf(streamingAsyncExecutor, backgroundAsyncExecutor).forEach { executor ->
       executor.corePoolSize.assert.isEqualTo(executor.maxPoolSize)
       executor.corePoolSize.assert.isGreaterThan(1)
     }
@@ -82,7 +86,18 @@ class AsyncExecutorConfigurationTest {
   }
 
   @Test
+  fun `the Async executor is the background bean itself`() {
+    asyncMethodConfiguration.asyncExecutor.assert.isSameAs(backgroundAsyncExecutor)
+  }
+
+  @Test
   fun `pools have distinguishable thread names`() {
+    setOf(
+      AsyncExecutorFactory.STREAMING_THREAD_NAME_PREFIX,
+      AsyncExecutorFactory.BACKGROUND_THREAD_NAME_PREFIX,
+      AsyncExecutorFactory.WEBSOCKET_THREAD_NAME_PREFIX,
+    ).assert.hasSize(3)
+
     streamingAsyncExecutor.threadNamePrefix.assert
       .isEqualTo(AsyncExecutorFactory.STREAMING_THREAD_NAME_PREFIX)
     asyncMethodConfiguration
@@ -127,6 +142,19 @@ class AsyncExecutorConfigurationTest {
     delegate.assert.isSameAs(streamingAsyncExecutor)
   }
 
+  /** core == max, so core-thread timeout is the only thing that ever releases a pooled thread. */
+  @Test
+  fun `pooled threads are released when idle`() {
+    streamingAsyncExecutor.threadPoolExecutor
+      .allowsCoreThreadTimeOut()
+      .assert
+      .isTrue()
+    backgroundAsyncExecutor.threadPoolExecutor
+      .allowsCoreThreadTimeOut()
+      .assert
+      .isTrue()
+  }
+
   @Test
   fun `the task decorator survives construction`() {
     ReflectionTestUtils
@@ -153,7 +181,7 @@ class AsyncExecutorConfigurationTest {
 
   @Test
   fun `background pool actually runs tasks in parallel`() {
-    assertRunsInParallel(asyncMethodConfiguration.backgroundAsyncExecutor())
+    assertRunsInParallel(backgroundAsyncExecutor)
   }
 
   @Test

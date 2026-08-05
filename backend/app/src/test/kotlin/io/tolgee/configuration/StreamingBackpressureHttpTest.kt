@@ -56,9 +56,7 @@ class StreamingBackpressureHttpTest {
     release.countDown()
     // Counting the latch down does not order the worker's return to the pool before the next test's
     // request arrives, and at queue-capacity 0 there is no slack to absorb that.
-    waitForNotThrowing(pollTime = 20, timeout = 10000) {
-      streamingAsyncExecutor.activeCount.assert.isEqualTo(0)
-    }
+    awaitDrained()
   }
 
   @Test
@@ -137,6 +135,12 @@ class StreamingBackpressureHttpTest {
       .firstValue("ETag")
       .isPresent.assert
       .isFalse()
+  }
+
+  private fun awaitDrained() {
+    waitForNotThrowing(pollTime = 20, timeout = 10000) {
+      streamingAsyncExecutor.activeCount.assert.isEqualTo(0)
+    }
   }
 
   private fun occupyTheOnlyStreamingThread() {
