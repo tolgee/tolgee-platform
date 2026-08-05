@@ -53,9 +53,9 @@ export const LanguagesSelect: FunctionComponent<
   const menuProps: Partial<MenuProps> = {
     variant: 'menu',
     PaperProps: {
-      style: {
-        width: 250,
-      },
+      sx: {
+        width:250,
+      }
     },
     id: `language-select-${props.context}-menu`,
     anchorOrigin: {
