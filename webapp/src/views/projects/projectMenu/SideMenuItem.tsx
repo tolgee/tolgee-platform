@@ -72,9 +72,7 @@ export function SideMenuItem({
   const matchesExactly = match.pathname === linkTo;
 
   const dataCySiblingProps = Object.fromEntries(
-    Object.entries(props).filter(
-      ([key]) => key.startsWith('data-cy-') && key !== 'data-cy'
-    )
+    Object.entries(props).filter(([key]) => key.startsWith('data-cy-'))
   );
 
   function wrapWithQuickStart(children: React.ReactNode) {
