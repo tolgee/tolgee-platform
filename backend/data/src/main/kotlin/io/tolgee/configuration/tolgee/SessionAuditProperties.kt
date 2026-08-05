@@ -51,6 +51,18 @@ class SessionAuditProperties {
 
   @DocProperty(
     description =
+      "How many reverse proxies sit in front of Tolgee. Addresses recorded as evidence - the " +
+        "session list and the authentication audit log - are read this many entries from the end " +
+        "of `X-Forwarded-For`, because a proxy appends the address it actually saw while a client " +
+        "can only prepend entries of its own. Leave at 0 when nothing proxies Tolgee, which uses " +
+        "the connection's address instead; set it to the number of trusted hops otherwise. Getting " +
+        "this too high lets clients forge their own address.",
+    defaultExplanation = "0, no proxy",
+  )
+  var trustedProxyCount: Int = 0
+
+  @DocProperty(
+    description =
       "Absolute path to a MaxMind-format GeoIP city database (`.mmdb`), used to show an approximate " +
         "location next to each session. No database is bundled with Tolgee; without this the session " +
         "list shows the IP address only. Both MaxMind GeoLite2 and DB-IP Lite databases work.",

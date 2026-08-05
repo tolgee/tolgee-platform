@@ -1,28 +1,45 @@
 package io.tolgee.util
 
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import org.springframework.stereotype.Component
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 
 @Component
-class RequestIpProvider {
+class RequestIpProvider(
+  private val tolgeeProperties: TolgeeProperties,
+) {
   /**
-   * The address the connection actually came from, which a client cannot choose - unlike the
-   * forwarding headers [getClientIp] reads. Anything that ends up in the audit trail or in front of
-   * a user as evidence uses this, the same value the rate limiter buckets on.
+   * The address to record as evidence - what the session list shows and the audit log keeps.
    *
-   * Behind a proxy this is the proxy's own address, which is useless for locating anyone but is at
-   * least never a lie. `server.forward-headers-strategy` would make the container derive it from
-   * `X-Forwarded-For` instead - do not set it unless the proxy in front is known to overwrite that
-   * header rather than append to it, because otherwise it hands the client back control of this
-   * value and of the rate limiter's bucket key.
+   * A proxy appends the address it actually observed to `X-Forwarded-For`, while a client can only
+   * prepend entries of its own, so counting from the end of the list is what makes the value
+   * unforgeable. With no proxy configured the connection's own address is used, which is the same
+   * value the rate limiter buckets on. Never the front of the list: that entry is whatever the
+   * caller chose to send.
    */
   fun getTrustedClientIp(): String? {
-    if (RequestContextHolder.getRequestAttributes() == null) {
-      return null
-    }
-    val request = (RequestContextHolder.getRequestAttributes() as ServletRequestAttributes).request
-    return request.remoteAddr?.take(MAX_IP_LENGTH)
+    val request = currentRequest() ?: return null
+    val hops = tolgeeProperties.authentication.sessionAudit.trustedProxyCount
+    if (hops <= 0) return request.remoteAddr?.take(MAX_IP_LENGTH)
+
+    val forwarded =
+      request
+        .getHeader("X-Forwarded-For")
+        ?.split(",")
+        ?.map { it.trim() }
+        ?.filter { it.isNotEmpty() }
+        ?: return request.remoteAddr?.take(MAX_IP_LENGTH)
+
+    return forwarded
+      .getOrNull(forwarded.size - hops)
+      ?.take(MAX_IP_LENGTH)
+      ?: request.remoteAddr?.take(MAX_IP_LENGTH)
+  }
+
+  private fun currentRequest(): jakarta.servlet.http.HttpServletRequest? {
+    val attributes = RequestContextHolder.getRequestAttributes() ?: return null
+    return (attributes as ServletRequestAttributes).request
   }
 
   fun getClientIp(): String? {
