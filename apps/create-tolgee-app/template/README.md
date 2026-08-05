@@ -149,3 +149,18 @@ From `@tolgee/apps-sdk/server`:
 Edit `server/manifest.template.json`. Keep `baseUrl` as `__BASE_URL__` — the
 server substitutes the real origin on every request. After changing the
 manifest, re-fetch it in Tolgee so the change is picked up.
+
+### The `icon` field
+
+A page's `icon` is either a **native Tolgee icon name** or an **emoji** (the
+generated manifest starts with `🧩`).
+
+Names come from Tolgee's icon registry — [Untitled UI
+icons](https://www.untitledui.com/free-icons) plus Tolgee's own set — and have
+to match an exported component **exactly**, numeric suffix included: `Key01` and
+`Key02` exist, plain `Key` does not. Other valid names: `Globe01`,
+`Translate01`, `LayoutAlt04`, `Settings01`, `BarChart01`, `Zap`.
+
+An unrecognised value is not an error — Tolgee renders the string as literal
+text. That is what makes emoji work, and it is how you spot a typo: the menu
+shows the word `Key` where the icon should be.

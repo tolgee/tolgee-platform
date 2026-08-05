@@ -13,7 +13,12 @@ export const DASHBOARD_ENTRY_KEY = 'main'
 /** Route the dashboard iframe loads, relative to the manifest `baseUrl`. */
 export const DASHBOARD_ENTRY_PATH = '/'
 
-/** Icon shown next to the app's item in the project menu. */
+/**
+ * Icon shown next to the app's item in the project menu: either an emoji or a
+ * native Tolgee icon name. A name must match an exported icon component
+ * exactly (`Key01`, not `Key`); anything else renders as literal text, which is
+ * what makes the emoji work.
+ */
 export const DASHBOARD_ICON = '🧩'
 
 /**

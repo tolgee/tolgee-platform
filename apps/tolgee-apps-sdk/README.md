@@ -58,9 +58,23 @@ const manifest: AppManifest = {
 }
 ```
 
-`icon` is either a name from the platform icon set or an emoji (`'🔑'`). A name has to
-match an exported icon component exactly — `Key01`, not `Key`. Anything the platform
-does not recognise is rendered as literal text, so a typo shows up as the name itself.
+### `icon`
+
+Either a **native Tolgee icon name** or an **emoji** (`'🔑'`, `'🧩'`).
+
+Names come from the platform's icon registry — [Untitled UI
+icons](https://www.untitledui.com/free-icons) plus Tolgee's own set — and must match an
+exported component **exactly**, numeric suffix included:
+
+| Valid | Not valid |
+| --- | --- |
+| `Key01`, `Key02` | `Key` — no such component |
+| `Globe01`, `Translate01`, `LayoutAlt04` | `globe01`, `Globe 01` — case and spacing count |
+| `Settings01`, `BarChart01`, `Zap` | `Book01` — not in the set |
+
+An unrecognised value is **not an error**: Tolgee renders the string as literal text.
+That is what makes emoji work, and it is how you spot a typo — the menu shows the word
+`Key` instead of an icon.
 
 Ship the manifest as a template with a `__BASE_URL__` placeholder and render it
 per request, so the URL can change between dev restarts (tunnels) without

@@ -33,9 +33,16 @@ export type AppDashboardPage = {
   /** Menu item label. */
   title: string
   /**
-   * Either a named icon from the platform icon set or an emoji. A name must match an
-   * exported icon component exactly (`Key01`, not `Key`); anything the platform does
-   * not recognise is rendered as literal text.
+   * Either a native Tolgee icon name or an emoji (`'🔑'`).
+   *
+   * Names come from the platform's icon registry — [Untitled UI
+   * icons](https://www.untitledui.com/free-icons) plus Tolgee's own set — and must
+   * match an exported component **exactly**: `Key01` and `Key02` exist, plain `Key`
+   * does not. Valid examples: `Key01`, `Globe01`, `Translate01`, `LayoutAlt04`,
+   * `Settings01`, `BarChart01`, `Zap`.
+   *
+   * An unrecognised value is not an error — Tolgee renders the string as literal
+   * text, so a typo shows up in the menu as the name you typed.
    */
   icon: string
   /** Route the iframe loads, relative to `baseUrl`. */

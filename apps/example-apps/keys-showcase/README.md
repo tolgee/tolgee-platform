@@ -147,6 +147,20 @@ there is nothing else to wire up. The script exchanges them for an access token
 translations. If the app has never registered — and no `TOLGEE_APP_CLIENT_ID` /
 `TOLGEE_APP_CLIENT_SECRET` are set — it says so and points at both ways to fix it.
 
+## Changing what the app contributes
+
+`server/manifest.template.json` is the source of truth. Keep `baseUrl` as `__BASE_URL__` — the
+server substitutes the real origin per request — and re-fetch the manifest in Tolgee afterwards.
+
+The page's `icon` is either a **native Tolgee icon name** or an **emoji**; this app uses
+`Key01`. Names come from Tolgee's icon registry ([Untitled UI
+icons](https://www.untitledui.com/free-icons) plus Tolgee's own set) and must match an exported
+component **exactly**, numeric suffix included — `Key01` and `Key02` exist, plain `Key` does
+not. Others: `Globe01`, `Translate01`, `LayoutAlt04`, `Settings01`, `BarChart01`, `Zap`.
+
+An unrecognised value is not an error: Tolgee renders the string as literal text. That is what
+makes emoji work, and how you spot a typo — the menu shows the word `Key` instead of an icon.
+
 ## Layout
 
 ```
