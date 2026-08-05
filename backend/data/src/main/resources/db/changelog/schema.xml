@@ -6144,4 +6144,9 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="jcizmar" id="1783771000000-27">
+        <addPrimaryKey columnNames="app_install_id, scope"
+                       constraintName="app_install_granted_scopePK"
+                       tableName="app_install_granted_scope"/>
+    </changeSet>
 </databaseChangeLog>
