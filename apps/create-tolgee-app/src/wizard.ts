@@ -40,43 +40,6 @@ export type Answers = {
   gitInit: boolean
 }
 
-const detectPackageManager = (): 'npm' | 'yarn' | 'pnpm' | 'bun' => {
-  const ua = process.env.npm_config_user_agent ?? ''
-  if (ua.startsWith('yarn')) return 'yarn'
-  if (ua.startsWith('pnpm')) return 'pnpm'
-  if (ua.startsWith('bun')) return 'bun'
-  return 'npm'
-}
-
-export const validateId = (raw: unknown): string | undefined => {
-  if (typeof raw !== 'string' || raw.length === 0) return 'App id is required.'
-  if (!/^[a-z][a-z0-9-]*$/.test(raw)) {
-    return 'Use kebab-case: lowercase letters, digits, hyphens.'
-  }
-  if (existsSync(resolve(process.cwd(), raw))) {
-    return `Directory "${raw}" already exists.`
-  }
-  return undefined
-}
-
-export const validateOrganizationSlug = (raw: unknown): string | undefined => {
-  if (typeof raw !== 'string' || raw.length === 0) {
-    return 'Organization slug is required for self-registration.'
-  }
-  if (!/^[a-z0-9][a-z0-9-]*$/i.test(raw)) {
-    return 'Slug looks wrong — copy it from the organization URL in Tolgee.'
-  }
-  return undefined
-}
-
-const abortIfCancelled = <T>(value: T | symbol): T => {
-  if (isCancel(value)) {
-    cancel('Cancelled.')
-    process.exit(0)
-  }
-  return value as T
-}
-
 export async function runWizard(
   initialId: string | undefined,
   sdkMode: SdkMode
@@ -181,6 +144,27 @@ export async function runWizard(
   }
 }
 
+export const validateId = (raw: unknown): string | undefined => {
+  if (typeof raw !== 'string' || raw.length === 0) return 'App id is required.'
+  if (!/^[a-z][a-z0-9-]*$/.test(raw)) {
+    return 'Use kebab-case: lowercase letters, digits, hyphens.'
+  }
+  if (existsSync(resolve(process.cwd(), raw))) {
+    return `Directory "${raw}" already exists.`
+  }
+  return undefined
+}
+
+export const validateOrganizationSlug = (raw: unknown): string | undefined => {
+  if (typeof raw !== 'string' || raw.length === 0) {
+    return 'Organization slug is required for self-registration.'
+  }
+  if (!/^[a-z0-9][a-z0-9-]*$/i.test(raw)) {
+    return 'Slug looks wrong — copy it from the organization URL in Tolgee.'
+  }
+  return undefined
+}
+
 export const validateUrl = (v: unknown): string | undefined => {
   if (typeof v !== 'string' || v.length === 0) return 'Required.'
   if ((v.match(/:\/\//g) ?? []).length > 1) {
@@ -212,4 +196,18 @@ export const packageManagerCommand = (
   ...args: string[]
 ): string => `${pm} ${args.join(' ')}`
 
-export { detectPackageManager }
+export const detectPackageManager = (): 'npm' | 'yarn' | 'pnpm' | 'bun' => {
+  const ua = process.env.npm_config_user_agent ?? ''
+  if (ua.startsWith('yarn')) return 'yarn'
+  if (ua.startsWith('pnpm')) return 'pnpm'
+  if (ua.startsWith('bun')) return 'bun'
+  return 'npm'
+}
+
+const abortIfCancelled = <T>(value: T | symbol): T => {
+  if (isCancel(value)) {
+    cancel('Cancelled.')
+    process.exit(0)
+  }
+  return value as T
+}

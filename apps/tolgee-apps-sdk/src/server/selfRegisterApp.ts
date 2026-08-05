@@ -1,3 +1,4 @@
+import { normalizeTolgeeUrl } from '../shared/url'
 import {
   appInstallStatePath,
   saveAppInstall,
@@ -65,7 +66,7 @@ export type SelfRegisterResult = {
 export const selfRegisterApp = async (
   input: SelfRegisterInput
 ): Promise<SelfRegisterResult> => {
-  const url = `${trimTrailingSlash(input.tolgeeUrl)}/v2/public/apps/self-register`
+  const url = `${normalizeTolgeeUrl(input.tolgeeUrl)}/v2/public/apps/self-register`
   const response = await fetch(url, {
     method: 'POST',
     headers: {
@@ -148,5 +149,3 @@ const persist = (
     )
   }
 }
-
-const trimTrailingSlash = (url: string): string => url.replace(/\/+$/, '')

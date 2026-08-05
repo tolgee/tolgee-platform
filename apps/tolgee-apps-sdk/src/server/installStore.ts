@@ -1,6 +1,7 @@
 import { randomBytes } from 'node:crypto'
 import { mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
+import { normalizeTolgeeUrl } from '../shared/url'
 
 const STATE_DIR_NAME = '.tolgee-dev'
 const STATE_FILE_NAME = 'install.json'
@@ -46,18 +47,59 @@ type StateFile = {
   installs: Record<string, StoredAppInstall>
 }
 
-const resolveStateDir = (options: AppInstallStoreOptions): string =>
-  options.stateDir ??
-  process.env.TOLGEE_APP_STATE_DIR ??
-  join(process.cwd(), STATE_DIR_NAME)
-
 /** Absolute path of the file `saveAppInstall` writes and `readStoredAppInstall` reads. */
 export const appInstallStatePath = (
   options: AppInstallStoreOptions = {}
 ): string => join(resolveStateDir(options), STATE_FILE_NAME)
 
-const normalizeTolgeeUrl = (tolgeeUrl: string): string =>
-  tolgeeUrl.trim().replace(/\/+$/, '')
+/** Credentials stored for `tolgeeUrl`, or null when this instance has none. */
+export const readStoredAppInstall = (
+  tolgeeUrl: string,
+  options: AppInstallStoreOptions = {}
+): StoredAppInstall | null =>
+  readStateFile(appInstallStatePath(options)).installs[
+    normalizeTolgeeUrl(tolgeeUrl)
+  ] ?? null
+
+/**
+ * Persists an install, keeping credentials that are already stored for the same
+ * install when the new record has none.
+ *
+ * Tolgee returns the client secret only when it creates the install — every
+ * later registration reports `clientSecret: null`, and overwriting with that
+ * would destroy the only copy of a secret Tolgee will not show again.
+ */
+export const saveAppInstall = (
+  record: AppInstallRecord,
+  options: AppInstallStoreOptions = {}
+): StoredAppInstall => {
+  const path = appInstallStatePath(options)
+  const key = normalizeTolgeeUrl(record.tolgeeUrl)
+  const state = readStateFile(path)
+  const previous = state.installs[key]
+  const carried =
+    previous && isSameInstall(previous, record) ? previous : undefined
+
+  const stored: StoredAppInstall = {
+    tolgeeUrl: key,
+    installId: record.installId,
+    clientId: record.clientId ?? carried?.clientId ?? null,
+    clientSecret: record.clientSecret ?? carried?.clientSecret ?? null,
+    native: record.native ?? carried?.native ?? false,
+    organizationSlug:
+      record.organizationSlug ?? carried?.organizationSlug ?? null,
+    updatedAt: new Date().toISOString(),
+  }
+
+  state.installs[key] = stored
+  writeStateFile(path, state)
+  return stored
+}
+
+const resolveStateDir = (options: AppInstallStoreOptions): string =>
+  options.stateDir ??
+  process.env.TOLGEE_APP_STATE_DIR ??
+  join(process.cwd(), STATE_DIR_NAME)
 
 const asStoredInstall = (
   tolgeeUrl: string,
@@ -136,47 +178,3 @@ const isSameInstall = (
   (record.clientId == null ||
     stored.clientId == null ||
     stored.clientId === record.clientId)
-
-/** Credentials stored for `tolgeeUrl`, or null when this instance has none. */
-export const readStoredAppInstall = (
-  tolgeeUrl: string,
-  options: AppInstallStoreOptions = {}
-): StoredAppInstall | null =>
-  readStateFile(appInstallStatePath(options)).installs[
-    normalizeTolgeeUrl(tolgeeUrl)
-  ] ?? null
-
-/**
- * Persists an install, keeping credentials that are already stored for the same
- * install when the new record has none.
- *
- * Tolgee returns the client secret only when it creates the install — every
- * later registration reports `clientSecret: null`, and overwriting with that
- * would destroy the only copy of a secret Tolgee will not show again.
- */
-export const saveAppInstall = (
-  record: AppInstallRecord,
-  options: AppInstallStoreOptions = {}
-): StoredAppInstall => {
-  const path = appInstallStatePath(options)
-  const key = normalizeTolgeeUrl(record.tolgeeUrl)
-  const state = readStateFile(path)
-  const previous = state.installs[key]
-  const carried =
-    previous && isSameInstall(previous, record) ? previous : undefined
-
-  const stored: StoredAppInstall = {
-    tolgeeUrl: key,
-    installId: record.installId,
-    clientId: record.clientId ?? carried?.clientId ?? null,
-    clientSecret: record.clientSecret ?? carried?.clientSecret ?? null,
-    native: record.native ?? carried?.native ?? false,
-    organizationSlug:
-      record.organizationSlug ?? carried?.organizationSlug ?? null,
-    updatedAt: new Date().toISOString(),
-  }
-
-  state.installs[key] = stored
-  writeStateFile(path, state)
-  return stored
-}

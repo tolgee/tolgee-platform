@@ -1,3 +1,4 @@
+import { normalizeTolgeeUrl } from '../shared/url'
 import { DEFAULT_TOLGEE_URL, loadTolgeeAppConfig } from './config'
 import { appInstallStatePath, type AppInstallStoreOptions } from './installStore'
 
@@ -34,7 +35,7 @@ export const fetchAppAccessToken = async (
   input: AppAccessTokenInput = {}
 ): Promise<AppAccessToken> => {
   const { tolgeeUrl, clientId, clientSecret } = resolveCredentials(input)
-  const url = `${trimTrailingSlash(tolgeeUrl)}/v2/public/apps/token`
+  const url = `${normalizeTolgeeUrl(tolgeeUrl)}/v2/public/apps/token`
   const response = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -93,5 +94,3 @@ const resolveCredentials = (
   }
   return { tolgeeUrl, clientId, clientSecret }
 }
-
-const trimTrailingSlash = (url: string): string => url.replace(/\/+$/, '')

@@ -3,33 +3,6 @@ import { dirname, join } from 'node:path'
 
 type Vars = Record<string, string>
 
-const isProbablyBinary = (filename: string): boolean => {
-  return /\.(png|jpg|jpeg|gif|svg|ico|webp|woff2?|ttf|otf|eot|mp4|webm)$/i.test(
-    filename
-  )
-}
-
-/**
- * Mustache-style replacement: `{{name}}` → vars.name. Only single-word
- * keys are substituted; missing keys leave the placeholder intact (so
- * literal `{{` appearances in user-facing copy survive).
- */
-const substitute = (text: string, vars: Vars): string => {
-  return text.replace(/\{\{(\w+)\}\}/g, (match, key: string) => {
-    return key in vars ? vars[key]! : match
-  })
-}
-
-/**
- * Renames template-only file conventions to their real names:
- *   `_package.json` → `package.json` (avoids npm seeing the template as a real package)
- *   `_X`            → `.X`           (lets the template ship dotfiles)
- */
-const targetFilename = (name: string): string => {
-  if (name === '_package.json') return 'package.json'
-  return name.startsWith('_') ? '.' + name.slice(1) : name
-}
-
 export type CopyOptions = {
   /** Source directory inside the template. */
   src: string
@@ -61,4 +34,31 @@ export async function copyTree(opts: CopyOptions): Promise<void> {
       }
     }
   }
+}
+
+const isProbablyBinary = (filename: string): boolean => {
+  return /\.(png|jpg|jpeg|gif|svg|ico|webp|woff2?|ttf|otf|eot|mp4|webm)$/i.test(
+    filename
+  )
+}
+
+/**
+ * Mustache-style replacement: `{{name}}` → vars.name. Only single-word
+ * keys are substituted; missing keys leave the placeholder intact (so
+ * literal `{{` appearances in user-facing copy survive).
+ */
+const substitute = (text: string, vars: Vars): string => {
+  return text.replace(/\{\{(\w+)\}\}/g, (match, key: string) => {
+    return key in vars ? vars[key]! : match
+  })
+}
+
+/**
+ * Renames template-only file conventions to their real names:
+ *   `_package.json` → `package.json` (avoids npm seeing the template as a real package)
+ *   `_X`            → `.X`           (lets the template ship dotfiles)
+ */
+const targetFilename = (name: string): string => {
+  if (name === '_package.json') return 'package.json'
+  return name.startsWith('_') ? '.' + name.slice(1) : name
 }
