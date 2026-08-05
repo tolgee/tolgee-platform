@@ -64,10 +64,6 @@ export const SessionsSection = () => {
     },
   });
 
-  const hasLocation = list.data?._embedded?.sessions?.some(
-    (session) => session.city || session.country
-  );
-
   return (
     <Box mt={4} data-cy="account-security-sessions">
       <StyledHeading>
@@ -111,7 +107,7 @@ export const SessionsSection = () => {
         </StyledContainer>
       )}
 
-      {revealed && hasLocation && (
+      {revealed && (
         <StyledAttribution>
           <T
             keyName="sessions-geoip-attribution"

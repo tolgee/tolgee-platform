@@ -5933,8 +5933,15 @@
             Sessions become revocable only from this release on, and only tokens minted afterwards
             get a user_session row. Signing everyone out once closes the window in which a
             pre-upgrade token would be invisible to (and unreachable by) session management.
+
+            The column is compared against a JVM instant but written here by the database, and the
+            two clocks are only the same when both run UTC. The offset is bounded by the range of
+            real time zones, so backing off by more than that guarantees the value can never land in
+            the JVM's future - which would reject every freshly minted token and lock everyone out
+            until real time caught up. Erring the other way only leaves the newest pre-upgrade
+            tokens valid, and those get a session row from the backfill path on first use anyway.
         </comment>
-        <sql>UPDATE user_account SET tokens_valid_not_before = now() WHERE deleted_at IS NULL;</sql>
+        <sql>UPDATE user_account SET tokens_valid_not_before = now() - interval '26 hours' WHERE deleted_at IS NULL;</sql>
         <rollback/>
     </changeSet>
     <changeSet author="jancizmar" id="1785400000000-11">
