@@ -81,6 +81,33 @@ class ProjectAppsControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `the enabled listing is readable by a project member without project edit permission`() {
+    val installId = installId()
+    performAuthPut("${projectAppsUrl()}/$installId", null).andIsOk
+
+    userAccount = testData.member
+    performAuthGet("${projectAppsUrl()}/enabled").andIsOk.andAssertThatJson {
+      node("_embedded.projectApps").isArray.hasSize(1)
+      node("_embedded.projectApps[0].appId").isEqualTo("test-app")
+      node("_embedded.projectApps[0].enabled").isEqualTo(true)
+    }
+  }
+
+  @Test
+  fun `the enabled listing omits an app that is registered but not enabled`() {
+    userAccount = testData.member
+    performAuthGet("${projectAppsUrl()}/enabled").andIsOk.andAssertThatJson {
+      node("_embedded.projectApps").isAbsent()
+    }
+  }
+
+  @Test
+  fun `the enabled listing hides the project from a user who is not a member`() {
+    userAccount = testData.otherOwner
+    performAuthGet("${projectAppsUrl()}/enabled").andIsNotFound
+  }
+
+  @Test
   fun `enable flips the state to true`() {
     val installId = installId()
     performAuthPut("${projectAppsUrl()}/$installId", null).andIsOk.andAssertThatJson {

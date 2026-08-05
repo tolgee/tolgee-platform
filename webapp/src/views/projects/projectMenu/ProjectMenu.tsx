@@ -159,27 +159,25 @@ export const ProjectMenu = () => {
 
   const items = addEeItems(baseItems);
 
-  const canViewProject = satisfiesPermission('keys.view');
-
-  const projectApps = useApiQuery({
-    url: '/v2/projects/{projectId}/apps',
+  const enabledApps = useApiQuery({
+    url: '/v2/projects/{projectId}/apps/enabled',
     method: 'get',
     path: { projectId: project.id },
     options: {
-      enabled: canViewProject,
+      enabled: config.appsEnabled,
     },
   });
 
-  const enabledAppPages = (projectApps.data?._embedded?.projectApps ?? [])
-    .filter((app) => app.enabled)
-    .flatMap((app) =>
-      (app.modules?.['project-dashboard-page'] ?? []).map((module) => ({
-        installId: app.id,
-        moduleKey: module.key,
-        title: module.title,
-        icon: module.icon,
-      }))
-    );
+  const enabledAppPages = (
+    enabledApps.data?._embedded?.projectApps ?? []
+  ).flatMap((app) =>
+    (app.modules?.['project-dashboard-page'] ?? []).map((module) => ({
+      installId: app.id,
+      moduleKey: module.key,
+      title: module.title,
+      icon: module.icon,
+    }))
+  );
 
   return (
     <SideMenu>

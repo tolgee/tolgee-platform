@@ -55,6 +55,22 @@ class ProjectAppsController(
     return CollectionModel.of(models)
   }
 
+  @GetMapping("/enabled")
+  @UseDefaultPermissions
+  @Operation(
+    summary = "List apps enabled for project",
+    description =
+      "Returns only the apps enabled for this project, which every project member needs to render " +
+        "their dashboard pages. Discloses nothing about the organization's other apps.",
+  )
+  fun listEnabled(
+    @PathVariable projectId: Long,
+  ): CollectionModel<ProjectAppModel> {
+    val installs = appEnablementService.listEnabledInstallsForProject(projectHolder.project.id)
+    val models = installs.map { projectAppModelAssembler.toModel(it, enabled = true) }
+    return CollectionModel.of(models)
+  }
+
   @PutMapping("/{installId}")
   @RequiresProjectPermissions([Scope.PROJECT_EDIT])
   @Operation(

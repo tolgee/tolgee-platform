@@ -92,6 +92,11 @@ class AppEnablementService(
   }
 
   @Transactional(readOnly = true)
+  fun listEnabledInstallsForProject(projectId: Long): List<AppInstall> {
+    return appEnabledForProjectRepository.findEnabledInstallsByProjectId(projectId)
+  }
+
+  @Transactional(readOnly = true)
   fun isEnabledForProject(
     projectId: Long,
     appInstallId: Long,
