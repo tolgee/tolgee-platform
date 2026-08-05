@@ -11,11 +11,6 @@ import org.springframework.scheduling.annotation.Async
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 
-/**
- * The MVC side has a wiring test; without this the @Async side could silently fall back to Spring's
- * own executor, or the websocket qualifier could resolve to the general pool, and every
- * configuration assertion would still pass.
- */
 @SpringBootTest
 @Import(AsyncDispatchTargetTest.AsyncProbeConfiguration::class)
 class AsyncDispatchTargetTest {

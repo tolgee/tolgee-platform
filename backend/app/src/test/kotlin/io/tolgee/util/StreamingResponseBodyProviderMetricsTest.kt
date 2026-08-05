@@ -33,10 +33,6 @@ class StreamingResponseBodyProviderMetricsTest {
     timerCount(StreamType.MT_SUGGEST).assert.isEqualTo(0L)
   }
 
-  /**
-   * A stream that dies holding its connection is exactly what this metric exists to expose, so the
-   * sample has to be recorded from the finally rather than after a successful body.
-   */
   @Test
   fun `times a stream that fails part-way through`() {
     val body =

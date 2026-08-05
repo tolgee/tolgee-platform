@@ -19,7 +19,6 @@ class AsyncMethodConfiguration(
 ) : AsyncConfigurer {
   override fun getAsyncExecutor(): Executor = backgroundAsyncExecutor()
 
-  // @Primary so the two special-purpose pools below cannot win a by-type TaskExecutor injection.
   @Primary
   @Bean(BACKGROUND_EXECUTOR_BEAN_NAME)
   fun backgroundAsyncExecutor(): ThreadPoolTaskExecutor {

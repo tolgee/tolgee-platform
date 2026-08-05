@@ -83,10 +83,6 @@ class StreamingBackpressureHttpTest {
       .isEqualTo("5")
   }
 
-  /**
-   * HeaderWriterFilter is configured to write eagerly so it cannot race a streaming task; that also
-   * means nothing re-writes these afterwards, so the 503 path must carry them over its reset().
-   */
   @Test
   fun `security headers survive on both a streamed response and a rejected one`() {
     val streamed = get().headers()
@@ -119,7 +115,6 @@ class StreamingBackpressureHttpTest {
       .isEqualTo("DENY")
   }
 
-  /** The staged streaming headers must not survive onto the error response. */
   @Test
   fun `the rejected response does not carry the staged streaming headers`() {
     occupyTheOnlyStreamingThread()

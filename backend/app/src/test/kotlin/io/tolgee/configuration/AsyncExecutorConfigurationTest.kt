@@ -51,10 +51,6 @@ class AsyncExecutorConfigurationTest {
   @Autowired
   private lateinit var asyncMethodConfiguration: AsyncMethodConfiguration
 
-  /**
-   * Hard-coded rather than recomputed from the divisors, so a change to either divisor has to be
-   * made here too instead of silently agreeing with itself.
-   */
   @Test
   fun `derives both pools from the database connection pool`() {
     (dataSource as HikariDataSource)
@@ -68,10 +64,6 @@ class AsyncExecutorConfigurationTest {
     asyncExecutorFactory.backgroundMaxThreads.assert.isEqualTo(16)
   }
 
-  /**
-   * Guards against silently falling back to ThreadPoolTaskExecutor's defaults, which pin a pool to a
-   * single thread forever because the unbounded queue never lets it grow past core size.
-   */
   @Test
   fun `no pool is left at the single-threaded default`() {
     listOf(streamingAsyncExecutor, asyncMethodConfiguration.backgroundAsyncExecutor()).forEach { executor ->
@@ -131,10 +123,6 @@ class AsyncExecutorConfigurationTest {
       .isEqualTo(AsyncMethodConfiguration.WEBSOCKET_EXECUTOR_BEAN_NAME)
   }
 
-  /**
-   * Without this, dropping the configureAsyncSupport override would silently fall back to Spring's
-   * own executor and every other test here would still pass.
-   */
   @Test
   fun `mvc async dispatch runs on the streaming executor`() {
     val installed = ReflectionTestUtils.getField(requestMappingHandlerAdapter, "taskExecutor")
@@ -144,10 +132,6 @@ class AsyncExecutorConfigurationTest {
     delegate.assert.isSameAs(streamingAsyncExecutor)
   }
 
-  /**
-   * StreamingBodyDatabasePoolHealthTest was de-flaked on this setting, but it would go back to
-   * skipping rather than failing if the setting were lost. This fails outright.
-   */
   @Test
   fun `security headers are written before the chain, not while it unwinds`() {
     val headerWriterFilter =
@@ -167,7 +151,6 @@ class AsyncExecutorConfigurationTest {
       .isInstanceOf(CompositeTaskDecorator::class.java)
   }
 
-  /** The two divisors and the reporter's reserve are separate constants; defaults must agree. */
   @Test
   fun `the shipped defaults never trip the capacity warning`() {
     val poolSize = asyncExecutorFactory.connectionPoolSize!!
@@ -209,7 +192,6 @@ class AsyncExecutorConfigurationTest {
         ).apply { initialize() }
     val release = CyclicBarrier(2)
     try {
-      // Occupies the single thread, then fills the single queue slot.
       executor.submit { release.await(10, TimeUnit.SECONDS) }
       executor.submit { }
 

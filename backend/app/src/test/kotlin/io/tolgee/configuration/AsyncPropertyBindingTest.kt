@@ -7,10 +7,6 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 
-/**
- * The deployment values.yaml pins tolgee.async.* explicitly, so those keys have to survive relaxed
- * binding all the way into the executors — nothing else in the suite would notice a rename.
- */
 @SpringBootTest(
   properties = [
     "tolgee.async.streaming.max-threads = 7",

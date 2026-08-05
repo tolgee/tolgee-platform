@@ -15,12 +15,7 @@ class AsyncExecutorFactory(
   private val tolgeeProperties: TolgeeProperties,
   private val dataSourceProvider: ObjectProvider<DataSource>,
 ) {
-  /**
-   * Null when the DataSource is not a HikariDataSource, which is the only thing that can report a
-   * pool size. Read from the live bean rather than from `spring.datasource.*`, because
-   * PostgresAutoStartConfiguration binds those properties straight onto the HikariDataSource and so
-   * which key wins depends on whether autostart is enabled.
-   */
+  /** Read off the live bean, not `spring.datasource.*` — see PostgresAutoStartConfiguration. */
   val connectionPoolSize: Int? by lazy {
     (dataSourceProvider.ifAvailable as? HikariDataSource)?.maximumPoolSize
   }
@@ -78,7 +73,6 @@ class AsyncExecutorFactory(
     const val BACKGROUND_POOL_DIVISOR = 6
     const val FALLBACK_CONNECTION_POOL_SIZE = 10
 
-    /** Matches the pre-existing @Async behaviour: background work is queued, never rejected. */
     const val UNBOUNDED_QUEUE = Int.MAX_VALUE
 
     const val STREAMING_THREAD_NAME_PREFIX = "tolgee-stream-"

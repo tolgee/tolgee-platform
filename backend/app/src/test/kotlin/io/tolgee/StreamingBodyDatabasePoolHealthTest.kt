@@ -61,8 +61,6 @@ class StreamingBodyDatabasePoolHealthTest : ProjectAuthControllerTest("/v2/proje
     val hikariDataSource = dataSource as HikariDataSource
     val pool = hikariDataSource.hikariPoolMXBean
 
-    // Every streaming response borrows a connection for its whole duration, so a stream that
-    // fails to hand it back leaves it active forever.
     waitForNotThrowing(pollTime = 50, timeout = 5000) {
       pool.activeConnections.assert.isEqualTo(0)
     }

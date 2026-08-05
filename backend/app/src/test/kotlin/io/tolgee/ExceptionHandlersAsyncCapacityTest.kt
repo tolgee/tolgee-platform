@@ -29,10 +29,6 @@ class ExceptionHandlersAsyncCapacityTest {
       .isEqualTo(Message.SERVER_BUSY.code)
   }
 
-  /**
-   * The streaming return-value handler stages these before the task is submitted; a caching proxy
-   * would otherwise key the 503 against that ETag.
-   */
   @Test
   fun `drops the streaming headers already staged on the response`() {
     val response = MockHttpServletResponse()
@@ -46,7 +42,6 @@ class ExceptionHandlersAsyncCapacityTest {
     response.getHeader(HttpHeaders.ETAG).assert.isNull()
   }
 
-  /** Without these the browser reports a CORS failure instead of surfacing the 503. */
   @Test
   fun `keeps the CORS and version headers written by earlier filters`() {
     val response = MockHttpServletResponse()
@@ -75,7 +70,6 @@ class ExceptionHandlersAsyncCapacityTest {
     response.getHeader(HttpHeaders.CONTENT_DISPOSITION).assert.isNotNull
   }
 
-  /** Any other executor's rejection is not ours to relabel as streaming saturation. */
   @Test
   fun `sends a rejection from another executor down the generic path`() {
     val unrelated = TaskRejectedException("some other executor is shutting down")
@@ -102,7 +96,6 @@ class ExceptionHandlersAsyncCapacityTest {
     response.getHeader(HttpHeaders.CONTENT_DISPOSITION).assert.isNull()
   }
 
-  /** A stream that timed out mid-write cannot be answered, and is worth reporting rather than hiding. */
   @Test
   fun `reports a stream that timed out after it started writing`() {
     val response = MockHttpServletResponse()
@@ -116,7 +109,6 @@ class ExceptionHandlersAsyncCapacityTest {
   private fun handle(response: MockHttpServletResponse) =
     exceptionHandlers.handleAsyncCapacityExceeded(wrappedRejection(), response)
 
-  /** Spring wraps whatever the rejection policy throws, so the handler only ever sees the wrapper. */
   private fun wrappedRejection(): RejectedExecutionException =
     TaskRejectedException("pool full", StreamingCapacityExceededException("queued=1, active=1"))
 }

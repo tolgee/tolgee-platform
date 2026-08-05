@@ -32,8 +32,7 @@ class ActivityWebsocketListener(
   private val relationDescriptionExtractor: RelationDescriptionExtractor,
   private val currentDateProvider: CurrentDateProvider,
 ) {
-  // Not the default pool: this one is single-threaded, and the webapp applies these events as
-  // ordered deltas.
+  // Ordering-sensitive — keep the qualifier; see websocketAsyncExecutor for why.
   @Async("websocketAsyncExecutor")
   @EventListener
   fun onActivity(event: OnProjectActivityStoredEvent) {

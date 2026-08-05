@@ -6,10 +6,6 @@ import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 import javax.sql.DataSource
 
-/**
- * Plain unit test so the floor and the "not a Hikari pool" fallback are reachable — a @SpringBootTest
- * is stuck with whatever connection pool the test context happens to have.
- */
 class AsyncPoolSizeDerivationTest {
   @Test
   fun `derives each pool by its divisor`() {

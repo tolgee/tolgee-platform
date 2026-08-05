@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory
 class AsyncCapacityReporterTest {
   @Test
   fun `stays quiet when a quarter of the connection pool is left for ordinary requests`() {
-    // 33 streaming + 16 background + 20 batch = 69 of 100, leaving 31.
     val events = report(connectionPoolSize = 100, batchConcurrency = 20)
 
     events.warnings.assert.isEmpty()
@@ -22,16 +21,11 @@ class AsyncCapacityReporterTest {
 
   @Test
   fun `warns when the pools plus batch jobs crowd out ordinary requests`() {
-    // 33 streaming + 16 background + 40 batch = 89 of 100.
     val events = report(connectionPoolSize = 100, batchConcurrency = 40)
 
     events.warnings.assert.anyMatch { it.contains("may starve the database connection pool") }
   }
 
-  /**
-   * Which key actually sets the pool size flips with postgres-autostart, so naming the wrong one
-   * would send an operator to a property their deployment silently ignores.
-   */
   @Test
   fun `names the connection pool property that the active binding mode actually reads`() {
     report(connectionPoolSize = 100, batchConcurrency = 40, postgresAutostart = true)
@@ -45,8 +39,6 @@ class AsyncCapacityReporterTest {
 
   @Test
   fun `sits exactly on the boundary without warning, and warns one job past it`() {
-    // pool 60 -> 20 streaming + 10 background, and the reserve is 60/4 = 15, so 15 batch jobs is
-    // the last configuration that still leaves a quarter free.
     report(connectionPoolSize = 60, batchConcurrency = 15).warnings.assert.isEmpty()
     report(connectionPoolSize = 60, batchConcurrency = 16).warnings.assert.isNotEmpty()
   }
