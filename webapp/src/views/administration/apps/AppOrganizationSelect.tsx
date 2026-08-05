@@ -19,18 +19,18 @@ type Option =
   | ({ kind: 'organization' } & SelectableOrganization);
 
 type Props = {
-  excludedIds: number[];
+  value: SelectableOrganization | null;
   disabled?: boolean;
   allOptionVisible?: boolean;
-  onSelect: (organization: SelectableOrganization) => void;
+  onChange: (organization: SelectableOrganization | null) => void;
   onSelectAll: () => void;
 };
 
 export const AppOrganizationSelect = ({
-  excludedIds,
+  value,
   disabled,
   allOptionVisible,
-  onSelect,
+  onChange,
   onSelectAll,
 }: Props) => {
   const { t } = useTranslate();
@@ -51,20 +51,31 @@ export const AppOrganizationSelect = ({
     },
   });
 
-  const excluded = new Set(excludedIds);
   const organizationOptions: Option[] = (
     organizationsLoadable.data?._embedded?.organizations ?? []
-  )
-    .filter((organization) => !excluded.has(organization.id))
-    .map((organization) => ({
-      kind: 'organization',
-      id: organization.id,
-      name: organization.name,
-    }));
+  ).map((organization) => ({
+    kind: 'organization',
+    id: organization.id,
+    name: organization.name,
+  }));
 
-  const options: Option[] = allOptionVisible
-    ? [ALL_ORGANIZATIONS_OPTION, ...organizationOptions]
-    : organizationOptions;
+  const selectedOption: Option | null = value
+    ? { kind: 'organization', ...value }
+    : null;
+
+  // The selected organization has to stay among the options, otherwise the search
+  // query narrowing the list would make Autocomplete drop the current value.
+  const selectedMissing =
+    value !== null &&
+    !organizationOptions.some(
+      (option) => option.kind === 'organization' && option.id === value.id
+    );
+
+  const options: Option[] = [
+    ...(allOptionVisible ? [ALL_ORGANIZATIONS_OPTION] : []),
+    ...(selectedMissing && selectedOption ? [selectedOption] : []),
+    ...organizationOptions,
+  ];
 
   const getLabel = (option: Option) =>
     option.kind === 'all'
@@ -82,20 +93,33 @@ export const AppOrganizationSelect = ({
       loading={organizationsLoadable.isFetching}
       getOptionLabel={getLabel}
       filterOptions={(items) => items}
-      value={null}
+      isOptionEqualToValue={(option, selected) =>
+        option.kind === selected.kind &&
+        (option.kind !== 'organization' ||
+          selected.kind !== 'organization' ||
+          option.id === selected.id)
+      }
+      value={selectedOption}
       onChange={(_, newValue) => {
         if (!newValue) {
+          onChange(null);
           return;
         }
         if (newValue.kind === 'all') {
           onSelectAll();
-        } else {
-          onSelect({ id: newValue.id, name: newValue.name });
+          return;
         }
-        setSearch('');
+        onChange({ id: newValue.id, name: newValue.name });
       }}
-      inputValue={search}
-      onInputChange={(_, value) => setSearch(value)}
+      onInputChange={(_, newValue, reason) => {
+        if (reason === 'input') {
+          setSearch(newValue);
+          return;
+        }
+        if (reason === 'clear') {
+          setSearch('');
+        }
+      }}
       renderOption={(props, option) =>
         option.kind === 'all' ? (
           <li
@@ -119,9 +143,13 @@ export const AppOrganizationSelect = ({
       renderInput={(params) => (
         <TextField
           {...params}
+          label={t(
+            'administration_apps_organization_select_label',
+            'Organization'
+          )}
           placeholder={t(
             'administration_apps_organization_select_placeholder',
-            'Add organization…'
+            'Search organizations…'
           )}
           data-cy="administration-apps-organization-select"
         />
@@ -130,8 +158,6 @@ export const AppOrganizationSelect = ({
         'administration_apps_organization_select_empty',
         'No matching organizations'
       )}
-      blurOnSelect
-      clearOnBlur
     />
   );
 };
