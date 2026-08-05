@@ -1,6 +1,7 @@
 package io.tolgee.configuration
 
 import io.tolgee.Metrics
+import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
@@ -53,6 +54,11 @@ class StreamingBackpressureHttpTest {
   @AfterEach
   fun releasePool() {
     release.countDown()
+    // Counting the latch down does not order the worker's return to the pool before the next test's
+    // request arrives, and at queue-capacity 0 there is no slack to absorb that.
+    waitForNotThrowing(pollTime = 20, timeout = 10000) {
+      streamingAsyncExecutor.activeCount.assert.isEqualTo(0)
+    }
   }
 
   @Test
