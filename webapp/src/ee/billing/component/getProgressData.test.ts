@@ -22,7 +22,7 @@ describe('usage progress', () => {
       currentWords: 100,
       isPayAsYouGo: false,
       ...overrides,
-    }) as any;
+    } as any);
 
   it('hides the seat bar when seats are not enforced', () => {
     const { seatsProgress } = getProgressData({ usage: usage() });

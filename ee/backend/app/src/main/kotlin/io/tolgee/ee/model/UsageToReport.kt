@@ -5,6 +5,7 @@ import io.tolgee.model.AuditModel
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
 import jakarta.persistence.Table
+import org.hibernate.annotations.ColumnDefault
 import java.util.Date
 
 /**
@@ -36,6 +37,7 @@ class UsageToReport :
   /**
    * Number of words reported in the last report
    */
+  @ColumnDefault("0")
   override var lastReportedWords: Long = 0
 
   /**
@@ -51,6 +53,7 @@ class UsageToReport :
   /**
    * Number of words that need to be reported in the next report
    */
+  @ColumnDefault("0")
   override var wordsToReport: Long = 0
 
   /**

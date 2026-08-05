@@ -105,11 +105,13 @@ class EeSubscription :
   /**
    * How many words are included in the subscription plan
    */
+  @ColumnDefault("0")
   var includedWords: Long = 0L
 
   /**
    * How many words can a customer use until they reach spending limit
    */
+  @ColumnDefault("-1")
   var wordsLimit: Long = -1L
 
   /**
