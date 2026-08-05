@@ -37,6 +37,15 @@ declare namespace DataCy {
         "administration-apps-organizations-error": true;
         "administration-apps-organizations-item": true;
         "administration-apps-organizations-item-remove": true;
+        "administration-apps-register-back": true;
+        "administration-apps-register-button": true;
+        "administration-apps-register-consent": true;
+        "administration-apps-register-consent-no-scopes": true;
+        "administration-apps-register-consent-scope": true;
+        "administration-apps-register-continue": true;
+        "administration-apps-register-dialog": true;
+        "administration-apps-register-manifest-url": true;
+        "administration-apps-register-submit": true;
         "administration-debug-customer-account-message": true;
         "administration-debug-customer-exit-button": true;
         "administration-ee-license-key-input": true;

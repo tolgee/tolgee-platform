@@ -3,16 +3,20 @@ package io.tolgee.api.v2.controllers.administration
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.controllers.IController
+import io.tolgee.dtos.request.RegisterAppRequest
 import io.tolgee.hateoas.organization.apps.AppAvailableOrganizationModel
 import io.tolgee.hateoas.organization.apps.AppAvailableOrganizationModelAssembler
 import io.tolgee.hateoas.organization.apps.AppInstallModel
 import io.tolgee.hateoas.organization.apps.AppInstallModelAssembler
+import io.tolgee.hateoas.organization.apps.AppManifestPreviewModel
+import io.tolgee.hateoas.organization.apps.AppManifestPreviewModelAssembler
 import io.tolgee.model.apps.AppInstall
 import io.tolgee.openApiDocs.OpenApiSelfHostedExtension
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.service.apps.AppAvailabilityService
 import io.tolgee.service.apps.AppInstallService
+import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.data.domain.Pageable
@@ -24,7 +28,9 @@ import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -45,6 +51,7 @@ class AdministrationAppsController(
   private val appAvailabilityService: AppAvailabilityService,
   private val appInstallModelAssembler: AppInstallModelAssembler,
   private val appAvailableOrganizationModelAssembler: AppAvailableOrganizationModelAssembler,
+  private val appManifestPreviewModelAssembler: AppManifestPreviewModelAssembler,
   private val pagedAppInstallResourcesAssembler: PagedResourcesAssembler<AppInstall>,
   private val authenticationFacade: AuthenticationFacade,
 ) : IController {
@@ -63,6 +70,41 @@ class AdministrationAppsController(
   ): PagedModel<AppInstallModel> {
     val installs = appInstallService.findAllNativePaged(pageable)
     return pagedAppInstallResourcesAssembler.toModel(installs, appInstallModelAssembler)
+  }
+
+  @PostMapping("/preview")
+  @Operation(
+    summary = "Preview a Tolgee app manifest",
+    description =
+      "Fetches the manifest at the given URL and returns its parsed contents (including the requested " +
+        "scopes) without persisting anything. Used by the registration UI to show a consent prompt " +
+        "before registering.",
+  )
+  @RequiresSuperAuthentication
+  fun preview(
+    @RequestBody @Valid data: RegisterAppRequest,
+  ): AppManifestPreviewModel {
+    val fetched = appInstallService.previewManifest(data.manifestUrl)
+    return appManifestPreviewModelAssembler.toModel(fetched)
+  }
+
+  @PostMapping
+  @Operation(
+    summary = "Register a native app",
+    description =
+      "Fetches the manifest at the given URL and registers the app at server level, belonging to no " +
+        "organization. The response is the only place the client secret is ever disclosed.",
+  )
+  @RequiresSuperAuthentication
+  fun register(
+    @RequestBody @Valid data: RegisterAppRequest,
+  ): AppInstallModel {
+    val result =
+      appInstallService.registerNative(
+        manifestUrl = data.manifestUrl,
+        author = authenticationFacade.authenticatedUserEntity,
+      )
+    return appInstallModelAssembler.toModelWithSecret(result.install, result.plaintextClientSecret)
   }
 
   @DeleteMapping("/{installId}")

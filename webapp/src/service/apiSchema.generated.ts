@@ -48,7 +48,13 @@ export interface paths {
   };
   "/v2/administration/apps": {
     /** Returns the apps registered at server level — those belonging to no organization. The client secret is never disclosed here. */
-    get: operations["list_12"];
+    get: operations["list_5"];
+    /** Fetches the manifest at the given URL and registers the app at server level, belonging to no organization. The response is the only place the client secret is ever disclosed. */
+    post: operations["register_1"];
+  };
+  "/v2/administration/apps/preview": {
+    /** Fetches the manifest at the given URL and returns its parsed contents (including the requested scopes) without persisting anything. Used by the registration UI to show a consent prompt before registering. */
+    post: operations["preview_1"];
   };
   "/v2/administration/apps/{installId}": {
     /** Removes the native app from the server: its availability for every organization, its enablement in every project and the install itself. Its client credentials stop working. */
@@ -511,7 +517,7 @@ export interface paths {
   };
   "/v2/projects/{projectId}/apps": {
     /** Returns all apps registered in the project's organization, each annotated with whether it is enabled for this project. Requires project.edit: it discloses the organization's whole app inventory, including apps not enabled for this project. */
-    get: operations["list_11"];
+    get: operations["list_12"];
   };
   "/v2/projects/{projectId}/apps/enabled": {
     /** Returns only the apps enabled for this project, which every project member needs to render their dashboard pages. Discloses nothing about the organization's other apps. */
@@ -538,7 +544,7 @@ export interface paths {
     delete: operations["removeAvatar_1"];
   };
   "/v2/projects/{projectId}/batch-jobs": {
-    get: operations["list_5"];
+    get: operations["list_6"];
   };
   "/v2/projects/{projectId}/batch-jobs/{id}": {
     get: operations["get_22"];
@@ -798,7 +804,7 @@ export interface paths {
     get: operations["selectKeys_2"];
   };
   "/v2/projects/{projectId}/keys/trash": {
-    get: operations["list_9"];
+    get: operations["list_10"];
   };
   "/v2/projects/{projectId}/keys/trash/deleters": {
     get: operations["listDeleters"];
@@ -1122,7 +1128,7 @@ export interface paths {
   };
   "/v2/projects/{projectId}/translation-memories": {
     /** Always readable. When the TRANSLATION_MEMORY feature is not enabled for the organization, only the project-type assignment (if any) is returned so the settings page can still show the row that already drives in-project suggestions. */
-    get: operations["list_7"];
+    get: operations["list_8"];
   };
   "/v2/projects/{projectId}/translation-memories/project-tm-settings": {
     /** Sets TM-level flags on the project's own PROJECT-type TM. The shared-TM update endpoint rejects PROJECT TMs; this narrow endpoint exists so project admins can toggle the `writeOnlyReviewed` flag without org-level privileges. */
@@ -8701,7 +8707,7 @@ export interface operations {
     };
   };
   /** Returns the apps registered at server level — those belonging to no organization. The client secret is never disclosed here. */
-  list_12: {
+  list_5: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -8750,6 +8756,102 @@ export interface operations {
             | components["schemas"]["ErrorResponseTyped"]
             | components["schemas"]["ErrorResponseBody"];
         };
+      };
+    };
+  };
+  /** Fetches the manifest at the given URL and registers the app at server level, belonging to no organization. The response is the only place the client secret is ever disclosed. */
+  register_1: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AppInstallModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RegisterAppRequest"];
+      };
+    };
+  };
+  /** Fetches the manifest at the given URL and returns its parsed contents (including the requested scopes) without persisting anything. Used by the registration UI to show a consent prompt before registering. */
+  preview_1: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AppManifestPreviewModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RegisterAppRequest"];
       };
     };
   };
@@ -16278,7 +16380,7 @@ export interface operations {
     };
   };
   /** Returns all apps registered in the project's organization, each annotated with whether it is enabled for this project. Requires project.edit: it discloses the organization's whole app inventory, including apps not enabled for this project. */
-  list_11: {
+  list_12: {
     parameters: {
       path: {
         projectId: number;
@@ -16719,7 +16821,7 @@ export interface operations {
       };
     };
   };
-  list_5: {
+  list_6: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -20648,7 +20750,7 @@ export interface operations {
       };
     };
   };
-  list_9: {
+  list_10: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -26748,7 +26850,7 @@ export interface operations {
     };
   };
   /** Always readable. When the TRANSLATION_MEMORY feature is not enabled for the organization, only the project-type assignment (if any) is returned so the settings page can still show the row that already drives in-project suggestions. */
-  list_7: {
+  list_8: {
     parameters: {
       path: {
         projectId: number;

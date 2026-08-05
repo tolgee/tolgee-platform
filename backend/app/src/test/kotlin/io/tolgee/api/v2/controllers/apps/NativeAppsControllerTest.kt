@@ -69,6 +69,97 @@ class NativeAppsControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `registers a native app from a manifest URL, disclosing the client secret once`() {
+    performAuthPost("/v2/administration/apps", registerBody()).andIsOk.andAssertThatJson {
+      node("appId").isEqualTo("test-app")
+      node("name").isEqualTo("Test App")
+      node("baseUrl").isEqualTo("https://app.example.com")
+      node("availableToAllOrganizations").isEqualTo(false)
+      node("clientId").isString.startsWith(AppInstallService.CLIENT_ID_PREFIX)
+      node("clientSecret").isString.startsWith(AppInstallService.CLIENT_SECRET_PREFIX)
+    }
+
+    val install = AppsTestFixtures.nativeInstalls(appInstallService).single()
+    install.organization.assert.isNull()
+    install.author.id.assert.isEqualTo(testData.admin.id)
+
+    performAuthGet("/v2/administration/apps").andIsOk.andAssertThatJson {
+      node("_embedded.appInstalls").isArray.hasSize(1)
+      node("_embedded.appInstalls[0].clientSecret").isNull()
+    }
+  }
+
+  @Test
+  fun `previews a manifest without registering anything`() {
+    performAuthPost("/v2/administration/apps/preview", registerBody()).andIsOk.andAssertThatJson {
+      node("appId").isEqualTo("test-app")
+      node("name").isEqualTo("Test App")
+      node("version").isEqualTo("0.1.0")
+      node("baseUrl").isEqualTo("https://app.example.com")
+      node("modules.project-dashboard-page[0].title").isEqualTo("Home")
+      node("requestedScopes").isArray.isEmpty()
+    }
+
+    AppsTestFixtures.nativeInstalls(appInstallService).assert.isEmpty()
+  }
+
+  @Test
+  fun `registering the same manifest twice is refused and leaves the first install alone`() {
+    performAuthPost("/v2/administration/apps", registerBody()).andIsOk
+    val install = AppsTestFixtures.nativeInstalls(appInstallService).single()
+
+    performAuthPost("/v2/administration/apps", registerBody()).andIsBadRequest.andAssertThatJson {
+      node("code").isEqualTo("app_already_installed")
+    }
+
+    AppsTestFixtures.nativeInstalls(appInstallService).map { it.id }.assert.containsExactly(install.id)
+  }
+
+  @Test
+  fun `an organization-owned install with the same app id does not block a native registration`() {
+    registerOrganizationApp()
+    AppsTestFixtures.mockManifest(appManifestHttpClient)
+
+    performAuthPost("/v2/administration/apps", registerBody()).andIsOk
+
+    AppsTestFixtures.nativeInstalls(appInstallService).assert.hasSize(1)
+  }
+
+  @Test
+  fun `the preview and register endpoints reject a non-admin caller`() {
+    userAccount = testData.user
+
+    performAuthPost("/v2/administration/apps/preview", registerBody()).andIsForbidden
+    performAuthPost("/v2/administration/apps", registerBody()).andIsForbidden
+
+    userAccount = testData.admin
+    AppsTestFixtures.nativeInstalls(appInstallService).assert.isEmpty()
+  }
+
+  @Test
+  fun `the preview and register endpoints reject a supporter`() {
+    userAccount = testData.supporter
+
+    performAuthPost("/v2/administration/apps/preview", registerBody()).andIsForbidden
+    performAuthPost("/v2/administration/apps", registerBody()).andIsForbidden
+
+    userAccount = testData.admin
+    AppsTestFixtures.nativeInstalls(appInstallService).assert.isEmpty()
+  }
+
+  @Test
+  fun `a project can enable a natively registered app once it is available to its organization`() {
+    performAuthPost("/v2/administration/apps", registerBody()).andIsOk
+    val install = AppsTestFixtures.nativeInstalls(appInstallService).single()
+    grantAvailability(install)
+
+    userAccount = testData.user
+    performAuthPut("${projectAppsUrl()}/${install.id}", null).andIsOk
+
+    appEnablementService.isEnabledForProject(testData.project.id, install.id).assert.isTrue()
+  }
+
+  @Test
   fun `does not list an organization-owned install among the native ones`() {
     registerOrganizationApp()
 
@@ -432,6 +523,8 @@ class NativeAppsControllerTest : AuthorizedControllerTest() {
       author = testData.admin,
     )
   }
+
+  private fun registerBody() = mapOf("manifestUrl" to AppsTestFixtures.MANIFEST_URL)
 
   private fun appsUrl(install: AppInstall) = "/v2/administration/apps/${install.id}"
 

@@ -15,6 +15,7 @@ import { useIsAdmin } from 'tg.globalContext/helpers';
 
 import { BaseAdministrationView } from '../components/BaseAdministrationView';
 import { AppOrganizationsDialog } from './AppOrganizationsDialog';
+import { RegisterNativeAppDialog } from './RegisterNativeAppDialog';
 
 type AppInstallModel = components['schemas']['AppInstallModel'];
 
@@ -39,6 +40,7 @@ export const AdministrationApps = () => {
   const isAdmin = useIsAdmin();
   const [page, setPage] = useState(0);
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [registerOpen, setRegisterOpen] = useState(false);
 
   const appsLoadable = useApiQuery({
     url: '/v2/administration/apps',
@@ -106,13 +108,32 @@ export const AdministrationApps = () => {
           hideChildrenOnLoading={false}
           loading={appsLoadable.isFetching}
         >
-          <Box mb={2}>
+          <Box
+            mb={2}
+            display="flex"
+            alignItems="flex-start"
+            justifyContent="space-between"
+            gap={2}
+          >
             <Typography variant="body2" color="text.secondary">
               <T
                 keyName="administration_apps_description"
                 defaultValue="Apps registered directly against this server. Choose which organizations may enable them in their projects."
               />
             </Typography>
+            {isAdmin && (
+              <Button
+                data-cy="administration-apps-register-button"
+                variant="contained"
+                color="primary"
+                onClick={() => setRegisterOpen(true)}
+              >
+                <T
+                  keyName="administration_apps_register_button"
+                  defaultValue="Register app"
+                />
+              </Button>
+            )}
           </Box>
 
           <PaginatedHateoasList
@@ -202,6 +223,11 @@ export const AdministrationApps = () => {
           />
         </BaseAdministrationView>
       </DashboardPage>
+
+      <RegisterNativeAppDialog
+        open={registerOpen}
+        onClose={() => setRegisterOpen(false)}
+      />
 
       {selected && (
         <AppOrganizationsDialog

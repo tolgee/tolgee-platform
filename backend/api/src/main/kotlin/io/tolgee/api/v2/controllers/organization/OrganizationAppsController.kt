@@ -6,6 +6,7 @@ import io.tolgee.dtos.request.RegisterAppRequest
 import io.tolgee.hateoas.organization.apps.AppInstallModel
 import io.tolgee.hateoas.organization.apps.AppInstallModelAssembler
 import io.tolgee.hateoas.organization.apps.AppManifestPreviewModel
+import io.tolgee.hateoas.organization.apps.AppManifestPreviewModelAssembler
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.authentication.AuthenticationFacade
@@ -34,6 +35,7 @@ class OrganizationAppsController(
   private val authenticationFacade: AuthenticationFacade,
   private val appInstallService: AppInstallService,
   private val appInstallModelAssembler: AppInstallModelAssembler,
+  private val appManifestPreviewModelAssembler: AppManifestPreviewModelAssembler,
 ) {
   @PostMapping("/preview")
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
@@ -48,14 +50,7 @@ class OrganizationAppsController(
     @RequestBody @Valid data: RegisterAppRequest,
   ): AppManifestPreviewModel {
     val fetched = appInstallService.previewManifest(data.manifestUrl)
-    return AppManifestPreviewModel(
-      appId = fetched.manifest.id,
-      name = fetched.manifest.name,
-      version = fetched.manifest.version,
-      baseUrl = fetched.manifest.baseUrl,
-      modules = fetched.manifest.modules,
-      requestedScopes = fetched.scopes.map { it.value },
-    )
+    return appManifestPreviewModelAssembler.toModel(fetched)
   }
 
   @PostMapping

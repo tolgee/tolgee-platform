@@ -45,8 +45,28 @@ class AppInstallService(
     manifestUrl: String,
     author: UserAccount,
   ): RegisterResult {
+    return create(organizationId = organization.id, manifestUrl = manifestUrl, author = author)
+  }
+
+  /**
+   * Registers a native (server-level) install owned by no organization, on behalf of a server admin.
+   * Unlike [selfRegister] it never repoints an existing install — an admin pasting a manifest whose
+   * app is already registered gets the same "already installed" error as an organization owner does.
+   */
+  fun registerNative(
+    manifestUrl: String,
+    author: UserAccount,
+  ): RegisterResult {
+    return create(organizationId = null, manifestUrl = manifestUrl, author = author)
+  }
+
+  private fun create(
+    organizationId: Long?,
+    manifestUrl: String,
+    author: UserAccount,
+  ): RegisterResult {
     val fetched = appManifestFetcher.fetch(manifestUrl)
-    return appInstallPersister.create(organization.id, author.id, manifestUrl, fetched)
+    return appInstallPersister.create(organizationId, author.id, manifestUrl, fetched)
   }
 
   /**
