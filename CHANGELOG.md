@@ -1,3 +1,10 @@
+## [3.216.4](https://github.com/tolgee/tolgee-platform/compare/v3.216.3...v3.216.4) (2026-08-05)
+
+
+### Performance Improvements
+
+* reduce Redis round-trips in pub/sub and batch-job state ([#3822](https://github.com/tolgee/tolgee-platform/issues/3822)) ([653b6eb](https://github.com/tolgee/tolgee-platform/commit/653b6eb2b40f8079489a626070ffc7996a1bf99b))
+
 ## [3.216.3](https://github.com/tolgee/tolgee-platform/compare/v3.216.2...v3.216.3) (2026-08-05)
 
 
