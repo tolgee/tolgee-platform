@@ -81,7 +81,8 @@ class NativeAppsControllerTest : AuthorizedControllerTest() {
 
     val install = AppsTestFixtures.nativeInstalls(appInstallService).single()
     install.organization.assert.isNull()
-    install.author.id.assert.isEqualTo(testData.admin.id)
+    install.author.id.assert
+      .isEqualTo(testData.admin.id)
 
     performAuthGet("/v2/administration/apps").andIsOk.andAssertThatJson {
       node("_embedded.appInstalls").isArray.hasSize(1)
@@ -112,7 +113,11 @@ class NativeAppsControllerTest : AuthorizedControllerTest() {
       node("code").isEqualTo("app_already_installed")
     }
 
-    AppsTestFixtures.nativeInstalls(appInstallService).map { it.id }.assert.containsExactly(install.id)
+    AppsTestFixtures
+      .nativeInstalls(appInstallService)
+      .map { it.id }
+      .assert
+      .containsExactly(install.id)
   }
 
   @Test
