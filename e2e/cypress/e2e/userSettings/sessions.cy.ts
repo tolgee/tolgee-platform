@@ -25,14 +25,27 @@ describe('Active sessions', () => {
 
   const visitSessions = () => {
     cy.visit(`${HOST}/account/security`);
+    // login() mints an already-super token, so listing goes straight through
     gcy('sessions-reveal-button').click();
-    // listing needs a super token - the dialog opens itself
+    gcy('session-list-item').should('exist');
+  };
+
+  it('asks for the password again once the super token has lapsed', () => {
+    cy.visit(`${HOST}/account/security`);
+    cy.request(
+      `${API_URL}/internal/e2e-data/sessions/expired-super-token`
+    ).then((response) => {
+      window.localStorage.setItem('jwtToken', response.body.token);
+    });
+
+    gcy('sessions-reveal-button').click();
     gcy('sensitive-dialog-password-input').type('admin');
     gcy('sensitive-protection-dialog')
       .findDcy('global-form-save-button')
       .click();
-    gcy('sensitive-protection-dialog').should('not.exist');
-  };
+
+    gcy('session-list-item').should('exist');
+  });
 
   it('is part of the account security screen', () => {
     visitSessions();
