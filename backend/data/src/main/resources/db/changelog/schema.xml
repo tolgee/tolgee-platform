@@ -5883,12 +5883,6 @@
             <column name="expires_at"/>
         </createIndex>
     </changeSet>
-    <changeSet author="jancizmar" id="1785400000000-5">
-        <addForeignKeyConstraint baseColumnNames="user_account_id" baseTableName="user_session"
-                                 constraintName="fk_user_session_user_account" deferrable="false"
-                                 initiallyDeferred="false" onDelete="CASCADE" referencedColumnNames="id"
-                                 referencedTableName="user_account" validate="true"/>
-    </changeSet>
     <changeSet author="jancizmar" id="1785400000000-6">
         <createTable tableName="auth_audit_event">
             <column name="id" type="BIGINT">
@@ -5941,7 +5935,7 @@
             until real time caught up. Erring the other way only leaves the newest pre-upgrade
             tokens valid, and those get a session row from the backfill path on first use anyway.
         </comment>
-        <sql>UPDATE user_account SET tokens_valid_not_before = now() - interval '26 hours' WHERE deleted_at IS NULL;</sql>
+        <sql>UPDATE user_account SET tokens_valid_not_before = greatest(coalesce(tokens_valid_not_before, to_timestamp(0)), now() - interval '26 hours') WHERE deleted_at IS NULL;</sql>
         <rollback/>
     </changeSet>
     <changeSet author="jancizmar" id="1785400000000-11">

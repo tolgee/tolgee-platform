@@ -35,7 +35,10 @@ class UserSession : StandardAuditModel() {
   lateinit var deviceId: String
 
   /**
-   * Plain column rather than a relation - the row is written by native upserts on the auth hot path.
+   * Plain column rather than a relation - the row is written by native upserts on the auth hot path,
+   * and no foreign key backs it: emitting a token must not require the account row to be visible to
+   * this transaction yet. Orphans age out with the purge, the same way `activity_revision.author_id`
+   * is handled.
    */
   @Column(name = "user_account_id", nullable = false)
   var userAccountId: Long = 0
