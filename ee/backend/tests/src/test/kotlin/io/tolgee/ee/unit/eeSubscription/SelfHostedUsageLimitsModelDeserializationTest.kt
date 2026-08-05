@@ -1,9 +1,9 @@
 package io.tolgee.ee.unit.eeSubscription
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.hateoas.limits.SelfHostedUsageLimitsModel
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import tools.jackson.module.kotlin.jacksonObjectMapper
 
 /**
  * An instance can run a newer version than the licensing server it talks to, so the licence
