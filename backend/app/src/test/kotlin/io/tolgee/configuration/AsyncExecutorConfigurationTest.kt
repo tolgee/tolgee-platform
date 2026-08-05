@@ -87,6 +87,31 @@ class AsyncExecutorConfigurationTest {
     asyncMethodConfiguration.asyncExecutor.assert.isSameAs(backgroundAsyncExecutor)
   }
 
+  /** Without these, context close rejects in-flight submissions into their callers. */
+  @Test
+  fun `executors keep accepting work while the context closes`() {
+    listOf(streamingAsyncExecutor, backgroundAsyncExecutor, asyncMethodConfiguration.websocketAsyncExecutor())
+      .forEach { executor ->
+        ReflectionTestUtils
+          .getField(executor, "acceptTasksAfterContextClose")
+          .assert
+          .isEqualTo(true)
+      }
+  }
+
+  /** Background work is worth draining; a queued stream's client is already gone. */
+  @Test
+  fun `only the background pools drain on shutdown`() {
+    ReflectionTestUtils
+      .getField(streamingAsyncExecutor, "waitForTasksToCompleteOnShutdown")
+      .assert
+      .isEqualTo(false)
+    ReflectionTestUtils
+      .getField(backgroundAsyncExecutor, "waitForTasksToCompleteOnShutdown")
+      .assert
+      .isEqualTo(true)
+  }
+
   @Test
   fun `pools have distinguishable thread names`() {
     setOf(

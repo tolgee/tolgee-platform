@@ -102,7 +102,16 @@ class StreamingBackpressureHttpTest {
       .orElse(null)
       .assert
       .isEqualTo("DENY")
+    streamed
+      .firstValue("Content-Disposition")
+      .isPresent.assert
+      .isTrue()
+    streamed
+      .firstValue("ETag")
+      .isPresent.assert
+      .isTrue()
 
+    awaitDrained()
     occupyTheOnlyStreamingThread()
 
     val rejected = get()

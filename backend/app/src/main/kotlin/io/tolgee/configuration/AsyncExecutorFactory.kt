@@ -38,6 +38,7 @@ class AsyncExecutorFactory(
     maxThreads: Int,
     queueCapacity: Int,
     keepAliveSeconds: Int,
+    drainOnShutdown: Boolean = true,
     rejectedExecutionHandler: RejectedExecutionHandler = ThreadPoolExecutor.AbortPolicy(),
   ): ThreadPoolTaskExecutor {
     return ThreadPoolTaskExecutor().apply {
@@ -51,7 +52,9 @@ class AsyncExecutorFactory(
       // Making these beans gave them a shutdown they never had. Without this, a task submitted by a
       // request still in flight when the context starts closing is rejected into its caller.
       setAcceptTasksAfterContextClose(true)
-      setWaitForTasksToCompleteOnShutdown(true)
+      // Queued streams have a client that is already gone once the connector stops; background work
+      // does not, so only that is worth draining.
+      setWaitForTasksToCompleteOnShutdown(drainOnShutdown)
       setAwaitTerminationSeconds(SHUTDOWN_DRAIN_SECONDS)
       setRejectedExecutionHandler(rejectedExecutionHandler)
       setTaskDecorator(

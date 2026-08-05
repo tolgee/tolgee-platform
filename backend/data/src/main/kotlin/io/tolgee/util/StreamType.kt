@@ -16,5 +16,5 @@ enum class StreamType {
   INTERNAL_TEST,
   ;
 
-  val tag: String get() = name.lowercase(Locale.ROOT)
+  val tag: String = name.lowercase(Locale.ROOT)
 }

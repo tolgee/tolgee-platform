@@ -423,10 +423,9 @@ export function useErrorTranslation() {
       case 'advanced_params_not_supported':
         return t('advanced_params_not_supported');
 
+      // Rate limiting
       case 'server_busy':
         return t('server_busy');
-
-      // Rate limiting
       case 'too_many_requests':
         return t('too_many_requests');
       case 'rate_limited':

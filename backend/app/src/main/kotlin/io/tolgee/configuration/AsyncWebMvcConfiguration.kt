@@ -29,6 +29,7 @@ class AsyncWebMvcConfiguration(
       maxThreads = asyncExecutorFactory.streamingMaxThreads,
       queueCapacity = asyncExecutorFactory.streamingQueueCapacity,
       keepAliveSeconds = tolgeeProperties.async.streaming.keepAliveSeconds,
+      drainOnShutdown = false,
       rejectedExecutionHandler = StreamingAbortPolicy { metrics.streamingRejectedCounter.increment() },
     )
 

@@ -7,7 +7,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 @DocProperty(
   displayName = "Asynchronous execution",
   description =
-    "Sizing of the two thread pools Tolgee uses for work that runs outside the HTTP request thread.\n\n" +
+    "Sizing of the thread pools Tolgee uses for work that runs outside the HTTP request thread.\n\n" +
       "By default both are derived from the size of the database connection pool, so a larger " +
       "instance automatically gets more concurrency without any extra configuration.\n\n" +
       ":::warning\n" +
@@ -22,6 +22,7 @@ class AsyncProperties {
   var background: BackgroundAsyncProperties = BackgroundAsyncProperties()
 }
 
+@ConfigurationProperties(prefix = "tolgee.async.streaming")
 @DocProperty(
   displayName = "Streaming responses",
   description =
@@ -57,11 +58,14 @@ class StreamingAsyncProperties {
   var keepAliveSeconds: Int = 60
 }
 
+@ConfigurationProperties(prefix = "tolgee.async.background")
 @DocProperty(
   displayName = "Background tasks",
   description =
     "Thread pool serving background (`@Async`) work: e-mail sending, analytics reporting, " +
-      "translation statistics recomputation, project hard-deletes and websocket broadcasts.\n\n" +
+      "translation statistics recomputation and project hard-deletes. Websocket activity broadcasts " +
+      "run on their own single-threaded pool so their ordering is preserved, and are not affected by " +
+      "this setting.\n\n" +
       "Its queue is unbounded — background work is queued, never dropped and never run on the " +
       "thread that submitted it.",
 )
