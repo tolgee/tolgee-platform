@@ -2,6 +2,7 @@ package io.tolgee.configuration
 
 import com.zaxxer.hikari.HikariDataSource
 import io.tolgee.Metrics
+import io.tolgee.component.automations.AutomationActivityListener
 import io.tolgee.events.OnProjectActivityStoredEvent
 import io.tolgee.exceptions.StreamingCapacityExceededException
 import io.tolgee.exceptions.StreamingUnavailableException
@@ -141,6 +142,27 @@ class AsyncExecutorConfigurationTest {
       .remainingCapacity()
       .assert
       .isEqualTo(Int.MAX_VALUE)
+  }
+
+  /** Its debounce is a find-then-insert with no lock, so two revisions at once defeat it. */
+  @Test
+  fun `automation triggers are pinned to a serial executor`() {
+    val automation = asyncMethodConfiguration.automationAsyncExecutor()
+    automation.corePoolSize.assert.isEqualTo(1)
+    automation.maxPoolSize.assert.isEqualTo(1)
+
+    AutomationActivityListener::class.java.declaredMethods
+      .filter { it.name == "listen" }
+      .assert
+      .hasSize(2)
+    AutomationActivityListener::class.java.declaredMethods
+      .filter { it.name == "listen" }
+      .forEach {
+        it
+          .getAnnotation(Async::class.java)
+          .value.assert
+          .isEqualTo(AsyncMethodConfiguration.AUTOMATION_EXECUTOR_BEAN_NAME)
+      }
   }
 
   @Test

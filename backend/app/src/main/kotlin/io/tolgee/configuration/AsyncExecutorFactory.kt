@@ -87,5 +87,6 @@ class AsyncExecutorFactory(
     const val STREAMING_THREAD_NAME_PREFIX = "tolgee-stream-"
     const val BACKGROUND_THREAD_NAME_PREFIX = "tolgee-async-"
     const val WEBSOCKET_THREAD_NAME_PREFIX = "tolgee-ws-"
+    const val AUTOMATION_THREAD_NAME_PREFIX = "tolgee-automation-"
   }
 }

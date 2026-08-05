@@ -47,9 +47,24 @@ class AsyncMethodConfiguration(
       keepAliveSeconds = WEBSOCKET_KEEP_ALIVE_SECONDS,
     )
 
+  /**
+   * Also single-threaded. BatchJobService.tryDebounceJob is a find-then-insert with no lock, and the
+   * automation triggers share a debouncing key on purpose, so running two revisions at once lets
+   * both see no PENDING job and enqueue a publish the debounce exists to collapse into one.
+   */
+  @Bean(AUTOMATION_EXECUTOR_BEAN_NAME)
+  fun automationAsyncExecutor(): ThreadPoolTaskExecutor =
+    asyncExecutorFactory.getObject().create(
+      threadNamePrefix = AsyncExecutorFactory.AUTOMATION_THREAD_NAME_PREFIX,
+      maxThreads = 1,
+      queueCapacity = AsyncExecutorFactory.UNBOUNDED_QUEUE,
+      keepAliveSeconds = WEBSOCKET_KEEP_ALIVE_SECONDS,
+    )
+
   companion object {
     const val BACKGROUND_EXECUTOR_BEAN_NAME = "backgroundAsyncExecutor"
     const val WEBSOCKET_EXECUTOR_BEAN_NAME = "websocketAsyncExecutor"
+    const val AUTOMATION_EXECUTOR_BEAN_NAME = "automationAsyncExecutor"
     const val WEBSOCKET_KEEP_ALIVE_SECONDS = 60
   }
 }

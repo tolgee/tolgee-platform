@@ -64,8 +64,8 @@ class StreamingAsyncProperties {
   description =
     "Thread pool serving background (`@Async`) work: e-mail sending, analytics reporting, " +
       "translation statistics recomputation and project hard-deletes. Websocket activity broadcasts " +
-      "run on their own single-threaded pool so their ordering is preserved, and are not affected by " +
-      "this setting.\n\n" +
+      "and automation triggers run on their own single-threaded pools, so their ordering and " +
+      "debouncing are preserved, and are not affected by this setting.\n\n" +
       "Its queue is unbounded — background work is queued, never dropped and never run on the " +
       "thread that submitted it.",
 )
