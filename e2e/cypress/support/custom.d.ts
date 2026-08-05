@@ -14,6 +14,11 @@ declare namespace Cypress {
       options?: Parameters<typeof cy['find']>[1]
     ): Chainable;
 
+    findDcyAdvanced(selector: {
+      value: Value;
+      [key: string]: string;
+    }): Chainable;
+
     nextUntilDcy(dataCy: Value): Chainable;
 
     findInputByName(name: string): Chainable;

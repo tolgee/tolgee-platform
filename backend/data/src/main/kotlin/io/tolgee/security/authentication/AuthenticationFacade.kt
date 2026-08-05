@@ -83,9 +83,21 @@ class AuthenticationFacade(
   val actingUser: UserAccountDto?
     get() = authentication.actingAsUserAccount
 
+  val actingUserOrNull: UserAccountDto?
+    get() {
+      if (!isAuthenticated) return null
+      return authentication.actingAsUserAccount
+    }
+
   // -- AUTHENTICATION METHOD AND DETAILS
   val deviceId: String?
     get() = authentication.deviceId
+
+  val deviceIdOrNull: String?
+    get() {
+      if (!isAuthenticated) return null
+      return authentication.deviceId
+    }
   val isReadOnly: Boolean
     get() = authentication.isReadOnly
 

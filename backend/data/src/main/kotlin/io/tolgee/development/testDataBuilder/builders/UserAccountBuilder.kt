@@ -6,6 +6,7 @@ import io.tolgee.model.AuthProviderChangeRequest
 import io.tolgee.model.Pat
 import io.tolgee.model.UserAccount
 import io.tolgee.model.UserPreferences
+import io.tolgee.model.UserSession
 import io.tolgee.model.notifications.Notification
 import io.tolgee.model.slackIntegration.SlackUserConnection
 import org.springframework.core.io.ClassPathResource
@@ -22,6 +23,7 @@ class UserAccountBuilder(
     var userPreferences: UserPreferencesBuilder? = null
     var authProviderChangeRequest: AuthProviderChangeRequestBuilder? = null
     var pats: MutableList<PatBuilder> = mutableListOf()
+    var sessions: MutableList<UserSessionBuilder> = mutableListOf()
     var slackUserConnections: MutableList<SlackUserConnectionBuilder> = mutableListOf()
     var notifications: MutableList<NotificationBuilder> = mutableListOf()
   }
@@ -46,6 +48,8 @@ class UserAccountBuilder(
   }
 
   fun addPat(ft: FT<Pat>) = addOperation(data.pats, ft)
+
+  fun addSession(ft: FT<UserSession>) = addOperation(data.sessions, ft)
 
   fun addSlackUserConnection(ft: FT<SlackUserConnection>) = addOperation(data.slackUserConnections, ft)
 

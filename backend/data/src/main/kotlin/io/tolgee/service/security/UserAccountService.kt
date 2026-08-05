@@ -21,6 +21,8 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.AllTokensInvalidatedTrigger
+import io.tolgee.model.enums.AuthAuditEventType
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.model.notifications.Notification
 import io.tolgee.model.notifications.NotificationType
@@ -28,6 +30,7 @@ import io.tolgee.model.views.ExtendedUserAccountInProject
 import io.tolgee.model.views.UserAccountInProjectView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import io.tolgee.repository.UserAccountRepository
+import io.tolgee.repository.UserSessionRepository
 import io.tolgee.service.AiPlaygroundResultService
 import io.tolgee.service.AvatarService
 import io.tolgee.service.EmailVerificationService
@@ -74,6 +77,10 @@ class UserAccountService(
   private val self: UserAccountService,
   @Lazy
   private val mfaService: MfaService,
+  @Lazy
+  private val authAuditService: AuthAuditService,
+  @Lazy
+  private val userSessionRepository: UserSessionRepository,
 ) : Logging {
   @Autowired
   @Lazy
@@ -222,6 +229,9 @@ class UserAccountService(
   }
 
   private fun deleteWithFetchedData(toDelete: UserAccount) {
+    // The audit trail deliberately outlives the account, but a session row is not audit - it
+    // carries the person's IP, user agent and city, and there is nothing left to revoke.
+    userSessionRepository.deleteAllByUserAccountId(toDelete.id)
     toDelete.emailVerification?.let {
       entityManager.remove(it)
     }
@@ -303,8 +313,9 @@ class UserAccountService(
   fun setUserPassword(
     userAccount: UserAccount,
     password: String?,
+    trigger: AllTokensInvalidatedTrigger,
   ): UserAccount {
-    resetTokensValidNotBefore(userAccount)
+    resetTokensValidNotBefore(userAccount, trigger)
     userAccount.password = passwordEncoder.encode(password)
     return userAccountRepository.save(userAccount)
   }
@@ -338,7 +349,7 @@ class UserAccountService(
         ?: throw ValidationException(Message.INVALID_OTP_CODE)
     userAccount.totpKey = key
     userAccount.totpLastUsedTimeStep = matchedStep
-    resetTokensValidNotBefore(userAccount)
+    resetTokensValidNotBefore(userAccount, AllTokensInvalidatedTrigger.MFA_ENABLED)
     val savedUser = userAccountRepository.save(userAccount)
     notifySelf(userAccount, NotificationType.MFA_ENABLED)
     return savedUser
@@ -351,7 +362,7 @@ class UserAccountService(
     userAccount.totpLastUsedTimeStep = null
     // note: if support for more MFA methods is added, this should be only done if no other MFA method is enabled
     userAccount.mfaRecoveryCodes = emptyList()
-    resetTokensValidNotBefore(userAccount)
+    resetTokensValidNotBefore(userAccount, AllTokensInvalidatedTrigger.MFA_DISABLED)
     val savedUser = userAccountRepository.save(userAccount)
     notifySelf(userAccount, NotificationType.MFA_DISABLED)
     return savedUser
@@ -563,7 +574,7 @@ class UserAccountService(
     val matches = passwordEncoder.matches(dto.currentPassword, userAccount.password)
     if (!matches) throw PermissionException(Message.WRONG_CURRENT_PASSWORD)
 
-    resetTokensValidNotBefore(userAccount)
+    resetTokensValidNotBefore(userAccount, AllTokensInvalidatedTrigger.PASSWORD_CHANGE)
     userAccount.password = passwordEncoder.encode(dto.password)
     userAccount.passwordChanged = true
     val savedUser = userAccountRepository.save(userAccount)
@@ -595,13 +606,24 @@ class UserAccountService(
     userAccount.username = newEmail
   }
 
-  fun invalidateTokens(userAccount: UserAccount): UserAccount {
-    resetTokensValidNotBefore(userAccount)
+  fun invalidateTokens(
+    userAccount: UserAccount,
+    trigger: AllTokensInvalidatedTrigger,
+  ): UserAccount {
+    resetTokensValidNotBefore(userAccount, trigger)
     return userAccountRepository.save(userAccount)
   }
 
-  private fun resetTokensValidNotBefore(userAccount: UserAccount) {
+  private fun resetTokensValidNotBefore(
+    userAccount: UserAccount,
+    trigger: AllTokensInvalidatedTrigger,
+  ) {
     userAccount.tokensValidNotBefore = DateUtils.truncate(currentDateProvider.date, Calendar.SECOND)
+    authAuditService.record(
+      type = AuthAuditEventType.ALL_TOKENS_INVALIDATED,
+      userAccountId = userAccount.id,
+      data = mutableMapOf("trigger" to trigger.name),
+    )
   }
 
   private fun publishUserInfoUpdatedEvent(

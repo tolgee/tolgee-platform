@@ -5,6 +5,7 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.sso.SsoTenantConfig
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.enums.ThirdPartyAuthType
+import io.tolgee.model.enums.UserSessionType
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.security.thirdParty.ThirdPartyAuthDelegate
@@ -85,7 +86,7 @@ class FakeThirdPartyAuthenticationService(
           tenant = tenant,
         ),
       )
-    val jwt = jwtService.emitToken(user.id)
+    val jwt = jwtService.emitToken(user.id, type = UserSessionType.TEST)
     return JwtAuthenticationResponse(jwt)
   }
 

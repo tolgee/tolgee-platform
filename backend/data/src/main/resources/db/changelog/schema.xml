@@ -5876,4 +5876,112 @@
             END $$;
         </sql>
     </changeSet>
+    <changeSet author="jancizmar" id="1785400000000-1">
+        <createTable tableName="user_session">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="user_sessionPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="device_id" type="VARCHAR(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_account_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ip" type="VARCHAR(64)"/>
+            <column name="user_agent" type="VARCHAR(255)"/>
+            <column name="expires_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_refreshed_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="last_used_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="revoked_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="revoked_by_id" type="BIGINT"/>
+            <column name="acting_user_account_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jancizmar" id="1785400000000-2">
+        <addUniqueConstraint columnNames="device_id" constraintName="user_session_device_id"
+                             tableName="user_session"/>
+    </changeSet>
+    <changeSet author="jancizmar" id="1785400000000-3">
+        <createIndex indexName="user_session_user_account_id" tableName="user_session">
+            <column name="user_account_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="jancizmar" id="1785400000000-4">
+        <createIndex indexName="user_session_expires_at" tableName="user_session">
+            <column name="expires_at"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="jancizmar" id="1785400000000-6">
+        <createTable tableName="auth_audit_event">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="auth_audit_eventPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_account_id" type="BIGINT"/>
+            <column name="attempted_username" type="VARCHAR(255)"/>
+            <column name="acting_user_account_id" type="BIGINT"/>
+            <column name="device_id" type="VARCHAR(36)"/>
+            <column name="target_id" type="BIGINT"/>
+            <column name="ip" type="VARCHAR(64)"/>
+            <column name="user_agent" type="VARCHAR(255)"/>
+            <column name="data" type="jsonb"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jancizmar" id="1785400000000-7">
+        <createIndex indexName="auth_audit_event_created_at" tableName="auth_audit_event">
+            <column name="created_at"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="jancizmar" id="1785400000000-8">
+        <createIndex indexName="auth_audit_event_user_account_id" tableName="auth_audit_event">
+            <column name="user_account_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="jancizmar" id="1785400000000-9">
+        <addColumn tableName="activity_revision">
+            <column name="acting_author_id" type="BIGINT"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jancizmar" id="1785400000000-10">
+        <comment>
+            Sessions become revocable only from this release on, and only tokens minted afterwards
+            get a user_session row. Signing everyone out once closes the window in which a
+            pre-upgrade token would be invisible to (and unreachable by) session management.
+
+            The column is compared against a JVM instant but written here by the database, and the
+            two clocks are only the same when both run UTC. The offset is bounded by the range of
+            real time zones, so backing off by more than that guarantees the value can never land in
+            the JVM's future - which would reject every freshly minted token and lock everyone out
+            until real time caught up. Erring the other way only leaves the newest pre-upgrade
+            tokens valid, and those get a session row from the backfill path on first use anyway.
+        </comment>
+        <sql>UPDATE user_account SET tokens_valid_not_before = greatest(coalesce(tokens_valid_not_before, to_timestamp(0)), now() - interval '26 hours') WHERE deleted_at IS NULL;</sql>
+        <rollback/>
+    </changeSet>
+    <changeSet author="jancizmar" id="1785400000000-11">
+        <addColumn tableName="user_session">
+            <column name="country_code" type="VARCHAR(2)"/>
+            <column name="country" type="VARCHAR(255)"/>
+            <column name="city" type="VARCHAR(255)"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

@@ -16,6 +16,7 @@ import io.tolgee.development.testDataBuilder.builders.TranslationBuilder
 import io.tolgee.development.testDataBuilder.builders.TranslationMemoryBuilder
 import io.tolgee.development.testDataBuilder.builders.UserAccountBuilder
 import io.tolgee.development.testDataBuilder.builders.UserPreferencesBuilder
+import io.tolgee.development.testDataBuilder.builders.UserSessionBuilder
 import io.tolgee.development.testDataBuilder.builders.slack.SlackUserConnectionBuilder
 import io.tolgee.model.Project
 import io.tolgee.repository.KeyCodeReferenceRepository
@@ -615,11 +616,19 @@ class TestDataService(
     saveUserPreferences(userAccountBuilders.mapNotNull { it.data.userPreferences })
     saveAuthProviderChangeRequests(userAccountBuilders.mapNotNull { it.data.authProviderChangeRequest })
     saveUserPats(userAccountBuilders.flatMap { it.data.pats })
+    saveUserSessions(userAccountBuilders.flatMap { it.data.sessions })
     saveUserSlackConnections(userAccountBuilders.flatMap { it.data.slackUserConnections })
   }
 
   private fun saveUserPats(data: List<PatBuilder>) {
     data.forEach { patService.save(it.self) }
+  }
+
+  private fun saveUserSessions(data: List<UserSessionBuilder>) {
+    data.forEach {
+      it.self.userAccountId = it.userAccountBuilder.self.id
+      entityManager.persist(it.self)
+    }
   }
 
   private fun saveUserSlackConnections(data: List<SlackUserConnectionBuilder>) {

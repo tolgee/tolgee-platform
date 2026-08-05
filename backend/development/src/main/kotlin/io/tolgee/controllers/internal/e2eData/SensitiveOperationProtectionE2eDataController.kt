@@ -5,6 +5,7 @@ import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.controllers.internal.InternalController
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.data.SensitiveOperationProtectionTestData
+import io.tolgee.model.enums.UserSessionType
 import io.tolgee.repository.UserAccountRepository
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.service.security.MfaService
@@ -28,14 +29,14 @@ class SensitiveOperationProtectionE2eDataController(
 
     val baseline = currentDateProvider.date
     currentDateProvider.forcedDate = Date(baseline.time - authenticationProperties.jwtSuperExpiration - 10_000)
-    val expiredToken = jwtService.emitToken(data.franta.id, isSuper = true)
+    val expiredToken = jwtService.emitToken(data.franta.id, type = UserSessionType.TEST, isSuper = true)
     currentDateProvider.forcedDate = null
 
     return mapOf(
       "frantasProjectId" to data.frantasProject.id,
       "pepasProjectId" to data.pepasProject.id,
       "frantaExpiredSuperJwt" to expiredToken,
-      "pepaExpiredSuperJwt" to jwtService.emitToken(data.pepa.id, isSuper = false),
+      "pepaExpiredSuperJwt" to jwtService.emitToken(data.pepa.id, type = UserSessionType.TEST, isSuper = false),
     )
   }
 

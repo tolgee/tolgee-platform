@@ -15,6 +15,7 @@ import io.tolgee.ee.exceptions.SsoAuthorizationException
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.enums.ThirdPartyAuthType
+import io.tolgee.model.enums.UserSessionType
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.security.thirdParty.SsoDelegate
@@ -181,7 +182,7 @@ class SsoDelegateEe(
           invitationCode,
         ),
       )
-    val jwt = jwtService.emitToken(user.id)
+    val jwt = jwtService.emitToken(user.id, type = UserSessionType.LOGIN_SSO)
     return JwtAuthenticationResponse(jwt)
   }
 

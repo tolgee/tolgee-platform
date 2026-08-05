@@ -73,6 +73,8 @@ export const apiKeysTestData = generateTestDataObject('api-keys');
 
 export const patsTestData = generateTestDataObject('pat');
 
+export const sessionsTestData = generateTestDataObject('sessions');
+
 export const languagePermissionsData = generateTestDataObject(
   'language-permissions'
 );

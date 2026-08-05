@@ -10,12 +10,14 @@ import io.tolgee.dtos.request.pat.UpdatePatDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Pat
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.AuthAuditEventType
 import io.tolgee.repository.PatRepository
 import io.tolgee.util.runSentryCatching
 import org.springframework.cache.Cache
 import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
+import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.scheduling.annotation.Async
@@ -29,6 +31,8 @@ class PatService(
   private val keyGenerator: KeyGenerator,
   private val currentDateProvider: CurrentDateProvider,
   private val cacheManager: CacheManager,
+  @Lazy
+  private val authAuditService: AuthAuditService,
 ) {
   private val cache: Cache? by lazy { cacheManager.getCache(Caches.PERSONAL_ACCESS_TOKENS) }
 
@@ -75,7 +79,20 @@ class PatService(
         description = dto.description
         this.userAccount = userAccount
       }
-    return save(pat)
+    val saved = save(pat)
+    recordAuditEvent(AuthAuditEventType.PAT_CREATED, saved)
+    return saved
+  }
+
+  private fun recordAuditEvent(
+    type: AuthAuditEventType,
+    pat: Pat,
+  ) {
+    authAuditService.record(
+      type = type,
+      userAccountId = pat.userAccount.id,
+      targetId = pat.id,
+    )
   }
 
   fun regenerate(
@@ -91,6 +108,7 @@ class PatService(
         this.regenerateToken()
         save(this)
       }
+    recordAuditEvent(AuthAuditEventType.PAT_REGENERATED, pat)
     return pat
   }
 
@@ -112,6 +130,7 @@ class PatService(
 
   @CacheEvict(cacheNames = [Caches.PERSONAL_ACCESS_TOKENS], key = "#pat.tokenHash")
   fun delete(pat: Pat) {
+    recordAuditEvent(AuthAuditEventType.PAT_DELETED, pat)
     return patRepository.deleteById(pat.id)
   }
 

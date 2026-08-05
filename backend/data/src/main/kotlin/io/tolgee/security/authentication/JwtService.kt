@@ -33,8 +33,11 @@ import io.tolgee.dtos.cacheable.isSupporterOrAdmin
 import io.tolgee.exceptions.AuthExpiredException
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.exceptions.PermissionException
+import io.tolgee.model.enums.UserSessionType
 import io.tolgee.service.security.UserAccountService
+import io.tolgee.service.security.UserSessionService
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import java.security.Key
 import java.util.Date
@@ -48,6 +51,9 @@ class JwtService(
   private val currentDateProvider: CurrentDateProvider,
   private val userAccountService: UserAccountService,
   private val authenticationFacade: AuthenticationFacade,
+  @Lazy
+  private val userSessionService: UserSessionService,
+  private val userSessionAccessManager: UserSessionAccessManager,
 ) {
   private val jwtParser: JwtParser =
     Jwts
@@ -60,16 +66,24 @@ class JwtService(
    * Emits an authentication token for the given user.
    *
    * @param userAccountId The user account ID this token belongs to.
+   * @param type How the session this token belongs to was started.
    * @param actingAsUserAccountId The user account ID of the actor who initiated impersonation.
    * @param isReadOnly Whether the token allows read-only access or full read-write access.
    * @param isSuper Whether to emit a super-powered token or not.
+   * @param refreshedDeviceId Device of the session being refreshed. A new device is minted when null.
+   * @param isRefresh Whether this token continues an existing session rather than starting one.
+   *                  Not derivable from [refreshedDeviceId]: refreshing a token issued before
+   *                  sessions existed has no device to carry over, yet is still a refresh.
    * @return An authentication token.
    */
   fun emitToken(
     userAccountId: Long,
+    type: UserSessionType,
     actingAsUserAccountId: Long? = null,
     isReadOnly: Boolean = false,
     isSuper: Boolean = false,
+    refreshedDeviceId: String? = null,
+    isRefresh: Boolean = false,
   ): String {
     val now = currentDateProvider.date
     val expiration = Date(now.time + authenticationProperties.jwtExpiration)
@@ -87,7 +101,7 @@ class JwtService(
       builder.claim(JWT_TOKEN_ACTING_USER_ID_CLAIM, actingAsUserAccountId.toString())
     }
 
-    val deviceId = UUID.randomUUID().toString()
+    val deviceId = refreshedDeviceId ?: UUID.randomUUID().toString()
     builder.claim(JWT_TOKEN_DEVICE_ID_CLAIM, deviceId)
 
     if (isReadOnly) {
@@ -98,6 +112,15 @@ class JwtService(
       val superExpiration = Date(now.time + authenticationProperties.jwtSuperExpiration)
       builder.claim(SUPER_JWT_TOKEN_EXPIRATION_CLAIM, superExpiration)
     }
+
+    userSessionService.registerToken(
+      deviceId = deviceId,
+      userAccountId = userAccountId,
+      type = type,
+      actingUserAccountId = actingAsUserAccountId,
+      expiresAt = expiration,
+      isRefresh = isRefresh,
+    )
 
     return builder.compact()
   }
@@ -113,15 +136,20 @@ class JwtService(
   fun emitTokenRefreshForCurrentUser(isSuper: Boolean? = false): String {
     return emitToken(
       userAccountId = authenticationFacade.authenticatedUser.id,
+      // the session keeps the type it was created with; the upsert never overwrites it
+      type = UserSessionType.UNKNOWN,
       actingAsUserAccountId = authenticationFacade.actingUser?.id,
       isReadOnly = authenticationFacade.isReadOnly,
       isSuper = isSuper ?: authenticationFacade.isUserSuperAuthenticated,
+      refreshedDeviceId = authenticationFacade.deviceId,
+      isRefresh = true,
     )
   }
 
   fun emitAdminImpersonationToken(userAccountId: Long): String {
     return emitToken(
       userAccountId = userAccountId,
+      type = UserSessionType.IMPERSONATION,
       actingAsUserAccountId = authenticationFacade.authenticatedUser.id,
       isReadOnly = false,
       isSuper = true,
@@ -131,6 +159,7 @@ class JwtService(
   fun emitSupporterImpersonationToken(userAccountId: Long): String {
     return emitToken(
       userAccountId = userAccountId,
+      type = UserSessionType.IMPERSONATION,
       actingAsUserAccountId = authenticationFacade.authenticatedUser.id,
       isReadOnly = true,
       isSuper = false,
@@ -199,10 +228,6 @@ class JwtService(
 
     val account = validateJwt(jws.body)
 
-    if (account.tokensValidNotBefore != null && jws.body.issuedAt.before(account.tokensValidNotBefore)) {
-      throw AuthExpiredException(Message.EXPIRED_JWT_TOKEN)
-    }
-
     val actor = validateActor(jws.body)
 
     // to avoid mass sign-out on update, we allow tokens without a device id
@@ -225,6 +250,15 @@ class JwtService(
         // actor got demoted and is no longer admin/supporter; impersonation not allowed
         throw AuthenticationException(Message.INVALID_JWT_TOKEN)
       }
+    }
+
+    if (deviceId != null) {
+      userSessionAccessManager.checkSessionAndTrackUsage(
+        deviceId = deviceId,
+        userAccountId = account.id,
+        expiresAt = jws.body.expiration,
+        actingUserAccountId = actor?.id,
+      )
     }
 
     return TolgeeAuthentication(
