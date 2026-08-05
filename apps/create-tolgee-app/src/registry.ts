@@ -54,12 +54,24 @@ export type SdkMode = 'auto' | 'local' | 'published'
 export const SDK_MODES: SdkMode[] = ['auto', 'local', 'published']
 
 /**
- * Used only when the generator cannot see the SDK sources. It is an exact
- * version on purpose: the SDK's npm `latest` tag points at an early alpha that
- * predates most of the API, so any range (`*`, `^…`) resolves to a package the
- * generated app does not compile against.
+ * Version the template is written against, used when the generator cannot see
+ * the SDK sources. It is an exact version on purpose: the SDK's npm `latest` tag
+ * points at an early alpha that predates most of the API, so any range (`*`,
+ * `^…`) resolves to a package the generated app does not compile against.
  */
-export const PUBLISHED_SDK_VERSION = '0.0.1-alpha.1'
+export const PUBLISHED_SDK_VERSION = '0.0.1-alpha.8'
+
+/**
+ * RELEASE MARKER — flip to `true` in the same commit that publishes
+ * `PUBLISHED_SDK_VERSION` to npm, and keep the two in lockstep afterwards.
+ *
+ * While it is `false`, `resolveSdk` refuses to scaffold against the registry:
+ * every version published so far predates `selfRegisterApp` and
+ * `applyTolgeeTheme`, which the template imports, so the generated app would
+ * fail to typecheck with a wall of missing-export errors instead of one
+ * sentence naming the cause.
+ */
+export const PUBLISHED_SDK_RELEASED = false
 
 export const DEFAULT_TOLGEE_URL = 'http://localhost:8718'
 export const DEFAULT_VITE_PORT = 5180

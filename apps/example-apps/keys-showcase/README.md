@@ -35,7 +35,7 @@ The app assumes Tolgee is at `http://localhost:8718`; override with `TOLGEE_URL`
 ## Install and run
 
 ```bash
-npm install                 # from the repo root — this is an npm workspace
+npm install --prefix ../..   # from apps/ — this is an npm workspace of it
 cp .env.example .env.local   # optional; every value has a default
 npm run dev                  # vite on :5180 + manifest server on :5181 + dev tunnel
 ```
@@ -65,6 +65,10 @@ Tolgee to follow along.
 
 `TOLGEE_DEV_TUNNEL=none` in `.env.local` forces the tunnel off and falls back to
 `http://localhost:5180`.
+
+`cloudflared` is a **dev dependency** — it is a local-development convenience, so
+nothing that deploys this app pulls its binary down. Without it installed the
+tunnel process says so and leaves Vite and the app server running.
 
 ## Connecting the app to Tolgee
 

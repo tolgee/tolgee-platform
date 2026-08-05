@@ -1,7 +1,17 @@
 {
   "name": "create-tolgee-app",
-  "version": "0.0.1-alpha.1",
+  "version": "0.0.1-alpha.8",
   "description": "Scaffold a Tolgee App — a Vite + React dashboard page with a manifest server — in one command.",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tolgee/tolgee-platform.git",
+    "directory": "apps/create-tolgee-app"
+  },
+  "homepage": "https://github.com/tolgee/tolgee-platform/tree/main/apps/create-tolgee-app#readme",
+  "bugs": {
+    "url": "https://github.com/tolgee/tolgee-platform/issues"
+  },
   "type": "module",
   "bin": {
     "create-tolgee-app": "./dist/index.js"
@@ -12,21 +22,25 @@
   ],
   "scripts": {
     "build": "tsup",
+    "prepack": "npm run build",
     "dev": "tsx src/index.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@clack/prompts": "^0.11.0",
+    "@clack/prompts": "^1.7.0",
     "picocolors": "^1.1.1"
   },
   "devDependencies": {
     "@tolgee/apps-sdk": "*",
-    "@types/node": "^24.12.3",
+    "@types/node": "^20.19.9",
     "tsup": "^8.3.5",
     "tsx": "^4.19.2",
     "typescript": "~6.0.2"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "engines": {
-    "node": ">=20"
+    "node": ">=20.12.0"
   }
 }

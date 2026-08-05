@@ -289,7 +289,9 @@ const nextSteps = (answers: Answers): string[] => {
   return steps
 }
 
-main().catch((err) => {
-  console.error(err)
+main().catch((err: unknown) => {
+  // These are the generator's own "you cannot get there from here" messages —
+  // a stack trace would only bury them.
+  log.error(err instanceof Error ? err.message : String(err))
   process.exit(1)
 })

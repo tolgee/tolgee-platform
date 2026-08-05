@@ -8,12 +8,13 @@ to your Tolgee instance.
 npx create-tolgee-app my-app
 ```
 
-> **Status: alpha, not published.** Inside this repository the package is
-> resolved through npm workspaces, so `npm install` at the repo root links it
-> (and `@tolgee/apps-sdk`) locally. `npx create-tolgee-app` from a clean machine
-> does not work yet. Run from a checkout, it scaffolds anywhere on disk and
-> wires the generated app to the SDK sources — see *Which SDK the generated app
-> gets*.
+> **Status: alpha, needs a checkout.** Inside this repository the package is
+> resolved through npm workspaces, so `npm install` in `apps/` links it (and
+> `@tolgee/apps-sdk`) locally. `npx create-tolgee-app` from a clean machine
+> **exits with an error**: no `@tolgee/apps-sdk` on npm carries the API the
+> template imports, so the scaffold could only produce a project that does not
+> compile. Run from a checkout, it scaffolds anywhere on disk and wires the
+> generated app to the SDK sources — see *Which SDK the generated app gets*.
 
 ## What it generates
 
@@ -89,14 +90,21 @@ summary and again in the next steps.
 
 | Mode | What the dependency becomes |
 | --- | --- |
-| `auto` (default) | `*` when the app is generated into this repo's npm workspaces (they link the SDK already), otherwise `file:<abs path>/apps/tolgee-apps-sdk`, and an exact published version when the CLI has no SDK sources next to it |
+| `auto` (default) | `*` when the app is generated into the `apps/` npm workspaces (they link the SDK already), otherwise `file:<abs path>/apps/tolgee-apps-sdk` |
 | `local` | as `auto`, but fails instead of falling back to the registry |
 | `published` | an exact published version, never a range |
+
+**`published` currently refuses to run.** Every `@tolgee/apps-sdk` release on npm
+predates `selfRegisterApp` and `applyTolgeeTheme`, which the template imports, so
+the generator exits with that sentence rather than handing you a project full of
+missing-export errors. `PUBLISHED_SDK_RELEASED` in `src/registry.ts` is the flag
+to flip — together with `PUBLISHED_SDK_VERSION` — once the SDK is on npm. `auto`
+hits the same wall only when the CLI has no SDK sources next to it.
 
 A `file:` dependency uses the SDK's build output, so the SDK has to be built:
 
 ```bash
-npm run build --workspace @tolgee/apps-sdk
+npm run build --workspace @tolgee/apps-sdk   # from apps/
 ```
 
 The generator does not build it for you, but it does check and says so in the
@@ -110,6 +118,11 @@ alongside Vite and Express: with a non-localhost `TOLGEE_URL` it opens a
 Cloudflare quick tunnel, publishes the public URLs to `.tolgee-dev/tunnel.json`,
 and the server registers the app with *those* URLs. `TOLGEE_DEV_TUNNEL=none`, or
 a localhost `TOLGEE_URL`, keeps everything local.
+
+`cloudflared` is a **dev dependency** of the generated app — it downloads a
+platform binary on install, which no deployment of the app needs. A production
+install (`npm ci --omit=dev`) simply has no tunnel; the script says so and lets
+Vite and the app server carry on.
 
 ## Non-interactive use
 
@@ -132,6 +145,9 @@ read from `VITE_PORT` / `SERVER_PORT` in the generated `.env.local` — change
 them there to run two apps side by side.
 
 ## Developing this package
+
+It is part of the `apps/` npm workspace, so dependencies come from
+`npm install` there, not at the repo root.
 
 ```bash
 npm run dev        # run the CLI from source (tsx)
