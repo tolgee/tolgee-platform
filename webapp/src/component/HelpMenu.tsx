@@ -25,7 +25,8 @@ import {
 } from '@untitled-ui/icons-react';
 import { T, useTranslate } from '@tolgee/react';
 
-import { usePreferredOrganization } from 'tg.globalContext/helpers';
+import { useUser } from 'tg.globalContext/helpers';
+
 import { GitHub, Slack } from './CustomIcons';
 import { TranslationsShortcuts } from './shortcuts/TranslationsShortcuts';
 import { useChatwoot } from 'tg.hooks/useChatwoot';
@@ -41,7 +42,7 @@ const StyledHelpButton = styled('div')`
 
 export const HelpMenu = () => {
   const { t } = useTranslate();
-  const { preferredOrganization } = usePreferredOrganization();
+  const user = useUser();
   const { chatwootAvailable, openChatwoot } = useChatwoot();
   const { intercomAvailable, openIntercom } = useIntercom();
 
@@ -72,7 +73,7 @@ export const HelpMenu = () => {
     return { href: url, target: 'blank', rel: 'noreferrer noopener' };
   }
 
-  if (!preferredOrganization) {
+  if (!user) {
     return null;
   }
 
@@ -82,7 +83,11 @@ export const HelpMenu = () => {
         title={t('help_menu_tooltip')}
         PopperProps={{ placement: 'right' }}
       >
-        <StyledHelpButton onClick={handleOpen} id="help-button">
+        <StyledHelpButton
+          onClick={handleOpen}
+          id="help-button"
+          data-cy="help-menu-button"
+        >
           <Fab color="primary" size="small">
             <HelpCircle />
           </Fab>

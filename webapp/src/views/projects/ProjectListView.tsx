@@ -11,8 +11,8 @@ import { ProjectsList } from 'tg.views/projects/ProjectsList';
 import { Button } from '@mui/material';
 import { Link } from 'react-router-dom';
 import {
+  useCanCreateProject,
   useIsAdminOrSupporter,
-  useIsOrganizationOwnerOrMaintainer,
   usePreferredOrganization,
 } from 'tg.globalContext/helpers';
 import { OrganizationSwitch } from 'tg.component/organizationSwitch/OrganizationSwitch';
@@ -46,15 +46,14 @@ export const ProjectListView = () => {
 
   const { t } = useTranslate();
 
-  const isOrganizationOwnerOrMaintainer = useIsOrganizationOwnerOrMaintainer();
-
   const isAdminOrSupporter = useIsAdminOrSupporter();
 
   const isAdminAccess =
     !isAtLeastMemberOrgRole(preferredOrganization?.currentUserRole) &&
     isAdminOrSupporter;
 
-  const addAllowed = isOrganizationOwnerOrMaintainer || isAdminAccess;
+  const { canCreateProject, isFetching } = useCanCreateProject();
+  const addAllowed = canCreateProject || isFetching;
 
   const showSearch = useLatchedSearchVisibility(
     listPermitted.data?.page?.totalElements,
@@ -102,7 +101,7 @@ export const ProjectListView = () => {
             <EmptyListMessage
               loading={listPermitted.isFetching}
               hint={
-                isOrganizationOwnerOrMaintainer ? (
+                addAllowed ? (
                   <Button
                     component={Link}
                     to={LINKS.PROJECT_ADD.build()}

@@ -299,6 +299,7 @@ declare namespace DataCy {
         "handlebars-editor": true;
         "handlebars-tooltip": true;
         "handlebars-tooltip-helper-description": true;
+        "help-menu-button": true;
         "import-conflict-resolution-dialog": true;
         "import-conflicts-not-resolved-dialog": true;
         "import-conflicts-not-resolved-dialog-cancel-button": true;
@@ -485,6 +486,7 @@ declare namespace DataCy {
         "namespaces-select-text-field": true;
         "namespaces-selector": true;
         "navigation-item": true;
+        "no-permissions-message": true;
         "notifications-button": true;
         "notifications-count": true;
         "notifications-empty-message": true;
@@ -557,6 +559,8 @@ declare namespace DataCy {
         "project-contributor-item": true;
         "project-contributor-item-first-contribution": true;
         "project-contributor-item-last-contribution": true;
+        "project-create-no-organization-message": true;
+        "project-create-no-permission-message": true;
         "project-dashboard-activity-chart": true;
         "project-dashboard-activity-list": true;
         "project-dashboard-base-word-count": true;

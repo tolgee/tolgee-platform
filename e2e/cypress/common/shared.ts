@@ -177,11 +177,15 @@ export const switchToOrganizationWithSearch = (name: string): Chainable => {
 };
 
 export const switchToOrganization = (name: string): Chainable => {
+  selectOrganizationInSwitch(name);
+  return assertSwitchedToOrganization(name);
+};
+
+export const selectOrganizationInSwitch = (name: string): Chainable => {
   cy.waitForDom();
   cy.gcy('organization-switch').click();
   cy.waitForDom();
-  cy.gcy('switch-popover-item').contains(name).scrollIntoView().click();
-  return assertSwitchedToOrganization(name);
+  return cy.gcy('switch-popover-item').contains(name).scrollIntoView().click();
 };
 
 export const assertSwitchedToOrganization = (name: string) => {

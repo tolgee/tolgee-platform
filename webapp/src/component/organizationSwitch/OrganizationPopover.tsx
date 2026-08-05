@@ -17,7 +17,6 @@ type Props = {
   anchorEl: HTMLElement;
   selected: OrganizationModel | undefined;
   onAddNew: () => void;
-  ownedOnly?: boolean;
   onCommunityNavigate?: () => void;
   communitySelected?: boolean;
 };
@@ -29,7 +28,6 @@ export const OrganizationPopover: React.FC<React.PropsWithChildren<Props>> = ({
   anchorEl,
   selected,
   onAddNew,
-  ownedOnly,
   onCommunityNavigate,
   communitySelected,
 }) => {
@@ -41,7 +39,7 @@ export const OrganizationPopover: React.FC<React.PropsWithChildren<Props>> = ({
     useIsAdmin() || config.userCanCreateOrganizations;
 
   const query = {
-    filterCurrentUserOwner: Boolean(ownedOnly),
+    filterCurrentUserOwner: false,
     search: search || undefined,
     size: 20,
     sort: ['name'],

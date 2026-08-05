@@ -17,28 +17,44 @@ export interface LoadableType {
   error?: ApiError | null;
 }
 
-interface FormProps<T> {
+interface FormPropsBase<T> {
   initialValues: T;
   onSubmit: (values: T, formikHelpers: FormikHelpers<T>) => void | Promise<any>;
   onCancel?: (formikHelpers: FormikProps<T>) => void;
   loading?: boolean;
   validationSchema?: ObjectSchema<any>;
-  submitButtons?: ReactNode;
-  customActions?: ReactNode;
-  submitButtonInner?: ReactNode;
   saveActionLoadable?: LoadableType;
-  disabled?: boolean;
   children: ReactNode | ((formikProps: FormikProps<T>) => ReactNode);
   rootSx?: SxProps;
-  hideCancel?: boolean;
   showResourceError?: boolean;
   formId?: string;
 }
+
+type FooterProps =
+  | {
+      submitButtons?: undefined;
+      submitDisabledReason?: ReactNode;
+      submitButtonInner?: ReactNode;
+      customActions?: ReactNode;
+      hideCancel?: boolean;
+      disabled?: boolean;
+    }
+  | {
+      submitButtons: ReactNode;
+      submitDisabledReason?: never;
+      submitButtonInner?: never;
+      customActions?: never;
+      hideCancel?: never;
+      disabled?: never;
+    };
+
+type FormProps<T> = FormPropsBase<T> & FooterProps;
 
 export function StandardForm<T extends FormikValues>({
   initialValues,
   validationSchema,
   disabled,
+  submitDisabledReason,
   rootSx = { mb: 2 },
   hideCancel,
   showResourceError = true,
@@ -50,6 +66,10 @@ export function StandardForm<T extends FormikValues>({
   const actionLoading =
     props.saveActionLoadable?.isLoading || props.saveActionLoadable?.loading;
 
+  const submitBlocked = Boolean(
+    props.loading || disabled || submitDisabledReason
+  );
+
   return (
     <>
       {showResourceError &&
@@ -60,7 +80,13 @@ export function StandardForm<T extends FormikValues>({
 
       <Formik
         initialValues={initialValues}
-        onSubmit={props.onSubmit}
+        onSubmit={(values, helpers) => {
+          if (submitBlocked) {
+            helpers.setSubmitting(false);
+            return;
+          }
+          return props.onSubmit(values, helpers);
+        }}
         validationSchema={validationSchema}
         enableReinitialize
       >
@@ -75,6 +101,11 @@ export function StandardForm<T extends FormikValues>({
               {typeof props.children === 'function'
                 ? !props.loading && props.children(formikProps)
                 : props.children}
+              {submitDisabledReason && (
+                <Box display="flex" justifyContent="flex-end" sx={{ mb: 1 }}>
+                  {submitDisabledReason}
+                </Box>
+              )}
               {props.submitButtons || (
                 <Box display="flex" justifyContent="flex-end" sx={rootSx}>
                   <React.Fragment>
@@ -96,7 +127,7 @@ export function StandardForm<T extends FormikValues>({
                           loading={actionLoading}
                           color="primary"
                           variant="contained"
-                          disabled={props.loading || disabled}
+                          disabled={submitBlocked}
                           type="submit"
                         >
                           {props.submitButtonInner || (

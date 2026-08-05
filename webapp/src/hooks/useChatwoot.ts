@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useTheme } from '@mui/material';
 import {
   useConfig,
+  useHasSupportChat,
   usePreferredOrganization,
   useUser,
 } from 'tg.globalContext/helpers';
@@ -55,8 +56,8 @@ async function loadChatwootOnce(websiteToken: string, darkMode: boolean) {
 
 function setChatwootUser(user: User) {
   window['$chatwoot']?.setUser(user.id, {
-    email: user!.username,
-    name: user!.name,
+    email: user.username,
+    name: user.name,
     url: window.location,
   });
 }
@@ -83,25 +84,18 @@ export function useChatwoot() {
   const config = useConfig();
   const token = config?.chatwootToken;
 
-  const enabledFeatures = preferredOrganization?.enabledFeatures;
+  const hasSupportChat = useHasSupportChat();
 
-  const hasStandardSupport =
-    enabledFeatures?.includes('STANDARD_SUPPORT') ||
-    enabledFeatures?.includes('PREMIUM_SUPPORT');
+  const available = !!(token && user && hasSupportChat);
 
-  const available = !!(token && user && hasStandardSupport);
-
-  const {
-    palette: { mode },
-  } = useTheme();
-
-  const darkMode = mode === 'dark';
+  const theme = useTheme();
+  const darkMode = theme.palette.mode === 'dark';
 
   useEffect(() => {
-    if (token) {
+    if (available) {
       loadChatwootOnce(token, darkMode);
     }
-  }, [token]);
+  }, [available]);
 
   const openChatwoot = async () => {
     if (!available) {
