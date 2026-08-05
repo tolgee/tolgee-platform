@@ -6,6 +6,21 @@ import org.springframework.web.context.request.ServletRequestAttributes
 
 @Component
 class RequestIpProvider {
+  /**
+   * The address the connection actually came from, which a client cannot choose - unlike the
+   * forwarding headers [getClientIp] reads. Anything that ends up in the audit trail or in front of
+   * a user as evidence uses this, the same value the rate limiter buckets on. Behind a proxy it is
+   * the proxy's address unless the deployment sets `server.forward-headers-strategy`, which makes
+   * the container resolve it from the forwarded headers it is willing to trust.
+   */
+  fun getTrustedClientIp(): String? {
+    if (RequestContextHolder.getRequestAttributes() == null) {
+      return null
+    }
+    val request = (RequestContextHolder.getRequestAttributes() as ServletRequestAttributes).request
+    return request.remoteAddr?.take(MAX_IP_LENGTH)
+  }
+
   fun getClientIp(): String? {
     if (RequestContextHolder.getRequestAttributes() == null) {
       return null

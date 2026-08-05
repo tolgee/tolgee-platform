@@ -62,7 +62,7 @@ class AuthAuditService(
         this.actingUserAccountId = actingUserAccountId ?: currentActingUserId()
         this.deviceId = deviceId ?: currentDeviceId()
         this.targetId = targetId
-        this.ip = requestIpProvider.getClientIp()
+        this.ip = requestIpProvider.getTrustedClientIp()
         this.userAgent = requestUserAgentProvider.getUserAgent()
         this.data = data
       }

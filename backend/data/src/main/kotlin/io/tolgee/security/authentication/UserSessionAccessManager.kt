@@ -85,7 +85,7 @@ class UserSessionAccessManager(
       userAccountId = userAccountId,
       expiresAt = expiresAt,
       actingUserAccountId = actingUserAccountId,
-      ip = requestIpProvider.getClientIp(),
+      ip = requestIpProvider.getTrustedClientIp(),
       userAgent = requestUserAgentProvider.getUserAgent(),
     )
   }

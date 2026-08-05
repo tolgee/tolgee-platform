@@ -137,9 +137,11 @@ class LoginFailureAuditTest : AuthorizedControllerTest() {
       MockMvcRequestBuilders
         .post("/api/public/generatetoken")
         .contentType(MediaType.APPLICATION_JSON)
-        .header("X-Forwarded-For", TEST_IP)
         .header("User-Agent", TEST_USER_AGENT)
-        .content(mapper.writeValueAsString(body)),
+        .with {
+          it.remoteAddr = TEST_IP
+          it
+        }.content(mapper.writeValueAsString(body)),
     )
   }
 

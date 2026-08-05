@@ -163,4 +163,6 @@ interface UserSessionRepository : JpaRepository<UserSession, Long> {
   ): List<Long>
 
   fun deleteAllByIdIn(ids: Collection<Long>)
+
+  fun deleteAllByUserAccountId(userAccountId: Long)
 }

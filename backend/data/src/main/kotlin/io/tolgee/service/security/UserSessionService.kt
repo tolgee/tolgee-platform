@@ -48,7 +48,7 @@ class UserSessionService(
     isRefresh: Boolean,
   ) {
     val now = currentDateProvider.date
-    val ip = requestIpProvider.getClientIp()
+    val ip = requestIpProvider.getTrustedClientIp()
     val location = geoIpResolver.resolve(ip)
     userSessionRepository.upsert(
       id = sequenceIdProvider.next(),

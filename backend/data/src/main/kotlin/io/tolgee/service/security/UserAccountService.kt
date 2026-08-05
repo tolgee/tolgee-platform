@@ -30,6 +30,7 @@ import io.tolgee.model.views.ExtendedUserAccountInProject
 import io.tolgee.model.views.UserAccountInProjectView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import io.tolgee.repository.UserAccountRepository
+import io.tolgee.repository.UserSessionRepository
 import io.tolgee.service.AiPlaygroundResultService
 import io.tolgee.service.AvatarService
 import io.tolgee.service.EmailVerificationService
@@ -78,6 +79,8 @@ class UserAccountService(
   private val mfaService: MfaService,
   @Lazy
   private val authAuditService: AuthAuditService,
+  @Lazy
+  private val userSessionRepository: UserSessionRepository,
 ) : Logging {
   @Autowired
   @Lazy
@@ -226,6 +229,9 @@ class UserAccountService(
   }
 
   private fun deleteWithFetchedData(toDelete: UserAccount) {
+    // The audit trail deliberately outlives the account, but a session row is not audit - it
+    // carries the person's IP, user agent and city, and there is nothing left to revoke.
+    userSessionRepository.deleteAllByUserAccountId(toDelete.id)
     toDelete.emailVerification?.let {
       entityManager.remove(it)
     }

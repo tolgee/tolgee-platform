@@ -231,7 +231,7 @@ class UserSessionLifecycleTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `sessions cascade away with the user while audit events survive`() {
+  fun `deleting the user drops their sessions while audit events survive`() {
     val user = dbPopulator.createUserIfNotExists("audit-survivor@tolgee.io")
     withRequestContext {
       jwtService.emitToken(user.id, type = UserSessionType.LOGIN_NATIVE)
@@ -239,10 +239,7 @@ class UserSessionLifecycleTest : AuthorizedControllerTest() {
     eventsOf(user.id, AuthAuditEventType.LOGIN).assert.hasSize(1)
 
     executeInNewTransaction {
-      entityManager
-        .createNativeQuery("delete from user_account where id = :id")
-        .setParameter("id", user.id)
-        .executeUpdate()
+      userAccountService.delete(userAccountService.get(user.id))
     }
 
     userSessionRepository
@@ -328,9 +325,11 @@ class UserSessionLifecycleTest : AuthorizedControllerTest() {
       org.springframework.test.web.servlet.request.MockMvcRequestBuilders
         .post("/api/public/generatetoken")
         .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-        .header("X-Forwarded-For", ip)
         .header("User-Agent", userAgent)
-        .content(
+        .with {
+          it.remoteAddr = ip
+          it
+        }.content(
           mapper.writeValueAsString(
             mapOf("username" to testData.user.username, "password" to "admin"),
           ),
@@ -344,7 +343,7 @@ class UserSessionLifecycleTest : AuthorizedControllerTest() {
     fn: () -> T,
   ): T {
     val request = MockHttpServletRequest()
-    ip?.let { request.addHeader("X-Forwarded-For", it) }
+    ip?.let { request.remoteAddr = it }
     userAgent?.let { request.addHeader("User-Agent", it) }
     RequestContextHolder.setRequestAttributes(ServletRequestAttributes(request))
     try {
