@@ -1,3 +1,10 @@
+## [3.216.3](https://github.com/tolgee/tolgee-platform/compare/v3.216.2...v3.216.3) (2026-08-05)
+
+
+### Bug Fixes
+
+* escape task and language names in notification emails ([#3842](https://github.com/tolgee/tolgee-platform/issues/3842)) ([e7b7a29](https://github.com/tolgee/tolgee-platform/commit/e7b7a29ca8bc6fe947b6a7ad0e1561297294e246)), closes [#1898](https://github.com/tolgee/tolgee-platform/issues/1898)
+
 ## [3.216.2](https://github.com/tolgee/tolgee-platform/compare/v3.216.1...v3.216.2) (2026-08-04)
 
 
