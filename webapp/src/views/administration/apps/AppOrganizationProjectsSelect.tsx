@@ -1,26 +1,23 @@
-import {
-  Box,
-  Checkbox,
-  CircularProgress,
-  FormControlLabel,
-  styled,
-  Typography,
-} from '@mui/material';
-import { T } from '@tolgee/react';
+import { useState } from 'react';
+import { styled, Typography } from '@mui/material';
+import { T, useTranslate } from '@tolgee/react';
+import { useDebounce } from 'use-debounce';
+
+import { useApiInfiniteQuery } from 'tg.service/http/useQueryApi';
+import { InfiniteMultiSearchSelect } from 'tg.component/searchSelect/InfiniteMultiSearchSelect';
+import { MultiselectItem } from 'tg.component/searchSelect/MultiselectItem';
+import { components } from 'tg.service/apiSchema.generated';
+import { TranslatedError } from 'tg.translationTools/TranslatedError';
+
+type ProjectModel = components['schemas']['ProjectModel'];
 
 export type SelectableProject = {
   id: number;
   name: string;
 };
 
-const StyledList = styled('div')`
-  display: grid;
-  max-height: 240px;
-  overflow-y: auto;
-  border-radius: ${({ theme }) => theme.shape.borderRadius}px;
-  border: 1px solid ${({ theme }) => theme.palette.divider};
-  padding: ${({ theme }) => theme.spacing(0.5, 1)};
-`;
+const SEARCH_DEBOUNCE_MS = 500;
+const PAGE_SIZE = 30;
 
 const StyledEmpty = styled('div')`
   padding: ${({ theme }) => theme.spacing(2)};
@@ -30,31 +27,82 @@ const StyledEmpty = styled('div')`
 `;
 
 type Props = {
-  projects: SelectableProject[];
-  loading: boolean;
-  truncated: boolean;
-  selectedIds: number[];
+  organizationId: number;
+  selected: SelectableProject[];
   disabled?: boolean;
-  onChange: (ids: number[]) => void;
+  onChange: (projects: SelectableProject[]) => void;
 };
 
 export const AppOrganizationProjectsSelect = ({
-  projects,
-  loading,
-  truncated,
-  selectedIds,
+  organizationId,
+  selected,
   disabled,
   onChange,
 }: Props) => {
-  if (loading) {
-    return (
-      <Box display="flex" justifyContent="center" py={2}>
-        <CircularProgress size={20} />
-      </Box>
-    );
-  }
+  const { t } = useTranslate();
+  const [search, setSearch] = useState('');
+  const [searchDebounced] = useDebounce(search, SEARCH_DEBOUNCE_MS);
 
-  if (projects.length === 0) {
+  const query = {
+    search: searchDebounced,
+    size: PAGE_SIZE,
+  };
+
+  const projectsLoadable = useApiInfiniteQuery({
+    url: '/v2/organizations/{id}/projects',
+    method: 'get',
+    path: { id: organizationId },
+    query,
+    options: {
+      keepPreviousData: true,
+      noGlobalLoading: true,
+      // Reported inline on the select instead of as a global toast.
+      onError: () => undefined,
+      getNextPageParam: (lastPage) => {
+        if (
+          lastPage.page &&
+          lastPage.page.number! < lastPage.page.totalPages! - 1
+        ) {
+          return {
+            path: { id: organizationId },
+            query: { ...query, page: lastPage.page!.number! + 1 },
+          };
+        }
+        return null;
+      },
+    },
+  });
+
+  const items = projectsLoadable.data?.pages.flatMap(
+    (page) => page._embedded?.projects ?? []
+  );
+
+  const totalElements = projectsLoadable.data?.pages[0]?.page?.totalElements;
+  const organizationHasNoProjects = !searchDebounced && totalElements === 0;
+
+  const handleFetchMore = () => {
+    if (projectsLoadable.hasNextPage && !projectsLoadable.isFetching) {
+      projectsLoadable.fetchNextPage();
+    }
+  };
+
+  const toggleSelected = (project: ProjectModel) => {
+    if (selected.some((item) => item.id === project.id)) {
+      onChange(selected.filter((item) => item.id !== project.id));
+      return;
+    }
+    onChange([...selected, { id: project.id, name: project.name }]);
+  };
+
+  const renderError = () => {
+    if (!projectsLoadable.error) return undefined;
+    if (typeof projectsLoadable.error.code === 'string') {
+      return <TranslatedError code={projectsLoadable.error.code} />;
+    }
+    return <T keyName="simple_paginated_list_error_message" />;
+  };
+
+  if (organizationHasNoProjects) {
     return (
       <StyledEmpty data-cy="administration-apps-projects-empty">
         <Typography variant="body2">
@@ -67,78 +115,34 @@ export const AppOrganizationProjectsSelect = ({
     );
   }
 
-  const selected = new Set(selectedIds);
-  const allSelected = projects.every((project) => selected.has(project.id));
-
-  const toggle = (projectId: number) => {
-    if (selected.has(projectId)) {
-      onChange(selectedIds.filter((id) => id !== projectId));
-      return;
-    }
-    onChange([...selectedIds, projectId]);
-  };
-
-  const toggleAll = () => {
-    if (allSelected) {
-      onChange([]);
-      return;
-    }
-    onChange(projects.map((project) => project.id));
-  };
-
   return (
-    <>
-      <StyledList data-cy="administration-apps-projects-select">
-        <FormControlLabel
-          control={
-            <Checkbox
-              size="small"
-              checked={allSelected}
-              indeterminate={!allSelected && selectedIds.length > 0}
-              disabled={disabled}
-              onChange={toggleAll}
-              data-cy="administration-apps-projects-select-all"
-            />
-          }
-          label={
-            <Typography variant="body2" color="text.secondary">
-              <T
-                keyName="administration_apps_projects_select_all"
-                defaultValue="Select all"
-              />
-            </Typography>
-          }
+    <InfiniteMultiSearchSelect
+      items={items}
+      selected={selected}
+      queryResult={projectsLoadable}
+      itemKey={(project) => project.id}
+      search={search}
+      onSearchChange={setSearch}
+      onFetchMore={handleFetchMore}
+      onClearSelected={() => onChange([])}
+      renderItem={(props, project) => (
+        <MultiselectItem
+          {...props}
+          data-cy="administration-apps-projects-item"
+          data-cy-project-id={project.id}
+          selected={selected.some((item) => item.id === project.id)}
+          label={project.name}
+          onClick={() => toggleSelected(project)}
         />
-        {projects.map((project) => (
-          <FormControlLabel
-            key={project.id}
-            control={
-              <Checkbox
-                size="small"
-                checked={selected.has(project.id)}
-                disabled={disabled}
-                onChange={() => toggle(project.id)}
-                data-cy="administration-apps-projects-item"
-                data-cy-project-id={project.id}
-              />
-            }
-            label={<Typography variant="body2">{project.name}</Typography>}
-          />
-        ))}
-      </StyledList>
-      {truncated && (
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          data-cy="administration-apps-projects-truncated"
-        >
-          <T
-            keyName="administration_apps_projects_truncated"
-            defaultValue="Only the first {count} projects are listed. Enable the app for the rest from their project settings."
-            params={{ count: projects.length }}
-          />
-        </Typography>
       )}
-    </>
+      labelItem={(project) => project.name}
+      label={t('administration_apps_projects_select_label', 'Projects')}
+      searchPlaceholder={t(
+        'administration_apps_projects_search_placeholder',
+        'Search projects…'
+      )}
+      error={renderError()}
+      disabled={disabled}
+    />
   );
 };

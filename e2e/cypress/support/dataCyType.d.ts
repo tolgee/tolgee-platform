@@ -40,11 +40,7 @@ declare namespace DataCy {
         "administration-apps-organizations-item": true;
         "administration-apps-organizations-item-remove": true;
         "administration-apps-projects-empty": true;
-        "administration-apps-projects-error": true;
         "administration-apps-projects-item": true;
-        "administration-apps-projects-select": true;
-        "administration-apps-projects-select-all": true;
-        "administration-apps-projects-truncated": true;
         "administration-apps-register-back": true;
         "administration-apps-register-button": true;
         "administration-apps-register-consent": true;

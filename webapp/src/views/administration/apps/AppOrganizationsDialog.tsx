@@ -36,8 +36,6 @@ import {
 
 type AppInstallModel = components['schemas']['AppInstallModel'];
 
-const PROJECTS_PAGE_SIZE = 100;
-
 const StyledList = styled('div')`
   display: grid;
   border-radius: ${({ theme }) => theme.shape.borderRadius}px;
@@ -83,24 +81,15 @@ export const AppOrganizationsDialog = ({ install, onClose }: Props) => {
 
   const [organization, setOrganization] =
     useState<SelectableOrganization | null>(null);
-  const [selectedProjectIds, setSelectedProjectIds] = useState<number[]>([]);
+  const [selectedProjects, setSelectedProjects] = useState<SelectableProject[]>(
+    []
+  );
   const [result, setResult] = useState<EnrollResult | null>(null);
 
   const organizationsLoadable = useApiQuery({
     url: '/v2/administration/apps/{installId}/organizations',
     method: 'get',
     path: { installId: install.id },
-  });
-
-  const projectsLoadable = useApiQuery({
-    url: '/v2/organizations/{id}/projects',
-    method: 'get',
-    path: { id: organization?.id ?? 0 },
-    query: { size: PROJECTS_PAGE_SIZE, sort: ['name,asc'] },
-    options: {
-      enabled: Boolean(organization),
-      noGlobalLoading: true,
-    },
   });
 
   const grantMutation = useApiMutation({
@@ -145,17 +134,11 @@ export const AppOrganizationsDialog = ({ install, onClose }: Props) => {
     grantAllMutation.isLoading ||
     revokeAllMutation.isLoading;
 
-  const projects: SelectableProject[] = (
-    projectsLoadable.data?._embedded?.projects ?? []
-  ).map((project) => ({ id: project.id, name: project.name }));
-  const projectsTruncated =
-    (projectsLoadable.data?.page?.totalElements ?? 0) > projects.length;
-
   const handleSelectOrganization = (
     selected: SelectableOrganization | null
   ) => {
     setOrganization(selected);
-    setSelectedProjectIds([]);
+    setSelectedProjects([]);
     setResult(null);
   };
 
@@ -173,19 +156,14 @@ export const AppOrganizationsDialog = ({ install, onClose }: Props) => {
 
     const failedProjects: SelectableProject[] = [];
     let enabledCount = 0;
-    for (const projectId of selectedProjectIds) {
+    for (const project of selectedProjects) {
       try {
         await enableMutation.mutateAsync({
-          path: { projectId, installId: install.id },
+          path: { projectId: project.id, installId: install.id },
         });
         enabledCount += 1;
       } catch (e) {
-        failedProjects.push(
-          projects.find((project) => project.id === projectId) ?? {
-            id: projectId,
-            name: String(projectId),
-          }
-        );
+        failedProjects.push(project);
       }
     }
 
@@ -194,7 +172,7 @@ export const AppOrganizationsDialog = ({ install, onClose }: Props) => {
       enabledCount,
       failedProjects,
     });
-    setSelectedProjectIds(failedProjects.map((project) => project.id));
+    setSelectedProjects(failedProjects);
   };
 
   const handleAddAll = () => {
@@ -338,27 +316,13 @@ export const AppOrganizationsDialog = ({ install, onClose }: Props) => {
               onSelectAll={handleAddAll}
             />
 
-            {organization && projectsLoadable.error && (
-              <Alert
-                severity="error"
-                data-cy="administration-apps-projects-error"
-              >
-                {typeof projectsLoadable.error.code === 'string' ? (
-                  <TranslatedError code={projectsLoadable.error.code} />
-                ) : (
-                  <T keyName="simple_paginated_list_error_message" />
-                )}
-              </Alert>
-            )}
-
-            {organization && !projectsLoadable.error && (
+            {organization && (
               <AppOrganizationProjectsSelect
-                projects={projects}
-                loading={projectsLoadable.isLoading}
-                truncated={projectsTruncated}
-                selectedIds={selectedProjectIds}
+                key={organization.id}
+                organizationId={organization.id}
+                selected={selectedProjects}
                 disabled={updating}
-                onChange={setSelectedProjectIds}
+                onChange={setSelectedProjects}
               />
             )}
 
@@ -408,7 +372,7 @@ export const AppOrganizationsDialog = ({ install, onClose }: Props) => {
                 disabled={!organization || updating}
                 onClick={handleEnroll}
               >
-                {selectedProjectIds.length === 0 ? (
+                {selectedProjects.length === 0 ? (
                   <T
                     keyName="administration_apps_organizations_enroll_submit"
                     defaultValue="Grant access"
