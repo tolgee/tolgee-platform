@@ -1,9 +1,12 @@
 import { login } from '../../../common/apiCalls/common';
 import { appsTestData } from '../../../common/apiCalls/testData/testData';
-import { API_URL, HOST } from '../../../common/constants';
+import {
+  interceptEnabledApps,
+  registerAppFromManifest,
+  waitForEnabledApps,
+} from '../../../common/apps';
+import { HOST } from '../../../common/constants';
 import { gcy } from '../../../common/shared';
-
-const MANIFEST_URL = `${API_URL}/internal/e2e-data/apps/manifest.json`;
 
 describe('project app dashboard page', () => {
   let organizationSlug: string;
@@ -20,11 +23,7 @@ describe('project app dashboard page', () => {
         login('apps-test-owner@test.com');
 
         cy.visit(`${HOST}/organizations/${organizationSlug}/apps`);
-        gcy('organization-apps-register-button').click();
-        gcy('organization-apps-register-manifest-url').type(MANIFEST_URL);
-        gcy('organization-apps-register-continue').click();
-        gcy('organization-apps-register-submit').click();
-        gcy('organization-apps-item').should('exist');
+        registerAppFromManifest();
       });
   });
 
@@ -33,7 +32,9 @@ describe('project app dashboard page', () => {
   });
 
   it('shows no app menu entry until the app is enabled for the project', () => {
+    interceptEnabledApps();
     cy.visit(`${HOST}/projects/${projectId}`);
+    waitForEnabledApps();
     gcy('project-menu-item-app').should('not.exist');
   });
 
@@ -66,7 +67,11 @@ describe('project app dashboard page', () => {
         .find('input')
         .should('not.be.checked');
 
+      interceptEnabledApps();
       cy.visit(appPageUrl);
+      waitForEnabledApps();
+      gcy('project-menu-item-app').should('not.exist');
+      gcy('project-app-page-iframe').should('not.exist');
       gcy('project-app-page-missing').should('exist');
     });
   });
