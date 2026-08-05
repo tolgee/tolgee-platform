@@ -2,6 +2,23 @@ import type { TolgeeAppContext, TolgeeAppTheme } from '../shared/contextTypes'
 
 type Unsubscribe = () => void
 
+export type TolgeeAppOptions = {
+  /**
+   * Origin(s) of the Tolgee instance this app may talk to — a full URL or a bare
+   * origin (`https://app.tolgee.io`). Set it whenever the app knows which Tolgee
+   * embeds it: only then can a page that frames the app be rejected outright.
+   *
+   * Left unset, the first `tolgee-app:init` posted by the parent window is
+   * trusted and its origin is pinned for the rest of the session — enough to
+   * stop a second window from swapping the token mid-session, but not enough to
+   * stop a hostile embedder, which is the parent by definition.
+   *
+   * Throws when a value is not a parsable URL, rather than silently degrading to
+   * the weaker mode.
+   */
+  tolgeeOrigin?: string | string[]
+}
+
 type InitMessage = {
   type: 'tolgee-app:init'
   token: string
@@ -16,46 +33,40 @@ type ThemeChangedMessage = {
   theme: TolgeeAppTheme
 }
 
-const isInit = (d: unknown): d is InitMessage =>
-  typeof d === 'object' &&
-  d !== null &&
-  (d as { type: unknown }).type === 'tolgee-app:init'
-
-const isThemeChanged = (d: unknown): d is ThemeChangedMessage =>
-  typeof d === 'object' &&
-  d !== null &&
-  (d as { type: unknown }).type === 'tolgee-app:theme-changed'
-
-const parseInit = (m: InitMessage): TolgeeAppContext => ({
-  token: m.token,
-  apiUrl: m.apiUrl,
-  organizationId: m.organizationId ?? null,
-  projectId: m.projectId,
-  theme: m.theme,
-})
-
 /**
  * Iframe-side handle to the Tolgee Apps postMessage protocol.
  *
  * Construct via {@link createTolgeeApp}. Sends `tolgee-app:ready` to the
  * parent automatically on the next microtask, so you can attach listeners
- * before the host's init message arrives. The first `tolgee-app:init`
+ * before the host's init message arrives. The first accepted `tolgee-app:init`
  * resolves {@link TolgeeApp.context}; later `tolgee-app:theme-changed`
  * messages fire registered theme handlers.
+ *
+ * The init message carries an API token, so it is only accepted from the parent
+ * window and — once `tolgeeOrigin` is set or the first init has arrived — only
+ * from that one origin. Everything this app posts back goes to the same pinned
+ * origin instead of `*`.
  */
 export class TolgeeApp {
   private contextPromise: Promise<TolgeeAppContext>
   private resolveContext!: (ctx: TolgeeAppContext) => void
   private themeHandlers = new Set<(t: TolgeeAppTheme) => void>()
   private currentTheme: TolgeeAppTheme | undefined
+  /** Origins the app declared up front; null when it declared none. */
+  private allowedOrigins: string[] | null
+  /** Origin of the accepted init, pinned for every later message. */
+  private hostOrigin: string | null = null
+  /** Window the accepted init came from, pinned alongside its origin. */
+  private hostWindow: MessageEventSource | null = null
 
-  constructor() {
+  constructor(options: TolgeeAppOptions = {}) {
+    this.allowedOrigins = toOrigins(options.tolgeeOrigin)
     this.contextPromise = new Promise((resolve) => {
       this.resolveContext = resolve
     })
     window.addEventListener('message', this.onMessage)
     queueMicrotask(() => {
-      window.parent.postMessage({ type: 'tolgee-app:ready' }, '*')
+      this.postToHost({ type: 'tolgee-app:ready' })
     })
   }
 
@@ -83,7 +94,7 @@ export class TolgeeApp {
 
   /** Tells the host how tall this iframe wants to be. */
   resize(height: number): void {
-    window.parent.postMessage({ type: 'tolgee-app:resize', height }, '*')
+    this.postToHost({ type: 'tolgee-app:resize', height })
   }
 
   /** Detaches the message listener. Safe to call multiple times. */
@@ -94,6 +105,9 @@ export class TolgeeApp {
   private onMessage = (event: MessageEvent): void => {
     const d = event.data
     if (isInit(d)) {
+      if (!this.acceptsInitFrom(event)) return
+      this.hostOrigin = event.origin
+      this.hostWindow = event.source
       const ctx = parseInit(d)
       this.currentTheme = ctx.theme
       this.resolveContext(ctx)
@@ -103,10 +117,77 @@ export class TolgeeApp {
       // fire on later changes, never on first load.
       this.themeHandlers.forEach((h) => h(ctx.theme))
     } else if (isThemeChanged(d)) {
+      if (!this.isFromHost(event)) return
       this.currentTheme = d.theme
       this.themeHandlers.forEach((h) => h(d.theme))
     }
   }
+
+  /**
+   * Only the embedder may hand this app a token, and only from an origin the app
+   * either declared or already accepted an init from.
+   */
+  private acceptsInitFrom(event: MessageEvent): boolean {
+    if (this.hostOrigin !== null) return this.isFromHost(event)
+    if (event.source !== window.parent) return false
+    return (
+      this.allowedOrigins === null ||
+      this.allowedOrigins.includes(event.origin)
+    )
+  }
+
+  private isFromHost(event: MessageEvent): boolean {
+    return event.origin === this.hostOrigin && event.source === this.hostWindow
+  }
+
+  /**
+   * `ready` has to go out before any origin is pinned, so it is addressed to
+   * every declared origin — or to `*` when the app declared none, which is safe
+   * only because neither `ready` nor `resize` carries anything secret.
+   */
+  private postToHost(message: unknown): void {
+    const targets =
+      this.hostOrigin !== null ? [this.hostOrigin] : (this.allowedOrigins ?? ['*'])
+    for (const target of targets) {
+      window.parent.postMessage(message, target)
+    }
+  }
 }
 
-export const createTolgeeApp = (): TolgeeApp => new TolgeeApp()
+export const createTolgeeApp = (options?: TolgeeAppOptions): TolgeeApp =>
+  new TolgeeApp(options)
+
+const isInit = (d: unknown): d is InitMessage =>
+  typeof d === 'object' &&
+  d !== null &&
+  (d as { type: unknown }).type === 'tolgee-app:init'
+
+const isThemeChanged = (d: unknown): d is ThemeChangedMessage =>
+  typeof d === 'object' &&
+  d !== null &&
+  (d as { type: unknown }).type === 'tolgee-app:theme-changed'
+
+const parseInit = (m: InitMessage): TolgeeAppContext => ({
+  token: m.token,
+  apiUrl: m.apiUrl,
+  organizationId: m.organizationId ?? null,
+  projectId: m.projectId,
+  theme: m.theme,
+})
+
+const toOrigins = (value: string | string[] | undefined): string[] | null => {
+  if (value === undefined) return null
+  const raw = (Array.isArray(value) ? value : [value]).filter(
+    (v) => v.length > 0
+  )
+  if (raw.length === 0) return null
+  return raw.map((v) => {
+    try {
+      return new URL(v).origin
+    } catch {
+      throw new Error(
+        `tolgeeOrigin must be an absolute URL or origin, got ${JSON.stringify(v)}.`
+      )
+    }
+  })
+}

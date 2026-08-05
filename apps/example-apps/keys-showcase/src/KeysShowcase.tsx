@@ -17,7 +17,12 @@ export const KeysShowcase = () => {
   const state = useProjectKeys(context)
 
   useEffect(() => {
-    const app = createTolgeeApp()
+    // Set from TOLGEE_URL at build time (see vite.config.ts). Empty when the app
+    // is built without one — the SDK then falls back to pinning whichever origin
+    // completes the handshake first.
+    const app = createTolgeeApp({
+      tolgeeOrigin: import.meta.env.VITE_TOLGEE_ORIGIN || undefined,
+    })
 
     app.context.then((ctx) => {
       applyTolgeeTheme(ctx.theme)

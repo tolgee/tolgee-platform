@@ -14,7 +14,12 @@ export default function App() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const app = createTolgeeApp()
+    // Set from TOLGEE_URL at build time (see vite.config.ts). Empty when the app
+    // is built without one — the SDK then falls back to pinning whichever origin
+    // completes the handshake first.
+    const app = createTolgeeApp({
+      tolgeeOrigin: import.meta.env.VITE_TOLGEE_ORIGIN || undefined,
+    })
     appRef.current = app
     app.context.then(setContext)
     const offTheme = app.onThemeChanged(applyTolgeeTheme)

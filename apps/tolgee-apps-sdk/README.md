@@ -127,6 +127,26 @@ const { data, error } = await tolgee.GET('/v2/projects/{projectId}', {
 app.resize(document.body.scrollHeight)
 ```
 
+### Pin the Tolgee origin
+
+`tolgee-app:init` hands the app an API token, so pass the origin of the Tolgee
+instance that is allowed to send it whenever the app knows it — typically baked
+in at build time:
+
+```ts
+const app = createTolgeeApp({ tolgeeOrigin: 'https://app.tolgee.io' })
+```
+
+Anything from another origin is then ignored, and everything the app posts back
+is addressed to that origin instead of `*`. Pass an array for an app that runs
+against several instances (a tunnel and production, say).
+
+Without it the SDK falls back to trust-on-first-use: the first
+`tolgee-app:init` **from the parent window** wins and its origin and window are
+pinned for the rest of the session, so no second window can swap the token
+afterwards. That does not help against a hostile page that frames the app —
+it *is* the parent — which is why declaring the origin is the stronger option.
+
 `applyTolgeeTheme` writes each palette color as a `--tg-color-*` CSS custom
 property (`--tg-color-background`, `--tg-color-text-secondary`, …), sets
 `[data-tg-theme="light|dark"]` and `color-scheme` on the root element — so your
@@ -262,14 +282,31 @@ either `TOLGEE_APP_CLIENT_ID` or `TOLGEE_APP_CLIENT_SECRET` makes the SDK ignore
 the stored record completely — an env client id is never paired with a stored
 secret — so in a deployment set both.
 
+## Developing this package
+
+The SDK lives in the `apps/` npm workspace next to `create-tolgee-app` and the
+example apps — a workspace of its own, so the repo root's release-only install
+does not drag app dependencies into the server release jobs.
+
+```bash
+cd apps
+npm install
+npm run check      # build + typecheck + test all three packages (what CI runs)
+```
+
+```bash
+npm run build --workspace @tolgee/apps-sdk    # dist/, what everything else typechecks against
+npm run test --workspace @tolgee/apps-sdk
+```
+
 ## API reference
 
 **`@tolgee/apps-sdk`** — `AppManifest`, `AppModules`, `AppDashboardPage`,
 `TolgeeAppContext`, `TolgeeAppTheme`, `AppContextClaims`.
 
-**`@tolgee/apps-sdk/browser`** — `createTolgeeApp()`, `TolgeeApp`
-(`context`, `onThemeChanged`, `resize`, `dispose`), `createTolgeeAppClient()`,
-`applyTolgeeTheme()`.
+**`@tolgee/apps-sdk/browser`** — `createTolgeeApp(options?)`, `TolgeeApp`
+(`context`, `onThemeChanged`, `resize`, `dispose`), `TolgeeAppOptions`,
+`createTolgeeAppClient()`, `TolgeeAppClient`, `applyTolgeeTheme()`.
 
 **`@tolgee/apps-sdk/server`** — `renderManifest()`, `tolgeeAppCorsHeaders()`,
 `decodeContextToken()`, `loadTolgeeAppConfig()`, `selfRegisterApp()`,
