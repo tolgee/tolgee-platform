@@ -2,12 +2,14 @@ package io.tolgee.repository
 
 import io.tolgee.model.UserSession
 import io.tolgee.model.enums.UserSessionType
+import jakarta.persistence.QueryHint
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
+import org.springframework.data.jpa.repository.QueryHints
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
 import java.util.Date
@@ -16,6 +18,17 @@ import java.util.Date
 @Lazy
 interface UserSessionRepository : JpaRepository<UserSession, Long> {
   fun findByDeviceId(deviceId: String): UserSession?
+
+  /**
+   * The authentication filter runs inside whatever transaction the request already opened, and
+   * Hibernate flushes a persistence context before querying it. Flushing someone else's half-built
+   * entities on the way past is not this lookup's business, so it asks not to.
+   */
+  @QueryHints(QueryHint(name = "org.hibernate.flushMode", value = "COMMIT"))
+  @Query("select us from UserSession us where us.deviceId = :deviceId")
+  fun findByDeviceIdForAuth(
+    @Param("deviceId") deviceId: String,
+  ): UserSession?
 
   /**
    * Sessions the user may see: not revoked, not expired, not invalidated by a `tokensValidNotBefore`

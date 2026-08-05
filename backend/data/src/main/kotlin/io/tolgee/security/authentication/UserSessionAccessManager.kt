@@ -4,11 +4,13 @@ import io.tolgee.component.CurrentDateProvider
 import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.AuthExpiredException
-import io.tolgee.repository.UserSessionRepository
 import io.tolgee.service.security.UserSessionService
+import io.tolgee.util.Logging
 import io.tolgee.util.RequestIpProvider
 import io.tolgee.util.RequestUserAgentProvider
+import io.tolgee.util.logger
 import org.springframework.context.annotation.Lazy
+import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
 import java.util.Date
 
@@ -19,7 +21,7 @@ import java.util.Date
  */
 @Component
 class UserSessionAccessManager(
-  private val userSessionRepository: UserSessionRepository,
+  private val jdbcTemplate: JdbcTemplate,
   @Lazy
   private val userSessionService: UserSessionService,
   private val userSessionHotCache: UserSessionHotCache,
@@ -27,7 +29,7 @@ class UserSessionAccessManager(
   private val authenticationProperties: AuthenticationProperties,
   private val requestIpProvider: RequestIpProvider,
   private val requestUserAgentProvider: RequestUserAgentProvider,
-) {
+) : Logging {
   fun checkSessionAndTrackUsage(
     deviceId: String,
     userAccountId: Long,
@@ -43,7 +45,7 @@ class UserSessionAccessManager(
       return
     }
 
-    val session = userSessionRepository.findByDeviceId(deviceId)
+    val session = readSession(deviceId)
 
     if (session == null) {
       backfill(deviceId, userAccountId, expiresAt, actingUserAccountId)
@@ -58,7 +60,7 @@ class UserSessionAccessManager(
       throw AuthExpiredException(Message.EXPIRED_JWT_TOKEN)
     }
 
-    if (session.revokedAt != null) {
+    if (session.revoked) {
       userSessionHotCache.put(deviceId, UserSessionHotCache.Entry(revoked = true, lastUsedWrittenAt = 0))
       throw AuthExpiredException(Message.EXPIRED_JWT_TOKEN)
     }
@@ -68,7 +70,7 @@ class UserSessionAccessManager(
         revoked = false,
         // a session that was never used yet is as recent as its creation, so the first write can
         // wait for the interval instead of landing on every fresh login
-        lastUsedWrittenAt = session.lastUsedAt?.time ?: session.createdAt?.time ?: 0,
+        lastUsedWrittenAt = session.lastUsedAt ?: session.createdAt,
       )
     userSessionHotCache.put(deviceId, entry)
     trackUsage(deviceId, entry)
@@ -80,15 +82,52 @@ class UserSessionAccessManager(
     expiresAt: Date,
     actingUserAccountId: Long?,
   ) {
-    userSessionService.backfillSession(
-      deviceId = deviceId,
-      userAccountId = userAccountId,
-      expiresAt = expiresAt,
-      actingUserAccountId = actingUserAccountId,
-      ip = requestIpProvider.getTrustedClientIp(),
-      userAgent = requestUserAgentProvider.getUserAgent(),
-    )
+    try {
+      userSessionService.backfillSession(
+        deviceId = deviceId,
+        userAccountId = userAccountId,
+        expiresAt = expiresAt,
+        actingUserAccountId = actingUserAccountId,
+        ip = requestIpProvider.getTrustedClientIp(),
+        userAgent = requestUserAgentProvider.getUserAgent(),
+      )
+    } catch (e: Exception) {
+      // Outside the transaction on purpose: the row this collides with belongs to a registration
+      // that has not committed, so the insert waits, hits the lock timeout and aborts its own
+      // transaction. That transaction is about to create the very row this wanted, and the caller's
+      // work must not be affected by it - which it would be if the catch were any deeper.
+      logger.debug("Session $deviceId is being written elsewhere; skipping backfill", e)
+    }
   }
+
+  /**
+   * Deliberately not a JPA query. This runs on the authentication filter, inside whatever
+   * transaction the request has already opened, and Hibernate flushes a persistence context before
+   * querying it - flushing a caller's half-built entities on the way past changed the outcome of an
+   * unrelated import request. Reading through JDBC keeps the caller's context untouched, and avoids
+   * hydrating an entity on a hot path for four columns.
+   */
+  private fun readSession(deviceId: String): SessionRow? =
+    jdbcTemplate
+      .query(
+        "select user_account_id, revoked_at, last_used_at, created_at from user_session where device_id = ?",
+        { rs, _ ->
+          SessionRow(
+            userAccountId = rs.getLong("user_account_id"),
+            revoked = rs.getTimestamp("revoked_at") != null,
+            lastUsedAt = rs.getTimestamp("last_used_at")?.time,
+            createdAt = rs.getTimestamp("created_at")?.time ?: 0,
+          )
+        },
+        deviceId,
+      ).firstOrNull()
+
+  private data class SessionRow(
+    val userAccountId: Long,
+    val revoked: Boolean,
+    val lastUsedAt: Long?,
+    val createdAt: Long,
+  )
 
   /**
    * The stamp is moved before the write is dispatched, so a burst of concurrent requests produces

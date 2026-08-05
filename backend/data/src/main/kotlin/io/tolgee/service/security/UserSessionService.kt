@@ -10,13 +10,17 @@ import io.tolgee.security.authentication.SessionEvictPublisher
 import io.tolgee.security.authentication.UserSessionHotCache
 import io.tolgee.util.GeoIpResolver
 import io.tolgee.util.HibernateSequenceIdProvider
+import io.tolgee.util.Logging
 import io.tolgee.util.RequestIpProvider
 import io.tolgee.util.RequestUserAgentProvider
+import io.tolgee.util.logger
 import io.tolgee.util.runSentryCatching
+import jakarta.persistence.EntityManager
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.support.TransactionSynchronization
 import org.springframework.transaction.support.TransactionSynchronizationManager
@@ -33,7 +37,8 @@ class UserSessionService(
   private val userSessionHotCache: UserSessionHotCache,
   private val sequenceIdProvider: HibernateSequenceIdProvider,
   private val sessionEvictPublisher: SessionEvictPublisher,
-) {
+  private val entityManager: EntityManager,
+) : Logging {
   /**
    * Records the session a freshly emitted token belongs to. Joins the caller's transaction so a
    * rolled-back sign-up leaves no session behind.
@@ -79,13 +84,15 @@ class UserSessionService(
   }
 
   /**
-   * Creates the missing session row for a token that predates session tracking. Written
-   * synchronously so a handler in the same request already finds the row - the authentication
-   * filter runs outside any transaction, so this opens and commits one of its own. It must not
-   * force a separate transaction: the row references the user account, and taking that foreign key
-   * lock from a nested transaction would block against an outer one already holding the same row.
+   * Creates the missing session row for a token that predates session tracking.
+   *
+   * In its own transaction, for two reasons. The filter can run inside a transaction the request
+   * already opened - and a statement that fails here, which the lock timeout below makes routine,
+   * aborts the whole Postgres transaction it runs in: catching the exception does not un-poison it,
+   * and every later statement in the caller's work would fail. Suspending the caller also means the
+   * lock wait cannot be on a row the caller itself is holding.
    */
-  @Transactional
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
   fun backfillSession(
     deviceId: String,
     userAccountId: Long,
@@ -94,6 +101,13 @@ class UserSessionService(
     ip: String?,
     userAgent: String?,
   ) {
+    // `on conflict` still has to wait for a conflicting row's transaction to resolve, and the row
+    // this collides with is the one a concurrent registerToken has not committed yet - a token used
+    // inside the request that minted it. Waiting for it is pointless: that transaction is about to
+    // create the very row this would insert, and blocking here holds locks that a truncating test
+    // run or a schema change then queues behind. Give up quickly instead.
+    entityManager.createNativeQuery("set local lock_timeout = '250ms'").executeUpdate()
+
     val location = geoIpResolver.resolve(ip)
     userSessionRepository.insertIfAbsent(
       id = sequenceIdProvider.next(),
