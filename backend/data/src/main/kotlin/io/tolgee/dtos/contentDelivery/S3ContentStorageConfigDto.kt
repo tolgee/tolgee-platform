@@ -22,11 +22,11 @@ class S3ContentStorageConfigDto : S3Config {
 
   @field:NotBlank
   @field:Size(max = 255)
-  override val signingRegion: String = ""
+  override var signingRegion: String = ""
 
   @field:Schema(
     description = "Specifies an optional subfolder structure within s3 bucket to which content will be stored",
   )
   @field:Size(max = 255)
-  override val path: String = ""
+  override var path: String = ""
 }

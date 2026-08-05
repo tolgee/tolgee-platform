@@ -1,6 +1,5 @@
 package io.tolgee.ee.api.v2.controllers.task
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.config.TestEmailConfiguration
 import io.tolgee.constants.Feature
@@ -13,6 +12,7 @@ import io.tolgee.ee.data.task.CreateTaskRequest
 import io.tolgee.ee.data.task.UpdateTaskKeyRequest
 import io.tolgee.ee.data.task.UpdateTaskKeysRequest
 import io.tolgee.ee.data.task.UpdateTaskRequest
+import io.tolgee.ee.repository.TaskRepository
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
@@ -23,6 +23,8 @@ import io.tolgee.model.notifications.NotificationType.TASK_CANCELED
 import io.tolgee.model.notifications.NotificationType.TASK_FINISHED
 import io.tolgee.model.task.TaskKey
 import io.tolgee.repository.TaskKeyRepository
+import io.tolgee.repository.notification.NotificationRepository
+import io.tolgee.service.task.ITaskService
 import io.tolgee.testing.NotificationTestUtil
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import org.assertj.core.api.Assertions.assertThat
@@ -30,6 +32,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.math.BigDecimal
 
 @Import(TestEmailConfiguration::class)
@@ -44,6 +47,15 @@ class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Autowired
   private lateinit var notificationUtil: NotificationTestUtil
+
+  @Autowired
+  private lateinit var taskService: ITaskService
+
+  @Autowired
+  private lateinit var taskRepository: TaskRepository
+
+  @Autowired
+  private lateinit var notificationRepository: NotificationRepository
 
   @BeforeEach
   fun setup() {
@@ -455,6 +467,38 @@ class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `deleteAll removes tasks together with their linked notifications`() {
+    performProjectAuthPost(
+      "tasks",
+      CreateTaskRequest(
+        name = "Task to delete",
+        description = "...",
+        type = TaskType.TRANSLATE,
+        languageId = testData.englishLanguage.id,
+        assignees = mutableSetOf(testData.user.id),
+        keys = testData.keysOutOfTask.map { it.self.id }.toMutableSet(),
+      ),
+    ).andIsOk
+
+    val (taskId, notificationId) =
+      executeInNewTransaction {
+        val notification = notificationUtil.newestInAppNotification()
+        notification.linkedTask!!.id to notification.id
+      }
+
+    executeInNewTransaction {
+      val task = taskRepository.findById(taskId).orElseThrow()
+      taskService.deleteAll(listOf(task))
+    }
+
+    executeInNewTransaction {
+      assertThat(taskRepository.findById(taskId).isPresent).isFalse()
+      assertThat(notificationRepository.findById(notificationId).isPresent).isFalse()
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `canceled tasks can be filtered out by timestamp`() {
     val closedAt =
       performProjectAuthPut(
@@ -466,7 +510,7 @@ class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
         }.andReturn()
         .response
         .let {
-          com.fasterxml.jackson.module.kotlin
+          tools.jackson.module.kotlin
             .jacksonObjectMapper()
             .readTree(it.contentAsString)["closedAt"]
             .asLong()

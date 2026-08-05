@@ -1,3 +1,17 @@
+## [3.216.2](https://github.com/tolgee/tolgee-platform/compare/v3.216.1...v3.216.2) (2026-08-04)
+
+
+### Bug Fixes
+
+* default isBatch on the legacy translate endpoint under Jackson 3 ([#3840](https://github.com/tolgee/tolgee-platform/issues/3840)) ([748f7c1](https://github.com/tolgee/tolgee-platform/commit/748f7c1f3e8ab103097b5516290558b4e684fb08)), closes [#3804](https://github.com/tolgee/tolgee-platform/issues/3804)
+
+## [3.216.1](https://github.com/tolgee/tolgee-platform/compare/v3.216.0...v3.216.1) (2026-08-04)
+
+
+### Bug Fixes
+
+* strip structural newlines from plural source in AI translator prompt ([#3830](https://github.com/tolgee/tolgee-platform/issues/3830)) ([b435134](https://github.com/tolgee/tolgee-platform/commit/b435134d8640d093865707f2e30122bcad6d8b46))
+
 # [3.216.0](https://github.com/tolgee/tolgee-platform/compare/v3.215.0...v3.216.0) (2026-08-03)
 
 

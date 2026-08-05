@@ -1,6 +1,5 @@
 package io.tolgee.unit.formats
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.fixtures.node
 import io.tolgee.formats.nestedStructureModel.StructureModelBuilder
 import io.tolgee.testing.assert
@@ -8,6 +7,7 @@ import net.javacrumbs.jsonunit.assertj.JsonAssert
 import net.javacrumbs.jsonunit.assertj.assertThatJson
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import tools.jackson.module.kotlin.jacksonObjectMapper
 
 class StructureModelBuilderTest {
   @Test

@@ -9,6 +9,8 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
+import java.time.ZoneId
 import java.util.Date
 
 /**
@@ -189,6 +191,6 @@ abstract class AbstractTranslationMemoryService(
       similarity = (row[6] as Number).toFloat(),
       translationMemoryName = row[7] as String?,
       // index 8 is assignmentPriority (kept for ordering only — not exposed)
-      updatedAt = row[9] as Date?,
+      updatedAt = (row[9] as LocalDateTime?)?.let { Date.from(it.atZone(ZoneId.systemDefault()).toInstant()) },
     )
 }

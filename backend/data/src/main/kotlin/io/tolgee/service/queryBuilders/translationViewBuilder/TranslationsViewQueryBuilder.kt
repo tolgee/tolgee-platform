@@ -9,9 +9,9 @@ import jakarta.persistence.EntityManager
 import jakarta.persistence.criteria.CriteriaBuilder
 import jakarta.persistence.criteria.CriteriaQuery
 import jakarta.persistence.criteria.Expression
+import jakarta.persistence.criteria.Nulls
 import jakarta.persistence.criteria.Order
 import jakarta.persistence.criteria.Predicate
-import org.hibernate.query.NullPrecedence
 import org.hibernate.query.sqm.tree.select.SqmSortSpecification
 import org.springframework.data.domain.Sort
 
@@ -92,8 +92,8 @@ class TranslationsViewQueryBuilder(
     orderList.forEach {
       (it as? SqmSortSpecification)?.let { sortSpec ->
         when {
-          sortSpec.isAscending -> sortSpec.nullPrecedence(NullPrecedence.FIRST)
-          else -> sortSpec.nullPrecedence(NullPrecedence.LAST)
+          sortSpec.isAscending -> sortSpec.nullPrecedence(Nulls.FIRST)
+          else -> sortSpec.nullPrecedence(Nulls.LAST)
         }
       }
     }

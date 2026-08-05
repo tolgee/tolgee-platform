@@ -1,6 +1,5 @@
 package io.tolgee.fixtures
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argumentCaptor
@@ -11,6 +10,7 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.client.RestTemplate
+import tools.jackson.module.kotlin.jacksonObjectMapper
 
 class HttpClientMocker(
   private val restTemplate: RestTemplate,

@@ -1,6 +1,5 @@
 package io.tolgee.component
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.constants.Message
@@ -28,6 +27,7 @@ import io.tolgee.util.executeInNewRepeatableTransaction
 import org.springframework.context.ApplicationContext
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.TransactionDefinition
+import tools.jackson.databind.ObjectMapper
 import kotlin.properties.Delegates
 
 class KeyComplexEditHelper(

@@ -36,7 +36,7 @@ class ProjectLastModifiedManager(
    * - Cache-Control header set to max-age=0 to ensure validation on each request
    *
    */
-  fun <T> onlyWhenProjectDataChanged(
+  fun <T : Any> onlyWhenProjectDataChanged(
     request: WebRequest,
     fn: (
       /**

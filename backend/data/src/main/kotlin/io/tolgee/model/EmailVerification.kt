@@ -16,9 +16,9 @@ data class EmailVerification(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   var id: Long? = null,
-  @NotBlank
+  @param:NotBlank
   var code: String? = null,
-  @Email
+  @param:Email
   var newEmail: String? = null,
 ) : AuditModel() {
   @Suppress("JoinDeclarationAndAssignment")

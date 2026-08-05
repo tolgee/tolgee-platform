@@ -24,7 +24,7 @@ interface TranslationCommentRepository : JpaRepository<TranslationComment, Long>
 
   @Query(
     """
-    from TranslationComment tc
+    select tc from TranslationComment tc
     join tc.translation t
     join t.key k
     where k.project.id = :projectId

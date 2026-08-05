@@ -1,6 +1,5 @@
 package io.tolgee.batch
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.opentelemetry.api.trace.Span
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import io.sentry.Sentry
@@ -22,6 +21,7 @@ import jakarta.persistence.EntityManager
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.hibernate.LockOptions
 import org.springframework.context.ApplicationContext
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.lang.RuntimeException
 import java.util.Date
 import kotlin.collections.sorted

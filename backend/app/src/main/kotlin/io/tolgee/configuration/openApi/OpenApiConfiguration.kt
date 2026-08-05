@@ -1,5 +1,8 @@
 package io.tolgee.configuration.openApi
 
+import com.fasterxml.jackson.module.kotlin.kotlinModule
+import io.swagger.v3.core.jackson.ModelResolver
+import io.swagger.v3.core.util.Json
 import io.swagger.v3.oas.models.ExternalDocumentation
 import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.Operation
@@ -8,13 +11,30 @@ import io.swagger.v3.oas.models.media.IntegerSchema
 import io.swagger.v3.oas.models.parameters.Parameter
 import io.tolgee.configuration.openApi.OpenApiGroupBuilder.Companion.PROJECT_ID_PARAMETER
 import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
+import org.springdoc.core.converters.CollectionModelContentConverter
+import org.springdoc.core.data.SpringDocJackson2HalModule
 import org.springdoc.core.models.GroupedOpenApi
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.hateoas.server.LinkRelationProvider
 import org.springframework.web.method.HandlerMethod
 
 @Configuration
 class OpenApiConfiguration {
+  @Bean
+  fun modelResolver(): ModelResolver {
+    val mapper = Json.mapper().registerModule(kotlinModule())
+    if (!SpringDocJackson2HalModule.isAlreadyRegisteredIn(mapper)) {
+      mapper.registerModule(SpringDocJackson2HalModule())
+    }
+    return ModelResolver(mapper)
+  }
+
+  @Bean
+  fun collectionModelContentConverter(linkRelationProvider: LinkRelationProvider): CollectionModelContentConverter {
+    return CollectionModelContentConverter(linkRelationProvider)
+  }
+
   @Bean
   fun openAPI(): OpenAPI? {
     return OpenAPI()

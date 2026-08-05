@@ -1,6 +1,5 @@
 package io.tolgee.mcp.tools
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.modelcontextprotocol.server.McpSyncServer
 import io.tolgee.api.v2.controllers.V2LanguagesController
 import io.tolgee.dtos.request.LanguageRequest
@@ -12,6 +11,7 @@ import io.tolgee.service.language.LanguageService
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Component
+import tools.jackson.databind.ObjectMapper
 
 @Component
 class LanguageMcpTools(

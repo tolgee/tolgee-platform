@@ -3,7 +3,7 @@ package io.tolgee.ee.service.qa
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Caches
 import io.tolgee.util.logger
-import org.springframework.boot.web.client.RestTemplateBuilder
+import org.springframework.boot.restclient.RestTemplateBuilder
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -105,7 +105,7 @@ class LanguageToolApiClient(
     val request = HttpEntity(body, headers)
     val response =
       requestSemaphore.use {
-        restTemplate.postForObject<LanguageToolResponse?>(
+        restTemplate.postForObject<LanguageToolResponse>(
           "$baseUrl/v2/check",
           request,
         )
@@ -115,7 +115,7 @@ class LanguageToolApiClient(
   }
 
   private fun getLanguagesApi(baseUrl: String): Array<LanguageToolLanguageInfo>? {
-    return restTemplate.getForObject<Array<LanguageToolLanguageInfo>?>(
+    return restTemplate.getForObject<Array<LanguageToolLanguageInfo>>(
       "$baseUrl/v2/languages",
     )
   }

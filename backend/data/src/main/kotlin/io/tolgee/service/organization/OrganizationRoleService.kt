@@ -70,7 +70,12 @@ class OrganizationRoleService(
   fun canUserViewOrPublic(
     user: UserAccountDto,
     organizationId: Long,
-  ): Boolean = user.isSupporterOrAdmin() || canUserViewStrictOrPublic(user.id, organizationId)
+  ): Boolean {
+    if (user.isSupporterOrAdmin()) {
+      return organizationRepository.find(organizationId) != null
+    }
+    return canUserViewStrictOrPublic(user.id, organizationId)
+  }
 
   fun canUserViewAtLeastMember(
     user: UserAccountDto,

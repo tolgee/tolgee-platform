@@ -10,7 +10,6 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Lazy
 import org.springframework.context.annotation.Scope
-import org.springframework.data.auditing.AuditingHandler
 import org.springframework.data.auditing.DateTimeProvider
 import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
@@ -27,14 +26,21 @@ import java.util.Optional
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 class CurrentDateProvider(
-  @Suppress("SpringJavaInjectionPointsAutowiringInspection") @Lazy
-  auditingHandler: AuditingHandler,
-  private val entityManager: EntityManager,
+  @Lazy private val entityManager: EntityManager,
   private val applicationEventPublisher: ApplicationEventPublisher,
   private val transactionManager: PlatformTransactionManager,
 ) : Logging,
   DateTimeProvider {
+  @Volatile
+  private var persistedDateLoaded = false
+
   var forcedDate: Date? = null
+    // Lazy, not constructor-loaded: servlet-filter beans reach this during startup, before Liquibase
+    // creates the forced_server_date_time table.
+    get() {
+      loadPersistedForcedDateOnce()
+      return field
+    }
     set(value) {
       if (field != value) {
         logger.debug("Forcing date to: {} (old value: {})", value, field)
@@ -65,9 +71,13 @@ class CurrentDateProvider(
     }
   }
 
-  init {
-    forcedDate = getForcedTime()
-    auditingHandler.setDateTimeProvider(this)
+  private fun loadPersistedForcedDateOnce() {
+    if (persistedDateLoaded) return
+    synchronized(this) {
+      if (persistedDateLoaded) return
+      persistedDateLoaded = true
+      forcedDate = getForcedTime()
+    }
   }
 
   fun forceDateString(

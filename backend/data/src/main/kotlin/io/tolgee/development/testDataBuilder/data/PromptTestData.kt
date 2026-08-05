@@ -28,6 +28,7 @@ class PromptTestData : BaseTestData() {
   lateinit var chinese: LanguageBuilder
   lateinit var keys: MutableList<KeyBuilder>
   lateinit var keyWithoutTranslations: KeyBuilder
+  lateinit var pluralKey: KeyBuilder
   lateinit var customPrompt: PromptBuilder
   lateinit var llmProvider: LlmProviderBuilder
   lateinit var unrelatedLlmProvider: LlmProviderBuilder
@@ -227,6 +228,25 @@ class PromptTestData : BaseTestData() {
   fun addKeyWithoutTranslations() {
     promptProject.build {
       keyWithoutTranslations = addKey("Key without translations") {}
+    }
+  }
+
+  fun addPluralKey() {
+    promptProject.build {
+      pluralKey =
+        addKey("Plural key") {}.also {
+          it.self.isPlural = true
+          it.self.pluralArgName = "count"
+          addTranslation {
+            key = it.self
+            language = english.self
+            text =
+              "{count, plural,\n" +
+              "one {Listing spreadsheet sheets}\n" +
+              "other {Listing sheets in # spreadsheets}\n" +
+              "}"
+          }
+        }
     }
   }
 

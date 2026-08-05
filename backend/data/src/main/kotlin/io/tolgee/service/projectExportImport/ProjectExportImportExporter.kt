@@ -1,7 +1,5 @@
 package io.tolgee.service.projectExportImport
 
-import com.fasterxml.jackson.core.JsonGenerator
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.model.Project
 import io.tolgee.service.project.ProjectService
@@ -16,6 +14,8 @@ import jakarta.persistence.metamodel.EntityType
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Isolation
 import org.springframework.transaction.annotation.Transactional
+import tools.jackson.core.StreamWriteFeature
+import tools.jackson.databind.ObjectMapper
 import java.io.BufferedOutputStream
 import java.nio.file.Files
 import java.nio.file.Path
@@ -95,7 +95,7 @@ class ProjectExportImportExporter(
     toSerialized: (T) -> Any,
   ) {
     zip.putNextEntry(ZipEntry(entryName))
-    val generator = objectMapper.factory.createGenerator(zip).disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET)
+    val generator = objectMapper.createGenerator(zip).configure(StreamWriteFeature.AUTO_CLOSE_TARGET, false)
     generator.writeStartArray()
     rows.forEach { objectMapper.writeValue(generator, toSerialized(it)) }
     generator.writeEndArray()

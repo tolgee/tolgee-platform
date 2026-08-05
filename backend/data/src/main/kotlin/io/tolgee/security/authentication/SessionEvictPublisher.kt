@@ -1,6 +1,5 @@
 package io.tolgee.security.authentication
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.component.UsingRedisProvider
 import io.tolgee.pubSub.RedisPubSubReceiverConfiguration
 import io.tolgee.util.Logging
@@ -9,6 +8,7 @@ import org.springframework.context.annotation.Lazy
 import org.springframework.context.event.EventListener
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.stereotype.Component
+import tools.jackson.module.kotlin.jacksonObjectMapper
 
 @Component
 class SessionEvictPublisher(

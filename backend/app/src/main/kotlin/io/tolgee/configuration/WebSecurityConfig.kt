@@ -155,9 +155,7 @@ class WebSecurityConfig(
 
   @Bean
   fun customFilterRegistration(): FilterRegistrationBean<TransferEncodingHeaderDebugFilter>? {
-    val registration: FilterRegistrationBean<TransferEncodingHeaderDebugFilter> =
-      FilterRegistrationBean<TransferEncodingHeaderDebugFilter>()
-    registration.filter = TransferEncodingHeaderDebugFilter()
+    val registration = FilterRegistrationBean(TransferEncodingHeaderDebugFilter())
     registration.order = Ordered.HIGHEST_PRECEDENCE
     return registration
   }

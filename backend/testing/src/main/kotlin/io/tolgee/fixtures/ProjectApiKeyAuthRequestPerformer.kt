@@ -64,7 +64,7 @@ class ProjectApiKeyAuthRequestPerformer(
     files.forEach { builder.file(it) }
     params.forEach { (name, values) -> builder.param(name, *values) }
     if (apiKeyPresentMode == ApiKeyPresentMode.HEADER) {
-      builder.header(API_KEY_HEADER_NAME, apiKey.key)
+      builder.header(API_KEY_HEADER_NAME, apiKey.key!!)
     }
     return mvc.perform(builder)
   }

@@ -18,6 +18,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.Resource
+import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.ResultActions
 
 class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
@@ -67,6 +68,23 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
         .map { it.name }
         .assert
         .contains("new-tag")
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `accepts the params part sent as application-octet-stream`() {
+    saveAndPrepare()
+    // The CLI sends the params part as octet-stream; OctetStreamSupportConfiguration adds that media
+    // type to the JSON converter. Without it this request would be rejected with 415.
+    performImport(
+      projectId = testData.project.id,
+      listOf(Pair(jsonFileName, simpleJson)),
+      params = mapOf("tagNewKeys" to listOf("new-tag")),
+      paramsContentType = MediaType.APPLICATION_OCTET_STREAM,
+    ).andIsOk
+    executeInNewTransaction {
+      assertJsonImported()
     }
   }
 
@@ -483,8 +501,9 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
     projectId: Long,
     files: List<Pair<String, Resource>>?,
     params: Map<String, Any?> = mapOf(),
+    paramsContentType: MediaType? = null,
   ): ResultActions {
-    return performSingleStepImport(mvc, projectId, files, params)
+    return performSingleStepImport(mvc, projectId, files, params, paramsContentType)
   }
 
   private fun assertJsonImported() {

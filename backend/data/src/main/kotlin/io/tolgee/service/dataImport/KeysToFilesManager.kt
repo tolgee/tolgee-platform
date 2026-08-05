@@ -1,6 +1,5 @@
 package io.tolgee.service.dataImport
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.dtos.request.ImportFileMapping
 import io.tolgee.dtos.request.importKeysResolvable.ResolvableTranslationResolution
@@ -8,6 +7,7 @@ import io.tolgee.dtos.request.importKeysResolvable.SingleStepImportResolvableIte
 import io.tolgee.dtos.request.importKeysResolvable.SingleStepImportResolvableTranslationRequest
 import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.util.nullIfEmpty
+import tools.jackson.module.kotlin.jacksonObjectMapper
 
 class KeysToFilesManager {
   private val filesMap: MutableMap<Pair<String, String>, VirtualFile> = mutableMapOf()

@@ -1,6 +1,5 @@
 package io.tolgee.component.contentDelivery.cachePurging.cloudflare
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.component.contentDelivery.cachePurging.ContentDeliveryCachePurging
 import io.tolgee.configuration.tolgee.ContentDeliveryCloudflareProperties
 import io.tolgee.model.contentDelivery.ContentDeliveryConfig
@@ -9,6 +8,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.web.client.RestTemplate
+import tools.jackson.module.kotlin.jacksonObjectMapper
 
 class CloudflareContentDeliveryCachePurging(
   private val config: ContentDeliveryCloudflareProperties,

@@ -46,7 +46,7 @@ interface ActivityModifiedEntityRepository : JpaRepository<ActivityModifiedEntit
 
   @Query(
     """
-      from ActivityModifiedEntity ame
+      select ame from ActivityModifiedEntity ame
         left join Branch b on ame.branchId = b.id
         where ame.activityRevision.projectId = :projectId 
         and ame.activityRevision.id in :revisionIds

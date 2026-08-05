@@ -1,6 +1,5 @@
 package io.tolgee.pubSub
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.batch.events.JobCancelEvent
 import io.tolgee.batch.events.JobQueueItemsEvent
 import io.tolgee.security.authentication.SessionEvictEvent
@@ -9,6 +8,7 @@ import io.tolgee.util.logger
 import io.tolgee.websocket.RedisWebsocketEventWrapper
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.messaging.simp.SimpMessagingTemplate
+import tools.jackson.databind.ObjectMapper
 
 class RedisPubSubReceiver(
   private val template: SimpMessagingTemplate,

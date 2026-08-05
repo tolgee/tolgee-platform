@@ -47,7 +47,7 @@ interface GlossaryTermTranslationRepository : JpaRepository<GlossaryTermTranslat
 
   @Query(
     """
-      from GlossaryTermTranslation gtt
+      select gtt from GlossaryTermTranslation gtt
         join gtt.term.glossary.assignedProjects ap
         where
             gtt.firstWordLowercased in :texts and

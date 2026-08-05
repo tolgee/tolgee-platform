@@ -2,6 +2,7 @@ package io.tolgee.development.testDataBuilder.data
 
 import io.tolgee.development.testDataBuilder.builders.KeyBuilder
 import io.tolgee.development.testDataBuilder.builders.LanguageBuilder
+import io.tolgee.development.testDataBuilder.builders.NotificationBuilder
 import io.tolgee.development.testDataBuilder.builders.OrganizationBuilder
 import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import io.tolgee.development.testDataBuilder.builders.TaskBuilder
@@ -12,6 +13,7 @@ import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.TaskState
 import io.tolgee.model.enums.TaskType
+import io.tolgee.model.notifications.NotificationType
 import io.tolgee.model.task.TaskKey
 
 class TaskTestData : BaseTestData("tasksTestUser", "Project with tasks") {
@@ -36,6 +38,9 @@ class TaskTestData : BaseTestData("tasksTestUser", "Project with tasks") {
   lateinit var unrelatedKey: KeyBuilder
 
   lateinit var blockedTask: TaskBuilder
+
+  lateinit var taskNotification: NotificationBuilder
+  lateinit var projectNotification: NotificationBuilder
 
   init {
     user.name = "Tasks test user"
@@ -217,6 +222,23 @@ class TaskTestData : BaseTestData("tasksTestUser", "Project with tasks") {
         type = ProjectPermissionType.EDIT
       }
     }
+  }
+
+  fun addNotifications() {
+    taskNotification =
+      userAccountBuilder.addNotification {
+        user = projectUser.self
+        linkedTask = translateTask.self
+        originatingUser = this@TaskTestData.user
+        type = NotificationType.TASK_ASSIGNED
+      }
+    projectNotification =
+      userAccountBuilder.addNotification {
+        user = projectUser.self
+        project = projectBuilder.self
+        originatingUser = this@TaskTestData.user
+        type = NotificationType.MFA_ENABLED
+      }
   }
 
   fun addBlockedTask() {

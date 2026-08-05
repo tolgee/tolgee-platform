@@ -37,8 +37,8 @@ class ApiKey(
    * Scope should be never nullable, but here were entries with null scopes in the production DB, which caused NPEs,
    * so to be sure, lets make it nullable
    */
-  @NotNull
-  @NotEmpty
+  @param:NotNull
+  @param:NotEmpty
   @Enumerated(EnumType.STRING)
   @ElementCollection(targetClass = Scope::class, fetch = FetchType.EAGER)
   var scopesEnum: MutableSet<Scope?>,

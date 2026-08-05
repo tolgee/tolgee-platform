@@ -1,11 +1,11 @@
 package io.tolgee.service.projectExportImport
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.service.projectExportImport.model.ExportManifest
 import io.tolgee.service.projectExportImport.model.ExportZipLayout
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.io.ByteArrayOutputStream
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream

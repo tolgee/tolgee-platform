@@ -1,8 +1,9 @@
 package io.tolgee.component
 
 import jakarta.persistence.EntityManager
-import org.hibernate.internal.SessionImpl
-import org.hibernate.resource.transaction.backend.jdbc.internal.JdbcResourceLocalTransactionCoordinatorImpl
+import org.hibernate.engine.spi.SharedSessionContractImplementor
+import org.hibernate.resource.jdbc.internal.AbstractLogicalConnectionImplementor
+import org.hibernate.resource.transaction.spi.TransactionStatus
 import org.springframework.stereotype.Component
 import java.sql.Savepoint
 import java.util.UUID
@@ -18,32 +19,23 @@ class SavePointManager(
   }
 
   fun rollbackSavepoint(savepoint: Savepoint?) {
-    getSession().doWork { connection ->
+    val session = getSession()
+    session.doWork { connection ->
       connection.rollback(savepoint)
     }
 
-    val session = getSession()
-    val coordinatorGetter = session::class.java.getMethod("getTransactionCoordinator")
-    coordinatorGetter.isAccessible = true
-    val coordinator =
-      coordinatorGetter.invoke(session) as? JdbcResourceLocalTransactionCoordinatorImpl
-        ?: throw IllegalStateException("Transaction coordinator is not JdbcResourceLocalTransactionCoordinatorImpl")
-    val delegateField = coordinator::class.java.getDeclaredField("physicalTransactionDelegate")
-    delegateField.isAccessible = true
-    val delegate =
-      delegateField.get(coordinator) as? JdbcResourceLocalTransactionCoordinatorImpl.TransactionDriverControlImpl
-        ?: throw IllegalStateException("Transaction delegate is not TransactionDriverControlImpl")
-    delegateField.isAccessible = false
-    val field = delegate::class.java.getDeclaredField("rollbackOnly")
-    field.isAccessible = true
-    field.set(delegate, false)
-    field.isAccessible = false
+    val logicalConnection =
+      session.jdbcCoordinator.logicalConnection as? AbstractLogicalConnectionImplementor
+        ?: throw IllegalStateException("Logical connection is not AbstractLogicalConnectionImplementor")
+    // Hibernate exposes no public API to clear a transaction's rollback-only mark; without this
+    // reset the commit after the savepoint rollback fails.
+    val statusField = AbstractLogicalConnectionImplementor::class.java.getDeclaredField("status")
+    statusField.isAccessible = true
+    statusField.set(logicalConnection, TransactionStatus.ACTIVE)
   }
 
-  fun getSession(): SessionImpl {
-    return entityManager
-      .unwrap(SessionImpl::class.java)
-      ?.let { it as? SessionImpl ?: throw IllegalStateException("Session is not SessionImpl") }
+  fun getSession(): SharedSessionContractImplementor {
+    return entityManager.unwrap(SharedSessionContractImplementor::class.java)
       ?: throw IllegalStateException("Session is null")
   }
 }

@@ -1,13 +1,13 @@
 package io.tolgee.ee.component.slackIntegration
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.component.Aes
 import io.tolgee.component.FrontendUrlProvider
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.slack.SlackUserLoginDto
 import io.tolgee.exceptions.BadRequestException
 import org.springframework.stereotype.Component
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.module.kotlin.readValue
 import java.util.Base64
 
 @Component
