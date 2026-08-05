@@ -1,6 +1,6 @@
 package io.tolgee.unit.apps
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.configuration.tolgee.AppsProperties
 import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.constants.Message

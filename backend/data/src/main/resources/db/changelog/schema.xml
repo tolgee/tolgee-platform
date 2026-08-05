@@ -5875,6 +5875,7 @@
                 END IF;
             END $$;
         </sql>
+    </changeSet>
     <changeSet author="jcizmar" id="1783771000000-1">
         <createTable tableName="app_install">
             <column name="id" type="BIGINT">

@@ -1,7 +1,7 @@
 package io.tolgee.hateoas.project.apps
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.module.kotlin.readValue
 import io.tolgee.dtos.apps.AppManifest
 import io.tolgee.model.apps.AppInstall
 import org.springframework.stereotype.Component

@@ -163,6 +163,10 @@ declare namespace DataCy {
         "comment-menu-needs-resolution": true;
         "comment-resolve": true;
         "comment-text": true;
+        "community-my-contributions-toggle": true;
+        "community-projects-view": true;
+        "community-translation-banner": true;
+        "community-translation-item": true;
         "content-delivery-add-button": true;
         "content-delivery-auto-publish-checkbox": true;
         "content-delivery-delete-button": true;
@@ -236,6 +240,7 @@ declare namespace DataCy {
         "export-submit-button": true;
         "export-support_arrays-selector": true;
         "file-dropzone-add-more-button": true;
+        "file-dropzone-file-input": true;
         "file-dropzone-remove-button": true;
         "file-dropzone-select-button": true;
         "filter-item": true;
@@ -266,6 +271,7 @@ declare namespace DataCy {
         "global-search-field": true;
         "global-search-field-clear": true;
         "global-user-menu-button": true;
+        "glossaries": true;
         "glossaries-empty-add-button": true;
         "glossaries-list-more-button": true;
         "glossary-batch-delete-button": true;
@@ -573,6 +579,7 @@ declare namespace DataCy {
         "plan-limit-dialog-close": true;
         "plan-limit-exceeded-popover": true;
         "plan_seat_limit_exceeded_while_accepting_invitation_message": true;
+        "profile": true;
         "project-ai-prompt-dialog-description-input": true;
         "project-ai-prompt-dialog-save": true;
         "project-app-page-iframe": true;
@@ -587,6 +594,11 @@ declare namespace DataCy {
         "project-branch-merge-change": true;
         "project-branch-merge-delete-branch-checkbox": true;
         "project-branch-merge-detail": true;
+        "project-contributor-invitation-pending": true;
+        "project-contributor-invite-button": true;
+        "project-contributor-item": true;
+        "project-contributor-item-first-contribution": true;
+        "project-contributor-item-last-contribution": true;
         "project-dashboard-activity-chart": true;
         "project-dashboard-activity-list": true;
         "project-dashboard-base-word-count": true;
@@ -617,11 +629,16 @@ declare namespace DataCy {
         "project-leave-button": true;
         "project-list-languages": true;
         "project-list-more-button": true;
+        "project-list-org-name": true;
+        "project-list-public-badge": true;
         "project-list-qa-badge-button": true;
         "project-list-translations-button": true;
         "project-member-item": true;
         "project-member-revoke-button": true;
+        "project-members-invitation-cancel-button": true;
         "project-members-invitation-item": true;
+        "project-members-tab-community": true;
+        "project-members-tab-team": true;
         "project-menu-item": true;
         "project-menu-item-ai": true;
         "project-menu-item-app": true;
@@ -658,6 +675,12 @@ declare namespace DataCy {
         "project-settings-button": true;
         "project-settings-delete-button": true;
         "project-settings-description": true;
+        "project-settings-export-button": true;
+        "project-settings-export-import": true;
+        "project-settings-import-button": true;
+        "project-settings-import-manifest": true;
+        "project-settings-import-manifest-unreadable": true;
+        "project-settings-import-version-warning": true;
         "project-settings-label-item": true;
         "project-settings-label-item-description": true;
         "project-settings-label-item-label": true;
@@ -672,10 +695,12 @@ declare namespace DataCy {
         "project-settings-languages-list-name": true;
         "project-settings-menu-advanced": true;
         "project-settings-menu-apps": true;
+        "project-settings-menu-export-import": true;
         "project-settings-menu-general": true;
         "project-settings-menu-labels": true;
         "project-settings-menu-qa": true;
         "project-settings-name": true;
+        "project-settings-public-switch": true;
         "project-settings-suggestions-mode-switch": true;
         "project-settings-tm-configure": true;
         "project-settings-tm-row": true;
@@ -698,6 +723,8 @@ declare namespace DataCy {
         "project-transfer-dialog": true;
         "prompt-basic-option": true;
         "prompt-basic-option-edit": true;
+        "public-projects-login-button": true;
+        "public-projects-sign-up-button": true;
         "qa-action-correct": true;
         "qa-action-ignore": true;
         "qa-badge": true;
@@ -772,6 +799,8 @@ declare namespace DataCy {
         "submenu-item": true;
         "suggestion-action": true;
         "suggestions-list": true;
+        "suggestions-show-all": true;
+        "switch-popover-footer-action": true;
         "switch-popover-item": true;
         "switch-popover-new": true;
         "switch-popover-search": true;
@@ -898,6 +927,7 @@ declare namespace DataCy {
         "translation-label-add": true;
         "translation-label-control": true;
         "translation-label-delete": true;
+        "translation-memories": true;
         "translation-memories-empty-add-button": true;
         "translation-memories-list-more-button": true;
         "translation-memory-delete-button": true;

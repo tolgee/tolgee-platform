@@ -1,7 +1,7 @@
 package io.tolgee.service.apps
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.module.kotlin.readValue
 import io.tolgee.configuration.tolgee.AppsProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.apps.AppManifest
