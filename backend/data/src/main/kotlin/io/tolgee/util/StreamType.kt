@@ -11,6 +11,9 @@ enum class StreamType {
   EXPORT_GLOSSARY,
   IMPORT_APPLY,
   MT_SUGGEST,
+
+  /** Only produced by the internal test-only endpoint. */
+  INTERNAL_TEST,
   ;
 
   val tag: String get() = name.lowercase(Locale.ROOT)

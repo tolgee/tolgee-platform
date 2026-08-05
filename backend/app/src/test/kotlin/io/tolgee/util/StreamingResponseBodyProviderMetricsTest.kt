@@ -19,6 +19,8 @@ import java.sql.Connection
 class StreamingResponseBodyProviderMetricsTest {
   private val meterRegistry = SimpleMeterRegistry()
   private val metrics = Metrics(meterRegistry)
+  private val connection = Mockito.mock(Connection::class.java)
+  private val session = Mockito.mock(Session::class.java)
   private val provider = StreamingResponseBodyProvider(entityManager(), ObjectMapper(), metrics)
 
   @Test
@@ -46,6 +48,16 @@ class StreamingResponseBodyProviderMetricsTest {
       .isInstanceOf(IllegalStateException::class.java)
 
     timerCount(StreamType.IMPORT_APPLY).assert.isEqualTo(1L)
+    Mockito.verify(session).close()
+  }
+
+  @Test
+  fun `returns the session when the stream completes`() {
+    provider
+      .createStreamingResponseBody(StreamType.EXPORT_ZIP) { it.write(1) }
+      .writeTo(ByteArrayOutputStream())
+
+    Mockito.verify(session).close()
   }
 
   @Test
@@ -66,8 +78,6 @@ class StreamingResponseBodyProviderMetricsTest {
       ?.count() ?: 0L
 
   private fun entityManager(): EntityManager {
-    val connection = Mockito.mock(Connection::class.java)
-    val session = Mockito.mock(Session::class.java)
     whenever(session.doWork(any())) doAnswer { invocation ->
       invocation.getArgument<Work>(0).execute(connection)
     }

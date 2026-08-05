@@ -48,7 +48,6 @@ import java.io.IOException
 import java.io.Serializable
 import java.util.Arrays
 import java.util.Collections
-import java.util.TreeSet
 import java.util.concurrent.RejectedExecutionException
 import java.util.function.Consumer
 
@@ -284,16 +283,20 @@ class ExceptionHandlers : Logging {
   }
 
   /**
-   * Spring reports the async timeout of a queued streaming request here. It is the same capacity
-   * condition as an outright rejection, and answering it generically would raise a Sentry event per
-   * overloaded request.
+   * A request that aged out of the streaming queue never started writing, so it is the same capacity
+   * condition as an outright rejection — and answering it generically would raise a Sentry event per
+   * overloaded request. A stream that timed out mid-write is a different animal: its response is
+   * already committed, nothing can be said to the client, and it is worth reporting.
    */
   @ExceptionHandler(AsyncRequestTimeoutException::class)
   fun handleAsyncRequestTimeout(
     ex: AsyncRequestTimeoutException,
     response: HttpServletResponse,
   ): ResponseEntity<ErrorResponseBody> {
-    logger.debug("Async request timed out", ex)
+    if (response.isCommitted) {
+      return handleOtherExceptions(ex)
+    }
+    logger.debug("Request timed out waiting for a streaming thread", ex)
     return serverBusy(response)
   }
 
@@ -384,17 +387,14 @@ class ExceptionHandlers : Logging {
     private const val RETRY_AFTER_SECONDS = "5"
 
     private val STAGED_STREAMING_HEADERS =
-      TreeSet(String.CASE_INSENSITIVE_ORDER).apply {
-        addAll(
-          listOf(
-            HttpHeaders.CONTENT_DISPOSITION,
-            HttpHeaders.CONTENT_LENGTH,
-            HttpHeaders.CONTENT_TYPE,
-            HttpHeaders.ETAG,
-            HttpHeaders.LAST_MODIFIED,
-            "X-Accel-Buffering",
-          ),
-        )
-      }
+      sortedSetOf(
+        String.CASE_INSENSITIVE_ORDER,
+        HttpHeaders.CONTENT_DISPOSITION,
+        HttpHeaders.CONTENT_LENGTH,
+        HttpHeaders.CONTENT_TYPE,
+        HttpHeaders.ETAG,
+        HttpHeaders.LAST_MODIFIED,
+        "X-Accel-Buffering",
+      )
   }
 }

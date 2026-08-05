@@ -57,6 +57,9 @@ class ProjectExportImportController(
   ): ResponseEntity<StreamingResponseBody> {
     val export = projectExportImportExporter.exportToTempFile(projectId, versionProvider.version)
     val tempFile = export.path
+    // A saturated streaming pool rejects the body after this method returns, so the delete below
+    // never runs. Bound that rather than leaking the temp file for the life of the pod.
+    tempFile.toFile().deleteOnExit()
     try {
       val body =
         streamingResponseBodyProvider.createStreamingResponseBody(StreamType.EXPORT_PROJECT) { outputStream ->

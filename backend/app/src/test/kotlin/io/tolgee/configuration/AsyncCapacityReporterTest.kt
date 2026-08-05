@@ -45,8 +45,8 @@ class AsyncCapacityReporterTest {
 
   @Test
   fun `sits exactly on the boundary without warning, and warns one job past it`() {
-    // pool 60 -> 20 streaming + 10 background; the reserve is 60/4 = 15, so 30 batch is the last
-    // configuration that still leaves a quarter free.
+    // pool 60 -> 20 streaming + 10 background, and the reserve is 60/4 = 15, so 15 batch jobs is
+    // the last configuration that still leaves a quarter free.
     report(connectionPoolSize = 60, batchConcurrency = 15).warnings.assert.isEmpty()
     report(connectionPoolSize = 60, batchConcurrency = 16).warnings.assert.isNotEmpty()
   }

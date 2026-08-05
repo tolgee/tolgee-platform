@@ -1,5 +1,6 @@
 package io.tolgee.configuration
 
+import io.tolgee.Metrics
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
@@ -41,6 +42,9 @@ class StreamingBackpressureHttpTest {
   @Qualifier(AsyncWebMvcConfiguration.STREAMING_EXECUTOR_BEAN_NAME)
   lateinit var streamingAsyncExecutor: ThreadPoolTaskExecutor
 
+  @Autowired
+  lateinit var metrics: Metrics
+
   private val release = CountDownLatch(1)
   private val client: HttpClient = HttpClient.newHttpClient()
 
@@ -60,8 +64,14 @@ class StreamingBackpressureHttpTest {
   @Test
   fun `answers 503 with Retry-After once the pool and its queue are full`() {
     occupyTheOnlyStreamingThread()
+    val rejectedBefore = metrics.streamingRejectedCounter.count()
 
     val response = get()
+
+    metrics.streamingRejectedCounter
+      .count()
+      .assert
+      .isEqualTo(rejectedBefore + 1)
 
     response.statusCode().assert.isEqualTo(HttpStatus.SERVICE_UNAVAILABLE.value())
     response.body().assert.contains("server_busy")

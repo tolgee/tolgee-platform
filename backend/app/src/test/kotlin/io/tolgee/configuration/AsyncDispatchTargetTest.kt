@@ -5,9 +5,9 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.TestConfiguration
+import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import org.springframework.scheduling.annotation.Async
-import org.springframework.stereotype.Component
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 
@@ -40,11 +40,10 @@ class AsyncDispatchTargetTest {
 
   @TestConfiguration
   class AsyncProbeConfiguration {
-    @org.springframework.context.annotation.Bean
+    @Bean
     fun asyncProbe() = AsyncProbe()
   }
 
-  @Component
   open class AsyncProbe {
     @Async
     open fun onDefaultExecutor(): CompletableFuture<String> =

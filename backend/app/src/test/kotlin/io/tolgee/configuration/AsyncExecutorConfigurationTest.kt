@@ -2,6 +2,7 @@ package io.tolgee.configuration
 
 import com.zaxxer.hikari.HikariDataSource
 import io.tolgee.Metrics
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.events.OnProjectActivityStoredEvent
 import io.tolgee.exceptions.StreamingCapacityExceededException
 import io.tolgee.testing.assert
@@ -14,6 +15,8 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.scheduling.annotation.Async
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import org.springframework.security.task.DelegatingSecurityContextAsyncTaskExecutor
+import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.header.HeaderWriterFilter
 import org.springframework.test.util.ReflectionTestUtils
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter
 import java.util.concurrent.CyclicBarrier
@@ -34,6 +37,12 @@ class AsyncExecutorConfigurationTest {
 
   @Autowired
   private lateinit var requestMappingHandlerAdapter: RequestMappingHandlerAdapter
+
+  @Autowired
+  private lateinit var securityFilterChain: SecurityFilterChain
+
+  @Autowired
+  private lateinit var tolgeeProperties: TolgeeProperties
 
   @Autowired
   @Qualifier(AsyncWebMvcConfiguration.STREAMING_EXECUTOR_BEAN_NAME)
@@ -133,6 +142,41 @@ class AsyncExecutorConfigurationTest {
 
     val delegate = ReflectionTestUtils.getField(installed!!, "delegate")
     delegate.assert.isSameAs(streamingAsyncExecutor)
+  }
+
+  /**
+   * StreamingBodyDatabasePoolHealthTest was de-flaked on this setting, but it would go back to
+   * skipping rather than failing if the setting were lost. This fails outright.
+   */
+  @Test
+  fun `security headers are written before the chain, not while it unwinds`() {
+    val headerWriterFilter =
+      securityFilterChain.filters.filterIsInstance<HeaderWriterFilter>().single()
+
+    ReflectionTestUtils
+      .getField(headerWriterFilter, "shouldWriteHeadersEagerly")
+      .assert
+      .isEqualTo(true)
+  }
+
+  @Test
+  fun `the task decorator survives construction`() {
+    ReflectionTestUtils
+      .getField(streamingAsyncExecutor, "taskDecorator")
+      .assert
+      .isInstanceOf(CompositeTaskDecorator::class.java)
+  }
+
+  /** The two divisors and the reporter's reserve are separate constants; defaults must agree. */
+  @Test
+  fun `the shipped defaults never trip the capacity warning`() {
+    val poolSize = asyncExecutorFactory.connectionPoolSize!!
+    val reserved =
+      asyncExecutorFactory.streamingMaxThreads +
+        asyncExecutorFactory.backgroundMaxThreads +
+        tolgeeProperties.batch.concurrency
+
+    reserved.assert.isLessThanOrEqualTo(poolSize - poolSize / AsyncCapacityReporter.SYNC_RESERVE_DIVISOR)
   }
 
   @Test

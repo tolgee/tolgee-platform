@@ -9,6 +9,7 @@ import org.springframework.core.task.TaskRejectedException
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.mock.web.MockHttpServletResponse
+import org.springframework.web.context.request.async.AsyncRequestTimeoutException
 import java.util.concurrent.RejectedExecutionException
 
 class ExceptionHandlersAsyncCapacityTest {
@@ -85,6 +86,31 @@ class ExceptionHandlersAsyncCapacityTest {
     result.body
       ?.code.assert
       .isEqualTo("unexpected_error_occurred")
+  }
+
+  @Test
+  fun `answers a request that aged out of the queue as capacity`() {
+    val response = MockHttpServletResponse()
+    response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=export.zip")
+
+    val result = exceptionHandlers.handleAsyncRequestTimeout(AsyncRequestTimeoutException(), response)
+
+    result.statusCode.assert.isEqualTo(HttpStatus.SERVICE_UNAVAILABLE)
+    result.body
+      ?.code.assert
+      .isEqualTo(Message.SERVER_BUSY.code)
+    response.getHeader(HttpHeaders.CONTENT_DISPOSITION).assert.isNull()
+  }
+
+  /** A stream that timed out mid-write cannot be answered, and is worth reporting rather than hiding. */
+  @Test
+  fun `reports a stream that timed out after it started writing`() {
+    val response = MockHttpServletResponse()
+    response.flushBuffer()
+
+    val result = exceptionHandlers.handleAsyncRequestTimeout(AsyncRequestTimeoutException(), response)
+
+    result.statusCode.assert.isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
   }
 
   private fun handle(response: MockHttpServletResponse) =

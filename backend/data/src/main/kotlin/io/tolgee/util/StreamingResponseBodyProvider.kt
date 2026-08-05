@@ -44,17 +44,15 @@ class StreamingResponseBodyProvider(
   ): StreamingResponseBody {
     return StreamingResponseBody {
       val sample = Timer.start()
+      val session = entityManager.unwrap(Session::class.java)
       try {
-        val session = entityManager.unwrap(Session::class.java)
-
         session.doWork { connection ->
           fn(it)
           // Manually dispose the connection because spring has a hard time doing so by itself
           connection.close()
         }
-
-        session.close()
       } finally {
+        session.close()
         sample.stop(metrics.streamDurationTimer(streamType))
       }
     }

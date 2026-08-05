@@ -20,7 +20,7 @@ class StreamingBackpressureTestController(
   @Operation(description = "Streams a fixed body through the same provider the real endpoints use")
   fun stream(): ResponseEntity<StreamingResponseBody> =
     ResponseEntity.ok(
-      streamingResponseBodyProvider.createStreamingResponseBody(StreamType.EXPORT_ZIP) { outputStream ->
+      streamingResponseBodyProvider.createStreamingResponseBody(StreamType.INTERNAL_TEST) { outputStream ->
         outputStream.write("streamed".toByteArray())
       },
     )
