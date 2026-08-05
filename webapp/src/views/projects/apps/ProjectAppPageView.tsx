@@ -2,11 +2,13 @@ import { Box, CircularProgress, styled, Typography } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { useParams } from 'react-router-dom';
 
-import { BaseProjectView } from '../BaseProjectView';
+import { BaseProjectView } from 'tg.views/projects/BaseProjectView';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
-import { useAppIframeMessaging } from './useAppIframeMessaging';
+import { useAppIframeMessaging } from 'tg.views/projects/apps/useAppIframeMessaging';
+
+const LOADING_MIN_HEIGHT = 400;
 
 const StyledIframe = styled('iframe')`
   width: 100%;
@@ -18,10 +20,10 @@ const StyledIframe = styled('iframe')`
 
 const StyledMissing = styled('div')`
   display: grid;
-  gap: 8px;
-  padding: 24px;
+  gap: ${({ theme }) => theme.spacing(1)};
+  padding: ${({ theme }) => theme.spacing(3)};
   border: 1px dashed ${({ theme }) => theme.palette.divider};
-  border-radius: 4px;
+  border-radius: ${({ theme }) => theme.shape.borderRadius}px;
 `;
 
 export const ProjectAppPageView = () => {
@@ -32,13 +34,13 @@ export const ProjectAppPageView = () => {
   const moduleKey = params[PARAMS.APP_MODULE_KEY];
 
   const apps = useApiQuery({
-    url: '/v2/projects/{projectId}/apps',
+    url: '/v2/projects/{projectId}/apps/enabled',
     method: 'get',
     path: { projectId: project.id },
   });
 
   const app = apps.data?._embedded?.projectApps?.find(
-    (item) => item.id === installId && item.enabled
+    (item) => item.id === installId
   );
   const module = app?.modules?.['project-dashboard-page']?.find(
     (m) => m.key === moduleKey
@@ -56,6 +58,18 @@ export const ProjectAppPageView = () => {
 
   const title = module?.title ?? t('project_app_page_fallback_title', 'App');
 
+  const loadingPlaceholder = (
+    <Box
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      minHeight={LOADING_MIN_HEIGHT}
+      data-cy="project-app-page-loading"
+    >
+      <CircularProgress />
+    </Box>
+  );
+
   return (
     <BaseProjectView
       maxWidth="max"
@@ -72,7 +86,9 @@ export const ProjectAppPageView = () => {
         ],
       ]}
     >
-      {!app || !module ? (
+      {apps.isLoading ? (
+        loadingPlaceholder
+      ) : !app || !module ? (
         <StyledMissing data-cy="project-app-page-missing">
           <Typography variant="h6">
             <T
@@ -88,15 +104,7 @@ export const ProjectAppPageView = () => {
           </Typography>
         </StyledMissing>
       ) : !iframeSrc ? (
-        <Box
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          minHeight={400}
-          data-cy="project-app-page-loading"
-        >
-          <CircularProgress />
-        </Box>
+        loadingPlaceholder
       ) : (
         <StyledIframe
           ref={iframeRef}
