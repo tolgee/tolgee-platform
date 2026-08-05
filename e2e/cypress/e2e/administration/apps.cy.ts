@@ -8,7 +8,7 @@ import { gcy } from '../../common/shared';
 describe('Administration apps', () => {
   beforeEach(() => {
     administrationTestData.clean();
-    administrationTestData.generate();
+    administrationTestData.generateStandard();
     login('admin@admin.com');
   });
 
