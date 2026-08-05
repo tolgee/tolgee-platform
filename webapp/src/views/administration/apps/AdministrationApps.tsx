@@ -13,9 +13,9 @@ import { AppChips } from 'tg.component/apps/AppChips';
 import { confirmation } from 'tg.hooks/confirmation';
 import { useIsAdmin } from 'tg.globalContext/helpers';
 
-import { BaseAdministrationView } from '../components/BaseAdministrationView';
-import { AppOrganizationsDialog } from './AppOrganizationsDialog';
-import { RegisterNativeAppDialog } from './RegisterNativeAppDialog';
+import { BaseAdministrationView } from 'tg.views/administration/components/BaseAdministrationView';
+import { AppOrganizationsDialog } from 'tg.views/administration/apps/AppOrganizationsDialog';
+import { RegisterNativeAppDialog } from 'tg.views/administration/apps/RegisterNativeAppDialog';
 
 type AppInstallModel = components['schemas']['AppInstallModel'];
 

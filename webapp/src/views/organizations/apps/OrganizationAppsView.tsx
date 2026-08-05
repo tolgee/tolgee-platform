@@ -6,7 +6,7 @@ import { LINKS, PARAMS } from 'tg.constants/links';
 import { useConfig } from 'tg.globalContext/helpers';
 import { useOrganization } from '../useOrganization';
 import { apps } from 'tg.ee';
-import { RegisteredAppsSection } from './registeredApps/RegisteredAppsSection';
+import { RegisteredAppsSection } from 'tg.views/organizations/apps/registeredApps/RegisteredAppsSection';
 
 export const OrganizationAppsView: FunctionComponent<
   React.PropsWithChildren<unknown>

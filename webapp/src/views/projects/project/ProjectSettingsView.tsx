@@ -10,7 +10,7 @@ import { BaseProjectView } from '../BaseProjectView';
 import { ProjectSettingsGeneral } from './ProjectSettingsGeneral';
 import { ProjectSettingsAdvanced } from './ProjectSettingsAdvanced';
 import { ProjectSettingsExportImport } from './ProjectSettingsExportImport';
-import { ProjectSettingsApps } from './ProjectSettingsApps';
+import { ProjectSettingsApps } from 'tg.views/projects/project/ProjectSettingsApps';
 import { useAddProjectSettingsTabs } from 'tg.ee';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { useReportEvent } from 'tg.hooks/useReportEvent';

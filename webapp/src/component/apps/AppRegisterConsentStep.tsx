@@ -9,9 +9,9 @@ import {
 
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 
-import { AppSummary } from './AppSummary';
-import { AppChips } from './AppChips';
-import { AppManifestPreviewModel } from './useAppRegisterState';
+import { AppSummary } from 'tg.component/apps/AppSummary';
+import { AppChips } from 'tg.component/apps/AppChips';
+import { AppManifestPreviewModel } from 'tg.component/apps/useAppRegisterState';
 
 type Props = {
   preview: AppManifestPreviewModel;

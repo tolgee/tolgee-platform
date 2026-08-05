@@ -28,11 +28,11 @@ import { TranslatedError } from 'tg.translationTools/TranslatedError';
 import {
   AppOrganizationSelect,
   SelectableOrganization,
-} from './AppOrganizationSelect';
+} from 'tg.views/administration/apps/AppOrganizationSelect';
 import {
   AppOrganizationProjectsSelect,
   SelectableProject,
-} from './AppOrganizationProjectsSelect';
+} from 'tg.views/administration/apps/AppOrganizationProjectsSelect';
 
 type AppInstallModel = components['schemas']['AppInstallModel'];
 

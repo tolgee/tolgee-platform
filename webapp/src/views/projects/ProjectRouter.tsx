@@ -22,7 +22,7 @@ import { TaskRedirect } from './TaskRedirect';
 import { routes } from 'tg.ee';
 import { IntegrateView } from './integrate/IntegrateView';
 import { AiView } from './ai/AiView';
-import { ProjectAppPageView } from './apps/ProjectAppPageView';
+import { ProjectAppPageView } from 'tg.views/projects/apps/ProjectAppPageView';
 import { BRANCH_ROUTES } from '../../branching/branchRoutes';
 
 export const ProjectRouter = () => {

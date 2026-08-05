@@ -15,8 +15,8 @@ import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { confirmation } from 'tg.hooks/confirmation';
 import { components } from 'tg.service/apiSchema.generated';
 
-import { RegisterAppDialog } from './RegisterAppDialog';
-import { RefreshAppDialog } from './RefreshAppDialog';
+import { RegisterAppDialog } from 'tg.views/organizations/apps/registeredApps/RegisterAppDialog';
+import { RefreshAppDialog } from 'tg.views/organizations/apps/registeredApps/RefreshAppDialog';
 import { AppSummary } from 'tg.component/apps/AppSummary';
 import { AppChips } from 'tg.component/apps/AppChips';
 import { AppIcon } from 'tg.component/apps/AppIcon';

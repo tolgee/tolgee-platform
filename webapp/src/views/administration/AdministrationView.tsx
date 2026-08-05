@@ -4,7 +4,7 @@ import { PrivateRoute } from 'tg.component/common/PrivateRoute';
 import { LINKS } from 'tg.constants/links';
 import { AdministrationOrganizations } from './AdministrationOrganizations';
 import { AdministrationUsers } from './AdministrationUsers';
-import { AdministrationApps } from './apps/AdministrationApps';
+import { AdministrationApps } from 'tg.views/administration/apps/AdministrationApps';
 
 import { routes } from 'tg.ee';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
