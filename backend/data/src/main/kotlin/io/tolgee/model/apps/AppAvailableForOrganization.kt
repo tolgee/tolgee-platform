@@ -25,12 +25,12 @@ import jakarta.persistence.UniqueConstraint
   ],
 )
 class AppAvailableForOrganization : StandardAuditModel() {
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
   lateinit var appInstall: AppInstall
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
   lateinit var organization: Organization
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
   lateinit var author: UserAccount
 }

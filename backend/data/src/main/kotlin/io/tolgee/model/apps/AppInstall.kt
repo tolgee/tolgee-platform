@@ -16,6 +16,7 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 import jakarta.persistence.UniqueConstraint
+import org.hibernate.annotations.ColumnDefault
 
 @Entity
 @Table(
@@ -39,20 +40,25 @@ class AppInstall : StandardAuditModel() {
   @ManyToOne(fetch = FetchType.LAZY)
   var organization: Organization? = null
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
   lateinit var author: UserAccount
 
+  @Column(nullable = false)
   lateinit var manifestUrl: String
 
+  @Column(nullable = false)
   lateinit var appId: String
 
+  @Column(nullable = false)
   lateinit var name: String
 
+  @Column(nullable = false)
   lateinit var version: String
 
+  @Column(nullable = false)
   lateinit var baseUrl: String
 
-  @Column(columnDefinition = "TEXT")
+  @Column(columnDefinition = "TEXT", nullable = false)
   lateinit var manifestJson: String
 
   /**
@@ -61,6 +67,7 @@ class AppInstall : StandardAuditModel() {
    * this flag falls back to exactly those.
    */
   @Column(name = "available_to_all_organizations", nullable = false)
+  @ColumnDefault("false")
   var availableToAllOrganizations: Boolean = false
 
   @Enumerated(EnumType.STRING)
@@ -69,7 +76,7 @@ class AppInstall : StandardAuditModel() {
     name = "app_install_granted_scope",
     joinColumns = [JoinColumn(name = "app_install_id")],
   )
-  @Column(name = "scope")
+  @Column(name = "scope", nullable = false)
   var grantedScopes: MutableSet<Scope> = mutableSetOf()
 
   /**
