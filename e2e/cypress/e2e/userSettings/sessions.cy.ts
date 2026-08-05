@@ -23,7 +23,16 @@ describe('Active sessions', () => {
   const row = (ip: string) =>
     gcyAdvanced({ value: 'session-list-item', 'session-ip': ip });
 
-  const visitSessions = () => cy.visit(`${HOST}/account/security`);
+  const visitSessions = () => {
+    cy.visit(`${HOST}/account/security`);
+    gcy('sessions-reveal-button').click();
+    // listing needs a super token - the dialog opens itself
+    gcy('sensitive-dialog-password-input').type('admin');
+    gcy('sensitive-protection-dialog')
+      .findDcy('global-form-save-button')
+      .click();
+    gcy('sensitive-protection-dialog').should('not.exist');
+  };
 
   it('is part of the account security screen', () => {
     visitSessions();
@@ -62,9 +71,10 @@ describe('Active sessions', () => {
       .contains('Chrome · macOS');
     // unparseable and missing user agents still render something
     row('10.10.0.9').findDcy('session-list-item-device').should('not.be.empty');
-    row('10.10.0.11')
-      .findDcy('session-list-item-device')
-      .contains('Unknown device');
+    gcyAdvanced({
+      value: 'session-list-item-device',
+      'device-known': 'false',
+    }).should('have.length', 1);
   });
 
   it('shows the location, falling back to the IP when there is none', () => {
@@ -76,8 +86,11 @@ describe('Active sessions', () => {
       .contains('Netherlands');
     // no location resolved - a private address reads as local rather than as a raw IP
     row('10.10.0.9')
-      .findDcy('session-list-item-location')
-      .contains('Local network');
+      .findDcyAdvanced({
+        value: 'session-list-item-location',
+        'location-kind': 'local',
+      })
+      .should('exist');
   });
 
   it('marks exactly one session as the current one', () => {

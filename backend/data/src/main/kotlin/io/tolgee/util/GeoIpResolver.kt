@@ -68,7 +68,7 @@ class GeoIpResolver(
   private fun parseLiteral(ip: String?): InetAddress? {
     val value = ip?.trim()
     if (value.isNullOrEmpty()) return null
-    if (!value.contains(':') && !IPV4.matches(value)) return null
+    if (!isIpLiteral(value)) return null
 
     return try {
       InetAddress.getByName(value)
@@ -78,13 +78,33 @@ class GeoIpResolver(
     }
   }
 
+  /**
+   * `getByName` resolves anything it cannot parse as a literal, and the address arrives from
+   * attacker-controlled forwarding headers - so anything reaching it must already be known to be a
+   * literal. Two ways it would otherwise resolve, both measured against the JDK: a dotted string
+   * with an out-of-range octet (`999.999.999.999`), and any value containing a colon whose first
+   * character is not a hex digit (`x:1`), since the JDK only short-circuits to literal parsing on
+   * that first character.
+   */
+  private fun isIpLiteral(value: String): Boolean {
+    if (!value.contains(':')) return isIpv4Literal(value)
+    // an IPv6 literal is hex digits, separators and an optional zone index
+    val address = value.substringBefore('%')
+    return address.isNotEmpty() &&
+      address.all { it.isDigit() || it in 'a'..'f' || it in 'A'..'F' || it == ':' || it == '.' }
+  }
+
+  private fun isIpv4Literal(value: String): Boolean {
+    val parts = value.split('.')
+    if (parts.size != 4) return false
+    return parts.all { part ->
+      part.isNotEmpty() && part.length <= 3 && part.all(Char::isDigit) && part.toInt() <= 255
+    }
+  }
+
   @PreDestroy
   fun close() {
     if (!readerLazy.isInitialized()) return
     runSentryCatching { readerLazy.value?.close() }
-  }
-
-  companion object {
-    private val IPV4 = Regex("""\d{1,3}(\.\d{1,3}){3}""")
   }
 }

@@ -26,8 +26,8 @@ import java.util.Date
     ),
   ],
   indexes = [
-    Index(columnList = "user_account_id"),
-    Index(columnList = "expires_at"),
+    Index(name = "user_session_user_account_id", columnList = "user_account_id"),
+    Index(name = "user_session_expires_at", columnList = "expires_at"),
   ],
 )
 class UserSession : StandardAuditModel() {

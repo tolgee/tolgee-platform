@@ -31,6 +31,17 @@ export const register = () => {
   );
 
   Cypress.Commands.add(
+    'findDcyAdvanced',
+    { prevSubject: 'element' },
+    (subject, { value, ...other }) => {
+      const attrs = Object.entries(other)
+        .map(([key, val]) => `[data-cy-${key}="${val}"]`)
+        .join('');
+      return cy.wrap(subject).find(`[data-cy="${value}"]${attrs}`);
+    }
+  );
+
+  Cypress.Commands.add(
     'nextUntilDcy',
     { prevSubject: 'element' },
     (subject, dataCy) => {

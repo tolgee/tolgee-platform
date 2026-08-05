@@ -5870,9 +5870,8 @@
         </createTable>
     </changeSet>
     <changeSet author="jancizmar" id="1785400000000-2">
-        <createIndex indexName="user_session_device_id" tableName="user_session" unique="true">
-            <column name="device_id"/>
-        </createIndex>
+        <addUniqueConstraint columnNames="device_id" constraintName="user_session_device_id"
+                             tableName="user_session"/>
     </changeSet>
     <changeSet author="jancizmar" id="1785400000000-3">
         <createIndex indexName="user_session_user_account_id" tableName="user_session">

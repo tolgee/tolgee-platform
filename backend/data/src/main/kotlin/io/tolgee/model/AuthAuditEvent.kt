@@ -18,8 +18,8 @@ import org.hibernate.annotations.Type
 @Table(
   name = "auth_audit_event",
   indexes = [
-    Index(columnList = "created_at"),
-    Index(columnList = "user_account_id"),
+    Index(name = "auth_audit_event_created_at", columnList = "created_at"),
+    Index(name = "auth_audit_event_user_account_id", columnList = "user_account_id"),
   ],
 )
 class AuthAuditEvent : StandardAuditModel() {

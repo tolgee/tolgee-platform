@@ -156,6 +156,7 @@ export function SessionListItem({ session }: Props) {
       <StyledDevice>
         <StyledDeviceName
           data-cy="session-list-item-device"
+          data-cy-device-known={device ? 'true' : 'false'}
           title={device?.title}
         >
           <StyledDeviceLabel>

@@ -54,7 +54,10 @@ export function SessionLocation({ session }: Props) {
 
     return (
       <Tooltip title={ip ?? ''} disableHoverListener={!ip}>
-        <StyledRoot data-cy="session-list-item-location">
+        <StyledRoot
+          data-cy="session-list-item-location"
+          data-cy-location-kind={ip && isLocalIp(ip) ? 'local' : 'ip'}
+        >
           <StyledLabel>{fallback}</StyledLabel>
         </StyledRoot>
       </Tooltip>
@@ -81,7 +84,10 @@ export function SessionLocation({ session }: Props) {
         </Box>
       }
     >
-      <StyledRoot data-cy="session-list-item-location">
+      <StyledRoot
+        data-cy="session-list-item-location"
+        data-cy-location-kind="resolved"
+      >
         {flagEmoji && <StyledFlag flagEmoji={flagEmoji} />}
         <StyledLabel>{label}</StyledLabel>
       </StyledRoot>

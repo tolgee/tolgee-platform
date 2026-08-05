@@ -109,11 +109,12 @@ class UserSessionsControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `refuses to revoke a session of another user`() {
+  fun `hides a session of another user rather than forbidding it`() {
     val otherUser = dbPopulator.createUserIfNotExists("sessions-controller-foreign@tolgee.io")
     val foreign = seedSession(otherUser.id, UserSessionType.LOGIN_NATIVE)
 
-    performAuthDelete("/v2/user/sessions/${foreign.id}").andIsForbidden
+    // 404, not 403: a distinct status would tell a caller which session ids exist on other accounts
+    performAuthDelete("/v2/user/sessions/${foreign.id}").andIsNotFound
   }
 
   @Test
@@ -147,12 +148,15 @@ class UserSessionsControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `session management stays reachable without a super token`() {
+  fun `revoking stays reachable without a super token, listing does not`() {
     val token = jwtService.emitToken(testData.user.id, type = UserSessionType.LOGIN_NATIVE, isSuper = false)
     val session = seedSession(testData.user.id, UserSessionType.LOGIN_NATIVE)
 
+    // the listing is the only endpoint that discloses where the account signs in from
+    performWithToken(org.springframework.http.HttpMethod.GET, "/v2/user/sessions", token)
+      .andIsForbidden
+
     // ordered so that revoking the caller's own session comes last
-    performWithToken(org.springframework.http.HttpMethod.GET, "/v2/user/sessions", token).andIsOk
     performWithToken(
       org.springframework.http.HttpMethod.DELETE,
       "/v2/user/sessions/${session.id}",
