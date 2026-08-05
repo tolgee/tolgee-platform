@@ -19,6 +19,7 @@ import { RegisterAppDialog } from './RegisterAppDialog';
 import { RefreshAppDialog } from './RefreshAppDialog';
 import { AppSummary } from 'tg.component/apps/AppSummary';
 import { AppChips } from 'tg.component/apps/AppChips';
+import { AppIcon } from 'tg.component/apps/AppIcon';
 
 type AppInstallModel = components['schemas']['AppInstallModel'];
 
@@ -145,15 +146,54 @@ export const RegisteredAppsSection = () => {
                   url={item.manifestUrl}
                 />
                 <AppChips
-                  items={dashboardPages.map(
-                    (module) => `${module.icon} ${module.title}`
-                  )}
+                  items={dashboardPages.map((module) => ({
+                    id: module.key,
+                    label: (
+                      <>
+                        <AppIcon icon={module.icon} size={14} />
+                        {module.title}
+                      </>
+                    ),
+                  }))}
                   dataCy="organization-apps-item-modules"
+                  label={
+                    <T keyName="app_pages_chips_label" defaultValue="Pages" />
+                  }
+                  tooltip={
+                    <T
+                      keyName="app_pages_chips_tooltip"
+                      defaultValue="Pages this app adds to the project menu of every project it is enabled for."
+                    />
+                  }
+                  emptyLabel={
+                    <T
+                      keyName="app_pages_chips_empty"
+                      defaultValue="Adds no pages"
+                    />
+                  }
                 />
                 <AppChips
                   items={item.scopes}
                   variant="outlined"
                   dataCy="organization-apps-item-scopes"
+                  label={
+                    <T
+                      keyName="app_scopes_chips_label"
+                      defaultValue="Permissions"
+                    />
+                  }
+                  tooltip={
+                    <T
+                      keyName="app_scopes_chips_tooltip"
+                      defaultValue="Permissions the app was granted when it was registered. They apply in every project the app is enabled for."
+                    />
+                  }
+                  emptyLabel={
+                    <T
+                      keyName="app_scopes_chips_empty"
+                      defaultValue="No permissions granted"
+                    />
+                  }
                 />
               </StyledItemMeta>
               <Box display="flex" gap={1}>

@@ -25,7 +25,7 @@ import { useAddProjectMenuItems } from 'tg.ee';
 import { useProject } from 'tg.hooks/useProject';
 import { useBranchLinks } from 'tg.component/branching/useBranchLinks';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
-import { AppIcon } from '../apps/AppIcon';
+import { AppIcon } from 'tg.component/apps/AppIcon';
 
 export const ProjectMenu = () => {
   const project = useProject();
@@ -208,7 +208,7 @@ export const ProjectMenu = () => {
             [PARAMS.APP_MODULE_KEY]: page.moduleKey,
           })}
           text={page.title}
-          icon={<AppIcon icon={page.icon} fontSize="1em" />}
+          icon={<AppIcon icon={page.icon} />}
           data-cy="project-menu-item-app"
           data-cy-app-install={page.installId}
         />

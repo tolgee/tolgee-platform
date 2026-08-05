@@ -11,12 +11,19 @@ const REGISTRY: Record<string, IconComponent> = {
   ...(CustomIcons as unknown as Record<string, IconComponent>),
 };
 
+/**
+ * The size @untitled-ui/icons-react renders at when given no width/height. The emoji
+ * fallback has to match it explicitly, otherwise an emoji icon comes out smaller than
+ * a native one sitting next to it.
+ */
+const NATIVE_ICON_DEFAULT_SIZE = 24;
+
 type Props = {
   /** Manifest icon string. Either a Tolgee native icon name or an emoji. */
   icon?: string | null;
-  /** px size for native icons. */
+  /** px size for the icon. Omit to render at the same size as any other native icon. */
   size?: number;
-  /** CSS font-size for the emoji / text fallback. */
+  /** CSS font-size for the emoji / text fallback. Defaults to `size`. */
   fontSize?: string | number;
 };
 
@@ -27,16 +34,17 @@ type Props = {
  * Otherwise the string is rendered as text — preserving the emoji path
  * and producing a self-explanatory fallback for unknown names.
  */
-export const AppIcon = ({ icon, size = 18, fontSize }: Props) => {
+export const AppIcon = ({ icon, size, fontSize }: Props) => {
   if (!icon) return null;
   const Component = REGISTRY[icon];
   if (typeof Component === 'function') {
+    if (size === undefined) return <Component />;
     return <Component width={size} height={size} />;
   }
   return (
     <span
       style={{
-        fontSize: fontSize ?? '1em',
+        fontSize: fontSize ?? `${size ?? NATIVE_ICON_DEFAULT_SIZE}px`,
         lineHeight: 1,
         display: 'inline-flex',
         alignItems: 'center',

@@ -58,6 +58,10 @@ const manifest: AppManifest = {
 }
 ```
 
+`icon` is either a name from the platform icon set or an emoji (`'🔑'`). A name has to
+match an exported icon component exactly — `Key01`, not `Key`. Anything the platform
+does not recognise is rendered as literal text, so a typo shows up as the name itself.
+
 Ship the manifest as a template with a `__BASE_URL__` placeholder and render it
 per request, so the URL can change between dev restarts (tunnels) without
 editing the file:

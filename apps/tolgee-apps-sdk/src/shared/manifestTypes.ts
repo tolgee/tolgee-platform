@@ -32,7 +32,11 @@ export type AppDashboardPage = {
   key: string
   /** Menu item label. */
   title: string
-  /** Named icon from the platform icon set (e.g. `LayoutAlt04`). */
+  /**
+   * Either a named icon from the platform icon set or an emoji. A name must match an
+   * exported icon component exactly (`Key01`, not `Key`); anything the platform does
+   * not recognise is rendered as literal text.
+   */
   icon: string
   /** Route the iframe loads, relative to `baseUrl`. */
   entry: string

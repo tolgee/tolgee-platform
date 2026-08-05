@@ -175,6 +175,24 @@ export const AdministrationApps = () => {
                     items={app.scopes}
                     variant="outlined"
                     dataCy="administration-apps-item-scopes"
+                    label={
+                      <T
+                        keyName="app_scopes_chips_label"
+                        defaultValue="Permissions"
+                      />
+                    }
+                    tooltip={
+                      <T
+                        keyName="app_scopes_chips_tooltip"
+                        defaultValue="Permissions the app was granted when it was registered. They apply in every project the app is enabled for."
+                      />
+                    }
+                    emptyLabel={
+                      <T
+                        keyName="app_scopes_chips_empty"
+                        defaultValue="No permissions granted"
+                      />
+                    }
                   />
                   {app.availableToAllOrganizations && (
                     <Box>
