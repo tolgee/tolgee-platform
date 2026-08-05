@@ -42,7 +42,9 @@ describe('project app dashboard page', () => {
     gcy('project-settings-apps-item-toggle').click();
     gcy('project-settings-apps-item-toggle').find('input').should('be.checked');
 
-    gcy('project-menu-item-app').should('contain', 'Home').click();
+    gcy('project-menu-item-app')
+      .should('have.attr', 'aria-label', 'Home')
+      .click();
 
     gcy('project-app-page-iframe')
       .should('have.attr', 'src', 'https://e2e-app.example.com/')
