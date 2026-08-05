@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { useTheme } from '@mui/material';
 
-import { useAppToken } from './useAppToken';
+import { useAppToken } from 'tg.views/projects/apps/useAppToken';
 
 export type UseAppIframeMessagingOptions = {
   installId: number;
@@ -22,6 +22,19 @@ export type UseAppIframeMessagingResult = {
 const safeOrigin = (url: string): string | null => {
   try {
     return new URL(url).origin;
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * Mirrors the backend's `URI(baseUrl).resolve(entry)` manifest validation. Concatenating the
+ * two instead would load a different URL than the one that was validated whenever `entry` is
+ * root-relative or `baseUrl` carries a path.
+ */
+const safeResolve = (baseUrl: string, entry: string): string | null => {
+  try {
+    return new URL(entry, baseUrl).toString();
   } catch {
     return null;
   }
@@ -54,7 +67,7 @@ export function useAppIframeMessaging(
 
   const appOrigin = useMemo(() => safeOrigin(baseUrl), [baseUrl]);
   const iframeSrc = useMemo(
-    () => (appOrigin ? `${baseUrl}${entry}` : null),
+    () => (appOrigin ? safeResolve(baseUrl, entry) : null),
     [appOrigin, baseUrl, entry]
   );
 
