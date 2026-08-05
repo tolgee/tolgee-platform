@@ -1,10 +1,8 @@
 package io.tolgee.unit
 
 import io.tolgee.component.FrontendUrlProvider
-import io.tolgee.model.Language
+import io.tolgee.development.testDataBuilder.data.TaskTestData
 import io.tolgee.model.notifications.Notification
-import io.tolgee.model.notifications.NotificationType
-import io.tolgee.model.task.Task
 import io.tolgee.service.notification.TaskEmailComposer
 import io.tolgee.testing.assert
 import io.tolgee.util.I18n
@@ -40,16 +38,12 @@ class TaskEmailComposerTest {
     taskName: String = "Translate",
     languageName: String = "English",
   ): Notification {
-    val task =
-      Task().apply {
-        this.name = taskName
-        this.number = 1L
-        this.language = Language().apply { this.name = languageName }
-      }
-
-    return Notification().apply {
-      this.type = NotificationType.TASK_ASSIGNED
-      this.linkedTask = task
+    val testData = TaskTestData()
+    testData.addNotifications()
+    testData.translateTask.self.apply {
+      name = taskName
+      language.name = languageName
     }
+    return testData.taskNotification.self
   }
 }
