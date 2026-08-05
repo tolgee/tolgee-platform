@@ -513,6 +513,10 @@ export interface paths {
     /** Returns all apps registered in the project's organization, each annotated with whether it is enabled for this project. Requires project.edit: it discloses the organization's whole app inventory, including apps not enabled for this project. */
     get: operations["list_11"];
   };
+  "/v2/projects/{projectId}/apps/enabled": {
+    /** Returns only the apps enabled for this project, which every project member needs to render their dashboard pages. Discloses nothing about the organization's other apps. */
+    get: operations["listEnabled"];
+  };
   "/v2/projects/{projectId}/apps/{installId}": {
     /** Enables the given app install for this project. Idempotent. */
     put: operations["enable"];
@@ -16275,6 +16279,54 @@ export interface operations {
   };
   /** Returns all apps registered in the project's organization, each annotated with whether it is enabled for this project. Requires project.edit: it discloses the organization's whole app inventory, including apps not enabled for this project. */
   list_11: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelProjectAppModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Returns only the apps enabled for this project, which every project member needs to render their dashboard pages. Discloses nothing about the organization's other apps. */
+  listEnabled: {
     parameters: {
       path: {
         projectId: number;
