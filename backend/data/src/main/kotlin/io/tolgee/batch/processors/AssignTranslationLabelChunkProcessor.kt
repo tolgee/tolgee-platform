@@ -1,10 +1,10 @@
 package io.tolgee.batch.processors
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.batch.ProgressManager
 import io.tolgee.service.label.LabelService
 import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Component
+import tools.jackson.databind.ObjectMapper
 
 @Component
 class AssignTranslationLabelChunkProcessor(

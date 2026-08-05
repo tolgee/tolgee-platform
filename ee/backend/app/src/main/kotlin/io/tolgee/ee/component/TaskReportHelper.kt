@@ -12,6 +12,7 @@ import java.util.Locale
 class TaskReportHelper(
   private val task: TaskWithScopeView,
   private val report: List<TaskPerUserReportView>,
+  private val maskEmail: (String?) -> String,
 ) {
   fun formatDate(date: Date): String {
     return DateFormat.getDateInstance(DateFormat.DEFAULT, Locale.ENGLISH).format(date)
@@ -29,11 +30,12 @@ class TaskReportHelper(
   }
 
   fun formatUserName(user: UserAccount): String {
-    val result = StringBuilder(user.name)
-    if (user.name != user.username) {
-      result.append(" (${user.username})")
+    val email = maskEmail(user.username)
+    val name = user.name.ifBlank { "#${user.id}" }
+    if (email.isBlank() || email == name) {
+      return name
     }
-    return result.toString()
+    return "$name ($email)"
   }
 
   fun capitalize(text: String): String {

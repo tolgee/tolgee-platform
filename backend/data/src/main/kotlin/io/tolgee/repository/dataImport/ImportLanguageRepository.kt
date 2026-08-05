@@ -48,7 +48,7 @@ LEFT JOIN il.existingLanguage el
         """
   }
 
-  @Query("from ImportLanguage il join il.file if join if.importData im where im.id = :importId")
+  @Query("select il from ImportLanguage il join il.file if join if.importData im where im.id = :importId")
   fun findAllByImport(importId: Long): List<ImportLanguage>
 
   @Modifying

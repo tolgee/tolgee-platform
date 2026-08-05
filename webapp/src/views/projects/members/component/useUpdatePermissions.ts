@@ -47,7 +47,10 @@ export const useUpdatePermissions = ({ userId, projectId }: Props) => {
   const setByOrganization = useApiMutation({
     url: '/v2/projects/{projectId}/users/{userId}/set-by-organization',
     method: 'put',
-    invalidatePrefix: '/v2/projects/{projectId}/users',
+    invalidatePrefix: [
+      '/v2/projects/{projectId}/users',
+      '/v2/projects/{projectId}/contributors',
+    ],
   });
 
   return {

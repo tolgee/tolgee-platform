@@ -24,6 +24,7 @@ import io.tolgee.service.language.LanguageService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PermissionService
+import io.tolgee.service.task.ITaskService
 import io.tolgee.service.translationMemory.TranslationMemoryManagementService
 import io.tolgee.util.Logging
 import jakarta.persistence.EntityManager
@@ -60,6 +61,7 @@ class ProjectHardDeletingService(
   private val translationMemoryManagementService: TranslationMemoryManagementService,
   private val labelService: LabelService,
   private val branchService: BranchService,
+  private val taskService: ITaskService,
   private val entityManager: EntityManager,
   private val projectQaConfigRepository: ProjectQaConfigRepository,
 ) : Logging {
@@ -88,8 +90,8 @@ class ProjectHardDeletingService(
         importSettingsService.deleteAllByProject(projectId)
       }
 
-      importService.getAllByProject(projectId).forEach {
-        importService.hardDeleteImport(it)
+      traceLogMeasureTime("deleteProject: delete imports") {
+        importService.deleteAllByProject(projectId)
       }
 
       // otherwise the project keeps referencing the language/namespace we are about to delete
@@ -116,6 +118,10 @@ class ProjectHardDeletingService(
       aiPlaygroundResultService.deleteResultsByProject(projectId)
 
       labelService.deleteLabelsByProjectId(projectId)
+
+      traceLogMeasureTime("deleteProject: delete tasks") {
+        taskService.deleteAllByProjectId(projectId)
+      }
 
       traceLogMeasureTime("deleteProject: delete languages") {
         languageService.deleteAllByProject(projectId)
@@ -197,6 +203,10 @@ class ProjectHardDeletingService(
         .executeUpdate()
       entityManager
         .createQuery("DELETE FROM SlackConfig s WHERE s.project.id = :projectId")
+        .setParameter("projectId", projectId)
+        .executeUpdate()
+      entityManager
+        .createQuery("DELETE FROM ProjectContributor pc WHERE pc.projectId = :projectId")
         .setParameter("projectId", projectId)
         .executeUpdate()
 

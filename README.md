@@ -10,8 +10,8 @@
 
 
 <h3 align="center">
-  <a href="https://tolgee.io/career" target="_blank" style="text-decoration: none;">
-    🤫 Psst... We're hiring engineers!
+  <a href="https://www.g2.com/products/tolgee/reviews" target="_blank" style="text-decoration: none;">
+    🤫 Happy with Tolgee? Please review us on G2 🙏
   </a>
 </h3>
 

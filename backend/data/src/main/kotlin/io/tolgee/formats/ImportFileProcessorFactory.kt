@@ -1,7 +1,6 @@
 package io.tolgee.formats
 
 import StringsdictFileProcessor
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.exceptions.ImportCannotParseFileException
@@ -23,6 +22,7 @@ import io.tolgee.service.dataImport.processors.ImportArchiveProcessor
 import io.tolgee.service.dataImport.processors.ZipTypeProcessor
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
+import tools.jackson.databind.ObjectMapper
 
 @Component
 class ImportFileProcessorFactory(

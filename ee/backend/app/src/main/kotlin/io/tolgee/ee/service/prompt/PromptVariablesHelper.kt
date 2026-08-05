@@ -1,7 +1,6 @@
 package io.tolgee.ee.service.prompt
 
 import com.fasterxml.jackson.annotation.JsonInclude
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.component.machineTranslation.metadata.TranslationGlossaryItem
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.LanguageDto
@@ -10,6 +9,8 @@ import io.tolgee.ee.component.PromptLazyMap.Companion.Variable
 import io.tolgee.ee.service.glossary.GlossaryTermService
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.formats.DEFAULT_PLURAL_ARGUMENT_NAME
+import io.tolgee.formats.getPluralForms
+import io.tolgee.formats.toIcuPluralString
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.service.key.KeyService
@@ -24,6 +25,8 @@ import io.tolgee.service.translation.TranslationService
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.json.JsonMapper
 
 @Component
 class PromptVariablesHelper(
@@ -36,6 +39,12 @@ class PromptVariablesHelper(
   private val screenshotService: ScreenshotService,
   private val glossaryTermService: GlossaryTermService,
 ) {
+  private val nonNullMapper: ObjectMapper =
+    JsonMapper
+      .builder()
+      .changeDefaultPropertyInclusion { incl -> incl.withValueInclusion(JsonInclude.Include.NON_NULL) }
+      .build()
+
   /**
    * Determines if the given language tag corresponds to Chinese, Japanese, or Korean.
    *
@@ -110,9 +119,7 @@ class PromptVariablesHelper(
             }
           if (!closeItems.isNullOrEmpty()) {
             closeItems.joinToString("\n") {
-              val mapper = ObjectMapper()
-              mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
-              mapper.writeValueAsString(it)
+              nonNullMapper.writeValueAsString(it)
             }
           } else {
             null
@@ -148,9 +155,7 @@ class PromptVariablesHelper(
       Variable("json", description = "Glossary items", lazyValue = {
         if (glossaryTerms.isNotEmpty()) {
           glossaryTerms.joinToString("\n") {
-            val mapper = ObjectMapper()
-            mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
-            mapper.writeValueAsString(removeUnnecessaryFields(it))
+            nonNullMapper.writeValueAsString(removeUnnecessaryFields(it))
           }
         } else {
           null
@@ -193,10 +198,15 @@ class PromptVariablesHelper(
 
     result.add(Variable("languageName", language?.name))
     result.add(Variable("languageTag", language?.tag))
-    result.add(Variable("translation", PromptHandlebarsHelper.escapeJson(translation?.text)))
+    result.add(Variable("translation", PromptHandlebarsHelper.escapeJson(singleLinePlural(translation?.text))))
     result.add(Variable("languageNote", language?.aiTranslatorPromptDescription ?: ""))
     result.add(cjkVariable(language?.tag))
     return result
+  }
+
+  private fun singleLinePlural(text: String?): String? {
+    val forms = getPluralForms(text) ?: return text
+    return forms.forms.toIcuPluralString(optimize = false, addNewLines = false, argName = forms.argName)
   }
 
   private fun getPluralVariables(
@@ -295,9 +305,7 @@ class PromptVariablesHelper(
             }
           if (!closeItems.isNullOrEmpty()) {
             closeItems.joinToString("\n") {
-              val mapper = ObjectMapper()
-              mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
-              mapper.writeValueAsString(it)
+              nonNullMapper.writeValueAsString(it)
             }
           } else {
             null

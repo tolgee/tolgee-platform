@@ -1,12 +1,12 @@
 package io.tolgee.testing.assertions
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.RequestBuilder
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+import tools.jackson.module.kotlin.jacksonObjectMapper
 
 class PakAction(
   var method: HttpMethod? = null,

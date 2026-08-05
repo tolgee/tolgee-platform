@@ -1,11 +1,11 @@
 package io.tolgee.formats.flutter.`in`
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.formats.ImportFileProcessor
 import io.tolgee.formats.MessageConvertorResult
 import io.tolgee.formats.flutter.FLUTTER_ARB_FILE_PLACEHOLDERS_CUSTOM_KEY
 import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.service.dataImport.processors.FileProcessorContext
+import tools.jackson.databind.ObjectMapper
 
 class FlutterArbFileProcessor(
   override val context: FileProcessorContext,

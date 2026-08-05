@@ -5,8 +5,8 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.testing.AuthorizedControllerTest
 import org.junit.jupiter.api.Test
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -17,6 +17,7 @@ class InitialDataControllerTest : AuthorizedControllerTest() {
       node("serverConfiguration.authentication").isEqualTo(true)
       node("userInfo.name").isEqualTo("admin")
       node("preferredOrganization.name").isEqualTo("admin")
+      node("hasCommunityContributions").isEqualTo(false)
     }
   }
 
@@ -26,6 +27,7 @@ class InitialDataControllerTest : AuthorizedControllerTest() {
       node("serverConfiguration.authentication").isEqualTo(true)
       node("userInfo").isEqualTo(null)
       node("preferredOrganization").isEqualTo(null)
+      node("hasCommunityContributions").isEqualTo(false)
     }
   }
 }

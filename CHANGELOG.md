@@ -1,3 +1,33 @@
+## [3.216.2](https://github.com/tolgee/tolgee-platform/compare/v3.216.1...v3.216.2) (2026-08-04)
+
+
+### Bug Fixes
+
+* default isBatch on the legacy translate endpoint under Jackson 3 ([#3840](https://github.com/tolgee/tolgee-platform/issues/3840)) ([748f7c1](https://github.com/tolgee/tolgee-platform/commit/748f7c1f3e8ab103097b5516290558b4e684fb08)), closes [#3804](https://github.com/tolgee/tolgee-platform/issues/3804)
+
+## [3.216.1](https://github.com/tolgee/tolgee-platform/compare/v3.216.0...v3.216.1) (2026-08-04)
+
+
+### Bug Fixes
+
+* strip structural newlines from plural source in AI translator prompt ([#3830](https://github.com/tolgee/tolgee-platform/issues/3830)) ([b435134](https://github.com/tolgee/tolgee-platform/commit/b435134d8640d093865707f2e30122bcad6d8b46))
+
+# [3.216.0](https://github.com/tolgee/tolgee-platform/compare/v3.215.0...v3.216.0) (2026-08-03)
+
+
+### Features
+
+* support Google Workspace as SSO provider ([#3837](https://github.com/tolgee/tolgee-platform/issues/3837)) ([03b144d](https://github.com/tolgee/tolgee-platform/commit/03b144d6fcaa8e66c4964812ab9449f09f596043))
+
+# [3.215.0](https://github.com/tolgee/tolgee-platform/compare/v3.214.1...v3.215.0) (2026-07-30)
+
+
+### Features
+
+* auto-invalidate caches by value shape instead of wiping on startup ([#3813](https://github.com/tolgee/tolgee-platform/issues/3813)) ([7e1db10](https://github.com/tolgee/tolgee-platform/commit/7e1db10ceb734c412fab34cc27eccc30ff5e577c))
+* Community translation v1.1 — Contributors (pitch [#3806](https://github.com/tolgee/tolgee-platform/issues/3806)) ([#3819](https://github.com/tolgee/tolgee-platform/issues/3819)) ([3232c4f](https://github.com/tolgee/tolgee-platform/commit/3232c4fe61c87759ecd30bb1fbbfc63123919acb))
+* deprecate embedded postgres ahead of v4 ([#3610](https://github.com/tolgee/tolgee-platform/issues/3610)) ([3cef7ad](https://github.com/tolgee/tolgee-platform/commit/3cef7ad2fb0a878a5d9291b53892c5c6dc6930f6)), closes [tolgee/documentation#1121](https://github.com/tolgee/documentation/issues/1121) [tolgee/billing#274](https://github.com/tolgee/billing/issues/274) [#3193](https://github.com/tolgee/tolgee-platform/issues/3193)
+
 ## [3.214.1](https://github.com/tolgee/tolgee-platform/compare/v3.214.0...v3.214.1) (2026-07-23)
 
 

@@ -96,7 +96,8 @@ class QaActivityListener(
       val project = projectService.findDto(projectId) ?: return@runSentryCatching
       if (!projectFeatureGuard.isFeatureEnabled(Feature.QA_CHECKS, project)) return@runSentryCatching
 
-      val entities = activityService.findModifiedEntitiesByRevisionId(event.activityRevisionId)
+      val activityRevisionId = event.activityRevisionId ?: return@runSentryCatching
+      val entities = activityService.findModifiedEntitiesByRevisionId(activityRevisionId)
       if (entities.isEmpty()) return@runSentryCatching
 
       processModifiedEntities(projectId, entities)

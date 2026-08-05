@@ -1,7 +1,5 @@
 package io.tolgee.service.projectExportImport
 
-import com.fasterxml.jackson.core.JacksonException
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.BadRequestException
@@ -25,6 +23,8 @@ import io.tolgee.util.logger
 import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+import tools.jackson.core.JacksonException
+import tools.jackson.databind.ObjectMapper
 import java.io.IOException
 import java.io.InputStream
 

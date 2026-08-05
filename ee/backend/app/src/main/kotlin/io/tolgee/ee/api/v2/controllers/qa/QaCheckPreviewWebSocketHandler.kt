@@ -1,7 +1,5 @@
 package io.tolgee.ee.api.v2.controllers.qa
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.sentry.Sentry
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Feature
@@ -44,6 +42,8 @@ import org.springframework.web.socket.CloseStatus
 import org.springframework.web.socket.TextMessage
 import org.springframework.web.socket.WebSocketSession
 import org.springframework.web.socket.handler.TextWebSocketHandler
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.ObjectMapper
 
 @Component
 class QaCheckPreviewWebSocketHandler(

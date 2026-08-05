@@ -38,12 +38,11 @@ import io.tolgee.service.notification.NotificationService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.SecurityService
-import io.tolgee.service.task.ITaskService
+import io.tolgee.service.task.AbstractTaskService
 import io.tolgee.util.executeInNewRepeatableTransaction
 import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
 import org.apache.commons.io.output.ByteArrayOutputStream
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.context.annotation.Primary
 import org.springframework.dao.DataIntegrityViolationException
@@ -59,13 +58,12 @@ import kotlin.math.max
 @Component
 class TaskService(
   private val taskRepository: TaskRepository,
-  private val entityManager: EntityManager,
+  entityManager: EntityManager,
   private val languageService: LanguageService,
   @Lazy
   private val securityService: SecurityService,
   private val taskKeyRepository: TaskKeyRepository,
   private val authenticationFacade: AuthenticationFacade,
-  @Autowired
   private val platformTransactionManager: PlatformTransactionManager,
   private val currentDateProvider: CurrentDateProvider,
   private val keyService: KeyService,
@@ -76,7 +74,7 @@ class TaskService(
   private val notificationService: NotificationService,
   @Lazy
   private val branchService: BranchService,
-) : ITaskService {
+) : AbstractTaskService(entityManager) {
   fun getAllPaged(
     projectId: Long,
     pageable: Pageable,
@@ -390,6 +388,7 @@ class TaskService(
   }
 
   override fun deleteAll(tasks: List<Task>) {
+    deleteNotificationsLinkedToTasks(tasks.map { it.id })
     for (task in tasks) {
       taskKeyRepository.deleteAll(task.keys)
       taskRepository.delete(task)
@@ -615,7 +614,7 @@ class TaskService(
     val task = getTask(project.id, taskNumber)
     val report = getReport(project, taskNumber)
 
-    val workbook = TaskReportHelper(task, report).generateExcelReport()
+    val workbook = TaskReportHelper(task, report, securityService::maskedMemberField).generateExcelReport()
 
     // Write the workbook to a byte array output stream
     val byteArrayOutputStream = ByteArrayOutputStream()

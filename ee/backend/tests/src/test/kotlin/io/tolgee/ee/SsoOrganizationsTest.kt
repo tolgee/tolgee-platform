@@ -1,6 +1,5 @@
 package io.tolgee.ee
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.SsoTestData
@@ -28,15 +27,18 @@ import org.mockito.ArgumentMatchers.startsWith
 import org.mockito.kotlin.clearInvocations
 import org.mockito.kotlin.only
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.web.client.RestTemplate
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.util.Date
 import java.util.HashMap
 
@@ -129,7 +131,7 @@ class SsoOrganizationsTest : AuthorizedControllerTest() {
     val response =
       ssoMultiTenantsMocks.authorize(
         "domain.com",
-        ResponseEntity<OAuth2TokenResponse>(null, null, 401),
+        ResponseEntity<OAuth2TokenResponse>(null, null as HttpHeaders?, 401),
       )
     assertThat(response.response.status).isEqualTo(401)
     assertThat(response.response.contentAsString).contains(Message.SSO_TOKEN_EXCHANGE_FAILED.code)
@@ -220,6 +222,108 @@ class SsoOrganizationsTest : AuthorizedControllerTest() {
       any(HttpEntity::class.java),
       eq(OAuth2TokenResponse::class.java),
     )
+  }
+
+  @Test
+  fun `auth link for generic provider requests offline_access scope`() {
+    val redirectUrl = getAuthLinkRedirectUrl()
+    redirectUrl.assert.contains("scope=openid profile email offline_access")
+    redirectUrl.assert.doesNotContain("access_type=offline")
+    redirectUrl.assert.doesNotContain("prompt=consent")
+  }
+
+  @Test
+  fun `auth link for google provider uses access_type instead of offline_access scope`() {
+    testData.tenant.authorizationUri = "https://accounts.google.com/o/oauth2/v2/auth"
+    tenantService.save(testData.tenant)
+    val redirectUrl = getAuthLinkRedirectUrl()
+    redirectUrl.assert.contains("scope=openid profile email&")
+    redirectUrl.assert.doesNotContain("offline_access")
+    redirectUrl.assert.contains("access_type=offline")
+    redirectUrl.assert.contains("prompt=consent")
+  }
+
+  @Test
+  fun `sso login succeeds when token response has no refresh token`() {
+    val response = loginAsSsoUser(tokenResponse = SsoMultiTenantsMocks.defaultTokenResponseWithoutRefreshToken)
+    assertThat(response.response.status).isEqualTo(200)
+    val userName = SsoMultiTenantsMocks.jwtClaimsSet.get("email") as String
+    val user = userAccountService.get(userName)
+    user.ssoRefreshToken.assert.isNull()
+  }
+
+  @Test
+  fun `doesn't authorize user when token response has no id token`() {
+    val response = loginAsSsoUser(tokenResponse = SsoMultiTenantsMocks.minimalRefreshTokenResponse)
+    assertThat(response.response.status).isEqualTo(401)
+    assertThat(response.response.contentAsString).contains(Message.SSO_TOKEN_EXCHANGE_FAILED.code)
+    val userName = SsoMultiTenantsMocks.jwtClaimsSet.get("email") as String
+    assertThrows<NotFoundException> { userAccountService.get(userName) }
+  }
+
+  @Test
+  fun `refresh succeeds when response contains only access token fields`() {
+    loginAsSsoUser()
+    val userName = SsoMultiTenantsMocks.jwtClaimsSet.get("email") as String
+    val user = userAccountService.get(userName)
+    val originalRefreshToken = user.ssoRefreshToken
+    originalRefreshToken.assert.isNotNull
+
+    whenever(
+      restTemplate?.exchange(
+        eq(testData.tenant.tokenUri),
+        eq(HttpMethod.POST),
+        any(HttpEntity::class.java),
+        eq(OAuth2TokenResponse::class.java),
+      ),
+    ).thenReturn(SsoMultiTenantsMocks.minimalRefreshTokenResponse)
+    currentDateProvider.forcedDate = Date(currentDateProvider.date.time + 600_000)
+
+    ssoDelegate
+      .verifyUserSsoAccountAvailable(userAccountService.getDto(user.id))
+      .assert
+      .isTrue()
+
+    userAccountService
+      .get(user.id)
+      .ssoRefreshToken.assert
+      .isEqualTo(originalRefreshToken)
+  }
+
+  @Test
+  fun `refresh keeps old refresh token when response contains none`() {
+    loginAsSsoUser()
+    val userName = SsoMultiTenantsMocks.jwtClaimsSet.get("email") as String
+    val user = userAccountService.get(userName)
+    val originalRefreshToken = user.ssoRefreshToken
+    originalRefreshToken.assert.isNotNull
+
+    whenever(
+      restTemplate?.exchange(
+        eq(testData.tenant.tokenUri),
+        eq(HttpMethod.POST),
+        any(HttpEntity::class.java),
+        eq(OAuth2TokenResponse::class.java),
+      ),
+    ).thenReturn(SsoMultiTenantsMocks.defaultTokenResponseWithoutRefreshToken)
+    currentDateProvider.forcedDate = Date(currentDateProvider.date.time + 600_000)
+
+    ssoDelegate
+      .verifyUserSsoAccountAvailable(userAccountService.getDto(user.id))
+      .assert
+      .isTrue()
+
+    userAccountService
+      .get(user.id)
+      .ssoRefreshToken.assert
+      .isEqualTo(originalRefreshToken)
+  }
+
+  private fun getAuthLinkRedirectUrl(): String {
+    val response = ssoMultiTenantsMocks.getAuthLink("domain.com").response
+    assertThat(response.status).isEqualTo(200)
+    val result = jacksonObjectMapper().readValue(response.contentAsString, HashMap::class.java)
+    return result["redirectUrl"] as String
   }
 
   fun organizationDto() =

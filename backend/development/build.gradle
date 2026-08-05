@@ -35,13 +35,13 @@ apply plugin: "kotlin-allopen"
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(javaVersion.toInteger())
     }
 }
 
 kotlin {
     compilerOptions {
-        freeCompilerArgs.addAll("-Xjsr305=strict")
+        freeCompilerArgs.addAll("-Xjsr305=strict", "-Xannotation-default-target=param-property")
     }
 }
 
@@ -79,6 +79,9 @@ dependencies {
 
 sourceSets {
     main.kotlin.srcDirs = ['src/main/kotlin', 'src/main/java']
+    if (gradle.ext.eeAppDirectoryExists) {
+        main.kotlin.srcDirs += ['src/mainEe/kotlin', 'src/mainEe/java']
+    }
     test.kotlin.srcDirs = ['src/test/kotlin', 'src/test/java']
 }
 

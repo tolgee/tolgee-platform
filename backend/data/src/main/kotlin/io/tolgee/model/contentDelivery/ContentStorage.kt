@@ -23,7 +23,7 @@ import jakarta.validation.constraints.NotBlank
 class ContentStorage(
   @ManyToOne(fetch = FetchType.LAZY)
   var project: Project,
-  @NotBlank
+  @param:NotBlank
   @ActivityLoggedProp
   @ActivityDescribingProp
   var name: String,

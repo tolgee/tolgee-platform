@@ -1,6 +1,5 @@
 package io.tolgee.ee.service.qa
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.posthog.server.PostHog
 import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.data.BatchJobType
@@ -31,10 +30,11 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.test.context.bean.override.mockito.MockitoBean
+import tools.jackson.module.kotlin.jacksonObjectMapper
 
 @SpringBootTest
 @AutoConfigureMockMvc

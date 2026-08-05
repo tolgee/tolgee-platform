@@ -1,8 +1,8 @@
 package io.tolgee.unit.util
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.model.dataImport.ImportTranslation
 import io.tolgee.service.dataImport.processors.FileProcessorContext
+import tools.jackson.module.kotlin.jacksonObjectMapper
 
 /**
  * Run this function in debug window to generate test result of each file processor

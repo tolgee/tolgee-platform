@@ -1,11 +1,10 @@
 package io.tolgee.unit.activity
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.tolgee.activity.data.PropertyModification
 import io.tolgee.activity.data.PropertyModifications
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import tools.jackson.module.kotlin.jacksonObjectMapper
 
 /**
  * Verifies that [PropertyModifications] is byte-equivalent on the wire to
@@ -14,7 +13,7 @@ import org.junit.jupiter.api.Test
  * the activity feed UI and must round-trip cleanly.
  */
 class PropertyModificationsTest {
-  private val mapper = ObjectMapper().registerKotlinModule()
+  private val mapper = jacksonObjectMapper()
 
   // region Wire format — must match Map<String, PropertyModification>
 

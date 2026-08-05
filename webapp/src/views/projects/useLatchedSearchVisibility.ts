@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useLatchedTrue } from 'tg.hooks/useLatchedTrue';
 
 const MAX_PROJECTS_WITHOUT_SEARCH = 5;
 
@@ -10,14 +10,7 @@ const MAX_PROJECTS_WITHOUT_SEARCH = 5;
 export const useLatchedSearchVisibility = (
   totalElements: number | undefined,
   search: string
-) => {
-  const relevant =
-    Boolean(search) || (totalElements ?? 0) > MAX_PROJECTS_WITHOUT_SEARCH;
-  const [latched, setLatched] = useState(false);
-  useEffect(() => {
-    if (relevant) {
-      setLatched(true);
-    }
-  }, [relevant]);
-  return relevant || latched;
-};
+) =>
+  useLatchedTrue(
+    Boolean(search) || (totalElements ?? 0) > MAX_PROJECTS_WITHOUT_SEARCH
+  );

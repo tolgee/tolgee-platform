@@ -1,6 +1,5 @@
 package io.tolgee.formats.flutter.out
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.dtos.IExportParams
 import io.tolgee.formats.DEFAULT_PLURAL_ARGUMENT_NAME
 import io.tolgee.formats.flutter.FLUTTER_ARB_FILE_PLACEHOLDERS_CUSTOM_KEY
@@ -10,6 +9,7 @@ import io.tolgee.formats.toIcuPluralString
 import io.tolgee.service.export.ExportFilePathProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.export.exporters.FileExporter
+import tools.jackson.databind.ObjectMapper
 import java.io.InputStream
 
 class FlutterArbFileExporter(

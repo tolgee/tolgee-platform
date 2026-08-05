@@ -182,7 +182,7 @@ class QueryBase<T>(
     val screenshotCount = cb.count(screenshotRoot.get(Screenshot_.id))
     screenshotSubquery.select(screenshotCount)
     screenshotSubquery.where(screenshotRoot.get(Screenshot_.id).`in`(getScreenshotIdFilterSubquery()))
-    screenshotCountExpression = screenshotSubquery.selection
+    screenshotCountExpression = screenshotSubquery
     this.querySelection[KeyWithTranslationsView::screenshotCount.name] = screenshotCountExpression
   }
 

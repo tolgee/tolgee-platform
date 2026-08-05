@@ -24,13 +24,13 @@ apply plugin: 'io.spring.dependency-management'
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(javaVersion.toInteger())
     }
 }
 
 kotlin {
     compilerOptions {
-        freeCompilerArgs.addAll("-Xjsr305=strict")
+        freeCompilerArgs.addAll("-Xjsr305=strict", "-Xannotation-default-target=param-property")
     }
 }
 
@@ -57,6 +57,8 @@ dependencies {
 
     implementation libs.redissonSpringBootStarter
 
+    implementation 'io.micrometer:micrometer-core'
+
     /**
      * Misc
      */
@@ -74,6 +76,7 @@ dependencies {
     testImplementation libs.assertJCore
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation('org.springframework.boot:spring-boot-starter-test')
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     // implementation libs.springmockk
     testImplementation libs.mockito
     ktlint(project(":ktlint"))
@@ -96,7 +99,6 @@ dependencyManagement {
         mavenBom(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES) {
             bomProperty "kotlin.version", "${kotlinVersion}"
         }
-        mavenBom 'org.junit:junit-bom:5.11.4'
     }
 }
 

@@ -4,18 +4,24 @@ import io.tolgee.development.testDataBuilder.data.PublicProjectsControllerTestDa
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.node
+import io.tolgee.service.contributor.ProjectContributorService
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
+import java.util.Date
 
 @SpringBootTest
 @AutoConfigureMockMvc
 class PublicProjectsControllerTest : AuthorizedControllerTest() {
   private lateinit var testData: PublicProjectsControllerTestData
+
+  @Autowired
+  private lateinit var projectContributorService: ProjectContributorService
 
   @BeforeEach
   fun setup() {
@@ -25,6 +31,7 @@ class PublicProjectsControllerTest : AuthorizedControllerTest() {
 
   @AfterEach
   fun cleanup() {
+    currentDateProvider.forcedDate = null
     testDataService.cleanTestData(testData.root)
   }
 
@@ -191,6 +198,127 @@ class PublicProjectsControllerTest : AuthorizedControllerTest() {
     projectService.hasPublicProjects(testData.deletedProjectOnlyOrg.id).assert.isFalse()
     projectService.hasPublicProjects(testData.softDeletedOrg.id).assert.isFalse()
   }
+
+  @Test
+  fun `filterContributed lists only public projects the user contributed to as a non-member`() {
+    recordActivity(testData.publicProject.id, testData.nonMember.id)
+
+    userAccount = testData.nonMember
+    performAuthGet("/v2/public/projects/with-stats?filterContributed=true").andIsOk.andAssertThatJson {
+      node("_embedded.projects") {
+        isArray.hasSize(1)
+        node("[0].id").isEqualTo(testData.publicProject.id)
+      }
+    }
+  }
+
+  @Test
+  fun `filterContributed excludes a contributed project the user is a member of`() {
+    recordActivity(testData.publicProject.id, testData.user.id)
+
+    userAccount = testData.user
+    performAuthGet("/v2/public/projects/with-stats?filterContributed=true").andIsOk.andAssertThatJson {
+      node("page.totalElements").isEqualTo(0)
+    }
+  }
+
+  @Test
+  fun `filterContributed excludes a contributed project the user is a direct-permission member of`() {
+    recordActivity(testData.otherOrgPublicProject.id, testData.directPermissionUser.id)
+
+    userAccount = testData.directPermissionUser
+    performAuthGet("/v2/public/projects/with-stats?filterContributed=true").andIsOk.andAssertThatJson {
+      node("page.totalElements").isEqualTo(0)
+    }
+    projectContributorService.hasCommunityContributions(testData.directPermissionUser.id).assert.isFalse()
+  }
+
+  @Test
+  fun `filterContributed narrows by search and pages`() {
+    recordActivity(testData.publicProject.id, testData.nonMember.id)
+    recordActivity(testData.otherOrgPublicProject.id, testData.nonMember.id)
+
+    userAccount = testData.nonMember
+    performAuthGet("/v2/public/projects/with-stats?filterContributed=true").andIsOk.andAssertThatJson {
+      node("page.totalElements").isEqualTo(2)
+    }
+
+    performAuthGet(
+      "/v2/public/projects/with-stats?filterContributed=true&search=Other org public",
+    ).andIsOk.andAssertThatJson {
+      node("_embedded.projects") {
+        isArray.hasSize(1)
+        node("[0].id").isEqualTo(testData.otherOrgPublicProject.id)
+      }
+    }
+
+    performAuthGet(
+      "/v2/public/projects/with-stats?filterContributed=true&size=1",
+    ).andIsOk.andAssertThatJson {
+      node("_embedded.projects").isArray.hasSize(1)
+      node("page.totalElements").isEqualTo(2)
+    }
+  }
+
+  @Test
+  fun `filterContributed returns nothing to an anonymous visitor`() {
+    recordActivity(testData.publicProject.id, testData.nonMember.id)
+
+    performGet("/v2/public/projects/with-stats?filterContributed=true").andIsOk.andAssertThatJson {
+      node("page.totalElements").isEqualTo(0)
+    }
+  }
+
+  @Test
+  fun `hasCommunityContributions is true for a non-member contributor, false for a member`() {
+    recordActivity(testData.publicProject.id, testData.nonMember.id)
+    recordActivity(testData.publicProject.id, testData.user.id)
+
+    projectContributorService.hasCommunityContributions(testData.nonMember.id).assert.isTrue()
+    projectContributorService.hasCommunityContributions(testData.user.id).assert.isFalse()
+  }
+
+  @Test
+  fun `hasCommunityContributions is false for a non-member who contributed only to a private project`() {
+    recordActivity(testData.otherOrgPrivateProject.id, testData.nonMember.id)
+
+    projectContributorService.hasCommunityContributions(testData.nonMember.id).assert.isFalse()
+  }
+
+  @Test
+  fun `hasCommunityContributions applies the same visibility exclusions as the contributed listing`() {
+    recordActivity(testData.softDeletedBaseProject.id, testData.nonMember.id)
+    recordActivity(testData.noBaseLanguageProject.id, testData.nonMember.id)
+    recordActivity(testData.deletedPublicProject.id, testData.nonMember.id)
+    recordActivity(testData.softDeletedOrgPublicProject.id, testData.nonMember.id)
+
+    projectContributorService.hasCommunityContributions(testData.nonMember.id).assert.isFalse()
+
+    userAccount = testData.nonMember
+    performAuthGet("/v2/public/projects/with-stats?filterContributed=true").andIsOk.andAssertThatJson {
+      node("page.totalElements").isEqualTo(0)
+    }
+  }
+
+  @Test
+  fun `counts a non-member global admin as a community contributor (keys on membership, not server role)`() {
+    recordActivity(testData.publicProject.id, testData.serverAdmin.id)
+
+    projectContributorService.hasCommunityContributions(testData.serverAdmin.id).assert.isTrue()
+  }
+
+  @Test
+  fun `counts an org member of another org as a contributor to a public project outside that org`() {
+    recordActivity(testData.publicProject.id, testData.otherOrgMember.id)
+
+    projectContributorService.hasCommunityContributions(testData.otherOrgMember.id).assert.isTrue()
+  }
+
+  private fun recordActivity(
+    projectId: Long,
+    authorId: Long?,
+    at: Date = Date(1_600_000_000_000),
+  ) = recordProjectActivity(projectId, authorId, at)
 
   private fun baseLanguageId(projectId: Long): Long? =
     executeInNewTransaction {

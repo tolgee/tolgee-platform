@@ -1,8 +1,8 @@
 package io.tolgee.component.machineTranslation.providers
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.component.machineTranslation.metadata.MtMetadata
 import io.tolgee.model.mtServiceConfig.Formality
+import tools.jackson.module.kotlin.jacksonObjectMapper
 
 data class ProviderTranslateParams(
   val text: String,

@@ -1,6 +1,5 @@
 package io.tolgee.mcp
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.modelcontextprotocol.server.McpNotificationHandler
 import io.modelcontextprotocol.server.McpRequestHandler
 import io.modelcontextprotocol.server.transport.WebMvcStreamableServerTransportProvider
@@ -14,6 +13,7 @@ import jakarta.servlet.http.HttpServletResponseWrapper
 import org.redisson.api.RedissonClient
 import org.slf4j.LoggerFactory
 import org.springframework.web.filter.OncePerRequestFilter
+import tools.jackson.databind.ObjectMapper
 import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
 

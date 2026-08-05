@@ -1,11 +1,11 @@
 package io.tolgee.formats.json.out
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.dtos.IExportParams
 import io.tolgee.formats.genericStructuredFile.out.CustomPrettyPrinter
 import io.tolgee.service.export.ExportFilePathProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.export.exporters.FileExporter
+import tools.jackson.databind.ObjectMapper
 import java.io.InputStream
 
 class JsonFileExporterWithManifest(
@@ -42,7 +42,8 @@ class JsonFileExporterWithManifest(
     val manifest = mapOf("locales" to locales)
 
     return objectMapper
-      .writer(customPrettyPrinter)
+      .writer()
+      .with(customPrettyPrinter)
       .writeValueAsBytes(manifest)
       .inputStream()
   }

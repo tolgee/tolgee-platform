@@ -1,14 +1,14 @@
 package io.tolgee.formats.genericStructuredFile.out
 
-import com.fasterxml.jackson.core.JsonGenerator
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
+import tools.jackson.core.JsonGenerator
+import tools.jackson.core.util.DefaultPrettyPrinter
 
 class CustomPrettyPrinter : DefaultPrettyPrinter() {
   override fun createInstance(): DefaultPrettyPrinter {
     return CustomPrettyPrinter()
   }
 
-  override fun writeObjectFieldValueSeparator(jg: JsonGenerator) {
+  override fun writeObjectNameValueSeparator(jg: JsonGenerator) {
     jg.writeRaw(": ")
   }
 }

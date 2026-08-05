@@ -1,5 +1,6 @@
 package io.tolgee.fixtures
 
+import org.springframework.test.web.servlet.request.AbstractMockHttpServletRequestBuilder
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 
@@ -31,7 +32,7 @@ object AuthorizedRequestFactory {
     return addToken(MockMvcRequestBuilders.delete(url))
   }
 
-  fun addToken(builder: MockHttpServletRequestBuilder): MockHttpServletRequestBuilder {
+  fun <B : AbstractMockHttpServletRequestBuilder<B>> addToken(builder: B): B {
     return builder.header("Authorization", getBearerTokenString(token))
   }
 

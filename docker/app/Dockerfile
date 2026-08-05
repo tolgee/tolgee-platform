@@ -1,3 +1,5 @@
+FROM eclipse-temurin:25-jre-alpine AS jre
+
 FROM postgres:13.23-alpine3.22
 
 ENTRYPOINT []
@@ -6,7 +8,12 @@ ENTRYPOINT []
 # pinned base image, which lags behind the alpine3.22 branch on security fixes.
 RUN apk --no-cache upgrade
 
-RUN apk --no-cache add openjdk21-jre
+# Alpine 3.22 only packages openjdk21, so bring the JRE 25 from the Temurin image.
+# Both are musl/alpine builds, so the copied runtime is ABI-compatible.
+COPY --from=jre /opt/java/openjdk /opt/java/openjdk
+ENV JAVA_HOME=/opt/java/openjdk \
+    PATH="/opt/java/openjdk/bin:${PATH}"
+
 RUN apk --no-cache add libxml2
 
 #############

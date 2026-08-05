@@ -108,7 +108,7 @@ interface TranslationSuggestionRepository : JpaRepository<TranslationSuggestion,
 
   @Query(
     """
-        from TranslationSuggestion ts
+        select ts from TranslationSuggestion ts
             join ts.language
             join ts.key
         where ts.project.id = :projectId

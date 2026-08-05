@@ -23,7 +23,7 @@ open class SelfHostedEePlanModel(
   val free: Boolean,
   val nonCommercial: Boolean,
   val invoiced: Boolean = false,
-  val isPayAsYouGo: Boolean,
+  val isPayAsYouGo: Boolean = false,
   val archivedAt: Date? = null,
   val metricType: MetricType = MetricType.KEYS_SEATS,
 ) : RepresentationModel<SelfHostedEePlanModel>() {

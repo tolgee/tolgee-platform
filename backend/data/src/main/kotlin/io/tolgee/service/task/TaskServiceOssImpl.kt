@@ -5,10 +5,13 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.TaskType
 import io.tolgee.model.task.Task
 import io.tolgee.model.views.TranslationToTaskView
+import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Component
 
 @Component
-class TaskServiceOssImpl : ITaskService {
+class TaskServiceOssImpl(
+  entityManager: EntityManager,
+) : AbstractTaskService(entityManager) {
   override fun deleteAll(tasks: List<Task>) {
     throw NotImplementedInOss()
   }

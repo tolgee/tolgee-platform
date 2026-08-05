@@ -8,7 +8,7 @@ import {
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { getScopeLanguagePermission } from 'tg.component/PermissionsSettings/hierarchyTools';
-import { languagePermissionsForRole } from './useUpdatePermissions';
+import { languagePermissionsForRole } from 'tg.views/projects/members/component/useUpdatePermissions';
 
 type Props = {
   projectId: number;
@@ -26,7 +26,10 @@ export const useCreateInvitation = ({ projectId, allLangs }: Props) => {
   const invite = useApiMutation({
     url: '/v2/projects/{projectId}/invite',
     method: 'put',
-    invalidatePrefix: '/v2/projects/{projectId}/invitations',
+    invalidatePrefix: [
+      '/v2/projects/{projectId}/invitations',
+      '/v2/projects/{projectId}/contributors',
+    ],
   });
 
   const messages = useMessage();

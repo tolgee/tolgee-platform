@@ -150,6 +150,7 @@ declare namespace DataCy {
         "comment-menu-needs-resolution": true;
         "comment-resolve": true;
         "comment-text": true;
+        "community-my-contributions-toggle": true;
         "community-projects-view": true;
         "community-translation-banner": true;
         "community-translation-item": true;
@@ -557,6 +558,11 @@ declare namespace DataCy {
         "project-branch-merge-change": true;
         "project-branch-merge-delete-branch-checkbox": true;
         "project-branch-merge-detail": true;
+        "project-contributor-invitation-pending": true;
+        "project-contributor-invite-button": true;
+        "project-contributor-item": true;
+        "project-contributor-item-first-contribution": true;
+        "project-contributor-item-last-contribution": true;
         "project-dashboard-activity-chart": true;
         "project-dashboard-activity-list": true;
         "project-dashboard-base-word-count": true;
@@ -593,7 +599,10 @@ declare namespace DataCy {
         "project-list-translations-button": true;
         "project-member-item": true;
         "project-member-revoke-button": true;
+        "project-members-invitation-cancel-button": true;
         "project-members-invitation-item": true;
+        "project-members-tab-community": true;
+        "project-members-tab-team": true;
         "project-menu-item": true;
         "project-menu-item-ai": true;
         "project-menu-item-branches": true;

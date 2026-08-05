@@ -1,6 +1,5 @@
 package io.tolgee.unit.formats.json.`in`
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.dtos.request.ImportFileMapping
 import io.tolgee.dtos.request.SingleStepImportRequest
 import io.tolgee.formats.importCommon.ImportFormat
@@ -16,6 +15,7 @@ import io.tolgee.util.custom
 import io.tolgee.util.description
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import tools.jackson.module.kotlin.jacksonObjectMapper
 
 class JsonFormatProcessorTest {
   lateinit var mockUtil: FileProcessorContextMockUtil

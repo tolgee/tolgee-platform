@@ -5806,4 +5806,74 @@
     <changeSet author="jirikuchynka (generated)" id="1782996347000-3">
         <addForeignKeyConstraint baseColumnNames="permission_id" baseTableName="permission_suggest_manage_languages" constraintName="FK_perm_suggest_manage_languages_permission" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="permission" validate="true"/>
     </changeSet>
+    <changeSet author="jirikuchynka" id="1784467200000-1">
+        <createTable tableName="project_contributor">
+            <column name="project_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="project_contributorPK"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="project_contributorPK"/>
+            </column>
+            <column name="first_contribution_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_contribution_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="project_contributor_user_id" tableName="project_contributor">
+            <column name="user_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="jirikuchynka" id="1784467200000-2">
+        <sqlFile path="classpath:db/changelog/projectContributorTrigger.sql" splitStatements="false"/>
+        <rollback>
+            DROP TRIGGER IF EXISTS track_project_contributor ON activity_revision;
+            DROP FUNCTION IF EXISTS track_project_contributor();
+        </rollback>
+    </changeSet>
+    <changeSet author="jirikuchynka" id="1784467200000-3">
+        <sqlFile path="classpath:db/changelog/projectContributorBackfill.sql" splitStatements="false"/>
+        <!-- Rolling back the backfill alone must not delete rows the trigger has since written. -->
+        <rollback/>
+    </changeSet>
+    <changeSet author="bdshadow" id="spring-boot-4-translation-suggestion-fks-not-null">
+        <addNotNullConstraint columnDataType="bigint" columnName="author_id" tableName="translation_suggestion" validate="true"/>
+        <addNotNullConstraint columnDataType="bigint" columnName="key_id" tableName="translation_suggestion" validate="true"/>
+        <addNotNullConstraint columnDataType="bigint" columnName="language_id" tableName="translation_suggestion" validate="true"/>
+        <addNotNullConstraint columnDataType="bigint" columnName="project_id" tableName="translation_suggestion" validate="true"/>
+    </changeSet>
+    <changeSet author="bdshadow" id="spring-boot-4-element-collection-unique">
+        <addUniqueConstraint columnNames="api_key_id, scopes_enum" constraintName="UKnkeo2sck9a20va0ygd3evj3yq" tableName="api_key_scopes_enum"/>
+        <addUniqueConstraint columnNames="mt_service_config_id, enabled_services" constraintName="UKi6l1mfk5lkwhe66mb07r5q1ct" tableName="mt_service_config_enabled_services"/>
+    </changeSet>
+    <changeSet author="bdshadow" id="spring-boot-4-batch-job-instance-seq">
+        <comment>
+            Spring Batch 6 renamed the job-instance id sequence from BATCH_JOB_SEQ to
+            BATCH_JOB_INSTANCE_SEQ. initialize-schema creates the new sequence starting at 1, so on an
+            upgraded database it hands out ids that already exist in BATCH_JOB_INSTANCE. Advance it past
+            the current max id. The orphaned BATCH_JOB_SEQ is intentionally left in place so a still
+            running Spring Batch 5 instance during a rolling deploy keeps a valid sequence; drop it in a
+            later release.
+        </comment>
+        <sql dbms="postgresql" splitStatements="false">
+            DO $$
+            DECLARE
+                desired BIGINT;
+                current_val BIGINT;
+            BEGIN
+                IF to_regclass('public.batch_job_instance') IS NULL THEN
+                    RETURN;
+                END IF;
+                IF to_regclass('public.batch_job_instance_seq') IS NULL THEN
+                    CREATE SEQUENCE batch_job_instance_seq MAXVALUE 9223372036854775807 NO CYCLE;
+                END IF;
+                SELECT COALESCE(MAX(job_instance_id), 0) + 1 INTO desired FROM batch_job_instance;
+                SELECT last_value INTO current_val FROM batch_job_instance_seq;
+                IF desired > current_val THEN
+                    PERFORM setval('batch_job_instance_seq', desired, false);
+                END IF;
+            END $$;
+        </sql>
+    </changeSet>
 </databaseChangeLog>

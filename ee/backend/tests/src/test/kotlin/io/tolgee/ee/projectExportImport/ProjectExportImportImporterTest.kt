@@ -1,6 +1,5 @@
 package io.tolgee.ee.projectExportImport
 
-import com.fasterxml.jackson.core.type.TypeReference
 import io.tolgee.AbstractSpringTest
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.ProjectExportImportTestData
@@ -39,6 +38,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import tools.jackson.core.type.TypeReference
 import java.awt.image.BufferedImage
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream

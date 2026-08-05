@@ -26,6 +26,7 @@ class PromptControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   fun setup() {
     testData = PromptTestData()
     testData.addKeyWithoutTranslations()
+    testData.addPluralKey()
     testDataService.saveTestData(testData.root)
     llmProperties.enabled = true
     llmProperties.providers =
@@ -302,6 +303,27 @@ class PromptControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       ),
     ).andIsOk.andAssertThatJson {
       node("prompt").isString.contains("bare=[] object=[]")
+    }
+  }
+
+  @Test
+  fun `renders a plural source translation as a single line without literal newlines`() {
+    performAuthPost(
+      "/v2/projects/${testData.promptProject.self.id}/prompts/run",
+      PromptRunDto(
+        template = "{{fragment.translationInfo}}",
+        keyId = testData.pluralKey.self.id,
+        targetLanguageId = testData.czech.self.id,
+        provider = "default",
+        basicPromptOptions = null,
+      ),
+    ).andIsOk.andAssertThatJson {
+      node("prompt").isString.doesNotContain("""\n""")
+      node("prompt")
+        .isString
+        .contains(
+          "{count, plural, one {Listing spreadsheet sheets} other {Listing sheets in # spreadsheets}}",
+        )
     }
   }
 

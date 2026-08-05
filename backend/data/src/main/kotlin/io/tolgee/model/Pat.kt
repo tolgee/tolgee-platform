@@ -26,11 +26,11 @@ import java.util.Date
   ],
 )
 class Pat(
-  @NotEmpty
-  @NotNull
+  @param:NotEmpty
+  @param:NotNull
   var tokenHash: String = "",
-  @NotEmpty
-  @NotNull
+  @param:NotEmpty
+  @param:NotNull
   var description: String = "",
   @Temporal(value = TemporalType.TIMESTAMP)
   var expiresAt: Date? = null,
