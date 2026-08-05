@@ -9,9 +9,13 @@ class RequestIpProvider {
   /**
    * The address the connection actually came from, which a client cannot choose - unlike the
    * forwarding headers [getClientIp] reads. Anything that ends up in the audit trail or in front of
-   * a user as evidence uses this, the same value the rate limiter buckets on. Behind a proxy it is
-   * the proxy's address unless the deployment sets `server.forward-headers-strategy`, which makes
-   * the container resolve it from the forwarded headers it is willing to trust.
+   * a user as evidence uses this, the same value the rate limiter buckets on.
+   *
+   * Behind a proxy this is the proxy's own address, which is useless for locating anyone but is at
+   * least never a lie. `server.forward-headers-strategy` would make the container derive it from
+   * `X-Forwarded-For` instead - do not set it unless the proxy in front is known to overwrite that
+   * header rather than append to it, because otherwise it hands the client back control of this
+   * value and of the rate limiter's bucket key.
    */
   fun getTrustedClientIp(): String? {
     if (RequestContextHolder.getRequestAttributes() == null) {
