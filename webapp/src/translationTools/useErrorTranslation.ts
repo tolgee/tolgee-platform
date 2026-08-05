@@ -125,13 +125,27 @@ export function useErrorTranslation() {
       case 'source_and_target_plan_must_be_different':
         return t('source_and_target_plan_must_be_different');
       case 'app_manifest_fetch_failed':
-        return t('app_manifest_fetch_failed');
+        return t(
+          'app_manifest_fetch_failed',
+          "The app manifest couldn't be downloaded. Check the URL and that the app is reachable."
+        );
       case 'app_manifest_invalid':
-        return t('app_manifest_invalid');
+        return t(
+          'app_manifest_invalid',
+          'The app manifest is not valid. Check it against the manifest format.'
+        );
       case 'app_already_installed':
-        return t('app_already_installed');
+        return t(
+          'app_already_installed',
+          'This app is already registered in the organization.'
+        );
       case 'app_install_not_found':
-        return t('app_install_not_found');
+        return t('app_install_not_found', 'App installation not found.');
+      case 'app_not_available_for_organization':
+        return t(
+          'app_not_available_for_organization',
+          'This app is not available for this organization.'
+        );
       case 'cannot_store_file_to_content_storage':
         return t('cannot_store_file_to_content_storage');
       case 'unexpected_error_while_publishing_to_content_storage':

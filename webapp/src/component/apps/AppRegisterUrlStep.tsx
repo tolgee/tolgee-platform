@@ -60,7 +60,7 @@ export const AppRegisterUrlStep = ({
     </DialogContent>
     <DialogActions>
       <Button onClick={onCancel}>
-        <T keyName="cancel_button" defaultValue="Cancel" />
+        <T keyName="global_cancel_button" defaultValue="Cancel" />
       </Button>
       <LoadingButton
         data-cy={submitDataCy}
