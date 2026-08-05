@@ -66,9 +66,8 @@ const connect = async (manifestUrl: string): Promise<void> => {
 
     console.log(
       `Auto-connect: registered install ${result.installId} on ${config.tolgeeUrl} ${where}.\n` +
-        '  Save these into .env.local NOW — Tolgee never shows the secret again:\n' +
-        `    TOLGEE_APP_CLIENT_ID=${result.clientId}\n` +
-        `    TOLGEE_APP_CLIENT_SECRET=${result.clientSecret}` +
+        `  Its credentials are stored in ${result.credentialsPath} (gitignored) — ` +
+        'nothing to copy; `npm run token` reads them from there.' +
         (result.native
           ? '\n  Next: grant it to an organization in Tolgee under ' +
             'Administration → Apps, then enable it for a project.'

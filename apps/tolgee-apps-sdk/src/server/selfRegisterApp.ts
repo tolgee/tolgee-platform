@@ -1,3 +1,9 @@
+import {
+  appInstallStatePath,
+  saveAppInstall,
+  type AppInstallStoreOptions,
+} from './installStore'
+
 export type SelfRegisterInput = {
   /** Base URL of the Tolgee instance to register with. */
   tolgeeUrl: string
@@ -12,6 +18,13 @@ export type SelfRegisterInput = {
   organizationSlug?: string | null
   /** Publicly reachable URL Tolgee fetches the manifest from. */
   manifestUrl: string
+  /**
+   * Set to false to keep the issued credentials out of the local state file —
+   * only for apps that capture the secret themselves. Defaults to true.
+   */
+  persist?: boolean
+  /** Directory of the local state file; see `appInstallStatePath`. */
+  stateDir?: string
 }
 
 export type SelfRegisterResult = {
@@ -19,13 +32,15 @@ export type SelfRegisterResult = {
   clientId: string | null
   /**
    * The one-time client secret. Non-null only when this call created the
-   * install — persist it immediately, Tolgee will not return it again.
+   * install; Tolgee will not return it again.
    */
   clientSecret: string | null
   /** False when an existing install was repointed at `manifestUrl` instead. */
   created: boolean
   /** True when the install belongs to no organization (see `organizationSlug`). */
   native: boolean
+  /** Where the credentials were stored; null when `persist` was false. */
+  credentialsPath: string | null
 }
 
 /**
@@ -35,9 +50,12 @@ export type SelfRegisterResult = {
  *
  * Tolgee returns the client secret only when it creates the install; calling
  * again for an already-registered app returns it as null and leaves the
- * existing credentials valid, which is what `created` reflects.
+ * existing credentials valid, which is what `created` reflects. The install and
+ * its credentials are stored locally, so `loadTolgeeAppConfig()` and
+ * `fetchAppAccessToken()` pick them up afterwards without anyone copying a
+ * secret by hand — never print them.
  *
- *     const { installId, clientId, clientSecret, created } = await selfRegisterApp({
+ *     const { installId, created, credentialsPath } = await selfRegisterApp({
  *       tolgeeUrl: config.tolgeeUrl,
  *       registrationSecret: config.registrationSecret!,
  *       organizationSlug: config.organizationSlug!,
@@ -81,12 +99,53 @@ export const selfRegisterApp = async (
   }
   const clientSecret =
     typeof body.clientSecret === 'string' ? body.clientSecret : null
-  return {
+  const result: SelfRegisterResult = {
     installId: body.id,
     clientId: typeof body.clientId === 'string' ? body.clientId : null,
     clientSecret,
     created: clientSecret !== null,
     native: !input.organizationSlug,
+    credentialsPath: null,
+  }
+
+  if (input.persist === false) return result
+  return { ...result, credentialsPath: persist(input, result) }
+}
+
+/**
+ * Returns the path the install was stored at, or null when storing failed and
+ * nothing was lost by it. A newly issued secret exists nowhere else, so failing
+ * to store *that* is fatal rather than a warning.
+ */
+const persist = (
+  input: SelfRegisterInput,
+  result: SelfRegisterResult
+): string | null => {
+  const options: AppInstallStoreOptions = input.stateDir
+    ? { stateDir: input.stateDir }
+    : {}
+  try {
+    saveAppInstall(
+      {
+        tolgeeUrl: input.tolgeeUrl,
+        installId: result.installId,
+        clientId: result.clientId,
+        clientSecret: result.clientSecret,
+        native: result.native,
+        organizationSlug: input.organizationSlug ?? null,
+      },
+      options
+    )
+    return appInstallStatePath(options)
+  } catch (error) {
+    if (!result.created) return null
+    throw new Error(
+      `Tolgee issued new credentials for install ${result.installId} but they could not be ` +
+        `stored at ${appInstallStatePath(options)}: ` +
+        `${error instanceof Error ? error.message : String(error)}. ` +
+        'The client secret is shown only once, so delete that install in Tolgee and ' +
+        'register again once the path is writable.'
+    )
   }
 }
 

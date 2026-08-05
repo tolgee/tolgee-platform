@@ -1,3 +1,13 @@
+import {
+  readStoredAppInstall,
+  type AppInstallStoreOptions,
+} from './installStore'
+
+export const DEFAULT_TOLGEE_URL = 'http://localhost:8718'
+
+/** Where the credentials in a config came from. */
+export type TolgeeAppCredentialsSource = 'env' | 'stored' | null
+
 export type TolgeeAppConfig = {
   /** Base URL of the Tolgee instance the app is installed on. */
   tolgeeUrl: string
@@ -9,25 +19,46 @@ export type TolgeeAppConfig = {
   organizationSlug: string | null
   /** Instance-wide secret authorizing self-registration; null when unset. */
   registrationSecret: string | null
-  /** OAuth client id issued by Tolgee at registration; null before first register. */
+  /** OAuth client id issued by Tolgee at registration; null when unknown. */
   clientId: string | null
-  /** OAuth client secret issued by Tolgee at registration; null before first register. */
+  /** OAuth client secret issued by Tolgee at registration; null when unknown. */
   clientSecret: string | null
+  /** Install the stored credentials belong to; null when nothing is stored. */
+  installId: number | null
+  credentialsSource: TolgeeAppCredentialsSource
 }
 
 /**
- * Reads a Tolgee App's standard environment variables into a typed config.
- * Centralizes the env-var contract (names + defaults) so every app reads them
- * the same way.
+ * Reads a Tolgee App's standard environment variables into a typed config,
+ * falling back to the credentials `selfRegisterApp` stored locally for the same
+ * `tolgeeUrl` (see `appInstallStatePath`).
+ *
+ * `TOLGEE_APP_CLIENT_ID` / `TOLGEE_APP_CLIENT_SECRET` win: a deployment injects
+ * its own credentials and must not pick up a developer's stale local file.
+ * Setting either of them ignores the stored file entirely, so an env client id
+ * can never be paired with a secret from somewhere else.
  */
 export const loadTolgeeAppConfig = (
-  env: NodeJS.ProcessEnv = process.env
-): TolgeeAppConfig => ({
-  tolgeeUrl: env.TOLGEE_URL ?? 'http://localhost:8718',
-  vitePort: Number(env.VITE_PORT ?? 5180),
-  serverPort: Number(env.SERVER_PORT ?? env.PORT ?? 5181),
-  organizationSlug: env.TOLGEE_ORGANIZATION_SLUG ?? null,
-  registrationSecret: env.TOLGEE_APP_REGISTRATION_SECRET ?? null,
-  clientId: env.TOLGEE_APP_CLIENT_ID ?? null,
-  clientSecret: env.TOLGEE_APP_CLIENT_SECRET ?? null,
-})
+  env: NodeJS.ProcessEnv = process.env,
+  options: AppInstallStoreOptions = {}
+): TolgeeAppConfig => {
+  const tolgeeUrl = env.TOLGEE_URL ?? DEFAULT_TOLGEE_URL
+  const envClientId = env.TOLGEE_APP_CLIENT_ID ?? null
+  const envClientSecret = env.TOLGEE_APP_CLIENT_SECRET ?? null
+  const fromEnv = envClientId !== null || envClientSecret !== null
+  const stored = fromEnv ? null : readStoredAppInstall(tolgeeUrl, options)
+  const storedCredentials =
+    stored !== null && (stored.clientId !== null || stored.clientSecret !== null)
+
+  return {
+    tolgeeUrl,
+    vitePort: Number(env.VITE_PORT ?? 5180),
+    serverPort: Number(env.SERVER_PORT ?? env.PORT ?? 5181),
+    organizationSlug: env.TOLGEE_ORGANIZATION_SLUG ?? null,
+    registrationSecret: env.TOLGEE_APP_REGISTRATION_SECRET ?? null,
+    clientId: fromEnv ? envClientId : (stored?.clientId ?? null),
+    clientSecret: fromEnv ? envClientSecret : (stored?.clientSecret ?? null),
+    installId: stored?.installId ?? null,
+    credentialsSource: fromEnv ? 'env' : storedCredentials ? 'stored' : null,
+  }
+}

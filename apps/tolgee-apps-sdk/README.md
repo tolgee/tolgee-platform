@@ -142,12 +142,11 @@ import { loadTolgeeAppConfig, selfRegisterApp } from '@tolgee/apps-sdk/server'
 
 const config = loadTolgeeAppConfig()
 
-const { installId, clientId, clientSecret, created, native } =
-  await selfRegisterApp({
-    tolgeeUrl: config.tolgeeUrl,
-    registrationSecret: config.registrationSecret!,
-    manifestUrl: `${baseUrl}/manifest.json`,
-  })
+const { installId, created, native, credentialsPath } = await selfRegisterApp({
+  tolgeeUrl: config.tolgeeUrl,
+  registrationSecret: config.registrationSecret!,
+  manifestUrl: `${baseUrl}/manifest.json`,
+})
 ```
 
 Omitting `organizationSlug` — the normal case — registers a **native** app: one
@@ -157,24 +156,52 @@ enables it per project afterwards. Pass an `organizationSlug` only when you want
 the app installed into that one organization instead.
 
 Tolgee returns the client secret **only when it creates the install** — that's
-what `created` reflects. Persist it right away; a later call for an already
-registered app repoints it at the new manifest URL and returns
-`clientSecret: null`, leaving the existing credentials valid.
+what `created` reflects. A later call for an already registered app repoints it
+at the new manifest URL and returns `clientSecret: null`, leaving the existing
+credentials valid.
+
+### Where the credentials go
+
+Tolgee shows the client secret once and stores only its hash, so the SDK writes
+the whole install record — install id, client id, client secret, and the
+`tolgeeUrl` it belongs to — to a local state file as soon as registration
+returns it. `credentialsPath` in the result is where it landed:
+
+```
+.tolgee-dev/install.json      # gitignored; mode 0600
+```
+
+Nothing to copy, and **never print the secret**. Log `credentialsPath` instead.
+
+- The directory is `.tolgee-dev` under the working directory, or
+  `TOLGEE_APP_STATE_DIR`, or the `stateDir` option — `appInstallStatePath()`
+  resolves the same path the SDK uses.
+- Records are keyed by Tolgee instance, so credentials issued by one instance
+  are never handed to another.
+- A re-registration that returns `clientSecret: null` keeps the stored secret.
+- Writes go through a temp file and a rename, so an interrupted or concurrent
+  write cannot leave a half-written file behind; an unreadable file reads as
+  "nothing stored" rather than throwing.
+- `persist: false` opts out, for apps that capture the secret themselves.
+
+`readStoredAppInstall(tolgeeUrl)` and `saveAppInstall(record)` are exported for
+apps that manage the record themselves.
 
 ### 2. `fetchAppAccessToken` — act as the app itself
 
 For work outside any iframe (background jobs, cron, webhooks of your own), an
-app backend authenticates with the OAuth 2.0 client-credentials grant.
+app backend authenticates with the OAuth 2.0 client-credentials grant. With
+nothing passed it uses the credentials `loadTolgeeAppConfig()` resolves, so a
+registered app needs no wiring at all:
 
 ```ts
 import { fetchAppAccessToken } from '@tolgee/apps-sdk/server'
 
-const { accessToken, expiresIn } = await fetchAppAccessToken({
-  tolgeeUrl: config.tolgeeUrl,
-  clientId: config.clientId!,
-  clientSecret: config.clientSecret!,
-})
+const { accessToken, expiresIn } = await fetchAppAccessToken()
 ```
+
+Pass `{ tolgeeUrl, clientId, clientSecret }` to override any of them. With no
+credentials anywhere it throws, naming both the env vars and the state file.
 
 The access token is **short-lived**: don't cache it past `expiresIn` — re-fetch
 when it expires (or on a `401`). The **client secret must only ever be sent to
@@ -207,8 +234,19 @@ const { installId, projectId, userId, expiresAt } = decodeContextToken(token)
 | `SERVER_PORT` (or `PORT`) | `serverPort` | `5181` |
 | `TOLGEE_ORGANIZATION_SLUG` | `organizationSlug` | `null` |
 | `TOLGEE_APP_REGISTRATION_SECRET` | `registrationSecret` | `null` |
-| `TOLGEE_APP_CLIENT_ID` | `clientId` | `null` |
-| `TOLGEE_APP_CLIENT_SECRET` | `clientSecret` | `null` |
+| `TOLGEE_APP_CLIENT_ID` | `clientId` | stored credentials |
+| `TOLGEE_APP_CLIENT_SECRET` | `clientSecret` | stored credentials |
+| `TOLGEE_APP_STATE_DIR` | — | `.tolgee-dev` in the working directory |
+
+Credentials fall back to the install record stored for the same `tolgeeUrl`;
+`credentialsSource` says which won (`'env'`, `'stored'` or `null`), and
+`installId` is the stored install.
+
+**The environment always wins.** A deployed app gets its secrets injected and
+must not be overridden by a state file left behind by a developer. Setting
+either `TOLGEE_APP_CLIENT_ID` or `TOLGEE_APP_CLIENT_SECRET` makes the SDK ignore
+the stored record completely — an env client id is never paired with a stored
+secret — so in a deployment set both.
 
 ## API reference
 
@@ -221,4 +259,5 @@ const { installId, projectId, userId, expiresAt } = decodeContextToken(token)
 
 **`@tolgee/apps-sdk/server`** — `renderManifest()`, `tolgeeAppCorsHeaders()`,
 `decodeContextToken()`, `loadTolgeeAppConfig()`, `selfRegisterApp()`,
-`fetchAppAccessToken()`.
+`fetchAppAccessToken()`, `appInstallStatePath()`, `readStoredAppInstall()`,
+`saveAppInstall()`.

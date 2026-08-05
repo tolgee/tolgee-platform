@@ -102,18 +102,22 @@ project.
 (Setting `TOLGEE_ORGANIZATION_SLUG` as well installs the app into that single
 organization instead, skipping the admin step. Usually you don't want that.)
 
-On the **first** registration the server prints the app's credentials:
+On the **first** registration Tolgee issues the app's credentials. It shows the client secret
+once and stores only its hash, so the SDK writes the install record straight to
+`.tolgee-dev/install.json` (gitignored) instead of printing it:
 
 ```
 Auto-connect: registered install 12 on http://localhost:8718 as a native (server-wide) app.
-  Save these into .env.local NOW — Tolgee never shows the secret again:
-    TOLGEE_APP_CLIENT_ID=...
-    TOLGEE_APP_CLIENT_SECRET=...
+  Its credentials are stored in .../keys-showcase/.tolgee-dev/install.json (gitignored) — nothing to copy; `npm run token` reads them from there.
 ```
 
-Copy both into `.env.local` — the client secret is shown once and never again. On later boots
-the app is already registered, so the server only repoints the existing install at the current
-manifest URL — which is exactly what makes a fresh tunnel hostname take effect.
+Nothing to copy. On later boots the app is already registered, so the server only repoints the
+existing install at the current manifest URL — which is exactly what makes a fresh tunnel
+hostname take effect; the stored secret is left untouched.
+
+Set `TOLGEE_APP_CLIENT_ID` and `TOLGEE_APP_CLIENT_SECRET` only when you deploy the app somewhere
+that injects secrets properly — the environment wins over the local file, and setting either one
+makes the SDK ignore the file entirely.
 
 If self-registration fails, the server logs why and keeps serving the manifest, so you can
 always fall back to the manual flow.
@@ -131,17 +135,17 @@ The **Keys Showcase** item then appears in the project's dashboard menu.
 The "cron job" story: an app backend that reads Tolgee on its own, without a user or a browser.
 
 ```bash
-# in .env.local, from the registration output above
-TOLGEE_APP_CLIENT_ID=...
-TOLGEE_APP_CLIENT_SECRET=...
+# in .env.local — the only thing you have to set
 TOLGEE_PROJECT_ID=1
 
 npm run token
 ```
 
-The script exchanges the client credentials for an access token (`fetchAppAccessToken`) and
-prints the project's first 10 keys with their base-language translations. It fails with a
-pointed message if any of the three variables is missing.
+The credentials come from `.tolgee-dev/install.json`, written when the app registered, so
+there is nothing else to wire up. The script exchanges them for an access token
+(`fetchAppAccessToken`) and prints the project's first 10 keys with their base-language
+translations. If the app has never registered — and no `TOLGEE_APP_CLIENT_ID` /
+`TOLGEE_APP_CLIENT_SECRET` are set — it says so and points at both ways to fix it.
 
 ## Layout
 
@@ -157,4 +161,7 @@ server/
 scripts/
   dev-tunnel.ts         opens the tunnel and publishes its URL
   token.ts              machine-to-machine demo
+.tolgee-dev/           local state, gitignored
+  tunnel.json           the URLs Tolgee currently reaches this app at
+  install.json          install id + app credentials, written at registration
 ```

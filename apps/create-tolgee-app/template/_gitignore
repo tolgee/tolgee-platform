@@ -4,10 +4,11 @@ dist-ssr
 *.local
 *.tsbuildinfo
 
-# Holds TOLGEE_APP_REGISTRATION_SECRET / TOLGEE_APP_CLIENT_SECRET — never commit.
+# Holds TOLGEE_APP_REGISTRATION_SECRET — never commit.
 .env.local
 
-# Dev-tunnel state written by `npm run dev`.
+# Local state: the dev-tunnel URLs and install.json, which holds the app's
+# one-time client secret. Never commit.
 .tolgee-dev/
 
 .DS_Store

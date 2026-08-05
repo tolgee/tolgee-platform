@@ -6,8 +6,9 @@
  *
  *   npm run token
  *
- * Requires TOLGEE_APP_CLIENT_ID / TOLGEE_APP_CLIENT_SECRET (printed once when
- * the app registers) and TOLGEE_PROJECT_ID.
+ * The app credentials come from wherever the SDK finds them: the ones stored at
+ * registration (`.tolgee-dev/install.json`) or TOLGEE_APP_CLIENT_ID /
+ * TOLGEE_APP_CLIENT_SECRET when those are set. Only TOLGEE_PROJECT_ID is on you.
  */
 import {
   fetchAppAccessToken,
@@ -37,13 +38,6 @@ const fail: (message: string) => never = (message) => {
 const config = loadTolgeeAppConfig()
 const projectId = Number(process.env.TOLGEE_PROJECT_ID)
 
-if (!config.clientId || !config.clientSecret) {
-  fail(
-    'Missing app credentials. Set TOLGEE_APP_CLIENT_ID and TOLGEE_APP_CLIENT_SECRET in .env.local.\n' +
-      'They are printed once, when the app registers — see the README ("Auto-connect mode").'
-  )
-}
-
 if (!Number.isInteger(projectId) || projectId <= 0) {
   fail(
     'Missing project. Set TOLGEE_PROJECT_ID in .env.local to the id of a project ' +
@@ -51,13 +45,18 @@ if (!Number.isInteger(projectId) || projectId <= 0) {
   )
 }
 
-const { accessToken, expiresIn } = await fetchAppAccessToken({
-  tolgeeUrl: config.tolgeeUrl,
-  clientId: config.clientId,
-  clientSecret: config.clientSecret,
-})
+const { accessToken, expiresIn } = await fetchAppAccessToken().catch(
+  (error: unknown) =>
+    fail(
+      `${error instanceof Error ? error.message : String(error)}\n` +
+        'Run `npm run dev` once with auto-connect on — see the README ("Auto-connect mode").'
+    )
+)
 
-console.log(`Got an app access token from ${config.tolgeeUrl} (valid ${expiresIn}s).\n`)
+console.log(
+  `Got an app access token from ${config.tolgeeUrl} (valid ${expiresIn}s, ` +
+    `credentials from ${config.credentialsSource === 'env' ? 'the environment' : 'the local install record'}).\n`
+)
 
 const url = new URL(
   `/v2/projects/${projectId}/translations`,

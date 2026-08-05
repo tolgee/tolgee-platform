@@ -67,10 +67,12 @@ it. The wizard asks how you want that to happen.
 
 **`auto`** — the generated server registers itself on boot, using the
 server-wide registration secret. The wizard also asks for the organization slug
-and the secret, and writes both into `.env.local`. The first successful
-registration prints a client id and a one-time client secret to save. If
-registration fails, the server logs an actionable error and keeps serving the
-manifest, so manual registration remains available.
+and the secret, and writes both into `.env.local`. Tolgee shows the client
+secret only at that first registration, so the SDK stores the install record in
+`.tolgee-dev/install.json` (gitignored) and reads it back later — nothing to
+copy, and the secret is never printed. If registration fails, the server logs an
+actionable error and keeps serving the manifest, so manual registration remains
+available.
 
 Either way, the last step is the same and is done per project:
 **Project → Settings → Apps**, enable the app.

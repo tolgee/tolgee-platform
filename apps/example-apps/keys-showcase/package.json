@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "npm run dev:clean && concurrently -k -n vite,server,tunnel -c blue,green,yellow \"npm:dev:frontend\" \"npm:dev:server\" \"npm:dev:tunnel\"",
-    "dev:clean": "node -e \"require('node:fs').rmSync('.tolgee-dev', { recursive: true, force: true })\"",
+    "dev:clean": "node -e \"require('node:fs').rmSync('.tolgee-dev/tunnel.json', { force: true })\"",
     "dev:frontend": "vite",
     "dev:server": "tsx watch --env-file-if-exists=.env.local server/index.ts",
     "dev:tunnel": "tsx --env-file-if-exists=.env.local scripts/dev-tunnel.ts",

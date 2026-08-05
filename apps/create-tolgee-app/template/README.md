@@ -74,13 +74,26 @@ This registers a **native** app — one owned by no organization. Which
 organizations may use it is a separate, admin-only decision, made in Tolgee
 under **Administration → Apps**; a project owner then enables it per project.
 (Setting `TOLGEE_ORGANIZATION_SLUG` too installs the app into that single
-organization instead, skipping the admin step.) The **first** registration prints a client id and a client
-secret — the secret is shown only that once, so paste both into `.env.local`:
+organization instead, skipping the admin step.)
+
+The **first** registration is the only time Tolgee hands out the client secret —
+it stores just a hash of it. So the SDK saves the whole install record to
+`.tolgee-dev/install.json` (gitignored) rather than printing it, and reads it
+back on later runs: `loadTolgeeAppConfig()` and `fetchAppAccessToken()` find the
+credentials with nothing wired up. Registering again only repoints the existing
+install; the stored secret stays put.
+
+Set these in `.env.local` **only where the app is deployed**, with secrets
+injected by the platform:
 
 ```dotenv
 TOLGEE_APP_CLIENT_ID=…
 TOLGEE_APP_CLIENT_SECRET=…
 ```
+
+The environment wins over the stored file, so a deployment is never overridden
+by a developer's leftover state. Setting either one makes the SDK ignore the
+file entirely — set both or neither.
 
 A failed registration never takes the server down; it logs what went wrong and
 keeps serving `/manifest.json` so you can fall back to registering by hand.
@@ -104,6 +117,8 @@ server/index.ts                 Express: /manifest.json + self-registration
 server/devTunnel.ts             the URLs Tolgee reaches this app at
 scripts/dev-tunnel.ts           opens the tunnel and publishes those URLs
 src/App.tsx                     the dashboard page
+.tolgee-dev/tunnel.json         the URLs currently in play (gitignored)
+.tolgee-dev/install.json        install id + app credentials (gitignored)
 ```
 
 ## What the SDK gives you
@@ -123,9 +138,11 @@ From `@tolgee/apps-sdk/server`:
 - **`loadTolgeeAppConfig()`** — reads the environment into a typed config.
 - **`renderManifest(template, baseUrl)`** — substitutes `__BASE_URL__`.
 - **`tolgeeAppCorsHeaders()`** — CORS headers for endpoints the webapp calls.
-- **`selfRegisterApp(…)`** — the boot-time registration used above.
-- **`fetchAppAccessToken(…)`** — exchanges the client id/secret for an access
-  token, for work the app does on its own behalf rather than a user's.
+- **`selfRegisterApp(…)`** — the boot-time registration used above; stores the
+  issued credentials in `.tolgee-dev/install.json`.
+- **`fetchAppAccessToken()`** — exchanges the client id/secret for an access
+  token, for work the app does on its own behalf rather than a user's. Called
+  with no arguments it uses the stored credentials.
 
 ## Changing what the app contributes
 

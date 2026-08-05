@@ -33,7 +33,13 @@ SERVER_PORT={{serverPort}}
 # instead of registering it server-wide.
 # TOLGEE_ORGANIZATION_SLUG=my-org
 
-# Credentials a successful registration returns. The client secret is shown
-# once, at first registration — paste it here to keep it.
+# --- App credentials (machine-to-machine) ------------------------------------
+# Leave these unset in development. Registration stores the credentials Tolgee
+# issues in .tolgee-dev/install.json (gitignored) and the SDK reads them back,
+# so there is nothing to copy.
+#
+# Set them only where the app is deployed and the secrets are injected by the
+# platform. Setting either one makes the SDK ignore the stored file entirely,
+# so set both or neither.
 # TOLGEE_APP_CLIENT_ID=
 # TOLGEE_APP_CLIENT_SECRET=

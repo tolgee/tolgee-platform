@@ -211,7 +211,9 @@ const envLocal = (answers: Answers): string => {
         ? [`TOLGEE_ORGANIZATION_SLUG=${answers.organizationSlug}`]
         : ['# TOLGEE_ORGANIZATION_SLUG=']),
       '',
-      '# Filled in from the credentials the first successful registration prints.',
+      '# Leave unset in dev: registration stores the credentials in',
+      '# .tolgee-dev/install.json and the SDK reads them from there. Set both',
+      '# only where the app is deployed and secrets are injected. See .env.example.',
       '# TOLGEE_APP_CLIENT_ID=',
       '# TOLGEE_APP_CLIENT_SECRET='
     )
@@ -248,11 +250,10 @@ const nextSteps = (answers: Answers): string[] => {
   if (answers.connectMode === 'auto') {
     steps.push(
       ...(answers.organizationSlug
-        ? [`The server registers itself in "${answers.organizationSlug}" on boot and prints`]
-        : [
-            'The server registers itself on boot as a native (server-wide) app and prints',
-          ]),
-      'a one-time client secret — copy both credentials into .env.local.',
+        ? [`The server registers itself in "${answers.organizationSlug}" on boot.`]
+        : ['The server registers itself on boot as a native (server-wide) app.']),
+      'Tolgee shows the client secret only then, so the SDK stores the credentials',
+      'in .tolgee-dev/install.json (gitignored) — nothing to copy.',
       ...(answers.organizationSlug
         ? []
         : [

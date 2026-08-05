@@ -13,6 +13,10 @@ import { config } from './config'
  * Registering again with a different `manifestUrl` repoints the existing
  * install, which is how a dev tunnel's new hostname takes effect on restart.
  *
+ * The SDK stores the credentials Tolgee issues in `.tolgee-dev/install.json`
+ * (gitignored) and reads them back through `loadTolgeeAppConfig()`, so nothing
+ * has to be copied by hand and the secret is never printed.
+ *
  * Never throws: `/manifest.json` must keep serving even when registration
  * fails, so manual registration stays possible.
  */
@@ -50,9 +54,10 @@ export const selfRegisterIfConfigured = async (
     }
 
     console.log(`[register] registered ${where} (install ${result.installId}).`)
-    console.log('[register] Save these into .env.local — the secret is shown only once:')
-    console.log(`  TOLGEE_APP_CLIENT_ID=${result.clientId}`)
-    console.log(`  TOLGEE_APP_CLIENT_SECRET=${result.clientSecret}`)
+    console.log(
+      `[register] credentials stored in ${result.credentialsPath} (gitignored); ` +
+        'the SDK reads them from there — nothing to copy.'
+    )
     if (result.native) {
       console.log(
         '[register] Next: grant it to an organization under Administration → Apps, ' +
