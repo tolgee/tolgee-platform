@@ -16,7 +16,9 @@
 
 package io.tolgee.util
 
+import io.micrometer.core.instrument.Timer
 import io.sentry.Sentry
+import io.tolgee.Metrics
 import io.tolgee.exceptions.ErrorException
 import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.exceptions.ExpectedException
@@ -34,25 +36,36 @@ import java.io.OutputStreamWriter
 class StreamingResponseBodyProvider(
   private val entityManager: EntityManager,
   private val objectMapper: ObjectMapper,
+  private val metrics: Metrics,
 ) : Logging {
-  fun createStreamingResponseBody(fn: (os: OutputStream) -> Unit): StreamingResponseBody {
+  fun createStreamingResponseBody(
+    streamType: StreamType,
+    fn: (os: OutputStream) -> Unit,
+  ): StreamingResponseBody {
     return StreamingResponseBody {
-      val session = entityManager.unwrap(Session::class.java)
+      val sample = Timer.start()
+      try {
+        val session = entityManager.unwrap(Session::class.java)
 
-      session.doWork { connection ->
-        fn(it)
-        // Manually dispose the connection because spring has a hard time doing so by itself
-        connection.close()
+        session.doWork { connection ->
+          fn(it)
+          // Manually dispose the connection because spring has a hard time doing so by itself
+          connection.close()
+        }
+
+        session.close()
+      } finally {
+        sample.stop(metrics.streamDurationTimer(streamType))
       }
-
-      // Manually dispose the connection because spring has a hard time doing so by itself
-      session.close()
     }
   }
 
-  fun streamNdJson(stream: (write: (message: Any?) -> Unit) -> Unit): ResponseEntity<StreamingResponseBody> {
+  fun streamNdJson(
+    streamType: StreamType,
+    stream: (write: (message: Any?) -> Unit) -> Unit,
+  ): ResponseEntity<StreamingResponseBody> {
     return ResponseEntity.ok().disableAccelBuffering().body(
-      this.createStreamingResponseBody { outputStream ->
+      this.createStreamingResponseBody(streamType) { outputStream ->
         OutputStreamWriter(outputStream).use { writer ->
           val write =
             { message: Any? -> writer.writeJson(message) }

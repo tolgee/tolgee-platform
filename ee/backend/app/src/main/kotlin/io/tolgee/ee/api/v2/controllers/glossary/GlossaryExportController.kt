@@ -10,6 +10,7 @@ import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthTokenType
 import io.tolgee.security.authorization.RequiresFeatures
 import io.tolgee.security.authorization.UseDefaultPermissions
+import io.tolgee.util.StreamType
 import io.tolgee.util.StreamingResponseBodyProvider
 import org.apache.tomcat.util.http.fileupload.IOUtils
 import org.springframework.http.ContentDisposition
@@ -58,7 +59,7 @@ class GlossaryExportController(
     val stream = glossaryExportService.exportCsv(glossary)
 
     return ResponseEntity.ok().headers(headers).body(
-      streamingResponseBodyProvider.createStreamingResponseBody { out: OutputStream ->
+      streamingResponseBodyProvider.createStreamingResponseBody(StreamType.EXPORT_GLOSSARY) { out: OutputStream ->
         stream.use { IOUtils.copy(stream, out) }
         out.close()
       },

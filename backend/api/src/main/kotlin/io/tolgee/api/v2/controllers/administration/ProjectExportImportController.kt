@@ -9,6 +9,7 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.service.projectExportImport.ProjectExportImportExporter
 import io.tolgee.service.projectExportImport.ProjectExportImportImporter
+import io.tolgee.util.StreamType
 import io.tolgee.util.StreamingResponseBodyProvider
 import io.tolgee.util.VersionProvider
 import org.springframework.http.ContentDisposition
@@ -58,7 +59,7 @@ class ProjectExportImportController(
     val tempFile = export.path
     try {
       val body =
-        streamingResponseBodyProvider.createStreamingResponseBody { outputStream ->
+        streamingResponseBodyProvider.createStreamingResponseBody(StreamType.EXPORT_PROJECT) { outputStream ->
           try {
             Files.copy(tempFile, outputStream)
           } finally {

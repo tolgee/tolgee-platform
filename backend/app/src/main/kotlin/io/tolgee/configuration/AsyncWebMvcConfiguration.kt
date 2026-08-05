@@ -1,29 +1,38 @@
 package io.tolgee.configuration
 
-import io.sentry.spring7.SentryTaskDecorator
+import io.tolgee.Metrics
+import io.tolgee.configuration.tolgee.TolgeeProperties
+import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.core.task.AsyncTaskExecutor
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import org.springframework.security.task.DelegatingSecurityContextAsyncTaskExecutor
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
 @Configuration
-class AsyncWebMvcConfiguration : WebMvcConfigurer {
+class AsyncWebMvcConfiguration(
+  private val asyncExecutorFactory: AsyncExecutorFactory,
+  private val tolgeeProperties: TolgeeProperties,
+  private val metrics: Metrics,
+) : WebMvcConfigurer {
   override fun configureAsyncSupport(configurer: AsyncSupportConfigurer) {
-    configurer.setTaskExecutor(asyncExecutor())
+    // WebSecurityConfig disables AuthorizationFilter on ASYNC dispatch and every interceptor bails
+    // there, so a streaming body can only reach the caller's principal through this wrapper.
+    configurer.setTaskExecutor(DelegatingSecurityContextAsyncTaskExecutor(streamingAsyncExecutor()))
   }
 
-  private fun asyncExecutor(): AsyncTaskExecutor {
-    val asyncExecutor = ThreadPoolTaskExecutor()
-    // Chain decorators: OTEL context propagation + Sentry context propagation
-    asyncExecutor.setTaskDecorator(
-      CompositeTaskDecorator(
-        OtelContextTaskDecorator(),
-        SentryTaskDecorator(),
-      ),
+  /** Kept unwrapped so Boot's executor metrics, which type-check the bean, still bind to it. */
+  @Bean(STREAMING_EXECUTOR_BEAN_NAME)
+  fun streamingAsyncExecutor(): ThreadPoolTaskExecutor =
+    asyncExecutorFactory.create(
+      threadNamePrefix = AsyncExecutorFactory.STREAMING_THREAD_NAME_PREFIX,
+      maxThreads = asyncExecutorFactory.streamingMaxThreads,
+      queueCapacity = asyncExecutorFactory.streamingQueueCapacity,
+      keepAliveSeconds = tolgeeProperties.async.streaming.keepAliveSeconds,
+      rejectedExecutionHandler = StreamingAbortPolicy { metrics.streamingRejectedCounter.increment() },
     )
-    asyncExecutor.initialize()
-    return DelegatingSecurityContextAsyncTaskExecutor(asyncExecutor)
+
+  companion object {
+    const val STREAMING_EXECUTOR_BEAN_NAME = "streamingAsyncExecutor"
   }
 }

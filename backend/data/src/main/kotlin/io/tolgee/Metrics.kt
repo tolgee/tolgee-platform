@@ -5,6 +5,7 @@ import io.micrometer.core.instrument.DistributionSummary
 import io.micrometer.core.instrument.Gauge
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Timer
+import io.tolgee.util.StreamType
 import org.springframework.stereotype.Component
 import java.time.Duration
 
@@ -268,4 +269,23 @@ class Metrics(
       .description("Time spent refreshing language stats")
       .register(meterRegistry)
   }
+
+  // ==========================================================================
+  // Asynchronous Execution Metrics
+  // ==========================================================================
+
+  val streamingRejectedCounter: Counter by lazy {
+    Counter
+      .builder("tolgee.async.streaming.rejected")
+      .description("Number of streaming requests rejected because the streaming pool and its queue were full")
+      .register(meterRegistry)
+  }
+
+  fun streamDurationTimer(streamType: StreamType): Timer =
+    Timer
+      .builder("tolgee.async.streaming.duration")
+      .description("Time a streaming response occupies a streaming thread and a database connection")
+      .tag("stream_type", streamType.tag)
+      .publishPercentileHistogram()
+      .register(meterRegistry)
 }

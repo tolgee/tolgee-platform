@@ -1,0 +1,147 @@
+package io.tolgee.configuration
+
+import io.tolgee.testing.assert
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.web.server.LocalServerPort
+import org.springframework.http.HttpStatus
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
+import java.net.URI
+import java.net.http.HttpClient
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+
+/**
+ * MockMvc cannot answer this: it never performs the ASYNC dispatch that Spring's
+ * WebAsyncManager triggers when the task executor rejects, so a MockMvc test sees a staged 200 and
+ * an unset async result whether or not the 503 actually reaches a client. Only a real container
+ * proves the rejection becomes a response.
+ */
+@SpringBootTest(
+  webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+  properties = [
+    "tolgee.async.streaming.max-threads = 1",
+    "tolgee.async.streaming.queue-capacity = 0",
+    "tolgee.internal.controller-enabled = true",
+    "tolgee.rate-limits.global-limits = false",
+    "tolgee.rate-limits.endpoint-limits = false",
+    "tolgee.rate-limits.authentication-limits = false",
+  ],
+)
+class StreamingBackpressureHttpTest {
+  @LocalServerPort
+  var port: Int = 0
+
+  @Autowired
+  @Qualifier(AsyncWebMvcConfiguration.STREAMING_EXECUTOR_BEAN_NAME)
+  lateinit var streamingAsyncExecutor: ThreadPoolTaskExecutor
+
+  private val release = CountDownLatch(1)
+  private val client: HttpClient = HttpClient.newHttpClient()
+
+  @AfterEach
+  fun releasePool() {
+    release.countDown()
+  }
+
+  @Test
+  fun `streams normally while the pool has capacity`() {
+    val response = get()
+
+    response.statusCode().assert.isEqualTo(HttpStatus.OK.value())
+    response.body().assert.isEqualTo("streamed")
+  }
+
+  @Test
+  fun `answers 503 with Retry-After once the pool and its queue are full`() {
+    occupyTheOnlyStreamingThread()
+
+    val response = get()
+
+    response.statusCode().assert.isEqualTo(HttpStatus.SERVICE_UNAVAILABLE.value())
+    response.body().assert.contains("server_busy")
+    response
+      .headers()
+      .firstValue("Retry-After")
+      .orElse(null)
+      .assert
+      .isEqualTo("5")
+  }
+
+  /**
+   * HeaderWriterFilter is configured to write eagerly so it cannot race a streaming task; that also
+   * means nothing re-writes these afterwards, so the 503 path must carry them over its reset().
+   */
+  @Test
+  fun `security headers survive on both a streamed response and a rejected one`() {
+    val streamed = get().headers()
+    streamed
+      .firstValue("X-Content-Type-Options")
+      .orElse(null)
+      .assert
+      .isEqualTo("nosniff")
+    streamed
+      .firstValue("X-Frame-Options")
+      .orElse(null)
+      .assert
+      .isEqualTo("DENY")
+
+    occupyTheOnlyStreamingThread()
+
+    val rejected = get()
+    rejected.statusCode().assert.isEqualTo(HttpStatus.SERVICE_UNAVAILABLE.value())
+    rejected
+      .headers()
+      .firstValue("X-Content-Type-Options")
+      .orElse(null)
+      .assert
+      .isEqualTo("nosniff")
+    rejected
+      .headers()
+      .firstValue("X-Frame-Options")
+      .orElse(null)
+      .assert
+      .isEqualTo("DENY")
+  }
+
+  /** The staged streaming headers must not survive onto the error response. */
+  @Test
+  fun `the rejected response does not carry the staged streaming headers`() {
+    occupyTheOnlyStreamingThread()
+
+    val headers = get().headers()
+
+    headers
+      .firstValue("Content-Disposition")
+      .isPresent.assert
+      .isFalse()
+    headers
+      .firstValue("ETag")
+      .isPresent.assert
+      .isFalse()
+  }
+
+  private fun occupyTheOnlyStreamingThread() {
+    val occupied = CountDownLatch(1)
+    streamingAsyncExecutor.execute {
+      occupied.countDown()
+      release.await(30, TimeUnit.SECONDS)
+    }
+    occupied.await(10, TimeUnit.SECONDS).assert.isTrue()
+  }
+
+  private fun get(): HttpResponse<String> {
+    val request =
+      HttpRequest
+        .newBuilder(URI.create("http://localhost:$port/internal/streaming/stream"))
+        .timeout(java.time.Duration.ofSeconds(20))
+        .GET()
+        .build()
+    return client.send(request, HttpResponse.BodyHandlers.ofString())
+  }
+}

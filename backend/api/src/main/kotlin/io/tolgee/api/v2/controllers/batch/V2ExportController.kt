@@ -19,6 +19,7 @@ import io.tolgee.security.ratelimit.RateLimitService
 import io.tolgee.service.export.ExportService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.project.ProjectFeatureGuard
+import io.tolgee.util.StreamType
 import io.tolgee.util.StreamingResponseBodyProvider
 import io.tolgee.util.nullIfEmpty
 import org.apache.tomcat.util.http.fileupload.IOUtils
@@ -195,7 +196,7 @@ class V2ExportController(
     return PreparedResponse(
       headers = headers,
       body =
-        streamingResponseBodyProvider.createStreamingResponseBody { out: OutputStream ->
+        streamingResponseBodyProvider.createStreamingResponseBody(StreamType.EXPORT_SINGLE_FILE) { out: OutputStream ->
           IOUtils.copy(stream, out)
           stream.close()
           out.close()
@@ -209,7 +210,7 @@ class V2ExportController(
     return PreparedResponse(
       headers = httpHeaders,
       body =
-        streamingResponseBodyProvider.createStreamingResponseBody { out: OutputStream ->
+        streamingResponseBodyProvider.createStreamingResponseBody(StreamType.EXPORT_ZIP) { out: OutputStream ->
           streamZipResponse(out, exported)
         },
     )
