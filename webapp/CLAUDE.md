@@ -5,7 +5,8 @@
 When adding new translation keys, use the Tolgee REST API at `https://app.tolgee.io`. The API key is stored in
 `.env.development.local` as `VITE_APP_TOLGEE_API_KEY`.
 
-**Important:** Do NOT edit local translation files (`public/i18n/en.json`, etc.). Tolgee serves translations at runtime
+**Important:** Do NOT edit local translation files (`src/i18n/en.json`, etc. — the `pull.path` in
+`.tolgeerc.json`). Tolgee serves translations at runtime
 via its API/CDN, so local files are only fallbacks shipped with the repo. New keys only need to be created via the
 Tolgee REST API — the running app will pick them up automatically.
 
@@ -75,11 +76,10 @@ curl -X POST "https://app.tolgee.io/v2/image-upload" \
 
 Response includes `"id": 123456` — this is the `uploadedImageId` for the next step.
 
-### 3. Create Keys with Translations, Tags, and Screenshots
+### 3. Create Keys with Translations and Screenshots
 
-Use `single-step-import-resolvable` to create all keys at once with their translations, tags, and screenshot
-references in a single API call. This replaces the need for separate key creation, tagging, and screenshot
-association steps.
+Use `single-step-import-resolvable` to create all keys at once with their translations and screenshot
+references in a single API call.
 
 **Endpoint:** `POST https://app.tolgee.io/v2/projects/single-step-import-resolvable`
 
@@ -92,9 +92,11 @@ curl -X POST "https://app.tolgee.io/v2/projects/single-step-import-resolvable" \
       {
         "name": "my_key",
         "translations": {
-          "en": "English text"
+          "en": {
+            "text": "English text",
+            "resolution": "EXPECT_NO_CONFLICT"
+          }
         },
-        "tags": ["draft: my-feature-branch"],
         "screenshots": [{
           "uploadedImageId": 123456,
           "positions": [{"x": 100, "y": 200, "width": 150, "height": 40}]
@@ -107,9 +109,48 @@ curl -X POST "https://app.tolgee.io/v2/projects/single-step-import-resolvable" \
 Map each entry from `getVisibleKeys()` to a key in the `keys` array, using the `position` values for `positions`.
 A key appearing multiple times (e.g. repeated buttons) should have multiple entries in `positions`.
 Only provide translations for the base language (English [en]).
-Tag each key using the branch tagging convention (see below): `"tags": ["draft: <feature-name>"]`.
 
-### 4. Upload Context (Related Keys)
+The request accepts `name`, `namespace`, `translations` and `screenshots` — **there is no `tags` field**.
+A `tags` array here is silently ignored and the call still returns 200, so tag in a separate step (see below).
+
+`resolution` is `OVERRIDE` by default, which overwrites an existing translation. Use
+`EXPECT_NO_CONFLICT` when the keys are meant to be new — the import then fails instead of
+overwriting someone's existing translation, and the response reports `unresolvedConflicts`.
+
+### 4. Tag Keys as Draft
+
+Tag keys with the current branch name (without username prefix). Format: `draft: <feature-name>`
+
+**Endpoint:** `PUT https://app.tolgee.io/v2/projects/tag-complex`
+
+```bash
+curl -X PUT "https://app.tolgee.io/v2/projects/tag-complex" \
+  -H "X-API-Key: ${VITE_APP_TOLGEE_API_KEY}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "filterKeys": [
+      { "name": "my_translation_key_1" },
+      { "name": "my_translation_key_2", "namespace": "my-namespace" }
+    ],
+    "tagFiltered": ["draft: my-feature-branch"]
+  }'
+```
+
+Each `filterKeys` entry matches on name **and** namespace, so pass the `namespace` of every
+namespaced key (the `keyNamespace` from `getVisibleKeys()`). Omitting it means the default
+namespace, and a namespaced key silently stays untagged while the call still returns 200.
+
+Verify the tags landed rather than trusting the status code — query the keys back with
+`filterTag` and check the count matches:
+
+```bash
+curl -s -G "https://app.tolgee.io/v2/projects/translations" \
+  -H "X-API-Key: ${VITE_APP_TOLGEE_API_KEY}" \
+  --data-urlencode "languages=en" \
+  --data-urlencode "filterTag=draft: my-feature-branch"
+```
+
+### 5. Upload Context (Related Keys)
 
 Store which keys appear together on the same page/component for better MT suggestions. Requires at least 2 keys.
 
