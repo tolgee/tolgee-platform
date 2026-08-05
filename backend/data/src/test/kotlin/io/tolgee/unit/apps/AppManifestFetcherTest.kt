@@ -1,6 +1,5 @@
 package io.tolgee.unit.apps
 
-import tools.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.configuration.tolgee.AppsProperties
 import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.constants.Message
@@ -18,6 +17,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
+import tools.jackson.module.kotlin.jacksonObjectMapper
 
 class AppManifestFetcherTest {
   private val manifestJson =

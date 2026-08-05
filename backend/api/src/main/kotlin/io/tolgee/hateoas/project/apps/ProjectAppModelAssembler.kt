@@ -1,10 +1,10 @@
 package io.tolgee.hateoas.project.apps
 
-import tools.jackson.databind.ObjectMapper
-import tools.jackson.module.kotlin.readValue
 import io.tolgee.dtos.apps.AppManifest
 import io.tolgee.model.apps.AppInstall
 import org.springframework.stereotype.Component
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.module.kotlin.readValue
 
 @Component
 class ProjectAppModelAssembler(

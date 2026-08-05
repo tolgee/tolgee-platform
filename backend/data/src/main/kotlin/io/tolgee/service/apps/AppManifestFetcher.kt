@@ -1,7 +1,5 @@
 package io.tolgee.service.apps
 
-import tools.jackson.databind.ObjectMapper
-import tools.jackson.module.kotlin.readValue
 import io.tolgee.configuration.tolgee.AppsProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.apps.AppManifest
@@ -9,6 +7,8 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.enums.Scope
 import io.tolgee.util.UrlSecurity
 import org.springframework.stereotype.Component
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.module.kotlin.readValue
 import java.net.URI
 
 @Component
