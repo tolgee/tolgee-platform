@@ -61,6 +61,38 @@ import org.springframework.boot.context.properties.ConfigurationProperties
         ),
       ],
     ),
+    DocProperty(
+      name = "oauth2",
+      prefix = "tolgee.oauth2",
+      displayName = "OAuth2 authorization server",
+      description = "Settings for Tolgee acting as an OAuth 2.1 authorization server (browser-extension login, MCP).",
+      children = [
+        DocProperty(
+          name = "browser-extension-redirect-uris",
+          description =
+            "Exact redirect URIs of the Tolgee browser extension, e.g. " +
+              "`https://<extension-id>.chromiumapp.org/`. The extension OAuth client is only registered when this " +
+              "is set.",
+          defaultValue = "",
+        ),
+        DocProperty(
+          name = "cimd.enabled",
+          description = "Whether URL-form (Client ID Metadata Document) client ids are resolved at all.",
+          defaultValue = "false",
+        ),
+        DocProperty(
+          name = "cimd.allowed-hosts",
+          description =
+            "Hosts allowed as CIMD client-id URLs. CIMD resolves nothing while this is empty (fail-closed), even " +
+              "when enabled — the allow-list is the primary bound on the outbound fetch, on top of the SSRF guard.\n" +
+              "\n" +
+              ":::danger\n" +
+              "Only add hosts you fully trust: a CIMD host controls the redirect URIs of the client it registers.\n" +
+              ":::\n\n",
+          defaultValue = "",
+        ),
+      ],
+    ),
   ],
   global = true,
 )
