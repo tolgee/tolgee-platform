@@ -1690,6 +1690,8 @@ export interface components {
       client_id: string;
       client_secret: string;
       grant_type: string;
+      /** Format: int64 */
+      install_id?: number;
     };
     AppDeliveryModel: {
       /**
@@ -3588,7 +3590,8 @@ export interface components {
         | "app_not_registered"
         | "app_already_registered"
         | "app_not_found"
-        | "app_secret_not_found";
+        | "app_secret_not_found"
+        | "app_install_id_required";
       params?: { [key: string]: unknown }[];
     };
     ExistenceEntityDescription: {
@@ -7562,7 +7565,8 @@ export interface components {
         | "app_not_registered"
         | "app_already_registered"
         | "app_not_found"
-        | "app_secret_not_found";
+        | "app_secret_not_found"
+        | "app_install_id_required";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };
