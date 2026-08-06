@@ -61,7 +61,7 @@ class ActivityHandlerInterceptor(
   ) {
     val activityRevision = activityHolder.activityRevision
     if (activityRevision.id == 0L && activityHolder.activity?.saveWithoutModification == true) {
-      activityRevision.authorId = authenticationFacade.attributableUserId
+      activityRevision.authorId = authenticationFacade.actingPersonUserId
       activityRevision.appInstallId = authenticationFacade.actingAppInstallId
       activityService.storeActivityData(activityRevision, activityHolder.modifiedEntities)
     }

@@ -767,13 +767,7 @@ class SecurityService(
    * whoever happened to register it.
    */
   private val languageRestrictedUserId: Long?
-    get() {
-      if (!authenticationFacade.isAppAuth) return activeUser.id
-      val appAuth = authenticationFacade.appAuthentication
-      appAuth.actingAsUserAccount?.let { return it.id }
-      if (appAuth.isInstallContext) return null
-      return activeUser.id
-    }
+    get() = authenticationFacade.actingPersonUserId
 
   private val activeApiKey: ApiKeyDto?
     get() = if (authenticationFacade.isProjectApiKeyAuth) authenticationFacade.projectApiKey else null

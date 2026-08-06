@@ -24,7 +24,7 @@ class ActivityRevisionInitializer(
 ) : Logging {
   fun initialize() {
     revision.isInitializedByInterceptor = true
-    revision.authorId = authenticationFacade.attributableUserId ?: revision.authorId
+    revision.authorId = authenticationFacade.actingPersonUserId ?: revision.authorId
     revision.appInstallId = authenticationFacade.actingAppInstallId ?: revision.appInstallId
     revision.organizationId = organizationId ?: revision.organizationId
     revision.projectId = project?.id ?: revision.projectId

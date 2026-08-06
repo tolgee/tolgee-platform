@@ -6,6 +6,7 @@ import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andIsUnauthorized
+import io.tolgee.model.UserAccount
 import io.tolgee.security.authentication.AppTokenService
 import io.tolgee.service.apps.AppManifestHttpClient
 import io.tolgee.service.apps.AppsTestFixtures
@@ -29,8 +30,8 @@ import java.util.Date
 
 /**
  * Covers what an app token may and may not reach. The install below is granted only
- * `translations.edit`, while its author is the organization owner — so anything the token reaches
- * beyond that grant is the author's own privileges leaking through.
+ * `translations.edit`, while the person who registered it is the organization owner — so anything
+ * the token reaches beyond that grant is that person's privileges leaking through.
  */
 class AppTokenAuthorizationTest : AuthorizedControllerTest() {
   @Autowired
@@ -154,10 +155,23 @@ class AppTokenAuthorizationTest : AuthorizedControllerTest() {
     ).andIsForbidden.andHasErrorMessage(Message.OPERATION_NOT_PERMITTED)
   }
 
+  /** The install belongs to the organization; the person who registered it may have left. */
   @Test
-  fun `rejects a token whose author has been disabled`() {
+  fun `keeps working once its author has been disabled`() {
     userAccountService.disable(testData.user.id)
-    asApp(get("/v2/projects/${testData.project.id}/translations")).andIsUnauthorized
+    asApp(get("/v2/projects/${testData.project.id}/translations")).andIsOk
+  }
+
+  /** The author's server role must not reach the install, whatever it is. */
+  @Test
+  fun `does not gain the author's server-admin privileges`() {
+    val author = userAccountService.get(testData.user.id)
+    author.role = UserAccount.Role.ADMIN
+    userAccountService.save(author)
+
+    asApp(get("/v2/projects/${testData.siblingProject.id}/translations"))
+      .andIsForbidden
+      .andHasErrorMessage(Message.APP_NOT_ENABLED_FOR_PROJECT)
   }
 
   @Test

@@ -139,17 +139,13 @@ class LanguageService(
     return language
   }
 
+  /** @param userId null applies no per-user language narrowing; see [viewLanguageIdsOf]. */
   fun getImplicitLanguages(
     projectId: Long,
-    userId: Long,
+    userId: Long?,
   ): Set<LanguageDto> {
     val all = self.getProjectLanguages(projectId)
-    val viewLanguageIds =
-      permissionService
-        .getProjectPermissionData(
-          projectId,
-          userId,
-        ).computedPermissions.viewLanguageIds
+    val viewLanguageIds = viewLanguageIdsOf(projectId, userId)
 
     val permitted =
       if (viewLanguageIds.isNullOrEmpty()) {
@@ -274,10 +270,25 @@ class LanguageService(
   }
 
   @Transactional
+  /**
+   * @param userId the person whose per-language grants narrow the result, or null when there is
+   *   none — an app install acting as itself has no per-language grant and must not borrow the
+   *   grants of whoever registered it.
+   */
+  private fun viewLanguageIdsOf(
+    projectId: Long,
+    userId: Long?,
+  ): Set<Long>? {
+    userId ?: return null
+    return permissionService
+      .getProjectPermissionData(projectId, userId)
+      .computedPermissions.viewLanguageIds
+  }
+
   fun getLanguagesForTranslationsView(
     languages: Set<String>?,
     projectId: Long,
-    userId: Long,
+    userId: Long?,
   ): Set<LanguageDto> {
     val canViewTranslations = securityService.currentPermittedScopesContain(Scope.TRANSLATIONS_VIEW)
 
@@ -293,15 +304,10 @@ class LanguageService(
 
   private fun findByTagsAndFilterPermitted(
     projectId: Long,
-    userId: Long,
+    userId: Long?,
     languages: Set<String>,
   ): Set<LanguageDto> {
-    val viewLanguageIds =
-      permissionService
-        .getProjectPermissionData(
-          projectId,
-          userId,
-        ).computedPermissions.viewLanguageIds
+    val viewLanguageIds = viewLanguageIdsOf(projectId, userId)
     return if (viewLanguageIds.isNullOrEmpty()) {
       findByTags(languages, projectId)
     } else {

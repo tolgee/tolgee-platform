@@ -110,12 +110,14 @@ class AuthenticationFacade(
         ?: throw AuthenticationException(Message.UNAUTHENTICATED)
 
   /**
-   * The person a change should be recorded against, or null when an app acted as itself. An
-   * install-context app token is not a person: attributing its writes to the human who registered
-   * the install would credit them with work they did not do, and keep crediting them after they
-   * left. [actingAppInstallId] identifies the actor in that case.
+   * The person this request is on behalf of, or null when an app install acts as itself.
+   *
+   * An install-context app token is not a person: it belongs to an organization and outlives whoever
+   * registered it. Anything that is about a person — who a change is attributed to, whose
+   * per-language grants narrow the request — must use this rather than the principal, which on that
+   * path is only the registering user's identity. [actingAppInstallId] identifies the actor instead.
    */
-  val attributableUserId: Long?
+  val actingPersonUserId: Long?
     get() {
       if (!isAppAuth) return authenticatedUserOrNull?.id
       appAuthentication.actingAsUserAccount?.let { return it.id }
