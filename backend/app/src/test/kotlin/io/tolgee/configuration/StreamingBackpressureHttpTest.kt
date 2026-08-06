@@ -1,6 +1,7 @@
 package io.tolgee.configuration
 
 import io.tolgee.Metrics
+import io.tolgee.constants.Message
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assert
@@ -12,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.http.HttpStatus
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
+import tools.jackson.databind.ObjectMapper
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
@@ -80,7 +82,7 @@ class StreamingBackpressureHttpTest {
       .isEqualTo(rejectedBefore + 1)
 
     response.statusCode().assert.isEqualTo(HttpStatus.SERVICE_UNAVAILABLE.value())
-    response.body().assert.contains("server_busy")
+    errorCodeOf(response.body()).assert.isEqualTo(Message.SERVER_BUSY.code)
     response
       .headers()
       .firstValue("Retry-After")
@@ -160,6 +162,9 @@ class StreamingBackpressureHttpTest {
     }
     occupied.await(10, TimeUnit.SECONDS).assert.isTrue()
   }
+
+  /** A real HTTP client, so the MockMvc andAssertThatJson helper is not available here. */
+  private fun errorCodeOf(body: String): String? = ObjectMapper().readTree(body).get("code")?.asString()
 
   private fun get(): HttpResponse<String> {
     val request =
