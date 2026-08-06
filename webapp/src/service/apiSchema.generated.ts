@@ -152,6 +152,10 @@ export interface paths {
     /** Returns specific API key info */
     get: operations["get_26"];
   };
+  "/v2/apps/self/installations": {
+    /** Returns the install the calling install-context token belongs to, together with the projects the app is currently enabled for and the organization owning each of them. Requires a token from the client-credentials grant — a user-context token (the one the dashboard iframe gets) is refused, because it acts for a single user who need not be a member of every project the install is enabled for. A collection is returned so that an app holding several installs on one server stays representable. */
+    get: operations["getSelfInstallations"];
+  };
   "/v2/auth-provider": {
     get: operations["getCurrentAuthProvider"];
     delete: operations["deleteCurrentAuthProvider"];
@@ -1644,6 +1648,35 @@ export interface components {
       requestedScopes: string[];
       version: string;
     };
+    AppSelfEnabledProjectModel: {
+      /** Format: int64 */
+      id: number;
+      name: string;
+      organization: components["schemas"]["AppSelfProjectOrganizationModel"];
+    };
+    AppSelfInstallationModel: {
+      appId: string;
+      /** @description Projects the app is currently enabled for. These are the only projects its token may act on; the list changes whenever a project owner enables or disables the app. */
+      enabledProjects: components["schemas"]["AppSelfEnabledProjectModel"][];
+      /**
+       * Format: int64
+       * @description Id of the install the calling token belongs to
+       */
+      id: number;
+      name: string;
+      /** @description True when the install belongs to no organization — a native (server-level) install a server admin makes available to organizations. */
+      native: boolean;
+      /** @description Permission scopes granted to the install at consent time */
+      scopes: string[];
+      version: string;
+    };
+    /** @description Organization owning the project, so a multi-tenant app can partition its work */
+    AppSelfProjectOrganizationModel: {
+      /** Format: int64 */
+      id: number;
+      name: string;
+      slug: string;
+    };
     AppSelfRegisterRequest: {
       manifestUrl: string;
       /** @description Slug of the organization owning the app. Leave empty to register a native (server-level) app, which belongs to no organization and is made available to organizations by a server admin. */
@@ -2018,6 +2051,11 @@ export interface components {
     CollectionModelAppInstallModel: {
       _embedded?: {
         appInstalls?: components["schemas"]["AppInstallModel"][];
+      };
+    };
+    CollectionModelAppSelfInstallationModel: {
+      _embedded?: {
+        installations?: components["schemas"]["AppSelfInstallationModel"][];
       };
     };
     CollectionModelAutoTranslationConfigModel: {
@@ -3366,7 +3404,10 @@ export interface components {
         | "invalid_app_registration_secret"
         | "organization_has_no_owner"
         | "app_not_available_for_organization"
-        | "initial_user_not_found";
+        | "initial_user_not_found"
+        | "app_access_forbidden"
+        | "app_not_enabled_for_project"
+        | "app_manifest_same_origin_as_tolgee";
       params?: { [key: string]: unknown }[];
     };
     ExistenceEntityDescription: {
@@ -7290,7 +7331,10 @@ export interface components {
         | "invalid_app_registration_secret"
         | "organization_has_no_owner"
         | "app_not_available_for_organization"
-        | "initial_user_not_found";
+        | "initial_user_not_found"
+        | "app_access_forbidden"
+        | "app_not_enabled_for_project"
+        | "app_manifest_same_origin_as_tolgee";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };
@@ -10116,6 +10160,49 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["ApiKeyModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Returns the install the calling install-context token belongs to, together with the projects the app is currently enabled for and the organization owning each of them. Requires a token from the client-credentials grant — a user-context token (the one the dashboard iframe gets) is refused, because it acts for a single user who need not be a member of every project the install is enabled for. A collection is returned so that an app holding several installs on one server stays representable. */
+  getSelfInstallations: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelAppSelfInstallationModel"];
         };
       };
       /** Bad Request */

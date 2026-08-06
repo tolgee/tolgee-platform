@@ -1,5 +1,6 @@
 package io.tolgee.repository.apps
 
+import io.tolgee.model.Project
 import io.tolgee.model.apps.AppEnabledForProject
 import io.tolgee.model.apps.AppInstall
 import org.springframework.context.annotation.Lazy
@@ -25,6 +26,19 @@ interface AppEnabledForProjectRepository : JpaRepository<AppEnabledForProject, L
     """,
   )
   fun findEnabledInstallsByProjectId(projectId: Long): List<AppInstall>
+
+  @Query(
+    """
+    select p from AppEnabledForProject e
+    join e.project p
+    join fetch p.organizationOwner o
+    where e.appInstall.id = :appInstallId
+      and p.deletedAt is null
+      and o.deletedAt is null
+    order by p.name, p.id
+    """,
+  )
+  fun findEnabledProjectsByAppInstallId(appInstallId: Long): List<Project>
 
   fun deleteByAppInstallId(appInstallId: Long)
 

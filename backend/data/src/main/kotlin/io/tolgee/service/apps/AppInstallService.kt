@@ -179,6 +179,11 @@ class AppInstallService(
   }
 
   @Transactional(readOnly = true)
+  fun isNative(installId: Long): Boolean {
+    return appInstallRepository.findByOrganizationIsNullAndId(installId) != null
+  }
+
+  @Transactional(readOnly = true)
   fun getNative(installId: Long): AppInstall {
     return appInstallRepository.findByOrganizationIsNullAndId(installId)
       ?: throw NotFoundException(Message.APP_INSTALL_NOT_FOUND)

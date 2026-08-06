@@ -1,5 +1,6 @@
 package io.tolgee.api.v2.controllers.organization
 
+import io.tolgee.api.v2.controllers.apps.AppSelfInstallationsController
 import io.tolgee.api.v2.controllers.project.ProjectAppsController
 import io.tolgee.development.testDataBuilder.data.AppsTestData
 import io.tolgee.fixtures.andAssertThatJson
@@ -46,6 +47,11 @@ class OrganizationAppsDisabledTest : AuthorizedControllerTest() {
       .isEmpty()
     applicationContext
       .getBeanNamesForType(ProjectAppsController::class.java)
+      .toList()
+      .assert
+      .isEmpty()
+    applicationContext
+      .getBeanNamesForType(AppSelfInstallationsController::class.java)
       .toList()
       .assert
       .isEmpty()

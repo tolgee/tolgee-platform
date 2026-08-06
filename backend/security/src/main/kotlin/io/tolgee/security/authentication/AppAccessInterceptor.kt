@@ -18,6 +18,9 @@ import org.springframework.web.method.HandlerMethod
  * [AppAuthentication.boundProjectId]. Anywhere else the token would act with the author's own
  * privileges, so it is rejected.
  *
+ * The single exception is [AllowAppOwnInstallAccess], for endpoints that only ever report on the
+ * caller's own install.
+ *
  * Must be registered after `ProjectAuthorizationInterceptor`.
  */
 @Component
@@ -31,6 +34,7 @@ class AppAccessInterceptor(
   ): Boolean {
     if (!authenticationFacade.isAppAuth) return true
     if (deniesAppAccess(handler)) throw PermissionException(Message.APP_ACCESS_FORBIDDEN)
+    if (allowsOwnInstallAccess(handler)) return true
     if (authenticationFacade.appAuthentication.boundProjectId != null) return true
     throw PermissionException(Message.APP_ACCESS_FORBIDDEN)
   }
@@ -38,5 +42,9 @@ class AppAccessInterceptor(
   private fun deniesAppAccess(handler: HandlerMethod): Boolean {
     if (AnnotationUtils.getAnnotation(handler.method, DenyAppAccess::class.java) != null) return true
     return AnnotationUtils.findAnnotation(handler.beanType, DenyAppAccess::class.java) != null
+  }
+
+  private fun allowsOwnInstallAccess(handler: HandlerMethod): Boolean {
+    return AnnotationUtils.getAnnotation(handler.method, AllowAppOwnInstallAccess::class.java) != null
   }
 }
