@@ -75,12 +75,10 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
     performAuthPost(appsUrl(), registerBody()).andIsOk.andAssertThatJson {
       node("clientId").isString.startsWith(AppInstallService.CLIENT_ID_PREFIX)
       node("clientSecret").isString.startsWith(AppInstallService.CLIENT_SECRET_PREFIX)
-      node("clientSecretPrefix").isString.startsWith(AppInstallService.CLIENT_SECRET_PREFIX)
     }
 
     performAuthGet(appsUrl()).andIsOk.andAssertThatJson {
       node("_embedded.appInstalls[0].clientId").isString.startsWith(AppInstallService.CLIENT_ID_PREFIX)
-      node("_embedded.appInstalls[0].clientSecretPrefix").isString.startsWith(AppInstallService.CLIENT_SECRET_PREFIX)
       node("_embedded.appInstalls[0].clientSecret").isNull()
     }
   }

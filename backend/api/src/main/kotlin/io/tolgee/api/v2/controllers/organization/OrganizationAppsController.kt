@@ -3,6 +3,8 @@ package io.tolgee.api.v2.controllers.organization
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.dtos.request.RegisterAppRequest
+import io.tolgee.hateoas.apps.AppInstallSecretModel
+import io.tolgee.hateoas.apps.AppInstallSecretModelAssembler
 import io.tolgee.hateoas.organization.apps.AppInstallModel
 import io.tolgee.hateoas.organization.apps.AppInstallModelAssembler
 import io.tolgee.hateoas.organization.apps.AppManifestPreviewModel
@@ -11,6 +13,7 @@ import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresOrganizationRole
+import io.tolgee.service.apps.AppInstallSecretService
 import io.tolgee.service.apps.AppInstallService
 import jakarta.validation.Valid
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -34,7 +37,9 @@ class OrganizationAppsController(
   private val organizationHolder: OrganizationHolder,
   private val authenticationFacade: AuthenticationFacade,
   private val appInstallService: AppInstallService,
+  private val appInstallSecretService: AppInstallSecretService,
   private val appInstallModelAssembler: AppInstallModelAssembler,
+  private val appInstallSecretModelAssembler: AppInstallSecretModelAssembler,
   private val appManifestPreviewModelAssembler: AppManifestPreviewModelAssembler,
 ) {
   @PostMapping("/preview")
@@ -134,5 +139,61 @@ class OrganizationAppsController(
     @PathVariable installId: Long,
   ) {
     appInstallService.remove(organizationId, installId)
+  }
+
+  @GetMapping("/{installId}/secrets")
+  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @Operation(
+    summary = "List the app's client secrets",
+    description =
+      "Returns every secret of the install, revoked ones included. `lastUsedAt` is what tells you " +
+        "whether the app has moved over to a newly issued secret and the old one can be revoked. " +
+        "The secrets themselves are never disclosed here.",
+  )
+  fun listSecrets(
+    @PathVariable organizationId: Long,
+    @PathVariable installId: Long,
+  ): CollectionModel<AppInstallSecretModel> {
+    val install = appInstallService.getScoped(organizationId, installId)
+    return appInstallSecretModelAssembler.toCollectionModel(appInstallSecretService.list(install.id))
+  }
+
+  @PostMapping("/{installId}/secrets")
+  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @Operation(
+    summary = "Issue an additional client secret",
+    description =
+      "Phase one of a rotation: mints a second secret while every existing one keeps working, so " +
+        "the app can pick the new one up before anything breaks. The install keeps its id, granted " +
+        "scopes and per-project enablements. The response is the only place the secret is ever " +
+        "disclosed.",
+  )
+  fun issueSecret(
+    @PathVariable organizationId: Long,
+    @PathVariable installId: Long,
+  ): AppInstallSecretModel {
+    val install = appInstallService.getScoped(organizationId, installId)
+    val issued = appInstallSecretService.issue(install)
+    return appInstallSecretModelAssembler.toModelWithSecret(issued.secret, issued.plaintextSecret)
+  }
+
+  @DeleteMapping("/{installId}/secrets/{secretId}")
+  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @Operation(
+    summary = "Revoke a client secret",
+    description =
+      "Phase two of a rotation: the secret stops authenticating immediately, every other secret of " +
+        "the install is untouched. Revoking the last live one is allowed — it is the way to cut a " +
+        "leaked credential off before a replacement exists — and leaves the app unable to " +
+        "authenticate until a new secret is issued. Idempotent.",
+  )
+  fun revokeSecret(
+    @PathVariable organizationId: Long,
+    @PathVariable installId: Long,
+    @PathVariable secretId: Long,
+  ): AppInstallSecretModel {
+    val install = appInstallService.getScoped(organizationId, installId)
+    val revoked = appInstallSecretService.revoke(install.id, secretId, allowRevokingLast = true)
+    return appInstallSecretModelAssembler.toModel(revoked)
   }
 }

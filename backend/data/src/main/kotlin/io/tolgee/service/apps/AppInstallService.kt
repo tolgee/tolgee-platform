@@ -1,6 +1,7 @@
 package io.tolgee.service.apps
 
 import io.tolgee.constants.Message
+import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Organization
 import io.tolgee.model.UserAccount
@@ -32,11 +33,6 @@ class AppInstallService(
     /** Non-null only when this call created the install; see [selfRegister]. */
     val plaintextClientSecret: String?,
     val created: Boolean,
-  )
-
-  data class AppCredentialResolution(
-    val install: AppInstall,
-    val authorId: Long,
   )
 
   fun register(
@@ -216,24 +212,45 @@ class AppInstallService(
   }
 
   /**
-   * Resolves an install by id alone plus the id of the author an install-context token acts as. Used
-   * by the app-token auth filter for the machine-to-machine (OAuth client-credentials) path. The
-   * caller must still resolve the author through the normal active-user lookup.
+   * Resolves an install together with the identity an install-context request is recorded under, for
+   * the app-token auth filter.
+   *
+   * The author is looked up **without** the active-user filter and with [UserAccountDto.role]
+   * cleared: an install belongs to its organization, not to the person who created it, so the app
+   * must keep working after that person is disabled or deleted, and no server role may reach the
+   * install through them. Everything the install may actually do comes from
+   * [AppInstall.grantedScopes] — see
+   * [io.tolgee.service.security.SecurityService.getCurrentPermittedScopes].
    */
   @Transactional(readOnly = true)
-  fun resolveForAppAuth(installId: Long): AppCredentialResolution? {
+  fun resolveForAppAuth(installId: Long): AppAuthResolution? {
     val install = appInstallRepository.findById(installId).orElse(null) ?: return null
-    return AppCredentialResolution(install, install.author.id)
+    return AppAuthResolution(install, UserAccountDto.fromEntity(install.author).copy(role = null))
   }
+
+  data class AppAuthResolution(
+    val install: AppInstall,
+    /** Who created the install. Identity and audit only; it grants nothing. */
+    val author: UserAccountDto,
+  )
 
   /**
    * Resolves an install by its OAuth `client_id`, for the token endpoint. The caller must still
-   * verify the presented client secret against [AppInstall.clientSecretHash].
+   * verify the presented secret against the install's live [io.tolgee.model.apps.AppInstallSecret]s.
    */
   @Transactional(readOnly = true)
-  fun resolveByClientId(clientId: String): AppCredentialResolution? {
-    val install = appInstallRepository.findByClientId(clientId) ?: return null
-    return AppCredentialResolution(install, install.author.id)
+  fun resolveByClientId(clientId: String): AppInstall? {
+    return appInstallRepository.findByClientId(clientId)
+  }
+
+  /** @param organizationId null targets a native (server-level) install. */
+  @Transactional(readOnly = true)
+  fun getScoped(
+    organizationId: Long?,
+    installId: Long,
+  ): AppInstall {
+    if (organizationId == null) return getNative(installId)
+    return requireInstall(organizationId, installId)
   }
 
   companion object {

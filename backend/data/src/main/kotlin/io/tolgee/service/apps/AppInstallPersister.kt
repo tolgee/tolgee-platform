@@ -19,6 +19,7 @@ class AppInstallPersister(
   private val appInstallRepository: AppInstallRepository,
   private val appEnablementService: AppEnablementService,
   private val appAvailabilityService: AppAvailabilityService,
+  private val appInstallSecretService: AppInstallSecretService,
   private val entityManager: EntityManager,
   private val keyGenerator: KeyGenerator,
 ) {
@@ -35,7 +36,6 @@ class AppInstallPersister(
     }
 
     val plaintextClientId = AppInstallService.CLIENT_ID_PREFIX + keyGenerator.generate(128)
-    val plaintextClientSecret = AppInstallService.CLIENT_SECRET_PREFIX + keyGenerator.generate(256)
 
     val install =
       AppInstall().apply {
@@ -49,8 +49,6 @@ class AppInstallPersister(
         this.manifestJson = fetched.rawJson
         this.grantedScopes = fetched.scopes.toMutableSet()
         this.clientId = plaintextClientId
-        this.clientSecretHash = keyGenerator.hash(plaintextClientSecret)
-        this.clientSecretPrefix = plaintextClientSecret.take(AppInstallService.CLIENT_SECRET_PREFIX_DISPLAY_LENGTH)
       }
 
     val saved =
@@ -59,7 +57,8 @@ class AppInstallPersister(
       } catch (_: DataIntegrityViolationException) {
         throw BadRequestException(Message.APP_ALREADY_INSTALLED)
       }
-    return AppInstallService.RegisterResult(install = saved, plaintextClientSecret = plaintextClientSecret)
+    val issued = appInstallSecretService.issueInitial(saved)
+    return AppInstallService.RegisterResult(install = saved, plaintextClientSecret = issued.plaintextSecret)
   }
 
   @Transactional

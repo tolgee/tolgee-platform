@@ -2,7 +2,6 @@ package io.tolgee.api.v2.controllers.apps
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import io.tolgee.component.KeyGenerator
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.apps.AppClientCredentialsRequest
@@ -11,8 +10,8 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.hateoas.apps.AppAccessTokenModel
 import io.tolgee.security.authentication.AppTokenService
 import io.tolgee.security.ratelimit.RateLimited
+import io.tolgee.service.apps.AppInstallSecretService
 import io.tolgee.service.apps.AppInstallService
-import io.tolgee.util.constantTimeEquals
 import jakarta.validation.Valid
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -36,8 +35,8 @@ import org.springframework.web.bind.annotation.RestController
 @Tag(name = "App Authentication")
 class AppTokenEndpointController(
   private val appInstallService: AppInstallService,
+  private val appInstallSecretService: AppInstallSecretService,
   private val appTokenService: AppTokenService,
-  private val keyGenerator: KeyGenerator,
   private val tolgeeProperties: TolgeeProperties,
 ) {
   @PostMapping("/token")
@@ -55,17 +54,17 @@ class AppTokenEndpointController(
       throw BadRequestException(Message.APP_UNSUPPORTED_GRANT_TYPE)
     }
 
-    val resolution =
+    val install =
       appInstallService.resolveByClientId(body.clientId)
         ?: throw AuthenticationException(Message.INVALID_APP_CREDENTIALS)
 
-    val storedHash = resolution.install.clientSecretHash
-    val providedHash = keyGenerator.hash(body.clientSecret)
-    if (storedHash == null || !constantTimeEquals(providedHash, storedHash)) {
-      throw AuthenticationException(Message.INVALID_APP_CREDENTIALS)
-    }
+    val secret =
+      appInstallSecretService.findLiveMatching(install.id, body.clientSecret)
+        ?: throw AuthenticationException(Message.INVALID_APP_CREDENTIALS)
 
-    val token = appTokenService.mintInstallContextToken(resolution.install.id)
+    appInstallSecretService.updateLastUsedAsync(secret.id, secret.lastUsedAt)
+
+    val token = appTokenService.mintInstallContextToken(install.id)
     return AppAccessTokenModel(
       accessToken = token,
       tokenType = "Bearer",

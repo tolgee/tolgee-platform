@@ -171,7 +171,7 @@ class SecurityService(
    * Always checks permissions for the current user even when using the API key for security reasons.
    *
    * Under app authentication the install's granted scopes are the ceiling — the author's own
-   * permissions never widen it.
+   * permissions never widen it, and never keep it working either.
    */
   fun checkProjectPermission(
     projectId: Long,
@@ -235,7 +235,7 @@ class SecurityService(
 
   /**
    * Task assignment belongs to a person, not to an install — an app must never widen its granted
-   * scopes through a task its author happens to be assigned to.
+   * scopes through a task the principal happens to be assigned to.
    */
   private fun translationInTask(
     keyId: Long,
@@ -467,10 +467,11 @@ class SecurityService(
     projectId: Long,
     permissionCheckFn: (data: ComputedPermissionDto) -> Unit,
   ) {
+    val userId = languageRestrictedUserId ?: return
     val usersPermission =
       permissionService.getProjectPermissionData(
         projectId,
-        languageRestrictedUserId,
+        userId,
       )
     permissionCheckFn(usersPermission.computedPermissions)
   }
@@ -480,12 +481,13 @@ class SecurityService(
     languageTags: Collection<String>,
     fn: (data: ComputedPermissionDto, languageIds: Collection<Long>) -> Unit,
   ) {
+    val userId = languageRestrictedUserId ?: return
     val languageIds = languageService.getLanguageIdsByTags(projectId, languageTags)
     try {
       val usersPermission =
         permissionService.getProjectPermissionData(
           projectId,
-          languageRestrictedUserId,
+          userId,
         )
       fn(usersPermission.computedPermissions, languageIds.values.map { it.id })
     } catch (e: LanguageNotPermittedException) {
@@ -540,8 +542,8 @@ class SecurityService(
   }
 
   /**
-   * There is no meaningful ceiling to apply here: the scopes an app may hand to a new API key are
-   * the author's, not the install's, so app authentication is refused outright.
+   * An API key belongs to a person and carries that person's scopes. An install is not a person and
+   * has nobody to draw them from, so app authentication is refused outright rather than guessing.
    */
   fun checkApiKeyScopes(
     scopes: Set<Scope>,
@@ -737,8 +739,8 @@ class SecurityService(
   }
 
   /**
-   * The server-role bypasses apply to a person acting in the UI. An app token carries its author's
-   * role, so honouring them would let an install owned by an admin skip every language check.
+   * The server-role bypasses apply to a person acting in the UI. An install has no server role, and
+   * an install-context principal is stripped of the author's — so these always run under app auth.
    */
   private fun runIfUserNotServerAdmin(runnable: () -> Unit) {
     if (authenticationFacade.isAppAuth || !activeUser.isAdmin()) {
@@ -756,14 +758,20 @@ class SecurityService(
     get() = authenticationFacade.authenticatedUserOrNull ?: throw PermissionException(Message.UNAUTHENTICATED)
 
   /**
-   * The user whose per-language restrictions apply. An install-context app token narrowed with
-   * `X-Tolgee-Act-As-User-Id` must not reach languages that user cannot reach.
+   * The user whose per-language restrictions apply, or null when no person's restrictions do.
+   *
+   * An install-context app token narrowed with `X-Tolgee-Act-As-User-Id` must not reach languages
+   * that user cannot reach. Without such a narrowing the install acts as itself and there is nobody
+   * to narrow it to — per-language grants belong to a person, and the install's ceiling is its
+   * granted scopes. Falling back to the author here would make an app's language reach depend on
+   * whoever happened to register it.
    */
-  private val languageRestrictedUserId: Long
+  private val languageRestrictedUserId: Long?
     get() {
-      if (authenticationFacade.isAppAuth) {
-        return authenticationFacade.appAuthentication.actingAsUserAccount?.id ?: activeUser.id
-      }
+      if (!authenticationFacade.isAppAuth) return activeUser.id
+      val appAuth = authenticationFacade.appAuthentication
+      appAuth.actingAsUserAccount?.let { return it.id }
+      if (appAuth.isInstallContext) return null
       return activeUser.id
     }
 

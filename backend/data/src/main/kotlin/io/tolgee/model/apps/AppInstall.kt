@@ -14,6 +14,7 @@ import jakarta.persistence.FetchType
 import jakarta.persistence.Index
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import jakarta.persistence.UniqueConstraint
 import org.hibernate.annotations.ColumnDefault
@@ -40,6 +41,11 @@ class AppInstall : StandardAuditModel() {
   @ManyToOne(fetch = FetchType.LAZY)
   var organization: Organization? = null
 
+  /**
+   * Who registered the install. A historical record and a display identity — an organization's app
+   * outlives the employee who created it, so nothing operational may depend on this account still
+   * existing or being enabled. What the install may do comes from [grantedScopes].
+   */
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   lateinit var author: UserAccount
 
@@ -80,17 +86,13 @@ class AppInstall : StandardAuditModel() {
   var grantedScopes: MutableSet<Scope> = mutableSetOf()
 
   /**
-   * OAuth client credentials for the app's backend (machine-to-machine). The secret is shown once
-   * at registration and never stored in plaintext — only its hash ([clientSecretHash]) and a short
-   * display prefix ([clientSecretPrefix]) are persisted. The backend exchanges these at the token
-   * endpoint for a short-lived install-context access token.
+   * OAuth client id of the app's backend (machine-to-machine). It never changes; the matching
+   * secrets live in [AppInstallSecret] and are rotated independently. The backend exchanges the pair
+   * at the token endpoint for a short-lived install-context access token.
    */
   @Column(name = "client_id", length = 64, unique = true)
   var clientId: String? = null
 
-  @Column(name = "client_secret_hash", length = 128, unique = true)
-  var clientSecretHash: String? = null
-
-  @Column(name = "client_secret_prefix", length = 16)
-  var clientSecretPrefix: String? = null
+  @OneToMany(mappedBy = "appInstall", fetch = FetchType.LAZY)
+  var secrets: MutableList<AppInstallSecret> = mutableListOf()
 }

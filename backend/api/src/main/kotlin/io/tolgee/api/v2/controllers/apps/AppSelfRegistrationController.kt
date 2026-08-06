@@ -85,8 +85,8 @@ class AppSelfRegistrationController(
   }
 
   /**
-   * A native install has no organization to draw an owner from, so it is attributed to the server's
-   * initial user — the install author doubles as the principal an install-context token acts as.
+   * A native install has no organization to draw an owner from, so it is recorded as created by the
+   * server's initial user. Nothing operational hangs off that — see [io.tolgee.model.apps.AppInstall].
    */
   private fun resolveAuthor(organization: Organization?): UserAccount {
     if (organization == null) {

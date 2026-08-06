@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.controllers.IController
 import io.tolgee.dtos.request.RegisterAppRequest
+import io.tolgee.hateoas.apps.AppInstallSecretModel
+import io.tolgee.hateoas.apps.AppInstallSecretModelAssembler
 import io.tolgee.hateoas.organization.apps.AppAvailableOrganizationModel
 import io.tolgee.hateoas.organization.apps.AppAvailableOrganizationModelAssembler
 import io.tolgee.hateoas.organization.apps.AppInstallModel
@@ -15,6 +17,7 @@ import io.tolgee.openApiDocs.OpenApiSelfHostedExtension
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.service.apps.AppAvailabilityService
+import io.tolgee.service.apps.AppInstallSecretService
 import io.tolgee.service.apps.AppInstallService
 import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
@@ -48,8 +51,10 @@ import org.springframework.web.bind.annotation.RestController
 @OpenApiSelfHostedExtension
 class AdministrationAppsController(
   private val appInstallService: AppInstallService,
+  private val appInstallSecretService: AppInstallSecretService,
   private val appAvailabilityService: AppAvailabilityService,
   private val appInstallModelAssembler: AppInstallModelAssembler,
+  private val appInstallSecretModelAssembler: AppInstallSecretModelAssembler,
   private val appAvailableOrganizationModelAssembler: AppAvailableOrganizationModelAssembler,
   private val appManifestPreviewModelAssembler: AppManifestPreviewModelAssembler,
   private val pagedAppInstallResourcesAssembler: PagedResourcesAssembler<AppInstall>,
@@ -119,6 +124,58 @@ class AdministrationAppsController(
     @PathVariable installId: Long,
   ) {
     appInstallService.remove(organizationId = null, installId = installId)
+  }
+
+  @GetMapping("/{installId}/secrets")
+  @Operation(
+    summary = "List a native app's client secrets",
+    description =
+      "Returns every secret of the native install, revoked ones included. `lastUsedAt` is what " +
+        "tells you whether the app has moved over to a newly issued secret and the old one can be " +
+        "revoked. The secrets themselves are never disclosed here.",
+  )
+  @RequiresSuperAuthentication
+  fun listSecrets(
+    @PathVariable installId: Long,
+  ): CollectionModel<AppInstallSecretModel> {
+    val install = appInstallService.getNative(installId)
+    return appInstallSecretModelAssembler.toCollectionModel(appInstallSecretService.list(install.id))
+  }
+
+  @PostMapping("/{installId}/secrets")
+  @Operation(
+    summary = "Issue an additional client secret for a native app",
+    description =
+      "Phase one of a rotation: mints a second secret while every existing one keeps working, so " +
+        "the app can pick the new one up before anything breaks. The install keeps its id, granted " +
+        "scopes, per-organization availability and per-project enablements. The response is the " +
+        "only place the secret is ever disclosed.",
+  )
+  @RequiresSuperAuthentication
+  fun issueSecret(
+    @PathVariable installId: Long,
+  ): AppInstallSecretModel {
+    val install = appInstallService.getNative(installId)
+    val issued = appInstallSecretService.issue(install)
+    return appInstallSecretModelAssembler.toModelWithSecret(issued.secret, issued.plaintextSecret)
+  }
+
+  @DeleteMapping("/{installId}/secrets/{secretId}")
+  @Operation(
+    summary = "Revoke a native app's client secret",
+    description =
+      "Phase two of a rotation: the secret stops authenticating immediately, every other secret of " +
+        "the install is untouched. Revoking the last live one is allowed — it is the way to cut a " +
+        "leaked credential off before a replacement exists. Idempotent.",
+  )
+  @RequiresSuperAuthentication
+  fun revokeSecret(
+    @PathVariable installId: Long,
+    @PathVariable secretId: Long,
+  ): AppInstallSecretModel {
+    val install = appInstallService.getNative(installId)
+    val revoked = appInstallSecretService.revoke(install.id, secretId, allowRevokingLast = true)
+    return appInstallSecretModelAssembler.toModel(revoked)
   }
 
   @GetMapping("/{installId}/organizations")

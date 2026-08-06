@@ -12,11 +12,10 @@ import org.springframework.web.method.HandlerMethod
 /**
  * Denies app tokens everywhere except the project-scoped routes they exist for.
  *
- * An app token carries the identity of the install's author (typically an organization owner), and
- * only the project-scoped path caps it to the install's granted scopes — via
+ * Only the project-scoped path caps an app token to the install's granted scopes — via
  * [io.tolgee.security.ProjectContextService], which is also the only thing that sets
- * [AppAuthentication.boundProjectId]. Anywhere else the token would act with the author's own
- * privileges, so it is rejected.
+ * [AppAuthentication.boundProjectId]. Anywhere else the token would reach an endpoint that was
+ * written for a signed-in person, so it is rejected.
  *
  * The single exception is [AllowAppOwnInstallAccess], for endpoints that only ever report on the
  * caller's own install.
