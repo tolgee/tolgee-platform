@@ -1,6 +1,7 @@
 import { normalizeTolgeeUrl } from '../shared/url'
 import {
   appInstallStatePath,
+  saveApp,
   saveAppInstall,
   type AppInstallStoreOptions,
 } from './installStore'
@@ -40,8 +41,21 @@ export type SelfRegisterResult = {
   created: boolean
   /** True when the install belongs to no organization (see `organizationSlug`). */
   native: boolean
+  /**
+   * App-level credentials, disclosed only by the call that first registered the
+   * app on this Tolgee. Null on every later call, including a repoint.
+   */
+  app: SelfRegisteredApp | null
   /** Where the credentials were stored; null when `persist` was false. */
   credentialsPath: string | null
+}
+
+export type SelfRegisteredApp = {
+  id: number | null
+  appId: string | null
+  clientId: string | null
+  clientSecret: string | null
+  webhookSecret: string | null
 }
 
 /**
@@ -92,6 +106,13 @@ export const selfRegisterApp = async (
     id?: unknown
     clientId?: unknown
     clientSecret?: unknown
+    app?: {
+      id?: unknown
+      appId?: unknown
+      clientId?: unknown
+      clientSecret?: unknown
+      webhookSecret?: unknown
+    }
   }
   if (typeof body.id !== 'number') {
     throw new Error(
@@ -106,6 +127,7 @@ export const selfRegisterApp = async (
     clientSecret,
     created: clientSecret !== null,
     native: !input.organizationSlug,
+    app: readApp(body.app),
     credentialsPath: null,
   }
 
@@ -126,6 +148,21 @@ const persist = (
     ? { stateDir: input.stateDir }
     : {}
   try {
+    // The app block is disclosed only by the call that created the app, so it is
+    // stored before the install — losing it means no app-level rotation, ever.
+    if (result.app) {
+      saveApp(
+        {
+          tolgeeUrl: input.tolgeeUrl,
+          id: result.app.id,
+          appId: result.app.appId,
+          clientId: result.app.clientId,
+          clientSecret: result.app.clientSecret,
+          webhookSecret: result.app.webhookSecret,
+        },
+        options
+      )
+    }
     saveAppInstall(
       {
         tolgeeUrl: input.tolgeeUrl,
@@ -147,5 +184,35 @@ const persist = (
         'The client secret is shown only once, so delete that install in Tolgee and ' +
         'register again once the path is writable.'
     )
+  }
+}
+
+const str = (v: unknown): string | null => (typeof v === 'string' ? v : null)
+
+/**
+ * Only a block carrying a client id is treated as a disclosure; Tolgee omits the
+ * credentials when the call merely installed an app somebody had already
+ * registered, and storing an empty record would overwrite what is held.
+ */
+const readApp = (
+  app:
+    | {
+        id?: unknown
+        appId?: unknown
+        clientId?: unknown
+        clientSecret?: unknown
+        webhookSecret?: unknown
+      }
+    | undefined
+): SelfRegisteredApp | null => {
+  if (!app) return null
+  const clientId = str(app.clientId)
+  if (!clientId) return null
+  return {
+    id: typeof app.id === 'number' ? app.id : null,
+    appId: str(app.appId),
+    clientId,
+    clientSecret: str(app.clientSecret),
+    webhookSecret: str(app.webhookSecret),
   }
 }
