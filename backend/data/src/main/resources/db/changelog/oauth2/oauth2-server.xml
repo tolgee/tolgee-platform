@@ -1,0 +1,148 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!--
+        Spring Authorization Server built-in JDBC schema (spring-security-oauth2-authorization-server).
+        Adapted for PostgreSQL per the notes in the shipped schema SQL: 'blob' -> 'text', 'timestamp' -> 'timestamptz'.
+        These tables are NOT JPA entities, so they are listed in gradle/liquibase.gradle excludeObjects to keep
+        diffChangeLog from emitting DROPs for them.
+    -->
+
+    <changeSet author="dbocharov" id="oauth2-registered-client">
+        <comment>
+            Source: classpath resource org/springframework/security/oauth2/server/authorization/client/oauth2-registered-client-schema.sql
+            (spring-security-oauth2-authorization-server jar). PostgreSQL adaptation: 'timestamp' -> 'timestamptz'.
+        </comment>
+        <sql dbms="postgresql" splitStatements="false">
+            CREATE TABLE oauth2_registered_client (
+                id varchar(100) NOT NULL,
+                client_id varchar(100) NOT NULL,
+                client_id_issued_at timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
+                client_secret varchar(200) DEFAULT NULL,
+                client_secret_expires_at timestamptz DEFAULT NULL,
+                client_name varchar(200) NOT NULL,
+                client_authentication_methods varchar(1000) NOT NULL,
+                authorization_grant_types varchar(1000) NOT NULL,
+                redirect_uris varchar(1000) DEFAULT NULL,
+                post_logout_redirect_uris varchar(1000) DEFAULT NULL,
+                scopes varchar(1000) NOT NULL,
+                client_settings varchar(2000) NOT NULL,
+                token_settings varchar(2000) NOT NULL,
+                PRIMARY KEY (id)
+            );
+        </sql>
+        <rollback>
+            <sql>DROP TABLE oauth2_registered_client;</sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="dbocharov" id="oauth2-authorization">
+        <comment>
+            Source: classpath resource org/springframework/security/oauth2/server/authorization/oauth2-authorization-schema.sql
+            (spring-security-oauth2-authorization-server jar). PostgreSQL adaptation: 'blob' -> 'text', 'timestamp' -> 'timestamptz'.
+        </comment>
+        <sql dbms="postgresql" splitStatements="false">
+            CREATE TABLE oauth2_authorization (
+                id varchar(100) NOT NULL,
+                registered_client_id varchar(100) NOT NULL,
+                principal_name varchar(200) NOT NULL,
+                authorization_grant_type varchar(100) NOT NULL,
+                authorized_scopes varchar(1000) DEFAULT NULL,
+                attributes text DEFAULT NULL,
+                state varchar(500) DEFAULT NULL,
+                authorization_code_value text DEFAULT NULL,
+                authorization_code_issued_at timestamptz DEFAULT NULL,
+                authorization_code_expires_at timestamptz DEFAULT NULL,
+                authorization_code_metadata text DEFAULT NULL,
+                access_token_value text DEFAULT NULL,
+                access_token_issued_at timestamptz DEFAULT NULL,
+                access_token_expires_at timestamptz DEFAULT NULL,
+                access_token_metadata text DEFAULT NULL,
+                access_token_type varchar(100) DEFAULT NULL,
+                access_token_scopes varchar(1000) DEFAULT NULL,
+                oidc_id_token_value text DEFAULT NULL,
+                oidc_id_token_issued_at timestamptz DEFAULT NULL,
+                oidc_id_token_expires_at timestamptz DEFAULT NULL,
+                oidc_id_token_metadata text DEFAULT NULL,
+                refresh_token_value text DEFAULT NULL,
+                refresh_token_issued_at timestamptz DEFAULT NULL,
+                refresh_token_expires_at timestamptz DEFAULT NULL,
+                refresh_token_metadata text DEFAULT NULL,
+                user_code_value text DEFAULT NULL,
+                user_code_issued_at timestamptz DEFAULT NULL,
+                user_code_expires_at timestamptz DEFAULT NULL,
+                user_code_metadata text DEFAULT NULL,
+                device_code_value text DEFAULT NULL,
+                device_code_issued_at timestamptz DEFAULT NULL,
+                device_code_expires_at timestamptz DEFAULT NULL,
+                device_code_metadata text DEFAULT NULL,
+                PRIMARY KEY (id)
+            );
+        </sql>
+        <rollback>
+            <sql>DROP TABLE oauth2_authorization;</sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="dbocharov" id="oauth2-authorization-consent">
+        <comment>
+            Source: classpath resource org/springframework/security/oauth2/server/authorization/oauth2-authorization-consent-schema.sql
+            (spring-security-oauth2-authorization-server jar). No PostgreSQL adaptation needed (varchar columns only).
+        </comment>
+        <sql dbms="postgresql" splitStatements="false">
+            CREATE TABLE oauth2_authorization_consent (
+                registered_client_id varchar(100) NOT NULL,
+                principal_name varchar(200) NOT NULL,
+                authorities varchar(1000) NOT NULL,
+                PRIMARY KEY (registered_client_id, principal_name)
+            );
+        </sql>
+        <rollback>
+            <sql>DROP TABLE oauth2_authorization_consent;</sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="dbocharov" id="oauth2-authorization-created-at">
+        <comment>
+            Not part of the SAS built-in schema. SAS persists a row at /authorize (before consent) whose token/code
+            expiry columns are all NULL; without a creation timestamp the nightly cleanup can never age those abandoned
+            pre-consent rows out. SAS ignores unknown columns, so this extra column does not affect its read/write.
+        </comment>
+        <sql dbms="postgresql" splitStatements="false">
+            ALTER TABLE oauth2_authorization ADD COLUMN created_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP;
+        </sql>
+        <rollback>
+            <sql>ALTER TABLE oauth2_authorization DROP COLUMN created_at;</sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="dbocharov" id="oauth2-authorization-indexes">
+        <comment>
+            The SAS reference schema ships PK-only; production must add these. findByToken (every code exchange and
+            refresh) filters on the token/state columns, and our connected-apps queries filter on principal_name.
+            The token columns are mostly NULL, so partial indexes keep them small.
+        </comment>
+        <sql dbms="postgresql" splitStatements="false">
+            CREATE INDEX ix_oauth2_authorization_principal_name ON oauth2_authorization (principal_name);
+            CREATE INDEX ix_oauth2_authorization_state ON oauth2_authorization (state) WHERE state IS NOT NULL;
+            CREATE INDEX ix_oauth2_authorization_auth_code ON oauth2_authorization (authorization_code_value)
+                WHERE authorization_code_value IS NOT NULL;
+            CREATE INDEX ix_oauth2_authorization_access_token ON oauth2_authorization (access_token_value)
+                WHERE access_token_value IS NOT NULL;
+            CREATE INDEX ix_oauth2_authorization_refresh_token ON oauth2_authorization (refresh_token_value)
+                WHERE refresh_token_value IS NOT NULL;
+        </sql>
+        <rollback>
+            <sql>
+                DROP INDEX ix_oauth2_authorization_principal_name;
+                DROP INDEX ix_oauth2_authorization_state;
+                DROP INDEX ix_oauth2_authorization_auth_code;
+                DROP INDEX ix_oauth2_authorization_access_token;
+                DROP INDEX ix_oauth2_authorization_refresh_token;
+            </sql>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
