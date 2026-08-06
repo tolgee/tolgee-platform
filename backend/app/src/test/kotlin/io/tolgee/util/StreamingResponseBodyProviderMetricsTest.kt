@@ -48,6 +48,7 @@ class StreamingResponseBodyProviderMetricsTest {
 
     timerCount(StreamType.IMPORT_APPLY).assert.isEqualTo(1L)
     Mockito.verify(session).close()
+    Mockito.verify(connection).close()
   }
 
   @Test
@@ -57,6 +58,7 @@ class StreamingResponseBodyProviderMetricsTest {
       .writeTo(ByteArrayOutputStream())
 
     Mockito.verify(session).close()
+    Mockito.verify(connection).close()
   }
 
   @Test

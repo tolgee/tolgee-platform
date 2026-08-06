@@ -318,7 +318,14 @@ class ExceptionHandlers(
       response.headerNames
         .filterNot { STAGED_STREAMING_HEADERS.contains(it) }
         .associateWith { response.getHeaders(it).toList() }
-    response.reset()
+    try {
+      response.reset()
+    } catch (e: IllegalStateException) {
+      // A stream that started just as the timeout fired can commit between the check above and
+      // here. Throwing out of an @ExceptionHandler would replace the 503 with a container 500 page.
+      logger.debug("Response committed while answering a streaming timeout", e)
+      return
+    }
     preserved.forEach { (name, values) -> values.forEach { response.addHeader(name, it) } }
   }
 

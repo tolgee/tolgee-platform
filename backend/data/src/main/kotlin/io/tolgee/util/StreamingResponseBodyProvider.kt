@@ -51,9 +51,12 @@ class StreamingResponseBodyProvider(
       val session = entityManager.unwrap(Session::class.java)
       try {
         session.doWork { connection ->
-          fn(it)
-          // Manually dispose the connection because spring has a hard time doing so by itself
-          connection.close()
+          try {
+            fn(it)
+          } finally {
+            // Manually dispose the connection because spring has a hard time doing so by itself
+            connection.close()
+          }
         }
       } finally {
         session.close()
