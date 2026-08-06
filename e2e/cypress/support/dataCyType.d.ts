@@ -136,6 +136,7 @@ declare namespace DataCy {
         "branch-selector": true;
         "cell-key-screenshot-dropzone": true;
         "cell-key-screenshot-file-input": true;
+        "character-counter": true;
         "checkbox-group-multiselect": true;
         "color-palette-field": true;
         "color-palette-popover": true;

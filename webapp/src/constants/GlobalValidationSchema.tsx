@@ -16,6 +16,8 @@ export type TranslateFunction = TFnType<
 type AccountType =
   components['schemas']['PrivateUserAccountModel']['accountType'];
 
+export const PROJECT_DESCRIPTION_MAX_LENGTH = 2000;
+
 Yup.setLocale({
   // use constant translation keys for messages without values
   mixed: {
@@ -258,7 +260,10 @@ export class Validation {
 
   static readonly PROJECT_SETTINGS = Yup.object().shape({
     name: Yup.string().trim().required().min(3).max(100),
-    description: Yup.string().nullable().min(3).max(2000),
+    description: Yup.string()
+      .nullable()
+      .min(3)
+      .max(PROJECT_DESCRIPTION_MAX_LENGTH),
   });
 
   static readonly TRANSLATION_MEMORY_CREATE_EDIT = Yup.object().shape({
