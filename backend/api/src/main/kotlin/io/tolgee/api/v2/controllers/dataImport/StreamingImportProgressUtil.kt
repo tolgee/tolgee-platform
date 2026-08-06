@@ -7,6 +7,7 @@ import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.service.dataImport.status.ImportApplicationStatus
 import io.tolgee.service.dataImport.status.ImportApplicationStatusItem
 import io.tolgee.util.Logging
+import io.tolgee.util.StreamType
 import io.tolgee.util.StreamingResponseBodyProvider
 import io.tolgee.util.logger
 import org.springframework.http.ResponseEntity
@@ -20,7 +21,7 @@ class StreamingImportProgressUtil(
   fun stream(
     fn: (writeStatus: (item: ImportApplicationStatusItem) -> Unit) -> Unit,
   ): ResponseEntity<StreamingResponseBody> {
-    return streamingResponseBodyProvider.streamNdJson { write ->
+    return streamingResponseBodyProvider.streamNdJson(StreamType.IMPORT_APPLY) { write ->
       val writeStatus = { item: ImportApplicationStatusItem ->
         write(item)
       }

@@ -1,5 +1,7 @@
 package io.tolgee
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry
+import io.tolgee.Metrics
 import io.tolgee.constants.Message
 import io.tolgee.controllers.PublicController
 import io.tolgee.fixtures.andAssertThatJson
@@ -55,7 +57,12 @@ class AuthTest : AbstractControllerTest() {
   @BeforeEach
   fun setup() {
     project = dbPopulator.createBase().project
-    authMvc = MockMvcBuilders.standaloneSetup(publicController!!).setControllerAdvice(ExceptionHandlers()).build()
+    authMvc =
+      MockMvcBuilders
+        .standaloneSetup(
+          publicController!!,
+        ).setControllerAdvice(ExceptionHandlers(Metrics(SimpleMeterRegistry())))
+        .build()
   }
 
   @AfterEach
