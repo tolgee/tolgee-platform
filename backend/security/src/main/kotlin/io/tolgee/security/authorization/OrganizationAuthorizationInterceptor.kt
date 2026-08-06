@@ -16,6 +16,7 @@
 
 package io.tolgee.security.authorization
 
+import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.isAdmin
 import io.tolgee.dtos.cacheable.isSupporterOrAdmin
 import io.tolgee.exceptions.NotFoundException
@@ -55,6 +56,11 @@ class OrganizationAuthorizationInterceptor(
     response: HttpServletResponse,
     handler: HandlerMethod,
   ): Boolean {
+    // An app token belongs to an install, not to a member of the organization, and no route here
+    // serves apps. Refusing up front keeps the refusal readable: the check below would otherwise
+    // answer "no such organization", since an install's principal is a member of nothing.
+    if (authenticationFacade.isAppAuth) throw PermissionException(Message.APP_ACCESS_FORBIDDEN)
+
     val userId = authenticationFacade.authenticatedUser.id
     val organization =
       requestContextService.getTargetOrganization(request)
