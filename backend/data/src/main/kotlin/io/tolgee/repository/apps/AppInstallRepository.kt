@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 
 @Repository
@@ -31,4 +32,7 @@ interface AppInstallRepository : JpaRepository<AppInstall, Long> {
   fun findByOrganizationIsNullAndAppId(appId: String): AppInstall?
 
   fun findByClientId(clientId: String): AppInstall?
+
+  @Query("select count(i) from AppInstall i where i.app.id = :appId")
+  fun countByRegisteredAppId(appId: Long): Long
 }

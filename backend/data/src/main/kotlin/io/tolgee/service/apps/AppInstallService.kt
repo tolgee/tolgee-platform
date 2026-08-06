@@ -2,6 +2,7 @@ package io.tolgee.service.apps
 
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Organization
 import io.tolgee.model.UserAccount
@@ -22,10 +23,14 @@ class AppInstallService(
   private val appInstallRepository: AppInstallRepository,
   private val appManifestFetcher: AppManifestFetcher,
   private val appInstallPersister: AppInstallPersister,
+  private val appService: AppService,
 ) {
   data class RegisterResult(
     val install: AppInstall,
     val plaintextClientSecret: String,
+    val app: AppService.AppSummary,
+    /** Non-null only when this call registered the app — see [AppService.registerIfAbsent]. */
+    val appCredentials: AppService.AppCredentials?,
   )
 
   data class SelfRegisterResult(
@@ -33,14 +38,51 @@ class AppInstallService(
     /** Non-null only when this call created the install; see [selfRegister]. */
     val plaintextClientSecret: String?,
     val created: Boolean,
+    val app: AppService.AppSummary,
+    val appCredentials: AppService.AppCredentials?,
   )
 
+  /**
+   * Registers the app for the organization and installs it. The organization owns the app unless
+   * somebody registered it first, in which case this only installs it.
+   */
   fun register(
     organization: Organization,
     manifestUrl: String,
     author: UserAccount,
   ): RegisterResult {
-    return create(organizationId = organization.id, manifestUrl = manifestUrl, author = author)
+    return registerAndCreate(organizationId = organization.id, manifestUrl = manifestUrl, author = author)
+  }
+
+  /**
+   * Installs an app that is already registered on this server, refusing with
+   * [io.tolgee.exceptions.AppNotRegisteredException] when it is not — installing must never register
+   * an app behind the caller's back, because registering hands out app-level credentials and makes
+   * the caller's organization the app's owner.
+   *
+   * The install snapshot is taken from the **registered** manifest URL, not from the one the caller
+   * pasted: an app is identified by the id in its manifest, so a lookalike manifest served elsewhere
+   * would otherwise decide the scopes and base URL of an install of somebody else's app.
+   */
+  fun install(
+    organization: Organization,
+    manifestUrl: String,
+    author: UserAccount,
+  ): RegisterResult {
+    val fetched = appManifestFetcher.fetch(manifestUrl)
+    val app = appService.requireRegistered(fetched.manifest.id)
+    val registeredUrl = app.manifestUrl
+    val authoritative = if (registeredUrl == manifestUrl) fetched else appManifestFetcher.fetch(registeredUrl)
+    if (authoritative.manifest.id != app.appId) {
+      throw BadRequestException(Message.APP_MANIFEST_INVALID)
+    }
+    return appInstallPersister.create(
+      appEntityId = app.id,
+      organizationId = organization.id,
+      authorId = author.id,
+      manifestUrl = registeredUrl,
+      fetched = authoritative,
+    )
   }
 
   /**
@@ -52,16 +94,16 @@ class AppInstallService(
     manifestUrl: String,
     author: UserAccount,
   ): RegisterResult {
-    return create(organizationId = null, manifestUrl = manifestUrl, author = author)
+    return registerAndCreate(organizationId = null, manifestUrl = manifestUrl, author = author)
   }
 
-  private fun create(
+  private fun registerAndCreate(
     organizationId: Long?,
     manifestUrl: String,
     author: UserAccount,
   ): RegisterResult {
     val fetched = appManifestFetcher.fetch(manifestUrl)
-    return appInstallPersister.create(organizationId, author.id, manifestUrl, fetched)
+    return appInstallPersister.registerAndCreate(organizationId, author.id, manifestUrl, fetched)
   }
 
   /**
@@ -87,11 +129,13 @@ class AppInstallService(
     val existing = findForSelfRegister(organizationId, fetched.manifest.id)
 
     if (existing == null) {
-      val created = appInstallPersister.create(organizationId, author.id, manifestUrl, fetched)
+      val created = appInstallPersister.registerAndCreate(organizationId, author.id, manifestUrl, fetched)
       return SelfRegisterResult(
         install = created.install,
         plaintextClientSecret = created.plaintextClientSecret,
         created = true,
+        app = created.app,
+        appCredentials = created.appCredentials,
       )
     }
 
@@ -103,7 +147,13 @@ class AppInstallService(
         fetched = fetched,
         allowScopeWidening = true,
       )
-    return SelfRegisterResult(install = updated, plaintextClientSecret = null, created = false)
+    return SelfRegisterResult(
+      install = updated,
+      plaintextClientSecret = null,
+      created = false,
+      app = appService.summarize(appService.requireRegistered(fetched.manifest.id)),
+      appCredentials = null,
+    )
   }
 
   private fun findForSelfRegister(

@@ -98,7 +98,9 @@ class AdministrationAppsController(
     summary = "Register a native app",
     description =
       "Fetches the manifest at the given URL and registers the app at server level, belonging to no " +
-        "organization. The response is the only place the client secret is ever disclosed.",
+        "organization. The response is the only place the client secret is ever disclosed. When an " +
+        "organization has already registered the same app, the native install is bound to that app " +
+        "and no app-level credentials are returned.",
   )
   @RequiresSuperAuthentication
   fun register(
@@ -109,7 +111,7 @@ class AdministrationAppsController(
         manifestUrl = data.manifestUrl,
         author = authenticationFacade.authenticatedUserEntity,
       )
-    return appInstallModelAssembler.toModelWithSecret(result.install, result.plaintextClientSecret)
+    return appInstallModelAssembler.toModel(result)
   }
 
   @DeleteMapping("/{installId}")

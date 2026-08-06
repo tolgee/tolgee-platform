@@ -6234,4 +6234,173 @@
             <column name="app_install_id"/>
         </createIndex>
     </changeSet>
+    <changeSet author="jcizmar" id="1783771000000-36">
+        <createTable tableName="app">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="appPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="organization_id" type="BIGINT"/>
+            <column name="author_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="app_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="manifest_url" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="base_url" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="client_id" type="VARCHAR(64)"/>
+            <column name="webhook_secret" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jcizmar" id="1783771000000-37">
+        <addUniqueConstraint columnNames="app_id"
+                             constraintName="app_app_id_unique"
+                             tableName="app"/>
+        <addUniqueConstraint columnNames="client_id"
+                             constraintName="app_client_id_unique"
+                             tableName="app"/>
+    </changeSet>
+    <changeSet author="jcizmar" id="1783771000000-38">
+        <createIndex indexName="IDX_app_organization_id" tableName="app">
+            <column name="organization_id"/>
+        </createIndex>
+        <createIndex indexName="IDX_app_author_id" tableName="app">
+            <column name="author_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="jcizmar" id="1783771000000-39">
+        <addForeignKeyConstraint baseColumnNames="organization_id"
+                                 baseTableName="app"
+                                 constraintName="FK_app_organization"
+                                 deferrable="false"
+                                 initiallyDeferred="false"
+                                 referencedColumnNames="id"
+                                 referencedTableName="organization"
+                                 onDelete="CASCADE"
+                                 validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="author_id"
+                                 baseTableName="app"
+                                 constraintName="FK_app_author"
+                                 deferrable="false"
+                                 initiallyDeferred="false"
+                                 referencedColumnNames="id"
+                                 referencedTableName="user_account"
+                                 validate="true"/>
+    </changeSet>
+    <changeSet author="jcizmar" id="1783771000000-40">
+        <createTable tableName="app_secret">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="app_secretPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="app_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="secret_hash" type="VARCHAR(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="secret_prefix" type="VARCHAR(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_used_at" type="TIMESTAMP(6) WITHOUT TIME ZONE"/>
+            <column name="revoked_at" type="TIMESTAMP(6) WITHOUT TIME ZONE"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jcizmar" id="1783771000000-41">
+        <addUniqueConstraint columnNames="secret_hash"
+                             constraintName="app_secret_secret_hash_unique"
+                             tableName="app_secret"/>
+        <createIndex indexName="IDX_app_secret_app_id" tableName="app_secret">
+            <column name="app_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="jcizmar" id="1783771000000-42">
+        <addForeignKeyConstraint baseColumnNames="app_id"
+                                 baseTableName="app_secret"
+                                 constraintName="FK_app_secret_app"
+                                 deferrable="false"
+                                 initiallyDeferred="false"
+                                 referencedColumnNames="id"
+                                 referencedTableName="app"
+                                 onDelete="CASCADE"
+                                 validate="true"/>
+    </changeSet>
+    <changeSet author="jcizmar" id="1783771000000-43">
+        <addColumn tableName="app_install">
+            <column name="registered_app_id" type="BIGINT"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jcizmar" id="1783771000000-44">
+        <comment>Turns every install registered before the app layer into an app of its own, owned by
+            that install's organization — a native install's app is owned by the server, as the
+            install itself already is. Where two organizations independently installed the same app
+            id, only one app can carry it, so the oldest install's organization becomes its owner.
+            No app-level credentials are minted: nobody was ever handed any for these, and a
+            credential nobody holds is only something to leak.
+        </comment>
+        <sql>
+            insert into app (
+                id, created_at, updated_at, organization_id, author_id,
+                app_id, manifest_url, name, base_url
+            )
+            select nextval('hibernate_sequence'), i.created_at, i.updated_at, i.organization_id, i.author_id,
+                   i.app_id, i.manifest_url, i.name, i.base_url
+            from (
+                select distinct on (app_id) *
+                from app_install
+                order by app_id, created_at, id
+            ) i
+            where not exists (
+                select 1 from app a where a.app_id = i.app_id
+            );
+        </sql>
+        <rollback>
+            <sql>delete from app;</sql>
+        </rollback>
+    </changeSet>
+    <changeSet author="jcizmar" id="1783771000000-45">
+        <sql>
+            update app_install i
+            set registered_app_id = a.id
+            from app a
+            where a.app_id = i.app_id
+              and i.registered_app_id is null;
+        </sql>
+        <rollback>
+            <sql>update app_install set registered_app_id = null;</sql>
+        </rollback>
+    </changeSet>
+    <changeSet author="jcizmar" id="1783771000000-46">
+        <addNotNullConstraint tableName="app_install" columnName="registered_app_id" columnDataType="BIGINT"/>
+        <createIndex indexName="IDX_app_install_registered_app_id" tableName="app_install">
+            <column name="registered_app_id"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="registered_app_id"
+                                 baseTableName="app_install"
+                                 constraintName="FK_app_install_app"
+                                 deferrable="false"
+                                 initiallyDeferred="false"
+                                 referencedColumnNames="id"
+                                 referencedTableName="app"
+                                 onDelete="CASCADE"
+                                 validate="true"/>
+    </changeSet>
 </databaseChangeLog>

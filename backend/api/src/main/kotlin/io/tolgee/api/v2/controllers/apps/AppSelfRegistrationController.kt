@@ -70,13 +70,7 @@ class AppSelfRegistrationController(
     val organization = resolveOrganization(body.organizationSlug)
     val author = resolveAuthor(organization)
 
-    val result = appInstallService.selfRegister(organization, body.manifestUrl, author)
-
-    val secret = result.plaintextClientSecret
-    if (secret == null) {
-      return appInstallModelAssembler.toModel(result.install)
-    }
-    return appInstallModelAssembler.toModelWithSecret(result.install, secret)
+    return appInstallModelAssembler.toModel(appInstallService.selfRegister(organization, body.manifestUrl, author))
   }
 
   private fun resolveOrganization(slug: String?): Organization? {

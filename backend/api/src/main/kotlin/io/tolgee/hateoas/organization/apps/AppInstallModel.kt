@@ -1,6 +1,7 @@
 package io.tolgee.hateoas.organization.apps
 
 import io.tolgee.dtos.apps.AppManifestModules
+import io.tolgee.hateoas.apps.AppModel
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
 
@@ -25,4 +26,9 @@ open class AppInstallModel(
    * stored and cannot be retrieved again.
    */
   val clientSecret: String? = null,
+  /**
+   * The registered app this is an installation of. Two organizations installing the same manifest
+   * see the same app here, each with their own install.
+   */
+  val app: AppModel? = null,
 ) : RepresentationModel<AppInstallModel>()

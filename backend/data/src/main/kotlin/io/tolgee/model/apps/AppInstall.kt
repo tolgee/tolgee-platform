@@ -31,9 +31,18 @@ import org.hibernate.annotations.ColumnDefault
   indexes = [
     Index(columnList = "organization_id"),
     Index(columnList = "author_id"),
+    Index(columnList = "registered_app_id"),
   ],
 )
 class AppInstall : StandardAuditModel() {
+  /**
+   * The registered [App] this is an installation of. Two organizations installing the same manifest
+   * share one app and hold one install each, with their own credentials.
+   */
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(name = "registered_app_id")
+  lateinit var app: App
+
   /**
    * Null for a native (first-party, server-level) app: it belongs to no customer organization and
    * a server admin controls which organizations may use it via [AppAvailableForOrganization].
