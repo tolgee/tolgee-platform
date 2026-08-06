@@ -1,3 +1,10 @@
+# [3.218.0](https://github.com/tolgee/tolgee-platform/compare/v3.217.0...v3.218.0) (2026-08-06)
+
+
+### Features
+
+* add character counter to AI and project description fields ([#3847](https://github.com/tolgee/tolgee-platform/issues/3847)) ([70957ca](https://github.com/tolgee/tolgee-platform/commit/70957ca3baae9268830b81be3c111404fe69f89d)), closes [#3833](https://github.com/tolgee/tolgee-platform/issues/3833)
+
 # [3.217.0](https://github.com/tolgee/tolgee-platform/compare/v3.216.4...v3.217.0) (2026-08-06)
 
 
