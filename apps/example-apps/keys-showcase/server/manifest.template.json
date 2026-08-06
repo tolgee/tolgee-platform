@@ -6,7 +6,7 @@
   "scopes": ["keys.view", "translations.view"],
   "modules": {
     "project-dashboard-page": [
-      { "key": "keys", "title": "Keys Showcase", "icon": "🔑", "entry": "/" }
+      { "key": "keys", "title": "Keys Showcase", "icon": "Key01", "entry": "/" }
     ]
   }
 }
