@@ -425,7 +425,10 @@ export function useErrorTranslation() {
 
       // Rate limiting
       case 'server_busy':
-        return t('server_busy');
+        return t(
+          'server_busy',
+          'The server is busy right now. Please try again in a moment.'
+        );
       case 'too_many_requests':
         return t('too_many_requests');
       case 'rate_limited':
