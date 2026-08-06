@@ -61,7 +61,10 @@ class AppInstallSecretRotationTest : AuthorizedControllerTest() {
 
     val json =
       objectMapper.readTree(
-        performAuthPost(orgAppsUrl(), registerBody()).andIsOk.andReturn().response.contentAsString,
+        performAuthPost("${orgAppsUrl()}/register", registerBody())
+          .andIsOk
+          .andReturn()
+          .response.contentAsString,
       )
     installId = json.get("id").asLong()
     clientId = json.get("clientId").asText()
@@ -144,7 +147,8 @@ class AppInstallSecretRotationTest : AuthorizedControllerTest() {
       node("_embedded.appInstallSecrets[0].secret").isNull()
       node("_embedded.appInstallSecrets[1].secret").isNull()
       node("_embedded.appInstallSecrets[0].prefix")
-        .isString.startsWith(AppInstallService.CLIENT_SECRET_PREFIX)
+        .isString
+        .startsWith(AppInstallService.CLIENT_SECRET_PREFIX)
     }
   }
 
@@ -181,7 +185,10 @@ class AppInstallSecretRotationTest : AuthorizedControllerTest() {
 
     val issued =
       objectMapper.readTree(
-        asToken(token, post(SELF_SECRETS)).andIsOk.andReturn().response.contentAsString,
+        asToken(token, post(SELF_SECRETS))
+          .andIsOk
+          .andReturn()
+          .response.contentAsString,
       )
     val newSecret = issued.get("secret").asText()
 
@@ -239,7 +246,9 @@ class AppInstallSecretRotationTest : AuthorizedControllerTest() {
     val issued =
       objectMapper.readTree(
         performAuthPost("/v2/administration/apps/${native.first}/secrets", null)
-          .andIsOk.andReturn().response.contentAsString,
+          .andIsOk
+          .andReturn()
+          .response.contentAsString,
       )
     tokenRequest(native.second, issued.get("secret").asText()).andIsOk
     tokenRequest(native.second, native.third).andIsOk
@@ -283,7 +292,9 @@ class AppInstallSecretRotationTest : AuthorizedControllerTest() {
     val json =
       objectMapper.readTree(
         performAuthPost("${orgAppsUrl()}/$installId/secrets", null)
-          .andIsOk.andReturn().response.contentAsString,
+          .andIsOk
+          .andReturn()
+          .response.contentAsString,
       )
     return json.get("id").asLong() to json.get("secret").asText()
   }
@@ -291,7 +302,10 @@ class AppInstallSecretRotationTest : AuthorizedControllerTest() {
   private fun secretIdsAsOwner(): List<Long> {
     userAccount = testData.user
     val response =
-      performAuthGet("${orgAppsUrl()}/$installId/secrets").andIsOk.andReturn().response.contentAsString
+      performAuthGet("${orgAppsUrl()}/$installId/secrets")
+        .andIsOk
+        .andReturn()
+        .response.contentAsString
     return objectMapper
       .readTree(response)
       .at("/_embedded/appInstallSecrets")
@@ -306,14 +320,19 @@ class AppInstallSecretRotationTest : AuthorizedControllerTest() {
     AppsTestFixtures.mockManifest(appManifestHttpClient, SECOND_MANIFEST)
     val json =
       objectMapper.readTree(
-        performAuthPost(orgAppsUrl(), registerBody()).andIsOk.andReturn().response.contentAsString,
+        performAuthPost("${orgAppsUrl()}/register", registerBody())
+          .andIsOk
+          .andReturn()
+          .response.contentAsString,
       )
     AppsTestFixtures.mockManifest(appManifestHttpClient, MANIFEST)
     val otherInstallId = json.get("id").asLong()
     val secrets =
       objectMapper.readTree(
         performAuthGet("${orgAppsUrl()}/$otherInstallId/secrets")
-          .andIsOk.andReturn().response.contentAsString,
+          .andIsOk
+          .andReturn()
+          .response.contentAsString,
       )
     return Triple(
       json.get("clientId").asText(),
@@ -329,14 +348,20 @@ class AppInstallSecretRotationTest : AuthorizedControllerTest() {
     val json =
       objectMapper.readTree(
         performAuthPost("/v2/administration/apps", registerBody())
-          .andIsOk.andReturn().response.contentAsString,
+          .andIsOk
+          .andReturn()
+          .response.contentAsString,
       )
     AppsTestFixtures.mockManifest(appManifestHttpClient, MANIFEST)
     return Triple(json.get("id").asLong(), json.get("clientId").asText(), json.get("clientSecret").asText())
   }
 
   private fun installToken(secret: String): String {
-    val response = tokenRequest(clientId, secret).andIsOk.andReturn().response.contentAsString
+    val response =
+      tokenRequest(clientId, secret)
+        .andIsOk
+        .andReturn()
+        .response.contentAsString
     return objectMapper.readTree(response).get("access_token").asText()
   }
 

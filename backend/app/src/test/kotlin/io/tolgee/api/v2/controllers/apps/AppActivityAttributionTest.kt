@@ -42,7 +42,7 @@ class AppActivityAttributionTest : AuthorizedControllerTest() {
     val json =
       objectMapper.readTree(
         performAuthPost(
-          "/v2/organizations/${testData.organization.id}/apps",
+          "/v2/organizations/${testData.organization.id}/apps/register",
           mapOf("manifestUrl" to AppsTestFixtures.MANIFEST_URL),
         ).andIsOk.andReturn().response.contentAsString,
       )

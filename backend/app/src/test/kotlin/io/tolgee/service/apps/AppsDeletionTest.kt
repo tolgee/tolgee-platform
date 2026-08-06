@@ -62,6 +62,9 @@ class AppsDeletionTest : AbstractSpringTest() {
     deleteRuleOf("fk_app_enabled_for_project_app_install").assert.isEqualTo("CASCADE")
     deleteRuleOf("fk_app_available_for_organization_app_install").assert.isEqualTo("CASCADE")
     deleteRuleOf("fk_app_available_for_organization_organization").assert.isEqualTo("CASCADE")
+    deleteRuleOf("fk_app_organization").assert.isEqualTo("CASCADE")
+    deleteRuleOf("fk_app_install_app").assert.isEqualTo("CASCADE")
+    deleteRuleOf("fk_app_secret_app").assert.isEqualTo("CASCADE")
   }
 
   @Test

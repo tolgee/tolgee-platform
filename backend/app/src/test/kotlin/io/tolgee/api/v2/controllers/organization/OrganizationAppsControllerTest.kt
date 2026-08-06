@@ -55,7 +55,7 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
   @Test
   fun `registers an app from a valid manifest`() {
     mockManifest(validManifest())
-    performAuthPost(appsUrl(), registerBody()).andIsOk.andAssertThatJson {
+    performAuthPost(registerUrl(), registerBody()).andIsOk.andAssertThatJson {
       node("appId").isEqualTo("test-app")
       node("name").isEqualTo("Test App")
       node("version").isEqualTo("0.1.0")
@@ -72,7 +72,7 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
   @Test
   fun `registration issues OAuth client credentials, exposing the secret exactly once`() {
     mockManifest(validManifest())
-    performAuthPost(appsUrl(), registerBody()).andIsOk.andAssertThatJson {
+    performAuthPost(registerUrl(), registerBody()).andIsOk.andAssertThatJson {
       node("clientId").isString.startsWith(AppInstallService.CLIENT_ID_PREFIX)
       node("clientSecret").isString.startsWith(AppInstallService.CLIENT_SECRET_PREFIX)
     }
@@ -98,7 +98,7 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
   @Test
   fun `refresh updates granted scopes from new manifest`() {
     mockManifest(validManifest())
-    performAuthPost(appsUrl(), registerBody()).andIsOk
+    performAuthPost(registerUrl(), registerBody()).andIsOk
     val installId = appInstallService.findAll(testData.organization.id).single().id
 
     mockManifest(validManifestV2WithExtraScope())
@@ -116,7 +116,7 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
   @Test
   fun `refresh and remove do not reach an install belonging to another organization`() {
     mockManifest(validManifest())
-    performAuthPost(appsUrl(), registerBody()).andIsOk
+    performAuthPost(registerUrl(), registerBody()).andIsOk
     val installId = appInstallService.findAll(testData.organization.id).single().id
 
     val otherOrgId = testData.otherOrganization.id
@@ -132,13 +132,14 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
   @Test
   fun `every org apps endpoint rejects a non-owner org member`() {
     mockManifest(validManifest())
-    performAuthPost(appsUrl(), registerBody()).andIsOk
+    performAuthPost(registerUrl(), registerBody()).andIsOk
     val installId = appInstallService.findAll(testData.organization.id).single().id
 
     userAccount = testData.member
 
     performAuthGet(appsUrl()).andIsForbidden
     performAuthPost(appsUrl(), registerBody()).andIsForbidden
+    performAuthPost(registerUrl(), registerBody()).andIsForbidden
     performAuthPost("${appsUrl()}/preview", registerBody()).andIsForbidden
     performAuthPost("${appsUrl()}/$installId/refresh", emptyMap<String, Any>()).andIsForbidden
     performAuthPatch("${appsUrl()}/$installId/manifest-url", registerBody()).andIsForbidden
@@ -148,7 +149,7 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
   @Test
   fun `rejects a manifest URL pointing at a private address`() {
     performAuthPost(
-      appsUrl(),
+      registerUrl(),
       mapOf("manifestUrl" to "http://127.0.0.1/manifest.json"),
     ).andIsBadRequest.andAssertThatJson {
       node("code").isEqualTo("url_not_valid")
@@ -158,7 +159,7 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
   @Test
   fun `rejects manifest with an unknown scope`() {
     mockManifest(validManifest().replace("\"keys.edit\"", "\"not.a.real.scope\""))
-    performAuthPost(appsUrl(), registerBody()).andIsBadRequest.andAssertThatJson {
+    performAuthPost(registerUrl(), registerBody()).andIsBadRequest.andAssertThatJson {
       node("code").isEqualTo("app_manifest_invalid")
     }
   }
@@ -166,7 +167,7 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
   @Test
   fun `register without scopes block stores no granted scopes`() {
     mockManifest(manifestWithoutScopes())
-    performAuthPost(appsUrl(), registerBody()).andIsOk.andAssertThatJson {
+    performAuthPost(registerUrl(), registerBody()).andIsOk.andAssertThatJson {
       node("scopes").isArray.isEmpty()
     }
     val install = appInstallService.findAll(testData.organization.id).single()
@@ -181,7 +182,7 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
         "\"decoratorsUrl\": \"https://app.example.com/d\",\n\"scopes\":",
       ),
     )
-    performAuthPost(appsUrl(), registerBody()).andIsBadRequest.andAssertThatJson {
+    performAuthPost(registerUrl(), registerBody()).andIsBadRequest.andAssertThatJson {
       node("code").isEqualTo("app_manifest_invalid")
       node("params[0]").isEqualTo("unsupported manifest features: decoratorsUrl")
     }
@@ -190,7 +191,7 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
   @Test
   fun `rejects a manifest declaring a non-dashboard module`() {
     mockManifest(manifestWithExtraModule())
-    performAuthPost(appsUrl(), registerBody()).andIsBadRequest.andAssertThatJson {
+    performAuthPost(registerUrl(), registerBody()).andIsBadRequest.andAssertThatJson {
       node("code").isEqualTo("app_manifest_invalid")
       node("params[0]").isEqualTo("unsupported manifest features: key-action")
     }
@@ -202,7 +203,7 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
       manifestWithExtraModule()
         .replace("\"scopes\":", "\"webhooks\": {\"url\": \"https://app.example.com/wh\"},\n\"scopes\":"),
     )
-    performAuthPost(appsUrl(), registerBody()).andIsBadRequest.andAssertThatJson {
+    performAuthPost(registerUrl(), registerBody()).andIsBadRequest.andAssertThatJson {
       node("code").isEqualTo("app_manifest_invalid")
       node("params[0]").isEqualTo("unsupported manifest features: key-action, webhooks")
     }
@@ -211,7 +212,7 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
   @Test
   fun `rejects a manifest with no dashboard page module`() {
     mockManifest(manifestWithoutDashboardPage())
-    performAuthPost(appsUrl(), registerBody()).andIsBadRequest.andAssertThatJson {
+    performAuthPost(registerUrl(), registerBody()).andIsBadRequest.andAssertThatJson {
       node("code").isEqualTo("app_manifest_invalid")
     }
   }
@@ -219,9 +220,9 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
   @Test
   fun `rejects duplicate app for the same organization`() {
     mockManifest(validManifest())
-    performAuthPost(appsUrl(), registerBody()).andIsOk
+    performAuthPost(registerUrl(), registerBody()).andIsOk
 
-    performAuthPost(appsUrl(), registerBody()).andIsBadRequest.andAssertThatJson {
+    performAuthPost(registerUrl(), registerBody()).andIsBadRequest.andAssertThatJson {
       node("code").isEqualTo("app_already_installed")
     }
   }
@@ -229,7 +230,7 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
   @Test
   fun `rejects invalid manifest JSON`() {
     mockManifest("not valid json")
-    performAuthPost(appsUrl(), registerBody()).andIsBadRequest.andAssertThatJson {
+    performAuthPost(registerUrl(), registerBody()).andIsBadRequest.andAssertThatJson {
       node("code").isEqualTo("app_manifest_invalid")
     }
   }
@@ -240,14 +241,14 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
       .whenever(appManifestHttpClient)
       .fetchBody(anyString())
 
-    performAuthPost(appsUrl(), registerBody()).andIsBadRequest.andAssertThatJson {
+    performAuthPost(registerUrl(), registerBody()).andIsBadRequest.andAssertThatJson {
       node("code").isEqualTo("app_manifest_fetch_failed")
     }
   }
 
   @Test
   fun `rejects a blank manifest URL with a validation error`() {
-    performAuthPost(appsUrl(), mapOf("manifestUrl" to "")).andIsBadRequest.andAssertThatJson {
+    performAuthPost(registerUrl(), mapOf("manifestUrl" to "")).andIsBadRequest.andAssertThatJson {
       node("STANDARD_VALIDATION.manifestUrl").isNotNull()
     }
   }
@@ -255,7 +256,7 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
   @Test
   fun `rejects a manifest whose fields exceed the stored column length`() {
     mockManifest(validManifest().replace("\"Test App\"", "\"${"x".repeat(256)}\""))
-    performAuthPost(appsUrl(), registerBody()).andIsBadRequest.andAssertThatJson {
+    performAuthPost(registerUrl(), registerBody()).andIsBadRequest.andAssertThatJson {
       node("code").isEqualTo("app_manifest_invalid")
     }
   }
@@ -263,7 +264,7 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
   @Test
   fun `rejects a manifest with a blank required field`() {
     mockManifest(validManifest().replace("\"Test App\"", "\"  \""))
-    performAuthPost(appsUrl(), registerBody()).andIsBadRequest.andAssertThatJson {
+    performAuthPost(registerUrl(), registerBody()).andIsBadRequest.andAssertThatJson {
       node("code").isEqualTo("app_manifest_invalid")
     }
   }
@@ -271,7 +272,7 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
   @Test
   fun `rejects a manifest whose module entry does not resolve to an http url`() {
     mockManifest(validManifest().replace("\"entry\": \"/\"", "\"entry\": \"javascript:alert(1)\""))
-    performAuthPost(appsUrl(), registerBody()).andIsBadRequest.andAssertThatJson {
+    performAuthPost(registerUrl(), registerBody()).andIsBadRequest.andAssertThatJson {
       node("code").isEqualTo("app_manifest_invalid")
     }
   }
@@ -279,7 +280,7 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
   @Test
   fun `manifest url update does not reach an install of another organization`() {
     mockManifest(validManifest())
-    performAuthPost(appsUrl(), registerBody()).andIsOk
+    performAuthPost(registerUrl(), registerBody()).andIsOk
     val installId = appInstallService.findAll(testData.organization.id).single().id
 
     userAccount = testData.otherOwner
@@ -298,7 +299,7 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
       validManifest()
     }.whenever(appManifestHttpClient).fetchBody(anyString())
 
-    performAuthPost(appsUrl(), registerBody()).andIsOk
+    performAuthPost(registerUrl(), registerBody()).andIsOk
     val installId = appInstallService.findAll(testData.organization.id).single().id
     performAuthPost("${appsUrl()}/$installId/refresh", emptyMap<String, Any>()).andIsOk
 
@@ -308,7 +309,7 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
   @Test
   fun `rejects a manifest whose baseUrl is not an absolute http url`() {
     mockManifest(validManifest().replace("\"https://app.example.com\"", "\"not-a-url\""))
-    performAuthPost(appsUrl(), registerBody()).andIsBadRequest.andAssertThatJson {
+    performAuthPost(registerUrl(), registerBody()).andIsBadRequest.andAssertThatJson {
       node("code").isEqualTo("app_manifest_invalid")
       node("params[0]").isEqualTo("baseUrl must be an absolute http(s) URL")
     }
@@ -317,7 +318,7 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
   @Test
   fun `manifest url update without scope widening withholds newly declared scopes and drops removed ones`() {
     mockManifest(validManifest())
-    performAuthPost(appsUrl(), registerBody()).andIsOk
+    performAuthPost(registerUrl(), registerBody()).andIsOk
     val installId = appInstallService.findAll(testData.organization.id).single().id
 
     mockManifest(validManifestV2WithExtraScope().replace("\"keys.edit\", ", ""))
@@ -337,7 +338,7 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
   @Test
   fun `lists registered apps for the organization`() {
     mockManifest(validManifest())
-    performAuthPost(appsUrl(), registerBody()).andIsOk
+    performAuthPost(registerUrl(), registerBody()).andIsOk
 
     performAuthGet(appsUrl()).andIsOk.andAssertThatJson {
       node("_embedded.appInstalls").isArray.hasSize(1)
@@ -348,7 +349,7 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
   @Test
   fun `refresh updates the stored manifest`() {
     mockManifest(validManifest())
-    performAuthPost(appsUrl(), registerBody()).andIsOk
+    performAuthPost(registerUrl(), registerBody()).andIsOk
     val installId = appInstallService.findAll(testData.organization.id).single().id
 
     mockManifest(validManifestV2())
@@ -361,7 +362,7 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
   @Test
   fun `refresh rejects manifest whose app id changed`() {
     mockManifest(validManifest())
-    performAuthPost(appsUrl(), registerBody()).andIsOk
+    performAuthPost(registerUrl(), registerBody()).andIsOk
     val installId = appInstallService.findAll(testData.organization.id).single().id
 
     mockManifest(validManifest().replace("\"test-app\"", "\"different-app\""))
@@ -373,7 +374,7 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
   @Test
   fun `updates the manifest URL and refetches from the new location`() {
     mockManifest(validManifest())
-    performAuthPost(appsUrl(), registerBody()).andIsOk
+    performAuthPost(registerUrl(), registerBody()).andIsOk
     val installId = appInstallService.findAll(testData.organization.id).single().id
 
     mockManifest(validManifestV2())
@@ -392,7 +393,7 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
   @Test
   fun `manifest URL update rejects manifest whose app id changed`() {
     mockManifest(validManifest())
-    performAuthPost(appsUrl(), registerBody()).andIsOk
+    performAuthPost(registerUrl(), registerBody()).andIsOk
     val installId = appInstallService.findAll(testData.organization.id).single().id
 
     mockManifest(validManifest().replace("\"test-app\"", "\"different-app\""))
@@ -407,7 +408,7 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
   @Test
   fun `removes a registered app`() {
     mockManifest(validManifest())
-    performAuthPost(appsUrl(), registerBody()).andIsOk
+    performAuthPost(registerUrl(), registerBody()).andIsOk
     val installId = appInstallService.findAll(testData.organization.id).single().id
 
     performAuthDelete("${appsUrl()}/$installId").andIsOk
@@ -415,6 +416,8 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
   }
 
   private fun appsUrl() = "/v2/organizations/${testData.organization.id}/apps"
+
+  private fun registerUrl() = "${appsUrl()}/register"
 
   private fun registerBody() = mapOf("manifestUrl" to AppsTestFixtures.MANIFEST_URL)
 

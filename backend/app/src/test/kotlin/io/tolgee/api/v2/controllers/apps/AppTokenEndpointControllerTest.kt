@@ -40,7 +40,7 @@ class AppTokenEndpointControllerTest : AuthorizedControllerTest() {
     AppsTestFixtures.mockManifest(appManifestHttpClient, MANIFEST_WITH_SCOPES)
     val response =
       performAuthPost(
-        "/v2/organizations/${testData.organization.id}/apps",
+        "/v2/organizations/${testData.organization.id}/apps/register",
         mapOf("manifestUrl" to AppsTestFixtures.MANIFEST_URL),
       ).andIsOk.andReturn().response.contentAsString
     val json = objectMapper.readTree(response)

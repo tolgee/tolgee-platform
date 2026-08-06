@@ -181,7 +181,7 @@ class AppSelfInstallationsControllerTest : AuthorizedControllerTest() {
   private fun registerOrganizationInstall(): Triple<Long, String, String> {
     val response =
       performAuthPost(
-        "/v2/organizations/${testData.organization.id}/apps",
+        "/v2/organizations/${testData.organization.id}/apps/register",
         mapOf("manifestUrl" to AppsTestFixtures.MANIFEST_URL),
       ).andIsOk.andReturn().response.contentAsString
     return credentialsOf(response)

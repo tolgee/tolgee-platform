@@ -250,7 +250,7 @@ class ProjectAppsControllerTest : AuthorizedControllerTest() {
   private fun registerApp() {
     mockManifest(validManifest())
     performAuthPost(
-      "/v2/organizations/${testData.organization.id}/apps",
+      "/v2/organizations/${testData.organization.id}/apps/register",
       mapOf("manifestUrl" to AppsTestFixtures.MANIFEST_URL),
     ).andIsOk
   }

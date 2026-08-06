@@ -54,7 +54,7 @@ class AppTokenAuthorizationTest : AuthorizedControllerTest() {
 
     val registration =
       performAuthPost(
-        "/v2/organizations/${testData.organization.id}/apps",
+        "/v2/organizations/${testData.organization.id}/apps/register",
         mapOf("manifestUrl" to AppsTestFixtures.MANIFEST_URL),
       ).andIsOk.andReturn().response.contentAsString
     val json = objectMapper.readTree(registration)
@@ -110,7 +110,7 @@ class AppTokenAuthorizationTest : AuthorizedControllerTest() {
     AppsTestFixtures.mockManifest(appManifestHttpClient, PROJECT_EDIT_MANIFEST)
     val registration =
       performAuthPost(
-        "/v2/organizations/${testData.organization.id}/apps",
+        "/v2/organizations/${testData.organization.id}/apps/register",
         mapOf("manifestUrl" to AppsTestFixtures.MANIFEST_URL),
       ).andIsOk.andReturn().response.contentAsString
     val json = objectMapper.readTree(registration)
