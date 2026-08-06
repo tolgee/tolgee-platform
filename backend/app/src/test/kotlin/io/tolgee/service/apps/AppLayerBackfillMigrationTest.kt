@@ -50,6 +50,30 @@ class AppLayerBackfillMigrationTest : AbstractSpringTest() {
   }
 
   @Test
+  fun `gives every existing install a principal of its own`() {
+    givenPreAppLayerDatabase()
+
+    applyBackfill()
+
+    val principals =
+      query(
+        """
+        select i.id, u.name, u.disabled_at, u.deleted_at, u.is_app_principal, u.account_type
+        from app_install i join user_account u on u.id = i.principal_id
+        order by i.id
+        """,
+      )
+    principals.assert.isEqualTo(
+      listOf(
+        listOf(INSTALL_ONE, "App [app]", null, null, true, "MANAGED"),
+        listOf(INSTALL_TWO, "App [app]", null, null, true, "MANAGED"),
+        listOf(INSTALL_NATIVE, "App [app]", null, null, true, "MANAGED"),
+      ),
+    )
+    single("select count(distinct principal_id) from app_install").assert.isEqualTo(3L)
+  }
+
+  @Test
   fun `re-running the backfill changes nothing`() {
     givenPreAppLayerDatabase()
     applyBackfill()
@@ -58,6 +82,7 @@ class AppLayerBackfillMigrationTest : AbstractSpringTest() {
     applyBackfill()
 
     query("select id, app_id, organization_id from app order by app_id").assert.isEqualTo(appsAfterFirstRun)
+    single("select count(*) from user_account").assert.isEqualTo(3L)
   }
 
   /**
@@ -77,11 +102,18 @@ class AppLayerBackfillMigrationTest : AbstractSpringTest() {
   private fun givenPreAppLayerDatabase() {
     execute("DROP SCHEMA IF EXISTS $SCRATCH_SCHEMA CASCADE")
     execute("CREATE SCHEMA $SCRATCH_SCHEMA")
-    listOf("app", "app_install", "app_install_secret", "app_available_for_organization", "app_enabled_for_project")
-      .forEach {
-        execute("CREATE TABLE $SCRATCH_SCHEMA.$it (LIKE public.$it INCLUDING ALL)")
-      }
+    listOf(
+      "app",
+      "app_install",
+      "app_install_secret",
+      "app_available_for_organization",
+      "app_enabled_for_project",
+      "user_account",
+    ).forEach {
+      execute("CREATE TABLE $SCRATCH_SCHEMA.$it (LIKE public.$it INCLUDING ALL)")
+    }
     execute("ALTER TABLE $SCRATCH_SCHEMA.app_install DROP COLUMN registered_app_id")
+    execute("ALTER TABLE $SCRATCH_SCHEMA.app_install DROP COLUMN principal_id")
 
     insertInstall(INSTALL_ONE, ORG_ONE, "shared-app", "2020-01-01")
     insertInstall(INSTALL_TWO, ORG_TWO, "shared-app", "2021-01-01")
@@ -130,6 +162,7 @@ class AppLayerBackfillMigrationTest : AbstractSpringTest() {
 
   private fun applyBackfill() {
     execute("ALTER TABLE $SCRATCH_SCHEMA.app_install ADD COLUMN IF NOT EXISTS registered_app_id BIGINT")
+    execute("ALTER TABLE $SCRATCH_SCHEMA.app_install ADD COLUMN IF NOT EXISTS principal_id BIGINT")
     BACKFILL_CHANGESET_IDS.forEach { execute(changesetSql(it)) }
   }
 
@@ -185,7 +218,8 @@ class AppLayerBackfillMigrationTest : AbstractSpringTest() {
   companion object {
     private const val SCRATCH_SCHEMA = "app_layer_backfill_test"
     private const val CHANGELOG_RESOURCE = "db/changelog/schema.xml"
-    private val BACKFILL_CHANGESET_IDS = listOf("1783771000000-44", "1783771000000-45")
+    private val BACKFILL_CHANGESET_IDS =
+      listOf("1783771000000-44", "1783771000000-45", "1783771000000-53")
 
     private const val AUTHOR = 7L
     private const val ORG_ONE = 11L

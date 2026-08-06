@@ -2,11 +2,13 @@ package io.tolgee.api.v2.controllers.apps
 
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.AppsTestData
+import io.tolgee.dtos.request.organization.SetOrganizationRoleDto
 import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andIsUnauthorized
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.security.authentication.AppTokenService
 import io.tolgee.service.apps.AppManifestHttpClient
 import io.tolgee.service.apps.AppsTestFixtures
@@ -167,7 +169,23 @@ class AppTokenAuthorizationTest : AuthorizedControllerTest() {
     asApp(get("/v2/projects/${testData.project.id}/translations")).andIsOk
   }
 
-  /** The author's server role must not reach the install, whatever it is. */
+  @Test
+  fun `keeps working once its author has been deleted`() {
+    // Somebody else has to own the organization first, or deleting its only owner takes it with them.
+    organizationRoleService.setMemberRole(
+      testData.organization.id,
+      testData.member.id,
+      SetOrganizationRoleDto(OrganizationRoleType.OWNER),
+    )
+    userAccountService.delete(testData.user.id)
+
+    asApp(get("/v2/projects/${testData.project.id}/translations")).andIsOk
+  }
+
+  /**
+   * The author's server role must not reach the install, whatever it is — neither to reach a project
+   * the app was never enabled for, nor to bypass a scope check inside one it was.
+   */
   @Test
   fun `does not gain the author's server-admin privileges`() {
     val author = userAccountService.get(testData.user.id)
@@ -177,6 +195,12 @@ class AppTokenAuthorizationTest : AuthorizedControllerTest() {
     asApp(get("/v2/projects/${testData.siblingProject.id}/translations"))
       .andIsForbidden
       .andHasErrorMessage(Message.APP_NOT_ENABLED_FOR_PROJECT)
+
+    asApp(
+      post("/v2/projects/${testData.project.id}/translations")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("""{"key":"brand-new-key","translations":{"en":"Hello"}}"""),
+    ).andIsForbidden.andHasErrorMessage(Message.OPERATION_NOT_PERMITTED)
   }
 
   @Test
