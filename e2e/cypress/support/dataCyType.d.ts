@@ -15,6 +15,7 @@ declare namespace DataCy {
         "account-security-provider-disconnect": true;
         "account-security-set-password-instructions-sent": true;
         "active-plan-license-key-input": true;
+        "active-plan-license-key-open-button": true;
         "activity-compact": true;
         "activity-compact-detail-button": true;
         "activity-detail": true;
@@ -123,10 +124,13 @@ declare namespace DataCy {
         "batch-operations-submit-button": true;
         "batch-progress": true;
         "batch-select-item": true;
+        "billing-active-card-current-period": true;
+        "billing-active-card-subscribed-at": true;
         "billing-plan-included-credits": true;
         "billing-plan-included-keys": true;
         "billing-plan-included-seats": true;
         "billing-plan-included-strings": true;
+        "billing-plan-included-words": true;
         "billing-plan-subtitle": true;
         "billing-progress-label-item": true;
         "branch-default-chip": true;
@@ -538,6 +542,8 @@ declare namespace DataCy {
         "permissions-menu-reset-to-organization": true;
         "permissions-menu-save": true;
         "plan-limit-dialog-close": true;
+        "plan-limit-dialog-enable-auto-upgrade": true;
+        "plan-limit-dialog-words-auto-upgrade-hint": true;
         "plan-limit-exceeded-popover": true;
         "plan_seat_limit_exceeded_while_accepting_invitation_message": true;
         "profile": true;

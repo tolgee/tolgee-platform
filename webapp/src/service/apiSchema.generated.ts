@@ -1654,6 +1654,8 @@ export interface components {
         | "SET_KEYS_NAMESPACE"
         | "AUTOMATION"
         | "BILLING_TRIAL_EXPIRATION_NOTICE"
+        | "BILLING_AUTO_UPGRADE_NOTICE"
+        | "BILLING_AUTO_UPGRADE_RENEWAL"
         | "ASSIGN_TRANSLATION_LABEL"
         | "UNASSIGN_TRANSLATION_LABEL"
         | "QA_CHECK"
@@ -2724,6 +2726,7 @@ export interface components {
       keys: components["schemas"]["CurrentUsageItemModel"];
       seats: components["schemas"]["CurrentUsageItemModel"];
       strings: components["schemas"]["CurrentUsageItemModel"];
+      words?: components["schemas"]["CurrentUsageItemModel"];
     };
     DeleteKeysDto: {
       /** @description IDs of keys to delete */
@@ -3056,6 +3059,9 @@ export interface components {
         | "user_is_subscribed_to_paid_plan"
         | "cannot_create_free_plan_without_fixed_type"
         | "cannot_modify_plan_free_status"
+        | "plan_invoiced_requires_free"
+        | "plan_incomplete_usd_pricing"
+        | "self_hosted_plan_usd_price_only_for_hosted_words"
         | "key_id_not_provided"
         | "free_self_hosted_seat_limit_exceeded"
         | "advanced_params_not_supported"
@@ -3128,15 +3134,29 @@ export interface components {
         | "specify_plan_id_or_custom_plan"
         | "custom_plans_has_to_be_private"
         | "cannot_create_free_plan_with_prices"
+        | "cannot_create_free_plan_with_multiple_tiers"
+        | "cloud_plan_must_have_at_least_one_tier"
+        | "cloud_plan_must_have_exactly_one_tier"
+        | "cloud_plan_tier_missing_included_words"
+        | "cloud_plan_tier_invalid_allowance_for_metric"
+        | "cloud_plan_tier_missing_eur_price"
+        | "cloud_plan_usd_price_only_for_hosted_words"
+        | "organization_currency_already_set"
+        | "plan_tiers_disagree_on_billing_period"
+        | "self_hosted_plan_missing_included_words"
+        | "stripe_product_id_required"
+        | "stripe_product_name_required"
         | "subscription_not_scheduled_for_cancellation"
         | "cannot_cancel_trial"
         | "cannot_update_without_modification"
+        | "cannot_downgrade_word_tier"
         | "current_subscription_is_not_trialing"
         | "sorting_and_paging_is_not_supported_when_using_cursor"
         | "strings_metric_are_not_supported"
         | "plan_key_limit_exceeded"
         | "keys_spending_limit_exceeded"
         | "plan_seat_limit_exceeded"
+        | "plan_word_limit_exceeded"
         | "instance_not_using_license_key"
         | "invalid_path"
         | "llm_provider_not_found"
@@ -3782,6 +3802,8 @@ export interface components {
         | "SET_KEYS_NAMESPACE"
         | "AUTOMATION"
         | "BILLING_TRIAL_EXPIRATION_NOTICE"
+        | "BILLING_AUTO_UPGRADE_NOTICE"
+        | "BILLING_AUTO_UPGRADE_RENEWAL"
         | "ASSIGN_TRANSLATION_LABEL"
         | "UNASSIGN_TRANSLATION_LABEL"
         | "QA_CHECK"
@@ -5195,14 +5217,19 @@ export interface components {
       seats: number;
       /** Format: int64 */
       translations: number;
+      /** Format: int64 */
+      words: number;
     };
     PlanPricesModel: {
       perSeat: number;
       perThousandKeys: number;
       perThousandMtCredits?: number;
+      perThousandMtCreditsUsd?: number;
       perThousandTranslations?: number;
       subscriptionMonthly: number;
+      subscriptionMonthlyUsd: number;
       subscriptionYearly: number;
+      subscriptionYearlyUsd: number;
     };
     PlausibleDto: {
       domain?: string;
@@ -5744,8 +5771,9 @@ export interface components {
       /** Format: int64 */
       id: number;
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
+      invoiced: boolean;
       /** @enum {string} */
-      metricType: "KEYS_SEATS" | "STRINGS";
+      metricType: "KEYS_SEATS" | "STRINGS" | "HOSTED_WORDS";
       name: string;
       nonCommercial: boolean;
       public: boolean;
@@ -5870,6 +5898,11 @@ export interface components {
       currentTranslations: number;
       /**
        * Format: int64
+       * @description How many hosted words are currently stored by organization
+       */
+      currentWords: number;
+      /**
+       * Format: int64
        * @deprecated
        * @description Customers were able to buy extra credits separately in the past.
        *
@@ -5896,6 +5929,11 @@ export interface components {
        * @description How many translations are included in current subscription plan. How many translations can organization use without additional costs
        */
       includedTranslations: number;
+      /**
+       * Format: int64
+       * @description How many hosted words are included in current subscription plan (for word-based plans). How many words the organization can host without additional costs.
+       */
+      includedWords: number;
       /** @description Whether the current plan is pay-as-you-go of fixed. For pay-as-you-go plans, the spending limit is the top limit. */
       isPayAsYouGo: boolean;
       /**
@@ -5920,6 +5958,11 @@ export interface components {
        * @description Currently used credits including credits used over the limit
        */
       usedMtCredits: number;
+      /**
+       * Format: int64
+       * @description How many hosted words can be stored until reaching the limit.
+       */
+      wordsLimit: number;
     };
     QaCheckCategoryModel: {
       /** @enum {string} */
@@ -6319,7 +6362,10 @@ export interface components {
       /** Format: int64 */
       id: number;
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
+      invoiced: boolean;
       isPayAsYouGo: boolean;
+      /** @enum {string} */
+      metricType: "KEYS_SEATS" | "STRINGS" | "HOSTED_WORDS";
       name: string;
       nonCommercial: boolean;
       prices: components["schemas"]["PlanPricesModel"];
@@ -6944,6 +6990,9 @@ export interface components {
         | "user_is_subscribed_to_paid_plan"
         | "cannot_create_free_plan_without_fixed_type"
         | "cannot_modify_plan_free_status"
+        | "plan_invoiced_requires_free"
+        | "plan_incomplete_usd_pricing"
+        | "self_hosted_plan_usd_price_only_for_hosted_words"
         | "key_id_not_provided"
         | "free_self_hosted_seat_limit_exceeded"
         | "advanced_params_not_supported"
@@ -7016,15 +7065,29 @@ export interface components {
         | "specify_plan_id_or_custom_plan"
         | "custom_plans_has_to_be_private"
         | "cannot_create_free_plan_with_prices"
+        | "cannot_create_free_plan_with_multiple_tiers"
+        | "cloud_plan_must_have_at_least_one_tier"
+        | "cloud_plan_must_have_exactly_one_tier"
+        | "cloud_plan_tier_missing_included_words"
+        | "cloud_plan_tier_invalid_allowance_for_metric"
+        | "cloud_plan_tier_missing_eur_price"
+        | "cloud_plan_usd_price_only_for_hosted_words"
+        | "organization_currency_already_set"
+        | "plan_tiers_disagree_on_billing_period"
+        | "self_hosted_plan_missing_included_words"
+        | "stripe_product_id_required"
+        | "stripe_product_name_required"
         | "subscription_not_scheduled_for_cancellation"
         | "cannot_cancel_trial"
         | "cannot_update_without_modification"
+        | "cannot_downgrade_word_tier"
         | "current_subscription_is_not_trialing"
         | "sorting_and_paging_is_not_supported_when_using_cursor"
         | "strings_metric_are_not_supported"
         | "plan_key_limit_exceeded"
         | "keys_spending_limit_exceeded"
         | "plan_seat_limit_exceeded"
+        | "plan_word_limit_exceeded"
         | "instance_not_using_license_key"
         | "invalid_path"
         | "llm_provider_not_found"

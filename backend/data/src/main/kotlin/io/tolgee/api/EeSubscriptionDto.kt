@@ -23,4 +23,7 @@ data class EeSubscriptionDto(
   var isPayAsYouGo: Boolean,
   var keysLimit: Long,
   var seatsLimit: Long,
+  var includedWords: Long = 0L,
+  var wordsLimit: Long = -1L,
+  var autoUpgradeEnabled: Boolean = false,
 )

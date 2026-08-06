@@ -21,9 +21,13 @@ export const getSelfHostedProgressData = ({
     usage.credits.current
   );
 
+  const wordsProgress =
+    usage.words && new ProgressItem(usage.words.included, usage.words.current);
+
   return {
     keysProgress,
     seatsProgress,
     creditProgress: creditsProgress,
+    wordsProgress: wordsProgress || undefined,
   };
 };

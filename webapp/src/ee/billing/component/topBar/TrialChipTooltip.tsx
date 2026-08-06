@@ -59,7 +59,7 @@ export const TrialChipTooltip: FC<
 
   const highlightColor = getHighlightColor(theme, !plan.public);
 
-  const importantFeatures: components['schemas']['CloudPlanModel']['enabledFeatures'] =
+  const importantFeatures: components['schemas']['CloudPlanTierModel']['enabledFeatures'] =
     [
       'GRANULAR_PERMISSIONS',
       'AI_PROMPT_CUSTOMIZATION',

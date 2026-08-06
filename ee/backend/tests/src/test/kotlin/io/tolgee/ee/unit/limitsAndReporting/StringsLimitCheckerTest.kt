@@ -21,6 +21,7 @@ class StringsLimitCheckerTest {
     keys = unlimitedLimit(),
     seats = unlimitedLimit(),
     mtCreditsInCents = unlimitedLimit(),
+    words = unlimitedLimit(),
   )
 
   @Test

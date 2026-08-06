@@ -5,6 +5,8 @@ import io.tolgee.batch.ChunkProcessor
 import io.tolgee.batch.processors.AiPlaygroundChunkProcessor
 import io.tolgee.batch.processors.AssignTranslationLabelChunkProcessor
 import io.tolgee.batch.processors.AutoTranslateChunkProcessor
+import io.tolgee.batch.processors.AutoUpgradeNoticeProcessor
+import io.tolgee.batch.processors.AutoUpgradeRenewalProcessor
 import io.tolgee.batch.processors.AutomationChunkProcessor
 import io.tolgee.batch.processors.ClearTranslationsChunkProcessor
 import io.tolgee.batch.processors.CopyTranslationsChunkProcessor
@@ -114,6 +116,17 @@ enum class BatchJobType(
   BILLING_TRIAL_EXPIRATION_NOTICE(
     maxRetries = 3,
     processor = TrialExpirationNoticeProcessor::class,
+  ),
+  BILLING_AUTO_UPGRADE_NOTICE(
+    maxRetries = 3,
+    processor = AutoUpgradeNoticeProcessor::class,
+  ),
+  BILLING_AUTO_UPGRADE_RENEWAL(
+    maxRetries = 3,
+    // long enough to outlast transient Stripe unavailability (e.g. test-clock advancement
+    // blocking subscription modifications) — the default 2s burns all retries within seconds
+    defaultRetryWaitTimeInMs = 30_000,
+    processor = AutoUpgradeRenewalProcessor::class,
   ),
   ASSIGN_TRANSLATION_LABEL(
     activityType = ActivityType.BATCH_ASSIGN_TRANSLATION_LABEL,

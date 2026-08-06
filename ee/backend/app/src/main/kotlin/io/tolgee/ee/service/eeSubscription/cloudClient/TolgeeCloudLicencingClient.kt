@@ -56,10 +56,11 @@ class TolgeeCloudLicencingClient(
     subscription: EeSubscriptionDto,
     keys: Long?,
     seats: Long?,
+    words: Long? = null,
   ) {
     postRequest<Unit>(
       REPORT_USAGE_PATH,
-      ReportUsageDto(licenseKey = subscription.licenseKey, keys = keys, seats = seats),
+      ReportUsageDto(licenseKey = subscription.licenseKey, keys = keys, seats = seats, words = words),
     )
   }
 

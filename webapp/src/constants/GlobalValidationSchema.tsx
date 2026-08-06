@@ -46,6 +46,13 @@ Yup.setLocale({
         params={{ min: min.toString() }}
       />
     ),
+    moreThan: ({ more }) => (
+      <T
+        keyName="validation_schema_number_more_than_message"
+        defaultValue="Value must be greater than {value}"
+        params={{ value: more.toString() }}
+      />
+    ),
   },
 });
 
@@ -385,14 +392,47 @@ export class Validation {
       is: (free: any, newStripeProduct: any) => !free && !newStripeProduct,
       then: Yup.string().required(),
     }),
-    prices: Yup.object().when('type', {
-      is: 'PAY_AS_YOU_GO',
-      then: Yup.object({
-        perThousandMtCredits: Yup.number().min(0),
-        perThousandTranslations: Yup.number().min(0),
-        perSeat: Yup.number().min(0),
-        perThousandKeys: Yup.number().min(0),
-      }),
+    tiers: Yup.array().when(['metricType', 'free'], {
+      is: (metricType: any, free: any) =>
+        metricType === 'HOSTED_WORDS' && !free,
+      then: Yup.array().of(
+        Yup.object().shape(
+          {
+            includedWords: Yup.number().moreThan(0).required(),
+            includedMtCredits: Yup.number().min(0),
+            // A tier needs a EUR price, but not necessarily a monthly one: an annual-only
+            // plan zeroes every monthly field and hides the column. The backend asks the
+            // same — a EUR price in either period. Required from both sides so the message
+            // lands on a field the current mode actually renders; the pair is declared
+            // below to keep Yup from seeing a cycle.
+            eurMonthly: Yup.number().when('eurYearly', {
+              is: (eurYearly: any) => !(Number(eurYearly) > 0),
+              then: Yup.number().moreThan(0).required(),
+              otherwise: Yup.number().min(0),
+            }),
+            eurYearly: Yup.number().when('eurMonthly', {
+              is: (eurMonthly: any) => !(Number(eurMonthly) > 0),
+              then: Yup.number().moreThan(0).required(),
+              otherwise: Yup.number().min(0),
+            }),
+            usdMonthly: Yup.number().min(0),
+            usdYearly: Yup.number().min(0),
+          },
+          [['eurMonthly', 'eurYearly']]
+        )
+      ),
+      otherwise: Yup.array().of(
+        Yup.object({
+          includedMtCredits: Yup.number().min(0),
+          eurMonthly: Yup.number().min(0),
+          eurYearly: Yup.number().min(0),
+          usdMonthly: Yup.number().min(0),
+          usdYearly: Yup.number().min(0),
+          pricePerThousandKeys: Yup.number().min(0),
+          pricePerSeat: Yup.number().min(0),
+          pricePerThousandTranslations: Yup.number().min(0),
+        })
+      ),
     }),
     free: Yup.boolean(),
     stripeProductName: Yup.string().when(['free', 'newStripeProduct'], {
@@ -406,6 +446,32 @@ export class Validation {
     stripeProductId: Yup.string().when('free', {
       is: false,
       then: Yup.string().required(),
+    }),
+    tiers: Yup.array().when(['metricType', 'free'], {
+      is: (metricType: any, free: any) =>
+        metricType === 'HOSTED_WORDS' && !free,
+      then: Yup.array().of(
+        Yup.object().shape(
+          {
+            includedWords: Yup.number().moreThan(0).required(),
+            includedMtCredits: Yup.number().min(0),
+            // Same EUR-price rule as the cloud tier schema above.
+            eurMonthly: Yup.number().when('eurYearly', {
+              is: (eurYearly: any) => !(Number(eurYearly) > 0),
+              then: Yup.number().moreThan(0).required(),
+              otherwise: Yup.number().min(0),
+            }),
+            eurYearly: Yup.number().when('eurMonthly', {
+              is: (eurMonthly: any) => !(Number(eurMonthly) > 0),
+              then: Yup.number().moreThan(0).required(),
+              otherwise: Yup.number().min(0),
+            }),
+            usdMonthly: Yup.number().min(0),
+            usdYearly: Yup.number().min(0),
+          },
+          [['eurMonthly', 'eurYearly']]
+        )
+      ),
     }),
   });
 

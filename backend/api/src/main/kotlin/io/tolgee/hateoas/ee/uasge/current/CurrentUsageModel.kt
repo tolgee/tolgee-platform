@@ -17,5 +17,7 @@ open class CurrentUsageModel(
   val credits: CurrentUsageItemModel,
   val keys: CurrentUsageItemModel,
   val isPayAsYouGo: Boolean,
+  // Nullable so a self-hosted server on an older version still deserializes this model.
+  val words: CurrentUsageItemModel? = null,
 ) : RepresentationModel<CurrentUsageModel>(),
   Serializable

@@ -141,4 +141,35 @@
         <addDefaultValue columnDataType="bigint" columnName="seats_limit" defaultValueNumeric="0" tableName="ee_subscription"/>
         <addDefaultValue columnDataType="boolean" columnName="is_pay_as_you_go" defaultValueBoolean="false" tableName="ee_subscription"/>
     </changeSet>
+    <changeSet author="dkrizan" id="1751900000000-1">
+        <addColumn tableName="ee_subscription">
+            <column name="included_words" type="BIGINT" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="dkrizan" id="1751900000000-2">
+        <addColumn tableName="ee_subscription">
+            <column name="words_limit" type="BIGINT" defaultValue="-1">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="dkrizan" id="1751900000000-3">
+        <addColumn tableName="usage_to_report">
+            <column name="words_to_report" type="BIGINT" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_reported_words" type="BIGINT" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="dkrizan" id="1751900000000-4">
+        <addColumn tableName="ee_subscription">
+            <column name="auto_upgrade_enabled" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

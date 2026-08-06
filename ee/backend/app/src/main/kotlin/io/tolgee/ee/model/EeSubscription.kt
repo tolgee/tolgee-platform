@@ -69,6 +69,9 @@ class EeSubscription :
       isPayAsYouGo = isPayAsYouGo,
       keysLimit = keysLimit,
       seatsLimit = seatsLimit,
+      includedWords = includedWords,
+      wordsLimit = wordsLimit,
+      autoUpgradeEnabled = autoUpgradeEnabled,
     )
   }
 
@@ -98,4 +101,24 @@ class EeSubscription :
 
   @ColumnDefault("false")
   var isPayAsYouGo: Boolean = false
+
+  /**
+   * How many words are included in the subscription plan
+   */
+  @ColumnDefault("0")
+  var includedWords: Long = 0L
+
+  /**
+   * How many words can a customer use until they reach spending limit
+   */
+  @ColumnDefault("-1")
+  var wordsLimit: Long = -1L
+
+  /**
+   * Whether the subscription auto-upgrades to a covering tier instead of blocking over the word limit.
+   * Defaults to false (blocking) so instances on an older server version that don't send this field
+   * on the license stay blocking.
+   */
+  @ColumnDefault("false")
+  var autoUpgradeEnabled: Boolean = false
 }

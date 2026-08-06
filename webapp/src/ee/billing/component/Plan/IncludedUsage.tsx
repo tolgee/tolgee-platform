@@ -5,6 +5,7 @@ import {
   IncludedKeys,
   IncludedSeats,
   IncludedStrings,
+  IncludedWords,
 } from '../IncludedItem';
 
 type Props = {
@@ -37,6 +38,23 @@ export const IncludedUsage = ({
             count={includedUsage?.translations ?? -1}
             highlightColor={highlightColor}
           />
+        )}
+
+        {metricType == 'HOSTED_WORDS' && (
+          <>
+            <IncludedWords
+              data-cy={'billing-plan-included-words'}
+              className="words"
+              count={includedUsage?.words ?? -1}
+              highlightColor={highlightColor}
+            />
+            <IncludedSeats
+              data-cy={'billing-plan-included-seats'}
+              className="seats"
+              count={includedUsage?.seats ?? -1}
+              highlightColor={highlightColor}
+            />
+          </>
         )}
 
         {metricType == 'KEYS_SEATS' && (
