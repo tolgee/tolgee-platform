@@ -35,4 +35,23 @@ interface AppInstallRepository : JpaRepository<AppInstall, Long> {
 
   @Query("select count(i) from AppInstall i where i.app.id = :appId")
   fun countByRegisteredAppId(appId: Long): Long
+
+  @Query("select i from AppInstall i where i.app.id = :appId")
+  fun findAllByRegisteredAppId(appId: Long): List<AppInstall>
+
+  @Query("select i.app.id from AppInstall i where i.id = :installId and i.organization.id = :organizationId")
+  fun findAppEntityId(
+    organizationId: Long,
+    installId: Long,
+  ): Long?
+
+  @Query("select i.app.id from AppInstall i where i.id = :installId and i.organization is null")
+  fun findAppEntityIdOfNativeInstall(installId: Long): Long?
+
+  @Query("select i.app.id from AppInstall i where i.id = :installId")
+  fun findAppEntityIdOfInstall(installId: Long): Long?
+
+  /** Null for a native install: the implicit join over a null organization matches nothing. */
+  @Query("select i.organization.id from AppInstall i where i.id = :installId")
+  fun findOrganizationIdOfInstall(installId: Long): Long?
 }

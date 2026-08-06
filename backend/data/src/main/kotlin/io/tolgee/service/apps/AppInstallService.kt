@@ -1,13 +1,17 @@
 package io.tolgee.service.apps
 
 import io.tolgee.constants.Message
+import io.tolgee.dtos.apps.AppLifecycleAppCredentials
+import io.tolgee.dtos.apps.AppLifecycleInstall
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Organization
 import io.tolgee.model.UserAccount
 import io.tolgee.model.apps.AppInstall
+import io.tolgee.model.apps.AppLifecycleEventType
 import io.tolgee.repository.apps.AppInstallRepository
+import io.tolgee.service.apps.lifecycle.AppLifecycleDeliveryService
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -24,6 +28,8 @@ class AppInstallService(
   private val appManifestFetcher: AppManifestFetcher,
   private val appInstallPersister: AppInstallPersister,
   private val appService: AppService,
+  private val appInstallSecretService: AppInstallSecretService,
+  private val appLifecycleDeliveryService: AppLifecycleDeliveryService,
 ) {
   data class RegisterResult(
     val install: AppInstall,
@@ -76,13 +82,16 @@ class AppInstallService(
     if (authoritative.manifest.id != app.appId) {
       throw BadRequestException(Message.APP_MANIFEST_INVALID)
     }
-    return appInstallPersister.create(
-      appEntityId = app.id,
-      organizationId = organization.id,
-      authorId = author.id,
-      manifestUrl = registeredUrl,
-      fetched = authoritative,
-    )
+    val result =
+      appInstallPersister.create(
+        appEntityId = app.id,
+        organizationId = organization.id,
+        authorId = author.id,
+        manifestUrl = registeredUrl,
+        fetched = authoritative,
+      )
+    deliverRegistrationAndInstall(result)
+    return result
   }
 
   private fun fetchRegistered(
@@ -112,7 +121,71 @@ class AppInstallService(
     author: UserAccount,
   ): RegisterResult {
     val fetched = appManifestFetcher.fetch(manifestUrl)
-    return appInstallPersister.registerAndCreate(organizationId, author.id, manifestUrl, fetched)
+    val result = appInstallPersister.registerAndCreate(organizationId, author.id, manifestUrl, fetched)
+    deliverRegistrationAndInstall(result)
+    return result
+  }
+
+  /**
+   * Announces the new app and the new install, in that order — an app that receives both learns its
+   * own credentials before the first install that uses them. Neither delivery may fail the call:
+   * the credentials were also returned in the response, so an app whose host was down is recovered
+   * by handing them over or by rotating, not by undoing somebody's install.
+   */
+  private fun deliverRegistrationAndInstall(result: RegisterResult) {
+    val target = appLifecycleDeliveryService.resolveTarget(result.app.id) ?: return
+
+    result.appCredentials?.let {
+      appLifecycleDeliveryService.deliver(
+        target = target,
+        eventType = AppLifecycleEventType.APP_REGISTERED,
+        organizationId = result.install.organization?.id,
+        appCredentials =
+          AppLifecycleAppCredentials(
+            clientId = it.clientId,
+            clientSecret = it.clientSecret,
+            webhookSecret = it.webhookSecret,
+          ),
+      )
+    }
+
+    appLifecycleDeliveryService.deliver(
+      target = target,
+      eventType = AppLifecycleEventType.APP_INSTALLED,
+      organizationId = result.install.organization?.id,
+      install = installPayload(result.install, result.plaintextClientSecret),
+    )
+  }
+
+  /**
+   * Issues an additional client secret for the install and pushes it to the app, so an app that can
+   * receive deliveries never has to be told a secret by hand. This is also how an install whose
+   * original credentials never reached the app is repaired: rotate, and the delivery is retried.
+   */
+  fun issueSecret(install: AppInstall): AppInstallSecretService.IssueResult {
+    val issued = appInstallSecretService.issue(install)
+
+    appInstallRepository.findAppEntityIdOfInstall(install.id)?.let { appEntityId ->
+      appLifecycleDeliveryService.deliver(
+        appEntityId = appEntityId,
+        eventType = AppLifecycleEventType.INSTALL_SECRET_ROTATED,
+        organizationId = appInstallRepository.findOrganizationIdOfInstall(install.id),
+        install = installPayload(install, issued.plaintextSecret),
+      )
+    }
+    return issued
+  }
+
+  private fun installPayload(
+    install: AppInstall,
+    plaintextClientSecret: String?,
+  ): AppLifecycleInstall {
+    return AppLifecycleInstall(
+      id = install.id,
+      clientId = install.clientId,
+      clientSecret = plaintextClientSecret,
+      scopes = install.grantedScopes.map { it.value },
+    )
   }
 
   /**
@@ -139,6 +212,7 @@ class AppInstallService(
 
     if (existing == null) {
       val created = appInstallPersister.registerAndCreate(organizationId, author.id, manifestUrl, fetched)
+      deliverRegistrationAndInstall(created)
       return SelfRegisterResult(
         install = created.install,
         plaintextClientSecret = created.plaintextClientSecret,
@@ -215,12 +289,39 @@ class AppInstallService(
     )
   }
 
-  /** @param organizationId null targets a native (server-level) install. */
+  /**
+   * Uninstalls the app from one organization. The app itself stays registered and every other
+   * organization's install is untouched — removing the app everywhere is the owner's operation, see
+   * [AppOwnerRemovalService].
+   *
+   * @param organizationId null targets a native (server-level) install.
+   */
   fun remove(
     organizationId: Long?,
     installId: Long,
   ) {
-    appInstallPersister.remove(organizationId, installId)
+    // Resolved before the removal: dropping the last install of a server-owned app drops the app too.
+    val target =
+      findScopedAppEntityId(organizationId, installId)
+        ?.let { appLifecycleDeliveryService.resolveTarget(it) }
+
+    val removed = appInstallPersister.remove(organizationId, installId)
+
+    target ?: return
+    appLifecycleDeliveryService.deliver(
+      target = target,
+      eventType = AppLifecycleEventType.APP_UNINSTALLED,
+      organizationId = removed.organizationId,
+      install = AppLifecycleInstall(id = removed.installId, clientId = null),
+    )
+  }
+
+  private fun findScopedAppEntityId(
+    organizationId: Long?,
+    installId: Long,
+  ): Long? {
+    if (organizationId == null) return appInstallRepository.findAppEntityIdOfNativeInstall(installId)
+    return appInstallRepository.findAppEntityId(organizationId, installId)
   }
 
   @Transactional(readOnly = true)

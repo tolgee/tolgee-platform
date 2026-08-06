@@ -195,14 +195,15 @@ class OrganizationAppsController(
       "Phase one of a rotation: mints a second secret while every existing one keeps working, so " +
         "the app can pick the new one up before anything breaks. The install keeps its id, granted " +
         "scopes and per-project enablements. The response is the only place the secret is ever " +
-        "disclosed.",
+        "disclosed to you; it is also pushed to the app over the lifecycle channel, which is how " +
+        "an install whose credentials never reached the app is repaired.",
   )
   fun issueSecret(
     @PathVariable organizationId: Long,
     @PathVariable installId: Long,
   ): AppInstallSecretModel {
     val install = appInstallService.getScoped(organizationId, installId)
-    val issued = appInstallSecretService.issue(install)
+    val issued = appInstallService.issueSecret(install)
     return appInstallSecretModelAssembler.toModelWithSecret(issued.secret, issued.plaintextSecret)
   }
 

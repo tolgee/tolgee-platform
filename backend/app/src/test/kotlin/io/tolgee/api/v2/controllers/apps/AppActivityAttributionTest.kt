@@ -6,6 +6,7 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.node
 import io.tolgee.service.apps.AppManifestHttpClient
 import io.tolgee.service.apps.AppsTestFixtures
+import io.tolgee.service.apps.lifecycle.AppLifecycleHttpClient
 import io.tolgee.testing.AuthorizedControllerTest
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -27,6 +28,10 @@ class AppActivityAttributionTest : AuthorizedControllerTest() {
   @MockitoBean
   @Autowired
   lateinit var appManifestHttpClient: AppManifestHttpClient
+
+  @MockitoBean
+  @Autowired
+  lateinit var appLifecycleHttpClient: AppLifecycleHttpClient
 
   lateinit var testData: AppsTestData
   var installId: Long = 0

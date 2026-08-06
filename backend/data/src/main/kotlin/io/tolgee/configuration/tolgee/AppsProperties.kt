@@ -54,4 +54,60 @@ class AppsProperties {
     defaultExplanation = "= 1 hour",
   )
   var tokenExpiration: Long = 60 * 60 * 1000
+
+  @DocProperty(
+    description =
+      "How many times a lifecycle delivery (app registered, installed, uninstalled, secret " +
+        "rotated) is attempted before it is abandoned. Attempts back off exponentially between " +
+        "`lifecycle-delivery-initial-backoff-seconds` and `lifecycle-delivery-max-backoff-seconds`.",
+  )
+  var lifecycleDeliveryMaxAttempts: Int = 8
+
+  @DocProperty(description = "Delay before the second delivery attempt. Doubles with every further attempt.")
+  var lifecycleDeliveryInitialBackoffSeconds: Long = 30
+
+  @DocProperty(description = "Upper bound on the delay between two delivery attempts.")
+  var lifecycleDeliveryMaxBackoffSeconds: Long = 1800
+
+  @DocProperty(
+    description =
+      "How often every registered app's manifest is re-fetched to check the app is still there.",
+  )
+  var manifestHealthCheckPeriodMinutes: Long = 60
+
+  @DocProperty(
+    description =
+      "How long a manifest URL must keep failing before the app is marked unhealthy and its owner " +
+        "notified. Both this and `manifest-unhealthy-min-failures` must be exceeded, so a single " +
+        "failure — or a burst of them inside a short window — never marks an app unhealthy.",
+    defaultExplanation = "= 1 day",
+  )
+  var manifestUnhealthyAfterHours: Long = 24
+
+  @DocProperty(
+    description =
+      "How many consecutive failed manifest checks are needed before an app may be marked unhealthy.",
+  )
+  var manifestUnhealthyMinFailures: Int = 3
+
+  @DocProperty(
+    description =
+      "How long an app stays unhealthy before it is removed from every organization that " +
+        "installed it. Counted from the moment it was marked unhealthy, so the total grace an app " +
+        "gets is this plus `manifest-unhealthy-after-hours`.",
+    defaultExplanation = "= 14 days",
+  )
+  var manifestReapAfterUnhealthyDays: Long = 14
+
+  @DocProperty(
+    description =
+      "Whether an app whose manifest stayed unreachable past the grace period is removed from " +
+        "every organization that installed it. Disabled by default: health state and owner " +
+        "notifications are always recorded, but the destructive step is opt-in, because a long " +
+        "egress or DNS outage on Tolgee's side is indistinguishable from an app that is gone.\n" +
+        "\n" +
+        "An app whose manifest is reachable but no longer valid is never removed — somebody is " +
+        "still serving it, so its author is there to fix it.",
+  )
+  var reapUnreachableApps: Boolean = false
 }

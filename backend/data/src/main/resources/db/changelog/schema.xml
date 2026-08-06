@@ -6403,4 +6403,80 @@
                                  onDelete="CASCADE"
                                  validate="true"/>
     </changeSet>
+    <changeSet author="jcizmar" id="1783771000000-47">
+        <addColumn tableName="app">
+            <column name="manifest_last_checked_at" type="TIMESTAMP(6) WITHOUT TIME ZONE"/>
+            <column name="manifest_failure_count" type="INT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="manifest_first_failed_at" type="TIMESTAMP(6) WITHOUT TIME ZONE"/>
+            <column name="manifest_last_error" type="VARCHAR(500)"/>
+            <column name="manifest_last_failure_kind" type="VARCHAR(32)"/>
+            <column name="unhealthy_since" type="TIMESTAMP(6) WITHOUT TIME ZONE"/>
+            <column name="unhealthy_notified_at" type="TIMESTAMP(6) WITHOUT TIME ZONE"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jcizmar" id="1783771000000-48">
+        <createTable tableName="app_delivery">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="app_deliveryPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="app_id" type="BIGINT"/>
+            <column name="app_identifier" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="organization_id" type="BIGINT"/>
+            <column name="event_type" type="VARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="target_url" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="attempts" type="INT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_attempt_at" type="TIMESTAMP(6) WITHOUT TIME ZONE"/>
+            <column name="last_error" type="VARCHAR(500)"/>
+            <column name="delivered_at" type="TIMESTAMP(6) WITHOUT TIME ZONE"/>
+            <column name="abandoned_at" type="TIMESTAMP(6) WITHOUT TIME ZONE"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jcizmar" id="1783771000000-49">
+        <createIndex indexName="IDX_app_delivery_app_id" tableName="app_delivery">
+            <column name="app_id"/>
+        </createIndex>
+        <createIndex indexName="IDX_app_delivery_organization_id" tableName="app_delivery">
+            <column name="organization_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="jcizmar" id="1783771000000-50">
+        <comment>Both references drop to null rather than cascading: the delivery announcing that an
+            app was removed from an organization is written before the app row goes, and it is
+            precisely the record an owner needs afterwards to see whether the app was told.
+        </comment>
+        <addForeignKeyConstraint baseColumnNames="app_id"
+                                 baseTableName="app_delivery"
+                                 constraintName="FK_app_delivery_app"
+                                 deferrable="false"
+                                 initiallyDeferred="false"
+                                 referencedColumnNames="id"
+                                 referencedTableName="app"
+                                 onDelete="SET NULL"
+                                 validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="organization_id"
+                                 baseTableName="app_delivery"
+                                 constraintName="FK_app_delivery_organization"
+                                 deferrable="false"
+                                 initiallyDeferred="false"
+                                 referencedColumnNames="id"
+                                 referencedTableName="organization"
+                                 onDelete="SET NULL"
+                                 validate="true"/>
+    </changeSet>
 </databaseChangeLog>

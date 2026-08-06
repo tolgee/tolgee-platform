@@ -158,7 +158,7 @@ class AdministrationAppsController(
     @PathVariable installId: Long,
   ): AppInstallSecretModel {
     val install = appInstallService.getNative(installId)
-    val issued = appInstallSecretService.issue(install)
+    val issued = appInstallService.issueSecret(install)
     return appInstallSecretModelAssembler.toModelWithSecret(issued.secret, issued.plaintextSecret)
   }
 

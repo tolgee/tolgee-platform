@@ -1,7 +1,5 @@
 package io.tolgee.component.automations.processors
 
-import io.tolgee.component.CurrentDateProvider
-import io.tolgee.fixtures.computeHmacSha256
 import io.tolgee.model.webhook.WebhookConfig
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpEntity
@@ -18,7 +16,7 @@ import tools.jackson.module.kotlin.jacksonObjectMapper
 class WebhookExecutor(
   @Qualifier("webhookRestTemplate")
   private val restTemplate: RestTemplate,
-  private val currentDateProvider: CurrentDateProvider,
+  private val webhookSigner: WebhookSigner,
 ) {
   fun signAndExecute(
     config: WebhookConfig,
@@ -27,7 +25,7 @@ class WebhookExecutor(
     val stringData = jacksonObjectMapper().writeValueAsString(data)
     val headers = HttpHeaders()
     @Suppress("UastIncorrectHttpHeaderInspection")
-    headers.add("Tolgee-Signature", generateSigHeader(stringData, config.webhookSecret))
+    headers.add(WebhookSigner.SIGNATURE_HEADER, webhookSigner.signatureHeader(stringData, config.webhookSecret))
     headers.contentType = MediaType.APPLICATION_JSON
 
     val request = HttpEntity(stringData, headers)
@@ -47,14 +45,5 @@ class WebhookExecutor(
     } catch (e: Exception) {
       throw WebhookExecutionFailed(e)
     }
-  }
-
-  private fun generateSigHeader(
-    payload: String,
-    key: String,
-  ): String {
-    val timestamp = currentDateProvider.date.time
-    val signature = computeHmacSha256(key, "$timestamp.$payload")
-    return String.format("""{"timestamp": $timestamp, "signature": "$signature"}""")
   }
 }

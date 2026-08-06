@@ -5,12 +5,16 @@ import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.UserAccount
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import jakarta.persistence.FetchType
 import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import jakarta.persistence.UniqueConstraint
+import org.hibernate.annotations.ColumnDefault
+import java.util.Date
 
 /**
  * A published app, registered once and installed by any number of organizations. Its credentials
@@ -71,4 +75,34 @@ class App : StandardAuditModel() {
 
   @OneToMany(mappedBy = "app", fetch = FetchType.LAZY)
   var secrets: MutableList<AppSecret> = mutableListOf()
+
+  @Column(name = "manifest_last_checked_at")
+  var manifestLastCheckedAt: Date? = null
+
+  /** Consecutive failed manifest checks. Reset to zero by the first successful one. */
+  @Column(name = "manifest_failure_count", nullable = false)
+  @ColumnDefault("0")
+  var manifestFailureCount: Int = 0
+
+  @Column(name = "manifest_first_failed_at")
+  var manifestFirstFailedAt: Date? = null
+
+  @Column(name = "manifest_last_error", length = 500)
+  var manifestLastError: String? = null
+
+  /**
+   * Whether the last failure was the host not answering or the manifest it answered with no longer
+   * being valid. Only [AppManifestFailureKind.UNREACHABLE] ever leads to reaping: an invalid
+   * manifest means somebody is still serving it, so the app's author is reachable and can fix it.
+   */
+  @Enumerated(EnumType.STRING)
+  @Column(name = "manifest_last_failure_kind", length = 32)
+  var manifestLastFailureKind: AppManifestFailureKind? = null
+
+  /** When the app crossed the sustained-failure threshold. Null while it is healthy. */
+  @Column(name = "unhealthy_since")
+  var unhealthySince: Date? = null
+
+  @Column(name = "unhealthy_notified_at")
+  var unhealthyNotifiedAt: Date? = null
 }
