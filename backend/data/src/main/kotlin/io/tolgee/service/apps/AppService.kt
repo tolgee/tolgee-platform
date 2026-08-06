@@ -52,11 +52,6 @@ class AppService(
     return appRepository.findByAppId(appId) ?: throw AppNotRegisteredException(appId)
   }
 
-  @Transactional(readOnly = true)
-  fun get(appEntityId: Long): App {
-    return appRepository.findById(appEntityId).orElseThrow { NotFoundException(Message.APP_NOT_FOUND) }
-  }
-
   /**
    * The app, provided [organizationId] owns it. An organization that merely installed somebody
    * else's app must not reach it here — administering an app is the owner's alone.
