@@ -455,11 +455,7 @@ export class Validation {
           {
             includedWords: Yup.number().moreThan(0).required(),
             includedMtCredits: Yup.number().min(0),
-            // A tier needs a EUR price, but not necessarily a monthly one: an annual-only
-            // plan zeroes every monthly field and hides the column. The backend asks the
-            // same — a EUR price in either period. Required from both sides so the message
-            // lands on a field the current mode actually renders; the pair is declared
-            // below to keep Yup from seeing a cycle.
+            // Same EUR-price rule as the cloud tier schema above.
             eurMonthly: Yup.number().when('eurYearly', {
               is: (eurYearly: any) => !(Number(eurYearly) > 0),
               then: Yup.number().moreThan(0).required(),

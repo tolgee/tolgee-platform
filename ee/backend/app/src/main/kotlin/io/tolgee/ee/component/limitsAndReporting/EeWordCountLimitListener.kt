@@ -15,14 +15,8 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
 
 /**
- * Listens for word count changes and checks whether ee instance
- * is not over the limit.
- *
- * We have to use this "EntityPreCommitEvent", because the approach
- * in io.tolgee.ee.component.EeKeyCountReportingListener, doesn't throw the exception
- * properly. (In that case, it would be wrapped with other excption, which we don't want.)
- * That's why we have separate class for that.
- *
+ * Must listen on EntityPreCommitEvent: the approach [EeKeyCountReportingListener] uses wraps the
+ * exception in another one, which loses the limit-exceeded signal.
  */
 @Scope(TransactionScopeConfig.SCOPE_TRANSACTION)
 @Component
