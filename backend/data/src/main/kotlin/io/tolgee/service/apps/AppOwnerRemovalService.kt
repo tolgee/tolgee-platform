@@ -26,6 +26,7 @@ class AppOwnerRemovalService(
   private val appInstallRepository: AppInstallRepository,
   private val appEnablementService: AppEnablementService,
   private val appAvailabilityService: AppAvailabilityService,
+  private val appInstallPrincipalService: AppInstallPrincipalService,
   private val appLifecycleDeliveryService: AppLifecycleDeliveryService,
   private val transactionManager: PlatformTransactionManager,
 ) : Logging {
@@ -60,6 +61,7 @@ class AppOwnerRemovalService(
   private fun purge(appEntityId: Long): List<RemovedInstall> {
     val installs = appInstallRepository.findAllByRegisteredAppId(appEntityId)
     val removed = installs.map { RemovedInstall(installId = it.id, organizationId = it.organization?.id) }
+    val principals = installs.map { it.principal }
 
     installs.forEach {
       appEnablementService.removeAllForAppInstall(it.id)
@@ -69,6 +71,7 @@ class AppOwnerRemovalService(
     appInstallRepository.flush()
     appRepository.deleteById(appEntityId)
     appRepository.flush()
+    principals.forEach { appInstallPrincipalService.retire(it) }
 
     return removed
   }

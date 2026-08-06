@@ -11,11 +11,11 @@ import io.tolgee.model.apps.AppInstall
  *    credentials) — not bound to a project, [isInstallContext] is true, and `actingAsUserAccount`
  *    is optionally set from the `X-Tolgee-Act-As-User-Id` header.
  *
- * On the install-context path `userAccount` is the person who registered the install, kept as a
- * display identity only: it carries no role, it is resolved even when that account is disabled or
- * deleted, and no permission is derived from it. What the install may do comes from
- * [AppInstall.grantedScopes], optionally narrowed by `actingAsUserAccount` — whose status and
- * permissions do still count.
+ * On the install-context path `userAccount` is the install's own [AppInstall.principal] — never the
+ * person who registered it, so nothing operational depends on that person still existing or being
+ * enabled. The principal holds no role, no membership and no project permission, so what the install
+ * may do comes from [AppInstall.grantedScopes], optionally narrowed by `actingAsUserAccount` — whose
+ * status and permissions do still count.
  *
  * [boundProjectId] is set by `ProjectContextService` once the request's project is known and its
  * enablement verified; permission resolution returns nothing for any other project.

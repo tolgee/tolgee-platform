@@ -32,6 +32,7 @@ import org.hibernate.annotations.ColumnDefault
     Index(columnList = "organization_id"),
     Index(columnList = "author_id"),
     Index(columnList = "registered_app_id"),
+    Index(columnList = "principal_id"),
   ],
 )
 class AppInstall : StandardAuditModel() {
@@ -51,12 +52,26 @@ class AppInstall : StandardAuditModel() {
   var organization: Organization? = null
 
   /**
-   * Who registered the install. A historical record and a display identity — an organization's app
+   * Who registered the install. A historical "created by" record only — an organization's app
    * outlives the employee who created it, so nothing operational may depend on this account still
    * existing or being enabled. What the install may do comes from [grantedScopes].
    */
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   lateinit var author: UserAccount
+
+  /**
+   * The install's own account, the identity an install-context request runs as. It is a real
+   * [UserAccount] row so that everything writing a user foreign key — a comment's author, an
+   * import's, a batch job's — works without the person who registered the install still being
+   * around, and so that it is obvious in the data who wrote what.
+   *
+   * It carries no organization role and no project permission, so it grants nothing: the install's
+   * capability is [grantedScopes] alone. It cannot sign in and is excluded from seats and user
+   * listings — see [UserAccount.isAppPrincipal].
+   */
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(name = "principal_id")
+  lateinit var principal: UserAccount
 
   @Column(nullable = false)
   lateinit var manifestUrl: String

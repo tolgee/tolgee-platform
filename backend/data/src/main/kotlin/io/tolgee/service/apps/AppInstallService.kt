@@ -372,26 +372,26 @@ class AppInstallService(
   }
 
   /**
-   * Resolves an install together with the identity an install-context request is recorded under, for
-   * the app-token auth filter.
+   * Resolves an install together with the identity an install-context request runs as, for the
+   * app-token auth filter.
    *
-   * The author is looked up **without** the active-user filter and with [UserAccountDto.role]
-   * cleared: an install belongs to its organization, not to the person who created it, so the app
-   * must keep working after that person is disabled or deleted, and no server role may reach the
-   * install through them. Everything the install may actually do comes from
-   * [AppInstall.grantedScopes] — see
+   * That identity is the install's own [AppInstall.principal], never the person who registered it:
+   * an install belongs to its organization and must keep working after that person is disabled or
+   * deleted, and nothing of theirs — server role, organization membership, project permissions,
+   * per-language grants — may reach the install through the principal. The principal holds none of
+   * those, so everything the install may do comes from [AppInstall.grantedScopes] — see
    * [io.tolgee.service.security.SecurityService.getCurrentPermittedScopes].
    */
   @Transactional(readOnly = true)
   fun resolveForAppAuth(installId: Long): AppAuthResolution? {
     val install = appInstallRepository.findById(installId).orElse(null) ?: return null
-    return AppAuthResolution(install, UserAccountDto.fromEntity(install.author).copy(role = null))
+    return AppAuthResolution(install, UserAccountDto.fromEntity(install.principal))
   }
 
   data class AppAuthResolution(
     val install: AppInstall,
-    /** Who created the install. Identity and audit only; it grants nothing. */
-    val author: UserAccountDto,
+    /** The install acting as itself. */
+    val principal: UserAccountDto,
   )
 
   /**

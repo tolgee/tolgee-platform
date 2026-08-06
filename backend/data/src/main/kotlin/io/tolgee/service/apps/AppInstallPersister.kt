@@ -24,6 +24,7 @@ class AppInstallPersister(
   private val appInstallSecretService: AppInstallSecretService,
   private val appService: AppService,
   private val appRepository: AppRepository,
+  private val appInstallPrincipalService: AppInstallPrincipalService,
   private val entityManager: EntityManager,
   private val keyGenerator: KeyGenerator,
 ) {
@@ -76,6 +77,7 @@ class AppInstallPersister(
         this.app = app
         this.organization = organizationId?.let { entityManager.getReference(Organization::class.java, it) }
         this.author = entityManager.getReference(UserAccount::class.java, authorId)
+        this.principal = appInstallPrincipalService.create(fetched.manifest.name)
         this.manifestUrl = manifestUrl
         this.appId = fetched.manifest.id
         this.name = fetched.manifest.name
@@ -137,11 +139,13 @@ class AppInstallPersister(
       findScopedInstall(organizationId, installId)
         ?: throw NotFoundException(Message.APP_INSTALL_NOT_FOUND)
     val app = install.app
+    val principal = install.principal
     val removed = RemovedInstall(appEntityId = app.id, organizationId = organizationId, installId = installId)
     appEnablementService.removeAllForAppInstall(installId)
     appAvailabilityService.removeAllForAppInstall(installId)
     appInstallRepository.delete(install)
     appInstallRepository.flush()
+    appInstallPrincipalService.retire(principal)
     return removed.copy(appDropped = dropServerOwnedAppIfUnused(app))
   }
 

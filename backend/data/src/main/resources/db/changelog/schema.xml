@@ -6479,4 +6479,56 @@
                                  onDelete="SET NULL"
                                  validate="true"/>
     </changeSet>
+    <changeSet author="jcizmar" id="1783771000000-51">
+        <addColumn tableName="user_account">
+            <column name="is_app_principal" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jcizmar" id="1783771000000-52">
+        <addColumn tableName="app_install">
+            <column name="principal_id" type="BIGINT"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jcizmar" id="1783771000000-53">
+        <comment>Gives every install registered before this an account of its own, so an
+            install-context request stops running as the person who registered it. The account is
+            enabled — everything that resolves the current principal to a row has to keep working —
+            and is kept out of seats, listings and sign-in by is_app_principal alone.
+        </comment>
+        <sql>
+            insert into user_account (created_at, updated_at, username, name, role, account_type, is_app_principal)
+            select now(), now(), '___app_install_' || i.id, left(i.name, 249) || ' [app]', 'USER', 'MANAGED', true
+            from app_install i
+            where i.principal_id is null;
+
+            update app_install i
+            set principal_id = u.id
+            from user_account u
+            where u.username = '___app_install_' || i.id
+              and u.is_app_principal = true
+              and i.principal_id is null;
+        </sql>
+        <rollback>
+            <sql>
+                update app_install set principal_id = null;
+                delete from user_account where is_app_principal = true;
+            </sql>
+        </rollback>
+    </changeSet>
+    <changeSet author="jcizmar" id="1783771000000-54">
+        <addNotNullConstraint tableName="app_install" columnName="principal_id" columnDataType="BIGINT"/>
+        <createIndex indexName="IDX_app_install_principal_id" tableName="app_install">
+            <column name="principal_id"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="principal_id"
+                                 baseTableName="app_install"
+                                 constraintName="FK_app_install_principal"
+                                 deferrable="false"
+                                 initiallyDeferred="false"
+                                 referencedColumnNames="id"
+                                 referencedTableName="user_account"
+                                 validate="true"/>
+    </changeSet>
 </databaseChangeLog>

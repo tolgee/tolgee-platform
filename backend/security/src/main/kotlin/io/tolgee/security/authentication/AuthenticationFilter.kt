@@ -105,9 +105,9 @@ class AuthenticationFilter(
         // well-formed app token that references a revoked or disabled entity throws instead.
         val appAuth = tryAppTokenAuth(request, token)
         if (appAuth != null) {
-          // An install-context token acts as the install, not as a person, so it must survive its
-          // author leaving the company — including their SSO account disappearing at the IdP. A
-          // user-context token really is a person acting through the app, so it is still checked.
+          // An install-context token runs as the install's own principal, which belongs to no
+          // identity provider and has nothing to verify there. A user-context token really is a
+          // person acting through the app, so it is still checked.
           if (!appAuth.isInstallContext) {
             checkIfSsoUserStillValid(appAuth.principal)
           }
@@ -217,7 +217,7 @@ class AuthenticationFilter(
     return AppAuthentication(
       credentials = token,
       appInstall = resolution.install,
-      userAccount = resolution.author,
+      userAccount = resolution.principal,
       tokenProjectId = null,
       isInstallContext = true,
       isReadOnly = claims.isReadOnly,
