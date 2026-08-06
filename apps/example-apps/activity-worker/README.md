@@ -165,6 +165,30 @@ Set `TOLGEE_APP_CLIENT_ID` and `TOLGEE_APP_CLIENT_SECRET` only when you deploy
 the app somewhere that injects secrets properly — the environment wins over the
 local file, and setting either one makes the SDK ignore the file entirely.
 
+## Credentials Tolgee pushes at you
+
+Registration is not the only way this app gets credentials. Tolgee POSTs **signed
+lifecycle deliveries** to the `baseUrl` in the manifest, and `server/index.ts`
+receives them in a single `mountTolgeeLifecycle(app, …)` call.
+
+There are two credential layers, and the deliveries carry both: **app-level**
+(`tgpub_` / `tgpubs_`, at registration) identifies and administers the app
+everywhere it is installed and reaches no data; **per-install** (`tgapp_` /
+`tgapps_`, at install) is what the worker actually polls Tolgee with. A rotation
+of either arrives the same way — and this app drops its cached access token when
+one does, so the next poll authenticates with the new secret.
+
+A third secret, the **webhook secret**, arrives with the registration and is
+never sent anywhere: Tolgee signs each delivery
+`HMAC-SHA256(webhookSecret, "<timestamp>.<body>")` in a `Tolgee-Signature`
+header, so holding it is what proves a delivery is really Tolgee. The SDK
+verifies every one, refuses a stale or replayed timestamp (5-minute window), and
+**refuses a first delivery once this app already holds credentials for that
+instance**, so nobody can push their own credentials over yours.
+
+Note what this channel does *not* replace: per-project enablement is still
+polled, which is what `fetchAppInstallations()` is for.
+
 ## Enabling the app for a project
 
 **Project → Settings → Apps → Activity Worker → enable**
@@ -196,7 +220,7 @@ src/                    iframe page (Vite + React)
   useActivityFeed.ts    polls the app's own /api/feed
   feedTypes.ts          the feed contract, shared with the server
 server/
-  index.ts              manifest + /api/feed + self-registration + worker start
+  index.ts              manifest + /api/feed + self-registration + lifecycle + worker start
   activityWorker.ts     the two polling loops (installations, activity)
   translationChanges.ts pulls translation edits out of an activity revision
   tolgeeAccess.ts       install-context token, cached until it nears expiry
@@ -208,7 +232,7 @@ scripts/
   dev-tunnel.ts         opens the tunnel and publishes its URL
 .tolgee-dev/            local state, gitignored
   tunnel.json           the URLs Tolgee currently reaches this app at
-  install.json          install id + app credentials, written at registration
+  install.json          app-level + per-install credentials, written as they arrive
 ```
 
 ## Limits worth knowing

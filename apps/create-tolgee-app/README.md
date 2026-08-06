@@ -78,6 +78,13 @@ available.
 Either way, the last step is the same and is done per project:
 **Project → Settings → Apps**, enable the app.
 
+Either way, too, the generated server already receives Tolgee's **signed
+lifecycle deliveries** — the app-level credentials at registration, the
+per-install credentials when an organization installs it, and every later
+rotation. That is `server/routes/lifecycle.ts`, one `mountTolgeeLifecycle()`
+call; the generated README explains the two credential layers and how a delivery
+is proved to be Tolgee.
+
 ## Which SDK the generated app gets
 
 The generated app depends on `@tolgee/apps-sdk`, and by default the generator
@@ -95,7 +102,8 @@ summary and again in the next steps.
 | `published` | an exact published version, never a range |
 
 **`published` currently refuses to run.** Every `@tolgee/apps-sdk` release on npm
-predates `selfRegisterApp` and `applyTolgeeTheme`, which the template imports, so
+predates `selfRegisterApp`, `applyTolgeeTheme` and `mountTolgeeLifecycle`, which
+the template imports, so
 the generator exits with that sentence rather than handing you a project full of
 missing-export errors. `PUBLISHED_SDK_RELEASED` in `src/registry.ts` is the flag
 to flip — together with `PUBLISHED_SDK_VERSION` — once the SDK is on npm. `auto`

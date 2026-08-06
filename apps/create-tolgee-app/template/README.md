@@ -108,17 +108,44 @@ Registration makes the app known to the organization, not visible in projects.
 For each project that should use it: **Project → Settings → Apps**, then enable
 **{{name}}**. The dashboard page shows up in that project's menu.
 
+## Credentials Tolgee pushes at you
+
+You never copy a secret into this app. Tolgee POSTs **signed lifecycle
+deliveries** to the `baseUrl` in the manifest, and `server/routes/lifecycle.ts`
+receives them in a single `mountTolgeeLifecycle(app, …)` call:
+
+| Event | What arrives |
+| --- | --- |
+| registered | The **app-level** credentials (`tgpub_` / `tgpubs_`) and the webhook signing secret. They identify the app; they reach no data. |
+| installed | The **per-install** credentials (`tgapp_` / `tgapps_`), the install id and the organization. These are the ones that act on projects. |
+| uninstalled | Nothing to store — the credentials of that install are dropped. |
+| secret rotated | The replacement secret, at whichever layer it belongs to. |
+
+Each delivery is signed `HMAC-SHA256(webhookSecret, "<timestamp>.<body>")` and
+sent in a `Tolgee-Signature` header. **Holding the webhook secret is what proves
+a delivery is really Tolgee** — the SDK verifies every one, refuses a stale or
+replayed timestamp, and refuses a first delivery outright once this app already
+holds credentials for that instance, so nobody can push their own credentials
+over yours. Everything it accepts lands in `.tolgee-dev/install.json`.
+
+The route is mounted **before `express.json()`** on purpose: the signature covers
+the exact bytes Tolgee sent, and a body parser would consume them.
+
+Self-registration still works on its own — an app that never receives a delivery
+keeps running on the credentials it registered with.
+
 ## Layout
 
 ```
 server/manifest.template.json   what the app contributes; __BASE_URL__ is
                                 substituted per request
 server/index.ts                 Express: /manifest.json + self-registration
+server/routes/lifecycle.ts      receives Tolgee's signed lifecycle deliveries
 server/devTunnel.ts             the URLs Tolgee reaches this app at
 scripts/dev-tunnel.ts           opens the tunnel and publishes those URLs
 src/App.tsx                     the dashboard page
 .tolgee-dev/tunnel.json         the URLs currently in play (gitignored)
-.tolgee-dev/install.json        install id + app credentials (gitignored)
+.tolgee-dev/install.json        app-level + per-install credentials (gitignored)
 ```
 
 ## What the SDK gives you
@@ -143,6 +170,8 @@ From `@tolgee/apps-sdk/server`:
 - **`fetchAppAccessToken()`** — exchanges the client id/secret for an access
   token, for work the app does on its own behalf rather than a user's. Called
   with no arguments it uses the stored credentials.
+- **`mountTolgeeLifecycle(app, …)`** — receives, verifies and stores everything
+  Tolgee pushes about this app. One call; see above.
 
 ## Changing what the app contributes
 

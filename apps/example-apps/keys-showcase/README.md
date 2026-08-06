@@ -126,6 +126,32 @@ makes the SDK ignore the file entirely.
 If self-registration fails, the server logs why and keeps serving the manifest, so you can
 always fall back to the manual flow.
 
+## Credentials Tolgee pushes at you
+
+Registration is not the only way this app gets credentials. Tolgee POSTs **signed
+lifecycle deliveries** to the `baseUrl` in the manifest, and `server/index.ts`
+receives them in a single `mountTolgeeLifecycle(app, …)` call — watch the server
+log when you register or install the app.
+
+There are two credential layers, and the deliveries carry both:
+
+| Layer | Prefixes | Arrives with | What it does |
+| --- | --- | --- | --- |
+| App | `tgpub_` / `tgpubs_` | *registered* | Identifies and administers the app everywhere it is installed. Reaches no data. |
+| Install | `tgapp_` / `tgapps_` | *installed* | Acts on one organization's projects — what `npm run token` uses. |
+
+A third secret, the **webhook secret**, arrives with the registration and is
+never sent anywhere: Tolgee signs each delivery
+`HMAC-SHA256(webhookSecret, "<timestamp>.<body>")` in a `Tolgee-Signature`
+header, so holding it is what proves a delivery is really Tolgee. The SDK
+verifies every one, refuses a stale or replayed timestamp (5-minute window), and
+**refuses a first delivery once this app already holds credentials for that
+instance** — otherwise anyone could post their own credentials over yours. A
+rotation, signed with the secret only Tolgee knows, is accepted and replaces what
+is held.
+
+Everything accepted lands in `.tolgee-dev/install.json`, and nothing is printed.
+
 ## Enabling the app for a project
 
 Registering installs the app into the organization; it still has to be turned on per project:
@@ -172,7 +198,7 @@ src/                    iframe page (Vite + React)
   KeysShowcase.tsx      the dashboard page: context, theme, resize
   useProjectKeys.ts     the REST call, via the SDK's typed client
 server/
-  index.ts              manifest endpoint + optional self-registration
+  index.ts              manifest endpoint + self-registration + lifecycle deliveries
   config.ts             env config and the URLs Tolgee should use
   devTunnel.ts          reads/writes the dev-tunnel state
   manifest.template.json  __BASE_URL__ is substituted at request time
@@ -181,5 +207,5 @@ scripts/
   token.ts              machine-to-machine demo
 .tolgee-dev/           local state, gitignored
   tunnel.json           the URLs Tolgee currently reaches this app at
-  install.json          install id + app credentials, written at registration
+  install.json          app-level + per-install credentials, written as they arrive
 ```

@@ -15,8 +15,10 @@ supports exactly one module type:
 | --- | --- |
 | `project-dashboard-page` | An iframe page under a project, with its own menu item |
 
-No webhooks, no row decorators, no translation-cell selection. Those surfaces
-will be added in later releases.
+No webhook modules, no row decorators, no translation-cell selection. Those
+surfaces will be added in later releases. (Tolgee does push **lifecycle**
+deliveries to every app — credentials and installs; see
+[the lifecycle channel](#5-the-lifecycle-channel).)
 
 ## Install
 
@@ -194,24 +196,61 @@ what `created` reflects. A later call for an already registered app repoints it
 at the new manifest URL and returns `clientSecret: null`, leaving the existing
 credentials valid.
 
+### The two credential layers
+
+An app has credentials at two levels, and they are not interchangeable:
+
+| Layer | Prefixes | Issued when | What it is for |
+| --- | --- | --- | --- |
+| **App** | `tgpub_` / `tgpubs_` | the app is registered, once server-wide | Identifying and administering the app across every organization that installed it. **Grants access to no data at all.** |
+| **Install** | `tgapp_` / `tgapps_` | each organization installs the app | Acting on that one organization's projects. This is what `fetchAppAccessToken()` uses. |
+
+Alongside them Tolgee issues a third secret, the **webhook secret**. It is not a
+credential you send anywhere — it is the key Tolgee signs its deliveries to your
+app with, so holding it is what lets you tell a real delivery from a forged one.
+See [the lifecycle channel](#5-the-lifecycle-channel).
+
 ### Where the credentials go
 
-Tolgee shows the client secret once and stores only its hash, so the SDK writes
-the whole install record — install id, client id, client secret, and the
-`tolgeeUrl` it belongs to — to a local state file as soon as registration
-returns it. `credentialsPath` in the result is where it landed:
+Tolgee shows each secret once and stores only its hash, so the SDK writes what
+it is given to a local state file as soon as it arrives.
+`credentialsPath` in a registration result is where it landed:
 
 ```
 .tolgee-dev/install.json      # gitignored; mode 0600
 ```
 
-Nothing to copy, and **never print the secret**. Log `credentialsPath` instead.
+Nothing to copy, and **never print a secret**. Log `credentialsPath` instead.
+
+The file holds both layers, per Tolgee instance:
+
+```jsonc
+{
+  "version": 2,
+  "instances": {
+    "https://app.tolgee.io": {
+      "app": { "appId": "my-company.glossary", "clientId": "tgpub_…", … },
+      "currentInstallId": 7,
+      "installs": {
+        "7": { "installId": 7, "clientId": "tgapp_…", "organizationSlug": "acme", … }
+      }
+    }
+  }
+}
+```
 
 - The directory is `.tolgee-dev` under the working directory, or
   `TOLGEE_APP_STATE_DIR`, or the `stateDir` option — `appInstallStatePath()`
   resolves the same path the SDK uses.
 - Records are keyed by Tolgee instance, so credentials issued by one instance
   are never handed to another.
+- One app can be installed by many organizations, so installs are keyed by
+  install id. `readStoredAppInstall()` returns the one this app authenticates
+  as — the install it registered itself, or the first one it was told about —
+  and `readStoredAppInstalls()` returns all of them.
+- A file written by an earlier SDK (`version: 1`, one install per URL, no app
+  layer) is **read forward**, not discarded: its install becomes the current one
+  and nothing has to be registered again.
 - A re-registration that returns `clientSecret: null` keeps the stored secret.
 - `secretIssuedAt` records when Tolgee issued the stored secret, which is what
   `ensureAppCredentialsFresh()` ages out.
@@ -306,11 +345,11 @@ siblings — so step two happens in Tolgee, under **Organization → Apps** (or
 lifecycle can still call `DELETE /v2/apps/self/secrets/{id}`; Tolgee refuses to
 let it revoke its own last live secret, which would lock it out permanently.
 
-> **A leaked secret is recovered from per install.** There is no publisher
-> identity behind a distributed app — every install has credentials of its own
-> and there is nobody to authenticate as across all of them. The recourse for a
-> mass leak is to rotate each install, which is what the self-service endpoints
-> above exist to make scriptable.
+> **App-level rotation is separate.** The calls above rotate the credentials of
+> **one install**. The app-level secret (`tgpubs_…`) is rotated by its owning
+> organization in Tolgee, and the new one arrives over
+> [the lifecycle channel](#5-the-lifecycle-channel) — nothing to copy there
+> either.
 
 ### 4. `fetchAppInstallations` — what am I installed for?
 
@@ -336,8 +375,9 @@ consent time, and `enabledProjects` — each with its owning `organization`
 
 `enabledProjects` is the app's authoritative list of what it may act on, and it
 changes without the app being told: **re-read it periodically** rather than
-caching it for the process lifetime. This alpha has no push channel, so polling
-is the only option.
+caching it for the process lifetime. The lifecycle channel below tells you about
+installs and uninstalls, but per-project enablement is not pushed — poll for
+that.
 
 Pass `{ accessToken }` to reuse a token you already hold instead of exchanging
 the credentials again.
@@ -347,6 +387,96 @@ reaches this endpoint. The user-context token an iframe receives is refused: it
 acts for one signed-in user, who need not be a member of every project the
 install is enabled for — and the iframe is already told its project and
 organization in the init payload.
+
+### 5. The lifecycle channel
+
+Tolgee **pushes** credentials to your app instead of making somebody copy them.
+It POSTs a signed delivery to the `baseUrl` in your manifest — that delivery is
+what proves you control the app's domain, and it is the only way per-install
+credentials ever leave Tolgee.
+
+One call receives the whole channel:
+
+```ts
+import { mountTolgeeLifecycle } from '@tolgee/apps-sdk/server'
+
+mountTolgeeLifecycle(app, {
+  tolgeeUrl: config.tolgeeUrl,
+  on: {
+    installed: (event) => console.log(`installed by ${event.organization?.slug}`),
+    uninstalled: (event) => console.log(`install ${event.install?.installId} is gone`),
+  },
+})
+```
+
+The SDK verifies the signature, rejects anything that fails, stores the
+credentials the delivery carries, and only then calls your listeners — which
+never have to touch a secret. Everything in `on` is optional; an app that just
+wants its credentials stored passes none at all.
+
+Tolgee addresses the delivery at the `baseUrl` itself, so `mountTolgeeLifecycle`
+answers `POST /` — and `POST /tolgee/lifecycle` as well, for an app that routes
+deliveries somewhere explicit. Pass `paths` to change that.
+
+**Mount it before any body parser.** The signature covers the exact bytes Tolgee
+sent, so the handler reads the raw request itself; `express.json()` mounted
+first drains the stream and the delivery is refused with a message saying so.
+
+Not on Express? `createTolgeeLifecycleHandler(options)` returns a plain
+`(req, res)` Node handler, and `receiveTolgeeDelivery({ rawBody,
+signatureHeader, … })` is the whole receiver with no HTTP in it.
+
+#### What each event carries
+
+| Event | Carries |
+| --- | --- |
+| `app.registered` | App-level `clientId` / `clientSecret`, the **webhook secret**, the manifest `appId` — plus the registering organization's install |
+| `app.installed` | Per-install `clientId` / `clientSecret`, the install id, and the organization (`id`, `name`, `slug`) |
+| `app.uninstalled` | The install id that is gone; the SDK drops its stored credentials |
+| `app.secret.rotated` | The replacement secret, and `rotatedLayer` — `'app'` or `'install'` — saying which layer it belongs to |
+
+Every event also carries `timestamp`, the `tolgeeUrl` it was accepted for,
+`deliveryId` — stable across Tolgee's retries of the same delivery, so it is what
+to key on when a listener must run exactly once — and the verified `payload` for
+fields the SDK does not model.
+
+#### How a delivery is verified
+
+Tolgee signs the body the same way its outgoing webhooks are signed: a
+`Tolgee-Signature` header holding `{"timestamp": …, "signature": "…"}`, where the
+signature is `HMAC-SHA256(webhookSecret, "<timestamp>.<body>")` in hex.
+
+**The webhook secret is what proves a delivery is really Tolgee.** Nothing else
+does — not the source IP, not the shape of the payload.
+
+- A delivery is **stale** if its timestamp is more than **5 minutes** from your
+  clock, in either direction, and is refused. That window is wide enough for
+  retry backoff and ordinary clock skew, narrow enough that a delivery captured
+  off the wire stops being replayable within minutes. An accepted signature is
+  also remembered for that window, so the same delivery replayed inside it is
+  refused too.
+- **The first delivery is the awkward one.** Tolgee discloses the webhook secret
+  in `app.registered` itself, so that one delivery can only be checked against
+  the key it brought along — which proves nothing but its own integrity. The SDK
+  accepts it **only while the app holds no credentials for that instance**, and
+  **refuses it (409) the moment it does**. That is the anti-hijack rule: a
+  stranger cannot post a self-signed "you were just registered" and overwrite a
+  live install.
+- **Every later delivery is genuinely authenticated**, because it is checked
+  against the stored webhook secret, which only Tolgee knows. A rotation
+  therefore replaces what is held — that is the point of it.
+- Set `TOLGEE_APP_WEBHOOK_SECRET` (or pass `webhookSecret`) in a deployment and
+  there is no first delivery to trust at all. Add `requireKnownSecret: true` to
+  refuse every delivery that cannot be checked against a secret you already
+  hold. It is also the way out of a refused first delivery.
+
+Rejections come back as a status and a `rejection` code — `bad-signature`,
+`stale-timestamp`, `replayed`, `credentials-already-held`, `unverifiable`,
+`unreadable-body`, `unknown-event` — and the message never contains secret
+material, so it is safe to log. Pass `onRejected` to see them.
+
+If a listener throws, the delivery is answered `500` and Tolgee retries it;
+whatever the delivery carried is already stored by then.
 
 ### Reading the context token
 
@@ -374,11 +504,14 @@ const { installId, projectId, userId, expiresAt } = decodeContextToken(token)
 | `TOLGEE_APP_REGISTRATION_SECRET` | `registrationSecret` | `null` |
 | `TOLGEE_APP_CLIENT_ID` | `clientId` | stored credentials |
 | `TOLGEE_APP_CLIENT_SECRET` | `clientSecret` | stored credentials |
+| `TOLGEE_APP_WEBHOOK_SECRET` | `webhookSecret` | stored app-level record |
 | `TOLGEE_APP_STATE_DIR` | — | `.tolgee-dev` in the working directory |
 
 Credentials fall back to the install record stored for the same `tolgeeUrl`;
 `credentialsSource` says which won (`'env'`, `'stored'` or `null`), and
-`installId` is the stored install.
+`installId` is the stored install. `appClientId` and `webhookSecret` come from
+the app-level record — a separate layer, so the client-credential override below
+has no say over them.
 
 **The environment always wins.** A deployed app gets its secrets injected and
 must not be overridden by a state file left behind by a developer. Setting
@@ -421,4 +554,17 @@ points).
 `ensureAppCredentialsFresh()`, `createTolgeeAppServerClient()`,
 `fetchAppInstallations()` (`AppInstallation`,
 `AppEnabledProject`, `AppInstallationOrganization`, `AppInstallationsInput`),
-`appInstallStatePath()`, `readStoredAppInstall()`, `saveAppInstall()`.
+`appInstallStatePath()`, `readStoredApp()`, `saveApp()`,
+`readStoredAppInstall()`, `readStoredAppInstalls()`,
+`readStoredAppInstallById()`, `saveAppInstall()`, `forgetAppInstall()`,
+`forgetTolgeeInstance()`, `hasStoredCredentials()`.
+
+The lifecycle channel: `mountTolgeeLifecycle()`,
+`createTolgeeLifecycleHandler()`, `receiveTolgeeDelivery()`,
+`TOLGEE_LIFECYCLE_PATHS`, `verifyTolgeeSignature()`,
+`computeTolgeeSignature()`, `parseSignatureHeader()`, `TolgeeSignatureError`,
+`TOLGEE_SIGNATURE_HEADER`, `DEFAULT_SIGNATURE_TOLERANCE_MS`, and the types
+`TolgeeLifecycleEvent`, `TolgeeLifecycleEventType`, `TolgeeCredentialLayer`,
+`DeliveredAppCredentials`, `DeliveredInstall`, `DeliveredOrganization`,
+`DeliveryResult`, `DeliveryRejection`, `TolgeeLifecycleListeners`,
+`TolgeeLifecycleOptions`.

@@ -45,3 +45,14 @@ SERVER_PORT={{serverPort}}
 # so set both or neither.
 # TOLGEE_APP_CLIENT_ID=
 # TOLGEE_APP_CLIENT_SECRET=
+
+# --- Lifecycle deliveries ----------------------------------------------------
+# The secret Tolgee signs its lifecycle deliveries (credentials, installs,
+# rotations) with. It authenticates nothing towards Tolgee and is never sent
+# anywhere — holding it is what proves an incoming delivery really is Tolgee.
+#
+# Leave unset in development: it arrives with the registration delivery and is
+# stored in .tolgee-dev/install.json. Set it in a deployment, to the value
+# Tolgee showed when the app was registered, so no first delivery has to be
+# taken on trust.
+# TOLGEE_APP_WEBHOOK_SECRET=
