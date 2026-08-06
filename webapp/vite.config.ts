@@ -14,6 +14,15 @@ import { sentryVitePlugin } from '@sentry/vite-plugin';
 const billingFrontendDir = resolve(__dirname, '../../billing/frontend');
 const hasBilling = existsSync(billingFrontendDir);
 
+// Optional trusted HTTPS for local OAuth browser-extension testing (chrome.identity requires HTTPS).
+// Generate with `mkcert localhost` in webapp/; without the files the dev server stays plain http.
+const localCert = resolve(__dirname, 'localhost.pem');
+const localCertKey = resolve(__dirname, 'localhost-key.pem');
+const devHttps =
+  existsSync(localCert) && existsSync(localCertKey)
+    ? { cert: localCert, key: localCertKey }
+    : undefined;
+
 export default defineConfig(({ mode }) => {
   process.env = { ...process.env, ...loadEnv(mode, process.cwd()) };
 
@@ -78,11 +87,35 @@ export default defineConfig(({ mode }) => {
       exclude: ['@tginternal/library'],
     },
     server: {
+      https: devHttps,
       // this ensures that the browser opens upon server start
       open: true,
       host: process.env.VITE_HOST || undefined,
       // this sets a default port to 3000
       port: Number(process.env.VITE_PORT) || 3000,
+      // These backend paths must be proxied so the OAuth browser flow stays single-origin (the session-bootstrap
+      // cookie). See docs/oauth/README.md for the full dev-server setup.
+      proxy: Object.fromEntries(
+        [
+          '/v2',
+          '/api',
+          '/oauth2/authorize',
+          '/oauth2/token',
+          '/oauth2/jwks',
+          '/.well-known',
+        ].map((path) => [
+          path,
+          {
+            target:
+              process.env.VITE_DEV_PROXY_TARGET || 'http://localhost:8080',
+            changeOrigin: false,
+            // Forward X-Forwarded-Proto/Host so the backend (forward-headers-strategy: framework) builds https URLs
+            // for the /oauth2/authorize -> /oauth2/bootstrap redirect; otherwise it emits http and the https-only dev
+            // server can't load it.
+            xfwd: true,
+          },
+        ])
+      ),
       // this enables direct access to library sources
       fs: {
         allow: [

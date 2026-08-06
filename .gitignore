@@ -94,3 +94,6 @@ ngrok.local.yml
 # mcp-publisher auth tokens
 /.mcpregistry_github_token
 /.mcpregistry_registry_token
+
+# local mkcert certs for OAuth browser-extension https testing (webapp/vite.config.ts)
+/webapp/localhost*.pem
