@@ -15,6 +15,16 @@ export type {
 } from './installStore'
 export { selfRegisterApp } from './selfRegisterApp'
 export type { SelfRegisterInput, SelfRegisterResult } from './selfRegisterApp'
+export {
+  ensureAppCredentialsFresh,
+  rotateAppClientSecret,
+} from './rotateAppClientSecret'
+export type {
+  EnsureAppCredentialsInput,
+  EnsureAppCredentialsResult,
+  RotateAppClientSecretInput,
+  RotatedAppClientSecret,
+} from './rotateAppClientSecret'
 export { fetchAppAccessToken } from './fetchAppAccessToken'
 export type { AppAccessToken, AppAccessTokenInput } from './fetchAppAccessToken'
 export { createTolgeeAppServerClient } from './client'

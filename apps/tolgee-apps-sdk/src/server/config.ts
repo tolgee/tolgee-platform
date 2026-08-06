@@ -25,6 +25,11 @@ export type TolgeeAppConfig = {
   clientSecret: string | null
   /** Install the stored credentials belong to; null when nothing is stored. */
   installId: number | null
+  /**
+   * When the stored client secret was issued, or null when it came from the
+   * environment or predates this being recorded. See `ensureAppCredentialsFresh`.
+   */
+  secretIssuedAt: string | null
   credentialsSource: TolgeeAppCredentialsSource
 }
 
@@ -59,6 +64,7 @@ export const loadTolgeeAppConfig = (
     clientId: fromEnv ? envClientId : (stored?.clientId ?? null),
     clientSecret: fromEnv ? envClientSecret : (stored?.clientSecret ?? null),
     installId: stored?.installId ?? null,
+    secretIssuedAt: fromEnv ? null : (stored?.secretIssuedAt ?? null),
     credentialsSource: fromEnv ? 'env' : storedCredentials ? 'stored' : null,
   }
 }

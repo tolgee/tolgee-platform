@@ -3,6 +3,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import express from 'express'
 import {
+  ensureAppCredentialsFresh,
   renderManifest,
   selfRegisterApp,
   tolgeeAppCorsHeaders,
@@ -97,6 +98,34 @@ const connect = async (manifestUrl: string): Promise<void> => {
   }
 }
 
+
+/**
+ * Ages the app's own client secret out on its own, so nobody ever has to copy a
+ * new one: Tolgee mints it, the SDK stores it, and the secret in use until now
+ * keeps working until an operator revokes it. No-op when the credentials are
+ * injected through the environment.
+ */
+const refreshCredentials = async (): Promise<void> => {
+  try {
+    const result = await ensureAppCredentialsFresh({
+      tolgeeUrl: config.tolgeeUrl,
+    })
+    if (result.rotated) {
+      console.log(
+        'Auto-connect: this app issued itself a fresh client secret and stored it. ' +
+          'The previous one still authenticates — revoke it in Tolgee once you see ' +
+          'it go idle.'
+      )
+    }
+  } catch (error) {
+    // The credential in use was not touched, so this is a warning, not a failure.
+    console.warn(
+      'Could not refresh the stored client secret: ' +
+        (error instanceof Error ? error.message : String(error))
+    )
+  }
+}
+
 /**
  * Registration is what tells Tolgee where to fetch the manifest, and the dev
  * tunnel gets a fresh hostname on every `npm run dev` — so the URLs have to be
@@ -120,6 +149,7 @@ const start = async (): Promise<void> => {
     `activity-worker serving ${urls.manifestUrl} (app baseUrl ${urls.baseUrl})`
   )
   await connect(urls.manifestUrl)
+  await refreshCredentials()
 
   console.log(
     `Watching for translation changes — installations every ${workerConfig.installationsRefreshIntervalMs}ms, ` +

@@ -161,7 +161,7 @@ body {
 
 Call `app.dispose()` when your UI unmounts.
 
-## Server: the two auth flows
+## Server: the auth flows
 
 ### 1. `selfRegisterApp` — register without the UI
 
@@ -213,6 +213,8 @@ Nothing to copy, and **never print the secret**. Log `credentialsPath` instead.
 - Records are keyed by Tolgee instance, so credentials issued by one instance
   are never handed to another.
 - A re-registration that returns `clientSecret: null` keeps the stored secret.
+- `secretIssuedAt` records when Tolgee issued the stored secret, which is what
+  `ensureAppCredentialsFresh()` ages out.
 - Writes go through a temp file and a rename, so an interrupted or concurrent
   write cannot leave a half-written file behind; an unreadable file reads as
   "nothing stored" rather than throwing.
@@ -255,7 +257,62 @@ const { data, error } = await tolgee.GET('/v2/projects/{projectId}/activity', {
 Inside an iframe you don't need this at all: the install token from
 `TolgeeAppContext` already authenticates calls as the install + user.
 
-### 3. `fetchAppInstallations` — what am I installed for?
+### 3. `rotateAppClientSecret` — replace the secret without anyone copying it
+
+A client secret ends up in the hands of whoever set the app up. When that person
+leaves, the organization needs the old credential dead — without deleting the
+install, which would take its granted scopes, its availability and every
+per-project enablement with it.
+
+Rotation is therefore two deliberate steps, and an install may hold **several
+live secrets at once** (up to five):
+
+1. **Issue.** A new secret is minted. Every existing one keeps working.
+2. **Revoke.** The old one is invalidated, on the operator's schedule, once
+   Tolgee's `lastUsedAt` shows nothing is using it any more.
+
+Step one is the app's own job, and needs no human:
+
+```ts
+import { rotateAppClientSecret } from '@tolgee/apps-sdk/server'
+
+await rotateAppClientSecret()
+```
+
+The call authenticates with the secret the app already holds, asks Tolgee for a
+new one, and writes it to the state file in place of the old one — atomically,
+and **never returned and never logged**. The previous secret still
+authenticates, so a failed write leaves the app running on what it had.
+
+`ensureAppCredentialsFresh()` is the same thing on a timer, meant for boot:
+
+```ts
+await selfRegisterApp({ ... })
+await ensureAppCredentialsFresh()   // rotates only if the stored secret is > 30 days old
+```
+
+Pass `{ maxAgeMs }` to change the age. It reports rather than throws when there
+is nothing to do, and it is a **no-op when the credentials come from
+`TOLGEE_APP_CLIENT_ID` / `TOLGEE_APP_CLIENT_SECRET`** — those win over the state
+file, so rotating would store a secret the app would never read. Rotate a
+deployment by issuing a secret in Tolgee and injecting it.
+
+Run several replicas off one install? Only one of them should rotate: every call
+mints another secret, and Tolgee caps how many an install may hold.
+
+Revoking is not the SDK's to do — one replica revoking would cut off its
+siblings — so step two happens in Tolgee, under **Organization → Apps** (or
+**Administration → Apps** for a native app). An app that genuinely owns its own
+lifecycle can still call `DELETE /v2/apps/self/secrets/{id}`; Tolgee refuses to
+let it revoke its own last live secret, which would lock it out permanently.
+
+> **A leaked secret is recovered from per install.** There is no publisher
+> identity behind a distributed app — every install has credentials of its own
+> and there is nobody to authenticate as across all of them. The recourse for a
+> mass leak is to rotate each install, which is what the self-service endpoints
+> above exist to make scriptable.
+
+### 4. `fetchAppInstallations` — what am I installed for?
 
 An app backend with no iframe and no user has no idea which projects it may
 touch: an org admin makes the app available, a project owner enables it, and
@@ -360,7 +417,8 @@ points).
 
 **`@tolgee/apps-sdk/server`** — `renderManifest()`, `tolgeeAppCorsHeaders()`,
 `decodeContextToken()`, `loadTolgeeAppConfig()`, `selfRegisterApp()`,
-`fetchAppAccessToken()`, `createTolgeeAppServerClient()`,
+`fetchAppAccessToken()`, `rotateAppClientSecret()`,
+`ensureAppCredentialsFresh()`, `createTolgeeAppServerClient()`,
 `fetchAppInstallations()` (`AppInstallation`,
 `AppEnabledProject`, `AppInstallationOrganization`, `AppInstallationsInput`),
 `appInstallStatePath()`, `readStoredAppInstall()`, `saveAppInstall()`.

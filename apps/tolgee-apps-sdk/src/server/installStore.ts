@@ -28,6 +28,11 @@ export type StoredAppInstall = {
   /** True when the install belongs to no organization. */
   native: boolean
   organizationSlug: string | null
+  /**
+   * ISO timestamp of when Tolgee issued `clientSecret`, or null when it was
+   * stored before this was recorded. Drives `ensureAppCredentialsFresh()`.
+   */
+  secretIssuedAt: string | null
   /** ISO timestamp of the last write. */
   updatedAt: string
 }
@@ -39,6 +44,8 @@ export type AppInstallRecord = {
   clientSecret?: string | null
   native?: boolean
   organizationSlug?: string | null
+  /** Defaults to now whenever the record carries a `clientSecret`. */
+  secretIssuedAt?: string | null
 }
 
 type StateFile = {
@@ -80,6 +87,7 @@ export const saveAppInstall = (
   const carried =
     previous && isSameInstall(previous, record) ? previous : undefined
 
+  const now = new Date().toISOString()
   const stored: StoredAppInstall = {
     tolgeeUrl: key,
     installId: record.installId,
@@ -88,7 +96,10 @@ export const saveAppInstall = (
     native: record.native ?? carried?.native ?? false,
     organizationSlug:
       record.organizationSlug ?? carried?.organizationSlug ?? null,
-    updatedAt: new Date().toISOString(),
+    secretIssuedAt:
+      record.secretIssuedAt ??
+      (record.clientSecret != null ? now : (carried?.secretIssuedAt ?? null)),
+    updatedAt: now,
   }
 
   state.installs[key] = stored
@@ -116,6 +127,8 @@ const asStoredInstall = (
     native: raw.native === true,
     organizationSlug:
       typeof raw.organizationSlug === 'string' ? raw.organizationSlug : null,
+    secretIssuedAt:
+      typeof raw.secretIssuedAt === 'string' ? raw.secretIssuedAt : null,
     updatedAt: typeof raw.updatedAt === 'string' ? raw.updatedAt : '',
   }
 }
