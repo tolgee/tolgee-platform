@@ -75,6 +75,10 @@ class McpRequestContext(
   private fun checkTokenType(spec: ToolEndpointSpec) {
     if (!authenticationFacade.isApiAuthentication) return
 
+    if (authenticationFacade.isOAuthTokenAuth && spec.allowedTokenType != AuthTokenType.ANY) {
+      throw PermissionException(Message.OAUTH_ACCESS_NOT_ALLOWED)
+    }
+
     when (spec.allowedTokenType) {
       AuthTokenType.ONLY_PAT -> {
         if (authenticationFacade.isProjectApiKeyAuth) {
