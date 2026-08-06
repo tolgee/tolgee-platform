@@ -109,6 +109,27 @@ class AuthenticationFacade(
       SecurityContextHolder.getContext().authentication as? AppAuthentication
         ?: throw AuthenticationException(Message.UNAUTHENTICATED)
 
+  /**
+   * The person a change should be recorded against, or null when an app acted as itself. An
+   * install-context app token is not a person: attributing its writes to the human who registered
+   * the install would credit them with work they did not do, and keep crediting them after they
+   * left. [actingAppInstallId] identifies the actor in that case.
+   */
+  val attributableUserId: Long?
+    get() {
+      if (!isAppAuth) return authenticatedUserOrNull?.id
+      appAuthentication.actingAsUserAccount?.let { return it.id }
+      if (appAuthentication.isInstallContext) return null
+      return authenticatedUserOrNull?.id
+    }
+
+  /** The install a change was made through, or null when no app token was used. */
+  val actingAppInstallId: Long?
+    get() {
+      if (!isAppAuth) return null
+      return appAuthentication.appInstall.id
+    }
+
   val projectApiKey: ApiKeyDto
     get() = authentication.credentials as ApiKeyDto
 

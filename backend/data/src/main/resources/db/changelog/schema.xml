@@ -6221,4 +6221,17 @@
             <column name="client_secret_prefix"/>
         </dropColumn>
     </changeSet>
+    <changeSet author="jcizmar" id="1783771000000-34">
+        <comment>Which install (rather than which person) made the change, for app-authenticated
+            writes. No foreign key, matching author_id: activity outlives the entity it points at.
+        </comment>
+        <addColumn tableName="activity_revision">
+            <column name="app_install_id" type="BIGINT"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jcizmar" id="1783771000000-35">
+        <createIndex indexName="IDX_activity_revision_app_install_id" tableName="activity_revision">
+            <column name="app_install_id"/>
+        </createIndex>
+    </changeSet>
 </databaseChangeLog>

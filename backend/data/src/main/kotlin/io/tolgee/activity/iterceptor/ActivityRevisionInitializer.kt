@@ -2,7 +2,6 @@ package io.tolgee.activity.iterceptor
 
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.dtos.cacheable.ProjectDto
-import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.model.activity.ActivityRevision
 import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.OrganizationNotSelectedException
@@ -25,7 +24,8 @@ class ActivityRevisionInitializer(
 ) : Logging {
   fun initialize() {
     revision.isInitializedByInterceptor = true
-    revision.authorId = userAccount?.id ?: revision.authorId
+    revision.authorId = authenticationFacade.attributableUserId ?: revision.authorId
+    revision.appInstallId = authenticationFacade.actingAppInstallId ?: revision.appInstallId
     revision.organizationId = organizationId ?: revision.organizationId
     revision.projectId = project?.id ?: revision.projectId
     revision.type = activityHolder.activity ?: revision.type
@@ -71,9 +71,6 @@ class ActivityRevisionInitializer(
   private val organizationHolder: OrganizationHolder by lazy {
     applicationContext.getBean(OrganizationHolder::class.java)
   }
-
-  private val userAccount: UserAccountDto?
-    get() = authenticationFacade.authenticatedUserOrNull
 
   private val authenticationFacade: AuthenticationFacade by lazy {
     applicationContext.getBean(AuthenticationFacade::class.java)
