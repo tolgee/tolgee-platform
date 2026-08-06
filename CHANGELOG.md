@@ -1,3 +1,10 @@
+# [3.217.0](https://github.com/tolgee/tolgee-platform/compare/v3.216.4...v3.217.0) (2026-08-06)
+
+
+### Features
+
+* server default LLM model selectable as "default" in prompts ([#3838](https://github.com/tolgee/tolgee-platform/issues/3838)) ([a434007](https://github.com/tolgee/tolgee-platform/commit/a4340079d8bf61354e43bd6ae4e8165034e0f641))
+
 ## [3.216.4](https://github.com/tolgee/tolgee-platform/compare/v3.216.3...v3.216.4) (2026-08-05)
 
 
