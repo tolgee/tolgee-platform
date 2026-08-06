@@ -18,6 +18,7 @@ export type AppInstallModel = components['schemas']['AppInstallModel'];
 export type AppInstallSecretModel = components['schemas']['AppInstallSecretModel'];
 export type AppManifestModules = components['schemas']['AppManifestModules'];
 export type AppManifestPreviewModel = components['schemas']['AppManifestPreviewModel'];
+export type AppModel = components['schemas']['AppModel'];
 export type AppSelfEnabledProjectModel = components['schemas']['AppSelfEnabledProjectModel'];
 export type AppSelfInstallationModel = components['schemas']['AppSelfInstallationModel'];
 export type AppSelfProjectOrganizationModel = components['schemas']['AppSelfProjectOrganizationModel'];

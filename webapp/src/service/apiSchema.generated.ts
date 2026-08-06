@@ -49,7 +49,7 @@ export interface paths {
   "/v2/administration/apps": {
     /** Returns the apps registered at server level — those belonging to no organization. The client secret is never disclosed here. */
     get: operations["list_6"];
-    /** Fetches the manifest at the given URL and registers the app at server level, belonging to no organization. The response is the only place the client secret is ever disclosed. */
+    /** Fetches the manifest at the given URL and registers the app at server level, belonging to no organization. The response is the only place the client secret is ever disclosed. When an organization has already registered the same app, the native install is bound to that app and no app-level credentials are returned. */
     post: operations["register_1"];
   };
   "/v2/administration/apps/preview": {
@@ -265,12 +265,16 @@ export interface paths {
   "/v2/organizations/{organizationId}/apps": {
     /** Returns all apps registered for the organization. */
     get: operations["list_4"];
-    /** Fetches the manifest at the given URL and registers the app for the organization. */
-    post: operations["register"];
+    /** Fetches the manifest at the given URL and installs the app it describes for the organization. The app must already be registered on this server: when it is not, the call fails with the `app_not_registered` code, and the caller may register it — becoming its owner — through `POST /register`. The response is the only place the install's client secret is ever disclosed; app-level credentials are not disclosed here. */
+    post: operations["install"];
   };
   "/v2/organizations/{organizationId}/apps/preview": {
     /** Fetches the manifest at the given URL and returns its parsed contents (including the requested scopes) without persisting anything. Used by the registration UI to show a consent prompt before installing. */
     post: operations["preview"];
+  };
+  "/v2/organizations/{organizationId}/apps/register": {
+    /** Registers the app described by the manifest and installs it for the organization, in one operation. The organization becomes the app's owner, and the response is the only place the app-level credentials are ever disclosed. When the app is already registered — by another organization or by this one — it is only installed, and no app-level credentials are returned. */
+    post: operations["register"];
   };
   "/v2/organizations/{organizationId}/apps/{installId}": {
     /** Removes the registered app from the organization. */
@@ -1653,6 +1657,7 @@ export interface components {
       grant_type: string;
     };
     AppInstallModel: {
+      app?: components["schemas"]["AppModel"];
       appId: string;
       availableToAllOrganizations: boolean;
       baseUrl: string;
@@ -1696,6 +1701,19 @@ export interface components {
       name: string;
       requestedScopes: string[];
       version: string;
+    };
+    AppModel: {
+      /** @description The `id` declared in the app's manifest, unique across the server */
+      appId: string;
+      /** @description App-level OAuth client id. Present only in the response to registering the app — an organization that merely installed it never sees it. */
+      clientId?: string;
+      /** @description App-level OAuth client secret in plaintext. Administers the app across every organization that installed it and grants access to no data. Present only in the response to registering the app; Tolgee stores only a hash and cannot show it again. */
+      clientSecret?: string;
+      /** Format: int64 */
+      id: number;
+      name: string;
+      /** @description The secret Tolgee signs this app's lifecycle deliveries with. Present only in the response to registering the app. */
+      webhookSecret?: string;
     };
     AppSelfEnabledProjectModel: {
       /** Format: int64 */
@@ -3464,7 +3482,9 @@ export interface components {
         | "app_manifest_same_origin_as_tolgee"
         | "app_install_secret_not_found"
         | "app_too_many_live_secrets"
-        | "app_cannot_revoke_last_secret";
+        | "app_cannot_revoke_last_secret"
+        | "app_not_registered"
+        | "app_already_registered";
       params?: { [key: string]: unknown }[];
     };
     ExistenceEntityDescription: {
@@ -7401,7 +7421,9 @@ export interface components {
         | "app_manifest_same_origin_as_tolgee"
         | "app_install_secret_not_found"
         | "app_too_many_live_secrets"
-        | "app_cannot_revoke_last_secret";
+        | "app_cannot_revoke_last_secret"
+        | "app_not_registered"
+        | "app_already_registered";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };
@@ -8870,7 +8892,7 @@ export interface operations {
       };
     };
   };
-  /** Fetches the manifest at the given URL and registers the app at server level, belonging to no organization. The response is the only place the client secret is ever disclosed. */
+  /** Fetches the manifest at the given URL and registers the app at server level, belonging to no organization. The response is the only place the client secret is ever disclosed. When an organization has already registered the same app, the native install is bound to that app and no app-level credentials are returned. */
   register_1: {
     responses: {
       /** OK */
@@ -12081,8 +12103,8 @@ export interface operations {
       };
     };
   };
-  /** Fetches the manifest at the given URL and registers the app for the organization. */
-  register: {
+  /** Fetches the manifest at the given URL and installs the app it describes for the organization. The app must already be registered on this server: when it is not, the call fails with the `app_not_registered` code, and the caller may register it — becoming its owner — through `POST /register`. The response is the only place the install's client secret is ever disclosed; app-level credentials are not disclosed here. */
+  install: {
     parameters: {
       path: {
         organizationId: number;
@@ -12146,6 +12168,59 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["AppManifestPreviewModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RegisterAppRequest"];
+      };
+    };
+  };
+  /** Registers the app described by the manifest and installs it for the organization, in one operation. The organization becomes the app's owner, and the response is the only place the app-level credentials are ever disclosed. When the app is already registered — by another organization or by this one — it is only installed, and no app-level credentials are returned. */
+  register: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AppInstallModel"];
         };
       };
       /** Bad Request */
