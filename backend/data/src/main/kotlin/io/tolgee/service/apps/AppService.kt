@@ -1,12 +1,15 @@
 package io.tolgee.service.apps
 
 import io.tolgee.component.KeyGenerator
+import io.tolgee.constants.Message
 import io.tolgee.exceptions.AppNotRegisteredException
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Organization
 import io.tolgee.model.UserAccount
 import io.tolgee.model.apps.App
 import io.tolgee.repository.apps.AppRepository
 import jakarta.persistence.EntityManager
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -75,7 +78,12 @@ class AppService(
         this.clientId = clientId
         this.webhookSecret = webhookSecret
       }
-    val saved = appRepository.saveAndFlush(app)
+    val saved =
+      try {
+        appRepository.saveAndFlush(app)
+      } catch (_: DataIntegrityViolationException) {
+        throw BadRequestException(Message.APP_ALREADY_REGISTERED)
+      }
     val issued = appSecretService.issueInitial(saved)
 
     return ResolveResult(

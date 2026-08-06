@@ -72,7 +72,7 @@ class AppInstallService(
     val fetched = appManifestFetcher.fetch(manifestUrl)
     val app = appService.requireRegistered(fetched.manifest.id)
     val registeredUrl = app.manifestUrl
-    val authoritative = if (registeredUrl == manifestUrl) fetched else appManifestFetcher.fetch(registeredUrl)
+    val authoritative = fetchRegistered(registeredUrl, manifestUrl, fetched)
     if (authoritative.manifest.id != app.appId) {
       throw BadRequestException(Message.APP_MANIFEST_INVALID)
     }
@@ -83,6 +83,15 @@ class AppInstallService(
       manifestUrl = registeredUrl,
       fetched = authoritative,
     )
+  }
+
+  private fun fetchRegistered(
+    registeredUrl: String,
+    requestedUrl: String,
+    alreadyFetched: AppManifestFetcher.FetchResult,
+  ): AppManifestFetcher.FetchResult {
+    if (registeredUrl == requestedUrl) return alreadyFetched
+    return appManifestFetcher.fetch(registeredUrl)
   }
 
   /**

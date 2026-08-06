@@ -11,10 +11,9 @@ import jakarta.persistence.UniqueConstraint
 import java.util.Date
 
 /**
- * One app-level client secret of an [App], shaped like [AppInstallSecret] so a rotation works the
- * same way at both layers. It lives in its own table rather than sharing that one: an operator
- * reading `app_install_secret` must be looking at exactly the credentials that reach a tenant's
- * data, and a union table would mix the two layers in every row, index and query.
+ * One app-level client secret of an [App]. Shaped like [AppInstallSecret] but kept in its own table:
+ * `app_install_secret` has to stay exactly the credentials that reach a tenant's data, or an
+ * operator cutting off a leak cannot tell the two layers apart and revokes the wrong one.
  *
  * The plaintext is disclosed only in the response to issuing it.
  */
