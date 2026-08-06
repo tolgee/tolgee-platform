@@ -6,14 +6,19 @@ export const APP_MANIFEST_URL = `${SERVER_SELF_URL}/internal/e2e-data/apps/manif
 const ENABLED_APPS_ALIAS = 'enabledApps';
 
 /**
- * Registers the e2e test app from its manifest URL. Expects the organization Apps
- * settings page to be open, and leaves the registered app listed on it.
+ * Registers the e2e test app from its manifest URL and installs it. Expects the organization
+ * Apps settings page to be open, and leaves the installed app listed on it.
+ *
+ * Nobody has registered the manifest yet, so approving the install stops on the
+ * not-registered screen and the app has to be registered from there first.
  */
 export function registerAppFromManifest() {
   gcy('organization-apps-register-button').click();
   gcy('organization-apps-register-manifest-url').type(APP_MANIFEST_URL);
   gcy('organization-apps-register-continue').click();
   gcy('organization-apps-register-submit').click();
+  gcy('organization-apps-not-registered-register').click();
+  gcy('organization-apps-registered-credentials-close').click();
   gcy('organization-apps-item').should('exist');
 }
 

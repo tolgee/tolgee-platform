@@ -37,6 +37,13 @@ describe('organization apps', () => {
       'translations.view'
     );
     gcy('organization-apps-register-submit').click();
+    gcy('organization-apps-not-registered').should('be.visible');
+    gcy('organization-apps-not-registered-register').click();
+    gcy('organization-apps-registered-credentials').should('be.visible');
+    gcy('app-credentials-client-id').should('be.visible');
+    gcy('app-credentials-client-secret').should('be.visible');
+    gcy('app-credentials-webhook-secret').should('be.visible');
+    gcy('organization-apps-registered-credentials-close').click();
     gcy('organization-apps-item').should('contain', 'E2E Test App');
     gcy('organization-apps-item-scopes').should('contain', 'translations.view');
 
