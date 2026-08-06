@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { T, useTranslate } from '@tolgee/react';
-import { Alert, Box, styled, Typography } from '@mui/material';
+import {
+  Alert,
+  Box,
+  Checkbox,
+  FormControlLabel,
+  styled,
+  Typography,
+} from '@mui/material';
 
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { CompactView } from 'tg.component/layout/CompactView';
@@ -23,11 +30,9 @@ type ConsentInfo = {
   allProjects: boolean;
 };
 
-const StyledCapabilities = styled('ul')`
-  margin: 0;
-  padding-left: 20px;
+const StyledCapabilities = styled('div')`
   display: grid;
-  gap: 8px;
+  gap: 4px;
 `;
 
 const StyledButtons = styled(Box)`
@@ -45,19 +50,27 @@ const OAuth2ConsentView: React.FC<React.PropsWithChildren<unknown>> = () => {
   const scope = asString(search.scope);
   const state = asString(search.state);
   const [info, setInfo] = useState<ConsentInfo>();
+  const [selectedScopes, setSelectedScopes] = useState<string[]>([]);
   const [failed, setFailed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     apiV2HttpService
       .get<ConsentInfo>('oauth2/consent-info', { clientId, scope, state })
-      .then(setInfo)
+      .then((data) => {
+        setInfo(data);
+        setSelectedScopes(data.scopes);
+      })
       .catch(() => setFailed(true));
   }, [clientId, scope, state]);
 
-  // Consent is submitted as a real form POST to the authorization endpoint so the browser sends the
-  // session cookie and follows the redirect back to the client. Approving = posting the scopes; denying
-  // = posting none, which the server turns into access_denied.
+  const toggleScope = (s: string) => {
+    setSelectedScopes((prev) =>
+      prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]
+    );
+  };
+
+  // Real form POST (not fetch) so the browser sends the session cookie and follows the redirect back to the client.
   const submitConsent = (approvedScopes: string[]) => {
     setSubmitting(true);
     const form = document.createElement('form');
@@ -117,9 +130,19 @@ const OAuth2ConsentView: React.FC<React.PropsWithChildren<unknown>> = () => {
           <Box data-cy="oauth2-consent">
             <StyledCapabilities>
               {info.scopes.map((s) => (
-                <li key={s} data-cy="oauth2-consent-scope">
-                  {getScopeTranslation(s as PermissionModelScope)}
-                </li>
+                <FormControlLabel
+                  key={s}
+                  data-cy="oauth2-consent-scope"
+                  data-cy-scope={s}
+                  control={
+                    <Checkbox
+                      size="small"
+                      checked={selectedScopes.includes(s)}
+                      onChange={() => toggleScope(s)}
+                    />
+                  }
+                  label={getScopeTranslation(s as PermissionModelScope)}
+                />
               ))}
             </StyledCapabilities>
             {info.project && (
@@ -165,7 +188,8 @@ const OAuth2ConsentView: React.FC<React.PropsWithChildren<unknown>> = () => {
                 color="primary"
                 data-cy="oauth2-consent-allow"
                 loading={submitting}
-                onClick={() => submitConsent(info.scopes)}
+                disabled={selectedScopes.length === 0}
+                onClick={() => submitConsent(selectedScopes)}
               >
                 <T keyName="oauth2_consent_allow" defaultValue="Allow" />
               </LoadingButton>
