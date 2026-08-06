@@ -63,6 +63,11 @@ class OrganizationAuthorizationInterceptor(
         // It is not the job of the interceptor to return a 404 error.
         ?: return true
 
+    // A token scoped to project capabilities must not act at the organization level via the user's org role.
+    if (authenticationFacade.isOAuthTokenAuth) {
+      throw PermissionException()
+    }
+
     var bypassed = false
     val requiredRole = getRequiredRole(request, handler)
     logger.debug(

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023 Tolgee s.r.o. and contributors
+ * Copyright (C) 2026 Tolgee s.r.o. and contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-package io.tolgee.security.authentication
+package io.tolgee.security.oauth2
 
-enum class AuthTokenType {
-  /** Any API credential — PAK, PAT, or OAuth2 access token. */
-  ANY,
+import io.tolgee.model.enums.Scope
 
-  /** Personal Access Token */
-  ONLY_PAT,
-
-  /** Project Api Key */
-  ONLY_PAK,
+data class OAuth2TokenCredentials(
+  val scopes: Set<Scope>,
+  /** Project ids the token is bound to, or null for the "all projects" sentinel (not narrowed to any subset). */
+  val projectIds: Set<Long>?,
+) {
+  fun coversProject(projectId: Long): Boolean {
+    return projectIds == null || projectId in projectIds
+  }
 }
