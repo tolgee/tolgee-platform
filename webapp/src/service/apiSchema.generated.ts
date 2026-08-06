@@ -48,7 +48,7 @@ export interface paths {
   };
   "/v2/administration/apps": {
     /** Returns the apps registered at server level — those belonging to no organization. The client secret is never disclosed here. */
-    get: operations["list_6"];
+    get: operations["list_7"];
     /** Fetches the manifest at the given URL and registers the app at server level, belonging to no organization. The response is the only place the client secret is ever disclosed. When an organization has already registered the same app, the native install is bound to that app and no app-level credentials are returned. */
     post: operations["register_1"];
   };
@@ -78,13 +78,13 @@ export interface paths {
   };
   "/v2/administration/apps/{installId}/secrets": {
     /** Returns every secret of the native install, revoked ones included. `lastUsedAt` is what tells you whether the app has moved over to a newly issued secret and the old one can be revoked. The secrets themselves are never disclosed here. */
-    get: operations["listSecrets_1"];
+    get: operations["listSecrets_2"];
     /** Phase one of a rotation: mints a second secret while every existing one keeps working, so the app can pick the new one up before anything breaks. The install keeps its id, granted scopes, per-organization availability and per-project enablements. The response is the only place the secret is ever disclosed. */
-    post: operations["issueSecret_1"];
+    post: operations["issueSecret_2"];
   };
   "/v2/administration/apps/{installId}/secrets/{secretId}": {
     /** Phase two of a rotation: the secret stops authenticating immediately, every other secret of the install is untouched. Revoking the last live one is allowed — it is the way to cut a leaked credential off before a replacement exists. Idempotent. */
-    delete: operations["revokeSecret_1"];
+    delete: operations["revokeSecret_2"];
   };
   "/v2/administration/batch-job-queue": {
     /** Returns all chunk execution items currently in the batch job queue */
@@ -160,7 +160,7 @@ export interface paths {
   };
   "/v2/api-keys/{keyId}": {
     /** Returns specific API key info */
-    get: operations["get_26"];
+    get: operations["get_27"];
   };
   "/v2/apps/self/installations": {
     /** Returns the install the calling install-context token belongs to, together with the projects the app is currently enabled for and the organization owning each of them. Requires a token from the client-credentials grant — a user-context token (the one the dashboard iframe gets) is refused, because it acts for a single user who need not be a member of every project the install is enabled for. A collection is returned so that an app holding several installs on one server stays representable. */
@@ -168,13 +168,13 @@ export interface paths {
   };
   "/v2/apps/self/secrets": {
     /** Returns every secret of the calling install, revoked ones included, without disclosing any of them. Requires a token from the client-credentials grant. */
-    get: operations["list_5"];
+    get: operations["list_6"];
     /** Mints a fresh secret for the calling install and returns it — the only place it is ever disclosed. The secret the call authenticated with keeps working, so the app can store the new one and only then revoke the old one. */
-    post: operations["issue"];
+    post: operations["issue_1"];
   };
   "/v2/apps/self/secrets/{secretId}": {
     /** The secret stops authenticating immediately. Revoking the install's last live secret is refused here — an app authenticates with a secret, so it would lock itself out of this very endpoint. Issue the replacement first. Idempotent. */
-    delete: operations["revoke_1"];
+    delete: operations["revoke_2"];
   };
   "/v2/auth-provider": {
     get: operations["getCurrentAuthProvider"];
@@ -264,7 +264,7 @@ export interface paths {
   };
   "/v2/organizations/{organizationId}/apps": {
     /** Returns all apps registered for the organization. */
-    get: operations["list_4"];
+    get: operations["list_5"];
     /** Fetches the manifest at the given URL and installs the app it describes for the organization. The app must already be registered on this server: when it is not, the call fails with the `app_not_registered` code, and the caller may register it — becoming its owner — through `POST /register`. The response is the only place the install's client secret is ever disclosed; app-level credentials are not disclosed here. */
     post: operations["install"];
   };
@@ -290,13 +290,13 @@ export interface paths {
   };
   "/v2/organizations/{organizationId}/apps/{installId}/secrets": {
     /** Returns every secret of the install, revoked ones included. `lastUsedAt` is what tells you whether the app has moved over to a newly issued secret and the old one can be revoked. The secrets themselves are never disclosed here. */
-    get: operations["listSecrets"];
-    /** Phase one of a rotation: mints a second secret while every existing one keeps working, so the app can pick the new one up before anything breaks. The install keeps its id, granted scopes and per-project enablements. The response is the only place the secret is ever disclosed. */
-    post: operations["issueSecret"];
+    get: operations["listSecrets_1"];
+    /** Phase one of a rotation: mints a second secret while every existing one keeps working, so the app can pick the new one up before anything breaks. The install keeps its id, granted scopes and per-project enablements. The response is the only place the secret is ever disclosed to you; it is also pushed to the app over the lifecycle channel, which is how an install whose credentials never reached the app is repaired. */
+    post: operations["issueSecret_1"];
   };
   "/v2/organizations/{organizationId}/apps/{installId}/secrets/{secretId}": {
     /** Phase two of a rotation: the secret stops authenticating immediately, every other secret of the install is untouched. Revoking the last live one is allowed — it is the way to cut a leaked credential off before a replacement exists — and leaves the app unable to authenticate until a new secret is issued. Idempotent. */
-    delete: operations["revokeSecret"];
+    delete: operations["revokeSecret_1"];
   };
   "/v2/organizations/{organizationId}/base-languages": {
     /** Returns all base languages in use by projects owned by specified organization */
@@ -340,7 +340,7 @@ export interface paths {
     post: operations["update_14"];
   };
   "/v2/organizations/{organizationId}/glossaries/{glossaryId}/terms/{termId}/translations/{languageTag}": {
-    get: operations["get_25"];
+    get: operations["get_26"];
   };
   "/v2/organizations/{organizationId}/glossaries/{glossaryId}/termsIds": {
     get: operations["getAllIds"];
@@ -373,6 +373,29 @@ export interface paths {
   "/v2/organizations/{organizationId}/machine-translation-credit-balance": {
     /** Returns machine translation credit balance for organization */
     get: operations["getOrganizationCredits"];
+  };
+  "/v2/organizations/{organizationId}/owned-apps": {
+    /** Returns every app the organization registered, together with the health of its manifest. An app the organization also installed appears in the installed apps list as well. */
+    get: operations["list_15"];
+  };
+  "/v2/organizations/{organizationId}/owned-apps/{appId}": {
+    get: operations["get_25"];
+    /** Deregisters the app and uninstalls it from every organization that installed it, revoking both the app-level and every per-install credential, and announcing an uninstall to the app for each of those organizations. Only the owner may do this; an organization that installed the app removes only its own install through `DELETE /apps/{installId}`. */
+    delete: operations["removeEverywhere"];
+  };
+  "/v2/organizations/{organizationId}/owned-apps/{appId}/deliveries": {
+    /** Every signed POST Tolgee has made to the app's base URL, with the outcome of each. This is where an owner finds out that an install's credentials never reached the app. */
+    get: operations["listDeliveries"];
+  };
+  "/v2/organizations/{organizationId}/owned-apps/{appId}/secrets": {
+    /** Returns every app-level secret, revoked ones included, without disclosing any of them. These administer the app across every organization that installed it and grant access to no data — they are not the per-install secrets under `/apps/{installId}/secrets`. */
+    get: operations["listSecrets"];
+    /** Phase one of an app-level rotation: mints a second secret while every existing one keeps working. The app's installs, their own secrets, their organization availability and their per-project enablements are all untouched. The new secret is both returned here — the only place it is ever disclosed — and pushed to the app over the lifecycle channel. */
+    post: operations["issueSecret"];
+  };
+  "/v2/organizations/{organizationId}/owned-apps/{appId}/secrets/{secretId}": {
+    /** Phase two of a rotation: the secret stops authenticating immediately and every other one is untouched. Revoking the last live one is allowed — it is how a leaked credential is cut off before a replacement exists. Idempotent. */
+    delete: operations["revokeSecret"];
   };
   "/v2/organizations/{organizationId}/projects-with-stats": {
     /** Returns all projects (including statistics) where current user has any permission (except none) */
@@ -430,7 +453,7 @@ export interface paths {
   };
   "/v2/organizations/{organizationId}/translation-memories/{translationMemoryId}/entries": {
     /** Pagination is row-level: each STORED bucket (manual entries on a source collapse into one row; each TMX `tuid` is its own row) and each VIRTUAL origin (one row per project key) gets its own page item. The `targetLanguageTag` filter narrows the *cells* of a row to a subset of target languages; rows themselves still appear with empty cells so the user can add a translation. */
-    get: operations["list_3"];
+    get: operations["list_4"];
     post: operations["create_16"];
     /** For every entry ID in the payload, deletes the entire group that shares the same source text (and key). The request is deduplicated to distinct groups so passing multiple entries from the same row is a no-op past the first one. */
     delete: operations["deleteMultipleGroups"];
@@ -555,7 +578,7 @@ export interface paths {
   };
   "/v2/projects/{projectId}/apps": {
     /** Returns all apps registered in the project's organization, each annotated with whether it is enabled for this project. Requires project.edit: it discloses the organization's whole app inventory, including apps not enabled for this project. */
-    get: operations["list_13"];
+    get: operations["list_14"];
   };
   "/v2/projects/{projectId}/apps/enabled": {
     /** Returns only the apps enabled for this project, which every project member needs to render their dashboard pages. Discloses nothing about the organization's other apps. */
@@ -582,7 +605,7 @@ export interface paths {
     delete: operations["removeAvatar_1"];
   };
   "/v2/projects/{projectId}/batch-jobs": {
-    get: operations["list_7"];
+    get: operations["list_8"];
   };
   "/v2/projects/{projectId}/batch-jobs/{id}": {
     get: operations["get_22"];
@@ -643,7 +666,7 @@ export interface paths {
     post: operations["setProtected"];
   };
   "/v2/projects/{projectId}/content-delivery-configs": {
-    get: operations["list_2"];
+    get: operations["list_3"];
     post: operations["create_10"];
   };
   "/v2/projects/{projectId}/content-delivery-configs/{id}": {
@@ -654,7 +677,7 @@ export interface paths {
     delete: operations["delete_5"];
   };
   "/v2/projects/{projectId}/content-storages": {
-    get: operations["list_1"];
+    get: operations["list_2"];
     post: operations["create_9"];
   };
   "/v2/projects/{projectId}/content-storages/test": {
@@ -842,7 +865,7 @@ export interface paths {
     get: operations["selectKeys_2"];
   };
   "/v2/projects/{projectId}/keys/trash": {
-    get: operations["list_11"];
+    get: operations["list_12"];
   };
   "/v2/projects/{projectId}/keys/trash/deleters": {
     get: operations["listDeleters"];
@@ -1166,7 +1189,7 @@ export interface paths {
   };
   "/v2/projects/{projectId}/translation-memories": {
     /** Always readable. When the TRANSLATION_MEMORY feature is not enabled for the organization, only the project-type assignment (if any) is returned so the settings page can still show the row that already drives in-project suggestions. */
-    get: operations["list_9"];
+    get: operations["list_10"];
   };
   "/v2/projects/{projectId}/translation-memories/project-tm-settings": {
     /** Sets TM-level flags on the project's own PROJECT-type TM. The shared-TM update endpoint rejects PROJECT TMs; this narrow endpoint exists so project admins can toggle the `writeOnlyReviewed` flag without org-level privileges. */
@@ -1268,7 +1291,7 @@ export interface paths {
     put: operations["setUsersPermissions_1"];
   };
   "/v2/projects/{projectId}/webhook-configs": {
-    get: operations["list"];
+    get: operations["list_1"];
     post: operations["create"];
   };
   "/v2/projects/{projectId}/webhook-configs/{id}": {
@@ -1279,6 +1302,18 @@ export interface paths {
   "/v2/projects/{projectId}/webhook-configs/{id}/test": {
     /** Sends a test request to the webhook */
     post: operations["test"];
+  };
+  "/v2/public/apps/app-secrets/issue": {
+    /** Mints a fresh app-level secret and returns it — the only place it is ever disclosed. The secret this call authenticated with keeps working, so the app can store the new one and only then revoke the old one. The new secret is also pushed to the app's base URL over the lifecycle channel. */
+    post: operations["issue"];
+  };
+  "/v2/public/apps/app-secrets/list": {
+    /** Returns every app-level secret, revoked ones included, without disclosing any of them. */
+    post: operations["list"];
+  };
+  "/v2/public/apps/app-secrets/revoke": {
+    /** The secret stops authenticating immediately. Revoking the app's last live secret is refused here — the app authenticates with a secret, so it would lock itself out of this very endpoint. Issue the replacement first. Idempotent. */
+    post: operations["revoke_1"];
   };
   "/v2/public/apps/self-register": {
     /** Registers the app described by the manifest, without a signed-in user. Requires the `X-Tolgee-App-Registration-Secret` header to match `tolgee.apps.registration-secret`. With an `organizationSlug` the app is installed into that organization; without one it is registered as a native (server-level) app that a server admin then makes available to organizations. Re-running it for an already-registered app repoints it at the new manifest URL; the one-time client secret is returned only when the install is first created. */
@@ -1656,6 +1691,32 @@ export interface components {
       client_secret: string;
       grant_type: string;
     };
+    AppDeliveryModel: {
+      /**
+       * Format: int64
+       * @description When retrying stopped without success. The operation that triggered the delivery still happened — issue a new secret to have the credentials delivered again.
+       */
+      abandonedAt?: number;
+      /** Format: int32 */
+      attempts: number;
+      /** Format: int64 */
+      createdAt: number;
+      /** Format: int64 */
+      deliveredAt?: number;
+      /** @description The lifecycle event as the app sees it, e.g. `app.installed` */
+      eventType: string;
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      lastAttemptAt?: number;
+      lastError?: string;
+      /**
+       * Format: int64
+       * @description The organization the event concerns, or null for app-level events
+       */
+      organizationId?: number;
+      targetUrl: string;
+    };
     AppInstallModel: {
       app?: components["schemas"]["AppModel"];
       appId: string;
@@ -1714,6 +1775,32 @@ export interface components {
       name: string;
       /** @description The secret Tolgee signs this app's lifecycle deliveries with. Present only in the response to registering the app. */
       webhookSecret?: string;
+    };
+    AppSecretModel: {
+      /** Format: int64 */
+      createdAt: number;
+      /** Format: int64 */
+      id: number;
+      /**
+       * Format: int64
+       * @description When this secret was last used to administer the app, or null if never
+       */
+      lastUsedAt?: number;
+      /** @description First characters of the secret, enough to tell two of them apart */
+      prefix: string;
+      /**
+       * Format: int64
+       * @description When the secret was revoked, or null while it still authenticates
+       */
+      revokedAt?: number;
+      /** @description The secret in plaintext. Present only in the response to issuing it — Tolgee stores only a hash and cannot show it again. It administers the app and grants access to no data. */
+      secret?: string;
+    };
+    AppSecretRotationRequest: {
+      client_id: string;
+      client_secret: string;
+      /** Format: int64 */
+      secret_id?: number;
     };
     AppSelfEnabledProjectModel: {
       /** Format: int64 */
@@ -2115,6 +2202,11 @@ export interface components {
         organizations?: components["schemas"]["AppAvailableOrganizationModel"][];
       };
     };
+    CollectionModelAppDeliveryModel: {
+      _embedded?: {
+        appDeliveries?: components["schemas"]["AppDeliveryModel"][];
+      };
+    };
     CollectionModelAppInstallModel: {
       _embedded?: {
         appInstalls?: components["schemas"]["AppInstallModel"][];
@@ -2123,6 +2215,11 @@ export interface components {
     CollectionModelAppInstallSecretModel: {
       _embedded?: {
         appInstallSecrets?: components["schemas"]["AppInstallSecretModel"][];
+      };
+    };
+    CollectionModelAppSecretModel: {
+      _embedded?: {
+        appSecrets?: components["schemas"]["AppSecretModel"][];
       };
     };
     CollectionModelAppSelfInstallationModel: {
@@ -2218,6 +2315,11 @@ export interface components {
     CollectionModelOrganizationInvitationModel: {
       _embedded?: {
         organizationInvitations?: components["schemas"]["OrganizationInvitationModel"][];
+      };
+    };
+    CollectionModelOwnedAppModel: {
+      _embedded?: {
+        ownedApps?: components["schemas"]["OwnedAppModel"][];
       };
     };
     CollectionModelProjectAppModel: {
@@ -3484,7 +3586,9 @@ export interface components {
         | "app_too_many_live_secrets"
         | "app_cannot_revoke_last_secret"
         | "app_not_registered"
-        | "app_already_registered";
+        | "app_already_registered"
+        | "app_not_found"
+        | "app_secret_not_found";
       params?: { [key: string]: unknown }[];
     };
     ExistenceEntityDescription: {
@@ -4910,6 +5014,39 @@ export interface components {
       name: string;
       /** @example btforg */
       slug: string;
+    };
+    OwnedAppModel: {
+      /** @description The `id` declared in the app's manifest, unique across the server */
+      appId: string;
+      baseUrl: string;
+      /** @description App-level OAuth client id, or null for an app that predates the app layer */
+      clientId?: string;
+      /** Format: int64 */
+      id: number;
+      /**
+       * Format: int64
+       * @description How many organizations, this one included, currently have the app installed
+       */
+      installCount: number;
+      /**
+       * Format: int32
+       * @description Consecutive failed manifest checks; zero while the manifest is answering
+       */
+      manifestFailureCount: number;
+      /** Format: int64 */
+      manifestFirstFailedAt?: number;
+      /** Format: int64 */
+      manifestLastCheckedAt?: number;
+      manifestLastError?: string;
+      /** @description `UNREACHABLE` or `INVALID`, or null while the manifest is answering */
+      manifestLastFailureKind?: string;
+      manifestUrl: string;
+      name: string;
+      /**
+       * Format: int64
+       * @description When the app was marked unhealthy, or null while it is healthy. An unhealthy app keeps working; it is only a warning that its manifest has stopped answering.
+       */
+      unhealthySince?: number;
     };
     PageMetadata: {
       /** Format: int64 */
@@ -7423,7 +7560,9 @@ export interface components {
         | "app_too_many_live_secrets"
         | "app_cannot_revoke_last_secret"
         | "app_not_registered"
-        | "app_already_registered";
+        | "app_already_registered"
+        | "app_not_found"
+        | "app_secret_not_found";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };
@@ -8840,7 +8979,7 @@ export interface operations {
     };
   };
   /** Returns the apps registered at server level — those belonging to no organization. The client secret is never disclosed here. */
-  list_6: {
+  list_7: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -9259,7 +9398,7 @@ export interface operations {
     };
   };
   /** Returns every secret of the native install, revoked ones included. `lastUsedAt` is what tells you whether the app has moved over to a newly issued secret and the old one can be revoked. The secrets themselves are never disclosed here. */
-  listSecrets_1: {
+  listSecrets_2: {
     parameters: {
       path: {
         installId: number;
@@ -9307,7 +9446,7 @@ export interface operations {
     };
   };
   /** Phase one of a rotation: mints a second secret while every existing one keeps working, so the app can pick the new one up before anything breaks. The install keeps its id, granted scopes, per-organization availability and per-project enablements. The response is the only place the secret is ever disclosed. */
-  issueSecret_1: {
+  issueSecret_2: {
     parameters: {
       path: {
         installId: number;
@@ -9355,7 +9494,7 @@ export interface operations {
     };
   };
   /** Phase two of a rotation: the secret stops authenticating immediately, every other secret of the install is untouched. Revoking the last live one is allowed — it is the way to cut a leaked credential off before a replacement exists. Idempotent. */
-  revokeSecret_1: {
+  revokeSecret_2: {
     parameters: {
       path: {
         installId: number;
@@ -10383,7 +10522,7 @@ export interface operations {
     };
   };
   /** Returns specific API key info */
-  get_26: {
+  get_27: {
     parameters: {
       path: {
         keyId: number;
@@ -10474,7 +10613,7 @@ export interface operations {
     };
   };
   /** Returns every secret of the calling install, revoked ones included, without disclosing any of them. Requires a token from the client-credentials grant. */
-  list_5: {
+  list_6: {
     responses: {
       /** OK */
       200: {
@@ -10517,7 +10656,7 @@ export interface operations {
     };
   };
   /** Mints a fresh secret for the calling install and returns it — the only place it is ever disclosed. The secret the call authenticated with keeps working, so the app can store the new one and only then revoke the old one. */
-  issue: {
+  issue_1: {
     responses: {
       /** OK */
       200: {
@@ -10560,7 +10699,7 @@ export interface operations {
     };
   };
   /** The secret stops authenticating immediately. Revoking the install's last live secret is refused here — an app authenticates with a secret, so it would lock itself out of this very endpoint. Issue the replacement first. Idempotent. */
-  revoke_1: {
+  revoke_2: {
     parameters: {
       path: {
         secretId: number;
@@ -12056,7 +12195,7 @@ export interface operations {
     };
   };
   /** Returns all apps registered for the organization. */
-  list_4: {
+  list_5: {
     parameters: {
       path: {
         organizationId: number;
@@ -12411,7 +12550,7 @@ export interface operations {
     };
   };
   /** Returns every secret of the install, revoked ones included. `lastUsedAt` is what tells you whether the app has moved over to a newly issued secret and the old one can be revoked. The secrets themselves are never disclosed here. */
-  listSecrets: {
+  listSecrets_1: {
     parameters: {
       path: {
         organizationId: number;
@@ -12459,8 +12598,8 @@ export interface operations {
       };
     };
   };
-  /** Phase one of a rotation: mints a second secret while every existing one keeps working, so the app can pick the new one up before anything breaks. The install keeps its id, granted scopes and per-project enablements. The response is the only place the secret is ever disclosed. */
-  issueSecret: {
+  /** Phase one of a rotation: mints a second secret while every existing one keeps working, so the app can pick the new one up before anything breaks. The install keeps its id, granted scopes and per-project enablements. The response is the only place the secret is ever disclosed to you; it is also pushed to the app over the lifecycle channel, which is how an install whose credentials never reached the app is repaired. */
+  issueSecret_1: {
     parameters: {
       path: {
         organizationId: number;
@@ -12509,7 +12648,7 @@ export interface operations {
     };
   };
   /** Phase two of a rotation: the secret stops authenticating immediately, every other secret of the install is untouched. Revoking the last live one is allowed — it is the way to cut a leaked credential off before a replacement exists — and leaves the app unable to authenticate until a new secret is issued. Idempotent. */
-  revokeSecret: {
+  revokeSecret_1: {
     parameters: {
       path: {
         organizationId: number;
@@ -13490,7 +13629,7 @@ export interface operations {
       };
     };
   };
-  get_25: {
+  get_26: {
     parameters: {
       path: {
         organizationId: number;
@@ -14058,6 +14197,344 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["CreditBalanceModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Returns every app the organization registered, together with the health of its manifest. An app the organization also installed appears in the installed apps list as well. */
+  list_15: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelOwnedAppModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  get_25: {
+    parameters: {
+      path: {
+        organizationId: number;
+        appId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["OwnedAppModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Deregisters the app and uninstalls it from every organization that installed it, revoking both the app-level and every per-install credential, and announcing an uninstall to the app for each of those organizations. Only the owner may do this; an organization that installed the app removes only its own install through `DELETE /apps/{installId}`. */
+  removeEverywhere: {
+    parameters: {
+      path: {
+        organizationId: number;
+        appId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Every signed POST Tolgee has made to the app's base URL, with the outcome of each. This is where an owner finds out that an install's credentials never reached the app. */
+  listDeliveries: {
+    parameters: {
+      path: {
+        organizationId: number;
+        appId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelAppDeliveryModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Returns every app-level secret, revoked ones included, without disclosing any of them. These administer the app across every organization that installed it and grant access to no data — they are not the per-install secrets under `/apps/{installId}/secrets`. */
+  listSecrets: {
+    parameters: {
+      path: {
+        organizationId: number;
+        appId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelAppSecretModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Phase one of an app-level rotation: mints a second secret while every existing one keeps working. The app's installs, their own secrets, their organization availability and their per-project enablements are all untouched. The new secret is both returned here — the only place it is ever disclosed — and pushed to the app over the lifecycle channel. */
+  issueSecret: {
+    parameters: {
+      path: {
+        organizationId: number;
+        appId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AppSecretModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Phase two of a rotation: the secret stops authenticating immediately and every other one is untouched. Revoking the last live one is allowed — it is how a leaked credential is cut off before a replacement exists. Idempotent. */
+  revokeSecret: {
+    parameters: {
+      path: {
+        organizationId: number;
+        appId: number;
+        secretId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AppSecretModel"];
         };
       };
       /** Bad Request */
@@ -14952,7 +15429,7 @@ export interface operations {
     };
   };
   /** Pagination is row-level: each STORED bucket (manual entries on a source collapse into one row; each TMX `tuid` is its own row) and each VIRTUAL origin (one row per project key) gets its own page item. The `targetLanguageTag` filter narrows the *cells* of a row to a subset of target languages; rows themselves still appear with empty cells so the user can add a translation. */
-  list_3: {
+  list_4: {
     parameters: {
       path: {
         organizationId: number;
@@ -17036,7 +17513,7 @@ export interface operations {
     };
   };
   /** Returns all apps registered in the project's organization, each annotated with whether it is enabled for this project. Requires project.edit: it discloses the organization's whole app inventory, including apps not enabled for this project. */
-  list_13: {
+  list_14: {
     parameters: {
       path: {
         projectId: number;
@@ -17477,7 +17954,7 @@ export interface operations {
       };
     };
   };
-  list_7: {
+  list_8: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -18538,7 +19015,7 @@ export interface operations {
       };
     };
   };
-  list_2: {
+  list_3: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -18835,7 +19312,7 @@ export interface operations {
       };
     };
   };
-  list_1: {
+  list_2: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -21406,7 +21883,7 @@ export interface operations {
       };
     };
   };
-  list_11: {
+  list_12: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -27506,7 +27983,7 @@ export interface operations {
     };
   };
   /** Always readable. When the TRANSLATION_MEMORY feature is not enabled for the organization, only the project-type assignment (if any) is returned so the settings page can still show the row that already drives in-project suggestions. */
-  list_9: {
+  list_10: {
     parameters: {
       path: {
         projectId: number;
@@ -29700,7 +30177,7 @@ export interface operations {
       };
     };
   };
-  list: {
+  list_1: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -29998,6 +30475,150 @@ export interface operations {
             | components["schemas"]["ErrorResponseTyped"]
             | components["schemas"]["ErrorResponseBody"];
         };
+      };
+    };
+  };
+  /** Mints a fresh app-level secret and returns it — the only place it is ever disclosed. The secret this call authenticated with keeps working, so the app can store the new one and only then revoke the old one. The new secret is also pushed to the app's base URL over the lifecycle channel. */
+  issue: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AppSecretModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AppSecretRotationRequest"];
+      };
+    };
+  };
+  /** Returns every app-level secret, revoked ones included, without disclosing any of them. */
+  list: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelAppSecretModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AppSecretRotationRequest"];
+      };
+    };
+  };
+  /** The secret stops authenticating immediately. Revoking the app's last live secret is refused here — the app authenticates with a secret, so it would lock itself out of this very endpoint. Issue the replacement first. Idempotent. */
+  revoke_1: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AppSecretModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AppSecretRotationRequest"];
       };
     };
   };
