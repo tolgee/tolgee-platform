@@ -44,10 +44,11 @@ class StreamingAsyncProperties {
     description =
       "How many streaming requests may wait for a free thread before Tolgee replies " +
         "`503 Service Unavailable`.\n\n" +
-        "Keep this small. A queued request already counts against `spring.mvc.async.request-timeout`, " +
-        "so a deep queue only means clients wait the full timeout and fail anyway.",
+        "A queued request already counts against `spring.mvc.async.request-timeout`, so the queue " +
+        "cannot make a request wait longer than that — it absorbs bursts while threads turn over, " +
+        "and requests that still cannot be served in time are answered rather than left hanging.",
     defaultValue = "-1",
-    defaultExplanation = "Same as max-threads",
+    defaultExplanation = "50, or max-threads if that is larger",
   )
   var queueCapacity: Int = -1
 

@@ -57,7 +57,7 @@ class AsyncExecutorConfigurationTest {
 
     asyncExecutorFactory.connectionPoolSize.assert.isEqualTo(100)
     asyncExecutorFactory.streamingMaxThreads.assert.isEqualTo(33)
-    asyncExecutorFactory.streamingQueueCapacity.assert.isEqualTo(33)
+    asyncExecutorFactory.streamingQueueCapacity.assert.isEqualTo(AsyncExecutorFactory.MIN_QUEUE_CAPACITY)
     asyncExecutorFactory.backgroundMaxThreads.assert.isEqualTo(16)
   }
 
@@ -74,7 +74,7 @@ class AsyncExecutorConfigurationTest {
     streamingAsyncExecutor.threadPoolExecutor.queue
       .remainingCapacity()
       .assert
-      .isEqualTo(33)
+      .isEqualTo(AsyncExecutorFactory.MIN_QUEUE_CAPACITY)
     asyncMethodConfiguration
       .backgroundAsyncExecutor()
       .threadPoolExecutor.queue
@@ -91,13 +91,17 @@ class AsyncExecutorConfigurationTest {
   /** Without these, context close rejects in-flight submissions into their callers. */
   @Test
   fun `executors keep accepting work while the context closes`() {
-    listOf(streamingAsyncExecutor, backgroundAsyncExecutor, asyncMethodConfiguration.websocketAsyncExecutor())
-      .forEach { executor ->
-        ReflectionTestUtils
-          .getField(executor, "acceptTasksAfterContextClose")
-          .assert
-          .isEqualTo(true)
-      }
+    listOf(
+      streamingAsyncExecutor,
+      backgroundAsyncExecutor,
+      asyncMethodConfiguration.websocketAsyncExecutor(),
+      asyncMethodConfiguration.automationAsyncExecutor(),
+    ).forEach { executor ->
+      ReflectionTestUtils
+        .getField(executor, "acceptTasksAfterContextClose")
+        .assert
+        .isEqualTo(true)
+    }
   }
 
   /** Background work is worth draining; a queued stream's client is already gone. */
@@ -150,6 +154,11 @@ class AsyncExecutorConfigurationTest {
     val automation = asyncMethodConfiguration.automationAsyncExecutor()
     automation.corePoolSize.assert.isEqualTo(1)
     automation.maxPoolSize.assert.isEqualTo(1)
+    automation.threadNamePrefix.assert.isEqualTo(AsyncExecutorFactory.AUTOMATION_THREAD_NAME_PREFIX)
+    automation.threadPoolExecutor.queue
+      .remainingCapacity()
+      .assert
+      .isEqualTo(Int.MAX_VALUE)
 
     AutomationActivityListener::class.java.declaredMethods
       .filter { it.name == "listen" }

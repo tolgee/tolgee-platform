@@ -44,7 +44,7 @@ class AsyncMethodConfiguration(
       threadNamePrefix = AsyncExecutorFactory.WEBSOCKET_THREAD_NAME_PREFIX,
       maxThreads = 1,
       queueCapacity = AsyncExecutorFactory.UNBOUNDED_QUEUE,
-      keepAliveSeconds = WEBSOCKET_KEEP_ALIVE_SECONDS,
+      keepAliveSeconds = SERIAL_POOL_KEEP_ALIVE_SECONDS,
     )
 
   /**
@@ -58,13 +58,13 @@ class AsyncMethodConfiguration(
       threadNamePrefix = AsyncExecutorFactory.AUTOMATION_THREAD_NAME_PREFIX,
       maxThreads = 1,
       queueCapacity = AsyncExecutorFactory.UNBOUNDED_QUEUE,
-      keepAliveSeconds = WEBSOCKET_KEEP_ALIVE_SECONDS,
+      keepAliveSeconds = SERIAL_POOL_KEEP_ALIVE_SECONDS,
     )
 
   companion object {
     const val BACKGROUND_EXECUTOR_BEAN_NAME = "backgroundAsyncExecutor"
     const val WEBSOCKET_EXECUTOR_BEAN_NAME = "websocketAsyncExecutor"
     const val AUTOMATION_EXECUTOR_BEAN_NAME = "automationAsyncExecutor"
-    const val WEBSOCKET_KEEP_ALIVE_SECONDS = 60
+    const val SERIAL_POOL_KEEP_ALIVE_SECONDS = 60
   }
 }

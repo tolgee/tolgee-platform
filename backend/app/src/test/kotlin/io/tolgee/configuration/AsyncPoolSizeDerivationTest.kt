@@ -23,6 +23,15 @@ class AsyncPoolSizeDerivationTest {
     factory.backgroundMaxThreads.assert.isEqualTo(AsyncExecutorFactory.MIN_POOL_SIZE)
   }
 
+  /** A small install still deserves a burst buffer; tying the queue to 3 threads gave it a window of 6. */
+  @Test
+  fun `queue capacity does not shrink with the thread count`() {
+    factory(connectionPoolSize = 10)
+      .streamingQueueCapacity.assert
+      .isEqualTo(AsyncExecutorFactory.MIN_QUEUE_CAPACITY)
+    factory(connectionPoolSize = 600).streamingQueueCapacity.assert.isEqualTo(200)
+  }
+
   @Test
   fun `explicit configuration wins over the derivation`() {
     val properties = TolgeeProperties()

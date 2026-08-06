@@ -27,7 +27,7 @@ class AsyncExecutorFactory(
     get() {
       val configured = tolgeeProperties.async.streaming.queueCapacity
       if (configured >= 0) return configured
-      return streamingMaxThreads
+      return maxOf(MIN_QUEUE_CAPACITY, streamingMaxThreads)
     }
 
   val backgroundMaxThreads: Int
@@ -80,6 +80,9 @@ class AsyncExecutorFactory(
     const val STREAMING_POOL_DIVISOR = 3
     const val BACKGROUND_POOL_DIVISOR = 6
     const val FALLBACK_CONNECTION_POOL_SIZE = 10
+
+    /** A burst is a burst regardless of how many threads drain it; 3 threads still deserve a buffer. */
+    const val MIN_QUEUE_CAPACITY = 50
     const val SHUTDOWN_DRAIN_SECONDS = 20
 
     const val UNBOUNDED_QUEUE = Int.MAX_VALUE

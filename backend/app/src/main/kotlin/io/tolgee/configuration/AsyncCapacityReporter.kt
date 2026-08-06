@@ -15,6 +15,7 @@ class AsyncCapacityReporter(
   @EventListener(ApplicationReadyEvent::class)
   fun report() {
     val streaming = asyncExecutorFactory.streamingMaxThreads
+    val streamingQueue = asyncExecutorFactory.streamingQueueCapacity
     val background = asyncExecutorFactory.backgroundMaxThreads
     val batch = tolgeeProperties.batch.concurrency
     val connectionPoolSize = asyncExecutorFactory.connectionPoolSize
@@ -30,11 +31,11 @@ class AsyncCapacityReporter(
     }
 
     logger.info(
-      "Async capacity: $streaming streaming threads, $background background threads, " +
-        "$batch batch jobs, $connectionPoolSize database connections.",
+      "Async capacity: $streaming streaming threads (queue $streamingQueue), $background background " +
+        "threads, $SERIAL_POOLS serial pools, $batch batch jobs, $connectionPoolSize database connections.",
     )
 
-    val reserved = streaming + background + batch
+    val reserved = streaming + background + batch + SERIAL_POOLS
     if (reserved <= connectionPoolSize - minimumSyncReserve(connectionPoolSize)) return
 
     logger.warn(
@@ -56,5 +57,8 @@ class AsyncCapacityReporter(
 
   companion object {
     const val SYNC_RESERVE_DIVISOR = 4
+
+    /** The websocket and automation executors, one thread each. */
+    const val SERIAL_POOLS = 2
   }
 }
