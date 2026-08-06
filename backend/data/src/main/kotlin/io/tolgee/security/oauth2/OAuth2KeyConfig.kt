@@ -21,38 +21,39 @@ import com.nimbusds.jose.jwk.RSAKey
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet
 import com.nimbusds.jose.jwk.source.JWKSource
 import com.nimbusds.jose.proc.SecurityContext
+import io.tolgee.component.LockingProvider
 import io.tolgee.component.fileStorage.FileStorage
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration
+import org.springframework.security.oauth2.core.OAuth2Token
 import org.springframework.security.oauth2.jwt.JwtDecoder
 import org.springframework.security.oauth2.jwt.JwtEncoder
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder
+import org.springframework.security.oauth2.server.authorization.token.DelegatingOAuth2TokenGenerator
+import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext
+import org.springframework.security.oauth2.server.authorization.token.JwtGenerator
+import org.springframework.security.oauth2.server.authorization.token.OAuth2AccessTokenGenerator
+import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer
+import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenGenerator
 import java.security.KeyPairGenerator
 import java.security.interfaces.RSAPrivateKey
 import java.security.interfaces.RSAPublicKey
 import java.util.UUID
 
 /**
- * Asymmetric signing key material for the OAuth2 authorization server.
- *
- * This is deliberately separate from the symmetric HMAC secret in [io.tolgee.security.authentication.AuthenticationConfig]:
- * the legacy webapp JWT is HS512 (verifier holds the shared secret), while OAuth2 access tokens are RS256 so external
- * resource servers can verify them against the published JWKS without holding a secret.
- *
- * The private JWK is persisted via [FileStorage] (same backend as `jwt.secret`) so restarts and replicas keep the same
- * `kid`; tokens carry the `kid` and validators fetch the matching public key from `/oauth2/jwks`.
+ * Asymmetric (RS256) signing key material for the OAuth2 authorization server. The private JWK is persisted via
+ * [FileStorage] so restarts and replicas keep the same `kid`; without that, live tokens (which carry the `kid`) would
+ * fail validation against the republished `/oauth2/jwks` after any restart.
  */
 @Configuration
 class OAuth2KeyConfig(
   private val fileStorage: FileStorage,
+  private val lockingProvider: LockingProvider,
 ) {
   @Bean
   fun jwkSource(): JWKSource<SecurityContext> {
-    val active = loadOrGenerate(ACTIVE_KEY_FILE)
-    val previous = loadIfExists(PREVIOUS_KEY_FILE)
-    val jwkSet = JWKSet(listOfNotNull(active, previous))
-    return ImmutableJWKSet(jwkSet)
+    return ImmutableJWKSet(JWKSet(loadOrGenerate(ACTIVE_KEY_FILE)))
   }
 
   @Bean
@@ -65,11 +66,28 @@ class OAuth2KeyConfig(
     return OAuth2AuthorizationServerConfiguration.jwtDecoder(jwkSource)
   }
 
+  @Bean
+  fun oauth2TokenGenerator(
+    jwtEncoder: JwtEncoder,
+    jwtCustomizer: OAuth2TokenCustomizer<JwtEncodingContext>,
+  ): OAuth2TokenGenerator<OAuth2Token> {
+    val jwtGenerator = JwtGenerator(jwtEncoder).apply { setJwtCustomizer(jwtCustomizer) }
+    return DelegatingOAuth2TokenGenerator(
+      jwtGenerator,
+      OAuth2AccessTokenGenerator(),
+      PublicClientRefreshTokenGenerator(),
+    )
+  }
+
   private fun loadOrGenerate(name: String): RSAKey {
     loadIfExists(name)?.let { return it }
-    val generated = generateRsaKey()
-    fileStorage.storeFile(name, generated.toJSONString().toByteArray(Charsets.UTF_8))
-    return generated
+    // Serialize first-boot generation across replicas: without the cluster-wide lock each replica of a fresh
+    // deployment would generate a distinct key, and tokens signed by one would fail JWKS validation on another.
+    return lockingProvider.withLocking(name) {
+      loadIfExists(name) ?: generateRsaKey().also {
+        fileStorage.storeFile(name, it.toJSONString().toByteArray(Charsets.UTF_8))
+      }
+    }
   }
 
   private fun loadIfExists(name: String): RSAKey? {
@@ -88,6 +106,5 @@ class OAuth2KeyConfig(
 
   companion object {
     const val ACTIVE_KEY_FILE = "oauth2/jwk-active.json"
-    const val PREVIOUS_KEY_FILE = "oauth2/jwk-previous.json"
   }
 }

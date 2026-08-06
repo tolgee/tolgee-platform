@@ -18,6 +18,8 @@ package io.tolgee.configuration
 
 import io.tolgee.component.ExceptionHandlerFilter
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.security.oauth2.PublicClientRefreshAuthenticationConverter
+import io.tolgee.security.oauth2.PublicClientRefreshAuthenticationProvider
 import io.tolgee.security.ratelimit.GlobalIpRateLimitFilter
 import io.tolgee.security.ratelimit.GlobalUserRateLimitFilter
 import org.springframework.context.annotation.Bean
@@ -28,20 +30,18 @@ import org.springframework.http.MediaType
 import org.springframework.security.config.Customizer
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2AuthorizationServerConfigurer
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher
 
 /**
- * OAuth2 authorization-server filter chain. It is scoped to the protocol endpoints (the oauth2, well-known and connect
- * paths) via the configurer's endpoint matcher and runs at [Ordered.HIGHEST_PRECEDENCE], ahead of the internal
- * chain (@Order 10) and the unordered main chain.
+ * OAuth2 authorization-server filter chain (scoped to the protocol endpoints).
  *
- * Unlike the main chain this one is NOT stateless: the authorization_code flow needs an HttpSession to carry the
- * authenticated principal through consent. The principal is established only by the session bootstrap (from a full
- * webapp login); Tolgee's [AuthenticationFilter] is deliberately NOT added here, so a delegated API credential
- * (PAK/PAT) or an OAuth token cannot authenticate `/oauth2/authorize` and self-escalate into a broader token.
+ * Tolgee's [AuthenticationFilter] is deliberately NOT added here, so a delegated API credential (PAK/PAT) or an OAuth
+ * token cannot authenticate `/oauth2/authorize` and self-escalate into a broader token — the principal is established
+ * only by the session bootstrap from a full webapp login.
  */
 @Configuration
 class OAuth2AuthorizationServerConfig(
@@ -54,6 +54,7 @@ class OAuth2AuthorizationServerConfig(
     exceptionHandlerFilter: ExceptionHandlerFilter,
     globalIpRateLimitFilter: GlobalIpRateLimitFilter,
     globalUserRateLimitFilter: GlobalUserRateLimitFilter,
+    registeredClientRepository: RegisteredClientRepository,
   ): SecurityFilterChain {
     val authorizationServerConfigurer = OAuth2AuthorizationServerConfigurer()
     val endpointsMatcher = authorizationServerConfigurer.endpointsMatcher
@@ -61,6 +62,10 @@ class OAuth2AuthorizationServerConfig(
     http
       .securityMatcher(endpointsMatcher)
       .with(authorizationServerConfigurer) { configurer ->
+        configurer.clientAuthentication { clientAuth ->
+          clientAuth.authenticationConverter(PublicClientRefreshAuthenticationConverter())
+          clientAuth.authenticationProvider(PublicClientRefreshAuthenticationProvider(registeredClientRepository))
+        }
         configurer.authorizationEndpoint { it.consentPage(CONSENT_PAGE_URI) }
         configurer.authorizationServerMetadataEndpoint { metadata ->
           metadata.authorizationServerMetadataCustomizer { claims ->
@@ -71,8 +76,6 @@ class OAuth2AuthorizationServerConfig(
       .csrf { it.ignoringRequestMatchers(endpointsMatcher) }
       .cors(Customizer.withDefaults())
       .addFilterBefore(exceptionHandlerFilter, UsernamePasswordAuthenticationFilter::class.java)
-      // The global rate limiters are wired per-chain (registered disabled, added explicitly); this chain needs them
-      // too so the token/authorize endpoints are throttled like the rest of the API.
       .addFilterBefore(globalUserRateLimitFilter, UsernamePasswordAuthenticationFilter::class.java)
       .addFilterBefore(globalIpRateLimitFilter, UsernamePasswordAuthenticationFilter::class.java)
       .exceptionHandling {
