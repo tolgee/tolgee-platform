@@ -288,6 +288,11 @@ export class LINKS {
 
   static ORGANIZATION_APPS = Link.ofParent(LINKS.ORGANIZATION, 'apps');
 
+  static ORGANIZATION_APPS_OWNED = Link.ofParent(
+    LINKS.ORGANIZATION_APPS,
+    'owned'
+  );
+
   static ORGANIZATION_APPS_SLACK_OAUTH_SUCCESS = Link.ofParent(
     LINKS.ORGANIZATION_APPS,
     'slack-oauth2-success'
