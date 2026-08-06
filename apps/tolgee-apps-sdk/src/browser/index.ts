@@ -7,3 +7,4 @@ export type {
   TolgeeAppContext,
   TolgeeAppTheme,
 } from '../shared/contextTypes'
+export type { TolgeeApiSchemas } from '../shared/apiTypes'

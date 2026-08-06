@@ -13,3 +13,4 @@ export type {
   AppManifest,
   AppModules,
 } from './shared/manifestTypes'
+export type { TolgeeApiSchemas } from './shared/apiTypes'

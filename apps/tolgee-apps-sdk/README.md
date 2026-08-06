@@ -241,8 +241,55 @@ The access token is **short-lived**: don't cache it past `expiresIn` — re-fetc
 when it expires (or on a `401`). The **client secret must only ever be sent to
 this endpoint** — never to the browser, and never as a bearer token on API calls.
 
+`createTolgeeAppServerClient({ tolgeeUrl, accessToken })` wraps that token in the
+same typed REST client the iframe gets, so a backend never hand-writes response
+shapes:
+
+```ts
+const tolgee = createTolgeeAppServerClient({ tolgeeUrl, accessToken })
+const { data, error } = await tolgee.GET('/v2/projects/{projectId}/activity', {
+  params: { path: { projectId }, query: { size: 20 } },
+})
+```
+
 Inside an iframe you don't need this at all: the install token from
 `TolgeeAppContext` already authenticates calls as the install + user.
+
+### 3. `fetchAppInstallations` — what am I installed for?
+
+An app backend with no iframe and no user has no idea which projects it may
+touch: an org admin makes the app available, a project owner enables it, and
+either can undo that at any time. `fetchAppInstallations()` asks Tolgee, using
+the same credentials as `fetchAppAccessToken()`:
+
+```ts
+import { fetchAppInstallations } from '@tolgee/apps-sdk/server'
+
+for (const install of await fetchAppInstallations()) {
+  for (const project of install.enabledProjects) {
+    console.log(`${project.organization.slug}/${project.name} (#${project.id})`)
+  }
+}
+```
+
+Each `AppInstallation` carries `id`, `appId`, `name`, `version`, `native`
+(true when the install belongs to no organization), the `scopes` granted at
+consent time, and `enabledProjects` — each with its owning `organization`
+(`id`, `name`, `slug`), so a multi-tenant app can partition its work.
+
+`enabledProjects` is the app's authoritative list of what it may act on, and it
+changes without the app being told: **re-read it periodically** rather than
+caching it for the process lifetime. This alpha has no push channel, so polling
+is the only option.
+
+Pass `{ accessToken }` to reuse a token you already hold instead of exchanging
+the credentials again.
+
+Only an **install-context** token (the one the client-credentials grant issues)
+reaches this endpoint. The user-context token an iframe receives is refused: it
+acts for one signed-in user, who need not be a member of every project the
+install is enabled for — and the iframe is already told its project and
+organization in the init payload.
 
 ### Reading the context token
 
@@ -302,7 +349,10 @@ npm run test --workspace @tolgee/apps-sdk
 ## API reference
 
 **`@tolgee/apps-sdk`** — `AppManifest`, `AppModules`, `AppDashboardPage`,
-`TolgeeAppContext`, `TolgeeAppTheme`, `AppContextClaims`.
+`TolgeeAppContext`, `TolgeeAppTheme`, `AppContextClaims`, `TolgeeApiSchemas`
+(Tolgee's generated response shapes, e.g.
+`TolgeeApiSchemas['ProjectActivityModel']`; re-exported from all three entry
+points).
 
 **`@tolgee/apps-sdk/browser`** — `createTolgeeApp(options?)`, `TolgeeApp`
 (`context`, `onThemeChanged`, `resize`, `dispose`), `TolgeeAppOptions`,
@@ -310,5 +360,7 @@ npm run test --workspace @tolgee/apps-sdk
 
 **`@tolgee/apps-sdk/server`** — `renderManifest()`, `tolgeeAppCorsHeaders()`,
 `decodeContextToken()`, `loadTolgeeAppConfig()`, `selfRegisterApp()`,
-`fetchAppAccessToken()`, `appInstallStatePath()`, `readStoredAppInstall()`,
-`saveAppInstall()`.
+`fetchAppAccessToken()`, `createTolgeeAppServerClient()`,
+`fetchAppInstallations()` (`AppInstallation`,
+`AppEnabledProject`, `AppInstallationOrganization`, `AppInstallationsInput`),
+`appInstallStatePath()`, `readStoredAppInstall()`, `saveAppInstall()`.

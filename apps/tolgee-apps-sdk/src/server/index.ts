@@ -17,6 +17,18 @@ export { selfRegisterApp } from './selfRegisterApp'
 export type { SelfRegisterInput, SelfRegisterResult } from './selfRegisterApp'
 export { fetchAppAccessToken } from './fetchAppAccessToken'
 export type { AppAccessToken, AppAccessTokenInput } from './fetchAppAccessToken'
+export { createTolgeeAppServerClient } from './client'
+export type {
+  TolgeeAppServerClient,
+  TolgeeAppServerClientInput,
+} from './client'
+export { fetchAppInstallations } from './fetchAppInstallations'
+export type {
+  AppEnabledProject,
+  AppInstallation,
+  AppInstallationOrganization,
+  AppInstallationsInput,
+} from './fetchAppInstallations'
 export type {
   AppContextClaims,
   TolgeeAppContext,
@@ -27,3 +39,4 @@ export type {
   AppManifest,
   AppModules,
 } from '../shared/manifestTypes'
+export type { TolgeeApiSchemas } from '../shared/apiTypes'
