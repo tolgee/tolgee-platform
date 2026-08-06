@@ -4,9 +4,11 @@ import io.tolgee.component.KeyGenerator
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.AppNotRegisteredException
 import io.tolgee.exceptions.BadRequestException
+import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Organization
 import io.tolgee.model.UserAccount
 import io.tolgee.model.apps.App
+import io.tolgee.repository.apps.AppInstallRepository
 import io.tolgee.repository.apps.AppRepository
 import jakarta.persistence.EntityManager
 import org.springframework.dao.DataIntegrityViolationException
@@ -16,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class AppService(
   private val appRepository: AppRepository,
+  private val appInstallRepository: AppInstallRepository,
   private val appSecretService: AppSecretService,
   private val keyGenerator: KeyGenerator,
   private val entityManager: EntityManager,
@@ -47,6 +50,41 @@ class AppService(
   @Transactional(readOnly = true)
   fun requireRegistered(appId: String): App {
     return appRepository.findByAppId(appId) ?: throw AppNotRegisteredException(appId)
+  }
+
+  @Transactional(readOnly = true)
+  fun get(appEntityId: Long): App {
+    return appRepository.findById(appEntityId).orElseThrow { NotFoundException(Message.APP_NOT_FOUND) }
+  }
+
+  /**
+   * The app, provided [organizationId] owns it. An organization that merely installed somebody
+   * else's app must not reach it here — administering an app is the owner's alone.
+   */
+  @Transactional(readOnly = true)
+  fun getOwned(
+    organizationId: Long,
+    appEntityId: Long,
+  ): App {
+    return appRepository.findByIdAndOrganizationId(appEntityId, organizationId)
+      ?: throw NotFoundException(Message.APP_NOT_FOUND)
+  }
+
+  @Transactional(readOnly = true)
+  fun listOwned(organizationId: Long): List<App> {
+    return appRepository.findAllByOrganizationIdOrderByNameAsc(organizationId)
+  }
+
+  /** How many organizations currently have the app installed. */
+  @Transactional(readOnly = true)
+  fun countInstalls(appEntityId: Long): Long {
+    return appInstallRepository.countByRegisteredAppId(appEntityId)
+  }
+
+  /** Resolves an app by its app-level `client_id`. The caller must still verify the secret. */
+  @Transactional(readOnly = true)
+  fun resolveByClientId(clientId: String): App? {
+    return appRepository.findByClientId(clientId)
   }
 
   /**
@@ -107,6 +145,21 @@ class AppService(
     app.webhookSecret?.let { return it }
     val minted = keyGenerator.generate(256)
     app.webhookSecret = minted
+    appRepository.save(app)
+    return minted
+  }
+
+  /**
+   * The app's app-level client id, minting one if the app was backfilled from an install that
+   * predates the app layer. Issuing a secret is what first gives such an app a usable app-level
+   * credential pair, so the id has to exist by then.
+   */
+  @Transactional
+  fun resolveClientId(appEntityId: Long): String {
+    val app = appRepository.getReferenceById(appEntityId)
+    app.clientId?.let { return it }
+    val minted = APP_CLIENT_ID_PREFIX + keyGenerator.generate(128)
+    app.clientId = minted
     appRepository.save(app)
     return minted
   }
