@@ -7,6 +7,15 @@ import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 
+/**
+ * Logs, once at startup, how much of the database connection pool the async machinery has reserved.
+ *
+ * Pool sizes are derived rather than configured on most instances, so without this an operator has
+ * no way to see what their instance actually chose. It also warns when the streaming, background and
+ * batch pools together leave too little of the connection pool for ordinary requests — a streaming
+ * response holds its connection for as long as the stream lasts, so oversizing them starves normal
+ * traffic rather than just slowing streams down.
+ */
 @Component
 class AsyncCapacityReporter(
   private val asyncExecutorFactory: AsyncExecutorFactory,

@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
 import java.nio.file.Files
+import java.nio.file.Path
 
 @Suppress("SpringJavaInjectionPointsAutowiringInspection", "MVCPathVariableInspection")
 @RestController
@@ -57,9 +58,7 @@ class ProjectExportImportController(
   ): ResponseEntity<StreamingResponseBody> {
     val export = projectExportImportExporter.exportToTempFile(projectId, versionProvider.version)
     val tempFile = export.path
-    // A saturated streaming pool rejects the body after this method returns, so the delete below
-    // never runs; this is the backstop, at JVM exit.
-    tempFile.toFile().deleteOnExit()
+    deleteAtJvmExitIfTheStreamNeverRuns(tempFile)
     try {
       val body =
         streamingResponseBodyProvider.createStreamingResponseBody(StreamType.EXPORT_PROJECT) { outputStream ->
@@ -108,6 +107,10 @@ class ProjectExportImportController(
         ignoreVersion = ignoreVersion,
       )
     }
+  }
+
+  private fun deleteAtJvmExitIfTheStreamNeverRuns(tempFile: Path) {
+    tempFile.toFile().deleteOnExit()
   }
 
   private fun zipHeaders(projectName: String): HttpHeaders {
