@@ -1,12 +1,25 @@
 import assert from 'node:assert/strict'
-import { mkdtempSync, readFileSync, rmSync, statSync } from 'node:fs'
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, it } from 'node:test'
 import { loadTolgeeAppConfig } from './config'
 import {
   appInstallStatePath,
+  forgetAppInstall,
+  hasStoredCredentials,
+  readStoredApp,
   readStoredAppInstall,
+  readStoredAppInstallById,
+  readStoredAppInstalls,
+  saveApp,
   saveAppInstall,
 } from './installStore'
 import { selfRegisterApp } from './selfRegisterApp'
@@ -109,6 +122,145 @@ describe('installStore', () => {
     rmSync(path)
 
     assert.equal(readStoredAppInstall(TOLGEE_URL, { stateDir }), null)
+  })
+
+  it('keeps the two credential layers apart', () => {
+    saveApp(
+      {
+        tolgeeUrl: TOLGEE_URL,
+        appId: 'my-company.glossary',
+        clientId: 'tgpub_app',
+        clientSecret: 'tgpubs_app',
+        webhookSecret: 'signing-secret',
+      },
+      { stateDir }
+    )
+    saveAppInstall(
+      {
+        tolgeeUrl: TOLGEE_URL,
+        installId: 7,
+        clientId: 'tgapp_install',
+        clientSecret: 'tgapps_install',
+      },
+      { stateDir }
+    )
+
+    assert.equal(readStoredApp(TOLGEE_URL, { stateDir })?.clientId, 'tgpub_app')
+    assert.equal(
+      readStoredAppInstall(TOLGEE_URL, { stateDir })?.clientId,
+      'tgapp_install'
+    )
+  })
+
+  it('keeps the app-level secret when a later write carries none', () => {
+    saveApp(
+      {
+        tolgeeUrl: TOLGEE_URL,
+        clientId: 'tgpub_app',
+        clientSecret: 'tgpubs_app',
+        webhookSecret: 'signing-secret',
+      },
+      { stateDir }
+    )
+    saveApp({ tolgeeUrl: TOLGEE_URL, appId: 'named-later' }, { stateDir })
+
+    const app = readStoredApp(TOLGEE_URL, { stateDir })
+    assert.equal(app?.clientSecret, 'tgpubs_app')
+    assert.equal(app?.webhookSecret, 'signing-secret')
+    assert.equal(app?.appId, 'named-later')
+  })
+
+  it('holds one install per organization and resolves the current one', () => {
+    saveAppInstall(
+      { tolgeeUrl: TOLGEE_URL, installId: 7, clientSecret: 'mine' },
+      { stateDir }
+    )
+    saveAppInstall(
+      {
+        tolgeeUrl: TOLGEE_URL,
+        installId: 9,
+        clientSecret: 'theirs',
+        organizationSlug: 'globex',
+        makeCurrent: false,
+      },
+      { stateDir }
+    )
+
+    assert.equal(readStoredAppInstalls(TOLGEE_URL, { stateDir }).length, 2)
+    assert.equal(readStoredAppInstall(TOLGEE_URL, { stateDir })?.installId, 7)
+    assert.equal(
+      readStoredAppInstallById(TOLGEE_URL, 9, { stateDir })?.organizationSlug,
+      'globex'
+    )
+
+    assert.equal(forgetAppInstall(TOLGEE_URL, 9, { stateDir }), true)
+    assert.equal(forgetAppInstall(TOLGEE_URL, 9, { stateDir }), false)
+    assert.equal(readStoredAppInstalls(TOLGEE_URL, { stateDir }).length, 1)
+  })
+
+  it('reports whether anything credential-bearing is held', () => {
+    assert.equal(hasStoredCredentials(TOLGEE_URL, { stateDir }), false)
+
+    saveAppInstall({ tolgeeUrl: TOLGEE_URL, installId: 7 }, { stateDir })
+    assert.equal(hasStoredCredentials(TOLGEE_URL, { stateDir }), false)
+
+    saveAppInstall(
+      { tolgeeUrl: TOLGEE_URL, installId: 7, clientSecret: 'tgapps_x' },
+      { stateDir }
+    )
+    assert.equal(hasStoredCredentials(TOLGEE_URL, { stateDir }), true)
+  })
+
+  /**
+   * Apps in the wild already run on the one-install-per-URL file, and the
+   * secret in it exists nowhere else — reading it forward is the only way not
+   * to strand them.
+   */
+  it('migrates a state file written before the app layer existed', () => {
+    const path = appInstallStatePath({ stateDir })
+    mkdirSync(stateDir, { recursive: true })
+    writeFileSync(
+      path,
+      JSON.stringify({
+        version: 1,
+        installs: {
+          [TOLGEE_URL]: {
+            tolgeeUrl: TOLGEE_URL,
+            installId: 12,
+            clientId: 'tgapp_legacy',
+            clientSecret: 'tgapps_legacy',
+            native: true,
+            organizationSlug: null,
+            secretIssuedAt: '2026-01-01T00:00:00.000Z',
+            updatedAt: '2026-01-01T00:00:00.000Z',
+          },
+        },
+      }),
+      { mode: 0o600 }
+    )
+
+    const migrated = readStoredAppInstall(TOLGEE_URL, { stateDir })
+    assert.equal(migrated?.installId, 12)
+    assert.equal(migrated?.clientSecret, 'tgapps_legacy')
+    assert.equal(migrated?.native, true)
+    assert.equal(migrated?.secretIssuedAt, '2026-01-01T00:00:00.000Z')
+    assert.equal(hasStoredCredentials(TOLGEE_URL, { stateDir }), true)
+    assert.equal(readStoredApp(TOLGEE_URL, { stateDir }), null)
+
+    saveApp(
+      { tolgeeUrl: TOLGEE_URL, webhookSecret: 'signing-secret' },
+      { stateDir }
+    )
+    const rewritten = JSON.parse(readFileSync(path, 'utf8'))
+    assert.equal(rewritten.version, 2)
+    assert.equal(
+      rewritten.instances[TOLGEE_URL].installs['12'].clientSecret,
+      'tgapps_legacy'
+    )
+    assert.equal(
+      readStoredApp(TOLGEE_URL, { stateDir })?.webhookSecret,
+      'signing-secret'
+    )
   })
 })
 
