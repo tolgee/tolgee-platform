@@ -1,0 +1,115 @@
+/**
+ * Copyright (C) 2026 Tolgee s.r.o. and contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package io.tolgee.security.oauth2
+
+import io.tolgee.AbstractSpringTest
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.jdbc.core.JdbcTemplate
+
+/**
+ * `principal_name` scoping is the only thing keeping one user from listing or revoking another user's OAuth grants, so
+ * cross-user isolation of findAuthorizedClients (info leak) and revoke (irreversible cross-tenant deletion) is asserted.
+ */
+class OAuth2AuthorizationQueryServiceTest : AbstractSpringTest() {
+  @Autowired
+  private lateinit var jdbcTemplate: JdbcTemplate
+
+  @Autowired
+  private lateinit var queryService: OAuth2AuthorizationQueryService
+
+  private val userA = "1001"
+  private val userB = "1002"
+
+  @AfterEach
+  fun cleanup() {
+    jdbcTemplate.update("DELETE FROM oauth2_authorization WHERE principal_name IN (?, ?)", userA, userB)
+    jdbcTemplate.update("DELETE FROM oauth2_authorization_consent WHERE principal_name IN (?, ?)", userA, userB)
+  }
+
+  @Test
+  fun `findAuthorizedClients returns only the requesting user's grants`() {
+    insertGrant("a-shared", "shared-client", userA)
+    insertGrant("a-only", "only-a-client", userA)
+    insertGrant("b-shared", "shared-client", userB)
+
+    val forB = queryService.findAuthorizedClients(userB).map { it.registeredClientId }
+    assertThat(forB).contains("shared-client").doesNotContain("only-a-client")
+  }
+
+  @Test
+  fun `revoke deletes only the requesting user's rows for the client, not another user's`() {
+    insertGrant("a-shared", "shared-client", userA)
+    insertGrant("b-shared", "shared-client", userB)
+    insertConsent("shared-client", userA)
+    insertConsent("shared-client", userB)
+
+    queryService.revoke("shared-client", userA)
+
+    assertThat(authorizationExists("a-shared")).isFalse()
+    assertThat(authorizationExists("b-shared")).isTrue()
+    assertThat(consentExists("shared-client", userA)).isFalse()
+    assertThat(consentExists("shared-client", userB)).isTrue()
+  }
+
+  private fun insertGrant(
+    id: String,
+    clientId: String,
+    principalName: String,
+  ) {
+    jdbcTemplate.update(
+      """
+      INSERT INTO oauth2_authorization
+        (id, registered_client_id, principal_name, authorization_grant_type, access_token_value)
+      VALUES (?, ?, ?, 'authorization_code', 'token')
+      """.trimIndent(),
+      id,
+      clientId,
+      principalName,
+    )
+  }
+
+  private fun insertConsent(
+    clientId: String,
+    principalName: String,
+  ) {
+    jdbcTemplate.update(
+      "INSERT INTO oauth2_authorization_consent (registered_client_id, principal_name, authorities) VALUES (?, ?, 'x')",
+      clientId,
+      principalName,
+    )
+  }
+
+  private fun authorizationExists(id: String): Boolean =
+    (jdbcTemplate.queryForObject("SELECT COUNT(*) FROM oauth2_authorization WHERE id = ?", Int::class.java, id) ?: 0) >
+      0
+
+  private fun consentExists(
+    clientId: String,
+    principalName: String,
+  ): Boolean =
+    (
+      jdbcTemplate.queryForObject(
+        "SELECT COUNT(*) FROM oauth2_authorization_consent WHERE registered_client_id = ? AND principal_name = ?",
+        Int::class.java,
+        clientId,
+        principalName,
+      ) ?: 0
+    ) > 0
+}
