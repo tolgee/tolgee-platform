@@ -5876,4 +5876,5 @@
             END $$;
         </sql>
     </changeSet>
+    <include file="db/changelog/oauth2/oauth2-server.xml"/>
 </databaseChangeLog>
