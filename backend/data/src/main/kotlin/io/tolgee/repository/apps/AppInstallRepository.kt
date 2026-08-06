@@ -33,6 +33,14 @@ interface AppInstallRepository : JpaRepository<AppInstall, Long> {
 
   fun findByClientId(clientId: String): AppInstall?
 
+  /**
+   * The app is fetched eagerly because app-token authentication reads its token cutoff from the
+   * servlet filter, outside any session — a lazy proxy there fails the request instead of
+   * authenticating it.
+   */
+  @Query("select i from AppInstall i join fetch i.app where i.id = :id")
+  fun findWithAppById(id: Long): AppInstall?
+
   @Query("select count(i) from AppInstall i where i.app.id = :appId")
   fun countByRegisteredAppId(appId: Long): Long
 

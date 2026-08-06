@@ -76,6 +76,17 @@ class App : StandardAuditModel() {
   @OneToMany(mappedBy = "app", fetch = FetchType.LAZY)
   var secrets: MutableList<AppSecret> = mutableListOf()
 
+  /**
+   * Access tokens issued before this moment no longer validate. Set whenever one of the app's
+   * secrets is revoked, which is what makes revocation take effect immediately instead of after the
+   * tokens minted from that secret expire on their own.
+   *
+   * Deliberately app-wide rather than per-secret: revoking is only correct once the app already
+   * holds a replacement, so the only tokens this destroys are ones the app re-mints straight away.
+   */
+  @Column(name = "tokens_invalid_before")
+  var tokensInvalidBefore: Date? = null
+
   @Column(name = "manifest_last_checked_at")
   var manifestLastCheckedAt: Date? = null
 

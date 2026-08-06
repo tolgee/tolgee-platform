@@ -58,6 +58,10 @@ class AppSecretService(
   }
 
   /**
+   * Revoking also stamps [App.tokensInvalidBefore], so every access token already minted from any of
+   * the app's secrets stops validating at once. Without it a leaked secret would keep buying access
+   * for as long as the tokens it minted live, which is the whole window revocation exists to close.
+   *
    * @param allowRevokingLast false refuses to revoke the app's only live secret. False for the
    *   app-initiated path, matching [AppInstallSecretService.revoke]: an app authenticates with a
    *   secret, so revoking its last one would lock it out of the endpoint that issues a replacement.
@@ -79,7 +83,13 @@ class AppSecretService(
       throw BadRequestException(Message.APP_CANNOT_REVOKE_LAST_SECRET)
     }
 
-    secret.revokedAt = currentDateProvider.date
+    val now = currentDateProvider.date
+    secret.revokedAt = now
+    // Truncated to the second because a JWT's `iat` is expressed in whole seconds: against an
+    // untruncated cutoff, the token the app mints to recover from this very revocation would be
+    // rejected whenever it lands in the same second. The cost is that a token issued earlier in
+    // that same second survives.
+    secret.app.tokensInvalidBefore = Date(now.time / 1000L * 1000L)
     return appSecretRepository.save(secret)
   }
 

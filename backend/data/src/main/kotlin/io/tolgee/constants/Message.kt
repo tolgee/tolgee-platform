@@ -381,6 +381,7 @@ enum class Message {
   APP_ALREADY_REGISTERED,
   APP_NOT_FOUND,
   APP_SECRET_NOT_FOUND,
+  APP_INSTALL_ID_REQUIRED,
   ;
 
   val code: String

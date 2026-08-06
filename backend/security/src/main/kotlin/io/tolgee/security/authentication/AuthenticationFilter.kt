@@ -23,6 +23,7 @@ import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.AuthExpiredException
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.exceptions.PermissionException
+import io.tolgee.model.apps.AppInstall
 import io.tolgee.security.BILLING_API_KEY_PREFIX
 import io.tolgee.security.PAT_PREFIX
 import io.tolgee.security.ratelimit.RateLimitService
@@ -193,6 +194,8 @@ class AuthenticationFilter(
       appInstallService.findForAppAuth(claims.installId)
         ?: throw AuthenticationException(Message.INVALID_JWT_TOKEN)
 
+    assertNotRevokedByAppCutoff(install, claims)
+
     val user = resolveAppTokenUser(claims.userId!!, claims)
 
     return AppAuthentication(
@@ -214,6 +217,8 @@ class AuthenticationFilter(
       appInstallService.resolveForAppAuth(claims.installId)
         ?: throw AuthenticationException(Message.INVALID_JWT_TOKEN)
 
+    assertNotRevokedByAppCutoff(resolution.install, claims)
+
     return AppAuthentication(
       credentials = token,
       appInstall = resolution.install,
@@ -223,6 +228,21 @@ class AuthenticationFilter(
       isReadOnly = claims.isReadOnly,
       actingAsUserAccount = resolveActingAsUser(request),
     )
+  }
+
+  /**
+   * Revoking any of an app's secrets stamps [io.tolgee.model.apps.App.tokensInvalidBefore], and
+   * every token minted before that moment dies with it — including user-context ones, so a
+   * compromised app loses its dashboard sessions too and not merely its backend access.
+   */
+  private fun assertNotRevokedByAppCutoff(
+    install: AppInstall,
+    claims: AppTokenClaims,
+  ) {
+    val cutoff = install.app.tokensInvalidBefore ?: return
+    if (claims.issuedAt.before(cutoff)) {
+      throw AuthExpiredException(Message.EXPIRED_JWT_TOKEN)
+    }
   }
 
   private fun resolveAppTokenUser(

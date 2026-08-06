@@ -6531,4 +6531,9 @@
                                  referencedTableName="user_account"
                                  validate="true"/>
     </changeSet>
+    <changeSet author="jcizmar" id="1783771000000-55">
+        <addColumn tableName="app">
+            <column name="tokens_invalid_before" type="TIMESTAMP WITHOUT TIME ZONE"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

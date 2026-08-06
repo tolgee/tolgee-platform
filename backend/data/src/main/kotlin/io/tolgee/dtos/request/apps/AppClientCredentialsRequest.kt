@@ -17,4 +17,10 @@ data class AppClientCredentialsRequest(
   @JsonProperty("client_secret")
   @field:NotBlank
   val clientSecret: String = "",
+  /**
+   * Which installation the token should act as. Required when the credentials are app-level, which
+   * identify an app installed by many organizations and so cannot imply one on their own.
+   */
+  @JsonProperty("install_id")
+  val installId: Long? = null,
 )

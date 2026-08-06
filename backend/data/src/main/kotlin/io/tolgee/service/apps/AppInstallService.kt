@@ -368,7 +368,7 @@ class AppInstallService(
    */
   @Transactional(readOnly = true)
   fun findForAppAuth(installId: Long): AppInstall? {
-    return appInstallRepository.findById(installId).orElse(null)
+    return appInstallRepository.findWithAppById(installId)
   }
 
   /**
@@ -384,7 +384,7 @@ class AppInstallService(
    */
   @Transactional(readOnly = true)
   fun resolveForAppAuth(installId: Long): AppAuthResolution? {
-    val install = appInstallRepository.findById(installId).orElse(null) ?: return null
+    val install = appInstallRepository.findWithAppById(installId) ?: return null
     return AppAuthResolution(install, UserAccountDto.fromEntity(install.principal))
   }
 
@@ -401,6 +401,22 @@ class AppInstallService(
   @Transactional(readOnly = true)
   fun resolveByClientId(clientId: String): AppInstall? {
     return appInstallRepository.findByClientId(clientId)
+  }
+
+  /**
+   * The app's own install [installId], for an app minting a token with its app-level credentials.
+   *
+   * Returns null both when no such install exists and when it belongs to a different app, so an
+   * authenticated app cannot use this to learn which install ids exist outside its own.
+   */
+  @Transactional(readOnly = true)
+  fun findOwnInstall(
+    appEntityId: Long,
+    installId: Long,
+  ): AppInstall? {
+    val install = appInstallRepository.findWithAppById(installId) ?: return null
+    if (install.app.id != appEntityId) return null
+    return install
   }
 
   /** @param organizationId null targets a native (server-level) install. */
