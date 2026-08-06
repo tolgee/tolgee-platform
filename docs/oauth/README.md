@@ -58,6 +58,13 @@ above is a plain browser navigation, which **can't** send that JWT. So when the 
 short-lived server session (a cookie), then continues to `/oauth2/authorize`. After that the standard
 flow above runs.
 
+This bootstrap session is the *only* stateful part of the otherwise-stateless app. To keep it working on
+multi-replica deployments (Tolgee Cloud, self-hosted HA) without requiring load-balancer session affinity,
+the HTTP session is backed by **Spring Session JDBC** over the existing Postgres (`spring.session.store-type:
+jdbc`; schema in `db/changelog/spring-session`). The bootstrapped `SecurityContext` is therefore visible on
+any replica, so the bootstrap → authorize → consent requests can land on different replicas. No shared Redis
+and no ingress stickiness are needed.
+
 ## 3. Reference — the jargon
 
 ### PKCE ("pixy", Proof Key for Code Exchange)
@@ -166,17 +173,112 @@ hands back a freshly-minted `client_id`.
 
 These are known gaps, deferred to the client rounds that first exercise them:
 
-- **Refresh is stock rotate-on-use.** `reuseRefreshTokens(false)` gives Spring's plain rotation with
-  no grace window and no reuse-detection family-revocation. A client that refreshes proactively can
-  hit `invalid_grant` on a near-simultaneous second refresh. When the first refreshing client lands
-  (browser extension / CLI), replace `OAuth2RefreshTokenAuthenticationProvider` with one that accepts
-  a just-superseded token within a short grace window and revokes the authorization family on replay
-  of an already-rotated token. (SAS also does not issue refresh tokens to public/`NONE`-auth clients
-  by default, so round-1 clients receive only short-lived access tokens.)
-- **Nightly cleanup does not prune abandoned pre-consent rows.** SAS persists an `oauth2_authorization`
-  row when consent is *required*, before any code/token is issued — its expiry columns are all NULL,
-  so the COALESCE-based `deleteExpiredBefore` never removes it. No round-1 client is consent-required
-  by default (the CLI client skips consent; the browser-extension client is only seeded when redirect
-  URIs are configured; CIMD is off), so no such rows are created today. When a consent-required client
-  is enabled, add a `created_at` column (DB default) to the SAS schema and extend the cleanup to also
-  delete all-NULL-expiry rows older than a short grace window.
+- **Refresh is stock rotate-on-use.** Public clients *do* get rotating refresh tokens — SAS withholds
+  them by default (both on the code grant and by refusing to authenticate a public client on the
+  refresh grant), so we add `PublicClientRefreshTokenGenerator` plus `PublicClientRefreshAuthentication`
+  (a converter + provider that authenticate a bare `client_id`, gated strictly to
+  `grant_type=refresh_token`). But `reuseRefreshTokens(false)` is plain rotation with no grace window
+  and no reuse-detection family-revocation, so a client that refreshes proactively can hit
+  `invalid_grant` on a near-simultaneous second refresh. Follow-up: replace
+  `OAuth2RefreshTokenAuthenticationProvider` with one that accepts a just-superseded token within a
+  short grace window and revokes the whole authorization family on replay of an already-rotated token.
+- **Disconnect kills the refresh token immediately, but access tokens live out their TTL.** Access
+  tokens are self-contained RS256 JWTs verified against the JWKS, so `DELETE /v2/user/connected-apps/{id}`
+  (which deletes the authorization + consent rows) stops all *future* tokens and kills the refresh token
+  at once, but an already-issued access token keeps working until it expires — up to
+  `tolgee.oauth2.access-token-validity-minutes` (default 30). This is standard stateless-JWT behaviour;
+  keep the access-token TTL short. The pitch's optional Redis revocation denylist (reject a token by
+  `jti` until its TTL passes) is the follow-up for immediate revocation and lands with the MCP round.
+- **Signing key rotation is a follow-up.** `OAuth2KeyConfig` persists a single active RSA key via
+  `FileStorage` (shared across replicas) and coordinates first-boot generation with `LockingProvider` so a
+  fresh multi-replica deployment converges on one `kid`. There is no overlap-rotation mechanism yet — a
+  two-key JWKS would need verify-only key selection (SAS's `JwtGenerator` sets no `kid`, so two RS256
+  signing candidates make `NimbusJwtEncoder` ambiguous). A rotation-with-overlap story (refreshable
+  `JWKSource` + verify-only previous key) is the follow-up. There is no compliance requirement for periodic
+  rotation, and the stable key has no user-facing impact (tokens keep validating; nobody is logged out).
+
+## Testing the browser extension locally (development)
+
+The browser OAuth flow assumes the Tolgee instance serves its SPA **and** its API/authorization-server
+on **one origin** (relative redirect, SPA-served `/oauth2/consent` + `/oauth2/bootstrap`, and a
+session-bootstrap cookie that must belong to the origin `/oauth2/authorize` runs on). Production is
+single-origin (the backend serves the built frontend), so nothing below is needed there — this is only
+to reproduce the flow against a local dev checkout, where the webapp (vite, `:3995`) and backend
+(`:8995`) are split.
+
+### 1. Single-origin dev server (vite proxy)
+
+`webapp/vite.config.ts` proxies the backend-owned paths (`/v2`, `/api`, `/oauth2/authorize`,
+`/oauth2/token`, `/oauth2/jwks`, `/.well-known`) to the backend, leaving `/oauth2/consent` and
+`/oauth2/bootstrap` as SPA routes:
+
+```ts
+// webapp/vite.config.ts — inside defineConfig(...).server
+proxy: Object.fromEntries(
+  ['/v2', '/api', '/oauth2/authorize', '/oauth2/token', '/oauth2/jwks', '/.well-known'].map((path) => [
+    path,
+    {
+      target: process.env.VITE_DEV_PROXY_TARGET || 'http://localhost:8080',
+      changeOrigin: false,
+    },
+  ])
+),
+```
+
+Point the app at the same origin and set the proxy target in `webapp/.env.development.local`:
+
+```bash
+VITE_APP_API_URL=                         # empty → app calls the API on its own origin (:3995)
+VITE_DEV_PROXY_TARGET=http://localhost:8995   # where the backend actually runs
+```
+
+Both are needed together: with `VITE_APP_API_URL` non-empty the app bypasses the proxy and the
+session-bootstrap cookie lands on the wrong origin. Restart vite after changing env (build-time vars).
+
+### 2. Trusted HTTPS (required by `launchWebAuthFlow`)
+
+`chrome.identity.launchWebAuthFlow` will not intercept the final `https://<id>.chromiumapp.org/`
+redirect when the flow runs over plain `http://` — it navigates to the (DNS-less) redirect host and
+fails with *"Authorization page could not be loaded."* A **trusted** cert is required (self-signed is
+rejected too). Use [`mkcert`](https://github.com/FiloSottile/mkcert):
+
+```bash
+brew install mkcert && mkcert -install     # installs a locally-trusted CA
+cd webapp && mkcert localhost              # → localhost.pem + localhost-key.pem
+```
+
+then enable HTTPS in `webapp/vite.config.ts` under `server`:
+
+```ts
+https: { cert: 'localhost.pem', key: 'localhost-key.pem' },
+```
+
+Now the extension's API url is `https://localhost:3995` and the whole flow is HTTPS end to end.
+
+### 3. Register the extension's redirect URI on the local backend
+
+Load the unpacked extension (`chrome://extensions` → Developer mode → Load unpacked → `dist-chrome`
+after `npm run build` in the chrome-plugin repo). In its **service worker** console run
+`chrome.identity.getRedirectURL()` and add that exact value (trailing slash included) to the local
+backend config, then restart the backend so `PreRegisteredClients` seeds the client:
+
+```yaml
+tolgee:
+  oauth2:
+    browser-extension-redirect-uris:
+      - https://<your-unpacked-extension-id>.chromiumapp.org/
+```
+
+An unpacked extension keeps its id as long as `dist-chrome` isn't moved. (Production/testing/preview
+already register the *published* extension's redirect in the deployment repo, so this step is
+dev-only.)
+
+### 4. Connect
+
+Log into the webapp at `https://localhost:3995` (so the webapp JWT is in `localStorage` — the bootstrap
+step reads it), open the extension popup, set **API url** to `https://localhost:3995`, and click
+**Connect with Tolgee** → bootstrap → consent → Allow → "Connected". The access token is injected into
+the page as `__tolgee_authToken`; the refresh token stays in the service worker.
+
+To re-show the consent screen after a first approval (Spring remembers consent per client+user), revoke
+the grant: `DELETE /v2/user/connected-apps/tolgee-browser-extension` with your JWT.
