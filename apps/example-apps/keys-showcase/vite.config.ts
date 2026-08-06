@@ -20,8 +20,14 @@ export default defineConfig(({ mode }) => {
     define: {
       // Baked in so the iframe can reject a `tolgee-app:init` — which carries an
       // API token — from any origin other than the Tolgee this app was built for.
+      //
+      // The iframe's parent is Tolgee's *web app*, which in development is a
+      // different origin from the API (3718 vs 8718) even though production
+      // usually serves both from one host. Both are pinned so either layout works.
       'import.meta.env.VITE_TOLGEE_ORIGIN': JSON.stringify(
-        originOf(env.TOLGEE_URL)
+        [originOf(env.TOLGEE_FRONTEND_URL), originOf(env.TOLGEE_URL)]
+          .filter(Boolean)
+          .join(',')
       ),
     },
     server: {

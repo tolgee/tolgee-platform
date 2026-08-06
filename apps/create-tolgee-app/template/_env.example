@@ -6,6 +6,12 @@
 # only — so rebuild after changing it.
 TOLGEE_URL={{tolgeeUrl}}
 
+# Origin of Tolgee's web app — the page that frames this app. Production usually
+# serves the web app and the API from one host, but a dev setup does not: the web
+# app is on 3718 while the API is on 8718. Both origins are baked into the bundle,
+# so set this whenever they differ or the iframe handshake is refused.
+# TOLGEE_FRONTEND_URL=http://localhost:3718
+
 # Ports the dev servers bind to. Vite serves the iframe, Express serves
 # /manifest.json. Change both when running two apps side by side.
 VITE_PORT={{vitePort}}

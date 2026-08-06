@@ -177,9 +177,12 @@ const parseInit = (m: InitMessage): TolgeeAppContext => ({
 
 const toOrigins = (value: string | string[] | undefined): string[] | null => {
   if (value === undefined) return null
-  const raw = (Array.isArray(value) ? value : [value]).filter(
-    (v) => v.length > 0
-  )
+  // A comma-separated string is accepted because this usually arrives from an
+  // environment variable, and Tolgee's web app and API are separate origins
+  // unless one host serves both.
+  const raw = (Array.isArray(value) ? value : value.split(','))
+    .map((v) => v.trim())
+    .filter((v) => v.length > 0)
   if (raw.length === 0) return null
   return raw.map((v) => {
     try {
