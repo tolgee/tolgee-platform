@@ -66,8 +66,8 @@ export const PUBLISHED_SDK_VERSION = '0.0.1-alpha.8'
  * `PUBLISHED_SDK_VERSION` to npm, and keep the two in lockstep afterwards.
  *
  * While it is `false`, `resolveSdk` refuses to scaffold against the registry:
- * every version published so far predates `selfRegisterApp` and
- * `applyTolgeeTheme`, which the template imports, so the generated app would
+ * every version published so far predates `selfRegisterApp`, `applyTolgeeTheme`
+ * and `mountTolgeeLifecycle`, which the template imports, so the generated app would
  * fail to typecheck with a wall of missing-export errors instead of one
  * sentence naming the cause.
  */

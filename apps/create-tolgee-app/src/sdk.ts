@@ -131,7 +131,8 @@ export const isWorkspaceTarget = (
 const noPublishedSdkError = (mode: SdkMode): Error =>
   new Error(
     `No published ${SDK_PACKAGE_NAME} supports this generator yet: every release on npm ` +
-      `predates selfRegisterApp and applyTolgeeTheme, which the generated app imports, so ` +
+      `predates selfRegisterApp, applyTolgeeTheme and mountTolgeeLifecycle, which the ` +
+      `generated app imports, so ` +
       `the scaffolded project would not typecheck.\n` +
       `Run the generator from a Tolgee checkout instead — it then builds against the SDK ` +
       `sources next to it` +

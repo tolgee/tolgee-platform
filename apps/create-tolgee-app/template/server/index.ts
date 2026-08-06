@@ -3,11 +3,17 @@ import { config } from './config'
 import { cors } from './cors'
 import { resolveDevUrls, tunnelNeeded } from './devTunnel'
 import { selfRegisterIfConfigured } from './register'
+import { registerLifecycleRoute } from './routes/lifecycle'
 import { registerManifestRoute } from './routes/manifest'
 
 const app = express()
 
 app.use(cors)
+
+// Before the JSON parser: lifecycle deliveries are verified against the exact
+// bytes Tolgee signed, which a parser would consume.
+registerLifecycleRoute(app)
+
 app.use(express.json())
 
 registerManifestRoute(app)

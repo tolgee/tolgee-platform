@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 import express from 'express'
 import {
   ensureAppCredentialsFresh,
+  mountTolgeeLifecycle,
   renderManifest,
   selfRegisterApp,
   tolgeeAppCorsHeaders,
@@ -12,6 +13,7 @@ import { startActivityWorker } from './activityWorker'
 import { applyUrlOverrides, config, currentUrls, workerConfig } from './config'
 import { resolveDevUrls, tunnelNeeded } from './devTunnel'
 import { handleFeedRequest } from './feedRoute'
+import { forgetTolgeeClient } from './tolgeeAccess'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const manifestTemplate = readFileSync(
@@ -41,6 +43,47 @@ app.get('/api/feed', (req, res) => {
       console.error('[server] /api/feed failed', error)
       res.status(502).json({ error: 'Could not reach Tolgee.' })
     })
+})
+
+/**
+ * The one call that receives everything Tolgee pushes about this app: the
+ * app-level credentials at registration, the per-install credentials whenever
+ * an organization installs it, and every later rotation. The SDK verifies each
+ * delivery against the app's webhook secret and stores what it carries.
+ */
+mountTolgeeLifecycle(app, {
+  tolgeeUrl: config.tolgeeUrl,
+  on: {
+    registered: (event) => {
+      console.log(
+        `Lifecycle: Tolgee registered this app as "${event.app?.appId ?? 'unknown'}" — ` +
+          'its app-level credentials are stored (never printed).'
+      )
+    },
+    installed: (event) => {
+      console.log(
+        `Lifecycle: installed by ${event.organization?.slug ?? 'no organization'} ` +
+          `(install ${event.install?.installId}) — credentials stored.`
+      )
+    },
+    uninstalled: (event) => {
+      console.log(
+        `Lifecycle: uninstalled (install ${event.install?.installId ?? 'all'}) — ` +
+          'the stored credentials were dropped.'
+      )
+    },
+    secretRotated: (event) => {
+      // The cached client holds a token minted from the previous secret.
+      forgetTolgeeClient()
+      console.log(
+        `Lifecycle: Tolgee rotated the ${event.rotatedLayer ?? 'app'}-level secret — ` +
+          'the worker re-authenticates with the new one.'
+      )
+    },
+  },
+  onRejected: (rejected) => {
+    console.warn(`Lifecycle: refused a delivery — ${rejected.message}`)
+  },
 })
 
 const connect = async (manifestUrl: string): Promise<void> => {

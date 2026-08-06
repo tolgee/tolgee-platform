@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 import express from 'express'
 import {
   ensureAppCredentialsFresh,
+  mountTolgeeLifecycle,
   renderManifest,
   selfRegisterApp,
   tolgeeAppCorsHeaders,
@@ -30,6 +31,46 @@ app.get('/manifest.json', (_req, res) => {
   res
     .type('application/json')
     .send(renderManifest(manifestTemplate, currentUrls().baseUrl))
+})
+
+/**
+ * The one call that receives everything Tolgee pushes about this app: the
+ * app-level credentials at registration, the per-install credentials whenever
+ * an organization installs it, and every later rotation. The SDK verifies each
+ * delivery against the app's webhook secret and stores what it carries, so
+ * nothing here handles a secret — these listeners only narrate.
+ */
+mountTolgeeLifecycle(app, {
+  tolgeeUrl: config.tolgeeUrl,
+  on: {
+    registered: (event) => {
+      console.log(
+        `Lifecycle: Tolgee registered this app as "${event.app?.appId ?? 'unknown'}" — ` +
+          'its app-level credentials are stored (never printed).'
+      )
+    },
+    installed: (event) => {
+      console.log(
+        `Lifecycle: installed by ${event.organization?.slug ?? 'no organization'} ` +
+          `(install ${event.install?.installId}) — credentials stored.`
+      )
+    },
+    uninstalled: (event) => {
+      console.log(
+        `Lifecycle: uninstalled (install ${event.install?.installId ?? 'all'}) — ` +
+          'the stored credentials were dropped.'
+      )
+    },
+    secretRotated: (event) => {
+      console.log(
+        `Lifecycle: Tolgee rotated the ${event.rotatedLayer ?? 'app'}-level secret — ` +
+          'the new one is stored and in use from the next call.'
+      )
+    },
+  },
+  onRejected: (rejected) => {
+    console.warn(`Lifecycle: refused a delivery — ${rejected.message}`)
+  },
 })
 
 const connect = async (manifestUrl: string): Promise<void> => {
