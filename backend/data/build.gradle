@@ -183,6 +183,7 @@ dependencies {
     implementation libs.jjwtApi
     implementation libs.jjwtImpl
     implementation libs.jjwtJackson
+    api libs.springSecurityOauth2AuthServer
     implementation libs.jacksonModuleKotlin
     implementation 'net.datafaker:datafaker:2.4.4'
     implementation 'jaxen:jaxen:1.2.0'
