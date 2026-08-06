@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useField } from 'formik';
 import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
 import { ProjectProfileAvatar } from './ProjectProfileAvatar';
 import { BaseLanguageSelect } from 'tg.views/projects/project/components/BaseLanguageSelect';
@@ -7,7 +8,11 @@ import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { messageService } from 'tg.service/MessageService';
-import { Validation } from 'tg.constants/GlobalValidationSchema';
+import {
+  PROJECT_DESCRIPTION_MAX_LENGTH,
+  Validation,
+} from 'tg.constants/GlobalValidationSchema';
+import { CharacterCounter } from 'tg.component/common/CharacterCounter';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { useLeaveProject } from '../useLeaveProject';
 import { TextField } from 'tg.component/common/form/fields/TextField';
@@ -55,6 +60,16 @@ const LanguageSelect = () => {
       label={<T keyName="project_settings_base_language" />}
       name="baseLanguageId"
       languages={projectLanguages}
+    />
+  );
+};
+
+const DescriptionCharacterCounter = () => {
+  const [field] = useField<string | undefined>('description');
+  return (
+    <CharacterCounter
+      currentCount={field.value?.length ?? 0}
+      maxLimit={PROJECT_DESCRIPTION_MAX_LENGTH}
     />
   );
 };
@@ -201,6 +216,7 @@ export const ProjectSettingsGeneral = () => {
                 data-cy="project-settings-description"
                 sx={{ mt: 0 }}
               />
+              <DescriptionCharacterCounter />
             </Box>
             <ProjectLanguagesProvider>
               <LanguageSelect />

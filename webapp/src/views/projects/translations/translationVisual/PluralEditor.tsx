@@ -6,7 +6,7 @@ import { getLanguageDirection } from 'tg.fixtures/getLanguageDirection';
 import { RefObject } from 'react';
 import { EditorView } from 'codemirror';
 import { useProject } from 'tg.hooks/useProject';
-import { CharacterCounter } from '../cell/CharacterCounter';
+import { CharacterCounter } from 'tg.component/common/CharacterCounter';
 import { getVisibleCharCount } from '../cell/getVisibleCharCount';
 
 type Props = {

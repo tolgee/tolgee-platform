@@ -28,6 +28,11 @@ describe('Projects Basics', () => {
       .first()
       .type('Test description');
 
+    cy.gcy('character-counter').should(
+      'contain',
+      `${'Test description'.length}/2000`
+    );
+
     cy.gcy('default-namespace-select').should('not.exist');
 
     cy.gcy('global-form-save-button').click();
