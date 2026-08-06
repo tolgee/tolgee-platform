@@ -56,6 +56,15 @@ class LlmProperties : MachineTranslationServiceProperties {
 
   @DocProperty(
     description = """
+    Name of the provider used when a prompt selects the `default` provider. The name must match
+    one of the configured providers (the `fallbacks` mapping is applied if the provider was renamed).
+    When unset, the first enabled provider is used.
+  """,
+  )
+  var defaultProvider: String? = null
+
+  @DocProperty(
+    description = """
     Map of provider defaults keyed by provider name. Use this to separate non-secret configuration
     (model, prices, type) from secrets (API keys) in Kubernetes deployments.
 

@@ -143,6 +143,35 @@ class LlmProviderFallbackTest {
     }.isInstanceOf(LlmProviderNotFoundException::class.java)
   }
 
+  @Test
+  fun `default alias resolves to server default provider`() {
+    setupServerProviders("gpt-6", "claude")
+    whenever(llmPropertiesService.getDefaultProviderName()).thenReturn("claude")
+
+    val result = service.callProvider(orgId, "default", createParams())
+
+    assertThat(result.response).contains("claude")
+  }
+
+  @Test
+  fun `real provider named default wins over the alias`() {
+    setupServerProviders("default", "gpt-6")
+    whenever(llmPropertiesService.getDefaultProviderName()).thenReturn("gpt-6")
+
+    val result = service.callProvider(orgId, "default", createParams())
+
+    assertThat(result.response).contains("default")
+  }
+
+  @Test
+  fun `default alias throws when no providers exist`() {
+    setupServerProviders()
+
+    assertThatThrownBy {
+      service.callProvider(orgId, "default", createParams())
+    }.isInstanceOf(LlmProviderNotFoundException::class.java)
+  }
+
   private fun setupServerProviders(vararg names: String) {
     whenever(llmPropertiesService.getProviders()).thenReturn(
       names.mapIndexed { index, name ->

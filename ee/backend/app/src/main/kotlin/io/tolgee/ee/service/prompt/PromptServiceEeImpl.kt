@@ -23,6 +23,7 @@ import io.tolgee.model.Prompt
 import io.tolgee.model.enums.BasicPromptOption
 import io.tolgee.model.enums.LlmProviderPriority
 import io.tolgee.repository.PromptRepository
+import io.tolgee.service.LlmPropertiesService
 import io.tolgee.service.PromptService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
@@ -295,9 +296,14 @@ class PromptServiceEeImpl(
    *
    * The entity is detached before mutation to prevent OSIV from flushing the resolved name
    * back to the DB — the stored value must remain the original.
+   *
+   * The "default" alias is intentionally NOT resolved — it must stay stable in API responses
+   * so the frontend keeps showing the alias option instead of the concrete provider it
+   * currently points to.
    */
   private fun withResolvedProviderName(prompt: Prompt): Prompt {
     if (prompt.providerName.isEmpty()) return prompt
+    if (prompt.providerName == LlmPropertiesService.DEFAULT_PROVIDER_ALIAS) return prompt
     // Access lazy association while still managed
     val organizationId = prompt.project.organizationOwner.id
     val resolvedName =

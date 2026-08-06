@@ -13,6 +13,7 @@ import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.authorization.RequiresOrganizationRole
 import io.tolgee.security.authorization.UseDefaultPermissions
+import io.tolgee.service.LlmPropertiesService
 import jakarta.validation.Valid
 import org.springframework.hateoas.CollectionModel
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -34,6 +35,7 @@ class LlmProviderController(
   private val providerService: LlmProviderService,
   private val providerModelAssembler: LlmProviderModelAssembler,
   private val providerSimpleModelAssembler: LlmProviderSimpleModelAssembler,
+  private val llmPropertiesService: LlmPropertiesService,
 ) {
   @GetMapping("all-available")
   @UseDefaultPermissions
@@ -60,7 +62,23 @@ class LlmProviderController(
         existing.add(it.name)
       }
     }
-    return providerSimpleModelAssembler.toCollectionModel(result)
+    val models = providerSimpleModelAssembler.toCollectionModel(result)
+    val defaultModel = getServerDefaultModel(existing) ?: return models
+    return CollectionModel.of(listOf(defaultModel) + models)
+  }
+
+  private fun getServerDefaultModel(existingNames: Set<String>): LlmProviderSimpleModel? {
+    if (LlmPropertiesService.DEFAULT_PROVIDER_ALIAS in existingNames) return null
+    val defaultName = llmPropertiesService.getDefaultProviderName() ?: return null
+    val provider = providerService.getAllServerProviders().find { it.name == defaultName } ?: return null
+    return LlmProviderSimpleModel(
+      name = LlmPropertiesService.DEFAULT_PROVIDER_ALIAS,
+      source = "server",
+      type = provider.type,
+      tokenPriceInCreditsInput = provider.tokenPriceInCreditsInput,
+      tokenPriceInCreditsOutput = provider.tokenPriceInCreditsOutput,
+      resolvesToName = defaultName,
+    )
   }
 
   @GetMapping("")
