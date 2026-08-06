@@ -2,6 +2,7 @@ package io.tolgee.unit.apps
 
 import io.tolgee.configuration.tolgee.AppsProperties
 import io.tolgee.configuration.tolgee.InternalProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.service.apps.AppManifestFetcher
@@ -47,10 +48,14 @@ class AppManifestFetcherTest {
       jacksonObjectMapper(),
       UrlSecurity(InternalProperties()),
       AppsProperties().apply { this.allowLocalAddresses = allowLocalAddresses },
+      TolgeeProperties(),
     )
   }
 
-  private fun fetcherReturning(json: String): AppManifestFetcher {
+  private fun fetcherReturning(
+    json: String,
+    tolgeeProperties: TolgeeProperties = TolgeeProperties(),
+  ): AppManifestFetcher {
     val client =
       mock<AppManifestHttpClient>().apply {
         doReturn(json).whenever(this).fetchBody(anyString())
@@ -60,6 +65,7 @@ class AppManifestFetcherTest {
       jacksonObjectMapper(),
       UrlSecurity(InternalProperties()),
       AppsProperties().apply { this.allowLocalAddresses = true },
+      tolgeeProperties,
     )
   }
 
@@ -148,6 +154,42 @@ class AppManifestFetcherTest {
       """.trimIndent()
     val exception = assertThrows<BadRequestException> { fetcherReturning(json).fetch(MANIFEST_URL) }
     exception.code.assert.isEqualTo(Message.APP_MANIFEST_INVALID.code)
+  }
+
+  @Test
+  fun `rejects a manifest whose baseUrl is Tolgee's own front-end origin`() {
+    val properties = TolgeeProperties().apply { frontEndUrl = "https://app.example.com" }
+    val exception =
+      assertThrows<BadRequestException> {
+        fetcherReturning(manifestJson, properties).fetch(MANIFEST_URL)
+      }
+    exception.code.assert.isEqualTo(Message.APP_MANIFEST_SAME_ORIGIN_AS_TOLGEE.code)
+  }
+
+  @Test
+  fun `rejects a manifest whose baseUrl only matches Tolgee's origin after normalization`() {
+    val properties = TolgeeProperties().apply { frontEndUrl = "https://APP.example.com:443/tolgee" }
+    val exception =
+      assertThrows<BadRequestException> {
+        fetcherReturning(manifestJson, properties).fetch(MANIFEST_URL)
+      }
+    exception.code.assert.isEqualTo(Message.APP_MANIFEST_SAME_ORIGIN_AS_TOLGEE.code)
+  }
+
+  @Test
+  fun `rejects a manifest whose baseUrl is Tolgee's own API origin`() {
+    val properties = TolgeeProperties().apply { backEndUrl = "https://app.example.com" }
+    val exception =
+      assertThrows<BadRequestException> {
+        fetcherReturning(manifestJson, properties).fetch(MANIFEST_URL)
+      }
+    exception.code.assert.isEqualTo(Message.APP_MANIFEST_SAME_ORIGIN_AS_TOLGEE.code)
+  }
+
+  @Test
+  fun `accepts a manifest served from a different host than Tolgee`() {
+    val properties = TolgeeProperties().apply { frontEndUrl = "https://tolgee.example.com" }
+    assertDoesNotThrow { fetcherReturning(manifestJson, properties).fetch(MANIFEST_URL) }
   }
 
   companion object {

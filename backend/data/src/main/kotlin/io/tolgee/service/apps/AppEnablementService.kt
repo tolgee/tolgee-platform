@@ -108,4 +108,14 @@ class AppEnablementService(
   fun removeAllForAppInstall(appInstallId: Long) {
     appEnabledForProjectRepository.deleteByAppInstallId(appInstallId)
   }
+
+  /**
+   * Enablement is consent given by one organization. Once the project belongs to another
+   * organization the old consent no longer applies, and the installs may not even be visible to the
+   * new owner — so the project starts with no app enabled.
+   */
+  @Transactional
+  fun removeAllForProject(projectId: Long) {
+    appEnabledForProjectRepository.deleteByProjectId(projectId)
+  }
 }

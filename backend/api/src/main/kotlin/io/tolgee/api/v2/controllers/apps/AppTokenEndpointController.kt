@@ -10,7 +10,9 @@ import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.hateoas.apps.AppAccessTokenModel
 import io.tolgee.security.authentication.AppTokenService
+import io.tolgee.security.ratelimit.RateLimited
 import io.tolgee.service.apps.AppInstallService
+import io.tolgee.util.constantTimeEquals
 import jakarta.validation.Valid
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -39,6 +41,7 @@ class AppTokenEndpointController(
   private val tolgeeProperties: TolgeeProperties,
 ) {
   @PostMapping("/token")
+  @RateLimited(5, isAuthentication = true)
   @Operation(
     summary = "Exchange app client credentials for an access token",
     description =
@@ -68,18 +71,6 @@ class AppTokenEndpointController(
       tokenType = "Bearer",
       expiresIn = tolgeeProperties.apps.tokenExpiration / 1000,
     )
-  }
-
-  private fun constantTimeEquals(
-    a: String,
-    b: String,
-  ): Boolean {
-    if (a.length != b.length) return false
-    var result = 0
-    for (i in a.indices) {
-      result = result or (a[i].code xor b[i].code)
-    }
-    return result == 0
   }
 
   companion object {

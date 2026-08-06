@@ -11,6 +11,7 @@ import io.tolgee.model.enums.Scope
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AppTokenService
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.security.authentication.DenyAppAccess
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.apps.AppEnablementService
@@ -30,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController
 @ConditionalOnProperty(name = ["tolgee.apps.enabled"], havingValue = "true")
 @RequestMapping(value = ["/v2/projects/{projectId:[0-9]+}/apps"])
 @Tag(name = "Project Apps")
+@DenyAppAccess
 class ProjectAppsController(
   private val projectHolder: ProjectHolder,
   private val authenticationFacade: AuthenticationFacade,
@@ -124,6 +126,7 @@ class ProjectAppsController(
         installId = installId,
         userId = authenticationFacade.authenticatedUser.id,
         projectId = projectId,
+        isReadOnly = authenticationFacade.isReadOnly,
       )
     return AppTokenModel(token = token)
   }

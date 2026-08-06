@@ -28,6 +28,8 @@ interface AppEnabledForProjectRepository : JpaRepository<AppEnabledForProject, L
 
   fun deleteByAppInstallId(appInstallId: Long)
 
+  fun deleteByProjectId(projectId: Long)
+
   fun deleteByAppInstallIdAndProjectOrganizationOwnerId(
     appInstallId: Long,
     organizationId: Long,

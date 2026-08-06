@@ -118,6 +118,29 @@ class AppsDeletionTest : AbstractSpringTest() {
     appEnablementService.isEnabledForProject(testData.otherProject.id, installId).assert.isTrue()
   }
 
+  @Test
+  fun `transferring a project to another organization clears its enablements`() {
+    val installId = registerOrganizationInstall()
+    enableForProject(testData.projectBuilder.self.id, installId)
+
+    executeInNewTransaction(platformTransactionManager) {
+      projectService.transferToOrganization(testData.projectBuilder.self.id, testData.otherOrganization.id)
+    }
+
+    appEnablementService.isEnabledForProject(testData.projectBuilder.self.id, installId).assert.isFalse()
+  }
+
+  private fun registerOrganizationInstall(): Long {
+    return executeInNewTransaction(platformTransactionManager) {
+      appInstallService
+        .register(
+          organization = testData.organization,
+          manifestUrl = AppsTestFixtures.MANIFEST_URL,
+          author = testData.user,
+        ).install.id
+    }
+  }
+
   private fun registerNativeInstall(): Long {
     return executeInNewTransaction(platformTransactionManager) {
       appInstallService

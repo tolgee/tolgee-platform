@@ -1,7 +1,6 @@
 package io.tolgee.service.apps
 
 import io.tolgee.constants.Message
-import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Organization
 import io.tolgee.model.UserAccount
@@ -37,7 +36,7 @@ class AppInstallService(
 
   data class AppCredentialResolution(
     val install: AppInstall,
-    val authorPrincipal: UserAccountDto,
+    val authorId: Long,
   )
 
   fun register(
@@ -212,14 +211,14 @@ class AppInstallService(
   }
 
   /**
-   * Resolves an install by id alone plus the principal (the install author) that an install-context
-   * token acts as. Used by the app-token auth filter for the machine-to-machine (OAuth
-   * client-credentials) path.
+   * Resolves an install by id alone plus the id of the author an install-context token acts as. Used
+   * by the app-token auth filter for the machine-to-machine (OAuth client-credentials) path. The
+   * caller must still resolve the author through the normal active-user lookup.
    */
   @Transactional(readOnly = true)
   fun resolveForAppAuth(installId: Long): AppCredentialResolution? {
     val install = appInstallRepository.findById(installId).orElse(null) ?: return null
-    return AppCredentialResolution(install, UserAccountDto.fromEntity(install.author))
+    return AppCredentialResolution(install, install.author.id)
   }
 
   /**
@@ -229,7 +228,7 @@ class AppInstallService(
   @Transactional(readOnly = true)
   fun resolveByClientId(clientId: String): AppCredentialResolution? {
     val install = appInstallRepository.findByClientId(clientId) ?: return null
-    return AppCredentialResolution(install, UserAccountDto.fromEntity(install.author))
+    return AppCredentialResolution(install, install.author.id)
   }
 
   companion object {

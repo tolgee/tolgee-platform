@@ -107,7 +107,7 @@ class AuthenticationFacade(
   val appAuthentication: AppAuthentication
     get() =
       SecurityContextHolder.getContext().authentication as? AppAuthentication
-        ?: throw IllegalStateException("Not an app authentication")
+        ?: throw AuthenticationException(Message.UNAUTHENTICATED)
 
   val projectApiKey: ApiKeyDto
     get() = authentication.credentials as ApiKeyDto

@@ -9,9 +9,12 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.exceptions.ProjectNotFoundException
 import io.tolgee.model.enums.Scope
+import io.tolgee.security.authentication.AppAuthentication
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.service.apps.AppEnablementService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
+import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.SecurityService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -25,6 +28,8 @@ class ProjectContextService(
   private val projectHolder: ProjectHolder,
   private val organizationHolder: OrganizationHolder,
   private val activityHolder: ActivityHolder,
+  private val appEnablementService: AppEnablementService,
+  private val permissionService: PermissionService,
 ) {
   private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -54,6 +59,8 @@ class ProjectContextService(
     useDefaultPermissions: Boolean,
     isWriteOperation: Boolean,
   ) {
+    bindAppToProject(project)
+
     val userId = authenticationFacade.authenticatedUser.id
     var bypassed = false
 
@@ -123,6 +130,43 @@ class ProjectContextService(
     }
 
     populateHolders(project)
+  }
+
+  /**
+   * Binds an app authentication to the request's project. Until this runs the app has no project it
+   * may act on, so [SecurityService.getCurrentPermittedScopes] resolves to nothing — every project
+   * route therefore has to pass through here, and one that never reaches it denies rather than
+   * silently skipping the enablement check.
+   */
+  private fun bindAppToProject(project: ProjectDto) {
+    if (!authenticationFacade.isAppAuth) return
+    val appAuth = authenticationFacade.appAuthentication
+
+    if (appAuth.tokenProjectId != null && appAuth.tokenProjectId != project.id) {
+      throw PermissionException(Message.APP_NOT_ENABLED_FOR_PROJECT)
+    }
+
+    if (!appEnablementService.isEnabledForProject(project.id, appAuth.appInstall.id)) {
+      throw PermissionException(Message.APP_NOT_ENABLED_FOR_PROJECT)
+    }
+
+    checkActingAsUserIsProjectMember(appAuth, project.id)
+
+    appAuth.boundProjectId = project.id
+  }
+
+  /**
+   * An install may narrow itself to a project member, never widen itself to a stranger.
+   */
+  private fun checkActingAsUserIsProjectMember(
+    appAuth: AppAuthentication,
+    projectId: Long,
+  ) {
+    val actingAs = appAuth.actingAsUserAccount ?: return
+    val scopes = permissionService.getProjectPermissionScopesNoApiKey(projectId, actingAs.id)
+    if (scopes.isNullOrEmpty()) {
+      throw PermissionException(Message.APP_ACTING_AS_USER_NOT_PROJECT_MEMBER)
+    }
   }
 
   private fun populateHolders(project: ProjectDto) {

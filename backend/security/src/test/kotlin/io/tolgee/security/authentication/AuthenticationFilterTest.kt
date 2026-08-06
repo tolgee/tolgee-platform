@@ -30,11 +30,9 @@ import io.tolgee.security.ratelimit.RateLimitPolicy
 import io.tolgee.security.ratelimit.RateLimitService
 import io.tolgee.security.ratelimit.RateLimitedException
 import io.tolgee.security.thirdParty.SsoDelegate
-import io.tolgee.service.apps.AppEnablementService
 import io.tolgee.service.apps.AppInstallService
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PatService
-import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -102,11 +100,9 @@ class AuthenticationFilterTest {
       jwtService = jwtService,
       appTokenService = appTokenService,
       appInstallService = Mockito.mock(AppInstallService::class.java),
-      appEnablementService = Mockito.mock(AppEnablementService::class.java),
       userAccountService = userAccountService,
       apiKeyService = pakService,
       patService = patService,
-      permissionService = Mockito.mock(PermissionService::class.java),
       ssoDelegate = ssoDelegate,
     )
 

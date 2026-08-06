@@ -1,6 +1,7 @@
 package io.tolgee.service.apps
 
 import io.tolgee.configuration.tolgee.AppsProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.apps.AppManifest
 import io.tolgee.exceptions.BadRequestException
@@ -17,6 +18,7 @@ class AppManifestFetcher(
   private val objectMapper: ObjectMapper,
   private val urlSecurity: UrlSecurity,
   private val appsProperties: AppsProperties,
+  private val tolgeeProperties: TolgeeProperties,
 ) {
   data class FetchResult(
     val manifest: AppManifest,
@@ -95,8 +97,43 @@ class AppManifestFetcher(
     }
   }
 
+  /**
+   * The app iframe is sandboxed with `allow-scripts allow-same-origin`, which stops isolating an app
+   * served from Tolgee's own origin: such an app shares the dashboard's `localStorage` and can lift
+   * the signed-in user's JWT.
+   */
+  private fun rejectTolgeeOrigin(manifest: AppManifest) {
+    val appOrigin = originOf(manifest.baseUrl) ?: return
+    val tolgeeOrigins =
+      listOfNotNull(tolgeeProperties.frontEndUrl, tolgeeProperties.backEndUrl)
+        .mapNotNull { originOf(it) }
+
+    if (appOrigin in tolgeeOrigins) {
+      throw BadRequestException(Message.APP_MANIFEST_SAME_ORIGIN_AS_TOLGEE, listOf(appOrigin))
+    }
+  }
+
+  private fun originOf(url: String): String? {
+    val uri =
+      try {
+        URI(url)
+      } catch (e: Exception) {
+        return null
+      }
+    val host = uri.host?.lowercase() ?: return null
+    val scheme = uri.scheme?.lowercase() ?: return null
+    val port = if (uri.port == -1) defaultPortOf(scheme) else uri.port
+    return "$scheme://$host:$port"
+  }
+
+  private fun defaultPortOf(scheme: String): Int {
+    if (scheme == "https") return 443
+    return 80
+  }
+
   private fun validateDashboardPages(manifest: AppManifest) {
     requireAbsoluteHttpUrl("baseUrl", manifest.baseUrl)
+    rejectTolgeeOrigin(manifest)
 
     val pages = manifest.modules.projectDashboardPage
     if (pages.isNullOrEmpty()) {

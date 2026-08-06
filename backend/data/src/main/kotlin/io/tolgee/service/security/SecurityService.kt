@@ -85,6 +85,13 @@ class SecurityService(
   }
 
   fun checkAnyProjectPermission(projectId: Long) {
+    if (authenticationFacade.isAppAuth) {
+      if (getCurrentPermittedScopes(projectId).isEmpty()) {
+        throw PermissionException(Message.USER_HAS_NO_PROJECT_ACCESS)
+      }
+      return
+    }
+
     if (
       getProjectPermissionScopesNoApiKey(projectId).isNullOrEmpty() &&
       !activeUser.isSupporterOrAdmin()
@@ -119,40 +126,43 @@ class SecurityService(
    * Returns current permitted scopes, expanded
    */
   fun getCurrentPermittedScopes(projectId: Long): Set<Scope> {
-    val projectScopes =
-      Scope
-        .expand(
-          getProjectPermissionScopesNoApiKey(projectId, authenticationFacade.authenticatedUser.id),
-        ).toSet()
-
     if (authenticationFacade.isAppAuth) {
-      val appAuth = authenticationFacade.appAuthentication
-      if (appAuth.projectId != null && appAuth.projectId != projectId) {
-        return emptySet()
-      }
-      val installScopes = Scope.expand(appAuth.appInstall.grantedScopes).toSet()
-
-      val actingAs = appAuth.actingAsUserAccount
-      if (actingAs != null) {
-        val actingAsScopes =
-          Scope
-            .expand(getProjectPermissionScopesNoApiKey(projectId, actingAs.id))
-            .toSet()
-        return installScopes.intersect(actingAsScopes)
-      }
-
-      if (appAuth.isInstallContext) {
-        // M2M token without an acting-as user — the app's own granted scopes, no user intersection.
-        return installScopes
-      }
-
-      // User-context JWT — intersect with the iframe user's project scopes.
-      return installScopes.intersect(projectScopes)
+      return getAppPermittedScopes(projectId)
     }
 
+    val projectScopes = expandedScopesOf(projectId, authenticationFacade.authenticatedUser.id)
     val apiKey = activeApiKey ?: return projectScopes
 
-    return Scope.expand(apiKey.scopes).toSet().intersect(projectScopes.toSet())
+    return Scope.expand(apiKey.scopes).toSet().intersect(projectScopes)
+  }
+
+  private fun getAppPermittedScopes(projectId: Long): Set<Scope> {
+    val appAuth = authenticationFacade.appAuthentication
+    // Only ProjectContextService binds a project, and only after verifying the install is enabled
+    // for it — an unbound project is one the app was never granted access to.
+    if (appAuth.boundProjectId != projectId) return emptySet()
+
+    val installScopes = Scope.expand(appAuth.appInstall.grantedScopes).toSet()
+
+    val actingAs = appAuth.actingAsUserAccount
+    if (actingAs != null) {
+      return installScopes.intersect(expandedScopesOf(projectId, actingAs.id))
+    }
+
+    if (appAuth.isInstallContext) {
+      // M2M token without an acting-as user — the app's own granted scopes, no user intersection.
+      return installScopes
+    }
+
+    // User-context JWT — intersect with the iframe user's project scopes.
+    return installScopes.intersect(expandedScopesOf(projectId, appAuth.principal.id))
+  }
+
+  private fun expandedScopesOf(
+    projectId: Long,
+    userId: Long,
+  ): Set<Scope> {
+    return Scope.expand(getProjectPermissionScopesNoApiKey(projectId, userId)).toSet()
   }
 
   /**
@@ -160,6 +170,8 @@ class SecurityService(
    * uses the currently authenticated user and active API key.
    * Always checks permissions for the current user even when using the API key for security reasons.
    *
+   * Under app authentication the install's granted scopes are the ceiling — the author's own
+   * permissions never widen it.
    */
   fun checkProjectPermission(
     projectId: Long,
@@ -167,6 +179,11 @@ class SecurityService(
     user: UserAccountDto? = null,
     apiKey: ApiKeyDto? = null,
   ) {
+    if (authenticationFacade.isAppAuth) {
+      checkAppPermission(projectId, requiredPermission)
+      return
+    }
+
     val user = user ?: activeUser
     // Always check for the current user even if we're using an API key for security reasons.
     // This prevents improper preservation of permissions.
@@ -180,6 +197,14 @@ class SecurityService(
     }
 
     this.checkApiKeyScopes(listOf(requiredPermission), apiKey)
+  }
+
+  private fun checkAppPermission(
+    projectId: Long,
+    requiredScope: Scope,
+  ) {
+    if (getCurrentPermittedScopes(projectId).contains(requiredScope)) return
+    throw PermissionException(Message.OPERATION_NOT_PERMITTED, listOf(requiredScope))
   }
 
   fun checkTaskEditScopeOrAssigned(
@@ -200,6 +225,7 @@ class SecurityService(
     try {
       checkProjectPermission(projectId, scope)
     } catch (err: PermissionException) {
+      if (authenticationFacade.isAppAuth) throw err
       val assignees = taskService.findAssigneeById(projectId, taskNumber, activeUser.id)
       if (assignees.isEmpty() || assignees[0].id != activeUser.id) {
         throw err
@@ -207,11 +233,16 @@ class SecurityService(
     }
   }
 
+  /**
+   * Task assignment belongs to a person, not to an install — an app must never widen its granted
+   * scopes through a task its author happens to be assigned to.
+   */
   private fun translationInTask(
     keyId: Long,
     languageId: Long,
     taskType: TaskType? = null,
   ): Boolean {
+    if (authenticationFacade.isAppAuth) return false
     val assignees =
       taskService.findAssigneeByKey(
         keyId,
@@ -439,7 +470,7 @@ class SecurityService(
     val usersPermission =
       permissionService.getProjectPermissionData(
         projectId,
-        authenticationFacade.authenticatedUser.id,
+        languageRestrictedUserId,
       )
     permissionCheckFn(usersPermission.computedPermissions)
   }
@@ -454,7 +485,7 @@ class SecurityService(
       val usersPermission =
         permissionService.getProjectPermissionData(
           projectId,
-          authenticationFacade.authenticatedUser.id,
+          languageRestrictedUserId,
         )
       fn(usersPermission.computedPermissions, languageIds.values.map { it.id })
     } catch (e: LanguageNotPermittedException) {
@@ -508,11 +539,18 @@ class SecurityService(
     this.checkLanguageStateChangePermission(projectId, languageIds, keyId)
   }
 
+  /**
+   * There is no meaningful ceiling to apply here: the scopes an app may hand to a new API key are
+   * the author's, not the install's, so app authentication is refused outright.
+   */
   fun checkApiKeyScopes(
     scopes: Set<Scope>,
     project: Project?,
     user: UserAccount? = null,
   ) {
+    if (authenticationFacade.isAppAuth) {
+      throw PermissionException(Message.APP_ACCESS_FORBIDDEN)
+    }
     try {
       val availableScopes = apiKeyService.getAvailableScopes(user?.id ?: activeUser.id, project!!)
       val userCanSelectTheScopes = availableScopes.toList().containsAll(scopes)
@@ -698,20 +736,36 @@ class SecurityService(
     }
   }
 
+  /**
+   * The server-role bypasses apply to a person acting in the UI. An app token carries its author's
+   * role, so honouring them would let an install owned by an admin skip every language check.
+   */
   private fun runIfUserNotServerAdmin(runnable: () -> Unit) {
-    if (!activeUser.isAdmin()) {
+    if (authenticationFacade.isAppAuth || !activeUser.isAdmin()) {
       runnable()
     }
   }
 
   private fun runIfUserNotServerSupporterOrAdmin(runnable: () -> Unit) {
-    if (!activeUser.isSupporterOrAdmin()) {
+    if (authenticationFacade.isAppAuth || !activeUser.isSupporterOrAdmin()) {
       runnable()
     }
   }
 
   private val activeUser: UserAccountDto
     get() = authenticationFacade.authenticatedUserOrNull ?: throw PermissionException(Message.UNAUTHENTICATED)
+
+  /**
+   * The user whose per-language restrictions apply. An install-context app token narrowed with
+   * `X-Tolgee-Act-As-User-Id` must not reach languages that user cannot reach.
+   */
+  private val languageRestrictedUserId: Long
+    get() {
+      if (authenticationFacade.isAppAuth) {
+        return authenticationFacade.appAuthentication.actingAsUserAccount?.id ?: activeUser.id
+      }
+      return activeUser.id
+    }
 
   private val activeApiKey: ApiKeyDto?
     get() = if (authenticationFacade.isProjectApiKeyAuth) authenticationFacade.projectApiKey else null

@@ -58,11 +58,9 @@ class AuthenticationDisabledFilterTest {
       jwtService = mock(),
       appTokenService = mock(),
       appInstallService = mock(),
-      appEnablementService = mock(),
       userAccountService = userAccountService,
       apiKeyService = mock(),
       patService = mock(),
-      permissionService = mock(),
       ssoDelegate = mock(),
     )
 

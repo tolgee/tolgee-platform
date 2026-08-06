@@ -12,10 +12,12 @@ import io.tolgee.hateoas.organization.apps.AppInstallModel
 import io.tolgee.hateoas.organization.apps.AppInstallModelAssembler
 import io.tolgee.model.Organization
 import io.tolgee.model.UserAccount
+import io.tolgee.security.ratelimit.RateLimited
 import io.tolgee.service.apps.AppInstallService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.security.UserAccountService
+import io.tolgee.util.constantTimeEquals
 import jakarta.validation.Valid
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -24,7 +26,6 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import java.security.MessageDigest
 
 /**
  * Lets an app register itself against a running server, authenticating with the server-wide
@@ -49,6 +50,7 @@ class AppSelfRegistrationController(
   private val tolgeeProperties: TolgeeProperties,
 ) {
   @PostMapping("/self-register")
+  @RateLimited(5, isAuthentication = true)
   @Operation(
     summary = "Register an app using the server-wide registration secret",
     description =
@@ -102,13 +104,6 @@ class AppSelfRegistrationController(
     if (providedSecret == null || !constantTimeEquals(providedSecret, configured)) {
       throw AuthenticationException(Message.INVALID_APP_REGISTRATION_SECRET)
     }
-  }
-
-  private fun constantTimeEquals(
-    a: String,
-    b: String,
-  ): Boolean {
-    return MessageDigest.isEqual(a.toByteArray(), b.toByteArray())
   }
 
   companion object {

@@ -9,6 +9,7 @@ import io.jsonwebtoken.security.SignatureException
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.configuration.tolgee.AppsProperties
 import io.tolgee.constants.Message
+import io.tolgee.exceptions.AuthExpiredException
 import io.tolgee.exceptions.AuthenticationException
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
@@ -53,12 +54,19 @@ class AppTokenService(
     installId: Long,
     userId: Long,
     projectId: Long,
+    isReadOnly: Boolean,
   ): String {
-    return baseBuilder(installId)
-      .setSubject(userId.toString())
-      .claim(JWT_APP_TOKEN_CONTEXT_CLAIM, CONTEXT_USER)
-      .claim(JWT_APP_TOKEN_PROJECT_ID_CLAIM, projectId)
-      .compact()
+    val builder =
+      baseBuilder(installId)
+        .setSubject(userId.toString())
+        .claim(JWT_APP_TOKEN_CONTEXT_CLAIM, CONTEXT_USER)
+        .claim(JWT_APP_TOKEN_PROJECT_ID_CLAIM, projectId)
+
+    if (isReadOnly) {
+      builder.claim(JWT_APP_TOKEN_READ_ONLY_CLAIM, true)
+    }
+
+    return builder.compact()
   }
 
   /**
@@ -96,7 +104,7 @@ class AppTokenService(
           is UnsupportedJwtException,
           is IllegalArgumentException,
           -> throw AuthenticationException(Message.INVALID_JWT_TOKEN)
-          is ExpiredJwtException -> throw AuthenticationException(Message.EXPIRED_JWT_TOKEN)
+          is ExpiredJwtException -> throw AuthExpiredException(Message.EXPIRED_JWT_TOKEN)
           else -> throw ex
         }
       }
@@ -109,6 +117,8 @@ class AppTokenService(
       (jws.body[JWT_APP_TOKEN_INSTALL_ID_CLAIM] as? Number)?.toLong()
         ?: throw AuthenticationException(Message.INVALID_JWT_TOKEN)
 
+    val isReadOnly = jws.body[JWT_APP_TOKEN_READ_ONLY_CLAIM] as? Boolean ?: false
+
     if (jws.body[JWT_APP_TOKEN_CONTEXT_CLAIM] == CONTEXT_INSTALL) {
       return AppTokenClaims(
         installId = installId,
@@ -116,6 +126,7 @@ class AppTokenService(
         userId = null,
         projectId = null,
         issuedAt = jws.body.issuedAt,
+        isReadOnly = isReadOnly,
       )
     }
 
@@ -132,6 +143,7 @@ class AppTokenService(
       userId = userId,
       projectId = projectId,
       issuedAt = jws.body.issuedAt,
+      isReadOnly = isReadOnly,
     )
   }
 
@@ -140,6 +152,7 @@ class AppTokenService(
     const val JWT_APP_TOKEN_INSTALL_ID_CLAIM = "tg.app.inst"
     const val JWT_APP_TOKEN_PROJECT_ID_CLAIM = "tg.app.proj"
     const val JWT_APP_TOKEN_CONTEXT_CLAIM = "tg.app.ctx"
+    const val JWT_APP_TOKEN_READ_ONLY_CLAIM = "tg.app.ro"
     const val CONTEXT_USER = "user"
     const val CONTEXT_INSTALL = "install"
   }
@@ -151,4 +164,5 @@ data class AppTokenClaims(
   val userId: Long?,
   val projectId: Long?,
   val issuedAt: Date,
+  val isReadOnly: Boolean,
 )
