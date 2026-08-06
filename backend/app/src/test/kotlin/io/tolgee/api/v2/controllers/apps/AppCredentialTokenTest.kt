@@ -42,6 +42,8 @@ class AppCredentialTokenTest : AuthorizedControllerTest() {
   lateinit var testData: AppsTestData
   lateinit var appClientId: String
   lateinit var appClientSecret: String
+  lateinit var installClientId: String
+  lateinit var installClientSecret: String
   var appEntityId: Long = 0
   var installId: Long = 0
 
@@ -54,6 +56,8 @@ class AppCredentialTokenTest : AuthorizedControllerTest() {
 
     val json = objectMapper.readTree(register(AppsTestFixtures.MANIFEST_URL))
     installId = json.get("id").asLong()
+    installClientId = json.get("clientId").asText()
+    installClientSecret = json.get("clientSecret").asText()
     val app = json.get("app")
     appEntityId = app.get("id").asLong()
     appClientId = app.get("clientId").asText()
@@ -131,6 +135,25 @@ class AppCredentialTokenTest : AuthorizedControllerTest() {
     translationsWith(token).andIsOk
   }
 
+  /**
+   * The cutoff is the app's, not one secret's, so it reaches tokens the install's own credentials
+   * minted too. That is deliberate — an app whose credentials leaked should lose every token issued
+   * in its name, whichever layer paid for it.
+   */
+  @Test
+  fun `revoking an app secret also invalidates tokens minted with install credentials`() {
+    val installToken = mintWithInstallCredentials()
+    translationsWith(installToken).andIsOk
+
+    issueSecret()
+    currentDateProvider.move(Duration.ofSeconds(2))
+    revokeSecret(firstSecretId())
+
+    translationsWith(installToken).andExpect(status().isUnauthorized)
+    // The install credentials themselves are untouched, so the app mints a replacement.
+    translationsWith(mintWithInstallCredentials()).andIsOk
+  }
+
   @Test
   fun `a token minted after a revocation keeps working`() {
     val second = issueSecret()
@@ -149,6 +172,15 @@ class AppCredentialTokenTest : AuthorizedControllerTest() {
   private fun mintToken(secret: String = appClientSecret): String {
     val response =
       tokenRequest(appClientId, secret, installId)
+        .andIsOk
+        .andReturn()
+        .response.contentAsString
+    return objectMapper.readTree(response).get("access_token").asText()
+  }
+
+  private fun mintWithInstallCredentials(): String {
+    val response =
+      tokenRequest(installClientId, installClientSecret, installId = null)
         .andIsOk
         .andReturn()
         .response.contentAsString
