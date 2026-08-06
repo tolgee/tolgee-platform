@@ -83,7 +83,13 @@ class AsyncExecutorFactory(
 
     /** A burst is a burst regardless of how many threads drain it; 3 threads still deserve a buffer. */
     const val MIN_QUEUE_CAPACITY = 50
-    const val SHUTDOWN_DRAIN_SECONDS = 20
+
+    /**
+     * Spring destroys the pools one at a time, so this is paid once per pool. Four pools at 5s stay
+     * inside Kubernetes' default terminationGracePeriodSeconds of 30, which the Tolgee chart does
+     * not override — going over it means the kubelet SIGKILLs mid-drain and the wait buys nothing.
+     */
+    const val SHUTDOWN_DRAIN_SECONDS = 5
 
     const val UNBOUNDED_QUEUE = Int.MAX_VALUE
 

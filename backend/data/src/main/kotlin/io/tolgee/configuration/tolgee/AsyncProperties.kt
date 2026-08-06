@@ -34,7 +34,9 @@ class StreamingAsyncProperties {
     description =
       "How many streaming responses this instance can produce at the same time.\n\n" +
         "Each one occupies one thread **and one database connection** until the response is " +
-        "finished, so this must stay well below your database connection pool size.",
+        "finished, so this must stay well below your database connection pool size.\n\n" +
+        "There is no way to switch streaming off: `0` and any negative value mean *derive it*, " +
+        "not *disable it*.",
     defaultValue = "-1",
     defaultExplanation = "A third of the database connection pool size, never less than 2",
   )
@@ -72,7 +74,10 @@ class StreamingAsyncProperties {
 )
 class BackgroundAsyncProperties {
   @DocProperty(
-    description = "How many background tasks Tolgee runs in parallel on this instance.",
+    description =
+      "How many background tasks Tolgee runs in parallel on this instance.\n\n" +
+        "There is no way to switch background processing off: `0` and any negative value mean " +
+        "*derive it*, not *disable it*.",
     defaultValue = "-1",
     defaultExplanation = "A sixth of the database connection pool size, never less than 2",
   )
