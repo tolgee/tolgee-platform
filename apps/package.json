@@ -8,7 +8,7 @@
     "example-apps/*"
   ],
   "scripts": {
-    "build": "npm run build --workspace @tolgee/apps-sdk --workspace create-tolgee-app --workspace keys-showcase",
+    "build": "npm run build --workspace @tolgee/apps-sdk --workspace create-tolgee-app --workspace keys-showcase --workspace activity-worker",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
     "check": "npm run build && npm run typecheck && npm run test"
