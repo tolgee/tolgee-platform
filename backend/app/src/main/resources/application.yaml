@@ -43,6 +43,8 @@ tolgee:
     use-redis: false
     default-ttl: 1200000
 server:
+  # Honor X-Forwarded-* so the OAuth2 issuer and .well-known URLs are correct behind the reverse proxy.
+  forward-headers-strategy: framework
   compression:
     enabled: true
     mime-types: "text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json"
