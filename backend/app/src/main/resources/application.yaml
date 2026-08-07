@@ -8,6 +8,12 @@ spring:
     redis:
       repositories:
         enabled: false
+  session:
+    # JDBC-backed HTTP sessions (shared across replicas) for the OAuth2 consent flow; the app is otherwise stateless.
+    # The schema is created by Liquibase (db/changelog/spring-session), not by Spring Session.
+    store-type: jdbc
+    jdbc:
+      initialize-schema: never
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
