@@ -11,10 +11,13 @@ describe('Invisible characters', () => {
     translationSingleTestData.clean();
     translationSingleTestData.generate().then((data) => {
       projectId = data.body.id;
-      login('franta', 'admin');
-      createKey(projectId, 'nbsp key', { en: 'Bonjour\u00A0!' });
-      createKey(projectId, 'zero width key', { en: 'Zero\u200Bwidth' });
-      createKey(projectId, 'plain key', { en: 'Plain value' });
+      // v2apiFetch reads the auth token when it builds the request options, so
+      // these must be enqueued after login has resolved or they go out unauthenticated.
+      login('franta', 'admin').then(() => {
+        createKey(projectId, 'nbsp key', { en: 'Bonjour\u00A0!' });
+        createKey(projectId, 'zero width key', { en: 'Zero\u200Bwidth' });
+        createKey(projectId, 'plain key', { en: 'Plain value' });
+      });
     });
   });
 
