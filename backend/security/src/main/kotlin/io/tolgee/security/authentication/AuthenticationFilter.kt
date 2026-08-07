@@ -22,10 +22,13 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.AuthExpiredException
 import io.tolgee.exceptions.AuthenticationException
+import io.tolgee.exceptions.PermissionException
+import io.tolgee.model.apps.AppInstall
 import io.tolgee.security.BILLING_API_KEY_PREFIX
 import io.tolgee.security.PAT_PREFIX
 import io.tolgee.security.ratelimit.RateLimitService
 import io.tolgee.security.thirdParty.SsoDelegate
+import io.tolgee.service.apps.AppInstallService
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PatService
 import io.tolgee.service.security.UserAccountService
@@ -48,6 +51,10 @@ class AuthenticationFilter(
   @Lazy
   private val jwtService: JwtService,
   @Lazy
+  private val appTokenService: AppTokenService,
+  @Lazy
+  private val appInstallService: AppInstallService,
+  @Lazy
   private val userAccountService: UserAccountService,
   @Lazy
   private val apiKeyService: ApiKeyService,
@@ -56,6 +63,10 @@ class AuthenticationFilter(
   @Lazy
   private val ssoDelegate: SsoDelegate,
 ) : OncePerRequestFilter() {
+  companion object {
+    const val ACTING_AS_USER_HEADER = "X-Tolgee-Act-As-User-Id"
+  }
+
   private val authenticationProperties
     get() = tolgeeProperties.authentication
   private val internalProperties
@@ -88,7 +99,25 @@ class AuthenticationFilter(
     val authorization = request.getHeader("Authorization")
     if (authorization != null) {
       if (authorization.startsWith("Bearer ")) {
-        val auth = jwtService.validateToken(authorization.substring(7))
+        val token = authorization.substring(7)
+
+        // Try app-token (audience `tg.app`) first. If validation returns null the token is not an
+        // app token (wrong audience / signature) and we fall through to the user JWT path. A
+        // well-formed app token that references a revoked or disabled entity throws instead.
+        val appAuth = tryAppTokenAuth(request, token)
+        if (appAuth != null) {
+          // An install-context token runs as the install's own principal, which belongs to no
+          // identity provider and has nothing to verify there. A user-context token really is a
+          // person acting through the app, so it is still checked.
+          if (!appAuth.isInstallContext) {
+            checkIfSsoUserStillValid(appAuth.principal)
+          }
+          appAuth.actingAsUserAccount?.let { checkIfSsoUserStillValid(it) }
+          SecurityContextHolder.getContext().authentication = appAuth
+          return
+        }
+
+        val auth = jwtService.validateToken(token)
         checkIfSsoUserStillValid(auth.principal)
 
         SecurityContextHolder.getContext().authentication = auth
@@ -128,6 +157,119 @@ class AuthenticationFilter(
           isSuperToken = true,
         )
     }
+  }
+
+  /**
+   * Returns an [AppAuthentication] if the token parses as an app token and live entity resolution
+   * succeeds. Returns null when the token is not an app token (so the caller falls back to user JWT
+   * validation). Throws for app tokens that are well-formed but reference revoked/missing entities.
+   *
+   * The project the token may act on is not known here — the URL has not been matched to a handler
+   * yet. [io.tolgee.security.ProjectContextService] performs the enablement check once it is.
+   */
+  private fun tryAppTokenAuth(
+    request: HttpServletRequest,
+    token: String,
+  ): AppAuthentication? {
+    val claims =
+      try {
+        appTokenService.validateToken(token)
+      } catch (e: AuthExpiredException) {
+        throw e
+      } catch (_: AuthenticationException) {
+        return null
+      }
+
+    if (claims.isInstallContext) {
+      return installContextAuth(request, token, claims)
+    }
+    return userContextAuth(token, claims)
+  }
+
+  private fun userContextAuth(
+    token: String,
+    claims: AppTokenClaims,
+  ): AppAuthentication {
+    val install =
+      appInstallService.findForAppAuth(claims.installId)
+        ?: throw AuthenticationException(Message.INVALID_JWT_TOKEN)
+
+    assertNotRevokedByAppCutoff(install, claims)
+
+    val user = resolveAppTokenUser(claims.userId!!, claims)
+
+    return AppAuthentication(
+      credentials = token,
+      appInstall = install,
+      userAccount = user,
+      tokenProjectId = claims.projectId,
+      isInstallContext = false,
+      isReadOnly = claims.isReadOnly,
+    )
+  }
+
+  private fun installContextAuth(
+    request: HttpServletRequest,
+    token: String,
+    claims: AppTokenClaims,
+  ): AppAuthentication {
+    val resolution =
+      appInstallService.resolveForAppAuth(claims.installId)
+        ?: throw AuthenticationException(Message.INVALID_JWT_TOKEN)
+
+    assertNotRevokedByAppCutoff(resolution.install, claims)
+
+    return AppAuthentication(
+      credentials = token,
+      appInstall = resolution.install,
+      userAccount = resolution.principal,
+      tokenProjectId = null,
+      isInstallContext = true,
+      isReadOnly = claims.isReadOnly,
+      actingAsUserAccount = resolveActingAsUser(request),
+    )
+  }
+
+  /**
+   * Revoking any of an app's secrets stamps [io.tolgee.model.apps.App.tokensInvalidBefore], and
+   * every token minted before that moment dies with it — including user-context ones, so a
+   * compromised app loses its dashboard sessions too and not merely its backend access.
+   */
+  private fun assertNotRevokedByAppCutoff(
+    install: AppInstall,
+    claims: AppTokenClaims,
+  ) {
+    val cutoff = install.app.tokensInvalidBefore ?: return
+    if (claims.issuedAt.before(cutoff)) {
+      throw AuthExpiredException(Message.EXPIRED_JWT_TOKEN)
+    }
+  }
+
+  private fun resolveAppTokenUser(
+    userId: Long,
+    claims: AppTokenClaims,
+  ): UserAccountDto {
+    val user =
+      userAccountService.findDto(userId)
+        ?: throw AuthenticationException(Message.INVALID_JWT_TOKEN)
+
+    if (user.tokensValidNotBefore != null && claims.issuedAt.before(user.tokensValidNotBefore)) {
+      throw AuthExpiredException(Message.EXPIRED_JWT_TOKEN)
+    }
+
+    return user
+  }
+
+  /**
+   * Resolves the optional acted-as user for an install-context request. Membership of the request's
+   * project is enforced later, by [io.tolgee.security.ProjectContextService].
+   */
+  private fun resolveActingAsUser(request: HttpServletRequest): UserAccountDto? {
+    val raw = request.getHeader(ACTING_AS_USER_HEADER) ?: return null
+    val userId =
+      raw.toLongOrNull() ?: throw AuthenticationException(Message.INVALID_APP_CREDENTIALS)
+    return userAccountService.findDto(userId)
+      ?: throw PermissionException(Message.APP_ACTING_AS_USER_NOT_PROJECT_MEMBER)
   }
 
   private fun checkIfSsoUserStillValid(userDto: UserAccountDto) {

@@ -13,6 +13,7 @@ class ProjectActivityModel(
   override val timestamp: Long,
   override val type: ActivityType,
   override val author: ProjectActivityAuthorModel?,
+  override val app: ProjectActivityAppModel?,
   override val modifiedEntities: Map<String, List<ModifiedEntityModel>>?,
   override val meta: Map<String, Any?>?,
   override val counts: MutableMap<String, Long>?,

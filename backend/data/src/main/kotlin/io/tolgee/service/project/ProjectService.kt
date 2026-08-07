@@ -28,6 +28,7 @@ import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.AiPlaygroundResultService
 import io.tolgee.service.AvatarService
+import io.tolgee.service.apps.AppEnablementService
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.branching.BranchService
 import io.tolgee.service.dataImport.ImportService
@@ -85,6 +86,8 @@ class ProjectService(
   private val batchJobService: BatchJobService,
   @Lazy
   private val branchService: BranchService,
+  @Lazy
+  private val appEnablementService: AppEnablementService,
 ) : Logging {
   @set:Autowired
   @set:Lazy
@@ -546,6 +549,7 @@ class ProjectService(
     val organization = organizationService.find(organizationId) ?: throw NotFoundException()
     project.organizationOwner = organization
     save(project)
+    appEnablementService.removeAllForProject(projectId)
   }
 
   @Transactional(readOnly = true)

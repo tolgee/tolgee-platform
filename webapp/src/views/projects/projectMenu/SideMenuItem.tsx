@@ -44,6 +44,7 @@ type Props = {
   hidden?: boolean;
   'data-cy': string;
   quickStart?: SideMenuItemQuickStart;
+  [dataCyAttr: `data-cy-${string}`]: string | number | undefined;
 };
 
 export type SideMenuItemQuickStart = Omit<
@@ -69,6 +70,10 @@ export function SideMenuItem({
     : match.pathname === linkTo;
 
   const matchesExactly = match.pathname === linkTo;
+
+  const dataCySiblingProps = Object.fromEntries(
+    Object.entries(props).filter(([key]) => key.startsWith('data-cy-'))
+  );
 
   function wrapWithQuickStart(children: React.ReactNode) {
     if (quickStart) {
@@ -97,6 +102,7 @@ export function SideMenuItem({
         >
           <Link
             data-cy={props['data-cy']}
+            {...dataCySiblingProps}
             aria-label={text}
             to={linkTo as string}
             tabIndex={hidden ? -1 : undefined}

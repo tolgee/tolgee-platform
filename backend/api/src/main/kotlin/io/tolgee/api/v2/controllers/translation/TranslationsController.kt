@@ -258,7 +258,7 @@ When null, resulting file will be a flat key-value object.
       languageService.getLanguagesForTranslationsView(
         params.languages,
         projectHolder.project.id,
-        authenticationFacade.authenticatedUser.id,
+        authenticationFacade.actingPersonUserId,
       )
 
     val pageableWithSort = getSafeSortPageable(pageable)

@@ -46,6 +46,36 @@ export interface paths {
     /** It checks whether the code from email is valid */
     get: operations["verifyEmail"];
   };
+  "/v2/administration/apps": {
+    /** Returns the apps registered at server level — those belonging to no organization. The client secret is never disclosed here. */
+    get: operations["list_7"];
+    /** Fetches the manifest at the given URL and registers the app at server level, belonging to no organization. The response is the only place the client secret is ever disclosed. When an organization has already registered the same app, the native install is bound to that app and no app-level credentials are returned. */
+    post: operations["register_1"];
+  };
+  "/v2/administration/apps/preview": {
+    /** Fetches the manifest at the given URL and returns its parsed contents (including the requested scopes) without persisting anything. Used by the registration UI to show a consent prompt before registering. */
+    post: operations["preview_1"];
+  };
+  "/v2/administration/apps/{installId}": {
+    /** Removes the native app from the server: its availability for every organization, its enablement in every project and the install itself. Its client credentials stop working. */
+    delete: operations["deregister"];
+  };
+  "/v2/administration/apps/{installId}/organizations": {
+    /** Returns the organizations allowed to enable this native app in their projects. */
+    get: operations["listOrganizations"];
+  };
+  "/v2/administration/apps/{installId}/organizations/all": {
+    /** Allows every organization — including organizations created later — to enable this native app. Explicit per-organization grants are kept, so revoking this falls back to them. Idempotent. */
+    put: operations["grantToAllOrganizations"];
+    /** Drops the blanket availability and disables the app in every project whose organization has no explicit grant. Idempotent. */
+    delete: operations["revokeFromAllOrganizations"];
+  };
+  "/v2/administration/apps/{installId}/organizations/{organizationId}": {
+    /** Allows the organization's projects to enable this native app. Idempotent. */
+    put: operations["grant"];
+    /** Revokes the explicit grant and disables the app in every project of that organization — unless the app is available to all organizations, which keeps covering it. Idempotent — no-op when it was not available. */
+    delete: operations["revoke"];
+  };
   "/v2/administration/batch-job-queue": {
     /** Returns all chunk execution items currently in the batch job queue */
     get: operations["getBatchJobQueue"];
@@ -120,7 +150,11 @@ export interface paths {
   };
   "/v2/api-keys/{keyId}": {
     /** Returns specific API key info */
-    get: operations["get_26"];
+    get: operations["get_27"];
+  };
+  "/v2/apps/self/installations": {
+    /** Returns the install the calling install-context token belongs to, together with the projects the app is currently enabled for and the organization owning each of them. Requires a token from the client-credentials grant — a user-context token (the one the dashboard iframe gets) is refused, because it acts for a single user who need not be a member of every project the install is enabled for. A collection is returned so that an app holding several installs on one server stays representable. */
+    get: operations["getSelfInstallations"];
   };
   "/v2/auth-provider": {
     get: operations["getCurrentAuthProvider"];
@@ -208,6 +242,32 @@ export interface paths {
     /** Returns all users in organization. The result also contains users who are only members of projects in the organization. */
     get: operations["getAllUsers_1"];
   };
+  "/v2/organizations/{organizationId}/apps": {
+    /** Returns all apps registered for the organization. */
+    get: operations["list_6"];
+    /** Fetches the manifest at the given URL and installs the app it describes for the organization. The app must already be registered on this server: when it is not, the call fails with the `app_not_registered` code, and the caller may register it — becoming its owner — through `POST /register`. No credentials are disclosed here: the app reaches its new install with its app-level credentials. */
+    post: operations["install"];
+  };
+  "/v2/organizations/{organizationId}/apps/preview": {
+    /** Fetches the manifest at the given URL and returns its parsed contents (including the requested scopes) without persisting anything. Used by the registration UI to show a consent prompt before installing. */
+    post: operations["preview"];
+  };
+  "/v2/organizations/{organizationId}/apps/register": {
+    /** Registers the app described by the manifest and installs it for the organization, in one operation. The organization becomes the app's owner, and the response is the only place the app-level credentials are ever disclosed. When the app is already registered — by another organization or by this one — it is only installed, and no app-level credentials are returned. */
+    post: operations["register"];
+  };
+  "/v2/organizations/{organizationId}/apps/{installId}": {
+    /** Removes the registered app from the organization. */
+    delete: operations["remove"];
+  };
+  "/v2/organizations/{organizationId}/apps/{installId}/manifest-url": {
+    /** Repoints an existing install at a new manifest URL and re-fetches the manifest from there. The new manifest must declare the same `id` as the original. Useful for development: a tunnel URL that changes on every restart can be swapped in without re-installing the app. */
+    patch: operations["updateManifestUrl"];
+  };
+  "/v2/organizations/{organizationId}/apps/{installId}/refresh": {
+    /** Re-fetches the manifest from the registered URL and updates the stored snapshot. */
+    post: operations["refresh"];
+  };
   "/v2/organizations/{organizationId}/base-languages": {
     /** Returns all base languages in use by projects owned by specified organization */
     get: operations["getAllBaseLanguagesInUse"];
@@ -250,7 +310,7 @@ export interface paths {
     post: operations["update_14"];
   };
   "/v2/organizations/{organizationId}/glossaries/{glossaryId}/terms/{termId}/translations/{languageTag}": {
-    get: operations["get_25"];
+    get: operations["get_26"];
   };
   "/v2/organizations/{organizationId}/glossaries/{glossaryId}/termsIds": {
     get: operations["getAllIds"];
@@ -283,6 +343,29 @@ export interface paths {
   "/v2/organizations/{organizationId}/machine-translation-credit-balance": {
     /** Returns machine translation credit balance for organization */
     get: operations["getOrganizationCredits"];
+  };
+  "/v2/organizations/{organizationId}/owned-apps": {
+    /** Returns every app the organization registered, together with the health of its manifest. An app the organization also installed appears in the installed apps list as well. */
+    get: operations["list_15"];
+  };
+  "/v2/organizations/{organizationId}/owned-apps/{appId}": {
+    get: operations["get_25"];
+    /** Deregisters the app and uninstalls it from every organization that installed it, revoking both the app-level and every per-install credential, and announcing an uninstall to the app for each of those organizations. Only the owner may do this; an organization that installed the app removes only its own install through `DELETE /apps/{installId}`. */
+    delete: operations["removeEverywhere"];
+  };
+  "/v2/organizations/{organizationId}/owned-apps/{appId}/deliveries": {
+    /** Every signed POST Tolgee has made to the app's base URL, with the outcome of each. This is where an owner finds out that an install's credentials never reached the app. */
+    get: operations["listDeliveries"];
+  };
+  "/v2/organizations/{organizationId}/owned-apps/{appId}/secrets": {
+    /** Returns every app-level secret, revoked ones included, without disclosing any of them. These administer the app across every organization that installed it and grant access to no data — they are not the per-install secrets under `/apps/{installId}/secrets`. */
+    get: operations["listSecrets"];
+    /** Phase one of an app-level rotation: mints a second secret while every existing one keeps working. The app's installs, their own secrets, their organization availability and their per-project enablements are all untouched. The new secret is both returned here — the only place it is ever disclosed — and pushed to the app over the lifecycle channel. */
+    post: operations["issueSecret"];
+  };
+  "/v2/organizations/{organizationId}/owned-apps/{appId}/secrets/{secretId}": {
+    /** Phase two of a rotation: the secret stops authenticating immediately and every other one is untouched. Revoking the last live one is allowed — it is how a leaked credential is cut off before a replacement exists. Idempotent. */
+    delete: operations["revokeSecret"];
   };
   "/v2/organizations/{organizationId}/projects-with-stats": {
     /** Returns all projects (including statistics) where current user has any permission (except none) */
@@ -340,7 +423,7 @@ export interface paths {
   };
   "/v2/organizations/{organizationId}/translation-memories/{translationMemoryId}/entries": {
     /** Pagination is row-level: each STORED bucket (manual entries on a source collapse into one row; each TMX `tuid` is its own row) and each VIRTUAL origin (one row per project key) gets its own page item. The `targetLanguageTag` filter narrows the *cells* of a row to a subset of target languages; rows themselves still appear with empty cells so the user can add a translation. */
-    get: operations["list_3"];
+    get: operations["list_5"];
     post: operations["create_16"];
     /** For every entry ID in the payload, deletes the entire group that shares the same source text (and key). The request is deduplicated to distinct groups so passing multiple entries from the same row is a no-op past the first one. */
     delete: operations["deleteMultipleGroups"];
@@ -463,6 +546,24 @@ export interface paths {
     /** Returns all API keys for specified project */
     get: operations["allByProject"];
   };
+  "/v2/projects/{projectId}/apps": {
+    /** Returns all apps registered in the project's organization, each annotated with whether it is enabled for this project. Requires project.edit: it discloses the organization's whole app inventory, including apps not enabled for this project. */
+    get: operations["list_14"];
+  };
+  "/v2/projects/{projectId}/apps/enabled": {
+    /** Returns only the apps enabled for this project, which every project member needs to render their dashboard pages. Discloses nothing about the organization's other apps. */
+    get: operations["listEnabled"];
+  };
+  "/v2/projects/{projectId}/apps/{installId}": {
+    /** Enables the given app install for this project. Idempotent. */
+    put: operations["enable"];
+    /** Disables the given app for this project. Idempotent — no-op if it wasn't enabled. */
+    delete: operations["disable"];
+  };
+  "/v2/projects/{projectId}/apps/{installId}/token": {
+    /** Issues a short-lived JWT bound to (install, project, current user) that the dashboard iframe uses to call Tolgee's REST API on behalf of the user. Returns 404 if the install is not enabled for this project. */
+    post: operations["mintToken"];
+  };
   "/v2/projects/{projectId}/auto-translation-settings": {
     /** Returns default auto translation settings for project (deprecated: use per language config with null language id) */
     get: operations["getAutoTranslationSettings"];
@@ -474,7 +575,7 @@ export interface paths {
     delete: operations["removeAvatar_1"];
   };
   "/v2/projects/{projectId}/batch-jobs": {
-    get: operations["list_4"];
+    get: operations["list_8"];
   };
   "/v2/projects/{projectId}/batch-jobs/{id}": {
     get: operations["get_22"];
@@ -535,7 +636,7 @@ export interface paths {
     post: operations["setProtected"];
   };
   "/v2/projects/{projectId}/content-delivery-configs": {
-    get: operations["list_2"];
+    get: operations["list_4"];
     post: operations["create_10"];
   };
   "/v2/projects/{projectId}/content-delivery-configs/{id}": {
@@ -546,7 +647,7 @@ export interface paths {
     delete: operations["delete_5"];
   };
   "/v2/projects/{projectId}/content-storages": {
-    get: operations["list_1"];
+    get: operations["list_3"];
     post: operations["create_9"];
   };
   "/v2/projects/{projectId}/content-storages/test": {
@@ -734,7 +835,7 @@ export interface paths {
     get: operations["selectKeys_2"];
   };
   "/v2/projects/{projectId}/keys/trash": {
-    get: operations["list_8"];
+    get: operations["list_12"];
   };
   "/v2/projects/{projectId}/keys/trash/deleters": {
     get: operations["listDeleters"];
@@ -1058,7 +1159,7 @@ export interface paths {
   };
   "/v2/projects/{projectId}/translation-memories": {
     /** Always readable. When the TRANSLATION_MEMORY feature is not enabled for the organization, only the project-type assignment (if any) is returned so the settings page can still show the row that already drives in-project suggestions. */
-    get: operations["list_6"];
+    get: operations["list_10"];
   };
   "/v2/projects/{projectId}/translation-memories/project-tm-settings": {
     /** Sets TM-level flags on the project's own PROJECT-type TM. The shared-TM update endpoint rejects PROJECT TMs; this narrow endpoint exists so project admins can toggle the `writeOnlyReviewed` flag without org-level privileges. */
@@ -1160,7 +1261,7 @@ export interface paths {
     put: operations["setUsersPermissions_1"];
   };
   "/v2/projects/{projectId}/webhook-configs": {
-    get: operations["list"];
+    get: operations["list_2"];
     post: operations["create"];
   };
   "/v2/projects/{projectId}/webhook-configs/{id}": {
@@ -1171,6 +1272,30 @@ export interface paths {
   "/v2/projects/{projectId}/webhook-configs/{id}/test": {
     /** Sends a test request to the webhook */
     post: operations["test"];
+  };
+  "/v2/public/apps/app-secrets/issue": {
+    /** Mints a fresh app-level secret and returns it — the only place it is ever disclosed. The secret this call authenticated with keeps working, so the app can store the new one and only then revoke the old one. The new secret is also pushed to the app's base URL over the lifecycle channel. */
+    post: operations["issue"];
+  };
+  "/v2/public/apps/app-secrets/list": {
+    /** Returns every app-level secret, revoked ones included, without disclosing any of them. */
+    post: operations["list_1"];
+  };
+  "/v2/public/apps/app-secrets/revoke": {
+    /** The secret stops authenticating immediately. Revoking the app's last live secret is refused here — the app authenticates with a secret, so it would lock itself out of this very endpoint. Issue the replacement first. Idempotent. */
+    post: operations["revoke_1"];
+  };
+  "/v2/public/apps/installations/list": {
+    /** Authenticates with the app-level client credentials and returns every installation of the app on this server, with the projects each one is currently enabled for. The install ids are what the token endpoint exchanges for install-scoped access tokens. */
+    post: operations["list"];
+  };
+  "/v2/public/apps/self-register": {
+    /** Registers the app described by the manifest, without a signed-in user. Requires the `X-Tolgee-App-Registration-Secret` header to match `tolgee.apps.registration-secret`. With an `organizationSlug` the app is installed into that organization; without one it is registered as a native (server-level) app that a server admin then makes available to organizations. Re-running it for an already-registered app repoints it at the new manifest URL; the one-time client secret is returned only when the install is first created. */
+    post: operations["selfRegister"];
+  };
+  "/v2/public/apps/token": {
+    /** OAuth 2.0 client-credentials grant. Authenticates with the app-level credentials, names an installation via `install_id`, and returns a short-lived access token the app's backend uses to call Tolgee's REST API as that install. Install ids come from `POST /v2/public/apps/installations/list`. */
+    post: operations["token"];
   };
   "/v2/public/business-events/identify": {
     post: operations["identify"];
@@ -1520,6 +1645,158 @@ export interface components {
       scopes: string[];
       userFullName?: string;
       username?: string;
+    };
+    AppAccessTokenModel: {
+      access_token: string;
+      /** Format: int64 */
+      expires_in: number;
+      token_type: string;
+    };
+    AppAvailableOrganizationModel: {
+      /** Format: int64 */
+      id: number;
+      /** @example Beautiful organization */
+      name: string;
+      /** @example btforg */
+      slug: string;
+    };
+    AppClientCredentialsRequest: {
+      client_id: string;
+      client_secret: string;
+      grant_type: string;
+      /** Format: int64 */
+      install_id?: number;
+    };
+    AppCredentialsRequest: {
+      client_id: string;
+      client_secret: string;
+    };
+    AppDeliveryModel: {
+      /**
+       * Format: int64
+       * @description When retrying stopped without success. The operation that triggered the delivery still happened — issue a new secret to have the credentials delivered again.
+       */
+      abandonedAt?: number;
+      /** Format: int32 */
+      attempts: number;
+      /** Format: int64 */
+      createdAt: number;
+      /** Format: int64 */
+      deliveredAt?: number;
+      /** @description The lifecycle event as the app sees it, e.g. `app.installed` */
+      eventType: string;
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      lastAttemptAt?: number;
+      lastError?: string;
+      /**
+       * Format: int64
+       * @description The organization the event concerns, or null for app-level events
+       */
+      organizationId?: number;
+      targetUrl: string;
+    };
+    AppInstallModel: {
+      app?: components["schemas"]["AppModel"];
+      appId: string;
+      availableToAllOrganizations: boolean;
+      baseUrl: string;
+      created?: boolean;
+      /** Format: int64 */
+      id: number;
+      manifestUrl: string;
+      modules: components["schemas"]["AppManifestModules"];
+      name: string;
+      scopes: string[];
+      version: string;
+    };
+    AppManifestModules: {
+      "project-dashboard-page"?: components["schemas"]["ProjectDashboardPageModule"][];
+    };
+    AppManifestPreviewModel: {
+      appId: string;
+      baseUrl: string;
+      modules: components["schemas"]["AppManifestModules"];
+      name: string;
+      requestedScopes: string[];
+      version: string;
+    };
+    AppModel: {
+      /** @description The `id` declared in the app's manifest, unique across the server */
+      appId: string;
+      /** @description App-level OAuth client id. Present only in the response to registering the app — an organization that merely installed it never sees it. */
+      clientId?: string;
+      /** @description App-level OAuth client secret in plaintext. Administers the app across every organization that installed it and grants access to no data. Present only in the response to registering the app; Tolgee stores only a hash and cannot show it again. */
+      clientSecret?: string;
+      /** Format: int64 */
+      id: number;
+      name: string;
+      /** @description The secret Tolgee signs this app's lifecycle deliveries with. Present only in the response to registering the app. */
+      webhookSecret?: string;
+    };
+    AppSecretModel: {
+      /** Format: int64 */
+      createdAt: number;
+      /** Format: int64 */
+      id: number;
+      /**
+       * Format: int64
+       * @description When this secret was last used to administer the app, or null if never
+       */
+      lastUsedAt?: number;
+      /** @description First characters of the secret, enough to tell two of them apart */
+      prefix: string;
+      /**
+       * Format: int64
+       * @description When the secret was revoked, or null while it still authenticates
+       */
+      revokedAt?: number;
+      /** @description The secret in plaintext. Present only in the response to issuing it — Tolgee stores only a hash and cannot show it again. It administers the app and grants access to no data. */
+      secret?: string;
+    };
+    AppSecretRotationRequest: {
+      client_id: string;
+      client_secret: string;
+      /** Format: int64 */
+      secret_id?: number;
+    };
+    AppSelfEnabledProjectModel: {
+      /** Format: int64 */
+      id: number;
+      name: string;
+      organization: components["schemas"]["AppSelfProjectOrganizationModel"];
+    };
+    AppSelfInstallationModel: {
+      appId: string;
+      /** @description Projects the app is currently enabled for. These are the only projects its token may act on; the list changes whenever a project owner enables or disables the app. */
+      enabledProjects: components["schemas"]["AppSelfEnabledProjectModel"][];
+      /**
+       * Format: int64
+       * @description Id of the install the calling token belongs to
+       */
+      id: number;
+      name: string;
+      /** @description True when the install belongs to no organization — a native (server-level) install a server admin makes available to organizations. */
+      native: boolean;
+      /** @description Permission scopes granted to the install at consent time */
+      scopes: string[];
+      version: string;
+    };
+    /** @description Organization owning the project, so a multi-tenant app can partition its work */
+    AppSelfProjectOrganizationModel: {
+      /** Format: int64 */
+      id: number;
+      name: string;
+      slug: string;
+    };
+    AppSelfRegisterRequest: {
+      manifestUrl: string;
+      /** @description Slug of the organization owning the app. Leave empty to register a native (server-level) app, which belongs to no organization and is made available to organizations by a server admin. */
+      organizationSlug?: string;
+    };
+    AppTokenModel: {
+      token: string;
     };
     ApplyBranchMergeRequest: {
       deleteBranch: boolean;
@@ -1879,6 +2156,31 @@ export interface components {
         results?: components["schemas"]["AiPlaygroundResultModel"][];
       };
     };
+    CollectionModelAppAvailableOrganizationModel: {
+      _embedded?: {
+        organizations?: components["schemas"]["AppAvailableOrganizationModel"][];
+      };
+    };
+    CollectionModelAppDeliveryModel: {
+      _embedded?: {
+        appDeliveries?: components["schemas"]["AppDeliveryModel"][];
+      };
+    };
+    CollectionModelAppInstallModel: {
+      _embedded?: {
+        appInstalls?: components["schemas"]["AppInstallModel"][];
+      };
+    };
+    CollectionModelAppSecretModel: {
+      _embedded?: {
+        appSecrets?: components["schemas"]["AppSecretModel"][];
+      };
+    };
+    CollectionModelAppSelfInstallationModel: {
+      _embedded?: {
+        installations?: components["schemas"]["AppSelfInstallationModel"][];
+      };
+    };
     CollectionModelAutoTranslationConfigModel: {
       _embedded?: {
         configs?: components["schemas"]["AutoTranslationConfigModel"][];
@@ -1967,6 +2269,16 @@ export interface components {
     CollectionModelOrganizationInvitationModel: {
       _embedded?: {
         organizationInvitations?: components["schemas"]["OrganizationInvitationModel"][];
+      };
+    };
+    CollectionModelOwnedAppModel: {
+      _embedded?: {
+        ownedApps?: components["schemas"]["OwnedAppModel"][];
+      };
+    };
+    CollectionModelProjectAppModel: {
+      _embedded?: {
+        projectApps?: components["schemas"]["ProjectAppModel"][];
       };
     };
     CollectionModelProjectInvitationModel: {
@@ -3208,7 +3520,30 @@ export interface components {
         | "source_and_target_plan_must_be_different"
         | "project_import_version_mismatch"
         | "project_import_missing_project_json"
-        | "project_import_corrupt_archive";
+        | "project_import_corrupt_archive"
+        | "app_manifest_fetch_failed"
+        | "app_manifest_invalid"
+        | "app_already_installed"
+        | "app_install_not_found"
+        | "invalid_app_credentials"
+        | "app_acting_as_user_not_project_member"
+        | "app_unsupported_grant_type"
+        | "app_self_registration_disabled"
+        | "invalid_app_registration_secret"
+        | "organization_has_no_owner"
+        | "app_not_available_for_organization"
+        | "initial_user_not_found"
+        | "app_access_forbidden"
+        | "app_not_enabled_for_project"
+        | "app_manifest_same_origin_as_tolgee"
+        | "app_install_secret_not_found"
+        | "app_too_many_live_secrets"
+        | "app_cannot_revoke_last_secret"
+        | "app_not_registered"
+        | "app_already_registered"
+        | "app_not_found"
+        | "app_secret_not_found"
+        | "app_install_id_required";
       params?: { [key: string]: unknown }[];
     };
     ExistenceEntityDescription: {
@@ -4637,6 +4972,39 @@ export interface components {
       /** @example btforg */
       slug: string;
     };
+    OwnedAppModel: {
+      /** @description The `id` declared in the app's manifest, unique across the server */
+      appId: string;
+      baseUrl: string;
+      /** @description App-level OAuth client id, or null for an app that predates the app layer */
+      clientId?: string;
+      /** Format: int64 */
+      id: number;
+      /**
+       * Format: int64
+       * @description How many organizations, this one included, currently have the app installed
+       */
+      installCount: number;
+      /**
+       * Format: int32
+       * @description Consecutive failed manifest checks; zero while the manifest is answering
+       */
+      manifestFailureCount: number;
+      /** Format: int64 */
+      manifestFirstFailedAt?: number;
+      /** Format: int64 */
+      manifestLastCheckedAt?: number;
+      manifestLastError?: string;
+      /** @description `UNREACHABLE` or `INVALID`, or null while the manifest is answering */
+      manifestLastFailureKind?: string;
+      manifestUrl: string;
+      name: string;
+      /**
+       * Format: int64
+       * @description When the app was marked unhealthy, or null while it is healthy. An unhealthy app keeps working; it is only a warning that its manifest has stopped answering.
+       */
+      unhealthySince?: number;
+    };
     PageMetadata: {
       /** Format: int64 */
       number?: number;
@@ -4657,6 +5025,12 @@ export interface components {
     PagedModelApiKeyModel: {
       _embedded?: {
         apiKeys?: components["schemas"]["ApiKeyModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelAppInstallModel: {
+      _embedded?: {
+        appInstalls?: components["schemas"]["AppInstallModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
     };
@@ -5299,6 +5673,12 @@ export interface components {
         | "SSO_GLOBAL";
       username: string;
     };
+    ProjectActivityAppModel: {
+      appId?: string;
+      /** Format: int64 */
+      installId: number;
+      name?: string;
+    };
     ProjectActivityAuthorModel: {
       avatar?: components["schemas"]["Avatar"];
       deleted: boolean;
@@ -5308,6 +5688,7 @@ export interface components {
       username?: string;
     };
     ProjectActivityModel: {
+      app?: components["schemas"]["ProjectActivityAppModel"];
       author?: components["schemas"]["ProjectActivityAuthorModel"];
       counts?: { [key: string]: number };
       meta?: { [key: string]: { [key: string]: unknown } };
@@ -5430,6 +5811,16 @@ export interface components {
        */
       description?: string;
     };
+    ProjectAppModel: {
+      appId: string;
+      baseUrl: string;
+      enabled: boolean;
+      /** Format: int64 */
+      id: number;
+      modules: components["schemas"]["AppManifestModules"];
+      name: string;
+      version: string;
+    };
     /** @description Project assignments with access settings. */
     ProjectAssignmentDto: {
       /**
@@ -5446,6 +5837,12 @@ export interface components {
       readAccess: boolean;
       /** @description Whether the project can write to this TM */
       writeAccess: boolean;
+    };
+    ProjectDashboardPageModule: {
+      entry: string;
+      icon: string;
+      key: string;
+      title: string;
     };
     ProjectInvitationModel: {
       code?: string;
@@ -5774,6 +6171,7 @@ export interface components {
     PublicConfigurationDTO: {
       allowRegistrations: boolean;
       appName: string;
+      appsEnabled: boolean;
       authMethods?: components["schemas"]["AuthMethodsDTO"];
       authentication: boolean;
       billing: components["schemas"]["PublicBillingConfigurationDTO"];
@@ -6160,6 +6558,9 @@ export interface components {
        * @example 1661172869000
        */
       expiresAt?: number;
+    };
+    RegisterAppRequest: {
+      manifestUrl: string;
     };
     /** @description Keys in the document used as a context for machine translation. Keys in the same order as they appear in the document. The order is important! We are using it for graph distance calculation. */
     RelatedKeyDto: {
@@ -7096,7 +7497,30 @@ export interface components {
         | "source_and_target_plan_must_be_different"
         | "project_import_version_mismatch"
         | "project_import_missing_project_json"
-        | "project_import_corrupt_archive";
+        | "project_import_corrupt_archive"
+        | "app_manifest_fetch_failed"
+        | "app_manifest_invalid"
+        | "app_already_installed"
+        | "app_install_not_found"
+        | "invalid_app_credentials"
+        | "app_acting_as_user_not_project_member"
+        | "app_unsupported_grant_type"
+        | "app_self_registration_disabled"
+        | "invalid_app_registration_secret"
+        | "organization_has_no_owner"
+        | "app_not_available_for_organization"
+        | "initial_user_not_found"
+        | "app_access_forbidden"
+        | "app_not_enabled_for_project"
+        | "app_manifest_same_origin_as_tolgee"
+        | "app_install_secret_not_found"
+        | "app_too_many_live_secrets"
+        | "app_cannot_revoke_last_secret"
+        | "app_not_registered"
+        | "app_already_registered"
+        | "app_not_found"
+        | "app_secret_not_found"
+        | "app_install_id_required";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };
@@ -8512,6 +8936,425 @@ export interface operations {
       };
     };
   };
+  /** Returns the apps registered at server level — those belonging to no organization. The client secret is never disclosed here. */
+  list_7: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelAppInstallModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Fetches the manifest at the given URL and registers the app at server level, belonging to no organization. The response is the only place the client secret is ever disclosed. When an organization has already registered the same app, the native install is bound to that app and no app-level credentials are returned. */
+  register_1: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AppInstallModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RegisterAppRequest"];
+      };
+    };
+  };
+  /** Fetches the manifest at the given URL and returns its parsed contents (including the requested scopes) without persisting anything. Used by the registration UI to show a consent prompt before registering. */
+  preview_1: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AppManifestPreviewModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RegisterAppRequest"];
+      };
+    };
+  };
+  /** Removes the native app from the server: its availability for every organization, its enablement in every project and the install itself. Its client credentials stop working. */
+  deregister: {
+    parameters: {
+      path: {
+        installId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Returns the organizations allowed to enable this native app in their projects. */
+  listOrganizations: {
+    parameters: {
+      path: {
+        installId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelAppAvailableOrganizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Allows every organization — including organizations created later — to enable this native app. Explicit per-organization grants are kept, so revoking this falls back to them. Idempotent. */
+  grantToAllOrganizations: {
+    parameters: {
+      path: {
+        installId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Drops the blanket availability and disables the app in every project whose organization has no explicit grant. Idempotent. */
+  revokeFromAllOrganizations: {
+    parameters: {
+      path: {
+        installId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Allows the organization's projects to enable this native app. Idempotent. */
+  grant: {
+    parameters: {
+      path: {
+        installId: number;
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Revokes the explicit grant and disables the app in every project of that organization — unless the app is available to all organizations, which keeps covering it. Idempotent — no-op when it was not available. */
+  revoke: {
+    parameters: {
+      path: {
+        installId: number;
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
   /** Returns all chunk execution items currently in the batch job queue */
   getBatchJobQueue: {
     responses: {
@@ -9492,7 +10335,7 @@ export interface operations {
     };
   };
   /** Returns specific API key info */
-  get_26: {
+  get_27: {
     parameters: {
       path: {
         keyId: number;
@@ -9503,6 +10346,49 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["ApiKeyModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Returns the install the calling install-context token belongs to, together with the projects the app is currently enabled for and the organization owning each of them. Requires a token from the client-credentials grant — a user-context token (the one the dashboard iframe gets) is refused, because it acts for a single user who need not be a member of every project the install is enabled for. A collection is returned so that an app holding several installs on one server stays representable. */
+  getSelfInstallations: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelAppSelfInstallationModel"];
         };
       };
       /** Bad Request */
@@ -10987,6 +11873,361 @@ export interface operations {
       };
     };
   };
+  /** Returns all apps registered for the organization. */
+  list_6: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelAppInstallModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Fetches the manifest at the given URL and installs the app it describes for the organization. The app must already be registered on this server: when it is not, the call fails with the `app_not_registered` code, and the caller may register it — becoming its owner — through `POST /register`. No credentials are disclosed here: the app reaches its new install with its app-level credentials. */
+  install: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AppInstallModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RegisterAppRequest"];
+      };
+    };
+  };
+  /** Fetches the manifest at the given URL and returns its parsed contents (including the requested scopes) without persisting anything. Used by the registration UI to show a consent prompt before installing. */
+  preview: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AppManifestPreviewModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RegisterAppRequest"];
+      };
+    };
+  };
+  /** Registers the app described by the manifest and installs it for the organization, in one operation. The organization becomes the app's owner, and the response is the only place the app-level credentials are ever disclosed. When the app is already registered — by another organization or by this one — it is only installed, and no app-level credentials are returned. */
+  register: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AppInstallModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RegisterAppRequest"];
+      };
+    };
+  };
+  /** Removes the registered app from the organization. */
+  remove: {
+    parameters: {
+      path: {
+        organizationId: number;
+        installId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Repoints an existing install at a new manifest URL and re-fetches the manifest from there. The new manifest must declare the same `id` as the original. Useful for development: a tunnel URL that changes on every restart can be swapped in without re-installing the app. */
+  updateManifestUrl: {
+    parameters: {
+      path: {
+        organizationId: number;
+        installId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AppInstallModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RegisterAppRequest"];
+      };
+    };
+  };
+  /** Re-fetches the manifest from the registered URL and updates the stored snapshot. */
+  refresh: {
+    parameters: {
+      path: {
+        organizationId: number;
+        installId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AppInstallModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
   /** Returns all base languages in use by projects owned by specified organization */
   getAllBaseLanguagesInUse: {
     parameters: {
@@ -11919,7 +13160,7 @@ export interface operations {
       };
     };
   };
-  get_25: {
+  get_26: {
     parameters: {
       path: {
         organizationId: number;
@@ -12487,6 +13728,344 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["CreditBalanceModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Returns every app the organization registered, together with the health of its manifest. An app the organization also installed appears in the installed apps list as well. */
+  list_15: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelOwnedAppModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  get_25: {
+    parameters: {
+      path: {
+        organizationId: number;
+        appId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["OwnedAppModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Deregisters the app and uninstalls it from every organization that installed it, revoking both the app-level and every per-install credential, and announcing an uninstall to the app for each of those organizations. Only the owner may do this; an organization that installed the app removes only its own install through `DELETE /apps/{installId}`. */
+  removeEverywhere: {
+    parameters: {
+      path: {
+        organizationId: number;
+        appId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Every signed POST Tolgee has made to the app's base URL, with the outcome of each. This is where an owner finds out that an install's credentials never reached the app. */
+  listDeliveries: {
+    parameters: {
+      path: {
+        organizationId: number;
+        appId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelAppDeliveryModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Returns every app-level secret, revoked ones included, without disclosing any of them. These administer the app across every organization that installed it and grant access to no data — they are not the per-install secrets under `/apps/{installId}/secrets`. */
+  listSecrets: {
+    parameters: {
+      path: {
+        organizationId: number;
+        appId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelAppSecretModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Phase one of an app-level rotation: mints a second secret while every existing one keeps working. The app's installs, their own secrets, their organization availability and their per-project enablements are all untouched. The new secret is both returned here — the only place it is ever disclosed — and pushed to the app over the lifecycle channel. */
+  issueSecret: {
+    parameters: {
+      path: {
+        organizationId: number;
+        appId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AppSecretModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Phase two of a rotation: the secret stops authenticating immediately and every other one is untouched. Revoking the last live one is allowed — it is how a leaked credential is cut off before a replacement exists. Idempotent. */
+  revokeSecret: {
+    parameters: {
+      path: {
+        organizationId: number;
+        appId: number;
+        secretId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AppSecretModel"];
         };
       };
       /** Bad Request */
@@ -13381,7 +14960,7 @@ export interface operations {
     };
   };
   /** Pagination is row-level: each STORED bucket (manual entries on a source collapse into one row; each TMX `tuid` is its own row) and each VIRTUAL origin (one row per project key) gets its own page item. The `targetLanguageTag` filter narrows the *cells* of a row to a subset of target languages; rows themselves still appear with empty cells so the user can add a translation. */
-  list_3: {
+  list_5: {
     parameters: {
       path: {
         organizationId: number;
@@ -15464,6 +17043,245 @@ export interface operations {
       };
     };
   };
+  /** Returns all apps registered in the project's organization, each annotated with whether it is enabled for this project. Requires project.edit: it discloses the organization's whole app inventory, including apps not enabled for this project. */
+  list_14: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelProjectAppModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Returns only the apps enabled for this project, which every project member needs to render their dashboard pages. Discloses nothing about the organization's other apps. */
+  listEnabled: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelProjectAppModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Enables the given app install for this project. Idempotent. */
+  enable: {
+    parameters: {
+      path: {
+        projectId: number;
+        installId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ProjectAppModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Disables the given app for this project. Idempotent — no-op if it wasn't enabled. */
+  disable: {
+    parameters: {
+      path: {
+        projectId: number;
+        installId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Issues a short-lived JWT bound to (install, project, current user) that the dashboard iframe uses to call Tolgee's REST API on behalf of the user. Returns 404 if the install is not enabled for this project. */
+  mintToken: {
+    parameters: {
+      path: {
+        projectId: number;
+        installId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AppTokenModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
   /** Returns default auto translation settings for project (deprecated: use per language config with null language id) */
   getAutoTranslationSettings: {
     parameters: {
@@ -15667,7 +17485,7 @@ export interface operations {
       };
     };
   };
-  list_4: {
+  list_8: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -16728,7 +18546,7 @@ export interface operations {
       };
     };
   };
-  list_2: {
+  list_4: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -17025,7 +18843,7 @@ export interface operations {
       };
     };
   };
-  list_1: {
+  list_3: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -19596,7 +21414,7 @@ export interface operations {
       };
     };
   };
-  list_8: {
+  list_12: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -25696,7 +27514,7 @@ export interface operations {
     };
   };
   /** Always readable. When the TRANSLATION_MEMORY feature is not enabled for the organization, only the project-type assignment (if any) is returned so the settings page can still show the row that already drives in-project suggestions. */
-  list_6: {
+  list_10: {
     parameters: {
       path: {
         projectId: number;
@@ -27890,7 +29708,7 @@ export interface operations {
       };
     };
   };
-  list: {
+  list_2: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -28188,6 +30006,299 @@ export interface operations {
             | components["schemas"]["ErrorResponseTyped"]
             | components["schemas"]["ErrorResponseBody"];
         };
+      };
+    };
+  };
+  /** Mints a fresh app-level secret and returns it — the only place it is ever disclosed. The secret this call authenticated with keeps working, so the app can store the new one and only then revoke the old one. The new secret is also pushed to the app's base URL over the lifecycle channel. */
+  issue: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AppSecretModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AppSecretRotationRequest"];
+      };
+    };
+  };
+  /** Returns every app-level secret, revoked ones included, without disclosing any of them. */
+  list_1: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelAppSecretModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AppSecretRotationRequest"];
+      };
+    };
+  };
+  /** The secret stops authenticating immediately. Revoking the app's last live secret is refused here — the app authenticates with a secret, so it would lock itself out of this very endpoint. Issue the replacement first. Idempotent. */
+  revoke_1: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AppSecretModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AppSecretRotationRequest"];
+      };
+    };
+  };
+  /** Authenticates with the app-level client credentials and returns every installation of the app on this server, with the projects each one is currently enabled for. The install ids are what the token endpoint exchanges for install-scoped access tokens. */
+  list: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelAppSelfInstallationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AppCredentialsRequest"];
+      };
+    };
+  };
+  /** Registers the app described by the manifest, without a signed-in user. Requires the `X-Tolgee-App-Registration-Secret` header to match `tolgee.apps.registration-secret`. With an `organizationSlug` the app is installed into that organization; without one it is registered as a native (server-level) app that a server admin then makes available to organizations. Re-running it for an already-registered app repoints it at the new manifest URL; the one-time client secret is returned only when the install is first created. */
+  selfRegister: {
+    parameters: {
+      header: {
+        "X-Tolgee-App-Registration-Secret"?: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AppInstallModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AppSelfRegisterRequest"];
+      };
+    };
+  };
+  /** OAuth 2.0 client-credentials grant. Authenticates with the app-level credentials, names an installation via `install_id`, and returns a short-lived access token the app's backend uses to call Tolgee's REST API as that install. Install ids come from `POST /v2/public/apps/installations/list`. */
+  token: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AppAccessTokenModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AppClientCredentialsRequest"];
       };
     };
   };

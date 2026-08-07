@@ -8,11 +8,13 @@ import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityModifiedEntity_
 import io.tolgee.model.activity.ActivityRevision
 import io.tolgee.model.activity.ActivityRevision_
+import io.tolgee.model.apps.AppInstall
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.Branch_
 import io.tolgee.model.views.activity.ModifiedEntityView
 import io.tolgee.model.views.activity.ProjectActivityView
 import io.tolgee.repository.activity.ActivityRevisionRepository
+import io.tolgee.repository.apps.AppInstallRepository
 import io.tolgee.service.security.UserAccountService
 import jakarta.persistence.EntityManager
 import jakarta.persistence.criteria.CriteriaBuilder
@@ -37,10 +39,14 @@ class ActivityViewByRevisionsProvider(
   private val activityRevisionRepository: ActivityRevisionRepository =
     applicationContext.getBean(ActivityRevisionRepository::class.java)
 
+  private val appInstallRepository: AppInstallRepository =
+    applicationContext.getBean(AppInstallRepository::class.java)
+
   private val entityManager: EntityManager =
     applicationContext.getBean(EntityManager::class.java)
 
   private lateinit var authors: Map<Long, UserAccount>
+  private lateinit var apps: Map<Long, AppInstall>
   private lateinit var modifiedEntities: Map<Long, List<ModifiedEntityView>>
   private lateinit var revisionIds: MutableList<Long>
   private lateinit var counts: MutableMap<Long, MutableMap<String, Long>>
@@ -55,6 +61,7 @@ class ActivityViewByRevisionsProvider(
 
     return revisions.map { revision ->
       val author = authors[revision.authorId]
+      val app = apps[revision.appInstallId]
       ProjectActivityView(
         revisionId = revision.id,
         timestamp = revision.timestamp.time,
@@ -64,6 +71,9 @@ class ActivityViewByRevisionsProvider(
         authorName = author?.name,
         authorAvatarHash = author?.avatarHash,
         authorDeleted = author?.deletedAt != null,
+        appInstallId = revision.appInstallId,
+        appAppId = app?.appId,
+        appName = app?.name,
         meta = revision.meta,
         modifications = modifiedEntities[revision.id],
         counts = counts[revision.id],
@@ -90,6 +100,14 @@ class ActivityViewByRevisionsProvider(
     params = getParams()
 
     authors = getAuthors(revisions)
+
+    apps = getApps(revisions)
+  }
+
+  private fun getApps(revisions: Collection<ActivityRevision>): Map<Long, AppInstall> {
+    val ids = revisions.mapNotNull { it.appInstallId }.toSet()
+    if (ids.isEmpty()) return emptyMap()
+    return appInstallRepository.findAllById(ids).associateBy { it.id }
   }
 
   private fun getParams(): Map<Long, Any?> {

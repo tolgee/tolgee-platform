@@ -1,0 +1,116 @@
+/* Colors come from applyTolgeeTheme(ctx.theme) → --tg-color-*.
+   The hex fallbacks only apply when the page is opened outside Tolgee. */
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, system-ui, sans-serif;
+  color: var(--tg-color-text, #1d1b20);
+  background: var(--tg-color-background, #fff);
+}
+
+.aw-page {
+  padding: 16px 20px;
+  max-width: 860px;
+}
+
+.aw-title {
+  margin: 0 0 4px;
+  font-size: 1.3rem;
+}
+
+.aw-description {
+  margin: 0 0 20px;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.aw-muted {
+  font-size: 0.9rem;
+  color: var(--tg-color-text-secondary, #6b6375);
+}
+
+.aw-notice {
+  padding: 12px 14px;
+  border: 1px solid var(--tg-color-divider, #e4e2dd);
+  border-radius: 8px;
+  background: var(--tg-color-background-paper, #f4f3ec);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.aw-notice-error {
+  border-color: var(--tg-color-error, #cc0000);
+}
+
+.aw-notice code {
+  background: var(--tg-color-background, #fff);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+.aw-feed {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+}
+
+.aw-feed-item {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--tg-color-divider, #e4e2dd);
+}
+
+.aw-feed-headline {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.aw-feed-diff {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+  font-size: 0.9rem;
+}
+
+.aw-feed-meta {
+  margin-top: 4px;
+  font-size: 0.78rem;
+}
+
+.aw-old {
+  color: var(--tg-color-text-secondary, #6b6375);
+  text-decoration: line-through;
+}
+
+.aw-arrow {
+  color: var(--tg-color-text-secondary, #6b6375);
+}
+
+.aw-new {
+  color: var(--tg-color-text, #1d1b20);
+}
+
+.aw-key-name {
+  font-size: 0.85em;
+  background: var(--tg-color-background-paper, #f4f3ec);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.aw-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  padding: 1px 8px;
+  border-radius: 10px;
+  background: var(--tg-color-background-paper, #f4f3ec);
+  color: var(--tg-color-text-secondary, #6b6375);
+}

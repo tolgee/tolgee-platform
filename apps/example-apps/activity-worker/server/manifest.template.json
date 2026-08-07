@@ -1,0 +1,12 @@
+{
+  "id": "activity-worker",
+  "name": "Activity Worker",
+  "version": "0.1.0",
+  "baseUrl": "__BASE_URL__",
+  "scopes": ["activity.view", "translations.view"],
+  "modules": {
+    "project-dashboard-page": [
+      { "key": "feed", "title": "Activity Worker", "icon": "Zap", "entry": "/" }
+    ]
+  }
+}

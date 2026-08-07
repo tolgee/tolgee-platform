@@ -30,6 +30,7 @@ import io.tolgee.security.ratelimit.RateLimitPolicy
 import io.tolgee.security.ratelimit.RateLimitService
 import io.tolgee.security.ratelimit.RateLimitedException
 import io.tolgee.security.thirdParty.SsoDelegate
+import io.tolgee.service.apps.AppInstallService
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PatService
 import io.tolgee.service.security.UserAccountService
@@ -73,6 +74,8 @@ class AuthenticationFilterTest {
 
   private val jwtService = Mockito.mock(JwtService::class.java)
 
+  private val appTokenService = Mockito.mock(AppTokenService::class.java)
+
   private val pakService = Mockito.mock(ApiKeyService::class.java)
 
   private val patService = Mockito.mock(PatService::class.java)
@@ -91,14 +94,16 @@ class AuthenticationFilterTest {
 
   private val authenticationFilter =
     AuthenticationFilter(
-      tolgeeProperties,
-      currentDateProvider,
-      rateLimitService,
-      jwtService,
-      userAccountService,
-      pakService,
-      patService,
-      ssoDelegate,
+      tolgeeProperties = tolgeeProperties,
+      currentDateProvider = currentDateProvider,
+      rateLimitService = rateLimitService,
+      jwtService = jwtService,
+      appTokenService = appTokenService,
+      appInstallService = Mockito.mock(AppInstallService::class.java),
+      userAccountService = userAccountService,
+      apiKeyService = pakService,
+      patService = patService,
+      ssoDelegate = ssoDelegate,
     )
 
   private val authenticationFacade =
@@ -112,6 +117,12 @@ class AuthenticationFilterTest {
   fun setupMocksAndSecurityCtx() {
     val now = Date()
     Mockito.`when`(currentDateProvider.date).thenReturn(now)
+
+    // Every token in this class is a user JWT, so app-token validation always rejects it and the
+    // filter falls through to the JWT path.
+    Mockito
+      .`when`(appTokenService.validateToken(any()))
+      .thenThrow(AuthenticationException(Message.INVALID_JWT_TOKEN))
 
     Mockito.`when`(tolgeeProperties.authentication).thenReturn(authProperties)
     Mockito.`when`(tolgeeProperties.internal).thenReturn(internalProperties)

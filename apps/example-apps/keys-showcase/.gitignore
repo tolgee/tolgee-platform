@@ -1,0 +1,12 @@
+node_modules
+dist
+*.tsbuildinfo
+
+# Local state: the dev-tunnel URLs and install.json, which holds the app's
+# one-time client secret. Never commit.
+.tolgee-dev/
+
+# Local env overrides.
+.env.local
+
+.DS_Store

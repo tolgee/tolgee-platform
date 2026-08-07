@@ -4,6 +4,7 @@ import { PrivateRoute } from 'tg.component/common/PrivateRoute';
 import { LINKS } from 'tg.constants/links';
 import { AdministrationOrganizations } from './AdministrationOrganizations';
 import { AdministrationUsers } from './AdministrationUsers';
+import { AdministrationApps } from 'tg.views/administration/apps/AdministrationApps';
 
 import { routes } from 'tg.ee';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
@@ -25,6 +26,9 @@ export const AdministrationView = () => {
             search={search as string}
             setSearch={setSearch}
           />
+        </PrivateRoute>
+        <PrivateRoute exact path={LINKS.ADMINISTRATION_APPS.template}>
+          <AdministrationApps />
         </PrivateRoute>
       </Switch>
       <routes.Administration />

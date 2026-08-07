@@ -67,7 +67,7 @@ class SelectAllController(
       languageService.getLanguagesForTranslationsView(
         params.languages,
         projectHolder.project.id,
-        authenticationFacade.authenticatedUser.id,
+        authenticationFacade.actingPersonUserId,
       )
 
     return SelectAllResponse(

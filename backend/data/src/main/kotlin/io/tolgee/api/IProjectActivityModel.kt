@@ -7,6 +7,7 @@ interface IProjectActivityModel {
   val timestamp: Long
   val type: ActivityType
   val author: IProjectActivityAuthorModel?
+  val app: IProjectActivityAppModel?
   val modifiedEntities: Map<String, List<IModifiedEntityModel>>?
   val meta: Map<String, Any?>?
   val counts: MutableMap<String, Long>?
