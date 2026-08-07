@@ -5,8 +5,11 @@ export type TolgeeLifecycleEventType =
   | 'app.uninstalled'
   | 'app.secret.rotated'
 
-/** Which credential layer a `app.secret.rotated` delivery replaces. */
-export type TolgeeCredentialLayer = 'app' | 'install'
+/**
+ * Which credential layer a `app.secret.rotated` delivery replaces. Only the
+ * app layer exists — installs carry no credentials of their own.
+ */
+export type TolgeeCredentialLayer = 'app'
 
 /**
  * App-level credentials: they identify and administer the app across every
@@ -32,13 +35,12 @@ export type DeliveredOrganization = {
   slug: string | null
 }
 
-/** Per-install credentials: the ones that actually reach an organization's data. */
+/**
+ * An installation named by a delivery. It carries no credentials — the
+ * app-level ones mint tokens for it.
+ */
 export type DeliveredInstall = {
   installId: number | null
-  /** Prefixed `tgapp_`. */
-  clientId: string | null
-  /** Prefixed `tgapps_`. Present on install and on an install-level rotation. */
-  clientSecret: string | null
   /** True when the install belongs to no organization. */
   native: boolean
   organization: DeliveredOrganization | null

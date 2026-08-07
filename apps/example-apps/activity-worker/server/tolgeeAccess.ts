@@ -20,8 +20,8 @@ let cached: Access | null = null
 
 /**
  * The app acting as itself: a typed Tolgee client backed by an install-context
- * token, minted from the client credentials the SDK resolved (stored install
- * record, or `TOLGEE_APP_CLIENT_ID` / `TOLGEE_APP_CLIENT_SECRET`).
+ * token, minted from the app credentials the SDK resolved (stored, or
+ * `TOLGEE_APP_CLIENT_ID` / `TOLGEE_APP_CLIENT_SECRET`) and the stored install.
  */
 export const tolgeeClient = async (): Promise<TolgeeAppServerClient> => {
   if (cached && cached.expiresAt > Date.now()) return cached.client

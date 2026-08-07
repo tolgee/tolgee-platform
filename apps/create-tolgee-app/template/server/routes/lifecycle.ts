@@ -25,7 +25,7 @@ export const registerLifecycleRoute = (app: Express): void => {
       installed: (event) => {
         console.log(
           `[lifecycle] installed by ${event.organization?.slug ?? 'no organization'} ` +
-            `(install ${event.install?.installId}) — credentials stored.`
+            `(install ${event.install?.installId}) — recorded; the app credentials mint its tokens.`
         )
       },
       uninstalled: (event) => {

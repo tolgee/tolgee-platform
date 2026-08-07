@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, it } from 'node:test'
 import { loadTolgeeAppConfig } from './config'
-import { readStoredAppInstall, saveAppInstall } from './installStore'
+import { readStoredApp, saveApp, saveAppInstall } from './installStore'
 import {
   ensureAppCredentialsFresh,
   rotateAppClientSecret,
@@ -24,16 +24,12 @@ afterEach(() => {
   rmSync(stateDir, { recursive: true, force: true })
 })
 
-/** Answers both calls the rotation makes: the token exchange and the issue. */
 const stubTolgee = (issued: unknown): string[] => {
   const calls: string[] = []
   globalThis.fetch = (async (input: RequestInfo | URL) => {
     const url = String(input)
     calls.push(url)
-    const body = url.endsWith('/v2/public/apps/token')
-      ? { access_token: 'install-token', expires_in: 300 }
-      : issued
-    return new Response(JSON.stringify(body), {
+    return new Response(JSON.stringify(issued), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     })
@@ -42,16 +38,16 @@ const stubTolgee = (issued: unknown): string[] => {
 }
 
 const storeCredentials = (secretIssuedAt?: string): void => {
-  saveAppInstall(
+  saveApp(
     {
       tolgeeUrl: TOLGEE_URL,
-      installId: 42,
       clientId: 'issued-id',
       clientSecret: 'old-secret',
       secretIssuedAt,
     },
     { stateDir }
   )
+  saveAppInstall({ tolgeeUrl: TOLGEE_URL, installId: 42 }, { stateDir })
 }
 
 describe('rotateAppClientSecret', () => {
@@ -65,7 +61,7 @@ describe('rotateAppClientSecret', () => {
     })
 
     assert.equal(result.secretId, 7)
-    assert.ok(calls.some((url) => url.endsWith('/v2/apps/self/secrets')))
+    assert.ok(calls.some((url) => url.endsWith('/v2/public/apps/app-secrets/issue')))
 
     const config = loadTolgeeAppConfig(
       { TOLGEE_URL } as NodeJS.ProcessEnv,
@@ -82,8 +78,7 @@ describe('rotateAppClientSecret', () => {
 
     await rotateAppClientSecret({ tolgeeUrl: TOLGEE_URL, stateDir })
 
-    const issuedAt = readStoredAppInstall(TOLGEE_URL, { stateDir })
-      ?.secretIssuedAt
+    const issuedAt = readStoredApp(TOLGEE_URL, { stateDir })?.secretIssuedAt
     assert.ok(issuedAt !== null && issuedAt !== undefined)
     assert.ok(Date.parse(issuedAt) > Date.parse('2020-01-01T00:00:00.000Z'))
   })
@@ -96,7 +91,7 @@ describe('rotateAppClientSecret', () => {
       rotateAppClientSecret({ tolgeeUrl: TOLGEE_URL, stateDir })
     )
     assert.equal(
-      readStoredAppInstall(TOLGEE_URL, { stateDir })?.clientSecret,
+      readStoredApp(TOLGEE_URL, { stateDir })?.clientSecret,
       'old-secret'
     )
   })
@@ -131,7 +126,7 @@ describe('ensureAppCredentialsFresh', () => {
 
     assert.equal(result.rotated, true)
     assert.equal(
-      readStoredAppInstall(TOLGEE_URL, { stateDir })?.clientSecret,
+      readStoredApp(TOLGEE_URL, { stateDir })?.clientSecret,
       'new-secret'
     )
   })
@@ -148,7 +143,7 @@ describe('ensureAppCredentialsFresh', () => {
     assert.equal(result.rotated, false)
     assert.equal(result.reason, 'fresh')
     assert.equal(
-      readStoredAppInstall(TOLGEE_URL, { stateDir })?.clientSecret,
+      readStoredApp(TOLGEE_URL, { stateDir })?.clientSecret,
       'old-secret'
     )
   })

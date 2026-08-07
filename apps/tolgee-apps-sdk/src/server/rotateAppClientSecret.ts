@@ -1,21 +1,23 @@
 import { normalizeTolgeeUrl } from '../shared/url'
 import { DEFAULT_TOLGEE_URL, loadTolgeeAppConfig } from './config'
 import {
-  fetchAppAccessToken,
-  type AppAccessTokenInput,
-} from './fetchAppAccessToken'
-import {
   appInstallStatePath,
-  saveAppInstall,
+  saveApp,
   type AppInstallStoreOptions,
 } from './installStore'
 
 /** Rotate a credential this old, or older. */
 const DEFAULT_MAX_SECRET_AGE_MS = 30 * 24 * 60 * 60 * 1000
 
-export type RotateAppClientSecretInput = AppAccessTokenInput & {
-  /** Token to use instead of exchanging the current credentials for a new one. */
-  accessToken?: string
+export type RotateAppClientSecretInput = {
+  /** Base URL of the Tolgee instance that issued the credentials. */
+  tolgeeUrl?: string
+  /** App-level client id to authenticate with, instead of the resolved one. */
+  clientId?: string
+  /** App-level client secret to authenticate with, instead of the resolved one. */
+  clientSecret?: string
+  /** Directory of the local state file; see `appInstallStatePath`. */
+  stateDir?: string
 }
 
 export type RotatedAppClientSecret = {
@@ -44,14 +46,15 @@ export type EnsureAppCredentialsResult = {
 }
 
 /**
- * Asks Tolgee for a **new client secret for this app's own install** and stores
- * it in place of the current one — the automatic half of a two-step rotation.
+ * Asks Tolgee for a **new app-level client secret** and stores it in place of
+ * the current one — the automatic half of a two-step rotation.
  *
  * The secret the call authenticated with keeps working until somebody revokes
  * it, which is what makes this safe to do while the app is serving traffic: if
  * the write fails, the app carries on with the credential it already had.
- * Whoever operates the Tolgee instance revokes the old one afterwards, once
- * `lastUsedAt` in Tolgee shows nothing is using it.
+ * Whoever operates the app revokes the old one afterwards, once `lastUsedAt`
+ * in Tolgee shows nothing is using it — and revoking is also what kills every
+ * access token the old secret ever minted.
  *
  * The new secret is never returned or logged — it goes straight into the state
  * file (`appInstallStatePath()`), where `fetchAppAccessToken()` picks it up.
@@ -63,9 +66,8 @@ export type EnsureAppCredentialsResult = {
  * would write a secret the app is never going to read. Rotate a deployment by
  * issuing a secret in Tolgee and injecting it.
  *
- * Running several replicas off one shared install? Only one of them should call
- * this — each call mints another secret, and Tolgee caps how many an install may
- * hold at once.
+ * Running several replicas? Only one of them should call this — each call
+ * mints another secret, and Tolgee caps how many an app may hold at once.
  */
 export const rotateAppClientSecret = async (
   input: RotateAppClientSecretInput = {}
@@ -88,20 +90,19 @@ export const rotateAppClientSecret = async (
         'never read. Issue a new secret in Tolgee and inject it instead.'
     )
   }
-  if (config.installId === null) {
+  const clientId = input.clientId ?? config.clientId
+  const clientSecret = input.clientSecret ?? config.clientSecret
+  if (!clientId || !clientSecret) {
     throw new Error(
-      `No stored Tolgee app install for ${tolgeeUrl}, so there is nothing to rotate. Register the ` +
-        `app first; credentials land in ${appInstallStatePath(options)}.`
+      `No stored Tolgee app credentials for ${tolgeeUrl}, so there is nothing to rotate. Register ` +
+        `the app first; credentials land in ${appInstallStatePath(options)}.`
     )
   }
 
-  const accessToken =
-    input.accessToken ??
-    (await fetchAppAccessToken({ ...input, tolgeeUrl })).accessToken
-
-  const response = await fetch(`${tolgeeUrl}/v2/apps/self/secrets`, {
+  const response = await fetch(`${tolgeeUrl}/v2/public/apps/app-secrets/issue`, {
     method: 'POST',
-    headers: { Authorization: `Bearer ${accessToken}` },
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ client_id: clientId, client_secret: clientSecret }),
   })
   if (!response.ok) {
     throw new Error(
@@ -117,11 +118,10 @@ export const rotateAppClientSecret = async (
   }
 
   const issuedAt = new Date().toISOString()
-  saveAppInstall(
+  saveApp(
     {
       tolgeeUrl,
-      installId: config.installId,
-      clientId: config.clientId,
+      clientId,
       clientSecret: body.secret,
       secretIssuedAt: issuedAt,
     },
@@ -165,7 +165,7 @@ export const ensureAppCredentialsFresh = async (
   if (config.credentialsSource === 'env') {
     return { rotated: false, reason: 'credentials-from-env' }
   }
-  if (config.credentialsSource === null || config.installId === null) {
+  if (config.credentialsSource === null) {
     return { rotated: false, reason: 'no-stored-credentials' }
   }
   if (!isStale(config.secretIssuedAt, input.maxAgeMs)) {

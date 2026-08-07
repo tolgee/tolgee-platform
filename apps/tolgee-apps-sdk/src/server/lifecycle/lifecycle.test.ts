@@ -10,6 +10,7 @@ import {
   readStoredAppInstall,
   readStoredAppInstallById,
   readStoredAppInstalls,
+  saveApp,
   saveAppInstall,
 } from '../installStore'
 import type { TolgeeLifecycleEvent } from './events'
@@ -96,8 +97,6 @@ const registered = (overrides: Record<string, unknown> = {}) => ({
   },
   install: {
     id: 7,
-    clientId: 'tgapp_install-client',
-    clientSecret: 'tgapps_install-secret',
     scopes: ['keys.view'],
   },
   organization: { id: 11, name: 'Acme', slug: 'acme' },
@@ -123,13 +122,14 @@ const assertAccepted = (result: DeliveryResult): TolgeeLifecycleEvent => {
 }
 
 /**
- * Golden vector produced by the JVM implementation the server signs with
- * (`io.tolgee.fixtures.computeHmacSha256` over `"$timestamp.$payload"`, wrapped
- * by `WebhookSigner.signatureHeader`), over the exact body `AppLifecyclePayload`
- * serializes. Neither side computing it changes without this failing.
+ * Golden vector over the exact body `AppLifecyclePayload` serializes, using the
+ * scheme cross-checked against the JVM implementation the server signs with
+ * (`HMAC-SHA256` over `"$timestamp.$payload"`, wrapped the way
+ * `WebhookSigner.signatureHeader` does). Neither the serializer nor the scheme
+ * changes without this failing.
  */
 const GOLDEN_SIGNATURE =
-  '3238ed17dcbfcdb8fe8cf0dc0b4e43279e9ddf263fef6812dc659ea9ea30c805'
+  '3afdc1203505504d0073c7a7be845c2fa80f6cbe80e92ec99f754f255b6075e8'
 const GOLDEN_HEADER = `{"timestamp": 1750000000000, "signature": "${GOLDEN_SIGNATURE}"}`
 
 describe('signature', () => {
@@ -177,19 +177,16 @@ describe('first delivery', () => {
     assert.equal(app?.webhookSecret, WEBHOOK_SECRET)
 
     const install = readStoredAppInstallById(TOLGEE_URL, 7, { stateDir })
-    assert.equal(install?.clientId, 'tgapp_install-client')
-    assert.equal(install?.clientSecret, 'tgapps_install-secret')
     assert.equal(install?.organizationSlug, 'acme')
     assert.equal(readStoredAppInstall(TOLGEE_URL, { stateDir })?.installId, 7)
   })
 
   it('is refused when credentials for that instance already exist', async () => {
-    saveAppInstall(
+    saveApp(
       {
         tolgeeUrl: TOLGEE_URL,
-        installId: 7,
-        clientId: 'tgapp_install-client',
-        clientSecret: 'tgapps_the-real-secret',
+        clientId: 'tgpub_app-client',
+        clientSecret: 'tgpubs_the-real-secret',
       },
       { stateDir }
     )
@@ -213,10 +210,9 @@ describe('first delivery', () => {
     assert.equal(rejected.status, 409)
     assert.ok(!rejected.message.includes('the-real-secret'))
     assert.equal(
-      readStoredAppInstallById(TOLGEE_URL, 7, { stateDir })?.clientSecret,
-      'tgapps_the-real-secret'
+      readStoredApp(TOLGEE_URL, { stateDir })?.clientSecret,
+      'tgpubs_the-real-secret'
     )
-    assert.equal(readStoredApp(TOLGEE_URL, { stateDir }), null)
   })
 
   it('is refused outright when the app is told to trust no first delivery', async () => {
@@ -262,22 +258,6 @@ describe('a delivery signed with the held secret', () => {
       readStoredApp(TOLGEE_URL, { stateDir })?.webhookSecret,
       WEBHOOK_SECRET
     )
-  })
-
-  it('replaces the install secret on an install-level rotation', async () => {
-    const event = assertAccepted(
-      await deliver({
-        eventType: 'app.install_secret_rotated',
-        install: { id: 7, clientSecret: 'tgapps_rotated' },
-      })
-    )
-
-    assert.equal(event.type, 'app.secret.rotated')
-    assert.equal(event.rotatedLayer, 'install')
-    assert.equal(event.trusted, true)
-    const install = readStoredAppInstallById(TOLGEE_URL, 7, { stateDir })
-    assert.equal(install?.clientSecret, 'tgapps_rotated')
-    assert.equal(install?.clientId, 'tgapp_install-client')
   })
 
   it('replaces the app secret and the signing secret on an app-level rotation', async () => {
@@ -348,8 +328,8 @@ describe('a delivery signed with the held secret', () => {
 
     assert.equal(readStoredAppInstallById(TOLGEE_URL, 9, { stateDir }), null)
     assert.equal(
-      readStoredAppInstallById(TOLGEE_URL, 7, { stateDir })?.clientSecret,
-      'tgapps_install-secret'
+      readStoredAppInstallById(TOLGEE_URL, 7, { stateDir })?.installId,
+      7
     )
   })
 

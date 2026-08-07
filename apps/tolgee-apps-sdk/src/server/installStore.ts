@@ -5,7 +5,7 @@ import { normalizeTolgeeUrl } from '../shared/url'
 
 const STATE_DIR_NAME = '.tolgee-dev'
 const STATE_FILE_NAME = 'install.json'
-const STATE_FILE_VERSION = 2
+const STATE_FILE_VERSION = 3
 
 /** Owner-only: the file holds the app's client secret. */
 const STATE_FILE_MODE = 0o600
@@ -55,25 +55,20 @@ export type AppRecord = {
   secretIssuedAt?: string | null
 }
 
-/** An install as it was persisted locally, with the credentials Tolgee issued. */
+/**
+ * An install as it was persisted locally. It carries no credentials — the
+ * app-level ones in {@link StoredApp} mint tokens for every install — only the
+ * identity an app needs to name an install without asking Tolgee first.
+ */
 export type StoredAppInstall = {
-  /** Tolgee instance the install (and therefore the credentials) belongs to. */
+  /** Tolgee instance the install belongs to. */
   tolgeeUrl: string
   installId: number
-  /** Per-install client id, prefixed `tgapp_`. */
-  clientId: string | null
-  /** Per-install client secret, prefixed `tgapps_`. */
-  clientSecret: string | null
   /** True when the install belongs to no organization. */
   native: boolean
   organizationId: number | null
   organizationSlug: string | null
   organizationName: string | null
-  /**
-   * ISO timestamp of when Tolgee issued `clientSecret`, or null when it was
-   * stored before this was recorded. Drives `ensureAppCredentialsFresh()`.
-   */
-  secretIssuedAt: string | null
   /** ISO timestamp of the last write. */
   updatedAt: string
 }
@@ -81,14 +76,10 @@ export type StoredAppInstall = {
 export type AppInstallRecord = {
   tolgeeUrl: string
   installId: number
-  clientId?: string | null
-  clientSecret?: string | null
   native?: boolean
   organizationId?: number | null
   organizationSlug?: string | null
   organizationName?: string | null
-  /** Defaults to now whenever the record carries a `clientSecret`. */
-  secretIssuedAt?: string | null
   /**
    * Whether this install becomes the one `readStoredAppInstall()` returns.
    * Defaults to true — an app registering itself means the install it just got.
@@ -169,10 +160,7 @@ export const hasStoredCredentials = (
     tolgeeUrl
   )
   if (instance.app?.clientSecret != null) return true
-  if (instance.app?.webhookSecret != null) return true
-  return Object.values(instance.installs).some(
-    (install) => install.clientSecret != null
-  )
+  return instance.app?.webhookSecret != null
 }
 
 /**
@@ -212,14 +200,7 @@ export const saveApp = (
   return stored
 }
 
-/**
- * Persists an install, keeping credentials that are already stored for the same
- * install when the new record has none.
- *
- * Tolgee returns the client secret only when it creates the install — every
- * later registration reports `clientSecret: null`, and overwriting with that
- * would destroy the only copy of a secret Tolgee will not show again.
- */
+/** Persists an install, keeping stored fields the new record does not carry. */
 export const saveAppInstall = (
   record: AppInstallRecord,
   options: AppInstallStoreOptions = {}
@@ -228,25 +209,18 @@ export const saveAppInstall = (
   const key = normalizeTolgeeUrl(record.tolgeeUrl)
   const state = readStateFile(path)
   const instance = readInstance(state, key)
-  const previous = instance.installs[String(record.installId)]
-  const carried =
-    previous && isSameInstall(previous, record) ? previous : undefined
+  const carried = instance.installs[String(record.installId)]
 
   const now = new Date().toISOString()
   const stored: StoredAppInstall = {
     tolgeeUrl: key,
     installId: record.installId,
-    clientId: record.clientId ?? carried?.clientId ?? null,
-    clientSecret: record.clientSecret ?? carried?.clientSecret ?? null,
     native: record.native ?? carried?.native ?? false,
     organizationId: record.organizationId ?? carried?.organizationId ?? null,
     organizationSlug:
       record.organizationSlug ?? carried?.organizationSlug ?? null,
     organizationName:
       record.organizationName ?? carried?.organizationName ?? null,
-    secretIssuedAt:
-      record.secretIssuedAt ??
-      (record.clientSecret != null ? now : (carried?.secretIssuedAt ?? null)),
     updatedAt: now,
   }
 
@@ -352,13 +326,10 @@ const asStoredInstall = (
   return {
     tolgeeUrl,
     installId: raw.installId,
-    clientId: asString(raw.clientId),
-    clientSecret: asString(raw.clientSecret),
     native: raw.native === true,
     organizationId: asNumber(raw.organizationId),
     organizationSlug: asString(raw.organizationSlug),
     organizationName: asString(raw.organizationName),
-    secretIssuedAt: asString(raw.secretIssuedAt),
     updatedAt: asString(raw.updatedAt) ?? '',
   }
 }
@@ -389,8 +360,8 @@ const asStoredInstance = (
 
 /**
  * Version 1 held exactly one install per Tolgee instance, keyed by URL, with no
- * app layer. Apps in the wild already have such a file and their credentials
- * exist nowhere else, so it is read forward rather than discarded.
+ * app layer. The install identity is read forward; the per-install credentials
+ * such a file carried no longer exist as a concept and are dropped.
  */
 const migrateVersion1 = (installs: object): Record<string, StoredInstance> => {
   const instances: Record<string, StoredInstance> = {}
@@ -460,12 +431,3 @@ const writeStateFile = (path: string, state: StateFile): void => {
     throw error
   }
 }
-
-const isSameInstall = (
-  stored: StoredAppInstall,
-  record: AppInstallRecord
-): boolean =>
-  stored.installId === record.installId &&
-  (record.clientId == null ||
-    stored.clientId == null ||
-    stored.clientId === record.clientId)

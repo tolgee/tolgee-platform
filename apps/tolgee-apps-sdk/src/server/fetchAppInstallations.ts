@@ -1,9 +1,6 @@
 import { normalizeTolgeeUrl } from '../shared/url'
-import { DEFAULT_TOLGEE_URL } from './config'
-import {
-  fetchAppAccessToken,
-  type AppAccessTokenInput,
-} from './fetchAppAccessToken'
+import { DEFAULT_TOLGEE_URL, loadTolgeeAppConfig } from './config'
+import type { AppInstallStoreOptions } from './installStore'
 
 /** Organization owning a project the app is enabled for. */
 export type AppInstallationOrganization = {
@@ -38,20 +35,24 @@ export type AppInstallation = {
   enabledProjects: AppEnabledProject[]
 }
 
-export type AppInstallationsInput = AppAccessTokenInput & {
-  /**
-   * Access token to use instead of exchanging the client credentials for a new
-   * one. Pass a token the caller already holds to save a round trip.
-   */
-  accessToken?: string
+export type AppInstallationsInput = {
+  /** Base URL of the Tolgee instance that issued the credentials. */
+  tolgeeUrl?: string
+  /** App-level client id (`tgpub_…`). */
+  clientId?: string
+  /** App-level client secret (`tgpubs_…`). */
+  clientSecret?: string
+  /** Directory of the local state file; see `appInstallStatePath`. */
+  stateDir?: string
 }
 
 /**
  * Asks Tolgee which installs this app has and which projects each is enabled
- * for — what an app backend needs before it can do any work of its own, since
- * nothing else tells it what it is allowed to touch.
+ * for — the entry point of the machine-to-machine flow. The install ids in the
+ * answer are what `fetchAppAccessToken({ installId })` exchanges for tokens,
+ * so this is the one call that needs no install id to already be known.
  *
- * Credentials are resolved exactly like `fetchAppAccessToken()`: the ones in
+ * Authenticates with the app-level credentials alone: the ones in
  * `TOLGEE_APP_CLIENT_ID` / `TOLGEE_APP_CLIENT_SECRET`, otherwise the ones
  * `selfRegisterApp` stored for this Tolgee instance.
  *
@@ -60,10 +61,6 @@ export type AppInstallationsInput = AppAccessTokenInput & {
  *         // …poll project.id
  *       }
  *     }
- *
- * Only an install-context token reaches this endpoint. The user-context token
- * the dashboard iframe receives is refused — the iframe is already told which
- * project and organization it was opened in.
  */
 export const fetchAppInstallations = async (
   input: AppInstallationsInput = {}
@@ -71,12 +68,26 @@ export const fetchAppInstallations = async (
   const tolgeeUrl = normalizeTolgeeUrl(
     input.tolgeeUrl ?? process.env.TOLGEE_URL ?? DEFAULT_TOLGEE_URL
   )
-  const accessToken =
-    input.accessToken ??
-    (await fetchAppAccessToken({ ...input, tolgeeUrl })).accessToken
+  const options: AppInstallStoreOptions = input.stateDir
+    ? { stateDir: input.stateDir }
+    : {}
+  const config = loadTolgeeAppConfig(
+    { ...process.env, TOLGEE_URL: tolgeeUrl },
+    options
+  )
+  const clientId = input.clientId ?? config.clientId
+  const clientSecret = input.clientSecret ?? config.clientSecret
+  if (!clientId || !clientSecret) {
+    throw new Error(
+      `No Tolgee app credentials for ${tolgeeUrl}. They are stored automatically when the app ` +
+        'self-registers, or set TOLGEE_APP_CLIENT_ID and TOLGEE_APP_CLIENT_SECRET yourself.'
+    )
+  }
 
-  const response = await fetch(`${tolgeeUrl}/v2/apps/self/installations`, {
-    headers: { Authorization: `Bearer ${accessToken}` },
+  const response = await fetch(`${tolgeeUrl}/v2/public/apps/installations/list`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ client_id: clientId, client_secret: clientSecret }),
   })
 
   if (!response.ok) {

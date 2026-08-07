@@ -20,17 +20,15 @@ export type TolgeeAppConfig = {
   organizationSlug: string | null
   /** Instance-wide secret authorizing self-registration; null when unset. */
   registrationSecret: string | null
-  /** OAuth client id issued by Tolgee at registration; null when unknown. */
-  clientId: string | null
-  /** OAuth client secret issued by Tolgee at registration; null when unknown. */
-  clientSecret: string | null
-  /** Install the stored credentials belong to; null when nothing is stored. */
-  installId: number | null
   /**
-   * App-level client id Tolgee issued when the app was registered (`tgpub_…`),
-   * or null when no registration delivery ever arrived.
+   * App-level client id (`tgpub_…`) — the app's only credentials; the token
+   * endpoint derives install-scoped tokens from them. Null when unknown.
    */
-  appClientId: string | null
+  clientId: string | null
+  /** App-level client secret (`tgpubs_…`); null when unknown. */
+  clientSecret: string | null
+  /** The install this app acts as by default; null when nothing is stored. */
+  installId: number | null
   /**
    * The secret Tolgee signs this app's lifecycle deliveries with. Holding it is
    * what proves a delivery really is Tolgee — it authenticates nothing towards
@@ -38,7 +36,7 @@ export type TolgeeAppConfig = {
    */
   webhookSecret: string | null
   /**
-   * When the stored client secret was issued, or null when it came from the
+   * When the stored app secret was issued, or null when it came from the
    * environment or predates this being recorded. See `ensureAppCredentialsFresh`.
    */
   secretIssuedAt: string | null
@@ -63,12 +61,11 @@ export const loadTolgeeAppConfig = (
   const envClientId = env.TOLGEE_APP_CLIENT_ID ?? null
   const envClientSecret = env.TOLGEE_APP_CLIENT_SECRET ?? null
   const fromEnv = envClientId !== null || envClientSecret !== null
-  const stored = fromEnv ? null : readStoredAppInstall(tolgeeUrl, options)
+  const storedApp = fromEnv ? null : readStoredApp(tolgeeUrl, options)
   const storedCredentials =
-    stored !== null && (stored.clientId !== null || stored.clientSecret !== null)
-  // App-level credentials are a separate layer: they never authenticate an API
-  // call, so the client-credential env override above has no say over them.
-  const storedApp = readStoredApp(tolgeeUrl, options)
+    storedApp !== null &&
+    (storedApp.clientId !== null || storedApp.clientSecret !== null)
+  const storedInstall = readStoredAppInstall(tolgeeUrl, options)
 
   return {
     tolgeeUrl,
@@ -76,13 +73,14 @@ export const loadTolgeeAppConfig = (
     serverPort: Number(env.SERVER_PORT ?? env.PORT ?? 5181),
     organizationSlug: env.TOLGEE_ORGANIZATION_SLUG ?? null,
     registrationSecret: env.TOLGEE_APP_REGISTRATION_SECRET ?? null,
-    clientId: fromEnv ? envClientId : (stored?.clientId ?? null),
-    clientSecret: fromEnv ? envClientSecret : (stored?.clientSecret ?? null),
-    installId: stored?.installId ?? null,
-    appClientId: storedApp?.clientId ?? null,
+    clientId: fromEnv ? envClientId : (storedApp?.clientId ?? null),
+    clientSecret: fromEnv ? envClientSecret : (storedApp?.clientSecret ?? null),
+    installId: storedInstall?.installId ?? null,
     webhookSecret:
-      env.TOLGEE_APP_WEBHOOK_SECRET ?? storedApp?.webhookSecret ?? null,
-    secretIssuedAt: fromEnv ? null : (stored?.secretIssuedAt ?? null),
+      env.TOLGEE_APP_WEBHOOK_SECRET ??
+      readStoredApp(tolgeeUrl, options)?.webhookSecret ??
+      null,
+    secretIssuedAt: fromEnv ? null : (storedApp?.secretIssuedAt ?? null),
     credentialsSource: fromEnv ? 'env' : storedCredentials ? 'stored' : null,
   }
 }

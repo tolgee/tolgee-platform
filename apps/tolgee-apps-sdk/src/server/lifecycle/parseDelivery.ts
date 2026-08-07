@@ -63,10 +63,7 @@ export const parseDelivery = (body: string): ParsedDelivery | null => {
     app,
     install,
     organization,
-    rotatedLayer:
-      type === 'app.secret.rotated'
-        ? rotatedLayer(payload, rawEventType, app, install)
-        : null,
+    rotatedLayer: type === 'app.secret.rotated' ? rotatedLayer(app) : null,
     tolgeeUrl:
       stringAt(
         payload,
@@ -97,30 +94,10 @@ const bareApp = (appId: string | null): DeliveredAppCredentials | null =>
         webhookSecret: null,
       }
 
-/**
- * Which layer a rotation replaced. The event name says so — Tolgee has one
- * event per layer — and the credentials in the body settle it otherwise, since
- * only one layer's secret is ever sent.
- */
+/** A rotation always replaces an app-level secret; null when none was carried. */
 const rotatedLayer = (
-  payload: Record<string, unknown>,
-  rawEventType: unknown,
-  app: DeliveredAppCredentials | null,
-  install: DeliveredInstall | null
+  app: DeliveredAppCredentials | null
 ): TolgeeCredentialLayer | null => {
-  const declared = stringAt(payload, 'layer', 'credentialLayer', 'secretLayer')
-  if (declared !== null) {
-    const token = declared.toUpperCase()
-    if (token.includes('INSTALL')) return 'install'
-    if (token.includes('APP')) return 'app'
-  }
-  if (
-    typeof rawEventType === 'string' &&
-    rawEventType.toUpperCase().replace(/[^A-Z]/g, '').includes('INSTALL')
-  ) {
-    return 'install'
-  }
-  if (install?.clientSecret != null) return 'install'
   if (app?.clientSecret != null || app?.webhookSecret != null) return 'app'
   return null
 }
@@ -178,8 +155,6 @@ const toAppCredentials = (
 
 const toInstall = (node: Record<string, unknown>): DeliveredInstall => ({
   installId: numberAt(node, 'installId', 'appInstallId', 'id'),
-  clientId: stringAt(node, 'clientId'),
-  clientSecret: stringAt(node, 'clientSecret', 'secret'),
   native: node.native === true,
   organization: toOrganization(objectAt(node, 'organization', 'org')),
 })

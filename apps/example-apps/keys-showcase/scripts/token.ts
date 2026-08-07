@@ -55,7 +55,7 @@ const { accessToken, expiresIn } = await fetchAppAccessToken().catch(
 
 console.log(
   `Got an app access token from ${config.tolgeeUrl} (valid ${expiresIn}s, ` +
-    `credentials from ${config.credentialsSource === 'env' ? 'the environment' : 'the local install record'}).\n`
+    `credentials from ${config.credentialsSource === 'env' ? 'the environment' : 'the local state file'}).\n`
 )
 
 const url = new URL(

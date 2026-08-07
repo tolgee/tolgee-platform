@@ -325,8 +325,6 @@ const persist = (
       {
         tolgeeUrl,
         installId,
-        clientId: event.install.clientId,
-        clientSecret: event.install.clientSecret,
         native: event.install.native,
         organizationId: organization?.id ?? null,
         organizationSlug: organization?.slug ?? null,

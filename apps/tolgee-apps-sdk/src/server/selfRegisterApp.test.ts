@@ -40,8 +40,7 @@ describe('selfRegisterApp', () => {
   it('stores the app-level credentials the registering call discloses', async () => {
     stubTolgee({
       id: 7,
-      clientId: 'tgapp_install',
-      clientSecret: 'tgapps_install',
+      created: true,
       app: {
         id: 3,
         appId: 'keys-showcase',
@@ -75,7 +74,7 @@ describe('selfRegisterApp', () => {
       { stateDir }
     )
     // Installing an app somebody already registered returns no app block.
-    stubTolgee({ id: 8, clientId: 'tgapp_other', clientSecret: 'tgapps_other' })
+    stubTolgee({ id: 8, created: true })
 
     const result = await register()
 
@@ -88,8 +87,7 @@ describe('selfRegisterApp', () => {
   it('ignores an app block that carries no client id', async () => {
     stubTolgee({
       id: 9,
-      clientId: 'tgapp_install',
-      clientSecret: 'tgapps_install',
+      created: true,
       app: { id: 3, appId: 'keys-showcase' },
     })
 

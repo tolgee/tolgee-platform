@@ -63,13 +63,13 @@ mountTolgeeLifecycle(app, {
     installed: (event) => {
       console.log(
         `Lifecycle: installed by ${event.organization?.slug ?? 'no organization'} ` +
-          `(install ${event.install?.installId}) — credentials stored.`
+          `(install ${event.install?.installId}) — recorded; the app credentials mint its tokens.`
       )
     },
     uninstalled: (event) => {
       console.log(
         `Lifecycle: uninstalled (install ${event.install?.installId ?? 'all'}) — ` +
-          'the stored credentials were dropped.'
+          'the stored install record was dropped.'
       )
     },
     secretRotated: (event) => {
