@@ -13,7 +13,7 @@ describe('Invisible characters', () => {
       projectId = data.body.id;
       login('franta', 'admin');
       createKey(projectId, 'nbsp key', { en: 'Bonjour\u00A0!' });
-      createKey(projectId, 'zero width key', { en: 'Save\u200Bchanges' });
+      createKey(projectId, 'zero width key', { en: 'Zero\u200Bwidth' });
       createKey(projectId, 'plain key', { en: 'Plain value' });
     });
   });
@@ -27,18 +27,24 @@ describe('Invisible characters', () => {
     visitTranslations(projectId);
     waitForGlobalLoading();
     gcyAdvanced({
-      value: 'invisible-character',
-      kind: 'nonBreakingSpace',
-    }).should('have.length.at.least', 1);
+      value: 'translations-table-cell',
+      key: 'nbsp key',
+      language: 'en',
+    })
+      .find('[data-cy="invisible-character"][data-cy-kind="nonBreakingSpace"]')
+      .should('have.length.at.least', 1);
   });
 
   it('marks a zero-width space in a translation cell', () => {
     visitTranslations(projectId);
     waitForGlobalLoading();
     gcyAdvanced({
-      value: 'invisible-character',
-      kind: 'zeroWidth',
-    }).should('have.length.at.least', 1);
+      value: 'translations-table-cell',
+      key: 'zero width key',
+      language: 'en',
+    })
+      .find('[data-cy="invisible-character"][data-cy-kind="zeroWidth"]')
+      .should('have.length.at.least', 1);
   });
 
   it('does not mark regular spaces', () => {
@@ -65,7 +71,7 @@ describe('Invisible characters', () => {
   it('marks a zero-width space inside the editor', () => {
     visitTranslations(projectId);
     waitForGlobalLoading();
-    editCell('Save');
+    editCell('Zero');
     gcy('global-editor')
       .find('.cm-invisible-char-zero-width')
       .should('have.length.at.least', 1);
