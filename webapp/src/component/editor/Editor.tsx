@@ -16,6 +16,7 @@ import {
 import { Direction } from 'tg.fixtures/getLanguageDirection';
 import { useScrollMargins } from 'tg.hooks/useScrollMargins';
 import { visibleKeyNameSpacesPlugin } from './utils/codemirrorVisibleWhitespace';
+import { invisibleCharactersPlugin } from './utils/codemirrorInvisibleCharacters';
 
 const StyledEditor = styled('div')`
   font-size: 14px;
@@ -60,6 +61,20 @@ const StyledEditor = styled('div')`
   & .cm-keyname-space-indicator {
     background-color: ${({ theme }) => theme.palette.label.lightBlue};
     border-radius: 2px;
+  }
+
+  & .cm-invisible-char-nbsp {
+    background-color: ${({ theme }) => theme.palette.label.lightBlue};
+    border-radius: 2px;
+  }
+
+  & .cm-invisible-char-zero-width {
+    display: inline-block;
+    width: 2px;
+    height: 1em;
+    background-color: ${({ theme }) => theme.palette.label.orange};
+    vertical-align: text-bottom;
+    border-radius: 1px;
   }
 `;
 
@@ -152,6 +167,7 @@ export const Editor: React.FC<React.PropsWithChildren<EditorProps>> = ({
           minimalSetup,
           Prec.highest(keymap.of(shortcutsUptoDate ?? [])),
           EditorView.lineWrapping,
+          invisibleCharactersPlugin(),
           EditorView.updateListener.of((v: ViewUpdate) => {
             if (v.focusChanged) {
               if (v.view.hasFocus) {

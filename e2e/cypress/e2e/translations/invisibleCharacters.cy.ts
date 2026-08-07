@@ -1,8 +1,8 @@
 import { createKey, login } from '../../common/apiCalls/common';
 import { translationSingleTestData } from '../../common/apiCalls/testData/testData';
 import { waitForGlobalLoading } from '../../common/loading';
-import { gcyAdvanced } from '../../common/shared';
-import { visitTranslations } from '../../common/translations';
+import { gcy, gcyAdvanced } from '../../common/shared';
+import { editCell, visitTranslations } from '../../common/translations';
 
 describe('Invisible characters', () => {
   let projectId: number;
@@ -51,5 +51,23 @@ describe('Invisible characters', () => {
     })
       .find('[data-cy="invisible-character"]')
       .should('not.exist');
+  });
+
+  it('marks a non-breaking space inside the editor', () => {
+    visitTranslations(projectId);
+    waitForGlobalLoading();
+    editCell('Bonjour');
+    gcy('global-editor')
+      .find('.cm-invisible-char-nbsp')
+      .should('have.length.at.least', 1);
+  });
+
+  it('marks a zero-width space inside the editor', () => {
+    visitTranslations(projectId);
+    waitForGlobalLoading();
+    editCell('Save');
+    gcy('global-editor')
+      .find('.cm-invisible-char-zero-width')
+      .should('have.length.at.least', 1);
   });
 });
