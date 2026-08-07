@@ -57,22 +57,24 @@ class AppSelfRegistrationControllerTest : AuthorizedControllerTest() {
   fun `registers an app with the server-wide secret and no signed-in user`() {
     selfRegister(secret = REGISTRATION_SECRET).andIsOk.andAssertThatJson {
       node("appId").isEqualTo("test-app")
-      node("clientId").isString.startsWith("tgapp_")
-      node("clientSecret").isString.startsWith("tgapps_")
+      node("created").isEqualTo(true)
+      node("app.clientId").isString.startsWith("tgpub_")
+      node("app.clientSecret").isString.startsWith("tgpubs_")
     }
 
     appInstallService.findAll(testData.organization.id).assert.hasSize(1)
   }
 
   @Test
-  fun `repoints an already-registered app at the new manifest url without re-issuing the secret`() {
+  fun `repoints an already-registered app at the new manifest url without disclosing credentials`() {
     selfRegister(secret = REGISTRATION_SECRET).andIsOk
     val installId = appInstallService.findAll(testData.organization.id).single().id
 
     selfRegister(secret = REGISTRATION_SECRET, manifestUrl = OTHER_MANIFEST_URL).andIsOk.andAssertThatJson {
       node("id").isEqualTo(installId)
       node("manifestUrl").isEqualTo(OTHER_MANIFEST_URL)
-      node("clientSecret").isNull()
+      node("created").isEqualTo(false)
+      node("app.clientSecret").isNull()
     }
 
     appInstallService.findAll(testData.organization.id).assert.hasSize(1)
@@ -109,8 +111,9 @@ class AppSelfRegistrationControllerTest : AuthorizedControllerTest() {
 
     selfRegister(secret = REGISTRATION_SECRET, organizationSlug = null).andIsOk.andAssertThatJson {
       node("appId").isEqualTo("test-app")
-      node("clientId").isString.startsWith("tgapp_")
-      node("clientSecret").isString.startsWith("tgapps_")
+      node("created").isEqualTo(true)
+      node("app.clientId").isString.startsWith("tgpub_")
+      node("app.clientSecret").isString.startsWith("tgpubs_")
     }
 
     appInstallService.findAll(testData.organization.id).assert.isEmpty()
@@ -132,7 +135,7 @@ class AppSelfRegistrationControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `repoints an already-registered native install without re-issuing the secret`() {
+  fun `repoints an already-registered native install without disclosing credentials`() {
     makeInitialUser()
     selfRegister(secret = REGISTRATION_SECRET, organizationSlug = null).andIsOk
     val installId = AppsTestFixtures.nativeInstalls(appInstallService).single().id
@@ -144,7 +147,8 @@ class AppSelfRegistrationControllerTest : AuthorizedControllerTest() {
     ).andIsOk.andAssertThatJson {
       node("id").isEqualTo(installId)
       node("manifestUrl").isEqualTo(OTHER_MANIFEST_URL)
-      node("clientSecret").isNull()
+      node("created").isEqualTo(false)
+      node("app.clientSecret").isNull()
     }
 
     AppsTestFixtures.nativeInstalls(appInstallService).assert.hasSize(1)

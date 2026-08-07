@@ -4,15 +4,14 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.apps.AppSecretRotationRequest
-import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.hateoas.apps.AppSecretModel
 import io.tolgee.hateoas.apps.AppSecretModelAssembler
 import io.tolgee.model.apps.App
 import io.tolgee.security.ratelimit.RateLimited
+import io.tolgee.service.apps.AppCredentialAuthenticator
 import io.tolgee.service.apps.AppSecretRotationService
 import io.tolgee.service.apps.AppSecretService
-import io.tolgee.service.apps.AppService
 import jakarta.validation.Valid
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.hateoas.CollectionModel
@@ -38,7 +37,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping(value = ["/v2/public/apps/app-secrets"])
 @Tag(name = "App Self Service")
 class AppSelfAppSecretsController(
-  private val appService: AppService,
+  private val appCredentialAuthenticator: AppCredentialAuthenticator,
   private val appSecretService: AppSecretService,
   private val appSecretRotationService: AppSecretRotationService,
   private val appSecretModelAssembler: AppSecretModelAssembler,
@@ -91,15 +90,6 @@ class AppSelfAppSecretsController(
     return appSecretModelAssembler.toModel(appSecretService.revoke(app.id, secretId, allowRevokingLast = false))
   }
 
-  private fun authenticate(body: AppSecretRotationRequest): App {
-    val app =
-      appService.resolveByClientId(body.clientId)
-        ?: throw AuthenticationException(Message.INVALID_APP_CREDENTIALS)
-    val secret =
-      appSecretService.findLiveMatching(app.id, body.clientSecret)
-        ?: throw AuthenticationException(Message.INVALID_APP_CREDENTIALS)
-
-    appSecretService.updateLastUsedAsync(secret.id, secret.lastUsedAt)
-    return app
-  }
+  private fun authenticate(body: AppSecretRotationRequest): App =
+    appCredentialAuthenticator.authenticate(body.clientId, body.clientSecret)
 }

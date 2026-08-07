@@ -28,12 +28,10 @@ class AppInstallService(
   private val appManifestFetcher: AppManifestFetcher,
   private val appInstallPersister: AppInstallPersister,
   private val appService: AppService,
-  private val appInstallSecretService: AppInstallSecretService,
   private val appLifecycleDeliveryService: AppLifecycleDeliveryService,
 ) {
   data class RegisterResult(
     val install: AppInstall,
-    val plaintextClientSecret: String,
     val app: AppService.AppSummary,
     /** Non-null only when this call registered the app — see [AppService.registerIfAbsent]. */
     val appCredentials: AppService.AppCredentials?,
@@ -41,8 +39,6 @@ class AppInstallService(
 
   data class SelfRegisterResult(
     val install: AppInstall,
-    /** Non-null only when this call created the install; see [selfRegister]. */
-    val plaintextClientSecret: String?,
     val created: Boolean,
     val app: AppService.AppSummary,
     val appCredentials: AppService.AppCredentials?,
@@ -128,9 +124,9 @@ class AppInstallService(
 
   /**
    * Announces the new app and the new install, in that order — an app that receives both learns its
-   * own credentials before the first install that uses them. Neither delivery may fail the call:
-   * the credentials were also returned in the response, so an app whose host was down is recovered
-   * by handing them over or by rotating, not by undoing somebody's install.
+   * own credentials before the first install they can mint tokens for. Neither delivery may fail
+   * the call: the credentials were also returned in the response, so an app whose host was down is
+   * recovered by handing them over or by rotating, not by undoing somebody's install.
    */
   private fun deliverRegistrationAndInstall(result: RegisterResult) {
     val target = appLifecycleDeliveryService.resolveTarget(result.app.id) ?: return
@@ -153,37 +149,13 @@ class AppInstallService(
       target = target,
       eventType = AppLifecycleEventType.APP_INSTALLED,
       organizationId = result.install.organization?.id,
-      install = installPayload(result.install, result.plaintextClientSecret),
+      install = installPayload(result.install),
     )
   }
 
-  /**
-   * Issues an additional client secret for the install and pushes it to the app, so an app that can
-   * receive deliveries never has to be told a secret by hand. This is also how an install whose
-   * original credentials never reached the app is repaired: rotate, and the delivery is retried.
-   */
-  fun issueSecret(install: AppInstall): AppInstallSecretService.IssueResult {
-    val issued = appInstallSecretService.issue(install)
-
-    appInstallRepository.findAppEntityIdOfInstall(install.id)?.let { appEntityId ->
-      appLifecycleDeliveryService.deliver(
-        appEntityId = appEntityId,
-        eventType = AppLifecycleEventType.INSTALL_SECRET_ROTATED,
-        organizationId = appInstallRepository.findOrganizationIdOfInstall(install.id),
-        install = installPayload(install, issued.plaintextSecret),
-      )
-    }
-    return issued
-  }
-
-  private fun installPayload(
-    install: AppInstall,
-    plaintextClientSecret: String?,
-  ): AppLifecycleInstall {
+  private fun installPayload(install: AppInstall): AppLifecycleInstall {
     return AppLifecycleInstall(
       id = install.id,
-      clientId = install.clientId,
-      clientSecret = plaintextClientSecret,
       scopes = install.grantedScopes.map { it.value },
     )
   }
@@ -194,9 +166,9 @@ class AppInstallService(
    * manifest URL instead of failing, so an app whose dev tunnel URL changes on every restart can
    * reconnect unattended.
    *
-   * The returned [SelfRegisterResult.plaintextClientSecret] is null on that repoint path: the secret
-   * is only ever disclosed at creation, and re-issuing it here would let anyone holding the
-   * registration secret silently mint fresh credentials for an existing install.
+   * The app-level credentials are disclosed only when this call registered the app; a repoint
+   * discloses nothing, or anyone holding the registration secret could silently mint fresh
+   * credentials for an existing app.
    *
    * @param organization null registers a native (server-level) install; a server admin then decides
    *   which organizations may use it.
@@ -215,7 +187,6 @@ class AppInstallService(
       deliverRegistrationAndInstall(created)
       return SelfRegisterResult(
         install = created.install,
-        plaintextClientSecret = created.plaintextClientSecret,
         created = true,
         app = created.app,
         appCredentials = created.appCredentials,
@@ -232,7 +203,6 @@ class AppInstallService(
       )
     return SelfRegisterResult(
       install = updated,
-      plaintextClientSecret = null,
       created = false,
       app = appService.summarize(appService.requireRegistered(fetched.manifest.id)),
       appCredentials = null,
@@ -312,7 +282,7 @@ class AppInstallService(
       target = target,
       eventType = AppLifecycleEventType.APP_UNINSTALLED,
       organizationId = removed.organizationId,
-      install = AppLifecycleInstall(id = removed.installId, clientId = null),
+      install = AppLifecycleInstall(id = removed.installId),
     )
   }
 
@@ -394,13 +364,10 @@ class AppInstallService(
     val principal: UserAccountDto,
   )
 
-  /**
-   * Resolves an install by its OAuth `client_id`, for the token endpoint. The caller must still
-   * verify the presented secret against the install's live [io.tolgee.model.apps.AppInstallSecret]s.
-   */
+  /** Every installation of the app, across organizations, for the app's own discovery call. */
   @Transactional(readOnly = true)
-  fun resolveByClientId(clientId: String): AppInstall? {
-    return appInstallRepository.findByClientId(clientId)
+  fun findAllByRegisteredApp(appEntityId: Long): List<AppInstall> {
+    return appInstallRepository.findAllByRegisteredAppId(appEntityId)
   }
 
   /**
@@ -427,11 +394,5 @@ class AppInstallService(
   ): AppInstall {
     if (organizationId == null) return getNative(installId)
     return requireInstall(organizationId, installId)
-  }
-
-  companion object {
-    const val CLIENT_ID_PREFIX = "tgapp_"
-    const val CLIENT_SECRET_PREFIX = "tgapps_"
-    const val CLIENT_SECRET_PREFIX_DISPLAY_LENGTH = 10
   }
 }

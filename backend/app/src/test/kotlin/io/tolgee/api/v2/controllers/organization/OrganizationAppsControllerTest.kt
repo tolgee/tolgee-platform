@@ -13,6 +13,7 @@ import io.tolgee.fixtures.node
 import io.tolgee.model.enums.Scope
 import io.tolgee.service.apps.AppInstallService
 import io.tolgee.service.apps.AppManifestHttpClient
+import io.tolgee.service.apps.AppService
 import io.tolgee.service.apps.AppsTestFixtures
 import io.tolgee.service.apps.lifecycle.AppLifecycleHttpClient
 import io.tolgee.testing.AuthorizedControllerTest
@@ -75,16 +76,16 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `registration issues OAuth client credentials, exposing the secret exactly once`() {
+  fun `registration discloses the app-level credentials exactly once`() {
     mockManifest(validManifest())
     performAuthPost(registerUrl(), registerBody()).andIsOk.andAssertThatJson {
-      node("clientId").isString.startsWith(AppInstallService.CLIENT_ID_PREFIX)
-      node("clientSecret").isString.startsWith(AppInstallService.CLIENT_SECRET_PREFIX)
+      node("app.clientId").isString.startsWith(AppService.APP_CLIENT_ID_PREFIX)
+      node("app.clientSecret").isString.startsWith(AppService.APP_CLIENT_SECRET_PREFIX)
     }
 
     performAuthGet(appsUrl()).andIsOk.andAssertThatJson {
-      node("_embedded.appInstalls[0].clientId").isString.startsWith(AppInstallService.CLIENT_ID_PREFIX)
-      node("_embedded.appInstalls[0].clientSecret").isNull()
+      node("_embedded.appInstalls[0].clientSecret").isAbsent()
+      node("_embedded.appInstalls[0].app.clientSecret").isAbsent()
     }
   }
 

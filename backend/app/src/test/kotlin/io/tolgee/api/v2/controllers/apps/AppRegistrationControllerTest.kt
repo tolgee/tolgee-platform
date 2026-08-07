@@ -92,11 +92,9 @@ class AppRegistrationControllerTest : AuthorizedControllerTest() {
       .asText()
       .assert
       .isNotBlank()
-    response
-      .at("/clientSecret")
-      .asText()
-      .assert
-      .startsWith(AppInstallService.CLIENT_SECRET_PREFIX)
+    // The install carries no credentials of its own — the app-level ones above mint its tokens.
+    response.get("clientSecret").assert.isNull()
+    response.get("clientId").assert.isNull()
 
     ownerOrganizationIdOf("test-app").assert.isEqualTo(testData.organization.id)
     appSecretService.list(appRepository.findByAppId("test-app")!!.id).assert.hasSize(1)
@@ -143,11 +141,6 @@ class AppRegistrationControllerTest : AuthorizedControllerTest() {
       .asLong()
       .assert
       .isNotEqualTo(first.at("/id").asLong())
-    second
-      .at("/clientId")
-      .asText()
-      .assert
-      .isNotEqualTo(first.at("/clientId").asText())
     appInstallService.findAll(testData.otherOrganization.id).assert.hasSize(1)
     appInstallService.findAll(testData.organization.id).assert.hasSize(1)
   }

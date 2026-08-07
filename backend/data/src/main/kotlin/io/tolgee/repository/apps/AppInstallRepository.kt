@@ -31,8 +31,6 @@ interface AppInstallRepository : JpaRepository<AppInstall, Long> {
 
   fun findByOrganizationIsNullAndAppId(appId: String): AppInstall?
 
-  fun findByClientId(clientId: String): AppInstall?
-
   /**
    * The app is fetched eagerly because app-token authentication reads its token cutoff from the
    * servlet filter, outside any session — a lazy proxy there fails the request instead of

@@ -6536,4 +6536,14 @@
             <column name="tokens_invalid_before" type="TIMESTAMP WITHOUT TIME ZONE"/>
         </addColumn>
     </changeSet>
+    <changeSet author="jcizmar" id="1783771000000-56">
+        <comment>Install-level credentials are gone: apps mint install-scoped tokens from their
+            app-level credentials instead, so revoking those revokes everything at once.
+        </comment>
+        <dropTable tableName="app_install_secret"/>
+        <dropUniqueConstraint tableName="app_install" constraintName="app_install_client_id_unique"/>
+        <dropColumn tableName="app_install">
+            <column name="client_id"/>
+        </dropColumn>
+    </changeSet>
 </databaseChangeLog>

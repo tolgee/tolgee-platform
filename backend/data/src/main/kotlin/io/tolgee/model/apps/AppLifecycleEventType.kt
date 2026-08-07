@@ -11,5 +11,4 @@ enum class AppLifecycleEventType(
   APP_INSTALLED("app.installed"),
   APP_UNINSTALLED("app.uninstalled"),
   APP_SECRET_ROTATED("app.secret_rotated"),
-  INSTALL_SECRET_ROTATED("app.install_secret_rotated"),
 }

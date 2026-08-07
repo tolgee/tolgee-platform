@@ -35,9 +35,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import tools.jackson.databind.JsonNode
 
 /**
- * The app layer's answer to a leaked publisher credential: rotate once, not once per organization
- * that installed the app. Mirrors [AppInstallSecretRotationTest] one level up, and must leave
- * everything that layer owns — installs, their secrets, availability and enablements — untouched.
+ * The answer to a leaked app credential: rotate once, not once per organization that installed the
+ * app. Rotation must leave everything below the credential — installs, availability, enablements —
+ * untouched.
  */
 class AppSecretRotationTest : AuthorizedControllerTest() {
   @Autowired
@@ -135,14 +135,14 @@ class AppSecretRotationTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `an app-level rotation leaves the install, its secret and its enablements alone`() {
-    val installSecret = registeredInstallSecret
-    issueAsOwner()
-    val originalId = liveSecretIds().first()
+  fun `an app-level rotation leaves the install and its enablements alone`() {
+    val issued = issueAsOwner()
+    val originalId = liveSecretIds().first { it != issued.get("id").asLong() }
     userAccount = testData.user
     performAuthDelete("${ownedAppsUrl()}/$appEntityId/secrets/$originalId").andIsOk
 
-    tokenRequest(registeredInstallClientId, installSecret).andIsOk
+    // The surviving secret still mints tokens for the untouched install.
+    tokenRequest(appClientId, issued.get("secret").asText()).andIsOk
     userAccount = testData.user
     performAuthGet("/v2/organizations/${testData.organization.id}/apps").andIsOk.andAssertThatJson {
       node("_embedded.appInstalls").isArray.hasSize(1)
@@ -234,11 +234,6 @@ class AppSecretRotationTest : AuthorizedControllerTest() {
     performAuthPost("${ownedAppsUrl()}/$appEntityId/secrets", null).andIsForbidden
   }
 
-  private lateinit var registeredInstallSecret: String
-
-  private val registeredInstallClientId: String
-    get() = executeInNewTransaction { appInstallService.getScoped(testData.organization.id, installId).clientId!! }
-
   private fun register(): JsonNode {
     userAccount = testData.user
     val json =
@@ -250,7 +245,6 @@ class AppSecretRotationTest : AuthorizedControllerTest() {
           .andReturn()
           .response.contentAsString,
       )
-    registeredInstallSecret = json.get("clientSecret").asText()
     return json
   }
 
@@ -316,6 +310,7 @@ class AppSecretRotationTest : AuthorizedControllerTest() {
               "grant_type" to "client_credentials",
               "client_id" to clientId,
               "client_secret" to clientSecret,
+              "install_id" to installId,
             ),
           ),
         ),

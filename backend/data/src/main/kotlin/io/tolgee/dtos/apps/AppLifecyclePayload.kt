@@ -33,9 +33,6 @@ data class AppLifecycleAppCredentials(
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class AppLifecycleInstall(
   val id: Long,
-  val clientId: String?,
-  /** Present only when this delivery is the one disclosing it. */
-  val clientSecret: String? = null,
   val scopes: List<String> = listOf(),
 )
 

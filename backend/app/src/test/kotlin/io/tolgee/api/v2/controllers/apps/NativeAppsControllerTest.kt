@@ -13,6 +13,7 @@ import io.tolgee.service.apps.AppAvailabilityService
 import io.tolgee.service.apps.AppEnablementService
 import io.tolgee.service.apps.AppInstallService
 import io.tolgee.service.apps.AppManifestHttpClient
+import io.tolgee.service.apps.AppService
 import io.tolgee.service.apps.AppsTestFixtures
 import io.tolgee.service.apps.lifecycle.AppLifecycleHttpClient
 import io.tolgee.testing.AuthorizedControllerTest
@@ -62,26 +63,25 @@ class NativeAppsControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `lists native installs without ever disclosing the client secret`() {
+  fun `lists native installs without ever disclosing any credentials`() {
     createNativeInstall()
 
     performAuthGet("/v2/administration/apps").andIsOk.andAssertThatJson {
       node("_embedded.appInstalls").isArray.hasSize(1)
       node("_embedded.appInstalls[0].appId").isEqualTo("test-app")
-      node("_embedded.appInstalls[0].clientId").isString.startsWith(AppInstallService.CLIENT_ID_PREFIX)
-      node("_embedded.appInstalls[0].clientSecret").isNull()
+      node("_embedded.appInstalls[0].clientSecret").isAbsent()
     }
   }
 
   @Test
-  fun `registers a native app from a manifest URL, disclosing the client secret once`() {
+  fun `registers a native app from a manifest URL, disclosing the app credentials once`() {
     performAuthPost("/v2/administration/apps", registerBody()).andIsOk.andAssertThatJson {
       node("appId").isEqualTo("test-app")
       node("name").isEqualTo("Test App")
       node("baseUrl").isEqualTo("https://app.example.com")
       node("availableToAllOrganizations").isEqualTo(false)
-      node("clientId").isString.startsWith(AppInstallService.CLIENT_ID_PREFIX)
-      node("clientSecret").isString.startsWith(AppInstallService.CLIENT_SECRET_PREFIX)
+      node("app.clientId").isString.startsWith(AppService.APP_CLIENT_ID_PREFIX)
+      node("app.clientSecret").isString.startsWith(AppService.APP_CLIENT_SECRET_PREFIX)
     }
 
     val install = AppsTestFixtures.nativeInstalls(appInstallService).single()
@@ -91,7 +91,7 @@ class NativeAppsControllerTest : AuthorizedControllerTest() {
 
     performAuthGet("/v2/administration/apps").andIsOk.andAssertThatJson {
       node("_embedded.appInstalls").isArray.hasSize(1)
-      node("_embedded.appInstalls[0].clientSecret").isNull()
+      node("_embedded.appInstalls[0].clientSecret").isAbsent()
     }
   }
 

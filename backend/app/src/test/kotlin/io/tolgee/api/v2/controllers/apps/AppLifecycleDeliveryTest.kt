@@ -98,9 +98,8 @@ class AppLifecycleDeliveryTest : AuthorizedControllerTest() {
 
     installed
       .at("/install/clientSecret")
-      .asText()
-      .assert
-      .isEqualTo(response.get("clientSecret").asText())
+      .isMissingNode.assert
+      .isTrue()
     installed
       .at("/install/id")
       .asLong()
@@ -184,27 +183,6 @@ class AppLifecycleDeliveryTest : AuthorizedControllerTest() {
       .at("/install/clientSecret")
       .isMissingNode.assert
       .isTrue()
-  }
-
-  @Test
-  fun `rotating an install secret pushes the new one to the app`() {
-    val installId = register().get("id").asLong()
-    awaitPayload("app.installed")
-
-    val issued =
-      objectMapper.readTree(
-        performAuthPost("${orgAppsUrl()}/$installId/secrets", null)
-          .andIsOk
-          .andReturn()
-          .response.contentAsString,
-      )
-
-    val rotated = awaitPayload("app.install_secret_rotated")
-    rotated
-      .at("/install/clientSecret")
-      .asText()
-      .assert
-      .isEqualTo(issued.get("secret").asText())
   }
 
   private fun failDeliveries() {

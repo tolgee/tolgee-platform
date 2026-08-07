@@ -29,6 +29,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
+import tools.jackson.databind.JsonNode
 import java.util.Date
 
 /**
@@ -68,7 +69,7 @@ class AppTokenAuthorizationTest : AuthorizedControllerTest() {
     installId = json.get("id").asLong()
 
     performAuthPut("/v2/projects/${testData.project.id}/apps/$installId", null).andIsOk
-    installToken = requestInstallToken(json.get("clientId").asText(), json.get("clientSecret").asText())
+    installToken = requestInstallToken(json)
   }
 
   @AfterEach
@@ -124,7 +125,7 @@ class AppTokenAuthorizationTest : AuthorizedControllerTest() {
     val privilegedInstallId = json.get("id").asLong()
     performAuthPut("/v2/projects/${testData.project.id}/apps/$privilegedInstallId", null).andIsOk
     val privilegedToken =
-      requestInstallToken(json.get("clientId").asText(), json.get("clientSecret").asText())
+      requestInstallToken(json)
 
     asToken(privilegedToken, get("/v2/projects/${testData.project.id}/apps"))
       .andIsForbidden
@@ -256,10 +257,7 @@ class AppTokenAuthorizationTest : AuthorizedControllerTest() {
     return perform(builder.header(HttpHeaders.AUTHORIZATION, "Bearer $token"))
   }
 
-  private fun requestInstallToken(
-    clientId: String,
-    clientSecret: String,
-  ): String {
+  private fun requestInstallToken(registration: JsonNode): String {
     val response =
       perform(
         post("/v2/public/apps/token")
@@ -268,8 +266,9 @@ class AppTokenAuthorizationTest : AuthorizedControllerTest() {
             objectMapper.writeValueAsString(
               mapOf(
                 "grant_type" to "client_credentials",
-                "client_id" to clientId,
-                "client_secret" to clientSecret,
+                "client_id" to registration.at("/app/clientId").asText(),
+                "client_secret" to registration.at("/app/clientSecret").asText(),
+                "install_id" to registration.get("id").asLong(),
               ),
             ),
           ),

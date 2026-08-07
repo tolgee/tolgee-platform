@@ -60,7 +60,7 @@ class AppSelfInstallationsControllerTest : AuthorizedControllerTest() {
     val registration = registerOrganizationInstall()
     installId = registration.first
     performAuthPut("/v2/projects/${testData.project.id}/apps/$installId", null).andIsOk
-    installToken = requestInstallToken(registration.second, registration.third)
+    installToken = requestInstallToken(registration.second, registration.third, registration.first)
   }
 
   @AfterEach
@@ -118,7 +118,7 @@ class AppSelfInstallationsControllerTest : AuthorizedControllerTest() {
     val native = registerNativeInstallGrantedToOrganization()
     userAccount = testData.user
     performAuthPut("/v2/projects/${testData.project.id}/apps/${native.first}", null).andIsOk
-    val nativeToken = requestInstallToken(native.second, native.third)
+    val nativeToken = requestInstallToken(native.second, native.third, native.first)
 
     asToken(nativeToken, get(SELF_INSTALLATIONS)).andIsOk.andAssertThatJson {
       node("_embedded.installations[0].native").isEqualTo(true)
@@ -212,8 +212,8 @@ class AppSelfInstallationsControllerTest : AuthorizedControllerTest() {
     val json = objectMapper.readTree(registrationResponse)
     return Triple(
       json.get("id").asLong(),
-      json.get("clientId").asText(),
-      json.get("clientSecret").asText(),
+      json.at("/app/clientId").asText(),
+      json.at("/app/clientSecret").asText(),
     )
   }
 
@@ -228,6 +228,7 @@ class AppSelfInstallationsControllerTest : AuthorizedControllerTest() {
   private fun requestInstallToken(
     clientId: String,
     clientSecret: String,
+    installId: Long,
   ): String {
     val response =
       perform(
@@ -239,6 +240,7 @@ class AppSelfInstallationsControllerTest : AuthorizedControllerTest() {
                 "grant_type" to "client_credentials",
                 "client_id" to clientId,
                 "client_secret" to clientSecret,
+                "install_id" to installId,
               ),
             ),
           ),

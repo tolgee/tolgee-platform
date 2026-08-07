@@ -5,7 +5,8 @@ import jakarta.validation.constraints.NotBlank
 
 /**
  * OAuth 2.0 client-credentials token request (RFC 6749 §4.4). An app's backend exchanges its
- * `client_id` + `client_secret` for a short-lived install-context access token.
+ * app-level `client_id` + `client_secret` plus an `install_id` for a short-lived install-scoped
+ * access token.
  */
 data class AppClientCredentialsRequest(
   @JsonProperty("grant_type")
@@ -18,8 +19,9 @@ data class AppClientCredentialsRequest(
   @field:NotBlank
   val clientSecret: String = "",
   /**
-   * Which installation the token should act as. Required when the credentials are app-level, which
-   * identify an app installed by many organizations and so cannot imply one on their own.
+   * Which installation the token should act as. The credentials identify an app installed by any
+   * number of organizations, so they cannot imply one on their own. Nullable only so its absence
+   * produces a specific error rather than a generic validation failure.
    */
   @JsonProperty("install_id")
   val installId: Long? = null,

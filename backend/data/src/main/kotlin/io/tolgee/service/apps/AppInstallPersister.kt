@@ -1,6 +1,5 @@
 package io.tolgee.service.apps
 
-import io.tolgee.component.KeyGenerator
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
@@ -21,12 +20,10 @@ class AppInstallPersister(
   private val appInstallRepository: AppInstallRepository,
   private val appEnablementService: AppEnablementService,
   private val appAvailabilityService: AppAvailabilityService,
-  private val appInstallSecretService: AppInstallSecretService,
   private val appService: AppService,
   private val appRepository: AppRepository,
   private val appInstallPrincipalService: AppInstallPrincipalService,
   private val entityManager: EntityManager,
-  private val keyGenerator: KeyGenerator,
 ) {
   /**
    * Registers the app if nobody has yet — making [organizationId] its owner — and installs it in one
@@ -70,8 +67,6 @@ class AppInstallPersister(
       throw BadRequestException(Message.APP_ALREADY_INSTALLED)
     }
 
-    val plaintextClientId = AppInstallService.CLIENT_ID_PREFIX + keyGenerator.generate(128)
-
     val install =
       AppInstall().apply {
         this.app = app
@@ -85,7 +80,6 @@ class AppInstallPersister(
         this.baseUrl = fetched.manifest.baseUrl
         this.manifestJson = fetched.rawJson
         this.grantedScopes = fetched.scopes.toMutableSet()
-        this.clientId = plaintextClientId
       }
 
     val saved =
@@ -94,10 +88,8 @@ class AppInstallPersister(
       } catch (_: DataIntegrityViolationException) {
         throw BadRequestException(Message.APP_ALREADY_INSTALLED)
       }
-    val issued = appInstallSecretService.issueInitial(saved)
     return AppInstallService.RegisterResult(
       install = saved,
-      plaintextClientSecret = issued.plaintextSecret,
       app = appService.summarize(app),
       appCredentials = appCredentials,
     )

@@ -5,17 +5,13 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.apps.AppClientCredentialsRequest
-import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.apps.AppAccessTokenModel
-import io.tolgee.model.apps.App
 import io.tolgee.security.authentication.AppTokenService
 import io.tolgee.security.ratelimit.RateLimited
-import io.tolgee.service.apps.AppInstallSecretService
+import io.tolgee.service.apps.AppCredentialAuthenticator
 import io.tolgee.service.apps.AppInstallService
-import io.tolgee.service.apps.AppSecretService
-import io.tolgee.service.apps.AppService
 import jakarta.validation.Valid
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -38,10 +34,8 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping(value = ["/v2/public/apps"])
 @Tag(name = "App Authentication")
 class AppTokenEndpointController(
+  private val appCredentialAuthenticator: AppCredentialAuthenticator,
   private val appInstallService: AppInstallService,
-  private val appInstallSecretService: AppInstallSecretService,
-  private val appService: AppService,
-  private val appSecretService: AppSecretService,
   private val appTokenService: AppTokenService,
   private val tolgeeProperties: TolgeeProperties,
 ) {
@@ -50,10 +44,12 @@ class AppTokenEndpointController(
   // restarts every replica at once arrives here as a burst.
   @RateLimited(120, isAuthentication = true)
   @Operation(
-    summary = "Exchange app client credentials for an access token",
+    summary = "Exchange app client credentials for an install-scoped access token",
     description =
-      "OAuth 2.0 client-credentials grant. Returns a short-lived install-context access token the " +
-        "app's backend uses to call Tolgee's REST API as the install.",
+      "OAuth 2.0 client-credentials grant. Authenticates with the app-level credentials, names an " +
+        "installation via `install_id`, and returns a short-lived access token the app's backend " +
+        "uses to call Tolgee's REST API as that install. Install ids come from " +
+        "`POST /v2/public/apps/installations/list`.",
   )
   fun token(
     @RequestBody @Valid body: AppClientCredentialsRequest,
@@ -62,55 +58,21 @@ class AppTokenEndpointController(
       throw BadRequestException(Message.APP_UNSUPPORTED_GRANT_TYPE)
     }
 
-    val installId = authenticateForInstall(body)
-    val token = appTokenService.mintInstallContextToken(installId)
-    return AppAccessTokenModel(
-      accessToken = token,
-      tokenType = "Bearer",
-      expiresIn = tolgeeProperties.apps.tokenExpiration / 1000,
-    )
-  }
+    val app = appCredentialAuthenticator.authenticate(body.clientId, body.clientSecret)
 
-  /**
-   * The credentials may be either the app's own or one install's, told apart by the `client_id`
-   * prefix. App-level credentials identify an app that many organizations installed, so they carry
-   * no install of their own and the caller has to name one.
-   */
-  private fun authenticateForInstall(body: AppClientCredentialsRequest): Long {
-    appService.resolveByClientId(body.clientId)?.let { return appCredentialsInstall(it, body) }
-    return installCredentialsInstall(body)
-  }
-
-  private fun appCredentialsInstall(
-    app: App,
-    body: AppClientCredentialsRequest,
-  ): Long {
-    val secret =
-      appSecretService.findLiveMatching(app.id, body.clientSecret)
-        ?: throw AuthenticationException(Message.INVALID_APP_CREDENTIALS)
-
-    appSecretService.updateLastUsedAsync(secret.id, secret.lastUsedAt)
-
+    // App-level credentials identify an app installed by any number of organizations, so they
+    // cannot imply an install on their own.
     val installId = body.installId ?: throw BadRequestException(Message.APP_INSTALL_ID_REQUIRED)
     val install =
       appInstallService.findOwnInstall(app.id, installId)
         ?: throw NotFoundException(Message.APP_INSTALL_NOT_FOUND)
 
-    return install.id
-  }
-
-  private fun installCredentialsInstall(body: AppClientCredentialsRequest): Long {
-    val install =
-      appInstallService.resolveByClientId(body.clientId)
-        ?: throw AuthenticationException(Message.INVALID_APP_CREDENTIALS)
-
-    val secret =
-      appInstallSecretService.findLiveMatching(install.id, body.clientSecret)
-        ?: throw AuthenticationException(Message.INVALID_APP_CREDENTIALS)
-
-    appInstallSecretService.updateLastUsedAsync(secret.id, secret.lastUsedAt)
-
-    return install.id
+    val token = appTokenService.mintInstallContextToken(install.id)
+    return AppAccessTokenModel(
+      accessToken = token,
+      tokenType = "Bearer",
+      expiresIn = tolgeeProperties.apps.tokenExpiration / 1000,
+    )
   }
 
   companion object {

@@ -48,7 +48,7 @@ class AppOwnerRemovalService(
         target = target,
         eventType = AppLifecycleEventType.APP_UNINSTALLED,
         organizationId = it.organizationId,
-        install = AppLifecycleInstall(id = it.installId, clientId = null),
+        install = AppLifecycleInstall(id = it.installId),
       )
     }
   }

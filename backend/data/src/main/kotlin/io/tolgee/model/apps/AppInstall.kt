@@ -14,7 +14,6 @@ import jakarta.persistence.FetchType
 import jakarta.persistence.Index
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
-import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import jakarta.persistence.UniqueConstraint
 import org.hibernate.annotations.ColumnDefault
@@ -108,15 +107,4 @@ class AppInstall : StandardAuditModel() {
   )
   @Column(name = "scope", nullable = false)
   var grantedScopes: MutableSet<Scope> = mutableSetOf()
-
-  /**
-   * OAuth client id of the app's backend (machine-to-machine). It never changes; the matching
-   * secrets live in [AppInstallSecret] and are rotated independently. The backend exchanges the pair
-   * at the token endpoint for a short-lived install-context access token.
-   */
-  @Column(name = "client_id", length = 64, unique = true)
-  var clientId: String? = null
-
-  @OneToMany(mappedBy = "appInstall", fetch = FetchType.LAZY)
-  var secrets: MutableList<AppInstallSecret> = mutableListOf()
 }

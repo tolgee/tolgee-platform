@@ -15,17 +15,16 @@ open class AppInstallModel(
   val baseUrl: String,
   val modules: AppManifestModules,
   val scopes: List<String>,
-  val clientId: String?,
   /**
    * Native apps only: whether every organization — including ones created later — may enable this
    * app, on top of the explicitly granted ones.
    */
   val availableToAllOrganizations: Boolean = false,
   /**
-   * The OAuth client secret in plaintext. Present only in the response to registration — it is never
-   * stored and cannot be retrieved again.
+   * Self-registration only: whether this call created the install, as opposed to repointing an
+   * existing one at a new manifest URL. Absent elsewhere.
    */
-  val clientSecret: String? = null,
+  val created: Boolean? = null,
   /**
    * The registered app this is an installation of. Two organizations installing the same manifest
    * see the same app here, each with their own install.

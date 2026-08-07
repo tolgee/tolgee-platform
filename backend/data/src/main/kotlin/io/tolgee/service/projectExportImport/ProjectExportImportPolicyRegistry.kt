@@ -34,7 +34,6 @@ import io.tolgee.model.apps.AppAvailableForOrganization
 import io.tolgee.model.apps.AppDelivery
 import io.tolgee.model.apps.AppEnabledForProject
 import io.tolgee.model.apps.AppInstall
-import io.tolgee.model.apps.AppInstallSecret
 import io.tolgee.model.apps.AppSecret
 import io.tolgee.model.automations.Automation
 import io.tolgee.model.automations.AutomationAction
@@ -199,7 +198,6 @@ object ProjectExportImportPolicyRegistry {
         AppSecret::class,
         AppDelivery::class,
         AppInstall::class,
-        AppInstallSecret::class,
         AppEnabledForProject::class,
         AppAvailableForOrganization::class,
         InstanceId::class,

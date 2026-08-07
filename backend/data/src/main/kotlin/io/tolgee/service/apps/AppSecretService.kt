@@ -16,11 +16,11 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.Date
 
 /**
- * Owns the app-level client secrets. They identify and administer the app across every organization
- * that installed it; nothing they authenticate reaches a tenant's data.
+ * Owns the app-level client secrets — the app's only long-lived credentials. Everything the app
+ * does starts here: the token endpoint exchanges them for short-lived install-scoped tokens.
  *
- * Rotation is the same two steps as at the install layer — issue while the old one still works, then
- * revoke it separately. See [AppInstallSecretService].
+ * Rotation is two separate steps — issue while the old one still works, then revoke it separately —
+ * so an app is never without a working secret mid-rotation.
  */
 @Service
 class AppSecretService(
@@ -63,9 +63,9 @@ class AppSecretService(
    * for as long as the tokens it minted live, which is the whole window revocation exists to close.
    *
    * @param allowRevokingLast false refuses to revoke the app's only live secret. False for the
-   *   app-initiated path, matching [AppInstallSecretService.revoke]: an app authenticates with a
-   *   secret, so revoking its last one would lock it out of the endpoint that issues a replacement.
-   *   The owning organization may do it — that is the kill switch for a leaked credential.
+   *   app-initiated path: an app authenticates with a secret, so revoking its last one would lock
+   *   it out of the endpoint that issues a replacement. The owning organization may do it — that
+   *   is the kill switch for a leaked credential.
    */
   @Transactional
   fun revoke(
@@ -100,7 +100,7 @@ class AppSecretService(
 
   /**
    * The app's live secret matching [plaintextSecret], or null when none does. Compared in constant
-   * time rather than looked up by hash, exactly as [AppInstallSecretService.findLiveMatching] does.
+   * time rather than looked up by hash, so a timing side channel cannot confirm a guessed secret.
    */
   @Transactional(readOnly = true)
   fun findLiveMatching(
@@ -121,7 +121,7 @@ class AppSecretService(
   ) {
     runSentryCatching {
       val now = currentDateProvider.date
-      val throttle = AppInstallSecretService.LAST_USED_THROTTLE_MS
+      val throttle = LAST_USED_THROTTLE_MS
       if (previousLastUsedAt != null && now.time - previousLastUsedAt.time < throttle) {
         return@runSentryCatching
       }
@@ -134,6 +134,13 @@ class AppSecretService(
   }
 
   companion object {
-    const val MAX_LIVE_SECRETS = AppInstallSecretService.MAX_LIVE_SECRETS
+    /**
+     * A rotation needs two, and a staged rollout across environments a few more. Beyond that the
+     * list stops being something an operator can reason about before revoking, and every extra live
+     * secret is another copy that can leak — so issuing is refused rather than silently unbounded.
+     */
+    const val MAX_LIVE_SECRETS = 5
+
+    const val LAST_USED_THROTTLE_MS = 60_000L
   }
 }
