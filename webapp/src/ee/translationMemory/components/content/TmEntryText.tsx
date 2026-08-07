@@ -3,6 +3,7 @@ import { generatePlaceholdersStyle, getPlaceholders } from '@tginternal/editor';
 import { styled, useTheme } from '@mui/material';
 import { getLanguageDirection } from 'tg.fixtures/getLanguageDirection';
 import { placeholderToElement } from 'tg.views/projects/translations/translationVisual/placeholderToElement';
+import { renderWithInvisibleCharacters } from 'tg.component/InvisibleCharacter';
 
 const StyledWrapper = styled('div')`
   white-space: pre-wrap;
@@ -44,7 +45,7 @@ export const TmEntryText: React.VFC<Props> = ({ text, locale }) => {
   if (placeholders.length === 0) {
     return (
       <StyledPlaceholdersWrapper dir={direction} lang={locale}>
-        {text}
+        {renderWithInvisibleCharacters(text, 'tm-entry-text')}
       </StyledPlaceholdersWrapper>
     );
   }
@@ -59,7 +60,12 @@ export const TmEntryText: React.VFC<Props> = ({ text, locale }) => {
       continue;
     }
     if (placeholder.position.start > index) {
-      chunks.push(text.substring(index, placeholder.position.start));
+      chunks.push(
+        ...renderWithInvisibleCharacters(
+          text.substring(index, placeholder.position.start),
+          `chunk-${index}`
+        )
+      );
     }
     chunks.push(
       placeholderToElement({
@@ -70,7 +76,9 @@ export const TmEntryText: React.VFC<Props> = ({ text, locale }) => {
     index = placeholder.position.end;
   }
   if (index < text.length) {
-    chunks.push(text.substring(index));
+    chunks.push(
+      ...renderWithInvisibleCharacters(text.substring(index), `chunk-${index}`)
+    );
   }
 
   return (
