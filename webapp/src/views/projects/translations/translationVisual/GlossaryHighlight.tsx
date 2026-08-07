@@ -1,5 +1,6 @@
 import { alpha, styled, Tooltip } from '@mui/material';
 import { TooltipCard } from 'tg.component/common/TooltipCard';
+import { renderWithInvisibleCharacters } from 'tg.component/InvisibleCharacter';
 import { GlossaryTermPreview } from 'tg.ee';
 import { components } from 'tg.service/apiSchema.generated';
 import { stopBubble } from 'tg.fixtures/eventHandler';
@@ -52,7 +53,7 @@ export const GlossaryHighlight = ({
       }
     >
       <StyledHighlight data-cy="glossary-term-highlight">
-        {text}
+        {renderWithInvisibleCharacters(text, 'glossary')}
       </StyledHighlight>
     </Tooltip>
   );

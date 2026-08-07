@@ -353,6 +353,7 @@ declare namespace DataCy {
         "integrate-select-api-key-step-content": true;
         "integrate-select-api-key-step-label": true;
         "integrate-weapon-selector-button": true;
+        "invisible-character": true;
         "invitation-accepted-success-message": true;
         "invitation-dialog-close-button": true;
         "invitation-dialog-input-field": true;
