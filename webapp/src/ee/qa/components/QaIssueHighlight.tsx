@@ -1,5 +1,6 @@
 import { alpha, styled, Tooltip } from '@mui/material';
 import { TooltipCard } from 'tg.component/common/TooltipCard';
+import { renderWithInvisibleCharacters } from 'tg.component/InvisibleCharacter';
 import { QaCheckItem } from 'tg.ee';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
@@ -105,10 +106,12 @@ export const QaIssueHighlight = ({
       }
     >
       {hasVisibleContent ? (
-        <StyledHighlight data-cy="qa-issue-highlight">{text}</StyledHighlight>
+        <StyledHighlight data-cy="qa-issue-highlight">
+          {renderWithInvisibleCharacters(text, 'qa-issue')}
+        </StyledHighlight>
       ) : (
         <span>
-          {text}
+          {renderWithInvisibleCharacters(text, 'qa-issue-empty')}
           <StyledMarker data-cy="qa-issue-marker" />
         </span>
       )}
