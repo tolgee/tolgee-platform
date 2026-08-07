@@ -184,6 +184,9 @@ dependencies {
     implementation libs.jjwtImpl
     implementation libs.jjwtJackson
     api libs.springSecurityOauth2AuthServer
+    // Shared JDBC session store so the OAuth2 consent flow's HttpSession survives across replicas (the app is
+    // otherwise stateless). See db/changelog/spring-session/spring-session.xml for the schema.
+    api 'org.springframework.session:spring-session-jdbc'
     implementation libs.jacksonModuleKotlin
     implementation 'net.datafaker:datafaker:2.4.4'
     implementation 'jaxen:jaxen:1.2.0'
