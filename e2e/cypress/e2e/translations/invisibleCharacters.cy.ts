@@ -81,7 +81,10 @@ describe('Invisible characters', () => {
     visitTranslations(projectId);
     waitForGlobalLoading();
     editCell('Bonjour');
-    gcy('global-editor').find('.cm-invisible-char-nbsp').first().trigger('mousemove');
+    gcy('global-editor')
+      .find('.cm-invisible-char-nbsp')
+      .first()
+      .trigger('mousemove');
     gcy('invisible-character-tooltip').should('be.visible');
   });
 });
