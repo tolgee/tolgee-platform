@@ -16,7 +16,11 @@ import {
 import { Direction } from 'tg.fixtures/getLanguageDirection';
 import { useScrollMargins } from 'tg.hooks/useScrollMargins';
 import { visibleKeyNameSpacesPlugin } from './utils/codemirrorVisibleWhitespace';
-import { invisibleCharactersPlugin } from './utils/codemirrorInvisibleCharacters';
+import {
+  invisibleCharactersPlugin,
+  invisibleCharactersTooltip,
+} from './utils/codemirrorInvisibleCharacters';
+import { useInvisibleCharacterLabel } from 'tg.component/InvisibleCharacter';
 
 const StyledEditor = styled('div')`
   font-size: 14px;
@@ -130,6 +134,7 @@ export const Editor: React.FC<React.PropsWithChildren<EditorProps>> = ({
     onFocus,
     onBlur,
   });
+  const invisibleCharacterLabelRef = useRefGroup(useInvisibleCharacterLabel());
   const languageCompartment = useRef<Compartment>(new Compartment());
 
   const StyledEditorWrapper = useMemo(() => {
@@ -168,6 +173,9 @@ export const Editor: React.FC<React.PropsWithChildren<EditorProps>> = ({
           Prec.highest(keymap.of(shortcutsUptoDate ?? [])),
           EditorView.lineWrapping,
           invisibleCharactersPlugin(),
+          invisibleCharactersTooltip(
+            (char) => invisibleCharacterLabelRef.current?.(char) ?? ''
+          ),
           EditorView.updateListener.of((v: ViewUpdate) => {
             if (v.focusChanged) {
               if (v.view.hasFocus) {

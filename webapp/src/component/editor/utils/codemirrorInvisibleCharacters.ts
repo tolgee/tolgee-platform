@@ -8,10 +8,14 @@ import {
   Decoration,
   DecorationSet,
   EditorView,
+  hoverTooltip,
   WidgetType,
 } from '@codemirror/view';
 
-import { findInvisibleCharacters } from 'tg.fixtures/invisibleCharacters';
+import {
+  findInvisibleCharacters,
+  InvisibleChar,
+} from 'tg.fixtures/invisibleCharacters';
 
 const nonBreakingSpaceDecoration = Decoration.mark({
   attributes: { class: 'cm-invisible-char-nbsp' },
@@ -62,3 +66,32 @@ const invisibleCharactersField = StateField.define<DecorationSet>({
 export const invisibleCharactersPlugin = (): Extension[] => [
   invisibleCharactersField,
 ];
+
+export const invisibleCharactersTooltip = (
+  getLabel: (char: InvisibleChar) => string
+): Extension =>
+  hoverTooltip((context, pos) => {
+    const found = findInvisibleCharacters(context.state.doc.toString()).find(
+      ({ index, char }) => pos >= index && pos <= index + char.value.length
+    );
+
+    if (!found) {
+      return null;
+    }
+
+    return {
+      pos: found.index,
+      end: found.index + found.char.value.length,
+      above: true,
+      create: () => {
+        const dom = document.createElement('div');
+        // Attributes must come from an object literal: `npm run generate-data-cy`
+        // scans for `'data-cy': '<literal>'` and misses `setAttribute` with a variable.
+        Object.entries({ 'data-cy': 'invisible-character-tooltip' }).forEach(
+          ([name, value]) => dom.setAttribute(name, value)
+        );
+        dom.textContent = getLabel(found.char);
+        return { dom };
+      },
+    };
+  });

@@ -70,4 +70,12 @@ describe('Invisible characters', () => {
       .find('.cm-invisible-char-zero-width')
       .should('have.length.at.least', 1);
   });
+
+  it('names the character in a hover tooltip', () => {
+    visitTranslations(projectId);
+    waitForGlobalLoading();
+    editCell('Bonjour');
+    gcy('global-editor').find('.cm-invisible-char-nbsp').first().trigger('mousemove');
+    gcy('invisible-character-tooltip').should('be.visible');
+  });
 });
