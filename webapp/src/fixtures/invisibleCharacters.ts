@@ -6,12 +6,12 @@ export type InvisibleChar = {
 };
 
 export const INVISIBLE_CHARACTERS: InvisibleChar[] = [
-  { value: ' ', kind: 'nonBreakingSpace' },
-  { value: ' ', kind: 'nonBreakingSpace' },
-  { value: ' ', kind: 'nonBreakingSpace' },
-  { value: '​', kind: 'zeroWidth' },
-  { value: '﻿', kind: 'zeroWidth' },
-  { value: '­', kind: 'zeroWidth' },
+  { value: '\u00A0', kind: 'nonBreakingSpace' },
+  { value: '\u202F', kind: 'nonBreakingSpace' },
+  { value: '\u2007', kind: 'nonBreakingSpace' },
+  { value: '\u200B', kind: 'zeroWidth' },
+  { value: '\uFEFF', kind: 'zeroWidth' },
+  { value: '\u00AD', kind: 'zeroWidth' },
 ];
 
 const BY_VALUE = new Map(

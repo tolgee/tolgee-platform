@@ -30,12 +30,12 @@ describe('findInvisibleCharacters', () => {
   });
 
   it.each([
-    [' ', 'nonBreakingSpace'],
-    [' ', 'nonBreakingSpace'],
-    [' ', 'nonBreakingSpace'],
-    ['​', 'zeroWidth'],
-    ['﻿', 'zeroWidth'],
-    ['­', 'zeroWidth'],
+    ['\u00A0', 'nonBreakingSpace'],
+    ['\u202F', 'nonBreakingSpace'],
+    ['\u2007', 'nonBreakingSpace'],
+    ['\u200B', 'zeroWidth'],
+    ['\uFEFF', 'zeroWidth'],
+    ['\u00AD', 'zeroWidth'],
   ])('finds %j and reports kind %s', (value, kind) => {
     expect(findInvisibleCharacters(`a${value}b`)).toEqual([
       { index: 1, char: { value, kind } },
@@ -43,39 +43,39 @@ describe('findInvisibleCharacters', () => {
   });
 
   it('finds a character at the first index', () => {
-    expect(findInvisibleCharacters(' abc')).toEqual([
-      { index: 0, char: { value: ' ', kind: 'nonBreakingSpace' } },
+    expect(findInvisibleCharacters('\u00A0abc')).toEqual([
+      { index: 0, char: { value: '\u00A0', kind: 'nonBreakingSpace' } },
     ]);
   });
 
   it('finds a character at the last index', () => {
-    expect(findInvisibleCharacters('abc ')).toEqual([
-      { index: 3, char: { value: ' ', kind: 'nonBreakingSpace' } },
+    expect(findInvisibleCharacters('abc\u00A0')).toEqual([
+      { index: 3, char: { value: '\u00A0', kind: 'nonBreakingSpace' } },
     ]);
   });
 
   it('finds multiple characters in ascending order', () => {
-    expect(findInvisibleCharacters('a b​c')).toEqual([
-      { index: 1, char: { value: ' ', kind: 'nonBreakingSpace' } },
-      { index: 3, char: { value: '​', kind: 'zeroWidth' } },
+    expect(findInvisibleCharacters('a\u00A0b\u200Bc')).toEqual([
+      { index: 1, char: { value: '\u00A0', kind: 'nonBreakingSpace' } },
+      { index: 3, char: { value: '\u200B', kind: 'zeroWidth' } },
     ]);
   });
 
   it('finds adjacent characters', () => {
-    expect(findInvisibleCharacters('  ')).toEqual([
-      { index: 0, char: { value: ' ', kind: 'nonBreakingSpace' } },
-      { index: 1, char: { value: ' ', kind: 'nonBreakingSpace' } },
+    expect(findInvisibleCharacters('\u00A0\u00A0')).toEqual([
+      { index: 0, char: { value: '\u00A0', kind: 'nonBreakingSpace' } },
+      { index: 1, char: { value: '\u00A0', kind: 'nonBreakingSpace' } },
     ]);
   });
 
   it('reports code-unit offsets in text containing surrogate pairs', () => {
-    expect(findInvisibleCharacters('\u{1f600} ')).toEqual([
-      { index: 2, char: { value: ' ', kind: 'nonBreakingSpace' } },
+    expect(findInvisibleCharacters('\u{1f600}\u00A0')).toEqual([
+      { index: 2, char: { value: '\u00A0', kind: 'nonBreakingSpace' } },
     ]);
   });
 
   it('is stable across repeated calls', () => {
-    const text = 'a b';
+    const text = 'a\u00A0b';
     expect(findInvisibleCharacters(text)).toEqual(
       findInvisibleCharacters(text)
     );
