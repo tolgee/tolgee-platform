@@ -22,6 +22,7 @@ import io.tolgee.model.translation.Translation
 import io.tolgee.repository.KeyRepository
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.security.oauth2.OAuth2TokenCredentials
 import io.tolgee.service.branching.BranchService
 import io.tolgee.service.label.LabelService
 import io.tolgee.service.language.LanguageService
@@ -91,6 +92,9 @@ class SecurityService(
     ) {
       throw PermissionException(Message.USER_HAS_NO_PROJECT_ACCESS)
     }
+    authenticationFacade.oauthTokenCredentials?.let {
+      if (!it.coversProject(projectId)) throw PermissionException(Message.USER_HAS_NO_PROJECT_ACCESS)
+    }
   }
 
   fun currentPermittedScopesContain(scope: Scope): Boolean {
@@ -119,14 +123,20 @@ class SecurityService(
    * Returns current permitted scopes, expanded
    */
   fun getCurrentPermittedScopes(projectId: Long): Set<Scope> {
-    val projectScopes =
+    var scopes =
       Scope
         .expand(
           getProjectPermissionScopesNoApiKey(projectId, authenticationFacade.authenticatedUser.id),
         ).toSet()
-    val apiKey = activeApiKey ?: return projectScopes
 
-    return Scope.expand(apiKey.scopes).toSet().intersect(projectScopes.toSet())
+    activeApiKey?.let { scopes = scopes.intersect(Scope.expand(it.scopes).toSet()) }
+
+    authenticationFacade.oauthTokenCredentials?.let { credentials ->
+      if (!credentials.coversProject(projectId)) return emptySet()
+      scopes = scopes.intersect(Scope.expand(credentials.scopes).toSet())
+    }
+
+    return scopes
   }
 
   /**
@@ -146,6 +156,8 @@ class SecurityService(
     // This prevents improper preservation of permissions.
     checkProjectPermissionNoApiKey(projectId, requiredPermission, user)
 
+    authenticationFacade.oauthTokenCredentials?.let { checkOAuthTokenPermission(projectId, requiredPermission, it) }
+
     val apiKey = apiKey ?: activeApiKey
     apiKey ?: return
 
@@ -154,6 +166,16 @@ class SecurityService(
     }
 
     this.checkApiKeyScopes(listOf(requiredPermission), apiKey)
+  }
+
+  private fun checkOAuthTokenPermission(
+    projectId: Long,
+    requiredPermission: Scope,
+    credentials: OAuth2TokenCredentials,
+  ) {
+    if (!credentials.coversProject(projectId) || !Scope.expand(credentials.scopes).contains(requiredPermission)) {
+      throw PermissionException(missingScopes = listOf(requiredPermission))
+    }
   }
 
   fun checkTaskEditScopeOrAssigned(
@@ -174,6 +196,9 @@ class SecurityService(
     try {
       checkProjectPermission(projectId, scope)
     } catch (err: PermissionException) {
+      // An OAuth token must not gain scope/project access via task assignment — that would widen it past its
+      // consented scope ∩ project-set ceiling. The assignee fallback is a user-authority path only.
+      if (authenticationFacade.isOAuthTokenAuth) throw err
       val assignees = taskService.findAssigneeById(projectId, taskNumber, activeUser.id)
       if (assignees.isEmpty() || assignees[0].id != activeUser.id) {
         throw err
@@ -186,6 +211,8 @@ class SecurityService(
     languageId: Long,
     taskType: TaskType? = null,
   ): Boolean {
+    // OAuth tokens never widen via task assignment (see checkTaskScopeOrAssigned).
+    if (authenticationFacade.isOAuthTokenAuth) return false
     val assignees =
       taskService.findAssigneeByKey(
         keyId,
@@ -307,6 +334,8 @@ class SecurityService(
     languageIds: Collection<Long>,
     keyId: Long? = null,
   ): Boolean {
+    // OAuth tokens never widen via task assignment (see checkTaskScopeOrAssigned).
+    if (authenticationFacade.isOAuthTokenAuth) return false
     checkLanguageViewPermission(projectId, languageIds)
 
     if (keyId != null && languageIds.isNotEmpty()) {

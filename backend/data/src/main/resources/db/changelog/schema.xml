@@ -5876,4 +5876,6 @@
             END $$;
         </sql>
     </changeSet>
+    <include file="db/changelog/oauth2/oauth2-server.xml"/>
+    <include file="db/changelog/spring-session/spring-session.xml"/>
 </databaseChangeLog>

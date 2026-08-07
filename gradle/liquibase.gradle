@@ -39,7 +39,14 @@ ext {
                             "column:enabled_features,"+
                             // Exclude id columns: liquibase-hibernate7 emits a spurious addDefaultValue for them. https://github.com/liquibase/liquibase-hibernate/issues/919
                             "column:(?i)^id\$,"+
-                            "table:temp_unsuccessful_job_keys"
+                            "table:temp_unsuccessful_job_keys,"+
+                            // Spring Authorization Server tables (not JPA entities): managed by db/changelog/oauth2/oauth2-server.xml
+                            "table:oauth2_registered_client,"+
+                            "table:oauth2_authorization,"+
+                            "table:oauth2_authorization_consent,"+
+                            // Spring Session tables (not JPA entities): managed by db/changelog/spring-session/spring-session.xml
+                            "table:spring_session,"+
+                            "table:spring_session_attributes"
                 }
             }
         }

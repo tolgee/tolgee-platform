@@ -8,6 +8,12 @@ spring:
     redis:
       repositories:
         enabled: false
+  session:
+    # JDBC-backed HTTP sessions (shared across replicas) for the OAuth2 consent flow; the app is otherwise stateless.
+    # The schema is created by Liquibase (db/changelog/spring-session), not by Spring Session.
+    store-type: jdbc
+    jdbc:
+      initialize-schema: never
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
@@ -43,6 +49,8 @@ tolgee:
     use-redis: false
     default-ttl: 1200000
 server:
+  # Honor X-Forwarded-* so the OAuth2 issuer and .well-known URLs are correct behind the reverse proxy.
+  forward-headers-strategy: framework
   compression:
     enabled: true
     mime-types: "text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json"

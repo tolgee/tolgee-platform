@@ -26,6 +26,7 @@ import io.tolgee.dtos.cacheable.PatDto
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.model.UserAccount
+import io.tolgee.security.oauth2.OAuth2AccessTokenResolver
 import io.tolgee.security.ratelimit.RateLimitPolicy
 import io.tolgee.security.ratelimit.RateLimitService
 import io.tolgee.security.ratelimit.RateLimitedException
@@ -73,6 +74,8 @@ class AuthenticationFilterTest {
 
   private val jwtService = Mockito.mock(JwtService::class.java)
 
+  private val oAuth2AccessTokenResolver = Mockito.mock(OAuth2AccessTokenResolver::class.java)
+
   private val pakService = Mockito.mock(ApiKeyService::class.java)
 
   private val patService = Mockito.mock(PatService::class.java)
@@ -95,6 +98,7 @@ class AuthenticationFilterTest {
       currentDateProvider,
       rateLimitService,
       jwtService,
+      oAuth2AccessTokenResolver,
       userAccountService,
       pakService,
       patService,

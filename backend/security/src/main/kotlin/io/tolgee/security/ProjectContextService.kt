@@ -131,7 +131,7 @@ class ProjectContextService(
   }
 
   private val canUseAdminPermissions
-    get() = !authenticationFacade.isProjectApiKeyAuth
+    get() = !authenticationFacade.isProjectApiKeyAuth && !authenticationFacade.isOAuthTokenAuth
 
   private fun canBypass(isWriteOperation: Boolean): Boolean {
     if (!canUseAdminPermissions) return false

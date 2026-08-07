@@ -25,6 +25,7 @@ import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.model.ApiKey
 import io.tolgee.model.Pat
 import io.tolgee.model.UserAccount
+import io.tolgee.security.oauth2.OAuth2TokenCredentials
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PatService
 import io.tolgee.service.security.UserAccountService
@@ -93,13 +94,22 @@ class AuthenticationFacade(
     get() = if (isAuthenticated) authentication.isSuperToken else false
 
   val isApiAuthentication: Boolean
-    get() = isProjectApiKeyAuth || isPersonalAccessTokenAuth
+    get() = isProjectApiKeyAuth || isPersonalAccessTokenAuth || isOAuthTokenAuth
 
   val isProjectApiKeyAuth: Boolean
     get() = if (isAuthenticated) authentication.credentials is ApiKeyDto else false
 
   val isPersonalAccessTokenAuth: Boolean
     get() = if (isAuthenticated) authentication.credentials is PatDto else false
+
+  val isOAuthTokenAuth: Boolean
+    get() = oauthTokenCredentials != null
+
+  val oauthTokenCredentials: OAuth2TokenCredentials?
+    get() {
+      if (!isAuthenticated) return null
+      return authentication.credentials as? OAuth2TokenCredentials
+    }
 
   val projectApiKey: ApiKeyDto
     get() = authentication.credentials as ApiKeyDto

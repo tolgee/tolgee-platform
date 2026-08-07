@@ -110,6 +110,10 @@ export class LINKS {
     'accept_auth_provider_change'
   );
 
+  static OAUTH2 = Link.ofRoot('oauth2');
+  static OAUTH2_BOOTSTRAP = Link.ofParent(LINKS.OAUTH2, 'bootstrap');
+  static OAUTH2_CONSENT = Link.ofParent(LINKS.OAUTH2, 'consent');
+
   static GO_TO_CLOUD_BILLING = Link.ofRoot('billing');
   static GO_TO_SELF_HOSTED_BILLING = Link.ofRoot('billing-self-hosted');
 
