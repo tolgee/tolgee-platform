@@ -70,9 +70,12 @@ export const invisibleCharactersPlugin = (): Extension[] => [
 export const invisibleCharactersTooltip = (
   getLabel: (char: InvisibleChar) => string
 ): Extension =>
-  hoverTooltip((context, pos) => {
+  hoverTooltip((context, pos, side) => {
     const found = findInvisibleCharacters(context.state.doc.toString()).find(
-      ({ index, char }) => pos >= index && pos <= index + char.value.length
+      ({ index, char }) =>
+        side < 0
+          ? pos > index && pos <= index + char.value.length
+          : pos >= index && pos < index + char.value.length
     );
 
     if (!found) {
