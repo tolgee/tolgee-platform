@@ -44,7 +44,7 @@ export const AppCredentialsDisclosure = ({
     <Alert severity="warning" sx={{ mb: 2 }}>
       <T
         keyName="app_credentials_shown_once_warning"
-        defaultValue="Copy these now — they are shown only once and cannot be retrieved again. They administer the app across every organization that installs it and grant access to no translation data."
+        defaultValue="Copy these now — they are shown only once and cannot be retrieved again. They are the app's only credentials: everything it does, on every organization that installs it, starts from them — so store them like a password."
       />
     </Alert>
 

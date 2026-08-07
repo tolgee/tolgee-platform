@@ -144,7 +144,7 @@ export const OwnedAppSecretsDialog = ({
         <Typography variant="body2" color="text.secondary" mb={2}>
           <T
             keyName="owned_app_secrets_description"
-            defaultValue="These administer the app across every organization that installed it and grant access to no translation data. They are not the per-install secrets the app uses to read and write translations."
+            defaultValue="The app's only long-lived credentials: everything it does — administering itself and minting the short-lived tokens that read and write translations — starts from these. Revoking one immediately invalidates every token it minted."
           />
         </Typography>
 

@@ -18,8 +18,9 @@ import java.util.Date
 
 /**
  * A published app, registered once and installed by any number of organizations. Its credentials
- * identify and administer the app; they never grant access to anyone's data — that is what makes it
- * safe to hand them to whoever registers it. Data access goes through [AppInstall] credentials only.
+ * are the app's only long-lived ones: the token endpoint exchanges them plus an install id for the
+ * short-lived tokens that reach an organization's data, so revoking them — which stamps
+ * [tokensInvalidBefore] — cuts the app off everywhere at once.
  */
 @Entity
 @Table(

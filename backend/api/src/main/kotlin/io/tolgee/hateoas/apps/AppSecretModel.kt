@@ -17,7 +17,8 @@ open class AppSecretModel(
   @Schema(
     description =
       "The secret in plaintext. Present only in the response to issuing it — Tolgee stores only a " +
-        "hash and cannot show it again. It administers the app and grants access to no data.",
+        "hash and cannot show it again. Everything the app does starts from it — the token " +
+        "endpoint exchanges it for the short-lived tokens that reach translation data.",
   )
   val secret: String? = null,
 ) : RepresentationModel<AppSecretModel>()

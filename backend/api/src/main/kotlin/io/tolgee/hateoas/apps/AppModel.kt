@@ -18,9 +18,9 @@ open class AppModel(
   val clientId: String? = null,
   @Schema(
     description =
-      "App-level OAuth client secret in plaintext. Administers the app across every organization " +
-        "that installed it and grants access to no data. Present only in the response to " +
-        "registering the app; Tolgee stores only a hash and cannot show it again.",
+      "App-level OAuth client secret in plaintext — the app's only long-lived credential; the " +
+        "token endpoint exchanges it for install-scoped access tokens. Present only in the " +
+        "response to registering the app; Tolgee stores only a hash and cannot show it again.",
   )
   val clientSecret: String? = null,
   @Schema(

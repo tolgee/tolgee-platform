@@ -12,8 +12,9 @@ export type TolgeeLifecycleEventType =
 export type TolgeeCredentialLayer = 'app'
 
 /**
- * App-level credentials: they identify and administer the app across every
- * organization that installed it, and grant access to no data at all.
+ * App-level credentials — the app's only credentials: the token endpoint
+ * derives install-scoped access tokens from them for every organization that
+ * installed the app.
  */
 export type DeliveredAppCredentials = {
   /** Tolgee's numeric id for the registered app. */

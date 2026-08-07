@@ -77,9 +77,10 @@ class OrganizationOwnedAppsController(
   @Operation(
     summary = "List the app-level client secrets",
     description =
-      "Returns every app-level secret, revoked ones included, without disclosing any of them. " +
-        "These administer the app across every organization that installed it and grant access to " +
-        "no data — they are not the per-install secrets under `/apps/{installId}/secrets`.",
+      "Returns every secret of the app, revoked ones included, without disclosing any of them. " +
+        "They are the app's only long-lived credentials — everything the app does across every " +
+        "organization that installed it starts from them. `lastUsedAt` is what tells you whether " +
+        "the app has moved to a newly issued secret and the old one can be revoked.",
   )
   fun listSecrets(
     @PathVariable organizationId: Long,

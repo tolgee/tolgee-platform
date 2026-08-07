@@ -19,12 +19,11 @@ export type AppInstallStoreOptions = {
 }
 
 /**
- * The app-level credentials Tolgee issues once, when the app is registered.
- *
- * They identify and administer the app across every organization that installed
- * it and grant access to nobody's data — that is what per-install credentials
- * are for. `webhookSecret` is the one Tolgee signs lifecycle deliveries with, so
- * holding it is what lets this app tell a real delivery from a forged one.
+ * The app-level credentials Tolgee issues once, when the app is registered —
+ * the app's only long-lived credentials. The token endpoint exchanges them for
+ * the short-lived install-scoped tokens everything else uses. `webhookSecret`
+ * is the one Tolgee signs lifecycle deliveries with, so holding it is what
+ * lets this app tell a real delivery from a forged one.
  */
 export type StoredApp = {
   /** Tolgee instance the app (and therefore the credentials) belongs to. */
