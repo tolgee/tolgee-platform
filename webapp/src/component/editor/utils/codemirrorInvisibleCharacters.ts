@@ -18,7 +18,11 @@ import {
 } from 'tg.fixtures/invisibleCharacters';
 
 const nonBreakingSpaceDecoration = Decoration.mark({
-  attributes: { class: 'cm-invisible-char-nbsp' },
+  attributes: {
+    class: 'cm-invisible-char-nbsp',
+    'data-cy': 'invisible-character-editor',
+    'data-cy-kind': 'nonBreakingSpace',
+  },
 });
 
 class ZeroWidthWidget extends WidgetType {
@@ -29,6 +33,12 @@ class ZeroWidthWidget extends WidgetType {
   toDOM() {
     const bar = document.createElement('span');
     bar.className = 'cm-invisible-char-zero-width';
+    // Attributes must come from an object literal: `npm run generate-data-cy`
+    // scans for `'data-cy': '<literal>'` and misses `setAttribute` with a variable.
+    Object.entries({
+      'data-cy': 'invisible-character-editor',
+      'data-cy-kind': 'zeroWidth',
+    }).forEach(([name, value]) => bar.setAttribute(name, value));
     return bar;
   }
 }

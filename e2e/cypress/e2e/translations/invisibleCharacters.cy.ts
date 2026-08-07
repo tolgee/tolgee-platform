@@ -67,7 +67,9 @@ describe('Invisible characters', () => {
     waitForGlobalLoading();
     editCell('Bonjour');
     gcy('global-editor')
-      .find('.cm-invisible-char-nbsp')
+      .find(
+        '[data-cy="invisible-character-editor"][data-cy-kind="nonBreakingSpace"]'
+      )
       .should('have.length.at.least', 1);
   });
 
@@ -76,7 +78,7 @@ describe('Invisible characters', () => {
     waitForGlobalLoading();
     editCell('Zero');
     gcy('global-editor')
-      .find('.cm-invisible-char-zero-width')
+      .find('[data-cy="invisible-character-editor"][data-cy-kind="zeroWidth"]')
       .should('have.length.at.least', 1);
   });
 
@@ -85,7 +87,9 @@ describe('Invisible characters', () => {
     waitForGlobalLoading();
     editCell('Bonjour');
     gcy('global-editor')
-      .find('.cm-invisible-char-nbsp')
+      .find(
+        '[data-cy="invisible-character-editor"][data-cy-kind="nonBreakingSpace"]'
+      )
       .first()
       .trigger('mousemove');
     gcy('invisible-character-tooltip').should('be.visible');
