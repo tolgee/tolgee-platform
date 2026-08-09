@@ -26,6 +26,9 @@ object OAuth2Constants {
   /** Custom `/oauth2/authorize` parameter binding the token to one project. */
   const val PROJECT_PARAM = "project"
 
+  /** Authorization attribute holding the project the user chose on the consent screen: a project id string, or [ALL_PROJECTS]. */
+  const val PROJECT_ATTRIBUTE = "tg.selected_project"
+
   const val BROWSER_EXTENSION_CLIENT_ID = "tolgee-browser-extension"
   const val CLI_CLIENT_ID = "tolgee-cli"
 }

@@ -16,7 +16,6 @@
 
 package io.tolgee.security.oauth2
 
-import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType
 import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer
@@ -40,14 +39,18 @@ class TolgeeOAuth2TokenCustomizer(
   private fun projectSet(context: JwtEncodingContext): Any {
     // Stamp ids as strings: SAS's JDBC polymorphic-type validator rejects java.lang.Long when it deserializes the
     // stored claims on the refresh grant, which would otherwise make a project-bound token unrefreshable.
+    consentSelection(context)?.let { return projectSetFor(it) }
     projectHint(context)?.let { return listOf(it.toString()) }
     return OAuth2Constants.ALL_PROJECTS
   }
 
-  private fun projectHint(context: JwtEncodingContext): Long? {
-    val authorizationRequest =
-      context.getAuthorization()?.getAttribute<OAuth2AuthorizationRequest>(OAuth2AuthorizationRequest::class.java.name)
-    val raw = authorizationRequest?.additionalParameters?.get(OAuth2Constants.PROJECT_PARAM) as? String
-    return raw?.toLongOrNull()
+  private fun projectSetFor(selection: String): Any {
+    if (selection == OAuth2Constants.ALL_PROJECTS) return OAuth2Constants.ALL_PROJECTS
+    return listOf(selection)
   }
+
+  private fun consentSelection(context: JwtEncodingContext): String? =
+    context.getAuthorization()?.getAttribute<String>(OAuth2Constants.PROJECT_ATTRIBUTE)
+
+  private fun projectHint(context: JwtEncodingContext): Long? = context.getAuthorization()?.projectHint()
 }

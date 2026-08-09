@@ -4,9 +4,12 @@ import {
   Alert,
   Box,
   Checkbox,
+  FormControl,
   FormControlLabel,
+  InputLabel,
+  MenuItem,
+  Select,
   styled,
-  Typography,
 } from '@mui/material';
 
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
@@ -23,23 +26,27 @@ const API_URL = import.meta.env.VITE_APP_API_URL || '';
 const asString = (value: string | string[] | undefined): string =>
   Array.isArray(value) ? value[0] ?? '' : value ?? '';
 
+type ProjectOption = { id: number; name: string };
+
 type ConsentInfo = {
   appName: string;
   scopes: string[];
-  project?: { id: number; name: string } | null;
-  allProjects: boolean;
+  project?: ProjectOption | null;
+  projects: ProjectOption[];
 };
+
+const ALL_PROJECTS = 'all' as const;
 
 const StyledCapabilities = styled('div')`
   display: grid;
-  gap: 4px;
+  gap: ${({ theme }) => theme.spacing(0.5)};
 `;
 
 const StyledButtons = styled(Box)`
   display: flex;
-  gap: 16px;
+  gap: ${({ theme }) => theme.spacing(2)};
   justify-content: flex-end;
-  margin-top: 24px;
+  margin-top: ${({ theme }) => theme.spacing(3)};
 `;
 
 const OAuth2ConsentView: React.FC<React.PropsWithChildren<unknown>> = () => {
@@ -51,6 +58,9 @@ const OAuth2ConsentView: React.FC<React.PropsWithChildren<unknown>> = () => {
   const state = asString(search.state);
   const [info, setInfo] = useState<ConsentInfo>();
   const [selectedScopes, setSelectedScopes] = useState<string[]>([]);
+  const [selectedProject, setSelectedProject] = useState<
+    number | typeof ALL_PROJECTS
+  >(ALL_PROJECTS);
   const [failed, setFailed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -60,6 +70,7 @@ const OAuth2ConsentView: React.FC<React.PropsWithChildren<unknown>> = () => {
       .then((data) => {
         setInfo(data);
         setSelectedScopes(data.scopes);
+        setSelectedProject(data.project ? data.project.id : ALL_PROJECTS);
       })
       .catch(() => setFailed(true));
   }, [clientId, scope, state]);
@@ -71,8 +82,7 @@ const OAuth2ConsentView: React.FC<React.PropsWithChildren<unknown>> = () => {
   };
 
   // Real form POST (not fetch) so the browser sends the session cookie and follows the redirect back to the client.
-  const submitConsent = (approvedScopes: string[]) => {
-    setSubmitting(true);
+  const submitForm = (approvedScopes: string[]) => {
     const form = document.createElement('form');
     form.method = 'post';
     form.action = `${API_URL}/oauth2/authorize`;
@@ -88,6 +98,29 @@ const OAuth2ConsentView: React.FC<React.PropsWithChildren<unknown>> = () => {
     approvedScopes.forEach((s) => addField('scope', s));
     document.body.appendChild(form);
     form.submit();
+  };
+
+  const submitConsent = async (approvedScopes: string[]) => {
+    setSubmitting(true);
+    // select-project must run before the SAS consent form POST, so the chosen project is on the authorization when
+    // the code is issued. Denials (no scopes) skip it.
+    if (approvedScopes.length > 0) {
+      const projectQuery =
+        selectedProject === ALL_PROJECTS ? '' : `&projectId=${selectedProject}`;
+      try {
+        await apiV2HttpService.post(
+          `oauth2/select-project?state=${encodeURIComponent(
+            state
+          )}${projectQuery}`,
+          {}
+        );
+      } catch {
+        setSubmitting(false);
+        setFailed(true);
+        return;
+      }
+    }
+    submitForm(approvedScopes);
   };
 
   if (failed) {
@@ -113,6 +146,13 @@ const OAuth2ConsentView: React.FC<React.PropsWithChildren<unknown>> = () => {
   if (!info) {
     return <FullPageLoading />;
   }
+
+  const hintedProject = info.project;
+  // A hinted project may be a public one the user isn't a member of — keep it selectable even if not in the list.
+  const projectOptions =
+    hintedProject && !info.projects.some((p) => p.id === hintedProject.id)
+      ? [hintedProject, ...info.projects]
+      : info.projects;
 
   return (
     <DashboardPage>
@@ -145,34 +185,42 @@ const OAuth2ConsentView: React.FC<React.PropsWithChildren<unknown>> = () => {
                 />
               ))}
             </StyledCapabilities>
-            {info.project && (
-              <Typography sx={{ mt: 2 }} data-cy="oauth2-consent-project">
-                <T
-                  keyName="oauth2_consent_project"
-                  defaultValue="On project: {projectName}"
-                  params={{ projectName: info.project.name }}
-                />
-              </Typography>
-            )}
-            {!info.project && info.allProjects && (
-              <Typography sx={{ mt: 2 }} data-cy="oauth2-consent-all-projects">
-                <T
-                  keyName="oauth2_consent_all_projects"
-                  defaultValue="On all your projects"
-                />
-              </Typography>
-            )}
-            {!info.project && !info.allProjects && (
-              <Typography
-                sx={{ mt: 2 }}
-                data-cy="oauth2-consent-single-project"
+            <FormControl fullWidth size="small" sx={{ mt: 2 }}>
+              <InputLabel id="oauth2-consent-project-label">
+                {t('oauth2_consent_project_label', 'Project')}
+              </InputLabel>
+              <Select
+                labelId="oauth2-consent-project-label"
+                label={t('oauth2_consent_project_label', 'Project')}
+                value={selectedProject}
+                data-cy="oauth2-consent-project-select"
+                onChange={(e) =>
+                  setSelectedProject(
+                    e.target.value === ALL_PROJECTS
+                      ? ALL_PROJECTS
+                      : Number(e.target.value)
+                  )
+                }
               >
-                <T
-                  keyName="oauth2_consent_single_project"
-                  defaultValue="On a single project"
-                />
-              </Typography>
-            )}
+                <MenuItem
+                  value={ALL_PROJECTS}
+                  data-cy="oauth2-consent-project-option"
+                  data-cy-project-id={ALL_PROJECTS}
+                >
+                  {t('oauth2_consent_all_projects_option', 'All projects')}
+                </MenuItem>
+                {projectOptions.map((p) => (
+                  <MenuItem
+                    key={p.id}
+                    value={p.id}
+                    data-cy="oauth2-consent-project-option"
+                    data-cy-project-id={p.id}
+                  >
+                    {p.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
             <StyledButtons>
               <LoadingButton
                 variant="outlined"

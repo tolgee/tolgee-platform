@@ -18,6 +18,7 @@ package io.tolgee.security.oauth2
 
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.model.UserAccount
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.testing.AbstractControllerTest
 import org.assertj.core.api.Assertions.assertThat
@@ -34,12 +35,15 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings
 import org.springframework.security.oauth2.server.authorization.settings.OAuth2TokenFormat
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings
+import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.web.util.UriComponentsBuilder
 import tools.jackson.databind.JsonNode
 import tools.jackson.module.kotlin.jacksonObjectMapper
+import java.net.URLDecoder
+import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.security.SecureRandom
 import java.util.Base64
@@ -57,11 +61,39 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
   private lateinit var registeredClientRepository: RegisteredClientRepository
 
   private lateinit var testData: BaseTestData
+  private lateinit var otherUser: UserAccount
+  private var otherProjectId: Long = 0
+  private var publicProjectId: Long = 0
 
   @BeforeEach
   fun setup() {
     testData = BaseTestData()
+    // A second user, plus a private project only they can access, for the cross-user / permission guards.
+    val otherUserBuilder = testData.root.addUserAccount { username = "oauth_other_user" }
+    otherUser = otherUserBuilder.self
+    val otherProjectBuilder =
+      testData.root.addProject {
+        name = "foreign_project"
+        organizationOwner = otherUserBuilder.defaultOrganizationBuilder.self
+      }
+    // A public project testData.user is NOT a member of — reachable only via the community floor.
+    val publicProjectBuilder =
+      testData.root
+        .addProject {
+          name = "public_project"
+          organizationOwner = otherUserBuilder.defaultOrganizationBuilder.self
+          public = true
+        }.build buildPublic@{
+          addLanguage {
+            name = "English"
+            tag = "en"
+            originalName = "English"
+            this@buildPublic.self.baseLanguage = this
+          }
+        }
     testDataService.saveTestData(testData.root)
+    otherProjectId = otherProjectBuilder.self.id
+    publicProjectId = publicProjectBuilder.self.id
     // Tolgee's per-test DB reset wipes the startup-seeded clients, so register self-contained ones here.
     registeredClientRepository.save(flowClient(TEST_CLIENT_ID, CLI_REDIRECT))
     registeredClientRepository.save(flowClient(SECOND_CLIENT_ID, SECOND_REDIRECT))
@@ -242,6 +274,272 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
   }
 
   @Test
+  fun `a single project chosen on the consent screen binds the token to it`() {
+    val accessToken = consentFlowAccessToken(testData.project.id)
+
+    val projectClaim = decodeClaims(accessToken).get(OAuth2Constants.PROJECTS_CLAIM)
+    assertThat(projectClaim.isArray).isTrue()
+    assertThat(projectClaim.size()).isEqualTo(1)
+    assertThat(projectClaim[0].asLong()).isEqualTo(testData.project.id)
+  }
+
+  @Test
+  fun `choosing all projects on the consent screen keeps the token unscoped`() {
+    val accessToken = consentFlowAccessToken(projectId = null)
+
+    assertThat(decodeClaims(accessToken).get(OAuth2Constants.PROJECTS_CLAIM).asString())
+      .isEqualTo(OAuth2Constants.ALL_PROJECTS)
+  }
+
+  @Test
+  fun `a consent-screen project choice overrides the client's authorize hint`() {
+    val jwt = jwtService.emitToken(testData.user.id)
+    // Hint an unrelated project on the authorize request, then consent-select the real one.
+    val pending = startPendingConsent(jwt, hintProjectId = INACCESSIBLE_PROJECT_ID)
+    selectProject(jwt, pending.state, testData.project.id)
+      .andExpect { assertThat(it.response.status).isEqualTo(204) }
+
+    val projectClaim = decodeClaims(completeConsent(pending)).get(OAuth2Constants.PROJECTS_CLAIM)
+    assertThat(projectClaim.isArray).isTrue()
+    assertThat(projectClaim[0].asLong()).isEqualTo(testData.project.id)
+  }
+
+  @Test
+  fun `choosing all projects on the consent screen overrides a client's authorize hint`() {
+    val jwt = jwtService.emitToken(testData.user.id)
+    // The client hints a concrete project, but the user widens to "all projects" (frontend omits projectId).
+    val pending = startPendingConsent(jwt, hintProjectId = testData.project.id)
+    selectProject(jwt, pending.state, null).andExpect { assertThat(it.response.status).isEqualTo(204) }
+
+    assertThat(decodeClaims(completeConsent(pending)).get(OAuth2Constants.PROJECTS_CLAIM).asString())
+      .isEqualTo(OAuth2Constants.ALL_PROJECTS)
+  }
+
+  @Test
+  fun `connected-apps surfaces the granted scopes and last-authorized time`() {
+    val jwt = jwtService.emitToken(testData.user.id)
+    // Drive the consent client so a real consent row (with granted scopes) is recorded for the app.
+    val pending = startPendingConsent(jwt)
+    selectProject(jwt, pending.state, testData.project.id).andExpect { assertThat(it.response.status).isEqualTo(204) }
+    completeConsent(pending)
+
+    val entry =
+      jacksonObjectMapper()
+        .readTree(connectedApps(jwt))
+        .first { it.get("clientId").asString() == CONSENT_CLIENT_ID }
+    assertThat(entry.get("scopes").toString()).contains("translations.view")
+    assertThat(entry.get("lastAuthorizedAt").isNull).isFalse()
+  }
+
+  @Test
+  fun `a consent-selected token keeps its project binding after a refresh`() {
+    // The consent selection is stored as an OAuth2Authorization attribute (not the authorize-time hint), so this proves
+    // that attribute survives the refresh grant — a refresh must not silently widen tg.prj back to ALL_PROJECTS.
+    val jwt = jwtService.emitToken(testData.user.id)
+    val pending = startPendingConsent(jwt) // no authorize hint — binding comes only from the consent attribute
+    selectProject(jwt, pending.state, testData.project.id).andExpect { assertThat(it.response.status).isEqualTo(204) }
+    val first = completeConsentTokenResponse(pending)
+    val refreshToken = first.get("refresh_token")?.asString()
+    assertThat(refreshToken).isNotNull()
+
+    val refreshed =
+      jacksonObjectMapper().readTree(
+        mvc
+          .perform(
+            post("/oauth2/token")
+              .param("grant_type", "refresh_token")
+              .param("refresh_token", refreshToken!!)
+              .param("client_id", CONSENT_CLIENT_ID)
+              .contentType(MediaType.APPLICATION_FORM_URLENCODED),
+          ).andReturn()
+          .response.contentAsString,
+      )
+
+    val initialClaims = decodeClaims(first.get("access_token").asString())
+    val refreshedClaims = decodeClaims(refreshed.get("access_token").asString())
+    assertThat(refreshedClaims.get(OAuth2Constants.PROJECTS_CLAIM).isArray).isTrue()
+    assertThat(refreshedClaims.get(OAuth2Constants.PROJECTS_CLAIM)[0].asLong()).isEqualTo(testData.project.id)
+    assertThat(refreshedClaims.get("aud")).isEqualTo(initialClaims.get("aud"))
+    assertThat(refreshedClaims.get("scope")).isEqualTo(initialClaims.get("scope"))
+  }
+
+  @Test
+  fun `consent-info lists the user's projects and hides an inaccessible hinted project`() {
+    val jwt = jwtService.emitToken(testData.user.id)
+
+    val noHint = consentInfo(jwt, state = null)
+    // Membership projects only: names of projects the user is not a member of (private or public) must not leak here.
+    assertThat(noHint.get("projects").toString())
+      .contains(testData.project.name)
+      .doesNotContain("foreign_project")
+      .doesNotContain("public_project")
+    assertThat(noHint.get("project").isNull).isTrue()
+
+    // A hint pointing at a project the user cannot access must not leak the project's name.
+    val inaccessible = startPendingConsent(jwt, hintProjectId = otherProjectId)
+    assertThat(consentInfo(jwt, state = inaccessible.state).get("project").isNull).isTrue()
+
+    // An accessible hint is surfaced (id + name) so the SPA can pre-select it.
+    val accessible = startPendingConsent(jwt, hintProjectId = testData.project.id)
+    val hinted = consentInfo(jwt, state = accessible.state).get("project")
+    assertThat(hinted.get("id").asLong()).isEqualTo(testData.project.id)
+    assertThat(hinted.get("name").asText()).isEqualTo(testData.project.name)
+
+    // A stale/nonexistent hint (e.g. a project deleted mid-flow) resolves to null instead of 404-ing the screen.
+    val nonexistent = startPendingConsent(jwt, hintProjectId = INACCESSIBLE_PROJECT_ID)
+    assertThat(consentInfo(jwt, state = nonexistent.state).get("project").isNull).isTrue()
+  }
+
+  @Test
+  fun `select-project rejects binding another user's pending authorization`() {
+    val pending = startPendingConsent(jwtService.emitToken(testData.user.id))
+    // otherUser tries to retarget user A's pending authorization by its state value.
+    selectProject(jwtService.emitToken(otherUser.id), pending.state, testData.project.id)
+      .andExpect { assertThat(it.response.status).isEqualTo(404) }
+  }
+
+  @Test
+  fun `select-project rejects a project the user has no access to`() {
+    val jwt = jwtService.emitToken(testData.user.id)
+    val pending = startPendingConsent(jwt)
+    // an existing project the user isn't a member of
+    selectProject(jwt, pending.state, otherProjectId)
+      .andExpect { assertThat(it.response.status).isEqualTo(403) }
+    // a nonexistent project id (e.g. deleted mid-flow) is denied with 403, not a leaked 404
+    selectProject(jwt, pending.state, INACCESSIBLE_PROJECT_ID)
+      .andExpect { assertThat(it.response.status).isEqualTo(403) }
+  }
+
+  @Test
+  fun `select-project returns 404 for an unknown state`() {
+    selectProject(jwtService.emitToken(testData.user.id), "no-such-state", testData.project.id)
+      .andExpect { assertThat(it.response.status).isEqualTo(404) }
+  }
+
+  @Test
+  fun `a public project the user is not a member of is selectable via the community floor`() {
+    // The headline community-contributor case: a non-member of a public project narrows the token to it via the hint.
+    val jwt = jwtService.emitToken(testData.user.id)
+    val pending = startPendingConsent(jwt, hintProjectId = publicProjectId)
+
+    // findAllPermitted excludes it (not a member), but the community floor resolves the hint, so it is surfaced.
+    val hinted = consentInfo(jwt, state = pending.state).get("project")
+    assertThat(hinted.get("id").asLong()).isEqualTo(publicProjectId)
+
+    // select-project takes the community-floor allow-path (204, not the private-foreign-project 403), binding the token.
+    selectProject(jwt, pending.state, publicProjectId).andExpect { assertThat(it.response.status).isEqualTo(204) }
+
+    val token = completeConsent(pending)
+    val claim = decodeClaims(token).get(OAuth2Constants.PROJECTS_CLAIM)
+    assertThat(claim.isArray).isTrue()
+    assertThat(claim[0].asLong()).isEqualTo(publicProjectId)
+
+    // and the minted token works on a community-permitted read endpoint, bounded by the contributor's live permissions.
+    mvc
+      .perform(get("/v2/projects/$publicProjectId/translations").header("Authorization", "Bearer $token"))
+      .andIsOk
+  }
+
+  private data class PendingConsent(
+    val session: MockHttpSession,
+    val state: String,
+    val verifier: String,
+  )
+
+  /** Bootstraps a session and reaches the consent page for the consent-required client, leaving a pending authorization. */
+  private fun startPendingConsent(
+    jwt: String,
+    hintProjectId: Long? = null,
+  ): PendingConsent {
+    val session = MockHttpSession()
+    mvc
+      .perform(post("/v2/oauth2/session-bootstrap").header("Authorization", "Bearer $jwt").session(session))
+      .andExpect { assertThat(it.response.status).isEqualTo(204) }
+
+    val verifier = randomVerifier()
+    val authorizeBuilder =
+      UriComponentsBuilder
+        .fromPath("/oauth2/authorize")
+        .queryParam("response_type", "code")
+        .queryParam("client_id", CONSENT_CLIENT_ID)
+        .queryParam("redirect_uri", CONSENT_REDIRECT)
+        .queryParam("scope", "translations.view")
+        .queryParam("code_challenge", s256Challenge(verifier))
+        .queryParam("code_challenge_method", "S256")
+        .queryParam("state", "client-state")
+    hintProjectId?.let { authorizeBuilder.queryParam(OAuth2Constants.PROJECT_PARAM, it.toString()) }
+    // The consent page carries SAS's own state (which keys the pending authorization); url-decoded, that is what the
+    // SPA and select-project use, not the client's original state.
+    val consentPageLocation =
+      mvc.perform(get(authorizeBuilder.build().toUriString()).session(session)).andReturn().response.getHeader("Location")
+    val state = URLDecoder.decode(queryParam(consentPageLocation!!, "state")!!, StandardCharsets.UTF_8)
+    return PendingConsent(session, state, verifier)
+  }
+
+  private fun selectProject(
+    jwt: String,
+    state: String,
+    projectId: Long?,
+  ): ResultActions {
+    val request = post("/v2/oauth2/select-project").header("Authorization", "Bearer $jwt").param("state", state)
+    projectId?.let { request.param("projectId", it.toString()) }
+    return mvc.perform(request)
+  }
+
+  private fun completeConsent(pending: PendingConsent): String =
+    completeConsentTokenResponse(pending).get("access_token").asString()
+
+  /** Submits the SAS consent form for a pending authorization and exchanges the resulting code for the token response. */
+  private fun completeConsentTokenResponse(pending: PendingConsent): JsonNode {
+    val consentLocation =
+      mvc
+        .perform(
+          post("/oauth2/authorize")
+            .param("client_id", CONSENT_CLIENT_ID)
+            .param("state", pending.state)
+            .param("scope", "translations.view")
+            .session(pending.session),
+        ).andReturn()
+        .response.getHeader("Location")
+    val code = queryParam(consentLocation!!, "code")
+    assertThat(code).isNotNull()
+
+    val tokenResponse =
+      mvc
+        .perform(
+          post("/oauth2/token")
+            .param("grant_type", "authorization_code")
+            .param("code", code!!)
+            .param("redirect_uri", CONSENT_REDIRECT)
+            .param("client_id", CONSENT_CLIENT_ID)
+            .param("code_verifier", pending.verifier)
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED),
+        ).andReturn()
+        .response.contentAsString
+    return jacksonObjectMapper().readTree(tokenResponse)
+  }
+
+  private fun consentFlowAccessToken(projectId: Long?): String {
+    val jwt = jwtService.emitToken(testData.user.id)
+    val pending = startPendingConsent(jwt)
+    selectProject(jwt, pending.state, projectId).andExpect { assertThat(it.response.status).isEqualTo(204) }
+    return completeConsent(pending)
+  }
+
+  private fun consentInfo(
+    jwt: String,
+    state: String?,
+  ): JsonNode {
+    val request =
+      get("/v2/oauth2/consent-info")
+        .header("Authorization", "Bearer $jwt")
+        .param("clientId", CONSENT_CLIENT_ID)
+        .param("scope", "translations.view")
+    state?.let { request.param("state", it) }
+    return jacksonObjectMapper().readTree(mvc.perform(request).andIsOk.andReturn().response.contentAsString)
+  }
+
+  @Test
   fun `session-bootstrap rotates the session id (fixation defense)`() {
     val jwt = jwtService.emitToken(testData.user.id)
     val session = MockHttpSession()
@@ -286,6 +584,14 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
     assertThat(location).contains("/oauth2/bootstrap")
     assertThat(location).doesNotContain(CLI_REDIRECT)
     assertThat(queryParam(location!!, "code")).isNull()
+
+    // The bootstrap redirect must preserve the original authorize URL (with its query) so the flow can resume after
+    // the session is established.
+    val continueUrl = URLDecoder.decode(queryParam(location, "continue")!!, StandardCharsets.UTF_8)
+    assertThat(continueUrl).contains("/oauth2/authorize")
+    assertThat(continueUrl).contains("client_id=$TEST_CLIENT_ID")
+    assertThat(continueUrl).contains("state=state-123")
+    assertThat(continueUrl).contains("code_challenge=")
   }
 
   @Test
@@ -409,5 +715,6 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
     private const val SECOND_CLIENT_ID = "test-flow-client-2"
     private const val CONSENT_REDIRECT = "http://127.0.0.1:9878/callback"
     private const val CONSENT_CLIENT_ID = "test-flow-client-consent"
+    private const val INACCESSIBLE_PROJECT_ID = 9_999_999L
   }
 }

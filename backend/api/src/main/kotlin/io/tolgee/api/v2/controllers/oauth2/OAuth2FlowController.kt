@@ -19,12 +19,16 @@ package io.tolgee.api.v2.controllers.oauth2
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.controllers.IController
+import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
+import io.tolgee.hateoas.oauth2.ConsentInfoModel
+import io.tolgee.hateoas.oauth2.OAuth2ProjectModel
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.BypassEmailVerification
 import io.tolgee.security.authentication.BypassForcedSsoAuthentication
 import io.tolgee.security.oauth2.OAuth2Constants
+import io.tolgee.security.oauth2.projectHint
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.SecurityService
 import jakarta.servlet.http.HttpServletRequest
@@ -32,8 +36,8 @@ import org.springframework.http.HttpStatus
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.authority.AuthorityUtils
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames
+import org.springframework.security.oauth2.server.authorization.OAuth2Authorization
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository
@@ -90,52 +94,74 @@ class OAuth2FlowController(
   ): ConsentInfoModel {
     val client = registeredClientRepository.findByClientId(clientId) ?: throw NotFoundException()
     val scopes = scope?.split(" ")?.filter { it.isNotBlank() } ?: emptyList()
-    val binding = state?.let { projectBinding(it) } ?: ProjectBinding.allProjects()
     return ConsentInfoModel(
       appName = client.clientName,
       scopes = scopes,
-      project = binding.project,
-      allProjects = binding.allProjects,
+      project = state?.let { hintedProject(it) },
+      projects = accessibleProjects(),
     )
   }
 
+  // Only membership projects — public projects the user is a non-member of are grantable via the community floor but
+  // reach the token only through a client hint (see hintedProject) or the "all projects" choice, not this list.
+  private fun accessibleProjects(): List<OAuth2ProjectModel> =
+    projectService
+      .findAllPermitted(authenticationFacade.authenticatedUserEntity)
+      .mapNotNull { dto -> dto.id?.let { id -> projectModel(id, dto.name) } }
+
   /** Resolves the hinted project's name only when the user has access, so an unrelated hint can't leak a name. */
-  private fun projectBinding(state: String): ProjectBinding {
-    val authorization =
-      oAuth2AuthorizationService.findByToken(state, OAuth2TokenType(OAuth2ParameterNames.STATE))
-        ?: return ProjectBinding.allProjects()
-    val authorizationRequest =
-      authorization.getAttribute<OAuth2AuthorizationRequest>(OAuth2AuthorizationRequest::class.java.name)
-        ?: return ProjectBinding.allProjects()
-    val projectId =
-      (authorizationRequest.additionalParameters[OAuth2Constants.PROJECT_PARAM] as? String)?.toLongOrNull()
-        ?: return ProjectBinding.allProjects()
-    val project =
-      projectId
-        .takeIf { securityService.getCurrentPermittedScopes(it).isNotEmpty() }
-        ?.let { projectService.findDto(it) }
-        ?.let { ProjectInfo(id = it.id, name = it.name) }
-    return ProjectBinding(allProjects = false, project = project)
+  private fun hintedProject(state: String): OAuth2ProjectModel? {
+    val projectId = ownAuthorization(state)?.projectHint() ?: return null
+    return accessibleProject(projectId)?.let { projectModel(it.id, it.name) }
   }
 
-  private data class ProjectBinding(
-    val allProjects: Boolean,
-    val project: ProjectInfo?,
+  private fun projectModel(
+    id: Long,
+    name: String?,
+  ) = OAuth2ProjectModel(id = id, name = name ?: "#$id")
+
+  @PostMapping("/select-project")
+  @Operation(summary = "Bind the pending authorization to the project chosen on the consent screen")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @BypassEmailVerification
+  @BypassForcedSsoAuthentication
+  fun selectProject(
+    @RequestParam state: String,
+    @RequestParam(required = false) projectId: Long?,
   ) {
-    companion object {
-      fun allProjects() = ProjectBinding(allProjects = true, project = null)
-    }
+    val authorization = ownAuthorization(state) ?: throw NotFoundException()
+    val selection = projectSelectionValue(projectId)
+    oAuth2AuthorizationService.save(
+      OAuth2Authorization.from(authorization).attribute(OAuth2Constants.PROJECT_ATTRIBUTE, selection).build(),
+    )
   }
 
-  data class ConsentInfoModel(
-    val appName: String,
-    val scopes: List<String>,
-    val project: ProjectInfo?,
-    val allProjects: Boolean,
-  )
+  /**
+   * The pending authorization for [state], only when it belongs to the caller — so a guessed/replayed state value
+   * can't retarget another user's in-flight authorization.
+   */
+  private fun ownAuthorization(state: String): OAuth2Authorization? {
+    val authorization =
+      oAuth2AuthorizationService.findByToken(state, OAuth2TokenType(OAuth2ParameterNames.STATE)) ?: return null
+    if (authorization.principalName != authenticationFacade.authenticatedUser.id.toString()) return null
+    return authorization
+  }
 
-  data class ProjectInfo(
-    val id: Long,
-    val name: String,
-  )
+  private fun projectSelectionValue(projectId: Long?): String {
+    if (projectId == null) return OAuth2Constants.ALL_PROJECTS
+    if (accessibleProject(projectId) == null) throw PermissionException()
+    return projectId.toString()
+  }
+
+  /**
+   * The single project-access decision shared by the consent-info (read) and select-project (write) paths: the DTO
+   * when the project exists and the user has a live permitted scope on it, else null. Existence is resolved first
+   * because the permission lookup throws NotFound for a missing project, which would otherwise 404 the consent screen
+   * on a stale/bogus hint (or a project deleted mid-flow).
+   */
+  private fun accessibleProject(projectId: Long): ProjectDto? {
+    val dto = projectService.findDto(projectId) ?: return null
+    if (securityService.getCurrentPermittedScopes(projectId).isEmpty()) return null
+    return dto
+  }
 }
