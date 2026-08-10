@@ -25,7 +25,6 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.BypassEmailVerification
 import io.tolgee.security.authentication.BypassForcedSsoAuthentication
 import io.tolgee.security.oauth2.OAuth2AuthorizationQueryService
-import org.springframework.http.HttpStatus
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationConsentService
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -33,7 +32,6 @@ import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 
 /**
@@ -70,7 +68,6 @@ class ConnectedAppsController(
 
   @DeleteMapping("/{clientId}")
   @Operation(summary = "Disconnect an OAuth app (revokes all its grants for the current user)")
-  @ResponseStatus(HttpStatus.NO_CONTENT)
   @BypassEmailVerification
   @BypassForcedSsoAuthentication
   fun revoke(

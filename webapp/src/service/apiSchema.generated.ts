@@ -177,6 +177,15 @@ export interface paths {
   "/v2/notifications-mark-seen": {
     put: operations["markNotificationsAsSeen"];
   };
+  "/v2/oauth2/consent-info": {
+    get: operations["consentInfo"];
+  };
+  "/v2/oauth2/select-project": {
+    post: operations["selectProject"];
+  };
+  "/v2/oauth2/session-bootstrap": {
+    post: operations["bootstrap"];
+  };
   "/v2/organizations": {
     /** Returns all organizations, which is current user allowed to view */
     get: operations["getAll_10"];
@@ -474,7 +483,7 @@ export interface paths {
     delete: operations["removeAvatar_1"];
   };
   "/v2/projects/{projectId}/batch-jobs": {
-    get: operations["list_4"];
+    get: operations["list_5"];
   };
   "/v2/projects/{projectId}/batch-jobs/{id}": {
     get: operations["get_22"];
@@ -734,7 +743,7 @@ export interface paths {
     get: operations["selectKeys_2"];
   };
   "/v2/projects/{projectId}/keys/trash": {
-    get: operations["list_8"];
+    get: operations["list_9"];
   };
   "/v2/projects/{projectId}/keys/trash/deleters": {
     get: operations["listDeleters"];
@@ -1058,7 +1067,7 @@ export interface paths {
   };
   "/v2/projects/{projectId}/translation-memories": {
     /** Always readable. When the TRANSLATION_MEMORY feature is not enabled for the organization, only the project-type assignment (if any) is returned so the settings page can still show the row that already drives in-project suggestions. */
-    get: operations["list_6"];
+    get: operations["list_7"];
   };
   "/v2/projects/{projectId}/translation-memories/project-tm-settings": {
     /** Sets TM-level flags on the project's own PROJECT-type TM. The shared-TM update endpoint rejects PROJECT TMs; this narrow endpoint exists so project admins can toggle the `writeOnlyReviewed` flag without org-level privileges. */
@@ -1283,6 +1292,12 @@ export interface paths {
   "/v2/user/avatar": {
     put: operations["uploadAvatar"];
     delete: operations["removeAvatar"];
+  };
+  "/v2/user/connected-apps": {
+    get: operations["list_4"];
+  };
+  "/v2/user/connected-apps/{clientId}": {
+    delete: operations["revoke"];
   };
   "/v2/user/generate-super-token": {
     /** Generates new JWT token permitted to sensitive operations */
@@ -2222,6 +2237,19 @@ export interface components {
     ConnectToSlackUrlModel: {
       url: string;
     };
+    ConnectedAppModel: {
+      clientId: string;
+      clientName: string;
+      /** Format: int64 */
+      lastAuthorizedAt?: number;
+      scopes: string[];
+    };
+    ConsentInfoModel: {
+      appName: string;
+      project?: components["schemas"]["OAuth2ProjectModel"];
+      projects: components["schemas"]["OAuth2ProjectModel"][];
+      scopes: string[];
+    };
     ContentDeliveryConfigModel: {
       autoPublish: boolean;
       /** @description Branch name this CDN config is associated with. Null means default branch or no branching. */
@@ -3033,6 +3061,7 @@ export interface components {
         | "rate_limited"
         | "pat_access_not_allowed"
         | "pak_access_not_allowed"
+        | "oauth_access_not_allowed"
         | "cannot_modify_disabled_translation"
         | "azure_config_required"
         | "s3_config_required"
@@ -4549,6 +4578,11 @@ export interface components {
        * ]
        */
       notificationIds: number[];
+    };
+    OAuth2ProjectModel: {
+      /** Format: int64 */
+      id: number;
+      name: string;
     };
     OAuthPublicConfigDTO: {
       clientId?: string;
@@ -6921,6 +6955,7 @@ export interface components {
         | "rate_limited"
         | "pat_access_not_allowed"
         | "pak_access_not_allowed"
+        | "oauth_access_not_allowed"
         | "cannot_modify_disabled_translation"
         | "azure_config_required"
         | "s3_config_required"
@@ -10420,6 +10455,137 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["NotificationsMarkSeenRequest"];
+      };
+    };
+  };
+  consentInfo: {
+    parameters: {
+      query: {
+        clientId: string;
+        scope?: string;
+        state?: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ConsentInfoModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  selectProject: {
+    parameters: {
+      query: {
+        state: string;
+        projectId?: number;
+      };
+    };
+    responses: {
+      /** No Content */
+      204: never;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  bootstrap: {
+    responses: {
+      /** No Content */
+      204: never;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
       };
     };
   };
@@ -15667,7 +15833,7 @@ export interface operations {
       };
     };
   };
-  list_4: {
+  list_5: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -19596,7 +19762,7 @@ export interface operations {
       };
     };
   };
-  list_8: {
+  list_9: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -25696,7 +25862,7 @@ export interface operations {
     };
   };
   /** Always readable. When the TRANSLATION_MEMORY feature is not enabled for the organization, only the project-type assignment (if any) is returned so the settings page can still show the row that already drives in-project suggestions. */
-  list_6: {
+  list_7: {
     parameters: {
       path: {
         projectId: number;
@@ -29769,6 +29935,91 @@ export interface operations {
           "application/json": components["schemas"]["PrivateUserAccountModel"];
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  list_4: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ConnectedAppModel"][];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  revoke: {
+    parameters: {
+      path: {
+        clientId: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
       /** Bad Request */
       400: {
         content: {

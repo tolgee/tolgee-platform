@@ -604,7 +604,7 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
 
     mvc
       .perform(delete("/v2/user/connected-apps/$TEST_CLIENT_ID").header("Authorization", "Bearer $jwt"))
-      .andExpect { assertThat(it.response.status).isEqualTo(204) }
+      .andIsOk
 
     assertThat(connectedApps(jwt)).doesNotContain("\"$TEST_CLIENT_ID\"").contains("\"$SECOND_CLIENT_ID\"")
   }
