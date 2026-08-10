@@ -309,6 +309,51 @@ class AppleXliffFileExporterTest {
   }
 
   @Test
+  fun `keeps a zero plural form that is not in the target locale's CLDR forms`() {
+    val built =
+      buildExportTranslationList {
+        add(
+          languageTag = "en",
+          keyName = "attendee_count",
+          text = "{count, plural, zero {No participants} one {1 Participant} other {Many participants}}",
+        ) {
+          key.isPlural = true
+          key.custom = mapOf(APPLE_FILE_ORIGINAL_CUSTOM_KEY to "Localizable.xcstrings")
+        }
+      }
+    val exporter = getExporter(built.translations, emptyList())
+    val data = getExported(exporter)
+    data.assertFile(
+      "en.xliff",
+      """
+    |<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+    |<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+    |  <file datatype="plaintext" original="Localizable.xcstrings" source-language="tag" target-language="en">
+    |    <header>
+    |      <tool tool-id="tolgee.io" tool-name="Tolgee"/>
+    |    </header>
+    |    <body>
+    |      <trans-unit id="attendee_count|==|plural.one">
+    |        <source xml:space="preserve"/>
+    |        <target xml:space="preserve">1 Participant</target>
+    |      </trans-unit>
+    |      <trans-unit id="attendee_count|==|plural.other">
+    |        <source xml:space="preserve"/>
+    |        <target xml:space="preserve">Many participants</target>
+    |      </trans-unit>
+    |      <trans-unit id="attendee_count|==|plural.zero">
+    |        <source xml:space="preserve"/>
+    |        <target xml:space="preserve">No participants</target>
+    |      </trans-unit>
+    |    </body>
+    |  </file>
+    |</xliff>
+    |
+      """.trimMargin(),
+    )
+  }
+
+  @Test
   fun `honors the provided fileStructureTemplate`() {
     val exporter =
       getExporter(
