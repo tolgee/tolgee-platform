@@ -21,6 +21,7 @@ import io.tolgee.dtos.cacheable.OrganizationDto
 import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.exceptions.InvalidPathException
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.security.oauth2.OAuth2TokenCredentials
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
 import org.assertj.core.api.Assertions.assertThat
@@ -83,6 +84,12 @@ class RequestContextServiceTest {
     Mockito.`when`(authenticationFacade.projectApiKey).thenReturn(apiKey)
   }
 
+  private fun setupOAuthToken(projectIds: Set<Long>?) {
+    Mockito.`when`(authenticationFacade.isApiAuthentication).thenReturn(true)
+    Mockito.`when`(authenticationFacade.oauthTokenCredentials)
+      .thenReturn(OAuth2TokenCredentials(scopes = emptySet(), projectIds = projectIds))
+  }
+
   private fun makeRequest(
     path: String,
     id: String = "",
@@ -139,6 +146,33 @@ class RequestContextServiceTest {
     assertThrows<ProjectNotSelectedException> { requestContextService.getTargetProject(reqCommon) }
     assertThrows<ProjectNotSelectedException> { requestContextService.getTargetProject(reqOldApi) }
     assertThrows<ProjectNotSelectedException> { requestContextService.getTargetProject(reqOldRepo) }
+  }
+
+  @Test
+  fun `it resolves the implicit project from a single-project OAuth token`() {
+    setupOAuthToken(setOf(TEST_PROJECT_ID))
+
+    val project = requestContextService.getTargetProject(makeRequest("/v2/projects/keys"))
+
+    assertThat(project?.id).isEqualTo(TEST_PROJECT_ID)
+  }
+
+  @Test
+  fun `it throws in implicit scenarios for an all-projects OAuth token`() {
+    setupOAuthToken(null)
+
+    assertThrows<ProjectNotSelectedException> {
+      requestContextService.getTargetProject(makeRequest("/v2/projects/keys"))
+    }
+  }
+
+  @Test
+  fun `it throws in implicit scenarios for a multi-project OAuth token`() {
+    setupOAuthToken(setOf(TEST_PROJECT_ID, TEST_PROJECT_ID + 1))
+
+    assertThrows<ProjectNotSelectedException> {
+      requestContextService.getTargetProject(makeRequest("/v2/projects/keys"))
+    }
   }
 
   @Test

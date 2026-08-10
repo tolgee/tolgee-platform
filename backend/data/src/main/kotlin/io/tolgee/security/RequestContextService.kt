@@ -67,11 +67,17 @@ class RequestContextService(
 
   private fun getTargetProjectImplicit(): ProjectDto? {
     // This method is the source of complexity for the global handling, but is itself quite simple. Oh, the irony!
-    if (!authenticationFacade.isProjectApiKeyAuth) {
-      throw ProjectNotSelectedException()
+    if (authenticationFacade.isProjectApiKeyAuth) {
+      return projectService.findDto(authenticationFacade.projectApiKey.projectId)
     }
 
-    return projectService.findDto(authenticationFacade.projectApiKey.projectId)
+    // An OAuth token narrowed to a single project carries that project the same way a PAK does, so implicit endpoints
+    // (no {projectId} in the path) can resolve it. All-projects or multi-project tokens can't be resolved implicitly.
+    authenticationFacade.oauthTokenCredentials?.projectIds?.singleOrNull()?.let {
+      return projectService.findDto(it)
+    }
+
+    throw ProjectNotSelectedException()
   }
 
   /**
