@@ -202,14 +202,15 @@ class ApiKeyController(
     projectId: Long?,
   ): ApiKeyPermissionsModel {
     val apiKeyAuthentication = authenticationFacade.isProjectApiKeyAuth
-    val personalAccessTokenAuth = authenticationFacade.isPersonalAccessTokenAuth
 
     val projectIdNotNull =
       when {
         apiKeyAuthentication ->
           authenticationFacade.projectApiKey.projectId
 
-        personalAccessTokenAuth ->
+        // PAT and OAuth tokens carry no embedded project, so the caller must name one (as the SDK's in-context
+        // editor does). getCurrentPermittedScopes below applies the OAuth token's scope/project narrowing.
+        authenticationFacade.isPersonalAccessTokenAuth || authenticationFacade.isOAuthTokenAuth ->
           projectId ?: throw BadRequestException(Message.NO_PROJECT_ID_PROVIDED)
 
         else -> throw BadRequestException(Message.INVALID_AUTHENTICATION_METHOD)

@@ -23,6 +23,8 @@ import com.nimbusds.jose.crypto.RSASSASigner
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
 import io.tolgee.development.testDataBuilder.data.BaseTestData
+import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
@@ -169,6 +171,25 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
   fun `narrows scopes below the user's live permissions`() {
     val token = mint(scopes = listOf("members.view"), projects = OAuth2Constants.ALL_PROJECTS)
     performGet(translationsUrl(), bearer(token)).andIsForbidden
+  }
+
+  @Test
+  fun `serves current-permissions for an OAuth token`() {
+    // The in-context editor bootstraps off this endpoint; it must accept OAuth tokens (with an explicit project),
+    // not only PAK/PAT, and reflect the token's narrowed scopes.
+    val token = mint(scopes = listOf("translations.view"), projects = OAuth2Constants.ALL_PROJECTS)
+    performGet("/v2/api-keys/current-permissions?projectId=${testData.project.id}", bearer(token))
+      .andIsOk
+      .andAssertThatJson {
+        node("projectId").isNumber
+        node("scopes").isArray.contains("translations.view")
+      }
+  }
+
+  @Test
+  fun `requires an explicit project for current-permissions with an OAuth token`() {
+    val token = mint(scopes = listOf("translations.view"), projects = OAuth2Constants.ALL_PROJECTS)
+    performGet("/v2/api-keys/current-permissions", bearer(token)).andIsBadRequest
   }
 
   private fun translationsUrl() = "/v2/projects/${testData.project.id}/translations"
