@@ -11,8 +11,6 @@ import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
-import jakarta.persistence.Temporal
-import jakarta.persistence.TemporalType
 import org.hibernate.annotations.ColumnDefault
 import java.util.Date
 
@@ -43,7 +41,6 @@ class LanguageStats(
 
   override var reviewedPercentage: Double = 0.0
 
-  @Temporal(TemporalType.TIMESTAMP)
   override var translationsUpdatedAt: Date? = null
 
   @ColumnDefault("0")

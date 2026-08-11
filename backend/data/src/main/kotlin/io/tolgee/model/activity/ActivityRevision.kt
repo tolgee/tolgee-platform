@@ -20,8 +20,6 @@ import jakarta.persistence.OneToOne
 import jakarta.persistence.PrePersist
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
-import jakarta.persistence.Temporal
-import jakarta.persistence.TemporalType
 import jakarta.persistence.Transient
 import org.hibernate.annotations.Type
 import org.springframework.beans.factory.ObjectFactory
@@ -54,7 +52,6 @@ class ActivityRevision : java.io.Serializable {
   )
   val id: Long = 0
 
-  @Temporal(TemporalType.TIMESTAMP)
   @Column(name = "timestamp", nullable = false, updatable = false)
   lateinit var timestamp: Date
 
