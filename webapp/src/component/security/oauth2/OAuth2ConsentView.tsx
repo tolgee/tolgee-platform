@@ -32,6 +32,7 @@ type ConsentInfo = {
   appName: string;
   scopes: string[];
   project?: ProjectOption | null;
+  requestedProjectId?: number | null;
   projects: ProjectOption[];
 };
 
@@ -147,12 +148,12 @@ const OAuth2ConsentView: React.FC<React.PropsWithChildren<unknown>> = () => {
     return <FullPageLoading />;
   }
 
-  const hintedProject = info.project;
-  // A hinted project may be a public one the user isn't a member of — keep it selectable even if not in the list.
-  const projectOptions =
-    hintedProject && !info.projects.some((p) => p.id === hintedProject.id)
-      ? [hintedProject, ...info.projects]
-      : info.projects;
+  // The site declares which project it edits, so the screen offers only that project (plus "All projects") — not the
+  // user's whole project list. An accessible hint resolves to `info.project`; a requested id with no resolved project
+  // means the user can't edit what the site asked for.
+  const requestedInaccessible =
+    info.requestedProjectId != null && !info.project;
+  const projectOptions = info.project ? [info.project] : [];
 
   return (
     <DashboardPage>
@@ -168,6 +169,18 @@ const OAuth2ConsentView: React.FC<React.PropsWithChildren<unknown>> = () => {
         }
         primaryContent={
           <Box data-cy="oauth2-consent">
+            {requestedInaccessible && (
+              <Alert
+                severity="warning"
+                data-cy="oauth2-consent-project-inaccessible"
+                sx={{ mb: 2 }}
+              >
+                <T
+                  keyName="oauth2_consent_project_inaccessible"
+                  defaultValue="The site requested a project you can't edit on this account. In-context editing there won't work — you can still authorize access to your own projects."
+                />
+              </Alert>
+            )}
             <StyledCapabilities>
               {info.scopes.map((s) => (
                 <FormControlLabel

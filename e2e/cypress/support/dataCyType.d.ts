@@ -151,6 +151,11 @@ declare namespace DataCy {
         "community-projects-view": true;
         "community-translation-banner": true;
         "community-translation-item": true;
+        "connected-apps-list": true;
+        "connected-apps-list-item": true;
+        "connected-apps-list-item-disconnect-button": true;
+        "connected-apps-list-item-last-authorized": true;
+        "connected-apps-list-item-name": true;
         "content-delivery-add-button": true;
         "content-delivery-auto-publish-checkbox": true;
         "content-delivery-delete-button": true;
@@ -498,6 +503,7 @@ declare namespace DataCy {
         "oauth2-consent-allow": true;
         "oauth2-consent-deny": true;
         "oauth2-consent-error": true;
+        "oauth2-consent-project-inaccessible": true;
         "oauth2-consent-project-option": true;
         "oauth2-consent-project-select": true;
         "oauth2-consent-scope": true;

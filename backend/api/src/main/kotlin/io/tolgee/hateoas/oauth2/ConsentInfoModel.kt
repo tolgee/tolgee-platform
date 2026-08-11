@@ -20,5 +20,9 @@ data class ConsentInfoModel(
   val appName: String,
   val scopes: List<String>,
   val project: OAuth2ProjectModel?,
+  // The project id the client hinted on the authorize request, regardless of access. Set with a null [project] means
+  // the site requested a project this user cannot edit here — the consent screen surfaces that instead of silently
+  // falling back to "all projects".
+  val requestedProjectId: Long?,
   val projects: List<OAuth2ProjectModel>,
 )

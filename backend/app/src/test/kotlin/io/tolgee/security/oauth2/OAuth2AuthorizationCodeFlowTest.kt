@@ -374,16 +374,22 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
       .doesNotContain("foreign_project")
       .doesNotContain("public_project")
     assertThat(noHint.get("project").isNull).isTrue()
+    assertThat(noHint.get("requestedProjectId").isNull).isTrue()
 
-    // A hint pointing at a project the user cannot access must not leak the project's name.
+    // A hint pointing at a project the user cannot access must not leak the project's name, but the raw id is still
+    // reported (as requestedProjectId) so the consent screen can say "you can't edit the requested project".
     val inaccessible = startPendingConsent(jwt, hintProjectId = otherProjectId)
-    assertThat(consentInfo(jwt, state = inaccessible.state).get("project").isNull).isTrue()
+    val inaccessibleInfo = consentInfo(jwt, state = inaccessible.state)
+    assertThat(inaccessibleInfo.get("project").isNull).isTrue()
+    assertThat(inaccessibleInfo.get("requestedProjectId").asLong()).isEqualTo(otherProjectId)
 
     // An accessible hint is surfaced (id + name) so the SPA can pre-select it.
     val accessible = startPendingConsent(jwt, hintProjectId = testData.project.id)
-    val hinted = consentInfo(jwt, state = accessible.state).get("project")
+    val accessibleInfo = consentInfo(jwt, state = accessible.state)
+    val hinted = accessibleInfo.get("project")
     assertThat(hinted.get("id").asLong()).isEqualTo(testData.project.id)
     assertThat(hinted.get("name").asText()).isEqualTo(testData.project.name)
+    assertThat(accessibleInfo.get("requestedProjectId").asLong()).isEqualTo(testData.project.id)
 
     // A stale/nonexistent hint (e.g. a project deleted mid-flow) resolves to null instead of 404-ing the screen.
     val nonexistent = startPendingConsent(jwt, hintProjectId = INACCESSIBLE_PROJECT_ID)

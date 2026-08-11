@@ -276,9 +276,52 @@ dev-only.)
 ### 4. Connect
 
 Log into the webapp at `https://localhost:3995` (so the webapp JWT is in `localStorage` — the bootstrap
-step reads it), open the extension popup, set **API url** to `https://localhost:3995`, and click
-**Connect with Tolgee** → bootstrap → consent → Allow → "Connected". The access token is injected into
-the page as `__tolgee_authToken`; the refresh token stays in the service worker.
+step reads it), open the extension popup on the **Login** tab, set the **Server** field to
+`https://localhost:3995` (behind *Change server*), and click **Connect to Tolgee** → bootstrap →
+consent → Allow → "Connected". The access token is injected into the page as `__tolgee_authToken`; the
+refresh token stays in the service worker.
 
 To re-show the consent screen after a first approval (Spring remembers consent per client+user), revoke
 the grant: `DELETE /v2/user/connected-apps/tolgee-browser-extension` with your JWT.
+
+### 5. Edit in-context against a local build of the editor
+
+Getting to "Connected" is not enough to actually edit: the in-context editor UI is **not bundled** — the
+SDK loads it at runtime from the jsdelivr CDN (`@tolgee/web@prerelease`). That published bundle predates
+the OAuth `authToken` support, so it authenticates with `X-API-Key` and in-context editing fails with
+**"Invalid API key"** until the patched `@tolgee/web` is published. For local dev, point the loader at
+your own build — `loadInContextLib` honors a `window.__TOLGEE_IN_CONTEXT_URL__` override.
+
+The cleanest surface is the **`testapps/react`** app in the **tolgee-js** repo: it consumes the local
+workspace SDK (so both the Bearer-capable `DevBackend` and the loader override are in play).
+
+1. Build the SDK + tools UMD in tolgee-js:
+   ```bash
+   cd packages/web && npm run build   # → dist/tolgee-in-context-tools.umd.min.js (with Bearer support)
+   ```
+2. Serve that UMD from the testapp's own origin and point the override at it. In
+   `testapps/react/.env.development.local` (gitignored):
+   ```bash
+   VITE_APP_TOLGEE_API_URL=https://localhost:3995
+   VITE_APP_TOLGEE_PROJECT_ID=1                    # must exist on THIS backend (see note)
+   VITE_APP_IN_CONTEXT_URL=/tolgee-in-context-tools.umd.min.js
+   ```
+   ```bash
+   cp packages/web/dist/tolgee-in-context-tools.umd.min.js testapps/react/public/
+   ```
+   `testapps/react/src/main.tsx` sets `window.__TOLGEE_IN_CONTEXT_URL__` from that env var (inert when
+   unset).
+3. Run `npm run develop:react` from the tolgee-js root, open the testapp, Connect via the extension
+   (Server = `https://localhost:3995`), Allow, and edit in-context. The editor now loads from your build
+   and sends `Authorization: Bearer …`.
+
+`develop`'s watch rebuilds the SDK bundle but **not** the tools UMD (separate build config), so re-run
+`npm run build` in `packages/web` and re-copy the UMD after changing the editor's code.
+
+**projectId must be valid on the connected server.** The extension enables Connect for any `projectId`
+the page declares, but that id must exist on the server you connect to. If it doesn't, the token can't be
+scoped to it: the consent screen warns, the popup shows "you can't edit this project here", and
+in-context editing won't work. Use a projectId that exists on your local backend.
+
+**Once `@tolgee/web` is published**, none of Step 5 is needed — `loadInContextLib` pulls the patched
+editor from the CDN automatically.

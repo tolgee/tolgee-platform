@@ -94,10 +94,12 @@ class OAuth2FlowController(
   ): ConsentInfoModel {
     val client = registeredClientRepository.findByClientId(clientId) ?: throw NotFoundException()
     val scopes = scope?.split(" ")?.filter { it.isNotBlank() } ?: emptyList()
+    val requestedProjectId = state?.let { ownAuthorization(it)?.projectHint() }
     return ConsentInfoModel(
       appName = client.clientName,
       scopes = scopes,
-      project = state?.let { hintedProject(it) },
+      project = requestedProjectId?.let { hintedProject(it) },
+      requestedProjectId = requestedProjectId,
       projects = accessibleProjects(),
     )
   }
@@ -110,10 +112,8 @@ class OAuth2FlowController(
       .mapNotNull { dto -> dto.id?.let { id -> projectModel(id, dto.name) } }
 
   /** Resolves the hinted project's name only when the user has access, so an unrelated hint can't leak a name. */
-  private fun hintedProject(state: String): OAuth2ProjectModel? {
-    val projectId = ownAuthorization(state)?.projectHint() ?: return null
-    return accessibleProject(projectId)?.let { projectModel(it.id, it.name) }
-  }
+  private fun hintedProject(projectId: Long): OAuth2ProjectModel? =
+    accessibleProject(projectId)?.let { projectModel(it.id, it.name) }
 
   private fun projectModel(
     id: Long,
