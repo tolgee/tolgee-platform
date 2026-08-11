@@ -52,7 +52,7 @@ class McpBatchToolsTest : AbstractMcpTest() {
         ),
       )
     assertThat(json["jobId"]).isNotNull()
-    assertThat(json["type"].asText()).isEqualTo("MACHINE_TRANSLATE")
+    assertThat(json["type"].asString()).isEqualTo("MACHINE_TRANSLATE")
   }
 
   @Test
@@ -83,7 +83,7 @@ class McpBatchToolsTest : AbstractMcpTest() {
         ),
       )
     assertThat(json["jobId"]).isNotNull()
-    assertThat(json["type"].asText()).isEqualTo("MACHINE_TRANSLATE")
+    assertThat(json["type"].asString()).isEqualTo("MACHINE_TRANSLATE")
     assertThat(json["totalItems"].asInt()).isEqualTo(1)
 
     val jobDto = batchJobService.findJobDto(json["jobId"].asLong())
@@ -127,7 +127,7 @@ class McpBatchToolsTest : AbstractMcpTest() {
       )
     assertThat(json["id"].asLong()).isEqualTo(jobId)
     assertThat(json["status"]).isNotNull()
-    assertThat(json["type"].asText()).isEqualTo("MACHINE_TRANSLATE")
+    assertThat(json["type"].asString()).isEqualTo("MACHINE_TRANSLATE")
     assertThat(json["totalItems"].asInt()).isEqualTo(1)
   }
 }

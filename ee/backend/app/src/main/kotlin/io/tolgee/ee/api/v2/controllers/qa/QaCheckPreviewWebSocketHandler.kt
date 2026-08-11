@@ -127,7 +127,7 @@ class QaCheckPreviewWebSocketHandler(
       return
     }
 
-    val text = json.get("text")?.asText() ?: ""
+    val text = json.get("text")?.asString() ?: ""
 
     state.cancelAndSetJob {
       scope.launch { runChecks(session, state, text) }
@@ -140,14 +140,14 @@ class QaCheckPreviewWebSocketHandler(
   ) {
     try {
       val token =
-        json.get("token")?.asText()
+        json.get("token")?.asString()
           ?: throw IllegalArgumentException("Missing token")
       val projectId =
         json.get("projectId")?.asLong()
           ?: throw IllegalArgumentException("Missing projectId")
       val keyId = json.get("keyId")?.asLong()
       val languageTag =
-        json.get("languageTag")?.asText()
+        json.get("languageTag")?.asString()
           ?: throw IllegalArgumentException("Missing languageTag")
 
       checkAuth(token, projectId)

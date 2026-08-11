@@ -41,7 +41,7 @@ class McpBranchToolsTest : AbstractMcpTest() {
     val json = callToolAndGetJson(client, "list_branches")
     assertThat(json["items"].isArray).isTrue()
     assertThat(json["totalItems"].asLong()).isGreaterThanOrEqualTo(1)
-    val branchNames = (0 until json["items"].size()).map { json["items"][it]["name"].asText() }
+    val branchNames = (0 until json["items"].size()).map { json["items"][it]["name"].asString() }
     assertThat(branchNames).contains("main")
   }
 
@@ -61,7 +61,7 @@ class McpBranchToolsTest : AbstractMcpTest() {
     val json = callToolAndGetJson(client, "list_branches", mapOf("projectId" to data.projectId))
     assertThat(json["items"].isArray).isTrue()
     assertThat(json["totalItems"].asLong()).isGreaterThanOrEqualTo(1)
-    val branchNames = (0 until json["items"].size()).map { json["items"][it]["name"].asText() }
+    val branchNames = (0 until json["items"].size()).map { json["items"][it]["name"].asString() }
     assertThat(branchNames).contains("main")
   }
 
@@ -80,7 +80,7 @@ class McpBranchToolsTest : AbstractMcpTest() {
         ),
       )
     assertThat(json["id"].asLong()).isGreaterThan(0)
-    assertThat(json["name"].asText()).isEqualTo("feature-branch")
+    assertThat(json["name"].asString()).isEqualTo("feature-branch")
     assertThat(json["isDefault"].asBoolean()).isFalse()
 
     // Verify via service

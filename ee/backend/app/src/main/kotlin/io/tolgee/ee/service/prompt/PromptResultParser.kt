@@ -14,8 +14,8 @@ class PromptResultParser(
 ) {
   fun parse(): ParsedResult {
     val json = extractJsonFromResponse(promptResult.response)
-    val output = json?.get("output")?.asText() ?: throw LlmProviderNotReturnedJsonException()
-    val contextDescription = json.get("contextDescription")?.asText()
+    val output = json?.get("output")?.asString() ?: throw LlmProviderNotReturnedJsonException()
+    val contextDescription = json.get("contextDescription")?.asString()
 
     return ParsedResult(
       promptResult = promptResult,
