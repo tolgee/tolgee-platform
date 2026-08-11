@@ -48,7 +48,7 @@ open class ProjectStatsProvider(
         getTaskCountSelection(),
       )
 
-    query.multiselect(selection)
+    query.select(cb.construct(ProjectStatsView::class.java, *selection.toTypedArray()))
 
     query.groupBy(project.get(Project_.id))
 

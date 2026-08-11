@@ -284,11 +284,14 @@ class BigMetaService(
       }
     val keyPredicates = cb.or(*predicates.toTypedArray())
     query.where(cb.and(keyPredicates, cb.equal(root.get(Key_.project).get(Project_.id), projectId)))
-    query.multiselect(
-      root.get(Key_.id).alias("id"),
-      namespace.get(Namespace_.name).alias("namespace"),
-      root.get(Key_.name).alias("name"),
-      branch.get(Branch_.name).alias("branch"),
+    query.select(
+      cb.construct(
+        KeyIdFindResult::class.java,
+        root.get(Key_.id),
+        namespace.get(Namespace_.name),
+        root.get(Key_.name),
+        branch.get(Branch_.name),
+      ),
     )
     return query
   }

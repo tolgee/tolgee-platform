@@ -228,7 +228,7 @@ internal class StateFilterBuilder(
     val cteQuery = cb.createTupleQuery()
     val tRoot = cteQuery.from(Translation::class.java)
     val keyIdPath = tRoot.get(Translation_.key).get(Key_.id)
-    cteQuery.multiselect(keyIdPath.alias("keyId"))
+    cteQuery.select(cb.tuple(keyIdPath.alias("keyId")))
     cteQuery.where(
       cb.and(
         tRoot.get(Translation_.language).get(Language_.id).`in`(langIds),

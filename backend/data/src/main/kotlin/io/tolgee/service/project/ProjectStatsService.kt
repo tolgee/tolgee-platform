@@ -47,10 +47,12 @@ class ProjectStatsService(
     val branch = keys.join(Key_.branch, JoinType.LEFT)
     val keyCountSelect = cb.countDistinct(keys)
     val languageCountSelect = cb.countDistinct(languages)
-    query.multiselect(
-      root.get(Project_.id),
-      keyCountSelect,
-      languageCountSelect,
+    query.select(
+      cb.tuple(
+        root.get(Project_.id),
+        keyCountSelect,
+        languageCountSelect,
+      ),
     )
     query.where(
       cb.and(
