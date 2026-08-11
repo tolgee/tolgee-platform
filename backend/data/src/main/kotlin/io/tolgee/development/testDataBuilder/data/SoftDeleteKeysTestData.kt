@@ -20,9 +20,9 @@ class SoftDeleteKeysTestData :
         }
       user2 = user2Builder.self
 
-      projectBuilder.apply {
+      projectBuilder.apply project@{
         addPermission {
-          project = this@apply.self
+          project = this@project.self
           user = user2
           type = ProjectPermissionType.MANAGE
         }

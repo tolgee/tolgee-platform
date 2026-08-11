@@ -87,10 +87,10 @@ class KeysTestData {
           addKey {
             name = "key_with_referecnces"
             this@KeysTestData.keyWithReferences = this
-          }.build {
+          }.build keyWithReferences@{
             addScreenshotReference {
               screenshot = this@KeysTestData.screenshot
-              key = this@build.self
+              key = this@keyWithReferences.self
             }
             addMeta {
               tags.add(
