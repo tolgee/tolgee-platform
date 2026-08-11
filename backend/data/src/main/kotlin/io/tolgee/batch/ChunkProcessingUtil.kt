@@ -19,7 +19,7 @@ import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import jakarta.persistence.EntityManager
 import org.apache.commons.lang3.exception.ExceptionUtils
-import org.hibernate.LockOptions
+import org.hibernate.Timeouts
 import org.springframework.context.ApplicationContext
 import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.lang.RuntimeException
@@ -286,7 +286,7 @@ open class ChunkProcessingUtil(
       .setParameter("status", BatchJobChunkExecutionStatus.FAILED)
       .setHint(
         "jakarta.persistence.lock.timeout",
-        LockOptions.NO_WAIT,
+        Timeouts.NO_WAIT_MILLI,
       ).resultList as List<BatchJobChunkExecution>
   }
 
