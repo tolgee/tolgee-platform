@@ -22,7 +22,7 @@ fun <T> executeInNewTransaction(
 
   return tt.execute { ts ->
     fn(ts)
-  } as T
+  }
 }
 
 fun <T> executeInNewTransaction(

@@ -69,7 +69,7 @@ class ExceptionHandlers : Logging {
   @ExceptionHandler(MethodArgumentTypeMismatchException::class)
   fun handleValidationExceptions(ex: MethodArgumentTypeMismatchException): ResponseEntity<ErrorResponseBody> {
     return ResponseEntity(
-      ErrorResponseBody(Message.WRONG_PARAM_TYPE.code, listOf(ex.parameter.parameterName) as List<Serializable>?),
+      ErrorResponseBody(Message.WRONG_PARAM_TYPE.code, listOfNotNull(ex.parameter.parameterName)),
       HttpStatus.BAD_REQUEST,
     )
   }

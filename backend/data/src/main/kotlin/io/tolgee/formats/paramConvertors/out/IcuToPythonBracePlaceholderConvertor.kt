@@ -46,7 +46,7 @@ class IcuToPythonBracePlaceholderConvertor : FromIcuPlaceholderConvertor {
   }
 
   private fun MessagePatternUtil.ArgNode.getPrecision(): Int? {
-    val precisionMatch = ICU_PRECISION_REGEX.matchEntire(this.simpleStyle ?: "") ?: return null
+    val precisionMatch = ICU_PRECISION_REGEX.matchEntire(this.simpleStyle) ?: return null
     return precisionMatch.groups["precision"]?.value?.length
   }
 

@@ -24,7 +24,7 @@ class TagKeysChunkProcessor(
     chunk: List<Long>,
     coroutineContext: CoroutineContext,
   ) {
-    val subChunked = chunk.chunked(100) as List<List<Long>>
+    val subChunked = chunk.chunked(100)
     val params = getParams(job)
 
     val projectId = job.projectId ?: throw IllegalArgumentException("Project id is required")

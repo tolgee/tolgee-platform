@@ -25,7 +25,7 @@ class UntagKeysChunkProcessor(
     coroutineContext: CoroutineContext,
   ) {
     @Suppress("UNCHECKED_CAST")
-    val subChunked = chunk.chunked(100) as List<List<Long>>
+    val subChunked = chunk.chunked(100)
     val params = getParams(job)
     val projectId = job.projectId ?: throw IllegalArgumentException("Project id is required")
     subChunked.forEach { subChunk ->

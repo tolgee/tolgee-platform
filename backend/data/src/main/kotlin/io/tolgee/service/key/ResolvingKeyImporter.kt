@@ -88,7 +88,7 @@ class ResolvingKeyImporter(
           if (validate(translationExists, resolvable, key, language.tag)) return@translations
 
           if (language.base) {
-            if (isNew || existingTranslation?.text != resolvable.text) {
+            if (isNew || existingTranslation.text != resolvable.text) {
               outdatedKeys.add(key.id)
             }
           }
@@ -106,7 +106,7 @@ class ResolvingKeyImporter(
           }
 
           if (isEmpty || (!isNew && resolvable.resolution == ImportTranslationResolution.OVERRIDE)) {
-            translationsToModify.add(TranslationToModify(existingTranslation!!, resolvable.text, false))
+            translationsToModify.add(TranslationToModify(existingTranslation, resolvable.text, false))
             return@translations
           }
 

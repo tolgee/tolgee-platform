@@ -7,7 +7,7 @@ class ValidationError(
   message: Message,
   vararg parameters: String,
 ) {
-  val parameters: Array<String> = parameters as Array<String>
+  val parameters: Array<out String> = parameters
   val type: ValidationErrorType = type
   val message: Message = message
 }

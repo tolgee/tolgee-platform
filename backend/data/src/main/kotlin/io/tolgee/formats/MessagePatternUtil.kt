@@ -423,9 +423,7 @@ object MessagePatternUtil {
       if (argType != MessagePattern.ArgType.NONE) {
         sb.append(',').append(typeName)
         if (argType == MessagePattern.ArgType.SIMPLE) {
-          if (simpleStyle != null) {
-            sb.append(',').append(simpleStyle)
-          }
+          sb.append(',').append(simpleStyle)
         } else {
           sb.append(',').append(complexStyle.toString())
         }
