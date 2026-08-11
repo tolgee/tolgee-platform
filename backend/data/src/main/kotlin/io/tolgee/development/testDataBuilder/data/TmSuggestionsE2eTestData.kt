@@ -28,7 +28,7 @@ class TmSuggestionsE2eTestData :
     const val BACKDATED_TARGET_TEXT = "Čas z TM"
   }
 
-  lateinit var czechLanguage: Language
+  var czechLanguage: Language
   lateinit var sharedTmWithDate: TranslationMemory
   lateinit var penalizedSharedTm: TranslationMemory
   lateinit var noReadSharedTm: TranslationMemory

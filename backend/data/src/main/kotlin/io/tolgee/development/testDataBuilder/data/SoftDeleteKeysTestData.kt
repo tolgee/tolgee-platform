@@ -9,7 +9,7 @@ class SoftDeleteKeysTestData :
     projectName = "Soft delete test",
   ) {
   val czechLanguage = projectBuilder.addCzech().self
-  lateinit var user2: UserAccount
+  var user2: UserAccount
 
   init {
     root.apply {

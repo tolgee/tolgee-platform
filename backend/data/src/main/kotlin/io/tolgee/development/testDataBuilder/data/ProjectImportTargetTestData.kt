@@ -20,9 +20,9 @@ import io.tolgee.model.key.Key
 class ProjectImportTargetTestData :
   BaseTestData(userName = "import-target-owner", projectName = "import-target-project") {
   val targetProject: Project get() = project
-  lateinit var targetBranch: Branch
-  lateinit var targetOldKey: Key
-  lateinit var siblingProject: Project
+  var targetBranch: Branch
+  var targetOldKey: Key
+  var siblingProject: Project
 
   val oldKeyName = "old-target-key"
   val oldLabelName = "old-target-label"

@@ -4,10 +4,10 @@ import io.tolgee.model.branching.Branch
 import io.tolgee.model.key.Key
 
 class SoftDeleteBranchingTestData : BaseTestData("soft_delete_branching", "Project for soft-delete branching tests") {
-  lateinit var mainBranch: Branch
-  lateinit var key1: Key
-  lateinit var key2: Key
-  lateinit var key3: Key
+  var mainBranch: Branch
+  var key1: Key
+  var key2: Key
+  var key3: Key
 
   init {
     projectBuilder.apply {

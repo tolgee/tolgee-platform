@@ -18,22 +18,22 @@ class ConcurrentBatchJobsTestData(
   val projectBKeyCount: Int = 300,
   val projectCKeyCount: Int = 200,
 ) {
-  lateinit var user: UserAccount
-  lateinit var userAccountBuilder: UserAccountBuilder
+  var user: UserAccount
+  var userAccountBuilder: UserAccountBuilder
 
   lateinit var projectA: Project
-  lateinit var projectABuilder: ProjectBuilder
+  var projectABuilder: ProjectBuilder
   lateinit var projectAEnglish: Language
   lateinit var projectACzech: Language
   lateinit var projectAGerman: Language
 
   lateinit var projectB: Project
-  lateinit var projectBBuilder: ProjectBuilder
+  var projectBBuilder: ProjectBuilder
   lateinit var projectBEnglish: Language
   lateinit var projectBCzech: Language
 
   lateinit var projectC: Project
-  lateinit var projectCBuilder: ProjectBuilder
+  var projectCBuilder: ProjectBuilder
   lateinit var projectCEnglish: Language
   lateinit var projectCCzech: Language
 
