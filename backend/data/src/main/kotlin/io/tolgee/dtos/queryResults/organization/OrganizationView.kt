@@ -14,6 +14,7 @@ class OrganizationView(
   val currentUserRole: OrganizationRoleType?,
   val avatarHash: String?,
 ) {
+  @Suppress("UNCHECKED_CAST")
   constructor(
     id: Long,
     name: String,

@@ -29,6 +29,7 @@ class KeyInfoProvider(
   private val screenshotService: ScreenshotService = applicationContext.getBean(ScreenshotService::class.java)
   private val translationService: TranslationService = applicationContext.getBean(TranslationService::class.java)
 
+  @Suppress("UNCHECKED_CAST")
   fun get(): List<Pair<Key, List<Screenshot>>> {
     val cb: CriteriaBuilder = entityManager.criteriaBuilder
     val query = cb.createQuery(Key::class.java)

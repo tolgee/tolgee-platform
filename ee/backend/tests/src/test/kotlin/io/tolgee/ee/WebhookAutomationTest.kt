@@ -130,6 +130,7 @@ class WebhookAutomationTest : ProjectAuthControllerTest("/v2/projects/") {
     )
   }
 
+  @Suppress("UNCHECKED_CAST")
   private fun verifyWebhookExecuted(
     testData: WebhooksTestData,
     webhookTriggeringCallback: () -> Unit,

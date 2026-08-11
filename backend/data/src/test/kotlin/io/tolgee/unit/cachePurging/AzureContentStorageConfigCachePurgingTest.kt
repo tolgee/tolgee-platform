@@ -22,6 +22,7 @@ import org.springframework.web.client.RestTemplate
 
 class AzureContentStorageConfigCachePurgingTest {
   @Test
+  @Suppress("UNCHECKED_CAST")
   fun `correctly purges`() {
     val config =
       object : AzureFrontDoorConfig {

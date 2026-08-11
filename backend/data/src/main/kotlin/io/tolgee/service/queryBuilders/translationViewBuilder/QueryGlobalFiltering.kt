@@ -265,6 +265,7 @@ class QueryGlobalFiltering(
     )
   }
 
+  @Suppress("UNCHECKED_CAST")
   private fun filterUntranslatedAny() {
     if (params.filterUntranslatedAny != true) return
     val selectedLangIds = queryBase.languages.map { it.id }

@@ -21,6 +21,7 @@ import java.net.URI
 
 class BunnyContentStorageConfigCachePurgingTest {
   @Test
+  @Suppress("UNCHECKED_CAST")
   fun `correctly purges`() {
     val config =
       ContentDeliveryBunnyProperties(

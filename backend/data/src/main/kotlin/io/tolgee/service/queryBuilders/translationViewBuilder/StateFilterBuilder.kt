@@ -101,6 +101,7 @@ internal class StateFilterBuilder(
    * For state sets **without UNTRANSLATED**: a single correlated EXISTS checks if any row
    * matches the requested (lang, state) pair — no missing-row handling needed.
    */
+  @Suppress("UNCHECKED_CAST")
   private fun homogeneousStateCountPredicate(
     languages: List<LanguageDto>,
     states: Set<TranslationState>,
