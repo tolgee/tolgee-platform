@@ -417,12 +417,11 @@ class BatchJobService(
           and j.type = :type
           and j.status not in :completedStatuses
         """.trimIndent(),
-        java.lang.Boolean::class.java,
+        Boolean::class.javaObjectType,
       ).setParameter("projectId", projectId)
       .setParameter("type", type)
       .setParameter("completedStatuses", BatchJobStatus.entries.filter { it.completed })
       .singleResult
-      .booleanValue()
   }
 
   fun getExecutions(batchJobId: Long): List<BatchJobChunkExecution> {
