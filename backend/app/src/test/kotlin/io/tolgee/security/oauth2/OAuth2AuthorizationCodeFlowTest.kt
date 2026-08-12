@@ -18,6 +18,7 @@ package io.tolgee.security.oauth2
 
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.andIsUnauthorized
 import io.tolgee.model.UserAccount
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.testing.AbstractControllerTest
@@ -60,6 +61,9 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
 
   @Autowired
   private lateinit var registeredClientRepository: RegisteredClientRepository
+
+  @Autowired
+  private lateinit var oauth2AuthorizationQueryService: OAuth2AuthorizationQueryService
 
   private lateinit var testData: BaseTestData
   private lateinit var otherUser: UserAccount
@@ -250,6 +254,44 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
         ).andReturn()
         .response.status
     assertThat(status).isEqualTo(400)
+
+    // Detecting the invalidated grant on refresh also revokes it — the authorization row is gone. (Checked directly
+    // rather than via the connected-apps endpoint, whose JWT would itself be rejected by the future cutoff above.)
+    assertThat(oauth2AuthorizationQueryService.findAuthorizedClients(testData.user.id.toString())).isEmpty()
+  }
+
+  @Test
+  fun `disconnecting the app kills its already-issued access token on the next request`() {
+    val accessToken = runAuthorizationCodeFlow()
+    mvc
+      .perform(get("/v2/projects/${testData.project.id}/translations").header("Authorization", "Bearer $accessToken"))
+      .andIsOk
+
+    // Disconnect deletes the authorization row; the resolver's liveness check must reject the still-unexpired token.
+    val superJwt = jwtService.emitToken(testData.user.id, isSuper = true)
+    mvc
+      .perform(delete("/v2/user/connected-apps/$TEST_CLIENT_ID").header("Authorization", "Bearer $superJwt"))
+      .andIsOk
+
+    mvc
+      .perform(get("/v2/projects/${testData.project.id}/translations").header("Authorization", "Bearer $accessToken"))
+      .andIsUnauthorized
+  }
+
+  @Test
+  fun `invalidating all tokens kills already-issued OAuth access tokens and grants`() {
+    val accessToken = runAuthorizationCodeFlow()
+    mvc
+      .perform(get("/v2/projects/${testData.project.id}/translations").header("Authorization", "Bearer $accessToken"))
+      .andIsOk
+
+    userAccountService.invalidateTokens(userAccountService.get(testData.user.id))
+
+    mvc
+      .perform(get("/v2/projects/${testData.project.id}/translations").header("Authorization", "Bearer $accessToken"))
+      .andIsUnauthorized
+    // The grant itself is gone (not merely time-cut): connected-apps no longer lists it.
+    assertThat(connectedApps(jwtService.emitToken(testData.user.id))).doesNotContain("\"$TEST_CLIENT_ID\"")
   }
 
   @Test

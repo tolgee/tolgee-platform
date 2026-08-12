@@ -28,6 +28,7 @@ import io.tolgee.model.views.ExtendedUserAccountInProject
 import io.tolgee.model.views.UserAccountInProjectView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import io.tolgee.repository.UserAccountRepository
+import io.tolgee.security.oauth2.OAuth2AuthorizationQueryService
 import io.tolgee.service.AiPlaygroundResultService
 import io.tolgee.service.AvatarService
 import io.tolgee.service.EmailVerificationService
@@ -88,6 +89,10 @@ class UserAccountService(
 
   @Autowired
   private lateinit var notificationService: NotificationService
+
+  @Autowired
+  @Lazy
+  private lateinit var oauth2AuthorizationQueryService: OAuth2AuthorizationQueryService
 
   private val emailValidator = EmailValidator()
 
@@ -597,6 +602,9 @@ class UserAccountService(
 
   fun invalidateTokens(userAccount: UserAccount): UserAccount {
     resetTokensValidNotBefore(userAccount)
+    // The tokensValidNotBefore cutoff alone only kills OAuth access tokens at expiry; deleting the grants makes it
+    // instant (the resolver's liveness check fails closed) and forces re-consent, same as every other token family.
+    oauth2AuthorizationQueryService.revokeAllForPrincipal(userAccount.id.toString())
     return userAccountRepository.save(userAccount)
   }
 

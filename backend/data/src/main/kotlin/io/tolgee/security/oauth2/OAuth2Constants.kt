@@ -19,6 +19,10 @@ package io.tolgee.security.oauth2
 object OAuth2Constants {
   const val PROJECTS_CLAIM = "tg.prj"
 
+  // Access-token claim carrying the id of the oauth2_authorization row that minted it, so the resolver can reject a
+  // token whose authorization has been revoked (disconnect / logout-everywhere) without waiting for it to expire.
+  const val AUTHORIZATION_ID_CLAIM = "tg.aid"
+
   /** [PROJECTS_CLAIM] sentinel: not narrowed to any project subset (still bounded by live permissions). */
   const val ALL_PROJECTS = "*"
 

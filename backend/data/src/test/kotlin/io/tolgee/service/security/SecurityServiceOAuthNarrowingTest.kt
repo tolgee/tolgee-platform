@@ -16,8 +16,8 @@
 
 package io.tolgee.service.security
 
-import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.constants.Message
+import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope

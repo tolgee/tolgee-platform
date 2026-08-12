@@ -37,6 +37,7 @@ class OAuth2AccessTokenResolver(
   private val decoder: JwtDecoder,
   private val userAccountService: UserAccountService,
   private val audienceResolver: OAuth2AudienceResolver,
+  private val authorizationLivenessService: OAuth2AuthorizationLivenessService,
 ) {
   fun tryResolve(token: String): TolgeeAuthentication? {
     if (!hasOAuthAudience(token)) return null
@@ -53,6 +54,8 @@ class OAuth2AccessTokenResolver(
       throw AuthExpiredException(Message.EXPIRED_JWT_TOKEN)
     }
 
+    rejectIfAuthorizationRevoked(jwt)
+
     return TolgeeAuthentication(
       credentials = OAuth2TokenCredentials(parseScopes(jwt), parseProjects(jwt)),
       deviceId = jwt.id,
@@ -63,9 +66,24 @@ class OAuth2AccessTokenResolver(
     )
   }
 
+  // Every token our customizer mints carries the authorization-id claim, so a token without it is not a valid
+  // production token and is rejected. A present id whose row is gone (the grant was revoked by disconnect or
+  // logout-everywhere) fails closed too.
+  private fun rejectIfAuthorizationRevoked(jwt: Jwt) {
+    val authorizationId =
+      jwt.getClaimAsString(OAuth2Constants.AUTHORIZATION_ID_CLAIM)
+        ?: throw AuthenticationException(Message.INVALID_JWT_TOKEN)
+    if (!authorizationLivenessService.isLive(authorizationId)) {
+      throw AuthExpiredException(Message.EXPIRED_JWT_TOKEN)
+    }
+  }
+
   private fun hasOAuthAudience(token: String): Boolean {
     return try {
-      SignedJWT.parse(token).jwtClaimsSet.audience.hasApiAudience()
+      SignedJWT
+        .parse(token)
+        .jwtClaimsSet.audience
+        .hasApiAudience()
     } catch (_: Exception) {
       false
     }

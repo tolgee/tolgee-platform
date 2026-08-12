@@ -47,7 +47,10 @@ data class UserAccountDto(
   // sign-out) is no longer valid. One owner for every bearer-token path (JWT, OAuth access + refresh).
   fun isTokenInvalidated(issuedAt: java.time.Instant?): Boolean {
     val validNotBefore = tokensValidNotBefore ?: return false
-    return issuedAt != null && issuedAt.isBefore(validNotBefore.toInstant())
+    if (issuedAt == null) return false
+    // JWT `iat` has whole-second precision; truncate the cutoff to seconds too, otherwise a token minted in the same
+    // second as the invalidation reads as "before" the millisecond-precise cutoff and is wrongly rejected.
+    return issuedAt.isBefore(validNotBefore.toInstant().truncatedTo(java.time.temporal.ChronoUnit.SECONDS))
   }
 }
 

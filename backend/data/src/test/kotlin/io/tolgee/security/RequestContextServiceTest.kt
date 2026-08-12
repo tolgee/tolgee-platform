@@ -86,7 +86,8 @@ class RequestContextServiceTest {
 
   private fun setupOAuthToken(projectIds: Set<Long>?) {
     Mockito.`when`(authenticationFacade.isApiAuthentication).thenReturn(true)
-    Mockito.`when`(authenticationFacade.oauthTokenCredentials)
+    Mockito
+      .`when`(authenticationFacade.oauthTokenCredentials)
       .thenReturn(OAuth2TokenCredentials(scopes = emptySet(), projectIds = projectIds))
   }
 

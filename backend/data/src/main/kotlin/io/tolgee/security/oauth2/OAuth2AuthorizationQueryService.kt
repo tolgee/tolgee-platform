@@ -16,71 +16,52 @@
 
 package io.tolgee.security.oauth2
 
-import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Service
-import java.sql.Timestamp
+import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 
-/** JDBC queries SAS's services don't expose (list authorized clients; revoke a client). `principal_name` = user id, so callers pass `user.id.toString()`. */
+/**
+ * Orchestrates operations over SAS's authorization tables that its built-in services don't cover — pairing the raw SQL
+ * in [OAuth2AuthorizationJdbcRepository] with cache eviction and transaction boundaries. `principal_name` = user id, so
+ * callers pass `user.id.toString()`.
+ */
 @Service
 class OAuth2AuthorizationQueryService(
-  private val jdbcTemplate: JdbcTemplate,
+  private val repository: OAuth2AuthorizationJdbcRepository,
+  private val authorizationLivenessService: OAuth2AuthorizationLivenessService,
 ) {
-  fun findAuthorizedClients(principalName: String): List<AuthorizedClient> {
-    // Consent-required clients (browser extension, CIMD) get an oauth2_authorization row at /authorize BEFORE the user
-    // approves; filtering on an issued token keeps abandoned/unapproved consent rows out of the connected-apps list.
-    return jdbcTemplate.query(
-      """
-      SELECT registered_client_id, MAX(access_token_issued_at) AS last_authorized_at
-      FROM oauth2_authorization
-      WHERE principal_name = ? AND (access_token_value IS NOT NULL OR refresh_token_value IS NOT NULL)
-      GROUP BY registered_client_id
-      """.trimIndent(),
-      { rs, _ ->
-        AuthorizedClient(
-          registeredClientId = rs.getString("registered_client_id"),
-          lastAuthorizedAt = rs.getTimestamp("last_authorized_at")?.toInstant(),
-        )
-      },
-      principalName,
-    )
-  }
+  fun findAuthorizedClients(principalName: String): List<OAuth2AuthorizationJdbcRepository.AuthorizedClient> =
+    repository.findAuthorizedClients(principalName)
 
   /** Deletes the user's authorizations and consents for the client; returns the authorization-row (not consent) count. */
   fun revoke(
     registeredClientId: String,
     principalName: String,
   ): Int {
-    jdbcTemplate.update(
-      "DELETE FROM oauth2_authorization_consent WHERE registered_client_id = ? AND principal_name = ?",
-      registeredClientId,
-      principalName,
-    )
-    return jdbcTemplate.update(
-      "DELETE FROM oauth2_authorization WHERE registered_client_id = ? AND principal_name = ?",
-      registeredClientId,
-      principalName,
-    )
+    val ids = repository.findIdsByClientAndPrincipal(registeredClientId, principalName)
+    repository.deleteConsentByClientAndPrincipal(registeredClientId, principalName)
+    val deleted = repository.deleteByClientAndPrincipal(registeredClientId, principalName)
+    ids.forEach { authorizationLivenessService.evict(it) }
+    return deleted
   }
 
-  // Deletes rows whose newest credential expiry (refresh > access > code) passed — so a still-valid refresh token is
-  // never deleted — plus abandoned pre-consent rows (all expiries NULL) before [cutoff], which the expiry test misses.
-  fun deleteExpiredBefore(cutoff: Instant): Int {
-    val ts = Timestamp.from(cutoff)
-    return jdbcTemplate.update(
-      """
-      DELETE FROM oauth2_authorization
-      WHERE COALESCE(refresh_token_expires_at, access_token_expires_at, authorization_code_expires_at) < ?
-         OR (refresh_token_expires_at IS NULL AND access_token_expires_at IS NULL
-             AND authorization_code_expires_at IS NULL AND created_at < ?)
-      """.trimIndent(),
-      ts,
-      ts,
-    )
+  /** Deletes ALL of the user's authorizations and consents (logout-everywhere); returns the authorization-row count. */
+  fun revokeAllForPrincipal(principalName: String): Int {
+    val ids = repository.findIdsByPrincipal(principalName)
+    repository.deleteConsentByPrincipal(principalName)
+    val deleted = repository.deleteByPrincipal(principalName)
+    ids.forEach { authorizationLivenessService.evict(it) }
+    return deleted
   }
 
-  data class AuthorizedClient(
-    val registeredClientId: String,
-    val lastAuthorizedAt: Instant?,
-  )
+  // Runs in its own transaction: the caller (the token customizer detecting an invalidated refresh grant) throws right
+  // after, rolling back the refresh-grant transaction — the deletion must survive that rollback to actually revoke.
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  fun revokeByIdInNewTransaction(authorizationId: String) {
+    repository.deleteById(authorizationId)
+    authorizationLivenessService.evict(authorizationId)
+  }
+
+  fun deleteExpiredBefore(cutoff: Instant): Int = repository.deleteExpiredBefore(cutoff)
 }

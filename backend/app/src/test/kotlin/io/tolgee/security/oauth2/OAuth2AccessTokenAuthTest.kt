@@ -41,6 +41,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
+import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm
 import org.springframework.security.oauth2.jwt.JwsHeader
 import org.springframework.security.oauth2.jwt.JwtClaimsSet
@@ -60,6 +61,9 @@ import java.util.Date
 class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
   @Autowired
   private lateinit var jwtEncoder: JwtEncoder
+
+  @Autowired
+  private lateinit var jdbcTemplate: JdbcTemplate
 
   private lateinit var testData: BaseTestData
   private lateinit var viewOnlyUser: UserAccount
@@ -98,10 +102,22 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
           totalItems = 1
         }.self
     testDataService.saveTestData(testData.root)
+    // Tokens are minted directly (bypassing SAS), so no real authorization row exists — insert one the liveness check
+    // can find, since the resolver now rejects any OAuth token whose authorization is gone.
+    jdbcTemplate.update("DELETE FROM oauth2_authorization WHERE id = ?", LIVE_AUTHORIZATION_ID)
+    jdbcTemplate.update(
+      "INSERT INTO oauth2_authorization (id, registered_client_id, principal_name, authorization_grant_type) " +
+        "VALUES (?, ?, ?, ?)",
+      LIVE_AUTHORIZATION_ID,
+      "test-client",
+      testData.user.id.toString(),
+      "authorization_code",
+    )
   }
 
   @AfterEach
   fun cleanup() {
+    jdbcTemplate.update("DELETE FROM oauth2_authorization WHERE id = ?", LIVE_AUTHORIZATION_ID)
     testDataService.cleanTestData(testData.root)
   }
 
@@ -233,6 +249,22 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
   }
 
   @Test
+  fun `rejects a token that carries no authorization-id claim`() {
+    // Every production token our customizer mints carries the claim; a token without it is not a valid token.
+    val token =
+      mint(scopes = listOf("translations.view"), projects = listOf(testData.project.id), authorizationId = null)
+    performGet(translationsUrl(), bearer(token)).andIsUnauthorized
+  }
+
+  @Test
+  fun `rejects a token whose authorization no longer exists`() {
+    // Fail closed: a token whose authorization row is gone (revoked) must be rejected on the next request.
+    val token =
+      mint(scopes = listOf("translations.view"), projects = listOf(testData.project.id), authorizationId = "gone")
+    performGet(translationsUrl(), bearer(token)).andIsUnauthorized
+  }
+
+  @Test
   fun `the own-jobs fallback cannot widen a token that lacks batch-jobs-view`() {
     val currentJobs = "/v2/projects/${testData.project.id}/current-batch-jobs"
     // The user holds batch-jobs.view live; a token that wasn't consented it must be rejected, not filtered to own jobs.
@@ -286,6 +318,7 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
     projects: Any,
     audience: String = apiAudience,
     subject: Long = testData.user.id,
+    authorizationId: String? = LIVE_AUTHORIZATION_ID,
   ): String {
     val now = Instant.now()
     val claims =
@@ -297,9 +330,14 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
         .expiresAt(now.plus(30, ChronoUnit.MINUTES))
         .claim("scope", scopes)
         .claim(OAuth2Constants.PROJECTS_CLAIM, projects)
+        .apply { authorizationId?.let { claim(OAuth2Constants.AUTHORIZATION_ID_CLAIM, it) } }
         .build()
     val header = JwsHeader.with(SignatureAlgorithm.RS256).build()
     return jwtEncoder.encode(JwtEncoderParameters.from(header, claims)).tokenValue
+  }
+
+  companion object {
+    private const val LIVE_AUTHORIZATION_ID = "oauth-access-token-auth-test-authz"
   }
 
   private val apiAudience: String

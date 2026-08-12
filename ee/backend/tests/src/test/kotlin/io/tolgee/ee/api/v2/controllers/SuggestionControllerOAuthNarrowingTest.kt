@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
+import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm
 import org.springframework.security.oauth2.jwt.JwsHeader
 import org.springframework.security.oauth2.jwt.JwtClaimsSet
@@ -29,16 +30,30 @@ class SuggestionControllerOAuthNarrowingTest : AbstractControllerTest() {
   @Autowired
   private lateinit var jwtEncoder: JwtEncoder
 
+  @Autowired
+  private lateinit var jdbcTemplate: JdbcTemplate
+
   private lateinit var testData: SuggestionsTestData
 
   @BeforeEach
   fun setup() {
     testData = SuggestionsTestData(SuggestionsMode.ENABLED)
     testDataService.saveTestData(testData.root)
+    // Tokens are minted directly (bypassing SAS); insert an authorization row the resolver's liveness check can find.
+    jdbcTemplate.update("DELETE FROM oauth2_authorization WHERE id = ?", LIVE_AUTHORIZATION_ID)
+    jdbcTemplate.update(
+      "INSERT INTO oauth2_authorization (id, registered_client_id, principal_name, authorization_grant_type) " +
+        "VALUES (?, ?, ?, ?)",
+      LIVE_AUTHORIZATION_ID,
+      "test-client",
+      "test",
+      "authorization_code",
+    )
   }
 
   @AfterEach
   fun cleanup() {
+    jdbcTemplate.update("DELETE FROM oauth2_authorization WHERE id = ?", LIVE_AUTHORIZATION_ID)
     testDataService.cleanTestData(testData.root)
   }
 
@@ -79,6 +94,7 @@ class SuggestionControllerOAuthNarrowingTest : AbstractControllerTest() {
         .expiresAt(now.plus(30, ChronoUnit.MINUTES))
         .claim("scope", scopes)
         .claim(OAuth2Constants.PROJECTS_CLAIM, OAuth2Constants.ALL_PROJECTS)
+        .claim(OAuth2Constants.AUTHORIZATION_ID_CLAIM, LIVE_AUTHORIZATION_ID)
         .build()
     val header = JwsHeader.with(SignatureAlgorithm.RS256).build()
     return jwtEncoder.encode(JwtEncoderParameters.from(header, claims)).tokenValue
@@ -89,4 +105,8 @@ class SuggestionControllerOAuthNarrowingTest : AbstractControllerTest() {
       tolgeeProperties.backEndUrl
         ?: tolgeeProperties.frontEndUrl
         ?: OAuth2AudienceResolver.DEFAULT_API_AUDIENCE
+
+  companion object {
+    private const val LIVE_AUTHORIZATION_ID = "suggestion-oauth-narrowing-test-authz"
+  }
 }
