@@ -2,46 +2,45 @@ package io.tolgee.service.apps.lifecycle
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.apps.AppLifecycleAppCredentials
-import io.tolgee.dtos.apps.AppLifecycleInstall
+import io.tolgee.dtos.apps.AppLifecycleDeliveryOutcome
 import io.tolgee.dtos.apps.AppLifecycleOrganization
 import io.tolgee.dtos.apps.AppLifecyclePayload
-import io.tolgee.model.apps.AppDelivery
 import io.tolgee.model.apps.AppLifecycleEventType
 import io.tolgee.repository.OrganizationRepository
-import io.tolgee.repository.apps.AppDeliveryRepository
 import io.tolgee.repository.apps.AppRepository
 import io.tolgee.service.apps.AppService
 import io.tolgee.util.Logging
 import io.tolgee.util.executeInNewTransaction
-import io.tolgee.util.runSentryCatching
+import io.tolgee.util.logger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
-import org.springframework.transaction.annotation.Transactional
 import tools.jackson.databind.ObjectMapper
 
 /**
- * Tells an app what happened to it, over a signed POST to the `baseUrl` in its manifest. That
- * delivery is the only channel per-install credentials travel over, and receiving it is what proves
- * the recipient controls the app's domain.
+ * Hands an app a secret-carrying event over a signed POST to the `baseUrl` in its manifest, and
+ * tells the caller whether it landed. Only two events travel this way now — an app being registered
+ * and an operator rotating its secret — and both happen with a human at a dialog, so the delivery
+ * is **synchronous** and its outcome is shown there. An app that discovers the rest (its installs)
+ * asks Tolgee itself.
  *
- * Every entry point is fire-and-forget: the record is written in its own transaction and the HTTP
- * happens on another thread, so a dead app host can neither block nor roll back the registration,
- * install or rotation that triggered the delivery.
+ * A failure never propagates: the credentials were already returned in the response, so a dead app
+ * host must not roll back the registration or rotation. The blast radius of the synchronous call is
+ * bounded by the shared apps HTTP timeout, and Tolgee just fetched the manifest from this same host
+ * seconds earlier, so the host is already known reachable.
  */
 @Service
 class AppLifecycleDeliveryService(
   private val appRepository: AppRepository,
   private val organizationRepository: OrganizationRepository,
-  private val appDeliveryRepository: AppDeliveryRepository,
   private val appService: AppService,
-  private val dispatcher: AppLifecycleDeliveryDispatcher,
+  private val httpClient: AppLifecycleHttpClient,
   private val tolgeeProperties: TolgeeProperties,
   private val objectMapper: ObjectMapper,
   private val transactionManager: PlatformTransactionManager,
 ) : Logging {
   /**
-   * Everything a delivery needs about the app, taken while the app still exists. An uninstalled
-   * delivery is sent after the install — and sometimes the app — is already gone.
+   * Everything a delivery needs about the app, taken while the app still exists. Read before a
+   * removal that will delete the app so the app can still be told about it.
    */
   data class AppTarget(
     val appEntityId: Long,
@@ -63,79 +62,43 @@ class AppLifecycleDeliveryService(
     }
   }
 
-  fun deliver(
+  /**
+   * Delivers [eventType] now and reports whether the app took it. Returns
+   * [AppLifecycleDeliveryOutcome.NOT_ATTEMPTED] when the app is already gone (nothing to deliver to);
+   * a failure is a value, never thrown.
+   */
+  fun deliverNow(
     appEntityId: Long,
     eventType: AppLifecycleEventType,
-    organizationId: Long? = null,
     appCredentials: AppLifecycleAppCredentials? = null,
-    install: AppLifecycleInstall? = null,
-  ) {
-    runSentryCatching {
-      val target = resolveTarget(appEntityId) ?: return@runSentryCatching
-      deliver(target, eventType, organizationId, appCredentials, install)
-    }
+    organizationId: Long? = null,
+  ): AppLifecycleDeliveryOutcome {
+    val target = resolveTarget(appEntityId) ?: return AppLifecycleDeliveryOutcome.NOT_ATTEMPTED
+    return deliverNow(target, eventType, appCredentials, organizationId)
   }
 
-  fun deliver(
+  fun deliverNow(
     target: AppTarget,
     eventType: AppLifecycleEventType,
-    organizationId: Long? = null,
     appCredentials: AppLifecycleAppCredentials? = null,
-    install: AppLifecycleInstall? = null,
-  ) {
-    runSentryCatching {
-      val prepared =
-        executeInNewTransaction(transactionManager) {
-          prepare(target, eventType, organizationId, appCredentials, install)
-        }
-      dispatcher.submit(prepared)
-    }
-  }
-
-  @Transactional(readOnly = true)
-  fun listForApp(appIdentifier: String): List<AppDelivery> {
-    return appDeliveryRepository.findAllByAppIdentifierOrderByCreatedAtDesc(appIdentifier)
-  }
-
-  private fun prepare(
-    target: AppTarget,
-    eventType: AppLifecycleEventType,
-    organizationId: Long?,
-    appCredentials: AppLifecycleAppCredentials?,
-    install: AppLifecycleInstall?,
-  ): PendingAppDelivery {
+    organizationId: Long? = null,
+  ): AppLifecycleDeliveryOutcome {
     val organization = organizationId?.let { organizationRepository.findById(it).orElse(null) }
-
-    val record =
-      appDeliveryRepository.save(
-        AppDelivery().apply {
-          this.app = appRepository.findById(target.appEntityId).orElse(null)
-          this.appIdentifier = target.appIdentifier
-          this.organization = organization
-          this.eventType = eventType
-          this.targetUrl = target.baseUrl
-        },
-      )
-
     val payload =
       AppLifecyclePayload(
         eventType = eventType.wireName,
-        deliveryId = record.id,
         appId = target.appIdentifier,
         tolgeeInstanceUrl = tolgeeProperties.backEndUrl,
         app = appCredentials,
-        install = install,
-        organization =
-          organization?.let {
-            AppLifecycleOrganization(id = it.id, name = it.name, slug = it.slug)
-          },
+        organization = organization?.let { AppLifecycleOrganization(id = it.id, name = it.name, slug = it.slug) },
       )
 
-    return PendingAppDelivery(
-      deliveryId = record.id,
-      targetUrl = target.baseUrl,
-      payload = objectMapper.writeValueAsString(payload),
-      signingSecret = target.signingSecret,
-    )
+    return try {
+      httpClient.post(target.baseUrl, objectMapper.writeValueAsString(payload), target.signingSecret)
+      AppLifecycleDeliveryOutcome.DELIVERED
+    } catch (e: AppLifecycleHttpClient.DeliveryFailedException) {
+      logger.info("App lifecycle {} delivery to {} failed: {}", eventType.wireName, target.baseUrl, e.message)
+      AppLifecycleDeliveryOutcome.failed(e.message ?: "delivery failed")
+    }
   }
 }

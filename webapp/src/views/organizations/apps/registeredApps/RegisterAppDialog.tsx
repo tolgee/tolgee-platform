@@ -247,6 +247,7 @@ export const RegisterAppDialog = ({ open, onClose }: Props) => {
               clientId={issuedApp.clientId}
               clientSecret={issuedApp.clientSecret}
               webhookSecret={issuedApp.webhookSecret}
+              delivery={issuedApp.delivery}
               dataCy="organization-apps-registered-credentials"
             />
           </DialogContent>

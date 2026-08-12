@@ -9,7 +9,6 @@ import com.fasterxml.jackson.annotation.JsonInclude
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class AppLifecyclePayload(
   val eventType: String,
-  val deliveryId: Long,
   /** The manifest id of the app the event is about. */
   val appId: String,
   /**
@@ -18,7 +17,6 @@ data class AppLifecyclePayload(
    */
   val tolgeeInstanceUrl: String?,
   val app: AppLifecycleAppCredentials? = null,
-  val install: AppLifecycleInstall? = null,
   val organization: AppLifecycleOrganization? = null,
 )
 
@@ -28,12 +26,6 @@ data class AppLifecycleAppCredentials(
   /** Present only when this delivery is the one disclosing it. */
   val clientSecret: String? = null,
   val webhookSecret: String? = null,
-)
-
-@JsonInclude(JsonInclude.Include.NON_NULL)
-data class AppLifecycleInstall(
-  val id: Long,
-  val scopes: List<String> = listOf(),
 )
 
 data class AppLifecycleOrganization(

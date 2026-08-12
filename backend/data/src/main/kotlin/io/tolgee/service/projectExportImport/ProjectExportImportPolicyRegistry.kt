@@ -31,7 +31,6 @@ import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
 import io.tolgee.model.apps.App
 import io.tolgee.model.apps.AppAvailableForOrganization
-import io.tolgee.model.apps.AppDelivery
 import io.tolgee.model.apps.AppEnabledForProject
 import io.tolgee.model.apps.AppInstall
 import io.tolgee.model.apps.AppSecret
@@ -196,7 +195,6 @@ object ProjectExportImportPolicyRegistry {
         TranslationAgency::class,
         App::class,
         AppSecret::class,
-        AppDelivery::class,
         AppInstall::class,
         AppEnabledForProject::class,
         AppAvailableForOrganization::class,

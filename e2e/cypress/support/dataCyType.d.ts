@@ -132,6 +132,8 @@ declare namespace DataCy {
         "api-keys-project-select-item": true;
         "app-credentials-client-id": true;
         "app-credentials-client-secret": true;
+        "app-credentials-delivered": true;
+        "app-credentials-delivery-failed": true;
         "app-credentials-webhook-secret": true;
         "assigned-projects-select": true;
         "assigned-projects-select-item": true;
@@ -572,7 +574,6 @@ declare namespace DataCy {
         "organization-name-field": true;
         "organization-owned-apps-empty": true;
         "organization-owned-apps-item": true;
-        "organization-owned-apps-item-deliveries": true;
         "organization-owned-apps-item-remove": true;
         "organization-owned-apps-item-secrets": true;
         "organization-owned-apps-section": true;
@@ -584,11 +585,6 @@ declare namespace DataCy {
         "organization-role-select-item": true;
         "organization-side-menu": true;
         "organization-switch": true;
-        "owned-app-deliveries-close": true;
-        "owned-app-deliveries-dialog": true;
-        "owned-app-deliveries-empty": true;
-        "owned-app-deliveries-item": true;
-        "owned-app-deliveries-state": true;
         "owned-app-secrets-client-id": true;
         "owned-app-secrets-close": true;
         "owned-app-secrets-dialog": true;

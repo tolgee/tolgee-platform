@@ -1,7 +1,9 @@
 package io.tolgee.hateoas.organization.apps
 
+import io.tolgee.dtos.apps.AppLifecycleDeliveryOutcome
 import io.tolgee.dtos.apps.AppManifest
 import io.tolgee.hateoas.apps.AppModel
+import io.tolgee.hateoas.apps.toModel
 import io.tolgee.model.apps.AppInstall
 import io.tolgee.service.apps.AppInstallService
 import io.tolgee.service.apps.AppService
@@ -25,16 +27,17 @@ class AppInstallModelAssembler(
    * installed somebody else's app from ever seeing its app-level credentials.
    */
   fun toModel(result: AppInstallService.RegisterResult): AppInstallModel {
-    return build(result.install, appModel(result.app, result.appCredentials))
+    return build(result.install, appModel(result.app, result.appCredentials, result.delivery))
   }
 
   fun toModel(result: AppInstallService.SelfRegisterResult): AppInstallModel {
-    return build(result.install, appModel(result.app, result.appCredentials), created = result.created)
+    return build(result.install, appModel(result.app, result.appCredentials, delivery = null), created = result.created)
   }
 
   private fun appModel(
     app: AppService.AppSummary,
     credentials: AppService.AppCredentials?,
+    delivery: AppLifecycleDeliveryOutcome?,
   ): AppModel {
     return AppModel(
       id = app.id,
@@ -43,6 +46,7 @@ class AppInstallModelAssembler(
       clientId = credentials?.clientId,
       clientSecret = credentials?.clientSecret,
       webhookSecret = credentials?.webhookSecret,
+      delivery = delivery?.toModel(),
     )
   }
 

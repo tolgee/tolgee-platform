@@ -350,17 +350,13 @@ export interface paths {
   };
   "/v2/organizations/{organizationId}/owned-apps/{appId}": {
     get: operations["get_25"];
-    /** Deregisters the app and uninstalls it from every organization that installed it, revoking both the app-level and every per-install credential, and announcing an uninstall to the app for each of those organizations. Only the owner may do this; an organization that installed the app removes only its own install through `DELETE /apps/{installId}`. */
+    /** Deregisters the app and uninstalls it from every organization that installed it, revoking its credentials. Only the owner may do this; an organization that installed the app removes only its own install through `DELETE /apps/{installId}`. */
     delete: operations["removeEverywhere"];
-  };
-  "/v2/organizations/{organizationId}/owned-apps/{appId}/deliveries": {
-    /** Every signed POST Tolgee has made to the app's base URL, with the outcome of each. This is where an owner finds out that an install's credentials never reached the app. */
-    get: operations["listDeliveries"];
   };
   "/v2/organizations/{organizationId}/owned-apps/{appId}/secrets": {
     /** Returns every secret of the app, revoked ones included, without disclosing any of them. They are the app's only long-lived credentials — everything the app does across every organization that installed it starts from them. `lastUsedAt` is what tells you whether the app has moved to a newly issued secret and the old one can be revoked. */
     get: operations["listSecrets"];
-    /** Phase one of an app-level rotation: mints a second secret while every existing one keeps working. The app's installs, their own secrets, their organization availability and their per-project enablements are all untouched. The new secret is both returned here — the only place it is ever disclosed — and pushed to the app over the lifecycle channel. */
+    /** Phase one of an app-level rotation: mints a second secret while every existing one keeps working. The app's installs, their organization availability and their per-project enablements are all untouched. The new secret is both returned here — the only place it is ever disclosed — and pushed to the app over the lifecycle channel; the `delivery` field says whether the app took it. */
     post: operations["issueSecret"];
   };
   "/v2/organizations/{organizationId}/owned-apps/{appId}/secrets/{secretId}": {
@@ -1671,31 +1667,13 @@ export interface components {
       client_id: string;
       client_secret: string;
     };
-    AppDeliveryModel: {
-      /**
-       * Format: int64
-       * @description When retrying stopped without success. The operation that triggered the delivery still happened — issue a new secret to have the credentials delivered again.
-       */
-      abandonedAt?: number;
-      /** Format: int32 */
-      attempts: number;
-      /** Format: int64 */
-      createdAt: number;
-      /** Format: int64 */
-      deliveredAt?: number;
-      /** @description The lifecycle event as the app sees it, e.g. `app.installed` */
-      eventType: string;
-      /** Format: int64 */
-      id: number;
-      /** Format: int64 */
-      lastAttemptAt?: number;
-      lastError?: string;
-      /**
-       * Format: int64
-       * @description The organization the event concerns, or null for app-level events
-       */
-      organizationId?: number;
-      targetUrl: string;
+    /** @description Outcome of pushing the disclosed credentials to the app's base URL */
+    AppDeliveryOutcomeModel: {
+      /** @description False when there was nothing to deliver to */
+      attempted: boolean;
+      delivered: boolean;
+      /** @description Short reason when the delivery was attempted and failed; null otherwise */
+      error?: string;
     };
     AppInstallModel: {
       app?: components["schemas"]["AppModel"];
@@ -1729,6 +1707,7 @@ export interface components {
       clientId?: string;
       /** @description App-level OAuth client secret in plaintext — the app's only long-lived credential; the token endpoint exchanges it for install-scoped access tokens. Present only in the response to registering the app; Tolgee stores only a hash and cannot show it again. */
       clientSecret?: string;
+      delivery?: components["schemas"]["AppDeliveryOutcomeModel"];
       /** Format: int64 */
       id: number;
       name: string;
@@ -1738,6 +1717,7 @@ export interface components {
     AppSecretModel: {
       /** Format: int64 */
       createdAt: number;
+      delivery?: components["schemas"]["AppDeliveryOutcomeModel"];
       /** Format: int64 */
       id: number;
       /**
@@ -2159,11 +2139,6 @@ export interface components {
     CollectionModelAppAvailableOrganizationModel: {
       _embedded?: {
         organizations?: components["schemas"]["AppAvailableOrganizationModel"][];
-      };
-    };
-    CollectionModelAppDeliveryModel: {
-      _embedded?: {
-        appDeliveries?: components["schemas"]["AppDeliveryModel"][];
       };
     };
     CollectionModelAppInstallModel: {
@@ -13858,7 +13833,7 @@ export interface operations {
       };
     };
   };
-  /** Deregisters the app and uninstalls it from every organization that installed it, revoking both the app-level and every per-install credential, and announcing an uninstall to the app for each of those organizations. Only the owner may do this; an organization that installed the app removes only its own install through `DELETE /apps/{installId}`. */
+  /** Deregisters the app and uninstalls it from every organization that installed it, revoking its credentials. Only the owner may do this; an organization that installed the app removes only its own install through `DELETE /apps/{installId}`. */
   removeEverywhere: {
     parameters: {
       path: {
@@ -13869,55 +13844,6 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Every signed POST Tolgee has made to the app's base URL, with the outcome of each. This is where an owner finds out that an install's credentials never reached the app. */
-  listDeliveries: {
-    parameters: {
-      path: {
-        organizationId: number;
-        appId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["CollectionModelAppDeliveryModel"];
-        };
-      };
       /** Bad Request */
       400: {
         content: {
@@ -14001,7 +13927,7 @@ export interface operations {
       };
     };
   };
-  /** Phase one of an app-level rotation: mints a second secret while every existing one keeps working. The app's installs, their own secrets, their organization availability and their per-project enablements are all untouched. The new secret is both returned here — the only place it is ever disclosed — and pushed to the app over the lifecycle channel. */
+  /** Phase one of an app-level rotation: mints a second secret while every existing one keeps working. The app's installs, their organization availability and their per-project enablements are all untouched. The new secret is both returned here — the only place it is ever disclosed — and pushed to the app over the lifecycle channel; the `delivery` field says whether the app took it. */
   issueSecret: {
     parameters: {
       path: {

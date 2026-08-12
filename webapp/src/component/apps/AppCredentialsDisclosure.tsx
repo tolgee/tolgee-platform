@@ -4,10 +4,18 @@ import { T } from '@tolgee/react';
 
 import { ClipboardCopyInput } from 'tg.component/common/ClipboardCopyInput';
 
+type DeliveryOutcome = {
+  attempted: boolean;
+  delivered: boolean;
+  error?: string;
+};
+
 type Props = {
   clientId?: string;
   clientSecret?: string;
   webhookSecret?: string;
+  /** Whether Tolgee managed to push these credentials to the app's base URL. */
+  delivery?: DeliveryOutcome;
   dataCy: string;
 };
 
@@ -38,9 +46,37 @@ export const AppCredentialsDisclosure = ({
   clientId,
   clientSecret,
   webhookSecret,
+  delivery,
   dataCy,
 }: Props) => (
   <Box data-cy={dataCy}>
+    {delivery?.delivered && (
+      <Alert
+        severity="success"
+        sx={{ mb: 2 }}
+        data-cy="app-credentials-delivered"
+      >
+        <T
+          keyName="app_credentials_delivered"
+          defaultValue="The app received these automatically — you don't have to copy anything. They are shown here once in case you keep your own record."
+        />
+      </Alert>
+    )}
+
+    {delivery?.attempted && !delivery.delivered && (
+      <Alert
+        severity="warning"
+        sx={{ mb: 2 }}
+        data-cy="app-credentials-delivery-failed"
+      >
+        <T
+          keyName="app_credentials_delivery_failed"
+          defaultValue="Tolgee couldn't hand these to the app ({error}). Copy the secret now and give it to the app by hand, or rotate later once the app is reachable."
+          params={{ error: delivery.error ?? '' }}
+        />
+      </Alert>
+    )}
+
     <Alert severity="warning" sx={{ mb: 2 }}>
       <T
         keyName="app_credentials_shown_once_warning"

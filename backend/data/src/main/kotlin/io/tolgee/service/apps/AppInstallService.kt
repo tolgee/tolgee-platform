@@ -2,7 +2,7 @@ package io.tolgee.service.apps
 
 import io.tolgee.constants.Message
 import io.tolgee.dtos.apps.AppLifecycleAppCredentials
-import io.tolgee.dtos.apps.AppLifecycleInstall
+import io.tolgee.dtos.apps.AppLifecycleDeliveryOutcome
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
@@ -35,6 +35,12 @@ class AppInstallService(
     val app: AppService.AppSummary,
     /** Non-null only when this call registered the app — see [AppService.registerIfAbsent]. */
     val appCredentials: AppService.AppCredentials?,
+    /**
+     * Whether the just-disclosed credentials reached the app over the lifecycle channel. Null when
+     * nothing was delivered — either this call only installed an already-registered app, or it is a
+     * self-registration, where the caller is the app and already holds the credentials.
+     */
+    val delivery: AppLifecycleDeliveryOutcome? = null,
   )
 
   data class SelfRegisterResult(
@@ -78,16 +84,15 @@ class AppInstallService(
     if (authoritative.manifest.id != app.appId) {
       throw BadRequestException(Message.APP_MANIFEST_INVALID)
     }
-    val result =
-      appInstallPersister.create(
-        appEntityId = app.id,
-        organizationId = organization.id,
-        authorId = author.id,
-        manifestUrl = registeredUrl,
-        fetched = authoritative,
-      )
-    deliverRegistrationAndInstall(result)
-    return result
+    // An install of an already-registered app discloses no credentials, so there is nothing to
+    // deliver — the app reaches its new install with the app-level credentials it already holds.
+    return appInstallPersister.create(
+      appEntityId = app.id,
+      organizationId = organization.id,
+      authorId = author.id,
+      manifestUrl = registeredUrl,
+      fetched = authoritative,
+    )
   }
 
   private fun fetchRegistered(
@@ -118,45 +123,27 @@ class AppInstallService(
   ): RegisterResult {
     val fetched = appManifestFetcher.fetch(manifestUrl)
     val result = appInstallPersister.registerAndCreate(organizationId, author.id, manifestUrl, fetched)
-    deliverRegistrationAndInstall(result)
-    return result
+    return result.copy(delivery = deliverRegistered(result))
   }
 
   /**
-   * Announces the new app and the new install, in that order — an app that receives both learns its
-   * own credentials before the first install they can mint tokens for. Neither delivery may fail
-   * the call: the credentials were also returned in the response, so an app whose host was down is
-   * recovered by handing them over or by rotating, not by undoing somebody's install.
+   * Hands the app its just-issued credentials, synchronously, so the registration dialog can say
+   * whether the app got them or the operator still has to copy them. A failure is reported, never
+   * thrown: the credentials were returned in the response too, so a dead app host does not undo the
+   * registration.
    */
-  private fun deliverRegistrationAndInstall(result: RegisterResult) {
-    val target = appLifecycleDeliveryService.resolveTarget(result.app.id) ?: return
-
-    result.appCredentials?.let {
-      appLifecycleDeliveryService.deliver(
-        target = target,
-        eventType = AppLifecycleEventType.APP_REGISTERED,
-        organizationId = result.install.organization?.id,
-        appCredentials =
-          AppLifecycleAppCredentials(
-            clientId = it.clientId,
-            clientSecret = it.clientSecret,
-            webhookSecret = it.webhookSecret,
-          ),
-      )
-    }
-
-    appLifecycleDeliveryService.deliver(
-      target = target,
-      eventType = AppLifecycleEventType.APP_INSTALLED,
+  private fun deliverRegistered(result: RegisterResult): AppLifecycleDeliveryOutcome? {
+    val credentials = result.appCredentials ?: return null
+    return appLifecycleDeliveryService.deliverNow(
+      appEntityId = result.app.id,
+      eventType = AppLifecycleEventType.APP_REGISTERED,
       organizationId = result.install.organization?.id,
-      install = installPayload(result.install),
-    )
-  }
-
-  private fun installPayload(install: AppInstall): AppLifecycleInstall {
-    return AppLifecycleInstall(
-      id = install.id,
-      scopes = install.grantedScopes.map { it.value },
+      appCredentials =
+        AppLifecycleAppCredentials(
+          clientId = credentials.clientId,
+          clientSecret = credentials.clientSecret,
+          webhookSecret = credentials.webhookSecret,
+        ),
     )
   }
 
@@ -183,8 +170,9 @@ class AppInstallService(
     val existing = findForSelfRegister(organizationId, fetched.manifest.id)
 
     if (existing == null) {
+      // No delivery on this path: the caller is the app itself and reads the credentials straight
+      // out of this call's response.
       val created = appInstallPersister.registerAndCreate(organizationId, author.id, manifestUrl, fetched)
-      deliverRegistrationAndInstall(created)
       return SelfRegisterResult(
         install = created.install,
         created = true,
@@ -270,28 +258,9 @@ class AppInstallService(
     organizationId: Long?,
     installId: Long,
   ) {
-    // Resolved before the removal: dropping the last install of a server-owned app drops the app too.
-    val target =
-      findScopedAppEntityId(organizationId, installId)
-        ?.let { appLifecycleDeliveryService.resolveTarget(it) }
-
-    val removed = appInstallPersister.remove(organizationId, installId)
-
-    target ?: return
-    appLifecycleDeliveryService.deliver(
-      target = target,
-      eventType = AppLifecycleEventType.APP_UNINSTALLED,
-      organizationId = removed.organizationId,
-      install = AppLifecycleInstall(id = removed.installId),
-    )
-  }
-
-  private fun findScopedAppEntityId(
-    organizationId: Long?,
-    installId: Long,
-  ): Long? {
-    if (organizationId == null) return appInstallRepository.findAppEntityIdOfNativeInstall(installId)
-    return appInstallRepository.findAppEntityId(organizationId, installId)
+    // No delivery: an uninstall carries no secret, and an app that tracks its installs sees this one
+    // vanish from its own discovery call.
+    appInstallPersister.remove(organizationId, installId)
   }
 
   @Transactional(readOnly = true)

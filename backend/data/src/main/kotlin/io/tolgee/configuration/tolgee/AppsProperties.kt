@@ -57,20 +57,6 @@ class AppsProperties {
 
   @DocProperty(
     description =
-      "How many times a lifecycle delivery (app registered, installed, uninstalled, secret " +
-        "rotated) is attempted before it is abandoned. Attempts back off exponentially between " +
-        "`lifecycle-delivery-initial-backoff-seconds` and `lifecycle-delivery-max-backoff-seconds`.",
-  )
-  var lifecycleDeliveryMaxAttempts: Int = 8
-
-  @DocProperty(description = "Delay before the second delivery attempt. Doubles with every further attempt.")
-  var lifecycleDeliveryInitialBackoffSeconds: Long = 30
-
-  @DocProperty(description = "Upper bound on the delay between two delivery attempts.")
-  var lifecycleDeliveryMaxBackoffSeconds: Long = 1800
-
-  @DocProperty(
-    description =
       "How often every registered app's manifest is re-fetched to check the app is still there.",
   )
   var manifestHealthCheckPeriodMinutes: Long = 60

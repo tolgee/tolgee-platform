@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Box, IconButton, Tooltip, Typography, styled } from '@mui/material';
-import { Key01, Send01, Trash01 } from '@untitled-ui/icons-react';
+import { Key01, Trash01 } from '@untitled-ui/icons-react';
 import { T } from '@tolgee/react';
 
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
@@ -8,7 +8,6 @@ import { confirmation } from 'tg.hooks/confirmation';
 import { components } from 'tg.service/apiSchema.generated';
 
 import { AppManifestHealth } from './AppManifestHealth';
-import { AppDeliveriesDialog } from './AppDeliveriesDialog';
 import { OwnedAppSecretsDialog } from './OwnedAppSecretsDialog';
 
 type OwnedAppModel = components['schemas']['OwnedAppModel'];
@@ -45,9 +44,6 @@ const StyledItemMeta = styled('div')`
 
 export const OwnedAppsSection = ({ organizationId }: Props) => {
   const [secretsFor, setSecretsFor] = useState<OwnedAppModel | null>(null);
-  const [deliveriesFor, setDeliveriesFor] = useState<OwnedAppModel | null>(
-    null
-  );
 
   const appsLoadable = useApiQuery({
     url: '/v2/organizations/{organizationId}/owned-apps',
@@ -167,21 +163,6 @@ export const OwnedAppsSection = ({ organizationId }: Props) => {
               <Tooltip
                 title={
                   <T
-                    keyName="owned_apps_deliveries_tooltip"
-                    defaultValue="Lifecycle deliveries"
-                  />
-                }
-              >
-                <IconButton
-                  data-cy="organization-owned-apps-item-deliveries"
-                  onClick={() => setDeliveriesFor(app)}
-                >
-                  <Send01 />
-                </IconButton>
-              </Tooltip>
-              <Tooltip
-                title={
-                  <T
                     keyName="owned_apps_remove_tooltip"
                     defaultValue="Remove from every organization"
                   />
@@ -207,15 +188,6 @@ export const OwnedAppsSection = ({ organizationId }: Props) => {
           appName={secretsFor.name}
           clientId={secretsFor.clientId}
           onClose={() => setSecretsFor(null)}
-        />
-      )}
-
-      {deliveriesFor && (
-        <AppDeliveriesDialog
-          organizationId={organizationId}
-          appId={deliveriesFor.id}
-          appName={deliveriesFor.name}
-          onClose={() => setDeliveriesFor(null)}
         />
       )}
     </>

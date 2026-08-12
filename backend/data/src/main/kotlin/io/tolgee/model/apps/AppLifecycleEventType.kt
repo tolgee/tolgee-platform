@@ -8,7 +8,5 @@ enum class AppLifecycleEventType(
   val wireName: String,
 ) {
   APP_REGISTERED("app.registered"),
-  APP_INSTALLED("app.installed"),
-  APP_UNINSTALLED("app.uninstalled"),
   APP_SECRET_ROTATED("app.secret_rotated"),
 }

@@ -2,8 +2,6 @@ package io.tolgee.api.v2.controllers.organization
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import io.tolgee.hateoas.apps.AppDeliveryModel
-import io.tolgee.hateoas.apps.AppDeliveryModelAssembler
 import io.tolgee.hateoas.apps.AppSecretModel
 import io.tolgee.hateoas.apps.AppSecretModelAssembler
 import io.tolgee.hateoas.organization.apps.OwnedAppModel
@@ -14,7 +12,6 @@ import io.tolgee.service.apps.AppOwnerRemovalService
 import io.tolgee.service.apps.AppSecretRotationService
 import io.tolgee.service.apps.AppSecretService
 import io.tolgee.service.apps.AppService
-import io.tolgee.service.apps.lifecycle.AppLifecycleDeliveryService
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.hateoas.CollectionModel
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -27,8 +24,7 @@ import org.springframework.web.bind.annotation.RestController
 
 /**
  * What an organization may do with an app it **registered**, as opposed to one it merely installed:
- * rotate the app-level credentials, see why a lifecycle delivery failed, and take the app off every
- * organization on the server.
+ * rotate the app-level credentials and take the app off every organization on the server.
  *
  * Every endpoint resolves the app within the organization, so an organization that installed
  * somebody else's app reaches none of this — app-level credentials are the owner's alone.
@@ -43,10 +39,8 @@ class OrganizationOwnedAppsController(
   private val appSecretService: AppSecretService,
   private val appSecretRotationService: AppSecretRotationService,
   private val appOwnerRemovalService: AppOwnerRemovalService,
-  private val appLifecycleDeliveryService: AppLifecycleDeliveryService,
   private val ownedAppModelAssembler: OwnedAppModelAssembler,
   private val appSecretModelAssembler: AppSecretModelAssembler,
-  private val appDeliveryModelAssembler: AppDeliveryModelAssembler,
 ) {
   @GetMapping
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
@@ -96,17 +90,22 @@ class OrganizationOwnedAppsController(
     summary = "Issue an additional app-level client secret",
     description =
       "Phase one of an app-level rotation: mints a second secret while every existing one keeps " +
-        "working. The app's installs, their own secrets, their organization availability and their " +
-        "per-project enablements are all untouched. The new secret is both returned here — the " +
-        "only place it is ever disclosed — and pushed to the app over the lifecycle channel.",
+        "working. The app's installs, their organization availability and their per-project " +
+        "enablements are all untouched. The new secret is both returned here — the only place it " +
+        "is ever disclosed — and pushed to the app over the lifecycle channel; the `delivery` " +
+        "field says whether the app took it.",
   )
   fun issueSecret(
     @PathVariable organizationId: Long,
     @PathVariable appId: Long,
   ): AppSecretModel {
     val app = appService.getOwned(organizationId, appId)
-    val issued = appSecretRotationService.issue(app)
-    return appSecretModelAssembler.toModelWithSecret(issued.secret, issued.plaintextSecret)
+    val rotation = appSecretRotationService.issueAndDeliver(app)
+    return appSecretModelAssembler.toModelWithSecret(
+      rotation.issued.secret,
+      rotation.issued.plaintextSecret,
+      rotation.delivery,
+    )
   }
 
   @DeleteMapping("/{appId}/secrets/{secretId}")
@@ -127,31 +126,14 @@ class OrganizationOwnedAppsController(
     return appSecretModelAssembler.toModel(appSecretService.revoke(app.id, secretId, allowRevokingLast = true))
   }
 
-  @GetMapping("/{appId}/deliveries")
-  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
-  @Operation(
-    summary = "List the app's lifecycle deliveries",
-    description =
-      "Every signed POST Tolgee has made to the app's base URL, with the outcome of each. This is " +
-        "where an owner finds out that an install's credentials never reached the app.",
-  )
-  fun listDeliveries(
-    @PathVariable organizationId: Long,
-    @PathVariable appId: Long,
-  ): CollectionModel<AppDeliveryModel> {
-    val app = appService.getOwned(organizationId, appId)
-    return appDeliveryModelAssembler.toCollectionModel(appLifecycleDeliveryService.listForApp(app.appId))
-  }
-
   @DeleteMapping("/{appId}")
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
   @Operation(
     summary = "Remove the app from every organization",
     description =
       "Deregisters the app and uninstalls it from every organization that installed it, revoking " +
-        "both the app-level and every per-install credential, and announcing an uninstall to the " +
-        "app for each of those organizations. Only the owner may do this; an organization that " +
-        "installed the app removes only its own install through `DELETE /apps/{installId}`.",
+        "its credentials. Only the owner may do this; an organization that installed the app " +
+        "removes only its own install through `DELETE /apps/{installId}`.",
   )
   fun removeEverywhere(
     @PathVariable organizationId: Long,

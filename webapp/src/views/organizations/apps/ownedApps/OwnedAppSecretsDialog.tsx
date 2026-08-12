@@ -166,6 +166,7 @@ export const OwnedAppSecretsDialog = ({
           <Box mb={2}>
             <AppCredentialsDisclosure
               clientSecret={issued.secret}
+              delivery={issued.delivery}
               dataCy="owned-app-secrets-new"
             />
           </Box>

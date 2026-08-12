@@ -6546,4 +6546,11 @@
             <column name="client_id"/>
         </dropColumn>
     </changeSet>
+    <changeSet author="jcizmar" id="1783771000000-57">
+        <comment>Lifecycle deliveries are synchronous now — the two secret-carrying events are handed
+            to the app inline and their outcome shown in the dialog, so there is no retry queue to
+            persist.
+        </comment>
+        <dropTable tableName="app_delivery"/>
+    </changeSet>
 </databaseChangeLog>

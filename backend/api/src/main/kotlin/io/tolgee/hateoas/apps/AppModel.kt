@@ -29,4 +29,11 @@ open class AppModel(
         "to registering the app.",
   )
   val webhookSecret: String? = null,
+  @Schema(
+    description =
+      "Whether Tolgee managed to push these just-issued credentials to the app's base URL. Present " +
+        "only in the response to registering the app, so the dialog can tell the operator whether " +
+        "the app got them or they still have to copy the secret by hand.",
+  )
+  val delivery: AppDeliveryOutcomeModel? = null,
 ) : RepresentationModel<AppModel>()

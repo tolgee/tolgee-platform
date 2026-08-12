@@ -5,33 +5,25 @@ import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.node
-import io.tolgee.fixtures.waitForNotThrowing
-import io.tolgee.model.apps.AppLifecycleEventType
 import io.tolgee.repository.apps.AppRepository
 import io.tolgee.service.apps.AppInstallService
 import io.tolgee.service.apps.AppManifestHttpClient
 import io.tolgee.service.apps.AppSecretService
 import io.tolgee.service.apps.AppsTestFixtures
-import io.tolgee.service.apps.lifecycle.AppLifecycleDeliveryService
 import io.tolgee.service.apps.lifecycle.AppLifecycleHttpClient
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.any
-import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.atLeastOnce
-import org.mockito.kotlin.clearInvocations
-import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import tools.jackson.databind.JsonNode
 
 /**
  * The publisher taking their app off the shelf. Distinct from one organization uninstalling: this
- * has to reach every organization that installed the app, and each of them has to be announced to
- * the app, or an app publisher cutting off a compromised release has no way to know who was cut off.
+ * reaches every organization that installed the app and revokes its credentials in one operation,
+ * which is what makes a compromised release recoverable without going tenant by tenant.
  */
 class AppOwnerRemovalTest : AuthorizedControllerTest() {
   @Autowired
@@ -42,9 +34,6 @@ class AppOwnerRemovalTest : AuthorizedControllerTest() {
 
   @Autowired
   lateinit var appRepository: AppRepository
-
-  @Autowired
-  lateinit var appLifecycleDeliveryService: AppLifecycleDeliveryService
 
   @MockitoBean
   @Autowired
@@ -81,7 +70,6 @@ class AppOwnerRemovalTest : AuthorizedControllerTest() {
         "/v2/organizations/${testData.otherOrganization.id}/apps",
         mapOf("manifestUrl" to AppsTestFixtures.MANIFEST_URL),
       ).get("id").asLong()
-    clearInvocations(appLifecycleHttpClient)
   }
 
   @AfterEach
@@ -91,7 +79,7 @@ class AppOwnerRemovalTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `the owner removes the app from every organization and both layers of credentials go with it`() {
+  fun `the owner removes the app from every organization and its credentials go with it`() {
     userAccount = testData.user
     performAuthDelete("${ownedAppsUrl()}/$appEntityId").andIsOk
 
@@ -101,40 +89,6 @@ class AppOwnerRemovalTest : AuthorizedControllerTest() {
     }
     appInstallService.findAll(testData.organization.id).assert.isEmpty()
     appInstallService.findAll(testData.otherOrganization.id).assert.isEmpty()
-  }
-
-  /**
-   * The deliveries outlive the app they announce the removal of, which is the point: an owner has to
-   * be able to see afterwards whether the app was told.
-   */
-  @Test
-  fun `every organization the app was installed in gets its own uninstalled delivery`() {
-    userAccount = testData.user
-    performAuthDelete("${ownedAppsUrl()}/$appEntityId").andIsOk
-
-    executeInNewTransaction {
-      val uninstalled =
-        appLifecycleDeliveryService
-          .listForApp("test-app")
-          .filter { it.eventType == AppLifecycleEventType.APP_UNINSTALLED }
-      uninstalled.map { it.organization?.id }.assert.containsExactlyInAnyOrder(
-        testData.organization.id,
-        testData.otherOrganization.id,
-      )
-      uninstalled.map { it.app }.assert.containsOnlyNulls()
-      uninstalled.map { it.appIdentifier }.assert.containsOnly("test-app")
-    }
-
-    waitForNotThrowing(throwableClass = AssertionError::class, timeout = 10000) {
-      val captor = argumentCaptor<String>()
-      verify(appLifecycleHttpClient, atLeastOnce()).post(any(), captor.capture(), any())
-      val organizationIds =
-        captor.allValues
-          .map { objectMapper.readTree(it) }
-          .filter { it.get("eventType").asText() == "app.uninstalled" }
-          .map { it.at("/organization/id").asLong() }
-      organizationIds.assert.contains(testData.organization.id, testData.otherOrganization.id)
-    }
   }
 
   /** An installing organization removing its own install must not take the app from anyone else. */

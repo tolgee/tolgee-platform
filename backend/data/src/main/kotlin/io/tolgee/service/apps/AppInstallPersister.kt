@@ -121,33 +121,23 @@ class AppInstallPersister(
     return appInstallRepository.save(install)
   }
 
-  /** @return what the caller needs to announce the removal, since the install itself is gone. */
   @Transactional
   fun remove(
     organizationId: Long?,
     installId: Long,
-  ): RemovedInstall {
+  ) {
     val install =
       findScopedInstall(organizationId, installId)
         ?: throw NotFoundException(Message.APP_INSTALL_NOT_FOUND)
     val app = install.app
     val principal = install.principal
-    val removed = RemovedInstall(appEntityId = app.id, organizationId = organizationId, installId = installId)
     appEnablementService.removeAllForAppInstall(installId)
     appAvailabilityService.removeAllForAppInstall(installId)
     appInstallRepository.delete(install)
     appInstallRepository.flush()
     appInstallPrincipalService.retire(principal)
-    return removed.copy(appDropped = dropServerOwnedAppIfUnused(app))
+    dropServerOwnedAppIfUnused(app)
   }
-
-  data class RemovedInstall(
-    val appEntityId: Long,
-    val organizationId: Long?,
-    val installId: Long,
-    /** Whether the app itself was deregistered along with the install. */
-    val appDropped: Boolean = false,
-  )
 
   /**
    * A server-owned app is reachable only through its native install. Once that is gone nothing can
@@ -155,11 +145,10 @@ class AppInstallPersister(
    * the last native install deregisters the app too. An app owned by an organization stays: its
    * owner still holds it, whether or not they have an install of it.
    */
-  private fun dropServerOwnedAppIfUnused(app: App): Boolean {
-    if (app.organization != null) return false
-    if (appInstallRepository.countByRegisteredAppId(app.id) > 0) return false
+  private fun dropServerOwnedAppIfUnused(app: App) {
+    if (app.organization != null) return
+    if (appInstallRepository.countByRegisteredAppId(app.id) > 0) return
     appRepository.delete(app)
-    return true
   }
 
   private fun findScopedInstall(
