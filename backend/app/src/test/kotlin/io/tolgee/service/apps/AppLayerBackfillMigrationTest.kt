@@ -105,13 +105,21 @@ class AppLayerBackfillMigrationTest : AbstractSpringTest() {
     listOf(
       "app",
       "app_install",
-      "app_install_secret",
       "app_available_for_organization",
       "app_enabled_for_project",
       "user_account",
     ).forEach {
       execute("CREATE TABLE $SCRATCH_SCHEMA.$it (LIKE public.$it INCLUDING ALL)")
     }
+    // Recreated by hand: changeset -56 dropped this table from the live schema, so there is nothing
+    // to clone anymore. Its shape is frozen in history — on an upgrade the backfill under test runs
+    // while the table still exists, and -56 removes it afterwards.
+    execute(
+      "CREATE TABLE $SCRATCH_SCHEMA.app_install_secret (" +
+        "id BIGINT PRIMARY KEY, created_at TIMESTAMP NOT NULL, updated_at TIMESTAMP NOT NULL, " +
+        "app_install_id BIGINT NOT NULL, secret_hash VARCHAR(128) NOT NULL, " +
+        "secret_prefix VARCHAR(16) NOT NULL, last_used_at TIMESTAMP, revoked_at TIMESTAMP)",
+    )
     execute("ALTER TABLE $SCRATCH_SCHEMA.app_install DROP COLUMN registered_app_id")
     execute("ALTER TABLE $SCRATCH_SCHEMA.app_install DROP COLUMN principal_id")
 

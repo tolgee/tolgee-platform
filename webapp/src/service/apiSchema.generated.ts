@@ -358,7 +358,7 @@ export interface paths {
     get: operations["listDeliveries"];
   };
   "/v2/organizations/{organizationId}/owned-apps/{appId}/secrets": {
-    /** Returns every app-level secret, revoked ones included, without disclosing any of them. These administer the app across every organization that installed it and grant access to no data — they are not the per-install secrets under `/apps/{installId}/secrets`. */
+    /** Returns every secret of the app, revoked ones included, without disclosing any of them. They are the app's only long-lived credentials — everything the app does across every organization that installed it starts from them. `lastUsedAt` is what tells you whether the app has moved to a newly issued secret and the old one can be revoked. */
     get: operations["listSecrets"];
     /** Phase one of an app-level rotation: mints a second secret while every existing one keeps working. The app's installs, their own secrets, their organization availability and their per-project enablements are all untouched. The new secret is both returned here — the only place it is ever disclosed — and pushed to the app over the lifecycle channel. */
     post: operations["issueSecret"];
@@ -1727,7 +1727,7 @@ export interface components {
       appId: string;
       /** @description App-level OAuth client id. Present only in the response to registering the app — an organization that merely installed it never sees it. */
       clientId?: string;
-      /** @description App-level OAuth client secret in plaintext. Administers the app across every organization that installed it and grants access to no data. Present only in the response to registering the app; Tolgee stores only a hash and cannot show it again. */
+      /** @description App-level OAuth client secret in plaintext — the app's only long-lived credential; the token endpoint exchanges it for install-scoped access tokens. Present only in the response to registering the app; Tolgee stores only a hash and cannot show it again. */
       clientSecret?: string;
       /** Format: int64 */
       id: number;
@@ -1752,7 +1752,7 @@ export interface components {
        * @description When the secret was revoked, or null while it still authenticates
        */
       revokedAt?: number;
-      /** @description The secret in plaintext. Present only in the response to issuing it — Tolgee stores only a hash and cannot show it again. It administers the app and grants access to no data. */
+      /** @description The secret in plaintext. Present only in the response to issuing it — Tolgee stores only a hash and cannot show it again. Everything the app does starts from it — the token endpoint exchanges it for the short-lived tokens that reach translation data. */
       secret?: string;
     };
     AppSecretRotationRequest: {
@@ -13952,7 +13952,7 @@ export interface operations {
       };
     };
   };
-  /** Returns every app-level secret, revoked ones included, without disclosing any of them. These administer the app across every organization that installed it and grant access to no data — they are not the per-install secrets under `/apps/{installId}/secrets`. */
+  /** Returns every secret of the app, revoked ones included, without disclosing any of them. They are the app's only long-lived credentials — everything the app does across every organization that installed it starts from them. `lastUsedAt` is what tells you whether the app has moved to a newly issued secret and the old one can be revoked. */
   listSecrets: {
     parameters: {
       path: {
