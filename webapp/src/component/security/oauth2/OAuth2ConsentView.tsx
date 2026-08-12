@@ -20,6 +20,7 @@ import { useUrlSearch } from 'tg.hooks/useUrlSearch';
 import { apiV2HttpService } from 'tg.service/http/ApiV2HttpService';
 import { useScopeTranslations } from 'tg.component/PermissionsSettings/useScopeTranslations';
 import { PermissionModelScope } from 'tg.component/PermissionsSettings/types';
+import { deriveConsentProjects } from './consentProjectOptions';
 
 const API_URL = import.meta.env.VITE_APP_API_URL || '';
 
@@ -33,7 +34,6 @@ type ConsentInfo = {
   scopes: string[];
   project?: ProjectOption | null;
   requestedProjectId?: number | null;
-  projects: ProjectOption[];
 };
 
 const ALL_PROJECTS = 'all' as const;
@@ -148,12 +148,7 @@ const OAuth2ConsentView: React.FC<React.PropsWithChildren<unknown>> = () => {
     return <FullPageLoading />;
   }
 
-  // The site declares which project it edits, so the screen offers only that project (plus "All projects") — not the
-  // user's whole project list. An accessible hint resolves to `info.project`; a requested id with no resolved project
-  // means the user can't edit what the site asked for.
-  const requestedInaccessible =
-    info.requestedProjectId != null && !info.project;
-  const projectOptions = info.project ? [info.project] : [];
+  const { requestedInaccessible, projectOptions } = deriveConsentProjects(info);
 
   return (
     <DashboardPage>
@@ -177,7 +172,7 @@ const OAuth2ConsentView: React.FC<React.PropsWithChildren<unknown>> = () => {
               >
                 <T
                   keyName="oauth2_consent_project_inaccessible"
-                  defaultValue="The site requested a project you can't edit on this account. In-context editing there won't work — you can still authorize access to your own projects."
+                  defaultValue="The site requested a project you can't edit on this account, so in-context editing won't work here. Sign in with an account that has access, or ask the project's team to add you."
                 />
               </Alert>
             )}

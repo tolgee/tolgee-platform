@@ -50,10 +50,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 
-/**
- * Backing endpoints for the SPA-driven browser consent flow. [bootstrap] turns the stateless Bearer JWT into an
- * HTTP session because the authorization_code flow needs one while the rest of the app is stateless.
- */
+/** Backs the SPA consent flow; [bootstrap] mints the single HTTP session this otherwise-stateless app relies on. */
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping("/v2/oauth2")
@@ -100,16 +97,8 @@ class OAuth2FlowController(
       scopes = scopes,
       project = requestedProjectId?.let { hintedProject(it) },
       requestedProjectId = requestedProjectId,
-      projects = accessibleProjects(),
     )
   }
-
-  // Only membership projects — public projects the user is a non-member of are grantable via the community floor but
-  // reach the token only through a client hint (see hintedProject) or the "all projects" choice, not this list.
-  private fun accessibleProjects(): List<OAuth2ProjectModel> =
-    projectService
-      .findAllPermitted(authenticationFacade.authenticatedUserEntity)
-      .mapNotNull { dto -> dto.id?.let { id -> projectModel(id, dto.name) } }
 
   /** Resolves the hinted project's name only when the user has access, so an unrelated hint can't leak a name. */
   private fun hintedProject(projectId: Long): OAuth2ProjectModel? =
@@ -136,10 +125,7 @@ class OAuth2FlowController(
     )
   }
 
-  /**
-   * The pending authorization for [state], only when it belongs to the caller — so a guessed/replayed state value
-   * can't retarget another user's in-flight authorization.
-   */
+  /** The pending authorization for [state], only when it belongs to the caller (guards against state replay). */
   private fun ownAuthorization(state: String): OAuth2Authorization? {
     val authorization =
       oAuth2AuthorizationService.findByToken(state, OAuth2TokenType(OAuth2ParameterNames.STATE)) ?: return null
@@ -153,12 +139,7 @@ class OAuth2FlowController(
     return projectId.toString()
   }
 
-  /**
-   * The single project-access decision shared by the consent-info (read) and select-project (write) paths: the DTO
-   * when the project exists and the user has a live permitted scope on it, else null. Existence is resolved first
-   * because the permission lookup throws NotFound for a missing project, which would otherwise 404 the consent screen
-   * on a stale/bogus hint (or a project deleted mid-flow).
-   */
+  // Existence first: the permission lookup 404s a missing project, which would 404 the consent screen on a stale hint.
   private fun accessibleProject(projectId: Long): ProjectDto? {
     val dto = projectService.findDto(projectId) ?: return null
     if (securityService.getCurrentPermittedScopes(projectId).isEmpty()) return null

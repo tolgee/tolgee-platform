@@ -2247,7 +2247,6 @@ export interface components {
     ConsentInfoModel: {
       appName: string;
       project?: components["schemas"]["OAuth2ProjectModel"];
-      projects: components["schemas"]["OAuth2ProjectModel"][];
       /** Format: int64 */
       requestedProjectId?: number;
       scopes: string[];

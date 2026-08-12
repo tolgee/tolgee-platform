@@ -90,7 +90,7 @@ export function ConnectedAppListItem(props: {
           <Chip
             key={scope}
             size="small"
-            label={getScopeTranslation(scope as PermissionModelScope) || scope}
+            label={getScopeTranslation(scope as PermissionModelScope)}
           />
         ))}
       </StyledScopes>
