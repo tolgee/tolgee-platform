@@ -18,6 +18,7 @@ package io.tolgee.security.oauth2
 
 import com.nimbusds.jwt.SignedJWT
 import io.tolgee.constants.Message
+import io.tolgee.exceptions.AuthExpiredException
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.authentication.TolgeeAuthentication
@@ -28,13 +29,8 @@ import org.springframework.security.oauth2.jwt.JwtDecoder
 import org.springframework.security.oauth2.jwt.JwtException
 import org.springframework.stereotype.Component
 
-/**
- * Resolves an authorization-server access token into a [TolgeeAuthentication].
- *
- * Dispatch is by the `aud` claim (the AS stamps `apiAudience`, the legacy webapp JWT carries `tg.tok`), so token-family
- * identity is independent of the signing algorithm; a non-matching `aud` returns null and falls to
- * [io.tolgee.security.authentication.JwtService].
- */
+// Resolves an AS access token into a [TolgeeAuthentication]. Dispatch is by the `aud` claim (AS = apiAudience, legacy
+// webapp JWT = tg.tok); a non-matching aud returns null and falls through to JwtService.
 @Component
 class OAuth2AccessTokenResolver(
   @Qualifier("oauth2AccessTokenDecoder")
@@ -53,6 +49,10 @@ class OAuth2AccessTokenResolver(
       userAccountService.findDto(userId)
         ?: throw AuthenticationException(Message.INVALID_JWT_TOKEN)
 
+    if (user.isTokenInvalidated(jwt.issuedAt)) {
+      throw AuthExpiredException(Message.EXPIRED_JWT_TOKEN)
+    }
+
     return TolgeeAuthentication(
       credentials = OAuth2TokenCredentials(parseScopes(jwt), parseProjects(jwt)),
       deviceId = jwt.id,
@@ -65,14 +65,13 @@ class OAuth2AccessTokenResolver(
 
   private fun hasOAuthAudience(token: String): Boolean {
     return try {
-      SignedJWT
-        .parse(token)
-        .jwtClaimsSet.audience
-        ?.contains(audienceResolver.apiAudience) == true
+      SignedJWT.parse(token).jwtClaimsSet.audience.hasApiAudience()
     } catch (_: Exception) {
       false
     }
   }
+
+  private fun List<String>?.hasApiAudience() = this?.contains(audienceResolver.apiAudience) == true
 
   private fun decode(token: String): Jwt {
     return try {
@@ -83,7 +82,7 @@ class OAuth2AccessTokenResolver(
   }
 
   private fun validateAudience(jwt: Jwt) {
-    if (jwt.audience?.contains(audienceResolver.apiAudience) != true) {
+    if (!jwt.audience.hasApiAudience()) {
       throw AuthenticationException(Message.INVALID_JWT_TOKEN)
     }
   }

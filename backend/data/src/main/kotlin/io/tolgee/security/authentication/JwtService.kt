@@ -199,7 +199,7 @@ class JwtService(
 
     val account = validateJwt(jws.body)
 
-    if (account.tokensValidNotBefore != null && jws.body.issuedAt.before(account.tokensValidNotBefore)) {
+    if (account.isTokenInvalidated(jws.body.issuedAt?.toInstant())) {
       throw AuthExpiredException(Message.EXPIRED_JWT_TOKEN)
     }
 
@@ -277,7 +277,7 @@ class JwtService(
       userAccountService.findDto(claims.subject.toLong())
         ?: throw AuthenticationException(Message.INVALID_JWT_TOKEN)
 
-    if (account.tokensValidNotBefore != null && claims.issuedAt.before(account.tokensValidNotBefore)) {
+    if (account.isTokenInvalidated(claims.issuedAt?.toInstant())) {
       throw AuthenticationException(Message.EXPIRED_JWT_TOKEN)
     }
 

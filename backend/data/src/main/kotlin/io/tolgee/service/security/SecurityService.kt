@@ -173,7 +173,10 @@ class SecurityService(
     requiredPermission: Scope,
     credentials: OAuth2TokenCredentials,
   ) {
-    if (!credentials.coversProject(projectId) || !Scope.expand(credentials.scopes).contains(requiredPermission)) {
+    if (!credentials.coversProject(projectId)) {
+      throw PermissionException(Message.USER_HAS_NO_PROJECT_ACCESS)
+    }
+    if (!Scope.expand(credentials.scopes).contains(requiredPermission)) {
       throw PermissionException(missingScopes = listOf(requiredPermission))
     }
   }
@@ -196,8 +199,8 @@ class SecurityService(
     try {
       checkProjectPermission(projectId, scope)
     } catch (err: PermissionException) {
-      // An OAuth token must not gain scope/project access via task assignment — that would widen it past its
-      // consented scope ∩ project-set ceiling. The assignee fallback is a user-authority path only.
+      // The assignee fallback below is a user-authority path; an OAuth token must not ride it to widen past its
+      // consented scope ∩ project-set ceiling.
       if (authenticationFacade.isOAuthTokenAuth) throw err
       val assignees = taskService.findAssigneeById(projectId, taskNumber, activeUser.id)
       if (assignees.isEmpty() || assignees[0].id != activeUser.id) {
@@ -211,7 +214,6 @@ class SecurityService(
     languageId: Long,
     taskType: TaskType? = null,
   ): Boolean {
-    // OAuth tokens never widen via task assignment (see checkTaskScopeOrAssigned).
     if (authenticationFacade.isOAuthTokenAuth) return false
     val assignees =
       taskService.findAssigneeByKey(
@@ -334,7 +336,6 @@ class SecurityService(
     languageIds: Collection<Long>,
     keyId: Long? = null,
   ): Boolean {
-    // OAuth tokens never widen via task assignment (see checkTaskScopeOrAssigned).
     if (authenticationFacade.isOAuthTokenAuth) return false
     checkLanguageViewPermission(projectId, languageIds)
 

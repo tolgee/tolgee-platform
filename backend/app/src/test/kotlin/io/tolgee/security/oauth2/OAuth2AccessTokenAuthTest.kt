@@ -23,6 +23,7 @@ import com.nimbusds.jose.crypto.RSASSASigner
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
 import io.tolgee.development.testDataBuilder.data.BaseTestData
+import io.tolgee.dtos.request.translation.comment.TranslationCommentDto
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
@@ -30,7 +31,10 @@ import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andIsUnauthorized
 import io.tolgee.model.UserAccount
+import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.enums.ProjectPermissionType
+import io.tolgee.model.translation.Translation
+import io.tolgee.model.translation.TranslationComment
 import io.tolgee.testing.AbstractControllerTest
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -59,6 +63,9 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
 
   private lateinit var testData: BaseTestData
   private lateinit var viewOnlyUser: UserAccount
+  private lateinit var ownComment: TranslationComment
+  private lateinit var ownCommentTranslation: Translation
+  private lateinit var ownBatchJob: BatchJob
 
   @BeforeEach
   fun setup() {
@@ -69,6 +76,27 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
       user = viewOnlyUser
       type = ProjectPermissionType.VIEW
     }
+    testData.projectBuilder
+      .addKey { name = "oauth-own-comment-key" }
+      .build {
+        addTranslation {
+          language = testData.projectBuilder.self.baseLanguage!!
+          text = "value"
+          ownCommentTranslation = this
+        }.build {
+          ownComment =
+            addComment {
+              text = "comment by token owner"
+              author = testData.user
+            }.self
+        }
+      }
+    ownBatchJob =
+      testData.projectBuilder
+        .addBatchJob {
+          author = testData.user
+          totalItems = 1
+        }.self
     testDataService.saveTestData(testData.root)
   }
 
@@ -182,7 +210,8 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
       .andIsOk
       .andAssertThatJson {
         node("projectId").isNumber
-        node("scopes").isArray.contains("translations.view")
+        // The owner holds every scope live, so excluding keys.edit can only pass if the token's scope∩ actually narrowed.
+        node("scopes").isArray.contains("translations.view").doesNotContain("keys.edit", "admin")
       }
   }
 
@@ -190,6 +219,62 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
   fun `requires an explicit project for current-permissions with an OAuth token`() {
     val token = mint(scopes = listOf("translations.view"), projects = OAuth2Constants.ALL_PROJECTS)
     performGet("/v2/api-keys/current-permissions", bearer(token)).andIsBadRequest
+  }
+
+  @Test
+  fun `rejects an access token issued before the user invalidated their tokens`() {
+    val token = mint(scopes = listOf("translations.view"), projects = OAuth2Constants.ALL_PROJECTS)
+    performGet(translationsUrl(), bearer(token)).andIsOk
+    // Password change / forced sign-out: an already-issued access token (iat < tokensValidNotBefore) must stop working.
+    val user = userAccountService.get(testData.user.id)
+    user.tokensValidNotBefore = Date(System.currentTimeMillis() + 3_600_000)
+    userAccountService.save(user)
+    performGet(translationsUrl(), bearer(token)).andIsUnauthorized
+  }
+
+  @Test
+  fun `the own-jobs fallback cannot widen a token that lacks batch-jobs-view`() {
+    val currentJobs = "/v2/projects/${testData.project.id}/current-batch-jobs"
+    // The user holds batch-jobs.view live; a token that wasn't consented it must be rejected, not filtered to own jobs.
+    val viewOnly = mint(scopes = listOf("translations.view"), projects = listOf(testData.project.id))
+    performGet(currentJobs, bearer(viewOnly)).andIsForbidden
+    // With the scope it goes through — proving the block above is the guard, not the endpoint being unreachable.
+    val withBatch =
+      mint(scopes = listOf("translations.view", "batch-jobs.view"), projects = listOf(testData.project.id))
+    performGet(currentJobs, bearer(withBatch)).andIsOk
+  }
+
+  @Test
+  fun `the own-comment fallback cannot widen a token that lacks comments-edit`() {
+    val commentUrl =
+      "/v2/projects/${testData.project.id}/translations/${ownCommentTranslation.id}/comments/${ownComment.id}"
+    // The token's user authored the comment, but the token wasn't consented translation-comments.edit —
+    // the own-author fallback must not apply to an OAuth token, so both edit and delete are rejected.
+    val token = mint(scopes = listOf("translations.view"), projects = listOf(testData.project.id))
+    performPut(commentUrl, TranslationCommentDto(text = "edited"), bearer(token)).andIsForbidden
+    performDelete(commentUrl, null, bearer(token)).andIsForbidden
+
+    // Positive control: with the edit scope the same author can edit then delete — proving the guard above is what
+    // blocks, not an unreachable route or a wrong scope string.
+    val editToken =
+      mint(scopes = listOf("translations.view", "translation-comments.edit"), projects = listOf(testData.project.id))
+    performPut(commentUrl, TranslationCommentDto(text = "edited"), bearer(editToken)).andIsOk
+    performDelete(commentUrl, null, bearer(editToken)).andIsOk
+  }
+
+  @Test
+  fun `the own-batch-job fallback cannot widen a token that lacks batch-jobs scopes`() {
+    val jobUrl = "/v2/projects/${testData.project.id}/batch-jobs/${ownBatchJob.id}"
+    // The token's user authored the job, but the token wasn't consented batch-jobs.view/.cancel —
+    // the own-author fallback must not apply to an OAuth token.
+    val token = mint(scopes = listOf("translations.view"), projects = listOf(testData.project.id))
+    performGet(jobUrl, bearer(token)).andIsForbidden
+    performPut("$jobUrl/cancel", null, bearer(token)).andIsForbidden
+
+    // Positive control: with batch-jobs.view the same author can view the job — proving the guard is the blocker.
+    val viewToken =
+      mint(scopes = listOf("translations.view", "batch-jobs.view"), projects = listOf(testData.project.id))
+    performGet(jobUrl, bearer(viewToken)).andIsOk
   }
 
   private fun translationsUrl() = "/v2/projects/${testData.project.id}/translations"

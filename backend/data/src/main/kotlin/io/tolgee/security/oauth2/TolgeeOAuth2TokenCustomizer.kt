@@ -16,6 +16,10 @@
 
 package io.tolgee.security.oauth2
 
+import io.tolgee.service.security.UserAccountService
+import org.springframework.security.oauth2.core.AuthorizationGrantType
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException
+import org.springframework.security.oauth2.core.OAuth2ErrorCodes
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType
 import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer
@@ -28,12 +32,27 @@ import org.springframework.stereotype.Component
 @Component
 class TolgeeOAuth2TokenCustomizer(
   private val audienceResolver: OAuth2AudienceResolver,
+  private val userAccountService: UserAccountService,
 ) : OAuth2TokenCustomizer<JwtEncodingContext> {
   override fun customize(context: JwtEncodingContext) {
     if (context.tokenType != OAuth2TokenType.ACCESS_TOKEN) return
 
+    rejectRefreshOfInvalidatedTokens(context)
     context.claims.claim(OAuth2Constants.PROJECTS_CLAIM, projectSet(context))
     context.claims.audience(listOf(audienceResolver.apiAudience))
+  }
+
+  // A refresh-minted access token carries a fresh iat, so it slips past the resolver's tokensValidNotBefore check —
+  // gate the refresh grant itself instead.
+  private fun rejectRefreshOfInvalidatedTokens(context: JwtEncodingContext) {
+    if (context.authorizationGrantType != AuthorizationGrantType.REFRESH_TOKEN) return
+    val userId = context.getAuthorization()?.principalName?.toLongOrNull() ?: return
+    val user =
+      userAccountService.findDto(userId) ?: throw OAuth2AuthenticationException(OAuth2ErrorCodes.INVALID_GRANT)
+    val refreshIssuedAt = context.getAuthorization()?.refreshToken?.token?.issuedAt
+    if (user.isTokenInvalidated(refreshIssuedAt)) {
+      throw OAuth2AuthenticationException(OAuth2ErrorCodes.INVALID_GRANT)
+    }
   }
 
   private fun projectSet(context: JwtEncodingContext): Any {

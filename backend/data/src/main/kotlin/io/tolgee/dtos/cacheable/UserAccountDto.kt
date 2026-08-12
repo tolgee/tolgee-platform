@@ -42,6 +42,13 @@ data class UserAccountDto(
   override fun toString(): String {
     return username
   }
+
+  // The account-wide token-invalidation gate: a token issued before [tokensValidNotBefore] (password change / forced
+  // sign-out) is no longer valid. One owner for every bearer-token path (JWT, OAuth access + refresh).
+  fun isTokenInvalidated(issuedAt: java.time.Instant?): Boolean {
+    val validNotBefore = tokensValidNotBefore ?: return false
+    return issuedAt != null && issuedAt.isBefore(validNotBefore.toInstant())
+  }
 }
 
 fun UserAccountDto.isAdmin(): Boolean {

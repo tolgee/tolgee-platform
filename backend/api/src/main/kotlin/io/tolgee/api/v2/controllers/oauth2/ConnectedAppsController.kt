@@ -24,6 +24,7 @@ import io.tolgee.hateoas.oauth2.ConnectedAppModel
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.BypassEmailVerification
 import io.tolgee.security.authentication.BypassForcedSsoAuthentication
+import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.security.oauth2.OAuth2AuthorizationQueryService
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationConsentService
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository
@@ -34,10 +35,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
-/**
- * Lets a signed-in user see the OAuth apps they have authorized and disconnect any of them. JWT (web) auth only — this
- * is account management, not something an API key should reach.
- */
+/** Lists/disconnects the user's authorized OAuth apps. JWT-only — account management, not an API-key surface. */
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping("/v2/user/connected-apps")
@@ -70,6 +68,7 @@ class ConnectedAppsController(
   @Operation(summary = "Disconnect an OAuth app (revokes all its grants for the current user)")
   @BypassEmailVerification
   @BypassForcedSsoAuthentication
+  @RequiresSuperAuthentication
   fun revoke(
     @PathVariable clientId: String,
   ) {

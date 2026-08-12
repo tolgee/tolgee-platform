@@ -119,6 +119,9 @@ class TranslationCommentController(
     if (comment.author.id != authenticationFacade.authenticatedUser.id) {
       throw BadRequestException(io.tolgee.constants.Message.CAN_EDIT_ONLY_OWN_COMMENT)
     }
+    if (authenticationFacade.isOAuthTokenAuth) {
+      checkEditPermission()
+    }
     translationCommentService.update(dto, comment)
     return translationCommentModelAssembler.toModel(comment)
   }
@@ -155,7 +158,9 @@ class TranslationCommentController(
     @PathVariable commentId: Long,
   ) {
     val comment = translationCommentService.get(projectHolder.project.id, translationId, commentId)
-    if (comment.author.id != authenticationFacade.authenticatedUser.id) {
+    if (authenticationFacade.isOAuthTokenAuth) {
+      checkEditPermission()
+    } else if (comment.author.id != authenticationFacade.authenticatedUser.id) {
       try {
         checkEditPermission()
       } catch (e: PermissionException) {

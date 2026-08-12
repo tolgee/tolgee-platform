@@ -136,7 +136,7 @@ class SuggestionController(
     suggestion: TranslationSuggestion,
     languageId: Long,
   ) {
-    if (suggestion.author?.id == authenticationFacade.authenticatedUser.id) {
+    if (!authenticationFacade.isOAuthTokenAuth && suggestion.author?.id == authenticationFacade.authenticatedUser.id) {
       return
     }
     try {

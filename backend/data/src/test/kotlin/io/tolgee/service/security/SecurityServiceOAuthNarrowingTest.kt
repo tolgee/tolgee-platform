@@ -17,6 +17,7 @@
 package io.tolgee.service.security
 
 import io.tolgee.dtos.cacheable.UserAccountDto
+import io.tolgee.constants.Message
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
@@ -97,6 +98,8 @@ class SecurityServiceOAuthNarrowingTest {
 
     assertThatThrownBy { service().checkProjectPermission(2L, Scope.KEYS_EDIT, user) }
       .isInstanceOf(PermissionException::class.java)
+      // A covered project but a missing scope is a scope error, not a project-access error.
+      .hasFieldOrPropertyWithValue("code", Message.OPERATION_NOT_PERMITTED.code)
   }
 
   @Test
@@ -107,6 +110,8 @@ class SecurityServiceOAuthNarrowingTest {
 
     assertThatThrownBy { service().checkProjectPermission(2L, Scope.KEYS_EDIT, user) }
       .isInstanceOf(PermissionException::class.java)
+      // A project outside the token set is a project-access denial, not a missing-scope error.
+      .hasFieldOrPropertyWithValue("code", Message.USER_HAS_NO_PROJECT_ACCESS.code)
   }
 
   @Test
