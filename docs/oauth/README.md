@@ -292,6 +292,14 @@ the OAuth `authToken` support, so it authenticates with `X-API-Key` and in-conte
 **"Invalid API key"** until the patched `@tolgee/web` is published. For local dev, point the loader at
 your own build — `loadInContextLib` honors a `window.__TOLGEE_IN_CONTEXT_URL__` override.
 
+Why this is new: `@tolgee/web` ships **two** builds. The main ESM is what `testapps/react` imports from
+the local workspace, so edits there show up on rebuild — this is why in-context tweaks normally "just
+work" locally. The editor tools (`ContextUi` + `DevBackend`) are the **separate lazy-loaded UMD** fetched
+from the CDN, i.e. always the *published* release, never your workspace. Past changes lived in the ESM (or
+didn't alter the UMD's behavior), so the CDN copy was fine. OAuth is the first change to the UMD's own
+request path — the Bearer branch in `DevBackend` — so the popup runs published code that lacks it, and no
+amount of rebuilding the workspace helps until you override the loader URL.
+
 The cleanest surface is the **`testapps/react`** app in the **tolgee-js** repo: it consumes the local
 workspace SDK (so both the Bearer-capable `DevBackend` and the loader override are in play).
 
