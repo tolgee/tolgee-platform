@@ -14,8 +14,7 @@ import { sentryVitePlugin } from '@sentry/vite-plugin';
 const billingFrontendDir = resolve(__dirname, '../../billing/frontend');
 const hasBilling = existsSync(billingFrontendDir);
 
-// Optional trusted HTTPS for local OAuth browser-extension testing (chrome.identity requires HTTPS).
-// Generate with `mkcert localhost` in webapp/; without the files the dev server stays plain http.
+// Optional trusted HTTPS for local OAuth extension testing (chrome.identity needs it); see docs/oauth/README.md.
 const localCert = resolve(__dirname, 'localhost.pem');
 const localCertKey = resolve(__dirname, 'localhost-key.pem');
 const devHttps =
@@ -93,8 +92,7 @@ export default defineConfig(({ mode }) => {
       host: process.env.VITE_HOST || undefined,
       // this sets a default port to 3000
       port: Number(process.env.VITE_PORT) || 3000,
-      // These backend paths must be proxied so the OAuth browser flow stays single-origin (the session-bootstrap
-      // cookie). See docs/oauth/README.md for the full dev-server setup.
+      // Proxy backend-owned paths so the OAuth flow stays single-origin. See docs/oauth/README.md.
       proxy: Object.fromEntries(
         [
           '/v2',
@@ -109,9 +107,7 @@ export default defineConfig(({ mode }) => {
             target:
               process.env.VITE_DEV_PROXY_TARGET || 'http://localhost:8080',
             changeOrigin: false,
-            // Forward X-Forwarded-Proto/Host so the backend (forward-headers-strategy: framework) builds https URLs
-            // for the /oauth2/authorize -> /oauth2/bootstrap redirect; otherwise it emits http and the https-only dev
-            // server can't load it.
+            // Forward X-Forwarded-* so the backend emits https redirect URLs the https-only dev server can load.
             xfwd: true,
           },
         ])

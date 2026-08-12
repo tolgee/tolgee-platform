@@ -146,6 +146,7 @@ class McpRequestContext(
     if (authenticationFacade.isProjectApiKeyAuth) {
       return authenticationFacade.projectApiKey.projectId
     }
+    authenticationFacade.oauthTokenCredentials?.singleProjectId()?.let { return it }
     throw ProjectNotSelectedException()
   }
 

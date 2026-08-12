@@ -26,12 +26,7 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings
 import org.springframework.stereotype.Component
 
-/**
- * Seeds Tolgee's own first-party public clients (browser extension, CLI) into the JDBC RegisteredClient store.
- * Idempotent: the row id equals the client id, so re-runs update in place.
- *
- * Third-party MCP clients are NOT seeded here — they self-register via CIMD ([CimdRegisteredClientRepository]).
- */
+/** Seeds the first-party public clients (browser extension, CLI). Idempotent: row id = client id, so re-runs update in place. (MCP clients self-register via CIMD.) */
 @Component
 class PreRegisteredClients(
   private val registeredClientRepository: RegisteredClientRepository,

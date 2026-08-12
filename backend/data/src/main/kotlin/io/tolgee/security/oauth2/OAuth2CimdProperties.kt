@@ -18,18 +18,12 @@ package io.tolgee.security.oauth2
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 
-/**
- * Configuration for Client ID Metadata Documents (CIMD): unknown OAuth2 clients (e.g. MCP clients) whose `client_id`
- * is an HTTPS URL the server fetches and validates instead of pre-registering.
- */
+/** CIMD config: clients whose `client_id` is an HTTPS URL the server fetches + validates instead of pre-registering. */
 @ConfigurationProperties(prefix = "tolgee.oauth2.cimd")
 class OAuth2CimdProperties {
   var enabled: Boolean = false
 
-  /**
-   * Hosts allowed as CIMD client-id URLs. CIMD resolves nothing while this is empty (fail-closed), even when
-   * [enabled] — the allow-list is the primary bound on the outbound fetch, on top of the SSRF guard.
-   */
+  /** Hosts allowed as CIMD client-id URLs; empty = fail-closed (resolves nothing even when [enabled]). Primary bound on the fetch. */
   var allowedHosts: List<String> = listOf()
 
   var fetchTimeoutMs: Long = 2000

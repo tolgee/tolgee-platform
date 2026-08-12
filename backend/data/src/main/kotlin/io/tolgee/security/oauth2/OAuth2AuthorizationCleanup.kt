@@ -23,10 +23,7 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.time.Duration
 
-/**
- * The JDBC authorization store never prunes itself, so expired authorization-code and token rows accumulate. This runs
- * nightly and deletes authorizations whose credentials have all been expired for longer than the retention window.
- */
+/** Nightly prune of the self-unpruning JDBC authorization store: deletes rows expired past the retention window. */
 @Component
 class OAuth2AuthorizationCleanup(
   private val queryService: OAuth2AuthorizationQueryService,

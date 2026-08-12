@@ -36,10 +36,7 @@ import java.security.MessageDigest
 import java.time.Duration
 import java.util.Base64
 
-/**
- * Fetches and validates a Client ID Metadata Document (HTTPS-URL `client_id`) into a transient [RegisteredClient]. The
- * generated `id` hashes client id + redirect uris, so a redirect change forces re-consent.
- */
+/** Fetches/validates a CIMD (HTTPS-URL `client_id`) into a transient [RegisteredClient]; the id hashes client id + redirect uris so a redirect change forces re-consent. */
 @Component
 class CimdMetadataFetcher(
   private val properties: OAuth2CimdProperties,

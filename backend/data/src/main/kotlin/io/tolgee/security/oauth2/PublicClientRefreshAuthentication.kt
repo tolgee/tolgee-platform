@@ -29,10 +29,7 @@ import org.springframework.security.oauth2.server.authorization.authentication.O
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository
 import org.springframework.security.web.authentication.AuthenticationConverter
 
-/**
- * Authenticates a bare `client_id` on the refresh grant for public (`NONE`) clients, which SAS otherwise can't. Gated
- * to `grant_type=refresh_token` to keep the code exchange PKCE-only.
- */
+/** Authenticates a bare `client_id` on the refresh grant for public clients (SAS can't); gated to refresh_token so the code exchange stays PKCE-only. */
 class PublicClientRefreshAuthenticationConverter : AuthenticationConverter {
   override fun convert(request: HttpServletRequest): Authentication? {
     if (request.getParameter(OAuth2ParameterNames.GRANT_TYPE) != AuthorizationGrantType.REFRESH_TOKEN.value) {

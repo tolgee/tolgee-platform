@@ -23,11 +23,7 @@ import java.time.Duration
 
 @ConfigurationProperties(prefix = "tolgee.oauth2")
 class OAuth2ServerProperties {
-  /**
-   * Exact redirect URIs of the Tolgee browser extension, e.g. `https://<extension-id>.chromiumapp.org/`.
-   * The extension id depends on the packaged key, so this is left to configuration; when empty, the extension client
-   * is not registered.
-   */
+  /** Browser-extension redirect URIs (the id depends on the packaged key, so it's configured). Empty = client not registered. */
   var browserExtensionRedirectUris: List<String> = listOf()
 
   /** Loopback redirect URIs for the Tolgee CLI (RFC 8252). */
@@ -37,10 +33,8 @@ class OAuth2ServerProperties {
 
   var refreshTokenValidityDays: Long = 30
 
-  /** How long a fully-expired authorization row is kept before the nightly cleanup deletes it. */
   var authorizationRetentionDays: Long = 7
 
-  /** The server-wide access-token policy shared by every registered client (pre-registered and CIMD). */
   fun tokenSettings(): TokenSettings {
     return TokenSettings
       .builder()

@@ -26,4 +26,7 @@ data class OAuth2TokenCredentials(
   fun coversProject(projectId: Long): Boolean {
     return projectIds == null || projectId in projectIds
   }
+
+  // The single project a token is implicitly scoped to (like a PAK's project); null for all-projects / multi-project.
+  fun singleProjectId(): Long? = projectIds?.singleOrNull()
 }

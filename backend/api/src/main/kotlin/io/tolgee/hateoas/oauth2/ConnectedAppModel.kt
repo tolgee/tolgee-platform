@@ -16,11 +16,7 @@
 
 package io.tolgee.hateoas.oauth2
 
-/**
- * A connected app is managed per client (revoking it drops all of that client's authorizations for the user). A
- * token's project narrowing (tg.prj) is a mint-time property enforced per request, not an independently revocable
- * grant — bindings to different projects for the same client are not surfaced or revoked separately.
- */
+/** A client the user has authorized; revoking it drops all of that client's grants (per-client, not per-project). */
 data class ConnectedAppModel(
   val clientId: String,
   val clientName: String,

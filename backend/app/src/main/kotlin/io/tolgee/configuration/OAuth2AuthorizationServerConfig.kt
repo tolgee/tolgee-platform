@@ -36,13 +36,8 @@ import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher
 
-/**
- * OAuth2 authorization-server filter chain (scoped to the protocol endpoints).
- *
- * Tolgee's [AuthenticationFilter] is deliberately NOT added here, so a delegated API credential (PAK/PAT) or an OAuth
- * token cannot authenticate `/oauth2/authorize` and self-escalate into a broader token — the principal is established
- * only by the session bootstrap from a full webapp login.
- */
+// [AuthenticationFilter] is deliberately NOT on this chain: the principal comes only from the session bootstrap, so a
+// PAK/PAT/OAuth token can't authenticate /oauth2/authorize and self-escalate into a broader token.
 @Configuration
 class OAuth2AuthorizationServerConfig(
   private val audienceResolver: OAuth2AudienceResolver,

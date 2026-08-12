@@ -21,11 +21,7 @@ import org.springframework.stereotype.Service
 import java.sql.Timestamp
 import java.time.Instant
 
-/**
- * JDBC queries over the Spring Authorization Server tables that its services don't expose (a user's authorized clients;
- * revoking every grant/consent for one client). `principal_name` is the Tolgee user id — see the flow's session
- * bootstrap — so callers pass `user.id.toString()`.
- */
+/** JDBC queries SAS's services don't expose (list authorized clients; revoke a client). `principal_name` = user id, so callers pass `user.id.toString()`. */
 @Service
 class OAuth2AuthorizationQueryService(
   private val jdbcTemplate: JdbcTemplate,
@@ -67,11 +63,8 @@ class OAuth2AuthorizationQueryService(
     )
   }
 
-  /**
-   * Deletes authorizations before [cutoff]: those whose newest credential expiry (refresh, then access, then code) has
-   * passed — so a still-valid refresh token is never deleted — plus abandoned pre-consent rows (no token/code at all,
-   * every expiry NULL) that were created before the cutoff, which the expiry predicate alone can never match.
-   */
+  // Deletes rows whose newest credential expiry (refresh > access > code) passed — so a still-valid refresh token is
+  // never deleted — plus abandoned pre-consent rows (all expiries NULL) before [cutoff], which the expiry test misses.
   fun deleteExpiredBefore(cutoff: Instant): Int {
     val ts = Timestamp.from(cutoff)
     return jdbcTemplate.update(

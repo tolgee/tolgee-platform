@@ -41,11 +41,7 @@ import java.security.interfaces.RSAPrivateKey
 import java.security.interfaces.RSAPublicKey
 import java.util.UUID
 
-/**
- * Asymmetric (RS256) signing key material for the OAuth2 authorization server. The private JWK is persisted via
- * [FileStorage] so restarts and replicas keep the same `kid`; without that, live tokens (which carry the `kid`) would
- * fail validation against the republished `/oauth2/jwks` after any restart.
- */
+// RS256 signing keys; the private JWK (with kid) is persisted so restarts/replicas keep the same kid — else live tokens fail against the republished JWKS.
 @Configuration
 class OAuth2KeyConfig(
   private val fileStorage: FileStorage,

@@ -25,11 +25,7 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.stereotype.Component
 import java.util.concurrent.ConcurrentHashMap
 
-/**
- * Primary [RegisteredClientRepository]: pre-registered clients (browser extension, CLI) resolve from the JDBC store;
- * an unknown URL-form `client_id` falls back to CIMD ([CimdMetadataFetcher]). CIMD clients are transient (never
- * persisted) and cached for a short TTL.
- */
+/** @Primary repo: fixed clients from the JDBC store; an unknown URL-form `client_id` falls back to CIMD (transient, TTL-cached). */
 @Component
 @Primary
 class CimdRegisteredClientRepository(

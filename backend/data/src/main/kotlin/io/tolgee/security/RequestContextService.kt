@@ -71,9 +71,7 @@ class RequestContextService(
       return projectService.findDto(authenticationFacade.projectApiKey.projectId)
     }
 
-    // An OAuth token narrowed to a single project carries that project the same way a PAK does, so implicit endpoints
-    // (no {projectId} in the path) can resolve it. All-projects or multi-project tokens can't be resolved implicitly.
-    authenticationFacade.oauthTokenCredentials?.projectIds?.singleOrNull()?.let {
+    authenticationFacade.oauthTokenCredentials?.singleProjectId()?.let {
       return projectService.findDto(it)
     }
 

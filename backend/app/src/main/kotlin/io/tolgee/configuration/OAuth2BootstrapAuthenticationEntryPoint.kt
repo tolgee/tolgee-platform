@@ -23,11 +23,7 @@ import org.springframework.security.web.AuthenticationEntryPoint
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
-/**
- * When a browser hits `/oauth2/authorize` without an authenticated session (it cannot send a Bearer header on a
- * top-level navigation), send it to the SPA bootstrap page, preserving the original authorize URL in `continue`.
- * That page turns the SPA's stored JWT into a session and navigates back here, now authenticated.
- */
+/** Unauthenticated `/oauth2/authorize` → the SPA bootstrap page (authorize URL in `continue`), which turns the stored JWT into a session and returns. */
 class OAuth2BootstrapAuthenticationEntryPoint(
   private val bootstrapPath: String,
 ) : AuthenticationEntryPoint {

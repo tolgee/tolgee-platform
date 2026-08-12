@@ -17,16 +17,13 @@
 package io.tolgee.security.oauth2
 
 object OAuth2Constants {
-  /** Access-token claim holding the project set the token is bound to: a list of project ids, or [ALL_PROJECTS]. */
   const val PROJECTS_CLAIM = "tg.prj"
 
-  /** Sentinel value for [PROJECTS_CLAIM] meaning "not narrowed to any project subset" (bounded by live permissions). */
+  /** [PROJECTS_CLAIM] sentinel: not narrowed to any project subset (still bounded by live permissions). */
   const val ALL_PROJECTS = "*"
 
-  /** Custom `/oauth2/authorize` parameter binding the token to one project. */
   const val PROJECT_PARAM = "project"
 
-  /** Authorization attribute holding the project the user chose on the consent screen: a project id string, or [ALL_PROJECTS]. */
   const val PROJECT_ATTRIBUTE = "tg.selected_project"
 
   const val BROWSER_EXTENSION_CLIENT_ID = "tolgee-browser-extension"
