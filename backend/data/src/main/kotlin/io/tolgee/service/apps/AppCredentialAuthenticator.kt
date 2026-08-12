@@ -26,7 +26,13 @@ class AppCredentialAuthenticator(
       appSecretService.findLiveMatching(app.id, clientSecret)
         ?: throw AuthenticationException(Message.INVALID_APP_CREDENTIALS)
 
-    appSecretService.updateLastUsedAsync(secret.id, secret.lastUsedAt)
+    // First use synchronously (the revoke guard reads it), later uses async off the hot path. Split
+    // here rather than inside the service so the @Async proxy is not bypassed by self-invocation.
+    if (secret.lastUsedAt == null) {
+      appSecretService.recordFirstUse(secret.id)
+    } else {
+      appSecretService.updateLastUsedAsync(secret.id, secret.lastUsedAt)
+    }
     return app
   }
 }

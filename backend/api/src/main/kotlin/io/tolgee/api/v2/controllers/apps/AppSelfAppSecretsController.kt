@@ -62,8 +62,7 @@ class AppSelfAppSecretsController(
     description =
       "Mints a fresh app-level secret and returns it — the only place it is ever disclosed. The " +
         "secret this call authenticated with keeps working, so the app can store the new one and " +
-        "only then revoke the old one. The new secret is also pushed to the app's base URL over " +
-        "the lifecycle channel.",
+        "only then revoke the old one.",
   )
   fun issue(
     @RequestBody @Valid body: AppSecretRotationRequest,
@@ -78,16 +77,16 @@ class AppSelfAppSecretsController(
   @Operation(
     summary = "Revoke one of the calling app's own app-level secrets",
     description =
-      "The secret stops authenticating immediately. Revoking the app's last live secret is refused " +
-        "here — the app authenticates with a secret, so it would lock itself out of this very " +
-        "endpoint. Issue the replacement first. Idempotent.",
+      "The secret stops authenticating immediately. Refused while the app has not moved to a " +
+        "replacement — the last live secret, or one issued but never used yet — so an app cannot " +
+        "lock itself out of this very endpoint. Issue the replacement and use it first. Idempotent.",
   )
   fun revoke(
     @RequestBody @Valid body: AppSecretRotationRequest,
   ): AppSecretModel {
     val app = authenticate(body)
     val secretId = body.secretId ?: throw BadRequestException(Message.APP_SECRET_NOT_FOUND)
-    return appSecretModelAssembler.toModel(appSecretService.revoke(app.id, secretId, allowRevokingLast = false))
+    return appSecretModelAssembler.toModel(appSecretService.revoke(app.id, secretId, force = false))
   }
 
   private fun authenticate(body: AppSecretRotationRequest): App =

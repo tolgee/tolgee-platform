@@ -102,6 +102,8 @@ class AppSecretRotationTest : AuthorizedControllerTest() {
   fun `a revoked app secret stops authenticating and the others keep working`() {
     val issued = issueAsOwner()
     val originalId = liveSecretIds().first { it != issued.get("id").asLong() }
+    // The app moves to the new secret; only then may the old one be revoked without forcing.
+    appSelfList(issued.get("secret").asText()).andIsOk
 
     userAccount = testData.user
     performAuthDelete("${ownedAppsUrl()}/$appEntityId/secrets/$originalId").andIsOk
@@ -138,6 +140,7 @@ class AppSecretRotationTest : AuthorizedControllerTest() {
   fun `an app-level rotation leaves the install and its enablements alone`() {
     val issued = issueAsOwner()
     val originalId = liveSecretIds().first { it != issued.get("id").asLong() }
+    appSelfList(issued.get("secret").asText()).andIsOk
     userAccount = testData.user
     performAuthDelete("${ownedAppsUrl()}/$appEntityId/secrets/$originalId").andIsOk
 
@@ -194,8 +197,27 @@ class AppSecretRotationTest : AuthorizedControllerTest() {
     val secretId = liveSecretIds().single()
 
     userAccount = testData.user
-    performAuthDelete("${ownedAppsUrl()}/$appEntityId/secrets/$secretId").andIsOk
+    performAuthDelete("${ownedAppsUrl()}/$appEntityId/secrets/$secretId?force=true").andIsOk
 
+    appSelfList(appClientSecret).andIsUnauthorized
+  }
+
+  /** The guard: an owner must not revoke the old secret before the app has moved to the new one. */
+  @Test
+  fun `revoking a secret before the app used its replacement is refused, and forced through`() {
+    val issued = issueAsOwner()
+    val originalId = liveSecretIds().first { it != issued.get("id").asLong() }
+
+    // Neither secret has been used yet, so an ordinary revoke of the original is refused.
+    userAccount = testData.user
+    performAuthDelete("${ownedAppsUrl()}/$appEntityId/secrets/$originalId")
+      .andIsBadRequest
+      .andHasErrorMessage(Message.APP_SECRET_REPLACEMENT_UNUSED)
+    appSelfList(appClientSecret).andIsOk
+
+    // Force overrides the guard — the kill switch for a leaked secret.
+    userAccount = testData.user
+    performAuthDelete("${ownedAppsUrl()}/$appEntityId/secrets/$originalId?force=true").andIsOk
     appSelfList(appClientSecret).andIsUnauthorized
   }
 

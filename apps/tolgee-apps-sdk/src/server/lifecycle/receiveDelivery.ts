@@ -27,6 +27,8 @@ export type DeliveryRejection =
   | 'unreadable-body'
   | 'unknown-event'
   | 'unverifiable'
+  | 'unverified-credentials'
+  | 'rate-limited'
   | 'credentials-already-held'
 
 /** Called for a delivery that verified; throwing makes Tolgee retry it. */
@@ -63,6 +65,13 @@ export type TolgeeLifecycleOptions = AppInstallStoreOptions & {
    * secret is injected — there is no first delivery to trust.
    */
   requireKnownSecret?: boolean
+  /**
+   * On a first delivery (no secret held yet), confirm the delivered app
+   * credentials against the configured Tolgee before trusting them. Defaults to
+   * true. Set false to fall back to trust-on-first-use — accept the self-signed
+   * delivery as-is, marked `trusted: false`.
+   */
+  verifyCredentials?: boolean
   /** Set false to dispatch without writing anything to the state file. */
   persist?: boolean
   on?: TolgeeLifecycleListeners
@@ -102,7 +111,53 @@ const REJECTION_STATUS: Record<DeliveryRejection, number> = {
   'unreadable-body': 400,
   'unknown-event': 400,
   unverifiable: 401,
+  'unverified-credentials': 401,
+  'rate-limited': 429,
   'credentials-already-held': 409,
+}
+
+/** How many first-contact verifications the SDK makes to one Tolgee per window. */
+const VERIFY_LIMIT = 10
+const VERIFY_WINDOW_MS = 60_000
+const verifyTimestamps = new Map<string, number[]>()
+
+/**
+ * A first delivery signs with the secret it carries, which proves nothing, so the SDK confirms the
+ * delivered credentials against the **configured** Tolgee before trusting them — the URL is always
+ * the one this app was configured with, never anything from the payload. The call is rate-limited so
+ * a flood of forged first deliveries cannot turn this app into an outbound amplifier against Tolgee.
+ */
+const allowVerify = (
+  tolgeeUrl: string,
+  now: number
+): boolean => {
+  const recent = (verifyTimestamps.get(tolgeeUrl) ?? []).filter(
+    (t) => t > now - VERIFY_WINDOW_MS
+  )
+  if (recent.length >= VERIFY_LIMIT) {
+    verifyTimestamps.set(tolgeeUrl, recent)
+    return false
+  }
+  recent.push(now)
+  verifyTimestamps.set(tolgeeUrl, recent)
+  return true
+}
+
+const verifyDeliveredCredentials = async (
+  tolgeeUrl: string,
+  clientId: string,
+  clientSecret: string
+): Promise<boolean> => {
+  try {
+    const response = await fetch(`${tolgeeUrl}/v2/public/apps/app-secrets/list`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ client_id: clientId, client_secret: clientSecret }),
+    })
+    return response.ok
+  } catch {
+    return false
+  }
 }
 
 const processSeenSignatures = new Map<string, number>()
@@ -147,7 +202,7 @@ export const receiveTolgeeDelivery = async (
     )
   }
 
-  const verified = verify(input, parsed, tolgeeUrl, storeOptions)
+  const verified = await verify(input, parsed, tolgeeUrl, storeOptions)
   if ('rejection' in verified) return verified
 
   const seen = input.seenSignatures ?? processSeenSignatures
@@ -180,12 +235,12 @@ export const receiveTolgeeDelivery = async (
 
 type Verified = { envelope: TolgeeSignatureEnvelope; trusted: boolean }
 
-const verify = (
+const verify = async (
   input: DeliveryInput,
   parsed: ParsedDelivery,
   tolgeeUrl: string,
   storeOptions: AppInstallStoreOptions
-): Verified | Extract<DeliveryResult, { accepted: false }> => {
+): Promise<Verified | Extract<DeliveryResult, { accepted: false }>> => {
   const known =
     input.webhookSecret ??
     process.env.TOLGEE_APP_WEBHOOK_SECRET ??
@@ -235,8 +290,8 @@ const verify = (
   }
 
   // The signature was made with a key the body handed over, so it proves only
-  // that the body is internally consistent. Trust it once, and only while there
-  // is nothing to lose.
+  // that the body is internally consistent. Never overwrite live credentials on
+  // the strength of that.
   if (hasStoredCredentials(tolgeeUrl, storeOptions)) {
     return reject(
       'credentials-already-held',
@@ -247,7 +302,41 @@ const verify = (
     )
   }
 
-  return { envelope, trusted: false }
+  // Verify by use: confirm the delivered credentials against the CONFIGURED Tolgee before trusting
+  // them. Skipping the check falls back to trust-on-first-use — accepting the self-signed delivery
+  // as-is, marked untrusted.
+  if (input.verifyCredentials === false) {
+    return { envelope, trusted: false }
+  }
+
+  const clientId = parsed.app?.clientId
+  const clientSecret = parsed.app?.clientSecret
+  if (!clientId || !clientSecret) {
+    return reject(
+      'unverifiable',
+      'This app holds no credentials for this Tolgee instance and the first delivery carries no ' +
+        'app credentials to verify against it.'
+    )
+  }
+
+  const now = input.now?.() ?? Date.now()
+  if (!allowVerify(tolgeeUrl, now)) {
+    return reject(
+      'rate-limited',
+      `Too many unverified first deliveries for ${tolgeeUrl} — refusing to check more this minute.`
+    )
+  }
+
+  if (!(await verifyDeliveredCredentials(tolgeeUrl, clientId, clientSecret))) {
+    return reject(
+      'unverified-credentials',
+      `${tolgeeUrl} did not accept the credentials this delivery carried, so it did not come from ` +
+        'Tolgee. Ignoring it.'
+    )
+  }
+
+  // Tolgee vouched for the credentials, so this first delivery is genuinely trusted.
+  return { envelope, trusted: true }
 }
 
 const rejectSignature = (

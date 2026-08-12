@@ -95,6 +95,45 @@ export const OwnedAppSecretsDialog = ({
     );
   };
 
+  const revoke = (secret: AppSecretModel, force: boolean) => {
+    revokeMutation.mutate(
+      {
+        path: { organizationId, appId, secretId: secret.id },
+        query: { force },
+      },
+      {
+        onError: (error) => {
+          // The app has not moved to a replacement yet. Offer to force it — the
+          // kill switch for a leaked secret, where breaking the app now is the point.
+          if (error.code === 'app_secret_replacement_unused') {
+            confirmation({
+              title: (
+                <T
+                  keyName="owned_app_secrets_force_revoke_title"
+                  defaultValue="The app hasn't switched to a new secret yet"
+                />
+              ),
+              message: (
+                <T
+                  keyName="owned_app_secrets_force_revoke_message"
+                  defaultValue="No other secret of {name} has been used yet, so revoking this one now will break the app until it picks up a replacement. Do this only if this secret leaked."
+                  params={{ name: appName }}
+                />
+              ),
+              confirmButtonText: (
+                <T
+                  keyName="owned_app_secrets_force_revoke_button"
+                  defaultValue="Revoke anyway"
+                />
+              ),
+              onConfirm: () => revoke(secret, true),
+            });
+          }
+        },
+      }
+    );
+  };
+
   const handleRevoke = (secret: AppSecretModel) => {
     confirmation({
       title: (
@@ -116,11 +155,7 @@ export const OwnedAppSecretsDialog = ({
           defaultValue="Revoke"
         />
       ),
-      onConfirm: () => {
-        revokeMutation.mutate({
-          path: { organizationId, appId, secretId: secret.id },
-        });
-      },
+      onConfirm: () => revoke(secret, false),
     });
   };
 

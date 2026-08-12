@@ -242,8 +242,10 @@ class AppCredentialTokenTest : AuthorizedControllerTest() {
 
   private fun revokeSecret(secretId: Long) {
     loginAsUser()
+    // force: these cases test the cutoff itself, not the replacement-unused guard, so they revoke
+    // the old secret before anything authenticates with the new one.
     performAuthDelete(
-      "/v2/organizations/${testData.organization.id}/owned-apps/$appEntityId/secrets/$secretId",
+      "/v2/organizations/${testData.organization.id}/owned-apps/$appEntityId/secrets/$secretId?force=true",
     ).andIsOk
   }
 

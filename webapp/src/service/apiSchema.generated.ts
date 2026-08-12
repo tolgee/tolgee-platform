@@ -360,7 +360,7 @@ export interface paths {
     post: operations["issueSecret"];
   };
   "/v2/organizations/{organizationId}/owned-apps/{appId}/secrets/{secretId}": {
-    /** Phase two of a rotation: the secret stops authenticating immediately and every other one is untouched. Revoking the last live one is allowed — it is how a leaked credential is cut off before a replacement exists. Idempotent. */
+    /** Phase two of a rotation: the secret stops authenticating immediately and every other one is untouched. Refused while the app has not demonstrably moved to a replacement (no other live secret has been used yet), so an ordinary rotation cannot cut the app off by mistake. Pass `force=true` to override — the kill switch for a leaked secret, where cutting the app off now is the point. Idempotent. */
     delete: operations["revokeSecret"];
   };
   "/v2/organizations/{organizationId}/projects-with-stats": {
@@ -1270,7 +1270,7 @@ export interface paths {
     post: operations["test"];
   };
   "/v2/public/apps/app-secrets/issue": {
-    /** Mints a fresh app-level secret and returns it — the only place it is ever disclosed. The secret this call authenticated with keeps working, so the app can store the new one and only then revoke the old one. The new secret is also pushed to the app's base URL over the lifecycle channel. */
+    /** Mints a fresh app-level secret and returns it — the only place it is ever disclosed. The secret this call authenticated with keeps working, so the app can store the new one and only then revoke the old one. */
     post: operations["issue"];
   };
   "/v2/public/apps/app-secrets/list": {
@@ -1278,7 +1278,7 @@ export interface paths {
     post: operations["list_1"];
   };
   "/v2/public/apps/app-secrets/revoke": {
-    /** The secret stops authenticating immediately. Revoking the app's last live secret is refused here — the app authenticates with a secret, so it would lock itself out of this very endpoint. Issue the replacement first. Idempotent. */
+    /** The secret stops authenticating immediately. Refused while the app has not moved to a replacement — the last live secret, or one issued but never used yet — so an app cannot lock itself out of this very endpoint. Issue the replacement and use it first. Idempotent. */
     post: operations["revoke_1"];
   };
   "/v2/public/apps/installations/list": {
@@ -3514,6 +3514,7 @@ export interface components {
         | "app_install_secret_not_found"
         | "app_too_many_live_secrets"
         | "app_cannot_revoke_last_secret"
+        | "app_secret_replacement_unused"
         | "app_not_registered"
         | "app_already_registered"
         | "app_not_found"
@@ -7489,6 +7490,7 @@ export interface components {
         | "app_install_secret_not_found"
         | "app_too_many_live_secrets"
         | "app_cannot_revoke_last_secret"
+        | "app_secret_replacement_unused"
         | "app_not_registered"
         | "app_already_registered"
         | "app_not_found"
@@ -13976,13 +13978,16 @@ export interface operations {
       };
     };
   };
-  /** Phase two of a rotation: the secret stops authenticating immediately and every other one is untouched. Revoking the last live one is allowed — it is how a leaked credential is cut off before a replacement exists. Idempotent. */
+  /** Phase two of a rotation: the secret stops authenticating immediately and every other one is untouched. Refused while the app has not demonstrably moved to a replacement (no other live secret has been used yet), so an ordinary rotation cannot cut the app off by mistake. Pass `force=true` to override — the kill switch for a leaked secret, where cutting the app off now is the point. Idempotent. */
   revokeSecret: {
     parameters: {
       path: {
         organizationId: number;
         appId: number;
         secretId: number;
+      };
+      query: {
+        force?: boolean;
       };
     };
     responses: {
@@ -29933,7 +29938,7 @@ export interface operations {
       };
     };
   };
-  /** Mints a fresh app-level secret and returns it — the only place it is ever disclosed. The secret this call authenticated with keeps working, so the app can store the new one and only then revoke the old one. The new secret is also pushed to the app's base URL over the lifecycle channel. */
+  /** Mints a fresh app-level secret and returns it — the only place it is ever disclosed. The secret this call authenticated with keeps working, so the app can store the new one and only then revoke the old one. */
   issue: {
     responses: {
       /** OK */
@@ -30029,7 +30034,7 @@ export interface operations {
       };
     };
   };
-  /** The secret stops authenticating immediately. Revoking the app's last live secret is refused here — the app authenticates with a secret, so it would lock itself out of this very endpoint. Issue the replacement first. Idempotent. */
+  /** The secret stops authenticating immediately. Refused while the app has not moved to a replacement — the last live secret, or one issued but never used yet — so an app cannot lock itself out of this very endpoint. Issue the replacement and use it first. Idempotent. */
   revoke_1: {
     responses: {
       /** OK */

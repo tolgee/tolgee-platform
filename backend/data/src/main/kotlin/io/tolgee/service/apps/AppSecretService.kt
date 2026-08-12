@@ -62,16 +62,22 @@ class AppSecretService(
    * the app's secrets stops validating at once. Without it a leaked secret would keep buying access
    * for as long as the tokens it minted live, which is the whole window revocation exists to close.
    *
-   * @param allowRevokingLast false refuses to revoke the app's only live secret. False for the
-   *   app-initiated path: an app authenticates with a secret, so revoking its last one would lock
-   *   it out of the endpoint that issues a replacement. The owning organization may do it — that
-   *   is the kill switch for a leaked credential.
+   * Two guard rails protect an ordinary rotation from cutting the app off, and both are lifted by
+   * [force] — the kill switch for a credential known to have leaked, where breaking the app now is
+   * exactly the point:
+   *  - the app's only live secret cannot be revoked (issue a replacement first);
+   *  - a secret cannot be revoked while no other live secret has ever been used, i.e. while the app
+   *    has not demonstrably moved to a replacement. `lastUsedAt` is written on a secret's first use,
+   *    so this reads whether some other live secret has authenticated at least once.
+   *
+   * @param force bypasses both guards. The owner's kill switch passes it; an app rotating itself
+   *   never does — it revokes its old secret only once it is authenticating with the new one.
    */
   @Transactional
   fun revoke(
     appId: Long,
     secretId: Long,
-    allowRevokingLast: Boolean,
+    force: Boolean,
   ): AppSecret {
     val secret =
       appSecretRepository.findByIdAndAppId(secretId, appId)
@@ -79,8 +85,13 @@ class AppSecretService(
 
     if (secret.revokedAt != null) return secret
 
-    if (!allowRevokingLast && countLive(appId) <= 1) {
-      throw BadRequestException(Message.APP_CANNOT_REVOKE_LAST_SECRET)
+    if (!force) {
+      if (countLive(appId) <= 1) {
+        throw BadRequestException(Message.APP_CANNOT_REVOKE_LAST_SECRET)
+      }
+      if (!hasOtherUsedLiveSecret(appId, secretId)) {
+        throw BadRequestException(Message.APP_SECRET_REPLACEMENT_UNUSED)
+      }
     }
 
     val now = currentDateProvider.date
@@ -113,6 +124,18 @@ class AppSecretService(
       .firstOrNull { constantTimeEquals(providedHash, it.secretHash) }
   }
 
+  /**
+   * Stamps a secret's first use **synchronously**, in the caller's transaction. The revoke guard
+   * reads `lastUsedAt` to decide whether the app has moved to a replacement, so this one write must
+   * not race the operator's revoke; every later use goes through [updateLastUsedAsync], off the
+   * token hot path. Called only when [AppSecret.lastUsedAt] is still null, so it runs once per
+   * secret.
+   */
+  @Transactional
+  fun recordFirstUse(secretId: Long) {
+    appSecretRepository.updateLastUsedById(secretId, currentDateProvider.date)
+  }
+
   @Async
   @Transactional
   fun updateLastUsedAsync(
@@ -131,6 +154,16 @@ class AppSecretService(
 
   private fun countLive(appId: Long): Long {
     return appSecretRepository.countByAppIdAndRevokedAtIsNull(appId)
+  }
+
+  /** Whether a live secret other than [excludingSecretId] has been used at least once. */
+  private fun hasOtherUsedLiveSecret(
+    appId: Long,
+    excludingSecretId: Long,
+  ): Boolean {
+    return appSecretRepository
+      .findAllByAppIdAndRevokedAtIsNull(appId)
+      .any { it.id != excludingSecretId && it.lastUsedAt != null }
   }
 
   companion object {

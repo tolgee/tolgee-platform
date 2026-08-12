@@ -78,6 +78,9 @@ const deliver = async (
     stateDir,
     seenSignatures,
     now: () => NOW,
+    // These tests exercise the receiver offline (signature, replay, storage,
+    // dispatch); the verify-by-use network check has its own block below.
+    verifyCredentials: false,
     ...rest,
     rawBody,
     signatureHeader: signatureHeader ?? sign(rawBody, secret, timestamp),
@@ -230,6 +233,85 @@ describe('first delivery', () => {
     )
 
     assert.equal(rejected.rejection, 'unverifiable')
+  })
+})
+
+describe('verify by use (first delivery, no secret held)', () => {
+  const originalFetch = globalThis.fetch
+
+  afterEach(() => {
+    globalThis.fetch = originalFetch
+  })
+
+  /** Stubs the credential-verification call to the configured Tolgee. */
+  const stubVerify = (ok: boolean): string[] => {
+    const calls: string[] = []
+    globalThis.fetch = (async (input: RequestInfo | URL) => {
+      calls.push(String(input))
+      return new Response(ok ? '{"_embedded":{}}' : '', {
+        status: ok ? 200 : 401,
+      })
+    }) as typeof fetch
+    return calls
+  }
+
+  const deliverVerified = (
+    ok: boolean,
+    options: Parameters<typeof deliver>[1] = {}
+  ) => {
+    const calls = stubVerify(ok)
+    return { calls, result: deliver(registered(), options) }
+  }
+
+  it('trusts and stores a first delivery Tolgee vouches for', async () => {
+    const { calls, result } = deliverVerified(true, {
+      verifyCredentials: true,
+    })
+    const event = assertAccepted(await result)
+
+    assert.equal(event.trusted, true)
+    assert.equal(
+      readStoredApp(TOLGEE_URL, { stateDir })?.clientSecret,
+      'tgpubs_app-secret'
+    )
+    // Verified against the configured URL, not anything from the payload.
+    assert.ok(
+      calls[0].startsWith(`${TOLGEE_URL}/v2/public/apps/app-secrets/list`)
+    )
+  })
+
+  it('rejects and stores nothing when Tolgee does not accept the credentials', async () => {
+    const { result } = deliverVerified(false, { verifyCredentials: true })
+    const rejected = assertRejected(await result)
+
+    assert.equal(rejected.rejection, 'unverified-credentials')
+    assert.equal(rejected.status, 401)
+    assert.equal(readStoredApp(TOLGEE_URL, { stateDir }), null)
+  })
+
+  it('rate-limits a flood of unverified first deliveries', async () => {
+    stubVerify(false)
+    // A URL of its own so the per-instance verify bucket is not shared with the
+    // other tests in this block.
+    const floodUrl = 'http://localhost:19876'
+    const body = JSON.stringify(registered())
+    let rateLimited = false
+    for (let i = 0; i < 20; i++) {
+      const result = await receiveTolgeeDelivery({
+        tolgeeUrl: floodUrl,
+        stateDir,
+        seenSignatures: new Map(),
+        now: () => NOW + i,
+        verifyCredentials: true,
+        rawBody: body,
+        signatureHeader: sign(body),
+      })
+      if (!result.accepted && result.rejection === 'rate-limited') {
+        rateLimited = true
+        break
+      }
+    }
+    assert.equal(rateLimited, true)
   })
 })
 
@@ -445,6 +527,8 @@ describe('the HTTP handler', () => {
         stateDir,
         seenSignatures,
         now: () => NOW,
+        // These tests cover HTTP framing, not the verify-by-use network call.
+        verifyCredentials: false,
         ...options,
       })(request, response)
     })

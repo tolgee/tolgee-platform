@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 /**
@@ -114,16 +115,19 @@ class OrganizationOwnedAppsController(
     summary = "Revoke an app-level client secret",
     description =
       "Phase two of a rotation: the secret stops authenticating immediately and every other one is " +
-        "untouched. Revoking the last live one is allowed — it is how a leaked credential is cut " +
-        "off before a replacement exists. Idempotent.",
+        "untouched. Refused while the app has not demonstrably moved to a replacement (no other " +
+        "live secret has been used yet), so an ordinary rotation cannot cut the app off by mistake. " +
+        "Pass `force=true` to override — the kill switch for a leaked secret, where cutting the app " +
+        "off now is the point. Idempotent.",
   )
   fun revokeSecret(
     @PathVariable organizationId: Long,
     @PathVariable appId: Long,
     @PathVariable secretId: Long,
+    @RequestParam(required = false, defaultValue = "false") force: Boolean,
   ): AppSecretModel {
     val app = appService.getOwned(organizationId, appId)
-    return appSecretModelAssembler.toModel(appSecretService.revoke(app.id, secretId, allowRevokingLast = true))
+    return appSecretModelAssembler.toModel(appSecretService.revoke(app.id, secretId, force = force))
   }
 
   @DeleteMapping("/{appId}")
