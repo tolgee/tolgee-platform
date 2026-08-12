@@ -503,6 +503,7 @@ declare namespace DataCy {
         "oauth2-consent-allow": true;
         "oauth2-consent-deny": true;
         "oauth2-consent-error": true;
+        "oauth2-consent-modify": true;
         "oauth2-consent-project-inaccessible": true;
         "oauth2-consent-project-option": true;
         "oauth2-consent-project-select": true;

@@ -40,6 +40,7 @@ import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames
 import org.springframework.security.oauth2.server.authorization.OAuth2Authorization
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClient
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -91,13 +92,20 @@ class OAuth2FlowController(
   ): ConsentInfoModel {
     val client = registeredClientRepository.findByClientId(clientId) ?: throw NotFoundException()
     val scopes = scope?.split(" ")?.filter { it.isNotBlank() } ?: emptyList()
+    val requiredScopes = clientRequiredScopes(client).filter { it in scopes }
     val requestedProjectId = state?.let { ownAuthorization(it)?.projectHint() }
     return ConsentInfoModel(
       appName = client.clientName,
       scopes = scopes,
+      requiredScopes = requiredScopes,
       project = requestedProjectId?.let { hintedProject(it) },
       requestedProjectId = requestedProjectId,
     )
+  }
+
+  private fun clientRequiredScopes(client: RegisteredClient): List<String> {
+    val raw = client.clientSettings.settings[OAuth2Constants.REQUIRED_SCOPES_SETTING] as? String ?: return emptyList()
+    return raw.split(" ").filter { it.isNotBlank() }
   }
 
   /** Resolves the hinted project's name only when the user has access, so an unrelated hint can't leak a name. */

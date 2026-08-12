@@ -108,6 +108,7 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
         CONSENT_REDIRECT,
         requireConsent = true,
         scopes = listOf("translations.view", "translations.edit"),
+        requiredScopes = listOf("translations.view"),
       ),
     )
   }
@@ -117,6 +118,7 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
     redirect: String,
     requireConsent: Boolean = false,
     scopes: Collection<String> = listOf("translations.view"),
+    requiredScopes: List<String> = emptyList(),
   ): RegisteredClient =
     RegisteredClient
       .withId(clientId)
@@ -132,7 +134,11 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
           .builder()
           .requireProofKey(true)
           .requireAuthorizationConsent(requireConsent)
-          .build(),
+          .apply {
+            if (requiredScopes.isNotEmpty()) {
+              setting(OAuth2Constants.REQUIRED_SCOPES_SETTING, requiredScopes.joinToString(" "))
+            }
+          }.build(),
       ).tokenSettings(
         TokenSettings
           .builder()
@@ -506,6 +512,7 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
     val noHint = consentInfo(jwt, state = null)
     assertThat(noHint.get("project").isNull).isTrue()
     assertThat(noHint.get("requestedProjectId").isNull).isTrue()
+    assertThat(noHint.get("requiredScopes").toString()).contains("translations.view")
 
     // A hint pointing at a project the user cannot access must not leak the project's name, but the raw id is still
     // reported (as requestedProjectId) so the consent screen can say "you can't edit the requested project".
@@ -528,6 +535,30 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
     val nonexistentInfo = consentInfo(jwt, state = nonexistent.state)
     assertThat(nonexistentInfo.get("project").isNull).isTrue()
     assertThat(nonexistentInfo.get("requestedProjectId").asLong()).isEqualTo(INACCESSIBLE_PROJECT_ID)
+  }
+
+  @Test
+  fun `consent-info marks only the client's required scopes as required`() {
+    val jwt = jwtService.emitToken(testData.user.id)
+    val info =
+      jacksonObjectMapper().readTree(
+        mvc
+          .perform(
+            get("/v2/oauth2/consent-info")
+              .header("Authorization", "Bearer $jwt")
+              .param("clientId", CONSENT_CLIENT_ID)
+              .param("scope", "translations.view translations.edit"),
+          ).andIsOk
+          .andReturn()
+          .response.contentAsString,
+      )
+    assertThat(info.get("scopes").toString())
+      .contains("translations.view")
+      .contains("translations.edit")
+    // translations.edit is requested but not in the client's required set, so it stays optional.
+    assertThat(info.get("requiredScopes").toString())
+      .contains("translations.view")
+      .doesNotContain("translations.edit")
   }
 
   @Test

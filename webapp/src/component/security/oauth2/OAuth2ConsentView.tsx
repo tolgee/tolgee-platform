@@ -4,9 +4,11 @@ import {
   Alert,
   Box,
   Checkbox,
+  Chip,
   FormControl,
   FormControlLabel,
   InputLabel,
+  Link,
   MenuItem,
   Select,
   styled,
@@ -19,8 +21,10 @@ import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { useUrlSearch } from 'tg.hooks/useUrlSearch';
 import { apiV2HttpService } from 'tg.service/http/ApiV2HttpService';
 import { useScopeTranslations } from 'tg.component/PermissionsSettings/useScopeTranslations';
+import { usePermissionsStructure } from 'tg.component/PermissionsSettings/usePermissionsStructure';
 import { PermissionModelScope } from 'tg.component/PermissionsSettings/types';
 import { deriveConsentProjects } from './consentProjectOptions';
+import { groupConsentScopes } from './consentScopeGroups';
 
 const API_URL = import.meta.env.VITE_APP_API_URL || '';
 
@@ -32,15 +36,39 @@ type ProjectOption = { id: number; name: string };
 type ConsentInfo = {
   appName: string;
   scopes: string[];
+  requiredScopes: string[];
   project?: ProjectOption | null;
   requestedProjectId?: number | null;
 };
 
 const ALL_PROJECTS = 'all' as const;
 
-const StyledCapabilities = styled('div')`
-  display: grid;
+const StyledPermissionsHeader = styled(Box)`
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-top: ${({ theme }) => theme.spacing(2)};
+`;
+
+const StyledSectionTitle = styled('div')`
+  font-weight: 600;
+`;
+
+const StyledGroup = styled('div')`
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
   gap: ${({ theme }) => theme.spacing(0.5)};
+  margin-top: ${({ theme }) => theme.spacing(1)};
+`;
+
+const StyledGroupLabel = styled('div')`
+  color: ${({ theme }) => theme.palette.text.secondary};
+  margin-right: ${({ theme }) => theme.spacing(0.5)};
+`;
+
+const StyledCheckboxGroup = styled('div')`
+  margin-top: ${({ theme }) => theme.spacing(1)};
 `;
 
 const StyledButtons = styled(Box)`
@@ -53,6 +81,7 @@ const StyledButtons = styled(Box)`
 const OAuth2ConsentView: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { t } = useTranslate();
   const { getScopeTranslation } = useScopeTranslations();
+  const structure = usePermissionsStructure();
   const search = useUrlSearch();
   const clientId = asString(search.client_id);
   const scope = asString(search.scope);
@@ -62,6 +91,7 @@ const OAuth2ConsentView: React.FC<React.PropsWithChildren<unknown>> = () => {
   const [selectedProject, setSelectedProject] = useState<
     number | typeof ALL_PROJECTS
   >(ALL_PROJECTS);
+  const [editing, setEditing] = useState(false);
   const [failed, setFailed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -76,7 +106,16 @@ const OAuth2ConsentView: React.FC<React.PropsWithChildren<unknown>> = () => {
       .catch(() => setFailed(true));
   }, [clientId, scope, state]);
 
+  const isRequired = (s: string) => info?.requiredScopes.includes(s) ?? false;
+
+  // Required scopes (locked on) sort to the top of their group; JS sort is stable, so the rest keep their order.
+  const requiredFirst = (scopes: string[]) =>
+    [...scopes].sort((a, b) => Number(isRequired(b)) - Number(isRequired(a)));
+
   const toggleScope = (s: string) => {
+    if (isRequired(s)) {
+      return;
+    }
     setSelectedScopes((prev) =>
       prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]
     );
@@ -149,16 +188,21 @@ const OAuth2ConsentView: React.FC<React.PropsWithChildren<unknown>> = () => {
   }
 
   const { requestedInaccessible, projectOptions } = deriveConsentProjects(info);
+  const allGroups = groupConsentScopes(info.scopes, structure);
+  const grantedGroups = groupConsentScopes(
+    info.scopes.filter((s) => selectedScopes.includes(s)),
+    structure
+  );
 
   return (
     <DashboardPage>
       <CompactView
         windowTitle={t('oauth2_consent_title', 'Authorize application')}
-        title={t('oauth2_consent_title', 'Authorize application')}
+        title={t('oauth2_consent_heading', 'Allow access')}
         subtitle={
           <T
             keyName="oauth2_consent_subtitle"
-            defaultValue="{appName} is requesting permission to:"
+            defaultValue="{appName} wants to access a project. Review what it will be able to do."
             params={{ appName: info.appName }}
           />
         }
@@ -176,24 +220,7 @@ const OAuth2ConsentView: React.FC<React.PropsWithChildren<unknown>> = () => {
                 />
               </Alert>
             )}
-            <StyledCapabilities>
-              {info.scopes.map((s) => (
-                <FormControlLabel
-                  key={s}
-                  data-cy="oauth2-consent-scope"
-                  data-cy-scope={s}
-                  control={
-                    <Checkbox
-                      size="small"
-                      checked={selectedScopes.includes(s)}
-                      onChange={() => toggleScope(s)}
-                    />
-                  }
-                  label={getScopeTranslation(s as PermissionModelScope)}
-                />
-              ))}
-            </StyledCapabilities>
-            <FormControl fullWidth size="small" sx={{ mt: 2 }}>
+            <FormControl fullWidth size="small">
               <InputLabel id="oauth2-consent-project-label">
                 {t('oauth2_consent_project_label', 'Project')}
               </InputLabel>
@@ -229,6 +256,70 @@ const OAuth2ConsentView: React.FC<React.PropsWithChildren<unknown>> = () => {
                 ))}
               </Select>
             </FormControl>
+
+            <StyledPermissionsHeader>
+              <StyledSectionTitle>
+                <T
+                  keyName="oauth2_consent_permissions_title"
+                  defaultValue="Permissions"
+                />
+              </StyledSectionTitle>
+              <Link
+                component="button"
+                type="button"
+                data-cy="oauth2-consent-modify"
+                onClick={() => setEditing((prev) => !prev)}
+              >
+                {editing
+                  ? t('oauth2_consent_modify_done', 'Done')
+                  : t('oauth2_consent_modify', 'Modify')}
+              </Link>
+            </StyledPermissionsHeader>
+
+            {!editing &&
+              grantedGroups.map((group, i) => (
+                <StyledGroup key={group.label ?? `_${i}`}>
+                  {group.label && (
+                    <StyledGroupLabel>{group.label}:</StyledGroupLabel>
+                  )}
+                  {group.scopes.map((s) => (
+                    <Chip
+                      key={s}
+                      size="small"
+                      data-cy="oauth2-consent-scope"
+                      data-cy-scope={s}
+                      label={getScopeTranslation(s as PermissionModelScope)}
+                    />
+                  ))}
+                </StyledGroup>
+              ))}
+
+            {editing &&
+              allGroups.map((group, i) => (
+                <StyledCheckboxGroup key={group.label ?? `_${i}`}>
+                  {group.label && (
+                    <StyledGroupLabel>{group.label}</StyledGroupLabel>
+                  )}
+                  {requiredFirst(group.scopes).map((s) => (
+                    <Box key={s} sx={{ display: 'block', ml: 1.5 }}>
+                      <FormControlLabel
+                        data-cy="oauth2-consent-scope"
+                        data-cy-scope={s}
+                        control={
+                          <Checkbox
+                            size="small"
+                            checked={selectedScopes.includes(s)}
+                            disabled={isRequired(s)}
+                            onChange={() => toggleScope(s)}
+                          />
+                        }
+                        label={getScopeTranslation(s as PermissionModelScope)}
+                      />
+                    </Box>
+                  ))}
+                </StyledCheckboxGroup>
+              ))}
+
             <StyledButtons>
               <LoadingButton
                 variant="outlined"

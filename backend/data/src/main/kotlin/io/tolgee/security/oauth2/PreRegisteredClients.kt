@@ -41,8 +41,12 @@ class PreRegisteredClients(
     if (properties.browserExtensionRedirectUris.isEmpty()) return null
     return publicClientBuilder(OAuth2Constants.BROWSER_EXTENSION_CLIENT_ID, "Tolgee Browser Extension")
       .apply { properties.browserExtensionRedirectUris.forEach { redirectUri(it) } }
-      .clientSettings(clientSettings(requireConsent = true))
-      .build()
+      .clientSettings(
+        clientSettings(
+          requireConsent = true,
+          requiredScopes = listOf(Scope.KEYS_VIEW, Scope.TRANSLATIONS_VIEW),
+        ),
+      ).build()
   }
 
   private fun cliClient(): RegisteredClient? {
@@ -69,11 +73,18 @@ class PreRegisteredClients(
       .tokenSettings(properties.tokenSettings())
   }
 
-  private fun clientSettings(requireConsent: Boolean): ClientSettings {
-    return ClientSettings
-      .builder()
-      .requireProofKey(true)
-      .requireAuthorizationConsent(requireConsent)
-      .build()
+  private fun clientSettings(
+    requireConsent: Boolean,
+    requiredScopes: List<Scope> = emptyList(),
+  ): ClientSettings {
+    val builder =
+      ClientSettings
+        .builder()
+        .requireProofKey(true)
+        .requireAuthorizationConsent(requireConsent)
+    if (requiredScopes.isNotEmpty()) {
+      builder.setting(OAuth2Constants.REQUIRED_SCOPES_SETTING, requiredScopes.joinToString(" ") { it.value })
+    }
+    return builder.build()
   }
 }

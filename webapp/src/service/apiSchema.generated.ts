@@ -2249,6 +2249,7 @@ export interface components {
       project?: components["schemas"]["OAuth2ProjectModel"];
       /** Format: int64 */
       requestedProjectId?: number;
+      requiredScopes: string[];
       scopes: string[];
     };
     ContentDeliveryConfigModel: {
