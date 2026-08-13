@@ -3,10 +3,8 @@ import { T, useTranslate } from '@tolgee/react';
 import {
   Alert,
   Box,
-  Checkbox,
   Chip,
   FormControl,
-  FormControlLabel,
   InputLabel,
   Link,
   MenuItem,
@@ -20,9 +18,18 @@ import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { useUrlSearch } from 'tg.hooks/useUrlSearch';
 import { apiV2HttpService } from 'tg.service/http/ApiV2HttpService';
+import { useApiQuery } from 'tg.service/http/useQueryApi';
+import { SpinnerProgress } from 'tg.component/SpinnerProgress';
 import { useScopeTranslations } from 'tg.component/PermissionsSettings/useScopeTranslations';
-import { usePermissionsStructure } from 'tg.component/PermissionsSettings/usePermissionsStructure';
-import { PermissionModelScope } from 'tg.component/PermissionsSettings/types';
+import {
+  limitStructureToOptions,
+  usePermissionsStructure,
+} from 'tg.component/PermissionsSettings/usePermissionsStructure';
+import { Hierarchy } from 'tg.component/PermissionsSettings/Hierarchy';
+import {
+  PermissionAdvancedState,
+  PermissionModelScope,
+} from 'tg.component/PermissionsSettings/types';
 import { deriveConsentProjects } from './consentProjectOptions';
 import { groupConsentScopes } from './consentScopeGroups';
 
@@ -67,10 +74,6 @@ const StyledGroupLabel = styled('div')`
   margin-right: ${({ theme }) => theme.spacing(0.5)};
 `;
 
-const StyledCheckboxGroup = styled('div')`
-  margin-top: ${({ theme }) => theme.spacing(1)};
-`;
-
 const StyledButtons = styled(Box)`
   display: flex;
   gap: ${({ theme }) => theme.spacing(2)};
@@ -106,19 +109,18 @@ const OAuth2ConsentView: React.FC<React.PropsWithChildren<unknown>> = () => {
       .catch(() => setFailed(true));
   }, [clientId, scope, state]);
 
-  const isRequired = (s: string) => info?.requiredScopes.includes(s) ?? false;
+  const dependenciesLoadable = useApiQuery({
+    url: '/v2/public/scope-info/hierarchy',
+    method: 'get',
+    query: {},
+  });
 
-  // Required scopes (locked on) sort to the top of their group; JS sort is stable, so the rest keep their order.
-  const requiredFirst = (scopes: string[]) =>
-    [...scopes].sort((a, b) => Number(isRequired(b)) - Number(isRequired(a)));
-
-  const toggleScope = (s: string) => {
-    if (isRequired(s)) {
-      return;
-    }
-    setSelectedScopes((prev) =>
-      prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]
-    );
+  // Keep only app-requested scopes and always re-add the required ones, so the tree can never grant beyond the
+  // authorization request nor drop a locked-on scope via a parent-group toggle.
+  const handleScopesChange = (data: PermissionAdvancedState) => {
+    const next = new Set(data.scopes as string[]);
+    info?.requiredScopes.forEach((s) => next.add(s));
+    setSelectedScopes((info?.scopes ?? []).filter((s) => next.has(s)));
   };
 
   // Real form POST (not fetch) so the browser sends the session cookie and follows the redirect back to the client.
@@ -188,7 +190,10 @@ const OAuth2ConsentView: React.FC<React.PropsWithChildren<unknown>> = () => {
   }
 
   const { requestedInaccessible, projectOptions } = deriveConsentProjects(info);
-  const allGroups = groupConsentScopes(info.scopes, structure);
+  const limitedStructure = limitStructureToOptions(
+    [structure],
+    info.scopes as PermissionModelScope[]
+  );
   const grantedGroups = groupConsentScopes(
     info.scopes.filter((s) => selectedScopes.includes(s)),
     structure
@@ -295,29 +300,27 @@ const OAuth2ConsentView: React.FC<React.PropsWithChildren<unknown>> = () => {
               ))}
 
             {editing &&
-              allGroups.map((group, i) => (
-                <StyledCheckboxGroup key={group.label ?? `_${i}`}>
-                  {group.label && (
-                    <StyledGroupLabel>{group.label}</StyledGroupLabel>
-                  )}
-                  {requiredFirst(group.scopes).map((s) => (
-                    <Box key={s} sx={{ display: 'block', ml: 1.5 }}>
-                      <FormControlLabel
-                        data-cy="oauth2-consent-scope"
-                        data-cy-scope={s}
-                        control={
-                          <Checkbox
-                            size="small"
-                            checked={selectedScopes.includes(s)}
-                            disabled={isRequired(s)}
-                            onChange={() => toggleScope(s)}
-                          />
-                        }
-                        label={getScopeTranslation(s as PermissionModelScope)}
-                      />
-                    </Box>
+              (dependenciesLoadable.isLoading ? (
+                <Box sx={{ mt: 1 }}>
+                  <SpinnerProgress />
+                </Box>
+              ) : (
+                <Box sx={{ mt: 1 }} data-cy="oauth2-consent-scopes">
+                  {limitedStructure.map((structureItem, i) => (
+                    <Hierarchy
+                      key={i}
+                      structure={structureItem}
+                      dependencies={dependenciesLoadable.data!}
+                      state={{
+                        scopes: selectedScopes as PermissionModelScope[],
+                      }}
+                      onChange={handleScopesChange}
+                      disabledScopes={
+                        info.requiredScopes as PermissionModelScope[]
+                      }
+                    />
                   ))}
-                </StyledCheckboxGroup>
+                </Box>
               ))}
 
             <StyledButtons>

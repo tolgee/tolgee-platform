@@ -44,6 +44,7 @@ type Props = {
   state: PermissionAdvancedState;
   onChange: (value: PermissionAdvancedState) => void;
   allLangs?: LanguageModel[];
+  disabledScopes?: PermissionModelScope[];
 };
 
 export const Hierarchy: React.FC<React.PropsWithChildren<Props>> = ({
@@ -52,6 +53,7 @@ export const Hierarchy: React.FC<React.PropsWithChildren<Props>> = ({
   state,
   onChange,
   allLangs,
+  disabledScopes,
 }) => {
   const { t } = useTranslate();
   const allLangIds = allLangs?.map((l) => l.id) || [];
@@ -77,7 +79,13 @@ export const Hierarchy: React.FC<React.PropsWithChildren<Props>> = ({
 
   const blockedLanguages = getLanguagesUnion(blockingScopes, state, allLangIds);
 
-  const disabled = Boolean(blockingScopes.length);
+  const lockedRequired = Boolean(
+    disabledScopes?.length &&
+      myScopes.length &&
+      myScopes.every((scope) => disabledScopes.includes(scope))
+  );
+
+  const disabled = Boolean(blockingScopes.length) || lockedRequired;
 
   const fullyChecked =
     scopeIncluded || (!structure.value && childrenCheckedAll);
@@ -210,6 +218,7 @@ export const Hierarchy: React.FC<React.PropsWithChildren<Props>> = ({
               state={state}
               onChange={onChange}
               allLangs={allLangs}
+              disabledScopes={disabledScopes}
             />
           );
         })}

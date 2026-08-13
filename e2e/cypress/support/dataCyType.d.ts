@@ -508,6 +508,7 @@ declare namespace DataCy {
         "oauth2-consent-project-option": true;
         "oauth2-consent-project-select": true;
         "oauth2-consent-scope": true;
+        "oauth2-consent-scopes": true;
         "order-translation-confirmation": true;
         "order-translation-confirmation-ok": true;
         "order-translation-invitation-checkbox": true;
