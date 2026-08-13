@@ -6,7 +6,7 @@ import { extname, resolve, relative } from 'node:path';
 import fg from 'fast-glob';
 
 const componentDirs = ['components'];
-const otherDirs = ['hooks', 'constants'];
+const otherDirs = ['hooks', 'constants', 'theme'];
 
 const entryFiles = [
   ...componentDirs.flatMap((dir) =>
@@ -32,10 +32,7 @@ export default defineConfig({
   plugins: [
     react(),
     viteTsconfigPaths({
-      projects: [
-        resolve(__dirname, 'tsconfig.json'),
-        resolve(__dirname, '../webapp/tsconfig.json'), // TODO remove once https://github.com/tolgee/tolgee-platform/issues/3326
-      ],
+      projects: [resolve(__dirname, 'tsconfig.json')],
     }),
     nodePolyfills(),
   ],

@@ -6,7 +6,7 @@ export default defineConfig({
   language: 'en', // === en-US
   minWordLength: 3,
   caseSensitive: true,
-  words: ['CSF', 'subpaths', 'Tolgee', 'tsc', 'Vite'],
+  words: ['CSF', 'Segoe', 'subpaths', 'Tolgee', 'tsc', 'Vite'],
   flagWords: [],
   ignoreWords: [
     'autodocs',
@@ -16,6 +16,7 @@ export default defineConfig({
     'Deutsch',
     'env',
     'esnext',
+    'figma',
     'Español',
     'Français',
     'fns',

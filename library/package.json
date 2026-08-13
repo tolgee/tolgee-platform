@@ -86,6 +86,10 @@
     "./constants/*": {
       "types": "./dist/constants/*.d.ts",
       "import": "./dist/constants/*.js"
+    },
+    "./theme/*": {
+      "types": "./dist/theme/*.d.ts",
+      "import": "./dist/theme/*.js"
     }
   },
   "files": [

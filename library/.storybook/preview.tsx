@@ -6,7 +6,7 @@ import { withTolgeeProvider } from '@tolgee/storybook-addon';
 import { MuiLocalizationProvider } from '@tginternal/library/components/MuiLocalizationProvider';
 import { locales } from '@tginternal/library/constants/locales';
 
-import { getTheme } from '../../webapp/src/ThemeProvider'; // TODO migrate https://github.com/tolgee/tolgee-platform/issues/3326
+import { getTheme } from '../src/theme/getTheme';
 import { branchName } from '../../webapp/src/branch.json';
 
 const LANGUAGE = 'en';
