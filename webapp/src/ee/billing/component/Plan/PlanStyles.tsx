@@ -33,21 +33,42 @@ export const PlanContainer = styled('div')`
       ${({ theme }) => theme.palette.tokens.elevation.pricingActive};
   }
   ${({ theme }) => theme.breakpoints.down('md')} {
+    /* The row stops being a joined surface here and becomes a grid of separate cards,
+       so every card gets its own chrome back — not just the active one. */
+    &.inRow {
+      border: 1px solid ${({ theme }) => theme.palette.tokens.border.soft};
+      border-radius: 20px;
+      box-shadow: 0px 0px 20px 0px
+        ${({ theme }) => theme.palette.tokens.elevation.pricing};
+    }
     &.inRow.active {
       margin: 0;
+      border-color: ${({ theme }) =>
+        theme.palette.tokens.secondary._states.outlinedBorder};
+      box-shadow: 0px 0px 20px 0px
+        ${({ theme }) => theme.palette.tokens.elevation.pricingActive};
     }
   }
 `;
 
 export const PlanRow = styled('div')`
   display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: 1fr;
-  align-items: start;
+  /* A 24% floor caps the row at four cards — a fifth cannot fit and wraps instead of
+     squeezing every column narrower. auto-fit collapses the unused tracks, so three
+     cards still stretch across the full width. */
+  grid-template-columns: repeat(auto-fit, minmax(24%, 1fr));
+  align-items: stretch;
   border: 1px solid ${({ theme }) => theme.palette.tokens.border.soft};
   border-radius: 20px;
   background: ${({ theme }) => theme.palette.tokens.background['paper-2']};
-  & > * + * {
+  /* The divider is a pseudo-element, not a border: PlanContainer's own .inRow rule
+     sets border:none at higher specificity and would silently win. */
+  & > * + *::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
     border-left: 1px solid ${({ theme }) => theme.palette.tokens.border.soft};
   }
   ${({ theme }) => theme.breakpoints.down('md')} {
@@ -56,8 +77,8 @@ export const PlanRow = styled('div')`
     border: none;
     background: none;
     gap: 16px;
-    & > * + * {
-      border-left: none;
+    & > * + *::before {
+      content: none;
     }
   }
 `;
@@ -102,8 +123,12 @@ export const PlanHeader = styled('div')`
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 4px;
   padding: 24px;
+  /* A contact-us plan has one line where the others have price + period; without a
+     floor its band is shorter and the row's header stops reading as continuous. */
+  min-height: 140px;
   background: ${({ theme }) => theme.palette.tokens.background['paper-3']};
   &.highlighted {
     background: ${({ theme }) => theme.palette.tokens.secondary.main};
