@@ -55,3 +55,36 @@ export const PlanFeaturesBox = styled(Box)`
   padding: 24px 20px;
   background: ${({ theme }) => theme.palette.tokens.background['paper-3']};
 `;
+
+export const PlanHeader = styled('div')`
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 24px;
+  background: ${({ theme }) => theme.palette.tokens.background['paper-3']};
+  &.highlighted {
+    background: ${({ theme }) => theme.palette.tokens.secondary.main};
+    color: ${({ theme }) => theme.palette.tokens.secondary.contrast};
+  }
+`;
+
+// Sits on PlanHeader's top edge (see PlanActiveBanner's `pill` mode) — needs
+// PlanHeader's `position: relative` as its offset parent.
+export const PlanHeaderBadge = styled('div')`
+  position: absolute;
+  top: 0px;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  color: ${({ theme }) => theme.palette.tokens.secondary.main};
+  background: ${({ theme }) => theme.palette.tokens.background['paper-1']};
+`;
