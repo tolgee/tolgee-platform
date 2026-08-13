@@ -126,6 +126,7 @@ declare namespace DataCy {
         "batch-select-item": true;
         "billing-active-card-current-period": true;
         "billing-active-card-subscribed-at": true;
+        "billing-plan-feature": true;
         "billing-plan-included-credits": true;
         "billing-plan-included-keys": true;
         "billing-plan-included-seats": true;
