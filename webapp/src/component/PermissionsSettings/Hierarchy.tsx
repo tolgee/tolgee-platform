@@ -85,7 +85,11 @@ export const Hierarchy: React.FC<React.PropsWithChildren<Props>> = ({
       myScopes.every((scope) => disabledScopes.includes(scope))
   );
 
-  const disabled = Boolean(blockingScopes.length) || lockedRequired;
+  // When an explicit locked set is supplied (OAuth consent), it is the only source of disabling: optional scopes stay
+  // freely toggleable and a group deselects down to its locked children (a dash) instead of being blocked wholesale.
+  const disabled = disabledScopes
+    ? lockedRequired
+    : Boolean(blockingScopes.length);
 
   const fullyChecked =
     scopeIncluded || (!structure.value && childrenCheckedAll);
