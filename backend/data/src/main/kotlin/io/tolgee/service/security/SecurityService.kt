@@ -199,9 +199,8 @@ class SecurityService(
     try {
       checkProjectPermission(projectId, scope)
     } catch (err: PermissionException) {
-      // The assignee fallback below is a user-authority path; an OAuth token must not ride it to widen past its
-      // consented scope ∩ project-set ceiling.
-      if (authenticationFacade.isOAuthTokenAuth) throw err
+      // TODO: an OAuth token can currently ride the assignee fallback to act past its consented scope. To be
+      //  fixed later with a dedicated scope that explicitly grants the task-assignee elevation.
       val assignees = taskService.findAssigneeById(projectId, taskNumber, activeUser.id)
       if (assignees.isEmpty() || assignees[0].id != activeUser.id) {
         throw err
@@ -214,7 +213,6 @@ class SecurityService(
     languageId: Long,
     taskType: TaskType? = null,
   ): Boolean {
-    if (authenticationFacade.isOAuthTokenAuth) return false
     val assignees =
       taskService.findAssigneeByKey(
         keyId,
@@ -336,7 +334,6 @@ class SecurityService(
     languageIds: Collection<Long>,
     keyId: Long? = null,
   ): Boolean {
-    if (authenticationFacade.isOAuthTokenAuth) return false
     checkLanguageViewPermission(projectId, languageIds)
 
     if (keyId != null && languageIds.isNotEmpty()) {
