@@ -1,0 +1,47 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import { Swatches } from '../../.storybook/docs/Swatches';
+
+<Meta title="Foundations/Colors" />
+
+# Colors
+
+Read from the theme itself, so this always matches what the app renders. Switch Light and Dark in
+the toolbar — every value updates with it, and tokens that differ between the two modes show the
+other mode's value underneath.
+
+The values come from `figmaTheme.ts`, which is exported from the Figma design system and must not
+be edited by hand.
+
+## Brand
+
+Raw palette exported from Figma, available as `theme.palette.colors`. These do not change with the
+mode.
+
+<Swatches path="palette.colors" />
+
+## Semantic tokens
+
+Available as `theme.palette.tokens`. These are what components should reach for — they follow the
+mode, the brand palette above does not.
+
+<Swatches path="palette.tokens" />
+
+## Surfaces
+
+<Swatches path="palette.background" />
+<Swatches path="palette.tile" />
+<Swatches path="palette.cell" />
+<Swatches path="palette.navbar" />
+
+## Editor and activity
+
+<Swatches path="palette.editor" />
+<Swatches path="palette.activity" />
+<Swatches path="palette.marker" />
+
+## Banners
+
+<Swatches path="palette.topBanner" />
+<Swatches path="palette.exampleBanner" />
+<Swatches path="palette.tipsBanner" />
+<Swatches path="palette.revisionFilterBanner" />

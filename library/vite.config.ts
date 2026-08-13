@@ -16,7 +16,9 @@ const entryFiles = [
     fg.sync(`src/${dir}/**/*.{ts,tsx}`, {
       cwd: __dirname,
       absolute: true,
-      ignore: ['**/*.stories.*', '**/*.test.*'],
+      // Story files are named `stories.ts`, with nothing before the dot, so the usual
+      // `*.stories.*` pattern never matches them and they end up as published entry points.
+      ignore: ['**/stories.*', '**/*.stories.*', '**/*.test.*'],
     }),
   ),
 ];

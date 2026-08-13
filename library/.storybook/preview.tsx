@@ -1,8 +1,9 @@
-import { CssBaseline, ThemeProvider } from '@mui/material';
+import { Box, CssBaseline, ThemeProvider } from '@mui/material';
 import type { Preview } from '@storybook/react-vite';
 import { withThemeFromJSXProvider } from '@storybook/addon-themes';
 import { configure } from 'storybook/test';
 import { withTolgeeProvider } from '@tolgee/storybook-addon';
+import { DocsContainer } from './docs/DocsContainer';
 import { MuiLocalizationProvider } from '@tginternal/library/components/MuiLocalizationProvider';
 import { locales } from '@tginternal/library/constants/locales';
 
@@ -22,8 +23,37 @@ const preview: Preview = {
         date: /Date$/i,
       },
     },
+    options: {
+      storySort: {
+        order: [
+          'Foundations',
+          ['Colors', 'Typography', 'Component styles'],
+          'components',
+          '*',
+        ],
+      },
+    },
+    docs: { container: DocsContainer },
+    // The theme switcher already sets the surface color; a second background control would paint
+    // over it and allow a light canvas under a dark theme.
+    backgrounds: { disable: true },
   },
   decorators: [
+    // Innermost, so it sits inside the theme provider below and reads the very theme the story
+    // was given. The canvas must never be painted from a second source: a dark surface under a
+    // light component is exactly what the theme switcher exists to rule out.
+    (Story) => (
+      <Box
+        sx={{
+          bgcolor: 'background.default',
+          color: 'text.primary',
+          p: 2,
+          minHeight: '100%',
+        }}
+      >
+        <Story />
+      </Box>
+    ),
     withTolgeeProvider({
       messageFormat: 'icu',
       locales,

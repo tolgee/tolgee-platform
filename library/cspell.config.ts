@@ -6,7 +6,18 @@ export default defineConfig({
   language: 'en', // === en-US
   minWordLength: 3,
   caseSensitive: true,
-  words: ['CSF', 'Segoe', 'subpaths', 'Tolgee', 'tsc', 'Vite'],
+  words: [
+    'argstable',
+    'CSF',
+    'hsl',
+    'sbdocs',
+    'Segoe',
+    'subpaths',
+    'Tolgee',
+    'tsc',
+    'Vite',
+    'wordmark',
+  ],
   flagWords: [],
   ignoreWords: [
     'autodocs',
