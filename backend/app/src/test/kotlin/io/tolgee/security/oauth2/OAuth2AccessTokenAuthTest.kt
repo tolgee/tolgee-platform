@@ -232,6 +232,16 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
   }
 
   @Test
+  fun `denies current-permissions for a project outside the token project set`() {
+    // The token is narrowed to a different project. Even though the underlying user can access testData.project, the
+    // endpoint must not disclose its name, the user's role or permitted languages — it has no project path variable, so
+    // the interceptor never narrows it; the controller must reject outright, not just return empty scopes.
+    val token = mint(scopes = listOf("translations.view"), projects = listOf(testData.project.id + 999))
+    performGet("/v2/api-keys/current-permissions?projectId=${testData.project.id}", bearer(token))
+      .andIsForbidden
+  }
+
+  @Test
   fun `requires an explicit project for current-permissions with an OAuth token`() {
     val token = mint(scopes = listOf("translations.view"), projects = OAuth2Constants.ALL_PROJECTS)
     performGet("/v2/api-keys/current-permissions", bearer(token)).andIsBadRequest
