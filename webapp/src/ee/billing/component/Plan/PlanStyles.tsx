@@ -19,6 +19,47 @@ export const PlanContainer = styled('div')`
     border-color: ${({ theme }) =>
       theme.palette.tokens.secondary._states.outlinedBorder};
   }
+  &.inRow {
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  &.inRow.active {
+    border: 1px solid
+      ${({ theme }) => theme.palette.tokens.secondary._states.outlinedBorder};
+    border-radius: 20px;
+    margin: -16px 0;
+    box-shadow: 0px 0px 20px 0px
+      ${({ theme }) => theme.palette.tokens.elevation.pricingActive};
+  }
+  ${({ theme }) => theme.breakpoints.down('md')} {
+    &.inRow.active {
+      margin: 0;
+    }
+  }
+`;
+
+export const PlanRow = styled('div')`
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  align-items: start;
+  border: 1px solid ${({ theme }) => theme.palette.tokens.border.soft};
+  border-radius: 20px;
+  background: ${({ theme }) => theme.palette.tokens.background['paper-2']};
+  & > * + * {
+    border-left: 1px solid ${({ theme }) => theme.palette.tokens.border.soft};
+  }
+  ${({ theme }) => theme.breakpoints.down('md')} {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(2, 1fr);
+    border: none;
+    background: none;
+    gap: 16px;
+    & > * + * {
+      border-left: none;
+    }
+  }
 `;
 
 export const PlanContent = styled('div')`
