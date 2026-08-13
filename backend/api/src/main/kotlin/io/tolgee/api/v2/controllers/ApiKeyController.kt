@@ -216,9 +216,6 @@ class ApiKeyController(
         else -> throw BadRequestException(Message.INVALID_AUTHENTICATION_METHOD)
       }
 
-    // The route has no project path variable, so ProjectAuthorizationInterceptor never narrows an OAuth token here.
-    // Without this gate the response would still expose a project's name, the user's role and permitted languages for a
-    // project outside the token's consented set (only `scopes` is emptied below), leaking past the confinement.
     authenticationFacade.oauthTokenCredentials?.let {
       if (!it.coversProject(projectIdNotNull)) throw PermissionException(Message.USER_HAS_NO_PROJECT_ACCESS)
     }
