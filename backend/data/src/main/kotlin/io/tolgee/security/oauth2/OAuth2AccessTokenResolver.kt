@@ -18,6 +18,7 @@ package io.tolgee.security.oauth2
 
 import com.nimbusds.jwt.SignedJWT
 import io.tolgee.constants.Message
+import io.tolgee.dtos.cacheable.isTokenInvalidated
 import io.tolgee.exceptions.AuthExpiredException
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.model.enums.Scope

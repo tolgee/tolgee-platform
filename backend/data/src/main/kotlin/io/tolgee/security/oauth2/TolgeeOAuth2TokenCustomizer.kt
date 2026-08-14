@@ -16,6 +16,7 @@
 
 package io.tolgee.security.oauth2
 
+import io.tolgee.dtos.cacheable.isTokenInvalidated
 import io.tolgee.service.security.UserAccountService
 import org.springframework.security.oauth2.core.AuthorizationGrantType
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException

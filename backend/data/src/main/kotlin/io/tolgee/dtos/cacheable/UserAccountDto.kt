@@ -42,16 +42,16 @@ data class UserAccountDto(
   override fun toString(): String {
     return username
   }
+}
 
-  // The account-wide token-invalidation gate: a token issued before [tokensValidNotBefore] (password change / forced
-  // sign-out) is no longer valid. One owner for every bearer-token path (JWT, OAuth access + refresh).
-  fun isTokenInvalidated(issuedAt: java.time.Instant?): Boolean {
-    val validNotBefore = tokensValidNotBefore ?: return false
-    if (issuedAt == null) return false
-    // JWT `iat` has whole-second precision; truncate the cutoff to seconds too, otherwise a token minted in the same
-    // second as the invalidation reads as "before" the millisecond-precise cutoff and is wrongly rejected.
-    return issuedAt.isBefore(validNotBefore.toInstant().truncatedTo(java.time.temporal.ChronoUnit.SECONDS))
-  }
+// The account-wide token-invalidation gate: a token issued before [tokensValidNotBefore] (password change / forced
+// sign-out) is no longer valid. One owner for every bearer-token path (JWT, OAuth access + refresh).
+fun UserAccountDto.isTokenInvalidated(issuedAt: java.time.Instant?): Boolean {
+  val validNotBefore = tokensValidNotBefore ?: return false
+  if (issuedAt == null) return false
+  // JWT `iat` has whole-second precision; truncate the cutoff to seconds too, otherwise a token minted in the same
+  // second as the invalidation reads as "before" the millisecond-precise cutoff and is wrongly rejected.
+  return issuedAt.isBefore(validNotBefore.toInstant().truncatedTo(java.time.temporal.ChronoUnit.SECONDS))
 }
 
 fun UserAccountDto.isAdmin(): Boolean {
