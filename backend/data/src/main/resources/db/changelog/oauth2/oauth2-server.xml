@@ -122,16 +122,18 @@
         <comment>
             The SAS reference schema ships PK-only; production must add these. findByToken (every code exchange and
             refresh) filters on the token/state columns, and our connected-apps queries filter on principal_name.
-            The token columns are mostly NULL, so partial indexes keep them small.
+            The token columns are mostly NULL, so partial indexes keep them small. The token-value columns use hash
+            indexes: findByToken only does equality lookups, and a self-contained access-token JWT can exceed the B-tree
+            entry size limit (~2704 bytes) with many scopes, which would make the row unindexable and break issuance.
         </comment>
         <sql dbms="postgresql" splitStatements="false">
             CREATE INDEX ix_oauth2_authorization_principal_name ON oauth2_authorization (principal_name);
             CREATE INDEX ix_oauth2_authorization_state ON oauth2_authorization (state) WHERE state IS NOT NULL;
-            CREATE INDEX ix_oauth2_authorization_auth_code ON oauth2_authorization (authorization_code_value)
+            CREATE INDEX ix_oauth2_authorization_auth_code ON oauth2_authorization USING hash (authorization_code_value)
                 WHERE authorization_code_value IS NOT NULL;
-            CREATE INDEX ix_oauth2_authorization_access_token ON oauth2_authorization (access_token_value)
+            CREATE INDEX ix_oauth2_authorization_access_token ON oauth2_authorization USING hash (access_token_value)
                 WHERE access_token_value IS NOT NULL;
-            CREATE INDEX ix_oauth2_authorization_refresh_token ON oauth2_authorization (refresh_token_value)
+            CREATE INDEX ix_oauth2_authorization_refresh_token ON oauth2_authorization USING hash (refresh_token_value)
                 WHERE refresh_token_value IS NOT NULL;
         </sql>
         <rollback>
