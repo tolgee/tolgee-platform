@@ -72,6 +72,7 @@ class PreRegisteredClientsTest {
 
     val cli = byClientId.getValue(OAuth2Constants.CLI_CLIENT_ID)
     assertThat(cli.clientSettings.isRequireProofKey).isTrue()
-    assertThat(cli.clientSettings.isRequireAuthorizationConsent).isFalse()
+    // Loopback public client: consent is required so a local process can't silently obtain a full-scope token.
+    assertThat(cli.clientSettings.isRequireAuthorizationConsent).isTrue()
   }
 }

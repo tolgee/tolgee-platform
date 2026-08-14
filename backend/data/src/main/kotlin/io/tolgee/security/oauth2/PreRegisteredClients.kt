@@ -54,7 +54,9 @@ class PreRegisteredClients(
     if (properties.cliRedirectUris.isEmpty()) return null
     return publicClientBuilder(OAuth2Constants.CLI_CLIENT_ID, "Tolgee CLI")
       .apply { properties.cliRedirectUris.forEach { redirectUri(it) } }
-      .clientSettings(clientSettings(requireConsent = false))
+      // A loopback redirect can't be bound to one local app, so any local process that knows this fixed client_id could
+      // otherwise obtain a full-scope token silently. Require consent (OAuth 2.1 / RFC 8252 for public native clients).
+      .clientSettings(clientSettings(requireConsent = true))
       .build()
   }
 
