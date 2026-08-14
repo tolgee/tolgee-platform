@@ -127,7 +127,8 @@ class QaCheckPreviewWebSocketHandler(
       return
     }
 
-    val text = json.get("text")?.asString() ?: ""
+    // asString() throws on objects and arrays, and handleTextMessage doesn't catch
+    val text = json.get("text")?.takeIf { it.isValueNode }?.asString() ?: ""
 
     state.cancelAndSetJob {
       scope.launch { runChecks(session, state, text) }
