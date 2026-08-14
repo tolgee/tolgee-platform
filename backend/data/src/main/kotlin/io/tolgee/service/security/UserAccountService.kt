@@ -600,6 +600,7 @@ class UserAccountService(
     userAccount.username = newEmail
   }
 
+  @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#userAccount.id")
   fun invalidateTokens(userAccount: UserAccount): UserAccount {
     resetTokensValidNotBefore(userAccount)
     // The tokensValidNotBefore cutoff alone only kills OAuth access tokens at expiry; deleting the grants makes it
