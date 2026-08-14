@@ -14,7 +14,7 @@ const css = (mode: 'light' | 'dark') => {
   const paper = palette.background.paper;
   const text = palette.text.primary;
   const line = palette.divider;
-  const code = palette.colors.grey['950'];
+  const codeBg = palette.colors.grey['950'];
   const onCode = palette.colors.grey['50'];
 
   return `
@@ -22,12 +22,13 @@ const css = (mode: 'light' | 'dark') => {
     .sbdocs.sbdocs-content, .sbdocs h1, .sbdocs h2, .sbdocs h3, .sbdocs h4,
     .sbdocs p, .sbdocs li, .sbdocs strong { color: ${text}; }
     .sbdocs hr, .sbdocs h2 { border-bottom-color: ${line}; }
-    .sbdocs p > code, .sbdocs li > code, .sbdocs h1 > code, .sbdocs h2 > code,
-    .sbdocs h3 > code { background: ${paper}; color: ${text}; border-color: ${line}; }
-    /* The surface stays dark in both modes because Storybook colors its syntax tokens for a dark
-       ground. A fenced block written in MDX has no tokens, so it needs the foreground set too —
-       without it the text keeps the light theme's near-black. */
-    .docblock-source, pre.prismjs { background: ${code} !important;
+    .sbdocs :not(pre) > code { background: ${paper}; color: ${text};
+      border-color: ${line}; }
+    /* The surface is dark in both modes because a story's source is syntax-highlighted for a dark
+       ground. Text without a token of its own needs the foreground set too — that is every block
+       written in these MDX pages, which is why they are fenced without a language: the docs theme
+       would highlight them with its light palette, unreadable here and unfixable from outside. */
+    .docblock-source, pre.prismjs { background: ${codeBg} !important;
       color: ${onCode} !important; border-color: ${line} !important; }
     .sbdocs a[href^='#'] { color: ${palette.text.secondary}; }
 
@@ -53,6 +54,8 @@ const css = (mode: 'light' | 'dark') => {
   `;
 };
 
+// The container's `theme` prop is deliberately not used: changing it re-renders the page and the
+// headings shift horizontally on every switch.
 export const DocsContainer = (props: Props) => {
   const mode = useThemeMode();
 
