@@ -8,7 +8,6 @@ import { UserProfileView } from './userProfile/UserProfileView';
 import { ApiKeysView } from './apiKeys/ApiKeysView';
 import { AccountSecurityView } from './accountSecurity/AccountSecurityView';
 import { PatsView } from './pats/PatsView';
-import { ConnectedAppsView } from './connectedApps/ConnectedAppsView';
 import { NotificationsView } from 'tg.views/userSettings/notifications/NotificationsView';
 
 export const UserSettingsRouter = () => {
@@ -37,10 +36,6 @@ export const UserSettingsRouter = () => {
 
         <PrivateRoute path={LINKS.USER_PATS.template}>
           <PatsView />
-        </PrivateRoute>
-
-        <PrivateRoute path={LINKS.USER_CONNECTED_APPS.template}>
-          <ConnectedAppsView />
         </PrivateRoute>
 
         <PrivateRoute path={LINKS.USER_ACCOUNT_NOTIFICATIONS.template}>

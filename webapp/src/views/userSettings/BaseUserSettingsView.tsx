@@ -44,11 +44,6 @@ export const BaseUserSettingsView: React.FC<React.PropsWithChildren<Props>> = ({
       link: LINKS.USER_PATS.build(),
       label: t('user_menu_pats'),
     });
-
-    menuItems.push({
-      link: LINKS.USER_CONNECTED_APPS.build(),
-      label: t('user_menu_connected_apps', 'Connected apps'),
-    });
   }
 
   return (
