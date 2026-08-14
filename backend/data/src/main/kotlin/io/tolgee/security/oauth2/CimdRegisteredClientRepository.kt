@@ -52,9 +52,11 @@ class CimdRegisteredClientRepository(
     jdbc.findByClientId(clientId)?.let { return it }
     if (!isUrlForm(clientId)) return null
 
-    cached(clientId)?.let { return it }
+    // A cached miss (client == null) short-circuits too: without it an unresolvable client_id — an allow-listed host
+    // exposes unbounded distinct paths — would re-run the blocking outbound fetch on every /oauth2/authorize request.
+    cached(clientId)?.let { return it.client }
 
-    val resolved = fetcher.fetchAndValidate(clientId) ?: return null
+    val resolved = fetcher.fetchAndValidate(clientId)
     put(clientId, resolved)
     return resolved
   }
@@ -63,31 +65,35 @@ class CimdRegisteredClientRepository(
     return clientId.startsWith("https://")
   }
 
-  private fun cached(clientId: String): RegisteredClient? {
+  private fun cached(clientId: String): CacheEntry? {
     val entry = byClientId[clientId] ?: return null
     if (entry.expiresAtMillis < now()) {
       byClientId.remove(clientId)
-      idToClientId.remove(entry.client.id)
+      entry.client?.let { idToClientId.remove(it.id) }
       return null
     }
-    return entry.client
+    return entry
   }
 
   private fun put(
     clientId: String,
-    client: RegisteredClient,
+    client: RegisteredClient?,
   ) {
     if (byClientId.size >= MAX_CACHE_ENTRIES) pruneExpired()
     if (byClientId.size >= MAX_CACHE_ENTRIES) return
-    byClientId[clientId] = CacheEntry(client, now() + cimdProperties.cacheTtlSeconds * 1000)
-    idToClientId[client.id] = clientId
+    val ttlSeconds = if (client != null) cimdProperties.cacheTtlSeconds else NEGATIVE_CACHE_TTL_SECONDS
+    val previous = byClientId.put(clientId, CacheEntry(client, now() + ttlSeconds * 1000))
+    // deterministicId hashes the redirect uris, so a redirect change remaps this clientId to a new client.id; drop the
+    // superseded reverse-mapping entry (and any negative entry has no id) so idToClientId can't grow without bound.
+    previous?.client?.let { if (it.id != client?.id) idToClientId.remove(it.id) }
+    client?.let { idToClientId[it.id] = clientId }
   }
 
   private fun pruneExpired() {
     val cutoff = now()
     byClientId.entries.removeIf { (_, entry) ->
       val expired = entry.expiresAtMillis < cutoff
-      if (expired) idToClientId.remove(entry.client.id)
+      if (expired) entry.client?.let { idToClientId.remove(it.id) }
       expired
     }
   }
@@ -95,11 +101,12 @@ class CimdRegisteredClientRepository(
   private fun now(): Long = currentDateProvider.date.time
 
   private class CacheEntry(
-    val client: RegisteredClient,
+    val client: RegisteredClient?,
     val expiresAtMillis: Long,
   )
 
   companion object {
     private const val MAX_CACHE_ENTRIES = 1000
+    private const val NEGATIVE_CACHE_TTL_SECONDS = 60L
   }
 }

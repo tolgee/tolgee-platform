@@ -100,6 +100,27 @@ class CimdRegisteredClientRepositoryTest {
   }
 
   @Test
+  fun `a failed lookup is cached so an unresolvable client id does not re-fetch on every request`() {
+    whenever(fetcher.fetchAndValidate("https://example.com/unknown")).thenReturn(null)
+    val repo = repo()
+
+    assertThat(repo.findByClientId("https://example.com/unknown")).isNull()
+    assertThat(repo.findByClientId("https://example.com/unknown")).isNull()
+    verify(fetcher, times(1)).fetchAndValidate("https://example.com/unknown")
+  }
+
+  @Test
+  fun `a cached failed lookup is retried after the short negative TTL`() {
+    whenever(fetcher.fetchAndValidate("https://example.com/unknown")).thenReturn(null)
+    val repo = repo()
+
+    repo.findByClientId("https://example.com/unknown")
+    advanceClock(61)
+    repo.findByClientId("https://example.com/unknown")
+    verify(fetcher, times(2)).fetchAndValidate("https://example.com/unknown")
+  }
+
+  @Test
   fun `the resolved-client cache is bounded so distinct urls beyond the cap are not cached`() {
     whenever(fetcher.fetchAndValidate(any())).thenAnswer { client(it.getArgument(0)) }
     val repo = repo()

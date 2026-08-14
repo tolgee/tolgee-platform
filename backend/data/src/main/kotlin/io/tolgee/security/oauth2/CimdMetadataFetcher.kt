@@ -60,7 +60,14 @@ class CimdMetadataFetcher(
     if (!isSafeUrl(clientIdUrl)) return null
 
     val document = fetch(clientIdUrl) ?: return null
-    return buildClient(clientIdUrl, document)
+    // Defense in depth: buildClient already reads every field fail-closed, but it builds a client out of untrusted
+    // metadata, so any residual throw must still resolve to null rather than surface as a 500 on /oauth2/authorize.
+    return try {
+      buildClient(clientIdUrl, document)
+    } catch (e: Exception) {
+      logger.debug("CIMD document rejected for {}: {}", clientIdUrl, e.message)
+      null
+    }
   }
 
   private fun isSafeUrl(clientIdUrl: String): Boolean {
@@ -111,8 +118,8 @@ class CimdMetadataFetcher(
     clientIdUrl: String,
     document: JsonNode,
   ): RegisteredClient? {
-    if (document.get("client_id")?.asString() != clientIdUrl) return null
-    if (document.get("token_endpoint_auth_method")?.asString() != "none") return null
+    if (document.get("client_id").textOrNull() != clientIdUrl) return null
+    if (document.get("token_endpoint_auth_method").textOrNull() != "none") return null
 
     val grantTypes = stringList(document.get("grant_types"))
     if (grantTypes.isNotEmpty() && !grantTypes.contains("authorization_code")) return null
@@ -125,7 +132,7 @@ class CimdMetadataFetcher(
       RegisteredClient
         .withId(deterministicId(clientIdUrl, redirectUris))
         .clientId(clientIdUrl)
-        .clientName(document.get("client_name")?.asString() ?: clientIdUrl)
+        .clientName(document.get("client_name").textOrNull() ?: clientIdUrl)
         .clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
         .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
         .clientSettings(
@@ -168,6 +175,18 @@ class CimdMetadataFetcher(
 
   private fun stringList(node: JsonNode?): List<String> {
     if (node == null || !node.isArray) return emptyList()
-    return node.mapNotNull { it.asString() }
+    return node.mapNotNull { it.textOrNull() }
+  }
+
+  // Jackson's asString() coerces scalars but throws on a container node (object/array), so an attacker-supplied field
+  // given as `{...}`/`[...]` would otherwise escape buildClient. Read every string field through this instead.
+  private fun JsonNode?.textOrNull(): String? {
+    val node = this ?: return null
+    if (!node.isValueNode) return null
+    return try {
+      node.asString()
+    } catch (_: Exception) {
+      null
+    }
   }
 }

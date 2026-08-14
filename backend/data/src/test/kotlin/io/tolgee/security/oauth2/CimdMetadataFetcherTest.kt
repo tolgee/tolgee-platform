@@ -107,6 +107,18 @@ class CimdMetadataFetcherTest {
   }
 
   @Test
+  fun `buildClient rejects a non-textual client_id instead of throwing`() {
+    // A malformed document can give client_id as an object/array; Jackson's asString() throws on those, so buildClient
+    // must read it fail-closed and return null (buildClient runs outside fetch's catch, so a throw would escape).
+    val document = mapper.createObjectNode()
+    document.set("client_id", mapper.createObjectNode().put("url", "https://example.com/client"))
+    document.put("token_endpoint_auth_method", "none")
+    document.set("grant_types", mapper.valueToTree<JsonNode>(listOf("authorization_code")))
+    document.set("redirect_uris", mapper.valueToTree<JsonNode>(listOf("https://example.com/callback")))
+    assertThat(fetcher(ssrfDisabled = true).buildClient("https://example.com/client", document)).isNull()
+  }
+
+  @Test
   fun `buildClient rejects a non-public token_endpoint_auth_method`() {
     val document = validDocument(authMethod = "client_secret_basic")
     assertThat(fetcher(ssrfDisabled = true).buildClient("https://example.com/client", document)).isNull()
