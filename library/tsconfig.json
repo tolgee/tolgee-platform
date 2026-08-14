@@ -2,8 +2,7 @@
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
-      "@tginternal/library/*": ["./src/*"],
-      "tg.fixtures/*": ["../webapp/src/fixtures/*"] // TODO remove under https://github.com/tolgee/tolgee-platform/issues/3326
+      "@tginternal/library/*": ["./src/*"]
     },
     "lib": ["dom", "esnext"],
     "target": "ESNext",
@@ -22,11 +21,6 @@
     "jsx": "react-jsx",
     "jsxImportSource": "@emotion/react"
   },
-  "include": [
-    "src/**/*",
-    ".storybook/**/*",
-    "custom.d.ts",
-    "../webapp/src/custom.d.ts" // TODO remove under https://github.com/tolgee/tolgee-platform/issues/3326
-  ],
+  "include": ["src/**/*", ".storybook/**/*", "custom.d.ts"],
   "exclude": ["dist", "node_modules"]
 }

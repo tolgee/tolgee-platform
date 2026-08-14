@@ -1,0 +1,55 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Foundations/Theme" />
+
+# Theme
+
+Everything on the Colors, Typography and Component styles pages is read from one MUI theme at
+render time. This page is about how that theme is put together and which file to touch when
+something needs to change.
+
+## Two layers
+
+`getThemeOptions(mode)` in `library/src/theme/getTheme.ts` builds the shared layer: palette,
+typography, mixins and the MUI component overrides. Everything that is design system lives here.
+
+The webapp adds its own layer on top in `webapp/src/ThemeProvider.tsx` — the `@font-face` blocks for
+the logo wordmark, and the page-shell rules (`body`, `#root`) that lay out the application frame.
+Those are branding and app layout, not design system, which is why they are not in the library.
+
+Storybook renders the shared layer alone, so what you see here is what a component gets before any
+app adds anything. Colors are identical in both; fonts are not.
+
+## Which file to edit
+
+- `library/src/theme/figmaTheme.ts` — brand palette and semantic tokens. **Edited by nobody: it is
+  exported from Figma.**
+- `library/src/theme/colors.ts` — surfaces, banners, editor and the feature-screen slices. Edited by
+  hand.
+- `library/src/theme/getTheme.ts` — how those two are mapped onto MUI, plus the component overrides.
+  Edited by hand.
+
+## Where a fresh Figma export goes
+
+```
+library/src/theme/figmaTheme.ts
+```
+
+It used to live at `webapp/src/figmaTheme.ts`. Saving an export there instead leaves the app with a
+second copy that nothing reads, while the theme everything else uses keeps the old colors — and no
+build, test or type check fails. The only symptom is that new Figma colors quietly never arrive, so
+check the path after every export.
+
+## Using it in a component
+
+Read colors from the theme, never as literals — that is what makes a component follow the Light and
+Dark switch in the toolbar:
+
+```tsx
+const Styled = styled('span')`
+  color: ${({ theme }) => theme.palette.tokens.text.primary};
+`;
+```
+
+Reach for `palette.tokens` (semantic, follows the mode) rather than `palette.colors` (the raw brand
+ramp, identical in both modes).

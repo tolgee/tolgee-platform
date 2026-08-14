@@ -36,15 +36,15 @@
     "lint:format": "prettier --check ."
   },
   "dependencies": {
-    "@tolgee/format-icu": "^6.2.7",
-    "@tolgee/react": "^6.2.7"
+    "@tolgee/format-icu": "^7.1.1",
+    "@tolgee/react": "^7.1.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
     "@eslint/json": "^0.14.0",
     "@eslint/markdown": "^7.5.1",
     "@storybook/icons": "^2.0.1",
-    "@tolgee/core": "^6.2.7",
+    "@tolgee/core": "^7.1.1",
     "@types/node": "^22.19.1",
     "@types/react": "^18.3.12",
     "cspell": "^9.4.0",

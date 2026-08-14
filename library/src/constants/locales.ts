@@ -8,9 +8,11 @@ import daDateLocale from 'date-fns/locale/da';
 import jaDateLocale from 'date-fns/locale/ja';
 import zhCNDateLocale from 'date-fns/locale/zh-CN';
 
+import type { TreeTranslationsData } from '@tolgee/react';
+
 // Explicit return type, not inference: otherwise tsc serializes each i18n JSON's full shape into
 // locales.d.ts, which trips TS7056 in the declaration build once the translation set grows large.
-type TranslationsData = Record<string, unknown>;
+type TranslationsData = TreeTranslationsData;
 
 export const locales = {
   en: {

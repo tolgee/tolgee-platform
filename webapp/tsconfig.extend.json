@@ -2,6 +2,7 @@
   "compilerOptions": {
     "baseUrl": "./src",
     "paths": {
+      "@tginternal/library/*": ["../../library/src/*"],
       "tg.component/*": ["component/*"],
       "tg.store/*": ["store/*"],
       "tg.hooks/*": ["hooks/*"],

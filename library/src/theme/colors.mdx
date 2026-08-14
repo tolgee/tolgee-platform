@@ -1,47 +1,47 @@
 import { Meta } from '@storybook/addon-docs/blocks';
 import { Swatches } from '../../.storybook/docs/Swatches';
+import { RemainingColors } from '../../.storybook/docs/RemainingColors';
+import { COLOR_SECTIONS } from '../../.storybook/docs/colorSections';
 
 <Meta title="Foundations/Colors" />
 
 # Colors
 
-Read from the theme itself, so this always matches what the app renders. Switch Light and Dark in
-the toolbar — every value updates with it, and tokens that differ between the two modes show the
-other mode's value underneath.
+Every value on this page is read from the library theme at render time, so it cannot drift from
+`getTheme`. Switch Light and Dark in the toolbar — every value updates with it, and tokens that
+differ between the two modes show the other mode's value underneath.
 
-The values come from `figmaTheme.ts`, which is exported from the Figma design system and must not
-be edited by hand.
+**Brand** and **Semantic tokens** are exported from Figma; everything below them is hand-maintained.
+See **Foundations → Theme** for which file to edit and where a fresh Figma export goes.
 
 ## Brand
 
 Raw palette exported from Figma, available as `theme.palette.colors`. These do not change with the
 mode.
 
-<Swatches path="palette.colors" />
+{COLOR_SECTIONS.brand.map((group) => <Swatches key={group} group={group} />)}
 
 ## Semantic tokens
 
 Available as `theme.palette.tokens`. These are what components should reach for — they follow the
 mode, the brand palette above does not.
 
-<Swatches path="palette.tokens" />
+{COLOR_SECTIONS.tokens.map((group) => <Swatches key={group} group={group} />)}
 
 ## Surfaces
 
-<Swatches path="palette.background" />
-<Swatches path="palette.tile" />
-<Swatches path="palette.cell" />
-<Swatches path="palette.navbar" />
+{COLOR_SECTIONS.surfaces.map((group) => <Swatches key={group} group={group} />)}
 
 ## Editor and activity
 
-<Swatches path="palette.editor" />
-<Swatches path="palette.activity" />
-<Swatches path="palette.marker" />
+{COLOR_SECTIONS.editorAndActivity.map((group) => <Swatches key={group} group={group} />)}
 
 ## Banners
 
-<Swatches path="palette.topBanner" />
-<Swatches path="palette.exampleBanner" />
-<Swatches path="palette.tipsBanner" />
-<Swatches path="palette.revisionFilterBanner" />
+{COLOR_SECTIONS.banners.map((group) => <Swatches key={group} group={group} />)}
+
+## Everything else
+
+Whatever the sections above do not list, so a new palette group cannot go undocumented.
+
+<RemainingColors />

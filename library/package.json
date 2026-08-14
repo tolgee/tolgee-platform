@@ -12,30 +12,29 @@
     "format": "prettier --write .",
     "lint": "npm run lint:code && npm run lint:types && npm run lint:spelling && npm run lint:format",
     "lint:code": "eslint '**/*'",
-    "lint:types": "tsc --project tsconfig.lint.json",
+    "lint:types": "tsc --project tsconfig.json",
     "lint:spelling": "cspell --no-progress --dot .",
     "lint:format": "prettier --check .",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
   "dependencies": {
-    "@mui/x-date-pickers": "^7.29.4",
+    "@mui/x-date-pickers": "^7.9.0",
     "@untitled-ui/icons-react": "^0.1.4",
-    "date-fns": "^2.30.0"
+    "date-fns": "^2.29.2"
   },
   "devDependencies": {
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.1",
+    "@emotion/react": "11.11.3",
+    "@emotion/styled": "11.11.0",
     "@eslint/js": "^9.39.1",
     "@eslint/json": "^0.14.0",
     "@eslint/markdown": "^7.5.1",
-    "@mui/material": "^5.18.0",
+    "@mui/material": "5.16.0",
     "@storybook/addon-a11y": "^10.1.5",
     "@storybook/addon-docs": "^10.1.5",
     "@storybook/addon-themes": "^10.1.5",
     "@storybook/react-vite": "^10.1.5",
-    "@tginternal/language-util": "^1.1.1",
-    "@tolgee/react": "^6.2.7",
+    "@tolgee/react": "7.1.1",
     "@tolgee/storybook-addon": "file:../storybook-tolgee-addon",
     "@types/node": "^20.16.0",
     "@types/react": "^18.3.12",
@@ -62,10 +61,11 @@
     "vite-tsconfig-paths": "^5.1.4"
   },
   "peerDependencies": {
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.1",
-    "@mui/material": "^5.18.0",
-    "@tolgee/react": "^6.2.7",
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@mui/material": "^5.16.0",
+    "@tginternal/language-util": "^1.1.1",
+    "@tolgee/react": "^7.1.1",
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0"
   },

@@ -1,5 +1,5 @@
 import { Meta } from '@storybook/addon-docs/blocks';
-import { ComponentOverrides } from '../../.storybook/docs/Swatches';
+import { ComponentOverrides } from '../../.storybook/docs/ComponentOverrides';
 
 <Meta title="Foundations/Component styles" />
 
@@ -8,5 +8,8 @@ import { ComponentOverrides } from '../../.storybook/docs/Swatches';
 The theme does not only carry colors and type — it also restyles MUI components project-wide.
 Anything listed here already has its look defined centrally, so a new component should build on it
 instead of re-styling from scratch.
+
+This is the library layer. The webapp adds its own `@font-face` and page-shell rules on top, so
+what the app renders can differ from this list.
 
 <ComponentOverrides />

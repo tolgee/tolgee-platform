@@ -4,6 +4,7 @@ import react from '@vitejs/plugin-react';
 import viteTsconfigPaths from 'vite-tsconfig-paths';
 import { extname, resolve, relative } from 'node:path';
 import fg from 'fast-glob';
+import pkg from './package.json';
 
 const componentDirs = ['components'];
 const otherDirs = ['hooks', 'constants', 'theme'];
@@ -16,9 +17,7 @@ const entryFiles = [
     fg.sync(`src/${dir}/**/*.{ts,tsx}`, {
       cwd: __dirname,
       absolute: true,
-      // Story files are named `stories.ts`, with nothing before the dot, so the usual
-      // `*.stories.*` pattern never matches them and they end up as published entry points.
-      ignore: ['**/stories.*', '**/*.stories.*', '**/*.test.*'],
+      ignore: ['**/*stories.*', '**/*.test.*'],
     }),
   ),
 ];
@@ -49,7 +48,14 @@ export default defineConfig({
   },
   resolve: {
     preserveSymlinks: true,
-    dedupe: ['react', 'react-dom', '@tolgee/react'],
+    // `preserveSymlinks: true` keeps the symlinked `webapp/node_modules` path distinct from this
+    // package's own, so a module reached through both becomes two instances even at identical
+    // versions — and for anything carrying a React context that means providers and consumers stop
+    // seeing each other.
+    dedupe: [
+      ...Object.keys(pkg.dependencies),
+      ...Object.keys(pkg.peerDependencies),
+    ],
     alias: {
       '@tolgee/storybook-addon': resolve(
         __dirname,

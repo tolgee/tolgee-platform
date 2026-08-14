@@ -1,19 +1,12 @@
 import { useEffect, useState } from 'react';
-import { addons } from 'storybook/internal/preview-api';
+import { addons } from 'storybook/preview-api';
+// The event constants have no public entry in storybook 10.
 import { GLOBALS_UPDATED, SET_GLOBALS } from 'storybook/internal/core-events';
+import { THEME_KEYS } from '../themeKeys';
 
-// Docs pages render outside the preview decorators, so `useGlobals()` throws — preview hooks are
-// only valid in decorators and story functions. Listen on the channel instead. `theme` is
-// addon-themes' GLOBAL_KEY and its values are the keys registered in preview.tsx.
-const isDark = (globals?: Record<string, unknown>) => globals?.theme === 'Dark';
-
+// `useGlobals()` throws here: preview hooks are only valid in decorators and story functions.
 export const useThemeMode = (): 'light' | 'dark' => {
-  const [dark, setDark] = useState(
-    () =>
-      new URLSearchParams(window.location.search)
-        .get('globals')
-        ?.includes('theme:Dark') ?? false,
-  );
+  const [dark, setDark] = useState(() => isDark(globalsFromUrl()));
 
   useEffect(() => {
     const channel = addons.getChannel();
@@ -29,3 +22,14 @@ export const useThemeMode = (): 'light' | 'dark' => {
 
   return dark ? 'dark' : 'light';
 };
+
+const isDark = (globals?: Record<string, unknown>) =>
+  globals?.theme === THEME_KEYS.dark;
+
+const globalsFromUrl = () =>
+  Object.fromEntries(
+    new URLSearchParams(window.location.search)
+      .get('globals')
+      ?.split(';')
+      .map((pair) => pair.split(':')) ?? [],
+  );

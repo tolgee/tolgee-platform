@@ -10,6 +10,7 @@ export default defineConfig({
     'argstable',
     'CSF',
     'hsl',
+    'rgb',
     'sbdocs',
     'Segoe',
     'subpaths',

@@ -1,170 +1,17 @@
-import { createTheme, PaletteColor, PaletteColorOptions } from '@mui/material';
-import type { PaletteMode } from '@mui/material';
+import { createTheme } from '@mui/material';
+import type { PaletteMode, ThemeOptions } from '@mui/material';
 
-import {
-  Activity,
-  Cell,
-  colors,
-  Editor,
-  Emphasis,
-  ExampleBanner,
-  Input,
-  Label,
-  LanguageChips,
-  Login,
-  Marker,
-  Navbar,
-  Placeholders,
-  QuickStart,
-  RevisionFilterBanner,
-  Tile,
-  TipsBanner,
-  Tooltip,
-  TopBanner,
-} from './colors';
+import { colors } from './colors';
 import { tolgeeColors, tolgeePalette } from './figmaTheme';
 import { fromFigmaColor } from './figma';
+import './augmentation';
 
-type TolgeeTokens =
-  | (typeof tolgeePalette)['Light']
-  | (typeof tolgeePalette)['Dark'];
-
-type TolgeeColors = typeof tolgeeColors;
-
-type Import = (typeof colors)['light']['import'];
-
-declare module '@mui/material/styles/createPalette' {
-  interface Palette {
-    primaryText: string;
-    divider1: string;
-    tooltip: Tooltip;
-    tile: Tile;
-    cell: Cell;
-    default: PaletteColor;
-    navbar: Navbar;
-    emphasis: Emphasis;
-    activity: Activity;
-    editor: Editor;
-    globalLoading: PaletteColor;
-    marker: Marker;
-    topBanner: TopBanner;
-    quickStart: QuickStart;
-    import: Import;
-    exampleBanner: ExampleBanner;
-    tipsBanner: TipsBanner;
-    tokens: TolgeeTokens;
-    colors: TolgeeColors;
-    placeholders: Placeholders;
-    languageChips: LanguageChips;
-    login: Login;
-    input: Input;
-    revisionFilterBanner: RevisionFilterBanner;
-    label: Label;
-  }
-
-  interface PaletteOptions {
-    primaryText: string;
-    divider1: string;
-    tooltip: Tooltip;
-    tile: Tile;
-    cell: Cell;
-    default: PaletteColor;
-    navbar: Navbar;
-    emphasis: Emphasis;
-    activity: Activity;
-    editor: Editor;
-    globalLoading: PaletteColorOptions;
-    marker: Marker;
-    topBanner: TopBanner;
-    quickStart: QuickStart;
-    import: Import;
-    exampleBanner: ExampleBanner;
-    tipsBanner: TipsBanner;
-    tokens: TolgeeTokens;
-    colors: TolgeeColors;
-    placeholders: Placeholders;
-    languageChips: LanguageChips;
-    login: Login;
-    input: Input;
-    revisionFilterBanner: RevisionFilterBanner;
-    label: Label;
-  }
-}
-
-declare module '@mui/material/Button' {
-  interface ButtonPropsColorOverrides {
-    default: true;
-    contrast: true;
-  }
-}
-
-const { palette } = createTheme();
-const { augmentColor } = palette;
-const createColor = (mainColor: string) =>
-  augmentColor({ color: { main: mainColor } });
-
-export const getTheme = (mode: PaletteMode) => {
+export const getThemeOptions = (mode: PaletteMode): ThemeOptions => {
   const c = mode === 'light' ? colors.light : colors.dark;
   const tPalette = mode === 'light' ? tolgeePalette.Light : tolgeePalette.Dark;
 
-  return createTheme({
-    typography: {
-      fontFamily:
-        '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"',
-      htmlFontSize: 15,
-      h1: {
-        fontSize: 42,
-        fontWeight: 300,
-      },
-      h2: {
-        fontSize: 36,
-        fontWeight: 300,
-      },
-      h3: {
-        fontSize: 28,
-        fontWeight: 400,
-      },
-      h4: {
-        fontSize: 24,
-        fontWeight: 400,
-      },
-      h5: {
-        fontSize: 20,
-        fontWeight: 400,
-      },
-      h6: {
-        fontSize: 18,
-        fontWeight: 500,
-      },
-      subtitle1: {
-        fontSize: 18,
-        fontWeight: 400,
-      },
-      subtitle2: {
-        fontSize: 16,
-        fontWeight: 500,
-      },
-      body1: {
-        fontSize: 16,
-        fontWeight: 400,
-      },
-      body2: {
-        fontSize: 15,
-        fontWeight: 400,
-      },
-      button: {
-        fontSize: 14,
-        fontWeight: 500,
-      },
-      caption: {
-        fontSize: 12,
-        fontWeight: 400,
-      },
-      overline: {
-        fontWeight: 400,
-        fontSize: 10,
-      },
-    },
+  return {
+    typography,
     palette: {
       mode,
       primary: fromFigmaColor(tPalette.primary),
@@ -209,11 +56,7 @@ export const getTheme = (mode: PaletteMode) => {
       revisionFilterBanner: c.revisionFilterBanner,
       label: tPalette.label,
     },
-    mixins: {
-      toolbar: {
-        minHeight: 52,
-      },
-    },
+    mixins,
     components: {
       MuiTooltip: {
         styleOverrides: {
@@ -243,16 +86,7 @@ export const getTheme = (mode: PaletteMode) => {
           body: {
             minHeight: '100%',
             position: 'relative',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'stretch',
             fontSize: 15,
-          },
-          '#root': {
-            flexGrow: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'stretch',
           },
         },
       },
@@ -354,5 +188,77 @@ export const getTheme = (mode: PaletteMode) => {
         },
       },
     },
-  });
+  };
 };
+
+export const getTheme = (mode: PaletteMode) =>
+  createTheme(getThemeOptions(mode));
+
+const typography = {
+  fontFamily:
+    '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"',
+  htmlFontSize: 15,
+  h1: {
+    fontSize: 42,
+    fontWeight: 300,
+  },
+  h2: {
+    fontSize: 36,
+    fontWeight: 300,
+  },
+  h3: {
+    fontSize: 28,
+    fontWeight: 400,
+  },
+  h4: {
+    fontSize: 24,
+    fontWeight: 400,
+  },
+  h5: {
+    fontSize: 20,
+    fontWeight: 400,
+  },
+  h6: {
+    fontSize: 18,
+    fontWeight: 500,
+  },
+  subtitle1: {
+    fontSize: 18,
+    fontWeight: 400,
+  },
+  subtitle2: {
+    fontSize: 16,
+    fontWeight: 500,
+  },
+  body1: {
+    fontSize: 16,
+    fontWeight: 400,
+  },
+  body2: {
+    fontSize: 15,
+    fontWeight: 400,
+  },
+  button: {
+    fontSize: 14,
+    fontWeight: 500,
+  },
+  caption: {
+    fontSize: 12,
+    fontWeight: 400,
+  },
+  overline: {
+    fontWeight: 400,
+    fontSize: 10,
+  },
+};
+
+const mixins = {
+  toolbar: {
+    minHeight: 52,
+  },
+};
+
+const { palette } = createTheme();
+const { augmentColor } = palette;
+const createColor = (mainColor: string) =>
+  augmentColor({ color: { main: mainColor } });

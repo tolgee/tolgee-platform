@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { createTheme, PaletteMode, useMediaQuery } from '@mui/material';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
-import { getTheme } from '@tginternal/library/theme/getTheme';
+import { getThemeOptions } from '@tginternal/library/theme/getTheme';
 
 // @ts-ignore
 import RighteousLatinExtWoff2 from './fonts/Righteous/righteous-latin-ext.woff2';
@@ -54,14 +54,23 @@ const righteousLatinExt = {
     'U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF',
 };
 
-// The fonts are webapp branding (logo wordmark), not part of the shared theme, so they are layered
-// on top of the library theme here rather than moved into it.
-const getWebappTheme = (mode: PaletteMode) =>
-  createTheme(getTheme(mode), {
+export const getWebappTheme = (mode: PaletteMode) =>
+  createTheme(getThemeOptions(mode), {
     components: {
       MuiCssBaseline: {
         styleOverrides: {
           '@font-face': [rubik, righteousLatinExt, righteousLatin],
+          body: {
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'stretch',
+          },
+          '#root': {
+            flexGrow: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'stretch',
+          },
         },
       },
     },
@@ -99,15 +108,15 @@ export const ThemeProvider: React.FC<React.PropsWithChildren<unknown>> = ({
     setMode,
   };
 
+  const resolvedMode = value.mode ?? (prefersDarkMode ? 'dark' : 'light');
+  const theme = React.useMemo(
+    () => getWebappTheme(resolvedMode),
+    [resolvedMode]
+  );
+
   return (
     <ThemeContext.Provider value={value}>
-      <MuiThemeProvider
-        theme={getWebappTheme(
-          value.mode ?? (prefersDarkMode ? 'dark' : 'light')
-        )}
-      >
-        {children}
-      </MuiThemeProvider>
+      <MuiThemeProvider theme={theme}>{children}</MuiThemeProvider>
     </ThemeContext.Provider>
   );
 };

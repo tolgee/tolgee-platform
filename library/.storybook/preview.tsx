@@ -7,11 +7,11 @@ import { DocsContainer } from './docs/DocsContainer';
 import { MuiLocalizationProvider } from '@tginternal/library/components/MuiLocalizationProvider';
 import { locales } from '@tginternal/library/constants/locales';
 
-import { getTheme } from '../src/theme/getTheme';
-import { branchName } from '../../webapp/src/branch.json';
+import { LIGHT_THEME, DARK_THEME } from './docs/themes';
+import { THEME_KEYS } from './themeKeys';
 
 const LANGUAGE = 'en';
-const FEATURE_TAG = `draft: ${branchName.split('/').pop()}`;
+const FEATURE_TAG = `draft: ${import.meta.env.VITE_BRANCH_NAME.split('/').pop()}`;
 
 configure({ testIdAttribute: 'data-cy' }); // instead of data-testid in findByTestId, getAllByTestId...
 
@@ -27,21 +27,16 @@ const preview: Preview = {
       storySort: {
         order: [
           'Foundations',
-          ['Colors', 'Typography', 'Component styles'],
+          ['Theme', 'Colors', 'Typography', 'Component styles'],
           'components',
           '*',
         ],
       },
     },
     docs: { container: DocsContainer },
-    // The theme switcher already sets the surface color; a second background control would paint
-    // over it and allow a light canvas under a dark theme.
     backgrounds: { disable: true },
   },
   decorators: [
-    // Innermost, so it sits inside the theme provider below and reads the very theme the story
-    // was given. The canvas must never be painted from a second source: a dark surface under a
-    // light component is exactly what the theme switcher exists to rule out.
     (Story) => (
       <Box
         sx={{
@@ -73,10 +68,10 @@ const preview: Preview = {
       GlobalStyles: CssBaseline,
       Provider: ThemeProvider,
       themes: {
-        Light: getTheme('light'),
-        Dark: getTheme('dark'),
+        [THEME_KEYS.light]: LIGHT_THEME,
+        [THEME_KEYS.dark]: DARK_THEME,
       },
-      defaultTheme: 'Light',
+      defaultTheme: THEME_KEYS.light,
     }),
   ],
 } satisfies Preview;
