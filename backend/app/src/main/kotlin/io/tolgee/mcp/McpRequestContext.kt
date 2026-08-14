@@ -115,6 +115,11 @@ class McpRequestContext(
   /** Mirrors [OrganizationAuthorizationInterceptor.preHandleInternal], reuses [OrganizationRoleService.isUserOfRole] */
   private fun checkOrgRole(spec: ToolEndpointSpec) {
     val requiredRole = spec.requiredOrgRole ?: return
+    // An OAuth token is a constrained capability; it must not inherit an org-role-gated operation from the org role of
+    // the user it authenticates. Reject it here rather than letting the user's membership widen the token's authority.
+    if (authenticationFacade.isOAuthTokenAuth) {
+      throw PermissionException(Message.OAUTH_ACCESS_NOT_ALLOWED)
+    }
     val orgId = organizationHolder.organizationOrNull?.id ?: return
     val userId = authenticationFacade.authenticatedUser.id
 
