@@ -16,32 +16,27 @@
 
 package io.tolgee.security.oauth2
 
+import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.testing.AuthorizedControllerTest
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class OAuth2ConnectedAppsAndDiscoveryTest : AuthorizedControllerTest() {
   @Test
   fun `lists no connected apps for a user who has authorized none`() {
-    val body =
-      performAuthGet("/v2/user/connected-apps")
-        .andIsOk
-        .andReturn()
-        .response.contentAsString
-    assertThat(body).isEqualTo("[]")
+    performAuthGet("/v2/user/connected-apps")
+      .andIsOk
+      .andAssertThatJson { isArray.hasSize(0) }
   }
 
   @Test
   fun `serves RFC 9728 protected resource metadata for the MCP endpoint`() {
-    val body =
-      performGet("/.well-known/oauth-protected-resource/mcp/developer")
-        .andIsOk
-        .andReturn()
-        .response.contentAsString
-    assertThat(body).contains("\"resource\"")
-    assertThat(body).contains("\"authorization_servers\"")
-    assertThat(body).contains("\"scopes_supported\"")
-    assertThat(body).contains("translations.suggest")
+    performGet("/.well-known/oauth-protected-resource/mcp/developer")
+      .andIsOk
+      .andAssertThatJson {
+        node("resource").isString
+        node("authorization_servers").isArray
+        node("scopes_supported").isArray.contains("translations.suggest")
+      }
   }
 }
