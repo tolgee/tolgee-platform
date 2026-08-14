@@ -106,7 +106,8 @@ discovery (`{issuer}/.well-known/oauth-authorization-server`), and Spring builds
 relative to it. It must therefore be the URL where the OAuth endpoints (`/oauth2/token`, `/oauth2/jwks`,
 …) are actually reachable — i.e. the **backend / API URL** (`back-end-url`).
 
-We compute it as `backEndUrl ?: frontEndUrl` (`OAuth2AuthorizationServerConfig`). The `frontEndUrl`
+We compute it as `backEndUrl ?: frontEndUrl` (`OAuth2AudienceResolver.serverBaseUrl`, read by
+`OAuth2AuthorizationServerConfig`). The `frontEndUrl`
 fallback is **not** "use the web app as the issuer" — it only exists for deployments that serve the API
 and the web app from **one origin** (the backend also serves the built SPA), where `back-end-url` is
 often left unset and `front-end-url` *is* that single origin. If your backend runs on a separate URL you
@@ -317,8 +318,8 @@ workspace SDK (so both the Bearer-capable `DevBackend` and the loader override a
    ```bash
    cp packages/web/dist/tolgee-in-context-tools.umd.min.js testapps/react/public/
    ```
-   `testapps/react/src/main.tsx` sets `window.__TOLGEE_IN_CONTEXT_URL__` from that env var (inert when
-   unset).
+   `testapps/react/src/inContextUrl.ts` (imported by `main.tsx`) sets `window.__TOLGEE_IN_CONTEXT_URL__`
+   from that env var (inert when unset).
 3. Run `npm run develop:react` from the tolgee-js root, open the testapp, Connect via the extension
    (Server = `https://localhost:3995`), Allow, and edit in-context. The editor now loads from your build
    and sends `Authorization: Bearer …`.
