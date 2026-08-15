@@ -723,6 +723,42 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
   }
 
   @Test
+  fun `invalidates the http session once the authorization code is issued`() {
+    // The session carries only the authorize round trip; killing it at code issuance stops a later connect from
+    // silently reusing a stale principal (e.g. after the webapp user switched accounts). A fresh bootstrap must run.
+    val jwt = jwtService.emitToken(testData.user.id)
+    val session = MockHttpSession()
+    mvc
+      .perform(post("/v2/oauth2/session-bootstrap").header("Authorization", "Bearer $jwt").session(session))
+      .andExpect { assertThat(it.response.status).isEqualTo(204) }
+
+    val verifier = randomVerifier()
+    val authorizeUrl =
+      UriComponentsBuilder
+        .fromPath("/oauth2/authorize")
+        .queryParam("response_type", "code")
+        .queryParam("client_id", TEST_CLIENT_ID)
+        .queryParam("redirect_uri", CLI_REDIRECT)
+        .queryParam("scope", "translations.view")
+        .queryParam("code_challenge", s256Challenge(verifier))
+        .queryParam("code_challenge_method", "S256")
+        .queryParam("state", "state-123")
+        .build()
+        .toUriString()
+    val location =
+      mvc
+        .perform(get(authorizeUrl).session(session))
+        .andReturn()
+        .response
+        .getHeader("Location")
+
+    // The code is still delivered (invalidation must not break the response)...
+    assertThat(queryParam(location!!, "code")).isNotNull()
+    // ...but the session that carried the flow is now dead.
+    assertThat(session.isInvalid).isTrue()
+  }
+
+  @Test
   fun `session-bootstrap rotates the session id (fixation defense)`() {
     val jwt = jwtService.emitToken(testData.user.id)
     val session = MockHttpSession()

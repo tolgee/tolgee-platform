@@ -61,7 +61,10 @@ class OAuth2AuthorizationServerConfig(
           clientAuth.authenticationConverter(PublicClientRefreshAuthenticationConverter())
           clientAuth.authenticationProvider(PublicClientRefreshAuthenticationProvider(registeredClientRepository))
         }
-        configurer.authorizationEndpoint { it.consentPage(CONSENT_PAGE_URI) }
+        configurer.authorizationEndpoint {
+          it.consentPage(CONSENT_PAGE_URI)
+          it.authorizationResponseHandler(OAuth2SessionInvalidatingAuthorizationResponseHandler())
+        }
         configurer.authorizationServerMetadataEndpoint { metadata ->
           metadata.authorizationServerMetadataCustomizer { claims ->
             claims.claim("client_id_metadata_document_supported", true)

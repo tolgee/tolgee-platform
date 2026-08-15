@@ -65,6 +65,48 @@ jdbc`; schema in `db/changelog/spring-session`). The bootstrapped `SecurityConte
 any replica, so the bootstrap → authorize → consent requests can land on different replicas. No shared Redis
 and no ingress stickiness are needed.
 
+#### The session is destroyed the moment a code is issued
+
+We invalidate the bootstrap session as soon as `/oauth2/authorize` issues an authorization code
+(`OAuth2SessionInvalidatingAuthorizationResponseHandler`, wired on the authorization endpoint). Its whole
+job is to carry the single authorize → consent → authorize round trip; the `/oauth2/token` and refresh
+exchanges are back-channel and sessionless, so nothing needs it afterwards.
+
+**Why we do this.** The session cookie lives in the browser's shared cookie jar, but the real web login is
+the JWT in local storage — logging out of the webapp drops that JWT and does **not** touch the cookie. Without
+invalidation, a lingering session keeps authenticating `/oauth2/authorize` as whoever bootstrapped it, so
+after a user signs out and back in as a **different** account, the next connect would silently mint a token
+for the *old* account (and, with consent already remembered, without even showing the consent screen). Killing
+the session at code issuance forces the next connect to re-bootstrap, so a token is always minted for whoever
+is signed into the webapp *now*.
+
+**Why not just revoke consent on disconnect instead.** Revoking the consent row (via
+`DELETE /v2/user/connected-apps/{id}`) when the client disconnects would only re-show the consent *screen* — it
+does nothing to the stale session, so the reconnect still authenticates as the old account and still mints its
+token (and the consent screen, fetched with the current JWT, would even disagree with the grant, bound to the
+session's old principal). It would also force a re-prompt on *every* reconnect, breaking same-account
+consent-skip, and it only runs if the client remembers to call it. Session invalidation fixes the actual cause
+(the principal) server-side, unconditionally. Consent revocation stays reserved for its real purpose — a user
+explicitly **revoking an app's access** (killing its refresh token + grant), not routine disconnect.
+
+**This is not an OAuth-spec behavior.** The specs (RFC 6749 §3.1) deliberately leave the authorization
+server's own login session out of scope, and a *typical* AS does the opposite — it keeps a long-lived **SSO**
+session so repeat authorizations are silent. What we have here is not an SSO session but a **synthetic,
+single-use bridge** from the stateless JWT into the session SAS requires; destroying it when its one
+transaction completes is ordinary session hygiene (the same family as the session-id rotation the bootstrap
+already does for fixation defense), just applied to a session that in a normal AS wouldn't be single-use.
+
+**Trade-off.** Reusing a live session would let a same-account reconnect skip the bootstrap entirely (a
+headless backend redirect), so invalidation makes every connect pay one SPA-bootstrap round trip. That cost
+falls only on the occasional, user-initiated *connect* action — never on runtime API calls, which use the
+already-minted access token — so in practice it's negligible. The faster-and-still-correct alternative is to
+invalidate the session only on an *actual* identity change (logout / account switch / password change) rather
+than on every code; that keeps the fast path but needs those events wired to delete the user's sessions, plus
+a session-timeout backstop for the "logout never fired" case. The clean way to get there is to tie this
+session into the first-class session lifecycle being built in
+[#3839](https://github.com/tolgee/tolgee-platform/pull/3839) (revoke-on-logout/password-change), so it's left
+as a follow-up.
+
 ## 3. Reference — the jargon
 
 ### PKCE ("pixy", Proof Key for Code Exchange)
@@ -166,6 +208,7 @@ hands back a freshly-minted `client_id`.
 | Token claims (`sub`, `scope`, `tg.prj`, `aud`) | `TolgeeOAuth2TokenCustomizer.kt` |
 | API accepts the token + narrows scopes | `AuthenticationFilter.kt`, `OAuth2AccessTokenResolver.kt`, `SecurityService.getCurrentPermittedScopes` |
 | Browser session bootstrap + consent info | `backend/api/.../controllers/oauth2/OAuth2FlowController.kt` |
+| Bootstrap session killed on code issuance | `backend/app/.../configuration/OAuth2SessionInvalidatingAuthorizationResponseHandler.kt` |
 | Connected apps / revoke | `ConnectedAppsController.kt` |
 | CIMD | `CimdMetadataFetcher.kt`, `CimdRegisteredClientRepository.kt` |
 | Grant/consent/client storage | `db/changelog/oauth2/oauth2-server.xml` (Spring Authorization Server JDBC schema) |
