@@ -74,6 +74,10 @@ export const PlanContainer = styled('div')`
   }
 `;
 
+/* What the `minmax(24%, 1fr)` template below settles on. A grid compares its card count against
+   this to know whether the row will wrap; change one and the other has to follow. */
+export const PLAN_ROW_MAX_COLUMNS = 4;
+
 export const PlanRow = styled('div')`
   display: grid;
   /* A 24% floor caps the row at four cards — a fifth cannot fit and wraps instead of
@@ -93,6 +97,17 @@ export const PlanRow = styled('div')`
     top: 0;
     bottom: 0;
     border-left: 1px solid ${({ theme }) => theme.palette.tokens.border.soft};
+  }
+  &.unjoined {
+    /* More cards than the row can fit. It stops being one joined surface and becomes a grid of
+       separate cards — each card's own chrome comes back by dropping its inRow class, not from
+       here. */
+    border: none;
+    background: none;
+    gap: 16px;
+    & > * + *::before {
+      content: none;
+    }
   }
   ${({ theme }) => theme.breakpoints.down('md')} {
     grid-auto-flow: row;
