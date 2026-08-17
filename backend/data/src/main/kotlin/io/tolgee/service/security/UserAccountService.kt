@@ -603,14 +603,14 @@ class UserAccountService(
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#userAccount.id")
   fun invalidateTokens(userAccount: UserAccount): UserAccount {
     resetTokensValidNotBefore(userAccount)
-    // The tokensValidNotBefore cutoff alone only kills OAuth access tokens at expiry; deleting the grants makes it
-    // instant (the resolver's liveness check fails closed) and forces re-consent, same as every other token family.
-    oauth2AuthorizationQueryService.revokeAllForPrincipal(userAccount.id.toString())
     return userAccountRepository.save(userAccount)
   }
 
   private fun resetTokensValidNotBefore(userAccount: UserAccount) {
     userAccount.tokensValidNotBefore = DateUtils.truncate(currentDateProvider.date, Calendar.SECOND)
+    // The tokensValidNotBefore cutoff is read from the USER_ACCOUNTS cache, which lags per-node without Redis, so the
+    // refresh grant could keep minting tokens on a stale replica; deleting the grants makes revocation topology-safe.
+    oauth2AuthorizationQueryService.revokeAllForPrincipal(userAccount.id.toString())
   }
 
   private fun publishUserInfoUpdatedEvent(

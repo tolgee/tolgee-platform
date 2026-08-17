@@ -16,6 +16,7 @@
 
 package io.tolgee.security.authorization
 
+import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.isAdmin
 import io.tolgee.dtos.cacheable.isSupporterOrAdmin
 import io.tolgee.exceptions.NotFoundException
@@ -65,7 +66,7 @@ class OrganizationAuthorizationInterceptor(
 
     // A token scoped to project capabilities must not act at the organization level via the user's org role.
     if (authenticationFacade.isOAuthTokenAuth) {
-      throw PermissionException()
+      throw PermissionException(Message.OAUTH_ACCESS_NOT_ALLOWED)
     }
 
     var bypassed = false

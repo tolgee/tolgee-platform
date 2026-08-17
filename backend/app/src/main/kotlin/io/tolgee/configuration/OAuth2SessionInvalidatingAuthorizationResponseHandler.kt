@@ -29,18 +29,14 @@ import org.springframework.web.util.UriUtils
 import java.nio.charset.StandardCharsets
 
 /**
- * Replaces SAS's default authorization-response handler so the HTTP session dies the moment an authorization code is
- * issued. The session exists only to carry the single authorize -> consent -> authorize round trip (the token and
- * refresh exchanges are back-channel and sessionless). Ending it here forces the next connect to re-run the session
- * bootstrap, so a token is always minted for whoever is signed into the webapp now — not a stale principal still sitting
- * in the session cookie after the webapp user switched accounts. Revoking the consent on disconnect would not fix this:
- * it only re-shows the consent screen while the reconnect still authenticates as the stale principal (and would break
- * same-account consent-skip). Consent revocation stays reserved for an explicit app-revocation, not routine disconnect.
+ * Ends the HTTP session when the authorization code is issued, so the next connect re-runs the session bootstrap and
+ * mints a token for whoever is signed into the webapp now, not a stale principal left in the session cookie.
  *
- * The redirect is reproduced from `OAuth2AuthorizationEndpointFilter.sendAuthorizationResponse` (the default is a
- * private method reference that can't be wrapped); it is the RFC 6749 §4.1.2 success response (code + optional state).
+ * The redirect is reproduced from `OAuth2AuthorizationEndpointFilter.sendAuthorizationResponse` because the default is
+ * a private method reference that can't be wrapped (RFC 6749 §4.1.2 success response: code + optional state).
  */
 class OAuth2SessionInvalidatingAuthorizationResponseHandler(
+  private val issuer: String?,
   private val redirectStrategy: RedirectStrategy = DefaultRedirectStrategy(),
 ) : AuthenticationSuccessHandler {
   override fun onAuthenticationSuccess(
@@ -56,13 +52,14 @@ class OAuth2SessionInvalidatingAuthorizationResponseHandler(
       UriComponentsBuilder
         .fromUriString(redirectUri)
         .queryParam(OAuth2ParameterNames.CODE, code.tokenValue)
+    // RFC 9207 iss (AS mix-up defense); SAS's default response includes it when an issuer is configured, so preserve it.
+    issuer?.let { uriBuilder.queryParam("iss", UriUtils.encode(it, StandardCharsets.UTF_8)) }
     val state = token.state
     if (!state.isNullOrBlank()) {
       uriBuilder.queryParam(OAuth2ParameterNames.STATE, UriUtils.encode(state, StandardCharsets.UTF_8))
     }
 
-    // Invalidate before the redirect commits the response: once it flushes, Spring Session can no longer expire the
-    // session cookie.
+    // Invalidate before the redirect flushes the response; after that the session cookie can no longer be expired.
     request.getSession(false)?.invalidate()
     redirectStrategy.sendRedirect(request, response, uriBuilder.build(true).toUriString())
   }

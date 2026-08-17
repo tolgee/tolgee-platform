@@ -3,6 +3,8 @@ package io.tolgee.dtos.cacheable
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ThirdPartyAuthType
 import java.io.Serializable
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 import java.util.Date
 
 data class UserAccountDto(
@@ -46,12 +48,13 @@ data class UserAccountDto(
 
 // The account-wide token-invalidation gate: a token issued before [tokensValidNotBefore] (password change / forced
 // sign-out) is no longer valid. One owner for every bearer-token path (JWT, OAuth access + refresh).
-fun UserAccountDto.isTokenInvalidated(issuedAt: java.time.Instant?): Boolean {
+fun UserAccountDto.isTokenInvalidated(issuedAt: Instant?): Boolean {
   val validNotBefore = tokensValidNotBefore ?: return false
-  if (issuedAt == null) return false
+  // Fail closed: a cutoff is set but the token carries no comparable issue time, so it can't be proven post-cutoff.
+  if (issuedAt == null) return true
   // JWT `iat` has whole-second precision; truncate the cutoff to seconds too, otherwise a token minted in the same
   // second as the invalidation reads as "before" the millisecond-precise cutoff and is wrongly rejected.
-  return issuedAt.isBefore(validNotBefore.toInstant().truncatedTo(java.time.temporal.ChronoUnit.SECONDS))
+  return issuedAt.isBefore(validNotBefore.toInstant().truncatedTo(ChronoUnit.SECONDS))
 }
 
 fun UserAccountDto.isAdmin(): Boolean {

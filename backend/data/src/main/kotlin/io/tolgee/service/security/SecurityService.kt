@@ -86,14 +86,22 @@ class SecurityService(
   }
 
   fun checkAnyProjectPermission(projectId: Long) {
+    val isOAuth = authenticationFacade.isOAuthTokenAuth
     if (
-      getProjectPermissionScopesNoApiKey(projectId).isNullOrEmpty() &&
-      !activeUser.isSupporterOrAdmin()
+      getProjectPermissionScopesNoApiKey(projectId, bypassAdminRights = isOAuth).isNullOrEmpty() &&
+      (isOAuth || !activeUser.isSupporterOrAdmin())
     ) {
       throw PermissionException(Message.USER_HAS_NO_PROJECT_ACCESS)
     }
-    authenticationFacade.oauthTokenCredentials?.let {
-      if (!it.coversProject(projectId)) throw PermissionException(Message.USER_HAS_NO_PROJECT_ACCESS)
+    authenticationFacade.oauthTokenCredentials?.let { requireOAuthCoversProject(it, projectId) }
+  }
+
+  private fun requireOAuthCoversProject(
+    credentials: OAuth2TokenCredentials,
+    projectId: Long,
+  ) {
+    if (!credentials.coversProject(projectId)) {
+      throw PermissionException(Message.USER_HAS_NO_PROJECT_ACCESS)
     }
   }
 
@@ -123,10 +131,15 @@ class SecurityService(
    * Returns current permitted scopes, expanded
    */
   fun getCurrentPermittedScopes(projectId: Long): Set<Scope> {
+    val isOAuth = authenticationFacade.isOAuthTokenAuth
     var scopes =
       Scope
         .expand(
-          getProjectPermissionScopesNoApiKey(projectId, authenticationFacade.authenticatedUser.id),
+          getProjectPermissionScopesNoApiKey(
+            projectId,
+            authenticationFacade.authenticatedUser.id,
+            bypassAdminRights = isOAuth,
+          ),
         ).toSet()
 
     activeApiKey?.let { scopes = scopes.intersect(Scope.expand(it.scopes).toSet()) }
@@ -154,7 +167,12 @@ class SecurityService(
     val user = user ?: activeUser
     // Always check for the current user even if we're using an API key for security reasons.
     // This prevents improper preservation of permissions.
-    checkProjectPermissionNoApiKey(projectId, requiredPermission, user)
+    checkProjectPermissionNoApiKey(
+      projectId,
+      requiredPermission,
+      user,
+      bypassAdminRights = authenticationFacade.isOAuthTokenAuth,
+    )
 
     authenticationFacade.oauthTokenCredentials?.let { checkOAuthTokenPermission(projectId, requiredPermission, it) }
 
@@ -173,9 +191,7 @@ class SecurityService(
     requiredPermission: Scope,
     credentials: OAuth2TokenCredentials,
   ) {
-    if (!credentials.coversProject(projectId)) {
-      throw PermissionException(Message.USER_HAS_NO_PROJECT_ACCESS)
-    }
+    requireOAuthCoversProject(credentials, projectId)
     if (!Scope.expand(credentials.scopes).contains(requiredPermission)) {
       throw PermissionException(missingScopes = listOf(requiredPermission))
     }
@@ -199,8 +215,10 @@ class SecurityService(
     try {
       checkProjectPermission(projectId, scope)
     } catch (err: PermissionException) {
-      // TODO: an OAuth token can currently ride the assignee fallback to act past its consented scope. To be
-      //  fixed later with a dedicated scope that explicitly grants the task-assignee elevation.
+      // TODO: an OAuth token rides the task-assignee elevation to act past its consented scope here and in the
+      //  translationInTask/translationsInTask fallbacks (checkLanguageTranslatePermission,
+      //  checkLanguageStateChangePermission, checkScopeOrAssignedToTask). Intentional for now (matches API-key
+      //  behavior); to be tightened later with a dedicated scope that explicitly grants the assignee elevation.
       val assignees = taskService.findAssigneeById(projectId, taskNumber, activeUser.id)
       if (assignees.isEmpty() || assignees[0].id != activeUser.id) {
         throw err
@@ -227,18 +245,19 @@ class SecurityService(
     projectId: Long,
     requiredScope: Scope,
     userAccountDto: UserAccountDto,
+    bypassAdminRights: Boolean = false,
   ) {
-    if (userAccountDto.isAdmin()) {
+    if (!bypassAdminRights && userAccountDto.isAdmin()) {
       return
     }
 
     val isReadonlyAccess = requiredScope.isReadOnly()
-    if (isReadonlyAccess && userAccountDto.isSupporterOrAdmin()) {
+    if (!bypassAdminRights && isReadonlyAccess && userAccountDto.isSupporterOrAdmin()) {
       return
     }
 
     val allowedScopes =
-      getProjectPermissionScopesNoApiKey(projectId, userAccountDto.id)
+      getProjectPermissionScopesNoApiKey(projectId, userAccountDto.id, bypassAdminRights = bypassAdminRights)
         ?: throw PermissionException(Message.USER_HAS_NO_PROJECT_ACCESS)
 
     checkPermission(requiredScope, allowedScopes)
@@ -441,6 +460,7 @@ class SecurityService(
       permissionService.getProjectPermissionData(
         projectId,
         authenticationFacade.authenticatedUser.id,
+        bypassAdminRights = authenticationFacade.isOAuthTokenAuth,
       )
     permissionCheckFn(usersPermission.computedPermissions)
   }
@@ -456,6 +476,7 @@ class SecurityService(
         permissionService.getProjectPermissionData(
           projectId,
           authenticationFacade.authenticatedUser.id,
+          bypassAdminRights = authenticationFacade.isOAuthTokenAuth,
         )
       fn(usersPermission.computedPermissions, languageIds.values.map { it.id })
     } catch (e: LanguageNotPermittedException) {
@@ -568,8 +589,9 @@ class SecurityService(
   fun getProjectPermissionScopesNoApiKey(
     projectId: Long,
     userId: Long = activeUser.id,
+    bypassAdminRights: Boolean = false,
   ): Array<Scope>? {
-    return permissionService.getProjectPermissionScopesNoApiKey(projectId, userId)
+    return permissionService.getProjectPermissionScopesNoApiKey(projectId, userId, bypassAdminRights)
   }
 
   fun checkKeyIdsExistAndIsFromProject(
@@ -699,14 +721,16 @@ class SecurityService(
     }
   }
 
+  // An OAuth token never inherits the admin/supporter bypass: the per-language check must run for it even when the
+  // underlying user is a server admin/supporter, so the token stays bound to that user's real language restrictions.
   private fun runIfUserNotServerAdmin(runnable: () -> Unit) {
-    if (!activeUser.isAdmin()) {
+    if (authenticationFacade.isOAuthTokenAuth || !activeUser.isAdmin()) {
       runnable()
     }
   }
 
   private fun runIfUserNotServerSupporterOrAdmin(runnable: () -> Unit) {
-    if (!activeUser.isSupporterOrAdmin()) {
+    if (authenticationFacade.isOAuthTokenAuth || !activeUser.isSupporterOrAdmin()) {
       runnable()
     }
   }

@@ -63,7 +63,7 @@ class OAuth2AuthorizationServerConfig(
         }
         configurer.authorizationEndpoint {
           it.consentPage(CONSENT_PAGE_URI)
-          it.authorizationResponseHandler(OAuth2SessionInvalidatingAuthorizationResponseHandler())
+          it.authorizationResponseHandler(OAuth2SessionInvalidatingAuthorizationResponseHandler(issuer))
         }
         configurer.authorizationServerMetadataEndpoint { metadata ->
           metadata.authorizationServerMetadataCustomizer { claims ->

@@ -95,14 +95,16 @@ class PermissionService(
   fun getProjectPermissionScopesNoApiKey(
     projectId: Long,
     userAccountId: Long,
+    bypassAdminRights: Boolean = false,
   ): Array<Scope>? {
-    return getProjectPermissionData(projectId, userAccountId).computedPermissions.expandedScopes
+    return getProjectPermissionData(projectId, userAccountId, bypassAdminRights).computedPermissions.expandedScopes
   }
 
   @Transactional(readOnly = true)
   fun getProjectPermissionData(
     project: ProjectDto,
     userAccountId: Long,
+    bypassAdminRights: Boolean = false,
   ): ProjectPermissionData {
     val projectPermission = find(projectId = project.id, userId = userAccountId)
 
@@ -121,6 +123,7 @@ class PermissionService(
         directPermission = projectPermission,
         userAccountService.findDto(userAccountId)?.role ?: throw IllegalStateException("User not found"),
         isProjectPublic = project.public,
+        bypassAdminRights = bypassAdminRights,
       )
 
     return ProjectPermissionData(
@@ -178,9 +181,10 @@ class PermissionService(
   fun getProjectPermissionData(
     projectId: Long,
     userAccountId: Long,
+    bypassAdminRights: Boolean = false,
   ): ProjectPermissionData {
     val project = projectService.findDto(projectId) ?: throw NotFoundException()
-    return getProjectPermissionData(project, userAccountId)
+    return getProjectPermissionData(project, userAccountId, bypassAdminRights)
   }
 
   fun create(permission: Permission): Permission {
@@ -234,6 +238,7 @@ class PermissionService(
     directPermission: IPermission?,
     userRole: UserAccount.Role? = null,
     isProjectPublic: Boolean = false,
+    bypassAdminRights: Boolean = false,
   ): ComputedPermissionDto {
     val computed =
       when {
@@ -248,11 +253,20 @@ class PermissionService(
         else -> ComputedPermissionDto.NONE
       }
 
-    if (isProjectPublic && userRole != null) {
-      return computed.withCommunityFloor().getAdminOrSupporterPermissions(userRole)
-    }
+    // The community floor still applies (public-project contributors keep view/suggest/comment), but an OAuth token
+    // must never inherit the user's server-admin/supporter reach — it stays bound to real membership.
+    val withFloor = communityFloored(computed, userRole, isProjectPublic)
+    if (bypassAdminRights) return withFloor
+    return withFloor.getAdminOrSupporterPermissions(userRole)
+  }
 
-    return computed.getAdminOrSupporterPermissions(userRole)
+  private fun communityFloored(
+    computed: ComputedPermissionDto,
+    userRole: UserAccount.Role?,
+    isProjectPublic: Boolean,
+  ): ComputedPermissionDto {
+    if (isProjectPublic && userRole != null) return computed.withCommunityFloor()
+    return computed
   }
 
   fun createForInvitation(

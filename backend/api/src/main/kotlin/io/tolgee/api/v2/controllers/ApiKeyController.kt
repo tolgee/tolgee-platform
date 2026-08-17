@@ -201,15 +201,12 @@ class ApiKeyController(
     @Parameter(description = "Required when using with PAT")
     projectId: Long?,
   ): ApiKeyPermissionsModel {
-    val apiKeyAuthentication = authenticationFacade.isProjectApiKeyAuth
-
     val projectIdNotNull =
       when {
-        apiKeyAuthentication ->
+        authenticationFacade.isProjectApiKeyAuth ->
           authenticationFacade.projectApiKey.projectId
 
-        // PAT and OAuth tokens carry no embedded project, so the caller must name one (as the SDK's in-context
-        // editor does). getCurrentPermittedScopes below applies the OAuth token's scope/project narrowing.
+        // PAT and OAuth tokens carry no embedded project, so the caller must name one (as the SDK's in-context editor).
         authenticationFacade.isPersonalAccessTokenAuth || authenticationFacade.isOAuthTokenAuth ->
           projectId ?: throw BadRequestException(Message.NO_PROJECT_ID_PROVIDED)
 
@@ -224,13 +221,14 @@ class ApiKeyController(
       permissionService.getProjectPermissionData(
         projectIdNotNull,
         authenticationFacade.authenticatedUser.id,
+        bypassAdminRights = authenticationFacade.isOAuthTokenAuth,
       )
 
     val computed = permissionData.computedPermissions
 
     return ApiKeyPermissionsModel(
       projectIdNotNull,
-      type = if (apiKeyAuthentication) null else computed.type,
+      type = resolveReportedPermissionType(computed.type),
       translateLanguageIds = computed.translateLanguageIds.toNormalizedPermittedLanguageSet(),
       viewLanguageIds = computed.viewLanguageIds.toNormalizedPermittedLanguageSet(),
       stateChangeLanguageIds = computed.stateChangeLanguageIds.toNormalizedPermittedLanguageSet(),
@@ -239,6 +237,12 @@ class ApiKeyController(
       scopes = securityService.getCurrentPermittedScopes(projectIdNotNull).toTypedArray(),
       project = simpleProjectModelAssembler.toModel(projectService.get(projectIdNotNull)),
     )
+  }
+
+  // A scoped credential (PAK or OAuth token) has no single project "type"; its authority is the scope list.
+  private fun resolveReportedPermissionType(computedType: ProjectPermissionType?): ProjectPermissionType? {
+    if (authenticationFacade.isProjectApiKeyAuth || authenticationFacade.isOAuthTokenAuth) return null
+    return computedType
   }
 
   fun Set<Long>?.toNormalizedPermittedLanguageSet(): Set<Long>? {

@@ -36,7 +36,6 @@ import java.security.MessageDigest
 import java.time.Duration
 import java.util.Base64
 
-/** Fetches/validates a CIMD (HTTPS-URL `client_id`) into a transient [RegisteredClient]; the id hashes client id + redirect uris so a redirect change forces re-consent. */
 @Component
 class CimdMetadataFetcher(
   private val properties: OAuth2CimdProperties,
@@ -142,14 +141,16 @@ class CimdMetadataFetcher(
             .requireAuthorizationConsent(true)
             .build(),
         ).tokenSettings(serverProperties.tokenSettings())
-    // Only grant refresh tokens if the document didn't opt out (empty = unspecified, or explicitly listed).
-    if (grantTypes.isEmpty() || grantTypes.contains("refresh_token")) {
+    if (grantsRefreshToken(grantTypes)) {
       builder.authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
     }
     redirectUris.forEach { builder.redirectUri(it) }
     Scope.entries.forEach { builder.scope(it.value) }
     return builder.build()
   }
+
+  private fun grantsRefreshToken(grantTypes: List<String>): Boolean =
+    grantTypes.isEmpty() || grantTypes.contains("refresh_token")
 
   private fun isSameOrigin(
     redirectUri: String,
@@ -158,10 +159,16 @@ class CimdMetadataFetcher(
     return try {
       val a = URI(redirectUri)
       val b = URI(clientIdUrl)
-      a.scheme == b.scheme && a.host == b.host && a.port == b.port
+      a.scheme == b.scheme && a.host == b.host && effectivePort(a) == effectivePort(b)
     } catch (_: Exception) {
       false
     }
+  }
+
+  // https-only, so an omitted port (-1) is the same origin as an explicit :443.
+  private fun effectivePort(uri: URI): Int {
+    if (uri.port == -1) return 443
+    return uri.port
   }
 
   private fun deterministicId(

@@ -27,10 +27,6 @@ import org.springframework.security.oauth2.server.authorization.token.JwtEncodin
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer
 import org.springframework.stereotype.Component
 
-/**
- * Adds Tolgee's `tg.prj` (project set) and `aud` claims to OAuth2 access tokens. `sub` is SAS's default — the
- * authorization principal's name, which the session bootstrap sets to the numeric user id.
- */
 @Component
 class TolgeeOAuth2TokenCustomizer(
   private val audienceResolver: OAuth2AudienceResolver,
@@ -46,18 +42,14 @@ class TolgeeOAuth2TokenCustomizer(
     context.claims.audience(listOf(audienceResolver.apiAudience))
   }
 
-  // A refresh-minted access token carries a fresh iat, so it slips past the resolver's tokensValidNotBefore check —
-  // gate the refresh grant itself instead, and revoke the dead grant so it can't be retried and its access tokens die.
+  // A refresh-minted access token carries a fresh iat, so it slips the resolver's tokensValidNotBefore check; gate the
+  // refresh grant here instead.
   private fun rejectRefreshOfInvalidatedTokens(context: JwtEncodingContext) {
     if (context.authorizationGrantType != AuthorizationGrantType.REFRESH_TOKEN) return
     val authorization = context.getAuthorization() ?: return
     val userId = authorization.principalName?.toLongOrNull() ?: return
     val user = userAccountService.findDto(userId)
-    if (user == null) {
-      revokeAuthorization(authorization)
-      throw OAuth2AuthenticationException(OAuth2ErrorCodes.INVALID_GRANT)
-    }
-    if (user.isTokenInvalidated(authorization.refreshToken?.token?.issuedAt)) {
+    if (user == null || user.isTokenInvalidated(authorization.refreshToken?.token?.issuedAt)) {
       revokeAuthorization(authorization)
       throw OAuth2AuthenticationException(OAuth2ErrorCodes.INVALID_GRANT)
     }
@@ -71,7 +63,13 @@ class TolgeeOAuth2TokenCustomizer(
     // Stamp ids as strings: SAS's JDBC polymorphic-type validator rejects java.lang.Long when it deserializes the
     // stored claims on the refresh grant, which would otherwise make a project-bound token unrefreshable.
     consentSelection(context)?.let { return projectSetFor(it) }
-    projectHint(context)?.let { return listOf(it.toString()) }
+    context.getAuthorization()?.projectHint()?.let { return listOf(it.toString()) }
+    // A consent-required client reaching here ran no select-project and sent no project hint — SAS skipped the consent
+    // screen because consent is remembered. Fail closed rather than silently widening from the consented project to
+    // ALL_PROJECTS; the client must re-prompt for consent (or send a project hint) to re-establish the binding.
+    if (context.registeredClient.clientSettings.isRequireAuthorizationConsent) {
+      throw OAuth2AuthenticationException(OAuth2ErrorCodes.INVALID_REQUEST)
+    }
     return OAuth2Constants.ALL_PROJECTS
   }
 
@@ -82,6 +80,4 @@ class TolgeeOAuth2TokenCustomizer(
 
   private fun consentSelection(context: JwtEncodingContext): String? =
     context.getAuthorization()?.getAttribute<String>(OAuth2Constants.PROJECT_ATTRIBUTE)
-
-  private fun projectHint(context: JwtEncodingContext): Long? = context.getAuthorization()?.projectHint()
 }

@@ -26,15 +26,29 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings
 import org.springframework.stereotype.Component
 
-/** Seeds the first-party public clients (browser extension, CLI). Idempotent: row id = client id, so re-runs update in place. (MCP clients self-register via CIMD.) */
+// Idempotent: the registered-client row id is the client id, so re-runs update in place rather than duplicating.
 @Component
 class PreRegisteredClients(
   private val registeredClientRepository: RegisteredClientRepository,
+  private val jdbcRepository: OAuth2AuthorizationJdbcRepository,
   private val properties: OAuth2ServerProperties,
 ) : ApplicationRunner {
   override fun run(args: ApplicationArguments) {
-    browserExtensionClient()?.let { registeredClientRepository.save(it) }
-    cliClient()?.let { registeredClientRepository.save(it) }
+    registerOrDisable(OAuth2Constants.BROWSER_EXTENSION_CLIENT_ID, browserExtensionClient())
+    registerOrDisable(OAuth2Constants.CLI_CLIENT_ID, cliClient())
+  }
+
+  // Emptying a client's redirect config disables it: save the new registration, or delete a prior one so a stale
+  // full-scope row can't outlive the operator's intent to turn the client off.
+  private fun registerOrDisable(
+    clientId: String,
+    client: RegisteredClient?,
+  ) {
+    if (client != null) {
+      registeredClientRepository.save(client)
+      return
+    }
+    jdbcRepository.deleteRegisteredClient(clientId)
   }
 
   private fun browserExtensionClient(): RegisteredClient? {
@@ -50,7 +64,6 @@ class PreRegisteredClients(
   }
 
   private fun cliClient(): RegisteredClient? {
-    // A client with no redirect URIs cannot complete the authorization_code flow, so skip it (as the extension does).
     if (properties.cliRedirectUris.isEmpty()) return null
     return publicClientBuilder(OAuth2Constants.CLI_CLIENT_ID, "Tolgee CLI")
       .apply { properties.cliRedirectUris.forEach { redirectUri(it) } }
