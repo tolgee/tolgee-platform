@@ -30,8 +30,6 @@ import org.springframework.security.oauth2.jwt.JwtDecoder
 import org.springframework.security.oauth2.jwt.JwtException
 import org.springframework.stereotype.Component
 
-// Resolves an AS access token into a [TolgeeAuthentication]. Dispatch is by the `aud` claim (AS = apiAudience, legacy
-// webapp JWT = tg.tok); a non-matching aud returns null and falls through to JwtService.
 @Component
 class OAuth2AccessTokenResolver(
   @Qualifier("oauth2AccessTokenDecoder")
@@ -67,18 +65,6 @@ class OAuth2AccessTokenResolver(
     )
   }
 
-  // Every token our customizer mints carries the authorization-id claim, so a token without it is not a valid
-  // production token and is rejected. A present id whose row is gone (the grant was revoked by disconnect or
-  // logout-everywhere) fails closed too.
-  private fun rejectIfAuthorizationRevoked(jwt: Jwt) {
-    val authorizationId =
-      jwt.getClaimAsString(OAuth2Constants.AUTHORIZATION_ID_CLAIM)
-        ?: throw AuthenticationException(Message.INVALID_JWT_TOKEN)
-    if (!authorizationLivenessService.isLive(authorizationId)) {
-      throw AuthExpiredException(Message.EXPIRED_JWT_TOKEN)
-    }
-  }
-
   private fun hasOAuthAudience(token: String): Boolean {
     return try {
       SignedJWT
@@ -103,6 +89,15 @@ class OAuth2AccessTokenResolver(
   private fun validateAudience(jwt: Jwt) {
     if (!jwt.audience.hasApiAudience()) {
       throw AuthenticationException(Message.INVALID_JWT_TOKEN)
+    }
+  }
+
+  private fun rejectIfAuthorizationRevoked(jwt: Jwt) {
+    val authorizationId =
+      jwt.getClaimAsString(OAuth2Constants.AUTHORIZATION_ID_CLAIM)
+        ?: throw AuthenticationException(Message.INVALID_JWT_TOKEN)
+    if (!authorizationLivenessService.isLive(authorizationId)) {
+      throw AuthExpiredException(Message.EXPIRED_JWT_TOKEN)
     }
   }
 

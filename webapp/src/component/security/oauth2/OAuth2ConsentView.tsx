@@ -30,23 +30,13 @@ import {
   PermissionAdvancedState,
   PermissionModelScope,
 } from 'tg.component/PermissionsSettings/types';
-import { deriveConsentProjects } from './consentProjectOptions';
-import { groupConsentScopes } from './consentScopeGroups';
-
-const API_URL = import.meta.env.VITE_APP_API_URL || '';
+import { deriveConsentProjects } from 'tg.component/security/oauth2/consentProjectOptions';
+import { groupConsentScopes } from 'tg.component/security/oauth2/consentScopeGroups';
+import { clampApprovedScopes } from 'tg.component/security/oauth2/consentScopeSelection';
+import { submitConsentForm } from 'tg.component/security/oauth2/oauth2ConsentSubmit';
 
 const asString = (value: string | string[] | undefined): string =>
   Array.isArray(value) ? value[0] ?? '' : value ?? '';
-
-type ProjectOption = { id: number; name: string };
-
-type ConsentInfo = {
-  appName: string;
-  scopes: string[];
-  requiredScopes: string[];
-  project?: ProjectOption | null;
-  requestedProjectId?: number | null;
-};
 
 const ALL_PROJECTS = 'all' as const;
 
@@ -89,25 +79,29 @@ const OAuth2ConsentView: React.FC<React.PropsWithChildren<unknown>> = () => {
   const clientId = asString(search.client_id);
   const scope = asString(search.scope);
   const state = asString(search.state);
-  const [info, setInfo] = useState<ConsentInfo>();
   const [selectedScopes, setSelectedScopes] = useState<string[]>([]);
   const [selectedProject, setSelectedProject] = useState<
     number | typeof ALL_PROJECTS
   >(ALL_PROJECTS);
   const [editing, setEditing] = useState(false);
-  const [failed, setFailed] = useState(false);
+  const [submitFailed, setSubmitFailed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
+  const consentLoadable = useApiQuery({
+    url: '/v2/oauth2/consent-info',
+    method: 'get',
+    query: { clientId, scope, state },
+  });
+  const info = consentLoadable.data;
+  const failed = submitFailed || consentLoadable.isError;
+
   useEffect(() => {
-    apiV2HttpService
-      .get<ConsentInfo>('oauth2/consent-info', { clientId, scope, state })
-      .then((data) => {
-        setInfo(data);
-        setSelectedScopes(data.scopes);
-        setSelectedProject(data.project ? data.project.id : ALL_PROJECTS);
-      })
-      .catch(() => setFailed(true));
-  }, [clientId, scope, state]);
+    if (!info) {
+      return;
+    }
+    setSelectedScopes(info.scopes);
+    setSelectedProject(info.project ? info.project.id : ALL_PROJECTS);
+  }, [info]);
 
   const dependenciesLoadable = useApiQuery({
     url: '/v2/public/scope-info/hierarchy',
@@ -115,31 +109,14 @@ const OAuth2ConsentView: React.FC<React.PropsWithChildren<unknown>> = () => {
     query: {},
   });
 
-  // Keep only app-requested scopes and always re-add the required ones, so the tree can never grant beyond the
-  // authorization request nor drop a locked-on scope via a parent-group toggle.
   const handleScopesChange = (data: PermissionAdvancedState) => {
-    const next = new Set(data.scopes as string[]);
-    info?.requiredScopes.forEach((s) => next.add(s));
-    setSelectedScopes((info?.scopes ?? []).filter((s) => next.has(s)));
-  };
-
-  // Real form POST (not fetch) so the browser sends the session cookie and follows the redirect back to the client.
-  const submitForm = (approvedScopes: string[]) => {
-    const form = document.createElement('form');
-    form.method = 'post';
-    form.action = `${API_URL}/oauth2/authorize`;
-    const addField = (name: string, value: string) => {
-      const input = document.createElement('input');
-      input.type = 'hidden';
-      input.name = name;
-      input.value = value;
-      form.appendChild(input);
-    };
-    addField('client_id', clientId);
-    addField('state', state);
-    approvedScopes.forEach((s) => addField('scope', s));
-    document.body.appendChild(form);
-    form.submit();
+    setSelectedScopes(
+      clampApprovedScopes(
+        data.scopes as string[],
+        info?.scopes ?? [],
+        info?.requiredScopes ?? []
+      )
+    );
   };
 
   const submitConsent = async (approvedScopes: string[]) => {
@@ -150,6 +127,8 @@ const OAuth2ConsentView: React.FC<React.PropsWithChildren<unknown>> = () => {
       const projectQuery =
         selectedProject === ALL_PROJECTS ? '' : `&projectId=${selectedProject}`;
       try {
+        // useApiMutation can't type this call: select-project has no request body, and RequestParamsType intersects
+        // parameters & requestBody, so the mutation's variables collapse to `never` (a query-only POST doesn't fit).
         await apiV2HttpService.post(
           `oauth2/select-project?state=${encodeURIComponent(
             state
@@ -158,11 +137,11 @@ const OAuth2ConsentView: React.FC<React.PropsWithChildren<unknown>> = () => {
         );
       } catch {
         setSubmitting(false);
-        setFailed(true);
+        setSubmitFailed(true);
         return;
       }
     }
-    submitForm(approvedScopes);
+    submitConsentForm({ clientId, state, approvedScopes });
   };
 
   if (failed) {
@@ -285,7 +264,11 @@ const OAuth2ConsentView: React.FC<React.PropsWithChildren<unknown>> = () => {
               grantedGroups.map((group, i) => (
                 <StyledGroup key={group.label ?? `_${i}`}>
                   {group.label && (
-                    <StyledGroupLabel>{group.label}:</StyledGroupLabel>
+                    <StyledGroupLabel>
+                      {t('oauth2_consent_group_label', '{label}:', {
+                        label: group.label,
+                      })}
+                    </StyledGroupLabel>
                   )}
                   {group.scopes.map((s) => (
                     <Chip

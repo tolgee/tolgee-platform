@@ -111,6 +111,18 @@ class AuthenticationFacade(
       return authentication.credentials as? OAuth2TokenCredentials
     }
 
+  // The author-self elevation ("you may act on what you created") never extends to an OAuth token, which is a scoped
+  // capability, not the user acting directly. One home so a new self-access site can't forget the OAuth exclusion.
+  fun isAuthorSelfAccess(authorId: Long?): Boolean = !isOAuthTokenAuth && authorId != null && authorId == authenticatedUser.id
+
+  // The single project a credential is unambiguously bound to — a PAK's embedded project, or an OAuth token narrowed to
+  // exactly one. Null for a user JWT/PAT or an all-projects OAuth token, which carry no implicit project.
+  val implicitProjectId: Long?
+    get() {
+      if (isProjectApiKeyAuth) return projectApiKey.projectId
+      return oauthTokenCredentials?.singleProjectId()
+    }
+
   val projectApiKey: ApiKeyDto
     get() = authentication.credentials as ApiKeyDto
 

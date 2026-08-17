@@ -46,7 +46,7 @@ class McpRequestContext(
     checkTokenType(spec)
     // 3–4. Reuses [ProjectContextService.setup], mirrors [ProjectAuthorizationInterceptor.preHandleInternal]
     if (!spec.isGlobalRoute) {
-      val resolvedProjectId = projectId ?: resolveProjectIdFromPak()
+      val resolvedProjectId = projectId ?: resolveImplicitProjectId()
       projectContextService.setup(
         resolvedProjectId,
         spec.requiredScopes,
@@ -147,13 +147,8 @@ class McpRequestContext(
     activityHolder.activity = activityType
   }
 
-  private fun resolveProjectIdFromPak(): Long {
-    if (authenticationFacade.isProjectApiKeyAuth) {
-      return authenticationFacade.projectApiKey.projectId
-    }
-    authenticationFacade.oauthTokenCredentials?.singleProjectId()?.let { return it }
-    throw ProjectNotSelectedException()
-  }
+  private fun resolveImplicitProjectId(): Long =
+    authenticationFacade.implicitProjectId ?: throw ProjectNotSelectedException()
 
   private fun emitPostHogEvent(spec: ToolEndpointSpec) {
     activityHolder.businessEventData["mcp"] = "true"

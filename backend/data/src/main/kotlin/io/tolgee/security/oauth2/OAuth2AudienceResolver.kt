@@ -23,7 +23,6 @@ import org.springframework.stereotype.Component
 class OAuth2AudienceResolver(
   private val tolgeeProperties: TolgeeProperties,
 ) {
-  /** The server's canonical base URL for `aud`/`iss`, or null when neither back-end nor front-end URL is configured. */
   val serverBaseUrl: String?
     get() = tolgeeProperties.backEndUrl ?: tolgeeProperties.frontEndUrl
 

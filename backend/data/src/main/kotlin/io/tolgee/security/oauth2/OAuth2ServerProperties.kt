@@ -23,7 +23,6 @@ import java.time.Duration
 
 @ConfigurationProperties(prefix = "tolgee.oauth2")
 class OAuth2ServerProperties {
-  /** Browser-extension redirect URIs (the id depends on the packaged key, so it's configured). Empty = client not registered. */
   var browserExtensionRedirectUris: List<String> = listOf()
 
   /** Loopback redirect URIs for the Tolgee CLI (RFC 8252). */

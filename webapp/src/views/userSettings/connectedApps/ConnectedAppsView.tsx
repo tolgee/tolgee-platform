@@ -3,10 +3,10 @@ import { T, useTranslate } from '@tolgee/react';
 import { Box } from '@mui/material';
 import { LINKS } from 'tg.constants/links';
 
-import { BaseUserSettingsView } from '../BaseUserSettingsView';
+import { BaseUserSettingsView } from 'tg.views/userSettings/BaseUserSettingsView';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
-import { ConnectedAppListItem } from './ConnectedAppListItem';
+import { ConnectedAppListItem } from 'tg.views/userSettings/connectedApps/ConnectedAppListItem';
 
 export const ConnectedAppsView: FunctionComponent<
   React.PropsWithChildren<unknown>

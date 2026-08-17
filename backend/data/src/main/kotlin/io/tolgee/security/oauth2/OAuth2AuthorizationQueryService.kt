@@ -21,11 +21,7 @@ import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 
-/**
- * Orchestrates operations over SAS's authorization tables that its built-in services don't cover — pairing the raw SQL
- * in [OAuth2AuthorizationJdbcRepository] with cache eviction and transaction boundaries. `principal_name` = user id, so
- * callers pass `user.id.toString()`.
- */
+// SAS stores the user id as `principal_name`, so callers pass `user.id.toString()`.
 @Service
 class OAuth2AuthorizationQueryService(
   private val repository: OAuth2AuthorizationJdbcRepository,

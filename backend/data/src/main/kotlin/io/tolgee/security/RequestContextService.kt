@@ -66,16 +66,8 @@ class RequestContextService(
   }
 
   private fun getTargetProjectImplicit(): ProjectDto? {
-    // This method is the source of complexity for the global handling, but is itself quite simple. Oh, the irony!
-    if (authenticationFacade.isProjectApiKeyAuth) {
-      return projectService.findDto(authenticationFacade.projectApiKey.projectId)
-    }
-
-    authenticationFacade.oauthTokenCredentials?.singleProjectId()?.let {
-      return projectService.findDto(it)
-    }
-
-    throw ProjectNotSelectedException()
+    val projectId = authenticationFacade.implicitProjectId ?: throw ProjectNotSelectedException()
+    return projectService.findDto(projectId)
   }
 
   /**

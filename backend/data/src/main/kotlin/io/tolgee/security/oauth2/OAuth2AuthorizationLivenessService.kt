@@ -21,13 +21,9 @@ import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 
-/**
- * Whether an oauth2_authorization row still exists — the "is this grant alive?" check the resolver runs on every OAuth
- * request. Keyed by authorization id (not token value): one authorization owns many tokens over its life as refresh
- * rotates them, so keying by id keeps the whole family as a single cache entry. Revoking a grant (disconnect,
- * logout-everywhere) deletes the row and [evict]s the entry, which is what makes revocation take effect on the next
- * request instead of at token expiry. A missing row caches as `false` and fails closed.
- */
+// Keyed by authorization id so the whole refresh-rotated token family shares one entry. The cache is shared (Redis, so
+// [evict] is global) or per-node (Caffeine, evict is local) with the global default TTL, so revocation of an
+// already-issued access token is ultimately bounded by that token's own expiry, not by this cache.
 @Service
 class OAuth2AuthorizationLivenessService(
   private val repository: OAuth2AuthorizationJdbcRepository,

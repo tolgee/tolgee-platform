@@ -23,7 +23,6 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.time.Duration
 
-/** Nightly prune of the self-unpruning JDBC authorization store: deletes rows expired past the retention window. */
 @Component
 class OAuth2AuthorizationCleanup(
   private val queryService: OAuth2AuthorizationQueryService,

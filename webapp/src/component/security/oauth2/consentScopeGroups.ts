@@ -5,20 +5,6 @@ export type ScopeGroup = {
   scopes: string[];
 };
 
-// Maps each scope to the label of its nearest labeled ancestor in the permission hierarchy, so the consent screen can
-// render "<resource>: <action> <action>" instead of a flat list of ambiguous action names (View, Edit, View...).
-const buildLabelMap = (
-  node: HierarchyType,
-  ancestorLabel: string | undefined,
-  map: Map<string, string | undefined>
-) => {
-  if (node.value !== undefined) {
-    map.set(node.value, ancestorLabel);
-  }
-  const childAncestor = node.label ?? ancestorLabel;
-  node.children?.forEach((child) => buildLabelMap(child, childAncestor, map));
-};
-
 export const groupConsentScopes = (
   scopes: string[],
   structure: HierarchyType
@@ -39,4 +25,16 @@ export const groupConsentScopes = (
     group.scopes.push(scope);
   });
   return groups;
+};
+
+const buildLabelMap = (
+  node: HierarchyType,
+  ancestorLabel: string | undefined,
+  map: Map<string, string | undefined>
+) => {
+  if (node.value !== undefined) {
+    map.set(node.value, ancestorLabel);
+  }
+  const childAncestor = node.label ?? ancestorLabel;
+  node.children?.forEach((child) => buildLabelMap(child, childAncestor, map));
 };

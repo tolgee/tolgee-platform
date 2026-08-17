@@ -18,7 +18,6 @@ package io.tolgee.security.oauth2
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 
-/** CIMD config: clients whose `client_id` is an HTTPS URL the server fetches + validates instead of pre-registering. */
 @ConfigurationProperties(prefix = "tolgee.oauth2.cimd")
 class OAuth2CimdProperties {
   var enabled: Boolean = false

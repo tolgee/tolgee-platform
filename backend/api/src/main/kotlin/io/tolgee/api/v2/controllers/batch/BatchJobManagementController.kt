@@ -121,14 +121,14 @@ class BatchJobManagementController(
   }
 
   private fun checkViewPermission(job: BatchJob) {
-    if (!authenticationFacade.isOAuthTokenAuth && job.author?.id == authenticationFacade.authenticatedUser.id) {
+    if (authenticationFacade.isAuthorSelfAccess(job.author?.id)) {
       return
     }
     securityService.checkProjectPermission(projectHolder.project.id, Scope.BATCH_JOBS_VIEW)
   }
 
   private fun checkCancelPermission(job: BatchJobDto) {
-    if (!authenticationFacade.isOAuthTokenAuth && job.authorId == authenticationFacade.authenticatedUser.id) {
+    if (authenticationFacade.isAuthorSelfAccess(job.authorId)) {
       return
     }
     securityService.checkProjectPermission(projectHolder.project.id, Scope.BATCH_JOBS_CANCEL)

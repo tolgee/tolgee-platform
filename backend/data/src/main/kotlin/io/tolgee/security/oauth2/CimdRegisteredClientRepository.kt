@@ -25,7 +25,6 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.stereotype.Component
 import java.util.concurrent.ConcurrentHashMap
 
-/** @Primary repo: fixed clients from the JDBC store; an unknown URL-form `client_id` falls back to CIMD (transient, TTL-cached). */
 @Component
 @Primary
 class CimdRegisteredClientRepository(
@@ -52,8 +51,6 @@ class CimdRegisteredClientRepository(
     jdbc.findByClientId(clientId)?.let { return it }
     if (!isUrlForm(clientId)) return null
 
-    // A cached miss (client == null) short-circuits too: without it an unresolvable client_id — an allow-listed host
-    // exposes unbounded distinct paths — would re-run the blocking outbound fetch on every /oauth2/authorize request.
     cached(clientId)?.let { return it.client }
 
     val resolved = fetcher.fetchAndValidate(clientId)
@@ -81,12 +78,17 @@ class CimdRegisteredClientRepository(
   ) {
     if (byClientId.size >= MAX_CACHE_ENTRIES) pruneExpired()
     if (byClientId.size >= MAX_CACHE_ENTRIES) return
-    val ttlSeconds = if (client != null) cimdProperties.cacheTtlSeconds else NEGATIVE_CACHE_TTL_SECONDS
+    val ttlSeconds = cacheTtlFor(client)
     val previous = byClientId.put(clientId, CacheEntry(client, now() + ttlSeconds * 1000))
     // deterministicId hashes the redirect uris, so a redirect change remaps this clientId to a new client.id; drop the
     // superseded reverse-mapping entry (and any negative entry has no id) so idToClientId can't grow without bound.
     previous?.client?.let { if (it.id != client?.id) idToClientId.remove(it.id) }
     client?.let { idToClientId[it.id] = clientId }
+  }
+
+  private fun cacheTtlFor(client: RegisteredClient?): Long {
+    if (client == null) return NEGATIVE_CACHE_TTL_SECONDS
+    return cimdProperties.cacheTtlSeconds
   }
 
   private fun pruneExpired() {

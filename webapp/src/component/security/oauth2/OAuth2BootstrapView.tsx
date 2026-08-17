@@ -8,18 +8,10 @@ import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 import { useUrlSearch } from 'tg.hooks/useUrlSearch';
 import { apiV2HttpService } from 'tg.service/http/ApiV2HttpService';
 import { isSafeContinue } from 'tg.component/security/oauth2/oauth2Continue';
+import { isReauthError } from 'tg.component/security/oauth2/oauth2ReauthError';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 
 const API_URL = import.meta.env.VITE_APP_API_URL || '';
-
-// A present-but-stale webapp JWT (e.g. invalidated by a password change) makes session-bootstrap fail with one of these
-// instead of the unauthenticated redirect PrivateRoute already handles. Dropping the token routes the user to log in.
-const REAUTH_ERROR_CODES = [
-  'unauthenticated',
-  'expired_jwt_token',
-  'invalid_jwt_token',
-  'general_jwt_error',
-];
 
 const OAuth2BootstrapView: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { t } = useTranslate();
@@ -40,9 +32,7 @@ const OAuth2BootstrapView: React.FC<React.PropsWithChildren<unknown>> = () => {
         window.location.href = continueUrl;
       })
       .catch((e: { code?: string }) => {
-        // Clear a stale token so PrivateRoute sends the user to log in and returns here, instead of dead-ending the
-        // OAuth authorization window. Other failures are genuine errors.
-        if (REAUTH_ERROR_CODES.includes(e?.code ?? '')) {
+        if (isReauthError(e?.code)) {
           logout();
           return;
         }

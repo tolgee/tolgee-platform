@@ -19,7 +19,6 @@ package io.tolgee.security.oauth2
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest
 import org.springframework.security.oauth2.server.authorization.OAuth2Authorization
 
-/** The client's `?project=` hint carried on the pending authorization, or null when absent/unparseable. */
 fun OAuth2Authorization.projectHint(): Long? {
   val request = getAttribute<OAuth2AuthorizationRequest>(OAuth2AuthorizationRequest::class.java.name) ?: return null
   return (request.additionalParameters[OAuth2Constants.PROJECT_PARAM] as? String)?.toLongOrNull()

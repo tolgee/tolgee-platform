@@ -33,7 +33,6 @@ import org.springframework.security.oauth2.jwt.NimbusJwtEncoder
 import org.springframework.security.oauth2.server.authorization.token.DelegatingOAuth2TokenGenerator
 import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext
 import org.springframework.security.oauth2.server.authorization.token.JwtGenerator
-import org.springframework.security.oauth2.server.authorization.token.OAuth2AccessTokenGenerator
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenGenerator
 import java.security.KeyPairGenerator
@@ -68,9 +67,10 @@ class OAuth2KeyConfig(
     jwtCustomizer: OAuth2TokenCustomizer<JwtEncodingContext>,
   ): OAuth2TokenGenerator<OAuth2Token> {
     val jwtGenerator = JwtGenerator(jwtEncoder).apply { setJwtCustomizer(jwtCustomizer) }
+    // No OAuth2AccessTokenGenerator: every client is SELF_CONTAINED, so JwtGenerator mints the access token; an opaque
+    // generator here would only ever produce a token OAuth2AccessTokenResolver (JWT-only) can't validate.
     return DelegatingOAuth2TokenGenerator(
       jwtGenerator,
-      OAuth2AccessTokenGenerator(),
       PublicClientRefreshTokenGenerator(),
     )
   }
