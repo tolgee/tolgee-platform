@@ -1,3 +1,10 @@
+## [3.218.1](https://github.com/tolgee/tolgee-platform/compare/v3.218.0...v3.218.1) (2026-08-17)
+
+
+### Bug Fixes
+
+* set correct MIME type on content delivery published files ([#3836](https://github.com/tolgee/tolgee-platform/issues/3836)) ([299dc9d](https://github.com/tolgee/tolgee-platform/commit/299dc9d1d9f3e15ed7ae336826edafc098f56cc9)), closes [#2504](https://github.com/tolgee/tolgee-platform/issues/2504)
+
 # [3.218.0](https://github.com/tolgee/tolgee-platform/compare/v3.217.0...v3.218.0) (2026-08-06)
 
 
