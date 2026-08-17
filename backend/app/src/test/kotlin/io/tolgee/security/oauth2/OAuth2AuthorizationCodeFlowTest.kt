@@ -34,6 +34,7 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository
+import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings
 import org.springframework.security.oauth2.server.authorization.settings.OAuth2TokenFormat
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings
@@ -67,7 +68,7 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
   private lateinit var oauth2AuthorizationQueryService: OAuth2AuthorizationQueryService
 
   @Autowired
-  private lateinit var audienceResolver: OAuth2AudienceResolver
+  private lateinit var authorizationServerSettings: AuthorizationServerSettings
 
   @Autowired
   private lateinit var jdbcTemplate: JdbcTemplate
@@ -419,9 +420,10 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
     // The client's original `state` must round-trip for CSRF defense — NOT SAS's internal pending-authorization state.
     val echoedState = URLDecoder.decode(queryParam(codeLocation!!, "state")!!, StandardCharsets.UTF_8)
     assertThat(echoedState).isEqualTo("client-state").isNotEqualTo(pending.state)
-    // iss is present and equals the configured issuer (RFC 9207 AS mix-up defense; tests run with a base URL set).
+    // iss is present and equals the issuer SAS was configured with (RFC 9207 AS mix-up defense). Compared against the
+    // AuthorizationServerSettings bean, not audienceResolver.serverBaseUrl (a live property another test can mutate).
     assertThat(URLDecoder.decode(queryParam(codeLocation, "iss")!!, StandardCharsets.UTF_8))
-      .isEqualTo(audienceResolver.serverBaseUrl)
+      .isEqualTo(authorizationServerSettings.issuer)
   }
 
   @Test
