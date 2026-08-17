@@ -62,6 +62,9 @@ const StyledGroup = styled('div')`
 const StyledGroupLabel = styled('div')`
   color: ${({ theme }) => theme.palette.text.secondary};
   margin-right: ${({ theme }) => theme.spacing(0.5)};
+  &::after {
+    content: ':';
+  }
 `;
 
 const StyledButtons = styled(Box)`
@@ -264,11 +267,7 @@ const OAuth2ConsentView: React.FC<React.PropsWithChildren<unknown>> = () => {
               grantedGroups.map((group, i) => (
                 <StyledGroup key={group.label ?? `_${i}`}>
                   {group.label && (
-                    <StyledGroupLabel>
-                      {t('oauth2_consent_group_label', '{label}:', {
-                        label: group.label,
-                      })}
-                    </StyledGroupLabel>
+                    <StyledGroupLabel>{group.label}</StyledGroupLabel>
                   )}
                   {group.scopes.map((s) => (
                     <Chip
