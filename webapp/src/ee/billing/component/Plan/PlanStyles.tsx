@@ -13,18 +13,23 @@ export const PlanContainer = styled('div')`
     ${({ theme }) => theme.palette.tokens.elevation.pricing};
   background: ${({ theme }) => theme.palette.tokens.background['paper-2']};
   border-color: ${({ theme }) => theme.palette.tokens.border.soft};
-  &.active,
-  &.popular {
+  &.active {
     box-shadow: 0px 0px 20px 0px
       ${({ theme }) => theme.palette.tokens.elevation.pricingActive};
-  }
-  &.active {
     border-color: ${({ theme }) =>
       theme.palette.tokens.secondary._states.outlinedBorder};
   }
+  /* No coloured glow: pricingActive is teal, which reads as a halo of the wrong hue around a
+     pink card. The pink standout leans on its border and wash instead. */
   &.popular {
-    border-color: ${({ theme }) =>
-      theme.palette.tokens.primary._states.outlinedBorder};
+    border-color: ${({ theme }) => theme.palette.tokens.primary.main};
+    /* Layered over the card's own surface instead of replacing it, so the result is opaque: the
+       row paints its border behind its children, and a translucent card lets that line show
+       through the 16px it breaks out past the row's edge. */
+    background-image: linear-gradient(
+      ${({ theme }) => theme.palette.tokens.primary._states.hover},
+      ${({ theme }) => theme.palette.tokens.primary._states.hover}
+    );
   }
   &.inRow {
     border: none;
@@ -37,16 +42,17 @@ export const PlanContainer = styled('div')`
     border-width: 1px;
     border-radius: 20px;
     margin: -16px 0;
-    box-shadow: 0px 0px 20px 0px
-      ${({ theme }) => theme.palette.tokens.elevation.pricingActive};
   }
   &.inRow.active {
     border-color: ${({ theme }) =>
       theme.palette.tokens.secondary._states.outlinedBorder};
+    box-shadow: 0px 0px 20px 0px
+      ${({ theme }) => theme.palette.tokens.elevation.pricingActive};
   }
   &.inRow.popular {
-    border-color: ${({ theme }) =>
-      theme.palette.tokens.primary._states.outlinedBorder};
+    border-color: ${({ theme }) => theme.palette.tokens.primary.main};
+    box-shadow: 0px 0px 20px 0px
+      ${({ theme }) => theme.palette.tokens.elevation.pricing};
   }
   ${({ theme }) => theme.breakpoints.down('md')} {
     /* The row stops being a joined surface here and becomes a grid of separate cards,
@@ -60,16 +66,15 @@ export const PlanContainer = styled('div')`
     &.inRow.active,
     &.inRow.popular {
       margin: 0;
-      box-shadow: 0px 0px 20px 0px
-        ${({ theme }) => theme.palette.tokens.elevation.pricingActive};
     }
     &.inRow.active {
       border-color: ${({ theme }) =>
         theme.palette.tokens.secondary._states.outlinedBorder};
+      box-shadow: 0px 0px 20px 0px
+        ${({ theme }) => theme.palette.tokens.elevation.pricingActive};
     }
     &.inRow.popular {
-      border-color: ${({ theme }) =>
-        theme.palette.tokens.primary._states.outlinedBorder};
+      border-color: ${({ theme }) => theme.palette.tokens.primary.main};
     }
   }
 `;
@@ -88,6 +93,10 @@ export const PlanRow = styled('div')`
   border: 1px solid ${({ theme }) => theme.palette.tokens.border.soft};
   border-radius: 20px;
   background: ${({ theme }) => theme.palette.tokens.background['paper-2']};
+  /* The joined row is the surface here, so it carries the elevation the individual cards
+     give up to the inRow class. */
+  box-shadow: 0px 0px 20px 0px
+    ${({ theme }) => theme.palette.tokens.elevation.pricing};
   /* The divider is a pseudo-element, not a border: PlanContainer's own .inRow rule
      sets border:none at higher specificity and would silently win. */
   & > * + *::before {
@@ -104,6 +113,7 @@ export const PlanRow = styled('div')`
        here. */
     border: none;
     background: none;
+    box-shadow: none;
     gap: 16px;
     & > * + *::before {
       content: none;
@@ -114,6 +124,7 @@ export const PlanRow = styled('div')`
     grid-template-columns: repeat(2, 1fr);
     border: none;
     background: none;
+    box-shadow: none;
     gap: 16px;
     & > * + *::before {
       content: none;
