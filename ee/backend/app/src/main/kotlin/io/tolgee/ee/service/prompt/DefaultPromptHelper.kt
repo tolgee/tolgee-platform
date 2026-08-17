@@ -5,9 +5,7 @@ import io.tolgee.service.LlmPropertiesService
 import org.springframework.stereotype.Component
 
 @Component
-class DefaultPromptHelper(
-  private val llmPropertiesService: LlmPropertiesService,
-) {
+class DefaultPromptHelper {
   fun getDefaultPrompt(): PromptDto {
     return PromptDto(
       name = "",
@@ -41,7 +39,7 @@ class DefaultPromptHelper(
 
         {{fragment.translateJson}}
         """.trimIndent(),
-      providerName = llmPropertiesService.getProviders().getOrNull(0)?.name ?: "default",
+      providerName = LlmPropertiesService.DEFAULT_PROVIDER_ALIAS,
     )
   }
 }

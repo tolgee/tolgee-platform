@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Timeout.ThreadMode.SEPARATE_THREAD
 import org.mockito.kotlin.mock
 import org.slf4j.LoggerFactory
 import org.springframework.data.redis.core.StringRedisTemplate
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.util.concurrent.TimeUnit
 import kotlin.time.measureTime
 
@@ -39,6 +40,7 @@ class BatchJobChunkExecutionQueuePerformanceTest {
         usingRedisProvider = mock<UsingRedisProvider>(),
         redisTemplate = mock<StringRedisTemplate>(),
         metrics = Metrics(SimpleMeterRegistry()),
+        objectMapper = jacksonObjectMapper(),
       )
     // The internal structures live in the companion object (static), clear between tests
     executionQueue.clear()

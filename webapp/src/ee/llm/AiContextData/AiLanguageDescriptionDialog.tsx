@@ -15,7 +15,9 @@ import { useProject } from 'tg.hooks/useProject';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { LanguageItem } from 'tg.component/languages/LanguageItem';
+import { CharacterCounter } from 'tg.component/common/CharacterCounter';
 import { AiTips } from './AiTips';
+import { AI_DESCRIPTION_MAX_LENGTH } from './constants';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
@@ -70,7 +72,8 @@ export const AiLanguageDescriptionDialog = ({
     );
   }
 
-  const isTooLong = Boolean(inputValue && inputValue.length > 2000);
+  const currentCount = inputValue?.length ?? 0;
+  const isTooLong = currentCount > AI_DESCRIPTION_MAX_LENGTH;
 
   return (
     <Dialog open fullWidth maxWidth="sm" onClose={handleClose}>
@@ -82,23 +85,22 @@ export const AiLanguageDescriptionDialog = ({
       </Box>
       <DialogContent>
         <Box sx={{ display: 'grid', gap: '16px' }}>
-          <TextField
-            multiline
-            sx={{ width: '100%', mt: '2px' }}
-            placeholder={placeholder}
-            minRows={2}
-            value={inputValue}
-            onChange={(e) => setInputValue(e.currentTarget.value)}
-            error={isTooLong}
-            helperText={
-              isTooLong &&
-              t(
-                'language_ai_prompt_dialog_description_too_long',
-                'Description is too long (max 2000 characters)'
-              )
-            }
-            data-cy="language-ai-prompt-dialog-description-input"
-          />
+          <Box display="grid" gap={0.5}>
+            <TextField
+              multiline
+              sx={{ width: '100%', mt: '2px' }}
+              placeholder={placeholder}
+              minRows={2}
+              value={inputValue}
+              onChange={(e) => setInputValue(e.currentTarget.value)}
+              error={isTooLong}
+              data-cy="language-ai-prompt-dialog-description-input"
+            />
+            <CharacterCounter
+              currentCount={currentCount}
+              maxLimit={AI_DESCRIPTION_MAX_LENGTH}
+            />
+          </Box>
           <AiTips
             tips={[
               t('language_ai_prompt_tip_usage'),

@@ -1,3 +1,38 @@
+## [3.218.1](https://github.com/tolgee/tolgee-platform/compare/v3.218.0...v3.218.1) (2026-08-17)
+
+
+### Bug Fixes
+
+* set correct MIME type on content delivery published files ([#3836](https://github.com/tolgee/tolgee-platform/issues/3836)) ([299dc9d](https://github.com/tolgee/tolgee-platform/commit/299dc9d1d9f3e15ed7ae336826edafc098f56cc9)), closes [#2504](https://github.com/tolgee/tolgee-platform/issues/2504)
+
+# [3.218.0](https://github.com/tolgee/tolgee-platform/compare/v3.217.0...v3.218.0) (2026-08-06)
+
+
+### Features
+
+* add character counter to AI and project description fields ([#3847](https://github.com/tolgee/tolgee-platform/issues/3847)) ([70957ca](https://github.com/tolgee/tolgee-platform/commit/70957ca3baae9268830b81be3c111404fe69f89d)), closes [#3833](https://github.com/tolgee/tolgee-platform/issues/3833)
+
+# [3.217.0](https://github.com/tolgee/tolgee-platform/compare/v3.216.4...v3.217.0) (2026-08-06)
+
+
+### Features
+
+* server default LLM model selectable as "default" in prompts ([#3838](https://github.com/tolgee/tolgee-platform/issues/3838)) ([a434007](https://github.com/tolgee/tolgee-platform/commit/a4340079d8bf61354e43bd6ae4e8165034e0f641))
+
+## [3.216.4](https://github.com/tolgee/tolgee-platform/compare/v3.216.3...v3.216.4) (2026-08-05)
+
+
+### Performance Improvements
+
+* reduce Redis round-trips in pub/sub and batch-job state ([#3822](https://github.com/tolgee/tolgee-platform/issues/3822)) ([653b6eb](https://github.com/tolgee/tolgee-platform/commit/653b6eb2b40f8079489a626070ffc7996a1bf99b))
+
+## [3.216.3](https://github.com/tolgee/tolgee-platform/compare/v3.216.2...v3.216.3) (2026-08-05)
+
+
+### Bug Fixes
+
+* escape task and language names in notification emails ([#3842](https://github.com/tolgee/tolgee-platform/issues/3842)) ([e7b7a29](https://github.com/tolgee/tolgee-platform/commit/e7b7a29ca8bc6fe947b6a7ad0e1561297294e246)), closes [#1898](https://github.com/tolgee/tolgee-platform/issues/1898)
+
 ## [3.216.2](https://github.com/tolgee/tolgee-platform/compare/v3.216.1...v3.216.2) (2026-08-04)
 
 

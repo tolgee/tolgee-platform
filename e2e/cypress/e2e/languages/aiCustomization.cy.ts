@@ -25,6 +25,7 @@ describe('Machine translation settings', () => {
     const description = 'Tolgee is software localization platform';
     cy.gcy('ai-customization-project-description-add').click();
     cy.gcy('project-ai-prompt-dialog-description-input').type(description);
+    cy.gcy('character-counter').should('contain', `${description.length}/2000`);
     cy.gcy('project-ai-prompt-dialog-save').click();
     waitForGlobalLoading();
     cy.gcy('ai-customization-project-description')
@@ -39,6 +40,7 @@ describe('Machine translation settings', () => {
       language: 'cs',
     }).click();
     cy.gcy('language-ai-prompt-dialog-description-input').type(description);
+    cy.gcy('character-counter').should('contain', `${description.length}/2000`);
     cy.gcy('language-ai-prompt-dialog-save').click();
     waitForGlobalLoading();
     gcyAdvanced({

@@ -1,0 +1,1 @@
+export const AI_DESCRIPTION_MAX_LENGTH = 2000;

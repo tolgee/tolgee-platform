@@ -23,13 +23,20 @@ class LlmProviderResolver(
         return current
       }
       tried.add(current)
-      val fallback = llmPropertiesService.getFallbackProviderName(current)
-      if (fallback == null || fallback in tried) {
+      val next = getNextName(current)
+      if (next == null || next in tried) {
         throw LlmProviderNotFoundException(provider)
       }
-      current = fallback
+      current = next
     }
     throw LlmProviderNotFoundException(provider)
+  }
+
+  private fun getNextName(current: String): String? {
+    if (current == LlmPropertiesService.DEFAULT_PROVIDER_ALIAS) {
+      return llmPropertiesService.getDefaultProviderName()
+    }
+    return llmPropertiesService.getFallbackProviderName(current)
   }
 
   private fun providerExists(

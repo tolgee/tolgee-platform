@@ -1,4 +1,5 @@
 import {
+  Box,
   Button,
   Dialog,
   DialogActions,
@@ -9,10 +10,12 @@ import {
 import { useTranslate } from '@tolgee/react';
 import { useState } from 'react';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
+import { CharacterCounter } from 'tg.component/common/CharacterCounter';
 import { confirmDiscardUnsaved } from 'tg.hooks/confirmation';
 import { useProject } from 'tg.hooks/useProject';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { AiTips } from './AiTips';
+import { AI_DESCRIPTION_MAX_LENGTH } from './constants';
 
 export const EXAMPLE = 'App for teaching children about the world.';
 
@@ -64,25 +67,29 @@ export const AiProjectDescriptionDialog = ({
     );
   }
 
-  const isTooLong = Boolean(inputValue && inputValue?.length > 2000);
+  const currentCount = inputValue?.length ?? 0;
+  const isTooLong = currentCount > AI_DESCRIPTION_MAX_LENGTH;
 
   return (
     <Dialog open fullWidth maxWidth="sm" onClose={handleClose}>
       <DialogTitle>{t('project_ai_prompt_dialog_title')}</DialogTitle>
       <DialogContent sx={{ display: 'grid', gap: '16px' }}>
-        <TextField
-          multiline
-          sx={{ width: '100%', mt: '2px' }}
-          placeholder={placeholder}
-          minRows={2}
-          value={inputValue}
-          onChange={(e) => setInputValue(e.currentTarget.value)}
-          error={isTooLong}
-          helperText={
-            isTooLong && t('project_ai_prompt_dialog_description_too_long')
-          }
-          data-cy="project-ai-prompt-dialog-description-input"
-        />
+        <Box display="grid" gap={0.5}>
+          <TextField
+            multiline
+            sx={{ width: '100%', mt: '2px' }}
+            placeholder={placeholder}
+            minRows={2}
+            value={inputValue}
+            onChange={(e) => setInputValue(e.currentTarget.value)}
+            error={isTooLong}
+            data-cy="project-ai-prompt-dialog-description-input"
+          />
+          <CharacterCounter
+            currentCount={currentCount}
+            maxLimit={AI_DESCRIPTION_MAX_LENGTH}
+          />
+        </Box>
         <AiTips
           tips={[
             t('project_ai_prompt_dialog_tip_topic'),

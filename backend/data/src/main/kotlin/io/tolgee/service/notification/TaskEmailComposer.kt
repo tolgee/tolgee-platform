@@ -5,6 +5,7 @@ import io.tolgee.model.notifications.Notification
 import io.tolgee.model.task.Task
 import io.tolgee.util.I18n
 import org.springframework.stereotype.Component
+import org.springframework.web.util.HtmlUtils
 
 @Component
 class TaskEmailComposer(
@@ -33,7 +34,7 @@ class TaskEmailComposer(
   private fun taskLink(task: Task): String {
     return """
         |<a href="${taskUrl(task)}">
-        |  ${taskName(task.name)} #${task.number} (${task.language.name})
+        |  ${HtmlUtils.htmlEscape(taskName(task.name))} #${task.number} (${HtmlUtils.htmlEscape(task.language.name)})
         |</a>
       """.trimMargin()
   }

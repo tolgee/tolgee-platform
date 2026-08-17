@@ -20,7 +20,7 @@ import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
-import tools.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.databind.ObjectMapper
 
 @Component
 class BatchJobCancellationManager(
@@ -36,6 +36,7 @@ class BatchJobCancellationManager(
   private val batchJobChunkExecutionQueue: BatchJobChunkExecutionQueue,
   private val concurrentExecutionLauncher: BatchJobConcurrentLauncher,
   private val batchProperties: io.tolgee.configuration.tolgee.BatchProperties,
+  private val objectMapper: ObjectMapper,
 ) : Logging {
   @Transactional
   fun cancel(id: Long) {
@@ -63,7 +64,7 @@ class BatchJobCancellationManager(
     if (usingRedisProvider.areWeUsingRedis) {
       redisTemplate.convertAndSend(
         RedisPubSubReceiverConfiguration.JOB_CANCEL_TOPIC,
-        jacksonObjectMapper().writeValueAsString(id),
+        objectMapper.writeValueAsString(id),
       )
     }
     cancelLocalJob(id)

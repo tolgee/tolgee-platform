@@ -74,11 +74,7 @@ class ContentDeliveryFileStorageProvider(
   }
 
   private fun bypassForTesting(): FileStorage? {
-    if (tolgeeProperties.internal.e3eContentStorageBypassOk == null) {
-      return null
-    }
-
-    val shouldBeOk = tolgeeProperties.internal.e3eContentStorageBypassOk!!
+    val shouldBeOk = tolgeeProperties.internal.e3eContentStorageBypassOk ?: return null
 
     if (shouldBeOk) {
       return okFileStorage
@@ -99,6 +95,7 @@ class ContentDeliveryFileStorageProvider(
         override fun storeFile(
           storageFilePath: String,
           bytes: ByteArray,
+          contentType: String?,
         ) {
         }
 
@@ -121,6 +118,7 @@ class ContentDeliveryFileStorageProvider(
         override fun storeFile(
           storageFilePath: String,
           bytes: ByteArray,
+          contentType: String?,
         ) {
           throw FileStoreException("Bypassed storage put exception", "test", IllegalStateException())
         }
