@@ -4,6 +4,8 @@ import io.tolgee.component.CurrentDateProvider
 import io.tolgee.dtos.IExportParams
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.formats.ExportFormat
+import io.tolgee.formats.apple.APPLE_STRINGSDICT_EXTENSION
+import io.tolgee.formats.apple.APPLE_STRINGS_EXTENSION
 import io.tolgee.formats.apple.out.AppleStringsStringsdictExporter
 import io.tolgee.formats.apple.out.AppleXcstringsExporter
 import io.tolgee.formats.apple.out.AppleXliffExporter
@@ -139,8 +141,8 @@ class FileExporterFactory(
           data,
           exportParams,
           projectIcuPlaceholdersSupport,
-          stringsFilePathProvider = getFilePathProvider(exportParams, data, "strings"),
-          stringsdictFilePathProvider = getFilePathProvider(exportParams, data, "stringsdict"),
+          stringsFilePathProvider = getFilePathProvider(exportParams, data, APPLE_STRINGS_EXTENSION),
+          stringsdictFilePathProvider = getFilePathProvider(exportParams, data, APPLE_STRINGSDICT_EXTENSION),
         )
       }
 
