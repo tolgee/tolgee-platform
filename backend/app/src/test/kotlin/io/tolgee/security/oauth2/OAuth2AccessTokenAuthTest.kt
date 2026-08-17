@@ -81,14 +81,33 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
     viewOnlyUser = testData.root.addUserAccount { username = "oauth_view_only_user" }.self
     // A server admin and supporter who are NOT members of testData.project, to prove an OAuth token can't ride their
     // server-wide reach onto a project they never joined.
-    adminUser = testData.root.addUserAccount { username = "oauth_admin_user"; role = UserAccount.Role.ADMIN }.self
+    adminUser =
+      testData.root
+        .addUserAccount {
+          username = "oauth_admin_user"
+          role = UserAccount.Role.ADMIN
+        }.self
     supporterUser =
-      testData.root.addUserAccount { username = "oauth_supporter_user"; role = UserAccount.Role.SUPPORTER }.self
+      testData.root
+        .addUserAccount {
+          username = "oauth_supporter_user"
+          role = UserAccount.Role.SUPPORTER
+        }.self
     // A server admin who is ALSO a language-restricted member (TRANSLATE, German only), to prove an OAuth token honors
     // the per-language restriction rather than riding the admin bypass.
-    val german = testData.projectBuilder.addLanguage { name = "German"; tag = "de"; originalName = "German" }.self
+    val german =
+      testData.projectBuilder
+        .addLanguage {
+          name = "German"
+          tag = "de"
+          originalName = "German"
+        }.self
     langRestrictedAdmin =
-      testData.root.addUserAccount { username = "oauth_lang_admin"; role = UserAccount.Role.ADMIN }.self
+      testData.root
+        .addUserAccount {
+          username = "oauth_lang_admin"
+          role = UserAccount.Role.ADMIN
+        }.self
     testData.projectBuilder.addPermission {
       user = langRestrictedAdmin
       type = ProjectPermissionType.TRANSLATE
@@ -286,7 +305,8 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
   @Test
   fun `an admin's OAuth token is bound to real membership, not the admin's server-wide reach`() {
     // Non-member access is masked as 404, same as any stranger.
-    val token = mint(scopes = listOf("translations.view"), projects = OAuth2Constants.ALL_PROJECTS, subject = adminUser.id)
+    val token =
+      mint(scopes = listOf("translations.view"), projects = OAuth2Constants.ALL_PROJECTS, subject = adminUser.id)
     performGet(translationsUrl(), bearer(token)).andIsNotFound
   }
 
@@ -302,7 +322,11 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
     // The admin is a TRANSLATE member limited to German; the per-language check must run for the OAuth token (the admin
     // bypass is suppressed), so editing English is denied even though the token covers the project and the edit scope.
     val token =
-      mint(scopes = listOf("translations.edit"), projects = OAuth2Constants.ALL_PROJECTS, subject = langRestrictedAdmin.id)
+      mint(
+        scopes = listOf("translations.edit"),
+        projects = OAuth2Constants.ALL_PROJECTS,
+        subject = langRestrictedAdmin.id,
+      )
     setTranslation("en", token).andIsForbidden
     setTranslation("de", token).andIsOk
   }

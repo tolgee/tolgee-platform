@@ -443,7 +443,12 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
         .queryParam("state", "client-state-2")
         .build()
         .toUriString()
-    val codeLocation = mvc.perform(get(authorizeUrl).session(session)).andReturn().response.getHeader("Location")
+    val codeLocation =
+      mvc
+        .perform(get(authorizeUrl).session(session))
+        .andReturn()
+        .response
+        .getHeader("Location")
     val code = queryParam(codeLocation!!, "code")
     assertThat(code).isNotNull() // consent skipped -> code issued straight to the client redirect
 
@@ -482,7 +487,12 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
         .queryParam("state", "no-pkce")
         .build()
         .toUriString()
-    val location = mvc.perform(get(authorizeUrl).session(session)).andReturn().response.getHeader("Location")
+    val location =
+      mvc
+        .perform(get(authorizeUrl).session(session))
+        .andReturn()
+        .response
+        .getHeader("Location")
     assertThat(location).contains("error=invalid_request")
     assertThat(queryParam(location!!, "code")).isNull()
   }

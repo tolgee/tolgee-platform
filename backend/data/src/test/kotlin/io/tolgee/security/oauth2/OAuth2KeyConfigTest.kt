@@ -1,8 +1,8 @@
 package io.tolgee.security.oauth2
 
-import com.nimbusds.jose.jwk.KeyType
 import com.nimbusds.jose.jwk.JWKMatcher
 import com.nimbusds.jose.jwk.JWKSelector
+import com.nimbusds.jose.jwk.KeyType
 import com.nimbusds.jose.jwk.source.JWKSource
 import com.nimbusds.jose.proc.SecurityContext
 import io.tolgee.component.LockingProvider
@@ -26,7 +26,10 @@ class OAuth2KeyConfigTest {
       on { fileExists(any()) } doAnswer { stored.get() != null }
       on { readFile(any()) } doAnswer { stored.get()!! }
     }.also { storage ->
-      doAnswer { stored.set(it.getArgument(1)); Unit }.whenever(storage).storeFile(any(), any())
+      doAnswer {
+        stored.set(it.getArgument(1))
+        Unit
+      }.whenever(storage).storeFile(any(), any())
     }
 
   private val lockingProvider =
